@@ -5,6 +5,7 @@ export                                  # types
     Distribution,
     DiscreteDistribution,
     ContinuousDistribution,
+    Arcsine,
     Bernoulli,
     Beta,
     Binomial,
@@ -389,6 +390,39 @@ macro _jl_dist_3p(T, b)
         end
     end
 end
+
+type Arcsine <: ContinuousDistribution
+end
+
+function cdf(d::Arcsine, x::Number)
+  if x < -1.
+    return 0.
+  elseif x > 1.
+    return 1.
+  else
+    return (2. / pi) * asin(sqrt((x + 1.) / 2.))
+  end
+end
+function insupport(d::Arcsine, x::Number)
+  if -1. <= x <= 1.
+    return true
+  else
+    return false
+  end
+end
+mean(d::Arcsine) = 0.0
+median(d::Arcsine) = 0.0
+function pdf(d::Arcsine, x::Number)
+  if insupport(d, x)
+    1. / (pi * sqrt(1. - x^2))
+  else
+    0.
+  end
+end
+quantile(d::Arcsine, p::Real) = 2. * sin((pi / 2.) * p)^2 - 1.
+rand(d::Arcsine) = sin(2. * pi * rand())
+skewness(d::Arcsine) = 0.
+var(d::Arcsine) = 1./2.
 
 type Alpha <: ContinuousDistribution
     location::Float64
