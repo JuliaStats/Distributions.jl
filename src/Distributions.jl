@@ -21,6 +21,7 @@ export                                  # types
     Laplace,
     Logistic,
     logNormal,
+    MixtureModel,
     Multinomial,
     NegativeBinomial,
     NoncentralBeta,
@@ -632,8 +633,8 @@ var(d::HyperGeometric)  = (N=d.ns+d.nf; p=d.ns/N; d.n*p*(1-p)*(N-d.n)/(N-1))
 insupport(d::HyperGeometric, x::Number) = integer_valued(x) && 0 <= x <= d.n && (d.n - d.nf) <= x <= d.ns
 
 type Laplace <: ContinuousDistribution
-  location::Float
-  scale::Float
+  location::Float64
+  scale::Float64
   function Laplace(l::Real, s::Real)
     if s > 0.0
       new(float(l), float(s))
@@ -702,6 +703,35 @@ mean(d::logNormal) = exp(d.meanlog + d.sdlog^2/2)
 var(d::logNormal)  = (sigsq=d.sdlog^2; (exp(sigsq) - 1)*exp(2d.meanlog+sigsq))
 insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 < x
 
+type MixtureModel <: Distribution
+  components::Vector # Vector should be able to contain any type of
+                     # distribution with comparable support
+  probs::Vector{Float64}
+  function MixtureModel(c::Vector, p::Vector{Float64})
+    if length(c) != length(p)
+      error("components and probs must have the same number of elements")
+    end
+    sump = 0.0
+    for i in 1:numel(p)
+      if p[i] < 0.0
+        error("MixtureModel: probabilities must be non-negative")
+      end
+      sump += p[i]
+    end
+    new(c, p ./ sump)
+  end
+end
+
+function pdf(d::MixtureModel, x::Real)
+  p = 0.0
+  for i in 1:numel(d.components)
+    p += pdf(d.components[i], x) * d.probs[i]
+  end
+end
+function rand(d::MixtureModel)
+  i = rand(Categorical(d.probs))
+  rand(d.components[i])
+end
 
 ## NegativeBinomial is the distribution of the number of failures
 ## before the size'th success in a sequence of Bernoulli trials.
