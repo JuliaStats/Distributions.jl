@@ -431,9 +431,6 @@ type Alpha <: ContinuousDistribution
 end
 const Levy = Alpha
 
-type Arcsine <: ContinuousDistribution
-end
-
 type Bernoulli <: DiscreteDistribution
     prob::Float64
     Bernoulli(p) = 0. <= p <= 1. ? new(float64(p)) : error("prob must be in [0,1]")
