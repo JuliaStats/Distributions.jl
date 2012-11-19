@@ -12,7 +12,7 @@ export                                  # types
     Cauchy,
     Chisq,
     Dirichlet,
-#    DiscreteUniform,            # need to add this
+    DiscreteUniform,
     Exponential,
     FDist,
     Gamma,
@@ -481,6 +481,46 @@ kurtosis(d::Chisq) = 12/d.df
 rand(d::Chisq)     = randchi2(d.df)
 rand!(d::Chisq, A::Array{Float64}) = randchi2!(d.df, A)
 insupport(d::Chisq, x::Number) =  real_valued(x) && isfinite(x) && 0 <= x
+
+type DiscreteUniform <: DiscreteDistribution
+  a::Int
+  b::Int
+  function DiscreteUniform(a::Real, b::Real)
+    if a < b
+      new(int(a), int(b))
+    else
+      error("a must be less than b")
+    end
+  end
+end
+DiscreteUniform(b::Int) = DiscreteUniform(0, b)
+DiscreteUniform() = DiscreteUniform(0, 1)
+
+cdf(d::DiscreteUniform) = error("not yet implemented")
+insupport(d::DiscreteUniform, x::Number) =
+  isinteger(x) && d.a <= x <= d.b
+function kurtosis(d::DiscreteUniform)
+  n = d.b - d.a + 1.
+  -(6. / 5.) * (n^2 + 1.)/(n^2 - 1.)
+end
+mean(d::DiscreteUniform) = (d.a + d.b) / 2.
+median(d::DiscreteUniform) = (d.a + d.b) / 2.
+pdf(d::DiscreteUniform, x::Real) =
+  insupport(d, x) ? (1.0 / (d.b - d.a + 1.)) : 0.0
+function quantile(d::DiscreteUniform, k::Real)
+  if k < d.a
+    0.0
+  elseif <= d.b
+    (floor(k) - d.a + 1.) / (d.b - d.a + 1.)
+  else
+    1.0
+  end
+end
+function rand(d::DiscreteUniform)
+  d.a + randi(d.b - d.a + 1) - 1
+end
+skewness(d::DiscreteUniform) = 0.0
+var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
 type Erlang <: ContinuousDistribution
     shape::Float64
