@@ -33,6 +33,7 @@ export                                  # types
     Normal,
     Pareto,
     Poisson,
+    Rayleigh,
     TDist,
     Uniform,
     Weibull,
@@ -923,6 +924,33 @@ mean(d::Poisson) = d.lambda
 mustart( d::Poisson,  y::Real, wt::Real) = y + 0.1
 var(     d::Poisson, mu::Real) = mu
 var(d::Poisson) = d.lambda
+
+type Rayleigh <: ContinuousDistribution
+  scale::Float64
+  function Rayleigh(s)
+    if s > 0.0
+      new(float(s))
+    else
+      error("scale must be positive")
+    end
+  end
+end
+Rayleigh() = Rayleigh(1.0)
+
+insupport(d::Rayleigh, x::Number) = real_valued(x) && isfinite(x) && x > 0.
+kurtosis(d::Rayleigh) = d.scale^4 * (8. - ((3. * pi^2) / 4.))
+mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
+median(d::Rayleigh) = d.scale * sqrt(2. * log(2.))
+function pdf(d::Rayleigh, x::Real)
+  if insupport(d, x)
+    return (x / (d.scale^2)) * exp(-(x^2)/(2. * (d.scale^2)))
+  else
+    return 0.
+  end
+end
+rand(d::Rayleigh) = d.scale * sqrt(-2.log(rand()))
+skewness(d::Rayleigh) = d.scale^3 * (pi - 3.) * sqrt(pi / 2.)
+var(d::Rayleigh) = d.scale^2 * (2. - pi / 2.)
 
 type TDist <: ContinuousDistribution
     df::Float64                         # non-integer degrees of freedom allowed
