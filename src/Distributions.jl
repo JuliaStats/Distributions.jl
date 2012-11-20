@@ -24,6 +24,7 @@ export                                  # types
     logNormal,
     MixtureModel,
     Multinomial,
+    MultivariateNormal,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
@@ -764,6 +765,33 @@ function rand(d::MixtureModel)
   i = rand(Categorical(d.probs))
   rand(d.components[i])
 end
+
+type MultivariateNormal <: Distribution
+  mean::Vector{Float64}
+  cov::Matrix{Float64}
+  sqrt_cov::Matrix{Float64}
+  function MultivariateNormal(m, c, s)
+    if length(m) == size(c, 1) == size(c, 2) == size(s, 1) == size(s, 2)
+      new(m, c, s)
+    else
+      error("Dimensions of mean and covariance do not match")
+    end
+  end
+end
+function MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64})
+  MultivariateNormal(mean, cov, chol(cov)') #'
+end
+function MultivariateNormal(mean::Vector{Float64})
+  MultivariateNormal(mean, eye(length(mean)))
+end
+MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
+
+mean(d::MultivariateNormal) = d.mean
+function rand(d::MultivariateNormal)
+  z = randn(length(d.mean))
+  return d.mean + d.sqrt_cov * z
+end
+var(d::MultivariateNormal) = d.cov
 
 ## NegativeBinomial is the distribution of the number of failures
 ## before the size'th success in a sequence of Bernoulli trials.
