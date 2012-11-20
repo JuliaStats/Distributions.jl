@@ -30,6 +30,7 @@ export                                  # types
     NoncentralF,
     NoncentralT,
     Normal,
+    Pareto,
     Poisson,
     TDist,
     Uniform,
@@ -829,6 +830,57 @@ cdf(d::Normal, x::Real) = (1+erf((x-d.mean)/(d.std*sqrt(2))))/2
 pdf(d::Normal, x::Real) = exp(-(x-d.mean)^2/(2d.std^2))/(d.std*sqrt(2pi))
 rand(d::Normal) = d.mean + d.std * randn()
 insupport(d::Normal, x::Number) = real_valued(x) && isfinite(x)
+
+type Pareto <: ContinuousDistribution
+  scale::Float64
+  shape::Float64
+  function Pareto(sc, sh)
+    if sc > 0.0 && sh > 0.0
+      new(float(sc), float(sh))
+    else
+      error("shape and scale must be positive")
+    end
+  end
+end
+Pareto(scale::Float64) = Pareto(scale, 1.)
+Pareto() = Pareto(1., 1.)
+
+cdf(d::Pareto, q::Real) = q >= d.scale ? 1. - (d.scale / q)^d.shape : 0.
+insupport(d::Pareto, x::Number) = real_valued(x) && isfinite(x) && x > d.scale
+function kurtosis(d::Pareto)
+  a = d.shape
+  if a > 4.
+    (6. * (a^3 + a^2 - 6.a - 2)) / (a * (a - 3.) * (a - 4.))
+  else
+    error("Kurtosis undefined for Pareto w/ shape <= 4")
+  end
+end
+mean(d::Pareto) = d.shape <= 1. ? Inf : (d.scale * d.shape) / (d.scale - 1.)
+median(d::Pareto) = d.scale * 2.^(d.shape)
+function pdf(d::Pareto, q::Real)
+  if q >= d.scale
+    return (d.shape * d.scale^d.shape) / (q^(d.shape + 1.))
+  else
+    return 0.
+  end
+end
+quantile(d::Pareto, p::Real) = d.scale / (1. - p)^(1. / d.shape)
+rand(d::Pareto) = d.shape / (rand()^(1. / d.scale))
+function skewness(d::Pareto)
+  a = d.shape
+  if a > 3.
+    ((2. * (1. + a)) / (a - 3.)) * sqrt((a - 2.)/a)
+  else
+    error("Skewness undefined for Pareto w/ shape <= 3")
+  end
+end
+function var(d::Pareto)
+  if d.scale < 2.
+    return Inf
+  else
+    return (d.shape^2 * d.scale) / ((d.scale - 1.)^2 * (d.scale - 2.))
+  end
+end
 
 type Poisson <: DiscreteDistribution
     lambda::Float64
