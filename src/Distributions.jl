@@ -1,5 +1,4 @@
 module Distributions
-using Base
 
 export                                  # types
     Distribution,
@@ -63,7 +62,7 @@ export                                  # types
     std,        # standard deviation of distribution
     var         # variance of distribution
 
-import Base.mean, Base.median, Base.quantile, Base.rand, Base.std, Base.var
+import Base.mean, Base.median, Base.quantile, Base.rand, Base.std, Base.var, Base.integer_valued
 
 abstract Distribution
 abstract DiscreteDistribution   <: Distribution
