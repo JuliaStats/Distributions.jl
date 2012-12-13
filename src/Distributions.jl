@@ -153,7 +153,7 @@ function insupport{T<:Real}(d::Distribution, x::AbstractArray{T})
     end
     true
 end
-
+const Rmath = :libRmath
 ## FIXME: Replace the three _jl_dist_*p macros with one by defining
 ## the argument tuples for the ccall dynamically from pn
 macro _jl_dist_1p(T, b)
@@ -170,62 +170,57 @@ macro _jl_dist_1p(T, b)
     quote
         global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
         function ($pf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
-                  Float64, (Float64, Float64, Int32),
+            ccall(($dd, Rmath), Float64,
+                  (Float64, Float64, Int32),
                   x, d.($p), 0)
         end
         function ($lf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
-                  Float64, (Float64, Float64, Int32),
+            ccall(($dd, Rmath), Float64,
+                  (Float64, Float64, Int32),
                   x, d.($p), 1)
         end
         function cdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Int32, Int32),
                   q, d.($p), 1, 0)
         end
         function logcdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath,  $pp),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Int32, Int32),
                   q, d.($p), 1, 1)
         end
         function ccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
+            ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Int32, Int32),
                   q, d.($p), 0, 0)
         end
         function logccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   q, d.($p), 0, 1)
         end
         function quantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   p, d.($p), 1, 0)
         end
         function cquantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   p, d.($p), 0, 0)
         end
         function invlogcdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   lp, d.($p), 1, 1)
         end
         function invlogccdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath,  $qq),
-                  Float64, (Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   lp, d.($p), 0, 1)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(dlsym(_jl_libRmath,  $rr), Float64, (Float64,), d.($p)))
+                int(ccall(($rr, Rmath), Float64, (Float64,), d.($p)))
             end
         else
             function rand(d::($T))
-                ccall(dlsym(_jl_libRmath,  $rr), Float64, (Float64,), d.($p))
+                ccall(($rr, Rmath), Float64, (Float64,), d.($p))
             end
         end
     end
@@ -251,63 +246,63 @@ macro _jl_dist_2p(T, b)
     quote
         global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
         function ($pf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
+            ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 0)
         end
         function ($lf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
+            ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 1)
         end
         function cdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
+            ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), 1, 0)
         end
         function logcdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath,  $pp),
+            ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), 1, 1)
         end
         function ccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
+            ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), 0, 0)
         end
         function logccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
+            ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), 0, 1)
         end
         function quantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
+            ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), 1, 0)
         end
         function cquantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
+            ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), 0, 0)
         end
         function invlogcdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
+            ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), 1, 1)
         end
         function invlogccdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
+            ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), 0, 1)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(dlsym(_jl_libRmath,  $rr), Float64,
+                int(ccall(($rr, Rmath), Float64,
                           (Float64,Float64), d.($p1), d.($p2)))
             end
         else
             function rand(d::($T))
-                ccall(dlsym(_jl_libRmath,  $rr), Float64,
+                ccall(($rr, Rmath), Float64,
                       (Float64,Float64), d.($p1), d.($p2))
             end
         end
@@ -330,63 +325,63 @@ macro _jl_dist_3p(T, b)
     quote
         global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
         function ($pf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
-                  Float64, (Float64, Float64, Float64, Float64, Int32),
+            ccall(($dd, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 0)
         end
         function ($lf)(d::($T), x::Real)
-            ccall(dlsym(_jl_libRmath, $dd),
-                  Float64, (Float64, Float64, Float64, Float64, Int32),
+            ccall(($dd, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 1)
         end
         function cdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), d.($p3), 1, 0)
         end
         function logcdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath,  $pp),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), d.($p3), 1, 1)
         end
         function ccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), d.($p3), 0, 0)
         end
         function logccdf(d::($T), q::Real)
-            ccall(dlsym(_jl_libRmath, $pp),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($pp, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   q, d.($p1), d.($p2), d.($p3), 0, 1)
         end
         function quantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), d.($p3), 1, 0)
         end
         function cquantile(d::($T), p::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), d.($p3), 0, 0)
         end
         function invlogcdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath, $qq),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), d.($p3), 1, 1)
         end
         function invlogccdf(d::($T), lp::Real)
-            ccall(dlsym(_jl_libRmath,  $qq),
-                  Float64, (Float64, Float64, Float64, Float64, Int32, Int32),
+            ccall(($qq, Rmath), Float64,
+                  (Float64, Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), d.($p3), 0, 1)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(dlsym(_jl_libRmath,  $rr), Float64,
+                int(ccall(($rr, Rmath), Float64,
                           (Float64,Float64,Float64), d.($p1), d.($p2), d.($p3)))
             end
         else
             function rand(d::($T))
-                ccall(dlsym(_jl_libRmath,  $rr), Float64,
+                ccall(($rr, Rmath), Float64,
                       (Float64,Float64,Float64), d.($p1), d.($p2), d.($p3))
             end
         end
@@ -918,7 +913,7 @@ Poisson() = Poisson(1)
 @_jl_dist_1p Poisson pois
 devresid(d::Poisson,  y::Real, mu::Real, wt::Real) = 2wt*((y==0? 0.: log(y/mu)) - (y-mu))
 insupport(d::Poisson, x::Number) = integer_valued(x) && 0 <= x
-logpmf(  d::Poisson, mu::Real, y::Real) = ccall(dlsym(_jl_libRmath,:dpois),Float64,(Float64,Float64,Int32),y,mu,1)
+logpmf(  d::Poisson, mu::Real, y::Real) = ccall((:dpois, Rmath),Float64,(Float64,Float64,Int32),y,mu,1)
 mean(d::Poisson) = d.lambda
 mustart( d::Poisson,  y::Real, wt::Real) = y + 0.1
 var(     d::Poisson, mu::Real) = mu
@@ -1066,7 +1061,7 @@ function rand(d::Multinomial)
   s = zeros(Int, l)
   psum = 1.0
   for j = 1:(l - 1)
-    s[j] = int(ccall(dlsym(_jl_libRmath, "rbinom"), Float64, (Float64, Float64), n, d.prob[j] / psum))
+    s[j] = int(ccall((:rbinom, Rmath), Float64, (Float64, Float64), n, d.prob[j] / psum))
     n -= s[j]
     if n == 0
       break
