@@ -464,7 +464,7 @@ mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 var(d::Beta) = (ab = d.alpha + d.beta; d.alpha * d.beta /(ab * ab * (ab + 1.)))
 skewness(d::Beta) = 2(d.beta - d.alpha)*sqrt(d.alpha + d.beta + 1)/((d.alpha + d.beta + 2)*sqrt(d.alpha*d.beta))
 rand(d::Beta) = randbeta(d.alpha, d.beta)
-rand!(d::Beta, A::Array{Float64}) = randbeta!(alpha, beta, A)
+rand!(d::Beta, A::Array{Float64}) = randbeta!(d.alpha, d.beta, A)
 insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 
 type BetaPrime <: ContinuousDistribution
