@@ -1,6 +1,8 @@
 module Distributions
 
 export                                  # types
+    CauchitLink,
+    CloglogLink,
     Distribution,
     DiscreteDistribution,
     ContinuousDistribution,
@@ -18,8 +20,13 @@ export                                  # types
     Gamma,
     Geometric,
     HyperGeometric,
+    IdentityLink,
+    InverseLink,
     Laplace,
+    Link,
     Logistic,
+    LogitLink,
+    LogLink,
     logNormal,
     MixtureModel,
     Multinomial,
@@ -32,11 +39,13 @@ export                                  # types
     Normal,
     Pareto,
     Poisson,
+    ProbitLink,
     Rayleigh,
     TDist,
     Uniform,
     Weibull,
                                         # methods
+    canonicallink, # canonical link function for a distribution
     ccdf,       # complementary cdf, i.e. 1 - cdf
     cdf,        # cumulative distribution function
     cquantile,  # complementary quantile (i.e. using prob in right hand tail)
@@ -46,20 +55,26 @@ export                                  # types
     invlogccdf, # complementary quantile based on log probability
     invlogcdf,  # quantile based on log probability
     kurtosis,   # kurtosis of the distribution
+    linkfun,    # link function mapping mu to eta, the linear predictor
+    linkinv,    # inverse link mapping eta to mu
     logccdf,    # ccdf returning log-probability
     logcdf,     # cdf returning log-probability
     logpdf,     # log probability density
     logpmf,     # log probability mass
     mean,       # mean of distribution
     median,     # median of distribution
+    mueta,      # derivative of inverse link function
     mustart,    # starting values of mean vector in GLMs
     pdf,        # probability density function (ContinuousDistribution)
     pmf,        # probability mass function (DiscreteDistribution)
     quantile,   # inverse of cdf (defined for p in (0,1))
     rand,       # random sampler
+    rand!,      # replacement random sampler
     sample,     # another random sampler - not sure why this is here
     skewness,   # skewness of the distribution
     std,        # standard deviation of distribution
+    valideta,   # validity check on linear predictor
+    validmu,    # validity check on mean vector
     var         # variance of distribution
 
 import Base.mean, Base.median, Base.quantile, Base.rand, Base.std, Base.var, Base.integer_valued
@@ -459,7 +474,7 @@ mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 var(d::Beta) = (ab = d.alpha + d.beta; d.alpha * d.beta /(ab * ab * (ab + 1.)))
 skewness(d::Beta) = 2(d.beta - d.alpha)*sqrt(d.alpha + d.beta + 1)/((d.alpha + d.beta + 2)*sqrt(d.alpha*d.beta))
 rand(d::Beta) = randbeta(d.alpha, d.beta)
-rand!(d::Beta, A::Array{Float64}) = randbeta!(alpha, beta, A)
+rand!(d::Beta, A::Array{Float64}) = randbeta!(d.alpha, d.beta, A)
 insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 
 type BetaPrime <: ContinuousDistribution
@@ -567,9 +582,7 @@ median(d::Exponential)   = d.scale * log(2.)
 var(d::Exponential)      = d.scale * d.scale
 skewness(d::Exponential) = 2.
 kurtosis(d::Exponential) = 6.
-function cdf(d::Exponential, q::Real)
-    q <= 0. ? 0. : -expm1(-q/d.scale)
-end
+cdf(d::Exponential, q::Real) = q <= 0. ? 0. : -expm1(-q/d.scale)
 function logcdf(d::Exponential, q::Real)
     q <= 0. ? -Inf : (qs = -q/d.scale; qs > log(0.5) ? log(-expm1(qs)) : log1p(-exp(qs)))
 end
@@ -1198,5 +1211,86 @@ function sample(a::Array)
   probs = ones(n) ./ n
   sample(a, probs)
 end
+
+const minfloat = realmin(Float64)
+const oneMeps  = 1. - eps()
+const llmaxabs = log(-log(minfloat))
+
+abstract Link                           # Link types define linkfun, linkinv, mueta,
+                                        # valideta and validmu.
+
+
+chkpositive(x::Real) = isfinite(x) && 0. < x ? x : error("argument must be positive")
+chkfinite(x::Real) = isfinite(x) ? x : error("argument must be finite")
+clamp01(x::Real) = clamp(x, minfloat, oneMeps)
+chk01(x::Real) = 0. < x < 1. ? x : error("argument must be in (0,1)")
+
+type CauchitLink  <: Link end
+linkfun (l::CauchitLink,   mu::Real) = tan(pi * (mu - 0.5))
+linkinv (l::CauchitLink,  eta::Real) = 0.5 + atan(eta) / pi
+mueta   (l::CauchitLink,  eta::Real) = 1. /(pi * (1 + eta * eta))
+valideta(l::CauchitLink,  eta::Real) = chkfinite(eta)
+validmu (l::CauchitLink,   mu::Real) = chk01(mu)
+
+type CloglogLink  <: Link end
+linkfun (l::CloglogLink,   mu::Real) = log(-log(1. - mu))
+linkinv (l::CloglogLink,  eta::Real) = -expm1(-exp(eta))
+mueta   (l::CloglogLink,  eta::Real) = exp(eta) * exp(-exp(eta))
+valideta(l::CloglogLink,  eta::Real) = abs(eta) < llmaxabs? eta: error("require abs(eta) < $llmaxabs")
+validmu (l::CloglogLink,   mu::Real) = chk01(mu)
+
+type IdentityLink <: Link end
+linkfun (l::IdentityLink,  mu::Real) = mu
+linkinv (l::IdentityLink, eta::Real) = eta
+mueta   (l::IdentityLink, eta::Real) = 1.
+valideta(l::IdentityLink, eta::Real) = chkfinite(eta)
+validmu (l::IdentityLink,  mu::Real) = chkfinite(mu)
+
+type InverseLink  <: Link end
+linkfun (l::InverseLink,   mu::Real) =  1. / mu
+linkinv (l::InverseLink,  eta::Real) =  1. / eta
+mueta   (l::InverseLink,  eta::Real) = -1. / (eta * eta)
+valideta(l::InverseLink,  eta::Real) = chkpositive(eta)
+validmu (l::InverseLink,  eta::Real) = chkpositive(mu)
+
+type LogitLink    <: Link end
+linkfun (l::LogitLink,     mu::Real) = log(mu / (1 - mu))
+linkinv (l::LogitLink,    eta::Real) = 1. / (1. + exp(-eta))
+mueta   (l::LogitLink,    eta::Real) = (e = exp(-abs(eta)); f = 1. + e; e / (f * f))
+valideta(l::LogitLink,    eta::Real) = chkfinite(eta)
+validmu (l::LogitLink,     mu::Real) = chk01(mu)
+
+type LogLink      <: Link end
+linkfun (l::LogLink,       mu::Real) = log(mu)
+linkinv (l::LogLink,      eta::Real) = exp(eta)
+mueta   (l::LogLink,      eta::Real) = exp(eta)
+valideta(l::LogLink,      eta::Real) = chkfinite(eta)
+validmu (l::LogLink,       mu::Real) = chkfinite(mu)
+
+type ProbitLink   <: Link end
+linkfun (l::ProbitLink,    mu::Real) =
+    ccall(dlsym(_jl_libRmath, :qnorm5), Float64,
+          (Float64,Float64,Float64,Int32,Int32), mu, 0., 1., 1, 0)
+linkinv (l::ProbitLink,   eta::Real) = (1. + erf(eta/sqrt(2.))) / 2.
+mueta   (l::ProbitLink,   eta::Real) = exp(-0.5eta^2) / sqrt(2.pi)
+valideta(l::ProbitLink,   eta::Real) = chkfinite(eta)
+validmu (l::ProbitLink,    mu::Real) = chk01(mu)
+                                        # Vectorized methods, including validity checks
+function linkfun{T<:Real}(l::Link, mu::AbstractArray{T,1})
+    [linkfun(l, validmu(l, m)) for m in mu]
+end
+
+function linkinv{T<:Real}(l::Link, eta::AbstractArray{T,1})
+    [linkinv(l, valideta(l, et)) for et in eta]
+end
+
+function mueta{T<:Real}(l::Link, eta::AbstractArray{T,1})
+    [mueta(l, valideta(l, et)) for et in eta]
+end
+
+canonicallink(d::Gamma)     = InverseLink()
+canonicallink(d::Normal)    = IdentityLink()
+canonicallink(d::Bernoulli) = LogitLink()
+canonicallink(d::Poisson)   = LogLink()
 
 end  #module

@@ -1,6 +1,8 @@
-require("pkg")
 load("Distributions")
 using Distributions
+
+require("extras/nearequal.jl")
+require("extras/test.jl")
 
 # n probability points, i.e. the midpoints of the intervals [0, 1/n],...,[1-1/n, 1]
 probpts(n::Int) = ((1:n) - 0.5)/n  
@@ -22,7 +24,7 @@ function reldiff{T<:Real}(current::AbstractArray{T}, target::AbstractArray{T})
     @assert all(size(current) == size(target))
     max([reldiff(current[i], target[i]) for i in 1:numel(target)])
 end
-
+    
 ## Checks on ContinuousDistribution instances
 for d in (Beta(), Cauchy(), Chisq(12), Exponential(), Exponential(23.1),
           FDist(2, 21), Gamma(3), Gamma(), Logistic(), logNormal(),
@@ -63,9 +65,9 @@ logpmf(d, [1, 1])
 logpmf(d, [0, 1])
 d.n = 10
 rand(d)
-A = zeros(Int, 2, 10)
+#A = zeros(Int, 2, 10)
 #rand!(d, A)
-A
+#A
 
 d = Dirichlet([1.0, 2.0, 1.0])
 d = Dirichlet(3)
@@ -78,9 +80,9 @@ insupport(d, [0.1, 0.8, 0.2])
 insupport(d, [0.1, 0.8])
 pdf(d, [0.1, 0.8, 0.1])
 rand(d)
-A = zeros(Float64, 10, 3)
-rand!(d, A)
-A
+#A = zeros(Float64, 10, 3)
+#rand!(d, A)
+#A
 
 d = Categorical([0.25, 0.5, 0.25])
 d = Categorical(3)
@@ -103,9 +105,9 @@ d = Categorical([0.25; 0.5; 0.25])
 
 @assert 1.0 <= rand(d) <= 3.0
 
-A = zeros(Int, 10)
+#A = zeros(Int, 10)
 #rand!(d, A)
-@assert 1.0 <= mean(A) <= 3.0
+#@assert 1.0 <= mean(A) <= 3.0
 
 # Examples of sample()
 a = [1, 6, 19]
@@ -117,3 +119,34 @@ x = sample(a, p)
 #a = 19.0 * eye(2)
 #x = sample(a)
 #@assert x == 0.0 || x == 19.0
+
+## Link function tests
+const ep = eps()
+const oneMeps = 1 - ep
+srand(1)
+
+etas = (linspace(-7., 7., 15),  # equal spacing to asymptotic area
+        14 * rand(17) - 7,      # random sample from wide uniform dist
+        clamp(rand(Normal(0, 4), 17), -7., 7.), # random sample from wide normal dist
+        [-7., rand(Normal(0, 4),15), 7.])
+
+## sample linear predictor values for the families in which eta must be positive
+etapos = (float64(1:20), rand(Exponential(), 20), rand(Gamma(3), 20), max(ep, rand(Normal(2.), 20)))
+
+## values of mu in the (0,1) interval
+mubinom = (rand(100), rand(Beta(1,3), 100),
+           [ccall((:rbeta, :libRmath), Float64, (Float64,Float64), 0.1, 3) for i in 1:100],
+           [ccall((:rbeta, :libRmath), Float64, (Float64,Float64), 3, 0.1) for i in 1:100])
+
+for ll in (LogitLink(), ProbitLink()#, CloglogLink() # edge cases for CloglogLink are tricky
+           , CauchitLink())
+#    println(ll)  # Having problems with the edge when eta is very large or very small
+#    for i in 1:size(etas,1)
+#        println(i)
+#        @assert all(isapprox(linkfun(ll, clamp(linkinv(ll, etas[i]), realmin(Float64), 1.-eps())), etas[i]))
+#    end
+    for mu in mubinom
+        mm = clamp(mu, realmin(), oneMeps)
+        @assert all(isapprox(linkinv(ll, linkfun(ll, mm)), mm))
+    end
+end
