@@ -1,6 +1,6 @@
 The Distributions module is licensed under the MIT License:
 
-> Copyright (c) 2012: Douglas Bates, John Myles White,
+> Copyright (c) 2012-2013: Douglas Bates, John Myles White,
 > Jeff Bezanson, Stefan Karpinski, Viral B. Shah,
 > and other contributors:
 > 
