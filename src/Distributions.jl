@@ -94,7 +94,7 @@ function deviance{M<:Real,Y<:Real,W<:Real}(d::DiscreteDistribution,
                                            wt::AbstractArray{W})
     promote_shape(size(mu), promote_shape(size(y), size(wt)))
     ans = 0.
-    for i in 1:numel(y)
+    for i in 1:length(y)
         ans += wt[i] * logpmf(d, mu[i], y[i])
     end
     -2ans
@@ -105,7 +105,7 @@ function deviance{M<:Real,Y<:Real,W<:Real}(d::ContinuousDistribution,
                                            wt::AbstractArray{W})
     promote_shape(size(mu), promote_shape(size(y), size(wt))) 
     ans = 0.
-    for i in 1:numel(y)
+    for i in 1:length(y)
         ans += wt[i] * logpdf(d, mu[i], y[i])
     end
     -2ans
@@ -119,7 +119,7 @@ function devresid{Y<:Real,M<:Real,W<:Real}(d::Distribution,
                                            mu::AbstractArray{M},
                                            wt::AbstractArray{W})
     R = Array(Float64, promote_shape(size(y), promote_shape(size(mu), size(wt))))
-    for i in 1:numel(mu)
+    for i in 1:length(mu)
         R[i] = devResid(d, y[i], mu[i], wt[i])
     end
     R
@@ -134,27 +134,27 @@ function mustart{Y<:Real,W<:Real}(d::Distribution,
                                   y::AbstractArray{Y},
                                   wt::AbstractArray{W})
     M = Array(Float64, promote_shape(size(y), size(wt)))
-    for i in 1:numel(M)
+    for i in 1:length(M)
         M[i] = mustart(d, y[i], wt[i])
     end
     M
 end
 std(d::Distribution)                          = sqrt(var(d))
 function rand!(d::ContinuousDistribution, A::Array{Float64})
-    for i in 1:numel(A) A[i] = rand(d) end
+    for i in 1:length(A) A[i] = rand(d) end
     A
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64,dims))
 rand(d::ContinuousDistribution, dims::Int...) = rand(d, dims)
 function rand!(d::DiscreteDistribution, A::Array{Int})
-    for i in 1:numel(A) A[i] = int(rand(d)) end
+    for i in 1:length(A) A[i] = int(rand(d)) end
     A
 end
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
 rand(d::DiscreteDistribution, dims::Int...)   = rand(d, dims)
 function var{M<:Real}(d::Distribution, mu::AbstractArray{M})
     V = similar(mu, Float64)
-    for i in 1:numel(mu)
+    for i in 1:length(mu)
         V[i] = var(d, mu[i])
     end
     V
@@ -474,7 +474,8 @@ mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 var(d::Beta) = (ab = d.alpha + d.beta; d.alpha * d.beta /(ab * ab * (ab + 1.)))
 skewness(d::Beta) = 2(d.beta - d.alpha)*sqrt(d.alpha + d.beta + 1)/((d.alpha + d.beta + 2)*sqrt(d.alpha*d.beta))
 rand(d::Beta) = randbeta(d.alpha, d.beta)
-rand!(d::Beta, A::Array{Float64}) = randbeta!(d.alpha, d.beta, A)
+rand(d::Beta, dims::Int...) = randbeta(d.alpha, d.beta, dims)
+rand!(d::Beta, A::Array{Float64}) = (A[:] = randbeta(d.alpha, d.beta, size(A)))
 insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 
 type BetaPrime <: ContinuousDistribution
@@ -753,7 +754,7 @@ type MixtureModel <: Distribution
       error("components and probs must have the same number of elements")
     end
     sump = 0.0
-    for i in 1:numel(p)
+    for i in 1:length(p)
       if p[i] < 0.0
         error("MixtureModel: probabilities must be non-negative")
       end
@@ -765,7 +766,7 @@ end
 
 function pdf(d::MixtureModel, x::Real)
   p = 0.0
-  for i in 1:numel(d.components)
+  for i in 1:length(d.components)
     p += pdf(d.components[i], x) * d.probs[i]
   end
 end
@@ -1024,7 +1025,7 @@ type Multinomial <: DiscreteDistribution
     function Multinomial(n::Integer, p::Vector{Float64})
         if n <= 0 error("Multinomial: n must be positive") end
         sump = 0.
-        for i in 1:numel(p)
+        for i in 1:length(p)
             if p[i] < 0. error("Multinomial: probabilities must be non-negative") end
             sump += p[i]
         end
@@ -1046,7 +1047,7 @@ function Multinomial(n::Integer, p::Matrix{Float64})
     if !(size(p, 1) == 1 || size(p, 2) == 1)
         error("Probability matrix must be a single row or single column")
     end
-    Multinomial(int(n), reshape(p, (numel(p),)))
+    Multinomial(int(n), reshape(p, (length(p),)))
 end
 
 mean(d::Multinomial) = d.n .* d.prob
@@ -1058,7 +1059,7 @@ function integer_valued{T<:Number}(x::AbstractArray{T})
     true
 end
 
-insupport{T <: Real}(d::Multinomial, x::Vector{T}) = integer_valued(x) && all(x .>= 0) && sum(x) == d.n && numel(d.prob) == numel(x)
+insupport{T <: Real}(d::Multinomial, x::Vector{T}) = integer_valued(x) && all(x .>= 0) && sum(x) == d.n && length(d.prob) == length(x)
 
 # log_factorial(n::Int64) = sum(log(1:n)) # lgamma(n + 1) is often much faster
 
@@ -1070,7 +1071,7 @@ pmf{T <: Real}(d::Multinomial, x::Vector{T}) = exp(logpmf(d, x))
 
 function rand(d::Multinomial)
   n = d.n
-  l = numel(d.prob)
+  l = length(d.prob)
   s = zeros(Int, l)
   psum = 1.0
   for j = 1:(l - 1)
@@ -1085,7 +1086,7 @@ function rand(d::Multinomial)
   s
 end
 
-rand(d::Multinomial, count::Int) = rand(d, (numel(d.prob), count))
+rand(d::Multinomial, count::Int) = rand(d, (length(d.prob), count))
 
 function rand!(d::Multinomial, A::Matrix{Int})
   n = size(A, 2)
@@ -1111,7 +1112,7 @@ function Dirichlet(alpha::Matrix{Float64})
     if !(size(alpha, 1) == 1 || size(alpha, 2) == 1)
         error("2D concentration parameters must come in a 1xN or Nx1 array")
     end
-    Dirichlet(reshape(alpha, (numel(alpha),)))
+    Dirichlet(reshape(alpha, (length(alpha),)))
 end
 
 mean(d::Dirichlet) = d.alpha ./ sum(d.alpha)
@@ -1122,7 +1123,7 @@ end
 
                                         # perhaps allow a bit of fuzz on sum(x) == 1?
 insupport{T<:Real}(d::Dirichlet, x::Vector{T}) =
-    numel(d.alpha) == numel(x) && all(x .>= 0.) && sum(x) == 1.
+    length(d.alpha) == length(x) && all(x .>= 0.) && sum(x) == 1.
     # removed the redundant real_valued check
 
 function pdf{T <: Real}(d::Dirichlet, x::Array{T,1})
@@ -1151,7 +1152,7 @@ type Categorical <: DiscreteDistribution
     function Categorical(p::Vector{Float64})
         if length(p) <= 1 error("Categorical: there must be at least two categories") end
         sump = 0.
-        for i in 1:numel(p)
+        for i in 1:length(p)
             if p[i] < 0. error("Categorical: probabilities must be non-negative") end
             sump += p[i]
         end
@@ -1171,7 +1172,7 @@ function Categorical(p::Matrix{Float64})
     if !(size(p, 1) == 1 || size(p, 2) == 1)
         error("Probability matrix must be a single row or single column")
     end
-    Categorical(reshape(p, (numel(p),)))
+    Categorical(reshape(p, (length(p),)))
 end
 
 insupport(d::Categorical, x::Int) = 1 <= x <= length(d.prob) && d.prob[x] != 0.0
@@ -1183,7 +1184,7 @@ end
 pmf(d::Categorical, x::Int) = exp(logpmf(d, x))
 
 function rand(d::Categorical)
-  l = numel(d.prob)
+  l = length(d.prob)
   r = rand()
   for j = 1:l
     r -= d.prob[j]
@@ -1207,7 +1208,7 @@ function sample{T<:Real}(a::AbstractVector, probs::Vector{T})
 end
 
 function sample(a::Array)
-  n = numel(a)
+  n = length(a)
   probs = ones(n) ./ n
   sample(a, probs)
 end
