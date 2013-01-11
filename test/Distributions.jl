@@ -1,4 +1,3 @@
-load("Distributions")
 using Distributions
 
 require("extras/nearequal.jl")
@@ -22,7 +21,7 @@ end
 
 function reldiff{T<:Real}(current::AbstractArray{T}, target::AbstractArray{T})
     @assert all(size(current) == size(target))
-    max([reldiff(current[i], target[i]) for i in 1:numel(target)])
+    max([reldiff(current[i], target[i]) for i in 1:length(target)])
 end
     
 ## Checks on ContinuousDistribution instances
