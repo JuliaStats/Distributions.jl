@@ -85,34 +85,24 @@ abstract ContinuousDistribution <: Distribution
 
 _jl_libRmath = dlopen("libRmath")
 
+pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
+logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
+
 ## Fallback methods, usually overridden for specific distributions
-ccdf(d::Distribution, q::Real)                = 1 - cdf(d,q)
-cquantile(d::Distribution, p::Real)           = quantile(d, 1-p)
-function deviance{M<:Real,Y<:Real,W<:Real}(d::DiscreteDistribution,
+ccdf(d::Distribution, q::Real)                = 1.0 - cdf(d, q)
+cquantile(d::Distribution, p::Real)           = quantile(d, 1.0 - p)
+function deviance{M<:Real,Y<:Real,W<:Real}(d::Distribution,
                                            mu::AbstractArray{M},
                                            y::AbstractArray{Y},
                                            wt::AbstractArray{W})
     promote_shape(size(mu), promote_shape(size(y), size(wt)))
     ans = 0.
     for i in 1:length(y)
-        ans += wt[i] * logpmf(d, mu[i], y[i])
-    end
-    -2ans
-end
-function deviance{M<:Real,Y<:Real,W<:Real}(d::ContinuousDistribution,
-                                           mu::AbstractArray{M},
-                                           y::AbstractArray{Y},
-                                           wt::AbstractArray{W})
-    promote_shape(size(mu), promote_shape(size(y), size(wt))) 
-    ans = 0.
-    for i in 1:length(y)
         ans += wt[i] * logpdf(d, mu[i], y[i])
     end
     -2ans
 end
-devresid(d::DiscreteDistribution, y::Real, mu::Real, wt::Real) =
-    -2wt*logpmf(d, mu, y)
-devresid(d::ContinuousDistribution, y::Real, mu::Real, wt::Real) =
+devresid(d::Distribution, y::Real, mu::Real, wt::Real) =
     -2wt*logpdf(d, mu, y)
 function devresid{Y<:Real,M<:Real,W<:Real}(d::Distribution,
                                            y::AbstractArray{Y},
@@ -128,8 +118,7 @@ invlogccdf(d::Distribution, lp::Real)         = quantile(d, exp(-lp))
 invlogcdf(d::Distribution, lp::Real)          = quantile(d, exp(lp))
 logccdf(d::Distribution, q::Real)             = log(ccdf(d,q))
 logcdf(d::Distribution, q::Real)              = log(cdf(d,q))
-logpdf(d::ContinuousDistribution, x::Real)    = log(pdf(d,x))
-logpmf(d::DiscreteDistribution, x::Real)      = log(pmf(d,x))
+logpdf(d::Distribution, x::Real)    = log(pdf(d,x))
 function mustart{Y<:Real,W<:Real}(d::Distribution,
                                   y::AbstractArray{Y},
                                   wt::AbstractArray{W})
@@ -144,14 +133,13 @@ function rand!(d::ContinuousDistribution, A::Array{Float64})
     for i in 1:length(A) A[i] = rand(d) end
     A
 end
-rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64,dims))
-rand(d::ContinuousDistribution, dims::Int...) = rand(d, dims)
 function rand!(d::DiscreteDistribution, A::Array{Int})
     for i in 1:length(A) A[i] = int(rand(d)) end
     A
 end
+rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
-rand(d::DiscreteDistribution, dims::Int...)   = rand(d, dims)
+rand(d::Distribution, dims::Int...) = rand(d, dims)
 function var{M<:Real}(d::Distribution, mu::AbstractArray{M})
     V = similar(mu, Float64)
     for i in 1:length(mu)
@@ -172,24 +160,23 @@ const Rmath = :libRmath
 ## FIXME: Replace the three _jl_dist_*p macros with one by defining
 ## the argument tuples for the ccall dynamically from pn
 macro _jl_dist_1p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf or pmf
+    dd = expr(:quote,strcat("d",b))     # C name for pdf
     pp = expr(:quote,strcat("p",b))     # C name for cdf
     qq = expr(:quote,strcat("q",b))     # C name for quantile
     rr = expr(:quote,strcat("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pf = dc ? :pmf : :pdf
-    lf = dc ? :logpmf : :logpdf
     pn = Ty.names                       # parameter names
     p  = expr(:quote,pn[1])
     quote
-        global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
-        function ($pf)(d::($T), x::Real)
+        global pdf, logpdf, cdf, logcdf, ccdf, logccdf
+        global quantile, cquantile, invlogcdf, invlogccdf, rand
+        function pdf(d::($T), x::Real)
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Int32),
                   x, d.($p), 0)
         end
-        function ($lf)(d::($T), x::Real)
+        function logpdf(d::($T), x::Real)
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Int32),
                   x, d.($p), 1)
@@ -242,14 +229,12 @@ macro _jl_dist_1p(T, b)
 end
 
 macro _jl_dist_2p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf or pmf
+    dd = expr(:quote,strcat("d",b))     # C name for pdf
     pp = expr(:quote,strcat("p",b))     # C name for cdf
     qq = expr(:quote,strcat("q",b))     # C name for quantile
     rr = expr(:quote,strcat("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pf = dc ? :pmf : :pdf
-    lf = dc ? :logpmf : :logpdf
     pn = Ty.names                       # parameter names
     p1 = expr(:quote,pn[1])
     p2 = expr(:quote,pn[2])    
@@ -259,13 +244,14 @@ macro _jl_dist_2p(T, b)
         qq = expr(:quote, :qnorm5)
     end
     quote
-        global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
-        function ($pf)(d::($T), x::Real)
+        global pdf, logpdf, cdf, logcdf, ccdf, logccdf
+        global quantile, cquantile, invlogcdf, invlogccdf, rand
+        function pdf(d::($T), x::Real)
             ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 0)
         end
-        function ($lf)(d::($T), x::Real)
+        function logpdf(d::($T), x::Real)
             ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 1)
@@ -325,26 +311,25 @@ macro _jl_dist_2p(T, b)
 end
 
 macro _jl_dist_3p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf or pmf
+    dd = expr(:quote,strcat("d",b))     # C name for pdf
     pp = expr(:quote,strcat("p",b))     # C name for cdf
     qq = expr(:quote,strcat("q",b))     # C name for quantile
     rr = expr(:quote,strcat("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pf = dc ? :pmf : :pdf
-    lf = dc ? :logpmf : :logpdf
     pn = Ty.names                       # parameter names
     p1 = expr(:quote,pn[1])
     p2 = expr(:quote,pn[2])    
     p3 = expr(:quote,pn[3])
     quote
-        global $pf,$lf,cdf,logcdf,ccdf,logccdf,quantile,cquantile,invlogcdf,invlogccdf,rand
-        function ($pf)(d::($T), x::Real)
+        global pdf, logpdf, cdf, logcdf, ccdf, logccdf
+        global quantile, cquantile, invlogcdf, invlogccdf, rand
+        function pdf(d::($T), x::Real)
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 0)
         end
-        function ($lf)(d::($T), x::Real)
+        function logpdf(d::($T), x::Real)
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 1)
@@ -452,10 +437,10 @@ Bernoulli() = Bernoulli(0.5)
 cdf(d::Bernoulli, q::Real) = q < 0. ? 0. : (q >= 1. ? 1. : 1. - d.prob)
 insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
 kurtosis(d::Bernoulli) = 1/var(d) - 6
-logpmf( d::Bernoulli, mu::Real, y::Real) = y==0? log(1. - mu): (y==1? log(mu): -Inf)
+logpdf( d::Bernoulli, mu::Real, y::Real) = y==0? log(1. - mu): (y==1? log(mu): -Inf)
 mean(d::Bernoulli) = d.prob
 mustart(d::Bernoulli,  y::Real, wt::Real) = (wt * y + 0.5)/(wt + 1)
-pmf(d::Bernoulli, x::Real) = x == 0 ? (1 - d.prob) : (x == 1 ? d.prob : 0)
+pdf(d::Bernoulli, x::Real) = x == 0 ? (1 - d.prob) : (x == 1 ? d.prob : 0)
 quantile(d::Bernoulli, p::Real) = 0 < p < 1 ? (p <= (1. - d.prob) ? 0 : 1) : NaN
 rand(d::Bernoulli) = rand() > d.prob ? 0 : 1
 skewness(d::Bernoulli) = (1-2d.prob)/std(d)
@@ -927,7 +912,7 @@ Poisson() = Poisson(1)
 @_jl_dist_1p Poisson pois
 devresid(d::Poisson,  y::Real, mu::Real, wt::Real) = 2wt*((y==0? 0.: log(y/mu)) - (y-mu))
 insupport(d::Poisson, x::Number) = integer_valued(x) && 0 <= x
-logpmf(  d::Poisson, mu::Real, y::Real) = ccall((:dpois, Rmath),Float64,(Float64,Float64,Int32),y,mu,1)
+logpdf(  d::Poisson, mu::Real, y::Real) = ccall((:dpois, Rmath),Float64,(Float64,Float64,Int32),y,mu,1)
 mean(d::Poisson) = d.lambda
 mustart( d::Poisson,  y::Real, wt::Real) = y + 0.1
 var(     d::Poisson, mu::Real) = mu
@@ -995,23 +980,9 @@ var(d::Weibull) = d.scale^2*gamma(1 + 2/d.shape) - mean(d)^2
 cdf(d::Weibull, x::Real) = 0 < x ? 1. - exp(-((x/d.scale)^d.shape)) : 0.
 insupport(d::Weibull, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-for f in (:cdf, :logcdf, :ccdf, :logccdf, :quantile, :cquantile, :invlogcdf, :invlogccdf)
+for f in (:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :quantile, :cquantile, :invlogcdf, :invlogccdf)
     @eval begin
         function ($f){T<:Real}(d::Distribution, x::AbstractArray{T})
-            reshape([($f)(d, e) for e in x], size(x))
-        end
-    end
-end
-for f in (:pmf, :logpmf)
-    @eval begin
-        function ($f){T<:Real}(d::DiscreteDistribution, x::AbstractArray{T})
-            reshape([($f)(d, e) for e in x], size(x))
-        end
-    end
-end
-for f in (:pdf, :logpdf)
-    @eval begin
-        function ($f){T<:Real}(d::ContinuousDistribution, x::AbstractArray{T})
             reshape([($f)(d, e) for e in x], size(x))
         end
     end
@@ -1063,11 +1034,11 @@ insupport{T <: Real}(d::Multinomial, x::Vector{T}) = integer_valued(x) && all(x 
 
 # log_factorial(n::Int64) = sum(log(1:n)) # lgamma(n + 1) is often much faster
 
-function logpmf{T <: Real}(d::Multinomial, x::Array{T, 1})
+function logpdf{T <: Real}(d::Multinomial, x::Array{T, 1})
   !insupport(d, x) ? -Inf : lgamma(d.n + 1) - sum(lgamma(x + 1)) + sum(x .* log(d.prob))
 end
 
-pmf{T <: Real}(d::Multinomial, x::Vector{T}) = exp(logpmf(d, x))
+pdf{T <: Real}(d::Multinomial, x::Vector{T}) = exp(logpdf(d, x))
 
 function rand(d::Multinomial)
   n = d.n
@@ -1177,11 +1148,11 @@ end
 
 insupport(d::Categorical, x::Int) = 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 
-function logpmf(d::Categorical, x::Int)
+function logpdf(d::Categorical, x::Int)
   !insupport(d, x) ? -Inf : log(d.prob[x])
 end
 
-pmf(d::Categorical, x::Int) = exp(logpmf(d, x))
+pdf(d::Categorical, x::Int) = exp(logpdf(d, x))
 
 function rand(d::Categorical)
   l = length(d.prob)
