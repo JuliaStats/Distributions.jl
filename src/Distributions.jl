@@ -792,7 +792,7 @@ function pdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   z = (x - d.mean)
   c = (2.0 * pi)^(-k / 2)
-  return c * sqrt(norm(d.cov)) * exp(-0.5 * z' * d.inv_cov * z)[1]
+  return c * sqrt(det(d.cov)) * exp(-0.5 * z' * d.inv_cov * z)[1]
 end
 
 ## NegativeBinomial is the distribution of the number of failures
