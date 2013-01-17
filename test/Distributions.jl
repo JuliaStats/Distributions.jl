@@ -141,3 +141,8 @@ for ll in (LogitLink(), ProbitLink()#, CloglogLink() # edge cases for CloglogLin
         @assert all(isapprox(linkinv(ll, linkfun(ll, mm)), mm))
     end
 end
+
+d = MultivariateNormal(zeros(2), eye(2))
+@assert abs(pdf(d, [0, 0]) - 0.159155) < 10e-3
+@assert abs(pdf(d, [1, 0]) - 0.0965324) < 10e-3
+@assert abs(pdf(d, [1, 1]) - 0.0585498) < 10e-3

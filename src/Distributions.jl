@@ -764,16 +764,17 @@ type MultivariateNormal <: Distribution
   mean::Vector{Float64}
   cov::Matrix{Float64}
   sqrt_cov::Matrix{Float64}
-  function MultivariateNormal(m, c, s)
-    if length(m) == size(c, 1) == size(c, 2) == size(s, 1) == size(s, 2)
-      new(m, c, s)
+  inv_cov::Matrix{Float64}
+  function MultivariateNormal(m, c, s, i)
+    if length(m) == size(c, 1) == size(c, 2) == size(s, 1) == size(s, 2) == size(i, 1) == size(i, 2)
+      new(m, c, s, i)
     else
-      error("Dimensions of mean and covariance do not match")
+      error("Dimensions of mean vector and covariance matrix do not match")
     end
   end
 end
 function MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64})
-  MultivariateNormal(mean, cov, chol(cov)') #'
+  MultivariateNormal(mean, cov, chol(cov)', inv(cov)) #'
 end
 function MultivariateNormal(mean::Vector{Float64})
   MultivariateNormal(mean, eye(length(mean)))
@@ -786,6 +787,13 @@ function rand(d::MultivariateNormal)
   return d.mean + d.sqrt_cov * z
 end
 var(d::MultivariateNormal) = d.cov
+
+function pdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
+  k = length(d.mean)
+  z = (x - d.mean)
+  c = (2.0 * pi)^(-k / 2)
+  return c * sqrt(norm(d.cov)) * exp(-0.5 * z' * d.inv_cov * z)[1]
+end
 
 ## NegativeBinomial is the distribution of the number of failures
 ## before the size'th success in a sequence of Bernoulli trials.
