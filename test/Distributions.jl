@@ -1,7 +1,7 @@
 using Distributions
 
-require("extras/nearequal.jl")
-require("extras/test.jl")
+require("nearequal.jl")
+require("test.jl")
 
 # n probability points, i.e. the midpoints of the intervals [0, 1/n],...,[1-1/n, 1]
 probpts(n::Int) = ((1:n) - 0.5)/n  
@@ -38,11 +38,6 @@ for d in (Beta(), Cauchy(), Chisq(12), Exponential(), Exponential(23.1),
     @assert reldiff(logccdf(d, qq), lpp[end:-1:1]) < tol
     @assert reldiff(invlogcdf(d, lpp), qq) < tol
     @assert reldiff(invlogccdf(d, lpp), qq[end:-1:1]) < tol
-## These tests are not suitable for routine use as they can fail due to sampling
-## variability.
-#    ss = rand(d, int(1e6))  
-#    if isfinite(mean(d)) @assert reldiff(mean(ss), mean(d)) < 1e-3 end
-#    if isfinite(std(d)) @assert reldiff(std(ss), std(d)) < 0.1 end
 end
 
 # Additional tests on the Multinomial and Dirichlet constructors
@@ -64,9 +59,8 @@ logpmf(d, [1, 1])
 logpmf(d, [0, 1])
 d.n = 10
 rand(d)
-#A = zeros(Int, 2, 10)
-#rand!(d, A)
-#A
+A = zeros(Int, 2, 10)
+rand!(d, A)
 
 d = Dirichlet([1.0, 2.0, 1.0])
 d = Dirichlet(3)
@@ -79,9 +73,8 @@ insupport(d, [0.1, 0.8, 0.2])
 insupport(d, [0.1, 0.8])
 pdf(d, [0.1, 0.8, 0.1])
 rand(d)
-#A = zeros(Float64, 10, 3)
-#rand!(d, A)
-#A
+A = zeros(Float64, 10, 3)
+rand!(d, A)
 
 d = Categorical([0.25, 0.5, 0.25])
 d = Categorical(3)
@@ -104,9 +97,9 @@ d = Categorical([0.25; 0.5; 0.25])
 
 @assert 1.0 <= rand(d) <= 3.0
 
-#A = zeros(Int, 10)
-#rand!(d, A)
-#@assert 1.0 <= mean(A) <= 3.0
+A = zeros(Int, 10)
+rand!(d, A)
+@assert 1.0 <= mean(A) <= 3.0
 
 # Examples of sample()
 a = [1, 6, 19]
@@ -114,10 +107,9 @@ p = rand(Dirichlet(3))
 x = sample(a, p)
 @assert x == 1 || x == 6 || x == 19
 
-# This worked before and now fails with recent changes.
-#a = 19.0 * eye(2)
-#x = sample(a)
-#@assert x == 0.0 || x == 19.0
+a = 19.0 * [1.0, 0.0]
+x = sample(a)
+@assert x == 0.0 || x == 19.0
 
 ## Link function tests
 const ep = eps()
