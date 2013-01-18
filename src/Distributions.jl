@@ -86,6 +86,8 @@ export                                  # types
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.integer_valued
 
+include("tvpack.jl")
+
 abstract Distribution
 abstract UnivariateDistribution             <: Distribution
 abstract MultivariateDistribution           <: Distribution
@@ -142,17 +144,30 @@ function mustart{Y<:Real,W<:Real}(d::Distribution,
     M
 end
 std(d::Distribution)                          = sqrt(var(d))
-function rand!(d::ContinuousDistribution, A::Array{Float64})
+function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A) A[i] = rand(d) end
-    A
-end
-function rand!(d::DiscreteDistribution, A::Array{Int})
-    for i in 1:length(A) A[i] = int(rand(d)) end
     A
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
 rand(d::Distribution, dims::Int...) = rand(d, dims)
+rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
+function rand!(d::MultivariateDistribution, X::Matrix)
+  k = length(mean(d))
+  m, n = size(X)
+  if m == k
+    for i = 1:n
+      X[:,i] = rand(d)
+    end
+  elseif n == k
+    for i = 1:m
+      X[i,:] = rand(d)
+    end
+  else
+    error("Wrong dimensions")
+  end
+  return X
+end
 function var{M<:Real}(d::Distribution, mu::AbstractArray{M})
     V = similar(mu, Float64)
     for i in 1:length(mu)
@@ -775,19 +790,17 @@ end
 
 type MultivariateNormal <: ContinuousMultivariateDistribution
   mean::Vector{Float64}
-  cov::Matrix{Float64}
-  sqrt_cov::Matrix{Float64}
-  inv_cov::Matrix{Float64}
-  function MultivariateNormal(m, c, s, i)
-    if length(m) == size(c, 1) == size(c, 2) == size(s, 1) == size(s, 2) == size(i, 1) == size(i, 2)
-      new(m, c, s, i)
+  covchol::CholeskyDense{Float64}
+  function MultivariateNormal(m, c)
+    if length(m) == size(c, 1) == size(c, 2)
+      new(m, c)
     else
       error("Dimensions of mean vector and covariance matrix do not match")
     end
   end
 end
 function MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64})
-  MultivariateNormal(mean, cov, chol(cov)', inv(cov)) #'
+  MultivariateNormal(mean, chold(cov))
 end
 function MultivariateNormal(mean::Vector{Float64})
   MultivariateNormal(mean, eye(length(mean)))
@@ -795,17 +808,32 @@ end
 MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
 mean(d::MultivariateNormal) = d.mean
+var(d::MultivariateNormal) = d.covchol.LR'd.covchol.LR
 function rand(d::MultivariateNormal)
   z = randn(length(d.mean))
-  return d.mean + d.sqrt_cov * z
+  return d.mean + d.covchol.LR'z
 end
-var(d::MultivariateNormal) = d.cov
 
-function pdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
+function logpdf(d::MultivariateNormal, x::Vector{Float64})
   k = length(d.mean)
-  z = (x - d.mean)
-  c = (2.0 * pi)^(-k / 2)
-  return c * sqrt(det(d.cov)) * exp(-0.5 * z' * d.inv_cov * z)[1]
+  z = d.covchol.LR \ (x - d.mean)
+  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.LR))) - 0.5 * dot(z,z)
+end
+pdf(d::MultivariateNormal, x::Vector{Float64}) = exp(logpdf(d, x))
+function cdf(d::MultivariateNormal, x::Vector{Float64})
+  k = length(d.mean)
+  if k > 3; error("Dimension larger than three is not supported yet"); end
+  stddev = sqrt(diag(var(d)))
+  z = (x - d.mean) ./ stddev
+  C = diagmm(d.covchol.LR, 1.0 / stddev)
+  C = C'C
+  if k == 3
+    return tvtcdf(0, z, C[[2, 3, 6]])
+  elseif k == 2
+    return bvtcdf(0, z[1], z[2], C[2])
+  else
+    return normcdf(z[1])
+  end
 end
 
 ## NegativeBinomial is the distribution of the number of failures
@@ -869,8 +897,8 @@ var(d::Normal) = d.std^2
 skewness(d::Normal) = 0.
 kurtosis(d::Normal) = 0.
 ## redefine common methods
-cdf(d::Normal, x::Real) = (1+erf((x-d.mean)/(d.std*sqrt(2))))/2
-pdf(d::Normal, x::Real) = exp(-(x-d.mean)^2/(2d.std^2))/(d.std*sqrt(2pi))
+cdf(d::Normal, x::Real) = normcdf((x - d.mean) / d.std)
+pdf(d::Normal, x::Real) = 0.3989422804014327 / d.std * exp(-0.5 * ((x - d.mean) / d.std)^2)
 rand(d::Normal) = d.mean + d.std * randn()
 insupport(d::Normal, x::Number) = real_valued(x) && isfinite(x)
 
@@ -975,6 +1003,7 @@ mean(d::TDist) = d.df > 1 ? 0. : NaN
 median(d::TDist) = 0.
 var(d::TDist) = d.df > 2 ? d.df/(d.df-2) : d.df > 1 ? Inf : NaN
 insupport(d::TDist, x::Number) = real_valued(x) && isfinite(x)
+pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2 / d.df)^(-0.5*(d.df + 1.0))
 
 type Uniform <: ContinuousUnivariateDistribution
     a::Float64
@@ -1078,16 +1107,6 @@ function rand(d::Multinomial)
   s
 end
 
-rand(d::Multinomial, count::Int) = rand(d, (length(d.prob), count))
-
-function rand!(d::Multinomial, A::Matrix{Int})
-  n = size(A, 2)
-  for i = 1:n
-    A[:, i] = rand(d)
-  end
-  A
-end
-
 type Dirichlet <: ContinuousMultivariateDistribution
     alpha::Vector{Float64}
     function Dirichlet{T<:Real}(alpha::Vector{T})
@@ -1130,12 +1149,6 @@ end
 function rand(d::Dirichlet)
     x = [randg(el) for el in d.alpha]
     x ./ sum(x)
-end
-
-function rand!(d::Dirichlet, A::Array{Float64,2})
-  for i in 1:size(A, 1)
-    A[i, :] = rand(d)'
-  end
 end
 
 # Categorical distribution
