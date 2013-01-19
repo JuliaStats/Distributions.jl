@@ -21,6 +21,7 @@ Many distribution types also provide useful theoretical information about the di
 
 As of v0.0.0, the following distributions have been implemented:
 
+* Arcsine
 * Bernoulli
 * Beta
 * Binomial
@@ -28,30 +29,38 @@ As of v0.0.0, the following distributions have been implemented:
 * Cauchy
 * Chisq
 * Dirichlet
+* DiscreteUniform
 * Exponential
 * FDist
 * Gamma
 * Geometric
 * HyperGeometric
+* Laplace
 * Logistic
 * logNormal
+* MixtureModel
 * Multinomial
+* MultivariateNormal
 * NegativeBinomial
 * NoncentralBeta
 * NoncentralChisq
 * NoncentralF
 * NoncentralT
 * Normal
+* Pareto
 * Poisson
+* Rayleigh
 * TDist
 * Uniform
 * Weibull
 
 ## Simple Examples
 
+    using Distributions
+
     x = rand(Normal(0.0, 1.0), 10_000)
     mean(x)
-    
+
     d = Beta(1.0, 9.0)
     pdf(d, 0.9)
     quantile(d, 0.1)

@@ -15,12 +15,15 @@ export                                  # types
     Arcsine,
     Bernoulli,
     Beta,
+    BetaPrime,
     Binomial,
     Categorical,
     Cauchy,
     Chisq,
     Dirichlet,
     DiscreteUniform,
+    EmpiricalDistribution,
+    Erlang,
     Exponential,
     FDist,
     Gamma,
@@ -29,6 +32,7 @@ export                                  # types
     IdentityLink,
     InverseLink,
     Laplace,
+    Levy,
     Link,
     Logistic,
     LogitLink,
@@ -48,45 +52,53 @@ export                                  # types
     ProbitLink,
     Rayleigh,
     TDist,
+    Triangular,
     Uniform,
     Weibull,
                                         # methods
+    binaryentropy, # entropy of distribution in bits
     canonicallink, # canonical link function for a distribution
-    ccdf,       # complementary cdf, i.e. 1 - cdf
-    cdf,        # cumulative distribution function
-    cquantile,  # complementary quantile (i.e. using prob in right hand tail)
-    deviance,   # deviance of fitted and observed responses
-    devresid,   # vector of squared deviance residuals
-    fit,        # fit a distribution to data
-    insupport,  # predicate, is x in the support of the distribution?
-    invlogccdf, # complementary quantile based on log probability
-    invlogcdf,  # quantile based on log probability
-    kurtosis,   # kurtosis of the distribution
-    linkfun,    # link function mapping mu to eta, the linear predictor
-    linkinv,    # inverse link mapping eta to mu
-    logccdf,    # ccdf returning log-probability
-    logcdf,     # cdf returning log-probability
-    logpdf,     # log probability density
-    logpmf,     # log probability mass
-    mean,       # mean of distribution
-    median,     # median of distribution
-    mueta,      # derivative of inverse link function
-    mustart,    # starting values of mean vector in GLMs
-    pdf,        # probability density function (ContinuousDistribution)
-    pmf,        # probability mass function (DiscreteDistribution)
-    quantile,   # inverse of cdf (defined for p in (0,1))
-    rand,       # random sampler
-    rand!,      # replacement random sampler
-    sample,     # another random sampler - not sure why this is here
-    skewness,   # skewness of the distribution
-    std,        # standard deviation of distribution
-    valideta,   # validity check on linear predictor
-    validmu,    # validity check on mean vector
-    var         # variance of distribution
+    ccdf,          # complementary cdf, i.e. 1 - cdf
+    cdf,           # cumulative distribution function
+    cquantile,     # complementary quantile (i.e. using prob in right hand tail)
+    deviance,      # deviance of fitted and observed responses
+    devresid,      # vector of squared deviance residuals
+    entropy,       # entropy of distribution in nats
+    fit,           # fit a distribution to data
+    insupport,     # predicate, is x in the support of the distribution?
+    invlogccdf,    # complementary quantile based on log probability
+    invlogcdf,     # quantile based on log probability
+    kurtosis,      # kurtosis of the distribution
+    linkfun,       # link function mapping mu to eta, the linear predictor
+    linkinv,       # inverse link mapping eta to mu
+    logccdf,       # ccdf returning log-probability
+    logcdf,        # cdf returning log-probability
+    logpdf,        # log probability density
+    logpmf,        # log probability mass
+    mean,          # mean of distribution
+    median,        # median of distribution
+    modes,         # mode(s) of distribution as vector
+    mueta,         # derivative of inverse link function
+    mustart,       # starting values of mean vector in GLMs
+    pdf,           # probability density function (ContinuousDistribution)
+    pmf,           # probability mass function (DiscreteDistribution)
+    quantile,      # inverse of cdf (defined for p in (0,1))
+    rand,          # random sampler
+    rand!,         # replacement random sampler
+    sample,        # another random sampler - not sure why this is here
+    skewness,      # skewness of the distribution
+    std,           # standard deviation of distribution
+    valideta,      # validity check on linear predictor
+    validmu,       # validity check on mean vector
+    var            # variance of distribution
 
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.integer_valued
 import Base.show
+
+# convenience methods for integer_valued
+integer_valued{T <: Integer}(x::AbstractArray{T}) = true
+integer_valued(x::AbstractArray) = allp(integer_valued, x)
 
 include("tvpack.jl")
 
@@ -101,9 +113,6 @@ typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMul
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
 _jl_libRmath = dlopen("libRmath")
-
-pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
-logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
 
 ## Fallback methods, usually overridden for specific distributions
 ccdf(d::Distribution, q::Real)                = 1.0 - cdf(d, q)
@@ -418,6 +427,58 @@ macro _jl_dist_3p(T, b)
     end
 end
 
+for f in (:pdf, :logpdf, :cdf, :logcdf,
+          :ccdf, :logccdf, :quantile, :cquantile,
+          :invlogcdf, :invlogccdf)
+  @eval begin
+    function ($f)(d::UnivariateDistribution, x::AbstractArray)
+      res = Array(Float64, size(x))
+      for i in 1:length(res)
+        res[i] = ($f)(d, x[i])
+      end
+      return res
+    end
+  end
+end
+
+pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
+logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
+
+binary_entropy(d::Distribution) = entropy(d) / log(2)
+
+##############################################################################
+#
+# Alpha distribution
+#
+# TODO: Decide what to implement here. Alpha-stable distributions are often
+#  analytically complex, so it may be not possible to define useful samplers.
+#
+##############################################################################
+
+type Alpha <: ContinuousUnivariateDistribution
+    location::Float64
+    scale::Float64
+    function Alpha(l::Real, s::Real)
+      s < 0. ? error("scale must be non-negative") : new(float64(l), float64(s))
+    end
+end
+Alpha(location::Real) = Alpha(location, 1.0)
+Alpha() = Alpha(0.0, 1.0)
+
+const Levy = Alpha
+
+##############################################################################
+#
+# Arcsine distribution
+#
+# REFERENCES: Using definition from Devroye, IX.7
+#  This definition differs from definitions on Wikipedia and other sources,
+#  where distribution is over [0, 1] rather than [-1, 1].
+#
+# TODO: Implement kurtosis and entropy.
+#
+##############################################################################
+
 type Arcsine <: ContinuousUnivariateDistribution
 end
 
@@ -451,31 +512,66 @@ rand(d::Arcsine) = sin(2. * pi * rand())
 skewness(d::Arcsine) = 0.
 var(d::Arcsine) = 1./2.
 
-type Alpha <: ContinuousUnivariateDistribution
-    location::Float64
-    scale::Float64
-    Alpha(l, s) = s < 0 ? error("scale must be non-negative") : new(float64(l), float64(s))
+##############################################################################
+#
+# Bernoulli distribution
+#
+# REFERENCES: Wasserman, "All of Statistics"
+#
+# TODO: Test kurtosis, skewness
+#
+# NOTES: Fails CDF/Quantile matching test
+#
+##############################################################################
+
+# TODO: Move these two methods into Base
+xlogx(x::Real) = x == 0.0 ? 0.0 : x * log(x)
+function entropy(p::Vector)
+    e = 0.0
+    for p_i in p
+        if p_i < 0.
+            error("Probabilities must lie in [0, 1]")
+        end
+        e -= xlogx(p_i)
+    end
+    return e
 end
-const Levy = Alpha
 
 type Bernoulli <: DiscreteUnivariateDistribution
     prob::Float64
-    Bernoulli(p) = 0. <= p <= 1. ? new(float64(p)) : error("prob must be in [0,1]")
+    Bernoulli(p::Real) = 0. <= p <= 1. ? new(float64(p)) : error("prob must be in [0,1]")
 end
 Bernoulli() = Bernoulli(0.5)
 
 cdf(d::Bernoulli, q::Real) = q < 0. ? 0. : (q >= 1. ? 1. : 1. - d.prob)
+entropy(d::Bernoulli) = -xlogx(1.0 - d.prob) - xlogx(d.prob)
 insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
-kurtosis(d::Bernoulli) = 1/var(d) - 6
-logpdf( d::Bernoulli, mu::Real, y::Real) = y==0? log(1. - mu): (y==1? log(mu): -Inf)
+kurtosis(d::Bernoulli) = 1 / var(d) - 6.
+logpdf( d::Bernoulli, mu::Real, y::Real) = y==0 ? log(1. - mu): (y == 1 ? log(mu): -Inf)
 mean(d::Bernoulli) = d.prob
-mustart(d::Bernoulli,  y::Real, wt::Real) = (wt * y + 0.5)/(wt + 1)
+median(d::Bernoulli) = d.prob < 0.5 ? 0.0 : 1.0
+function modes(d::Bernoulli)
+  if d.prob < 0.5
+    [0]
+  elseif d.prob == 0.5
+    [0, 1]
+  else
+    [1]
+  end
+end
+mustart(d::Bernoulli,  y::Real, wt::Real) = (wt * y + 0.5) / (wt + 1)
 pdf(d::Bernoulli, x::Real) = x == 0 ? (1 - d.prob) : (x == 1 ? d.prob : 0)
 quantile(d::Bernoulli, p::Real) = 0 < p < 1 ? (p <= (1. - d.prob) ? 0 : 1) : NaN
 rand(d::Bernoulli) = rand() > d.prob ? 0 : 1
 skewness(d::Bernoulli) = (1-2d.prob)/std(d)
 var(d::Bernoulli, mu::Real) = max(eps(), mu*(1. - mu))
 var(d::Bernoulli) = d.prob * (1. - d.prob)
+
+##############################################################################
+#
+# Beta distribution
+#
+##############################################################################
 
 type Beta <: ContinuousUnivariateDistribution
     alpha::Float64
@@ -485,18 +581,79 @@ end
 Beta(a) = Beta(a, a)                    # symmetric in [0,1]
 Beta()  = Beta(1)                       # uniform
 @_jl_dist_2p Beta beta
+function entropy(d::Beta)
+  o = lbeta(d.alpha, d.beta)
+  o = o - (d.alpha - 1.0) * digamma(d.alpha)
+  o = o - (d.beta - 1.0) * digamma(d.beta)
+  o = o + (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
+  return o
+end
 mean(d::Beta) = d.alpha / (d.alpha + d.beta)
+function modes(d::Beta)
+  if d.alpha > 1.0 && d.beta > 1.0
+    return [(d.alpha - 1.) / (d.alpha + d.beta - 2.)]
+  else
+    error("Beta distribution with (a, b) has no modes")
+  end
+end
 var(d::Beta) = (ab = d.alpha + d.beta; d.alpha * d.beta /(ab * ab * (ab + 1.)))
-skewness(d::Beta) = 2(d.beta - d.alpha)*sqrt(d.alpha + d.beta + 1)/((d.alpha + d.beta + 2)*sqrt(d.alpha*d.beta))
+function skewness(d::Beta)
+  d = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
+  n = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
+  return d / n
+end
+function kurtosis(d::Beta)
+  a, b = d.alpha, d.beta
+  d = 6.0 * ((a - b)^2 * (a + b + 1.0) - a * b * (a + b + 2.0))
+  n = a * b * (a + b + 2.0) * (a + b + 3.0)
+  return d / n
+end
 rand(d::Beta) = randbeta(d.alpha, d.beta)
 rand(d::Beta, dims::Int...) = randbeta(d.alpha, d.beta, dims)
 rand!(d::Beta, A::Array{Float64}) = (A[:] = randbeta(d.alpha, d.beta, size(A)))
 insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 
+##############################################################################
+#
+# BetaPrime distribution
+#
+# REFERENCES: Forbes et al. "Statistical Distributions"
+#
+##############################################################################
+
 type BetaPrime <: ContinuousUnivariateDistribution
-    alpha::Float64
-    beta::Float64
+  alpha::Float64
+  beta::Float64
+  function BetaPrime(a::Real, b::Real)
+    if a > 0.0 && b > 0.0
+      new(float64(a), float64(b))
+    else
+      error("Both alpha and beta must be positive")
+    end
+  end
 end
+BetaPrime() = BetaPrime(2.0, 1.0)
+
+cdf(d::BetaPrime, q::Real) = inc_beta(q / 1.0 + q, d.alpha, d.beta)
+insupport(d::BetaPrime, x::Number) = real_valued(x) && x > 0 ? true : false
+function mean(d::BetaPrime)
+  if d.beta > 1.0
+    d.alpha / (d.beta + 1.0)
+  else
+    error("mean not defined when beta <= 1")
+  end
+end
+function pdf(d::BetaPrime, x::Real)
+  a, b = d.alpha, d.beta
+  (x^(a - 1.0) * (10. + x)^(-(a + b))) / beta(a, b)
+end
+rand(d::BetaPrime) = 1 / randbeta(d.alpha, d.beta)
+
+##############################################################################
+#
+# Binomial distribution
+#
+##############################################################################
 
 type Binomial <: DiscreteUnivariateDistribution
     size::Int
@@ -506,19 +663,27 @@ end
 Binomial(size) = Binomial(size, 0.5)
 Binomial()     = Binomial(1, 0.5)
 @_jl_dist_2p Binomial binom
+kurtosis(d::Binomial) = (1.0 - 2.0 * d.prob * (1. - d.prob)) / var(d)
 mean(d::Binomial)     = d.size * d.prob
+modes(d::Binomial) = iround([d.size * d.prob])
 var(d::Binomial)      = d.size * d.prob * (1. - d.prob)
 skewness(d::Binomial) = (1-2d.prob)/std(d)
 kurtosis(d::Binomial) = (1-2d.prob*(1-d.prob))/var(d)
 insupport(d::Binomial, x::Number) = integer_valued(x) && 0 <= x <= d.size
 
+##############################################################################
+#
+# Cauchy distribution
+#
+##############################################################################
+
 type Cauchy <: ContinuousUnivariateDistribution
-    location::Real
-    scale::Real
+    location::Float64
+    scale::Float64
     Cauchy(l, s) = s > 0 ? new(float64(l), float64(s)) : error("scale must be positive")
 end
-Cauchy(l) = Cauchy(l, 1)
-Cauchy()  = Cauchy(0, 1)
+Cauchy(l) = Cauchy(l, 1.0)
+Cauchy()  = Cauchy(0.0, 1.0)
 @_jl_dist_2p Cauchy cauchy
 mean(d::Cauchy)     = NaN
 var(d::Cauchy)      = NaN
@@ -557,9 +722,7 @@ end
 DiscreteUniform(b::Int) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
-cdf(d::DiscreteUniform) = error("not yet implemented")
-insupport(d::DiscreteUniform, x::Number) =
-  isinteger(x) && d.a <= x <= d.b
+insupport(d::DiscreteUniform, x::Number) = isinteger(x) && d.a <= x <= d.b
 function kurtosis(d::DiscreteUniform)
   n = d.b - d.a + 1.
   -(6. / 5.) * (n^2 + 1.)/(n^2 - 1.)
@@ -694,7 +857,7 @@ type Laplace <: ContinuousUnivariateDistribution
   scale::Float64
   function Laplace(l::Real, s::Real)
     if s > 0.0
-      new(float(l), float(s))
+      new(float64(l), float64(s))
     else
       error("scale must be positive")
     end
@@ -923,7 +1086,7 @@ type Pareto <: ContinuousUnivariateDistribution
   shape::Float64
   function Pareto(sc, sh)
     if sc > 0.0 && sh > 0.0
-      new(float(sc), float(sh))
+      new(float64(sc), float64(sh))
     else
       error("shape and scale must be positive")
     end
@@ -983,11 +1146,17 @@ mustart( d::Poisson,  y::Real, wt::Real) = y + 0.1
 var(     d::Poisson, mu::Real) = mu
 var(d::Poisson) = d.lambda
 
+##############################################################################
+#
+# Rayleigh distribution from Distributions Handbook
+#
+##############################################################################
+
 type Rayleigh <: ContinuousUnivariateDistribution
   scale::Float64
   function Rayleigh(s)
     if s > 0.0
-      new(float(s))
+      new(float64(s))
     else
       error("scale must be positive")
     end
@@ -1010,16 +1179,76 @@ rand(d::Rayleigh) = d.scale * sqrt(-2.log(rand()))
 skewness(d::Rayleigh) = d.scale^3 * (pi - 3.) * sqrt(pi / 2.)
 var(d::Rayleigh) = d.scale^2 * (2. - pi / 2.)
 
+##############################################################################
+#
+# TDist distribution
+#
+##############################################################################
+
 type TDist <: ContinuousUnivariateDistribution
     df::Float64                         # non-integer degrees of freedom allowed
     TDist(d) = d > 0 ? new(float64(d)) : error("df must be positive")
 end
 @_jl_dist_1p TDist t
+entropy(d::TDist) = ((d.df + 1.)/2.)*(digamma((d.df + 1.)/2.) - digamma((d.df)/2.)) + (1./2.)*log(d.df) + lbeta(d.df + 1., 1./2.)
 mean(d::TDist) = d.df > 1 ? 0. : NaN
 median(d::TDist) = 0.
+modes(d::TDist) = [0.0]
 var(d::TDist) = d.df > 2 ? d.df/(d.df-2) : d.df > 1 ? Inf : NaN
 insupport(d::TDist, x::Number) = real_valued(x) && isfinite(x)
 pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2 / d.df)^(-0.5*(d.df + 1.0))
+
+##############################################################################
+#
+# Symmetric triangular distribution from Distributions Handbook
+#
+# TODO: Rearrange methods
+#
+##############################################################################
+
+type Triangular <: ContinuousUnivariateDistribution
+  location::Float64
+  scale::Float64
+  function Triangular(l, s)
+    if s > 0.0
+      new(float64(l), float64(s))
+    else
+      error("scale must be positive")
+    end
+  end
+end
+Triangular(location::Real) = Triangular(location, 1.0)
+Triangular() = Triangular(0.0, 1.0)
+
+function insupport(d::Triangular, x::Number)
+  o = real_valued(x) && isfinite(x)
+  return o && d.location - d.scale <= x <= d.location + d.scale
+end
+kurtosis(d::Triangular) = d.scale^4 / 15.0
+mean(d::Triangular) = d.location
+median(d::Triangular) = d.location
+modes(d::Triangular) = [d.location]
+function pdf(d::Triangular, x::Real)
+  if insupport(d, x)
+    return -abs(x - d.location) / (d.scale^2) + 1.0 / d.scale
+  else
+    return 0.0
+  end
+end
+function rand(d::Triangular)
+  xi1, xi2 = rand(), rand()
+  return d.location + (xi1 - xi2) * d.scale
+end
+skewness(d::Triangular) = 0.0
+var(d::Triangular) = d.scale^2 / 6.0
+
+##############################################################################
+#
+# Uniform distribution
+#
+# TODO: Rearrange methods
+#
+##############################################################################
 
 type Uniform <: ContinuousUnivariateDistribution
     a::Float64
@@ -1028,11 +1257,15 @@ type Uniform <: ContinuousUnivariateDistribution
 end
 Uniform() = Uniform(0, 1)
 @_jl_dist_2p Uniform unif
+entropy(d::Uniform) = log(d.b - d.a + 1.)
 mean(d::Uniform) = (d.a + d.b) / 2.
 median(d::Uniform) = (d.a + d.b)/2.
+modes(d::Uniform) = error("The uniform distribution has no modes")
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()
 var(d::Uniform) = (w = d.b - d.a; w * w / 12.)
 insupport(d::Uniform, x::Number) = real_valued(x) && d.a <= x <= d.b
+skewness(d::Uniform) = 0.0
+kurtosis(d::Uniform) = -6.0 / 5.0
 
 type Weibull <: ContinuousUnivariateDistribution
     shape::Float64
@@ -1046,61 +1279,61 @@ var(d::Weibull) = d.scale^2*gamma(1 + 2/d.shape) - mean(d)^2
 cdf(d::Weibull, x::Real) = 0 < x ? 1. - exp(-((x/d.scale)^d.shape)) : 0.
 insupport(d::Weibull, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-for f in (:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :quantile, :cquantile, :invlogcdf, :invlogccdf)
-    @eval begin
-        function ($f){T<:Real}(d::Distribution, x::AbstractArray{T})
-            reshape([($f)(d, e) for e in x], size(x))
-        end
-    end
-end
-
-## Distributions contributed by John Myles White.
+##
+##
+## Multinomial distribution
+##
+##
 
 type Multinomial <: DiscreteMultivariateDistribution
-    n::Int
-    prob::Vector{Float64}
-    function Multinomial(n::Integer, p::Vector{Float64})
-        if n <= 0 error("Multinomial: n must be positive") end
-        sump = 0.
-        for i in 1:length(p)
-            if p[i] < 0. error("Multinomial: probabilities must be non-negative") end
-            sump += p[i]
-        end
-        ## if abs(sump - 1.) > sqrt(eps())   # allow a bit of slack
-        ##     error("Multinomial: probabilities must add to 1")
-        ## end
-        new(int(n), p ./ sump)
-    end      
+  n::Int
+  prob::Vector{Float64}
+  function Multinomial{T <: Real}(n::Integer, p::Vector{T})
+    if n <= 0
+      error("Multinomial: n must be positive")
+    end
+    sump = 0.
+    for i in 1:length(p)
+      if p[i] < 0.
+        error("Multinomial: probabilities must be non-negative")
+      end
+      sump += p[i]
+    end
+    new(int(n), p ./ sump)
+  end
 end
 
 function Multinomial(n::Integer, d::Integer)
-    if d <= 1  error("d must be greater than 1") end
-    Multinomial(n, ones(Float64, d)./float64(d))
+  if d <= 1
+    error("d must be greater than 1")
+  end
+  Multinomial(n, ones(d) / d)
 end
 
 Multinomial(d::Integer) = Multinomial(1, d)
 
-function Multinomial(n::Integer, p::Matrix{Float64})
-    if !(size(p, 1) == 1 || size(p, 2) == 1)
-        error("Probability matrix must be a single row or single column")
-    end
-    Multinomial(int(n), reshape(p, (length(p),)))
-end
-
 mean(d::Multinomial) = d.n .* d.prob
 var(d::Multinomial)  = d.n .* d.prob .* (1 - d.prob)
-                                        # convenience methods for integer_valued
-integer_valued{T<:Integer}(x::AbstractArray{T}) = true
-function integer_valued{T<:Number}(x::AbstractArray{T})
-    for el in x if !integer_valued(el) return false end end
-    true
+
+function insupport{T <: Real}(d::Multinomial, x::Vector{T})
+  n = length(x)
+  if length(d.prob) != n
+    return false
+  end
+  s = 0.0
+  for i in 1:n
+    if x[i] < 0. || !integer_valued(x[i])
+      return false
+    end
+    s += x[i]
+  end
+  if abs(s - d.n) > 10e-8
+    return false
+  end
+  return true
 end
 
-insupport{T <: Real}(d::Multinomial, x::Vector{T}) = integer_valued(x) && all(x .>= 0) && sum(x) == d.n && length(d.prob) == length(x)
-
-# log_factorial(n::Int64) = sum(log(1:n)) # lgamma(n + 1) is often much faster
-
-function logpdf{T <: Real}(d::Multinomial, x::Array{T, 1})
+function logpdf{T <: Real}(d::Multinomial, x::Vector{T})
   !insupport(d, x) ? -Inf : lgamma(d.n + 1) - sum(lgamma(x + 1)) + sum(x .* log(d.prob))
 end
 
@@ -1123,37 +1356,50 @@ function rand(d::Multinomial)
   s
 end
 
+##
+##
+## Dirichlet distribution
+##
+##
+
 type Dirichlet <: ContinuousMultivariateDistribution
-    alpha::Vector{Float64}
-    function Dirichlet{T<:Real}(alpha::Vector{T})
-        for el in alpha
-            if el < 0 error("Dirichlet: elements of alpha must be non-negative") end
-        end
-        new(float64(alpha))
+  alpha::Vector{Float64}
+  function Dirichlet{T <: Real}(alpha::Vector{T})
+    for el in alpha
+      if el < 0. error("Dirichlet: elements of alpha must be non-negative") end
     end
+    new(float64(alpha))
+  end
 end
 
-Dirichlet(dim::Int) = Dirichlet(ones(dim))
-
-function Dirichlet(alpha::Matrix{Float64})
-    if !(size(alpha, 1) == 1 || size(alpha, 2) == 1)
-        error("2D concentration parameters must come in a 1xN or Nx1 array")
-    end
-    Dirichlet(reshape(alpha, (length(alpha),)))
-end
+Dirichlet(dim::Integer) = Dirichlet(ones(dim))
 
 mean(d::Dirichlet) = d.alpha ./ sum(d.alpha)
+
 function var(d::Dirichlet)
-    alpha0 = sum(d.alpha)
-    d.alpha .* (alpha0 - d.alpha) / (alpha0^2 * (alpha0 + 1))
+  alpha0 = sum(d.alpha)
+  d.alpha .* (alpha0 - d.alpha) / (alpha0^2 * (alpha0 + 1))
 end
 
-                                        # perhaps allow a bit of fuzz on sum(x) == 1?
-insupport{T<:Real}(d::Dirichlet, x::Vector{T}) =
-    length(d.alpha) == length(x) && all(x .>= 0.) && sum(x) == 1.
-    # removed the redundant real_valued check
+function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
+  n = length(x)
+  if length(d.alpha) != n
+    return false
+  end
+  s = 0.0
+  for i in 1:n
+    if x[i] < 0.
+      return false
+    end
+    s += x[i]
+  end
+  if abs(s - 1.) > 10e-8
+    return false
+  end
+  return true
+end
 
-function pdf{T <: Real}(d::Dirichlet, x::Array{T,1})
+function pdf{T <: Real}(d::Dirichlet, x::Vector{T})
   if !insupport(d, x)
     error("x not in the support of Dirichlet distribution")
   end
@@ -1161,48 +1407,46 @@ function pdf{T <: Real}(d::Dirichlet, x::Array{T,1})
   (1 / b) * prod(x.^(d.alpha - 1))
 end
 
-# Idea adapted from R's MCMCpack Dirichlet sampler.
 function rand(d::Dirichlet)
-    x = [randg(el) for el in d.alpha]
-    x ./ sum(x)
+  x = [randg(el) for el in d.alpha]
+  x ./ sum(x)
 end
 
-# Categorical distribution
+##
+##
+## Categorical distribution
+##
+##
+
 type Categorical <: DiscreteUnivariateDistribution
-    prob::Vector{Float64}
-    function Categorical(p::Vector{Float64})
-        if length(p) <= 1 error("Categorical: there must be at least two categories") end
-        sump = 0.
-        for i in 1:length(p)
-            if p[i] < 0. error("Categorical: probabilities must be non-negative") end
-            sump += p[i]
-        end
-#        if abs(sump - 1.) > sqrt(eps())   # allow a bit of slack
-#            error("Categorical: probabilities must add to 1")
-#        end
-        new(p ./ sump)
+  prob::Vector{Float64}
+  function Categorical{T <: Real}(p::Vector{T})
+    if length(p) <= 1
+      error("Categorical: there must be at least two categories")
     end
+    sump = 0.
+    for i in 1:length(p)
+      if p[i] < 0.
+        error("Categorical: probabilities must be non-negative")
+      end
+      sump += p[i]
+    end
+    new(p ./ sump)
+  end
 end
 
 function Categorical(d::Integer)
-    if d <= 1 error("d must be greater than 1") end
-    Categorical(ones(Float64, d) ./ float64(d))
+  if d <= 1
+    error("d must be greater than 1")
+  end
+  Categorical(ones(d) / d)
 end
 
-function Categorical(p::Matrix{Float64})
-    if !(size(p, 1) == 1 || size(p, 2) == 1)
-        error("Probability matrix must be a single row or single column")
-    end
-    Categorical(reshape(p, (length(p),)))
+function insupport(d::Categorical, x::Real)
+  integer_valued(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
 
-insupport(d::Categorical, x::Int) = 1 <= x <= length(d.prob) && d.prob[x] != 0.0
-
-function logpdf(d::Categorical, x::Int)
-  !insupport(d, x) ? -Inf : log(d.prob[x])
-end
-
-pdf(d::Categorical, x::Int) = exp(logpdf(d, x))
+pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0. : d.prob[x]
 
 function rand(d::Categorical)
   l = length(d.prob)
@@ -1216,19 +1460,18 @@ function rand(d::Categorical)
   return l
 end
 
-## Why is this needed?  There is already such a method for DiscreteDistribution
-## function rand!{T<:Integer}(d::Categorical, A::Vector{T})
-##   for i = 1:length(A)
-##     A[i] = rand(d)
-##   end
-## end
+##
+##
+## Sample from arbitrary arrays
+##
+##
 
-function sample{T<:Real}(a::AbstractVector, probs::Vector{T})
+function sample{T <: Real}(a::AbstractArray, probs::Vector{T})
   i = rand(Categorical(probs))
   a[i]
 end
 
-function sample(a::Array)
+function sample(a::AbstractArray)
   n = length(a)
   probs = ones(n) ./ n
   sample(a, probs)
@@ -1240,7 +1483,6 @@ const llmaxabs = log(-log(minfloat))
 
 abstract Link                           # Link types define linkfun, linkinv, mueta,
                                         # valideta and validmu.
-
 
 chkpositive(x::Real) = isfinite(x) && 0. < x ? x : error("argument must be positive")
 chkfinite(x::Real) = isfinite(x) ? x : error("argument must be finite")
@@ -1315,29 +1557,7 @@ canonicallink(d::Normal)    = IdentityLink()
 canonicallink(d::Bernoulli) = LogitLink()
 canonicallink(d::Poisson)   = LogLink()
 
-function show(io::IO, d::Distribution)
-  print(io, @sprintf "%s distribution\n" typeof(d))
-  for parameter in typeof(d).names
-    if isa(d.(parameter), AbstractArray)
-      param = strcat(ucfirst(string(parameter)), ":\n", d.(parameter), "\n")
-    else
-      param = strcat(ucfirst(string(parameter)), ": ", d.(parameter), "\n")
-    end
-    print(io, param)
-  end
-  m = mean(d)
-  if isa(m, AbstractArray)
-    print(io, strcat("Mean:\n", m, "\n"))
-  else
-    print(io, strcat("Mean: ", m, "\n"))
-  end
-  v = var(d)
-  if isa(v, AbstractArray)
-    print(io, strcat("Variance:\n", v))
-  else
-    print(io, strcat("Variance: ", v))
-  end
-end
+include("show.jl")
 
 include("fit.jl")
 

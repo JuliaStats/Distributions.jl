@@ -43,9 +43,7 @@ end
 # Additional tests on the Multinomial and Dirichlet constructors
 d = Multinomial(1, [0.5, 0.4, 0.1])
 d = Multinomial(1, 3)
-d = Multinomial(3)
-d = Multinomial(1, [0.6; 0.4])
-d = Multinomial(1, [0.6; 0.4]')
+d = Multinomial(2)
 mean(d)
 var(d)
 @assert insupport(d, [1, 0])
@@ -64,8 +62,6 @@ rand!(d, A)
 
 d = Dirichlet([1.0, 2.0, 1.0])
 d = Dirichlet(3)
-d = Dirichlet([1.0; 2.0; 1.0])
-d = Dirichlet([1.0; 2.0; 1.0]')
 mean(d)
 var(d)
 insupport(d, [0.1, 0.8, 0.1])
@@ -78,7 +74,7 @@ rand!(d, A)
 
 d = Categorical([0.25, 0.5, 0.25])
 d = Categorical(3)
-d = Categorical([0.25; 0.5; 0.25])
+d = Categorical([0.25, 0.5, 0.25])
 
 @assert !insupport(d, 0)
 @assert insupport(d, 1)
