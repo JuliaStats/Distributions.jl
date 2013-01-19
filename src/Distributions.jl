@@ -57,6 +57,7 @@ export                                  # types
     cquantile,  # complementary quantile (i.e. using prob in right hand tail)
     deviance,   # deviance of fitted and observed responses
     devresid,   # vector of squared deviance residuals
+    fit,        # fit a distribution to data
     insupport,  # predicate, is x in the support of the distribution?
     invlogccdf, # complementary quantile based on log probability
     invlogcdf,  # quantile based on log probability
@@ -1337,5 +1338,7 @@ function show(io::IO, d::Distribution)
     print(io, strcat("Variance: ", v))
   end
 end
+
+include("fit.jl")
 
 end  #module
