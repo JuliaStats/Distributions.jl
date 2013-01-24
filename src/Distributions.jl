@@ -608,8 +608,8 @@ function kurtosis(d::Beta)
   n = a * b * (a + b + 2.0) * (a + b + 3.0)
   return d / n
 end
-rand(d::Beta) = randbeta(d.alpha, d.beta)
-rand(d::Beta, dims::Int...) = randbeta(d.alpha, d.beta, dims)
+rand(d::Beta) = (u = rand(Gamma(d.alpha)); u / (u + rand(Gamma(d.beta))))
+rand(d::Beta, dims::Dims) = (u = rand(Gamma(d.alpha), dims); u ./ (u + rand(Gamma(d.beta), dims)))
 rand!(d::Beta, A::Array{Float64}) = (A[:] = randbeta(d.alpha, d.beta, size(A)))
 insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 
@@ -704,8 +704,21 @@ mean(d::Chisq)     = d.df
 var(d::Chisq)      = 2d.df
 skewness(d::Chisq) = sqrt(8/d.df)
 kurtosis(d::Chisq) = 12/d.df
-rand(d::Chisq)     = randchi2(d.df)
-rand!(d::Chisq, A::Array{Float64}) = randchi2!(d.df, A)
+## rand - the distribution chi^2(df) is 2*gamma(df/2)
+## for integer n, a chi^2(n) is the sum of n squared standard normals
+rand(d::Chisq) = d.df == 1 ? randn()^2 : 2.rand(Gamma(d.df/2.))
+function rand!(d::Chisq, A::Array{Float64})
+    if d.df == 1
+        for i in 1:length(A)
+            A[i] = randn()^2
+            end
+        return A
+    end
+    dpar = d.df >= 2 ? d.df/2. - 1.0/3.0 : error("require degrees of freedom df >= 2")
+    cpar = 1.0/sqrt(9.0dpar)
+    for i in 1:length(A) A[i] = 2.randg2(dpar,cpar) end
+    A
+end
 insupport(d::Chisq, x::Number) =  real_valued(x) && isfinite(x) && 0 <= x
 
 type DiscreteUniform <: DiscreteUnivariateDistribution
@@ -789,8 +802,8 @@ end
 function invlogccdf(d::Exponential, lp::Real)
     lp <= 0. ? -d.scale * lp : NaN
 end
-rand(d::Exponential)                     = d.scale * randexp()
-rand!(d::Exponential, A::Array{Float64}) = d.scale * randexp!(A)
+rand(d::Exponential)                     = d.scale * Random.randmtzig_exprnd()
+rand!(d::Exponential, A::Array{Float64}) = d.scale * Random.randmtzig_fill_exprnd!(A)
 insupport(d::Exponential, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
 type FDist <: ContinuousUnivariateDistribution
@@ -814,8 +827,40 @@ Gamma()   = Gamma(1., 1.)               # Standard exponential distribution
 mean(d::Gamma)     = d.shape * d.scale
 var(d::Gamma)      = d.shape * d.scale * d.scale
 skewness(d::Gamma) = 2/sqrt(d.shape)
-rand(d::Gamma)     = d.scale * randg(d.shape)
-rand!(d::Gamma, A::Array{Float64}) = d.scale * randg!(d.shape, A)
+## rand()
+# A simple method for generating gamma variables - Marsaglia and Tsang (2000)
+# http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
+# Page 369
+# basic simulation loop for pre-computed d and c
+function randg2(d::Float64, c::Float64) 
+    while true
+        x = v = 0.0
+        while v <= 0.0
+            x = randn()
+            v = 1.0 + c*x
+        end
+        v = v^3
+        U = rand()
+        x2 = x^2
+        if U < 1.0-0.331*x2^2 || log(U) < 0.5*x2+d*(1.0-v+log(v))
+            return d*v
+        end
+    end
+end
+function rand(d::Gamma)
+    dpar = (d.shape <= 1. ? d.shape + 1 : d.shape) - 1.0/3.0
+    d.scale*randg2(dpar, 1.0/sqrt(9.0dpar)) * (d.shape > 1. ? 1. : rand()^(1./d.shape))
+end
+function rand!(d::Gamma, A::Array{Float64})
+    dpar = (d.shape <= 1. ? d.shape + 1 : d.shape) - 1.0/3.0
+    cpar = 1.0/sqrt(9.0dpar)
+    for i in 1:length(A) A[i] = randg2(dpar, cpar) end
+    if d.shape <= 1.
+        ainv = 1./d.shape
+        for i in 1:length(A) A[i] *= rand()^ainv end
+    end
+    d.scale*A
+end
 insupport(d::Gamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
 type Geometric <: DiscreteUnivariateDistribution
