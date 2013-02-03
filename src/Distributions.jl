@@ -199,10 +199,10 @@ const Rmath = :libRmath
 ## FIXME: Replace the three _jl_dist_*p macros with one by defining
 ## the argument tuples for the ccall dynamically from pn
 macro _jl_dist_1p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf
-    pp = expr(:quote,strcat("p",b))     # C name for cdf
-    qq = expr(:quote,strcat("q",b))     # C name for quantile
-    rr = expr(:quote,strcat("r",b))     # C name for random sampler
+    dd = expr(:quote,string("d",b))     # C name for pdf
+    pp = expr(:quote,string("p",b))     # C name for cdf
+    qq = expr(:quote,string("q",b))     # C name for quantile
+    rr = expr(:quote,string("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
@@ -268,10 +268,10 @@ macro _jl_dist_1p(T, b)
 end
 
 macro _jl_dist_2p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf
-    pp = expr(:quote,strcat("p",b))     # C name for cdf
-    qq = expr(:quote,strcat("q",b))     # C name for quantile
-    rr = expr(:quote,strcat("r",b))     # C name for random sampler
+    dd = expr(:quote,string("d",b))     # C name for pdf
+    pp = expr(:quote,string("p",b))     # C name for cdf
+    qq = expr(:quote,string("q",b))     # C name for quantile
+    rr = expr(:quote,string("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
@@ -350,10 +350,10 @@ macro _jl_dist_2p(T, b)
 end
 
 macro _jl_dist_3p(T, b)
-    dd = expr(:quote,strcat("d",b))     # C name for pdf
-    pp = expr(:quote,strcat("p",b))     # C name for cdf
-    qq = expr(:quote,strcat("q",b))     # C name for quantile
-    rr = expr(:quote,strcat("r",b))     # C name for random sampler
+    dd = expr(:quote,string("d",b))     # C name for pdf
+    pp = expr(:quote,string("p",b))     # C name for cdf
+    qq = expr(:quote,string("q",b))     # C name for quantile
+    rr = expr(:quote,string("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
