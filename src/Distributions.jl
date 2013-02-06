@@ -112,8 +112,6 @@ abstract ContinuousMultivariateDistribution <: MultivariateDistribution
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
-_jl_libRmath = dlopen("libRmath")
-
 ## Fallback methods, usually overridden for specific distributions
 ccdf(d::Distribution, q::Real)                = 1.0 - cdf(d, q)
 cquantile(d::Distribution, p::Real)           = quantile(d, 1.0 - p)
@@ -1577,9 +1575,9 @@ valideta(l::LogLink,      eta::Real) = chkfinite(eta)
 validmu (l::LogLink,       mu::Real) = chkfinite(mu)
 
 type ProbitLink   <: Link end
-linkfun (l::ProbitLink,    mu::Real) =
-    ccall(dlsym(_jl_libRmath, :qnorm5), Float64,
-          (Float64,Float64,Float64,Int32,Int32), mu, 0., 1., 1, 0)
+linkfun (l::ProbitLink,    mu::Real) = ccall((:qnorm5, :Rmath), Float64,
+                                             (Float64,Float64,Float64,Int32,Int32),
+                                             mu, 0., 1., 1, 0)
 linkinv (l::ProbitLink,   eta::Real) = (1. + erf(eta/sqrt(2.))) / 2.
 mueta   (l::ProbitLink,   eta::Real) = exp(-0.5eta^2) / sqrt(2.pi)
 valideta(l::ProbitLink,   eta::Real) = chkfinite(eta)
