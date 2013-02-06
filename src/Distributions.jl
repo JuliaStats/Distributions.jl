@@ -817,7 +817,7 @@ insupport(d::FDist, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 type Gamma <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
-    Gamma(sh,sc) = sh > 0 && sc > 0 ? new(float64(sh), float64(sc)) : error("Both schape and scale must be positive")
+    Gamma(sh,sc) = sh > 0 && sc > 0 ? new(float64(sh), float64(sc)) : error("Both shape and scale must be positive")
 end
 Gamma(sh) = Gamma(sh, 1.)
 Gamma()   = Gamma(1., 1.)               # Standard exponential distribution
