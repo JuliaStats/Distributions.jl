@@ -1021,12 +1021,9 @@ type MultivariateNormal <: ContinuousMultivariateDistribution
     end
   end
 end
-function MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64})
-  MultivariateNormal(mean, chold(cov))
-end
-function MultivariateNormal(mean::Vector{Float64})
-  MultivariateNormal(mean, eye(length(mean)))
-end
+MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64}) = MultivariateNormal(mean, cholfact(cov))
+MultivariateNormal(mean::Vector{Float64}) = MultivariateNormal(mean, eye(length(mean)))
+MultivariateNormal(cov::Matrix{Float64}) = MultivariateNormal(zeros(size(cov, 1)), cov)
 MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
 mean(d::MultivariateNormal) = d.mean
@@ -1035,7 +1032,18 @@ function rand(d::MultivariateNormal)
   z = randn(length(d.mean))
   return d.mean + d.covchol.LR'z
 end
-
+function rand!(d::MultivariateNormal, X::Matrix)
+  k = length(mean(d))
+  m, n = size(X)
+  if m == k 
+    X = d.covchol.LR'randn(m, n)
+  elseif n == k
+    X = randn(m, n) * d.covchol.LR
+  else
+    error("Wrong dimensions")
+  end
+  return X
+end
 function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   z = d.covchol.LR \ (x - d.mean)
@@ -1109,8 +1117,8 @@ type Normal <: ContinuousUnivariateDistribution
     std::Float64
     Normal(mu, sd) = sd > 0 ? new(float64(mu), float64(sd)) : error("std must be positive")
 end
-Normal(mu) = Normal(mu, 1)
-Normal() = Normal(0,1)
+Normal(mu) = Normal(mu, 1.0)
+Normal() = Normal(0.0, 1.0)
 const Gaussian = Normal
 @_jl_dist_2p Normal norm
 mean(d::Normal) = d.mean
