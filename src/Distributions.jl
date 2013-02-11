@@ -1459,7 +1459,7 @@ function pdf{T <: Real}(d::Dirichlet, x::Vector{T})
 end
 
 function rand(d::Dirichlet)
-  x = [randg(el) for el in d.alpha]
+  x = [rand(Gamma(el)) for el in d.alpha]
   x ./ sum(x)
 end
 
@@ -1583,7 +1583,7 @@ valideta(l::LogLink,      eta::Real) = chkfinite(eta)
 validmu (l::LogLink,       mu::Real) = chkfinite(mu)
 
 type ProbitLink   <: Link end
-linkfun (l::ProbitLink,    mu::Real) = ccall((:qnorm5, :Rmath), Float64,
+linkfun (l::ProbitLink,    mu::Real) = ccall((:qnorm5, Rmath), Float64,
                                              (Float64,Float64,Float64,Int32,Int32),
                                              mu, 0., 1., 1, 0)
 linkinv (l::ProbitLink,   eta::Real) = (1. + erf(eta/sqrt(2.))) / 2.
