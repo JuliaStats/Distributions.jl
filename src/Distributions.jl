@@ -1493,6 +1493,10 @@ function Categorical(d::Integer)
   Categorical(ones(d) / d)
 end
 
+mean(d::Categorical) = sum([1:length(d.prob)] .* d.prob)
+var(d::Categorical, m::Number) = sum(([1:length(d.prob)] - m).^2 .* d.prob)
+var(d::Categorical) = var(d, mean(d))
+
 function insupport(d::Categorical, x::Real)
   integer_valued(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
