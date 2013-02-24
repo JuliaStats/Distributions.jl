@@ -126,17 +126,19 @@ function deviance{M<:Real,Y<:Real,W<:Real}(d::Distribution,
     end
     -2ans
 end
-devresid(d::Distribution, y::Real, mu::Real, wt::Real) =
-    -2wt*logpdf(d, mu, y)
+devresid(d::Distribution, y::Real, mu::Real, wt::Real) = -2wt*logpdf(d, mu, y)
 function devresid{Y<:Real,M<:Real,W<:Real}(d::Distribution,
                                            y::AbstractArray{Y},
                                            mu::AbstractArray{M},
                                            wt::AbstractArray{W})
     R = Array(Float64, promote_shape(size(y), promote_shape(size(mu), size(wt))))
     for i in 1:length(mu)
-        R[i] = devResid(d, y[i], mu[i], wt[i])
+        R[i] = devresid(d, y[i], mu[i], wt[i])
     end
     R
+end
+function devresid(d::Distribution, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
+    [devresid(d, y[i], mu[i], wt[i]) for i in 1:length(y)]
 end
 invlogccdf(d::Distribution, lp::Real)         = quantile(d, exp(-lp))
 invlogcdf(d::Distribution, lp::Real)          = quantile(d, exp(lp))
@@ -524,6 +526,7 @@ var(d::Arcsine) = 1./2.
 
 # TODO: Move these two methods into Base
 xlogx(x::Real) = x == 0.0 ? 0.0 : x * log(x)
+xlogxdmu(x::Real, mu::Real) = x == 0.0 ? 0.0 : x * log(x/mu)
 function entropy(p::Vector)
     e = 0.0
     for p_i in p
@@ -542,6 +545,12 @@ end
 Bernoulli() = Bernoulli(0.5)
 
 cdf(d::Bernoulli, q::Real) = q < 0. ? 0. : (q >= 1. ? 1. : 1. - d.prob)
+function devresid(d::Bernoulli, y::Real, mu::Real, wt::Real)
+    2wt*(xlogxdmu(y,mu) + xlogxdmu(1.-y,1.-mu))
+end
+function devresid(d::Bernoulli, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
+    [2wt[i]*(xlogxdmu(y[i],mu[i]) + xlogxdmu(1-y[i],1-mu[i])) for i in 1:length(y)]
+end
 entropy(d::Bernoulli) = -xlogx(1.0 - d.prob) - xlogx(d.prob)
 insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
 kurtosis(d::Bernoulli) = 1 / var(d) - 6.
@@ -1189,7 +1198,10 @@ type Poisson <: DiscreteUnivariateDistribution
 end
 Poisson() = Poisson(1)
 @_jl_dist_1p Poisson pois
-devresid(d::Poisson,  y::Real, mu::Real, wt::Real) = 2wt*((y==0? 0.: log(y/mu)) - (y-mu))
+devresid(d::Poisson,  y::Real, mu::Real, wt::Real) = 2wt*(xlogxdmu(y,mu) - (y-mu))
+function devresid(d::Poisson, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
+    [2wt[i]*(xlogxdmu(y[i],mu[i]) - (y[i]-mu[i])) for i in 1:length(y)]
+end
 insupport(d::Poisson, x::Number) = integer_valued(x) && 0 <= x
 logpdf(  d::Poisson, mu::Real, y::Real) = ccall((:dpois, Rmath),Float64,(Float64,Float64,Int32),y,mu,1)
 mean(d::Poisson) = d.lambda
@@ -1531,7 +1543,7 @@ end
 const minfloat = realmin(Float64)
 const oneMeps  = 1. - eps()
 const llmaxabs = log(-log(minfloat))
-
+const logeps   = log(eps())
 abstract Link                           # Link types define linkfun, linkinv, mueta,
                                         # valideta and validmu.
 
@@ -1578,9 +1590,9 @@ validmu (l::LogitLink,     mu::Real) = chk01(mu)
 type LogLink      <: Link end
 linkfun (l::LogLink,       mu::Real) = log(mu)
 linkinv (l::LogLink,      eta::Real) = exp(eta)
-mueta   (l::LogLink,      eta::Real) = exp(eta)
+mueta   (l::LogLink,      eta::Real) = eta < logeps ? eps() : exp(eta)
 valideta(l::LogLink,      eta::Real) = chkfinite(eta)
-validmu (l::LogLink,       mu::Real) = chkfinite(mu)
+validmu (l::LogLink,       mu::Real) = chkpositive(mu)
 
 type ProbitLink   <: Link end
 linkfun (l::ProbitLink,    mu::Real) = ccall((:qnorm5, Rmath), Float64,
