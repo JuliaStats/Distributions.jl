@@ -1056,8 +1056,8 @@ end
 function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   u = x - d.mean
-  z = d.covchol.LR \ u
-  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.LR))) - 0.5 * dot(u,z)
+  z = d.covchol.LR' \ u
+  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.LR))) - 0.5 * dot(z,z)
 end
 pdf{T <: Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
 function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
