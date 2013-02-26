@@ -1476,6 +1476,21 @@ function rand(d::Dirichlet)
   x ./ sum(x)
 end
 
+function rand!(d::Dirichlet, X::Matrix)
+  m, n = size(X)
+  for i in 1:n
+    X[:,i] = rand(Gamma(d.alpha[i]), m)
+  end
+  for i in 1:m
+    isum = sum(X[i,:])
+    for j in 1:n
+      X[i,j] /= isum
+    end
+  end
+  return X
+end
+
+
 ##
 ##
 ## Categorical distribution
