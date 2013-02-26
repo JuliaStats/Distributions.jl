@@ -40,11 +40,11 @@ function tvtcdf(nu::Int, h::Vector{Float64}, r::Vector{Float64})
 	if abs(h1) + abs(h2) + abs(h3) < eps()
 	   	tvt = (1.0 + (asin(r12) + asin(r13) + asin(r23)) / pt) * 0.125
 	elseif nu < 1 && abs(r12) + abs(r13) < eps()
-	   	tvt = normcdf(h1) * bvtcdf(nu, h2, h3, r23)
+	   	tvt = cdf(Normal(), h1) * bvtcdf(nu, h2, h3, r23)
 	elseif nu < 1 && abs(r13) + abs(r23) < eps()
-	   	tvt = normcdf(h3) * bvtcdf(nu, h1, h2, r12)
+	   	tvt = cdf(Normal(), h3) * bvtcdf(nu, h1, h2, r12)
 	elseif nu < 1 && abs(r12) + abs(r23) < eps()
-	   	tvt = normcdf(h2) * bvtcdf(nu, h1, h3, r13)
+	   	tvt = cdf(Normal(), h2) * bvtcdf(nu, h1, h3, r13)
 	elseif 1.0 - r23 < eps()
 	   	tvt = bvtnorm(nu, h1, min(h2, h3), r12)
 	elseif r23 + 1.0 < eps()
@@ -54,7 +54,7 @@ function tvtcdf(nu::Int, h::Vector{Float64}, r::Vector{Float64})
 	   	# Compute singular TVT value
 	
 	   	if nu < 1
-	      	tvt = bvtcdf(nu, h2, h3, r23) * normcdf(h1)
+	      	tvt = bvtcdf(nu, h2, h3, r23) * cdf(Normal(), h1)
 	   	elseif r23 > 0
 	      	tvt = bvtcdf( nu, h1, min( h2, h3 ), 0.0)
 	   	elseif h2 > -h3
@@ -112,7 +112,7 @@ function pntgnd(nu::Int, ba::Float64, bb::Float64, bc::Float64, ra::Float64, rb:
    		if nu < 1
       		if bt > -10 && ft < 100
          		retval = exp(-ft * 0.5)
-         		if bt < 10; retval *= normcdf(bt) end
+         		if bt < 10; retval *= cdf(Normal(), bt) end
       		end
    		else
       		ft = sqrt(1.0 + ft / nu)
@@ -210,7 +210,7 @@ end
 
 function tcdf(nu::Int, t::Float64)
 	if nu < 1
-   		studnt = normcdf(t)
+   		studnt = cdf(Normal(), t)
 	elseif nu == 1
    		studnt = (1.0 + 2.0atan(t) / pi) * 0.5
 	elseif nu == 2
@@ -308,8 +308,6 @@ function bvtcdf(nu::Int, dh::Float64, dk::Float64, r::Float64)
     end
 end
 
-normcdf(x::Float64) = 0.5 * (1.0 + erf(0.7071067811865475x))
-
 # This function is based on the method described by 
 #     Drezner, Z and G.O. Wesolowsky, (1989),
 #     On the computation of the bivariate normal integral,
@@ -365,7 +363,7 @@ function bvnuppercdf(dh::Float64, dk::Float64, r::Float64)
 	      	end
 	      	bvn *= asr / (4.0pi)
 	   	end
-	   	bvn += normcdf(-h) * normcdf(-k)
+	   	bvn += cdf(Normal(), -h) * cdf(Normal(), -k)
 	else
 	   	if r < 0
 	      	k = -k
@@ -383,7 +381,7 @@ function bvnuppercdf(dh::Float64, dk::Float64, r::Float64)
 	      	end
 	      	if -hk < 100
 	         	b = sqrt(bs)
-	         	bvn -= exp(-hk * 0.5) * sqrt(2.0pi) * normcdf(-b / a) * b * (1.0 - c * bs * (1.0 - d * bs / 5.0) / 3.0)
+	         	bvn -= exp(-hk * 0.5) * sqrt(2.0pi) * cdf(Normal(), -b / a) * b * (1.0 - c * bs * (1.0 - d * bs / 5.0) / 3.0)
 	      	end
 	     	a /= 2.0
 		    for i = 1:lg
@@ -399,11 +397,11 @@ function bvnuppercdf(dh::Float64, dk::Float64, r::Float64)
 	      	bvn /= -2.0pi
 	   	end
 	   	if r > 0
-	      	bvn += normcdf(-max(h, k))
+	      	bvn += cdf(Normal(), -max(h, k))
 	   	else
 	      	bvn = -bvn
 	      	if k > h
-	      		bvn += normcdf(k) - normcdf(h)
+	      		bvn += cdf(Normal(), k) - cdf(Normal(), h)
 	      	end
 		end
 	end
