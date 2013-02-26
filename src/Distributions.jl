@@ -1072,7 +1072,7 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   elseif k == 2
     return bvtcdf(0, z[1], z[2], C[2])
   else
-    return normcdf(z[1])
+    return cdf(Normal(), z[1])
   end
 end
 
@@ -1137,8 +1137,6 @@ var(d::Normal) = d.std^2
 skewness(d::Normal) = 0.
 kurtosis(d::Normal) = 0.
 ## redefine common methods
-cdf(d::Normal, x::Real) = normcdf((x - d.mean) / d.std)
-pdf(d::Normal, x::Real) = 0.3989422804014327 / d.std * exp(-0.5 * ((x - d.mean) / d.std)^2)
 rand(d::Normal) = d.mean + d.std * randn()
 insupport(d::Normal, x::Number) = real_valued(x) && isfinite(x)
 
