@@ -1469,6 +1469,14 @@ function pdf{T <: Real}(d::Dirichlet, x::Vector{T})
   (1 / b) * prod(x.^(d.alpha - 1))
 end
 
+function logpdf{T <: Real}(d::Dirichlet, x::Vector{T})
+  if !insupport(d, x)
+    error("x not in the support of Dirichlet distribution")
+  end
+  b = sum(lgamma(d.alpha)) - lgamma(sum(d.alpha))
+  dot((d.alpha - 1), log(x)) - b
+end
+
 function rand(d::Dirichlet)
   x = [rand(Gamma(el)) for el in d.alpha]
   x ./ sum(x)
