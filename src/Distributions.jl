@@ -199,14 +199,14 @@ const Rmath = :libRmath
 ## FIXME: Replace the three _jl_dist_*p macros with one by defining
 ## the argument tuples for the ccall dynamically from pn
 macro _jl_dist_1p(T, b)
-    dd = expr(:quote,string("d",b))     # C name for pdf
-    pp = expr(:quote,string("p",b))     # C name for cdf
-    qq = expr(:quote,string("q",b))     # C name for quantile
-    rr = expr(:quote,string("r",b))     # C name for random sampler
+    dd = Expr(:quote, string("d", b))     # C name for pdf
+    pp = Expr(:quote, string("p", b))     # C name for cdf
+    qq = Expr(:quote, string("q", b))     # C name for quantile
+    rr = Expr(:quote, string("r", b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
-    p  = expr(:quote,pn[1])
+    p  = Expr(:quote, pn[1])
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
@@ -268,19 +268,19 @@ macro _jl_dist_1p(T, b)
 end
 
 macro _jl_dist_2p(T, b)
-    dd = expr(:quote,string("d",b))     # C name for pdf
-    pp = expr(:quote,string("p",b))     # C name for cdf
-    qq = expr(:quote,string("q",b))     # C name for quantile
-    rr = expr(:quote,string("r",b))     # C name for random sampler
+    dd = Expr(:quote, string("d",b))     # C name for pdf
+    pp = Expr(:quote, string("p",b))     # C name for cdf
+    qq = Expr(:quote, string("q",b))     # C name for quantile
+    rr = Expr(:quote, string("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
-    p1 = expr(:quote,pn[1])
-    p2 = expr(:quote,pn[2])    
+    p1 = Expr(:quote, pn[1])
+    p2 = Expr(:quote, pn[2])
     if string(b) == "norm"              # normal dist has unusual names
-        dd = expr(:quote, :dnorm4)
-        pp = expr(:quote, :pnorm5)
-        qq = expr(:quote, :qnorm5)
+        dd = Expr(:quote, :dnorm4)
+        pp = Expr(:quote, :pnorm5)
+        qq = Expr(:quote, :qnorm5)
     end
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
@@ -350,16 +350,16 @@ macro _jl_dist_2p(T, b)
 end
 
 macro _jl_dist_3p(T, b)
-    dd = expr(:quote,string("d",b))     # C name for pdf
-    pp = expr(:quote,string("p",b))     # C name for cdf
-    qq = expr(:quote,string("q",b))     # C name for quantile
-    rr = expr(:quote,string("r",b))     # C name for random sampler
+    dd = Expr(:quote, string("d", b))     # C name for pdf
+    pp = Expr(:quote, string("p", b))     # C name for cdf
+    qq = Expr(:quote, string("q", b))     # C name for quantile
+    rr = Expr(:quote, string("r", b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
-    p1 = expr(:quote,pn[1])
-    p2 = expr(:quote,pn[2])    
-    p3 = expr(:quote,pn[3])
+    p1 = Expr(:quote, pn[1])
+    p2 = Expr(:quote, pn[2])
+    p3 = Expr(:quote, pn[3])
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
@@ -455,7 +455,7 @@ binary_entropy(d::Distribution) = entropy(d) / log(2)
 #
 ##############################################################################
 
-type Alpha <: ContinuousUnivariateDistribution
+immutable Alpha <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
     function Alpha(l::Real, s::Real)
@@ -479,7 +479,7 @@ const Levy = Alpha
 #
 ##############################################################################
 
-type Arcsine <: ContinuousUnivariateDistribution
+immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
 function cdf(d::Arcsine, x::Number)
@@ -538,7 +538,7 @@ function entropy(p::Vector)
     return e
 end
 
-type Bernoulli <: DiscreteUnivariateDistribution
+immutable Bernoulli <: DiscreteUnivariateDistribution
     prob::Float64
     Bernoulli(p::Real) = 0. <= p <= 1. ? new(float64(p)) : error("prob must be in [0,1]")
 end
@@ -580,7 +580,7 @@ var(d::Bernoulli) = d.prob * (1. - d.prob)
 #
 ##############################################################################
 
-type Beta <: ContinuousUnivariateDistribution
+immutable Beta <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     Beta(a, b) = a > 0 && b > 0 ? new(float64(a), float64(b)) : error("Both alpha and beta must be positive")
@@ -628,7 +628,7 @@ insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
 #
 ##############################################################################
 
-type BetaPrime <: ContinuousUnivariateDistribution
+immutable BetaPrime <: ContinuousUnivariateDistribution
   alpha::Float64
   beta::Float64
   function BetaPrime(a::Real, b::Real)
@@ -662,7 +662,7 @@ rand(d::BetaPrime) = 1 / randbeta(d.alpha, d.beta)
 #
 ##############################################################################
 
-type Binomial <: DiscreteUnivariateDistribution
+immutable Binomial <: DiscreteUnivariateDistribution
     size::Int
     prob::Float64
     Binomial(n, p) = n <= 0 ?  error("size must be positive") : (0. <= p <= 1. ? new(int(n), float64(p)) : error("prob must be in [0,1]"))
@@ -684,7 +684,7 @@ insupport(d::Binomial, x::Number) = integer_valued(x) && 0 <= x <= d.size
 #
 ##############################################################################
 
-type Cauchy <: ContinuousUnivariateDistribution
+immutable Cauchy <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
     Cauchy(l, s) = s > 0 ? new(float64(l), float64(s)) : error("scale must be positive")
@@ -698,11 +698,11 @@ skewness(d::Cauchy) = NaN
 kurtosis(d::Cauchy) = NaN
 insupport(d::Cauchy, x::Number) = real_valued(x) && isfinite(x)
 
-type Chi <: ContinuousUnivariateDistribution
+immutable Chi <: ContinuousUnivariateDistribution
     df::Float64
 end
 
-type Chisq <: ContinuousUnivariateDistribution
+immutable Chisq <: ContinuousUnivariateDistribution
     df::Float64      # non-integer degrees of freedom are meaningful
     Chisq(d) = d > 0 ? new(float64(d)) : error("df must be positive")
 end
@@ -728,7 +728,7 @@ function rand!(d::Chisq, A::Array{Float64})
 end
 insupport(d::Chisq, x::Number) =  real_valued(x) && isfinite(x) && 0 <= x
 
-type DiscreteUniform <: DiscreteUnivariateDistribution
+immutable DiscreteUniform <: DiscreteUnivariateDistribution
   a::Int
   b::Int
   function DiscreteUniform(a::Real, b::Real)
@@ -761,17 +761,17 @@ function quantile(d::DiscreteUniform, k::Real)
   end
 end
 function rand(d::DiscreteUniform)
-  d.a + randi(d.b - d.a + 1) - 1
+  d.a + rand(0:(d.b - d.a))
 end
 skewness(d::DiscreteUniform) = 0.0
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
-type Erlang <: ContinuousUnivariateDistribution
+immutable Erlang <: ContinuousUnivariateDistribution
     shape::Float64
     rate::Float64
 end
 
-type Exponential <: ContinuousUnivariateDistribution
+immutable Exponential <: ContinuousUnivariateDistribution
     scale::Float64                      # note: scale not rate
     Exponential(sc) = sc > 0 ? new(float64(sc)) : error("scale must be positive")
 end
@@ -813,7 +813,7 @@ rand(d::Exponential)                     = d.scale * Random.randmtzig_exprnd()
 rand!(d::Exponential, A::Array{Float64}) = d.scale * Random.randmtzig_fill_exprnd!(A)
 insupport(d::Exponential, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-type FDist <: ContinuousUnivariateDistribution
+immutable FDist <: ContinuousUnivariateDistribution
     ndf::Float64
     ddf::Float64
     FDist(d1,d2) = d1 > 0 && d2 > 0 ? new(float64(d1), float64(d2)) : error("Both numerator and denominator degrees of freedom must be positive")
@@ -823,7 +823,7 @@ mean(d::FDist) = 2 < d.ddf ? d.ddf/(d.ddf - 2) : NaN
 var(d::FDist)  = 4 < d.ddf ? 2d.ddf^2*(d.ndf+d.ddf-2)/(d.ndf*(d.ddf-2)^2*(d.ddf-4)) : NaN
 insupport(d::FDist, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-type Gamma <: ContinuousUnivariateDistribution
+immutable Gamma <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
     Gamma(sh,sc) = sh > 0 && sc > 0 ? new(float64(sh), float64(sc)) : error("Both shape and scale must be positive")
@@ -870,7 +870,7 @@ function rand!(d::Gamma, A::Array{Float64})
 end
 insupport(d::Gamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-type Geometric <: DiscreteUnivariateDistribution
+immutable Geometric <: DiscreteUnivariateDistribution
     # In the form of # of failures before the first success
     prob::Float64
     Geometric(p) = 0 < p < 1 ? new(float64(p)) : error("prob must be in (0,1)")
@@ -889,7 +889,7 @@ function ccdf(d::Geometric, q::Real)
 end
 insupport(d::Geometric, x::Number) = integer_valued(x) && 0 <= x
 
-type HyperGeometric <: DiscreteUnivariateDistribution
+immutable HyperGeometric <: DiscreteUnivariateDistribution
     ns::Float64                         # number of successes in population
     nf::Float64                         # number of failures in population
     n::Float64                          # sample size
@@ -904,7 +904,7 @@ mean(d::HyperGeometric) = d.n*d.ns/(d.ns+d.nf)
 var(d::HyperGeometric)  = (N=d.ns+d.nf; p=d.ns/N; d.n*p*(1-p)*(N-d.n)/(N-1))
 insupport(d::HyperGeometric, x::Number) = integer_valued(x) && 0 <= x <= d.n && (d.n - d.nf) <= x <= d.ns
 
-type Laplace <: ContinuousUnivariateDistribution
+immutable Laplace <: ContinuousUnivariateDistribution
   location::Float64
   scale::Float64
   function Laplace(l::Real, s::Real)
@@ -947,7 +947,7 @@ skewness(d::Laplace) = 0.0
 std(d::Laplace) = sqrt(2.0) * d.scale
 var(d::Laplace) = 2.0 * d.scale^2
 
-type Logistic <: ContinuousUnivariateDistribution
+immutable Logistic <: ContinuousUnivariateDistribution
     location::Real
     scale::Real
     Logistic(l, s) = s > 0 ? new(float64(l), float64(s)) : error("scale must be positive")
@@ -963,7 +963,7 @@ skewness(d::Logistic) = 0.
 kurtosis(d::Logistic) = 1.2
 isupport(d::Logistic, x::Number) = real_valued(x) && isfinite(x)
 
-type logNormal <: ContinuousUnivariateDistribution
+immutable logNormal <: ContinuousUnivariateDistribution
     meanlog::Float64
     sdlog::Float64
     logNormal(ml,sdl) = sdl > 0 ? new(float64(ml), float64(sdl)) : error("sdlog must be positive")
@@ -1081,7 +1081,7 @@ end
 ## We do not enforce integer size, as the distribution is well defined
 ## for non-integers, and this can be useful for e.g. overdispersed
 ## discrete survival times.
-type NegativeBinomial <: DiscreteUnivariateDistribution
+immutable NegativeBinomial <: DiscreteUnivariateDistribution
     size::Float64
     prob::Float64
     NegativeBinomial(s,p) = 0 < p <= 1 ? (s >= 0 ? new(float64(s),float64(p)) : error("size must be non-negative")) : error("prob must be in (0,1]")
@@ -1089,7 +1089,7 @@ end
 @_jl_dist_2p NegativeBinomial nbinom
 insupport(d::NegativeBinomial, x::Number) = integer_valued(x) && 0 <= x
 
-type NoncentralBeta <: ContinuousUnivariateDistribution
+immutable NoncentralBeta <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     ncp::Float64
@@ -1097,7 +1097,7 @@ type NoncentralBeta <: ContinuousUnivariateDistribution
 end
 @_jl_dist_3p NoncentralBeta nbeta
 
-type NoncentralChisq <: ContinuousUnivariateDistribution
+immutable NoncentralChisq <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
     NonCentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
@@ -1105,7 +1105,7 @@ end
 @_jl_dist_2p NoncentralChisq nchisq
 insupport(d::NoncentralChisq, x::Number) = real_valued(x) && isfinite(x) && 0 < x
 
-type NoncentralF <: ContinuousUnivariateDistribution
+immutable NoncentralF <: ContinuousUnivariateDistribution
     ndf::Float64
     ddf::Float64
     ncp::Float64
@@ -1114,7 +1114,7 @@ end
 @_jl_dist_3p NoncentralF nf
 insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 
-type NoncentralT <: ContinuousUnivariateDistribution
+immutable NoncentralT <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
     NonCentralT(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
@@ -1122,7 +1122,7 @@ end
 @_jl_dist_2p NoncentralT nt
 insupport(d::NoncentralT, x::Number) = real_valued(x) && isfinite(x)
 
-type Normal <: ContinuousUnivariateDistribution
+immutable Normal <: ContinuousUnivariateDistribution
     mean::Float64
     std::Float64
     Normal(mu, sd) = sd > 0 ? new(float64(mu), float64(sd)) : error("std must be positive")
@@ -1140,7 +1140,7 @@ kurtosis(d::Normal) = 0.
 rand(d::Normal) = d.mean + d.std * randn()
 insupport(d::Normal, x::Number) = real_valued(x) && isfinite(x)
 
-type Pareto <: ContinuousUnivariateDistribution
+immutable Pareto <: ContinuousUnivariateDistribution
   scale::Float64
   shape::Float64
   function Pareto(sc, sh)
@@ -1191,7 +1191,7 @@ function var(d::Pareto)
   end
 end
 
-type Poisson <: DiscreteUnivariateDistribution
+immutable Poisson <: DiscreteUnivariateDistribution
     lambda::Float64
     Poisson(l) = l > 0 ? new(float64(l)) : error("lambda must be positive")
 end
@@ -1214,7 +1214,7 @@ var(d::Poisson) = d.lambda
 #
 ##############################################################################
 
-type Rayleigh <: ContinuousUnivariateDistribution
+immutable Rayleigh <: ContinuousUnivariateDistribution
   scale::Float64
   function Rayleigh(s)
     if s > 0.0
@@ -1247,7 +1247,7 @@ var(d::Rayleigh) = d.scale^2 * (2. - pi / 2.)
 #
 ##############################################################################
 
-type TDist <: ContinuousUnivariateDistribution
+immutable TDist <: ContinuousUnivariateDistribution
     df::Float64                         # non-integer degrees of freedom allowed
     TDist(d) = d > 0 ? new(float64(d)) : error("df must be positive")
 end
@@ -1268,7 +1268,7 @@ pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2
 #
 ##############################################################################
 
-type Triangular <: ContinuousUnivariateDistribution
+immutable Triangular <: ContinuousUnivariateDistribution
   location::Float64
   scale::Float64
   function Triangular(l, s)
@@ -1312,7 +1312,7 @@ var(d::Triangular) = d.scale^2 / 6.0
 #
 ##############################################################################
 
-type Uniform <: ContinuousUnivariateDistribution
+immutable Uniform <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
     Uniform(a, b) = a < b ? new(float64(a), float64(b)) : error("a < b required for range [a, b]")
@@ -1329,7 +1329,7 @@ insupport(d::Uniform, x::Number) = real_valued(x) && d.a <= x <= d.b
 skewness(d::Uniform) = 0.0
 kurtosis(d::Uniform) = -6.0 / 5.0
 
-type Weibull <: ContinuousUnivariateDistribution
+immutable Weibull <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
     Weibull(sh,sc) = 0 < sh && 0 < sc ? new(float64(sh), float64(sc)) : error("Both shape and scale must be positive")
