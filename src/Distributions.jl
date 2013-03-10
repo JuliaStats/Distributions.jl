@@ -1641,7 +1641,7 @@ include("show.jl")
 include("fit.jl")
 
 
-function kde(v::AbstractVector,npoints::Integer)
+function kde(v::AbstractVector,npoints::Union(Integer,AbstractVector))
     h = (4/3/npoints)^.2*var(v,true) # Silverman, B.W. (1998). Density Estimation for Statistics and Data Analysis. London: Chapman & Hall/CRC. p. 48. ISBN 0-412-24620-1.
     normal = Normal(0,h)
     kde((x)->pdf(normal,x),v,npoints)
@@ -1655,9 +1655,17 @@ function kde(f::Function,v::AbstractVector,npoints::Integer)
     if lo == hi
         lo -= div(npoints,2)
         hi += div(npoints,2) + int(isodd(npoints))
+    else
+        range = hi - lo
+        hi += range*0.25
+        lo -= range*0.25
     end
-    step = (hi - lo) / npoints
+    step = (hi - lo) / (npoints-1)
     xs = lo:step:hi
+    kde(f,v,xs)
+end
+
+function kde(f::Function,v::AbstractVector,xs::AbstractVector)
     n = length(v)
     y1 = sum(f, v-xs[1]) / n
     ys = zeros(typeof(y1), size(xs))
