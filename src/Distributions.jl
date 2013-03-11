@@ -1638,4 +1638,7 @@ include("show.jl")
 
 include("fit.jl")
 
+include("kde.jl")
+export kde
+
 end  #module
