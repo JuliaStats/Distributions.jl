@@ -29,7 +29,7 @@ function kde(data::Vector, npoints::Integer)
     # Define some more constants
     step = (dhi - dlo) / npoints
     # Why not just 1.0 / (dhi - dlo) here?
-    ainc = 1.0 / (npoints * step)
+    ainc = 1.0 / (ndata * step)
     npoints2 = fld(npoints, 2)
     hw = window / step
     fac1 = 32.0 * (atan(1.0) * hw / npoints)^2
