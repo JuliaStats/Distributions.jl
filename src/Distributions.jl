@@ -975,7 +975,7 @@ mean(d::logNormal) = exp(d.meanlog + d.sdlog^2/2)
 var(d::logNormal)  = (sigsq=d.sdlog^2; (exp(sigsq) - 1)*exp(2d.meanlog+sigsq))
 insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 < x
 
-type MixtureModel <: Distribution
+immutable MixtureModel <: Distribution
   components::Vector # Vector should be able to contain any type of
                      # distribution with comparable support
   probs::Vector{Float64}
@@ -1019,7 +1019,7 @@ function var(d::MixtureModel)
   return m
 end
 
-type MultivariateNormal <: ContinuousMultivariateDistribution
+immutable MultivariateNormal <: ContinuousMultivariateDistribution
   mean::Vector{Float64}
   covchol::CholeskyDense{Float64}
   function MultivariateNormal(m, c)
@@ -1347,7 +1347,7 @@ insupport(d::Weibull, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 ##
 ##
 
-type Multinomial <: DiscreteMultivariateDistribution
+immutable Multinomial <: DiscreteMultivariateDistribution
   n::Int
   prob::Vector{Float64}
   function Multinomial{T <: Real}(n::Integer, p::Vector{T})
@@ -1424,7 +1424,7 @@ end
 ##
 ##
 
-type Dirichlet <: ContinuousMultivariateDistribution
+immutable Dirichlet <: ContinuousMultivariateDistribution
   alpha::Vector{Float64}
   function Dirichlet{T <: Real}(alpha::Vector{T})
     for el in alpha
@@ -1495,7 +1495,7 @@ end
 ##
 ##
 
-type Categorical <: DiscreteUnivariateDistribution
+immutable Categorical <: DiscreteUnivariateDistribution
   prob::Vector{Float64}
   function Categorical{T <: Real}(p::Vector{T})
     if length(p) <= 1
