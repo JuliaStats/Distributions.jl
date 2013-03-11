@@ -68,6 +68,7 @@ export                                  # types
     insupport,     # predicate, is x in the support of the distribution?
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
+    kde,           # kernel density estimator (similar to hist)
     kurtosis,      # kurtosis of the distribution
     linkfun,       # link function mapping mu to eta, the linear predictor
     linkinv,       # inverse link mapping eta to mu
@@ -91,6 +92,7 @@ export                                  # types
     valideta,      # validity check on linear predictor
     validmu,       # validity check on mean vector
     var            # variance of distribution
+
 
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.integer_valued
@@ -1637,5 +1639,41 @@ canonicallink(d::Poisson)   = LogLink()
 include("show.jl")
 
 include("fit.jl")
+
+
+function kde(v::AbstractVector,npoints::Union(Integer,AbstractVector))
+    h = (4/3/npoints)^.2*var(v,true) # Silverman, B.W. (1998). Density Estimation for Statistics and Data Analysis. London: Chapman & Hall/CRC. p. 48. ISBN 0-412-24620-1.
+    normal = Normal(0,h)
+    kde((x)->pdf(normal,x),v,npoints)
+end
+
+function kde(f::Function,v::AbstractVector,npoints::Integer)
+    if npoints == 0
+        return [], []
+    end
+    lo, hi = min(v), max(v)
+    if lo == hi
+        lo -= div(npoints,2)
+        hi += div(npoints,2) + int(isodd(npoints))
+    else
+        range = hi - lo
+        hi += range*0.25
+        lo -= range*0.25
+    end
+    step = (hi - lo) / (npoints-1)
+    xs = lo:step:hi
+    kde(f,v,xs)
+end
+
+function kde(f::Function,v::AbstractVector,xs::AbstractVector)
+    n = length(v)
+    y1 = sum(f, v-xs[1]) / n
+    ys = zeros(typeof(y1), size(xs))
+    ys[1] = y1
+    for i in 2:length(xs)
+        ys[i] = sum(f, v-xs[i]) / n
+    end
+    ys, xs
+end
 
 end  #module

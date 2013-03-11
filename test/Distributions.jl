@@ -144,3 +144,7 @@ d = MultivariateNormal(zeros(2), eye(2))
 d = MultivariateNormal(zeros(3), [4. -2. -1.; -2. 5. -1.; -1. -1. 6.])
 @test abs(logpdf(d, [3., 4., 5.]) - (-15.75539253001834)) < 1.0e-10
 
+# visual test of kde:
+#using Winston
+#y,x=kde(randn(10000),50); plot(x,y,"b-", -4:.1:4, pdf(Normal(),-4:.1:4))
+
