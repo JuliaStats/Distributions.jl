@@ -31,6 +31,7 @@ export                                  # types
     HyperGeometric,
     IdentityLink,
     InverseLink,
+    InvertedGamma,
     Laplace,
     Levy,
     Link,
@@ -869,6 +870,28 @@ function rand!(d::Gamma, A::Array{Float64})
     d.scale*A
 end
 insupport(d::Gamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+
+###########################################################################
+## InvertedGamma distribution, cf Bayesian Theory (Barnardo & Smith) p 119
+###########################################################################
+immutable InvertedGamma <: ContinuousUnivariateDistribution
+    alpha::Float64
+    beta::Float64
+    InvertedGamma(alpha,beta) = alpha > 0 & beta > 0 ? new(float64(alpha), float64(beta)) : error("Both shape and scale must be positive")
+end
+InvertedGamma(alpha) = InvertedGamma(alpha, 1.)
+InvertedGamma() = InvertedGamma(1., 1.)
+@_jl_dist_2p InvertedGamma igamma
+mean(d::InvertedGamma) = d.alpha > 1. ? d.beta / (d.alpha - 1.) ? error("Expectation only defined if alpha > 1")
+var(d::InvertedGamma) = d.alpha > 2. ? d.beta^2 / ((d.alpha - 1.)^2 * (d.alpha - 2.)) ? error("Variance only defined if alpha > 2")
+rand(d::InvertedGamma) = 1. / rand(Gamma(d.alpha, d.beta))
+insupport(d::InvertedGamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+function logpdf(d.InvertedGamma, x::Real)
+    (d.alpha * log(d.beta)) - lgamma(d.alpha) - ((d.alpha + 1) * log(x)) - (d.beta / x)
+end
+function pdf(d.InvertedGamma, x::Real)
+    exp(logpdf(d, x))
+end
 
 immutable Geometric <: DiscreteUnivariateDistribution
     # In the form of # of failures before the first success
