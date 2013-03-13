@@ -884,6 +884,10 @@ InvertedGamma() = InvertedGamma(1., 1.)
 mean(d::InvertedGamma) = d.alpha > 1. ? d.beta / (d.alpha - 1.) : error("Expectation only defined if alpha > 1")
 var(d::InvertedGamma) = d.alpha > 2. ? d.beta^2 / ((d.alpha - 1.)^2 * (d.alpha - 2.)) : error("Variance only defined if alpha > 2")
 rand(d::InvertedGamma) = 1. / rand(Gamma(d.alpha, d.beta))
+function rand!(d::InvertedGamma, A::Array{Float64})
+    gammas = rand!(Gamma(d.alpha, d.beta), A)
+    1./A
+end
 insupport(d::InvertedGamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 function logpdf(d::InvertedGamma, x::Real)
     (d.alpha * log(d.beta)) - lgamma(d.alpha) - ((d.alpha + 1) * log(x)) - (d.beta / x)
@@ -894,6 +898,8 @@ end
 function cdf(d::InvertedGamma, x::Real)
   1-cdf(Gamma(d.alpha,1),d.beta/x)
 end
+modes(d::InvertedGamma) = [d.beta / (d.alpha + 1)]
+## TODO: add quantile function
 
 immutable Geometric <: DiscreteUnivariateDistribution
     # In the form of # of failures before the first success
