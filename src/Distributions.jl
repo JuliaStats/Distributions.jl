@@ -31,6 +31,7 @@ export                                  # types
     HyperGeometric,
     IdentityLink,
     InverseLink,
+    InvertedGamma,
     Laplace,
     Levy,
     Link,
@@ -869,6 +870,40 @@ function rand!(d::Gamma, A::Array{Float64})
     d.scale*A
 end
 insupport(d::Gamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+
+###########################################################################
+## InvertedGamma distribution, cf Bayesian Theory (Barnardo & Smith) p 119
+## Note that B&S parametrize in terms of shape/rate, but this is uses
+## shape/scale so that it is consistent with the implementation of Gamma
+###########################################################################
+immutable InvertedGamma <: ContinuousUnivariateDistribution
+    shape::Float64 # location
+    scale::Float64 # scale
+    InvertedGamma(sh,sc) = sh > 0 && sc > 0 ? new(float64(sh), float64(sc)) : error("Both shape and scale must be positive")
+end
+mean(d::InvertedGamma) = d.shape > 1. ? (1. / d.scale) / (d.shape - 1.) : error("Expectation only defined if shape > 1")
+var(d::InvertedGamma) = d.shape > 2. ? (1. / d.scale)^2 / ((d.shape - 1.)^2 * (d.shape - 2.)) : error("Variance only defined if shape > 2")
+function rand(d::InvertedGamma)
+   1. / rand(Gamma(d.shape, d.scale))
+end
+function rand!(d::InvertedGamma, A::Array{Float64})
+    A = rand!(Gamma(d.shape, d.scale), A)
+    1. / A
+end
+insupport(d::InvertedGamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+function logpdf(d::InvertedGamma, x::Real)
+    -(d.shape * log(d.scale)) - lgamma(d.shape) - ((d.shape + 1) * log(x)) - 1./(d.scale * x)
+end
+function pdf(d::InvertedGamma, x::Real)
+    exp(logpdf(d, x))
+end
+function cdf(d::InvertedGamma, x::Real)
+    1. - cdf(Gamma(d.shape, d.scale), 1./x)
+end
+function quantile(d::InvertedGamma, p::Real)
+    1. / quantile(Gamma(d.shape, d.scale), 1 - p)
+end
+modes(d::InvertedGamma) = [(1./d.scale) / (d.shape + 1)]
 
 immutable Geometric <: DiscreteUnivariateDistribution
     # In the form of # of failures before the first success
