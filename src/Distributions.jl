@@ -31,6 +31,7 @@ export                                  # types
     HyperGeometric,
     IdentityLink,
     InverseLink,
+    InverseWishart,
     InvertedGamma,
     Laplace,
     Levy,
@@ -56,6 +57,7 @@ export                                  # types
     Triangular,
     Uniform,
     Weibull,
+    Wishart,
                                         # methods
     binaryentropy, # entropy of distribution in bits
     canonicallink, # canonical link function for a distribution
@@ -106,10 +108,17 @@ include("tvpack.jl")
 abstract Distribution
 abstract UnivariateDistribution             <: Distribution
 abstract MultivariateDistribution           <: Distribution
+abstract MatrixvariateDistribution          <: Distribution
+
 abstract DiscreteUnivariateDistribution     <: UnivariateDistribution
 abstract ContinuousUnivariateDistribution   <: UnivariateDistribution
 abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
 abstract ContinuousMultivariateDistribution <: MultivariateDistribution
+
+abstract ContinuousMatrixvariateDistribution<: MatrixvariateDistribution
+abstract DiscreteMatrixvariateDistribution  <: MatrixvariateDistribution # is there such a thing?
+
+typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
@@ -162,8 +171,10 @@ function rand!(d::UnivariateDistribution, A::Array)
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
-rand(d::Distribution, dims::Int...) = rand(d, dims)
+rand(d::NonMatrixDistribution, dims::Int...) = rand(d, dims)
 rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
+rand(d::MatrixvariateDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
+
 function rand!(d::MultivariateDistribution, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
@@ -180,6 +191,14 @@ function rand!(d::MultivariateDistribution, X::Matrix)
   end
   return X
 end
+
+function rand!(d::MatrixvariateDistribution, X::Array{Matrix{Float64}})
+  for i in 1:length(X)
+    X[i] = rand(d)
+  end
+  return X
+end
+
 function var{M<:Real}(d::Distribution, mu::AbstractArray{M})
     V = similar(mu, Float64)
     for i in 1:length(mu)
@@ -1109,6 +1128,82 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   else
     return cdf(Normal(), z[1])
   end
+end
+
+
+########################
+## Wishart Distribution
+########################
+immutable Wishart <: ContinuousMatrixvariateDistribution
+  nu::Float64
+  Schol::CholeskyDense{Float64}
+  function Wishart(n::Float64, Sc::CholeskyDense{Float64})
+    if n > (size(Sc, 1) - 1.)
+      new(n, Sc)
+    else
+      error("Wishart parameters must be df > p - 1")
+    end
+  end
+end
+Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S,'U'))
+Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
+Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
+mean(w::Wishart) = w.nu * w.Schol.LR' * w.Schol.LR
+var(w::Wishart) = "TODO"
+
+function rand(w::Wishart)
+  p = size(w.Schol, 1)
+  X = zeros(p,p)
+  for ii in 1:p
+    X[ii,ii] = sqrt(rand(Chisq(w.nu - ii + 1)))
+  end
+  if p > 1
+    for col in 2:p
+      for row in 1:(col - 1)
+        X[row,col] = randn()
+      end
+    end
+  end
+  Z = X * w.Schol.LR
+  return Z' * Z
+end
+
+
+#################################
+## Inverse Wishart Distribution
+#################################
+immutable InverseWishart <: ContinuousMatrixvariateDistribution
+  nu::Float64
+  Psichol::CholeskyDense{Float64}
+  function InverseWishart(n::Float64, Pc::CholeskyDense{Float64})
+    if n > (size(Pc, 1) - 1)
+      new(n, Pc)
+    else
+      error("Inverse Wishart parameters must be df > p - 1")
+    end
+  end
+end
+InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi, 'U'))
+InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
+InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
+mean(iw::InverseWishart) =  iw.nu > (size(iw.Psichol, 1) + 1) ? 1/(iw.nu - size(iw.Psichol, 1) - 1) * iw.Psichol.LR' * iw.Psichol.LR : "mean only defined for nu > p + 1"
+var(iw::InverseWishart) = "TODO"
+
+function rand(iw::InverseWishart)
+  ## rand(Wishart(nu, Psi^-1))^-1 is an sample from an inverse wishart(nu, Psi)
+  return inv(rand(Wishart(iw.nu, inv(iw.Psichol))))
+  ## there is actually some wacky behavior here where inv of the CholeskyDense return the 
+  ## inverse of the original matrix, in this case we're getting Psi^-1
+end
+
+function rand!(iw::InverseWishart, X::Array{Matrix{Float64}})
+  Psiinv = inv(iw.Psichol)
+  W = Wishart(iw.nu, Psiinv)
+  X = rand!(W, X)
+  for i in 1:length(X)
+    X[i] = inv(X[i])
+  end
+  return X
 end
 
 ## NegativeBinomial is the distribution of the number of failures
