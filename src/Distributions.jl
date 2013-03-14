@@ -1111,6 +1111,25 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   end
 end
 
+
+########################
+## Wishart Distribution
+########################
+immutable Wishart <: ContinuousMultivariateDistribution
+    nu::Float64
+    S:Matrix{Float64}
+
+end
+
+#################################
+## Inverse Wishart Distribution
+#################################
+immutable InverseWishart <: ContinuousMultivariateDistribution
+    nu::Float64
+    S:Matrix{Float64}
+    
+end
+    
 ## NegativeBinomial is the distribution of the number of failures
 ## before the size'th success in a sequence of Bernoulli trials.
 ## We do not enforce integer size, as the distribution is well defined
