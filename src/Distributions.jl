@@ -1131,9 +1131,13 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
 end
 
 
-########################
+#########################################################
 ## Wishart Distribution
-########################
+## Parameters nu and S such that E(X) = nu * S 
+## See the rwish and dwish implementation in R's MCMCPack
+## This parametrization differs from Barnardo & Smith p 435
+## in this way: (nu, S) = (2*alpha, .5*beta^-1) 
+#########################################################
 immutable Wishart <: ContinuousMatrixvariateDistribution
   nu::Float64
   Schol::CholeskyDense{Float64}
@@ -1168,6 +1172,35 @@ function rand(w::Wishart)
   return Z' * Z
 end
 
+function insupport(W::Wishart, X::Matrix{Float64})
+  return size(X,1) == size(X,2) && X == X' && size(X,1) == size(W.Schol,1) && isposdef(X)
+end
+
+function logpdf(W::Wishart, X::Matrix{Float64})
+  if !insupport(W, X)
+    return -Inf
+  else
+    p = size(X,1)
+    logd::Float64 = - (W.nu * p / 2. * log(2) + W.nu / 2. * log(det(W.Schol)) + log_partial_gamma(p, W.nu/2.))
+    logd += 0.5 * (W.nu - p - 1.) * log(det(X))
+    logd -= 0.5 * trace(inv(W.Schol)*X)
+    return logd
+  end
+end
+
+## multivariate gamma / partial gamma function
+function log_partial_gamma(p::Int64, a::Float64)
+  res::Float64 = p * (p - 1.) / 4. * log(pi)
+  for ii in 1:p
+    res += lgamma(a + (1.-ii)/2.)
+  end
+  return res
+end
+
+function pdf(W::Wishart, X::Matrix{Float64})
+  return exp(logpdf(W, X))
+end
+
 
 #################################
 ## Inverse Wishart Distribution
@@ -1186,24 +1219,44 @@ end
 InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi, 'U'))
 InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
 InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
-mean(iw::InverseWishart) =  iw.nu > (size(iw.Psichol, 1) + 1) ? 1/(iw.nu - size(iw.Psichol, 1) - 1) * iw.Psichol.LR' * iw.Psichol.LR : "mean only defined for nu > p + 1"
-var(iw::InverseWishart) = "TODO"
+mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol.LR' * IW.Psichol.LR : "mean only defined for nu > p + 1"
+var(IW::InverseWishart) = "TODO"
 
-function rand(iw::InverseWishart)
+function rand(IW::InverseWishart)
   ## rand(Wishart(nu, Psi^-1))^-1 is an sample from an inverse wishart(nu, Psi)
-  return inv(rand(Wishart(iw.nu, inv(iw.Psichol))))
-  ## there is actually some wacky behavior here where inv of the CholeskyDense return the 
-  ## inverse of the original matrix, in this case we're getting Psi^-1
+  return inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
+  ## there is actually some wacky behavior here where inv of the CholeskyDense returns the 
+  ## inverse of the original matrix, in this case we're getting Psi^-1 like we want
 end
 
-function rand!(iw::InverseWishart, X::Array{Matrix{Float64}})
-  Psiinv = inv(iw.Psichol)
-  W = Wishart(iw.nu, Psiinv)
+function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
+  Psiinv = inv(IW.Psichol)
+  W = Wishart(IW.nu, Psiinv)
   X = rand!(W, X)
   for i in 1:length(X)
     X[i] = inv(X[i])
   end
   return X
+end
+
+function insupport(IW::InverseWishart, X::Matrix{Float64})
+  return size(X,1) == size(X,2) && X == X' && size(X,1) == size(IW.Psichol,1) && isposdef(X)
+end
+
+function pdf(IW::InverseWishart, X::Matrix{Float64})
+  return exp(logpdf(IW, X))
+end
+
+function logpdf(IW::InverseWishart, X::Matrix{Float64})
+  if !insupport(IW, X)
+    return -Inf
+  else
+    p = size(X,1)
+    logd::Float64 = - ( IW.nu * p / 2. * log(2) + log_partial_gamma(p, IW.nu / 2.) - IW.nu / 2. * log(det(IW.Psichol)))
+    logd -= 0.5 * (IW.nu + p + 1) * log(det(X))
+    logd -= 0.5 * trace(IW.Psichol.LR' * IW.Psichol.LR * inv(X))
+    return logd
+  end
 end
 
 ## NegativeBinomial is the distribution of the number of failures
