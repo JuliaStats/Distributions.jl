@@ -1173,7 +1173,7 @@ function rand(w::Wishart)
 end
 
 function insupport(W::Wishart, X::Matrix{Float64})
-  return size(X,1) == size(X,2) && X == X' && size(X,1) == size(W.Schol,1) && isposdef(X)
+ return size(X,1) == size(X,2) && isApproxSymmmetric(X) && size(X,1) == size(W.Schol,1) && hasCholesky(X)
 end
 
 function logpdf(W::Wishart, X::Matrix{Float64})
@@ -1192,7 +1192,7 @@ end
 function log_partial_gamma(p::Int64, a::Float64)
   res::Float64 = p * (p - 1.) / 4. * log(pi)
   for ii in 1:p
-    res += lgamma(a + (1.-ii)/2.)
+    res += lgamma(a + (1. - ii)/2.)
   end
   return res
 end
@@ -1202,9 +1202,11 @@ function pdf(W::Wishart, X::Matrix{Float64})
 end
 
 
-#################################
+######################################################
 ## Inverse Wishart Distribution
-#################################
+## Parametrized such that E(X) = Psi / (nu - p - 1)
+## See the riwish and diwish function of R's MCMCpack
+######################################################
 immutable InverseWishart <: ContinuousMatrixvariateDistribution
   nu::Float64
   Psichol::CholeskyDense{Float64}
@@ -1240,7 +1242,7 @@ function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
 end
 
 function insupport(IW::InverseWishart, X::Matrix{Float64})
-  return size(X,1) == size(X,2) && X == X' && size(X,1) == size(IW.Psichol,1) && isposdef(X)
+  return size(X,1) == size(X,2) && isApproxSymmmetric(X) && size(X,1) == size(IW.Psichol,1) && hasCholesky(X)
 end
 
 function pdf(IW::InverseWishart, X::Matrix{Float64})
@@ -1257,6 +1259,20 @@ function logpdf(IW::InverseWishart, X::Matrix{Float64})
     logd -= 0.5 * trace(IW.Psichol.LR' * IW.Psichol.LR * inv(X))
     return logd
   end
+end
+
+## because X==X' keeps failing due to floating point nonsense
+function isApproxSymmmetric(a::Matrix{Float64})
+  return max(abs(a - a')) < 1e-8
+end
+
+## because isposdef keeps giving the wrong answer for samples from Wishart and InverseWisharts
+function hasCholesky(a::Matrix{Float64})
+  try achol = cholfact(a)
+  catch e
+    return false
+  end
+  return true
 end
 
 ## NegativeBinomial is the distribution of the number of failures
