@@ -958,7 +958,7 @@ const Biexponential = Laplace
 function cdf(d::Laplace, q::Real)
   0.5 * (1.0 + sign(q - d.location) * (1.0 - exp(-abs(q - d.location) / d.scale)))
 end
-isupport(d::Laplace, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Laplace, x::Number) = real_valued(x) && isfinite(x)
 kurtosis(d::Laplace) = 3.0
 mean(d::Laplace) = d.location
 median(d::Laplace) = d.location
@@ -996,7 +996,7 @@ var(d::Logistic)      = (pi*d.scale)^2/3.
 std(d::Logistic)      = pi*d.scale/sqrt(3.)
 skewness(d::Logistic) = 0.
 kurtosis(d::Logistic) = 1.2
-isupport(d::Logistic, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Logistic, x::Number) = real_valued(x) && isfinite(x)
 
 immutable logNormal <: ContinuousUnivariateDistribution
     meanlog::Float64
