@@ -1185,15 +1185,15 @@ function logpdf(W::Wishart, X::Matrix{Float64})
     return -Inf
   else
     p = size(X,1)
-    logd::Float64 = - (W.nu * p / 2. * log(2) + W.nu / 2. * log(det(W.Schol)) + log_partial_gamma(p, W.nu/2.))
-    logd += 0.5 * (W.nu - p - 1.) * log(det(X))
+    logd::Float64 = - (W.nu * p / 2. * log(2) + W.nu / 2. * log(det(W.Schol)) + lpgamma(p, W.nu/2.))
+    logd += 0.5 * (W.nu - p - 1.) * logdet(X)
     logd -= 0.5 * trace(inv(W.Schol)*X)
     return logd
   end
 end
 
 ## multivariate gamma / partial gamma function
-function log_partial_gamma(p::Int64, a::Float64)
+function lpgamma(p::Int64, a::Float64)
   res::Float64 = p * (p - 1.) / 4. * log(pi)
   for ii in 1:p
     res += lgamma(a + (1. - ii)/2.)
@@ -1258,8 +1258,8 @@ function logpdf(IW::InverseWishart, X::Matrix{Float64})
     return -Inf
   else
     p = size(X,1)
-    logd::Float64 = - ( IW.nu * p / 2. * log(2) + log_partial_gamma(p, IW.nu / 2.) - IW.nu / 2. * log(det(IW.Psichol)))
-    logd -= 0.5 * (IW.nu + p + 1) * log(det(X))
+    logd::Float64 = - ( IW.nu * p / 2. * log(2) + lpgamma(p, IW.nu / 2.) - IW.nu / 2. * log(det(IW.Psichol)))
+    logd -= 0.5 * (IW.nu + p + 1) * logdet(X)
     logd -= 0.5 * trace(IW.Psichol[:U]' * IW.Psichol[:U] * inv(X))
     return logd
   end
