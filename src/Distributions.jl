@@ -6,12 +6,16 @@ export                                  # types
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
+    MatrixDistribution,
+    NonMatrixDistribution,
     DiscreteDistribution,
     ContinuousDistribution,
     DiscreteUnivariateDistribution,
     DiscreteMultivariateDistribution,
+    DiscreteMatrixDistribution,
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
+    ContinuousMatrixDistribution,
     Arcsine,
     Bernoulli,
     Beta,
@@ -108,15 +112,15 @@ include("tvpack.jl")
 abstract Distribution
 abstract UnivariateDistribution             <: Distribution
 abstract MultivariateDistribution           <: Distribution
-abstract MatrixvariateDistribution          <: Distribution
+abstract MatrixDistribution                 <: Distribution
 
 abstract DiscreteUnivariateDistribution     <: UnivariateDistribution
 abstract ContinuousUnivariateDistribution   <: UnivariateDistribution
 abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
 abstract ContinuousMultivariateDistribution <: MultivariateDistribution
 
-abstract ContinuousMatrixvariateDistribution<: MatrixvariateDistribution
-abstract DiscreteMatrixvariateDistribution  <: MatrixvariateDistribution # is there such a thing?
+abstract ContinuousMatrixDistribution       <: MatrixDistribution
+abstract DiscreteMatrixDistribution         <: MatrixDistribution # is there such a thing?
 
 typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
@@ -173,7 +177,7 @@ rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
 rand(d::NonMatrixDistribution, dims::Int...) = rand(d, dims)
 rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
-rand(d::MatrixvariateDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
+rand(d::MatrixDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
 
 function rand!(d::MultivariateDistribution, X::Matrix)
   k = length(mean(d))
@@ -192,7 +196,7 @@ function rand!(d::MultivariateDistribution, X::Matrix)
   return X
 end
 
-function rand!(d::MatrixvariateDistribution, X::Array{Matrix{Float64}})
+function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
   for i in 1:length(X)
     X[i] = rand(d)
   end
@@ -1138,7 +1142,7 @@ end
 ## This parametrization differs from Barnardo & Smith p 435
 ## in this way: (nu, S) = (2*alpha, .5*beta^-1) 
 #########################################################
-immutable Wishart <: ContinuousMatrixvariateDistribution
+immutable Wishart <: ContinuousMatrixDistribution
   nu::Float64
   Schol::CholeskyDense{Float64}
   function Wishart(n::Float64, Sc::CholeskyDense{Float64})
@@ -1149,7 +1153,7 @@ immutable Wishart <: ContinuousMatrixvariateDistribution
     end
   end
 end
-Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S,'U'))
+Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
 Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
 mean(w::Wishart) = w.nu * w.Schol.LR' * w.Schol.LR
@@ -1207,7 +1211,7 @@ end
 ## Parametrized such that E(X) = Psi / (nu - p - 1)
 ## See the riwish and diwish function of R's MCMCpack
 ######################################################
-immutable InverseWishart <: ContinuousMatrixvariateDistribution
+immutable InverseWishart <: ContinuousMatrixDistribution
   nu::Float64
   Psichol::CholeskyDense{Float64}
   function InverseWishart(n::Float64, Pc::CholeskyDense{Float64})
@@ -1218,7 +1222,7 @@ immutable InverseWishart <: ContinuousMatrixvariateDistribution
     end
   end
 end
-InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi, 'U'))
+InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi))
 InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
 InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
 mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol.LR' * IW.Psichol.LR : "mean only defined for nu > p + 1"
