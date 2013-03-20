@@ -6,12 +6,16 @@ export                                  # types
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
+    MatrixDistribution,
+    NonMatrixDistribution,
     DiscreteDistribution,
     ContinuousDistribution,
     DiscreteUnivariateDistribution,
     DiscreteMultivariateDistribution,
+    DiscreteMatrixDistribution,
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
+    ContinuousMatrixDistribution,
     Arcsine,
     Bernoulli,
     Beta,
@@ -31,6 +35,7 @@ export                                  # types
     HyperGeometric,
     IdentityLink,
     InverseLink,
+    InverseWishart,
     InvertedGamma,
     Laplace,
     Levy,
@@ -56,6 +61,7 @@ export                                  # types
     Triangular,
     Uniform,
     Weibull,
+    Wishart,
                                         # methods
     binaryentropy, # entropy of distribution in bits
     canonicallink, # canonical link function for a distribution
@@ -106,10 +112,17 @@ include("tvpack.jl")
 abstract Distribution
 abstract UnivariateDistribution             <: Distribution
 abstract MultivariateDistribution           <: Distribution
+abstract MatrixDistribution                 <: Distribution
+
 abstract DiscreteUnivariateDistribution     <: UnivariateDistribution
 abstract ContinuousUnivariateDistribution   <: UnivariateDistribution
 abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
 abstract ContinuousMultivariateDistribution <: MultivariateDistribution
+
+abstract ContinuousMatrixDistribution       <: MatrixDistribution
+abstract DiscreteMatrixDistribution         <: MatrixDistribution # is there such a thing?
+
+typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
@@ -162,8 +175,10 @@ function rand!(d::UnivariateDistribution, A::Array)
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
-rand(d::Distribution, dims::Int...) = rand(d, dims)
+rand(d::NonMatrixDistribution, dims::Int...) = rand(d, dims)
 rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
+rand(d::MatrixDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
+
 function rand!(d::MultivariateDistribution, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
@@ -180,6 +195,14 @@ function rand!(d::MultivariateDistribution, X::Matrix)
   end
   return X
 end
+
+function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
+  for i in 1:length(X)
+    X[i] = rand(d)
+  end
+  return X
+end
+
 function var{M<:Real}(d::Distribution, mu::AbstractArray{M})
     V = similar(mu, Float64)
     for i in 1:length(mu)
@@ -1109,6 +1132,151 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   else
     return cdf(Normal(), z[1])
   end
+end
+
+
+#########################################################
+## Wishart Distribution
+## Parameters nu and S such that E(X) = nu * S 
+## See the rwish and dwish implementation in R's MCMCPack
+## This parametrization differs from Barnardo & Smith p 435
+## in this way: (nu, S) = (2*alpha, .5*beta^-1) 
+#########################################################
+immutable Wishart <: ContinuousMatrixDistribution
+  nu::Float64
+  Schol::CholeskyDense{Float64}
+  function Wishart(n::Float64, Sc::CholeskyDense{Float64})
+    if n > (size(Sc, 1) - 1.)
+      new(n, Sc)
+    else
+      error("Wishart parameters must be df > p - 1")
+    end
+  end
+end
+Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
+Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
+Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
+mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
+var(w::Wishart) = "TODO"
+
+function rand(w::Wishart)
+  p = size(w.Schol, 1)
+  X = zeros(p,p)
+  for ii in 1:p
+    X[ii,ii] = sqrt(rand(Chisq(w.nu - ii + 1)))
+  end
+  if p > 1
+    for col in 2:p
+      for row in 1:(col - 1)
+        X[row,col] = randn()
+      end
+    end
+  end
+  Z = X * w.Schol[:U]
+  return Z' * Z
+end
+
+function insupport(W::Wishart, X::Matrix{Float64})
+ return size(X,1) == size(X,2) && isApproxSymmmetric(X) && size(X,1) == size(W.Schol,1) && hasCholesky(X)
+end
+
+function logpdf(W::Wishart, X::Matrix{Float64})
+  if !insupport(W, X)
+    return -Inf
+  else
+    p = size(X,1)
+    logd::Float64 = - (W.nu * p / 2. * log(2) + W.nu / 2. * log(det(W.Schol)) + log_partial_gamma(p, W.nu/2.))
+    logd += 0.5 * (W.nu - p - 1.) * log(det(X))
+    logd -= 0.5 * trace(inv(W.Schol)*X)
+    return logd
+  end
+end
+
+## multivariate gamma / partial gamma function
+function log_partial_gamma(p::Int64, a::Float64)
+  res::Float64 = p * (p - 1.) / 4. * log(pi)
+  for ii in 1:p
+    res += lgamma(a + (1. - ii)/2.)
+  end
+  return res
+end
+
+function pdf(W::Wishart, X::Matrix{Float64})
+  return exp(logpdf(W, X))
+end
+
+
+######################################################
+## Inverse Wishart Distribution
+## Parametrized such that E(X) = Psi / (nu - p - 1)
+## See the riwish and diwish function of R's MCMCpack
+######################################################
+immutable InverseWishart <: ContinuousMatrixDistribution
+  nu::Float64
+  Psichol::CholeskyDense{Float64}
+  function InverseWishart(n::Float64, Pc::CholeskyDense{Float64})
+    if n > (size(Pc, 1) - 1)
+      new(n, Pc)
+    else
+      error("Inverse Wishart parameters must be df > p - 1")
+    end
+  end
+end
+InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi))
+InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
+InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
+mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol[:U]' * IW.Psichol[:U] : "mean only defined for nu > p + 1"
+var(IW::InverseWishart) = "TODO"
+
+function rand(IW::InverseWishart)
+  ## rand(Wishart(nu, Psi^-1))^-1 is an sample from an inverse wishart(nu, Psi)
+  return inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
+  ## there is actually some wacky behavior here where inv of the CholeskyDense returns the 
+  ## inverse of the original matrix, in this case we're getting Psi^-1 like we want
+end
+
+function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
+  Psiinv = inv(IW.Psichol)
+  W = Wishart(IW.nu, Psiinv)
+  X = rand!(W, X)
+  for i in 1:length(X)
+    X[i] = inv(X[i])
+  end
+  return X
+end
+
+function insupport(IW::InverseWishart, X::Matrix{Float64})
+  return size(X,1) == size(X,2) && isApproxSymmmetric(X) && size(X,1) == size(IW.Psichol,1) && hasCholesky(X)
+end
+
+function pdf(IW::InverseWishart, X::Matrix{Float64})
+  return exp(logpdf(IW, X))
+end
+
+function logpdf(IW::InverseWishart, X::Matrix{Float64})
+  if !insupport(IW, X)
+    return -Inf
+  else
+    p = size(X,1)
+    logd::Float64 = - ( IW.nu * p / 2. * log(2) + log_partial_gamma(p, IW.nu / 2.) - IW.nu / 2. * log(det(IW.Psichol)))
+    logd -= 0.5 * (IW.nu + p + 1) * log(det(X))
+    logd -= 0.5 * trace(IW.Psichol[:U]' * IW.Psichol[:U] * inv(X))
+    return logd
+  end
+end
+
+## because X==X' keeps failing due to floating point nonsense
+function isApproxSymmmetric(a::Matrix{Float64})
+  return max(abs(a - a')) < 1e-8
+end
+
+## because isposdef keeps giving the wrong answer for samples from Wishart and InverseWisharts
+function hasCholesky(a::Matrix{Float64})
+  try achol = cholfact(a)
+  catch e
+    return false
+  end
+  return true
 end
 
 ## NegativeBinomial is the distribution of the number of failures
