@@ -35,6 +35,8 @@ As of v0.0.0, the following distributions have been implemented:
 * Gamma
 * Geometric
 * HyperGeometric
+* InvertedGamma
+* InverseWishart
 * Laplace
 * Logistic
 * logNormal
@@ -53,6 +55,7 @@ As of v0.0.0, the following distributions have been implemented:
 * TDist
 * Uniform
 * Weibull
+* Wishart
 
 ## Simple Examples
 
