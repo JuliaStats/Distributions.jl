@@ -1156,7 +1156,7 @@ end
 Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
 Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
-mean(w::Wishart) = w.nu * w.Schol.LR' * w.Schol.LR
+mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 var(w::Wishart) = "TODO"
 
 function rand(w::Wishart)
@@ -1172,7 +1172,7 @@ function rand(w::Wishart)
       end
     end
   end
-  Z = X * w.Schol.LR
+  Z = X * w.Schol[:U]
   return Z' * Z
 end
 
@@ -1225,7 +1225,7 @@ end
 InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi))
 InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
 InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
-mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol.LR' * IW.Psichol.LR : "mean only defined for nu > p + 1"
+mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol[:U]' * IW.Psichol[:U] : "mean only defined for nu > p + 1"
 var(IW::InverseWishart) = "TODO"
 
 function rand(IW::InverseWishart)
@@ -1260,7 +1260,7 @@ function logpdf(IW::InverseWishart, X::Matrix{Float64})
     p = size(X,1)
     logd::Float64 = - ( IW.nu * p / 2. * log(2) + log_partial_gamma(p, IW.nu / 2.) - IW.nu / 2. * log(det(IW.Psichol)))
     logd -= 0.5 * (IW.nu + p + 1) * log(det(X))
-    logd -= 0.5 * trace(IW.Psichol.LR' * IW.Psichol.LR * inv(X))
+    logd -= 0.5 * trace(IW.Psichol[:U]' * IW.Psichol[:U] * inv(X))
     return logd
   end
 end
