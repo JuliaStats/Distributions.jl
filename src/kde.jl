@@ -50,7 +50,7 @@ function kde(data::Vector, npoints::Integer)
     # Find transform of KDE by convolving grid with FT of kernel
     # Hardcodes a Gaussian kernel
     for j = 2:length(ft)
-        ft[j] *= exp(-fac1 * j^2)
+        ft[j] *= exp(-fac1 * (j-1)^2)
     end
 
     # Invert the Fourier transform to get the KDE
