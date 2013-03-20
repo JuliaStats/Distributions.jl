@@ -1071,18 +1071,18 @@ MultivariateNormal(cov::Matrix{Float64}) = MultivariateNormal(zeros(size(cov, 1)
 MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
 mean(d::MultivariateNormal) = d.mean
-var(d::MultivariateNormal) = d.covchol.LR'd.covchol.LR
+var(d::MultivariateNormal) = d.covchol[:L]'d.covchol[:L]
 function rand(d::MultivariateNormal)
   z = randn(length(d.mean))
-  return d.mean + d.covchol.LR'z
+  return d.mean + d.covchol[:L]'z
 end
 function rand!(d::MultivariateNormal, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
   if m == k 
-    X = d.covchol.LR'randn(m, n)
+    X = d.covchol[:L]'randn(m, n)
   elseif n == k
-    X = randn(m, n) * d.covchol.LR
+    X = randn(m, n) * d.covchol[:L]
   else
     error("Wrong dimensions")
   end
@@ -1092,7 +1092,7 @@ function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   u = x - d.mean
   z = d.covchol \ u  # This is equivalent to inv(cov) * u, but much faster
-  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.LR))) - 0.5 * dot(u,z)
+  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol[:L]))) - 0.5 * dot(u,z)
 end
 pdf{T <: Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
 function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
@@ -1100,7 +1100,7 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   if k > 3; error("Dimension larger than three is not supported yet"); end
   stddev = sqrt(diag(var(d)))
   z = (x - d.mean) ./ stddev
-  C = diagmm(d.covchol.LR, 1.0 / stddev)
+  C = diagmm(d.covchol[:L], 1.0 / stddev)
   C = C'C
   if k == 3
     return tvtcdf(0, z, C[[2, 3, 6]])
