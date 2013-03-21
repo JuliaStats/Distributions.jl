@@ -1856,4 +1856,17 @@ include("show.jl")
 
 include("fit.jl")
 
+
+
+function expectation(distr::Distribution, g::Function, epsilon::Real)
+    f = x->pdf(distr,x)
+    endpoints=map(e->quantile(distr,e), (epsilon, 1-epsilon))
+    integrate(x -> f(x)*g(x), endpoints[1], endpoints[2])
+end
+
+function expectation(distr::Distribution, g::Function)
+    expectation(distr, g, 1e-5)
+end
+
+                             
 end  #module
