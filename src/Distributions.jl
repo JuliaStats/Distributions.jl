@@ -1868,5 +1868,14 @@ function expectation(distr::Distribution, g::Function)
     expectation(distr, g, 1e-5)
 end
 
+function entropy(distr::Distribution)
+    f = x -> pdf(distr, x)
+    expectation(distr, x -> -log(f(x)))
+end
+
+function KL(P::Distribution, Q::Distribution)
+    expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))
+end
+
                              
 end  #module
