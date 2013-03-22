@@ -1856,26 +1856,37 @@ include("show.jl")
 
 include("fit.jl")
 
+                  
+end  #module
 
-
-function expectation(distr::Distribution, g::Function, epsilon::Real)
+                             
+function expectation(distr::ContinuousDistribution, g::Function, epsilon::Real)
     f = x->pdf(distr,x)
-    endpoints=map(e->quantile(distr,e), (epsilon, 1-epsilon))
-    integrate(x -> f(x)*g(x), endpoints[1], endpoints[2])
+    (left,right) = map(x -> quantile(distr,x), (0,1))
+    leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
+    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
+    integrate(x -> f(x)*g(x), leftEnd, rightEnd)
+end
+
+## Assuming that discrete distributions only take integer values between 0 and infinity.
+function expectation(distr::DiscreteDistribution, g::Function, epsilon::Real)
+    f = x->pmf(distr,x)
+    (left,right) = map(x -> quantile(distr,x), (0,1))
+    leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
+    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
+    sum(map(x -> f(x)*g(x), leftEnd:rightEnd))
 end
 
 function expectation(distr::Distribution, g::Function)
-    expectation(distr, g, 1e-5)
+    expectation(distr, g, 1e-10)
 end
 
 function entropy(distr::Distribution)
-    f = x -> pdf(distr, x)
+    pf = typeof(distr)<:ContinuousDistribution ? pdf : pmf
+    f = x -> pf(distr, x)
     expectation(distr, x -> -log(f(x)))
 end
 
 function KL(P::Distribution, Q::Distribution)
     expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))
 end
-
-                             
-end  #module
