@@ -1868,12 +1868,12 @@ function expectation(distr::ContinuousDistribution, g::Function, epsilon::Real)
     integrate(x -> f(x)*g(x), leftEnd, rightEnd)
 end
 
-## Assuming that discrete distributions only take integer values between 0 and infinity.
+## Assuming that discrete distributions only take integer values.
 function expectation(distr::DiscreteDistribution, g::Function, epsilon::Real)
     f = x->pmf(distr,x)
     (left,right) = map(x -> quantile(distr,x), (0,1))
     leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
-    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
+    rightEnd = right!=Inf ? right : quantile(distr, 1-epsilon)
     sum(map(x -> f(x)*g(x), leftEnd:rightEnd))
 end
 
