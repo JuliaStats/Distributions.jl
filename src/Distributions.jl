@@ -1095,7 +1095,7 @@ MultivariateNormal(cov::Matrix{Float64}) = MultivariateNormal(zeros(size(cov, 1)
 MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
 mean(d::MultivariateNormal) = d.mean
-var(d::MultivariateNormal) = d.covchol[:U]'d.covchol[:U]
+var(d::MultivariateNormal) = (U = d.covchol[:U]; U'U)
 function rand(d::MultivariateNormal)
   z = randn(length(d.mean))
   return d.mean + d.covchol[:U]'z
@@ -1103,14 +1103,9 @@ end
 function rand!(d::MultivariateNormal, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
-  if m == k 
-    X = d.covchol[:U]'randn(m, n)
-  elseif n == k
-    X = randn(m, n) * d.covchol[:U]
-  else
-    error("Wrong dimensions")
-  end
-  return X
+  if m == k return d.covchol[:U]'randn!(X) + d.mean[:,ones(Int,n)] end
+  if n == k return randn!(X) * d.covchol[:U] + d.mean'[ones(Int,m),:] end
+  error("Wrong dimensions")
 end
 function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
