@@ -1052,11 +1052,12 @@ immutable MixtureModel <: Distribution
   end
 end
 
-function pdf(d::MixtureModel, x::Real)
+function pdf(d::MixtureModel, x::Any)
   p = 0.0
   for i in 1:length(d.components)
     p += pdf(d.components[i], x) * d.probs[i]
   end
+  retun p
 end
 function rand(d::MixtureModel)
   i = rand(Categorical(d.probs))
