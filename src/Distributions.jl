@@ -67,11 +67,15 @@ export                                  # types
     canonicallink, # canonical link function for a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
+    cf,            # characteristic function
+    cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
+    cumulant,      # cumulants of distribution
     deviance,      # deviance of fitted and observed responses
     devresid,      # vector of squared deviance residuals
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data
+    freecumulant,  # free cumulants of distribution
     insupport,     # predicate, is x in the support of the distribution?
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
@@ -84,7 +88,9 @@ export                                  # types
     logpmf,        # log probability mass
     mean,          # mean of distribution
     median,        # median of distribution
+    mgf,           # moment generating function
     modes,         # mode(s) of distribution as vector
+    moment,        # moments of distribution
     mueta,         # derivative of inverse link function
     mustart,       # starting values of mean vector in GLMs
     pdf,           # probability density function (ContinuousDistribution)
