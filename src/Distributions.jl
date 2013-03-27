@@ -74,6 +74,7 @@ export                                  # types
     deviance,      # deviance of fitted and observed responses
     devresid,      # vector of squared deviance residuals
     entropy,       # entropy of distribution in nats
+    excesskurtosis # excess kurtosis of distribution
     fit,           # fit a distribution to data
     freecumulant,  # free cumulants of distribution
     insupport,     # predicate, is x in the support of the distribution?
@@ -175,6 +176,7 @@ function mustart{Y<:Real,W<:Real}(d::Distribution,
     M
 end
 std(d::Distribution)                          = sqrt(var(d))
+excess_kurtosis(d::Distribution)              = kurtosis(d)-3
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A) A[i] = rand(d) end
     A
@@ -474,7 +476,7 @@ end
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
 
-binary_entropy(d::Distribution) = entropy(d) / log(2)
+binaryentropy(d::Distribution) = entropy(d) / log(2)
 
 ##############################################################################
 #
