@@ -175,6 +175,13 @@ function mustart{Y<:Real,W<:Real}(d::Distribution,
     M
 end
 std(d::Distribution)                          = sqrt(var(d))
+
+#kurtosis returns excess kurtosis by default. proper kurtosis can be returned with correction=false
+kurtosis(d::Distribution, correction::Bool)   = correction ? kurtosis(d) : kurtosis(d) + 3.0
+excess(d) = kurtosis(d)
+excess_kurtosis(d) = kurtosis(d)
+proper_kurtosis(d) = kurtosis(d, false)
+
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A) A[i] = rand(d) end
     A
