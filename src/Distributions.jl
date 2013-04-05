@@ -1093,7 +1093,7 @@ end
 
 immutable MultivariateNormal <: ContinuousMultivariateDistribution
   mean::Vector{Float64}
-  covchol::CholeskyDense{Float64}
+  covchol::Cholesky{Float64}
   function MultivariateNormal(m, c)
     if length(m) == size(c, 1) == size(c, 2)
       new(m, c)
@@ -1153,8 +1153,8 @@ end
 #########################################################
 immutable Wishart <: ContinuousMatrixDistribution
   nu::Float64
-  Schol::CholeskyDense{Float64}
-  function Wishart(n::Float64, Sc::CholeskyDense{Float64})
+  Schol::Cholesky{Float64}
+  function Wishart(n::Float64, Sc::Cholesky{Float64})
     if n > (size(Sc, 1) - 1.)
       new(n, Sc)
     else
@@ -1164,7 +1164,7 @@ immutable Wishart <: ContinuousMatrixDistribution
 end
 Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
-Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
+Wishart(nu::Int64, Schol::Cholesky{Float64}) = Wishart(convert(Float64, nu), Schol)
 mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 var(w::Wishart) = "TODO"
 
@@ -1222,8 +1222,8 @@ end
 ######################################################
 immutable InverseWishart <: ContinuousMatrixDistribution
   nu::Float64
-  Psichol::CholeskyDense{Float64}
-  function InverseWishart(n::Float64, Pc::CholeskyDense{Float64})
+  Psichol::Cholesky{Float64}
+  function InverseWishart(n::Float64, Pc::Cholesky{Float64})
     if n > (size(Pc, 1) - 1)
       new(n, Pc)
     else
@@ -1233,14 +1233,14 @@ immutable InverseWishart <: ContinuousMatrixDistribution
 end
 InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi))
 InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
-InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
+InverseWishart(nu::Int64, Psichol::Cholesky{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
 mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol[:U]' * IW.Psichol[:U] : "mean only defined for nu > p + 1"
 var(IW::InverseWishart) = "TODO"
 
 function rand(IW::InverseWishart)
   ## rand(Wishart(nu, Psi^-1))^-1 is an sample from an inverse wishart(nu, Psi)
   return inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
-  ## there is actually some wacky behavior here where inv of the CholeskyDense returns the 
+  ## there is actually some wacky behavior here where inv of the Cholesky returns the 
   ## inverse of the original matrix, in this case we're getting Psi^-1 like we want
 end
 
