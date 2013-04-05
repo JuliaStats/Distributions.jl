@@ -1495,7 +1495,7 @@ immutable StDist <: ContinuousUnivariateDistribution
     sigma::Float64
     StDist(d,m,s) = d > 0 ? new(float64(d),float64(s),float64(s)) : error("df must be positive")
 end
-rand(d::StDist)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(FLoat64,),d.df)
+rand(d::StDist)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(Float64,),d.df)
 mean(d::StDist) = d.df > 1 ? d.mu : NaN
 median(d::StDist) = d.mu
 modes(d::StDist) = [d.mu]
