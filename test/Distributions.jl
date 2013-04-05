@@ -144,3 +144,12 @@ d = MultivariateNormal(zeros(2), eye(2))
 d = MultivariateNormal(zeros(3), [4. -2. -1.; -2. 5. -1.; -1. -1. 6.])
 @test abs(logpdf(d, [3., 4., 5.]) - (-15.75539253001834)) < 1.0e-10
 
+
+d = MStDist(3.)
+@test abs(pdf(d, [0, 0]) - 0.159155) < 10e-3
+@test abs(pdf(d, [1, 0]) - 0.0775306) < 10e-3
+@test abs(pdf(d, [1, 1]) - 0.0443811) < 10e-3
+
+d = MStDist(7.,zeros(3), [4. -2. -1.; -2. 5. -1.; -1. -1. 6.])
+@test abs(logpdf(d, [3., 4., 5.]) - (-11.901990144583023)) < 1.0e-10
+

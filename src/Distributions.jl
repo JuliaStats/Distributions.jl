@@ -45,6 +45,7 @@ export                                  # types
     LogLink,
     logNormal,
     MixtureModel,
+    MStDist,
     Multinomial,
     MultivariateNormal,
     NegativeBinomial,
@@ -57,6 +58,7 @@ export                                  # types
     Poisson,
     ProbitLink,
     Rayleigh,
+    StDist,
     TDist,
     Triangular,
     Uniform,
@@ -1478,6 +1480,82 @@ modes(d::TDist) = [0.0]
 var(d::TDist) = d.df > 2 ? d.df/(d.df-2) : d.df > 1 ? Inf : NaN
 insupport(d::TDist, x::Number) = real_valued(x) && isfinite(x)
 pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2 / d.df)^(-0.5*(d.df + 1.0))
+
+##############################################################################
+#
+# StDist distribution
+#
+# TODO: entropy?
+#
+##############################################################################
+
+immutable StDist <: ContinuousUnivariateDistribution
+    df::Float64                         # non-integer degrees of freedom allowed
+    mu::Float64
+    sigma::Float64
+    StDist(d,m,s) = d > 0 ? new(float64(d),float64(s),float64(s)) : error("df must be positive")
+end
+rand(d::StDist)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(FLoat64,),d.df)
+mean(d::StDist) = d.df > 1 ? d.mu : NaN
+median(d::StDist) = d.mu
+modes(d::StDist) = [d.mu]
+var(d::StDist) = d.df > 2 ? d.sigma^2*(d.df/(d.df-2)) : d.df > 1 ? Inf : NaN
+insupport(d::StDist, x::Number) = real_valued(x) && isfinite(x)
+pdf(d::StDist, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.0 + (x-d.mu)^2 / (d.df*d.sigma^2))^(-0.5*(d.df + 1.0))
+
+##############################################################################
+#
+# MStDist distribution
+#
+# TODO: CDF algos?
+#
+##############################################################################
+
+immutable MStDist <: ContinuousMultivariateDistribution
+  df::Float64
+  mean::Vector{Float64}
+  covchol::CholeskyDense{Float64}
+  function MStDist(d, m, c)
+    if d<=0
+	error("df must be positive")
+    elseif length(m) == size(c, 1) == size(c, 2)
+      new(d, m, c)
+    else
+      error("Dimensions of mean vector and scale matrix do not match")
+    end
+  end
+end
+
+MStDist(df::Float64,mean::Vector{Float64}, cov::Matrix{Float64}) = MStDist(df,mean,cholfact(cov))
+MStDist(df::Float64,mean::Vector{Float64}) = MStDist(df,mean, eye(length(mean)))
+MStDist(df::Float64,cov::Matrix{Float64}) = MStDist(df,zeros(size(cov, 1)), cov)
+MStDist(df::Float64) = MStDist(df,zeros(2), eye(2))
+
+mean(d::MStDist) = d.df > 1 ? d.mean : NaN
+var(d::MStDist) = d.df > 2 ? (U = d.covchol[:U]; U'U*(d.df/(d.df-2))) : NaN
+
+function rand(d::MStDist)
+  z = randn(length(d.mean))
+  x = rand(Chisq(d.df))
+  return d.mean + d.covchol[:U]'z*sqrt(d.df/x)
+end
+
+function rand!(d::MStDist, X::Matrix)
+  k = length(mean(d))
+  m, n = size(X)
+  if m == k return d.covchol[:U]'randn!(X)*sqrt(d.df/rand(Chisq(d.df),n))'[ones(Int,m),:] + d.mean[:,ones(Int,n)] end
+  if n == k return randn!(X) * d.covchol[:U]*sqrt(d.df/rand(Chisq(d.df),m))[:,ones(Int,n)] + d.mean'[ones(Int,m),:] end
+  error("Wrong dimensions")
+end
+
+function logpdf{T <: Real}(d::MStDist, x::Vector{T})
+  k = length(d.mean)
+  u = x - d.mean
+  z = d.covchol \ u  # This is equivalent to inv(cov) * u, but much faster
+  return lgamma((d.df+k)/2) - (lgamma(d.df/2) + (k/2)*(log(d.df) + log(pi))) - sum(log(diag(d.covchol[:U]))) -(d.df+k)/2*log(1+(1/d.df)*dot(u,z))
+end
+
+pdf{T <: Real}(d::MStDist, x::Vector{T}) = exp(logpdf(d, x))
 
 ##############################################################################
 #
