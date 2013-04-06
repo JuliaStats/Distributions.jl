@@ -1095,7 +1095,7 @@ end
 
 immutable MultivariateNormal <: ContinuousMultivariateDistribution
   mean::Vector{Float64}
-  covchol::CholeskyDense{Float64}
+  covchol::Cholesky{Float64}
   function MultivariateNormal(m, c)
     if length(m) == size(c, 1) == size(c, 2)
       new(m, c)
@@ -1155,8 +1155,8 @@ end
 #########################################################
 immutable Wishart <: ContinuousMatrixDistribution
   nu::Float64
-  Schol::CholeskyDense{Float64}
-  function Wishart(n::Float64, Sc::CholeskyDense{Float64})
+  Schol::Cholesky{Float64}
+  function Wishart(n::Float64, Sc::Cholesky{Float64})
     if n > (size(Sc, 1) - 1.)
       new(n, Sc)
     else
@@ -1166,7 +1166,7 @@ immutable Wishart <: ContinuousMatrixDistribution
 end
 Wishart(nu::Float64, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 Wishart(nu::Int64, S::Matrix{Float64}) = Wishart(convert(Float64, nu), S)
-Wishart(nu::Int64, Schol::CholeskyDense{Float64}) = Wishart(convert(Float64, nu), Schol)
+Wishart(nu::Int64, Schol::Cholesky{Float64}) = Wishart(convert(Float64, nu), Schol)
 mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 var(w::Wishart) = "TODO"
 
@@ -1224,8 +1224,8 @@ end
 ######################################################
 immutable InverseWishart <: ContinuousMatrixDistribution
   nu::Float64
-  Psichol::CholeskyDense{Float64}
-  function InverseWishart(n::Float64, Pc::CholeskyDense{Float64})
+  Psichol::Cholesky{Float64}
+  function InverseWishart(n::Float64, Pc::Cholesky{Float64})
     if n > (size(Pc, 1) - 1)
       new(n, Pc)
     else
@@ -1235,14 +1235,14 @@ immutable InverseWishart <: ContinuousMatrixDistribution
 end
 InverseWishart(nu::Float64, Psi::Matrix{Float64}) = InverseWishart(nu, cholfact(Psi))
 InverseWishart(nu::Int64, Psi::Matrix{Float64}) = InverseWishart(convert(Float64, nu), Psi)
-InverseWishart(nu::Int64, Psichol::CholeskyDense{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
+InverseWishart(nu::Int64, Psichol::Cholesky{Float64}) = InverseWishart(convert(Float64, nu), Psichol)
 mean(IW::InverseWishart) =  IW.nu > (size(IW.Psichol, 1) + 1) ? 1/(IW.nu - size(IW.Psichol, 1) - 1) * IW.Psichol[:U]' * IW.Psichol[:U] : "mean only defined for nu > p + 1"
 var(IW::InverseWishart) = "TODO"
 
 function rand(IW::InverseWishart)
   ## rand(Wishart(nu, Psi^-1))^-1 is an sample from an inverse wishart(nu, Psi)
   return inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
-  ## there is actually some wacky behavior here where inv of the CholeskyDense returns the 
+  ## there is actually some wacky behavior here where inv of the Cholesky returns the 
   ## inverse of the original matrix, in this case we're getting Psi^-1 like we want
 end
 
@@ -1314,14 +1314,14 @@ immutable NoncentralBeta <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     ncp::Float64
-    NonCentralBeta(a,b,nc) = a > 0 && b > 0 && nc >= 0 ? new(float64(a),float64(b),float64(nc)) : error("alpha and beta must be > 0 and ncp >= 0")
+    NoncentralBeta(a,b,nc) = a > 0 && b > 0 && nc >= 0 ? new(float64(a),float64(b),float64(nc)) : error("alpha and beta must be > 0 and ncp >= 0")
 end
 @_jl_dist_3p NoncentralBeta nbeta
 
 immutable NoncentralChisq <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
-    NonCentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
+    NoncentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
 end
 @_jl_dist_2p NoncentralChisq nchisq
 insupport(d::NoncentralChisq, x::Number) = real_valued(x) && isfinite(x) && 0 < x
@@ -1330,7 +1330,7 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     ndf::Float64
     ddf::Float64
     ncp::Float64
-    NonCentralF(n,d,nc) = n > 0 && d > 0 && nc >= 0 ? new(float64(n),float64(d),float64(nc)) : error("ndf and ddf must be > 0 and ncp >= 0")
+    NoncentralF(n,d,nc) = n > 0 && d > 0 && nc >= 0 ? new(float64(n),float64(d),float64(nc)) : error("ndf and ddf must be > 0 and ncp >= 0")
 end
 @_jl_dist_3p NoncentralF nf
 insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
@@ -1464,7 +1464,7 @@ var(d::Rayleigh) = d.scale^2 * (2. - pi / 2.)
 
 ##############################################################################
 #
-# TDist distribution
+# TDist distribution - Standard student-t distribution
 #
 ##############################################################################
 
@@ -1483,9 +1483,8 @@ pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2
 
 ##############################################################################
 #
-# StDist distribution
-#
-# TODO: entropy?
+# univariate scaled, noncentral Student-t distribution with df degrees of freedom
+# non-centrality parameter 'mean' and scale parameter 'sigma'
 #
 ##############################################################################
 
@@ -1505,16 +1504,16 @@ pdf(d::StDist, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.
 
 ##############################################################################
 #
-# MStDist distribution
-#
-# TODO: CDF algos?
+# Multivariate scaled, noncentral Student-t distribution with df degrees of freedom
+# non-centrality parameter 'mean' and parameterized in terms of the Choleski decomposed scale matrix 'covchol',
+# (although a scale matrix can be entered to define the distribution)
 #
 ##############################################################################
 
 immutable MStDist <: ContinuousMultivariateDistribution
   df::Float64
   mean::Vector{Float64}
-  covchol::CholeskyDense{Float64}
+  covchol::Cholesky{Float64}
   function MStDist(d, m, c)
     if d<=0
 	error("df must be positive")
