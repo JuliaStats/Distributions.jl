@@ -113,6 +113,7 @@ import Base.show
 integer_valued{T <: Integer}(x::AbstractArray{T}) = true
 integer_valued(x::AbstractArray) = allp(integer_valued, x)
 
+include("utils.jl")
 include("tvpack.jl")
 
 abstract Distribution
@@ -1569,6 +1570,7 @@ insupport(d::Weibull, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 immutable Multinomial <: DiscreteMultivariateDistribution
   n::Int
   prob::Vector{Float64}
+  drawtable::DiscreteDistributionTable
   function Multinomial{T <: Real}(n::Integer, p::Vector{T})
     if n <= 0
       error("Multinomial: n must be positive")
@@ -1580,7 +1582,10 @@ immutable Multinomial <: DiscreteMultivariateDistribution
       end
       sump += p[i]
     end
-    new(int(n), p ./ sump)
+    for i in 1:length(p)
+      p[i] /= sump
+    end
+    new(int(n), p, DiscreteDistributionTable(p))
   end
 end
 
@@ -1625,15 +1630,10 @@ function rand(d::Multinomial)
   l = length(d.prob)
   s = zeros(Int, l)
   psum = 1.0
-  for j = 1:(l - 1)
-    s[j] = int(ccall((:rbinom, Rmath), Float64, (Float64, Float64), n, d.prob[j] / psum))
-    n -= s[j]
-    if n == 0
-      break
-    end
-    psum -= d.prob[j]
+  for index in 1:n
+    i = draw(d.drawtable)
+    s[i] += 1
   end
-  s[end] = n
   s
 end
 
@@ -1724,6 +1724,7 @@ end
 
 immutable Categorical <: DiscreteUnivariateDistribution
   prob::Vector{Float64}
+  drawtable::DiscreteDistributionTable
   function Categorical{T <: Real}(p::Vector{T})
     if length(p) <= 1
       error("Categorical: there must be at least two categories")
@@ -1735,7 +1736,10 @@ immutable Categorical <: DiscreteUnivariateDistribution
       end
       sump += p[i]
     end
-    new(p ./ sump)
+    for i in 1:length(p)
+      p[i] /= sump
+    end
+    new(p, DiscreteDistributionTable(p))
   end
 end
 
@@ -1756,17 +1760,7 @@ end
 
 pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0. : d.prob[x]
 
-function rand(d::Categorical)
-  l = length(d.prob)
-  r = rand()
-  for j = 1:l
-    r -= d.prob[j]
-    if r <= 0.0
-      return j
-    end
-  end
-  return l
-end
+rand(d::Categorical) = draw(d.drawtable)
 
 ##
 ##
