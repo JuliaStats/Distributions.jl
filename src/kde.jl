@@ -5,8 +5,19 @@ function kde(data::Vector, npoints::Integer)
     # Determine length of data
     ndata = length(data)
 
-    # Set bandwidth to a good default for normal data
-    window = 1.06 * std(data) * ndata^(-1/5)
+    # Set bandwidth using Silverman's rule of thumb
+    var_width = std(data)
+    q25, q75 = quantile(data, [0.25, 0.75])
+    quantile_width = (q75 - q25) / 1.34
+    width = min(var_width, quantile_width)
+    if width == 0.0
+        if var_width == 0.0
+            width = 1.0
+        else
+            width = var_width
+        end
+    end
+    window = 0.9 * width * ndata^(-0.2)
 
     # Find interval that will contain most mass
     dlo = min(data) - 3 * window
