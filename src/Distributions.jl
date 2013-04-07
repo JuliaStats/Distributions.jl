@@ -1866,8 +1866,6 @@ include("show.jl")
 include("fit.jl")
 
                   
-end  #module
-
 function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
     (left,right) = map(x -> quantile(distr,x), (0,1))
     leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
@@ -1901,3 +1899,5 @@ end
 function KL(P::UnivariateDistribution, Q::UnivariateDistribution)
     expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))
 end
+
+end  #module
