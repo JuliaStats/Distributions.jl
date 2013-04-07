@@ -1,9 +1,9 @@
 function digamma(x::Float64) # Use Int instead?
-  ccall(dlsym(_jl_libRmath,  :digamma), Float64, (Float64, ), x)
+  ccall(("digamma", :libRmath), Float64, (Float64, ), x)
 end
 
 function trigamma(x::Float64) # Use Int instead?
-  ccall(dlsym(_jl_libRmath,  :trigamma), Float64, (Float64, ), x)
+  ccall(("trigamma", :libRmath), Float64, (Float64, ), x)
 end
 
 function fit(::Type{Bernoulli}, x::Array)
