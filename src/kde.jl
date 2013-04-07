@@ -45,26 +45,16 @@ function kde(data::Vector, npoints::Integer)
     end
 
     # Transform to Fourier basis
-    ft = fft(grid)
+    ft = rfft(grid)
 
     # Find transform of KDE by convolving grid with FT of kernel
     # Hardcodes a Gaussian kernel
-    jmax = npoints2 - 1
-    smooth = Array(Complex{Float64}, npoints)
-    smooth[1] = ft[1]
-    rj = 0.0
-    for j = 1:jmax
-        rj = rj + 1.0
-        fac = exp(-fac1 * rj^2)
-        j1 = j + 1
-        j2 = j1 + npoints2
-        smooth[j1] = fac * ft[j1]
-        smooth[j2] = fac * ft[j2]
+    for j = 2:length(ft)
+        ft[j] *= exp(-fac1 * (j-1)^2)
     end
-    smooth[npoints2 + 1] = exp(-fac1 * npoints^2) * ft[npoints2 + 1]
 
     # Invert the Fourier transform to get the KDE
-    smooth = real(ifft(smooth))
+    smooth = irfft(ft,npoints)
 
     # Fix any noise that crept in
     for j in 1:npoints
@@ -74,7 +64,5 @@ function kde(data::Vector, npoints::Integer)
     end
 
     # Return the grid over which KDE was calculated and KDE
-    # TODO: Values of smooth oscillate improperly
-    # TODO: Values of smooth are on wrong scale
     return dlo:step:(dhi - step), smooth
 end
