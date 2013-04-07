@@ -1746,6 +1746,9 @@ function Categorical(d::Integer)
   Categorical(ones(d) / d)
 end
 
+mean(d::Categorical) = d.prob
+var(d::Categorical) = d.prob .* (1-d.prob)
+
 function insupport(d::Categorical, x::Real)
   integer_valued(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
