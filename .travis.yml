@@ -20,3 +20,4 @@ script:
     - julia ~/.julia/Distributions/test/Distributions.jl
     - julia ~/.julia/Distributions/test/Wisharts.jl
     - julia ~/.julia/Distributions/test/fit.jl
+    - julia ~/.julia/Distributions/test/utils.jl
