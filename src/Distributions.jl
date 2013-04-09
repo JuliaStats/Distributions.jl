@@ -100,6 +100,7 @@ export                                  # types
     rand!,         # replacement random sampler
     sample,        # another random sampler - not sure why this is here
     skewness,      # skewness of the distribution
+    sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
     valideta,      # validity check on linear predictor
     validmu,       # validity check on mean vector
@@ -107,7 +108,7 @@ export                                  # types
 
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.integer_valued
-import Base.show
+import Base.show, Base.sprand
 
 # convenience methods for integer_valued
 integer_valued{T <: Integer}(x::AbstractArray{T}) = true
@@ -192,6 +193,8 @@ rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
 rand(d::NonMatrixDistribution, dims::Int...) = rand(d, dims)
 rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
 rand(d::MatrixDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
+
+sprand(m::Integer, n::Integer, density::Real, d::Distribution)=sprand(m, n, density, n->rand(d, n))
 
 function rand!(d::MultivariateDistribution, X::Matrix)
   k = length(mean(d))
