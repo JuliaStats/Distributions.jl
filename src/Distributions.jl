@@ -45,7 +45,7 @@ export                                  # types
     LogLink,
     logNormal,
     MixtureModel,
-    MStDist,
+    MultivariateStudentT,
     Multinomial,
     MultivariateNormal,
     NegativeBinomial,
@@ -58,7 +58,7 @@ export                                  # types
     Poisson,
     ProbitLink,
     Rayleigh,
-    StDist,
+    StudentT,
     TDist,
     Triangular,
     Uniform,
@@ -1488,19 +1488,19 @@ pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2
 #
 ##############################################################################
 
-immutable StDist <: ContinuousUnivariateDistribution
+immutable StudentT <: ContinuousUnivariateDistribution
     df::Float64                         # non-integer degrees of freedom allowed
     mu::Float64
     sigma::Float64
-    StDist(d,m,s) = d > 0 ? new(float64(d),float64(s),float64(s)) : error("df must be positive")
+    StudentT(d,m,s) = d > 0 ? new(float64(d),float64(s),float64(s)) : error("df must be positive")
 end
-rand(d::StDist)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(Float64,),d.df)
-mean(d::StDist) = d.df > 1 ? d.mu : NaN
-median(d::StDist) = d.mu
-modes(d::StDist) = [d.mu]
-var(d::StDist) = d.df > 2 ? d.sigma^2*(d.df/(d.df-2)) : d.df > 1 ? Inf : NaN
-insupport(d::StDist, x::Number) = real_valued(x) && isfinite(x)
-pdf(d::StDist, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.0 + (x-d.mu)^2 / (d.df*d.sigma^2))^(-0.5*(d.df + 1.0))
+rand(d::StudentT)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(Float64,),d.df)
+mean(d::StudentT) = d.df > 1 ? d.mu : NaN
+median(d::StudentT) = d.mu
+modes(d::StudentT) = [d.mu]
+var(d::StudentT) = d.df > 2 ? d.sigma^2*(d.df/(d.df-2)) : d.df > 1 ? Inf : NaN
+insupport(d::StudentT, x::Number) = real_valued(x) && isfinite(x)
+pdf(d::StudentT, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.0 + (x-d.mu)^2 / (d.df*d.sigma^2))^(-0.5*(d.df + 1.0))
 
 ##############################################################################
 #
@@ -1510,11 +1510,11 @@ pdf(d::StDist, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.
 #
 ##############################################################################
 
-immutable MStDist <: ContinuousMultivariateDistribution
+immutable MultivariateStudentT <: ContinuousMultivariateDistribution
   df::Float64
   mean::Vector{Float64}
   covchol::Cholesky{Float64}
-  function MStDist(d, m, c)
+  function MultivariateStudentT(d, m, c)
     if d<=0
 	error("df must be positive")
     elseif length(m) == size(c, 1) == size(c, 2)
@@ -1525,21 +1525,21 @@ immutable MStDist <: ContinuousMultivariateDistribution
   end
 end
 
-MStDist(df::Float64,mean::Vector{Float64}, cov::Matrix{Float64}) = MStDist(df,mean,cholfact(cov))
-MStDist(df::Float64,mean::Vector{Float64}) = MStDist(df,mean, eye(length(mean)))
-MStDist(df::Float64,cov::Matrix{Float64}) = MStDist(df,zeros(size(cov, 1)), cov)
-MStDist(df::Float64) = MStDist(df,zeros(2), eye(2))
+MultivariateStudentT(df::Float64,mean::Vector{Float64}, cov::Matrix{Float64}) = MultivariateStudentT(df,mean,cholfact(cov))
+MultivariateStudentT(df::Float64,mean::Vector{Float64}) = MultivariateStudentT(df,mean, eye(length(mean)))
+MultivariateStudentT(df::Float64,cov::Matrix{Float64}) = MultivariateStudentT(df,zeros(size(cov, 1)), cov)
+MultivariateStudentT(df::Float64) = MultivariateStudentT(df,zeros(2), eye(2))
 
-mean(d::MStDist) = d.df > 1 ? d.mean : NaN
-var(d::MStDist) = d.df > 2 ? (U = d.covchol[:U]; U'U*(d.df/(d.df-2))) : NaN
+mean(d::MultivariateStudentT) = d.df > 1 ? d.mean : NaN
+var(d::MultivariateStudentT) = d.df > 2 ? (U = d.covchol[:U]; U'U*(d.df/(d.df-2))) : NaN
 
-function rand(d::MStDist)
+function rand(d::MultivariateStudentT)
   z = randn(length(d.mean))
   x = rand(Chisq(d.df))
   return d.mean + d.covchol[:U]'z*sqrt(d.df/x)
 end
 
-function rand!(d::MStDist, X::Matrix)
+function rand!(d::MultivariateStudentT, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
   if m == k return d.covchol[:U]'randn!(X)*sqrt(d.df/rand(Chisq(d.df),n))'[ones(Int,m),:] + d.mean[:,ones(Int,n)] end
@@ -1547,14 +1547,14 @@ function rand!(d::MStDist, X::Matrix)
   error("Wrong dimensions")
 end
 
-function logpdf{T <: Real}(d::MStDist, x::Vector{T})
+function logpdf{T <: Real}(d::MultivariateStudentT, x::Vector{T})
   k = length(d.mean)
   u = x - d.mean
   z = d.covchol \ u  # This is equivalent to inv(cov) * u, but much faster
   return lgamma((d.df+k)/2) - (lgamma(d.df/2) + (k/2)*(log(d.df) + log(pi))) - sum(log(diag(d.covchol[:U]))) -(d.df+k)/2*log(1+(1/d.df)*dot(u,z))
 end
 
-pdf{T <: Real}(d::MStDist, x::Vector{T}) = exp(logpdf(d, x))
+pdf{T <: Real}(d::MultivariateStudentT, x::Vector{T}) = exp(logpdf(d, x))
 
 ##############################################################################
 #
