@@ -190,9 +190,9 @@ function rand!(d::UnivariateDistribution, A::Array)
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
 rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
-rand(d::NonMatrixDistribution, dims::Int...) = rand(d, dims)
-rand(d::MultivariateDistribution, dims::Int)  = rand(d, (dims, length(mean(d))))
-rand(d::MatrixDistribution, dims::Int) = rand!(d, Array(Matrix{Float64},dims))
+rand(d::NonMatrixDistribution, dims::Integer...) = rand(d, map(int, dims))
+rand(d::MultivariateDistribution, dims::Integer)  = rand(d, (dims, length(mean(d))))
+rand(d::MatrixDistribution, dims::Integer) = rand!(d, Array(Matrix{Float64},int(dims)))
 
 sprand(m::Integer, n::Integer, density::Real, d::Distribution)=sprand(m, n, density, n->rand(d, n))
 
