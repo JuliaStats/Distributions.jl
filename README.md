@@ -1,6 +1,8 @@
 Distributions.jl
 ================
 
+[![Build Status](https://travis-ci.org/JuliaStats/Distributions.jl.png)](https://travis-ci.org/JuliaStats/Distributions.jl)
+
 ## Introduction
 
 A Julia package for probability distributions and associated funtions. Each distribution is reified as a new type in the Julia type hierarchy deriving from the new abstract type, `Distribution`. These distributions minimally provide the following:
