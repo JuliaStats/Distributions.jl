@@ -19,6 +19,22 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 	table = Array(Any, 6)
 	bounds = zeros(Int64, 6)
 
+	# Special case for deterministic distributions
+	for i in 1:n
+		if vals[i] == 10^6
+			table[1] = Array(Int64, 10)
+			for j in 1:10
+				table[1][j] = i
+			end
+			bounds[1] = 10^6
+			for j in 2:6
+				table[j] = Array(Int64, 0)
+				bounds[j] = 10^6
+			end
+			return DiscreteDistributionTable(table, bounds)
+		end
+	end
+
 	# Fill tables
 	multiplier = 1
 	for index in 6:-1:1
