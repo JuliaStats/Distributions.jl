@@ -43,6 +43,7 @@ As of v0.0.0, the following distributions have been implemented:
 * Logistic
 * logNormal
 * MixtureModel
+* MStDist
 * Multinomial
 * MultivariateNormal
 * NegativeBinomial
@@ -54,6 +55,7 @@ As of v0.0.0, the following distributions have been implemented:
 * Pareto
 * Poisson
 * Rayleigh
+* StDist
 * TDist
 * Uniform
 * Weibull

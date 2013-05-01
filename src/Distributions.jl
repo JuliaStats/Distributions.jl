@@ -45,6 +45,7 @@ export                                  # types
     LogLink,
     logNormal,
     MixtureModel,
+    MultivariateStudentT,
     Multinomial,
     MultivariateNormal,
     NegativeBinomial,
@@ -57,6 +58,7 @@ export                                  # types
     Poisson,
     ProbitLink,
     Rayleigh,
+    StudentT,
     TDist,
     Triangular,
     Uniform,
@@ -1316,14 +1318,14 @@ immutable NoncentralBeta <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     ncp::Float64
-    NonCentralBeta(a,b,nc) = a > 0 && b > 0 && nc >= 0 ? new(float64(a),float64(b),float64(nc)) : error("alpha and beta must be > 0 and ncp >= 0")
+    NoncentralBeta(a,b,nc) = a > 0 && b > 0 && nc >= 0 ? new(float64(a),float64(b),float64(nc)) : error("alpha and beta must be > 0 and ncp >= 0")
 end
 @_jl_dist_3p NoncentralBeta nbeta
 
 immutable NoncentralChisq <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
-    NonCentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
+    NoncentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
 end
 @_jl_dist_2p NoncentralChisq nchisq
 insupport(d::NoncentralChisq, x::Number) = real_valued(x) && isfinite(x) && 0 < x
@@ -1332,7 +1334,7 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     ndf::Float64
     ddf::Float64
     ncp::Float64
-    NonCentralF(n,d,nc) = n > 0 && d > 0 && nc >= 0 ? new(float64(n),float64(d),float64(nc)) : error("ndf and ddf must be > 0 and ncp >= 0")
+    NoncentralF(n,d,nc) = n > 0 && d > 0 && nc >= 0 ? new(float64(n),float64(d),float64(nc)) : error("ndf and ddf must be > 0 and ncp >= 0")
 end
 @_jl_dist_3p NoncentralF nf
 insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
@@ -1340,9 +1342,9 @@ insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
 immutable NoncentralT <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
-    NonCentralT(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
+    NoncentralT(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
 end
-@_jl_dist_2p NoncentralT nt
+@_jl_dist_2p NoncentralT t
 insupport(d::NoncentralT, x::Number) = real_valued(x) && isfinite(x)
 
 immutable Normal <: ContinuousUnivariateDistribution
@@ -1466,7 +1468,7 @@ var(d::Rayleigh) = d.scale^2 * (2. - pi / 2.)
 
 ##############################################################################
 #
-# TDist distribution
+# TDist distribution - Standard student-t distribution
 #
 ##############################################################################
 
@@ -1482,6 +1484,81 @@ modes(d::TDist) = [0.0]
 var(d::TDist) = d.df > 2 ? d.df/(d.df-2) : d.df > 1 ? Inf : NaN
 insupport(d::TDist, x::Number) = real_valued(x) && isfinite(x)
 pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2 / d.df)^(-0.5*(d.df + 1.0))
+
+##############################################################################
+#
+# univariate scaled, noncentral Student-t distribution with df degrees of freedom
+# non-centrality parameter 'mean' and scale parameter 'sigma'
+#
+##############################################################################
+
+immutable StudentT <: ContinuousUnivariateDistribution
+    df::Float64                         # non-integer degrees of freedom allowed
+    mu::Float64
+    sigma::Float64
+    StudentT(d,m,s) = d > 0 ? new(float64(d),float64(s),float64(s)) : error("df must be positive")
+end
+rand(d::StudentT)= d.mu+d.sigma*ccall((:rt,Rmath),Float64,(Float64,),d.df)
+mean(d::StudentT) = d.df > 1 ? d.mu : NaN
+median(d::StudentT) = d.mu
+modes(d::StudentT) = [d.mu]
+var(d::StudentT) = d.df > 2 ? d.sigma^2*(d.df/(d.df-2)) : d.df > 1 ? Inf : NaN
+insupport(d::StudentT, x::Number) = real_valued(x) && isfinite(x)
+pdf(d::StudentT, x::Real) = 1.0 / (sqrt(d.df*sigma) * beta(0.5, 0.5 * d.df)) * (1.0 + (x-d.mu)^2 / (d.df*d.sigma^2))^(-0.5*(d.df + 1.0))
+
+##############################################################################
+#
+# Multivariate scaled, noncentral Student-t distribution with df degrees of freedom
+# non-centrality parameter 'mean' and parameterized in terms of the Choleski decomposed scale matrix 'covchol',
+# (although a scale matrix can be entered to define the distribution)
+#
+##############################################################################
+
+immutable MultivariateStudentT <: ContinuousMultivariateDistribution
+  df::Float64
+  mean::Vector{Float64}
+  covchol::Cholesky{Float64}
+  function MultivariateStudentT(d, m, c)
+    if d<=0
+	error("df must be positive")
+    elseif length(m) == size(c, 1) == size(c, 2)
+      new(d, m, c)
+    else
+      error("Dimensions of mean vector and scale matrix do not match")
+    end
+  end
+end
+
+MultivariateStudentT(df::Float64,mean::Vector{Float64}, cov::Matrix{Float64}) = MultivariateStudentT(df,mean,cholfact(cov))
+MultivariateStudentT(df::Float64,mean::Vector{Float64}) = MultivariateStudentT(df,mean, eye(length(mean)))
+MultivariateStudentT(df::Float64,cov::Matrix{Float64}) = MultivariateStudentT(df,zeros(size(cov, 1)), cov)
+MultivariateStudentT(df::Float64) = MultivariateStudentT(df,zeros(2), eye(2))
+
+mean(d::MultivariateStudentT) = d.df > 1 ? d.mean : NaN
+var(d::MultivariateStudentT) = d.df > 2 ? (U = d.covchol[:U]; U'U*(d.df/(d.df-2))) : NaN
+
+function rand(d::MultivariateStudentT)
+  z = randn(length(d.mean))
+  x = rand(Chisq(d.df))
+  return d.mean + d.covchol[:U]'z*sqrt(d.df/x)
+end
+
+function rand!(d::MultivariateStudentT, X::Matrix)
+  k = length(mean(d))
+  m, n = size(X)
+  if m == k return d.covchol[:U]'randn!(X)*sqrt(d.df/rand(Chisq(d.df),n))'[ones(Int,m),:] + d.mean[:,ones(Int,n)] end
+  if n == k return randn!(X) * d.covchol[:U]*sqrt(d.df/rand(Chisq(d.df),m))[:,ones(Int,n)] + d.mean'[ones(Int,m),:] end
+  error("Wrong dimensions")
+end
+
+function logpdf{T <: Real}(d::MultivariateStudentT, x::Vector{T})
+  k = length(d.mean)
+  u = x - d.mean
+  z = d.covchol \ u  # This is equivalent to inv(cov) * u, but much faster
+  return lgamma((d.df+k)/2) - (lgamma(d.df/2) + (k/2)*(log(d.df) + log(pi))) - sum(log(diag(d.covchol[:U]))) -(d.df+k)/2*log(1+(1/d.df)*dot(u,z))
+end
+
+pdf{T <: Real}(d::MultivariateStudentT, x::Vector{T}) = exp(logpdf(d, x))
 
 ##############################################################################
 #
