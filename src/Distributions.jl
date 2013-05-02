@@ -1164,7 +1164,7 @@ function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   u = x - d.mean  
   # don't have to copy u, as we only use the transformed version (not the original one)
   Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
-  -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.UL))) - 0.5 * dot(u,u)
+  -0.5 * k * log(2.0pi) - 0.5 * logdet(d.covchol) - 0.5 * dot(u,u)
 end
 
 function logpdf!{T <: Real}(d::MultivariateNormal, x::Matrix{T}, r::AbstractVector)
@@ -1181,7 +1181,7 @@ function logpdf!{T <: Real}(d::MultivariateNormal, x::Matrix{T}, r::AbstractVect
       end
   end   
   Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
-  c::Float64 = -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol.UL)))
+  c::Float64 = -0.5 * k * log(2.0pi) - 0.5 * logdet(d.covchol)
   for j = 1 : n
       dot_uj = 0.
       for i = 1 : k
