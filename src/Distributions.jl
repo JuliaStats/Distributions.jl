@@ -484,7 +484,7 @@ for f in (:pdf, :logpdf, :cdf, :logcdf,
   end
 end
 
-function logpdf!(d::UnivariateDistribution, x::AbstractArray, r::AbstractArray)
+function logpdf!(r::AbstractArray, d::UnivariateDistribution, x::AbstractArray)
     if size(x) != size(r)
         throw(ArgumentError("Inconsistent array dimensions."))
     end    
@@ -502,7 +502,7 @@ function logpdf(d::MultivariateDistribution, x::AbstractMatrix)
     r
 end
 
-function logpdf!(d::MultivariateDistribution, x::AbstractMatrix, r::AbstractArray)
+function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::AbstractMatrix)
     n::Int = size(x, 2)
     if length(r) != n
         throw(ArgumentError("Inconsistent array dimensions."))
@@ -515,7 +515,7 @@ end
 
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
-logpmf!(d::DiscreteDistribution, args::Any...) = logpdf!(d, args...)
+logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d, args...)
 
 binary_entropy(d::Distribution) = entropy(d) / log(2)
 
@@ -1164,10 +1164,10 @@ function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   u = x - d.mean  
   # don't have to copy u, as we only use the transformed version (not the original one)
   Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
-  -0.5 * k * log(2.0pi) - 0.5 * logdet(d.covchol) - 0.5 * dot(u,u)
+  -0.5 * (k * log(2.0pi) + logdet(d.covchol) + dot(u,u))
 end
 
-function logpdf!{T <: Real}(d::MultivariateNormal, x::Matrix{T}, r::AbstractVector)
+function logpdf!{T <: Real}(r::AbstractVector, d::MultivariateNormal, x::Matrix{T})
   mu::Vector{Float64} = d.mean
   k = length(mu)
   if size(x, 1) != k
@@ -1181,7 +1181,7 @@ function logpdf!{T <: Real}(d::MultivariateNormal, x::Matrix{T}, r::AbstractVect
       end
   end   
   Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
-  c::Float64 = -0.5 * k * log(2.0pi) - 0.5 * logdet(d.covchol)
+  c::Float64 = -0.5 * (k * log(2.0pi) + logdet(d.covchol))
   for j = 1 : n
       dot_uj = 0.
       for i = 1 : k
@@ -1193,7 +1193,7 @@ end
 
 function logpdf{T <: Real}(d::MultivariateNormal, x::Matrix{T})
     r = Array(Float64, size(x, 2))
-    logpdf!(d, x, r)
+    logpdf!(r, d, x)
     r
 end
 
@@ -1762,7 +1762,7 @@ end
 
 pdf{T <: Real}(d::Dirichlet, x::Vector{T}) = exp(logpdf(d, x))
 
-function logpdf!{T <: Real}(d::Dirichlet, x::Matrix{T}, r::Vector{T})
+function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
   if size(x, 1) != length(d.alpha)
     throw(ArgumentError("Inconsistent argument dimensions."))
   end
@@ -1780,7 +1780,7 @@ end
 
 function logpdf{T <: Real}(d::Dirichlet, x::Matrix{T})
   r = Array(Float64, size(x, 2))
-  logpdf!(d, x, r)
+  logpdf!(r, d, x)
   r
 end
 
