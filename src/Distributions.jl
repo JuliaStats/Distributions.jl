@@ -1159,11 +1159,14 @@ function rand!(d::MultivariateNormal, X::Matrix)
   error("Wrong dimensions")
 end
 
+function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
+    Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', chol.UL, u)
+end
+
 function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
-  u = x - d.mean  
-  # don't have to copy u, as we only use the transformed version (not the original one)
-  Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
+  u = x - d.mean
+  chol_ldiv!(d.covchol, u)  
   -0.5 * (k * log(2.0pi) + logdet(d.covchol) + dot(u,u))
 end
 
@@ -1180,7 +1183,7 @@ function logpdf!{T <: Real}(r::AbstractVector, d::MultivariateNormal, x::Matrix{
           u[i, j] = x[i, j] - mu[i]
       end
   end   
-  Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', d.covchol.UL, u)
+  chol_ldiv!(d.covchol, u)
   c::Float64 = -0.5 * (k * log(2.0pi) + logdet(d.covchol))
   for j = 1 : n
       dot_uj = 0.
