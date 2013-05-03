@@ -15,7 +15,7 @@ script:
     - julia -e 'versioninfo(); Pkg.init();'
     - mkdir -p ~/.julia/Distributions
     - cp -R ./* ~/.julia/Distributions/
-    - julia ~/.julia/Distributions/test/Distributions.jl
-    - julia ~/.julia/Distributions/test/Wisharts.jl
+    - julia ~/.julia/Distributions/test/distributions.jl
+    - julia ~/.julia/Distributions/test/wisharts.jl
     - julia ~/.julia/Distributions/test/fit.jl
     - julia ~/.julia/Distributions/test/utils.jl
