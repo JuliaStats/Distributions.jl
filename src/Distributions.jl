@@ -85,7 +85,9 @@ export                                  # types
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
     logpdf,        # log probability density
+    logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
+    logpmf!,       # evaluate log pmf to provided storage
     mean,          # mean of distribution
     median,        # median of distribution
     mgf,           # moment generating function
@@ -471,7 +473,7 @@ end
 for f in (:pdf, :logpdf, :cdf, :logcdf,
           :ccdf, :logccdf, :quantile, :cquantile,
           :invlogcdf, :invlogccdf)
-  @eval begin
+  @eval begin  
     function ($f)(d::UnivariateDistribution, x::AbstractArray)
       res = Array(Float64, size(x))
       for i in 1:length(res)
@@ -482,8 +484,38 @@ for f in (:pdf, :logpdf, :cdf, :logcdf,
   end
 end
 
+function logpdf!(r::AbstractArray, d::UnivariateDistribution, x::AbstractArray)
+    if size(x) != size(r)
+        throw(ArgumentError("Inconsistent array dimensions."))
+    end    
+    for i = 1 : length(x)
+        r[i] = logpdf(d, x[i])
+    end
+end
+
+function logpdf(d::MultivariateDistribution, x::AbstractMatrix)
+    n::Int = size(x, 2)
+    r = Array(Float64, n)   
+    for i = 1 : n
+        r[i] = logpdf(d, x[:,i])
+    end
+    r
+end
+
+function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::AbstractMatrix)
+    n::Int = size(x, 2)
+    if length(r) != n
+        throw(ArgumentError("Inconsistent array dimensions."))
+    end
+    for i = 1 : n
+        r[i] = logpdf(d, x[:,i])
+    end
+end
+
+
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
+logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d, args...)
 
 binary_entropy(d::Distribution) = entropy(d) / log(2)
 
@@ -1113,10 +1145,12 @@ MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
 mean(d::MultivariateNormal) = d.mean
 var(d::MultivariateNormal) = (U = d.covchol[:U]; U'U)
+
 function rand(d::MultivariateNormal)
   z = randn(length(d.mean))
   return d.mean + d.covchol[:U]'z
 end
+
 function rand!(d::MultivariateNormal, X::Matrix)
   k = length(mean(d))
   m, n = size(X)
@@ -1124,13 +1158,50 @@ function rand!(d::MultivariateNormal, X::Matrix)
   if n == k return randn!(X) * d.covchol[:U] + d.mean'[ones(Int,m),:] end
   error("Wrong dimensions")
 end
+
+function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
+    Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', chol.UL, u)
+end
+
 function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   u = x - d.mean
-  z = d.covchol \ u  # This is equivalent to inv(cov) * u, but much faster
-  return -0.5 * k * log(2.0pi) - sum(log(diag(d.covchol[:U]))) - 0.5 * dot(u,z)
+  chol_ldiv!(d.covchol, u)  
+  -0.5 * (k * log(2.0pi) + logdet(d.covchol) + dot(u,u))
 end
-pdf{T <: Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
+
+function logpdf!{T <: Real}(r::AbstractVector, d::MultivariateNormal, x::Matrix{T})
+  mu::Vector{Float64} = d.mean
+  k = length(mu)
+  if size(x, 1) != k
+      throw(ArgumentError("The dimension of x is inconsistent with d."))
+  end
+  n = size(x, 2)
+  u = Array(Float64, k, n)
+  for j = 1 : n  # u[:,j] = x[:,j] - mu
+      for i = 1 : k
+          u[i, j] = x[i, j] - mu[i]
+      end
+  end   
+  chol_ldiv!(d.covchol, u)
+  c::Float64 = -0.5 * (k * log(2.0pi) + logdet(d.covchol))
+  for j = 1 : n
+      dot_uj = 0.
+      for i = 1 : k
+          dot_uj += u[i,j] * u[i,j]
+      end      
+      r[j] = c - 0.5 * dot_uj
+  end
+end
+
+function logpdf{T <: Real}(d::MultivariateNormal, x::Matrix{T})
+    r = Array(Float64, size(x, 2))
+    logpdf!(r, d, x)
+    r
+end
+
+pdf{T<:Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
+
 function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
   k = length(d.mean)
   if k > 3; error("Dimension larger than three is not supported yet"); end
@@ -1648,12 +1719,16 @@ end
 
 immutable Dirichlet <: ContinuousMultivariateDistribution
   alpha::Vector{Float64}
+  
   function Dirichlet{T <: Real}(alpha::Vector{T})
     for el in alpha
       if el < 0. error("Dirichlet: elements of alpha must be non-negative") end
     end
     new(float64(alpha))
   end
+  
+  # construct a symmetric Dirichlet distribution
+  Dirichlet{T <: Real}(d::Int, alpha::T) = Dirichlet(fill(alpha, d))
 end
 
 Dirichlet(dim::Integer) = Dirichlet(ones(dim))
@@ -1683,21 +1758,35 @@ function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
   return true
 end
 
-function pdf{T <: Real}(d::Dirichlet, x::Vector{T})
-  if !insupport(d, x)
-    error("x not in the support of Dirichlet distribution")
-  end
-  b = prod(gamma(d.alpha)) / gamma(sum(d.alpha))
-  (1 / b) * prod(x.^(d.alpha - 1))
-end
-
 function logpdf{T <: Real}(d::Dirichlet, x::Vector{T})
-  if !insupport(d, x)
-    error("x not in the support of Dirichlet distribution")
-  end
   b = sum(lgamma(d.alpha)) - lgamma(sum(d.alpha))
   dot((d.alpha - 1), log(x)) - b
 end
+
+pdf{T <: Real}(d::Dirichlet, x::Vector{T}) = exp(logpdf(d, x))
+
+function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
+  if size(x, 1) != length(d.alpha)
+    throw(ArgumentError("Inconsistent argument dimensions."))
+  end
+    
+  n = size(x, 2)
+  if length(r) != n
+    throw(ArgumentError("Inconsistent argument dimensions."))
+  end
+  b::Float64 = sum(lgamma(d.alpha)) - lgamma(sum(d.alpha))  
+  At_mul_B(r, log(x), d.alpha - 1.)
+  for i = 1 : n
+      r[i] -= b
+  end
+end
+
+function logpdf{T <: Real}(d::Dirichlet, x::Matrix{T})
+  r = Array(Float64, size(x, 2))
+  logpdf!(r, d, x)
+  r
+end
+
 
 function rand(d::Dirichlet)
   x = [rand(Gamma(el)) for el in d.alpha]

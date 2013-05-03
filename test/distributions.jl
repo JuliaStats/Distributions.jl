@@ -136,11 +136,31 @@ for ll in (LogitLink(), ProbitLink()#, CloglogLink() # edge cases for CloglogLin
     end
 end
 
+# Multivariate normal
+
 d = MultivariateNormal(zeros(2), eye(2))
-@test abs(pdf(d, [0, 0]) - 0.159155) < 10e-3
-@test abs(pdf(d, [1, 0]) - 0.0965324) < 10e-3
-@test abs(pdf(d, [1, 1]) - 0.0585498) < 10e-3
+@test abs(pdf(d, [0., 0.]) - 0.159155) < 1.0e-5
+@test abs(pdf(d, [1., 0.]) - 0.0965324) < 1.0e-5
+@test abs(pdf(d, [1., 1.]) - 0.0585498) < 1.0e-5
 
 d = MultivariateNormal(zeros(3), [4. -2. -1.; -2. 5. -1.; -1. -1. 6.])
-@test abs(logpdf(d, [3., 4., 5.]) - (-15.75539253001834)) < 1.0e-10
+@test_approx_eq logpdf(d, [3., 4., 5.]) (-15.75539253001834)
+
+x = [3. 4. 5.; 1. 2. 3.; -4. -3. -2.; -1. -3. -2.]'
+r0 = zeros(4)
+for i = 1 : 4
+    r0[i] = logpdf(d, x[:,i])
+end
+@test_approx_eq logpdf(d, x) r0
+
+# Dirichlet
+
+d = Dirichlet([1.5, 2.0, 2.5])
+x = [0.2 0.5 0.3; 0.1 0.5 0.4; 0.8 0.1 0.1; 0.05 0.15 0.8]'
+
+r0 = zeros(4)
+for i = 1 : 4
+    r0[i] = logpdf(d, x[:,i])
+end
+@test_approx_eq logpdf(d, x) r0
 
