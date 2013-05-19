@@ -1152,11 +1152,19 @@ function rand(d::MultivariateNormal)
 end
 
 function rand!(d::MultivariateNormal, X::Matrix)
-  k = length(mean(d))
+  k = length(d.mean)
   m, n = size(X)
-  if m == k return d.covchol[:U]'randn!(X) + d.mean[:,ones(Int,n)] end
-  if n == k return randn!(X) * d.covchol[:U] + d.mean'[ones(Int,m),:] end
-  error("Wrong dimensions")
+  if m != k
+    throw(ArgumentError("Wrong dimensions"))
+  end
+  randn!(X)
+  for i in 1:n
+    X[:, i] = d.covchol[:U]'X[:, i] # TODO: Clean this up?
+    for dim in 1:m
+      X[dim, i] = X[dim, i] + d.mean[dim]
+    end
+  end
+  return
 end
 
 function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
