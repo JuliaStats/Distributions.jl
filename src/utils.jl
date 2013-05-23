@@ -12,24 +12,24 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 	# Convert all Float64's into integers
 	vals = Array(Int64, n)
 	for i in 1:n
-		vals[i] = int(probs[i] * 10^6)
+		vals[i] = int(probs[i] * 64^9)
 	end
 
 	# Allocate digit table and digit sums as table bounds
-	table = Array(Any, 6)
-	bounds = zeros(Int64, 6)
+	table = Array(Any, 9)
+	bounds = zeros(Int64, 9)
 
 	# Special case for deterministic distributions
 	for i in 1:n
-		if vals[i] == 10^6
-			table[1] = Array(Int64, 10)
-			for j in 1:10
+		if vals[i] == 64^9
+			table[1] = Array(Int64, 64)
+			for j in 1:64
 				table[1][j] = i
 			end
-			bounds[1] = 10^6
-			for j in 2:6
+			bounds[1] = 64^9
+			for j in 2:9
 				table[j] = Array(Int64, 0)
-				bounds[j] = 10^6
+				bounds[j] = 64^9
 			end
 			return DiscreteDistributionTable(table, bounds)
 		end
@@ -37,11 +37,11 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 
 	# Fill tables
 	multiplier = 1
-	for index in 6:-1:1
+	for index in 9:-1:1
 		counts = Array(Int64, 0)
 		for i in 1:n
-			digit = mod(vals[i], 10)
-			vals[i] = fld(vals[i], 10)
+			digit = mod(vals[i], 64)
+			vals[i] = fld(vals[i], 64)
 			bounds[index] += digit
 			for itr in 1:digit
 				push!(counts, i)
@@ -49,7 +49,7 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 		end
 		bounds[index] *= multiplier
 		table[index] = counts
-		multiplier *= 10
+		multiplier *= 64
 	end
 
 	# Make bounds cumulative
@@ -59,15 +59,18 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 end
 
 function draw(table::DiscreteDistributionTable)
-	i = rand(1:10^6)
+	i = rand(1:64^9)
+	if i == 64^9
+		return table.table[9][rand(1:length(table.table[9]))]
+	end
 	bound = 1
-	while i > table.bounds[bound] && bound < 6
+	while i > table.bounds[bound] && bound < 9
 		bound += 1
 	end
 	if bound > 1
-		index = fld(i - table.bounds[bound - 1] - 1, 10^(6 - bound)) + 1
+		index = fld(i - table.bounds[bound - 1] - 1, 64^(9 - bound)) + 1
 	else
-		index = fld(i - 1, 10^(6 - bound)) + 1
+		index = fld(i - 1, 64^(9 - bound)) + 1
 	end
 	return table.table[bound][index]
 end
