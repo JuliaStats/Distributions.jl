@@ -25,7 +25,9 @@ end
 ## Checks on ContinuousDistribution instances
 for d in (Beta(), Cauchy(), Chisq(12), Exponential(), Exponential(23.1),
           FDist(2, 21), Gamma(3), Gamma(), Logistic(), logNormal(),
-          Normal(), TDist(1), TDist(28), Uniform(), Weibull(2.3))
+          Normal(), TDist(1), TDist(28), TruncatedNormal(0, 1, -3, 3),
+          TruncatedNormal(-100, 1, 0, 1), TruncatedNormal(27, 3, 0, Inf),
+          Uniform(), Weibull(2.3))
 ##    println(d)  # uncomment if an assertion fails
     qq = quantile(d, pp)
     @test_approx_eq cdf(d, qq) pp

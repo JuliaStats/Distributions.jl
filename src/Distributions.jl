@@ -59,6 +59,7 @@ export                                  # types
     Rayleigh,
     TDist,
     Triangular,
+    TruncatedNormal,
     Uniform,
     Weibull,
     Wishart,
@@ -1605,6 +1606,120 @@ function rand(d::Triangular)
 end
 skewness(d::Triangular) = 0.0
 var(d::Triangular) = d.scale^2 / 6.0
+
+##############################################################################
+#
+# Truncated normal distribution
+#
+# TODO: Rearrange methods, optimise, check numerical stability
+#
+##############################################################################
+
+immutable TruncatedNormal <: ContinuousUnivariateDistribution
+  untruncated::Normal
+  lower::Float64
+  upper::Float64
+  TruncatedNormal(mu, sd, lower, upper) = upper > lower ? new(Normal(mu, sd), lower, upper) : error("upper must be > lower")
+end
+
+insupport(d::TruncatedNormal, x::Number) = x >= lower && x <= upper && insupport(d.untruncated, x)
+
+normalizing_factor(d::TruncatedNormal) = cdf(d.untruncated, d.upper) - cdf(d.untruncated, d.lower)
+
+pdf(d::TruncatedNormal, x::Real) = pdf(d.untruncated, x) / normalizing_factor(d)
+logpdf(d::TruncatedNormal, x::Real) = logpdf(d.untruncated, x) - log(normalizing_factor(d))
+cdf(d::TruncatedNormal, x::Real) = (cdf(d.untruncated, x) - cdf(d.untruncated, d.lower)) / normalizing_factor(d)
+
+mean(d::TruncatedNormal) = mean(d.untruncated) + (pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)) * var(d.untruncated) / normalizing_factor(d)
+
+function quantile(d::TruncatedNormal, p::Real)
+  top = cdf(d.untruncated, d.upper)
+  bottom = cdf(d.untruncated, d.lower)
+  quantile(d.untruncated, bottom + p * (top - bottom))
+end
+function modes(d::TruncatedNormal)
+  mu = mean(d.untruncated)
+  if d.upper < mu
+    [d.upper]
+  elseif d.lower > mu
+    [d.lower]
+  else
+    [mu]
+  end
+end
+function var(d::TruncatedNormal) 
+  s = std(d.untruncated)
+  a = d.lower
+  b = d.upper
+  phi_a = pdf(d.untruncated, a) * s
+  phi_b = pdf(d.untruncated, b) * s
+  a_phi_a = a == -Inf ? 0 : a * phi_a
+  b_phi_b = b == Inf ? 0 : b * phi_b
+  z = normalizing_factor(d)
+  s^2 * (1 + (a_phi_a - b_phi_b)/z - ((phi_a - phi_b)/z)^2)
+end
+function entropy(d::TruncatedNormal)
+  s = std(d.untruncated)
+  a = d.lower
+  b = d.upper
+  phi_a = pdf(d.untruncated, a) * s
+  phi_b = pdf(d.untruncated, b) * s
+  a_phi_a = a == -Inf ? 0 : a * phi_a
+  b_phi_b = b == Inf ? 0 : b * phi_b
+  z = normalizing_factor(d)
+  entropy(d.untruncated) + log(z) + .5 * (a_phi_a - b_phi_b)/z - .5 * ((phi_a - phi_b)/z)^2
+end
+
+# Rejection sampler based on algorithm from Robert (1992) - http://arxiv.org/abs/0907.4010
+function randnt(lower, upper)
+  if ((lower <= 0 && upper == Inf) ||
+      (upper >= 0 && lower == Inf) ||
+      (lower <= 0 && upper >= 0 && upper - lower > sqrt(2.0*pi)))
+    while true
+      r = randn()
+      if r > lower && r < upper
+        return r
+      end
+    end
+  elseif lower > 0 && upper - lower > 2.0 / (lower + sqrt(lower^2 + 4.0)) * exp((lower^2 - lower * sqrt(lower^2 + 4.0))/4.0)
+    a = (lower + sqrt(lower^2 + 4.0))/2.0
+    while true
+      r = rand(Exponential(1.0/a)) + lower
+      u = rand()
+      if u < exp(-0.5 * (r-a)^2) && r < upper
+        return r
+      end
+    end    
+  elseif upper < 0 && upper - lower > 2.0 / (-upper + sqrt(upper^2 + 4.0)) * exp((upper^2 + upper * sqrt(upper^2 + 4.0))/4.0)
+    a = (-upper + sqrt(upper^2 + 4.0))/2.0
+    while true
+      r = rand(Exponential(1.0/a)) - upper
+      u = rand()
+      if u < exp(-0.5 * (r-a)^2) && r < -lower
+        return -r
+      end
+    end
+  else
+    while true
+      r = lower + rand() * (upper - lower)
+      u = rand()
+      if lower > 0
+        rho = exp((lower^2 - r^2) * 0.5)
+      elseif upper < 0
+        rho = exp((upper^2 - r^2) * 0.5)
+      else
+        rho = exp(-r^2 * 0.5)
+      end
+      if u < rho
+        return r
+      end
+    end
+  end
+end
+
+function rand(d::TruncatedNormal)
+  randnt((d.lower - mean(d.untruncated))/std(d.untruncated), (d.upper - mean(d.untruncated))/std(d.untruncated))
+end
 
 ##############################################################################
 #
