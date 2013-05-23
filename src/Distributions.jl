@@ -164,7 +164,7 @@ end
 function devresid(d::Distribution, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
     [devresid(d, y[i], mu[i], wt[i]) for i in 1:length(y)]
 end
-invlogccdf(d::Distribution, lp::Real)         = quantile(d, exp(-lp))
+invlogccdf(d::Distribution, lp::Real)         = quantile(d, -expm1(lp))
 invlogcdf(d::Distribution, lp::Real)          = quantile(d, exp(lp))
 logccdf(d::Distribution, q::Real)             = log(ccdf(d,q))
 logcdf(d::Distribution, q::Real)              = log(cdf(d,q))
