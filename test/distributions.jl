@@ -166,3 +166,9 @@ for i = 1 : 4
 end
 @test_approx_eq logpdf(d, x) r0
 
+# Truncated normal
+
+for d in (TruncatedNormal(0, 1, -1, 1), TruncatedNormal(3, 10, 7, 8),
+          TruncatedNormal(-5, 1, -Inf, -10))
+    @test all(insupport(d, rand(d, 1000)))
+end
