@@ -1622,7 +1622,7 @@ immutable TruncatedNormal <: ContinuousUnivariateDistribution
   TruncatedNormal(mu, sd, lower, upper) = upper > lower ? new(Normal(mu, sd), lower, upper) : error("upper must be > lower")
 end
 
-insupport(d::TruncatedNormal, x::Number) = x >= lower && x <= upper && insupport(d.untruncated, x)
+insupport(d::TruncatedNormal, x::Number) = x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 
 normalizing_factor(d::TruncatedNormal) = cdf(d.untruncated, d.upper) - cdf(d.untruncated, d.lower)
 
