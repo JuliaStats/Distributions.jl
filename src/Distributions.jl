@@ -1718,7 +1718,9 @@ function randnt(lower, upper)
 end
 
 function rand(d::TruncatedNormal)
-  randnt((d.lower - mean(d.untruncated))/std(d.untruncated), (d.upper - mean(d.untruncated))/std(d.untruncated))
+  mu = mean(d.untruncated)
+  sigma = std(d.untruncated)
+  mu + sigma * randnt((d.lower - mu)/sigma, (d.upper - mu)/sigma)
 end
 
 ##############################################################################
