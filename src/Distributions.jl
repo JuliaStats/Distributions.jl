@@ -26,12 +26,14 @@ export                                  # types
     Chisq,
     Dirichlet,
     DiscreteUniform,
+    DoubleExponential,
     EmpiricalDistribution,
     Erlang,
     Exponential,
     FDist,
     Gamma,
     Geometric,
+    Gumbel,
     HyperGeometric,
     IdentityLink,
     InverseLink,
@@ -996,6 +998,51 @@ function ccdf(d::Geometric, q::Real)
     q < 0. ? 1. : exp(log1p(-d.prob) * (floor(q + 1e-7) + 1.))
 end
 insupport(d::Geometric, x::Number) = integer_valued(x) && 0 <= x
+
+##############################################################################
+#
+# Gumbel/double-exponential distribution
+#
+##############################################################################
+
+immutable Gumbel <: ContinuousUnivariateDistribution
+    mu::Float64   # location
+    beta::Float64 # scale
+    function Gumbel(mu::Real, beta::Real)
+        if beta <= 0
+            error("beta must be positive")
+        end
+        new(float64(mu), float64(beta))
+    end
+end
+Gumbel() = Gumbel(0.0, 1.0)
+
+insupport(d::Gumbel, x::Number) = isreal(x) && isfinite(x)
+
+function pdf(d::Gumbel, x::Real)
+    z = (x - d.mu)/d.beta
+    exp(-z - exp(-z))/d.beta
+end
+function logpdf(d::Gumbel, x::Real)
+    z = (x - d.mu)/d.beta
+    -z - exp(-z) - log(d.beta)
+end
+cdf(d::Gumbel, x::Real) = exp(-exp((d.mu - x)/d.beta))
+logcdf(d::Gumbel, x::Real) = -exp((d.mu - x)/d.beta)
+
+quantile(d::Gumbel, p::Real) = d.mu - d.beta * log(-log(p))
+
+mean(d::Gumbel) = d.mu - d.beta * digamma(1.0)
+median(d::Gumbel) = d.mu - d.beta * log(log(2.0))
+modes(d::Gumbel) = [d.mu]
+var(d::Gumbel) = pi^2 / 6.0 * d.beta^2
+skewness(d::Gumbel) = 12.0 * sqrt(6.0) * zeta(3.0) / pi^3
+kurtosis(d::Gumbel) = 2.4
+entropy(d::Gumbel) = log(d.beta) - digamma(1.0) + 1.0
+
+rand(d::Gumbel) = d.mu - d.beta * log(-log(rand()))
+
+const DoubleExponential = Gumbel
 
 immutable HyperGeometric <: DiscreteUnivariateDistribution
     ns::Float64                         # number of successes in population
