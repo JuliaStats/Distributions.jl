@@ -1,6 +1,3 @@
-using Distributions
-using Base.Test
-
 # n probability points, i.e. the midpoints of the intervals [0, 1/n],...,[1-1/n, 1]
 probpts(n::Int) = ((1:n) - 0.5)/n  
 pp  = float(probpts(1000))              # convert from a Range{Float64}
@@ -23,12 +20,27 @@ function reldiff{T<:Real}(current::AbstractArray{T}, target::AbstractArray{T})
 end
     
 ## Checks on ContinuousDistribution instances
-for d in (Beta(), Cauchy(), Chisq(12), Exponential(), Exponential(23.1),
-          FDist(2, 21), Gamma(3), Gamma(), Gumbel(), Gumbel(5, 3), 
-          Logistic(), logNormal(), Normal(), TDist(1), TDist(28), 
-          TruncatedNormal(0, 1, -3, 3), TruncatedNormal(-100, 1, 0, 1), 
-          TruncatedNormal(27, 3, 0, Inf), Uniform(), Weibull(2.3))
-##    println(d)  # uncomment if an assertion fails
+for d in (Beta(),
+          Cauchy(),
+          Chisq(12),
+          Exponential(),
+          Exponential(23.1),
+          FDist(2, 21),
+          Gamma(3),
+          Gamma(),
+          Gumbel(),
+          Gumbel(5, 3), 
+          Logistic(),
+          logNormal(),
+          Normal(),
+          TDist(1),
+          TDist(28), 
+          TruncatedNormal(Normal(0, 1), -3, 3),
+          # TruncatedNormal(Normal(-100, 1), 0, 1),
+          TruncatedNormal(Normal(27, 3), 0, Inf),
+          Uniform(),
+          Weibull(2.3))
+    # println(d)  # uncomment if an assertion fails
     qq = quantile(d, pp)
     @test_approx_eq cdf(d, qq) pp
     @test_approx_eq ccdf(d, qq) 1 - pp
@@ -168,7 +180,8 @@ end
 
 # Truncated normal
 
-for d in (TruncatedNormal(0, 1, -1, 1), TruncatedNormal(3, 10, 7, 8),
-          TruncatedNormal(-5, 1, -Inf, -10))
+for d in (TruncatedNormal(Normal(0, 1), -1, 1),
+          TruncatedNormal(Normal(3, 10), 7, 8),
+          TruncatedNormal(Normal(-5, 1), -Inf, -10))
     @test all(insupport(d, rand(d, 1000)))
 end

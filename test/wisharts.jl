@@ -1,6 +1,3 @@
-using Distributions
-using Base.Test
-
 v = 3.0
 S = eye(2)
 S[1, 2] = S[2, 1] = 0.5

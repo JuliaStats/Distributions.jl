@@ -1,9 +1,11 @@
+using Distributions
+using Base.Test
 
-my_tests = [
-    "test/distributions.jl", 
-    "test/utils.jl",
-    "test/wisharts.jl", 
-    "test/fit.jl"]
+my_tests = ["test/distributions.jl", 
+            "test/utils.jl",
+            "test/wisharts.jl", 
+            "test/fit.jl",
+            "test/truncate.jl"]
 
 println("Running tests:")
 

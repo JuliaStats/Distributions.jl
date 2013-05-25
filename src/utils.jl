@@ -1,6 +1,6 @@
 # Store an alias table
 immutable DiscreteDistributionTable
-	table::Vector{Any}
+	table::Vector{Vector{Int64}}
 	bounds::Vector{Int64}
 end
 
@@ -16,7 +16,7 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 	end
 
 	# Allocate digit table and digit sums as table bounds
-	table = Array(Any, 9)
+	table = Array(Vector{Int64}, 9)
 	bounds = zeros(Int64, 9)
 
 	# Special case for deterministic distributions

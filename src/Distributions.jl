@@ -112,12 +112,12 @@ export                                  # types
     var            # variance of distribution
 
 import Base.mean, Base.median, Base.quantile
-import Base.rand, Base.std, Base.var, Base.integer_valued
+import Base.rand, Base.std, Base.var, Base.isinteger
 import Base.show, Base.sprand
 
-# convenience methods for integer_valued
-integer_valued{T <: Integer}(x::AbstractArray{T}) = true
-integer_valued(x::AbstractArray) = allp(integer_valued, x)
+# convenience methods for isinteger
+# Base.isinteger{T <: Integer}(x::AbstractArray{T}) = true
+# Base.isinteger(x::AbstractArray) = allp(isinteger, x)
 
 include("utils.jl")
 include("tvpack.jl")
@@ -194,10 +194,10 @@ function rand!(d::UnivariateDistribution, A::Array)
     A
 end
 rand(d::ContinuousDistribution, dims::Dims)   = rand!(d, Array(Float64, dims))
-rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int,dims))
+rand(d::DiscreteDistribution, dims::Dims)     = rand!(d, Array(Int, dims))
 rand(d::NonMatrixDistribution, dims::Integer...) = rand(d, map(int, dims))
 rand(d::MultivariateDistribution, dims::Integer)  = rand(d, (dims, length(mean(d))))
-rand(d::MatrixDistribution, dims::Integer) = rand!(d, Array(Matrix{Float64},int(dims)))
+rand(d::MatrixDistribution, dims::Integer) = rand!(d, Array(Matrix{Float64}, int(dims)))
 
 sprand(m::Integer, n::Integer, density::Real, d::Distribution)=sprand(m, n, density, n->rand(d, n))
 
@@ -694,7 +694,7 @@ end
 rand(d::Beta) = (u = rand(Gamma(d.alpha)); u / (u + rand(Gamma(d.beta))))
 rand(d::Beta, dims::Dims) = (u = rand(Gamma(d.alpha), dims); u ./ (u + rand(Gamma(d.beta), dims)))
 rand!(d::Beta, A::Array{Float64}) = (A[:] = randbeta(d.alpha, d.beta, size(A)))
-insupport(d::Beta, x::Number) = real_valued(x) && 0 < x < 1
+insupport(d::Beta, x::Number) = isreal(x) && 0 < x < 1
 
 ##############################################################################
 #
@@ -718,7 +718,7 @@ end
 BetaPrime() = BetaPrime(2.0, 1.0)
 
 cdf(d::BetaPrime, q::Real) = inc_beta(q / 1.0 + q, d.alpha, d.beta)
-insupport(d::BetaPrime, x::Number) = real_valued(x) && x > 0 ? true : false
+insupport(d::BetaPrime, x::Number) = isreal(x) && x > 0 ? true : false
 function mean(d::BetaPrime)
   if d.beta > 1.0
     d.alpha / (d.beta + 1.0)
@@ -752,7 +752,7 @@ modes(d::Binomial) = iround([d.size * d.prob])
 var(d::Binomial)      = d.size * d.prob * (1. - d.prob)
 skewness(d::Binomial) = (1-2d.prob)/std(d)
 kurtosis(d::Binomial) = (1-2d.prob*(1-d.prob))/var(d)
-insupport(d::Binomial, x::Number) = integer_valued(x) && 0 <= x <= d.size
+insupport(d::Binomial, x::Number) = isinteger(x) && 0 <= x <= d.size
 
 ##############################################################################
 #
@@ -772,7 +772,7 @@ mean(d::Cauchy)     = NaN
 var(d::Cauchy)      = NaN
 skewness(d::Cauchy) = NaN
 kurtosis(d::Cauchy) = NaN
-insupport(d::Cauchy, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Cauchy, x::Number) = isreal(x) && isfinite(x)
 
 immutable Chi <: ContinuousUnivariateDistribution
     df::Float64
@@ -802,7 +802,7 @@ function rand!(d::Chisq, A::Array{Float64})
     for i in 1:length(A) A[i] = 2.randg2(dpar,cpar) end
     A
 end
-insupport(d::Chisq, x::Number) =  real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::Chisq, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 
 immutable DiscreteUniform <: DiscreteUnivariateDistribution
   a::Int
@@ -887,7 +887,7 @@ function invlogccdf(d::Exponential, lp::Real)
 end
 rand(d::Exponential)                     = d.scale * Random.randmtzig_exprnd()
 rand!(d::Exponential, A::Array{Float64}) = d.scale * Random.randmtzig_fill_exprnd!(A)
-insupport(d::Exponential, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 
 immutable FDist <: ContinuousUnivariateDistribution
     ndf::Float64
@@ -897,7 +897,7 @@ end
 @_jl_dist_2p FDist f
 mean(d::FDist) = 2 < d.ddf ? d.ddf/(d.ddf - 2) : NaN
 var(d::FDist)  = 4 < d.ddf ? 2d.ddf^2*(d.ndf+d.ddf-2)/(d.ndf*(d.ddf-2)^2*(d.ddf-4)) : NaN
-insupport(d::FDist, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::FDist, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 
 immutable Gamma <: ContinuousUnivariateDistribution
     shape::Float64
@@ -944,7 +944,7 @@ function rand!(d::Gamma, A::Array{Float64})
     end
     d.scale*A
 end
-insupport(d::Gamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::Gamma, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 
 ###########################################################################
 ## InvertedGamma distribution, cf Bayesian Theory (Barnardo & Smith) p 119
@@ -965,7 +965,7 @@ function rand!(d::InvertedGamma, A::Array{Float64})
     A = rand!(Gamma(d.shape, d.scale), A)
     1. / A
 end
-insupport(d::InvertedGamma, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::InvertedGamma, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 function logpdf(d::InvertedGamma, x::Real)
     -(d.shape * log(d.scale)) - lgamma(d.shape) - ((d.shape + 1) * log(x)) - 1./(d.scale * x)
 end
@@ -997,7 +997,7 @@ end
 function ccdf(d::Geometric, q::Real)
     q < 0. ? 1. : exp(log1p(-d.prob) * (floor(q + 1e-7) + 1.))
 end
-insupport(d::Geometric, x::Number) = integer_valued(x) && 0 <= x
+insupport(d::Geometric, x::Number) = isinteger(x) && 0 <= x
 
 ##############################################################################
 #
@@ -1057,7 +1057,7 @@ end
 @_jl_dist_3p HyperGeometric hyper
 mean(d::HyperGeometric) = d.n*d.ns/(d.ns+d.nf)
 var(d::HyperGeometric)  = (N=d.ns+d.nf; p=d.ns/N; d.n*p*(1-p)*(N-d.n)/(N-1))
-insupport(d::HyperGeometric, x::Number) = integer_valued(x) && 0 <= x <= d.n && (d.n - d.nf) <= x <= d.ns
+insupport(d::HyperGeometric, x::Number) = isinteger(x) && 0 <= x <= d.n && (d.n - d.nf) <= x <= d.ns
 
 immutable Laplace <: ContinuousUnivariateDistribution
   location::Float64
@@ -1078,7 +1078,7 @@ const Biexponential = Laplace
 function cdf(d::Laplace, q::Real)
   0.5 * (1.0 + sign(q - d.location) * (1.0 - exp(-abs(q - d.location) / d.scale)))
 end
-insupport(d::Laplace, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Laplace, x::Number) = isreal(x) && isfinite(x)
 kurtosis(d::Laplace) = 3.0
 mean(d::Laplace) = d.location
 median(d::Laplace) = d.location
@@ -1116,7 +1116,7 @@ var(d::Logistic)      = (pi*d.scale)^2/3.
 std(d::Logistic)      = pi*d.scale/sqrt(3.)
 skewness(d::Logistic) = 0.
 kurtosis(d::Logistic) = 1.2
-insupport(d::Logistic, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Logistic, x::Number) = isreal(x) && isfinite(x)
 
 immutable logNormal <: ContinuousUnivariateDistribution
     meanlog::Float64
@@ -1128,7 +1128,7 @@ logNormal()   = logNormal(0, 1)
 @_jl_dist_2p logNormal lnorm
 mean(d::logNormal) = exp(d.meanlog + d.sdlog^2/2)
 var(d::logNormal)  = (sigsq=d.sdlog^2; (exp(sigsq) - 1)*exp(2d.meanlog+sigsq))
-insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 < x
+insupport(d::logNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
 
 immutable MixtureModel <: Distribution
   components::Vector # Vector should be able to contain any type of
@@ -1437,7 +1437,7 @@ immutable NegativeBinomial <: DiscreteUnivariateDistribution
     NegativeBinomial(s,p) = 0 < p <= 1 ? (s >= 0 ? new(float64(s),float64(p)) : error("size must be non-negative")) : error("prob must be in (0,1]")
 end
 @_jl_dist_2p NegativeBinomial nbinom
-insupport(d::NegativeBinomial, x::Number) = integer_valued(x) && 0 <= x
+insupport(d::NegativeBinomial, x::Number) = isinteger(x) && 0 <= x
 
 immutable NoncentralBeta <: ContinuousUnivariateDistribution
     alpha::Float64
@@ -1453,7 +1453,7 @@ immutable NoncentralChisq <: ContinuousUnivariateDistribution
     NonCentralChisq(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
 end
 @_jl_dist_2p NoncentralChisq nchisq
-insupport(d::NoncentralChisq, x::Number) = real_valued(x) && isfinite(x) && 0 < x
+insupport(d::NoncentralChisq, x::Number) = isreal(x) && isfinite(x) && 0 < x
 
 immutable NoncentralF <: ContinuousUnivariateDistribution
     ndf::Float64
@@ -1462,7 +1462,7 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     NonCentralF(n,d,nc) = n > 0 && d > 0 && nc >= 0 ? new(float64(n),float64(d),float64(nc)) : error("ndf and ddf must be > 0 and ncp >= 0")
 end
 @_jl_dist_3p NoncentralF nf
-insupport(d::logNormal, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::logNormal, x::Number) = isreal(x) && isfinite(x) && 0 <= x
 
 immutable NoncentralT <: ContinuousUnivariateDistribution
     df::Float64
@@ -1470,7 +1470,7 @@ immutable NoncentralT <: ContinuousUnivariateDistribution
     NonCentralT(d,nc) = d >= 0 && nc >= 0 ? new(float64(d),float64(nc)) : error("df and ncp must be non-negative")
 end
 @_jl_dist_2p NoncentralT nt
-insupport(d::NoncentralT, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::NoncentralT, x::Number) = isreal(x) && isfinite(x)
 
 immutable Normal <: ContinuousUnivariateDistribution
     mean::Float64
@@ -1488,7 +1488,7 @@ skewness(d::Normal) = 0.
 kurtosis(d::Normal) = 0.
 ## redefine common methods
 rand(d::Normal) = d.mean + d.std * randn()
-insupport(d::Normal, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::Normal, x::Number) = isreal(x) && isfinite(x)
 
 immutable Pareto <: ContinuousUnivariateDistribution
   scale::Float64
@@ -1505,7 +1505,7 @@ Pareto(scale::Float64) = Pareto(scale, 1.)
 Pareto() = Pareto(1., 1.)
 
 cdf(d::Pareto, q::Real) = q >= d.scale ? 1. - (d.scale / q)^d.shape : 0.
-insupport(d::Pareto, x::Number) = real_valued(x) && isfinite(x) && x > d.scale
+insupport(d::Pareto, x::Number) = isreal(x) && isfinite(x) && x > d.scale
 function kurtosis(d::Pareto)
   a = d.shape
   if a > 4.
@@ -1551,7 +1551,7 @@ devresid(d::Poisson,  y::Real, mu::Real, wt::Real) = 2wt*(xlogxdmu(y,mu) - (y-mu
 function devresid(d::Poisson, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
     [2wt[i]*(xlogxdmu(y[i],mu[i]) - (y[i]-mu[i])) for i in 1:length(y)]
 end
-insupport(d::Poisson, x::Number) = integer_valued(x) && 0 <= x
+insupport(d::Poisson, x::Number) = isinteger(x) && 0 <= x
 logpdf(  d::Poisson, mu::Real, y::Real) = ccall((:dpois, Rmath),Float64,(Float64,Float64,Int32),y,mu,1)
 mean(d::Poisson) = d.lambda
 mustart( d::Poisson,  y::Real, wt::Real) = y + 0.1
@@ -1576,7 +1576,7 @@ immutable Rayleigh <: ContinuousUnivariateDistribution
 end
 Rayleigh() = Rayleigh(1.0)
 
-insupport(d::Rayleigh, x::Number) = real_valued(x) && isfinite(x) && x > 0.
+insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && x > 0.
 kurtosis(d::Rayleigh) = d.scale^4 * (8. - ((3. * pi^2) / 4.))
 mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
 median(d::Rayleigh) = d.scale * sqrt(2. * log(2.))
@@ -1607,7 +1607,7 @@ mean(d::TDist) = d.df > 1 ? 0. : NaN
 median(d::TDist) = 0.
 modes(d::TDist) = [0.0]
 var(d::TDist) = d.df > 2 ? d.df/(d.df-2) : d.df > 1 ? Inf : NaN
-insupport(d::TDist, x::Number) = real_valued(x) && isfinite(x)
+insupport(d::TDist, x::Number) = isreal(x) && isfinite(x)
 pdf(d::TDist, x::Real) = 1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) * (1.0 + x^2 / d.df)^(-0.5*(d.df + 1.0))
 
 ##############################################################################
@@ -1633,7 +1633,7 @@ Triangular(location::Real) = Triangular(location, 1.0)
 Triangular() = Triangular(0.0, 1.0)
 
 function insupport(d::Triangular, x::Number)
-  o = real_valued(x) && isfinite(x)
+  o = isreal(x) && isfinite(x)
   return o && d.location - d.scale <= x <= d.location + d.scale
 end
 kurtosis(d::Triangular) = d.scale^4 / 15.0
@@ -1656,122 +1656,6 @@ var(d::Triangular) = d.scale^2 / 6.0
 
 ##############################################################################
 #
-# Truncated normal distribution
-#
-# TODO: Rearrange methods, optimise, check numerical stability
-#
-##############################################################################
-
-immutable TruncatedNormal <: ContinuousUnivariateDistribution
-  untruncated::Normal
-  lower::Float64
-  upper::Float64
-  TruncatedNormal(mu, sd, lower, upper) = upper > lower ? new(Normal(mu, sd), lower, upper) : error("upper must be > lower")
-end
-
-insupport(d::TruncatedNormal, x::Number) = x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
-
-normalizing_factor(d::TruncatedNormal) = cdf(d.untruncated, d.upper) - cdf(d.untruncated, d.lower)
-
-pdf(d::TruncatedNormal, x::Real) = pdf(d.untruncated, x) / normalizing_factor(d)
-logpdf(d::TruncatedNormal, x::Real) = logpdf(d.untruncated, x) - log(normalizing_factor(d))
-cdf(d::TruncatedNormal, x::Real) = (cdf(d.untruncated, x) - cdf(d.untruncated, d.lower)) / normalizing_factor(d)
-
-mean(d::TruncatedNormal) = mean(d.untruncated) + (pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)) * var(d.untruncated) / normalizing_factor(d)
-
-function quantile(d::TruncatedNormal, p::Real)
-  top = cdf(d.untruncated, d.upper)
-  bottom = cdf(d.untruncated, d.lower)
-  quantile(d.untruncated, bottom + p * (top - bottom))
-end
-function modes(d::TruncatedNormal)
-  mu = mean(d.untruncated)
-  if d.upper < mu
-    [d.upper]
-  elseif d.lower > mu
-    [d.lower]
-  else
-    [mu]
-  end
-end
-function var(d::TruncatedNormal) 
-  s = std(d.untruncated)
-  a = d.lower
-  b = d.upper
-  phi_a = pdf(d.untruncated, a) * s
-  phi_b = pdf(d.untruncated, b) * s
-  a_phi_a = a == -Inf ? 0 : a * phi_a
-  b_phi_b = b == Inf ? 0 : b * phi_b
-  z = normalizing_factor(d)
-  s^2 * (1 + (a_phi_a - b_phi_b)/z - ((phi_a - phi_b)/z)^2)
-end
-function entropy(d::TruncatedNormal)
-  s = std(d.untruncated)
-  a = d.lower
-  b = d.upper
-  phi_a = pdf(d.untruncated, a) * s
-  phi_b = pdf(d.untruncated, b) * s
-  a_phi_a = a == -Inf ? 0 : a * phi_a
-  b_phi_b = b == Inf ? 0 : b * phi_b
-  z = normalizing_factor(d)
-  entropy(d.untruncated) + log(z) + .5 * (a_phi_a - b_phi_b)/z - .5 * ((phi_a - phi_b)/z)^2
-end
-
-# Rejection sampler based on algorithm from Robert (1992) - http://arxiv.org/abs/0907.4010
-function randnt(lower, upper)
-  if ((lower <= 0 && upper == Inf) ||
-      (upper >= 0 && lower == Inf) ||
-      (lower <= 0 && upper >= 0 && upper - lower > sqrt(2.0*pi)))
-    while true
-      r = randn()
-      if r > lower && r < upper
-        return r
-      end
-    end
-  elseif lower > 0 && upper - lower > 2.0 / (lower + sqrt(lower^2 + 4.0)) * exp((lower^2 - lower * sqrt(lower^2 + 4.0))/4.0)
-    a = (lower + sqrt(lower^2 + 4.0))/2.0
-    while true
-      r = rand(Exponential(1.0/a)) + lower
-      u = rand()
-      if u < exp(-0.5 * (r-a)^2) && r < upper
-        return r
-      end
-    end    
-  elseif upper < 0 && upper - lower > 2.0 / (-upper + sqrt(upper^2 + 4.0)) * exp((upper^2 + upper * sqrt(upper^2 + 4.0))/4.0)
-    a = (-upper + sqrt(upper^2 + 4.0))/2.0
-    while true
-      r = rand(Exponential(1.0/a)) - upper
-      u = rand()
-      if u < exp(-0.5 * (r-a)^2) && r < -lower
-        return -r
-      end
-    end
-  else
-    while true
-      r = lower + rand() * (upper - lower)
-      u = rand()
-      if lower > 0
-        rho = exp((lower^2 - r^2) * 0.5)
-      elseif upper < 0
-        rho = exp((upper^2 - r^2) * 0.5)
-      else
-        rho = exp(-r^2 * 0.5)
-      end
-      if u < rho
-        return r
-      end
-    end
-  end
-end
-
-function rand(d::TruncatedNormal)
-  mu = mean(d.untruncated)
-  sigma = std(d.untruncated)
-  mu + sigma * randnt((d.lower - mu)/sigma, (d.upper - mu)/sigma)
-end
-
-##############################################################################
-#
 # Uniform distribution
 #
 # TODO: Rearrange methods
@@ -1791,7 +1675,7 @@ median(d::Uniform) = (d.a + d.b)/2.
 modes(d::Uniform) = error("The uniform distribution has no modes")
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()
 var(d::Uniform) = (w = d.b - d.a; w * w / 12.)
-insupport(d::Uniform, x::Number) = real_valued(x) && d.a <= x <= d.b
+insupport(d::Uniform, x::Number) = isreal(x) && d.a <= x <= d.b
 skewness(d::Uniform) = 0.0
 kurtosis(d::Uniform) = -6.0 / 5.0
 
@@ -1805,7 +1689,7 @@ Weibull(sh) = Weibull(sh, 1)
 mean(d::Weibull) = d.scale * gamma(1 + 1/d.shape)
 var(d::Weibull) = d.scale^2*gamma(1 + 2/d.shape) - mean(d)^2
 cdf(d::Weibull, x::Real) = 0 < x ? 1. - exp(-((x/d.scale)^d.shape)) : 0.
-insupport(d::Weibull, x::Number) = real_valued(x) && isfinite(x) && 0 <= x
+insupport(d::Weibull, x::Number) = real(x) && isfinite(x) && 0 <= x
 
 ##
 ##
@@ -1854,7 +1738,7 @@ function insupport{T <: Real}(d::Multinomial, x::Vector{T})
   end
   s = 0.0
   for i in 1:n
-    if x[i] < 0. || !integer_valued(x[i])
+    if x[i] < 0. || !isinteger(x[i])
       return false
     end
     s += x[i]
@@ -2019,7 +1903,7 @@ var(d::Categorical, m::Number) = sum(([1:length(d.prob)] - m).^2 .* d.prob)
 var(d::Categorical) = var(d, mean(d))
 
 function insupport(d::Categorical, x::Real)
-  integer_valued(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
+  isinteger(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
 
 pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0. : d.prob[x]
@@ -2164,4 +2048,122 @@ end
 include("kde.jl")
 export kde
 
-end  #module
+include("truncate.jl")
+
+##############################################################################
+#
+# Truncated Normal distribution
+#
+# TODO: Rearrange methods, optimise, check numerical stability
+#
+##############################################################################
+
+@truncate Normal
+
+function mean(d::TruncatedNormal)
+    delta = pdf(d.untruncated, d.lower) -
+            pdf(d.untruncated, d.upper)
+    return mean(d.untruncated) +
+           delta * var(d.untruncated) / d.nc
+end
+
+function modes(d::TruncatedNormal)
+    mu = mean(d.untruncated)
+    if d.upper < mu
+        return [d.upper]
+    elseif d.lower > mu
+        return [d.lower]
+    else
+        return [mu]
+    end
+end
+
+function var(d::TruncatedNormal) 
+    s = std(d.untruncated)
+    a = d.lower
+    b = d.upper
+    phi_a = pdf(d.untruncated, a) * s
+    phi_b = pdf(d.untruncated, b) * s
+    a_phi_a = a == -Inf ? 0 : a * phi_a
+    b_phi_b = b == Inf ? 0 : b * phi_b
+    z = d.nc
+    return s^2 * (1 + (a_phi_a - b_phi_b) / z -
+           ((phi_a - phi_b) / z)^2)
+end
+
+function entropy(d::TruncatedNormal)
+    s = std(d.untruncated)
+    a = d.lower
+    b = d.upper
+    phi_a = pdf(d.untruncated, a) * s
+    phi_b = pdf(d.untruncated, b) * s
+    a_phi_a = a == -Inf ? 0 : a * phi_a
+    b_phi_b = b == Inf ? 0 : b * phi_b
+    z = d.nc
+    return entropy(d.untruncated) +
+           log(z) +
+           0.5 * (a_phi_a - b_phi_b) / z -
+           0.5 * ((phi_a - phi_b) / z)^2
+end
+
+# Rejection sampler based on algorithm from Robert (1992)
+#  - Available at http://arxiv.org/abs/0907.4010
+function randnt(lower::Real, upper::Real)
+    if (lower <= 0 && upper == Inf) ||
+       (upper >= 0 && lower == Inf) ||
+       (lower <= 0 && upper >= 0 && upper - lower > sqrt(2.0 * pi))
+        while true
+            r = randn()
+            if r > lower && r < upper
+                return r
+            end
+        end
+    elseif lower > 0 && upper - lower > 2.0 / (lower + sqrt(lower^2 + 4.0)) * exp((lower^2 - lower * sqrt(lower^2 + 4.0)) / 4.0)
+        a = (lower + sqrt(lower^2 + 4.0))/2.0
+        while true
+            r = rand(Exponential(1.0/a)) + lower
+            u = rand()
+            if u < exp(-0.5 * (r - a)^2) && r < upper
+                return r
+            end
+        end    
+    elseif upper < 0 && upper - lower > 2.0 / (-upper + sqrt(upper^2 + 4.0)) * exp((upper^2 + upper * sqrt(upper^2 + 4.0)) / 4.0)
+        a = (-upper + sqrt(upper^2 + 4.0)) / 2.0
+        while true
+            r = rand(Exponential(1.0/a)) - upper
+            u = rand()
+            if u < exp(-0.5 * (r - a)^2) && r < -lower
+                return -r
+            end
+        end
+    else
+        while true
+            r = lower + rand() * (upper - lower)
+            u = rand()
+            if lower > 0
+                rho = exp((lower^2 - r^2) * 0.5)
+            elseif upper < 0
+                rho = exp((upper^2 - r^2) * 0.5)
+            else
+                rho = exp(-r^2 * 0.5)
+            end
+            if u < rho
+                return r
+            end
+        end
+    end
+end
+
+function rand(d::TruncatedNormal)
+    mu = mean(d.untruncated)
+    sigma = std(d.untruncated)
+    z = randnt((d.lower - mu) / sigma,
+               (d.upper - mu) / sigma)
+    return mu + sigma * z
+end
+
+# TODO: Fill in other truncated distributions
+# @truncate Gamma
+# #...
+
+end # module

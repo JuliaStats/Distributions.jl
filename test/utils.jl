@@ -1,5 +1,3 @@
-using Distributions
-
 probs = [0.2245, 0.1271, 0.3452, 0.3032]
 table = Distributions.DiscreteDistributionTable(probs)
 Distributions.draw(table)
