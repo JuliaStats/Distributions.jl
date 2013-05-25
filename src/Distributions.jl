@@ -107,6 +107,7 @@ export                                  # types
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
+    truncate,      # truncate distribution to a range
     valideta,      # validity check on linear predictor
     validmu,       # validity check on mean vector
     var            # variance of distribution
@@ -521,6 +522,58 @@ logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
 logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d, args...)
 
 binary_entropy(d::Distribution) = entropy(d) / log(2)
+
+##############################################################################
+#
+# Truncated distributions
+#
+##############################################################################
+
+immutable Truncated{T <: ContinuousUnivariateDistribution} <: ContinuousUnivariateDistribution
+    dist::T
+    lower::Float64
+    upper::Float64
+    function Truncated(d::T, l::Real, u::Real)
+        if l >= u
+            error("upper must be > lower")
+        end
+        new(d, float64(l), float64(u))
+    end
+end
+Truncated{T <: ContinuousUnivariateDistribution}(d::T, l::Real, r::Real) = Truncated{T}(d,l,r)
+insupport(d::Truncated, x::Number) = x >= d.lower && x <= d.upper && insupport(d.dist, x)
+
+normalizing_factor(d::Truncated) = cdf(d.dist, d.upper) - cdf(d.dist, d.lower)
+
+pdf(d::Truncated, x::Real) = pdf(d.dist, x) / normalizing_factor(d)
+logpdf(d::Truncated, x::Real) = logpdf(d.dist, x) - log(normalizing_factor(d))
+cdf(d::Truncated, x::Real) = (cdf(d.dist, x) - cdf(d.dist, d.lower)) / normalizing_factor(d)
+
+function quantile(d::Truncated, p::Real)
+  top = cdf(d.dist, d.upper)
+  bottom = cdf(d.dist, d.lower)
+  quantile(d.dist, bottom + p * (top - bottom))
+end
+
+function rand(d::Truncated) 
+    while true
+        r = rand(d.dist)
+        if d.lower <= r <= d.upper
+            return r
+        end
+    end
+end
+
+function truncate(d::ContinuousUnivariateDistribution, lower::Real, upper::Real)
+    Truncated(d, lower, upper)
+end
+
+function truncate(d::Truncated, lower::Real, upper::Real)
+    lower = lower > d.lower ? lower : d.lower
+    upper = upper < d.upper ? upper : d.upper
+    truncate(d.dist, lower, upper)
+end
+
 
 ##############################################################################
 #
@@ -1662,30 +1715,14 @@ var(d::Triangular) = d.scale^2 / 6.0
 #
 ##############################################################################
 
-immutable TruncatedNormal <: ContinuousUnivariateDistribution
-  untruncated::Normal
-  lower::Float64
-  upper::Float64
-  TruncatedNormal(mu, sd, lower, upper) = upper > lower ? new(Normal(mu, sd), lower, upper) : error("upper must be > lower")
-end
+typealias TruncatedNormal Truncated{Normal}
 
-insupport(d::TruncatedNormal, x::Number) = x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
+TruncatedNormal(mu, sd, lower, upper) =  truncate(Normal(mu, sd), lower, upper)
 
-normalizing_factor(d::TruncatedNormal) = cdf(d.untruncated, d.upper) - cdf(d.untruncated, d.lower)
+mean(d::TruncatedNormal) = mean(d.dist) + (pdf(d.dist, d.lower) - pdf(d.dist, d.upper)) * var(d.dist) / normalizing_factor(d)
 
-pdf(d::TruncatedNormal, x::Real) = pdf(d.untruncated, x) / normalizing_factor(d)
-logpdf(d::TruncatedNormal, x::Real) = logpdf(d.untruncated, x) - log(normalizing_factor(d))
-cdf(d::TruncatedNormal, x::Real) = (cdf(d.untruncated, x) - cdf(d.untruncated, d.lower)) / normalizing_factor(d)
-
-mean(d::TruncatedNormal) = mean(d.untruncated) + (pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)) * var(d.untruncated) / normalizing_factor(d)
-
-function quantile(d::TruncatedNormal, p::Real)
-  top = cdf(d.untruncated, d.upper)
-  bottom = cdf(d.untruncated, d.lower)
-  quantile(d.untruncated, bottom + p * (top - bottom))
-end
 function modes(d::TruncatedNormal)
-  mu = mean(d.untruncated)
+  mu = mean(d.dist)
   if d.upper < mu
     [d.upper]
   elseif d.lower > mu
@@ -1695,26 +1732,26 @@ function modes(d::TruncatedNormal)
   end
 end
 function var(d::TruncatedNormal) 
-  s = std(d.untruncated)
+  s = std(d.dist)
   a = d.lower
   b = d.upper
-  phi_a = pdf(d.untruncated, a) * s
-  phi_b = pdf(d.untruncated, b) * s
+  phi_a = pdf(d.dist, a) * s
+  phi_b = pdf(d.dist, b) * s
   a_phi_a = a == -Inf ? 0 : a * phi_a
   b_phi_b = b == Inf ? 0 : b * phi_b
   z = normalizing_factor(d)
   s^2 * (1 + (a_phi_a - b_phi_b)/z - ((phi_a - phi_b)/z)^2)
 end
 function entropy(d::TruncatedNormal)
-  s = std(d.untruncated)
+  s = std(d.dist)
   a = d.lower
   b = d.upper
-  phi_a = pdf(d.untruncated, a) * s
-  phi_b = pdf(d.untruncated, b) * s
+  phi_a = pdf(d.dist, a) * s
+  phi_b = pdf(d.dist, b) * s
   a_phi_a = a == -Inf ? 0 : a * phi_a
   b_phi_b = b == Inf ? 0 : b * phi_b
   z = normalizing_factor(d)
-  entropy(d.untruncated) + log(z) + .5 * (a_phi_a - b_phi_b)/z - .5 * ((phi_a - phi_b)/z)^2
+  entropy(d.dist) + log(z) + .5 * (a_phi_a - b_phi_b)/z - .5 * ((phi_a - phi_b)/z)^2
 end
 
 # Rejection sampler based on algorithm from Robert (1992) - http://arxiv.org/abs/0907.4010
@@ -1765,8 +1802,8 @@ function randnt(lower, upper)
 end
 
 function rand(d::TruncatedNormal)
-  mu = mean(d.untruncated)
-  sigma = std(d.untruncated)
+  mu = mean(d.dist)
+  sigma = std(d.dist)
   mu + sigma * randnt((d.lower - mu)/sigma, (d.upper - mu)/sigma)
 end
 
@@ -1794,6 +1831,12 @@ var(d::Uniform) = (w = d.b - d.a; w * w / 12.)
 insupport(d::Uniform, x::Number) = real_valued(x) && d.a <= x <= d.b
 skewness(d::Uniform) = 0.0
 kurtosis(d::Uniform) = -6.0 / 5.0
+
+function truncate(d::Uniform, lower::Real, upper::Real)
+    lower = lower > d.a ? lower : d.a
+    upper = upper < d.b ? upper : d.b
+    Uniform(lower, upper)
+end
 
 immutable Weibull <: ContinuousUnivariateDistribution
     shape::Float64
