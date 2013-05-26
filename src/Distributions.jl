@@ -1,5 +1,7 @@
 module Distributions
 
+using Stats
+
 export                                  # types
     CauchitLink,
     CloglogLink,
