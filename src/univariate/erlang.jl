@@ -9,10 +9,10 @@ immutable Erlang <: ContinuousUnivariateDistribution
     rate::Float64
 end
 
-Erlang(scale::Float) = Erlang(1.0, 1.0)
+Erlang(scale::Real) = Erlang(1.0, 1.0)
 Erlang() = Erlang(1.0, 1.0)
 
-insupport(d::Erlang, x::Number) = isreal(x) && is_finite(x) && 0.0 <= x
+insupport(d::Erlang, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
 mean(d::Erlang) = d.scale * d.shape
 
