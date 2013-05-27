@@ -72,12 +72,14 @@ end
 
 function rand!(d::Dirichlet, X::Matrix)
     m, n = size(X)
-    for i in 1:n
-        X[:, i] = rand(Gamma(d.alpha[i]), m)
+    for j in 1:n
+        for i in 1:m
+            X[i, j] = rand(Gamma(d.alpha[i]))
+        end
     end
-    for i in 1:m
-        isum = sum(X[i, :])
-        for j in 1:n
+    for j in 1:n
+        isum = sum(X[:, j])
+        for i in 1:m
             X[i, j] /= isum
         end
     end
@@ -85,6 +87,18 @@ function rand!(d::Dirichlet, X::Matrix)
 end
 
 function var(d::Dirichlet)
+    n = length(d.alpha)
     alpha0 = sum(d.alpha)
-    return d.alpha .* (alpha0 - d.alpha) / (alpha0^2 * (alpha0 + 1))
+    tmp = alpha0^2 * (alpha0 + 1.0)
+    S = Array(Float64, n, n)
+    for j in 1:n
+        for i in 1:n
+            if i == j
+                S[i, j] = d.alpha[i] * (alpha0 - d.alpha[i]) / tmp
+            else
+                S[i, j] = -d.alpha[i] * d.alpha[j] / tmp
+            end
+        end
+    end
+    return S
 end

@@ -5,7 +5,8 @@ my_tests = ["test/distributions.jl",
             "test/utils.jl",
             "test/wisharts.jl", 
             "test/fit.jl",
-            "test/truncate.jl"]
+            "test/truncate.jl",
+            "test/multivariate.jl"]
 
 println("Running tests:")
 

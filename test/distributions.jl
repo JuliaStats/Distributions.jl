@@ -69,7 +69,7 @@ logpmf(d, [1, 1])
 logpmf(d, [0, 1])
 d = Multinomial(10)
 rand(d)
-A = zeros(Int, 2, 10)
+A = Array(Int, 10, 2)
 rand!(d, A)
 
 d = Dirichlet([1.0, 2.0, 1.0])
@@ -81,7 +81,7 @@ insupport(d, [0.1, 0.8, 0.2])
 insupport(d, [0.1, 0.8])
 pdf(d, [0.1, 0.8, 0.1])
 rand(d)
-A = zeros(Float64, 10, 3)
+A = Array(Float64, 3, 10)
 rand!(d, A)
 
 d = Categorical([0.25, 0.5, 0.25])
@@ -105,7 +105,7 @@ d = Categorical([0.25, 0.5, 0.25])
 
 @test 1.0 <= rand(d) <= 3.0
 
-A = zeros(Int, 10)
+A = Array(Int, 10)
 rand!(d, A)
 @test 1.0 <= mean(A) <= 3.0
 

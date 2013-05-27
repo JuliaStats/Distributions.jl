@@ -70,9 +70,16 @@ function rand(d::Multinomial)
 end
 
 function var(d::Multinomial)
-    s = 0.0
-    for i in 1:length(d.prob)
-        s += d.n * d.prob[i] .* (1.0 - d.prob[i])
+    n = length(d.prob)
+    S = Array(Float64, n, n)
+    for j in 1:n
+        for i in 1:n
+            if i == j
+                S[i, j] = d.n * d.prob[i] * (1.0 - d.prob[i])
+            else
+                S[i, j] = -d.n * d.prob[i] * d.prob[j]
+            end
+        end
     end
-    return s
+    return S
 end

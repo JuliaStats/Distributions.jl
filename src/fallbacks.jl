@@ -6,6 +6,8 @@
 
 binaryentropy(d::Distribution) = entropy(d) / log(2)
 
+cov(d::MultivariateDistribution) = var(d)
+
 ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
 
 cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
@@ -139,8 +141,12 @@ function rand(d::NonMatrixDistribution, dims::Integer...)
     return rand(d, map(int, dims))
 end
 
-function rand(d::MultivariateDistribution, dims::Integer)
-    return rand(d, (dims, length(mean(d))))
+function rand(d::ContinuousMultivariateDistribution, dims::Integer)
+    return rand!(d, Array(Float64, length(mean(d)), dims))
+end
+
+function rand(d::DiscreteMultivariateDistribution, dims::Integer)
+    return rand!(d, Array(Int, length(mean(d)), dims))
 end
 
 function rand(d::MatrixDistribution, dims::Integer)
@@ -150,16 +156,11 @@ end
 function rand!(d::MultivariateDistribution, X::Matrix)
     k = length(mean(d))
     m, n = size(X)
-    if m == k
-        for i in 1:n
-            X[:, i] = rand(d)
-        end
-    elseif n == k
-        for i in 1:m
-            X[i, :] = rand(d)
-        end
-    else
+    if m != k
         error("Wrong dimensions")
+    end
+    for i in 1:n
+        X[:, i] = rand(d)
     end
     return X
 end

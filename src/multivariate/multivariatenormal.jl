@@ -100,7 +100,7 @@ function rand!(d::MultivariateNormal, X::Matrix)
             X[dim, i] = X[dim, i] + d.mean[dim]
         end
     end
-    return
+    return X
 end
 
 var(d::MultivariateNormal) = (U = d.covchol[:U]; U'U)
