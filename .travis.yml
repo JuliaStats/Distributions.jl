@@ -13,9 +13,7 @@ before_install:
     - git config --global user.email "travis@example.net"
 script:
     - julia -e 'versioninfo(); Pkg.init();'
+    - julia -e 'Pkg.add("Stats")'
     - mkdir -p ~/.julia/Distributions
     - cp -R ./* ~/.julia/Distributions/
-    - julia ~/.julia/Distributions/test/distributions.jl
-    - julia ~/.julia/Distributions/test/wisharts.jl
-    - julia ~/.julia/Distributions/test/fit.jl
-    - julia ~/.julia/Distributions/test/utils.jl
+    - julia ./run_tests.jl
