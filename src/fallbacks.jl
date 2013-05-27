@@ -105,6 +105,12 @@ function logpdf(d::MultivariateDistribution, x::AbstractMatrix)
     r
 end
 
+# function logpdf{T <: Real}(d::Dirichlet, x::Matrix{T})
+#     r = Array(Float64, size(x, 2))
+#     logpdf!(r, d, x)
+#     return r
+# end
+
 function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::AbstractMatrix)
     n::Int = size(x, 2)
     if length(r) != n
@@ -132,6 +138,18 @@ function mustart{Y<:Real,W<:Real}(d::Distribution,
 end
 
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
+
+function pdf(d::MultivariateDistribution, X::AbstractMatrix)
+    r = Array(Float64, size(X, 2))
+    return pdf!(r, d, X)
+end
+
+function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
+    for i in 1:size(X, 2)
+        r[i] = pdf(d, X[:, i])
+    end
+    return r
+end
 
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A)

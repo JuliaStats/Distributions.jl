@@ -29,6 +29,19 @@ kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
 
 mean(d::Geometric) = (1.0 - d.prob) / d.prob
 
+function mgf(d::Geometric, t::Real)
+    p = d.prob
+    if t >= -log(1.0 - p)
+        error("MGF does not exist for all t")
+    end
+    return (p * exp(t)) / (1.0 - (1.0 - p) * exp(t))
+end
+
+function cf(d::Geometric, t::Real)
+    p = d.prob
+    return (p * exp(im * t)) / (1.0 - (1.0 - p) * exp(im * t))
+end
+
 skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
 
 var(d::Geometric) = (1.0 - d.prob) / d.prob^2

@@ -23,6 +23,16 @@ kurtosis(d::Chisq) = 12.0 / d.df
 
 mean(d::Chisq) = d.df
 
+function mgf(d::Chisq, t::Real)
+    k = d.df
+    return (1.0 - 2.0 * t)^(-k / 2.0)
+end
+
+function cf(d::Chisq, t::Real)
+    k = d.df
+    return (1.0 - 2.0 * im * t)^(-k / 2.0)
+end
+
 # rand - the distribution chi^2(df) is 2 * gamma(df / 2)
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)

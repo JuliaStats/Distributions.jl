@@ -26,6 +26,18 @@ mean(d::DiscreteUniform) = (d.a + d.b) / 2.0
 
 median(d::DiscreteUniform) = (d.a + d.b) / 2.0
 
+function mgf(d::DiscreteUniform, t::Real)
+    a, b = d.a, d.b
+    return (exp(t * a) - exp(t * (b + 1))) /
+           ((b - a + 1.0) * (1.0 - exp(t)))
+end
+
+function cf(d::DiscreteUniform, t::Real)
+    a, b = d.a, d.b
+    return (exp(im * t * a) - exp(im * t * (b + 1))) /
+           ((b - a + 1.0) * (1.0 - exp(im * t)))
+end
+
 modes(d::DiscreteUniform) = [d.a:d.b]
 
 function pdf(d::DiscreteUniform, x::Real)

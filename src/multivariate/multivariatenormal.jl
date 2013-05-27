@@ -39,7 +39,28 @@ function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
     end
 end
 
+function entropy(d::MultivariateNormal)
+    S = cov(d)
+    n = size(S, 1)
+    for j in 1:n
+        for i in 1:n
+            S[i, j] *= 2.0 * pi * e
+        end
+    end
+    return 0.5 * logdet(S)
+end
+
 mean(d::MultivariateNormal) = d.mean
+
+function mgf(d::MultivariateNormal, t::AbstractVector)
+    m, S = d.mean, var(d)
+    return exp(dot(t, m) + 0.5 * dot(t, S * t))
+end
+
+function cf(d::MultivariateNormal, t::AbstractVector)
+    m, S = d.mean, var(d)
+    return exp(im * dot(t, m) - 0.5 * dot(t, S * t))
+end
 
 pdf{T<:Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
 
@@ -82,28 +103,48 @@ function logpdf{T <: Real}(d::MultivariateNormal, x::Matrix{T})
     return r
 end
 
+function rand!(d::MultivariateNormal, x::Vector, tmp::Vector)
+    randn!(tmp)
+    At_mul_B(x, d.covchol[:U], tmp)
+    for i in 1:length(x)
+        x[i] += d.mean[i]
+    end
+    return x
+end
+
+function rand!(d::MultivariateNormal, x::Vector)
+    tmp = randn(length(x))
+    return rand!(d, x, tmp)
+end
+
 function rand(d::MultivariateNormal)
-    z = randn(length(d.mean))
-    return d.mean + d.covchol[:U]'z
+    x = Array(Float64, length(d.mean))
+    tmp = Array(Float64, length(d.mean))
+    return rand!(d, x, tmp)
 end
 
 function rand!(d::MultivariateNormal, X::Matrix)
     k = length(d.mean)
+    tmp = Array(Float64, k)
     m, n = size(X)
     if m != k
         throw(ArgumentError("Wrong dimensions"))
     end
     randn!(X)
     for i in 1:n
-        X[:, i] = d.covchol[:U]'X[:, i] # TODO: Clean this up?
+        # This makes a copy of X[:, i]
+        At_mul_B(tmp, d.covchol[:U], X[:, i])
         for dim in 1:m
-            X[dim, i] = X[dim, i] + d.mean[dim]
+            X[dim, i] = tmp[dim] + d.mean[dim]
         end
     end
     return X
 end
 
-var(d::MultivariateNormal) = (U = d.covchol[:U]; U'U)
+function var(d::MultivariateNormal)
+    U = d.covchol[:U]
+    return U'U
+end
 
 function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
     Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', chol.UL, u)

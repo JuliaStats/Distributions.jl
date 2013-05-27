@@ -24,6 +24,16 @@ mean(d::Uniform) = (d.a + d.b) / 2.0
 
 median(d::Uniform) = (d.a + d.b) / 2.0
 
+function mgf(d::Uniform, t::Real)
+	a, b = d.a, d.b
+	return (exp(t * b) - exp(t * a)) / (t * (b - a))
+end
+
+function cf(d::Uniform, t::Real)
+	a, b = d.a, d.b
+	return (exp(im * t * b) - exp(im * t * a)) / (im * t * (b - a))
+end
+
 modes(d::Uniform) = error("The uniform distribution has no modes")
 
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()

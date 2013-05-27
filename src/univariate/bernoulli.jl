@@ -31,6 +31,16 @@ mean(d::Bernoulli) = d.prob
 
 median(d::Bernoulli) = d.prob < 0.5 ? 0.0 : 1.0
 
+function mgf(d::Bernoulli, t::Real)
+    p = d.prob
+    return 1.0 - p + p * exp(t)
+end
+
+function cf(d::Bernoulli, t::Real)
+    p = d.prob
+    return 1.0 - p + p * exp(im * t)
+end
+
 function modes(d::Bernoulli)
     if d.prob < 0.5
       return [0]

@@ -25,6 +25,16 @@ insupport(d::Gamma, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
 mean(d::Gamma) = d.shape * d.scale
 
+function mgf(d::Gamma, t::Real)
+    k, theta = d.shape, d.scale
+    return (1.0 - t * theta)^(-k)
+end
+
+function cf(d::Gamma, t::Real)
+    k, theta = d.shape, d.scale
+    return (1.0 - im * t * theta)^(-k)
+end
+
 # rand()
 #
 #  A simple method for generating gamma variables - Marsaglia and Tsang (2000)

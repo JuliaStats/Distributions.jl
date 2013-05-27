@@ -23,3 +23,13 @@ end
 @_jl_dist_2p NegativeBinomial nbinom
 
 insupport(d::NegativeBinomial, x::Number) = isinteger(x) && 0.0 <= x
+
+function mgf(d::NegativeBinomial, t::Real)
+    r, p = d.size, d.prob
+    return ((1.0 - p) * exp(t))^r / (1.0 - p * exp(t))^r
+end
+
+function cf(d::NegativeBinomial, t::Real)
+    r, p = d.size, d.prob
+    return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
+end

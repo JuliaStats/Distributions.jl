@@ -56,6 +56,16 @@ mean(d::Exponential) = d.scale
 
 median(d::Exponential) = d.scale * log(2.0)
 
+function mgf(d::Exponential, t::Real)
+    s = d.scale
+    return (1.0 - t * s)^(-1)
+end
+
+function cf(d::Exponential, t::Real)
+    s = d.scale
+    return (1.0 - t * im * s)^(-1)
+end
+
 function pdf(d::Exponential, x::Real)
     x <= 0.0 ? 0.0 : exp(-x / d.scale) / d.scale
 end

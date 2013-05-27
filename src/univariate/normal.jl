@@ -27,6 +27,16 @@ mean(d::Normal) = d.mean
 
 median(d::Normal) = d.mean
 
+function mgf(d::Normal, t::Real)
+	m, s = d.mean, d.std
+	return exp(t * m + 0.5 * s^t * t^2)
+end
+
+function cf(d::Normal, t::Real)
+	m, s = d.mean, d.std
+	return exp(im * t * m - 0.5 * s^t * t^2)
+end
+
 modes(d::Normal) = [d.mean]
 
 rand(d::Normal) = d.mean + d.std * randn()

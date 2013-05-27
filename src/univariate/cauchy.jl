@@ -25,6 +25,13 @@ mean(d::Cauchy) = NaN
 
 median(d::Cauchy) = d.location
 
+mgf(d::Cauchy, t::Real) = NaN
+
+function cf(d::Cauchy, t::Real)
+	m, theta = d.location, d.scale
+	return exp(im * t * m - theta * abs(t))
+end
+
 modes(d::Cauchy) = [d.location]
 
 skewness(d::Cauchy) = NaN

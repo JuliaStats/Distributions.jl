@@ -133,7 +133,7 @@ abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
 abstract ContinuousMultivariateDistribution <: MultivariateDistribution
 
 abstract ContinuousMatrixDistribution       <: MatrixDistribution
-abstract DiscreteMatrixDistribution         <: MatrixDistribution # is there such a thing?
+abstract DiscreteMatrixDistribution         <: MatrixDistribution
 
 typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)

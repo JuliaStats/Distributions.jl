@@ -24,6 +24,16 @@ end
 
 mean(d::Poisson) = d.lambda
 
+function mgf(d::Poisson, t::Real)
+    l = d.lambda
+    return exp(l * (exp(t) - 1.0))
+end
+
+function cf(d::Poisson, t::Real)
+    l = d.lambda
+    return exp(l * (exp(im * t) - 1.0))
+end
+
 var(d::Poisson) = d.lambda
 
 # GLM Methods

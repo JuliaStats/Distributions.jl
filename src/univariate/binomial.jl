@@ -25,6 +25,18 @@ kurtosis(d::Binomial) = (1.0 - 2.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 mean(d::Binomial) = d.size * d.prob
 
+function mgf(d::Binomial, t::Real)
+	n = d.size
+	p = d.prob
+	return (1.0 - p + p * exp(t))^n
+end
+
+function cf(d::Binomial, t::Real)
+	n = d.size
+	p = d.prob
+	return (1.0 - p + p * exp(im * t))^n
+end
+
 modes(d::Binomial) = iround([d.size * d.prob])
 
 skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
