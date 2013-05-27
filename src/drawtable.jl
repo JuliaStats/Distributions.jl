@@ -41,7 +41,8 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 		counts = Array(Int64, 0)
 		for i in 1:n
 			digit = mod(vals[i], 64)
-			vals[i] = fld(vals[i], 64)
+			# vals[i] = fld(vals[i], 64)
+			vals[i] >>= 6
 			bounds[index] += digit
 			for itr in 1:digit
 				push!(counts, i)
@@ -49,7 +50,8 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 		end
 		bounds[index] *= multiplier
 		table[index] = counts
-		multiplier *= 64
+		# multiplier *= 64
+		multiplier <<= 6
 	end
 
 	# Make bounds cumulative
@@ -59,10 +61,11 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 end
 
 function draw(table::DiscreteDistributionTable)
-	i = rand(1:64^9)
-	if i == 64^9
-		return table.table[9][rand(1:length(table.table[9]))]
-	end
+	# 64^9 - 1 == 0x003fffffffffffff
+	i = rand(1:(64^9 - 1))
+	# if i == 64^9
+	# 	return table.table[9][rand(1:length(table.table[9]))]
+	# end
 	bound = 1
 	while i > table.bounds[bound] && bound < 9
 		bound += 1

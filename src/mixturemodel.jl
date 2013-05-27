@@ -1,0 +1,50 @@
+immutable MixtureModel <: Distribution
+    components::Vector # Vector should be able to contain any type of
+                       # distribution with comparable support
+    probs::Vector{Float64}
+    drawtable::DiscreteDistributionTable
+    function MixtureModel(c::Vector, p::Vector{Float64})
+        if length(c) != length(p)
+            error("components and probs must have the same number of elements")
+        end
+        sump = 0.0
+        for i in 1:length(p)
+            if p[i] < 0.0
+                error("MixtureModel: probabilities must be non-negative")
+            end
+            sump += p[i]
+        end
+        table = DiscreteDistributionTable(p)
+        new(c, p ./ sump, table)
+    end
+end
+
+function mean(d::MixtureModel)
+    m = 0.0
+    for i in 1:length(d.components)
+        m += mean(d.components[i]) * d.probs[i]
+    end
+    return m
+end
+
+function pdf(d::MixtureModel, x::Any)
+    p = 0.0
+    for i in 1:length(d.components)
+        p += pdf(d.components[i], x) * d.probs[i]
+    end
+    return p
+end
+
+function rand(d::MixtureModel)
+    i = draw(d.drawtable)
+    return rand(d.components[i])
+end
+
+# TODO: Correct this definition
+function var(d::MixtureModel)
+    m = 0.0
+    for i in 1:length(d.components)
+        m += var(d.components[i]) * d.probs[i]^2
+    end
+    return m
+end

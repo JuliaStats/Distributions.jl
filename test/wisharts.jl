@@ -17,4 +17,3 @@ IW = InverseWishart(v+1,S)
 @test_approx_eq_eps pdf(InverseWishart(v,S), inv(S)) 0.006247377 1e-8
 @test_approx_eq_eps pdf(InverseWishart(v,inv(S)),S)  0.03147137 1e-8
 @test_approx_eq_eps pdf(InverseWishart(v,inv(S)),inv(S)) 0.01901462 1e-8
-
