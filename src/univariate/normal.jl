@@ -17,6 +17,8 @@ const Gaussian = Normal
 
 @_jl_dist_2p Normal norm
 
+entropy(d::Normal) = (1.0 / 2.0) * log(2.0 * pi * e * d.std^2)
+
 insupport(d::Normal, x::Number) = isreal(x) && isfinite(x)
 
 kurtosis(d::Normal) = 0.0

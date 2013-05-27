@@ -115,7 +115,7 @@ export                                  # types
     var            # variance of distribution
 
 import Base.mean, Base.median, Base.quantile
-import Base.rand, Base.std, Base.var, Base.cov
+import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 
 include("drawtable.jl")

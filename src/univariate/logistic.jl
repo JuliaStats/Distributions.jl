@@ -15,6 +15,8 @@ Logistic()  = Logistic(0.0, 1.0)
 
 @_jl_dist_2p Logistic logis
 
+entropy(d::Logistic) = log(d.scale) + 2.0
+
 insupport(d::Logistic, x::Number) = isreal(x) && isfinite(x)
 
 kurtosis(d::Logistic) = 1.2

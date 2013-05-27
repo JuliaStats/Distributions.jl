@@ -15,6 +15,8 @@ Pareto() = Pareto(1.0, 1.0)
 
 cdf(d::Pareto, q::Real) = q >= d.scale ? 1.0 - (d.scale / q)^d.shape : 0.0
 
+entropy(d::Pareto) = log(d.shape / d.scale) + 1. / d.scale + 1.
+
 insupport(d::Pareto, x::Number) = isreal(x) && isfinite(x) && x > d.scale
 
 function kurtosis(d::Pareto)

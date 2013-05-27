@@ -29,6 +29,8 @@ end
 
 Multinomial(d::Integer) = Multinomial(1, d)
 
+entropy(d::Multinomial) = entropy(d.probs)
+
 function insupport{T <: Real}(d::Multinomial, x::Vector{T})
     n = length(x)
     if length(d.prob) != n

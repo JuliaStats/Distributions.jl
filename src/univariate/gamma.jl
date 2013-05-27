@@ -15,6 +15,12 @@ Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 
 @_jl_dist_2p Gamma gamma
 
+function entropy(d::Gamma)
+    x = d.shape + log(d.scale) + lgamma(d.shape)
+    x = x + (1.0 - d.shape) * digamma(d.shape)
+    return x
+end
+
 insupport(d::Gamma, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
 mean(d::Gamma) = d.shape * d.scale

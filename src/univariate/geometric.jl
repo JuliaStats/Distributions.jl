@@ -21,6 +21,8 @@ function ccdf(d::Geometric, q::Real)
     q < 0.0 ? 1.0 : exp(log1p(-d.prob) * (floor(q + 1e-7) + 1.0))
 end
 
+entropy(d::Geometric) = (-xlogx(1.0 - d.prob) - xlogx(d.prob)) / d.prob
+
 insupport(d::Geometric, x::Number) = isinteger(x) && 0.0 <= x
 
 kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)

@@ -15,6 +15,9 @@ logNormal() = logNormal(0.0, 1.0)
 
 @_jl_dist_2p logNormal lnorm
 
+entropy(d::logNormal) = 1.0 / 2.0 + (1.0 / 2.0) *
+                        log(2.0 * pi * d.sdlog^2) + d.meanlog
+
 insupport(d::logNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
 
 mean(d::logNormal) = exp(d.meanlog + d.sdlog^2 / 2)

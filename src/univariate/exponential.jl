@@ -46,6 +46,8 @@ function invlogccdf(d::Exponential, lp::Real)
     lp <= 0.0 ? -d.scale * lp : NaN
 end
 
+entropy(d::Exponential) = 1 - log(d.scale)
+
 insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
 kurtosis(d::Exponential) = 6.0

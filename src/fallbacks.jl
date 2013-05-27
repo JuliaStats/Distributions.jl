@@ -6,6 +6,17 @@
 
 binaryentropy(d::Distribution) = entropy(d) / log(2)
 
+function cor(d::MultivariateDistribution)
+    R = copy(d.cov)
+    m, n = size(R)
+    for j in 1:n
+        for i in 1:n
+            R[i, j] = d.cov[i, j] / sqrt(d.cov[i, i] * d.cov[j, j])
+        end
+    end
+    return R
+end
+
 cov(d::MultivariateDistribution) = var(d)
 
 ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
