@@ -19,6 +19,8 @@ function cdf(d::Arcsine, x::Number)
     end
 end
 
+entropy(d::Arcsine) = -log(2.0) / pi
+
 function insupport(d::Arcsine, x::Number)
     if -1.0 <= x <= 1.0
         return true

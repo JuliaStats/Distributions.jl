@@ -17,9 +17,9 @@ Beta() = Beta(1.0) # uniform
 
 function entropy(d::Beta)
     o = lbeta(d.alpha, d.beta)
-    o = o - (d.alpha - 1.0) * digamma(d.alpha)
-    o = o - (d.beta - 1.0) * digamma(d.beta)
-    o = o + (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
+    o -= (d.alpha - 1.0) * digamma(d.alpha)
+    o -= (d.beta - 1.0) * digamma(d.beta)
+    o += (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
     return o
 end
 
@@ -47,13 +47,16 @@ function rand(d::Beta)
     return u / (u + rand(Gamma(d.beta)))
 end
 
+# TODO: Don't create temporaries here
 function rand(d::Beta, dims::Dims)
     u = rand(Gamma(d.alpha), dims)
     return u ./ (u + rand(Gamma(d.beta), dims))
 end
 
 function rand!(d::Beta, A::Array{Float64})
-    A[:] = randbeta(d.alpha, d.beta, size(A))
+    for i in 1:length(A)
+        A[i] = rand(d)
+    end
     return A
 end
 

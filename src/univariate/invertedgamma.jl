@@ -21,7 +21,22 @@ end
 
 cdf(d::InvertedGamma, x::Real) = 1.0 - cdf(Gamma(d.shape, d.scale), 1.0 / x)
 
+function entropy(d::InvertedGamma)
+    a = d.shape
+    b = d.scale
+    return a + log(b) + lgamma(a) - (1.0 + a) * digamma(a)
+end
+
 insupport(d::InvertedGamma, x::Number) = isreal(x) && isfinite(x) && 0 <= x
+
+function kurtosis(d::InvertedGamma)
+    a = d.shape
+    if a > 4.0
+        return (30.0 * a - 66.0) / ((a - 3.0) * (a - 4.0))
+    else
+        error("kurtosis not defined unless shape > 4")
+    end
+end
 
 function mean(d::InvertedGamma)
 	if d.shape > 1.0
@@ -29,6 +44,18 @@ function mean(d::InvertedGamma)
 	else
 		error("Expectation only defined if shape > 1")
 	end
+end
+
+function mgf(d::InvertedGamma, t::Real)
+    a, b = d.shape, d.scale
+    return (2 * (-b * t)^(a / 2)) / gamma(a) *
+           besselk(a, sqrt(-4.0 * b * t))
+end
+
+function cf(d::InvertedGamma, t::Real)
+    a, b = d.shape, d.scale
+    return (2 * (-im * b * t)^(a / 2)) / gamma(a) *
+           besselk(a, sqrt(-4.0 * im * b * t))
 end
 
 modes(d::InvertedGamma) = [(1.0 / d.scale) / (d.shape + 1.0)]
@@ -52,6 +79,15 @@ function rand!(d::InvertedGamma, A::Array{Float64})
     	A[i] = 1.0 / A[i]
     end
     return A
+end
+
+function skewness(d::InvertedGamma)
+    a = d.shape
+    if a > 3.0
+        return (4.0 * sqrt(a - 2.0)) / (a - 3.0)
+    else
+        error("skewness not defined unless shape > 3")
+    end
 end
 
 function var(d::InvertedGamma)

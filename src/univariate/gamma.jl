@@ -16,12 +16,14 @@ Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 @_jl_dist_2p Gamma gamma
 
 function entropy(d::Gamma)
-    x = d.shape + log(d.scale) + lgamma(d.shape)
-    x = x + (1.0 - d.shape) * digamma(d.shape)
+    x = (1.0 - d.shape) * digamma(d.shape)
+    x += lgamma(d.shape) + log(d.scale) + d.shape
     return x
 end
 
 insupport(d::Gamma, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+
+kurtosis(d::Gamma) = 6.0 / d.shape
 
 mean(d::Gamma) = d.shape * d.scale
 
@@ -33,6 +35,12 @@ end
 function cf(d::Gamma, t::Real)
     k, theta = d.shape, d.scale
     return (1.0 - im * t * theta)^(-k)
+end
+
+function modes(d::Gamma)
+    if d.shape >= 1.0
+        d.scale * (d.shape - 1.0)
+    end
 end
 
 # rand()

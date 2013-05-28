@@ -40,11 +40,10 @@ function cdf(d::Categorical, x::Integer)
     end
 end
 
-entropy(d::Categorical) = entropy(d.prob)
+entropy(d::Categorical) = pventropy(d.prob)
 
 function insupport(d::Categorical, x::Real)
-    return isinteger(x) && 1 <= x <= length(d.prob) &&
-           d.prob[x] != 0.0
+    return isinteger(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
 
 function mean(d::Categorical)
@@ -54,6 +53,34 @@ function mean(d::Categorical)
     end
     return s
 end
+
+function median(d::Categorical)
+    p, n = 0.0, length(d.prob)
+    i = 0
+    while p < 0.5 && i <= n
+        i += 1
+        p += d.prob[i]
+    end
+    return i
+end
+
+function mgf(d::Categorical, t::AbstractVector)
+    s = 0.0
+    for i in 1:length(d.prob)
+        s += d.prob[i] * exp(t[i])
+    end
+    return s
+end
+
+function cf(d::Categorical, t::AbstractVector)
+    s = 0.0 + 0.0im
+    for i in 1:length(d.prob)
+        s += d.prob[i] * exp(im * t[i])
+    end
+    return s
+end
+
+modes(d::Categorical) = [indmax(d.prob)]
 
 pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0.0 : d.prob[x]
 

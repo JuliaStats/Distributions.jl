@@ -46,7 +46,7 @@ function invlogccdf(d::Exponential, lp::Real)
     lp <= 0.0 ? -d.scale * lp : NaN
 end
 
-entropy(d::Exponential) = 1 - log(d.scale)
+entropy(d::Exponential) = 1.0 - log(d.scale)
 
 insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
@@ -65,6 +65,8 @@ function cf(d::Exponential, t::Real)
     s = d.scale
     return (1.0 - t * im * s)^(-1)
 end
+
+modes(d::Exponential) = [0.0]
 
 function pdf(d::Exponential, x::Real)
     x <= 0.0 ? 0.0 : exp(-x / d.scale) / d.scale

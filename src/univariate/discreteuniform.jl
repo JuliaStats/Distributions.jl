@@ -13,6 +13,16 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
+function cdf(d::DiscreteUniform, k::Real)
+    if k < d.a
+        return 0.0
+    elseif <= d.b
+        return (ifloor(k) - d.a + 1.0) / (d.b - d.a + 1.0)
+    else
+        return 1.0
+    end
+end
+
 entropy(d::DiscreteUniform) = log(d.b - d.a + 1.0)
 
 insupport(d::DiscreteUniform, x::Number) = isinteger(x) && d.a <= x <= d.b
@@ -42,20 +52,15 @@ modes(d::DiscreteUniform) = [d.a:d.b]
 
 function pdf(d::DiscreteUniform, x::Real)
     if insupport(d, x)
-        return (1.0 / (d.b - d.a + 1.))
+        return (1.0 / (d.b - d.a + 1))
     else
         return 0.0
     end
 end
 
-function quantile(d::DiscreteUniform, k::Real)
-    if k < d.a
-        return 0.0
-    elseif <= d.b
-        return (floor(k) - d.a + 1.) / (d.b - d.a + 1.)
-    else
-        return 1.0
-    end
+function quantile(d::DiscreteUniform, p::Real)
+    n = d.b - d.a + 1
+    return d.a + ifloor(p * n)
 end
 
 rand(d::DiscreteUniform) = d.a + rand(0:(d.b - d.a))

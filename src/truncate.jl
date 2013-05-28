@@ -1,5 +1,3 @@
-using Distributions
-
 abstract TruncatedContinuousUnivariateDistribution <: ContinuousUnivariateDistribution
 abstract TruncatedDiscreteUnivariateDistribution <: DiscreteUnivariateDistribution
 typealias TruncatedUnivariateDistribution Union(TruncatedContinuousUnivariateDistribution, TruncatedDiscreteUnivariateDistribution)

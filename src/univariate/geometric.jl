@@ -29,6 +29,12 @@ kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
 
 mean(d::Geometric) = (1.0 - d.prob) / d.prob
 
+function median(d::Geometric)
+    iceil(-1.0 / log(2.0, 1.0 - d.prob)) - 1
+end
+
+modes(d::Geometric) = [0]
+
 function mgf(d::Geometric, t::Real)
     p = d.prob
     if t >= -log(1.0 - p)

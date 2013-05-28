@@ -1,5 +1,18 @@
 @truncate Normal
 
+function entropy(d::TruncatedNormal)
+    s = std(d.untruncated)
+    a = d.lower
+    b = d.upper
+    phi_a = pdf(d.untruncated, a) * s
+    phi_b = pdf(d.untruncated, b) * s
+    a_phi_a = a == -Inf ? 0.0 : a * phi_a
+    b_phi_b = b == Inf ? 0.0 : b * phi_b
+    z = d.nc
+    return entropy(d.untruncated) + log(z) +
+           0.5 * (a_phi_a - b_phi_b) / z - 0.5 * ((phi_a - phi_b) / z)^2
+end
+
 function mean(d::TruncatedNormal)
     delta = pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)
     return mean(d.untruncated) + delta * var(d.untruncated) / d.nc
@@ -16,6 +29,13 @@ function modes(d::TruncatedNormal)
     end
 end
 
+function rand(d::TruncatedNormal)
+    mu = mean(d.untruncated)
+    sigma = std(d.untruncated)
+    z = randnt((d.lower - mu) / sigma, (d.upper - mu) / sigma)
+    return mu + sigma * z
+end
+
 function var(d::TruncatedNormal) 
     s = std(d.untruncated)
     a = d.lower
@@ -26,19 +46,6 @@ function var(d::TruncatedNormal)
     b_phi_b = b == Inf ? 0.0 : b * phi_b
     z = d.nc
     return s^2 * (1 + (a_phi_a - b_phi_b) / z - ((phi_a - phi_b) / z)^2)
-end
-
-function entropy(d::TruncatedNormal)
-    s = std(d.untruncated)
-    a = d.lower
-    b = d.upper
-    phi_a = pdf(d.untruncated, a) * s
-    phi_b = pdf(d.untruncated, b) * s
-    a_phi_a = a == -Inf ? 0.0 : a * phi_a
-    b_phi_b = b == Inf ? 0.0 : b * phi_b
-    z = d.nc
-    return entropy(d.untruncated) + log(z) +
-           0.5 * (a_phi_a - b_phi_b) / z - 0.5 * ((phi_a - phi_b) / z)^2
 end
 
 # Rejection sampler based on algorithm from Robert (1992)
@@ -87,11 +94,4 @@ function randnt(lower::Real, upper::Real)
             end
         end
     end
-end
-
-function rand(d::TruncatedNormal)
-    mu = mean(d.untruncated)
-    sigma = std(d.untruncated)
-    z = randnt((d.lower - mu) / sigma, (d.upper - mu) / sigma)
-    return mu + sigma * z
 end
