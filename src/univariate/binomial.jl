@@ -49,3 +49,10 @@ modes(d::Binomial) = iround([d.size * d.prob])
 skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 
 var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
+
+function fit(::Type{Binomial}, x::Real, n::Real)
+    if x > n || x < 0
+        error("For binomial observations, x must lie in [0, n]")
+    end
+    return Binomial(int(n), x / n)
+end

@@ -36,6 +36,15 @@ end
 
 var(d::Poisson) = d.lambda
 
+function fit(::Type{Poisson}, x::Array)
+    for i in 1:length(x)
+        if !insupport(Poisson(), x[i])
+            error("Poisson observations must be non-negative integers")
+        end
+    end
+    Poisson(mean(x))
+end
+
 # GLM Methods
 
 function devresid(d::Poisson, y::Real, mu::Real, wt::Real)

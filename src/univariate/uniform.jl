@@ -44,3 +44,7 @@ function var(d::Uniform)
 	w = d.b - d.a
 	return w * w / 12.0
 end
+
+function fit{T <: Real}(::Type{Uniform}, x::Vector{T})
+	Uniform(min(x), max(x))
+end

@@ -85,6 +85,22 @@ logcdf(d::Distribution, q::Real) = log(cdf(d,q))
 
 logccdf(d::Distribution, q::Real) = log(ccdf(d,q))
 
+function loglikelihood(d::UnivariateDistribution, X::Array)
+    ll = 0.0
+    for i in 1:length(X)
+        ll += logpdf(d, X[i])
+    end
+    return ll
+end
+
+function loglikelihood(d::MultivariateDistribution, X::Matrix)
+    ll = 0.0
+    for i in 1:size(X, 2)
+        ll += logpdf(d, X[:, i])
+    end
+    return ll
+end
+
 logpdf(d::Distribution, x::Real) = log(pdf(d,x))
 
 function logpdf!(r::AbstractArray, d::UnivariateDistribution, x::AbstractArray)

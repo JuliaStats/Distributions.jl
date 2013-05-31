@@ -10,7 +10,8 @@ fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
 
 fit(Exponential, rand(Exponential(0.1), N))
 
-fit(Gamma, rand(Gamma(7.9, 3.1), N))
+# TODO: Reable when polygamma gets merged
+# fit(Gamma, rand(Gamma(7.9, 3.1), N))
 
 fit(Geometric, rand(Geometric(0.1), N))
 

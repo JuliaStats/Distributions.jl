@@ -91,3 +91,24 @@ end
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
+
+function fit(::Type{Gamma}, x::Array)
+    a_old = 0.5 / (log(mean(x)) - mean(log(x)))
+    a_new = 0.5 / (log(mean(x)) - mean(log(x)))
+
+    z = 1.0 / a_old + (mean(log(x)) - log(mean(x)) + log(a_old) - digamma(a_old)) / (a_old^2 * (1.0 / a_old - trigamma(a_old)))
+    a_new, a_old = 1.0 / z, a_new
+
+    iterations = 1
+
+    while abs(a_old - a_new) > 1e-16 && iterations <= 10_000
+        z = 1.0 / a_old + (mean(log(x)) - log(mean(x)) + log(a_old) - digamma(a_old)) / (a_old^2 * (1.0 / a_old - trigamma(a_old)))
+        a_new, a_old = 1.0 / z, a_new
+    end
+
+    if iterations >= 10_000
+        error("Parameter estimation failed to converge in 10,000 iterations")
+    end
+
+    Gamma(a_new, mean(x) / a_new)
+end

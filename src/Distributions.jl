@@ -29,7 +29,7 @@ export                                  # types
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
-    EmpiricalDistribution,
+    EmpiricalUnivariateDistribution,
     Erlang,
     Exponential,
     FDist,
@@ -90,6 +90,7 @@ export                                  # types
     linkinv,       # inverse link mapping eta to mu
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
+    loglikelihood, # log probability of array of IID draws
     logpdf,        # log probability density
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
@@ -158,6 +159,7 @@ include(joinpath("univariate", "cauchy.jl"))
 include(joinpath("univariate", "chi.jl"))
 include(joinpath("univariate", "chisq.jl"))
 include(joinpath("univariate", "discreteuniform.jl"))
+include(joinpath("univariate", "empirical.jl"))
 include(joinpath("univariate", "exponential.jl"))
 include(joinpath("univariate", "fdist.jl"))
 include(joinpath("univariate", "gamma.jl"))
@@ -207,9 +209,6 @@ include("glmtools.jl")
 
 # REPL representations
 include("show.jl")
-
-# Fit distributions to data
-include("fit.jl")
 
 # Kernel density estimators
 include("kde.jl")

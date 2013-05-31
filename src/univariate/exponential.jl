@@ -91,3 +91,12 @@ rand!(d::Exponential, A::Array{Float64}) = d.scale * Random.randmtzig_fill_exprn
 skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
+
+function fit(::Type{Exponential}, x::Array)
+    for i in 1:length(x)
+        if !insupport(Exponential(), x[i])
+            error("Exponential observations must be non-negative values")
+        end
+    end
+    return Exponential(mean(x))
+end

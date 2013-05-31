@@ -95,3 +95,8 @@ function var(d::Categorical, m::Number)
     end
     return s
 end
+
+function fit{T <: Real}(::Type{Categorical}, x::Array{T})
+    # Counts for all categories
+    return Categorical()
+end

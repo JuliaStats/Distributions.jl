@@ -77,3 +77,7 @@ function draw(table::DiscreteDistributionTable)
 	end
 	return table.table[bound][index]
 end
+
+function Base.show(io::IO, table::DiscreteDistributionTable)
+	@printf io "DiscreteDistributionTable"
+end

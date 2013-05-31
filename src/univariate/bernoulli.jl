@@ -63,6 +63,15 @@ skewness(d::Bernoulli) = (1.0 - 2.0 * d.prob) / std(d)
 
 var(d::Bernoulli) = d.prob * (1.0 - d.prob)
 
+function fit(::Type{Bernoulli}, x::Array)
+    for i in 1:length(x)
+        if !insupport(Bernoulli(), x[i])
+            error("Bernoulli observations must be in {0, 1}")
+        end
+    end
+    return Bernoulli(mean(x))
+end
+
 # GLM methods
 function devresid(d::Bernoulli, y::Real, mu::Real, wt::Real)
     2wt * (xlogxdmu(y, mu) + xlogxdmu(1.0 - y, 1.0 - mu))

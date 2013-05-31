@@ -146,6 +146,10 @@ function var(d::MultivariateNormal)
     return U'U
 end
 
+function fit{T <: Real}(::Type{MultivariateNormal}, X::Matrix{T})
+    MultivariateNormal(vec(mean(X, 2)), cov(X'))
+end
+
 function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
     Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', chol.UL, u)
 end

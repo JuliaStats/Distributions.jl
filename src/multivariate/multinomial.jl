@@ -115,3 +115,7 @@ function var(d::Multinomial)
     end
     return S
 end
+
+function fit(::Type{Multinomial}, X::Matrix)
+    return Multinomial(sum(X[:, 1]), vec(mean(X, 2)))
+end

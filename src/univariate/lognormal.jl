@@ -26,3 +26,8 @@ function var(d::logNormal)
 	sigsq = d.sdlog^2
 	return (exp(sigsq) - 1) * exp(2d.meanlog + sigsq)
 end
+
+function fit{T <: Real}(::Type{logNormal}, x::Array{T})
+    lx = log(x)
+    return logNormal(mean(lx), std(lx))
+end

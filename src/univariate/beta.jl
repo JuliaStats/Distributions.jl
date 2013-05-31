@@ -70,3 +70,16 @@ function var(d::Beta)
     ab = d.alpha + d.beta
     return d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
+
+function fit(::Type{Beta}, x::Array)
+    for i in 1:length(x)
+        if !insupport(Beta(), x[i])
+            error("Bernoulli observations must be in [0,1]")
+        end
+    end
+    x_bar = mean(x)
+    v_bar = var(x)
+    a = x_bar * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
+    b = (1.0 - x_bar) * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
+    return Beta(a, b)
+end

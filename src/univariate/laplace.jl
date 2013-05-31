@@ -67,3 +67,14 @@ skewness(d::Laplace) = 0.0
 std(d::Laplace) = sqrt(2.0) * d.scale
 
 var(d::Laplace) = 2.0 * d.scale^2
+
+function fit(::Type{Laplace}, x::Array)
+    n = length(x)
+    a = median(x)
+    deviations = 0.0
+    for i in 1:n
+        deviations += abs(x[i] - a)
+    end
+    b = deviations / n
+    Laplace(a, b)
+end

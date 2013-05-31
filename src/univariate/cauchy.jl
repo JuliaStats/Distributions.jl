@@ -37,3 +37,9 @@ modes(d::Cauchy) = [d.location]
 skewness(d::Cauchy) = NaN
 
 var(d::Cauchy) = NaN
+
+function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
+	c = median(x)
+	l, u = iqr(x)
+	return Cauchy(c, (u - l) / 2.0)
+end

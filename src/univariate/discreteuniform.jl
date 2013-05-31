@@ -68,3 +68,7 @@ rand(d::DiscreteUniform) = d.a + rand(0:(d.b - d.a))
 skewness(d::DiscreteUniform) = 0.0
 
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
+
+function fit{T <: Real}(::Type{DiscreteUniform}, x::Array{T})
+    DiscreteUniform(min(x), max(x))
+end
