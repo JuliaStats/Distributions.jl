@@ -29,12 +29,9 @@ immutable UnivariateKDE
 end
 
 # Algorithm AS 176 for calculating univariate KDE
-function kde(data::Vector, npoints::Integer = 512)
+function kde(data::Vector, window::Float64, npoints::Integer = 512)
     # Determine length of data
     ndata = length(data)
-
-    # Set bandwidth
-    window = bandwidth(data)
 
     # Check that the window is a positive constant
     if window <= 0.0
@@ -63,7 +60,7 @@ function kde(data::Vector, npoints::Integer = 512)
     # Discretize the data using a histogram
     dlo1 = dlo - step
     for i in 1:ndata
-        j = fld(data[i] - dlo1, step)
+        j = iround(fld(data[i] - dlo1, step))
         if j >= 1 && j <= npoints
             grid[j] = grid[j] + ainc
         end
@@ -93,3 +90,5 @@ function kde(data::Vector, npoints::Integer = 512)
 
     return UnivariateKDE(x, density)
 end
+
+kde(data::Vector) = kde(data, bandwidth(data), 512)
