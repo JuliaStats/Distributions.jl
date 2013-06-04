@@ -139,6 +139,63 @@ function var(d::Dirichlet)
     return S
 end
 
+function fit{T <: Real}(::Type{Dirichlet}, P::Matrix{T})
+    K, N = size(P)
+
+    alpha = zeros(Float64, K)
+    lpbar = zeros(Float64, K)
+    E_P = Array(Float64, K)
+    E_Psq = zeros(Float64, K)
+    g = Array(Float64, K)
+    q = Array(Float64, K)
+
+    for i in 1:N
+        for k in 1:K
+            tmp = P[k, i]
+            alpha[k] += tmp
+            E_Psq[k] += tmp^2
+            lpbar[k] += log(tmp)
+        end
+    end
+    for k in 1:K
+        alpha[k] /= N
+        E_Psq[k] /= N
+        lpbar[k] /= N
+    end
+    copy!(E_P, alpha)
+
+    alpha0 = (E_P[1] - E_Psq[1]) / (E_Psq[1] - E_P[1]^2)
+    for k in 1:K
+        alpha[k] *= alpha0
+    end
+
+    iteration = 0
+    converged = false
+    while !converged && iteration < 25
+        iteration += 1
+        alpha0 = sum(alpha)
+        b = 0.0
+        iqs = 0.0
+        iz = 1.0 / (N * trigamma(alpha0))
+        dgalpha0 = digamma(alpha0)
+        for k in 1:K
+            g[k] = N * (dgalpha0 - digamma(alpha[k]) + lpbar[k])
+            q[k] = -N * trigamma(alpha[k])
+            b += g[k] / q[k]
+            iqs += 1.0 / q[k]
+        end
+        b /= (iz + iqs)
+        for k in 1:K
+            alpha[k] -= (g[k] - b) / q[k]
+        end
+        if norm(g, Inf) > 1e-8
+            converged = true
+        end
+    end
+
+    return Dirichlet(alpha)
+end
+
 # Log multinomial beta
 function lmnB(d::Dirichlet)
     s = 0.0
