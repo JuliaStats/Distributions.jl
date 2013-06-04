@@ -50,6 +50,10 @@ function entropy(d::MultivariateNormal)
     return 0.5 * logdet(S)
 end
 
+function insupport{T <: Real}(d::MultivariateNormal, x::Vector{T})
+    return length(d.mean) == length(x)
+end
+
 mean(d::MultivariateNormal) = d.mean
 
 function mgf(d::MultivariateNormal, t::AbstractVector)

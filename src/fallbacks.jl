@@ -55,14 +55,42 @@ function devresid(d::Distribution, y::Vector{Float64},
     return [devresid(d, y[i], mu[i], wt[i]) for i in 1:length(y)]
 end
 
-function insupport(d::Distribution, x::AbstractArray)
-    for e in x
-        if !insupport(d, e)
+function insupport{T <: Real}(d::UnivariateDistribution,
+                              X::Array{T})
+    for el in X
+        if !insupport(d, el)
             return false
         end
     end
     return true
 end
+
+function insupport{T <: Real}(d::MultivariateDistribution,
+                              X::Matrix{T})
+    res = true
+    for i in 1:size(X, 2)
+        res &= insupport(d, X[:, i])
+    end
+    return res
+    # TODO: Determine which is faster
+    # for i in 1:size(X, 2)
+    #     if !insupport(d, X[:, i])
+    #         return false
+    #     end
+    # end
+    # return true
+end
+
+function insupport{T <: Real}(d::MatrixDistribution,
+                              X::Array{T})
+    res = true
+    for i in 1:size(X, 3)
+        res &= insupport(d, X[:, :, i])
+    end
+    return res
+end
+
+insupport(d::Distribution, x::Any) = false
 
 invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 
