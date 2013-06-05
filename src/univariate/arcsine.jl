@@ -1,50 +1,51 @@
-##############################################################################
-#
-# REFERENCES: Using definition from Devroye, IX.7
-#  This definition differs from definitions on Wikipedia and other sources,
-#  where distribution is over [0, 1] rather than [-1, 1].
-#
-##############################################################################
+# TODO: Implement standard Arcsine(0, 1) and Arcsine(a, b)
 
 immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
-function cdf(d::Arcsine, x::Number)
-    if x < -1.0
+function cdf(d::Arcsine, x::Real)
+    if x < 0.0
         return 0.0
     elseif x > 1.0
         return 1.0
     else
-        return (2.0 / pi) * asin(sqrt((x + 1.0) / 2.0))
+        return (2.0 / pi) * asin(sqrt(x))
     end
 end
 
 entropy(d::Arcsine) = -log(2.0) / pi
 
-function insupport(d::Arcsine, x::Number)
-    if -1.0 <= x <= 1.0
+function insupport(d::Arcsine, x::Real)
+    if 0 <= x <= 1.0
         return true
     else
         return false
     end
 end
 
-mean(d::Arcsine) = 0.0
+kurtosis(d::Arcsine) = -1.5
 
-median(d::Arcsine) = 0.0
+mean(d::Arcsine) = 0.5
+
+median(d::Arcsine) = 0.5
+
+# mgf(d::Arcsine, t::Real)
+# cf(d::Arcsine, t::Real)
+
+modes(d::Arcsine) = [0.0, 1.0]
 
 function pdf(d::Arcsine, x::Number)
-    if insupport(d, x)
-        return 1.0 / (pi * sqrt(1.0 - x^2))
+    if 0.0 <= x <= 1.0
+        return 1.0 / (pi * sqrt(x * (1.0 - x)))
     else
         return 0.0
     end
 end
 
-quantile(d::Arcsine, p::Real) = 2.0 * sin((pi / 2.0) * p)^2 - 1.0
+quantile(d::Arcsine, p::Real) = sin((pi * p) / 2.0)^2
 
-rand(d::Arcsine) = sin(2.0 * pi * rand())
+rand(d::Arcsine) = sin(rand() * pi / 2.0)^2
 
 skewness(d::Arcsine) = 0.0
 
-var(d::Arcsine) = 1.0 / 2.0
+var(d::Arcsine) = 1.0 / 8.0

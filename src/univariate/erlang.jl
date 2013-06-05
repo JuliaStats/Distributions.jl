@@ -8,6 +8,12 @@ immutable Erlang <: ContinuousUnivariateDistribution
     shape::Int
     scale::Float64
     nested_gamma::Gamma
+    function Erlang(shape::Real, scale::Real)
+        if !isinteger(shape)
+            raise(ArgumentError("Erlang shape parameter must be an integer"))
+        end
+        new(int(shape), float64(scale), Gamma(shape, scale))
+    end
 end
 
 Erlang(scale::Real) = Erlang(1, 1.0)
@@ -39,7 +45,7 @@ quantile(d::Erlang, p::Real) = quantile(d.nested_gamma, p)
 
 function rand(d::Erlang)
     b, c = d.scale, d.shape
-    z = 0.0
+    z = 1.0
     for i in 1:c
         z *= rand()
     end

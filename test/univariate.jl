@@ -5,27 +5,53 @@ n_samples = 5_000_000
 
 # Test default instances
 
-for d in [Beta(2.0, 2.0),
+for d in [Arcsine(),
+          Bernoulli(0.5),
+          Beta(2.0, 2.0),
+          # BetaPrime(2.0, 2.0),
+          Binomial(1, 0.5),
+          Categorical([0.5, 0.5]),
           Cauchy(0.0, 1.0),
+          # Chi(12),
           Chisq(12),
+          # Cosine(),
+          DiscreteUniform(2, 5),
+          # Empirical(),
+          Erlang(1),
           Exponential(1.0),
           Exponential(5.1),
           # FDist(2, 21), # Entropy wrong
           Gamma(3.0),
           Gamma(3.0, 3.0),
+          Geometric(),
           Gumbel(),
           Gumbel(5, 3), 
+          # Hypergeometric(),
+          # InvertedGamma(),
+          Laplace(0.0, 1.0),
+          Levy(),
           Logistic(),
           logNormal(0.0, 1.0),
+          # NegativeBinomial(),
+          # NoncentralBeta(),
+          # NoncentralChisq(),
+          # NoncentralFDist(),
+          # NoncentralTDist(),
           Normal(0.0, 1.0),
-          #TDist(1), # Entropy wrong
-          #TDist(28), # Entropy wrong
+          # Pareto(),
+          Poisson(10.0),
+          Rayleigh(10.0),
+          # Skellam(10.0, 2.0), # Entropy wrong
+          # TDist(1), # Entropy wrong
+          # TDist(28), # Entropy wrong
+          Triangular(3.0, 2.0),
           TruncatedNormal(Normal(0, 1), -3, 3),
-          # TruncatedNormal(Normal(-100, 1), 0, 1),
+          TruncatedNormal(Normal(-100, 1), 0, 1),
           TruncatedNormal(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Weibull(2.3)]
 
+    # NB: Uncomment if test fails
     # Mention distribution being run
     # println(d)
 
@@ -53,14 +79,14 @@ for d in [Beta(2.0, 2.0),
     # Because of the Weak Law of Large Numbers,
     #  empirical mean should be close to theoretical value
     mu, mu_hat = mean(d), mean(X)
-    if !isnan(mu)
+    if isfinite(mu)
         @assert norm(mu - mu_hat, Inf) < 1e-1
     end
 
     # Because of the Weak Law of Large Numbers,
     #  empirical covariance matrix should be close to theoretical value
     sigma, sigma_hat = var(d), var(X)
-    if !isnan(mu)
+    if isfinite(mu)
         @assert norm(sigma - sigma_hat, Inf) < 1e-1
     end
 
@@ -70,7 +96,7 @@ for d in [Beta(2.0, 2.0),
     # By the Asymptotic Equipartition Property,
     #  empirical mean negative log PDF should be close to theoretical value
     ent, ent_hat = entropy(d), -mean(logpdf(d, X))
-    if !isnan(mu)
+    if isfinite(mu)
         @assert norm(ent - ent_hat, Inf) < 1e-1
     end
 
@@ -78,7 +104,7 @@ for d in [Beta(2.0, 2.0),
 
     # Test non-logged PDF
     ent, ent_hat = entropy(d), -mean(log(pdf(d, X)))
-    if !isnan(mu)
+    if isfinite(mu)
         @assert norm(ent - ent_hat, Inf) < 1e-1
     end
 

@@ -26,6 +26,7 @@ export                                  # types
     Categorical,
     Cauchy,
     Chisq,
+    # Cosine,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
@@ -61,6 +62,7 @@ export                                  # types
     Poisson,
     ProbitLink,
     Rayleigh,
+    Skellam,
     TDist,
     Triangular,
     TruncatedNormal,
@@ -148,7 +150,6 @@ xlogx(x::Real) = x == 0.0 ? 0.0 : x * log(x)
 xlogxdmu(x::Real, mu::Real) = x == 0.0 ? 0.0 : x * log(x / mu)
 
 # Univariate distributions
-include(joinpath("univariate", "alpha.jl"))
 include(joinpath("univariate", "arcsine.jl"))
 include(joinpath("univariate", "bernoulli.jl"))
 include(joinpath("univariate", "beta.jl"))
@@ -158,6 +159,7 @@ include(joinpath("univariate", "categorical.jl"))
 include(joinpath("univariate", "cauchy.jl"))
 include(joinpath("univariate", "chi.jl"))
 include(joinpath("univariate", "chisq.jl"))
+include(joinpath("univariate", "cosine.jl"))
 include(joinpath("univariate", "discreteuniform.jl"))
 include(joinpath("univariate", "empirical.jl"))
 include(joinpath("univariate", "exponential.jl"))
@@ -169,6 +171,7 @@ include(joinpath("univariate", "gumbel.jl"))
 include(joinpath("univariate", "hypergeometric.jl"))
 include(joinpath("univariate", "invertedgamma.jl"))
 include(joinpath("univariate", "laplace.jl"))
+include(joinpath("univariate", "levy.jl"))
 include(joinpath("univariate", "logistic.jl"))
 include(joinpath("univariate", "lognormal.jl"))
 include(joinpath("univariate", "negativebinomial.jl"))
@@ -180,6 +183,7 @@ include(joinpath("univariate", "normal.jl"))
 include(joinpath("univariate", "pareto.jl"))
 include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "rayleigh.jl"))
+include(joinpath("univariate", "skellam.jl"))
 include(joinpath("univariate", "tdist.jl"))
 include(joinpath("univariate", "triangular.jl"))
 include(joinpath("univariate", "uniform.jl"))
