@@ -14,7 +14,7 @@ Uniform() = Uniform(0.0, 1.0)
 
 @_jl_dist_2p Uniform unif
 
-entropy(d::Uniform) = log(d.b - d.a + 1.0)
+entropy(d::Uniform) = log(d.b - d.a)
 
 insupport(d::Uniform, x::Number) = isreal(x) && d.a <= x <= d.b
 

@@ -46,7 +46,7 @@ function invlogccdf(d::Exponential, lp::Real)
     lp <= 0.0 ? -d.scale * lp : NaN
 end
 
-entropy(d::Exponential) = 1.0 - log(d.scale)
+entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
 
 insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
@@ -86,7 +86,13 @@ end
 
 rand(d::Exponential) = d.scale * Random.randmtzig_exprnd()
 
-rand!(d::Exponential, A::Array{Float64}) = d.scale * Random.randmtzig_fill_exprnd!(A)
+function rand!(d::Exponential, A::Array{Float64})
+    Random.randmtzig_fill_exprnd!(A)
+    for i in 1:length(A)
+        A[i] *= d.scale
+    end
+    return A
+end
 
 skewness(d::Exponential) = 2.0
 

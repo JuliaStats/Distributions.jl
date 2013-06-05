@@ -19,6 +19,8 @@ end
 Triangular(location::Real) = Triangular(location, 1.0)
 Triangular() = Triangular(0.0, 1.0)
 
+entropy(d::Triangular) = 0.5 + log(d.scale) - log(2)
+
 function insupport(d::Triangular, x::Number)
     return isreal(x) && isfinite(x) &&
            d.location - d.scale <= x <= d.location + d.scale

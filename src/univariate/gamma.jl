@@ -85,7 +85,10 @@ function rand!(d::Gamma, A::Array{Float64})
             A[i] *= rand()^ainv
         end
     end
-    return d.scale * A
+    for i in 1:length(A)
+        A[i] *= d.scale
+    end
+    return A
 end
 
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)

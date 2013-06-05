@@ -23,11 +23,11 @@ function cdf(d::Weibull, x::Real)
 end
 
 function entropy(d::Weibull)
-    return -digamma(1.0) * (1.0 - 1.0 / d.scale) +
-           log(d.shape / d.scale) + 1.0
+    k, l = d.shape, d.scale
+    return ((k - 1.0) / k) * -digamma(1.0) + log(l / k) + 1.0
 end
 
-insupport(d::Weibull, x::Number) = real(x) && isfinite(x) && 0.0 <= x
+insupport(d::Weibull, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
 mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
 

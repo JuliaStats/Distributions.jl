@@ -17,6 +17,8 @@ end
 
 Rayleigh() = Rayleigh(1.0)
 
+entropy(d::Rayleigh) = 1.0 + log(d.scale) - log(sqrt(2.0)) - digamma(1.0) / 2.0
+
 insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
 
 kurtosis(d::Rayleigh) = d.scale^4 * (8.0 - ((3.0 * pi^2) / 4.0))
