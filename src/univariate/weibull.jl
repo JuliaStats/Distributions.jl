@@ -29,6 +29,18 @@ end
 
 insupport(d::Weibull, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
 
+function kurtosis(d::Weibull)
+    λ, k = d.scale, d.shape
+    μ = mean(d)
+    σ = std(d)
+    γ = skewness(d)
+    den = λ^4 * gamma(1.0 + 4.0 / k) -
+          4.0 * γ * σ^3 * μ -
+          6.0 * μ^2 * σ^2 - μ^4
+    num = σ^4
+    return den / num - 3.0
+end
+
 mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
 
 median(d::Weibull) = d.scale * log(2.0)^(1.0 / d.shape)

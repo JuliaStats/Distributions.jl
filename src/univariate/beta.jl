@@ -26,13 +26,15 @@ end
 insupport(d::Beta, x::Number) = isreal(x) && 0.0 < x < 1.0
 
 function kurtosis(d::Beta)
-    a, b = d.alpha, d.beta
-    d = 6.0 * ((a - b)^2 * (a + b + 1.0) - a * b * (a + b + 2.0))
-    n = a * b * (a + b + 2.0) * (a + b + 3.0)
-    return d / n
+    α, β = d.alpha, d.beta
+    den = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
+    num = α * β * (α + β + 2.0) * (α + β + 3.0)
+    return den / num
 end
 
 mean(d::Beta) = d.alpha / (d.alpha + d.beta)
+
+median(d::Beta) = quantile(d, 0.5)
 
 function modes(d::Beta)
     if d.alpha > 1.0 && d.beta > 1.0
@@ -61,9 +63,9 @@ function rand!(d::Beta, A::Array{Float64})
 end
 
 function skewness(d::Beta)
-    d = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
-    n = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
-    return d / n
+    den = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
+    num = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
+    return den / num
 end
 
 function var(d::Beta)

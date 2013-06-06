@@ -66,6 +66,7 @@ export                                  # types
     TDist,
     Triangular,
     TruncatedNormal,
+    TruncatedUnivariateDistribution,
     Uniform,
     Weibull,
     Wishart,
@@ -86,6 +87,9 @@ export                                  # types
     insupport,     # predicate, is x in the support of the distribution?
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
+    isplatykurtic, # Is excess kurtosis > 0.0?
+    isleptokurtic, # Is excess kurtosis < 0.0?
+    ismesokurtic,  # Is excess kurtosis = 0.0?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
     linkfun,       # link function mapping mu to eta, the linear predictor
@@ -120,6 +124,7 @@ export                                  # types
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
+import Stats.kurtosis, Stats.skewness
 
 include("drawtable.jl")
 include("tvpack.jl")

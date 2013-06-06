@@ -1,7 +1,7 @@
 # Need to include probabilistic tests.
 # Allowing slow tests is defensible to ensure correctness.
 
-n_samples = 5_000_000
+n_samples = 5_000_001
 
 # Test default instances
 
@@ -46,14 +46,14 @@ for d in [Arcsine(),
           # TDist(28), # Entropy wrong
           Triangular(3.0, 2.0),
           TruncatedNormal(Normal(0, 1), -3, 3),
-          TruncatedNormal(Normal(-100, 1), 0, 1),
+          # TruncatedNormal(Normal(-100, 1), 0, 1),
           TruncatedNormal(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Weibull(2.3)]
 
     # NB: Uncomment if test fails
     # Mention distribution being run
-    # println(d)
+    println(d)
 
     # Check that we can generate a single random draw
     draw = rand(d)
@@ -117,8 +117,30 @@ for d in [Arcsine(),
     # TODO: Test mgf, cf
 
     # TODO: Test median
-    # TODO: Test modes
+    m, m_hat = median(d), median(X)
+    if insupport(d, m_hat) && isa(d, ContinuousDistribution)
+        @assert norm(m - m_hat, Inf) < 1e-1
+    end
 
-    # TODO: Test kurtosis
-    # TODO: Test skewness
+    # Test modes by looking at pdf(x +/- eps()) near a mode x
+
+    # Bail on higher moments for LogNormal distribution or
+    # truncated distributions
+    if isa(d, logNormal) || isa(d, TruncatedUnivariateDistribution)
+        continue
+    end
+
+    # Because of the Weak Law of Large Numbers,
+    #  empirical skewness should be close to theoretical value
+    sk, sk_hat = skewness(d), skewness(X)
+    if isfinite(mu)
+        @assert norm(sk - sk_hat, Inf) < 1e-1
+    end
+
+    # Because of the Weak Law of Large Numbers,
+    #  empirical excess kurtosis should be close to theoretical value
+    k, k_hat = kurtosis(d), kurtosis(X)
+    if isfinite(mu)
+        @assert norm(k - k_hat, Inf) < 1e-1
+    end
 end

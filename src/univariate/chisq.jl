@@ -23,6 +23,12 @@ kurtosis(d::Chisq) = 12.0 / d.df
 
 mean(d::Chisq) = d.df
 
+# TODO: Switch to using quantile?
+function median(d::Chisq)
+    k = d.df
+    return k * (1.0 - 2.0 / (9.0 * k))^3
+end
+
 function mgf(d::Chisq, t::Real)
     k = d.df
     return (1.0 - 2.0 * t)^(-k / 2.0)

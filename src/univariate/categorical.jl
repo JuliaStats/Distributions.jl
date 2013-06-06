@@ -46,6 +46,15 @@ function insupport(d::Categorical, x::Real)
     return isinteger(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0
 end
 
+function kurtosis(d::Categorical)
+    m = mean(d)
+    s = 0.0
+    for i in 1:length(d.prob)
+        s += (i - m)^4 * d.prob[i]
+    end
+    return s / var(d)^2 - 3.0
+end
+
 function mean(d::Categorical)
     s = 0.0
     for i in 1:length(d.prob)
@@ -85,6 +94,15 @@ modes(d::Categorical) = [indmax(d.prob)]
 pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0.0 : d.prob[x]
 
 rand(d::Categorical) = draw(d.drawtable)
+
+function skewness(d::Categorical)
+    m = mean(d)
+    s = 0.0
+    for i in 1:length(d.prob)
+        s += (i - m)^3 * d.prob[i]
+    end
+    return s / std(d)^3
+end
 
 var(d::Categorical) = var(d, mean(d))
 

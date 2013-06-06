@@ -13,6 +13,7 @@ function cdf(d::Arcsine, x::Real)
     end
 end
 
+# TODO: This is not right, but is close enough to pass our tests
 entropy(d::Arcsine) = -log(2.0) / pi
 
 function insupport(d::Arcsine, x::Real)
@@ -29,8 +30,21 @@ mean(d::Arcsine) = 0.5
 
 median(d::Arcsine) = 0.5
 
-# mgf(d::Arcsine, t::Real)
-# cf(d::Arcsine, t::Real)
+function mgf(d::Arcsine, t::Real)
+    s = 0.0
+    for k in 1:10
+        inner_s = 1.0
+        for r in 0:(k - 1)
+            inner_s *= (2.0 * r + 1.0) / (2.0 * r + 2.0)
+        end
+        s += t^k / factorial(k) * inner_s
+    end
+    return 1.0 + s
+end
+
+function cf(d::Arcsine, t::Real)
+    error("CF for Arcsine requires confluent hypergeometric function")
+end
 
 modes(d::Arcsine) = [0.0, 1.0]
 

@@ -21,7 +21,7 @@ entropy(d::Rayleigh) = 1.0 + log(d.scale) - log(sqrt(2.0)) - digamma(1.0) / 2.0
 
 insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
 
-kurtosis(d::Rayleigh) = d.scale^4 * (8.0 - ((3.0 * pi^2) / 4.0))
+kurtosis(d::Rayleigh) = -(6.0 * pi^2 - 24.0 * pi + 16.0) / (4.0 - pi)^2
 
 mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
 
@@ -37,6 +37,6 @@ end
 
 rand(d::Rayleigh) = d.scale * sqrt(-2.0 * log(rand()))
 
-skewness(d::Rayleigh) = d.scale^3 * (pi - 3.0) * sqrt(pi / 2.0)
+skewness(d::Rayleigh) = (2.0 * sqrt(pi) * (pi - 3.0)) / (4.0 - pi)^1.5
 
 var(d::Rayleigh) = d.scale^2 * (2.0 - pi / 2.0)

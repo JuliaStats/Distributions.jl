@@ -15,12 +15,27 @@ logNormal() = logNormal(0.0, 1.0)
 
 @_jl_dist_2p logNormal lnorm
 
-entropy(d::logNormal) = 1.0 / 2.0 + (1.0 / 2.0) *
-                        log(2.0 * pi * d.sdlog^2) + d.meanlog
+entropy(d::logNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
 
 insupport(d::logNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
 
+function kurtosis(d::logNormal)
+    return exp(4.0 * d.sdlog^2) + 2.0 * exp(3.0 * d.sdlog^2) +
+           3.0 * exp(2.0 * d.sdlog^2) - 6.0
+end
+
 mean(d::logNormal) = exp(d.meanlog + d.sdlog^2 / 2)
+
+median(d::logNormal) = exp(d.meanlog)
+
+# mgf(d::logNormal)
+# cf(d::logNormal)
+
+modes(d::logNormal) = [exp(d.meanlog - d.sdlog^2)]
+
+function skewness(d::logNormal)
+    return (exp(d.sdlog^2) + 2.0) * sqrt(exp(d.sdlog^2) - 1.0)
+end
 
 function var(d::logNormal)
 	sigsq = d.sdlog^2

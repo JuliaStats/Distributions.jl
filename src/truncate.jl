@@ -66,6 +66,8 @@ function quantile(d::TruncatedUnivariateDistribution, p::Real)
     return quantile(d.untruncated, bottom + p * (top - bottom))
 end
 
+median(d::TruncatedUnivariateDistribution) = quantile(d, 0.5)
+
 function rand(d::TruncatedUnivariateDistribution)
     while true
         r = rand(d.untruncated)

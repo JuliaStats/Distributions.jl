@@ -1,4 +1,5 @@
 using Distributions
+using Stats
 using Base.Test
 
 my_tests = ["test/distributions.jl", 

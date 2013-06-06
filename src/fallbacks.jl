@@ -96,6 +96,12 @@ invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 
 invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
 
+isplatykurtic(d::Distribution) = kurtosis(d) > 0.0
+
+isleptokurtic(d::Distribution) = kurtosis(d) < 0.0
+
+ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
+
 # kurtosis returns excess kurtosis by default
 # proper kurtosis can be returned with correction = false
 function kurtosis(d::Distribution, correction::Bool)
@@ -194,6 +200,9 @@ function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     end
     return r
 end
+
+# Activate after checking all distributions have something written out
+# median(d::UnivariateDistribution) = quantile(d, 0.5)
 
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A)

@@ -31,6 +31,8 @@ end
 
 insupport(d::Poisson, x::Number) = isinteger(x) && 0.0 <= x
 
+kurtosis(d::Poisson) = 1.0 / d.lambda
+
 function logpdf(d::Poisson, mu::Real, y::Real)
 	return ccall((:dpois, Rmath),
 		         Float64,
@@ -39,6 +41,8 @@ function logpdf(d::Poisson, mu::Real, y::Real)
 end
 
 mean(d::Poisson) = d.lambda
+
+median(d::Poisson) = quantile(d, 0.5)
 
 function mgf(d::Poisson, t::Real)
     l = d.lambda
@@ -49,6 +53,8 @@ function cf(d::Poisson, t::Real)
     l = d.lambda
     return exp(l * (exp(im * t) - 1.0))
 end
+
+skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 
 var(d::Poisson) = d.lambda
 

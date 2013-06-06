@@ -27,6 +27,8 @@ kurtosis(d::Gamma) = 6.0 / d.shape
 
 mean(d::Gamma) = d.shape * d.scale
 
+median(d::Gamma) = quantile(d, 0.5)
+
 function mgf(d::Gamma, t::Real)
     k, theta = d.shape, d.scale
     return (1.0 - t * theta)^(-k)
