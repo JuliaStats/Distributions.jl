@@ -23,7 +23,7 @@ entropy(d::Binomial) = d.size * (-xlogx(1.0 - d.prob) - xlogx(d.prob))
 
 insupport(d::Binomial, x::Number) = isinteger(x) && 0 <= x <= d.size
 
-kurtosis(d::Binomial) = (1.0 - 2.0 * d.prob * (1.0 - d.prob)) / var(d)
+kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 mean(d::Binomial) = d.size * d.prob
 

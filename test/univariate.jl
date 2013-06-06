@@ -53,7 +53,7 @@ for d in [Arcsine(),
 
     # NB: Uncomment if test fails
     # Mention distribution being run
-    println(d)
+    # println(d)
 
     # Check that we can generate a single random draw
     draw = rand(d)
@@ -123,6 +123,15 @@ for d in [Arcsine(),
     end
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
+    try
+        ms = modes(d)
+        if isa(d, ContinuousUnivariateDistribution)
+            @assert pdf(d, ms[1]) > pdf(d, ms[1] + eps(ms[1]))
+            @assert pdf(d, ms[1]) > pdf(d, ms[1] - eps(ms[1]))
+        end
+    catch
+        @printf "Skipping %s\n" typeof(d)
+    end
 
     # Bail on higher moments for LogNormal distribution or
     # truncated distributions
