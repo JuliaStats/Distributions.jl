@@ -1,55 +1,107 @@
-# Need to include probabilistic tests.
-# Allowing slow tests is defensible to ensure correctness.
+# This test suite exploits the Weak Law of Large Numbers
+# to verify that all of the functions defined on a
+# distribution produce values within a close range of
+# their theoretically predicted values.
+#
+# This includes tests of means, variances, skewness and kurtosis;
+# as well as tests of more complex quantities like quantiles,
+# entropy, etc...
+#
+# These tests are quite slow, but are essential to verifying the
+# accuracy of our distributions
 
+# Use a large, odd number of samples for testing all quantities
 n_samples = 5_000_001
 
-# Test default instances
-
+# Try out many parameterizations of any given distribution
 for d in [Arcsine(),
+          Bernoulli(0.1),
           Bernoulli(0.5),
+          Bernoulli(0.9),
           Beta(2.0, 2.0),
-          # BetaPrime(2.0, 2.0),
+          Beta(3.0, 4.0),
+          Beta(17.0, 13.0),
+          # BetaPrime(3.0, 3.0),
+          # BetaPrime(3.0, 5.0),
+          # BetaPrime(5.0, 3.0),
           Binomial(1, 0.5),
+          Binomial(100, 0.1),
+          Binomial(100, 0.9),
+          Categorical([0.1, 0.9]),
           Categorical([0.5, 0.5]),
+          Categorical([0.9, 0.1]),
           Cauchy(0.0, 1.0),
+          Cauchy(10.0, 1.0),
+          Cauchy(0.0, 10.0),
           # Chi(12),
-          Chisq(12),
+          Chisq(8),
+          Chisq(12.0),
+          Chisq(20.0),
           # Cosine(),
-          DiscreteUniform(2, 5),
+          DiscreteUniform(0, 3),
+          DiscreteUniform(2.0, 5.0),
           # Empirical(),
           Erlang(1),
+          Erlang(17.0),
           Exponential(1.0),
           Exponential(5.1),
           # FDist(2, 21), # Entropy wrong
-          Gamma(3.0),
+          Gamma(3.0, 2.0),
+          Gamma(2.0, 3.0),
           Gamma(3.0, 3.0),
-          Geometric(),
-          Gumbel(),
-          Gumbel(5, 3), 
-          # Hypergeometric(),
+          Geometric(0.1),
+          Geometric(0.5),
+          Geometric(0.9),
+          Gumbel(3.0, 5.0),
+          Gumbel(5, 3),
+          # HyperGeometric(1.0, 1.0, 1.0),
+          # HyperGeometric(2.0, 2.0, 2.0),
+          # HyperGeometric(3.0, 2.0, 2.0),
+          # HyperGeometric(2.0, 3.0, 2.0),
+          # HyperGeometric(2.0, 2.0, 3.0),
           # InvertedGamma(),
           Laplace(0.0, 1.0),
-          Levy(),
-          Logistic(),
+          Laplace(10.0, 1.0),
+          Laplace(0.0, 10.0),
+          Levy(0.0, 1.0),
+          Levy(2.0, 8.0),
+          Levy(3.0, 3.0),
+          Logistic(0.0, 1.0),
+          Logistic(10.0, 1.0),
+          Logistic(0.0, 10.0),
           logNormal(0.0, 1.0),
+          logNormal(10.0, 1.0),
+          logNormal(0.0, 10.0),
           # NegativeBinomial(),
           # NoncentralBeta(),
           # NoncentralChisq(),
           # NoncentralFDist(),
           # NoncentralTDist(),
           Normal(0.0, 1.0),
+          Normal(-1.0, 10.0),
+          Normal(1.0, 10.0),
           # Pareto(),
+          Poisson(2.0),
           Poisson(10.0),
+          Poisson(51.0),
+          Rayleigh(1.0),
+          Rayleigh(5.0),
           Rayleigh(10.0),
           # Skellam(10.0, 2.0), # Entropy wrong
           # TDist(1), # Entropy wrong
           # TDist(28), # Entropy wrong
+          Triangular(3.0, 1.0),
           Triangular(3.0, 2.0),
+          Triangular(10.0, 10.0),
           TruncatedNormal(Normal(0, 1), -3, 3),
           # TruncatedNormal(Normal(-100, 1), 0, 1),
           TruncatedNormal(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
-          Weibull(2.3)]
+          Uniform(3.0, 17.0),
+          Uniform(3.0, 3.1),
+          Weibull(2.3),
+          Weibull(23.0),
+          Weibull(230.0)]
 
     # NB: Uncomment if test fails
     # Mention distribution being run
@@ -62,50 +114,53 @@ for d in [Arcsine(),
     @assert insupport(d, draw)
 
     # Check that we can generate many random draws at once
-    X = rand(d, n_samples)
+    x = rand(d, n_samples)
 
     # Check that sequence of draws satifies insupport()
-    @assert insupport(d, X)
+    @assert insupport(d, x)
 
     # Check that we can generate many random draws in-place
-    rand!(d, X)
+    rand!(d, x)
+
+    mu, mu_hat = mean(d), mean(x)
+    ent, ent_hat = entropy(d), -mean(logpdf(d, x))
+    ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
+    m, m_hat = median(d), median(x)
+    sigma, sigma_hat = var(d), var(x)
 
     # Check that KL between fitted distribution and true distribution
     #  is small
     # TODO: Restore the line below
-    # d_hat = fit(typeof(d), X)
+    # d_hat = fit(typeof(d), x)
     # TODO: @assert kl(d, d_hat) < 1e-2
 
     # Because of the Weak Law of Large Numbers,
     #  empirical mean should be close to theoretical value
-    mu, mu_hat = mean(d), mean(X)
     if isfinite(mu)
-        @assert norm(mu - mu_hat, Inf) < 1e-1
+        if sigma > 0.0
+            @assert abs(mu - mu_hat) / sigma < 1e-0
+        else
+            @assert abs(mu - mu_hat) < 1e-1
+        end
     end
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical covariance matrix should be close to theoretical value
-    sigma, sigma_hat = var(d), var(X)
-    if isfinite(mu)
-        @assert norm(sigma - sigma_hat, Inf) < 1e-1
-    end
-
-    # TODO: Test cov and cor for multivariate distributions
-    # TODO: Decide how var(d::MultivariateDistribution) should be defined
 
     # By the Asymptotic Equipartition Property,
     #  empirical mean negative log PDF should be close to theoretical value
-    ent, ent_hat = entropy(d), -mean(logpdf(d, X))
-    if isfinite(mu)
-        @assert norm(ent - ent_hat, Inf) < 1e-1
+    if isfinite(ent) && !isa(d, Arcsine)
+        # @assert norm(ent - ent_hat, Inf) < 1e-1
+        if ent > 0.0
+            @assert abs(ent - ent_hat) / abs(ent) < 1e-0
+        end
     end
 
     # TODO: Test logpdf!()
 
     # Test non-logged PDF
-    ent, ent_hat = entropy(d), -mean(log(pdf(d, X)))
-    if isfinite(mu)
-        @assert norm(ent - ent_hat, Inf) < 1e-1
+    if isfinite(ent2) && !isa(d, Arcsine)
+        # @assert norm(ent - ent_hat, Inf) < 1e-1
+        if ent2 > 0.0
+            @assert abs(ent2 - ent_hat2) / abs(ent2) < 1e-0
+        end
     end
 
     # TODO: Test pdf!()
@@ -113,24 +168,35 @@ for d in [Arcsine(),
     # TODO: Test independence of draws?
 
     # TODO: Test cdf, quantile
+    if isa(d, ContinuousUnivariateDistribution)
+        for p in 0.1:0.1:0.9
+            @assert abs(cdf(d, quantile(d, p)) - p) < 1e-8
+        end
+    end
 
     # TODO: Test mgf, cf
 
     # TODO: Test median
-    m, m_hat = median(d), median(X)
     if insupport(d, m_hat) && isa(d, ContinuousDistribution)
-        @assert norm(m - m_hat, Inf) < 1e-1
+        if isa(d, Cauchy) || isa(d, Laplace)
+            @assert abs(m - m_hat) / d.scale < 1e-0
+        else
+            # @assert norm(m - m_hat, Inf) < 1e-1
+            @assert abs(m - m_hat) / sigma < 1e-0
+        end
     end
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
-    try
+    if !isa(d, Uniform)
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
-            @assert pdf(d, ms[1]) > pdf(d, ms[1] + eps(ms[1]))
-            @assert pdf(d, ms[1]) > pdf(d, ms[1] - eps(ms[1]))
+            if insupport(d, ms[1] + 0.1)
+                @assert pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
+            end
+            if insupport(d, ms[1] - 0.1)
+                @assert pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
+            end
         end
-    catch
-        @printf "Skipping %s\n" typeof(d)
     end
 
     # Bail on higher moments for LogNormal distribution or
@@ -139,17 +205,37 @@ for d in [Arcsine(),
         continue
     end
 
-    # Because of the Weak Law of Large Numbers,
-    #  empirical skewness should be close to theoretical value
-    sk, sk_hat = skewness(d), skewness(X)
-    if isfinite(mu)
-        @assert norm(sk - sk_hat, Inf) < 1e-1
-    end
+    sk, sk_hat = skewness(d), skewness(x)
+    k, k_hat = kurtosis(d), kurtosis(x)
 
     # Because of the Weak Law of Large Numbers,
-    #  empirical excess kurtosis should be close to theoretical value
-    k, k_hat = kurtosis(d), kurtosis(X)
+    #  empirical covariance matrix should be close to theoretical value
     if isfinite(mu)
-        @assert norm(k - k_hat, Inf) < 1e-1
+        if sigma > 0.0
+            @assert abs(sigma - sigma_hat) / sigma < 1e-0
+        else
+            @assert abs(sigma - sigma_hat) < 1e-1
+        end
+    end
+
+    # TODO: Test cov and cor for multivariate distributions
+    # TODO: Decide how var(d::MultivariateDistribution) should be defined
+
+    # Because of the Weak Law of Large Numbers,
+    #  empirical skewness should be close to theoretical value
+    if isfinite(mu)
+        if sk > 0.0
+            @assert abs(sk - sk_hat) / sigma < 1e-0
+        else
+            @assert abs(sk - sk_hat) < 1e-1
+        end
+    end
+
+    if isfinite(mu)
+        if k > 0.0
+            @assert abs(k - k_hat) / abs(k) < 1e-0
+        else
+            @assert abs(k - k_hat) < 1e-1
+        end
     end
 end
