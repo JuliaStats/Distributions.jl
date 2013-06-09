@@ -69,11 +69,11 @@ end
 modes(d::Exponential) = [0.0]
 
 function pdf(d::Exponential, x::Real)
-    x <= 0.0 ? 0.0 : exp(-x / d.scale) / d.scale
+    x < 0.0 ? 0.0 : exp(-x / d.scale) / d.scale
 end
 
 function logpdf(d::Exponential, x::Real)
-    x <= 0.0 ? -Inf : -x / d.scale - log(d.scale)
+    x < 0.0 ? -Inf : -x / d.scale - log(d.scale)
 end
 
 function quantile(d::Exponential, p::Real)

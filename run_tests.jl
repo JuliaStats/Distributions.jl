@@ -4,11 +4,11 @@ using Base.Test
 
 my_tests = ["test/distributions.jl", 
             "test/utils.jl",
-            "test/wisharts.jl", 
             "test/fit.jl",
             "test/truncate.jl",
             "test/univariate.jl",
-            "test/multivariate.jl"]
+            "test/multivariate.jl",
+            "test/matrix.jl"]
 
 println("Running tests:")
 

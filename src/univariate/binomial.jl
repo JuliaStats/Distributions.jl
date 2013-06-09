@@ -19,7 +19,10 @@ Binomial() = Binomial(1, 0.5)
 
 @_jl_dist_2p Binomial binom
 
-entropy(d::Binomial) = d.size * (-xlogx(1.0 - d.prob) - xlogx(d.prob))
+function entropy(d::Binomial)
+	n, p = d.size, d.prob
+	return 0.5 * log(2.0 * pi * e * n * p * (1.0 - p))
+end
 
 insupport(d::Binomial, x::Number) = isinteger(x) && 0 <= x <= d.size
 

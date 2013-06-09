@@ -19,6 +19,19 @@ end
 Triangular(location::Real) = Triangular(location, 1.0)
 Triangular() = Triangular(0.0, 1.0)
 
+function cdf(d::Triangular, x::Real)
+    a, b, c = d.location - d.scale, d.location + d.scale, d.location
+    if x <= a
+        return 0.0
+    elseif a <= x <= c
+        return (x - a)^2 / ((b - a) * (c - a))
+    elseif c < x <= b
+        return 1.0 - (b - x)^2 / ((b - a) * (b - c))
+    else
+        return 1.0
+    end
+end
+
 entropy(d::Triangular) = 0.5 + log(d.scale)
 
 function insupport(d::Triangular, x::Number)
@@ -39,6 +52,19 @@ function pdf(d::Triangular, x::Real)
         return -abs(x - d.location) / (d.scale^2) + 1.0 / d.scale
     else
         return 0.0
+    end
+end
+
+function quantile(d::Triangular, p::Real)
+    a, b, c = d.location - d.scale, d.location + d.scale, d.location
+    if p <= 0.0
+        return a
+    elseif p < 0.5
+        return a + sqrt(p * 2.0 * d.scale^2)
+    elseif p >= 0.5
+        return b -  sqrt((1.0 - p) * 2.0 * d.scale^2)
+    else
+        return b
     end
 end
 

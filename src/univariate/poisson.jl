@@ -54,6 +54,8 @@ function cf(d::Poisson, t::Real)
     return exp(l * (exp(im * t) - 1.0))
 end
 
+modes(d::Poisson) = [floor(d.lambda)]
+
 skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 
 var(d::Poisson) = d.lambda

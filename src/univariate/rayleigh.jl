@@ -17,6 +17,8 @@ end
 
 Rayleigh() = Rayleigh(1.0)
 
+cdf(d::Rayleigh, x::Real) = 1.0 - exp(-x^2 / (2.0 * d.scale^2))
+
 entropy(d::Rayleigh) = 1.0 + log(d.scale) - log(sqrt(2.0)) - digamma(1.0) / 2.0
 
 insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
@@ -27,6 +29,8 @@ mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
 
 median(d::Rayleigh) = d.scale * sqrt(2. * log(2.))
 
+modes(d::Rayleigh) = [d.scale]
+
 function pdf(d::Rayleigh, x::Real)
     if insupport(d, x)
         return (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2)))
@@ -34,6 +38,8 @@ function pdf(d::Rayleigh, x::Real)
         return 0.0
     end
 end
+
+quantile(d::Rayleigh, p::Real) = sqrt(-2.0 * d.scale^2 * log(1.0 - p))
 
 rand(d::Rayleigh) = d.scale * sqrt(-2.0 * log(rand()))
 

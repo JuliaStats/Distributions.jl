@@ -13,7 +13,7 @@ end
 Levy(location::Real) = Levy(location, 1.0)
 Levy() = Levy(0.0, 1.0)
 
-cdf(d::Levy, x::Real) = erfc(sqrt(c / (2.0 * (x - d.location))))
+cdf(d::Levy, x::Real) = erfc(sqrt(d.scale / (2.0 * (x - d.location))))
 
 function entropy(d::Levy)
 	c = d.scale
@@ -47,6 +47,8 @@ function pdf(d::Levy, x::Real)
 	return sqrt(c / (2.0 * pi)) *
 	       exp(-(c / (2.0 * (x - m)))) / (x - m)^1.5
 end
+
+quantile(d::Levy, p::Real) = d.location + d.scale / (2.0 * erfcinv(p)^2)
 
 function rand(d::Levy)
 	m, c = d.location, d.scale
