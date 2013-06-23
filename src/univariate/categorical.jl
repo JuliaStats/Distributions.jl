@@ -12,6 +12,9 @@ immutable Categorical <: DiscreteUnivariateDistribution
             end
             sump += p[i]
         end
+        if sump == 0.0
+            error("Categorical: probabilities must sum to 1")
+        end
         for i in 1:length(p)
             p[i] /= sump
         end
