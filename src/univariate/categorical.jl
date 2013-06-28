@@ -2,6 +2,7 @@ immutable Categorical <: DiscreteUnivariateDistribution
     prob::Vector{Float64}
     drawtable::DiscreteDistributionTable
     function Categorical{T <: Real}(p::Vector{T})
+        p = convert(Vector{FloatingPoint},p)
         if length(p) <= 1
             error("Categorical: there must be at least two categories")
         end
