@@ -3,6 +3,7 @@ immutable Multinomial <: DiscreteMultivariateDistribution
     prob::Vector{Float64}
     drawtable::DiscreteDistributionTable
     function Multinomial{T <: Real}(n::Integer, p::Vector{T})
+        p = float(p)
         if n <= 0
             error("Multinomial: n must be positive")
         end

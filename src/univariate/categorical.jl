@@ -2,6 +2,8 @@ immutable Categorical <: DiscreteUnivariateDistribution
     prob::Vector{Float64}
     drawtable::DiscreteDistributionTable
     function Categorical{T <: Real}(p::Vector{T})
+        # TODO: Should we just ban Int inputs? They're too cute for their own good.
+        p = float(p)
         if length(p) <= 1
             error("Categorical: there must be at least two categories")
         end
