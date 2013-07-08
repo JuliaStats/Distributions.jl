@@ -2,16 +2,16 @@ immutable Binomial <: DiscreteUnivariateDistribution
     size::Int
     prob::Float64
     function Binomial(n::Real, p::Real)
-    	if n <= 0
-	    	error("size must be positive")
-	    else
+    	if n < 0
+	    	error("size must be non-negative")
+	else
 	    	if 0.0 <= p <= 1.0
 	    		new(int(n), float64(p))
 	    	else
 	    		error("prob must be in [0, 1]")
-			end
-	    end
+		end
 	end
+    end
 end
 
 Binomial(size::Integer) = Binomial(size, 0.5)
