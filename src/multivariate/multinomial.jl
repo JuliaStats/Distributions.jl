@@ -1,7 +1,6 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
-    drawtable::DiscreteDistributionTable
     function Multinomial{T <: Real}(n::Integer, p::Vector{T})
         p = float(p)
         if n <= 0
@@ -17,7 +16,7 @@ immutable Multinomial <: DiscreteMultivariateDistribution
         for i in 1:length(p)
             p[i] /= sump
         end
-        new(int(n), p, DiscreteDistributionTable(p))
+        new(int(n), p)
     end
 end
 
@@ -89,18 +88,19 @@ function logpdf{T <: Real}(d::Multinomial, x::Vector{T})
     end
 end
 
+
 function rand!(d::Multinomial, x::Vector)
-    for itr in 1:d.n
-        i = draw(d.drawtable)
-        x[i] += 1
+    k = length(d.prob)
+    n = d.n
+    for i = 1:k
+        l = rand(Binomial(n, d.prob[i] / sum(d.prob[i:end]) ))
+        x[i] = l
+        n -= l
     end
-    return x
+    x
 end
 
-function rand(d::Multinomial)
-    x = zeros(Int, length(d.prob))
-    return rand!(d, x)
-end
+rand(d::Multinomial) = rand!(d, Array(Int,length(d.prob)))
 
 function var(d::Multinomial)
     n = length(d.prob)
