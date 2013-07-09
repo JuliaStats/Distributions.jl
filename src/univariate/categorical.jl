@@ -2,36 +2,16 @@ immutable Categorical <: DiscreteUnivariateDistribution
     prob::Vector{Float64}
     drawtable::DiscreteDistributionTable
     function Categorical{T <: Real}(p::Vector{T})
-        # TODO: Should we just ban Int inputs? They're too cute for their own good.
-        p = float(p)
-        if length(p) <= 1
-            error("Categorical: there must be at least two categories")
-        end
-        sump = 0.0
-        for i in 1:length(p)
-            if p[i] < 0.0
-                error("Categorical: probabilities must be non-negative")
-            end
-            sump += p[i]
-        end
-        if sump == 0.0
-            error("Categorical: probabilities must sum to 1")
-        end
-        for i in 1:length(p)
-            p[i] /= sump
-        end
-        new(p, DiscreteDistributionTable(p))
+        length(p) > 1 || error("Categorical: there must be at least two categories")
+        pv = T <: Float64 ? copy(p) : float64(p)
+        all(pv .>= 0.) || error("Categorical: probabilities must be non-negative")
+        sump = sum(pv); sump > 0. || error("Categorical: sum(p) = 0.")
+        pv ./= sump
+        new(pv, DiscreteDistributionTable(pv))
     end
 end
 
-function Categorical(d::Integer)
-    if d <= 1
-        error("d must be greater than 1")
-    end
-    prob = Array(Float64, d)
-    fill!(prob, 1.0 / d)
-    Categorical(prob)
-end
+Categorical(d::Integer) = Categorical(ones(d))
 
 function cdf(d::Categorical, x::Integer)
     if !insupport(d, x)
