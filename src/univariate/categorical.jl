@@ -1,13 +1,13 @@
 immutable Categorical <: DiscreteUnivariateDistribution
     prob::Vector{Float64}
-    drawtable::DiscreteDistributionTable
+    aliastable::AliasTable
     function Categorical{T <: Real}(p::Vector{T})
         length(p) > 1 || error("Categorical: there must be at least two categories")
         pv = T <: Float64 ? copy(p) : float64(p)
         all(pv .>= 0.) || error("Categorical: probabilities must be non-negative")
         sump = sum(pv); sump > 0. || error("Categorical: sum(p) = 0.")
         pv ./= sump
-        new(pv, DiscreteDistributionTable(pv))
+        new(pv, AliasTable(pv))
     end
 end
 
@@ -78,7 +78,7 @@ modes(d::Categorical) = [indmax(d.prob)]
 
 pdf(d::Categorical, x::Real) = !insupport(d, x) ? 0.0 : d.prob[x]
 
-rand(d::Categorical) = draw(d.drawtable)
+rand(d::Categorical) = rand(d.aliastable)
 
 function skewness(d::Categorical)
     m = mean(d)

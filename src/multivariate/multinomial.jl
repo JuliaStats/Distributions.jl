@@ -1,7 +1,7 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
-    drawtable::DiscreteDistributionTable
+    aliastable::AliasTable
     function Multinomial{T <: Real}(n::Integer, p::Vector{T})
         p = float(p)
         if n <= 0
@@ -17,7 +17,7 @@ immutable Multinomial <: DiscreteMultivariateDistribution
         for i in 1:length(p)
             p[i] /= sump
         end
-        new(int(n), p, DiscreteDistributionTable(p))
+        new(int(n), p, AliasTable(p))
     end
 end
 
@@ -91,7 +91,7 @@ end
 
 function rand!(d::Multinomial, x::Vector)
     for itr in 1:d.n
-        i = draw(d.drawtable)
+        i = rand(d.aliastable)
         x[i] += 1
     end
     return x

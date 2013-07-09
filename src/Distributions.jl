@@ -127,6 +127,8 @@ import Base.show, Base.sprand
 import Stats.kurtosis, Stats.skewness
 
 include("drawtable.jl")
+include("huffman.jl")
+include("alias.jl")
 include("tvpack.jl")
 
 abstract Distribution
