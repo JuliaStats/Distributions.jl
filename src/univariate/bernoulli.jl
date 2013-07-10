@@ -53,8 +53,6 @@ end
 
 pdf(d::Bernoulli, x::Real) = x == 0 ? (1.0 - d.prob) : (x == 1 ? d.prob : 0.0)
 
-logpdf(d::Bernoulli, mu::Real, y::Real) = y == 0 ? log(1.0 - mu) : (y == 1 ? log(mu) : -Inf)
-
 quantile(d::Bernoulli, p::Real) = 0.0 < p < 1.0 ? (p <= (1.0 - d.prob) ? 0 : 1) : NaN
 
 rand(d::Bernoulli) = rand() > d.prob ? 0 : 1
@@ -72,15 +70,3 @@ function fit(::Type{Bernoulli}, x::Array)
     return Bernoulli(mean(x))
 end
 
-# GLM methods
-function devresid(d::Bernoulli, y::Real, mu::Real, wt::Real)
-    2wt * (xlogxdmu(y, mu) + xlogxdmu(1.0 - y, 1.0 - mu))
-end
-
-function devresid(d::Bernoulli, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
-    [2wt[i] * (xlogxdmu(y[i], mu[i]) + xlogxdmu(1.0 - y[i], 1.0 - mu[i])) for i in 1:length(y)]
-end
-
-mustart(d::Bernoulli,  y::Real, wt::Real) = (wt * y + 0.5) / (wt + 1.0)
-
-var(d::Bernoulli, mu::Real) = max(eps(), mu * (1.0 - mu))
