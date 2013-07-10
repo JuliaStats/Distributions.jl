@@ -60,7 +60,7 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
 	return DiscreteDistributionTable(table, bounds)
 end
 
-function draw(table::DiscreteDistributionTable)
+function rand(table::DiscreteDistributionTable)
 	# 64^9 - 1 == 0x003fffffffffffff
 	i = rand(1:(64^9 - 1))
 	# if i == 64^9
