@@ -20,7 +20,7 @@ function cdf(d::Laplace, q::Real)
            (1.0 - exp(-abs(q - d.location) / d.scale)))
 end
 
-entropy(d::Laplace) = log(2.0 * e * d.scale)
+entropy(d::Laplace) = log(2.0 * d.scale) + 1.0
 
 insupport(d::Laplace, x::Number) = isreal(x) && isfinite(x)
 
