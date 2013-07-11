@@ -17,7 +17,7 @@ const Gaussian = Normal
 
 @_jl_dist_2p Normal norm
 
-entropy(d::Normal) = (1.0 / 2.0) * log(2.0 * pi * e * d.std^2)
+entropy(d::Normal) = 0.5 * log(2.0 * pi) + 0.5 + log(d.std)
 
 insupport(d::Normal, x::Number) = isreal(x) && isfinite(x)
 

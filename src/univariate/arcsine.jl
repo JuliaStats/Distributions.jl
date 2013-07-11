@@ -13,8 +13,9 @@ function cdf(d::Arcsine, x::Real)
     end
 end
 
-# TODO: This is not right, but is close enough to pass our tests
-entropy(d::Arcsine) = -log(2.0) / pi
+# entropy(d::Arcsine) = log(pi) + digamma(0.5) + eulergamma
+# calculated using higher-precision arithmetic 
+entropy(d::Arcsine) = -0.24156447527049044469
 
 function insupport(d::Arcsine, x::Real)
     if 0 <= x <= 1.0
