@@ -25,7 +25,7 @@ function cdf(d::Categorical, x::Integer)
     end
 end
 
-entropy(d::Categorical) = pventropy(d.prob)
+entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
 
 function insupport(d::Categorical, x::Real)
     return isinteger(x) && 1 <= x <= length(d.prob) && d.prob[x] != 0.0

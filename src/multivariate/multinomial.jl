@@ -32,7 +32,7 @@ end
 
 Multinomial(d::Integer) = Multinomial(1, d)
 
-entropy(d::Multinomial) = pventropy(d.prob)
+entropy(d::Multinomial) = NumericExtensions.entropy(d.prob)
 
 function insupport{T <: Real}(d::Multinomial, x::Vector{T})
     n = length(x)

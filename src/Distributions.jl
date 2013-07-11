@@ -1,5 +1,6 @@
 module Distributions
 
+using NumericExtensions
 using Stats
 
 export                                  # types
@@ -124,7 +125,7 @@ export                                  # types
 import Base.mean, Base.median, Base.quantile
 import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
-import Stats.kurtosis, Stats.skewness
+import Stats.kurtosis, Stats.skewness, Stats.modes
 
 include("drawtable.jl")
 include("huffman.jl")

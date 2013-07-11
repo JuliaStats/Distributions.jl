@@ -45,7 +45,9 @@ for d in [Arcsine(),
           Erlang(17.0),
           Exponential(1.0),
           Exponential(5.1),
-          # FDist(2, 21), # Entropy wrong
+          FDist(9, 9),
+          FDist(9, 21),
+          FDist(21, 9),
           Gamma(3.0, 2.0),
           Gamma(2.0, 3.0),
           Gamma(3.0, 3.0),
@@ -137,7 +139,7 @@ for d in [Arcsine(),
     # Because of the Weak Law of Large Numbers,
     #  empirical mean should be close to theoretical value
     if isfinite(mu)
-        if sigma > 0.0
+        if isfinite(sigma) && sigma > 0.0
             @assert abs(mu - mu_hat) / sigma < 1e-0
         else
             @assert abs(mu - mu_hat) < 1e-1
@@ -180,6 +182,8 @@ for d in [Arcsine(),
     if insupport(d, m_hat) && isa(d, ContinuousDistribution)
         if isa(d, Cauchy) || isa(d, Laplace)
             @assert abs(m - m_hat) / d.scale < 1e-0
+        elseif isa(d, FDist)
+            println("Skipping median test for FDist")
         else
             # @assert norm(m - m_hat, Inf) < 1e-1
             @assert abs(m - m_hat) / sigma < 1e-0
@@ -210,7 +214,7 @@ for d in [Arcsine(),
 
     # Because of the Weak Law of Large Numbers,
     #  empirical covariance matrix should be close to theoretical value
-    if isfinite(mu)
+    if isfinite(mu) && isfinite(sigma)
         if sigma > 0.0
             @assert abs(sigma - sigma_hat) / sigma < 1e-0
         else
@@ -223,7 +227,7 @@ for d in [Arcsine(),
 
     # Because of the Weak Law of Large Numbers,
     #  empirical skewness should be close to theoretical value
-    if isfinite(mu)
+    if isfinite(mu) && isfinite(sk)
         if sk > 0.0
             @assert abs(sk - sk_hat) / sigma < 1e-0
         else
@@ -231,7 +235,12 @@ for d in [Arcsine(),
         end
     end
 
-    if isfinite(mu)
+    # Empirical kurtosis is very unstable for FDist
+    if isa(d, FDist)
+        continue
+    end
+
+    if isfinite(mu) && isfinite(k)
         if k > 0.0
             @assert abs(k - k_hat) / abs(k) < 1e-0
         else
