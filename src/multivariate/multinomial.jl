@@ -90,9 +90,30 @@ function logpdf{T <: Real}(d::Multinomial, x::Vector{T})
 end
 
 function rand!(d::Multinomial, x::Vector)
-    for itr in 1:d.n
-        i = rand(d.aliastable)
-        x[i] += 1
+    k = length(d.prob)
+    fill!(x, 0)
+    # TODO: Decide on cutoffs
+    if k < 1_000 && d.n > 1_000
+        # Switch to sequential binomial sampling for very large of draws in one vector
+        n = d.n
+        l = length(d.prob)
+        psum = 1.0
+        for j in 1:(l - 1)
+            tmp = rand(Binomial(n, d.prob[j] / psum))
+            x[j] = tmp
+            n -= tmp
+            if n == 0
+                break
+            end
+            psum -= d.prob[j]
+        end
+        x[k] = n
+        return x
+    else
+        for itr in 1:d.n
+            i = rand(d.aliastable)
+            x[i] += 1
+        end
     end
     return x
 end
