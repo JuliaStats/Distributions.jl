@@ -281,3 +281,9 @@ for f in (:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :quantile,
         end
     end
 end
+
+# Fitting
+
+fit{D <: Distribution}(d::Type{D}, x::Array) = fit_mle(d, x)
+
+

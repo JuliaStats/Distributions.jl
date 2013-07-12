@@ -53,9 +53,21 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 
 var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
 
-function fit(::Type{Binomial}, x::Real, n::Real)
-    if x > n || x < 0
-        error("For binomial observations, x must lie in [0, n]")
+function fit_mle{T<:Real}(::Type{Binomial}, n::Integer, x::Array{T})
+    # a series of experiments, each experiment has n trials
+    # x[i] is the number of successes in the i-th experiment
+
+    sx = 0.
+    for xi in x
+    	if xi < 0 || xi > n
+    		error("Each element in x must be in [0, n].")
+    	end
+    	sx += xi
     end
-    return Binomial(int(n), x / n)
+
+    Binomial(int(n), sx / (n * length(x)))
 end
+
+fit(::Type{Binomial}, n::Integer, x::Array) = fit_mle(Binomial, n, x)
+
+

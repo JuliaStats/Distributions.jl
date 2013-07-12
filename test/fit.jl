@@ -4,7 +4,7 @@ fit(Bernoulli, rand(Bernoulli(0.7), N))
 
 fit(Beta, rand(Beta(1.3, 3.7), N))
 
-fit(Binomial, rand(Binomial(N, 0.3)), N)
+fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 
 fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
 

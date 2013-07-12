@@ -153,7 +153,7 @@ function var(d::MultivariateNormal)
     return U'U
 end
 
-function fit{T <: Real}(::Type{MultivariateNormal}, X::Matrix{T})
+function fit_mle{T <: Real}(::Type{MultivariateNormal}, X::Matrix{T})
     MultivariateNormal(vec(mean(X, 2)), cov(X'))
 end
 

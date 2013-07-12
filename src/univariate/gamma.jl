@@ -97,7 +97,7 @@ skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 
-function fit(::Type{Gamma}, x::Array)
+function fit_mle(::Type{Gamma}, x::Array)
     a_old = 0.5 / (log(mean(x)) - mean(log(x)))
     a_new = 0.5 / (log(mean(x)) - mean(log(x)))
 
@@ -117,3 +117,4 @@ function fit(::Type{Gamma}, x::Array)
 
     Gamma(a_new, mean(x) / a_new)
 end
+

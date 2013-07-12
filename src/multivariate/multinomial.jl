@@ -140,6 +140,14 @@ function var(d::Multinomial)
     return S
 end
 
-function fit(::Type{Multinomial}, X::Matrix)
-    return Multinomial(sum(X[:, 1]), vec(mean(X, 2)))
+function fit_mle{T<:Real}(::Type{Multinomial}, X::Matrix{T})
+    ns = vec(sum(X, 1))
+    if !(all(ns .== ns[1]))
+        error("Each sample in X should have the same number of trials.")
+    end
+    n = int(ns[1])
+    p = vec(mean(X, 2)) * (1.0 / n)
+    Multinomial(n, p)
 end
+
+

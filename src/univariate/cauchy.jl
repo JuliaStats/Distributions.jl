@@ -38,7 +38,7 @@ skewness(d::Cauchy) = NaN
 
 var(d::Cauchy) = NaN
 
-function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
+function fit_mle{T <: Real}(::Type{Cauchy}, x::Array{T})
 	c = median(x)
 	l, u = iqr(x)
 	return Cauchy(c, (u - l) / 2.0)

@@ -52,4 +52,4 @@ skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
 
 var(d::Geometric) = (1.0 - d.prob) / d.prob^2
 
-fit(::Type{Geometric}, x::Array) = Geometric(1.0 / mean(x))
+fit_mle(::Type{Geometric}, x::Array) = Geometric(1.0 / mean(x))

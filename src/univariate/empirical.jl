@@ -67,7 +67,8 @@ skewness(d::EmpiricalUnivariateDistribution) = NaN
 
 var(d::EmpiricalUnivariateDistribution) = d.var
 
-function fit{T <: Real}(::Type{EmpiricalUnivariateDistribution},
+function fit_mle{T <: Real}(::Type{EmpiricalUnivariateDistribution},
 	                    x::Vector{T})
 	EmpiricalUnivariateDistribution(x)
 end
+

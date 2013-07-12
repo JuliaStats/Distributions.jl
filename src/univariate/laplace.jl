@@ -68,7 +68,7 @@ std(d::Laplace) = sqrt(2.0) * d.scale
 
 var(d::Laplace) = 2.0 * d.scale^2
 
-function fit(::Type{Laplace}, x::Array)
+function fit_mle(::Type{Laplace}, x::Array)
     n = length(x)
     a = median(x)
     deviations = 0.0
@@ -78,3 +78,5 @@ function fit(::Type{Laplace}, x::Array)
     b = deviations / n
     Laplace(a, b)
 end
+
+

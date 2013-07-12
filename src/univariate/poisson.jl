@@ -60,7 +60,7 @@ skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 
 var(d::Poisson) = d.lambda
 
-function fit(::Type{Poisson}, x::Array)
+function fit_mle(::Type{Poisson}, x::Array)
     for i in 1:length(x)
         if !insupport(Poisson(), x[i])
             error("Poisson observations must be non-negative integers")

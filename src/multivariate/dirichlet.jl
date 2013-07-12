@@ -141,7 +141,7 @@ function var(d::Dirichlet)
     return S
 end
 
-function fit{T <: Real}(::Type{Dirichlet}, P::Matrix{T})
+function fit_mle{T <: Real}(::Type{Dirichlet}, P::Matrix{T})
     K, N = size(P)
 
     alpha = zeros(Float64, K)

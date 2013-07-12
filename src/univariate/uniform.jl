@@ -45,6 +45,6 @@ function var(d::Uniform)
 	return w * w / 12.0
 end
 
-function fit{T <: Real}(::Type{Uniform}, x::Vector{T})
+function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
 	Uniform(min(x), max(x))
 end

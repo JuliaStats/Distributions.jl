@@ -47,4 +47,4 @@ std(d::Normal) = d.std
 
 var(d::Normal) = d.std^2
 
-fit{T <: Real}(::Type{Normal}, x::Array{T}) = Normal(mean(x), std(x))
+fit_mle{T <: Real}(::Type{Normal}, x::Array{T}) = Normal(mean(x), std(x))

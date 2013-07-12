@@ -98,7 +98,7 @@ skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
-function fit(::Type{Exponential}, x::Array)
+function fit_mle(::Type{Exponential}, x::Array)
     for i in 1:length(x)
         if !insupport(Exponential(), x[i])
             error("Exponential observations must be non-negative values")
@@ -106,3 +106,7 @@ function fit(::Type{Exponential}, x::Array)
     end
     return Exponential(mean(x))
 end
+
+fit(::Type{Exponential}, x::Array) = fit_mle(Exponential, x)
+
+
