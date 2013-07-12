@@ -23,38 +23,6 @@ ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
 
 cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
 
-function deviance{M<:Real,Y<:Real,W<:Real}(d::Distribution,
-                                           mu::AbstractArray{M},
-                                           y::AbstractArray{Y},
-                                           wt::AbstractArray{W})
-    promote_shape(size(mu), promote_shape(size(y), size(wt)))
-    ans = 0.0
-    for i in 1:length(y)
-        ans += wt[i] * logpdf(d, mu[i], y[i])
-    end
-    return -2.0 * ans
-end
-
-function devresid(d::Distribution, y::Real, mu::Real, wt::Real)
-    return -2.0 * wt * logpdf(d, mu, y)
-end
-
-function devresid{Y<:Real,M<:Real,W<:Real}(d::Distribution,
-                                           y::AbstractArray{Y},
-                                           mu::AbstractArray{M},
-                                           wt::AbstractArray{W})
-    R = Array(Float64, promote_shape(size(y), promote_shape(size(mu), size(wt))))
-    for i in 1:length(mu)
-        R[i] = devresid(d, y[i], mu[i], wt[i])
-    end
-    return R
-end
-
-function devresid(d::Distribution, y::Vector{Float64},
-                  mu::Vector{Float64}, wt::Vector{Float64})
-    return [devresid(d, y[i], mu[i], wt[i]) for i in 1:length(y)]
-end
-
 function insupport{T <: Real}(d::UnivariateDistribution,
                               X::Array{T})
     for el in X
@@ -175,16 +143,6 @@ logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
 
 function logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...)
     return logpdf!(r, d, args...)
-end
-
-function mustart{Y<:Real,W<:Real}(d::Distribution,
-                                  y::AbstractArray{Y},
-                                  wt::AbstractArray{W})
-    M = Array(Float64, promote_shape(size(y), size(wt)))
-    for i in 1:length(M)
-        M[i] = mustart(d, y[i], wt[i])
-    end
-    return M
 end
 
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
