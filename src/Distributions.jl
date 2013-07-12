@@ -4,8 +4,8 @@ using NumericExtensions
 using Stats
 
 export                                  # types
-    CauchitLink,
-    CloglogLink,
+#    CauchitLink,
+#    CloglogLink,
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
@@ -39,16 +39,16 @@ export                                  # types
     Geometric,
     Gumbel,
     HyperGeometric,
-    IdentityLink,
-    InverseLink,
+#    IdentityLink,
+#    InverseLink,
     InverseWishart,
     InvertedGamma,
     Laplace,
     Levy,
-    Link,
+#    Link,
     Logistic,
-    LogitLink,
-    LogLink,
+#    LogitLink,
+#    LogLink,
     logNormal,
     MixtureModel,
     Multinomial,
@@ -61,7 +61,7 @@ export                                  # types
     Normal,
     Pareto,
     Poisson,
-    ProbitLink,
+#    ProbitLink,
     Rayleigh,
     Skellam,
     TDist,
@@ -73,15 +73,15 @@ export                                  # types
     Wishart,
                                         # methods
     binaryentropy, # entropy of distribution in bits
-    canonicallink, # canonical link function for a distribution
+#    canonicallink, # canonical link function for a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
-    deviance,      # deviance of fitted and observed responses
-    devresid,      # vector of squared deviance residuals
+#    deviance,      # deviance of fitted and observed responses
+#    devresid,      # vector of squared deviance residuals
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
@@ -96,8 +96,8 @@ export                                  # types
     ismesokurtic,  # Is excess kurtosis = 0.0?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
-    linkfun,       # link function mapping mu to eta, the linear predictor
-    linkinv,       # inverse link mapping eta to mu
+#    linkfun,       # link function mapping mu to eta, the linear predictor
+#    linkinv,       # inverse link mapping eta to mu
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
     loglikelihood, # log probability of array of IID draws
@@ -110,8 +110,8 @@ export                                  # types
     mgf,           # moment generating function
     modes,         # mode(s) of distribution as vector
     moment,        # moments of distribution
-    mueta,         # derivative of inverse link function
-    mustart,       # starting values of mean vector in GLMs
+#    mueta,         # derivative of inverse link function
+#    mustart,       # starting values of mean vector in GLMs
     pdf,           # probability density function (ContinuousDistribution)
     pmf,           # probability mass function (DiscreteDistribution)
     quantile,      # inverse of cdf (defined for p in (0,1))
@@ -155,10 +155,6 @@ typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, Continu
 
 include("fallbacks.jl")
 include("rmath.jl")
-
-# TODO: Move these two methods into Stats
-xlogx(x::Real) = x == 0.0 ? 0.0 : x * log(x)
-xlogxdmu(x::Real, mu::Real) = x == 0.0 ? 0.0 : x * log(x / mu)
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))
@@ -220,7 +216,7 @@ include("mixturemodel.jl")
 include("sample.jl")
 
 # Link functions for GLM's
-include("glmtools.jl")
+#include("glmtools.jl")
 
 # REPL representations
 include("show.jl")
