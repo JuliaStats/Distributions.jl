@@ -8,12 +8,14 @@ for d in [Dirichlet([100.0, 17.0, 31.0, 45.0]),
           MultivariateNormal([0.0, 0.0], [1.0 0.9; 0.9 1.0])]
     # Check that we can generate a single random draw
     draw = rand(d)
+    @assert length(draw) == dim(d)
 
     # Check that draw satifies insupport()
     @assert insupport(d, draw)
 
     # Check that we can generate many random draws at once
     X = rand(d, n_samples)
+    @assert size(X, 1) == dim(d)
 
     # Check that sequence of draws satifies insupport()
     @assert insupport(d, X)

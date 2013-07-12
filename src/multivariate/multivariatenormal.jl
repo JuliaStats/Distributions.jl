@@ -21,6 +21,9 @@ function MultivariateNormal(cov::Matrix{Float64})
 end
 MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
+
+dim(d::MultivariateNormal) = length(d.mean)
+
 function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
     k = length(d.mean)
     if k > 3

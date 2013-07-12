@@ -82,6 +82,7 @@ export                                  # types
     cumulant,      # cumulants of distribution
     deviance,      # deviance of fitted and observed responses
     devresid,      # vector of squared deviance residuals
+    dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data
     freecumulant,  # free cumulants of distribution

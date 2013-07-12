@@ -19,6 +19,8 @@ Dirichlet(d::Integer, alpha::Real) = Dirichlet(fill(alpha, d))
 
 Dirichlet(dim::Integer) = Dirichlet(ones(dim))
 
+dim(d::Dirichlet) = length(d.alpha)
+
 function entropy(d::Dirichlet)
     k = length(d.alpha)
     en = lmnB(d)
