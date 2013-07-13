@@ -131,11 +131,6 @@ import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import Stats.kurtosis, Stats.skewness, Stats.modes
 
-include("drawtable.jl")
-include("huffman.jl")
-include("alias.jl")
-include("tvpack.jl")
-
 abstract Distribution
 abstract UnivariateDistribution             <: Distribution
 abstract MultivariateDistribution           <: Distribution
@@ -156,6 +151,11 @@ typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, Continu
 
 include("fallbacks.jl")
 include("rmath.jl")
+
+include("drawtable.jl")
+include("huffman.jl")
+include("alias.jl")
+include("tvpack.jl")
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))
