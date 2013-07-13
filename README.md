@@ -47,7 +47,7 @@ Generally, we observe following rules for sample types:
 
 As of version 0.0.0, the package implements the following distributions:
 
-*Discrete Distributions*:
+**Discrete Distributions**:
 
 * Bernoulli
 * Binomial
@@ -59,7 +59,7 @@ As of version 0.0.0, the package implements the following distributions:
 * Poisson
 * Skellam
 
-*Continuous Distributions*:
+**Continuous Distributions**:
 
 * Arcsine
 * Beta
