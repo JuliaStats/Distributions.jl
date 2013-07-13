@@ -1,3 +1,6 @@
+using Distributions
+using Base.Test
+
 # n probability points, i.e. the midpoints of the intervals [0, 1/n],...,[1-1/n, 1]
 probpts(n::Int) = ((1:n) - 0.5)/n  
 pp  = float(probpts(1000))              # convert from a Range{Float64}

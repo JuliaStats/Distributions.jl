@@ -1,3 +1,6 @@
+using Distributions
+using Base.Test
+
 probs = [0.2245, 0.1271, 0.3452, 0.3032]
 drawtable = Distributions.DiscreteDistributionTable(probs)
 rand(drawtable)
@@ -13,8 +16,8 @@ for table = [drawtable,aliastable]
 	results[i] = rand(table)
     end
 
-    @assert abs(sum(results .== 1) / N - probs[1]) < 0.1
-    @assert abs(sum(results .== 2) / N - probs[2]) < 0.1
-    @assert abs(sum(results .== 3) / N - probs[3]) < 0.1
-    @assert abs(sum(results .== 4) / N - probs[4]) < 0.1
+    @test abs(sum(results .== 1) / N - probs[1]) < 0.1
+    @test abs(sum(results .== 2) / N - probs[2]) < 0.1
+    @test abs(sum(results .== 3) / N - probs[3]) < 0.1
+    @test abs(sum(results .== 4) / N - probs[4]) < 0.1
 end

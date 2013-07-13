@@ -1,18 +1,17 @@
-using Distributions
-using Stats
-using Base.Test
 
-my_tests = ["test/distributions.jl", 
-            "test/utils.jl",
-            "test/fit.jl",
-            "test/truncate.jl",
-            "test/univariate.jl",
-            "test/multivariate.jl",
-            "test/matrix.jl"]
+tests = [
+	"distributions", 
+	"utils", 
+	"fit", 
+	"truncate", 
+	"univariate", 
+	"multivariate", 
+	"matrix"]
 
 println("Running tests:")
 
-for my_test in my_tests
-    println(" * $(my_test)")
-    include(my_test)
+for t in tests
+	test_fn = joinpath("test", "$t.jl")
+    println(" * $test_fn")
+    include(test_fn)
 end

@@ -10,6 +10,9 @@
 # These tests are quite slow, but are essential to verifying the
 # accuracy of our distributions
 
+using Distributions
+using Base.Test
+
 # Use a large, odd number of samples for testing all quantities
 n_samples = 5_000_001
 
@@ -113,13 +116,13 @@ for d in [Arcsine(),
     draw = rand(d)
 
     # Check that draw satifies insupport()
-    @assert insupport(d, draw)
+    @test insupport(d, draw)
 
     # Check that we can generate many random draws at once
     x = rand(d, n_samples)
 
     # Check that sequence of draws satifies insupport()
-    @assert insupport(d, x)
+    @test insupport(d, x)
 
     # Check that we can generate many random draws in-place
     rand!(d, x)
@@ -134,24 +137,24 @@ for d in [Arcsine(),
     #  is small
     # TODO: Restore the line below
     # d_hat = fit(typeof(d), x)
-    # TODO: @assert kl(d, d_hat) < 1e-2
+    # TODO: @test kl(d, d_hat) < 1e-2
 
     # Because of the Weak Law of Large Numbers,
     #  empirical mean should be close to theoretical value
     if isfinite(mu)
         if isfinite(sigma) && sigma > 0.0
-            @assert abs(mu - mu_hat) / sigma < 1e-0
+            @test abs(mu - mu_hat) / sigma < 1e-0
         else
-            @assert abs(mu - mu_hat) < 1e-1
+            @test abs(mu - mu_hat) < 1e-1
         end
     end
 
     # By the Asymptotic Equipartition Property,
     #  empirical mean negative log PDF should be close to theoretical value
     if isfinite(ent) && !isa(d, Arcsine)
-        # @assert norm(ent - ent_hat, Inf) < 1e-1
+        # @test norm(ent - ent_hat, Inf) < 1e-1
         if ent > 0.0
-            @assert abs(ent - ent_hat) / abs(ent) < 1e-0
+            @test abs(ent - ent_hat) / abs(ent) < 1e-0
         end
     end
 
@@ -159,9 +162,9 @@ for d in [Arcsine(),
 
     # Test non-logged PDF
     if isfinite(ent2) && !isa(d, Arcsine)
-        # @assert norm(ent - ent_hat, Inf) < 1e-1
+        # @test norm(ent - ent_hat, Inf) < 1e-1
         if ent2 > 0.0
-            @assert abs(ent2 - ent_hat2) / abs(ent2) < 1e-0
+            @test abs(ent2 - ent_hat2) / abs(ent2) < 1e-0
         end
     end
 
@@ -172,7 +175,7 @@ for d in [Arcsine(),
     # TODO: Test cdf, quantile
     if isa(d, ContinuousUnivariateDistribution)
         for p in 0.1:0.1:0.9
-            @assert abs(cdf(d, quantile(d, p)) - p) < 1e-8
+            @test abs(cdf(d, quantile(d, p)) - p) < 1e-8
         end
     end
 
@@ -181,12 +184,12 @@ for d in [Arcsine(),
     # TODO: Test median
     if insupport(d, m_hat) && isa(d, ContinuousDistribution)
         if isa(d, Cauchy) || isa(d, Laplace)
-            @assert abs(m - m_hat) / d.scale < 1e-0
+            @test abs(m - m_hat) / d.scale < 1e-0
         elseif isa(d, FDist)
             println("Skipping median test for FDist")
         else
-            # @assert norm(m - m_hat, Inf) < 1e-1
-            @assert abs(m - m_hat) / sigma < 1e-0
+            # @test norm(m - m_hat, Inf) < 1e-1
+            @test abs(m - m_hat) / sigma < 1e-0
         end
     end
 
@@ -195,10 +198,10 @@ for d in [Arcsine(),
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
             if insupport(d, ms[1] + 0.1)
-                @assert pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
+                @test pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
             end
             if insupport(d, ms[1] - 0.1)
-                @assert pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
+                @test pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
             end
         end
     end
@@ -216,9 +219,9 @@ for d in [Arcsine(),
     #  empirical covariance matrix should be close to theoretical value
     if isfinite(mu) && isfinite(sigma)
         if sigma > 0.0
-            @assert abs(sigma - sigma_hat) / sigma < 1e-0
+            @test abs(sigma - sigma_hat) / sigma < 1e-0
         else
-            @assert abs(sigma - sigma_hat) < 1e-1
+            @test abs(sigma - sigma_hat) < 1e-1
         end
     end
 
@@ -229,9 +232,9 @@ for d in [Arcsine(),
     #  empirical skewness should be close to theoretical value
     if isfinite(mu) && isfinite(sk)
         if sk > 0.0
-            @assert abs(sk - sk_hat) / sigma < 1e-0
+            @test abs(sk - sk_hat) / sigma < 1e-0
         else
-            @assert abs(sk - sk_hat) < 1e-1
+            @test abs(sk - sk_hat) < 1e-1
         end
     end
 
@@ -242,9 +245,9 @@ for d in [Arcsine(),
 
     if isfinite(mu) && isfinite(k)
         if k > 0.0
-            @assert abs(k - k_hat) / abs(k) < 1e-0
+            @test abs(k - k_hat) / abs(k) < 1e-0
         else
-            @assert abs(k - k_hat) < 1e-1
+            @test abs(k - k_hat) < 1e-1
         end
     end
 end

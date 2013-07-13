@@ -1,3 +1,5 @@
+using Distributions
+
 N = 100_000
 
 fit(Bernoulli, rand(Bernoulli(0.7), N))
