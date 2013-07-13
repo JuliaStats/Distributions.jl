@@ -7,10 +7,12 @@
 ##############################################################################
 
 immutable Bernoulli <: DiscreteUnivariateDistribution
-    prob::Float64
+    p0::Float64
+    p1::Float64
+
     function Bernoulli(p::Real)
         if 0.0 <= p <= 1.0
-            new(float64(p))
+            new(1.0 - p, float(p))
         else
             error("prob must be in [0,1]")
         end
@@ -19,47 +21,40 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
-cdf(d::Bernoulli, q::Real) = q < 0.0 ? 0.0 : (q >= 1.0 ? 1.0 : 1.0 - d.prob)
+cdf(d::Bernoulli, q::Real) = q >= 0. ? (q >= 1. ? 1.0 : d.p0) : 0.
 
-entropy(d::Bernoulli) = -xlogx(1.0 - d.prob) - xlogx(d.prob)
+function entropy(d::Bernoulli) 
+    p0 = d.p0
+    p1 = d.p1
+    p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
+end
 
 insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
 
-kurtosis(d::Bernoulli) = 1.0 / var(d) - 6.0
+mean(d::Bernoulli) = d.p1
 
-mean(d::Bernoulli) = d.prob
+var(d::Bernoulli) = d.p0 * d.p1
 
-median(d::Bernoulli) = d.prob < 0.5 ? 0.0 : 1.0
+skewness(d::Bernoulli) = (d.p0 - d.p1) / sqrt(d.p0 * d.p1)
 
-function mgf(d::Bernoulli, t::Real)
-    p = d.prob
-    return 1.0 - p + p * exp(t)
-end
+kurtosis(d::Bernoulli) = 1.0 / (d.p0 * d.p1) - 6.0
 
-function cf(d::Bernoulli, t::Real)
-    p = d.prob
-    return 1.0 - p + p * exp(im * t)
-end
+median(d::Bernoulli) = d.p1 < 0.5 ? 0.0 : 1.0
+
+mgf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(t)
+
+cf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(im * t)
 
 function modes(d::Bernoulli)
-    if d.prob < 0.5
-      return [0]
-    elseif d.prob == 0.5
-      return [0, 1]
-    else
-      return [1]
-    end
+    d.p1 < 0.5 ? [0] : 
+    d.p1 > 0.5 ? [1] : [0, 1]
 end
 
-pdf(d::Bernoulli, x::Real) = x == 0 ? (1.0 - d.prob) : (x == 1 ? d.prob : 0.0)
+pdf(d::Bernoulli, x::Real) = x == 0 ? d.p0 : x == 1 ? d.p1 : 0.0
 
-quantile(d::Bernoulli, p::Real) = 0.0 < p < 1.0 ? (p <= (1.0 - d.prob) ? 0 : 1) : NaN
+quantile(d::Bernoulli, p::Real) = 0.0 < p < 1.0 ? (p <= d.p0 ? 0 : 1) : NaN
 
-rand(d::Bernoulli) = rand() > d.prob ? 0 : 1
-
-skewness(d::Bernoulli) = (1.0 - 2.0 * d.prob) / std(d)
-
-var(d::Bernoulli) = d.prob * (1.0 - d.prob)
+rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
 function fit_mle(::Type{Bernoulli}, x::Array)
     for i in 1:length(x)
