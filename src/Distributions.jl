@@ -49,7 +49,7 @@ export                                  # types
     Logistic,
 #    LogitLink,
 #    LogLink,
-    logNormal,
+    LogNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,

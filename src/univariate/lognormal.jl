@@ -1,7 +1,7 @@
-immutable logNormal <: ContinuousUnivariateDistribution
+immutable LogNormal <: ContinuousUnivariateDistribution
     meanlog::Float64
     sdlog::Float64
-    function logNormal(ml::Real, sdl::Real)
+    function LogNormal(ml::Real, sdl::Real)
     	if sdl > 0.0
     		new(float64(ml), float64(sdl))
     	else
@@ -10,39 +10,39 @@ immutable logNormal <: ContinuousUnivariateDistribution
 	end
 end
 
-logNormal(ml::Real) = logNormal(ml, 1.0)
-logNormal() = logNormal(0.0, 1.0)
+LogNormal(ml::Real) = LogNormal(ml, 1.0)
+LogNormal() = LogNormal(0.0, 1.0)
 
-@_jl_dist_2p logNormal lnorm
+@_jl_dist_2p LogNormal lnorm
 
-entropy(d::logNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
+entropy(d::LogNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
 
-insupport(d::logNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
+insupport(d::LogNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
 
-function kurtosis(d::logNormal)
+function kurtosis(d::LogNormal)
     return exp(4.0 * d.sdlog^2) + 2.0 * exp(3.0 * d.sdlog^2) +
            3.0 * exp(2.0 * d.sdlog^2) - 6.0
 end
 
-mean(d::logNormal) = exp(d.meanlog + d.sdlog^2 / 2)
+mean(d::LogNormal) = exp(d.meanlog + d.sdlog^2 / 2)
 
-median(d::logNormal) = exp(d.meanlog)
+median(d::LogNormal) = exp(d.meanlog)
 
-# mgf(d::logNormal)
-# cf(d::logNormal)
+# mgf(d::LogNormal)
+# cf(d::LogNormal)
 
-modes(d::logNormal) = [exp(d.meanlog - d.sdlog^2)]
+modes(d::LogNormal) = [exp(d.meanlog - d.sdlog^2)]
 
-function skewness(d::logNormal)
+function skewness(d::LogNormal)
     return (exp(d.sdlog^2) + 2.0) * sqrt(exp(d.sdlog^2) - 1.0)
 end
 
-function var(d::logNormal)
+function var(d::LogNormal)
 	sigsq = d.sdlog^2
 	return (exp(sigsq) - 1) * exp(2d.meanlog + sigsq)
 end
 
-function fit_mle{T <: Real}(::Type{logNormal}, x::Array{T})
+function fit_mle{T <: Real}(::Type{LogNormal}, x::Array{T})
     lx = log(x)
-    return logNormal(mean(lx), std(lx))
+    return LogNormal(mean(lx), std(lx))
 end

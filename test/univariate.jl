@@ -71,9 +71,9 @@ for d in [Arcsine(),
           Logistic(0.0, 1.0),
           Logistic(10.0, 1.0),
           Logistic(0.0, 10.0),
-          logNormal(0.0, 1.0),
-          logNormal(10.0, 1.0),
-          logNormal(0.0, 10.0),
+          LogNormal(0.0, 1.0),
+          LogNormal(10.0, 1.0),
+          LogNormal(0.0, 10.0),
           # NegativeBinomial(),
           # NoncentralBeta(),
           # NoncentralChisq(),
@@ -205,7 +205,7 @@ for d in [Arcsine(),
 
     # Bail on higher moments for LogNormal distribution or
     # truncated distributions
-    if isa(d, logNormal) || isa(d, TruncatedUnivariateDistribution)
+    if isa(d, LogNormal) || isa(d, TruncatedUnivariateDistribution)
         continue
     end
 

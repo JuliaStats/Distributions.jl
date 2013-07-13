@@ -77,7 +77,7 @@ As of version 0.0.0, the package implements the following distributions:
 * Laplace
 * Levy
 * Logistic
-* logNormal
+* LogNormal
 * NoncentralBeta
 * NoncentralChisq
 * NoncentralF
