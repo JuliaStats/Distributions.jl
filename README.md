@@ -43,7 +43,7 @@ Generally, we observe following rules for sample types:
 
 
 
-#### Univariate Distributions:
+#### Univariate Distributions
 
 As of version 0.0.0, the package implements the following distributions:
 
@@ -89,13 +89,13 @@ As of version 0.0.0, the package implements the following distributions:
 * Uniform
 * Weibull
 
-#### Multivariate Distributions:
+#### Multivariate Distributions
 
 * Dirichlet
 * Multinomial
 * MultivariateNormal
 
-#### Matrix Distributions:
+#### Matrix Distributions
 
 * InverseWishart
 * MixtureModel
