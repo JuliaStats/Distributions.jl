@@ -16,7 +16,7 @@ DiscreteUniform() = DiscreteUniform(0, 1)
 function cdf(d::DiscreteUniform, k::Real)
     if k < d.a
         return 0.0
-    elseif <= d.b
+    elseif k <= d.b
         return (ifloor(k) - d.a + 1.0) / (d.b - d.a + 1.0)
     else
         return 1.0

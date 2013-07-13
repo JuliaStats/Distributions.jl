@@ -1,8 +1,8 @@
 
 tests = [
-	"distributions", 
 	"utils", 
 	"fit", 
+	"categorical",
 	"truncate", 
 	"univariate", 
 	"multivariate", 

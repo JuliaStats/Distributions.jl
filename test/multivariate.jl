@@ -69,3 +69,72 @@ for d in [Dirichlet([100.0, 17.0, 31.0, 45.0]),
     # TODO: Test kurtosis
     # TODO: Test skewness
 end
+
+
+#####
+#
+# Specialized testings
+#
+#####
+
+# Multinomial
+
+d = Multinomial(1, [0.5, 0.4, 0.1])
+d = Multinomial(1, 3)
+d = Multinomial(2)
+mean(d)
+var(d)
+@test insupport(d, [1, 0])
+@test !insupport(d, [1, 1])
+@test insupport(d, [0, 1])
+pmf(d, [1, 0])
+pmf(d, [1, 1])
+pmf(d, [0, 1])
+logpmf(d, [1, 0])
+logpmf(d, [1, 1])
+logpmf(d, [0, 1])
+d = Multinomial(10)
+rand(d)
+A = Array(Int, 10, 2)
+rand!(d, A)
+
+# Dirichlet
+
+d = Dirichlet([1.0, 2.0, 1.0])
+d = Dirichlet(3)
+mean(d)
+var(d)
+insupport(d, [0.1, 0.8, 0.1])
+insupport(d, [0.1, 0.8, 0.2])
+insupport(d, [0.1, 0.8])
+pdf(d, [0.1, 0.8, 0.1])
+rand(d)
+A = Array(Float64, 3, 10)
+rand!(d, A)
+
+d = Dirichlet([1.5, 2.0, 2.5])
+x = [0.2 0.5 0.3; 0.1 0.5 0.4; 0.8 0.1 0.1; 0.05 0.15 0.8]'
+
+r0 = zeros(4)
+for i = 1 : 4
+    r0[i] = logpdf(d, x[:,i])
+end
+@test_approx_eq logpdf(d, x) r0
+
+# MultivariateNormal
+
+d = MultivariateNormal(zeros(2), eye(2))
+@test abs(pdf(d, [0., 0.]) - 0.159155) < 1.0e-5
+@test abs(pdf(d, [1., 0.]) - 0.0965324) < 1.0e-5
+@test abs(pdf(d, [1., 1.]) - 0.0585498) < 1.0e-5
+
+d = MultivariateNormal(zeros(3), [4. -2. -1.; -2. 5. -1.; -1. -1. 6.])
+@test_approx_eq logpdf(d, [3., 4., 5.]) (-15.75539253001834)
+
+x = [3. 4. 5.; 1. 2. 3.; -4. -3. -2.; -1. -3. -2.]'
+r0 = zeros(4)
+for i = 1 : 4
+    r0[i] = logpdf(d, x[:,i])
+end
+@test_approx_eq logpdf(d, x) r0
+

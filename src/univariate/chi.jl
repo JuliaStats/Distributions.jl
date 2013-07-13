@@ -1,5 +1,7 @@
 immutable Chi <: ContinuousUnivariateDistribution
     df::Float64
+
+    Chi(df::Real) = new(float64(df))
 end
 
 cdf(d::Chi, x::Real) = regularized_gamma(d.df / 2.0, x^2 / 2.0)

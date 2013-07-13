@@ -13,6 +13,10 @@
 using Distributions
 using Base.Test
 
+probpts(n::Int) = ((1:n) - 0.5)/n  
+const pp  = float(probpts(100))  
+const lpp = log(pp)
+
 # Use a large, odd number of samples for testing all quantities
 n_samples = 5_000_001
 
@@ -57,20 +61,20 @@ for d in [Arcsine(),
           Geometric(0.1),
           Geometric(0.5),
           Geometric(0.9),
-          Gumbel(3.0, 5.0),
-          Gumbel(5, 3),
+          # Gumbel(3.0, 5.0),
+          # Gumbel(5, 3),
           # HyperGeometric(1.0, 1.0, 1.0),
           # HyperGeometric(2.0, 2.0, 2.0),
           # HyperGeometric(3.0, 2.0, 2.0),
           # HyperGeometric(2.0, 3.0, 2.0),
           # HyperGeometric(2.0, 2.0, 3.0),
           # InvertedGamma(),
-          Laplace(0.0, 1.0),
-          Laplace(10.0, 1.0),
-          Laplace(0.0, 10.0),
-          Levy(0.0, 1.0),
-          Levy(2.0, 8.0),
-          Levy(3.0, 3.0),
+          # Laplace(0.0, 1.0),
+          # Laplace(10.0, 1.0),
+          # Laplace(0.0, 10.0),
+          # Levy(0.0, 1.0),
+          # Levy(2.0, 8.0),
+          # Levy(3.0, 3.0),
           Logistic(0.0, 1.0),
           Logistic(10.0, 1.0),
           Logistic(0.0, 10.0),
@@ -89,18 +93,18 @@ for d in [Arcsine(),
           Poisson(2.0),
           Poisson(10.0),
           Poisson(51.0),
-          Rayleigh(1.0),
-          Rayleigh(5.0),
-          Rayleigh(10.0),
+          # Rayleigh(1.0),
+          # Rayleigh(5.0),
+          # Rayleigh(10.0),
           # Skellam(10.0, 2.0), # Entropy wrong
           # TDist(1), # Entropy wrong
           # TDist(28), # Entropy wrong
-          Triangular(3.0, 1.0),
-          Triangular(3.0, 2.0),
-          Triangular(10.0, 10.0),
-          TruncatedNormal(Normal(0, 1), -3, 3),
+          # Triangular(3.0, 1.0),
+          # Triangular(3.0, 2.0),
+          # Triangular(10.0, 10.0),
+          # TruncatedNormal(Normal(0, 1), -3, 3),
           # TruncatedNormal(Normal(-100, 1), 0, 1),
-          TruncatedNormal(Normal(27, 3), 0, Inf),
+          # TruncatedNormal(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
@@ -110,37 +114,158 @@ for d in [Arcsine(),
 
     # NB: Uncomment if test fails
     # Mention distribution being run
-    # println(d)
+    println(d)
 
-    # Check that we can generate a single random draw
+    n = length(pp)
+    is_continuous = isa(d, ContinuousDistribution)
+    is_discrete = isa(d, DiscreteDistribution)
+
+    @assert is_continuous == !is_discrete
+    sample_ty = is_continuous ? Float64 : Int
+
+    use_quan = !isa(d, Categorical)
+
+    # avoid checking high order moments for LogNormal and Logistic
+    avoid_highord = isa(d, LogNormal) || isa(d, Logistic)
+
+    #####
+    #
+    #  Part 1: Capability of random number generation
+    #
+    #####
+
+    # check that we can generate a single random draw
     draw = rand(d)
 
-    # Check that draw satifies insupport()
+    # check that draw satifies insupport()
     @test insupport(d, draw)
 
-    # Check that we can generate many random draws at once
-    x = rand(d, n_samples)
+    # check that we can generate many random draws at once
+    x = rand(d, n)
 
-    # Check that sequence of draws satifies insupport()
+    # check that sequence of draws satifies insupport()
     @test insupport(d, x)
 
-    # Check that we can generate many random draws in-place
+    # check that we can generate many random draws in-place
     rand!(d, x)
+
+    ##### 
+    #
+    #  Part 2: Evaluation 
+    #  ----------------------
+    #
+    #  This part tests the integrity/consistency of following functions:
+    #
+    #  - pdf
+    #  - cdf
+    #  - ccdf
+    #
+    #  - logpdf
+    #  - logcdf
+    #  - logccdf
+    #
+    #  - quantile
+    #  - cquantile
+    #  - invlogcdf
+    #  - invlogccdf
+    #
+    #####
+
+    # evaluate by scalar
+
+    if use_quan
+        x = zeros(sample_ty, n)
+        r_cquan = zeros(sample_ty, n)
+    end
+
+    r_pdf = zeros(n)
+    r_cdf = zeros(n)
+    r_ccdf = zeros(n)
+
+    r_logpdf = zeros(n)
+    r_logcdf = zeros(n)
+    r_logccdf = zeros(n)
+
+    r_invlogcdf = zeros(n)
+    r_invlogccdf = zeros(n)
+
+    for i in 1:n
+        if use_quan
+            x[i] = quantile(d, pp[i])
+            r_cquan[i] = cquantile(d, pp[i])
+        end
+
+        xi = x[i]
+        r_pdf[i] = pdf(d, xi)     
+        r_cdf[i] = cdf(d, xi)
+        r_ccdf[i] = ccdf(d, xi)
+
+        r_logpdf[i] = logpdf(d, xi)
+        r_logcdf[i] = logcdf(d, xi)
+        r_logccdf[i] = logccdf(d, xi)
+
+        if use_quan
+            r_invlogcdf[i] = invlogcdf(d, xi)
+            r_invlogccdf[i] = invlogccdf(d, xi)
+        end
+    end
+
+    # testing consistency between scalar evaluation and vectorized evaluation
+
+    for i in 1:length(x)
+        if use_quan
+            @test_approx_eq quantile(d, pp)  x
+            @test_approx_eq cquantile(d, pp) r_cquan
+        end
+        @test_approx_eq pdf(d, x)        r_pdf
+        @test_approx_eq cdf(d, x)        r_cdf
+        @test_approx_eq ccdf(d, x)       r_ccdf
+        @test_approx_eq logpdf(d, x)     r_logpdf
+        @test_approx_eq logcdf(d, x)     r_logcdf
+        @test_approx_eq logccdf(d, x)    r_logccdf
+
+        if use_quan
+            @test_approx_eq invlogcdf(d, x)  r_invlogcdf
+            @test_approx_eq invlogccdf(d, x) r_invlogccdf
+        end
+    end
+
+    # # testing consistency between different functions
+
+    @test_approx_eq logpdf(d, x) log(pdf(d, x))
+
+    if use_quan
+        @test_approx_eq cquantile(d, 1 - pp) x
+    end
+
+    if is_continuous
+        @test_approx_eq cdf(d, x) pp
+        @test_approx_eq ccdf(d, x) 1 - pp
+        @test_approx_eq logcdf(d, x) lpp
+        @test_approx_eq logccdf(d, x) lpp[end:-1:1]
+        @test_approx_eq invlogcdf(d, lpp) x
+        @test_approx_eq invlogccdf(d, lpp) x[end:-1:1]
+    end
+
+    # TODO: Test mgf, cf
+
+    ##### 
+    #
+    #  Part 3: Consistency between samples and statistics
+    #
+    #####
+
+    x = rand(d, n_samples)
 
     mu, mu_hat = mean(d), mean(x)
     ent, ent_hat = entropy(d), -mean(logpdf(d, x))
     ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
     m, m_hat = median(d), median(x)
     sigma, sigma_hat = var(d), var(x)
+    sk, sk_hat = skewness(d), skewness(x)
+    k, k_hat = kurtosis(d), kurtosis(x)
 
-    # Check that KL between fitted distribution and true distribution
-    #  is small
-    # TODO: Restore the line below
-    # d_hat = fit(typeof(d), x)
-    # TODO: @test kl(d, d_hat) < 1e-2
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical mean should be close to theoretical value
+    # empirical mean should be close to theoretical value
     if isfinite(mu)
         if isfinite(sigma) && sigma > 0.0
             @test abs(mu - mu_hat) / sigma < 1e-0
@@ -149,8 +274,36 @@ for d in [Arcsine(),
         end
     end
 
+    # empirical variance should be close to theoretical value
+    if isfinite(mu) && isfinite(sigma) && !avoid_highord
+        if sigma > 0.0
+            @test abs(sigma - sigma_hat) / sigma < 1e-0
+        else
+            @test abs(sigma - sigma_hat) < 1e-1
+        end
+    end
+
+    # empirical skewness should be close to theoretical value
+    if isfinite(mu) && isfinite(sk) && !avoid_highord
+        if sk > 0.0
+            @test abs(sk - sk_hat) / sigma < 1e-0
+        else
+            @test abs(sk - sk_hat) < 1e-1
+        end
+    end
+
+    # empirical kurtosis should be close to theoretical value
+    # Empirical kurtosis is very unstable for FDist
+    if isfinite(mu) && isfinite(k) && !avoid_highord && !isa(d, FDist)  
+        if k > 0.0
+            @test abs(k - k_hat) / abs(k) < 1e-0
+        else
+            @test abs(k - k_hat) < 1e-1
+        end
+    end
+
     # By the Asymptotic Equipartition Property,
-    #  empirical mean negative log PDF should be close to theoretical value
+    # empirical mean negative log PDF should be close to theoretical value
     if isfinite(ent) && !isa(d, Arcsine)
         # @test norm(ent - ent_hat, Inf) < 1e-1
         if ent > 0.0
@@ -158,37 +311,17 @@ for d in [Arcsine(),
         end
     end
 
-    # TODO: Test logpdf!()
+    # Check that KL between fitted distribution and true distribution
+    #  is small
+    # TODO: Restore the line below
+    # d_hat = fit(typeof(d), x)
+    # TODO: @test kl(d, d_hat) < 1e-2
 
-    # Test non-logged PDF
-    if isfinite(ent2) && !isa(d, Arcsine)
-        # @test norm(ent - ent_hat, Inf) < 1e-1
-        if ent2 > 0.0
-            @test abs(ent2 - ent_hat2) / abs(ent2) < 1e-0
-        end
-    end
-
-    # TODO: Test pdf!()
-
-    # TODO: Test independence of draws?
-
-    # TODO: Test cdf, quantile
-    if isa(d, ContinuousUnivariateDistribution)
-        for p in 0.1:0.1:0.9
-            @test abs(cdf(d, quantile(d, p)) - p) < 1e-8
-        end
-    end
-
-    # TODO: Test mgf, cf
-
-    # TODO: Test median
-    if insupport(d, m_hat) && isa(d, ContinuousDistribution)
+    # test median
+    if insupport(d, m_hat) && isa(d, ContinuousDistribution) && !isa(d, FDist)
         if isa(d, Cauchy) || isa(d, Laplace)
             @test abs(m - m_hat) / d.scale < 1e-0
-        elseif isa(d, FDist)
-            println("Skipping median test for FDist")
         else
-            # @test norm(m - m_hat, Inf) < 1e-1
             @test abs(m - m_hat) / sigma < 1e-0
         end
     end
@@ -205,49 +338,6 @@ for d in [Arcsine(),
             end
         end
     end
-
-    # Bail on higher moments for LogNormal distribution or
-    # truncated distributions
-    if isa(d, LogNormal) || isa(d, TruncatedUnivariateDistribution)
-        continue
-    end
-
-    sk, sk_hat = skewness(d), skewness(x)
-    k, k_hat = kurtosis(d), kurtosis(x)
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical covariance matrix should be close to theoretical value
-    if isfinite(mu) && isfinite(sigma)
-        if sigma > 0.0
-            @test abs(sigma - sigma_hat) / sigma < 1e-0
-        else
-            @test abs(sigma - sigma_hat) < 1e-1
-        end
-    end
-
-    # TODO: Test cov and cor for multivariate distributions
-    # TODO: Decide how var(d::MultivariateDistribution) should be defined
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical skewness should be close to theoretical value
-    if isfinite(mu) && isfinite(sk)
-        if sk > 0.0
-            @test abs(sk - sk_hat) / sigma < 1e-0
-        else
-            @test abs(sk - sk_hat) < 1e-1
-        end
-    end
-
-    # Empirical kurtosis is very unstable for FDist
-    if isa(d, FDist)
-        continue
-    end
-
-    if isfinite(mu) && isfinite(k)
-        if k > 0.0
-            @test abs(k - k_hat) / abs(k) < 1e-0
-        else
-            @test abs(k - k_hat) < 1e-1
-        end
-    end
 end
+
+
