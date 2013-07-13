@@ -4,7 +4,21 @@
 #
 ##############################################################################
 
-binaryentropy(d::Distribution) = entropy(d) / log(2)
+
+#### Statistics ####
+
+std(d::Distribution) = sqrt(var(d))
+
+cov(d::MultivariateDistribution) = var(d)
+
+# What's the purpose for this function?
+function var{M <: Real}(d::UnivariateDistribution, mu::AbstractArray{M})
+    V = similar(mu, Float64)
+    for i in 1:length(mu)
+        V[i] = var(d, mu[i])
+    end
+    return V
+end
 
 function cor(d::MultivariateDistribution)
     R = copy(d.cov)
@@ -17,58 +31,7 @@ function cor(d::MultivariateDistribution)
     return R
 end
 
-cov(d::MultivariateDistribution) = var(d)
-
-ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
-
-cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
-
-function insupport{T <: Real}(d::UnivariateDistribution,
-                              X::Array{T})
-    for el in X
-        if !insupport(d, el)
-            return false
-        end
-    end
-    return true
-end
-
-function insupport{T <: Real}(d::MultivariateDistribution,
-                              X::Matrix{T})
-    res = true
-    for i in 1:size(X, 2)
-        res &= insupport(d, X[:, i])
-    end
-    return res
-    # TODO: Determine which is faster
-    # for i in 1:size(X, 2)
-    #     if !insupport(d, X[:, i])
-    #         return false
-    #     end
-    # end
-    # return true
-end
-
-function insupport{T <: Real}(d::MatrixDistribution,
-                              X::Array{T})
-    res = true
-    for i in 1:size(X, 3)
-        res &= insupport(d, X[:, :, i])
-    end
-    return res
-end
-
-insupport(d::Distribution, x::Any) = false
-
-invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
-
-invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
-
-isplatykurtic(d::Distribution) = kurtosis(d) > 0.0
-
-isleptokurtic(d::Distribution) = kurtosis(d) < 0.0
-
-ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
+binaryentropy(d::Distribution) = entropy(d) / log(2)
 
 # kurtosis returns excess kurtosis by default
 # proper kurtosis can be returned with correction = false
@@ -79,13 +42,65 @@ function kurtosis(d::Distribution, correction::Bool)
         return kurtosis(d) + 3.0
     end
 end
+
 excess(d::Distribution) = kurtosis(d)
 excess_kurtosis(d::Distribution) = kurtosis(d)
 proper_kurtosis(d::Distribution) = kurtosis(d, false)
 
-logcdf(d::Distribution, q::Real) = log(cdf(d,q))
+isplatykurtic(d::Distribution) = kurtosis(d) > 0.0
+isleptokurtic(d::Distribution) = kurtosis(d) < 0.0
+ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
 
+# Activate after checking all distributions have something written out
+# median(d::UnivariateDistribution) = quantile(d, 0.5)
+
+#### pdf, cdf, and quantile ####
+
+logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
+pdf(d::MultivariateDistribution, x::Vector) = exp(logpdf(d, x))
+
+ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
+cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
+
+logcdf(d::Distribution, q::Real) = log(cdf(d,q))
 logccdf(d::Distribution, q::Real) = log(ccdf(d,q))
+invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
+invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
+
+
+#### insupport ####
+
+insupport(d::Distribution, x) = false
+
+function insupport(d::UnivariateDistribution, X::Array)
+    for el in X
+        if !insupport(d, el)
+            return false
+        end
+    end
+    return true
+end
+
+function insupport(d::MultivariateDistribution, X::Matrix)
+    for i in 1 : size(X, 2)
+        if !insupport(d, X[:, i])  # short-circuit is generally faster
+            return false
+        end
+    end
+    return true
+end
+
+function insupport(d::MatrixDistribution, X::Array)
+    for i in 1 : size(X, 3)
+        if !insupport(d, X[:, :, i])
+            return false
+        end
+    end
+    return true
+end
+
+
+#### log likelihood ####
 
 function loglikelihood(d::UnivariateDistribution, X::Array)
     ll = 0.0
@@ -103,64 +118,67 @@ function loglikelihood(d::MultivariateDistribution, X::Matrix)
     return ll
 end
 
-logpdf(d::Distribution, x::Real) = log(pdf(d,x))
 
-function logpdf!(r::AbstractArray, d::UnivariateDistribution, x::AbstractArray)
-    if size(x) != size(r)
-        throw(ArgumentError("Inconsistent array dimensions."))
-    end    
-    for i in 1:length(x)
-        r[i] = logpdf(d, x[i])
+#### Vectorized functions for univariate distributions ####
+
+for fun in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :invlogcdf, :invlogccdf, :quantile, :cquantile]
+    fun! = symbol(string(fun, '!'))
+
+    @eval begin
+        function ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
+            if length(r) != length(X)
+                throw(ArgumentError("Inconsistent array dimensions."))
+            end
+            for i in 1 : length(X)
+                r[i] = ($fun)(d, X[i])
+            end
+            r
+        end
+
+        function ($fun)(d::UnivariateDistribution, X::AbstractArray)
+            ($fun!)(Array(Float64, size(X)), d, X)
+        end
     end
 end
 
-function logpdf(d::MultivariateDistribution, x::AbstractMatrix)
-    n::Int = size(x, 2)
-    r = Array(Float64, n)   
-    for i in 1:n
-        r[i] = logpdf(d, x[:, i])
-    end
-    r
-end
-
-# function logpdf{T <: Real}(d::Dirichlet, x::Matrix{T})
-#     r = Array(Float64, size(x, 2))
-#     logpdf!(r, d, x)
-#     return r
-# end
+#### Vectorized functions for multivariate distributions ####
 
 function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::AbstractMatrix)
     n::Int = size(x, 2)
     if length(r) != n
         throw(ArgumentError("Inconsistent array dimensions."))
     end
-    for i = 1:n
+    for i in 1 : n
         r[i] = logpdf(d, x[:, i])
     end
+    r
 end
 
-logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
-
-function logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...)
-    return logpdf!(r, d, args...)
-end
-
-pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
-
-function pdf(d::MultivariateDistribution, X::AbstractMatrix)
-    r = Array(Float64, size(X, 2))
-    return pdf!(r, d, X)
+function logpdf(d::MultivariateDistribution, X::AbstractMatrix)  
+    logpdf!(Array(Float64, size(X, 2)), d, X)
 end
 
 function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1:size(X, 2)
-        r[i] = pdf(d, X[:, i])
+    logpdf!(r, d, X)  # size checking is done by logpdf!
+    for i in 1 : size(X, 2)
+        r[i] = exp(r[i])
     end
-    return r
+    r
 end
 
-# Activate after checking all distributions have something written out
-# median(d::UnivariateDistribution) = quantile(d, 0.5)
+function pdf(d::MultivariateDistribution, X::AbstractMatrix)
+    pdf!(Array(Float64, size(X, 2)), d, X)
+end
+
+
+#### logpmf & pmf for discrete distributions ####
+
+logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
+logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d, args...)
+pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
+
+
+#### Sampling: rand & rand! ####
 
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A)
@@ -181,28 +199,26 @@ function rand(d::NonMatrixDistribution, dims::Integer...)
     return rand(d, map(int, dims))
 end
 
-function rand(d::ContinuousMultivariateDistribution, dims::Integer)
-    return rand!(d, Array(Float64, length(mean(d)), dims))
+function rand(d::ContinuousMultivariateDistribution, n::Integer)
+    return rand!(d, Array(Float64, dim(d), n))
 end
 
-function rand(d::DiscreteMultivariateDistribution, dims::Integer)
-    return rand!(d, Array(Int, length(mean(d)), dims))
+function rand(d::DiscreteMultivariateDistribution, n::Integer)
+    return rand!(d, Array(Int, dim(d), n))
 end
 
-function rand(d::MatrixDistribution, dims::Integer)
-    return rand!(d, Array(Matrix{Float64}, int(dims)))
+function rand(d::MatrixDistribution, n::Integer)
+    return rand!(d, Array(Matrix{Float64}, n))
 end
 
 function rand!(d::MultivariateDistribution, X::Matrix)
-    k = length(mean(d))
-    m, n = size(X)
-    if m != k
-        error("Wrong dimensions")
+    if size(X, 1) != dim(d)
+        error("Inconsistent argument dimensions")
     end
-    for i in 1:n
+    for i in 1 : size(X, 2)
         X[:, i] = rand(d)
     end
-    return X
+    X
 end
 
 function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
@@ -212,32 +228,9 @@ function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
     return X
 end
 
+
 function sprand(m::Integer, n::Integer, density::Real, d::Distribution)
     return sprand(m, n, density, n -> rand(d, n))
-end
-
-std(d::Distribution) = sqrt(var(d))
-
-function var{M <: Real}(d::Distribution, mu::AbstractArray{M})
-    V = similar(mu, Float64)
-    for i in 1:length(mu)
-        V[i] = var(d, mu[i])
-    end
-    return V
-end
-
-# Vectorize methods
-for f in (:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :quantile,
-          :cquantile, :invlogcdf, :invlogccdf)
-    @eval begin  
-        function ($f)(d::UnivariateDistribution, x::AbstractArray)
-            res = Array(Float64, size(x))
-            for i in 1:length(res)
-                res[i] = ($f)(d, x[i])
-            end
-            return res
-        end
-    end
 end
 
 # Fitting

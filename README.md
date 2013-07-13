@@ -159,6 +159,7 @@ rand!(d, a)     # generates samples to a pre-allocated array a
 The following methods are implemented for multivariate distributions:
 
 ```julia
+dim(d)          # sample dimension, i.e. length of each sample
 mean(d)         # mean vector
 cov(d)          # covariance matrix
 entropy(d)      # entropy

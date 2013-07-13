@@ -84,7 +84,7 @@ function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
     for i in 1:n
         r[i] -= b
     end
-    return
+    r
 end
 
 function rand!(d::Dirichlet, x::Vector)

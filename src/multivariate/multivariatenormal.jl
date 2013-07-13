@@ -102,13 +102,9 @@ function logpdf!{T <: Real}(r::AbstractVector,
         end      
         r[j] = c - 0.5 * dot_uj
     end
+    r
 end
 
-function logpdf{T <: Real}(d::MultivariateNormal, x::Matrix{T})
-    r = Array(Float64, size(x, 2))
-    logpdf!(r, d, x)
-    return r
-end
 
 function rand!(d::MultivariateNormal, x::Vector, tmp::Vector)
     randn!(tmp)
