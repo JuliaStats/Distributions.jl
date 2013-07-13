@@ -21,7 +21,6 @@ Bernoulli() = Bernoulli(0.5)
 
 cdf(d::Bernoulli, q::Real) = q < 0.0 ? 0.0 : (q >= 1.0 ? 1.0 : 1.0 - d.prob)
 
-xlogx{T<:FloatingPoint}(x::T) = x > 0 ? x * log(x) : zero(T)
 entropy(d::Bernoulli) = -xlogx(1.0 - d.prob) - xlogx(d.prob)
 
 insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
