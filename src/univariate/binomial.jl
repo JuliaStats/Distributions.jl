@@ -17,6 +17,9 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
+min(d::Binomial) = 0
+max(d::Binomial) = d.size
+
 @_jl_dist_2p Binomial binom
 
 function entropy(d::Binomial)

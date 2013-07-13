@@ -21,6 +21,9 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
+min(d::Bernoulli) = 0
+max(d::Bernoulli) = 1
+
 cdf(d::Bernoulli, q::Real) = q >= 0. ? (q >= 1. ? 1.0 : d.p0) : 0.
 
 function entropy(d::Bernoulli) 

@@ -126,7 +126,7 @@ export                                  # types
     validmu,       # validity check on mean vector
     var            # variance of distribution
 
-import Base.mean, Base.median, Base.quantile
+import Base.mean, Base.median, Base.quantile, Base.max, Base.min
 import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import Stats.kurtosis, Stats.skewness, Stats.modes

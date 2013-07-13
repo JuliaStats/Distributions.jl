@@ -13,6 +13,9 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
+min(d::DiscreteUniform) = d.a
+max(d::DiscreteUniform) = d.b
+
 function cdf(d::DiscreteUniform, k::Real)
     if k < d.a
         return 0.0

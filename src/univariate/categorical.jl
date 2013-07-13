@@ -5,13 +5,16 @@ immutable Categorical <: DiscreteUnivariateDistribution
         length(p) > 1 || error("Categorical: there must be at least two categories")
         pv = T <: Float64 ? copy(p) : float64(p)
         all(pv .>= 0.) || error("Categorical: probabilities must be non-negative")
-        sump = sum(pv); sump > 0. || error("Categorical: sum(p) = 0.")
+        sump = sum(pv); sump > 0. || error("Categorical: sum(p) > 0.")
         pv ./= sump
         new(pv, AliasTable(pv))
     end
 end
 
 Categorical(d::Integer) = Categorical(ones(d))
+
+min(d::Categorical) = 1
+max(d::Categorical) = length(d.prob)
 
 function cdf(d::Categorical, x::Integer)
     if !insupport(d, x)
