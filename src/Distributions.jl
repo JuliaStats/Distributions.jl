@@ -119,6 +119,7 @@ export                                  # types
     rand,          # random sampler
     rand!,         # replacement random sampler
     sample,        # another random sampler - not sure why this is here
+    sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution

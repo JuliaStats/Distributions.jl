@@ -13,7 +13,12 @@ function AliasTable(probs)
     smalls = Array(Int,0)
 
     for i = 1:n
-        accept[i] > 1.0 ? push!(larges,i) : push!(smalls,i)
+        acci = accept[i] 
+        if acci > 1.0 
+            push!(larges,i)
+        elseif acci < 1.0
+            push!(smalls,i)
+        end
     end
     while !isempty(larges) && !isempty(smalls)
         s = pop!(smalls)
@@ -40,3 +45,5 @@ function rand(a::AliasTable)
     u = rand()
     u < a.accept[i] ? i : a.alias[i]
 end
+
+Base.show(io::IO, a::AliasTable) = @printf io "AliasTable with %d entries" length(a.accept)

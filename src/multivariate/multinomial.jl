@@ -1,7 +1,6 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
-    aliastable::AliasTable
     function Multinomial{T <: Real}(n::Integer, p::Vector{T})
         p = float(p)
         if n <= 0
@@ -17,22 +16,34 @@ immutable Multinomial <: DiscreteMultivariateDistribution
         for i in 1:length(p)
             p[i] /= sump
         end
-        new(int(n), p, AliasTable(p))
+        new(int(n), p)
     end
 end
 
+immutable MultinomialSampler <: DiscreteMultivariateDistribution
+    d::Multinomial
+    alias::AliasTable
+    function MultinomialSampler(d::Multinomial)
+        new(d, AliasTable(d.prob))
+    end
+end
+
+sampler(d::Multinomial) = MultinomialSampler(d)
+
 function Multinomial(n::Integer, d::Integer)
-    if d <= 1
-        error("d must be greater than 1")
+    if d < 1
+        error("d must be greater than 0")
     end
     prob = Array(Float64, d)
     fill!(prob, 1.0 / d)
     Multinomial(n, prob)
 end
 
+# TODO: Debate removing this
 Multinomial(d::Integer) = Multinomial(1, d)
 
 dim(d::Multinomial) = length(d.prob)
+dim(s::MultinomialSampler) = length(s.d.prob)
 
 entropy(d::Multinomial) = NumericExtensions.entropy(d.prob)
 
@@ -91,16 +102,33 @@ function logpdf{T <: Real}(d::Multinomial, x::Vector{T})
     end
 end
 
-function rand!(d::Multinomial, x::Vector)
-    k = length(d.prob)
+# TODO: Debate making T <: Integer
+function rand!{T <: Real}(d::Multinomial, x::Vector{T})
+    n, k = d.n, dim(d)
     fill!(x, 0)
-    # TODO: Decide on cutoffs
-    if k < 1_000 && d.n > 1_000
-        # Switch to sequential binomial sampling for very large of draws in one vector
-        n = d.n
-        l = length(d.prob)
+    psum = 1.0
+    for j in 1:(k - 1)
+        tmp = rand(Binomial(n, d.prob[j] / psum))
+        x[j] = tmp
+        n -= tmp
+        if n == 0
+            break
+        end
+        psum -= d.prob[j]
+    end
+    x[k] = n
+    return x
+end
+
+function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
+    d = s.d
+    n, k = d.n, dim(d)
+    fill!(x, 0)
+    if n^2 > k
+        # Use sequential binomial sampling
+        # TODO: Refactor this code to make it DRYer
         psum = 1.0
-        for j in 1:(l - 1)
+        for j in 1:(k - 1)
             tmp = rand(Binomial(n, d.prob[j] / psum))
             x[j] = tmp
             n -= tmp
@@ -110,19 +138,23 @@ function rand!(d::Multinomial, x::Vector)
             psum -= d.prob[j]
         end
         x[k] = n
-        return x
     else
-        for itr in 1:d.n
-            i = rand(d.aliastable)
-            x[i] += 1
+        # Use an alias table
+        for itr in 1:n
+            x[rand(s.alias)] += 1
         end
     end
     return x
 end
 
 function rand(d::Multinomial)
-    x = zeros(Int, length(d.prob))
+    x = zeros(Int, dim(d))
     return rand!(d, x)
+end
+
+function rand(s::MultinomialSampler)
+    x = zeros(Int, dim(s.d))
+    return rand!(s, x)
 end
 
 function var(d::Multinomial)
@@ -149,5 +181,3 @@ function fit_mle{T<:Real}(::Type{Multinomial}, X::Matrix{T})
     p = vec(mean(X, 2)) * (1.0 / n)
     Multinomial(n, p)
 end
-
-
