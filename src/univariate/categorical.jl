@@ -1,17 +1,34 @@
 immutable Categorical <: DiscreteUnivariateDistribution
     K::Int
     prob::Vector{Float64}
-    aliastable::AliasTable
-
     function Categorical{T <: Real}(p::Vector{T})
-        length(p) > 1 || error("Categorical: there must be at least two categories")
-        pv = T <: Float64 ? copy(p) : float64(p)
-        all(pv .>= 0.) || error("Categorical: probabilities must be non-negative")
-        sump = sum(pv); sump > 0. || error("Categorical: sum(p) > 0.")
-        pv ./= sump
-        new(length(pv), pv, AliasTable(pv))
+        k = length(p)
+        k > 1 || error("Categorical: there must be at least one category")
+        pv = Array(Float64, k)
+        sump = 0.0
+        for i in 1:k
+            tmp = float64(p[i])
+            tmp >= 0 || error("Categorical: probabilities must be non-negative")
+            pv[i] = tmp
+            sump += tmp
+        end
+        sump > 0 || error("Categorical: sum(p) > 0")
+        for i in 1:k
+            pv[i] /= sump
+        end
+        new(k, pv)
     end
 end
+
+immutable CategoricalSampler <: DiscreteUnivariateDistribution
+    d::Categorical
+    alias::AliasTable
+    function CategoricalSampler(d::Categorical)
+        new(d, AliasTable(d.prob))
+    end
+end
+
+sampler(d::Categorical) = CategoricalSampler(d)
 
 Categorical(d::Integer) = Categorical(ones(d))
 
@@ -99,7 +116,19 @@ function quantile(d::Categorical, p::Real)
     return i
 end
 
-rand(d::Categorical) = rand(d.aliastable)
+function rand(d::Categorical)
+    u = rand()
+    sump = 0.0 
+    for i in 1:d.K
+        sump += d.prob[i]
+        if u <= sump
+            return i
+        end
+    end
+    return d.K
+end
+
+rand(s::CategoricalSampler) = rand(s.alias)
 
 function skewness(d::Categorical)
     m = mean(d)
@@ -110,9 +139,8 @@ function skewness(d::Categorical)
     return s / std(d)^3
 end
 
-var(d::Categorical) = var(d, mean(d))
-
-function var(d::Categorical, m::Number)
+function var(d::Categorical)
+    m = mean(d)
     s = 0.0
     for i in 1:d.K
         s += (i - m)^2 * d.prob[i]
@@ -122,8 +150,12 @@ end
 
 function fit_mle{T <: Real}(::Type{Categorical}, x::Array{T})
     # Counts for all categories
-    return Categorical()
+    n = length(x)
+    tab = table(x)
+    k = max(keys(tab))
+    p = Array(Float64, k)
+    for i in 1:k
+        p[i] = get(tab, i, 0) / n
+    end
+    return Categorical(p)
 end
-
-
-
