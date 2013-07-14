@@ -123,8 +123,6 @@ for d in [Arcsine(),
     @assert is_continuous == !is_discrete
     sample_ty = is_continuous ? Float64 : Int
 
-    use_quan = !isa(d, Categorical)
-
     # avoid checking high order moments for LogNormal and Logistic
     avoid_highord = isa(d, LogNormal) || isa(d, Logistic)
 
@@ -173,10 +171,8 @@ for d in [Arcsine(),
 
     # evaluate by scalar
 
-    if use_quan
-        x = zeros(sample_ty, n)
-        r_cquan = zeros(sample_ty, n)
-    end
+    x = zeros(sample_ty, n)
+    r_cquan = zeros(sample_ty, n)
 
     r_pdf = zeros(n)
     r_cdf = zeros(n)
@@ -190,10 +186,8 @@ for d in [Arcsine(),
     r_invlogccdf = zeros(n)
 
     for i in 1:n
-        if use_quan
-            x[i] = quantile(d, pp[i])
-            r_cquan[i] = cquantile(d, pp[i])
-        end
+        x[i] = quantile(d, pp[i])
+        r_cquan[i] = cquantile(d, pp[i])
 
         xi = x[i]
         r_pdf[i] = pdf(d, xi)     
@@ -204,19 +198,15 @@ for d in [Arcsine(),
         r_logcdf[i] = logcdf(d, xi)
         r_logccdf[i] = logccdf(d, xi)
 
-        if use_quan
-            r_invlogcdf[i] = invlogcdf(d, xi)
-            r_invlogccdf[i] = invlogccdf(d, xi)
-        end
+        r_invlogcdf[i] = invlogcdf(d, lpp[i])
+        r_invlogccdf[i] = invlogccdf(d, lpp[i])
     end
 
     # testing consistency between scalar evaluation and vectorized evaluation
 
     for i in 1:length(x)
-        if use_quan
-            @test_approx_eq quantile(d, pp)  x
-            @test_approx_eq cquantile(d, pp) r_cquan
-        end
+        @test_approx_eq quantile(d, pp)  x
+        @test_approx_eq cquantile(d, pp) r_cquan
         @test_approx_eq pdf(d, x)        r_pdf
         @test_approx_eq cdf(d, x)        r_cdf
         @test_approx_eq ccdf(d, x)       r_ccdf
@@ -224,19 +214,14 @@ for d in [Arcsine(),
         @test_approx_eq logcdf(d, x)     r_logcdf
         @test_approx_eq logccdf(d, x)    r_logccdf
 
-        if use_quan
-            @test_approx_eq invlogcdf(d, x)  r_invlogcdf
-            @test_approx_eq invlogccdf(d, x) r_invlogccdf
-        end
+        @test_approx_eq invlogcdf(d, lpp)  r_invlogcdf
+        @test_approx_eq invlogccdf(d, lpp) r_invlogccdf
     end
 
     # # testing consistency between different functions
 
     @test_approx_eq logpdf(d, x) log(pdf(d, x))
-
-    if use_quan
-        @test_approx_eq cquantile(d, 1 - pp) x
-    end
+    @test_approx_eq cquantile(d, 1 - pp) x
 
     if is_continuous
         @test_approx_eq cdf(d, x) pp
@@ -307,7 +292,8 @@ for d in [Arcsine(),
     if isfinite(ent) && !isa(d, Arcsine)
         # @test norm(ent - ent_hat, Inf) < 1e-1
         if ent > 0.0
-            @test abs(ent - ent_hat) / abs(ent) < 1e-0
+            tol = isa(d, Binomial) ? 0.1 : 0.01 
+            @test abs(ent - ent_hat) / abs(ent) < tol
         end
     end
 
