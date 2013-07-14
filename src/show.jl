@@ -15,3 +15,19 @@ function show(io::IO, d::Distribution)
         print(io, param)
     end
 end
+
+function compact_show(io::IO, d::Distribution)
+    print(io, typeof(d))
+    print(io, "( ")
+    for parameter in typeof(d).names
+        param = string(string(parameter), "=", d.(parameter), " ")
+        print(io, param)            
+    end        
+    print(io, ")")  
+end
+
+function show(io::IO, d::UnivariateDistribution)
+    compact_show(io, d)
+end
+
+
