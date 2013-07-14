@@ -55,7 +55,7 @@ end
 
 pdf(d::Bernoulli, x::Real) = x == 0 ? d.p0 : x == 1 ? d.p1 : 0.0
 
-quantile(d::Bernoulli, p::Real) = 0.0 < p < 1.0 ? (p <= d.p0 ? 0 : 1) : NaN
+quantile(d::Bernoulli, p::Real) = 0.0 <= p <= 1.0 ? (p <= d.p0 ? 0 : 1) : NaN
 
 rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
