@@ -9,12 +9,8 @@ immutable NegativeBinomial <: DiscreteUnivariateDistribution
     prob::Float64
 
     function NegativeBinomial(r::Real, p::Real)
-        if p <= 0. || p > 1.
-            error("prob must be in (0, 1].")
-        end
-        if r <= 0
-            error("r must be positive.")
-        end
+        zero(p) < p <= one(p) || error("prob must be in (0, 1].")
+        zero(r) < r || error("r must be positive.")
         new(float64(r), float64(p))
     end
 
@@ -23,7 +19,8 @@ end
 
 @_jl_dist_2p NegativeBinomial nbinom
 
-insupport(d::NegativeBinomial, x::Real) = isinteger(x) && 0.0 <= x
+insupport(::NegativeBinomial, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{NegativeBinomial}, x::Real) = isinteger(x) && zero(x) <= x
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = d.size, d.prob

@@ -2,16 +2,13 @@ immutable Pareto <: ContinuousUnivariateDistribution
     scale::Float64
     shape::Float64
     function Pareto(sc::Real, sh::Real)
-        if sc > 0.0 && sh > 0.0
-            new(float64(sc), float64(sh))
-        else
-            error("shape and scale must be positive")
-        end
+        sc > zero(sc) && sh > zero(sh) || error("shape and scale must be positive")
+        new(float64(sc), float64(sh))
     end
+    Pareto() = new(1.0, 1.0)
 end
 
 Pareto(scale::Real) = Pareto(scale, 1.0)
-Pareto() = Pareto(1.0, 1.0)
 
 cdf(d::Pareto, q::Real) = q >= d.scale ? 1.0 - (d.scale / q)^d.shape : 0.0
 

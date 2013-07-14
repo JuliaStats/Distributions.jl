@@ -21,7 +21,8 @@ function entropy(d::Gamma)
     return x
 end
 
-insupport(d::Gamma, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Gamma, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Gamma}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Gamma) = 6.0 / d.shape
 

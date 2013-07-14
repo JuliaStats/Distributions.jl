@@ -23,7 +23,8 @@ cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
 
 entropy(d::Erlang) = entropy(d.nested_gamma)
 
-insupport(d::Erlang, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Erlang, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Erlang}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Erlang) = kurtosis(d.nested_gamma)
 

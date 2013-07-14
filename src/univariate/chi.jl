@@ -6,17 +6,12 @@ end
 
 cdf(d::Chi, x::Real) = regularized_gamma(d.df / 2.0, x^2 / 2.0)
 
-function mean(d::Chi)
-	return sqrt(2.0) * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
-end
+mean(d::Chi) = sqrt(2.0) * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
-function modes(d::Chi)
-	if d.df < 1.0
-		error("Modes undefined for k < 1")
-	else
-		return [sqrt(d.df - 1)]
-	end
-end
+insupport(::Chi, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
+
+modes(d::Chi) = d.df >= 1.0 ? [sqrt(d.df - 1)] : error("Modes undefined for k < 1")
 
 var(d::Chi) = d.df - mean(d)^2
 

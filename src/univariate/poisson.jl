@@ -1,15 +1,10 @@
 immutable Poisson <: DiscreteUnivariateDistribution
     lambda::Float64
     function Poisson(l::Real)
-    	if l > 0.0
-    		new(float64(l))
-    	else
-    		error("lambda must be positive")
-    	end
+    	l > zero(l) ? new(float64(l)) : error("lambda must be positive")
     end
+    Poisson() = new(1.0)
 end
-
-Poisson() = Poisson(1.0)
 
 @_jl_dist_1p Poisson pois
 
@@ -29,7 +24,8 @@ function entropy(d::Poisson)
     end
 end
 
-insupport(d::Poisson, x::Number) = isinteger(x) && 0.0 <= x
+insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
 
 kurtosis(d::Poisson) = 1.0 / d.lambda
 

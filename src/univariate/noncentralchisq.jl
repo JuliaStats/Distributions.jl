@@ -12,4 +12,5 @@ end
 
 @_jl_dist_2p NoncentralChisq nchisq
 
-insupport(d::NoncentralChisq, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
+insupport(::NoncentralChisq, x::Real) = zero(x) < x < Inf
+insupport(::Type{NoncentralChisq}, x::Real) = zero(x) < x < Inf

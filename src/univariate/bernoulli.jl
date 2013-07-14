@@ -32,7 +32,8 @@ function entropy(d::Bernoulli)
     p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
 end
 
-insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
+insupport(::Bernoulli, x::Real) = (x == 0) || (x == 1)
+insupport(::Type{Bernoulli}, x::Real) = (x == 0) || (x == 1)
 
 mean(d::Bernoulli) = d.p1
 

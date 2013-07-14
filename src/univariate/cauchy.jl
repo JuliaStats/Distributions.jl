@@ -17,7 +17,8 @@ Cauchy() = Cauchy(0.0, 1.0)
 
 entropy(d::Cauchy) = log(d.scale) + log(4.0 * pi)
 
-insupport(d::Cauchy, x::Number) = isreal(x) && isfinite(x)
+insupport(::Cauchy, x::Real) = isfinite(x)
+insupport(::Type{Cauchy}, x::Real) = isfinite(x)
 
 kurtosis(d::Cauchy) = NaN
 

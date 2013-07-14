@@ -2,11 +2,8 @@ immutable Normal <: ContinuousUnivariateDistribution
     mean::Float64
     std::Float64
     function Normal(mu::Real, sd::Real)
-    	if sd > 0.0
-    		new(float64(mu), float64(sd))
-    	else
-    		error("std must be positive")
-    	end
+    	sd > zero(sd) || error("std must be positive")
+    	new(float64(mu), float64(sd))
     end
 end
 

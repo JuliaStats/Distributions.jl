@@ -18,13 +18,8 @@ end
 
 entropy(d::Cosine) = log(4.0 * pi) - 1.0
 
-function insupport(d::Cosine, x::Real)
-    if 0 <= x <= 1.0
-        return true
-    else
-        return false
-    end
-end
+insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
+insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Cosine) = -1.5
 
@@ -37,13 +32,7 @@ median(d::Cosine) = 0.5
 
 modes(d::Cosine) = [0.5]
 
-function pdf(d::Cosine, x::Number)
-    if 0.0 <= x <= 1.0
-        return 0.5 * cos(x)
-    else
-        return 0.0
-    end
-end
+pdf(d::Cosine, x::Number) =  0 <= x <= 1 ? 0.5 * cos(x) : 0.0
 
 quantile(d::Cosine, p::Real) = asin(2.0 * p - 1.0)
 

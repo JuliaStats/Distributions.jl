@@ -2,21 +2,17 @@ immutable Uniform <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
     function Uniform(a::Real, b::Real)
-	    if a < b
-	    	new(float64(a), float64(b))
-	    else
-	    	error("a < b required for range [a, b]")
-	    end
-	end
+	a < b || error("a < b required for range [a, b]")
+	new(float64(a), float64(b))
+    end
+    Uniform() = new(0.0, 1.0)
 end
-
-Uniform() = Uniform(0.0, 1.0)
 
 @_jl_dist_2p Uniform unif
 
 entropy(d::Uniform) = log(d.b - d.a)
 
-insupport(d::Uniform, x::Number) = isreal(x) && d.a <= x <= d.b
+insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 kurtosis(d::Uniform) = -6.0 / 5.0
 
