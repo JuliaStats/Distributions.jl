@@ -114,7 +114,7 @@ for d in [Arcsine(),
 
     # NB: Uncomment if test fails
     # Mention distribution being run
-    println(d)
+    # println(d)
 
     n = length(pp)
     is_continuous = isa(d, ContinuousDistribution)
@@ -236,86 +236,12 @@ for d in [Arcsine(),
 
     ##### 
     #
-    #  Part 3: Consistency between samples and statistics
+    #  Part 3: Other tests
     #
     #####
 
-    x = rand(d, n_samples)
-
-    mu, mu_hat = mean(d), mean(x)
-    ent, ent_hat = entropy(d), -mean(logpdf(d, x))
-    ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
-    m, m_hat = median(d), median(x)
-    sigma, sigma_hat = var(d), var(x)
-
-    if !avoid_highord
-        sk, sk_hat = skewness(d), skewness(x)
-        k, k_hat = kurtosis(d), kurtosis(x)
-    end
-
-    # empirical mean should be close to theoretical value
-    if isfinite(mu)
-        if isfinite(sigma) && sigma > 0.0
-            @test abs(mu - mu_hat) / sigma < 1e-0
-        else
-            @test abs(mu - mu_hat) < 1e-1
-        end
-    end
-
-    # empirical variance should be close to theoretical value
-    if isfinite(mu) && isfinite(sigma) && !avoid_highord
-        if sigma > 0.0
-            @test abs(sigma - sigma_hat) / sigma < 1e-0
-        else
-            @test abs(sigma - sigma_hat) < 1e-1
-        end
-    end
-
-    # empirical skewness should be close to theoretical value
-    if isfinite(mu) && isfinite(sk) && !avoid_highord
-        if sk > 0.0
-            @test abs(sk - sk_hat) / sigma < 1e-0
-        else
-            @test abs(sk - sk_hat) < 1e-1
-        end
-    end
-
-    # empirical kurtosis should be close to theoretical value
-    # Empirical kurtosis is very unstable for FDist
-    if isfinite(mu) && isfinite(k) && !avoid_highord && !isa(d, FDist)  
-        if k > 0.0
-            @test abs(k - k_hat) / abs(k) < 1e-0
-        else
-            @test abs(k - k_hat) < 1e-1
-        end
-    end
-
-    # By the Asymptotic Equipartition Property,
-    # empirical mean negative log PDF should be close to theoretical value
-    if isfinite(ent) && !isa(d, Arcsine)
-        # @test norm(ent - ent_hat, Inf) < 1e-1
-        if ent > 0.0
-            tol = isa(d, Binomial) ? 0.1 : 0.01 
-            @test abs(ent - ent_hat) / abs(ent) < tol
-        end
-    end
-
-    # Check that KL between fitted distribution and true distribution
-    #  is small
-    # TODO: Restore the line below
-    # d_hat = fit(typeof(d), x)
-    # TODO: @test kl(d, d_hat) < 1e-2
-
-    # test median
-    if insupport(d, m_hat) && isa(d, ContinuousDistribution) && !isa(d, FDist)
-        if isa(d, Cauchy) || isa(d, Laplace)
-            @test abs(m - m_hat) / d.scale < 1e-0
-        else
-            @test abs(m - m_hat) / sigma < 1e-0
-        end
-    end
-
     # Test modes by looking at pdf(x +/- eps()) near a mode x
+
     if !isa(d, Uniform)
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
