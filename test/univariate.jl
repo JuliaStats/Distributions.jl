@@ -61,27 +61,27 @@ for d in [Arcsine(),
           Geometric(0.1),
           Geometric(0.5),
           Geometric(0.9),
-          # Gumbel(3.0, 5.0),
-          # Gumbel(5, 3),
+          Gumbel(3.0, 5.0),
+          Gumbel(5, 3),
           # HyperGeometric(1.0, 1.0, 1.0),
           # HyperGeometric(2.0, 2.0, 2.0),
           # HyperGeometric(3.0, 2.0, 2.0),
           # HyperGeometric(2.0, 3.0, 2.0),
           # HyperGeometric(2.0, 2.0, 3.0),
           # InvertedGamma(),
-          # Laplace(0.0, 1.0),
-          # Laplace(10.0, 1.0),
-          # Laplace(0.0, 10.0),
-          # Levy(0.0, 1.0),
-          # Levy(2.0, 8.0),
-          # Levy(3.0, 3.0),
+          Laplace(0.0, 1.0),
+          Laplace(10.0, 1.0),
+          Laplace(0.0, 10.0),
+          Levy(0.0, 1.0),
+          Levy(2.0, 8.0),
+          Levy(3.0, 3.0),
           Logistic(0.0, 1.0),
           Logistic(10.0, 1.0),
           Logistic(0.0, 10.0),
           LogNormal(0.0, 1.0),
           LogNormal(10.0, 1.0),
           LogNormal(0.0, 10.0),
-          # NegativeBinomial(),
+          # NegativeBinomial(5, 0.6),
           # NoncentralBeta(),
           # NoncentralChisq(),
           # NoncentralFDist(),
@@ -93,18 +93,18 @@ for d in [Arcsine(),
           Poisson(2.0),
           Poisson(10.0),
           Poisson(51.0),
-          # Rayleigh(1.0),
-          # Rayleigh(5.0),
-          # Rayleigh(10.0),
+          Rayleigh(1.0),
+          Rayleigh(5.0),
+          Rayleigh(10.0),
           # Skellam(10.0, 2.0), # Entropy wrong
           # TDist(1), # Entropy wrong
           # TDist(28), # Entropy wrong
-          # Triangular(3.0, 1.0),
-          # Triangular(3.0, 2.0),
-          # Triangular(10.0, 10.0),
-          # TruncatedNormal(Normal(0, 1), -3, 3),
+          Triangular(3.0, 1.0),
+          Triangular(3.0, 2.0),
+          Triangular(10.0, 10.0),
+          TruncatedNormal(Normal(0, 1), -3, 3),
           # TruncatedNormal(Normal(-100, 1), 0, 1),
-          # TruncatedNormal(Normal(27, 3), 0, Inf),
+          TruncatedNormal(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
@@ -124,7 +124,7 @@ for d in [Arcsine(),
     sample_ty = is_continuous ? Float64 : Int
 
     # avoid checking high order moments for LogNormal and Logistic
-    avoid_highord = isa(d, LogNormal) || isa(d, Logistic)
+    avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, TruncatedNormal)
 
     #####
     #
@@ -247,8 +247,11 @@ for d in [Arcsine(),
     ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
     m, m_hat = median(d), median(x)
     sigma, sigma_hat = var(d), var(x)
-    sk, sk_hat = skewness(d), skewness(x)
-    k, k_hat = kurtosis(d), kurtosis(x)
+
+    if !avoid_highord
+        sk, sk_hat = skewness(d), skewness(x)
+        k, k_hat = kurtosis(d), kurtosis(x)
+    end
 
     # empirical mean should be close to theoretical value
     if isfinite(mu)

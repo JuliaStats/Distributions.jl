@@ -51,8 +51,7 @@ isplatykurtic(d::Distribution) = kurtosis(d) > 0.0
 isleptokurtic(d::Distribution) = kurtosis(d) < 0.0
 ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
 
-# Activate after checking all distributions have something written out
-# median(d::UnivariateDistribution) = quantile(d, 0.5)
+median(d::UnivariateDistribution) = quantile(d, 0.5)
 
 #### pdf, cdf, and quantile ####
 
