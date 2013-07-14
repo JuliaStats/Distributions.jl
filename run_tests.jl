@@ -2,9 +2,9 @@
 tests = [
 	"utils", 
 	"fit", 
-	"categorical",
-	"truncate", 
+	"discrete",
 	"univariate", 
+	"truncate", 
 	"multivariate", 
 	"matrix"]
 

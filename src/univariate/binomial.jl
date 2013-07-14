@@ -22,9 +22,31 @@ max(d::Binomial) = d.size
 
 @_jl_dist_2p Binomial binom
 
-function entropy(d::Binomial)
-	n, p = d.size, d.prob
-	return 0.5 * log(2.0 * pi * e * n * p * (1.0 - p))
+function entropy(d::Binomial; approx::Bool=false)
+	n = d.size
+	p1 = d.prob
+
+	if p1 == 0.0 || p1 == 1.0
+		return 0.0
+	else
+		p0 = 1.0 - p1
+
+		if approx
+			return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0)
+		else
+			lg = log(p1 / p0)
+
+			# when k = 0
+			lp = n * log(p0)
+			s = exp(lp) * lp
+
+			for k = 1:n
+				lp += log((n - k) / (k + 1)) + lg
+				s += exp(lp) * lp
+			end
+			return -s
+		end
+	end
 end
 
 insupport(d::Binomial, x::Number) = isinteger(x) && 0 <= x <= d.size
