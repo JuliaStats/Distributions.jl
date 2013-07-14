@@ -1,28 +1,29 @@
 # NegativeBinomial is the distribution of the number of failures
-# before the size'th success in a sequence of Bernoulli trials.
+# before the r-th success in a sequence of Bernoulli trials.
 # We do not enforce integer size, as the distribution is well defined
 # for non-integers, and this can be useful for e.g. overdispersed
 # discrete survival times.
 
 immutable NegativeBinomial <: DiscreteUnivariateDistribution
-    size::Float64
+    r::Float64
     prob::Float64
-    function NegativeBinomial(s::Real, p::Real)
-    	if 0.0 < p <= 1.0
-    		if s >= 0.0
-    			new(float64(s), float64(p))
-    		else
-    			error("size must be non-negative")
-			end
-		else
-			error("prob must be in (0, 1]")
-		end
+
+    function NegativeBinomial(r::Real, p::Real)
+        if p <= 0. || p > 1.
+            error("prob must be in (0, 1].")
+        end
+        if r <= 0
+            error("r must be positive.")
+        end
+        new(float64(r), float64(p))
     end
+
+    NegativeBinomial() = new(1.0, 0.5)
 end
 
 @_jl_dist_2p NegativeBinomial nbinom
 
-insupport(d::NegativeBinomial, x::Number) = isinteger(x) && 0.0 <= x
+insupport(d::NegativeBinomial, x::Real) = isinteger(x) && 0.0 <= x
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = d.size, d.prob
@@ -32,4 +33,34 @@ end
 function cf(d::NegativeBinomial, t::Real)
     r, p = d.size, d.prob
     return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
+end
+
+function mean(d::NegativeBinomial)
+    p = d.prob
+    (1.0 - p) * d.r / p
+end
+
+function var(d::NegativeBinomial)
+    p = d.prob
+    (1.0 - p) * d.r / (p * p)
+end
+
+function std(d::NegativeBinomial)
+    p = d.prob
+    sqrt((1.0 - p) * d.r) / p
+end
+
+function skewness(d::NegativeBinomial)
+    p = d.prob
+    (2.0 - p) / sqrt((1.0 - p) * r)
+end
+
+function kurtosis(d::NegativeBinomial)
+    p = d.prob
+    6.0 / r + (p * p) / ((1.0 - p) * r)
+end
+
+function modes(d::NegativeBinomial)
+    p = d.prob
+    ifloor((1.0 - p) * (d.r - 1.) / p)
 end
