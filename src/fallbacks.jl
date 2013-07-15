@@ -72,12 +72,13 @@ invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
 insupport(d::Distribution, x) = false
 
 function insupport(d::UnivariateDistribution, X::Array)
-    for el in X
-        if !insupport(d, el)
-            return false
-        end
-    end
-    return true
+    for x in X; insupport(d, x) || return false; end
+    true
+end
+
+function insupport(t::DataType, X::Array)
+    for x in X; insupport(t, x) || return false; end
+    true
 end
 
 function insupport(d::MultivariateDistribution, X::Matrix)

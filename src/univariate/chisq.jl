@@ -17,7 +17,8 @@ function entropy(d::Chisq)
     return x
 end
 
-insupport(d::Chisq, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Chisq, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Chisq) = 12.0 / d.df
 

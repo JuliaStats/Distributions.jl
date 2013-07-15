@@ -48,7 +48,8 @@ end
 
 entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
 
-insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Exponential, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Exponential) = 6.0
 

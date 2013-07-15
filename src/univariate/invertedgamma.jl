@@ -27,7 +27,8 @@ function entropy(d::InvertedGamma)
     return a + log(b) + lgamma(a) - (1.0 + a) * digamma(a)
 end
 
-insupport(d::InvertedGamma, x::Number) = isreal(x) && isfinite(x) && 0 <= x
+insupport(::InvertedGamma, x::Real) = zero(x) <= x < Inf
+insupport(::Type{InvertedGamma}, x::Real) = zero(x) <= x < Inf
 
 function kurtosis(d::InvertedGamma)
     a = d.shape

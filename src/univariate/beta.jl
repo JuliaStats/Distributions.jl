@@ -23,7 +23,8 @@ function entropy(d::Beta)
     return o
 end
 
-insupport(d::Beta, x::Number) = isreal(x) && 0.0 < x < 1.0
+insupport(::Beta, x::Real) = zero(x) < x < one(x)
+insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
 
 function kurtosis(d::Beta)
     α, β = d.alpha, d.beta

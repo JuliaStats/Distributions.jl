@@ -17,13 +17,8 @@ end
 # calculated using higher-precision arithmetic 
 entropy(d::Arcsine) = -0.24156447527049044469
 
-function insupport(d::Arcsine, x::Real)
-    if 0 <= x <= 1.0
-        return true
-    else
-        return false
-    end
-end
+insupport(d::Arcsine, x::Real) = zero(x) <= x <= one(x)
+insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Arcsine) = -1.5
 

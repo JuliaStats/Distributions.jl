@@ -23,7 +23,8 @@ end
 
 entropy(d::Geometric) = (-xlogx(1.0 - d.prob) - xlogx(d.prob)) / d.prob
 
-insupport(d::Geometric, x::Number) = isinteger(x) && 0.0 <= x
+insupport(::Geometric, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{Geometric}, x::Real) = isinteger(x) && zero(x) <= x
 
 kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
 
