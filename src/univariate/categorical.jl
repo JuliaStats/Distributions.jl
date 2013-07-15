@@ -148,14 +148,12 @@ function var(d::Categorical)
     return s
 end
 
-function fit_mle{T <: Real}(::Type{Categorical}, x::Array{T})
-    # Counts for all categories
-    n = length(x)
-    tab = table(x)
-    k = max(keys(tab))
-    p = Array(Float64, k)
-    for i in 1:k
-        p[i] = get(tab, i, 0) / n
+function fit_mle{T<:Real}(::Type{Categorical}, k::Integer, x::Array{T})
+    w = zeros(Int, k)
+    for i in 1:length(x)
+         w[x[i]] += 1
     end
-    return Categorical(p)
+    Categorical(w)   # the constructor will normalize w
 end
+
+fit_mle{T<:Real}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
