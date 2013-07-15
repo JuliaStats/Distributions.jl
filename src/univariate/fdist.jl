@@ -12,7 +12,8 @@ end
 
 @_jl_dist_2p FDist f
 
-insupport(d::FDist, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::FDist, x::Number) = zero(x) <= x < Inf
+insupport(::Type{FDist}, x::Number) = zero(x) <= x < Inf
 
 mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 

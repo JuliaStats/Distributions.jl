@@ -22,7 +22,8 @@ end
 
 entropy(d::Laplace) = log(2.0 * d.scale) + 1.0
 
-insupport(d::Laplace, x::Number) = isreal(x) && isfinite(x)
+insupport(d::Laplace, x::Real) = isfinite(x)
+insupport(d::Type{Laplace}, x::Real) = isfinite(x)
 
 kurtosis(d::Laplace) = 3.0
 

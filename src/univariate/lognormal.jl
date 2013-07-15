@@ -17,7 +17,8 @@ LogNormal() = LogNormal(0.0, 1.0)
 
 entropy(d::LogNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
 
-insupport(d::LogNormal, x::Number) = isreal(x) && isfinite(x) && 0 < x
+insupport(::LogNormal, x::Real) = zero(x) < x < Inf
+insupport(::Type{LogNormal}, x::Real) = zero(x) < x < Inf
 
 function kurtosis(d::LogNormal)
     return exp(4.0 * d.sdlog^2) + 2.0 * exp(3.0 * d.sdlog^2) +

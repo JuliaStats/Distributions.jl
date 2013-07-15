@@ -19,7 +19,8 @@ logcdf(d::Gumbel, x::Real) = -exp((d.mu - x) / d.beta)
 
 entropy(d::Gumbel) = log(d.beta) - digamma(1.0) + 1.0
 
-insupport(d::Gumbel, x::Number) = isreal(x) && isfinite(x)
+insupport(::Gumbel, x::Real) = isfinite(x)
+insupport(::Type{Gumbel}, x::Real) = isfinite(x)
 
 kurtosis(d::Gumbel) = 2.4
 

@@ -7,21 +7,17 @@
 immutable Rayleigh <: ContinuousUnivariateDistribution
     scale::Float64
     function Rayleigh(s::Real)
-        if s > 0.0
-            new(float64(s))
-        else
-            error("scale must be positive")
-        end
+        s > zero(s) ? new(float64(s)) : error("scale must be positive")
     end
+    Rayleigh() = new(1.0)
 end
-
-Rayleigh() = Rayleigh(1.0)
 
 cdf(d::Rayleigh, x::Real) = 1.0 - exp(-x^2 / (2.0 * d.scale^2))
 
 entropy(d::Rayleigh) = 1.0 + log(d.scale) - log(sqrt(2.0)) - digamma(1.0) / 2.0
 
-insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
+insupport(::Rayleigh, x::Real) = zero(x) < x < Inf
+insupport(::Type{Rayleigh}, x::Real) = zero(x) < x < Inf
 
 kurtosis(d::Rayleigh) = -(6.0 * pi^2 - 24.0 * pi + 16.0) / (4.0 - pi)^2
 
