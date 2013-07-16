@@ -37,5 +37,7 @@ mode(d::MvNormal) = d.μ
 
 modes(d::MvNormal) = [mode(d)]
 
-entropy(d::MvNormal) = 0.5 * ()
+entropy(d::MvNormal) = 0.5 * (log2π + 1.0 + logdet_cov(d))
+
+
 
