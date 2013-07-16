@@ -87,6 +87,7 @@ export                                  # types
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
     fit_mle,       # fit a distribution to data using MLE
+    fit_mle!,      # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
     insupport,     # predicate, is x in the support of the distribution?
