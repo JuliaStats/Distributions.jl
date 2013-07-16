@@ -5,7 +5,7 @@ tests = [
 	"discrete",
 	"univariate", 
 	"truncate", 
-	"multivariate", 
+	"dirichlet", 
 	"matrix"]
 
 println("Running tests:")
