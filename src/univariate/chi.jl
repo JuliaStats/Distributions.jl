@@ -4,7 +4,7 @@ immutable Chi <: ContinuousUnivariateDistribution
     Chi(df::Real) = new(float64(df))
 end
 
-cdf(d::Chi, x::Real) = regularized_gamma(d.df / 2.0, x^2 / 2.0)
+cdf(d::Chi, x::Real) = cdf(Chisq(d.df),x^2)
 
 mean(d::Chi) = sqrt(2.0) * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
@@ -17,7 +17,7 @@ var(d::Chi) = d.df - mean(d)^2
 
 function skewness(d::Chi)
 	μ, σ = mean(d), std(d)
-	(μ / σ^2) * (1.0 - 2.0 * σ^2)
+	(μ / σ^3) * (1.0 - 2.0 * σ^2)
 end
 
 function kurtosis(d::Chi)
@@ -40,3 +40,6 @@ function entropy(d::Chi)
 	return lgamma(k / 2.0) - log(sqrt(2.0)) -
 	       ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
 end
+
+rand(d::Chi) = sqrt(rand(Chisq(d.df)))
+quantile(d::Chi,p::Real) = sqrt(quantile(Chisq(d.df),p))
