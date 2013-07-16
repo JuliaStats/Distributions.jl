@@ -53,5 +53,5 @@ end
 
 x = rand(d, 2000)
 r = fit_mle(Dirichlet, x)
-@test_approx_eq_eps r.alpha d.alpha 0.1
+@test_approx_eq_eps r.alpha d.alpha 0.5
 
