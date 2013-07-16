@@ -164,19 +164,24 @@ end
 #  
 #####
 
-function fit_mle!{T <: Real}(
+function fit_mle!(
     dty::Type{Dirichlet}, 
-    alpha::Vector{Float64},   # initial guess of alpha
+    α::Vector{Float64},   # initial guess of α
     Elogp::Vector{Float64};   # expectation/mean of log(p)
-    maxiter::Int=25, tol::Float64=1.0e-8)
+    maxiter::Int=25, tol::Float64=1.0e-8, debug::Bool=false)
 
-    K = length(alpha)
+    K = length(α)
     if length(Elogp) != K
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
 
     g = Array(Float64, K)
     iq = Array(Float64, K)
+    α0 = sum(α)
+
+    if debug
+        objv = dot(α - 1.0, Elogp) + lgamma(α0) - sum(lgamma(α))
+    end
 
     t = 0
     converged = false
@@ -186,18 +191,19 @@ function fit_mle!{T <: Real}(
         # compute gradient & Hessian
         # (b is computed as well)
 
-        a0 = sum(alpha)
-        digam_a0 = digamma(a0)
-        iz = 1.0 / trigamma(a0)
+        digam_α0 = digamma(α0)
+        iz = 1.0 / trigamma(α0)
         gnorm = 0.
+        b = 0.
+        iqs = 0.
 
         for k = 1:K
-            ak = alpha[k]
-            g[k] = gk = digam_a0 - digamma(ak) + Elogp[k]
+            ak = α[k]
+            g[k] = gk = digam_α0 - digamma(ak) + Elogp[k]
             iq[k] = - 1.0 / trigamma(ak)
 
             b += gk * iq[k]
-            iqs += 1.0 * iq[k]
+            iqs += iq[k]
 
             agk = abs(gk)
             if agk > gnorm
@@ -206,10 +212,18 @@ function fit_mle!{T <: Real}(
         end
         b /= (iz + iqs)
 
-        # update alpha
+        # update α
 
         for k = 1:K
-            alpha[k] -= (g[k] - b) * iq[k]
+            α[k] -= (g[k] - b) * iq[k]
+        end
+        α0 = sum(α)
+
+        if debug
+            prev_objv = objv
+            objv = dot(α - 1.0, Elogp) + lgamma(α0) - sum(lgamma(α))
+            @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n", 
+                t, objv, objv - prev_objv, gnorm)
         end
 
         # determine convergence
@@ -217,43 +231,64 @@ function fit_mle!{T <: Real}(
         converged = gnorm < tol
     end
 
-    Dirichlet(alpha)
+    Dirichlet(α)
 end
 
 
-function fit_mle{T <: Real}(::Type{Dirichlet}, P::Matrix{T}; maxiter::Int=25, tol::Float64=1.0e-8)
-    K, N = size(P)
+function fit_mle{T <: Real}(::Type{Dirichlet}, P::Matrix{T}; 
+    init::Union(Vector{Float64},Nothing)=nothing, 
+    maxiter::Int=25, tol::Float64=1.0e-8)
 
-    alpha = zeros(Float64, K)
-    lpbar = zeros(Float64, K)
-    E_P = Array(Float64, K)
-    E_Psq = zeros(Float64, K)
-    g = Array(Float64, K)
-    q = Array(Float64, K)
+    K = size(P, 1)
+    n = size(P, 2)
+    c = inv(n)
 
-    for i in 1:N
-        for k in 1:K
-            tmp = P[k, i]
-            alpha[k] += tmp
-            E_Psq[k] += tmp^2
-            lpbar[k] += log(tmp)
+    # Compute sufficient statistics E[log(p)]
+
+    Elp = Array(Float64, K)
+    for i = 1:n
+        for k = 1:K
+            Elp[k] += log(P[k,i])
         end
     end
-    for k in 1:K
-        alpha[k] /= N
-        E_Psq[k] /= N
-        lpbar[k] /= N
+    multiply!(Elp, c)
+
+    if init == nothing
+        # Initialize mean
+
+        μ = Array(Float64, K)  # E[p]
+        γ = Array(Float64, K)  # E[p^2]
+    
+        for i = 1:n
+            for k = 1:K
+                pk = P[k, i]
+                μ[k] += pk
+                γ[k] += pk^2
+            end
+        end
+
+        for k = 1:K
+            μ[k] *= c
+            γ[k] *= c
+        end
+
+        # Initialize concentration
+
+        α0 = 0.
+        for k = 1:K
+            μk = μ[k]
+            γk = γ[k]
+            ak = (μk - γk) / (γk - μk * μk)
+            α0 += ak
+        end
+        α0 /= K
+
+        # store initial solution to μ
+        multiply!(μ, α0)
+        fit_mle!(Dirichlet, μ, Elp; maxiter=maxiter, tol=tol)        
+    else
+        fit_mle!(Dirichlet, init, Elp; maxiter=maxiter, tol=tol)
     end
-    copy!(E_P, alpha)
-
-    alpha0 = (E_P[1] - E_Psq[1]) / (E_Psq[1] - E_P[1]^2)
-    for k in 1:K
-        alpha[k] *= alpha0
-    end
-
-
-
-    return Dirichlet(alpha)
+    
 end
-
 

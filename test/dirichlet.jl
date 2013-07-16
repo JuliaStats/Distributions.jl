@@ -49,3 +49,9 @@ for i in 1 : size(x, 2)
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
 end
 
+# Test MLE
+
+x = rand(d, 2000)
+r = fit_mle(Dirichlet, x)
+@test_approx_eq_eps r.alpha d.alpha 0.1
+
