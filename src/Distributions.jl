@@ -152,6 +152,8 @@ typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistri
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
+include("constants.jl")
+
 include("fallbacks.jl")
 include("rmath.jl")
 
