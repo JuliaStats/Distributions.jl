@@ -2,7 +2,7 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     ndf::Float64
     ddf::Float64
     ncp::Float64
-    function NonCentralF(n::Real, d::Real, nc::Real)
+    function NoncentralF(n::Real, d::Real, nc::Real)
 		if n > 0.0 && d > 0.0 && nc >= 0.0
 			new(float64(n), float64(d), float64(nc))
 		else

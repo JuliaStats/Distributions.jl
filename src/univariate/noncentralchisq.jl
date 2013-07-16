@@ -1,7 +1,7 @@
 immutable NoncentralChisq <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
-    function NonCentralChisq(d::Real, nc::Real)
+    function NoncentralChisq(d::Real, nc::Real)
     	if d >= 0.0 && nc >= 0.0
     		new(float64(d), float64(nc))
     	else

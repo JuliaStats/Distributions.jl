@@ -1,7 +1,7 @@
 immutable NoncentralT <: ContinuousUnivariateDistribution
     df::Float64
     ncp::Float64
-    function NonCentralT(d::Real, nc::Real)
+    function NoncentralT(d::Real, nc::Real)
     	d >= zero(d) && nc >= zero(nc) || error("df and ncp must be non-negative")
         new(float64(d), float64(nc))
     end
