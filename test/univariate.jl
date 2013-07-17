@@ -73,10 +73,14 @@ for d in [Arcsine(),
           LogNormal(0.0, 10.0),
           NegativeBinomial(),
           NegativeBinomial(5, 0.6),
-          # NoncentralBeta(),
-          # NoncentralChisq(),
-          # NoncentralFDist(),
-          # NoncentralTDist(),
+          NoncentralBeta(2,2,0),
+          NoncentralBeta(2,6,5),
+          NoncentralChisq(2,2),
+          NoncentralChisq(2,5),
+          NoncentralF(2,2,2),
+          NoncentralF(8,10,5),
+          NoncentralT(2,2),
+          NoncentralT(10,2),
           Normal(0.0, 1.0),
           Normal(-1.0, 10.0),
           Normal(1.0, 10.0),
@@ -233,7 +237,7 @@ for d in [Arcsine(),
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
 
-    if !isa(d, Uniform)
+    if !isa(d, Uniform) && method_exists(modes,(typeof(d),))
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
             if insupport(d, ms[1] + 0.1)

@@ -80,10 +80,14 @@ for d in [Arcsine(),
           LogNormal(0.0, 10.0),
           # NegativeBinomial(),
           # NegativeBinomial(5, 0.6),
-          # NoncentralBeta(),
-          # NoncentralChisq(),
-          # NoncentralFDist(),
-          # NoncentralTDist(),
+          NoncentralBeta(2,2,0),
+          NoncentralBeta(2,6,5),
+          NoncentralChisq(2,2),
+          NoncentralChisq(2,5),
+          NoncentralF(2,2,2),
+          NoncentralF(8,10,5),
+          # NoncentralT(2,2),
+          NoncentralT(10,2),
           Normal(0.0, 1.0),
           Normal(-1.0, 10.0),
           Normal(1.0, 10.0),
@@ -112,47 +116,58 @@ for d in [Arcsine(),
 
     x = rand(d, n_samples)
 
-    mu, mu_hat = mean(d), mean(x)
-    ent, ent_hat = entropy(d), -mean(logpdf(d, x))
-    ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
-    m, m_hat = median(d), median(x)
-    sigma, sigma_hat = var(d), var(x)
-    sk, sk_hat = skewness(d), skewness(x)
-    k, k_hat = kurtosis(d), kurtosis(x)
 
     println(d)
-
-    # empirical mean should be close to theoretical value
-    if isfinite(mu)
-        @check_deviation "mean" mu mu_hat
+    
+    if method_exists(mean,(typeof(d),))
+        mu, mu_hat = mean(d), mean(x)
+        # empirical mean should be close to theoretical value
+        if isfinite(mu)
+            @check_deviation "mean" mu mu_hat
+        end
     end
 
-    # empirical variance should be close to theoretical value
-    if isfinite(mu) && isfinite(sigma)       
-        @check_deviation "variance" sigma sigma_hat
+    if method_exists(median,(typeof(d),))
+        m, m_hat = median(d), median!(x)
+        if insupport(d, m_hat) && isa(d, ContinuousDistribution) && !isa(d, FDist)
+            @check_deviation "median" m m_hat
+        end
     end
 
-    # empirical skewness should be close to theoretical value
-    if isfinite(mu) && isfinite(sk) 
-        @check_deviation "skewness" sk sk_hat
+    if method_exists(var,(typeof(d),))
+        sigma, sigma_hat = var(d), var(x)
+        # empirical variance should be close to theoretical value
+        if isfinite(mu) && isfinite(sigma)       
+            @check_deviation "variance" sigma sigma_hat
+        end
     end
 
-    # empirical kurtosis should be close to theoretical value
-    # Empirical kurtosis is very unstable for FDist
-    if isfinite(mu) && isfinite(k)
-        @check_deviation "kurtosis" k k_hat
+    if method_exists(skewness,(typeof(d),))
+        sk, sk_hat = skewness(d), skewness(x)
+        # empirical skewness should be close to theoretical value
+        if isfinite(mu) && isfinite(sk) 
+            @check_deviation "skewness" sk sk_hat
+        end
     end
 
-    # By the Asymptotic Equipartition Property,
-    # empirical mean negative log PDF should be close to theoretical value
-    if isfinite(ent) && !isa(d, Arcsine)
-        @check_deviation "entropy" ent ent_hat
+    if method_exists(kurtosis,(typeof(d),))    
+        k, k_hat = kurtosis(d), kurtosis(x)
+        # empirical kurtosis should be close to theoretical value
+        # Empirical kurtosis is very unstable for FDist
+        if isfinite(mu) && isfinite(k)
+            @check_deviation "kurtosis" k k_hat
+        end
     end
 
-    if insupport(d, m_hat) && isa(d, ContinuousDistribution) && !isa(d, FDist)
-        @check_deviation "median" m m_hat
+    if method_exists(entropy,(typeof(d),))
+        ent, ent_hat = entropy(d), -mean(logpdf(d, x))
+        # By the Asymptotic Equipartition Property,
+        # empirical mean negative log PDF should be close to theoretical value
+        if isfinite(ent)
+            @check_deviation "entropy" ent ent_hat
+        end
     end
-
+        
     # Kolmogorov-Smirnov test
     if isa(d, ContinuousDistribution)
         c = cdf(d,x)

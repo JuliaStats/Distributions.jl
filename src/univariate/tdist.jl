@@ -16,7 +16,7 @@ end
 insupport(::TDist, x::Real) = isfinite(x)
 insupport(::Type{TDist}, x::Real) = isfinite(x)
 
-mean(d::TDist) = d.df > 1 ? 0.0 : NaN
+mean(d::TDist) = d.df > 1.0 ? 0.0 : NaN
 
 median(d::TDist) = 0.0
 
