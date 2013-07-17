@@ -193,7 +193,7 @@ function rand(d::DiscreteDistribution, dims::Dims)
     return rand!(d, Array(Int, dims))
 end
 
-function rand(d::NonMatrixDistribution, dims::Integer...)
+function rand(d::UnivariateDistribution, dims::Integer...)
     return rand(d, map(int, dims))
 end
 

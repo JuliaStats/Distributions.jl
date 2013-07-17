@@ -72,3 +72,10 @@ function logpdf!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
     r
 end
 
+# Sampling
+
+rand!(d::MvNormal, x::Vector{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
+
+rand!(d::MvNormal, x::Matrix{Float64}) = badd!(unwhiten!(d.Σ, randn!(x)), d.μ, 1)
+
+

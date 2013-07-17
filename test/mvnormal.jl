@@ -62,3 +62,31 @@ for i = 1:n; r[i] = logpdf(gf, x[:,i]); end
 @test_approx_eq logpdf(gf, x) r
 @test_approx_eq pdf(gf, x) exp(r)
 
+
+##### Sampling 
+
+x = rand(gs)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gs)
+
+x = rand(gd)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gd)
+
+x = rand(gf)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gf)
+
+n = 10
+x = rand(gs, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gs), n)
+
+x = rand(gd, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gd), n)
+
+x = rand(gf, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gf), n)
+

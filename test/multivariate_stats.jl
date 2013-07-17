@@ -3,10 +3,15 @@ using Base.Test
 
 const n_samples = 5_000_001
 
+mu = [1.0, 2.0, 3.0]
+C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
 for d in [
 	Dirichlet(3, 2.0), 
-	Dirichlet([2.0, 1.0, 3.0])]
+	Dirichlet([2.0, 1.0, 3.0]), 
+	MultivariateNormal(mu, 2.0), 
+	MultivariateNormal(mu, [1.5, 2.0, 2.5]), 
+	MultivariateNormal(mu, C)]
 
 	println(d)
 	dmean = mean(d)
