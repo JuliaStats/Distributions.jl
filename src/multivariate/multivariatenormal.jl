@@ -55,16 +55,17 @@ function sqmahal!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
     if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    invquad!(r, d.Σ, bsubtract(x, d.μ, 1))
+    z::Matrix{Float64} = bsubtract(x, d.μ, 1)
+    invquad!(r, d.Σ, z)
 end
 
 sqmahal(d::MvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
-logpdf(g::MvNormal, x::Vector{Float64}) = _gauss_c0(g) - 0.5 * sqmahal(g, x) 
+logpdf(d::MvNormal, x::Vector{Float64}) = _gauss_c0(d) - 0.5 * sqmahal(d, x) 
 
-function logpdf!(r::Array{Float64}, g::MvNormal, x::Matrix{Float64})
-    sqmahal!(r, g, x)
-    c0::Float64 = _gauss_c0(g)
+function logpdf!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
+    sqmahal!(r, d, x)
+    c0::Float64 = _gauss_c0(d)
     for i = 1:size(x, 2)
         r[i] = c0 - 0.5 * r[i]
     end 
