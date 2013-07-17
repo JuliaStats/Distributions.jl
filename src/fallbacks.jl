@@ -19,7 +19,7 @@ function var{M <: Real}(d::UnivariateDistribution, mu::AbstractArray{M})
 end
 
 function cor(d::MultivariateDistribution)
-    R = copy(d.cov)
+    R = cov(d)
     m, n = size(R)
     for j in 1:n
         for i in 1:n

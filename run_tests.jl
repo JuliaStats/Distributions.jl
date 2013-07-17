@@ -5,6 +5,7 @@ tests = [
 	"discrete",
 	"univariate", 
 	"truncate", 
+	"multinomial",
 	"dirichlet", 
 	"mvnormal",
 	"kolmogorov",
