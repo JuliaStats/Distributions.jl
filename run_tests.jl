@@ -6,6 +6,7 @@ tests = [
 	"univariate", 
 	"truncate", 
 	"dirichlet", 
+	"mvnormal",
 	"matrix"]
 
 println("Running tests:")

@@ -72,6 +72,7 @@ function logpdf!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
     r
 end
 
+
 # Sampling
 
 rand!(d::MvNormal, x::Vector{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
@@ -79,3 +80,155 @@ rand!(d::MvNormal, x::Vector{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
 rand!(d::MvNormal, x::Matrix{Float64}) = badd!(unwhiten!(d.Σ, randn!(x)), d.μ, 1)
 
 
+# Maximum Likelihood Estimation
+#
+# Specialized algorithms are respectively implemented for 
+# each kind of covariance
+#
+
+function fit_mle(dty::Type{MvNormal{PDMat}}, x::Matrix{Float64}; 
+    weights::Union(Vector{Float64}, Nothing) = nothing)
+
+    n = size(x, 2)
+
+    if weights == nothing
+        n = size(x, 2)
+        mu = vec(mean(x, 2))
+        C = Base.LinAlg.BLAS.gemm!('N', 'T', 1.0/n, x, x, -1.0, mu * mu')
+    else
+        w::Vector{Float64} = weights
+        if length(w) != n
+            throw(ArgumentError("Inconsistent argument dimensions"))
+        end
+
+        inv_sw = 1.0 / sum(w)
+        mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+        z = bmultiply(x, sqrt(w), 2)
+        C = Base.LinAlg.BLAS.gemm!('N', 'T', inv_sw, z, z, -1.0, mu * mu')
+    end
+
+    MvNormal(mu, PDMat(C))
+end
+
+
+function fit_mle(dty::Type{MvNormal{PDiagMat}}, x::Matrix{Float64}; 
+    weights::Union(Vector{Float64}, Nothing) = nothing)
+
+    d = size(x, 1)
+    n = size(x, 2)
+
+    if weights == nothing
+
+        mu = zeros(d)
+        va = zeros(d)
+
+        for j in 1:n
+            o = (j - 1) * d
+            for i in 1 : d
+                xi = x[o + i]
+                mu[i] += xi
+                va[i] += xi * xi
+            end
+        end
+
+        inv_n = 1.0 / n
+        for i in 1 : d
+            mu[i] *= inv_n
+            va[i] = va[i] * inv_n - abs2(mu[i])
+        end
+
+    else
+        w::Vector{Float64} = weights
+        if length(w) != n
+            throw(ArgumentError("Inconsistent argument dimensions"))
+        end
+
+        inv_sw = 1.0 / sum(w)
+
+        # mean vector
+        mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+        
+        # variance
+        va = zeros(d)
+        o = 0
+        for j in 1 : n
+            wj = w[j]
+            for i in 1 : d
+                va[i] += abs2(x[o + i] - mu[i]) * wj
+            end
+            o += d
+        end
+        multiply!(va, inv_sw)
+    end
+
+    MvNormal(mu, PDiagMat(va))
+end
+
+
+function fit_mle(dty::Type{MvNormal{ScalMat}}, x::Matrix{Float64}; 
+    weights::Union(Vector{Float64}, Nothing) = nothing)
+
+    d = size(x, 1)
+    n = size(x, 2)
+
+    mu = zeros(d)
+    inv_d = 1.0 / d
+
+    if weights == nothing
+        va = 0.
+        for j in 1 : n
+            vj = 0.
+            for i in 1 : d
+                xi = x[i, j]
+                mu[i] += xi
+                vj += xi * xi
+            end
+            va += vj * inv_d
+        end
+        inv_sw = 1.0 / n
+    else
+        w::Vector{Float64} = weights
+        if length(w) != n
+            throw(ArgumentError("Inconsistent argument dimensions"))
+        end
+
+        va = 0.
+        sw = 0.
+        o = 0
+        for j in 1 : n
+            vj = 0.
+            wj = w[j]
+            sw += wj
+
+            for i in 1 : d
+                xi = x[o + i]
+                mu[i] += xi * wj
+                vj += xi * xi
+            end
+            va += vj * inv_d * wj
+            o += d
+        end
+        inv_sw = 1.0 / sw
+    end
+
+    su = 0.
+    for i in 1 : d
+        mu[i] *= inv_sw
+        su += abs2(mu[i])
+    end
+
+    v = va * inv_sw - su * inv_d
+    MvNormal(mu, ScalMat(d, v))
+end
+
+function fit{D<:MvNormal}(dty::Type{D}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
+    fit_mle(D, x; weights=weights)
+end
+
+function fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
+    fit_mle(MvNormal{PDMat}, x; weights=weights)
+end
+
+function fit(dty::Type{MvNormal}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
+    fit(MvNormal{PDMat}, x; weights=weights)
+end

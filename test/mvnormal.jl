@@ -1,6 +1,10 @@
 # Tests on Multivariate Normal distributions
 
-using NumericExtensions
+import NumericExtensions
+import NumericExtensions.ScalMat
+import NumericExtensions.PDiagMat
+import NumericExtensions.PDMat
+
 using Distributions
 using Base.Test
 
@@ -92,4 +96,68 @@ x = rand(gd, n)
 x = rand(gf, n)
 @test isa(x, Matrix{Float64})
 @test size(x) == (dim(gf), n)
+
+
+##### MLE
+
+# a slow but safe way to implement MLE for verification
+
+function _gauss_mle(x::Matrix{Float64})
+	mu = vec(mean(x, 2))
+	z = x .- mu
+	C = (z * z') * (1/size(x,2))
+	return mu, C
+end
+
+function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
+	sw = sum(w)
+	mu = (x * w) * (1/sw)
+	z = x .- mu
+	C = (z * scale(w, z')) * (1/sw)
+	symmetrize!(C) 
+	return mu, C
+end
+
+x = randn(3, 20) .+ randn(3) * 2.
+w = rand(20)
+
+g = fit(MvNormal, x)
+mu, C = _gauss_mle(x)
+@test_approx_eq mean(g) mu
+@test_approx_eq cov(g) C
+
+g = fit(MvNormal, x; weights=w)
+mu, C = _gauss_mle(x, w)
+@test_approx_eq mean(g) mu
+@test_approx_eq cov(g) C
+
+g = fit(MvNormal{ScalMat}, x)
+mu, C = _gauss_mle(x)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.value mean(diag(C))
+
+g = fit(MvNormal{ScalMat}, x; weights=w)
+mu, C = _gauss_mle(x, w)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.value mean(diag(C))
+
+g = fit(MvNormal{PDiagMat}, x)
+mu, C = _gauss_mle(x)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.diag diag(C)
+
+g = fit(MvNormal{PDiagMat}, x; weights=w)
+mu, C = _gauss_mle(x, w)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.diag diag(C)
+
+g = fit(MvNormal{PDMat}, x)
+mu, C = _gauss_mle(x)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.mat C
+
+g = fit(MvNormal{PDMat}, x; weights=w)
+mu, C = _gauss_mle(x, w)
+@test_approx_eq g.μ mu
+@test_approx_eq g.Σ.mat C
 
