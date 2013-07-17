@@ -11,6 +11,7 @@ d = Dirichlet(3, 2.0)
 
 @test_approx_eq mean(d) fill(1.0/3, 3)
 @test_approx_eq cov(d) [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
+@test_approx_eq var(d) diag(cov(d))
 
 @test_approx_eq pdf(d, [0.2, 0.3, 0.5]) 3.6
 @test_approx_eq pdf(d, [0.4, 0.5, 0.1]) 2.4
@@ -35,6 +36,7 @@ d = Dirichlet(v)
 
 @test_approx_eq mean(d) v / sum(v)
 @test_approx_eq cov(d) [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
+@test_approx_eq var(d) diag(cov(d))
 
 @test_approx_eq pdf(d, [0.2, 0.3, 0.5]) 3.0
 @test_approx_eq pdf(d, [0.4, 0.5, 0.1]) 0.24
