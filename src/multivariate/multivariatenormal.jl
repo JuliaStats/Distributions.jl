@@ -8,7 +8,7 @@ end
 
 function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
     d = length(μ)
-    if dim(Σ) != (d, d)
+    if dim(Σ) != d
         throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
     end
     MultivariateNormal{Cov}(d, μ, Σ)
@@ -19,7 +19,12 @@ function MultivariateNormal{Cov<:AbstractPDMat}(Σ::Cov)
     MultivariateNormal{Cov}(d, zeros(d), Σ)    
 end
 
+MultivariateNormal(μ::Vector{Float64}, σ2::Float64) = MultivariateNormal(μ, ScalMat(length(μ), σ2))
+MultivariateNormal(μ::Vector{Float64}, σ2::Vector{Float64}) = MultivariateNormal(μ, PDiagMat(σ2))
+MultivariateNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, PDMat(Σ))
+
 const MvNormal = MultivariateNormal
+
 
 # Basic statistics
 
@@ -40,4 +45,5 @@ modes(d::MvNormal) = [mode(d)]
 entropy(d::MvNormal) = 0.5 * (log2π + 1.0 + logdet_cov(d))
 
 
+# PDF evaluation
 
