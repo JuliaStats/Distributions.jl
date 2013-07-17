@@ -55,6 +55,7 @@ export                                  # types
     MixtureModel,
     Multinomial,
     MultivariateNormal,
+    MvNormal,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
@@ -108,9 +109,12 @@ export                                  # types
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
+    sqmahal,       # squared Mahalanobis distance to Gaussian center
+    sqmahal!,      # inplace evaluation of sqmahal
     mean,          # mean of distribution
     median,        # median of distribution
     mgf,           # moment generating function
+    mode,          # the mode of a unimodal distribution
     modes,         # mode(s) of distribution as vector
     moment,        # moments of distribution
 #    mueta,         # derivative of inverse link function
@@ -132,7 +136,7 @@ export                                  # types
 import Base.mean, Base.median, Base.quantile, Base.max, Base.min
 import Base.rand, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
-import NumericExtensions.entropy
+import NumericExtensions.dim, NumericExtensions.entropy
 import Stats.kurtosis, Stats.skewness, Stats.modes
 
 abstract Distribution
