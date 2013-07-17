@@ -185,16 +185,24 @@ function rand!(d::UnivariateDistribution, A::Array)
     return A
 end
 
-function rand(d::ContinuousDistribution, dims::Dims)
+function rand(d::ContinuousUnivariateDistribution, dims::Dims)
     return rand!(d, Array(Float64, dims))
 end
 
-function rand(d::DiscreteDistribution, dims::Dims)
+function rand(d::DiscreteUnivariateDistribution, dims::Dims)
     return rand!(d, Array(Int, dims))
 end
 
-function rand(d::NonMatrixDistribution, dims::Integer...)
+function rand(d::UnivariateDistribution, dims::Integer...)
     return rand(d, map(int, dims))
+end
+
+function rand(d::ContinuousMultivariateDistribution)
+    return rand!(d, Array(Float64, dim(d)))
+end
+
+function rand(d::DiscreteMultivariateDistribution)
+    return rand!(d, Array(Int, dim(d)))
 end
 
 function rand(d::ContinuousMultivariateDistribution, n::Integer)

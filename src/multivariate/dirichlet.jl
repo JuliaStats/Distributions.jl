@@ -152,7 +152,7 @@ function rand!(d::Dirichlet, x::Vector)
     for i in 1:n
         s += (x[i] = randg(α[i]))
     end
-    mul!(x, inv(s)) # this returns x
+    multiply!(x, inv(s)) # this returns x
 end
 
 rand(d::Dirichlet) = rand!(d, Array(Float64, dim(d)))
