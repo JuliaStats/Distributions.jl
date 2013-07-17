@@ -1,6 +1,7 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
+
     function Multinomial{T <: Real}(n::Integer, p::Vector{T})
         p = float(p)
         if n <= 0
@@ -13,8 +14,9 @@ immutable Multinomial <: DiscreteMultivariateDistribution
             end
             sump += p[i]
         end
-        for i in 1:length(p)
-            p[i] /= sump
+
+        if abs(sump - 1.) > 1.0e-12
+            multiply!(p, inv(sump))
         end
         new(int(n), p)
     end
@@ -66,6 +68,42 @@ function insupport{T <: Real}(d::Multinomial, x::Vector{T})
 end
 
 mean(d::Multinomial) = d.n .* d.prob
+
+function var(d::Multinomial) 
+    p = d.prob
+    k = length(p)
+    v = Array(Float64, k)
+    n = d.n
+    for i = 1:k
+        pi = p[i]
+        v[i] = n * pi * (1.0 - pi)
+    end
+    v
+end
+
+function cov(d::Multinomial)
+    p = d.prob
+    k = length(p)
+    C = Array(Float64, k, k)
+    n = d.n
+
+    for j = 1:k
+        pj = p[j]
+        for i = 1:j-1
+            C[i,j] = - n * p[i] * pj
+        end
+
+        C[j,j] = n * pj * (1.0-pj)
+    end
+
+    for j = 1:k-1
+        for i = j+1:k
+            C[i,j] = C[j,i]
+        end
+    end
+    C
+end
+
 
 function mgf(d::Multinomial, t::AbstractVector)
     p, n = d.prob, d.n
@@ -155,21 +193,6 @@ end
 function rand(s::MultinomialSampler)
     x = zeros(Int, dim(s.d))
     return rand!(s, x)
-end
-
-function var(d::Multinomial)
-    n = length(d.prob)
-    S = Array(Float64, n, n)
-    for j in 1:n
-        for i in 1:n
-            if i == j
-                S[i, j] = d.n * d.prob[i] * (1.0 - d.prob[i])
-            else
-                S[i, j] = -d.n * d.prob[i] * d.prob[j]
-            end
-        end
-    end
-    return S
 end
 
 function fit_mle{T<:Real}(::Type{Multinomial}, X::Matrix{T})
