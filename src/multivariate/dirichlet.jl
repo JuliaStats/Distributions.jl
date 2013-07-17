@@ -28,6 +28,56 @@ dim(d::Dirichlet) = length(d.alpha)
 
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 
+function var(d::Dirichlet)
+    α = d.alpha
+    α0 = d.alpha0
+    c = 1.0 / (α0 * α0 * (α0 + 1.0))
+
+    k = length(α)
+    v = Array(Float64, k)
+    for i = 1:k
+        v[i] = α[i] * (α0 - α[i]) * c
+    end
+    v
+end
+
+function cov(d::Dirichlet)
+    α = d.alpha
+    α0 = d.alpha0
+    c = 1.0 / (α0 * α0 * (α0 + 1.0))
+
+    k = length(α)
+    C = Array(Float64, k, k)
+
+    for j = 1:k
+        αj = α[j]
+        αjc = αj * c
+        for i = 1:j-1
+            C[i,j] = - α[i] * αjc
+        end
+        C[j,j] = αj * (α0 - αj) * c
+    end
+
+    for j = 1:k-1
+        for i = j+1:k
+            C[i,j] = C[j,i]
+        end
+    end
+    C
+end
+
+function entropy(d::Dirichlet)
+    α = d.alpha
+    α0 = d.alpha0
+    k = length(α)
+
+    en = d.lmnB + (α0 - k) * digamma(α0)
+    for j in 1:k
+        en -= (α[j] - 1.0) * digamma(α[j])
+    end
+    return en
+end
+
 function modes(d::Dirichlet)
     k = length(d.alpha)
     x = Array(Float64, k)
@@ -39,32 +89,6 @@ function modes(d::Dirichlet)
         x[i] = (d.alpha[i] - 1.0) / s
     end
     return [x]
-end
-
-function var(d::Dirichlet)
-    n = length(d.alpha)
-    tmp = d.alpha0^2 * (d.alpha0 + 1.0)
-    S = Array(Float64, n, n)
-    for j in 1:n
-        for i in 1:n
-            if i == j
-                S[i, j] = d.alpha[i] * (d.alpha0 - d.alpha[i]) / tmp
-            else
-                S[i, j] = -d.alpha[i] * d.alpha[j] / tmp
-            end
-        end
-    end
-    return S
-end
-
-function entropy(d::Dirichlet)
-    k = length(d.alpha)
-    en = lmnB(d)
-    en += (d.alpha0 - k) * digamma(d.alpha0)
-    for j in 1:k
-        en -= (d.alpha[j] - 1.0) * digamma(d.alpha[j])
-    end
-    return en
 end
 
 function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
@@ -124,11 +148,9 @@ end
 function rand!(d::Dirichlet, x::Vector)
     s = 0.0
     n = length(x)
-    a = d.alpha
+    α = d.alpha
     for i in 1:n
-        tmp = rand(Gamma(a[i]))
-        x[i] = tmp
-        s += tmp
+        s += (x[i] = randg(α[i]))
     end
     mul!(x, inv(s)) # this returns x
 end
@@ -142,11 +164,11 @@ function rand!(d::Dirichlet, X::Matrix)
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
 
-    a = d.alpha
+    α = d.alpha
     for j = 1:n
         s = 0.
         for i = 1:k
-            s += (X[i,j] = rand(Gamma(a[i])))
+            s += (X[i,j] = randg(α[i]))
         end
         inv_s = 1.0 / s
         for i = 1:k

@@ -11,11 +11,15 @@ for d in [
 	println(d)
 	dmean = mean(d)
 	dcov = cov(d)
+	dent = entropy(d)
 
 	x = rand(d, n_samples)
 	xmean = vec(mean(x, 2))
 	z = x .- xmean
 	xcov = (z * z') * (1 / n_samples)
+
+	lp = logpdf(d, x)
+	xent = -mean(lp)
 
 	println("expected mean  = $dmean")
 	println("empirical mean = $xmean")
@@ -24,6 +28,10 @@ for d in [
 	println("expected cov  = $dcov")
 	println("empirical cov = $xcov")
 	println("--> abs.dev = $(max(abs(dcov - xcov)))")
+
+	println("expected entropy = $dent")
+	println("empirical entropy = $xent")
+	println("--> abs.dev = $(abs(dent - xent))")
 
 	println()
 end

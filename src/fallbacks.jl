@@ -9,8 +9,6 @@
 
 std(d::Distribution) = sqrt(var(d))
 
-cov(d::MultivariateDistribution) = var(d)
-
 # What's the purpose for this function?
 function var{M <: Real}(d::UnivariateDistribution, mu::AbstractArray{M})
     V = similar(mu, Float64)

@@ -69,29 +69,31 @@ function randg2(d::Float64, c::Float64)
     end
 end
 
-function rand(d::Gamma)
-    dpar = (d.shape <= 1.0 ? d.shape + 1.0 : d.shape) - 1.0 / 3.0
-    return d.scale *
-           randg2(dpar, 1.0 / sqrt(9.0 * dpar)) *
-           (d.shape > 1.0 ? 1.0 : rand()^(1.0 / d.shape))
+
+# sampling from Gamma(α, 1)
+function randg(α::Float64)
+    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
+    cpar = 1.0 / sqrt(9.0 * dpar)
+    randg2(dpar, cpar) * (α > 1.0 ? 1.0 : rand()^(1.0 / α))
 end
 
+rand(d::Gamma) = d.scale * randg(d.shape)
+
 function rand!(d::Gamma, A::Array{Float64})
-    dpar = (d.shape <= 1.0 ? d.shape + 1.0 : d.shape) - 1.0 / 3.0
+    α = d.shape
+    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
     cpar = 1.0 / sqrt(9.0 * dpar)
-    for i in 1:length(A)
+    n = length(A)
+    for i in 1:n
         A[i] = randg2(dpar, cpar)
     end
-    if d.shape <= 1.0
-        ainv = 1.0 / d.shape
-        for i in 1:length(A)
+    if α <= 1.0
+        ainv = 1.0 / α
+        for i in 1:n
             A[i] *= rand()^ainv
         end
     end
-    for i in 1:length(A)
-        A[i] *= d.scale
-    end
-    return A
+    multiply!(A, d.scale)
 end
 
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)
