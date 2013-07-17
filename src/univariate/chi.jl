@@ -5,6 +5,14 @@ immutable Chi <: ContinuousUnivariateDistribution
 end
 
 cdf(d::Chi, x::Real) = cdf(Chisq(d.df),x^2)
+ccdf(d::Chi, x::Real) = ccdf(Chisq(d.df),x^2)
+logcdf(d::Chi, x::Real) = logcdf(Chisq(d.df),x^2)
+logccdf(d::Chi, x::Real) = logccdf(Chisq(d.df),x^2)
+
+quantile(d::Chi,p::Real) = sqrt(quantile(Chisq(d.df),p))
+cquantile(d::Chi,p::Real) = sqrt(cquantile(Chisq(d.df),p))
+invlogcdf(d::Chi,p::Real) = sqrt(invlogcdf(Chisq(d.df),p))
+invlogccdf(d::Chi,p::Real) = sqrt(invlogccdf(Chisq(d.df),p))
 
 mean(d::Chi) = sqrt(2.0) * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
@@ -42,4 +50,3 @@ function entropy(d::Chi)
 end
 
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))
-quantile(d::Chi,p::Real) = sqrt(quantile(Chisq(d.df),p))
