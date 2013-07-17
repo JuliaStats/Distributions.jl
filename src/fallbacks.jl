@@ -193,8 +193,8 @@ function rand(d::DiscreteUnivariateDistribution, dims::Dims)
     return rand!(d, Array(Int, dims))
 end
 
-function rand(d::UnivariateDistribution, dims::Integer...)
-    return rand(d, map(int, dims))
+function rand(d::UnivariateDistribution, dim1::Integer, dims::Integer...)
+    return rand(d, map(int, tuple(dim1,dims...)))
 end
 
 function rand(d::ContinuousMultivariateDistribution)
