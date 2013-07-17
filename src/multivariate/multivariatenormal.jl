@@ -42,8 +42,32 @@ mode(d::MvNormal) = d.μ
 
 modes(d::MvNormal) = [mode(d)]
 
-entropy(d::MvNormal) = 0.5 * (log2π + 1.0 + logdet_cov(d))
+entropy(d::MvNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
 
 
 # PDF evaluation
+
+_gauss_c0(g::MvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
+
+sqmahal(d::MvNormal, x::Vector{Float64}) = invquad(d.Σ, x - d.μ)
+
+function sqmahal!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
+    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+    invquad!(r, d.Σ, bsubtract(x, d.μ, 1))
+end
+
+sqmahal(d::MvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+
+logpdf(g::MvNormal, x::Vector{Float64}) = _gauss_c0(g) - 0.5 * sqmahal(g, x) 
+
+function logpdf!(r::Array{Float64}, g::MvNormal, x::Matrix{Float64})
+    sqmahal!(r, g, x)
+    c0::Float64 = _gauss_c0(g)
+    for i = 1:size(x, 2)
+        r[i] = c0 - 0.5 * r[i]
+    end 
+    r
+end
 
