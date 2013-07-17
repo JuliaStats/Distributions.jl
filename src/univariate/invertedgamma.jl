@@ -42,7 +42,7 @@ invlogccdf(d::InvertedGamma, p::Real) = 1.0 / invlogcdf(Gamma(d.shape, d.scale),
 function entropy(d::InvertedGamma)
     a = d.shape
     b = d.scale
-    return a + log(b) + lgamma(a) - (1.0 + a) * digamma(a)
+    return a - log(b) + lgamma(a) - (1.0 + a) * digamma(a)
 end
 
 
