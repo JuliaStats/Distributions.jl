@@ -11,3 +11,9 @@ end
 
 insupport(::NoncentralT, x::Real) = isfinite(x)
 insupport(::Type{NoncentralT}, x::Real) = isfinite(x)
+
+function rand(d::NoncentralT)
+    z = randn()
+    v = rand(Chisq(d.df))
+    (z+d.ncp)/sqrt(v/d.df)
+end
