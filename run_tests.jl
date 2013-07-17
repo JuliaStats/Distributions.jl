@@ -5,7 +5,8 @@ tests = [
 	"discrete",
 	"univariate", 
 	"truncate", 
-	"dirichlet",
+	"dirichlet", 
+	"mvnormal",
 	"kolmogorov",
 	"matrix"]
 
