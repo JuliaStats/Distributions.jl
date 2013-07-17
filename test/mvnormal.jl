@@ -20,6 +20,7 @@ gs = MvNormal(mu, 2.0)
 @test dim(gs) == 3
 @test mean(gs) == mode(gs) == mu
 @test cov(gs) == diagm(fill(2.0, 3))
+@test var(gs) == diag(cov(gs))
 @test_approx_eq entropy(gs) 0.5 * logdet(2π * e * cov(gs))
 
 # DGauss
@@ -29,6 +30,7 @@ gd = MvNormal(mu, va)
 @test dim(gd) == 3
 @test mean(gd) == mode(gd) == mu
 @test cov(gd) == diagm(va)
+@test var(gd) == diag(cov(gd))
 @test_approx_eq entropy(gd) 0.5 * logdet(2π * e * cov(gd))
 
 # Gauss
@@ -38,6 +40,7 @@ gf = MvNormal(mu, C)
 @test dim(gf) == 3
 @test mean(gf) == mode(gf) == mu
 @test cov(gf) == C
+@test var(gf) == diag(cov(gf))
 @test_approx_eq entropy(gf) 0.5 * logdet(2π * e * cov(gf))
 
 
