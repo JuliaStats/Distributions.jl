@@ -19,8 +19,8 @@ function MultivariateNormal{Cov<:AbstractPDMat}(Σ::Cov)
     MultivariateNormal{Cov}(d, zeros(d), Σ)    
 end
 
-MultivariateNormal(μ::Vector{Float64}, σ2::Float64) = MultivariateNormal(μ, ScalMat(length(μ), σ2))
-MultivariateNormal(μ::Vector{Float64}, σ2::Vector{Float64}) = MultivariateNormal(μ, PDiagMat(σ2))
+MultivariateNormal(μ::Vector{Float64}, σ::Float64) = MultivariateNormal(μ, ScalMat(length(μ), abs2(σ)))
+MultivariateNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MultivariateNormal(μ, PDiagMat(abs2(σ)))
 MultivariateNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, PDMat(Σ))
 
 const MvNormal = MultivariateNormal

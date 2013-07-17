@@ -109,6 +109,8 @@ export                                  # types
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
+    sqmahal,       # squared Mahalanobis distance to Gaussian center
+    sqmahal!,      # inplace evaluation of sqmahal
     mean,          # mean of distribution
     median,        # median of distribution
     mgf,           # moment generating function
