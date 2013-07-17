@@ -118,7 +118,6 @@ function fit_mle(dty::Type{MvNormal{PDiagMat}}, x::Matrix{Float64};
     n = size(x, 2)
 
     if weights == nothing
-
         mu = zeros(d)
         va = zeros(d)
 
