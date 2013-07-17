@@ -22,9 +22,11 @@ end
 
 insupport(d::Levy, x::Real) = d.location <= x && isfinite(x)
 
+mean(d::Levy) = Inf
+var(d::Levy) = Inf
+skewness(d::Levy) = NaN
 kurtosis(d::Levy) = NaN
 
-mean(d::Levy) = Inf
 
 function median(d::Levy)
 	m, c = d.location, d.scale
@@ -54,7 +56,3 @@ function rand(d::Levy)
 	m, c = d.location, d.scale
 	return m + 1 / rand(Normal(0.0, 1.0 / sqrt(c)))^2
 end
-
-skewness(d::Levy) = NaN
-
-var(d::Levy) = Inf
