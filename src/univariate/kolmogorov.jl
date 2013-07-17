@@ -22,7 +22,9 @@ var(d::Kolmogorov) = pi^2/12.0 - pi/2.0*log(2.0)^2
 # both series so assume error in table.
 
 function cdf(d::Kolmogorov,x::Real)
-    if x > 1.0
+    if x <= 0.0
+        return 0.0
+    elseif x > 1.0
         return 1.0-ccdf(d,x)
     end
     s = 0.0
