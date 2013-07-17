@@ -64,7 +64,8 @@ for d in [Arcsine(),
           # HyperGeometric(3.0, 2.0, 2.0),
           # HyperGeometric(2.0, 3.0, 2.0),
           # HyperGeometric(2.0, 2.0, 3.0),
-          # InvertedGamma(),
+          InvertedGamma(1.0,1.0),
+          InvertedGamma(2.0,3.0),
           Laplace(0.0, 1.0),
           Laplace(10.0, 1.0),
           Laplace(0.0, 10.0),
@@ -152,6 +153,23 @@ for d in [Arcsine(),
         @check_deviation "median" m m_hat
     end
 
+    # Kolmogorov-Smirnov test
+    if isa(d, ContinuousDistribution)
+        c = cdf(d,x)
+        sort!(c)
+        for i = 1:n_samples
+            c[i] = c[i]*n_samples - i
+        end
+        a = max(abs(c))
+        for i = 1:n_samples
+            c[i] += 1.0
+        end
+        b = max(abs(c))
+        ks = max(a,b)
+        kss = ks/n_samples
+        ksp = ccdf(Kolmogorov(),ks/sqrt(n_samples))
+        @printf "    KS statistic = %10.3e,   p-value = %8.6f \n" kss ksp
+    end
     println()
 end
 

@@ -7,6 +7,7 @@ tests = [
 	"truncate", 
 	"dirichlet", 
 	"mvnormal",
+	"kolmogorov",
 	"matrix"]
 
 println("Running tests:")

@@ -12,3 +12,9 @@ immutable NoncentralBeta <: ContinuousUnivariateDistribution
 end
 
 @_jl_dist_3p NoncentralBeta nbeta
+
+function rand(d::NoncentralBeta)
+    a = rand(NoncentralChisq(d.alpha,d.ncp))
+    b = rand(Chisq(d.beta))
+    a / (a+b)
+end
