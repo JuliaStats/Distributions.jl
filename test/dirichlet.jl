@@ -51,6 +51,17 @@ for i in 1 : size(x, 2)
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
 end
 
+# Sampling
+
+x = rand(d)
+@test isa(x, Vector{Float64})
+@test length(x) == 3
+
+x = rand(d, 10)
+@test isa(x, Matrix{Float64})
+@test size(x) == (3, 10)
+
+
 # Test MLE
 
 x = rand(d, 2000)
