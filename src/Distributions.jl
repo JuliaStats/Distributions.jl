@@ -161,11 +161,9 @@ include("constants.jl")
 
 include("fallbacks.jl")
 include("rmath.jl")
-
-include("drawtable.jl")
-include("huffman.jl")
-include("alias.jl")
 include("tvpack.jl")
+
+include(joinpath("samplers", "categorical_samplers.jl"))
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))

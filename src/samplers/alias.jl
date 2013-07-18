@@ -1,4 +1,4 @@
-immutable AliasTable
+immutable AliasTable <: AbstractCategoricalSampler
     accept::Vector{Float64}
     alias::Vector{Int}
 end
