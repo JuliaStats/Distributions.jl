@@ -66,7 +66,7 @@ function quantile(d::DiscreteUniform, p::Real)
     return d.a + ifloor(p * n)
 end
 
-rand(d::DiscreteUniform) = d.a + rand(0:(d.b - d.a))
+rand(d::DiscreteUniform) = d.a + randi(d.b - d.a)
 
 skewness(d::DiscreteUniform) = 0.0
 

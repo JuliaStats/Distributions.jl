@@ -162,6 +162,7 @@ include("constants.jl")
 include("fallbacks.jl")
 include("rmath.jl")
 include("tvpack.jl")
+include("utils.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
 
