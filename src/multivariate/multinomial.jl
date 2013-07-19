@@ -2,21 +2,14 @@ immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
 
-    function Multinomial{T <: Real}(n::Integer, p::Vector{T})
-        p = float(p)
-        if n <= 0
-            error("Multinomial: n must be positive")
-        end
-        sump = 0.0
-        for i in 1:length(p)
-            if p[i] < 0.0
-                error("Multinomial: probabilities must be non-negative")
+    function Multinomial(n::Integer, p::Vector{Float64}; check::Bool=true)
+        if check
+            if n <= 0
+                throw(ArgumentError("n must be a positive integer."))
             end
-            sump += p[i]
-        end
-
-        if abs(sump - 1.) > 1.0e-12
-            multiply!(p, inv(sump))
+            if !isprobvec(p)
+                throw(ArgumentError("p must be a probability vector."))
+            end
         end
         new(int(n), p)
     end
@@ -202,5 +195,5 @@ function fit_mle{T<:Real}(::Type{Multinomial}, X::Matrix{T})
     end
     n = int(ns[1])
     p = vec(mean(X, 2)) * (1.0 / n)
-    Multinomial(n, p)
+    Multinomial(n, p; check=false)
 end

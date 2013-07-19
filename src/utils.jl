@@ -1,5 +1,18 @@
 # Utility functions
 
+function isprobvec(p::Vector{Float64})
+    s = 0.
+    for i = 1:length(p)
+        pi = p[i]
+        s += pi
+        if pi < 0
+            return false
+        end
+    end      
+    return abs(s - 1.0) <= 1.0e-12
+end
+
+
 function _randu(Ku::Uint, U::Uint)   # ~ U[0:Ku-1]
 	x = rand(Uint)
 	while x > U

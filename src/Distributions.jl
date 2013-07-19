@@ -98,6 +98,7 @@ export                                  # types
     isplatykurtic, # Is excess kurtosis > 0.0?
     isleptokurtic, # Is excess kurtosis < 0.0?
     ismesokurtic,  # Is excess kurtosis = 0.0?
+    isprobvec,     # Is a probability vector?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
 #    linkfun,       # link function mapping mu to eta, the linear predictor
