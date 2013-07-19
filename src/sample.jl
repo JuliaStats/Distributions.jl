@@ -1,15 +1,52 @@
 # Sample from arbitrary arrays
-
-#####
+ 
+################################################################
 #
-#  Sampling from an array with even probabilities
+#  A variety of algorithms for sampling without replacement
 #
-#####
+#  They are suited for different cases.
+#
+################################################################
 
-### Internal implementation of sampling with replacement
 
-sample_one{T<:Integer}(a::Range1{T}) = rand(a)
-sample_one(a::AbstractArray) = a[rand(1:length(a))]
+## A sampler that implements without-replacement sampling 
+## via Fisher-Yates shuffling
+##
+immutable FisherYateSampler
+    n::Int             # samples are in 1:n
+    seq::Vector{Int}   # Internal sequence for shuffling
+
+    FisherYateSampler(n::Int) = new(n, [1:n])
+end
+
+
+function rand!(s::FisherYateSampler, x::Array)
+    # draw samples without-replacement to x
+
+    k = length(x)
+    if k > s.n
+        throw(ArgumentError("Cannot draw more than n samples without replacement."))
+    end
+
+    seq::Vector{Int} = s.seq
+    for i = 1:k
+        j = (i-1) + randi(k-i)
+        sj = seq[j]
+        x[i] = sj
+        if j > i
+            seq[j] = seq[i]
+            seq[i] = sj
+        end
+    end
+    x
+end
+
+
+
+
+
+
+
 
 
 function sample_pair_without_rep!(a::AbstractArray, x::Array)
@@ -25,6 +62,13 @@ function sample_pair_without_rep!(a::AbstractArray, x::Array)
     x1[1] = a[i1]
     x2[1] = a[i2]
 end
+
+####
+#
+#  Randomly choose k elements from src without 
+#
+
+
 
 function sample_without_rep_by_set!{T}(a::AbstractArray{T}, x::Array)
     # This algorithm is suitable when length(x) << length(a)
