@@ -30,24 +30,14 @@ function rand!(s::FisherYateSampler, x::Array)
 
     seq::Vector{Int} = s.seq
     for i = 1:k
-        j = (i-1) + randi(k-i)
+        j = randi(i, k)
         sj = seq[j]
         x[i] = sj
-        if j > i
-            seq[j] = seq[i]
-            seq[i] = sj
-        end
+        seq[j] = seq[i]
+        seq[i] = sj
     end
     x
 end
-
-
-
-
-
-
-
-
 
 function sample_pair_without_rep!(a::AbstractArray, x::Array)
     # Pick a pair of values without replacement
