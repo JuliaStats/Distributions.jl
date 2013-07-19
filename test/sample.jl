@@ -80,7 +80,7 @@ end
 
 w = [2., 5., 3.]
 n = 10^5
-x = sample([10,20,30], w, n)
+x = wsample([10,20,30], w, n)
 
 h = [sum(x .== 10), sum(x .== 20), sum(x .== 30)]
 @test sum(h) == n

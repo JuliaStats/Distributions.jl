@@ -124,7 +124,8 @@ export                                  # types
     quantile,      # inverse of cdf (defined for p in (0,1))
     rand,          # random sampler
     rand!,         # replacement random sampler
-    sample,        # another random sampler - not sure why this is here
+    sample,        # sample from a source array
+    wsample,       # weighted sampling from a source array
     sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices

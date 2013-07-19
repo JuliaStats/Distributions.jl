@@ -140,7 +140,7 @@ end
 #
 ################################################################
 
-function sample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
+function wsample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
     n = length(w)
     t = rand() * wsum
 
@@ -154,9 +154,9 @@ function sample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
     a[i]
 end
 
-sample{W<:FloatingPoint}(a::AbstractArray, w::AbstractArray{Float64}) = sample(a, w, sum(w))
+wsample{W<:FloatingPoint}(a::AbstractArray, w::AbstractArray{Float64}) = wsample(a, w, sum(w))
 
-function sample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray; 
+function wsample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray; 
     wsum::Float64=NaN)
 
     n = length(a)
@@ -166,16 +166,16 @@ function sample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray;
 
     _wsum::Float64 = isnan(wsum) ? sum(w) : wsum
     for i = 1:length(x)
-        x[i] = sample(a, w, _wsum)
+        x[i] = wsample(a, w, _wsum)
     end
     x
 end
 
-function sample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, n::Integer; wsum::Float64=NaN)
-    sample!(a, w, Array(T, n); wsum=wsum)
+function wsample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, n::Integer; wsum::Float64=NaN)
+    wsample!(a, w, Array(T, n); wsum=wsum)
 end
 
-function sample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, dims::Dims; wsum::Float64=NaN)
-    sample!(a, w, Array(T, dims); wsum=wsum)
+function wsample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, dims::Dims; wsum::Float64=NaN)
+    wsample!(a, w, Array(T, dims); wsum=wsum)
 end
 
