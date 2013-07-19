@@ -124,7 +124,8 @@ export                                  # types
     quantile,      # inverse of cdf (defined for p in (0,1))
     rand,          # random sampler
     rand!,         # replacement random sampler
-    sample,        # another random sampler - not sure why this is here
+    sample,        # sample from a source array
+    wsample,       # weighted sampling from a source array
     sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
@@ -134,7 +135,7 @@ export                                  # types
     var            # variance of distribution
 
 import Base.mean, Base.median, Base.quantile, Base.max, Base.min
-import Base.rand, Base.std, Base.var, Base.cor, Base.cov
+import Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
 import Stats.kurtosis, Stats.skewness, Stats.modes
