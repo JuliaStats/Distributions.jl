@@ -6,7 +6,7 @@
 
 import Base.isless, Base.show, Base.getindex, Base.rand
 
-abstract HuffmanNode{T}
+abstract HuffmanNode{T} <: AbstractCategoricalSampler
 
 immutable HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
@@ -40,7 +40,7 @@ end
 # could be slightly more efficient using a Deque.
 function huffman{T}(values::AbstractVector{T},weights::AbstractVector{Uint64})
     leafs = [HuffmanLeaf{T}(values[i],weights[i]) for i = 1:length(weights)]
-    sort!(leafs,Base.Sort.Reverse)
+    sort!(leafs; rev=true)
     
     branches = Array(HuffmanBranch{T},0)
         

@@ -1,4 +1,6 @@
-immutable AliasTable
+immutable AliasTable <: AbstractCategoricalSampler
+    Ku::Uint
+    U::Uint
     accept::Vector{Float64}
     alias::Vector{Int}
 end
@@ -37,11 +39,13 @@ function AliasTable(probs)
         accept[s] = 1.0
     end
 
-    AliasTable(accept,alias)
+    Ku = uint(length(accept))
+    U = div(typemax(Uint), Ku) * Ku
+    AliasTable(Ku, U, accept, alias)
 end
 
 function rand(a::AliasTable)
-    i = rand(1:length(a.accept))
+    i = _randi(a.Ku, a.U)
     u = rand()
     u < a.accept[i] ? i : a.alias[i]
 end
