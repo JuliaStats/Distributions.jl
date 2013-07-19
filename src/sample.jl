@@ -14,7 +14,7 @@
 #
 ################################################################
 
-function pick2!(a::AbstractArray, x::Array)
+function pick2!(a::AbstractArray, x::AbstractArray)
     # Pick a pair of values without replacement
 
     n0 = 1 : length(a)
@@ -38,7 +38,7 @@ immutable FisherYatesSampler
     FisherYatesSampler(n::Int) = new(n, [1:n])
 end
 
-function rand!(s::FisherYatesSampler, a::AbstractArray, x::Array)
+function rand!(s::FisherYatesSampler, a::AbstractArray, x::AbstractArray)
     # draw samples without-replacement to x
 
     k = length(x)
@@ -57,9 +57,9 @@ function rand!(s::FisherYatesSampler, a::AbstractArray, x::Array)
     x
 end
 
-fisher_yates_sample!(a::AbstractArray, x::Array) = rand!(FisherYatesSampler(length(a)), a, x)
+fisher_yates_sample!(a::AbstractArray, x::AbstractArray) = rand!(FisherYatesSampler(length(a)), a, x)
 
-function self_avoid_sample!{T}(a::AbstractArray{T}, x::Array)
+function self_avoid_sample!{T}(a::AbstractArray{T}, x::AbstractArray)
     # This algorithm is suitable when length(x) << length(a)
 
     s = Set{T}()
@@ -83,33 +83,45 @@ function self_avoid_sample!{T}(a::AbstractArray{T}, x::Array)
     x
 end
 
-function sample_without_replacement!(a::AbstractArray, x::Array)
+###########################################################
+#
+#   Interface functions
+#
+###########################################################
+
+sample(a::AbstractArray) = a[randi(length(a))]
+
+function sample!(a::AbstractArray, x::AbstractArray; replace=true)
     n = length(a)
     k = length(x)
-    if k > n
-        throw(ArgumentError("n exceeds the length of x"))
-    end
 
-    if n == 1
-        x[1] = a[randi(length(a))]
-        
-    elseif n == 2
-        pick2!(a, x)
+    if !isempty(x)
+        if replace   # with replacement
+            s = RandIntSampler(n)
+            for i = 1:k
+                x[i] = a[rand(s)]
+            end
 
-    elseif n * max(n, 100) < n0
-        fisher_yates_sample!(a, x)
-        
-    else
-        self_avoid_sample!(a, x)
+        else  # without replacement
+            if k > n
+                throw(ArgumentError("n exceeds the length of x"))
+            end
+
+            if n == 1
+                x[1] = sample(a)
+                
+            elseif n == 2
+                pick2!(a, x)
+
+            elseif n * max(n, 100) < n0
+                fisher_yates_sample!(a, x)
+                
+            else
+                self_avoid_sample!(a, x)
+            end
+        end
     end
     x
-end
-
-# Interface function
-
-function sample!(a::AbstractArray, x::Array; replace=true)
-	rep ? rand!(a, x) : sample_with_rep!(a, x)
-	return x
 end
 
 function sample{T}(a::AbstractArray{T}, n::Integer; replace=true)
@@ -121,7 +133,48 @@ function sample{T}(a::AbstractArray{T}, dims::Dims; replace=true)
 end
 
 
+################################################################
+#
+#  Weighted sampling
+#
+################################################################
 
+function sample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
+    n = length(w)
+    t = rand() * wsum
 
+    i = 1
+    s = w[1]
 
+    while i < n && s < t
+        i += 1
+        s += w[i]
+    end
+    a[i]
+end
+
+sample{W<:FloatingPoint}(a::AbstractArray, w::AbstractArray{Float64}) = sample(a, w, sum(w))
+
+function sample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray; 
+    wsum::Float64=NaN)
+
+    n = length(a)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    _wsum::Float64 = isnan(wsum) ? sum(w) : wsum
+    for i = 1:length(x)
+        x[i] = sample(a, w, _wsum)
+    end
+    x
+end
+
+function sample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, n::Integer; wsum::Float64=NaN)
+    sample!(a, w, Array(T, n); wsum=wsum)
+end
+
+function sample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, dims::Dims; wsum::Float64=NaN)
+    sample!(a, w, Array(T, dims); wsum=wsum)
+end
 
