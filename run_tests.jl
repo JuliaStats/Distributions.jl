@@ -1,6 +1,7 @@
 
 tests = [
 	"utils", 
+	"sample",
 	"fit", 
 	"discrete",
 	"univariate", 

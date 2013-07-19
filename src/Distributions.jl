@@ -134,7 +134,7 @@ export                                  # types
     var            # variance of distribution
 
 import Base.mean, Base.median, Base.quantile, Base.max, Base.min
-import Base.rand, Base.std, Base.var, Base.cor, Base.cov
+import Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
 import Stats.kurtosis, Stats.skewness, Stats.modes

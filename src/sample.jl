@@ -17,15 +17,15 @@
 function pick2!(a::AbstractArray, x::AbstractArray)
     # Pick a pair of values without replacement
 
-    n0 = 1 : length(a)
+    n0 = length(a)
     i1 = randi(n0)
     i2 = randi(n0 - 1)
     if i2 == i1
         i2 = n0
     end
 
-    x1[1] = a[i1]
-    x2[1] = a[i2]
+    x[1] = a[i1]
+    x[2] = a[i2]
 end
 
 ## A sampler that implements without-replacement sampling 
@@ -41,14 +41,15 @@ end
 function rand!(s::FisherYatesSampler, a::AbstractArray, x::AbstractArray)
     # draw samples without-replacement to x
 
-    k = length(x)
-    if k > s.n
+    n::Int = s.n
+    k::Int = length(x)
+    if k > n
         throw(ArgumentError("Cannot draw more than n samples without replacement."))
     end
 
     seq::Vector{Int} = s.seq
     for i = 1:k
-        j = randi(i, k)
+        j = randi(i, n)
         sj = seq[j]
         x[i] = a[sj]
         seq[j] = seq[i]
@@ -63,19 +64,19 @@ function self_avoid_sample!{T}(a::AbstractArray{T}, x::AbstractArray)
     # This algorithm is suitable when length(x) << length(a)
 
     s = Set{T}()
-    sizehint(s, length(x))
-    rg = 1:length(a)
+    # sizehint(s, length(x))
+    rgen = RandIntSampler(length(a))
 
     # first one    
-    idx = rand(rg)
+    idx = rand(rgen)
     x[1] = a[idx]
     add!(s, idx)
 
     # remaining
     for i = 2:length(x)
-        idx = rand(rg)
-        while !contains(s, idx)
-            idx = rand(rg)
+        idx = rand(rgen)
+        while contains(s, idx)
+            idx = rand(rgen)
         end
         x[i] = a[idx]
         add!(s, idx)
@@ -107,13 +108,13 @@ function sample!(a::AbstractArray, x::AbstractArray; replace=true)
                 throw(ArgumentError("n exceeds the length of x"))
             end
 
-            if n == 1
+            if k == 1
                 x[1] = sample(a)
                 
-            elseif n == 2
+            elseif k == 2
                 pick2!(a, x)
 
-            elseif n * max(n, 100) < n0
+            elseif n < k * max(k, 100) 
                 fisher_yates_sample!(a, x)
                 
             else
