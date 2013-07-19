@@ -45,7 +45,7 @@ function AliasTable(probs)
 end
 
 function rand(a::AliasTable)
-    i = _randi(a.Ku, a.U)
+    i = int(_randu(a.Ku, a.U)) + 1
     u = rand()
     u < a.accept[i] ? i : a.alias[i]
 end
