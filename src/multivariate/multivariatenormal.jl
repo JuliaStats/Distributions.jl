@@ -2,8 +2,17 @@
 
 immutable MultivariateNormal{Cov<:AbstractPDMat} <: ContinuousMultivariateDistribution
     dim::Int
+    zeromean::Bool
     μ::Vector{Float64}
     Σ::Cov
+end
+
+function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov, zmean::Bool)
+    d = length(μ)
+    if dim(Σ) != d
+        throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
+    end
+    MultivariateNormal{Cov}(d, zmean, μ, Σ)
 end
 
 function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
@@ -11,17 +20,27 @@ function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
     if dim(Σ) != d
         throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
     end
-    MultivariateNormal{Cov}(d, μ, Σ)
+    zmean::Bool = true
+    for i = 1:d
+        if μ[i] != 0.
+            zmean = false
+            break
+        end
+    end
+    MultivariateNormal{Cov}(d, zmean, μ, Σ)
 end
 
 function MultivariateNormal{Cov<:AbstractPDMat}(Σ::Cov)
     d = dim(Σ)
-    MultivariateNormal{Cov}(d, zeros(d), Σ)    
+    MultivariateNormal{Cov}(d, true, zeros(d), Σ)    
 end
 
 MultivariateNormal(μ::Vector{Float64}, σ::Float64) = MultivariateNormal(μ, ScalMat(length(μ), abs2(σ)))
 MultivariateNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MultivariateNormal(μ, PDiagMat(abs2(σ)))
 MultivariateNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, PDMat(Σ))
+
+MultivariateNormal(d::Int, σ::Float64) = MultivariateNormal(ScalMat(d, abs2(σ)))
+MultivariateNormal(Σ::Matrix{Float64}) = MultivariateNormal(PDMat(Σ))
 
 const MvNormal = MultivariateNormal
 
@@ -49,13 +68,16 @@ entropy(d::MvNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
 
 _gauss_c0(g::MvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
 
-sqmahal(d::MvNormal, x::Vector{Float64}) = invquad(d.Σ, x - d.μ)
+function sqmahal(d::MvNormal, x::Vector{Float64}) 
+    z::Vector{Float64} = d.zeromean ? x : x - d.μ
+    invquad(d.Σ, z) 
+end
 
 function sqmahal!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
     if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    z::Matrix{Float64} = bsubtract(x, d.μ, 1)
+    z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
     invquad!(r, d.Σ, z)
 end
 
@@ -75,10 +97,21 @@ end
 
 # Sampling
 
-rand!(d::MvNormal, x::Vector{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
+function rand!(d::MvNormal, x::Vector{Float64})
+    unwhiten!(d.Σ, randn!(x))
+    if !d.zeromean
+        add!(x, d.μ)
+    end
+    x
+end
 
-rand!(d::MvNormal, x::Matrix{Float64}) = badd!(unwhiten!(d.Σ, randn!(x)), d.μ, 1)
-
+function rand!(d::MvNormal, x::Matrix{Float64})
+    unwhiten!(d.Σ, randn!(x))
+    if !d.zeromean
+        badd!(x, d.μ, 1)
+    end
+    x
+end
 
 # Maximum Likelihood Estimation
 #

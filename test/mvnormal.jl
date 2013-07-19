@@ -27,6 +27,12 @@ gs = MvNormal(mu, sqrt(2.0))
 @test var(gs) == diag(cov(gs))
 @test_approx_eq entropy(gs) 0.5 * logdet(2π * e * cov(gs))
 
+gsz = MvNormal(3, sqrt(2.0))
+@test isa(gsz, MvNormal{ScalMat})
+@test dim(gsz) == 3
+@test mean(gsz) == zeros(3)
+@test gsz.zeromean
+
 # DGauss
 
 gd = MvNormal(mu, sqrt(va))
@@ -36,6 +42,12 @@ gd = MvNormal(mu, sqrt(va))
 @test_approx_eq cov(gd) diagm(va)
 @test var(gd) == diag(cov(gd))
 @test_approx_eq entropy(gd) 0.5 * logdet(2π * e * cov(gd))
+
+gdz = MvNormal(PDiagMat(va))
+@test isa(gdz, MvNormal{PDiagMat})
+@test dim(gdz) == 3
+@test mean(gdz) == zeros(3)
+@test gdz.zeromean
 
 # Gauss
 
@@ -47,12 +59,23 @@ gf = MvNormal(mu, C)
 @test var(gf) == diag(cov(gf))
 @test_approx_eq entropy(gf) 0.5 * logdet(2π * e * cov(gf))
 
+gfz = MvNormal(C)
+@test isa(gfz, MvNormal{PDMat})
+@test dim(gfz) == 3
+@test mean(gfz) == zeros(3)
+@test gfz.zeromean
+
 
 ##### LogPDF/PDF evaluation
 
 @test_approx_eq_eps logpdf(gs, x1) -5.106536370454 1.0e-8
 @test_approx_eq_eps logpdf(gd, x1) -6.029399605174 1.0e-8
 @test_approx_eq_eps logpdf(gf, x1) -5.680452770982 1.0e-8
+
+@test_approx_eq_eps logpdf(gsz, x1) -8.606536370454 1.0e-8
+@test_approx_eq_eps logpdf(gdz, x1) -9.788449378930 1.0e-8
+@test_approx_eq_eps logpdf(gfz, x1) -9.621416626404 1.0e-8
+
 
 n = size(x, 2)
 r = zeros(n)
@@ -61,13 +84,25 @@ for i = 1:n; r[i] = logpdf(gs, x[:,i]); end
 @test_approx_eq logpdf(gs, x) r
 @test_approx_eq pdf(gs, x) exp(r)
 
+for i = 1:n; r[i] = logpdf(gsz, x[:,i]); end
+@test_approx_eq logpdf(gsz, x) r
+@test_approx_eq pdf(gsz, x) exp(r)
+
 for i = 1:n; r[i] = logpdf(gd, x[:,i]); end
 @test_approx_eq logpdf(gd, x) r
 @test_approx_eq pdf(gd, x) exp(r)
 
+for i = 1:n; r[i] = logpdf(gdz, x[:,i]); end
+@test_approx_eq logpdf(gdz, x) r
+@test_approx_eq pdf(gdz, x) exp(r)
+
 for i = 1:n; r[i] = logpdf(gf, x[:,i]); end
 @test_approx_eq logpdf(gf, x) r
 @test_approx_eq pdf(gf, x) exp(r)
+
+for i = 1:n; r[i] = logpdf(gfz, x[:,i]); end
+@test_approx_eq logpdf(gfz, x) r
+@test_approx_eq pdf(gfz, x) exp(r)
 
 
 ##### Sampling 
@@ -84,6 +119,18 @@ x = rand(gf)
 @test isa(x, Vector{Float64})
 @test length(x) == dim(gf)
 
+x = rand(gsz)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gsz)
+
+x = rand(gdz)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gdz)
+
+x = rand(gfz)
+@test isa(x, Vector{Float64})
+@test length(x) == dim(gfz)
+
 n = 10
 x = rand(gs, n)
 @test isa(x, Matrix{Float64})
@@ -97,6 +144,17 @@ x = rand(gf, n)
 @test isa(x, Matrix{Float64})
 @test size(x) == (dim(gf), n)
 
+x = rand(gsz, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gsz), n)
+
+x = rand(gdz, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gdz), n)
+
+x = rand(gfz, n)
+@test isa(x, Matrix{Float64})
+@test size(x) == (dim(gfz), n)
 
 ##### MLE
 
