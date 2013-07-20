@@ -120,6 +120,7 @@ export                                  # types
     moment,        # moments of distribution
 #    mueta,         # derivative of inverse link function
 #    mustart,       # starting values of mean vector in GLMs
+    nsamples,      # get the number of samples in a data array based on distribution types
     pdf,           # probability density function (ContinuousDistribution)
     pmf,           # probability mass function (DiscreteDistribution)
     quantile,      # inverse of cdf (defined for p in (0,1))

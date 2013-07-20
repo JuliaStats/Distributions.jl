@@ -135,6 +135,7 @@ for d in [Arcsine(),
 
     # check that we can generate many random draws at once
     x = rand(d, n)
+    @test nsamples(typeof(d), x) == n
 
     # check that sequence of draws satifies insupport()
     @test insupport(d, x)

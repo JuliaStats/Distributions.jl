@@ -4,6 +4,11 @@
 #
 ##############################################################################
 
+# generic function to get number of samples
+
+nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)
+nsamples{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix) = size(x, 2)
+nsamples{D<:MatrixDistribution,T}(dt::Type{D}, x::Array{Matrix{T}}) = length(x)
 
 #### Statistics ####
 
