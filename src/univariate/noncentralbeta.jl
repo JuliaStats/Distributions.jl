@@ -13,12 +13,6 @@ end
 
 @_jl_dist_3p NoncentralBeta nbeta
 
-# does have a mean and var, but requires generalized hypergeometric
-# in the meantime, use NaN otherwise we get problems in tests.
-mean(d::NoncentralBeta) = NaN
-var(d::NoncentralBeta) = NaN
-entropy(d::NoncentralBeta) = NaN
-
 insupport(::NoncentralBeta, x::Real) = zero(x) < x < one(x)
 insupport(::Type{NoncentralBeta}, x::Real) = zero(x) < x < one(x)
 

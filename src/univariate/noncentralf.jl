@@ -19,7 +19,6 @@ var(d::NoncentralF) = d.ddf > 4.0 ? 2.0 * d.ddf^2 *
 		       ((d.ndf+d.ncp)^2 + (d.ddf - 2.0)*(d.ndf + 2.0*d.ncp)) /
 		       (d.ndf * (d.ddf - 2.0)^2 * (d.ddf - 4.0)) : NaN
 
-entropy(d::NoncentralF) = NaN
 
 
 insupport(::NoncentralF, x::Number) = zero(x) <= x < Inf

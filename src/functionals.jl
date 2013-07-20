@@ -4,7 +4,7 @@ function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
     rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
     (leftEnd, rightEnd)
 end
-                             
+
 function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
@@ -21,12 +21,13 @@ end
 function expectation(distr::UnivariateDistribution, g::Function)
     expectation(distr, g, 1e-10)
 end
-                             
-function entropy(distr::UnivariateDistribution)
-    pf = typeof(distr)<:ContinuousDistribution ? pdf : pmf
-    f = x -> pf(distr, x)
-    expectation(distr, x -> -log(f(x)))
-end
+
+## Leave undefined until we've implemented a numerical integration procedure
+# function entropy(distr::UnivariateDistribution)
+#     pf = typeof(distr)<:ContinuousDistribution ? pdf : pmf
+#     f = x -> pf(distr, x)
+#     expectation(distr, x -> -log(f(x)))
+# end
 
 function KL(P::UnivariateDistribution, Q::UnivariateDistribution)
     expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))

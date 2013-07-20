@@ -11,7 +11,6 @@ end
 
 mean(d::NoncentralT) = d.df > 1.0 ? sqrt(0.5*d.df)*d.ncp*gamma(0.5*(d.df-1))/gamma(0.5*d.df) : NaN
 var(d::NoncentralT) = d.df > 2.0 ? d.df*(1+d.ncp^2)/(d.df-2.0) - mean(d)^2 : NaN
-entropy(d::NoncentralT) = NaN
 
 insupport(::NoncentralT, x::Real) = isfinite(x)
 insupport(::Type{NoncentralT}, x::Real) = isfinite(x)

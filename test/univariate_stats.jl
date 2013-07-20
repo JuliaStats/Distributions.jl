@@ -17,6 +17,18 @@ macro check_deviation(title, v, vhat)
     end
 end
 
+macro ignore_methoderror(ex)
+    quote
+        try
+            $(esc(ex))
+        catch err
+            if !isa(err,MethodError)
+                rethrow(err)
+            end
+        end
+    end
+end
+
 for d in [Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
@@ -118,31 +130,31 @@ for d in [Arcsine(),
 
 
     println(d)
-    
-    if method_exists(mean,(typeof(d),))
+    local mu
+    @ignore_methoderror begin
         mu, mu_hat = mean(d), mean(x)
-        # empirical mean should be close to theoretical value
         if isfinite(mu)
-            @check_deviation "mean" mu mu_hat
+            # empirical mean should be close to theoretical value
+            @check_deviation "mean" mu mu_hat        
         end
     end
 
-    if method_exists(median,(typeof(d),))
-        m, m_hat = median(d), median!(x)
-        if insupport(d, m_hat) && isa(d, ContinuousDistribution) && !isa(d, FDist)
-            @check_deviation "median" m m_hat
-        end
+    @ignore_methoderror begin 
+        m, m_hat = median(d), median(x)
+        @assert insupport(d, m_hat)
+        @check_deviation "median" m m_hat
     end
+    
 
-    if method_exists(var,(typeof(d),))
-        sigma, sigma_hat = var(d), var(x)
+    @ignore_methoderror begin 
+        sigma2, sigma2_hat = var(d), var(x)
         # empirical variance should be close to theoretical value
-        if isfinite(mu) && isfinite(sigma)       
-            @check_deviation "variance" sigma sigma_hat
+        if isfinite(mu) && isfinite(sigma2)       
+            @check_deviation "variance" sigma2 sigma2_hat
         end
     end
 
-    if method_exists(skewness,(typeof(d),))
+    @ignore_methoderror begin 
         sk, sk_hat = skewness(d), skewness(x)
         # empirical skewness should be close to theoretical value
         if isfinite(mu) && isfinite(sk) 
@@ -150,16 +162,16 @@ for d in [Arcsine(),
         end
     end
 
-    if method_exists(kurtosis,(typeof(d),))    
+    @ignore_methoderror begin 
         k, k_hat = kurtosis(d), kurtosis(x)
         # empirical kurtosis should be close to theoretical value
-        # Empirical kurtosis is very unstable for FDist
+        # very unstable for FDist
         if isfinite(mu) && isfinite(k)
             @check_deviation "kurtosis" k k_hat
         end
     end
 
-    if method_exists(entropy,(typeof(d),))
+    @ignore_methoderror begin 
         ent, ent_hat = entropy(d), -mean(logpdf(d, x))
         # By the Asymptotic Equipartition Property,
         # empirical mean negative log PDF should be close to theoretical value
