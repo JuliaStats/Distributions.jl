@@ -46,6 +46,8 @@ export                                  # types
     InverseWishart,
     InvertedGamma,
     Kolmogorov,
+    KSDist,
+    KSOneSided,
     Laplace,
     Levy,
 #    Link,
@@ -195,6 +197,8 @@ include(joinpath("univariate", "gumbel.jl"))
 include(joinpath("univariate", "hypergeometric.jl"))
 include(joinpath("univariate", "invertedgamma.jl"))
 include(joinpath("univariate", "kolmogorov.jl"))
+include(joinpath("univariate", "ksdist.jl"))
+include(joinpath("univariate", "ksonesided.jl"))
 include(joinpath("univariate", "laplace.jl"))
 include(joinpath("univariate", "levy.jl"))
 include(joinpath("univariate", "logistic.jl"))

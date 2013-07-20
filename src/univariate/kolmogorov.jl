@@ -1,6 +1,7 @@
 # Kolmogorov distribution
 # defined as the sup_{t \in [0,1]} |B(t)|, where B(t) is a Brownian bridge
 # used in the Kolmogorov--Smirnov test for large n.
+
 immutable Kolmogorov <: ContinuousUnivariateDistribution
 end
 
@@ -44,3 +45,25 @@ function ccdf(d::Kolmogorov,x::Real)
     end
     2.0*s
 end
+
+# TODO: figure out how best to truncate series
+function pdf(d::Kolmogorov,x::Real)
+    if x <= 0.0
+        return 0.0
+    elseif x <= 1.0
+        c = π/(2.0*x)        
+        s = 0.0
+        for i = 1:20
+            k = ((2*i-1)*c)^2
+            s += (k-1.0)*exp(-k/2.0)
+        end
+        return √2π*s/x^2
+    else
+        s = 0.0
+        for i = 1:20
+            s += (iseven(i) ? -1 : 1)*i^2*exp(-2.0*(i*x)^2)
+        end
+        return 8.0*x*s
+    end
+end
+
