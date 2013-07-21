@@ -2,8 +2,8 @@ immutable Categorical <: DiscreteUnivariateDistribution
     K::Int
     prob::Vector{Float64}
 
-    function Categorical(p::Vector{Float64}; check::Bool=true)
-        if check && !isprobvec(p)
+    function Categorical(p::Vector{Float64})
+        if !isprobvec(p)
             throw(ArgumentError("p must be a probability vector."))
         end
         new(length(p), p)
@@ -151,7 +151,7 @@ function fit_mle{T<:Real}(::Type{Categorical}, k::Integer, x::Array{T})
         p[i] = w[i] * c
     end
 
-    Categorical(w; check=false)   # the constructor will normalize w
+    Categorical(w)
 end
 
 fit_mle{T<:Real}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
