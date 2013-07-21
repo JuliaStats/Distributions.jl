@@ -37,6 +37,12 @@ d = fit_mle(Normal, suffstats(Normal, x))
 @test_approx_eq_eps mean(d) 11.3 0.1
 @test_approx_eq_eps std(d) 5.7 0.1
 
+d = fit(Uniform, rand(Uniform(1.2, 10.3), N))
+@test isa(d, Uniform)
+@test 1.2 <= min(d) <= max(d) <= 10.3
+@test_approx_eq_eps min(d) 1.2 0.02
+@test_approx_eq_eps max(d) 10.3 0.02
+
 # 
 
 # # TODO: Reable when polygamma gets merged
@@ -50,4 +56,4 @@ d = fit_mle(Normal, suffstats(Normal, x))
 
 # fit(Poisson, rand(Poisson(19.0), N))
 
-# fit(Uniform, rand(Uniform(1.1, 98.3), N))
+# 

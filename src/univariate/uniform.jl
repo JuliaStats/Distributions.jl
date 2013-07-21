@@ -10,6 +10,10 @@ end
 
 @_jl_dist_2p Uniform unif
 
+min(d::Uniform) = d.a
+
+max(d::Uniform) = d.b
+
 entropy(d::Uniform) = log(d.b - d.a)
 
 insupport(d::Uniform, x::Real) = d.a <= x <= d.b
@@ -41,6 +45,22 @@ function var(d::Uniform)
 	return w * w / 12.0
 end
 
+# fit model
+
 function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
-	Uniform(min(x), max(x))
+    if isempty(x)
+        throw(ArgumentError("x cannot be empty."))
+    end
+
+    xmin = xmax = x[1]
+    for i = 2:length(x)
+        xi = x[i]
+        if xi < xmin
+            xmin = xi
+        elseif xi > xmax
+            xmax = xi
+        end
+    end
+
+    Uniform(xmin, xmax)
 end
