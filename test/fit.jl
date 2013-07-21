@@ -43,10 +43,16 @@ d = fit(Uniform, rand(Uniform(1.2, 10.3), N))
 @test_approx_eq_eps min(d) 1.2 0.02
 @test_approx_eq_eps max(d) 10.3 0.02
 
+d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
+@test isa(d, Gamma)
+@test_approx_eq_eps d.shape 3.9 0.02
+@test_approx_eq_eps d.scale 2.1 0.02
+
+
 # 
 
 # # TODO: Reable when polygamma gets merged
-# # fit(Gamma, rand(Gamma(7.9, 3.1), N))
+# # 
 
 # fit(Geometric, rand(Geometric(0.1), N))
 

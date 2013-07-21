@@ -100,24 +100,71 @@ skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 
-function fit_mle(::Type{Gamma}, x::Array)
-    a_old = 0.5 / (log(mean(x)) - mean(log(x)))
-    a_new = 0.5 / (log(mean(x)) - mean(log(x)))
 
-    z = 1.0 / a_old + (mean(log(x)) - log(mean(x)) + log(a_old) - digamma(a_old)) / (a_old^2 * (1.0 / a_old - trigamma(a_old)))
-    a_new, a_old = 1.0 / z, a_new
+## Fit model
 
-    iterations = 1
+immutable GammaStats
+    sx::Float64      # (weighted) sum of x
+    slogx::Float64   # (weighted) sum of log(x)
+    tw::Float64      # total sample weight
 
-    while abs(a_old - a_new) > 1e-16 && iterations <= 10_000
-        z = 1.0 / a_old + (mean(log(x)) - log(mean(x)) + log(a_old) - digamma(a_old)) / (a_old^2 * (1.0 / a_old - trigamma(a_old)))
-        a_new, a_old = 1.0 / z, a_new
-    end
-
-    if iterations >= 10_000
-        error("Parameter estimation failed to converge in 10,000 iterations")
-    end
-
-    Gamma(a_new, mean(x) / a_new)
+    GammaStats(sx::Real, slogx::Real, tw::Real) = new(float64(sx), float64(slogx), float64(tw))
 end
+
+function suffstats(::Type{Gamma}, x::Array)
+    sx = 0.
+    slogx = 0.
+    for xi = x
+        sx += xi
+        slogx += log(xi)
+    end
+    GammaStats(sx, slogx, length(x))
+end
+
+function suffstats(::Type{Gamma}, x::Array, w::Array{Float64})
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    sx = 0.
+    slogx = 0.
+    tw = 0.
+    for i = 1:n
+        xi = x[i]
+        wi = w[i]
+        sx += wi * xi
+        slogx += wi * log(xi)
+        tw += wi
+    end
+    GammaStats(sx, slogx, tw)
+end
+
+function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
+    ia = 1.0 / a
+    z = ia + (mlogx - logmx + log(a) - digamma(a)) / (abs2(a) * (ia - trigamma(a)))
+    1.0 / z
+end
+
+function fit_mle(::Type{Gamma}, ss::GammaStats; 
+    alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1.0e-16)
+
+    mx = ss.sx / ss.tw
+    logmx = log(mx)
+    mlogx = ss.slogx / ss.tw
+
+    a::Float64 = isnan(alpha0) ? 0.5 / (logmx - mlogx) : alpha0
+    converged = false
+    
+    t = 0
+    while !converged && t < maxiter
+        t += 1
+        a_old = a
+        a = gamma_mle_update(logmx, mlogx, a)
+        converged = abs(a - a_old) <= tol
+    end
+
+    Gamma(a, mx / a)
+end
+
 
