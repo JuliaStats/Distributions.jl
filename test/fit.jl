@@ -7,10 +7,13 @@ d = fit(Bernoulli, rand(Bernoulli(0.7), N))
 @test isa(d, Bernoulli)
 @test_approx_eq_eps mean(d) 0.7 0.01
 
+d = fit(Beta, rand(Beta(1.3, 3.7), N))
+@test isa(d, Beta)
+@test_approx_eq_eps d.alpha 1.3 0.01
+@test_approx_eq_eps d.beta  3.7 0.01
 
-# fit(Beta, rand(Beta(1.3, 3.7), N))
+d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 
-# fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 
 # fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
 

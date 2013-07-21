@@ -74,7 +74,13 @@ function var(d::Beta)
     return d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
 
-function fit_mle(::Type{Beta}, x::Array)
+## Fit model
+
+# TODO: add MLE method (should be similar to Dirichlet)
+
+# This is a moment-matching method (not MLE)
+#
+function fit(::Type{Beta}, x::Array)
     for i in 1:length(x)
         if !insupport(Beta(), x[i])
             error("Bernoulli observations must be in [0,1]")
