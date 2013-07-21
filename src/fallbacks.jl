@@ -247,6 +247,11 @@ end
 
 # Fitting
 
+function suffstats{D<:Distribution}(dt::Type{D}, xs...) 
+    argtypes = tuple(D, map(typeof, xs)...)
+    error("suffstats is not implemented for $argtypes.")
+end
+
 fit_mle{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = fit_mle(D, suffstats(D, x))
 fit_mle{D<:UnivariateDistribution}(dt::Type{D}, x::Array, w::Array) = fit_mle(D, suffstats(D, x, w))
 
