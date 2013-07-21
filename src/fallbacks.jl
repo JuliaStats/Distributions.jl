@@ -244,8 +244,15 @@ function sprand(m::Integer, n::Integer, density::Real, d::Distribution)
     return sprand(m, n, density, n -> rand(d, n))
 end
 
+
 # Fitting
 
-fit{D <: Distribution}(d::Type{D}, x::Array) = fit_mle(d, x)
+fit_mle{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = fit_mle(D, suffstats(D, x))
+fit_mle{D<:UnivariateDistribution}(dt::Type{D}, x::Array, w::Array) = fit_mle(D, suffstats(D, x, w))
+
+fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix) = fit_mle(D, suffstats(D, x))
+fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix, w::Array) = fit_mle(D, suffstats(D, x, w))
+
+fit{D <: Distribution}(dt::Type{D}, x::Array) = fit_mle(D, x)
 
 

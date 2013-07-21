@@ -60,12 +60,52 @@ quantile(d::Bernoulli, p::Real) = 0.0 <= p <= 1.0 ? (p <= d.p0 ? 0 : 1) : NaN
 
 rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
-function fit_mle(::Type{Bernoulli}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Bernoulli(), x[i])
-            error("Bernoulli observations must be in {0, 1}")
+
+## MLE fitting
+
+immutable BernoulliStats
+    cnt0::Float64
+    cnt1::Float64
+
+    BernoulliStats(c0::Real, c1::Real) = new(float64(c0), float64(c1))
+end
+
+fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
+
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T})
+    n0 = 0
+    n1 = 0
+    for xi in x
+        if xi == 0
+            n0 += 1
+        elseif xi == 1
+            n1 += 1
+        else
+            throw(DomainError())
         end
     end
-    return Bernoulli(mean(x))
+    BernoulliStats(n0, n1)
 end
+
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T}, w::Array{Float64})
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    n0 = 0.0
+    n1 = 0.0
+    for i = 1:n
+        xi = x[i]
+        if xi == 0
+            n0 += w[i]
+        elseif xi == 1
+            n1 += w[i]
+        else
+            throw(DomainError())
+        end
+    end
+    BernoulliStats(n0, n1)
+end
+
 
