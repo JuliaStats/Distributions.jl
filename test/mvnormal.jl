@@ -176,8 +176,8 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
 	return mu, C
 end
 
-x = randn(3, 20) .+ randn(3) * 2.
-w = rand(20)
+x = randn(3, 200) .+ randn(3) * 2.
+w = rand(200)
 
 g = fit(MvNormal, x)
 mu, C = _gauss_mle(x)
