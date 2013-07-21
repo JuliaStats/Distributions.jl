@@ -48,22 +48,15 @@ d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
 @test_approx_eq_eps d.shape 3.9 0.02
 @test_approx_eq_eps d.scale 2.1 0.02
 
-
 d = fit(Geometric, rand(Geometric(0.3), N))
 @test isa(d, Geometric)
 @test_approx_eq_eps d.prob 0.3 0.01
 
+d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
+@test isa(d, Laplace)
+@test_approx_eq_eps d.location 5.0 0.1
+@test_approx_eq_eps d.scale 3.0 0.1
 
-# 
-
-# # TODO: Reable when polygamma gets merged
-# # 
-
-# 
-
-# fit(Laplace, rand(Laplace(10.0, 3.0), N))
-
-# 
 
 # fit(Poisson, rand(Poisson(19.0), N))
 
