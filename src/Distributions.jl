@@ -19,6 +19,7 @@ export                                  # types
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
+    SufficientStats,
     Arcsine,
     Bernoulli,
     Beta,
