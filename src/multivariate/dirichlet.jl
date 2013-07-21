@@ -182,29 +182,169 @@ function rand!(d::Dirichlet, X::Matrix)
 end
 
 
-#####
+#######################################
 #
-#  Algorithm: Newton-Raphson
-#  
-#####
+#  Estimation
+#
+#######################################
 
-function fit_mle!(
-    dty::Type{Dirichlet}, 
-    α::Vector{Float64},   # initial guess of α
-    Elogp::Vector{Float64};   # expectation/mean of log(p)
-    maxiter::Int=25, tol::Float64=1.0e-8, debug::Bool=false)
+immutable DirichletStats <: SufficientStats
+    slogp::Vector{Float64}   # (weighted) sum of log(p)
+    tw::Float64              # total sample weights
 
-    K = length(α)
-    if length(Elogp) != K
+    DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, float64(tw))
+end
+
+dim(ss::DirichletStats) = length(s.slogp)
+
+mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
+
+function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+    slogp = zeros(K)
+    for i = 1:n
+        for k = 1:K
+            slogp[k] += log(P[k,i])
+        end
+    end
+    DirichletStats(slogp, n)
+end
+
+function suffstats(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+    if length(w) != n
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
+
+    tw = 0.
+    slogp = zeros(K)
+
+    for i = 1:n
+        wi = w[i]
+        tw += wi
+        for k = 1:K
+            slogp[k] += log(P[k,i]) * wi
+        end
+    end
+    DirichletStats(slogp, tw)
+end
+
+# fit_mle methods
+
+immutable DirichletMLEOptions
+    maxiter::Int
+    tol::Float64
+end
+
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
+    α = dirichlet_mle_init(P)
+    elogp = mean_logp(suffstats(Dirichlet, P))
+    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
+end
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
+    n = size(P, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    α = dirichlet_mle_init(P, w)
+    elogp = mean_logp(suffstats(Dirichlet, P, w))
+    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
+end
+
+
+## Initialization
+
+function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
+    K = length(μ)
+    
+    α0 = 0.
+    for k = 1:K
+        μk = μ[k]
+        γk = γ[k]
+        ak = (μk - γk) / (γk - μk * μk)
+        α0 += ak
+    end
+    α0 /= K
+
+    multiply!(μ, α0)     
+end
+
+function dirichlet_mle_init(P::Matrix{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+
+    μ = Array(Float64, K)  # E[p]
+    γ = Array(Float64, K)  # E[p^2]
+
+    for i = 1:n
+        for k = 1:K
+            pk = P[k, i]
+            μ[k] += pk
+            γ[k] += pk * pk
+        end
+    end
+
+    c = 1.0 / n
+    for k = 1:K
+        μ[k] *= c
+        γ[k] *= c
+    end
+
+    _dirichlet_mle_init2(μ, γ)
+end
+
+function dirichlet_mle_init(P::Matrix{Float64}, w::Vector{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+
+    μ = Array(Float64, K)  # E[p]
+    γ = Array(Float64, K)  # E[p^2]
+    tw = 0.
+
+    for i = 1:n
+        wi = w[i]
+        tw += wi
+        for k = 1:K
+            pk = P[k, i]
+            μ[k] += pk * wi
+            γ[k] += pk * pk * wi
+        end
+    end
+
+    c = 1.0 / tw
+    for k = 1:K
+        μ[k] *= c
+        γ[k] *= c
+    end
+
+    _dirichlet_mle_init2(μ, γ)
+end
+
+## Newton-Ralphson algorithm
+
+function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64},
+    opts::DirichletMLEOptions; debug::Bool=false)
+    # This function directly overrides α
+
+    K = length(elogp)
+    if length(α) != K
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    maxiter::Int = opts.maxiter
+    tol::Float64 = opts.tol
 
     g = Array(Float64, K)
     iq = Array(Float64, K)
     α0 = sum(α)
 
     if debug
-        objv = dot(α - 1.0, Elogp) + lgamma(α0) - sum(lgamma(α))
+        objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
     end
 
     t = 0
@@ -223,7 +363,7 @@ function fit_mle!(
 
         for k = 1:K
             ak = α[k]
-            g[k] = gk = digam_α0 - digamma(ak) + Elogp[k]
+            g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
             iq[k] = - 1.0 / trigamma(ak)
 
             b += gk * iq[k]
@@ -245,7 +385,7 @@ function fit_mle!(
 
         if debug
             prev_objv = objv
-            objv = dot(α - 1.0, Elogp) + lgamma(α0) - sum(lgamma(α))
+            objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
             @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n", 
                 t, objv, objv - prev_objv, gnorm)
         end
@@ -256,63 +396,5 @@ function fit_mle!(
     end
 
     Dirichlet(α)
-end
-
-
-function fit_mle{T <: Real}(::Type{Dirichlet}, P::Matrix{T}; 
-    init::Union(Vector{Float64},Nothing)=nothing, 
-    maxiter::Int=25, tol::Float64=1.0e-8)
-
-    K = size(P, 1)
-    n = size(P, 2)
-    c = inv(n)
-
-    # Compute sufficient statistics E[log(p)]
-
-    Elp = Array(Float64, K)
-    for i = 1:n
-        for k = 1:K
-            Elp[k] += log(P[k,i])
-        end
-    end
-    multiply!(Elp, c)
-
-    if init == nothing
-        # Initialize mean
-
-        μ = Array(Float64, K)  # E[p]
-        γ = Array(Float64, K)  # E[p^2]
-    
-        for i = 1:n
-            for k = 1:K
-                pk = P[k, i]
-                μ[k] += pk
-                γ[k] += pk^2
-            end
-        end
-
-        for k = 1:K
-            μ[k] *= c
-            γ[k] *= c
-        end
-
-        # Initialize concentration
-
-        α0 = 0.
-        for k = 1:K
-            μk = μ[k]
-            γk = γ[k]
-            ak = (μk - γk) / (γk - μk * μk)
-            α0 += ak
-        end
-        α0 /= K
-
-        # store initial solution to μ
-        multiply!(μ, α0)
-        fit_mle!(Dirichlet, μ, Elp; maxiter=maxiter, tol=tol)        
-    else
-        fit_mle!(Dirichlet, init, Elp; maxiter=maxiter, tol=tol)
-    end
-    
 end
 

@@ -78,19 +78,52 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 
 var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
 
-function fit_mle{T<:Real}(::Type{Binomial}, n::Integer, x::Array{T})
-    # a series of experiments, each experiment has n trials
-    # x[i] is the number of successes in the i-th experiment
 
-    sx = 0.
-    for xi in x
-    	if xi < 0 || xi > n
-    		error("Each element in x must be in [0, n].")
-    	end
-    	sx += xi
-    end
+## Fit model
 
-    Binomial(int(n), sx / (n * length(x)))
+immutable BinomialStats <: SufficientStats
+	ns::Float64   # the total number of successes
+	ne::Float64   # the number of experiments
+	n::Int        # the number of trials in each experiment
+
+	BinomialStats(ns::Real, ne::Real, n::Integer) = new(float64(ns), float64(ne), int(n))
+end
+
+function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
+	ns = zero(T)
+	for xi in x
+		if xi < 0 || xi > n
+			throw(DomainError())
+		end
+		ns += xi
+	end
+	BinomialStats(ns, length(x), n)
+end
+
+function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
+	ns = 0.
+	ne = 0.
+	for i = 1:length(x)
+		xi = x[i]
+		wi = w[i]
+		if xi < 0 || xi > n
+			throw(DomainError())
+		end
+
+		ns += xi * wi
+		ne += wi
+	end
+	BinomialStats(ns, ne, n)
+end
+
+fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
+
+function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
+	fit_mle(Binomial, suffstats(Binomial, n, x))
+end
+
+function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
+	fit_mle(Binomial, suffstats(Binomial, n, x, w))
 end
 
 fit(::Type{Binomial}, n::Integer, x::Array) = fit_mle(Binomial, n, x)

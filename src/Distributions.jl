@@ -19,6 +19,7 @@ export                                  # types
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
+    SufficientStats,
     Arcsine,
     Bernoulli,
     Beta,
@@ -127,14 +128,15 @@ export                                  # types
     rand,          # random sampler
     rand!,         # replacement random sampler
     sample,        # sample from a source array
-    wsample,       # weighted sampling from a source array
     sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
+    suffstats,     # compute sufficient statistics
     valideta,      # validity check on linear predictor
     validmu,       # validity check on mean vector
-    var            # variance of distribution
+    var,           # variance of distribution
+    wsample        # weighted sampling from a source array
 
 import Base.mean, Base.median, Base.quantile, Base.max, Base.min
 import Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
@@ -159,6 +161,8 @@ abstract DiscreteMatrixDistribution         <: MatrixDistribution
 typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
 typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
+
+abstract SufficientStats
 
 include("constants.jl")
 
