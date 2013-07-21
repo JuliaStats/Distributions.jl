@@ -99,15 +99,20 @@ skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
-function fit_mle(::Type{Exponential}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Exponential(), x[i])
-            error("Exponential observations must be non-negative values")
-        end
-    end
-    return Exponential(mean(x))
+
+## Fit model
+
+immutable ExponentialStats <: SufficientStats
+    sx::Float64   # (weighted) sum of x
+    sw::Float64   # sum of sample weights
+
+    ExponentialStats(sx::Real, sw::Real) = new(float64(sx), float64(sw))
 end
 
-fit(::Type{Exponential}, x::Array) = fit_mle(Exponential, x)
+suffstats(::Type{Exponential}, x::Array) = ExponentialStats(sum(x), length(x))
+    
+suffstats(::Type{Exponential}, x::Array, w::Array) = ExponentialStats(dot(x, w), sum(w))
+
+fit_mle(::Type{Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)
 
 

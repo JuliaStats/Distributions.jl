@@ -44,4 +44,85 @@ std(d::Normal) = d.std
 
 var(d::Normal) = d.std^2
 
-fit_mle{T <: Real}(::Type{Normal}, x::Array{T}) = Normal(mean(x), std(x))
+## Fit model
+
+immutable NormalStats
+    sx::Float64    # (weighted) sum of x
+    sx2::Float64   # (weighted) sum of x^2
+    tw::Float64    # total sample weight
+
+    NormalStats(sx::Real, sx2::Real, tw::Real) = new(float64(sx), float64(sx2), float64(tw))
+end
+
+function suffstats(::Type{Normal}, x::Array) 
+    sx = 0.
+    sx2 = 0.
+    for xi in x
+        sx += xi
+        sx2 += xi * xi
+    end
+    NormalStats(sx, sx2, length(x))
+end
+
+function suffstats(::Type{Normal}, x::Array, w::Array)
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    sx = 0.
+    sx2 = 0.
+    tw = 0.
+
+    for i = 1:n
+        xi = x[i]
+        wi = w[i]
+        sx += wi * xi
+        sx2 += wi * (xi * xi)
+        tw += wi
+    end
+    NormalStats(sx, sx2, tw)
+end
+
+function fit_mle(::Type{Normal}, ss::NormalStats)
+    mu = ss.sx / ss.tw
+    sig2 = ss.sx2 / ss.tw - mu * mu
+    Normal(mu, sqrt(sig2))
+end
+
+function fit_mle{T<:Real}(::Type{Normal}, x::Array{T})
+    n = length(x)
+    mu = mean(x)
+    sig2 = 0.
+    for xi in x
+        sig2 += abs2(xi - mu)
+    end
+    Normal(mu, sqrt(sig2 / n))
+end
+
+function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64})
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))        
+    end
+
+    sx = 0.
+    tw = 0.
+
+    for i = 1:n
+        wi = w[i]
+        sx += x[i] * wi
+        tw += wi
+    end
+    mu = sx / tw
+
+    sig2 = 0.
+    for i = 1:n
+        sig2 += abs2(x[i] - mu) * w[i]
+    end
+    sig2 /= tw
+
+    Normal(mu, sqrt(sig2))
+end
+
+

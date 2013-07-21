@@ -176,15 +176,15 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
 	return mu, C
 end
 
-x = randn(3, 20) .+ randn(3) * 2.
-w = rand(20)
+x = randn(3, 200) .+ randn(3) * 2.
+w = rand(200)
 
 g = fit(MvNormal, x)
 mu, C = _gauss_mle(x)
 @test_approx_eq mean(g) mu
 @test_approx_eq cov(g) C
 
-g = fit(MvNormal, x; weights=w)
+g = fit_mle(MvNormal, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq mean(g) mu
 @test_approx_eq cov(g) C
@@ -194,7 +194,7 @@ mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
 
-g = fit(MvNormal{ScalMat}, x; weights=w)
+g = fit_mle(MvNormal{ScalMat}, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
@@ -204,7 +204,7 @@ mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.diag diag(C)
 
-g = fit(MvNormal{PDiagMat}, x; weights=w)
+g = fit_mle(MvNormal{PDiagMat}, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.diag diag(C)
@@ -214,7 +214,7 @@ mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.mat C
 
-g = fit(MvNormal{PDMat}, x; weights=w)
+g = fit_mle(MvNormal{PDMat}, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.mat C

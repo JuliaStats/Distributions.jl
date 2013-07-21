@@ -186,12 +186,68 @@ function rand(s::MultinomialSampler)
     return rand!(s, x)
 end
 
-function fit_mle{T<:Real}(::Type{Multinomial}, X::Matrix{T})
-    ns = vec(sum(X, 1))
-    if !(all(ns .== ns[1]))
-        error("Each sample in X should have the same number of trials.")
-    end
-    n = int(ns[1])
-    p = vec(mean(X, 2)) * (1.0 / n)
-    Multinomial(n, p)
+## Fit model
+
+immutable MultinomialStats
+    n::Int  # number of trials in each experiment
+    scnts::Vector{Float64}  # sum of counts
+    tw::Float64  # total sample weight
+
+    MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, float64(tw))
 end
+
+function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})
+    K = size(x, 1)
+    n::T = zero(T)
+    scnts = Array(Float64, K)
+
+    for j = 1:size(x,2)
+        nj = zero(T)
+        for i = 1:K
+            xi = x[i,j]
+            nj += xi
+
+            scnts[i] += xi
+        end
+
+        if j == 1
+            n = nj
+        elseif nj != n
+            error("Each sample in X should sum to the same value.")
+        end
+    end
+    MultinomialStats(n, scnts, size(x,2))
+end
+
+function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T}, w::Vector{Float64})
+    if length(w) != size(x, 2)
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    K = size(x, 1)
+    n::T = zero(T)
+    scnts = Array(Float64, K)
+    tw = 0.
+
+    for j = 1:size(x,2)
+        nj = zero(T)
+        wj = w[j]
+        tw += wj
+        for i = 1:K
+            xi = x[i,j]
+            nj += xi
+
+            scnts[i] += xi * wj
+        end
+
+        if j == 1
+            n = nj
+        elseif nj != n
+            error("Each sample in X should sum to the same value.")
+        end
+    end
+    MultinomialStats(n, scnts, tw)
+end
+
+fit_mle(::Type{Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
+

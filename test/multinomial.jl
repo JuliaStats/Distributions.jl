@@ -38,9 +38,26 @@ x1 = [1, 6, 3]
 @test_approx_eq logpdf(d, x1) log(pdf(d, x1))
 
 x = rand(d, 100)
-p = pdf(d, x)
+pv = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test_approx_eq p[i] pdf(d, x[:,i])
+	@test_approx_eq pv[i] pdf(d, x[:,i])
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
 end
+
+# fit
+
+x = rand(d, 10^5)
+@test size(x) == (dim(d), 10^5)
+@test all(sum(x, 1) .== nt)
+
+r = fit(Multinomial, x)
+@test r.n == nt
+@test dim(r) == length(p)
+@test_approx_eq_eps r.prob p 0.02
+
+r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
+@test r.n == nt
+@test dim(r) == length(p)
+@test_approx_eq_eps r.prob p 0.02
+
