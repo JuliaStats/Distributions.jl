@@ -113,154 +113,122 @@ function rand!(d::MvNormal, x::Matrix{Float64})
     x
 end
 
+
 # Maximum Likelihood Estimation
 #
 # Specialized algorithms are respectively implemented for 
 # each kind of covariance
 #
 
-function fit_mle(dty::Type{MvNormal{PDMat}}, x::Matrix{Float64}; 
-    weights::Union(Vector{Float64}, Nothing) = nothing)
-
+function fit_mle(::Type{MvNormal{PDMat}}, x::Matrix{Float64})
     n = size(x, 2)
+    mu = vec(mean(x, 2))
+    z = bsubtract(x, mu, 1)
+    C = Base.LinAlg.BLAS.gemm('N', 'T', 1.0/n, z, z)   
+    MvNormal(mu, PDMat(C)) 
+end
 
-    if weights == nothing
-        n = size(x, 2)
-        mu = vec(mean(x, 2))
-        C = Base.LinAlg.BLAS.gemm!('N', 'T', 1.0/n, x, x, -1.0, mu * mu')
-    else
-        w::Vector{Float64} = weights
-        if length(w) != n
-            throw(ArgumentError("Inconsistent argument dimensions"))
-        end
-
-        inv_sw = 1.0 / sum(w)
-        mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
-        z = bmultiply(x, sqrt(w), 2)
-        C = Base.LinAlg.BLAS.gemm!('N', 'T', inv_sw, z, z, -1.0, mu * mu')
+function fit_mle(::Type{MvNormal{PDMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
     end
+
+    inv_sw = 1.0 / sum(w)
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    z = Array(Float64, m, n)
+    for j = 1:n
+        cj = sqrt(w[j])
+        for i = 1:m
+            @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
+        end
+    end
+    C = Base.LinAlg.BLAS.gemm('N', 'T', inv_sw, z, z) 
 
     MvNormal(mu, PDMat(C))
 end
 
+function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
 
-function fit_mle(dty::Type{MvNormal{PDiagMat}}, x::Matrix{Float64}; 
-    weights::Union(Vector{Float64}, Nothing) = nothing)
-
-    d = size(x, 1)
-    n = size(x, 2)
-
-    if weights == nothing
-        mu = zeros(d)
-        va = zeros(d)
-
-        for j in 1:n
-            o = (j - 1) * d
-            for i in 1 : d
-                xi = x[o + i]
-                mu[i] += xi
-                va[i] += xi * xi
-            end
+    mu = vec(mean(x, 2))
+    va = Array(Float64, m)
+    for j = 1:n
+        for i = 1:m
+            @inbounds va[i] += abs2(x[i,j] - mu[i])
         end
-
-        inv_n = 1.0 / n
-        for i in 1 : d
-            mu[i] *= inv_n
-            va[i] = va[i] * inv_n - abs2(mu[i])
-        end
-
-    else
-        w::Vector{Float64} = weights
-        if length(w) != n
-            throw(ArgumentError("Inconsistent argument dimensions"))
-        end
-
-        inv_sw = 1.0 / sum(w)
-
-        # mean vector
-        mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
-        
-        # variance
-        va = zeros(d)
-        o = 0
-        for j in 1 : n
-            wj = w[j]
-            for i in 1 : d
-                va[i] += abs2(x[o + i] - mu[i]) * wj
-            end
-            o += d
-        end
-        multiply!(va, inv_sw)
     end
+    multiply!(va, inv(n))
 
     MvNormal(mu, PDiagMat(va))
 end
 
-
-function fit_mle(dty::Type{MvNormal{ScalMat}}, x::Matrix{Float64}; 
-    weights::Union(Vector{Float64}, Nothing) = nothing)
-
-    d = size(x, 1)
-    n = size(x, 2)
-
-    mu = zeros(d)
-    inv_d = 1.0 / d
-
-    if weights == nothing
-        va = 0.
-        for j in 1 : n
-            vj = 0.
-            for i in 1 : d
-                xi = x[i, j]
-                mu[i] += xi
-                vj += xi * xi
-            end
-            va += vj * inv_d
-        end
-        inv_sw = 1.0 / n
-    else
-        w::Vector{Float64} = weights
-        if length(w) != n
-            throw(ArgumentError("Inconsistent argument dimensions"))
-        end
-
-        va = 0.
-        sw = 0.
-        o = 0
-        for j in 1 : n
-            vj = 0.
-            wj = w[j]
-            sw += wj
-
-            for i in 1 : d
-                xi = x[o + i]
-                mu[i] += xi * wj
-                vj += xi * xi
-            end
-            va += vj * inv_d * wj
-            o += d
-        end
-        inv_sw = 1.0 / sw
+function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
     end
 
-    su = 0.
-    for i in 1 : d
-        mu[i] *= inv_sw
-        su += abs2(mu[i])
+    inv_sw = 1.0 / sum(w)
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    va = Array(Float64, m)
+    for j = 1:n
+        @inbounds wj = w[j]
+        for i = 1:m
+            @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
+        end
+    end
+    multiply!(va, inv_sw)
+
+    MvNormal(mu, PDiagMat(va))
+end
+
+function fit_mle(::Type{MvNormal{ScalMat}}, x::Matrix{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+
+    mu = vec(mean(x, 2))
+    va = 0.
+    for j = 1:n
+        va_j = 0.
+        for i = 1:m
+            @inbounds va_j += abs2(x[i,j] - mu[i])
+        end
+        va += va_j
     end
 
-    v = va * inv_sw - su * inv_d
-    MvNormal(mu, ScalMat(d, v))
+    MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
-function fit{D<:MvNormal}(dty::Type{D}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
-    fit_mle(D, x; weights=weights)
+function fit_mle(::Type{MvNormal{ScalMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
+    end
+
+    sw = sum(w)
+    inv_sw = 1.0 / sw
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    va = 0.
+    for j = 1:n
+        @inbounds wj = w[j]
+        va_j = 0.
+        for i = 1:m
+            @inbounds va_j += abs2(x[i,j] - mu[i]) * wj
+        end
+        va += va_j
+    end
+
+    MvNormal(mu, ScalMat(m, va / (m * sw)))
 end
 
-function fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
-    fit_mle(MvNormal{PDMat}, x; weights=weights)
-end
+fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}) = fit_mle(MvNormal{PDMat}, x)
+fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64}) = fit_mle(MvNormal{PDMat}, x, w)
 
-function fit(dty::Type{MvNormal}, x::Matrix{Float64}; weights::Union(Vector{Float64}, Nothing) = nothing)
-    fit(MvNormal{PDMat}, x; weights=weights)
-end

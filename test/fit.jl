@@ -45,8 +45,8 @@ d = fit(Uniform, rand(Uniform(1.2, 10.3), N))
 
 d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
 @test isa(d, Gamma)
-@test_approx_eq_eps d.shape 3.9 0.02
-@test_approx_eq_eps d.scale 2.1 0.02
+@test_approx_eq_eps d.shape 3.9 0.1
+@test_approx_eq_eps d.scale 2.1 0.1
 
 d = fit(Geometric, rand(Geometric(0.3), N))
 @test isa(d, Geometric)
