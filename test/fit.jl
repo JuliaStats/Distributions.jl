@@ -3,6 +3,11 @@ using Base.Test
 
 N = 10^5
 
+d = fit(DiscreteUniform, rand(DiscreteUniform(10, 15), N))
+@test isa(d, DiscreteUniform)
+@test min(d) == 10
+@test max(d) == 15
+
 d = fit(Bernoulli, rand(Bernoulli(0.7), N))
 @test isa(d, Bernoulli)
 @test_approx_eq_eps mean(d) 0.7 0.01
@@ -31,9 +36,6 @@ d = fit_mle(Normal, suffstats(Normal, x))
 @test isa(d, Normal)
 @test_approx_eq_eps mean(d) 11.3 0.1
 @test_approx_eq_eps std(d) 5.7 0.1
-
-
-# fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
 
 # 
 

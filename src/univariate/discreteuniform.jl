@@ -72,10 +72,26 @@ skewness(d::DiscreteUniform) = 0.0
 
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
+
+# Fit model
+
 function fit_mle{T <: Real}(::Type{DiscreteUniform}, x::Array{T})
-    DiscreteUniform(min(x), max(x))
+    if isempty(x)
+        throw(ArgumentError("x cannot be empty."))
+    end
+
+    xmin = xmax = x[1]
+    for i = 2:length(x)
+        xi = x[i]
+        if xi < xmin
+            xmin = xi
+        elseif xi > xmax
+            xmax = xi
+        end
+    end
+
+    DiscreteUniform(xmin, xmax)
 end
 
-fit(::Type{DiscreteUniform}, x::Array) = fit_mle(DiscreteUniform, x)
 
 
