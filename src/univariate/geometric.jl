@@ -53,4 +53,31 @@ skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
 
 var(d::Geometric) = (1.0 - d.prob) / d.prob^2
 
-fit_mle(::Type{Geometric}, x::Array) = Geometric(1.0 / (mean(x) + 1))
+## Fit model
+
+immutable GeometricStats
+    sx::Float64
+    tw::Float64
+
+    GeometricStats(sx::Real, tw::Real) = new(float64(sx), float64(tw))
+end
+
+suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}) = GeometricStats(sum(x), length(x))
+
+function suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}, w::Array{Float64})
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+    sx = 0.
+    tw = 0.
+    for i = 1:n
+        wi = w[i]
+        sx += wi * x[i]
+        tw += wi
+    end
+    GeometricStats(sx, tw)
+end
+
+fit_mle(::Type{Geometric}, ss::GeometricStats) = Geometric(1.0 / (ss.sx / ss.tw + 1.0))
+
