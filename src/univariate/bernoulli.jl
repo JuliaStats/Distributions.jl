@@ -63,7 +63,7 @@ rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
 ## MLE fitting
 
-immutable BernoulliStats
+immutable BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 
