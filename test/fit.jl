@@ -17,10 +17,13 @@ d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 @test d.size == 100
 @test_approx_eq_eps d.prob 0.3 0.01
 
+d = fit(Exponential, rand(Exponential(0.5), N))
+@test isa(d, Exponential)
+@test_approx_eq_eps mean(d) 0.5 0.01
 
 # fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
 
-# fit(Exponential, rand(Exponential(0.1), N))
+# 
 
 # # TODO: Reable when polygamma gets merged
 # # fit(Gamma, rand(Gamma(7.9, 3.1), N))
