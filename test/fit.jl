@@ -13,6 +13,9 @@ d = fit(Beta, rand(Beta(1.3, 3.7), N))
 @test_approx_eq_eps d.beta  3.7 0.01
 
 d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
+@test isa(d, Binomial)
+@test d.size == 100
+@test_approx_eq_eps d.prob 0.3 0.01
 
 
 # fit(DiscreteUniform, rand(DiscreteUniform(300_000, 700_000), N))
