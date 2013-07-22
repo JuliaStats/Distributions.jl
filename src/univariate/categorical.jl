@@ -4,7 +4,7 @@ immutable Categorical <: DiscreteUnivariateDistribution
 
     function Categorical(p::Vector{Float64})
         if !isprobvec(p)
-            throw(ArgumentError("p must be a probability vector."))
+            throw(ArgumentError("p = $p is not a probability vector."))
         end
         new(length(p), p)
     end

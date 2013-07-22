@@ -155,7 +155,7 @@ function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64})
     n = size(x, 2)    
 
     mu = vec(mean(x, 2))
-    va = Array(Float64, m)
+    va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
             @inbounds va[i] += abs2(x[i,j] - mu[i])
@@ -176,7 +176,7 @@ function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64}, w::Vector{Float
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
 
-    va = Array(Float64, m)
+    va = zeros(Float64, m)
     for j = 1:n
         @inbounds wj = w[j]
         for i = 1:m

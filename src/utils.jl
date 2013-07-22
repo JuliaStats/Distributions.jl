@@ -9,7 +9,7 @@ function isprobvec(p::Vector{Float64})
             return false
         end
     end      
-    return abs(s - 1.0) <= 1.0e-8
+    return abs(s - 1.0) <= 1.0e-12
 end
 
 

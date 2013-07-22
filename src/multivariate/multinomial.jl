@@ -7,7 +7,7 @@ immutable Multinomial <: DiscreteMultivariateDistribution
             throw(ArgumentError("n must be a positive integer."))
         end
         if !isprobvec(p)
-            throw(ArgumentError("p must be a probability vector."))
+            throw(ArgumentError("p = $p is not a probability vector."))
         end
         new(int(n), p)
     end
@@ -199,7 +199,7 @@ end
 function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})
     K = size(x, 1)
     n::T = zero(T)
-    scnts = Array(Float64, K)
+    scnts = zeros(K)
 
     for j = 1:size(x,2)
         nj = zero(T)
@@ -219,14 +219,14 @@ function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})
     MultinomialStats(n, scnts, size(x,2))
 end
 
-function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T}, w::Vector{Float64})
+function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64})
     if length(w) != size(x, 2)
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
 
     K = size(x, 1)
     n::T = zero(T)
-    scnts = Array(Float64, K)
+    scnts = zeros(K)
     tw = 0.
 
     for j = 1:size(x,2)
