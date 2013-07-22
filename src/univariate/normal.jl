@@ -48,11 +48,11 @@ var(d::Normal) = d.std^2
 
 immutable NormalStats
     s::Float64    # (weighted) sum of x
-    μ::Float64    # (weighted) mean of x
+    m::Float64    # (weighted) mean of x
     s2::Float64   # (weighted) sum of (x - μ)^2
     tw::Float64    # total sample weight
 
-    NormalStats(s::Real, u::Real, s2::Real, tw::Real) = new(float64(s), float64(u), float64(s2), float64(tw))
+    NormalStats(s::Real, m::Real, s2::Real, tw::Real) = new(float64(s), float64(m), float64(s2), float64(tw))
 end
 
 function suffstats{T<:Real}(::Type{Normal}, x::Array{T}) 
@@ -63,15 +63,15 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T})
     for i = 2:n
         @inbounds s += x[i]
     end
-    μ = s / n
+    m = s / n
 
     # compute ss
-    s2 = abs2(x[1] - μ)
+    s2 = abs2(x[1] - m)
     for i = 2:n
-        s2 += abs2(x[i] - μ)
+        s2 += abs2(x[i] - m)
     end
 
-    NormalStats(s, μ, s2, n)
+    NormalStats(s, m, s2, n)
 end
 
 function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}) 
@@ -85,16 +85,16 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64})
         @inbounds s += wi * x[i]
         tw += wi
     end
-    μ = s / tw
+    m = s / tw
 
     # compute ss
-    s2 = w[1] * abs2(x[1] - μ)
+    s2 = w[1] * abs2(x[1] - m)
     for i = 2:n
-        @inbounds s2 += abs2(x[i] - μ)
+        @inbounds s2 += abs2(x[i] - m)
     end
 
-    NormalStats(s, μ, s2, tw)
+    NormalStats(s, m, s2, tw)
 end
 
-fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.μ, sqrt(ss.s2 / ss.tw))
+fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
 
