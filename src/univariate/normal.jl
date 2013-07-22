@@ -1,48 +1,70 @@
 immutable Normal <: ContinuousUnivariateDistribution
-    mean::Float64
-    std::Float64
-    function Normal(mu::Real, sd::Real)
-    	sd > zero(sd) || error("std must be positive")
-    	new(float64(mu), float64(sd))
+    μ::Float64
+    σ::Float64
+    function Normal(μ::Real, σ::Real)
+    	σ > zero(σ) || error("std.dev. must be positive")
+    	new(float64(μ), float64(σ))
     end
 end
-
-Normal(mu::Real) = Normal(mu, 1.0)
+Normal(μ::Real) = Normal(float64(μ), 1.0)
 Normal() = Normal(0.0, 1.0)
-
-const Gaussian = Normal
 
 @_jl_dist_2p Normal norm
 
-entropy(d::Normal) = 0.5 * log(2.0 * pi) + 0.5 + log(d.std)
+const Gaussian = Normal
 
-insupport(d::Normal, x::Number) = isreal(x) && isfinite(x)
+begin
+    zval(d::Normal, x::Real) = (x - d.μ)/d.σ
+    xval(d::Normal, z::Real) = d.μ + d.σ * z
+    
+    φ{T<:FloatingPoint}(z::T) = exp(-0.5*z*z)/√2π
+    pdf(d::Normal, x::FloatingPoint) = φ(zval(d,x))/d.σ
+
+    logφ{T<:FloatingPoint}(z::T) = -0.5*(z*z + log2π)
+    logpdf(d::Normal, x::FloatingPoint) = logφ(zval(d,x)) - log(d.σ)
+
+    Φ{T<:FloatingPoint}(z::T) = 0.5 + 0.5*erf(z/√2)
+    cdf(d::Normal, x::FloatingPoint) = Φ(zval(d,x))
+
+    Φc{T<:FloatingPoint}(z::T) = 0.5*erfc(z/√2)
+    ccdf(d::Normal, x::FloatingPoint) = Φc(zval(d,x))
+
+    Φinv{T<:FloatingPoint}(p::T) = √2 * erfinv(2p - 1)
+    quantile(d::Normal, p::FloatingPoint) = xval(d, Φinv(p))
+
+    Φcinv{T<:FloatingPoint}(p::T) = √2 * erfcinv(2p)
+    cquantile(d::Normal, p::FloatingPoint) = xval(d, Φcinv(p))
+end
+
+for f in [pdf, logpdf, ccdf, cdf, quantile]
+    quote
+        $f(d::Normal, x::Integer) = $f(d, float64(x))
+    end
+end
+
+entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
+
+insupport(d::Normal, x::Real) = isfinite(x)
 
 kurtosis(d::Normal) = 0.0
 
-mean(d::Normal) = d.mean
+mean(d::Normal) = d.μ
 
-median(d::Normal) = d.mean
+median(d::Normal) = d.μ
 
-function mgf(d::Normal, t::Real)
-	m, s = d.mean, d.std
-	return exp(t * m + 0.5 * s^t * t^2)
-end
+mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^t * t^2)
 
-function cf(d::Normal, t::Real)
-	m, s = d.mean, d.std
-	return exp(im * t * m - 0.5 * s^t * t^2)
-end
+cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^t * t^2)
 
-modes(d::Normal) = [d.mean]
+modes(d::Normal) = [d.μ]
 
-rand(d::Normal) = d.mean + d.std * randn()
+rand(d::Normal) = d.μ + d.σ * randn()
 
 skewness(d::Normal) = 0.0
 
-std(d::Normal) = d.std
+std(d::Normal) = d.σ
 
-var(d::Normal) = d.std^2
+var(d::Normal) = d.σ^2
 
 ## Fit model
 
@@ -68,7 +90,7 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T})
     # compute ss
     s2 = abs2(x[1] - m)
     for i = 2:n
-        s2 += abs2(x[i] - m)
+        s2 += abs2(x[i] - m)  # is there a reason this is not also @inbounds ?
     end
 
     NormalStats(s, m, s2, n)
