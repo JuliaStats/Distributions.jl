@@ -87,10 +87,10 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T})
     end
     m = s / n
 
-    # compute ss
+    # compute s2
     s2 = abs2(x[1] - m)
     for i = 2:n
-        s2 += abs2(x[i] - m)  # is there a reason this is not also @inbounds ?
+        @inbounds s2 += abs2(x[i] - m)  
     end
 
     NormalStats(s, m, s2, n)
@@ -109,7 +109,7 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64})
     end
     m = s / tw
 
-    # compute ss
+    # compute s2
     s2 = w[1] * abs2(x[1] - m)
     for i = 2:n
         @inbounds s2 += abs2(x[i] - m)
