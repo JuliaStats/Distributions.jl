@@ -80,18 +80,23 @@ function entropy(d::Dirichlet)
     return en
 end
 
-function modes(d::Dirichlet)
+function mode(d::Dirichlet)
     k = length(d.alpha)
     x = Array(Float64, k)
     s = d.alpha0 - k
+    a = d.alpha
     for i in 1:k
-        if d.alpha[i] <= 1.0
-            error("modes only defined when alpha[i] > 1 for all i")
+        @inbounds ai = a[i]
+        if ai <= 1.0
+            error("Dirichlet has a mode only when alpha[i] > 1 for all i")
         end
-        x[i] = (d.alpha[i] - 1.0) / s
+        x[i] = (ai - 1.0) / s
     end
-    return [x]
+    return x
 end
+
+modes(d::Dirichlet) = [mode(d)]
+
 
 function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     n = length(x)
