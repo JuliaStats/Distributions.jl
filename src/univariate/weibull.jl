@@ -62,7 +62,7 @@ var(d::Weibull) = d.scale^2 * gamma(1.0 + 2.0 / d.shape) - mean(d)^2
 
 function mode(d::Weibull)
     inv_k = 1.0 / d.shape
-    k > 1.0 ? d.scale * (1.0 - inv_k) ^ inv_k : 0.0
+    d.shape > 1.0 ? d.scale * (1.0 - inv_k) ^ inv_k : 0.0
 end
 
 modes(d::Weibull) = [mode(d)]
