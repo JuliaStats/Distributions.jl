@@ -120,6 +120,7 @@ kurtosis(d)       # excess kurtosis
 entropy(d)        # entropy 
 mgf(d, t)         # moment generating function
 cf(d, t)          # characteristic function
+mode(d)           # a mode of the distribution
 modes(d)          # all modes (this function returns an array)
 
 insupport(d, x)   # returns whether x is in the support of d
@@ -163,6 +164,8 @@ dim(d)          # sample dimension, i.e. length of each sample
 mean(d)         # mean vector
 cov(d)          # covariance matrix
 entropy(d)      # entropy
+mode(d)         # a mode
+modes(d)        # an array of all modes
 
 insupport(d, x)    # return whether x is in the support of d
 pdf(d, x)          # probability density function
