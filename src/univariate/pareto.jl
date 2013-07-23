@@ -29,6 +29,9 @@ mean(d::Pareto) = d.shape <= 1.0 ? Inf : (d.scale * d.shape) / (d.scale - 1.0)
 
 median(d::Pareto) = d.scale * 2.0^d.shape
 
+mode(d::Pareto) = d.scale
+modes(d::Pareto) = [d.scale]
+
 function pdf(d::Pareto, q::Real)
     if q >= d.scale
         return (d.shape * d.scale^d.shape) / (q^(d.shape + 1.0))

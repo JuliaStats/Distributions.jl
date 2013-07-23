@@ -19,7 +19,9 @@ mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 
 median(d::FDist) = quantile(d, 0.5)
 
-modes(d::FDist) = d.ndf <= 2 ? [0.0] : [(d.ndf - 2) / d.ndf * d.ddf / (d.ddf + 2)]
+
+mode(d::FDist) = d.ndf <= 2 ? 0.0 : (d.ndf - 2) / d.ndf * d.ddf / (d.ddf + 2)
+modes(d::FDist) = [mode(d)]
 
 var(d::FDist) = d.ddf > 4.0 ?  2.0 * d.ddf^2 *
 		       (d.ndf + d.ddf - 2.0) /

@@ -34,6 +34,7 @@ function cf(d::Uniform, t::Real)
 	return (exp(im * t * b) - exp(im * t * a)) / (im * t * (b - a))
 end
 
+mode(d::Uniform) = d.a
 modes(d::Uniform) = error("The uniform distribution has no modes")
 
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()

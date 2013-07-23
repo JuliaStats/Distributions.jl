@@ -28,6 +28,7 @@ mean(d::Gumbel) = d.mu - d.beta * digamma(1.0)
 
 median(d::Gumbel) = d.mu - d.beta * log(log(2.0))
 
+mode(d::Gumbel) = d.mu
 modes(d::Gumbel) = [d.mu]
 
 function pdf(d::Gumbel, x::Real)

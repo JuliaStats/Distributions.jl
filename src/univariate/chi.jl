@@ -19,7 +19,14 @@ mean(d::Chi) = sqrt(2.0) * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 insupport(::Chi, x::Real) = zero(x) <= x < Inf
 insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
 
-modes(d::Chi) = d.df >= 1.0 ? [sqrt(d.df - 1)] : error("Modes undefined for k < 1")
+function mode(d::Chi)
+	if d.df >= 1.0 
+		sqrt(d.df - 1)
+	else
+		error("Chi distribution has no mode when df < 1")
+	end
+end
+modes(d) = [mode(d)]
 
 var(d::Chi) = d.df - mean(d)^2
 

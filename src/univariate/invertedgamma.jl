@@ -28,6 +28,8 @@ var(d::InvertedGamma) = d.shape > 2.0 ? (1.0 / d.scale)^2 / ((d.shape - 1.0)^2 *
 skewness(d::InvertedGamma) = d.shape > 3.0 ? (4.0 * sqrt(d.shape - 2.0)) / (d.shape - 3.0) : NaN
 kurtosis(d::InvertedGamma) = d.shape > 4.0 ? (30.0 * d.shape - 66.0) / ((d.shape - 3.0) * (d.shape - 4.0)) : NaN
 
+mode(d::InvertedGamma) = (1.0 / d.scale) / (d.shape + 1.0)
+modes(d::InvertedGamma) = [mode(d)]
 
 cdf(d::InvertedGamma, x::Real) = ccdf(Gamma(d.shape, d.scale), 1.0 / x)
 ccdf(d::InvertedGamma, x::Real) = cdf(Gamma(d.shape, d.scale), 1.0 / x)
@@ -57,8 +59,6 @@ function cf(d::InvertedGamma, t::Real)
     return (2 * (-im * b * t)^(a / 2)) / gamma(a) *
            besselk(a, sqrt(-4.0 * im * b * t))
 end
-
-modes(d::InvertedGamma) = [(1.0 / d.scale) / (d.shape + 1.0)]
 
 pdf(d::InvertedGamma, x::Real) = exp(logpdf(d, x))
 

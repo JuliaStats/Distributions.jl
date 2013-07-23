@@ -37,13 +37,15 @@ mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 
 median(d::Beta) = quantile(d, 0.5)
 
-function modes(d::Beta)
+function mode(d::Beta)
     if d.alpha > 1.0 && d.beta > 1.0
-        return [(d.alpha - 1.0) / (d.alpha + d.beta - 2.0)]
+        return (d.alpha - 1.0) / (d.alpha + d.beta - 2.0)
     else
-        error("Beta distribution with a <= 1 || b <= 1 has no modes")
-    end
+        throw(ArgumentError("Beta with a <= 1 or b <= 1 has no modes"))
+    end    
 end
+
+modes(d::Beta) = [mode(d)]
 
 function rand(d::Beta)
     u = rand(Gamma(d.alpha))

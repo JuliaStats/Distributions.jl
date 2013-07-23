@@ -40,11 +40,11 @@ function cf(d::Gamma, t::Real)
     return (1.0 - im * t * theta)^(-k)
 end
 
-function modes(d::Gamma)
-    if d.shape >= 1.0
-        d.scale * (d.shape - 1.0)
-    end
+function mode(d::Gamma)
+    d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
+
+modes(d::Gamma) = [mode(d)]
 
 # rand()
 #

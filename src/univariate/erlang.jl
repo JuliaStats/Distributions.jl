@@ -35,6 +35,7 @@ median(d::Erlang) = median(d.nested_gamma)
 mgf(d::Erlang, t::Real) = mgf(d.nested_gamma, t)
 cf(d::Erlang, t::Real) = cf(d.nested_gamma, t)
 
+mode(d::Erlang) = mode(d.nested_gamma)
 modes(d::Erlang) = modes(d.nested_gamma)
 
 function pdf(d::Erlang, x::Real)

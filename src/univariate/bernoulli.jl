@@ -49,6 +49,8 @@ mgf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(t)
 
 cf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(im * t)
 
+mode(d::Bernoulli) = d.p1 > 0.5 ? 1 : 0
+
 function modes(d::Bernoulli)
     d.p1 < 0.5 ? [0] : 
     d.p1 > 0.5 ? [1] : [0, 1]

@@ -41,6 +41,7 @@ function cf(d::Laplace, t::Real)
     return exp(im * t * m) / (1.0 + b^2 * t^2)
 end
 
+mode(d::Laplace) = d.location
 modes(d::Laplace) = [d.location]
 
 function pdf(d::Laplace, x::Real)

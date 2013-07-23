@@ -67,6 +67,7 @@ function cf(d::Exponential, t::Real)
     return (1.0 - t * im * s)^(-1)
 end
 
+mode(d::Exponential) = 0.0
 modes(d::Exponential) = [0.0]
 
 function pdf(d::Exponential, x::Real)

@@ -42,6 +42,7 @@ mean(d::Triangular) = d.location
 
 median(d::Triangular) = d.location
 
+mode(d::Triangular) = d.location
 modes(d::Triangular) = [d.location]
 
 function pdf(d::Triangular, x::Real)

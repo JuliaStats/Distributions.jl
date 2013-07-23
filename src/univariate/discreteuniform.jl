@@ -51,6 +51,7 @@ function cf(d::DiscreteUniform, t::Real)
            ((b - a + 1.0) * (1.0 - exp(im * t)))
 end
 
+mode(d::DiscreteUniform) = d.a
 modes(d::DiscreteUniform) = [d.a:d.b]
 
 function pdf(d::DiscreteUniform, x::Real)

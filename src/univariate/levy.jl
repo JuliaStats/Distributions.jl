@@ -27,6 +27,8 @@ var(d::Levy) = Inf
 skewness(d::Levy) = NaN
 kurtosis(d::Levy) = NaN
 
+mode(d::Levy) = d.scale / 3.0 + d.location
+modes(d::Levy) = [mode(d)]
 
 function median(d::Levy)
 	m, c = d.location, d.scale
@@ -41,8 +43,6 @@ function cf(d::Levy, t::Real)
 	m, c = d.location, d.scale
 	return exp(im * m * t - sqrt(-2.0 * im * c * t))
 end
-
-modes(d::Levy) = [d.scale / 3.0 + d.location]
 
 function pdf(d::Levy, x::Real)
 	m, c = d.location, d.scale

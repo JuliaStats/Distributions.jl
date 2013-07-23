@@ -31,13 +31,8 @@ function mean(d::BetaPrime)
     end
 end
 
-function modes(d::BetaPrime)
-    if d.alpha > 1.0
-        return [(d.alpha - 1.0) / (d.beta + 1.0)]
-    else
-        return [0.0]
-    end
-end
+mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
+modes(d::BetaPrime) = [mode(d)]
 
 function pdf(d::BetaPrime, x::Real)
     a, b = d.alpha, d.beta

@@ -58,7 +58,8 @@ mean(d::Binomial) = d.size * d.prob
 median(d::Binomial) = iround(d.size * d.prob)
 
 # TODO: May need to subtract 1 sometimes
-modes(d::Binomial) = iround((d.size + 1.0) * d.prob)
+mode(d::Binomial) = iround((d.size + 1.0) * d.prob)
+modes(d::Binomial) = [mode(d)]
 
 function mgf(d::Binomial, t::Real)
 	n, p = d.size, d.prob

@@ -33,7 +33,8 @@ function cf(d::Cauchy, t::Real)
 	return exp(im * t * m - theta * abs(t))
 end
 
-modes(d::Cauchy) = [d.location]
+mode(d::Cauchy) = d.location
+modes(d::Cauchy) = [mode(d)]
 
 skewness(d::Cauchy) = NaN
 

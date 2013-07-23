@@ -32,7 +32,8 @@ median(d::LogNormal) = exp(d.meanlog)
 # mgf(d::LogNormal)
 # cf(d::LogNormal)
 
-modes(d::LogNormal) = [exp(d.meanlog - d.sdlog^2)]
+mode(d::LogNormal) = exp(d.meanlog - d.sdlog^2)
+modes(d::LogNormal) = [mode(d)]
 
 function skewness(d::LogNormal)
     return (exp(d.sdlog^2) + 2.0) * sqrt(exp(d.sdlog^2) - 1.0)

@@ -87,7 +87,21 @@ function cf(d::Categorical, t::AbstractVector)
     return s
 end
 
-modes(d::Categorical) = [indmax(d.prob)]
+mode(d::Categorical) = indmax(d.prob)
+
+function modes(d::Categorical)
+    K = d.K
+    p = d.prob
+    maxp = max(p)
+    r = Array(Int, 0)
+    for k = 1:K
+        if p[k] == maxp
+            push!(r, k)
+        end
+    end
+    r
+end
+
 
 pdf(d::Categorical, x::Real) = 1 <= x <= d.K ? d.prob[x] : 0.0
 

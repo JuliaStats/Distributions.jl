@@ -22,6 +22,7 @@ mean(d::Logistic) = d.location
 
 median(d::Logistic) = d.location
 
+mode(d::Logistic) = d.location
 modes(d::Logistic) = [d.location]
 
 skewness(d::Logistic) = 0.0

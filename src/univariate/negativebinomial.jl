@@ -57,7 +57,9 @@ function kurtosis(d::NegativeBinomial)
     6.0 / r + (p * p) / ((1.0 - p) * r)
 end
 
-function modes(d::NegativeBinomial)
+function mode(d::NegativeBinomial)
     p = d.prob
     ifloor((1.0 - p) * (d.r - 1.) / p)
 end
+
+modes(d::NegativeBinomial) = [mode(d)]

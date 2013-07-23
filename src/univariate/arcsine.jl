@@ -42,6 +42,7 @@ function cf(d::Arcsine, t::Real)
     error("CF for Arcsine requires confluent hypergeometric function")
 end
 
+mode(d::Arcsine) = 0.0
 modes(d::Arcsine) = [0.0, 1.0]
 
 function pdf(d::Arcsine, x::Number)

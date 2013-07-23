@@ -34,6 +34,7 @@ function median(d::Geometric)
     iceil(-1.0 / log(2.0, 1.0 - d.prob)) - 1
 end
 
+mode(d::Geometric) = 0
 modes(d::Geometric) = [0]
 
 function mgf(d::Geometric, t::Real)

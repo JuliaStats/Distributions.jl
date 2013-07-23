@@ -20,6 +20,7 @@ mean(d::TDist) = d.df > 1.0 ? 0.0 : NaN
 
 median(d::TDist) = 0.0
 
+mode(d::TDist) = 0.0
 modes(d::TDist) = [0.0]
 
 function pdf(d::TDist, x::Real)
