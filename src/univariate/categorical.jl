@@ -25,22 +25,20 @@ Categorical(d::Integer) = Categorical(ones(d))
 min(d::Categorical) = 1
 max(d::Categorical) = d.K
 
-function cdf(d::Categorical, x::Integer)
-    if !insupport(d, x)
-        error("$x is not in the support")
-    else
-        p = 0.0
-        for i in 1:x
-            p += d.prob[i]
-        end
-        return p
+function cdf(d::Categorical, x::Real)
+    x < one(x) && return 0.0
+    d.K <= x && return 1.0
+    p = d.prob[1]
+    for i in 2:ifloor(x)
+        p += d.prob[i]
     end
+    p
 end
 
 entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
 
 function insupport(d::Categorical, x::Real)
-    return isinteger(x) && 1 <= x <= d.K && d.prob[x] != 0.0
+    isinteger(x) && one(x) <= x <= d.K && d.prob[x] != 0.0
 end
 
 function kurtosis(d::Categorical)
@@ -49,15 +47,15 @@ function kurtosis(d::Categorical)
     for i in 1:d.K
         s += (i - m)^4 * d.prob[i]
     end
-    return s / var(d)^2 - 3.0
+    s / var(d)^2 - 3.0
 end
 
 function mean(d::Categorical)
-    s = 0.0
-    for i in 1:d.K
+    s = d.prob[1]
+    for i in 2:d.K
         s += i * d.prob[i]
     end
-    return s
+    s
 end
 
 function median(d::Categorical)
@@ -68,7 +66,7 @@ function median(d::Categorical)
         i += 1
         p += d.prob[i]
     end
-    return i
+    i
 end
 
 function mgf(d::Categorical, t::AbstractVector)
@@ -76,7 +74,7 @@ function mgf(d::Categorical, t::AbstractVector)
     for i in 1:d.K
         s += d.prob[i] * exp(t[i])
     end
-    return s
+    s
 end
 
 function cf(d::Categorical, t::AbstractVector)
@@ -84,7 +82,7 @@ function cf(d::Categorical, t::AbstractVector)
     for i in 1:d.K
         s += d.prob[i] * exp(im * t[i])
     end
-    return s
+    s
 end
 
 mode(d::Categorical) = indmax(d.prob)
@@ -103,12 +101,10 @@ function modes(d::Categorical)
 end
 
 
-pdf(d::Categorical, x::Real) = 1 <= x <= d.K ? d.prob[x] : 0.0
+pdf(d::Categorical, x::Real) = one(x) <= x <= d.K ? d.prob[x] : 0.0
 
 function quantile(d::Categorical, p::Real)
-    if p < 0. || p > 1.
-        throw(DomainError())
-    end
+    zero(p) <= p <= one(p) || throw(DomainError())
     k = d.K
     pv = d.prob
     i = 1
@@ -117,7 +113,7 @@ function quantile(d::Categorical, p::Real)
         i += 1
         v += pv[i]
     end
-    return i
+    i
 end
 
 function rand(d::Categorical)
@@ -129,7 +125,7 @@ function rand(d::Categorical)
             return i
         end
     end
-    return d.K
+    d.K
 end
 
 rand(s::CategoricalSampler) = rand(s.alias)
@@ -140,7 +136,7 @@ function skewness(d::Categorical)
     for i in 1:d.K
         s += (i - m)^3 * d.prob[i]
     end
-    return s / std(d)^3
+    s / std(d)^3
 end
 
 function var(d::Categorical)
@@ -149,7 +145,7 @@ function var(d::Categorical)
     for i in 1:d.K
         s += (i - m)^2 * d.prob[i]
     end
-    return s
+    s
 end
 
 function fit_mle{T<:Real}(::Type{Categorical}, k::Integer, x::Array{T})
@@ -169,6 +165,3 @@ function fit_mle{T<:Real}(::Type{Categorical}, k::Integer, x::Array{T})
 end
 
 fit_mle{T<:Real}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
-
-
-

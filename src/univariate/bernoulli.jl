@@ -11,11 +11,8 @@ immutable Bernoulli <: DiscreteUnivariateDistribution
     p1::Float64
 
     function Bernoulli(p::Real)
-        if 0.0 <= p <= 1.0
-            new(1.0 - p, float(p))
-        else
-            error("prob must be in [0,1]")
-        end
+        zero(p) <= p <= one(p) || error("prob must be in [0,1]")
+        new(1.0 - p, float64(p))
     end
 end
 
@@ -24,7 +21,7 @@ Bernoulli() = Bernoulli(0.5)
 min(d::Bernoulli) = 0
 max(d::Bernoulli) = 1
 
-cdf(d::Bernoulli, q::Real) = q >= 0. ? (q >= 1. ? 1.0 : d.p0) : 0.
+cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
 function entropy(d::Bernoulli) 
     p0 = d.p0
@@ -32,8 +29,8 @@ function entropy(d::Bernoulli)
     p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
 end
 
-insupport(::Bernoulli, x::Real) = (x == 0) || (x == 1)
-insupport(::Type{Bernoulli}, x::Real) = (x == 0) || (x == 1)
+insupport(::Bernoulli, x::Real) = (x == zero(x)) || (x == one(x))
+insupport(::Type{Bernoulli}, x::Real) = (x == zero(x)) || (x == one(x))
 
 mean(d::Bernoulli) = d.p1
 
@@ -56,9 +53,9 @@ function modes(d::Bernoulli)
     d.p1 > 0.5 ? [1] : [0, 1]
 end
 
-pdf(d::Bernoulli, x::Real) = x == 0 ? d.p0 : x == 1 ? d.p1 : 0.0
+pdf(d::Bernoulli, x::Real) = x == zero(x) ? d.p0 : x == one(x) ? d.p1 : 0.0
 
-quantile(d::Bernoulli, p::Real) = 0.0 <= p <= 1.0 ? (p <= d.p0 ? 0 : 1) : NaN
+quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= d.p0 ? 0 : 1) : NaN
 
 rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 

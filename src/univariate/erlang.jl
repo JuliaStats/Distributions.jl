@@ -9,14 +9,12 @@ immutable Erlang <: ContinuousUnivariateDistribution
     scale::Float64
     nested_gamma::Gamma
     function Erlang(shape::Real, scale::Real)
-        if !isinteger(shape)
-            raise(ArgumentError("Erlang shape parameter must be an integer"))
-        end
+        isinteger(shape) || error("Erlang shape parameter must be an integer")
         new(int(shape), float64(scale), Gamma(shape, scale))
     end
 end
 
-Erlang(scale::Real) = Erlang(1, 1.0)
+Erlang(scale::Real) = Erlang(scale, 1.0)
 Erlang() = Erlang(1, 1.0)
 
 cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
@@ -40,7 +38,7 @@ modes(d::Erlang) = modes(d.nested_gamma)
 
 function pdf(d::Erlang, x::Real)
     b, c = d.scale, d.shape
-    return ((x / b)^(c - 1.0) * exp(-x / b)) / (b * gamma(c))
+    ((x / b)^(c - 1.0) * exp(-x / b)) / (b * gamma(c))
 end
 
 quantile(d::Erlang, p::Real) = quantile(d.nested_gamma, p)
@@ -51,7 +49,7 @@ function rand(d::Erlang)
     for i in 1:c
         z *= rand()
     end
-    return -b * log(z)
+    -b * log(z)
 end
 
 skewness(d::Erlang) = skewness(d.nested_gamma)
