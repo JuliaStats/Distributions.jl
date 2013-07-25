@@ -1,7 +1,8 @@
 immutable Poisson <: DiscreteUnivariateDistribution
     lambda::Float64
     function Poisson(l::Real)
-    	l > zero(l) ? new(float64(l)) : error("lambda must be positive")
+    	l > zero(l) || error("lambda must be positive")
+        new(float64(l))
     end
     Poisson() = new(1.0)
 end

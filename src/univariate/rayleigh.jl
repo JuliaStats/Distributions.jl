@@ -7,7 +7,8 @@
 immutable Rayleigh <: ContinuousUnivariateDistribution
     scale::Float64
     function Rayleigh(s::Real)
-        s > zero(s) ? new(float64(s)) : error("scale must be positive")
+        s > zero(s) || error("scale must be positive")
+        new(float64(s))
     end
     Rayleigh() = new(1.0)
 end
@@ -29,11 +30,7 @@ mode(d::Rayleigh) = d.scale
 modes(d::Rayleigh) = [d.scale]
 
 function pdf(d::Rayleigh, x::Real)
-    if insupport(d, x)
-        return (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2)))
-    else
-        return 0.0
-    end
+    insupport(d, x) ? (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2))) : 0.0
 end
 
 quantile(d::Rayleigh, p::Real) = sqrt(-2.0 * d.scale^2 * log(1.0 - p))

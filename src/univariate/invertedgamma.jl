@@ -11,11 +11,8 @@ immutable InvertedGamma <: ContinuousUnivariateDistribution
     shape::Float64 # location
     scale::Float64 # scale
     function InvertedGamma(sh::Real, sc::Real)
-    	if sh > 0.0 && sc > 0.0
-    		new(float64(sh), float64(sc))
-    	else
-    		error("Both shape and scale must be positive")
-    	end
+    	sh > zero(sh) && sc > zero(sc) || error("Both shape and scale must be positive")
+    	new(float64(sh), float64(sc))
     end
 end
 
@@ -42,38 +39,34 @@ invlogcdf(d::InvertedGamma, p::Real) = 1.0 / invlogccdf(Gamma(d.shape, d.scale),
 invlogccdf(d::InvertedGamma, p::Real) = 1.0 / invlogcdf(Gamma(d.shape, d.scale), p)
 
 function entropy(d::InvertedGamma)
-    a = d.shape
-    b = d.scale
-    return a - log(b) + lgamma(a) - (1.0 + a) * digamma(a)
+    a, b = d.shape, d.scale
+    a - log(b) + lgamma(a) - (1.0 + a) * digamma(a)
 end
 
 
 function mgf(d::InvertedGamma, t::Real)
     a, b = d.shape, d.scale
-    return (2 * (-b * t)^(a / 2)) / gamma(a) *
-           besselk(a, sqrt(-4.0 * b * t))
+    (2 * (-b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * b * t))
 end
 
 function cf(d::InvertedGamma, t::Real)
     a, b = d.shape, d.scale
-    return (2 * (-im * b * t)^(a / 2)) / gamma(a) *
-           besselk(a, sqrt(-4.0 * im * b * t))
+    (2 * (-im * b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * im * b * t))
 end
 
 pdf(d::InvertedGamma, x::Real) = exp(logpdf(d, x))
 
 function logpdf(d::InvertedGamma, x::Real)
-    return -(d.shape * log(d.scale)) - lgamma(d.shape) -
-           ((d.shape + 1.0) * log(x)) - 1.0/ (d.scale * x)
+    a, b = d.shape, d.scale
+    -(a * log(b)) - lgamma(a) - ((a + 1.0) * log(x)) - 1.0/ (b * x)
 end
-
 
 rand(d::InvertedGamma) = 1.0 / rand(Gamma(d.shape, d.scale))
 
 function rand!(d::InvertedGamma, A::Array{Float64})
-    A = rand!(Gamma(d.shape, d.scale), A)
+    rand!(Gamma(d.shape, d.scale), A)
     for i in 1:length(A)
     	A[i] = 1.0 / A[i]
     end
-    return A
+    A
 end

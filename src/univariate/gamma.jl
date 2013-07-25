@@ -2,11 +2,9 @@ immutable Gamma <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
     function Gamma(sh::Real, sc::Real)
-        if sh > 0.0 && sc > 0.0
-            new(float64(sh), float64(sc))
-        else
+        sh > zero(sh) && sc > zero(sc) || 
             error("Both shape and scale must be positive")
-        end
+        new(float64(sh), float64(sc))
     end
 end
 
@@ -17,8 +15,7 @@ Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)
-    x += lgamma(d.shape) + log(d.scale) + d.shape
-    return x
+    x + lgamma(d.shape) + log(d.scale) + d.shape
 end
 
 insupport(::Gamma, x::Real) = zero(x) <= x < Inf
@@ -30,15 +27,9 @@ mean(d::Gamma) = d.shape * d.scale
 
 median(d::Gamma) = quantile(d, 0.5)
 
-function mgf(d::Gamma, t::Real)
-    k, theta = d.shape, d.scale
-    return (1.0 - t * theta)^(-k)
-end
+mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
 
-function cf(d::Gamma, t::Real)
-    k, theta = d.shape, d.scale
-    return (1.0 - im * t * theta)^(-k)
-end
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
 
 function mode(d::Gamma)
     d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
@@ -166,5 +157,4 @@ function fit_mle(::Type{Gamma}, ss::GammaStats;
 
     Gamma(a, mx / a)
 end
-
 

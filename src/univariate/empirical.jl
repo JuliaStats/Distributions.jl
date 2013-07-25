@@ -33,7 +33,7 @@ cdf(d::EmpiricalUnivariateDistribution, q::Real) = d.cdf(q)
 entropy(d::EmpiricalUnivariateDistribution) = d.entropy
 
 function insupport(d::EmpiricalUnivariateDistribution, x::Number)
-	return contains(d.values, x)
+    contains(d.values, x)
 end
 
 kurtosis(d::EmpiricalUnivariateDistribution) = d.kurtosis
@@ -45,22 +45,18 @@ median(d::EmpiricalUnivariateDistribution) = d.median
 modes(d::EmpiricalUnivariateDistribution) = Float64[]
 
 function pdf(d::EmpiricalUnivariateDistribution, x::Real)
-	# TODO: Create lookup table for discrete case
-	1.0 / length(d.values)
+    ## TODO: Create lookup table for discrete case
+    1.0 / length(d.values)
 end
 
 function quantile(d::EmpiricalUnivariateDistribution, p::Real)
-	n = length(d.values)
-	index = ifloor(p * n) + 1
-	if index > n
-		return d.values[n]
-	else
-		return d.values[index]
-	end
+    n = length(d.values)
+    index = ifloor(p * n) + 1
+    index > n ? d.values[n] : d.values[index]
 end
 
 function rand(d::EmpiricalUnivariateDistribution)
-	return d.values[rand(1:length(d.values))]
+    d.values[rand(1:length(d.values))]
 end
 
 skewness(d::EmpiricalUnivariateDistribution) = NaN
@@ -71,4 +67,3 @@ function fit_mle{T <: Real}(::Type{EmpiricalUnivariateDistribution},
 	                    x::Vector{T})
 	EmpiricalUnivariateDistribution(x)
 end
-

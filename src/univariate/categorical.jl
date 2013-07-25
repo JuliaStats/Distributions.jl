@@ -50,13 +50,7 @@ function kurtosis(d::Categorical)
     s / var(d)^2 - 3.0
 end
 
-function mean(d::Categorical)
-    s = d.prob[1]
-    for i in 2:d.K
-        s += i * d.prob[i]
-    end
-    s
-end
+mean(d::Categorical) = sum(Multiply(), [1:d.K], d.prob)
 
 function median(d::Categorical)
     p = 0.
@@ -101,7 +95,7 @@ function modes(d::Categorical)
 end
 
 
-pdf(d::Categorical, x::Real) = one(x) <= x <= d.K ? d.prob[x] : 0.0
+pdf(d::Categorical, x::Real) = isinteger(x) && one(x) <= x <= d.K ? d.prob[x] : 0.0
 
 function quantile(d::Categorical, p::Real)
     zero(p) <= p <= one(p) || throw(DomainError())

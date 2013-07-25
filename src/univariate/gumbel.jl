@@ -2,9 +2,7 @@ immutable Gumbel <: ContinuousUnivariateDistribution
     mu::Float64   # location
     beta::Float64 # scale
     function Gumbel(mu::Real, beta::Real)
-        if beta <= 0
-            error("beta must be positive")
-        end
+        beta > zero(beta) || error("beta must be positive")
         new(float64(mu), float64(beta))
     end
 end

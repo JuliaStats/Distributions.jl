@@ -18,11 +18,8 @@ insupport(d::Pareto, x::Number) = isreal(x) && isfinite(x) && x > d.scale
 
 function kurtosis(d::Pareto)
     a = d.shape
-    if a > 4.0
-        return (6.0 * (a^3 + a^2 - 6.0 * a - 2.0)) / (a * (a - 3.0) * (a - 4.0))
-    else
-        error("Kurtosis undefined for Pareto w/ shape <= 4")
-    end
+    a > 4.0 || error("Kurtosis undefined for Pareto w/ shape <= 4")
+    (6.0 * (a^3 + a^2 - 6.0 * a - 2.0)) / (a * (a - 3.0) * (a - 4.0))
 end
 
 mean(d::Pareto) = d.shape <= 1.0 ? Inf : (d.scale * d.shape) / (d.scale - 1.0)
@@ -33,11 +30,7 @@ mode(d::Pareto) = d.scale
 modes(d::Pareto) = [d.scale]
 
 function pdf(d::Pareto, q::Real)
-    if q >= d.scale
-        return (d.shape * d.scale^d.shape) / (q^(d.shape + 1.0))
-    else
-        return 0.0
-    end
+    q >= d.scale ? (d.shape * d.scale^d.shape) / (q^(d.shape + 1.0)) : 0.0
 end
 
 quantile(d::Pareto, p::Real) = d.scale / (1.0 - p)^(1.0 / d.shape)
@@ -46,17 +39,10 @@ rand(d::Pareto) = d.shape / (rand()^(1.0 / d.scale))
 
 function skewness(d::Pareto)
     a = d.shape
-    if a > 3.0
-        return ((2.0 * (1.0 + a)) / (a - 3.0)) * sqrt((a - 2.0) / a)
-    else
-        error("Skewness undefined for Pareto w/ shape <= 3")
-    end
+    a > 3.0 || error("Skewness undefined for Pareto w/ shape <= 3")
+    ((2.0 * (1.0 + a)) / (a - 3.0)) * sqrt((a - 2.0) / a)
 end
 
 function var(d::Pareto)
-    if d.scale < 2.0
-        return Inf
-    else
-        return (d.shape^2 * d.scale) / ((d.scale - 1.0)^2 * (d.scale - 2.0))
-    end
+    d.scale < 2.0 ? Inf : (d.shape^2 * d.scale) / ((d.scale - 1.0)^2 * (d.scale - 2.0))
 end

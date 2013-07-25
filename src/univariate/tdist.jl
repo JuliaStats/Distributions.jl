@@ -1,7 +1,8 @@
 immutable TDist <: ContinuousUnivariateDistribution
     df::Float64 # non-integer degrees of freedom allowed
     function TDist(d::Real)
-    	d > zero(d) ? new(float64(d)) : error("df must be positive")
+    	d > zero(d) || error("df must be positive")
+        new(float64(d))
     end
 end
 
