@@ -11,25 +11,32 @@ d_z = EdgeworthZ(dg,10)
 
 dg_s = Gamma(10,1)
 dg_m = Gamma(10,0.1)
+dg_za = Gamma(10,1/std(dg_s))
 
 for i = 0.01:0.01:0.99
-    @test_approx_eq quantile(d_s,i) cquantile(d_s,1-i) 
-    @test_approx_eq_eps cdf(d_s,quantile(d_s,i))/i 1.0 0.2
-    @test_approx_eq_eps ccdf(d_s,cquantile(d_s,i))/i 1.0 0.2
 
-    @test_approx_eq_eps quantile(d_s,i) quantile(dg_s,i) 0.02
+    q = quantile(dg_s,i)    
+    @test_approx_eq_eps quantile(d_s,i) q 0.02
+    @test_approx_eq_eps cquantile(d_s,1-i) q 0.02
+    @test_approx_eq_eps cdf(d_s,q) i 0.002
+    @test_approx_eq_eps ccdf(d_s,q) 1-i 0.002
+    @test_approx_eq_eps pdf(d_s,q) pdf(dg_s,q) 0.005
 
-    @test_approx_eq quantile(d_m,i) cquantile(d_m,1-i) 
-    @test_approx_eq_eps cdf(d_m,quantile(d_m,i))/i 1.0 0.2
-    @test_approx_eq_eps ccdf(d_m,cquantile(d_m,i))/i 1.0 0.2
+    q = quantile(dg_m,i)
+    @test_approx_eq_eps quantile(d_m,i) q 0.01
+    @test_approx_eq_eps cquantile(d_m,1-i) q 0.01
+    @test_approx_eq_eps cdf(d_m,q) i 0.002
+    @test_approx_eq_eps ccdf(d_m,q) 1-i 0.002
+    @test_approx_eq_eps pdf(d_m,q) pdf(dg_m,q) 0.05
+    
+    q = quantile(dg_za,i) - mean(dg_za)
+    @test_approx_eq_eps quantile(d_z,i) q 0.01
+    @test_approx_eq_eps cquantile(d_z,1-i) q 0.01
+    @test_approx_eq_eps cdf(d_z,q) i 0.002
+    @test_approx_eq_eps ccdf(d_z,q) 1-i 0.002
+    @test_approx_eq_eps pdf(d_z,q) pdf(dg_za,q+mean(dg_za)) 0.02
 
-    @test_approx_eq_eps quantile(d_m,i) quantile(dg_m,i) 0.002
-
-    @test_approx_eq quantile(d_z,i) cquantile(d_z,1-i) 
-    @test_approx_eq_eps cdf(d_z,quantile(d_z,i))/i 1.0 0.2
-    @test_approx_eq_eps ccdf(d_z,cquantile(d_z,i))/i 1.0 0.2
-
-    @test_approx_eq_eps quantile(d_z,i) (quantile(dg_s,i)-mean(dg_s))/std(dg_s) 0.007
+    
 end
 
 

@@ -103,7 +103,7 @@ EdgeworthMean(d::UnivariateDistribution,n::Real) = EdgeworthMean{typeof(d)}(d,n)
 mean(d::EdgeworthMean) = mean(d.dist)
 var(d::EdgeworthMean) = var(d.dist) / d.n
 
-function pdf(d::EdgeworthAbstract)
+function pdf(d::EdgeworthAbstract,x::Real)
     m, s = mean(d), std(d)
     pdf(EdgeworthZ(d.dist,d.n),(x-m)/s)/s
 end
