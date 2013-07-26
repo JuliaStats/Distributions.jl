@@ -10,6 +10,7 @@ tests = [
 	"dirichlet", 
 	"mvnormal",
 	"kolmogorov",
+	"edgeworth",
 	"matrix"]
 
 println("Running tests:")

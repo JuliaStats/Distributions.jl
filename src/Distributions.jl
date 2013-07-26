@@ -33,6 +33,9 @@ export                                  # types
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
+    EdgeworthMean,
+    EdgeworthSum,
+    EdgeworthZ,
     EmpiricalUnivariateDistribution,
     Erlang,
     Exponential,
@@ -191,6 +194,7 @@ include(joinpath("univariate", "empirical.jl"))
 include(joinpath("univariate", "exponential.jl"))
 include(joinpath("univariate", "fdist.jl"))
 include(joinpath("univariate", "gamma.jl"))
+include(joinpath("univariate", "edgeworth.jl"))
 include(joinpath("univariate", "erlang.jl"))
 include(joinpath("univariate", "geometric.jl"))
 include(joinpath("univariate", "gumbel.jl"))
