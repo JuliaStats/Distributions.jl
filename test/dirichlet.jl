@@ -22,8 +22,8 @@ x = rand(d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test_approx_eq p[i] pdf(d, x[:,i])
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
+	@test_approx_eq p[i] pdf(d, x[:,i])
 end
 
 
