@@ -55,8 +55,8 @@ d = fit(Geometric, rand(Geometric(0.3), N))
 d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 @test isa(d, Laplace)
 @test_approx_eq_eps d.location 5.0 0.1
-@test_approx_eq_eps d.scale 3.0 0.1
+@test_approx_eq_eps d.scale 3.0 0.2
 
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
-@test_approx_eq_eps mean(d) 8.2 0.1
+@test_approx_eq_eps mean(d) 8.2 0.2
