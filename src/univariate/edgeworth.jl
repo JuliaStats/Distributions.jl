@@ -111,10 +111,3 @@ cdf(d::EdgeworthAbstract, x::Real) = cdf(EdgeworthZ(d.dist,d.n), (x-mean(d))/std
 ccdf(d::EdgeworthAbstract, x::Real) = ccdf(EdgeworthZ(d.dist,d.n), (x-mean(d))/std(d))
 quantile(d::EdgeworthAbstract, p::Real) = mean(d) + std(d)*quantile(EdgeworthZ(d.dist,d.n), p)
 cquantile(d::EdgeworthAbstract, p::Real) = mean(d) + std(d)*cquantile(EdgeworthZ(d.dist,d.n), p)
-
-immutable FooH{T<:Real}
-  a::T
-  function FooH(a::T)
-      error("ahh")
-  end
-end
