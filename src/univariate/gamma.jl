@@ -7,6 +7,7 @@ immutable Gamma <: ContinuousUnivariateDistribution
         new(float64(sh), float64(sc))
     end
 end
+typealias Erlang Gamma
 
 Gamma(sh::Real) = Gamma(sh, 1.0)
 Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
