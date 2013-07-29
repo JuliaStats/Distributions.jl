@@ -386,6 +386,9 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
 
         for k = 1:K
             α[k] -= (g[k] - b) * iq[k]
+            if α[k] < 1.0e-12
+                α[k] = 1.0e-12
+            end
         end
         α0 = sum(α)
 
@@ -401,6 +404,13 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
         converged = gnorm < tol
     end
 
+    println("α = $α")
     Dirichlet(α)
 end
+
+function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64})
+    fit_mle!(dty, elogp, α, DirichletMLEOptions(25, 1.0e-12))
+end
+
+
 
