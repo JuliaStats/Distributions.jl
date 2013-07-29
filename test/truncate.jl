@@ -1,13 +1,13 @@
 using Distributions
 using Base.Test
 
-for d in (TruncatedNormal(Normal(0, 1), -1, 1),
-          TruncatedNormal(Normal(3, 10), 7, 8),
-          TruncatedNormal(Normal(-5, 1), -Inf, -10))
+for d in (Truncated(Normal(0, 1), -1, 1),
+          Truncated(Normal(3, 10), 7, 8),
+          Truncated(Normal(-5, 1), -Inf, -10))
     @test all(insupport(d, rand(d, 1000)))
 end
 
-d = TruncatedNormal(Normal(0, 1), -0.1, +0.1)
+d = Truncated(Normal(0, 1), -0.1, +0.1)
 
 @test pdf(d, 0.0) > pdf(Normal(0, 1), 0.0)
 @test pdf(d, -1.0) == 0.0

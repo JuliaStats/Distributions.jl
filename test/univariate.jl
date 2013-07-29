@@ -97,9 +97,9 @@ for d in [Arcsine(),
           Triangular(3.0, 1.0),
           Triangular(3.0, 2.0),
           Triangular(10.0, 10.0),
-          TruncatedNormal(Normal(0, 1), -3, 3),
-          # TruncatedNormal(Normal(-100, 1), 0, 1),
-          TruncatedNormal(Normal(27, 3), 0, Inf),
+          Truncated(Normal(0, 1), -3, 3),
+          # Truncated(Normal(-100, 1), 0, 1),
+          Truncated(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
@@ -112,14 +112,14 @@ for d in [Arcsine(),
     # println(d)
 
     n = length(pp)
-    is_continuous = isa(d, ContinuousDistribution)
-    is_discrete = isa(d, DiscreteDistribution)
+    is_continuous = isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
+    is_discrete = isa(d, Truncated) ? isa(d.untruncated, DiscreteDistribution) : isa(d, DiscreteDistribution) 
 
     @assert is_continuous == !is_discrete
     sample_ty = is_continuous ? Float64 : Int
 
     # avoid checking high order moments for LogNormal and Logistic
-    avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, TruncatedNormal)
+    avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, Truncated)
 
     #####
     #
