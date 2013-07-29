@@ -4,8 +4,6 @@ using NumericExtensions
 using Stats
 
 export                                  # types
-#    CauchitLink,
-#    CloglogLink,
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
@@ -44,8 +42,6 @@ export                                  # types
     Geometric,
     Gumbel,
     HyperGeometric,
-#    IdentityLink,
-#    InverseLink,
     InverseWishart,
     InvertedGamma,
     Kolmogorov,
@@ -53,10 +49,7 @@ export                                  # types
     KSOneSided,
     Laplace,
     Levy,
-#    Link,
     Logistic,
-#    LogitLink,
-#    LogLink,
     LogNormal,
     MixtureModel,
     Multinomial,
@@ -70,7 +63,6 @@ export                                  # types
     Normal,
     Pareto,
     Poisson,
-#    ProbitLink,
     Rayleigh,
     Skellam,
     TDist,
@@ -82,15 +74,12 @@ export                                  # types
     Wishart,
                                         # methods
     binaryentropy, # entropy of distribution in bits
-#    canonicallink, # canonical link function for a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
-#    deviance,      # deviance of fitted and observed responses
-#    devresid,      # vector of squared deviance residuals
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
@@ -107,8 +96,6 @@ export                                  # types
     isprobvec,     # Is a probability vector?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
-#    linkfun,       # link function mapping mu to eta, the linear predictor
-#    linkinv,       # inverse link mapping eta to mu
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
     loglikelihood, # log probability of array of IID draws
@@ -124,8 +111,6 @@ export                                  # types
     mode,          # the mode of a unimodal distribution
     modes,         # mode(s) of distribution as vector
     moment,        # moments of distribution
-#    mueta,         # derivative of inverse link function
-#    mustart,       # starting values of mean vector in GLMs
     nsamples,      # get the number of samples in a data array based on distribution types
     pdf,           # probability density function (ContinuousDistribution)
     pmf,           # probability mass function (DiscreteDistribution)
@@ -138,8 +123,6 @@ export                                  # types
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
     suffstats,     # compute sufficient statistics
-    valideta,      # validity check on linear predictor
-    validmu,       # validity check on mean vector
     var,           # variance of distribution
     wsample        # weighted sampling from a source array
 
