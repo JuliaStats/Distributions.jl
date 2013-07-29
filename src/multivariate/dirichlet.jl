@@ -404,7 +404,6 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
         converged = gnorm < tol
     end
 
-    println("α = $α")
     Dirichlet(α)
 end
 
