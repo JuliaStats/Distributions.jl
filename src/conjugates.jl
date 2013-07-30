@@ -59,7 +59,7 @@ function posterior{T<:Real}(prior::Dirichlet, ::Type{Multinomial}, X::Matrix{T})
 	return Dirichlet(α)
 end
 
-function posterior{T<:Real}(prior::Dirichlet, ::Type{Multinomial}, X::Matrix{T}, w::Vector{T})
+function posterior{T<:Real}(prior::Dirichlet, ::Type{Multinomial}, X::Matrix{T}, w::Array{Float64})
 	d::Int = dim(prior)
 	if d != size(X, 1)
 		throw(ArgumentError("Inconsistent argument dimensions."))
@@ -84,7 +84,7 @@ end
 ### Gamma -- Exponential
 
 function posterior(prior::Gamma, ss::ExponentialStats)
-	return Gamma(prior.shape + ss.sw, 1 / (1 / prior.scale + ss.sx))
+	return Gamma(prior.shape + ss.sw, 1.0 / (rate(prior) + ss.sx))
 end
 
 
