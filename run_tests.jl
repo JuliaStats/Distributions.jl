@@ -9,6 +9,7 @@ tests = [
 	"multinomial",
 	"dirichlet", 
 	"mvnormal",
+	"conjugates",
 	"kolmogorov",
 	"edgeworth",
 	"matrix"]
