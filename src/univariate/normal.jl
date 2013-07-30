@@ -29,10 +29,10 @@ begin
     Φc{T<:FloatingPoint}(z::T) = 0.5*erfc(z/√2)
     ccdf(d::Normal, x::FloatingPoint) = Φc(zval(d,x))
 
-    logΦ(z) = z < -1.0 ? log(erfcx(-z/√2))-log(2.0)-0.5*z*z : log1p(-0.5*erfc(z/√2))
+    logΦ(z) = z < -1.0 ? log(0.5*erfcx(-z/√2)) - 0.5*z*z : log1p(-0.5*erfc(z/√2))
     logcdf(d::Normal, x::FloatingPoint) = logΦ(zval(d,x))
 
-    logΦc(z) = z > 1.0 ? log(erfcx(z/√2))-log(2.0)-0.5*z*z : log1p(-0.5*erfc(-z/√2))
+    logΦc(z) = z > 1.0 ? log(0.5*erfcx(z/√2)) - 0.5*z*z : log1p(-0.5*erfc(-z/√2))
     logccdf(d::Normal, x::FloatingPoint) = logΦc(zval(d,x))    
     
     Φinv{T<:FloatingPoint}(p::T) = -√2 * erfcinv(2p)
