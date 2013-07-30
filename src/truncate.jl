@@ -1,40 +1,25 @@
-abstract TruncatedContinuousUnivariateDistribution <: ContinuousUnivariateDistribution
-abstract TruncatedDiscreteUnivariateDistribution <: DiscreteUnivariateDistribution
-typealias TruncatedUnivariateDistribution Union(TruncatedContinuousUnivariateDistribution, TruncatedDiscreteUnivariateDistribution)
 
-macro truncate(dname::Any)
-    new_dname = esc(symbol(string("Truncated", string(dname))))
-    # TODO: Are we not supposed to run eval() in a macro?
-    if eval(dname) <: ContinuousUnivariateDistribution
-        dtype = esc(TruncatedContinuousUnivariateDistribution)
-    else
-        dtype = esc(TruncatedDiscreteUnivariateDistribution)
-    end
-    dname = esc(dname)
-    quote
-        immutable $new_dname <: $dtype
-            untruncated::$dname
-            lower::Float64
-            upper::Float64
-            nc::Float64 # Normalization constant
-            function ($new_dname)(d::$dname, l::Real, u::Real, nc::Real)
-                if l >= u
-                    error("upper must be > lower")
-                end
-                new(d, float64(l), float64(u), float64(nc))
-            end
+immutable Truncated{D<:UnivariateDistribution} <: UnivariateDistribution
+    untruncated::D
+    lower::Float64
+    upper::Float64
+    nc::Float64
+    function Truncated{T<:UnivariateDistribution}(d::T, l::Real, u::Real, nc::Real)
+        if l >= u
+            error("upper must be > lower")
         end
-        function ($new_dname)(d::$dname, l::Real, u::Real)
-            return ($new_dname)(d, l, u, cdf(d, u) - cdf(d, l))
-        end
+        new(d, float64(l), float64(u), float64(nc))
     end
 end
+Truncated(d::UnivariateDistribution, l::Real, u::Real, nc::Real) = Truncated{typeof(d)}(d,l,u,nc)
+Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated{typeof(d)}(d,l,u, cdf(d, u) - cdf(d, l))
 
-function insupport(d::TruncatedUnivariateDistribution, x::Number)
+
+function insupport(d::Truncated, x::Number)
     return x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 end
 
-function pdf(d::TruncatedUnivariateDistribution, x::Real)
+function pdf(d::Truncated, x::Real)
     if !insupport(d, x)
         return 0.0
     else
@@ -42,7 +27,7 @@ function pdf(d::TruncatedUnivariateDistribution, x::Real)
     end
 end
 
-function logpdf(d::TruncatedUnivariateDistribution, x::Real)
+function logpdf(d::Truncated, x::Real)
     if !insupport(d, x)
         return -Inf
     else
@@ -50,7 +35,7 @@ function logpdf(d::TruncatedUnivariateDistribution, x::Real)
     end
 end
 
-function cdf(d::TruncatedUnivariateDistribution, x::Real)
+function cdf(d::Truncated, x::Real)
     if x < d.lower
         return 0.0
     elseif x > d.upper
@@ -60,19 +45,28 @@ function cdf(d::TruncatedUnivariateDistribution, x::Real)
     end
 end
 
-function quantile(d::TruncatedUnivariateDistribution, p::Real)
+function quantile(d::Truncated, p::Real)
     top = cdf(d.untruncated, d.upper)
     bottom = cdf(d.untruncated, d.lower)
     return quantile(d.untruncated, bottom + p * (top - bottom))
 end
 
-median(d::TruncatedUnivariateDistribution) = quantile(d, 0.5)
+median(d::Truncated) = quantile(d, 0.5)
 
-function rand(d::TruncatedUnivariateDistribution)
+function rand(d::Truncated)
     while true
         r = rand(d.untruncated)
         if d.lower <= r <= d.upper
             return r
         end
     end
+end
+
+# from fallbacks
+function rand{D<:ContinuousUnivariateDistribution}(d::Truncated{D}, dims::Dims)
+    return rand!(d, Array(Float64, dims))
+end
+
+function rand{D<:DiscreteUnivariateDistribution}(d::Truncated{D}, dims::Dims)
+    return rand!(d, Array(Int, dims))
 end
