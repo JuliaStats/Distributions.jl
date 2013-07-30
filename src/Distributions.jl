@@ -102,6 +102,7 @@ export                                  # types
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
+    posterior,     # Bayesian updating
     sqmahal,       # squared Mahalanobis distance to Gaussian center
     sqmahal!,      # inplace evaluation of sqmahal
     mean,          # mean of distribution
@@ -234,5 +235,7 @@ include("kde.jl")
 
 # Expectations, entropy, KL divergence
 include("functionals.jl")
+
+include("conjugates.jl")
 
 end # module
