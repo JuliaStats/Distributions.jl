@@ -11,6 +11,9 @@ end
 Gamma(sh::Real) = Gamma(sh, 1.0)
 Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 
+scale(d::Gamma) = d.scale
+rate(d::Gamma) = 1.0 / d.scale
+
 @_jl_dist_2p Gamma gamma
 
 function entropy(d::Gamma)

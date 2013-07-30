@@ -16,6 +16,9 @@ immutable InvertedGamma <: ContinuousUnivariateDistribution
     end
 end
 
+scale(d::InvertedGamma) = d.scale
+rate(d::InvertedGamma) = 1.0 / d.scale
+
 insupport(::InvertedGamma, x::Real) = zero(x) <= x < Inf
 insupport(::Type{InvertedGamma}, x::Real) = zero(x) <= x < Inf
 

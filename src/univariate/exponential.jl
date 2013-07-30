@@ -8,6 +8,9 @@ end
 
 Exponential() = Exponential(1.0)
 
+scale(d::Exponential) = d.scale
+rate(d::Exponential) = 1.0 / d.scale
+
 cdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -expm1(-q / d.scale)
 
 function logcdf(d::Exponential, q::Real)

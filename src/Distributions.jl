@@ -103,6 +103,8 @@ export                                  # types
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
     posterior,     # Bayesian updating
+    scale,         # scale parameter of a distribution
+    rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
     sqmahal!,      # inplace evaluation of sqmahal
     mean,          # mean of distribution
@@ -126,7 +128,7 @@ export                                  # types
     var,           # variance of distribution
     wsample        # weighted sampling from a source array
 
-import Base.mean, Base.median, Base.quantile, Base.max, Base.min
+import Base.mean, Base.median, Base.quantile, Base.max, Base.min, Base.scale
 import Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
