@@ -151,6 +151,7 @@ typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMul
 typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
 
 abstract SufficientStats
+abstract GenerativeFormulation
 
 include("constants.jl")
 
