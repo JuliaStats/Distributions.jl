@@ -23,13 +23,19 @@ begin
     logφ{T<:FloatingPoint}(z::T) = -0.5*(z*z + log2π)
     logpdf(d::Normal, x::FloatingPoint) = logφ(zval(d,x)) - log(d.σ)
 
-    Φ{T<:FloatingPoint}(z::T) = 0.5 + 0.5*erf(z/√2)
+    Φ{T<:FloatingPoint}(z::T) = 0.5*erfc(-z/√2)
     cdf(d::Normal, x::FloatingPoint) = Φ(zval(d,x))
 
     Φc{T<:FloatingPoint}(z::T) = 0.5*erfc(z/√2)
     ccdf(d::Normal, x::FloatingPoint) = Φc(zval(d,x))
 
-    Φinv{T<:FloatingPoint}(p::T) = √2 * erfinv(2p - 1)
+    logΦ(z) = z < -1.0 ? log(erfcx(-z/√2))-log(2.0)-0.5*z*z : log1p(-0.5*erfc(z/√2))
+    logcdf(d::Normal, x::FloatingPoint) = logΦ(zval(d,x))
+
+    logΦc(z) = z > 1.0 ? log(erfcx(z/√2))-log(2.0)-0.5*z*z : log1p(-0.5*erfc(-z/√2))
+    logccdf(d::Normal, x::FloatingPoint) = logΦc(zval(d,x))    
+    
+    Φinv{T<:FloatingPoint}(p::T) = -√2 * erfcinv(2p)
     quantile(d::Normal, p::FloatingPoint) = xval(d, Φinv(p))
 
     Φcinv{T<:FloatingPoint}(p::T) = √2 * erfcinv(2p)
