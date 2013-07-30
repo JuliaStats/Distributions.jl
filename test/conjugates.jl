@@ -6,8 +6,7 @@ newprior = posterior(Beta(1, 1), Bernoulli, x)
 @test_approx_eq_eps mean(newprior) 0.3 0.1
 
 x = rand(Binomial(10, 0.3), 10_000)
-X = hcat(x, [10 for i in 1:10_000])
-newprior = posterior(Beta(1, 1), Binomial, X)
+newprior = posterior(Beta(1, 1), Binomial, 10, x)
 @test_approx_eq_eps mean(newprior) 0.3 0.1
 
 x = rand(Categorical([0.5, 0.25, 0.25]), 10_000)
