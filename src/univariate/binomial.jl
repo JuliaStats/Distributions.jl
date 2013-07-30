@@ -79,8 +79,8 @@ end
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
     ns = zero(T)
     for xi in x
-	0 <= xi <= n || throw(DomainError())
-	ns += xi
+        0 <= xi <= n || throw(DomainError())
+        ns += xi
     end
     BinomialStats(ns, length(x), n)
 end
@@ -89,11 +89,11 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Arr
     ns = 0.
     ne = 0.
     for i = 1:length(x)
-	xi = x[i]
-	0 <= xi <= n || throw(DomainError())
-	wi = w[i]
-	ns += xi * wi
-	ne += wi
+        xi = x[i]
+        0 <= xi <= n || throw(DomainError())
+        wi = w[i]
+        ns += xi * wi
+        ne += wi
     end
     BinomialStats(ns, ne, n)
 end
