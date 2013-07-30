@@ -53,7 +53,7 @@ end
 function randnt(lower::Real, upper::Real)
     if (lower <= 0 && upper == Inf) ||
        (upper >= 0 && lower == Inf) ||
-       (lower <= 0 && upper >= 0 && upper - lower > sqrt(2.0 * pi))
+       (lower <= 0 && upper >= 0 && upper - lower > √2π)
         while true
             r = randn()
             if r > lower && r < upper

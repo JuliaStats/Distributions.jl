@@ -29,6 +29,7 @@ macro ignore_methoderror(ex)
     end
 end
 
+
 for d in [Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
@@ -116,9 +117,9 @@ for d in [Arcsine(),
           Triangular(3.0, 1.0),
           Triangular(3.0, 2.0),
           Triangular(10.0, 10.0),
-          # Truncated(Normal(0, 1), -3, 3),
+          Truncated(Normal(0, 1), -3, 3),
           # Truncated(Normal(-100, 1), 0, 1),
-          # Truncated(Normal(27, 3), 0, Inf),
+          Truncated(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
@@ -181,7 +182,7 @@ for d in [Arcsine(),
     end
         
     # Kolmogorov-Smirnov test
-    if isa(d, ContinuousDistribution)
+    if isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
         c = cdf(d,x)
         sort!(c)
         for i = 1:n_samples
