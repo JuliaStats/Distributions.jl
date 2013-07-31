@@ -221,5 +221,102 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64})
     NormalStats(s, m, s2, tw)
 end
 
+# Cases where μ or σ is known
+
+immutable NormalKnownMu <: GenerativeFormulation
+    μ::Float64
+end
+
+immutable NormalKnownMuStats
+    s2::Float64     # (weighted) sum of (x - μ)^2
+    tw::Float64     # total sample weight
+end
+
+function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
+    μ = g.μ
+    s2 = abs2(x[1] - μ)
+    for i = 2:n
+        @inbounds s2 += abs2(x[i] - μ)
+    end
+    NormalKnownMuStats(s2, float64(length(x)))
+end
+
+function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
+    μ = g.μ
+    s2 = abs2(x[1] - μ)
+    tw = w[1]
+    for i = 2:n
+        @inbounds wi = w[i]        
+        @inbounds s2 += abs2(x[i] - μ) * wi
+        tw += wi
+    end
+    NormalKnownMuStats(s2, tw)
+end
+
+
+immutable NormalKnownSigma <: GenerativeFormulation
+    σ::Float64
+
+    function NormalKnownSigma(σ::Float64)
+        σ > 0.0 || throw(ArgumentError("σ must be a positive value."))
+        new(σ)
+    end
+end
+
+immutable NormalKnownSigmaStats
+    s::Float64      # (weighted) sum of x
+    tw::Float64     # total sample weight
+end
+
+function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T})
+    NormalKnownSigmaStats(sum(x), float64(length(x)))    
+end
+
+function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T}, w::Array{T})
+    NormalKnownSigmaStats(dot(x, w), sum(w))    
+end
+
+# fit_mle based on sufficient statistics
+
 fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
+fit_mle(g::NormalKnownMu, ss::NormalKnownMuStats) = Normal(g.μ, ss.s2 / ss.tw)
+fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.s / ss.tw, g.σ)
+
+# generic fit_mle methods
+
+function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}; mu::Float64=NaN, sigma::Float64=NaN)
+    if isnan(mu)
+        if isnan(sigma)
+            fit_mle(Normal, suffstats(Normal, x))
+        else
+            g = NormalKnownSigma(sigma)
+            fit_mle(g, suffstats(g, x)) 
+        end
+    else
+        if isnan(sigma)
+            g = NormalKnownMu(mu)
+            fit_mle(g, suffstats(g, x))
+        else
+            Normal(mu, sigma)
+        end
+    end    
+end
+
+function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}; mu::Float64=NaN, sigma::Float64=NaN)
+    if isnan(mu)
+        if isnan(sigma)
+            fit_mle(Normal, suffstats(Normal, x, w))
+        else
+            g = NormalKnownSigma(sigma)
+            fit_mle(g, suffstats(g, x, w)) 
+        end
+    else
+        if isnan(sigma)
+            g = NormalKnownMu(mu)
+            fit_mle(g, suffstats(g, x, w))
+        else
+            Normal(mu, sigma)
+        end
+    end    
+end
 
