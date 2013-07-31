@@ -24,12 +24,21 @@ end
 
 # Store both grid and density for KDE over the real line
 immutable UnivariateKDE
-    x::Vector
-    density::Vector
+    x::Vector{Float64}
+    density::Vector{Float64}
+end
+
+# Store both grid and density for KDE over R2
+immutable BivariateKDE
+    x::Vector{Float64}
+    y::Vector{Float64}
+    density::Matrix{Float64}
 end
 
 # Algorithm AS 176 for calculating univariate KDE
-function kde(data::Vector, window::Float64, npoints::Integer = 512)
+function kde{T <: Real}(data::Vector{T},
+                        window::Real = bandwidth(data),
+                        npoints::Integer = 2048)
     # Determine length of data
     ndata = length(data)
 
@@ -91,4 +100,44 @@ function kde(data::Vector, window::Float64, npoints::Integer = 512)
     return UnivariateKDE(x, density)
 end
 
-kde(data::Vector) = kde(data, bandwidth(data), 512)
+# Algorithm from MASS Chapter 5 for calculating 2D KDE
+function kde{S <: Real, T <: Real}(x::Vector{S},
+                                   y::Vector{T};
+                                   h::Real = NaN,
+                                   resolution::Integer = 25)
+    n = length(x)
+
+    if length(y) != n
+        error("x and y must have the same length")
+    end
+
+    if isnan(h)
+        h1 = bandwidth(x)
+        h2 = bandwidth(y)
+    else
+        h1 = h
+        h2 = h
+    end
+
+    min_x, max_x = minmax(x)
+    min_y, max_y = minmax(y)
+
+    grid_x = [min_x:((max_x - min_x) / (resolution - 1)):max_x]
+    grid_y = [min_y:((max_y - min_y) / (resolution - 1)):max_y]
+
+    mx = Array(Float64, resolution, n)
+    my = Array(Float64, resolution, n)
+    for i in 1:resolution
+        for j in 1:n
+            mx[i, j] = pdf(Normal(), (grid_x[i] - x[j]) / h1)
+            my[i, j] = pdf(Normal(), (grid_y[i] - y[j]) / h2)
+        end
+    end
+
+    z = A_mul_Bt(mx, my)
+    for i in 1:(resolution^2)
+        z[i] /= (n * h1 * h2)
+    end
+
+    return BivariateKDE(grid_x, grid_y, z)
+end
