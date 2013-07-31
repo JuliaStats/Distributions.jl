@@ -228,6 +228,7 @@ immutable NormalKnownMu <: GenerativeFormulation
 end
 
 immutable NormalKnownMuStats
+    μ::Float64      # known mean
     s2::Float64     # (weighted) sum of (x - μ)^2
     tw::Float64     # total sample weight
 end
@@ -238,7 +239,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
     for i = 2:n
         @inbounds s2 += abs2(x[i] - μ)
     end
-    NormalKnownMuStats(s2, float64(length(x)))
+    NormalKnownMuStats(g.μ, s2, float64(length(x)))
 end
 
 function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
@@ -250,7 +251,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi
     end
-    NormalKnownMuStats(s2, tw)
+    NormalKnownMuStats(g.μ, s2, tw)
 end
 
 
@@ -264,16 +265,17 @@ immutable NormalKnownSigma <: GenerativeFormulation
 end
 
 immutable NormalKnownSigmaStats
+    σ::Float64      # known std.dev
     s::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T})
-    NormalKnownSigmaStats(sum(x), float64(length(x)))    
+    NormalKnownSigmaStats(g.σ, sum(x), float64(length(x)))    
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T}, w::Array{T})
-    NormalKnownSigmaStats(dot(x, w), sum(w))    
+    NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))    
 end
 
 # fit_mle based on sufficient statistics
