@@ -71,6 +71,7 @@ export                                  # types
     Uniform,
     Weibull,
     Wishart,
+    QQPair,
                                         # methods
     binaryentropy, # entropy of distribution in bits
     ccdf,          # complementary cdf, i.e. 1 - cdf
@@ -117,6 +118,7 @@ export                                  # types
     pdf,           # probability density function (ContinuousDistribution)
     pmf,           # probability mass function (DiscreteDistribution)
     quantile,      # inverse of cdf (defined for p in (0,1))
+    qqbuild,       # build a paired quantiles data structure for qqplots
     rand,          # random sampler
     rand!,         # replacement random sampler
     sample,        # sample from a source array
@@ -240,5 +242,7 @@ include("kde.jl")
 include("functionals.jl")
 
 include("conjugates.jl")
+
+include("qq.jl")
 
 end # module
