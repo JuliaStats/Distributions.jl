@@ -88,37 +88,47 @@ function posterior(prior::Gamma, ss::ExponentialStats)
 end
 
 
-### TODO: explore ways to deal with Normal
 
-# Normal(μ0, σ0) prior on μ
-# Known generative standard deviation σ
-# Normal likelihood
-function posterior{T <: Real}(prior::Normal,
-	                          σ::Real,
-	                          ::Type{Normal},
-	                          x::Vector{T})
-	n = length(x)
-	μ0, σ0 = mean(prior), std(prior)
-	τ = 1 / σ0^2 + n / σ^2
-	μ1 = (μ0 / σ0^2 + sum(x) / σ^2) / τ
+### For Normal distributions
+
+function posterior(prior::Normal, ss::NormalKnownSigmaStats)
+	μ0 = prior.μ
+	c0 = 1.0 / abs2(prior.σ)
+	c1 = 1.0 / abs2(ss.σ)
+
+	τ = c0 + ss.tw * c1
+	μ1 = (μ0 * c0 + ss.s * c1) / τ
 	σ1 = sqrt(1 / τ)
-	return Normal(μ1, σ1)
+	return Normal(μ1, σ1)	
 end
 
-# Known generative variance μ
-# InvertedGamma(α, β) prior on σ
-# Normal likelihood
-function posterior{T <: Real}(μ::Real,
-	                          prior::InvertedGamma,
-	                          ::Type{Normal},
-	                          x::Vector{T})
-	n = length(x)
-	α0, β0 = prior.shape, 1 / prior.scale
-	sqsum = 0.0
-	for i in 1:n
-		sqsum += (x[i] - μ)^2
-	end
-	α1 = α0 + n / 2
-	β1 = β0 + sqsum / 2
-	return InvertedGamma(α1, 1 / β1)
+function posterior(prior::InvertedGamma, ss::NormalKnownMuStats)
+	α1 = prior.shape + ss.tw / 2
+	β1 = rate(prior) + ss.s2 / 2
+	return InvertedGamma(α1, 1.0 / β1)
 end
+
+function posterior{T<:Real}(prior::(Normal, Float64), ::Type{Normal}, x::Array{T}) 
+	pri_μ::Normal = prior[1]
+	σ::Float64 = prior[2]
+	posterior(pri_μ, suffstats(NormalKnownSigma(σ), x))
+end
+
+function posterior{T<:Real}(prior::(Normal, Float64), ::Type{Normal}, x::Array{T}, w::Array{Float64}) 
+	pri_μ::Normal = prior[1]
+	σ::Float64 = prior[2]
+	posterior(pri_μ, suffstats(NormalKnownSigma(σ), x, w))
+end
+
+function posterior{T<:Real}(prior::(Float64, InvertedGamma), ::Type{Normal}, x::Array{T}) 
+	μ::Float64 = prior[1]
+	pri_σ::InvertedGamma = prior[2]
+	posterior(pri_σ, suffstats(NormalKnownMu(μ), x))
+end
+
+function posterior{T<:Real}(prior::(Float64, InvertedGamma), ::Type{Normal}, x::Array{T}, w::Array{Float64}) 
+	μ::Float64 = prior[1]
+	pri_σ::InvertedGamma = prior[2]
+	posterior(pri_σ, suffstats(NormalKnownMu(μ), x, w))
+end
+

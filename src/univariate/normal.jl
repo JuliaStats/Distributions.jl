@@ -236,7 +236,7 @@ end
 function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
     μ = g.μ
     s2 = abs2(x[1] - μ)
-    for i = 2:n
+    for i = 2:length(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
     NormalKnownMuStats(g.μ, s2, float64(length(x)))
@@ -244,9 +244,9 @@ end
 
 function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
     μ = g.μ
-    s2 = abs2(x[1] - μ)
+    s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
-    for i = 2:n
+    for i = 2:length(x)
         @inbounds wi = w[i]        
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi

@@ -33,7 +33,6 @@ p = posterior(pri, Bernoulli, x)
 @test_approx_eq p.alpha pri.alpha + sum(x)
 @test_approx_eq p.beta  pri.beta + (n - sum(x))
 
-x = rand(Bernoulli(0.3), n)
 p = posterior(pri, Bernoulli, x, w)
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x .* w)
@@ -45,7 +44,6 @@ p = posterior(pri, Binomial, 10, x)
 @test_approx_eq p.alpha pri.alpha + sum(x)
 @test_approx_eq p.beta  pri.beta + (10n - sum(x))
 
-x = rand(Binomial(10, 0.3), n)
 p = posterior(pri, Binomial, 10, x, w)
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x .* w)
@@ -60,7 +58,6 @@ p = posterior(pri, Categorical, x)
 @test isa(p, Dirichlet)
 @test_approx_eq p.alpha pri.alpha + ccount(3, x)
 
-x = rand(Categorical([0.2, 0.3, 0.5]), n)
 p = posterior(pri, Categorical, x, w)
 @test isa(p, Dirichlet)
 @test_approx_eq p.alpha pri.alpha + ccount(3, x, w)
@@ -75,7 +72,6 @@ p = posterior(pri, Multinomial, x)
 @test isa(p, Dirichlet)
 @test_approx_eq p.alpha pri.alpha + vec(sum(x, 2))
 
-x = rand(Multinomial(10, [0.2, 0.3, 0.5]), n)
 p = posterior(pri, Multinomial, x, w)
 @test isa(p, Dirichlet)
 @test_approx_eq p.alpha pri.alpha + vec(x * w)
@@ -91,7 +87,6 @@ p = posterior(pri, Exponential, x)
 @test_approx_eq p.shape pri.shape + n
 @test_approx_eq rate(p) rate(pri) + sum(x)
 
-x = rand(Exponential(2.0), n)
 p = posterior(pri, Exponential, x, w)
 @test isa(p, Gamma)
 @test_approx_eq p.shape pri.shape + sum(w)
@@ -100,11 +95,28 @@ p = posterior(pri, Exponential, x, w)
 
 # Normal likelihood
 
-# x = rand(Normal(1.7, 3.0), 10_000)
-# newprior = posterior(Normal(0.0, 1.0), 3.0, Normal, x)
-# @test_approx_eq_eps mean(newprior) 1.7 0.1
+pri = Normal(1.0, 5.0)
 
-# x = rand(Normal(1.7, 3.0), 10_000)
-# newprior = posterior(1.7, InvertedGamma(1.0, 1.0), Normal, x)
-# @test_approx_eq_eps sqrt(mean(newprior)) 3.0 0.1
+x = rand(Normal(2.0, 3.0), n)
+p = posterior((pri, 3.0), Normal, x)
+@test isa(p, Normal)
+@test_approx_eq mean(p)  (mean(pri) / var(pri) + sum(x) / 9.0) / (1.0 / var(pri) + n / 9.0)
+@test_approx_eq var(p) inv(1.0 / var(pri) + n / 9.0)
 
+p = posterior((pri, 3.0), Normal, x, w)
+@test isa(p, Normal)
+@test_approx_eq mean(p)  (mean(pri) / var(pri) + dot(x, w) / 9.0) / (1.0 / var(pri) + sum(w) / 9.0)
+@test_approx_eq var(p) inv(1.0 / var(pri) + sum(w) / 9.0)
+
+pri = InvertedGamma(1.5, 0.5) # β = 2.0
+
+x = rand(Normal(2.0, 3.0), n)
+p = posterior((2.0, pri), Normal, x)
+@test isa(p, InvertedGamma)
+@test_approx_eq p.shape pri.shape + n / 2
+@test_approx_eq rate(p) rate(pri) + sum(abs2(x - 2.0)) / 2
+
+p = posterior((2.0, pri), Normal, x, w)
+@test isa(p, InvertedGamma)
+@test_approx_eq p.shape pri.shape + sum(w) / 2
+@test_approx_eq rate(p) rate(pri) + dot(w, abs2(x - 2.0)) / 2
