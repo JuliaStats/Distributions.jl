@@ -161,6 +161,7 @@ include("constants.jl")
 
 include("fallbacks.jl")
 include("rmath.jl")
+include("specialfuns.jl")
 include("tvpack.jl")
 include("utils.jl")
 
