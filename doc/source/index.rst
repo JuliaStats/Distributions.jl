@@ -1,22 +1,32 @@
-.. Distributions.jl documentation master file, created by
-   sphinx-quickstart on Wed Jul 31 21:03:24 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Distributions Package (version 0.2)
+====================================
 
-Welcome to Distributions.jl's documentation!
-============================================
+The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
 
-Contents:
+* Moments (*e.g* mean, variance, skewness, and kurtosis), entropy, and other properties
+* Probability density/mass functions (pdf) and their logarithm (logpdf)
+* Moment generating functions and characteristic functions
+* Sampling from population or from a distribution
+* Maximum likelihood estimation
+* Posterior *w.r.t.* conjugate prior, and Maximum-A-Posteriori (MAP) estimation
+
+**Contents:**
 
 .. toctree::
    :maxdepth: 2
 
+   distributions.rst
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+
+
+
+.. Indices and tables
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
