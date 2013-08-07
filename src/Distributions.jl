@@ -3,7 +3,15 @@ module Distributions
 using NumericExtensions
 using Stats
 
-export                                  # types
+export                                  
+    # types
+    VariateForm,
+    ValueSupport,
+    Univariate,
+    Multivariate,
+    Matrixvariate,
+    Discrete,
+    Continuous,
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
@@ -72,7 +80,8 @@ export                                  # types
     Weibull,
     Wishart,
     QQPair,
-                                        # methods
+
+    # methods
     binaryentropy, # entropy of distribution in bits
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
@@ -136,26 +145,40 @@ import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
 import Stats.kurtosis, Stats.skewness, Stats.mode, Stats.modes
 
-abstract Distribution
-abstract UnivariateDistribution             <: Distribution
-abstract MultivariateDistribution           <: Distribution
-abstract MatrixDistribution                 <: Distribution
 
-abstract DiscreteUnivariateDistribution     <: UnivariateDistribution
-abstract ContinuousUnivariateDistribution   <: UnivariateDistribution
+#### Distribution type system
 
-abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
-abstract ContinuousMultivariateDistribution <: MultivariateDistribution
+abstract ValueSupport
+type Discrete <: ValueSupport end
+type Continuous <: ValueSupport end
 
-abstract ContinuousMatrixDistribution       <: MatrixDistribution
-abstract DiscreteMatrixDistribution         <: MatrixDistribution
+abstract VariateForm
+type Univariate <: VariateForm end
+type Multivariate <: VariateForm end
+type Matrixvariate <: VariateForm end
 
+abstract Distribution{F<:VariateForm,S<:ValueSupport}
+
+typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
+typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
+typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
 typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
-typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
-typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
+
+typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
+typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
+
+typealias DiscreteUnivariateDistribution     Distribution{Univariate,    Discrete}
+typealias ContinuousUnivariateDistribution   Distribution{Univariate,    Continuous}
+typealias DiscreteMultivariateDistribution   Distribution{Multivariate,  Discrete}
+typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
+typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
+typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
 abstract SufficientStats
 abstract GenerativeFormulation
+
+
+#### Include files
 
 include("constants.jl")
 

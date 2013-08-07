@@ -1,5 +1,5 @@
 
-immutable Truncated{D<:UnivariateDistribution} <: UnivariateDistribution
+immutable Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}
     untruncated::D
     lower::Float64
     upper::Float64
@@ -11,9 +11,14 @@ immutable Truncated{D<:UnivariateDistribution} <: UnivariateDistribution
         new(d, float64(l), float64(u), float64(nc))
     end
 end
-Truncated(d::UnivariateDistribution, l::Real, u::Real, nc::Real) = Truncated{typeof(d)}(d,l,u,nc)
-Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated{typeof(d)}(d,l,u, cdf(d, u) - cdf(d, l))
 
+function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Real, nc::Real)
+    Truncated{typeof(d),S}(d,l,u,nc)
+end
+
+function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Real)
+    Truncated{typeof(d),S}(d,l,u, cdf(d, u) - cdf(d, l))
+end
 
 function insupport(d::Truncated, x::Number)
     return x >= d.lower && x <= d.upper && insupport(d.untruncated, x)

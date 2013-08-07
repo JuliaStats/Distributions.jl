@@ -1,5 +1,6 @@
 
 tests = [
+    "types",
 	"utils", 
 	"sample",
 	"fit", 
