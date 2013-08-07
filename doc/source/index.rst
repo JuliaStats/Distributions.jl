@@ -16,8 +16,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
    :maxdepth: 2
 
    distributions.rst
-
-
+   univariate.rst
 
 
 
