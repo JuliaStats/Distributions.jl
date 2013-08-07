@@ -57,10 +57,10 @@ quantile(d::Exponential, p::Real) = zero(p) <= p <= one(p) ? -d.scale * log1p(-p
 
 cquantile(d::Exponential, p::Real) = zero(p) <= p <= one(p) ? -d.scale * log(p) : NaN
 
-rand(d::Exponential) = d.scale * Random.randmtzig_exprnd()
+rand(d::Exponential) = d.scale * Base.Random.randmtzig_exprnd()
 
 function rand!(d::Exponential, A::Array{Float64})
-    Random.randmtzig_fill_exprnd!(A)
+    Base.Random.randmtzig_fill_exprnd!(A)
     for i in 1:length(A)
         A[i] *= d.scale
     end
