@@ -14,6 +14,68 @@ end
 #   Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
 for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
     @eval begin
+        function $fn($arg::Float32)
+            if $(fn == :Φinv)
+                q = p - 0.5f0
+            else
+                q = exp(logp) - 0.5f0
+            end
+            if abs(q) <= 0.425f0 
+                r = 0.180625f0 - q*q
+                return q * @horner(r,
+                                   3.38713_27179f0, 
+                                   5.04342_71938f1, 
+                                   1.59291_13202f2, 
+                                   5.91093_74720f1, 
+                                   ) /
+                @horner(r,
+                        1.0f0,
+                        1.78951_69469f1, 
+                        7.87577_57664f1, 
+                        6.71875_63600f1)  
+            else
+                if $(fn == :Φinv)
+                    if p <= 0f0
+                        return p == 0f0 ? -inf(Float32) : nan(Float32)
+                    elseif p >= 1f0 
+                        return p == 1f0 ? inf(Float32) : nan(Float32)
+                    end
+                    r = sqrt(q < 0f0 ? -log(p) : -log1p(-p))
+                else
+                    if logp == -Inf
+                        return -inf(Float32)
+                    elseif logp >= 0f0 
+                        return logp == 0f0 ? inf(Float32) : nan(Float32)
+                    end
+                    r = sqrt(qf0 < 0 ? -logp : -log(-expm1(logp)))
+                end
+                if r < 5.0f0
+                    r -= 1.6f0
+                    z = @horner(r,
+                                1.42343_72777f0, 
+                                2.75681_53900f0, 
+                                1.30672_84816f0, 
+                                1.70238_21103f-1) /
+                    @horner(r,
+                            1.0f0,
+                            7.37001_64250f-1, 
+                            1.20211_32975f-1)
+                else
+                    r -= 5.0f0
+                    z = @horner(r,
+                                6.65790_51150f0, 
+                                3.08122_63860f0, 
+                                4.28682_94337f-1, 
+                                1.73372_03997f-2) /
+                    @horner(r,
+                            1.0f0,
+                            2.41978_94225f-1, 
+                            1.22582_02635f-2) 
+                end
+                return copysign(z,q)
+            end
+        end
+
         function $fn($arg::Real)
             if $(fn == :Φinv)
                 q = p - 0.5
