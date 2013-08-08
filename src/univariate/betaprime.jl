@@ -22,7 +22,7 @@ insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
 
 function mean(d::BetaPrime)
     d.beta > 1.0 || error("mean not defined when beta <= 1")
-    d.alpha / (d.beta + 1.0)
+    d.alpha / (d.beta - 1.0)
 end
 
 mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
