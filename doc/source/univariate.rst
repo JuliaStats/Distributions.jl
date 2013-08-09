@@ -1,7 +1,152 @@
 Univariate Distributions
 ==========================
 
-*Univariate distributions* are the distributions whose samples are scalars (*e.g.* integers or real values). *Distributions* provides a large collection of univariate distributions, as listed below.
+*Univariate distributions* are the distributions whose samples are scalars (*e.g.* integers or real values). 
+
+
+Common Interface
+------------------
+
+A series of methods are implemented for each univariate distribution, which provide useful functionalities such as moment computation, pdf evaluation, and sampling (*i.e.* random number generation).
+
+
+Computation of statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. function:: mean(d)
+
+    Return the expectation of distribution d
+
+.. function:: var(d)
+
+    Return the variance of distribution d
+
+.. function:: std(d)
+
+    Return the standard deviation of distribution d, i.e. sqrt(var(d))
+
+.. function:: median(d)
+
+    Return the median value of distribution d
+
+.. function:: modes(d)    
+
+    Return an array of all modes of d. 
+
+.. function:: mode(d)
+
+    Return the mode of distribution d. If d has multiple modes, it returns the first one, i.e. modes(d)[1].
+
+.. function:: skewness(d)
+
+    Return the skewness of distribution d
+
+.. function:: kurtosis(d)
+
+    Return the excess kurtosis of distribution d
+
+.. function:: entropy(d)
+
+    Return the entropy value of distribution d
+
+.. function:: mgf(d, t)
+
+    Evaluate the moment generating function
+
+.. function:: cf(d, t)
+
+    Evaluate the characteristic function    
+
+
+Probability Evaluation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. function:: insupport(d, x)
+
+    When x is a scalar, it returns whether x is within the support of d. 
+    When x is an array, it returns whether every element in x is within the support of d. 
+
+.. function:: pdf(d, x)
+
+    The pdf value(s) evaluated at x.
+
+.. function:: logpdf(d, x)
+
+    The logarithm of the pdf value(s) evaluated at x, i.e. ``log(pdf(x))``. 
+
+    **Node:** The internal implementation may directly evaluate logpdf instead of first computing pdf and then taking the logarithm, for better numerical stability or efficiency.
+
+.. function:: cdf(d, x)
+
+    The cumulative distribution function evaluated at x.
+
+.. function:: logcdf(d, x)        
+
+    The logarithm of the cumulative function value(s) evaluated at x, i.e. ``log(cdf(x))``.
+
+.. function:: ccdf(d, x)
+
+    The complementary cumulative function evaluated at x, i.e. ``1 - cdf(d, x)``.
+
+.. function:: logccdf(d, x)
+
+    The logarithm of the complementary cumulative function values evaluated at x, i.e. ``log(ccdf(x))``.
+
+.. function:: quantile(d, q)
+
+    The quantile value. Let ``x = quantile(d, q)``, then ``cdf(d, x) = q``.
+
+.. function:: cquantile(d, q)
+
+    The complementary quantile value, i.e. ``quantile(d, 1-q)``.
+
+.. function:: invlogcdf(d, lp)
+
+    The inverse function of logcdf. 
+
+.. function:: invlogccdf(d, lp)
+
+    The inverse function of logccdf.    
+
+
+**Node:** Vectorized computation and inplace vectorized computation are supported for the following functions:
+
+* pdf
+* logpdf
+* cdf
+* logcdf
+* ccdf
+* logccdf
+* quantile
+* cquantile
+* invlogcdf
+* invlogccdf
+
+For example, when ``x`` is an array, then ``r = pdf(d, x)`` returns an array ``r`` of the same size, such that ``r[i] = pdf(d, x[i])``. One can also use ``pdf!`` to write results to pre-allocated storage, as ``pdf!(r, d, x)``. 
+
+
+Sampling (Random number generation)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. function:: rand(d)
+
+    Draw a sample from d
+
+.. function:: rand(d, n)
+
+    Return a vector comprised of n independent samples from d
+
+.. function:: rand(d, dims)
+
+    Return an array of size dims that is filled with independent samples from d.            
+
+.. function:: rand!(d, arr)
+
+    Fills a pre-allocated array arr with independent samples from d.
+
+
+
+*Distributions* provides a large collection of univariate distributions, as listed below.
 
 Discrete Distributions
 ------------------------
