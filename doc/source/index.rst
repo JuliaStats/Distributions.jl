@@ -17,6 +17,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
 
    distributions.rst
    univariate.rst
+   multivariate.rst
 
 
 
