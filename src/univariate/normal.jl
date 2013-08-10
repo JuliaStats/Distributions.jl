@@ -16,22 +16,12 @@ const Gaussian = Normal
 zval(d::Normal, x::Real) = (x - d.μ)/d.σ
 xval(d::Normal, z::Real) = d.μ + d.σ * z
 
-φ(z::Real) = exp(-0.5*z*z)/√2π
 pdf(d::Normal, x::Real) = φ(zval(d,x))/d.σ
-
-logφ(z::Real) = -0.5*(z*z + log2π)
 logpdf(d::Normal, x::Real) = logφ(zval(d,x)) - log(d.σ)
 
-Φ(z::Real) = 0.5*erfc(-z/√2)
 cdf(d::Normal, x::Real) = Φ(zval(d,x))
-
-Φc(z::Real) = 0.5*erfc(z/√2)
 ccdf(d::Normal, x::Real) = Φc(zval(d,x))
-
-logΦ(z::Real) = z < -1.0 ? log(0.5*erfcx(-z/√2)) - 0.5*z*z : log1p(-0.5*erfc(z/√2))
 logcdf(d::Normal, x::Real) = logΦ(zval(d,x))
-
-logΦc(z::Real) = z > 1.0 ? log(0.5*erfcx(z/√2)) - 0.5*z*z : log1p(-0.5*erfc(-z/√2))
 logccdf(d::Normal, x::Real) = logΦc(zval(d,x))    
 
 quantile(d::Normal, p::Real) = xval(d, Φinv(p))
