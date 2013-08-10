@@ -1,13 +1,14 @@
 # Special functions
 
-#import Base.Math.@horner
-macro horner(x, p...)
-    ex = p[end]
-    for i = length(p)-1:-1:1
-        ex = :($(p[i]) + $x * $ex)
-    end
-    ex
-end
+φ(z::Real) = exp(-0.5*z*z)/√2π
+logφ(z::Real) = -0.5*(z*z + log2π)
+
+Φ(z::Real) = 0.5*erfc(-z/√2)
+Φc(z::Real) = 0.5*erfc(z/√2)
+logΦ(z::Real) = z < -1.0 ? log(0.5*erfcx(-z/√2)) - 0.5*z*z : log1p(-0.5*erfc(z/√2))
+logΦc(z::Real) = z > 1.0 ? log(0.5*erfcx(z/√2)) - 0.5*z*z : log1p(-0.5*erfc(-z/√2))
+
+import Base.Math.@horner
 
 # Rational approximations for the inverse cdf, from:
 #   Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
