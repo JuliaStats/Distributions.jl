@@ -38,6 +38,25 @@ function cdf(d::InverseGaussian, x::Real)
     v = x/d.mu
     Φ(u*(v-1.0)) + exp(2.0*d.lambda/d.mu)*Φ(-u*(v+1.0))
 end
+function ccdf(d::InverseGaussian, x::Real)
+    u = sqrt(d.lambda/x)
+    v = x/d.mu
+    Φc(u*(v-1.0)) - exp(2.0*d.lambda/d.mu)*Φ(-u*(v+1.0))
+end
+function logcdf(d::InverseGaussian, x::Real)
+    u = sqrt(d.lambda/x)
+    v = x/d.mu
+    a = logΦ(u*(v-1.0)) 
+    b = 2.0*d.lambda/d.mu + logΦ(-u*(v+1.0))
+    a + log1p(exp(b-a))
+end
+function logccdf(d::InverseGaussian, x::Real)
+    u = sqrt(d.lambda/x)
+    v = x/d.mu
+    a = logΦc(u*(v-1.0)) 
+    b = 2.0*d.lambda/d.mu + logΦ(-u*(v+1.0))
+    a + log(-expm1(b-a))
+end
 
 function quantile(d::InverseGaussian, p::Real)
     if p <= 0.0 || p >= 1.0
