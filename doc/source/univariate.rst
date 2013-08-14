@@ -15,19 +15,19 @@ Computation of statistics
 
 .. function:: mean(d)
 
-    Return the expectation of distribution d
+    Return the expectation of distribution d.
 
 .. function:: var(d)
 
-    Return the variance of distribution d
+    Return the variance of distribution d.
 
 .. function:: std(d)
 
-    Return the standard deviation of distribution d, i.e. sqrt(var(d))
+    Return the standard deviation of distribution d, i.e. sqrt(var(d)).
 
 .. function:: median(d)
 
-    Return the median value of distribution d
+    Return the median value of distribution d.
 
 .. function:: modes(d)    
 
@@ -39,23 +39,23 @@ Computation of statistics
 
 .. function:: skewness(d)
 
-    Return the skewness of distribution d
+    Return the skewness of distribution d.
 
 .. function:: kurtosis(d)
 
-    Return the excess kurtosis of distribution d
+    Return the excess kurtosis of distribution d.
 
 .. function:: entropy(d)
 
-    Return the entropy value of distribution d
+    Return the entropy value of distribution d.
 
 .. function:: mgf(d, t)
 
-    Evaluate the moment generating function
+    Evaluate the moment generating function.
 
 .. function:: cf(d, t)
 
-    Evaluate the characteristic function    
+    Evaluate the characteristic function. 
 
 
 Probability Evaluation

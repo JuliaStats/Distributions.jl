@@ -3,6 +3,83 @@ Multivariate Distributions
 
 *Multivariate distributions* are probabilistic distributions whose samples are vectors. The *Distributions* package implements several commonly used multivariate distributions, including *Multinomial*, *Multivairate Normal* and *Dirichlet*.
 
+Common Interface
+------------------
+
+The methods listed as below are implemented for each multivariate distribution, which provides a consistent interface to work with multivariate distributions.
+
+Computation of statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. function:: dim(d)
+
+    Return the sample dimension.
+
+.. function:: mean(d)
+
+    Return the mean vector of distribution d.
+
+.. function:: var(d)
+
+    Return the vector of component-wise variances of distribution d.
+
+.. function:: cov(d)
+
+    Return the covariance matrix of distribution d.
+
+.. function:: cor(d)
+
+    Return the correlation matrix of distribution d.
+
+
+Probability evaluation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. function:: pdf(d, x)
+
+    Return the probability density evaluated at x.
+
+    - If x is a vector, it returns the result as a scalar. 
+    - If x is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
+
+
+.. function:: pdf!(r, d, x)
+
+    Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
+
+
+.. function:: logpdf(d, x)
+
+    Return the logarithm of probability density evaluated at x.
+
+    - If x is a vector, it returns the result as a scalar. 
+    - If x is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
+
+.. function:: logpdf!(r, d, x)
+
+    Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
+
+
+**Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
+
+
+Sampling
+~~~~~~~~~
+
+.. function:: rand(d)
+
+    Sample a vector from the distribution d.
+
+.. function:: rand(d, n)
+
+    Sample n vectors from the distribution d. This returns a matrix of size ``(dim(d), n)``, where each column is a sample.
+
+.. function:: rand!(d, x)
+
+    Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.     
+
+
+
 Multinomial Distribution
 ---------------------------
 
