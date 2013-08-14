@@ -109,7 +109,10 @@ Probability Evaluation
     The inverse function of logccdf.    
 
 
-**Node:** Vectorized computation and inplace vectorized computation are supported for the following functions:
+Vectorized evaluation
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Vectorized computation and inplace vectorized computation are supported for the following functions:
 
 * pdf
 * logpdf
