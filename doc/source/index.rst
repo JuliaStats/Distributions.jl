@@ -20,8 +20,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
    multivariate.rst
    matrix.rst
    sample.rst
-
-
+   fit.rst
 
 
 .. Indices and tables
