@@ -37,8 +37,8 @@ for d in [Arcsine(),
           Chisq(20.0),
           # Cosine(),
           # Empirical(),
-          Erlang(1),
-          Erlang(17.0),
+          # Erlang(1),
+          # Erlang(17.0),
           Exponential(1.0),
           Exponential(5.1),
           FDist(9, 9),
@@ -125,7 +125,6 @@ for d in [Arcsine(),
 
     # avoid checking high order moments for LogNormal and Logistic
     avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, Truncated)
-
     #####
     #
     #  Part 1: Capability of random number generation

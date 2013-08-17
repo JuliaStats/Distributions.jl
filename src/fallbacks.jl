@@ -69,6 +69,47 @@ logccdf(d::Distribution, q::Real) = log(ccdf(d,q))
 invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
 
+function quantile(d::ContinuousUnivariateDistribution, α::Real)
+
+    if α < 0 || α > 1 return NaN end
+    if α == 0 return 0.0 end
+    if α == 1 return 1.0 end
+
+    cc = 10eps()
+    e = sqrt(eps())
+    x = mode(d)
+    while true
+        dx = (cdf(d, x)::Float64 - α)/max(e,pdf(d, x)::Float64)
+        if abs(dx) < cc 
+            x -= dx
+            return x
+        end
+        t = x - dx
+        while !insupport(d, t)
+            dx *= 0.5
+            t = x - dx
+        end
+        x = t
+    end
+end
+
+function quantile(d::DiscreteUnivariateDistribution, α::Real)
+    if α < 0 || α > 1 return NaN end
+    if α == 0 return 0 end
+    if α == 1 return d.size end
+    qc = itrunc(quantile(Normal(mean(d), std(d)), α))
+    if α < cdf(d, qc)
+        qc -= 1
+        while α < cdf(d, qc)
+            qc -= 1
+        end
+        return qc + 1
+    end
+    while α > cdf(d, qc)
+        qc += 1
+    end
+    return qc
+end
 
 #### insupport ####
 
@@ -102,6 +143,7 @@ function insupport(d::MatrixDistribution, X::Array)
     return true
 end
 
+rand(d::UnivariateDistribution) = quantile(d, rand())
 
 #### log likelihood ####
 
