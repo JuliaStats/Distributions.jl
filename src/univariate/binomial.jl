@@ -16,6 +16,12 @@ max(d::Binomial) = d.size
 
 @_jl_dist_2p Binomial binom
 
+function cdf(d::Binomial, x::Real)
+    if x >= d.size return 1.0 end
+    if x < 0 return 0.0 end
+    return cdf(Beta(d.size - x, x + 1.0), 1.0 - d.prob)
+end
+
 function entropy(d::Binomial; approx::Bool=false)
     n = d.size
     p1 = d.prob
@@ -35,14 +41,9 @@ function entropy(d::Binomial; approx::Bool=false)
 end
 
 insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
-
 kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 mean(d::Binomial) = d.size * d.prob
-
-median(d::Binomial) = iround(d.size * d.prob)
-
-# TODO: May need to subtract 1 sometimes
 mode(d::Binomial) = iround((d.size + 1.0) * d.prob)
 modes(d::Binomial) = [mode(d)]
 
@@ -56,7 +57,7 @@ function cf(d::Binomial, t::Real)
     (1.0 - p + p * exp(im * t))^d.size
 end
 
-modes(d::Binomial) = iround([d.size * d.prob])
+pdf(d::Binomial, x::Real) = insupport(d,x) ? pdf(Beta(d.size - x + 1.0, x + 1.0), 1 - d.prob)::Float64/(d.size + 1) : 0.0
 
 # TODO: rand() is totally screwed up
 
@@ -109,5 +110,3 @@ function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array
 end
 
 fit(::Type{Binomial}, n::Integer, x::Array) = fit_mle(Binomial, n, x)
-
-
