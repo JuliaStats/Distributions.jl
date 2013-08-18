@@ -154,7 +154,7 @@ function wsample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
     a[i]
 end
 
-wsample{W<:FloatingPoint}(a::AbstractArray, w::AbstractArray{Float64}) = wsample(a, w, sum(w))
+wsample(a::AbstractArray, w::AbstractArray{Float64}) = wsample(a, w, sum(w))
 
 function wsample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray; 
     wsum::Float64=NaN)

@@ -264,26 +264,26 @@ fit{D <: Distribution}(dt::Type{D}, x::Array) = fit_mle(D, x)
 # Conjugates
 
 posterior{D<:Distribution}(pri::Distribution, G::Type{D}, x) = posterior(pri, suffstats(G, x))
-posterior{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x) = posterior(pri, suffstats(G, x))
+posterior(pri::Distribution, G::GenerativeFormulation, x) = posterior(pri, suffstats(G, x))
 
 posterior{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = posterior(pri, suffstats(G, x, w))
-posterior{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x, w) = posterior(pri, suffstats(G, x, w))
+posterior(pri::Distribution, G::GenerativeFormulation, x, w) = posterior(pri, suffstats(G, x, w))
 
-posterior_rand{D<:Distribution}(pri::Distribution, s::SufficientStats) = rand(posterior(pri, s))
+posterior_rand(pri::Distribution, s::SufficientStats) = rand(posterior(pri, s))
 posterior_rand{D<:Distribution}(pri::Distribution, G::Type{D}, x) = rand(posterior(pri, G, x))
 posterior_rand{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = rand(posterior(pri, G, x, w))
-posterior_rand{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x) = rand(posterior(pri, G, x))
-posterior_rand{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x, w) = rand(posterior(pri, G, x, w))
+posterior_rand(pri::Distribution, G::GenerativeFormulation, x) = rand(posterior(pri, G, x))
+posterior_rand(pri::Distribution, G::GenerativeFormulation, x, w) = rand(posterior(pri, G, x, w))
 
-posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, s::SufficientStats) = rand!(posterior(pri, s), r)
+posterior_rand!(r::Array, pri::Distribution, s::SufficientStats) = rand!(posterior(pri, s), r)
 posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::Type{D}, x) = rand!(posterior(pri, G, x), r)
 posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::Type{D}, x, w) = rand!(posterior(pri, G, x, w), r)
-posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::GenerativeFormulation, x) = rand!(posterior(pri, G, x), r)
-posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::GenerativeFormulation, x, w) = rand!(posterior(pri, G, x, w), r)
+posterior_rand!(r::Array, pri::Distribution, G::GenerativeFormulation, x) = rand!(posterior(pri, G, x), r)
+posterior_rand!(r::Array, pri::Distribution, G::GenerativeFormulation, x, w) = rand!(posterior(pri, G, x, w), r)
 
-posterior_mode{D<:Distribution}(pri::Distribution, s::SufficientStats) = mode(posterior(pri, s))
+posterior_mode(pri::Distribution, s::SufficientStats) = mode(posterior(pri, s))
 posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x) = mode(posterior(pri, G, x))
 posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = mode(posterior(pri, G, x, w))
-posterior_mode{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x) = mode(posterior(pri, G, x))
-posterior_mode{D<:Distribution}(pri::Distribution, G::GenerativeFormulation, x, w) = mode(posterior(pri, G, x, w))
+posterior_mode(pri::Distribution, G::GenerativeFormulation, x) = mode(posterior(pri, G, x))
+posterior_mode(pri::Distribution, G::GenerativeFormulation, x, w) = mode(posterior(pri, G, x, w))
 
