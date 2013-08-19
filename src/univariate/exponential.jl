@@ -13,21 +13,13 @@ rate(d::Exponential) = 1.0 / d.scale
 
 cdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -expm1(-q / d.scale)
 
-function logcdf(d::Exponential, q::Real)
-    if q > zero(q)
-        qs = -q / d.scale
-        return qs > log(0.5) ? log(-expm1(qs)) : log1p(-exp(qs))
-    end
-    -Inf
-end
+logcdf(d::Exponential, q::Real) = q > zero(q) ? log1mexp(-q / d.scale) : -Inf
 
 ccdf(d::Exponential, q::Real) = q <= zero(q) ? 1.0 : exp(-q / d.scale)
 
 logccdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -q / d.scale
 
-function invlogcdf(d::Exponential, lp::Real)
-    lp > zero(lp) ? NaN : -d.scale * (lp > log(0.5) ? log(-expm1(lp)) : log1p(-exp(lp)))
-end
+invlogcdf(d::Exponential, lp::Real) = lp > zero(lp) ? NaN : -d.scale * log1mexp(lp)
 
 invlogccdf(d::Exponential, lp::Real) = lp <= zero(lp) ? -d.scale * lp : NaN
 

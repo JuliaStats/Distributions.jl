@@ -48,14 +48,14 @@ function logcdf(d::InverseGaussian, x::Real)
     v = x/d.mu
     a = logΦ(u*(v-1.0)) 
     b = 2.0*d.lambda/d.mu + logΦ(-u*(v+1.0))
-    a + log1p(exp(b-a))
+    a + log1pexp(b-a)
 end
 function logccdf(d::InverseGaussian, x::Real)
     u = sqrt(d.lambda/x)
     v = x/d.mu
     a = logΦc(u*(v-1.0)) 
     b = 2.0*d.lambda/d.mu + logΦ(-u*(v+1.0))
-    a + log(-expm1(b-a))
+    a + log1mexp(b-a)
 end
 
 function quantile(d::InverseGaussian, p::Real)

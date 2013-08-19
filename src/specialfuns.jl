@@ -1,5 +1,15 @@
 # Special functions
 
+# See:
+#   Martin Maechler (2012) "Accurately Computing log(1 − exp(− |a|))"
+#   http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
+
+# log(1-exp(x)) 
+# NOTE: different than Maechler (2012), no negation inside parantheses
+log1mexp(x::Real) = x >= -0.6931471805599453 ? log(-expm1(x)) : log1p(-exp(x))
+# log(1+exp(x))
+log1pexp(x::Real) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
+
 φ(z::Real) = exp(-0.5*z*z)/√2π
 logφ(z::Real) = -0.5*(z*z + log2π)
 
@@ -48,7 +58,7 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
                     elseif logp >= 0f0 
                         return logp == 0f0 ? inf(Float32) : nan(Float32)
                     end
-                    r = sqrt(qf0 < 0 ? -logp : -log(-expm1(logp)))
+                    r = sqrt(qf0 < 0 ? -logp : -log1mexp(logp))
                 end
                 if r < 5.0f0
                     r -= 1.6f0
@@ -117,7 +127,7 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
                     elseif logp >= 0.0 
                         return logp == 0.0 ? inf(Float64) : nan(Float64)
                     end
-                    r = sqrt(q < 0 ? -logp : -log(-expm1(logp)))
+                    r = sqrt(q < 0 ? -logp : -log1mexp(logp))
                 end
                 if r < 5.0
                     r -= 1.6
