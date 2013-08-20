@@ -3,7 +3,7 @@ module Distributions
 using NumericExtensions
 using Stats
 
-export                                  
+export
     # types
     VariateForm,
     ValueSupport,
@@ -141,7 +141,7 @@ export
     wsample        # weighted sampling from a source array
 
 import Base.mean, Base.median, Base.quantile, Base.max, Base.min, Base.scale
-import Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
+import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
 import Stats.kurtosis, Stats.skewness, Stats.mode, Stats.modes
