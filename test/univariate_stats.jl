@@ -30,7 +30,8 @@ macro ignore_methoderror(ex)
 end
 
 
-for d in [Arcsine(),
+for d in [
+          Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
           Bernoulli(0.9),
@@ -81,6 +82,7 @@ for d in [Arcsine(),
           InverseGaussian(2.0,7.0),
           InvertedGamma(1.0,1.0),
           InvertedGamma(2.0,3.0),
+          Kolmogorov(),
           Laplace(0.0, 1.0),
           Laplace(10.0, 1.0),
           Laplace(0.0, 10.0),
@@ -127,7 +129,8 @@ for d in [Arcsine(),
           Uniform(3.0, 3.1),
           Weibull(2.3),
           Weibull(23.0),
-          Weibull(230.0)]
+          Weibull(230.0),
+          ]
 
     x = rand(d, n_samples)
 

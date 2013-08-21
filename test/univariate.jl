@@ -61,6 +61,7 @@ for d in [Arcsine(),
           InverseGaussian(2.0,7.0),
           InvertedGamma(1.0,1.0),
           InvertedGamma(2.0,3.0),
+          # Kolmogorov(), # no quantile function
           Laplace(0.0, 1.0),
           Laplace(10.0, 1.0),
           Laplace(0.0, 10.0),
