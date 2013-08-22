@@ -23,12 +23,12 @@ insupport(::NegativeBinomial, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{NegativeBinomial}, x::Real) = isinteger(x) && zero(x) <= x
 
 function mgf(d::NegativeBinomial, t::Real)
-    r, p = d.size, d.prob
+    r, p = d.r, d.prob
     return ((1.0 - p) * exp(t))^r / (1.0 - p * exp(t))^r
 end
 
 function cf(d::NegativeBinomial, t::Real)
-    r, p = d.size, d.prob
+    r, p = d.r, d.prob
     return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
 end
 
@@ -49,12 +49,12 @@ end
 
 function skewness(d::NegativeBinomial)
     p = d.prob
-    (2.0 - p) / sqrt((1.0 - p) * r)
+    (2.0 - p) / sqrt((1.0 - p) * d.r)
 end
 
 function kurtosis(d::NegativeBinomial)
     p = d.prob
-    6.0 / r + (p * p) / ((1.0 - p) * r)
+    6.0 / d.r + (p * p) / ((1.0 - p) * d.r)
 end
 
 function mode(d::NegativeBinomial)

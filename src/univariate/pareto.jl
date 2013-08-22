@@ -10,39 +10,44 @@ end
 
 Pareto(scale::Real) = Pareto(scale, 1.0)
 
-cdf(d::Pareto, q::Real) = q >= d.scale ? 1.0 - (d.scale / q)^d.shape : 0.0
-
-entropy(d::Pareto) = log(d.shape / d.scale) + 1. / d.scale + 1.
-
 insupport(d::Pareto, x::Number) = isreal(x) && isfinite(x) && x > d.scale
 
-function kurtosis(d::Pareto)
-    a = d.shape
-    a > 4.0 || error("Kurtosis undefined for Pareto w/ shape <= 4")
-    (6.0 * (a^3 + a^2 - 6.0 * a - 2.0)) / (a * (a - 3.0) * (a - 4.0))
-end
+mean(d::Pareto) = d.shape > 1.0 ? (d.scale * d.shape) / (d.shape - 1.0) : Inf
 
-mean(d::Pareto) = d.shape <= 1.0 ? Inf : (d.scale * d.shape) / (d.scale - 1.0)
-
-median(d::Pareto) = d.scale * 2.0^d.shape
+median(d::Pareto) = d.scale * 2.0^(1.0/d.shape)
 
 mode(d::Pareto) = d.scale
 modes(d::Pareto) = [d.scale]
 
-function pdf(d::Pareto, q::Real)
-    q >= d.scale ? (d.shape * d.scale^d.shape) / (q^(d.shape + 1.0)) : 0.0
+function var(d::Pareto)
+    α = d.shape
+    α > 2.0 ? (d.scale^2 * α) / ((α - 1.0)^2 * (α - 2.0)) : Inf
 end
-
-quantile(d::Pareto, p::Real) = d.scale / (1.0 - p)^(1.0 / d.shape)
-
-rand(d::Pareto) = d.shape / (rand()^(1.0 / d.scale))
 
 function skewness(d::Pareto)
-    a = d.shape
-    a > 3.0 || error("Skewness undefined for Pareto w/ shape <= 3")
-    ((2.0 * (1.0 + a)) / (a - 3.0)) * sqrt((a - 2.0) / a)
+    α = d.shape
+    α > 3.0 ? ((2.0 * (1.0 + α)) / (α - 3.0)) * sqrt((α - 2.0) / α) : NaN
 end
 
-function var(d::Pareto)
-    d.scale < 2.0 ? Inf : (d.shape^2 * d.scale) / ((d.scale - 1.0)^2 * (d.scale - 2.0))
+
+function kurtosis(d::Pareto)
+    α = d.shape
+    α > 4.0 ? (6.0 * (α^3 + α^2 - 6.0 * α - 2.0)) / (α * (α - 3.0) * (α - 4.0)) : NaN
 end
+
+entropy(d::Pareto) = log(d.scale / d.shape) + 1. / d.shape + 1.
+
+function pdf(d::Pareto, q::Real)
+    q >= d.scale ? d.shape * (d.scale/q)^d.shape / q : 0.0
+end
+
+ccdf(d::Pareto, q::Real) = q >= d.scale ? (d.scale / q)^d.shape : 1.0
+logccdf(d::Pareto, q::Real) = q >= d.scale ? d.shape*log(d.scale / q) : 0.0
+cdf(d::Pareto, q::Real) = 1.0 - ccdf(d,q)
+logcdf(d::Pareto, q::Real) = log1p(-ccdf(d,q))
+
+cquantile(d::Pareto, p::Real) = d.scale / p^(1.0 / d.shape)
+quantile(d::Pareto, p::Real) = cquantile(d,1.0-p)
+
+rand(d::Pareto) = d.scale*exp(rand(Exponential(1.0/d.shape)))
+

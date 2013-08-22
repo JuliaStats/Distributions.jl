@@ -9,9 +9,10 @@ end
 @_jl_dist_1p TDist t
 
 function entropy(d::TDist)
-    ((d.df + 1.0) / 2.0) *
-        (digamma((d.df + 1.0) / 2.0) - digamma((d.df) / 2.0)) +
-        (1.0 / 2.0) * log(d.df) + lbeta(d.df + 1.0, 1.0 / 2.0)
+    hdf = 0.5*d.df
+    hdfph = hdf + 0.5
+    hdfph*(digamma(hdfph) - digamma(hdf)) +
+        0.5*log(d.df) + lbeta(hdf,0.5)
 end
 
 insupport(::TDist, x::Real) = isfinite(x)

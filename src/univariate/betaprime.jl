@@ -15,14 +15,11 @@ end
 
 BetaPrime() = BetaPrime(1.0, 1.0)
 
-cdf(d::BetaPrime, q::Real) = inc_beta(q / 1.0 + q, d.alpha, d.beta)
-
 insupport(::BetaPrime, x::Real) = zero(x) < x
 insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
 
 function mean(d::BetaPrime)
-    d.beta > 1.0 || error("mean not defined when beta <= 1")
-    d.alpha / (d.beta - 1.0)
+    d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
 end
 
 mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
@@ -33,16 +30,29 @@ function pdf(d::BetaPrime, x::Real)
     (x^(α - 1.0) * (1.0 + x)^(-(α + β))) / beta(α, β)
 end
 
-rand(d::BetaPrime) = 1.0 / rand(Beta(d.alpha, d.beta))
+cdf(d::BetaPrime, q::Real) = cdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+ccdf(d::BetaPrime, q::Real) = ccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+logcdf(d::BetaPrime, q::Real) = logcdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+logccdf(d::BetaPrime, q::Real) = logccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+
+quantile(d::BetaPrime, p::Real) = (x = quantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+cquantile(d::BetaPrime, p::Real) = (x = cquantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogcdf(d::BetaPrime, p::Real) = (x = invlogcdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogccdf(d::BetaPrime, p::Real) = (x = invlogccdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+    
+
+function rand(d::BetaPrime)
+    x = rand(Gamma(d.alpha, 1))
+    y = rand(Gamma(d.beta, 1))
+    x/y
+end
 
 function skewness(d::BetaPrime)
     α, β = d.alpha, d.beta
-    β > 3.0 || error("skewness not defined when β <= 3")
-    (2.0 * (2.0 * α + β - 1))/(β - 3.0) * sqrt((β - 2.0)/(α * (α + β - 1.0)))
+    β > 3.0 ? (2.0 * (2.0 * α + β - 1))/(β - 3.0) * sqrt((β - 2.0)/(α * (α + β - 1.0))) : NaN
 end
 
 function var(d::BetaPrime)
     α, β = d.alpha, d.beta
-    β > 2.0 || error("var not defined when β <= 2")
-    (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2)
+    β > 2.0 ? (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2) : NaN
 end
