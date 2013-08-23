@@ -78,6 +78,7 @@ export
     Triangular,
     Truncated,
     Uniform,
+    VonMisesFisher,
     Weibull,
     Wishart,
     QQPair,
@@ -240,6 +241,7 @@ include(joinpath("univariate", "weibull.jl"))
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
 include(joinpath("multivariate", "multivariatenormal.jl"))
+include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
 include(joinpath("matrix", "inversewishart.jl"))
