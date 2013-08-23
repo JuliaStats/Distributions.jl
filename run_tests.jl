@@ -13,7 +13,8 @@ tests = [
 	"conjugates",
 	"kolmogorov",
 	"edgeworth",
-	"matrix"]
+	"matrix",
+	"vonmisesfisher"]
 
 println("Running tests:")
 
