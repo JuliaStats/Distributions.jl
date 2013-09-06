@@ -70,16 +70,16 @@ function self_avoid_sample!{T}(a::AbstractArray{T}, x::AbstractArray)
     # first one    
     idx = rand(rgen)
     x[1] = a[idx]
-    add!(s, idx)
+    push!(s, idx)
 
     # remaining
     for i = 2:length(x)
         idx = rand(rgen)
-        while contains(s, idx)
+        while in(s, idx)
             idx = rand(rgen)
         end
         x[i] = a[idx]
-        add!(s, idx)
+        push!(s, idx)
     end
     x
 end
