@@ -176,3 +176,17 @@ p = posterior((2.0, pri), Normal, x, w)
 @test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
 
 
+# posterior_sample
+pri = Beta(1.0, 2.0)
+x = rand(Bernoulli(0.3), n)
+p = posterior(pri, Bernoulli, x)
+ps = posterior_sample(p, Bernoulli)
+
+@test isa(ps, Bernoulli)
+@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
+@test zero(ps.p1) <= ps.p1 <= one(ps.p1)
+
+ps = posterior_sample(pri, Bernoulli, x)
+@test isa(ps, Bernoulli)
+@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
+@test zero(ps.p1) <= ps.p1 <= one(ps.p1)

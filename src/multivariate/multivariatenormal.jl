@@ -44,6 +44,14 @@ MultivariateNormal(Σ::Matrix{Float64}) = MultivariateNormal(PDMat(Σ))
 
 const MvNormal = MultivariateNormal
 
+function insupport{T<:Real}(d::MultivariateNormal, x::Vector{T})
+    return length(x) == d.dim && all(isfinite(x))
+end
+# Just check if any MvNormal could have generated x
+function insupport{T<:Real}(::Type{MultivariateNormal}, x::Vector{T})
+    return all(isfinite(x))
+end
+
 
 # Basic statistics
 
@@ -232,3 +240,55 @@ end
 fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}) = fit_mle(MvNormal{PDMat}, x)
 fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64}) = fit_mle(MvNormal{PDMat}, x, w)
 
+
+# Useful for posterior
+immutable MvNormalStats
+    s::Vector{Float64}  # (weighted) sum of x
+    m::Vector{Float64}  # (weighted) mean of x
+    s2::Matrix{Float64} # (weighted) sum of (x-mu)^2
+    tw::Float64         # total sample weight
+
+    function MvNormalStats(s::Vector{Float64}, m::Vector{Float64},
+                           s2::Matrix{Float64}, tw::Float64)
+        new(s, m, s2, float64(tw))
+    end
+end
+
+function suffstats{T<:Real}(::Type{MvNormal}, X::Matrix{T})
+    d, n = size(X)
+
+    # Could also use NumericExtensions
+    s = X[:,1]
+    for j in 2:n
+        for i in 1:d
+            @inbounds s[i] += X[i,j]
+        end
+    end
+    m = s ./ n
+    
+    Z = vbroadcast(Subtract(), X, m, 1)
+    s2 = A_mul_Bt(Z, Z)
+
+    MvNormalStats(s, m, s2, float64(n))
+end
+
+function suffstats{T<:Real}(::Type{MvNormal}, X::Matrix{T}, w::Array{Float64})
+    d, n = size(X)
+
+    # Could use NumericExtensions or BLAS
+    tw = w[1]
+    s = w[1] .* X[:,1]
+    for j in 2:n
+        @inbounds wj = w[j]
+        for i in 1:d
+            @inbounds s[i] += wj * X[i,j]
+        end
+        tw += wj
+    end
+    m = s ./ tw
+    
+    Z = vbroadcast(Subtract(), X, m, 1)
+    s2 = Z * bmultiply(Z, w, 2)'
+
+    MvNormalStats(s, m, s2, float64(tw))
+end
