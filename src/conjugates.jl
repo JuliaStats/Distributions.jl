@@ -102,10 +102,10 @@ function posterior(prior::Normal, ss::NormalKnownSigmaStats)
 	return Normal(μ1, σ1)	
 end
 
-function posterior(prior::InvertedGamma, ss::NormalKnownMuStats)
+function posterior(prior::InverseGamma, ss::NormalKnownMuStats)
 	α1 = prior.shape + ss.tw / 2
 	β1 = rate(prior) + ss.s2 / 2
-	return InvertedGamma(α1, 1.0 / β1)
+	return InverseGamma(α1, 1.0 / β1)
 end
 
 function posterior{T<:Real}(prior::(Normal, Float64), ::Type{Normal}, x::Array{T}) 
@@ -120,15 +120,15 @@ function posterior{T<:Real}(prior::(Normal, Float64), ::Type{Normal}, x::Array{T
 	posterior(pri_μ, suffstats(NormalKnownSigma(σ), x, w))
 end
 
-function posterior{T<:Real}(prior::(Float64, InvertedGamma), ::Type{Normal}, x::Array{T}) 
+function posterior{T<:Real}(prior::(Float64, InverseGamma), ::Type{Normal}, x::Array{T}) 
 	μ::Float64 = prior[1]
-	pri_σ::InvertedGamma = prior[2]
+	pri_σ::InverseGamma = prior[2]
 	posterior(pri_σ, suffstats(NormalKnownMu(μ), x))
 end
 
-function posterior{T<:Real}(prior::(Float64, InvertedGamma), ::Type{Normal}, x::Array{T}, w::Array{Float64}) 
+function posterior{T<:Real}(prior::(Float64, InverseGamma), ::Type{Normal}, x::Array{T}, w::Array{Float64}) 
 	μ::Float64 = prior[1]
-	pri_σ::InvertedGamma = prior[2]
+	pri_σ::InverseGamma = prior[2]
 	posterior(pri_σ, suffstats(NormalKnownMu(μ), x, w))
 end
 

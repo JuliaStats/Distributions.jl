@@ -51,8 +51,8 @@ export
     Gumbel,
     HyperGeometric,
     InverseWishart,
-    InverseGaussian,
-    InvertedGamma,
+    InverseGamma,
+    InverseGaussian,    
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -213,8 +213,8 @@ include(joinpath("univariate", "erlang.jl"))
 include(joinpath("univariate", "geometric.jl"))
 include(joinpath("univariate", "gumbel.jl"))
 include(joinpath("univariate", "hypergeometric.jl"))
+include(joinpath("univariate", "inversegamma.jl"))
 include(joinpath("univariate", "inversegaussian.jl"))
-include(joinpath("univariate", "invertedgamma.jl"))
 include(joinpath("univariate", "kolmogorov.jl"))
 include(joinpath("univariate", "ksdist.jl"))
 include(joinpath("univariate", "ksonesided.jl"))

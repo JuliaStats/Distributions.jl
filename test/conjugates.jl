@@ -108,15 +108,15 @@ p = posterior((pri, 3.0), Normal, x, w)
 @test_approx_eq mean(p)  (mean(pri) / var(pri) + dot(x, w) / 9.0) / (1.0 / var(pri) + sum(w) / 9.0)
 @test_approx_eq var(p) inv(1.0 / var(pri) + sum(w) / 9.0)
 
-pri = InvertedGamma(1.5, 0.5) # β = 2.0
+pri = InverseGamma(1.5, 0.5) # β = 2.0
 
 x = rand(Normal(2.0, 3.0), n)
 p = posterior((2.0, pri), Normal, x)
-@test isa(p, InvertedGamma)
+@test isa(p, InverseGamma)
 @test_approx_eq p.shape pri.shape + n / 2
 @test_approx_eq rate(p) rate(pri) + sum(abs2(x - 2.0)) / 2
 
 p = posterior((2.0, pri), Normal, x, w)
-@test isa(p, InvertedGamma)
+@test isa(p, InverseGamma)
 @test_approx_eq p.shape pri.shape + sum(w) / 2
 @test_approx_eq rate(p) rate(pri) + dot(w, abs2(x - 2.0)) / 2
