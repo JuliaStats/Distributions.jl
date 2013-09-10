@@ -100,7 +100,7 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64})
     # compute s2
     s2 = w[1] * abs2(x[1] - m)
     for i = 2:n
-        @inbounds s2 += abs2(x[i] - m)
+        @inbounds s2 += w[i] * abs2(x[i] - m)
     end
 
     NormalStats(s, m, s2, tw)
