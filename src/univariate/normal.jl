@@ -9,8 +9,6 @@ end
 Normal(μ::Real) = Normal(float64(μ), 1.0)
 Normal() = Normal(0.0, 1.0)
 
-@_jl_dist_2p Normal norm
-
 const Gaussian = Normal
 
 zval(d::Normal, x::Real) = (x - d.μ)/d.σ
