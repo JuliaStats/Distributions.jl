@@ -14,7 +14,12 @@ Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 scale(d::Gamma) = d.scale
 rate(d::Gamma) = 1.0 / d.scale
 
-@_jl_dist_2p Gamma gamma
+# @_jl_dist_2p Gamma gamma
+
+function cdf(d::Gamma, x::Real)
+    if x < 0 return 0.0 end
+    return dgrat(d.shape, x/d.scale)[1]
+end
 
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)
@@ -39,6 +44,8 @@ function mode(d::Gamma)
 end
 
 modes(d::Gamma) = [mode(d)]
+
+pdf(d::Gamma, x::Real) = insupport(d, x) ? drcomp(d.shape, x/d.scale)/x : 0.0
 
 # rand()
 #
