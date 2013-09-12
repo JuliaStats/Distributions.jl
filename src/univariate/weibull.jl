@@ -9,21 +9,23 @@ end
 
 Weibull(sh::Real) = Weibull(sh, 1.0)
 
-@_jl_dist_2p Weibull weibull
-
+## Support
 @continuous_distr_support Weibull 0.0 Inf
 
-function cdf(d::Weibull, x::Real)
-	if 0.0 < x
-		return 1.0 - exp(-((x / d.scale)^d.shape))
-	else
-		0.0
-	end
-end
+## Properties
+mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
+median(d::Weibull) = d.scale * log(2.0)^(1.0 / d.shape)
 
-function entropy(d::Weibull)
-    k, l = d.shape, d.scale
-    return ((k - 1.0) / k) * -digamma(1.0) + log(l / k) + 1.0
+mode(d::Weibull) = d.shape > 1.0 ? (ik = 1.0/d.shape; d.scale * (1.0-ik)^ik) : 0.0
+modes(d::Weibull) = [mode(d)]
+
+var(d::Weibull) = d.scale^2 * gamma(1.0 + 2.0 / d.shape) - mean(d)^2
+
+function skewness(d::Weibull)
+    tmp = gamma(1.0 + 3.0 / d.shape) * d.scale^3
+    tmp -= 3.0 * mean(d) * var(d)
+    tmp -= mean(d)^3
+    return tmp / std(d)^3
 end
 
 function kurtosis(d::Weibull)
@@ -38,34 +40,35 @@ function kurtosis(d::Weibull)
     return den / num - 3.0
 end
 
-mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
-
-median(d::Weibull) = d.scale * log(2.0)^(1.0 / d.shape)
-
-function modes(d::Weibull)
-    if d.shape <= 1.0
-        return [0.0]
-    else
-        return [d.scale * ((d.shape - 1.0) / d.shape)^(1.0 / d.shape)]
-    end
+function entropy(d::Weibull)
+    λ, k = d.scale, d.shape
+    return ((k - 1.0) / k) * -digamma(1.0) + log(λ / k) + 1.0
 end
 
-function skewness(d::Weibull)
-    tmp = gamma(1.0 + 3.0 / d.shape) * d.scale^3
-    tmp -= 3.0 * mean(d) * var(d)
-    tmp -= mean(d)^3
-    return tmp / std(d)^3
+## Functions
+function pdf(d::Weibull, x::Real)
+    a = x/d.scale
+    d.shape/d.scale * a^(d.shape-1.0) * exp(-a^d.shape)
+end
+function logpdf(d::Weibull, x::Real)
+    a = x/d.scale
+    log(d.shape/d.scale) + (d.shape-1.0)*log(a) - a^d.shape
 end
 
-var(d::Weibull) = d.scale^2 * gamma(1.0 + 2.0 / d.shape) - mean(d)^2
+cdf(d::Weibull, x::Real) = x <= 0.0 ? 0.0 : 1-exp(-((x / d.scale)^d.shape))
+ccdf(d::Weibull, x::Real) = x <= 0.0 ? 1.0 : exp(-((x / d.scale)^d.shape))
+logcdf(d::Weibull, x::Real) = x <= 0.0 ? -Inf : log1mexp(-((x / d.scale)^d.shape))
+logccdf(d::Weibull, x::Real) = x <= 0.0 ? 0.0 : -(x / d.scale)^d.shape
 
-function mode(d::Weibull)
-    inv_k = 1.0 / d.shape
-    d.shape > 1.0 ? d.scale * (1.0 - inv_k) ^ inv_k : 0.0
-end
+quantile(d::Weibull, p::Real) = (p < zero(p) || p > one(p)) ? NaN : d.scale*(-log1p(-p))^(1/d.shape)
+cquantile(d::Weibull, p::Real) = (p < zero(p) || p > one(p)) ? NaN : d.scale*(-log(p))^(1/d.shape)
+invlogcdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(1/d.shape)
+invlogccdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-lp)^(1/d.shape)
 
-modes(d::Weibull) = [mode(d)]
 
 function gradloglik(d::Weibull, x::Float64)
   insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(d.shape - 1.0) / (d.scale^d.shape) : 0.0
 end
+
+## Sampling
+rand(d::Weibull) = d.scale*Base.Random.randmtzig_exprnd()^(1/d.shape)
