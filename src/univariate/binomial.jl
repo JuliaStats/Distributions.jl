@@ -55,19 +55,25 @@ end
 #     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
 # Uses slightly different form for D(x;n,p) function
 function pdf(d::Binomial, x::Real)
+    if !insupport(d,x)
+        return 0.0
+    end
     n, p = d.size, d.prob
-    q = 1.0-p
-    y = n-x
     if x == 0
-        return q^n # should this be exp(n*log1p(-p)) ?
-    elseif y == 0
+        return exp(n*log1p(-p))
+    elseif x == n
         return p^n
     end
+    q = 1.0-p
+    y = n-x
     sqrt(n/(2.0*pi*x*y))*exp((lstirling(n) - lstirling(x) - lstirling(y))
                              + x*logmxp1(n*p/x) + y*logmxp1(n*q/y))
 end
 
 function logpdf(d::Binomial, x::Real)
+    if !insupport(d,x)
+        return -Inf
+    end
     n, p = d.size, d.prob
     q = 1.0-p
     y = n-x
