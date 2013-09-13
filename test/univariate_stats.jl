@@ -44,6 +44,7 @@ for d in [
           Binomial(1, 0.5),
           Binomial(100, 0.1),
           Binomial(100, 0.9),
+          Binomial(10000, 0.03),
           Categorical([0.1, 0.9]),
           Categorical([0.5, 0.5]),
           Categorical([0.9, 0.1]),

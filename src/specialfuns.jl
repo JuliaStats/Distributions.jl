@@ -31,6 +31,9 @@ import Base.Math.@horner
 # Rational approximations for the inverse cdf, from:
 #   Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
 #   Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
+Φinv(p::Integer) = Φinv(float(p))
+logΦinv(p::Integer) = logΦinv(float(p))
+
 for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
     @eval begin
         function $fn($arg::Float32)
@@ -95,7 +98,7 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
             end
         end
 
-        function $fn($arg::Real)
+        function $fn($arg::Float64)
             if $(fn == :Φinv)
                 q = p - 0.5
             else
@@ -181,5 +184,128 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
                 return copysign(z,q)
             end
         end
+    end
+end
+
+
+# log(x) - x + 1
+# fallback
+logmxp1(x) = log(x) - x + one(x)
+logmxp1(x::Integer) = logmxp1(float(x))
+
+# negative of NSWC DRLOG
+function logmxp1(x::Float64)
+    if (x < 0.61) || (x > 1.57)
+        return log(x) - (x-1.0)
+    end
+    if x < 0.82
+        u = (x-0.7)/0.7
+        up2 = u+2.0
+        w1 = 0.566749439387323789126387112411845e-01 - u*0.3
+    elseif x > 1.18
+        t = 0.75*(x-1.0)
+        u = t-0.25
+        up2 = t+1.75
+        w1 = 0.456512608815524058941143273395059e-01 + u/3.0
+    else
+        u = x-1.0
+        up2 = x+1.0
+        w1 = 0.0
+    end
+    r = u/up2
+    t = r*r
+    z = @horner(t,
+                0.7692307692307692307680e-01,
+                -0.1505958055914600184836e+00,
+                0.9302355725278521726994e-01,
+                -0.1787900022182327735804e-01) /
+    @horner(t,1.0,
+            -0.2824412139355646910683e+01,
+            0.2892424216041495392509e+01,
+            -0.1263560605948009364422e+01,
+            0.1966769435894561313526e+00)
+    w = @horner(t,
+                0.333333333333333333333333333333333e+00,
+                0.200000000000000000000000000000000e+00,
+                0.142857142857142857142857142857143e+00,
+                0.111111111111111111111111111111111e+00,
+                0.909090909090909090909090909090909e-01,
+                z)
+    return r*(2.0*t*w-u) - w1
+end
+
+# negative of NSWC RLOG
+function logmxp1(x::Float32)
+    if (x < 0.61f0) || (x > 1.57f0)
+        return log(x) - (x-1f0)
+    end
+    if x < 0.82f0
+        u = (x-0.7f0)/0.7f0
+        up2 = u+2f0
+        w1 = 0.566749439387324f-01 - u*0.3f0
+    elseif x > 1.18f0
+        t = 0.75f0*(x-1f0)
+        u = t-0.25f0
+        up2 = t+1.75f0
+        w1 = 0.456512608815524f-01 + u/3f0
+    else
+        u = x-1f0
+        up2 = x+1f0
+        w1 = 0f0
+    end
+    r = u/up2
+    t = r*r
+    w = @horner(t,
+                0.333333333333333f+00, 
+                -.224696413112536f+00,
+                0.620886815375787f-02) /
+    @horner(t, 1f0,
+            -.127408923933623f+01, 
+            0.354508718369557f+00)
+    return r*(2f0*t*w-u) - w1
+end
+
+
+
+# Stirling series for the gamma function
+# 
+# stirling(x) = gamma(x) * e^x / (x^(x-0.5) * √2π)
+#             = 1 + 1/(12x) + 1/(288x^2) - 139/(51_840z^3) + ...
+
+# TODO: create dedicated function, as working in
+# log-space will lose a few bits of precision.
+stirling(x) = exp(lstirling(x))
+
+# lstirling(x) = log(stirling(x))
+#              = lgamma(x) + x - (x-0.5)*log(x) - 0.5*log2π
+#              = 1/(12x) - 1/(360x^3) + 1/(1260x^5) + ...
+
+# fallback
+lstirling(x) = lgamma(x)- (x-0.5)*log(x) + x - 0.5*oftype(x,log2π)
+lstirling(x::Integer) = lstirling(float(x))
+# based on NSWC DPDEL: only valid for values >= 10
+# Float32 version?
+function lstirling(x::Float64)
+    if x <= 10.0
+        return lgamma(x) - (x-0.5)*log(x) + x - 0.5*log2π
+    else
+        u = 10.0/x
+        t = u*u
+        return @horner(t,
+                .833333333333333333333333333333e-01,
+                -.277777777777777777777777752282e-04,
+                .793650793650793650791732130419e-07,
+                -.595238095238095232389839236182e-09,
+                .841750841750832853294451671990e-11,
+                -.191752691751854612334149171243e-12,
+                .641025640510325475730918472625e-14,
+                -.295506514125338232839867823991e-15,
+                .179643716359402238723287696452e-16,
+                -.139228964661627791231203060395e-17,
+                .133802855014020915603275339093e-18,
+                -.154246009867966094273710216533e-19,
+                .197701992980957427278370133333e-20,
+                -.234065664793997056856992426667e-21,
+                .171348014966398575409015466667e-22) / x
     end
 end

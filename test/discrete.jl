@@ -26,7 +26,8 @@ for d in [
     DiscreteUniform(2.0, 5.0),
     Binomial(1, 0.5),
     Binomial(100, 0.1),
-    Binomial(100, 0.9)]
+    Binomial(100, 0.9),
+    Binomial(10000, 0.03)]
 
     # println(d)
 
@@ -104,9 +105,9 @@ for d in [
         lc[i] = logcdf(d, x[i])
         lcc[i] = logccdf(d, x[i])
 
-        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
-        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
-        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+        @test_approx_eq_eps exp(lp[i]) p[i] 1.0e-12
+        @test_approx_eq_eps exp(lc[i]) c[i] 1.0e-12
+        @test_approx_eq_eps exp(lcc[i]) cc[i] 1.0e-12
 
         if !isa(d, Binomial)
             @test quantile(d, c[i] - 1.0e-8) == x[i]

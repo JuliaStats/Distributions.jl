@@ -91,7 +91,7 @@ function cdf_durbin(d::KSDist,x::Float64)
     end
     Q = H^n
     s = Q[k,k]
-    s*stirling(n)
+    s*sqrt(2.0*pi*n)*stirling(n)
 end
 
 # Miller (1956) approximation
@@ -116,17 +116,3 @@ function ceil_rems_mult(n,x)
     return convert(typeof(n),cl), convert(typeof(x),lrem), convert(typeof(x),urem)
 end
 
-# n!*(e/n)^n
-function stirling(n)    
-    if n < 500
-        s = 1.0
-        for i = 1:n
-            s *= i/n*e 
-        end
-        return s
-    else
-        # 3rd-order Stirling's approximation more accurate for large n
-        twn = 12.0*n
-        return sqrt(2.0*pi*n)*(1.0 + twn\(1 + (2.0*twn)\(1 - (15.0*twn)\139.0)))
-    end
-end

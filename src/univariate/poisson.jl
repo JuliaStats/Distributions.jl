@@ -51,6 +51,15 @@ skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 
 var(d::Poisson) = d.lambda
 
+# Based on:
+#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
+#   available from:
+#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
+# Uses slightly different forms instead of D0 function
+pdf(d::Poisson, x::Real) = exp(x*logmxp1(d.lambda/x)-lstirling(x))/(√2π*sqrt(x))
+logpdf(d::Poisson, x::Real) = x*logmxp1(d.lambda/x)-lstirling(x)-0.5*(log2π+log(x))
+
+
 function fit_mle(::Type{Poisson}, x::Array)
     for i in 1:length(x)
         if !insupport(Poisson(), x[i])

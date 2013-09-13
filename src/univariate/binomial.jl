@@ -11,10 +11,23 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
+insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
+
 min(d::Binomial) = 0
 max(d::Binomial) = d.size
 
-@_jl_dist_2p Binomial binom
+mean(d::Binomial) = d.size * d.prob
+
+median(d::Binomial) = iround(d.size * d.prob)
+
+# TODO: May need to subtract 1 sometimes
+# possible to get two equal modes (e.g. prob=0.5, n odd)
+mode(d::Binomial) = iround((d.size + 1.0) * d.prob)
+modes(d::Binomial) = [mode(d)]
+
+var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
+skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
+kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 function entropy(d::Binomial; approx::Bool=false)
     n = d.size
@@ -34,17 +47,60 @@ function entropy(d::Binomial; approx::Bool=false)
     -s
 end
 
-insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
+@_jl_dist_2p Binomial binom
 
-kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
+# Based on:
+#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
+#   available from:
+#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
+# Uses slightly different form for D(x;n,p) function
+function pdf(d::Binomial, x::Real)
+    n, p = d.size, d.prob
+    q = 1.0-p
+    y = n-x
+    if x == 0
+        return q^n # should this be exp(n*log1p(-p)) ?
+    elseif y == 0
+        return p^n
+    end
+    sqrt(n/(2.0*pi*x*y))*exp((lstirling(n) - lstirling(x) - lstirling(y))
+                             + x*logmxp1(n*p/x) + y*logmxp1(n*q/y))
+end
 
-mean(d::Binomial) = d.size * d.prob
+function logpdf(d::Binomial, x::Real)
+    n, p = d.size, d.prob
+    q = 1.0-p
+    y = n-x
+    if x == 0
+        return n*log1p(-p)
+    elseif y ==0
+        return n*log(p)
+    end
+    (lstirling(n) - lstirling(x) - lstirling(y)) +
+    x*logmxp1(n*p/x) + y*logmxp1(n*q/y) + 0.5*(log(n/(x*y))-log2π)
+end
 
-median(d::Binomial) = iround(d.size * d.prob)
 
-# TODO: May need to subtract 1 sometimes
-mode(d::Binomial) = iround((d.size + 1.0) * d.prob)
-modes(d::Binomial) = [mode(d)]
+function quantile(d::Binomial, p::Real)
+    # Edgeworth approximation
+    x = round(quantile(EdgeworthSum(d,1), p))
+    if cdf(d,x) >= p
+        # search down
+        xl = x-1.0
+        while cdf(d,xl) >= p
+            x = xl
+            xl -= 1.0
+        end
+    else
+        # search up
+        x += 1.0
+        while cdf(d,x) < p
+            x += 1.0
+        end
+    end
+    x
+end
+
 
 function mgf(d::Binomial, t::Real)
     p = d.prob
@@ -55,14 +111,6 @@ function cf(d::Binomial, t::Real)
     p = d.prob
     (1.0 - p + p * exp(im * t))^d.size
 end
-
-modes(d::Binomial) = iround([d.size * d.prob])
-
-# TODO: rand() is totally screwed up
-
-skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
-
-var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
 
 ## Fit model
 
