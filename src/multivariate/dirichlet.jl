@@ -211,7 +211,7 @@ function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
     slogp = zeros(K)
     for i = 1:n
         for k = 1:K
-            slogp[k] += log(P[k,i])
+            @inbounds slogp[k] += log(P[k,i])
         end
     end
     DirichletStats(slogp, n)
@@ -228,10 +228,10 @@ function suffstats(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64})
     slogp = zeros(K)
 
     for i = 1:n
-        wi = w[i]
+        @inbounds wi = w[i]
         tw += wi
         for k = 1:K
-            slogp[k] += log(P[k,i]) * wi
+            @inbounds slogp[k] += log(P[k,i]) * wi
         end
     end
     DirichletStats(slogp, tw)
@@ -246,8 +246,8 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     
     α0 = 0.
     for k = 1:K
-        μk = μ[k]
-        γk = γ[k]
+        @inbounds μk = μ[k]
+        @inbounds γk = γ[k]
         ak = (μk - γk) / (γk - μk * μk)
         α0 += ak
     end
@@ -265,9 +265,9 @@ function dirichlet_mle_init(P::Matrix{Float64})
 
     for i = 1:n
         for k = 1:K
-            pk = P[k, i]
-            μ[k] += pk
-            γ[k] += pk * pk
+            @inbounds pk = P[k, i]
+            @inbounds μ[k] += pk
+            @inbounds γ[k] += pk * pk
         end
     end
 
@@ -289,12 +289,12 @@ function dirichlet_mle_init(P::Matrix{Float64}, w::Vector{Float64})
     tw = 0.
 
     for i = 1:n
-        wi = w[i]
+        @inbounds wi = w[i]
         tw += wi
         for k = 1:K
             pk = P[k, i]
-            μ[k] += pk * wi
-            γ[k] += pk * pk * wi
+            @inbounds μ[k] += pk * wi
+            @inbounds γ[k] += pk * pk * wi
         end
     end
 
@@ -341,12 +341,12 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         iqs = 0.
 
         for k = 1:K
-            ak = α[k]
-            g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
-            iq[k] = - 1.0 / trigamma(ak)
+            @inbounds ak = α[k]
+            @inbounds g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
+            @inbounds iq[k] = - 1.0 / trigamma(ak)
 
-            b += gk * iq[k]
-            iqs += iq[k]
+            @inbounds b += gk * iq[k]
+            @inbounds iqs += iq[k]
 
             agk = abs(gk)
             if agk > gnorm
@@ -358,8 +358,8 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         # update α
 
         for k = 1:K
-            α[k] -= (g[k] - b) * iq[k]
-            if α[k] < 1.0e-12
+            @inbounds α[k] -= (g[k] - b) * iq[k]
+            @inbounds if α[k] < 1.0e-12
                 α[k] = 1.0e-12
             end
         end
