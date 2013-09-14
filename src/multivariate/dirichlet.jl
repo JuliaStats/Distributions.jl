@@ -239,30 +239,6 @@ end
 
 # fit_mle methods
 
-immutable DirichletMLEOptions
-    maxiter::Int
-    tol::Float64
-end
-
-
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
-    α = dirichlet_mle_init(P)
-    elogp = mean_logp(suffstats(Dirichlet, P))
-    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
-end
-
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
-    n = size(P, 2)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    α = dirichlet_mle_init(P, w)
-    elogp = mean_logp(suffstats(Dirichlet, P, w))
-    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
-end
-
-
 ## Initialization
 
 function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
@@ -333,17 +309,14 @@ end
 
 ## Newton-Ralphson algorithm
 
-function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64},
-    opts::DirichletMLEOptions; debug::Bool=false)
+function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
+    maxiter::Int=25, tol::Float64=1.0e-12, debug::Bool=false)
     # This function directly overrides α
 
     K = length(elogp)
     if length(α) != K
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-
-    maxiter::Int = opts.maxiter
-    tol::Float64 = opts.tol
 
     g = Array(Float64, K)
     iq = Array(Float64, K)
@@ -407,9 +380,22 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
     Dirichlet(α)
 end
 
-function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64})
-    fit_mle!(dty, elogp, α, DirichletMLEOptions(25, 1.0e-12))
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
+    α = dirichlet_mle_init(P)
+    elogp = mean_logp(suffstats(Dirichlet, P))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
+    n = size(P, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    α = dirichlet_mle_init(P, w)
+    elogp = mean_logp(suffstats(Dirichlet, P, w))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
+end
 
 
