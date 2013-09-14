@@ -80,21 +80,21 @@ function entropy(d::Dirichlet)
     return en
 end
 
-function mode(d::Dirichlet)
-    k = length(d.alpha)
-    x = Array(Float64, k)
-    s = d.alpha0 - k
-    a = d.alpha
-    for i in 1:k
-        @inbounds ai = a[i]
-        if ai <= 1.0
-            error("Dirichlet has a mode only when alpha[i] > 1 for all i")
+
+function dirichlet_mode!(r::Vector{Float64}, α::Vector{Float64}, α0::Float64)
+    k = length(α)
+    s = α0 - k
+    for i = 1:k
+        @inbounds ai = α[i]
+        if ai <= 1.
+            error("Dirichlet has a mode only when alpha[i] > 1 for all i" )
         end
-        x[i] = (ai - 1.0) / s
+        @inbounds r[i] = (ai - 1.0) / s
     end
-    return x
+    r
 end
 
+mode(d::Dirichlet) = dirichlet_mode!(zeros(dim(d)), d.alpha, d.alpha0)
 modes(d::Dirichlet) = [mode(d)]
 
 

@@ -1,6 +1,8 @@
 using Distributions
 using Base.Test
 
+# Fit MLE
+
 N = 10^5
 
 d = fit(DiscreteUniform, rand(DiscreteUniform(10, 15), N))
@@ -72,3 +74,4 @@ d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
 @test_approx_eq_eps mean(d) 8.2 0.2
+

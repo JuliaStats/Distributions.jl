@@ -287,3 +287,7 @@ posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = mode(post
 posterior_mode(pri::Distribution, G::GenerativeFormulation, x) = mode(posterior(pri, G, x))
 posterior_mode(pri::Distribution, G::GenerativeFormulation, x, w) = mode(posterior(pri, G, x, w))
 
+posterior_make{D<:Distribution}(::Type{D}, θ) = D(θ) 
+fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x) = posterior_make(D, posterior_mode(pri, D, x))
+fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x, w) = posterior_make(D, posterior_mode(pri, D, x, w))
+

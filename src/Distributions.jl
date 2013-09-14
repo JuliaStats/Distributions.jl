@@ -114,7 +114,11 @@ export
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
-    posterior,     # Bayesian updating
+    posterior,       # get posterior distribution given prior and observed data
+    posterior_mode,  # get the mode of posterior distribution
+    posterior_rand,  # draw samples from the posterior distribution
+    posterior_rand!, 
+    posterior_make,  # create a distribution/model from params obtained from posterior 
     scale,         # scale parameter of a distribution
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
