@@ -82,32 +82,29 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
         0 <= xi <= n || throw(DomainError())
         ns += xi
     end
-    BinomialStats(ns, length(x), n)
+    BinomialStats(ns, length(x), n)    
 end
 
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
     ns = 0.
     ne = 0.
     for i = 1:length(x)
-        xi = x[i]
+        @inbounds xi = x[i]
         0 <= xi <= n || throw(DomainError())
-        wi = w[i]
+        @inbounds wi = w[i]
         ns += xi * wi
         ne += wi
     end
-    BinomialStats(ns, ne, n)
+    BinomialStats(ns, ne, n)   
 end
+
+suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = suffstats(Binomial, data...)
+suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Binomial, data..., w)
 
 fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
-    fit_mle(Binomial, suffstats(Binomial, n, x))
-end
-
-function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
-    fit_mle(Binomial, suffstats(Binomial, n, x, w))
-end
-
-fit(::Type{Binomial}, n::Integer, x::Array) = fit_mle(Binomial, n, x)
-
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = fit_mle(Binomial, suffstats(Binomial, data))
+fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 
