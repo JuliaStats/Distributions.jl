@@ -273,4 +273,6 @@ include("conjugates.jl")
 
 include("qq.jl")
 
+include("estimators.jl")
+
 end # module
