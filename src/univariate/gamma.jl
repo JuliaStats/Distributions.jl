@@ -125,8 +125,8 @@ function suffstats(::Type{Gamma}, x::Array, w::Array{Float64})
     slogx = 0.
     tw = 0.
     for i = 1:n
-        xi = x[i]
-        wi = w[i]
+        @inbounds xi = x[i]
+        @inbounds wi = w[i]
         sx += wi * xi
         slogx += wi * log(xi)
         tw += wi
@@ -160,4 +160,3 @@ function fit_mle(::Type{Gamma}, ss::GammaStats;
 
     Gamma(a, mx / a)
 end
-
