@@ -195,8 +195,9 @@ end
 
 fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_categorical(data...)
 fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_categorical(data..., w)
-
+fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) = fit_categorical(k, x)
+fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) = fit_categorical(k, x, w)
 fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_categorical(max(x), x)
-fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_categorical(Categorical, max(x), x, w)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_categorical(max(x), x, w)
 
 
