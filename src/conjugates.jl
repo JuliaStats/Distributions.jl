@@ -188,8 +188,8 @@ end
 
 function posterior(prior::InverseGamma, ss::NormalKnownMuStats)
 	α1 = prior.shape + ss.tw / 2
-	β1 = rate(prior) + ss.s2 / 2
-	return InverseGamma(α1, 1.0 / β1)
+	β1 = prior.scale + ss.s2 / 2
+	return InverseGamma(α1, β1)
 end
 
 function posterior{T<:Real}(prior::(Float64, InverseGamma), ::Type{Normal}, x::Array{T}) 

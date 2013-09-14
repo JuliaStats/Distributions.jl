@@ -168,11 +168,11 @@ x = rand(Normal(2.0, 3.0), n)
 p = posterior((2.0, pri), Normal, x)
 @test isa(p, InverseGamma)
 @test_approx_eq p.shape pri.shape + n / 2
-@test_approx_eq rate(p) rate(pri) + sum(abs2(x - 2.0)) / 2
+@test_approx_eq p.scale pri.scale + sum(abs2(x - 2.0)) / 2
 
 p = posterior((2.0, pri), Normal, x, w)
 @test isa(p, InverseGamma)
 @test_approx_eq p.shape pri.shape + sum(w) / 2
-@test_approx_eq rate(p) rate(pri) + dot(w, abs2(x - 2.0)) / 2
+@test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
 
 
