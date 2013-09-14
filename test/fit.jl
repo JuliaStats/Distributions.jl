@@ -22,6 +22,18 @@ d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 @test d.size == 100
 @test_approx_eq_eps d.prob 0.3 0.01
 
+p = [0.2, 0.5, 0.3]
+x = rand(Categorical(p), N)
+d = fit(Categorical, x)
+@test isa(d, Categorical)
+@test d.K == 3
+@test_approx_eq_eps d.prob p 0.01
+
+d = fit_mle(Categorical, (3, x))
+@test isa(d, Categorical)
+@test d.K == 3
+@test_approx_eq_eps d.prob p 0.01
+
 d = fit(Exponential, rand(Exponential(0.5), N))
 @test isa(d, Exponential)
 @test_approx_eq_eps mean(d) 0.5 0.01
