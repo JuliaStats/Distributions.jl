@@ -14,7 +14,12 @@ tests = [
 	"kolmogorov",
 	"edgeworth",
 	"matrix",
-	"vonmisesfisher"]
+	"vonmisesfisher",
+    "conjugate-normal/normalgamma",
+    "conjugate-normal/normalinversegamma",
+    "conjugate-normal/normalwishart",
+    "conjugate-normal/normalinversewishart",
+    "conjugate-normal/normalknowncov"]
 
 println("Running tests:")
 

@@ -291,3 +291,6 @@ posterior_make{D<:Distribution}(::Type{D}, θ) = D(θ)
 fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x) = posterior_make(D, posterior_mode(pri, D, x))
 fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x, w) = posterior_make(D, posterior_mode(pri, D, x, w))
 
+posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x) = D(rand(posterior(pri, G, x))...)
+posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = D(rand(posterior(pri, G, x, w))...)
+posterior_sample{D<:Distribution,G<:Distribution}(post::D, ::Type{G}) = G(rand(post)...)

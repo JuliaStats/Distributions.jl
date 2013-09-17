@@ -70,6 +70,10 @@ export
     NoncentralF,
     NoncentralT,
     Normal,
+    NormalGamma,
+    NormalInverseGamma,
+    NormalInverseWishart,
+    NormalWishart,
     Pareto,
     Poisson,
     Rayleigh,
@@ -119,6 +123,7 @@ export
     posterior_rand,  # draw samples from the posterior distribution
     posterior_rand!, 
     posterior_make,  # create a distribution/model from params obtained from posterior 
+    posterior_sample,
     scale,         # scale parameter of a distribution
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
@@ -273,7 +278,13 @@ include("kde.jl")
 # Expectations, entropy, KL divergence
 include("functionals.jl")
 
+# Posteriors and conjugate priors
 include("conjugates.jl")
+include(joinpath("conjugate-normal", "normalgamma.jl"))
+include(joinpath("conjugate-normal", "normalinversegamma.jl"))
+include(joinpath("conjugate-normal", "normalwishart.jl"))
+include(joinpath("conjugate-normal", "normalinversewishart.jl"))
+include(joinpath("conjugate-normal", "normalknowncov.jl"))
 
 include("qq.jl")
 
