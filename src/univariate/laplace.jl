@@ -2,11 +2,8 @@ immutable Laplace <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
     function Laplace(l::Real, s::Real)
-        if s > 0.0
-            new(float64(l), float64(s))
-        else
-            error("scale must be positive")
-        end
+        s > zero(s) || error("scale must be positive")
+        new(float64(l), float64(s))
     end
 end
 
@@ -16,13 +13,14 @@ Laplace() = Laplace(0.0, 1.0)
 const Biexponential = Laplace
 
 function cdf(d::Laplace, q::Real)
-    return 0.5 * (1.0 + sign(q - d.location) *
+    0.5 * (1.0 + sign(q - d.location) *
            (1.0 - exp(-abs(q - d.location) / d.scale)))
 end
 
-entropy(d::Laplace) = log(2.0 * e * d.scale)
+entropy(d::Laplace) = log(2.0 * d.scale) + 1.0
 
-insupport(d::Laplace, x::Number) = isreal(x) && isfinite(x)
+insupport(d::Laplace, x::Real) = isfinite(x)
+insupport(d::Type{Laplace}, x::Real) = isfinite(x)
 
 kurtosis(d::Laplace) = 3.0
 
@@ -32,18 +30,19 @@ median(d::Laplace) = d.location
 
 function mgf(d::Laplace, t::Real)
     m, b = d.location, d.scale
-    return exp(t * m) / (1.0 - b^2 * t^2)
+    exp(t * m) / (1.0 - b^2 * t^2)
 end
 
 function cf(d::Laplace, t::Real)
     m, b = d.location, d.scale
-    return exp(im * t * m) / (1.0 + b^2 * t^2)
+    exp(im * t * m) / (1.0 + b^2 * t^2)
 end
 
+mode(d::Laplace) = d.location
 modes(d::Laplace) = [d.location]
 
 function pdf(d::Laplace, x::Real)
-    (1.0 / (2.0 * d.scale)) * exp(-abs(x - d.location) / d.scale)
+    0.5exp(-abs(x - d.location)/d.scale) / d.scale
 end
 
 function logpdf(d::Laplace, x::Real)
@@ -68,13 +67,7 @@ std(d::Laplace) = sqrt(2.0) * d.scale
 
 var(d::Laplace) = 2.0 * d.scale^2
 
-function fit(::Type{Laplace}, x::Array)
-    n = length(x)
+function fit_mle(::Type{Laplace}, x::Array)
     a = median(x)
-    deviations = 0.0
-    for i in 1:n
-        deviations += abs(x[i] - a)
-    end
-    b = deviations / n
-    Laplace(a, b)
+    Laplace(a, mad(x, a))
 end

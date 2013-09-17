@@ -1,11 +1,8 @@
 immutable Chisq <: ContinuousUnivariateDistribution
     df::Float64 # non-integer degrees of freedom are meaningful
     function Chisq(d::Real)
-        if d > 0.0
-            new(float64(d))
-        else
-            error("df must be positive")
-        end
+        d > zero(d) || error("df must be positive")
+        new(float64(d))
     end
 end
 
@@ -13,11 +10,11 @@ end
 
 function entropy(d::Chisq)
     x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)
-    x += (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
-    return x
+    x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
 end
 
-insupport(d::Chisq, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Chisq, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Chisq) = 12.0 / d.df
 
@@ -26,29 +23,23 @@ mean(d::Chisq) = d.df
 # TODO: Switch to using quantile?
 function median(d::Chisq)
     k = d.df
-    return k * (1.0 - 2.0 / (9.0 * k))^3
+    k * (1.0 - 2.0 / (9.0 * k))^3
 end
 
 function mgf(d::Chisq, t::Real)
     k = d.df
-    return (1.0 - 2.0 * t)^(-k / 2.0)
+    (1.0 - 2.0 * t)^(-k / 2.0)
 end
 
-function cf(d::Chisq, t::Real)
-    k = d.df
-    return (1.0 - 2.0 * im * t)^(-k / 2.0)
-end
+cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
 
-modes(d::Chisq) = max(d.df - 2, 0)
+mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
+modes(d::Chisq) = [mode(d)]
 
 # rand - the distribution chi^2(df) is 2 * gamma(df / 2)
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)
-    if d.df == 1
-        return randn()^2
-    else
-        return 2.0 * rand(Gamma(d.df / 2.0))
-    end
+    d.df == 1 ? randn()^2 : 2.0 * rand(Gamma(d.df / 2.0))
 end
 
 function rand!(d::Chisq, A::Array{Float64})

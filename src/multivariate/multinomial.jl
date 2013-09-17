@@ -1,37 +1,44 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
     prob::Vector{Float64}
-    drawtable::DiscreteDistributionTable
-    function Multinomial{T <: Real}(n::Integer, p::Vector{T})
+
+    function Multinomial(n::Integer, p::Vector{Float64})
         if n <= 0
-            error("Multinomial: n must be positive")
+            throw(ArgumentError("n must be a positive integer."))
         end
-        sump = 0.0
-        for i in 1:length(p)
-            if p[i] < 0.0
-                error("Multinomial: probabilities must be non-negative")
-            end
-            sump += p[i]
+        if !isprobvec(p)
+            throw(ArgumentError("p = $p is not a probability vector."))
         end
-        for i in 1:length(p)
-            p[i] /= sump
-        end
-        new(int(n), p, DiscreteDistributionTable(p))
+        new(int(n), p)
     end
 end
 
+immutable MultinomialSampler <: DiscreteMultivariateDistribution
+    d::Multinomial
+    alias::AliasTable
+    function MultinomialSampler(d::Multinomial)
+        new(d, AliasTable(d.prob))
+    end
+end
+
+sampler(d::Multinomial) = MultinomialSampler(d)
+
 function Multinomial(n::Integer, d::Integer)
-    if d <= 1
-        error("d must be greater than 1")
+    if d < 1
+        error("d must be greater than 0")
     end
     prob = Array(Float64, d)
     fill!(prob, 1.0 / d)
     Multinomial(n, prob)
 end
 
+# TODO: Debate removing this
 Multinomial(d::Integer) = Multinomial(1, d)
 
-entropy(d::Multinomial) = pventropy(d.prob)
+dim(d::Multinomial) = length(d.prob)
+dim(s::MultinomialSampler) = length(s.d.prob)
+
+entropy(d::Multinomial) = NumericExtensions.entropy(d.prob)
 
 function insupport{T <: Real}(d::Multinomial, x::Vector{T})
     n = length(x)
@@ -52,6 +59,42 @@ function insupport{T <: Real}(d::Multinomial, x::Vector{T})
 end
 
 mean(d::Multinomial) = d.n .* d.prob
+
+function var(d::Multinomial) 
+    p = d.prob
+    k = length(p)
+    v = Array(Float64, k)
+    n = d.n
+    for i = 1:k
+        pi = p[i]
+        v[i] = n * pi * (1.0 - pi)
+    end
+    v
+end
+
+function cov(d::Multinomial)
+    p = d.prob
+    k = length(p)
+    C = Array(Float64, k, k)
+    n = d.n
+
+    for j = 1:k
+        pj = p[j]
+        for i = 1:j-1
+            C[i,j] = - n * p[i] * pj
+        end
+
+        C[j,j] = n * pj * (1.0-pj)
+    end
+
+    for j = 1:k-1
+        for i = j+1:k
+            C[i,j] = C[j,i]
+        end
+    end
+    C
+end
+
 
 function mgf(d::Multinomial, t::AbstractVector)
     p, n = d.prob, d.n
@@ -88,34 +131,123 @@ function logpdf{T <: Real}(d::Multinomial, x::Vector{T})
     end
 end
 
-function rand!(d::Multinomial, x::Vector)
-    for itr in 1:d.n
-        i = draw(d.drawtable)
-        x[i] += 1
+# TODO: Debate making T <: Integer
+function rand!{T <: Real}(d::Multinomial, x::Vector{T})
+    n, k = d.n, dim(d)
+    fill!(x, 0)
+    psum = 1.0
+    for j in 1:(k - 1)
+        tmp = rand(Binomial(n, d.prob[j] / psum))
+        x[j] = tmp
+        n -= tmp
+        if n == 0
+            break
+        end
+        psum -= d.prob[j]
+    end
+    x[k] = n
+    return x
+end
+
+function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
+    d = s.d
+    n, k = d.n, dim(d)
+    fill!(x, 0)
+    if n^2 > k
+        # Use sequential binomial sampling
+        # TODO: Refactor this code to make it DRYer
+        psum = 1.0
+        for j in 1:(k - 1)
+            tmp = rand(Binomial(n, d.prob[j] / psum))
+            x[j] = tmp
+            n -= tmp
+            if n == 0
+                break
+            end
+            psum -= d.prob[j]
+        end
+        x[k] = n
+    else
+        # Use an alias table
+        for itr in 1:n
+            x[rand(s.alias)] += 1
+        end
     end
     return x
 end
 
 function rand(d::Multinomial)
-    x = zeros(Int, length(d.prob))
+    x = zeros(Int, dim(d))
     return rand!(d, x)
 end
 
-function var(d::Multinomial)
-    n = length(d.prob)
-    S = Array(Float64, n, n)
-    for j in 1:n
-        for i in 1:n
-            if i == j
-                S[i, j] = d.n * d.prob[i] * (1.0 - d.prob[i])
-            else
-                S[i, j] = -d.n * d.prob[i] * d.prob[j]
-            end
-        end
-    end
-    return S
+function rand(s::MultinomialSampler)
+    x = zeros(Int, dim(s.d))
+    return rand!(s, x)
 end
 
-function fit(::Type{Multinomial}, X::Matrix)
-    return Multinomial(sum(X[:, 1]), vec(mean(X, 2)))
+## Fit model
+
+immutable MultinomialStats
+    n::Int  # number of trials in each experiment
+    scnts::Vector{Float64}  # sum of counts
+    tw::Float64  # total sample weight
+
+    MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, float64(tw))
 end
+
+function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})
+    K = size(x, 1)
+    n::T = zero(T)
+    scnts = zeros(K)
+
+    for j = 1:size(x,2)
+        nj = zero(T)
+        for i = 1:K
+            xi = x[i,j]
+            nj += xi
+
+            scnts[i] += xi
+        end
+
+        if j == 1
+            n = nj
+        elseif nj != n
+            error("Each sample in X should sum to the same value.")
+        end
+    end
+    MultinomialStats(n, scnts, size(x,2))
+end
+
+function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64})
+    if length(w) != size(x, 2)
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    K = size(x, 1)
+    n::T = zero(T)
+    scnts = zeros(K)
+    tw = 0.
+
+    for j = 1:size(x,2)
+        nj = zero(T)
+        wj = w[j]
+        tw += wj
+        for i = 1:K
+            xi = x[i,j]
+            nj += xi
+
+            scnts[i] += xi * wj
+        end
+
+        if j == 1
+            n = nj
+        elseif nj != n
+            error("Each sample in X should sum to the same value.")
+        end
+    end
+    MultinomialStats(n, scnts, tw)
+end
+
+fit_mle(::Type{Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
+

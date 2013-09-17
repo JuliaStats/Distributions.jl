@@ -13,6 +13,7 @@ before_install:
     - git config --global user.email "travis@example.net"
 script:
     - julia -e 'versioninfo(); Pkg.init();'
+    - julia -e 'Pkg.add("NumericExtensions")'
     - julia -e 'Pkg.add("Stats")'
     - mkdir -p ~/.julia/Distributions
     - cp -R ./* ~/.julia/Distributions/

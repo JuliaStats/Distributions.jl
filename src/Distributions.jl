@@ -1,10 +1,17 @@
 module Distributions
 
+using NumericExtensions
 using Stats
 
-export                                  # types
-    CauchitLink,
-    CloglogLink,
+export
+    # types
+    VariateForm,
+    ValueSupport,
+    Univariate,
+    Multivariate,
+    Matrixvariate,
+    Discrete,
+    Continuous,
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
@@ -18,6 +25,7 @@ export                                  # types
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
+    SufficientStats,
     Arcsine,
     Bernoulli,
     Beta,
@@ -25,11 +33,15 @@ export                                  # types
     Binomial,
     Categorical,
     Cauchy,
+    Chi,
     Chisq,
-    # Cosine,
+    Cosine,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
+    EdgeworthMean,
+    EdgeworthSum,
+    EdgeworthZ,
     EmpiricalUnivariateDistribution,
     Erlang,
     Exponential,
@@ -38,51 +50,57 @@ export                                  # types
     Geometric,
     Gumbel,
     HyperGeometric,
-    IdentityLink,
-    InverseLink,
     InverseWishart,
-    InvertedGamma,
+    InverseGamma,
+    InverseGaussian,    
+    Kolmogorov,
+    KSDist,
+    KSOneSided,
     Laplace,
     Levy,
-    Link,
     Logistic,
-    LogitLink,
-    LogLink,
-    logNormal,
+    LogNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
+    MvNormal,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
     NoncentralF,
     NoncentralT,
     Normal,
+    NormalGamma,
+    NormalInverseGamma,
+    NormalInverseWishart,
+    NormalWishart,
     Pareto,
     Poisson,
-    ProbitLink,
     Rayleigh,
     Skellam,
     TDist,
     Triangular,
-    TruncatedNormal,
-    TruncatedUnivariateDistribution,
+    Truncated,
     Uniform,
+    VonMisesFisher,
     Weibull,
     Wishart,
-                                        # methods
+    QQPair,
+
+    # methods
     binaryentropy, # entropy of distribution in bits
-    canonicallink, # canonical link function for a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
-    deviance,      # deviance of fitted and observed responses
-    devresid,      # vector of squared deviance residuals
+    dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
-    fit,           # fit a distribution to data
+    fit,           # fit a distribution to data (using default method)
+    fit_mle,       # fit a distribution to data using MLE
+    fit_mle!,      # fit a distribution to data using MLE (inplace update to initial guess)
+    fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
     insupport,     # predicate, is x in the support of the distribution?
     invlogccdf,    # complementary quantile based on log probability
@@ -90,10 +108,9 @@ export                                  # types
     isplatykurtic, # Is excess kurtosis > 0.0?
     isleptokurtic, # Is excess kurtosis < 0.0?
     ismesokurtic,  # Is excess kurtosis = 0.0?
+    isprobvec,     # Is a probability vector?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
-    linkfun,       # link function mapping mu to eta, the linear predictor
-    linkinv,       # inverse link mapping eta to mu
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
     loglikelihood, # log probability of array of IID draws
@@ -101,58 +118,88 @@ export                                  # types
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
+    posterior,       # get posterior distribution given prior and observed data
+    posterior_mode,  # get the mode of posterior distribution
+    posterior_rand,  # draw samples from the posterior distribution
+    posterior_rand!, 
+    posterior_make,  # create a distribution/model from params obtained from posterior 
+    posterior_sample,
+    scale,         # scale parameter of a distribution
+    rate,          # rate parameter of a distribution
+    sqmahal,       # squared Mahalanobis distance to Gaussian center
+    sqmahal!,      # inplace evaluation of sqmahal
     mean,          # mean of distribution
     median,        # median of distribution
     mgf,           # moment generating function
+    mode,          # the mode of a unimodal distribution
     modes,         # mode(s) of distribution as vector
     moment,        # moments of distribution
-    mueta,         # derivative of inverse link function
-    mustart,       # starting values of mean vector in GLMs
+    nsamples,      # get the number of samples in a data array based on distribution types
     pdf,           # probability density function (ContinuousDistribution)
     pmf,           # probability mass function (DiscreteDistribution)
     quantile,      # inverse of cdf (defined for p in (0,1))
+    qqbuild,       # build a paired quantiles data structure for qqplots
     rand,          # random sampler
     rand!,         # replacement random sampler
-    sample,        # another random sampler - not sure why this is here
+    sample,        # sample from a source array
+    sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
-    valideta,      # validity check on linear predictor
-    validmu,       # validity check on mean vector
-    var            # variance of distribution
+    suffstats,     # compute sufficient statistics
+    var,           # variance of distribution
+    wsample        # weighted sampling from a source array
 
-import Base.mean, Base.median, Base.quantile
-import Base.rand, Base.std, Base.var, Base.cor, Base.cov
+import Base.mean, Base.median, Base.quantile, Base.max, Base.min, Base.scale
+import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
-import Stats.kurtosis, Stats.skewness
+import NumericExtensions.dim, NumericExtensions.entropy
+import Stats.kurtosis, Stats.skewness, Stats.mode, Stats.modes
 
-include("drawtable.jl")
-include("tvpack.jl")
 
-abstract Distribution
-abstract UnivariateDistribution             <: Distribution
-abstract MultivariateDistribution           <: Distribution
-abstract MatrixDistribution                 <: Distribution
+#### Distribution type system
 
-abstract DiscreteUnivariateDistribution     <: UnivariateDistribution
-abstract ContinuousUnivariateDistribution   <: UnivariateDistribution
+abstract ValueSupport
+type Discrete <: ValueSupport end
+type Continuous <: ValueSupport end
 
-abstract DiscreteMultivariateDistribution   <: MultivariateDistribution
-abstract ContinuousMultivariateDistribution <: MultivariateDistribution
+abstract VariateForm
+type Univariate <: VariateForm end
+type Multivariate <: VariateForm end
+type Matrixvariate <: VariateForm end
 
-abstract ContinuousMatrixDistribution       <: MatrixDistribution
-abstract DiscreteMatrixDistribution         <: MatrixDistribution
+abstract Distribution{F<:VariateForm,S<:ValueSupport}
 
+typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
+typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
+typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
 typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
-typealias DiscreteDistribution Union(DiscreteUnivariateDistribution, DiscreteMultivariateDistribution)
-typealias ContinuousDistribution Union(ContinuousUnivariateDistribution, ContinuousMultivariateDistribution)
+
+typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
+typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
+
+typealias DiscreteUnivariateDistribution     Distribution{Univariate,    Discrete}
+typealias ContinuousUnivariateDistribution   Distribution{Univariate,    Continuous}
+typealias DiscreteMultivariateDistribution   Distribution{Multivariate,  Discrete}
+typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
+typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
+typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
+
+abstract SufficientStats
+abstract GenerativeFormulation
+
+
+#### Include files
+
+include("constants.jl")
 
 include("fallbacks.jl")
 include("rmath.jl")
+include("specialfuns.jl")
+include("tvpack.jl")
+include("utils.jl")
 
-# TODO: Move these two methods into Stats
-xlogx(x::Real) = x == 0.0 ? 0.0 : x * log(x)
-xlogxdmu(x::Real, mu::Real) = x == 0.0 ? 0.0 : x * log(x / mu)
+include(joinpath("samplers", "categorical_samplers.jl"))
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))
@@ -170,11 +217,16 @@ include(joinpath("univariate", "empirical.jl"))
 include(joinpath("univariate", "exponential.jl"))
 include(joinpath("univariate", "fdist.jl"))
 include(joinpath("univariate", "gamma.jl"))
+include(joinpath("univariate", "edgeworth.jl"))
 include(joinpath("univariate", "erlang.jl"))
 include(joinpath("univariate", "geometric.jl"))
 include(joinpath("univariate", "gumbel.jl"))
 include(joinpath("univariate", "hypergeometric.jl"))
-include(joinpath("univariate", "invertedgamma.jl"))
+include(joinpath("univariate", "inversegamma.jl"))
+include(joinpath("univariate", "inversegaussian.jl"))
+include(joinpath("univariate", "kolmogorov.jl"))
+include(joinpath("univariate", "ksdist.jl"))
+include(joinpath("univariate", "ksonesided.jl"))
 include(joinpath("univariate", "laplace.jl"))
 include(joinpath("univariate", "levy.jl"))
 include(joinpath("univariate", "logistic.jl"))
@@ -198,6 +250,7 @@ include(joinpath("univariate", "weibull.jl"))
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
 include(joinpath("multivariate", "multivariatenormal.jl"))
+include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
 include(joinpath("matrix", "inversewishart.jl"))
@@ -214,7 +267,7 @@ include("mixturemodel.jl")
 include("sample.jl")
 
 # Link functions for GLM's
-include("glmtools.jl")
+#include("glmtools.jl")
 
 # REPL representations
 include("show.jl")
@@ -224,5 +277,17 @@ include("kde.jl")
 
 # Expectations, entropy, KL divergence
 include("functionals.jl")
+
+# Posteriors and conjugate priors
+include("conjugates.jl")
+include(joinpath("conjugate-normal", "normalgamma.jl"))
+include(joinpath("conjugate-normal", "normalinversegamma.jl"))
+include(joinpath("conjugate-normal", "normalwishart.jl"))
+include(joinpath("conjugate-normal", "normalinversewishart.jl"))
+include(joinpath("conjugate-normal", "normalknowncov.jl"))
+
+include("qq.jl")
+
+include("estimators.jl")
 
 end # module

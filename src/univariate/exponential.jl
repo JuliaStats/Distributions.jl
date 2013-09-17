@@ -1,54 +1,32 @@
 immutable Exponential <: ContinuousUnivariateDistribution
     scale::Float64 # note: scale not rate
     function Exponential(sc::Real)
-        if sc > 0.0
-            new(float64(sc))
-        else
-            error("scale must be positive")
-        end
+        sc > zero(sc) || error("scale must be positive")
+        new(float64(sc))
     end
 end
 
 Exponential() = Exponential(1.0)
 
-cdf(d::Exponential, q::Real) = q <= 0.0 ? 0.0 : -expm1(-q / d.scale)
+scale(d::Exponential) = d.scale
+rate(d::Exponential) = 1.0 / d.scale
 
-function logcdf(d::Exponential, q::Real)
-    if q <= 0.0
-        return -Inf
-    else
-        qs = -q / d.scale
-        if qs > log(0.5)
-            return log(-expm1(qs))
-        else
-            return log1p(-exp(qs))
-        end
-    end
-end
+cdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -expm1(-q / d.scale)
 
-function ccdf(d::Exponential, q::Real)
-    q <= 0.0 ? 1.0 : exp(-q / d.scale)
-end
+logcdf(d::Exponential, q::Real) = q > zero(q) ? log1mexp(-q / d.scale) : -Inf
 
-function logccdf(d::Exponential, q::Real)
-    q <= 0.0 ? 0.0 : -q / d.scale
-end
+ccdf(d::Exponential, q::Real) = q <= zero(q) ? 1.0 : exp(-q / d.scale)
 
-function invlogcdf(d::Exponential, lp::Real)
-    if lp <= 0.0
-        -d.scale * (lp > log(0.5) ? log(-expm1(lp)) : log1p(-exp(lp)))
-    else
-        return NaN
-    end
-end
+logccdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -q / d.scale
 
-function invlogccdf(d::Exponential, lp::Real)
-    lp <= 0.0 ? -d.scale * lp : NaN
-end
+invlogcdf(d::Exponential, lp::Real) = lp > zero(lp) ? NaN : -d.scale * log1mexp(lp)
+
+invlogccdf(d::Exponential, lp::Real) = lp <= zero(lp) ? -d.scale * lp : NaN
 
 entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
 
-insupport(d::Exponential, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Exponential, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Exponential) = 6.0
 
@@ -56,53 +34,47 @@ mean(d::Exponential) = d.scale
 
 median(d::Exponential) = d.scale * log(2.0)
 
-function mgf(d::Exponential, t::Real)
-    s = d.scale
-    return (1.0 - t * s)^(-1)
-end
+mgf(d::Exponential, t::Real) = 1.0/(1.0 - t * d.scale)
 
-function cf(d::Exponential, t::Real)
-    s = d.scale
-    return (1.0 - t * im * s)^(-1)
-end
+cf(d::Exponential, t::Real) = (1.0 - t * im * d.scale)^(-1)
 
+mode(d::Exponential) = 0.0
 modes(d::Exponential) = [0.0]
 
-function pdf(d::Exponential, x::Real)
-    x < 0.0 ? 0.0 : exp(-x / d.scale) / d.scale
-end
+pdf(d::Exponential, x::Real) = x < zero(x) ? 0.0 : exp(-x / d.scale) / d.scale
 
-function logpdf(d::Exponential, x::Real)
-    x < 0.0 ? -Inf : -x / d.scale - log(d.scale)
-end
+logpdf(d::Exponential, x::Real) =  x < zero(x) ? -Inf : -x / d.scale - log(d.scale)
 
-function quantile(d::Exponential, p::Real)
-    0.0 <= p <= 1.0 ? -d.scale * log1p(-p) : NaN
-end
+quantile(d::Exponential, p::Real) = zero(p) <= p <= one(p) ? -d.scale * log1p(-p) : NaN
 
-function cquantile(d::Exponential, p::Real)
-    0.0 <= p <= 1.0 ? -d.scale * log(p) : NaN
-end
+cquantile(d::Exponential, p::Real) = zero(p) <= p <= one(p) ? -d.scale * log(p) : NaN
 
-rand(d::Exponential) = d.scale * Random.randmtzig_exprnd()
+rand(d::Exponential) = d.scale * Base.Random.randmtzig_exprnd()
 
 function rand!(d::Exponential, A::Array{Float64})
-    Random.randmtzig_fill_exprnd!(A)
+    Base.Random.randmtzig_fill_exprnd!(A)
     for i in 1:length(A)
         A[i] *= d.scale
     end
-    return A
+    A
 end
 
 skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
-function fit(::Type{Exponential}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Exponential(), x[i])
-            error("Exponential observations must be non-negative values")
-        end
-    end
-    return Exponential(mean(x))
+
+## Fit model
+
+immutable ExponentialStats <: SufficientStats
+    sx::Float64   # (weighted) sum of x
+    sw::Float64   # sum of sample weights
+
+    ExponentialStats(sx::Real, sw::Real) = new(float64(sx), float64(sw))
 end
+
+suffstats(::Type{Exponential}, x::Array) = ExponentialStats(sum(x), length(x))
+    
+suffstats(::Type{Exponential}, x::Array, w::Array) = ExponentialStats(dot(x, w), sum(w))
+
+fit_mle(::Type{Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)

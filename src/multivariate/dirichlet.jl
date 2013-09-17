@@ -1,33 +1,102 @@
 immutable Dirichlet <: ContinuousMultivariateDistribution
     alpha::Vector{Float64}
     alpha0::Float64
+    lmnB::Float64
 
     function Dirichlet{T <: Real}(alpha::Vector{T})
         alpha0::Float64 = 0.0
+        lmnB::Float64 = 0.0        
         for i in 1:length(alpha)
-            if alpha[i] < 0.0
-                error("Dirichlet: elements of alpha must be non-negative")
-            else
-                alpha0 += alpha[i]
+            ai = alpha[i]
+            if ai <= 0. 
+                throw(ArgumentError("alpha must be a positive vector."))
             end
+            alpha0 += ai
+            lmnB += lgamma(ai)
         end
-        new(float64(alpha), alpha0)
+        lmnB -= lgamma(alpha0)
+        new(float64(alpha), alpha0, lmnB)
     end
+
+    function Dirichlet(d::Integer, alpha::Float64)
+        alpha0 = alpha * d
+        new(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
+    end
+
+    Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, float64(alpha))
 end
 
-Dirichlet(d::Integer, alpha::Real) = Dirichlet(fill(alpha, d))
+dim(d::Dirichlet) = length(d.alpha)
 
-Dirichlet(dim::Integer) = Dirichlet(ones(dim))
+mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
+
+function var(d::Dirichlet)
+    α = d.alpha
+    α0 = d.alpha0
+    c = 1.0 / (α0 * α0 * (α0 + 1.0))
+
+    k = length(α)
+    v = Array(Float64, k)
+    for i = 1:k
+        v[i] = α[i] * (α0 - α[i]) * c
+    end
+    v
+end
+
+function cov(d::Dirichlet)
+    α = d.alpha
+    α0 = d.alpha0
+    c = 1.0 / (α0 * α0 * (α0 + 1.0))
+
+    k = length(α)
+    C = Array(Float64, k, k)
+
+    for j = 1:k
+        αj = α[j]
+        αjc = αj * c
+        for i = 1:j-1
+            C[i,j] = - α[i] * αjc
+        end
+        C[j,j] = αj * (α0 - αj) * c
+    end
+
+    for j = 1:k-1
+        for i = j+1:k
+            C[i,j] = C[j,i]
+        end
+    end
+    C
+end
 
 function entropy(d::Dirichlet)
-    k = length(d.alpha)
-    en = lmnB(d)
-    en += (d.alpha0 - k) * digamma(d.alpha0)
+    α = d.alpha
+    α0 = d.alpha0
+    k = length(α)
+
+    en = d.lmnB + (α0 - k) * digamma(α0)
     for j in 1:k
-        en -= (d.alpha[j] - 1.0) * digamma(d.alpha[j])
+        en -= (α[j] - 1.0) * digamma(α[j])
     end
     return en
 end
+
+
+function dirichlet_mode!(r::Vector{Float64}, α::Vector{Float64}, α0::Float64)
+    k = length(α)
+    s = α0 - k
+    for i = 1:k
+        @inbounds ai = α[i]
+        if ai <= 1.
+            error("Dirichlet has a mode only when alpha[i] > 1 for all i" )
+        end
+        @inbounds r[i] = (ai - 1.0) / s
+    end
+    r
+end
+
+mode(d::Dirichlet) = dirichlet_mode!(zeros(dim(d)), d.alpha, d.alpha0)
+modes(d::Dirichlet) = [mode(d)]
+
 
 function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     n = length(x)
@@ -36,10 +105,11 @@ function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     end
     s = 0.0
     for i in 1:n
-        if x[i] < 0.0
+        xi = x[i]
+        if xi < 0.0
             return false
         end
-        s += x[i]
+        s += xi
     end
     if abs(s - 1.0) > 1e-8
         return false
@@ -47,28 +117,24 @@ function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     return true
 end
 
-mean(d::Dirichlet) = d.alpha ./ d.alpha0
-
-function modes(d::Dirichlet)
-    k = length(d.alpha)
-    x = Array(Float64, k)
-    s = d.alpha0 - k
-    for i in 1:k
-        if d.alpha[i] <= 1.0
-            error("modes only defined when alpha[i] > 1 for all i")
-        end
-        x[i] = (d.alpha[i] - 1.0) / s
-    end
-    return [x]
-end
-
 pdf{T <: Real}(d::Dirichlet, x::Vector{T}) = exp(logpdf(d, x))
 
 function logpdf{T <: Real}(d::Dirichlet, x::Vector{T})
-    return dot((d.alpha - 1.0), log(x)) - lmnB(d)
+    a = d.alpha
+    k = length(a)
+    if length(x) != k
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    s = 0.
+    for i in 1 : k
+        s += (a[i] - 1.0) * log(x[i])
+    end
+    s - d.lmnB
 end
 
 function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
+    a = d.alpha
     if size(x, 1) != length(d.alpha)
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
@@ -77,132 +143,259 @@ function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
     if length(r) != n
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    b::Float64 = lmnB(d)
-    At_mul_B(r, log(x), d.alpha - 1.0)
+
+    b::Float64 = d.lmnB
+    Base.LinAlg.BLAS.gemv!('T', 1.0, log(x), d.alpha - 1.0, 0.0, r)
+    # At_mul_B(r, log(x), d.alpha - 1.0)
     for i in 1:n
         r[i] -= b
     end
-    return
+    r
 end
 
 function rand!(d::Dirichlet, x::Vector)
     s = 0.0
     n = length(x)
+    α = d.alpha
     for i in 1:n
-        tmp = rand(Gamma(d.alpha[i]))
-        x[i] = tmp
-        s += tmp
+        s += (x[i] = randg(α[i]))
     end
-    for i in 1:n
-        x[i] /= s
-    end
-    return x
+    multiply!(x, inv(s)) # this returns x
 end
 
-function rand(d::Dirichlet)
-    x = Array(Float64, length(d.alpha))
-    return rand!(d, x)
-end
+rand(d::Dirichlet) = rand!(d, Array(Float64, dim(d)))
 
 function rand!(d::Dirichlet, X::Matrix)
-    m, n = size(X)
-    for j in 1:n
-        for i in 1:m
-            X[i, j] = rand(Gamma(d.alpha[i]))
+    k = size(X, 1)
+    n = size(X, 2)
+    if k != dim(d)
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    α = d.alpha
+    for j = 1:n
+        s = 0.
+        for i = 1:k
+            s += (X[i,j] = randg(α[i]))
+        end
+        inv_s = 1.0 / s
+        for i = 1:k
+            X[i,j] *= inv_s
         end
     end
-    for j in 1:n
-        isum = 0.0
-        for i in 1:m
-            isum += X[i, j]
-        end
-        for i in 1:m
-            X[i, j] /= isum
-        end
-    end
+
     return X
 end
 
-function var(d::Dirichlet)
-    n = length(d.alpha)
-    tmp = d.alpha0^2 * (d.alpha0 + 1.0)
-    S = Array(Float64, n, n)
-    for j in 1:n
-        for i in 1:n
-            if i == j
-                S[i, j] = d.alpha[i] * (d.alpha0 - d.alpha[i]) / tmp
-            else
-                S[i, j] = -d.alpha[i] * d.alpha[j] / tmp
+
+#######################################
+#
+#  Estimation
+#
+#######################################
+
+immutable DirichletStats <: SufficientStats
+    slogp::Vector{Float64}   # (weighted) sum of log(p)
+    tw::Float64              # total sample weights
+
+    DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, float64(tw))
+end
+
+dim(ss::DirichletStats) = length(s.slogp)
+
+mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
+
+function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+    slogp = zeros(K)
+    for i = 1:n
+        for k = 1:K
+            @inbounds slogp[k] += log(P[k,i])
+        end
+    end
+    DirichletStats(slogp, n)
+end
+
+function suffstats(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    tw = 0.
+    slogp = zeros(K)
+
+    for i = 1:n
+        @inbounds wi = w[i]
+        tw += wi
+        for k = 1:K
+            @inbounds slogp[k] += log(P[k,i]) * wi
+        end
+    end
+    DirichletStats(slogp, tw)
+end
+
+# fit_mle methods
+
+## Initialization
+
+function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
+    K = length(μ)
+    
+    α0 = 0.
+    for k = 1:K
+        @inbounds μk = μ[k]
+        @inbounds γk = γ[k]
+        ak = (μk - γk) / (γk - μk * μk)
+        α0 += ak
+    end
+    α0 /= K
+
+    multiply!(μ, α0)     
+end
+
+function dirichlet_mle_init(P::Matrix{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+
+    μ = Array(Float64, K)  # E[p]
+    γ = Array(Float64, K)  # E[p^2]
+
+    for i = 1:n
+        for k = 1:K
+            @inbounds pk = P[k, i]
+            @inbounds μ[k] += pk
+            @inbounds γ[k] += pk * pk
+        end
+    end
+
+    c = 1.0 / n
+    for k = 1:K
+        μ[k] *= c
+        γ[k] *= c
+    end
+
+    _dirichlet_mle_init2(μ, γ)
+end
+
+function dirichlet_mle_init(P::Matrix{Float64}, w::Vector{Float64})
+    K = size(P, 1)
+    n = size(P, 2)
+
+    μ = Array(Float64, K)  # E[p]
+    γ = Array(Float64, K)  # E[p^2]
+    tw = 0.
+
+    for i = 1:n
+        @inbounds wi = w[i]
+        tw += wi
+        for k = 1:K
+            pk = P[k, i]
+            @inbounds μ[k] += pk * wi
+            @inbounds γ[k] += pk * pk * wi
+        end
+    end
+
+    c = 1.0 / tw
+    for k = 1:K
+        μ[k] *= c
+        γ[k] *= c
+    end
+
+    _dirichlet_mle_init2(μ, γ)
+end
+
+## Newton-Ralphson algorithm
+
+function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
+    maxiter::Int=25, tol::Float64=1.0e-12, debug::Bool=false)
+    # This function directly overrides α
+
+    K = length(elogp)
+    if length(α) != K
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    g = Array(Float64, K)
+    iq = Array(Float64, K)
+    α0 = sum(α)
+
+    if debug
+        objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+    end
+
+    t = 0
+    converged = false
+    while !converged && t < maxiter
+        t += 1
+
+        # compute gradient & Hessian
+        # (b is computed as well)
+
+        digam_α0 = digamma(α0)
+        iz = 1.0 / trigamma(α0)
+        gnorm = 0.
+        b = 0.
+        iqs = 0.
+
+        for k = 1:K
+            @inbounds ak = α[k]
+            @inbounds g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
+            @inbounds iq[k] = - 1.0 / trigamma(ak)
+
+            @inbounds b += gk * iq[k]
+            @inbounds iqs += iq[k]
+
+            agk = abs(gk)
+            if agk > gnorm
+                gnorm = agk
             end
         end
-    end
-    return S
-end
-
-function fit{T <: Real}(::Type{Dirichlet}, P::Matrix{T})
-    K, N = size(P)
-
-    alpha = zeros(Float64, K)
-    lpbar = zeros(Float64, K)
-    E_P = Array(Float64, K)
-    E_Psq = zeros(Float64, K)
-    g = Array(Float64, K)
-    q = Array(Float64, K)
-
-    for i in 1:N
-        for k in 1:K
-            tmp = P[k, i]
-            alpha[k] += tmp
-            E_Psq[k] += tmp^2
-            lpbar[k] += log(tmp)
-        end
-    end
-    for k in 1:K
-        alpha[k] /= N
-        E_Psq[k] /= N
-        lpbar[k] /= N
-    end
-    copy!(E_P, alpha)
-
-    alpha0 = (E_P[1] - E_Psq[1]) / (E_Psq[1] - E_P[1]^2)
-    for k in 1:K
-        alpha[k] *= alpha0
-    end
-
-    iteration = 0
-    converged = false
-    while !converged && iteration < 25
-        iteration += 1
-        alpha0 = sum(alpha)
-        b = 0.0
-        iqs = 0.0
-        iz = 1.0 / (N * trigamma(alpha0))
-        dgalpha0 = digamma(alpha0)
-        for k in 1:K
-            g[k] = N * (dgalpha0 - digamma(alpha[k]) + lpbar[k])
-            q[k] = -N * trigamma(alpha[k])
-            b += g[k] / q[k]
-            iqs += 1.0 / q[k]
-        end
         b /= (iz + iqs)
-        for k in 1:K
-            alpha[k] -= (g[k] - b) / q[k]
+
+        # update α
+
+        for k = 1:K
+            @inbounds α[k] -= (g[k] - b) * iq[k]
+            @inbounds if α[k] < 1.0e-12
+                α[k] = 1.0e-12
+            end
         end
-        if norm(g, Inf) > 1e-8
-            converged = true
+        α0 = sum(α)
+
+        if debug
+            prev_objv = objv
+            objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+            @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n", 
+                t, objv, objv - prev_objv, gnorm)
         end
+
+        # determine convergence
+
+        converged = gnorm < tol
     end
 
-    return Dirichlet(alpha)
+    Dirichlet(α)
 end
 
-# Log multinomial beta
-function lmnB(d::Dirichlet)
-    s = 0.0
-    for i in 1:length(d.alpha)
-        s += lgamma(d.alpha[i])
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
+    α = dirichlet_mle_init(P)
+    elogp = mean_logp(suffstats(Dirichlet, P))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
+end
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
+    n = size(P, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    return s - lgamma(d.alpha0)
+
+    α = dirichlet_mle_init(P, w)
+    elogp = mean_logp(suffstats(Dirichlet, P, w))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-mnB(d::Dirichlet) = exp(lmnB(d))
+

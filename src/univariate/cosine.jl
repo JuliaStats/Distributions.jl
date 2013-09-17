@@ -7,24 +7,13 @@ end
 rand(d::Cosine) = asin(2.0 * rand() - 1.0)
 
 function cdf(d::Cosine, x::Real)
-    if x < 0.0
-        return 0.0
-    elseif x > 1.0
-        return 1.0
-    else
-        return 0.5 * (1 + sin(x))
-    end
+    x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : 0.5(1 + sin(x)))
 end
 
 entropy(d::Cosine) = log(4.0 * pi) - 1.0
 
-function insupport(d::Cosine, x::Real)
-    if 0 <= x <= 1.0
-        return true
-    else
-        return false
-    end
-end
+insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
+insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Cosine) = -1.5
 
@@ -35,17 +24,12 @@ median(d::Cosine) = 0.5
 # mgf(d::Cosine, t::Real)
 # cf(d::Cosine, t::Real)
 
+mode(d::Cosine) = 0.5
 modes(d::Cosine) = [0.5]
 
-function pdf(d::Cosine, x::Number)
-    if 0.0 <= x <= 1.0
-        return 0.5 * cos(x)
-    else
-        return 0.0
-    end
-end
+pdf(d::Cosine, x::Real) = zero(x) <= x <= one(x) ? 0.5 * cos(x) : 0.0
 
-quantile(d::Cosine, p::Real) = asin(2.0 * p - 1.0)
+quantile(d::Cosine, p::Real) = asin(2.p - 1.0)
 
 rand(d::Cosine) = sin(rand() * pi / 2.0)^2
 

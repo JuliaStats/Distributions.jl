@@ -1,159 +1,294 @@
-immutable MultivariateNormal <: ContinuousMultivariateDistribution
-    mean::Vector{Float64}
-    covchol::Cholesky{Float64}
-    function MultivariateNormal(m::Vector{Float64}, c::Cholesky{Float64})
-        if length(m) == size(c, 1) == size(c, 2)
-            new(m, c)
-        else
-            error("Dimensions of mean vector and covariance matrix do not match")
+# Multivariate Normal distribution
+
+immutable MultivariateNormal{Cov<:AbstractPDMat} <: ContinuousMultivariateDistribution
+    dim::Int
+    zeromean::Bool
+    μ::Vector{Float64}
+    Σ::Cov
+end
+
+function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov, zmean::Bool)
+    d = length(μ)
+    if dim(Σ) != d
+        throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
+    end
+    MultivariateNormal{Cov}(d, zmean, μ, Σ)
+end
+
+function MultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
+    d = length(μ)
+    if dim(Σ) != d
+        throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
+    end
+    zmean::Bool = true
+    for i = 1:d
+        if μ[i] != 0.
+            zmean = false
+            break
         end
     end
+    MultivariateNormal{Cov}(d, zmean, μ, Σ)
 end
 
-function MultivariateNormal(mean::Vector{Float64}, cov::Matrix{Float64})
-    MultivariateNormal(mean, cholfact(cov))
+function MultivariateNormal{Cov<:AbstractPDMat}(Σ::Cov)
+    d = dim(Σ)
+    MultivariateNormal{Cov}(d, true, zeros(d), Σ)    
 end
-function MultivariateNormal(mean::Vector{Float64})
-    MultivariateNormal(mean, eye(length(mean)))
-end
-function MultivariateNormal(cov::Matrix{Float64})
-    MultivariateNormal(zeros(size(cov, 1)), cov)
-end
-MultivariateNormal() = MultivariateNormal(zeros(2), eye(2))
 
-function cdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
-    k = length(d.mean)
-    if k > 3
-        error("Dimension larger than three is not supported yet")
+MultivariateNormal(μ::Vector{Float64}, σ::Float64) = MultivariateNormal(μ, ScalMat(length(μ), abs2(σ)))
+MultivariateNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MultivariateNormal(μ, PDiagMat(abs2(σ)))
+MultivariateNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, PDMat(Σ))
+
+MultivariateNormal(d::Int, σ::Float64) = MultivariateNormal(ScalMat(d, abs2(σ)))
+MultivariateNormal(Σ::Matrix{Float64}) = MultivariateNormal(PDMat(Σ))
+
+const MvNormal = MultivariateNormal
+
+function insupport{T<:Real}(d::MultivariateNormal, x::Vector{T})
+    return length(x) == d.dim && all(isfinite(x))
+end
+# Just check if any MvNormal could have generated x
+function insupport{T<:Real}(::Type{MultivariateNormal}, x::Vector{T})
+    return all(isfinite(x))
+end
+
+
+# Basic statistics
+
+dim(d::MvNormal) = d.dim
+
+mean(d::MvNormal) = d.μ
+
+var(d::MvNormal) = diag(d.Σ)
+
+cov(d::MvNormal) = full(d.Σ)
+
+logdet_cov(d::MvNormal) = logdet(d.Σ)
+
+mode(d::MvNormal) = d.μ
+
+modes(d::MvNormal) = [mode(d)]
+
+entropy(d::MvNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
+
+
+# PDF evaluation
+
+_gauss_c0(g::MvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
+
+function sqmahal(d::MvNormal, x::Vector{Float64}) 
+    z::Vector{Float64} = d.zeromean ? x : x - d.μ
+    invquad(d.Σ, z) 
+end
+
+function sqmahal!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
+    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
+        throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    stddev = sqrt(diag(var(d)))
-    z = (x - d.mean) ./ stddev
-    C = diagmm(d.covchol[:U], 1.0 / stddev)
-    C = C'C
-    if k == 3
-        return tvtcdf(0, z, C[[2, 3, 6]])
-    elseif k == 2
-        return bvtcdf(0, z[1], z[2], C[2])
-    else
-        return cdf(Normal(), z[1])
+    z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
+    invquad!(r, d.Σ, z)
+end
+
+sqmahal(d::MvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+
+logpdf(d::MvNormal, x::Vector{Float64}) = _gauss_c0(d) - 0.5 * sqmahal(d, x) 
+
+function logpdf!(r::Array{Float64}, d::MvNormal, x::Matrix{Float64})
+    sqmahal!(r, d, x)
+    c0::Float64 = _gauss_c0(d)
+    for i = 1:size(x, 2)
+        r[i] = c0 - 0.5 * r[i]
+    end 
+    r
+end
+
+
+# Sampling
+
+function rand!(d::MvNormal, x::Vector{Float64})
+    unwhiten!(d.Σ, randn!(x))
+    if !d.zeromean
+        add!(x, d.μ)
     end
+    x
 end
 
-function entropy(d::MultivariateNormal)
-    S = cov(d)
-    n = size(S, 1)
-    for j in 1:n
-        for i in 1:n
-            S[i, j] *= 2.0 * pi * e
-        end
+function rand!(d::MvNormal, x::Matrix{Float64})
+    unwhiten!(d.Σ, randn!(x))
+    if !d.zeromean
+        badd!(x, d.μ, 1)
     end
-    return 0.5 * logdet(S)
+    x
 end
 
-function insupport{T <: Real}(d::MultivariateNormal, x::Vector{T})
-    return length(d.mean) == length(x)
-end
 
-mean(d::MultivariateNormal) = d.mean
+# Maximum Likelihood Estimation
+#
+# Specialized algorithms are respectively implemented for 
+# each kind of covariance
+#
 
-function mgf(d::MultivariateNormal, t::AbstractVector)
-    m, S = d.mean, var(d)
-    return exp(dot(t, m) + 0.5 * dot(t, S * t))
-end
-
-function cf(d::MultivariateNormal, t::AbstractVector)
-    m, S = d.mean, var(d)
-    return exp(im * dot(t, m) - 0.5 * dot(t, S * t))
-end
-
-pdf{T<:Real}(d::MultivariateNormal, x::Vector{T}) = exp(logpdf(d, x))
-
-function logpdf{T <: Real}(d::MultivariateNormal, x::Vector{T})
-    k = length(d.mean)
-    u = x - d.mean
-    chol_ldiv!(d.covchol, u)
-    return -0.5 * (k * log(2.0 * pi) + logdet(d.covchol) + dot(u, u))
-end
-
-function logpdf!{T <: Real}(r::AbstractVector,
-                            d::MultivariateNormal,
-                            x::Matrix{T})
-    mu::Vector{Float64} = d.mean
-    k = length(mu)
-    if size(x, 1) != k
-        throw(ArgumentError("The dimension of x is inconsistent with d."))
-    end
+function fit_mle(::Type{MvNormal{PDMat}}, x::Matrix{Float64})
     n = size(x, 2)
-    u = Array(Float64, k, n)
-    for j = 1:n # u[:,j] = x[:,j] - mu
-        for i = 1:k
-            u[i, j] = x[i, j] - mu[i]
-        end
-    end   
-    chol_ldiv!(d.covchol, u)
-    c::Float64 = -0.5 * (k * log(2.0 * pi) + logdet(d.covchol))
+    mu = vec(mean(x, 2))
+    z = bsubtract(x, mu, 1)
+    C = Base.LinAlg.BLAS.gemm('N', 'T', 1.0/n, z, z)   
+    MvNormal(mu, PDMat(C)) 
+end
+
+function fit_mle(::Type{MvNormal{PDMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
+    end
+
+    inv_sw = 1.0 / sum(w)
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    z = Array(Float64, m, n)
     for j = 1:n
-        dot_uj = 0.0
-        for i = 1:k
-            dot_uj += u[i, j] * u[i, j]
-        end      
-        r[j] = c - 0.5 * dot_uj
-    end
-end
-
-function logpdf{T <: Real}(d::MultivariateNormal, x::Matrix{T})
-    r = Array(Float64, size(x, 2))
-    logpdf!(r, d, x)
-    return r
-end
-
-function rand!(d::MultivariateNormal, x::Vector, tmp::Vector)
-    randn!(tmp)
-    At_mul_B(x, d.covchol[:U], tmp)
-    for i in 1:length(x)
-        x[i] += d.mean[i]
-    end
-    return x
-end
-
-function rand!(d::MultivariateNormal, x::Vector)
-    tmp = randn(length(x))
-    return rand!(d, x, tmp)
-end
-
-function rand(d::MultivariateNormal)
-    x = Array(Float64, length(d.mean))
-    tmp = Array(Float64, length(d.mean))
-    return rand!(d, x, tmp)
-end
-
-function rand!(d::MultivariateNormal, X::Matrix)
-    k = length(d.mean)
-    tmp = Array(Float64, k)
-    m, n = size(X)
-    if m != k
-        throw(ArgumentError("Wrong dimensions"))
-    end
-    randn!(X)
-    for i in 1:n
-        # This makes a copy of X[:, i]
-        At_mul_B(tmp, d.covchol[:U], X[:, i])
-        for dim in 1:m
-            X[dim, i] = tmp[dim] + d.mean[dim]
+        cj = sqrt(w[j])
+        for i = 1:m
+            @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
-    return X
+    C = Base.LinAlg.BLAS.gemm('N', 'T', inv_sw, z, z) 
+
+    MvNormal(mu, PDMat(C))
 end
 
-function var(d::MultivariateNormal)
-    U = d.covchol[:U]
-    return U'U
+function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+
+    mu = vec(mean(x, 2))
+    va = zeros(Float64, m)
+    for j = 1:n
+        for i = 1:m
+            @inbounds va[i] += abs2(x[i,j] - mu[i])
+        end
+    end
+    multiply!(va, inv(n))
+
+    MvNormal(mu, PDiagMat(va))
 end
 
-function fit{T <: Real}(::Type{MultivariateNormal}, X::Matrix{T})
-    MultivariateNormal(vec(mean(X, 2)), cov(X'))
+function fit_mle(::Type{MvNormal{PDiagMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
+    end
+
+    inv_sw = 1.0 / sum(w)
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    va = zeros(Float64, m)
+    for j = 1:n
+        @inbounds wj = w[j]
+        for i = 1:m
+            @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
+        end
+    end
+    multiply!(va, inv_sw)
+
+    MvNormal(mu, PDiagMat(va))
 end
 
-function chol_ldiv!(chol::Cholesky{Float64}, u::VecOrMat{Float64})
-    Base.LinAlg.LAPACK.trtrs!('U', 'T', 'N', chol.UL, u)
+function fit_mle(::Type{MvNormal{ScalMat}}, x::Matrix{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+
+    mu = vec(mean(x, 2))
+    va = 0.
+    for j = 1:n
+        va_j = 0.
+        for i = 1:m
+            @inbounds va_j += abs2(x[i,j] - mu[i])
+        end
+        va += va_j
+    end
+
+    MvNormal(mu, ScalMat(m, va / (m * n)))
+end
+
+function fit_mle(::Type{MvNormal{ScalMat}}, x::Matrix{Float64}, w::Vector{Float64})
+    m = size(x, 1)
+    n = size(x, 2)    
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions"))
+    end
+
+    sw = sum(w)
+    inv_sw = 1.0 / sw
+    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+
+    va = 0.
+    for j = 1:n
+        @inbounds wj = w[j]
+        va_j = 0.
+        for i = 1:m
+            @inbounds va_j += abs2(x[i,j] - mu[i]) * wj
+        end
+        va += va_j
+    end
+
+    MvNormal(mu, ScalMat(m, va / (m * sw)))
+end
+
+fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}) = fit_mle(MvNormal{PDMat}, x)
+fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64}) = fit_mle(MvNormal{PDMat}, x, w)
+
+
+# Useful for posterior
+immutable MvNormalStats
+    s::Vector{Float64}  # (weighted) sum of x
+    m::Vector{Float64}  # (weighted) mean of x
+    s2::Matrix{Float64} # (weighted) sum of (x-mu)^2
+    tw::Float64         # total sample weight
+
+    function MvNormalStats(s::Vector{Float64}, m::Vector{Float64},
+                           s2::Matrix{Float64}, tw::Float64)
+        new(s, m, s2, float64(tw))
+    end
+end
+
+function suffstats{T<:Real}(::Type{MvNormal}, X::Matrix{T})
+    d, n = size(X)
+
+    # Could also use NumericExtensions
+    s = X[:,1]
+    for j in 2:n
+        for i in 1:d
+            @inbounds s[i] += X[i,j]
+        end
+    end
+    m = s ./ n
+    
+    Z = vbroadcast(Subtract(), X, m, 1)
+    s2 = A_mul_Bt(Z, Z)
+
+    MvNormalStats(s, m, s2, float64(n))
+end
+
+function suffstats{T<:Real}(::Type{MvNormal}, X::Matrix{T}, w::Array{Float64})
+    d, n = size(X)
+
+    # Could use NumericExtensions or BLAS
+    tw = w[1]
+    s = w[1] .* X[:,1]
+    for j in 2:n
+        @inbounds wj = w[j]
+        for i in 1:d
+            @inbounds s[i] += wj * X[i,j]
+        end
+        tw += wj
+    end
+    m = s ./ tw
+    
+    Z = vbroadcast(Subtract(), X, m, 1)
+    s2 = Z * bmultiply(Z, w, 2)'
+
+    MvNormalStats(s, m, s2, float64(tw))
 end

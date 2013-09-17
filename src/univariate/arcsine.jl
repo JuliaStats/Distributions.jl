@@ -4,25 +4,15 @@ immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
 function cdf(d::Arcsine, x::Real)
-    if x < 0.0
-        return 0.0
-    elseif x > 1.0
-        return 1.0
-    else
-        return (2.0 / pi) * asin(sqrt(x))
-    end
+    x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : (2.0 / pi) * asin(sqrt(x)))
 end
 
-# TODO: This is not right, but is close enough to pass our tests
-entropy(d::Arcsine) = -log(2.0) / pi
+# entropy(d::Arcsine) = log(pi) + digamma(0.5) + eulergamma
+# calculated using higher-precision arithmetic 
+entropy(d::Arcsine) = -0.24156447527049044469
 
-function insupport(d::Arcsine, x::Real)
-    if 0 <= x <= 1.0
-        return true
-    else
-        return false
-    end
-end
+insupport(d::Arcsine, x::Real) = zero(x) <= x <= one(x)
+insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Arcsine) = -1.5
 
@@ -39,21 +29,18 @@ function mgf(d::Arcsine, t::Real)
         end
         s += t^k / factorial(k) * inner_s
     end
-    return 1.0 + s
+    1.0 + s
 end
 
 function cf(d::Arcsine, t::Real)
     error("CF for Arcsine requires confluent hypergeometric function")
 end
 
+mode(d::Arcsine) = 0.0
 modes(d::Arcsine) = [0.0, 1.0]
 
-function pdf(d::Arcsine, x::Number)
-    if 0.0 <= x <= 1.0
-        return 1.0 / (pi * sqrt(x * (1.0 - x)))
-    else
-        return 0.0
-    end
+function pdf(d::Arcsine, x::Real)
+    zero(x) <= x <= one(x) ? 1.0 / (pi * sqrt(x * (1.0 - x))) : 0.0
 end
 
 quantile(d::Arcsine, p::Real) = sin((pi * p) / 2.0)^2

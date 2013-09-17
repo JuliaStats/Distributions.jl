@@ -8,58 +8,51 @@ immutable BetaPrime <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     function BetaPrime(a::Real, b::Real)
-        if a > 0.0 && b > 0.0
-            new(float64(a), float64(b))
-        else
-            error("Both alpha and beta must be positive")
-        end
+        (a > zero(a) && b > zero(b)) || error("Alpha and beta must be positive")
+        new(float64(a), float64(b))
     end
 end
 
 BetaPrime() = BetaPrime(1.0, 1.0)
 
-cdf(d::BetaPrime, q::Real) = inc_beta(q / 1.0 + q, d.alpha, d.beta)
-
-insupport(d::BetaPrime, x::Number) = isreal(x) && x > 0.0 ? true : false
+insupport(::BetaPrime, x::Real) = zero(x) < x
+insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
 
 function mean(d::BetaPrime)
-    if d.beta > 1.0
-        return d.alpha / (d.beta + 1.0)
-    else
-        error("mean not defined when beta <= 1")
-    end
+    d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
 end
 
-function modes(d::BetaPrime)
-    if d.alpha > 1.0
-        return [(d.alpha - 1.0) / (d.beta + 1.0)]
-    else
-        return [0.0]
-    end
-end
+mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
+modes(d::BetaPrime) = [mode(d)]
 
 function pdf(d::BetaPrime, x::Real)
-    a, b = d.alpha, d.beta
-    return (x^(a - 1.0) * (1.0 + x)^(-(a + b))) / beta(a, b)
+    α, β = d.alpha, d.beta
+    (x^(α - 1.0) * (1.0 + x)^(-(α + β))) / beta(α, β)
 end
 
-rand(d::BetaPrime) = 1.0 / rand(Beta(d.alpha, d.beta))
+cdf(d::BetaPrime, q::Real) = cdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+ccdf(d::BetaPrime, q::Real) = ccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+logcdf(d::BetaPrime, q::Real) = logcdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+logccdf(d::BetaPrime, q::Real) = logccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+
+quantile(d::BetaPrime, p::Real) = (x = quantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+cquantile(d::BetaPrime, p::Real) = (x = cquantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogcdf(d::BetaPrime, p::Real) = (x = invlogcdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogccdf(d::BetaPrime, p::Real) = (x = invlogccdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+    
+
+function rand(d::BetaPrime)
+    x = rand(Gamma(d.alpha, 1))
+    y = rand(Gamma(d.beta, 1))
+    x/y
+end
 
 function skewness(d::BetaPrime)
-    a, b = d.alpha, d.beta
-    if b > 3.0
-        return (2.0 * (2.0 * a + b - 1)) / (b - 3.0) *
-               sqrt((b - 2.0) / (a * (a + b - 1.0)))
-    else
-        error("skewness not defined when beta <= 3")
-    end
+    α, β = d.alpha, d.beta
+    β > 3.0 ? (2.0 * (2.0 * α + β - 1))/(β - 3.0) * sqrt((β - 2.0)/(α * (α + β - 1.0))) : NaN
 end
 
 function var(d::BetaPrime)
-    a, b = d.alpha, d.beta
-    if b > 2.0
-        return (a * (a + b - 1.0)) / ((b - 2.0) * (b - 1.0)^2)
-    else
-        error("var not defined when beta <= 2")
-    end
+    α, β = d.alpha, d.beta
+    β > 2.0 ? (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2) : NaN
 end

@@ -2,21 +2,21 @@ immutable Uniform <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
     function Uniform(a::Real, b::Real)
-	    if a < b
-	    	new(float64(a), float64(b))
-	    else
-	    	error("a < b required for range [a, b]")
-	    end
-	end
+	a < b || error("a < b required for range [a, b]")
+	new(float64(a), float64(b))
+    end
+    Uniform() = new(0.0, 1.0)
 end
-
-Uniform() = Uniform(0.0, 1.0)
 
 @_jl_dist_2p Uniform unif
 
+min(d::Uniform) = d.a
+
+max(d::Uniform) = d.b
+
 entropy(d::Uniform) = log(d.b - d.a)
 
-insupport(d::Uniform, x::Number) = isreal(x) && d.a <= x <= d.b
+insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 kurtosis(d::Uniform) = -6.0 / 5.0
 
@@ -34,6 +34,7 @@ function cf(d::Uniform, t::Real)
 	return (exp(im * t * b) - exp(im * t * a)) / (im * t * (b - a))
 end
 
+mode(d::Uniform) = d.a
 modes(d::Uniform) = error("The uniform distribution has no modes")
 
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()
@@ -45,6 +46,22 @@ function var(d::Uniform)
 	return w * w / 12.0
 end
 
-function fit{T <: Real}(::Type{Uniform}, x::Vector{T})
-	Uniform(min(x), max(x))
+# fit model
+
+function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
+    if isempty(x)
+        throw(ArgumentError("x cannot be empty."))
+    end
+
+    xmin = xmax = x[1]
+    for i = 2:length(x)
+        xi = x[i]
+        if xi < xmin
+            xmin = xi
+        elseif xi > xmax
+            xmax = xi
+        end
+    end
+
+    Uniform(xmin, xmax)
 end

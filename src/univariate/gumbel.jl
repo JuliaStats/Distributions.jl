@@ -2,9 +2,7 @@ immutable Gumbel <: ContinuousUnivariateDistribution
     mu::Float64   # location
     beta::Float64 # scale
     function Gumbel(mu::Real, beta::Real)
-        if beta <= 0
-            error("beta must be positive")
-        end
+        beta > zero(beta) || error("beta must be positive")
         new(float64(mu), float64(beta))
     end
 end
@@ -19,7 +17,8 @@ logcdf(d::Gumbel, x::Real) = -exp((d.mu - x) / d.beta)
 
 entropy(d::Gumbel) = log(d.beta) - digamma(1.0) + 1.0
 
-insupport(d::Gumbel, x::Number) = isreal(x) && isfinite(x)
+insupport(::Gumbel, x::Real) = isfinite(x)
+insupport(::Type{Gumbel}, x::Real) = isfinite(x)
 
 kurtosis(d::Gumbel) = 2.4
 
@@ -27,6 +26,7 @@ mean(d::Gumbel) = d.mu - d.beta * digamma(1.0)
 
 median(d::Gumbel) = d.mu - d.beta * log(log(2.0))
 
+mode(d::Gumbel) = d.mu
 modes(d::Gumbel) = [d.mu]
 
 function pdf(d::Gumbel, x::Real)

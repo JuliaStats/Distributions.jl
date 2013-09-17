@@ -2,7 +2,7 @@ immutable MixtureModel <: Distribution
     components::Vector # Vector should be able to contain any type of
                        # distribution with comparable support
     probs::Vector{Float64}
-    drawtable::DiscreteDistributionTable
+    aliastable::AliasTable
     function MixtureModel(c::Vector, p::Vector{Float64})
         if length(c) != length(p)
             error("components and probs must have the same number of elements")
@@ -14,7 +14,7 @@ immutable MixtureModel <: Distribution
             end
             sump += p[i]
         end
-        table = DiscreteDistributionTable(p)
+        table = AliasTable(p)
         new(c, p ./ sump, table)
     end
 end
@@ -36,7 +36,7 @@ function pdf(d::MixtureModel, x::Any)
 end
 
 function rand(d::MixtureModel)
-    i = draw(d.drawtable)
+    i = rand(d.aliastable)
     return rand(d.components[i])
 end
 

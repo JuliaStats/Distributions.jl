@@ -8,11 +8,8 @@ immutable Triangular <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
     function Triangular(l::Real, s::Real)
-        if s > 0.0
-            new(float64(l), float64(s))
-        else
-            error("scale must be positive")
-        end
+        s > zero(s) || error("scale must be positive")
+        new(float64(l), float64(s))
     end
 end
 
@@ -45,6 +42,7 @@ mean(d::Triangular) = d.location
 
 median(d::Triangular) = d.location
 
+mode(d::Triangular) = d.location
 modes(d::Triangular) = [d.location]
 
 function pdf(d::Triangular, x::Real)

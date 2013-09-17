@@ -2,11 +2,8 @@ immutable Beta <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
     function Beta(a::Real, b::Real)
-        if a > 0.0 && b > 0.0
-            new(float64(a), float64(b))
-        else
-            error("Both alpha and beta must be positive")
-        end
+        (a > zero(a) && b > zero(b)) || error("alpha and beta must be positive")
+        new(float64(a), float64(b))
     end
 end
 
@@ -20,33 +17,34 @@ function entropy(d::Beta)
     o -= (d.alpha - 1.0) * digamma(d.alpha)
     o -= (d.beta - 1.0) * digamma(d.beta)
     o += (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
-    return o
+    o
 end
 
-insupport(d::Beta, x::Number) = isreal(x) && 0.0 < x < 1.0
+insupport(::Beta, x::Real) = zero(x) < x < one(x)
+insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
 
 function kurtosis(d::Beta)
     α, β = d.alpha, d.beta
-    den = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
-    num = α * β * (α + β + 2.0) * (α + β + 3.0)
-    return den / num
+    num = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
+    den = α * β * (α + β + 2.0) * (α + β + 3.0)
+    num / den
 end
 
 mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 
 median(d::Beta) = quantile(d, 0.5)
 
-function modes(d::Beta)
-    if d.alpha > 1.0 && d.beta > 1.0
-        return [(d.alpha - 1.0) / (d.alpha + d.beta - 2.0)]
-    else
-        error("Beta distribution with a <= 1 || b <= 1 has no modes")
-    end
+function mode(d::Beta)
+    α, β = d.alpha, d.beta
+    α > 1.0 && β > 1.0 || error("Beta with α <= 1 or β <= 1 has no modes")
+    (α - 1.0) / (α + β - 2.0)
 end
+
+modes(d::Beta) = [mode(d)]
 
 function rand(d::Beta)
     u = rand(Gamma(d.alpha))
-    return u / (u + rand(Gamma(d.beta)))
+    u / (u + rand(Gamma(d.beta)))
 end
 
 # TODO: Don't create temporaries here
@@ -59,29 +57,35 @@ function rand!(d::Beta, A::Array{Float64})
     for i in 1:length(A)
         A[i] = rand(d)
     end
-    return A
+    A
 end
 
 function skewness(d::Beta)
-    den = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
-    num = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
-    return den / num
+    num = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
+    den = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
+    num / den
 end
 
 function var(d::Beta)
     ab = d.alpha + d.beta
-    return d.alpha * d.beta / (ab * ab * (ab + 1.0))
+    d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
 
+## Fit model
+
+# TODO: add MLE method (should be similar to Dirichlet)
+
+# This is a moment-matching method (not MLE)
+#
 function fit(::Type{Beta}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Beta(), x[i])
-            error("Bernoulli observations must be in [0,1]")
-        end
+    for xi in x
+        insupport(Beta, xi) || error("Beta observations must be in [0,1]")
     end
     x_bar = mean(x)
-    v_bar = var(x)
-    a = x_bar * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
-    b = (1.0 - x_bar) * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
-    return Beta(a, b)
+    v_bar = varm(x, x_bar)
+    α = x_bar * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
+    β = (1.0 - x_bar) * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
+    Beta(α, β)
 end
+
+

@@ -7,21 +7,18 @@
 immutable Rayleigh <: ContinuousUnivariateDistribution
     scale::Float64
     function Rayleigh(s::Real)
-        if s > 0.0
-            new(float64(s))
-        else
-            error("scale must be positive")
-        end
+        s > zero(s) || error("scale must be positive")
+        new(float64(s))
     end
+    Rayleigh() = new(1.0)
 end
-
-Rayleigh() = Rayleigh(1.0)
 
 cdf(d::Rayleigh, x::Real) = 1.0 - exp(-x^2 / (2.0 * d.scale^2))
 
 entropy(d::Rayleigh) = 1.0 + log(d.scale) - log(sqrt(2.0)) - digamma(1.0) / 2.0
 
-insupport(d::Rayleigh, x::Number) = isreal(x) && isfinite(x) && 0.0 < x
+insupport(::Rayleigh, x::Real) = zero(x) < x < Inf
+insupport(::Type{Rayleigh}, x::Real) = zero(x) < x < Inf
 
 kurtosis(d::Rayleigh) = -(6.0 * pi^2 - 24.0 * pi + 16.0) / (4.0 - pi)^2
 
@@ -29,14 +26,11 @@ mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
 
 median(d::Rayleigh) = d.scale * sqrt(2. * log(2.))
 
+mode(d::Rayleigh) = d.scale
 modes(d::Rayleigh) = [d.scale]
 
 function pdf(d::Rayleigh, x::Real)
-    if insupport(d, x)
-        return (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2)))
-    else
-        return 0.0
-    end
+    insupport(d, x) ? (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2))) : 0.0
 end
 
 quantile(d::Rayleigh, p::Real) = sqrt(-2.0 * d.scale^2 * log(1.0 - p))

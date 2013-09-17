@@ -1,6 +1,6 @@
-@truncate Normal
 
-function entropy(d::TruncatedNormal)
+
+function entropy(d::Truncated{Normal})
     s = std(d.untruncated)
     a = d.lower
     b = d.upper
@@ -13,12 +13,12 @@ function entropy(d::TruncatedNormal)
            0.5 * (a_phi_a - b_phi_b) / z - 0.5 * ((phi_a - phi_b) / z)^2
 end
 
-function mean(d::TruncatedNormal)
+function mean(d::Truncated{Normal})
     delta = pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)
     return mean(d.untruncated) + delta * var(d.untruncated) / d.nc
 end
 
-function modes(d::TruncatedNormal)
+function modes(d::Truncated{Normal})
     mu = mean(d.untruncated)
     if d.upper < mu
         return [d.upper]
@@ -29,14 +29,14 @@ function modes(d::TruncatedNormal)
     end
 end
 
-function rand(d::TruncatedNormal)
+function rand(d::Truncated{Normal})
     mu = mean(d.untruncated)
     sigma = std(d.untruncated)
     z = randnt((d.lower - mu) / sigma, (d.upper - mu) / sigma)
     return mu + sigma * z
 end
 
-function var(d::TruncatedNormal) 
+function var(d::Truncated{Normal}) 
     s = std(d.untruncated)
     a = d.lower
     b = d.upper
@@ -53,7 +53,7 @@ end
 function randnt(lower::Real, upper::Real)
     if (lower <= 0 && upper == Inf) ||
        (upper >= 0 && lower == Inf) ||
-       (lower <= 0 && upper >= 0 && upper - lower > sqrt(2.0 * pi))
+       (lower <= 0 && upper >= 0 && upper - lower > √2π)
         while true
             r = randn()
             if r > lower && r < upper

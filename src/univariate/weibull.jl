@@ -2,11 +2,8 @@ immutable Weibull <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
     function Weibull(sh::Real, sc::Real)
-    	if 0.0 < sh && 0.0 < sc
-    		new(float64(sh), float64(sc))
-    	else
-    		error("Both shape and scale must be positive")
-    	end
+    	zero(sh) < sh && zero(sc) < sc || error("Both shape and scale must be positive")
+    	new(float64(sh), float64(sc))
     end
 end
 
@@ -27,7 +24,8 @@ function entropy(d::Weibull)
     return ((k - 1.0) / k) * -digamma(1.0) + log(l / k) + 1.0
 end
 
-insupport(d::Weibull, x::Number) = isreal(x) && isfinite(x) && 0.0 <= x
+insupport(::Weibull, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Weibull}, x::Real) = zero(x) <= x < Inf
 
 function kurtosis(d::Weibull)
     λ, k = d.scale, d.shape
@@ -61,3 +59,10 @@ function skewness(d::Weibull)
 end
 
 var(d::Weibull) = d.scale^2 * gamma(1.0 + 2.0 / d.shape) - mean(d)^2
+
+function mode(d::Weibull)
+    inv_k = 1.0 / d.shape
+    d.shape > 1.0 ? d.scale * (1.0 - inv_k) ^ inv_k : 0.0
+end
+
+modes(d::Weibull) = [mode(d)]

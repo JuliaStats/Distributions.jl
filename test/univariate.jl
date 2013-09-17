@@ -10,42 +10,40 @@
 # These tests are quite slow, but are essential to verifying the
 # accuracy of our distributions
 
+using Distributions
+using Base.Test
+
+probpts(n::Int) = ((1:n) - 0.5)/n  
+const pp  = float(probpts(100))  
+const lpp = log(pp)
+
 # Use a large, odd number of samples for testing all quantities
 n_samples = 5_000_001
 
 # Try out many parameterizations of any given distribution
 for d in [Arcsine(),
-          Bernoulli(0.1),
-          Bernoulli(0.5),
-          Bernoulli(0.9),
           Beta(2.0, 2.0),
           Beta(3.0, 4.0),
           Beta(17.0, 13.0),
-          # BetaPrime(3.0, 3.0),
-          # BetaPrime(3.0, 5.0),
-          # BetaPrime(5.0, 3.0),
-          Binomial(1, 0.5),
-          Binomial(100, 0.1),
-          Binomial(100, 0.9),
-          Categorical([0.1, 0.9]),
-          Categorical([0.5, 0.5]),
-          Categorical([0.9, 0.1]),
+          BetaPrime(3.0, 3.0),
+          BetaPrime(3.0, 5.0),
+          BetaPrime(5.0, 3.0),
           Cauchy(0.0, 1.0),
           Cauchy(10.0, 1.0),
           Cauchy(0.0, 10.0),
-          # Chi(12),
+          Chi(12),
           Chisq(8),
           Chisq(12.0),
           Chisq(20.0),
           # Cosine(),
-          DiscreteUniform(0, 3),
-          DiscreteUniform(2.0, 5.0),
           # Empirical(),
           Erlang(1),
           Erlang(17.0),
           Exponential(1.0),
           Exponential(5.1),
-          # FDist(2, 21), # Entropy wrong
+          FDist(9, 9),
+          FDist(9, 21),
+          FDist(21, 9),
           Gamma(3.0, 2.0),
           Gamma(2.0, 3.0),
           Gamma(3.0, 3.0),
@@ -54,12 +52,16 @@ for d in [Arcsine(),
           Geometric(0.9),
           Gumbel(3.0, 5.0),
           Gumbel(5, 3),
-          # HyperGeometric(1.0, 1.0, 1.0),
-          # HyperGeometric(2.0, 2.0, 2.0),
-          # HyperGeometric(3.0, 2.0, 2.0),
-          # HyperGeometric(2.0, 3.0, 2.0),
-          # HyperGeometric(2.0, 2.0, 3.0),
-          # InvertedGamma(),
+          HyperGeometric(1.0, 1.0, 1.0),
+          HyperGeometric(2.0, 2.0, 2.0),
+          HyperGeometric(3.0, 2.0, 2.0),
+          HyperGeometric(2.0, 3.0, 2.0),
+          HyperGeometric(2.0, 2.0, 3.0),
+          InverseGaussian(1.0,1.0),
+          InverseGaussian(2.0,7.0),
+          InverseGamma(1.0, 1.0),
+          InverseGamma(2.0, 3.0),
+          # Kolmogorov(), # no quantile function
           Laplace(0.0, 1.0),
           Laplace(10.0, 1.0),
           Laplace(0.0, 10.0),
@@ -69,33 +71,40 @@ for d in [Arcsine(),
           Logistic(0.0, 1.0),
           Logistic(10.0, 1.0),
           Logistic(0.0, 10.0),
-          logNormal(0.0, 1.0),
-          logNormal(10.0, 1.0),
-          logNormal(0.0, 10.0),
-          # NegativeBinomial(),
-          # NoncentralBeta(),
-          # NoncentralChisq(),
-          # NoncentralFDist(),
-          # NoncentralTDist(),
+          LogNormal(0.0, 1.0),
+          LogNormal(10.0, 1.0),
+          LogNormal(0.0, 10.0),
+          NegativeBinomial(),
+          NegativeBinomial(5, 0.6),
+          NoncentralBeta(2,2,0),
+          NoncentralBeta(2,6,5),
+          NoncentralChisq(2,2),
+          NoncentralChisq(2,5),
+          NoncentralF(2,2,2),
+          NoncentralF(8,10,5),
+          NoncentralT(2,2),
+          NoncentralT(10,2),
           Normal(0.0, 1.0),
           Normal(-1.0, 10.0),
           Normal(1.0, 10.0),
-          # Pareto(),
+          Pareto(),
+          Pareto(5.0,2.0),
+          Pareto(2.0,5.0),
           Poisson(2.0),
           Poisson(10.0),
           Poisson(51.0),
           Rayleigh(1.0),
           Rayleigh(5.0),
           Rayleigh(10.0),
-          # Skellam(10.0, 2.0), # Entropy wrong
-          # TDist(1), # Entropy wrong
-          # TDist(28), # Entropy wrong
+          # Skellam(10.0, 2.0), # no quantile function
+          TDist(1),
+          TDist(28),
           Triangular(3.0, 1.0),
           Triangular(3.0, 2.0),
           Triangular(10.0, 10.0),
-          TruncatedNormal(Normal(0, 1), -3, 3),
-          # TruncatedNormal(Normal(-100, 1), 0, 1),
-          TruncatedNormal(Normal(27, 3), 0, Inf),
+          Truncated(Normal(0, 1), -3, 3),
+          # Truncated(Normal(-100, 1), 0, 1),
+          Truncated(Normal(27, 3), 0, Inf),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
@@ -107,135 +116,144 @@ for d in [Arcsine(),
     # Mention distribution being run
     # println(d)
 
-    # Check that we can generate a single random draw
+    n = length(pp)
+    is_continuous = isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
+    is_discrete = isa(d, Truncated) ? isa(d.untruncated, DiscreteDistribution) : isa(d, DiscreteDistribution) 
+
+    @assert is_continuous == !is_discrete
+    sample_ty = is_continuous ? Float64 : Int
+
+    # avoid checking high order moments for LogNormal and Logistic
+    avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, Truncated)
+
+    #####
+    #
+    #  Part 1: Capability of random number generation
+    #
+    #####
+
+    # check that we can generate a single random draw
     draw = rand(d)
 
-    # Check that draw satifies insupport()
-    @assert insupport(d, draw)
+    # check that draw satifies insupport()
+    @test insupport(d, draw)
 
-    # Check that we can generate many random draws at once
-    x = rand(d, n_samples)
+    # check that we can generate many random draws at once
+    x = rand(d, n)
+    @test nsamples(typeof(d), x) == n
 
-    # Check that sequence of draws satifies insupport()
-    @assert insupport(d, x)
+    # check that sequence of draws satifies insupport()
+    @test insupport(d, x)
 
-    # Check that we can generate many random draws in-place
+    # check that we can generate many random draws in-place
     rand!(d, x)
 
-    mu, mu_hat = mean(d), mean(x)
-    ent, ent_hat = entropy(d), -mean(logpdf(d, x))
-    ent2, ent_hat2 = entropy(d), -mean(log(pdf(d, x)))
-    m, m_hat = median(d), median(x)
-    sigma, sigma_hat = var(d), var(x)
+    ##### 
+    #
+    #  Part 2: Evaluation 
+    #  ----------------------
+    #
+    #  This part tests the integrity/consistency of following functions:
+    #
+    #  - pdf
+    #  - cdf
+    #  - ccdf
+    #
+    #  - logpdf
+    #  - logcdf
+    #  - logccdf
+    #
+    #  - quantile
+    #  - cquantile
+    #  - invlogcdf
+    #  - invlogccdf
+    #
+    #####
 
-    # Check that KL between fitted distribution and true distribution
-    #  is small
-    # TODO: Restore the line below
-    # d_hat = fit(typeof(d), x)
-    # TODO: @assert kl(d, d_hat) < 1e-2
+    # evaluate by scalar
 
-    # Because of the Weak Law of Large Numbers,
-    #  empirical mean should be close to theoretical value
-    if isfinite(mu)
-        if sigma > 0.0
-            @assert abs(mu - mu_hat) / sigma < 1e-0
-        else
-            @assert abs(mu - mu_hat) < 1e-1
-        end
+    x = zeros(sample_ty, n)
+    r_cquan = zeros(sample_ty, n)
+
+    r_pdf = zeros(n)
+    r_cdf = zeros(n)
+    r_ccdf = zeros(n)
+
+    r_logpdf = zeros(n)
+    r_logcdf = zeros(n)
+    r_logccdf = zeros(n)
+
+    r_invlogcdf = zeros(n)
+    r_invlogccdf = zeros(n)
+
+    for i in 1:n
+        x[i] = quantile(d, pp[i])
+        r_cquan[i] = cquantile(d, pp[i])
+
+        xi = x[i]
+        r_pdf[i] = pdf(d, xi)     
+        r_cdf[i] = cdf(d, xi)
+        r_ccdf[i] = ccdf(d, xi)
+
+        r_logpdf[i] = logpdf(d, xi)
+        r_logcdf[i] = logcdf(d, xi)
+        r_logccdf[i] = logccdf(d, xi)
+
+        r_invlogcdf[i] = invlogcdf(d, lpp[i])
+        r_invlogccdf[i] = invlogccdf(d, lpp[i])
     end
 
-    # By the Asymptotic Equipartition Property,
-    #  empirical mean negative log PDF should be close to theoretical value
-    if isfinite(ent) && !isa(d, Arcsine)
-        # @assert norm(ent - ent_hat, Inf) < 1e-1
-        if ent > 0.0
-            @assert abs(ent - ent_hat) / abs(ent) < 1e-0
-        end
+    # testing consistency between scalar evaluation and vectorized evaluation
+
+    for i in 1:length(x)
+        @test_approx_eq quantile(d, pp)  x
+        @test_approx_eq cquantile(d, pp) r_cquan
+        @test_approx_eq pdf(d, x)        r_pdf
+        @test_approx_eq cdf(d, x)        r_cdf
+        @test_approx_eq ccdf(d, x)       r_ccdf
+        @test_approx_eq logpdf(d, x)     r_logpdf
+        @test_approx_eq logcdf(d, x)     r_logcdf
+        @test_approx_eq logccdf(d, x)    r_logccdf
+
+        @test_approx_eq invlogcdf(d, lpp)  r_invlogcdf
+        @test_approx_eq invlogccdf(d, lpp) r_invlogccdf
     end
 
-    # TODO: Test logpdf!()
+    # # testing consistency between different functions
 
-    # Test non-logged PDF
-    if isfinite(ent2) && !isa(d, Arcsine)
-        # @assert norm(ent - ent_hat, Inf) < 1e-1
-        if ent2 > 0.0
-            @assert abs(ent2 - ent_hat2) / abs(ent2) < 1e-0
-        end
-    end
+    @test_approx_eq logpdf(d, x) log(pdf(d, x))
+    @test_approx_eq cquantile(d, 1 - pp) x
 
-    # TODO: Test pdf!()
-
-    # TODO: Test independence of draws?
-
-    # TODO: Test cdf, quantile
-    if isa(d, ContinuousUnivariateDistribution)
-        for p in 0.1:0.1:0.9
-            @assert abs(cdf(d, quantile(d, p)) - p) < 1e-8
-        end
+    if is_continuous
+        @test_approx_eq cdf(d, x) pp
+        @test_approx_eq ccdf(d, x) 1 - pp
+        @test_approx_eq logcdf(d, x) lpp
+        @test_approx_eq logccdf(d, x) lpp[end:-1:1]
+        @test_approx_eq invlogcdf(d, lpp) x
+        @test_approx_eq invlogccdf(d, lpp) x[end:-1:1]
     end
 
     # TODO: Test mgf, cf
 
-    # TODO: Test median
-    if insupport(d, m_hat) && isa(d, ContinuousDistribution)
-        if isa(d, Cauchy) || isa(d, Laplace)
-            @assert abs(m - m_hat) / d.scale < 1e-0
-        else
-            # @assert norm(m - m_hat, Inf) < 1e-1
-            @assert abs(m - m_hat) / sigma < 1e-0
-        end
-    end
+    ##### 
+    #
+    #  Part 3: Other tests
+    #
+    #####
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
-    if !isa(d, Uniform)
+
+    if !isa(d, Uniform) && method_exists(modes,(typeof(d),))
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
             if insupport(d, ms[1] + 0.1)
-                @assert pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
+                @test pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
             end
             if insupport(d, ms[1] - 0.1)
-                @assert pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
+                @test pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
             end
-        end
-    end
-
-    # Bail on higher moments for LogNormal distribution or
-    # truncated distributions
-    if isa(d, logNormal) || isa(d, TruncatedUnivariateDistribution)
-        continue
-    end
-
-    sk, sk_hat = skewness(d), skewness(x)
-    k, k_hat = kurtosis(d), kurtosis(x)
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical covariance matrix should be close to theoretical value
-    if isfinite(mu)
-        if sigma > 0.0
-            @assert abs(sigma - sigma_hat) / sigma < 1e-0
-        else
-            @assert abs(sigma - sigma_hat) < 1e-1
-        end
-    end
-
-    # TODO: Test cov and cor for multivariate distributions
-    # TODO: Decide how var(d::MultivariateDistribution) should be defined
-
-    # Because of the Weak Law of Large Numbers,
-    #  empirical skewness should be close to theoretical value
-    if isfinite(mu)
-        if sk > 0.0
-            @assert abs(sk - sk_hat) / sigma < 1e-0
-        else
-            @assert abs(sk - sk_hat) < 1e-1
-        end
-    end
-
-    if isfinite(mu)
-        if k > 0.0
-            @assert abs(k - k_hat) / abs(k) < 1e-0
-        else
-            @assert abs(k - k_hat) < 1e-1
         end
     end
 end
+
+

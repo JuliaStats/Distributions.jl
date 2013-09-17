@@ -7,80 +7,104 @@
 ##############################################################################
 
 immutable Bernoulli <: DiscreteUnivariateDistribution
-    prob::Float64
+    p0::Float64
+    p1::Float64
+
     function Bernoulli(p::Real)
-        if 0.0 <= p <= 1.0
-            new(float64(p))
-        else
-            error("prob must be in [0,1]")
-        end
+        zero(p) <= p <= one(p) || error("prob must be in [0,1]")
+        new(1.0 - p, float64(p))
     end
 end
 
 Bernoulli() = Bernoulli(0.5)
 
-cdf(d::Bernoulli, q::Real) = q < 0.0 ? 0.0 : (q >= 1.0 ? 1.0 : 1.0 - d.prob)
+min(d::Bernoulli) = 0
+max(d::Bernoulli) = 1
 
-entropy(d::Bernoulli) = -xlogx(1.0 - d.prob) - xlogx(d.prob)
+cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
-insupport(d::Bernoulli, x::Number) = (x == 0) || (x == 1)
-
-kurtosis(d::Bernoulli) = 1.0 / var(d) - 6.0
-
-mean(d::Bernoulli) = d.prob
-
-median(d::Bernoulli) = d.prob < 0.5 ? 0.0 : 1.0
-
-function mgf(d::Bernoulli, t::Real)
-    p = d.prob
-    return 1.0 - p + p * exp(t)
+function entropy(d::Bernoulli) 
+    p0 = d.p0
+    p1 = d.p1
+    p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
 end
 
-function cf(d::Bernoulli, t::Real)
-    p = d.prob
-    return 1.0 - p + p * exp(im * t)
-end
+insupport(::Bernoulli, x::Real) = (x == zero(x)) || (x == one(x))
+insupport(::Type{Bernoulli}, x::Real) = (x == zero(x)) || (x == one(x))
+
+mean(d::Bernoulli) = d.p1
+
+var(d::Bernoulli) = d.p0 * d.p1
+
+skewness(d::Bernoulli) = (d.p0 - d.p1) / sqrt(d.p0 * d.p1)
+
+kurtosis(d::Bernoulli) = 1.0 / (d.p0 * d.p1) - 6.0
+
+median(d::Bernoulli) = d.p1 < 0.5 ? 0.0 : 1.0
+
+mgf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(t)
+
+cf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(im * t)
+
+mode(d::Bernoulli) = d.p1 > 0.5 ? 1 : 0
 
 function modes(d::Bernoulli)
-    if d.prob < 0.5
-      return [0]
-    elseif d.prob == 0.5
-      return [0, 1]
-    else
-      return [1]
-    end
+    d.p1 < 0.5 ? [0] : 
+    d.p1 > 0.5 ? [1] : [0, 1]
 end
 
-pdf(d::Bernoulli, x::Real) = x == 0 ? (1.0 - d.prob) : (x == 1 ? d.prob : 0.0)
+pdf(d::Bernoulli, x::Real) = x == zero(x) ? d.p0 : x == one(x) ? d.p1 : 0.0
 
-logpdf(d::Bernoulli, mu::Real, y::Real) = y == 0 ? log(1.0 - mu) : (y == 1 ? log(mu) : -Inf)
+quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= d.p0 ? 0 : 1) : NaN
 
-quantile(d::Bernoulli, p::Real) = 0.0 < p < 1.0 ? (p <= (1.0 - d.prob) ? 0 : 1) : NaN
+rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
-rand(d::Bernoulli) = rand() > d.prob ? 0 : 1
 
-skewness(d::Bernoulli) = (1.0 - 2.0 * d.prob) / std(d)
+## MLE fitting
 
-var(d::Bernoulli) = d.prob * (1.0 - d.prob)
+immutable BernoulliStats <: SufficientStats
+    cnt0::Float64
+    cnt1::Float64
 
-function fit(::Type{Bernoulli}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Bernoulli(), x[i])
-            error("Bernoulli observations must be in {0, 1}")
+    BernoulliStats(c0::Real, c1::Real) = new(float64(c0), float64(c1))
+end
+
+fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
+
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T})
+    n0 = 0
+    n1 = 0
+    for xi in x
+        if xi == 0
+            n0 += 1
+        elseif xi == 1
+            n1 += 1
+        else
+            throw(DomainError())
         end
     end
-    return Bernoulli(mean(x))
+    BernoulliStats(n0, n1)
 end
 
-# GLM methods
-function devresid(d::Bernoulli, y::Real, mu::Real, wt::Real)
-    2wt * (xlogxdmu(y, mu) + xlogxdmu(1.0 - y, 1.0 - mu))
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T}, w::Array{Float64})
+    n = length(x)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    n0 = 0.0
+    n1 = 0.0
+    for i = 1:n
+        xi = x[i]
+        if xi == 0
+            n0 += w[i]
+        elseif xi == 1
+            n1 += w[i]
+        else
+            throw(DomainError())
+        end
+    end
+    BernoulliStats(n0, n1)
 end
 
-function devresid(d::Bernoulli, y::Vector{Float64}, mu::Vector{Float64}, wt::Vector{Float64})
-    [2wt[i] * (xlogxdmu(y[i], mu[i]) + xlogxdmu(1.0 - y[i], 1.0 - mu[i])) for i in 1:length(y)]
-end
 
-mustart(d::Bernoulli,  y::Real, wt::Real) = (wt * y + 0.5) / (wt + 1.0)
-
-var(d::Bernoulli, mu::Real) = max(eps(), mu * (1.0 - mu))
