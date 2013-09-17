@@ -207,3 +207,11 @@ function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}; mu::Fl
     end    
 end
 
+location(d::Normal) = d.μ
+scale(d::Normal) = d.σ
+
+Base.(:+)(d::Normal, a::Real) = Normal(d.μ + a, d.σ)
+Base.(:+)(a::Real, d::Normal) = Normal(d.μ + a, d.σ)
+
+Base.(:*)(d::Normal, b::Real) = Normal(d.μ, b * d.σ)
+Base.(:*)(b::Real, d::Normal) = Normal(d.μ, b * d.σ)

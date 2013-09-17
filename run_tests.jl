@@ -14,7 +14,8 @@ tests = [
 	"kolmogorov",
 	"edgeworth",
 	"matrix",
-	"vonmisesfisher"]
+	"vonmisesfisher",
+	"locationscale"]
 
 println("Running tests:")
 

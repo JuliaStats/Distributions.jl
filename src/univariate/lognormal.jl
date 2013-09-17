@@ -45,3 +45,6 @@ function fit_mle{T <: Real}(::Type{LogNormal}, x::Array{T})
     lx = log(x)
     LogNormal(mean(lx), std(lx))
 end
+
+location(d::LogNormal) = d.meanlog
+scale(d::LogNormal) = d.sdlog
