@@ -47,3 +47,6 @@ end
 quantile(d::Levy, p::Real) = d.location + d.scale / (2.erfcinv(p)^2)
 
 rand(d::Levy) = d.location + 1 / rand(Normal(0.0, 1.0 / sqrt(d.scale)))^2
+
+location(d::Levy) = d.location
+scale(d::Levy) = d.scale

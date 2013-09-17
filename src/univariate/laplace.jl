@@ -71,3 +71,6 @@ function fit_mle(::Type{Laplace}, x::Array)
     a = median(x)
     Laplace(a, mad(x, a))
 end
+
+location(d::Laplace) = d.location
+scale(d::Laplace) = d.scale

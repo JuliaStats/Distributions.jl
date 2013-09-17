@@ -14,6 +14,7 @@ export
     Continuous,
     Distribution,
     UnivariateDistribution,
+    UnivariateLocationScaleFamily,
     MultivariateDistribution,
     MatrixDistribution,
     NonMatrixDistribution,
@@ -107,6 +108,7 @@ export
     isprobvec,     # Is a probability vector?
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
+    location,      # location of a location-scale family
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
     loglikelihood, # log probability of array of IID draws
@@ -138,6 +140,7 @@ export
     rand!,         # replacement random sampler
     sample,        # sample from a source array
     sampler,       # create a Sampler object for efficient samples
+    scale,         # scale of a location-scale family
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
@@ -278,5 +281,8 @@ include("conjugates.jl")
 include("qq.jl")
 
 include("estimators.jl")
+
+# Location-scale families
+include("locationscale.jl")
 
 end # module
