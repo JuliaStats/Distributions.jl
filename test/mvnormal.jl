@@ -4,6 +4,8 @@ import NumericExtensions
 import NumericExtensions.ScalMat
 import NumericExtensions.PDiagMat
 import NumericExtensions.PDMat
+import NumericExtensions.vbroadcast
+import NumericExtensions.Subtract
 
 using Distributions
 using Base.Test
@@ -218,4 +220,33 @@ g = fit_mle(MvNormal{PDMat}, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.mat C
+
+
+##### Sufficient statistics type
+n = 3
+X = reshape(Float64[1:12], 4, n)
+w = rand(n)
+Xw = X * diagm(w)
+
+ss = suffstats(MvNormal, X)
+ssw = suffstats(MvNormal, X, w)
+
+s_t = sum(X, 2)
+ws_t = sum(Xw, 2)
+tmp = vbroadcast(Subtract(), X, s_t./n, 1)
+ss_t = tmp*tmp'
+tmp = vbroadcast(Subtract(), X, sum(Xw,2)./sum(w), 1)
+wss_t = (tmp*diagm(w))*tmp'
+tw_t = length(w)
+wtw_t = sum(w)
+
+@test_approx_eq ss.s s_t
+@test_approx_eq ss.m (s_t ./ n)
+@test_approx_eq ss.s2 ss_t
+@test_approx_eq ss.tw tw_t
+
+@test_approx_eq ssw.s ws_t
+@test_approx_eq ssw.m (ws_t ./ wtw_t)
+@test_approx_eq ssw.s2 wss_t
+@test_approx_eq ssw.tw wtw_t
 

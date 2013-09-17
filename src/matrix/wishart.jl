@@ -27,6 +27,10 @@ function insupport(W::Wishart, X::Matrix{Float64})
     return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) &&
            size(X, 1) == size(W.Schol, 1) && hasCholesky(X)
 end
+# This just checks if X could come from any Wishart
+function insupport(::Type{Wishart}, X::Matrix{Float64})
+    return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) && hasCholesky(X)
+end
 
 mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 
@@ -65,12 +69,3 @@ function rand(w::Wishart)
 end
 
 var(w::Wishart) = error("Not yet implemented")
-
-# multivariate gamma / partial gamma function
-function lpgamma(p::Int64, a::Float64)
-    res::Float64 = p * (p - 1.0) / 4.0 * log(pi)
-    for ii in 1:p
-        res += lgamma(a + (1.0 - ii) / 2.0)
-    end
-    return res
-end
