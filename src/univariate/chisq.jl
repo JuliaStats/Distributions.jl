@@ -13,9 +13,6 @@ function entropy(d::Chisq)
     x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
 end
 
-insupport(::Chisq, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
-
 kurtosis(d::Chisq) = 12.0 / d.df
 
 mean(d::Chisq) = d.df
@@ -64,3 +61,15 @@ end
 skewness(d::Chisq) = sqrt(8.0 / d.df)
 
 var(d::Chisq) = 2.0 * d.df
+
+### handling support
+insupport(::Chisq, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
+
+
+isupperbounded(d::Chisq) = false
+islowerbounded(d::Chisq) = true
+isbounded(d::Chisq) = false
+
+hasfinitesupport(d::Chisq) = false
+min(d::Chisq) = zero(Real)

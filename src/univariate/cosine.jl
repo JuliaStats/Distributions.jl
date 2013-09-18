@@ -12,9 +12,6 @@ end
 
 entropy(d::Cosine) = log(4.0 * pi) - 1.0
 
-insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
-insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
-
 kurtosis(d::Cosine) = -1.5
 
 mean(d::Cosine) = 0.5
@@ -36,3 +33,15 @@ rand(d::Cosine) = sin(rand() * pi / 2.0)^2
 skewness(d::Cosine) = 0.0
 
 var(d::Cosine) = (pi^2 - 8.0) / (4.0 * pi^2)
+
+### handling support
+insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
+insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
+
+isupperbounded(d::Cosine) = true
+islowerbounded(d::Cosine) = true
+isbounded(d::Cosine) = true
+
+hasfinitesupport(d::Cosine) = false
+min(d::Cosine) = zero(Real)
+max(d::Cosine) = one(Real)

@@ -21,9 +21,6 @@ cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
 
 entropy(d::Erlang) = entropy(d.nested_gamma)
 
-insupport(::Erlang, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Erlang}, x::Real) = zero(x) <= x < Inf
-
 kurtosis(d::Erlang) = kurtosis(d.nested_gamma)
 
 mean(d::Erlang) = d.shape * d.scale
@@ -55,3 +52,14 @@ end
 skewness(d::Erlang) = skewness(d.nested_gamma)
 
 var(d::Erlang) = d.scale^2 * d.shape
+
+### handling support
+insupport(::Erlang, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Erlang}, x::Real) = zero(x) <= x < Inf
+
+isupperbounded(d::Erlang) = false
+islowerbounded(d::Erlang) = true
+isbounded(d::Erlang) = false
+
+hasfinitesupport(d::Erlang) = false
+min(d::Erlang) = zero(Real)

@@ -18,9 +18,6 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
-min(d::Bernoulli) = 0
-max(d::Bernoulli) = 1
-
 cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
 function entropy(d::Bernoulli) 
@@ -28,9 +25,6 @@ function entropy(d::Bernoulli)
     p1 = d.p1
     p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
 end
-
-insupport(::Bernoulli, x::Real) = (x == zero(x)) || (x == one(x))
-insupport(::Type{Bernoulli}, x::Real) = (x == zero(x)) || (x == one(x))
 
 mean(d::Bernoulli) = d.p1
 
@@ -58,6 +52,20 @@ pdf(d::Bernoulli, x::Real) = x == zero(x) ? d.p0 : x == one(x) ? d.p1 : 0.0
 quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= d.p0 ? 0 : 1) : NaN
 
 rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
+
+### handling support
+
+insupport(::Type{Bernoulli}, x::Real) = (x == zero(x)) || (x == one(x))
+insupport(::Bernoulli, x::Real) = (x == zero(x)) || (x == one(x))
+
+isupperbounded(::Bernoulli) = true
+islowerbounded(::Bernoulli) = true
+isbounded(::Bernoulli) = true
+
+hasfinitesupport(::Bernoulli) = true
+min(::Bernoulli) = zero(Real)
+max(::Bernoulli) = one(Real)
+support(::Bernoulli) = (zero(Real), one(Real))
 
 
 ## MLE fitting

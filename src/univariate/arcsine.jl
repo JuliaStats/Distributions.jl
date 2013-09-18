@@ -11,9 +11,6 @@ end
 # calculated using higher-precision arithmetic 
 entropy(d::Arcsine) = -0.24156447527049044469
 
-insupport(d::Arcsine, x::Real) = zero(x) <= x <= one(x)
-insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
-
 kurtosis(d::Arcsine) = -1.5
 
 mean(d::Arcsine) = 0.5
@@ -50,3 +47,16 @@ rand(d::Arcsine) = sin(rand() * pi / 2.0)^2
 skewness(d::Arcsine) = 0.0
 
 var(d::Arcsine) = 1.0 / 8.0
+
+### handling support
+insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
+insupport(::Arcsine, x::Real) = zero(x) <= x <= one(x)
+
+
+isupperbounded(d::Arcsine) = true
+islowerbounded(d::Arcsine) = true
+isbounded(d::Arcsine) = true
+
+hasfinitesupport(d::Arcsine) = false
+min(d::Arcsine) = zero(Real)
+max(d::Arcsine) = one(Real)

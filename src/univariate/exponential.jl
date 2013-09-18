@@ -25,9 +25,6 @@ invlogccdf(d::Exponential, lp::Real) = lp <= zero(lp) ? -d.scale * lp : NaN
 
 entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
 
-insupport(::Exponential, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
-
 kurtosis(d::Exponential) = 6.0
 
 mean(d::Exponential) = d.scale
@@ -62,6 +59,17 @@ end
 skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
+
+### handling support
+insupport(::Exponential, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
+
+isupperbounded(d::Exponential) = false
+islowerbounded(d::Exponential) = true
+isbounded(d::Exponential) = false
+
+hasfinitesupport(d::Exponential) = false
+min(d::Exponential) = zero(Real)
 
 
 ## Fit model

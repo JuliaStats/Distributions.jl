@@ -70,7 +70,7 @@ invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
 
 
-#### insupport ####
+#### handling support ####
 
 insupport(d::Distribution, x) = false
 
@@ -101,6 +101,11 @@ function insupport(d::MatrixDistribution, X::Array)
     end
     return true
 end
+
+hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
+hasfinitesupport(d::ContinuousUnivariateDistribution) = false
+isbounded(d::Distribution) = islowerbounded(d) && isupperbounded(d)
+support(d::ContinuousUnivariateDistribution)
 
 
 #### log likelihood ####

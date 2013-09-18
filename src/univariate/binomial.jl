@@ -34,8 +34,6 @@ function entropy(d::Binomial; approx::Bool=false)
     -s
 end
 
-insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
-
 kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 mean(d::Binomial) = d.size * d.prob
@@ -63,6 +61,18 @@ modes(d::Binomial) = iround([d.size * d.prob])
 skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 
 var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
+
+### handling support
+insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
+
+isupperbounded(d::Binomial) = true
+islowerbounded(d::Binomial) = true
+isbounded(d::Binomial) = true
+
+hasfinitesupport(d::Binomial) = true
+min(d::Binomial) = 0
+max(d::Binomial) = d.size
+support(d::Binomial) = 0:d.size
 
 ## Fit model
 

@@ -37,10 +37,6 @@ end
 
 entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
 
-function insupport(d::Categorical, x::Real)
-    isinteger(x) && one(x) <= x <= d.K && d.prob[x] != 0.0
-end
-
 function kurtosis(d::Categorical)
     m = mean(d)
     s = 0.0
@@ -141,6 +137,21 @@ function var(d::Categorical)
     end
     s
 end
+
+### handling support
+
+function insupport(d::Categorical, x::Real)
+    isinteger(x) && one(x) <= x <= d.K && d.prob[x] != 0.0
+end
+
+isupperbounded(::Categorical) = true
+islowerbounded(::Categorical) = true
+isbounded(::Categorical) = true
+
+hasfinitesupport(::Categorical) = true
+min(::Categorical) = 1
+max(d::Categorical) = d.K
+support(d::Categorical) = (1:d.K)
 
 
 ### Model fitting

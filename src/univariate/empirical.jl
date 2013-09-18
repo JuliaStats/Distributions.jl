@@ -6,6 +6,7 @@
 
 immutable EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
 	values::Vector{Float64}
+    support::Vector{Float64}
 	cdf::Function
 	entropy::Float64
 	kurtosis::Float64
@@ -17,7 +18,9 @@ immutable EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
 end
 
 function EmpiricalUnivariateDistribution(x::Vector)
-	EmpiricalUnivariateDistribution(sort(x),
+    sx = sort(x)
+	EmpiricalUnivariateDistribution(sx,
+                                    unique(sx),
 	                                ecdf(x),
 	                                NaN,
 	                                NaN,
@@ -31,10 +34,6 @@ end
 cdf(d::EmpiricalUnivariateDistribution, q::Real) = d.cdf(q)
 
 entropy(d::EmpiricalUnivariateDistribution) = d.entropy
-
-function insupport(d::EmpiricalUnivariateDistribution, x::Number)
-    contains(d.values, x)
-end
 
 kurtosis(d::EmpiricalUnivariateDistribution) = d.kurtosis
 
@@ -62,6 +61,21 @@ end
 skewness(d::EmpiricalUnivariateDistribution) = NaN
 
 var(d::EmpiricalUnivariateDistribution) = d.var
+
+### handling support
+
+insupport(d::EmpiricalUnivariateDistribution, x::Number) = contains(d.support, x)
+
+isupperbounded(d::EmpiricalUnivariateDistribution) = true
+islowerbounded(d::EmpiricalUnivariateDistribution) = true
+isbounded(d::EmpiricalUnivariateDistribution) = true
+
+hasfinitesupport(d::EmpiricalUnivariateDistribution) = true
+min(d::EmpiricalUnivariateDistribution) = min(d.values[1])
+max(d::EmpiricalUnivariateDistribution) = max(d.values[end])
+support(d::EmpiricalUnivariateDistribution) = d.support
+
+### fit model
 
 function fit_mle{T <: Real}(::Type{EmpiricalUnivariateDistribution},
 	                    x::Vector{T})

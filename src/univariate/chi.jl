@@ -18,9 +18,6 @@ invlogccdf(d::Chi,p::Real) = sqrt(invlogccdf(Chisq(d.df),p))
 
 mean(d::Chi) = √2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
-insupport(::Chi, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
-
 function mode(d::Chi)
     d.df >= 1.0 || error("Chi distribution has no mode when df < 1")
     sqrt(d.df - 1)
@@ -55,3 +52,14 @@ function entropy(d::Chi)
 end
 
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))
+
+### handling support
+insupport(::Chi, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
+
+isupperbounded(d::Chi) = false
+islowerbounded(d::Chi) = true
+isbounded(d::Chi) = false
+
+hasfinitesupport(d::Chi) = false
+min(d::Chi) = zero(Real)

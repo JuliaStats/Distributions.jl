@@ -15,9 +15,6 @@ end
 
 BetaPrime() = BetaPrime(1.0, 1.0)
 
-insupport(::BetaPrime, x::Real) = zero(x) < x
-insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
-
 function mean(d::BetaPrime)
     d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
 end
@@ -56,3 +53,15 @@ function var(d::BetaPrime)
     α, β = d.alpha, d.beta
     β > 2.0 ? (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2) : NaN
 end
+
+### handling support
+insupport(::BetaPrime, x::Real) = zero(x) < x
+insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
+
+isupperbounded(d::BetaPrime) = true
+islowerbounded(d::BetaPrime) = false
+isbounded(d::BetaPrime) = false
+
+hasfinitesupport(d::BetaPrime) = false
+#min(d::BetaPrime) = zero(Real) # maybe inf(::BetaPrime) = 0 would make sense
+#max(d::BetaPrime) = one(Real)  # and sup(::BetaPrime) = Inf
