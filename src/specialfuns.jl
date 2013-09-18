@@ -1,5 +1,13 @@
 # Special functions
 
+realmaxexp{T<:FloatingPoint}(::Type{T}) = with_rounding(()->log(realmax(T)),RoundDown)
+realmaxexp(::Type{BigFloat}) = with_bigfloat_rounding(()->log(prevfloat(inf(BigFloat))),RoundDown)
+
+realminexp{T<:FloatingPoint}(::Type{T}) = with_rounding(()->log(realmin(T)),RoundUp)
+realmaxexp(::Type{BigFloat}) = with_bigfloat_rounding(()->log(nextfloat(zero(BigFloat))),RoundUp)
+
+
+
 # See:
 #   Martin Maechler (2012) "Accurately Computing log(1 − exp(− |a|))"
 #   http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
@@ -8,12 +16,12 @@
 # NOTE: different than Maechler (2012), no negation inside parantheses
 log1mexp(x::Real) = x >= -0.6931471805599453 ? log(-expm1(x)) : log1p(-exp(x))
 # log(1+exp(x))
-log1pexp(x::Real) = log1p(exp(x))
+log1pexp(x::BigFloat) = x <= realmaxexp(typeof(x)) ? log1p(exp(x)) : x
 log1pexp(x::Float64) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
 log1pexp(x::Float32) = x <= 9f0 ? log1p(exp(x)) : x <= 16f0 ? x + exp(-x) : x
 log1pexp(x::Integer) = log1pexp(float(x))
 # log(exp(x)-1)
-logexpm1(x::Real) = log(expm1(x))
+logexpm1(x::BigFloat) = x <= realmaxexp(typeof(x)) ? log(expm1(x)) : x 
 logexpm1(x::Float64) = x <= 18.0 ? log(expm1(x)) : x <= 33.3 ? x - exp(-x) : x
 logexpm1(x::Float32) = x <= 9f0 ? log(expm1(x)) : x <= 16f0 ? x - exp(-x) : x
 logexpm1(x::Integer) = logexpm1(float(x))
@@ -265,6 +273,80 @@ function logmxp1(x::Float32)
 end
 
 
+# negative of NSWC DRLOG1
+function log1pmx(x::Float64)
+#-----------------------------------------------------------------------
+#             EVALUATION OF THE FUNCTION X - LN(1 + X)
+#-----------------------------------------------------------------------
+#     DOUBLE PRECISION X
+#     DOUBLE PRECISION A, B, R, T, U, UP2, W, W1, Z
+#     DOUBLE PRECISION P0, P1, P2, P3, Q1, Q2, Q3, Q4
+#     DOUBLE PRECISION C1, C2, C3, C4, C5
+#-------------------------
+#     A = DRLOG (0.7)
+#     B = DRLOG (4/3)
+#-------------------------
+    a = 0.566749439387323789126387112411845e-01
+    b = 0.456512608815524058941143273395059e-01
+#-------------------------
+#-------------------------
+#     CI = 1/(2I + 1)
+#-------------------------
+#-------------------------
+    if x >= -0.39 && x <= 0.57 # go to 100
+        if x < -0.18 # go to 10
+            u = (x + 0.3)/0.7
+            up2 = u + 2.0
+            w1 = a - u*0.3
+        elseif x > 0.18 # go to 20
+            t = 0.75*x
+            u = t - 0.25
+            up2 = t + 1.75
+            w1 = b + u/3.0
+        else
+            u = x
+            up2 = u + 2.0
+            w1 = 0.0
+        end
+#
+#                  SERIES EXPANSION
+#
+        r = u/up2
+        t = r*r
+#
+#        Z IS A MINIMAX APPROXIMATION OF THE SERIES
+#
+#               C6 + C7*R**2 + C8*R**4 + ...
+#
+#        FOR THE INTERVAL (0.0, 0.375). THE APPROX-
+#        IMATION IS ACCURATE TO WITHIN 1.6 UNITS OF
+#        THE 21-ST SIGNIFICANT DIGIT.
+#
+      z = @horner(t,
+                   .7692307692307692307680e-01,
+                  -.1505958055914600184836e+00,
+                   .9302355725278521726994e-01,
+                  -.1787900022182327735804e-01) /
+        @horner(t,1.0,
+                -.2824412139355646910683e+01,
+                 .2892424216041495392509e+01,
+                -.1263560605948009364422e+01,
+                 .1966769435894561313526e+00)
+      w = @horner(t,
+                  .333333333333333333333333333333333e+00,
+                  .200000000000000000000000000000000e+00,
+                  .142857142857142857142857142857143e+00,
+                  .111111111111111111111111111111111e+00,
+                  .909090909090909090909090909090909e-01,
+                  z)
+
+        return r*(2.0*t*w - u) - w1
+    end
+    return log1p(x) - x
+end
+
+
+
 
 # Stirling series for the gamma function
 # 
@@ -282,6 +364,7 @@ stirling(x) = exp(lstirling(x))
 # fallback
 lstirling(x) = lgamma(x)- (x-0.5)*log(x) + x - 0.5*oftype(x,log2π)
 lstirling(x::Integer) = lstirling(float(x))
+
 # based on NSWC DPDEL: only valid for values >= 10
 # Float32 version?
 function lstirling(x::Float64)
@@ -415,7 +498,7 @@ function gratio(a::Float32, x::Float32, ind::Integer)
             j = a*x*((sum/6.0f0 - 0.5f0/(a + 2.0f0))*x + 1.0f0/(a + 1.0f0))
     
             z = a*log(x)
-            h = gam1(a)
+            h = rgamma1pm1(a)
             g = 1.0f0 + h
             if x >= 0.25 # go to 120
                 if a < x/2.59f0 # go to 135
@@ -474,7 +557,7 @@ function gratio(a::Float32, x::Float32, ind::Integer)
         l = x/a
         if l == 0.0 return 0.0f0, 1.0f0 end # go to 300
         s = 0.5f0 + (0.5f0 - l)
-        z = rlog(l)
+        z = -logmxp1(l)
         if z >= 700.0f0/a # go to 330
             if abs(s) <= 2.0f0*e error() end # go to 400
             if x <= a return 0.0f0, 1.0f0 end # go to 300
@@ -867,7 +950,7 @@ function dgrat(a::Real, x::Real)
     
                 z = a*log(x)
                 u = exp(z)
-                h = dgam1(a)
+                h = rgamma1pm1(a)
                 g = 1.0 + h
                 ans = u*g*(0.5 + (0.5 - j))
                 qans = 0.5 + (0.5 - ans)
@@ -916,7 +999,7 @@ function dgrat(a::Real, x::Real)
             l = x/a
             if l == 0.0 return 0.0, 1.0 end
             s = 0.5 + (0.5 - l)
-            z = drlog(l)
+            z = -logmxp1(l)
             if z >= 700.0/a # go to 330
                 if abs(s) <= 2.0*e error("ierr=3") end
                 if x < a return 0.0, 1.0 end
@@ -1036,9 +1119,9 @@ function rcomp(a::Float32, x::Float32)
     if a < 20.0 # go to 20
 
         t = a*log(x) - x
-        if t < exparg(true) return 0.0f0 end
+        if t < realminexp(Float32) return 0.0f0 end
         if a < 1.0 # go to 10
-            return (a*exp(t))*(1.0f0 + gam1(a))
+            return (a*exp(t))*(1.0f0 + rgamma1pm1(a))
         end
         return exp(t)/gamma(a)
     end
@@ -1047,8 +1130,8 @@ function rcomp(a::Float32, x::Float32)
     if u == 0.0 return 0.0f0 end
     t = (1.0f0/a)^2
     t1 = (((0.75f0*t - 1.0f0)*t + 3.5f0)*t - 105.0f0)/(a*1260.0f0)
-    t1 -= a*rlog(u)
-    if t1 >= exparg(true) return rt2pin*sqrt(a)*exp(t1) end
+    t1 += a*logmxp1(u)
+    if t1 >= realminexp(Float32) return rt2pin*sqrt(a)*exp(t1) end
 end
 
 function drcomp(a::Real, x::Real)
@@ -1065,179 +1148,24 @@ function drcomp(a::Real, x::Real)
     if x == 0.0 return 0.0 end
     if a <= 20.0 # go to 20
         t = a*log(x) - x
-        if t < dxparg(true) return 0.0 end
+        if t < realminexp(Float64) return 0.0 end
         if a < 1.0 # go to 10
-            return (a*exp(t))*(1.0 + dgam1(a))
+            return (a*exp(t))*(1.0 + rgamma1pm1(a))
         end
         return exp(t)/gamma(a)
     end
 
     t = x/a
     if t == 0.0 return 0.0 end
-    w = -(dpdel(a) + a*drlog(t))
-    if w >= dxparg(true) 
+    w = -(lstirling(a) - a*logmxp1(t))
+    if w >= realminexp(Float64) 
         return c*sqrt(a)*exp(w)
     else
         return 0.0
     end
 end
 
-function dpdel(x::Real)
-#-----------------------------------------------------------------------
-#
-#     COMPUTATION OF THE FUNCTION DEL(X) FOR  X .GE. 10  WHERE
-#     LN(GAMMA(X)) = (X - 0.5)*LN(X) - X + 0.5*LN(2*PI) + DEL(X)
-#
-#                         --------
-#
-#     THE SERIES FOR DPDEL ON THE INTERVAL 0.0 TO 1.0 DERIVED BY
-#     A.H. MORRIS FROM THE CHEBYSHEV SERIES IN THE SLATEC LIBRARY
-#     OBTAINED BY WAYNE FULLERTON (LOS ALAMOS).
-#
-#-----------------------------------------------------------------------
-#     DOUBLE PRECISION X, A(15), T, W
-#-----------------------------------------------------------------------
 
-#-----------------------------------------------------------------------
-    t = (10.0/x)^2
-    w = Base.Math.@horner(t, .833333333333333333333333333333e-01,
-                            -.277777777777777777777777752282e-04,
-                             .793650793650793650791732130419e-07,
-                            -.595238095238095232389839236182e-09,
-                             .841750841750832853294451671990e-11,
-                            -.191752691751854612334149171243e-12,
-                             .641025640510325475730918472625e-14,
-                            -.295506514125338232839867823991e-15,
-                             .179643716359402238723287696452e-16,
-                            -.139228964661627791231203060395e-17,
-                             .133802855014020915603275339093e-18,
-                            -.154246009867966094273710216533e-19,
-                             .197701992980957427278370133333e-20,
-                            -.234065664793997056856992426667e-21,
-                             .171348014966398575409015466667e-22)
-    return w/x
-end
-
-function rlog(x::Float32)
-#-----------------------------------------------------------------------
-#             EVALUATION OF THE FUNCTION X - 1 - LN(X)
-#-----------------------------------------------------------------------
-#     A = RLOG (0.7)
-#     B = RLOG (4/3)
-#------------------------
-    a = .566749439387324f-01
-    b = .456512608815524f-01
-#------------------------
-    p0 =  .333333333333333f+00
-    p1 = -.224696413112536f+00
-    p2 =  .620886815375787f-02
-    q1 = -.127408923933623f+01
-    q2 =  .354508718369557f+00
-#------------------------
-    if x < 0.61 || x > 1.57 # go to 100
-        r = (x - 0.5f0) - 0.5f0
-        return r - log(x)
-    end
-    if x < 0.82 # go to 10
-        u = (x - 0.7f0)/0.7f0
-        up2 = u + 2.0f0
-        w1 = a - u*0.3f0
-    elseif x > 1.18 # go to 20
-        t = 0.75f0*(x - 1.0f0)
-        u = t - 0.25f0
-        up2 = t + 1.75f0
-        w1 = b + u/3.0f0
-    else
-#                 ARGUMENT REDUCTION
-
-        u = (x - 0.5f0) - 0.5f0
-        up2 = u + 2.0f0
-        w1 = 0.0f0
-    end
-
-#                  SERIES EXPANSION
-
-    r = u/up2
-    t = r*r
-    w = ((p2*t + p1)*t + p0)/((q2*t + q1)*t + 1.0f0)
-    return r*(u - 2.0f0*t*w) + w1
-end
-
-function drlog(x::Real)
-#-----------------------------------------------------------------------
-#             EVALUATION OF THE FUNCTION X - 1 - LN(X)
-#-----------------------------------------------------------------------
-#     DOUBLE PRECISION X
-#     DOUBLE PRECISION A, B, R, T, U, UP2, W, W1, Z
-#     DOUBLE PRECISION P0, P1, P2, P3, Q1, Q2, Q3, Q4
-#     DOUBLE PRECISION C1, C2, C3, C4, C5
-#-------------------------
-#     A = DRLOG (0.7)
-#     B = DRLOG (4/3)
-#-------------------------
-    a = .566749439387323789126387112411845e-01
-    b = .456512608815524058941143273395059e-01
-#-------------------------
-    p0 =  .7692307692307692307680e-01
-    p1 = -.1505958055914600184836e+00
-    p2 =  .9302355725278521726994e-01
-    p3 = -.1787900022182327735804e-01
-    q1 = -.2824412139355646910683e+01
-    q2 =  .2892424216041495392509e+01
-    q3 = -.1263560605948009364422e+01
-    q4 =  .1966769435894561313526e+00
-#-------------------------
-#     CI = 1/(2I + 1)
-#-------------------------
-    c1 = .333333333333333333333333333333333e+00
-    c2 = .200000000000000000000000000000000e+00
-    c3 = .142857142857142857142857142857143e+00
-    c4 = .111111111111111111111111111111111e+00
-    c5 = .909090909090909090909090909090909e-01
-#-------------------------
-    if x < 0.61 || x > 1.57 # go to 100
-        r = (x - 0.5) - 0.5
-        return r - log(x)
-    end
-    if x <= 1.18 # go to 20
-        if x >= 0.82 # go to 10
-
-#                 ARGUMENT REDUCTION
-
-            u = (x - 0.5) - 0.5
-            up2 = u + 2.0
-            w1 = 0.0
-        else
-
-            u = (x - 0.7)/0.7
-            up2 = u + 2.0
-            w1 = a - u*0.3
-        end
-    else
-        t = 0.75*(x - 1.0)
-        u = t - 0.25
-        up2 = t + 1.75
-        w1 = b + u/3.0
-    end
-
-#                  SERIES EXPANSION
-
-    r = u/up2
-    t = r*r
-#
-#        Z IS A MINIMAX APPROXIMATION OF THE SERIES
-#
-#               C6 + C7*R**2 + C8*R**4 + ...
-#
-#        FOR THE INTERVAL (0.0, 0.375). THE APPROX-
-#        IMATION IS ACCURATE TO WITHIN 1.6 UNITS OF
-#        THE 21-ST SIGNIFICANT DIGIT.
-#
-    z = (((p3*t + p2)*t + p1)*t + p0)/((((q4*t + q3)*t + q2)*t + q1)*t + 1.0)
-
-    w = ((((z*t + c5)*t + c4)*t + c3)*t + c2)*t + c1
-    return r*(u - 2.0*t*w) + w1
-end
 
 function dgr17(a::Real, y::Real, l::Real, z::Real, rta::Real)
 #-----------------------------------------------------------------------
@@ -1265,85 +1193,85 @@ function dgr17(a::Real, y::Real, l::Real, z::Real, rta::Real)
     z = sqrt(z + z)
     if l < 1.0 z = -z end
 
-    c0 = Base.Math.@horner(z,  -.33333333333333333e+00,
+    c0 = @horner(z,  -.33333333333333333e+00,
                                -.24232172943558393e+00,
                                -.76816029947195974e-01,
                                -.11758531313175796e-01,
                                -.73324404807556026e-03)
-    c0 /= Base.Math.@horner(z,                     1.0,
+    c0 /= @horner(z,                     1.0,
                                 .97696518830675185e+00, 
                                 .43024494247383254e+00,
                                 .10288837674434487e+00, 
                                 .13250270182342259e-01,
                                 .73121701584237188e-03, 
                                 .10555647473018528e-06)
-    c1 = Base.Math.@horner(z,  -.18518518518518417e-02,
+    c1 = @horner(z,  -.18518518518518417e-02,
                                -.52949366601406939e-02,
                                -.16090334014223031e-02,
                                -.16746784557475121e-03)
-    c1 /= Base.Math.@horner(z, 1.0,
+    c1 /= @horner(z, 1.0,
                                 .98426579647613593e+00,
                                 .45195109694529839e+00,
                                 .11439610256504704e+00,
                                 .15954049115266936e-01,
                                 .98671953445602142e-03,
                                 .12328086517283227e-05)
-    c2 = Base.Math.@horner(z,   .41335978835983393e-02,
+    c2 = @horner(z,   .41335978835983393e-02,
                                 .15067356806896441e-02,
                                 .13743853858711134e-03,
                                 .12049855113125238e-04)
-    c2 /= Base.Math.@horner(z, 1.0,
+    c2 /= @horner(z, 1.0,
                                 .10131761625405203e+01,
                                 .50379606871703058e+00,
                                 .14009848931638062e+00,
                                 .22316881460606523e-01,
                                 .15927093345670077e-02)
-    c3 = Base.Math.@horner(z,   .64943415637082551e-03,
+    c3 = @horner(z,   .64943415637082551e-03,
                                 .81804333975935872e-03,
                                 .13012396979747783e-04,
                                 .46318872971699924e-05)
-    c3 /= Base.Math.@horner(z, 1.0,
+    c3 /= @horner(z, 1.0,
                                 .90628317147366376e+00,
                                 .42226789458984594e+00,
                                 .10044290377295469e+00,
                                 .12414068921653593e-01)
-    c4 = Base.Math.@horner(z,  -.86188829773520181e-03,
+    c4 = @horner(z,  -.86188829773520181e-03,
                                -.82794205648271314e-04,
                                -.37567394580525597e-05)
-    c4 /= Base.Math.@horner(z, 1.0,
+    c4 /= @horner(z, 1.0,
                                 .10057375981227881e+01,
                                 .57225859400072754e+00,
                                 .16988291247058802e+00,
                                 .31290397554562032e-01)
-    c5 = Base.Math.@horner(z,  -.33679854644784478e-03,
+    c5 = @horner(z,  -.33679854644784478e-03,
                                -.43263341886764011e-03)
-    c5 /= Base.Math.@horner(z, 1.0,
+    c5 /= @horner(z, 1.0,
                                 .10775200414676195e+01,
                                 .60019022026983067e+00,
                                 .17081504060220639e+00,
                                 .22714615451529335e-01)
 
-    c6 = Base.Math.@horner(z,   .53130115408837152e-03,
+    c6 = @horner(z,   .53130115408837152e-03,
                                -.12962670089753501e-03)
-    c6 /= Base.Math.@horner(z, 1.0,
+    c6 /= @horner(z, 1.0,
                                 .87058903334443855e+00,
                                 .45957439582639129e+00,
                                 .65929776650152292e-01)
-    c7 = Base.Math.@horner(z,   .34438428473168988e-03,
+    c7 = @horner(z,   .34438428473168988e-03,
                                 .47861364421780889e-03)
-    c7 /= Base.Math.@horner(z, 1.0,
+    c7 /= @horner(z, 1.0,
                                 .12396875725833093e+01,
                                 .78991370162247144e+00,
                                 .27176241899664174e+00)
-    c8 = Base.Math.@horner(z,  -.65256615574219131e-03,
+    c8 = @horner(z,  -.65256615574219131e-03,
                                 .27086391808339115e-03)
-    c8 /= Base.Math.@horner(z, 1.0,
+    c8 /= @horner(z, 1.0,
                                 .87002402612484571e+00,
                                 .44207055629598579e+00)
-    c9 = Base.Math.@horner(z,  -.60335050249571475e-03,
+    c9 = @horner(z,  -.60335050249571475e-03,
                                -.14838721516118744e-03,
                                 .84725086921921823e-03)
-    c10 = Base.Math.@horner(z,  .13324454494800656e-02,
+    c10 = @horner(z,  .13324454494800656e-02,
                                -.19144384985654775e-02)
 
 
@@ -1386,14 +1314,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
     z = sqrt(z + z)
     if l < 1.0 z = -z end
 
-    t = Base.Math.@horner(z,-.218544851067999216147364227e-05,
+    t = @horner(z,-.218544851067999216147364227e-05,
                             -.490033281596113358850307112e-05,
                             -.372722892959910688597417881e-05,
                             -.145717031728609218851588740e-05,
                             -.327874000161065050049103731e-06,
                             -.408902435641223939887180303e-07,
                             -.234443848930188413698825870e-08)
-    t /= Base.Math.@horner(z,1.0, 
+    t /= @horner(z,1.0, 
                              .139388806936391316154237713e+01,
                              .902581259032419042347458484e+00,
                              .349373447613102956696810725e+00,
@@ -1410,14 +1338,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                           -.148148148148148148148148148148e-01)*z + 
                            .833333333333333333333333333333e-01)*z + 
                           -.333333333333333333333333333333e+00
-    c1 = Base.Math.@horner(z,-.185185185185185185185185200e-02,
+    c1 = @horner(z,-.185185185185185185185185200e-02,
                              -.627269388216833251971110268e-02,
                              -.462960105006279850867332060e-02,
                              -.167787748352827199882047653e-02,
                              -.334816794629374699945489443e-03,
                              -.359791514993122440319624428e-04,
                              -.162671127226300802902860047e-05)
-    c1 /= Base.Math.@horner(z,1.0,
+    c1 /= @horner(z,1.0,
                                .151225469637089956064399494e+01,
                                .109307843990990308990473663e+01,
                                .482173396010404307346794795e+00,
@@ -1427,14 +1355,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .275463718595762102271929980e-03,
                                .974094440943696092434381137e-05,
                                .361538770500640888027927000e-09)
-    c2 = Base.Math.@horner(z,  .413359788359788359788359644e-02,
+    c2 = @horner(z,  .413359788359788359788359644e-02,
                                .365985331203490698463644329e-02,
                                .138385867950361368914038461e-02,
                                .287368655528567495658887760e-03,
                                .351658023234640143803014403e-04,
                                .261809837060522545971782889e-05,
                                .100841467329617467204527243e-06)
-    c2 /= Base.Math.@horner(z,1.0,
+    c2 /= @horner(z,1.0,
                                .153405837991415136438992306e+01,
                                .114320896084982707537755002e+01,
                                .524238095721639512312120765e+00,
@@ -1443,14 +1371,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .457258679387716305283282667e-02,
                                .378705615967233119938297206e-03,
                                .144996224602847932479320241e-04)
-    c3 = Base.Math.@horner(z,  .649434156378600823045102236e-03,
+    c3 = @horner(z,  .649434156378600823045102236e-03,
                                .141844584435355290321010006e-02,
                                .987931909328964685388525477e-03,
                                .331552280167649130371474456e-03,
                                .620467118988901865955998784e-04,
                                .695396758348887902366951353e-05,
                                .352304123782956092061364635e-06)
-    c3 /= Base.Math.@horner(z,1.0,
+    c3 /= @horner(z,1.0,
                                .183078413578083710405050462e+01,
                                .159678625605457556492814589e+01,
                                .856743428738899911100227393e+00,
@@ -1459,14 +1387,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .126418031281256648240652355e-01,
                                .130398975231883219976260776e-02,
                                .656342109234806261144233394e-04)
-    c4 = Base.Math.@horner(z, -.861888290916711698604710684e-03,
+    c4 = @horner(z, -.861888290916711698604710684e-03,
                               -.619343030286408407629007048e-03,
                               -.173138093150706317400323103e-03,
                               -.337525643163070607393381432e-04,
                               -.487392507564453824976295590e-05,
                               -.470448694272734954500324169e-06,
                               -.260879135093022176005540138e-07)
-    c4 /= Base.Math.@horner(z,1.0,
+    c4 /= @horner(z,1.0,
                                .162826466816694512158165085e+01,
                                .133507902144433100426436242e+01,
                                .686949677014349678482109368e+00,
@@ -1475,14 +1403,14 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .990129468337836044520381371e-02,
                                .104553622856827932853059322e-02,
                                .561738585657138771286755470e-04)
-    c5 = Base.Math.@horner(z, -.336798553366358151161633777e-03,
+    c5 = @horner(z, -.336798553366358151161633777e-03,
                               -.548868487607991087508092013e-03,
                               -.171902547619915856635305717e-03,
                               -.332229941748769925615918550e-04,
                               -.556701576804390213081214801e-05,
                                .506465072067030007394288471e-08,
                               -.116166342948098688243985652e-07)
-    c5 /= Base.Math.@horner(z,1.0,
+    c5 /= @horner(z,1.0,
                                .142263185288429590449288300e+01,
                                .103913867517817784825064299e+01,
                                .462890328922621047510807887e+00,
@@ -1490,11 +1418,11 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .254669201041872409738119341e-01,
                                .280714123386276098548285440e-02,
                                .106576106868815233442641444e-03)
-    c6 = Base.Math.@horner(z,  .531307936463992224884286210e-03,
+    c6 = @horner(z,  .531307936463992224884286210e-03,
                                .209213745619758030399432459e-03,
                                .694345283181981060040314140e-05,
                                .118384620224413424936260301e-04)
-    c6 /= Base.Math.@horner(z,1.0,
+    c6 /= @horner(z,1.0,
                                .150831585220968267709550582e+01,
                                .118432122801495778365352945e+01,
                                .571784440733980642101712125e+00,
@@ -1504,12 +1432,12 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .151734058829700925162000373e-03,
                               -.248639208901374031411609873e-04,
                               -.633002360430352916354621750e-05)
-    c7 = Base.Math.@horner(z,  .344367606892381545765962366e-03,
+    c7 = @horner(z,  .344367606892381545765962366e-03,
                                .605983804794748515383615779e-03,
                                .208913588225005764102252127e-03,
                                .462793722775687016808279009e-04,
                                .972342656522493967167788395e-05)
-    c7 /= Base.Math.@horner(z,1.0,
+    c7 /= @horner(z,1.0,
                                .160951809815647533045690195e+01,
                                .133753662990343866552766613e+01,
                                .682159830165959997577293001e+00,
@@ -1517,12 +1445,12 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .497403555098433701440032746e-01,
                                .621296161441756044580440529e-02,
                                .215964480325937088444595990e-03)
-    c8 = Base.Math.@horner(z, -.652623918595320914510590273e-03,
+    c8 = @horner(z, -.652623918595320914510590273e-03,
                               -.353272052089782073130912603e-03,
                               -.282551884312564905942488077e-04,
                               -.192877995065652524742879002e-04,
                               -.231069438570167401077137510e-05)
-    c8 /= Base.Math.@horner(z,1.0,
+    c8 /= @horner(z,1.0,
                                .182765408802230546887514255e+01,
                                .172269407630659768618234623e+01,
                                .101702505946784412105505734e+01,
@@ -1530,65 +1458,65 @@ function dgr29(a::Real, y::Real, l::Real, z::Real, rta::Real)
                                .110127834209242088316741250e+00,
                                .189231675289329563916597032e-01,
                                .156052480203446255774109882e-02)
-    c9 = Base.Math.@horner(z, -.596761290192642722092337263e-03,
+    c9 = @horner(z, -.596761290192642722092337263e-03,
                               -.109151697941931403194363814e-02,
                               -.377126645910917006921076652e-03,
                               -.120148495117517992204095691e-03,
                               -.203007139532451428594124139e-04)
-    c9 /= Base.Math.@horner(z,1.0,
+    c9 /= @horner(z,1.0,
                                .170833470935668756293234818e+01,
                                .156222230858412078350692234e+01,
                                .881575022436158946373557744e+00,
                                .335555306170768573903990019e+00,
                                .803149717787956717154553908e-01,
                                .108808775028021530146610124e-01)
-    c10 =Base.Math.@horner(z,  .133244544950730832649306319e-02,
+    c10 =@horner(z,  .133244544950730832649306319e-02,
                                .580375987713106460207815603e-03,
                               -.352503880413640910997936559e-04,
                                .475862254251166503473724173e-04)
-    c10/=Base.Math.@horner(z, 1.0,
+    c10/=@horner(z, 1.0,
                                .187235769169449339141968881e+01,
                                .183146436130501918547134176e+01,
                                .110810715319704031415255670e+01,
                                .448280675300097555552484502e+00,
                                .114651544043625219459951640e+00,
                                .161103572271541189817119144e-01)
-    c11 =Base.Math.@horner(z,  .157972766214718575927904484e-02,
+    c11 =@horner(z,  .157972766214718575927904484e-02,
                                .246371734409638623215800502e-02,
                                .717725173388339108430635016e-05,
                                .121185049262809526794966703e-03)
-    c11/=Base.Math.@horner(z, 1.0,
+    c11/=@horner(z, 1.0,
                                .145670749780693850410866175e+01,
                                .116082103318559904744144217e+01,
                                .505939635317477779328000706e+00,
                                .131627017265860324219513170e+00,
                                .794610889405176143379963912e-02)
-    c12 =Base.Math.@horner(z, -.407251199495291398243480255e-02,
+    c12 =@horner(z, -.407251199495291398243480255e-02,
                               -.214376520139497301154749750e-03,
                                .650624975008642297405944869e-03,
                               -.246294151509758620837749269e-03)
-    c12/=Base.Math.@horner(z, 1.0,
+    c12/=@horner(z, 1.0,
                                .162497775209192630951344224e+01,
                                .140298208333879535577602171e+01,
                                .653453590771198550320727688e+00,
                                .168390445944818504703640731e+00)
-    c13 =Base.Math.@horner(z, -.594758070915055362667114240e-02,
+    c13 =@horner(z, -.594758070915055362667114240e-02,
                               -.109727312966041723997078734e-01,
                               -.159520095187034545391135461e-02)
-    c13/=Base.Math.@horner(z, 1.0,
+    c13/=@horner(z, 1.0,
                                .175409273929961597148916309e+01,
                                .158706682625067673596619095e+01,
                                .790935125477975506817064616e+00,
                                .207815761771742289849225339e+00)
-    c14 =Base.Math.@horner(z,  .175722793448246103440764372e-01,
+    c14 =@horner(z,  .175722793448246103440764372e-01,
                               -.119636668153843644820445054e-01,
                                .245543970647383469794050102e-02)
-    c14/=Base.Math.@horner(z, 1.0,
+    c14/=@horner(z, 1.0,
                                .100158659226079685399214158e+01,
                                .676925518749829493412063599e+00)
-    c15 =Base.Math.@horner(z,  .400765463491067514929787780e-01,
+    c15 =@horner(z,  .400765463491067514929787780e-01,
                                .588261033368548917447688791e-01)
-    c15/=Base.Math.@horner(z, 1.0,
+    c15/=@horner(z, 1.0,
                                .149189509890654955611528542e+01,
                                .124266359850901469771032599e+01)
     c16 =                     (.119522261141925960204472459e+00*z + 
@@ -1769,7 +1697,7 @@ function dginv(a::Real, p::Real, q::Real)
                 if b*q <= 1.0e-8 # go to 31
                     xn = exp(-(q/a + c))
                 elseif p > 0.9 # go to 32
-                    xn = exp((dlnrel(-q) + dgmln1(a))/a)
+                    xn = exp((dlnrel(-q) + lgamma1p(a))/a)
                 else
                     xn = exp(log(p*g)/a)
                 end
@@ -2536,18 +2464,18 @@ function bpser(a::Real, b::Real, x::Real, precision::Real)
 
             apb = a + b
             if (apb <= 1.0) # go to 20
-                z = 1.0 + dgam1(apb)
+                z = 1.0 + rgamma1pm1(apb)
             else
                 u = a + b - 1.0
-                z = (1.0 + dgam1(u))/apb 
+                z = (1.0 + rgamma1pm1(u))/apb 
             end
-            c = (1.0 + dgam1(a))*(1.0 + dgam1(b))/z
+            c = (1.0 + rgamma1pm1(a))*(1.0 + rgamma1pm1(b))/z
             bpserval *= c*(b/apb) 
 
         elseif (b0 < 8.0)
 #         PROCEDURE FOR A0 .LT. 1 AND 1 .LT. B0 .LT. 8
 
-            u = dgmln1(a0)
+            u = lgamma1p(a0)
             m = itrunc(b0 - 1.0)
             if (m >= 1) # go to 50
                 c = 1.0
@@ -2561,17 +2489,17 @@ function bpser(a::Real, b::Real, x::Real, precision::Real)
             b0 -= 1.0 
             apb = a0 + b0 
             if (apb <= 1.0) # go to 51
-                t = 1.0 + dgam1(apb)
+                t = 1.0 + rgamma1pm1(apb)
             else
                 u = a0 + b0 - 1.0
-                t = (1.0 + dgam1(u))/apb
+                t = (1.0 + rgamma1pm1(u))/apb
             end
-            bpserval = exp(z)*(a0/a)*(1.0 + dgam1(b0))/t
+            bpserval = exp(z)*(a0/a)*(1.0 + rgamma1pm1(b0))/t
         else
 
 #            PROCEDURE FOR A0 .LT. 1 AND B0 .GE. 8
 
-            u = dgmln1(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + dlgdiv(a0,b0)
             z = a*log(x) - u
             bpserval = (a0/a)*exp(z)
         end
@@ -2610,8 +2538,8 @@ function bup(a::Real, b::Real, x::Real, y::Real, n::Integer, precision::Real)
     mu = 0
     d = 1.0
     if (n != 1 && a >= 1.0 && apb >= 1.1*ap1) # go to 10
-        mu = itrunc(abs(dxparg(true)))
-        k = itrunc(dxparg(false))
+        mu = itrunc(abs(realminexp(Float64)))
+        k = itrunc(realmaxexp(Float64))
         if (k < mu) mu = k end
         t = mu
         d = exp(-t)
@@ -2771,19 +2699,19 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
 
             apb = a + b
             if (apb <= 1.0) # go to 40
-                z = 1.0 + dgam1(apb)
+                z = 1.0 + rgamma1pm1(apb)
             else
                 u = a + b - 1.0
-                z = (1.0 + dgam1(u))/apb 
+                z = (1.0 + rgamma1pm1(u))/apb 
             end
 
-            c = (1.0 + dgam1(a))*(1.0 + dgam1(b))/z
+            c = (1.0 + rgamma1pm1(a))*(1.0 + rgamma1pm1(b))/z
             return brcompval*(a0*c)/(1.0 + a0/b0)
         elseif (b0 < 8.0)
 
 #                ALGORITHM FOR 1 .LT. B0 .LT. 8
 
-            u = dgmln1(a0)
+            u = lgamma1p(a0)
             n = itrunc(b0 - 1.0)
             if (n > 1) # go to 70
                 c = 1.0
@@ -2798,16 +2726,16 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
             b0 -= 1.0 
             apb = a0 + b0 
             if (apb <= 1.0)
-                t = 1.0 + dgam1(apb)
+                t = 1.0 + rgamma1pm1(apb)
             else
                 u = a0 + b0 - 1.0
-                t = (1.0 + dgam1(u))/apb
+                t = (1.0 + rgamma1pm1(u))/apb
             end
-            return a0*exp(z)*(1.0 + dgam1(b0))/t
+            return a0*exp(z)*(1.0 + rgamma1pm1(b0))/t
         else
 
 #                   ALGORITHM FOR B0 .GE. 8
-            u = dgmln1(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + dlgdiv(a0,b0)
             return a0*exp(z - u)
         end
     end
@@ -2827,14 +2755,14 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
     end
     e = -lambda/a 
     if (abs(e) <= 0.6) # go to 111
-        u = drlog1(e)
+        u = -log1pmx(e)
     else
         u = e - log(x/x0)
     end
 
     e = lambda/b
     if (abs(e) <= 0.6) # go to 121
-        v = drlog1(e)
+        v = -log1pmx(e)
     else
         v = e - log(y/y0)
     end
@@ -2889,19 +2817,19 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
 
             apb = a + b
             if (apb <= 1.0) # go to 40
-                z = 1.0 + dgam1(apb)
+                z = 1.0 + rgamma1pm1(apb)
             else
                 u = a + b - 1.0
-                z = (1.0 + dgam1(u))/apb 
+                z = (1.0 + rgamma1pm1(u))/apb 
             end
 
-            c = (1.0 + dgam1(a))*(1.0 + dgam1(b))/z
+            c = (1.0 + rgamma1pm1(a))*(1.0 + rgamma1pm1(b))/z
             return brcompval*(a0*c)/(1.0 + a0/b0)
         elseif (b0 < 8.0)
 
 #                ALGORITHM FOR 1 .LT. B0 .LT. 8
 
-            u = dgmln1(a0)
+            u = lgamma1p(a0)
             n = itrunc(b0 - 1.0)
             if (n > 1) # go to 70
                 c = 1.0
@@ -2916,17 +2844,17 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
             b0 -= 1.0 
             apb = a0 + b0 
             if (apb <= 1.0)
-                t = 1.0 + dgam1(apb)
+                t = 1.0 + rgamma1pm1(apb)
             else
                 u = a0 + b0 - 1.0
-                t = (1.0 + dgam1(u))/apb
+                t = (1.0 + rgamma1pm1(u))/apb
             end
-            return a0*exp(mu + z)*(1.0 + dgam1(b0))/t
+            return a0*exp(mu + z)*(1.0 + rgamma1pm1(b0))/t
         else
 
 #                   ALGORITHM FOR B0 .GE. 8
 
-            u = dgmln1(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + dlgdiv(a0,b0)
             return a0*exp(mu + z - u)
         end
     end
@@ -2946,14 +2874,14 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
     end
     e = -lambda/a 
     if (abs(e) <= 0.6) # go to 111
-        u = drlog1(e)
+        u = -log1pmx(e)
     else
         u = e - log(x/x0)
     end
 
     e = lambda/b
     if (abs(e) <= 0.6) # go to 121
-        v = drlog1(e)
+        v = -log1pmx(e)
     else
         v = e - log(y/y0)
     end
@@ -2988,7 +2916,7 @@ function bgrat(a::Real, b::Real, x::Real, y::Real, w::Real, precision::Real)
 #                 COMPUTATION OF THE EXPANSION
 #                 SET R = EXP(-Z)*Z**B/GAMMA(B)
 
-    r = b*(1.0 + dgam1(b))*z^b
+    r = b*(1.0 + rgamma1pm1(b))*z^b
     r *= exp(a*lnx)*exp(0.5*bm1*lnx) 
     u = dlgdiv(b,a) + b*log(nu)
     u = r*exp(-u) 
@@ -3070,7 +2998,7 @@ function grat1(a::Real,x::Real,r::Real,precision::Real)
         j = a*x*((sumval/6.0 - 0.5/(a + 2.0))*x + 1.0/(a + 1.0)) 
         
         z = a*log(x) 
-        h = dgam1(a)
+        h = rgamma1pm1(a)
         g = 1.0 + h
         while true
             if (x >= 0.25)
@@ -3156,7 +3084,7 @@ function basym(a::Real, b::Real, lambda::Real, precision::Real)
         w0 = 1.0/sqrt(b*(1.0 + h))
     end
 
-    f = a*drlog1(-lambda/a) + b*drlog1(lambda/b)
+    f = -a*log1pmx(-lambda/a) - b*log1pmx(lambda/b)
     t = exp(-f)
     if (t == 0.0) return basymval end
     z0 = sqrt(f)
@@ -3221,77 +3149,6 @@ function basym(a::Real, b::Real, lambda::Real, precision::Real)
     return e0*t*u*sumval
 end
 
-function drlog1(x::Real)
-#-----------------------------------------------------------------------
-#             EVALUATION OF THE FUNCTION X - LN(1 + X)
-#-----------------------------------------------------------------------
-#     DOUBLE PRECISION X
-#     DOUBLE PRECISION A, B, R, T, U, UP2, W, W1, Z
-#     DOUBLE PRECISION P0, P1, P2, P3, Q1, Q2, Q3, Q4
-#     DOUBLE PRECISION C1, C2, C3, C4, C5
-#-------------------------
-#     A = DRLOG (0.7)
-#     B = DRLOG (4/3)
-#-------------------------
-    a = 0.566749439387323789126387112411845e-01
-    b = 0.456512608815524058941143273395059e-01
-#-------------------------
-    p0 =  .7692307692307692307680e-01
-    p1 = -.1505958055914600184836e+00
-    p2 =  .9302355725278521726994e-01
-    p3 = -.1787900022182327735804e-01
-    q1 = -.2824412139355646910683e+01
-    q2 =  .2892424216041495392509e+01
-    q3 = -.1263560605948009364422e+01
-    q4 =  .1966769435894561313526e+00
-#-------------------------
-#     CI = 1/(2I + 1)
-#-------------------------
-    c1 = .333333333333333333333333333333333e+00
-    c2 = .200000000000000000000000000000000e+00
-    c3 = .142857142857142857142857142857143e+00
-    c4 = .111111111111111111111111111111111e+00
-    c5 = .909090909090909090909090909090909e-01
-#-------------------------
-    if x >= -0.39 && x <= 0.57 # go to 100
-        if x < -0.18 # go to 10
-            u = (x + 0.3)/0.7
-            up2 = u + 2.0
-            w1 = a - u*0.3
-        elseif x > 0.18 # go to 20
-            t = 0.75*x
-            u = t - 0.25
-            up2 = t + 1.75
-            w1 = b + u/3.0
-        else
-            u = x
-            up2 = u + 2.0
-            w1 = 0.0
-        end
-#
-#                  SERIES EXPANSION
-#
-        r = u/up2
-        t = r*r
-#
-#        Z IS A MINIMAX APPROXIMATION OF THE SERIES
-#
-#               C6 + C7*R**2 + C8*R**4 + ...
-#
-#        FOR THE INTERVAL (0.0, 0.375). THE APPROX-
-#        IMATION IS ACCURATE TO WITHIN 1.6 UNITS OF
-#        THE 21-ST SIGNIFICANT DIGIT.
-#
-      z = (((p3*t + p2)*t + p1)*t + p0)/((((q4*t + q3)*t + q2)*t + q1)*t + 1.0)
-#
-      w = ((((z*t + c5)*t + c4)*t + c3)*t + c2)*t + c1
-      return r*(u - 2.0*t*w) + w1
-#
-#
-    end
-    w = (x + 0.5) + 0.5
-    return x - log(w)
-end
 
 function dbcorr(a0::Real, b0::Real)
 #-----------------------------------------------------------------------
@@ -3612,12 +3469,12 @@ function dgsmln(a::Real, b::Real)
 
     x = (a - 1.0) + (b - 1.0)
     if x <= 0.50 # go to 10
-        return dgmln1(1.0 + x)
+        return lgamma1p(1.0 + x)
     end
     if x < 1.50 # go to 20
-        return dgmln1(x) + dlnrel(x)
+        return lgamma1p(x) + dlnrel(x)
     end
-    return dgmln1(x - 1.0) + log(x*(1.0 + x))
+    return lgamma1p(x - 1.0) + log(x*(1.0 + x))
 end
 
 function desum(mu::Integer, x::Real)
@@ -3640,7 +3497,8 @@ function desum(mu::Integer, x::Real)
     return exp(w)
 end
 
-function dgam1(x::Real)
+# NSWC DGAM1
+function rgamma1pm1(x::Float64)
 #-----------------------------------------------------------------------
 #     EVALUATION OF 1/GAMMA(1 + X) - 1  FOR -0.5 .LE. X .LE. 1.5
 #-----------------------------------------------------------------------
@@ -3726,12 +3584,13 @@ function dgam1(x::Real)
     z = (((((((((((((w*t + c13)*t + c12)*t + c11)*t + c10)*t + c9)*t + c8)*t + c7)*t + c6)*t + c5)*t + c4)*t + c3)*t + c2)*t + c1)*t + c
 
     if d <= 0.0 # go to 50
-        return x*((z + 0.5d0) + 0.5d0)
+        return x*((z + 0.5) + 0.5)
     end
     return t*z/x
 end
 
-function gam1(a::Float32)
+# NSWC GAM1
+function rgamma1pm1(a::Float32)
 #-----------------------------------------------------------------------
 #     COMPUTATION OF 1/GAMMA(A+1) - 1  FOR -0.5 .LE. A .LE. 1.5
 #-----------------------------------------------------------------------
@@ -3781,10 +3640,13 @@ function gam1(a::Float32)
     return t*w/a
 end
 
-gamln1(x::Float32) = lgamma(1.0f0 + x)
-dgmln1(x::Real) = lgamma(1 + x)
-dxparg(bmin::Bool) = (bmin ? log(realmin()) : log(realmax()))
-exparg(bmin::Bool) = (bmin ? log(realmin(Float32)) : log(realmax(Float32)))
+function lgamma1p(x)
+    if -0.5 <= x <= 1.5
+        return -log1p(rgamma1pm1(x))
+    else
+        lgamma(one(x)+x)
+    end
+end
 
 ### End of regularized incomplete beta function
 
