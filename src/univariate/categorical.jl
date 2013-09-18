@@ -142,20 +142,62 @@ function var(d::Categorical)
     s
 end
 
-function fit_mle{T<:Real}(::Type{Categorical}, k::Integer, x::Array{T})
-    w = zeros(Int, k)
+
+### Model fitting
+
+function fit_categorical!{T<:Integer}(p::Vector{Float64}, x::Array{T}; pricount::Float64=0.0)
+    k = length(p)
     n = length(x)
-    for i in 1:n
-         w[x[i]] += 1
+
+    # accumulate counts
+    fill!(p, pricount)
+    for i = 1:n
+        @inbounds p[x[i]] += 1.
     end
 
-    p = Array(Float64, k)
-    c = 1.0 / n
+    # normalize
+    tw = n + pricount * k
+    c = 1.0 / tw
     for i = 1:k
-        p[i] = w[i] * c
+        @inbounds p[i] *= c
     end
-
-    Categorical(w)
+    return p
 end
 
-fit_mle{T<:Real}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
+function fit_categorical!{T<:Integer}(p::Vector{Float64}, x::Array{T}, w::Array{Float64}; pricount::Float64=0.0)
+    k = length(p)
+    n = length(x)
+
+    # accumulate counts
+    fill!(p, pricount)
+    tw = pricount * k
+    for i = 1:n
+        @inbounds wi = w[i]
+        @inbounds p[x[i]] += wi 
+        tw += wi
+    end
+
+    # normalize
+    c = 1.0 / tw
+    for i = 1:k
+        @inbounds p[i] *= c
+    end
+    return p
+end
+
+function fit_categorical{T<:Integer}(k::Integer, x::Array{T}; pricount::Float64=0.0)
+    Categorical(fit_categorical!(zeros(k), x; pricount=pricount))
+end
+
+function fit_categorical{T<:Integer}(k::Integer, x::Array{T}, w::Array{Float64}; pricount::Float64=0.0)
+    Categorical(fit_categorical!(zeros(k), x; pricount=pricount))
+end
+
+fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_categorical(data...)
+fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_categorical(data..., w)
+fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) = fit_categorical(k, x)
+fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) = fit_categorical(k, x, w)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_categorical(max(x), x)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_categorical(max(x), x, w)
+
+

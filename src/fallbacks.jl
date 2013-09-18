@@ -69,6 +69,47 @@ logccdf(d::Distribution, q::Real) = log(ccdf(d,q))
 invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
 
+function quantile(d::ContinuousUnivariateDistribution, α::Real)
+
+    if α < 0 || α > 1 return NaN end
+    if α == 0 return 0.0 end
+    if α == 1 return 1.0 end
+
+    cc = 10eps()
+    e = sqrt(eps())
+    x = mode(d)
+    while true
+        dx = (cdf(d, x)::Float64 - α)/max(e,pdf(d, x)::Float64)
+        if abs(dx) < cc 
+            x -= dx
+            return x
+        end
+        t = x - dx
+        while !insupport(d, t)
+            dx *= 0.5
+            t = x - dx
+        end
+        x = t
+    end
+end
+
+function quantile(d::DiscreteUnivariateDistribution, α::Real)
+    if α < 0 || α > 1 return NaN end
+    if α == 0 return 0 end
+    if α == 1 return d.size end
+    qc = itrunc(quantile(Normal(mean(d), std(d)), α))
+    if α < cdf(d, qc)
+        qc -= 1
+        while α < cdf(d, qc)
+            qc -= 1
+        end
+        return qc + 1
+    end
+    while α > cdf(d, qc)
+        qc += 1
+    end
+    return qc
+end
 
 #### insupport ####
 
@@ -102,6 +143,7 @@ function insupport(d::MatrixDistribution, X::Array)
     return true
 end
 
+rand(d::UnivariateDistribution) = quantile(d, rand())
 
 #### log likelihood ####
 
@@ -258,8 +300,8 @@ fit_mle{D<:UnivariateDistribution}(dt::Type{D}, x::Array, w::Array) = fit_mle(D,
 fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix) = fit_mle(D, suffstats(D, x))
 fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix, w::Array) = fit_mle(D, suffstats(D, x, w))
 
-fit{D <: Distribution}(dt::Type{D}, x::Array) = fit_mle(D, x)
-
+fit{D<:Distribution}(dt::Type{D}, x) = fit_mle(D, x)
+fit{D<:Distribution}(dt::Type{D}, args...) = fit_mle(D, args...)
 
 # Conjugates
 
@@ -287,3 +329,10 @@ posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = mode(post
 posterior_mode(pri::Distribution, G::GenerativeFormulation, x) = mode(posterior(pri, G, x))
 posterior_mode(pri::Distribution, G::GenerativeFormulation, x, w) = mode(posterior(pri, G, x, w))
 
+posterior_make{D<:Distribution}(::Type{D}, θ) = D(θ) 
+fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x) = posterior_make(D, posterior_mode(pri, D, x))
+fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x, w) = posterior_make(D, posterior_mode(pri, D, x, w))
+
+posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x) = D(rand(posterior(pri, G, x))...)
+posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = D(rand(posterior(pri, G, x, w))...)
+posterior_sample{D<:Distribution,G<:Distribution}(post::D, ::Type{G}) = G(rand(post)...)

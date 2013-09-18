@@ -37,9 +37,9 @@ mean(d::Normal) = d.μ
 
 median(d::Normal) = d.μ
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^t * t^2)
+mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
 
-cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^t * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
 
 mode(d::Normal) = d.μ
 modes(d::Normal) = [d.μ]

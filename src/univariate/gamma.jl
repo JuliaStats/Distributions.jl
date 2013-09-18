@@ -16,6 +16,13 @@ rate(d::Gamma) = 1.0 / d.scale
 
 @_jl_dist_2p Gamma gamma
 
+function cdf(d::Gamma, x::Real)
+    if x < 0 return 0.0 end
+    return dgrat(d.shape, x/d.scale)[1]
+end
+
+quantile(d::Gamma, α::Real) = dginv(d.shape, α, 1-α)*d.scale
+
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)
     x + lgamma(d.shape) + log(d.scale) + d.shape
@@ -39,6 +46,8 @@ function mode(d::Gamma)
 end
 
 modes(d::Gamma) = [mode(d)]
+
+pdf(d::Gamma, x::Real) = insupport(d, x) ? drcomp(d.shape, x/d.scale)/x : 0.0
 
 # rand()
 #
@@ -125,8 +134,8 @@ function suffstats(::Type{Gamma}, x::Array, w::Array{Float64})
     slogx = 0.
     tw = 0.
     for i = 1:n
-        xi = x[i]
-        wi = w[i]
+        @inbounds xi = x[i]
+        @inbounds wi = w[i]
         sx += wi * xi
         slogx += wi * log(xi)
         tw += wi
@@ -160,4 +169,3 @@ function fit_mle(::Type{Gamma}, ss::GammaStats;
 
     Gamma(a, mx / a)
 end
-

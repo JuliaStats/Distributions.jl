@@ -43,7 +43,8 @@ end
 
 
 
-function fit_mle{T <: Real}(::Type{Cauchy}, x::Array{T})
+# Note: this is not a Maximum Likelihood estimator
+function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
     l, u = iqr(x)
     Cauchy(median(x), (u - l) / 2.0)
 end

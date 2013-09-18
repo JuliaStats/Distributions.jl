@@ -147,7 +147,7 @@ for d in [
     @test_approx_eq mean(d)     xmean
     @test_approx_eq var(d)      xvar
     @test_approx_eq std(d)      xstd
-    @test_approx_eq skewness(d) xskew
+    @test_approx_eq_eps skewness(d) xskew 1000eps()
     @test_approx_eq kurtosis(d) xkurt
     @test_approx_eq entropy(d)  xentropy
 

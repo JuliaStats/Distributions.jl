@@ -7,7 +7,10 @@ immutable Poisson <: DiscreteUnivariateDistribution
     Poisson() = new(1.0)
 end
 
-@_jl_dist_1p Poisson pois
+function cdf(d::Poisson, x::Real)
+    if x < 0 return 0.0 end
+    dgrat(floor(x), d.lambda)[2] + pdf(d, x)
+end
 
 function entropy(d::Poisson)
     λ = d.lambda
@@ -46,6 +49,8 @@ end
 
 mode(d::Poisson) = ifloor(d.lambda)
 modes(d::Poisson) = [mode(d)]
+
+pdf(d::Poisson, x::Real) = insupport(d, x) ? drcomp(x, d.lambda)/x : 0.0
 
 skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 

@@ -47,7 +47,6 @@ function entropy(d::Binomial; approx::Bool=false)
     -s
 end
 
-@_jl_dist_2p Binomial binom
 
 # Based on:
 #   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
@@ -86,27 +85,13 @@ function logpdf(d::Binomial, x::Real)
     x*logmxp1(n*p/x) + y*logmxp1(n*q/y) + 0.5*(log(n/(x*y))-log2π)
 end
 
+# pdf(d::Binomial, x::Real) = insupport(d,x) ? pdf(Beta(d.size - x + 1.0, x + 1.0), 1 - d.prob)::Float64/(d.size + 1) : 0.0
 
-function quantile(d::Binomial, p::Real)
-    # Edgeworth approximation
-    x = round(quantile(EdgeworthSum(d,1), p))
-    if cdf(d,x) >= p
-        # search down
-        xl = x-1.0
-        while cdf(d,xl) >= p
-            x = xl
-            xl -= 1.0
-        end
-    else
-        # search up
-        x += 1.0
-        while cdf(d,x) < p
-            x += 1.0
-        end
-    end
-    x
+function cdf(d::Binomial, x::Real)
+    if x >= d.size return 1.0 end
+    if x < 0 return 0.0 end
+    return cdf(Beta(d.size - x, x + 1.0), 1.0 - d.prob)
 end
-
 
 function mgf(d::Binomial, t::Real)
     p = d.prob
@@ -117,6 +102,7 @@ function cf(d::Binomial, t::Real)
     p = d.prob
     (1.0 - p + p * exp(im * t))^d.size
 end
+
 
 ## Fit model
 
@@ -136,32 +122,28 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
         0 <= xi <= n || throw(DomainError())
         ns += xi
     end
-    BinomialStats(ns, length(x), n)
+    BinomialStats(ns, length(x), n)    
 end
 
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
     ns = 0.
     ne = 0.
     for i = 1:length(x)
-        xi = x[i]
+        @inbounds xi = x[i]
         0 <= xi <= n || throw(DomainError())
-        wi = w[i]
+        @inbounds wi = w[i]
         ns += xi * wi
         ne += wi
     end
-    BinomialStats(ns, ne, n)
+    BinomialStats(ns, ne, n)   
 end
+
+suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = suffstats(Binomial, data...)
+suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Binomial, data..., w)
 
 fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T})
-    fit_mle(Binomial, suffstats(Binomial, n, x))
-end
-
-function fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64})
-    fit_mle(Binomial, suffstats(Binomial, n, x, w))
-end
-
-fit(::Type{Binomial}, n::Integer, x::Array) = fit_mle(Binomial, n, x)
-
-
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = fit_mle(Binomial, suffstats(Binomial, data))
+fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))

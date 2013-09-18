@@ -80,21 +80,21 @@ function entropy(d::Dirichlet)
     return en
 end
 
-function mode(d::Dirichlet)
-    k = length(d.alpha)
-    x = Array(Float64, k)
-    s = d.alpha0 - k
-    a = d.alpha
-    for i in 1:k
-        @inbounds ai = a[i]
-        if ai <= 1.0
-            error("Dirichlet has a mode only when alpha[i] > 1 for all i")
+
+function dirichlet_mode!(r::Vector{Float64}, α::Vector{Float64}, α0::Float64)
+    k = length(α)
+    s = α0 - k
+    for i = 1:k
+        @inbounds ai = α[i]
+        if ai <= 1.
+            error("Dirichlet has a mode only when alpha[i] > 1 for all i" )
         end
-        x[i] = (ai - 1.0) / s
+        @inbounds r[i] = (ai - 1.0) / s
     end
-    return x
+    r
 end
 
+mode(d::Dirichlet) = dirichlet_mode!(zeros(dim(d)), d.alpha, d.alpha0)
 modes(d::Dirichlet) = [mode(d)]
 
 
@@ -211,7 +211,7 @@ function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
     slogp = zeros(K)
     for i = 1:n
         for k = 1:K
-            slogp[k] += log(P[k,i])
+            @inbounds slogp[k] += log(P[k,i])
         end
     end
     DirichletStats(slogp, n)
@@ -228,40 +228,16 @@ function suffstats(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64})
     slogp = zeros(K)
 
     for i = 1:n
-        wi = w[i]
+        @inbounds wi = w[i]
         tw += wi
         for k = 1:K
-            slogp[k] += log(P[k,i]) * wi
+            @inbounds slogp[k] += log(P[k,i]) * wi
         end
     end
     DirichletStats(slogp, tw)
 end
 
 # fit_mle methods
-
-immutable DirichletMLEOptions
-    maxiter::Int
-    tol::Float64
-end
-
-
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
-    α = dirichlet_mle_init(P)
-    elogp = mean_logp(suffstats(Dirichlet, P))
-    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
-end
-
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
-    n = size(P, 2)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    α = dirichlet_mle_init(P, w)
-    elogp = mean_logp(suffstats(Dirichlet, P, w))
-    fit_mle!(Dirichlet, elogp, α, DirichletMLEOptions(maxiter, tol))
-end
-
 
 ## Initialization
 
@@ -270,8 +246,8 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     
     α0 = 0.
     for k = 1:K
-        μk = μ[k]
-        γk = γ[k]
+        @inbounds μk = μ[k]
+        @inbounds γk = γ[k]
         ak = (μk - γk) / (γk - μk * μk)
         α0 += ak
     end
@@ -289,9 +265,9 @@ function dirichlet_mle_init(P::Matrix{Float64})
 
     for i = 1:n
         for k = 1:K
-            pk = P[k, i]
-            μ[k] += pk
-            γ[k] += pk * pk
+            @inbounds pk = P[k, i]
+            @inbounds μ[k] += pk
+            @inbounds γ[k] += pk * pk
         end
     end
 
@@ -313,12 +289,12 @@ function dirichlet_mle_init(P::Matrix{Float64}, w::Vector{Float64})
     tw = 0.
 
     for i = 1:n
-        wi = w[i]
+        @inbounds wi = w[i]
         tw += wi
         for k = 1:K
             pk = P[k, i]
-            μ[k] += pk * wi
-            γ[k] += pk * pk * wi
+            @inbounds μ[k] += pk * wi
+            @inbounds γ[k] += pk * pk * wi
         end
     end
 
@@ -333,17 +309,14 @@ end
 
 ## Newton-Ralphson algorithm
 
-function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64},
-    opts::DirichletMLEOptions; debug::Bool=false)
+function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
+    maxiter::Int=25, tol::Float64=1.0e-12, debug::Bool=false)
     # This function directly overrides α
 
     K = length(elogp)
     if length(α) != K
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-
-    maxiter::Int = opts.maxiter
-    tol::Float64 = opts.tol
 
     g = Array(Float64, K)
     iq = Array(Float64, K)
@@ -368,12 +341,12 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
         iqs = 0.
 
         for k = 1:K
-            ak = α[k]
-            g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
-            iq[k] = - 1.0 / trigamma(ak)
+            @inbounds ak = α[k]
+            @inbounds g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
+            @inbounds iq[k] = - 1.0 / trigamma(ak)
 
-            b += gk * iq[k]
-            iqs += iq[k]
+            @inbounds b += gk * iq[k]
+            @inbounds iqs += iq[k]
 
             agk = abs(gk)
             if agk > gnorm
@@ -385,8 +358,8 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
         # update α
 
         for k = 1:K
-            α[k] -= (g[k] - b) * iq[k]
-            if α[k] < 1.0e-12
+            @inbounds α[k] -= (g[k] - b) * iq[k]
+            @inbounds if α[k] < 1.0e-12
                 α[k] = 1.0e-12
             end
         end
@@ -407,9 +380,22 @@ function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float
     Dirichlet(α)
 end
 
-function fit_mle!(dty::Type{Dirichlet}, elogp::Vector{Float64}, α::Vector{Float64})
-    fit_mle!(dty, elogp, α, DirichletMLEOptions(25, 1.0e-12))
+
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
+    α = dirichlet_mle_init(P)
+    elogp = mean_logp(suffstats(Dirichlet, P))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
+    n = size(P, 2)
+    if length(w) != n
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+
+    α = dirichlet_mle_init(P, w)
+    elogp = mean_logp(suffstats(Dirichlet, P, w))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
+end
 
 

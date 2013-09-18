@@ -1,6 +1,8 @@
 using Distributions
 using Base.Test
 
+# Fit MLE
+
 N = 10^5
 
 d = fit(DiscreteUniform, rand(DiscreteUniform(10, 15), N))
@@ -21,6 +23,18 @@ d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 @test isa(d, Binomial)
 @test d.size == 100
 @test_approx_eq_eps d.prob 0.3 0.01
+
+p = [0.2, 0.5, 0.3]
+x = rand(Categorical(p), N)
+d = fit(Categorical, x)
+@test isa(d, Categorical)
+@test d.K == 3
+@test_approx_eq_eps d.prob p 0.01
+
+d = fit_mle(Categorical, (3, x))
+@test isa(d, Categorical)
+@test d.K == 3
+@test_approx_eq_eps d.prob p 0.01
 
 d = fit(Exponential, rand(Exponential(0.5), N))
 @test isa(d, Exponential)
@@ -60,3 +74,4 @@ d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
 @test_approx_eq_eps mean(d) 8.2 0.2
+

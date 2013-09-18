@@ -10,7 +10,11 @@ end
 Beta(a::Real) = Beta(a, a) # symmetric in [0, 1]
 Beta() = Beta(1.0) # uniform
 
-@_jl_dist_2p Beta beta
+function cdf(d::Beta, x::Real)
+    if x >= 1 return 1.0 end
+    if x <= 0 return 0.0 end
+    return bratio(d.alpha, d.beta, x)
+end
 
 function entropy(d::Beta)
     o = lbeta(d.alpha, d.beta)
@@ -41,6 +45,8 @@ function mode(d::Beta)
 end
 
 modes(d::Beta) = [mode(d)]
+
+pdf(d::Beta, x::Real) = insupport(d, x) ? brcomp(d.alpha, d.beta, x, 1.0 - x)/(x*(1.0 - x)) : 0.0
 
 function rand(d::Beta)
     u = rand(Gamma(d.alpha))
