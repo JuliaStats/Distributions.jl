@@ -1,11 +1,12 @@
 # Special functions
 
+# the largest x such that exp(x) < Inf
 realmaxexp{T<:FloatingPoint}(::Type{T}) = with_rounding(()->log(realmax(T)),RoundDown)
 realmaxexp(::Type{BigFloat}) = with_bigfloat_rounding(()->log(prevfloat(inf(BigFloat))),RoundDown)
 
+# the smallest x such that exp(x) > 0 (or at least not a subnormal number)
 realminexp{T<:FloatingPoint}(::Type{T}) = with_rounding(()->log(realmin(T)),RoundUp)
-realmaxexp(::Type{BigFloat}) = with_bigfloat_rounding(()->log(nextfloat(zero(BigFloat))),RoundUp)
-
+realminexp(::Type{BigFloat}) = with_bigfloat_rounding(()->log(nextfloat(zero(BigFloat))),RoundUp)
 
 
 # See:
@@ -21,6 +22,7 @@ log1pexp(x::Float64) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
 log1pexp(x::Float32) = x <= 9f0 ? log1p(exp(x)) : x <= 16f0 ? x + exp(-x) : x
 log1pexp(x::Integer) = log1pexp(float(x))
 # log(exp(x)-1)
+# still inaccurate for values close to log(2)
 logexpm1(x::BigFloat) = x <= realmaxexp(typeof(x)) ? log(expm1(x)) : x 
 logexpm1(x::Float64) = x <= 18.0 ? log(expm1(x)) : x <= 33.3 ? x - exp(-x) : x
 logexpm1(x::Float32) = x <= 9f0 ? log(expm1(x)) : x <= 16f0 ? x - exp(-x) : x
@@ -273,6 +275,7 @@ function logmxp1(x::Float32)
 end
 
 
+log1pmx(x) = log1p(x) - x
 # negative of NSWC DRLOG1
 function log1pmx(x::Float64)
 #-----------------------------------------------------------------------
@@ -345,6 +348,44 @@ function log1pmx(x::Float64)
     return log1p(x) - x
 end
 
+# NSWC RLOG1
+function log1pmx(x::Float32)
+    a = 0.566749439387324f-01
+    b = 0.456512608815524f-01
+
+    if x >= -0.39f0 && x <= 0.57f0 # go to 100
+        if x < -0.18f0 # go to 10
+            u = (x + 0.3f0)/0.7f0
+            up2 = u + 2f0
+            w1 = a - u*0.3f0
+        elseif x > 0.18 # go to 20
+            t = 0.75f0*x
+            u = t - 0.25f0
+            up2 = t + 1.75f0
+            w1 = b + u/3f0
+        else
+            u = x
+            up2 = u + 2f0
+            w1 = 0f0
+        end
+#
+#                  SERIES EXPANSION
+#
+        r = u/up2
+        t = r*r
+
+        w = @horner(t,
+                    0.333333333333333f+00, 
+                    -.224696413112536f+00,
+                    0.620886815375787f-02) /
+        @horner(t, 1f0,
+                -.127408923933623f+01,
+                0.354508718369557f+00)
+
+        return r*(2f0*t*w - u) - w1
+    end
+    return log1p(x) - x
+end
 
 
 
@@ -391,6 +432,26 @@ function lstirling(x::Float64)
                 .171348014966398575409015466667e-22) / x
     end
 end
+
+
+function lstirling(x::Float32)
+    if x <= 10.0
+        return lgamma(x) - (x-0.5f0)*log(x) + x - 0.5f0*log2π
+    else
+        u = 10f0/x
+        t = u*u
+        return @horner(t,
+                .833333333333333333333333333333f-01,
+                -.277777777777777777777777752282f-04,
+                .793650793650793650791732130419f-07,
+                -.595238095238095232389839236182f-09,
+                .841750841750832853294451671990f-11,
+                -.191752691751854612334149171243f-12,
+                .641025640510325475730918472625f-14,
+                -.295506514125338232839867823991f-15) / x
+    end
+end
+
 
 # The regularized incomplete gamma function
 # Translated from the NSWC Library
