@@ -1,8 +1,5 @@
-using NumericExtensions
 using Distributions
 using Base.Test
-using Base.LinAlg
-
 
 n = 100
 
@@ -37,8 +34,8 @@ Lam_true = eye(2)
 Lam_true[1,2] = Lam_true[2,1] = 0.25
 
 X = rand(MultivariateNormal(mu_true, inv(Lam_true)), n)
-Xm = vbroadcast(Subtract(), X, mean(X,2), 1)
 Xbar = mean(X,2)
+Xm = X .- Xbar
 
 pri = NormalWishart(mu0, kappa0, T0, nu0)
 

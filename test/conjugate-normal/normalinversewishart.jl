@@ -1,8 +1,6 @@
 
-using NumericExtensions
 using Distributions
 using Base.Test
-
 
 n = 100
 
@@ -37,8 +35,8 @@ Sig_true = eye(2)
 Sig_true[1,2] = Sig_true[2,1] = 0.25
 
 X = rand(MultivariateNormal(mu_true, Sig_true), n)
-Xm = vbroadcast(Subtract(), X, mean(X,2), 1)
 Xbar = mean(X,2)
+Xm = X .- mean(X,2)
 
 pri = NormalInverseWishart(mu0, kappa0, T0, nu0)
 
