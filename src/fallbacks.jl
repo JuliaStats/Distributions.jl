@@ -105,7 +105,6 @@ end
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 isbounded(d::Distribution) = islowerbounded(d) && isupperbounded(d)
-support(d::ContinuousUnivariateDistribution)
 
 
 #### log likelihood ####
