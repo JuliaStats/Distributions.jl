@@ -181,7 +181,7 @@ function log1pmx(x::Float32)
             u = (x + 0.3f0)/0.7f0
             up2 = u + 2f0
             w1 = a - u*0.3f0
-        elseif x > 0.18 # go to 20
+        elseif x > 0.18f0 # go to 20
             t = 0.75f0*x
             u = t - 0.25f0
             up2 = t + 1.75f0
