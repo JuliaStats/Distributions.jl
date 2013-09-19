@@ -195,7 +195,10 @@ include("constants.jl")
 
 include("fallbacks.jl")
 include("rmath.jl")
-include("specialfuns.jl")
+include("specialfuns/misc.jl")
+include("specialfuns/normal.jl")
+include("specialfuns/log.jl")
+include("specialfuns/gammabeta.jl")
 include("tvpack.jl")
 include("utils.jl")
 
