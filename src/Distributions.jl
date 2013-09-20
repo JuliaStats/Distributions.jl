@@ -279,15 +279,20 @@ include("kde.jl")
 include("functionals.jl")
 
 # Posteriors and conjugate priors
-include("conjugates.jl")
-include(joinpath("conjugate-normal", "normalgamma.jl"))
-include(joinpath("conjugate-normal", "normalinversegamma.jl"))
-include(joinpath("conjugate-normal", "normalwishart.jl"))
-include(joinpath("conjugate-normal", "normalinversewishart.jl"))
-include(joinpath("conjugate-normal", "normalknowncov.jl"))
+include(joinpath("conjugates", "fallbacks.jl"))
+include(joinpath("conjugates", "beta_binom.jl"))
+include(joinpath("conjugates", "dirichlet_multi.jl"))
+include(joinpath("conjugates", "gamma_exp.jl"))
 
+include(joinpath("conjugates", "normalgamma.jl"))
+include(joinpath("conjugates", "normalinversegamma.jl"))
+include(joinpath("conjugates", "normalwishart.jl"))
+include(joinpath("conjugates", "normalinversewishart.jl"))
+include(joinpath("conjugates", "normal.jl"))
+include(joinpath("conjugates", "mvnormal.jl"))
+
+# other stuff
 include("qq.jl")
-
 include("estimators.jl")
 
 end # module

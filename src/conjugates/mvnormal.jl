@@ -1,7 +1,11 @@
-
-# Used "Conjugate Bayesian analysis of the Gaussian distribution" by Murphy as
-# a reference.  Note that there were some typos in that document so the code
-# here may not correspond exactly.
+# Conjugates for Multivariate Normal
+#
+#   MvNormal -- MvNormal (with known covariance)
+#
+#
+#   TODO: The non-conjugate normal prior on mean and inverse-gamma/Wishart prior
+#   on (co)variance.
+#
 
 import NumericExtensions.sum
 
