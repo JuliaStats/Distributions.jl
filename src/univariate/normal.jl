@@ -108,7 +108,7 @@ end
 
 # Cases where μ or σ is known
 
-immutable NormalKnownMu <: GenerativeFormulation
+immutable NormalKnownMu <: IncompleteDistribution
     μ::Float64
 end
 
@@ -140,7 +140,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
 end
 
 
-immutable NormalKnownSigma <: GenerativeFormulation
+immutable NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)

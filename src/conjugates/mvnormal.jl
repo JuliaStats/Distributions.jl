@@ -7,7 +7,7 @@
 #   on (co)variance.
 #
 
-immutable MvNormalKnownSigma <: GenerativeFormulation
+immutable MvNormalKnownSigma <: IncompleteDistribution
     Sigma::Matrix{Float64}
 
     function MvNormalKnownSigma(S::Matrix{Float64})

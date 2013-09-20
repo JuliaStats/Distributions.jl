@@ -187,7 +187,10 @@ typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discret
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
 abstract SufficientStats
-abstract GenerativeFormulation
+abstract IncompleteDistribution
+
+typealias DistributionType{D<:Distribution} Type{D}
+typealias IncompleteFormulation Union(DistributionType,IncompleteDistribution)
 
 
 #### Include files
