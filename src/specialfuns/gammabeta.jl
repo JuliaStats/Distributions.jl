@@ -66,6 +66,8 @@ end
 
 # The regularized incomplete gamma function
 # Translated from the NSWC Library
+gratio(a::Float32, x::Float32) = gratio(a,x,0)
+
 function gratio(a::Float32, x::Float32, ind::Integer)
 #-----------------------------------------------------------------------
 #
@@ -541,7 +543,7 @@ function gratio(a::Float32, x::Float32, ind::Integer)
     return ans, 0.5f0 + (0.5f0 - ans)
 end
 
-function dgrat(a::Real, x::Real)
+function gratio(a::Real, x::Real)
 #-----------------------------------------------------------------------
 #
 #        EVALUATION OF THE INCOMPLETE GAMMA RATIO FUNCTIONS
@@ -633,7 +635,7 @@ function dgrat(a::Real, x::Real)
                 if qans <= 0.0 return 1.0, 0.0 end
                 return 0.5 + (0.5 - qans), qans
             end
-            r = drcomp(a,x)
+            r = rcomp(a,x)
             if r == 0.0 return 1.0, 0.0 end
             break
         end # go to 170
@@ -687,7 +689,7 @@ function dgrat(a::Real, x::Real)
             break
         end
 
-        r = drcomp(a,x)
+        r = rcomp(a,x)
         if r == 0.0 # go to 331
             if abs(s) <= 2.0*e error("ierr=3") end
             if x < a return 0.0, 1.0 end
@@ -779,61 +781,60 @@ function dgrat(a::Real, x::Real)
     return 0.5 + (0.5 - qans), qans
 end
 
-function rcomp(a::Float32, x::Float32)
-#-----------------------------------------------------------------------
-#                EVALUATION OF EXP(-X)*X**A/GAMMA(A)
-#-----------------------------------------------------------------------
-#     RT2PIN = 1/SQRT(2*PI)
-#------------------------
-    rt2pin = .398942280401433f0
-#------------------------
-    if x == 0.0 return 0.0f0 end
-    if a < 20.0 # go to 20
+# rcomp(a,x) = exp(-x) * x^a / gamma(a)
+rcomp(a,x) = rcomp(promote(a,x)...)
 
+# NSWC RCOMP
+function rcomp(a::Float32, x::Float32)
+    if x == 0.0 
+        return 0.0f0 
+    end
+    if a < 20f0 # go to 20
         t = a*log(x) - x
-        if t < realminexp(Float32) return 0.0f0 end
-        if a < 1.0 # go to 10
+        if t < realminexp(Float32) 
+            return 0.0f0 
+        elseif a < 1f0 # go to 10
             return (a*exp(t))*(1.0f0 + rgamma1pm1(a))
         end
         return exp(t)/gamma(a)
+    else
+        u = x/a
+        if u == 0f0 
+            return 0f0 
+        end
+        t = (1f0/a)^2
+        t1 = (((0.75f0*t - 1.0f0)*t + 3.5f0)*t - 105.0f0)/(a*1260.0f0)
+        t1 += a*logmxp1(u)
+        if t1 >= realminexp(Float32) 
+            return r√2π*sqrt(a)*exp(t1) 
+        end
     end
-
-    u = x/a
-    if u == 0.0 return 0.0f0 end
-    t = (1.0f0/a)^2
-    t1 = (((0.75f0*t - 1.0f0)*t + 3.5f0)*t - 105.0f0)/(a*1260.0f0)
-    t1 += a*logmxp1(u)
-    if t1 >= realminexp(Float32) return rt2pin*sqrt(a)*exp(t1) end
 end
 
-function drcomp(a::Real, x::Real)
-#-----------------------------------------------------------------------
-#              EVALUATION OF EXP(-X)*X**A/GAMMA(A)
-#-----------------------------------------------------------------------
-#     DOUBLE PRECISION A, X, C, T, W
-#     DOUBLE PRECISION DGAMMA, DGAM1, DPDEL, DRLOG, DXPARG
-#--------------------------
-#     C = 1/SQRT(2*PI)
-#--------------------------
-    c = .398942280401432677939946059934
-#--------------------------
-    if x == 0.0 return 0.0 end
+# NSWC DRCOMP
+function rcomp(a::Float64, x::Float64)
+    if x == 0.0 
+        return 0.0 
+    end
     if a <= 20.0 # go to 20
         t = a*log(x) - x
-        if t < realminexp(Float64) return 0.0 end
-        if a < 1.0 # go to 10
+        if t < realminexp(Float64) 
+            return 0.0         
+        elseif a < 1.0 # go to 10
             return (a*exp(t))*(1.0 + rgamma1pm1(a))
         end
         return exp(t)/gamma(a)
-    end
-
-    t = x/a
-    if t == 0.0 return 0.0 end
-    w = -(lstirling(a) - a*logmxp1(t))
-    if w >= realminexp(Float64) 
-        return c*sqrt(a)*exp(w)
     else
-        return 0.0
+        t = x/a
+        if t == 0.0 
+            return 0.0 
+        end
+        w = a*logmxp1(t)-lstirling(a)
+        if w >= realminexp(Float64) 
+            return r√2π*sqrt(a)*exp(w)
+        else
+            return 0.0
+        end
     end
 end
 
@@ -1209,8 +1210,8 @@ c5)*u + c4)*u + c3)*u + c2)*u + c1)*u + c0
 end
 
 # The inverse incomplete Gamma ratio function
-# Translated from NSWC
-function dginv(a::Real, p::Real, q::Real)
+# Translated from NSWC DGINV
+function gaminv(a::Float64, p::Float64, q::Float64)
 #-----------------------------------------------------------------------
 #
 #                        DOUBLE PRECISION
@@ -1312,7 +1313,7 @@ function dginv(a::Real, p::Real, q::Real)
             p0 = float32(p)
             q0 = float32(q)
             if p0 != 0.0 && q0 != 0.0 # go to 10
-                x0, ier = gaminv(float32(a), 0.0f0, p0, q0)
+                x0, ier = gaminv(float32(a), p0, q0)
                 if ier >= 0 || ier == -8 # go to 10
                     ierr = max(ier,0)
                     if x0 <= 1.f34 # go to 10
@@ -1465,9 +1466,9 @@ function dginv(a::Real, p::Real, q::Real)
         while true
             if ierr >= 10 return x end # go to 530
             ierr += 1
-            pn, qn = dgrat(a, xn)
+            pn, qn = gratio(a, xn)
             if pn == 0.0 || qn == 0.0 return xn end# go to 550
-            r = drcomp(a,xn)
+            r = rcomp(a,xn)
             if r < xmin return xn end # go to 550
             t = (pn - p)/r
             w = 0.5*(am1 - xn)
@@ -1498,9 +1499,9 @@ function dginv(a::Real, p::Real, q::Real)
         while true
             if ierr >= 10 return x end # go to 530
             ierr += 1
-            pn, qn = dgrat(a, xn)
+            pn, qn = gratio(a, xn)
             if pn == 0.0 || qn == 0.0 return xn end # go to 550
-            r = drcomp(a,xn)
+            r = rcomp(a,xn)
             if r < xmin return xn end # go to 550
             t = (q - qn)/r
             w = 0.5*(am1 - xn)
@@ -1523,6 +1524,8 @@ function dginv(a::Real, p::Real, q::Real)
         end
     end
 end
+
+gaminv(a::Float32, p::Float32, q::Float32) = gaminv(a,0f0,p,q)
 
 function gaminv(a::Float32, x0::Float32, p::Float32, q::Float32)
 #-----------------------------------------------------------------------

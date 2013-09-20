@@ -11,43 +11,46 @@ end
 Gamma(sh::Real) = Gamma(sh, 1.0)
 Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
 
+insupport(::Gamma, x::Real) = zero(x) <= x < Inf
+insupport(::Type{Gamma}, x::Real) = zero(x) <= x < Inf
+
 scale(d::Gamma) = d.scale
 rate(d::Gamma) = 1.0 / d.scale
 
-@_jl_dist_2p Gamma gamma
+mean(d::Gamma) = d.shape * d.scale
 
-function cdf(d::Gamma, x::Real)
-    if x < 0 return 0.0 end
-    return dgrat(d.shape, x/d.scale)[1]
-end
+mode(d::Gamma) = d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : 0.0
+modes(d::Gamma) = [mode(d)]
 
-quantile(d::Gamma, α::Real) = dginv(d.shape, α, 1-α)*d.scale
+var(d::Gamma) = d.shape * d.scale * d.scale
+skewness(d::Gamma) = 2.0 / sqrt(d.shape)
+kurtosis(d::Gamma) = 6.0 / d.shape
 
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)
     x + lgamma(d.shape) + log(d.scale) + d.shape
 end
 
-insupport(::Gamma, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Gamma}, x::Real) = zero(x) <= x < Inf
 
-kurtosis(d::Gamma) = 6.0 / d.shape
-
-mean(d::Gamma) = d.shape * d.scale
-
-median(d::Gamma) = quantile(d, 0.5)
-
-mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
-
-cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
-
-function mode(d::Gamma)
-    d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
+function pdf(d::Gamma, x::Real) 
+    if !insupport(d, x)
+        return 0.0
+    elseif x == 0.0
+        return d.shape > 1.0 ? 0.0 : d.shape == 1.0 ? 1/d.scale : Inf
+    end
+    rcomp(d.shape, x/d.scale)/x
 end
 
-modes(d::Gamma) = [mode(d)]
 
-pdf(d::Gamma, x::Real) = insupport(d, x) ? drcomp(d.shape, x/d.scale)/x : 0.0
+cdf(d::Gamma, x::Real) = x<0 ? 0.0 : gratio(d.shape, x/d.scale)[1]
+ccdf(d::Gamma, x::Real) = x<0 ? 1.0 : gratio(d.shape, x/d.scale)[2]
+
+quantile(d::Gamma, α::Real) = gaminv(d.shape, α, 1-α)*d.scale
+cquantile(d::Gamma, α::Real) = gaminv(d.shape, 1-α, α)*d.scale
+
+mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
+
 
 # rand()
 #
@@ -99,9 +102,6 @@ function rand!(d::Gamma, A::Array{Float64})
     multiply!(A, d.scale)
 end
 
-skewness(d::Gamma) = 2.0 / sqrt(d.shape)
-
-var(d::Gamma) = d.shape * d.scale * d.scale
 
 
 ## Fit model

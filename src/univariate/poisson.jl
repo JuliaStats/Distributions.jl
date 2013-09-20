@@ -35,11 +35,6 @@ function entropy(d::Poisson)
 end
 
 
-# Based on:
-#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
-#   available from:
-#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
-# Uses slightly different forms instead of D0 function
 function pdf(d::Poisson, x::Real)
     if !insupport(d,x)
         return 0.0
@@ -47,11 +42,14 @@ function pdf(d::Poisson, x::Real)
     if x == 0
         return exp(-d.lambda)
     end
-    # NSWC version: 
-    drcomp(x, d.lambda)/x
-    # Loader's version:
-    # exp(x*logmxp1(d.lambda/x)-lstirling(x))/(√2π*sqrt(x))    
+    rcomp(x, d.lambda)/x
 end
+
+# Based on:
+#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
+#   available from:
+#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
+# Uses slightly different forms instead of D0 function
 function logpdf(d::Poisson, x::Real)
     if !insupport(d,x)
         return -Inf
@@ -63,19 +61,8 @@ function logpdf(d::Poisson, x::Real)
 end
 
 
-function cdf(d::Poisson, x::Real)
-    if x < 0 
-        return 0.0 
-    end
-    dgrat(floor(x)+1.0, d.lambda)[2]
-end
-function ccdf(d::Poisson, x::Real)
-    if x < 0 
-        return 1.0
-    end
-    dgrat(floor(x)+1.0, d.lambda)[1]
-end
-
+cdf(d::Poisson, x::Real) = x<0 ? 0.0 : gratio(floor(x)+1.0, d.lambda)[2]
+ccdf(d::Poisson, x::Real) = x<0 ? 1.0 : gratio(floor(x)+1.0, d.lambda)[1]
 
 
 function mgf(d::Poisson, t::Real)
