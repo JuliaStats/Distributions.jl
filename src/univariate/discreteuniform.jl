@@ -11,16 +11,11 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
-min(d::DiscreteUniform) = d.a
-max(d::DiscreteUniform) = d.b
-
 function cdf(d::DiscreteUniform, k::Real)
     k < d.a ? 0. : (k > d.b ? 1. : (ifloor(k) - d.a + 1.0) / (d.b - d.a + 1.0))
 end
 
 entropy(d::DiscreteUniform) = log(d.b - d.a + 1.0)
-
-insupport(d::DiscreteUniform, x::Number) = isinteger(x) && d.a <= x <= d.b
 
 function kurtosis(d::DiscreteUniform)
     n = d.b - d.a + 1.0
@@ -58,6 +53,18 @@ skewness(d::DiscreteUniform) = 0.0
 
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
+### handling support
+
+isupperbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+islowerbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+isbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+
+hasfinitesupport(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+min(d::DiscreteUniform) = d.a
+max(d::DiscreteUniform) = d.b
+support(d::DiscreteUniform) = d.a:d.b
+
+insupport(d::DiscreteUniform, x::Number) = isinteger(x) && min(d) <= x <= max(d)
 
 # Fit model
 
