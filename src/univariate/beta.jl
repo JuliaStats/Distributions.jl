@@ -20,9 +20,6 @@ function entropy(d::Beta)
     o
 end
 
-insupport(::Beta, x::Real) = zero(x) < x < one(x)
-insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
-
 function kurtosis(d::Beta)
     α, β = d.alpha, d.beta
     num = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
@@ -70,6 +67,19 @@ function var(d::Beta)
     ab = d.alpha + d.beta
     d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
+
+### handling support
+
+isupperbounded(::Union(Beta, Type{Beta})) = true
+islowerbounded(::Union(Beta, Type{Beta})) = true
+isbounded(::Union(Beta, Type{Beta})) = true
+
+hasfinitesupport(::Union(Beta, Type{Beta})) = false
+
+min(::Union(Beta, Type{Beta})) = zero(Real)
+max(::Union(Beta, Type{Beta})) = one(Real)
+
+insupport(::Union(Beta, Type{Beta}), x::Real) = min(Beta) <= x <= max(Beta)
 
 ## Fit model
 

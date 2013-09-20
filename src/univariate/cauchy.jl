@@ -14,9 +14,6 @@ Cauchy() = Cauchy(0.0, 1.0)
 
 entropy(d::Cauchy) = log(d.scale) + log(4.0 * pi)
 
-insupport(::Cauchy, x::Real) = isfinite(x)
-insupport(::Type{Cauchy}, x::Real) = isfinite(x)
-
 kurtosis(d::Cauchy) = NaN
 
 mean(d::Cauchy) = NaN
@@ -35,6 +32,15 @@ modes(d::Cauchy) = [mode(d)]
 skewness(d::Cauchy) = NaN
 
 var(d::Cauchy) = NaN
+
+### handling support
+insupport(::Union(Cauchy, Type{Cauchy}), x::Real) = isfinite(x)
+
+isupperbounded(d::Union(Cauchy, Type{Cauchy})) = false
+islowerbounded(d::Union(Cauchy, Type{Cauchy})) = false
+isbounded(d::Union(Cauchy, Type{Cauchy})) = false
+
+hasfinitesupport(d::Union(Cauchy, Type{Cauchy})) = false
 
 # Note: this is not a Maximum Likelihood estimator
 function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
