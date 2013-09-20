@@ -51,6 +51,17 @@ skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
 
 var(d::Geometric) = (1.0 - d.prob) / d.prob^2
 
+### handling support
+
+isupperbounded(d::Union(Geometric, Type{Geometric})) = false
+islowerbounded(d::Union(Geometric, Type{Geometric})) = true
+isbounded(d::Union(Geometric, Type{Geometric})) = false
+
+min(d::Union(Geometric, Type{Geometric})) = 0
+max(d::Geometric) = Inf
+insupport(d::Geometric, x::Real) = isinteger(x) && x >= 0
+
+
 ## Fit model
 
 immutable GeometricStats

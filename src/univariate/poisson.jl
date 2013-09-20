@@ -25,6 +25,13 @@ function entropy(d::Poisson)
     end
 end
 
+isupperbounded(::Union(Poisson, Type{Poisson})) = false
+islowerbounded(::Union(Poisson, Type{Poisson})) = true
+isbounded(::Union(Poisson, Type{Poisson})) = false
+
+min(::Union(Poisson, Type{Poisson})) = 0
+max(::Union(Poisson, Type{Poisson})) = Inf
+
 insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
 

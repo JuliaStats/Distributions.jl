@@ -31,10 +31,16 @@ end
 
 entropy(d::Triangular) = 0.5 + log(d.scale)
 
-function insupport(d::Triangular, x::Number)
-    return isreal(x) && isfinite(x) &&
-           d.location - d.scale <= x <= d.location + d.scale
-end
+# support handling
+
+isupperbounded(::Union(Triangular, Type{Triangular})) = true
+islowerbounded(::Union(Triangular, Type{Triangular})) = true
+isbounded(::Union(Triangular, Type{Triangular})) = true
+
+min(d::Triangular) = d.location - d.scale
+max(d::Triangular) = d.location + d.scale
+insupport(d::Triangular, x::Real) = min(d) <= x <= max(d)
+
 
 kurtosis(d::Triangular) = -0.6
 

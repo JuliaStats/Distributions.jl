@@ -5,7 +5,15 @@ immutable KSDist <: ContinuousUnivariateDistribution
     n::Int
 end
 
-insupport(d::KSDist, x::Real) = 1/(2*d.n) <= x <= 1.0
+# support handling
+
+isupperbounded(::Union(KSDist, Type{KSDist})) = true
+islowerbounded(::Union(KSDist, Type{KSDist})) = true
+isbounded(::Union(KSDist, Type{KSDist})) = true
+
+min(d::KSDist) = 1 / (2 * d.n)
+max(d::KSDist) = 1.0
+insupport(d::KSDist, x::Real) = min(d) <= x <= 1.0
 
 # TODO: implement Simard and L'Ecuyer (2011) meta-algorithm
 # requires Pomeranz and Pelz-Good algorithms

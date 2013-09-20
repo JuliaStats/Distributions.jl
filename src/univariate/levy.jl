@@ -17,6 +17,12 @@ function entropy(d::Levy)
     (1.0 - 3.0 * digamma(1.0) + log(16.0 * pi * c * c)) / 2.0
 end
 
+isupperbounded(::Union(Levy, Type{Levy})) = false
+islowerbounded(::Union(Levy, Type{Levy})) = true
+isbounded(::Union(Levy, Type{Levy})) = false
+
+min(d::Levy) = d.location
+max(d::Levy) = Inf
 insupport(d::Levy, x::Real) = d.location <= x && isfinite(x)
 
 mean(d::Levy) = Inf

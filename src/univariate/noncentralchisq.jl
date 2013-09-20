@@ -14,5 +14,5 @@ kurtosis(d::NoncentralChisq) = 12.0*(d.df + 4.0*d.ncp)/(d.df + 2.0*d.ncp)^2
 
 @_jl_dist_2p NoncentralChisq nchisq
 
-insupport(::NoncentralChisq, x::Real) = zero(x) < x < Inf
-insupport(::Type{NoncentralChisq}, x::Real) = zero(x) < x < Inf
+@continuous_distr_support NoncentralChisq 0.0 Inf
+

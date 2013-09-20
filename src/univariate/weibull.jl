@@ -11,6 +11,8 @@ Weibull(sh::Real) = Weibull(sh, 1.0)
 
 @_jl_dist_2p Weibull weibull
 
+@continuous_distr_support Weibull 0.0 Inf
+
 function cdf(d::Weibull, x::Real)
 	if 0.0 < x
 		return 1.0 - exp(-((x / d.scale)^d.shape))
@@ -23,9 +25,6 @@ function entropy(d::Weibull)
     k, l = d.shape, d.scale
     return ((k - 1.0) / k) * -digamma(1.0) + log(l / k) + 1.0
 end
-
-insupport(::Weibull, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Weibull}, x::Real) = zero(x) <= x < Inf
 
 function kurtosis(d::Weibull)
     λ, k = d.scale, d.shape

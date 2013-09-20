@@ -68,7 +68,6 @@ isupperbounded(d::Union(Binomial, Type{Binomial})) = true
 islowerbounded(d::Union(Binomial, Type{Binomial})) = true
 isbounded(d::Union(Binomial, Type{Binomial})) = true
 
-hasfinitesupport(d::Union(Binomial, Type{Binomial})) = true
 min(d::Union(Binomial, Type{Binomial})) = 0
 max(d::Binomial) = d.size
 support(d::Binomial) = 0:d.size

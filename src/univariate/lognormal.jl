@@ -12,10 +12,9 @@ LogNormal() = LogNormal(0.0, 1.0)
 
 @_jl_dist_2p LogNormal lnorm
 
-entropy(d::LogNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
+@continuous_distr_support LogNormal 0.0 Inf
 
-insupport(::LogNormal, x::Real) = zero(x) < x < Inf
-insupport(::Type{LogNormal}, x::Real) = zero(x) < x < Inf
+entropy(d::LogNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
 
 function kurtosis(d::LogNormal)
    exp(4.0 * d.sdlog^2) + 2.0 * exp(3.0 * d.sdlog^2) +

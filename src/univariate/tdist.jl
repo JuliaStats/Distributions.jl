@@ -8,15 +8,14 @@ end
 
 @_jl_dist_1p TDist t
 
+@continuous_distr_support TDist -Inf Inf
+
 function entropy(d::TDist)
     hdf = 0.5*d.df
     hdfph = hdf + 0.5
     hdfph*(digamma(hdfph) - digamma(hdf)) +
         0.5*log(d.df) + lbeta(hdf,0.5)
 end
-
-insupport(::TDist, x::Real) = isfinite(x)
-insupport(::Type{TDist}, x::Real) = isfinite(x)
 
 mean(d::TDist) = d.df > 1.0 ? 0.0 : NaN
 

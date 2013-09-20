@@ -10,6 +10,8 @@ end
 Laplace(location::Real) = Laplace(location, 1.0)
 Laplace() = Laplace(0.0, 1.0)
 
+@continuous_distr_support Laplace -Inf Inf
+
 const Biexponential = Laplace
 
 function cdf(d::Laplace, q::Real)
@@ -18,9 +20,6 @@ function cdf(d::Laplace, q::Real)
 end
 
 entropy(d::Laplace) = log(2.0 * d.scale) + 1.0
-
-insupport(d::Laplace, x::Real) = isfinite(x)
-insupport(d::Type{Laplace}, x::Real) = isfinite(x)
 
 kurtosis(d::Laplace) = 3.0
 

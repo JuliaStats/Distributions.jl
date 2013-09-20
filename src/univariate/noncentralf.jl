@@ -11,16 +11,13 @@ end
 
 @_jl_dist_3p NoncentralF nf
 
+@continuous_distr_support NoncentralF 0.0 Inf
+
 mean(d::NoncentralF) = d.ddf > 2.0 ? d.ddf / (d.ddf - 2.0) * (d.ndf + d.ncp) / d.ndf : NaN
 
 var(d::NoncentralF) = d.ddf > 4.0 ? 2.0 * d.ddf^2 *
 		       ((d.ndf+d.ncp)^2 + (d.ddf - 2.0)*(d.ndf + 2.0*d.ncp)) /
 		       (d.ndf * (d.ddf - 2.0)^2 * (d.ddf - 4.0)) : NaN
-
-
-
-insupport(::NoncentralF, x::Number) = zero(x) <= x < Inf
-insupport(::Type{NoncentralF}, x::Number) = zero(x) <= x < Inf
 
 function rand(d::NoncentralF)
     rn = rand(NoncentralChisq(d.ndf,d.ncp)) / d.ndf

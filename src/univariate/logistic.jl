@@ -11,10 +11,9 @@ end
 
 @_jl_dist_2p Logistic logis
 
-entropy(d::Logistic) = log(d.scale) + 2.0
+@continuous_distr_support Logistic -Inf Inf
 
-insupport(::Logistic, x::Real) = isfinite(x)
-insupport(::Type{Logistic}, x::Real) = isfinite(x)
+entropy(d::Logistic) = log(d.scale) + 2.0
 
 kurtosis(d::Logistic) = 1.2
 

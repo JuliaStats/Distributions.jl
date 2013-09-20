@@ -10,13 +10,15 @@ end
 
 @_jl_dist_2p Uniform unif
 
-min(d::Uniform) = d.a
+isupperbounded(::Union(Uniform, Type{Uniform})) = true
+islowerbounded(::Union(Uniform, Type{Uniform})) = true
+isbounded(::Union(Uniform, Type{Uniform})) = true
 
+min(d::Uniform) = d.a
 max(d::Uniform) = d.b
+insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 entropy(d::Uniform) = log(d.b - d.a)
-
-insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 kurtosis(d::Uniform) = -6.0 / 5.0
 

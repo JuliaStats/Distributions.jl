@@ -11,6 +11,8 @@ Normal() = Normal(0.0, 1.0)
 
 @_jl_dist_2p Normal norm
 
+@continuous_distr_support Normal -Inf Inf
+
 const Gaussian = Normal
 
 zval(d::Normal, x::Real) = (x - d.μ)/d.σ
@@ -30,8 +32,6 @@ invlogcdf(d::Normal, p::Real) = xval(d, logΦinv(p))
 invlogccdf(d::Normal, p::Real) = xval(d, -logΦinv(p))
 
 entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
-
-insupport(d::Normal, x::Real) = isfinite(x)
 
 kurtosis(d::Normal) = 0.0
 

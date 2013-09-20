@@ -11,8 +11,7 @@ end
 
 @_jl_dist_3p NoncentralBeta nbeta
 
-insupport(::NoncentralBeta, x::Real) = zero(x) < x < one(x)
-insupport(::Type{NoncentralBeta}, x::Real) = zero(x) < x < one(x)
+@continuous_distr_support NoncentralBeta 0.0 1.0
 
 function rand(d::NoncentralBeta)
     a = rand(NoncentralChisq(2.0 * d.alpha, d.ncp))

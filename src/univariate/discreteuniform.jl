@@ -59,7 +59,6 @@ isupperbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 islowerbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 isbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 
-hasfinitesupport(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 min(d::DiscreteUniform) = d.a
 max(d::DiscreteUniform) = d.b
 support(d::DiscreteUniform) = d.a:d.b
