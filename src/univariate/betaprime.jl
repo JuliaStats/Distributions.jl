@@ -60,7 +60,7 @@ islowerbounded(::Union(BetaPrime, Type{BetaPrime})) = false
 isbounded(::Union(BetaPrime, Type{BetaPrime})) = false
 
 hasfinitesupport(::Union(BetaPrime, Type{BetaPrime})) = false
-min(::Union(BetaPrime, Type{BetaPrime})) = zero(Real)
+min(::Union(BetaPrime, Type{BetaPrime})) = 0.0
 max(::Union(BetaPrime, Type{BetaPrime})) = Inf
 
-insupport(::Union(BetaPrime, Type{BetaPrime}), x::Real) = min(BetaPrime) <= x < max(BetaPrime)
+insupport(::Union(BetaPrime, Type{BetaPrime}), x::Real) = x >= 0.

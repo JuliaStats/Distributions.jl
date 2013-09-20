@@ -41,7 +41,7 @@ islowerbounded(::Union(Cosine, Type{Cosine})) = true
 isbounded(::Union(Cosine, Type{Cosine})) = true
 
 hasfinitesupport(::Union(Cosine, Type{Cosine})) = false
-min(::Union(Cosine, Type{Cosine})) = zero(Real)
-max(::Union(Cosine, Type{Cosine})) = one(Real)
+min(::Union(Cosine, Type{Cosine})) = 0.0
+max(::Union(Cosine, Type{Cosine})) = 1.0
 
-insupport(::Union(Cosine, Type{Cosine}), x::Real) = min(x) <= x <= max(x)
+insupport(::Union(Cosine, Type{Cosine}), x::Real) = 0.0 <= x <= 1.0

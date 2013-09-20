@@ -42,6 +42,10 @@ isbounded(d::Union(Cauchy, Type{Cauchy})) = false
 
 hasfinitesupport(d::Union(Cauchy, Type{Cauchy})) = false
 
+min(::Union(Cauchy, Type{Cauchy})) = -Inf
+max(::Union(Cauchy, Type{Cauchy})) = Inf
+
+
 # Note: this is not a Maximum Likelihood estimator
 function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
     l, u = iqr(x)

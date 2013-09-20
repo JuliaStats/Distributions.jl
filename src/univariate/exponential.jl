@@ -67,10 +67,10 @@ islowerbounded(::Union(Exponential, Type{Exponential})) = true
 isbounded(::Union(Exponential, Type{Exponential})) = false
 
 hasfinitesupport(::Union(Exponential, Type{Exponential})) = false
-min(::Union(Exponential, Type{Exponential})) = zero(Real)
+min(::Union(Exponential, Type{Exponential})) = 0.0
 max(::Union(Exponential, Type{Exponential})) = Inf
 
-insupport(::Union(Exponential, Type{Exponential}), x::Real) = min(Exponential) <= x < max(Exponential)
+insupport(::Union(Exponential, Type{Exponential}), x::Real) = x >= 0.0
 
 
 ## Fit model

@@ -73,7 +73,7 @@ min(d::Union(Binomial, Type{Binomial})) = 0
 max(d::Binomial) = d.size
 support(d::Binomial) = 0:d.size
 
-insupport(::Binomial, x::Real) = isinteger(x) && min(Binomial) <= x <= d.size
+insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
 
 ## Fit model
 

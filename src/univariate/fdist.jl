@@ -45,7 +45,7 @@ islowerbounded(::Union(FDist, Type{FDist})) = true
 isbounded(::Union(FDist, Type{FDist})) = false
 
 hasfinitesupport(::Union(FDist, Type{FDist})) = false
-min(::Union(FDist, Type{FDist})) = zero(Real)
+min(::Union(FDist, Type{FDist})) = 0.0
 max(::Union(FDist, Type{FDist})) = Inf
 
-insupport(::Union(FDist, Type{FDist}), x::Real) = min(FDist) <= x < max(FDist)
+insupport(::Union(FDist, Type{FDist}), x::Real) = x >= 0.0

@@ -55,7 +55,7 @@ islowerbounded(::Union(Arcsine, Type{Arcsine})) = true
 isbounded(::Union(Arcsine, Type{Arcsine})) = true
 
 hasfinitesupport(::Union(Arcsine, Type{Arcsine})) = false
-min(::Union(Arcsine, Type{Arcsine})) = zero(Real)
-max(::Union(Arcsine, Type{Arcsine})) = one(Real)
+min(::Union(Arcsine, Type{Arcsine})) = 0.0
+max(::Union(Arcsine, Type{Arcsine})) = 1.0
 
-insupport(::Union(Arcsine, Type{Arcsine}), x::Real) = min(Arcsine) <= x <= max(Arcsine)
+insupport(::Union(Arcsine, Type{Arcsine}), x::Real) = 0.0 <= x <= 1.0

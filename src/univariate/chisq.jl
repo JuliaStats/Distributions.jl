@@ -69,7 +69,7 @@ islowerbounded(d::Union(Chisq, Type{Chisq})) = true
 isbounded(d::Union(Chisq, Type{Chisq})) = false
 
 hasfinitesupport(d::Union(Chisq, Type{Chisq})) = false
-min(d::Union(Chisq, Type{Chisq})) = zero(Real)
+min(d::Union(Chisq, Type{Chisq})) = 0.0
 max(d::Union(Chisq, Type{Chisq})) = Inf
 
-insupport(::Union(Chisq, Type{Chisq})), x::Real) = min(Chisq) <= x < max(Chisq)
+insupport(::Union(Chisq, Type{Chisq}), x::Real) = x >= 0.0

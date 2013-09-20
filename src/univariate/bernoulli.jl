@@ -60,11 +60,11 @@ islowerbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 isbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 
 hasfinitesupport(::Union(Bernoulli, Type{Bernoulli})) = true
-min(::Union(Bernoulli, Type{Bernoulli})) = zero(Real)
-max(::Union(Bernoulli, Type{Bernoulli})) = one(Real)
-support(::Union(Bernoulli, Type{Bernoulli})) = (zero(Real), one(Real))
+min(::Union(Bernoulli, Type{Bernoulli})) = 0
+max(::Union(Bernoulli, Type{Bernoulli})) = 1
+support(::Union(Bernoulli, Type{Bernoulli})) = 0:1
 
-insupport(::Union(Bernoulli, Type{Bernoulli}), x::Real) = (x == min(Bernoulli)) || (x == max(Bernoulli))
+insupport(::Union(Bernoulli, Type{Bernoulli}), x::Real) = (x == 0 || x == 1)
 
 
 ## MLE fitting

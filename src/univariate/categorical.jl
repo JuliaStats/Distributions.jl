@@ -151,7 +151,7 @@ isbounded(::Union(Categorical, Type{Categorical})) = true
 hasfinitesupport(::Union(Categorical, Type{Categorical})) = true
 min(::Union(Categorical, Type{Categorical})) = 1
 max(d::Categorical) = d.K
-support(d::Categorical) = (1:d.K)
+support(d::Categorical) = 1:d.K
 
 
 ### Model fitting

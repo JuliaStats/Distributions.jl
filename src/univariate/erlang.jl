@@ -60,7 +60,7 @@ islowerbounded(::Union(Erlang, Type{Erlang})) = true
 isbounded(::Union(Erlang, Type{Erlang})) = false
 
 hasfinitesupport(::Union(Erlang, Type{Erlang})) = false
-min(::Union(Erlang, Type{Erlang})) = zero(Real)
+min(::Union(Erlang, Type{Erlang})) = 0.0
 max(::Union(Erlang, Type{Erlang})) = Inf
 
-insupport(::Union(Erlang, Type{Erlang}), x::Real) = min(Erlang) <= x < max(Erlang)
+insupport(::Union(Erlang, Type{Erlang}), x::Real) = x >= 0.0

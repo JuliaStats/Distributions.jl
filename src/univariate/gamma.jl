@@ -97,10 +97,10 @@ islowerbounded(::Union(Gamma, Type{Gamma})) = true
 isbounded(::Union(Gamma, Type{Gamma})) = false
 
 hasfinitesupport(::Union(Gamma, Type{Gamma})) = false
-min(::Union(Gamma, Type{Gamma})) = zero(Real)
+min(::Union(Gamma, Type{Gamma})) = 0.0
 max(::Union(Gamma, Type{Gamma})) = Inf
 
-insupport(::Union(Gamma, Type{Gamma}), x::Real) = min(Gamma) <= x < max(Gamma)
+insupport(::Union(Gamma, Type{Gamma}), x::Real) = x >= 0.0
 
 ## Fit model
 

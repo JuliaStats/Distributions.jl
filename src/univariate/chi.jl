@@ -59,7 +59,7 @@ islowerbounded(d::Union(Chi, Type{Chi})) = true
 isbounded(d::Union(Chi, Type{Chi})) = false
 
 hasfinitesupport(d::Union(Chi, Type{Chi})) = false
-min(d::Union(Chi, Type{Chi})) = zero(Real)
+min(d::Union(Chi, Type{Chi})) = 0.0
 max(d::Union(Chi, Type{Chi})) = Inf
 
-insupport(::Union(Chi, Type{Chi}), x::Real) = min(Chi) <= x < max(Chi)
+insupport(::Union(Chi, Type{Chi}), x::Real) = x >= 0.0
