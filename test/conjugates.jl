@@ -102,7 +102,6 @@ r = posterior_mode(pri, Multinomial, x, w)
 @test_approx_eq r mode(p)
 
 
-
 # Gamma - Exponential
 
 pri = Gamma(1.5, 2.0)
@@ -127,56 +126,8 @@ f = fit_map(pri, Exponential, x, w)
 @test_approx_eq rate(f) mode(p)
 
 
-# Normal likelihood
-
-# known sigma
-
-pri = Normal(1.0, 5.0)
-
-x = rand(Normal(2.0, 3.0), n)
-p = posterior((pri, 3.0), Normal, x)
-@test isa(p, Normal)
-@test_approx_eq mean(p)  (mean(pri) / var(pri) + sum(x) / 9.0) / (1.0 / var(pri) + n / 9.0)
-@test_approx_eq var(p) inv(1.0 / var(pri) + n / 9.0)
-
-r = posterior_mode((pri, 3.0), Normal, x)
-@test_approx_eq r mode(p)
-
-f = fit_map((pri, 3.0), Normal, x)
-@test isa(f, Normal)
-@test f.μ == r
-@test f.σ == 3.0
-
-p = posterior((pri, 3.0), Normal, x, w)
-@test isa(p, Normal)
-@test_approx_eq mean(p)  (mean(pri) / var(pri) + dot(x, w) / 9.0) / (1.0 / var(pri) + sum(w) / 9.0)
-@test_approx_eq var(p) inv(1.0 / var(pri) + sum(w) / 9.0)
-
-r = posterior_mode((pri, 3.0), Normal, x, w)
-@test_approx_eq r mode(p)
-
-f = fit_map((pri, 3.0), Normal, x, w)
-@test isa(f, Normal)
-@test f.μ == r
-@test f.σ == 3.0
-
-# known mu
-
-pri = InverseGamma(1.5, 0.5) # β = 2.0
-
-x = rand(Normal(2.0, 3.0), n)
-p = posterior((2.0, pri), Normal, x)
-@test isa(p, InverseGamma)
-@test_approx_eq p.shape pri.shape + n / 2
-@test_approx_eq p.scale pri.scale + sum(abs2(x - 2.0)) / 2
-
-p = posterior((2.0, pri), Normal, x, w)
-@test isa(p, InverseGamma)
-@test_approx_eq p.shape pri.shape + sum(w) / 2
-@test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
-
-
 # posterior_sample
+
 pri = Beta(1.0, 2.0)
 x = rand(Bernoulli(0.3), n)
 p = posterior(pri, Bernoulli, x)
@@ -190,3 +141,10 @@ ps = posterior_sample(pri, Bernoulli, x)
 @test isa(ps, Bernoulli)
 @test zero(ps.p0) <= ps.p0 <= one(ps.p0)
 @test zero(ps.p1) <= ps.p1 <= one(ps.p1)
+
+
+
+
+
+
+

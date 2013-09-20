@@ -64,6 +64,7 @@ export
     Multinomial,
     MultivariateNormal,
     MvNormal,
+    MvNormalKnownSigma,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,

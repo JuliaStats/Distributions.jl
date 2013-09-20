@@ -7,8 +7,6 @@
 #   on (co)variance.
 #
 
-import NumericExtensions.sum
-
 immutable MvNormalKnownSigma <: GenerativeFormulation
     Sigma::Matrix{Float64}
 
