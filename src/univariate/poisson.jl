@@ -7,10 +7,16 @@ immutable Poisson <: DiscreteUnivariateDistribution
     Poisson() = new(1.0)
 end
 
-function cdf(d::Poisson, x::Real)
-    if x < 0 return 0.0 end
-    dgrat(floor(x), d.lambda)[2] + pdf(d, x)
-end
+insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
+
+mean(d::Poisson) = d.lambda
+mode(d::Poisson) = ifloor(d.lambda)
+modes(d::Poisson) = [mode(d)]
+
+var(d::Poisson) = d.lambda
+skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
+kurtosis(d::Poisson) = 1.0 / d.lambda
 
 function entropy(d::Poisson)
     λ = d.lambda
@@ -28,14 +34,49 @@ function entropy(d::Poisson)
     end
 end
 
-insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
-insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
 
-kurtosis(d::Poisson) = 1.0 / d.lambda
+# Based on:
+#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
+#   available from:
+#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
+# Uses slightly different forms instead of D0 function
+function pdf(d::Poisson, x::Real)
+    if !insupport(d,x)
+        return 0.0
+    end
+    if x == 0
+        return exp(-d.lambda)
+    end
+    # NSWC version: 
+    drcomp(x, d.lambda)/x
+    # Loader's version:
+    # exp(x*logmxp1(d.lambda/x)-lstirling(x))/(√2π*sqrt(x))    
+end
+function logpdf(d::Poisson, x::Real)
+    if !insupport(d,x)
+        return -Inf
+    end
+    if x == 0
+        return -d.lambda
+    end
+    x*logmxp1(d.lambda/x)-lstirling(x)-0.5*(log2π+log(x))
+end
 
-mean(d::Poisson) = d.lambda
 
-median(d::Poisson) = quantile(d, 0.5)
+function cdf(d::Poisson, x::Real)
+    if x < 0 
+        return 0.0 
+    end
+    dgrat(floor(x)+1.0, d.lambda)[2]
+end
+function ccdf(d::Poisson, x::Real)
+    if x < 0 
+        return 1.0
+    end
+    dgrat(floor(x)+1.0, d.lambda)[1]
+end
+
+
 
 function mgf(d::Poisson, t::Real)
     l = d.lambda
@@ -47,22 +88,6 @@ function cf(d::Poisson, t::Real)
     return exp(l * (exp(im * t) - 1.0))
 end
 
-mode(d::Poisson) = ifloor(d.lambda)
-modes(d::Poisson) = [mode(d)]
-
-pdf(d::Poisson, x::Real) = insupport(d, x) ? drcomp(x, d.lambda)/x : 0.0
-
-skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
-
-var(d::Poisson) = d.lambda
-
-# Based on:
-#   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
-#   available from:
-#     http://projects.scipy.org/scipy/raw-attachment/ticket/620/loader2000Fast.pdf
-# Uses slightly different forms instead of D0 function
-pdf(d::Poisson, x::Real) = exp(x*logmxp1(d.lambda/x)-lstirling(x))/(√2π*sqrt(x))
-logpdf(d::Poisson, x::Real) = x*logmxp1(d.lambda/x)-lstirling(x)-0.5*(log2π+log(x))
 
 
 function fit_mle(::Type{Poisson}, x::Array)
