@@ -70,16 +70,7 @@ end
 
 ### handling support
 
-isupperbounded(::Union(Beta, Type{Beta})) = true
-islowerbounded(::Union(Beta, Type{Beta})) = true
-isbounded(::Union(Beta, Type{Beta})) = true
-
-hasfinitesupport(::Union(Beta, Type{Beta})) = false
-
-min(::Union(Beta, Type{Beta})) = 0.0
-max(::Union(Beta, Type{Beta})) = 1.0
-
-insupport(::Union(Beta, Type{Beta}), x::Real) = 0.0 <= x <= 1.0
+@continuous_distr_support Beta 0.0 1.0
 
 ## Fit model
 

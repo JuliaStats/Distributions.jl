@@ -10,6 +10,8 @@ end
 
 @_jl_dist_2p FDist f
 
+@continuous_distr_support FDist 0.0 Inf
+
 mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 
 median(d::FDist) = quantile(d, 0.5)
@@ -37,15 +39,3 @@ entropy(d::FDist) = (log(d.ddf) -log(d.ndf)
                      +lgamma(0.5*d.ndf) +lgamma(0.5*d.ddf) -lgamma(0.5*(d.ndf+d.ddf)) 
                      +(1.0-0.5*d.ndf)*digamma(0.5*d.ndf) +(-1.0-0.5*d.ddf)*digamma(0.5*d.ddf)
                      +0.5*(d.ndf+d.ddf)*digamma(0.5*(d.ndf+d.ddf)))
-
-### handling support
-
-isupperbounded(::Union(FDist, Type{FDist})) = false
-islowerbounded(::Union(FDist, Type{FDist})) = true
-isbounded(::Union(FDist, Type{FDist})) = false
-
-hasfinitesupport(::Union(FDist, Type{FDist})) = false
-min(::Union(FDist, Type{FDist})) = 0.0
-max(::Union(FDist, Type{FDist})) = Inf
-
-insupport(::Union(FDist, Type{FDist}), x::Real) = x >= 0.0

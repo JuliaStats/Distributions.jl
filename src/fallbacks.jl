@@ -4,6 +4,12 @@
 #
 ##############################################################################
 
+# support handling
+
+isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
+hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
+hasfinitesupport(d::ContinuousUnivariateDistribution) = false
+
 # generic function to get number of samples
 
 nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)

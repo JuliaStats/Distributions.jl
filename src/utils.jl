@@ -52,3 +52,55 @@ immutable RandIntSampler
 end
 
 rand(s::RandIntSampler) = int(_randu(s.Ku, s.U)) + s.a
+
+
+# macros for generating functions for support handling
+#
+# Both lb & ub should be compile-time constants
+# otherwise, one should manually specify the methods
+#
+
+macro continuous_distr_support(D, lb, ub)
+	if isfinite(eval(lb)) && isfinite(eval(ub))  # [lb, ub]
+		esc(quote
+			isupperbounded(::Union($D, Type{$D})) = true
+			islowerbounded(::Union($D, Type{$D})) = true
+			isbounded(::Union($D, Type{$D})) = true
+			min(::Union($D, Type{$D})) = $lb
+			max(::Union($D, Type{$D})) = $ub
+			insupport(::Union($D, Type{$D}), x::Real) = ($lb <= x <= $ub)
+		end)
+
+	elseif isfinite(eval(lb))  # [lb, inf)
+		esc(quote
+			isupperbounded(::Union($D, Type{$D})) = false
+			islowerbounded(::Union($D, Type{$D})) = true
+			isbounded(::Union($D, Type{$D})) = false
+			min(::Union($D, Type{$D})) = $lb
+			max(::Union($D, Type{$D})) = $ub
+			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x >= $lb)
+		end)
+
+	elseif isfinite(eval(ub))  # (-inf, ub]
+		esc(quote
+			isupperbounded(::Union($D, Type{$D})) = true
+			islowerbounded(::Union($D, Type{$D})) = false
+			isbounded(::Union($D, Type{$D})) = false
+			min(::Union($D, Type{$D})) = $lb
+			max(::Union($D, Type{$D})) = $ub
+			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x <= $ub)
+		end)
+
+	else   # (-inf, inf)
+		esc(quote
+			isupperbounded(::Union($D, Type{$D})) = false
+			islowerbounded(::Union($D, Type{$D})) = false
+			isbounded(::Union($D, Type{$D})) = false
+			min(::Union($D, Type{$D})) = $lb
+			max(::Union($D, Type{$D})) = $ub
+			insupport(::Union($D, Type{$D}), x::Real) = isfinite(x)
+		end)
+
+	end
+end
+

@@ -8,6 +8,8 @@ end
 
 @_jl_dist_1p Chisq chisq
 
+@continuous_distr_support Chisq 0.0 Inf
+
 function entropy(d::Chisq)
     x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)
     x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
@@ -61,15 +63,3 @@ end
 skewness(d::Chisq) = sqrt(8.0 / d.df)
 
 var(d::Chisq) = 2.0 * d.df
-
-### handling support
-
-isupperbounded(d::Union(Chisq, Type{Chisq})) = false
-islowerbounded(d::Union(Chisq, Type{Chisq})) = true
-isbounded(d::Union(Chisq, Type{Chisq})) = false
-
-hasfinitesupport(d::Union(Chisq, Type{Chisq})) = false
-min(d::Union(Chisq, Type{Chisq})) = 0.0
-max(d::Union(Chisq, Type{Chisq})) = Inf
-
-insupport(::Union(Chisq, Type{Chisq}), x::Real) = x >= 0.0

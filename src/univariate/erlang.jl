@@ -8,14 +8,17 @@ immutable Erlang <: ContinuousUnivariateDistribution
     shape::Int
     scale::Float64
     nested_gamma::Gamma
+
     function Erlang(shape::Real, scale::Real)
         isinteger(shape) || error("Erlang shape parameter must be an integer")
         new(int(shape), float64(scale), Gamma(shape, scale))
     end
+
+    Erlang(scale::Real) = Erlang(scale, 1.0)
+    Erlang() = Erlang(1, 1.0)
 end
 
-Erlang(scale::Real) = Erlang(scale, 1.0)
-Erlang() = Erlang(1, 1.0)
+@continuous_distr_support Erlang 0.0 Inf
 
 cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
 
@@ -52,15 +55,3 @@ end
 skewness(d::Erlang) = skewness(d.nested_gamma)
 
 var(d::Erlang) = d.scale^2 * d.shape
-
-### handling support
-
-isupperbounded(::Union(Erlang, Type{Erlang})) = false
-islowerbounded(::Union(Erlang, Type{Erlang})) = true
-isbounded(::Union(Erlang, Type{Erlang})) = false
-
-hasfinitesupport(::Union(Erlang, Type{Erlang})) = false
-min(::Union(Erlang, Type{Erlang})) = 0.0
-max(::Union(Erlang, Type{Erlang})) = Inf
-
-insupport(::Union(Erlang, Type{Erlang}), x::Real) = x >= 0.0

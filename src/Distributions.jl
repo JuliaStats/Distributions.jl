@@ -110,6 +110,10 @@ export
     isleptokurtic, # Is excess kurtosis < 0.0?
     ismesokurtic,  # Is excess kurtosis = 0.0?
     isprobvec,     # Is a probability vector?
+    isupperbounded,  
+    islowerbounded,
+    isbouned,
+    hasfinitesupport,
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
     logccdf,       # ccdf returning log-probability

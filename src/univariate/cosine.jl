@@ -4,6 +4,8 @@
 immutable Cosine <: ContinuousUnivariateDistribution
 end
 
+@continuous_distr_support Cosine 0.0 1.0
+
 rand(d::Cosine) = asin(2.0 * rand() - 1.0)
 
 function cdf(d::Cosine, x::Real)
@@ -33,15 +35,3 @@ rand(d::Cosine) = sin(rand() * pi / 2.0)^2
 skewness(d::Cosine) = 0.0
 
 var(d::Cosine) = (pi^2 - 8.0) / (4.0 * pi^2)
-
-### handling support
-
-isupperbounded(::Union(Cosine, Type{Cosine})) = true
-islowerbounded(::Union(Cosine, Type{Cosine})) = true
-isbounded(::Union(Cosine, Type{Cosine})) = true
-
-hasfinitesupport(::Union(Cosine, Type{Cosine})) = false
-min(::Union(Cosine, Type{Cosine})) = 0.0
-max(::Union(Cosine, Type{Cosine})) = 1.0
-
-insupport(::Union(Cosine, Type{Cosine}), x::Real) = 0.0 <= x <= 1.0

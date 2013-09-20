@@ -15,6 +15,8 @@ end
 
 BetaPrime() = BetaPrime(1.0, 1.0)
 
+@continuous_distr_support BetaPrime 0.0 Inf
+
 function mean(d::BetaPrime)
     d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
 end
@@ -53,14 +55,3 @@ function var(d::BetaPrime)
     α, β = d.alpha, d.beta
     β > 2.0 ? (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2) : NaN
 end
-
-### handling support
-isupperbounded(::Union(BetaPrime, Type{BetaPrime})) = true
-islowerbounded(::Union(BetaPrime, Type{BetaPrime})) = false
-isbounded(::Union(BetaPrime, Type{BetaPrime})) = false
-
-hasfinitesupport(::Union(BetaPrime, Type{BetaPrime})) = false
-min(::Union(BetaPrime, Type{BetaPrime})) = 0.0
-max(::Union(BetaPrime, Type{BetaPrime})) = Inf
-
-insupport(::Union(BetaPrime, Type{BetaPrime}), x::Real) = x >= 0.

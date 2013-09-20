@@ -3,6 +3,8 @@
 immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
+@continuous_distr_support Arcsine 0.0 1.0
+
 function cdf(d::Arcsine, x::Real)
     x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : (2.0 / pi) * asin(sqrt(x)))
 end
@@ -48,14 +50,3 @@ skewness(d::Arcsine) = 0.0
 
 var(d::Arcsine) = 1.0 / 8.0
 
-### handling support
-
-isupperbounded(::Union(Arcsine, Type{Arcsine})) = true
-islowerbounded(::Union(Arcsine, Type{Arcsine})) = true
-isbounded(::Union(Arcsine, Type{Arcsine})) = true
-
-hasfinitesupport(::Union(Arcsine, Type{Arcsine})) = false
-min(::Union(Arcsine, Type{Arcsine})) = 0.0
-max(::Union(Arcsine, Type{Arcsine})) = 1.0
-
-insupport(::Union(Arcsine, Type{Arcsine}), x::Real) = 0.0 <= x <= 1.0

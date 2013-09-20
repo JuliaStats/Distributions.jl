@@ -16,6 +16,8 @@ rate(d::Gamma) = 1.0 / d.scale
 
 @_jl_dist_2p Gamma gamma
 
+@continuous_distr_support Gamma 0.0 Inf
+
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)
     x + lgamma(d.shape) + log(d.scale) + d.shape
@@ -90,17 +92,6 @@ end
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
-
-### handling support
-isupperbounded(::Union(Gamma, Type{Gamma})) = false
-islowerbounded(::Union(Gamma, Type{Gamma})) = true
-isbounded(::Union(Gamma, Type{Gamma})) = false
-
-hasfinitesupport(::Union(Gamma, Type{Gamma})) = false
-min(::Union(Gamma, Type{Gamma})) = 0.0
-max(::Union(Gamma, Type{Gamma})) = Inf
-
-insupport(::Union(Gamma, Type{Gamma}), x::Real) = x >= 0.0
 
 ## Fit model
 

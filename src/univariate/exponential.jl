@@ -8,6 +8,8 @@ end
 
 Exponential() = Exponential(1.0)
 
+@continuous_distr_support Exponential 0.0 Inf
+
 scale(d::Exponential) = d.scale
 rate(d::Exponential) = 1.0 / d.scale
 

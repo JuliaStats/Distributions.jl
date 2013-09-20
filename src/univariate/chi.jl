@@ -6,6 +6,8 @@ immutable Chi <: ContinuousUnivariateDistribution
     end
 end
 
+@continuous_distr_support Chi 0.0 Inf
+
 cdf(d::Chi, x::Real) = cdf(Chisq(d.df),x^2)
 ccdf(d::Chi, x::Real) = ccdf(Chisq(d.df),x^2)
 logcdf(d::Chi, x::Real) = logcdf(Chisq(d.df),x^2)
@@ -52,14 +54,3 @@ function entropy(d::Chi)
 end
 
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))
-
-### handling support
-isupperbounded(d::Union(Chi, Type{Chi})) = false
-islowerbounded(d::Union(Chi, Type{Chi})) = true
-isbounded(d::Union(Chi, Type{Chi})) = false
-
-hasfinitesupport(d::Union(Chi, Type{Chi})) = false
-min(d::Union(Chi, Type{Chi})) = 0.0
-max(d::Union(Chi, Type{Chi})) = Inf
-
-insupport(::Union(Chi, Type{Chi}), x::Real) = x >= 0.0
