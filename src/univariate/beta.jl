@@ -69,18 +69,17 @@ function var(d::Beta)
 end
 
 ### handling support
-insupport(::Beta, x::Real) = zero(x) < x < one(x)
-insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
 
-isupperbounded(d::Beta) = true
-islowerbounded(d::Beta) = true
-isbounded(d::Beta) = true
+isupperbounded(::Union(Beta, Type{Beta})) = true
+islowerbounded(::Union(Beta, Type{Beta})) = true
+isbounded(::Union(Beta, Type{Beta})) = true
 
-hasfinitesupport(d::Beta) = false
+hasfinitesupport(::Union(Beta, Type{Beta})) = false
 
+min(::Union(Beta, Type{Beta})) = zero(Real)
+max(::Union(Beta, Type{Beta})) = one(Real)
 
-#min(d::Beta) = zero(Real) # maybe inf(::Beta) = 0 would make sense
-#max(d::Beta) = one(Real)  # and sup(::Beta) = 1
+insupport(::Union(Beta, Type{Beta}), x::Real) = min(Beta) <= x <= max(Beta)
 
 ## Fit model
 

@@ -49,14 +49,13 @@ skewness(d::Arcsine) = 0.0
 var(d::Arcsine) = 1.0 / 8.0
 
 ### handling support
-insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
-insupport(::Arcsine, x::Real) = zero(x) <= x <= one(x)
 
+isupperbounded(::Union(Arcsine, Type{Arcsine})) = true
+islowerbounded(::Union(Arcsine, Type{Arcsine})) = true
+isbounded(::Union(Arcsine, Type{Arcsine})) = true
 
-isupperbounded(d::Arcsine) = true
-islowerbounded(d::Arcsine) = true
-isbounded(d::Arcsine) = true
+hasfinitesupport(::Union(Arcsine, Type{Arcsine})) = false
+min(::Union(Arcsine, Type{Arcsine})) = zero(Real)
+max(::Union(Arcsine, Type{Arcsine})) = one(Real)
 
-hasfinitesupport(d::Arcsine) = false
-min(d::Arcsine) = zero(Real)
-max(d::Arcsine) = one(Real)
+insupport(::Union(Arcsine, Type{Arcsine}), x::Real) = min(Arcsine) <= x <= max(Arcsine)

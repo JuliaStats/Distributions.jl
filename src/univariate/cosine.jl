@@ -35,13 +35,13 @@ skewness(d::Cosine) = 0.0
 var(d::Cosine) = (pi^2 - 8.0) / (4.0 * pi^2)
 
 ### handling support
-insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
-insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
 
-isupperbounded(d::Cosine) = true
-islowerbounded(d::Cosine) = true
-isbounded(d::Cosine) = true
+isupperbounded(::Union(Cosine, Type{Cosine})) = true
+islowerbounded(::Union(Cosine, Type{Cosine})) = true
+isbounded(::Union(Cosine, Type{Cosine})) = true
 
-hasfinitesupport(d::Cosine) = false
-min(d::Cosine) = zero(Real)
-max(d::Cosine) = one(Real)
+hasfinitesupport(::Union(Cosine, Type{Cosine})) = false
+min(::Union(Cosine, Type{Cosine})) = zero(Real)
+max(::Union(Cosine, Type{Cosine})) = one(Real)
+
+insupport(::Union(Cosine, Type{Cosine}), x::Real) = min(x) <= x <= max(x)

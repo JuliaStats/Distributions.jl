@@ -144,12 +144,12 @@ function insupport(d::Categorical, x::Real)
     isinteger(x) && one(x) <= x <= d.K && d.prob[x] != 0.0
 end
 
-isupperbounded(::Categorical) = true
-islowerbounded(::Categorical) = true
-isbounded(::Categorical) = true
+isupperbounded(::Union(Categorical, Type{Categorical})) = true
+islowerbounded(::Union(Categorical, Type{Categorical})) = true
+isbounded(::Union(Categorical, Type{Categorical})) = true
 
-hasfinitesupport(::Categorical) = true
-min(::Categorical) = 1
+hasfinitesupport(::Union(Categorical, Type{Categorical})) = true
+min(::Union(Categorical, Type{Categorical})) = 1
 max(d::Categorical) = d.K
 support(d::Categorical) = (1:d.K)
 

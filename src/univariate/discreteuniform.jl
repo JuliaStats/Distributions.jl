@@ -54,16 +54,17 @@ skewness(d::DiscreteUniform) = 0.0
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
 ### handling support
-insupport(d::DiscreteUniform, x::Number) = isinteger(x) && d.a <= x <= d.b
 
-isupperbounded(d::DiscreteUniform) = true
-islowerbounded(d::DiscreteUniform) = true
-isbounded(d::DiscreteUniform) = true
+isupperbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+islowerbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
+isbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 
-hasfinitesupport(d::DiscreteUniform) = true
+hasfinitesupport(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
 min(d::DiscreteUniform) = d.a
 max(d::DiscreteUniform) = d.b
 support(d::DiscreteUniform) = d.a:d.b
+
+insupport(d::DiscreteUniform, x::Number) = isinteger(x) && min(d) <= x <= max(d)
 
 # Fit model
 

@@ -39,12 +39,13 @@ entropy(d::FDist) = (log(d.ddf) -log(d.ndf)
                      +0.5*(d.ndf+d.ddf)*digamma(0.5*(d.ndf+d.ddf)))
 
 ### handling support
-insupport(::FDist, x::Real) = zero(x) <= x < Inf
-insupport(::Type{FDist}, x::Real) = zero(x) <= x < Inf
 
-isupperbounded(d::FDist) = false
-islowerbounded(d::FDist) = true
-isbounded(d::FDist) = false
+isupperbounded(::Union(FDist, Type{FDist})) = false
+islowerbounded(::Union(FDist, Type{FDist})) = true
+isbounded(::Union(FDist, Type{FDist})) = false
 
-hasfinitesupport(d::FDist) = false
-min(d::FDist) = zero(Real)
+hasfinitesupport(::Union(FDist, Type{FDist})) = false
+min(::Union(FDist, Type{FDist})) = zero(Real)
+max(::Union(FDist, Type{FDist})) = Inf
+
+insupport(::Union(FDist, Type{FDist}), x::Real) = min(FDist) <= x < max(FDist)

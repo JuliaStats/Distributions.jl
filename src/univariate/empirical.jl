@@ -66,11 +66,11 @@ var(d::EmpiricalUnivariateDistribution) = d.var
 
 insupport(d::EmpiricalUnivariateDistribution, x::Number) = contains(d.support, x)
 
-isupperbounded(d::EmpiricalUnivariateDistribution) = true
-islowerbounded(d::EmpiricalUnivariateDistribution) = true
-isbounded(d::EmpiricalUnivariateDistribution) = true
+isupperbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
+islowerbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
+isbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
 
-hasfinitesupport(d::EmpiricalUnivariateDistribution) = true
+hasfinitesupport(d::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
 min(d::EmpiricalUnivariateDistribution) = min(d.values[1])
 max(d::EmpiricalUnivariateDistribution) = max(d.values[end])
 support(d::EmpiricalUnivariateDistribution) = d.support

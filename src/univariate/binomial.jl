@@ -63,16 +63,17 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
 
 ### handling support
-insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
 
-isupperbounded(d::Binomial) = true
-islowerbounded(d::Binomial) = true
-isbounded(d::Binomial) = true
+isupperbounded(d::Union(Binomial, Type{Binomial})) = true
+islowerbounded(d::Union(Binomial, Type{Binomial})) = true
+isbounded(d::Union(Binomial, Type{Binomial})) = true
 
-hasfinitesupport(d::Binomial) = true
-min(d::Binomial) = 0
+hasfinitesupport(d::Union(Binomial, Type{Binomial})) = true
+min(d::Union(Binomial, Type{Binomial})) = 0
 max(d::Binomial) = d.size
 support(d::Binomial) = 0:d.size
+
+insupport(::Binomial, x::Real) = isinteger(x) && min(Binomial) <= x <= d.size
 
 ## Fit model
 

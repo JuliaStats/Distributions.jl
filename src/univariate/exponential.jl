@@ -61,15 +61,16 @@ skewness(d::Exponential) = 2.0
 var(d::Exponential) = d.scale * d.scale
 
 ### handling support
-insupport(::Exponential, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
 
-isupperbounded(d::Exponential) = false
-islowerbounded(d::Exponential) = true
-isbounded(d::Exponential) = false
+isupperbounded(::Union(Exponential, Type{Exponential})) = false
+islowerbounded(::Union(Exponential, Type{Exponential})) = true
+isbounded(::Union(Exponential, Type{Exponential})) = false
 
-hasfinitesupport(d::Exponential) = false
-min(d::Exponential) = zero(Real)
+hasfinitesupport(::Union(Exponential, Type{Exponential})) = false
+min(::Union(Exponential, Type{Exponential})) = zero(Real)
+max(::Union(Exponential, Type{Exponential})) = Inf
+
+insupport(::Union(Exponential, Type{Exponential}), x::Real) = min(Exponential) <= x < max(Exponential)
 
 
 ## Fit model

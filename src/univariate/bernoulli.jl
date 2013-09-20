@@ -55,17 +55,16 @@ rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
 
 ### handling support
 
-insupport(::Type{Bernoulli}, x::Real) = (x == zero(x)) || (x == one(x))
-insupport(::Bernoulli, x::Real) = (x == zero(x)) || (x == one(x))
+isupperbounded(::Union(Bernoulli, Type{Bernoulli})) = true
+islowerbounded(::Union(Bernoulli, Type{Bernoulli})) = true
+isbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 
-isupperbounded(::Bernoulli) = true
-islowerbounded(::Bernoulli) = true
-isbounded(::Bernoulli) = true
+hasfinitesupport(::Union(Bernoulli, Type{Bernoulli})) = true
+min(::Union(Bernoulli, Type{Bernoulli})) = zero(Real)
+max(::Union(Bernoulli, Type{Bernoulli})) = one(Real)
+support(::Union(Bernoulli, Type{Bernoulli})) = (zero(Real), one(Real))
 
-hasfinitesupport(::Bernoulli) = true
-min(::Bernoulli) = zero(Real)
-max(::Bernoulli) = one(Real)
-support(::Bernoulli) = (zero(Real), one(Real))
+insupport(::Union(Bernoulli, Type{Bernoulli}), x::Real) = (x == min(Bernoulli)) || (x == max(Bernoulli))
 
 
 ## MLE fitting

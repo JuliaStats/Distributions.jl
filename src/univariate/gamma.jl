@@ -21,9 +21,6 @@ function entropy(d::Gamma)
     x + lgamma(d.shape) + log(d.scale) + d.shape
 end
 
-insupport(::Gamma, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Gamma}, x::Real) = zero(x) <= x < Inf
-
 kurtosis(d::Gamma) = 6.0 / d.shape
 
 mean(d::Gamma) = d.shape * d.scale
@@ -94,6 +91,16 @@ skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 
+### handling support
+isupperbounded(::Union(Gamma, Type{Gamma})) = false
+islowerbounded(::Union(Gamma, Type{Gamma})) = true
+isbounded(::Union(Gamma, Type{Gamma})) = false
+
+hasfinitesupport(::Union(Gamma, Type{Gamma})) = false
+min(::Union(Gamma, Type{Gamma})) = zero(Real)
+max(::Union(Gamma, Type{Gamma})) = Inf
+
+insupport(::Union(Gamma, Type{Gamma}), x::Real) = min(Gamma) <= x < max(Gamma)
 
 ## Fit model
 

@@ -54,12 +54,13 @@ skewness(d::Erlang) = skewness(d.nested_gamma)
 var(d::Erlang) = d.scale^2 * d.shape
 
 ### handling support
-insupport(::Erlang, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Erlang}, x::Real) = zero(x) <= x < Inf
 
-isupperbounded(d::Erlang) = false
-islowerbounded(d::Erlang) = true
-isbounded(d::Erlang) = false
+isupperbounded(::Union(Erlang, Type{Erlang})) = false
+islowerbounded(::Union(Erlang, Type{Erlang})) = true
+isbounded(::Union(Erlang, Type{Erlang})) = false
 
-hasfinitesupport(d::Erlang) = false
-min(d::Erlang) = zero(Real)
+hasfinitesupport(::Union(Erlang, Type{Erlang})) = false
+min(::Union(Erlang, Type{Erlang})) = zero(Real)
+max(::Union(Erlang, Type{Erlang})) = Inf
+
+insupport(::Union(Erlang, Type{Erlang}), x::Real) = min(Erlang) <= x < max(Erlang)

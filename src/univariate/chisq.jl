@@ -63,13 +63,13 @@ skewness(d::Chisq) = sqrt(8.0 / d.df)
 var(d::Chisq) = 2.0 * d.df
 
 ### handling support
-insupport(::Chisq, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
 
+isupperbounded(d::Union(Chisq, Type{Chisq})) = false
+islowerbounded(d::Union(Chisq, Type{Chisq})) = true
+isbounded(d::Union(Chisq, Type{Chisq})) = false
 
-isupperbounded(d::Chisq) = false
-islowerbounded(d::Chisq) = true
-isbounded(d::Chisq) = false
+hasfinitesupport(d::Union(Chisq, Type{Chisq})) = false
+min(d::Union(Chisq, Type{Chisq})) = zero(Real)
+max(d::Union(Chisq, Type{Chisq})) = Inf
 
-hasfinitesupport(d::Chisq) = false
-min(d::Chisq) = zero(Real)
+insupport(::Union(Chisq, Type{Chisq})), x::Real) = min(Chisq) <= x < max(Chisq)

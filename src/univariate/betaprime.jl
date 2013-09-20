@@ -55,13 +55,12 @@ function var(d::BetaPrime)
 end
 
 ### handling support
-insupport(::BetaPrime, x::Real) = zero(x) < x
-insupport(::Type{BetaPrime}, x::Real) = zero(x) < x
+isupperbounded(::Union(BetaPrime, Type{BetaPrime})) = true
+islowerbounded(::Union(BetaPrime, Type{BetaPrime})) = false
+isbounded(::Union(BetaPrime, Type{BetaPrime})) = false
 
-isupperbounded(d::BetaPrime) = true
-islowerbounded(d::BetaPrime) = false
-isbounded(d::BetaPrime) = false
+hasfinitesupport(::Union(BetaPrime, Type{BetaPrime})) = false
+min(::Union(BetaPrime, Type{BetaPrime})) = zero(Real)
+max(::Union(BetaPrime, Type{BetaPrime})) = Inf
 
-hasfinitesupport(d::BetaPrime) = false
-#min(d::BetaPrime) = zero(Real) # maybe inf(::BetaPrime) = 0 would make sense
-#max(d::BetaPrime) = one(Real)  # and sup(::BetaPrime) = Inf
+insupport(::Union(BetaPrime, Type{BetaPrime}), x::Real) = min(BetaPrime) <= x < max(BetaPrime)

@@ -34,14 +34,13 @@ skewness(d::Cauchy) = NaN
 var(d::Cauchy) = NaN
 
 ### handling support
-insupport(::Cauchy, x::Real) = isfinite(x)
-insupport(::Type{Cauchy}, x::Real) = isfinite(x)
+insupport(::Union(Cauchy, Type{Cauchy}), x::Real) = isfinite(x)
 
-isupperbounded(d::Cauchy) = false
-islowerbounded(d::Cauchy) = false
-isbounded(d::Cauchy) = false
+isupperbounded(d::Union(Cauchy, Type{Cauchy})) = false
+islowerbounded(d::Union(Cauchy, Type{Cauchy})) = false
+isbounded(d::Union(Cauchy, Type{Cauchy})) = false
 
-hasfinitesupport(d::Cauchy) = false
+hasfinitesupport(d::Union(Cauchy, Type{Cauchy})) = false
 
 # Note: this is not a Maximum Likelihood estimator
 function fit{T <: Real}(::Type{Cauchy}, x::Array{T})

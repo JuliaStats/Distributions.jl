@@ -54,12 +54,12 @@ end
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))
 
 ### handling support
-insupport(::Chi, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
+isupperbounded(d::Union(Chi, Type{Chi})) = false
+islowerbounded(d::Union(Chi, Type{Chi})) = true
+isbounded(d::Union(Chi, Type{Chi})) = false
 
-isupperbounded(d::Chi) = false
-islowerbounded(d::Chi) = true
-isbounded(d::Chi) = false
+hasfinitesupport(d::Union(Chi, Type{Chi})) = false
+min(d::Union(Chi, Type{Chi})) = zero(Real)
+max(d::Union(Chi, Type{Chi})) = Inf
 
-hasfinitesupport(d::Chi) = false
-min(d::Chi) = zero(Real)
+insupport(::Union(Chi, Type{Chi}), x::Real) = min(Chi) <= x < max(Chi)
