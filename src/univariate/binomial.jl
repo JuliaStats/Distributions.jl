@@ -38,6 +38,10 @@ kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
 mean(d::Binomial) = d.size * d.prob
 
+var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
+
+skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
+
 median(d::Binomial) = iround(d.size * d.prob)
 
 # TODO: May need to subtract 1 sometimes
@@ -55,12 +59,6 @@ function cf(d::Binomial, t::Real)
 end
 
 modes(d::Binomial) = iround([d.size * d.prob])
-
-# TODO: rand() is totally screwed up
-
-skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
-
-var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
 
 ### handling support
 
