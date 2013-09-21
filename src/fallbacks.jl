@@ -10,6 +10,36 @@ isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 
+insupport(d::Distribution, x) = false
+
+function insupport(d::UnivariateDistribution, X::Array)
+    for x in X; insupport(d, x) || return false; end
+    true
+end
+
+function insupport(t::DataType, X::Array)
+    for x in X; insupport(t, x) || return false; end
+    true
+end
+
+function insupport(d::MultivariateDistribution, X::Matrix)
+    for i in 1 : size(X, 2)
+        if !insupport(d, X[:, i])  # short-circuit is generally faster
+            return false
+        end
+    end
+    return true
+end
+
+function insupport(d::MatrixDistribution, X::Array)
+    for i in 1 : size(X, 3)
+        if !insupport(d, X[:, :, i])
+            return false
+        end
+    end
+    return true
+end
+
 # generic function to get number of samples
 
 nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)
@@ -74,43 +104,6 @@ logcdf(d::Distribution, q::Real) = log(cdf(d,q))
 logccdf(d::Distribution, q::Real) = log(ccdf(d,q))
 invlogccdf(d::Distribution, lp::Real) = quantile(d, -expm1(lp))
 invlogcdf(d::Distribution, lp::Real) = quantile(d, exp(lp))
-
-
-#### handling support ####
-
-insupport(d::Distribution, x) = false
-
-function insupport(d::UnivariateDistribution, X::Array)
-    for x in X; insupport(d, x) || return false; end
-    true
-end
-
-function insupport(t::DataType, X::Array)
-    for x in X; insupport(t, x) || return false; end
-    true
-end
-
-function insupport(d::MultivariateDistribution, X::Matrix)
-    for i in 1 : size(X, 2)
-        if !insupport(d, X[:, i])  # short-circuit is generally faster
-            return false
-        end
-    end
-    return true
-end
-
-function insupport(d::MatrixDistribution, X::Array)
-    for i in 1 : size(X, 3)
-        if !insupport(d, X[:, :, i])
-            return false
-        end
-    end
-    return true
-end
-
-hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
-hasfinitesupport(d::ContinuousUnivariateDistribution) = false
-isbounded(d::Distribution) = islowerbounded(d) && isupperbounded(d)
 
 
 #### log likelihood ####

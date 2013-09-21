@@ -56,6 +56,41 @@ end
 rand(s::RandIntSampler) = int(_randu(s.Ku, s.U)) + s.a
 
 
+# Routines for sampling from Gamma distribution
+#
+# The reason why these functions are in utils.jl instead of gamma.jl is:
+# other distributions (e.g. Beta & Dirichlet) also use them
+#
+
+#  A simple method for generating gamma variables - Marsaglia and Tsang (2000)
+#  http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
+#  Page 369
+#  basic simulation loop for pre-computed d and c
+function randg2(d::Float64, c::Float64) 
+    while true
+        x = v = 0.0
+        while v <= 0.0
+            x = randn()
+            v = 1.0 + c * x
+        end
+        v = v^3
+        U = rand()
+        x2 = x^2
+        if U < 1.0 - 0.331 * x2^2 ||
+           log(U) < 0.5 * x2 + d * (1.0 - v + log(v))
+            return d * v
+        end
+    end
+end
+
+# sampling from Gamma(α, 1)
+function randg(α::Float64)
+    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
+    cpar = 1.0 / sqrt(9.0 * dpar)
+    randg2(dpar, cpar) * (α > 1.0 ? 1.0 : rand()^(1.0 / α))
+end
+
+
 # macros for generating functions for support handling
 #
 # Both lb & ub should be compile-time constants
