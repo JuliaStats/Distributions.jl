@@ -206,6 +206,7 @@ include("rmath.jl")
 include("specialfuns.jl")
 include("tvpack.jl")
 include("utils.jl")
+include("sample.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
 
@@ -270,12 +271,6 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 
 # Mixture distributions
 include("mixturemodel.jl")
-
-# Sample w/ and w/o replacement
-include("sample.jl")
-
-# Link functions for GLM's
-#include("glmtools.jl")
 
 # REPL representations
 include("show.jl")

@@ -1,5 +1,7 @@
 # Utility functions
 
+type NoArgCheck end
+
 function isprobvec(p::Vector{Float64})
     s = 0.
     for i = 1:length(p)

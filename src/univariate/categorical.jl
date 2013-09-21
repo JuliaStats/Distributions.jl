@@ -2,140 +2,14 @@ immutable Categorical <: DiscreteUnivariateDistribution
     K::Int
     prob::Vector{Float64}
 
+    Categorical(p::Vector{Float64}, ::NoArgCheck) = new(length(p), p)
+
     function Categorical(p::Vector{Float64})
-        if !isprobvec(p)
-            throw(ArgumentError("p = $p is not a probability vector."))
-        end
+        isprobvec(p) || error("p is not a valid probability vector.")
         new(length(p), p)
     end
-end
 
-immutable CategoricalSampler <: DiscreteUnivariateDistribution
-    d::Categorical
-    alias::AliasTable
-    function CategoricalSampler(d::Categorical)
-        new(d, AliasTable(d.prob))
-    end
-end
-
-sampler(d::Categorical) = CategoricalSampler(d)
-
-Categorical(d::Integer) = Categorical(ones(d))
-
-min(d::Categorical) = 1
-max(d::Categorical) = d.K
-
-function cdf(d::Categorical, x::Real)
-    x < one(x) && return 0.0
-    d.K <= x && return 1.0
-    p = d.prob[1]
-    for i in 2:ifloor(x)
-        p += d.prob[i]
-    end
-    p
-end
-
-entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
-
-function kurtosis(d::Categorical)
-    m = mean(d)
-    s = 0.0
-    for i in 1:d.K
-        s += (i - m)^4 * d.prob[i]
-    end
-    s / var(d)^2 - 3.0
-end
-
-mean(d::Categorical) = sum(Multiply(), [1:d.K], d.prob)
-
-function median(d::Categorical)
-    p = 0.
-    n = d.K
-    i = 0
-    while p < 0.5 && i <= n
-        i += 1
-        p += d.prob[i]
-    end
-    i
-end
-
-function mgf(d::Categorical, t::AbstractVector)
-    s = 0.0
-    for i in 1:d.K
-        s += d.prob[i] * exp(t[i])
-    end
-    s
-end
-
-function cf(d::Categorical, t::AbstractVector)
-    s = 0.0 + 0.0im
-    for i in 1:d.K
-        s += d.prob[i] * exp(im * t[i])
-    end
-    s
-end
-
-mode(d::Categorical) = indmax(d.prob)
-
-function modes(d::Categorical)
-    K = d.K
-    p = d.prob
-    maxp = max(p)
-    r = Array(Int, 0)
-    for k = 1:K
-        if p[k] == maxp
-            push!(r, k)
-        end
-    end
-    r
-end
-
-
-pdf(d::Categorical, x::Real) = isinteger(x) && one(x) <= x <= d.K ? d.prob[x] : 0.0
-
-function quantile(d::Categorical, p::Real)
-    zero(p) <= p <= one(p) || throw(DomainError())
-    k = d.K
-    pv = d.prob
-    i = 1
-    v = pv[1]
-    while v < p && i < k
-        i += 1
-        v += pv[i]
-    end
-    i
-end
-
-function rand(d::Categorical)
-    u = rand()
-    sump = 0.0 
-    for i in 1:d.K
-        sump += d.prob[i]
-        if u <= sump
-            return i
-        end
-    end
-    d.K
-end
-
-rand(s::CategoricalSampler) = rand(s.alias)
-
-function skewness(d::Categorical)
-    m = mean(d)
-    s = 0.0
-    for i in 1:d.K
-        s += (i - m)^3 * d.prob[i]
-    end
-    s / std(d)^3
-end
-
-function var(d::Categorical)
-    m = mean(d)
-    s = 0.0
-    for i in 1:d.K
-        s += (i - m)^2 * d.prob[i]
-    end
-    s
+    Categorical(k::Int) = new(k, fill(1.0/k, k))
 end
 
 ### handling support
@@ -152,62 +26,205 @@ min(::Union(Categorical, Type{Categorical})) = 1
 max(d::Categorical) = d.K
 support(d::Categorical) = 1:d.K
 
+# evaluation
+
+function cdf(d::Categorical, x::Real)
+    x < one(x) && return 0.0
+    d.K <= x && return 1.0
+    p = d.prob[1]
+    for i in 2:ifloor(x)
+        p += d.prob[i]
+    end
+    p
+end
+
+pdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? d.prob[x] : 0.0
+
+logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x]) : -Inf
+
+function quantile(d::Categorical, p::Real)
+    0. <= p <= 1. || throw(DomainError())
+    k = d.K
+    pv = d.prob
+    i = 1
+    v = pv[1]
+    while v < p && i < k
+        i += 1
+        @inbounds v += pv[i]
+    end
+    i
+end
+
+# properties
+
+function categorical_mean(p::AbstractArray{Float64})
+    k = length(p)
+    s = 0.
+    for i = 1 : k
+        @inbounds s += p[i] * i
+    end
+    s
+end
+
+mean(d::Categorical) = categorical_mean(d.prob)
+
+function median(d::Categorical)
+    k = d.K
+    cp = 0.
+    i = 0
+    while cp < 0.5 && i <= K
+        i += 1
+        @inbounds cp += p[i]
+    end
+    i
+end
+
+function var(d::Categorical)
+    k = d.K
+    p = d.prob
+    m = categorical_mean(p)
+    s = 0.0
+    for i = 1 : k
+        @inbounds s += abs2(i - m) * p[i]
+    end
+    s
+end
+
+function skewness(d::Categorical)
+    k = d.K
+    p = d.prob
+    m = categorical_mean(p)
+    s = 0.0
+    for i = 1 : k
+        @inbounds s += (i - m)^3 * p[i]
+    end
+    v = var(d)
+    s / (v * sqrt(v))
+end
+
+function kurtosis(d::Categorical)
+    k = d.K
+    p = d.prob
+    m = categorical_mean(p)
+    s = 0.0
+    for i in 1:d.K
+        @inbounds s += (i - m)^4 * p[i]
+    end
+    s / abs2(var(d)) - 3.0
+end
+
+entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
+
+function mgf(d::Categorical, t::AbstractVector)
+    k = d.K
+    p = d.prob
+    s = 0.0
+    for i = 1 : k
+        @inbounds s += p[i] * exp(t[i])
+    end
+    s
+end
+
+function cf(d::Categorical, t::AbstractVector)
+    k = d.K
+    p = d.prob
+    s = 0.0 + 0.0im
+    for i = 1 : K
+        @inbounds s += p[i] * exp(im * t[i])
+    end
+    s
+end
+
+mode(d::Categorical) = indmax(d.prob)
+
+function modes(d::Categorical)
+    K = d.K
+    p = d.prob
+    maxp = max(p)
+    r = Array(Int, 0)
+    for k = 1:K
+        @inbounds if p[k] == maxp
+            push!(r, k)
+        end
+    end
+    r
+end
+
+
+# sampling
+
+immutable CategoricalSampler
+    d::Categorical
+    alias::AliasTable
+    function CategoricalSampler(d::Categorical)
+        new(d, AliasTable(d.prob))
+    end
+end
+
+sampler(d::Categorical) = CategoricalSampler(d)
+
+rand(d::Categorical) = wsample(1:d.K, d.prob, 1.0)
+
+rand(s::CategoricalSampler) = rand(s.alias)
+
+
+### sufficient statistics
+
+immutable CategoricalStats <: SufficientStats
+    h::Vector{Float64}
+end
+
+function add_categorical_counts!{T<:Integer}(h::Vector{Float64}, x::AbstractArray{T})
+    for i = 1 : length(x)
+        @inbounds xi = x[i]
+        h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound 
+    end
+    h
+end
+
+function add_categorical_counts!{T<:Integer}(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64})
+    n = length(x)
+    if n != length(h)
+        throw(ArgumentError("Inconsistent array lengths."))
+    end
+    for i = 1 : n
+        @inbounds xi = x[i]
+        @inbounds wi = w[i]
+        h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound 
+    end
+    h
+end
+
+function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T})
+    CategoricalStats(add_categorical_counts!(zeros(k), x))
+end
+
+function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{T})
+    CategoricalStats(add_categorical_counts!(zeros(k), x, w))
+end
+
+suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = suffstats(Categorical, data...)
+suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Categorical, data..., w)
+
 
 ### Model fitting
 
-function fit_categorical!{T<:Integer}(p::Vector{Float64}, x::Array{T}; pricount::Float64=0.0)
-    k = length(p)
-    n = length(x)
-
-    # accumulate counts
-    fill!(p, pricount)
-    for i = 1:n
-        @inbounds p[x[i]] += 1.
-    end
-
-    # normalize
-    tw = n + pricount * k
-    c = 1.0 / tw
-    for i = 1:k
-        @inbounds p[i] *= c
-    end
-    return p
+function fit_mle(::Type{Categorical}, ss::CategoricalStats)
+    Categorical(normalize!(ss.h))
 end
 
-function fit_categorical!{T<:Integer}(p::Vector{Float64}, x::Array{T}, w::Array{Float64}; pricount::Float64=0.0)
-    k = length(p)
-    n = length(x)
-
-    # accumulate counts
-    fill!(p, pricount)
-    tw = pricount * k
-    for i = 1:n
-        @inbounds wi = w[i]
-        @inbounds p[x[i]] += wi 
-        tw += wi
-    end
-
-    # normalize
-    c = 1.0 / tw
-    for i = 1:k
-        @inbounds p[i] *= c
-    end
-    return p
+function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) 
+    Categorical(normalize!(add_categorical_counts!(zeros(k), x), 1), NoArgCheck())
 end
 
-function fit_categorical{T<:Integer}(k::Integer, x::Array{T}; pricount::Float64=0.0)
-    Categorical(fit_categorical!(zeros(k), x; pricount=pricount))
+function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) 
+    Categorical(normalize!(add_categorical_counts!(zeros(k), x, w), 1), NoArgCheck())
 end
 
-function fit_categorical{T<:Integer}(k::Integer, x::Array{T}, w::Array{Float64}; pricount::Float64=0.0)
-    Categorical(fit_categorical!(zeros(k), x; pricount=pricount))
-end
+fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_mle(Categorical, data...)
+fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Categorical, data..., w)
 
-fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_categorical(data...)
-fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_categorical(data..., w)
-fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) = fit_categorical(k, x)
-fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) = fit_categorical(k, x, w)
-fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_categorical(max(x), x)
-fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_categorical(max(x), x, w)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_mle(Categorical, max(x), x, w)
 
 

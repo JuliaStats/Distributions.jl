@@ -28,6 +28,7 @@ for d in [
     Binomial(100, 0.1),
     Binomial(100, 0.9)]
 
+    # NB: uncomment if some tests failed
     # println(d)
 
     xmin = min(d)
