@@ -20,8 +20,23 @@ function compact_show(io::IO, d::Distribution)
     print(io, typeof(d))
     print(io, "( ")
     for parameter in typeof(d).names
-        param = string(string(parameter), "=", d.(parameter), " ")
-        print(io, param)            
+        print(io, string(parameter))
+        print(io, "=")
+        pv = d.(parameter)
+        if isa(pv, AbstractVector)
+            print(io, '[')
+            if !isempty(pv)
+                for i = 1 : length(pv)-1
+                    print(io, pv[i])
+                    print(io, ", ")
+                end
+                print(io, pv[end])
+            end
+            print(io, ']')
+        else
+            print(io, pv)
+        end 
+        print(io, " ")         
     end        
     print(io, ")")  
 end
