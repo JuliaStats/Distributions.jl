@@ -70,9 +70,10 @@ mean(d::Categorical) = categorical_mean(d.prob)
 
 function median(d::Categorical)
     k = d.K
+    p = d.prob
     cp = 0.
     i = 0
-    while cp < 0.5 && i <= K
+    while cp < 0.5 && i <= k
         i += 1
         @inbounds cp += p[i]
     end
@@ -107,7 +108,7 @@ function kurtosis(d::Categorical)
     p = d.prob
     m = categorical_mean(p)
     s = 0.0
-    for i in 1:d.K
+    for i = 1 : k
         @inbounds s += (i - m)^4 * p[i]
     end
     s / abs2(var(d)) - 3.0
@@ -129,7 +130,7 @@ function cf(d::Categorical, t::AbstractVector)
     k = d.K
     p = d.prob
     s = 0.0 + 0.0im
-    for i = 1 : K
+    for i = 1 : k
         @inbounds s += p[i] * exp(im * t[i])
     end
     s
