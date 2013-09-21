@@ -26,18 +26,18 @@ function entropy(d::Chisq)
 end
 
 
-pdf(d::Chisq, x::Real) = pdf(Gamma(0.5*d.df), x)
-logpdf(d::Chisq, x::Real) = logpdf(Gamma(0.5*d.df), x)
+pdf(d::Chisq, x::Real) = pdf(Gamma(0.5*d.df,2.0), x)
+logpdf(d::Chisq, x::Real) = logpdf(Gamma(0.5*d.df,2.0), x)
 
-cdf(d::Chisq, x::Real) = cdf(Gamma(0.5*d.df), x)
-ccdf(d::Chisq, x::Real) = ccdf(Gamma(0.5*d.df), x)
-logcdf(d::Chisq, x::Real) = logcdf(Gamma(0.5*d.df), x)
-logccdf(d::Chisq, x::Real) = logccdf(Gamma(0.5*d.df), x)
+cdf(d::Chisq, x::Real) = cdf(Gamma(0.5*d.df,2.0), x)
+ccdf(d::Chisq, x::Real) = ccdf(Gamma(0.5*d.df,2.0), x)
+logcdf(d::Chisq, x::Real) = logcdf(Gamma(0.5*d.df,2.0), x)
+logccdf(d::Chisq, x::Real) = logccdf(Gamma(0.5*d.df,2.0), x)
 
-quantile(d::Chisq, p::Real) = quantile(Gamma(0.5*d.df), p)
-cquantile(d::Chisq, p::Real) = cquantile(Gamma(0.5*d.df), p)
-invlogcdf(d::Chisq, lp::Real) = invlogcdf(Gamma(0.5*d.df), lp)
-invlogccdf(d::Chisq, lp::Real) = invlogccdf(Gamma(0.5*d.df), lp)
+quantile(d::Chisq, p::Real) = quantile(Gamma(0.5*d.df,2.0), p)
+cquantile(d::Chisq, p::Real) = cquantile(Gamma(0.5*d.df,2.0), p)
+invlogcdf(d::Chisq, lp::Real) = invlogcdf(Gamma(0.5*d.df,2.0), lp)
+invlogccdf(d::Chisq, lp::Real) = invlogccdf(Gamma(0.5*d.df,2.0), lp)
 
 
 function mgf(d::Chisq, t::Real)
@@ -51,7 +51,7 @@ cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-0.5*d.df)
 # rand - the distribution chi^2(df) is 2 * gamma(df / 2)
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)
-    d.df == 1 ? randn()^2 : 2.0 * rand(Gamma(0.5*d.df))
+    d.df == 1 ? randn()^2 : rand(Gamma(0.5*d.df,2.0))
 end
 
 function rand!(d::Chisq, A::Array{Float64})
