@@ -98,6 +98,7 @@ export
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
+    complete,      # turn an incomplete formulation into a complete distribution
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
@@ -126,12 +127,12 @@ export
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
-    posterior,       # get posterior distribution given prior and observed data
+    posterior,        # get posterior distribution given prior and observed data
+    posterior_canon,  # get the canonical form of the posterior distribution
     posterior_mode,  # get the mode of posterior distribution
     posterior_rand,  # draw samples from the posterior distribution
     posterior_rand!, 
-    posterior_make,  # create a distribution/model from params obtained from posterior 
-    posterior_sample,
+    posterior_randmodel,
     scale,         # scale parameter of a distribution
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
