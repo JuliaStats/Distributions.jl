@@ -242,7 +242,7 @@ fit_mle(dty::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64}) = fit_mle(M
 
 
 # Useful for posterior
-immutable MvNormalStats
+immutable MvNormalStats <: SufficientStats
     s::Vector{Float64}  # (weighted) sum of x
     m::Vector{Float64}  # (weighted) mean of x
     s2::Matrix{Float64} # (weighted) sum of (x-mu)^2

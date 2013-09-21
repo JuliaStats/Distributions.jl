@@ -188,7 +188,7 @@ end
 
 ## Fit model
 
-immutable MultinomialStats
+immutable MultinomialStats <: SufficientStats
     n::Int  # number of trials in each experiment
     scnts::Vector{Float64}  # sum of counts
     tw::Float64  # total sample weight

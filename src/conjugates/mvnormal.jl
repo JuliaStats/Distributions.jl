@@ -16,7 +16,7 @@ immutable MvNormalKnownSigma <: IncompleteDistribution
     end
 end
 
-immutable MvNormalKnownSigmaStats
+immutable MvNormalKnownSigmaStats <: SufficientStats
     Sigma::Matrix{Float64}      # known covariance
     s::Vector{Float64}          # (weighted) sum of x
     tw::Float64                 # total sample weight

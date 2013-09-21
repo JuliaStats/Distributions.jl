@@ -95,7 +95,7 @@ var(d::Gamma) = d.shape * d.scale * d.scale
 
 ## Fit model
 
-immutable GammaStats
+immutable GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight

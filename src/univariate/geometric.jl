@@ -64,7 +64,7 @@ insupport(d::Geometric, x::Real) = isinteger(x) && x >= 0
 
 ## Fit model
 
-immutable GeometricStats
+immutable GeometricStats <: SufficientStats
     sx::Float64
     tw::Float64
 

@@ -56,7 +56,7 @@ var(d::Normal) = d.σ^2
 
 ## Fit model
 
-immutable NormalStats
+immutable NormalStats <: SufficientStats
     s::Float64    # (weighted) sum of x
     m::Float64    # (weighted) mean of x
     s2::Float64   # (weighted) sum of (x - μ)^2
@@ -112,7 +112,7 @@ immutable NormalKnownMu <: IncompleteDistribution
     μ::Float64
 end
 
-immutable NormalKnownMuStats
+immutable NormalKnownMuStats <: SufficientStats
     μ::Float64      # known mean
     s2::Float64     # (weighted) sum of (x - μ)^2
     tw::Float64     # total sample weight
@@ -149,7 +149,7 @@ immutable NormalKnownSigma <: IncompleteDistribution
     end
 end
 
-immutable NormalKnownSigmaStats
+immutable NormalKnownSigmaStats <: SufficientStats
     σ::Float64      # known std.dev
     s::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight
