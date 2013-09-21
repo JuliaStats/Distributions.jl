@@ -184,7 +184,7 @@ end
 
 function add_categorical_counts!{T<:Integer}(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
-    if n != length(h)
+    if n != length(w)
         throw(ArgumentError("Inconsistent array lengths."))
     end
     for i = 1 : n
@@ -199,7 +199,7 @@ function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T})
     CategoricalStats(add_categorical_counts!(zeros(k), x))
 end
 
-function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{T})
+function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64})
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 

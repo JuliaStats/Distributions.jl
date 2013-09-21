@@ -1,15 +1,16 @@
 immutable Gamma <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
+
     function Gamma(sh::Real, sc::Real)
         sh > zero(sh) && sc > zero(sc) || 
             error("Both shape and scale must be positive")
         new(float64(sh), float64(sc))
     end
-end
 
-Gamma(sh::Real) = Gamma(sh, 1.0)
-Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
+    Gamma(sh::Real) = Gamma(sh, 1.0)
+    Gamma() = Gamma(1.0, 1.0)
+end
 
 scale(d::Gamma) = d.scale
 rate(d::Gamma) = 1.0 / d.scale
@@ -61,7 +62,6 @@ function randg2(d::Float64, c::Float64)
         end
     end
 end
-
 
 # sampling from Gamma(α, 1)
 function randg(α::Float64)
