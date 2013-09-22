@@ -36,6 +36,7 @@ export
     Chi,
     Chisq,
     Cosine,
+    DiagNormal,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
@@ -52,7 +53,8 @@ export
     HyperGeometric,
     InverseWishart,
     InverseGamma,
-    InverseGaussian,    
+    InverseGaussian,  
+    IsoNormal,  
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -103,6 +105,7 @@ export
     fit_mle!,      # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
+    gmvnormal,     # a generic function to construct multivariate normal distributions
     insupport,     # predicate, is x in the support of the distribution?
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability

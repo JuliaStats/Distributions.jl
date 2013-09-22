@@ -1,13 +1,15 @@
 immutable Normal <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
+
     function Normal(μ::Real, σ::Real)
     	σ > zero(σ) || error("std.dev. must be positive")
     	new(float64(μ), float64(σ))
     end
+
+    Normal(μ::Real) = Normal(float64(μ), 1.0)
+    Normal() = Normal(0.0, 1.0)
 end
-Normal(μ::Real) = Normal(float64(μ), 1.0)
-Normal() = Normal(0.0, 1.0)
 
 @_jl_dist_2p Normal norm
 

@@ -4,8 +4,6 @@ import NumericExtensions
 import NumericExtensions.ScalMat
 import NumericExtensions.PDiagMat
 import NumericExtensions.PDMat
-import NumericExtensions.vbroadcast
-import NumericExtensions.Subtract
 
 using Distributions
 using Base.Test
@@ -21,32 +19,32 @@ x = rand(3, 100)
 
 # SGauss
 
-gs = MvNormal(mu, sqrt(2.0))
-@test isa(gs, MvNormal{ScalMat})
+gs = gmvnormal(mu, sqrt(2.0))
+@test isa(gs, IsoNormal)
 @test dim(gs) == 3
 @test mean(gs) == mode(gs) == mu
 @test_approx_eq cov(gs) diagm(fill(2.0, 3))
 @test var(gs) == diag(cov(gs))
 @test_approx_eq entropy(gs) 0.5 * logdet(2π * e * cov(gs))
 
-gsz = MvNormal(3, sqrt(2.0))
-@test isa(gsz, MvNormal{ScalMat})
+gsz = gmvnormal(3, sqrt(2.0))
+@test isa(gsz, IsoNormal)
 @test dim(gsz) == 3
 @test mean(gsz) == zeros(3)
 @test gsz.zeromean
 
 # DGauss
 
-gd = MvNormal(mu, sqrt(va))
-@test isa(gd, MvNormal{PDiagMat})
+gd = gmvnormal(mu, sqrt(va))
+@test isa(gd, DiagNormal)
 @test dim(gd) == 3
 @test mean(gd) == mode(gd) == mu
 @test_approx_eq cov(gd) diagm(va)
 @test var(gd) == diag(cov(gd))
 @test_approx_eq entropy(gd) 0.5 * logdet(2π * e * cov(gd))
 
-gdz = MvNormal(PDiagMat(va))
-@test isa(gdz, MvNormal{PDiagMat})
+gdz = gmvnormal(PDiagMat(va))
+@test isa(gdz, DiagNormal)
 @test dim(gdz) == 3
 @test mean(gdz) == zeros(3)
 @test gdz.zeromean
@@ -54,7 +52,7 @@ gdz = MvNormal(PDiagMat(va))
 # Gauss
 
 gf = MvNormal(mu, C)
-@test isa(gf, MvNormal{PDMat})
+@test isa(gf, MvNormal)
 @test dim(gf) == 3
 @test mean(gf) == mode(gf) == mu
 @test cov(gf) == C
@@ -62,7 +60,7 @@ gf = MvNormal(mu, C)
 @test_approx_eq entropy(gf) 0.5 * logdet(2π * e * cov(gf))
 
 gfz = MvNormal(C)
-@test isa(gfz, MvNormal{PDMat})
+@test isa(gfz, MvNormal)
 @test dim(gfz) == 3
 @test mean(gfz) == zeros(3)
 @test gfz.zeromean
@@ -191,35 +189,25 @@ mu, C = _gauss_mle(x, w)
 @test_approx_eq mean(g) mu
 @test_approx_eq cov(g) C
 
-g = fit(MvNormal{ScalMat}, x)
+g = fit(IsoNormal, x)
 mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
 
-g = fit_mle(MvNormal{ScalMat}, x, w)
+g = fit_mle(IsoNormal, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
 
-g = fit(MvNormal{PDiagMat}, x)
+g = fit(DiagNormal, x)
 mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.diag diag(C)
 
-g = fit_mle(MvNormal{PDiagMat}, x, w)
+g = fit_mle(DiagNormal, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.diag diag(C)
-
-g = fit(MvNormal{PDMat}, x)
-mu, C = _gauss_mle(x)
-@test_approx_eq g.μ mu
-@test_approx_eq g.Σ.mat C
-
-g = fit_mle(MvNormal{PDMat}, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq g.μ mu
-@test_approx_eq g.Σ.mat C
 
 
 ##### Sufficient statistics type
@@ -233,9 +221,10 @@ ssw = suffstats(MvNormal, X, w)
 
 s_t = sum(X, 2)
 ws_t = sum(Xw, 2)
-tmp = vbroadcast(Subtract(), X, s_t./n, 1)
+tmp = X .- (s_t ./ n)
 ss_t = tmp*tmp'
-tmp = vbroadcast(Subtract(), X, sum(Xw,2)./sum(w), 1)
+
+tmp = X .- sum(Xw, 2) ./ sum(w)
 wss_t = (tmp*diagm(w))*tmp'
 tw_t = length(w)
 wtw_t = sum(w)

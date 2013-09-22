@@ -2,6 +2,15 @@
 
 type NoArgCheck end
 
+function allfinite{T<:Real}(x::Array{T})
+	for i = 1 : length(x)
+		if !(isfinite(x[i]))
+			return false
+		end
+	end
+	return true
+end
+
 function isprobvec(p::Vector{Float64})
     s = 0.
     for i = 1:length(p)
