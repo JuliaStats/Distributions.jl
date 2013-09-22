@@ -156,6 +156,7 @@ x = rand(gfz, n)
 @test isa(x, Matrix{Float64})
 @test size(x) == (dim(gfz), n)
 
+
 ##### MLE
 
 # a slow but safe way to implement MLE for verification

@@ -142,11 +142,123 @@ function rand!(d::GenericMultivariateNormal, x::Matrix{Float64})
 end
 
 
+# Computation of sufficient statistics (with known covariance)
+#
+
+immutable GenericMvNormalKnownSigma{Cov<:AbstractPDMat}
+    Σ::Cov
+end
+
+typealias MvNormalKnownSigma   GenericMvNormalKnownSigma{PDMat}
+typealias DiagNormalKnownSigma GenericMvNormalKnownSigma{PDiagMat}
+typealias IsoNormalKnownSigma  GenericMvNormalKnownSigma{ScalMat}
+
+IsoNormalKnownSigma(σ::Float64) = IsoNormalKnownSigma(abs2(σ))
+DiagNormalKnownSigma(σ::Vector{Float64}) = DiagNormalKnownSigma(abs2(σ))
+MvNormalKnownSigma(C::Matrix{Float64}) = MvNormalKnownSigma(PDMat(C)) 
+
+dim(g::GenericMvNormalKnownSigma) = dim(g.Σ)
+
+
+immutable GenericMvNormalKnownSigmaStats{Cov<:AbstractPDMat}
+    invΣ::Cov              # inverse covariance
+    sx::Vector{Float64}    # (weighted) sum of vectors 
+    tw::Float64            # sum of weights
+end
+
+typealias MvNormalKnownSigmaStats   GenericMvNormalKnownSigmaStats{PDMat}
+typealias DiagNormalKnownSigmaStats GenericMvNormalKnownSigmaStats{PDiagMat}
+typealias IsoNormalKnownSigmaStats  GenericMvNormalKnownSigmaStats{ScalMat}
+
+function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64})
+    size(x,1) == dim(g) || throw(ArgumentError("Invalid argument dimensions."))
+    invΣ = inv(g.Σ)
+    sx = vec(sum(x, 2))
+    tw = float64(size(x, 2))
+    GenericMvNormalKnownSigmaStats{Cov}(invΣ, sx, tw)
+end
+
+function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64}, w::Array{Float64})
+    if !(size(x,1) == dim(g) && size(x,2) == length(w))
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+    invΣ = inv(g.Σ)
+    sx = x * vec(w)
+    tw = sum(w)
+    GenericMvNormalKnownSigmaStats{Cov}(invΣ, sx, tw)
+end
+
+
+## MLE estimation with covariance known
+
+function fit_mle{C<:AbstractPDMat}(g::GenericMvNormalKnownSigma{C}, ss::GenericMvNormalKnownSigmaStats{C})
+    GenericMultivariateNormal(ss.sx * inv(ss.tw), g.Σ)
+end
+
+function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64})
+    d = dim(g)
+    size(x,1) == d || throw(ArgumentError("Invalid argument dimensions."))
+    μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
+    GenericMultivariateNormal(μ, g.Σ)
+end
+
+function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64}, w::Array{Float64})
+    d = dim(g)
+    if !(size(x,1) == d && size(x,2) == length(w))
+        throw(ArgumentError("Inconsistent argument dimensions."))
+    end
+    μ = Base.LinAlg.BLAS.gemv('N', inv(sum(w)), x, vec(w))
+    GenericMultivariateNormal(μ, g.Σ)
+end
+
+
+# Computation of sufficient statistics (both μ and Σ are unknown)
+#
+# TODO: implement methods for DiagNormal and IsoNormal
+#
+
+immutable MvNormalStats <: SufficientStats
+    s::Vector{Float64}  # (weighted) sum of x
+    m::Vector{Float64}  # (weighted) mean of x
+    s2::Matrix{Float64} # (weighted) sum of (x-μ) * (x-μ)'
+    tw::Float64         # total sample weight
+end
+
+function suffstats(D::Type{MultivariateNormal}, x::Matrix{Float64})
+    d = size(x, 1)
+    n = size(x, 2)
+
+    s = vec(sum(x,2))
+    m = s * inv(n)
+    z = bsubtract(x, m, 1)
+    s2 = A_mul_Bt(z, z)
+
+    MvNormalStats(s, m, s2, float64(n))
+end
+
+function suffstats(D::Type{MultivariateNormal}, x::Matrix{Float64}, w::Array{Float64})
+    d = size(x, 1)
+    n = size(x, 2)
+    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+
+    tw = sum(w)
+    s = x * vec(w)
+    m = s * inv(tw)
+    z = bmultiply!(bsubtract(x, m, 1), sqrt(w), 2)
+    s2 = A_mul_Bt(z, z)
+
+    MvNormalStats(s, m, s2, tw)
+end
+
+
 # Maximum Likelihood Estimation
 #
 # Specialized algorithms are respectively implemented for 
 # each kind of covariance
 #
+
+
+fit_mle(D::Type{MultivariateNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
 function fit_mle(D::Type{MultivariateNormal}, x::Matrix{Float64})
     n = size(x, 2)
@@ -257,55 +369,3 @@ function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64}, w::Vector{Float64})
     IsoNormal(mu, ScalMat(m, va / (m * sw)))
 end
 
-
-# Useful for posterior
-immutable MvNormalStats <: SufficientStats
-    s::Vector{Float64}  # (weighted) sum of x
-    m::Vector{Float64}  # (weighted) mean of x
-    s2::Matrix{Float64} # (weighted) sum of (x-mu)^2
-    tw::Float64         # total sample weight
-
-    function MvNormalStats(s::Vector{Float64}, m::Vector{Float64},
-                           s2::Matrix{Float64}, tw::Float64)
-        new(s, m, s2, float64(tw))
-    end
-end
-
-function suffstats{T<:Real}(D::Type{MultivariateNormal}, X::Matrix{T})
-    d, n = size(X)
-
-    # Could also use NumericExtensions
-    s = X[:,1]
-    for j in 2:n
-        for i in 1:d
-            @inbounds s[i] += X[i,j]
-        end
-    end
-    m = s ./ n
-    
-    Z = vbroadcast(Subtract(), X, m, 1)
-    s2 = A_mul_Bt(Z, Z)
-
-    MvNormalStats(s, m, s2, float64(n))
-end
-
-function suffstats{T<:Real}(D::Type{MultivariateNormal}, X::Matrix{T}, w::Array{Float64})
-    d, n = size(X)
-
-    # Could use NumericExtensions or BLAS
-    tw = w[1]
-    s = w[1] .* X[:,1]
-    for j in 2:n
-        @inbounds wj = w[j]
-        for i in 1:d
-            @inbounds s[i] += wj * X[i,j]
-        end
-        tw += wj
-    end
-    m = s ./ tw
-    
-    Z = vbroadcast(Subtract(), X, m, 1)
-    s2 = Z * bmultiply(Z, w, 2)'
-
-    MvNormalStats(s, m, s2, float64(tw))
-end

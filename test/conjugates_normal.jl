@@ -75,10 +75,10 @@ ws_t = sum(Xw, 2)
 tw_t = length(w)
 wtw_t = sum(w)
 
-@test_approx_eq ss.s s_t
+@test_approx_eq ss.sx s_t
 @test_approx_eq ss.tw tw_t
 
-@test_approx_eq ssw.s ws_t
+@test_approx_eq ssw.sx ws_t
 @test_approx_eq ssw.tw wtw_t
 
 # Posterior
