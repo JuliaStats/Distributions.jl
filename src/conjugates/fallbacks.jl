@@ -19,9 +19,9 @@ posterior_mode(pri::Distribution, ss::SufficientStats) = mode(posterior_canon(pr
 posterior_mode(pri::Distribution, G::IncompleteFormulation, x) = mode(posterior_canon(pri, G, x))
 posterior_mode(pri::Distribution, G::IncompleteFormulation, x, w) = mode(posterior_canon(pri, G, x, w))
 
-fit_map(pri::Distribution, G::IncompleteFormulation, x) = complete(G, pri, posterior_mode(pri, G, x)...)
-fit_map(pri::Distribution, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_mode(pri, G, x, w)...)
+fit_map(pri::Distribution, G::IncompleteFormulation, x) = complete(G, pri, posterior_mode(pri, G, x))
+fit_map(pri::Distribution, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_mode(pri, G, x, w))
 
-posterior_randmodel(pri::Distribution, G::IncompleteFormulation, x) = complete(G, pri, posterior_rand(pri, G, x)...)
-posterior_randmodel(pri::Distribution, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_rand(pri, G, x, w)...)
+posterior_randmodel(pri::Distribution, G::IncompleteFormulation, x) = complete(G, pri, posterior_rand(pri, G, x))
+posterior_randmodel(pri::Distribution, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_rand(pri, G, x, w))
 

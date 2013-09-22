@@ -23,7 +23,7 @@ function ccount(K, x, w)
 end
 
 
-# Beta - Bernoulli / Binomial
+# Beta - Bernoulli
 
 pri = Beta(1.0, 2.0)
 
@@ -46,18 +46,55 @@ f = fit_map(pri, Bernoulli, x, w)
 @test isa(f, Bernoulli)
 @test_approx_eq f.p1 mode(p)
 
+
+# posterior_rand & posterior_randmodel
+
+pri = Beta(1.0, 2.0)
+x = rand(Bernoulli(0.3), n)
+post = posterior(pri, Bernoulli, x)
+
+pv = posterior_rand(pri, Bernoulli, x)
+@test isa(pv, Float64)
+@test 0. <= pv <= 1.
+
+pv = posterior_rand(pri, Bernoulli, x, w)
+@test isa(pv, Float64)
+@test 0. <= pv <= 1.
+
+pm = posterior_randmodel(pri, Bernoulli, x)
+@test isa(pm, Bernoulli)
+@test 0. <= pm.p1 <= 1.
+
+pm = posterior_randmodel(pri, Bernoulli, x, w)
+@test isa(pm, Bernoulli)
+@test 0. <= pm.p1 <= 1.
+
+
+# Beta - Binomial
+
 x = rand(Binomial(10, 0.3), n)
-p = posterior(pri, Binomial, 10, x)
+p = posterior(pri, Binomial, (10, x))
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x)
 @test_approx_eq p.beta  pri.beta + (10n - sum(x))
 
-p = posterior(pri, Binomial, 10, x, w)
+f = fit_map(pri, Binomial, (10, x))
+@test isa(f, Binomial)
+@test f.size == 10
+@test_approx_eq f.prob mode(p)
+
+p = posterior(pri, Binomial, (10, x), w)
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x .* w)
 @test_approx_eq p.beta  pri.beta + (10 * sum(w) - sum(x .* w))
 
-# Dirichlet - Categorical / Multinomial
+f = fit_map(pri, Binomial, (10, x), w)
+@test isa(f, Binomial)
+@test f.size == 10
+@test_approx_eq f.prob mode(p)
+
+
+# Dirichlet - Categorical
 
 pri = Dirichlet([1., 2., 3.])
 
@@ -77,6 +114,9 @@ p = posterior(pri, Categorical, x, w)
 f = fit_map(pri, Categorical, x, w)
 @test isa(f, Categorical)
 @test_approx_eq f.prob mode(p)
+
+
+# Dirichlet - Multinomial
 
 x = rand(Multinomial(100, [0.2, 0.3, 0.5]), 1)
 p = posterior(pri, Multinomial, x)
@@ -124,27 +164,5 @@ p = posterior(pri, Exponential, x, w)
 f = fit_map(pri, Exponential, x, w)
 @test isa(f, Exponential)
 @test_approx_eq rate(f) mode(p)
-
-
-# posterior_sample
-
-pri = Beta(1.0, 2.0)
-x = rand(Bernoulli(0.3), n)
-p = posterior(pri, Bernoulli, x)
-ps = posterior_sample(p, Bernoulli)
-
-@test isa(ps, Bernoulli)
-@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
-@test zero(ps.p1) <= ps.p1 <= one(ps.p1)
-
-ps = posterior_sample(pri, Bernoulli, x)
-@test isa(ps, Bernoulli)
-@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
-@test zero(ps.p1) <= ps.p1 <= one(ps.p1)
-
-
-
-
-
 
 

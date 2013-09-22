@@ -24,6 +24,14 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
     Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, float64(alpha))
 end
 
+immutable DirichletCanon
+    alpha::Vector{Float64}
+end
+
+dim(d::DirichletCanon) = length(d.alpha)
+Base.convert(::Type{Dirichlet}, cf::DirichletCanon) = Dirichlet(cf.alpha)
+
+
 # Properties
 
 dim(d::Dirichlet) = length(d.alpha)
@@ -94,7 +102,11 @@ function dirichlet_mode!(r::Vector{Float64}, α::Vector{Float64}, α0::Float64)
     return r
 end
 
-mode(d::Dirichlet) = dirichlet_mode!(zeros(dim(d)), d.alpha, d.alpha0)
+dirichlet_mode(α::Vector{Float64}, α0::Float64) = dirichlet_mode!(Array(Float64, length(α)), α, α0)
+
+mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
+mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
+
 modes(d::Dirichlet) = [mode(d)]
 
 
@@ -158,7 +170,7 @@ end
 
 # sampling
 
-function rand!(d::Dirichlet, x::Vector)
+function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
     s = 0.0
     n = length(x)
     α = d.alpha
@@ -168,9 +180,9 @@ function rand!(d::Dirichlet, x::Vector)
     multiply!(x, inv(s)) # this returns x
 end
 
-rand(d::Dirichlet) = rand!(d, Array(Float64, dim(d)))
+rand(d::Union(Dirichlet,DirichletCanon)) = rand!(d, Array(Float64, dim(d)))
 
-function rand!(d::Dirichlet, X::Matrix)
+function rand!(d::Union(Dirichlet,DirichletCanon), X::Matrix)
     k = size(X, 1)
     n = size(X, 2)
     if k != dim(d)
