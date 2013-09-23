@@ -56,6 +56,22 @@ std(d::Normal) = d.σ
 
 var(d::Normal) = d.σ^2
 
+## Canonical Form
+
+immutable NormalCanon
+    h::Float64       # σ^(-2) * μ
+    prec::Float64    # σ^(-2)
+end
+
+Base.convert(::Type{Normal}, cf::NormalCanon) = (σ2 = 1.0 / cf.prec; Normal(σ2 * cf.h, sqrt(σ2)))
+
+mean(cf::NormalCanon) = cf.h / cf.prec
+mode(cf::NormalCanon) = cf.h / cf.prec
+
+rand(cf::NormalCanon) = (σ2 = 1.0 / cf.prec; σ2 * cf.h + randn() * sqrt(σ2))
+rand!{T<:FloatingPoint}(cf::NormalCanon, r::Array{T}) = rand!(convert(Normal, cf), r)
+
+
 ## Fit model
 
 immutable NormalStats <: SufficientStats
@@ -153,7 +169,7 @@ end
 
 immutable NormalKnownSigmaStats <: SufficientStats
     σ::Float64      # known std.dev
-    s::Float64      # (weighted) sum of x
+    sx::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight
 end
 
