@@ -48,6 +48,8 @@ export
     Exponential,
     FDist,
     Gamma,
+    GenericMvNormal,
+    GenericMvNormalCanon,
     Geometric,
     Gumbel,
     HyperGeometric,
@@ -265,7 +267,8 @@ include(joinpath("univariate", "weibull.jl"))
 # Multivariate distributions
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
-include(joinpath("multivariate", "multivariatenormal.jl"))
+include(joinpath("multivariate", "mvnormal.jl"))
+include(joinpath("multivariate", "mvnormalcanon.jl"))
 include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions

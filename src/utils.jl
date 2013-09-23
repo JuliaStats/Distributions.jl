@@ -11,6 +11,15 @@ function allfinite{T<:Real}(x::Array{T})
 	return true
 end
 
+function allzeros{T<:Real}(x::Array{T})
+	for i = 1 : length(x)
+		if !(x == zero(T))
+			return false
+		end
+	end
+	return true
+end
+
 function isprobvec(p::Vector{Float64})
     s = 0.
     for i = 1:length(p)
