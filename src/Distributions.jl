@@ -73,6 +73,7 @@ export
     NoncentralF,
     NoncentralT,
     Normal,
+    NormalCanon,
     NormalGamma,
     NormalInverseGamma,
     NormalInverseWishart,
@@ -92,6 +93,7 @@ export
 
     # methods
     binaryentropy, # entropy of distribution in bits
+    canonform,     # get canonical form of a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
@@ -250,6 +252,7 @@ include(joinpath("univariate", "noncentralchisq.jl"))
 include(joinpath("univariate", "noncentralf.jl"))
 include(joinpath("univariate", "noncentralt.jl"))
 include(joinpath("univariate", "normal.jl"))
+include(joinpath("Univariate", "normalcanon.jl"))
 include(joinpath("univariate", "pareto.jl"))
 include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "rayleigh.jl"))
