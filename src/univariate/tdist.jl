@@ -28,8 +28,6 @@ function entropy(d::TDist)
         0.5*log(d.df) + lbeta(hdf,0.5)
 end
 
-@_jl_dist_1p TDist t
-
 function pdf(d::TDist, x::Real)
     1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) *
         (1.0 + x^2 / d.df)^(-0.5 * (d.df + 1.0))
@@ -102,7 +100,7 @@ function quantile(d::TDist, p::Real)
     q
 end
 
-# cquantile(d::TDist, p::Real) = -quantile(d,p)
+cquantile(d::TDist, p::Real) = -quantile(d,p)
 
 function rand(d::TDist)
     z = randn()
