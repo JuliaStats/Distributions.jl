@@ -218,13 +218,13 @@ d = fit_mle(Normal, x, w; mu=μ)
 ss = suffstats(NormalKnownSigma(σ), x)
 @test isa(ss, Distributions.NormalKnownSigmaStats)
 @test ss.σ == σ
-@test_approx_eq ss.s sum(x)
+@test_approx_eq ss.sx sum(x)
 @test_approx_eq ss.tw n0
 
 ss = suffstats(NormalKnownSigma(σ), x, w)
 @test isa(ss, Distributions.NormalKnownSigmaStats)
 @test ss.σ == σ
-@test_approx_eq ss.s dot(x, w)
+@test_approx_eq ss.sx dot(x, w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit_mle(Normal, x; sigma=σ)

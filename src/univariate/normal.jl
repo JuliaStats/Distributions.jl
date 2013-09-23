@@ -185,7 +185,7 @@ end
 
 fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
 fit_mle(g::NormalKnownMu, ss::NormalKnownMuStats) = Normal(g.μ, sqrt(ss.s2 / ss.tw))
-fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.s / ss.tw, g.σ)
+fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, g.σ)
 
 # generic fit_mle methods
 
