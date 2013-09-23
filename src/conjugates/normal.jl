@@ -83,3 +83,48 @@ posterior(pri::(Float64, Gamma), G::Type{Normal}, x::Array, w::Array{Float64}) =
 
 complete(G::Type{Normal}, pri::(Float64, Gamma), τ::Float64) = Normal(pri[1], 1.0 / sqrt(τ))
 
+
+#### NormalInverseGamma on (μ, σ^2)
+
+function posterior_canon(prior::NormalInverseGamma, ss::NormalStats)
+    mu0 = prior.mu
+    v0 = prior.v0
+    shape0 = prior.shape
+    scale0 = prior.scale
+
+    # ss.tw contains the number of observations if weight wasn't used to
+    # compute the sufficient statistics.
+
+    vn_inv = 1./v0 + ss.tw
+    mu = (mu0/v0 + ss.s) / vn_inv  # ss.s = ss.tw*ss.m = n*xbar
+    shape = shape0 + 0.5*ss.tw
+    scale = scale0 + 0.5*ss.s2 + 0.5/(vn_inv*v0)*ss.tw*(ss.m-mu0).^2
+
+    return NormalInverseGamma(mu, 1./vn_inv, shape, scale)
+end
+
+complete(G::Type{Normal}, pri::NormalInverseGamma, t::(Float64, Float64)) = Normal(t[1], sqrt(t[2]))
+
+
+#### NormalGamma on (μ, σ^(-2))
+
+function posterior_canon(prior::NormalGamma, ss::NormalStats)
+    mu0 = prior.mu
+    nu0 = prior.nu
+    shape0 = prior.shape
+    rate0 = prior.rate
+
+    # ss.tw contains the number of observations if weight wasn't used to
+    # compute the sufficient statistics.
+
+    nu = nu0 + ss.tw
+    mu = (nu0*mu0 + ss.s) / nu
+    shape = shape0 + 0.5*ss.tw
+    rate = rate0 + 0.5*ss.s2 + 0.5*nu0/nu*ss.tw*(ss.m-mu0).^2
+
+    return NormalGamma(mu, nu, shape, rate)
+end
+
+complete(G::Type{Normal}, pri::NormalGamma, t::(Float64, Float64)) = Normal(t[1], 1. / sqrt(t[2]))
+
+

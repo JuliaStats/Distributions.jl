@@ -43,38 +43,3 @@ function rand(d::NormalGamma)
     mu = rand(Normal(d.mu, 1./(tau2*d.nu)))
     return mu, tau2
 end
-
-function posterior(prior::NormalGamma, ss::NormalStats)
-    mu0 = prior.mu
-    nu0 = prior.nu
-    shape0 = prior.shape
-    rate0 = prior.rate
-
-    # ss.tw contains the number of observations if weight wasn't used to
-    # compute the sufficient statistics.
-
-    nu = nu0 + ss.tw
-    mu = (nu0*mu0 + ss.s) / nu
-    shape = shape0 + 0.5*ss.tw
-    rate = rate0 + 0.5*ss.s2 + 0.5*nu0/nu*ss.tw*(ss.m-mu0).^2
-
-    return NormalGamma(mu, nu, shape, rate)
-end
-
-function posterior{T<:Real}(prior::NormalGamma, ::Type{Normal}, x::Array{T})
-    return posterior(prior, suffstats(Normal, x))
-end
-
-function posterior{T<:Real}(prior::NormalGamma, ::Type{Normal}, x::Array{T}, w::Array{Float64})
-    return posterior(prior, suffstats(Normal, x, w))
-end
-
-function posterior_sample{T<:Real}(prior::NormalGamma, ::Type{Normal}, x::Array{T})
-    mu, tau2 = rand(posterior(prior, suffstats(Normal, x)))
-    return Normal(mu, 1./sqrt(tau2))
-end
-
-function posterior_sample{T<:Real}(prior::NormalGamma, ::Type{Normal}, x::Array{T}, w::Array{Float64})
-    mu, tau2 = rand(posterior(prior, suffstats(Normal, x, w)))
-    return Normal(mu, 1./sqrt(tau2))
-end
