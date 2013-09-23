@@ -66,6 +66,27 @@ gmvnormal(μ::Vector{Float64}, σ::Vector{Float64}) = DiagNormal(μ, σ)
 gmvnormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, Σ)
 gmvnormal(Σ::Matrix{Float64}) = MultivariateNormal(Σ)
 
+## canonical forms
+
+immutable GenericMvNormalCanon{Prec<:AbstractPDMat}
+    h::Vector{Float64}   # potential vector, i.e. inv(Σ) * μ
+    J::Prec              # precision matrix, i.e. inv(Σ)
+end
+
+GenericMvNormalCanon{Prec<:AbstractPDMat}(h::Vector{Float64}, J::Prec) = GenericMvNormalCanon{Prec}(h, J)
+
+dim(cf::GenericMvNormalCanon) = length(cf.h)
+
+function Base.convert{C<:AbstractPDMat}(D::Type{GenericMultivariateNormal{C}}, cf::GenericMvNormalCanon{C})
+    Σ::C = inv(cf.J)
+    μ = Σ * cf.h
+    GenericMultivariateNormal(μ, Σ)
+end
+
+mean(cf::GenericMvNormalCanon) = cf.J \ cf.h
+mode(cf::GenericMvNormalCanon) = cf.J \ cf.h
+
+rand{C<:AbstractPDMat}(cf::GenericMvNormalCanon{C}) = rand(convert(GenericMultivariateNormal{C}, cf))
 
 # Basic statistics
 
