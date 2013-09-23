@@ -11,16 +11,19 @@ immutable HyperGeometric <: DiscreteUnivariateDistribution
     end
 end
 
-@_jl_dist_3p HyperGeometric hyper
-
 function insupport(d::HyperGeometric, x::Number)
     isinteger(x) && zero(x) <= x <= d.n && (d.n - d.nf) <= x <= d.ns
 end
 
+
 mean(d::HyperGeometric) = d.n * d.ns / (d.ns + d.nf)
+
+mode(d::HyperGeometric) = floor((d.n+1)*(d.ns+1)/(d.ns+d.nf+2))
 
 function var(d::HyperGeometric)
     N = d.ns + d.nf
     p = d.ns / N
     d.n * p * (1.0 - p) * (N - d.n) / (N - 1.0)
 end
+
+@_jl_dist_3p HyperGeometric hyper

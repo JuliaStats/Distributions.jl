@@ -52,9 +52,6 @@ function kurtosis(d::NegativeBinomial)
 end
 
 
-@_jl_dist_2p NegativeBinomial nbinom
-
-
 function pdf(d::NegativeBinomial, x::Real)
     if !insupport(d,x)
         return 0.0
@@ -82,6 +79,15 @@ function logpdf(d::NegativeBinomial, x::Real)
     x*logmxp1(n*p/x) + r*logmxp1(n*q/r) + 0.5*(log(r/(x*n))-log2π)
 end
 
+function cdf(d::NegativeBinomial, x::Real)
+    if x <= 0 return 0.0 end
+    return bratio(d.r, floor(x)+1.0, d.prob)
+end
+
+function ccdf(d::NegativeBinomial, x::Real)
+    if x <= 0 return 1.0 end
+    return bratio(floor(x)+1.0, d.r, 1.0-d.prob)
+end
 
 
 
@@ -93,4 +99,9 @@ end
 function cf(d::NegativeBinomial, t::Real)
     r, p = d.r, d.prob
     return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
+end
+
+function rand(d::NegativeBinomial)
+    lambda = rand(Gamma(d.r, (1-d.prob)/d.prob))
+    rand(Poisson(lambda))
 end

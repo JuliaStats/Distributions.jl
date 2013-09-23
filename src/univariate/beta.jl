@@ -16,6 +16,12 @@ function cdf(d::Beta, x::Real)
     return bratio(d.alpha, d.beta, x)
 end
 
+function ccdf(d::Beta, x::Real)
+    if x >= 1 return 0.0 end
+    if x <= 0 return 1.0 end
+    return bratio(d.beta, d.alpha, 1.0-x)
+end
+
 function entropy(d::Beta)
     o = lbeta(d.alpha, d.beta)
     o -= (d.alpha - 1.0) * digamma(d.alpha)
