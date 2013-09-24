@@ -9,13 +9,12 @@ immutable InverseGamma <: ContinuousUnivariateDistribution
     end
 end
 
+@continuous_distr_support InverseGamma 0.0 Inf
+
 _inv(d::InverseGamma) = Gamma(d.shape, 1.0 / d.scale)
 
 scale(d::InverseGamma) = d.scale
 rate(d::InverseGamma) = 1.0 / d.scale
-
-insupport(::InverseGamma, x::Real) = zero(x) <= x < Inf
-insupport(::Type{InverseGamma}, x::Real) = zero(x) <= x < Inf
 
 mean(d::InverseGamma) = d.shape > 1.0 ? d.scale / (d.shape - 1.0) : Inf
 var(d::InverseGamma) = d.shape > 2.0 ? abs2(d.scale) / (abs2(d.shape - 1.0) * (d.shape - 2.0)) : Inf

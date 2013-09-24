@@ -4,6 +4,8 @@
 immutable Cosine <: ContinuousUnivariateDistribution
 end
 
+@continuous_distr_support Cosine 0.0 1.0
+
 rand(d::Cosine) = asin(2.0 * rand() - 1.0)
 
 function cdf(d::Cosine, x::Real)
@@ -11,9 +13,6 @@ function cdf(d::Cosine, x::Real)
 end
 
 entropy(d::Cosine) = log(4.0 * pi) - 1.0
-
-insupport(::Cosine, x::Real) = zero(x) <= x <= one(x)
-insupport(::Type{Cosine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Cosine) = -1.5
 

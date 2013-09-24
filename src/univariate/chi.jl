@@ -6,6 +6,8 @@ immutable Chi <: ContinuousUnivariateDistribution
     end
 end
 
+@continuous_distr_support Chi 0.0 Inf
+
 cdf(d::Chi, x::Real) = cdf(Chisq(d.df),x^2)
 ccdf(d::Chi, x::Real) = ccdf(Chisq(d.df),x^2)
 logcdf(d::Chi, x::Real) = logcdf(Chisq(d.df),x^2)
@@ -17,9 +19,6 @@ invlogcdf(d::Chi,p::Real) = sqrt(invlogcdf(Chisq(d.df),p))
 invlogccdf(d::Chi,p::Real) = sqrt(invlogccdf(Chisq(d.df),p))
 
 mean(d::Chi) = √2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
-
-insupport(::Chi, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chi}, x::Real) = zero(x) <= x < Inf
 
 function mode(d::Chi)
     d.df >= 1.0 || error("Chi distribution has no mode when df < 1")

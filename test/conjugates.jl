@@ -23,7 +23,7 @@ function ccount(K, x, w)
 end
 
 
-# Beta - Bernoulli / Binomial
+# Beta - Bernoulli
 
 pri = Beta(1.0, 2.0)
 
@@ -46,18 +46,55 @@ f = fit_map(pri, Bernoulli, x, w)
 @test isa(f, Bernoulli)
 @test_approx_eq f.p1 mode(p)
 
+
+# posterior_rand & posterior_randmodel
+
+pri = Beta(1.0, 2.0)
+x = rand(Bernoulli(0.3), n)
+post = posterior(pri, Bernoulli, x)
+
+pv = posterior_rand(pri, Bernoulli, x)
+@test isa(pv, Float64)
+@test 0. <= pv <= 1.
+
+pv = posterior_rand(pri, Bernoulli, x, w)
+@test isa(pv, Float64)
+@test 0. <= pv <= 1.
+
+pm = posterior_randmodel(pri, Bernoulli, x)
+@test isa(pm, Bernoulli)
+@test 0. <= pm.p1 <= 1.
+
+pm = posterior_randmodel(pri, Bernoulli, x, w)
+@test isa(pm, Bernoulli)
+@test 0. <= pm.p1 <= 1.
+
+
+# Beta - Binomial
+
 x = rand(Binomial(10, 0.3), n)
-p = posterior(pri, Binomial, 10, x)
+p = posterior(pri, Binomial, (10, x))
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x)
 @test_approx_eq p.beta  pri.beta + (10n - sum(x))
 
-p = posterior(pri, Binomial, 10, x, w)
+f = fit_map(pri, Binomial, (10, x))
+@test isa(f, Binomial)
+@test f.size == 10
+@test_approx_eq f.prob mode(p)
+
+p = posterior(pri, Binomial, (10, x), w)
 @test isa(p, Beta)
 @test_approx_eq p.alpha pri.alpha + sum(x .* w)
 @test_approx_eq p.beta  pri.beta + (10 * sum(w) - sum(x .* w))
 
-# Dirichlet - Categorical / Multinomial
+f = fit_map(pri, Binomial, (10, x), w)
+@test isa(f, Binomial)
+@test f.size == 10
+@test_approx_eq f.prob mode(p)
+
+
+# Dirichlet - Categorical
 
 pri = Dirichlet([1., 2., 3.])
 
@@ -77,6 +114,9 @@ p = posterior(pri, Categorical, x, w)
 f = fit_map(pri, Categorical, x, w)
 @test isa(f, Categorical)
 @test_approx_eq f.prob mode(p)
+
+
+# Dirichlet - Multinomial
 
 x = rand(Multinomial(100, [0.2, 0.3, 0.5]), 1)
 p = posterior(pri, Multinomial, x)
@@ -100,7 +140,6 @@ p = posterior(pri, Multinomial, x, w)
 
 r = posterior_mode(pri, Multinomial, x, w)
 @test_approx_eq r mode(p)
-
 
 
 # Gamma - Exponential
@@ -127,66 +166,3 @@ f = fit_map(pri, Exponential, x, w)
 @test_approx_eq rate(f) mode(p)
 
 
-# Normal likelihood
-
-# known sigma
-
-pri = Normal(1.0, 5.0)
-
-x = rand(Normal(2.0, 3.0), n)
-p = posterior((pri, 3.0), Normal, x)
-@test isa(p, Normal)
-@test_approx_eq mean(p)  (mean(pri) / var(pri) + sum(x) / 9.0) / (1.0 / var(pri) + n / 9.0)
-@test_approx_eq var(p) inv(1.0 / var(pri) + n / 9.0)
-
-r = posterior_mode((pri, 3.0), Normal, x)
-@test_approx_eq r mode(p)
-
-f = fit_map((pri, 3.0), Normal, x)
-@test isa(f, Normal)
-@test f.μ == r
-@test f.σ == 3.0
-
-p = posterior((pri, 3.0), Normal, x, w)
-@test isa(p, Normal)
-@test_approx_eq mean(p)  (mean(pri) / var(pri) + dot(x, w) / 9.0) / (1.0 / var(pri) + sum(w) / 9.0)
-@test_approx_eq var(p) inv(1.0 / var(pri) + sum(w) / 9.0)
-
-r = posterior_mode((pri, 3.0), Normal, x, w)
-@test_approx_eq r mode(p)
-
-f = fit_map((pri, 3.0), Normal, x, w)
-@test isa(f, Normal)
-@test f.μ == r
-@test f.σ == 3.0
-
-# known mu
-
-pri = InverseGamma(1.5, 0.5) # β = 2.0
-
-x = rand(Normal(2.0, 3.0), n)
-p = posterior((2.0, pri), Normal, x)
-@test isa(p, InverseGamma)
-@test_approx_eq p.shape pri.shape + n / 2
-@test_approx_eq p.scale pri.scale + sum(abs2(x - 2.0)) / 2
-
-p = posterior((2.0, pri), Normal, x, w)
-@test isa(p, InverseGamma)
-@test_approx_eq p.shape pri.shape + sum(w) / 2
-@test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
-
-
-# posterior_sample
-pri = Beta(1.0, 2.0)
-x = rand(Bernoulli(0.3), n)
-p = posterior(pri, Bernoulli, x)
-ps = posterior_sample(p, Bernoulli)
-
-@test isa(ps, Bernoulli)
-@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
-@test zero(ps.p1) <= ps.p1 <= one(ps.p1)
-
-ps = posterior_sample(pri, Bernoulli, x)
-@test isa(ps, Bernoulli)
-@test zero(ps.p0) <= ps.p0 <= one(ps.p0)
-@test zero(ps.p1) <= ps.p1 <= one(ps.p1)

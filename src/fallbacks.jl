@@ -4,6 +4,42 @@
 #
 ##############################################################################
 
+# support handling
+
+isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
+hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
+hasfinitesupport(d::ContinuousUnivariateDistribution) = false
+
+insupport(d::Distribution, x) = false
+
+function insupport(d::UnivariateDistribution, X::Array)
+    for x in X; insupport(d, x) || return false; end
+    true
+end
+
+function insupport(t::DataType, X::Array)
+    for x in X; insupport(t, x) || return false; end
+    true
+end
+
+function insupport(d::MultivariateDistribution, X::Matrix)
+    for i in 1 : size(X, 2)
+        if !insupport(d, X[:, i])  # short-circuit is generally faster
+            return false
+        end
+    end
+    return true
+end
+
+function insupport(d::MatrixDistribution, X::Array)
+    for i in 1 : size(X, 3)
+        if !insupport(d, X[:, :, i])
+            return false
+        end
+    end
+    return true
+end
+
 # generic function to get number of samples
 
 nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)
@@ -110,40 +146,6 @@ function quantile(d::DiscreteUnivariateDistribution, α::Real)
     end
     return qc
 end
-
-#### insupport ####
-
-insupport(d::Distribution, x) = false
-
-function insupport(d::UnivariateDistribution, X::Array)
-    for x in X; insupport(d, x) || return false; end
-    true
-end
-
-function insupport(t::DataType, X::Array)
-    for x in X; insupport(t, x) || return false; end
-    true
-end
-
-function insupport(d::MultivariateDistribution, X::Matrix)
-    for i in 1 : size(X, 2)
-        if !insupport(d, X[:, i])  # short-circuit is generally faster
-            return false
-        end
-    end
-    return true
-end
-
-function insupport(d::MatrixDistribution, X::Array)
-    for i in 1 : size(X, 3)
-        if !insupport(d, X[:, :, i])
-            return false
-        end
-    end
-    return true
-end
-
-rand(d::UnivariateDistribution) = quantile(d, rand())
 
 #### log likelihood ####
 
@@ -303,36 +305,3 @@ fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix, w::Array) = fit_mle
 fit{D<:Distribution}(dt::Type{D}, x) = fit_mle(D, x)
 fit{D<:Distribution}(dt::Type{D}, args...) = fit_mle(D, args...)
 
-# Conjugates
-
-posterior{D<:Distribution}(pri::Distribution, G::Type{D}, x) = posterior(pri, suffstats(G, x))
-posterior(pri::Distribution, G::GenerativeFormulation, x) = posterior(pri, suffstats(G, x))
-
-posterior{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = posterior(pri, suffstats(G, x, w))
-posterior(pri::Distribution, G::GenerativeFormulation, x, w) = posterior(pri, suffstats(G, x, w))
-
-posterior_rand(pri::Distribution, s::SufficientStats) = rand(posterior(pri, s))
-posterior_rand{D<:Distribution}(pri::Distribution, G::Type{D}, x) = rand(posterior(pri, G, x))
-posterior_rand{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = rand(posterior(pri, G, x, w))
-posterior_rand(pri::Distribution, G::GenerativeFormulation, x) = rand(posterior(pri, G, x))
-posterior_rand(pri::Distribution, G::GenerativeFormulation, x, w) = rand(posterior(pri, G, x, w))
-
-posterior_rand!(r::Array, pri::Distribution, s::SufficientStats) = rand!(posterior(pri, s), r)
-posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::Type{D}, x) = rand!(posterior(pri, G, x), r)
-posterior_rand!{D<:Distribution}(r::Array, pri::Distribution, G::Type{D}, x, w) = rand!(posterior(pri, G, x, w), r)
-posterior_rand!(r::Array, pri::Distribution, G::GenerativeFormulation, x) = rand!(posterior(pri, G, x), r)
-posterior_rand!(r::Array, pri::Distribution, G::GenerativeFormulation, x, w) = rand!(posterior(pri, G, x, w), r)
-
-posterior_mode(pri::Distribution, s::SufficientStats) = mode(posterior(pri, s))
-posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x) = mode(posterior(pri, G, x))
-posterior_mode{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = mode(posterior(pri, G, x, w))
-posterior_mode(pri::Distribution, G::GenerativeFormulation, x) = mode(posterior(pri, G, x))
-posterior_mode(pri::Distribution, G::GenerativeFormulation, x, w) = mode(posterior(pri, G, x, w))
-
-posterior_make{D<:Distribution}(::Type{D}, θ) = D(θ) 
-fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x) = posterior_make(D, posterior_mode(pri, D, x))
-fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x, w) = posterior_make(D, posterior_mode(pri, D, x, w))
-
-posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x) = D(rand(posterior(pri, G, x))...)
-posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = D(rand(posterior(pri, G, x, w))...)
-posterior_sample{D<:Distribution,G<:Distribution}(post::D, ::Type{G}) = G(rand(post)...)

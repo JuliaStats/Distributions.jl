@@ -30,6 +30,11 @@ x = rand(d, 100)
 @test all(sum(x, 1) .== nt)
 @test insupport(d, x)
 
+x = rand(sampler(d))
+@test isa(x, Vector{Int})
+@test sum(x) == nt
+@test insupport(d, x)
+
 # logpdf
 
 x1 = [1, 6, 3]
@@ -45,10 +50,29 @@ for i in 1 : size(x, 2)
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
 end
 
+# suffstats
+
+d0 = d
+n0 = 100
+x = rand(d0, n0)
+w = rand(n0)
+
+ss = suffstats(Multinomial, x)
+@test isa(ss, Distributions.MultinomialStats)
+@test ss.n == nt
+@test ss.scnts == vec(sum(float64(x), 2))
+@test ss.tw == n0
+
+ss = suffstats(Multinomial, x, w)
+@test isa(ss, Distributions.MultinomialStats)
+@test ss.n == nt
+@test_approx_eq ss.scnts float64(x) * w
+@test_approx_eq ss.tw sum(w)
+
 # fit
 
-x = rand(d, 10^5)
-@test size(x) == (dim(d), 10^5)
+x = rand(d0, 10^5)
+@test size(x) == (dim(d0), 10^5)
 @test all(sum(x, 1) .== nt)
 
 r = fit(Multinomial, x)

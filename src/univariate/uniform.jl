@@ -10,8 +10,13 @@ end
 
 insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
+isupperbounded(::Union(Uniform, Type{Uniform})) = true
+islowerbounded(::Union(Uniform, Type{Uniform})) = true
+isbounded(::Union(Uniform, Type{Uniform})) = true
+
 min(d::Uniform) = d.a
 max(d::Uniform) = d.b
+
 
 mean(d::Uniform) = (d.a + d.b) / 2.0
 

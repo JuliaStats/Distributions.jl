@@ -6,8 +6,7 @@ immutable Chisq <: ContinuousUnivariateDistribution
     end
 end
 
-insupport(::Chisq, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Chisq}, x::Real) = zero(x) <= x < Inf
+@continuous_distr_support Chisq 0.0 Inf
 
 
 mean(d::Chisq) = d.df

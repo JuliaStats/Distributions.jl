@@ -6,8 +6,8 @@ immutable TDist <: ContinuousUnivariateDistribution
     end
 end
 
-insupport(::TDist, x::Real) = isfinite(x)
-insupport(::Type{TDist}, x::Real) = isfinite(x)
+@continuous_distr_support TDist -Inf Inf
+
 
 mean(d::TDist) = d.df > 1.0 ? 0.0 : NaN
 

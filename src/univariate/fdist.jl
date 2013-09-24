@@ -8,8 +8,7 @@ immutable FDist <: ContinuousUnivariateDistribution
     end
 end
 
-insupport(::FDist, x::Real) = zero(x) <= x < Inf
-insupport(::Type{FDist}, x::Real) = zero(x) <= x < Inf
+@continuous_distr_support FDist 0.0 Inf
 
 mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 

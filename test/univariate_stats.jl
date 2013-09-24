@@ -28,6 +28,7 @@ macro ignore_methoderror(ex)
         end
     end
 end
+
 distlist = [
           Arcsine(),
           Bernoulli(0.1),
@@ -107,6 +108,9 @@ distlist = [
           Normal(0.0, 1.0),
           Normal(-1.0, 10.0),
           Normal(1.0, 10.0),
+          NormalCanon(),
+          NormalCanon(-1.0, 0.5),
+          NormalCanon(2.0, 0.8),
           Pareto(),
           Pareto(5.0,2.0),
           Pareto(2.0,5.0),

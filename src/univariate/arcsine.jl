@@ -3,6 +3,8 @@
 immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
+@continuous_distr_support Arcsine 0.0 1.0
+
 function cdf(d::Arcsine, x::Real)
     x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : (2.0 / pi) * asin(sqrt(x)))
 end
@@ -10,9 +12,6 @@ end
 # entropy(d::Arcsine) = log(pi) + digamma(0.5) + eulergamma
 # calculated using higher-precision arithmetic 
 entropy(d::Arcsine) = -0.24156447527049044469
-
-insupport(d::Arcsine, x::Real) = zero(x) <= x <= one(x)
-insupport(::Type{Arcsine}, x::Real) = zero(x) <= x <= one(x)
 
 kurtosis(d::Arcsine) = -1.5
 
@@ -50,3 +49,4 @@ rand(d::Arcsine) = sin(rand() * pi / 2.0)^2
 skewness(d::Arcsine) = 0.0
 
 var(d::Arcsine) = 1.0 / 8.0
+

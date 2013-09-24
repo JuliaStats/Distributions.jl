@@ -8,6 +8,8 @@ end
 
 Exponential() = Exponential(1.0)
 
+@continuous_distr_support Exponential 0.0 Inf
+
 scale(d::Exponential) = d.scale
 rate(d::Exponential) = 1.0 / d.scale
 
@@ -24,9 +26,6 @@ invlogcdf(d::Exponential, lp::Real) = lp > zero(lp) ? NaN : -d.scale * log1mexp(
 invlogccdf(d::Exponential, lp::Real) = lp <= zero(lp) ? -d.scale * lp : NaN
 
 entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
-
-insupport(::Exponential, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Exponential}, x::Real) = zero(x) <= x < Inf
 
 kurtosis(d::Exponential) = 6.0
 
@@ -62,6 +61,18 @@ end
 skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
+
+### handling support
+
+isupperbounded(::Union(Exponential, Type{Exponential})) = false
+islowerbounded(::Union(Exponential, Type{Exponential})) = true
+isbounded(::Union(Exponential, Type{Exponential})) = false
+
+hasfinitesupport(::Union(Exponential, Type{Exponential})) = false
+min(::Union(Exponential, Type{Exponential})) = 0.0
+max(::Union(Exponential, Type{Exponential})) = Inf
+
+insupport(::Union(Exponential, Type{Exponential}), x::Real) = x >= 0.0
 
 
 ## Fit model

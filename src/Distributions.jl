@@ -36,6 +36,8 @@ export
     Chi,
     Chisq,
     Cosine,
+    DiagNormal,
+    DiagNormalCanon,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
@@ -47,12 +49,16 @@ export
     Exponential,
     FDist,
     Gamma,
+    GenericMvNormal,
+    GenericMvNormalCanon,
     Geometric,
     Gumbel,
     HyperGeometric,
     InverseWishart,
     InverseGamma,
-    InverseGaussian,    
+    InverseGaussian,  
+    IsoNormal,
+    IsoNormalCanon,  
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -64,12 +70,15 @@ export
     Multinomial,
     MultivariateNormal,
     MvNormal,
+    MvNormalCanon,
+    MvNormalKnownSigma,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
     NoncentralF,
     NoncentralT,
     Normal,
+    NormalCanon,
     NormalGamma,
     NormalInverseGamma,
     NormalInverseWishart,
@@ -89,12 +98,14 @@ export
 
     # methods
     binaryentropy, # entropy of distribution in bits
+    canonform,     # get canonical form of a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
+    complete,      # turn an incomplete formulation into a complete distribution
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
@@ -102,13 +113,19 @@ export
     fit_mle!,      # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
+    gmvnormal,     # a generic function to construct multivariate normal distributions
     insupport,     # predicate, is x in the support of the distribution?
+    invcov,        # get the inversed covariance
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
     isplatykurtic, # Is excess kurtosis > 0.0?
     isleptokurtic, # Is excess kurtosis < 0.0?
     ismesokurtic,  # Is excess kurtosis = 0.0?
     isprobvec,     # Is a probability vector?
+    isupperbounded,  
+    islowerbounded,
+    isbouned,
+    hasfinitesupport,
     kde,           # Kernel density estimator
     kurtosis,      # kurtosis of the distribution
     logccdf,       # ccdf returning log-probability
@@ -118,12 +135,12 @@ export
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
-    posterior,       # get posterior distribution given prior and observed data
+    posterior,        # get posterior distribution given prior and observed data
+    posterior_canon,  # get the canonical form of the posterior distribution
     posterior_mode,  # get the mode of posterior distribution
     posterior_rand,  # draw samples from the posterior distribution
     posterior_rand!, 
-    posterior_make,  # create a distribution/model from params obtained from posterior 
-    posterior_sample,
+    posterior_randmodel,
     scale,         # scale parameter of a distribution
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
@@ -186,7 +203,10 @@ typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discret
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
 abstract SufficientStats
-abstract GenerativeFormulation
+abstract IncompleteDistribution
+
+typealias DistributionType{D<:Distribution} Type{D}
+typealias IncompleteFormulation Union(DistributionType,IncompleteDistribution)
 
 
 #### Include files
@@ -201,6 +221,7 @@ include("specialfuns/log.jl")
 include("specialfuns/gammabeta.jl")
 include("tvpack.jl")
 include("utils.jl")
+include("sample.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
 
@@ -241,6 +262,7 @@ include(joinpath("univariate", "noncentralchisq.jl"))
 include(joinpath("univariate", "noncentralf.jl"))
 include(joinpath("univariate", "noncentralt.jl"))
 include(joinpath("univariate", "normal.jl"))
+include(joinpath("univariate", "normalcanon.jl"))
 include(joinpath("univariate", "pareto.jl"))
 include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "poisson_rand.jl"))
@@ -254,7 +276,8 @@ include(joinpath("univariate", "weibull.jl"))
 # Multivariate distributions
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
-include(joinpath("multivariate", "multivariatenormal.jl"))
+include(joinpath("multivariate", "mvnormal.jl"))
+include(joinpath("multivariate", "mvnormalcanon.jl"))
 include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
@@ -268,12 +291,6 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 # Mixture distributions
 include("mixturemodel.jl")
 
-# Sample w/ and w/o replacement
-include("sample.jl")
-
-# Link functions for GLM's
-#include("glmtools.jl")
-
 # REPL representations
 include("show.jl")
 
@@ -284,15 +301,20 @@ include("kde.jl")
 include("functionals.jl")
 
 # Posteriors and conjugate priors
-include("conjugates.jl")
-include(joinpath("conjugate-normal", "normalgamma.jl"))
-include(joinpath("conjugate-normal", "normalinversegamma.jl"))
-include(joinpath("conjugate-normal", "normalwishart.jl"))
-include(joinpath("conjugate-normal", "normalinversewishart.jl"))
-include(joinpath("conjugate-normal", "normalknowncov.jl"))
+include(joinpath("conjugates", "fallbacks.jl"))
+include(joinpath("conjugates", "beta_binom.jl"))
+include(joinpath("conjugates", "dirichlet_multi.jl"))
+include(joinpath("conjugates", "gamma_exp.jl"))
 
+include(joinpath("conjugates", "normalgamma.jl"))
+include(joinpath("conjugates", "normalinversegamma.jl"))
+include(joinpath("conjugates", "normalwishart.jl"))
+include(joinpath("conjugates", "normalinversewishart.jl"))
+include(joinpath("conjugates", "normal.jl"))
+include(joinpath("conjugates", "mvnormal.jl"))
+
+# other stuff
 include("qq.jl")
-
 include("estimators.jl")
 
 end # module

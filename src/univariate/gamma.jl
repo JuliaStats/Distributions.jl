@@ -1,18 +1,18 @@
 immutable Gamma <: ContinuousUnivariateDistribution
     shape::Float64
     scale::Float64
+
     function Gamma(sh::Real, sc::Real)
         sh > zero(sh) && sc > zero(sc) || 
             error("Both shape and scale must be positive")
         new(float64(sh), float64(sc))
     end
+
+    Gamma(sh::Real) = Gamma(sh, 1.0)
+    Gamma() = Gamma(1.0, 1.0)
 end
 
-Gamma(sh::Real) = Gamma(sh, 1.0)
-Gamma() = Gamma(1.0, 1.0) # Standard exponential distribution
-
-insupport(::Gamma, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Gamma}, x::Real) = zero(x) <= x < Inf
+@continuous_distr_support Gamma 0.0 Inf
 
 scale(d::Gamma) = d.scale
 rate(d::Gamma) = 1.0 / d.scale
@@ -52,37 +52,6 @@ mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
 cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
 
 
-# rand()
-#
-#  A simple method for generating gamma variables - Marsaglia and Tsang (2000)
-#  http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
-#  Page 369
-#  basic simulation loop for pre-computed d and c
-function randg2(d::Float64, c::Float64) 
-    while true
-        x = v = 0.0
-        while v <= 0.0
-            x = randn()
-            v = 1.0 + c * x
-        end
-        v = v^3
-        U = rand()
-        x2 = x^2
-        if U < 1.0 - 0.331 * x2^2 ||
-           log(U) < 0.5 * x2 + d * (1.0 - v + log(v))
-            return d * v
-        end
-    end
-end
-
-
-# sampling from Gamma(α, 1)
-function randg(α::Float64)
-    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
-    cpar = 1.0 / sqrt(9.0 * dpar)
-    randg2(dpar, cpar) * (α > 1.0 ? 1.0 : rand()^(1.0 / α))
-end
-
 rand(d::Gamma) = d.scale * randg(d.shape)
 
 function rand!(d::Gamma, A::Array{Float64})
@@ -103,10 +72,9 @@ function rand!(d::Gamma, A::Array{Float64})
 end
 
 
-
 ## Fit model
 
-immutable GammaStats
+immutable GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight

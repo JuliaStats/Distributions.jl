@@ -10,8 +10,8 @@ end
 LogNormal(ml::Real) = LogNormal(ml, 1.0)
 LogNormal() = LogNormal(0.0, 1.0)
 
-insupport(::LogNormal, x::Real) = zero(x) < x < Inf
-insupport(::Type{LogNormal}, x::Real) = zero(x) < x < Inf
+@continuous_distr_support LogNormal 0.0 Inf
+
 
 mean(d::LogNormal) = exp(d.meanlog + d.sdlog^2 / 2)
 

@@ -10,8 +10,7 @@ end
 Cauchy(l::Real) = Cauchy(l, 1.0)
 Cauchy() = Cauchy(0.0, 1.0)
 
-insupport(::Cauchy, x::Real) = isfinite(x)
-insupport(::Type{Cauchy}, x::Real) = isfinite(x)
+@continuous_distr_support Cauchy -Inf Inf
 
 mean(d::Cauchy) = NaN
 median(d::Cauchy) = d.location

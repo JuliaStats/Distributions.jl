@@ -5,8 +5,7 @@
 immutable Kolmogorov <: ContinuousUnivariateDistribution
 end
 
-insupport(::Kolmogorov, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Kolmogorov}, x::Real) = zero(x) <= x < Inf
+@continuous_distr_support Kolmogorov 0.0 Inf
 
 mean(d::Kolmogorov) = 0.5*√2π*log(2.0)
 var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2

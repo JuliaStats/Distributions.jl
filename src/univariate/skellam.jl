@@ -4,8 +4,15 @@ immutable Skellam <: DiscreteUnivariateDistribution
     Skellam(m1::Real, m2::Real) = new(float64(m1), float64(m2))
 end
 
-insupport(::Skellam, k::Real) = isinteger(k)
-insupport(::Type{Skellam}, k::Real) = isinteger(k)
+isupperbounded(::Union(Skellam, Type{Skellam})) = false
+islowerbounded(::Union(Skellam, Type{Skellam})) = false
+isbounded(::Union(Skellam, Type{Skellam})) = false
+
+min(::Union(Skellam, Type{Skellam})) = -Inf
+max(::Union(Skellam, Type{Skellam})) = Inf
+
+insupport(::Skellam, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{Skellam}, x::Real) = isinteger(x) && zero(x) <= x
 
 kurtosis(d::Skellam) = 1.0 / (d.mu1 + d.mu2)
 

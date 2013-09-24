@@ -10,7 +10,13 @@ end
 
 Pareto(scale::Real) = Pareto(scale, 1.0)
 
-insupport(d::Pareto, x::Number) = isreal(x) && isfinite(x) && x > d.scale
+islowerbounded(::Union(Pareto, Type{Pareto})) = true
+isupperbounded(::Union(Pareto, Type{Pareto})) = false
+isbounded(::Union(Pareto, Type{Pareto})) = false
+
+min(d::Pareto) = d.scale
+max(d::Pareto) = Inf
+insupport(d::Pareto, x::Number) = isfinite(x) && x >= d.scale
 
 mean(d::Pareto) = d.shape > 1.0 ? (d.scale * d.shape) / (d.shape - 1.0) : Inf
 

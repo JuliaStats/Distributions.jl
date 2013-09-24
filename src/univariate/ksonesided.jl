@@ -4,7 +4,7 @@ immutable KSOneSided <: ContinuousUnivariateDistribution
     n::Int
 end
 
-insupport(d::KSOneSided, x::Real) = 0.0 <= x <= 1.0
+@continuous_distr_support KSOneSided 0.0 1.0
 
 # formula of Birnbaum and Tingey (1951)
 function ccdf(d::KSOneSided,x::Real)

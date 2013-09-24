@@ -9,6 +9,8 @@ end
 
 Gumbel() = Gumbel(0.0, 1.0)
 
+@continuous_distr_support Gumbel -Inf Inf
+
 const DoubleExponential = Gumbel
 
 cdf(d::Gumbel, x::Real) = exp(-exp((d.mu - x) / d.beta))
@@ -16,9 +18,6 @@ cdf(d::Gumbel, x::Real) = exp(-exp((d.mu - x) / d.beta))
 logcdf(d::Gumbel, x::Real) = -exp((d.mu - x) / d.beta)
 
 entropy(d::Gumbel) = log(d.beta) - digamma(1.0) + 1.0
-
-insupport(::Gumbel, x::Real) = isfinite(x)
-insupport(::Type{Gumbel}, x::Real) = isfinite(x)
 
 kurtosis(d::Gumbel) = 2.4
 

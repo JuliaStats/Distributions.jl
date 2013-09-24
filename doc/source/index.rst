@@ -1,5 +1,5 @@
-Distributions Package (version 0.2)
-====================================
+Distributions Package (version 0.2.9)
+=======================================
 
 The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
 

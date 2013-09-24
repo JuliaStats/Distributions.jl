@@ -9,8 +9,7 @@ immutable Logistic <: ContinuousUnivariateDistribution
     Logistic() = new(0.0, 1.0)
 end
 
-insupport(::Logistic, x::Real) = isfinite(x)
-insupport(::Type{Logistic}, x::Real) = isfinite(x)
+@continuous_distr_support Logistic -Inf Inf
 
 
 mean(d::Logistic) = d.location

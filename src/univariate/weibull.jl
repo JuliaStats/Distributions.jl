@@ -9,9 +9,7 @@ end
 
 Weibull(sh::Real) = Weibull(sh, 1.0)
 
-insupport(::Weibull, x::Real) = zero(x) <= x < Inf
-insupport(::Type{Weibull}, x::Real) = zero(x) <= x < Inf
-
+@continuous_distr_support Weibull 0.0 Inf
 
 mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
 median(d::Weibull) = d.scale * log(2.0)^(1.0 / d.shape)

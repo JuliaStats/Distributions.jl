@@ -11,10 +11,18 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
+# handling support
+isupperbounded(d::Union(Binomial, Type{Binomial})) = true
+islowerbounded(d::Union(Binomial, Type{Binomial})) = true
+isbounded(d::Union(Binomial, Type{Binomial})) = true
+
+min(d::Union(Binomial, Type{Binomial})) = 0
+max(d::Binomial) = d.size
+support(d::Binomial) = 0:d.size
+
 insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
 
-min(d::Binomial) = 0
-max(d::Binomial) = d.size
+
 
 mean(d::Binomial) = d.size * d.prob
 
@@ -46,7 +54,6 @@ function entropy(d::Binomial; approx::Bool=false)
     end
     -s
 end
-
 
 # Based on:
 #   Catherine Loader (2000) "Fast and accurate computation of binomial probabilities"
@@ -86,7 +93,6 @@ function logpdf(d::Binomial, x::Real)
     x*logmxp1(n*p/x) + y*logmxp1(n*q/y) + 0.5*(log(n/(x*y))-log2π)
 end
 
-# pdf(d::Binomial, x::Real) = insupport(d,x) ? pdf(Beta(d.size - x + 1.0, x + 1.0), 1 - d.prob)::Float64/(d.size + 1) : 0.0
 
 function cdf(d::Binomial, x::Real)
     if x >= d.size return 1.0 end

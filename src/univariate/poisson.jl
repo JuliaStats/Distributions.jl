@@ -10,6 +10,15 @@ end
 insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
 
+isupperbounded(::Union(Poisson, Type{Poisson})) = false
+islowerbounded(::Union(Poisson, Type{Poisson})) = true
+isbounded(::Union(Poisson, Type{Poisson})) = false
+
+min(::Union(Poisson, Type{Poisson})) = 0
+max(::Union(Poisson, Type{Poisson})) = Inf
+
+
+
 mean(d::Poisson) = d.lambda
 mode(d::Poisson) = ifloor(d.lambda)
 modes(d::Poisson) = [mode(d)]
@@ -77,11 +86,27 @@ end
 
 
 
-function fit_mle(::Type{Poisson}, x::Array)
-    for i in 1:length(x)
-        if !insupport(Poisson(), x[i])
-            error("Poisson observations must be non-negative integers")
-        end
-    end
-    Poisson(mean(x))
+# model fitting
+
+immutable PoissonStats <: SufficientStats
+    sx::Float64   # (weighted) sum of x
+    tw::Float64   # total sample weight
 end
+
+suffstats(::Type{Poisson}, x::Array) = PoissonStats(float64(sum(x)), float64(length(x)))
+
+function suffstats(::Type{Poisson}, x::Array, w::Array{Float64})
+    n = length(x)
+    n == length(w) || throw(ArgumentError("Inconsistent array lengths."))
+    sx = 0.
+    tw = 0.
+    for i = 1 : n
+        @inbounds wi = w[i]
+        @inbounds sx += x[i] * wi
+        tw += wi
+    end
+    PoissonStats(sx, tw)
+end
+
+fit_mle(::Type{Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
+

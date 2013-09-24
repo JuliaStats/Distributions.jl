@@ -10,8 +10,7 @@ end
 
 InverseGaussian() = InverseGaussian(1.0, 1.0)
 
-insupport(::InverseGaussian, x::Real) = zero(x) <= x < Inf
-insupport(::Type{InverseGaussian}, x::Real) = zero(x) <= x < Inf
+@continuous_distr_support InverseGaussian 0.0 Inf
 
 mean(d::InverseGaussian) = d.mu
 mode(d::InverseGaussian) = (r=d.mu/d.lambda; d.mu*(sqrt(1.0+2.25*r*r)-1.5*r))

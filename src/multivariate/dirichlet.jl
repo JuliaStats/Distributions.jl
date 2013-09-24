@@ -8,9 +8,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
         lmnB::Float64 = 0.0        
         for i in 1:length(alpha)
             ai = alpha[i]
-            if ai <= 0. 
-                throw(ArgumentError("alpha must be a positive vector."))
-            end
+            ai > 0 || throw(ArgumentError("alpha must be a positive vector."))
             alpha0 += ai
             lmnB += lgamma(ai)
         end
@@ -26,6 +24,16 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
     Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, float64(alpha))
 end
 
+immutable DirichletCanon
+    alpha::Vector{Float64}
+end
+
+dim(d::DirichletCanon) = length(d.alpha)
+Base.convert(::Type{Dirichlet}, cf::DirichletCanon) = Dirichlet(cf.alpha)
+
+
+# Properties
+
 dim(d::Dirichlet) = length(d.alpha)
 
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
@@ -38,9 +46,10 @@ function var(d::Dirichlet)
     k = length(α)
     v = Array(Float64, k)
     for i = 1:k
-        v[i] = α[i] * (α0 - α[i]) * c
+        @inbounds αi = α[i]
+        @inbounds v[i] = αi * (α0 - αi) * c
     end
-    v
+    return v
 end
 
 function cov(d::Dirichlet)
@@ -55,17 +64,15 @@ function cov(d::Dirichlet)
         αj = α[j]
         αjc = αj * c
         for i = 1:j-1
-            C[i,j] = - α[i] * αjc
+            @inbounds C[i,j] = - α[i] * αjc
         end
-        C[j,j] = αj * (α0 - αj) * c
+        @inbounds C[j,j] = αj * (α0 - αj) * c
     end
 
-    for j = 1:k-1
-        for i = j+1:k
-            C[i,j] = C[j,i]
-        end
+    for j = 1:k-1, i = j+1:k
+        @inbounds C[i,j] = C[j,i]
     end
-    C
+    return C
 end
 
 function entropy(d::Dirichlet)
@@ -75,7 +82,8 @@ function entropy(d::Dirichlet)
 
     en = d.lmnB + (α0 - k) * digamma(α0)
     for j in 1:k
-        en -= (α[j] - 1.0) * digamma(α[j])
+        @inbounds αj = α[j]
+        en -= (αj - 1.0) * digamma(αj)
     end
     return en
 end
@@ -85,18 +93,24 @@ function dirichlet_mode!(r::Vector{Float64}, α::Vector{Float64}, α0::Float64)
     k = length(α)
     s = α0 - k
     for i = 1:k
-        @inbounds ai = α[i]
-        if ai <= 1.
+        @inbounds αi = α[i]
+        if αi <= 1.
             error("Dirichlet has a mode only when alpha[i] > 1 for all i" )
         end
-        @inbounds r[i] = (ai - 1.0) / s
+        @inbounds r[i] = (αi - 1.0) / s
     end
-    r
+    return r
 end
 
-mode(d::Dirichlet) = dirichlet_mode!(zeros(dim(d)), d.alpha, d.alpha0)
+dirichlet_mode(α::Vector{Float64}, α0::Float64) = dirichlet_mode!(Array(Float64, length(α)), α, α0)
+
+mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
+mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
+
 modes(d::Dirichlet) = [mode(d)]
 
+
+# Evaluation
 
 function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     n = length(x)
@@ -153,19 +167,22 @@ function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
     r
 end
 
-function rand!(d::Dirichlet, x::Vector)
+
+# sampling
+
+function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
     s = 0.0
     n = length(x)
     α = d.alpha
     for i in 1:n
-        s += (x[i] = randg(α[i]))
+        @inbounds s += (x[i] = randg(α[i]))
     end
     multiply!(x, inv(s)) # this returns x
 end
 
-rand(d::Dirichlet) = rand!(d, Array(Float64, dim(d)))
+rand(d::Union(Dirichlet,DirichletCanon)) = rand!(d, Array(Float64, dim(d)))
 
-function rand!(d::Dirichlet, X::Matrix)
+function rand!(d::Union(Dirichlet,DirichletCanon), X::Matrix)
     k = size(X, 1)
     n = size(X, 2)
     if k != dim(d)
@@ -176,11 +193,11 @@ function rand!(d::Dirichlet, X::Matrix)
     for j = 1:n
         s = 0.
         for i = 1:k
-            s += (X[i,j] = randg(α[i]))
+            @inbounds s += (X[i,j] = randg(α[i]))
         end
         inv_s = 1.0 / s
         for i = 1:k
-            X[i,j] *= inv_s
+            @inbounds X[i,j] *= inv_s
         end
     end
 
@@ -314,9 +331,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     # This function directly overrides α
 
     K = length(elogp)
-    if length(α) != K
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
+    length(α) == K || throw(ArgumentError("Inconsistent argument dimensions."))
 
     g = Array(Float64, K)
     iq = Array(Float64, K)
@@ -381,19 +396,21 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 end
 
 
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; maxiter=25, tol=1.0e-12)
-    α = dirichlet_mle_init(P)
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; 
+    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
+
+    α = isempty(init) ? dirichlet_mle_init(P) : init
     elogp = mean_logp(suffstats(Dirichlet, P))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; maxiter=25, tol=1.0e-12)
-    n = size(P, 2)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
+function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; 
+    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
-    α = dirichlet_mle_init(P, w)
+    n = size(P, 2)
+    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+
+    α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end

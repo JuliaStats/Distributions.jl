@@ -10,16 +10,14 @@ tests = [
 	"multinomial",
 	"dirichlet", 
 	"mvnormal",
-	"conjugates",
 	"kolmogorov",
 	"edgeworth",
 	"matrix",
 	"vonmisesfisher",
-    "conjugate-normal/normalgamma",
-    "conjugate-normal/normalinversegamma",
-    "conjugate-normal/normalwishart",
-    "conjugate-normal/normalinversewishart",
-    "conjugate-normal/normalknowncov"]
+	"compoundvariate",
+	"conjugates",
+    "conjugates_normal",
+    "conjugates_mvnormal"]
 
 println("Running tests:")
 

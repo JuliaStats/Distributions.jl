@@ -7,13 +7,12 @@ immutable Beta <: ContinuousUnivariateDistribution
     end
 end
 
+### handling support
+
+@continuous_distr_support Beta 0.0 1.0
+
 Beta(a::Real) = Beta(a, a) # symmetric in [0, 1]
 Beta() = Beta(1.0) # uniform
-
-
-insupport(::Beta, x::Real) = zero(x) < x < one(x)
-insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
-
 
 mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 
@@ -71,19 +70,23 @@ end
 
 
 function rand(d::Beta)
-    u = rand(Gamma(d.alpha))
-    u / (u + rand(Gamma(d.beta)))
-end
-
-# TODO: Don't create temporaries here
-function rand(d::Beta, dims::Dims)
-    u = rand(Gamma(d.alpha), dims)
-    return u ./ (u + rand(Gamma(d.beta), dims))
+    u = randg(d.alpha)
+    u / (u + randg(d.beta))
 end
 
 function rand!(d::Beta, A::Array{Float64})
-    for i in 1:length(A)
-        A[i] = rand(d)
+    α = d.alpha
+    β = d.beta
+
+    da = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
+    ca = 1.0 / sqrt(9.0 * da)
+
+    db = (β <= 1.0 ? β + 1.0 : β) - 1.0 / 3.0
+    cb = 1.0 / sqrt(9.0 * db)
+
+    for i = 1:length(A)
+        u = randg2(da, ca)
+        A[i] = u / (u + randg2(db, cb))
     end
     A
 end
