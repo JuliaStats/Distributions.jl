@@ -37,6 +37,7 @@ export
     Chisq,
     Cosine,
     DiagNormal,
+    DiagNormalCanon,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
@@ -56,7 +57,8 @@ export
     InverseWishart,
     InverseGamma,
     InverseGaussian,  
-    IsoNormal,  
+    IsoNormal,
+    IsoNormalCanon,  
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -68,6 +70,7 @@ export
     Multinomial,
     MultivariateNormal,
     MvNormal,
+    MvNormalCanon,
     MvNormalKnownSigma,
     NegativeBinomial,
     NoncentralBeta,
@@ -112,6 +115,7 @@ export
     freecumulant,  # free cumulants of distribution
     gmvnormal,     # a generic function to construct multivariate normal distributions
     insupport,     # predicate, is x in the support of the distribution?
+    invcov,        # get the inversed covariance
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
     isplatykurtic, # Is excess kurtosis > 0.0?

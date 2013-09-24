@@ -26,7 +26,7 @@ function GenericMvNormalCanon{P<:AbstractPDMat}(μ::Vector{Float64}, h::Vector{F
 end
 
 function GenericMvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P, zmean::Bool)
-	μ = zmean ? zeros(length(h)) : J \ h
+	μ = zmean ? zeros(length(h)) : (J \ h)
 	GenericMvNormalCanon{P}(μ, h, J, zmean)
 end
 
@@ -34,7 +34,10 @@ function GenericMvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P)
 	GenericMvNormalCanon(h, J, allzeros(h))
 end
 
-GenericMvNormalCanon{P<:AbstractPDMat}(J::P) = GenericMvNormalCanon{P}(J)
+function GenericMvNormalCanon{P<:AbstractPDMat}(J::P)
+    d = dim(J)
+    GenericMvNormalCanon{P}(zeros(d), zeros(d), J, true)
+end
 
 ## type aliases and convenient constructors
 
@@ -105,14 +108,6 @@ end
 
 
 # Sampling (for GenericMvNormal)
-
-# helper routines (unwhiten w.r.t. inv(J))
-
-unwhiten_winv!(J::ScalMat,  z::VecOrMat{Float64}) = whiten!(J, z)
-unwhiten_winv!(J::PDiagMat, z::VecOrMat{Float64}) = whiten!(J, z)
-unwhiten_winv!(J::PDMat, x::VecOrMat{Float64}) = (Base.LinAlg.LAPACK.trtrs!('U', 'N', 'N', J.chol.UL, x); x)
-
-# sampling functions
 
 function rand!(d::GenericMvNormalCanon, x::Vector{Float64})
     unwhiten_winv!(d.J, randn!(x))
