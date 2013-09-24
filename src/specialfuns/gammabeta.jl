@@ -2125,7 +2125,7 @@ function bpser(a::Real, b::Real, x::Real, precision::Real)
 #-----------------------------------------------------------------------
     a0 = min(a,b)
     if (a0 >= 1.0) # go to 10
-         z = a*log(x) - dbetln(a,b)
+         z = a*log(x) - lbeta(a,b)
          bpserval = exp(z)/a
          # go to 70
     else
@@ -2174,7 +2174,7 @@ function bpser(a::Real, b::Real, x::Real, precision::Real)
 
 #            PROCEDURE FOR A0 .LT. 1 AND B0 .GE. 8
 
-            u = lgamma1p(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + lgammadiv(a0,b0)
             z = a*log(x) - u
             bpserval = (a0/a)*exp(z)
         end
@@ -2356,7 +2356,7 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
 
         z = a*lnx + b*lny
         if (a0 >= 1.0) # go to 30
-            z -= dbetln(a,b)
+            z -= lbeta(a,b)
             return exp(z)
         end
             
@@ -2410,7 +2410,7 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
         else
 
 #                   ALGORITHM FOR B0 .GE. 8
-            u = lgamma1p(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + lgammadiv(a0,b0)
             return a0*exp(z - u)
         end
     end
@@ -2442,7 +2442,7 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
         v = e - log(y/y0)
     end
     z = exp(-(a*u + b*v))
-    return cnst*sqrt(b*x0)*z*exp(-dbcorr(a,b))
+    return cnst*sqrt(b*x0)*z*exp(-bcorr(a,b))
 end
 
 function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
@@ -2474,7 +2474,7 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
 
         z = a*lnx + b*lny
         if (a0 >= 1.0) # go to 30
-            z -= dbetln(a,b)
+            z -= lbeta(a,b)
             return desum(mu, z)
         end
             
@@ -2529,7 +2529,7 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
 
 #                   ALGORITHM FOR B0 .GE. 8
 
-            u = lgamma1p(a0) + dlgdiv(a0,b0)
+            u = lgamma1p(a0) + lgammadiv(a0,b0)
             return a0*exp(mu + z - u)
         end
     end
@@ -2561,7 +2561,7 @@ function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)
         v = e - log(y/y0)
     end
     z = exp(mu - (a*u + b*v))
-    return cnst*sqrt(b*x0)*z*exp(-dbcorr(a,b))
+    return cnst*sqrt(b*x0)*z*exp(-bcorr(a,b))
 end 
 
 function bgrat(a::Real, b::Real, x::Real, y::Real, w::Real, precision::Real)
@@ -2593,7 +2593,7 @@ function bgrat(a::Real, b::Real, x::Real, y::Real, w::Real, precision::Real)
 
     r = b*(1.0 + rgamma1pm1(b))*z^b
     r *= exp(a*lnx)*exp(0.5*bm1*lnx) 
-    u = dlgdiv(b,a) + b*log(nu)
+    u = lgammadiv(b,a) + b*log(nu)
     u = r*exp(-u) 
     if (u == 0.0) return w end # How should errors be handled? They are ognored in the original progam. ("Cannot calculate expansion")
     p,q = grat1(b,z,r,precision)
@@ -2820,15 +2820,15 @@ function basym(a::Real, b::Real, lambda::Real, precision::Real)
         if ((abs(t0) + abs(t1)) <= precision*sumval) break end
     end
 
-    u = exp(-dbcorr(a,b))
+    u = exp(-bcorr(a,b))
     return e0*t*u*sumval
 end
 
-
-function dbcorr(a0::Real, b0::Real)
+bcorr(a0,b0) = bcorr(promote(float(a0),float(b0))...)
+function bcorr(a0::Float64, b0::Float64)
 #-----------------------------------------------------------------------
 #
-#     EVALUATION OF DEL(A) + DEL(B0) - DEL(A) + B0) WHERE
+#     EVALUATION OF DEL(A0) + DEL(B0) - DEL(A0 + B0) WHERE
 #     LN(GAMMA(X)) = (X - 0.5)*LN(X) - X + 0.5*LN(2*PI) + DEL(X).
 #     IT IS ASSUMED THAT A0 .GE. 10 AND B0 .GE. 10.
 #
@@ -2888,15 +2888,28 @@ function dbcorr(a0::Real, b0::Real)
 #                    COMPUTE  DEL(A) + W
 #
     t = (10.0/a)^2
-    z = e[15]
-    for j = 1:14
-        k = 15 - j
-        z = t*z + e[k]
-    end
+    z = @horner(t,
+                .833333333333333333333333333333e-01,
+                -.277777777777777777777777752282e-04,
+                .793650793650793650791732130419e-07,
+                -.595238095238095232389839236182e-09,
+                .841750841750832853294451671990e-11,
+                -.191752691751854612334149171243e-12,
+                .641025640510325475730918472625e-14,
+                -.295506514125338232839867823991e-15,
+                .179643716359402238723287696452e-16,
+                -.139228964661627791231203060395e-17,
+                .133802855014020915603275339093e-18,
+                -.154246009867966094273710216533e-19,
+                .197701992980957427278370133333e-20,
+                -.234065664793997056856992426667e-21,
+                .171348014966398575409015466667e-22)
     return z/a + w
 end
 
-function dlgdiv(a::Real, b::Real)
+# NSWC DLGDIV
+lgammadiv(a, b) = lgammadiv(promote(float(a),float(b))...)
+function lgammadiv(a::Float64, b::Float64)
 #-----------------------------------------------------------------------
 #
 #     COMPUTATION OF LN(GAMMA(B)/GAMMA(A+B)) FOR B .GE. 10
@@ -2972,8 +2985,8 @@ function dlgdiv(a::Real, b::Real)
     return (w - u) - v
 end
 
-
-function dbetln(a0::Real, b0::Real)
+# override lbeta in Base
+function lbeta(a0::Real, b0::Real)
 #-----------------------------------------------------------------------
 #     EVALUATION OF THE LOGARITHM OF THE BETA FUNCTION
 #-----------------------------------------------------------------------
@@ -2981,12 +2994,8 @@ function dbetln(a0::Real, b0::Real)
 #     DOUBLE PRECISION A, B, C, E, H, SN, U, V, W, Z
 #     DOUBLE PRECISION DBCORR, DGAMLN, DGSMLN, DLGDIV, DLNREL
 #--------------------------
-#     E = 0.5*LN(2*PI)
-#--------------------------
-    e = .9189385332046727417803297364056
-#--------------------------
-    a = min(a0,b0)
-    b = max(a0,b0)
+    a = float(min(a0,b0))
+    b = float(max(a0,b0))
     if a < 10.0 # go to 60
         if a < 1.0 # go to 20
 #-----------------------------------------------------------------------
@@ -2995,75 +3004,75 @@ function dbetln(a0::Real, b0::Real)
             if b < 10.0 # go to 10
                 return lgamma(a) + (lgamma(b) - lgamma(a + b))
             else
-                return lgamma(a) + dlgdiv(a,b)
+                return lgamma(a) + lgammadiv(a,b)
             end
         end
 #-----------------------------------------------------------------------
 #               PROCEDURE WHEN 1 .LE. A .LT. 10
 #-----------------------------------------------------------------------
-        while true
-            if a <= 2.0 # go to 30
-                if b <= 2.0 # go to 21
-                    return lgamma(a) + lgamma(b) - dgsmln(a,b)
-                end
-                w = 0.0
-                if b < 10.0 break end # go to 40
-                return lgamma(a) + dlgdiv(a,b)
+
+        if a <= 2.0 # go to 30
+            if b <= 2.0 # go to 21
+                return lgamma(a) + lgamma(b) - lgammasum(a,b)
+            elseif b >= 10.0 
+                return lgamma(a) + lgammadiv(a,b)
             end
-#
-#               REDUCTION OF A WHEN B .LE. 1000
-#
-            if b > 1.0e3 # go to 50
+
+            w = zero(a)
+        elseif b > 1.0e3 # go to 50
 #
 #               REDUCTION OF A WHEN B .GT. 1000
 #
-                n = itrunc(a - 1.0)
-                w = 1.0
-                for i = 1:n
-                    a -= 1.0
-                    w *= a/(1.0 + a/b)
-                end
-                sn = n
-                return (log(w) - sn*log(b)) + (lgamma(a) + dlgdiv(a,b))
-            end
-
-            n = itrunc(a - 1.0)
-            w = 1.0
+            n = itrunc(a - one(a))
+            w = one(a)
             for i = 1:n
-                a -= 1.0
+                a -= one(a)
+                w *= a/(one(a) + a/b)
+            end
+            sn = n
+            return (log(w) - sn*log(b)) + (lgamma(a) + lgammadiv(a,b))
+        else
+            n = itrunc(a - one(a))
+            w = one(a)
+            for i = 1:n
+                a -= one(a)
                 h = a/b
-                w *= h/(1.0 + h)
+                w *= h/(one(h) + h)
             end
             w = log(w)
-            if b < 10.0 break end # go to 40
-            return w + lgamma(a) + dlgdiv(a,b)
+            if b >= 10.0
+                return w + lgamma(a) + lgammadiv(a,b)
+            end
         end
 #
 #                REDUCTION OF B WHEN B .LT. 10
 #
-        n = b - 1.0
-        z = 1.0
+        n = b - one(b)
+        z = one(b)
         for i = 1:n
-            b -= 1.0
+            b -= one(b)
             z *= b/(a + b)
         end
-        return w + log(z) + (lgamma(a) + (lgamma(b) - dgsmln(a,b)))
+        return w + log(z) + (lgamma(a) + (lgamma(b) - lgammasum(a,b)))
     end
 #-----------------------------------------------------------------------
 #                  PROCEDURE WHEN A .GE. 10
 #-----------------------------------------------------------------------
-    w = dbcorr(a,b)
+    w = bcorr(a,b)
     h = a/b
-    c = h/(1.0 + h)
-    u = -(a - 0.50)*log(c)
+    c = h/(one(h) + h)
+    u = -(a - oftype(a,0.50))*log(c)
     v = b*log1p(h)
     if u > v # go to 61
-        return (((-0.5*log(b) + e) + w) - v) - u
+        return ((oftype(a,0.50)*(log2π-log(b)) + w) - v) - u
     end
-    return (((-0.5*log(b) + e) + w) - u) - v
+    return ((oftype(a,0.50)*(log2π-log(b)) + w) - u) - v
 end
 
-function dgsmln(a::Real, b::Real)
+
+
+# NSWC GSUMLN / DGSMLN
+function lgammasum(a::Real, b::Real)
 #-----------------------------------------------------------------------
 #          EVALUATION OF THE FUNCTION LN(GAMMA(A + B))
 #          FOR 1 .LE. A .LE. 2  AND  1 .LE. B .LE. 2
@@ -3071,14 +3080,14 @@ function dgsmln(a::Real, b::Real)
 #     DOUBLE PRECISION A, B, X
 #     DOUBLE PRECISION DGMLN1, DLNREL
 
-    x = (a - 1.0) + (b - 1.0)
+    x = (a - one(a)) + (b - one(b))
     if x <= 0.50 # go to 10
-        return lgamma1p(1.0 + x)
+        return lgamma1p(one(x) + x)
     end
     if x < 1.50 # go to 20
         return lgamma1p(x) + log1p(x)
     end
-    return lgamma1p(x - 1.0) + log(x*(1.0 + x))
+    return lgamma1p(x - one(x)) + log(x*(one(x) + x))
 end
 
 function desum(mu::Integer, x::Real)
@@ -3203,9 +3212,9 @@ function rgamma1pm1(a::Float32)
     t = a
     d = a - 0.5f0
     if d > 0.0f0 t = d - 0.5f0 end
-    if t == 0 # 30,10,20
+    if t == 0f0 # 30,10,20
         return 0.0f0
-    elseif t < 0
+    elseif t < 0f0
         top = @horner(t, .577215664901533f+00, 
                         -.409078193005776f+00, 
                         -.230975380857675f+00, 
