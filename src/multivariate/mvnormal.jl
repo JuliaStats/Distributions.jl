@@ -45,8 +45,8 @@ DiagNormal(μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvNormal(μ, PDiag
 
 IsoNormal(μ::Vector{Float64}, C::ScalMat) = GenericMvNormal(μ, C)
 IsoNormal(C::ScalMat) = GenericMvNormal(C)
-IsoNormal(μ::Vector{Float64}, σ::Float64) = GenericMvNormal(μ, ScalMat(length(μ), abs2(σ)))
-IsoNormal(d::Int, σ::Float64) = GenericMvNormal(ScalMat(d, abs2(σ)))
+IsoNormal(μ::Vector{Float64}, σ::Real) = GenericMvNormal(μ, ScalMat(length(μ), abs2(float64(σ))))
+IsoNormal(d::Int, σ::Real) = GenericMvNormal(ScalMat(d, abs2(float64(σ))))
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
@@ -55,7 +55,7 @@ const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 gmvnormal(μ::Vector{Float64}, C::AbstractPDMat) = GenericMvNormal(μ, C)
 gmvnormal(C::AbstractPDMat) = GenericMvNormal(C)
 
-gmvnormal(μ::Vector{Float64}, σ::Float64) = IsoNormal(μ, σ)
+gmvnormal(μ::Vector{Float64}, σ::Real) = IsoNormal(μ, float64(σ))
 gmvnormal(d::Int, σ::Float64) = IsoNormal(d, σ)
 gmvnormal(μ::Vector{Float64}, σ::Vector{Float64}) = DiagNormal(μ, σ)
 gmvnormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, Σ)
