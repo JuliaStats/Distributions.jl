@@ -26,7 +26,10 @@ distlist = [
     Binomial(1, 0.5),
     Binomial(100, 0.1),
     Binomial(100, 0.9),
-    Binomial(10000, 0.03)]
+    Binomial(10000, 0.03),
+    HyperGeometric(10, 10, 3),
+    HyperGeometric(50, 80, 3),
+    HyperGeometric(50, 80, 60)]
 
 if length(ARGS) > 0
     newdistlist = {}
@@ -124,7 +127,7 @@ for d in distlist
         @test_approx_eq_eps exp(lc[i]) c[i] 1.0e-12
         @test_approx_eq_eps exp(lcc[i]) cc[i] 1.0e-12
 
-        if !isa(d, Binomial)
+        if !isa(d, Binomial) && p[i] > 1.1e-8
             @test quantile(d, c[i] - 1.0e-8) == x[i]
             @test cquantile(d, cc[i] + 1.0e-8) == x[i]
             @test invlogcdf(d, lc[i] - 1.0e-8) == x[i]
@@ -162,7 +165,7 @@ for d in distlist
     @test_approx_eq mean(d)     xmean
     @test_approx_eq var(d)      xvar
     @test_approx_eq std(d)      xstd
-    @test_approx_eq skewness(d) xskew
+    @test_approx_eq_eps skewness(d) xskew max(1000eps(xskew),100eps())
     @test_approx_eq kurtosis(d) xkurt
     @test_approx_eq entropy(d)  xentropy
 
