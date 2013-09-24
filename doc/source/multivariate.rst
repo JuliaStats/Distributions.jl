@@ -31,6 +31,10 @@ Computation of statistics
 
     Return the correlation matrix of distribution d.
 
+.. function:: entropy(d)
+
+    Return the entropy of distribution d. 
+
 
 Probability evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,6 +83,8 @@ Sampling
     Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.     
 
 
+**Node:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
+
 
 Multinomial Distribution
 ---------------------------
@@ -96,6 +102,9 @@ The probability mass function is given by
 
     Multinomial(n, p)   # Multinomial distribution for n trials with probability vector p
 
+    Multinomial(n, k)   # Multinomial distribution for n trials with equal probabilities 
+                        # over 1:k
+
 
 Multivariate Normal Distribution
 ----------------------------------
@@ -108,33 +117,148 @@ The *multivariate normal distribution* is a multidimensional generalization of t
     \exp \left( - \frac{1}{2} (x - \mu)^T \Sigma^{-1} (x - \mu) \right)
 
 
-.. code-block:: julia
+Three different types of covariances matrices are usually employed in practice:
 
-    # Let sig be a scalar
-    MultivariateNormal(mu, sig)     # Multivariate normal distribution 
-                                    # with mean mu and covariance sig^2 * I
+* *Full covariance matrix*
+* *Diagonal covariance matrix*
+* *Isotropic covariance matrix*: a special diagonal matrix of which all diagonal elements are the same, i.e.: :math:`\sigma^2 * I`.
 
-    # Let v be a vector
-    MultivariateNormal(mu, v)       # Multivariate normal distribution
-                                    # with mean mu and covariance diagm(v)
-
-    # Let C be a positive definite matrix
-    MultivariateNormal(mu, C)       # Multivariate normal distribution
-                                    # with mean mu and covariance C
-
-To save some typing, we introduce the name ``MvNormal`` as an alias of ``MultivariateNormal``. One can use ``MvNormal`` in the place of ``MultivariateNormal`` (*e.g.* ``MvNormal(mu, C)``.)
-
-
-The MultivariateNormal type and specialized covariance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-*MultivariateNormal* is a parameteric type declared as below, which takes ``Cov``, the type of the covariance, as an argument, thus enables specialized handling of covariance matrices of different structures.
+We use three different types to respectively represent multivariate normal distributions of these covariance structures: ``MvNormal``, ``DiagNormal``, and ``IsoNormal``. Internally, these types leverage the positive definite matrix types (``PDMat``, ``PDiagMat``, and ``ScalMat``) to represent the covariance. These matrix types are provided in the package *NumericExtensions.jl* for the purpose of handling postive definite matrices of different structures efficiently (see `related docs <http://lindahua.github.io/NumericExtensions.jl/pdmat.html>`_).
 
 .. code-block:: julia
 
-    immutable MultivariateNormal{Cov<:AbstractPDMat} <: ContinuousMultivariateDistribution
+    # For MvNormal (using full covariance)
+    MvNormal(mu, C)     # multivariate normal distribution with mean mu and covariance C.
+                        # Here, C can be a matrix or an instance of PDMat.
 
-In particular, ``ScalMat``, ``PDiagMat`` and ``PDMat`` are respectively used as the covariance type for cases where the covariance matrix is respectively isotropic, diagonal, or a full matrix. Consequently, more efficient implementation will be internally used when handling covariance matrix with special structures.
+    MvNormal(C)         # multivariate normal distribution with zero mean and covariance C.
+
+    # For DiagNormal (using diagonal covariance)
+
+    DiagNormal(mu, C)     # diagonal normal distribution with mean mu and covariance C.
+                          # Here, C is an instance of PDiagMat.
+
+    DiagNormal(C)         # diagonal normal distribution with zero mean and covariance C.
+
+    DiagNormal(mu, sig)   # diagonal normal distribution with mean mu and a diagonal covariance,
+                          # where all diagonal elements are provided by sig.^2
+                          # sig is a vector of component-wise standard deviation.
+
+    # If you know the diagonal elements sig2 (i.e. component-wise variance)
+    DiagNormal(mu, PDiagMat(sig2))
+    DiagNormal(PDiagMat(sig2))       # with zero mean
+
+    # For IsoNormal (using isotropic covariance)
+
+    IsoNormal(mu, C)     # isotropic normal distribution with mean mu and covariance C.
+                         # Here, C is an instance of ScalMat.
+
+    IsoNormal(C)         # isotropic normal distribution with zero mean and covariance C.
+
+    IsoNormal(mu, sig)   # isotropic normal distribution with mean mu and std.dev. sig
+                         # Here, sig is the component-wise standard deviation (a scalar).
+
+    IsoNormal(d, sig)    # d-dimensional isotropic normal distribution with zero mean
+                         # and component-wise standard deviation sig. 
+
+We also provide a convenient function ``gmvnormal`` to construct multivariate normal distributions of different types depending on the input arguments. 
+
+.. code-block:: julia
+
+    gmvnormal(mu, C)   # ==> MvNormal, when C is an instance of PDMat or Matrix
+                       # ==> DiagNormal, when C is an instance of PDiagMat or Vector
+                       # ==> IsoNormal, when C is an instance of ScalMat or a real scalar
+
+    gmvnormal(C)       # multivariate normal distribution with zero mean
+                       # ==> MvNormal, when C is an instance of PDMat or Matrix
+                       # ==> DiagNormal, when C is an instance of PDiagMat
+                       # ==> IsoNormal, when C is an instance of ScalMat
+
+    gmvnormal(d, sig)  # ==> IsoNormal(d, sig)
+
+
+Additional interface
+~~~~~~~~~~~~~~~~~~~~~~
+
+The following methods are specific to all kinds of multivariate normal distributions.
+
+.. function:: invcov(d)
+
+    Return the inversed covariance matrix of d.
+
+.. function:: logdet_cov(d)
+
+    Return the log-determinant value of the covariance matrix.
+
+.. function:: sqmahal(d, x)
+
+    Return the squared Mahalanobis distance from x to the center of d, w.r.t. the covariance.
+
+    When x is a vector, it returns a scalar value. When x is a matrix, it returns a vector of length size(x,2).
+
+.. function:: sqmahal!(r, d, x)
+
+    Writes the squared Mahalanbobis distances from each column of x to the center of d to r.
+
+
+Canonical form
+~~~~~~~~~~~~~~~
+
+Multivariate normal distribution is an *exponential family distribution*, with two canonical parameters: the *potential vector* :math:`h` and the *precision matrix* :math:`J`. The relation between these parameters and the conventional representation (*i.e.* the one using mean :math:`\mu` and covariance :math:`\Sigma`) is:
+
+.. math::
+
+    h = \Sigma^{-1} \mu, \quad \text{ and } \quad J = \Sigma^{-1} 
+
+The canonical parameterization is often more efficient than the conventional representation in Bayesian analysis. We provide several classes to represent Multivariate normal distributions in canonical form. They are ``MvNormalCanon``, ``DiagNormalCanon``, and ``IsoNormalCanon``. 
+
+.. code:: julia
+
+    MvNormalCanon(h, J)     # potential vector h and precision matrix J (PDMat or Matrix)
+    MvNormalCanon(J)        # zero potential and precision matrix J (PDMat or Matrix)
+
+    DiagNormalCanon(h, J)   # potential vector h and precision matrix J (PDiagMat or Vector)
+    DiagNormalCanon(J)      # zero potential and precision matrix J (PDiagMat or Vector)
+
+    IsoNormalCanon(h, J)      # potential vector h and precision matrix J (ScalMat)
+    IsoNormalCanon(J)         # zero potential and precision matrix J (ScalMat)
+    IsoNormalCanon(mu, prec)  # potential vector h and component-wise precision value prec
+    IsoNormalCanon(d, prec)   # zero potential (dim = d) and component-wise precision value prec
+                              # Note: prec = inv(sig^2).
+
+
+All methods for multivariate normal distributions (including the additional interface above) are implemented in an efficient way for all these types using canonical forms.
+
+
+Type system for Multivariate normal distributions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Under the hood, we have a type system that underlies these rich representation of multivariate normal distributions. 
+
+First, we have an abstract type ``AbstractMvNormal`` as the base type. For those using conventional representation, we define:
+
+.. code:: julia
+
+    immutable GenericMvNormal{Cov<:AbstractPDMat} <: AbstractMvNormal
+
+    typealias MvNormal   GenericMvNormal{PDMat} 
+    typealias DiagNormal GenericMvNormal{PDiagMat} 
+    typealias IsoNormal  GenericMvNormal{ScalMat}
+    .
+
+For those using canonical form, we define:
+
+.. code:: julia
+
+    immutable GenericMvNormalCanon{Prec<:AbstractPDMat} <: AbstractMvNormal
+
+    typealias MvNormalCanon   GenericMvNormalCanon{PDMat} 
+    typealias DiagNormalCanon GenericMvNormalCanon{PDiagMat} 
+    typealias IsoNormalCanon  GenericMvNormalCanon{ScalMat}
+    .
+
+
+Leverging this type system, the multiple dispatch mechanism of Julia, as well as the computational support of the *NumericExtensions* package on positive definite matrices, we managed to provide this rich representation while ensuring that we take the most efficient computational routines for each particular type.
 
 
 Dirichlet Distribution
