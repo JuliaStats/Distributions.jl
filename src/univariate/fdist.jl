@@ -8,8 +8,6 @@ immutable FDist <: ContinuousUnivariateDistribution
     end
 end
 
-@_jl_dist_2p FDist f
-
 insupport(::FDist, x::Real) = zero(x) <= x < Inf
 insupport(::Type{FDist}, x::Real) = zero(x) <= x < Inf
 
@@ -40,3 +38,42 @@ entropy(d::FDist) = (log(d.ddf) -log(d.ndf)
                      +lgamma(0.5*d.ndf) +lgamma(0.5*d.ddf) -lgamma(0.5*(d.ndf+d.ddf)) 
                      +(1.0-0.5*d.ndf)*digamma(0.5*d.ndf) +(-1.0-0.5*d.ddf)*digamma(0.5*d.ddf)
                      +0.5*(d.ndf+d.ddf)*digamma(0.5*(d.ndf+d.ddf)))
+
+
+function pdf(d::FDist,x::Real)
+    if !insupport(d,x)
+        return 0.0
+    end
+    a = 0.5*d.ndf
+    b = 0.5*d.ddf
+    u = d.ndf*x
+    v = d.ddf
+    w = u+v
+    brcomp(a,b,u/w,v/w)/x
+end
+
+function cdf(d::FDist, x::Real)
+    if !insupport(d,x)
+        return 0.0
+    end
+    u = x*d.ndf/d.ddf
+    y = u/(one(u)+u)
+    cdf(Beta(0.5*d.ndf,0.5*d.ddf),y)
+end
+function ccdf(d::FDist, x::Real)
+    if !insupport(d,x)
+        return 0.0
+    end
+    u = x*d.ndf/d.ddf
+    y = u/(one(u)+u)
+    ccdf(Beta(0.5*d.ndf,0.5*d.ddf),y)
+end
+
+function quantile(d::FDist, p::Real)
+    y = quantile(Beta(0.5*d.ndf,0.5*d.ddf),p)
+    (d.ddf*y)/(d.ndf*(one(y)-y))
+end
+
+
+rand(d::FDist) = (d.ddf*rand(Chisq(d.ndf)))/(d.ndf*rand(Chisq(d.ddf)))
+

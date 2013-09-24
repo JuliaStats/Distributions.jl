@@ -124,15 +124,17 @@ if length(ARGS) > 0
             push!(newdistlist, a)
         end
     end
-    distlist = newdistlist
+    distlist = newdistlist    
 end
 
 # Try out many parameterizations of any given distribution
 for d in distlist
     # NB: Uncomment if test fails
     # Mention distribution being run
-    # println(d)
-
+    if length(ARGS) > 0
+        println(d)
+    end
+    
     n = length(pp)
     is_continuous = isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
     is_discrete = isa(d, Truncated) ? isa(d.untruncated, DiscreteDistribution) : isa(d, DiscreteDistribution) 

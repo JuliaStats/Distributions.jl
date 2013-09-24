@@ -65,8 +65,7 @@ function pdf(d::Binomial, x::Real)
     end
     q = 1.0-p
     y = n-x
-    sqrt(n/(2.0*pi*x*y))*exp((lstirling(n) - lstirling(x) - lstirling(y))
-                             + x*logmxp1(n*p/x) + y*logmxp1(n*q/y))
+    brcomp(x,y,p,q)*n/(x*y)
 end
 
 function logpdf(d::Binomial, x::Real)
@@ -81,6 +80,8 @@ function logpdf(d::Binomial, x::Real)
     elseif y ==0
         return n*log(p)
     end
+    # TODO: replace lstirling with bcorr
+    # need to figure out what to do when x,y < 10
     (lstirling(n) - lstirling(x) - lstirling(y)) +
     x*logmxp1(n*p/x) + y*logmxp1(n*q/y) + 0.5*(log(n/(x*y))-log2π)
 end

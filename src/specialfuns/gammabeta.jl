@@ -2334,9 +2334,6 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
 #-----------------------------------------------------------------------
 #     REAL LAMBDA, LNX, LNY
 #-----------------
-#     CONST = 1/SQRT(2*PI)
-#-----------------
-    cnst = .398942280401433
 
     brcompval = 0.0
     if (x == 0.0 || y == 0.0) return brcompval end
@@ -2442,7 +2439,7 @@ function brcomp(a::Real, b::Real, x::Real, y::Real)
         v = e - log(y/y0)
     end
     z = exp(-(a*u + b*v))
-    return cnst*sqrt(b*x0)*z*exp(-bcorr(a,b))
+    return r√2π*sqrt(b*x0)*z*exp(-bcorr(a,b))
 end
 
 function brcmp1(mu::Integer, a::Real, b::Real, x::Real, y::Real)

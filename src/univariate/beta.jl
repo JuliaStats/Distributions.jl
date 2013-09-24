@@ -10,35 +10,10 @@ end
 Beta(a::Real) = Beta(a, a) # symmetric in [0, 1]
 Beta() = Beta(1.0) # uniform
 
-function cdf(d::Beta, x::Real)
-    if x >= 1 return 1.0 end
-    if x <= 0 return 0.0 end
-    return bratio(d.alpha, d.beta, x)
-end
-
-function ccdf(d::Beta, x::Real)
-    if x >= 1 return 0.0 end
-    if x <= 0 return 1.0 end
-    return bratio(d.beta, d.alpha, 1.0-x)
-end
-
-function entropy(d::Beta)
-    o = lbeta(d.alpha, d.beta)
-    o -= (d.alpha - 1.0) * digamma(d.alpha)
-    o -= (d.beta - 1.0) * digamma(d.beta)
-    o += (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
-    o
-end
 
 insupport(::Beta, x::Real) = zero(x) < x < one(x)
 insupport(::Type{Beta}, x::Real) = zero(x) < x < one(x)
 
-function kurtosis(d::Beta)
-    α, β = d.alpha, d.beta
-    num = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
-    den = α * β * (α + β + 2.0) * (α + β + 3.0)
-    num / den
-end
 
 mean(d::Beta) = d.alpha / (d.alpha + d.beta)
 
@@ -52,7 +27,48 @@ end
 
 modes(d::Beta) = [mode(d)]
 
+function var(d::Beta)
+    ab = d.alpha + d.beta
+    d.alpha * d.beta / (ab * ab * (ab + 1.0))
+end
+
+function skewness(d::Beta)
+    num = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
+    den = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
+    num / den
+end
+function kurtosis(d::Beta)
+    α, β = d.alpha, d.beta
+    num = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
+    den = α * β * (α + β + 2.0) * (α + β + 3.0)
+    num / den
+end
+
+function entropy(d::Beta)
+    o = lbeta(d.alpha, d.beta)
+    o -= (d.alpha - 1.0) * digamma(d.alpha)
+    o -= (d.beta - 1.0) * digamma(d.beta)
+    o += (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
+    o
+end
+
+
 pdf(d::Beta, x::Real) = insupport(d, x) ? brcomp(d.alpha, d.beta, x, 1.0 - x)/(x*(1.0 - x)) : 0.0
+
+
+function cdf(d::Beta, x::Real)
+    if x >= 1 return 1.0 end
+    if x <= 0 return 0.0 end
+    return bratio(d.alpha, d.beta, x)
+end
+
+function ccdf(d::Beta, x::Real)
+    if x >= 1 return 0.0 end
+    if x <= 0 return 1.0 end
+    return bratio(d.beta, d.alpha, 1.0-x)
+end
+
+
 
 function rand(d::Beta)
     u = rand(Gamma(d.alpha))
@@ -70,17 +86,6 @@ function rand!(d::Beta, A::Array{Float64})
         A[i] = rand(d)
     end
     A
-end
-
-function skewness(d::Beta)
-    num = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
-    den = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
-    num / den
-end
-
-function var(d::Beta)
-    ab = d.alpha + d.beta
-    d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
 
 ## Fit model

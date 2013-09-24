@@ -13,8 +13,7 @@ import NumericExtensions
 using Distributions
 using Base.Test
 
-
-for d in [
+distlist = [
     Bernoulli(0.1),
     Bernoulli(0.5),
     Bernoulli(0.9), 
@@ -29,7 +28,23 @@ for d in [
     Binomial(100, 0.9),
     Binomial(10000, 0.03)]
 
-    # println(d)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
+    if length(ARGS) > 0
+        println(d)
+    end
 
     xmin = min(d)
     xmax = max(d)

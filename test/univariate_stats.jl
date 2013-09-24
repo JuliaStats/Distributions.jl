@@ -28,9 +28,7 @@ macro ignore_methoderror(ex)
         end
     end
 end
-
-
-for d in [
+distlist = [
           Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
@@ -134,6 +132,24 @@ for d in [
           Weibull(23.0),
           Weibull(230.0),
           ]
+
+# allows calling 
+#   julia univariate.jl Normal 
+#   julia univariate.jl Normal(1.2,2)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
 
     x = rand(d, n_samples)
 
