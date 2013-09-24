@@ -431,10 +431,10 @@ The probability density function of a *Gumbel distribution* with location μ and
     Gumbel(mu, s)     # Gumbel distribution with location mu and scale s
 
 
-Inverted Gamma Distribution
+Inverse Gamma Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of an *inverted Gamma distribution* with shape parameter α and scale θ is
+The probability density function of an *inverse Gamma distribution* with shape parameter α and scale θ is
 
 .. math::
 
@@ -443,7 +443,7 @@ The probability density function of an *inverted Gamma distribution* with shape 
 
 .. code-block:: julia
 
-    InvertedGamma(a, s)    # Inverted Gamma distribution with shape a and scale s
+    InverseGamma(a, s)    # Inverted Gamma distribution with shape a and scale s
 
 
 Laplace Distribution

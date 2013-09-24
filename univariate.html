@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Univariate Distributions &mdash; Distributions.jl 0.2.3 documentation</title>
+    <title>Univariate Distributions &mdash; Distributions.jl 0.2.9 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.2.3',
+        VERSION:     '0.2.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Distributions.jl 0.2.3 documentation" href="index.html" />
+    <link rel="top" title="Distributions.jl 0.2.9 documentation" href="index.html" />
     <link rel="next" title="Multivariate Distributions" href="multivariate.html" />
     <link rel="prev" title="Distribution Types" href="distributions.html" /> 
   </head>
@@ -33,7 +33,7 @@
     <div class="header-wrapper">
       <div class="header">
         <div class="headertitle"><a
-          href="index.html">Distributions.jl 0.2.3 documentation</a></div>
+          href="index.html">Distributions.jl 0.2.9 documentation</a></div>
         <div class="rel">
           <a href="distributions.html" title="Distribution Types"
              accesskey="P">previous</a> |
@@ -438,13 +438,13 @@ x^{\alpha - 1} (1 + x)^{- (\alpha + \beta)}, \quad x &gt; 0"/></p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="inverted-gamma-distribution">
-<h3>Inverted Gamma Distribution<a class="headerlink" href="#inverted-gamma-distribution" title="Permalink to this headline">¶</a></h3>
-<p>The probability density function of an <em>inverted Gamma distribution</em> with shape parameter α and scale θ is</p>
+<div class="section" id="inverse-gamma-distribution">
+<h3>Inverse Gamma Distribution<a class="headerlink" href="#inverse-gamma-distribution" title="Permalink to this headline">¶</a></h3>
+<p>The probability density function of an <em>inverse Gamma distribution</em> with shape parameter α and scale θ is</p>
 <div class="math">
 <p><img src="_images/math/c65ae35ff028caa9aaf938f5a2d5b5590a7b260c.png" alt="f(x; \alpha, \theta) = \frac{\theta^\alpha x^{-(\alpha + 1)}}{\Gamma(\alpha)}
 e^{-\frac{\theta}{x}}, \quad x &gt; 0"/></p>
-</div><div class="highlight-julia"><div class="highlight"><pre><span class="n">InvertedGamma</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>    <span class="c"># Inverted Gamma distribution with shape a and scale s</span>
+</div><div class="highlight-julia"><div class="highlight"><pre><span class="n">InverseGamma</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>    <span class="c"># Inverted Gamma distribution with shape a and scale s</span>
 </pre></div>
 </div>
 </div>
@@ -578,6 +578,10 @@ e^{-\frac{\theta}{x}}, \quad x &gt; 0"/></p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="multivariate.html">Multivariate Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix.html">Matrix Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample.html">Sampling from Population</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit.html">Distribution Fitting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conjugates.html">Conjugate Prior and Posterior</a></li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
@@ -613,7 +617,7 @@ e^{-\frac{\theta}{x}}, \quad x &gt; 0"/></p>
           
     <div class="footer">
         &copy; Copyright 2013, JuliaStats.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
         </div>
         <div class="clearer"></div>

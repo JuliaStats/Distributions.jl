@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Conjugate Prior and Posterior &mdash; Distributions.jl 0.2.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Distributions.jl 0.2.9 documentation" href="index.html" />
+    <link rel="prev" title="Distribution Fitting" href="fit.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">Distributions.jl 0.2.9 documentation</a></div>
+        <div class="rel">
+          <a href="fit.html" title="Distribution Fitting"
+             accesskey="P">previous</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="conjugate-prior-and-posterior">
+<span id="ref-conj"></span><h1>Conjugate Prior and Posterior<a class="headerlink" href="#conjugate-prior-and-posterior" title="Permalink to this headline">¶</a></h1>
+<p><em>Conjugate prior</em> plays an important role in Bayesian analysis. In Bayesian theory, the distribution <img class="math" src="_images/math/324193c5f781a9547f2f56aff9cbb782a882384f.png" alt="p(\theta)"/> is said to be <strong>conjugate</strong> <em>w.r.t.</em> a conditional distribution (often referred to as the <em>likelihood model</em>) <img class="math" src="_images/math/c674ad7ed7c09d836f7e3f9e7749a9674ee5b8d4.png" alt="p(x | \theta)"/>, if the posterior distribution <img class="math" src="_images/math/79e4cc3433c0bf161157e6bd14578a1dbd26ef17.png" alt="p(\theta | x)"/> is in the same family as <img class="math" src="_images/math/324193c5f781a9547f2f56aff9cbb782a882384f.png" alt="p(\theta)"/>. (Interested readers may refer to <a class="reference external" href="http://en.wikipedia.org/wiki/Conjugate_prior">this wikipedia article</a> for more detais.)</p>
+<div class="section" id="generic-interface">
+<h2>Generic Interface<a class="headerlink" href="#generic-interface" title="Permalink to this headline">¶</a></h2>
+<p>In Bayesian analysis, canonical parameterization (<em>i.e.</em> the parameterization using canonical parameters) is often the most efficient. With a conjugate prior, the canonical parameters of the posterior are simply the sum of the canonical parameters of the prior and the sufficient statistics obtained from the data (<em>w.r.t.</em> the likelihood model).</p>
+<p>Motivated by this, we design the interface as described below to support Bayesian inference based on conjugate models:</p>
+<dl class="function">
+<dt id="posterior_canon">
+<tt class="descname">posterior_canon</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#posterior_canon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior_canon</tt><big>(</big><em>pri</em>, <em>ss</em><big>)</big></dt>
+<dd><p>Returns the posterior distribution (in canonical form) w.r.t. the prior <tt class="docutils literal"><span class="pre">pri</span></tt> and the likelihood model <tt class="docutils literal"><span class="pre">G</span></tt>.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">pri</span></tt>:  the prior distribution.</li>
+<li><tt class="docutils literal"><span class="pre">G</span></tt>:  the likelihood model. In simple cases, G can be just a distribution type.</li>
+<li><tt class="docutils literal"><span class="pre">x</span></tt>:  the data.</li>
+<li><tt class="docutils literal"><span class="pre">w</span></tt>:  the sample weights (<tt class="docutils literal"><span class="pre">length(w)</span></tt> should be equal to the number of samples). When <tt class="docutils literal"><span class="pre">w</span></tt> is omitted, the data are unweighted (<em>i.e.</em> all samples have unit weights).</li>
+<li><tt class="docutils literal"><span class="pre">ss</span></tt>:  pre-computed sufficient statistics</li>
+</ul>
+<p><strong>Note:</strong> In general, the returned type need not be the same as <tt class="docutils literal"><span class="pre">typeof(pri)</span></tt>. However, when <tt class="docutils literal"><span class="pre">pri</span></tt> is already using the canonical parameters (this is the case for many exponential family distributions), the returned instance is in the same
+type as <tt class="docutils literal"><span class="pre">pri</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="posterior">
+<tt class="descname">posterior</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#posterior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior</tt><big>(</big><em>pri</em>, <em>ss</em><big>)</big></dt>
+<dd><p>Returns the posterior distribution in the same type of <tt class="docutils literal"><span class="pre">pri</span></tt>, based on given data or sufficient statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="posterior_rand">
+<tt class="descname">posterior_rand</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#posterior_rand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior_rand</tt><big>(</big><em>pri</em>, <em>ss</em><big>)</big></dt>
+<dd><p>Returns a random sample from the posterior distribution based on given data or sufficient statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior_rand!(r, pri, G, x[, w])</tt></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior_rand!(r, pri, ss)</tt></dt>
+<dd><p>Draws random samples from the posterior distribution based on given data or sufficient statistics. The number of samples to draw depends on the size of <tt class="docutils literal"><span class="pre">r</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="posterior_randmodel">
+<tt class="descname">posterior_randmodel</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#posterior_randmodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a distribution constructed using a parameter drawn from the posterior based on given data or sufficient statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="posterior_mode">
+<tt class="descname">posterior_mode</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#posterior_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">posterior_mode</tt><big>(</big><em>pri</em>, <em>ss</em><big>)</big></dt>
+<dd><p>Returns the mode of the posterior distribution based on given data or sufficient statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fit_map">
+<tt class="descname">fit_map</tt><big>(</big><em>pri</em>, <em>G</em>, <em>x</em><span class="optional">[</span>, <em>w</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#fit_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs Maximum-a-Posterior (MAP) estimation based on given data or sufficient statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="complete">
+<tt class="descname">complete</tt><big>(</big><em>pri</em>, <em>G</em>, <em>param</em><big>)</big><a class="headerlink" href="#complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a completed distribution based on the likelihood model <tt class="docutils literal"><span class="pre">G</span></tt> and a given parameter <tt class="docutils literal"><span class="pre">param</span></tt>.</p>
+</dd></dl>
+
+<p><strong>Notes:</strong> There exists an important difference between <tt class="docutils literal"><span class="pre">posterior_rand</span></tt> and <tt class="docutils literal"><span class="pre">posterior_randmodel</span></tt>. The former returns a parameter (which might be a number, a vector, or other appropriate form of the parameters), while the latter returns a distribution instance. In general, the latter will invoke the <tt class="docutils literal"><span class="pre">complete</span></tt> function to create a distribution from a given parameter. The same differences apply to <tt class="docutils literal"><span class="pre">posterior_mode</span></tt> and <tt class="docutils literal"><span class="pre">fit_map</span></tt>.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>We support the conjugate pairs (the list will grow over time as development goes on). We use the <tt class="docutils literal"><span class="pre">posterior</span></tt> function as the example to show how we may work with these pairs (other functions above are also applicable).</p>
+<div class="code julia highlight-python"><div class="highlight"><pre><span class="c"># Beta - Bernoulli</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="n">Bernoulli</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c"># each value in x should be either 0 or 1</span>
+
+<span class="c"># Beta - Binomial</span>
+<span class="c"># Here, 10 is the number of trials in each experiment</span>
+<span class="c"># x is an array of #successes (each for one experiment)</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">Beta</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="n">Binomial</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+
+<span class="c"># Dirichlet - Categorical</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="n">k</span><span class="p">)),</span> <span class="n">Categorical</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c"># each value in x is an integer in 1:k</span>
+
+<span class="c"># Dirichlet - Multinomial</span>
+<span class="c"># x is a matrix of size (k, n)</span>
+<span class="c"># each column of x is the histogram of outcomes in one experiments</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">Dirichlet</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">k</span><span class="p">)),</span> <span class="n">Multinomial</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># Gamma - Exponential</span>
+<span class="c"># Here, the Gamma prior is over the rate parameter of the Exponential distribution</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">Gamma</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">Exponential</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The cases for <em>Normal</em> are more involved, as they have two parameters: the mean and the variance. Sometimes, one of these parameters are known.</p>
+<div class="code julia highlight-python"><div class="highlight"><pre><span class="c"># Normal (over mu) - Normal (sigma is known)</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">)</span>
+<span class="n">sig</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">pri</span><span class="p">,</span> <span class="n">sig</span><span class="p">),</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>   <span class="c"># returns a Normal distribution</span>
+
+<span class="c"># InverseGamma (over sigma) - Normal (mu is known)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">InverseGamma</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">mu</span><span class="p">,</span> <span class="n">pri</span><span class="p">),</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>   <span class="c"># returns an InverseGamma distribution</span>
+
+<span class="c"># Gamma (over sigma) - Normal (mu is known)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">Gamma</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">mu</span><span class="p">,</span> <span class="n">pri</span><span class="p">),</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>   <span class="c"># returns a Gamma distribution</span>
+
+<span class="c"># NormalInverseGamma - Normal</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">NormalInverseGamma</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">sh</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">pri</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>     <span class="c"># returns a NormalInverseGamma distribution</span>
+
+<span class="c"># NormalGamma - Normal</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">NormalGamma</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">sh</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">pri</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>     <span class="c"># returns a NormalGamma distribution</span>
+</pre></div>
+</div>
+<p>The following examples are for multivariate normal distributions.</p>
+<div class="code julia highlight-python"><div class="highlight"><pre><span class="c"># MvNormal (over mu) -- MvNormal (covariance is known)</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">MvNormal</span><span class="p">(</span><span class="n">C0</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">pri</span><span class="p">,</span> <span class="n">C</span><span class="p">),</span> <span class="n">MvNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># One can also use other types of multivariate normal distributions here</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">IsoNormal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">DiagNormal</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">pri</span><span class="p">,</span> <span class="n">C</span><span class="p">),</span> <span class="n">DiagNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># InverseWishart (over covariance) -- MvNormal</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">InverseWishart</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">mu</span><span class="p">,</span> <span class="n">pri</span><span class="p">),</span> <span class="n">MvNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># Wishart (over covariance) -- MvNormal</span>
+<span class="c"># Note: Wishart is usually less efficient than InverseWishart as a prior</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">Wishart</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">((</span><span class="n">mu</span><span class="p">,</span> <span class="n">pri</span><span class="p">),</span> <span class="n">MvNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># NormalInverseWishart -- MvNormal</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">NormalInverseWishart</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">pri</span><span class="p">,</span> <span class="n">MvNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># NormalWishart -- MvNormal</span>
+<span class="n">pri</span> <span class="o">=</span> <span class="n">NormalWishart</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+<span class="n">posterior</span><span class="p">(</span><span class="n">pri</span><span class="p">,</span> <span class="n">MvNormal</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="implement-new-conjugate-pairs">
+<h2>Implement New Conjugate Pairs<a class="headerlink" href="#implement-new-conjugate-pairs" title="Permalink to this headline">¶</a></h2>
+<p>This framework is designed to be extensible.</p>
+<p>To implement new conjugate pairs, one need to implement all methods listed in the generic interface above. Generally, one only have to implement <tt class="docutils literal"><span class="pre">posterior_canon(pri,</span> <span class="pre">ss)</span></tt> and the methods to compute sufficient statistics. We provide a series of fallback functions to do the rest of the job (see <tt class="docutils literal"><span class="pre">src/conjugates/fallbacks.jl</span></tt> in the source for details). The fallback methods are defined in such a way that they are reasonably efficient for most cases.</p>
+<p>However, there do exist cases where the fallbacks are not efficient enough, then one might override some of these fallbacks by providing more efficient specialized methods.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="distributions.html">Distribution Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="univariate.html">Univariate Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multivariate.html">Multivariate Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix.html">Matrix Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample.html">Sampling from Population</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fit.html">Distribution Fitting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Conjugate Prior and Posterior</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generic-interface">Generic Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implement-new-conjugate-pairs">Implement New Conjugate Pairs</a></li>
+</ul>
+</li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="fit.html" title="Distribution Fitting"
+             >previous</a> |
+          <a href="genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="_sources/conjugates.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2013, JuliaStats.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
