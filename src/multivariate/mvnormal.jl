@@ -2,106 +2,89 @@
 
 ## Generic multivariate normal class
 
-immutable GenericMultivariateNormal{Cov<:AbstractPDMat} <: ContinuousMultivariateDistribution
+abstract AbstractMvNormal <: ContinuousMultivariateDistribution
+
+immutable GenericMvNormal{Cov<:AbstractPDMat} <: AbstractMvNormal
     dim::Int
     zeromean::Bool
     μ::Vector{Float64}
     Σ::Cov
 end
 
-function GenericMultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov, zmean::Bool)
+function GenericMvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMultivariateNormal{Cov}(d, zmean, μ, Σ)
+    GenericMvNormal{Cov}(d, zmean, μ, Σ)
 end
 
-function GenericMultivariateNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
+function GenericMvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    zmean::Bool = true
-    for i = 1:d
-        if μ[i] != 0.
-            zmean = false
-            break
-        end
-    end
-    GenericMultivariateNormal{Cov}(d, zmean, μ, Σ)
+    GenericMvNormal{Cov}(d, allzeros(μ), μ, Σ)
 end
 
-function GenericMultivariateNormal{Cov<:AbstractPDMat}(Σ::Cov)
+function GenericMvNormal{Cov<:AbstractPDMat}(Σ::Cov)
     d = dim(Σ)
-    GenericMultivariateNormal{Cov}(d, true, zeros(d), Σ)    
+    GenericMvNormal{Cov}(d, true, zeros(d), Σ)    
 end
 
 ## Construction of multivariate normal with specific covariance type
 
-typealias IsoNormal  GenericMultivariateNormal{ScalMat}
-typealias DiagNormal GenericMultivariateNormal{PDiagMat}
-typealias MultivariateNormal GenericMultivariateNormal{PDMat}
+typealias IsoNormal  GenericMvNormal{ScalMat}
+typealias DiagNormal GenericMvNormal{PDiagMat}
+typealias MvNormal GenericMvNormal{PDMat}
 
-IsoNormal(μ::Vector{Float64}, C::ScalMat) = GenericMultivariateNormal(μ, C)
-IsoNormal(C::ScalMat) = GenericMultivariateNormal(C)
-IsoNormal(μ::Vector{Float64}, σ::Float64) = GenericMultivariateNormal(μ, ScalMat(length(μ), abs2(σ)))
-IsoNormal(d::Int, σ::Float64) = GenericMultivariateNormal(ScalMat(d, abs2(σ)))
+MvNormal(μ::Vector{Float64}, C::PDMat) = GenericMvNormal(μ, C)
+MvNormal(C::PDMat) = GenericMvNormal(C)
+MvNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = GenericMvNormal(μ, PDMat(Σ))
+MvNormal(Σ::Matrix{Float64}) = GenericMvNormal(PDMat(Σ))
 
-DiagNormal(μ::Vector{Float64}, C::PDiagMat) = GenericMultivariateNormal(μ, C)
-DiagNormal(C::PDiagMat) = GenericMultivariateNormal(C)
-DiagNormal(μ::Vector{Float64}, σ::Vector{Float64}) = GenericMultivariateNormal(μ, PDiagMat(abs2(σ)))
+DiagNormal(μ::Vector{Float64}, C::PDiagMat) = GenericMvNormal(μ, C)
+DiagNormal(C::PDiagMat) = GenericMvNormal(C)
+DiagNormal(μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvNormal(μ, PDiagMat(abs2(σ)))
 
-MultivariateNormal(μ::Vector{Float64}, C::PDMat) = GenericMultivariateNormal(μ, C)
-MultivariateNormal(C::PDMat) = GenericMultivariateNormal(C)
-MultivariateNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = GenericMultivariateNormal(μ, PDMat(Σ))
-MultivariateNormal(Σ::Matrix{Float64}) = GenericMultivariateNormal(PDMat(Σ))
+IsoNormal(μ::Vector{Float64}, C::ScalMat) = GenericMvNormal(μ, C)
+IsoNormal(C::ScalMat) = GenericMvNormal(C)
+IsoNormal(μ::Vector{Float64}, σ::Float64) = GenericMvNormal(μ, ScalMat(length(μ), abs2(σ)))
+IsoNormal(d::Int, σ::Float64) = GenericMvNormal(ScalMat(d, abs2(σ)))
 
-const MvNormal = MultivariateNormal
+const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
 ## convenient function to construct distributions of proper type based on arguments
 
-gmvnormal(μ::Vector{Float64}, C::AbstractPDMat) = GenericMultivariateNormal(μ, C)
-gmvnormal(C::AbstractPDMat) = GenericMultivariateNormal(C)
+gmvnormal(μ::Vector{Float64}, C::AbstractPDMat) = GenericMvNormal(μ, C)
+gmvnormal(C::AbstractPDMat) = GenericMvNormal(C)
 
 gmvnormal(μ::Vector{Float64}, σ::Float64) = IsoNormal(μ, σ)
 gmvnormal(d::Int, σ::Float64) = IsoNormal(d, σ)
 gmvnormal(μ::Vector{Float64}, σ::Vector{Float64}) = DiagNormal(μ, σ)
-gmvnormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MultivariateNormal(μ, Σ)
-gmvnormal(Σ::Matrix{Float64}) = MultivariateNormal(Σ)
-
+gmvnormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, Σ)
+gmvnormal(Σ::Matrix{Float64}) = MvNormal(Σ)
 
 # Basic statistics
 
-dim(d::GenericMultivariateNormal) = d.dim
+dim(d::GenericMvNormal) = d.dim
 
-mean(d::GenericMultivariateNormal) = d.μ
+mean(d::GenericMvNormal) = d.μ
+mode(d::GenericMvNormal) = d.μ
+modes(d::GenericMvNormal) = [mode(d)]
 
-var(d::GenericMultivariateNormal) = diag(d.Σ)
+var(d::GenericMvNormal) = diag(d.Σ)
+cov(d::GenericMvNormal) = full(d.Σ)
+invcov(d::GenericMvNormal) = full(inv(d.Σ))
+logdet_cov(d::GenericMvNormal) = logdet(d.Σ)
 
-cov(d::GenericMultivariateNormal) = full(d.Σ)
-
-logdet_cov(d::GenericMultivariateNormal) = logdet(d.Σ)
-
-mode(d::GenericMultivariateNormal) = d.μ
-
-modes(d::GenericMultivariateNormal) = [mode(d)]
-
-entropy(d::GenericMultivariateNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
+entropy(d::GenericMvNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
 
 
-# PDF evaluation
+# evaluation (for GenericMvNormal)
 
-insupport{T<:Real}(d::GenericMultivariateNormal, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{T<:Real}(d::GenericMultivariateNormal, x::Matrix{T}) = dim(d) == size(x,1) && allfinite(x)
-insupport{G<:GenericMultivariateNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
-insupport{G<:GenericMultivariateNormal,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
-
-
-_mvnormal_c0(g::GenericMultivariateNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
-
-function sqmahal(d::GenericMultivariateNormal, x::Vector{Float64}) 
+function sqmahal(d::GenericMvNormal, x::Vector{Float64}) 
     z::Vector{Float64} = d.zeromean ? x : x - d.μ
     invquad(d.Σ, z) 
 end
 
-function sqmahal!(r::Array{Float64}, d::GenericMultivariateNormal, x::Matrix{Float64})
+function sqmahal!(r::Array{Float64}, d::GenericMvNormal, x::Matrix{Float64})
     if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
@@ -109,13 +92,23 @@ function sqmahal!(r::Array{Float64}, d::GenericMultivariateNormal, x::Matrix{Flo
     invquad!(r, d.Σ, z)
 end
 
-sqmahal(d::GenericMultivariateNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
-logpdf(d::GenericMultivariateNormal, x::Vector{Float64}) = _mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
+# generic PDF evaluation (appliable to AbstractMvNormal)
 
-function logpdf!(r::Array{Float64}, d::GenericMultivariateNormal, x::Matrix{Float64})
+insupport{T<:Real}(d::AbstractMvNormal, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
+insupport{T<:Real}(d::AbstractMvNormal, x::Matrix{T}) = dim(d) == size(x,1) && allfinite(x)
+insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
+insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
+
+mvnormal_c0(g::AbstractMvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
+
+sqmahal(d::AbstractMvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+
+logpdf(d::AbstractMvNormal, x::Vector{Float64}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
+
+function logpdf!(r::Array{Float64}, d::AbstractMvNormal, x::Matrix{Float64})
     sqmahal!(r, d, x)
-    c0::Float64 = _mvnormal_c0(d)
+    c0::Float64 = mvnormal_c0(d)
     for i = 1:size(x, 2)
         r[i] = c0 - 0.5 * r[i]
     end 
@@ -123,9 +116,9 @@ function logpdf!(r::Array{Float64}, d::GenericMultivariateNormal, x::Matrix{Floa
 end
 
 
-# Sampling
+# Sampling (for GenericMvNormal)
 
-function rand!(d::GenericMultivariateNormal, x::Vector{Float64})
+function rand!(d::GenericMvNormal, x::Vector{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         add!(x, d.μ)
@@ -133,7 +126,7 @@ function rand!(d::GenericMultivariateNormal, x::Vector{Float64})
     x
 end
 
-function rand!(d::GenericMultivariateNormal, x::Matrix{Float64})
+function rand!(d::GenericMvNormal, x::Matrix{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         badd!(x, d.μ, 1)
@@ -192,14 +185,14 @@ end
 ## MLE estimation with covariance known
 
 function fit_mle{C<:AbstractPDMat}(g::GenericMvNormalKnownSigma{C}, ss::GenericMvNormalKnownSigmaStats{C})
-    GenericMultivariateNormal(ss.sx * inv(ss.tw), g.Σ)
+    GenericMvNormal(ss.sx * inv(ss.tw), g.Σ)
 end
 
 function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64})
     d = dim(g)
     size(x,1) == d || throw(ArgumentError("Invalid argument dimensions."))
     μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
-    GenericMultivariateNormal(μ, g.Σ)
+    GenericMvNormal(μ, g.Σ)
 end
 
 function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64}, w::Array{Float64})
@@ -208,7 +201,7 @@ function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64}, w::Array{Floa
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
     μ = Base.LinAlg.BLAS.gemv('N', inv(sum(w)), x, vec(w))
-    GenericMultivariateNormal(μ, g.Σ)
+    GenericMvNormal(μ, g.Σ)
 end
 
 
@@ -224,7 +217,7 @@ immutable MvNormalStats <: SufficientStats
     tw::Float64         # total sample weight
 end
 
-function suffstats(D::Type{MultivariateNormal}, x::Matrix{Float64})
+function suffstats(D::Type{MvNormal}, x::Matrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
 
@@ -236,7 +229,7 @@ function suffstats(D::Type{MultivariateNormal}, x::Matrix{Float64})
     MvNormalStats(s, m, s2, float64(n))
 end
 
-function suffstats(D::Type{MultivariateNormal}, x::Matrix{Float64}, w::Array{Float64})
+function suffstats(D::Type{MvNormal}, x::Matrix{Float64}, w::Array{Float64})
     d = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
@@ -258,9 +251,9 @@ end
 #
 
 
-fit_mle(D::Type{MultivariateNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
+fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
-function fit_mle(D::Type{MultivariateNormal}, x::Matrix{Float64})
+function fit_mle(D::Type{MvNormal}, x::Matrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, 2))
     z = bsubtract(x, mu, 1)
@@ -268,7 +261,7 @@ function fit_mle(D::Type{MultivariateNormal}, x::Matrix{Float64})
     MvNormal(mu, PDMat(C)) 
 end
 
-function fit_mle(D::Type{MultivariateNormal}, x::Matrix{Float64}, w::Vector{Float64})
+function fit_mle(D::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64})
     m = size(x, 1)
     n = size(x, 2)
     if length(w) != n

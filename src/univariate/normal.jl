@@ -17,6 +17,25 @@ end
 
 const Gaussian = Normal
 
+# Properties
+
+mean(d::Normal) = d.μ
+median(d::Normal) = d.μ
+mode(d::Normal) = d.μ
+modes(d::Normal) = [d.μ]
+
+var(d::Normal) = abs2(d.σ)
+std(d::Normal) = d.σ
+skewness(d::Normal) = 0.0
+kurtosis(d::Normal) = 0.0
+
+entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
+
+mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
+
+# Evaluation
+
 zval(d::Normal, x::Real) = (x - d.μ)/d.σ
 xval(d::Normal, z::Real) = d.μ + d.σ * z
 
@@ -33,28 +52,10 @@ cquantile(d::Normal, p::Real) = xval(d, -Φinv(p))
 invlogcdf(d::Normal, p::Real) = xval(d, logΦinv(p))
 invlogccdf(d::Normal, p::Real) = xval(d, -logΦinv(p))
 
-entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
-
-kurtosis(d::Normal) = 0.0
-
-mean(d::Normal) = d.μ
-
-median(d::Normal) = d.μ
-
-mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
-
-cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
-
-mode(d::Normal) = d.μ
-modes(d::Normal) = [d.μ]
+# Sampling
 
 rand(d::Normal) = d.μ + d.σ * randn()
 
-skewness(d::Normal) = 0.0
-
-std(d::Normal) = d.σ
-
-var(d::Normal) = d.σ^2
 
 ## Fit model
 
@@ -153,7 +154,7 @@ end
 
 immutable NormalKnownSigmaStats <: SufficientStats
     σ::Float64      # known std.dev
-    s::Float64      # (weighted) sum of x
+    sx::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight
 end
 
@@ -169,7 +170,7 @@ end
 
 fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
 fit_mle(g::NormalKnownMu, ss::NormalKnownMuStats) = Normal(g.μ, sqrt(ss.s2 / ss.tw))
-fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.s / ss.tw, g.σ)
+fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, g.σ)
 
 # generic fit_mle methods
 

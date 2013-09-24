@@ -1,25 +1,27 @@
 # Fallback functions for conjugates
 
-posterior(pri::Distribution, G::IncompleteFormulation, x) = posterior(pri, suffstats(G, x))
-posterior(pri::Distribution, G::IncompleteFormulation, x, w) = posterior(pri, suffstats(G, x, w))
+posterior_canon(pri, G::IncompleteFormulation, x) = posterior_canon(pri, suffstats(G, x))
+posterior_canon(pri, G::IncompleteFormulation, x, w) = posterior_canon(pri, suffstats(G, x, w))
 
-posterior_rand(pri::Distribution, s::SufficientStats) = rand(posterior(pri, s))
-posterior_rand(pri::Distribution, G::IncompleteFormulation, x) = rand(posterior(pri, G, x))
-posterior_rand(pri::Distribution, G::IncompleteFormulation, x, w) = rand(posterior(pri, G, x, w))
+posterior{P<:Distribution}(pri::P, ss::SufficientStats) = convert(P, posterior_canon(pri, ss)) 
+posterior{P<:Distribution}(pri::P, G::IncompleteFormulation, x) = convert(P, posterior_canon(pri, G, x))
+posterior{P<:Distribution}(pri::P, G::IncompleteFormulation, x, w) = convert(P, posterior_canon(pri, G, x, w))
 
-posterior_rand!(r::Array, pri::Distribution, s::SufficientStats) = rand!(posterior(pri, s), r)
-posterior_rand!(r::Array, pri::Distribution, G::IncompleteFormulation, x) = rand!(posterior(pri, G, x), r)
-posterior_rand!(r::Array, pri::Distribution, G::IncompleteFormulation, x, w) = rand!(posterior(pri, G, x, w), r)
+posterior_rand(pri, ss::SufficientStats) = rand(posterior_canon(pri, ss))
+posterior_rand(pri, G::IncompleteFormulation, x) = rand(posterior_canon(pri, G, x))
+posterior_rand(pri, G::IncompleteFormulation, x, w) = rand(posterior_canon(pri, G, x, w))
 
-posterior_mode(pri::Distribution, s::SufficientStats) = mode(posterior(pri, s))
-posterior_mode(pri::Distribution, G::IncompleteFormulation, x) = mode(posterior(pri, G, x))
-posterior_mode(pri::Distribution, G::IncompleteFormulation, x, w) = mode(posterior(pri, G, x, w))
+posterior_rand!(r::Array, pri, ss::SufficientStats) = rand!(posterior_canon(pri, ss), r)
+posterior_rand!(r::Array, pri, G::IncompleteFormulation, x) = rand!(posterior_canon(pri, G, x), r)
+posterior_rand!(r::Array, pri, G::IncompleteFormulation, x, w) = rand!(posterior_canon(pri, G, x, w), r)
 
-posterior_make{D<:Distribution}(::Type{D}, θ) = D(θ) 
-fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x) = posterior_make(D, posterior_mode(pri, D, x))
-fit_map{D<:Distribution}(pri::Distribution, ::Type{D}, x, w) = posterior_make(D, posterior_mode(pri, D, x, w))
+posterior_mode(pri, ss::SufficientStats) = mode(posterior_canon(pri, ss))
+posterior_mode(pri, G::IncompleteFormulation, x) = mode(posterior_canon(pri, G, x))
+posterior_mode(pri, G::IncompleteFormulation, x, w) = mode(posterior_canon(pri, G, x, w))
 
-posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x) = D(rand(posterior(pri, G, x))...)
-posterior_sample{D<:Distribution}(pri::Distribution, G::Type{D}, x, w) = D(rand(posterior(pri, G, x, w))...)
-posterior_sample{D<:Distribution,G<:Distribution}(post::D, ::Type{G}) = G(rand(post)...)
+fit_map(pri, G::IncompleteFormulation, x) = complete(G, pri, posterior_mode(pri, G, x))
+fit_map(pri, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_mode(pri, G, x, w))
+
+posterior_randmodel(pri, G::IncompleteFormulation, x) = complete(G, pri, posterior_rand(pri, G, x))
+posterior_randmodel(pri, G::IncompleteFormulation, x, w) = complete(G, pri, posterior_rand(pri, G, x, w))
 

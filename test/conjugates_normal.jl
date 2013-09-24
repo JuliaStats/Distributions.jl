@@ -7,7 +7,7 @@ using Distributions
 n = 100
 w = rand(100)
 
-# normal - normal (known sigma)
+# Νormal - Νormal (known sigma)
 
 pri = Normal(1.0, 5.0)
 
@@ -38,9 +38,10 @@ f = fit_map((pri, 3.0), Normal, x, w)
 @test f.μ == r
 @test f.σ == 3.0
 
-# inversegamma - normal (known mu)
 
-pri = InverseGamma(1.5, 0.5) # β = 2.0
+# ΙnverseGamma - Νormal (known mu)
+
+pri = InverseGamma(1.5, 0.5) 
 
 x = rand(Normal(2.0, 3.0), n)
 p = posterior((2.0, pri), Normal, x)
@@ -48,62 +49,108 @@ p = posterior((2.0, pri), Normal, x)
 @test_approx_eq p.shape pri.shape + n / 2
 @test_approx_eq p.scale pri.scale + sum(abs2(x - 2.0)) / 2
 
+r = posterior_mode((2.0, pri), Normal, x)
+@test_approx_eq r mode(p)
+
+f = fit_map((2.0, pri), Normal, x)
+@test isa(f, Normal)
+@test f.μ == 2.0
+@test_approx_eq abs2(f.σ) r
+
 p = posterior((2.0, pri), Normal, x, w)
 @test isa(p, InverseGamma)
 @test_approx_eq p.shape pri.shape + sum(w) / 2
 @test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
 
+r = posterior_mode((2.0, pri), Normal, x, w)
+@test_approx_eq r mode(p)
 
-# MvNormal -- Normal (known covariance)
+f = fit_map((2.0, pri), Normal, x, w)
+@test isa(f, Normal)
+@test f.μ == 2.0
+@test_approx_eq abs2(f.σ) r
 
-n = 3
-p = 4
-X = reshape(Float64[1:12], p, n)
-w = rand(n)
-Xw = X * diagm(w)
 
-# Convoluted way to put 1's on diag
-Sigma = eye(p)
-Sigma += 0.25
-Sigma -= 0.25*eye(p)
+# Gamma - Νormal (known mu)
 
-ss = suffstats(MvNormalKnownSigma(Sigma), X)
-ssw = suffstats(MvNormalKnownSigma(Sigma), X, w)
+pri = Gamma(1.5, 2.0)
 
-s_t = sum(X, 2)
-ws_t = sum(Xw, 2)
-tw_t = length(w)
-wtw_t = sum(w)
+x = rand(Normal(2.0, 3.0), n)
+p = posterior((2.0, pri), Normal, x)
+@test isa(p, Gamma)
+@test_approx_eq p.shape pri.shape + n / 2
+@test_approx_eq p.scale pri.scale + sum(abs2(x - 2.0)) / 2
 
-@test_approx_eq ss.sx s_t
-@test_approx_eq ss.tw tw_t
+r = posterior_mode((2.0, pri), Normal, x)
+@test_approx_eq r mode(p)
 
-@test_approx_eq ssw.sx ws_t
-@test_approx_eq ssw.tw wtw_t
+f = fit_map((2.0, pri), Normal, x)
+@test isa(f, Normal)
+@test f.μ == 2.0
+@test_approx_eq abs2(f.σ) inv(r)
 
-# Posterior
-n = 100
-mu_true = [2., 3.]
-Sig_true = eye(2)
-Sig_true[1,2] = Sig_true[2,1] = 0.25
-mu0 = [2.5, 2.5]
-Sig0 = eye(2)
-Sig0[1,2] = Sig0[2,1] = 0.5
-X = rand(MultivariateNormal(mu_true, Sig_true), n)
+p = posterior((2.0, pri), Normal, x, w)
+@test isa(p, Gamma)
+@test_approx_eq p.shape pri.shape + sum(w) / 2
+@test_approx_eq p.scale pri.scale + dot(w, abs2(x - 2.0)) / 2
 
-pri = MultivariateNormal(mu0, Sig0)
+r = posterior_mode((2.0, pri), Normal, x, w)
+@test_approx_eq r mode(p)
 
-post = posterior((pri, Sig_true), MultivariateNormal, X)
-@test isa(post, MultivariateNormal)
+f = fit_map((2.0, pri), Normal, x, w)
+@test isa(f, Normal)
+@test f.μ == 2.0
+@test_approx_eq abs2(f.σ) inv(r)
 
-@test_approx_eq post.μ inv(inv(Sig0) + n*inv(Sig_true))*(n*inv(Sig_true)*mean(X,2) + inv(Sig0)*mu0)
-@test_approx_eq post.Σ.mat inv(inv(Sig0) + n*inv(Sig_true))
 
-# posterior_sample
+# NormalInverseGamma - Normal
 
-ps = posterior_sample((pri, Sig_true), MultivariateNormal, X)
+mu_true = 2.
+sig2_true = 3.
+x = rand(Normal(mu_true, sig2_true), n)
 
-@test isa(ps, MultivariateNormal)
-@test insupport(ps, ps.μ)
-@test insupport(InverseWishart, ps.Σ.mat)
+mu0 = 2.
+v0 = 3.
+shape0 = 5.
+scale0 = 2.
+pri = NormalInverseGamma(mu0, v0, shape0, scale0)
+
+post = posterior(pri, Normal, x)
+@test isa(post, NormalInverseGamma)
+
+@test_approx_eq post.mu (mu0/v0 + n*mean(x))/(1./v0 + n)
+@test_approx_eq post.v0 1./(1./v0 + n)
+@test_approx_eq post.shape shape0 + 0.5*n
+@test_approx_eq post.scale scale0 + 0.5*(n-1)*var(x) + n./v0./(n + 1./v0)*0.5*(mean(x)-mu0).^2
+
+ps = posterior_randmodel(pri, Normal, x)
+
+@test isa(ps, Normal)
+@test insupport(ps,ps.μ) && ps.σ > zero(ps.σ)
+
+
+# NormalGamma - Normal
+
+mu_true = 2.
+tau2_true = 3.
+x = rand(Normal(mu_true, 1./tau2_true), n)
+
+mu0 = 2.
+nu0 = 3.
+shape0 = 5.
+rate0 = 2.
+pri = NormalGamma(mu0, nu0, shape0, rate0)
+
+post = posterior(pri, Normal, x)
+@test isa(post, NormalGamma)
+
+@test_approx_eq post.mu (nu0*mu0 + n*mean(x))./(nu0 + n)
+@test_approx_eq post.nu nu0 + n
+@test_approx_eq post.shape shape0 + 0.5*n
+@test_approx_eq post.rate rate0 + 0.5*(n-1)*var(x) + n*nu0/(n + nu0)*0.5*(mean(x)-mu0).^2
+
+ps = posterior_randmodel(pri, Normal, x)
+
+@test isa(ps, Normal)
+@test insupport(ps, ps.μ) && ps.σ > zero(ps.σ)
 

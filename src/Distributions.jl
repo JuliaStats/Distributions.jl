@@ -37,6 +37,7 @@ export
     Chisq,
     Cosine,
     DiagNormal,
+    DiagNormalCanon,
     Dirichlet,
     DiscreteUniform,
     DoubleExponential,
@@ -48,13 +49,16 @@ export
     Exponential,
     FDist,
     Gamma,
+    GenericMvNormal,
+    GenericMvNormalCanon,
     Geometric,
     Gumbel,
     HyperGeometric,
     InverseWishart,
     InverseGamma,
     InverseGaussian,  
-    IsoNormal,  
+    IsoNormal,
+    IsoNormalCanon,  
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -66,6 +70,7 @@ export
     Multinomial,
     MultivariateNormal,
     MvNormal,
+    MvNormalCanon,
     MvNormalKnownSigma,
     NegativeBinomial,
     NoncentralBeta,
@@ -73,6 +78,7 @@ export
     NoncentralF,
     NoncentralT,
     Normal,
+    NormalCanon,
     NormalGamma,
     NormalInverseGamma,
     NormalInverseWishart,
@@ -92,12 +98,14 @@ export
 
     # methods
     binaryentropy, # entropy of distribution in bits
+    canonform,     # get canonical form of a distribution
     ccdf,          # complementary cdf, i.e. 1 - cdf
     cdf,           # cumulative distribution function
     cf,            # characteristic function
     cgf,           # cumulant generating function
     cquantile,     # complementary quantile (i.e. using prob in right hand tail)
     cumulant,      # cumulants of distribution
+    complete,      # turn an incomplete formulation into a complete distribution
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
     fit,           # fit a distribution to data (using default method)
@@ -107,6 +115,7 @@ export
     freecumulant,  # free cumulants of distribution
     gmvnormal,     # a generic function to construct multivariate normal distributions
     insupport,     # predicate, is x in the support of the distribution?
+    invcov,        # get the inversed covariance
     invlogccdf,    # complementary quantile based on log probability
     invlogcdf,     # quantile based on log probability
     isplatykurtic, # Is excess kurtosis > 0.0?
@@ -126,12 +135,12 @@ export
     logpdf!,       # evaluate log pdf to provided storage
     logpmf,        # log probability mass
     logpmf!,       # evaluate log pmf to provided storage
-    posterior,       # get posterior distribution given prior and observed data
+    posterior,        # get posterior distribution given prior and observed data
+    posterior_canon,  # get the canonical form of the posterior distribution
     posterior_mode,  # get the mode of posterior distribution
     posterior_rand,  # draw samples from the posterior distribution
     posterior_rand!, 
-    posterior_make,  # create a distribution/model from params obtained from posterior 
-    posterior_sample,
+    posterior_randmodel,
     scale,         # scale parameter of a distribution
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
@@ -249,6 +258,7 @@ include(joinpath("univariate", "noncentralchisq.jl"))
 include(joinpath("univariate", "noncentralf.jl"))
 include(joinpath("univariate", "noncentralt.jl"))
 include(joinpath("univariate", "normal.jl"))
+include(joinpath("univariate", "normalcanon.jl"))
 include(joinpath("univariate", "pareto.jl"))
 include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "rayleigh.jl"))
@@ -261,7 +271,8 @@ include(joinpath("univariate", "weibull.jl"))
 # Multivariate distributions
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
-include(joinpath("multivariate", "multivariatenormal.jl"))
+include(joinpath("multivariate", "mvnormal.jl"))
+include(joinpath("multivariate", "mvnormalcanon.jl"))
 include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
