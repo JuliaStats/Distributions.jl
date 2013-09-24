@@ -30,8 +30,7 @@ macro ignore_methoderror(ex)
 end
 
 
-for d in [
-          Arcsine(),
+for d in [Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
           Bernoulli(0.9),
@@ -108,6 +107,9 @@ for d in [
           Normal(0.0, 1.0),
           Normal(-1.0, 10.0),
           Normal(1.0, 10.0),
+          NormalCanon(),
+          NormalCanon(-1.0, 0.5),
+          NormalCanon(2.0, 0.8),
           Pareto(),
           Pareto(5.0,2.0),
           Pareto(2.0,5.0),

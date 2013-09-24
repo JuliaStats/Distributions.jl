@@ -14,9 +14,10 @@ tests = [
 	"edgeworth",
 	"matrix",
 	"vonmisesfisher",
+	"compoundvariate",
 	"conjugates",
     "conjugates_normal",
-    "compoundvariate"]
+    "conjugates_mvnormal"]
 
 println("Running tests:")
 

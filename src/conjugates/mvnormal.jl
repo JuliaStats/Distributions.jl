@@ -1,38 +1,113 @@
 # Conjugates for Multivariate Normal
 
+#### Generic MvNormal -- Generic MvNormal (Σ is known)
 
-##### 
-#
-# Cases where covariance is known, the goal is to infer the posterior of mu
-#
-
-function posterior(prior::GenericMultivariateNormal, ss::GenericMvNormalKnownSigmaStats)
+function posterior_canon(prior::GenericMvNormal, ss::GenericMvNormalKnownSigmaStats)
     invΣ0 = inv(prior.Σ)
     μ0 = prior.μ
     invΣp = add_scal(invΣ0, ss.invΣ, ss.tw)
-    Σp = inv(invΣp)
-    μp = Σp * add!(invΣ0 * μ0, ss.invΣ * ss.sx)
-	return gmvnormal(μp, Σp)
+    h = add!(invΣ0 * μ0, ss.invΣ * ss.sx)
+	return GenericMvNormalCanon(h, invΣp)
+end
+
+function posterior_canon{Pri<:GenericMvNormal,Cov<:AbstractPDMat}(
+    prior::(Pri, Cov), 
+    G::Type{GenericMvNormal{Cov}}, 
+    x::Matrix) 
+
+	μpri::Pri, Σ::Cov = prior
+	posterior_canon(μpri, suffstats(GenericMvNormalKnownSigma{Cov}(Σ), x))
+end
+
+function posterior_canon{Pri<:GenericMvNormal,Cov<:AbstractPDMat}(
+    prior::(Pri, Cov), 
+    G::Type{GenericMvNormal{Cov}}, 
+    x::Matrix, w::Array{Float64}) 
+
+    μpri::Pri, Σ::Cov = prior
+    posterior_canon(μpri, suffstats(GenericMvNormalKnownSigma{Cov}(Σ), x, w))
+end
+
+function posterior{Pri<:GenericMvNormal,Cov<:AbstractPDMat}(
+    prior::(Pri, Cov), 
+    G::Type{GenericMvNormal{Cov}}, 
+    x::Matrix) 
+
+    convert(Pri, posterior_canon(prior, G, x))
+end
+
+function posterior{Pri<:GenericMvNormal,Cov<:AbstractPDMat}(
+    prior::(Pri, Cov), 
+    G::Type{GenericMvNormal{Cov}}, 
+    x::Matrix, w::Array{Float64}) 
+
+    convert(Pri, posterior_canon(prior, G, x, w))
+end
+
+function complete{Pri<:GenericMvNormal,Cov<:AbstractPDMat}(
+    G::Type{GenericMvNormal{Cov}},
+    pri::(Pri, Cov), 
+    μ::Vector{Float64})
+
+    GenericMvNormal(μ, pri[2]::Cov)
 end
 
 
-
-function posterior{T<:Real}(prior::(MultivariateNormal, Matrix{Float64}), ::Type{MultivariateNormal}, X::Matrix{T}) 
-	pri_μ::MultivariateNormal, Σ::Matrix{Float64} = prior
-	posterior(pri_μ, suffstats(MvNormalKnownSigma(Σ), X))
+function posterior_canon(pri::(MvNormal, Matrix{Float64}), G::Type{MvNormal}, args...) 
+    μpri::MvNormal, Σmat::Matrix{Float64} = pri
+    posterior_canon((μpri, PDMat(Σmat)), G, args...)
 end
 
-function posterior{T<:Real}(prior::(MultivariateNormal, Matrix{Float64}), ::Type{MultivariateNormal}, X::Matrix{T}, w::Array{Float64}) 
-	pri_μ::MultivariateNormal, Σ::Matrix{Float64} = prior
-	posterior(pri_μ, suffstats(MvNormalKnownSigma(Σ), X, w))
+function posterior(pri::(MvNormal, Matrix{Float64}), G::Type{MvNormal}, args...) 
+    μpri::MvNormal, Σmat::Matrix{Float64} = pri
+    posterior((μpri, PDMat(Σmat)), G, args...)
 end
 
-function posterior_sample{T<:Real}(prior::(MultivariateNormal, Matrix{Float64}), ::Type{MultivariateNormal}, X::Matrix{T})
-    mu = rand(posterior(prior[1], suffstats(MvNormalKnownSigma(prior[2]), X)))
-    return MultivariateNormal(mu, prior[2]) 
+function complete(G::Type{MvNormal}, pri::(MvNormal, Matrix{Float64}), μ::Vector{Float64})
+    GenericMvNormal(μ, PDMat(pri[2]))
 end
 
-function posterior_sample{T<:Real}(prior::(MultivariateNormal, Matrix{Float64}), ::Type{MultivariateNormal}, X::Matrix{T}, w::Array{Float64})
-    mu = rand(posterior(prior[1], suffstats(MvNormalKnownSigma(prior[2]), X, w)))
-    return MultivariateNormal(mu, prior[2]) 
+
+#### NormalInverseWishart -- Normal
+
+function posterior_canon(prior::NormalInverseWishart, ss::MvNormalStats)
+    mu0 = prior.mu
+    kappa0 = prior.kappa
+    LamC0 = prior.Lamchol
+    nu0 = prior.nu
+
+    kappa = kappa0 + ss.tw
+    mu = (kappa0.*mu0 + ss.s) ./ kappa
+    nu = nu0 + ss.tw
+
+    Lam0 = LamC0[:U]'*LamC0[:U]
+    z = prior.zeromean ? ss.m : ss.m - mu0
+    Lam = Lam0 + ss.s2 + kappa0*ss.tw/kappa*(z*z')
+
+    return NormalInverseWishart(mu, kappa, cholfact(Lam), nu)
 end
+
+complete(G::Type{MvNormal}, pri::NormalInverseWishart, s::(Vector{Float64}, Matrix{Float64})) = MvNormal(s...)
+
+
+#### NormalWishart -- Normal
+
+function posterior_canon(prior::NormalWishart, ss::MvNormalStats)
+    mu0 = prior.mu
+    kappa0 = prior.kappa
+    TC0 = prior.Tchol
+    nu0 = prior.nu
+
+    kappa = kappa0 + ss.tw
+    nu = nu0 + ss.tw
+    mu = (kappa0.*mu0 + ss.s) ./ kappa
+
+    Lam0 = TC0[:U]'*TC0[:U]
+    z = prior.zeromean ? ss.m : ss.m - mu0
+    Lam = Lam0 + ss.s2 + kappa0*ss.tw/kappa*(z*z')
+
+    return NormalWishart(mu, kappa, cholfact(Lam), nu)
+end
+
+complete(G::Type{MvNormal}, pri::NormalWishart, s::(Vector{Float64}, Matrix{Float64})) = MvNormal(s[1], inv(PDMat(s[2])))
+
