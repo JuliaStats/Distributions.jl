@@ -141,7 +141,7 @@ mode(d::Categorical) = indmax(d.prob)
 function modes(d::Categorical)
     K = d.K
     p = d.prob
-    maxp = max(p)
+    maxp = maximum(p)
     r = Array(Int, 0)
     for k = 1:K
         @inbounds if p[k] == maxp
@@ -225,7 +225,7 @@ end
 fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_mle(Categorical, data...)
 fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Categorical, data..., w)
 
-fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, max(x), x)
-fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_mle(Categorical, max(x), x, w)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, maximum(x), x)
+fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_mle(Categorical, maximum(x), x, w)
 
 

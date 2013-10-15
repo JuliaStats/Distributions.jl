@@ -36,8 +36,8 @@ for i = 1:n
 	@assert v[1] != v[2]
 	x[:,i] = v
 end
-@test min(x) == 11
-@test max(x) == 15
+@test minimum(x) == 11
+@test maximum(x) == 15
 
 x[:] -= 10  # brings x to 1:5
 p0 = fill(1/5, 5)
@@ -53,8 +53,8 @@ for i = 1 : n
 	@assert sv[1] < sv[2] < sv[3] < sv[4]
 	x[:,i] = v
 end
-@test min(x) == 11
-@test max(x) == 20
+@test minimum(x) == 11
+@test maximum(x) == 20
 
 x[:] -= 10
 p0 = fill(0.1, 10)
@@ -72,8 +72,8 @@ for i = 1 : n
 	@assert sv[1] < sv[2] < sv[3] < sv[4]
 	x[:,i] = v
 end
-@test min(x) >= a
-@test max(x) <= b
+@test minimum(x) >= a
+@test maximum(x) <= b
 
 
 #### weighted sampling

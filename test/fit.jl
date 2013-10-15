@@ -17,8 +17,8 @@ w = rand(n0)
 x = rand(DiscreteUniform(10, 15), n0)
 d = fit(DiscreteUniform, x)
 @test isa(d, DiscreteUniform)
-@test min(d) == min(x)
-@test max(d) == max(x)
+@test min(d) == minimum(x)
+@test max(d) == maximum(x)
 
 d = fit(DiscreteUniform, rand(DiscreteUniform(10, 15), N))
 @test min(d) == 10
@@ -244,8 +244,8 @@ x = rand(Uniform(1.2, 5.8), n0)
 d = fit(Uniform, x)
 @test isa(d, Uniform)
 @test 1.2 <= min(d) <= max(d) <= 5.8
-@test min(d) == min(x)
-@test max(d) == max(x)
+@test min(d) == minimum(x)
+@test max(d) == maximum(x)
 
 d = fit(Uniform, rand(Uniform(1.2, 5.8), N))
 @test 1.2 <= min(d) <= max(d) <= 5.8

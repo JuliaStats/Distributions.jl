@@ -53,11 +53,11 @@ for d in [
     # check that we can generate many random draws at once
     x = rand(d, n)
     @test isa(x, Vector{Int})
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     # check that we can generate many random draws in-place
     rand!(d, x)
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     ####
     #
