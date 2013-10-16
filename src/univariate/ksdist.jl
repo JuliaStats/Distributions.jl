@@ -11,9 +11,9 @@ isupperbounded(::Union(KSDist, Type{KSDist})) = true
 islowerbounded(::Union(KSDist, Type{KSDist})) = true
 isbounded(::Union(KSDist, Type{KSDist})) = true
 
-min(d::KSDist) = 1 / (2 * d.n)
-max(d::KSDist) = 1.0
-insupport(d::KSDist, x::Real) = min(d) <= x <= 1.0
+minimum(d::KSDist) = 1 / (2 * d.n)
+maximum(d::KSDist) = 1.0
+insupport(d::KSDist, x::Real) = minimum(d) <= x <= 1.0
 
 # TODO: implement Simard and L'Ecuyer (2011) meta-algorithm
 # requires Pomeranz and Pelz-Good algorithms

@@ -71,8 +71,8 @@ islowerbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariate
 isbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
 
 hasfinitesupport(d::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
-min(d::EmpiricalUnivariateDistribution) = d.values[1]
-max(d::EmpiricalUnivariateDistribution) = d.values[end]
+minimum(d::EmpiricalUnivariateDistribution) = d.values[1]
+maximum(d::EmpiricalUnivariateDistribution) = d.values[end]
 support(d::EmpiricalUnivariateDistribution) = d.support
 
 ### fit model

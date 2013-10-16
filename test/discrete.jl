@@ -31,8 +31,8 @@ for d in [
     # NB: uncomment if some tests failed
     # println(d)
 
-    xmin = min(d)
-    xmax = max(d)
+    xmin = minimum(d)
+    xmax = maximum(d)
     @assert isa(xmin, Int)
     @assert isa(xmax, Int)
     @assert xmin <= xmax
