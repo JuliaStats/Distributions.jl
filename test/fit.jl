@@ -17,12 +17,12 @@ w = rand(n0)
 x = rand(DiscreteUniform(10, 15), n0)
 d = fit(DiscreteUniform, x)
 @test isa(d, DiscreteUniform)
-@test min(d) == min(x)
-@test max(d) == max(x)
+@test minimum(d) == minimum(x)
+@test maximum(d) == maximum(x)
 
 d = fit(DiscreteUniform, rand(DiscreteUniform(10, 15), N))
-@test min(d) == 10
-@test max(d) == 15
+@test minimum(d) == 10
+@test maximum(d) == 15
 
 
 # Bernoulli
@@ -243,14 +243,14 @@ d = fit_mle(Normal, x, w; sigma=σ)
 x = rand(Uniform(1.2, 5.8), n0)
 d = fit(Uniform, x)
 @test isa(d, Uniform)
-@test 1.2 <= min(d) <= max(d) <= 5.8
-@test min(d) == min(x)
-@test max(d) == max(x)
+@test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+@test minimum(d) == minimum(x)
+@test maximum(d) == maximum(x)
 
 d = fit(Uniform, rand(Uniform(1.2, 5.8), N))
-@test 1.2 <= min(d) <= max(d) <= 5.8
-@test_approx_eq_eps min(d) 1.2 0.02
-@test_approx_eq_eps max(d) 5.8 0.02
+@test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+@test_approx_eq_eps minimum(d) 1.2 0.02
+@test_approx_eq_eps maximum(d) 5.8 0.02
 
 
 # Gamma

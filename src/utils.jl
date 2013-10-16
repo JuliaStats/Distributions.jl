@@ -121,8 +121,8 @@ macro continuous_distr_support(D, lb, ub)
 			isupperbounded(::Union($D, Type{$D})) = true
 			islowerbounded(::Union($D, Type{$D})) = true
 			isbounded(::Union($D, Type{$D})) = true
-			min(::Union($D, Type{$D})) = $lb
-			max(::Union($D, Type{$D})) = $ub
+			minimum(::Union($D, Type{$D})) = $lb
+			maximum(::Union($D, Type{$D})) = $ub
 			insupport(::Union($D, Type{$D}), x::Real) = ($lb <= x <= $ub)
 		end)
 
@@ -131,8 +131,8 @@ macro continuous_distr_support(D, lb, ub)
 			isupperbounded(::Union($D, Type{$D})) = false
 			islowerbounded(::Union($D, Type{$D})) = true
 			isbounded(::Union($D, Type{$D})) = false
-			min(::Union($D, Type{$D})) = $lb
-			max(::Union($D, Type{$D})) = $ub
+			minimum(::Union($D, Type{$D})) = $lb
+			maximum(::Union($D, Type{$D})) = $ub
 			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x >= $lb)
 		end)
 
@@ -141,8 +141,8 @@ macro continuous_distr_support(D, lb, ub)
 			isupperbounded(::Union($D, Type{$D})) = true
 			islowerbounded(::Union($D, Type{$D})) = false
 			isbounded(::Union($D, Type{$D})) = false
-			min(::Union($D, Type{$D})) = $lb
-			max(::Union($D, Type{$D})) = $ub
+			minimum(::Union($D, Type{$D})) = $lb
+			maximum(::Union($D, Type{$D})) = $ub
 			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x <= $ub)
 		end)
 
@@ -151,8 +151,8 @@ macro continuous_distr_support(D, lb, ub)
 			isupperbounded(::Union($D, Type{$D})) = false
 			islowerbounded(::Union($D, Type{$D})) = false
 			isbounded(::Union($D, Type{$D})) = false
-			min(::Union($D, Type{$D})) = $lb
-			max(::Union($D, Type{$D})) = $ub
+			minimum(::Union($D, Type{$D})) = $lb
+			maximum(::Union($D, Type{$D})) = $ub
 			insupport(::Union($D, Type{$D}), x::Real) = isfinite(x)
 		end)
 

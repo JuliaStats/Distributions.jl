@@ -11,8 +11,8 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
-min(d::Binomial) = 0
-max(d::Binomial) = d.size
+minimum(d::Binomial) = 0
+maximum(d::Binomial) = d.size
 
 @_jl_dist_2p Binomial binom
 
@@ -66,8 +66,8 @@ isupperbounded(d::Union(Binomial, Type{Binomial})) = true
 islowerbounded(d::Union(Binomial, Type{Binomial})) = true
 isbounded(d::Union(Binomial, Type{Binomial})) = true
 
-min(d::Union(Binomial, Type{Binomial})) = 0
-max(d::Binomial) = d.size
+minimum(d::Union(Binomial, Type{Binomial})) = 0
+maximum(d::Binomial) = d.size
 support(d::Binomial) = 0:d.size
 
 insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size

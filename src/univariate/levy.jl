@@ -21,8 +21,8 @@ isupperbounded(::Union(Levy, Type{Levy})) = false
 islowerbounded(::Union(Levy, Type{Levy})) = true
 isbounded(::Union(Levy, Type{Levy})) = false
 
-min(d::Levy) = d.location
-max(d::Levy) = Inf
+minimum(d::Levy) = d.location
+maximum(d::Levy) = Inf
 insupport(d::Levy, x::Real) = d.location <= x && isfinite(x)
 
 mean(d::Levy) = Inf

@@ -37,9 +37,9 @@ isupperbounded(::Union(Triangular, Type{Triangular})) = true
 islowerbounded(::Union(Triangular, Type{Triangular})) = true
 isbounded(::Union(Triangular, Type{Triangular})) = true
 
-min(d::Triangular) = d.location - d.scale
-max(d::Triangular) = d.location + d.scale
-insupport(d::Triangular, x::Real) = min(d) <= x <= max(d)
+minimum(d::Triangular) = d.location - d.scale
+maximum(d::Triangular) = d.location + d.scale
+insupport(d::Triangular, x::Real) = minimum(d) <= x <= maximum(d)
 
 
 kurtosis(d::Triangular) = -0.6

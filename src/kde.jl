@@ -48,8 +48,8 @@ function kde{T <: Real}(data::Vector{T},
     end
 
     # Find interval that will contain almost all mass
-    dlo = min(data) - 3 * window
-    dhi = max(data) + 3 * window
+    dlo = minimum(data) - 3 * window
+    dhi = maximum(data) + 3 * window
 
     # Check that interval for estimation is valid
     if dlo >= dhi

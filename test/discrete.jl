@@ -31,8 +31,8 @@ for d in [
     # NB: uncomment if some tests failed
     # println(d)
 
-    xmin = min(d)
-    xmax = max(d)
+    xmin = minimum(d)
+    xmax = maximum(d)
     @assert isa(xmin, Int)
     @assert isa(xmax, Int)
     @assert xmin <= xmax
@@ -53,11 +53,11 @@ for d in [
     # check that we can generate many random draws at once
     x = rand(d, n)
     @test isa(x, Vector{Int})
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     # check that we can generate many random draws in-place
     rand!(d, x)
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     ####
     #

@@ -197,11 +197,11 @@ for d in [Arcsine(),
         for i = 1:n_samples
             c[i] = c[i]*n_samples - i
         end
-        a = max(abs(c))
+        a = maximum(abs(c))
         for i = 1:n_samples
             c[i] += 1.0
         end
-        b = max(abs(c))
+        b = maximum(abs(c))
         ks = max(a,b)
         kss = ks/n_samples
         ksp = ccdf(Kolmogorov(),ks/sqrt(n_samples))
