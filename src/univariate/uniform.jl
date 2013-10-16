@@ -14,8 +14,8 @@ isupperbounded(::Union(Uniform, Type{Uniform})) = true
 islowerbounded(::Union(Uniform, Type{Uniform})) = true
 isbounded(::Union(Uniform, Type{Uniform})) = true
 
-min(d::Uniform) = d.a
-max(d::Uniform) = d.b
+minimum(d::Uniform) = d.a
+maximum(d::Uniform) = d.b
 insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 entropy(d::Uniform) = log(d.b - d.a)

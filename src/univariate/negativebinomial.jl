@@ -23,8 +23,8 @@ isupperbounded(::Union(NegativeBinomial, Type{NegativeBinomial})) = false
 islowerbounded(::Union(NegativeBinomial, Type{NegativeBinomial})) = true
 isbounded(::Union(NegativeBinomial, Type{NegativeBinomial})) = false
 
-min(::Union(NegativeBinomial, Type{NegativeBinomial})) = 0
-max(::Union(NegativeBinomial, Type{NegativeBinomial})) = Inf
+minimum(::Union(NegativeBinomial, Type{NegativeBinomial})) = 0
+maximum(::Union(NegativeBinomial, Type{NegativeBinomial})) = Inf
 
 insupport(::NegativeBinomial, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{NegativeBinomial}, x::Real) = isinteger(x) && zero(x) <= x

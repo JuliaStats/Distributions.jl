@@ -167,7 +167,8 @@ export
     var,           # variance of distribution
     wsample        # weighted sampling from a source array
 
-import Base.mean, Base.median, Base.quantile, Base.max, Base.min, Base.scale
+import Base.mean, Base.median, Base.quantile, Base.scale
+import Base.max, Base.min, Base.maximum, Base.minimum
 import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy

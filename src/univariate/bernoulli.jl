@@ -59,8 +59,8 @@ isupperbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 islowerbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 isbounded(::Union(Bernoulli, Type{Bernoulli})) = true
 
-min(::Union(Bernoulli, Type{Bernoulli})) = 0
-max(::Union(Bernoulli, Type{Bernoulli})) = 1
+minimum(::Union(Bernoulli, Type{Bernoulli})) = 0
+maximum(::Union(Bernoulli, Type{Bernoulli})) = 1
 support(::Union(Bernoulli, Type{Bernoulli})) = 0:1
 
 insupport(::Union(Bernoulli, Type{Bernoulli}), x::Real) = (x == 0 || x == 1)
