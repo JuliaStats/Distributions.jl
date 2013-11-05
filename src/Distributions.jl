@@ -53,7 +53,7 @@ export
     GenericMvNormalCanon,
     Geometric,
     Gumbel,
-    HyperGeometric,
+    Hypergeometric,
     InverseWishart,
     InverseGamma,
     InverseGaussian,  
