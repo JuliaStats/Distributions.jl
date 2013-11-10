@@ -166,7 +166,7 @@ export
     suffstats,     # compute sufficient statistics
     var,           # variance of distribution
     wsample,       # weighted sampling from a source array
-    expected_log_det # expected logarithm of random matrix determinant
+    expected_logdet # expected logarithm of random matrix determinant
 
 import Base.mean, Base.median, Base.quantile, Base.scale
 import Base.max, Base.min, Base.maximum, Base.minimum

@@ -10,7 +10,7 @@ W = Wishart(3., V)
 
 # logdet
 
-@test_approx_eq expected_log_det(W) 1.9441809588650447
+@test_approx_eq expected_logdet(W) 1.9441809588650447
 
 # entropy
 
