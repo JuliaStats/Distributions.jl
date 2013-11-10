@@ -52,7 +52,7 @@ function expected_logdet(W::Wishart)
     return logd
 end
 
-function log_norm(W::Wishart)
+function lognorm(W::Wishart)
     d = dim(W)
     return (W.nu / 2) * logdet(W.Schol) + (d * W.nu / 2) * log(2) + lpgamma(d, W.nu / 2)
 end
@@ -62,7 +62,7 @@ function logpdf(W::Wishart, X::Matrix{Float64})
         return -Inf
     else
         d = dim(W)
-        logd = -log_norm(W)
+        logd = -lognorm(W)
         logd += 0.5 * (W.nu - d - 1.0) * logdet(X)
         logd -= 0.5 * trace(W.Schol \ X)
         return logd
@@ -88,7 +88,7 @@ end
 
 function entropy(W::Wishart)
     d = dim(W)
-    return log_norm(W) - (W.nu - d - 1) / 2 * expected_logdet(W) + W.nu * d / 2
+    return lognorm(W) - (W.nu - d - 1) / 2 * expected_logdet(W) + W.nu * d / 2
 end
 
 var(w::Wishart) = error("Not yet implemented")

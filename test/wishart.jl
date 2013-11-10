@@ -1,7 +1,5 @@
 # Tests on Wishart distributions
 
-require("../src/Distributions.jl")
-
 using Distributions
 using Base.Test
 
