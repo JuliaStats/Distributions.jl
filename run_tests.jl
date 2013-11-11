@@ -17,7 +17,8 @@ tests = [
 	"compoundvariate",
 	"conjugates",
     "conjugates_normal",
-    "conjugates_mvnormal"]
+    "conjugates_mvnormal",
+    "wishart"]
 
 println("Running tests:")
 

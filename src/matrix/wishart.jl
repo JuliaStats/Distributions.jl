@@ -36,16 +36,34 @@ mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 
 pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
 
+dim(W::Wishart) = size(W.Schol, 1)
+
+function expected_logdet(W::Wishart)
+    logd = 0.
+    d = dim(W)
+
+    for i=1:d
+        logd += digamma(0.5 * (W.nu + 1 - i))
+    end
+
+    logd += d * log(2)
+    logd += logdet(W.Schol)
+
+    return logd
+end
+
+function lognorm(W::Wishart)
+    d = dim(W)
+    return (W.nu / 2) * logdet(W.Schol) + (d * W.nu / 2) * log(2) + lpgamma(d, W.nu / 2)
+end
+
 function logpdf(W::Wishart, X::Matrix{Float64})
     if !insupport(W, X)
         return -Inf
     else
-        p = size(X, 1)
-        logd::Float64 = W.nu * p / 2.0 * log(2.0)
-        logd += W.nu / 2.0 * log(det(W.Schol))
-        logd += lpgamma(p, W.nu / 2.0)
-        logd = -logd
-        logd += 0.5 * (W.nu - p - 1.0) * logdet(X)
+        d = dim(W)
+        logd = -lognorm(W)
+        logd += 0.5 * (W.nu - d - 1.0) * logdet(X)
         logd -= 0.5 * trace(W.Schol \ X)
         return logd
     end
@@ -66,6 +84,11 @@ function rand(w::Wishart)
     end
     Z = X * w.Schol[:U]
     return Z' * Z
+end
+
+function entropy(W::Wishart)
+    d = dim(W)
+    return lognorm(W) - (W.nu - d - 1) / 2 * expected_logdet(W) + W.nu * d / 2
 end
 
 var(w::Wishart) = error("Not yet implemented")
