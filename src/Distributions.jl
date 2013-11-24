@@ -88,7 +88,7 @@ export
     Rayleigh,
     Skellam,
     TDist,
-    Triangular,
+    TriangularDist,
     Truncated,
     Uniform,
     VonMisesFisher,
