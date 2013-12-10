@@ -72,6 +72,7 @@ export
     MvNormal,
     MvNormalCanon,
     MvNormalKnownSigma,
+    MvTDist,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
@@ -275,6 +276,7 @@ include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
 include(joinpath("multivariate", "mvnormal.jl"))
 include(joinpath("multivariate", "mvnormalcanon.jl"))
+include(joinpath("multivariate", "mvtdist.jl"))
 include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
