@@ -56,14 +56,14 @@ IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(flo
 
 ## convenient function to construct distributions of proper type based on arguments
 
-gmvtdist(df::Float64, μ::Vector{Float64}, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
-gmvtdist(df::Float64, C::AbstractPDMat) = GenericMvTDist(df, C)
+mvtdist(df::Float64, μ::Vector{Float64}, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
+mvtdist(df::Float64, C::AbstractPDMat) = GenericMvTDist(df, C)
 
-gmvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, float64(σ))
-gmvtdist(df::Float64, d::Int, σ::Float64) = IsoTDist(d, σ)
-gmvtdist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = DiagTDist(df, μ, σ)
-gmvtdist(df::Float64, μ::Vector{Float64}, Σ::Matrix{Float64}) = MvTDist(df, μ, Σ)
-gmvtdist(df::Float64, Σ::Matrix{Float64}) = MvTDist(df, Σ)
+mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, float64(σ))
+mvtdist(df::Float64, d::Int, σ::Float64) = IsoTDist(d, σ)
+mvtdist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = DiagTDist(df, μ, σ)
+mvtdist(df::Float64, μ::Vector{Float64}, Σ::Matrix{Float64}) = MvTDist(df, μ, Σ)
+mvtdist(df::Float64, Σ::Matrix{Float64}) = MvTDist(df, Σ)
 
 # Basic statistics
 
