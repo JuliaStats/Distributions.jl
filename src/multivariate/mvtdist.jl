@@ -124,3 +124,35 @@ function logpdf!(r::Array{Float64}, d::AbstractMvTDist, x::Matrix{Float64})
   end 
   r
 end
+
+# Sampling (for GenericMvTDist)
+
+function rand!(d::GenericMvTDist, x::Vector{Float64})
+  normdim = d.dim
+  normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+  chisqd = Chisq(d.df)
+  y = Array(Float64, d.dim)
+  unwhiten!(normd.Σ, randn!(x))
+  rand!(chisqd, y)
+  y = sqrt(y/(d.df))
+  divide!(x, y)
+  if !d.zeromean
+    add!(x, d.μ)
+  end
+  x
+end
+
+function rand!(d::GenericMvTDist, x::Matrix{Float64})
+  normdim = d.dim
+  normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+  chisqd = Chisq(d.df)
+  y = Array(Float64, d.dim)
+  unwhiten!(normd.Σ, randn!(x))
+  rand!(chisqd, y)
+  y = sqrt(y/(d.df))
+  bdivide!(x, y, 1)
+  if !d.zeromean
+    badd!(x, d.μ, 1)
+  end
+  x
+end
