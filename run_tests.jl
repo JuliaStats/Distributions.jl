@@ -10,6 +10,7 @@ tests = [
 	"multinomial",
 	"dirichlet", 
 	"mvnormal",
+  "mvtdist",
 	"kolmogorov",
 	"edgeworth",
 	"matrix",
