@@ -132,7 +132,7 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
     while i < km1 && n > 0
         i += 1
         @inbounds pi = p[i]
-        xi = rand(Binomial(n, pi / rp))
+        xi = rand(Binomial(n, min(pi / rp, 1.0)))
         @inbounds x[i] = xi
         n -= xi
         rp -= pi
