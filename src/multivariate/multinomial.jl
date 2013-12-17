@@ -129,7 +129,7 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
     i = 0
     km1 = k - 1
 
-    while i < km1 && n > 0        
+    while i < km1 && n > 0
         i += 1
         @inbounds pi = p[i]
         if pi < rp            
@@ -138,7 +138,7 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
             n -= xi
             rp -= pi
         else 
-            # In this case, we don't have to even sample
+            # In this case, we don't even have to sample
             # from Binomial. Just assign remaining counts
             # to xi. 
 
