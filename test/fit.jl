@@ -36,8 +36,8 @@ ss = suffstats(Bernoulli, x)
 
 ss = suffstats(Bernoulli, x, w)
 @test isa(ss, Distributions.BernoulliStats)
-@test ss.cnt0 == sum(w[x .== 0])
-@test ss.cnt1 == sum(w[x .== 1])
+@test_approx_eq ss.cnt0 sum(w[x .== 0])
+@test_approx_eq ss.cnt1 sum(w[x .== 1])
 
 d = fit(Bernoulli, x)
 p = nnz(x) / n0
