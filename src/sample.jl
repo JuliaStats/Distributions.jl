@@ -84,6 +84,53 @@ function self_avoid_sample!{T}(a::AbstractArray{T}, x::AbstractArray)
     x
 end
 
+# Ordered sampling without replacement
+# Author: Mike Innes
+
+function rand_first_index(n, k)
+  r = rand()
+  p = k/n
+  i = 1
+  while p < r
+    i += 1
+    p += (1-p)k/(n-(i-1))
+  end
+  return i
+end
+
+function ordered_sample_norep!(xs::AbstractArray, target::AbstractArray)
+  n = length(xs)
+  k = length(target)
+  i = 0
+  for j in 1:k
+    step = rand_first_index(n, k)
+    n -= step
+    i += step
+    target[j] = xs[i]
+    k -= 1
+  end
+  return target
+end
+
+function ordered_sample_rep!(xs::AbstractArray, target::AbstractArray)
+  n = length(xs)
+  n_left = n
+  k = length(target)
+  j = 0
+
+  for i = 1:n
+    k > 0 || break
+    num = i == n ? k : rand(Binomial(k, 1/n_left))
+    for _ = 1:num
+      j += 1
+      target[j] = xs[i]
+    end
+    k -= num
+    n_left -= 1
+  end
+  return target
+end
+
 ###########################################################
 #
 #   Interface functions
@@ -92,45 +139,49 @@ end
 
 sample(a::AbstractArray) = a[randi(length(a))]
 
-function sample!(a::AbstractArray, x::AbstractArray; replace=true)
+function sample!(a::AbstractArray, x::AbstractArray; replace=true, ordered=false)
     n = length(a)
     k = length(x)
 
     if !isempty(x)
-        if replace   # with replacement
-            s = RandIntSampler(n)
-            for i = 1:k
-                x[i] = a[rand(s)]
-            end
+        if ordered
+          replace ? ordered_sample_rep!(a, x) : ordered_sample_norep!(a, x)
+        else
+            if replace   # with replacement
+                s = RandIntSampler(n)
+                for i = 1:k
+                    x[i] = a[rand(s)]
+                end
 
-        else  # without replacement
-            if k > n
-                throw(ArgumentError("n exceeds the length of x"))
-            end
+            else  # without replacement
+                if k > n
+                    throw(ArgumentError("n exceeds the length of x"))
+                end
 
-            if k == 1
-                x[1] = sample(a)
-                
-            elseif k == 2
-                pick2!(a, x)
+                if k == 1
+                    x[1] = sample(a)
+                    
+                elseif k == 2
+                    pick2!(a, x)
 
-            elseif n < k * max(k, 100) 
-                fisher_yates_sample!(a, x)
-                
-            else
-                self_avoid_sample!(a, x)
+                elseif n < k * max(k, 100) 
+                    fisher_yates_sample!(a, x)
+                    
+                else
+                    self_avoid_sample!(a, x)
+                end
             end
         end
     end
     x
 end
 
-function sample{T}(a::AbstractArray{T}, n::Integer; replace=true)
-    sample!(a, Array(T, n); replace=replace)
+function sample{T}(a::AbstractArray{T}, n::Integer; replace=true, ordered=false)
+    sample!(a, Array(T, n); replace=replace, ordered=ordered)
 end
 
-function sample{T}(a::AbstractArray{T}, dims::Dims; replace=true)
-    sample!(a, Array(T, dims); replace=replace)
+function sample{T}(a::AbstractArray{T}, dims::Dims; replace=true, ordered=false)
+    sample!(a, Array(T, dims); replace=replace, ordered=ordered)
 end
 
 
