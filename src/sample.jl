@@ -140,7 +140,7 @@ end
 #
 ################################################################
 
-function wsample(ws; wsum = sum(ws))
+function wsample(ws::AbstractArray; wsum::Number = sum(ws))
   t = rand() * wsum
   i = 0
   p = 0.
@@ -148,13 +148,14 @@ function wsample(ws; wsum = sum(ws))
     i += 1
     p += ws[i]
   end
-  i
+  return i
 end
 
-wsample(xs, ws; wsum = sum(ws)) = xs[wsample(ws, wsum=wsum)]
+wsample(xs::AbstractArray, ws::AbstractArray; wsum::Number = sum(ws)) =
+  xs[wsample(ws, wsum=wsum)]
 
 # Author: Mike Innes
-function wsample!(xs, ws, target; wsum = sum(ws))
+function wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws))
   n = length(xs)
   k = length(target)
   j = 0
@@ -174,4 +175,4 @@ function wsample!(xs, ws, target; wsum = sum(ws))
   return target
 end
 
-wsample(xs, ws, k; wsum = sum(ws)) = wsample!(xs, ws, similar(xs, k), wsum=wsum)
+wsample(xs::AbstractArray, ws::AbstractArray, k; wsum::Number = sum(ws)) = wsample!(xs, ws, similar(xs, k), wsum=wsum)
