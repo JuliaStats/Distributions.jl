@@ -155,7 +155,7 @@ wsample(xs::AbstractArray, ws::AbstractArray; wsum::Number = sum(ws)) =
   xs[wsample(ws, wsum=wsum)]
 
 # Author: Mike Innes
-function wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws))
+function ordered_wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws))
   n = length(xs)
   k = length(target)
   j = 0
@@ -175,4 +175,16 @@ function wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; w
   return target
 end
 
-wsample(xs::AbstractArray, ws::AbstractArray, k; wsum::Number = sum(ws)) = wsample!(xs, ws, similar(xs, k), wsum=wsum)
+function wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws), ordered::Bool = false)
+  k = length(target)
+  ordered && return ordered_wsample!(xs, ws, target, wsum = wsum)
+  k > 100 && return ordered_wsample!(xs, ws, target, wsum = wsum) |> shuffle!
+
+  for i = 1:k
+    target[i] = wsample(xs)
+  end
+  return target
+end
+
+wsample(xs::AbstractArray, ws::AbstractArray, k; wsum::Number = sum(ws), ordered::Bool = false) =
+  wsample!(xs, ws, similar(xs, k), wsum = wsum, ordered = ordered)
