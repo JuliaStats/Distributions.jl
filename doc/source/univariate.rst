@@ -452,7 +452,8 @@ The probability density function of an *inverse Gaussian distribution* with mean
 
 .. math::
 
-    f(x; \mu, \lambda) = \sqrt{\frac{\lambda}{2\pi x^3}}\exp\!\left(\frac{-\lambda(x-\mu)^2}{2\mu^2x}\right), \quad x > 0
+    f(x; \mu, \lambda) = \sqrt{\frac{\lambda}{2\pi x^3}}
+    \exp\!\left(\frac{-\lambda(x-\mu)^2}{2\mu^2x}\right), \quad x > 0
 
 .. code-block:: julia
   
