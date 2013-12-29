@@ -127,7 +127,7 @@ export
     islowerbounded,
     isbouned,
     hasfinitesupport,
-    kde,           # Kernel density estimator
+    kde,           # Kernel density estimator (from Stats.jl)
     kurtosis,      # kurtosis of the distribution
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
@@ -294,7 +294,7 @@ include("mixturemodel.jl")
 include("show.jl")
 
 # Kernel density estimators
-include("kde.jl")
+# include("kde.jl")  ## migrated to Stats.jl
 
 # Expectations, entropy, KL divergence
 include("functionals.jl")
