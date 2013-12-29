@@ -2,9 +2,9 @@ immutable Binomial <: DiscreteUnivariateDistribution
     size::Int
     prob::Float64
     function Binomial(n::Real, p::Real)
-    	n > zero(n) || error("size must be positive")
-	zero(p) <= p <= one(p) || error("prob must be in [0, 1]")
-	new(int(n), float64(p))
+        n >= zero(n) || error("size must be positive")
+        zero(p) <= p <= one(p) || error("prob must be in [0, 1]")
+        new(int(n), float64(p))
     end
 end
 
@@ -20,18 +20,21 @@ function entropy(d::Binomial; approx::Bool=false)
     n = d.size
     p1 = d.prob
 
-    (p1 == 0.0 || p1 == 1.0) && return 0.0
+    (p1 == 0.0 || p1 == 1.0 || n == 0) && return 0.0
     p0 = 1.0 - p1
-    if approx return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0) end
-    lg = log(p1 / p0)
-			# when k = 0
-    lp = n * log(p0)
-    s = exp(lp) * lp
-    for k = 1:n
-	lp += log((n - k) / (k + 1)) + lg
-	s += exp(lp) * lp
+
+    if approx 
+        return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0) 
+    else
+        lg = log(p1 / p0)        
+        lp = n * log(p0)
+        s = exp(lp) * lp
+        for k = 1:n
+           lp += log((n - k) / (k + 1)) + lg
+           s += exp(lp) * lp
+        end
+        return -s
     end
-    -s
 end
 
 kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
@@ -45,7 +48,7 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 median(d::Binomial) = iround(d.size * d.prob)
 
 # TODO: May need to subtract 1 sometimes
-mode(d::Binomial) = iround((d.size + 1.0) * d.prob)
+mode(d::Binomial) = d.size > 0 ? iround((d.size + 1.0) * d.prob) : 0
 modes(d::Binomial) = [mode(d)]
 
 function mgf(d::Binomial, t::Real)
