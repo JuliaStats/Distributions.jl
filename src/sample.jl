@@ -191,42 +191,51 @@ end
 #
 ################################################################
 
-function wsample(a::AbstractArray, w::AbstractArray{Float64}, wsum::Float64)
-    n = length(w)
-    t = rand() * wsum
+function wsample(ws::AbstractArray; wsum::Number = sum(ws))
+  t = rand() * wsum
+  i = 0
+  p = 0.
+  while p < t
+    i += 1
+    p += ws[i]
+  end
+  return i
+end
 
-    i = 1
-    s = w[1]
+wsample(xs::AbstractArray, ws::AbstractArray; wsum::Number = sum(ws)) =
+  xs[wsample(ws, wsum=wsum)]
 
-    while i < n && s < t
-        i += 1
-        s += w[i]
+# Author: Mike Innes
+function ordered_wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws))
+  n = length(xs)
+  k = length(target)
+  j = 0
+
+  length(ws) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+
+  for i = 1:n
+    k > 0 || break
+    num = i == n ? k : rand(Binomial(k, ws[i]/wsum))
+    for _ = 1:num
+      j += 1
+      target[j] = xs[i]
     end
-    a[i]
+    k -= num
+    wsum -= ws[i]
+  end
+  return target
 end
 
-wsample(a::AbstractArray, w::AbstractArray{Float64}) = wsample(a, w, sum(w))
+function wsample!(xs::AbstractArray, ws::AbstractArray, target::AbstractArray; wsum::Number = sum(ws), ordered::Bool = false)
+  k = length(target)
+  ordered && return ordered_wsample!(xs, ws, target, wsum = wsum)
+  k > 100 && return ordered_wsample!(xs, ws, target, wsum = wsum) |> shuffle!
 
-function wsample!(a::AbstractArray, w::AbstractArray{Float64}, x::AbstractArray; 
-    wsum::Float64=NaN)
-
-    n = length(a)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    _wsum::Float64 = isnan(wsum) ? sum(w) : wsum
-    for i = 1:length(x)
-        x[i] = wsample(a, w, _wsum)
-    end
-    x
+  for i = 1:k
+    target[i] = wsample(xs)
+  end
+  return target
 end
 
-function wsample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, n::Integer; wsum::Float64=NaN)
-    wsample!(a, w, Array(T, n); wsum=wsum)
-end
-
-function wsample{T}(a::AbstractArray{T}, w::AbstractArray{Float64}, dims::Dims; wsum::Float64=NaN)
-    wsample!(a, w, Array(T, dims); wsum=wsum)
-end
-
+wsample(xs::AbstractArray, ws::AbstractArray, k; wsum::Number = sum(ws), ordered::Bool = false) =
+  wsample!(xs, ws, similar(xs, k), wsum = wsum, ordered = ordered)
