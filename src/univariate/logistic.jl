@@ -29,3 +29,13 @@ skewness(d::Logistic) = 0.0
 std(d::Logistic) = pi * d.scale / sqrt(3.0)
 
 var(d::Logistic) = (pi * d.scale)^2 / 3.0
+
+function mgf(d::Logistic, t::Real)
+    m, b = d.location, d.scale
+    exp(t * m) * (pi * b * t) / sin(pi * b * t)
+end
+
+function cf(d::Logistic, t::Real)
+    m, b = d.location, d.scale
+    exp(im * t * m) * (pi * b * t) / sinh(pi * b * t)
+end
