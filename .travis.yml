@@ -13,7 +13,7 @@ before_install:
 script:
     - julia -e 'versioninfo(); Pkg.init();'
     - julia -e 'Pkg.add("NumericExtensions")'
-    - julia -e 'Pkg.add("Stats")'
+    - julia -e 'Pkg.add("StatsBase")'
     - mkdir -p ~/.julia/Distributions
     - cp -R ./* ~/.julia/Distributions/
     - julia ./run_tests.jl

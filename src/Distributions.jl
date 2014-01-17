@@ -1,7 +1,7 @@
 module Distributions
 
 using NumericExtensions
-using Stats
+using StatsBase
 
 export
     # types
@@ -174,7 +174,7 @@ import Base.max, Base.min, Base.maximum, Base.minimum
 import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
 import Base.show, Base.sprand
 import NumericExtensions.dim, NumericExtensions.entropy
-import Stats.kurtosis, Stats.skewness, Stats.mode, Stats.modes
+import StatsBase.kurtosis, StatsBase.skewness, StatsBase.mode, StatsBase.modes
 
 
 #### Distribution type system
@@ -294,7 +294,7 @@ include("mixturemodel.jl")
 include("show.jl")
 
 # Kernel density estimators
-# include("kde.jl")  ## migrated to Stats.jl
+# include("kde.jl")  ## migrated to StatsBase.jl
 
 # Expectations, entropy, KL divergence
 include("functionals.jl")
