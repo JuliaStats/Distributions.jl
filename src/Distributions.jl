@@ -169,12 +169,11 @@ export
     wsample,       # weighted sampling from a source array
     expected_logdet # expected logarithm of random matrix determinant
 
-import Base.mean, Base.median, Base.quantile, Base.scale
-import Base.max, Base.min, Base.maximum, Base.minimum
-import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
-import Base.show, Base.sprand
-import NumericExtensions.dim, NumericExtensions.entropy
-import StatsBase.kurtosis, StatsBase.skewness, StatsBase.mode, StatsBase.modes
+import Base.Random
+import Base: show, scale, sum!, rand, rand!, sprand
+import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
+import NumericExtensions: dim, entropy
+import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler
 
 
 #### Distribution type system
@@ -221,7 +220,6 @@ include("rmath.jl")
 include("specialfuns.jl")
 include("tvpack.jl")
 include("utils.jl")
-include("sample.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
 
