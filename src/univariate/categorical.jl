@@ -164,7 +164,7 @@ end
 
 sampler(d::Categorical) = CategoricalSampler(d)
 
-rand(d::Categorical) = wsample(1:d.K, d.prob, wsum = 1.0)
+rand(d::Categorical) = sample(WeightVec(d.prob, 1.0))
 
 rand(s::CategoricalSampler) = rand(s.alias)
 
