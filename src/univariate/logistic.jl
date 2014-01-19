@@ -45,3 +45,14 @@ invlogcdf(d::Logistic, lp::Real) = d.location - d.scale*logexpm1(-lp)
 invlogccdf(d::Logistic, lp::Real) = d.location + d.scale*logexpm1(-lp)
 
 rand(d::Logistic) = quantile(d, rand())
+
+
+function mgf(d::Logistic, t::Real)
+    m, b = d.location, d.scale
+    exp(t * m) * (pi * b * t) / sin(pi * b * t)
+end
+
+function cf(d::Logistic, t::Real)
+    m, b = d.location, d.scale
+    exp(im * t * m) * (pi * b * t) / sinh(pi * b * t)
+end

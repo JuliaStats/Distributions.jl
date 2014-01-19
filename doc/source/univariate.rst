@@ -446,6 +446,21 @@ The probability density function of an *inverse Gamma distribution* with shape p
     InverseGamma(a, s)    # Inverted Gamma distribution with shape a and scale s
 
 
+Inverse Gaussian Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The probability density function of an *inverse Gaussian distribution* with mean μ and shape λ is
+
+.. math::
+
+    f(x; \mu, \lambda) = \sqrt{\frac{\lambda}{2\pi x^3}}
+    \exp\!\left(\frac{-\lambda(x-\mu)^2}{2\mu^2x}\right), \quad x > 0
+
+.. code-block:: julia
+  
+    InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape    
+    InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+
+
 Laplace Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 

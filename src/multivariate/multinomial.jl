@@ -132,18 +132,28 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
     while i < km1 && n > 0
         i += 1
         @inbounds pi = p[i]
-        xi = rand(Binomial(n, pi / rp))
-        @inbounds x[i] = xi
-        n -= xi
-        rp -= pi
+        if pi < rp            
+            xi = rand(Binomial(n, pi / rp))
+            @inbounds x[i] = xi
+            n -= xi
+            rp -= pi
+        else 
+            # In this case, we don't even have to sample
+            # from Binomial. Just assign remaining counts
+            # to xi. 
+
+            @inbounds x[i] = n
+            n = 0
+            # rp = 0.0 (no need for this, as rp is no longer needed)
+        end
     end
 
     if i == km1
-        x[k] = n
+        @inbounds x[k] = n
     else  # n must have been zero
         z = zero(T)
         for j = i+1 : k
-            x[j] = z
+            @inbounds x[j] = z
         end
     end
 

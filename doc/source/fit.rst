@@ -90,5 +90,9 @@ When ``fit_mle`` on ``D`` is invoked, a fallback ``fit_mle`` method will first c
 Maximum-a-Posteriori Estimation
 --------------------------------
 
-*Maximum-a-Posteriori (MAP)* estimation has been implemented for some conjugate pairs. This is still work in progress. Document will be provided when the interface is stablized.
+Maximum-a-Posteriori (MAP) estimation is also supported by this package, which is implemented as part of the conjugate exponential family framework (see :ref:`Conjugate Prior and Posterior <ref-conj>`).
+
+
+
+
 

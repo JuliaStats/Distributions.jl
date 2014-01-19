@@ -27,9 +27,9 @@ distlist = [
     Binomial(100, 0.1),
     Binomial(100, 0.9),
     Binomial(10000, 0.03),
-    HyperGeometric(10, 10, 3),
-    HyperGeometric(50, 80, 3),
-    HyperGeometric(50, 80, 60)]
+    Hypergeometric(10, 10, 3),
+    Hypergeometric(50, 80, 3),
+    Hypergeometric(50, 80, 60)]
 
 if length(ARGS) > 0
     newdistlist = {}
@@ -49,8 +49,8 @@ for d in distlist
         println(d)
     end
 
-    xmin = min(d)
-    xmax = max(d)
+    xmin = minimum(d)
+    xmax = maximum(d)
     @assert isa(xmin, Int)
     @assert isa(xmax, Int)
     @assert xmin <= xmax
@@ -71,11 +71,11 @@ for d in distlist
     # check that we can generate many random draws at once
     x = rand(d, n)
     @test isa(x, Vector{Int})
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     # check that we can generate many random draws in-place
     rand!(d, x)
-    @test xmin <= min(x) <= max(x) <= xmax
+    @test xmin <= minimum(x) <= maximum(x) <= xmax
 
     ####
     #

@@ -64,13 +64,13 @@ x = rand(d, 10)
 
 # Test MLE
 
-n = 6000
+n = 10000
 x = rand(d, n)
 x = x ./ sum(x, 1)
 
 r = fit_mle(Dirichlet, x)
-@test_approx_eq_eps r.alpha d.alpha 0.1
+@test_approx_eq_eps r.alpha d.alpha 0.25
 
 r = fit_mle(Dirichlet, x, fill(2.0, n))
-@test_approx_eq_eps r.alpha d.alpha 0.1
+@test_approx_eq_eps r.alpha d.alpha 0.25
 

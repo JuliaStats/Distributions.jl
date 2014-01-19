@@ -14,8 +14,8 @@ isupperbounded(d::Union(Geometric, Type{Geometric})) = false
 islowerbounded(d::Union(Geometric, Type{Geometric})) = true
 isbounded(d::Union(Geometric, Type{Geometric})) = false
 
-min(d::Union(Geometric, Type{Geometric})) = 0
-max(d::Geometric) = Inf
+minimum(d::Union(Geometric, Type{Geometric})) = 0
+maximum(d::Geometric) = Inf
 
 insupport(::Geometric, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{Geometric}, x::Real) = isinteger(x) && zero(x) <= x

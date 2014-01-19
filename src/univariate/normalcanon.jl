@@ -35,7 +35,7 @@ kurtosis(cf::NormalCanon) = 0.0
 var(cf::NormalCanon) = 1.0 / cf.prec
 std(cf::NormalCanon) = sqrt(var(cf))
 
-entropy(cf::Normal) = 0.5 * (log2π + 1. - log(cf.prec))
+entropy(cf::NormalCanon) = 0.5 * (log2π + 1. - log(cf.prec))
 
 # Evaluation
 

@@ -2,26 +2,25 @@ immutable Binomial <: DiscreteUnivariateDistribution
     size::Int
     prob::Float64
     function Binomial(n::Real, p::Real)
-    	n > zero(n) || error("size must be positive")
-	zero(p) <= p <= one(p) || error("prob must be in [0, 1]")
-	new(int(n), float64(p))
+        n >= zero(n) || error("size must be positive")
+        zero(p) <= p <= one(p) || error("prob must be in [0, 1]")
+        new(int(n), float64(p))
     end
 end
 
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
-# handling support
+
 isupperbounded(d::Union(Binomial, Type{Binomial})) = true
 islowerbounded(d::Union(Binomial, Type{Binomial})) = true
 isbounded(d::Union(Binomial, Type{Binomial})) = true
 
-min(d::Union(Binomial, Type{Binomial})) = 0
-max(d::Binomial) = d.size
+minimum(d::Union(Binomial, Type{Binomial})) = 0
+maximum(d::Binomial) = d.size
 support(d::Binomial) = 0:d.size
 
 insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
-
 
 
 mean(d::Binomial) = d.size * d.prob
@@ -41,18 +40,21 @@ function entropy(d::Binomial; approx::Bool=false)
     n = d.size
     p1 = d.prob
 
-    (p1 == 0.0 || p1 == 1.0) && return 0.0
+    (p1 == 0.0 || p1 == 1.0 || n == 0) && return 0.0
     p0 = 1.0 - p1
-    if approx return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0) end
-    lg = log(p1 / p0)
-			# when k = 0
-    lp = n * log(p0)
-    s = exp(lp) * lp
-    for k = 1:n
-	lp += log((n - k) / (k + 1)) + lg
-	s += exp(lp) * lp
+
+    if approx 
+        return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0) 
+    else
+        lg = log(p1 / p0)        
+        lp = n * log(p0)
+        s = exp(lp) * lp
+        for k = 1:n
+           lp += log((n - k) / (k + 1)) + lg
+           s += exp(lp) * lp
+        end
+        return -s
     end
-    -s
 end
 
 # Based on:

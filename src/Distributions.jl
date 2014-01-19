@@ -1,7 +1,7 @@
 module Distributions
 
 using NumericExtensions
-using Stats
+using StatsBase
 
 export
     # types
@@ -53,7 +53,7 @@ export
     GenericMvNormalCanon,
     Geometric,
     Gumbel,
-    HyperGeometric,
+    Hypergeometric,
     InverseWishart,
     InverseGamma,
     InverseGaussian,  
@@ -72,6 +72,7 @@ export
     MvNormal,
     MvNormalCanon,
     MvNormalKnownSigma,
+    MvTDist,
     NegativeBinomial,
     NoncentralBeta,
     NoncentralChisq,
@@ -88,7 +89,7 @@ export
     Rayleigh,
     Skellam,
     TDist,
-    Triangular,
+    TriangularDist,
     Truncated,
     Uniform,
     VonMisesFisher,
@@ -126,7 +127,7 @@ export
     islowerbounded,
     isbouned,
     hasfinitesupport,
-    kde,           # Kernel density estimator
+    kde,           # Kernel density estimator (from Stats.jl)
     kurtosis,      # kurtosis of the distribution
     logccdf,       # ccdf returning log-probability
     logcdf,        # cdf returning log-probability
@@ -165,13 +166,14 @@ export
     std,           # standard deviation of distribution
     suffstats,     # compute sufficient statistics
     var,           # variance of distribution
-    wsample        # weighted sampling from a source array
+    wsample,       # weighted sampling from a source array
+    expected_logdet # expected logarithm of random matrix determinant
 
-import Base.mean, Base.median, Base.quantile, Base.max, Base.min, Base.scale
-import Base.Random, Base.rand, Base.rand!, Base.std, Base.var, Base.cor, Base.cov
-import Base.show, Base.sprand
-import NumericExtensions.dim, NumericExtensions.entropy
-import Stats.kurtosis, Stats.skewness, Stats.mode, Stats.modes
+import Base.Random
+import Base: show, scale, sum!, rand, rand!, sprand
+import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
+import NumericExtensions: dim, entropy
+import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler
 
 
 #### Distribution type system
@@ -221,7 +223,6 @@ include("specialfuns/log.jl")
 include("specialfuns/gammabeta.jl")
 include("tvpack.jl")
 include("utils.jl")
-include("sample.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
 
@@ -278,6 +279,7 @@ include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
 include(joinpath("multivariate", "mvnormal.jl"))
 include(joinpath("multivariate", "mvnormalcanon.jl"))
+include(joinpath("multivariate", "mvtdist.jl"))
 include(joinpath("multivariate", "vonmisesfisher.jl"))
 
 # Matrix distributions
@@ -295,7 +297,7 @@ include("mixturemodel.jl")
 include("show.jl")
 
 # Kernel density estimators
-include("kde.jl")
+# include("kde.jl")  ## migrated to StatsBase.jl
 
 # Expectations, entropy, KL divergence
 include("functionals.jl")

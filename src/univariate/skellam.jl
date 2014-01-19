@@ -8,8 +8,8 @@ isupperbounded(::Union(Skellam, Type{Skellam})) = false
 islowerbounded(::Union(Skellam, Type{Skellam})) = false
 isbounded(::Union(Skellam, Type{Skellam})) = false
 
-min(::Union(Skellam, Type{Skellam})) = -Inf
-max(::Union(Skellam, Type{Skellam})) = Inf
+minimum(::Union(Skellam, Type{Skellam})) = -Inf
+maximum(::Union(Skellam, Type{Skellam})) = Inf
 
 insupport(::Skellam, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{Skellam}, x::Real) = isinteger(x) && zero(x) <= x

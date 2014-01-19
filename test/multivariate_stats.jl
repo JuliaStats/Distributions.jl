@@ -34,11 +34,11 @@ for d in [
 
 	println("expected mean  = $dmean")
 	println("empirical mean = $xmean")
-	println("--> abs.dev = $(max(abs(dmean - xmean)))")
+	println("--> abs.dev = $(maximum(abs(dmean - xmean)))")
 
 	println("expected cov  = $dcov")
 	println("empirical cov = $xcov")
-	println("--> abs.dev = $(max(abs(dcov - xcov)))")
+	println("--> abs.dev = $(maximum(abs(dcov - xcov)))")
 
 	println("expected entropy = $dent")
 	println("empirical entropy = $xent")

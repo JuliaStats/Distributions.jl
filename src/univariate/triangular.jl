@@ -4,19 +4,19 @@
 #
 ##############################################################################
 
-immutable Triangular <: ContinuousUnivariateDistribution
+immutable TriangularDist <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
-    function Triangular(l::Real, s::Real)
+    function TriangularDist(l::Real, s::Real)
         s > zero(s) || error("scale must be positive")
         new(float64(l), float64(s))
     end
 end
 
-Triangular(location::Real) = Triangular(location, 1.0)
-Triangular() = Triangular(0.0, 1.0)
+TriangularDist(location::Real) = TriangularDist(location, 1.0)
+TriangularDist() = TriangularDist(0.0, 1.0)
 
-function cdf(d::Triangular, x::Real)
+function cdf(d::TriangularDist, x::Real)
     a, b, c = d.location - d.scale, d.location + d.scale, d.location
     if x <= a
         return 0.0
@@ -29,29 +29,29 @@ function cdf(d::Triangular, x::Real)
     end
 end
 
-entropy(d::Triangular) = 0.5 + log(d.scale)
+entropy(d::TriangularDist) = 0.5 + log(d.scale)
 
 # support handling
 
-isupperbounded(::Union(Triangular, Type{Triangular})) = true
-islowerbounded(::Union(Triangular, Type{Triangular})) = true
-isbounded(::Union(Triangular, Type{Triangular})) = true
+isupperbounded(::Union(TriangularDist, Type{TriangularDist})) = true
+islowerbounded(::Union(TriangularDist, Type{TriangularDist})) = true
+isbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 
-min(d::Triangular) = d.location - d.scale
-max(d::Triangular) = d.location + d.scale
-insupport(d::Triangular, x::Real) = min(d) <= x <= max(d)
+minimum(d::TriangularDist) = d.location - d.scale
+maximum(d::TriangularDist) = d.location + d.scale
+insupport(d::TriangularDist, x::Real) = minimum(d) <= x <= maximum(d)
 
 
-kurtosis(d::Triangular) = -0.6
+kurtosis(d::TriangularDist) = -0.6
 
-mean(d::Triangular) = d.location
+mean(d::TriangularDist) = d.location
 
-median(d::Triangular) = d.location
+median(d::TriangularDist) = d.location
 
-mode(d::Triangular) = d.location
-modes(d::Triangular) = [d.location]
+mode(d::TriangularDist) = d.location
+modes(d::TriangularDist) = [d.location]
 
-function pdf(d::Triangular, x::Real)
+function pdf(d::TriangularDist, x::Real)
     if insupport(d, x)
         return -abs(x - d.location) / (d.scale^2) + 1.0 / d.scale
     else
@@ -59,7 +59,7 @@ function pdf(d::Triangular, x::Real)
     end
 end
 
-function quantile(d::Triangular, p::Real)
+function quantile(d::TriangularDist, p::Real)
     a, b, c = d.location - d.scale, d.location + d.scale, d.location
     if p <= 0.0
         return a
@@ -72,12 +72,12 @@ function quantile(d::Triangular, p::Real)
     end
 end
 
-function rand(d::Triangular)
+function rand(d::TriangularDist)
     ξ1, ξ2 = rand(), rand()
     return d.location + (ξ1 - ξ2) * d.scale
 end
 
-function skewness(d::Triangular)
+function skewness(d::TriangularDist)
     a = d.location - d.scale
     b = d.location + d.scale
     c = (b - a) / 2 + a
@@ -88,4 +88,4 @@ function skewness(d::Triangular)
     return den / num
 end
 
-var(d::Triangular) = d.scale^2 / 6.0
+var(d::TriangularDist) = d.scale^2 / 6.0

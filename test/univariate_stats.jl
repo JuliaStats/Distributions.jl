@@ -73,11 +73,11 @@ distlist = [
           Geometric(0.9),
           Gumbel(3.0, 5.0),
           Gumbel(5, 3),
-          HyperGeometric(1.0, 1.0, 1.0),
-          HyperGeometric(2.0, 2.0, 2.0),
-          HyperGeometric(3.0, 2.0, 2.0),
-          HyperGeometric(2.0, 3.0, 2.0),
-          HyperGeometric(2.0, 2.0, 3.0),
+          Hypergeometric(1.0, 1.0, 1.0),
+          Hypergeometric(2.0, 2.0, 2.0),
+          Hypergeometric(3.0, 2.0, 2.0),
+          Hypergeometric(2.0, 3.0, 2.0),
+          Hypergeometric(2.0, 2.0, 3.0),
           InverseGaussian(1.0,1.0),
           InverseGaussian(2.0,7.0),
           InverseGamma(1.0,1.0),
@@ -216,11 +216,11 @@ for d in distlist
         for i = 1:n_samples
             c[i] = c[i]*n_samples - i
         end
-        a = max(abs(c))
+        a = maximum(abs(c))
         for i = 1:n_samples
             c[i] += 1.0
         end
-        b = max(abs(c))
+        b = maximum(abs(c))
         ks = max(a,b)
         kss = ks/n_samples
         ksp = ccdf(Kolmogorov(),ks/sqrt(n_samples))
