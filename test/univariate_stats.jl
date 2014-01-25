@@ -29,8 +29,8 @@ macro ignore_methoderror(ex)
     end
 end
 
-
-for d in [Arcsine(),
+distlist = [
+          Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
           Bernoulli(0.9),
@@ -43,6 +43,7 @@ for d in [Arcsine(),
           Binomial(1, 0.5),
           Binomial(100, 0.1),
           Binomial(100, 0.9),
+          Binomial(10000, 0.03),
           Categorical([0.1, 0.9]),
           Categorical([0.5, 0.5]),
           Categorical([0.9, 0.1]),
@@ -122,9 +123,9 @@ for d in [Arcsine(),
           Skellam(10.0, 2.0),
           TDist(1),
           TDist(28),
-          Triangular(3.0, 1.0),
-          Triangular(3.0, 2.0),
-          Triangular(10.0, 10.0),
+          TriangularDist(3.0, 1.0),
+          TriangularDist(3.0, 2.0),
+          TriangularDist(10.0, 10.0),
           Truncated(Normal(0, 1), -3, 3),
           # Truncated(Normal(-100, 1), 0, 1),
           Truncated(Normal(27, 3), 0, Inf),
@@ -135,6 +136,24 @@ for d in [Arcsine(),
           Weibull(23.0),
           Weibull(230.0),
           ]
+
+# allows calling 
+#   julia univariate.jl Normal 
+#   julia univariate.jl Normal(1.2,2)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
 
     x = rand(d, n_samples)
 

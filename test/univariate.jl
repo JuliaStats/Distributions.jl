@@ -20,8 +20,7 @@ const lpp = log(pp)
 # Use a large, odd number of samples for testing all quantities
 n_samples = 5_000_001
 
-# Try out many parameterizations of any given distribution
-for d in [Arcsine(),
+distlist = [Arcsine(),
           Beta(2.0, 2.0),
           Beta(3.0, 4.0),
           Beta(17.0, 13.0),
@@ -37,8 +36,8 @@ for d in [Arcsine(),
           Chisq(20.0),
           # Cosine(),
           # Empirical(),
-          Erlang(1),
-          Erlang(17.0),
+          # Erlang(1),
+          # Erlang(17.0),
           Exponential(1.0),
           Exponential(5.1),
           FDist(9, 9),
@@ -115,10 +114,30 @@ for d in [Arcsine(),
           Weibull(23.0),
           Weibull(230.0)]
 
+# allows calling 
+#   julia univariate.jl Normal 
+#   julia univariate.jl Normal(1.2,2)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+# Try out many parameterizations of any given distribution
+for d in distlist
     # NB: Uncomment if test fails
     # Mention distribution being run
-    # println(d)
-
+    if length(ARGS) > 0
+        println(d)
+    end
+    
     n = length(pp)
     is_continuous = isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
     is_discrete = isa(d, Truncated) ? isa(d.untruncated, DiscreteDistribution) : isa(d, DiscreteDistribution) 
@@ -128,7 +147,6 @@ for d in [Arcsine(),
 
     # avoid checking high order moments for LogNormal and Logistic
     avoid_highord = isa(d, LogNormal) || isa(d, Logistic) || isa(d, Truncated)
-
     #####
     #
     #  Part 1: Capability of random number generation

@@ -1,14 +1,4 @@
-# Special functions
-
-# See:
-#   Martin Maechler (2012) "Accurately Computing log(1 − exp(− |a|))"
-#   http://cran.r-project.org/web/packages/Rmpfr/vignettes/log1mexp-note.pdf
-
-# log(1-exp(x)) 
-# NOTE: different than Maechler (2012), no negation inside parantheses
-log1mexp(x::Real) = x >= -0.6931471805599453 ? log(-expm1(x)) : log1p(-exp(x))
-# log(1+exp(x))
-log1pexp(x::Real) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
+# normal density and cumulative distribution functions
 
 φ(z::Real) = exp(-0.5*z*z)/√2π
 logφ(z::Real) = -0.5*(z*z + log2π)
@@ -23,6 +13,9 @@ import Base.Math.@horner
 # Rational approximations for the inverse cdf, from:
 #   Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
 #   Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
+Φinv(p::Integer) = Φinv(float(p))
+logΦinv(p::Integer) = logΦinv(float(p))
+
 for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
     @eval begin
         function $fn($arg::Float32)
@@ -87,7 +80,7 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
             end
         end
 
-        function $fn($arg::Real)
+        function $fn($arg::Float64)
             if $(fn == :Φinv)
                 q = p - 0.5
             else
@@ -174,14 +167,4 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
             end
         end
     end
-end
-
-
-# Multidimensional gamma / partial gamma function
-function lpgamma(p::Int64, a::Float64)
-    res::Float64 = p * (p - 1.0) / 4.0 * log(pi)
-    for ii in 1:p
-        res += lgamma(a + (1.0 - ii) / 2.0)
-    end
-    return res
 end

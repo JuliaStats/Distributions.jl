@@ -6,39 +6,51 @@ immutable Chisq <: ContinuousUnivariateDistribution
     end
 end
 
-@_jl_dist_1p Chisq chisq
-
 @continuous_distr_support Chisq 0.0 Inf
 
-function entropy(d::Chisq)
-    x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)
-    x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
-end
-
-kurtosis(d::Chisq) = 12.0 / d.df
 
 mean(d::Chisq) = d.df
 
-# TODO: Switch to using quantile?
-function median(d::Chisq)
-    k = d.df
-    k * (1.0 - 2.0 / (9.0 * k))^3
+mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
+modes(d::Chisq) = [mode(d)]
+
+var(d::Chisq) = 2.0 * d.df
+skewness(d::Chisq) = sqrt(8.0 / d.df)
+kurtosis(d::Chisq) = 12.0 / d.df
+
+
+function entropy(d::Chisq)
+    x = d.df / 2.0 + log(2.0) + lgamma(0.5*d.df)
+    x + (1.0 - d.df / 2.0) * digamma(0.5*d.df)
 end
+
+
+pdf(d::Chisq, x::Real) = pdf(Gamma(0.5*d.df,2.0), x)
+logpdf(d::Chisq, x::Real) = logpdf(Gamma(0.5*d.df,2.0), x)
+
+cdf(d::Chisq, x::Real) = cdf(Gamma(0.5*d.df,2.0), x)
+ccdf(d::Chisq, x::Real) = ccdf(Gamma(0.5*d.df,2.0), x)
+logcdf(d::Chisq, x::Real) = logcdf(Gamma(0.5*d.df,2.0), x)
+logccdf(d::Chisq, x::Real) = logccdf(Gamma(0.5*d.df,2.0), x)
+
+quantile(d::Chisq, p::Real) = quantile(Gamma(0.5*d.df,2.0), p)
+cquantile(d::Chisq, p::Real) = cquantile(Gamma(0.5*d.df,2.0), p)
+invlogcdf(d::Chisq, lp::Real) = invlogcdf(Gamma(0.5*d.df,2.0), lp)
+invlogccdf(d::Chisq, lp::Real) = invlogccdf(Gamma(0.5*d.df,2.0), lp)
+
 
 function mgf(d::Chisq, t::Real)
     k = d.df
     (1.0 - 2.0 * t)^(-k / 2.0)
 end
 
-cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
+cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-0.5*d.df)
 
-mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
-modes(d::Chisq) = [mode(d)]
 
 # rand - the distribution chi^2(df) is 2 * gamma(df / 2)
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)
-    d.df == 1 ? randn()^2 : 2.0 * rand(Gamma(d.df / 2.0))
+    d.df == 1 ? randn()^2 : rand(Gamma(0.5*d.df,2.0))
 end
 
 function rand!(d::Chisq, A::Array{Float64})
@@ -49,7 +61,7 @@ function rand!(d::Chisq, A::Array{Float64})
         return A
     end
     if d.df >= 2
-        dpar = d.df / 2.0 - 1.0 / 3.0
+        dpar = 0.5*d.df - 1.0 / 3.0
     else
         error("require degrees of freedom df >= 2")
     end
@@ -60,6 +72,3 @@ function rand!(d::Chisq, A::Array{Float64})
     A
 end
 
-skewness(d::Chisq) = sqrt(8.0 / d.df)
-
-var(d::Chisq) = 2.0 * d.df

@@ -11,8 +11,6 @@ immutable Normal <: ContinuousUnivariateDistribution
     Normal() = Normal(0.0, 1.0)
 end
 
-@_jl_dist_2p Normal norm
-
 @continuous_distr_support Normal -Inf Inf
 
 const Gaussian = Normal

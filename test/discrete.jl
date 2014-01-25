@@ -13,8 +13,7 @@ import NumericExtensions
 using Distributions
 using Base.Test
 
-
-for d in [
+distlist = [
     Bernoulli(0.1),
     Bernoulli(0.5),
     Bernoulli(0.9), 
@@ -26,10 +25,29 @@ for d in [
     DiscreteUniform(2.0, 5.0),
     Binomial(1, 0.5),
     Binomial(100, 0.1),
-    Binomial(100, 0.9)]
+    Binomial(100, 0.9),
+    Binomial(10000, 0.03),
+    Hypergeometric(10, 10, 3),
+    Hypergeometric(50, 80, 3),
+    Hypergeometric(50, 80, 60)]
 
-    # NB: uncomment if some tests failed
-    # println(d)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
+    if length(ARGS) > 0
+        println(d)
+    end
 
     xmin = minimum(d)
     xmax = maximum(d)
@@ -105,11 +123,11 @@ for d in [
         lc[i] = logcdf(d, x[i])
         lcc[i] = logccdf(d, x[i])
 
-        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
-        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
-        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+        @test_approx_eq_eps exp(lp[i]) p[i] 1.0e-12
+        @test_approx_eq_eps exp(lc[i]) c[i] 1.0e-12
+        @test_approx_eq_eps exp(lcc[i]) cc[i] 1.0e-12
 
-        if !isa(d, Binomial)
+        if !isa(d, Binomial) && p[i] > 1.1e-8
             @test quantile(d, c[i] - 1.0e-8) == x[i]
             @test cquantile(d, cc[i] + 1.0e-8) == x[i]
             @test invlogcdf(d, lc[i] - 1.0e-8) == x[i]
@@ -147,7 +165,7 @@ for d in [
     @test_approx_eq mean(d)     xmean
     @test_approx_eq var(d)      xvar
     @test_approx_eq std(d)      xstd
-    @test_approx_eq skewness(d) xskew
+    @test_approx_eq_eps skewness(d) xskew max(1000eps(xskew),100eps())
     @test_approx_eq kurtosis(d) xkurt
     @test_approx_eq entropy(d)  xentropy
 
