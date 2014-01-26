@@ -26,7 +26,7 @@ scale(d::VonMisesFisher) = d.kappa
 
 insupport{T <: Real}(d::VonMisesFisher, x::Vector{T}) = abs(sum(x) - 1.) < 1e-8
 
-function rand(d::VonMisesFisher, n::Int64)
+function rand(d::VonMisesFisher, n::Int)
     randvonMisesFisher(n, d.kappa, d.mu)
 end
 
