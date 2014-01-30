@@ -30,7 +30,7 @@ std(d::Logistic) = pi * d.scale / sqrt(3.0)
 
 var(d::Logistic) = (pi * d.scale)^2 / 3.0
 
-function score(d::Logistic, x::Real)
+function gradlogpdf(d::Logistic, x::Real)
   expterm = exp((d.location - x) / d.scale)
   ((2 * expterm) / (1 + expterm) - 1) / d.scale
 end

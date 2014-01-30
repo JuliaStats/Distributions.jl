@@ -29,7 +29,7 @@ std(d::Normal) = d.σ
 skewness(d::Normal) = 0.0
 kurtosis(d::Normal) = 0.0
 
-score(d::Normal, x::Real) = (d.μ - x) / d.σ^2
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
 

@@ -46,6 +46,6 @@ skewness(d::Gumbel) = 12.0 * sqrt(6.0) * zeta(3.0) / pi^3
 
 var(d::Gumbel) = pi^2 / 6.0 * d.beta^2
 
-function score(d::Gumbel, x::Real)
+function gradlogpdf(d::Gumbel, x::Real)
   - (1.0 + exp((d.mu - x) / d.beta)) / d.beta
 end

@@ -72,7 +72,7 @@ function var(d::Beta)
     d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
 
-function score(d::Beta, x::Real)
+function gradlogpdf(d::Beta, x::Real)
   insupport(Beta, x) ? (d.alpha - 1.0) / x - (d.beta - 1.0) / (1 - x) : zero(x)
 end
 

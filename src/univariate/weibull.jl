@@ -66,6 +66,6 @@ end
 
 modes(d::Weibull) = [mode(d)]
 
-function score(d::Weibull, x::Real)
+function gradlogpdf(d::Weibull, x::Real)
   insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(k - 1.0) / (d.scale^k) : zero(x)
 end

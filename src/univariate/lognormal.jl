@@ -40,7 +40,7 @@ function var(d::LogNormal)
     (exp(sigsq) - 1) * exp(2d.meanlog + sigsq)
 end
 
-function score(d::LogNormal, x::Real)
+function gradlogpdf(d::LogNormal, x::Real)
   insupport(LogNormal, x) ? - ((log(x) - d.meanlog) / (d.sdlog^2) + 1.0) / x : zero(x)
 end
 

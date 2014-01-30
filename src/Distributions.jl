@@ -115,6 +115,7 @@ export
     fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
     gmvnormal,     # a generic function to construct multivariate normal distributions
+    gradlogpdf,    # score function of distribution (derivative or gradient of logpdf)
     insupport,     # predicate, is x in the support of the distribution?
     invcov,        # get the inversed covariance
     invlogccdf,    # complementary quantile based on log probability
@@ -161,7 +162,6 @@ export
     rand!,         # replacement random sampler
     sample,        # sample from a source array
     sampler,       # create a Sampler object for efficient samples
-    score,         # score function of distribution (derivative or gradient of logpdf)
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
