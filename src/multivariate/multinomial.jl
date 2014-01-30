@@ -167,7 +167,7 @@ function rand!{T<:Real}(d::Multinomial, x::Matrix{T})
     size(x,1) == k || throw(ArgumentError("Invalid argument dimension."))
 
     for i = 1 : size(x, 2)
-        multinom_rand!(d.n, d.prob, unsafe_view(x, :, i))
+        multinom_rand!(d.n, d.prob, view(x, :, i))
     end
     return x
 end
