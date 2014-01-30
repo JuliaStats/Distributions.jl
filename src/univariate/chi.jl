@@ -38,10 +38,6 @@ function kurtosis(d::Chi)
     (2.0 / σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-function entropy(d::Chi)
-    lgamma(k / 2.0) + 0.5 * (k - log(2.0) - (k - 1.0) * digamma(k / 2.0))
-end
-
 function pdf(d::Chi, x::Real)
     k = d.df
     (2.0^(1.0 - k / 2.0) * x^(k - 1.0) * exp(-x^2 / 2.0)) / gamma(k / 2.0)
