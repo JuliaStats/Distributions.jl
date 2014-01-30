@@ -54,11 +54,41 @@ function rand!(d::Beta, A::Array{Float64})
     db = (β <= 1.0 ? β + 1.0 : β) - 1.0 / 3.0
     cb = 1.0 / sqrt(9.0 * db)
 
-    for i = 1:length(A)
-        u = randg2(da, ca)
-        A[i] = u / (u + randg2(db, cb))
+    n = length(A)
+
+    if α > 1.0
+        if β > 1.0
+            for i = 1:n
+                u = randg2(da, ca)
+                v = randg2(db, cb)
+                @inbounds A[i] = u / (u + v)
+            end
+        else
+            invβ = 1.0 / β
+            for i = 1:n
+                u = randg2(da, ca)
+                v = randg2(db, cb) * (rand()^invβ)
+                @inbounds A[i] = u / (u + v)
+            end
+        end
+    else
+        invα = 1.0 / α
+        if β > 1.0
+            for i = 1:n
+                u = randg2(da, ca) * (rand()^invα)
+                v = randg2(db, cb)
+                @inbounds A[i] = u / (u + v)
+            end
+        else
+            invβ = 1.0 / β
+            for i = 1:n
+                u = randg2(da, ca) * (rand()^invα)
+                v = randg2(db, cb) * (rand()^invβ)
+                @inbounds A[i] = u / (u + v)
+            end
+        end
     end
-    A
+    return A
 end
 
 function skewness(d::Beta)
