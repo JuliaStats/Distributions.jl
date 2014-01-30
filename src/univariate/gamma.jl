@@ -43,18 +43,9 @@ modes(d::Gamma) = [mode(d)]
 rand(d::Gamma) = d.scale * randg(d.shape)
 
 function rand!(d::Gamma, A::Array{Float64})
-    α = d.shape
-    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
-    cpar = 1.0 / sqrt(9.0 * dpar)
-    n = length(A)
-    for i in 1:n
-        A[i] = randg2(dpar, cpar)
-    end
-    if α <= 1.0
-        ainv = 1.0 / α
-        for i in 1:n
-            A[i] *= rand()^ainv
-        end
+    s = GammaSampler(d.shape)
+    for i = 1:length(A)
+        A[i] = rand(s)
     end
     multiply!(A, d.scale)
 end

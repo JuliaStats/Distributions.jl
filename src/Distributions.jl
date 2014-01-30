@@ -222,6 +222,7 @@ include("tvpack.jl")
 include("utils.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
+include(joinpath("samplers", "gamma_sampler.jl"))
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))

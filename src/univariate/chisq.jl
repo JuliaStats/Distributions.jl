@@ -43,21 +43,16 @@ end
 
 function rand!(d::Chisq, A::Array{Float64})
     if d.df == 1
-        for i in 1:length(A)
-            A[i] = randn()^2
+        for i = 1:length(A)
+            @inbounds A[i] = randn()^2
         end
-        return A
-    end
-    if d.df >= 2
-        dpar = d.df / 2.0 - 1.0 / 3.0
     else
-        error("require degrees of freedom df >= 2")
+        s = GammaSampler(d.df / 2.0)
+        for i = 1:length(A)
+            @inbounds A[i] = 2.0 * rand(s)
+        end
     end
-    cpar = 1.0 / sqrt(9.0 * dpar)
-    for i in 1:length(A)
-        A[i] = 2.0 * randg2(dpar, cpar)
-    end
-    A
+    return A
 end
 
 skewness(d::Chisq) = sqrt(8.0 / d.df)
