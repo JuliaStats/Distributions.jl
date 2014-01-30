@@ -161,6 +161,7 @@ export
     rand!,         # replacement random sampler
     sample,        # sample from a source array
     sampler,       # create a Sampler object for efficient samples
+    score,         # score function of distribution (derivative or gradient of logpdf)
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution

@@ -63,6 +63,10 @@ skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 
+function score(d::Gamma, x::Real)
+  insupport(Gamma, x) ? (d.shape - 1.0) / x - 1.0 / d.scale : zero(x)
+end
+
 ## Fit model
 
 immutable GammaStats <: SufficientStats

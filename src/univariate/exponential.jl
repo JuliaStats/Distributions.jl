@@ -62,6 +62,10 @@ skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
+function score(d::Exponential, x::Real)
+  insupport(Exponential, x) ? - 1.0 / d.scale : zero(x)
+end
+
 ### handling support
 
 isupperbounded(::Union(Exponential, Type{Exponential})) = false
