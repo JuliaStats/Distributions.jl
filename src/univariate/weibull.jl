@@ -67,5 +67,5 @@ end
 modes(d::Weibull) = [mode(d)]
 
 function gradloglik(d::Weibull, x::Float64)
-  insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(k - 1.0) / (d.scale^k) : 0.0
+  insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(d.shape - 1.0) / (d.scale^d.shape) : 0.0
 end
