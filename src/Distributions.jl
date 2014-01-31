@@ -115,6 +115,7 @@ export
     fit_map,       # fit a distribution to data using MAP
     freecumulant,  # free cumulants of distribution
     gmvnormal,     # a generic function to construct multivariate normal distributions
+    gradlogpdf,    # score function of distribution (derivative or gradient of logpdf)
     insupport,     # predicate, is x in the support of the distribution?
     invcov,        # get the inversed covariance
     invlogccdf,    # complementary quantile based on log probability

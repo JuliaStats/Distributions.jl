@@ -29,6 +29,8 @@ std(d::Normal) = d.σ
 skewness(d::Normal) = 0.0
 kurtosis(d::Normal) = 0.0
 
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
+
 entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)

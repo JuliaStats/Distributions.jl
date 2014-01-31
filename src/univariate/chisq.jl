@@ -58,3 +58,7 @@ end
 skewness(d::Chisq) = sqrt(8.0 / d.df)
 
 var(d::Chisq) = 2.0 * d.df
+
+function gradlogpdf(d::Chisq, x::Real)
+  insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : zero(x)
+end

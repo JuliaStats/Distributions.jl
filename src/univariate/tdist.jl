@@ -34,3 +34,5 @@ function var(d::TDist)
     d.df > 1.0 && return Inf
     NaN
 end
+
+gradlogpdf(d::TDist, x::Real) = -((d.df + 1.0) * x) / (x^2 + d.df)

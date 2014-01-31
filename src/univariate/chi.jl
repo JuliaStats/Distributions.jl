@@ -49,4 +49,8 @@ function entropy(d::Chi)
         ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
 end
 
+function gradlogpdf(d::Chi, x::Real)
+  insupport(Chi, x) ? (d.df - 1.0) / x - x : zero(x)
+end
+
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))
