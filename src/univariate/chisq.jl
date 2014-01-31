@@ -35,6 +35,10 @@ cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
 mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
 modes(d::Chisq) = [mode(d)]
 
+function gradloglik(d::Chisq, x::Float64)
+  insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
+end
+
 # rand - the distribution chi^2(df) is 2 * gamma(df / 2)
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)

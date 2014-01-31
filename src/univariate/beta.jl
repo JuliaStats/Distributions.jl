@@ -68,6 +68,10 @@ function var(d::Beta)
     d.alpha * d.beta / (ab * ab * (ab + 1.0))
 end
 
+function gradloglik(d::Beta, x::Float64)
+  insupport(Beta, x) ? (d.alpha - 1.0) / x - (d.beta - 1.0) / (1 - x) : 0.0
+end
+
 ### handling support
 
 @continuous_distr_support Beta 0.0 1.0

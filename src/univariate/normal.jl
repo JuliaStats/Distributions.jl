@@ -47,6 +47,8 @@ ccdf(d::Normal, x::Real) = Φc(zval(d,x))
 logcdf(d::Normal, x::Real) = logΦ(zval(d,x))
 logccdf(d::Normal, x::Real) = logΦc(zval(d,x))    
 
+gradloglik(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
+
 quantile(d::Normal, p::Real) = xval(d, Φinv(p))
 cquantile(d::Normal, p::Real) = xval(d, -Φinv(p))
 invlogcdf(d::Normal, p::Real) = xval(d, logΦinv(p))

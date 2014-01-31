@@ -45,3 +45,7 @@ rand(d::Gumbel) = d.mu - d.beta * log(-log(rand()))
 skewness(d::Gumbel) = 12.0 * sqrt(6.0) * zeta(3.0) / pi^3
 
 var(d::Gumbel) = pi^2 / 6.0 * d.beta^2
+
+function gradloglik(d::Gumbel, x::Float64)
+  - (1.0 + exp((d.mu - x) / d.beta)) / d.beta
+end

@@ -34,3 +34,5 @@ function var(d::TDist)
     d.df > 1.0 && return Inf
     NaN
 end
+
+gradloglik(d::TDist, x::Float64) = -((d.df + 1.0) * x) / (x^2 + d.df)

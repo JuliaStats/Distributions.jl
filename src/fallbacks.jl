@@ -184,6 +184,10 @@ logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d,
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 
 
+### Gradient (derivative of logpdf)
+
+gradloglik(d::UnivariateDistribution, x::Real) = gradloglik(d, float64(x))
+
 #### Sampling: rand & rand! ####
 
 function rand!(d::UnivariateDistribution, A::Array)

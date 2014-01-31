@@ -167,7 +167,8 @@ export
     suffstats,     # compute sufficient statistics
     var,           # variance of distribution
     wsample,       # weighted sampling from a source array
-    expected_logdet # expected logarithm of random matrix determinant
+    expected_logdet, # expected logarithm of random matrix determinant
+    gradloglik     # gradient (or derivative) of logpdf
 
 import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
