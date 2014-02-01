@@ -49,4 +49,8 @@ function entropy(d::Chi)
         ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
 end
 
+function gradloglik(d::Chi, x::Float64)
+  insupport(Chi, x) ? (d.df - 1.0) / x - x : 0.0
+end
+
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))

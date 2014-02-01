@@ -62,6 +62,10 @@ skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
+function gradloglik(d::Exponential, x::Float64)
+  insupport(Exponential, x) ? - 1.0 / d.scale : 0.0
+end
+
 ### handling support
 
 isupperbounded(::Union(Exponential, Type{Exponential})) = false
