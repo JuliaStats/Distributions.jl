@@ -115,6 +115,10 @@ function logpdf!(r::Array{Float64}, d::AbstractMvNormal, x::Matrix{Float64})
     r
 end
 
+function gradloglik(d::GenericMvNormal, x::Vector{Float64})
+  z::Vector{Float64} = d.zeromean ? x : x - d.μ
+  -invcov(d)*z
+end
 
 # Sampling (for GenericMvNormal)
 

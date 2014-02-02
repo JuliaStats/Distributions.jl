@@ -187,6 +187,7 @@ pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 ### Gradient (derivative of logpdf)
 
 gradloglik(d::UnivariateDistribution, x::Real) = gradloglik(d, float64(x))
+gradloglik(d::MultivariateDistribution, x::Vector{Real}) = gradloglik(d, float64(x))
 
 #### Sampling: rand & rand! ####
 

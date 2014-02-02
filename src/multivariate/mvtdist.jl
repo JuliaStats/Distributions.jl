@@ -74,7 +74,9 @@ mode(d::GenericMvTDist) = d.μ
 modes(d::GenericMvTDist) = [mode(d)]
 
 var(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*diag(d.Σ) : Float64[NaN for i = 1:d.dim]
+scale(d::GenericMvTDist) = full(d.Σ)
 cov(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*full(d.Σ) : NaN*ones(d.dim, d.dim)
+invscale(d::GenericMvTDist) = full(inv(d.Σ))
 invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*full(inv(d.Σ)) : NaN*ones(d.dim, d.dim)
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
@@ -123,6 +125,12 @@ function logpdf!(r::Array{Float64}, d::AbstractMvTDist, x::Matrix{Float64})
     r[i] = lgamma(shdfhdim)-lgamma(hdf)-hdim*log(d.df)-hdim*log(pi)-0.5*logdet(d.Σ)-shdfhdim*log(1+r[i]/d.df)
   end 
   r
+end
+
+function gradloglik(d::GenericMvTDist, x::Vector{Float64})
+  z::Vector{Float64} = d.zeromean ? x : x - d.μ
+  prz = invscale(d)*z
+  -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
 end
 
 # Sampling (for GenericMvTDist)
