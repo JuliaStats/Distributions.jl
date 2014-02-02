@@ -143,6 +143,7 @@ export
     posterior_rand!, 
     posterior_randmodel,
     scale,         # scale parameter of a distribution
+    invscale,      # invscale parameter of a distribution (see multivariate t-distribution)
     rate,          # rate parameter of a distribution
     sqmahal,       # squared Mahalanobis distance to Gaussian center
     sqmahal!,      # inplace evaluation of sqmahal
