@@ -1,4 +1,4 @@
-const Rmath = :libRmath
+const Rmath = "libRmath-julia"
 
 # TODO: Replace the three _jl_dist_*p macros with one by defining
 # the argument tuples for the ccall dynamically from pn
