@@ -31,8 +31,8 @@ x = rand(Bernoulli(0.7), n0)
 
 ss = suffstats(Bernoulli, x)
 @test isa(ss, Distributions.BernoulliStats)
-@test ss.cnt0 == n0 - nnz(x)
-@test ss.cnt1 == nnz(x)
+@test ss.cnt0 == n0 - countnz(x)
+@test ss.cnt1 == countnz(x)
 
 ss = suffstats(Bernoulli, x, w)
 @test isa(ss, Distributions.BernoulliStats)
@@ -40,7 +40,7 @@ ss = suffstats(Bernoulli, x, w)
 @test_approx_eq ss.cnt1 sum(w[x .== 1])
 
 d = fit(Bernoulli, x)
-p = nnz(x) / n0
+p = countnz(x) / n0
 @test isa(d, Bernoulli)
 @test_approx_eq mean(d) p
 
@@ -100,7 +100,7 @@ p = [0.2, 0.5, 0.3]
 x = rand(Categorical(p), n0)
 
 ss = suffstats(Categorical, (3, x))
-h = Float64[nnz(x .== i) for i = 1 : 3]
+h = Float64[countnz(x .== i) for i = 1 : 3]
 @test isa(ss, Distributions.CategoricalStats)
 @test_approx_eq ss.h h
 
