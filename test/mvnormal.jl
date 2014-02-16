@@ -1,9 +1,7 @@
 # Tests on Multivariate Normal distributions
 
 import NumericExtensions
-import NumericExtensions.ScalMat
-import NumericExtensions.PDiagMat
-import NumericExtensions.PDMat
+import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions
 using Base.Test

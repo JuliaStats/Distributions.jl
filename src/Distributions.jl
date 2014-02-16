@@ -1,6 +1,7 @@
 module Distributions
 
 using NumericExtensions
+using PDMats
 using StatsBase
 
 export
@@ -174,7 +175,8 @@ export
 import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
-import NumericExtensions: dim, entropy
+import NumericExtensions: entropy
+import PDMats: dim, PDMat, invquad
 import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler
 
 
