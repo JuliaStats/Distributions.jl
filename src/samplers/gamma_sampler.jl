@@ -61,6 +61,6 @@ function rand(s::GammaSampler)
 end
 
 randg(α::Float64) = rand(GammaSampler(α))
-randg(α::Real) = rand(float64(α))
+randg(α::Real) = randg(float64(α))
 
 
