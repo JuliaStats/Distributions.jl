@@ -30,7 +30,7 @@ function entropy(d::Binomial; approx::Bool=false)
         lp = n * log(p0)
         s = exp(lp) * lp
         for k = 1:n
-           lp += log((n - k) / (k + 1)) + lg
+           lp += log((n - k + 1) / k) + lg
            s += exp(lp) * lp
         end
         return -s
