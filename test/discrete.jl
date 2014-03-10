@@ -138,11 +138,11 @@ for d in [
 
     xf = float64(x)
     xmean = dot(p, xf)
-    xvar = dot(p, abs2(xf - xmean))
+    xvar = dot(p, abs2(xf .- xmean))
     xstd = sqrt(xvar)
     xentropy = NumericExtensions.entropy(p)
-    xskew = dot(p, (xf - xmean).^3) / (xstd.^3)
-    xkurt = dot(p, (xf - xmean).^4) / (xvar.^2) - 3.0
+    xskew = dot(p, (xf .- xmean).^3) / (xstd.^3)
+    xkurt = dot(p, (xf .- xmean).^4) / (xvar.^2) - 3.0
 
     @test_approx_eq mean(d)     xmean
     @test_approx_eq var(d)      xvar

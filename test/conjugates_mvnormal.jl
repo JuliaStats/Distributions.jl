@@ -11,11 +11,7 @@ X = reshape(Float64[1:12], p, n)
 w = rand(n)
 Xw = X * diagm(w)
 
-# Convoluted way to put 1's on diag
-Sigma = eye(p)
-Sigma += 0.25
-Sigma -= 0.25*eye(p)
-
+Sigma = 0.75 * eye(p) + fill(0.25, 4, 4)
 ss = suffstats(MvNormalKnownSigma(Sigma), X)
 ssw = suffstats(MvNormalKnownSigma(Sigma), X, w)
 

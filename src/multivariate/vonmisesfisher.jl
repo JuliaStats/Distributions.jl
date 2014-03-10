@@ -10,7 +10,7 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     kappa::Float64
 
     function VonMisesFisher{T <: Real}(mu::Vector{T}, kappa::Float64)
-        mu = mu / norm(mu)
+        mu = mu ./ norm(mu)
         if kappa < 0
             throw(ArgumentError("kappa must be a nonnegative real number."))
         end
@@ -56,7 +56,7 @@ function randvonMisesFisher(n, kappa, mu)
     w = rW(n, kappa, m)
     v = rand(MvNormal(zeros(m-1), eye(m-1)), n)
     v = normalize(v',2,2)
-    r = sqrt(1 - w .^ 2)
+    r = sqrt(1.0 .- w .^ 2)
     for j = 1:size(v,2) v[:,j] = v[:,j] .* r; end  
     x = hcat(v, w)
     mu = mu / norm(mu)

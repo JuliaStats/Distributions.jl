@@ -159,7 +159,7 @@ function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
     end
 
     b::Float64 = d.lmnB
-    Base.LinAlg.BLAS.gemv!('T', 1.0, log(x), d.alpha - 1.0, 0.0, r)
+    Base.LinAlg.BLAS.gemv!('T', 1.0, log(x), d.alpha .- 1.0, 0.0, r)
     # At_mul_B(r, log(x), d.alpha - 1.0)
     for i in 1:n
         r[i] -= b

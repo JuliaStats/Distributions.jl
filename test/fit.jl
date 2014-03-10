@@ -165,25 +165,25 @@ ss = suffstats(Normal, x)
 @test isa(ss, Distributions.NormalStats)
 @test_approx_eq ss.s sum(x)
 @test_approx_eq ss.m mean(x)
-@test_approx_eq ss.s2 sum((x - ss.m).^2)
+@test_approx_eq ss.s2 sum((x .- ss.m).^2)
 @test_approx_eq ss.tw n0
 
 ss = suffstats(Normal, x, w)
 @test isa(ss, Distributions.NormalStats)
 @test_approx_eq ss.s dot(x, w)
 @test_approx_eq ss.m dot(x, w) / sum(w)
-@test_approx_eq ss.s2 dot((x - ss.m).^2, w)
+@test_approx_eq ss.s2 dot((x .- ss.m).^2, w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit(Normal, x)
 @test isa(d, Normal)
 @test_approx_eq d.μ mean(x)
-@test_approx_eq d.σ sqrt(mean((x - d.μ).^2))
+@test_approx_eq d.σ sqrt(mean((x .- d.μ).^2))
 
 d = fit(Normal, x, w)
 @test isa(d, Normal)
 @test_approx_eq d.μ dot(x, w) / sum(w)
-@test_approx_eq d.σ sqrt(dot((x - d.μ).^2, w) / sum(w))
+@test_approx_eq d.σ sqrt(dot((x .- d.μ).^2, w) / sum(w))
 
 d = fit(Normal, rand(Normal(μ, σ), N))
 @test isa(d, Normal)
@@ -195,24 +195,24 @@ import Distributions.NormalKnownMu, Distributions.NormalKnownSigma
 ss = suffstats(NormalKnownMu(μ), x)
 @test isa(ss, Distributions.NormalKnownMuStats)
 @test ss.μ == μ
-@test_approx_eq ss.s2 sum((x - μ).^2)
+@test_approx_eq ss.s2 sum((x .- μ).^2)
 @test_approx_eq ss.tw n0
 
 ss = suffstats(NormalKnownMu(μ), x, w)
 @test isa(ss, Distributions.NormalKnownMuStats)
 @test ss.μ == μ
-@test_approx_eq ss.s2 dot((x - μ).^2, w)
+@test_approx_eq ss.s2 dot((x .- μ).^2, w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit_mle(Normal, x; mu=μ)
 @test isa(d, Normal)
 @test d.μ == μ
-@test_approx_eq d.σ sqrt(mean((x - d.μ).^2))
+@test_approx_eq d.σ sqrt(mean((x .- d.μ).^2))
 
 d = fit_mle(Normal, x, w; mu=μ)
 @test isa(d, Normal)
 @test d.μ == μ
-@test_approx_eq d.σ sqrt(dot((x - d.μ).^2, w) / sum(w))
+@test_approx_eq d.σ sqrt(dot((x .- d.μ).^2, w) / sum(w))
 
 
 ss = suffstats(NormalKnownSigma(σ), x)
