@@ -1,4 +1,4 @@
-Distributions Package (version 0.2.9)
+Distributions Package (version 0.4.2)
 =======================================
 
 The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
@@ -6,7 +6,6 @@ The *Distributions* package provides a large collection of probabilistic distrib
 * Moments (*e.g* mean, variance, skewness, and kurtosis), entropy, and other properties
 * Probability density/mass functions (pdf) and their logarithm (logpdf)
 * Moment generating functions and characteristic functions
-* Sampling from population or from a distribution
 * Maximum likelihood estimation
 * Posterior *w.r.t.* conjugate prior, and Maximum-A-Posteriori (MAP) estimation
 
@@ -19,7 +18,6 @@ The *Distributions* package provides a large collection of probabilistic distrib
    univariate.rst
    multivariate.rst
    matrix.rst
-   sample.rst
    fit.rst
    conjugates.rst
 

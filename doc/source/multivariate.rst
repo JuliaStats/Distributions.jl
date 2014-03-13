@@ -11,55 +11,55 @@ The methods listed as below are implemented for each multivariate distribution, 
 Computation of statistics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. function:: dim(d)
+- **dim** (d)
 
-    Return the sample dimension.
+    Return the sample dimension of distribution ``d``.
 
-.. function:: mean(d)
+- **mean** (d)
 
-    Return the mean vector of distribution d.
+    Return the mean vector of distribution ``d``.
 
-.. function:: var(d)
+- **var** (d)
 
-    Return the vector of component-wise variances of distribution d.
+    Return the vector of component-wise variances of distribution ``d``.
 
-.. function:: cov(d)
+- **cov** (d)
 
-    Return the covariance matrix of distribution d.
+    Return the covariance matrix of distribution ``d``.
 
-.. function:: cor(d)
+- **cor** (d)
 
-    Return the correlation matrix of distribution d.
+    Return the correlation matrix of distribution ``d``.
 
-.. function:: entropy(d)
+- **entropy** (d)
 
-    Return the entropy of distribution d. 
+    Return the entropy of distribution ``d``. 
 
 
 Probability evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. function:: pdf(d, x)
+- **pdf** (d, x)
 
-    Return the probability density evaluated at x.
+    Return the probability density of distribution ``d`` evaluated at ``x``.
 
-    - If x is a vector, it returns the result as a scalar. 
-    - If x is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
+    - If ``x`` is a vector, it returns the result as a scalar. 
+    - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
 
 
-.. function:: pdf!(r, d, x)
+- **pdf!** (r, d, x)
 
     Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
 
 
-.. function:: logpdf(d, x)
+- **logpdf** (d, x)
 
-    Return the logarithm of probability density evaluated at x.
+    Return the logarithm of probability density evaluated at ``x``.
 
-    - If x is a vector, it returns the result as a scalar. 
-    - If x is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
+    - If ``x`` is a vector, it returns the result as a scalar. 
+    - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
 
-.. function:: logpdf!(r, d, x)
+- **logpdf!** (r, d, x)
 
     Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
 
@@ -70,15 +70,15 @@ Probability evaluation
 Sampling
 ~~~~~~~~~
 
-.. function:: rand(d)
+- **rand** (d)
 
-    Sample a vector from the distribution d.
+    Sample a vector from the distribution ``d``.
 
-.. function:: rand(d, n)
+- **rand** (d, n)
 
-    Sample n vectors from the distribution d. This returns a matrix of size ``(dim(d), n)``, where each column is a sample.
+    Sample n vectors from the distribution ``d``. This returns a matrix of size ``(dim(d), n)``, where each column is a sample.
 
-.. function:: rand!(d, x)
+- **rand!** (d, x)
 
     Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.     
 
@@ -86,10 +86,12 @@ Sampling
 **Node:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
 
 
+.. _multinomial:
+
 Multinomial Distribution
 ---------------------------
 
-The *multinomial distribution* generalizes the *binomial distribution*. Consider n independent draws from a Categorical distribution over a finite set of size k, and let :math:`X = (X_1, ..., X_k)` where ``X_i`` represents the number of times the element ``i`` occurs, then the distribution of ``X`` is a multinomial distribution. Each sample of a multinomial distribution is a k-dimensional integer vector that sums to n.
+The `Multinomial distribution <http://en.wikipedia.org/wiki/Multinomial_distribution>`_ generalizes the *binomial distribution*. Consider n independent draws from a Categorical distribution over a finite set of size k, and let :math:`X = (X_1, ..., X_k)` where ``X_i`` represents the number of times the element ``i`` occurs, then the distribution of ``X`` is a multinomial distribution. Each sample of a multinomial distribution is a k-dimensional integer vector that sums to n.
 
 The probability mass function is given by
 
@@ -106,10 +108,12 @@ The probability mass function is given by
                         # over 1:k
 
 
+.. _multivariatenormal:
+
 Multivariate Normal Distribution
 ----------------------------------
 
-The *multivariate normal distribution* is a multidimensional generalization of the *normal distribution*. The probability density function of a d-dimensional multivariate normal distribution with mean vector μ and covariance matrix Σ is 
+The `Multivariate normal distribution <http://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_ is a multidimensional generalization of the *normal distribution*. The probability density function of a d-dimensional multivariate normal distribution with mean vector μ and covariance matrix Σ is 
 
 .. math::
 
@@ -123,7 +127,7 @@ Three different types of covariances matrices are usually employed in practice:
 * *Diagonal covariance matrix*
 * *Isotropic covariance matrix*: a special diagonal matrix of which all diagonal elements are the same, i.e.: :math:`\sigma^2 * I`.
 
-We use three different types to respectively represent multivariate normal distributions of these covariance structures: ``MvNormal``, ``DiagNormal``, and ``IsoNormal``. Internally, these types leverage the positive definite matrix types (``PDMat``, ``PDiagMat``, and ``ScalMat``) to represent the covariance. These matrix types are provided in the package *NumericExtensions.jl* for the purpose of handling postive definite matrices of different structures efficiently (see `related docs <http://lindahua.github.io/NumericExtensions.jl/pdmat.html>`_).
+We use three different types to respectively represent multivariate normal distributions of these covariance structures: ``MvNormal``, ``DiagNormal``, and ``IsoNormal``. Internally, these types leverage the positive definite matrix types (``PDMat``, ``PDiagMat``, and ``ScalMat``) to represent the covariance. These matrix types are provided in the Julia package `PDMats <https://github.com/lindahua/PDMats.jl>`_ for the purpose of handling postive definite matrices of different structures efficiently.
 
 .. code-block:: julia
 
@@ -182,21 +186,21 @@ Additional interface
 
 The following methods are specific to all kinds of multivariate normal distributions.
 
-.. function:: invcov(d)
+- **invcov** (d)
 
     Return the inversed covariance matrix of d.
 
-.. function:: logdet_cov(d)
+- **logdet_cov** (d)
 
     Return the log-determinant value of the covariance matrix.
 
-.. function:: sqmahal(d, x)
+- **sqmahal** (d, x)
 
     Return the squared Mahalanobis distance from x to the center of d, w.r.t. the covariance.
 
     When x is a vector, it returns a scalar value. When x is a matrix, it returns a vector of length size(x,2).
 
-.. function:: sqmahal!(r, d, x)
+- **sqmahal!** (r, d, x)
 
     Writes the squared Mahalanbobis distances from each column of x to the center of d to r.
 
@@ -204,7 +208,7 @@ The following methods are specific to all kinds of multivariate normal distribut
 Canonical form
 ~~~~~~~~~~~~~~~
 
-Multivariate normal distribution is an *exponential family distribution*, with two canonical parameters: the *potential vector* :math:`h` and the *precision matrix* :math:`J`. The relation between these parameters and the conventional representation (*i.e.* the one using mean :math:`\mu` and covariance :math:`\Sigma`) is:
+Multivariate normal distribution is an `exponential family distribution <http://en.wikipedia.org/wiki/Exponential_family>`_, with two canonical parameters: the *potential vector* :math:`h` and the *precision matrix* :math:`J`. The relation between these parameters and the conventional representation (*i.e.* the one using mean :math:`\mu` and covariance :math:`\Sigma`) is:
 
 .. math::
 
@@ -244,7 +248,6 @@ First, we have an abstract type ``AbstractMvNormal`` as the base type. For those
     typealias MvNormal   GenericMvNormal{PDMat} 
     typealias DiagNormal GenericMvNormal{PDiagMat} 
     typealias IsoNormal  GenericMvNormal{ScalMat}
-    .
 
 For those using canonical form, we define:
 
@@ -255,16 +258,17 @@ For those using canonical form, we define:
     typealias MvNormalCanon   GenericMvNormalCanon{PDMat} 
     typealias DiagNormalCanon GenericMvNormalCanon{PDiagMat} 
     typealias IsoNormalCanon  GenericMvNormalCanon{ScalMat}
-    .
 
 
 Leverging this type system, the multiple dispatch mechanism of Julia, as well as the computational support of the *NumericExtensions* package on positive definite matrices, we managed to provide this rich representation while ensuring that we take the most efficient computational routines for each particular type.
 
 
+.. _dirichlet:
+
 Dirichlet Distribution
 ------------------------
 
-The Dirichlet distribution is often used the conjugate prior for Categorical or Multinomial distributions. The probability density function of a Dirichlet distribution with parameter :math:`\alpha = (\alpha_1, \ldots, \alpha_k)` is
+The `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution>`_ is often used the conjugate prior for Categorical or Multinomial distributions. The probability density function of a Dirichlet distribution with parameter :math:`\alpha = (\alpha_1, \ldots, \alpha_k)` is
 
 .. math::
 

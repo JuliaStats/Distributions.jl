@@ -12,8 +12,8 @@ In Bayesian analysis, canonical parameterization (*i.e.* the parameterization us
 
 Motivated by this, we design the interface as described below to support Bayesian inference based on conjugate models:
 
-.. function:: posterior_canon(pri, G, x[, w])
-.. function:: posterior_canon(pri, ss)
+- **posterior_canon** (pri, G, x[, w])
+- **posterior_canon** (pri, ss)
 
 	Returns the posterior distribution (in canonical form) w.r.t. the prior ``pri`` and the likelihood model ``G``.
 
@@ -27,35 +27,35 @@ Motivated by this, we design the interface as described below to support Bayesia
 	type as ``pri``.
 
 
-.. function:: posterior(pri, G, x[, w])
-.. function:: posterior(pri, ss)
+- **posterior** (pri, G, x[, w])
+- **posterior** (pri, ss)
 
 	Returns the posterior distribution in the same type of ``pri``, based on given data or sufficient statistics.
 
-.. function:: posterior_rand(pri, G, x[, w])
-.. function:: posterior_rand(pri, ss)
+- **posterior_rand** (pri, G, x[, w])
+- **posterior_rand** (pri, ss)
 
 	Returns a random sample from the posterior distribution based on given data or sufficient statistics. 
 
-.. function:: posterior_rand!(r, pri, G, x[, w])
-.. function:: posterior_rand!(r, pri, ss)
+- **posterior_rand!** (r, pri, G, x[, w])
+- **posterior_rand!** (r, pri, ss)
 
 	Draws random samples from the posterior distribution based on given data or sufficient statistics. The number of samples to draw depends on the size of ``r``. 
 
-.. function:: posterior_randmodel(pri, G, x[, w])
+- **posterior_randmodel(pri, G, x[, w])
 
 	Returns a distribution constructed using a parameter drawn from the posterior based on given data or sufficient statistics. 
 
-.. function:: posterior_mode(pri, G, x[, w])
-.. function:: posterior_mode(pri, ss)
+- **posterior_mode** (pri, G, x[, w])
+- **posterior_mode** (pri, ss)
 
 	Returns the mode of the posterior distribution based on given data or sufficient statistics.
 
-.. function:: fit_map(pri, G, x[, w])
+- **fit_map** (pri, G, x[, w])
 
 	Performs Maximum-a-Posterior (MAP) estimation based on given data or sufficient statistics. 
 
-.. function:: complete(pri, G, param)
+- **complete** (pri, G, param)
 
 	Returns a completed distribution based on the likelihood model ``G`` and a given parameter ``param``. 
 

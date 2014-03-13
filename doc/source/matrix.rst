@@ -8,27 +8,27 @@ Common Interface
 
 Both distributions implement the same set of methods:
 
-.. function:: mean(d)
+- **mean** (d)
 
-	Return the mean matrix of d
+	Return the mean matrix of ``d``.
 
-.. function:: pdf(d, x)
+- **pdf** (d, x)
 
-	Compute the probability density at the input matrix x.
+	Compute the probability density at the input matrix ``x``.
 
-.. function:: logpdf(d, x)
+- **logpdf** (d, x)
 
-	Compute the logarithm of the probability density at the input matrix x.
+	Compute the logarithm of the probability density at the input matrix ``x``.
 
-.. function:: rand(d)
+- **rand** (d)
 
-	Draw a sample matrix from the distribution d.
+	Draw a sample matrix from the distribution ``d``.
 
 
 Wishart Distribution
 ---------------------
 
-The *Wishart distribution* is a multidimensional generalization of the Chi-square distribution, which is characterized by a degree of freedom ν, and a base matrix S.
+The `Wishart distribution <http://en.wikipedia.org/wiki/Wishart_distribution>`_ is a multidimensional generalization of the Chi-square distribution, which is characterized by a degree of freedom ν, and a base matrix S.
 
 .. code-block:: julia
 
@@ -38,7 +38,7 @@ The *Wishart distribution* is a multidimensional generalization of the Chi-squar
 Inverse-Wishart Distribution
 ------------------------------
 
-The *Inverse-Wishart distribution* is usually used a the conjugate prior for the covariance matrix of a multivariate normal distribution, which is characterized by a degree of freedom ν, and a base matrix Φ.
+The `Inverse Wishart distribution <http://en.wikipedia.org/wiki/Inverse-Wishart_distribution>`_ is usually used a the conjugate prior for the covariance matrix of a multivariate normal distribution, which is characterized by a degree of freedom ν, and a base matrix Φ.
 
 .. code-block:: julia
 

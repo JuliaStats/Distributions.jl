@@ -7,7 +7,19 @@ Each distribution is implemented by a sub-type of ``Distribution``. ``Distributi
 
     abstract Distribution{F<:VariateForm,S<:ValueSupport}
 
-The ``Distribution`` type has two parameters: ``F`` specifies the form of the variate, which can be either of ``Univariate``, ``Multivariate``, or ``Matrixvariate``; ``S`` specifies the support of sample elements, which can be ``Continuous`` or ``Discrete``.
+The ``Distribution`` type has two parameters: 
+
+- ``F`` specifies the form of the variate, which can be either of the following:
+
+    * ``Univariate``:  each sample is a scalar
+    * ``Multivariate``: each sample is a vector
+    * ``Matrixvariate``: each sample is a matrix
+
+- ``S`` specifies the support of sample elements, which can be either of the following:
+
+    * ``Continuous``: samples take continuous real values
+    * ``Discrete``: samples take discrete values (*e.g.* integers)
+
 For example, a continuous univariate distribution is an instance of ``Distribution{Univariate,Continuous}``.
 
 To simplify the use in practice, we introduce a series of type alias as follows:

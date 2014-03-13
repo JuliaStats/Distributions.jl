@@ -1,13 +1,13 @@
 Distribution Fitting
 =====================
 
-The *Distributions* package provides methods to fit a distribution to a given set of samples. Generally, one may write
+This package provides methods to fit a distribution to a given set of samples. Generally, one may write
 
 .. code-block:: julia
 
 	d = fit(D, x)
 
-This statement fits a distribution of type ``D`` to a given dataset ``x``, where ``x`` should be an array comprised of all samples. The fit function will choose a reasonable way to fit the distribution, which, in most cases, is *maximum likelihood estimation*.
+This statement fits a distribution of type ``D`` to a given dataset ``x``, where ``x`` should be an array comprised of all samples. The fit function will choose a reasonable way to fit the distribution, which, in most cases, is `maximum likelihood estimation <http://en.wikipedia.org/wiki/Maximum_likelihood>`_.
 
 
 Maximum Likelihood Estimation
@@ -18,18 +18,19 @@ The function ``fit_mle`` is for maximum likelihood estimation.
 Synopsis
 ~~~~~~~~~
 
-.. function:: fit_mle(D, x)
+- **fit_mle** (D, x)
 
-	Fit a distribution of type D to a given data set x.
+	Fit a distribution of type ``D`` to a given data set ``x``.
 
 	- For univariate distribution, x can be an array of arbitrary size. 
 	- For multivariate distribution, x should be a matrix, where each column is a sample.
 
-.. function:: fit_mle(D, x, w)
+- **fit_mle** (D, x, w)
 
-	Fit a distribution of type D to a weighted data set x, with weights given by w.
+	Fit a distribution of type ``D`` to a weighted data set ``x``, with weights given by ``w``.
 
- 	Here, w should be an array with length n, where n is the number of samples contained in x.
+ 	Here, ``w`` should be an array with length ``n``, where ``n`` is the number of samples contained in ``x``.
+
 
 Applicable distributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,24 +39,24 @@ The ``fit_mle`` method has been implemented for the following distributions:
 
 **Univariate:**
 
-- Bernoulli
-- Beta
-- Binomial
-- Categorical
-- DiscreteUniform
-- Exponential
-- Normal
-- Gamma
-- Geometric
-- Laplace 
-- Poisson
-- Uniform
+- :ref:`bernoulli`
+- :ref:`beta`
+- :ref:`binomial`
+- :ref:`categorical`
+- :ref:`discreteuniform`
+- :ref:`exponential`
+- :ref:`normal`
+- :ref:`gamma`
+- :ref:`geometric`
+- :ref:`laplace`
+- :ref:`poisson`
+- :ref:`uniform`
 
 **Multivariate:**
 
-- MultivariateNormal
-- Multinomial
-- Dirichlet
+- :ref:`multinomial`
+- :ref:`multivariatenormal`
+- :ref:`dirichlet`
 
 For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use modified interface:
 
