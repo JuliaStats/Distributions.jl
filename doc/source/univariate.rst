@@ -150,6 +150,9 @@ Sampling (Random number generation)
     Fills a pre-allocated array arr with independent samples from the distribution ``d``.
 
 
+List of Distributions
+----------------------
+
 *Distributions* provides a large collection of univariate distributions. Here is a brief list:
 
 * Discrete univariate distributions:
