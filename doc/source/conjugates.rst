@@ -3,7 +3,7 @@
 Conjugate Prior and Posterior 
 ==============================
 
-*Conjugate prior* plays an important role in Bayesian analysis. In Bayesian theory, the distribution :math:`p(\theta)` is said to be **conjugate** *w.r.t.* a conditional distribution (often referred to as the *likelihood model*) :math:`p(x | \theta)`, if the posterior distribution :math:`p(\theta | x)` is in the same family as :math:`p(\theta)`. (Interested readers may refer to `this wikipedia article <http://en.wikipedia.org/wiki/Conjugate_prior>`_ for more detais.)
+*Conjugate prior* plays an important role in Bayesian analysis. In Bayesian theory, the distribution :math:`p(\theta)` is said to be **conjugate** *w.r.t.* a conditional distribution (often referred to as the *likelihood model*) :math:`p(x | \theta)`, if the posterior distribution :math:`p(\theta | x)` is in the same family as :math:`p(\theta)`. (Interested readers may refer to `this wikipedia article <http://en.wikipedia.org/wiki/Conjugate_prior>`_ for more details.)
 
 Generic Interface
 ------------------
@@ -21,7 +21,7 @@ Motivated by this, we design the interface as described below to support Bayesia
 	- ``G``:  the likelihood model. In simple cases, G can be just a distribution type.
 	- ``x``:  the data.
 	- ``w``:  the sample weights (``length(w)`` should be equal to the number of samples). When ``w`` is omitted, the data are unweighted (*i.e.* all samples have unit weights).
-	- ``ss``:  pre-computed sufficient statistics
+	- ``ss``:  pre-computed sufficient statistics.
 
 	**Note:** In general, the returned type need not be the same as ``typeof(pri)``. However, when ``pri`` is already using the canonical parameters (this is the case for many exponential family distributions), the returned instance is in the same
 	type as ``pri``.
@@ -53,7 +53,7 @@ Motivated by this, we design the interface as described below to support Bayesia
 
 - **fit_map** (pri, G, x[, w])
 
-	Performs Maximum-a-Posterior (MAP) estimation based on given data or sufficient statistics. 
+	Performs Maximum-a-Posteriori (MAP) estimation based on given data or sufficient statistics. 
 
 - **complete** (pri, G, param)
 
