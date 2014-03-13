@@ -12,4 +12,4 @@ A Julia package for probability distributions and associated functions. Particul
 * Maximum likelihood estimation
 * Posterior w.r.t. conjugate prior, and Maximum-A-Posteriori (MAP) estimation
 
-Please refer to the [Package Documentation](http://juliastats.github.io/Distributions.jl/index.html) for details. 
+Please refer to the [Package Documentation](http://distributionsjl.readthedocs.org/en/latest/) for details. 
