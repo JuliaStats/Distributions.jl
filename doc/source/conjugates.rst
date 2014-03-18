@@ -42,7 +42,7 @@ Motivated by this, we design the interface as described below to support Bayesia
 
 	Draws random samples from the posterior distribution based on given data or sufficient statistics. The number of samples to draw depends on the size of ``r``. 
 
-- **posterior_randmodel(pri, G, x[, w])
+- **posterior_randmodel** (pri, G, x[, w])
 
 	Returns a distribution constructed using a parameter drawn from the posterior based on given data or sufficient statistics. 
 
