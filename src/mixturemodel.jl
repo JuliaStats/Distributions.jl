@@ -14,7 +14,7 @@ immutable MixtureModel <: Distribution
             end
             sump += p[i]
         end
-        table = AliasTable(p)
+        table = AliasTable(p ./ sump)
         new(c, p ./ sump, table)
     end
 end
