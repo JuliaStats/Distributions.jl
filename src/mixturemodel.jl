@@ -42,9 +42,9 @@ end
 
 function var(d::MixtureModel)
     m = 0.0
-    squared_mean_mixture = mean(d)^2
+    squared_mean_mixture = mean(d).^2
     for i in 1:length(d.components)
-        m += (var(d.components[i]) - squared_mean_mixture + mean(d.components[i])^2) * d.probs[i]
+        m += (var(d.components[i]) .- squared_mean_mixture .+ mean(d.components[i]).^2) * d.probs[i]
     end
     return m
 end
