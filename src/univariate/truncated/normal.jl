@@ -1,5 +1,4 @@
 
-
 function entropy(d::Truncated{Normal})
     s = std(d.untruncated)
     a = d.lower
@@ -94,4 +93,5 @@ function randnt(lower::Real, upper::Real)
             end
         end
     end
+    return 0.0
 end
