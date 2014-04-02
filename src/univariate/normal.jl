@@ -11,7 +11,7 @@ immutable Normal <: ContinuousUnivariateDistribution
     Normal() = Normal(0.0, 1.0)
 end
 
-typealias Gaussian = Normal
+typealias Gaussian Normal
 
 ## Support
 @continuous_distr_support Normal -Inf Inf

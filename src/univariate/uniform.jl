@@ -62,18 +62,8 @@ function ccdf(d::Uniform, q::Real)
     (d.b-q)/(d.b-d.a)
 end
 
-function quantile(d::Uniform, p::Real) 
-    if isnan(p) || (p < zero(p)) || (p > one(p))
-        return NaN
-    end
-    d.a + p*(d.b-d.a)
-end
-function cquantile(d::Uniform, p::Real) 
-    if isnan(p) || (p < zero(p)) || (p > one(p))
-        return NaN
-    end
-    d.b + p*(d.a-d.b)
-end
+quantile(d::Uniform, p::Real) = @checkquantile p d.a+p*(d.b-d.a)
+cquantile(d::Uniform, p::Real) = @checkquantile p d.b+p*(d.a-d.b)
 
 
 function mgf(d::Uniform, t::Real)

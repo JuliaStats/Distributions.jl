@@ -82,3 +82,9 @@ macro continuous_distr_support(D, lb, ub)
 	end
 end
 
+# for checking the input range of quantile functions
+# comparison with NaN is always false, so no explicit check is required
+macro checkquantile(p,ex)
+    :(zero($p) <= $p <= one($p) ? $ex : NaN)
+end
+

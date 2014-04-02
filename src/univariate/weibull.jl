@@ -60,8 +60,8 @@ ccdf(d::Weibull, x::Real) = x <= 0.0 ? 1.0 : exp(-((x / d.scale)^d.shape))
 logcdf(d::Weibull, x::Real) = x <= 0.0 ? -Inf : log1mexp(-((x / d.scale)^d.shape))
 logccdf(d::Weibull, x::Real) = x <= 0.0 ? 0.0 : -(x / d.scale)^d.shape
 
-quantile(d::Weibull, p::Real) = (p < zero(p) || p > one(p)) ? NaN : d.scale*(-log1p(-p))^(1/d.shape)
-cquantile(d::Weibull, p::Real) = (p < zero(p) || p > one(p)) ? NaN : d.scale*(-log(p))^(1/d.shape)
+quantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log1p(-p))^(1/d.shape)
+cquantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log(p))^(1/d.shape)
 invlogcdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(1/d.shape)
 invlogccdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-lp)^(1/d.shape)
 
