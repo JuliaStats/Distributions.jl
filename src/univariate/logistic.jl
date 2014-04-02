@@ -36,8 +36,8 @@ function logpdf(d::Logistic, x::Real)
     u - 2*log1pexp(u) - log(d.scale)
 end
 
-cdf(d::Logistic, x::Real) = logistic((x-d.location)/d.scale)
-ccdf(d::Logistic, x::Real) = logistic((d.location-x)/d.scale)
+cdf(d::Logistic, x::Real) = sigmoid((x-d.location)/d.scale)
+ccdf(d::Logistic, x::Real) = sigmoid((d.location-x)/d.scale)
 logcdf(d::Logistic, x::Real) = -log1pexp((d.location-x)/d.scale)
 logccdf(d::Logistic, x::Real) = -log1pexp((x-d.location)/d.scale)
 

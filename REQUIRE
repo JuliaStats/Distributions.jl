@@ -1,4 +1,5 @@
 julia 0.3-
-NumericExtensions 0.5-
+NumericExtensions 0.6-
+NumericFuns 0.2-
 PDMats 0.1-
 StatsBase 0.3-
