@@ -13,7 +13,7 @@
 using Distributions
 using Base.Test
 
-probpts(n::Int) = ((1:n) - 0.5)/n  
+probpts(n::Int) = ((1.0:n) - 0.5)/n  
 const pp  = float(probpts(100))  
 const lpp = log(pp)
 
