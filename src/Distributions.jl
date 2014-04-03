@@ -1,6 +1,7 @@
 module Distributions
 
 using NumericExtensions
+using NumericFuns
 using PDMats
 using StatsBase
 import Base.LinAlg: Cholesky
