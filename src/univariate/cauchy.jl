@@ -31,9 +31,13 @@ logpdf(d::Cauchy, x::Real) = -log(pi) - log(d.scale) - log1p(((x-d.location)/d.s
 
 cdf(d::Cauchy, x::Real) = atan2(one(x),-(x-d.location)/d.scale)/pi
 ccdf(d::Cauchy, x::Real) = atan2(one(x),(x-d.location)/d.scale)/pi
+logcdf(d::Cauchy, x::Real) = x <= d.location ? log(cdf(d,x)) : log1p(-ccdf(d,x))
+logccdf(d::Cauchy, x::Real) = x <= d.location ? log1p(-cdf(d,x)) : log(ccdf(d,x))
 
 quantile(d::Cauchy, p::Real) = @checkquantile p d.location - d.scale*cospi(p)/sinpi(p)
 cquantile(d::Cauchy, p::Real) = @checkquantile p d.location + d.scale*cospi(p)/sinpi(p)
+invlogcdf(d::Cauchy, lp::Real) = lp < loghalf ? quantile(d,exp(lp)) : cquantile(d,-expm1(lp))
+invlogccdf(d::Cauchy, lp::Real) = lp < loghalf ? cquantile(d,exp(lp)) : quantile(d,-expm1(lp))
 
 mgf(d::Cauchy, t::Real) = NaN
 cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))

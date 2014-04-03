@@ -6,7 +6,7 @@
 
 # log(1-exp(x)) 
 # NOTE: different than Maechler (2012), no negation inside parantheses
-log1mexp(x::Real) = x >= -0.6931471805599453 ? log(-expm1(x)) : log1p(-exp(x))
+log1mexp(x::Real) = x >= loghalf ? log(-expm1(x)) : log1p(-exp(x))
 # log(1+exp(x))
 log1pexp(x::Real) = x > zero(x) ? x + log1p(exp(-x)) : log1p(exp(x))
 log1pexp(x::Float64) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
