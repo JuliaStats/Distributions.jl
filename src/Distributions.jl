@@ -3,6 +3,7 @@ module Distributions
 using NumericExtensions
 using PDMats
 using StatsBase
+import Base.LinAlg: Cholesky
 
 export
     # types
