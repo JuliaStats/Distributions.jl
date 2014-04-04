@@ -38,8 +38,8 @@ kurtosis(d::Uniform) = -1.2
 entropy(d::Uniform) = log(d.b - d.a)
 
 ## Functions
-pdf(d::Uniform, x::Real) = insupport(d,x) ? 0.0 : 1/(d.b-d.a)
-logpdf(d::Uniform, x::Real) = insupport(d,x) ? -Inf : -log(d.b-d.a)
+pdf(d::Uniform, x::Real) = insupport(d,x) ? 1/(d.b-d.a) : 0.0
+logpdf(d::Uniform, x::Real) = insupport(d,x) ? -log(d.b-d.a) : -Inf 
 
 function cdf(d::Uniform, q::Real) 
     if isnan(q)

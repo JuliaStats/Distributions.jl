@@ -47,18 +47,20 @@ end
 
 ## Functions
 function pdf(d::Weibull, x::Real)
+    x < zero(x) && 0.0
     a = x/d.scale
     d.shape/d.scale * a^(d.shape-1.0) * exp(-a^d.shape)
 end
 function logpdf(d::Weibull, x::Real)
+    x < zero(x) && -Inf
     a = x/d.scale
     log(d.shape/d.scale) + (d.shape-1.0)*log(a) - a^d.shape
 end
 
-cdf(d::Weibull, x::Real) = x <= 0.0 ? 0.0 : 1-exp(-((x / d.scale)^d.shape))
-ccdf(d::Weibull, x::Real) = x <= 0.0 ? 1.0 : exp(-((x / d.scale)^d.shape))
-logcdf(d::Weibull, x::Real) = x <= 0.0 ? -Inf : log1mexp(-((x / d.scale)^d.shape))
-logccdf(d::Weibull, x::Real) = x <= 0.0 ? 0.0 : -(x / d.scale)^d.shape
+cdf(d::Weibull, x::Real) = x <= zero(x) ? 0.0 : -expm1(-((x / d.scale)^d.shape))
+ccdf(d::Weibull, x::Real) = x <= zero(x) ? 1.0 : exp(-((x / d.scale)^d.shape))
+logcdf(d::Weibull, x::Real) = x <= zero(x) ? -Inf : log1mexp(-((x / d.scale)^d.shape))
+logccdf(d::Weibull, x::Real) = x <= zero(x) ? 0.0 : -(x / d.scale)^d.shape
 
 quantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log1p(-p))^(1/d.shape)
 cquantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log(p))^(1/d.shape)

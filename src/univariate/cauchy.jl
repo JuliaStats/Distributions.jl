@@ -27,7 +27,7 @@ entropy(d::Cauchy) = log(d.scale) + log(4.0 * pi)
 
 ## Functions
 pdf(d::Cauchy, x::Real) = 1/(pi*d.scale*(1+((x-d.location)/d.scale)^2))
-logpdf(d::Cauchy, x::Real) = -log(pi) - log(d.scale) - log1p(((x-d.location)/d.scale)^2)
+logpdf(d::Cauchy, x::Real) = -log(pi) - log(d.scale) - log1psq((x-d.location)/d.scale)
 
 cdf(d::Cauchy, x::Real) = atan2(one(x),-(x-d.location)/d.scale)/pi
 ccdf(d::Cauchy, x::Real) = atan2(one(x),(x-d.location)/d.scale)/pi

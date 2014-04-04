@@ -42,45 +42,19 @@ ccdf(d::Geometric, q::Real) =  q < zero(q) ? 1.0 : exp(log1p(-d.prob) * (floor(q
 logcdf(d::Geometric, q::Real) = q < zero(q) ? -Inf : log1mexp(log1p(-d.prob) * (floor(q) + 1.0))
 logccdf(d::Geometric, q::Real) =  q < zero(q) ? 0.0 : log1p(-d.prob) * (floor(q) + 1.0)
 
-function quantile(d::Geometric, p::Real) 
-    if isnan(p) || (p < zero(p)) || (p > one(p))
+quantile(d::Geometric, p::Real) = invlogccdf(d,log1p(-p))
+cquantile(d::Geometric, p::Real) = invlogccdf(d,log(p))
+invlogcdf(d::Geometric, lp::Real) = invlogccdf(d,log1mexp(lp))
+
+function invlogccdf(d::Geometric, lp::Real) 
+    if (lp > zero(lp)) || isnan(lp)
         return NaN
-    elseif p == zero(p)
-        return 0.0
-    elseif p == one(p)
+    elseif isinf(lp)
         return Inf
-    end
-    -fld(-log1p(-p),log1p(-d.prob))-1.0
-end
-function cquantile(d::Geometric, p::Real) 
-    if isnan(p) || (p < zero(p)) || (p > one(p))
-        return NaN
-    elseif p == zero(p)
-        return Inf
-    elseif p == one(p)
+    elseif lp == zero(lp)
         return 0.0
     end
-    -fld(-log(p),log1p(-d.prob))-1.0
-end
-function invlogcdf(d::Geometric, p::Real) 
-    if (p > zero(p)) || isnan(p)
-        return NaN
-    elseif isinf(p)
-        return 0.0
-    elseif p == zero(p)
-        return Inf
-    end
-    -fld(-log1mexp(p),log1p(-d.prob))-1.0
-end
-function invlogccdf(d::Geometric, p::Real) 
-    if (p > zero(p)) || isnan(p)
-        return NaN
-    elseif isinf(p)
-        return Inf
-    elseif p == zero(p)
-        return 0.0
-    end
-    -fld(-p,log1p(-d.prob))-1.0
+    max(ceil(lp/log1p(-d.prob))-1.0,0.0)
 end
 
 function mgf(d::Geometric, t::Real)
@@ -99,7 +73,7 @@ end
 ## Sampling
 function rand(d::Geometric)
     e = Base.Random.randmtzig_exprnd()
-    fld(e,-log1p(-d.prob))
+    floor(-e/log1p(-d.prob))
 end
 
 ## Fitting
