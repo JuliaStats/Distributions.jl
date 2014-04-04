@@ -61,6 +61,3 @@ function cf(d::Logistic, t::Real)
     m, b = d.location, d.scale
     exp(im * t * m) * (pi * b * t) / sinh(pi * b * t)
 end
-
-## Sampling
-rand(d::Logistic) = quantile(d, rand())

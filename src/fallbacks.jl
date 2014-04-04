@@ -191,6 +191,9 @@ gradloglik(d::MultivariateDistribution, x::Vector{Real}) = gradloglik(d, float64
 
 #### Sampling: rand & rand! ####
 
+# default: inverse transform sampling
+rand(d::UnivariateDistribution) = quantile(d, rand())
+
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A)
         A[i] = rand(d)

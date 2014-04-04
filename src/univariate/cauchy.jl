@@ -42,9 +42,6 @@ invlogccdf(d::Cauchy, lp::Real) = lp < loghalf ? cquantile(d,exp(lp)) : quantile
 mgf(d::Cauchy, t::Real) = NaN
 cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))
 
-## Sampling
-rand(d::Cauchy) = quantile(d,rand())
-
 ## Fitting
 # Note: this is not a Maximum Likelihood estimator
 function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
