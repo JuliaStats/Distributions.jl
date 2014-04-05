@@ -8,31 +8,54 @@ end
 
 Geometric() = Geometric(0.5) # Flips of a fair coin
 
-@_jl_dist_1p Geometric geom
+## Support
+insupport(::Geometric, x::Real) = isinteger(x) && x >= zero(x)
+insupport(::Type{Geometric}, x::Real) = isinteger(x) && x >= zero(x)
 
-function cdf(d::Geometric, q::Real)
-    q < zero(q) ? 0.0 : -expm1(log1p(-d.prob) * (floor(q) + 1.0))
-end
+isupperbounded(d::Union(Geometric, Type{Geometric})) = false
+islowerbounded(d::Union(Geometric, Type{Geometric})) = true
+isbounded(d::Union(Geometric, Type{Geometric})) = false
 
-function ccdf(d::Geometric, q::Real)
-    q < zero(q) ? 1.0 : exp(log1p(-d.prob) * (floor(q + 1e-7) + 1.0))
-end
+minimum(d::Union(Geometric, Type{Geometric})) = 0
+maximum(d::Geometric) = Inf
 
-entropy(d::Geometric) = (-xlogx(1.0 - d.prob) - xlogx(d.prob)) / d.prob
-
-insupport(::Geometric, x::Real) = isinteger(x) && x >= 0
-insupport(::Type{Geometric}, x::Real) = isinteger(x) && x >= 0
-
-kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
-
+## Properties
 mean(d::Geometric) = (1.0 - d.prob) / d.prob
 
-function median(d::Geometric)
-    iceil(-1.0 / log(2.0, 1.0 - d.prob)) - 1
-end
+median(d::Geometric) = -fld(0.6931471805599453,log1p(-d.prob)) - 1.0
 
 mode(d::Geometric) = 0
 modes(d::Geometric) = [0]
+
+var(d::Geometric) = (1.0 - d.prob) / d.prob^2
+skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
+kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
+
+entropy(d::Geometric) = (-xlogx(1.0 - d.prob) - xlogx(d.prob)) / d.prob
+
+## Functions
+pdf(d::Geometric, x::Real) = insupport(d,x) ? d.prob*exp(log1p(-d.prob)*x) : 0.0
+logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.prob) + log1p(-d.prob)*x : -Inf
+
+cdf(d::Geometric, q::Real) = q < zero(q) ? 0.0 : -expm1(log1p(-d.prob) * (floor(q) + 1.0))
+ccdf(d::Geometric, q::Real) =  q < zero(q) ? 1.0 : exp(log1p(-d.prob) * (floor(q) + 1.0))
+logcdf(d::Geometric, q::Real) = q < zero(q) ? -Inf : log1mexp(log1p(-d.prob) * (floor(q) + 1.0))
+logccdf(d::Geometric, q::Real) =  q < zero(q) ? 0.0 : log1p(-d.prob) * (floor(q) + 1.0)
+
+quantile(d::Geometric, p::Real) = invlogccdf(d,log1p(-p))
+cquantile(d::Geometric, p::Real) = invlogccdf(d,log(p))
+invlogcdf(d::Geometric, lp::Real) = invlogccdf(d,log1mexp(lp))
+
+function invlogccdf(d::Geometric, lp::Real) 
+    if (lp > zero(lp)) || isnan(lp)
+        return NaN
+    elseif isinf(lp)
+        return Inf
+    elseif lp == zero(lp)
+        return 0.0
+    end
+    max(ceil(lp/log1p(-d.prob))-1.0,0.0)
+end
 
 function mgf(d::Geometric, t::Real)
     p = d.prob
@@ -47,22 +70,13 @@ function cf(d::Geometric, t::Real)
     (p * exp(im * t)) / (1.0 - (1.0 - p) * exp(im * t))
 end
 
-skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
+## Sampling
+function rand(d::Geometric)
+    e = Base.Random.randmtzig_exprnd()
+    floor(-e/log1p(-d.prob))
+end
 
-var(d::Geometric) = (1.0 - d.prob) / d.prob^2
-
-### handling support
-
-isupperbounded(d::Union(Geometric, Type{Geometric})) = false
-islowerbounded(d::Union(Geometric, Type{Geometric})) = true
-isbounded(d::Union(Geometric, Type{Geometric})) = false
-
-minimum(d::Union(Geometric, Type{Geometric})) = 0
-maximum(d::Geometric) = Inf
-
-
-## Fit model
-
+## Fitting
 immutable GeometricStats <: SufficientStats
     sx::Float64
     tw::Float64

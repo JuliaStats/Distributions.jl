@@ -6,9 +6,20 @@
 
 # log(1-exp(x)) 
 # NOTE: different than Maechler (2012), no negation inside parantheses
-log1mexp(x::Real) = x >= -0.6931471805599453 ? log(-expm1(x)) : log1p(-exp(x))
+log1mexp(x::Real) = x >= loghalf ? log(-expm1(x)) : log1p(-exp(x))
 # log(1+exp(x))
-log1pexp(x::Real) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
+log1pexp(x::Real) = x > zero(x) ? x + log1p(exp(-x)) : log1p(exp(x))
+log1pexp(x::Float64) = x <= 18.0 ? log1p(exp(x)) : x <= 33.3 ? x + exp(-x) : x
+log1pexp(x::Float32) = x <= 9f0 ? log1p(exp(x)) : x <= 16f0 ? x + exp(-x) : x
+log1pexp(x::Integer) = log1pexp(float(x))
+# log(exp(x)-1)
+logexpm1(x::Real) = x + log1mexp(-x)
+logexpm1(x::Float64) = x <= 18.0 ? log(expm1(x)) : x <= 33.3 ? x - exp(-x) : x
+logexpm1(x::Float32) = x <= 9f0 ? log(expm1(x)) : x <= 16f0 ? x - exp(-x) : x
+logexpm1(x::Integer) = logexpm1(float(x))
+
+# log(1+x^2)
+log1psq(x::FloatingPoint) = (ax = abs(x); ax < maxintfloat(x) ? log1p(ax*ax) : 2*log(ax))
 
 φ(z::Real) = exp(-0.5*z*z)/√2π
 logφ(z::Real) = -0.5*(z*z + log2π)
