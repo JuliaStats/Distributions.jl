@@ -112,7 +112,6 @@ export
     complete,      # turn an incomplete formulation into a complete distribution
     dim,           # sample dimension of multivariate distribution
     entropy,       # entropy of distribution in nats
-    fit,           # fit a distribution to data (using default method)
     fit_mle,       # fit a distribution to data using MLE
     fit_mle!,      # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,       # fit a distribution to data using MAP
@@ -179,7 +178,7 @@ import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
 import NumericExtensions: entropy
 import PDMats: dim, PDMat, invquad
-import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler
+import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler, fit
 
 
 #### Distribution type system
