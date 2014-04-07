@@ -17,29 +17,56 @@ rate(d::Gamma) = 1.0 / d.scale
 
 @_jl_dist_2p Gamma gamma
 
+## Support
 @continuous_distr_support Gamma 0.0 Inf
 
-function entropy(d::Gamma)
-    x = (1.0 - d.shape) * digamma(d.shape)
-    x + lgamma(d.shape) + log(d.scale) + d.shape
-end
-
-kurtosis(d::Gamma) = 6.0 / d.shape
-
+## Properties
 mean(d::Gamma) = d.shape * d.scale
-
 median(d::Gamma) = quantile(d, 0.5)
-
-mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
-
-cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
-
-function mode(d::Gamma)
-    d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
-end
-
+mode(d::Gamma) = d.shape > 1.0 ? d.scale * (d.shape - 1.0) : 0.0
 modes(d::Gamma) = [mode(d)]
 
+var(d::Gamma) = d.shape * d.scale * d.scale
+skewness(d::Gamma) = 2.0 / sqrt(d.shape)
+kurtosis(d::Gamma) = 6.0 / d.shape
+
+entropy(d::Gamma) = (1.0-d.shape)*digamma(d.shape) + lgamma(d.shape) + log(d.scale) + d.shape
+
+## Functions
+function pdf(d::Gamma, x::Real)
+    x < zero(x) && return 0.0
+    k = d.shape
+    u = x / d.scale
+    if k < 1.0
+        exp(k*log(u) - u) / (x*gamma(k))
+    elseif k < 11.0
+        exp((k-1.0)*log(u) - u) / (d.scale*gamma(k))
+    else
+        km1 = k-1.0
+        exp(km1*logmxp1(u/km1)-lstirling_asym(km1))/(d.scale*sqrt(twoπ*km1))
+    end
+end
+
+function logpdf(d::Gamma, x::Real)
+    x < zero(x) && return -Inf
+    k = d.shape
+    u = x / d.scale
+    if k < 1.0
+        k*log(u) - u - log(x) - lgamma(k)
+    elseif k < 11.0
+        (k-1.0)*log(u) - u - log(d.scale) - lgamma(k)
+    else
+        km1 = k-1.0
+        km1*logmxp1(u/km1) - lstirling_asym(km1) - 0.5*log(km1) - log(d.scale) - 0.5*log2π
+    end
+end
+
+gradloglik(d::Gamma, x::Real) = x > zero(x) ? (d.shape-1.0)/x - 1.0/d.scale : 0.0
+
+mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
+
+## Sampling
 rand(d::Gamma) = d.scale * randg(d.shape)
 
 function rand!(d::Gamma, A::Array{Float64})
@@ -50,16 +77,7 @@ function rand!(d::Gamma, A::Array{Float64})
     multiply!(A, d.scale)
 end
 
-skewness(d::Gamma) = 2.0 / sqrt(d.shape)
-
-var(d::Gamma) = d.shape * d.scale * d.scale
-
-function gradloglik(d::Gamma, x::Float64)
-  insupport(Gamma, x) ? (d.shape - 1.0) / x - 1.0 / d.scale : 0.0
-end
-
-## Fit model
-
+## Fitting
 immutable GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     slogx::Float64   # (weighted) sum of log(x)

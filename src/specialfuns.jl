@@ -40,9 +40,9 @@ function log1pmx_kernel(x::Float64)
     r*(hxsq+w*t)-hxsq
 end
 
-# range reduction outside kernel range.
+# use naive calculation or range reduction outside kernel range.
 function log1pmx(x::Float64)
-    if (x < -0.7) || (x > 0.9)
+    if !(-0.7 < x < 0.9)
         return log1p(x) - x
     elseif x > 0.315
         u = (x-0.5)/1.5
@@ -63,12 +63,12 @@ end
 
 # log(x) - x + 1
 function logmxp1(x::Float64)
-    if x < 0.3
+    if x <= 0.3
         return (log(x) + 1.0) - x
-    elseif x < 0.4
+    elseif x <= 0.4
         u = (x-0.375)/0.375
         return log1pmx_kernel(u) - 3.55829253011726237e-1 + 0.625*u
-    elseif x < 0.6
+    elseif x <= 0.6
         u = 2.0*(x-0.5)
         return log1pmx_kernel(u) - 1.93147180559945309e-1 + 0.5*u
     else
@@ -265,6 +265,8 @@ end
 #   (174611/125400 x^-19) / (1/12 x^-1 - 1/360 x^-3)
 # which is < 1/2 ulp for x >= 10.0
 # total numeric error appears to be < 2 ulps
+lstirling_asym(x::Integer) = lstirling_asym(float(x))
+
 function lstirling_asym(x::Float64)
     t = 1.0/(x*x)
     @horner(t,
