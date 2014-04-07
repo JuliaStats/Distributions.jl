@@ -8,41 +8,38 @@ end
 
 @_jl_dist_1p Chisq chisq
 
+convert(::Type{Gamma},d::Chisq) = Gamma(0.5*d.df,2.0)
+
+## Support
 @continuous_distr_support Chisq 0.0 Inf
 
-function entropy(d::Chisq)
-    x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)
-    x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
-end
+## Properties
+mean(d::Chisq) = d.df
+mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
 
+var(d::Chisq) = 2.0 * d.df
+skewness(d::Chisq) = sqrt(8.0 / d.df)
 kurtosis(d::Chisq) = 12.0 / d.df
 
-mean(d::Chisq) = d.df
-
-# TODO: Switch to using quantile?
-function median(d::Chisq)
-    k = d.df
-    k * (1.0 - 2.0 / (9.0 * k))^3
+function entropy(d::Chisq) 
+    hdf = 0.5*d.df
+    hdf + logtwo + lgamma(hdf) + (1.0-hdf)*digamma(hdf)
 end
 
-function mgf(d::Chisq, t::Real)
-    k = d.df
-    (1.0 - 2.0 * t)^(-k / 2.0)
-end
+## Functions
+pdf(d::Chisq, x::Real) = pdf(convert(Gamma,d),x)
+logpdf(d::Chisq, x::Real) = logpdf(convert(Gamma,d),x)
 
-cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
+gradloglik(d::Chisq, x::Float64) = x > zero(x) ? (0.5*d.df-1.0)/x - 0.5 : 0.0
 
-mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
-modes(d::Chisq) = [mode(d)]
+mgf(d::Chisq, t::Real) = (1.0 - 2.0*t)^(-0.5*d.df)
+cf(d::Chisq, t::Real) = (1.0 - 2.0*im*t)^(-0.5*d.df)
 
-function gradloglik(d::Chisq, x::Float64)
-  insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
-end
 
-# rand - the distribution chi^2(df) is 2 * gamma(df / 2)
+## Sampling
 # for integer n, a chi^2(n) is the sum of n squared standard normals
 function rand(d::Chisq)
-    d.df == 1 ? randn()^2 : 2.0 * rand(Gamma(d.df / 2.0))
+    d.df == 1 ? randn()^2 : rand(convert(Gamma,d))
 end
 
 function rand!(d::Chisq, A::Array{Float64})
@@ -59,6 +56,3 @@ function rand!(d::Chisq, A::Array{Float64})
     return A
 end
 
-skewness(d::Chisq) = sqrt(8.0 / d.df)
-
-var(d::Chisq) = 2.0 * d.df

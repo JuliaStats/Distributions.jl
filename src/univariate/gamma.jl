@@ -22,9 +22,7 @@ rate(d::Gamma) = 1.0 / d.scale
 
 ## Properties
 mean(d::Gamma) = d.shape * d.scale
-median(d::Gamma) = quantile(d, 0.5)
 mode(d::Gamma) = d.shape > 1.0 ? d.scale * (d.shape - 1.0) : 0.0
-modes(d::Gamma) = [mode(d)]
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)

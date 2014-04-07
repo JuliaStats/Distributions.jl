@@ -41,6 +41,7 @@ function log1pmx_kernel(x::Float64)
 end
 
 # use naive calculation or range reduction outside kernel range.
+# accurate ~2ulps for all x
 function log1pmx(x::Float64)
     if !(-0.7 < x < 0.9)
         return log1p(x) - x

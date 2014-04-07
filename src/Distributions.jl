@@ -175,7 +175,7 @@ export
     gradloglik     # gradient (or derivative) of logpdf
 
 import Base.Random
-import Base: show, scale, sum!, rand, rand!, sprand
+import Base: show, scale, sum!, rand, rand!, sprand, convert
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
 import NumericExtensions: entropy
 import PDMats: dim, PDMat, invquad
