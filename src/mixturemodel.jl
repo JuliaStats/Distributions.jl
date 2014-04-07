@@ -7,6 +7,10 @@ immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF,VS}
         if length(c) != length(p)
             error("components and probs must have the same number of elements")
         end
+        dims = map(dim, c)
+        if !all(dims .== dims[1])
+            error("MixtureModel: mixture components have different dimensions")
+        end
         sump = 0.0
         for i in 1:length(p)
             if p[i] < 0.0
@@ -18,6 +22,8 @@ immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF,VS}
         new(c, p ./ sump, table)
     end
 end
+
+dim(d::MixtureModel) = dim(d.components[1])
 
 function mean(d::MixtureModel)
     m = 0.0

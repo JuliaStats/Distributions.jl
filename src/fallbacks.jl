@@ -40,6 +40,8 @@ function insupport(d::MatrixDistribution, X::Array)
     return true
 end
 
+dim(d::UnivariateDistribution) = 1
+
 # generic function to get number of samples
 
 nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)
