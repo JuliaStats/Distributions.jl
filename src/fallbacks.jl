@@ -91,6 +91,7 @@ isleptokurtic(d::Distribution) = kurtosis(d) < 0.0
 ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
 
 median(d::UnivariateDistribution) = quantile(d, 0.5)
+modes(d::Distribution) = [mode(d)]
 
 #### pdf, cdf, and quantile ####
 

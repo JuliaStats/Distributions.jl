@@ -1,0 +1,15 @@
+using Distributions
+using RmathDist
+
+distlist = [
+            Poisson(1.0),
+            Poisson(1e10),
+            Poisson(1e-3)
+            ]
+
+for d in distlist
+    for x in [0:1_000_000,1_000_001:100:100_000_000]
+        test_rmath(pdf,d,x,1e4)
+        test_rmath(logpdf,d,x)
+    end
+end

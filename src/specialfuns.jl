@@ -1,4 +1,5 @@
 # Special functions
+import Base.Math.@horner
 
 # See:
 #   Martin Maechler (2012) "Accurately Computing log(1 − exp(− |a|))"
@@ -21,6 +22,63 @@ logexpm1(x::Integer) = logexpm1(float(x))
 # log(1+x^2)
 log1psq(x::FloatingPoint) = (ax = abs(x); ax < maxintfloat(x) ? log1p(ax*ax) : 2*log(ax))
 
+# log(1+x)-x
+# accurate ~2ulps for -0.227 < x < 0.315
+function log1pmx_kernel(x::Float64)
+    r = x/(x+2.0)
+    t = r*r
+    w = @horner(t,
+                6.66666666666666667e-1, # 2/3
+                4.00000000000000000e-1, # 2/5
+                2.85714285714285714e-1, # 2/7
+                2.22222222222222222e-1, # 2/9
+                1.81818181818181818e-1, # 2/11
+                1.53846153846153846e-1, # 2/13
+                1.33333333333333333e-1, # 2/15
+                1.17647058823529412e-1) # 2/17
+    hxsq = 0.5*x*x
+    r*(hxsq+w*t)-hxsq
+end
+
+# use naive calculation or range reduction outside kernel range.
+# accurate ~2ulps for all x
+function log1pmx(x::Float64)
+    if !(-0.7 < x < 0.9)
+        return log1p(x) - x
+    elseif x > 0.315
+        u = (x-0.5)/1.5
+        return log1pmx_kernel(u) - 9.45348918918356180e-2 - 0.5*u
+    elseif x > -0.227
+        return log1pmx_kernel(x)
+    elseif x > -0.4
+        u = (x+0.25)/0.75
+        return log1pmx_kernel(u) - 3.76820724517809274e-2 + 0.25*u
+    elseif x > -0.6
+        u = (x+0.5)*2.0
+        return log1pmx_kernel(u) - 1.93147180559945309e-1 + 0.5*u
+    else
+        u = (x+0.625)/0.375
+        return log1pmx_kernel(u) - 3.55829253011726237e-1 + 0.625*u
+    end
+end
+
+# log(x) - x + 1
+function logmxp1(x::Float64)
+    if x <= 0.3
+        return (log(x) + 1.0) - x
+    elseif x <= 0.4
+        u = (x-0.375)/0.375
+        return log1pmx_kernel(u) - 3.55829253011726237e-1 + 0.625*u
+    elseif x <= 0.6
+        u = 2.0*(x-0.5)
+        return log1pmx_kernel(u) - 1.93147180559945309e-1 + 0.5*u
+    else
+        return log1pmx(x-1.0)
+    end
+end
+
+
+
 φ(z::Real) = exp(-0.5*z*z)/√2π
 logφ(z::Real) = -0.5*(z*z + log2π)
 
@@ -28,8 +86,6 @@ logφ(z::Real) = -0.5*(z*z + log2π)
 Φc(z::Real) = 0.5*erfc(z/√2)
 logΦ(z::Real) = z < -1.0 ? log(0.5*erfcx(-z/√2)) - 0.5*z*z : log1p(-0.5*erfc(z/√2))
 logΦc(z::Real) = z > 1.0 ? log(0.5*erfcx(z/√2)) - 0.5*z*z : log1p(-0.5*erfc(-z/√2))
-
-import Base.Math.@horner
 
 # Rational approximations for the inverse cdf, from:
 #   Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
@@ -195,4 +251,43 @@ function lpgamma(p::Int, a::Float64)
         res += lgamma(a + (1.0 - ii) / 2.0)
     end
     return res
+end
+
+
+
+# Remainder term after Stirling's approximation to the log-gamma function
+# lstirling(x) = lgamma(x) + x - (x-0.5)*log(x) - 0.5*log2π
+#              = 1/(12x) - 1/(360x^3) + 1/(1260x^5) + ...
+# Asymptotic expansion from:
+#   Temme, N. (1996) Special functions: An introduction to the classical
+#   functions of mathematical physics, Wiley, New York, ISBN: 0-471-11313-1,
+#   Chapter 3.6, pp 61-65.
+# Relative error of approximation is bounded by
+#   (174611/125400 x^-19) / (1/12 x^-1 - 1/360 x^-3)
+# which is < 1/2 ulp for x >= 10.0
+# total numeric error appears to be < 2 ulps
+lstirling_asym(x::Integer) = lstirling_asym(float(x))
+
+function lstirling_asym(x::Float64)
+    t = 1.0/(x*x)
+    @horner(t,
+             8.33333333333333333e-2, #  1/12 x^-1
+            -2.77777777777777778e-3, # -1/360 x^-3
+             7.93650793650793651e-4, #  1/1260 x^-5
+            -5.95238095238095238e-4, # -1/1680 x^-7
+             8.41750841750841751e-4, #  1/1188 x^-9
+            -1.91752691752691753e-3, # -691/360360 x^-11
+             6.41025641025641026e-3, #  1/156 x^-13
+            -2.95506535947712418e-2, # -3617/122400 x^-15
+             1.79644372368830573e-1)/x #  43867/244188 x^-17
+end
+
+function lstirling_asym(x::Float32)
+    t = 1f0/(x*x)
+    @horner(t,
+             8.333333333333f-2, #  1/12 x^-1
+            -2.777777777777f-3, # -1/360 x^-3
+             7.936507936508f-4, #  1/1260 x^-5
+            -5.952380952381f-4, # -1/1680 x^-7
+             8.417508417508f-4)/x #  1/1188 x^-9
 end

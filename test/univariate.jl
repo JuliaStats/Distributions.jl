@@ -246,7 +246,7 @@ for d in [Arcsine(),
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
 
-    if !isa(d, Uniform) && method_exists(modes,(typeof(d),))
+    try
         ms = modes(d)
         if isa(d, ContinuousUnivariateDistribution)
             if insupport(d, ms[1] + 0.1)
@@ -256,7 +256,9 @@ for d in [Arcsine(),
                 @test pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
             end
         end
+    catch e
+        if !(isa(e,MethodError) && e.f == mode)
+            rethrow(e)
+        end        
     end
 end
-
-

@@ -21,11 +21,7 @@ insupport(d::Uniform, x::Real) = d.a <= x <= d.b
 
 ## Properties
 mean(d::Uniform) = (d.a + d.b) / 2.0
-
 median(d::Uniform) = (d.a + d.b) / 2.0
-
-mode(d::Uniform) = d.a
-modes(d::Uniform) = error("The uniform distribution has no modes")
 
 function var(d::Uniform)
     w = d.b - d.a

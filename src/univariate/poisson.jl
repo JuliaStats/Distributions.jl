@@ -9,6 +9,27 @@ end
 
 @_jl_dist_1p Poisson pois
 
+## Support
+isupperbounded(::Union(Poisson, Type{Poisson})) = false
+islowerbounded(::Union(Poisson, Type{Poisson})) = true
+isbounded(::Union(Poisson, Type{Poisson})) = false
+
+minimum(::Union(Poisson, Type{Poisson})) = 0
+maximum(::Union(Poisson, Type{Poisson})) = Inf
+
+insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
+insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
+
+## Properties
+mean(d::Poisson) = d.lambda
+median(d::Poisson) = quantile(d, 0.5)
+mode(d::Poisson) = ifloor(d.lambda)
+modes(d::Poisson) = [mode(d)]
+
+var(d::Poisson) = d.lambda
+skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
+kurtosis(d::Poisson) = 1.0 / d.lambda
+
 function entropy(d::Poisson)
     λ = d.lambda
     if λ < 50.0
@@ -25,41 +46,36 @@ function entropy(d::Poisson)
     end
 end
 
-isupperbounded(::Union(Poisson, Type{Poisson})) = false
-islowerbounded(::Union(Poisson, Type{Poisson})) = true
-isbounded(::Union(Poisson, Type{Poisson})) = false
-
-minimum(::Union(Poisson, Type{Poisson})) = 0
-maximum(::Union(Poisson, Type{Poisson})) = Inf
-
-insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
-insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
-
-kurtosis(d::Poisson) = 1.0 / d.lambda
-
-mean(d::Poisson) = d.lambda
-
-median(d::Poisson) = quantile(d, 0.5)
-
-function mgf(d::Poisson, t::Real)
-    l = d.lambda
-    return exp(l * (exp(t) - 1.0))
+## Functions
+function pdf(d::Poisson, x::Real)
+    λ = d.lambda
+    if !(isinteger(x) && x >= zero(x))
+        0.0
+    elseif x == zero(x)
+        exp(-λ)
+    elseif x < 10
+        exp(x*log(λ) - λ) / gamma(x+1.0)
+    else
+        exp(x*logmxp1(λ/x)-lstirling_asym(x)) / sqrt(twoπ*x)
+    end
+end
+function logpdf(d::Poisson, x::Real)
+    λ = d.lambda
+    if !(isinteger(x) && x >= zero(x))
+        -Inf
+    elseif x == zero(x)
+        -λ
+    elseif x < 10
+        x*log(λ) - λ - lgamma(x+1.0)
+    else
+        x*logmxp1(λ/x) - lstirling_asym(x) - 0.5*log(x) - 0.5*log2π
+    end
 end
 
-function cf(d::Poisson, t::Real)
-    l = d.lambda
-    return exp(l * (exp(im * t) - 1.0))
-end
+mgf(d::Poisson, t::Real) = exp(d.lambda*expm1(t))
+cf(d::Poisson, t::Real) = exp(d.lambda*(exp(im*t)-1.0))
 
-mode(d::Poisson) = ifloor(d.lambda)
-modes(d::Poisson) = [mode(d)]
-
-skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
-
-var(d::Poisson) = d.lambda
-
-# model fitting
-
+## Fitting
 immutable PoissonStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     tw::Float64   # total sample weight
