@@ -8,8 +8,6 @@ end
 
 @_jl_dist_1p Chisq chisq
 
-convert(::Type{Gamma},d::Chisq) = Gamma(0.5*d.df,2.0)
-
 ## Support
 @continuous_distr_support Chisq 0.0 Inf
 

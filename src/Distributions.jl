@@ -295,6 +295,9 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 # Mixture distributions
 include("mixturemodel.jl")
 
+# Relations between distributions
+include("relations.jl")
+
 # REPL representations
 include("show.jl")
 
