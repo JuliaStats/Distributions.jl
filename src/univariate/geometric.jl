@@ -42,15 +42,15 @@ end
 logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.prob) + log1p(-d.prob)*x : -Inf
 
 function cdf(d::Geometric, x::Real) 
-    x < zero(q) && return 0.0
+    x < zero(x) && return 0.0
     p = d.prob
-    n = floor(q) + 1.0
+    n = floor(x) + 1.0
     p < 0.5 ? -expm1(log1p(-p)*n) : 1.0-(1.0-p)^n
 end
 function ccdf(d::Geometric, x::Real)
-    x < zero(q) && return 1.0 
+    x < zero(x) && return 1.0 
     p = d.prob
-    n = floor(q) + 1.0
+    n = floor(x) + 1.0
     p < 0.5 ? exp(log1p(-p)*n) : (1.0-p)^n
 end
 logcdf(d::Geometric, q::Real) = q < zero(q) ? -Inf : log1mexp(log1p(-d.prob) * (floor(q) + 1.0))
