@@ -22,10 +22,9 @@ maximum(d::Geometric) = Inf
 ## Properties
 mean(d::Geometric) = (1.0 - d.prob) / d.prob
 
-median(d::Geometric) = -fld(0.6931471805599453,log1p(-d.prob)) - 1.0
+median(d::Geometric) = -fld(logtwo,log1p(-d.prob)) - 1.0
 
 mode(d::Geometric) = 0
-modes(d::Geometric) = [0]
 
 var(d::Geometric) = (1.0 - d.prob) / d.prob^2
 skewness(d::Geometric) = (2.0 - d.prob) / sqrt(1.0 - d.prob)
@@ -34,11 +33,26 @@ kurtosis(d::Geometric) = 6.0 + d.prob^2 / (1.0 - d.prob)
 entropy(d::Geometric) = (-xlogx(1.0 - d.prob) - xlogx(d.prob)) / d.prob
 
 ## Functions
-pdf(d::Geometric, x::Real) = insupport(d,x) ? d.prob*exp(log1p(-d.prob)*x) : 0.0
+function pdf(d::Geometric, x::Real)
+    !insupport(d,x) && return 0.0
+    p = d.prob
+    p < 0.5 ? p*exp(log1p(-p)*x) : p*(1.0-p)^x
+end
+
 logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.prob) + log1p(-d.prob)*x : -Inf
 
-cdf(d::Geometric, q::Real) = q < zero(q) ? 0.0 : -expm1(log1p(-d.prob) * (floor(q) + 1.0))
-ccdf(d::Geometric, q::Real) =  q < zero(q) ? 1.0 : exp(log1p(-d.prob) * (floor(q) + 1.0))
+function cdf(d::Geometric, x::Real) 
+    x < zero(q) && return 0.0
+    p = d.prob
+    n = floor(q) + 1.0
+    p < 0.5 ? -expm1(log1p(-p)*n) : 1.0-(1.0-p)^n
+end
+function ccdf(d::Geometric, x::Real)
+    x < zero(q) && return 1.0 
+    p = d.prob
+    n = floor(q) + 1.0
+    p < 0.5 ? exp(log1p(-p)*n) : (1.0-p)^n
+end
 logcdf(d::Geometric, q::Real) = q < zero(q) ? -Inf : log1mexp(log1p(-d.prob) * (floor(q) + 1.0))
 logccdf(d::Geometric, q::Real) =  q < zero(q) ? 0.0 : log1p(-d.prob) * (floor(q) + 1.0)
 
