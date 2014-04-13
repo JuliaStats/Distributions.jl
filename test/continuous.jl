@@ -11,7 +11,7 @@ using Base.Test
 #   (1) make sure that python, numpy, and scipy are installed in your system
 #   (2) enter the sub-directory test
 #   (3) run: python discrete_ref.py > discrete_ref.csv
-#  
+#
 #   For most cases, you don't have. You only need to run this when you
 #   implement a new distribution and want to add new test cases, then
 #   you should add the new test cases to discrete_ref.py and run this
@@ -80,7 +80,11 @@ end
 # additional distributions that have no direct counterparts in scipy
 println("    -----")
 
-for distr in [   
+for distr in [
+    Biweight(),
+    Biweight(1,3),
+    Epanechnikov(),
+    Epanechnikov(1,3),
     Frechet(0.5, 1.0),
     Frechet(3.0, 1.0),
     Frechet(20.0, 1.0),
@@ -104,8 +108,10 @@ for distr in [
     NoncentralF(2,2,2),
     NoncentralF(8,10,5),
     NoncentralT(2,2),
-    NoncentralT(10,2) ]
-
+    NoncentralT(10,2),
+    Triweight(),
+    Triweight(1,3),
+]
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)
 end
@@ -119,4 +125,3 @@ for distr in [
     println("    testing $(distr)")
     test_samples(distr, n_tsamples)
 end
-

@@ -10,6 +10,7 @@ import Base: size, eltype, length, full, convert, show, getindex, scale, rand, r
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.LinAlg: Cholesky
+import Base.Math.@horner
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler
 import PDMats: dim, PDMat, invquad
@@ -50,6 +51,7 @@ export
     Beta,
     BetaPrime,
     Binomial,
+    Biweight,
     Categorical,
     Cauchy,
     Chi,
@@ -65,6 +67,7 @@ export
     EdgeworthZ,
     EmpiricalUnivariateDistribution,
     Erlang,
+    Epanechnikov,
     Exponential,
     FDist,
     FisherNoncentralHypergeometric,
@@ -115,6 +118,7 @@ export
     SymTriangularDist,
     TDist,
     TriangularDist,
+    Triweight,
     Truncated,
     TruncatedNormal,
     Uniform,

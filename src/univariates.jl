@@ -471,10 +471,12 @@ const continuous_distributions = [
     "arcsine",
     "beta",
     "betaprime",
+    "biweight",
     "cauchy",
     "chisq",    # Chi depends on Chisq
     "chi",
     "cosine",
+    "epanechnikov",
     "exponential",
     "fdist",
     "frechet",
@@ -500,6 +502,7 @@ const continuous_distributions = [
     "symtriangular",
     "tdist",
     "triangular",
+    "triweight",
     "uniform",
     "vonmises",
     "weibull"
