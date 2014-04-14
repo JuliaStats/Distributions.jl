@@ -88,3 +88,6 @@ macro checkquantile(p,ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
 
+macro checkinvlogcdf(lp,ex)
+    :($lp <= zero($lp) ? $ex : NaN)
+end

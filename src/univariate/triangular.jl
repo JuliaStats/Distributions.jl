@@ -1,9 +1,4 @@
-##############################################################################
-#
-# Symmetric triangular distribution from Distributions Handbook
-#
-##############################################################################
-
+# Symmetric triangular distribution
 immutable TriangularDist <: ContinuousUnivariateDistribution
     location::Float64
     scale::Float64
@@ -16,23 +11,7 @@ end
 TriangularDist(location::Real) = TriangularDist(location, 1.0)
 TriangularDist() = TriangularDist(0.0, 1.0)
 
-function cdf(d::TriangularDist, x::Real)
-    a, b, c = d.location - d.scale, d.location + d.scale, d.location
-    if x <= a
-        return 0.0
-    elseif a <= x <= c
-        return (x - a)^2 / ((b - a) * (c - a))
-    elseif c < x <= b
-        return 1.0 - (b - x)^2 / ((b - a) * (b - c))
-    else
-        return 1.0
-    end
-end
-
-entropy(d::TriangularDist) = 0.5 + log(d.scale)
-
-# support handling
-
+## Support
 isupperbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 islowerbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 isbounded(::Union(TriangularDist, Type{TriangularDist})) = true
@@ -41,51 +20,132 @@ minimum(d::TriangularDist) = d.location - d.scale
 maximum(d::TriangularDist) = d.location + d.scale
 insupport(d::TriangularDist, x::Real) = minimum(d) <= x <= maximum(d)
 
+## Properties
+mean(d::TriangularDist) = d.location
+median(d::TriangularDist) = d.location
+mode(d::TriangularDist) = d.location
 
+var(d::TriangularDist) = d.scale^2 / 6.0
+skewness(d::TriangularDist) = 0.0
 kurtosis(d::TriangularDist) = -0.6
 
-mean(d::TriangularDist) = d.location
+entropy(d::TriangularDist) = 0.5 + log(d.scale)
 
-median(d::TriangularDist) = d.location
-
-mode(d::TriangularDist) = d.location
-modes(d::TriangularDist) = [d.location]
-
+## Functions
 function pdf(d::TriangularDist, x::Real)
     if insupport(d, x)
-        return -abs(x - d.location) / (d.scale^2) + 1.0 / d.scale
+        (1.0 - abs(x-d.location)/d.scale) / d.scale
     else
-        return 0.0
+        0.0
+    end
+end
+
+function logpdf(d::TriangularDist, x::Real)
+    if insupport(d, x)
+        log1p(-abs(x-d.location)/d.scale) -log(d.scale)
+    else
+        -Inf
+    end
+end
+
+function cdf(d::TriangularDist, x::Real)
+    u = (x - d.location) / d.scale
+    if u <= -1.0
+        0.0
+    elseif u <= 0.0
+        0.5*(1.0 + u)^2
+    elseif u <= 1.0
+        1.0 - 0.5*(1.0 - u)^2
+    else
+        1.0
+    end
+end
+function ccdf(d::TriangularDist, x::Real)
+    u = (x - d.location) / d.scale
+    if u <= -1.0
+        1.0
+    elseif u <= 0.0
+        1.0 - 0.5*(1.0 + u)^2
+    elseif u <= 1.0
+        0.5*(1.0 - u)^2
+    else
+        0.0
+    end
+end
+
+function logcdf(d::TriangularDist, x::Real)
+    u = (x - d.location) / d.scale
+    if u <= -1.0
+        -Inf
+    elseif u <= 0.0
+        loghalf + 2.0*log1p(u)
+    elseif u <= 1.0
+        log1p(-0.5*(1.0 - u)^2)
+    else
+        0.0
+    end
+end
+function logccdf(d::TriangularDist, x::Real)
+    u = (x - d.location) / d.scale
+    if u <= -1.0
+        0.0
+    elseif u <= 0.0
+        log1p(- 0.5*(1.0 + u)^2)
+    elseif u <= 1.0
+        loghalf + 2.0*log1p(-u)
+    else
+        -Inf
     end
 end
 
 function quantile(d::TriangularDist, p::Real)
-    a, b, c = d.location - d.scale, d.location + d.scale, d.location
-    if p <= 0.0
-        return a
-    elseif p < 0.5
-        return a + sqrt(p * 2.0 * d.scale^2)
-    elseif p >= 0.5
-        return b -  sqrt((1.0 - p) * 2.0 * d.scale^2)
-    else
-        return b
+    @checkquantile p begin
+        if p < 0.5
+            d.location - d.scale*(1.0 - sqrt(2.0*p))
+        else
+            d.location + d.scale*(1.0 - sqrt(2.0*(1.0-p)))
+        end
+    end
+end
+function cquantile(d::TriangularDist, p::Real)
+    @checkquantile p begin
+        if p > 0.5
+            d.location - d.scale*(1.0 - sqrt(2.0*(1.0-p)))
+        else
+            d.location + d.scale*(1.0 - sqrt(2.0*p))
+        end
+    end
+end
+function invlogcdf(d::TriangularDist, lp::Real)
+    @checkinvlogcdf lp begin
+        if lp < loghalf
+            d.location + d.scale*expm1(0.5*(lp-loghalf))
+        else
+            d.location + d.scale*(1.0 - sqrt(-2.0*expm1(lp)))
+        end
+    end
+end
+function invlogccdf(d::TriangularDist, lp::Real)
+    @checkinvlogcdf lp begin
+        if lp > loghalf
+            d.location - d.scale*(1.0 - sqrt(-2.0*expm1(lp)))
+        else
+            d.location - d.scale*expm1(0.5*(lp-loghalf))
+        end
     end
 end
 
+function mgf(d::TriangularDist, t::Real)
+    a = d.scale*t
+    4.0*exp(d.location*t)*(sinh(0.5*a)/a)^2
+end
+function cf(d::TriangularDist, t::Real)
+    a = d.scale*t
+    4.0*exp(im*d.location*t)*(sin(0.5*a)/a)^2
+end
+
+## Sampling
 function rand(d::TriangularDist)
     ξ1, ξ2 = rand(), rand()
     return d.location + (ξ1 - ξ2) * d.scale
 end
-
-function skewness(d::TriangularDist)
-    a = d.location - d.scale
-    b = d.location + d.scale
-    c = (b - a) / 2 + a
-    den = sqrt(2.0) * (a + b - 2.0 * c) *
-                      (2.0 * a - b - c) *
-                      (a - 2.0 * b + c)
-    num = 5.0 * (a^2 + b^2 + c^2 - a * b - a * c - b * c)^1.5
-    return den / num
-end
-
-var(d::TriangularDist) = d.scale^2 / 6.0
