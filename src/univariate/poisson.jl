@@ -52,7 +52,7 @@ function cf(d::Poisson, t::Real)
 end
 
 mode(d::Poisson) = ifloor(d.lambda)
-modes(d::Poisson) = [mode(d)]
+modes(d::Poisson) = isinteger(d.lambda) ? [int(d.lambda)-1,int(d.lambda)] : [ifloor(d.lambda)]
 
 skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 

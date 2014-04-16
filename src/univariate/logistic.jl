@@ -16,7 +16,6 @@ end
 mean(d::Logistic) = d.location
 median(d::Logistic) = d.location
 mode(d::Logistic) = d.location
-modes(d::Logistic) = [d.location]
 
 std(d::Logistic) = pi * d.scale / sqrt(3.0)
 var(d::Logistic) = (pi * d.scale)^2 / 3.0

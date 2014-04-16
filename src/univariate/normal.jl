@@ -20,7 +20,6 @@ typealias Gaussian Normal
 mean(d::Normal) = d.μ
 median(d::Normal) = d.μ
 mode(d::Normal) = d.μ
-modes(d::Normal) = [d.μ]
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ

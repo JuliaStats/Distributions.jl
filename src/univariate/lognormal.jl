@@ -19,7 +19,6 @@ mean(d::LogNormal) = exp(d.meanlog + d.sdlog^2 / 2)
 median(d::LogNormal) = exp(d.meanlog)
 
 mode(d::LogNormal) = exp(d.meanlog - d.sdlog^2)
-modes(d::LogNormal) = [mode(d)]
 
 function var(d::LogNormal)
     sigsq = d.sdlog^2

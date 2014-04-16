@@ -48,8 +48,8 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 median(d::Binomial) = iround(d.size * d.prob)
 
 # TODO: May need to subtract 1 sometimes
+# two modes possible e.g. size odd, p = 0.5
 mode(d::Binomial) = d.size > 0 ? iround((d.size + 1.0) * d.prob) : 0
-modes(d::Binomial) = [mode(d)]
 
 function mgf(d::Binomial, t::Real)
     p = d.prob

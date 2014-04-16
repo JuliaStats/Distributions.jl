@@ -22,7 +22,6 @@ skewness(d::InverseGamma) = d.shape > 3.0 ? (4.0 * sqrt(d.shape - 2.0)) / (d.sha
 kurtosis(d::InverseGamma) = d.shape > 4.0 ? (30.0 * d.shape - 66.0) / ((d.shape - 3.0) * (d.shape - 4.0)) : NaN
 
 mode(d::InverseGamma) = d.scale / (d.shape + 1.0)
-modes(d::InverseGamma) = [mode(d)]
 
 cdf(d::InverseGamma, x::Real) = ccdf(_inv(d), 1.0 / x)
 ccdf(d::InverseGamma, x::Real) = cdf(_inv(d), 1.0 / x)

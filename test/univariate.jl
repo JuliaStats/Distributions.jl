@@ -252,15 +252,27 @@ for d in [Arcsine(),
 
     # Test modes by looking at pdf(x +/- eps()) near a mode x
 
-    if !isa(d, Uniform) && method_exists(modes,(typeof(d),))
-        ms = modes(d)
-        if isa(d, ContinuousUnivariateDistribution)
-            if insupport(d, ms[1] + 0.1)
-                @test pdf(d, ms[1]) > pdf(d, ms[1] + 0.1)
+    try
+        for m in modes(d)
+            if isa(d, ContinuousUnivariateDistribution)
+                if insupport(d, m + 0.1)
+                    @test pdf(d, m) > pdf(d, m + 0.1)
+                end
+                if insupport(d, m - 0.1)
+                    @test pdf(d, m) > pdf(d, m - 0.1)
+                end
+            elseif isa(d, DiscreteUnivariateDistribution)
+                if insupport(d, m + 1) && !in(m+1,modes(d))
+                    @test pdf(d, m) > pdf(d, m + 1)
+                end
+                if insupport(d, m - 1) && !in(m-1,modes(d))
+                    @test pdf(d, m) > pdf(d, m - 1)
+                end
             end
-            if insupport(d, ms[1] - 0.1)
-                @test pdf(d, ms[1]) > pdf(d, ms[1] - 0.1)
-            end
+        end
+    catch e
+        if !(isa(e,MethodError) && e.f == mode)
+            rethrow(e)
         end
     end
 end

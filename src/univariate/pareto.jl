@@ -23,7 +23,6 @@ mean(d::Pareto) = d.shape > 1.0 ? (d.scale * d.shape) / (d.shape - 1.0) : Inf
 median(d::Pareto) = d.scale * 2.0^(1.0/d.shape)
 
 mode(d::Pareto) = d.scale
-modes(d::Pareto) = [d.scale]
 
 function var(d::Pareto)
     α = d.shape

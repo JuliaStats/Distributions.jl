@@ -31,7 +31,6 @@ skewness(d::Levy) = NaN
 kurtosis(d::Levy) = NaN
 
 mode(d::Levy) = d.scale / 3.0 + d.location
-modes(d::Levy) = [mode(d)]
 
 function median(d::Levy)
     m, c = d.location, d.scale

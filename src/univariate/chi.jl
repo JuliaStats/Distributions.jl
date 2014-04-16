@@ -24,7 +24,6 @@ function mode(d::Chi)
     d.df >= 1.0 || error("Chi distribution has no mode when df < 1")
     sqrt(d.df - 1)
 end
-modes(d::Chi) = [mode(d)]
 
 var(d::Chi) = d.df - mean(d)^2
 

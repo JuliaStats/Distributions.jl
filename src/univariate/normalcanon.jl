@@ -27,7 +27,6 @@ canonform(d::Normal) = convert(NormalCanon, d)
 mean(cf::NormalCanon) = cf.μ
 median(cf::NormalCanon) = mean(cf)
 mode(cf::NormalCanon) = mean(cf)
-modes(cf::NormalCanon) = [mean(cf)]
 
 skewness(cf::NormalCanon) = 0.0
 kurtosis(cf::NormalCanon) = 0.0

@@ -17,7 +17,6 @@ Cauchy() = Cauchy(0.0, 1.0)
 mean(d::Cauchy) = NaN
 median(d::Cauchy) = d.location
 mode(d::Cauchy) = d.location
-modes(d::Cauchy) = [mode(d)]
 
 var(d::Cauchy) = NaN
 skewness(d::Cauchy) = NaN

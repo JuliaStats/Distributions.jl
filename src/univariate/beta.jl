@@ -33,11 +33,44 @@ median(d::Beta) = quantile(d, 0.5)
 
 function mode(d::Beta)
     α, β = d.alpha, d.beta
-    α > 1.0 && β > 1.0 || error("Beta with α <= 1 or β <= 1 has no modes")
-    (α - 1.0) / (α + β - 2.0)
+    if α >= 1.0
+        if β > 1.0
+            (α - 1.0) / (α + β - 2.0)
+        elseif α == 1.0 && β == 1.0
+            # Uniform[0,1]: what should be returned?
+            0.5
+        else
+            1.0
+        end
+    else
+        if β >= 1.0
+            0.0
+        else
+            # not unique: return largest
+            α > β ? 1.0 : 0.0
+        end
+    end
 end
 
-modes(d::Beta) = [mode(d)]
+function modes(d::Beta)
+    α, β = d.alpha, d.beta
+    if α >= 1.0
+        if β > 1.0
+            [(α - 1.0) / (α + β - 2.0)]
+        elseif α == 1.0 && β == 1.0
+            # Uniform[0,1]: what should be returned?
+            Float64[]
+        else
+            [1.0]
+        end
+    else
+        if β >= 1.0
+            [0.0]
+        else
+            [0.0,1.0]
+        end
+    end
+end
 
 function rand(d::Beta)
     u = randg(d.alpha)

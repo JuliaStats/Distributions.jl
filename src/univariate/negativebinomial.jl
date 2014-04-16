@@ -69,4 +69,3 @@ function mode(d::NegativeBinomial)
     ifloor((1.0 - p) * (d.r - 1.) / p)
 end
 
-modes(d::NegativeBinomial) = [mode(d)]

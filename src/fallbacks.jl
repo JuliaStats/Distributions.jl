@@ -92,6 +92,8 @@ ismesokurtic(d::Distribution) = kurtosis(d) == 0.0
 
 median(d::UnivariateDistribution) = quantile(d, 0.5)
 
+modes(d::Distribution) = [mode(d)]
+
 #### pdf, cdf, and quantile ####
 
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))

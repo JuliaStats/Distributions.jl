@@ -24,8 +24,8 @@ mean(d::Uniform) = (d.a + d.b) / 2.0
 
 median(d::Uniform) = (d.a + d.b) / 2.0
 
-mode(d::Uniform) = d.a
-modes(d::Uniform) = error("The uniform distribution has no modes")
+mode(d::Uniform) = mean(d)
+modes(d::Uniform) = Float64[]
 
 function var(d::Uniform)
     w = d.b - d.a

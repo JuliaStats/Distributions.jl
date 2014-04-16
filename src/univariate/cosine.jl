@@ -24,7 +24,6 @@ median(d::Cosine) = 0.5
 # cf(d::Cosine, t::Real)
 
 mode(d::Cosine) = 0.5
-modes(d::Cosine) = [0.5]
 
 pdf(d::Cosine, x::Real) = zero(x) <= x <= one(x) ? 0.5 * cos(x) : 0.0
 

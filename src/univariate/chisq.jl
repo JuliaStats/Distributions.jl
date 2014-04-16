@@ -33,7 +33,6 @@ end
 cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
 
 mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
-modes(d::Chisq) = [mode(d)]
 
 function gradloglik(d::Chisq, x::Float64)
   insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : 0.0

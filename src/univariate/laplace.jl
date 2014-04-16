@@ -38,7 +38,6 @@ function cf(d::Laplace, t::Real)
 end
 
 mode(d::Laplace) = d.location
-modes(d::Laplace) = [d.location]
 
 function pdf(d::Laplace, x::Real)
     0.5exp(-abs(x - d.location)/d.scale) / d.scale

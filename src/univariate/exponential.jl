@@ -38,7 +38,6 @@ mgf(d::Exponential, t::Real) = 1.0/(1.0 - t * d.scale)
 cf(d::Exponential, t::Real) = 1.0/(1.0 - t * im * d.scale)
 
 mode(d::Exponential) = 0.0
-modes(d::Exponential) = [0.0]
 
 pdf(d::Exponential, x::Real) = x < zero(x) ? 0.0 : exp(-x / d.scale) / d.scale
 

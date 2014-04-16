@@ -17,7 +17,6 @@ mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)
 median(d::Weibull) = d.scale * log(2.0)^(1.0 / d.shape)
 
 mode(d::Weibull) = d.shape > 1.0 ? (ik = 1.0/d.shape; d.scale * (1.0-ik)^ik) : 0.0
-modes(d::Weibull) = [mode(d)]
 
 var(d::Weibull) = d.scale^2 * gamma(1.0 + 2.0 / d.shape) - mean(d)^2
 
