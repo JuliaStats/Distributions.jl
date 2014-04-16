@@ -137,10 +137,12 @@ end
 
 function mgf(d::TriangularDist, t::Real)
     a = d.scale*t
+    a == zero(a) && return one(a)
     4.0*exp(d.location*t)*(sinh(0.5*a)/a)^2
 end
 function cf(d::TriangularDist, t::Real)
     a = d.scale*t
+    a == zero(a) && return complex(one(a))
     4.0*exp(im*d.location*t)*(sin(0.5*a)/a)^2
 end
 

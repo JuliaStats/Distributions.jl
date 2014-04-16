@@ -73,15 +73,12 @@ end
 
 function mgf(d::Geometric, t::Real)
     p = d.prob
-    if t >= -log(1.0 - p)
-        error("MGF does not exist for all t")
-    end
-    (p * exp(t)) / (1.0 - (1.0 - p) * exp(t))
+    p / (expm1(-t) + p)
 end
 
 function cf(d::Geometric, t::Real)
     p = d.prob
-    (p * exp(im * t)) / (1.0 - (1.0 - p) * exp(im * t))
+    p / (expm1(-t*im) + p)
 end
 
 ## Sampling

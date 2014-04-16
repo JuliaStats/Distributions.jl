@@ -52,12 +52,10 @@ function gradloglik(d::Logistic, x::Float64)
   ((2 * expterm) / (1 + expterm) - 1) / d.scale
 end
 
-function mgf(d::Logistic, t::Real)
-    m, b = d.location, d.scale
-    exp(t * m) * (pi * b * t) / sin(pi * b * t)
-end
+mgf(d::Logistic, t::Real) = exp(t*d.location)/sinc(d.scale*t)
 
 function cf(d::Logistic, t::Real)
-    m, b = d.location, d.scale
-    exp(im * t * m) * (pi * b * t) / sinh(pi * b * t)
+    a = (pi*t)*d.scale
+    a == zero(a) && complex(one(a))
+    exp(im*t*d.location) * a / sinh(a)
 end

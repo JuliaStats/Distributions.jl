@@ -38,7 +38,7 @@ function median(d::Levy)
     m + c / (2.0 * erfcinv(0.5)^2)
 end
 
-mgf(d::Levy, t::Real) = error("MGF is undefined for Levy distributions")
+mgf(d::Levy, t::Real) = t == zero(t) ? 1.0 : NaN
 
 function cf(d::Levy, t::Real)
     m, c = d.location, d.scale

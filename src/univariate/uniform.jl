@@ -67,13 +67,16 @@ cquantile(d::Uniform, p::Real) = @checkquantile p d.b+p*(d.a-d.b)
 
 
 function mgf(d::Uniform, t::Real)
-	a, b = d.a, d.b
-	return (exp(t * b) - exp(t * a)) / (t * (b - a))
+    u = 0.5*(d.b-d.a)*t
+    u == zero(u) && return one(u)
+    v = 0.5*(d.a+d.b)*t
+    exp(v)*(sinh(u)/u)
 end
-
 function cf(d::Uniform, t::Real)
-	a, b = d.a, d.b
-	return (exp(im * t * b) - exp(im * t * a)) / (im * t * (b - a))
+    u = 0.5*(d.b-d.a)*t
+    u == zero(u) && return complex(one(u))
+    v = 0.5*(d.a+d.b)*t
+    exp(im*v)*(sin(u)/u)
 end
 
 ## Sampling

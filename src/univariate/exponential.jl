@@ -35,7 +35,7 @@ median(d::Exponential) = d.scale * log(2.0)
 
 mgf(d::Exponential, t::Real) = 1.0/(1.0 - t * d.scale)
 
-cf(d::Exponential, t::Real) = (1.0 - t * im * d.scale)^(-1)
+cf(d::Exponential, t::Real) = 1.0/(1.0 - t * im * d.scale)
 
 mode(d::Exponential) = 0.0
 modes(d::Exponential) = [0.0]

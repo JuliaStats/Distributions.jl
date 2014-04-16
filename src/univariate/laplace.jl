@@ -29,12 +29,12 @@ median(d::Laplace) = d.location
 
 function mgf(d::Laplace, t::Real)
     m, b = d.location, d.scale
-    exp(t * m) / (1.0 - b^2 * t^2)
+    exp(t * m) / (1.0 - (b*t)^2)
 end
 
 function cf(d::Laplace, t::Real)
     m, b = d.location, d.scale
-    exp(im * t * m) / (1.0 + b^2 * t^2)
+    exp(im * t * m) / (1.0 + (b*t)^2)
 end
 
 mode(d::Laplace) = d.location

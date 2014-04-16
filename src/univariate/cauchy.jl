@@ -39,7 +39,7 @@ cquantile(d::Cauchy, p::Real) = @checkquantile p d.location + d.scale*cospi(p)/s
 invlogcdf(d::Cauchy, lp::Real) = lp < loghalf ? quantile(d,exp(lp)) : cquantile(d,-expm1(lp))
 invlogccdf(d::Cauchy, lp::Real) = lp < loghalf ? cquantile(d,exp(lp)) : quantile(d,-expm1(lp))
 
-mgf(d::Cauchy, t::Real) = NaN
+mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
 cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))
 
 ## Fitting
