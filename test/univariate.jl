@@ -237,10 +237,10 @@ for d in [Arcsine(),
     end
 
     # TODO: Test mgf, cf
-    if method_exists(mgf,(typeof(d),))
+    if method_exists(mgf,(typeof(d),Float64))
         @test mgf(d,0.0) == 1.0
     end
-    if method_exists(cf,(typeof(d),))
+    if method_exists(cf,(typeof(d),Float64))
         @test cf(d,0.0) == 1.0
     end
 

@@ -43,13 +43,13 @@ end
 function mgf(d::InverseGamma, t::Real)
     a = d.shape
     b = d.scale
-    (2 * (-b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * b * t))
+    t == zero(t) ? one(float(t)) : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
 end
 
 function cf(d::InverseGamma, t::Real)
     a = d.shape
     b = d.scale
-    (2 * (-im * b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * im * b * t))
+    t == zero(t) ? complex(one(float(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
 end
 
 pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))

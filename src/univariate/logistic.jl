@@ -55,6 +55,5 @@ mgf(d::Logistic, t::Real) = exp(t*d.location)/sinc(d.scale*t)
 
 function cf(d::Logistic, t::Real)
     a = (pi*t)*d.scale
-    a == zero(a) && complex(one(a))
-    exp(im*t*d.location) * a / sinh(a)
+    a == zero(a) ? complex(one(a)) : exp(im*t*d.location) * a / sinh(a)    
 end

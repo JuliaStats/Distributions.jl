@@ -78,7 +78,8 @@ end
 
 function cf(d::Geometric, t::Real)
     p = d.prob
-    p / (expm1(-t*im) + p)
+    # replace with expm1 when complex version available
+    p / (exp(-t*im) - 1.0 + p)
 end
 
 ## Sampling

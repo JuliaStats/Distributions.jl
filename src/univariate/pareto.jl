@@ -5,9 +5,9 @@ immutable Pareto <: ContinuousUnivariateDistribution
         sc > zero(sc) && sh > zero(sh) || error("shape and scale must be positive")
         new(float64(sc), float64(sh))
     end
-    Pareto() = new(1.0, 1.0)
 end
 
+Pareto() = Pareto(1.0, 1.0)
 Pareto(scale::Real) = Pareto(scale, 1.0)
 
 islowerbounded(::Union(Pareto, Type{Pareto})) = true
