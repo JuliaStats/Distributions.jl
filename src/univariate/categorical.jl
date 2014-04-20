@@ -211,7 +211,7 @@ suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float
 ### Model fitting
 
 function fit_mle(::Type{Categorical}, ss::CategoricalStats)
-    Categorical(normalize!(ss.h))
+    Categorical(normalize!(ss.h,1))
 end
 
 function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) 
