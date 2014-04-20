@@ -48,3 +48,6 @@ function var(d::MixtureModel)
     end
     return m
 end
+
+size(d::MixtureModel) = size(d.components[1])
+length(d::MixtureModel) = length(d.components[1])

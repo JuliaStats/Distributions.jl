@@ -4,6 +4,15 @@
 #
 ##############################################################################
 
+# array-like characteristics
+
+# size(d::Distribution) = size(rand(d))
+size(d::UnivariateDistribution) = ()
+size(d::MultivariateDistribution) = (dim(d),)
+size(d::MatrixDistribution) = (dim(d), dim(d)) # override if the matrix isn't square
+
+length(d::Distribution) = prod(size(d))
+
 # support handling
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
