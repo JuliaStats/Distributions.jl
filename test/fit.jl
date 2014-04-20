@@ -122,6 +122,10 @@ d = fit(Categorical, (3, x), w)
 @test isa(d, Categorical)
 @test_approx_eq d.prob h / sum(h)
 
+d = fit(Categorical, suffstats(Categorical, 3, x, w))
+@test isa(d, Categorical)
+@test_approx_eq d.prob (h / sum(h))
+
 d = fit(Categorical, rand(Categorical(p), N))
 @test isa(d, Categorical)
 @test_approx_eq_eps d.prob p 0.01
