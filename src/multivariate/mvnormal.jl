@@ -150,7 +150,8 @@ typealias MvNormalKnownSigma   GenericMvNormalKnownSigma{PDMat}
 typealias DiagNormalKnownSigma GenericMvNormalKnownSigma{PDiagMat}
 typealias IsoNormalKnownSigma  GenericMvNormalKnownSigma{ScalMat}
 
-IsoNormalKnownSigma(σ::Float64) = IsoNormalKnownSigma(abs2(σ))
+IsoNormalKnownSigma(dimension::Int, σ::Float64) =
+    IsoNormalKnownSigma(ScalMat(dimension, abs2(σ)))
 DiagNormalKnownSigma(σ::Vector{Float64}) = DiagNormalKnownSigma(abs2(σ))
 MvNormalKnownSigma(C::Matrix{Float64}) = MvNormalKnownSigma(PDMat(C)) 
 
