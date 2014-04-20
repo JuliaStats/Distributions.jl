@@ -85,6 +85,19 @@ Sampling
 
 **Node:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
 
+Variate Dimensions
+~~~~~~~~~~~~~~~~~~~~
+
+The functions ``size`` and ``length`` apply to any type of distribution.
+
+- **size** (d)
+
+   For multivariate distributions, this is equal to ``(dim(d),)``. In the general case, ``size(d)==size(rand(d))``.
+
+- **length** (d)
+
+   For univariate distributions, this is equal to ``dim(d)``. In the general case, ``length(d)==length(rand(d))``.
+
 
 .. _multinomial:
 
