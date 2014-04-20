@@ -198,6 +198,12 @@ mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
 
+assumed_g = Distributions.IsoNormalKnownSigma(3, 1.)
+g = fit_mle(assumed_g, x, w)
+mu, C = _gauss_mle(x, w)
+@test_approx_eq g.μ mu
+@test_approx_eq diag(g.Σ) diag(assumed_g.Σ)
+
 g = fit(DiagNormal, x)
 mu, C = _gauss_mle(x)
 @test_approx_eq g.μ mu
