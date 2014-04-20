@@ -49,14 +49,6 @@ cquantile(d::Exponential, p::Real) = zero(p) <= p <= one(p) ? -d.scale * log(p) 
 
 rand(d::Exponential) = d.scale * Base.Random.randmtzig_exprnd()
 
-function rand!(d::Exponential, A::Array{Float64})
-    Base.Random.randmtzig_fill_exprnd!(A)
-    for i in 1:length(A)
-        A[i] *= d.scale
-    end
-    A
-end
-
 skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
