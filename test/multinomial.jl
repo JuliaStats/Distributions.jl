@@ -24,6 +24,8 @@ x = rand(d)
 @test isa(x, Vector{Int})
 @test sum(x) == nt
 @test insupport(d, x)
+@test size(x) == size(d)
+@test length(x) == length(d)
 
 x = rand(d, 100)
 @test isa(x, Matrix{Int})

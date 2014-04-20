@@ -137,6 +137,8 @@ for d in [Arcsine(),
 
     # check that we can generate a single random draw
     draw = rand(d)
+    @test size(draw) == size(d)
+    @test length(draw) == length(d)
 
     # check that draw satifies insupport()
     @test insupport(d, draw)

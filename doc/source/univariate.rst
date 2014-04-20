@@ -9,7 +9,6 @@ Common Interface
 
 A series of methods are implemented for each univariate distribution, which provide useful functionalities such as moment computation, pdf evaluation, and sampling (*i.e.* random number generation).
 
-
 Computation of statistics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,7 +57,6 @@ Let ``d`` be a distribution:
 - **cf** (d, t)
 
     Evaluate the characteristic function of distribution ``d``. 
-
 
 Probability Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,6 +147,19 @@ Sampling (Random number generation)
 
     Fills a pre-allocated array arr with independent samples from the distribution ``d``.
 
+
+Variate Dimensions
+~~~~~~~~~~~~~~~~~~~~
+
+The functions ``size`` and ``length`` apply to any type of distribution.
+
+- **size** (d)
+
+   For univariate distributions, this is always ``()``. In the general case, ``size(d)==size(rand(d))``.
+
+- **length** (d)
+
+   For univariate distributions, this is always ``1``. In the general case, ``length(d)==length(rand(d))``.
 
 List of Distributions
 ----------------------

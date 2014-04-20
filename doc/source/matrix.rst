@@ -25,6 +25,20 @@ Both distributions implement the same set of methods:
 	Draw a sample matrix from the distribution ``d``.
 
 
+Variate Dimensions
+~~~~~~~~~~~~~~~~~~~~
+
+The functions ``size`` and ``length`` apply to any type of distribution.
+
+- **size** (d)
+
+   ``size(d)==size(rand(d))``, that is, the size of the samples from this distribution.
+
+- **length** (d)
+
+   ``length(d)==length(rand(d))``, that is, the total number of elements in a sampled matrix.
+
+
 Wishart Distribution
 ---------------------
 

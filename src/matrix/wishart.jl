@@ -36,6 +36,7 @@ mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
 
 pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
 
+size(W::Wishart) = size(W.Schol)
 dim(W::Wishart) = size(W.Schol, 1)
 
 function expected_logdet(W::Wishart)

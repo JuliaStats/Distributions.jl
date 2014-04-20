@@ -19,6 +19,8 @@ immutable InverseWishart <: ContinuousMatrixDistribution
     end
 end
 
+size(d::InverseWishart) = size(d.Psichol)
+
 function InverseWishart(nu::Real, Psi::Matrix{Float64})
     InverseWishart(float64(nu), cholfact(Psi))
 end

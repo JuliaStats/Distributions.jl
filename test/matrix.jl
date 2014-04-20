@@ -8,6 +8,11 @@ S[1, 2] = S[2, 1] = 0.5
 W = Wishart(v,S)
 IW = InverseWishart(v+1,S)
 
+for d in [W,IW]
+    @test size(d) == size(rand(d))
+    @test length(d) == length(rand(d))
+end
+
 @test_approx_eq_eps mean(rand(W,100000)) mean(W) 0.3
 @test_approx_eq_eps mean(rand(IW,100000)) mean(IW) 0.3
 

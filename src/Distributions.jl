@@ -177,6 +177,7 @@ export
 import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
+import Base: size, length
 import NumericExtensions: entropy
 import PDMats: dim, PDMat, invquad
 import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler, fit
