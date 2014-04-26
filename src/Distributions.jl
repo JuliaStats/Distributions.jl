@@ -95,6 +95,7 @@ export
     TriangularDist,
     Truncated,
     Uniform,
+    VonMises,
     VonMisesFisher,
     Weibull,
     Wishart,
@@ -275,6 +276,7 @@ include(joinpath("univariate", "skellam.jl"))
 include(joinpath("univariate", "tdist.jl"))
 include(joinpath("univariate", "triangular.jl"))
 include(joinpath("univariate", "uniform.jl"))
+include(joinpath("univariate", "vonmises.jl"))
 include(joinpath("univariate", "weibull.jl"))
 
 # Multivariate distributions
