@@ -13,24 +13,21 @@ immutable VonMises <: ContinuousUnivariateDistribution
     VonMises() = VonMises(0.0, 1.0)
 end
 
-## Support
-@continuous_distr_support VonMises -Inf Inf
-
 ## Properties
-mean(d::VonMises) = d.μ
-median(d::VonMises) = d.μ
-mode(d::VonMises) = d.μ
-var(d::VonMises) = 1.0 - besseliexpscaled(1, d.κ) / besseliexpscaled(0, d.κ)
+circmean(d::VonMises) = d.μ
+circmedian(d::VonMises) = d.μ
+circmode(d::VonMises) = d.μ
+circvar(d::VonMises) = 1.0 - besselix(1, d.κ) / besselix(0, d.κ)
 
 function entropy(d::VonMises)
-	I0κ = besseliexpscaled(0.0, d.κ)
-	log(twoπ * I0κ) - d.κ * (besseliexpscaled(1, d.κ) / I0κ - 1.0)
+	I0κ = besselix(0.0, d.κ)
+	log(twoπ * I0κ) - d.κ * (besselix(1, d.κ) / I0κ - 1.0)
 end
 
 ## Functions
-pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1.0)) / (twoπ * besseliexpscaled(0, d.κ))
-logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1.0) - log2π - log(besseliexpscaled(0, d.κ))
-cf(d::VonMises, t::Real) = besseliexpscaled(abs(t), d.k) / besseliexpscaled(0.0, d.κ) * exp(im * t * d.μ)
+pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1.0)) / (twoπ * besselix(0, d.κ))
+logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1.0) - log2π - log(besselix(0, d.κ))
+cf(d::VonMises, t::Real) = besselix(abs(t), d.k) / besselix(0.0, d.κ) * exp(im * t * d.μ)
 cdf(d::VonMises, x::Real) = cdf(d, x, d.μ - π)
 
 function cdf(d::VonMises, x::Real, from::Real)
@@ -53,12 +50,12 @@ end
 function vmcdfseries(κ::Real, x::Real, tol::Real)
 	j, s = 1, 0.0
 	while true
-		sj = besseliexpscaled(j, κ) * sin(j * x) / j
+		sj = besselix(j, κ) * sin(j * x) / j
 		s += sj
 		j += 1
 		abs(sj) >= tol || break
 	end
-	x / twoπ + s / (π * besseliexpscaled(0, κ))
+	x / twoπ + s / (π * besselix(0, κ))
 end
 
 ## Sampling
@@ -94,17 +91,12 @@ function vmrand(κ::Float64)
 	rand() > 0.5 ? acos(f) : -acos(f)
 end
 
+# TODO: remove as soon as implemented in Base/math.jl
 ## Helper functions
 # Bessel function as in Base/math.jl, but with exponential scaling
-const cy = Array(Float64,2)
-const ae = Array(Int32,2)
-const openspecfun = "libopenspecfun"
+import Base.Math: cy, ae, openspecfun, AmosException
 
-type AmosException <: Exception
-    info::Int32
-end
-
-# Computes modified bessel function of first kind, scaled by exp(-Re(z))
+# Computes modified bessel function of first kind, scaled by exp(-|Re(z)|)
 function _besseliexpscaled(nu::Float64, z::Complex128)
     ccall((:zbesi_,openspecfun), Void,
           (Ptr{Float64}, Ptr{Float64}, Ptr{Float64}, Ptr{Int32}, Ptr{Int32},
@@ -119,13 +111,13 @@ function _besseliexpscaled(nu::Float64, z::Complex128)
     end
 end
 
-besseliexpscaled(nu::Float64, z::Complex128) = _besseliexpscaled(nu, z)
-besseliexpscaled(nu::Real, z::Complex64) = complex64(besseliexpscaled(float64(nu), complex128(z)))
-besseliexpscaled(nu::Real, z::Complex) = besseliexpscaled(float64(nu), complex128(z))
-besseliexpscaled(nu::Real, x::Integer) = besseliexpscaled(nu, float64(x))
-function besseliexpscaled(nu::Real, x::FloatingPoint)
+besselix(nu::Float64, z::Complex128) = _besseliexpscaled(nu, z)
+besselix(nu::Real, z::Complex64) = complex64(besselix(float64(nu), complex128(z)))
+besselix(nu::Real, z::Complex) = besselix(float64(nu), complex128(z))
+besselix(nu::Real, x::Integer) = besselix(nu, float64(x))
+function besselix(nu::Real, x::FloatingPoint)
     if x < 0 && !isinteger(nu)
         throw(DomainError())
     end
-    oftype(x, real(besseliexpscaled(float64(nu), complex128(x))))
+    oftype(x, real(besselix(float64(nu), complex128(x))))
 end
