@@ -202,6 +202,7 @@ List of Distributions
     - :ref:`rayleigh`
     - :ref:`tdist`
     - :ref:`uniform`
+    - :ref:`vonmises`
     - :ref:`weibull`
 
 
@@ -708,6 +709,24 @@ The probability density function of a `Continuous Uniform distribution <http://e
 
     Uniform()        # Uniform distribution over [0, 1]
     Uniform(a, b)    # Uniform distribution over [a, b]
+
+.. _vonmises:
+
+Von Mises Distribution
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a `von Mises distribution <http://en.wikipedia.org/wiki/Von_Mises_distribution>`_ with mean μ and concentration κ is
+
+.. math::
+
+    f(x; \mu, \kappa) = \frac{1}{2 \pi I_0(\kappa)} \exp \left( \kappa \cos (x - \mu) \right)
+
+.. code-block:: julia
+
+    VonMises()       # von Mises distribution with zero mean and unit concentration
+    VonMises(κ)      # von Mises distribution with zero mean and concentration κ
+    VonMises(μ, κ)   # von Mises distribution with mean μ and concentration κ
+
 
 .. _weibull:
 

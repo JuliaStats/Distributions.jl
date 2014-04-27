@@ -94,7 +94,7 @@ function vmrand(κ::Float64)
 	rand() > 0.5 ? acos(f) : -acos(f)
 end
 
-## Support functions
+## Helper functions
 # Bessel function as in Base/math.jl, but with exponential scaling
 const cy = Array(Float64,2)
 const ae = Array(Int32,2)
