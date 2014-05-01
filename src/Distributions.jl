@@ -60,6 +60,7 @@ export
     Erlang,
     Exponential,
     FDist,
+    Frechet,
     Gamma,
     GenericMvNormal,
     GenericMvNormalCanon,
