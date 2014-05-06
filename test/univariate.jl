@@ -111,9 +111,18 @@ for d in [Arcsine(),
           Uniform(0.0, 1.0),
           Uniform(3.0, 17.0),
           Uniform(3.0, 3.1),
+          Weibull(0.23,0.1),
+          Weibull(2.3,0.1),
+          Weibull(23.0,0.1),
+          Weibull(230.0,0.1),
+          Weibull(0.23),
           Weibull(2.3),
           Weibull(23.0),
-          Weibull(230.0)]
+          Weibull(230.0),
+          Weibull(0.23,10.0),
+          Weibull(2.3,10.0),
+          Weibull(23.0,10.0),
+          Weibull(230.0,10.0)]
 
     # NB: Uncomment if test fails
     # Mention distribution being run

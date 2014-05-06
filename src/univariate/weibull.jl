@@ -46,12 +46,12 @@ end
 
 ## Functions
 function pdf(d::Weibull, x::Real)
-    x < zero(x) && 0.0
+    x < zero(x) && return 0.0
     a = x/d.scale
     d.shape/d.scale * a^(d.shape-1.0) * exp(-a^d.shape)
 end
 function logpdf(d::Weibull, x::Real)
-    x < zero(x) && -Inf
+    x < zero(x) && return -Inf
     a = x/d.scale
     log(d.shape/d.scale) + (d.shape-1.0)*log(a) - a^d.shape
 end
