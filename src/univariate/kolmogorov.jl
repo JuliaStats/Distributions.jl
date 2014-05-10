@@ -7,7 +7,7 @@ end
 
 @continuous_distr_support Kolmogorov 0.0 Inf
 
-mean(d::Kolmogorov) = 0.5*√2π*log(2.0)
+mean(d::Kolmogorov) = 0.5*sqrt2π*log(2.0)
 var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
 # TODO: higher-order moments also exist, can be obtained by differentiating series
 
@@ -31,7 +31,7 @@ function cdf(d::Kolmogorov,x::Real)
     for i = 1:5
         s += exp(-((2*i-1)*π/x)^2/8.0)
     end
-    √2π*s/x
+    sqrt2π*s/x
 end
 
 function ccdf(d::Kolmogorov,x::Real)
@@ -56,7 +56,7 @@ function pdf(d::Kolmogorov,x::Real)
             k = ((2*i-1)*c)^2
             s += (k-1.0)*exp(-k/2.0)
         end
-        return √2π*s/x^2
+        return sqrt2π*s/x^2
     else
         s = 0.0
         for i = 1:20

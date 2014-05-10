@@ -21,13 +21,13 @@ logexpm1(x::Integer) = logexpm1(float(x))
 # log(1+x^2)
 log1psq(x::FloatingPoint) = (ax = abs(x); ax < maxintfloat(x) ? log1p(ax*ax) : 2*log(ax))
 
-φ(z::Real) = exp(-0.5*z*z)/√2π
+φ(z::Real) = exp(-0.5*z*z)/sqrt2π
 logφ(z::Real) = -0.5*(z*z + log2π)
 
-Φ(z::Real) = 0.5*erfc(-z/√2)
-Φc(z::Real) = 0.5*erfc(z/√2)
-logΦ(z::Real) = z < -1.0 ? log(0.5*erfcx(-z/√2)) - 0.5*z*z : log1p(-0.5*erfc(z/√2))
-logΦc(z::Real) = z > 1.0 ? log(0.5*erfcx(z/√2)) - 0.5*z*z : log1p(-0.5*erfc(-z/√2))
+Φ(z::Real) = 0.5*erfc(-z/sqrt2)
+Φc(z::Real) = 0.5*erfc(z/sqrt2)
+logΦ(z::Real) = z < -1.0 ? log(0.5*erfcx(-z/sqrt2)) - 0.5*z*z : log1p(-0.5*erfc(z/sqrt2))
+logΦc(z::Real) = z > 1.0 ? log(0.5*erfcx(z/sqrt2)) - 0.5*z*z : log1p(-0.5*erfc(-z/sqrt2))
 
 import Base.Math.@horner
 
