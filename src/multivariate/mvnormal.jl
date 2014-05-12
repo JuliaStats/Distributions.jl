@@ -96,9 +96,7 @@ end
 # generic PDF evaluation (appliable to AbstractMvNormal)
 
 insupport{T<:Real}(d::AbstractMvNormal, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{T<:Real}(d::AbstractMvNormal, x::Matrix{T}) = dim(d) == size(x,1) && allfinite(x)
 insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
-insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
 
 mvnormal_c0(g::AbstractMvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
 

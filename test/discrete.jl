@@ -73,7 +73,7 @@ for d in [
     for i = 1:n
         @test insupport(d, x[i])
     end
-    @test insupport(d, x)
+    @test all(insupport(d, x))
 
     ####
     #

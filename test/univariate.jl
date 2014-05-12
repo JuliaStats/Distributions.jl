@@ -157,7 +157,7 @@ for d in [Arcsine(),
     @test nsamples(typeof(d), x) == n
 
     # check that sequence of draws satifies insupport()
-    @test insupport(d, x)
+    @test all(insupport(d, x))
 
     # check that we can generate many random draws in-place
     rand!(d, x)

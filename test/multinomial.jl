@@ -30,7 +30,7 @@ x = rand(d)
 x = rand(d, 100)
 @test isa(x, Matrix{Int})
 @test all(sum(x, 1) .== nt)
-@test insupport(d, x)
+@test all(insupport(d, x))
 
 x = rand(sampler(d))
 @test isa(x, Vector{Int})

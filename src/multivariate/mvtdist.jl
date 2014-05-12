@@ -105,9 +105,8 @@ end
 # generic PDF evaluation (appliable to AbstractMvTDist)
 
 insupport{T<:Real}(d::AbstractMvTDist, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{T<:Real}(d::AbstractMvTDist, x::Matrix{T}) = dim(d) == size(x, 1) && allfinite(x)
 insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
-insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
+
 
 sqmahal(d::AbstractMvTDist, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 

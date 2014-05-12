@@ -21,33 +21,41 @@ hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 
 insupport(d::Distribution, x) = false
 
-function insupport(d::UnivariateDistribution, X::Array)
-    for x in X; insupport(d, x) || return false; end
-    true
-end
-
-function insupport(t::DataType, X::Array)
-    for x in X; insupport(t, x) || return false; end
-    true
-end
-
-function insupport(d::MultivariateDistribution, X::Matrix)
-    for i in 1 : size(X, 2)
-        if !insupport(d, X[:, i])  # short-circuit is generally faster
-            return false
-        end
+function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+    if length(r) != length(X)
+        throw(ArgumentError("Inconsistent array dimensions."))
     end
-    return true
+    for i in 1 : length(X)
+        r[i] = insupport(d, X[i])
+    end
+    r
 end
 
-function insupport(d::MatrixDistribution, X::Array)
-    for i in 1 : size(X, 3)
-        if !insupport(d, X[:, :, i])
-            return false
-        end
+insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = insupport!(BitArray(size(X)), d, X)
+
+function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+    n = div(length(X),size(X,1))
+    if length(r) != n
+        throw(ArgumentError("Inconsistent array dimensions."))
+    end    
+    for i in 1 : n
+        r[i] = insupport(d, X[:, i])
     end
-    return true
+    r
 end
+insupport{D<:MultivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = insupport!(BitArray(size(X)[2:end]), d, X)
+
+function insupport!{D<:MatrixDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+    n = div(length(X),size(X,1)*size(X,2))
+    if length(r) != n
+        throw(ArgumentError("Inconsistent array dimensions."))
+    end    
+    for i in 1 : n
+        r[i] = insupport(d, X[:, :, i])
+    end
+    r
+end
+insupport{D<:MatrixDistribution}(d::Union(D,Type{D}), X::AbstractArray) = insupport!(BitArray(size(X)[3:end]), d, X)
 
 # generic function to get number of samples
 
