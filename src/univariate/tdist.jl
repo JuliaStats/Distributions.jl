@@ -34,4 +34,4 @@ function var(d::TDist)
     NaN
 end
 
-gradloglik(d::TDist, x::Float64) = -((d.df + 1.0) * x) / (x^2 + d.df)
+gradlogpdf(d::TDist, x::Real) = -((d.df + 1.0) * x) / (x^2 + d.df)

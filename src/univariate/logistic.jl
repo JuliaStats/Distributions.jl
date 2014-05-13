@@ -46,7 +46,7 @@ invlogcdf(d::Logistic, lp::Real) = d.location - d.scale*logexpm1(-lp)
 invlogccdf(d::Logistic, lp::Real) = d.location + d.scale*logexpm1(-lp)
 
 
-function gradloglik(d::Logistic, x::Float64)
+function gradlogpdf(d::Logistic, x::Real)
   expterm = exp((d.location - x) / d.scale)
   ((2 * expterm) / (1 + expterm) - 1) / d.scale
 end

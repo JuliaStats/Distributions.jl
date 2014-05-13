@@ -126,7 +126,7 @@ function logpdf!(r::Array{Float64}, d::AbstractMvTDist, x::Matrix{Float64})
   r
 end
 
-function gradloglik(d::GenericMvTDist, x::Vector{Float64})
+function gradlogpdf(d::GenericMvTDist, x::Vector{Float64})
   z::Vector{Float64} = d.zeromean ? x : x - d.μ
   prz = invscale(d)*z
   -((d.df + d.dim) / (d.df + dot(z, prz))) * prz

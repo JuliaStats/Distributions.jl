@@ -49,7 +49,7 @@ invlogccdf(d::Normal, p::Real) = xval(d, -logΦinv(p))
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
 
-gradloglik(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 ## Sampling
 rand(d::Normal) = d.μ + d.σ * randn()

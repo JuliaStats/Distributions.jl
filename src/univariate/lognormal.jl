@@ -50,7 +50,7 @@ cquantile(d::LogNormal, p::Real) = exp(cquantile(Normal(d.meanlog,d.sdlog),p))
 invlogcdf(d::LogNormal, p::Real) = exp(invlogcdf(Normal(d.meanlog,d.sdlog),p))
 invlogccdf(d::LogNormal, p::Real) = exp(invlogccdf(Normal(d.meanlog,d.sdlog),p))
 
-function gradloglik(d::LogNormal, x::Float64)
+function gradlogpdf(d::LogNormal, x::Real)
   insupport(LogNormal, x) ? - ((log(x) - d.meanlog) / (d.sdlog^2) + 1.0) / x : 0.0
 end
 

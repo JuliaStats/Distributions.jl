@@ -37,7 +37,7 @@ end
 function mean(IW::InverseWishart)
     if IW.nu > size(IW.Psichol, 1) + 1
         return 1.0 / (IW.nu - size(IW.Psichol, 1) - 1.0) *
-               IW.Psichol[:U]' * IW.Psichol[:U]
+               (IW.Psichol[:U]' * IW.Psichol[:U])
     else
         error("mean only defined for nu > p + 1")
     end
