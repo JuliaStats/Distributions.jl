@@ -3,12 +3,8 @@ immutable Multinomial <: DiscreteMultivariateDistribution
     prob::Vector{Float64}
 
     function Multinomial(n::Integer, p::Vector{Float64})
-        if n <= 0
-            throw(ArgumentError("n must be a positive integer."))
-        end
-        if !isprobvec(p)
-            throw(ArgumentError("p = $p is not a probability vector."))
-        end
+        n > 0 || throw(ArgumentError("n must be a positive integer."))
+        isprobvec(p) || throw(ArgumentError("p = $p is not a probability vector."))
         new(int(n), p)
     end
 

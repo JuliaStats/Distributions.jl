@@ -4,6 +4,7 @@ using NumericExtensions
 using NumericFuns
 using PDMats
 using StatsBase
+import StatsBase: RealVector, RealMatrix, RealArray
 import Base.LinAlg: Cholesky
 
 export
@@ -177,7 +178,7 @@ export
 import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: size, length
+import Base: size, length, eltype
 import NumericExtensions: entropy
 import PDMats: dim, PDMat, invquad
 import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler, fit
