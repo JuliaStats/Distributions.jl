@@ -7,11 +7,17 @@
 # array-like characteristics
 
 # size(d::Distribution) = size(rand(d))
+length(d::UnivariateDistribution) = 1
 size(d::UnivariateDistribution) = ()
-size(d::MultivariateDistribution) = (dim(d),)
+size(d::UnivariateDistribution,n) = convert(Int,n)<1 ? throw(BoundsError()) : 1
+
+# length should be defined by the distribution
+size(d::MultivariateDistribution) = (length(d),)
+size(d::UnivariateDistribution,n) = (n = convert(Int,n); n<1 ? throw(BoundsError()) : n==1 ? length(d) : 1)
+
+length(d::MatrixDistribution) = prod(size(d))
 size(d::MatrixDistribution) = (dim(d), dim(d)) # override if the matrix isn't square
 
-length(d::Distribution) = prod(size(d))
 
 # support handling
 
@@ -22,9 +28,7 @@ hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 insupport(d::Distribution, x) = false
 
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
-    if length(r) != length(X)
-        throw(ArgumentError("Inconsistent array dimensions."))
-    end
+    length(r) != length(X) && throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
         r[i] = insupport(d, X[i])
     end
@@ -35,9 +39,7 @@ insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = in
 
 function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
     n = div(length(X),size(X,1))
-    if length(r) != n
-        throw(ArgumentError("Inconsistent array dimensions."))
-    end    
+    length(r) != n && throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : n
         r[i] = insupport(d, X[:, i])
     end
@@ -47,9 +49,7 @@ insupport{D<:MultivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = 
 
 function insupport!{D<:MatrixDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
     n = div(length(X),size(X,1)*size(X,2))
-    if length(r) != n
-        throw(ArgumentError("Inconsistent array dimensions."))
-    end    
+    length(r) != n && throw(ArgumentError("Inconsistent array dimensions."))
     for i in 1 : n
         r[i] = insupport(d, X[:, :, i])
     end
@@ -151,9 +151,7 @@ for fun in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf, :invlogcdf, :invlogcc
 
     @eval begin
         function ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            if length(r) != length(X)
-                throw(ArgumentError("Inconsistent array dimensions."))
-            end
+            length(r) != length(X) && throw(DimensionMismatch("Inconsistent array dimensions."))
             for i in 1 : length(X)
                 r[i] = ($fun)(d, X[i])
             end
@@ -169,10 +167,8 @@ end
 #### Vectorized functions for multivariate distributions ####
 
 function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::AbstractMatrix)
-    n::Int = size(x, 2)
-    if length(r) != n
-        throw(ArgumentError("Inconsistent array dimensions."))
-    end
+    n = size(x, 2)
+    length(r) != n && throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : n
         r[i] = logpdf(d, x[:, i])
     end
@@ -197,78 +193,59 @@ end
 
 
 #### logpmf & pmf for discrete distributions ####
-
 logpmf(d::DiscreteDistribution, args::Any...) = logpdf(d, args...)
 logpmf!(r::AbstractArray, d::DiscreteDistribution, args::Any...) = logpdf!(r, d, args...)
 pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 
 
-### Gradient (derivative of logpdf)
-
-gradloglik(d::UnivariateDistribution, x::Real) = gradloglik(d, float64(x))
-gradloglik(d::MultivariateDistribution, x::Vector{Real}) = gradloglik(d, float64(x))
-
 #### Sampling: rand & rand! ####
+# default types for rand arrays
+eltype(d::ContinuousDistribution) = Float64
+eltype(d::DiscreteDistribution) = Int
 
+# univariate
 # default: inverse transform sampling
 rand(d::UnivariateDistribution) = quantile(d, rand())
-
-function rand!(d::UnivariateDistribution, A::Array)
+function rand!(d::UnivariateDistribution, A::AbstractArray)
     for i in 1:length(A)
         A[i] = rand(d)
     end
     return A
 end
 
-function rand(d::ContinuousUnivariateDistribution, dims::Dims)
-    return rand!(d, Array(Float64, dims))
-end
+rand(d::UnivariateDistribution, dims::Dims) = rand!(d, Array(eltype(d), dims))
+rand(d::UnivariateDistribution, dim1::Integer, dims::Integer...) = rand(d, map(int, tuple(dim1,dims...)))
 
-function rand(d::DiscreteUnivariateDistribution, dims::Dims)
-    return rand!(d, Array(Int, dims))
-end
+# multivariate
+# methods should define the following
+rand!(d::MultivariateDistribution, X::AbstractVector) = throw(MethodError(rand!,(d,X)))
 
-function rand(d::UnivariateDistribution, dim1::Integer, dims::Integer...)
-    return rand(d, map(int, tuple(dim1,dims...)))
-end
-
-function rand(d::ContinuousMultivariateDistribution)
-    return rand!(d, Array(Float64, dim(d)))
-end
-
-function rand(d::DiscreteMultivariateDistribution)
-    return rand!(d, Array(Int, dim(d)))
-end
-
-function rand(d::ContinuousMultivariateDistribution, n::Integer)
-    return rand!(d, Array(Float64, dim(d), n))
-end
-
-function rand(d::DiscreteMultivariateDistribution, n::Integer)
-    return rand!(d, Array(Int, dim(d), n))
-end
-
-function rand(d::MatrixDistribution, n::Integer)
-    return rand!(d, Array(Matrix{Float64}, n))
-end
-
-function rand!(d::MultivariateDistribution, X::Matrix)
-    if size(X, 1) != dim(d)
-        error("Inconsistent argument dimensions")
-    end
-    for i in 1 : size(X, 2)
-        X[:, i] = rand(d)
+function rand!(d::MultivariateDistribution, X::AbstractArray)
+    size(X, 1) == size(d,1) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    for i in 1 : div(length(X),size(X,1))
+        rand!(d,view(X,:,i))
     end
     X
 end
+rand(d::MultivariateDistribution) = rand!(d, Array(eltype(d), length(d)))
+rand(d::MultivariateDistribution, dims::Dims) = rand!(d, Array(eltype(d), length(d), dims...))
+rand(d::MultivariateDistribution, dims::Integer...) = rand(d, dims)
 
-function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
-    for i in 1:length(X)
-        X[i] = rand(d)
+# matrix rand
+rand!(d::MatrixDistribution, X::AbstractVector) = throw(MethodError(rand!,(d,X)))
+# methods should define the following:
+rand!(d::MatrixDistribution, X::AbstractMatrix) = throw(MethodError(rand!,(d,X)))
+
+function rand!(d::MatrixDistribution, X::AbstractArray)
+    size(X,1) == size(d,1) && size(X,2) == size(d,2) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    for i in 1:div(length(X),size(X,1)*size(X,2))
+        rand!(d,view(X,:,:,i))
     end
-    return X
+    X
 end
-
+rand(d::MatrixDistribution) = rand!(d, Array(eltype(d), size(d,1), size(d,2)))
+rand(d::MatrixDistribution, dims::Dims) = rand!(d, Array(eltype(d), size(d,1), size(d,2), dims...))
+rand(d::MatrixDistribution, dims::Integer...) = rand(d, dims)
 
 function sprand(m::Integer, n::Integer, density::Real, d::Distribution)
     return sprand(m, n, density, n -> rand(d, n))
@@ -290,4 +267,3 @@ fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix, w::Array) = fit_mle
 
 fit{D<:Distribution}(dt::Type{D}, x) = fit_mle(D, x)
 fit{D<:Distribution}(dt::Type{D}, args...) = fit_mle(D, args...)
-

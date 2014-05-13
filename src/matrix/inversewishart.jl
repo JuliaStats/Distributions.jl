@@ -20,6 +20,7 @@ immutable InverseWishart <: ContinuousMatrixDistribution
 end
 
 size(d::InverseWishart) = size(d.Psichol)
+size(d::InverseWishart,n) = size(d.Psichol,n)
 
 function InverseWishart(nu::Real, Psi::Matrix{Float64})
     InverseWishart(float64(nu), cholfact(Psi))
@@ -65,16 +66,22 @@ end
 #  behavior here where inv of the Cholesky returns the 
 #  inverse of the original matrix, in this case we're getting
 #  Psi^-1 like we want
-rand(IW::InverseWishart) = inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
-
-function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
-    Psiinv = inv(IW.Psichol)
-    W = Wishart(IW.nu, Psiinv)
-    X = rand!(W, X)
-    for i in 1:length(X)
-        X[i] = inv(X[i])
+function rand!(d::InverseWishart, X::AbstractMatrix) 
+    p = size(d,1)
+    size(X,1) == p && size(X,2) == p || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    A = zeros(p, p)
+    for ii in 1:p
+        A[ii, ii] = sqrt(rand(Chisq(d.nu - ii + 1)))
     end
-    return X
+    if p > 1
+        for col in 2:p
+            for row in 1:(col - 1)
+                A[row, col] = randn()
+            end
+        end
+    end
+    Z = inv(Triangular(A / d.Psichol[:U],:U))
+    At_mul_B!(X,Z,Z)
 end
 
 var(IW::InverseWishart) = error("Not yet implemented")

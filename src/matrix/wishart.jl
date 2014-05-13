@@ -70,21 +70,22 @@ function logpdf(W::Wishart, X::Matrix{Float64})
     end
 end
 
-function rand(w::Wishart)
-    p = size(w.Schol, 1)
-    X = zeros(p, p)
+function rand!(d::Wishart,X::AbstractArray)
+    p = size(d,1)
+    size(X,1) == p && size(X,2) == p || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    A = zeros(p, p)
     for ii in 1:p
-        X[ii, ii] = sqrt(rand(Chisq(w.nu - ii + 1)))
+        A[ii, ii] = sqrt(rand(Chisq(d.nu - ii + 1)))
     end
     if p > 1
         for col in 2:p
             for row in 1:(col - 1)
-                X[row, col] = randn()
+                A[row, col] = randn()
             end
         end
     end
-    Z = X * w.Schol[:U]
-    return Z' * Z
+    Z = A * d.Schol[:U]
+    At_mul_B!(X,Z,Z)
 end
 
 function entropy(W::Wishart)
