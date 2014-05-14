@@ -128,7 +128,7 @@ export
     isprobvec,     # Is a probability vector?
     isupperbounded,  
     islowerbounded,
-    isbouned,
+    isbounded,
     hasfinitesupport,
     kde,           # Kernel density estimator (from Stats.jl)
     kurtosis,      # kurtosis of the distribution
