@@ -20,7 +20,8 @@ tests = [
     "conjugates_mvnormal",
     "wishart",
     "mixture",
-    "gradlogpdf"]
+    "gradlogpdf",
+    "triangular"]
 
 println("Running tests:")
 

@@ -92,6 +92,7 @@ export
     Rayleigh,
     Skellam,
     TDist,
+    TriangularDist,
     SymTriangularDist,
     Truncated,
     Uniform,
@@ -273,6 +274,7 @@ include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "rayleigh.jl"))
 include(joinpath("univariate", "skellam.jl"))
 include(joinpath("univariate", "tdist.jl"))
+include(joinpath("univariate", "triangular.jl"))
 include(joinpath("univariate", "symtriangular.jl"))
 include(joinpath("univariate", "uniform.jl"))
 include(joinpath("univariate", "weibull.jl"))
