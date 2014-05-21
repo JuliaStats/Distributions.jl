@@ -1,10 +1,9 @@
 module Distributions
 
-using NumericExtensions
+using ArrayViews
 using NumericFuns
 using PDMats
 using StatsBase
-import Base.LinAlg: Cholesky
 
 export
     # types
@@ -178,9 +177,9 @@ import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: size, length
-import NumericExtensions: entropy
+import Base.LinAlg: Cholesky
+import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, RandIntSampler, fit
 import PDMats: dim, PDMat, invquad
-import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler, fit
 
 
 #### Distribution type system

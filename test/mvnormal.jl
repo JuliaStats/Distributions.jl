@@ -1,6 +1,5 @@
 # Tests on Multivariate Normal distributions
 
-import NumericExtensions
 import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions

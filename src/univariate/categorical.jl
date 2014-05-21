@@ -114,7 +114,7 @@ function kurtosis(d::Categorical)
     s / abs2(var(d)) - 3.0
 end
 
-entropy(d::Categorical) = NumericExtensions.entropy(d.prob)
+entropy(d::Categorical) = entropy(d.prob)
 
 function mgf(d::Categorical, t::AbstractVector)
     k = d.K
@@ -211,15 +211,15 @@ suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float
 ### Model fitting
 
 function fit_mle(::Type{Categorical}, ss::CategoricalStats)
-    Categorical(normalize!(ss.h,1))
+    Categorical(pnormalize!(ss.h))
 end
 
 function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) 
-    Categorical(normalize!(add_categorical_counts!(zeros(k), x), 1), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
 end
 
 function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) 
-    Categorical(normalize!(add_categorical_counts!(zeros(k), x, w), 1), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
 end
 
 fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_mle(Categorical, data...)
