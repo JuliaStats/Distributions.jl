@@ -1,7 +1,6 @@
 module Distributions
 
 using ArrayViews
-using NumericFuns
 using PDMats
 using StatsBase
 
