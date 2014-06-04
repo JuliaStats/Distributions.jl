@@ -59,7 +59,16 @@ end
 median(d::Truncated) = quantile(d, 0.5)
 
 function rand(d::Truncated)
-    return quantile(d.untruncated, cdf(d.untruncated, d.lower) + rand() * d.nc)
+    if d.nc > 0.25
+        while true
+            r = rand(d.untruncated)
+            if d.lower <= r <= d.upper
+                return r
+            end
+        end
+    else
+        return quantile(d.untruncated, cdf(d.untruncated, d.lower) + rand() * d.nc)
+    end
 end
 
 # from fallbacks
