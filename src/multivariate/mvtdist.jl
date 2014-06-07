@@ -142,9 +142,9 @@ function rand!(d::GenericMvTDist, x::Vector{Float64})
   unwhiten!(normd.Σ, randn!(x))
   rand!(chisqd, y)
   y = sqrt(y/(d.df))
-  x = x./y
+  broadcast!(/, x, x, y)
   if !d.zeromean
-    x = x+d.μ
+    broadcast!(+, x, x, d.μ)
   end
   x
 end
@@ -157,9 +157,9 @@ function rand!(d::GenericMvTDist, x::Matrix{Float64})
   unwhiten!(normd.Σ, randn!(x))
   rand!(chisqd, y)
   y = sqrt(y/(d.df))
-  x = x./y
+  broadcast!(/, x, x, y)
   if !d.zeromean
-    x = x+d.μ
+    broadcast!(+, x, x, d.μ)
   end
   x
 end
