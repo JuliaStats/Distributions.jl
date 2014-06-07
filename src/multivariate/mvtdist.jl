@@ -157,7 +157,6 @@ function rand!(d::GenericMvTDist, x::Matrix{Float64})
   unwhiten!(normd.Σ, randn!(x))
   rand!(chisqd, y)
   y = sqrt(y/(d.df))
-  bdivide!(x, y, 1)
   x = x./y
   if !d.zeromean
     x = x+d.μ
