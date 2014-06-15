@@ -65,7 +65,7 @@ std(d::Laplace) = sqrt(2.0) * d.scale
 
 var(d::Laplace) = 2.0 * d.scale^2
 
-function gradloglik(d::Laplace, x::Float64)
+function gradlogpdf(d::Laplace, x::Real)
   d.location != x || error("Score is undefined at the location point")
   x > d.location ? - 1.0 / d.scale : 1.0 / d.scale
 end

@@ -9,7 +9,7 @@ end
 
 mean(d::NoncentralChisq) = d.df + d.ncp
 var(d::NoncentralChisq) = 2.0*(d.df + 2.0*d.ncp)
-skewness(d::NoncentralChisq) = 2.0*√2*(d.df + 3.0*d.ncp)/sqrt(d.df + 2.0*d.ncp)^3
+skewness(d::NoncentralChisq) = 2.0*sqrt2*(d.df + 3.0*d.ncp)/sqrt(d.df + 2.0*d.ncp)^3
 kurtosis(d::NoncentralChisq) = 12.0*(d.df + 4.0*d.ncp)/(d.df + 2.0*d.ncp)^2
 
 function mgf(d::NoncentralChisq, t::Real)

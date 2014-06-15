@@ -38,7 +38,7 @@ entropy(cf::NormalCanon) = 0.5 * (log2π + 1. - log(cf.prec))
 
 # Evaluation
 
-pdf(d::NormalCanon, x::Real) = (sqrt(d.prec) / √2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
+pdf(d::NormalCanon, x::Real) = (sqrt(d.prec) / sqrt2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
 logpdf(d::NormalCanon, x::Real) = 0.5 * (log(d.prec) - log2π - d.prec * abs2(x - d.μ))
 
 zval(d::NormalCanon, x::Real) = (x - d.μ) * sqrt(d.prec)

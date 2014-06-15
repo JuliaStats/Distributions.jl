@@ -46,7 +46,7 @@ end
 
 function pdf(d::Levy, x::Real)
     m, c = d.location, d.scale
-    (sqrt(c)/√2π) * exp(-(c / (2.0 * (x - m)))) / (x - m)^1.5
+    (sqrt(c)/sqrt2π) * exp(-(c / (2.0 * (x - m)))) / (x - m)^1.5
 end
 
 quantile(d::Levy, p::Real) = d.location + d.scale / (2.erfcinv(p)^2)

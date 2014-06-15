@@ -53,7 +53,7 @@ skewness(d::Exponential) = 2.0
 
 var(d::Exponential) = d.scale * d.scale
 
-function gradloglik(d::Exponential, x::Float64)
+function gradlogpdf(d::Exponential, x::Real)
   insupport(Exponential, x) ? - 1.0 / d.scale : 0.0
 end
 

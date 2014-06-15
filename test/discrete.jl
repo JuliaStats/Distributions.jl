@@ -9,10 +9,9 @@
 #   - DiscreteUniform
 #
 
-import NumericExtensions
 using Distributions
 using Base.Test
-
+import StatsBase: entropy
 
 for d in [
     Bernoulli(0.1),
@@ -73,7 +72,7 @@ for d in [
     for i = 1:n
         @test insupport(d, x[i])
     end
-    @test insupport(d, x)
+    @test all(insupport(d, x))
 
     ####
     #
@@ -140,7 +139,7 @@ for d in [
     xmean = dot(p, xf)
     xvar = dot(p, abs2(xf .- xmean))
     xstd = sqrt(xvar)
-    xentropy = NumericExtensions.entropy(p)
+    xentropy = entropy(p)
     xskew = dot(p, (xf .- xmean).^3) / (xstd.^3)
     xkurt = dot(p, (xf .- xmean).^4) / (xvar.^2) - 3.0
 

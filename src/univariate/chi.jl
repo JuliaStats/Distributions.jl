@@ -18,7 +18,7 @@ cquantile(d::Chi,p::Real) = sqrt(cquantile(Chisq(d.df),p))
 invlogcdf(d::Chi,p::Real) = sqrt(invlogcdf(Chisq(d.df),p))
 invlogccdf(d::Chi,p::Real) = sqrt(invlogccdf(Chisq(d.df),p))
 
-mean(d::Chi) = √2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
+mean(d::Chi) = sqrt2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
 function mode(d::Chi)
     d.df >= 1.0 || error("Chi distribution has no mode when df < 1")
@@ -48,7 +48,7 @@ function entropy(d::Chi)
         ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
 end
 
-function gradloglik(d::Chi, x::Float64)
+function gradlogpdf(d::Chi, x::Real)
   insupport(Chi, x) ? (d.df - 1.0) / x - x : 0.0
 end
 

@@ -1,10 +1,8 @@
 module Distributions
 
-using NumericExtensions
-using NumericFuns
+using ArrayViews
 using PDMats
 using StatsBase
-import Base.LinAlg: Cholesky
 
 export
     # types
@@ -92,7 +90,7 @@ export
     Rayleigh,
     Skellam,
     TDist,
-    TriangularDist,
+    SymTriangularDist,
     Truncated,
     Uniform,
     VonMises,
@@ -133,7 +131,7 @@ export
     isprobvec,     # Is a probability vector?
     isupperbounded,  
     islowerbounded,
-    isbouned,
+    isbounded,
     hasfinitesupport,
     kde,           # Kernel density estimator (from Stats.jl)
     kurtosis,      # kurtosis of the distribution
@@ -177,15 +175,15 @@ export
     var,           # variance of distribution
     wsample,       # weighted sampling from a source array
     expected_logdet, # expected logarithm of random matrix determinant
-    gradloglik     # gradient (or derivative) of logpdf
+    gradlogpdf     # gradient (or derivative) of logpdf(d,x) wrt x
 
 import Base.Random
 import Base: show, scale, sum!, rand, rand!, sprand
 import Base: mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: size, length
-import NumericExtensions: entropy
+import Base.LinAlg: Cholesky
+import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, RandIntSampler, fit
 import PDMats: dim, PDMat, invquad
-import StatsBase: kurtosis, skewness, mode, modes, randi, RandIntSampler, fit
 
 
 #### Distribution type system
@@ -278,7 +276,7 @@ include(joinpath("univariate", "poisson.jl"))
 include(joinpath("univariate", "rayleigh.jl"))
 include(joinpath("univariate", "skellam.jl"))
 include(joinpath("univariate", "tdist.jl"))
-include(joinpath("univariate", "triangular.jl"))
+include(joinpath("univariate", "symtriangular.jl"))
 include(joinpath("univariate", "uniform.jl"))
 include(joinpath("univariate", "vonmises.jl"))
 include(joinpath("univariate", "weibull.jl"))

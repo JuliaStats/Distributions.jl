@@ -43,17 +43,22 @@ rand(d::Gamma) = d.scale * randg(d.shape)
 
 function rand!(d::Gamma, A::Array{Float64})
     s = GammaSampler(d.shape)
-    for i = 1:length(A)
-        A[i] = rand(s)
+    n = length(A)
+    for i = 1:n
+        @inbounds A[i] = rand(s)
     end
-    multiply!(A, d.scale)
+    ds = d.scale
+    for i = 1:n
+        @inbounds A[i] *= ds
+    end
+    A
 end
 
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
 
-function gradloglik(d::Gamma, x::Float64)
+function gradlogpdf(d::Gamma, x::Real)
   insupport(Gamma, x) ? (d.shape - 1.0) / x - 1.0 / d.scale : 0.0
 end
 

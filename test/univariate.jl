@@ -102,9 +102,9 @@ for d in [Arcsine(),
           # Skellam(10.0, 2.0), # no quantile function
           TDist(1),
           TDist(28),
-          TriangularDist(3.0, 1.0),
-          TriangularDist(3.0, 2.0),
-          TriangularDist(10.0, 10.0),
+          SymTriangularDist(3.0, 1.0),
+          SymTriangularDist(3.0, 2.0),
+          SymTriangularDist(10.0, 10.0),
           Truncated(Normal(0, 1), -3, 3),
           # Truncated(Normal(-100, 1), 0, 1),
           Truncated(Normal(27, 3), 0, Inf),
@@ -157,7 +157,7 @@ for d in [Arcsine(),
     @test nsamples(typeof(d), x) == n
 
     # check that sequence of draws satifies insupport()
-    @test insupport(d, x)
+    @test all(insupport(d, x))
 
     # check that we can generate many random draws in-place
     rand!(d, x)

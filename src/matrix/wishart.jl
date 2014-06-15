@@ -32,7 +32,7 @@ function insupport(::Type{Wishart}, X::Matrix{Float64})
     return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) && hasCholesky(X)
 end
 
-mean(w::Wishart) = w.nu * w.Schol[:U]' * w.Schol[:U]
+mean(w::Wishart) = w.nu * (w.Schol[:U]' * w.Schol[:U])
 
 pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
 

@@ -105,9 +105,8 @@ end
 # generic PDF evaluation (appliable to AbstractMvTDist)
 
 insupport{T<:Real}(d::AbstractMvTDist, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{T<:Real}(d::AbstractMvTDist, x::Matrix{T}) = dim(d) == size(x, 1) && allfinite(x)
 insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
-insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
+
 
 sqmahal(d::AbstractMvTDist, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
@@ -127,7 +126,7 @@ function logpdf!(r::Array{Float64}, d::AbstractMvTDist, x::Matrix{Float64})
   r
 end
 
-function gradloglik(d::GenericMvTDist, x::Vector{Float64})
+function gradlogpdf(d::GenericMvTDist, x::Vector{Float64})
   z::Vector{Float64} = d.zeromean ? x : x - d.μ
   prz = invscale(d)*z
   -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
@@ -143,9 +142,9 @@ function rand!(d::GenericMvTDist, x::Vector{Float64})
   unwhiten!(normd.Σ, randn!(x))
   rand!(chisqd, y)
   y = sqrt(y/(d.df))
-  divide!(x, y)
+  broadcast!(/, x, x, y)
   if !d.zeromean
-    add!(x, d.μ)
+    broadcast!(+, x, x, d.μ)
   end
   x
 end
@@ -158,9 +157,9 @@ function rand!(d::GenericMvTDist, x::Matrix{Float64})
   unwhiten!(normd.Σ, randn!(x))
   rand!(chisqd, y)
   y = sqrt(y/(d.df))
-  bdivide!(x, y, 1)
+  broadcast!(/, x, x, y)
   if !d.zeromean
-    badd!(x, d.μ, 1)
+    broadcast!(+, x, x, d.μ)
   end
   x
 end

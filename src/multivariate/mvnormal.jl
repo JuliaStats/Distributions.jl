@@ -88,7 +88,7 @@ function sqmahal!(r::Array{Float64}, d::GenericMvNormal, x::Matrix{Float64})
     if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
+    z::Matrix{Float64} = d.zeromean ? x : x .- d.μ
     invquad!(r, d.Σ, z)
 end
 
@@ -96,9 +96,7 @@ end
 # generic PDF evaluation (appliable to AbstractMvNormal)
 
 insupport{T<:Real}(d::AbstractMvNormal, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{T<:Real}(d::AbstractMvNormal, x::Matrix{T}) = dim(d) == size(x,1) && allfinite(x)
 insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
-insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Matrix{T}) = allfinite(x)
 
 mvnormal_c0(g::AbstractMvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
 
@@ -115,7 +113,7 @@ function logpdf!(r::Array{Float64}, d::AbstractMvNormal, x::Matrix{Float64})
     r
 end
 
-function gradloglik(d::GenericMvNormal, x::Vector{Float64})
+function gradlogpdf(d::GenericMvNormal, x::Vector{Float64})
   z::Vector{Float64} = d.zeromean ? x : x - d.μ
   -invcov(d)*z
 end
@@ -133,7 +131,10 @@ end
 function rand!(d::GenericMvNormal, x::Matrix{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
-        badd!(x, d.μ, 1)
+        μ = d.μ
+        for j = 1:size(x,2)
+            add!(view(x,:,j), μ)
+        end
     end
     x
 end
@@ -228,7 +229,7 @@ function suffstats(D::Type{MvNormal}, x::Matrix{Float64})
 
     s = vec(sum(x,2))
     m = s * inv(n)
-    z = bsubtract(x, m, 1)
+    z = x .- m
     s2 = A_mul_Bt(z, z)
 
     MvNormalStats(s, m, s2, float64(n))
@@ -242,9 +243,16 @@ function suffstats(D::Type{MvNormal}, x::Matrix{Float64}, w::Array{Float64})
     tw = sum(w)
     s = x * vec(w)
     m = s * inv(tw)
-    z = bmultiply!(bsubtract(x, m, 1), sqrt(w), 2)
+    z = similar(x)
+    for j = 1:n
+        xj = view(x,:,j)
+        zj = view(z,:,j)
+        swj = sqrt(w[j])
+        for i = 1:d
+            @inbounds zj[i] = swj * (xj[i] - m[i])
+        end
+    end
     s2 = A_mul_Bt(z, z)
-
     MvNormalStats(s, m, s2, tw)
 end
 
@@ -261,7 +269,7 @@ fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw
 function fit_mle(D::Type{MvNormal}, x::Matrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, 2))
-    z = bsubtract(x, mu, 1)
+    z = x .- mu
     C = Base.LinAlg.BLAS.gemm('N', 'T', 1.0/n, z, z)   
     MvNormal(mu, PDMat(C)) 
 end

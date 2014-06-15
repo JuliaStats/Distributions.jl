@@ -67,7 +67,7 @@ invlogcdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^
 invlogccdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-lp)^(1/d.shape)
 
 
-function gradloglik(d::Weibull, x::Float64)
+function gradlogpdf(d::Weibull, x::Real)
   insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(d.shape - 1.0) / (d.scale^d.shape) : 0.0
 end
 

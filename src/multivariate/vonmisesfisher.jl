@@ -55,7 +55,21 @@ function randvonMisesFisher(n, kappa, mu)
     m = length(mu)
     w = rW(n, kappa, m)
     v = rand(MvNormal(zeros(m-1), eye(m-1)), n)
-    v = normalize(v',2,2)
+
+    # normalize each column of v
+    for j = 1:n
+        s = 0.
+        vj = view(v,:,j)
+        for i = 1:size(v,1)
+            s += abs2(vj[i])
+        end
+        s = sqrt(s)
+        for i = 1:size(v,1)
+            vj[i] /= s
+        end
+    end
+    v = v'
+
     r = sqrt(1.0 .- w .^ 2)
     for j = 1:size(v,2) v[:,j] = v[:,j] .* r; end  
     x = hcat(v, w)

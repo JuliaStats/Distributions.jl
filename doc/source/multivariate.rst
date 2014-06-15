@@ -273,7 +273,7 @@ For those using canonical form, we define:
     typealias IsoNormalCanon  GenericMvNormalCanon{ScalMat}
 
 
-Leverging this type system, the multiple dispatch mechanism of Julia, as well as the computational support of the *NumericExtensions* package on positive definite matrices, we managed to provide this rich representation while ensuring that we take the most efficient computational routines for each particular type.
+Leverging this type system, the multiple dispatch mechanism of Julia, we managed to provide this rich representation while ensuring that we take the most efficient computational routines for each particular type.
 
 
 .. _dirichlet:
