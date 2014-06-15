@@ -175,7 +175,7 @@ function rand(s::BinomialTPESampler)
             w = float64(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
-                    lstirling(f1) + lstirling(z) + lstirling(x1) + lstirling(w))
+                    lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
                 # Goto 1
                 continue
             end                
@@ -186,9 +186,4 @@ function rand(s::BinomialTPESampler)
     end
     # 6
     s.comp ? s.n - y : y
-end
-
-function lstirling(x)
-    ix2 = 1.0/(x*x)
-    (13860.0 - (462.0 - (132.0 - (99.0 - 140.0*ix2)*ix2)*ix2)*ix2)/(x*166320.0)
 end

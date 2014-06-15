@@ -297,6 +297,7 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 include("mixturemodel.jl")
 
 include(joinpath("samplers", "binomial.jl"))
+include(joinpath("samplers", "poisson.jl"))
 
 # REPL representations
 include("show.jl")
