@@ -91,33 +91,3 @@ function vmrand(κ::Float64)
 	rand() > 0.5 ? acos(f) : -acos(f)
 end
 
-# TODO: remove as soon as implemented in Base/math.jl
-## Helper functions
-# Bessel function as in Base/math.jl, but with exponential scaling
-import Base.Math: cy, ae, openspecfun, AmosException
-
-# Computes modified bessel function of first kind, scaled by exp(-|Re(z)|)
-function _besseliexpscaled(nu::Float64, z::Complex128)
-    ccall((:zbesi_,openspecfun), Void,
-          (Ptr{Float64}, Ptr{Float64}, Ptr{Float64}, Ptr{Int32}, Ptr{Int32},
-           Ptr{Float64}, Ptr{Float64}, Ptr{Int32}, Ptr{Int32}),
-          &real(z), &imag(z), &nu, &2, &1,
-          pointer(cy,1), pointer(cy,2),
-          pointer(ae,1), pointer(ae,2))
-    if ae[2] == 0 || ae[2] == 3 
-        return complex(cy[1],cy[2]) 
-    else
-        throw(AmosException(ae[2]))
-    end
-end
-
-besselix(nu::Float64, z::Complex128) = _besseliexpscaled(nu, z)
-besselix(nu::Real, z::Complex64) = complex64(besselix(float64(nu), complex128(z)))
-besselix(nu::Real, z::Complex) = besselix(float64(nu), complex128(z))
-besselix(nu::Real, x::Integer) = besselix(nu, float64(x))
-function besselix(nu::Real, x::FloatingPoint)
-    if x < 0 && !isinteger(nu)
-        throw(DomainError())
-    end
-    oftype(x, real(besselix(float64(nu), complex128(x))))
-end
