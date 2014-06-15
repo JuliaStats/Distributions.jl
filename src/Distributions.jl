@@ -209,6 +209,8 @@ typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continu
 typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
+abstract AbstractSampler{D<:Distribution}
+
 abstract SufficientStats
 abstract IncompleteDistribution
 
@@ -293,6 +295,8 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 
 # Mixture distributions
 include("mixturemodel.jl")
+
+include(joinpath("samplers", "binomial.jl"))
 
 # REPL representations
 include("show.jl")

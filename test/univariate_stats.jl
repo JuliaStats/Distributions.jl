@@ -30,7 +30,7 @@ macro ignore_methoderror(ex)
 end
 
 
-for d in [Arcsine(),
+distlist = [Arcsine(),
           Bernoulli(0.1),
           Bernoulli(0.5),
           Bernoulli(0.9),
@@ -43,6 +43,8 @@ for d in [Arcsine(),
           Binomial(1, 0.5),
           Binomial(100, 0.1),
           Binomial(100, 0.9),
+          Binomial(10000, 0.2),
+          Binomial(10000, 0.8),
           Categorical([0.1, 0.9]),
           Categorical([0.5, 0.5]),
           Categorical([0.9, 0.1]),
@@ -136,8 +138,21 @@ for d in [Arcsine(),
           Weibull(230.0),
           ]
 
-    x = rand(d, n_samples)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
 
+for d in distlist
+    x = rand(d, n_samples)
 
     println(d)
     local mu
@@ -191,8 +206,11 @@ for d in [Arcsine(),
     end
         
     # Kolmogorov-Smirnov test
-    if isa(d, Truncated) ? isa(d.untruncated, ContinuousDistribution) : isa(d, ContinuousDistribution)
+    @ignore_methoderror begin
         c = cdf(d,x)
+        if isa(d, DiscreteDistribution) 
+            c -= rand(n_samples) .* pdf(d,x)
+        end
         sort!(c)
         for i = 1:n_samples
             c[i] = c[i]*n_samples - i
