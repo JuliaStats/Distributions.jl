@@ -1,5 +1,5 @@
 # Store an alias table
-immutable DiscreteDistributionTable <: AbstractCategoricalSampler
+immutable DiscreteDistributionTable <: Sampler{Univariate,Discrete}
 	table::Vector{Vector{Int64}}
 	bounds::Vector{Int64}
 end

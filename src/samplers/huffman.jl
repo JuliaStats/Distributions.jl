@@ -6,7 +6,7 @@
 
 import Base.isless, Base.show, Base.getindex, Base.rand
 
-abstract HuffmanNode{T} <: AbstractCategoricalSampler
+abstract HuffmanNode{T} <: Sampler{Univariate,Discrete}
 
 immutable HuffmanLeaf{T} <: HuffmanNode{T}
     value::T

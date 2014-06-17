@@ -26,6 +26,7 @@ export
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
+    Sampler,
     SufficientStats,
     Arcsine,
     Bernoulli,
@@ -209,6 +210,24 @@ typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continu
 typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
+abstract Sampler{F<:VariateForm,S<:ValueSupport}
+
+typealias UnivariateSampler{S<:ValueSupport}   Sampler{Univariate,S}
+typealias MultivariateSampler{S<:ValueSupport} Sampler{Multivariate,S}
+typealias MatrixSampler{S<:ValueSupport}       Sampler{Matrixvariate,S}
+
+typealias DiscreteSampler{F<:VariateForm}   Sampler{F,Discrete}
+typealias ContinuousSampler{F<:VariateForm} Sampler{F,Continuous}
+
+typealias DiscreteUnivariateSampler     Sampler{Univariate,    Discrete}
+typealias ContinuousUnivariateSampler   Sampler{Univariate,    Continuous}
+typealias DiscreteMultivariateSampler   Sampler{Multivariate,  Discrete}
+typealias ContinuousMultivariateSampler Sampler{Multivariate,  Continuous}
+typealias DiscreteMatrixSampler         Sampler{Matrixvariate, Discrete}
+typealias ContinuousMatrixSampler       Sampler{Matrixvariate, Continuous}
+
+
+
 abstract SufficientStats
 abstract IncompleteDistribution
 
@@ -227,7 +246,6 @@ include("tvpack.jl")
 include("utils.jl")
 
 include(joinpath("samplers", "categorical_samplers.jl"))
-include(joinpath("samplers", "gamma_sampler.jl"))
 
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))
@@ -293,6 +311,15 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 
 # Mixture distributions
 include("mixturemodel.jl")
+
+# Samplers
+include(joinpath("samplers", "gamma.jl"))
+include(joinpath("samplers", "beta.jl"))
+
+include(joinpath("samplers", "binomial.jl"))
+
+include(joinpath("samplers", "discreteinversetransform.jl"))
+include(joinpath("samplers", "poisson.jl"))
 
 # REPL representations
 include("show.jl")

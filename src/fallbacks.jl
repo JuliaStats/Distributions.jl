@@ -210,7 +210,14 @@ rand(d::UnivariateDistribution) = quantile(d, rand())
 
 function rand!(d::UnivariateDistribution, A::Array)
     for i in 1:length(A)
-        A[i] = rand(d)
+        @inbounds A[i] = rand(d)
+    end
+    return A
+end
+
+function rand!(s::UnivariateSampler, A::Array)
+    for i in 1:length(A)
+        @inbounds A[i] = rand(s)
     end
     return A
 end

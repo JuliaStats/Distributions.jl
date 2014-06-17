@@ -72,24 +72,6 @@ function modes(d::Beta)
     end
 end
 
-function rand(d::Beta)
-    u = randg(d.alpha)
-    u / (u + randg(d.beta))
-end
-
-function rand!(d::Beta, A::Array{Float64})
-    sa = GammaSampler(d.alpha)
-    sb = GammaSampler(d.beta)
-
-    for i = 1:length(A)
-        u = rand(sa)
-        v = rand(sb)
-        @inbounds A[i] = u / (u + v)
-    end
-
-    return A
-end
-
 function skewness(d::Beta)
     num = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
     den = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)

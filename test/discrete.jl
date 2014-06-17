@@ -13,7 +13,7 @@ using Distributions
 using Base.Test
 import StatsBase: entropy
 
-for d in [
+distlist = [
     Bernoulli(0.1),
     Bernoulli(0.5),
     Bernoulli(0.9), 
@@ -27,8 +27,21 @@ for d in [
     Binomial(100, 0.1),
     Binomial(100, 0.9)]
 
-    # NB: uncomment if some tests failed
-    # println(d)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
+    length(ARGS) > 0 && println(d)
 
     xmin = minimum(d)
     xmax = maximum(d)
