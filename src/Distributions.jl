@@ -230,8 +230,6 @@ include("specialfuns.jl")
 include("tvpack.jl")
 include("utils.jl")
 
-include(joinpath("samplers", "categorical_samplers.jl"))
-
 # Univariate distributions
 include(joinpath("univariate", "arcsine.jl"))
 include(joinpath("univariate", "bernoulli.jl"))
