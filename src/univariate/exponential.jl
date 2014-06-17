@@ -34,8 +34,8 @@ ccdf(d::Exponential, q::Real) = q <= zero(q) ? 1.0 : exp(-q / d.scale)
 logcdf(d::Exponential, q::Real) = q > zero(q) ? log1mexp(-q / d.scale) : -Inf
 logccdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -q / d.scale
 
-quantile(d::Exponential, p::Real) = @check_quantile p -d.scale * log1p(-p)
-cquantile(d::Exponential, p::Real) = @check_quantile p -d.scale * log(p)
+quantile(d::Exponential, p::Real) = @checkquantile p -d.scale * log1p(-p)
+cquantile(d::Exponential, p::Real) = @checkquantile p -d.scale * log(p)
 invlogcdf(d::Exponential, lp::Real) = @checkinvlogcdf lp -d.scale * log1mexp(lp)
 invlogccdf(d::Exponential, lp::Real) = @checkinvlogcdf lp -d.scale * lp 
 
