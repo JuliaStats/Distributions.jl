@@ -5,7 +5,7 @@ using PDMats
 using StatsBase
 
 export
-    # types
+    # reexport from StatsBase
     VariateForm,
     ValueSupport,
     Univariate,
@@ -13,6 +13,23 @@ export
     Matrixvariate,
     Discrete,
     Continuous,
+
+    Sampler,
+    UnivariateSampler,
+    MultivariateSampler,
+    MatrixSampler,
+    DiscreteUnivariateSampler,
+    ContinuousUnivariateSampler,
+    DiscreteMultivariateSampler,
+    ContinuousMultivariateSampler,
+    DiscreteMatrixSampler,
+    ContinuousMatrixSampler,
+
+    rand, rand!,            # random sampling
+    sample, sample!,        # sample from a source array
+    wsample, wsample!,      # weighted sampling from a source array
+
+    # types
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
@@ -26,7 +43,6 @@ export
     ContinuousUnivariateDistribution,
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
-    Sampler,
     SufficientStats,
     Arcsine,
     Bernoulli,
@@ -160,16 +176,12 @@ export
     pmf,           # probability mass function (DiscreteDistribution)
     quantile,      # inverse of cdf (defined for p in (0,1))
     qqbuild,       # build a paired quantiles data structure for qqplots
-    rand,          # random sampler
-    rand!,         # replacement random sampler
-    sample,        # sample from a source array
     sampler,       # create a Sampler object for efficient samples
     skewness,      # skewness of the distribution
     sprand,        # random sampler for sparse matrices
     std,           # standard deviation of distribution
     suffstats,     # compute sufficient statistics
     var,           # variance of distribution
-    wsample,       # weighted sampling from a source array
     expected_logdet, # expected logarithm of random matrix determinant
     gradlogpdf     # gradient (or derivative) of logpdf(d,x) wrt x
 
@@ -183,15 +195,6 @@ import PDMats: dim, PDMat, invquad
 
 
 #### Distribution type system
-
-abstract ValueSupport
-type Discrete <: ValueSupport end
-type Continuous <: ValueSupport end
-
-abstract VariateForm
-type Univariate <: VariateForm end
-type Multivariate <: VariateForm end
-type Matrixvariate <: VariateForm end
 
 abstract Distribution{F<:VariateForm,S<:ValueSupport}
 
@@ -209,24 +212,6 @@ typealias DiscreteMultivariateDistribution   Distribution{Multivariate,  Discret
 typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
 typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
-
-abstract Sampler{F<:VariateForm,S<:ValueSupport}
-
-typealias UnivariateSampler{S<:ValueSupport}   Sampler{Univariate,S}
-typealias MultivariateSampler{S<:ValueSupport} Sampler{Multivariate,S}
-typealias MatrixSampler{S<:ValueSupport}       Sampler{Matrixvariate,S}
-
-typealias DiscreteSampler{F<:VariateForm}   Sampler{F,Discrete}
-typealias ContinuousSampler{F<:VariateForm} Sampler{F,Continuous}
-
-typealias DiscreteUnivariateSampler     Sampler{Univariate,    Discrete}
-typealias ContinuousUnivariateSampler   Sampler{Univariate,    Continuous}
-typealias DiscreteMultivariateSampler   Sampler{Multivariate,  Discrete}
-typealias ContinuousMultivariateSampler Sampler{Multivariate,  Continuous}
-typealias DiscreteMatrixSampler         Sampler{Matrixvariate, Discrete}
-typealias ContinuousMatrixSampler       Sampler{Matrixvariate, Continuous}
-
-
 
 abstract SufficientStats
 abstract IncompleteDistribution
