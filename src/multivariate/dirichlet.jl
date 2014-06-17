@@ -175,7 +175,7 @@ function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = randg(α[i]))
+        @inbounds s += (x[i] = rand(Gamma(α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
@@ -193,7 +193,7 @@ function rand!(d::Union(Dirichlet,DirichletCanon), X::Matrix)
     for j = 1:n
         s = 0.
         for i = 1:k
-            @inbounds s += (X[i,j] = randg(α[i]))
+            @inbounds s += (X[i,j] = rand(Gamma(α[i])))
         end
         inv_s = 1.0 / s
         for i = 1:k

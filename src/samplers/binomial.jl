@@ -7,7 +7,7 @@ rand!(d::Binomial,a::Array) = rand!(sampler(d),a)
 #   Devroye. L. 
 #   "Generating the maximum of independent identically  distributed random variables" 
 #   Computers and Marhemafics with Applicalions 6, 1960, 305-315.
-immutable BinomialGeomSampler <: AbstractSampler{Binomial}
+immutable BinomialGeomSampler <: Sampler{Univariate,Discrete}
     comp::Bool
     n::Int
     scale::Float64
@@ -42,7 +42,7 @@ end
 #   Kachitvichyanukul, V.; Schmeiser, B. W. 
 #   "Binomial random variate generation." 
 #   Comm. ACM 31 (1988), no. 2, 216–222. 
-immutable BinomialTPESampler <: AbstractSampler{Binomial}
+immutable BinomialTPESampler <: Sampler{Univariate,Discrete}
     comp::Bool
     n::Int
     r::Float64

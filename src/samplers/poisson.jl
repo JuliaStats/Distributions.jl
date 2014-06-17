@@ -1,14 +1,11 @@
-sampler(d::Poisson) = d.lambda <= 10.0 ? PoissonITSampler(d) : PoissonADSampler(d)
+sampler(d::Poisson) = d.lambda <= 10.0 ? DiscreteITSampler(d) : PoissonADSampler(d)
 
 rand(d::Poisson) = rand(sampler(d))
 rand!(d::Poisson,a::Array) = rand!(sampler(d),a)
 
-# inverse transform sampler: could be made more general
-immutable PoissonITSampler <: AbstractSampler{Poisson}
-    cdf::Vector{Float64}
-end
-
-function PoissonITSampler(d::Poisson)
+function DiscreteITSampler(d::Poisson)
+    d.lambda <= 10.0 || error("lambda too large")
+    values = 0:44
     cdf = Array(Float64,44)
     p = exp(-d.lambda)
     c = p
@@ -18,17 +15,7 @@ function PoissonITSampler(d::Poisson)
         c += p
         cdf[i+1] = c
     end
-    PoissonITSampler(cdf)
-end
-
-function rand(s::PoissonITSampler)
-    u = rand()
-    for i = 1:44
-        @inbounds if u <= s.cdf[i]
-            return i-1
-        end
-    end
-    44
+    DiscreteITSampler(values,cdf)
 end
 
 # algorithm from:
@@ -36,7 +23,7 @@ end
 #   "Computer Generation of Poisson Deviates from Modified Normal Distributions"
 #   ACM Transactions on Mathematical Software, 8(2):163-179
 # μ >= 10.0 
-immutable PoissonADSampler <: AbstractSampler{Poisson}
+immutable PoissonADSampler <: Sampler{Univariate,Discrete}
     μ::Float64
     s::Float64
     d::Float64

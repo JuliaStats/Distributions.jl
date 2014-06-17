@@ -1,5 +1,5 @@
 
-immutable AliasTable <: AbstractCategoricalSampler
+immutable AliasTable <: Sampler{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
     isampler::RandIntSampler

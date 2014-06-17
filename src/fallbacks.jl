@@ -215,7 +215,7 @@ function rand!(d::UnivariateDistribution, A::Array)
     return A
 end
 
-function rand!{D<:UnivariateDistribution}(s::AbstractSampler{D}, A::Array)
+function rand!(s::UnivariateSampler, A::Array)
     for i in 1:length(A)
         @inbounds A[i] = rand(s)
     end
