@@ -116,6 +116,9 @@ end
 macro checkquantile(p,ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
+macro checkinvlogcdf(lp,ex)
+    :($lp <= zero($lp) ? $ex : NaN)
+end
 
 # get the variate form (uni/multi/matrix-variate) of a Distribution
 variate_form{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VF
@@ -124,7 +127,3 @@ variate_form{T<:Distribution}(::Type{T}) = variate_form(super(T))
 # get the value support (discrete/continuous) of a Distribution
 value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VS
 value_support{T<:Distribution}(::Type{T}) = value_support(super(T))
-
-macro checkinvlogcdf(lp,ex)
-    :($lp <= zero($lp) ? $ex : NaN)
-end
