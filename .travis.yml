@@ -5,7 +5,6 @@ notifications:
   email: false
 env:
   matrix: 
-#    - JULIAVERSION="juliareleases" 
     - JULIAVERSION="julianightlies" 
 before_install:
   - sudo add-apt-repository ppa:staticfloat/julia-deps -y
@@ -15,4 +14,6 @@ before_install:
 script:
   - julia -e 'Pkg.init(); run(`ln -s $(pwd()) $(Pkg.dir("Distributions"))`); Pkg.pin("Distributions"); Pkg.resolve()'
   - julia -e 'using Distributions; @assert isdefined(:Distributions); @assert typeof(Distributions) === Module'
-  - julia ./test/runtests.jl
+  - julia --code-coverage ./test/runtests.jl
+after_success:
+- julia -e 'cd(Pkg.dir("Distributions")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
