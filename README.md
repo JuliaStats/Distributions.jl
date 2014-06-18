@@ -2,6 +2,7 @@ Distributions.jl
 ================
 
 [![Build Status](https://travis-ci.org/JuliaStats/Distributions.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distributions.jl)
+[![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.png?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
 
 A Julia package for probability distributions and associated functions. Particularly, Distributions implements:
 
