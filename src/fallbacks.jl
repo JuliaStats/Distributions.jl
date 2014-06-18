@@ -215,13 +215,6 @@ function rand!(d::UnivariateDistribution, A::Array)
     return A
 end
 
-function rand!(s::UnivariateSampler, A::Array)
-    for i in 1:length(A)
-        @inbounds A[i] = rand(s)
-    end
-    return A
-end
-
 function rand(d::ContinuousUnivariateDistribution, dims::Dims)
     return rand!(d, Array(Float64, dims))
 end
