@@ -1,5 +1,3 @@
-import StatsBase: AliasTable
-
 immutable Categorical <: DiscreteUnivariateDistribution
     K::Int
     prob::Vector{Float64}
