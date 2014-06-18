@@ -277,6 +277,8 @@ include(joinpath("univariate", "symtriangular.jl"))
 include(joinpath("univariate", "uniform.jl"))
 include(joinpath("univariate", "weibull.jl"))
 
+include("samplers.jl")
+
 # Multivariate distributions
 include(joinpath("multivariate", "dirichlet.jl"))
 include(joinpath("multivariate", "multinomial.jl"))
@@ -295,15 +297,6 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 
 # Mixture distributions
 include("mixturemodel.jl")
-
-# Samplers
-include(joinpath("samplers", "gamma.jl"))
-include(joinpath("samplers", "beta.jl"))
-
-include(joinpath("samplers", "binomial.jl"))
-
-include(joinpath("samplers", "discreteinversetransform.jl"))
-include(joinpath("samplers", "poisson.jl"))
 
 # REPL representations
 include("show.jl")
