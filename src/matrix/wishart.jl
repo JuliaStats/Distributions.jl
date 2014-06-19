@@ -23,6 +23,9 @@ end
 
 Wishart(nu::Real, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 
+dim(W::Wishart) = size(W.Schol, 1)
+size(W::Wishart) = size(W.Schol)
+
 function insupport(W::Wishart, X::Matrix{Float64})
     return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) &&
            size(X, 1) == size(W.Schol, 1) && hasCholesky(X)
@@ -35,9 +38,6 @@ end
 mean(w::Wishart) = w.nu * (w.Schol[:U]' * w.Schol[:U])
 
 pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
-
-size(W::Wishart) = size(W.Schol)
-dim(W::Wishart) = size(W.Schol, 1)
 
 function expected_logdet(W::Wishart)
     logd = 0.

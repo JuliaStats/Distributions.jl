@@ -18,7 +18,7 @@ end
 
 # Properties
 
-dim(d::Multinomial) = length(d.prob)
+length(d::Multinomial) = length(d.prob)
 
 mean(d::Multinomial) = d.n .* d.prob
 
@@ -173,7 +173,7 @@ end
 function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
     d::Multinomial = s.d
     n::Int = d.n
-    k = dim(s)
+    k = length(s)
     
     if n^2 > k
         d = s.d
@@ -189,10 +189,10 @@ function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
     return x
 end
 
-dim(s::MultinomialSampler) = length(s.d.prob)
+length(s::MultinomialSampler) = length(s.d.prob)
 sampler(d::Multinomial) = MultinomialSampler(d)
 
-rand(s::MultinomialSampler) = rand!(s, zeros(Int, dim(s)))
+rand(s::MultinomialSampler) = rand!(s, zeros(Int, length(s)))
 
 
 ## Fit model

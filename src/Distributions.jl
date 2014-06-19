@@ -219,4 +219,6 @@ include("estimators.jl")
 # mixture distributions (TODO: moveout)
 include("mixturemodel.jl")
 
+include("deprecates.jl")
+
 end # module

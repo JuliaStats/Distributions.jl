@@ -67,7 +67,7 @@ mvtdist(df::Float64, Σ::Matrix{Float64}) = MvTDist(df, Σ)
 
 # Basic statistics
 
-dim(d::GenericMvTDist) = d.dim
+length(d::GenericMvTDist) = d.dim
 
 mean(d::GenericMvTDist) = d.df>1 ? d.μ : NaN
 mode(d::GenericMvTDist) = d.μ
@@ -95,7 +95,7 @@ function sqmahal(d::GenericMvTDist, x::Vector{Float64})
 end
 
 function sqmahal!(r::Array{Float64}, d::GenericMvTDist, x::Matrix{Float64})
-    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
+    if !(size(x, 1) == length(d) && size(x, 2) == length(r))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
     z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
@@ -104,7 +104,7 @@ end
 
 # generic PDF evaluation (appliable to AbstractMvTDist)
 
-insupport{T<:Real}(d::AbstractMvTDist, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
+insupport{T<:Real}(d::AbstractMvTDist, x::Vector{T}) = length(d) == length(x) && allfinite(x)
 insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
 
 

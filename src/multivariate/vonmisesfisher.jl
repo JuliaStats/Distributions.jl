@@ -18,7 +18,7 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     end
 end
 
-dim(d::VonMisesFisher) = length(d.mu)
+length(d::VonMisesFisher) = length(d.mu)
 
 mean(d::VonMisesFisher) = d.mu
 
@@ -37,7 +37,7 @@ function logpdf(d::VonMisesFisher, x::Vector{Float64}; stable=true)
         return d.kappa * dot(d.mu, x) - d.kappa + log(d.kappa) - log(2*pi) - log(1-exp(-2*d.kappa))
     else 
         # As described on Wikipedia
-        p = dim(d)
+        p = length(d)
         logCpk = 0.0
         if p == 3
             logCpk = log(d.kappa) - log(2 * pi * (exp(kappa) - exp(-kappa)))

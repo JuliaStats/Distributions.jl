@@ -53,11 +53,6 @@ variate_form{T<:Distribution}(::Type{T}) = variate_form(super(T))
 value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VS
 value_support{T<:Distribution}(::Type{T}) = value_support(super(T))
 
-
-## TODO: replace dim with length in specialized methods
-Base.length(d::MultivariateDistribution) = dim(d)
-Base.size(d::MatrixDistribution) = (dim(d), dim(d)) # override if the matrix isn't square
-
 ## TODO: the following types need to be improved
 abstract SufficientStats
 abstract IncompleteDistribution

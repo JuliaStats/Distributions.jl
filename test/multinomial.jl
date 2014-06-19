@@ -9,7 +9,7 @@ d = Multinomial(nt, p)
 
 # Basics
 
-@test dim(d) == 3
+@test length(d) == 3
 @test d.n == nt
 @test_approx_eq mean(d) [2., 5., 3.]
 @test_approx_eq var(d) [1.6, 2.5, 2.1]
@@ -74,16 +74,16 @@ ss = suffstats(Multinomial, x, w)
 # fit
 
 x = rand(d0, 10^5)
-@test size(x) == (dim(d0), 10^5)
+@test size(x) == (length(d0), 10^5)
 @test all(sum(x, 1) .== nt)
 
 r = fit(Multinomial, x)
 @test r.n == nt
-@test dim(r) == length(p)
+@test length(r) == length(p)
 @test_approx_eq_eps r.prob p 0.02
 
 r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt
-@test dim(r) == length(p)
+@test length(r) == length(p)
 @test_approx_eq_eps r.prob p 0.02
 

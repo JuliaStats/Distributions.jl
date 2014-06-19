@@ -28,14 +28,13 @@ immutable DirichletCanon
     alpha::Vector{Float64}
 end
 
-dim(d::DirichletCanon) = length(d.alpha)
+length(d::DirichletCanon) = length(d.alpha)
 Base.convert(::Type{Dirichlet}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 
 
 # Properties
 
-dim(d::Dirichlet) = length(d.alpha)
-
+length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 
 function var(d::Dirichlet)
@@ -193,7 +192,7 @@ immutable DirichletStats <: SufficientStats
     DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, float64(tw))
 end
 
-dim(ss::DirichletStats) = length(s.slogp)
+length(ss::DirichletStats) = length(s.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
