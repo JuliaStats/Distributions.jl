@@ -29,6 +29,6 @@ end
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function KL(P::UnivariateDistribution, Q::UnivariateDistribution)
+function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
     expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))
 end

@@ -8,7 +8,8 @@ import Base.Random
 import Base: size, length, show, getindex, scale, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base.LinAlg: Cholesky
-import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, RandIntSampler, fit
+import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
+import StatsBase: RandIntSampler
 import PDMats: dim, PDMat, invquad
 
 export
@@ -182,107 +183,40 @@ export
     sample, sample!,        # sample from a source array
     wsample, wsample!      # weighted sampling from a source array
 
+
+### source files
+
+# type system
 include("common.jl")
+
+# implementation helpers
 include("constants.jl")
-include("fallbacks.jl")
-include("rmath.jl")
 include("specialfuns.jl")
 include("tvpack.jl")
 include("utils.jl")
-include("samplers.jl")
+include("rmath.jl")
+
+# generic functions
+include("fallbacks.jl")
+include("show.jl")
 include("genericrand.jl")
+include("functionals.jl")
 
-# Univariate distributions
-include(joinpath("univariate", "arcsine.jl"))
-include(joinpath("univariate", "bernoulli.jl"))
-include(joinpath("univariate", "beta.jl"))
-include(joinpath("univariate", "betaprime.jl"))
-include(joinpath("univariate", "binomial.jl"))
-include(joinpath("univariate", "categorical.jl"))
-include(joinpath("univariate", "cauchy.jl"))
-include(joinpath("univariate", "chi.jl"))
-include(joinpath("univariate", "chisq.jl"))
-include(joinpath("univariate", "cosine.jl"))
-include(joinpath("univariate", "discreteuniform.jl"))
-include(joinpath("univariate", "empirical.jl"))
-include(joinpath("univariate", "exponential.jl"))
-include(joinpath("univariate", "fdist.jl"))
-include(joinpath("univariate", "gamma.jl"))
-include(joinpath("univariate", "edgeworth.jl"))
-include(joinpath("univariate", "erlang.jl"))
-include(joinpath("univariate", "geometric.jl"))
-include(joinpath("univariate", "gumbel.jl"))
-include(joinpath("univariate", "hypergeometric.jl"))
-include(joinpath("univariate", "inversegamma.jl"))
-include(joinpath("univariate", "inversegaussian.jl"))
-include(joinpath("univariate", "kolmogorov.jl"))
-include(joinpath("univariate", "ksdist.jl"))
-include(joinpath("univariate", "ksonesided.jl"))
-include(joinpath("univariate", "laplace.jl"))
-include(joinpath("univariate", "levy.jl"))
-include(joinpath("univariate", "logistic.jl"))
-include(joinpath("univariate", "lognormal.jl"))
-include(joinpath("univariate", "negativebinomial.jl"))
-include(joinpath("univariate", "noncentralbeta.jl"))
-include(joinpath("univariate", "noncentralchisq.jl"))
-include(joinpath("univariate", "noncentralf.jl"))
-include(joinpath("univariate", "noncentralt.jl"))
-include(joinpath("univariate", "normal.jl"))
-include(joinpath("univariate", "normalcanon.jl"))
-include(joinpath("univariate", "pareto.jl"))
-include(joinpath("univariate", "poisson.jl"))
-include(joinpath("univariate", "rayleigh.jl"))
-include(joinpath("univariate", "skellam.jl"))
-include(joinpath("univariate", "tdist.jl"))
-include(joinpath("univariate", "symtriangular.jl"))
-include(joinpath("univariate", "uniform.jl"))
-include(joinpath("univariate", "weibull.jl"))
-
+# specific samplers and distributions
 include("samplers.jl")
-
-# Multivariate distributions
-include(joinpath("multivariate", "dirichlet.jl"))
-include(joinpath("multivariate", "multinomial.jl"))
-include(joinpath("multivariate", "mvnormal.jl"))
-include(joinpath("multivariate", "mvnormalcanon.jl"))
-include(joinpath("multivariate", "mvtdist.jl"))
-include(joinpath("multivariate", "vonmisesfisher.jl"))
-
-# Matrix distributions
+include("univariates.jl")
+include("multivariates.jl")
 include(joinpath("matrix", "inversewishart.jl"))
 include(joinpath("matrix", "wishart.jl"))
 
-# Truncated distributions
+# others
 include("truncate.jl")
 include(joinpath("univariate", "truncated", "normal.jl"))
-
-# Mixture distributions
-include("mixturemodel.jl")
-
-# REPL representations
-include("show.jl")
-
-# Kernel density estimators
-# include("kde.jl")  ## migrated to StatsBase.jl
-
-# Expectations, entropy, KL divergence
-include("functionals.jl")
-
-# Posteriors and conjugate priors
-include(joinpath("conjugates", "fallbacks.jl"))
-include(joinpath("conjugates", "beta_binom.jl"))
-include(joinpath("conjugates", "dirichlet_multi.jl"))
-include(joinpath("conjugates", "gamma_exp.jl"))
-
-include(joinpath("conjugates", "normalgamma.jl"))
-include(joinpath("conjugates", "normalinversegamma.jl"))
-include(joinpath("conjugates", "normalwishart.jl"))
-include(joinpath("conjugates", "normalinversewishart.jl"))
-include(joinpath("conjugates", "normal.jl"))
-include(joinpath("conjugates", "mvnormal.jl"))
-
-# other stuff
+include("conjugates.jl")
 include("qq.jl")
 include("estimators.jl")
+
+# mixture distributions (TODO: moveout)
+include("mixturemodel.jl")
 
 end # module
