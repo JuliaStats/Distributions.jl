@@ -53,6 +53,11 @@ Computation of statistics
 Probability evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+.. function:: insupport(d, x)
+
+    If ``x`` is a vector, it returns whether x is within the support of ``d``. 
+    If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``. 
+
 .. function:: pdf(d, x)
 
     Return the probability density of distribution ``d`` evaluated at ``x``.
@@ -60,11 +65,9 @@ Probability evaluation
     - If ``x`` is a vector, it returns the result as a scalar. 
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
 
-
 .. function:: pdf!(r, d, x)
 
     Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
-
 
 .. function:: logpdf(d, x)
 
@@ -77,6 +80,9 @@ Probability evaluation
 
     Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
 
+.. function:: loglikelihood(d, x)
+
+    The log-likelihood of distribution ``d`` w.r.t. all columns contained in matrix ``x``.
 
 **Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
 

@@ -55,9 +55,25 @@ Let ``d`` be a distribution:
 
     Return the excess kurtosis of distribution ``d``.
 
+.. function:: isplatykurtic(d)
+
+    Return whether ``d`` is platykurtic (*i.e* ``kurtosis(d) > 0``).
+
+.. function:: isleptokurtic(d)
+
+    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) < 0``).
+
+.. function:: ismesokurtic(d)
+
+    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) == 0``).
+
 .. function:: entropy(d)
 
     Return the entropy value of distribution ``d``.
+
+.. function:: entropy(d, base)
+
+    Return the entropy value of distribution ``d``, w.r.t. a given base. 
 
 .. function:: mgf(d, t)
 
@@ -84,6 +100,10 @@ Probability Evaluation
     The logarithm of the pdf value(s) evaluated at x, i.e. ``log(pdf(x))``. 
 
     **Node:** The internal implementation may directly evaluate logpdf instead of first computing pdf and then taking the logarithm, for better numerical stability or efficiency.
+
+.. function:: loglikelihood(d, x)
+
+    The log-likelihood of distribution ``d`` w.r.t. all samples contained in array ``x``.
 
 .. function:: cdf(d, x)
 

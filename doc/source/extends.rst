@@ -135,6 +135,9 @@ Following methods need to be implemented for each univariate distribution type (
 
     Again, the package provides vectorized version of ``logpdf!`` and ``logpdf``. One may override ``logpdf!`` to provide more efficient vectorized evaluation.
 
+    Furthermore, the generic ``loglikelihood`` function delegates to ``_loglikelihood``, which repeatedly calls ``logpdf``. If there is a better way to compute log-likelihood, one should override ``_loglikelihood``.
+
+
 .. function:: cdf(d::D, x::Real)
 
     Evaluate the cumulative probability at ``x``.
@@ -209,18 +212,18 @@ Following methods need to be implemented for each univariate distribution type (
 
     .. code-block:: julia
 
-        _pdf(d::MultivariateDistribution, x::AbstractVector) = exp(_logpdf(d, x))
+        _pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
 
-        function logpdf(d::MultivariateDistribution, x::AbstractVector)
-            length(d) == length(x) ||
+        function logpdf(d::MultivariateDistribution, X::AbstractVector)
+            length(X) == length(d) || 
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _logpdf(d, x)
+            _logpdf(d, X)
         end
 
-        function pdf(d::MultivariateDistribution, x::AbstractVector)
-            length(d) == length(x) ||
+        function pdf(d::MultivariateDistribution, X::AbstractVector)
+            length(X) == length(d) || 
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _pdf(d, x)
+            _pdf(d, X)
         end
 
     If there are better ways that can directly evaluate pdf values, one should override ``_pdf`` (*NOT* ``pdf``).
@@ -229,45 +232,47 @@ Following methods need to be implemented for each univariate distribution type (
 
     .. code-block:: julia
 
-        function _logpdf!(r::AbstractArray, d::MultivariateDistribution, x::DenseMatrix)
-            for i = 1:size(x,2)
-                @inbounds r[i] = _logpdf(d, view(x, :, i))
+        function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+            for i in 1 : size(X,2)
+                @inbounds r[i] = logpdf(d, view(X,:,i))
             end
             return r
         end
 
-        function _pdf!(r::AbstractArray, d::MultivariateDistribution, x::DenseMatrix)
-            for i = 1:size(x,2)
-                @inbounds r[i] = _pdf(d, view(x, :, i))
+        function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+            for i in 1 : size(X,2)
+                @inbounds r[i] = pdf(d, view(X,:,i))
             end
             return r
         end
 
-        function logpdf!(r::AbstractArray, d::MultivariateDistribution, x::DenseMatrix)
-            size(x) == (length(d), length(r)) ||
+        function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+            size(X) == (length(d), length(r)) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _logpdf!(r, d, x)
+            _logpdf!(r, d, X)
         end
 
-        function pdf!(r::AbstractArray, d::MultivariateDistribution, x::DenseMatrix)
-            size(x) == (length(d), length(r)) ||
+        function pdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+            size(X) == (length(d), length(r)) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _pdf!(r, d, x)
+            _pdf!(r, d, X)
         end
 
-        function logpdf(d::MultivariateDistribution, x::DenseMatrix)
-            size(x,1) == length(d) ||
+        function logpdf(d::MultivariateDistribution, X::DenseMatrix)
+            size(X, 1) == length(d) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _logpdf!(Array(eltype(d), size(x,2)), d, x)
+            _logpdf!(Array(Float64, size(X,2)), d, X)
         end
 
-        function pdf(d::MultivariateDistribution, x::DenseMatrix)
-            size(x,1) == length(d) ||
+        function pdf(d::MultivariateDistribution, X::DenseMatrix)
+            size(X, 1) == length(d) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _pdf!(Array(eltype(d), size(x,2)), d, x)
+            _pdf!(Array(Float64, size(X,2)), d, X)
         end
 
     Note that if there exists faster methods for batch evaluation, one should override ``_logpdf!`` and ``_pdf!``.
+
+    Furthermore, the generic ``loglikelihood`` function delegates to ``_loglikelihood``, which repeatedly calls ``_logpdf``. If there is a better way to compute log-likelihood, one should override ``_loglikelihood``.
 
 It is also recommended that one also implements the following statistics functions: 
 

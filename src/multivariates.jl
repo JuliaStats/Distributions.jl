@@ -18,6 +18,8 @@ insupport{D<:MultivariateDistribution}(d::Union(D,Type{D}), X::AbstractMatrix) =
 
 ## statistics
 
+entropy(d::MultivariateDistribution, b::Real) = entropy(d) / log(b)
+
 function cor(d::MultivariateDistribution)
     C = cov(d)
     n = size(C, 1)
@@ -93,12 +95,18 @@ end
 
 ## log likelihood
 
-function loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
+function _loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
     ll = 0.0
     for i in 1:size(X, 2)
         ll += _logpdf(d, view(X,:,i))
     end
     return ll
+end
+
+function loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
+    size(X,1) == length(d) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    _loglikelihood(d, X)
 end
 
 

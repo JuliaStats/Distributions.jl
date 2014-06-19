@@ -27,7 +27,7 @@ insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
 std(d::UnivariateDistribution) = sqrt(var(d))
 median(d::UnivariateDistribution) = quantile(d, 0.5)
 modes(d::UnivariateDistribution) = [mode(d)]
-binaryentropy(d::UnivariateDistribution) = entropy(d) / log(2)
+entropy(d::UnivariateDistribution, b::Real) = entropy(d) / log(b)
 
 isplatykurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
 isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
@@ -88,7 +88,7 @@ end
 
 ## loglikelihood
 
-function loglikelihood(d::UnivariateDistribution, X::AbstractArray)
+function _loglikelihood(d::UnivariateDistribution, X::AbstractArray)
     ll = 0.0
     for i in 1:length(X)
         @inbounds ll += logpdf(d, X[i])
@@ -96,7 +96,8 @@ function loglikelihood(d::UnivariateDistribution, X::AbstractArray)
     return ll
 end
 
-
+loglikelihood(d::UnivariateDistribution, X::AbstractArray) = 
+    _loglikelihood(d, X)
 
 ##### specific distributions #####
 

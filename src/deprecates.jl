@@ -6,6 +6,11 @@ function dim(d::MultivariateDistribution)
 	return length(d)
 end
 
+function binaryentropy(d::UnivariateDistribution) 
+	Base.depwarn("binaryentropy is deprecated. Please use entropy(d, 2).", :binaryentropy)
+	return entropy(d) / log(2)
+end
+
 @Base.deprecate logpmf logpdf
 @Base.deprecate logpmf! logpmf!
 @Base.deprecate pmf pdf
