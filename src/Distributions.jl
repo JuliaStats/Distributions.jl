@@ -14,17 +14,7 @@ export
     Matrixvariate,
     Discrete,
     Continuous,
-
-    Sampler,
-    UnivariateSampler,
-    MultivariateSampler,
-    MatrixSampler,
-    DiscreteUnivariateSampler,
-    ContinuousUnivariateSampler,
-    DiscreteMultivariateSampler,
-    ContinuousMultivariateSampler,
-    DiscreteMatrixSampler,
-    ContinuousMatrixSampler,
+    Sampleable,
 
     rand, rand!,            # random sampling
     sample, sample!,        # sample from a source array
@@ -197,7 +187,7 @@ import PDMats: dim, PDMat, invquad
 
 #### Distribution type system
 
-abstract Distribution{F<:VariateForm,S<:ValueSupport}
+abstract Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 
 typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
 typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}

@@ -208,63 +208,6 @@ pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 # default: inverse transform sampling
 rand(d::UnivariateDistribution) = quantile(d, rand())
 
-function rand!(d::UnivariateDistribution, A::Array)
-    for i in 1:length(A)
-        @inbounds A[i] = rand(d)
-    end
-    return A
-end
-
-function rand(d::ContinuousUnivariateDistribution, dims::Dims)
-    return rand!(d, Array(Float64, dims))
-end
-
-function rand(d::DiscreteUnivariateDistribution, dims::Dims)
-    return rand!(d, Array(Int, dims))
-end
-
-function rand(d::UnivariateDistribution, dim1::Integer, dims::Integer...)
-    return rand(d, map(int, tuple(dim1,dims...)))
-end
-
-function rand(d::ContinuousMultivariateDistribution)
-    return rand!(d, Array(Float64, dim(d)))
-end
-
-function rand(d::DiscreteMultivariateDistribution)
-    return rand!(d, Array(Int, dim(d)))
-end
-
-function rand(d::ContinuousMultivariateDistribution, n::Integer)
-    return rand!(d, Array(Float64, dim(d), n))
-end
-
-function rand(d::DiscreteMultivariateDistribution, n::Integer)
-    return rand!(d, Array(Int, dim(d), n))
-end
-
-function rand(d::MatrixDistribution, n::Integer)
-    return rand!(d, Array(Matrix{Float64}, n))
-end
-
-function rand!(d::MultivariateDistribution, X::Matrix)
-    if size(X, 1) != dim(d)
-        error("Inconsistent argument dimensions")
-    end
-    for i in 1 : size(X, 2)
-        X[:, i] = rand(d)
-    end
-    X
-end
-
-function rand!(d::MatrixDistribution, X::Array{Matrix{Float64}})
-    for i in 1:length(X)
-        X[i] = rand(d)
-    end
-    return X
-end
-
-
 function sprand(m::Integer, n::Integer, density::Real, d::Distribution)
     return sprand(m, n, density, n -> rand(d, n))
 end
