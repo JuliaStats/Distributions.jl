@@ -23,10 +23,12 @@ Base.length(s::Sampleable) = prod(size(s))
 Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
+nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::Number) = 1
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::AbstractArray) = length(x)
 nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractVector) = 1
 nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractMatrix) = size(x, 2)
-nsamples{D<:Sampleable{Matrixvariate},T}(::Type{D}, x::Array{Matrix{T}}) = length(x)
+nsamples{D<:Sampleable{Matrixvariate}}(::Type{D}, x::Number) = 1
+nsamples{D<:Sampleable{Matrixvariate},T<:Number}(::Type{D}, x::Array{Matrix{T}}) = length(x)
 
 ## Distribution <: Sampleable
 

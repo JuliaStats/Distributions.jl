@@ -1,3 +1,5 @@
+.. _multivariates:
+
 Multivariate Distributions
 =============================
 

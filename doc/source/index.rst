@@ -14,7 +14,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
 .. toctree::
    :maxdepth: 2
 
-   distributions.rst
+   types.rst
    univariate.rst
    multivariate.rst
    matrix.rst
