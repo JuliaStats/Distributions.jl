@@ -116,7 +116,7 @@ To simplify the use in practice, we introduce a series of type alias as follows:
     typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
     typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
-All methods applicable to `Sampleable` also applies to `Distribution`. The API for distributions of different variate forms are different (refer to :ref:`univariates` and :ref:`multivariates` for details).
+All methods applicable to `Sampleable` also applies to `Distribution`. The API for distributions of different variate forms are different (refer to :ref:`univariates`, :ref:`multivariates`, and :ref:`matrix` for details).
 
 
 

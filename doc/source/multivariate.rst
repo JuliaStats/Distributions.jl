@@ -3,7 +3,15 @@
 Multivariate Distributions
 =============================
 
-*Multivariate distributions* are probabilistic distributions whose samples are vectors. The *Distributions* package implements several commonly used multivariate distributions, including *Multinomial*, *Multivairate Normal* and *Dirichlet*.
+*Multivariate distributions* are the distributions whose variate forms are ``Multivariate`` (*i.e* each sample is a vector). Abstract types for multivariate distributions:
+
+.. code-block:: julia
+
+    typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
+
+    typealias DiscreteMultivariateDistribution   Distribution{Multivariate, Discrete}
+    typealias ContinuousMultivariateDistribution Distribution{Multivariate, Continuous}
+
 
 Common Interface
 ------------------
@@ -13,27 +21,31 @@ The methods listed as below are implemented for each multivariate distribution, 
 Computation of statistics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- **dim** (d)
+.. function:: length(d)
 
     Return the sample dimension of distribution ``d``.
 
-- **mean** (d)
+.. function:: size(d)
+
+    Return the sample size of distribution ``d``, *i.e* ``(length(d), 1)``.
+
+.. function:: mean(d)
 
     Return the mean vector of distribution ``d``.
 
-- **var** (d)
+.. function:: var(d)
 
     Return the vector of component-wise variances of distribution ``d``.
 
-- **cov** (d)
+.. function:: cov(d)
 
     Return the covariance matrix of distribution ``d``.
 
-- **cor** (d)
+.. function:: cor(d)
 
     Return the correlation matrix of distribution ``d``.
 
-- **entropy** (d)
+.. function:: entropy(d)
 
     Return the entropy of distribution ``d``. 
 
@@ -41,7 +53,7 @@ Computation of statistics
 Probability evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-- **pdf** (d, x)
+.. function:: pdf(d, x)
 
     Return the probability density of distribution ``d`` evaluated at ``x``.
 
@@ -49,19 +61,19 @@ Probability evaluation
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
 
 
-- **pdf!** (r, d, x)
+.. function:: pdf!** (r, d, x)
 
     Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
 
 
-- **logpdf** (d, x)
+.. function:: logpdf(d, x)
 
     Return the logarithm of probability density evaluated at ``x``.
 
     - If ``x`` is a vector, it returns the result as a scalar. 
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
 
-- **logpdf!** (r, d, x)
+.. function:: logpdf!** (r, d, x)
 
     Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
 
@@ -72,33 +84,20 @@ Probability evaluation
 Sampling
 ~~~~~~~~~
 
-- **rand** (d)
+.. function:: rand(d)
 
     Sample a vector from the distribution ``d``.
 
-- **rand** (d, n)
+.. function:: rand(d, n)
 
     Sample n vectors from the distribution ``d``. This returns a matrix of size ``(dim(d), n)``, where each column is a sample.
 
-- **rand!** (d, x)
+.. function:: rand!(d, x)
 
     Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.     
 
 
 **Node:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
-
-Variate Dimensions
-~~~~~~~~~~~~~~~~~~~~
-
-The functions ``size`` and ``length`` apply to any type of distribution.
-
-- **size** (d)
-
-   For multivariate distributions, this is equal to ``(dim(d),)``. In the general case, ``size(d)==size(rand(d))``.
-
-- **length** (d)
-
-   For univariate distributions, this is equal to ``dim(d)``. In the general case, ``length(d)==length(rand(d))``.
 
 
 .. _multinomial:
@@ -201,21 +200,21 @@ Additional interface
 
 The following methods are specific to all kinds of multivariate normal distributions.
 
-- **invcov** (d)
+.. function:: invcov(d)
 
     Return the inversed covariance matrix of d.
 
-- **logdet_cov** (d)
+.. function:: logdet_cov(d)
 
     Return the log-determinant value of the covariance matrix.
 
-- **sqmahal** (d, x)
+.. function:: sqmahal(d, x)
 
     Return the squared Mahalanobis distance from x to the center of d, w.r.t. the covariance.
 
     When x is a vector, it returns a scalar value. When x is a matrix, it returns a vector of length size(x,2).
 
-- **sqmahal!** (r, d, x)
+.. function:: sqmahal!** (r, d, x)
 
     Writes the squared Mahalanbobis distances from each column of x to the center of d to r.
 
