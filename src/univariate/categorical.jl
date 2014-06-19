@@ -12,6 +12,8 @@ immutable Categorical <: DiscreteUnivariateDistribution
     Categorical(k::Int) = new(k, fill(1.0/k, k))
 end
 
+ncategories(d::Categorical) = d.K
+
 ### handling support
 
 function insupport(d::Categorical, x::Real)

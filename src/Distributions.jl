@@ -165,6 +165,7 @@ export
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution
     nsamples,           # get the number of samples contained in an array
+    ncategories,        # the number of categories in a Categorical distribution
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     quantile,           # inverse of cdf (defined for p in (0,1))

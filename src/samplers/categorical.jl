@@ -5,7 +5,7 @@ immutable AliasTable <: Sampleable{Univariate,Discrete}
     alias::Vector{Int}
     isampler::RandIntSampler
 end
-numcategories(s::AliasTable) = length(s.accept)
+ncategories(s::AliasTable) = length(s.accept)
 
 function make_alias_table!(a::AbstractVector{Float64})
     # input probabilities via a, which is then

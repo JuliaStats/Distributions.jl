@@ -92,61 +92,6 @@ function rand(s::PoissonADSampler)
     end
 end
 
-# log(1+x)-x
-# accurate ~2ulps for -0.227 < x < 0.315
-function log1pmx_kernel(x::Float64)
-    r = x/(x+2.0)
-    t = r*r
-    w = @horner(t,
-                6.66666666666666667e-1, # 2/3
-                4.00000000000000000e-1, # 2/5
-                2.85714285714285714e-1, # 2/7
-                2.22222222222222222e-1, # 2/9
-                1.81818181818181818e-1, # 2/11
-                1.53846153846153846e-1, # 2/13
-                1.33333333333333333e-1, # 2/15
-                1.17647058823529412e-1) # 2/17
-    hxsq = 0.5*x*x
-    r*(hxsq+w*t)-hxsq
-end
-
-# use naive calculation or range reduction outside kernel range.
-# accurate ~2ulps for all x
-function log1pmx(x::Float64)
-    if !(-0.7 < x < 0.9)
-        return log1p(x) - x
-    elseif x > 0.315
-        u = (x-0.5)/1.5
-        return log1pmx_kernel(u) - 9.45348918918356180e-2 - 0.5*u
-    elseif x > -0.227
-        return log1pmx_kernel(x)
-    elseif x > -0.4
-        u = (x+0.25)/0.75
-        return log1pmx_kernel(u) - 3.76820724517809274e-2 + 0.25*u
-    elseif x > -0.6
-        u = (x+0.5)*2.0
-        return log1pmx_kernel(u) - 1.93147180559945309e-1 + 0.5*u
-    else
-        u = (x+0.625)/0.375
-        return log1pmx_kernel(u) - 3.55829253011726237e-1 + 0.625*u
-    end
-end
-
-# log(x) - x + 1
-function logmxp1(x::Float64)
-    if x <= 0.3
-        return (log(x) + 1.0) - x
-    elseif x <= 0.4
-        u = (x-0.375)/0.375
-        return log1pmx_kernel(u) - 3.55829253011726237e-1 + 0.625*u
-    elseif x <= 0.6
-        u = 2.0*(x-0.5)
-        return log1pmx_kernel(u) - 1.93147180559945309e-1 + 0.5*u
-    else
-        return log1pmx(x-1.0)
-    end
-end
-
 # Procedure F                    
 function procf(μ::Float64, K::Int, s::Float64)
     # can be pre-computed, but does not seem to affect performance
