@@ -11,6 +11,8 @@ size(d::UnivariateDistribution) = ()
 size(d::MultivariateDistribution) = (dim(d),)
 size(d::MatrixDistribution) = (dim(d), dim(d)) # override if the matrix isn't square
 
+length(d::UnivariateDistribution) = 1
+length(d::MultivariateDistribution) = dim(d)
 length(d::Distribution) = prod(size(d))
 
 # support handling
