@@ -111,7 +111,7 @@ modes(d::Dirichlet) = [mode(d)]
 
 # Evaluation
 
-function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
+function insupport{T<:Real}(d::Dirichlet, x::AbstractVector{T})
     n = length(x)
     if length(d.alpha) != n
         return false
@@ -130,42 +130,14 @@ function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     return true
 end
 
-pdf{T <: Real}(d::Dirichlet, x::Vector{T}) = exp(logpdf(d, x))
-
-function logpdf{T <: Real}(d::Dirichlet, x::Vector{T})
+function _logpdf{T<:Real}(d::Dirichlet, x::AbstractVector{T})
     a = d.alpha
-    k = length(a)
-    if length(x) != k
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
     s = 0.
-    for i in 1 : k
-        s += (a[i] - 1.0) * log(x[i])
+    for i in 1:length(a)
+        @inbounds s += (a[i] - 1.0) * log(x[i])
     end
-    s - d.lmnB
+    return s - d.lmnB
 end
-
-function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
-    a = d.alpha
-    if size(x, 1) != length(d.alpha)
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    n = size(x, 2)
-    if length(r) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    b::Float64 = d.lmnB
-    Base.LinAlg.BLAS.gemv!('T', 1.0, log(x), d.alpha .- 1.0, 0.0, r)
-    # At_mul_B(r, log(x), d.alpha - 1.0)
-    for i in 1:n
-        r[i] -= b
-    end
-    r
-end
-
 
 # sampling
 

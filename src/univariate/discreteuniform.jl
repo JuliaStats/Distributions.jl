@@ -63,7 +63,7 @@ minimum(d::DiscreteUniform) = d.a
 maximum(d::DiscreteUniform) = d.b
 support(d::DiscreteUniform) = d.a:d.b
 
-insupport(d::DiscreteUniform, x::Number) = isinteger(x) && d.a <= x <= d.b
+insupport(d::DiscreteUniform, x::Real) = isinteger(x) && d.a <= x <= d.b
 
 # Fit model
 

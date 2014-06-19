@@ -99,9 +99,6 @@ function sqmahal(d::GenericMvNormalCanon, x::Vector{Float64})
 end
 
 function sqmahal!(r::Array{Float64}, d::GenericMvNormalCanon, x::Matrix{Float64})
-    if !(size(x, 1) == length(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
     z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
     quad!(r, d.J, z)
 end

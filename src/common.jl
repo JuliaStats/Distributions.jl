@@ -23,6 +23,10 @@ Base.length(s::Sampleable) = prod(size(s))
 Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
+Base.eltype{F,S}(s::Sampleable{F,S}) = eltype(S)
+Base.eltype{F}(s::Sampleable{F,Discrete}) = Int
+Base.eltype{F}(s::Sampleable{F,Continuous}) = Float64
+
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::Number) = 1
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::AbstractArray) = length(x)
 nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractVector) = 1

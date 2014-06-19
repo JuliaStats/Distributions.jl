@@ -79,39 +79,38 @@ entropy(d::GenericMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logde
 
 # evaluation (for GenericMvNormal)
 
-function sqmahal(d::GenericMvNormal, x::Vector{Float64}) 
-    z::Vector{Float64} = d.zeromean ? x : x - d.μ
+function sqmahal{T<:Real}(d::GenericMvNormal, x::DenseVector{T}) 
+    z = d.zeromean ? x : x - d.μ
     invquad(d.Σ, z) 
 end
 
-function sqmahal!(r::Array{Float64}, d::GenericMvNormal, x::Matrix{Float64})
-    if !(size(x, 1) == length(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-    z::Matrix{Float64} = d.zeromean ? x : x .- d.μ
+function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvNormal, x::DenseMatrix{T})
+    z = d.zeromean ? x : x .- d.μ
     invquad!(r, d.Σ, z)
 end
 
 
 # generic PDF evaluation (appliable to AbstractMvNormal)
 
-insupport{T<:Real}(d::AbstractMvNormal, x::Vector{T}) = length(d) == length(x) && allfinite(x)
-insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
+insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
+    length(d) == length(x) && allfinite(x)
 
 mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdet_cov(g))
 
-sqmahal(d::AbstractMvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
-logpdf(d::AbstractMvNormal, x::Vector{Float64}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
+_logpdf{T<:Real}(d::AbstractMvNormal, x::DenseVector{T}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
 
-function logpdf!(r::Array{Float64}, d::AbstractMvNormal, x::Matrix{Float64})
+function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T})
     sqmahal!(r, d, x)
     c0::Float64 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        r[i] = c0 - 0.5 * r[i]
+        @inbounds r[i] = c0 - 0.5 * r[i]
     end 
     r
 end
+
+_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
 
 function gradlogpdf(d::GenericMvNormal, x::Vector{Float64})
   z::Vector{Float64} = d.zeromean ? x : x - d.μ

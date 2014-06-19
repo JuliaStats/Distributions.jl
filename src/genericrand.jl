@@ -10,8 +10,8 @@ function _rand!(s::Sampleable{Univariate}, A::AbstractArray)
 end
 rand!(s::Sampleable{Univariate}, A::AbstractArray) = _rand!(s, A)
 
-rand{S<:ValueSupport}(s::Sampleable{Univariate,S}, shp::Union(Int,(Int...))) = 
-    _rand!(s, Array(eltype(S), shp))
+rand(s::Sampleable{Univariate}, shp::Union(Int,(Int...))) = 
+    _rand!(s, Array(eltype(s), shp))
 
 # multivariate
 
@@ -34,11 +34,11 @@ function rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
     _rand!(s, A)
 end
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}) = 
-    _rand!(s, Array(eltype(S), length(s)))
+rand(s::Sampleable{Multivariate}) = 
+    _rand!(s, Array(eltype(s), length(s)))
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}, n::Int) = 
-    _rand!(s, Array(eltype(S), length(s), n))
+rand(s::Sampleable{Multivariate}, n::Int) = 
+    _rand!(s, Array(eltype(s), length(s), n))
 
 
 # matrix-variate
@@ -53,8 +53,8 @@ end
 rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) = 
     _rand!(s, X)
 
-rand{S<:ValueSupport}(s::Sampleable{Matrixvariate,S}, n::Int) =
-    rand!(s, Array(Matrix{eltype(S)}, n))
+rand(s::Sampleable{Matrixvariate}, n::Int) =
+    rand!(s, Array(Matrix{eltype(s)}, n))
 
 
 # sampler
@@ -62,6 +62,8 @@ rand{S<:ValueSupport}(s::Sampleable{Matrixvariate,S}, n::Int) =
 # one can specialize this function to provide more efficient samplers
 # for certain distributions
 sampler(d::Distribution) = d
+
+rand(d::UnivariateDistribution) = quantile(d, rand())
 
 rand!(s::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(s), A)
 

@@ -60,6 +60,12 @@ function multiply!(x::AbstractArray, c::Number)
 	x
 end
 
+function exp!(x::AbstractArray)
+	for i = 1:length(x)
+		@inbounds x[i] = exp(x[i])
+	end
+	x
+end
 
 # macros for generating functions for support handling
 #

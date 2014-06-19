@@ -82,7 +82,7 @@ end
 
 # Evaluation
 
-function insupport{T<:Real}(d::Multinomial, x::Vector{T})
+function insupport{T<:Real}(d::Multinomial, x::AbstractVector{T})
     n = length(x)
     if length(d.prob) != n
         return false
@@ -98,25 +98,20 @@ function insupport{T<:Real}(d::Multinomial, x::Vector{T})
     return s == d.n  # integer computation would not yield truncation errors
 end
 
-function logpdf{T<:Real}(d::Multinomial, x::Vector{T})
+function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
     n = d.n
     p = d.prob
-    k = length(p)
-    length(x) == k || throw(ArgumentError("Invalid dimension of x."))
-
     s = lgamma(n + 1.0)
     t = zero(T)
-    for i = 1 : k
+    for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds pi = p[i]
         t += xi
         s -= lgamma(xi + 1.0)
         @inbounds s += xi * log(pi)
     end
-    return (t == n ? s : -Inf)::Float64
+    return ifelse(t == n, s, -Inf)::Float64
 end
-
-pdf{T <: Real}(d::Multinomial, x::Vector{T}) = exp(logpdf(d, x))
 
 
 # Sampling

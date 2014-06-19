@@ -6,3 +6,6 @@ function dim(d::MultivariateDistribution)
 	return length(d)
 end
 
+@Base.deprecate logpmf logpdf
+@Base.deprecate logpmf! logpmf!
+@Base.deprecate pmf pdf

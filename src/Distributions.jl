@@ -197,10 +197,10 @@ include("utils.jl")
 include("rmath.jl")
 
 # generic functions
-include("fallbacks.jl")
 include("show.jl")
 include("genericrand.jl")
 include("functionals.jl")
+include("genericfit.jl")
 
 # specific samplers and distributions
 include("samplers.jl")
