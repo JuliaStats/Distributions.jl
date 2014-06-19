@@ -160,18 +160,7 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
     return x  
 end
 
-rand!{T<:Real}(d::Multinomial, x::Vector{T}) = multinom_rand!(d.n, d.prob, x)
-
-function rand!{T<:Real}(d::Multinomial, x::Matrix{T})
-    k = dim(d)
-    size(x,1) == k || throw(ArgumentError("Invalid argument dimension."))
-
-    for i = 1 : size(x, 2)
-        multinom_rand!(d.n, d.prob, view(x, :, i))
-    end
-    return x
-end
-
+_rand!{T<:Real}(d::Multinomial, x::AbstractVector{T}) = multinom_rand!(d.n, d.prob, x)
 
 immutable MultinomialSampler <: DiscreteMultivariateDistribution
     d::Multinomial

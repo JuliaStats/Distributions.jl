@@ -156,20 +156,7 @@ end
 
 # sampling
 
-immutable CategoricalSampler
-    d::Categorical
-    alias::AliasTable
-    function CategoricalSampler(d::Categorical)
-        new(d, AliasTable(d.prob))
-    end
-end
-
-sampler(d::Categorical) = CategoricalSampler(d)
-
-rand(d::Categorical) = sample(WeightVec(d.prob, 1.0))
-
-rand(s::CategoricalSampler) = rand(s.alias)
-
+sampler(d::Categorical) = AliasTable(d.prob)
 
 ### sufficient statistics
 

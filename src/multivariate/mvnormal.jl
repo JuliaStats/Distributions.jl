@@ -120,7 +120,7 @@ end
 
 # Sampling (for GenericMvNormal)
 
-function rand!(d::GenericMvNormal, x::Vector{Float64})
+function _rand!(d::GenericMvNormal, x::DenseVector{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         add!(x, d.μ)
@@ -128,7 +128,7 @@ function rand!(d::GenericMvNormal, x::Vector{Float64})
     x
 end
 
-function rand!(d::GenericMvNormal, x::Matrix{Float64})
+function _rand!(d::GenericMvNormal, x::DenseMatrix{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         μ = d.μ

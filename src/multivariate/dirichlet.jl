@@ -170,7 +170,7 @@ end
 
 # sampling
 
-function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
+function _rand!{T<:Real}(d::Union(Dirichlet,DirichletCanon), x::AbstractVector{T})
     s = 0.0
     n = length(x)
     α = d.alpha
@@ -179,31 +179,6 @@ function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
     end
     multiply!(x, inv(s)) # this returns x
 end
-
-rand(d::Union(Dirichlet,DirichletCanon)) = rand!(d, Array(Float64, dim(d)))
-
-function rand!(d::Union(Dirichlet,DirichletCanon), X::Matrix)
-    k = size(X, 1)
-    n = size(X, 2)
-    if k != dim(d)
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    α = d.alpha
-    for j = 1:n
-        s = 0.
-        for i = 1:k
-            @inbounds s += (X[i,j] = rand(Gamma(α[i])))
-        end
-        inv_s = 1.0 / s
-        for i = 1:k
-            @inbounds X[i,j] *= inv_s
-        end
-    end
-
-    return X
-end
-
 
 #######################################
 #
