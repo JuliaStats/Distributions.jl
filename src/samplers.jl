@@ -1,5 +1,9 @@
 # delegation of samplers
 
-sampler(d::Binomial) = BinomialPolySampler(d.size, d.prob)
-sampler(d::Gamma) = GammaMTSampler(d.shape, d.scale)
-
+for fname in ["categorical.jl",
+              "binomial.jl",
+              "poisson.jl", 
+              "exponential.jl",
+              "gamma.jl"]
+    include(joinpath("samplers", fname))
+end
