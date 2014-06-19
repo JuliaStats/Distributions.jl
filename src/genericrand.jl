@@ -64,6 +64,12 @@ rand{S<:ValueSupport}(s::Sampleable{Matrixvariate,S}, n::Int) =
 sampler(d::Distribution) = d
 
 rand!(s::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(s), A)
-rand!(s::MultivariateDistribution, A::DenseMatrix) = _rand!(sampler(s), A)
+
+function rand!(s::MultivariateDistribution, A::DenseMatrix)
+    size(A,1) == length(s) || 
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(sampler(s), A)
+end
+
 rand!{M<:Matrix}(s::MatrixDistribution, A::AbstractArray{M}) = _rand!(sampler(s), A)
 

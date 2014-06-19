@@ -20,6 +20,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
    matrix.rst
    fit.rst
    conjugates.rst
+   extends.rst
 
 
 .. Indices and tables

@@ -3,6 +3,8 @@ Type Hierarchy
 
 All samplers and distributions provided in this package are organized into a type hierarchy described as follows.
 
+.. _sampleable:
+
 Sampleable
 -----------
 

@@ -61,7 +61,7 @@ Probability evaluation
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
 
 
-.. function:: pdf!** (r, d, x)
+.. function:: pdf!(r, d, x)
 
     Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
 
@@ -73,7 +73,7 @@ Probability evaluation
     - If ``x`` is a vector, it returns the result as a scalar. 
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
 
-.. function:: logpdf!** (r, d, x)
+.. function:: logpdf!(r, d, x)
 
     Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
 
