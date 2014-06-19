@@ -4,17 +4,6 @@
 #
 ##############################################################################
 
-# array-like characteristics
-
-# size(d::Distribution) = size(rand(d))
-size(d::UnivariateDistribution) = ()
-size(d::MultivariateDistribution) = (dim(d),)
-size(d::MatrixDistribution) = (dim(d), dim(d)) # override if the matrix isn't square
-
-length(d::UnivariateDistribution) = 1
-length(d::MultivariateDistribution) = dim(d)
-length(d::Distribution) = prod(size(d))
-
 # support handling
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
@@ -58,12 +47,6 @@ function insupport!{D<:MatrixDistribution}(r::AbstractArray, d::Union(D,Type{D})
     r
 end
 insupport{D<:MatrixDistribution}(d::Union(D,Type{D}), X::AbstractArray) = insupport!(BitArray(size(X)[3:end]), d, X)
-
-# generic function to get number of samples
-
-nsamples{D<:UnivariateDistribution}(dt::Type{D}, x::Array) = length(x)
-nsamples{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix) = size(x, 2)
-nsamples{D<:MatrixDistribution,T}(dt::Type{D}, x::Array{Matrix{T}}) = length(x)
 
 #### Statistics ####
 mean(d::Distribution) = throw(MethodError(mean,(d,)))
@@ -210,7 +193,7 @@ pmf(d::DiscreteDistribution, args::Any...) = pdf(d, args...)
 # default: inverse transform sampling
 rand(d::UnivariateDistribution) = quantile(d, rand())
 
-function sprand(m::Integer, n::Integer, density::Real, d::Distribution)
+function Base.sprand(m::Integer, n::Integer, density::Real, d::Distribution)
     return sprand(m, n, density, n -> rand(d, n))
 end
 
