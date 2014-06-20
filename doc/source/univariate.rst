@@ -205,6 +205,7 @@ List of Distributions
     - :ref:`erlang`
     - :ref:`exponential`
     - :ref:`fdist`
+    - :ref:`frechet`
     - :ref:`gamma`
     - :ref:`gumbel`
     - :ref:`inversegamma`
@@ -493,6 +494,25 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 .. code-block:: julia
 
     FDist(d1, d2)     # F-Distribution with parameters d1 and d2    
+
+
+.. _frechet:
+
+Fréchet Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a Fréchet distribution with shape k>0 and scale θ>0 is 
+
+.. math::
+
+    f(x; k, \theta) = \frac{k}{\theta} \left( \frac{x}{\theta} \right)^{-k-1} e^{-(x/\theta)^{-k}},
+    \quad x > 0
+
+.. code-block:: julia
+
+    Frechet(k)       # Fréchet distribution with shape k and unit scale
+    Frechet(k, s)    # Fréchet distribution with shape k and scale s
+
 
 .. _gamma:
 
