@@ -501,7 +501,7 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 Fréchet Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a Fréchet distribution with shape k>0 and scale θ>0 is 
+The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape k>0 and scale θ>0 is 
 
 .. math::
 
