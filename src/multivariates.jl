@@ -1,6 +1,17 @@
 
 ##### Generic methods #####
 
+## sampling
+
+function rand!(d::MultivariateDistribution, A::DenseMatrix)
+    size(A,1) == length(d) || 
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(sampler(d), A)
+end
+
+rand(d::MultivariateDistribution) = _rand!(d, Array(eltype(d), length(d)))
+rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), length(d), n))
+
 ## domain
 
 function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractMatrix)

@@ -1,6 +1,14 @@
 
 ##### generic methods (fallback) #####
 
+## sampling
+
+rand(d::UnivariateDistribution) = quantile(d, rand())
+
+rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
+
 ## domain
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)

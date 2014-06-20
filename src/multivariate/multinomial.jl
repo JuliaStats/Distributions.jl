@@ -113,81 +113,11 @@ function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
     return ifelse(t == n, s, -Inf)::Float64
 end
 
-
 # Sampling
-
-function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T})
-    k = length(p)
-    length(x) == k || throw(ArgumentError("Invalid argument dimension."))
-
-    rp = 1.0  # remaining total probability
-    i = 0
-    km1 = k - 1
-
-    while i < km1 && n > 0
-        i += 1
-        @inbounds pi = p[i]
-        if pi < rp            
-            xi = rand(Binomial(n, pi / rp))
-            @inbounds x[i] = xi
-            n -= xi
-            rp -= pi
-        else 
-            # In this case, we don't even have to sample
-            # from Binomial. Just assign remaining counts
-            # to xi. 
-
-            @inbounds x[i] = n
-            n = 0
-            # rp = 0.0 (no need for this, as rp is no longer needed)
-        end
-    end
-
-    if i == km1
-        @inbounds x[k] = n
-    else  # n must have been zero
-        z = zero(T)
-        for j = i+1 : k
-            @inbounds x[j] = z
-        end
-    end
-
-    return x  
-end
 
 _rand!{T<:Real}(d::Multinomial, x::AbstractVector{T}) = multinom_rand!(d.n, d.prob, x)
 
-immutable MultinomialSampler <: DiscreteMultivariateDistribution
-    d::Multinomial
-    alias::AliasTable
-    function MultinomialSampler(d::Multinomial)
-        new(d, AliasTable(d.prob))
-    end
-end
-
-function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
-    d::Multinomial = s.d
-    n::Int = d.n
-    k = length(s)
-    
-    if n^2 > k
-        d = s.d
-        multinom_rand!(n, d.prob, x)
-    else
-        # Use an alias table
-        fill!(x, convert(T, 0))
-        a = s.alias
-        for i = 1:n
-            x[rand(a)] += 1
-        end
-    end
-    return x
-end
-
-length(s::MultinomialSampler) = length(s.d.prob)
-sampler(d::Multinomial) = MultinomialSampler(d)
-
-rand(s::MultinomialSampler) = rand!(s, zeros(Int, length(s)))
+sampler(d::Multinomial) = MultinomialSampler(d.n, d.prob)
 
 
 ## Fit model
