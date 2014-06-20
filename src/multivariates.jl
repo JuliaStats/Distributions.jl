@@ -3,6 +3,12 @@
 
 ## sampling
 
+function rand!(d::MultivariateDistribution, x::DenseVector)
+    length(x) == length(d) || 
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(d, x)
+end
+
 function rand!(d::MultivariateDistribution, A::DenseMatrix)
     size(A,1) == length(d) || 
         throw(DimensionMismatch("Output size inconsistent with sample length."))

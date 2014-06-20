@@ -44,9 +44,7 @@ function mean(IW::InverseWishart)
     end
 end
 
-pdf(IW::InverseWishart, X::Matrix{Float64}) = exp(logpdf(IW, X))
-
-function logpdf(IW::InverseWishart, X::Matrix{Float64})
+function _logpdf{T<:Real}(IW::InverseWishart, X::DenseMatrix{T})
     if !insupport(IW, X)
         return -Inf
     else

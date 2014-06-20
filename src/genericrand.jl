@@ -63,10 +63,3 @@ rand(s::Sampleable{Matrixvariate}, n::Int) =
 # for certain distributions
 sampler(d::Distribution) = d
 
-
-
-
-
-
-rand!{M<:Matrix}(d::MatrixDistribution, A::AbstractArray{M}) = _rand!(sampler(d), A)
-

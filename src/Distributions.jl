@@ -206,8 +206,7 @@ include("genericfit.jl")
 include("samplers.jl")
 include("univariates.jl")
 include("multivariates.jl")
-include(joinpath("matrix", "inversewishart.jl"))
-include(joinpath("matrix", "wishart.jl"))
+include("matrixvariates.jl")
 
 # others
 include("truncate.jl")

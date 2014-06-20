@@ -37,8 +37,6 @@ end
 
 mean(w::Wishart) = w.nu * (w.Schol[:U]' * w.Schol[:U])
 
-pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
-
 function expected_logdet(W::Wishart)
     logd = 0.
     d = dim(W)
@@ -58,7 +56,7 @@ function lognorm(W::Wishart)
     return (W.nu / 2) * logdet(W.Schol) + (d * W.nu / 2) * log(2) + lpgamma(d, W.nu / 2)
 end
 
-function logpdf(W::Wishart, X::Matrix{Float64})
+function _logpdf{T<:Real}(W::Wishart, X::DenseMatrix{T})
     if !insupport(W, X)
         return -Inf
     else
@@ -84,7 +82,7 @@ function rand(w::Wishart)
         end
     end
     Z = X * w.Schol[:U]
-    return Z' * Z
+    return At_mul_B(Z, Z)
 end
 
 function entropy(W::Wishart)

@@ -293,11 +293,9 @@ Following methods need to be implemented for each univariate distribution type (
 
     Return the size of each sample.
 
-.. function:: _rand!{T<:Real}(d::D, x::AbstractMatrix{T})
+.. function:: rand{T<:Real}(d::D)
 
-    Generate a matrix sample to ``x``. 
-
-    This function does not need to perform dimension checking. 
+    Generate a matrix sample. 
 
 .. function:: sampler(d::D)
 
