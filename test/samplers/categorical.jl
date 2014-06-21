@@ -1,6 +1,6 @@
 using Distributions
 using Base.Test
-import Distributions: AliasTable
+import Distributions: CategoricalDirectSampler, AliasTable
 
 function test_categoricalsampler(s, p::Vector{Float64}, n::Int, tol::Float64)
     # s: the sampler to be tested
@@ -24,13 +24,17 @@ function test_categoricalsampler(s, p::Vector{Float64}, n::Int, tol::Float64)
     @test_approx_eq_eps p q tol
 end
 
+@test_throws ErrorException CategoricalDirectSampler(Float64[])
 @test_throws ErrorException AliasTable(Float64[])
 
-s = AliasTable([1.0])
-for i = 1:10
-    @test rand(s) == 1
+
+for S in [CategoricalDirectSampler, AliasTable]
+    s = S([1.0])
+    for i = 1:10
+        @test rand(s) == 1
+    end
+    for p in {[0.3, 0.7], [0.2, 0.3, 0.4, 0.1]}
+        test_categoricalsampler(S(p), p, 10^5, 0.015)
+    end
 end
 
-for p in {[0.3, 0.7], [0.2, 0.3, 0.4, 0.1]}
-    test_categoricalsampler(AliasTable(p), p, 10^5, 0.015)
-end
