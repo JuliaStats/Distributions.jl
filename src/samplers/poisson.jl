@@ -1,4 +1,12 @@
 
+immutable PoissonRmathSampler <: Sampleable{Univariate,Discrete}
+    mu::Float64
+end
+
+rand(s::PoissonRmathSampler) = 
+    int(ccall((:rpois, "libRmath-julia"), Float64, (Float64,), s.mu))
+
+
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
     pv = Array(Float64, n+1)

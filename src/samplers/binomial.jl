@@ -1,6 +1,4 @@
-# BinomialRmathSampler is non-exported, which is mainly used
-# for benchmarking or testing purpose
-#
+
 immutable BinomialRmathSampler <: Sampleable{Univariate,Discrete}
     n::Int
     prob::Float64

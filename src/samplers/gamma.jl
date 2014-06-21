@@ -1,4 +1,12 @@
 
+immutable GammaRmathSampler <: Sampleable{Univariate,Continuous}
+    α::Float64
+    scale::Float64
+end
+
+rand(s::GammaRmathSampler) = 
+    ccall((:rgamma, "libRmath-julia"), Float64, (Float64, Float64), s.α, s.scale)
+
 #  A simple method for generating gamma variables - Marsaglia and Tsang (2000)
 #  http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 #  Page 369
