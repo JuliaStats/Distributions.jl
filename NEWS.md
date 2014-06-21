@@ -7,6 +7,8 @@ Version 0.6
 --------------
 
 * Add Fréchet Distribution ([#238]).
+* Add `CategoricalDirectSampler`.
+
 
 [#238]: https://github.com/JuliaStats/Distributions.jl/pull/238
 
