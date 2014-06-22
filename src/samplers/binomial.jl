@@ -238,8 +238,12 @@ immutable BinomialAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 
-BinomialAliasSampler(n::Int, p::Float64) = 
-    BinomialAliasSampler(make_alias_table!(binompvec(n, p)))
+function BinomialAliasSampler(n::Int, p::Float64)
+    pv = binompvec(n, p)
+    alias = Array(Int, n+1)
+    StatsBase.make_alias_table!(pv, 1.0, pv, alias)
+    BinomialAliasSampler(AliasTable(pv, alias, RandIntSampler(n+1)))
+end
 
 rand(s::BinomialAliasSampler) = rand(s.table) - 1
 
