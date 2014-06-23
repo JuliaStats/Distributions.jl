@@ -38,26 +38,6 @@ function gradlogpdf(d::Chisq, x::Real)
   insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
 end
 
-# rand - the distribution chi^2(df) is 2 * gamma(df / 2)
-# for integer n, a chi^2(n) is the sum of n squared standard normals
-function rand(d::Chisq)
-    d.df == 1 ? randn()^2 : 2.0 * rand(Gamma(d.df / 2.0))
-end
-
-function rand!(d::Chisq, A::Array{Float64})
-    if d.df == 1
-        for i = 1:length(A)
-            @inbounds A[i] = randn()^2
-        end
-    else
-        s = GammaSampler(d.df / 2.0)
-        for i = 1:length(A)
-            @inbounds A[i] = 2.0 * rand(s)
-        end
-    end
-    return A
-end
-
 skewness(d::Chisq) = sqrt(8.0 / d.df)
 
 var(d::Chisq) = 2.0 * d.df

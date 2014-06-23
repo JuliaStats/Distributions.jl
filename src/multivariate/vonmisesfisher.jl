@@ -18,26 +18,22 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     end
 end
 
-dim(d::VonMisesFisher) = length(d.mu)
-
+length(d::VonMisesFisher) = length(d.mu)
 mean(d::VonMisesFisher) = d.mu
-
 scale(d::VonMisesFisher) = d.kappa
 
-insupport{T <: Real}(d::VonMisesFisher, x::Vector{T}) = abs(sum(x) - 1.) < 1e-8
+insupport{T<:Real}(d::VonMisesFisher, x::AbstractVector{T}) = abs(sum(x) - 1.) < 1e-8
 
-function rand(d::VonMisesFisher, n::Int)
-    randvonMisesFisher(n, d.kappa, d.mu)
-end
-
-function logpdf(d::VonMisesFisher, x::Vector{Float64}; stable=true)
-    if abs(d.kappa - 0.0) < eps() return 1/4/pi; end
+function _logpdf{T<:Real}(d::VonMisesFisher, x::DenseVector{T}; stable=true)
+    if abs(d.kappa - 0.0) < eps() 
+        return 0.25 / pi
+    end
     if stable
         # As suggested by Wenzel Jakob: http://www.mitsuba-renderer.org/~wenzel/vmf.pdf
         return d.kappa * dot(d.mu, x) - d.kappa + log(d.kappa) - log(2*pi) - log(1-exp(-2*d.kappa))
     else 
         # As described on Wikipedia
-        p = dim(d)
+        p = length(d)
         logCpk = 0.0
         if p == 3
             logCpk = log(d.kappa) - log(2 * pi * (exp(kappa) - exp(-kappa)))
@@ -48,9 +44,12 @@ function logpdf(d::VonMisesFisher, x::Vector{Float64}; stable=true)
     end
 end
 
-# Helper functions
+# sampling (TODO: make it consistent with the common API)
 
-# Sample n vectors x ~ VonMisesFisher(mu, kappa)
+function rand(d::VonMisesFisher, n::Int)
+    randvonMisesFisher(n, d.kappa, d.mu)
+end
+
 function randvonMisesFisher(n, kappa, mu)
     m = length(mu)
     w = rW(n, kappa, m)

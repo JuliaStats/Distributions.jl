@@ -18,7 +18,7 @@ x = rand(3, 100)
 
 gs = gmvnormal(mu, sqrt(2.0))
 @test isa(gs, IsoNormal)
-@test dim(gs) == 3
+@test length(gs) == 3
 @test mean(gs) == mode(gs) == mu
 @test_approx_eq cov(gs) diagm(fill(2.0, 3))
 @test var(gs) == diag(cov(gs))
@@ -26,7 +26,7 @@ gs = gmvnormal(mu, sqrt(2.0))
 
 gsz = gmvnormal(3, sqrt(2.0))
 @test isa(gsz, IsoNormal)
-@test dim(gsz) == 3
+@test length(gsz) == 3
 @test mean(gsz) == zeros(3)
 @test gsz.zeromean
 
@@ -34,7 +34,7 @@ gsz = gmvnormal(3, sqrt(2.0))
 
 gd = gmvnormal(mu, sqrt(va))
 @test isa(gd, DiagNormal)
-@test dim(gd) == 3
+@test length(gd) == 3
 @test mean(gd) == mode(gd) == mu
 @test_approx_eq cov(gd) diagm(va)
 @test var(gd) == diag(cov(gd))
@@ -42,7 +42,7 @@ gd = gmvnormal(mu, sqrt(va))
 
 gdz = gmvnormal(PDiagMat(va))
 @test isa(gdz, DiagNormal)
-@test dim(gdz) == 3
+@test length(gdz) == 3
 @test mean(gdz) == zeros(3)
 @test gdz.zeromean
 
@@ -50,7 +50,7 @@ gdz = gmvnormal(PDiagMat(va))
 
 gf = MvNormal(mu, C)
 @test isa(gf, MvNormal)
-@test dim(gf) == 3
+@test length(gf) == 3
 @test mean(gf) == mode(gf) == mu
 @test cov(gf) == C
 @test var(gf) == diag(cov(gf))
@@ -58,7 +58,7 @@ gf = MvNormal(mu, C)
 
 gfz = MvNormal(C)
 @test isa(gfz, MvNormal)
-@test dim(gfz) == 3
+@test length(gfz) == 3
 @test mean(gfz) == zeros(3)
 @test gfz.zeromean
 
@@ -106,52 +106,52 @@ for i = 1:n; r[i] = logpdf(gfz, x[:,i]); end
 
 x = rand(gs)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gs)
+@test length(x) == length(gs)
 
 x = rand(gd)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gd)
+@test length(x) == length(gd)
 
 x = rand(gf)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gf)
+@test length(x) == length(gf)
 
 x = rand(gsz)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gsz)
+@test length(x) == length(gsz)
 
 x = rand(gdz)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gdz)
+@test length(x) == length(gdz)
 
 x = rand(gfz)
 @test isa(x, Vector{Float64})
-@test length(x) == dim(gfz)
+@test length(x) == length(gfz)
 
 n = 10
 x = rand(gs, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gs), n)
+@test size(x) == (length(gs), n)
 
 x = rand(gd, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gd), n)
+@test size(x) == (length(gd), n)
 
 x = rand(gf, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gf), n)
+@test size(x) == (length(gf), n)
 
 x = rand(gsz, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gsz), n)
+@test size(x) == (length(gsz), n)
 
 x = rand(gdz, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gdz), n)
+@test size(x) == (length(gdz), n)
 
 x = rand(gfz, n)
 @test isa(x, Matrix{Float64})
-@test size(x) == (dim(gfz), n)
+@test size(x) == (length(gfz), n)
 
 
 ##### MLE

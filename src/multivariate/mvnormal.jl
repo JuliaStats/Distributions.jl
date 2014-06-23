@@ -63,7 +63,7 @@ gmvnormal(Σ::Matrix{Float64}) = MvNormal(Σ)
 
 # Basic statistics
 
-dim(d::GenericMvNormal) = d.dim
+length(d::GenericMvNormal) = d.dim
 
 mean(d::GenericMvNormal) = d.μ
 mode(d::GenericMvNormal) = d.μ
@@ -74,44 +74,43 @@ cov(d::GenericMvNormal) = full(d.Σ)
 invcov(d::GenericMvNormal) = full(inv(d.Σ))
 logdet_cov(d::GenericMvNormal) = logdet(d.Σ)
 
-entropy(d::GenericMvNormal) = 0.5 * (dim(d) * (float64(log2π) + 1.0) + logdet_cov(d))
+entropy(d::GenericMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdet_cov(d))
 
 
 # evaluation (for GenericMvNormal)
 
-function sqmahal(d::GenericMvNormal, x::Vector{Float64}) 
-    z::Vector{Float64} = d.zeromean ? x : x - d.μ
+function sqmahal{T<:Real}(d::GenericMvNormal, x::DenseVector{T}) 
+    z = d.zeromean ? x : x - d.μ
     invquad(d.Σ, z) 
 end
 
-function sqmahal!(r::Array{Float64}, d::GenericMvNormal, x::Matrix{Float64})
-    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-    z::Matrix{Float64} = d.zeromean ? x : x .- d.μ
+function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvNormal, x::DenseMatrix{T})
+    z = d.zeromean ? x : x .- d.μ
     invquad!(r, d.Σ, z)
 end
 
 
 # generic PDF evaluation (appliable to AbstractMvNormal)
 
-insupport{T<:Real}(d::AbstractMvNormal, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{G<:AbstractMvNormal,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
+insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
+    length(d) == length(x) && allfinite(x)
 
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (dim(g) * float64(log2π) + logdet_cov(g))
+mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdet_cov(g))
 
-sqmahal(d::AbstractMvNormal, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
-logpdf(d::AbstractMvNormal, x::Vector{Float64}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
+_logpdf{T<:Real}(d::AbstractMvNormal, x::DenseVector{T}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
 
-function logpdf!(r::Array{Float64}, d::AbstractMvNormal, x::Matrix{Float64})
+function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T})
     sqmahal!(r, d, x)
     c0::Float64 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        r[i] = c0 - 0.5 * r[i]
+        @inbounds r[i] = c0 - 0.5 * r[i]
     end 
     r
 end
+
+_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
 
 function gradlogpdf(d::GenericMvNormal, x::Vector{Float64})
   z::Vector{Float64} = d.zeromean ? x : x - d.μ
@@ -120,7 +119,7 @@ end
 
 # Sampling (for GenericMvNormal)
 
-function rand!(d::GenericMvNormal, x::Vector{Float64})
+function _rand!(d::GenericMvNormal, x::DenseVector{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         add!(x, d.μ)
@@ -128,7 +127,7 @@ function rand!(d::GenericMvNormal, x::Vector{Float64})
     x
 end
 
-function rand!(d::GenericMvNormal, x::Matrix{Float64})
+function _rand!(d::GenericMvNormal, x::DenseMatrix{Float64})
     unwhiten!(d.Σ, randn!(x))
     if !d.zeromean
         μ = d.μ
@@ -156,7 +155,7 @@ IsoNormalKnownSigma(dimension::Int, σ::Float64) =
 DiagNormalKnownSigma(σ::Vector{Float64}) = DiagNormalKnownSigma(abs2(σ))
 MvNormalKnownSigma(C::Matrix{Float64}) = MvNormalKnownSigma(PDMat(C)) 
 
-dim(g::GenericMvNormalKnownSigma) = dim(g.Σ)
+length(g::GenericMvNormalKnownSigma) = dim(g.Σ)
 
 
 immutable GenericMvNormalKnownSigmaStats{Cov<:AbstractPDMat}
@@ -170,7 +169,7 @@ typealias DiagNormalKnownSigmaStats GenericMvNormalKnownSigmaStats{PDiagMat}
 typealias IsoNormalKnownSigmaStats  GenericMvNormalKnownSigmaStats{ScalMat}
 
 function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64})
-    size(x,1) == dim(g) || throw(ArgumentError("Invalid argument dimensions."))
+    size(x,1) == length(g) || throw(ArgumentError("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, 2))
     tw = float64(size(x, 2))
@@ -178,7 +177,7 @@ function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Mat
 end
 
 function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64}, w::Array{Float64})
-    if !(size(x,1) == dim(g) && size(x,2) == length(w))
+    if !(size(x,1) == length(g) && size(x,2) == length(w))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
     invΣ = inv(g.Σ)
@@ -195,14 +194,14 @@ function fit_mle{C<:AbstractPDMat}(g::GenericMvNormalKnownSigma{C}, ss::GenericM
 end
 
 function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64})
-    d = dim(g)
+    d = length(g)
     size(x,1) == d || throw(ArgumentError("Invalid argument dimensions."))
     μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
     GenericMvNormal(μ, g.Σ)
 end
 
 function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64}, w::Array{Float64})
-    d = dim(g)
+    d = length(g)
     if !(size(x,1) == d && size(x,2) == length(w))
         throw(ArgumentError("Inconsistent argument dimensions."))
     end

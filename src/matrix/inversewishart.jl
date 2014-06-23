@@ -19,6 +19,7 @@ immutable InverseWishart <: ContinuousMatrixDistribution
     end
 end
 
+dim(d::InverseWishart) = size(d.Psichol, 1)
 size(d::InverseWishart) = size(d.Psichol)
 
 function InverseWishart(nu::Real, Psi::Matrix{Float64})
@@ -43,9 +44,7 @@ function mean(IW::InverseWishart)
     end
 end
 
-pdf(IW::InverseWishart, X::Matrix{Float64}) = exp(logpdf(IW, X))
-
-function logpdf(IW::InverseWishart, X::Matrix{Float64})
+function _logpdf{T<:Real}(IW::InverseWishart, X::DenseMatrix{T})
     if !insupport(IW, X)
         return -Inf
     else

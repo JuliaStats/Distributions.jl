@@ -20,9 +20,8 @@ function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Re
     Truncated{typeof(d),S}(d,l,u, cdf(d, u) - cdf(d, l))
 end
 
-function insupport(d::Truncated, x::Number)
-    return x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
-end
+insupport(d::Truncated, x::Real) = 
+    x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 
 function pdf(d::Truncated, x::Real)
     if !insupport(d, x)

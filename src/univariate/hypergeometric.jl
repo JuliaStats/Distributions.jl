@@ -13,7 +13,7 @@ end
 
 @_jl_dist_3p Hypergeometric hyper
 
-function insupport(d::Hypergeometric, x::Number)
+function insupport(d::Hypergeometric, x::Real)
     isinteger(x) && zero(x) <= x <= d.n && (d.n - d.nf) <= x <= d.ns
 end
 

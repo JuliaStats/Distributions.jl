@@ -11,7 +11,7 @@ d = VonMisesFisher(mu, kappa)
 
 # Basics
 
-@test dim(d) == D
+@test length(d) == D
 @test d.kappa == kappa
 @test_approx_eq d.mu mean(d)
 @test_approx_eq norm(d.mu) 1.0

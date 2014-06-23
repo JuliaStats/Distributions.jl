@@ -16,7 +16,7 @@ isbounded(::Union(Pareto, Type{Pareto})) = false
 
 minimum(d::Pareto) = d.scale
 maximum(d::Pareto) = Inf
-insupport(d::Pareto, x::Number) = isfinite(x) && x >= d.scale
+insupport(d::Pareto, x::Real) = isfinite(x) && x >= d.scale
 
 mean(d::Pareto) = d.shape > 1.0 ? (d.scale * d.shape) / (d.shape - 1.0) : Inf
 

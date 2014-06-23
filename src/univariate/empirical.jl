@@ -64,7 +64,7 @@ var(d::EmpiricalUnivariateDistribution) = d.var
 
 ### handling support
 
-insupport(d::EmpiricalUnivariateDistribution, x::Number) = contains(d.support, x)
+insupport(d::EmpiricalUnivariateDistribution, x::Real) = contains(d.support, x)
 
 isupperbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
 islowerbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true

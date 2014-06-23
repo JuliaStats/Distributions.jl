@@ -85,7 +85,7 @@ end
 ## Sampling
 function rand(d::Geometric)
     e = Base.Random.randmtzig_exprnd()
-    floor(-e/log1p(-d.prob))
+    ifloor(-e/log1p(-d.prob))
 end
 
 ## Fitting
