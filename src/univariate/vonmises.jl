@@ -59,35 +59,4 @@ function vmcdfseries(κ::Real, x::Real, tol::Real)
 end
 
 ## Sampling
-# normal approximation for large concentrations
-rand(d::VonMises) = mod(d.μ + 
-	(d.κ > 700.0 ? sqrt(1.0 / d.κ) * randn() : vmrand(d.κ)), twoπ)
-
-# from Best & Fisher (1979): Efficient Simulation of the von Mises Distribution
-function vmrand(κ::Float64)
-	const tau = 1.0 + sqrt(1.0 + 4 * κ ^ 2)
-	const rho = (tau - sqrt(2.0 * tau)) / (2.0 * κ)
-	const r = (1.0 + rho ^ 2) / (2.0 * rho)
-
-	f = 0.0
-	while true
-		t, u = 0.0, 0.0
-		while true
-		    const v, w = rand() - 0.5, rand() - 0.5
-		    const d, e = v ^ 2, w ^ 2
-		    if d + e <= 0.25
-		    	t = d / e
-		    	u = 4 * (d + e)
-		    	break
-		    end
-		end
-		const z = (1.0 - t) / (1.0 + t)
-		f = (1.0 + r * z) / (r + z)
-		const c = κ * (r - f)
-		if c * (2.0 - c) > u || log(c / u) + 1 >= c
-			break
-		end
-	end
-	rand() > 0.5 ? acos(f) : -acos(f)
-end
-
+sampler(d::VonMises) = VonMisesSampler(d.μ, d.κ)
