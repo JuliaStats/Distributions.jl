@@ -153,6 +153,7 @@ for finame in ["arcsine.jl",
                "tdist.jl",
                "symtriangular.jl",
                "uniform.jl",
+               "vonmises.jl",
                "weibull.jl"
                ]
     include(joinpath("univariate", finame))

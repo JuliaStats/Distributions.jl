@@ -105,6 +105,7 @@ export
     SymTriangularDist,
     Truncated,
     Uniform,
+    VonMises,
     VonMisesFisher,
     Weibull,
     Wishart,
@@ -117,6 +118,10 @@ export
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
     cgf,                # cumulant generating function
+    circmean,           # mean of circular distribution
+    circmedian,         # median of circular distribution
+    circmode,           # mode of circular distribution
+    circvar,            # variance of circular distribution
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
