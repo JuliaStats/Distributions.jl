@@ -1,3 +1,35 @@
+# This program is a Julia port of KolmogorovSmirnovDist.c, which is 
+# distributed under the GNU GPL v3 license.
+# The original code is available from http://simul.iro.umontreal.ca/ksdir/
+#
+# /********************************************************************
+#  *
+#  * File:          KolmogorovSmirnovDist.c
+#  * Environment:   ISO C99 or ANSI C89
+#  * Author:        Richard Simard
+#  * Organization:  DIRO, Université de Montréal
+#  * Date:          1 February 2012
+#  * Version        1.1
+# 
+#  * Copyright 1 march 2010 by Université de Montréal,
+#                              Richard Simard and Pierre L'Ecuyer
+#  =====================================================================
+# 
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, version 3 of the License.
+# 
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+# 
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+#  =====================================================================*/
+
+
 # Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
 #   D_n = \sup_x |\hat{F}_n(x) - F(x)|
 #   sqrt(n) D_n converges a.s. to the Kolmogorov distribution.
