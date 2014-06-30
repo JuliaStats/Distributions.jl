@@ -1,4 +1,3 @@
-
 sampler_tests = [
     "categorical",
     "binomial", 
@@ -20,6 +19,7 @@ tests = [
     "kolmogorov",
     "edgeworth",
     "matrix",
+    "noncentralhypergeometric",
     "vonmisesfisher",
     "compoundvariate",
     "conjugates",
