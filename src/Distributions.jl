@@ -110,6 +110,7 @@ export
     Uniform,
     VonMises,
     VonMisesFisher,
+    WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
     QQPair,
