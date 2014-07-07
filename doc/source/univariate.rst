@@ -298,7 +298,11 @@ A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`
 Hypergeometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in *n* draws without replacement from a finite population containing *s* successes and *f* failures.
+A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in *n* draws without replacement from a finite population containing *s* successes and *f* failures. The probability mass function is:
+
+.. math::
+
+    P(X=x) = {{{s \choose x} {f \choose {n-x}}}\over {s+f \choose n}}, \quad x \in [\max(0, n - f), \min(n, s)]
 
 .. code-block:: julia
 

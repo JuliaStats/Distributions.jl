@@ -13,6 +13,7 @@ tests = [
     "truncate", 
     "multinomial",
     "dirichlet",
+    "hypergeometric",
     "multivariate",
     "mvnormal",
     "mvtdist",
