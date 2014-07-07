@@ -1,4 +1,3 @@
-
 ##### generic methods (fallback) #####
 
 ## sampling
@@ -143,6 +142,7 @@ for finame in ["arcsine.jl",
                "noncentralbeta.jl",
                "noncentralchisq.jl",
                "noncentralf.jl",
+               "noncentralhypergeometric.jl",
                "noncentralt.jl",
                "normal.jl",
                "normalcanon.jl",
