@@ -34,7 +34,7 @@ It has two type parameters that define the kind of samples that can be drawn the
        **Type**           **Element type**           **Descriptions**
     ------------------ ------------------------- --------------------------------------
      ``Discrete``         ``Int``                   Samples take discrete values
-     ``Discrete``         ``Float64``               Samples take continuous real values
+     ``Continuous``       ``Float64``               Samples take continuous real values
     ================== ========================= ======================================
 
 Multiple samples are often organized into an array, depending on the variate form.
