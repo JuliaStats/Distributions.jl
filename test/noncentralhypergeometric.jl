@@ -40,7 +40,7 @@ ref = Hypergeometric(ns,nf,n)
 @test_approx_eq_eps cdf(d, 51) cdf(ref, 51) 1e-7
 @test_approx_eq_eps quantile(d, 0.05) quantile(ref, 0.05) 1e-7
 @test_approx_eq_eps quantile(d, 0.95) quantile(ref, 0.95) 1e-7
-@test mode(d) == 57
+@test mode(d) == mode(ref)
 
 ## Wallenius' noncentral hypergeometric distribution
 ns = 80
@@ -81,4 +81,4 @@ ref = Hypergeometric(ns,nf,n)
 @test_approx_eq_eps cdf(d, 51) cdf(ref, 51) 1e-7
 @test_approx_eq_eps quantile(d, 0.05) quantile(ref, 0.05) 1e-7
 @test_approx_eq_eps quantile(d, 0.95) quantile(ref, 0.95) 1e-7
-@test mode(d) == 57
+@test mode(d) == mode(ref)

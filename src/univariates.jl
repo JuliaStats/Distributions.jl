@@ -56,6 +56,7 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 ## pdf, cdf, and friends
 
 logpdf(d::UnivariateDistribution, x::Number) = log(pdf(d, x))
+cdf(d::DiscreteUnivariateDistribution, k::Real) = sum([pdf(d,i) for i in minimum(d):k])
 ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
 cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
 
