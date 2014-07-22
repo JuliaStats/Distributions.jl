@@ -48,6 +48,6 @@ function rand(d::NormalInverseGamma)
     if sig2 <= zero(Float64)
         sig2 = eps(Float64)
     end
-    mu = rand(Normal(d.mu, sig2*d.v0))
+    mu = rand(Normal(d.mu, sqrt(sig2*d.v0)))
     return mu, sig2
 end
