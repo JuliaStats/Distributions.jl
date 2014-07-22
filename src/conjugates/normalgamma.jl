@@ -40,7 +40,7 @@ function rand(d::NormalGamma)
     if tau2 <= zero(Float64)
         tau2 = eps(Float64)
     end
-    mu = rand(Normal(d.mu, 1./(tau2*d.nu)))
+    mu = rand(Normal(d.mu, sqrt(1./(tau2*d.nu))))
     return mu, tau2
 end
 
