@@ -44,3 +44,10 @@ function rand(d::NormalGamma)
     return mu, tau2
 end
 
+mean(d::NormalGamma) = (d.mu, d.shape/d.rate)
+
+function var(d::NormalGamma)
+    varmu   = d.rate/(d.nu*(d.shape-1.0))
+    vartau2 = d.shape/(d.rate^2)
+    varmu, vartau2
+end

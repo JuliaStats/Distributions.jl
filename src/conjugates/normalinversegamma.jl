@@ -51,3 +51,15 @@ function rand(d::NormalInverseGamma)
     mu = rand(Normal(d.mu, sqrt(sig2*d.v0)))
     return mu, sig2
 end
+
+function mean(d::NormalInverseGamma)
+    d.shape > 1.0 || throw(ArgumentError("Mean of NormalInverseGamma only defined for shape > 1"))
+    d.mu, d.scale/(d.shape-1.0)
+end
+
+function var(d::NormalInverseGamma)
+    d.shape > 2.0 || throw(ArgumentError("Variance of NormalInverseGamma only defined for shape > 2"))
+    varmu   = d.v0*d.scale/(d.shape-1.0)
+    varsig2 = (d.scale/(d.shape-1))^2/(d.shape-2)
+    varmu, varsig2
+end
