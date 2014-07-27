@@ -27,8 +27,7 @@ function InverseWishart(nu::Real, Psi::Matrix{Float64})
 end
 
 function insupport(IW::InverseWishart, X::Matrix{Float64})
-    return size(X) == size(IW.Psichol) && isApproxSymmmetric(X) &&
-           hasCholesky(X)
+    return size(X) == size(IW) && isApproxSymmmetric(X) && hasCholesky(X)
 end
 # This just checks if X could come from any Inverse-Wishart
 function insupport(::Type{InverseWishart}, X::Matrix{Float64})
@@ -45,17 +44,18 @@ function mean(IW::InverseWishart)
 end
 
 function _logpdf{T<:Real}(IW::InverseWishart, X::DenseMatrix{T})
-    if !insupport(IW, X)
-        return -Inf
-    else
+    Xchol = trycholfact(X)
+    if size(X) == size(IW) && isApproxSymmmetric(X) && isa(Xchol, Cholesky)
         p = size(X, 1)
         logd::Float64 = IW.nu * p / 2.0 * log(2.0)
         logd += lpgamma(p, IW.nu / 2.0)
         logd -= IW.nu / 2.0 * logdet(IW.Psichol)
         logd = -logd
-        logd -= 0.5 * (IW.nu + p + 1.0) * logdet(X)
-        logd -= 0.5 * trace(X \ (IW.Psichol[:U]' * IW.Psichol[:U]))
+        logd -= 0.5 * (IW.nu + p + 1.0) * logdet(Xchol)
+        logd -= 0.5 * trace(inv(Xchol) * (IW.Psichol[:U]' * IW.Psichol[:U]))
         return logd
+    else
+        return -Inf
     end
 end
 

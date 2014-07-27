@@ -27,7 +27,7 @@ dim(W::Wishart) = size(W.Schol, 1)
 size(W::Wishart) = size(W.Schol)
 
 function insupport(W::Wishart, X::Matrix{Float64})
-    return size(X) == size(W.Schol) && isApproxSymmmetric(X) && hasCholesky(X)
+    return size(X) == size(W) && isApproxSymmmetric(X) && hasCholesky(X)
 end
 # This just checks if X could come from any Wishart
 function insupport(::Type{Wishart}, X::Matrix{Float64})
@@ -56,14 +56,15 @@ function lognorm(W::Wishart)
 end
 
 function _logpdf{T<:Real}(W::Wishart, X::DenseMatrix{T})
-    if !insupport(W, X)
-        return -Inf
-    else
+    Xchol = trycholfact(X)
+    if size(X) == size(W) && isApproxSymmmetric(X) && isa(Xchol, Cholesky)
         d = dim(W)
         logd = -lognorm(W)
-        logd += 0.5 * (W.nu - d - 1.0) * logdet(X)
+        logd += 0.5 * (W.nu - d - 1.0) * logdet(Xchol)
         logd -= 0.5 * trace(W.Schol \ X)
         return logd
+    else
+        return -Inf
     end
 end
 
