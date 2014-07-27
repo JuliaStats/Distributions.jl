@@ -27,8 +27,8 @@ function InverseWishart(nu::Real, Psi::Matrix{Float64})
 end
 
 function insupport(IW::InverseWishart, X::Matrix{Float64})
-    return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) &&
-           size(X, 1) == size(IW.Psichol, 1) && hasCholesky(X)
+    return size(X) == size(IW.Psichol) && isApproxSymmmetric(X) &&
+           hasCholesky(X)
 end
 # This just checks if X could come from any Inverse-Wishart
 function insupport(::Type{InverseWishart}, X::Matrix{Float64})

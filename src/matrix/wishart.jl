@@ -27,8 +27,7 @@ dim(W::Wishart) = size(W.Schol, 1)
 size(W::Wishart) = size(W.Schol)
 
 function insupport(W::Wishart, X::Matrix{Float64})
-    return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) &&
-           size(X, 1) == size(W.Schol, 1) && hasCholesky(X)
+    return size(X) == size(W.Schol) && isApproxSymmmetric(X) && hasCholesky(X)
 end
 # This just checks if X could come from any Wishart
 function insupport(::Type{Wishart}, X::Matrix{Float64})
