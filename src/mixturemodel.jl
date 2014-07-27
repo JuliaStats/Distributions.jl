@@ -40,7 +40,9 @@ dim(d::MixtureModel{Multivariate}) = dim(d.components[1])
 function mean(d::MixtureModel)
     m = 0.0
     for i in 1:length(d.components)
-        m += mean(d.components[i]) * d.probs[i]
+        if probs[i] > 0.
+            m += mean(d.components[i]) * d.probs[i]
+        end
     end
     return m
 end
@@ -75,7 +77,9 @@ function var(d::MixtureModel)
     m = 0.0
     squared_mean_mixture = mean(d).^2
     for i in 1:length(d.components)
-        m += (var(d.components[i]) .- squared_mean_mixture .+ mean(d.components[i]).^2) * d.probs[i]
+        if probs[i] > 0.
+            m += (var(d.components[i]) .- squared_mean_mixture .+ mean(d.components[i]).^2) * d.probs[i]
+        end
     end
     return m
 end
