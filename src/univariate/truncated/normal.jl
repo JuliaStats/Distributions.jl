@@ -35,13 +35,12 @@ function rand(d::Truncated{Normal})
     return mu + sigma * z
 end
 
-function var(d::Truncated{Normal})
-    m = mean(d.untruncated)
+function var(d::Truncated{Normal}) 
     s = std(d.untruncated)
-    a = (d.lower-m)/s
-    b = (d.upper-m)/s
-    phi_a = pdf(Normal(), a)
-    phi_b = pdf(Normal(), b)
+    a = d.lower
+    b = d.upper
+    phi_a = pdf(d.untruncated, a) * s
+    phi_b = pdf(d.untruncated, b) * s
     a_phi_a = a == -Inf ? 0.0 : a * phi_a
     b_phi_b = b == Inf ? 0.0 : b * phi_b
     z = d.nc
