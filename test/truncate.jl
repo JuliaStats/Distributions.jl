@@ -31,4 +31,9 @@ d = Truncated(Normal(0, 1), -0.1, +0.1)
 @test abs(cdf(d, quantile(d, 0.50)) - 0.50) < 1e-8
 @test abs(cdf(d, quantile(d, 0.99)) - 0.99) < 1e-8
 
+@test abs(cdf(d, quantile(d, 0.99)) - 0.99) < 1e-8
 
+@test abs(var(Truncated(Normal(1, 3), 2, Inf)) - 2.673385618) < 1e-8
+@test abs(mean(Truncated(Normal(1, 3), 2, Inf)) - 4.064491057) < 1e-8
+@test abs(var(Truncated(Normal(1, 3), 2, 4)) - 0.3252902118) < 1e-8
+@test abs(mean(Truncated(Normal(1, 3), 2, 4)) - 2.927250118) < 1e-8
