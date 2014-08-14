@@ -17,7 +17,14 @@ function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Re
 end
 
 function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Real)
-    Truncated{typeof(d),S}(d,l,u, cdf(d, u) - cdf(d, l))
+    cdf_u = cdf(d, u)
+    cdf_l = cdf(d, l)
+    nc = if cdf_u > 0.98 && cdf_l > 0.98
+        ccdf(d, l) - ccdf(d, u)
+    else
+        cdf_u - cdf_l
+    end
+    Truncated{typeof(d),S}(d,l,u,nc)
 end
 
 insupport(d::Truncated, x::Real) = 
