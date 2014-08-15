@@ -23,9 +23,11 @@ end
 
 Wishart(nu::Real, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 
+dim(W::Wishart) = size(W.Schol, 1)
+size(W::Wishart) = size(W.Schol)
+
 function insupport(W::Wishart, X::Matrix{Float64})
-    return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) &&
-           size(X, 1) == size(W.Schol, 1) && hasCholesky(X)
+    return size(X) == size(W) && isApproxSymmmetric(X) && hasCholesky(X)
 end
 # This just checks if X could come from any Wishart
 function insupport(::Type{Wishart}, X::Matrix{Float64})
@@ -33,11 +35,6 @@ function insupport(::Type{Wishart}, X::Matrix{Float64})
 end
 
 mean(w::Wishart) = w.nu * (w.Schol[:U]' * w.Schol[:U])
-
-pdf(W::Wishart, X::Matrix{Float64}) = exp(logpdf(W, X))
-
-size(W::Wishart) = size(W.Schol)
-dim(W::Wishart) = size(W.Schol, 1)
 
 function expected_logdet(W::Wishart)
     logd = 0.
@@ -58,15 +55,16 @@ function lognorm(W::Wishart)
     return (W.nu / 2) * logdet(W.Schol) + (d * W.nu / 2) * log(2) + lpgamma(d, W.nu / 2)
 end
 
-function logpdf(W::Wishart, X::Matrix{Float64})
-    if !insupport(W, X)
-        return -Inf
-    else
+function _logpdf{T<:Real}(W::Wishart, X::DenseMatrix{T})
+    Xchol = trycholfact(X)
+    if size(X) == size(W) && isApproxSymmmetric(X) && isa(Xchol, Cholesky)
         d = dim(W)
         logd = -lognorm(W)
-        logd += 0.5 * (W.nu - d - 1.0) * logdet(X)
+        logd += 0.5 * (W.nu - d - 1.0) * logdet(Xchol)
         logd -= 0.5 * trace(W.Schol \ X)
         return logd
+    else
+        return -Inf
     end
 end
 
@@ -84,7 +82,7 @@ function rand(w::Wishart)
         end
     end
     Z = X * w.Schol[:U]
-    return Z' * Z
+    return At_mul_B(Z, Z)
 end
 
 function entropy(W::Wishart)

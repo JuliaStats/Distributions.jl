@@ -24,7 +24,7 @@ immutable MixtureModel{VF,VS,Component<:Distribution} <: Distribution{VF,VS}
             end
             sump += p[i]
         end
-        table = AliasTable(p)
+        table = AliasTable(p ./ sump)
         new(c, p ./ sump, table)
     end
 end
@@ -45,7 +45,7 @@ function mean(d::MixtureModel)
     return m
 end
 
-function _pdf(d::MixtureModel, x)
+function _mixpdf(d::MixtureModel, x)
     p = 0.0
     for i in 1:length(d.components)
         p += pdf(d.components[i], x) * d.probs[i]
@@ -53,32 +53,29 @@ function _pdf(d::MixtureModel, x)
     return p
 end
 
-function _logpdf(d::MixtureModel, x)
+function _mixlogpdf(d::MixtureModel, x)
     l = [(logpdf(d.components[i],x)+log(d.probs[i]))::Float64
          for i in find(d.probs .> 0.)]
     m = maximum(l)
     log(sum(exp(l.-m))) + m
 end
 
-# avoid dispatch ambiguity by defining sufficiently specific methods
-pdf(d::MixtureModel{Univariate}, x::Real) = _pdf(d, x)
-pdf(d::MixtureModel{Multivariate}, x::Vector) = _pdf(d, x)
-pdf(d::MixtureModel{Matrixvariate}, x::Matrix) = _pdf(d, x)
+pdf(d::MixtureModel{Univariate}, x::Real) = _mixpdf(d, x)
+logpdf(d::MixtureModel{Univariate}, x::Real) = _mixlogpdf(d, x)
 
-logpdf(d::MixtureModel{Univariate}, x::Real) = _logpdf(d,x)
-logpdf(d::MixtureModel{Multivariate}, x::Vector) = _logpdf(d,x)
-logpdf(d::MixtureModel{Matrixvariate}, x::Matrix) = _logpdf(d,x)
+_pdf(d::MixtureModel{Multivariate}, x::AbstractVector) = _mixpdf(d, x)
+_logpdf(d::MixtureModel{Multivariate}, x::AbstractVector) = _mixpdf(d, x)
 
 function rand(d::MixtureModel)
     i = rand(d.aliastable)
     return rand(d.components[i])
 end
 
-# TODO: Correct this definition
 function var(d::MixtureModel)
     m = 0.0
+    squared_mean_mixture = mean(d).^2
     for i in 1:length(d.components)
-        m += var(d.components[i]) * d.probs[i]^2
+        m += (var(d.components[i]) .- squared_mean_mixture .+ mean(d.components[i]).^2) * d.probs[i]
     end
     return m
 end

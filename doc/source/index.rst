@@ -1,5 +1,5 @@
-Distributions Package (version 0.4.2)
-=======================================
+Distributions Package
+=======================
 
 The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
 
@@ -14,12 +14,13 @@ The *Distributions* package provides a large collection of probabilistic distrib
 .. toctree::
    :maxdepth: 2
 
-   distributions.rst
+   types.rst
    univariate.rst
    multivariate.rst
    matrix.rst
    fit.rst
    conjugates.rst
+   extends.rst
 
 
 .. Indices and tables

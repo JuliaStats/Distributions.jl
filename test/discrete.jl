@@ -9,12 +9,11 @@
 #   - DiscreteUniform
 #
 
-import NumericExtensions
 using Distributions
 using Base.Test
+import StatsBase: entropy
 
-
-for d in [
+distlist = [
     Bernoulli(0.1),
     Bernoulli(0.5),
     Bernoulli(0.9), 
@@ -28,8 +27,21 @@ for d in [
     Binomial(100, 0.1),
     Binomial(100, 0.9)]
 
-    # NB: uncomment if some tests failed
-    # println(d)
+if length(ARGS) > 0
+    newdistlist = {}
+    for arg in ARGS
+        a = eval(parse(arg))
+        if isa(a, DataType)
+            append!(newdistlist, filter(x -> isa(x,a),distlist))
+        elseif isa(a,Distribution)
+            push!(newdistlist, a)
+        end
+    end
+    distlist = newdistlist    
+end
+
+for d in distlist
+    length(ARGS) > 0 && println(d)
 
     xmin = minimum(d)
     xmax = maximum(d)
@@ -140,7 +152,7 @@ for d in [
     xmean = dot(p, xf)
     xvar = dot(p, abs2(xf .- xmean))
     xstd = sqrt(xvar)
-    xentropy = NumericExtensions.entropy(p)
+    xentropy = entropy(p)
     xskew = dot(p, (xf .- xmean).^3) / (xstd.^3)
     xkurt = dot(p, (xf .- xmean).^4) / (xvar.^2) - 3.0
 

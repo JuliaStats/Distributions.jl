@@ -28,14 +28,13 @@ immutable DirichletCanon
     alpha::Vector{Float64}
 end
 
-dim(d::DirichletCanon) = length(d.alpha)
+length(d::DirichletCanon) = length(d.alpha)
 Base.convert(::Type{Dirichlet}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 
 
 # Properties
 
-dim(d::Dirichlet) = length(d.alpha)
-
+length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 
 function var(d::Dirichlet)
@@ -112,7 +111,7 @@ modes(d::Dirichlet) = [mode(d)]
 
 # Evaluation
 
-function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
+function insupport{T<:Real}(d::Dirichlet, x::AbstractVector{T})
     n = length(x)
     if length(d.alpha) != n
         return false
@@ -131,79 +130,26 @@ function insupport{T <: Real}(d::Dirichlet, x::Vector{T})
     return true
 end
 
-pdf{T <: Real}(d::Dirichlet, x::Vector{T}) = exp(logpdf(d, x))
-
-function logpdf{T <: Real}(d::Dirichlet, x::Vector{T})
+function _logpdf{T<:Real}(d::Dirichlet, x::AbstractVector{T})
     a = d.alpha
-    k = length(a)
-    if length(x) != k
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
     s = 0.
-    for i in 1 : k
-        s += (a[i] - 1.0) * log(x[i])
+    for i in 1:length(a)
+        @inbounds s += (a[i] - 1.0) * log(x[i])
     end
-    s - d.lmnB
+    return s - d.lmnB
 end
-
-function logpdf!{T <: Real}(r::AbstractArray, d::Dirichlet, x::Matrix{T})
-    a = d.alpha
-    if size(x, 1) != length(d.alpha)
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    n = size(x, 2)
-    if length(r) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    b::Float64 = d.lmnB
-    Base.LinAlg.BLAS.gemv!('T', 1.0, log(x), d.alpha .- 1.0, 0.0, r)
-    # At_mul_B(r, log(x), d.alpha - 1.0)
-    for i in 1:n
-        r[i] -= b
-    end
-    r
-end
-
 
 # sampling
 
-function rand!(d::Union(Dirichlet,DirichletCanon), x::Vector)
+function _rand!{T<:Real}(d::Union(Dirichlet,DirichletCanon), x::AbstractVector{T})
     s = 0.0
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = randg(α[i]))
+        @inbounds s += (x[i] = rand(Gamma(α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
-
-rand(d::Union(Dirichlet,DirichletCanon)) = rand!(d, Array(Float64, dim(d)))
-
-function rand!(d::Union(Dirichlet,DirichletCanon), X::Matrix)
-    k = size(X, 1)
-    n = size(X, 2)
-    if k != dim(d)
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    α = d.alpha
-    for j = 1:n
-        s = 0.
-        for i = 1:k
-            @inbounds s += (X[i,j] = randg(α[i]))
-        end
-        inv_s = 1.0 / s
-        for i = 1:k
-            @inbounds X[i,j] *= inv_s
-        end
-    end
-
-    return X
-end
-
 
 #######################################
 #
@@ -218,7 +164,7 @@ immutable DirichletStats <: SufficientStats
     DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, float64(tw))
 end
 
-dim(ss::DirichletStats) = length(s.slogp)
+length(ss::DirichletStats) = length(s.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 

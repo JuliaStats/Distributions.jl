@@ -1,7 +1,16 @@
+.. _univariates:
+
 Univariate Distributions
 ==========================
 
-*Univariate distributions* are the distributions whose samples are scalars (*e.g.* integers or real values). 
+*Univariate distributions* are the distributions whose variate forms are ``Univariate`` (*i.e* each sample is a scalar). Abstract types for univariate distributions:
+
+.. code-block:: julia
+
+    typealias UnivariateDistribution{S<:ValueSupport} Distribution{Univariate,S}
+
+    typealias DiscreteUnivariateDistribution   Distribution{Univariate, Discrete}
+    typealias ContinuousUnivariateDistribution Distribution{Univariate, Continuous}
 
 
 Common Interface
@@ -14,97 +23,117 @@ Computation of statistics
 
 Let ``d`` be a distribution:
 
-- **mean** (d)
+.. function:: mean(d)
 
     Return the expectation of distribution ``d``.
 
-- **var** (d)
+.. function:: var(d)
 
     Return the variance of distribution ``d``.
 
-- **std** (d)
+.. function:: std(d)
 
     Return the standard deviation of distribution ``d``, i.e. ``sqrt(var(d))``.
 
-- **median** (d)
+.. function:: median(d)
 
     Return the median value of distribution ``d``.
 
-- **modes** (d)    
+.. function:: modes(d)    
 
     Return an array of all modes of ``d``. 
 
-- **mode** (d)
+.. function:: mode(d)
 
     Return the mode of distribution ``d``. If ``d`` has multiple modes, it returns the first one, i.e. ``modes(d)[1]``.
 
-- **skewness** (d)
+.. function:: skewness(d)
 
     Return the skewness of distribution ``d``.
 
-- **kurtosis** (d)
+.. function:: kurtosis(d)
 
     Return the excess kurtosis of distribution ``d``.
 
-- **entropy** (d)
+.. function:: isplatykurtic(d)
+
+    Return whether ``d`` is platykurtic (*i.e* ``kurtosis(d) > 0``).
+
+.. function:: isleptokurtic(d)
+
+    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) < 0``).
+
+.. function:: ismesokurtic(d)
+
+    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) == 0``).
+
+.. function:: entropy(d)
 
     Return the entropy value of distribution ``d``.
 
-- **mgf** (d, t)
+.. function:: entropy(d, base)
+
+    Return the entropy value of distribution ``d``, w.r.t. a given base. 
+
+.. function:: mgf(d, t)
 
     Evaluate the moment generating function of distribution ``d``.
 
-- **cf** (d, t)
+.. function:: cf(d, t)
 
     Evaluate the characteristic function of distribution ``d``. 
 
 Probability Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-- **insupport** (d, x)
+.. function:: insupport(d, x)
 
     When ``x`` is a scalar, it returns whether x is within the support of ``d``. 
     When ``x`` is an array, it returns whether every element in x is within the support of ``d``. 
 
-- **pdf** (d, x)
+.. function:: pdf(d, x)
 
     The pdf value(s) evaluated at ``x``.
 
-- **logpdf** (d, x)
+.. function:: logpdf(d, x)
 
     The logarithm of the pdf value(s) evaluated at x, i.e. ``log(pdf(x))``. 
 
     **Node:** The internal implementation may directly evaluate logpdf instead of first computing pdf and then taking the logarithm, for better numerical stability or efficiency.
 
-- **cdf** (d, x)
+.. function:: loglikelihood(d, x)
+
+    The log-likelihood of distribution ``d`` w.r.t. all samples contained in array ``x``.
+
+.. function:: cdf(d, x)
 
     The cumulative distribution function evaluated at ``x``.
 
-- **logcdf** (d, x)        
+.. function:: logcdf(d, x)        
 
     The logarithm of the cumulative function value(s) evaluated at ``x``, i.e. ``log(cdf(x))``.
 
-- **ccdf** (d, x)
+.. function:: ccdf(d, x)
 
     The complementary cumulative function evaluated at ``x``, i.e. ``1 - cdf(d, x)``.
 
-- **logccdf** (d, x)
+.. function:: logccdf(d, x)
 
     The logarithm of the complementary cumulative function values evaluated at x, i.e. ``log(ccdf(x))``.
 
-- **quantile** (d, q)
+.. function:: quantile(d, q)
 
     The quantile value. Let ``x = quantile(d, q)``, then ``cdf(d, x) = q``.
 
-- **cquantile** (d, q)
+.. function:: cquantile(d, q)
 
     The complementary quantile value, i.e. ``quantile(d, 1-q)``.
 
-- **invlogcdf** (d, lp)
+.. function:: invlogcdf(d, lp)
 
     The inverse function of logcdf. 
 
-- **invlogccdf** (d, lp)
+.. function:: invlogccdf(d, lp)
 
     The inverse function of logccdf.    
 
@@ -131,35 +160,22 @@ For example, when ``x`` is an array, then ``r = pdf(d, x)`` returns an array ``r
 Sampling (Random number generation)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- **rand** (d)
+.. function:: rand(d)
 
     Draw a sample from d
 
-- **rand** (d, n)
+.. function:: rand(d, n)
 
     Return a vector comprised of n independent samples from the distribution ``d``.
 
-- **rand** (d, dims)
+.. function:: rand(d, dims)
 
     Return an array of size dims that is filled with independent samples from the distribution ``d``.            
 
-- **rand!** (d, arr)
+.. function:: rand!(d, arr)
 
-    Fills a pre-allocated array arr with independent samples from the distribution ``d``.
+    Fills a pre-allocated array ``arr`` with independent samples from the distribution ``d``.
 
-
-Variate Dimensions
-~~~~~~~~~~~~~~~~~~~~
-
-The functions ``size`` and ``length`` apply to any type of distribution.
-
-- **size** (d)
-
-   For univariate distributions, this is always ``()``. In the general case, ``size(d)==size(rand(d))``.
-
-- **length** (d)
-
-   For univariate distributions, this is always ``1``. In the general case, ``length(d)==length(rand(d))``.
 
 List of Distributions
 ----------------------
@@ -178,7 +194,7 @@ List of Distributions
     - :ref:`poisson`
     - :ref:`skellam`
 
-* Continguous univariate distributions:
+* Continuous univariate distributions:
 
     - :ref:`arcsine`
     - :ref:`beta`
@@ -189,6 +205,7 @@ List of Distributions
     - :ref:`erlang`
     - :ref:`exponential`
     - :ref:`fdist`
+    - :ref:`frechet`
     - :ref:`gamma`
     - :ref:`gumbel`
     - :ref:`inversegamma`
@@ -203,6 +220,7 @@ List of Distributions
     - :ref:`tdist`
     - :ref:`triangular`
     - :ref:`uniform`
+    - :ref:`vonmises`
     - :ref:`weibull`
 
 
@@ -281,7 +299,11 @@ A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`
 Hypergeometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in *n* draws without replacement from a finite population containing *s* successes and *f* failures.
+A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in *n* draws without replacement from a finite population containing *s* successes and *f* failures. The probability mass function is:
+
+.. math::
+
+    P(X=x) = {{{s \choose x} {f \choose {n-x}}}\over {s+f \choose n}}, \quad x \in [\max(0, n - f), \min(n, s)]
 
 .. code-block:: julia
 
@@ -478,6 +500,25 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 .. code-block:: julia
 
     FDist(d1, d2)     # F-Distribution with parameters d1 and d2    
+
+
+.. _frechet:
+
+Fréchet Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape k>0 and scale θ>0 is 
+
+.. math::
+
+    f(x; k, \theta) = \frac{k}{\theta} \left( \frac{x}{\theta} \right)^{-k-1} e^{-(x/\theta)^{-k}},
+    \quad x > 0
+
+.. code-block:: julia
+
+    Frechet(k)       # Fréchet distribution with shape k and unit scale
+    Frechet(k, s)    # Fréchet distribution with shape k and scale s
+
 
 .. _gamma:
 
@@ -728,6 +769,24 @@ The probability density function of a `Continuous Uniform distribution <http://e
 
     Uniform()        # Uniform distribution over [0, 1]
     Uniform(a, b)    # Uniform distribution over [a, b]
+
+.. _vonmises:
+
+Von Mises Distribution
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a `von Mises distribution <http://en.wikipedia.org/wiki/Von_Mises_distribution>`_ with mean μ and concentration κ is
+
+.. math::
+
+    f(x; \mu, \kappa) = \frac{1}{2 \pi I_0(\kappa)} \exp \left( \kappa \cos (x - \mu) \right)
+
+.. code-block:: julia
+
+    VonMises()       # von Mises distribution with zero mean and unit concentration
+    VonMises(κ)      # von Mises distribution with zero mean and concentration κ
+    VonMises(μ, κ)   # von Mises distribution with mean μ and concentration κ
+
 
 .. _weibull:
 

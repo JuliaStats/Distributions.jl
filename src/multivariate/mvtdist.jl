@@ -67,7 +67,7 @@ mvtdist(df::Float64, Σ::Matrix{Float64}) = MvTDist(df, Σ)
 
 # Basic statistics
 
-dim(d::GenericMvTDist) = d.dim
+length(d::GenericMvTDist) = d.dim
 
 mean(d::GenericMvTDist) = d.df>1 ? d.μ : NaN
 mode(d::GenericMvTDist) = d.μ
@@ -89,77 +89,80 @@ end
 
 # evaluation (for GenericMvTDist)
 
-function sqmahal(d::GenericMvTDist, x::Vector{Float64}) 
+insupport{T<:Real}(d::AbstractMvTDist, x::AbstractVector{T}) = 
+  length(d) == length(x) && allfinite(x)
+
+function sqmahal{T<:Real}(d::GenericMvTDist, x::DenseVector{T}) 
     z::Vector{Float64} = d.zeromean ? x : x - d.μ
     invquad(d.Σ, z) 
 end
 
-function sqmahal!(r::Array{Float64}, d::GenericMvTDist, x::Matrix{Float64})
-    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-    z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
+function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvTDist, x::DenseMatrix{T})
+    z::Matrix{Float64} = d.zeromean ? x : x .- d.μ
     invquad!(r, d.Σ, z)
 end
 
-# generic PDF evaluation (appliable to AbstractMvTDist)
-
-insupport{T<:Real}(d::AbstractMvTDist, x::Vector{T}) = dim(d) == length(x) && allfinite(x)
-insupport{G<:AbstractMvTDist,T<:Real}(::Type{G}, x::Vector{T}) = allfinite(x)
+sqmahal{T<:Real}(d::AbstractMvTDist, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
 
-sqmahal(d::AbstractMvTDist, x::Matrix{Float64}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
-
-function logpdf(d::AbstractMvTDist, x::Vector{Float64})
-  hdf, hdim = 0.5*d.df, 0.5*d.dim
-  shdfhdim = hdf+hdim
-  lgamma(shdfhdim)-lgamma(hdf)-hdim*log(d.df)-hdim*log(pi)-0.5*logdet(d.Σ)-shdfhdim*log(1+sqmahal(d, x)/d.df)
+function mvtdist_consts(d::AbstractMvTDist)
+    hdf = 0.5 * d.df
+    hdim = 0.5 * d.dim
+    shdfhdim = hdf + hdim
+    v = lgamma(shdfhdim) - lgamma(hdf) - hdim*log(d.df) - hdim*log(pi) - 0.5*logdet(d.Σ)
+    return (shdfhdim, v)
 end
 
-function logpdf!(r::Array{Float64}, d::AbstractMvTDist, x::Matrix{Float64})
-  sqmahal!(r, d, x)
-  hdf, hdim = 0.5*d.df, 0.5*d.dim
-  shdfhdim = hdf+hdim
-  for i = 1:size(x, 2)
-    r[i] = lgamma(shdfhdim)-lgamma(hdf)-hdim*log(d.df)-hdim*log(pi)-0.5*logdet(d.Σ)-shdfhdim*log(1+r[i]/d.df)
-  end 
-  r
+function _logpdf{T<:Real}(d::AbstractMvTDist, x::DenseVector{T})
+    shdfhdim, v = mvtdist_consts(d)
+    v - shdfhdim * log1p(sqmahal(d, x) / d.df)
 end
 
-function gradlogpdf(d::GenericMvTDist, x::Vector{Float64})
-  z::Vector{Float64} = d.zeromean ? x : x - d.μ
-  prz = invscale(d)*z
-  -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
+function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvTDist, x::DenseMatrix{T})
+    sqmahal!(r, d, x)
+    shdfhdim, v = mvtdist_consts(d)
+    for i = 1:size(x, 2)
+        r[i] = v - shdfhdim * log1p(r[i] / d.df)
+    end
+    return r
+end
+
+_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::DenseMatrix{T}) = exp!(_logpdf!(r, d, x))
+
+function gradlogpdf{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
+    z::Vector{Float64} = d.zeromean ? x : x - d.μ
+    prz = invscale(d)*z
+    -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
 end
 
 # Sampling (for GenericMvTDist)
 
-function rand!(d::GenericMvTDist, x::Vector{Float64})
-  normdim = d.dim
-  normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
-  chisqd = Chisq(d.df)
-  y = Array(Float64, d.dim)
-  unwhiten!(normd.Σ, randn!(x))
-  rand!(chisqd, y)
-  y = sqrt(y/(d.df))
-  divide!(x, y)
-  if !d.zeromean
-    add!(x, d.μ)
-  end
-  x
+function _rand!{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
+    normdim = d.dim
+    normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+    chisqd = Chisq(d.df)
+    y = Array(Float64, d.dim)
+    unwhiten!(normd.Σ, randn!(x))
+    rand!(chisqd, y)
+    y = sqrt(y/(d.df))
+    broadcast!(/, x, x, y)
+    if !d.zeromean
+    broadcast!(+, x, x, d.μ)
+    end
+    x
 end
 
-function rand!(d::GenericMvTDist, x::Matrix{Float64})
-  normdim = d.dim
-  normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
-  chisqd = Chisq(d.df)
-  y = Array(Float64, d.dim)
-  unwhiten!(normd.Σ, randn!(x))
-  rand!(chisqd, y)
-  y = sqrt(y/(d.df))
-  bdivide!(x, y, 1)
-  if !d.zeromean
-    badd!(x, d.μ, 1)
-  end
-  x
+function _rand!{T<:Real}(d::GenericMvTDist, x::DenseMatrix{T})
+    normdim = d.dim
+    normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+    chisqd = Chisq(d.df)
+    y = Array(Float64, d.dim)
+    unwhiten!(normd.Σ, randn!(x))
+    rand!(chisqd, y)
+    y = sqrt(y/(d.df))
+    broadcast!(/, x, x, y)
+    if !d.zeromean
+    broadcast!(+, x, x, d.μ)
+    end
+    x
 end

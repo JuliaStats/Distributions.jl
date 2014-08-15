@@ -20,9 +20,8 @@ function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Re
     Truncated{typeof(d),S}(d,l,u, cdf(d, u) - cdf(d, l))
 end
 
-function insupport(d::Truncated, x::Number)
-    return x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
-end
+insupport(d::Truncated, x::Real) = 
+    x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 
 function pdf(d::Truncated, x::Real)
     if !insupport(d, x)
@@ -59,11 +58,15 @@ end
 median(d::Truncated) = quantile(d, 0.5)
 
 function rand(d::Truncated)
-    while true
-        r = rand(d.untruncated)
-        if d.lower <= r <= d.upper
-            return r
+    if d.nc > 0.25
+        while true
+            r = rand(d.untruncated)
+            if d.lower <= r <= d.upper
+                return r
+            end
         end
+    else
+        return quantile(d.untruncated, cdf(d.untruncated, d.lower) + rand() * d.nc)
     end
 end
 

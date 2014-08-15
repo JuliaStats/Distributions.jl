@@ -32,6 +32,41 @@ function isprobvec(p::Vector{Float64})
     return abs(s - 1.0) <= 1.0e-12
 end
 
+function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
+	s = 0.
+	n = length(v)
+	for i = 1:n
+		@inbounds s += v[i]
+	end
+	for i = 1:n
+		@inbounds v[i] /= s
+	end
+	v
+end
+
+function add!(x::AbstractArray, y::AbstractArray)
+	n = length(x)
+	length(y) == n || throw(DimensionMismatch("Inconsistent array lengths."))
+	for i = 1:n
+		x[i] += y[i]
+	end
+	x
+end
+
+function multiply!(x::AbstractArray, c::Number)
+	for i = 1:length(x)
+		@inbounds x[i] *= c
+	end
+	x
+end
+
+function exp!(x::AbstractArray)
+	for i = 1:length(x)
+		@inbounds x[i] = exp(x[i])
+	end
+	x
+end
+
 # macros for generating functions for support handling
 #
 # Both lb & ub should be compile-time constants
@@ -87,15 +122,7 @@ end
 macro checkquantile(p,ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
-
-# get the variate form (uni/multi/matrix-variate) of a Distribution
-variate_form{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VF
-variate_form{T<:Distribution}(::Type{T}) = variate_form(super(T))
-
-# get the value support (discrete/continuous) of a Distribution
-value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VS
-value_support{T<:Distribution}(::Type{T}) = value_support(super(T))
-
 macro checkinvlogcdf(lp,ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
+

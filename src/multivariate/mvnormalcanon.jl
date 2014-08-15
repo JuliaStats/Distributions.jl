@@ -77,7 +77,7 @@ canonform{C<:AbstractPDMat}(d::GenericMvNormal{C}) = convert(GenericMvNormalCano
 
 # Basic statistics
 
-dim(d::GenericMvNormalCanon) = d.dim
+length(d::GenericMvNormalCanon) = d.dim
 
 mean(d::GenericMvNormalCanon) = d.μ
 mode(d::GenericMvNormalCanon) = d.μ
@@ -88,7 +88,7 @@ cov(d::GenericMvNormalCanon) = full(inv(d.J))
 invcov(d::GenericMvNormalCanon) = full(d.J)
 logdet_cov(d::GenericMvNormalCanon) = -logdet(d.J)
 
-entropy(d::GenericMvNormalCanon) = 0.5 * (dim(d) * (float64(log2π) + 1.0) - logdet(d.J))
+entropy(d::GenericMvNormalCanon) = 0.5 * (length(d) * (float64(log2π) + 1.0) - logdet(d.J))
 
 
 # PDF evaluation
@@ -99,9 +99,6 @@ function sqmahal(d::GenericMvNormalCanon, x::Vector{Float64})
 end
 
 function sqmahal!(r::Array{Float64}, d::GenericMvNormalCanon, x::Matrix{Float64})
-    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
     z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
     quad!(r, d.J, z)
 end
@@ -109,7 +106,7 @@ end
 
 # Sampling (for GenericMvNormal)
 
-function rand!(d::GenericMvNormalCanon, x::Vector{Float64})
+function _rand!(d::GenericMvNormalCanon, x::DenseVector{Float64})
     unwhiten_winv!(d.J, randn!(x))
     if !d.zeromean
         add!(x, d.μ)
@@ -117,7 +114,7 @@ function rand!(d::GenericMvNormalCanon, x::Vector{Float64})
     x
 end
 
-function rand!(d::GenericMvNormalCanon, x::Matrix{Float64})
+function _rand!(d::GenericMvNormalCanon, x::DenseMatrix{Float64})
     unwhiten_winv!(d.J, randn!(x))
     if !d.zeromean
         badd!(x, d.μ, 1)

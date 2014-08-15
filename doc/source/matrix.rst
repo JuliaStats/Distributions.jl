@@ -1,42 +1,38 @@
-Matrix Distributions
-======================
+.. _matrix:
 
-The *Distributions* package implements two matrix distributions: *Wishart* and *InverseWishart*.
+Matrix-variate Distributions
+=============================
+
+*Matrix-variate distributions* are the distributions whose variate forms are ``Matrixvariate`` (*i.e* each sample is a matrix). Abstract types for matrix-variate distributions:
 
 Common Interface
 ------------------
 
 Both distributions implement the same set of methods:
 
-- **mean** (d)
+.. function:: size(d)
+
+   The size of each sample from the distribution ``d``.
+
+.. function:: length(d)
+
+   The length (*i.e* number of elements) of each sample from the distribution ``d``.
+
+.. function:: mean(d)
 
 	Return the mean matrix of ``d``.
 
-- **pdf** (d, x)
+.. function:: pdf(d, x)
 
 	Compute the probability density at the input matrix ``x``.
 
-- **logpdf** (d, x)
+.. function:: logpdf(d, x)
 
 	Compute the logarithm of the probability density at the input matrix ``x``.
 
-- **rand** (d)
+.. function:: rand(d)
 
 	Draw a sample matrix from the distribution ``d``.
-
-
-Variate Dimensions
-~~~~~~~~~~~~~~~~~~~~
-
-The functions ``size`` and ``length`` apply to any type of distribution.
-
-- **size** (d)
-
-   ``size(d)==size(rand(d))``, that is, the size of the samples from this distribution.
-
-- **length** (d)
-
-   ``length(d)==length(rand(d))``, that is, the total number of elements in a sampled matrix.
 
 
 Wishart Distribution
