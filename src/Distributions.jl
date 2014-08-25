@@ -105,6 +105,7 @@ export
     Rayleigh,
     Skellam,
     TDist,
+    TriangularDist,
     SymTriangularDist,
     Truncated,
     Uniform,

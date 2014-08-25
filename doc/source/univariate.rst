@@ -218,6 +218,7 @@ List of Distributions
     - :ref:`pareto`
     - :ref:`rayleigh`
     - :ref:`tdist`
+    - :ref:`triangular`
     - :ref:`uniform`
     - :ref:`vonmises`
     - :ref:`weibull`
@@ -733,6 +734,25 @@ The probability density function of a `Students T distribution <http://en.wikipe
 
     TDist(d)      # t-distribution with d degrees of freedom
 
+.. _triangular:
+
+Triangular Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a `Triangular distribution <http://en.wikipedia.org/wiki/Triangular_distribution>`_ with lower limit a, upper limit b and mode c is
+
+.. math::
+    
+    f(x; a, b, c)= \begin{cases}
+        0 & \mathrm{for\ } x < a, \\
+        \frac{2(x-a)}{(b-a)(c-a)} & \mathrm{for\ } a \le x \leq c, \\[4pt]
+        \frac{2(b-x)}{(b-a)(b-c)} & \mathrm{for\ } c < x \le b, \\[4pt]
+        0 & \mathrm{for\ } b < x,
+        \end{cases}
+
+.. code-block:: julia
+
+    TriangularDist(a, b, c)     # Triangular distribution with lower limit a, upper limit b and mode c
 
 .. _uniform:
 
