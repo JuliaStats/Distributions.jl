@@ -22,25 +22,6 @@ pdf(d::NoncentralHypergeometric, k::Real) = exp(logpdf(d,k))
 logpdf(d::NoncentralHypergeometric, k::Real) = log(pdf(d,k))
 cdf(d::NoncentralHypergeometric, k::Real) = sum([pdf(d,i) for i in minimum(d):k])
 
-function quantile(d::NoncentralHypergeometric, q::Real)
-    if !(zero(q) <= q <= one(q))
-        NaN
-    else
-        range = support(d)
-        if q > 0.5
-            q = 1-q
-            range = reverse(range)
-        end
-
-        qsum, i = 0.0, 0
-        while qsum < q
-            i += 1
-            qsum += pdf(d, range[i])
-        end
-        range[i]
-    end
-end
-
 ## Fisher's noncentral hypergeometric distribution
 
 immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric

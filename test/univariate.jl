@@ -73,7 +73,7 @@ distlist = [Arcsine(),
           InverseGaussian(2.0,7.0),
           InverseGamma(1.0, 1.0),
           InverseGamma(2.0, 3.0),
-          # Kolmogorov(), # no quantile function
+          Kolmogorov(),
           Laplace(0.0, 1.0),
           Laplace(10.0, 1.0),
           Laplace(0.0, 10.0),
@@ -111,7 +111,7 @@ distlist = [Arcsine(),
           Rayleigh(1.0),
           Rayleigh(5.0),
           Rayleigh(10.0),
-          # Skellam(10.0, 2.0), # no quantile function
+          # Skellam(10.0, 2.0), # no quantile function, since not bounded
           TDist(1),
           TDist(28),
           SymTriangularDist(3.0, 1.0),
@@ -265,6 +265,14 @@ for d in distlist
 
     @test_approx_eq logpdf(d, x) log(pdf(d, x))
     @test_approx_eq cquantile(d, 1 - pp) x
+    println(d)
+    for i in 1:n
+        if isa(d, ContinuousUnivariateDistribution)
+            @test_approx_eq invoke(quantile, (ContinuousUnivariateDistribution, Real), d, pp[i]) x[i]
+        elseif isa(d, DiscreteUnivariateDistribution)
+            @test_approx_eq invoke(quantile, (DiscreteUnivariateDistribution, Real), d, pp[i]) x[i]
+        end
+    end
 
     if is_continuous
         @test_approx_eq cdf(d, x) pp

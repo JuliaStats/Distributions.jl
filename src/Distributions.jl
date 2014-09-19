@@ -2,6 +2,7 @@ module Distributions
 
 using ArrayViews
 using PDMats
+using Roots
 using StatsBase
 
 import Base.Random

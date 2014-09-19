@@ -64,6 +64,42 @@ logccdf(d::UnivariateDistribution, q::Real) = log(ccdf(d,q))
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
+function quantile(d::ContinuousUnivariateDistribution, p::Real)
+    @checkquantile p begin
+      if p == 1.0
+        maximum(d)
+      elseif p == 0.0
+        minimum(d)
+      else
+        order = 0
+        init = median(d)
+        fzero(x->cdf(d, x)-p, init; order=order)
+      end
+    end
+end
+
+function quantile(d::DiscreteUnivariateDistribution, p::Real)
+    if !isbounded(d)
+        return NaN
+    end
+
+    @checkquantile p begin
+        range = minimum(d):maximum(d)
+        q = p
+        if p > 0.5
+            q = 1.0-p
+            range = reverse(range)
+        end
+
+        psum, i = 0.0, 0
+        while psum < q
+            i += 1
+            psum += pdf(d, range[i])
+        end
+        range[i]
+    end
+end
+
 # vectorized versions
 for fun in [:pdf, :logpdf, 
             :cdf, :logcdf, 

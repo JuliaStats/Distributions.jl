@@ -1,3 +1,4 @@
+push!(LOAD_PATH, "src")
 sampler_tests = [
     "categorical",
     "binomial", 
