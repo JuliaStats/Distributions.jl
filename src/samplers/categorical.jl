@@ -44,5 +44,5 @@ end
 rand(s::AliasTable) = 
     (i = rand(s.isampler); u = rand(); @inbounds r = u < s.accept[i] ? i : s.alias[i]; r)
 
-show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", numcategories(s))
+show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
 
