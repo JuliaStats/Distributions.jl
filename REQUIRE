@@ -1,4 +1,4 @@
 julia 0.3-
-ArrayViews 0.4.3-
+ArrayViews 0.4.8-
 PDMats 0.2.2-
 StatsBase 0.5.1-
