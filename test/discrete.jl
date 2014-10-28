@@ -28,7 +28,7 @@ distlist = [
     Binomial(100, 0.9)]
 
 if length(ARGS) > 0
-    newdistlist = {}
+    newdistlist = Any[]
     for arg in ARGS
         a = eval(parse(arg))
         if isa(a, DataType)

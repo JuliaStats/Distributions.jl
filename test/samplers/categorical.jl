@@ -33,7 +33,7 @@ for S in [CategoricalDirectSampler, AliasTable]
     for i = 1:10
         @test rand(s) == 1
     end
-    for p in {[0.3, 0.7], [0.2, 0.3, 0.4, 0.1]}
+    for p in Any[[0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
         test_categoricalsampler(S(p), p, 10^5, 0.015)
     end
 end

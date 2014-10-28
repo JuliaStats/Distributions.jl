@@ -141,7 +141,7 @@ distlist = [Arcsine(),
 #   julia univariate.jl Normal 
 #   julia univariate.jl Normal(1.2,2)
 if length(ARGS) > 0
-    newdistlist = {}
+    newdistlist = Any[]
     for arg in ARGS
         a = eval(parse(arg))
         if isa(a, DataType)
