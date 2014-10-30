@@ -106,18 +106,14 @@ end
 
 # Sampling (for GenericMvNormal)
 
-function _rand!(d::GenericMvNormalCanon, x::DenseVector{Float64})
-    unwhiten_winv!(d.J, randn!(x))
-    if !d.zeromean
-        add!(x, d.μ)
-    end
-    x
-end
+unwhiten_winv!(J::AbstractPDMat, x::DenseVecOrMat) = unwhiten!(inv(J), x)
+unwhiten_winv!(J::PDiagMat, x::DenseVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::ScalMat, x::DenseVecOrMat) = whiten!(J, x)
 
-function _rand!(d::GenericMvNormalCanon, x::DenseMatrix{Float64})
+function _rand!(d::GenericMvNormalCanon, x::DenseVecOrMat)
     unwhiten_winv!(d.J, randn!(x))
     if !d.zeromean
-        badd!(x, d.μ, 1)
+        broadcast!(+, x, x, d.μ)
     end
     x
 end
