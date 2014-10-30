@@ -5,7 +5,7 @@
 function posterior_canon(prior::GenericMvNormal, ss::GenericMvNormalKnownSigmaStats)
     invΣ0 = inv(prior.Σ)
     μ0 = prior.μ
-    invΣp = add_scal(invΣ0, ss.invΣ, ss.tw)
+    invΣp = pdadd(invΣ0, ss.invΣ, ss.tw)
     h = add!(invΣ0 * μ0, ss.invΣ * ss.sx)
 	return GenericMvNormalCanon(h, invΣp)
 end
