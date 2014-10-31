@@ -18,6 +18,9 @@ minimum(d::Hypergeometric) = max(0, d.n - d.nf)
 maximum(d::Hypergeometric) = min(d.ns, d.n)
 support(d::Hypergeometric) = minimum(d):maximum(d)
 
+islowerbounded(d::Hypergeometric) = true
+isupperbounded(d::Hypergeometric) = true
+
 # properties
 mean(d::Hypergeometric) = d.n * d.ns / (d.ns + d.nf)
 

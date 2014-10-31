@@ -3,7 +3,7 @@ tests = [
     "samplers",
     "fit", 
     "discrete",
-    "univariate", 
+    "univariates", 
     "truncate", 
     "multinomial",
     "dirichlet",

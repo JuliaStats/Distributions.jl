@@ -3,8 +3,6 @@
 using Distributions
 using Base.Test
 
-import Distributions: test_samples
-
 import Distributions: 
     CategoricalDirectSampler, 
     AliasTable,

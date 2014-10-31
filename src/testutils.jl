@@ -1,5 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
+import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
 
 #### Testing sampleable objects (samplers)
 
@@ -73,7 +74,11 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         clb[i] <= cnts[i] <= cub[i] ||
             error("The counts are out of the confidence interval.")
     end
+    return samples
 end
+
+test_samples(distr::DiscreteUnivariateDistribution, n::Int; q::Float64=1.0e-6, verbose::Bool=false) = 
+    test_samples(distr, distr, n; q=q, verbose=verbose)
 
 
 # for continuous samplers
@@ -150,6 +155,138 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         clb[i] <= cnts[i] <= cub[i] ||
             error("The counts are out of the confidence interval.")
     end
+    return samples
+end
+
+test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false) =
+    test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose)
+
+
+# testing the implementation of a discrete univariate distribution
+#
+function test_univariate(distr::DiscreteUnivariateDistribution, n::Int)
+
+    ### Part 1: test sample range
+    #
+    vmin = minimum(distr)
+    vmax = maximum(distr)
+    @test vmin <= vmax
+
+    is_lb = islowerbounded(distr)
+    is_ub = isupperbounded(distr)
+
+    @test isfinite(vmin) == is_lb
+    @test isfinite(vmax) == is_ub
+    @test isbounded(distr) == (is_lb && is_ub)
+
+    lv = is_lb ? vmin : ifloor(quantile(distr, 0.00001))
+    hv = is_ub ? vmax : iceil(quantile(distr,  0.99999))
+    @assert isfinite(lv) && isfinite(hv) && lv <= hv
+
+    ### Part 2: test insupport
+    #
+    for v = lv:hv
+        @test insupport(distr, v)
+    end
+    @test all(insupport(distr, [lv:hv]))
+
+    if is_lb
+        @test !insupport(distr, vmin-1)
+    end
+    if is_ub
+        @test !insupport(distr, vmax+1)
+    end
+
+    ### Part 3: test evaluation
+    #
+    vs = [lv:hv]
+    nv = length(vs)
+    p = Array(Float64, nv)
+    c = Array(Float64, nv)
+    cc = Array(Float64, nv)
+    lp = Array(Float64, nv)
+    lc = Array(Float64, nv)
+    lcc = Array(Float64, nv)
+    ci = 0.
+
+    for (i, v) in enumerate(vs)
+        p[i] = pdf(distr, v)        
+        ci += p[i]
+
+        c[i] = cdf(distr, v)
+        cc[i] = ccdf(distr, v)
+
+        @test_approx_eq ci c[i]
+        @test_approx_eq c[i] + cc[i] 1.0
+
+        lp[i] = logpdf(distr, v)
+        lc[i] = logcdf(distr, v)
+        lcc[i] = logccdf(distr, v)
+
+        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
+        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
+        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+
+        ep = 1.0e-8
+        if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
+            @test quantile(distr, c[i] - ep) == v
+            @test cquantile(distr, cc[i] + ep) == v
+            @test invlogcdf(distr, lc[i] - ep) == v
+            if 0.0 < c[i] < 1.0
+                @test invlogccdf(distr, lcc[i] + ep) == v
+            end
+        end
+    end
+
+    ### Part 4: consistency of scalar-based and vectorized evaluation
+    #
+    @test_approx_eq pdf(distr, vs) p
+    @test_approx_eq cdf(distr, vs) c
+    @test_approx_eq ccdf(distr, vs) cc
+
+    @test_approx_eq logpdf(distr, vs) lp
+    @test_approx_eq logcdf(distr, vs) lc
+    @test_approx_eq logccdf(distr, vs) lcc
+
+    ### Part 5: sample statistics 
+    #
+    vf = float64(vs)
+    xmean = dot(p, vf)
+    xvar = dot(p, abs2(vf .- xmean))
+    xstd = sqrt(xvar)
+    xentropy = entropy(p)
+    xskew = dot(p, (vf .- xmean).^3) / (xstd.^3)
+    xkurt = dot(p, (vf .- xmean).^4) / (xvar.^2) - 3.0
+
+    if isbounded(distr)
+        @test_approx_eq_eps mean(distr)  xmean  1.0e-8
+        @test_approx_eq_eps var(distr)   xvar   1.0e-8
+        @test_approx_eq_eps std(distr)   xstd   1.0e-8
+
+        if isfinite(skewness(distr))
+            @test_approx_eq_eps skewness(distr) xskew 1.0e-8
+        end
+        if isfinite(kurtosis(distr))
+            @test_approx_eq_eps kurtosis(distr) xkurt 1.0e-8
+        end
+        if applicable(entropy, distr)
+            @test_approx_eq_eps entropy(distr) xentropy 1.0e-8
+        end
+    else
+        @test_approx_eq_eps mean(distr) xmean max(1.0e-3, 1.0e-3 * abs(xmean))
+        @test_approx_eq_eps var(distr)  xvar  0.01 * xvar
+        @test_approx_eq_eps std(distr)  xstd  0.01 * xstd
+    end
+
+    ### Part 6: sampling
+    #
+    test_samples(distr, n)
+end
+
+
+# testing the implementation of a continuous univariate distribution
+#
+function test_univariate(distr::ContinuousUnivariateDistribution, n::Int)
 end
 
 
