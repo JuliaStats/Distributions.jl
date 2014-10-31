@@ -13,8 +13,11 @@ import Distributions:
     BinomialPolySampler, 
     BinomialAliasSampler, 
     PoissonADSampler, 
-    PoissonCountSampler
+    PoissonCountSampler,
+    ExponentialSampler,
+    GammaMTSampler
 
+n_tsamples = 10^5
 
 ## Categorical samplers
 
@@ -24,7 +27,7 @@ import Distributions:
 for S in [CategoricalDirectSampler, AliasTable]
     println("    testing $S")
     for p in Any[[1.0], [0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
-        test_samples(S(p), Categorical(p), 10^5)
+        test_samples(S(p), Categorical(p), n_tsamples)
     end
 end
 
@@ -44,7 +47,7 @@ for (S, paramlst) in [
     println("    testing $S")
     for pa in paramlst
         n, p = pa
-        test_samples(S(n, p), Binomial(n, p), 10^5)
+        test_samples(S(n, p), Binomial(n, p), n_tsamples)
     end
 end
 
@@ -57,7 +60,27 @@ for (S, paramlst) in [
 
     println("    testing $S")
     for μ in paramlst
-        test_samples(S(μ), Poisson(μ), 10^5)
+        test_samples(S(μ), Poisson(μ), n_tsamples)
+    end
+end
+
+
+## Exponential samplers
+
+for S in [ExponentialSampler]
+    println("    testing $S")
+    for scale in [1.0, 2.0, 3.0]
+        test_samples(S(scale), Exponential(scale), n_tsamples)
+    end
+end
+
+
+## Gamma samplers
+
+for S in [GammaMTSampler]
+    for pa in [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (0.5, 1.0), 
+               (1.0, 2.0), (3.0, 2.0), (0.5, 2.0)]
+        test_samples(S(pa...), Gamma(pa...), n_tsamples)
     end
 end
 

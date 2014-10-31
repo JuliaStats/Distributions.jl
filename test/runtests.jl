@@ -1,12 +1,6 @@
-sampler_tests = [
-    "categorical",
-    "binomial", 
-    "poisson", 
-    "exponential", 
-    "gamma"]
-
 tests = [
     "types",
+    "samplers",
     "fit", 
     "discrete",
     "univariate", 
@@ -31,12 +25,6 @@ tests = [
     "gradlogpdf"]
 
 println("Running tests:")
-
-for t in sampler_tests
-    test_fn = joinpath("samplers", "$t.jl")
-    println(" * $test_fn")
-    include(test_fn)
-end
 
 for t in tests
     test_fn = "$t.jl"
