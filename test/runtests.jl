@@ -24,10 +24,10 @@ tests = [
     "mixture",
     "gradlogpdf"]
 
-println("Running tests:")
+print_with_color(:blue, "Running tests:\n")
 
 for t in tests
     test_fn = "$t.jl"
-    println(" * $test_fn")
+    print_with_color(:green, "* $test_fn\n")
     include(test_fn)
 end
