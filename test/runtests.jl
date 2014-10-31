@@ -2,7 +2,6 @@ tests = [
     "types",
     "samplers",
     "fit", 
-    "discrete",
     "univariates", 
     "truncate", 
     "multinomial",
