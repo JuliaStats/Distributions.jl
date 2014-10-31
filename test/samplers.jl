@@ -23,13 +23,8 @@ import Distributions:
 
 for S in [CategoricalDirectSampler, AliasTable]
     println("    testing $S")
-    s = S([1.0])
-    for i = 1:100
-        @test rand(s) == 1
-    end
-    for p in Any[[0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
-        k = length(p)
-        test_samples(S(p), 1:k, p, 10^5)
+    for p in Any[[1.0], [0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
+        test_samples(S(p), Categorical(p), 10^5)
     end
 end
 
@@ -49,15 +44,7 @@ for (S, paramlst) in [
     println("    testing $S")
     for pa in paramlst
         n, p = pa
-        s = S(n, p)
-        if n == 0
-            for i = 1:100
-                @test rand(s) == 0
-            end
-        else
-            pv = Distributions.binompvec(n, p)
-            test_samples(s, 0:n, pv, 10^5)
-        end
+        test_samples(S(n, p), Binomial(n, p), 10^5)
     end
 end
 
@@ -70,9 +57,7 @@ for (S, paramlst) in [
 
     println("    testing $S")
     for μ in paramlst
-        k = iceil(4.0 * μ) + 1
-        pv = Distributions.poissonpvec(μ, k)
-        test_samples(S(μ), 0:k, pv, 10^5; ubound=false)
+        test_samples(S(μ), Poisson(μ), 10^5; verbose=true)
     end
 end
 
