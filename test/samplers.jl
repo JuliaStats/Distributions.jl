@@ -57,7 +57,7 @@ for (S, paramlst) in [
 
     println("    testing $S")
     for μ in paramlst
-        test_samples(S(μ), Poisson(μ), 10^5; verbose=true)
+        test_samples(S(μ), Poisson(μ), 10^5)
     end
 end
 
