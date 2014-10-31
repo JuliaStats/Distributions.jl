@@ -224,6 +224,7 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 include("conjugates.jl")
 include("qq.jl")
 include("estimators.jl")
+include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixturemodel.jl")
