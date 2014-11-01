@@ -60,9 +60,9 @@ function verify(e::ContinuousRefEntry)
         @test_approx_eq_eps entropy(d) e.entropy 1.0e-6 * (abs(e.entropy) + 1.0)
     end
 
-    @test_approx_eq_eps quantile(d, 0.25) e.x25 1.0e-9
-    @test_approx_eq_eps quantile(d, 0.50) e.x50 1.0e-9
-    @test_approx_eq_eps quantile(d, 0.75) e.x75 1.0e-9
+    @test_approx_eq_eps quantile(d, 0.25) e.x25 5.0e-9
+    @test_approx_eq_eps quantile(d, 0.50) e.x50 5.0e-9
+    @test_approx_eq_eps quantile(d, 0.75) e.x75 5.0e-9
 
     @test_approx_eq_eps logpdf(d, e.x25) e.lp25 1.0e-12
     @test_approx_eq_eps logpdf(d, e.x50) e.lp50 1.0e-12
@@ -77,7 +77,8 @@ for rentry in R
     test_distr(rentry.distr, n_tsamples)
 end
 
-# additional distributions that have no counter parts in scipy
+# additional distributions that have no direct counterparts in scipy
+println("    -----")
 
 for distr in [   
     Frechet(0.5, 1.0),
@@ -100,7 +101,12 @@ for distr in [
     NoncentralF(2,2,2),
     NoncentralF(8,10,5),
     NoncentralT(2,2),
-    NoncentralT(10,2) ]
+    NoncentralT(10,2),
+    SymTriangularDist(3.0, 1.0),
+    SymTriangularDist(3.0, 2.0),
+    SymTriangularDist(10.0, 10.0),
+    Truncated(Normal(0, 1), -3, 3),    
+    Truncated(Normal(27, 3), 0, Inf) ]
 
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)
