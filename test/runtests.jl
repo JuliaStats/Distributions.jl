@@ -1,9 +1,9 @@
 tests = [
     "types",
     "samplers",
-    "fit", 
-    "univariates", 
+    "discrete", 
     "truncate", 
+    "fit", 
     "multinomial",
     "dirichlet",
     "hypergeometric",
