@@ -15,7 +15,7 @@ import Distributions:
     ExponentialSampler,
     GammaMTSampler
 
-n_tsamples = 10^5
+n_tsamples = 10^6
 
 ## Categorical samplers
 

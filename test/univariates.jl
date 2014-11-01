@@ -2,7 +2,7 @@
 
 using Distributions
 
-n_tsamples = 10^5
+n_tsamples = 10^6
 
 # This list includes both discrete and continuous distributions
 #
