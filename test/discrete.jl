@@ -4,6 +4,19 @@ using Distributions
 using Base.Test
 
 ### load reference data
+#
+#   Note
+#   -------
+#   To generate the reference data:
+#   (1) make sure that python, numpy, and scipy are installed in your system
+#   (2) enter the sub-directory test
+#   (3) run: python discrete_ref.py > discrete_ref.csv
+#  
+#   For most cases, you don't have. You only need to run this when you
+#   implement a new distribution and want to add new test cases, then
+#   you should add the new test cases to discrete_ref.py and run this
+#   procedure to update the reference data.
+#
 
 immutable DiscreteRefEntry
     distr::DiscreteUnivariateDistribution
