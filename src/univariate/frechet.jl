@@ -46,8 +46,8 @@ function kurtosis(d::Frechet)
 end
 
 function entropy(d::Frechet)
-    λ, k = d.scale, d.shape
-    return (k + 1.0) * (log(λ) - digamma(1.0)/k) - log(λ * k) + 1.0
+    const γ = 0.57721566490153286060
+    1.0 + γ / d.shape + γ + log(d.scale / d.shape)
 end
 
 ## Functions
