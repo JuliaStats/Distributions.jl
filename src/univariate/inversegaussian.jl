@@ -57,6 +57,7 @@ function logccdf(d::InverseGaussian, x::Real)
     a + log1mexp(b-a)
 end
 
+# TODO: need a more accurate method
 function quantile(d::InverseGaussian, p::Real)
     if p <= 0.0 || p >= 1.0
         if p == 1.0

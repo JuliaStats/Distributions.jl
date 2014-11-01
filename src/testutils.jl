@@ -31,6 +31,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
     vs = get_evalsamples(distr, 0.01, 2000)
 
     test_support(distr, vs)
+    test_evaluation(distr, vs)
 end
 
 
@@ -261,19 +262,19 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     ci = 0.
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)        
-        ci += p[i]
-
+        p[i] = pdf(d, v)    
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
-
-        @test_approx_eq ci c[i]
-        @test_approx_eq c[i] + cc[i] 1.0
-
         lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
-        lcc[i] = logccdf(d, v)
+        lcc[i] = logccdf(d, v)   
 
+        @assert p[i] >= 0.0 
+        @assert (i == 1 || c[i] >= c[i-1])
+
+        ci += p[i]
+        @test_approx_eq ci c[i]
+        @test_approx_eq_eps c[i] + cc[i] 1.0 1.0e-12
         @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
         @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
         @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
@@ -298,6 +299,63 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     @test_approx_eq logcdf(d, vs) lc
     @test_approx_eq logccdf(d, vs) lcc
 end
+
+
+function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector)
+    nv = length(vs)
+    p = Array(Float64, nv)
+    c = Array(Float64, nv)
+    cc = Array(Float64, nv)
+    lp = Array(Float64, nv)
+    lc = Array(Float64, nv)
+    lcc = Array(Float64, nv)
+
+    for (i, v) in enumerate(vs)
+        p[i] = pdf(d, v) 
+        c[i] = cdf(d, v)
+        cc[i] = ccdf(d, v)
+        lp[i] = logpdf(d, v)
+        lc[i] = logcdf(d, v)
+        lcc[i] = logccdf(d, v)
+
+        @assert p[i] >= 0.0 
+        @assert (i == 1 || c[i] >= c[i-1])
+
+        @test_approx_eq_eps c[i] + cc[i] 1.0 1.0e-12
+        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
+        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
+        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+
+        # TODO: remove this line when we have more accurate implementation
+        # of quantile for InverseGaussian
+        qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10  
+        if p[i] > 1.0e-6
+            @test_approx_eq_eps quantile(d, c[i]) v qtol * (abs(v) + 1.0)
+            @test_approx_eq_eps cquantile(d, cc[i]) v qtol * (abs(v) + 1.0)
+            @test_approx_eq_eps invlogcdf(d, lc[i]) v qtol * (abs(v) + 1.0)
+            @test_approx_eq_eps invlogccdf(d, lcc[i]) v qtol * (abs(v) + 1.0)
+        end
+    end
+
+    # check: pdf should be the derivative of cdf
+    for i = 2:(nv-1)
+        if p[i] > 1.0e-6
+            v = vs[i]
+            ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
+            @test_approx_eq_eps p[i] ap p[i] * 1.0e-3
+        end
+    end
+
+    # consistency of scalar-based and vectorized evaluation
+    @test_approx_eq pdf(d, vs) p
+    @test_approx_eq cdf(d, vs) c
+    @test_approx_eq ccdf(d, vs) cc
+
+    @test_approx_eq logpdf(d, vs) lp
+    @test_approx_eq logcdf(d, vs) lc
+    @test_approx_eq logccdf(d, vs) lcc
+end
+
 
 
 #### Testing statistics methods
