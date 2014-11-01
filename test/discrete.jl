@@ -58,3 +58,21 @@ for rentry in R
     test_distr(rentry.distr, n_tsamples)
 end
 
+# for Categorical (scipy.stats no counterpart)
+
+for distr in [
+    Categorical([0.1, 0.9]),
+    Categorical([0.5, 0.5]),
+    Categorical([0.9, 0.1]), 
+    Categorical([0.2, 0.5, 0.3])]
+
+    @test minimum(distr) == 1
+    @test maximum(distr) == ncategories(distr)
+    for i = 1:distr.K
+        @test pdf(distr, i) == distr.prob[i]
+    end
+
+    println("    testing $(distr)")
+    test_distr(distr, n_tsamples)
+end
+
