@@ -24,7 +24,25 @@ lst = [
 	(erlang(3, scale=1.0), "Erlang(3, 1.0)"),
 	(erlang(5, scale=2.0), "Erlang(5, 2.0)"),
 	(expon(scale=1.0), "Exponential(1.0)"),
-	(expon(scale=6.5), "Exponential(6.5)")
+	(expon(scale=6.5), "Exponential(6.5)"),
+	(gamma(1.0, scale=1.0), "Gamma(1.0, 1.0)"),
+	(gamma(3.0, scale=1.0), "Gamma(3.0, 1.0)"),
+	(gamma(3.0, scale=2.0), "Gamma(3.0, 2.0)"),
+	(gumbel_r(3.0, 5.0), "Gumbel(3.0, 5.0)"),
+	(gumbel_r(5.0, 3.0), "Gumbel(5.0, 3.0)"),
+	(invgamma(1.0, scale=1.0), "InverseGamma(1.0, 1.0)"),
+	(invgamma(1.0, scale=2.0), "InverseGamma(1.0, 2.0)"),
+	(invgamma(2.0, scale=1.0), "InverseGamma(2.0, 1.0)"),
+	(invgamma(2.0, scale=3.0), "InverseGamma(2.0, 3.0)"),
+	(invgauss(1.0), "InverseGaussian(1.0, 1.0)"),
+	(laplace(0.0, 1.0), "Laplace(0.0, 1.0)"),
+	(laplace(5.0, 1.0), "Laplace(5.0, 1.0)"),
+	(laplace(5.0, 1.5), "Laplace(5.0, 1.5)"),
+	(logistic(0.0, 1.0), "Logistic(0.0, 1.0)"),
+	(logistic(5.0, 1.0), "Logistic(5.0, 1.0)"),
+	(logistic(5.0, 1.5), "Logistic(5.0, 1.5)"),
+	(lognorm(1.0), "LogNormal(0.0, 1.0)"), 
+	(lognorm(2.0), "LogNormal(0.0, 2.0)")
 ]
 
 print "distr, mean, var, entropy, x25, x50, x75, p25, p50, p75"

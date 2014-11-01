@@ -74,5 +74,27 @@ n_tsamples = 10^6
 for rentry in R
     println("    testing $(rentry.distr)")
     verify(rentry)
-    # test_distr(rentry.distr, n_tsamples)
+    test_distr(rentry.distr, n_tsamples)
 end
+
+# additional distributions that have no counter parts in scipy
+
+for distr in [   
+    Frechet(0.5, 1.0),
+    Frechet(3.0, 1.0),
+    Frechet(20.0, 1.0),
+    Frechet(120.0, 1.0),
+    Frechet(0.5, 2.0),
+    Frechet(3.0, 2.0),
+    InverseGaussian(2.0, 7.0),
+    Levy(0.0, 1.0),
+    Levy(2.0, 8.0),
+    Levy(3.0, 3.0),
+    LogNormal(3.0, 0.5),
+    LogNormal(3.0, 1.0),
+    LogNormal(3.0, 2.0) ]
+
+    println("    testing $(distr)")
+    test_distr(distr, n_tsamples)
+ end
+
