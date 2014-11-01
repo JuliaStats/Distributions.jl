@@ -2,6 +2,7 @@ tests = [
     "types",
     "samplers",
     "discrete", 
+    "continuous",
     "truncate", 
     "fit", 
     "multinomial",
