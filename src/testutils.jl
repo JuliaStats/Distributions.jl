@@ -2,6 +2,44 @@
 
 import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
 
+
+#################################################
+#
+#   Driver functions
+#
+#################################################
+
+# testing the implementation of a discrete univariate distribution
+#
+function test_distr(distr::DiscreteUnivariateDistribution, n::Int)
+
+    test_range(distr)
+    vs = get_evalsamples(distr, 0.00001)
+
+    test_support(distr, vs)
+    test_evaluation(distr, vs)
+    test_stats(distr, vs)
+    test_samples(distr, n)
+end
+
+
+# testing the implementation of a continuous univariate distribution
+#
+function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
+    
+    test_range(distr)
+    vs = get_evalsamples(distr, 0.01, 2000)
+
+    test_support(distr, vs)
+end
+
+
+#################################################
+#
+#   Core testing functions
+#
+#################################################
+
 #### Testing sampleable objects (samplers)
 
 # for discrete samplers
@@ -162,44 +200,57 @@ test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::
     test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose)
 
 
-# testing the implementation of a discrete univariate distribution
-#
-function test_univariate(distr::DiscreteUnivariateDistribution, n::Int)
+#### Testing range & support methods
 
-    ### Part 1: test sample range
-    #
-    vmin = minimum(distr)
-    vmax = maximum(distr)
+function test_range(d::UnivariateDistribution)
+    vmin = minimum(d)
+    vmax = maximum(d)
     @test vmin <= vmax
 
-    is_lb = islowerbounded(distr)
-    is_ub = isupperbounded(distr)
+    is_lb = islowerbounded(d)
+    is_ub = isupperbounded(d)
 
     @test isfinite(vmin) == is_lb
     @test isfinite(vmax) == is_ub
-    @test isbounded(distr) == (is_lb && is_ub)
+    @test isbounded(d) == (is_lb && is_ub)
+end
 
-    lv = is_lb ? vmin : ifloor(quantile(distr, 0.00001))
-    hv = is_ub ? vmax : iceil(quantile(distr,  0.99999))
+function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
+    # samples for testing evaluation functions (even spacing)
+
+    lv = (islowerbounded(d) ? minimum(d) : ifloor(quantile(d, q/2)))::Int
+    hv = (isupperbounded(d) ? maximum(d) : iceil(cquantile(d, q/2)))::Int
+    @assert lv <= hv
+    return lv:hv
+end
+
+function get_evalsamples(d::ContinuousUnivariateDistribution, q::Float64, n::Int)
+    # samples for testing evaluation functions (even spacing)
+
+    lv = quantile(d, q/2)
+    hv = cquantile(d, q/2)
     @assert isfinite(lv) && isfinite(hv) && lv <= hv
+    return linspace(lv, hv, n)
+end
 
-    ### Part 2: test insupport
-    #
-    for v = lv:hv
-        @test insupport(distr, v)
+function test_support(d::UnivariateDistribution, vs::AbstractVector)
+    for v in vs
+        @test insupport(d, v)
     end
-    @test all(insupport(distr, [lv:hv]))
+    @test all(insupport(d, vs))
 
-    if is_lb
-        @test !insupport(distr, vmin-1)
+    if islowerbounded(d)
+        @test !insupport(d, minimum(d)-1)
     end
-    if is_ub
-        @test !insupport(distr, vmax+1)
+    if isupperbounded(d)
+        @test !insupport(d, maximum(d)+1)
     end
+end
 
-    ### Part 3: test evaluation
-    #
-    vs = [lv:hv]
+
+#### Testing evaluation methods
+
+function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     nv = length(vs)
     p = Array(Float64, nv)
     c = Array(Float64, nv)
@@ -210,18 +261,18 @@ function test_univariate(distr::DiscreteUnivariateDistribution, n::Int)
     ci = 0.
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(distr, v)        
+        p[i] = pdf(d, v)        
         ci += p[i]
 
-        c[i] = cdf(distr, v)
-        cc[i] = ccdf(distr, v)
+        c[i] = cdf(d, v)
+        cc[i] = ccdf(d, v)
 
         @test_approx_eq ci c[i]
         @test_approx_eq c[i] + cc[i] 1.0
 
-        lp[i] = logpdf(distr, v)
-        lc[i] = logcdf(distr, v)
-        lcc[i] = logccdf(distr, v)
+        lp[i] = logpdf(d, v)
+        lc[i] = logcdf(d, v)
+        lcc[i] = logccdf(d, v)
 
         @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
         @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
@@ -229,28 +280,31 @@ function test_univariate(distr::DiscreteUnivariateDistribution, n::Int)
 
         ep = 1.0e-8
         if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
-            @test quantile(distr, c[i] - ep) == v
-            @test cquantile(distr, cc[i] + ep) == v
-            @test invlogcdf(distr, lc[i] - ep) == v
+            @test quantile(d, c[i] - ep) == v
+            @test cquantile(d, cc[i] + ep) == v
+            @test invlogcdf(d, lc[i] - ep) == v
             if 0.0 < c[i] < 1.0
-                @test invlogccdf(distr, lcc[i] + ep) == v
+                @test invlogccdf(d, lcc[i] + ep) == v
             end
         end
     end
 
-    ### Part 4: consistency of scalar-based and vectorized evaluation
-    #
-    @test_approx_eq pdf(distr, vs) p
-    @test_approx_eq cdf(distr, vs) c
-    @test_approx_eq ccdf(distr, vs) cc
+    # consistency of scalar-based and vectorized evaluation
+    @test_approx_eq pdf(d, vs) p
+    @test_approx_eq cdf(d, vs) c
+    @test_approx_eq ccdf(d, vs) cc
 
-    @test_approx_eq logpdf(distr, vs) lp
-    @test_approx_eq logcdf(distr, vs) lc
-    @test_approx_eq logccdf(distr, vs) lcc
+    @test_approx_eq logpdf(d, vs) lp
+    @test_approx_eq logcdf(d, vs) lc
+    @test_approx_eq logccdf(d, vs) lcc
+end
 
-    ### Part 5: sample statistics 
-    #
+
+#### Testing statistics methods
+
+function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     vf = float64(vs)
+    p = pdf(d, vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2(vf .- xmean))
     xstd = sqrt(xvar)
@@ -258,35 +312,24 @@ function test_univariate(distr::DiscreteUnivariateDistribution, n::Int)
     xskew = dot(p, (vf .- xmean).^3) / (xstd.^3)
     xkurt = dot(p, (vf .- xmean).^4) / (xvar.^2) - 3.0
 
-    if isbounded(distr)
-        @test_approx_eq_eps mean(distr)  xmean  1.0e-8
-        @test_approx_eq_eps var(distr)   xvar   1.0e-8
-        @test_approx_eq_eps std(distr)   xstd   1.0e-8
+    if isbounded(d)
+        @test_approx_eq_eps mean(d)  xmean  1.0e-8
+        @test_approx_eq_eps var(d)   xvar   1.0e-8
+        @test_approx_eq_eps std(d)   xstd   1.0e-8
 
-        if isfinite(skewness(distr))
-            @test_approx_eq_eps skewness(distr) xskew 1.0e-8
+        if isfinite(skewness(d))
+            @test_approx_eq_eps skewness(d) xskew 1.0e-8
         end
-        if isfinite(kurtosis(distr))
-            @test_approx_eq_eps kurtosis(distr) xkurt 1.0e-8
+        if isfinite(kurtosis(d))
+            @test_approx_eq_eps kurtosis(d) xkurt 1.0e-8
         end
-        if applicable(entropy, distr)
-            @test_approx_eq_eps entropy(distr) xentropy 1.0e-8
+        if applicable(entropy, d)
+            @test_approx_eq_eps entropy(d) xentropy 1.0e-8
         end
     else
-        @test_approx_eq_eps mean(distr) xmean max(1.0e-3, 1.0e-3 * abs(xmean))
-        @test_approx_eq_eps var(distr)  xvar  0.01 * xvar
-        @test_approx_eq_eps std(distr)  xstd  0.01 * xstd
+        @test_approx_eq_eps mean(d) xmean max(1.0e-3, 1.0e-3 * abs(xmean))
+        @test_approx_eq_eps var(d)  xvar  0.01 * xvar
+        @test_approx_eq_eps std(d)  xstd  0.01 * xstd
     end
-
-    ### Part 6: sampling
-    #
-    test_samples(distr, n)
 end
-
-
-# testing the implementation of a continuous univariate distribution
-#
-function test_univariate(distr::ContinuousUnivariateDistribution, n::Int)
-end
-
 

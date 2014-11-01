@@ -138,7 +138,7 @@ distrlist = [
 
 for distr in distrlist
      println("    testing $(distr)")
-     test_univariate(distr, n_tsamples)
+     test_distr(distr, n_tsamples)
 end
 
 
