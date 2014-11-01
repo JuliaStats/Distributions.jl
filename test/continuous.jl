@@ -74,5 +74,5 @@ n_tsamples = 10^6
 for rentry in R
     println("    testing $(rentry.distr)")
     verify(rentry)
-    test_distr(rentry.distr, n_tsamples)
+    # test_distr(rentry.distr, n_tsamples)
 end

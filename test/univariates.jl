@@ -7,13 +7,7 @@ n_tsamples = 10^6
 # This list includes both discrete and continuous distributions
 #
 distrlist = [
-     Chi(12),
-     Chisq(8),
-     Chisq(12.0),
-     Chisq(20.0),
      # Cosine(),
-     Erlang(1),
-     Erlang(17.0),
      Exponential(1.0),
      Exponential(5.1),
      FDist(9, 9),

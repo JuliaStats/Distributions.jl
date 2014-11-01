@@ -19,7 +19,12 @@ lst = [
 	(chi(12.0), "Chi(12)"),
 	(chi2(1.0), "Chisq(1)"),
 	(chi2(8.0), "Chisq(8)"),
-	(chi2(20.0), "Chisq(20)")
+	(chi2(20.0), "Chisq(20)"),
+	(erlang(1, scale=1.0), "Erlang(1, 1.0)"),
+	(erlang(3, scale=1.0), "Erlang(3, 1.0)"),
+	(erlang(5, scale=2.0), "Erlang(5, 2.0)"),
+	(expon(scale=1.0), "Exponential(1.0)"),
+	(expon(scale=6.5), "Exponential(6.5)")
 ]
 
 print "distr, mean, var, entropy, x25, x50, x75, p25, p50, p75"
