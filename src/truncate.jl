@@ -23,6 +23,12 @@ end
 insupport(d::Truncated, x::Real) = 
     x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 
+islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)
+isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper)
+
+minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
+maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
+
 function pdf(d::Truncated, x::Real)
     if !insupport(d, x)
         return 0.0
