@@ -1,8 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
 import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
-import Calculus: finite_difference
-
 
 #################################################
 #
