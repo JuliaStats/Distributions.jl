@@ -104,9 +104,7 @@ for distr in [
     NoncentralT(10,2),
     SymTriangularDist(3.0, 1.0),
     SymTriangularDist(3.0, 2.0),
-    SymTriangularDist(10.0, 10.0),
-    Truncated(Normal(0, 1), -3, 3),    
-    Truncated(Normal(27, 3), 0, Inf) ]
+    SymTriangularDist(10.0, 10.0) ]
 
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)

@@ -7,7 +7,6 @@ tests = [
     "fit", 
     "multinomial",
     "dirichlet",
-    "hypergeometric",
     "multivariate",
     "mvnormal",
     "mvtdist",
