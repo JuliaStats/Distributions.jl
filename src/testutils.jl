@@ -1,6 +1,7 @@
 # Utilities to support the testing of distributions and samplers
 
 import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
+import Calculus: finite_difference
 
 
 #################################################
@@ -32,7 +33,9 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
 
     test_support(distr, vs)
     test_evaluation(distr, vs)
-    test_samples(distr, n)
+
+    xs = test_samples(distr, n)
+    allow_test_stats(distr) && test_stats(distr, xs)
 end
 
 
@@ -362,6 +365,8 @@ end
 #### Testing statistics methods
 
 function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
+    # using definition (or an approximation)
+
     vf = float64(vs)
     p = pdf(d, vf)
     xmean = dot(p, vf)
@@ -386,9 +391,57 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
             @test_approx_eq_eps entropy(d) xentropy 1.0e-8
         end
     else
-        @test_approx_eq_eps mean(d) xmean max(1.0e-3, 1.0e-3 * abs(xmean))
+        @test_approx_eq_eps mean(d) xmean 1.0e-3 * (abs(xmean) + 1.0)
         @test_approx_eq_eps var(d)  xvar  0.01 * xvar
         @test_approx_eq_eps std(d)  xstd  0.01 * xstd
+    end
+end
+
+
+allow_test_stats(d::UnivariateDistribution) = true
+allow_test_stats(d::NoncentralBeta) = false
+
+function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
+    # using Monte Carlo methods
+
+    if !(isfinite(mean(d)) && isfinite(var(d)))
+        return 
+    end
+    vd = var(d)
+
+    n = length(xs)
+    xmean = mean(xs)
+    xvar = var(xs)
+    xstd = sqrt(xvar)    
+
+    # we utilize central limit theorem, and consider xmean as (approximately) normally
+    # distributed with std = std(d) / sqrt(n)
+    #
+    # For a normal distribution, it is extremely rare for a sample to deviate more
+    # than 5 * std.dev, (chance < 6.0e-7)
+    mean_tol = 5.0 * (sqrt(vd / n))  
+    @test_approx_eq_eps mean(d) xmean mean_tol
+
+    # test variance
+    if applicable(kurtosis, d)
+        kd = kurtosis(d)
+        # when the excessive kurtosis is sufficiently large (i.e. > 2)
+        # the sample variance has a finite variance, given by
+        #
+        #   (sigma^4 / n) * (k + 3 - (n-3)/(n-1))
+        #
+        # where k is the excessive kurtosis
+        #
+        if isfinite(kd) && kd > -2.0
+            @test_approx_eq_eps var(d) xvar 5.0 * vd * (kd + 2) / sqrt(n)
+        end
+    end
+
+    # test entropy
+    if applicable(entropy, d)
+        xentropy = mean(-logpdf(d, xs))
+        dentropy = entropy(d)
+        @test_approx_eq_eps dentropy xentropy 1.0e-2 * (abs(dentropy) + 1.0e-3)
     end
 end
 

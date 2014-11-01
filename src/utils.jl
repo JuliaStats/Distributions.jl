@@ -126,3 +126,15 @@ macro checkinvlogcdf(lp,ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 
+# Simple method for integration
+function simpson(f::AbstractVector{Float64}, h::Float64)
+    n = length(f)
+    isodd(n) || error("The length of the input vector must be odd.")
+    s = f[1]
+    t = -1
+    for i = 2:2:n-1
+        @inbounds s += (4 * f[i] + 2 * f[i+1])
+    end
+    s += f[n]
+    return s * h / 3.0
+end
