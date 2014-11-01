@@ -32,6 +32,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
 
     test_support(distr, vs)
     test_evaluation(distr, vs)
+    test_samples(distr, n)
 end
 
 
@@ -153,8 +154,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    rmin = ifloor(quantile(distr, 0.01))::Int
-    rmax = ifloor(quantile(distr, 0.99))::Int
+    rmin = quantile(distr, 0.01)
+    rmax = quantile(distr, 0.99)
     edges = linspace(rmin, rmax, nbins+1)
 
     # determine confidence intervals for counts:
@@ -165,7 +166,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     cdfs = cdf(distr, edges)
 
     for i = 1:nbins
-        bp = Binomial(n, cdfs[i+1] - cdfs[i])
+        pi = cdfs[i+1] - cdfs[i]
+        bp = Binomial(n, pi)
         clb[i] = ifloor(quantile(bp, q/2))
         cub[i] = iceil(cquantile(bp, q/2))
         @assert cub[i] >= clb[i]
@@ -355,7 +357,6 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     @test_approx_eq logcdf(d, vs) lc
     @test_approx_eq logccdf(d, vs) lcc
 end
-
 
 
 #### Testing statistics methods
