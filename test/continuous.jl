@@ -92,7 +92,15 @@ for distr in [
     Levy(3.0, 3.0),
     LogNormal(3.0, 0.5),
     LogNormal(3.0, 1.0),
-    LogNormal(3.0, 2.0) ]
+    LogNormal(3.0, 2.0),
+    NoncentralBeta(2,2,0),
+    NoncentralBeta(2,6,5),
+    NoncentralChisq(2,2),
+    NoncentralChisq(2,5),
+    NoncentralF(2,2,2),
+    NoncentralF(8,10,5),
+    NoncentralT(2,2),
+    NoncentralT(10,2) ]
 
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)
