@@ -7,16 +7,6 @@ n_tsamples = 10^6
 # This list includes both discrete and continuous distributions
 #
 distrlist = [
-     Arcsine(),
-     Beta(2.0, 2.0),
-     Beta(3.0, 4.0),
-     Beta(17.0, 13.0),
-     BetaPrime(3.0, 3.0),
-     BetaPrime(3.0, 5.0),
-     BetaPrime(5.0, 3.0),
-     Cauchy(0.0, 1.0),
-     Cauchy(10.0, 1.0),
-     Cauchy(0.0, 10.0),
      Chi(12),
      Chisq(8),
      Chisq(12.0),

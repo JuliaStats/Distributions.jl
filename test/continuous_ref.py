@@ -3,7 +3,23 @@
 from scipy.stats import *
 
 lst = [
-	(arcsine(), "Arcsine()")
+	(arcsine(), "Arcsine()"),
+	(beta(2.0, 2.0), "Beta(2.0, 2.0)"),
+	(beta(3.0, 4.0), "Beta(3.0, 4.0)"),
+	(beta(17.0, 13.0), "Beta(17.0, 13.0)"),
+	(betaprime(3.0, 3.0), "BetaPrime(3.0, 3.0)"),
+	(betaprime(3.0, 5.0), "BetaPrime(3.0, 5.0)"),
+	(betaprime(5.0, 3.0), "BetaPrime(5.0, 3.0)"),
+	(cauchy(0.0, 1.0), "Cauchy(0.0, 1.0)"),
+	(cauchy(10.0, 1.0), "Cauchy(10.0, 1.0)"),
+	(cauchy(2.0, 10.0), "Cauchy(2.0, 10.0)"),
+	(chi(1.0), "Chi(1)"),
+	(chi(2.0), "Chi(2)"),
+	(chi(3.0), "Chi(3)"),
+	(chi(12.0), "Chi(12)"),
+	(chi2(1.0), "Chisq(1)"),
+	(chi2(8.0), "Chisq(8)"),
+	(chi2(20.0), "Chisq(20)")
 ]
 
 print "distr, mean, var, entropy, x25, x50, x75, p25, p50, p75"

@@ -47,10 +47,16 @@ R = [ContinuousRefEntry(vec(table[i,:])) for i = 2:size(table,1)]
 
 function verify(e::ContinuousRefEntry)
     d = e.distr
-    @test_approx_eq_eps mean(d)    e.mean    1.0e-12
-    @test_approx_eq_eps var(d)     e.var     1.0e-12
 
-    if applicable(entropy, d)
+    if isfinite(e.mean)
+        @test_approx_eq_eps mean(d)    e.mean    1.0e-12
+    end
+
+    if isfinite(e.var)
+        @test_approx_eq_eps var(d)     e.var     1.0e-12
+    end
+
+    if isfinite(e.entropy) && applicable(entropy, d)
         @test_approx_eq_eps entropy(d) e.entropy 1.0e-6 * (abs(e.entropy) + 1.0)
     end
 
