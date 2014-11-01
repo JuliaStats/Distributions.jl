@@ -16,11 +16,16 @@ show(io::IO, d::Distribution) = show(io, d, typeof(d).names)
 # specify which fields to show.
 #
 function show(io::IO, d::Distribution, pnames::(Symbol...))
+    uml, namevals = _use_multline_show(d, pnames)
+    uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
+end
+
+function _use_multline_show(d::Distribution, pnames::(Symbol...))
     # decide whether to use one-line or multi-line format
     #
     # Criteria: if total number of values is greater than 8, or
     # there are matrix-valued params, we use multi-line format
-    #
+    #    
     namevals = (Symbol, Any)[]
     multline = false
     tlen = 0
@@ -35,11 +40,9 @@ function show(io::IO, d::Distribution, pnames::(Symbol...))
     if tlen > 8
         multline = true
     end
-
-    # call the function that actually does the job
-    multline ? show_multline(io, d, namevals) :
-               show_oneline(io, d, namevals)
+    return (multline, namevals)
 end
+_use_multline_show(d::Distribution) = _use_multline_show(d, typeof(d).names)
 
 function show_oneline(io::IO, d::Distribution, namevals)
     print(io, distrname(d))
@@ -67,5 +70,3 @@ function show_multline(io::IO, d::Distribution, namevals)
     end
     println(io, ")")
 end
-
-

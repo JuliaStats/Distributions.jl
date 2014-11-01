@@ -55,3 +55,5 @@ end
 skewness(d::Erlang) = skewness(d.nested_gamma)
 
 var(d::Erlang) = d.scale^2 * d.shape
+
+show(io::IO, d::Erlang) = show(io, d, (:shape, :scale))
