@@ -1,16 +1,10 @@
-sampler_tests = [
-    "categorical",
-    "binomial", 
-    "poisson", 
-    "exponential", 
-    "gamma"]
-
 tests = [
     "types",
-    "fit", 
-    "discrete",
-    "univariate", 
+    "samplers",
+    "discrete", 
+    "continuous",
     "truncate", 
+    "fit", 
     "multinomial",
     "dirichlet",
     "hypergeometric",
@@ -30,16 +24,12 @@ tests = [
     "mixture",
     "gradlogpdf"]
 
-println("Running tests:")
+print_with_color(:blue, "Running tests:\n")
 
-for t in sampler_tests
-    test_fn = joinpath("samplers", "$t.jl")
-    println(" * $test_fn")
-    include(test_fn)
-end
+srand(345678)
 
 for t in tests
     test_fn = "$t.jl"
-    println(" * $test_fn")
+    print_with_color(:green, "* $test_fn\n")
     include(test_fn)
 end

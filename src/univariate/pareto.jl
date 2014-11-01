@@ -1,9 +1,9 @@
 immutable Pareto <: ContinuousUnivariateDistribution
-    scale::Float64
     shape::Float64
-    function Pareto(sc::Real, sh::Real)
+    scale::Float64
+    function Pareto(sh::Real, sc::Real)
         sc > zero(sc) && sh > zero(sh) || error("shape and scale must be positive")
-        new(float64(sc), float64(sh))
+        new(float64(sh), float64(sc))
     end
 end
 

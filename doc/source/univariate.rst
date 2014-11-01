@@ -696,8 +696,7 @@ The probability density function of a `Pareto distribution <http://en.wikipedia.
 .. code-block:: julia
 
     Pareto()          # Pareto distribution with unit scale and unit shape
-    Pareto(s)         # Pareto distribution with scale s and unit shape
-    Pareto(s, a)      # Pareto distribution with scale s and shape a
+    Pareto(sh, sc)    # Pareto distribution with shape sh and scale sc
 
 
 .. _rayleigh:

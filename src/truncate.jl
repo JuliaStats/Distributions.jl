@@ -23,6 +23,12 @@ end
 insupport(d::Truncated, x::Real) = 
     x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
 
+islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)
+isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper)
+
+minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
+maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
+
 function pdf(d::Truncated, x::Real)
     if !insupport(d, x)
         return 0.0
@@ -78,3 +84,19 @@ end
 function rand{D<:DiscreteUnivariateDistribution}(d::Truncated{D}, dims::Dims)
     return rand!(d, Array(Int, dims))
 end
+
+function show(io::IO, d::Truncated) 
+    print(io, "Truncated(")
+    d0 = d.untruncated
+    uml, namevals = _use_multline_show(d0)
+    uml ? show_multline(io, d0, namevals) : 
+          show_oneline(io, d0, namevals)
+    print(io, ", range = ($(d.lower), $(d.upper)), prop = $(d.nc) )") 
+    uml && println(io)
+end
+
+_use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
+
+
+
+

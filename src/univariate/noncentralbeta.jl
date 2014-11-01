@@ -13,6 +13,8 @@ end
 
 @continuous_distr_support NoncentralBeta 0.0 1.0
 
+# TODO: add mean and var
+
 function rand(d::NoncentralBeta)
     a = rand(NoncentralChisq(2.0 * d.alpha, d.ncp))
     b = rand(Chisq(2.0 * d.beta))
