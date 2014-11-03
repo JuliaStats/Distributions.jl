@@ -40,8 +40,8 @@ function kurtosis(d::Weibull)
 end
 
 function entropy(d::Weibull)
-    λ, k = d.scale, d.shape
-    return ((k - 1.0) / k) * -digamma(1.0) + log(λ / k) + 1.0
+    k = d.shape
+    return 0.5772156649015328606 * (1.0 - 1.0 / k) + log(d.scale / k) + 1.0
 end
 
 ## Functions
