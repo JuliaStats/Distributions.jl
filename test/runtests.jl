@@ -6,7 +6,6 @@ tests = [
     "fit", 
     "multinomial",
     "dirichlet",
-    "multivariate",
     "mvnormal",
     "mvtdist",
     "kolmogorov",
@@ -17,7 +16,7 @@ tests = [
     "compoundvariate",
     "conjugates",
     "conjugates_normal",
-    "conjugates_mvnormal",
+    # "conjugates_mvnormal",
     "wishart",
     "mixture",
     "gradlogpdf"]

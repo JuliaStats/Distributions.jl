@@ -5,8 +5,9 @@ using PDMats
 using StatsBase
 
 import Base.Random
-import Base: size, length, show, getindex, scale, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
+import Base: +, -, .+, .-
 import Base.LinAlg: Cholesky
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler
@@ -63,6 +64,8 @@ export
     FDist,
     FisherNoncentralHypergeometric,
     Frechet,
+    FullNormal,
+    FullNormalCanon,
     Gamma,
     GenericMvNormal,
     GenericMvNormalCanon,
@@ -102,6 +105,7 @@ export
     NormalWishart,
     Pareto,
     Poisson,
+    QQPair,
     Rayleigh,
     Skellam,
     SymTriangularDist,
@@ -114,7 +118,9 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
-    QQPair,
+    ZeroMeanIsoNormal,
+    ZeroMeanDiagNormal,
+    ZeroMeanFullNormal,
 
     # methods
     binaryentropy,      # entropy of distribution in bits

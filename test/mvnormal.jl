@@ -14,9 +14,7 @@ C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 x1 = [3.2, 1.8, 2.4]
 x = rand(3, 100)
 
-# SGauss
-
-gs = gmvnormal(mu, sqrt(2.0))
+gs = MvNormal(mu, sqrt(2.0))
 @test isa(gs, IsoNormal)
 @test length(gs) == 3
 @test mean(gs) == mode(gs) == mu
@@ -24,15 +22,12 @@ gs = gmvnormal(mu, sqrt(2.0))
 @test var(gs) == diag(cov(gs))
 @test_approx_eq entropy(gs) 0.5 * logdet(2π * e * cov(gs))
 
-gsz = gmvnormal(3, sqrt(2.0))
-@test isa(gsz, IsoNormal)
+gsz = MvNormal(3, sqrt(2.0))
+@test isa(gsz, ZeroMeanIsoNormal)
 @test length(gsz) == 3
 @test mean(gsz) == zeros(3)
-@test gsz.zeromean
 
-# DGauss
-
-gd = gmvnormal(mu, sqrt(va))
+gd = MvNormal(mu, sqrt(va))
 @test isa(gd, DiagNormal)
 @test length(gd) == 3
 @test mean(gd) == mode(gd) == mu
@@ -40,16 +35,13 @@ gd = gmvnormal(mu, sqrt(va))
 @test var(gd) == diag(cov(gd))
 @test_approx_eq entropy(gd) 0.5 * logdet(2π * e * cov(gd))
 
-gdz = gmvnormal(PDiagMat(va))
-@test isa(gdz, DiagNormal)
+gdz = MvNormal(PDiagMat(va))
+@test isa(gdz, ZeroMeanDiagNormal)
 @test length(gdz) == 3
 @test mean(gdz) == zeros(3)
-@test gdz.zeromean
-
-# Gauss
 
 gf = MvNormal(mu, C)
-@test isa(gf, MvNormal)
+@test isa(gf, FullNormal)
 @test length(gf) == 3
 @test mean(gf) == mode(gf) == mu
 @test cov(gf) == C
@@ -57,10 +49,9 @@ gf = MvNormal(mu, C)
 @test_approx_eq entropy(gf) 0.5 * logdet(2π * e * cov(gf))
 
 gfz = MvNormal(C)
-@test isa(gfz, MvNormal)
+@test isa(gfz, ZeroMeanFullNormal)
 @test length(gfz) == 3
 @test mean(gfz) == zeros(3)
-@test gfz.zeromean
 
 
 ##### LogPDF/PDF evaluation
@@ -196,12 +187,6 @@ g = fit_mle(IsoNormal, x, w)
 mu, C = _gauss_mle(x, w)
 @test_approx_eq g.μ mu
 @test_approx_eq g.Σ.value mean(diag(C))
-
-assumed_g = Distributions.IsoNormalKnownSigma(3, 1.)
-g = fit_mle(assumed_g, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq g.μ mu
-@test_approx_eq diag(g.Σ) diag(assumed_g.Σ)
 
 g = fit(DiagNormal, x)
 mu, C = _gauss_mle(x)

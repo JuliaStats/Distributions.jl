@@ -1,24 +1,47 @@
+
+## a type to indicate zero vector
+
+immutable ZeroVector{T} 
+    len::Int 
+end
+
+ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
+
+eltype{T}(v::ZeroVector{T}) = T
+length(v::ZeroVector) = v.len
+full(v::ZeroVector) = zeros(T, v.len)
+
+convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
+
++ (x::DenseArray, v::ZeroVector) = x
+- (x::DenseArray, v::ZeroVector) = x
+.+ (x::DenseArray, v::ZeroVector) = x
+.- (x::DenseArray, v::ZeroVector) = x
+
+
 # Utility functions
 
 type NoArgCheck end
 
 function allfinite{T<:Real}(x::Array{T})
-	for i = 1 : length(x)
-		if !(isfinite(x[i]))
-			return false
-		end
-	end
-	return true
+    for i = 1 : length(x)
+        if !(isfinite(x[i]))
+            return false
+        end
+    end
+    return true
 end
 
 function allzeros{T<:Real}(x::Array{T})
-	for i = 1 : length(x)
-		if !(x == zero(T))
-			return false
-		end
-	end
-	return true
+    for i = 1 : length(x)
+        if !(x == zero(T))
+            return false
+        end
+    end
+    return true
 end
+
+allzeros(x::ZeroVector) = true
 
 function isprobvec(p::Vector{Float64})
     s = 0.
@@ -33,38 +56,32 @@ function isprobvec(p::Vector{Float64})
 end
 
 function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
-	s = 0.
-	n = length(v)
-	for i = 1:n
-		@inbounds s += v[i]
-	end
-	for i = 1:n
-		@inbounds v[i] /= s
-	end
-	v
+    s = 0.
+    n = length(v)
+    for i = 1:n
+        @inbounds s += v[i]
+    end
+    for i = 1:n
+        @inbounds v[i] /= s
+    end
+    v
 end
 
-function add!(x::AbstractArray, y::AbstractArray)
-	n = length(x)
-	length(y) == n || throw(DimensionMismatch("Inconsistent array lengths."))
-	for i = 1:n
-		x[i] += y[i]
-	end
-	x
-end
+add!(x::DenseArray, y::DenseVector) = broadcast!(+, x, x, y)
+add!(x::DenseVecOrMat, y::ZeroVector) = x
 
 function multiply!(x::AbstractArray, c::Number)
-	for i = 1:length(x)
-		@inbounds x[i] *= c
-	end
-	x
+    for i = 1:length(x)
+        @inbounds x[i] *= c
+    end
+    x
 end
 
 function exp!(x::AbstractArray)
-	for i = 1:length(x)
-		@inbounds x[i] = exp(x[i])
-	end
-	x
+    for i = 1:length(x)
+        @inbounds x[i] = exp(x[i])
+    end
+    x
 end
 
 # macros for generating functions for support handling
@@ -74,47 +91,47 @@ end
 #
 
 macro continuous_distr_support(D, lb, ub)
-	if isfinite(eval(lb)) && isfinite(eval(ub))  # [lb, ub]
-		esc(quote
-			isupperbounded(::Union($D, Type{$D})) = true
-			islowerbounded(::Union($D, Type{$D})) = true
-			isbounded(::Union($D, Type{$D})) = true
-			minimum(::Union($D, Type{$D})) = $lb
-			maximum(::Union($D, Type{$D})) = $ub
-			insupport(::Union($D, Type{$D}), x::Real) = ($lb <= x <= $ub)
-		end)
+    if isfinite(eval(lb)) && isfinite(eval(ub))  # [lb, ub]
+        esc(quote
+            isupperbounded(::Union($D, Type{$D})) = true
+            islowerbounded(::Union($D, Type{$D})) = true
+            isbounded(::Union($D, Type{$D})) = true
+            minimum(::Union($D, Type{$D})) = $lb
+            maximum(::Union($D, Type{$D})) = $ub
+            insupport(::Union($D, Type{$D}), x::Real) = ($lb <= x <= $ub)
+        end)
 
-	elseif isfinite(eval(lb))  # [lb, inf)
-		esc(quote
-			isupperbounded(::Union($D, Type{$D})) = false
-			islowerbounded(::Union($D, Type{$D})) = true
-			isbounded(::Union($D, Type{$D})) = false
-			minimum(::Union($D, Type{$D})) = $lb
-			maximum(::Union($D, Type{$D})) = $ub
-			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x >= $lb)
-		end)
+    elseif isfinite(eval(lb))  # [lb, inf)
+        esc(quote
+            isupperbounded(::Union($D, Type{$D})) = false
+            islowerbounded(::Union($D, Type{$D})) = true
+            isbounded(::Union($D, Type{$D})) = false
+            minimum(::Union($D, Type{$D})) = $lb
+            maximum(::Union($D, Type{$D})) = $ub
+            insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x >= $lb)
+        end)
 
-	elseif isfinite(eval(ub))  # (-inf, ub]
-		esc(quote
-			isupperbounded(::Union($D, Type{$D})) = true
-			islowerbounded(::Union($D, Type{$D})) = false
-			isbounded(::Union($D, Type{$D})) = false
-			minimum(::Union($D, Type{$D})) = $lb
-			maximum(::Union($D, Type{$D})) = $ub
-			insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x <= $ub)
-		end)
+    elseif isfinite(eval(ub))  # (-inf, ub]
+        esc(quote
+            isupperbounded(::Union($D, Type{$D})) = true
+            islowerbounded(::Union($D, Type{$D})) = false
+            isbounded(::Union($D, Type{$D})) = false
+            minimum(::Union($D, Type{$D})) = $lb
+            maximum(::Union($D, Type{$D})) = $ub
+            insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x <= $ub)
+        end)
 
-	else   # (-inf, inf)
-		esc(quote
-			isupperbounded(::Union($D, Type{$D})) = false
-			islowerbounded(::Union($D, Type{$D})) = false
-			isbounded(::Union($D, Type{$D})) = false
-			minimum(::Union($D, Type{$D})) = $lb
-			maximum(::Union($D, Type{$D})) = $ub
-			insupport(::Union($D, Type{$D}), x::Real) = isfinite(x)
-		end)
+    else   # (-inf, inf)
+        esc(quote
+            isupperbounded(::Union($D, Type{$D})) = false
+            islowerbounded(::Union($D, Type{$D})) = false
+            isbounded(::Union($D, Type{$D})) = false
+            minimum(::Union($D, Type{$D})) = $lb
+            maximum(::Union($D, Type{$D})) = $ub
+            insupport(::Union($D, Type{$D}), x::Real) = isfinite(x)
+        end)
 
-	end
+    end
 end
 
 # for checking the input range of quantile functions
@@ -138,3 +155,4 @@ function simpson(f::AbstractVector{Float64}, h::Float64)
     s += f[n]
     return s * h / 3.0
 end
+

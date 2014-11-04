@@ -62,17 +62,16 @@ IsoNormalCanon(h::Vector{Float64}, prec::Real) = GenericMvNormalCanon(h, ScalMat
 
 # conversion between conventional form and canonical form
 
-function Base.convert{C<:AbstractPDMat}(D::Type{GenericMvNormal{C}}, cf::GenericMvNormalCanon{C})
-	GenericMvNormal{C}(cf.dim, cf.zeromean, cf.μ, inv(cf.J))
-end
+Base.convert{C<:AbstractPDMat}(D::Type{MvNormal{C,Vector{Float64}}}, cf::GenericMvNormalCanon{C}) = 
+    MvNormal{C}(cf.μ, inv(cf.J))
 
-function Base.convert{C<:AbstractPDMat}(D::Type{GenericMvNormalCanon{C}}, d::GenericMvNormal{C})
+function Base.convert{C<:AbstractPDMat}(D::Type{GenericMvNormalCanon{C}}, d::MvNormal{C,Vector{Float64}})
 	J::C = inv(d.Σ)
 	h::Vector{Float64} = J * d.μ
-	GenericMvNormalCanon{C}(d.μ, h, J, d.zeromean)
+	MvNormalCanon{C}(d.μ, h, J, false)
 end
 
-canonform{C<:AbstractPDMat}(d::GenericMvNormal{C}) = convert(GenericMvNormalCanon{C}, d)
+canonform{C<:AbstractPDMat}(d::MvNormal{C,Vector{Float64}}) = convert(GenericMvNormalCanon{C}, d)
 
 
 # Basic statistics
