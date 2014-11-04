@@ -185,6 +185,8 @@ export
     skewness,           # skewness of the distribution
     std,                # standard deviation of distribution
     suffstats,          # compute sufficient statistics
+    test_samples,       # test a sampler
+    test_distr,         # test a distribution
     var,                # variance of distribution
     expected_logdet,    # expected logarithm of random matrix determinant
     gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
@@ -224,6 +226,7 @@ include(joinpath("univariate", "truncated", "normal.jl"))
 include("conjugates.jl")
 include("qq.jl")
 include("estimators.jl")
+include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixturemodel.jl")

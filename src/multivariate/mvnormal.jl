@@ -28,6 +28,9 @@ function GenericMvNormal{Cov<:AbstractPDMat}(Σ::Cov)
     GenericMvNormal{Cov}(d, true, zeros(d), Σ)    
 end
 
+Base.show(io::IO, d::GenericMvNormal) = 
+    show_multline(io, d, [(:dim, d.dim), (:μ, mean(d)), (:Σ, cov(d))])
+
 ## Construction of multivariate normal with specific covariance type
 
 typealias IsoNormal  GenericMvNormal{ScalMat}

@@ -20,7 +20,10 @@ median(d::Frechet) = d.scale * log(2)^(-1.0 / d.shape)
 
 mode(d::Frechet) = (ik = -1.0/d.shape; d.scale * (1.0-ik)^ik)
 
-var(d::Frechet) = d.shape > 2.0 ? d.scale^2 * gamma(1.0 - 2.0 / d.shape) - mean(d)^2 : NaN
+function var(d::Frechet)
+    ia = 1.0 / d.shape
+    d.shape > 2.0 ? abs2(d.scale) * (gamma(1.0 - 2.0 * ia) - abs2(gamma(1.0 - ia))) : Inf
+end
 
 function skewness(d::Frechet)
     d.shape <= 3.0 && return NaN
@@ -46,8 +49,8 @@ function kurtosis(d::Frechet)
 end
 
 function entropy(d::Frechet)
-    λ, k = d.scale, d.shape
-    return (k + 1.0) * (log(λ) - digamma(1.0)/k) - log(λ * k) + 1.0
+    const γ = 0.57721566490153286060
+    1.0 + γ / d.shape + γ + log(d.scale / d.shape)
 end
 
 ## Functions

@@ -32,6 +32,8 @@ length(d::DirichletCanon) = length(d.alpha)
 Base.convert(::Type{Dirichlet}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 
 
+Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
+
 # Properties
 
 length(d::Dirichlet) = length(d.alpha)
