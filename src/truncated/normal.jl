@@ -1,50 +1,65 @@
+# Truncated normal distribution
 
-function entropy(d::Truncated{Normal})
-    s = std(d.untruncated)
-    a = d.lower
-    b = d.upper
-    phi_a = pdf(d.untruncated, a) * s
-    phi_b = pdf(d.untruncated, b) * s
-    a_phi_a = a == -Inf ? 0.0 : a * phi_a
-    b_phi_b = b == Inf ? 0.0 : b * phi_b
-    z = d.tp
-    return entropy(d.untruncated) + log(z) +
-           0.5 * (a_phi_a - b_phi_b) / z - 0.5 * ((phi_a - phi_b) / z)^2
+### statistics
+
+minimum(d::Truncated{Normal}) = d.lower
+maximum(d::Truncated{Normal}) = d.upper
+
+
+function mode(d::Truncated{Normal})
+    μ = mean(d.untruncated)
+    d.upper < mu ? d.upper :
+    d.lower > mu ? d.lower : μ
 end
+
+modes(d::Truncated{Normal}) = [mode(d)]
+
 
 function mean(d::Truncated{Normal})
-    delta = pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)
-    return mean(d.untruncated) + delta * var(d.untruncated) / d.tp
+    d0 = d.untruncated
+    μ = mean(d0)
+    σ = std(d0)
+    a = (d.lower - μ) / σ
+    b = (d.upper - μ) / σ
+    μ + ((φ(a) - φ(b)) / d.tp) * σ
 end
 
-function modes(d::Truncated{Normal})
-    mu = mean(d.untruncated)
-    if d.upper < mu
-        return [d.upper]
-    elseif d.lower > mu
-        return [d.lower]
-    else
-        return [mu]
-    end
+function var(d::Truncated{Normal})
+    d0 = d.untruncated
+    μ = mean(d0)
+    σ = std(d0)
+    a = (d.lower - μ) / σ
+    b = (d.upper - μ) / σ
+    z = d.tp
+    φa = φ(a)
+    φb = φ(b)
+    aφa = isinf(a) ? 0.0 : a * φa
+    bφb = isinf(b) ? 0.0 : b * φb
+    t1 = (aφa - bφb) / z
+    t2 = abs2((φa - φb) / z)
+    abs2(σ) * (1 + t1 - t2)
 end
+
+function entropy(d::Truncated{Normal})
+    d0 = d.untruncated
+    z = d.tp
+    μ = mean(d0)
+    σ = std(d0)
+    a = (d.lower - μ) / σ
+    b = (d.upper - μ) / σ
+    aφa = isinf(a) ? 0.0 : a * φ(a)
+    bφb = isinf(b) ? 0.0 : b * φ(b)
+    0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
+end
+
+
+### sampling
 
 function rand(d::Truncated{Normal})
     mu = mean(d.untruncated)
     sigma = std(d.untruncated)
     z = randnt((d.lower - mu) / sigma, (d.upper - mu) / sigma)
     return mu + sigma * z
-end
-
-function var(d::Truncated{Normal}) 
-    s = std(d.untruncated)
-    a = d.lower
-    b = d.upper
-    phi_a = pdf(d.untruncated, a) * s
-    phi_b = pdf(d.untruncated, b) * s
-    a_phi_a = a == -Inf ? 0.0 : a * phi_a
-    b_phi_b = b == Inf ? 0.0 : b * phi_b
-    z = d.tp
-    return s^2 * (1 + (a_phi_a - b_phi_b) / z - ((phi_a - phi_b) / z)^2)
 end
 
 # Rejection sampler based on algorithm from Robert (1992)

@@ -434,12 +434,5 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
             @test_approx_eq_eps var(d) xvar 5.0 * vd * (kd + 2) / sqrt(n)
         end
     end
-
-    # test entropy
-    if applicable(entropy, d)
-        xentropy = mean(-logpdf(d, xs))
-        dentropy = entropy(d)
-        @test_approx_eq_eps dentropy xentropy 1.0e-2 * (abs(dentropy) + 1.0e-3)
-    end
 end
 
