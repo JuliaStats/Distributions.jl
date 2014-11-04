@@ -7,14 +7,14 @@ function entropy(d::Truncated{Normal})
     phi_b = pdf(d.untruncated, b) * s
     a_phi_a = a == -Inf ? 0.0 : a * phi_a
     b_phi_b = b == Inf ? 0.0 : b * phi_b
-    z = d.nc
+    z = d.tp
     return entropy(d.untruncated) + log(z) +
            0.5 * (a_phi_a - b_phi_b) / z - 0.5 * ((phi_a - phi_b) / z)^2
 end
 
 function mean(d::Truncated{Normal})
     delta = pdf(d.untruncated, d.lower) - pdf(d.untruncated, d.upper)
-    return mean(d.untruncated) + delta * var(d.untruncated) / d.nc
+    return mean(d.untruncated) + delta * var(d.untruncated) / d.tp
 end
 
 function modes(d::Truncated{Normal})
@@ -43,7 +43,7 @@ function var(d::Truncated{Normal})
     phi_b = pdf(d.untruncated, b) * s
     a_phi_a = a == -Inf ? 0.0 : a * phi_a
     b_phi_b = b == Inf ? 0.0 : b * phi_b
-    z = d.nc
+    z = d.tp
     return s^2 * (1 + (a_phi_a - b_phi_b) / z - ((phi_a - phi_b) / z)^2)
 end
 
