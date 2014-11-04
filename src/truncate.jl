@@ -86,7 +86,7 @@ function show(io::IO, d::Truncated)
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals) : 
           show_oneline(io, d0, namevals)
-    print(io, ", range = ($(d.lower), $(d.upper)), prop = $(d.tp) )") 
+    print(io, ", range=($(d.lower), $(d.upper)), tp=$(d.tp))") 
     uml && println(io)
 end
 

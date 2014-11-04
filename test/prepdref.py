@@ -28,6 +28,8 @@ def read_distr_list(filename):
 	lst = []
 	for line in lines:
 		s = line.strip()
+		if s.startswith("#"):
+			continue
 		name, args = parse_distr(s)
 		lst.append((s, name, args))
 
@@ -136,6 +138,15 @@ def to_scipy_dist(name, args):
 	elif name == "TDist":
 		assert len(args) == 1
 		return t(args[0])
+
+	elif name == "TruncatedNormal":
+		assert len(args) == 4
+		mu, sig, a, b = args
+		za = (a - mu) / sig
+		zb = (b - mu) / sig
+		za = max(za, -1000.0)
+		zb = min(zb, 1000.0)
+		return truncnorm(za, zb, loc=mu, scale=sig)
 
 	elif name == "Uniform":
 		assert len(args) == 2
