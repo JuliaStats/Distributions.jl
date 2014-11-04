@@ -119,8 +119,11 @@ export
     Weibull,
     Wishart,
     ZeroMeanIsoNormal,
+    ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
+    ZeroMeanDiagNormalCanon,
     ZeroMeanFullNormal,
+    ZeroMeanFullNormalCanon,
 
     # methods
     binaryentropy,      # entropy of distribution in bits
@@ -177,6 +180,7 @@ export
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
     mean,               # mean of distribution
+    meanform,           # convert a normal distribution from canonical form to mean form
     median,             # median of distribution
     mgf,                # moment generating function
     mode,               # the mode of a unimodal distribution
