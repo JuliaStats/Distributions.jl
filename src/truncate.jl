@@ -73,7 +73,7 @@ function rand(d::Truncated)
             end
         end
     else
-        return quantile(d0, d.lcdf + p * d.tp)
+        return quantile(d0, d.lcdf + rand() * d.tp)
     end
 end
 

@@ -61,58 +61,68 @@ end
 
 ### sampling
 
-function rand(d::Truncated{Normal})
-    mu = mean(d.untruncated)
-    sigma = std(d.untruncated)
-    z = randnt((d.lower - mu) / sigma, (d.upper - mu) / sigma)
-    return mu + sigma * z
-end
+## Benchmarks doesn't seem to show that this specialized
+## sampler is faster than the generic quantile-based method
 
-# Rejection sampler based on algorithm from Robert (1992)
+# function rand(d::Truncated{Normal})
+#     d0 = d.untruncated
+#     μ = mean(d0)
+#     σ = std(d0)
+#     a = (d.lower - μ) / σ
+#     b = (d.upper - μ) / σ
+#     z = randnt(a, b, d.tp)
+#     return μ + σ * z
+# end
+
+# Rejection sampler based on algorithm from Robert (1995)
+#
 #  - Available at http://arxiv.org/abs/0907.4010
-function randnt(lower::Real, upper::Real)
-    if (lower <= 0 && upper == Inf) ||
-       (upper >= 0 && lower == Inf) ||
-       (lower <= 0 && upper >= 0 && upper - lower > sqrt2π)
-        while true
-            r = randn()
-            if r > lower && r < upper
-                return r
-            end
-        end
-    elseif lower > 0 && upper - lower > 2.0 / (lower + sqrt(lower^2 + 4.0)) * exp((lower^2 - lower * sqrt(lower^2 + 4.0)) / 4.0)
-        a = (lower + sqrt(lower^2 + 4.0))/2.0
-        while true
-            r = rand(Exponential(1.0 / a)) + lower
-            u = rand()
-            if u < exp(-0.5 * (r - a)^2) && r < upper
-                return r
-            end
-        end    
-    elseif upper < 0 && upper - lower > 2.0 / (-upper + sqrt(upper^2 + 4.0)) * exp((upper^2 + upper * sqrt(upper^2 + 4.0)) / 4.0)
-        a = (-upper + sqrt(upper^2 + 4.0)) / 2.0
-        while true
-            r = rand(Exponential(1.0 / a)) - upper
-            u = rand()
-            if u < exp(-0.5 * (r - a)^2) && r < -lower
-                return -r
-            end
-        end
-    else
-        while true
-            r = lower + rand() * (upper - lower)
-            u = rand()
-            if lower > 0
-                rho = exp((lower^2 - r^2) * 0.5)
-            elseif upper < 0
-                rho = exp((upper^2 - r^2) * 0.5)
-            else
-                rho = exp(-r^2 * 0.5)
-            end
-            if u < rho
-                return r
-            end
-        end
-    end
-    return 0.0
-end
+#
+# function randnt(lb::Float64, ub::Float64, tp::Float64)
+#     r::Float64
+#     if tp > 0.3   # has considerable chance of falling in [lb, ub]
+#         r = randn()
+#         while r < lb || r > ub
+#             r = randn()
+#         end
+#         return r
+
+#     else 
+#         span = ub - lb
+#         if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
+#             a = (lb + sqrt(lb^2 + 4.0))/2.0
+#             while true
+#                 r = rand(Exponential(1.0 / a)) + lb
+#                 u = rand()
+#                 if u < exp(-0.5 * (r - a)^2) && r < ub
+#                     return r
+#                 end
+#             end
+#         elseif ub < 0 && ub - lb > 2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
+#             a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
+#             while true
+#                 r = rand(Exponential(1.0 / a)) - ub
+#                 u = rand()
+#                 if u < exp(-0.5 * (r - a)^2) && r < -lb
+#                     return -r
+#                 end
+#             end
+#         else 
+#             while true
+#                 r = lb + rand() * (ub - lb)
+#                 u = rand()
+#                 if lb > 0
+#                     rho = exp((lb^2 - r^2) * 0.5)
+#                 elseif ub < 0
+#                     rho = exp((ub^2 - r^2) * 0.5)
+#                 else
+#                     rho = exp(-r^2 * 0.5)
+#                 end
+#                 if u < rho
+#                     return r
+#                 end
+#             end
+#         end
+#     end
+# end
+
