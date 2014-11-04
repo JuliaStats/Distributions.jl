@@ -118,22 +118,22 @@ end
 
 entropy(d::Categorical) = entropy(d.prob)
 
-function mgf(d::Categorical, t::AbstractVector)
+function mgf(d::Categorical, t::Real)
     k = d.K
     p = d.prob
     s = 0.0
     for i = 1 : k
-        @inbounds s += p[i] * exp(t[i])
+        @inbounds s += p[i] * exp(t)
     end
     s
 end
 
-function cf(d::Categorical, t::AbstractVector)
+function cf(d::Categorical, t::Real)
     k = d.K
     p = d.prob
     s = 0.0 + 0.0im
     for i = 1 : k
-        @inbounds s += p[i] * exp(im * t[i])
+        @inbounds s += p[i] * exp(im * t)
     end
     s
 end
