@@ -1,4 +1,4 @@
 julia 0.3-
-ArrayViews 0.4.8
-PDMats 0.3.1
-StatsBase 0.6.10
+ArrayViews 0.4.8-
+PDMats 0.3.1-
+StatsBase 0.6.10-
