@@ -1,27 +1,29 @@
 
 immutable Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}
     untruncated::D
-    lower::Float64
-    upper::Float64
-    nc::Float64
-    function Truncated{T<:UnivariateDistribution}(d::T, l::Real, u::Real, nc::Real)
-        if l >= u
-            error("upper must be > lower")
-        end
-        new(d, float64(l), float64(u), float64(nc))
-    end
+    lower::Float64      # lower bound
+    upper::Float64      # upper bound
+    lcdf::Float64       # cdf of lower bound
+    ucdf::Float64       # cdf of upper bound
+
+    tp::Float64         # the probability of the truncated part, i.e. ucdf - lcdf
+    logtp::Float64      # log(tp), i.e. log(ucdf - lcdf)
 end
 
-function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Real, nc::Real)
-    Truncated{typeof(d),S}(d,l,u,nc)
+### Constructors
+
+function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Float64, u::Float64)
+    l < u || error("lower bound should be less than upper bound.")
+    lcdf = isinf(l) ? 0.0 : cdf(d, l)
+    ucdf = isinf(u) ? 1.0 : cdf(d, u)
+    tp = ucdf - lcdf
+    Truncated{typeof(d),S}(d, l, u, lcdf, ucdf, tp, log(tp))
 end
 
-function Truncated{S<:ValueSupport}(d::UnivariateDistribution{S}, l::Real, u::Real)
-    Truncated{typeof(d),S}(d,l,u, cdf(d, u) - cdf(d, l))
-end
+Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, float64(l), float64(u))
 
-insupport(d::Truncated, x::Real) = 
-    x >= d.lower && x <= d.upper && insupport(d.untruncated, x)
+
+### range and support
 
 islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)
 isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper)
@@ -29,61 +31,54 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-function pdf(d::Truncated, x::Real)
-    if !insupport(d, x)
-        return 0.0
-    else
-        return pdf(d.untruncated, x) / d.nc
-    end
-end
+insupport(d::Truncated, x::Real) = 
+    d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
-function logpdf(d::Truncated, x::Real)
-    if !insupport(d, x)
-        return -Inf
-    else
-        return logpdf(d.untruncated, x) - log(d.nc)
-    end
-end
 
-function cdf(d::Truncated, x::Real)
-    if x < d.lower
-        return 0.0
-    elseif x > d.upper
-        return 1.0
-    else
-        return (cdf(d.untruncated, x) - cdf(d.untruncated, d.lower)) / d.nc
-    end
-end
+### evaluation
 
-function quantile(d::Truncated, p::Real)
-    top = cdf(d.untruncated, d.upper)
-    bottom = cdf(d.untruncated, d.lower)
-    return quantile(d.untruncated, bottom + p * (top - bottom))
-end
+pdf(d::Truncated, x::Real) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
 
-median(d::Truncated) = quantile(d, 0.5)
+logpdf(d::Truncated, x::Real) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+
+cdf(d::Truncated, x::Real) = x <= d.lower ? 0.0 : 
+                             x >= d.upper ? 1.0 :
+                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
+
+logcdf(d::Truncated, x::Real) = x <= d.lower ? -Inf :
+                                x >= d.upper ? 0.0 :
+                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+
+ccdf(d::Truncated, x::Real) = x <= d.lower ? 1.0 : 
+                              x >= d.upper ? 0.0 :
+                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
+
+logccdf(d::Truncated, x::Real) = x <= d.lower ? 0.0 :
+                                 x >= d.upper ? -Inf :
+                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp 
+
+
+quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
+
+
+## random number generation
 
 function rand(d::Truncated)
-    if d.nc > 0.25
+    d0 = d.untruncated
+    if d.tp > 0.25
         while true
-            r = rand(d.untruncated)
+            r = rand(d0)
             if d.lower <= r <= d.upper
                 return r
             end
         end
     else
-        return quantile(d.untruncated, cdf(d.untruncated, d.lower) + rand() * d.nc)
+        return quantile(d0, d.lcdf + rand() * d.tp)
     end
 end
 
-# from fallbacks
-function rand{D<:ContinuousUnivariateDistribution}(d::Truncated{D}, dims::Dims)
-    return rand!(d, Array(Float64, dims))
-end
 
-function rand{D<:DiscreteUnivariateDistribution}(d::Truncated{D}, dims::Dims)
-    return rand!(d, Array(Int, dims))
-end
+## show
 
 function show(io::IO, d::Truncated) 
     print(io, "Truncated(")
@@ -91,11 +86,16 @@ function show(io::IO, d::Truncated)
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals) : 
           show_oneline(io, d0, namevals)
-    print(io, ", range = ($(d.lower), $(d.upper)), prop = $(d.nc) )") 
+    print(io, ", range=($(d.lower), $(d.upper)), tp=$(d.tp))") 
     uml && println(io)
 end
 
 _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
+
+
+### specialized truncated distributions
+
+include(joinpath("truncated", "normal.jl"))
 
 
 

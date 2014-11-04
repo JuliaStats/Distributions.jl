@@ -104,9 +104,10 @@ export
     Poisson,
     Rayleigh,
     Skellam,
-    TDist,
     SymTriangularDist,
+    TDist,
     Truncated,
+    TruncatedNormal,
     Uniform,
     VonMises,
     VonMisesFisher,
@@ -222,7 +223,6 @@ include("matrixvariates.jl")
 
 # others
 include("truncate.jl")
-include(joinpath("univariate", "truncated", "normal.jl"))
 include("conjugates.jl")
 include("qq.jl")
 include("estimators.jl")
