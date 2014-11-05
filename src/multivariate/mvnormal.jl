@@ -1,12 +1,64 @@
 # Multivariate Normal distribution
 
 
-### Abstract base class for multivariate normal
+###########################################################
+#
+#   Abstract base class for multivariate normal
+#
+#   Each subtype should provide the following methods:
+#
+#   - length(d):        vector dimension
+#   - mean(d):          the mean vector (in full form)
+#   - cov(d):           the covariance matrix (in full form)
+#   - invcov(d):        inverse of covariance
+#   - logdetcov(d):     log-determinant of covariance
+#   - sqmahal(d, x):        Squared Mahalanobis distance to center
+#   - sqmahal!(r, d, x):    Squared Mahalanobis distances
+#   - gradlogpdf(d, x):     Gradient of logpdf w.r.t. x
+#   - _rand!(d, x):         Sample random vector(s)
+#
+#   Other generic functions will be implemented on top
+#   of these core functions.
+#
+###########################################################
 
 abstract AbstractMvNormal <: ContinuousMultivariateDistribution
 
+### Generic methods (for all AbstractMvNormal subtypes)
 
-### Generic multivariate normal class
+insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
+    length(d) == length(x) && allfinite(x)
+
+mode(d::AbstractMvNormal) = mean(d)
+modes(d::AbstractMvNormal) = [mean(d)]
+
+entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdetcov(d))
+
+mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdetcov(g))
+
+sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+
+_logpdf{T<:Real}(d::AbstractMvNormal, x::DenseVector{T}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
+
+function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T})
+    sqmahal!(r, d, x)
+    c0::Float64 = mvnormal_c0(d)
+    for i = 1:size(x, 2)
+        @inbounds r[i] = c0 - 0.5 * r[i]
+    end 
+    r
+end
+
+_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
+
+
+###########################################################
+#
+#   MvNormal
+#
+#   Multivariate normal distribution with mean parameters
+#
+###########################################################
 
 immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
     μ::Mean
@@ -22,7 +74,6 @@ typealias FullNormal MvNormal{PDMat,Vector{Float64}}
 typealias ZeroMeanIsoNormal  MvNormal{ScalMat,ZeroVector{Float64}}
 typealias ZeroMeanDiagNormal MvNormal{PDiagMat,ZeroVector{Float64}}
 typealias ZeroMeanFullNormal MvNormal{PDMat,ZeroVector{Float64}}
-
 
 ### Construction
 
@@ -41,7 +92,6 @@ MvNormal(Σ::Matrix{Float64}) = MvNormal(PDMat(Σ))
 MvNormal(σ::Vector{Float64}) = MvNormal(PDiagMat(abs2(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(float64(σ))))
 
-
 ### Show
 
 distrname(d::IsoNormal) = "IsoNormal"    # Note: IsoNormal, etc are just alias names
@@ -55,7 +105,6 @@ distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
 Base.show(io::IO, d::MvNormal) = 
     show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
 
-
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
@@ -64,8 +113,7 @@ mean(d::MvNormal) = convert(Vector{Float64}, d.μ)
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = full(d.Σ)
 invcov(d::MvNormal) = full(inv(d.Σ))
-logdet_cov(d::MvNormal) = logdet(d.Σ)
-
+logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
@@ -76,40 +124,16 @@ sqmahal!{T<:Real}(r::DenseVector, d::MvNormal, x::DenseMatrix{T}) =
 
 gradlogpdf(d::MvNormal, x::Vector{Float64}) = -(d.Σ \ (x - d.μ))
 
-
 # Sampling (for GenericMvNormal)
 
 _rand!(d::MvNormal, x::DenseVecOrMat{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
 
 
-### Generic methods (for all AbstractMvNormal subtypes)
-
-mode(d::AbstractMvNormal) = mean(d)
-modes(d::AbstractMvNormal) = [mean(d)]
-
-entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdet_cov(d))
-
-insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
-    length(d) == length(x) && allfinite(x)
-
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdet_cov(g))
-
-sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
-
-_logpdf{T<:Real}(d::AbstractMvNormal, x::DenseVector{T}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x) 
-
-function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T})
-    sqmahal!(r, d, x)
-    c0::Float64 = mvnormal_c0(d)
-    for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - 0.5 * r[i]
-    end 
-    r
-end
-
-_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
-
-
+###########################################################
+#
+#   Estimation of MvNormal
+#
+###########################################################
 
 ### Estimation with known covariance
 
@@ -120,7 +144,6 @@ end
 MvNormalKnownCov{Cov<:AbstractPDMat}(C::Cov) = MvNormalKnownCov{Cov}(C)
 
 length(g::MvNormalKnownCov) = dim(g.Σ)
-
 
 immutable MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance
@@ -316,4 +339,5 @@ function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64}, w::Vector{Float64})
     end
     MvNormal(mu, ScalMat(m, va / (m * sw)))
 end
+
 

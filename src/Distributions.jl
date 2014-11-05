@@ -38,6 +38,7 @@ export
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
     SufficientStats,
+    AbstractMvNormal,
 
     # distribution types
     Arcsine,
@@ -163,6 +164,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
+    logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
