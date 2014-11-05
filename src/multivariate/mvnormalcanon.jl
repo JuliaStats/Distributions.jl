@@ -43,14 +43,22 @@ MvNormalCanon(prec::Vector{Float64}) = MvNormalCanon(PDiagMat(prec))
 MvNormalCanon(d::Int, prec::Float64) = MvNormalCanon(ScalMat(d, prec)) 
 
 
+### Show
+
+distrname(d::IsoNormalCanon) = "IsoNormalCanon"  
+distrname(d::DiagNormalCanon) = "DiagNormalCanon"
+distrname(d::FullNormalCanon) = "FullNormalCanon"
+
+distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
+distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
+distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
+
 ### conversion between conventional form and canonical form
 
 meanform{C,V}(d::MvNormalCanon{C,V}) = MvNormal{C,V}(d.μ, inv(d.J))
 
-function canonform{C,V}(d::MvNormal{C,V})
-    J::C = inv(d.Σ)
-    MvNormalCanon{C,V}(d.μ, J * d.μ, J)
-end
+canonform{C}(d::MvNormal{C,Vector{Float64}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
+canonform{C}(d::MvNormal{C,ZeroVector{Float64}}) = MvNormalCanon(inv(d.Σ))
 
 
 ### Basic statistics
@@ -61,7 +69,7 @@ mean(d::MvNormalCanon) = convert(Vector{Float64}, d.μ)
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = full(inv(d.J))
 invcov(d::MvNormalCanon) = full(d.J)
-logdet_cov(d::MvNormalCanon) = -logdet(d.J)
+logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 
 ### Evaluation

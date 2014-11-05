@@ -51,11 +51,15 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
 end
 
 
-###### Testing
+###### General Testing
 
 mu = [1., 2., 3.]
 va = [1.2, 3.4, 2.6]
 C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+
+h = [1., 2., 3.]
+dv = [1.2, 3.4, 2.6]
+J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
 for (T, g, μ, Σ) in [ 
     (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, 2.0 * eye(3)), 
@@ -63,7 +67,13 @@ for (T, g, μ, Σ) in [
     (DiagNormal, MvNormal(mu, sqrt(va)), mu, diagm(va)), 
     (ZeroMeanDiagNormal, MvNormal(sqrt(va)), zeros(3), diagm(va)), 
     (FullNormal, MvNormal(mu, C), mu, C), 
-    (ZeroMeanFullNormal, MvNormal(C), zeros(3), C) ]
+    (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
+    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, 0.5 * eye(3)),
+    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), 0.5 * eye(3)),
+    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, diagm(1.0 ./ dv)),
+    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), diagm(1.0 ./ dv)),
+    (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)), 
+    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)) ]
 
     println("    testing $(distrname(g))")
 
@@ -71,6 +81,22 @@ for (T, g, μ, Σ) in [
     @test_approx_eq mean(g) μ
     @test_approx_eq cov(g) Σ
     test_mvnormal(g) 
+
+    # conversion between mean form and canonical form
+    if isa(g, MvNormal)
+        gc = canonform(g) 
+        @test isa(gc, MvNormalCanon)
+        @test length(gc) == length(g)
+        @test_approx_eq mean(gc) mean(g)
+        @test_approx_eq cov(gc) cov(g)
+    else 
+        @assert isa(g, MvNormalCanon)
+        gc = meanform(g)
+        @test isa(gc, MvNormal)
+        @test length(gc) == length(g)
+        @test_approx_eq mean(gc) mean(g)
+        @test_approx_eq cov(gc) cov(g)
+    end
 end
 
 

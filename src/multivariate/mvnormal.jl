@@ -99,7 +99,7 @@ distrname(d::DiagNormal) = "DiagNormal"
 distrname(d::FullNormal) = "FullNormal"
 
 distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
-distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDistrNormal"
+distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
 distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
 
 Base.show(io::IO, d::MvNormal) = 
