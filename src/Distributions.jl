@@ -90,7 +90,7 @@ export
     MultivariateNormal,
     MvNormal,
     MvNormalCanon,
-    MvNormalKnownSigma,
+    MvNormalKnownCov,
     MvTDist,
     NegativeBinomial,
     NoncentralBeta,

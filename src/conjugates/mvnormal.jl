@@ -7,21 +7,21 @@ function posterior_canon(prior::MvNormal, ss::MvNormalKnownCovStats)
     μ0 = prior.μ
     invΣp = pdadd(invΣ0, ss.invΣ, ss.tw)
     h = add!(invΣ0 * μ0, ss.invΣ * ss.sx)
-	return GenericMvNormalCanon(h, invΣp)
+	return MvNormalCanon(h, invΣp)
 end
 
 function posterior_canon{Pri<:MvNormal,Cov<:AbstractPDMat}(
     prior::(Pri, Cov), 
-    G::Type{MvNormal{Cov}}, 
+    G::Type{MvNormal}, 
     x::Matrix) 
 
 	μpri::Pri, Σ::Cov = prior
-	posterior_canon(μpri, suffstats(MvNormalKnownSigma{Cov}(Σ), x))
+	posterior_canon(μpri, suffstats(MvNormalKnownCov{Cov}(Σ), x))
 end
 
 function posterior_canon{Pri<:MvNormal,Cov<:AbstractPDMat}(
     prior::(Pri, Cov), 
-    G::Type{MvNormal{Cov}}, 
+    G::Type{MvNormal}, 
     x::Matrix, w::Array{Float64}) 
 
     μpri::Pri, Σ::Cov = prior
@@ -30,22 +30,22 @@ end
 
 function posterior{Pri<:MvNormal,Cov<:AbstractPDMat}(
     prior::(Pri, Cov), 
-    G::Type{MvNormal{Cov}}, 
+    G::Type{MvNormal}, 
     x::Matrix) 
 
-    convert(Pri, posterior_canon(prior, G, x))
+    meanform(posterior_canon(prior, G, x))
 end
 
 function posterior{Pri<:MvNormal,Cov<:AbstractPDMat}(
     prior::(Pri, Cov), 
-    G::Type{MvNormal{Cov}}, 
+    G::Type{MvNormal}, 
     x::Matrix, w::Array{Float64}) 
 
-    convert(Pri, posterior_canon(prior, G, x, w))
+    meanform(posterior_canon(prior, G, x, w))
 end
 
 function complete{Pri<:MvNormal,Cov<:AbstractPDMat}(
-    G::Type{MvNormal{Cov}},
+    G::Type{MvNormal},
     pri::(Pri, Cov), 
     μ::Vector{Float64})
 
