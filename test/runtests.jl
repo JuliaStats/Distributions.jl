@@ -19,8 +19,7 @@ tests = [
     "conjugates_mvnormal",
     "wishart",
     "mixture",
-    "gradlogpdf",
-    "triangular"]
+    "gradlogpdf"]
 
 print_with_color(:blue, "Running tests:\n")
 
