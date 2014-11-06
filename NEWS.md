@@ -18,9 +18,11 @@ Changes from v0.5 to v0.6
 * A consistent testing framework for univariate distributions ([#291])
 * Reimplement truncated distributions, fixing various bugs ([#295])
 * Refactored type system for multivariate normal distributions, supporting zero-mean normal seamlessly and introducing common constructors. ([#296])
+* Add triangular distribution ([#237])
 
 [#238]: https://github.com/JuliaStats/Distributions.jl/pull/238
 [#223]: https://github.com/JuliaStats/Distributions.jl/pull/223
+[#237]: https://github.com/JuliaStats/Distributions.jl/pull/237
 [#243]: https://github.com/JuliaStats/Distributions.jl/pull/243
 [#255]: https://github.com/JuliaStats/Distributions.jl/pull/255
 [#256]: https://github.com/JuliaStats/Distributions.jl/pull/256
