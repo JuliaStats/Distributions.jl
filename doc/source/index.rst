@@ -16,6 +16,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
 
    types.rst
    univariate.rst
+   truncate.rst
    multivariate.rst
    matrix.rst
    fit.rst

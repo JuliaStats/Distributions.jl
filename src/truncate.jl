@@ -1,6 +1,6 @@
 
 immutable Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}
-    untruncated::D
+    untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
     lcdf::Float64       # cdf of lower bound
