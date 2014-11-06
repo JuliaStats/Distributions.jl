@@ -108,5 +108,15 @@ for distr in [
 
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)
- end
+end
+
+
+for distr in [
+    VonMises(0.0, 1.0),
+    VonMises(0.5, 1.0),
+    VonMises(0.5, 2.0) ]
+
+    println("    testing $(distr)")
+    test_samples(distr, n_tsamples)
+end
 
