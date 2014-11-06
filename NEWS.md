@@ -19,6 +19,7 @@ Changes from v0.5 to v0.6
 * Reimplement truncated distributions, fixing various bugs ([#295])
 * Refactored type system for multivariate normal distributions, supporting zero-mean normal seamlessly and introducing common constructors. ([#296])
 * Add triangular distribution ([#237])
+* Reimplement von Mises distribution, fixing a few bugs ([#300])
 
 [#238]: https://github.com/JuliaStats/Distributions.jl/pull/238
 [#223]: https://github.com/JuliaStats/Distributions.jl/pull/223
@@ -30,4 +31,5 @@ Changes from v0.5 to v0.6
 [#291]: https://github.com/JuliaStats/Distributions.jl/pull/291
 [#295]: https://github.com/JuliaStats/Distributions.jl/pull/295
 [#296]: https://github.com/JuliaStats/Distributions.jl/pull/296
+[#300]: https://github.com/JuliaStats/Distributions.jl/pull/300
 
