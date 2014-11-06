@@ -135,6 +135,10 @@ def to_scipy_dist(name, args):
 		assert len(args) == 1
 		return rayleigh(scale=args[0])
 
+	elif name == "SymTriangularDist":
+		assert len(args) == 2
+		return triang(0.5, loc=args[0] - args[1], scale=args[1] * 2.0)
+
 	elif name == "TDist":
 		assert len(args) == 1
 		return t(args[0])
@@ -147,6 +151,11 @@ def to_scipy_dist(name, args):
 		za = max(za, -1000.0)
 		zb = min(zb, 1000.0)
 		return truncnorm(za, zb, loc=mu, scale=sig)
+
+	elif name == "TriangularDist":
+		assert len(args) == 3
+		a, b, c = args
+		return triang((c - a) / (b - a), loc=a, scale=b-a)
 
 	elif name == "Uniform":
 		assert len(args) == 2
