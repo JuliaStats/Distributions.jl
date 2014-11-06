@@ -1,104 +1,40 @@
 # Multivariate Normal distribution
 
-## Generic multivariate normal class
+
+###########################################################
+#
+#   Abstract base class for multivariate normal
+#
+#   Each subtype should provide the following methods:
+#
+#   - length(d):        vector dimension
+#   - mean(d):          the mean vector (in full form)
+#   - cov(d):           the covariance matrix (in full form)
+#   - invcov(d):        inverse of covariance
+#   - logdetcov(d):     log-determinant of covariance
+#   - sqmahal(d, x):        Squared Mahalanobis distance to center
+#   - sqmahal!(r, d, x):    Squared Mahalanobis distances
+#   - gradlogpdf(d, x):     Gradient of logpdf w.r.t. x
+#   - _rand!(d, x):         Sample random vector(s)
+#
+#   Other generic functions will be implemented on top
+#   of these core functions.
+#
+###########################################################
 
 abstract AbstractMvNormal <: ContinuousMultivariateDistribution
 
-immutable GenericMvNormal{Cov<:AbstractPDMat} <: AbstractMvNormal
-    dim::Int
-    zeromean::Bool
-    μ::Vector{Float64}
-    Σ::Cov
-end
-
-function GenericMvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov, zmean::Bool)
-    d = length(μ)
-    dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMvNormal{Cov}(d, zmean, μ, Σ)
-end
-
-function GenericMvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
-    d = length(μ)
-    dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMvNormal{Cov}(d, allzeros(μ), μ, Σ)
-end
-
-function GenericMvNormal{Cov<:AbstractPDMat}(Σ::Cov)
-    d = dim(Σ)
-    GenericMvNormal{Cov}(d, true, zeros(d), Σ)    
-end
-
-Base.show(io::IO, d::GenericMvNormal) = 
-    show_multline(io, d, [(:dim, d.dim), (:μ, mean(d)), (:Σ, cov(d))])
-
-## Construction of multivariate normal with specific covariance type
-
-typealias IsoNormal  GenericMvNormal{ScalMat}
-typealias DiagNormal GenericMvNormal{PDiagMat}
-typealias MvNormal GenericMvNormal{PDMat}
-
-MvNormal(μ::Vector{Float64}, C::PDMat) = GenericMvNormal(μ, C)
-MvNormal(C::PDMat) = GenericMvNormal(C)
-MvNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = GenericMvNormal(μ, PDMat(Σ))
-MvNormal(Σ::Matrix{Float64}) = GenericMvNormal(PDMat(Σ))
-
-DiagNormal(μ::Vector{Float64}, C::PDiagMat) = GenericMvNormal(μ, C)
-DiagNormal(C::PDiagMat) = GenericMvNormal(C)
-DiagNormal(μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvNormal(μ, PDiagMat(abs2(σ)))
-
-IsoNormal(μ::Vector{Float64}, C::ScalMat) = GenericMvNormal(μ, C)
-IsoNormal(C::ScalMat) = GenericMvNormal(C)
-IsoNormal(μ::Vector{Float64}, σ::Real) = GenericMvNormal(μ, ScalMat(length(μ), abs2(float64(σ))))
-IsoNormal(d::Int, σ::Real) = GenericMvNormal(ScalMat(d, abs2(float64(σ))))
-
-const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
-
-## convenient function to construct distributions of proper type based on arguments
-
-gmvnormal(μ::Vector{Float64}, C::AbstractPDMat) = GenericMvNormal(μ, C)
-gmvnormal(C::AbstractPDMat) = GenericMvNormal(C)
-
-gmvnormal(μ::Vector{Float64}, σ::Real) = IsoNormal(μ, float64(σ))
-gmvnormal(d::Int, σ::Float64) = IsoNormal(d, σ)
-gmvnormal(μ::Vector{Float64}, σ::Vector{Float64}) = DiagNormal(μ, σ)
-gmvnormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, Σ)
-gmvnormal(Σ::Matrix{Float64}) = MvNormal(Σ)
-
-# Basic statistics
-
-length(d::GenericMvNormal) = d.dim
-
-mean(d::GenericMvNormal) = d.μ
-mode(d::GenericMvNormal) = d.μ
-modes(d::GenericMvNormal) = [mode(d)]
-
-var(d::GenericMvNormal) = diag(d.Σ)
-cov(d::GenericMvNormal) = full(d.Σ)
-invcov(d::GenericMvNormal) = full(inv(d.Σ))
-logdet_cov(d::GenericMvNormal) = logdet(d.Σ)
-
-entropy(d::GenericMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdet_cov(d))
-
-
-# evaluation (for GenericMvNormal)
-
-function sqmahal{T<:Real}(d::GenericMvNormal, x::DenseVector{T}) 
-    z = d.zeromean ? x : x - d.μ
-    invquad(d.Σ, z) 
-end
-
-function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvNormal, x::DenseMatrix{T})
-    z = d.zeromean ? x : x .- d.μ
-    invquad!(r, d.Σ, z)
-end
-
-
-# generic PDF evaluation (appliable to AbstractMvNormal)
+### Generic methods (for all AbstractMvNormal subtypes)
 
 insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
     length(d) == length(x) && allfinite(x)
 
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdet_cov(g))
+mode(d::AbstractMvNormal) = mean(d)
+modes(d::AbstractMvNormal) = [mean(d)]
+
+entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdetcov(d))
+
+mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdetcov(g))
 
 sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
@@ -115,108 +51,148 @@ end
 
 _pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
 
-function gradlogpdf(d::GenericMvNormal, x::Vector{Float64})
-  z::Vector{Float64} = d.zeromean ? x : x - d.μ
-  -invcov(d)*z
-end
 
-# Sampling (for GenericMvNormal)
-
-function _rand!(d::GenericMvNormal, x::DenseVector{Float64})
-    unwhiten!(d.Σ, randn!(x))
-    if !d.zeromean
-        add!(x, d.μ)
-    end
-    x
-end
-
-function _rand!(d::GenericMvNormal, x::DenseMatrix{Float64})
-    unwhiten!(d.Σ, randn!(x))
-    if !d.zeromean
-        μ = d.μ
-        for j = 1:size(x,2)
-            add!(view(x,:,j), μ)
-        end
-    end
-    x
-end
-
-
-# Computation of sufficient statistics (with known covariance)
+###########################################################
 #
+#   MvNormal
+#
+#   Multivariate normal distribution with mean parameters
+#
+###########################################################
 
-immutable GenericMvNormalKnownSigma{Cov<:AbstractPDMat}
+immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+    μ::Mean
     Σ::Cov
 end
 
-typealias MvNormalKnownSigma   GenericMvNormalKnownSigma{PDMat}
-typealias DiagNormalKnownSigma GenericMvNormalKnownSigma{PDiagMat}
-typealias IsoNormalKnownSigma  GenericMvNormalKnownSigma{ScalMat}
+const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-IsoNormalKnownSigma(dimension::Int, σ::Float64) =
-    IsoNormalKnownSigma(ScalMat(dimension, abs2(σ)))
-DiagNormalKnownSigma(σ::Vector{Float64}) = DiagNormalKnownSigma(abs2(σ))
-MvNormalKnownSigma(C::Matrix{Float64}) = MvNormalKnownSigma(PDMat(C)) 
+typealias IsoNormal  MvNormal{ScalMat,Vector{Float64}}
+typealias DiagNormal MvNormal{PDiagMat,Vector{Float64}}
+typealias FullNormal MvNormal{PDMat,Vector{Float64}}
 
-length(g::GenericMvNormalKnownSigma) = dim(g.Σ)
+typealias ZeroMeanIsoNormal  MvNormal{ScalMat,ZeroVector{Float64}}
+typealias ZeroMeanDiagNormal MvNormal{PDiagMat,ZeroVector{Float64}}
+typealias ZeroMeanFullNormal MvNormal{PDMat,ZeroVector{Float64}}
+
+### Construction
+
+function MvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
+    dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
+    MvNormal{Cov,Vector{Float64}}(μ, Σ)
+end
+
+MvNormal{Cov<:AbstractPDMat}(Σ::Cov) = MvNormal{Cov,ZeroVector{Float64}}(ZeroVector(Float64, dim(Σ)), Σ)
+
+MvNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MvNormal(μ, PDiagMat(abs2(σ)))
+MvNormal(μ::Vector{Float64}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(float64(σ))))
+
+MvNormal(Σ::Matrix{Float64}) = MvNormal(PDMat(Σ))
+MvNormal(σ::Vector{Float64}) = MvNormal(PDiagMat(abs2(σ)))
+MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(float64(σ))))
+
+### Show
+
+distrname(d::IsoNormal) = "IsoNormal"    # Note: IsoNormal, etc are just alias names
+distrname(d::DiagNormal) = "DiagNormal"
+distrname(d::FullNormal) = "FullNormal"
+
+distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
+distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
+distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
+
+Base.show(io::IO, d::MvNormal) = 
+    show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
+
+### Basic statistics
+
+length(d::MvNormal) = length(d.μ)
+mean(d::MvNormal) = convert(Vector{Float64}, d.μ)
+
+var(d::MvNormal) = diag(d.Σ)
+cov(d::MvNormal) = full(d.Σ)
+invcov(d::MvNormal) = full(inv(d.Σ))
+logdetcov(d::MvNormal) = logdet(d.Σ)
+
+### Evaluation
+
+sqmahal{T<:Real}(d::MvNormal, x::DenseVector{T}) = invquad(d.Σ, x - d.μ)
+
+sqmahal!{T<:Real}(r::DenseVector, d::MvNormal, x::DenseMatrix{T}) = 
+    invquad!(r, d.Σ, x .- d.μ)
+
+gradlogpdf(d::MvNormal, x::Vector{Float64}) = -(d.Σ \ (x - d.μ))
+
+# Sampling (for GenericMvNormal)
+
+_rand!(d::MvNormal, x::DenseVecOrMat{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
 
 
-immutable GenericMvNormalKnownSigmaStats{Cov<:AbstractPDMat}
+###########################################################
+#
+#   Estimation of MvNormal
+#
+###########################################################
+
+### Estimation with known covariance
+
+immutable MvNormalKnownCov{Cov<:AbstractPDMat}
+    Σ::Cov
+end
+
+MvNormalKnownCov{Cov<:AbstractPDMat}(C::Cov) = MvNormalKnownCov{Cov}(C)
+MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(float64(σ))))
+MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2(σ)))
+MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
+
+length(g::MvNormalKnownCov) = dim(g.Σ)
+
+immutable MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance
     sx::Vector{Float64}    # (weighted) sum of vectors 
     tw::Float64            # sum of weights
 end
 
-typealias MvNormalKnownSigmaStats   GenericMvNormalKnownSigmaStats{PDMat}
-typealias DiagNormalKnownSigmaStats GenericMvNormalKnownSigmaStats{PDiagMat}
-typealias IsoNormalKnownSigmaStats  GenericMvNormalKnownSigmaStats{ScalMat}
-
-function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64})
-    size(x,1) == length(g) || throw(ArgumentError("Invalid argument dimensions."))
+function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::Matrix{Float64})
+    size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, 2))
     tw = float64(size(x, 2))
-    GenericMvNormalKnownSigmaStats{Cov}(invΣ, sx, tw)
+    MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
-function suffstats{Cov<:AbstractPDMat}(g::GenericMvNormalKnownSigma{Cov}, x::Matrix{Float64}, w::Array{Float64})
-    if !(size(x,1) == length(g) && size(x,2) == length(w))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
+function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::Matrix{Float64}, w::Array{Float64})
+    (size(x,1) == length(g) && size(x,2) == length(w)) || 
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     invΣ = inv(g.Σ)
     sx = x * vec(w)
     tw = sum(w)
-    GenericMvNormalKnownSigmaStats{Cov}(invΣ, sx, tw)
+    MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
-
 
 ## MLE estimation with covariance known
 
-function fit_mle{C<:AbstractPDMat}(g::GenericMvNormalKnownSigma{C}, ss::GenericMvNormalKnownSigmaStats{C})
-    GenericMvNormal(ss.sx * inv(ss.tw), g.Σ)
-end
+fit_mle{C<:AbstractPDMat}(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) = 
+    MvNormal(ss.sx * inv(ss.tw), g.Σ)
 
-function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64})
+function fit_mle(g::MvNormalKnownCov, x::Matrix{Float64})
     d = length(g)
-    size(x,1) == d || throw(ArgumentError("Invalid argument dimensions."))
+    size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
     μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
-    GenericMvNormal(μ, g.Σ)
+    MvNormal(μ, g.Σ)
 end
 
-function fit_mle(g::GenericMvNormalKnownSigma, x::Matrix{Float64}, w::Array{Float64})
+function fit_mle(g::MvNormalKnownCov, x::Matrix{Float64}, w::Array{Float64})
     d = length(g)
-    if !(size(x,1) == d && size(x,2) == length(w))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
+    (size(x,1) == d && size(x,2) == length(w)) ||
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     μ = Base.LinAlg.BLAS.gemv('N', inv(sum(w)), x, vec(w))
-    GenericMvNormal(μ, g.Σ)
+    MvNormal(μ, g.Σ)
 end
 
 
-# Computation of sufficient statistics (both μ and Σ are unknown)
-#
-# TODO: implement methods for DiagNormal and IsoNormal
-#
+### Estimation (both mean and cov unknown)
 
 immutable MvNormalStats <: SufficientStats
     s::Vector{Float64}  # (weighted) sum of x
@@ -228,12 +204,10 @@ end
 function suffstats(D::Type{MvNormal}, x::Matrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
-
     s = vec(sum(x,2))
     m = s * inv(n)
     z = x .- m
     s2 = A_mul_Bt(z, z)
-
     MvNormalStats(s, m, s2, float64(n))
 end
 
@@ -265,10 +239,13 @@ end
 # each kind of covariance
 #
 
+fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = fit_mle(FullNormal, ss)
+fit_mle(D::Type{MvNormal}, x::Matrix{Float64}) = fit_mle(FullNormal, x)
+fit_mle(D::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64}) = fit_mle(FullNormal, x, w)
 
-fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
+fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
-function fit_mle(D::Type{MvNormal}, x::Matrix{Float64})
+function fit_mle(D::Type{FullNormal}, x::Matrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, 2))
     z = x .- mu
@@ -276,12 +253,10 @@ function fit_mle(D::Type{MvNormal}, x::Matrix{Float64})
     MvNormal(mu, PDMat(C)) 
 end
 
-function fit_mle(D::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64})
+function fit_mle(D::Type{FullNormal}, x::Matrix{Float64}, w::Vector{Float64})
     m = size(x, 1)
     n = size(x, 2)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions"))
-    end
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
@@ -294,7 +269,6 @@ function fit_mle(D::Type{MvNormal}, x::Matrix{Float64}, w::Vector{Float64})
         end
     end
     C = Base.LinAlg.BLAS.gemm('N', 'T', inv_sw, z, z) 
-
     MvNormal(mu, PDMat(C))
 end
 
@@ -310,16 +284,13 @@ function fit_mle(D::Type{DiagNormal}, x::Matrix{Float64})
         end
     end
     multiply!(va, inv(n))
-
-    DiagNormal(mu, PDiagMat(va))
+    MvNormal(mu, PDiagMat(va))
 end
 
 function fit_mle(D::Type{DiagNormal}, x::Matrix{Float64}, w::Vector{Float64})
     m = size(x, 1)
     n = size(x, 2)    
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions"))
-    end
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
@@ -332,8 +303,7 @@ function fit_mle(D::Type{DiagNormal}, x::Matrix{Float64}, w::Vector{Float64})
         end
     end
     multiply!(va, inv_sw)
-
-    DiagNormal(mu, PDiagMat(va))
+    MvNormal(mu, PDiagMat(va))
 end
 
 function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64})
@@ -349,16 +319,13 @@ function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64})
         end
         va += va_j
     end
-
-    IsoNormal(mu, ScalMat(m, va / (m * n)))
+    MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
 function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64}, w::Vector{Float64})
     m = size(x, 1)
     n = size(x, 2)    
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions"))
-    end
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     sw = sum(w)
     inv_sw = 1.0 / sw
@@ -373,7 +340,7 @@ function fit_mle(D::Type{IsoNormal}, x::Matrix{Float64}, w::Vector{Float64})
         end
         va += va_j
     end
-
-    IsoNormal(mu, ScalMat(m, va / (m * sw)))
+    MvNormal(mu, ScalMat(m, va / (m * sw)))
 end
+
 

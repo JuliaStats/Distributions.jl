@@ -5,8 +5,9 @@ using PDMats
 using StatsBase
 
 import Base.Random
-import Base: size, length, show, getindex, scale, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
+import Base: +, -, .+, .-
 import Base.LinAlg: Cholesky
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler
@@ -37,6 +38,7 @@ export
     ContinuousMultivariateDistribution,
     ContinuousMatrixDistribution,
     SufficientStats,
+    AbstractMvNormal,
 
     # distribution types
     Arcsine,
@@ -63,6 +65,8 @@ export
     FDist,
     FisherNoncentralHypergeometric,
     Frechet,
+    FullNormal,
+    FullNormalCanon,
     Gamma,
     GenericMvNormal,
     GenericMvNormalCanon,
@@ -86,7 +90,7 @@ export
     MultivariateNormal,
     MvNormal,
     MvNormalCanon,
-    MvNormalKnownSigma,
+    MvNormalKnownCov,
     MvTDist,
     NegativeBinomial,
     NoncentralBeta,
@@ -102,6 +106,7 @@ export
     NormalWishart,
     Pareto,
     Poisson,
+    QQPair,
     Rayleigh,
     Skellam,
     SymTriangularDist,
@@ -114,7 +119,12 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
-    QQPair,
+    ZeroMeanIsoNormal,
+    ZeroMeanIsoNormalCanon,
+    ZeroMeanDiagNormal,
+    ZeroMeanDiagNormalCanon,
+    ZeroMeanFullNormal,
+    ZeroMeanFullNormalCanon,
 
     # methods
     binaryentropy,      # entropy of distribution in bits
@@ -154,6 +164,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
+    logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
@@ -171,6 +182,7 @@ export
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
     mean,               # mean of distribution
+    meanform,           # convert a normal distribution from canonical form to mean form
     median,             # median of distribution
     mgf,                # moment generating function
     mode,               # the mode of a unimodal distribution

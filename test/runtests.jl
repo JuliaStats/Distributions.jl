@@ -6,7 +6,6 @@ tests = [
     "fit", 
     "multinomial",
     "dirichlet",
-    "multivariate",
     "mvnormal",
     "mvtdist",
     "kolmogorov",

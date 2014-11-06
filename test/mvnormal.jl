@@ -4,154 +4,100 @@ import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions
 using Base.Test
+import Distributions: distrname
 
-##### construction, basic properties, and evaluation
+
+####### Core testing procedure
+
+function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
+    d = length(g)
+    μ = mean(g) 
+    Σ = cov(g)
+    @test isa(μ, Vector{Float64})
+    @test isa(Σ, Matrix{Float64})
+    @test length(μ) == d
+    @test size(Σ) == (d, d)
+    @test_approx_eq var(g) diag(Σ)
+    @test_approx_eq entropy(g) 0.5 * logdet(2π * e * Σ)
+    ldcov = logdetcov(g)
+    @test_approx_eq ldcov logdet(Σ)
+    vs = diag(Σ)
+
+    # sampling
+    X = rand(g, n_tsamples)
+    emp_mu = vec(mean(X, 2))
+    Z = X .- emp_mu
+    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    for i = 1:d
+        @test_approx_eq_eps emp_mu[i] μ[i] (sqrt(vs[i] / n_tsamples) * 8.0)
+    end
+    for i = 1:d, j = 1:d
+        @test_approx_eq_eps emp_cov[i,j] Σ[i,j] (sqrt(vs[i] * vs[j]) * 10.0) / sqrt(n_tsamples)
+    end
+
+    # evaluation of sqmahal & logpdf
+    U = X .- μ
+    sqm = vec(sum(U .* (Σ \ U), 1))
+    for i = 1:min(100, n_tsamples)
+        @test_approx_eq sqmahal(g, X[:,i]) sqm[i]
+    end
+    @test_approx_eq sqmahal(g, X) sqm
+
+    lp = -0.5 * sqm - 0.5 * (d * log(2.0 * pi) + ldcov)
+    for i = 1:min(100, n_tsamples)
+        @test_approx_eq logpdf(g, X[:,i]) lp[i]
+    end
+    @test_approx_eq logpdf(g, X) lp
+end
+
+
+###### General Testing
 
 mu = [1., 2., 3.]
 va = [1.2, 3.4, 2.6]
 C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-x1 = [3.2, 1.8, 2.4]
-x = rand(3, 100)
+h = [1., 2., 3.]
+dv = [1.2, 3.4, 2.6]
+J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-# SGauss
+for (T, g, μ, Σ) in [ 
+    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, 2.0 * eye(3)), 
+    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), 2.0 * eye(3)), 
+    (DiagNormal, MvNormal(mu, sqrt(va)), mu, diagm(va)), 
+    (ZeroMeanDiagNormal, MvNormal(sqrt(va)), zeros(3), diagm(va)), 
+    (FullNormal, MvNormal(mu, C), mu, C), 
+    (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
+    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, 0.5 * eye(3)),
+    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), 0.5 * eye(3)),
+    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, diagm(1.0 ./ dv)),
+    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), diagm(1.0 ./ dv)),
+    (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)), 
+    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)) ]
 
-gs = gmvnormal(mu, sqrt(2.0))
-@test isa(gs, IsoNormal)
-@test length(gs) == 3
-@test mean(gs) == mode(gs) == mu
-@test_approx_eq cov(gs) diagm(fill(2.0, 3))
-@test var(gs) == diag(cov(gs))
-@test_approx_eq entropy(gs) 0.5 * logdet(2π * e * cov(gs))
+    println("    testing $(distrname(g))")
 
-gsz = gmvnormal(3, sqrt(2.0))
-@test isa(gsz, IsoNormal)
-@test length(gsz) == 3
-@test mean(gsz) == zeros(3)
-@test gsz.zeromean
+    @test isa(g, T)
+    @test_approx_eq mean(g) μ
+    @test_approx_eq cov(g) Σ
+    test_mvnormal(g) 
 
-# DGauss
-
-gd = gmvnormal(mu, sqrt(va))
-@test isa(gd, DiagNormal)
-@test length(gd) == 3
-@test mean(gd) == mode(gd) == mu
-@test_approx_eq cov(gd) diagm(va)
-@test var(gd) == diag(cov(gd))
-@test_approx_eq entropy(gd) 0.5 * logdet(2π * e * cov(gd))
-
-gdz = gmvnormal(PDiagMat(va))
-@test isa(gdz, DiagNormal)
-@test length(gdz) == 3
-@test mean(gdz) == zeros(3)
-@test gdz.zeromean
-
-# Gauss
-
-gf = MvNormal(mu, C)
-@test isa(gf, MvNormal)
-@test length(gf) == 3
-@test mean(gf) == mode(gf) == mu
-@test cov(gf) == C
-@test var(gf) == diag(cov(gf))
-@test_approx_eq entropy(gf) 0.5 * logdet(2π * e * cov(gf))
-
-gfz = MvNormal(C)
-@test isa(gfz, MvNormal)
-@test length(gfz) == 3
-@test mean(gfz) == zeros(3)
-@test gfz.zeromean
-
-
-##### LogPDF/PDF evaluation
-
-@test_approx_eq_eps logpdf(gs, x1) -5.106536370454 1.0e-8
-@test_approx_eq_eps logpdf(gd, x1) -6.029399605174 1.0e-8
-@test_approx_eq_eps logpdf(gf, x1) -5.680452770982 1.0e-8
-
-@test_approx_eq_eps logpdf(gsz, x1) -8.606536370454 1.0e-8
-@test_approx_eq_eps logpdf(gdz, x1) -9.788449378930 1.0e-8
-@test_approx_eq_eps logpdf(gfz, x1) -9.621416626404 1.0e-8
-
-
-n = size(x, 2)
-r = zeros(n)
-
-for i = 1:n; r[i] = logpdf(gs, x[:,i]); end
-@test_approx_eq logpdf(gs, x) r
-@test_approx_eq pdf(gs, x) exp(r)
-
-for i = 1:n; r[i] = logpdf(gsz, x[:,i]); end
-@test_approx_eq logpdf(gsz, x) r
-@test_approx_eq pdf(gsz, x) exp(r)
-
-for i = 1:n; r[i] = logpdf(gd, x[:,i]); end
-@test_approx_eq logpdf(gd, x) r
-@test_approx_eq pdf(gd, x) exp(r)
-
-for i = 1:n; r[i] = logpdf(gdz, x[:,i]); end
-@test_approx_eq logpdf(gdz, x) r
-@test_approx_eq pdf(gdz, x) exp(r)
-
-for i = 1:n; r[i] = logpdf(gf, x[:,i]); end
-@test_approx_eq logpdf(gf, x) r
-@test_approx_eq pdf(gf, x) exp(r)
-
-for i = 1:n; r[i] = logpdf(gfz, x[:,i]); end
-@test_approx_eq logpdf(gfz, x) r
-@test_approx_eq pdf(gfz, x) exp(r)
-
-
-##### Sampling 
-
-x = rand(gs)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gs)
-
-x = rand(gd)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gd)
-
-x = rand(gf)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gf)
-
-x = rand(gsz)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gsz)
-
-x = rand(gdz)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gdz)
-
-x = rand(gfz)
-@test isa(x, Vector{Float64})
-@test length(x) == length(gfz)
-
-n = 10
-x = rand(gs, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gs), n)
-
-x = rand(gd, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gd), n)
-
-x = rand(gf, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gf), n)
-
-x = rand(gsz, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gsz), n)
-
-x = rand(gdz, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gdz), n)
-
-x = rand(gfz, n)
-@test isa(x, Matrix{Float64})
-@test size(x) == (length(gfz), n)
+    # conversion between mean form and canonical form
+    if isa(g, MvNormal)
+        gc = canonform(g) 
+        @test isa(gc, MvNormalCanon)
+        @test length(gc) == length(g)
+        @test_approx_eq mean(gc) mean(g)
+        @test_approx_eq cov(gc) cov(g)
+    else 
+        @assert isa(g, MvNormalCanon)
+        gc = meanform(g)
+        @test isa(gc, MvNormal)
+        @test length(gc) == length(g)
+        @test_approx_eq mean(gc) mean(g)
+        @test_approx_eq cov(gc) cov(g)
+    end
+end
 
 
 ##### MLE
@@ -159,87 +105,61 @@ x = rand(gfz, n)
 # a slow but safe way to implement MLE for verification
 
 function _gauss_mle(x::Matrix{Float64})
-	mu = vec(mean(x, 2))
-	z = x .- mu
-	C = (z * z') * (1/size(x,2))
-	return mu, C
+    mu = vec(mean(x, 2))
+    z = x .- mu
+    C = (z * z') * (1/size(x,2))
+    return mu, C
 end
 
 function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
-	sw = sum(w)
-	mu = (x * w) * (1/sw)
-	z = x .- mu
-	C = (z * scale(w, z')) * (1/sw)
-	Base.LinAlg.copytri!(C, 'U') 
-	return mu, C
+    sw = sum(w)
+    mu = (x * w) * (1/sw)
+    z = x .- mu
+    C = (z * scale(w, z')) * (1/sw)
+    Base.LinAlg.copytri!(C, 'U') 
+    return mu, C
 end
+
+println("    testing fit_mle")
 
 x = randn(3, 200) .+ randn(3) * 2.
 w = rand(200)
+u, C = _gauss_mle(x)
+uw, Cw = _gauss_mle(x, w)
 
-g = fit(MvNormal, x)
-mu, C = _gauss_mle(x)
-@test_approx_eq mean(g) mu
+g = fit_mle(MvNormal, suffstats(MvNormal, x))
+@test isa(g, FullNormal)
+@test_approx_eq mean(g) u
+@test_approx_eq cov(g) C
+
+g = fit_mle(MvNormal, x)
+@test isa(g, FullNormal)
+@test_approx_eq mean(g) u
 @test_approx_eq cov(g) C
 
 g = fit_mle(MvNormal, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq mean(g) mu
-@test_approx_eq cov(g) C
+@test isa(g, FullNormal)
+@test_approx_eq mean(g) uw
+@test_approx_eq cov(g) Cw
 
-g = fit(IsoNormal, x)
-mu, C = _gauss_mle(x)
-@test_approx_eq g.μ mu
+g = fit_mle(IsoNormal, x)
+@test isa(g, IsoNormal)
+@test_approx_eq g.μ u
 @test_approx_eq g.Σ.value mean(diag(C))
 
 g = fit_mle(IsoNormal, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq g.μ mu
-@test_approx_eq g.Σ.value mean(diag(C))
+@test isa(g, IsoNormal)
+@test_approx_eq g.μ uw
+@test_approx_eq g.Σ.value mean(diag(Cw))
 
-assumed_g = Distributions.IsoNormalKnownSigma(3, 1.)
-g = fit_mle(assumed_g, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq g.μ mu
-@test_approx_eq diag(g.Σ) diag(assumed_g.Σ)
-
-g = fit(DiagNormal, x)
-mu, C = _gauss_mle(x)
-@test_approx_eq g.μ mu
+g = fit_mle(DiagNormal, x)
+@test isa(g, DiagNormal)
+@test_approx_eq g.μ u
 @test_approx_eq g.Σ.diag diag(C)
 
 g = fit_mle(DiagNormal, x, w)
-mu, C = _gauss_mle(x, w)
-@test_approx_eq g.μ mu
-@test_approx_eq g.Σ.diag diag(C)
+@test isa(g, DiagNormal)
+@test_approx_eq g.μ uw
+@test_approx_eq g.Σ.diag diag(Cw)
 
-
-##### Sufficient statistics type
-n = 3
-X = reshape(Float64[1:12], 4, n)
-w = rand(n)
-Xw = X * diagm(w)
-
-ss = suffstats(MvNormal, X)
-ssw = suffstats(MvNormal, X, w)
-
-s_t = sum(X, 2)
-ws_t = sum(Xw, 2)
-tmp = X .- (s_t ./ n)
-ss_t = tmp*tmp'
-
-tmp = X .- sum(Xw, 2) ./ sum(w)
-wss_t = (tmp*diagm(w))*tmp'
-tw_t = length(w)
-wtw_t = sum(w)
-
-@test_approx_eq ss.s s_t
-@test_approx_eq ss.m (s_t ./ n)
-@test_approx_eq ss.s2 ss_t
-@test_approx_eq ss.tw tw_t
-
-@test_approx_eq ssw.s ws_t
-@test_approx_eq ssw.m (ws_t ./ wtw_t)
-@test_approx_eq ssw.s2 wss_t
-@test_approx_eq ssw.tw wtw_t
 
