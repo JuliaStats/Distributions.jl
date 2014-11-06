@@ -111,6 +111,7 @@ export
     Skellam,
     SymTriangularDist,
     TDist,
+    TriangularDist,
     Truncated,
     TruncatedNormal,
     Uniform,
