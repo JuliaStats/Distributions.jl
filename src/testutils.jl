@@ -155,8 +155,15 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    rmin = quantile(distr, 0.01)
-    rmax = quantile(distr, 0.99)
+    rmin::Float64
+    rmax::Float64
+    if applicable(quantile, distr, 0.5)
+        rmin = quantile(distr, 0.01)
+        rmax = quantile(distr, 0.99)
+    elseif isfinite(vmin) && isfinite(vmax)
+        rmin = vmin
+        rmax = vmax
+    end
     edges = linspace(rmin, rmax, nbins+1)
 
     # determine confidence intervals for counts:

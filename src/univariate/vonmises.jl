@@ -1,61 +1,58 @@
 # von Mises distribution
+#
+#  Implemented based on Wikipedia
+#
 
 immutable VonMises <: ContinuousUnivariateDistribution
-    μ::Float64  # mean
-    κ::Float64  # concentration
+    μ::Float64      # mean
+    κ::Float64      # concentration
+    I0κ::Float64    # I0(κ), where I0 is the modified Bessel function of order 0
 
     function VonMises(μ::Real, κ::Real)
         κ > zero(κ) || error("kappa must be positive")
-        new(float64(μ), float64(κ))
+        new(float64(μ), float64(κ), besseli(0, κ))
     end
 
     VonMises(κ::Real) = VonMises(0.0, float64(κ))
     VonMises() = VonMises(0.0, 1.0)
 end
 
-## Properties
-circmean(d::VonMises) = d.μ
-circmedian(d::VonMises) = d.μ
-circmode(d::VonMises) = d.μ
-circvar(d::VonMises) = 1.0 - besselix(1, d.κ) / besselix(0, d.κ)
+show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
-function entropy(d::VonMises)
-	I0κ = besselix(0.0, d.κ)
-	log(twoπ * I0κ) - d.κ * (besselix(1, d.κ) / I0κ - 1.0)
-end
+### Properties
 
-## Functions
-pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1.0)) / (twoπ * besselix(0, d.κ))
-logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1.0) - log2π - log(besselix(0, d.κ))
-cf(d::VonMises, t::Real) = besselix(abs(t), d.k) / besselix(0.0, d.κ) * exp(im * t * d.μ)
-cdf(d::VonMises, x::Real) = cdf(d, x, d.μ - π)
+minimum(d::VonMises) = d.μ - π
+maximum(d::VonMises) = d.μ + π
+islowerbounded(d::VonMises) = true
+isupperbounded(d::VonMises) = true
+insupport(d::VonMises, x::Real) = -π <= (x - d.μ) <= π
 
-function cdf(d::VonMises, x::Real, from::Real)
-	const tol = 1.0e-20
-	x = mod(x - from, twoπ)
-	μ = mod(d.μ - from, twoπ)
-	if μ == 0.0
-		return vmcdfseries(d.κ, x, tol)
-	elseif x <= μ
-		upper = mod(x - μ, twoπ)
-		if upper == 0.0
-			upper = twoπ
-		end
-		return vmcdfseries(d.κ, upper, tol) - vmcdfseries(d.κ, mod(-μ, twoπ), tol)
-	else
-		return vmcdfseries(d.κ, x - μ, tol) - vmcdfseries(d.κ, μ, tol)
-	end
-end
+mean(d::VonMises) = d.μ
+median(d::VonMises) = d.μ
+mode(d::VonMises) = d.μ
+circvar(d::VonMises) = 1.0 - besseli(1, d.κ) / I0κ
+entropy(d::VonMises) = log(twoπ * d.I0κ) - d.κ * (besseli(1, d.κ) / d.I0κ)
 
-function vmcdfseries(κ::Real, x::Real, tol::Real)
-	j, s = 1, 0.0
-	while true
-		sj = besselix(j, κ) * sin(j * x) / j
-		s += sj
-		j += 1
-		abs(sj) >= tol || break
-	end
-	x / twoπ + s / (π * besselix(0, κ))
+cf(d::VonMises, t::Real) = (besseli(abs(t), d.k) / I0κ) * exp(im * t * d.μ)
+
+
+### Functions
+
+pdf(d::VonMises, x::Real) = exp(d.κ * cos(float64(x) - d.μ)) / (twoπ * d.I0κ)
+logpdf(d::VonMises, x::Real) = d.κ * cos(float64(x) - d.μ) - log(d.I0κ) - log2π
+
+cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κ, float64(x) - d.μ, 1.0e-15)
+
+function _vmcdf(κ::Float64, I0κ::Float64, x::Float64, tol::Float64)
+    j = 1
+    cj = besseli(j, κ) / j
+    s = cj * sin(j * x)
+    while abs(cj) > tol
+        j += 1
+        cj = besseli(j, κ) / j
+        s += cj * sin(j * x)
+    end
+    return (x + 2.0 * s / I0κ) / twoπ + 0.5
 end
 
 ## Sampling
