@@ -15,7 +15,7 @@ function gen_vmf_tdata(n::Int, p::Int)
     return X
 end
 
-function test_vonmisesfisher(p::Int, κ::Float64, n::Int)
+function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     μ = randn(p)
     μ = μ ./ vecnorm(μ)
 
@@ -50,19 +50,26 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int)
     for i = 1:n
         @test_approx_eq vecnorm(X[:,i]) 1.0
     end
+
+    # MLE
+    X = rand(d, ns)
+    d_est = fit_mle(VonMisesFisher, X)
+    @test isa(d_est, VonMisesFisher)
+    @test_approx_eq_eps d_est.μ μ 0.01
+    @test_approx_eq_eps d_est.κ κ κ * 0.01
 end
 
 
+## General testing
+
 n = 1000
+ns = 10^6
 for (p, κ) in [(2, 1.0), 
                (2, 5.0),
                (3, 1.0), 
                (3, 5.0),
                (5, 2.0)]
 
-    test_vonmisesfisher(p, κ, n)
+    test_vonmisesfisher(p, κ, n, ns)
 end 
-
-
-
 

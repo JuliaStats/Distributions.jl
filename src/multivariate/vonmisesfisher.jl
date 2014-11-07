@@ -65,3 +65,47 @@ _rand!(d::VonMisesFisher, x::DenseVector) = _rand!(sampler(d), x)
 _rand!(d::VonMisesFisher, x::DenseMatrix) = _rand!(sampler(d), x)
 
 
+### Estimation
+
+function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
+    r = vec(sum(X, 2))
+    n = size(X, 2)
+    r_nrm = vecnorm(r)
+    μ = scale!(r, 1.0 / r_nrm)
+    ρ = r_nrm / n
+    κ = _vmf_estkappa(length(μ), ρ)
+    VonMisesFisher(μ, κ)
+end
+
+fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, float64(X))
+
+function _vmf_estkappa(p::Int, ρ::Float64)
+    # Using the fixed-point iteration algorithm in the following paper:
+    #
+    #   Akihiro Tanabe, Kenji Fukumizu, and Shigeyuki Oba, Takashi Takenouchi, and Shin Ishii
+    #   Parameter estimation for von Mises-Fisher distributions.
+    #   Computational Statistics, 2007, Vol. 22:145-157.
+    #
+
+    const maxiter = 200
+    half_p = 0.5 * p
+
+    ρ2 = abs2(ρ)
+    κ = ρ * (p - ρ2) / (1 - ρ2)
+    i = 0
+    while i < maxiter
+        i += 1
+        κ_prev = κ
+        a = (ρ / _vmfA(half_p, κ))
+        # println("i = $i, a = $a, abs(a - 1) = $(abs(a - 1))")
+        κ *= a
+        if abs(a - 1.0) < 1.0e-12
+            break
+        end
+    end
+    return κ
+end
+
+_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ) 
+
+
