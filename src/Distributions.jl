@@ -39,6 +39,8 @@ export
     ContinuousMatrixDistribution,
     SufficientStats,
     AbstractMvNormal,
+    UnivariateMixture,
+    MultivariateMixture,
 
     # distribution types
     Arcsine,
@@ -141,6 +143,7 @@ export
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
+    components,         # get components from a mixture model
     concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
     entropy,            # entropy of distribution in nats
@@ -195,6 +198,7 @@ export
     ncategories,        # the number of categories in a Categorical distribution
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
+    priorprobs,         # prior probabilities
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     sampler,            # create a Sampler object for efficient samples
