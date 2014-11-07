@@ -22,6 +22,8 @@ end
 dim(d::InverseWishart) = size(d.Psichol, 1)
 size(d::InverseWishart) = size(d.Psichol)
 
+show(io::IO, d::InverseWishart) = show_multline(io, d, [(:nu, d.nu), (:Psi, full(d.Psichol))])
+
 function InverseWishart(nu::Real, Psi::Matrix{Float64})
     InverseWishart(float64(nu), cholfact(Psi))
 end

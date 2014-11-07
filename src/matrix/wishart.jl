@@ -23,6 +23,9 @@ end
 
 Wishart(nu::Real, S::Matrix{Float64}) = Wishart(nu, cholfact(S))
 
+show(io::IO, d::Wishart) = show_multline(io, d, [(:nu, d.nu), (:S, full(d.Schol))])
+
+
 dim(W::Wishart) = size(W.Schol, 1)
 size(W::Wishart) = size(W.Schol)
 
