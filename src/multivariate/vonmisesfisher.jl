@@ -1,130 +1,111 @@
-# Von-Mises Fisher: a multivariate distribution useful in directional statistics
-
-# Useful notes:
-# http://www.mitsuba-renderer.org/~wenzel/vmf.pdf
-# Some of the code adapted from http://www.unc.edu/~sungkyu/manifolds/randvonMisesFisherm.m
-# as well as the movMF R package.
+# von Mises-Fisher distribution is useful for directional statistics
+#
+# The implementation here follows:
+#
+#   - Wikipedia: 
+#     http://en.wikipedia.org/wiki/Von_Mises–Fisher_distribution
+#
+#   - R's movMF package's document: 
+#     http://cran.r-project.org/web/packages/movMF/vignettes/movMF.pdf
+#
+#   - Wenzel Jakob's notes:
+#     http://www.mitsuba-renderer.org/~wenzel/files/vmf.pdf
+#
 
 immutable VonMisesFisher <: ContinuousMultivariateDistribution
-    mu::Vector{Float64}
-    kappa::Float64
+    μ::Vector{Float64}
+    κ::Float64
+    logCκ::Float64
 
-    function VonMisesFisher{T <: Real}(mu::Vector{T}, kappa::Float64)
-        mu = mu ./ norm(mu)
-        if kappa < 0
-            throw(ArgumentError("kappa must be a nonnegative real number."))
+    function VonMisesFisher(μ::Vector{Float64}, κ::Float64; checknorm::Bool=true)
+        if checknorm 
+            isunitvec(μ) || error("μ must be a unit vector")
         end
-        new(float64(mu), kappa)
+        κ > 0 || error("κ must be positive.")
+        new(μ, κ, vmflck(length(μ), κ))
     end
 end
 
-length(d::VonMisesFisher) = length(d.mu)
-mean(d::VonMisesFisher) = d.mu
-scale(d::VonMisesFisher) = d.kappa
+VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(float64(μ), float64(κ))
 
-insupport{T<:Real}(d::VonMisesFisher, x::AbstractVector{T}) = abs(sum(x) - 1.) < 1e-8
+VonMisesFisher(θ::Vector{Float64}) = (κ = vecnorm(θ); VonMisesFisher(scale(θ, 1.0 / κ), κ))
+VonMisesFisher{T<:Real}(θ::Vector{T}) = VonMisesFisher(float64(θ))
 
-function _logpdf{T<:Real}(d::VonMisesFisher, x::DenseVector{T}; stable=true)
-    if abs(d.kappa - 0.0) < eps() 
-        return 0.25 / pi
-    end
-    if stable
-        # As suggested by Wenzel Jakob: http://www.mitsuba-renderer.org/~wenzel/vmf.pdf
-        return d.kappa * dot(d.mu, x) - d.kappa + log(d.kappa) - log(2*pi) - log(1-exp(-2*d.kappa))
-    else 
-        # As described on Wikipedia
-        p = length(d)
-        logCpk = 0.0
-        if p == 3
-            logCpk = log(d.kappa) - log(2 * pi * (exp(kappa) - exp(-kappa)))
-        else
-            logCpk = (p/2 - 1) * log(d.kappa) - (p/2) * log(2*pi) - log(besselj(p/2-1, d.kappa))
+show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
+
+
+### Basic properties
+
+length(d::VonMisesFisher) = length(d.μ)
+
+meandir(d::VonMisesFisher) = d.μ
+concentration(d::VonMisesFisher) = d.κ
+
+insupport{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = isunitvec(x)
+
+
+### Evaluation
+
+function _vmflck(p, κ)
+    hp = 0.5 * p
+    q = hp - 1.0
+    q * log(κ) - hp * log(2π) - log(besseli(q, κ))
+end
+_vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2.0 * κ) 
+vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))::Float64
+
+_logpdf{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = d.logCκ + d.κ * dot(d.μ, x)
+
+
+### Sampling 
+
+sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
+
+_rand!(d::VonMisesFisher, x::DenseVector) = _rand!(sampler(d), x)
+_rand!(d::VonMisesFisher, x::DenseMatrix) = _rand!(sampler(d), x)
+
+
+### Estimation
+
+function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
+    r = vec(sum(X, 2))
+    n = size(X, 2)
+    r_nrm = vecnorm(r)
+    μ = scale!(r, 1.0 / r_nrm)
+    ρ = r_nrm / n
+    κ = _vmf_estkappa(length(μ), ρ)
+    VonMisesFisher(μ, κ)
+end
+
+fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, float64(X))
+
+function _vmf_estkappa(p::Int, ρ::Float64)
+    # Using the fixed-point iteration algorithm in the following paper:
+    #
+    #   Akihiro Tanabe, Kenji Fukumizu, and Shigeyuki Oba, Takashi Takenouchi, and Shin Ishii
+    #   Parameter estimation for von Mises-Fisher distributions.
+    #   Computational Statistics, 2007, Vol. 22:145-157.
+    #
+
+    const maxiter = 200
+    half_p = 0.5 * p
+
+    ρ2 = abs2(ρ)
+    κ = ρ * (p - ρ2) / (1 - ρ2)
+    i = 0
+    while i < maxiter
+        i += 1
+        κ_prev = κ
+        a = (ρ / _vmfA(half_p, κ))
+        # println("i = $i, a = $a, abs(a - 1) = $(abs(a - 1))")
+        κ *= a
+        if abs(a - 1.0) < 1.0e-12
+            break
         end
-        return d.kappa * dot(d.mu, x) + logCpk
     end
+    return κ
 end
 
-# sampling (TODO: make it consistent with the common API)
+_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ) 
 
-function rand(d::VonMisesFisher, n::Int)
-    randvonMisesFisher(n, d.kappa, d.mu)
-end
 
-function randvonMisesFisher(n, kappa, mu)
-    m = length(mu)
-    w = rW(n, kappa, m)
-    v = rand(MvNormal(zeros(m-1), eye(m-1)), n)
-
-    # normalize each column of v
-    for j = 1:n
-        s = 0.
-        vj = view(v,:,j)
-        for i = 1:size(v,1)
-            s += abs2(vj[i])
-        end
-        s = sqrt(s)
-        for i = 1:size(v,1)
-            vj[i] /= s
-        end
-    end
-    v = v'
-
-    r = sqrt(1.0 .- w .^ 2)
-    for j = 1:size(v,2) v[:,j] = v[:,j] .* r; end  
-    x = hcat(v, w)
-    mu = mu / norm(mu)
-    return rotMat(mu)'*x'
-end
-
-# Randomly sample W
-function rW(n, kappa, m)
-    y = zeros(n)
-    l = kappa;
-    d = m - 1;
-    b = (- 2. * l + sqrt(4. * l * l + d * d)) / d;
-    x = (1. - b) / (1. + b);
-    c = l * x + d * log(1. - x * x);
-    w = 0
-    for i=1:n
-        done = false
-        while !done
-            z = rand(Beta(d / 2., d / 2.))
-            w = (1. - (1. + b) * z) / (1. - (1. - b) * z);
-            u = rand()
-            if l * w + d * log(1. - x * w) - c >= log(u)
-                done = true
-            end
-        end
-        y[i] = w
-    end
-    return y
-end
-
-# Rotation helper function
-function rotMat(b)
-    d = length(b)
-    b= b/norm(b)
-    a = [zeros(d-1,1); 1]
-    alpha = acos(a'*b)[1]
-    c = b - a * (a'*b); c = c / norm(c)
-    A = a*c' - c*a'
-    return eye(d) + sin(alpha)*A + (cos(alpha) - 1)*(a*a' +c*c')
-end
-
-# Each row of x assumed to be ~ VonMisesFisher(mu, kappa)
-# MLE notes from: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.186.1887&rep=rep1&type=pdf
-
-function fit_mle(::Type{VonMisesFisher}, x::Matrix{Float64})
-    (n,p) = size(x)
-    sx = sum(x, 1)
-    mu = sx[:] / norm(sx)
-    rbar = norm(sx) / n
-    kappa0 = rbar * (p-rbar^2) / (1-rbar^2)  # Eqn. 4
-    # TODO: Include a few Newton steps to get a better approximation.
-    # A(p,kappa) = besselj(p/2, kappa) / besselj(p/2-1, kappa)
-    # apk0 = A(p,kappa0)
-    # kappa1 = kappa0 + (apk0 - rbar) / (1 - apk0^2 - (p-1)*apk0/kappa0)
-    # apk1 = A(p,kappa1)
-    # kappa2 = kappa1 + (apk1 - rbar) / (1 - apk1^2 - (p-1)*apk1/kappa1)
-    return VonMisesFisher(mu, kappa0)#, kappa1, kappa2)
-end

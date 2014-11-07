@@ -141,6 +141,7 @@ export
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
+    concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
     entropy,            # entropy of distribution in nats
     fit,                # fit a distribution to data (using default method)
@@ -183,6 +184,7 @@ export
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
     mean,               # mean of distribution
+    meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
     median,             # median of distribution
     mgf,                # moment generating function
