@@ -23,6 +23,8 @@ convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
 
 type NoArgCheck end
 
+isunitvec{T}(v::AbstractVector{T}) = (vecnorm(v) - 1.0) < 1.0e-12
+
 function allfinite{T<:Real}(x::Array{T})
     for i = 1 : length(x)
         if !(isfinite(x[i]))
