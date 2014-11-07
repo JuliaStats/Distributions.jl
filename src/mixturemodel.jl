@@ -30,7 +30,7 @@ MixtureModel{C<:Distribution}(components::Vector{C}) =
 
 #### Basic properties
 
-length(d::MultivariateMixture) = dim(d.components[1])
+length(d::MultivariateMixture) = length(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
@@ -228,9 +228,4 @@ rand(s::MixtureSampler) = rand(s.csamplers[rand(s.psampler)])
 _rand!(s::MixtureSampler{Multivariate}, x::DenseVector) = _rand!(s.csamplers[rand(s.psampler)], x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)
-
-
-
-
-
 

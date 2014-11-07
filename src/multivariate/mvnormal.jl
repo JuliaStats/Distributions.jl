@@ -126,8 +126,15 @@ gradlogpdf(d::MvNormal, x::Vector{Float64}) = -(d.Σ \ (x - d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::DenseVecOrMat{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
+_rand!(d::MvNormal, x::VecOrMat{Float64}) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
 
+# Workaround: randn! only works for Array, but not generally for DenseArray
+function _rand!(d::MvNormal, x::DenseVecOrMat{Float64})
+    for i = 1:length(x)
+        @inbounds x[i] = randn()
+    end
+    add!(unwhiten!(d.Σ, x), d.μ)
+end
 
 ###########################################################
 #
