@@ -141,6 +141,7 @@ export
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
+    components,         # get components from a mixture model
     concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
     entropy,            # entropy of distribution in nats
