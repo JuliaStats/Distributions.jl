@@ -39,6 +39,8 @@ export
     ContinuousMatrixDistribution,
     SufficientStats,
     AbstractMvNormal,
+    UnivariateMixture,
+    MultivariateMixture,
 
     # distribution types
     Arcsine,
@@ -196,6 +198,7 @@ export
     ncategories,        # the number of categories in a Categorical distribution
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
+    priorprobs,         # prior probabilities
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     sampler,            # create a Sampler object for efficient samples

@@ -13,7 +13,7 @@ typealias MatrixvariateMixture MixtureModel{Matrixvariate}
 #### Constructors
 
 function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical)
-    length(complements) == ncategories(prior) ||
+    length(components) == ncategories(prior) ||
         error("Inconsistent sizes of components and prior.")
     VF = variate_form(C)
     VS = value_support(C)
@@ -34,10 +34,11 @@ length(d::MultivariateMixture) = dim(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
+priorprobs(d::MixtureModel) = d.prior.prob
 
 function mean(d::UnivariateMixture)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     m = 0.0
     for i = 1:length(cs)
         pi = p[i]
@@ -49,8 +50,8 @@ function mean(d::UnivariateMixture)
 end
 
 function mean(d::MultivariateMixture)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     m = zeros(length(d))
     for i = 1:length(cs)
         pi = p[i]
@@ -62,8 +63,8 @@ function mean(d::MultivariateMixture)
 end
 
 function var(d::UnivariateMixture)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     K = length(cs)
     means = Array(Float64, K)
     m = 0.0
@@ -90,8 +91,8 @@ end
 #### Evaluation
 
 function _mixpdf1(d::MixtureModel, x)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     v = 0.0
     for i = 1:length(cs)
         pi = p[i]
@@ -103,8 +104,8 @@ function _mixpdf1(d::MixtureModel, x)
 end
 
 function _mixpdf!(r::DenseArray, d::MixtureModel, x)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     fill!(r, 0.0)
     t = Array(Float64, size(r))
     for i = 1:length(cs)
@@ -132,8 +133,8 @@ function _mixlogpdf1(d::MixtureModel, x)
     #  such that the argument of exp is in a reasonable range
     #
 
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     K = length(cs)
     lp = Array(Float64, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
@@ -157,8 +158,8 @@ function _mixlogpdf1(d::MixtureModel, x)
 end
 
 function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
-    cs = d.components
-    p = d.prior
+    cs = components(d)
+    p = priorprobs(d)
     K = length(cs)
     n = length(r)
     Lp = Array(Float64, n, K)
@@ -184,6 +185,7 @@ function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
     fill!(r, 0.0)
     for i = 1:K
         if p[i] > 0.0
+            lp_i = view(Lp, :, i)
             for j = 1:n
                 r[j] += exp(lp_i[j] - m[j])
             end
@@ -219,8 +221,16 @@ function MixtureSampler{VF,VS}(d::MixtureModel{VF,VS})
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
 end
 
+
+rand(d::MixtureModel) = rand(d.components[rand(d.prior)])
+
 rand(s::MixtureSampler) = rand(s.csamplers[rand(s.psampler)])
-_rand!(s::MixtureSampler, x::DenseVector) = _rand!(s.csampler[rand(s.psampler)], x)
+_rand!(s::MixtureSampler{Multivariate}, x::DenseVector) = _rand!(s.csamplers[rand(s.psampler)], x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)
+
+
+
+
+
 
