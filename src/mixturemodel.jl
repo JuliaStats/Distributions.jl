@@ -27,6 +27,19 @@ MixtureModel{C<:Distribution}(components::Vector{C}, p::Vector{Float64}) =
 MixtureModel{C<:Distribution}(components::Vector{C}) = 
     MixtureModel(components, Categorical(length(components)))
 
+_construct_component{C<:Distribution}(::Type{C}, arg) = C(arg)
+_construct_component{C<:Distribution}(::Type{C}, args::Tuple) = C(args...)
+
+function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray, p::Vector{Float64})
+    components = C[_construct_component(C, a) for a in params]
+    MixtureModel(components, p)
+end
+
+function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray)
+    components = C[_construct_component(C, a) for a in params]
+    MixtureModel(components)
+end
+
 
 #### Basic properties
 
@@ -35,6 +48,8 @@ size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
 priorprobs(d::MixtureModel) = d.prior.prob
+
+component_type{VF,VS,C}(d::MixtureModel{VF,VS,C}) = C
 
 function mean(d::UnivariateMixture)
     cs = components(d)
@@ -86,6 +101,25 @@ function var(d::UnivariateMixture)
     end
     return v
 end
+
+
+#### show
+
+function show(io::IO, d::MixtureModel)
+    cs = components(d)
+    pr = priorprobs(d)
+    K = length(cs)
+    println(io, "MixtureModel{$(component_type(d))}(K = $K)")
+    Ks = min(K, 8)
+    for i = 1:Ks
+        @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
+        println(io, cs[i])
+    end
+    if Ks < K
+        println(io, "The rest are omitted ...")
+    end
+end
+
 
 
 #### Evaluation
