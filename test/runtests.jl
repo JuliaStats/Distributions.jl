@@ -17,7 +17,6 @@ tests = [
     "conjugates",
     "conjugates_normal",
     "conjugates_mvnormal",
-    "wishart",
     "mixture",
     "gradlogpdf"]
 

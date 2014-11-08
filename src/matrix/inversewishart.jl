@@ -1,103 +1,85 @@
-##############################################################################
+# Inverse Wishart distribution
 #
-# Inverse Wishart Distribution
+#   following Wikipedia parametrization
 #
-#  Parameterized such that E(X) = Psi / (nu - p - 1)
-#  See the riwish and diwish function of R's MCMCpack
-#
-##############################################################################
 
-immutable InverseWishart <: ContinuousMatrixDistribution
-    nu::Float64
-    Psichol::Cholesky{Float64}
-    function InverseWishart(n::Real, Pc::Cholesky{Float64})
-        if n > size(Pc, 1) - 1
-            new(float64(n), Pc)
-        else
-            error("Inverse Wishart parameters must be df > p - 1")
-        end
-    end
+immutable InverseWishart{ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+    df::Float64     # degree of freedom
+    Ψ::ST           # scale matrix
+    c0::Float64     # log of normalizing constant
 end
 
-dim(d::InverseWishart) = size(d.Psichol, 1)
-size(d::InverseWishart) = size(d.Psichol)
+#### Constructors
 
-show(io::IO, d::InverseWishart) = show_multline(io, d, [(:nu, d.nu), (:Psi, full(d.Psichol))])
-
-function InverseWishart(nu::Real, Psi::Matrix{Float64})
-    InverseWishart(float64(nu), cholfact(Psi))
+function InverseWishart{ST<:AbstractPDMat}(df::Real, Ψ::ST)
+    p = dim(Ψ)
+    df > p - 1 || error("df should be greater than dim - 1.")
+    InverseWishart{ST}(df, Ψ, _invwishart_c0(df, Ψ))
 end
 
-function insupport(IW::InverseWishart, X::Matrix{Float64})
-    return size(X) == size(IW) && isApproxSymmmetric(X) && hasCholesky(X)
-end
-# This just checks if X could come from any Inverse-Wishart
-function insupport(::Type{InverseWishart}, X::Matrix{Float64})
-    return size(X, 1) == size(X, 2) && isApproxSymmmetric(X) && hasCholesky(X)
+InverseWishart(df::Real, Ψ::Matrix{Float64}) = InverseWishart(df, PDMat(Ψ))
+
+InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
+
+function _invwishart_c0(df::Float64, Ψ::AbstractPDMat)
+    h_df = df / 2
+    p = dim(Ψ)
+    h_df * (p * logtwo - logdet(Ψ)) + lpgamma(p, h_df)
 end
 
-function mean(IW::InverseWishart)
-    if IW.nu > size(IW.Psichol, 1) + 1
-        return 1.0 / (IW.nu - size(IW.Psichol, 1) - 1.0) *
-               (IW.Psichol[:U]' * IW.Psichol[:U])
+
+#### Properties
+
+insupport(::Type{InverseWishart}, X::Matrix{Float64}) = isposdef(X)
+insupport(d::InverseWishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
+
+dim(d::InverseWishart) = dim(d.Ψ)
+size(d::InverseWishart) = (p = dim(d); (p, p))
+
+
+#### Show
+
+show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, full(d.Ψ))])
+
+
+#### Statistics
+
+function mean(d::InverseWishart)
+    df = d.df
+    p = dim(d)
+    r = df - (p + 1)
+    if r > 0.0
+        return full(d.Ψ) * (1.0 / r)
     else
-        error("mean only defined for nu > p + 1")
+        error("mean only defined for df > p + 1")
     end
 end
 
-function _logpdf{T<:Real}(IW::InverseWishart, X::DenseMatrix{T})
-    Xchol = trycholfact(X)
-    if size(X) == size(IW) && isApproxSymmmetric(X) && isa(Xchol, Cholesky)
-        p = size(X, 1)
-        logd::Float64 = IW.nu * p / 2.0 * log(2.0)
-        logd += lpgamma(p, IW.nu / 2.0)
-        logd -= IW.nu / 2.0 * logdet(IW.Psichol)
-        logd = -logd
-        logd -= 0.5 * (IW.nu + p + 1.0) * logdet(Xchol)
-        logd -= 0.5 * trace(inv(Xchol) * (IW.Psichol[:U]' * IW.Psichol[:U]))
-        return logd
-    else
-        return -Inf
-    end
+mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
+
+
+#### Evaluation
+
+function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
+    p = dim(d)
+    df = d.df
+    Xcf = cholfact(X)
+    # we use the fact: trace(Ψ * inv(X)) = trace(inv(X) * Ψ) = trace(X \ Ψ)
+    Ψ = full(d.Ψ)
+    -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
 end
 
-# rand(Wishart(nu, Psi^-1))^-1 is an sample from an
-#  inverse wishart(nu, Psi). there is actually some wacky
-#  behavior here where inv of the Cholesky returns the 
-#  inverse of the original matrix, in this case we're getting
-#  Psi^-1 like we want
-rand(IW::InverseWishart) = inv(rand(Wishart(IW.nu, inv(IW.Psichol))))
+_logpdf{T<:Real}(d::InverseWishart, X::DenseMatrix{T}) = _logpdf(d, float64(X))
 
-function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
-    Psiinv = inv(IW.Psichol)
-    W = Wishart(IW.nu, Psiinv)
-    X = rand!(W, X)
+
+#### Sampling
+
+rand(d::InverseWishart) = inv(rand(Wishart(d.df, inv(d.Ψ))))
+
+function _rand!{M<:Matrix}(d::InverseWishart, X::AbstractArray{M})
+    wd = Wishart(d.df, inv(d.Ψ))
     for i in 1:length(X)
-        X[i] = inv(X[i])
+        X[i] = inv(rand(wd))
     end
     return X
-end
-
-var(IW::InverseWishart) = error("Not yet implemented")
-
-# because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
-    tmp = true
-    for j in 2:size(a, 1)
-        for i in 1:(j - 1)
-            tmp &= abs(a[i, j] - a[j, i]) < 1e-8
-        end
-    end
-    return tmp
-end
-
-# because isposdef keeps giving the wrong answer for samples
-# from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholfact(a), Cholesky)
-
-function trycholfact(a::Matrix{Float64})
-    try cholfact(a)
-    catch e
-        return e
-    end
 end

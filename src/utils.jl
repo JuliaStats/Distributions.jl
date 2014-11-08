@@ -145,16 +145,28 @@ macro checkinvlogcdf(lp,ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 
-# Simple method for integration
-function simpson(f::AbstractVector{Float64}, h::Float64)
-    n = length(f)
-    isodd(n) || error("The length of the input vector must be odd.")
-    s = f[1]
-    t = -1
-    for i = 2:2:n-1
-        @inbounds s += (4 * f[i] + 2 * f[i+1])
+# because X == X' keeps failing due to floating point nonsense
+function isApproxSymmmetric(a::Matrix{Float64})
+    tmp = true
+    for j in 2:size(a, 1)
+        for i in 1:(j - 1)
+            tmp &= abs(a[i, j] - a[j, i]) < 1e-8
+        end
     end
-    s += f[n]
-    return s * h / 3.0
+    return tmp
 end
+
+# because isposdef keeps giving the wrong answer for samples
+# from Wishart and InverseWisharts
+hasCholesky(a::Matrix{Float64}) = isa(trycholfact(a), Cholesky)
+
+function trycholfact(a::Matrix{Float64})
+    try cholfact(a)
+    catch e
+        return e
+    end
+end
+
+
+
 

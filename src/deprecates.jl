@@ -14,3 +14,9 @@ end
 @Base.deprecate logpmf logpdf
 @Base.deprecate logpmf! logpmf!
 @Base.deprecate pmf pdf
+
+
+#### Deprecate on 0.6 (to be removed on 0.7)
+
+@Base.deprecate expected_logdet meanlogdet
+
