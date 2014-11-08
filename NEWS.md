@@ -23,6 +23,7 @@ Changes from v0.5 to v0.6
 * Reimplement von Mises-Fisher distribution, making it consistent with the common interface ([#302])
 * Reimplement mixture models, improving efficiency, numerical stability, and the friendliness of the user interface. ([#303])
 * Reimplement Wishart and InverseWishart distributions. They now support the use of positive definite matrices of arbitrary subtype of `AbstractPDMat`. ([#304])
+* Add ``probs`` method for ``Categorical``, ``Multinomial``, and ``MixtureModel``.
 
 [#238]: https://github.com/JuliaStats/Distributions.jl/pull/238
 [#223]: https://github.com/JuliaStats/Distributions.jl/pull/223
