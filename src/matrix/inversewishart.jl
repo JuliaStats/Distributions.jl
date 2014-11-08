@@ -79,25 +79,3 @@ function rand!(IW::InverseWishart, X::Array{Matrix{Float64}})
 end
 
 var(IW::InverseWishart) = error("Not yet implemented")
-
-# because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
-    tmp = true
-    for j in 2:size(a, 1)
-        for i in 1:(j - 1)
-            tmp &= abs(a[i, j] - a[j, i]) < 1e-8
-        end
-    end
-    return tmp
-end
-
-# because isposdef keeps giving the wrong answer for samples
-# from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholfact(a), Cholesky)
-
-function trycholfact(a::Matrix{Float64})
-    try cholfact(a)
-    catch e
-        return e
-    end
-end
