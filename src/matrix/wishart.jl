@@ -46,6 +46,15 @@ show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, full(d.S))])
 
 mean(d::Wishart) = d.df * full(d.S)
 
+function mode(d::Wishart)
+    r = d.df - dim(d) - 1.0
+    if r > 0.0
+        return full(d.S) * r
+    else
+        error("mode is only defined when df > p + 1")
+    end
+end
+
 function meanlogdet(d::Wishart) 
     p = dim(d)
     df = d.df
@@ -66,12 +75,13 @@ end
 #### Evaluation
 
 function _logpdf(d::Wishart, X::DenseMatrix{Float64})
-    Xcf = cholfact(X)
     df = d.df
     p = dim(d)
+    Xcf = cholfact(X)
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
 
+_logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, float64(X))
 
 #### Sampling
 
