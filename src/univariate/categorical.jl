@@ -14,6 +14,7 @@ end
 
 ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.prob
+probs(d::Categorical, rgn::UnitRange) = d.prob[rgn]
 
 ### handling support
 

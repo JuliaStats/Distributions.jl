@@ -18,6 +18,26 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
+probs(d::Bernoulli) = [d.p0, d.p1]
+
+function probs(d::Bernoulli, rgn::UnitRange) 
+    n = length(rgn)
+    if n == 0
+        return Float64[]
+    elseif n == 1
+        f = rgn[1]
+        return f == zero(f) ? [d.p0] : 
+               f == one(f) ? [d.p1] : 
+               throw(BoundsError())
+    elseif n == 2
+        f = rgn[1]
+        return f == zero(f) ? [d.p0, d.p1] : 
+               throw(BoundsError())
+    else
+        throw(BoundsError())
+    end
+end
+
 cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
 function entropy(d::Bernoulli) 
