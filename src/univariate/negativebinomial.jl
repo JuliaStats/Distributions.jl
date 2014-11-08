@@ -29,6 +29,21 @@ maximum(::Union(NegativeBinomial, Type{NegativeBinomial})) = Inf
 insupport(::NegativeBinomial, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{NegativeBinomial}, x::Real) = isinteger(x) && zero(x) <= x
 
+function probs(d::NegativeBinomial, rgn::UnitRange)
+    r = d.r
+    p0 = 1.0 - d.prob
+    f, l = rgn[1], rgn[end]
+    0 <= f <= l || throw(BoundsError())
+    res = Array(Float64, l - f + 1)
+    res[1] = v = pdf(d, f)
+    b = f - 1
+    for x = f+1:l
+        c = (x + r - 1) * p0 / x
+        res[x-b] = (v *= c)
+    end
+    return res
+end
+
 function mgf(d::NegativeBinomial, t::Real)
     r, p = d.r, d.prob
     return ((1.0 - p) * exp(t))^r / (1.0 - p * exp(t))^r
