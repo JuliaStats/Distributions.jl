@@ -39,6 +39,7 @@ export
     ContinuousMatrixDistribution,
     SufficientStats,
     AbstractMvNormal,
+    AbstractMixtureModel,
     UnivariateMixture,
     MultivariateMixture,
 

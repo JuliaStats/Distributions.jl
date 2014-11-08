@@ -107,11 +107,9 @@ end
 
 println("    testing UnivariateMixture")
 
-g_u = MixtureModel(
-    Normal[Normal(0.0, 1.0), Normal(2.0, 1.0), Normal(-4.0, 1.5)], 
-    [0.2, 0.5, 0.3])
-
+g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
 @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
+@test length(components(g_u)) == 3
 test_mixture(g_u, 1000, 10^6)
 
 
@@ -121,8 +119,8 @@ g_m = MixtureModel(
                MvNormal([0.2, 1.0], 1.0), 
                MvNormal([-0.5, -3.0], 1.6) ], 
     [0.2, 0.5, 0.3])
-
 @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
+@test length(components(g_m)) == 3
 @test length(g_m) == 2
 test_mixture(g_m, 1000, 10^6)
 

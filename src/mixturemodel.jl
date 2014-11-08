@@ -1,13 +1,15 @@
 # finite mixture models
 
-immutable MixtureModel{VF<:VariateForm, VS<:ValueSupport, Component<:Distribution} <: Distribution{VF,VS}
+abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF, VS}
+
+immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,Component<:Distribution} <: AbstractMixtureModel{VF,VS}
     components::Vector{Component}
     prior::Categorical
 end
 
-typealias UnivariateMixture    MixtureModel{Univariate} 
-typealias MultivariateMixture  MixtureModel{Multivariate}
-typealias MatrixvariateMixture MixtureModel{Matrixvariate}
+typealias UnivariateMixture    AbstractMixtureModel{Univariate} 
+typealias MultivariateMixture  AbstractMixtureModel{Multivariate}
+typealias MatrixvariateMixture AbstractMixtureModel{Matrixvariate}
 
 
 #### Constructors
