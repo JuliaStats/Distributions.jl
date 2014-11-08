@@ -83,10 +83,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
 
     # check the consistency between probs and pdf
     if isa(s, Distribution)
-        if applicable(probs, s, rmin:rmax)
-            @test_approx_eq probs(s, rmin:rmax) p0
-        end
-        if applicable(probs, s)
+        @test_approx_eq probs(s, rmin:rmax) p0
+        if isbounded(s)
             @assert isfinite(vmin) && isfinite(vmax)
             @test_approx_eq probs(s) probs(s, vmin:vmax) 
         end
