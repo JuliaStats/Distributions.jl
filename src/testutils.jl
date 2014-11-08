@@ -81,6 +81,15 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     p0 = pdf(distr, rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
+    # check the consistency between probs and pdf
+    if isa(s, Distribution)
+        @test_approx_eq probs(s, rmin:rmax) p0
+        if isbounded(s)
+            @assert isfinite(vmin) && isfinite(vmax)
+            @test_approx_eq probs(s) probs(s, vmin:vmax) 
+        end
+    end
+
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
