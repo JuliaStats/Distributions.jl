@@ -49,13 +49,13 @@ length(d::MultivariateMixture) = length(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
-priorprobs(d::MixtureModel) = d.prior.prob
+probs(d::MixtureModel) = d.prior.prob
 
 component_type{VF,VS,C}(d::MixtureModel{VF,VS,C}) = C
 
 function mean(d::UnivariateMixture)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     m = 0.0
     for i = 1:length(cs)
         pi = p[i]
@@ -68,7 +68,7 @@ end
 
 function mean(d::MultivariateMixture)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     m = zeros(length(d))
     for i = 1:length(cs)
         pi = p[i]
@@ -81,7 +81,7 @@ end
 
 function var(d::UnivariateMixture)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     K = length(cs)
     means = Array(Float64, K)
     m = 0.0
@@ -109,7 +109,7 @@ end
 
 function show(io::IO, d::MixtureModel)
     cs = components(d)
-    pr = priorprobs(d)
+    pr = probs(d)
     K = length(cs)
     println(io, "MixtureModel{$(component_type(d))}(K = $K)")
     Ks = min(K, 8)
@@ -128,7 +128,7 @@ end
 
 function _mixpdf1(d::MixtureModel, x)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     v = 0.0
     for i = 1:length(cs)
         pi = p[i]
@@ -141,7 +141,7 @@ end
 
 function _mixpdf!(r::DenseArray, d::MixtureModel, x)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     fill!(r, 0.0)
     t = Array(Float64, size(r))
     for i = 1:length(cs)
@@ -170,7 +170,7 @@ function _mixlogpdf1(d::MixtureModel, x)
     #
 
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     K = length(cs)
     lp = Array(Float64, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
@@ -195,7 +195,7 @@ end
 
 function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
     cs = components(d)
-    p = priorprobs(d)
+    p = probs(d)
     K = length(cs)
     n = length(r)
     Lp = Array(Float64, n, K)

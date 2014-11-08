@@ -10,7 +10,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     cs = components(g)
-    pr = priorprobs(g)
+    pr = probs(g)
     @assert length(cs) == length(pr)
 
     # mean
@@ -59,7 +59,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
 
     cs = components(g)
-    pr = priorprobs(g)
+    pr = probs(g)
     @assert length(cs) == length(pr)
 
     # mean

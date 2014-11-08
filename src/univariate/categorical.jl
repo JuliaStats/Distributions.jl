@@ -13,6 +13,7 @@ immutable Categorical <: DiscreteUnivariateDistribution
 end
 
 ncategories(d::Categorical) = d.K
+probs(d::Categorical) = d.prob
 
 ### handling support
 

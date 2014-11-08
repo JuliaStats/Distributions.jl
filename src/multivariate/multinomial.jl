@@ -20,6 +20,8 @@ end
 
 length(d::Multinomial) = length(d.prob)
 
+probs(d::Multinomial) = d.prob
+
 mean(d::Multinomial) = d.n .* d.prob
 
 function var(d::Multinomial) 
