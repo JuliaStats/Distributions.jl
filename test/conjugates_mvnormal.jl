@@ -105,7 +105,7 @@ post = posterior(pri, MvNormal, X)
 @test_approx_eq post.mu (kappa0*mu0 + n*Xbar)./(kappa0 + n)
 @test_approx_eq post.kappa kappa0 + n
 @test_approx_eq post.nu nu0 + n
-@test_approx_eq (post.Tchol[:U]'*post.Tchol[:U]) T0 + A_mul_Bt(Xm, Xm) + kappa0*n/(kappa0+n)*(Xbar-mu0)*(Xbar-mu0)'
+@test_approx_eq (post.Tchol[:U]'*post.Tchol[:U]) inv(T0 + A_mul_Bt(Xm, Xm) + kappa0*n/(kappa0+n)*(Xbar-mu0)*(Xbar-mu0)')
 
 ps = posterior_randmodel(pri, MvNormal, X)
 
