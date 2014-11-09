@@ -3,9 +3,6 @@
 # a reference.  Note that there were some typos in that document so the code
 # here may not correspond exactly.
 
-import NumericExtensions.PDMat
-import NumericExtensions.invquad
-
 immutable NormalInverseWishart <: Distribution
     dim::Int
     zeromean::Bool

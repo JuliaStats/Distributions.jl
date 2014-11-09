@@ -11,18 +11,15 @@ immutable Normal <: ContinuousUnivariateDistribution
     Normal() = Normal(0.0, 1.0)
 end
 
-@_jl_dist_2p Normal norm
+typealias Gaussian Normal
 
+## Support
 @continuous_distr_support Normal -Inf Inf
 
-const Gaussian = Normal
-
-# Properties
-
+## Properties
 mean(d::Normal) = d.μ
 median(d::Normal) = d.μ
 mode(d::Normal) = d.μ
-modes(d::Normal) = [d.μ]
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
@@ -31,11 +28,8 @@ kurtosis(d::Normal) = 0.0
 
 entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
-cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
 
-# Evaluation
-
+## Functions
 zval(d::Normal, x::Real) = (x - d.μ)/d.σ
 xval(d::Normal, z::Real) = d.μ + d.σ * z
 
@@ -52,13 +46,15 @@ cquantile(d::Normal, p::Real) = xval(d, -Φinv(p))
 invlogcdf(d::Normal, p::Real) = xval(d, logΦinv(p))
 invlogccdf(d::Normal, p::Real) = xval(d, -logΦinv(p))
 
-# Sampling
+mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
 
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
+
+## Sampling
 rand(d::Normal) = d.μ + d.σ * randn()
 
-
-## Fit model
-
+## Fitting
 immutable NormalStats <: SufficientStats
     s::Float64    # (weighted) sum of x
     m::Float64    # (weighted) mean of x

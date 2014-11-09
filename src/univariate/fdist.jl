@@ -18,7 +18,6 @@ median(d::FDist) = quantile(d, 0.5)
 
 
 mode(d::FDist) = d.ndf <= 2. ? 0.0 : (d.ndf - 2.) / d.ndf * d.ddf / (d.ddf + 2.)
-modes(d::FDist) = [mode(d)]
 
 var(d::FDist) = d.ddf > 4. ?  2.0 * d.ddf^2 *
 		       (d.ndf + d.ddf - 2.0) /

@@ -1,127 +1,89 @@
 # Canonical form of multivariate normal
 
-## generic types
+### Generic types
 
-immutable GenericMvNormalCanon{Prec<:AbstractPDMat} <: AbstractMvNormal
-	dim::Int             # dimension of sample space
-	zeromean::Bool       # whether the mean vector is zero
-	μ::Vector{Float64}   # the mean vector
-    h::Vector{Float64}   # potential vector, i.e. inv(Σ) * μ
-    J::Prec              # precision matrix, i.e. inv(Σ)
-
-    function GenericMvNormalCanon(μ::Vector{Float64}, h::Vector{Float64}, J::Prec, zmean::Bool)
-    	d = dim(J)
-    	length(μ) == length(h) == d || throw(ArgumentError("Inconsistent argument dimensions."))
-    	new(d, zmean, μ, h, J)
-    end  
-
-	function GenericMvNormalCanon(J::Prec)
-		d = dim(J)
-    	new(d, true, zeros(d), zeros(d), J)
-    end 
+immutable MvNormalCanon{P<:AbstractPDMat,V<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+    μ::V    # the mean vector
+    h::V    # potential vector, i.e. inv(Σ) * μ
+    J::P    # precision matrix, i.e. inv(Σ)
 end
 
-function GenericMvNormalCanon{P<:AbstractPDMat}(μ::Vector{Float64}, h::Vector{Float64}, J::P)
-	GenericMvNormalCanon{P}(μ, h, J, allzeros(μ))
+typealias FullNormalCanon MvNormalCanon{PDMat,Vector{Float64}} 
+typealias DiagNormalCanon MvNormalCanon{PDiagMat,Vector{Float64}} 
+typealias IsoNormalCanon  MvNormalCanon{ScalMat,Vector{Float64}}
+
+typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,ZeroVector{Float64}} 
+typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat,ZeroVector{Float64}} 
+typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat,ZeroVector{Float64}}
+
+
+### Constructors
+
+function MvNormalCanon{P<:AbstractPDMat}(μ::Vector{Float64}, h::Vector{Float64}, J::P) 
+    length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    MvNormalCanon{P,Vector{Float64}}(μ, h, J)
 end
 
-function GenericMvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P, zmean::Bool)
-	μ = zmean ? zeros(length(h)) : (J \ h)
-	GenericMvNormalCanon{P}(μ, h, J, zmean)
+function MvNormalCanon{P<:AbstractPDMat}(J::P) 
+    z = ZeroVector(Float64, dim(J))
+    MvNormalCanon{P,ZeroVector{Float64}}(z, z, J)
 end
 
-function GenericMvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P)
-	GenericMvNormalCanon(h, J, allzeros(h))
+function MvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P) 
+    length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    MvNormalCanon{P,Vector{Float64}}(J \ h, h, J)
 end
 
-function GenericMvNormalCanon{P<:AbstractPDMat}(J::P)
-    d = dim(J)
-    GenericMvNormalCanon{P}(zeros(d), zeros(d), J, true)
-end
+MvNormalCanon(h::Vector{Float64}, J::Matrix{Float64}) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon(h::Vector{Float64}, prec::Vector{Float64}) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon(h::Vector{Float64}, prec::Float64) = MvNormalCanon(h, ScalMat(length(h), prec)) 
 
-## type aliases and convenient constructors
-
-typealias MvNormalCanon   GenericMvNormalCanon{PDMat} 
-typealias DiagNormalCanon GenericMvNormalCanon{PDiagMat} 
-typealias IsoNormalCanon  GenericMvNormalCanon{ScalMat}
-
-MvNormalCanon(J::PDMat) = GenericMvNormalCanon(J)
-MvNormalCanon(J::Matrix{Float64}) = GenericMvNormalCanon(PDMat(J))
-MvNormalCanon(h::Vector{Float64}, J::PDMat) = GenericMvNormalCanon(h, J)
-MvNormalCanon(h::Vector{Float64}, J::Matrix{Float64}) = GenericMvNormalCanon(h, PDMat(J))
-
-DiagNormalCanon(J::PDiagMat) = GenericMvNormalCanon(J)
-DiagNormalCanon(J::Vector{Float64}) = GenericMvNormalCanon(PDiagMat(J))
-DiagNormalCanon(h::Vector{Float64}, J::PDiagMat) = GenericMvNormalCanon(h, J)
-DiagNormalCanon(h::Vector{Float64}, J::Vector{Float64}) = GenericMvNormalCanon(h, PDiagMat(J))
-
-IsoNormalCanon(J::ScalMat) = GenericMvNormalCanon(J)
-IsoNormalCanon(d::Integer, prec::Real) = GenericMvNormalCanon(ScalMat(int(d), float64(prec)))
-IsoNormalCanon(h::Vector{Float64}, J::ScalMat) = GenericMvNormalCanon(h, J)
-IsoNormalCanon(h::Vector{Float64}, prec::Real) = GenericMvNormalCanon(h, ScalMat(length(h), float64(prec)))
-
-# conversion between conventional form and canonical form
-
-function Base.convert{C<:AbstractPDMat}(D::Type{GenericMvNormal{C}}, cf::GenericMvNormalCanon{C})
-	GenericMvNormal{C}(cf.dim, cf.zeromean, cf.μ, inv(cf.J))
-end
-
-function Base.convert{C<:AbstractPDMat}(D::Type{GenericMvNormalCanon{C}}, d::GenericMvNormal{C})
-	J::C = inv(d.Σ)
-	h::Vector{Float64} = J * d.μ
-	GenericMvNormalCanon{C}(d.μ, h, J, d.zeromean)
-end
-
-canonform{C<:AbstractPDMat}(d::GenericMvNormal{C}) = convert(GenericMvNormalCanon{C}, d)
+MvNormalCanon(J::Matrix{Float64}) = MvNormalCanon(PDMat(J))
+MvNormalCanon(prec::Vector{Float64}) = MvNormalCanon(PDiagMat(prec))
+MvNormalCanon(d::Int, prec::Float64) = MvNormalCanon(ScalMat(d, prec)) 
 
 
-# Basic statistics
+### Show
 
-dim(d::GenericMvNormalCanon) = d.dim
+distrname(d::IsoNormalCanon) = "IsoNormalCanon"  
+distrname(d::DiagNormalCanon) = "DiagNormalCanon"
+distrname(d::FullNormalCanon) = "FullNormalCanon"
 
-mean(d::GenericMvNormalCanon) = d.μ
-mode(d::GenericMvNormalCanon) = d.μ
-modes(d::GenericMvNormalCanon) = [mode(d)]
+distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
+distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
+distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
-var(d::GenericMvNormalCanon) = diag(inv(d.J))
-cov(d::GenericMvNormalCanon) = full(inv(d.J))
-invcov(d::GenericMvNormalCanon) = full(d.J)
-logdet_cov(d::GenericMvNormalCanon) = -logdet(d.J)
+### conversion between conventional form and canonical form
 
-entropy(d::GenericMvNormalCanon) = 0.5 * (dim(d) * (float64(log2π) + 1.0) - logdet(d.J))
+meanform{C,V}(d::MvNormalCanon{C,V}) = MvNormal{C,V}(d.μ, inv(d.J))
+
+canonform{C}(d::MvNormal{C,Vector{Float64}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
+canonform{C}(d::MvNormal{C,ZeroVector{Float64}}) = MvNormalCanon(inv(d.Σ))
 
 
-# PDF evaluation
+### Basic statistics
 
-function sqmahal(d::GenericMvNormalCanon, x::Vector{Float64}) 
-    z::Vector{Float64} = d.zeromean ? x : x - d.μ
-    quad(d.J, z) 
-end
+length(d::MvNormalCanon) = length(d.μ)
+mean(d::MvNormalCanon) = convert(Vector{Float64}, d.μ)
 
-function sqmahal!(r::Array{Float64}, d::GenericMvNormalCanon, x::Matrix{Float64})
-    if !(size(x, 1) == dim(d) && size(x, 2) == length(r))
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-    z::Matrix{Float64} = d.zeromean ? x : bsubtract(x, d.μ, 1)
-    quad!(r, d.J, z)
-end
+var(d::MvNormalCanon) = diag(inv(d.J))
+cov(d::MvNormalCanon) = full(inv(d.J))
+invcov(d::MvNormalCanon) = full(d.J)
+logdetcov(d::MvNormalCanon) = -logdet(d.J)
+
+
+### Evaluation
+
+sqmahal(d::MvNormalCanon, x::DenseVector{Float64}) = quad(d.J, x - d.μ)
+sqmahal!(r::DenseVector{Float64}, d::MvNormalCanon, x::DenseMatrix{Float64}) = quad!(r, d.J, x .- d.μ)
 
 
 # Sampling (for GenericMvNormal)
 
-function rand!(d::GenericMvNormalCanon, x::Vector{Float64})
-    unwhiten_winv!(d.J, randn!(x))
-    if !d.zeromean
-        add!(x, d.μ)
-    end
-    x
-end
+unwhiten_winv!(J::AbstractPDMat, x::DenseVecOrMat) = unwhiten!(inv(J), x)
+unwhiten_winv!(J::PDiagMat, x::DenseVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::ScalMat, x::DenseVecOrMat) = whiten!(J, x)
 
-function rand!(d::GenericMvNormalCanon, x::Matrix{Float64})
-    unwhiten_winv!(d.J, randn!(x))
-    if !d.zeromean
-        badd!(x, d.μ, 1)
-    end
-    x
-end
+_rand!(d::MvNormalCanon, x::DenseVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
+
 

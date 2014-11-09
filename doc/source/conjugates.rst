@@ -3,7 +3,7 @@
 Conjugate Prior and Posterior 
 ==============================
 
-*Conjugate prior* plays an important role in Bayesian analysis. In Bayesian theory, the distribution :math:`p(\theta)` is said to be **conjugate** *w.r.t.* a conditional distribution (often referred to as the *likelihood model*) :math:`p(x | \theta)`, if the posterior distribution :math:`p(\theta | x)` is in the same family as :math:`p(\theta)`. (Interested readers may refer to `this wikipedia article <http://en.wikipedia.org/wiki/Conjugate_prior>`_ for more detais.)
+*Conjugate prior* plays an important role in Bayesian analysis. In Bayesian theory, the distribution :math:`p(\theta)` is said to be **conjugate** *w.r.t.* a conditional distribution (often referred to as the *likelihood model*) :math:`p(x | \theta)`, if the posterior distribution :math:`p(\theta | x)` is in the same family as :math:`p(\theta)`. (Interested readers may refer to `this wikipedia article <http://en.wikipedia.org/wiki/Conjugate_prior>`_ for more details.)
 
 Generic Interface
 ------------------
@@ -12,8 +12,8 @@ In Bayesian analysis, canonical parameterization (*i.e.* the parameterization us
 
 Motivated by this, we design the interface as described below to support Bayesian inference based on conjugate models:
 
-.. function:: posterior_canon(pri, G, x[, w])
-.. function:: posterior_canon(pri, ss)
+- **posterior_canon** (pri, G, x[, w])
+- **posterior_canon** (pri, ss)
 
 	Returns the posterior distribution (in canonical form) w.r.t. the prior ``pri`` and the likelihood model ``G``.
 
@@ -21,41 +21,41 @@ Motivated by this, we design the interface as described below to support Bayesia
 	- ``G``:  the likelihood model. In simple cases, G can be just a distribution type.
 	- ``x``:  the data.
 	- ``w``:  the sample weights (``length(w)`` should be equal to the number of samples). When ``w`` is omitted, the data are unweighted (*i.e.* all samples have unit weights).
-	- ``ss``:  pre-computed sufficient statistics
+	- ``ss``:  pre-computed sufficient statistics.
 
 	**Note:** In general, the returned type need not be the same as ``typeof(pri)``. However, when ``pri`` is already using the canonical parameters (this is the case for many exponential family distributions), the returned instance is in the same
 	type as ``pri``.
 
 
-.. function:: posterior(pri, G, x[, w])
-.. function:: posterior(pri, ss)
+- **posterior** (pri, G, x[, w])
+- **posterior** (pri, ss)
 
 	Returns the posterior distribution in the same type of ``pri``, based on given data or sufficient statistics.
 
-.. function:: posterior_rand(pri, G, x[, w])
-.. function:: posterior_rand(pri, ss)
+- **posterior_rand** (pri, G, x[, w])
+- **posterior_rand** (pri, ss)
 
 	Returns a random sample from the posterior distribution based on given data or sufficient statistics. 
 
-.. function:: posterior_rand!(r, pri, G, x[, w])
-.. function:: posterior_rand!(r, pri, ss)
+- **posterior_rand!** (r, pri, G, x[, w])
+- **posterior_rand!** (r, pri, ss)
 
 	Draws random samples from the posterior distribution based on given data or sufficient statistics. The number of samples to draw depends on the size of ``r``. 
 
-.. function:: posterior_randmodel(pri, G, x[, w])
+- **posterior_randmodel** (pri, G, x[, w])
 
 	Returns a distribution constructed using a parameter drawn from the posterior based on given data or sufficient statistics. 
 
-.. function:: posterior_mode(pri, G, x[, w])
-.. function:: posterior_mode(pri, ss)
+- **posterior_mode** (pri, G, x[, w])
+- **posterior_mode** (pri, ss)
 
 	Returns the mode of the posterior distribution based on given data or sufficient statistics.
 
-.. function:: fit_map(pri, G, x[, w])
+- **fit_map** (pri, G, x[, w])
 
-	Performs Maximum-a-Posterior (MAP) estimation based on given data or sufficient statistics. 
+	Performs Maximum-a-Posteriori (MAP) estimation based on given data or sufficient statistics. 
 
-.. function:: complete(pri, G, param)
+- **complete** (pri, G, param)
 
 	Returns a completed distribution based on the likelihood model ``G`` and a given parameter ``param``. 
 

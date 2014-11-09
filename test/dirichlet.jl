@@ -5,7 +5,7 @@ using Base.Test
 
 d = Dirichlet(3, 2.0)
 
-@test dim(d) == 3
+@test length(d) == 3
 @test d.alpha == [2.0, 2.0, 2.0]
 @test d.alpha0 == 6.0
 
@@ -30,7 +30,7 @@ end
 v = [2.0, 1.0, 3.0]
 d = Dirichlet(v)
 
-@test dim(d) == length(v)
+@test length(d) == length(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)
 

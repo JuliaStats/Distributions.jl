@@ -22,7 +22,6 @@ skewness(d::InverseGamma) = d.shape > 3.0 ? (4.0 * sqrt(d.shape - 2.0)) / (d.sha
 kurtosis(d::InverseGamma) = d.shape > 4.0 ? (30.0 * d.shape - 66.0) / ((d.shape - 3.0) * (d.shape - 4.0)) : NaN
 
 mode(d::InverseGamma) = d.scale / (d.shape + 1.0)
-modes(d::InverseGamma) = [mode(d)]
 
 cdf(d::InverseGamma, x::Real) = ccdf(_inv(d), 1.0 / x)
 ccdf(d::InverseGamma, x::Real) = cdf(_inv(d), 1.0 / x)
@@ -44,13 +43,13 @@ end
 function mgf(d::InverseGamma, t::Real)
     a = d.shape
     b = d.scale
-    (2 * (-b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * b * t))
+    t == zero(t) ? one(float(t)) : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
 end
 
 function cf(d::InverseGamma, t::Real)
     a = d.shape
     b = d.scale
-    (2 * (-im * b * t)^(a / 2)) / gamma(a) * besselk(a, sqrt(-4.0 * im * b * t))
+    t == zero(t) ? complex(one(float(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
 end
 
 pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))

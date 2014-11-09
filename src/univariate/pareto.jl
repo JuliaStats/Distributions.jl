@@ -1,13 +1,13 @@
 immutable Pareto <: ContinuousUnivariateDistribution
-    scale::Float64
     shape::Float64
-    function Pareto(sc::Real, sh::Real)
+    scale::Float64
+    function Pareto(sh::Real, sc::Real)
         sc > zero(sc) && sh > zero(sh) || error("shape and scale must be positive")
-        new(float64(sc), float64(sh))
+        new(float64(sh), float64(sc))
     end
-    Pareto() = new(1.0, 1.0)
 end
 
+Pareto() = Pareto(1.0, 1.0)
 Pareto(scale::Real) = Pareto(scale, 1.0)
 
 islowerbounded(::Union(Pareto, Type{Pareto})) = true
@@ -16,14 +16,13 @@ isbounded(::Union(Pareto, Type{Pareto})) = false
 
 minimum(d::Pareto) = d.scale
 maximum(d::Pareto) = Inf
-insupport(d::Pareto, x::Number) = isfinite(x) && x >= d.scale
+insupport(d::Pareto, x::Real) = isfinite(x) && x >= d.scale
 
 mean(d::Pareto) = d.shape > 1.0 ? (d.scale * d.shape) / (d.shape - 1.0) : Inf
 
 median(d::Pareto) = d.scale * 2.0^(1.0/d.shape)
 
 mode(d::Pareto) = d.scale
-modes(d::Pareto) = [d.scale]
 
 function var(d::Pareto)
     α = d.shape

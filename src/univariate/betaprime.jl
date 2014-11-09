@@ -22,7 +22,6 @@ function mean(d::BetaPrime)
 end
 
 mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
-modes(d::BetaPrime) = [mode(d)]
 
 function pdf(d::BetaPrime, x::Real)
     α, β = d.alpha, d.beta

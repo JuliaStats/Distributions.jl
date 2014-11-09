@@ -31,14 +31,13 @@ skewness(d::Levy) = NaN
 kurtosis(d::Levy) = NaN
 
 mode(d::Levy) = d.scale / 3.0 + d.location
-modes(d::Levy) = [mode(d)]
 
 function median(d::Levy)
     m, c = d.location, d.scale
     m + c / (2.0 * erfcinv(0.5)^2)
 end
 
-mgf(d::Levy, t::Real) = error("MGF is undefined for Levy distributions")
+mgf(d::Levy, t::Real) = t == zero(t) ? 1.0 : NaN
 
 function cf(d::Levy, t::Real)
     m, c = d.location, d.scale
@@ -47,7 +46,7 @@ end
 
 function pdf(d::Levy, x::Real)
     m, c = d.location, d.scale
-    (sqrt(c)/√2π) * exp(-(c / (2.0 * (x - m)))) / (x - m)^1.5
+    (sqrt(c)/sqrt2π) * exp(-(c / (2.0 * (x - m)))) / (x - m)^1.5
 end
 
 quantile(d::Levy, p::Real) = d.location + d.scale / (2.erfcinv(p)^2)

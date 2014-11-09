@@ -1,91 +1,98 @@
-##############################################################################
-#
-# Symmetric triangular distribution from Distributions Handbook
-#
-##############################################################################
-
+# Triangular distribution
 immutable TriangularDist <: ContinuousUnivariateDistribution
-    location::Float64
-    scale::Float64
-    function TriangularDist(l::Real, s::Real)
-        s > zero(s) || error("scale must be positive")
-        new(float64(l), float64(s))
+    a::Float64
+    b::Float64
+    c::Float64
+    function TriangularDist(a::Real, b::Real, c::Real)
+        a < b || error("a<b must be true")
+        a <= c <= b || error("a<=c<=b must be true")
+        new(float64(a), float64(b), float64(c))
     end
 end
 
-TriangularDist(location::Real) = TriangularDist(location, 1.0)
-TriangularDist() = TriangularDist(0.0, 1.0)
-
-function cdf(d::TriangularDist, x::Real)
-    a, b, c = d.location - d.scale, d.location + d.scale, d.location
-    if x <= a
-        return 0.0
-    elseif a <= x <= c
-        return (x - a)^2 / ((b - a) * (c - a))
-    elseif c < x <= b
-        return 1.0 - (b - x)^2 / ((b - a) * (b - c))
-    else
-        return 1.0
-    end
-end
-
-entropy(d::TriangularDist) = 0.5 + log(d.scale)
-
-# support handling
-
+## Support
 isupperbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 islowerbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 isbounded(::Union(TriangularDist, Type{TriangularDist})) = true
 
-minimum(d::TriangularDist) = d.location - d.scale
-maximum(d::TriangularDist) = d.location + d.scale
+minimum(d::TriangularDist) = d.a
+maximum(d::TriangularDist) = d.b
 insupport(d::TriangularDist, x::Real) = minimum(d) <= x <= maximum(d)
 
+## Properties
+mean(d::TriangularDist) = (d.a + d.b + d.c) / 3.0
+median(d::TriangularDist) = d.c >= (d.a+d.b)/2.0 ?
+    d.a + sqrt((d.b-d.a)*(d.c-d.a))/sqrt(2.0) :
+    d.b - sqrt((d.b-d.a)*(d.b-d.c))/sqrt(2.0)
+mode(d::TriangularDist) = d.c
 
+var(d::TriangularDist) = (d.a^2.0 + d.b^2.0 + d.c^2.0-d.a*d.b-d.a*d.c-d.b*d.c)/18.0
+skewness(d::TriangularDist) = sqrt(2.0)*(d.a+d.b-2.0d.c)*(2d.a-d.b-d.c)*(d.a-2d.b+d.c)/5.0/(d.a^2.0 + d.b^2.0 + d.c^2.0-d.a*d.b-d.a*d.c-d.b*d.c)^(3.0/2.0)
 kurtosis(d::TriangularDist) = -0.6
 
-mean(d::TriangularDist) = d.location
+entropy(d::TriangularDist) = 0.5 + log((d.b-d.a)/2.0)
 
-median(d::TriangularDist) = d.location
-
-mode(d::TriangularDist) = d.location
-modes(d::TriangularDist) = [d.location]
-
+## Functions
 function pdf(d::TriangularDist, x::Real)
-    if insupport(d, x)
-        return -abs(x - d.location) / (d.scale^2) + 1.0 / d.scale
+    if d.a<=x<=d.c
+        return 2.0*(x-d.a)/(d.b-d.a)/(d.c-d.a)
+    elseif d.c<x<=d.b
+        return 2.0*(d.b-x)/(d.b-d.a)/(d.b-d.c)
     else
-        return 0.0
+        return zero(x)
+    end
+end
+
+function cdf(d::TriangularDist, x::Real)
+    if x<d.a
+        return zero(x)
+    elseif d.a<=x<=d.c
+        return (x-d.a)^2/(d.b-d.a)/(d.c-d.a)
+    elseif d.c<x<=d.b
+        return 1.0-(d.b-x)^2/(d.b-d.a)/(d.b-d.c)
+    else
+        return one(x)
     end
 end
 
 function quantile(d::TriangularDist, p::Real)
-    a, b, c = d.location - d.scale, d.location + d.scale, d.location
-    if p <= 0.0
-        return a
-    elseif p < 0.5
-        return a + sqrt(p * 2.0 * d.scale^2)
-    elseif p >= 0.5
-        return b -  sqrt((1.0 - p) * 2.0 * d.scale^2)
-    else
-        return b
+    @checkquantile p begin
+        if p <= (d.c-d.a)/(d.b-d.a)
+            return d.a + sqrt((d.b-d.a)*(d.c-d.a)*p)
+        else
+            return d.b - sqrt((d.b-d.a)*(d.b-d.c)*(1-p))
+        end
     end
 end
 
+function mgf(d::TriangularDist, t::Real)
+    if t==zero(t)
+        return one(t)
+    else
+        nominator = (d.b-d.c)*exp(d.a*t)-(d.b-d.a)*exp(d.c*t)+(d.c-d.a)*exp(d.b*t)
+        denominator = (d.b-d.a)*(d.c-d.a)*(d.b-d.c)*t^2
+        return 2*nominator/denominator
+    end
+end
+
+function cf(d::TriangularDist, t::Real)
+    # Is this correct?
+    if t==zero(t)
+        return one(t)
+    else
+        nominator = (d.b-d.c)*exp(im*d.a*t)-(d.b-d.a)*exp(im*d.c*t)+(d.c-d.a)*exp(im*d.b*t)
+        denominator = (d.b-d.a)*(d.c-d.a)*(d.b-d.c)*t^2
+        return -2*nominator/denominator
+    end
+end
+
+## Sampling
 function rand(d::TriangularDist)
-    ξ1, ξ2 = rand(), rand()
-    return d.location + (ξ1 - ξ2) * d.scale
-end
+    u = rand()
 
-function skewness(d::TriangularDist)
-    a = d.location - d.scale
-    b = d.location + d.scale
-    c = (b - a) / 2 + a
-    den = sqrt(2.0) * (a + b - 2.0 * c) *
-                      (2.0 * a - b - c) *
-                      (a - 2.0 * b + c)
-    num = 5.0 * (a^2 + b^2 + c^2 - a * b - a * c - b * c)^1.5
-    return den / num
+    if u < (d.c-d.a)/(d.b-d.a)
+        return d.a + sqrt(u*(d.b-d.a)*(d.c-d.a))
+    else
+        return d.b - sqrt((1.0-u)*(d.b-d.a)*(d.b-d.c))
+    end
 end
-
-var(d::TriangularDist) = d.scale^2 / 6.0

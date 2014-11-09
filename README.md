@@ -1,7 +1,9 @@
 Distributions.jl
 ================
 
-[![Build Status](https://travis-ci.org/JuliaStats/Distributions.jl.png)](https://travis-ci.org/JuliaStats/Distributions.jl)
+[![Build Status](https://travis-ci.org/JuliaStats/Distributions.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distributions.jl)
+[![Distributions](http://pkg.julialang.org/badges/Distributions_release.svg)](http://pkg.julialang.org/?pkg=Distributions&ver=release)
+[![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.png?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
 
 A Julia package for probability distributions and associated functions. Particularly, Distributions implements:
 
@@ -12,4 +14,8 @@ A Julia package for probability distributions and associated functions. Particul
 * Maximum likelihood estimation
 * Posterior w.r.t. conjugate prior, and Maximum-A-Posteriori (MAP) estimation
 
-Please refer to the [Package Documentation](http://juliastats.github.io/Distributions.jl/index.html) for details. 
+#### Resources
+
+* **Documentation**: <http://distributionsjl.readthedocs.org/en/latest/>
+* **Release Notes**: <https://github.com/JuliaStats/Distributions.jl/blob/master/NEWS.md>
+

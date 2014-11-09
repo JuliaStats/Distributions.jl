@@ -27,7 +27,6 @@ canonform(d::Normal) = convert(NormalCanon, d)
 mean(cf::NormalCanon) = cf.μ
 median(cf::NormalCanon) = mean(cf)
 mode(cf::NormalCanon) = mean(cf)
-modes(cf::NormalCanon) = [mean(cf)]
 
 skewness(cf::NormalCanon) = 0.0
 kurtosis(cf::NormalCanon) = 0.0
@@ -39,7 +38,7 @@ entropy(cf::NormalCanon) = 0.5 * (log2π + 1. - log(cf.prec))
 
 # Evaluation
 
-pdf(d::NormalCanon, x::Real) = (sqrt(d.prec) / √2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
+pdf(d::NormalCanon, x::Real) = (sqrt(d.prec) / sqrt2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
 logpdf(d::NormalCanon, x::Real) = 0.5 * (log(d.prec) - log2π - d.prec * abs2(x - d.μ))
 
 zval(d::NormalCanon, x::Real) = (x - d.μ) * sqrt(d.prec)

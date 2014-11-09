@@ -3,49 +3,73 @@
 using Distributions
 using Base.Test
 
-D = 3
-mu = randn(D)
-mu = mu / norm(mu)
-kappa = 100.0
-d = VonMisesFisher(mu, kappa)
+vmfCp(p::Int, κ::Float64) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
 
-# Basics
+safe_vmfpdf(μ::Vector, κ::Float64, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
 
-@test dim(d) == D
-@test d.kappa == kappa
-@test_approx_eq d.mu mean(d)
-@test_approx_eq norm(d.mu) 1.0
+function gen_vmf_tdata(n::Int, p::Int)
+    X = randn(p, n)
+    for i = 1:n
+        X[:,i] = X[:,i] ./ vecnorm(X[:,i])
+    end
+    return X
+end
 
-# MLE
+function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
+    μ = randn(p)
+    μ = μ ./ vecnorm(μ)
 
-x = rand(d, 10_000)
-dmle = fit_mle(VonMisesFisher, x')
-@test all(abs(mean(d) - mean(dmle)) .< .01)
-@test_approx_eq norm(dmle.mu) 1.0
-#@test abs(scale(dmle) - scale(d)) < .01 * scale(d) # within 1%? not always...
+    d = VonMisesFisher(μ, κ)
+    @test length(d) == p
+    @test meandir(d) == μ
+    @test concentration(d) == κ
+    # println(d)
 
-# Density
+    θ = κ * μ
+    d2 = VonMisesFisher(θ)
+    @test length(d2) == p
+    @test_approx_eq meandir(d2) μ
+    @test_approx_eq concentration(d2) κ
 
-# TODO: Check against R's movMF. (Currently I'm a bit suspicious about their code.)
-# > set.seed(1)
-# > mu=c(1,0,0)
-# > kappa=1.
-# > x = rmovMF(1, mu, kappa)
-# > x
-#           [,1]       [,2]     [,3]
-# [1,] 0.1772372 -0.4566632 0.871806
-# > dmovMF(x, mu, kappa)
-# [1] 1.015923
-# WEIRD:
-# > dmovMF(x, mu, 100)
-# [1] 1.015923
-# > dmovMF(x, mu, 1)
-# [1] 1.015923
+    @test_approx_eq_eps d.logCκ log(vmfCp(p, κ)) 1.0e-12
 
-# mu = [1.0, 0., 0.]
-# kappa = 1.0
-# x = [0.1772372, -0.4566632, 0.871806]
-# d = VonMisesFisher(mu, kappa)
-#@test abs(logpdf(d, x) - 1.015923) < .00001
+    X = gen_vmf_tdata(n, p)
+    lp0 = zeros(n)
+    for i = 1:n
+        xi = X[:,i]
+        lp0[i] = log(safe_vmfpdf(μ, κ, xi))
+        @test_approx_eq logpdf(d, xi) lp0[i]
+    end
+    @test_approx_eq logpdf(d, X) lp0
 
+    # sampling
+    x = rand(d)
+    @test_approx_eq vecnorm(x) 1.0
+
+    X = rand(d, n)
+    for i = 1:n
+        @test_approx_eq vecnorm(X[:,i]) 1.0
+    end
+
+    # MLE
+    X = rand(d, ns)
+    d_est = fit_mle(VonMisesFisher, X)
+    @test isa(d_est, VonMisesFisher)
+    @test_approx_eq_eps d_est.μ μ 0.01
+    @test_approx_eq_eps d_est.κ κ κ * 0.01
+end
+
+
+## General testing
+
+n = 1000
+ns = 10^6
+for (p, κ) in [(2, 1.0), 
+               (2, 5.0),
+               (3, 1.0), 
+               (3, 5.0),
+               (5, 2.0)]
+
+    test_vonmisesfisher(p, κ, n, ns)
+end 
 

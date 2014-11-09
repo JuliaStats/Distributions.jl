@@ -18,13 +18,12 @@ cquantile(d::Chi,p::Real) = sqrt(cquantile(Chisq(d.df),p))
 invlogcdf(d::Chi,p::Real) = sqrt(invlogcdf(Chisq(d.df),p))
 invlogccdf(d::Chi,p::Real) = sqrt(invlogccdf(Chisq(d.df),p))
 
-mean(d::Chi) = √2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
+mean(d::Chi) = sqrt2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
 
 function mode(d::Chi)
     d.df >= 1.0 || error("Chi distribution has no mode when df < 1")
     sqrt(d.df - 1)
 end
-modes(d::Chi) = [mode(d)]
 
 var(d::Chi) = d.df - mean(d)^2
 
@@ -38,10 +37,6 @@ function kurtosis(d::Chi)
     (2.0 / σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-function entropy(d::Chi)
-    lgamma(k / 2.0) + 0.5 * (k - log(2.0) - (k - 1.0) * digamma(k / 2.0))
-end
-
 function pdf(d::Chi, x::Real)
     k = d.df
     (2.0^(1.0 - k / 2.0) * x^(k - 1.0) * exp(-x^2 / 2.0)) / gamma(k / 2.0)
@@ -51,6 +46,10 @@ function entropy(d::Chi)
     k = d.df
     lgamma(k / 2.0) - log(sqrt(2.0)) -
         ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
+end
+
+function gradlogpdf(d::Chi, x::Real)
+  insupport(Chi, x) ? (d.df - 1.0) / x - x : 0.0
 end
 
 rand(d::Chi) = sqrt(rand(Chisq(d.df)))

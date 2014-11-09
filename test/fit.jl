@@ -31,8 +31,8 @@ x = rand(Bernoulli(0.7), n0)
 
 ss = suffstats(Bernoulli, x)
 @test isa(ss, Distributions.BernoulliStats)
-@test ss.cnt0 == n0 - nnz(x)
-@test ss.cnt1 == nnz(x)
+@test ss.cnt0 == n0 - countnz(x)
+@test ss.cnt1 == countnz(x)
 
 ss = suffstats(Bernoulli, x, w)
 @test isa(ss, Distributions.BernoulliStats)
@@ -40,7 +40,7 @@ ss = suffstats(Bernoulli, x, w)
 @test_approx_eq ss.cnt1 sum(w[x .== 1])
 
 d = fit(Bernoulli, x)
-p = nnz(x) / n0
+p = countnz(x) / n0
 @test isa(d, Bernoulli)
 @test_approx_eq mean(d) p
 
@@ -100,7 +100,7 @@ p = [0.2, 0.5, 0.3]
 x = rand(Categorical(p), n0)
 
 ss = suffstats(Categorical, (3, x))
-h = Float64[nnz(x .== i) for i = 1 : 3]
+h = Float64[countnz(x .== i) for i = 1 : 3]
 @test isa(ss, Distributions.CategoricalStats)
 @test_approx_eq ss.h h
 
@@ -121,6 +121,10 @@ h = Float64[sum(w[x .== i]) for i = 1 : 3]
 d = fit(Categorical, (3, x), w)
 @test isa(d, Categorical)
 @test_approx_eq d.prob h / sum(h)
+
+d = fit(Categorical, suffstats(Categorical, 3, x, w))
+@test isa(d, Categorical)
+@test_approx_eq d.prob (h / sum(h))
 
 d = fit(Categorical, rand(Categorical(p), N))
 @test isa(d, Categorical)
@@ -165,25 +169,25 @@ ss = suffstats(Normal, x)
 @test isa(ss, Distributions.NormalStats)
 @test_approx_eq ss.s sum(x)
 @test_approx_eq ss.m mean(x)
-@test_approx_eq ss.s2 sum((x - ss.m).^2)
+@test_approx_eq ss.s2 sum((x .- ss.m).^2)
 @test_approx_eq ss.tw n0
 
 ss = suffstats(Normal, x, w)
 @test isa(ss, Distributions.NormalStats)
 @test_approx_eq ss.s dot(x, w)
 @test_approx_eq ss.m dot(x, w) / sum(w)
-@test_approx_eq ss.s2 dot((x - ss.m).^2, w)
+@test_approx_eq ss.s2 dot((x .- ss.m).^2, w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit(Normal, x)
 @test isa(d, Normal)
 @test_approx_eq d.μ mean(x)
-@test_approx_eq d.σ sqrt(mean((x - d.μ).^2))
+@test_approx_eq d.σ sqrt(mean((x .- d.μ).^2))
 
 d = fit(Normal, x, w)
 @test isa(d, Normal)
 @test_approx_eq d.μ dot(x, w) / sum(w)
-@test_approx_eq d.σ sqrt(dot((x - d.μ).^2, w) / sum(w))
+@test_approx_eq d.σ sqrt(dot((x .- d.μ).^2, w) / sum(w))
 
 d = fit(Normal, rand(Normal(μ, σ), N))
 @test isa(d, Normal)
@@ -195,24 +199,24 @@ import Distributions.NormalKnownMu, Distributions.NormalKnownSigma
 ss = suffstats(NormalKnownMu(μ), x)
 @test isa(ss, Distributions.NormalKnownMuStats)
 @test ss.μ == μ
-@test_approx_eq ss.s2 sum((x - μ).^2)
+@test_approx_eq ss.s2 sum((x .- μ).^2)
 @test_approx_eq ss.tw n0
 
 ss = suffstats(NormalKnownMu(μ), x, w)
 @test isa(ss, Distributions.NormalKnownMuStats)
 @test ss.μ == μ
-@test_approx_eq ss.s2 dot((x - μ).^2, w)
+@test_approx_eq ss.s2 dot((x .- μ).^2, w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit_mle(Normal, x; mu=μ)
 @test isa(d, Normal)
 @test d.μ == μ
-@test_approx_eq d.σ sqrt(mean((x - d.μ).^2))
+@test_approx_eq d.σ sqrt(mean((x .- d.μ).^2))
 
 d = fit_mle(Normal, x, w; mu=μ)
 @test isa(d, Normal)
 @test d.μ == μ
-@test_approx_eq d.σ sqrt(dot((x - d.μ).^2, w) / sum(w))
+@test_approx_eq d.σ sqrt(dot((x .- d.μ).^2, w) / sum(w))
 
 
 ss = suffstats(NormalKnownSigma(σ), x)

@@ -1,28 +1,31 @@
-
 tests = [
     "types",
+    "samplers",
+    "discrete", 
+    "continuous", 
     "fit", 
-    "discrete",
-    "univariate", 
-    "truncate", 
     "multinomial",
-    "dirichlet", 
+    "dirichlet",
     "mvnormal",
     "mvtdist",
     "kolmogorov",
     "edgeworth",
     "matrix",
+    "noncentralhypergeometric",
     "vonmisesfisher",
     "compoundvariate",
     "conjugates",
     "conjugates_normal",
     "conjugates_mvnormal",
-    "wishart"]
+    "mixture",
+    "gradlogpdf"]
 
-println("Running tests:")
+print_with_color(:blue, "Running tests:\n")
+
+srand(345678)
 
 for t in tests
-    test_fn = joinpath("test", "$t.jl")
-    println(" * $test_fn")
+    test_fn = "$t.jl"
+    print_with_color(:green, "* $test_fn\n")
     include(test_fn)
 end

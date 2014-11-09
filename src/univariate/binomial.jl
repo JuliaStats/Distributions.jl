@@ -16,6 +16,31 @@ maximum(d::Binomial) = d.size
 
 @_jl_dist_2p Binomial binom
 
+function _probs(d::Binomial, f::Int, l::Int)
+    n = d.size
+    p = d.prob
+    b = f - 1
+    r = Array(Float64, l - b)
+    r[1] = v = pdf(d, f)
+    if l > f
+        c = p / (1.0 - p)
+        for k = f+1:l
+            v *= ((n - k + 1) / k * c)
+            r[k-b] = v
+        end
+    end
+    return r
+end
+
+probs(d::Binomial) = _probs(d, 0, d.size)
+
+function probs(d::Binomial, rgn::UnitRange)
+    f, l = rgn[1], rgn[end]
+    0 <= f <= l <= d.size || throw(BoundsError())
+    _probs(d, f, l)
+end
+
+
 function entropy(d::Binomial; approx::Bool=false)
     n = d.size
     p1 = d.prob
@@ -30,7 +55,7 @@ function entropy(d::Binomial; approx::Bool=false)
         lp = n * log(p0)
         s = exp(lp) * lp
         for k = 1:n
-           lp += log((n - k) / (k + 1)) + lg
+           lp += log((n - k + 1) / k) + lg
            s += exp(lp) * lp
         end
         return -s
@@ -48,8 +73,8 @@ skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
 median(d::Binomial) = iround(d.size * d.prob)
 
 # TODO: May need to subtract 1 sometimes
+# two modes possible e.g. size odd, p = 0.5
 mode(d::Binomial) = d.size > 0 ? iround((d.size + 1.0) * d.prob) : 0
-modes(d::Binomial) = [mode(d)]
 
 function mgf(d::Binomial, t::Real)
     p = d.prob

@@ -11,13 +11,9 @@ X = reshape(Float64[1:12], p, n)
 w = rand(n)
 Xw = X * diagm(w)
 
-# Convoluted way to put 1's on diag
-Sigma = eye(p)
-Sigma += 0.25
-Sigma -= 0.25*eye(p)
-
-ss = suffstats(MvNormalKnownSigma(Sigma), X)
-ssw = suffstats(MvNormalKnownSigma(Sigma), X, w)
+Sigma = 0.75 * eye(p) + fill(0.25, 4, 4)
+ss = suffstats(MvNormalKnownCov(Sigma), X)
+ssw = suffstats(MvNormalKnownCov(Sigma), X, w)
 
 s_t = sum(X, 2)
 ws_t = sum(Xw, 2)
@@ -42,17 +38,17 @@ X = rand(MultivariateNormal(mu_true, Sig_true), n)
 
 pri = MultivariateNormal(mu0, Sig0)
 
-post = posterior((pri, Sig_true), MultivariateNormal, X)
-@test isa(post, MultivariateNormal)
+post = posterior((pri, Sig_true), MvNormal, X)
+@test isa(post, FullNormal)
 
 @test_approx_eq post.μ inv(inv(Sig0) + n*inv(Sig_true))*(n*inv(Sig_true)*mean(X,2) + inv(Sig0)*mu0)
 @test_approx_eq post.Σ.mat inv(inv(Sig0) + n*inv(Sig_true))
 
 # posterior_sample
 
-ps = posterior_randmodel((pri, Sig_true), MultivariateNormal, X)
+ps = posterior_randmodel((pri, Sig_true), MvNormal, X)
 
-@test isa(ps, MultivariateNormal)
+@test isa(ps, FullNormal)
 @test insupport(ps, ps.μ)
 @test insupport(InverseWishart, ps.Σ.mat)
 
@@ -93,7 +89,7 @@ mu_true = [2., 2.]
 Lam_true = eye(2)
 Lam_true[1,2] = Lam_true[2,1] = 0.25
 
-X = rand(MultivariateNormal(mu_true, inv(Lam_true)), n)
+X = rand(MvNormal(mu_true, inv(Lam_true)), n)
 Xbar = mean(X,2)
 Xm = X .- Xbar
 

@@ -38,30 +38,13 @@ function mode(d::Gamma)
     d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
 
-modes(d::Gamma) = [mode(d)]
-
-rand(d::Gamma) = d.scale * randg(d.shape)
-
-function rand!(d::Gamma, A::Array{Float64})
-    α = d.shape
-    dpar = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
-    cpar = 1.0 / sqrt(9.0 * dpar)
-    n = length(A)
-    for i in 1:n
-        A[i] = randg2(dpar, cpar)
-    end
-    if α <= 1.0
-        ainv = 1.0 / α
-        for i in 1:n
-            A[i] *= rand()^ainv
-        end
-    end
-    multiply!(A, d.scale)
-end
-
 skewness(d::Gamma) = 2.0 / sqrt(d.shape)
 
 var(d::Gamma) = d.shape * d.scale * d.scale
+
+function gradlogpdf(d::Gamma, x::Real)
+  insupport(Gamma, x) ? (d.shape - 1.0) / x - 1.0 / d.scale : 0.0
+end
 
 ## Fit model
 

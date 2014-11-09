@@ -18,7 +18,9 @@ end
 
 # Properties
 
-dim(d::Multinomial) = length(d.prob)
+length(d::Multinomial) = length(d.prob)
+
+probs(d::Multinomial) = d.prob
 
 mean(d::Multinomial) = d.n .* d.prob
 
@@ -82,7 +84,7 @@ end
 
 # Evaluation
 
-function insupport{T<:Real}(d::Multinomial, x::Vector{T})
+function insupport{T<:Real}(d::Multinomial, x::AbstractVector{T})
     n = length(x)
     if length(d.prob) != n
         return false
@@ -98,112 +100,26 @@ function insupport{T<:Real}(d::Multinomial, x::Vector{T})
     return s == d.n  # integer computation would not yield truncation errors
 end
 
-function logpdf{T<:Real}(d::Multinomial, x::Vector{T})
+function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
     n = d.n
     p = d.prob
-    k = length(p)
-    length(x) == k || throw(ArgumentError("Invalid dimension of x."))
-
     s = lgamma(n + 1.0)
     t = zero(T)
-    for i = 1 : k
+    for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds pi = p[i]
         t += xi
         s -= lgamma(xi + 1.0)
         @inbounds s += xi * log(pi)
     end
-    return (t == n ? s : -Inf)::Float64
+    return ifelse(t == n, s, -Inf)::Float64
 end
-
-pdf{T <: Real}(d::Multinomial, x::Vector{T}) = exp(logpdf(d, x))
-
 
 # Sampling
 
-function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T})
-    k = length(p)
-    length(x) == k || throw(ArgumentError("Invalid argument dimension."))
+_rand!{T<:Real}(d::Multinomial, x::AbstractVector{T}) = multinom_rand!(d.n, d.prob, x)
 
-    rp = 1.0  # remaining total probability
-    i = 0
-    km1 = k - 1
-
-    while i < km1 && n > 0
-        i += 1
-        @inbounds pi = p[i]
-        if pi < rp            
-            xi = rand(Binomial(n, pi / rp))
-            @inbounds x[i] = xi
-            n -= xi
-            rp -= pi
-        else 
-            # In this case, we don't even have to sample
-            # from Binomial. Just assign remaining counts
-            # to xi. 
-
-            @inbounds x[i] = n
-            n = 0
-            # rp = 0.0 (no need for this, as rp is no longer needed)
-        end
-    end
-
-    if i == km1
-        @inbounds x[k] = n
-    else  # n must have been zero
-        z = zero(T)
-        for j = i+1 : k
-            @inbounds x[j] = z
-        end
-    end
-
-    return x  
-end
-
-rand!{T<:Real}(d::Multinomial, x::Vector{T}) = multinom_rand!(d.n, d.prob, x)
-
-function rand!{T<:Real}(d::Multinomial, x::Matrix{T})
-    k = dim(d)
-    size(x,1) == k || throw(ArgumentError("Invalid argument dimension."))
-
-    for i = 1 : size(x, 2)
-        multinom_rand!(d.n, d.prob, unsafe_view(x, :, i))
-    end
-    return x
-end
-
-
-immutable MultinomialSampler <: DiscreteMultivariateDistribution
-    d::Multinomial
-    alias::AliasTable
-    function MultinomialSampler(d::Multinomial)
-        new(d, AliasTable(d.prob))
-    end
-end
-
-function rand!{T <: Real}(s::MultinomialSampler, x::Vector{T})
-    d::Multinomial = s.d
-    n::Int = d.n
-    k = dim(s)
-    
-    if n^2 > k
-        d = s.d
-        multinom_rand!(n, d.prob, x)
-    else
-        # Use an alias table
-        fill!(x, convert(T, 0))
-        a = s.alias
-        for i = 1:n
-            x[rand(a)] += 1
-        end
-    end
-    return x
-end
-
-dim(s::MultinomialSampler) = length(s.d.prob)
-sampler(d::Multinomial) = MultinomialSampler(d)
-
-rand(s::MultinomialSampler) = rand!(s, zeros(Int, dim(s)))
+sampler(d::Multinomial) = MultinomialSampler(d.n, d.prob)
 
 
 ## Fit model

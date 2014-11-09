@@ -33,32 +33,43 @@ median(d::Beta) = quantile(d, 0.5)
 
 function mode(d::Beta)
     α, β = d.alpha, d.beta
-    α > 1.0 && β > 1.0 || error("Beta with α <= 1 or β <= 1 has no modes")
-    (α - 1.0) / (α + β - 2.0)
-end
-
-modes(d::Beta) = [mode(d)]
-
-function rand(d::Beta)
-    u = randg(d.alpha)
-    u / (u + randg(d.beta))
-end
-
-function rand!(d::Beta, A::Array{Float64})
-    α = d.alpha
-    β = d.beta
-
-    da = (α <= 1.0 ? α + 1.0 : α) - 1.0 / 3.0
-    ca = 1.0 / sqrt(9.0 * da)
-
-    db = (β <= 1.0 ? β + 1.0 : β) - 1.0 / 3.0
-    cb = 1.0 / sqrt(9.0 * db)
-
-    for i = 1:length(A)
-        u = randg2(da, ca)
-        A[i] = u / (u + randg2(db, cb))
+    if α >= 1.0
+        if β > 1.0
+            (α - 1.0) / (α + β - 2.0)
+        elseif α == 1.0 && β == 1.0
+            # Uniform[0,1]: what should be returned?
+            0.5
+        else
+            1.0
+        end
+    else
+        if β >= 1.0
+            0.0
+        else
+            # not unique: return largest
+            α > β ? 1.0 : 0.0
+        end
     end
-    A
+end
+
+function modes(d::Beta)
+    α, β = d.alpha, d.beta
+    if α >= 1.0
+        if β > 1.0
+            [(α - 1.0) / (α + β - 2.0)]
+        elseif α == 1.0 && β == 1.0
+            # Uniform[0,1]: what should be returned?
+            Float64[]
+        else
+            [1.0]
+        end
+    else
+        if β >= 1.0
+            [0.0]
+        else
+            [0.0,1.0]
+        end
+    end
 end
 
 function skewness(d::Beta)
@@ -70,6 +81,10 @@ end
 function var(d::Beta)
     ab = d.alpha + d.beta
     d.alpha * d.beta / (ab * ab * (ab + 1.0))
+end
+
+function gradlogpdf(d::Beta, x::Real)
+  insupport(Beta, x) ? (d.alpha - 1.0) / x - (d.beta - 1.0) / (1 - x) : 0.0
 end
 
 ### handling support

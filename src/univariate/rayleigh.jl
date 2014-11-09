@@ -26,7 +26,6 @@ mean(d::Rayleigh) = d.scale * sqrt(pi / 2.)
 median(d::Rayleigh) = d.scale * sqrt(2. * log(2.))
 
 mode(d::Rayleigh) = d.scale
-modes(d::Rayleigh) = [d.scale]
 
 function pdf(d::Rayleigh, x::Real)
     insupport(d, x) ? (x / (d.scale^2)) * exp(-(x^2)/(2.0 * (d.scale^2))) : 0.0

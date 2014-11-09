@@ -31,9 +31,7 @@ function mgf(d::Arcsine, t::Real)
     1.0 + s
 end
 
-function cf(d::Arcsine, t::Real)
-    error("CF for Arcsine requires confluent hypergeometric function")
-end
+# cf for Arcsine requires confluent hypergeometric function
 
 mode(d::Arcsine) = 0.0
 modes(d::Arcsine) = [0.0, 1.0]
