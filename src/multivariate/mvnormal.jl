@@ -78,7 +78,7 @@ typealias ZeroMeanFullNormal MvNormal{PDMat,ZeroVector{Float64}}
 ### Construction
 
 function MvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
-    dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
+    dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{Cov,Vector{Float64}}(μ, Σ)
 end
 
