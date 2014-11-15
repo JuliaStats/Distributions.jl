@@ -19,7 +19,7 @@ convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
 .- (x::DenseArray, v::ZeroVector) = x
 
 
-# Utility functions
+##### Utility functions
 
 type NoArgCheck end
 

@@ -8,20 +8,6 @@ end
 
 Geometric() = Geometric(0.5) # Flips of a fair coin
 
-function probs(d::Geometric, rgn::UnitRange)
-    f, l = rgn[1], rgn[end]
-    0 <= f <= l || throw(BoundsError())
-    p = d.prob
-    r = Array(Float64, l - f + 1)
-    pfail = 1.0 - p
-    r[1] = v = (pfail^f) * p
-    b = f - 1
-    for i = f+1:l
-        r[i - b] = (v *= pfail)
-    end
-    return r
-end
-
 ## Support
 insupport(::Geometric, x::Real) = isinteger(x) && x >= zero(x)
 insupport(::Type{Geometric}, x::Real) = isinteger(x) && x >= zero(x)

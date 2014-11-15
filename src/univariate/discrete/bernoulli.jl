@@ -1,11 +1,3 @@
-##############################################################################
-#
-# REFERENCES: Wasserman, "All of Statistics"
-#
-# NOTES: Fails CDF/Quantile matching test
-#
-##############################################################################
-
 immutable Bernoulli <: DiscreteUnivariateDistribution
     p0::Float64
     p1::Float64
@@ -18,27 +10,6 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
-probs(d::Bernoulli) = [d.p0, d.p1]
-
-function probs(d::Bernoulli, rgn::UnitRange) 
-    n = length(rgn)
-    if n == 0
-        return Float64[]
-    elseif n == 1
-        f = rgn[1]
-        return f == zero(f) ? [d.p0] : 
-               f == one(f) ? [d.p1] : 
-               throw(BoundsError())
-    elseif n == 2
-        f = rgn[1]
-        return f == zero(f) ? [d.p0, d.p1] : 
-               throw(BoundsError())
-    else
-        throw(BoundsError())
-    end
-end
-
-cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
 function entropy(d::Bernoulli) 
     p0 = d.p0
@@ -68,6 +39,10 @@ function modes(d::Bernoulli)
 end
 
 pdf(d::Bernoulli, x::Real) = x == zero(x) ? d.p0 : x == one(x) ? d.p1 : 0.0
+
+pdf(d::Bernoulli) = [d.p0, d.p1]
+
+cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
 
 quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= d.p0 ? 0 : 1) : NaN
 

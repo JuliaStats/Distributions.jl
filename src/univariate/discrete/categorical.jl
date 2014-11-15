@@ -46,6 +46,8 @@ pdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? d.prob[x] : 0.0
 
 logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x]) : -Inf
 
+pdf(d::Categorical) = copy(d.prob)
+
 function quantile(d::Categorical, p::Real)
     0. <= p <= 1. || throw(DomainError())
     k = d.K

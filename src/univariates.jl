@@ -94,6 +94,49 @@ for fun in [:pdf, :logpdf,
     end
 end
 
+function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
+    vl = vfirst = first(X)
+    vr = vlast = last(X)
+    n = vlast - vfirst + 1
+    if islowerbounded(d) 
+        lb = minimum(d)
+        if vl < lb
+            vl = lb
+        end
+    end
+    if isupperbounded(d)
+        ub = maximum(d)
+        if vr > ub
+            vr = ub
+        end
+    end
+
+    # fill left part
+    if vl > vfirst
+        for i = 1:(vl - vfirst)
+            r[i] = 0.0
+        end
+    end
+
+    # fill central part: with non-zero pdf
+    fm1 = vfirst - 1
+    for v = vl:vr
+        r[v - fm1] = pdf(d, v)
+    end
+
+    # fill right part
+    if vr < vlast
+        for i = (vr-vfirst+2):n
+            r[i] = 0.0
+        end
+    end
+    return r
+end
+
+pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) : 
+                                                        error("pdf(d) is not allowed when d is unbounded.")
+
+
 ## loglikelihood
 
 function _loglikelihood(d::UnivariateDistribution, X::AbstractArray)

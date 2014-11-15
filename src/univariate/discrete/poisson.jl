@@ -20,23 +20,6 @@ maximum(::Union(Poisson, Type{Poisson})) = Inf
 insupport(::Poisson, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{Poisson}, x::Real) = isinteger(x) && zero(x) <= x
 
-
-function probs(d::Poisson, rgn::UnitRange)
-    λ = d.lambda
-    f, l = rgn[1], rgn[end]
-    0 <= f <= l || throw(BoundsError())
-    r = Array(Float64, l - f + 1)
-    v = r[1] = pdf(d, f)
-    if l > f
-        b = f - 1
-        for x = f+1:l
-            c = λ / x
-            r[x - b] = (v *= c)
-        end
-    end
-    return r
-end
-
 mean(d::Poisson) = d.lambda
 
 median(d::Poisson) = quantile(d, 0.5)

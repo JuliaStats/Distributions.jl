@@ -17,6 +17,8 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int)
 
     test_support(distr, vs)
     test_evaluation(distr, vs)
+    test_range_evaluation(distr)
+
     test_stats(distr, vs)
     test_samples(distr, n)
 end
@@ -80,15 +82,6 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     m = rmax - rmin + 1  # length of the range
     p0 = pdf(distr, rmin:rmax)  # reference probability masses
     @assert length(p0) == m
-
-    # check the consistency between probs and pdf
-    if isa(s, Distribution)
-        @test_approx_eq probs(s, rmin:rmax) p0
-        if isbounded(s)
-            @assert isfinite(vmin) && isfinite(vmax)
-            @test_approx_eq probs(s) probs(s, vmin:vmax) 
-        end
-    end
 
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
@@ -269,6 +262,29 @@ end
 
 
 #### Testing evaluation methods
+
+function test_range_evaluation(d::DiscreteUnivariateDistribution)
+    # check the consistency between range-based and ordinary pdf
+    vmin = minimum(d)
+    vmax = maximum(d)
+    @test vmin <= vmax
+    if islowerbounded(d)
+        @test isa(vmin, Integer)
+    end
+    if isupperbounded(d)
+        @test isa(vmax, Integer)
+    end
+
+    rmin = int(islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
+    rmax = int(isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
+
+    p0 = pdf(d, [rmin:rmax])
+    @test_approx_eq pdf(d, rmin:rmax) p0
+    if isbounded(d)
+        @test_approx_eq pdf(d) p0
+    end
+end
+
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     nv = length(vs)

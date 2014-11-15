@@ -26,24 +26,6 @@ support(d::Hypergeometric) = minimum(d):maximum(d)
 islowerbounded(d::Hypergeometric) = true
 isupperbounded(d::Hypergeometric) = true
 
-function _probs(d::Hypergeometric, f::Int, l::Int)
-    ns = d.ns
-    nf = d.nf
-    n = d.n
-    r = Array(Float64, l - f + 1)
-    r[1] = v = pdf(d, f)
-    b = f - 1
-    if l > f
-        for x = f+1:l
-            c = ((ns - x + 1) / x) * ((n - x + 1) / (nf - n + x))
-            r[x-b] = (v *= c)
-        end
-    end
-    return r
-end
-
-probs(d::Hypergeometric) = _probs(d, minimum(d), maximum(d))
-
 function probs(d::Hypergeometric, rgn::UnitRange)
     f, l = rgn[1], rgn[end]
     minimum(d) <= f <= l <= maximum(d) || throw(BoundsError())

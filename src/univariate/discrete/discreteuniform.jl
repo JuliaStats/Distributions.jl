@@ -11,16 +11,7 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
-function probs(d::DiscreteUniform) 
-    n = d.b - d.a + 1
-    fill(1.0 / n, n)
-end
-
-function probs(d::DiscreteUniform, rgn::UnitRange)
-    f, l = rgn[1], rgn[end]
-    d.a <= f <= l <= d.b || throw(BoundsError())
-    fill(1.0 / (d.b - d.a + 1), l - f + 1)
-end
+pdf(d::DiscreteUniform) = (n = d.b - d.a + 1; fill(1.0 / n, n))
 
 function cdf(d::DiscreteUniform, k::Real)
     k < d.a ? 0. : (k > d.b ? 1. : (ifloor(k) - d.a + 1.0) / (d.b - d.a + 1.0))
