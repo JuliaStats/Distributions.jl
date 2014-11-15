@@ -280,8 +280,17 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
 
     p0 = pdf(d, [rmin:rmax])
     @test_approx_eq pdf(d, rmin:rmax) p0
+    if rmin + 2 <= rmax
+        @test_approx_eq pdf(d, rmin+1:rmax-1) p0[2:end-1]
+    end
+
     if isbounded(d)
         @test_approx_eq pdf(d) p0
+        @test_approx_eq pdf(d, rmin-2:rmax) vcat(0.0, 0.0, p0)
+        @test_approx_eq pdf(d, rmin:rmax+3) vcat(p0, 0.0, 0.0, 0.0)
+        @test_approx_eq pdf(d, rmin-2:rmax+3) vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+    elseif islowerbounded(d)
+        @test_approx_eq pdf(d, rmin-2:rmax) vcat(0.0, 0.0, p0)
     end
 end
 
