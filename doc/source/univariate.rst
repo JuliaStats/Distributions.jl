@@ -91,22 +91,22 @@ Probability Evaluation
     When ``x`` is a scalar, it returns whether x is within the support of ``d``. 
     When ``x`` is an array, it returns whether every element in x is within the support of ``d``. 
 
-.. function:: probs(d, rgn)
+.. function:: pdf(d, x)
+
+    The pdf value(s) evaluated at ``x``.
+
+.. function:: pdf(d, rgn)
 
     Get/compute the probabilities over a range of values. Here, ``rgn`` should be in the form of ``a:b``.
 
     **Note:** computing the probabilities over a contiguous range of values can take advantage of the recursive relations between probability masses and thus is often more efficient than computing these probabilities individually.
 
-.. function:: probs(d)
+.. function:: pdf(d)
 
-    Get/compute the entire probability vector of ``d``. This is equivalent to ``probs(d, minimum(d):maximum(d))``.
+    Get/compute the entire probability vector of ``d``. This is equivalent to ``pdf(d, minimum(d):maximum(d))``.
 
     **Note:** this method is only defined for *bounded* distributions.
 
-
-.. function:: pdf(d, x)
-
-    The pdf value(s) evaluated at ``x``.
 
 .. function:: logpdf(d, x)
 
