@@ -26,12 +26,6 @@ support(d::Hypergeometric) = minimum(d):maximum(d)
 islowerbounded(d::Hypergeometric) = true
 isupperbounded(d::Hypergeometric) = true
 
-function probs(d::Hypergeometric, rgn::UnitRange)
-    f, l = rgn[1], rgn[end]
-    minimum(d) <= f <= l <= maximum(d) || throw(BoundsError())
-    _probs(d, f, l)
-end
-
 
 # properties
 mean(d::Hypergeometric) = d.n * d.ns / (d.ns + d.nf)

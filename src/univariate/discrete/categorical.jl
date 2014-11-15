@@ -48,6 +48,30 @@ logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x])
 
 pdf(d::Categorical) = copy(d.prob)
 
+function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
+    vfirst = int(first(rgn))
+    vlast = int(last(rgn))
+    vl = max(vfirst, 1)
+    vr = min(vlast, d.K)
+    p = probs(d)
+    if vl > vfirst
+        for i = 1:(vl - vfirst)
+            r[i] = 0.0
+        end
+    end
+    fm1 = vfirst - 1
+    for v = vl:vr
+        r[v - fm1] = p[v]
+    end
+    if vr < vlast
+        for i = (vr-vfirst+2):length(rgn)
+            r[i] = 0.0
+        end
+    end
+    return r
+end
+
+
 function quantile(d::Categorical, p::Real)
     0. <= p <= 1. || throw(DomainError())
     k = d.K

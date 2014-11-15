@@ -45,6 +45,32 @@ function pdf(d::DiscreteUniform, x::Real)
     insupport(d, x) ? (1.0 / (d.b - d.a + 1)) : 0.0
 end
 
+function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
+    vfirst = int(first(rgn))
+    vlast = int(last(rgn))
+    vl = max(vfirst, d.a)
+    vr = min(vlast, d.b)
+    if vl > vfirst
+        for i = 1:(vl - vfirst)
+            r[i] = 0.0
+        end
+    end
+    fm1 = vfirst - 1
+    if vl <= vr
+        pv = 1.0 / (d.b - d.a + 1)
+        for v = vl:vr
+            r[v - fm1] = pv
+        end
+    end
+    if vr < vlast
+        for i = (vr-vfirst+2):length(rgn)
+            r[i] = 0.0
+        end
+    end
+    return r
+end
+
+
 function quantile(d::DiscreteUniform, p::Real)
     d.a + ifloor(p * (d.b - d.a + 1))
 end

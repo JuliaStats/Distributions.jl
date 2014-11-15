@@ -51,6 +51,17 @@ median(d::Binomial) = iround(d.size * d.prob)
 # two modes possible e.g. size odd, p = 0.5
 mode(d::Binomial) = d.size > 0 ? iround((d.size + 1.0) * d.prob) : 0
 
+
+immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
+    n::Int
+    coef::Float64   # p / (1 - p)
+end
+
+RecursiveBinomProbEvaluator(d::Binomial) = (p = d.prob; RecursiveBinomProbEvaluator(d.size, p / (1.0 - p)))
+nextpdf(s::RecursiveBinomProbEvaluator, p::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * p
+_pdf!(r::AbstractArray, d::Binomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveBinomProbEvaluator(d))
+
+
 function mgf(d::Binomial, t::Real)
     p = d.prob
     (1.0 - p + p * exp(t))^d.size

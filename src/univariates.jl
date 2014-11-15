@@ -133,6 +133,52 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
     return r
 end
 
+
+abstract RecursiveProbabilityEvaluator
+
+function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
+    vl = vfirst = first(X)
+    vr = vlast = last(X)
+    n = vlast - vfirst + 1
+    if islowerbounded(d) 
+        lb = minimum(d)
+        if vl < lb
+            vl = lb
+        end
+    end
+    if isupperbounded(d)
+        ub = maximum(d)
+        if vr > ub
+            vr = ub
+        end
+    end
+
+    # fill left part
+    if vl > vfirst
+        for i = 1:(vl - vfirst)
+            r[i] = 0.0
+        end
+    end
+
+    # fill central part: with non-zero pdf
+    if vl <= vr
+        fm1 = vfirst - 1
+        r[vl - fm1] = pv = pdf(d, vl)
+        for v = (vl+1):vr
+            r[v - fm1] = pv = nextpdf(rpe, pv, v)
+        end
+    end
+
+    # fill right part
+    if vr < vlast
+        for i = (vr-vfirst+2):n
+            r[i] = 0.0
+        end
+    end
+    return r
+end
+
+
 pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) : 
                                                         error("pdf(d) is not allowed when d is unbounded.")
 

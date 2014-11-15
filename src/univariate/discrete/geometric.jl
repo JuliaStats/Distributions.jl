@@ -39,6 +39,15 @@ function pdf(d::Geometric, x::Real)
     p < 0.5 ? p*exp(log1p(-p)*x) : p*(1.0-p)^x
 end
 
+immutable RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
+    p0::Float64
+end
+
+RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(1.0 - d.prob)
+nextpdf(s::RecursiveGeomProbEvaluator, p::Float64, x::Integer) = p * s.p0
+_pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+
+
 logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.prob) + log1p(-d.prob)*x : -Inf
 
 function cdf(d::Geometric, x::Real) 

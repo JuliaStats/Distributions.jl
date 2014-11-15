@@ -49,6 +49,15 @@ function entropy(d::Poisson)
     end
 end
 
+immutable RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
+    λ::Float64
+end
+
+RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(d.lambda)
+nextpdf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
+_pdf!(r::AbstractArray, d::Poisson, rgn::UnitRange) = _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
+
+
 function mgf(d::Poisson, t::Real)
     l = d.lambda
     return exp(l * (exp(t) - 1.0))
