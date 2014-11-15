@@ -29,6 +29,14 @@ maximum(::Union(NegativeBinomial, Type{NegativeBinomial})) = Inf
 insupport(::NegativeBinomial, x::Real) = isinteger(x) && zero(x) <= x
 insupport(::Type{NegativeBinomial}, x::Real) = isinteger(x) && zero(x) <= x
 
+immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
+    r::Float64
+    p0::Float64
+end
+
+RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, 1.0 - d.prob)
+nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
+_pdf!(r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = d.r, d.prob

@@ -27,6 +27,20 @@ islowerbounded(d::Hypergeometric) = true
 isupperbounded(d::Hypergeometric) = true
 
 
+immutable RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
+    ns::Float64
+    nf::Float64
+    n::Float64
+end
+
+RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvaluator(d.ns, d.nf, d.n)
+
+nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) = 
+    ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
+
+_pdf!(r::AbstractArray, d::Hypergeometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+
+
 # properties
 mean(d::Hypergeometric) = d.n * d.ns / (d.ns + d.nf)
 
