@@ -10,20 +10,14 @@ end
 Levy(location::Real) = Levy(location, 1.0)
 Levy() = Levy(0.0, 1.0)
 
+@distr_support Levy d.location Inf
+
 cdf(d::Levy, x::Real) = erfc(sqrt(d.scale / (2.0 * (x - d.location))))
 
 function entropy(d::Levy)
     c = d.scale
     (1.0 - 3.0 * digamma(1.0) + log(16.0 * pi * c * c)) / 2.0
 end
-
-isupperbounded(::Union(Levy, Type{Levy})) = false
-islowerbounded(::Union(Levy, Type{Levy})) = true
-isbounded(::Union(Levy, Type{Levy})) = false
-
-minimum(d::Levy) = d.location
-maximum(d::Levy) = Inf
-insupport(d::Levy, x::Real) = d.location <= x && isfinite(x)
 
 mean(d::Levy) = Inf
 var(d::Levy) = Inf

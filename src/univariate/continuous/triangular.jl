@@ -11,13 +11,7 @@ immutable TriangularDist <: ContinuousUnivariateDistribution
 end
 
 ## Support
-isupperbounded(::Union(TriangularDist, Type{TriangularDist})) = true
-islowerbounded(::Union(TriangularDist, Type{TriangularDist})) = true
-isbounded(::Union(TriangularDist, Type{TriangularDist})) = true
-
-minimum(d::TriangularDist) = d.a
-maximum(d::TriangularDist) = d.b
-insupport(d::TriangularDist, x::Real) = minimum(d) <= x <= maximum(d)
+@distr_support TriangularDist d.a d.b
 
 ## Properties
 mean(d::TriangularDist) = (d.a + d.b + d.c) / 3.0
