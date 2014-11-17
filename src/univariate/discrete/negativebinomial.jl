@@ -19,7 +19,7 @@ end
 
 @_jl_dist_2p NegativeBinomial nbinom
 
-@with_lowerbounded_support NegativeBinomial 0
+@distr_support NegativeBinomial 0 Inf
 
 immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64

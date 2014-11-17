@@ -9,7 +9,7 @@ end
 
 @_jl_dist_1p Poisson pois
 
-@with_lowerbounded_support Poisson 0
+@distr_support Poisson 0 Inf
 
 mean(d::Poisson) = d.lambda
 

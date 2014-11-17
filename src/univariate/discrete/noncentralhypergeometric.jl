@@ -8,7 +8,7 @@ function insupport(d::NoncentralHypergeometric, x::Real)
     isinteger(x) && minimum(d) <= x <= maximum(d)
 end
 
-@with_bounded_support NoncentralHypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
+@distr_support NoncentralHypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 # Functions
 

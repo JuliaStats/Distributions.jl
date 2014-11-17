@@ -14,10 +14,6 @@ in(x::Real, r::RealInterval) = (r.lb <= float64(x) <= r.ub)
 
 make_support{D<:DiscreteUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = int(lb):int(ub)
 make_support{D<:ContinuousUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = RealInterval(lb, ub)
- 
-in_value_domain{D<:DiscreteUnivariateDistribution}(::Type{D}, x::Integer) = true
-in_value_domain{D<:DiscreteUnivariateDistribution}(::Type{D}, x::Real) = isinteger(x)
-in_value_domain{D<:ContinuousUnivariateDistribution}(::Type{D}, x::Real) = true
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
@@ -37,85 +33,60 @@ insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
 
 ## macros to declare support
 
-macro with_bounded_support(D, lb, ub)
-    common = quote
-        islowerbounded(::Union($D, Type{$D})) = true
-        isupperbounded(::Union($D, Type{$D})) = true
-        isbounded(::Union($D, Type{$D})) = true
-        minimum(d::$D) = $(lb)
-        maximum(d::$D) = $(ub)
-    end
+macro distr_support(D, lb, ub)
+    Dty = eval(D)
+    @assert Dty <: UnivariateDistribution
 
-    if isa(lb, Number) && isa(ub, Number)
-        esc(quote
-            $(common)    
-            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && ($lb <= x <= $ub)
-            support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
-        end)
+    # determine whether is it upper & lower bounded
+    D_is_lbounded = !(lb == :(-Inf))
+    D_is_ubounded = !(ub == :Inf)
+    D_is_bounded = D_is_lbounded && D_is_ubounded
+
+    D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
+                           (isa(lb, Number) || lb == :(-Inf))
+
+    insuppcomp = (D_is_lbounded && D_is_ubounded)  ? :(($lb) <= x <= $(ub)) :
+                 (D_is_lbounded && !D_is_ubounded) ? :(x >= $(lb)) :
+                 (!D_is_lbounded && D_is_ubounded) ? :(x <= $(ub)) : :true
+
+    suppfuns = if Dty <: DiscreteUnivariateDistribution
+        if D_has_constantbounds
+            quote
+                support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
+                insupport(::Union($D, Type{$D}), x::Real) = isinteger(x) && ($insuppcomp)
+                insupport(::Union($D, Type{$D}), x::Integer) = $insuppcomp
+            end
+        else
+            quote 
+                support(d::$D) = make_support($D, $lb, $ub)
+                insupport(d::$D, x::Real) = isinteger(x) && ($insuppcomp)
+                insupport(d::$D, x::Integer) = $insuppcomp
+            end
+        end
     else
-        esc(quote
-            $(common)
-            insupport(d::$D, x::Real) = in_value_domain($D, x) && (($lb) <= x <= ($ub))
-            support(d::$D) = make_support($D, $lb, $ub)
-        end)
-    end
-end
-
-macro with_lowerbounded_support(D, lb)
-    # this macro assumes that the support is not upper-bounded
-    common = quote
-        islowerbounded(::Union($D, Type{$D})) = true
-        isupperbounded(::Union($D, Type{$D})) = false
-        isbounded(::Union($D, Type{$D})) = false
-        minimum(d::$D) = $(lb)
-        maximum(d::$D) = Inf
+        @assert Dty <: ContinuousUnivariateDistribution
+        if D_has_constantbounds
+            quote
+                support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
+                insupport(::Union($D, Type{$D}), x::Real) = $insuppcomp
+            end
+        else
+            quote
+                support(d::$D) = make_support($D, $lb, $ub)
+                insupport(d::$D) = $insuppcomp
+            end
+        end        
     end
 
-    if isa(lb, Number)
-        esc(quote
-            $(common)
-            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && (x >= $lb)
-        end)
-    else
-        esc(quote
-            $(common)
-            insupport(d::$D, x::Real) = in_value_domain($D, x) && (x >= ($lb))
-        end)
-    end
-end
-
-macro with_uppperbounded_support(D, ub)
-    # this macro assumes that the support is not lower-bounded
-    common = quote
-        islowerbounded(::Union($D, Type{$D})) = false
-        isupperbounded(::Union($D, Type{$D})) = true
-        isbounded(::Union($D, Type{$D})) = false
-        minimum(d::$D) = -Inf
-        maximum(d::$D) = $(ub)
-    end
-
-    if isa(ub, Number)
-        esc(quote
-            $(common)
-            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && (x <= $ub)
-        end)
-    else
-        esc(quote
-            $(common)
-            insupport(d::$D, x::Real) = in_value_domain($D, x) && (x <= ($ub))
-        end)
-    end
-end
-
-macro with_unbounded_support(D)
-    quote
-        islowerbounded(::Union($D, Type{$D})) = false
-        isupperbounded(::Union($D, Type{$D})) = false
-        isbounded(::Union($D, Type{$D})) = false
-        minimum(d::$D) = -Inf
-        maximum(d::$D) = Inf
-        insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x)
-    end
+    # overall
+    esc(quote
+        islowerbounded(::Union($D, Type{$D})) = $(D_is_lbounded)
+        isupperbounded(::Union($D, Type{$D})) = $(D_is_ubounded)
+        isbounded(::Union($D, Type{$D})) = $(D_is_bounded)
+        minimum(d::$D) = $lb
+        maximum(d::$D) = $ub
+        $(suppfuns)
+    end)
 end
 
 

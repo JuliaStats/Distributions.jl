@@ -11,7 +11,7 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
-@with_bounded_support Binomial 0 d.size
+@distr_support Binomial 0 d.size
 
 
 @_jl_dist_2p Binomial binom

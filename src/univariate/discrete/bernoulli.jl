@@ -15,7 +15,7 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
-@with_bounded_support Bernoulli 0 1 
+@distr_support Bernoulli 0 1 
 
 
 #### Properties

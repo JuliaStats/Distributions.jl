@@ -8,7 +8,7 @@ end
 
 Geometric() = Geometric(0.5) # Flips of a fair coin
 
-@with_lowerbounded_support Geometric 0
+@distr_support Geometric 0 Inf
 
 ## Properties
 mean(d::Geometric) = (1.0 - d.prob) / d.prob

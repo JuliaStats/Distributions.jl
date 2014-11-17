@@ -19,7 +19,7 @@ end
 @_jl_dist_3p Hypergeometric hyper
 
 # handling support
-@with_bounded_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
+@distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 immutable RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
     ns::Float64

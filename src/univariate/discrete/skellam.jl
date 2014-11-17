@@ -4,7 +4,7 @@ immutable Skellam <: DiscreteUnivariateDistribution
     Skellam(m1::Real, m2::Real) = new(float64(m1), float64(m2))
 end
 
-@with_unbounded_support Skellam
+@distr_support Skellam -Inf Inf
 
 kurtosis(d::Skellam) = 1.0 / (d.mu1 + d.mu2)
 

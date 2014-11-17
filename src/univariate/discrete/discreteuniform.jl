@@ -11,7 +11,7 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
-@with_bounded_support DiscreteUniform d.a d.b
+@distr_support DiscreteUniform d.a d.b
 
 
 pdf(d::DiscreteUniform) = (n = d.b - d.a + 1; fill(1.0 / n, n))

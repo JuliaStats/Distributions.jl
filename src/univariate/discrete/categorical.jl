@@ -12,7 +12,7 @@ immutable Categorical <: DiscreteUnivariateDistribution
     Categorical(k::Int) = new(k, fill(1.0/k, k))
 end
 
-@with_bounded_support Categorical 1 d.K
+@distr_support Categorical 1 d.K
 
 
 ncategories(d::Categorical) = d.K
