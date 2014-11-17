@@ -130,6 +130,9 @@ export
     ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon,
 
+    # auxiliary types
+    RealInterval,
+
     # methods
     binaryentropy,      # entropy of distribution in bits
     canonform,          # get canonical form of a distribution
