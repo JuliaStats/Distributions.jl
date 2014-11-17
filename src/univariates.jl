@@ -9,11 +9,7 @@ end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
-
 in(x::Real, r::RealInterval) = (r.lb <= float64(x) <= r.ub)
-
-make_support{D<:DiscreteUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = int(lb):int(ub)
-make_support{D<:ContinuousUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = RealInterval(lb, ub)
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
@@ -45,37 +41,36 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
+    paramdecl = D_has_constantbounds ? :(::Union($D, Type{$D})) : :(d::$D)
+
     insuppcomp = (D_is_lbounded && D_is_ubounded)  ? :(($lb) <= x <= $(ub)) :
                  (D_is_lbounded && !D_is_ubounded) ? :(x >= $(lb)) :
                  (!D_is_lbounded && D_is_ubounded) ? :(x <= $(ub)) : :true
 
-    suppfuns = if Dty <: DiscreteUnivariateDistribution
-        if D_has_constantbounds
+    support_funs = 
+
+    support_funs = if Dty <: DiscreteUnivariateDistribution
+        if D_is_bounded
             quote
-                support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
-                insupport(::Union($D, Type{$D}), x::Real) = isinteger(x) && ($insuppcomp)
-                insupport(::Union($D, Type{$D}), x::Integer) = $insuppcomp
-            end
-        else
-            quote 
-                support(d::$D) = make_support($D, $lb, $ub)
-                insupport(d::$D, x::Real) = isinteger(x) && ($insuppcomp)
-                insupport(d::$D, x::Integer) = $insuppcomp
+                support($(paramdecl)) = int($lb):int($ub)
             end
         end
     else
+        quote
+            support($(paramdecl)) = RealInterval($lb, $ub)
+        end
+    end
+
+    insupport_funs = if Dty <: DiscreteUnivariateDistribution
+        quote 
+            insupport($(paramdecl), x::Real) = isinteger(x) && ($insuppcomp)
+            insupport($(paramdecl), x::Integer) = $insuppcomp
+        end
+    else
         @assert Dty <: ContinuousUnivariateDistribution
-        if D_has_constantbounds
-            quote
-                support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
-                insupport(::Union($D, Type{$D}), x::Real) = $insuppcomp
-            end
-        else
-            quote
-                support(d::$D) = make_support($D, $lb, $ub)
-                insupport(d::$D) = $insuppcomp
-            end
-        end        
+        quote
+            insupport($(paramdecl), x::Real) = $insuppcomp
+        end
     end
 
     # overall
@@ -85,7 +80,8 @@ macro distr_support(D, lb, ub)
         isbounded(::Union($D, Type{$D})) = $(D_is_bounded)
         minimum(d::$D) = $lb
         maximum(d::$D) = $ub
-        $(suppfuns)
+        $(support_funs)
+        $(insupport_funs)
     end)
 end
 
