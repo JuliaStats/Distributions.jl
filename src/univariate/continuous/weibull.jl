@@ -10,7 +10,7 @@ end
 Weibull(sh::Real) = Weibull(sh, 1.0)
 
 ## Support
-@continuous_distr_support Weibull 0.0 Inf
+@distr_support Weibull 0.0 Inf
 
 ## Properties
 mean(d::Weibull) = d.scale * gamma(1.0 + 1.0 / d.shape)

@@ -12,7 +12,7 @@ end
 Frechet(sh::Real) = Frechet(sh, 1.0)
 
 ## Support
-@continuous_distr_support Frechet 0.0 Inf
+@distr_support Frechet 0.0 Inf
 
 ## Properties
 mean(d::Frechet) = d.shape > 1.0 ? d.scale * gamma(1.0 - 1.0 / d.shape) : Inf

@@ -11,8 +11,8 @@ end
 Binomial(size::Integer) = Binomial(size, 0.5)
 Binomial() = Binomial(1, 0.5)
 
-minimum(d::Binomial) = 0
-maximum(d::Binomial) = d.size
+@distr_support Binomial 0 d.size
+
 
 @_jl_dist_2p Binomial binom
 
@@ -74,17 +74,6 @@ end
 
 modes(d::Binomial) = iround([d.size * d.prob])
 
-### handling support
-
-isupperbounded(d::Union(Binomial, Type{Binomial})) = true
-islowerbounded(d::Union(Binomial, Type{Binomial})) = true
-isbounded(d::Union(Binomial, Type{Binomial})) = true
-
-minimum(d::Union(Binomial, Type{Binomial})) = 0
-maximum(d::Binomial) = d.size
-support(d::Binomial) = 0:d.size
-
-insupport(d::Binomial, x::Real) = isinteger(x) && 0 <= x <= d.size
 
 ## Fit model
 

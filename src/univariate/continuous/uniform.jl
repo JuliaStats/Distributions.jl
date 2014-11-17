@@ -9,15 +9,7 @@ immutable Uniform <: ContinuousUnivariateDistribution
 end
 
 ## Support
-insupport(d::Uniform, x::Real) = d.a <= x <= d.b
-
-isupperbounded(::Union(Uniform, Type{Uniform})) = true
-islowerbounded(::Union(Uniform, Type{Uniform})) = true
-isbounded(::Union(Uniform, Type{Uniform})) = true
-
-minimum(d::Uniform) = d.a
-maximum(d::Uniform) = d.b
-insupport(d::Uniform, x::Real) = d.a <= x <= d.b
+@distr_support Uniform d.a d.b
 
 ## Properties
 mean(d::Uniform) = (d.a + d.b) / 2.0

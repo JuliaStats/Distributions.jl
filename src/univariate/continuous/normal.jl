@@ -14,7 +14,7 @@ end
 typealias Gaussian Normal
 
 ## Support
-@continuous_distr_support Normal -Inf Inf
+@distr_support Normal -Inf Inf
 
 ## Properties
 mean(d::Normal) = d.μ

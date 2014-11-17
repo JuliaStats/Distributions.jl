@@ -13,7 +13,7 @@ immutable Rayleigh <: ContinuousUnivariateDistribution
     Rayleigh() = new(1.0)
 end
 
-@continuous_distr_support Rayleigh 0.0 Inf
+@distr_support Rayleigh 0.0 Inf
 
 cdf(d::Rayleigh, x::Real) = 1.0 - exp(-x^2 / (2.0 * d.scale^2))
 

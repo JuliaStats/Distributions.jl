@@ -15,18 +15,7 @@ end
 
 Bernoulli() = Bernoulli(0.5)
 
-
-#### Suppport
-
-isupperbounded(::Union(Bernoulli, Type{Bernoulli})) = true
-islowerbounded(::Union(Bernoulli, Type{Bernoulli})) = true
-isbounded(::Union(Bernoulli, Type{Bernoulli})) = true
-
-minimum(::Union(Bernoulli, Type{Bernoulli})) = 0
-maximum(::Union(Bernoulli, Type{Bernoulli})) = 1
-support(::Union(Bernoulli, Type{Bernoulli})) = 0:1
-
-insupport(::Union(Bernoulli, Type{Bernoulli}), x::Real) = (x == 0 || x == 1)
+@distr_support Bernoulli 0 1 
 
 
 #### Properties

@@ -8,7 +8,7 @@ end
 
 @_jl_dist_1p Chisq chisq
 
-@continuous_distr_support Chisq 0.0 Inf
+@distr_support Chisq 0.0 Inf
 
 function entropy(d::Chisq)
     x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)

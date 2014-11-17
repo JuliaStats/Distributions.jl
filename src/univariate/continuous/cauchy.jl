@@ -11,7 +11,7 @@ Cauchy(l::Real) = Cauchy(l, 1.0)
 Cauchy() = Cauchy(0.0, 1.0)
 
 ## Support
-@continuous_distr_support Cauchy -Inf Inf
+@distr_support Cauchy -Inf Inf
 
 ## Properties
 mean(d::Cauchy) = NaN

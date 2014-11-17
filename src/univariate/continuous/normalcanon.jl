@@ -22,7 +22,7 @@ canonform(d::Normal) = convert(NormalCanon, d)
 
 ## Basic properties
 
-@continuous_distr_support NormalCanon -Inf Inf
+@distr_support NormalCanon -Inf Inf
 
 mean(cf::NormalCanon) = cf.μ
 median(cf::NormalCanon) = mean(cf)

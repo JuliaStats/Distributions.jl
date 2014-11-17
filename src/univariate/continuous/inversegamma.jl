@@ -9,7 +9,7 @@ immutable InverseGamma <: ContinuousUnivariateDistribution
     end
 end
 
-@continuous_distr_support InverseGamma 0.0 Inf
+@distr_support InverseGamma 0.0 Inf
 
 _inv(d::InverseGamma) = Gamma(d.shape, 1.0 / d.scale)
 

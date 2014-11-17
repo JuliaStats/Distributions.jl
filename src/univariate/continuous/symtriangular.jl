@@ -11,14 +11,7 @@ end
 SymTriangularDist(location::Real) = SymTriangularDist(location, 1.0)
 SymTriangularDist() = SymTriangularDist(0.0, 1.0)
 
-## Support
-isupperbounded(::Union(SymTriangularDist, Type{SymTriangularDist})) = true
-islowerbounded(::Union(SymTriangularDist, Type{SymTriangularDist})) = true
-isbounded(::Union(SymTriangularDist, Type{SymTriangularDist})) = true
-
-minimum(d::SymTriangularDist) = d.location - d.scale
-maximum(d::SymTriangularDist) = d.location + d.scale
-insupport(d::SymTriangularDist, x::Real) = minimum(d) <= x <= maximum(d)
+@distr_support SymTriangularDist d.location - d.scale d.location + d.scale
 
 ## Properties
 mean(d::SymTriangularDist) = d.location

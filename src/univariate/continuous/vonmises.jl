@@ -21,11 +21,7 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 ### Properties
 
-minimum(d::VonMises) = d.μ - π
-maximum(d::VonMises) = d.μ + π
-islowerbounded(d::VonMises) = true
-isupperbounded(d::VonMises) = true
-insupport(d::VonMises, x::Real) = -π <= (x - d.μ) <= π
+@distr_support VonMises d.μ - π d.μ + π
 
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ

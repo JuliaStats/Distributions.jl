@@ -10,7 +10,7 @@ end
 
 @_jl_dist_2p FDist f
 
-@continuous_distr_support FDist 0.0 Inf
+@distr_support FDist 0.0 Inf
 
 mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 

@@ -5,7 +5,7 @@
 immutable Kolmogorov <: ContinuousUnivariateDistribution
 end
 
-@continuous_distr_support Kolmogorov 0.0 Inf
+@distr_support Kolmogorov 0.0 Inf
 
 mean(d::Kolmogorov) = 0.5*sqrt2π*log(2.0)
 var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2

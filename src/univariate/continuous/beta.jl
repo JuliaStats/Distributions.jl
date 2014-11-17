@@ -12,6 +12,8 @@ Beta() = Beta(1.0) # uniform
 
 @_jl_dist_2p Beta beta
 
+@distr_support Beta 0.0 1.0
+
 function entropy(d::Beta)
     o = lbeta(d.alpha, d.beta)
     o -= (d.alpha - 1.0) * digamma(d.alpha)
@@ -86,10 +88,6 @@ end
 function gradlogpdf(d::Beta, x::Real)
   insupport(Beta, x) ? (d.alpha - 1.0) / x - (d.beta - 1.0) / (1 - x) : 0.0
 end
-
-### handling support
-
-@continuous_distr_support Beta 0.0 1.0
 
 ## Fit model
 

@@ -18,7 +18,7 @@ immutable Erlang <: ContinuousUnivariateDistribution
     Erlang() = Erlang(1, 1.0)
 end
 
-@continuous_distr_support Erlang 0.0 Inf
+@distr_support Erlang 0.0 Inf
 
 cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
 

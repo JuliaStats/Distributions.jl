@@ -1,21 +1,19 @@
-##### generic methods (fallback) #####
+#### Domain && Support
 
-## sampling
+immutable RealInterval
+    lb::Float64
+    ub::Float64
 
-rand(d::UnivariateDistribution) = quantile(d, rand())
+    RealInterval(lb::Real, ub::Real) = new(float64(lb), float64(ub))
+end
 
-rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
-
-## domain
+minimum(r::RealInterval) = r.lb
+maximum(r::RealInterval) = r.ub
+in(x::Real, r::RealInterval) = (r.lb <= float64(x) <= r.ub)
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
-
-insupport(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) && (minimum(d) <= x <= maximum(d))
-insupport(d::ContinuousUnivariateDistribution, x::Real) = minimum(d) <= x <= maximum(d)
 
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
     length(r) == length(X) ||
@@ -28,6 +26,75 @@ end
 
 insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = 
      insupport!(BitArray(size(X)), d, X)
+
+## macros to declare support
+
+macro distr_support(D, lb, ub)
+    Dty = eval(D)
+    @assert Dty <: UnivariateDistribution
+
+    # determine whether is it upper & lower bounded
+    D_is_lbounded = !(lb == :(-Inf))
+    D_is_ubounded = !(ub == :Inf)
+    D_is_bounded = D_is_lbounded && D_is_ubounded
+
+    D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
+                           (isa(lb, Number) || lb == :(-Inf))
+
+    paramdecl = D_has_constantbounds ? :(::Union($D, Type{$D})) : :(d::$D)
+
+    insuppcomp = (D_is_lbounded && D_is_ubounded)  ? :(($lb) <= x <= $(ub)) :
+                 (D_is_lbounded && !D_is_ubounded) ? :(x >= $(lb)) :
+                 (!D_is_lbounded && D_is_ubounded) ? :(x <= $(ub)) : :true
+
+    support_funs = 
+
+    support_funs = if Dty <: DiscreteUnivariateDistribution
+        if D_is_bounded
+            quote
+                support($(paramdecl)) = int($lb):int($ub)
+            end
+        end
+    else
+        quote
+            support($(paramdecl)) = RealInterval($lb, $ub)
+        end
+    end
+
+    insupport_funs = if Dty <: DiscreteUnivariateDistribution
+        quote 
+            insupport($(paramdecl), x::Real) = isinteger(x) && ($insuppcomp)
+            insupport($(paramdecl), x::Integer) = $insuppcomp
+        end
+    else
+        @assert Dty <: ContinuousUnivariateDistribution
+        quote
+            insupport($(paramdecl), x::Real) = $insuppcomp
+        end
+    end
+
+    # overall
+    esc(quote
+        islowerbounded(::Union($D, Type{$D})) = $(D_is_lbounded)
+        isupperbounded(::Union($D, Type{$D})) = $(D_is_ubounded)
+        isbounded(::Union($D, Type{$D})) = $(D_is_bounded)
+        minimum(d::$D) = $lb
+        maximum(d::$D) = $ub
+        $(support_funs)
+        $(insupport_funs)
+    end)
+end
+
+
+##### generic methods (fallback) #####
+
+## sampling
+
+rand(d::UnivariateDistribution) = quantile(d, rand())
+
+rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
 
 ## statistics
 

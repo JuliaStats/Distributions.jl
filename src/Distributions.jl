@@ -130,6 +130,9 @@ export
     ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon,
 
+    # auxiliary types
+    RealInterval,
+
     # methods
     binaryentropy,      # entropy of distribution in bits
     canonform,          # get canonical form of a distribution
@@ -206,6 +209,7 @@ export
     skewness,           # skewness of the distribution
     std,                # standard deviation of distribution
     suffstats,          # compute sufficient statistics
+    support,            # the support of a distribution (or a distribution type)
     test_samples,       # test a sampler
     test_distr,         # test a distribution
     var,                # variance of distribution

@@ -11,7 +11,7 @@ end
 
 @_jl_dist_3p NoncentralF nf
 
-@continuous_distr_support NoncentralF 0.0 Inf
+@distr_support NoncentralF 0.0 Inf
 
 mean(d::NoncentralF) = d.ddf > 2.0 ? d.ddf / (d.ddf - 2.0) * (d.ndf + d.ncp) / d.ndf : NaN
 

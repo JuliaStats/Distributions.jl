@@ -8,7 +8,7 @@ end
 
 @_jl_dist_1p TDist t
 
-@continuous_distr_support TDist -Inf Inf
+@distr_support TDist -Inf Inf
 
 function entropy(d::TDist)
     hdf = 0.5*d.df
