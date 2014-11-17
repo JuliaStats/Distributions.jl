@@ -12,23 +12,13 @@ immutable Categorical <: DiscreteUnivariateDistribution
     Categorical(k::Int) = new(k, fill(1.0/k, k))
 end
 
+@with_bounded_support Categorical 1 d.K
+
+
 ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.prob
 probs(d::Categorical, rgn::UnitRange) = d.prob[rgn]
 
-### handling support
-
-function insupport(d::Categorical, x::Real)
-    isinteger(x) && one(x) <= x <= d.K && d.prob[x] != 0.0
-end
-
-isupperbounded(::Union(Categorical, Type{Categorical})) = true
-islowerbounded(::Union(Categorical, Type{Categorical})) = true
-isbounded(::Union(Categorical, Type{Categorical})) = true
-
-minimum(::Union(Categorical, Type{Categorical})) = 1
-maximum(d::Categorical) = d.K
-support(d::Categorical) = 1:d.K
 
 # evaluation
 

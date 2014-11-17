@@ -8,13 +8,7 @@ function insupport(d::NoncentralHypergeometric, x::Real)
     isinteger(x) && minimum(d) <= x <= maximum(d)
 end
 
-isupperbounded(::Union(NoncentralHypergeometric, Type{NoncentralHypergeometric})) = true
-islowerbounded(::Union(NoncentralHypergeometric, Type{NoncentralHypergeometric})) = true
-isbounded(::Union(NoncentralHypergeometric, Type{NoncentralHypergeometric})) = true
-
-minimum(d::NoncentralHypergeometric) = max(0, d.n-d.nf)
-maximum(d::NoncentralHypergeometric) = min(d.n, d.ns)
-support(d::NoncentralHypergeometric) = minimum(d):maximum(d)
+@with_bounded_support NoncentralHypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 # Functions
 

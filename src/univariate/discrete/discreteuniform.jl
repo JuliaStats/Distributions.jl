@@ -11,6 +11,9 @@ end
 DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
 DiscreteUniform() = DiscreteUniform(0, 1)
 
+@with_bounded_support DiscreteUniform d.a d.b
+
+
 pdf(d::DiscreteUniform) = (n = d.b - d.a + 1; fill(1.0 / n, n))
 
 function cdf(d::DiscreteUniform, k::Real)
@@ -80,18 +83,6 @@ rand(d::DiscreteUniform) = randi(d.a, d.b)
 skewness(d::DiscreteUniform) = 0.0
 
 var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
-
-### handling support
-
-isupperbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
-islowerbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
-isbounded(::Union(DiscreteUniform, Type{DiscreteUniform})) = true
-
-minimum(d::DiscreteUniform) = d.a
-maximum(d::DiscreteUniform) = d.b
-support(d::DiscreteUniform) = d.a:d.b
-
-insupport(d::DiscreteUniform, x::Real) = isinteger(x) && d.a <= x <= d.b
 
 # Fit model
 

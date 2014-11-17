@@ -1,21 +1,27 @@
-##### generic methods (fallback) #####
+#### Domain && Support
 
-## sampling
+immutable RealInterval
+    lb::Float64
+    ub::Float64
 
-rand(d::UnivariateDistribution) = quantile(d, rand())
+    RealInterval(lb::Real, ub::Real) = new(float64(lb), float64(ub))
+end
 
-rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
+minimum(r::RealInterval) = r.lb
+maximum(r::RealInterval) = r.ub
 
-## domain
+in(x::Real, r::RealInterval) = (r.lb <= float64(x) <= r.ub)
+
+make_support{D<:DiscreteUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = int(lb):int(ub)
+make_support{D<:ContinuousUnivariateDistribution}(::Type{D}, lb::Real, ub::Real) = RealInterval(lb, ub)
+ 
+in_value_domain{D<:DiscreteUnivariateDistribution}(::Type{D}, x::Integer) = true
+in_value_domain{D<:DiscreteUnivariateDistribution}(::Type{D}, x::Real) = isinteger(x)
+in_value_domain{D<:ContinuousUnivariateDistribution}(::Type{D}, x::Real) = true
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
-
-insupport(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) && (minimum(d) <= x <= maximum(d))
-insupport(d::ContinuousUnivariateDistribution, x::Real) = minimum(d) <= x <= maximum(d)
 
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
     length(r) == length(X) ||
@@ -28,6 +34,100 @@ end
 
 insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = 
      insupport!(BitArray(size(X)), d, X)
+
+## macros to declare support
+
+macro with_bounded_support(D, lb, ub)
+    common = quote
+        islowerbounded(::Union($D, Type{$D})) = true
+        isupperbounded(::Union($D, Type{$D})) = true
+        isbounded(::Union($D, Type{$D})) = true
+        minimum(d::$D) = $(lb)
+        maximum(d::$D) = $(ub)
+    end
+
+    if isa(lb, Number) && isa(ub, Number)
+        esc(quote
+            $(common)    
+            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && ($lb <= x <= $ub)
+            support(::Union($D, Type{$D})) = make_support($D, $lb, $ub)
+        end)
+    else
+        esc(quote
+            $(common)
+            insupport(d::$D, x::Real) = in_value_domain($D, x) && (($lb) <= x <= ($ub))
+            support(d::$D) = make_support($D, $lb, $ub)
+        end)
+    end
+end
+
+macro with_lowerbounded_support(D, lb)
+    # this macro assumes that the support is not upper-bounded
+    common = quote
+        islowerbounded(::Union($D, Type{$D})) = true
+        isupperbounded(::Union($D, Type{$D})) = false
+        isbounded(::Union($D, Type{$D})) = false
+        minimum(d::$D) = $(lb)
+        maximum(d::$D) = Inf
+    end
+
+    if isa(lb, Number)
+        esc(quote
+            $(common)
+            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && (x >= $lb)
+        end)
+    else
+        esc(quote
+            $(common)
+            insupport(d::$D, x::Real) = in_value_domain($D, x) && (x >= ($lb))
+        end)
+    end
+end
+
+macro with_uppperbounded_support(D, ub)
+    # this macro assumes that the support is not lower-bounded
+    common = quote
+        islowerbounded(::Union($D, Type{$D})) = false
+        isupperbounded(::Union($D, Type{$D})) = true
+        isbounded(::Union($D, Type{$D})) = false
+        minimum(d::$D) = -Inf
+        maximum(d::$D) = $(ub)
+    end
+
+    if isa(ub, Number)
+        esc(quote
+            $(common)
+            insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x) && (x <= $ub)
+        end)
+    else
+        esc(quote
+            $(common)
+            insupport(d::$D, x::Real) = in_value_domain($D, x) && (x <= ($ub))
+        end)
+    end
+end
+
+macro with_unbounded_support(D)
+    quote
+        islowerbounded(::Union($D, Type{$D})) = false
+        isupperbounded(::Union($D, Type{$D})) = false
+        isbounded(::Union($D, Type{$D})) = false
+        minimum(d::$D) = -Inf
+        maximum(d::$D) = Inf
+        insupport(::Union($D, Type{$D}), x::Real) = in_value_domain($D, x)
+    end
+end
+
+
+##### generic methods (fallback) #####
+
+## sampling
+
+rand(d::UnivariateDistribution) = quantile(d, rand())
+
+rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
 
 ## statistics
 

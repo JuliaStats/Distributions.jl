@@ -8,16 +8,7 @@ end
 
 Geometric() = Geometric(0.5) # Flips of a fair coin
 
-## Support
-insupport(::Geometric, x::Real) = isinteger(x) && x >= zero(x)
-insupport(::Type{Geometric}, x::Real) = isinteger(x) && x >= zero(x)
-
-isupperbounded(d::Union(Geometric, Type{Geometric})) = false
-islowerbounded(d::Union(Geometric, Type{Geometric})) = true
-isbounded(d::Union(Geometric, Type{Geometric})) = false
-
-minimum(d::Union(Geometric, Type{Geometric})) = 0
-maximum(d::Geometric) = Inf
+@with_lowerbounded_support Geometric 0
 
 ## Properties
 mean(d::Geometric) = (1.0 - d.prob) / d.prob

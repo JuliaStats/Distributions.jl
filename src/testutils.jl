@@ -253,11 +253,17 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     @test all(insupport(d, vs))
 
     if islowerbounded(d)
+        @test isfinite(minimum(d))
+        @test insupport(d, minimum(d))
         @test !insupport(d, minimum(d)-1)
     end
     if isupperbounded(d)
+        @test isfinite(maximum(d))
+        @test insupport(d, maximum(d))
         @test !insupport(d, maximum(d)+1)
     end
+
+    @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 end
 
 
