@@ -264,6 +264,15 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     end
 
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
+
+    if isbounded(d)
+        if isa(d, DiscreteUnivariateDistribution)
+            s = support(d)
+            @test isa(s, UnitRange)
+            @test first(s) == minimum(d)
+            @test last(s) == maximum(d)
+        end
+    end
 end
 
 
