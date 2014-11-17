@@ -17,7 +17,7 @@ rate(d::Gamma) = 1.0 / d.scale
 
 @_jl_dist_2p Gamma gamma
 
-@continuous_distr_support Gamma 0.0 Inf
+@distr_support Gamma 0.0 Inf
 
 function entropy(d::Gamma)
     x = (1.0 - d.shape) * digamma(d.shape)

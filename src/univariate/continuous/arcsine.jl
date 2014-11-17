@@ -3,7 +3,7 @@
 immutable Arcsine <: ContinuousUnivariateDistribution
 end
 
-@continuous_distr_support Arcsine 0.0 1.0
+@distr_support Arcsine 0.0 1.0
 
 function cdf(d::Arcsine, x::Real)
     x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : (2.0 / pi) * asin(sqrt(x)))

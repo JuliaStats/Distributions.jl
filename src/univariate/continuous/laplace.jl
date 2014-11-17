@@ -13,7 +13,7 @@ Laplace() = Laplace(0.0, 1.0)
 typealias Biexponential Laplace
 
 ## Support
-@continuous_distr_support Laplace -Inf Inf
+@distr_support Laplace -Inf Inf
 
 ## Properties
 mean(d::Laplace) = d.location

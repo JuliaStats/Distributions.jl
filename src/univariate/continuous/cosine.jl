@@ -4,7 +4,7 @@
 immutable Cosine <: ContinuousUnivariateDistribution
 end
 
-@continuous_distr_support Cosine 0.0 1.0
+@distr_support Cosine 0.0 1.0
 
 rand(d::Cosine) = asin(2.0 * rand() - 1.0)
 

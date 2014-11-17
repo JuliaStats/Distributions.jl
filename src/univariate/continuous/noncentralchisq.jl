@@ -21,5 +21,5 @@ cf(d::NoncentralChisq, t::Real) = exp(im * d.ncp * t/(1.0 - 2.0 * im * t))*(1.0 
 
 @_jl_dist_2p NoncentralChisq nchisq
 
-@continuous_distr_support NoncentralChisq 0.0 Inf
+@distr_support NoncentralChisq 0.0 Inf
 

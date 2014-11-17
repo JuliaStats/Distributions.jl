@@ -86,55 +86,6 @@ function exp!(x::AbstractArray)
     x
 end
 
-# macros for generating functions for support handling
-#
-# Both lb & ub should be compile-time constants
-# otherwise, one should manually specify the methods
-#
-
-macro continuous_distr_support(D, lb, ub)
-    if isfinite(eval(lb)) && isfinite(eval(ub))  # [lb, ub]
-        esc(quote
-            isupperbounded(::Union($D, Type{$D})) = true
-            islowerbounded(::Union($D, Type{$D})) = true
-            isbounded(::Union($D, Type{$D})) = true
-            minimum(::Union($D, Type{$D})) = $lb
-            maximum(::Union($D, Type{$D})) = $ub
-            insupport(::Union($D, Type{$D}), x::Real) = ($lb <= x <= $ub)
-        end)
-
-    elseif isfinite(eval(lb))  # [lb, inf)
-        esc(quote
-            isupperbounded(::Union($D, Type{$D})) = false
-            islowerbounded(::Union($D, Type{$D})) = true
-            isbounded(::Union($D, Type{$D})) = false
-            minimum(::Union($D, Type{$D})) = $lb
-            maximum(::Union($D, Type{$D})) = $ub
-            insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x >= $lb)
-        end)
-
-    elseif isfinite(eval(ub))  # (-inf, ub]
-        esc(quote
-            isupperbounded(::Union($D, Type{$D})) = true
-            islowerbounded(::Union($D, Type{$D})) = false
-            isbounded(::Union($D, Type{$D})) = false
-            minimum(::Union($D, Type{$D})) = $lb
-            maximum(::Union($D, Type{$D})) = $ub
-            insupport(::Union($D, Type{$D}), x::Real) = (isfinite(x) && x <= $ub)
-        end)
-
-    else   # (-inf, inf)
-        esc(quote
-            isupperbounded(::Union($D, Type{$D})) = false
-            islowerbounded(::Union($D, Type{$D})) = false
-            isbounded(::Union($D, Type{$D})) = false
-            minimum(::Union($D, Type{$D})) = $lb
-            maximum(::Union($D, Type{$D})) = $ub
-            insupport(::Union($D, Type{$D}), x::Real) = isfinite(x)
-        end)
-
-    end
-end
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required

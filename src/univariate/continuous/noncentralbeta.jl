@@ -11,7 +11,7 @@ end
 
 @_jl_dist_3p NoncentralBeta nbeta
 
-@continuous_distr_support NoncentralBeta 0.0 1.0
+@distr_support NoncentralBeta 0.0 1.0
 
 # TODO: add mean and var
 

@@ -9,7 +9,7 @@ end
 Exponential() = Exponential(1.0)
 
 ## Support
-@continuous_distr_support Exponential 0.0 Inf
+@distr_support Exponential 0.0 Inf
 
 ## Properties
 scale(d::Exponential) = d.scale

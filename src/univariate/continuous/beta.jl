@@ -89,7 +89,7 @@ end
 
 ### handling support
 
-@continuous_distr_support Beta 0.0 1.0
+@distr_support Beta 0.0 1.0
 
 ## Fit model
 

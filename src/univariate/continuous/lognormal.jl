@@ -11,7 +11,7 @@ LogNormal(ml::Real) = LogNormal(ml, 1.0)
 LogNormal() = LogNormal(0.0, 1.0)
 
 ## Support
-@continuous_distr_support LogNormal 0.0 Inf
+@distr_support LogNormal 0.0 Inf
 
 ## Properties
 mean(d::LogNormal) = exp(d.meanlog + d.sdlog^2 / 2)

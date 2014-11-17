@@ -9,7 +9,7 @@ end
 
 Gumbel() = Gumbel(0.0, 1.0)
 
-@continuous_distr_support Gumbel -Inf Inf
+@distr_support Gumbel -Inf Inf
 
 const DoubleExponential = Gumbel
 

@@ -6,7 +6,7 @@ immutable Chi <: ContinuousUnivariateDistribution
     end
 end
 
-@continuous_distr_support Chi 0.0 Inf
+@distr_support Chi 0.0 Inf
 
 cdf(d::Chi, x::Real) = cdf(Chisq(d.df),x^2)
 ccdf(d::Chi, x::Real) = ccdf(Chisq(d.df),x^2)

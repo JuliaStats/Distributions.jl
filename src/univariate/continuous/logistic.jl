@@ -10,7 +10,7 @@ immutable Logistic <: ContinuousUnivariateDistribution
 end
 
 ## Support
-@continuous_distr_support Logistic -Inf Inf
+@distr_support Logistic -Inf Inf
 
 ## Properties
 mean(d::Logistic) = d.location

@@ -15,7 +15,7 @@ end
 
 BetaPrime() = BetaPrime(1.0, 1.0)
 
-@continuous_distr_support BetaPrime 0.0 Inf
+@distr_support BetaPrime 0.0 Inf
 
 function mean(d::BetaPrime)
     d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
