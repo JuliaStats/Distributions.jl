@@ -18,12 +18,13 @@ end
 @distr_support Bernoulli 0 1 
 
 
-#### parameters
+#### Parameters
 
 succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1.0 - d.p
 
 params(d::Bernoulli) = (d.p,)
+
 
 #### Properties
 

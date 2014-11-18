@@ -201,6 +201,7 @@ export
     moment,             # moments of distribution
     nsamples,           # get the number of samples contained in an array
     ncategories,        # the number of categories in a Categorical distribution
+    ntrials,            # the number of trials being performed in the experiment
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities

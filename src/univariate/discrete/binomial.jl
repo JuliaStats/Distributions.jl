@@ -1,30 +1,60 @@
+
 immutable Binomial <: DiscreteUnivariateDistribution
-    size::Int
-    prob::Float64
-    function Binomial(n::Real, p::Real)
-        n >= zero(n) || error("size must be positive")
-        zero(p) <= p <= one(p) || error("prob must be in [0, 1]")
-        new(int(n), float64(p))
+    n::Int
+    p::Float64
+
+    function Binomial(n::Int, p::Float64)
+        n >= 0 || error("n must be non-negative.")
+        0.0 <= p <= 1.0 || error("p must be in [0, 1]")
+        new(n, p)
     end
+
+    Binomial(n::Integer, p::Real) = Binomial(int(n), float64(p))
+    Binomial(n::Integer) = Binomial(int(n), 0.5)
+    Binomial() = new(1, 0.5)
 end
 
-Binomial(size::Integer) = Binomial(size, 0.5)
-Binomial() = Binomial(1, 0.5)
-
-@distr_support Binomial 0 d.size
-
+@distr_support Binomial 0 d.n
 
 @_jl_dist_2p Binomial binom
 
-function entropy(d::Binomial; approx::Bool=false)
-    n = d.size
-    p1 = d.prob
 
+#### parameters
+
+ntrials(d::Binomial) = d.n
+succprob(d::Binomial) = d.p
+failprob(d::Binomial) = 1.0 - d.p
+
+params(d::Binomial) = (d.n, d.p)
+
+
+#### Properties
+
+mean(d::Binomial) = ntrials(d) * succprob(d)
+var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
+mode(d::Binomial) = ((n, p) = params(d); n > 0 ? iround((n + 1) * d.prob) : 0)
+modes(d::Binomial) = Int[mode(d)]
+
+median(d::Binomial) = iround(mean(d))
+
+function skewness(d::Binomial) 
+    n, p1 = params(d)
+    p0 = 1.0 - p1
+    (p0 - p1) / sqrt(n * p0 * p1)
+end
+
+function kurtosis(d::Binomial)
+    n, p = params(d)
+    u = p * (1.0 - p)
+    (1.0 - 6.0 * u) / (n * u) 
+end
+
+function entropy(d::Binomial; approx::Bool=false)
+    n, p1 = params(d)
     (p1 == 0.0 || p1 == 1.0 || n == 0) && return 0.0
     p0 = 1.0 - p1
-
     if approx 
-        return 0.5 * (log(2.0pi * n * p0 * p1) + 1.0) 
+        return 0.5 * (log(twoπ * n * p0 * p1) + 1.0) 
     else
         lg = log(p1 / p0)        
         lp = n * log(p0)
@@ -37,45 +67,31 @@ function entropy(d::Binomial; approx::Bool=false)
     end
 end
 
-kurtosis(d::Binomial) = (1.0 - 6.0 * d.prob * (1.0 - d.prob)) / var(d)
 
-mean(d::Binomial) = d.size * d.prob
-
-var(d::Binomial) = d.size * d.prob * (1.0 - d.prob)
-
-skewness(d::Binomial) = (1.0 - 2.0 * d.prob) / std(d)
-
-median(d::Binomial) = iround(d.size * d.prob)
-
-# TODO: May need to subtract 1 sometimes
-# two modes possible e.g. size odd, p = 0.5
-mode(d::Binomial) = d.size > 0 ? iround((d.size + 1.0) * d.prob) : 0
-
+#### Evaluation
 
 immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
     n::Int
     coef::Float64   # p / (1 - p)
 end
 
-RecursiveBinomProbEvaluator(d::Binomial) = (p = d.prob; RecursiveBinomProbEvaluator(d.size, p / (1.0 - p)))
+RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1.0 - d.p))
 nextpdf(s::RecursiveBinomProbEvaluator, p::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * p
 _pdf!(r::AbstractArray, d::Binomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveBinomProbEvaluator(d))
 
 
 function mgf(d::Binomial, t::Real)
-    p = d.prob
-    (1.0 - p + p * exp(t))^d.size
+    n, p = params(d)
+    (1.0 - p + p * exp(t)) ^ n
 end
 
 function cf(d::Binomial, t::Real)
-    p = d.prob
-    (1.0 - p + p * exp(im * t))^d.size
+    n, p = params(d)
+    (1.0 - p + p * exp(im * t)) ^ n
 end
 
-modes(d::Binomial) = iround([d.size * d.prob])
 
-
-## Fit model
+#### Fit model
 
 immutable BinomialStats <: SufficientStats
     ns::Float64   # the total number of successes

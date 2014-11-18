@@ -65,13 +65,9 @@ end
 
 n_tsamples = 10^6
 
-for rentry in R
-    println("    testing $(rentry.distr)")
-    verify(rentry)
-    test_distr(rentry.distr, n_tsamples)
-end
+pdtitle(d::DiscreteUnivariateDistribution) = println("    testing $d")
 
-# for Bernoulli
+### Bernoulli
 
 for (d, p) in [ (Bernoulli(), 0.5), 
                 (Bernoulli(0.25), 0.25), 
@@ -79,7 +75,7 @@ for (d, p) in [ (Bernoulli(), 0.5),
                 (Bernoulli(0.00), 0.00),
                 (Bernoulli(1.00), 1.00) ]
 
-    println("    testing $d")
+    pdtitle(d)
 
     @test isa(d, Bernoulli)
     @test succprob(d) == p
@@ -100,7 +96,36 @@ for (d, p) in [ (Bernoulli(), 0.5),
     test_distr(d, n_tsamples)
 end
 
-# for Categorical
+
+### Binomial
+
+for (d, n, p) in [ (Binomial(), 1, 0.5), 
+                   (Binomial(3), 3, 0.5),
+                   (Binomial(5, 0.4), 5, 0.4),
+                   (Binomial(6, 0.8), 6, 0.8),
+                   (Binomial(100, 0.1), 100, 0.1),
+                   (Binomial(100, 0.9), 100, 0.9),
+                   (Binomial(10, 0.0), 10, 0.0),
+                   (Binomial(10, 1.0), 10, 1.0) ]
+
+    pdtitle(d)
+
+    @test isa(d, Binomial)
+    @test succprob(d) == p
+    @test failprob(d) == 1.0 - p
+    @test minimum(d) == 0
+    @test maximum(d) == n
+    @test_approx_eq mean(d) n * p
+    @test_approx_eq var(d) n * p * (1.0 - p)
+
+    # TODO: current implementation has some problem when p = 1.0
+    if p < 1.0  
+        test_distr(d, n_tsamples)
+    end
+end
+
+
+### Categorical
 
 for distr in [
     Categorical([0.1, 0.9]),
@@ -114,7 +139,18 @@ for distr in [
         @test pdf(distr, i) == distr.prob[i]
     end
 
-    println("    testing $(distr)")
+    pdtitle(distr)
     test_distr(distr, n_tsamples)
 end
+
+
+### Others
+
+for rentry in R
+    pdtitle(rentry.distr)
+    verify(rentry)
+    test_distr(rentry.distr, n_tsamples)
+end
+
+
 

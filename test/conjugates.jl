@@ -80,8 +80,8 @@ p = posterior(pri, Binomial, (10, x))
 
 f = fit_map(pri, Binomial, (10, x))
 @test isa(f, Binomial)
-@test f.size == 10
-@test_approx_eq f.prob mode(p)
+@test ntrials(f) == 10
+@test_approx_eq succprob(f) mode(p)
 
 p = posterior(pri, Binomial, (10, x), w)
 @test isa(p, Beta)
@@ -90,8 +90,8 @@ p = posterior(pri, Binomial, (10, x), w)
 
 f = fit_map(pri, Binomial, (10, x), w)
 @test isa(f, Binomial)
-@test f.size == 10
-@test_approx_eq f.prob mode(p)
+@test ntrials(f) == 10
+@test_approx_eq succprob(f) mode(p)
 
 
 # Dirichlet - Categorical

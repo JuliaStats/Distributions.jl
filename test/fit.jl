@@ -80,18 +80,18 @@ ss = suffstats(Binomial, (100, x), w)
 
 d = fit(Binomial, (100, x))
 @test isa(d, Binomial)
-@test d.size == 100
-@test_approx_eq d.prob sum(x) / (n0 * 100)
+@test ntrials(d) == 100
+@test_approx_eq succprob(d) sum(x) / (n0 * 100)
 
 d = fit(Binomial, (100, x), w)
 @test isa(d, Binomial)
-@test d.size == 100
-@test_approx_eq d.prob dot(x, w) / (sum(w) * 100)
+@test ntrials(d) == 100
+@test_approx_eq succprob(d) dot(x, w) / (sum(w) * 100)
 
 d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 @test isa(d, Binomial)
-@test d.size == 100
-@test_approx_eq_eps d.prob 0.3 0.01
+@test ntrials(d) == 100
+@test_approx_eq_eps succprob(d) 0.3 0.01
 
 
 # Categorical
