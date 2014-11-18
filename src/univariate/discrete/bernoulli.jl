@@ -4,60 +4,82 @@
 #### Type and Constructor
 
 immutable Bernoulli <: DiscreteUnivariateDistribution
-    p0::Float64
-    p1::Float64
+    p::Float64
 
-    function Bernoulli(p::Real)
-        zero(p) <= p <= one(p) || error("prob must be in [0,1]")
-        new(1.0 - p, float64(p))
+    function Bernoulli(p::Float64)
+        0.0 <= p <= 1.0 || error("p must be in [0, 1].")
+        new(p)
     end
-end
 
-Bernoulli() = Bernoulli(0.5)
+    Bernoulli(p::Real) = Bernoulli(float64(p))
+    Bernoulli() = new(0.5)
+end
 
 @distr_support Bernoulli 0 1 
 
 
+#### parameters
+
+succprob(d::Bernoulli) = d.p
+failprob(d::Bernoulli) = 1.0 - d.p
+
+params(d::Bernoulli) = (d.p,)
+
 #### Properties
 
-mean(d::Bernoulli) = d.p1
-var(d::Bernoulli) = d.p0 * d.p1
-skewness(d::Bernoulli) = (d.p0 - d.p1) / sqrt(d.p0 * d.p1)
-kurtosis(d::Bernoulli) = 1.0 / (d.p0 * d.p1) - 6.0
+mean(d::Bernoulli) = succprob(d)
+var(d::Bernoulli) =  succprob(d) * failprob(d)
+skewness(d::Bernoulli) = (p0 = failprob(d); p1 = succprob(d); (p0 - p1) / sqrt(p0 * p1))
+kurtosis(d::Bernoulli) = 1.0 / var(d) - 6.0
 
 
-mode(d::Bernoulli) = ifelse(d.p1 > 0.5, 1, 0)
+mode(d::Bernoulli) = ifelse(succprob(d) > 0.5, 1, 0)
 
-modes(d::Bernoulli) = d.p1 < 0.5 ? [0] :
-                      d.p1 > 0.5 ? [1] : [0, 1]
+function modes(d::Bernoulli)
+    p = succprob(d)
+    p < 0.5 ? [0] :
+    p > 0.5 ? [1] : [0, 1]
+end
 
-median(d::Bernoulli) = ifelse(d.p1 > 0.5, 1.0, 0.0)
+function median(d::Bernoulli)
+    p = succprob(d)
+    p < 0.5 ? 0.0 :
+    p > 0.5 ? 1.0 : 0.5
+end
 
 function entropy(d::Bernoulli) 
-    p0 = d.p0
-    p1 = d.p1
-    p0 == 0. || p0 == 1. ? 0. : -(p0 * log(p0) + p1 * log(p1))
+    p0 = failprob(d)
+    p1 = succprob(d)
+    (p0 == 0.0 || p0 == 1.0) ? 0.0 : -(p0 * log(p0) + p1 * log(p1))
 end
+
 
 
 #### Evaluation
 
-pdf(d::Bernoulli, x::Real) = x == zero(x) ? d.p0 : x == one(x) ? d.p1 : 0.0
+pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
+pdf(d::Bernoulli, x::Real) = x == zero(x) ? failprob(d) : 
+                             x == one(x) ? succprob(d) : 0.0
 
-pdf(d::Bernoulli) = [d.p0, d.p1]
+pdf(d::Bernoulli) = Float64[failprob(d), succprob(d)]
 
-cdf(d::Bernoulli, q::Real) = q >= zero(q) ? (q >= one(q) ? 1.0 : d.p0) : 0.
+cdf(d::Bernoulli, x::Real) = x < zero(x) ? 0.0 :
+                             x < one(x) ? failprob(d) : 1.0
 
-quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= d.p0 ? 0 : 1) : NaN
+ccdf(d::Bernoulli, x::Real) = x < zero(x) ? 1.0 :
+                              x < one(x) ? succprob(d) : 0.0
 
-mgf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(t)
+quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= failprob(d) ? 0 : 1) : NaN
+cquantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p >= succprob(d) ? 0 : 1) : NaN
 
-cf(d::Bernoulli, t::Real) = d.p0 + d.p1 * exp(im * t)
+
+mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
+cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(im * t)
 
 
 #### Sampling
 
-rand(d::Bernoulli) = rand() > d.p1 ? 0 : 1
+rand(d::Bernoulli) = int(rand() <= succprob(d))
 
 
 #### MLE fitting
@@ -71,40 +93,38 @@ end
 
 fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
 
-function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T})
-    n0 = 0
-    n1 = 0
-    for xi in x
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T})
+    n = length(x)
+    c0 = c1 = 0
+    for i = 1:n
+        @inbounds xi = x[i]
         if xi == 0
-            n0 += 1
+            c0 += 1
         elseif xi == 1
-            n1 += 1
+            c1 += 1
         else
             throw(DomainError())
         end
     end
-    BernoulliStats(n0, n1)
+    BernoulliStats(c0, c1)
 end
 
-function suffstats{T<:Integer}(::Type{Bernoulli}, x::Array{T}, w::Array{Float64})
+function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
-    if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
-    end
-
-    n0 = 0.0
-    n1 = 0.0
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
+    c0 = c1 = 0.0
     for i = 1:n
-        xi = x[i]
+        @inbounds xi = x[i]
+        @inbounds wi = w[i]
         if xi == 0
-            n0 += w[i]
+            c0 += wi
         elseif xi == 1
-            n1 += w[i]
+            c1 += wi
         else
             throw(DomainError())
         end
     end
-    BernoulliStats(n0, n1)
+    BernoulliStats(c0, c1)
 end
 
 

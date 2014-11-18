@@ -71,7 +71,36 @@ for rentry in R
     test_distr(rentry.distr, n_tsamples)
 end
 
-# for Categorical (scipy.stats no counterpart)
+# for Bernoulli
+
+for (d, p) in [ (Bernoulli(), 0.5), 
+                (Bernoulli(0.25), 0.25), 
+                (Bernoulli(0.75), 0.75),
+                (Bernoulli(0.00), 0.00),
+                (Bernoulli(1.00), 1.00) ]
+
+    println("    testing $d")
+
+    @test isa(d, Bernoulli)
+    @test succprob(d) == p
+    @test failprob(d) == 1.0 - p
+    @test minimum(d) == 0
+    @test maximum(d) == 1
+    @test mode(d) == ifelse(p <= 0.5, 0, 1)
+    @test mean(d) == p
+    @test var(d) == p * (1.0 - p)
+    @test median(d) == (p < 0.5 ? 0 : p > 0.5 ? 1 : 0.5)
+
+    if 0.0 < p < 1.0
+        @test_approx_eq entropy(d) -(p * log(p) + (1-p) * log(1-p))
+    else
+        @test entropy(d) == 0.0
+    end
+
+    test_distr(d, n_tsamples)
+end
+
+# for Categorical
 
 for distr in [
     Categorical([0.1, 0.9]),

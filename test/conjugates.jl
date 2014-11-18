@@ -35,7 +35,7 @@ p = posterior(pri, Bernoulli, x)
 
 f = fit_map(pri, Bernoulli, x)
 @test isa(f, Bernoulli)
-@test_approx_eq f.p1 mode(p)
+@test_approx_eq succprob(f) mode(p)
 
 p = posterior(pri, Bernoulli, x, w)
 @test isa(p, Beta)
@@ -44,7 +44,7 @@ p = posterior(pri, Bernoulli, x, w)
 
 f = fit_map(pri, Bernoulli, x, w)
 @test isa(f, Bernoulli)
-@test_approx_eq f.p1 mode(p)
+@test_approx_eq succprob(f) mode(p)
 
 
 # posterior_rand & posterior_randmodel
@@ -63,11 +63,11 @@ pv = posterior_rand(pri, Bernoulli, x, w)
 
 pm = posterior_randmodel(pri, Bernoulli, x)
 @test isa(pm, Bernoulli)
-@test 0. <= pm.p1 <= 1.
+@test 0. <= succprob(pm) <= 1.
 
 pm = posterior_randmodel(pri, Bernoulli, x, w)
 @test isa(pm, Bernoulli)
-@test 0. <= pm.p1 <= 1.
+@test 0. <= succprob(pm) <= 1.
 
 
 # Beta - Binomial

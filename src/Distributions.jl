@@ -151,6 +151,7 @@ export
     concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
     entropy,            # entropy of distribution in nats
+    failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
     fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
@@ -209,6 +210,7 @@ export
     skewness,           # skewness of the distribution
     std,                # standard deviation of distribution
     suffstats,          # compute sufficient statistics
+    succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
     test_samples,       # test a sampler
     test_distr,         # test a distribution

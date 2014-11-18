@@ -1,6 +1,3 @@
-Bernoulli(0.5)
-Bernoulli(0.9)
-Bernoulli(0.1)
 Binomial(1, 0.5)
 Binomial(5, 0.4)
 Binomial(6, 0.8)

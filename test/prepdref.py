@@ -178,6 +178,8 @@ def do_main(title):
 
 	with open(filename + ".csv", "wt") as fout:
 
+		print >>fout, "distr, mean, var, entropy, x25, x50, x75, lp25, lp50, lp75"
+
 		for (ex, name, args) in lst:
 			d = to_scipy_dist(name, args)
 
