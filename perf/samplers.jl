@@ -87,15 +87,22 @@ benchmark_exponential() = (
 
 ## gamma
 
-import Distributions: GammaRmathSampler, GammaMTSampler
+import Distributions: GammaRmathSampler, GammaGDSampler, GammaGSSampler,
+    GammaMTSampler, GammaIPSampler
 
 getname(::Type{GammaRmathSampler}) = "rmath"
+getname(::Type{GammaGDSampler}) = "GD"
+getname(::Type{GammaGSSampler}) = "GS"
 getname(::Type{GammaMTSampler}) = "MT"
+getname(::Type{GammaIPSampler}) = "IP"
 
-benchmark_gamma() = (
-    make_procs(GammaRmathSampler, GammaMTSampler),
-    "(α, scale)", [(α, 1.0) for α in [0.5, 1.0, 2.0, 5.0, 20.0]])
+benchmark_gamma_hi() = (
+    make_procs(GammaRmathSampler, GammaMTSampler, GammaGDSampler),
+    "Dist", [(Gamma(α, 1.0),) for α in [1.5, 2.0, 3.0, 5.0, 20.0]])
 
+benchmark_gamma_lo() = (
+    make_procs(GammaRmathSampler, GammaGSSampler, GammaIPSampler),
+    "Dist", [(Gamma(α, 1.0),) for α in [0.1, 0.5, 0.9]])
 
 ### main
 
@@ -103,7 +110,7 @@ const dnames = ["categorical",
                 "binomial", 
                 "poisson",
                 "exponential",
-                "gamma"]
+                "gamma_hi","gamma_lo"]
 
 function printhelp()
     println("Require exactly one argument. Usage:")
@@ -141,10 +148,11 @@ function do_benchmark(dname; verbose::Int=2)
         dname == "binomial"    ? benchmark_binomial() :
         dname == "poisson"     ? benchmark_poisson() :
         dname == "exponential" ? benchmark_exponential() :
-        dname == "gamma"       ? benchmark_gamma() :
+        dname == "gamma_hi"    ? benchmark_gamma_hi() :
+        dname == "gamma_lo"    ? benchmark_gamma_lo() :
         error("benchmarking function for $dname has not been implemented.")
 
-    r = run(procs, cfgs; duration=0.2, verbose=verbose)
+    r = run(procs, cfgs; duration=0.5, verbose=verbose)
     println()
     show(r; unit=:mps, cfghead=cfghead)
 end

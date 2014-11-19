@@ -220,7 +220,7 @@ end
 function GammaIPSampler{S<:Sampleable}(d::Gamma,::Type{S})
     GammaIPSampler(Gamma(1.0+d.shape,d.scale), -1.0/d.shape)
 end
-GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaGDSampler)
+GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
 function rand(s::GammaIPSampler)
     x = rand(s.s)
@@ -231,7 +231,7 @@ end
 # function sampler(d::Gamma)
 #     if d.shape < 1.0
 #         # TODO: d.shape = 0.5 : use scaled chisq
-#         GammaIPSampler(d,GammaGDSampler)
+#         GammaIPSampler(d)
 #     elseif d.shape == 1.0
 #         Exponential(d.scale)
 #     else
