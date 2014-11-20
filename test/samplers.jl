@@ -13,7 +13,10 @@ import Distributions:
     PoissonADSampler, 
     PoissonCountSampler,
     ExponentialSampler,
-    GammaMTSampler
+    GammaGDSampler,
+    GammaGSSampler,
+    GammaMTSampler,
+    GammaIPSampler
 
 n_tsamples = 10^6
 
@@ -74,11 +77,19 @@ end
 
 
 ## Gamma samplers
-
-for S in [GammaMTSampler]
-    for pa in [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (0.5, 1.0), 
-               (1.0, 2.0), (3.0, 2.0), (0.5, 2.0)]
-        test_samples(S(pa...), Gamma(pa...), n_tsamples)
+# shape >= 1
+for S in [GammaGDSampler, GammaMTSampler]
+    println("    testing $S")
+    for d in [Gamma(1.0, 1.0), Gamma(2.0, 1.0), Gamma(3.0, 1.0),
+               Gamma(1.0, 2.0), Gamma(3.0, 2.0), Gamma(100.0, 2.0)]
+        test_samples(S(d), d, n_tsamples)
     end
 end
 
+# shape < 1
+for S in [GammaGSSampler, GammaIPSampler]
+    println("    testing $S")
+    for d in [Gamma(0.1,1.0),Gamma(0.9,1.0)]
+        test_samples(S(d), d, n_tsamples)
+    end
+end
