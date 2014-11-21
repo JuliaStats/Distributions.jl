@@ -39,8 +39,8 @@ def read_dentry_list(filename):
 
 
 def dsamples(d, rmin, rmax):
-	vmin = int(np.floor(d.ppf(0.01))) if rmin == "-inf" else rmin
-	vmax = int(np.ceil(d.ppf(0.99))) if rmax == "inf" else rmax
+	vmin = rmin if np.isfinite(rmin) else int(np.floor(d.ppf(0.01)))
+	vmax = rmax if np.isfinite(rmax) else int(np.ceil(d.ppf(0.99)))
 
 	if vmax - vmin + 1 <= 10:
 		xs = range(vmin, vmax+1)
@@ -94,7 +94,7 @@ def get_dinfo(dname, args):
 			a = b = get(a, 0) or 1.0
 		else:
 			a, b = args
-		return (betaprime(a, b), (0.0, "inf"), {})
+		return (betaprime(a, b), (0.0, inf), {})
 
 	elif dname == "Bernoulli":
 		assert len(args) <= 1
@@ -108,6 +108,22 @@ def get_dinfo(dname, args):
 		return (binom(n, p), (0, n), 
 			{"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
 
+	elif dname == "Cauchy":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (cauchy(l, s), (-inf, inf), {})
+
+	elif dname == "Chi":
+		assert len(args) == 1
+		df = args[0]
+		return (chi(df), (0, inf), {})
+
+	elif dname == "Chisq":
+		assert len(args) == 1
+		df = args[0]
+		return (chi2(df), (0, inf), {})
+
 	elif dname == "DiscreteUniform":
 		assert len(args) <= 2
 		if len(args) == 0:
@@ -118,10 +134,16 @@ def get_dinfo(dname, args):
 			a, b = int(args[0]), int(args[1])
 		return (randint(a, b+1), (a, b), {})
 
+	elif dname == "Erlang":
+		assert len(args) <= 2
+		a = get(args, 0) or 1
+		s = get(args, 1) or 1.0
+		return (erlang(a, scale=s), (0, inf), {})
+
 	elif dname == "Geometric":
 		assert len(args) <= 1
 		p = get(args, 0) or 0.5
-		return (geom(p), (0, "inf"), {})
+		return (geom(p), (0, inf), {})
 
 	elif dname == "Hypergeometric":
 		assert len(args) == 3
@@ -133,16 +155,19 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		r = int(get(args, 0) or 1)
 		p = get(args, 1) or 0.5
-		return (nbinom(r, p), (0, "inf"), {})
+		return (nbinom(r, p), (0, inf), {})
 
 	elif dname == "Poisson":
 		assert len(args) <= 1
 		lam = get(args, 0) or 1.0
-		return (poisson(lam), (0, "inf"), {})
+		return (poisson(lam), (0, inf), {})
 
 	else:
 		raise ValueError("Unrecognized distribution name: " + dname)
 
+
+def json_num(x):
+	return x if np.isfinite(x) else str(x)
 
 
 def make_json(ex, c, distr_name, args, d, mm, pdict):
@@ -158,10 +183,10 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 	r_min, r_max = mm
 	jdict = {"dtype" : distr_name,
 			"params" : pdict,
-			"minimum" : r_min,
-			"maximum" : r_max,
-			"mean" : d.mean(),
-			"var" : d.var(),
+			"minimum" : json_num(r_min),
+			"maximum" : json_num(r_max),
+			"mean" : json_num(d.mean()),
+			"var" : json_num(d.var()),
 			"entropy" : np.float64(d.entropy()),
 			"median" : d.median(), 
 			"q10" : d.ppf(0.10), 
@@ -172,7 +197,7 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 
 	if is_discrete:
 		if distr_name == "Geometric":
-			xs = dsamples(d, 1, "inf")
+			xs = dsamples(d, 1, inf)
 		else:
 			xs = dsamples(d, r_min, r_max)
 		pts = [{"x" : x, "logpdf" : d.logpmf(x), "cdf" : d.cdf(x)} for x in xs]
@@ -193,6 +218,10 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 
 		for pt in pts:
 			pt["x"] -= 1
+
+	elif distr_name == "Cauchy":
+		jdict["mean"] = "nan"
+		jdict["var"] = "nan"
 
 	# output
 	return [ex, jdict]

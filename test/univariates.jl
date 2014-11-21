@@ -36,15 +36,14 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify stats
-    r_min = dct["minimum"]
-    r_max = dct["maximum"]
-    r_min = r_min == "-inf" ? -Inf : r_min
-    r_max = r_max == "inf" ? Inf : r_max
+    r_min = float64(dct["minimum"])
+    r_max = float64(dct["maximum"])
+    @assert r_min < r_max
 
     @test_approx_eq minimum(d) r_min
     @test_approx_eq maximum(d) r_max
-    @test_approx_eq mean(d) dct["mean"]
-    @test_approx_eq var(d) dct["var"]
+    @test_approx_eq mean(d) float64(dct["mean"])
+    @test_approx_eq var(d) float64(dct["var"])
     @test_approx_eq_eps median(d) dct["median"] 1.0
 
     if applicable(entropy, d)
@@ -83,5 +82,6 @@ for c in ["discrete",
     println("----------------------------")
     jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json") 
     verify_and_test_drive(jsonfile, 10^6)
+    println()
 end
 

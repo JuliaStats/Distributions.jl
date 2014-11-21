@@ -14,7 +14,7 @@ immutable Erlang <: ContinuousUnivariateDistribution
         new(int(shape), float64(scale), Gamma(shape, scale))
     end
 
-    Erlang(scale::Real) = Erlang(scale, 1.0)
+    Erlang(shape::Real) = Erlang(shape, 1.0)
     Erlang() = Erlang(1, 1.0)
 end
 
