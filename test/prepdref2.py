@@ -140,16 +140,51 @@ def get_dinfo(dname, args):
 		s = get(args, 1) or 1.0
 		return (erlang(a, scale=s), (0, inf), {})
 
+	elif dname == "Exponential":
+		assert len(args) <= 1
+		s = get(args, 0) or 1.0
+		return (expon(scale=s), (0, inf), {})
+
+	elif dname == "Gamma":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (gamma(a, scale=s), (0, inf), {})
+
 	elif dname == "Geometric":
 		assert len(args) <= 1
 		p = get(args, 0) or 0.5
 		return (geom(p), (0, inf), {})
+
+	elif dname == "Gumbel":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (gumbel_r(l, s), (-inf, inf), {})
 
 	elif dname == "Hypergeometric":
 		assert len(args) == 3
 		ns, nf, n = [int(t) for t in args]
 		return (hypergeom(ns + nf, ns, n), 
 			(max(n - nf, 0), min(ns, n)), {})
+
+	elif dname == "InverseGamma":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (invgamma(a, scale=s), (0, inf), {})
+
+	elif dname == "Laplace":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (laplace(l, s), (-inf, inf), {})
+
+	elif dname == "Logistic":
+		assert len(args) == 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (logistic(l, s), (-inf, inf), {})
 
 	elif dname == "NegativeBinomial":
 		assert len(args) <= 2
