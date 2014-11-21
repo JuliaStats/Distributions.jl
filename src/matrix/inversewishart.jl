@@ -21,7 +21,7 @@ InverseWishart(df::Real, Ψ::Matrix{Float64}) = InverseWishart(df, PDMat(Ψ))
 
 InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 
-function _invwishart_c0(df::Float64, Ψ::AbstractPDMat)
+function _invwishart_c0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
     p = dim(Ψ)
     h_df * (p * logtwo - logdet(Ψ)) + lpgamma(p, h_df)
