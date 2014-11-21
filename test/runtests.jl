@@ -2,7 +2,7 @@ tests = [
     "types",
     "utils",
     "samplers",
-    "discrete", 
+    "univariates", 
     "continuous", 
     "fit", 
     "multinomial",
