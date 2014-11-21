@@ -55,7 +55,13 @@ def dsamples(d, rmin, rmax):
 	return xs
 
 
-def get_dinfo(distr_name, args):
+def get(a, i):
+	"""Retrieve the i-th element or return None"""
+
+	return a[i] if len(a) > i else None
+
+
+def get_dinfo(dname, args):
 	"""Make an python object that captures all relevant quantities
 
 		Returns a tuple in the form of (d, supp, xs, pdict), where:
@@ -66,20 +72,39 @@ def get_dinfo(distr_name, args):
 		- pdict: a dictionary of distribution parameters to check
 	"""
 
-	if distr_name == "Bernoulli":
-		assert len(args) <= 1
-		p = args[0] if len(args) == 1 else 0.5
-		d = bernoulli(p)
-		return (d, (0, 1), {"succprob" : p, "failprob": 1.0 - p})
+	if dname == "Arcsine":
+		assert len(args) == 0
+		return (arcsine(), (0.0, 1.0), {})
 
-	elif distr_name == "Binomial":
+	elif dname == "Beta":
 		assert len(args) <= 2
-		n = int(args[0]) if len(args) >= 1 else 1
-		p = args[1] if len(args) >= 2 else 0.5
-		d = binom(n, p)
-		return (d, (0, n), {"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
+		if len(args) <= 1:
+			a = b = get(args, 0) or 1.0
+		else:
+			a, b = args
+		return (beta(a, b), (0.0, 1.0), {})
 
-	elif distr_name == "DiscreteUniform":
+	elif dname == "BetaPrime":
+		assert len(args) <= 2
+		if len(args) <= 1:
+			a = b = get(a, 0) or 1.0
+		else:
+			a, b = args
+		return (betaprime(a, b), (0.0, "inf"), {})
+
+	elif dname == "Bernoulli":
+		assert len(args) <= 1
+		p = get(args, 0) or 0.5
+		return (bernoulli(p), (0, 1), {"succprob" : p, "failprob": 1.0 - p})
+
+	elif dname == "Binomial":
+		assert len(args) <= 2
+		n = int(get(args, 0) or 1)
+		p = get(args, 1) or 0.5
+		return (binom(n, p), (0, n), 
+			{"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
+
+	elif dname == "DiscreteUniform":
 		assert len(args) <= 2
 		if len(args) == 0:
 			a, b = 0, 1
@@ -87,38 +112,32 @@ def get_dinfo(distr_name, args):
 			a, b = 0, int(args[0])
 		else:
 			a, b = int(args[0]), int(args[1])
-		d = randint(a, b+1)
-		return (d, (a, b), {})
+		return (randint(a, b+1), (a, b), {})
 
-	elif distr_name == "Geometric":
+	elif dname == "Geometric":
 		assert len(args) <= 1
-		p = args[0] if len(args) == 1 else 0.5
-		d = geom(p)
-		return (d, (0, "inf"), {})
+		p = get(args, 0) or 0.5
+		return (geom(p), (0, "inf"), {})
 
-	elif distr_name == "Hypergeometric":
+	elif dname == "Hypergeometric":
 		assert len(args) == 3
-		ns = int(args[0])
-		nf = int(args[1])
-		n = int(args[2])
-		d = hypergeom(ns + nf, ns, n)
-		return (d, (max(n - nf, 0), min(ns, n)), {})
+		ns, nf, n = [int(t) for t in args]
+		return (hypergeom(ns + nf, ns, n), 
+			(max(n - nf, 0), min(ns, n)), {})
 
-	elif distr_name == "NegativeBinomial":
+	elif dname == "NegativeBinomial":
 		assert len(args) <= 2
-		r = int(args[0]) if len(args) >= 1 else 1
-		p = args[1] if len(args) >= 2 else 0.5
-		d = nbinom(r, p)
-		return (d, (0, "inf"), {})
+		r = int(get(args, 0) or 1)
+		p = get(args, 1) or 0.5
+		return (nbinom(r, p), (0, "inf"), {})
 
-	elif distr_name == "Poisson":
+	elif dname == "Poisson":
 		assert len(args) <= 1
-		lam = args[0] if len(args) == 1 else 1.0
-		d = poisson(lam)
-		return (d, (0, "inf"), {})
+		lam = get(args, 0) or 1.0
+		return (poisson(lam), (0, "inf"), {})
 
 	else:
-		raise ValueError("Unrecognized distribution name: " + distr_name)
+		raise ValueError("Unrecognized distribution name: " + dname)
 
 
 
