@@ -3,6 +3,7 @@
 import re
 import numpy as np
 from numpy import sqrt, nan, inf, ceil
+import scipy.stats
 from scipy.stats import *
 import json
 
@@ -192,10 +193,74 @@ def get_dinfo(dname, args):
 		p = get(args, 1) or 0.5
 		return (nbinom(r, p), (0, inf), {})
 
+	elif dname == "Normal":
+		assert len(args) == 2
+		mu = args[0]
+		sig = args[1]
+		return (norm(mu, sig), (-inf, inf), {})
+
+	elif dname == "NormalCanon":
+		assert len(args) == 2
+		h = args[0]
+		J = args[1]
+		return (norm(h/J, sqrt(1.0/J)), (-inf, inf), {})
+
+	elif dname == "Pareto":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (pareto(a, scale=s), (s, inf), {})
+
 	elif dname == "Poisson":
 		assert len(args) <= 1
 		lam = get(args, 0) or 1.0
 		return (poisson(lam), (0, inf), {})
+
+	elif dname == "Rayleigh":
+		assert len(args) <= 1
+		s = get(args, 0) or 1.0
+		return (rayleigh(scale=s), (0, inf), {})
+
+	elif dname == "SymTriangularDist":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s), {})
+
+	elif dname == "TDist":
+		assert len(args) == 1
+		df = args[0]
+		return (scipy.stats.t(df), (-inf, inf), {})
+
+	elif dname == "TruncatedNormal":
+		assert len(args) == 4
+		mu, sig, a, b = args
+		za = (a - mu) / sig
+		zb = (b - mu) / sig
+		za = max(za, -1000.0)
+		zb = min(zb, 1000.0)
+		return (truncnorm(za, zb, loc=mu, scale=sig), (a, b), {})
+
+	elif dname == "TriangularDist":
+		assert len(args) == 3
+		a, b, c = args
+		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b), {})
+
+	elif dname == "Uniform":
+		assert len(args) <= 2
+		if len(args) == 0:
+			a, b = 0.0, 1.0
+		elif len(args) == 1:
+			a, b = 0.0, args[0]
+		else:
+			a, b = args
+		return (uniform(a, b-a), (a, b), {})
+
+	elif dname == "Weibull":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (weibull_min(a, scale=s), (0, inf), {})
 
 	else:
 		raise ValueError("Unrecognized distribution name: " + dname)

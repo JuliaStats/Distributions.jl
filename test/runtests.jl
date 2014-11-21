@@ -3,7 +3,6 @@ tests = [
     "utils",
     "samplers",
     "univariates", 
-    "continuous", 
     "fit", 
     "multinomial",
     "dirichlet",

@@ -12,9 +12,13 @@ function verify_and_test_drive(jsonfile, n_tsamples::Int)
 
         # check type
         dtype = eval(symbol(dct["dtype"]))
-        @assert isa(dtype, Type) && dtype <: UnivariateDistribution
         d = eval(parse(ex))
-        @test isa(d, dtype)
+        if dtype == TruncatedNormal
+            @test isa(d, Truncated{Normal})
+        else
+            @assert isa(dtype, Type) && dtype <: UnivariateDistribution
+            @test isa(d, dtype)
+        end
 
         # verification and testing
         verify_and_test(d, dct, n_tsamples)
@@ -42,8 +46,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
 
     @test_approx_eq minimum(d) r_min
     @test_approx_eq maximum(d) r_max
-    @test_approx_eq mean(d) float64(dct["mean"])
-    @test_approx_eq var(d) float64(dct["var"])
+    @test_approx_eq_eps mean(d) float64(dct["mean"]) 1.0e-8
+    @test_approx_eq_eps var(d) float64(dct["var"]) 1.0e-8
     @test_approx_eq_eps median(d) dct["median"] 1.0
 
     if applicable(entropy, d)
@@ -51,11 +55,11 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify quantiles
-    @test_approx_eq quantile(d, 0.10) dct["q10"]
-    @test_approx_eq quantile(d, 0.25) dct["q25"]
-    @test_approx_eq quantile(d, 0.50) dct["q50"]
-    @test_approx_eq quantile(d, 0.75) dct["q75"]
-    @test_approx_eq quantile(d, 0.90) dct["q90"]
+    @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
+    @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
+    @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
+    @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
+    @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]

@@ -8,7 +8,7 @@ immutable Pareto <: ContinuousUnivariateDistribution
 end
 
 Pareto() = Pareto(1.0, 1.0)
-Pareto(scale::Real) = Pareto(scale, 1.0)
+Pareto(shape::Real) = Pareto(shape, 1.0)
 
 @distr_support Pareto d.scale Inf
 
