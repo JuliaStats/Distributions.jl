@@ -5,14 +5,14 @@ import JSON
 using Base.Test
 
 
-function verify_and_test_discretes(jsonfile, n_tsamples::Int)
+function verify_and_test_drive(jsonfile, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for (ex, dct) in R
         println("    testing $(ex)")
 
         # check type
         dtype = eval(symbol(dct["dtype"]))
-        @assert isa(dtype, Type) && dtype <: DiscreteUnivariateDistribution
+        @assert isa(dtype, Type) && dtype <: UnivariateDistribution
         d = eval(parse(ex))
         @test isa(d, dtype)
 
@@ -21,7 +21,12 @@ function verify_and_test_discretes(jsonfile, n_tsamples::Int)
     end
 end
 
-function verify_and_test(d::DiscreteUnivariateDistribution, dct::Dict, n_tsamples::Int)
+
+_parse_x(d::DiscreteUnivariateDistribution, x) = int(x)
+_parse_x(d::ContinuousUnivariateDistribution, x) = float64(x)
+
+
+function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify parameters
     pdct = dct["params"]
     for (fname, val) in pdct
@@ -56,7 +61,7 @@ function verify_and_test(d::DiscreteUnivariateDistribution, dct::Dict, n_tsample
     # verify logpdf and cdf at certain points
     pts = dct["points"]
     for pt in pts
-        x = int(pt["x"])
+        x = _parse_x(d, pt["x"])
         lp = float64(pt["logpdf"])
         cf = float64(pt["cdf"])
         Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
@@ -70,6 +75,13 @@ end
 
 ## main
 
-jsonfile = joinpath(dirname(@__FILE__), "discrete_test.json")
-verify_and_test_discretes(jsonfile, 10^6)
+for c in ["discrete", 
+          "continuous"]
+          
+    title = string(uppercase(c[1]), c[2:end])
+    println("$title")
+    println("----------------------------")
+    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json") 
+    verify_and_test_drive(jsonfile, 10^6)
+end
 

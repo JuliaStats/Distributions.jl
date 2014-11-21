@@ -55,6 +55,10 @@ def dsamples(d, rmin, rmax):
 	return xs
 
 
+def csamples(d):
+	return [d.ppf(q) for q in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]
+
+
 def get(a, i):
 	"""Retrieve the i-th element or return None"""
 
@@ -173,7 +177,7 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 			xs = dsamples(d, r_min, r_max)
 		pts = [{"x" : x, "logpdf" : d.logpmf(x), "cdf" : d.cdf(x)} for x in xs]
 	else:
-		xs = csamples(d, r_min, r_max)
+		xs = csamples(d)
 		pts = [{"x" : x, "logpdf" : d.logpdf(x), "cdf" : d.cdf(x)} for x in xs]
 
 	jdict["points"] = pts
@@ -216,6 +220,6 @@ def do_main(c):
 
 if __name__ == "__main__":
 	do_main("discrete")
-	# do_main("continuous")
+	do_main("continuous")
 
 
