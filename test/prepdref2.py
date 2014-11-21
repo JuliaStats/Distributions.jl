@@ -38,13 +38,21 @@ def read_dentry_list(filename):
 	return lst
 
 
-def dsamples(a, b):
-	nmax = 10
-	n = b - a + 1
-	if n < nmax:
-		return np.arange(a, b+1)
+def dsamples(d, rmin, rmax):
+	vmin = int(np.floor(d.ppf(0.01))) if rmin == "-inf" else rmin
+	vmax = int(np.ceil(d.ppf(0.99))) if rmax == "inf" else rmax
+
+	if vmax - vmin + 1 <= 10:
+		xs = range(vmin, vmax+1)
 	else:
-		return np.round(np.linspace(a, b, nmax)).astype(int)
+		xs = [int(np.round(d.ppf(q))) for q in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]
+		xs = list(np.unique(xs))
+		if vmin < xs[0]:
+			xs.insert(0, vmin)
+		if vmax > xs[-1]:
+			xs.append(vmax)
+
+	return xs
 
 
 def get_dinfo(distr_name, args):
@@ -55,7 +63,6 @@ def get_dinfo(distr_name, args):
 		- d: the scipy.stats distribution object
 		- supp: the support in the form of (minimum, maximum)
 		        Note that "inf" or "-inf" should be used for infinity values
-		- xs: a list of samples at which logpdf and cdf are to be tested
 		- pdict: a dictionary of distribution parameters to check
 	"""
 
@@ -63,70 +70,59 @@ def get_dinfo(distr_name, args):
 		assert len(args) <= 1
 		p = args[0] if len(args) == 1 else 0.5
 		d = bernoulli(p)
-		return (d, (0, 1), [0, 1], { 
-			"succprob" : p, 
-			"failprob": 1.0 - p})
+		return (d, (0, 1), {"succprob" : p, "failprob": 1.0 - p})
 
 	elif distr_name == "Binomial":
 		assert len(args) <= 2
-		n = args[0] if len(args) >= 1 else 1
+		n = int(args[0]) if len(args) >= 1 else 1
 		p = args[1] if len(args) >= 2 else 0.5
 		d = binom(n, p)
-
-		return (d, (0, n), dsamples(0, n), {
-			"succprob" : p,
-			"failprob" : 1.0 - p,
-			"ntrials" : n})
+		return (d, (0, n), {"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
 
 	elif distr_name == "DiscreteUniform":
 		assert len(args) <= 2
 		if len(args) == 0:
 			a, b = 0, 1
 		elif len(args) == 1:
-			a, b = 0, args[0]
+			a, b = 0, int(args[0])
 		else:
-			a, b = args
+			a, b = int(args[0]), int(args[1])
 		d = randint(a, b+1)
-
-		return (d, (a, b), dsamples(a, b), {})
+		return (d, (a, b), {})
 
 	elif distr_name == "Geometric":
 		assert len(args) <= 1
 		p = args[0] if len(args) == 1 else 0.5
 		d = geom(p)
-
-		n = int(np.ceil(d.ppf(0.99)))
-		return (d, (0, "inf"), dsamples(1, n), {})
+		return (d, (0, "inf"), {})
 
 	elif distr_name == "Hypergeometric":
 		assert len(args) == 3
-		ns, nf, n = args
+		ns = int(args[0])
+		nf = int(args[1])
+		n = int(args[2])
 		d = hypergeom(ns + nf, ns, n)
-		a = max(n - nf, 0)
-		b = min(ns, n)
-		return (d, (a, b), dsamples(a, b), {})
+		return (d, (max(n - nf, 0), min(ns, n)), {})
 
 	elif distr_name == "NegativeBinomial":
 		assert len(args) <= 2
-		r = args[0] if len(args) >= 1 else 1
+		r = int(args[0]) if len(args) >= 1 else 1
 		p = args[1] if len(args) >= 2 else 0.5
 		d = nbinom(r, p)
-		n = int(np.ceil(d.ppf(0.99)))
-		return (d, (0, "inf"), dsamples(0, n), {})
+		return (d, (0, "inf"), {})
 
 	elif distr_name == "Poisson":
 		assert len(args) <= 1
 		lam = args[0] if len(args) == 1 else 1.0
 		d = poisson(lam)
-		n = int(np.ceil(d.ppf(0.99)))
-		return (d, (0, "inf"), dsamples(0, n), {})
+		return (d, (0, "inf"), {})
 
 	else:
 		raise ValueError("Unrecognized distribution name: " + distr_name)
 
 
 
-def make_json(ex, c, distr_name, args, d, mm, xs, pdict):
+def make_json(ex, c, distr_name, args, d, mm, pdict):
 	"""Make a json object by collecting all information"""
 
 	if c == "discrete":
@@ -136,10 +132,11 @@ def make_json(ex, c, distr_name, args, d, mm, xs, pdict):
 	else:
 		raise ValueError("Invalid value of the c-argument.")
 
+	r_min, r_max = mm
 	jdict = {"dtype" : distr_name,
 			"params" : pdict,
-			"minimum" : mm[0],
-			"maximum" : mm[1],
+			"minimum" : r_min,
+			"maximum" : r_max,
 			"mean" : d.mean(),
 			"var" : d.var(),
 			"entropy" : np.float64(d.entropy()),
@@ -151,8 +148,13 @@ def make_json(ex, c, distr_name, args, d, mm, xs, pdict):
 			"q90" : d.ppf(0.90)} 
 
 	if is_discrete:
+		if distr_name == "Geometric":
+			xs = dsamples(d, 1, "inf")
+		else:
+			xs = dsamples(d, r_min, r_max)
 		pts = [{"x" : x, "logpdf" : d.logpmf(x), "cdf" : d.cdf(x)} for x in xs]
 	else:
+		xs = csamples(d, r_min, r_max)
 		pts = [{"x" : x, "logpdf" : d.logpdf(x), "cdf" : d.cdf(x)} for x in xs]
 
 	jdict["points"] = pts
@@ -183,8 +185,8 @@ def do_main(c):
 	jall = []
 	for (ex, dname, args) in entries:
 		print ex, "..."
-		d, mm, xs, pdict = get_dinfo(dname, args)
-		je = make_json(ex, c, dname, args, d, mm, xs, pdict)
+		d, mm, pdict = get_dinfo(dname, args)
+		je = make_json(ex, c, dname, args, d, mm, pdict)
 
 		# add je to list
 		jall.append(je)
