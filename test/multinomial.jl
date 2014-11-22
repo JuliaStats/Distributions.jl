@@ -80,10 +80,10 @@ x = rand(d0, 10^5)
 r = fit(Multinomial, x)
 @test r.n == nt
 @test length(r) == length(p)
-@test_approx_eq_eps r.prob p 0.02
+@test_approx_eq_eps probs(r) p 0.02
 
 r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt
 @test length(r) == length(p)
-@test_approx_eq_eps r.prob p 0.02
+@test_approx_eq_eps probs(r) p 0.02
 

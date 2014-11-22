@@ -1,6 +1,6 @@
 immutable Multinomial <: DiscreteMultivariateDistribution
     n::Int
-    prob::Vector{Float64}
+    p::Vector{Float64}
 
     function Multinomial(n::Integer, p::Vector{Float64})
         if n <= 0
@@ -16,20 +16,26 @@ immutable Multinomial <: DiscreteMultivariateDistribution
     Multinomial(n::Integer, k::Integer) = new(int(n), fill(1.0 / k, k))
 end
 
-# Properties
+# Parameters
 
-length(d::Multinomial) = length(d.prob)
-probs(d::Multinomial) = d.prob
+ncategories(d::Multinomial) = length(d.p)
+length(d::Multinomial) = ncategories(d)
+probs(d::Multinomial) = d.p
+ntrials(d::Multinomial) = d.n
+
+params(d::Multinomial) = (d.n, d.p)
+
 
 # Statistics
 
-mean(d::Multinomial) = d.n .* d.prob
+mean(d::Multinomial) = d.n .* d.p
 
 function var(d::Multinomial) 
-    p = d.prob
+    p = probs(d)
     k = length(p)
+    n = ntrials(d)
+
     v = Array(Float64, k)
-    n = d.n
     for i = 1:k
         @inbounds pi = p[i]
         v[i] = n * pi * (1.0 - pi)
@@ -38,11 +44,11 @@ function var(d::Multinomial)
 end
 
 function cov(d::Multinomial)
-    p = d.prob
+    p = probs(d)
     k = length(p)
-    C = Array(Float64, k, k)
-    n = d.n
+    n = ntrials(d)
 
+    C = Array(Float64, k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
@@ -61,22 +67,20 @@ function cov(d::Multinomial)
 end
 
 function mgf(d::Multinomial, t::AbstractVector)
-    p = d.prob
-    n = d.n
-    k = length(p)
+    p = probs(d)
+    n = ntrials(p)
     s = 0.0
-    for i in 1:k
+    for i in 1:length(p)
         s += p[i] * exp(t[i])
     end
     return s^n
 end
 
 function cf(d::Multinomial, t::AbstractVector)
-    p = d.prob
-    n = d.n
-    k = length(p)
+    p = probs(d)
+    n = ntrials(d)
     s = 0.0 + 0.0im
-    for i in 1:k
+    for i in 1:length(p)
         s += p[i] * exp(im * t[i])
     end
     return s^n
@@ -86,26 +90,24 @@ end
 # Evaluation
 
 function insupport{T<:Real}(d::Multinomial, x::AbstractVector{T})
-    n = length(x)
-    if length(d.prob) != n
-        return false
-    end
+    k = length(d)
+    length(x) == k || return false
     s = 0.0
-    for i in 1:n
+    for i = 1:k
         @inbounds xi = x[i]
         if !(isinteger(xi) && xi >= 0)
             return false
         end
         s += xi
     end
-    return s == d.n  # integer computation would not yield truncation errors
+    return s == ntrials(d)  # integer computation would not yield truncation errors
 end
 
 function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
-    n = d.n
-    p = d.prob
+    p = probs(d)
+    n = ntrials(d)
     s = lgamma(n + 1.0)
-    t = zero(T)
+    t = 0
     for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds pi = p[i]
@@ -118,9 +120,9 @@ end
 
 # Sampling
 
-_rand!{T<:Real}(d::Multinomial, x::AbstractVector{T}) = multinom_rand!(d.n, d.prob, x)
+_rand!{T<:Real}(d::Multinomial, x::AbstractVector{T}) = multinom_rand!(ntrials(d), probs(d), x)
 
-sampler(d::Multinomial) = MultinomialSampler(d.n, d.prob)
+sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 
 
 ## Fit model
