@@ -17,6 +17,9 @@ end
 
 @distr_support Categorical 1 d.K
 
+
+### Parameters
+
 ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.p
 params(d::Categorical) = (d.p,)

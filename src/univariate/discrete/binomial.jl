@@ -19,7 +19,7 @@ end
 @_jl_dist_2p Binomial binom
 
 
-#### parameters
+#### Parameters
 
 ntrials(d::Binomial) = d.n
 succprob(d::Binomial) = d.p
