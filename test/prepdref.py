@@ -225,6 +225,14 @@ def get_dinfo(dname, args):
 		s = get(args, 0) or 1.0
 		return (rayleigh(scale=s), (0, inf), {})
 
+	elif dname == "Skellam":
+		assert len(args) <= 2
+		if len(args) <= 1:
+			u1 = u2 = get(args, 0) or 1.0
+		else:
+			u1, u2 = args
+		return (skellam(u1, u2), (-inf, inf), {})
+
 	elif dname == "SymTriangularDist":
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
