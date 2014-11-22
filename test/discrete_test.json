@@ -610,7 +610,10 @@
       "mean": 1.0, 
       "median": 0.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "failprob": 0.5, 
+        "succprob": 0.5
+      }, 
       "points": [
         {
           "cdf": 0.5, 
@@ -665,7 +668,10 @@
       "mean": 9.0, 
       "median": 6.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "failprob": 0.9, 
+        "succprob": 0.1
+      }, 
       "points": [
         {
           "cdf": 0.10000000000000001, 
@@ -735,7 +741,10 @@
       "mean": 1.0, 
       "median": 0.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "failprob": 0.5, 
+        "succprob": 0.5
+      }, 
       "points": [
         {
           "cdf": 0.5, 
@@ -790,7 +799,10 @@
       "mean": 0.11111111111111116, 
       "median": 0.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "failprob": 0.09999999999999998, 
+        "succprob": 0.9
+      }, 
       "points": [
         {
           "cdf": 0.90000000000000002, 

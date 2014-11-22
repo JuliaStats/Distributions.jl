@@ -157,7 +157,8 @@ def get_dinfo(dname, args):
 	elif dname == "Geometric":
 		assert len(args) <= 1
 		p = get(args, 0) or 0.5
-		return (geom(p), (0, inf), {})
+		return (geom(p), (0, inf), 
+			{"succprob" : p, "failprob" : 1.0 - p})
 
 	elif dname == "Gumbel":
 		assert len(args) <= 2

@@ -295,15 +295,15 @@ ss = suffstats(Geometric, x, w)
 
 d = fit(Geometric, x)
 @test isa(d, Geometric)
-@test_approx_eq d.prob inv(1. + mean(x))
+@test_approx_eq succprob(d) inv(1. + mean(x))
 
 d = fit(Geometric, x, w)
 @test isa(d, Geometric)
-@test_approx_eq d.prob inv(1. + dot(x, w) / sum(w))
+@test_approx_eq succprob(d) inv(1. + dot(x, w) / sum(w))
 
 d = fit(Geometric, rand(Geometric(0.3), N))
 @test isa(d, Geometric)
-@test_approx_eq_eps d.prob 0.3 0.01
+@test_approx_eq_eps succprob(d) 0.3 0.01
 
 
 # Laplace
