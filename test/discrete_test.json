@@ -1259,7 +1259,9 @@
       "mean": 1.0, 
       "median": 1.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "rate": 1.0
+      }, 
       "points": [
         {
           "cdf": 0.36787944117144233, 
@@ -1304,7 +1306,9 @@
       "mean": 0.5, 
       "median": 0.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "rate": 0.5
+      }, 
       "points": [
         {
           "cdf": 0.60653065971263342, 
@@ -1344,7 +1348,9 @@
       "mean": 2.0, 
       "median": 2.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "rate": 2.0
+      }, 
       "points": [
         {
           "cdf": 0.1353352832366127, 
@@ -1399,7 +1405,9 @@
       "mean": 10.0, 
       "median": 10.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "rate": 10.0
+      }, 
       "points": [
         {
           "cdf": 4.5399929762484861e-05, 
@@ -1474,7 +1482,9 @@
       "mean": 80.0, 
       "median": 80.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "rate": 80.0
+      }, 
       "points": [
         {
           "cdf": 1.8048513878454081e-35, 

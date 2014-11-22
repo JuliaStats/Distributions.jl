@@ -208,6 +208,7 @@ export
     probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
+    rate,               # get the rate parameter
     sampler,            # create a Sampler object for efficient samples
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)

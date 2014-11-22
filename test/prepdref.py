@@ -218,7 +218,7 @@ def get_dinfo(dname, args):
 	elif dname == "Poisson":
 		assert len(args) <= 1
 		lam = get(args, 0) or 1.0
-		return (poisson(lam), (0, inf), {})
+		return (poisson(lam), (0, inf), {"rate":lam})
 
 	elif dname == "Rayleigh":
 		assert len(args) <= 1

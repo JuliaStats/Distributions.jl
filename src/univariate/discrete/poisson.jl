@@ -1,9 +1,12 @@
 immutable Poisson <: DiscreteUnivariateDistribution
-    lambda::Float64
-    function Poisson(l::Real)
-    	l > zero(l) || error("lambda must be positive")
-        new(float64(l))
+    λ::Float64
+
+    function Poisson(λ::Float64)
+        λ > 0.0 || error("λ must be positive.")
+        new(λ)
     end
+
+    Poisson(λ::Real) = Poisson(float64(λ))
     Poisson() = new(1.0)
 end
 
@@ -11,25 +14,39 @@ end
 
 @distr_support Poisson 0 Inf
 
-mean(d::Poisson) = d.lambda
 
-median(d::Poisson) = quantile(d, 0.5)
+### Parameters
 
-mode(d::Poisson) = ifloor(d.lambda)
-modes(d::Poisson) = isinteger(d.lambda) ? [int(d.lambda)-1,int(d.lambda)] : [ifloor(d.lambda)]
+params(d::Poisson) = (d.λ,)
 
-var(d::Poisson) = d.lambda
+rate(d::Poisson) = d.λ
 
-skewness(d::Poisson) = 1.0 / sqrt(d.lambda)
 
-kurtosis(d::Poisson) = 1.0 / d.lambda
+### Statistics
+
+mean(d::Poisson) = d.λ
+
+mode(d::Poisson) = ifloor(d.λ)
+
+function modes(d::Poisson)
+    λ = d.λ
+    isinteger(λ) ? [int(λ)-1,int(λ)] : [ifloor(λ)]
+end
+
+var(d::Poisson) = d.λ
+
+skewness(d::Poisson) = 1.0 / sqrt(d.λ)
+
+kurtosis(d::Poisson) = 1.0 / d.λ
 
 function entropy(d::Poisson)
-    λ = d.lambda
+    λ = rate(d)
     if λ < 50.0
         s = 0.0
-        for k in 1:100
-            s += λ^k * lgamma(k + 1.0) / gamma(k + 1.0)
+        λk = 1.0
+        for k = 1:100
+            λk *= λ
+            s += λk * lgamma(k + 1.0) / gamma(k + 1.0)
         end
         return λ * (1.0 - log(λ)) + exp(-λ) * s
     else
@@ -40,26 +57,29 @@ function entropy(d::Poisson)
     end
 end
 
+
+### Evaluation
+
 immutable RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64
 end
 
-RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(d.lambda)
+RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(rate(d))
 nextpdf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
 _pdf!(r::AbstractArray, d::Poisson, rgn::UnitRange) = _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
 
-
 function mgf(d::Poisson, t::Real)
-    l = d.lambda
-    return exp(l * (exp(t) - 1.0))
+    λ = rate(d)
+    return exp(λ * (exp(t) - 1.0))
 end
 
 function cf(d::Poisson, t::Real)
-    l = d.lambda
-    return exp(l * (exp(im * t) - 1.0))
+    λ = rate(d)
+    return exp(λ * (exp(im * t) - 1.0))
 end
 
-# model fitting
+
+### Fitting
 
 immutable PoissonStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
