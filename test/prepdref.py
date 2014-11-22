@@ -1,11 +1,14 @@
 # A Python script to prepare reference values for distribution testing
 
 import re
-from numpy import sqrt, nan, inf
+import numpy as np
+from numpy import sqrt, nan, inf, ceil
+import scipy.stats
 from scipy.stats import *
+import json
 
-def parse_distr(s):
-	"""Parse a string into (distr_name, params)"""
+def parse_dentry(s):
+	"""Parse a string into (distr_name, args)"""
 
 	l = s.index("(")
 	r = s.index(")")
@@ -19,8 +22,8 @@ def parse_distr(s):
 	return name, args
 
 
-def read_distr_list(filename):
-	"""Read a list of Julia distributions from a text file"""
+def read_dentry_list(filename):
+	"""Read a list of Julia distribution entries from a text file"""
 
 	with open(filename) as f:
 		lines = f.readlines()
@@ -28,191 +31,322 @@ def read_distr_list(filename):
 	lst = []
 	for line in lines:
 		s = line.strip()
-		if s.startswith("#"):
+		if len(s) == 0 or s.startswith("#"):
 			continue
-		name, args = parse_distr(s)
+		name, args = parse_dentry(s)
 		lst.append((s, name, args))
 
 	return lst
 
 
-def to_scipy_dist(name, args):
-	"""Convert from Julia distribution to scipy.stats distribution"""
+def dsamples(d, rmin, rmax):
+	vmin = rmin if np.isfinite(rmin) else int(np.floor(d.ppf(0.01)))
+	vmax = rmax if np.isfinite(rmax) else int(np.ceil(d.ppf(0.99)))
 
-	if name == "Arcsine":
+	if vmax - vmin + 1 <= 10:
+		xs = range(vmin, vmax+1)
+	else:
+		xs = [int(np.round(d.ppf(q))) for q in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]
+		xs = list(np.unique(xs))
+		if vmin < xs[0]:
+			xs.insert(0, vmin)
+		if vmax > xs[-1]:
+			xs.append(vmax)
+
+	return xs
+
+
+def csamples(d):
+	return [d.ppf(q) for q in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]]
+
+
+def get(a, i):
+	"""Retrieve the i-th element or return None"""
+
+	return a[i] if len(a) > i else None
+
+
+def get_dinfo(dname, args):
+	"""Make an python object that captures all relevant quantities
+
+		Returns a tuple in the form of (d, supp, xs, pdict), where:
+
+		- d: the scipy.stats distribution object
+		- supp: the support in the form of (minimum, maximum)
+		        Note that "inf" or "-inf" should be used for infinity values
+		- pdict: a dictionary of distribution parameters to check
+	"""
+
+	if dname == "Arcsine":
 		assert len(args) == 0
-		return arcsine()
+		return (arcsine(), (0.0, 1.0), {})
 
-	elif name == "Bernoulli":
+	elif dname == "Beta":
+		assert len(args) <= 2
+		if len(args) <= 1:
+			a = b = get(args, 0) or 1.0
+		else:
+			a, b = args
+		return (beta(a, b), (0.0, 1.0), {})
+
+	elif dname == "BetaPrime":
+		assert len(args) <= 2
+		if len(args) <= 1:
+			a = b = get(a, 0) or 1.0
+		else:
+			a, b = args
+		return (betaprime(a, b), (0.0, inf), {})
+
+	elif dname == "Bernoulli":
+		assert len(args) <= 1
+		p = get(args, 0) or 0.5
+		return (bernoulli(p), (0, 1), {"succprob" : p, "failprob": 1.0 - p})
+
+	elif dname == "Binomial":
+		assert len(args) <= 2
+		n = int(get(args, 0) or 1)
+		p = get(args, 1) or 0.5
+		return (binom(n, p), (0, n), 
+			{"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
+
+	elif dname == "Cauchy":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (cauchy(l, s), (-inf, inf), {})
+
+	elif dname == "Chi":
 		assert len(args) == 1
-		return bernoulli(args[0])
+		df = args[0]
+		return (chi(df), (0, inf), {})
 
-	elif name == "Beta":
-		assert len(args) == 2
-		return beta(args[0], args[1])
-
-	elif name == "BetaPrime":
-		assert len(args) == 2
-		return betaprime(args[0], args[1])
-
-	elif name == "Binomial":
-		assert len(args) == 2
-		return binom(args[0], args[1])
-
-	elif name == "Cauchy":
-		assert len(args) == 2
-		return cauchy(args[0], args[1])
-
-	elif name == "Chi":
+	elif dname == "Chisq":
 		assert len(args) == 1
-		return chi(args[0])
+		df = args[0]
+		return (chi2(df), (0, inf), {})
 
-	elif name == "Chisq":
-		assert len(args) == 1
-		return chi2(args[0])
+	elif dname == "DiscreteUniform":
+		assert len(args) <= 2
+		if len(args) == 0:
+			a, b = 0, 1
+		elif len(args) == 1:
+			a, b = 0, int(args[0])
+		else:
+			a, b = int(args[0]), int(args[1])
+		sp = b - a + 1
+		return (randint(a, b+1), (a, b), 
+			{"span" : sp, "probval" : 1.0 / sp})
 
-	elif name == "DiscreteUniform":
-		assert len(args) == 2
-		return randint(args[0], args[1] + 1)
+	elif dname == "Erlang":
+		assert len(args) <= 2
+		a = get(args, 0) or 1
+		s = get(args, 1) or 1.0
+		return (erlang(a, scale=s), (0, inf), {})
 
-	elif name == "Erlang":
-		assert len(args) == 2
-		return erlang(args[0], scale=args[1])
+	elif dname == "Exponential":
+		assert len(args) <= 1
+		s = get(args, 0) or 1.0
+		return (expon(scale=s), (0, inf), {})
 
-	elif name == "Exponential":
-		assert len(args) == 1
-		return expon(scale=args[0])
+	elif dname == "Gamma":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (gamma(a, scale=s), (0, inf), {})
 
-	elif name == "Gamma":
-		assert len(args) == 2
-		return gamma(args[0], scale=args[1])
+	elif dname == "Geometric":
+		assert len(args) <= 1
+		p = get(args, 0) or 0.5
+		return (geom(p), (0, inf), {})
 
-	elif name == "Geometric":
-		assert len(args) == 1
-		return geom(args[0])
+	elif dname == "Gumbel":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (gumbel_r(l, s), (-inf, inf), {})
 
-	elif name == "Gumbel":
-		assert len(args) == 2
-		return gumbel_r(args[0], args[1])
-
-	elif name == "Hypergeometric":
+	elif dname == "Hypergeometric":
 		assert len(args) == 3
-		return hypergeom(args[0] + args[1], args[0], args[2])
+		ns, nf, n = [int(t) for t in args]
+		return (hypergeom(ns + nf, ns, n), 
+			(max(n - nf, 0), min(ns, n)), {})
 
-	elif name == "InverseGamma":
+	elif dname == "InverseGamma":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (invgamma(a, scale=s), (0, inf), {})
+
+	elif dname == "Laplace":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (laplace(l, s), (-inf, inf), {})
+
+	elif dname == "Logistic":
 		assert len(args) == 2
-		return invgamma(args[0], scale=args[1])
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (logistic(l, s), (-inf, inf), {})
 
-	elif name == "Laplace":
+	elif dname == "NegativeBinomial":
+		assert len(args) <= 2
+		r = int(get(args, 0) or 1)
+		p = get(args, 1) or 0.5
+		return (nbinom(r, p), (0, inf), {})
+
+	elif dname == "Normal":
 		assert len(args) == 2
-		return laplace(args[0], args[1])
+		mu = args[0]
+		sig = args[1]
+		return (norm(mu, sig), (-inf, inf), {})
 
-	elif name == "Logistic":
+	elif dname == "NormalCanon":
 		assert len(args) == 2
-		return logistic(args[0], args[1])
+		h = args[0]
+		J = args[1]
+		return (norm(h/J, sqrt(1.0/J)), (-inf, inf), {})
 
-	elif name == "NegativeBinomial":
-		assert len(args) == 2
-		return nbinom(args[0], args[1])
+	elif dname == "Pareto":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (pareto(a, scale=s), (s, inf), {})
 
-	elif name == "Normal":
-		assert len(args) == 2
-		return norm(args[0], args[1])
+	elif dname == "Poisson":
+		assert len(args) <= 1
+		lam = get(args, 0) or 1.0
+		return (poisson(lam), (0, inf), {})
 
-	elif name == "NormalCanon":
-		assert len(args) == 2
-		return norm(args[0] / args[1], sqrt(1.0 / args[1]))
+	elif dname == "Rayleigh":
+		assert len(args) <= 1
+		s = get(args, 0) or 1.0
+		return (rayleigh(scale=s), (0, inf), {})
 
-	elif name == "Pareto":
-		assert len(args) == 2
-		return pareto(args[0], scale=args[1])
+	elif dname == "SymTriangularDist":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s), {})
 
-	elif name == "Poisson":
+	elif dname == "TDist":
 		assert len(args) == 1
-		return poisson(args[0])
+		df = args[0]
+		return (scipy.stats.t(df), (-inf, inf), {})
 
-	elif name == "Rayleigh":
-		assert len(args) == 1
-		return rayleigh(scale=args[0])
-
-	elif name == "SymTriangularDist":
-		assert len(args) == 2
-		return triang(0.5, loc=args[0] - args[1], scale=args[1] * 2.0)
-
-	elif name == "TDist":
-		assert len(args) == 1
-		return t(args[0])
-
-	elif name == "TruncatedNormal":
+	elif dname == "TruncatedNormal":
 		assert len(args) == 4
 		mu, sig, a, b = args
 		za = (a - mu) / sig
 		zb = (b - mu) / sig
 		za = max(za, -1000.0)
 		zb = min(zb, 1000.0)
-		return truncnorm(za, zb, loc=mu, scale=sig)
+		return (truncnorm(za, zb, loc=mu, scale=sig), (a, b), {})
 
-	elif name == "TriangularDist":
+	elif dname == "TriangularDist":
 		assert len(args) == 3
 		a, b, c = args
-		return triang((c - a) / (b - a), loc=a, scale=b-a)
+		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b), {})
 
-	elif name == "Uniform":
-		assert len(args) == 2
-		return uniform(args[0], args[1] - args[0])
+	elif dname == "Uniform":
+		assert len(args) <= 2
+		if len(args) == 0:
+			a, b = 0.0, 1.0
+		elif len(args) == 1:
+			a, b = 0.0, args[0]
+		else:
+			a, b = args
+		return (uniform(a, b-a), (a, b), {})
 
-	elif name == "Weibull":
-		assert len(args) == 2
-		return weibull_min(args[0], scale=args[1])
+	elif dname == "Weibull":
+		assert len(args) <= 2
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		return (weibull_min(a, scale=s), (0, inf), {})
 
 	else:
-		raise ValueError("Unknown distribution name %s" % name)
+		raise ValueError("Unrecognized distribution name: " + dname)
 
 
+def json_num(x):
+	return x if np.isfinite(x) else str(x)
 
-def do_main(title):
-	"""main skeleton"""
 
-	filename = title + "_ref"
-	lst = read_distr_list(filename + ".txt")
+def make_json(ex, c, distr_name, args, d, mm, pdict):
+	"""Make a json object by collecting all information"""
 
-	with open(filename + ".csv", "wt") as fout:
+	if c == "discrete":
+		is_discrete = True
+	elif c == "continuous":
+		is_discrete = False
+	else:
+		raise ValueError("Invalid value of the c-argument.")
 
-		print >>fout, "distr, mean, var, entropy, x25, x50, x75, lp25, lp50, lp75"
+	r_min, r_max = mm
+	jdict = {"dtype" : distr_name,
+			"params" : pdict,
+			"minimum" : json_num(r_min),
+			"maximum" : json_num(r_max),
+			"mean" : json_num(d.mean()),
+			"var" : json_num(d.var()),
+			"entropy" : np.float64(d.entropy()),
+			"median" : d.median(), 
+			"q10" : d.ppf(0.10), 
+			"q25" : d.ppf(0.25), 
+			"q50" : d.ppf(0.50), 
+			"q75" : d.ppf(0.75), 
+			"q90" : d.ppf(0.90)} 
 
-		for (ex, name, args) in lst:
-			d = to_scipy_dist(name, args)
+	if is_discrete:
+		if distr_name == "Geometric":
+			xs = dsamples(d, 1, inf)
+		else:
+			xs = dsamples(d, r_min, r_max)
+		pts = [{"x" : x, "logpdf" : d.logpmf(x), "cdf" : d.cdf(x)} for x in xs]
+	else:
+		xs = csamples(d)
+		pts = [{"x" : x, "logpdf" : d.logpdf(x), "cdf" : d.cdf(x)} for x in xs]
 
-			m = d.mean()
-			v = d.var()
-			ent = d.entropy()
+	jdict["points"] = pts
 
-			x25 = d.ppf(0.25)
-			x50 = d.ppf(0.50)
-			x75 = d.ppf(0.75)
+	# work around inconsistencies in scipy.stats
+	if distr_name == "Bernoulli":
+		if len(args) == 0 or args[0] == 0.5:
+			jdict["median"] = 0.5
 
-			if title == "discrete":
-				lp25 = d.logpmf(x25)
-				lp50 = d.logpmf(x50)
-				lp75 = d.logpmf(x75)
-			else:
-				lp25 = d.logpdf(x25)
-				lp50 = d.logpdf(x50)
-				lp75 = d.logpdf(x75)
+	elif distr_name == "Geometric":
+		for t in ["mean", "median", "q10", "q25", "q50", "q75", "q90"]:
+			jdict[t] -= 1
 
-			# workaround inconsistency of definitions
-			if name == "Geometric":
-				x25 -= 1
-				x50 -= 1
-				x75 -= 1
-				m -= 1
+		for pt in pts:
+			pt["x"] -= 1
 
-			if title == "discrete":
-				print >>fout, '"%s", %.16e, %.16e, %.16e, %d, %d, %d, %.16e, %.16e, %.16e' % (
-					ex, m, v, ent, x25, x50, x75, lp25, lp50, lp75)
-			else:
-				print >>fout, '"%s", %.16e, %.16e, %.16e, %.16e, %.16e, %.16e, %.16e, %.16e, %.16e' % (
-					ex, m, v, ent, x25, x50, x75, lp25, lp50, lp75)
+	elif distr_name == "Cauchy":
+		jdict["mean"] = "nan"
+		jdict["var"] = "nan"
+
+	# output
+	return [ex, jdict]
+
+
+def do_main(c):
+	"""The main driver, c can be either 'discrete' or 'continuous'."""
+
+	srcfile = "%s_test.lst" % c
+	dstfile = "%s_test.json" % c
+	entries = read_dentry_list(srcfile)
+
+	jall = []
+	for (ex, dname, args) in entries:
+		print ex, "..."
+		d, mm, pdict = get_dinfo(dname, args)
+		je = make_json(ex, c, dname, args, d, mm, pdict)
+
+		# add je to list
+		jall.append(je)
+
+	with open(dstfile, "wt") as fout:
+		print >>fout, json.JSONEncoder(indent=2, sort_keys=True).encode(jall)
 
 
 if __name__ == "__main__":
