@@ -19,6 +19,7 @@ end
 
 span(d::DiscreteUniform) = d.b - d.a + 1
 probval(d::DiscreteUniform) = d.pv
+params(d::DiscreteUniform) = (d.a, d.b)
 
 
 ### Show
