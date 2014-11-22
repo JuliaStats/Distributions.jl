@@ -17,6 +17,7 @@ end
 
 @distr_support Categorical 1 d.K
 
+ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.p
 params(d::Categorical) = (d.p,)
 
@@ -35,7 +36,7 @@ end
 mean(d::Categorical) = categorical_mean(d.p)
 
 function median(d::Categorical)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     cp = 0.
     i = 0
@@ -47,7 +48,7 @@ function median(d::Categorical)
 end
 
 function var(d::Categorical)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     m = categorical_mean(p)
     s = 0.0
@@ -58,7 +59,7 @@ function var(d::Categorical)
 end
 
 function skewness(d::Categorical)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     m = categorical_mean(p)
     s = 0.0
@@ -70,7 +71,7 @@ function skewness(d::Categorical)
 end
 
 function kurtosis(d::Categorical)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     m = categorical_mean(p)
     s = 0.0
@@ -83,7 +84,7 @@ end
 entropy(d::Categorical) = entropy(d.p)
 
 function mgf(d::Categorical, t::Real)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     s = 0.0
     for i = 1 : k
@@ -93,7 +94,7 @@ function mgf(d::Categorical, t::Real)
 end
 
 function cf(d::Categorical, t::Real)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     s = 0.0 + 0.0im
     for i = 1:k
@@ -105,7 +106,7 @@ end
 mode(d::Categorical) = indmax(probs(d))
 
 function modes(d::Categorical)
-    K = maximum(d)
+    K = ncategories(d)
     p = probs(d)
     maxp = maximum(p)
     r = Array(Int, 0)
@@ -121,7 +122,7 @@ end
 ### Evaluation
 
 function cdf(d::Categorical, x::Int)
-    k = maximum(d)
+    k = ncategories(d)
     p = probs(d)
     x < 1 && return 0.0
     x >= k && return 1.0
@@ -166,7 +167,7 @@ end
 
 function quantile(d::Categorical, p::Real)
     zero(p) <= p <= one(p) || throw(DomainError())
-    k = maximum(d)
+    k = ncategories(d)
     pv = probs(d)
     i = 1
     v = pv[1]

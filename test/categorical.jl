@@ -14,6 +14,7 @@ for p in Vector{Float64}[
     @test probs(d) == p
     @test minimum(d) == 1
     @test maximum(d) == k
+    @test ncategories(d) == k
 
     c = 0.0
     for i = 1:k

@@ -19,8 +19,9 @@ end
 # Properties
 
 length(d::Multinomial) = length(d.prob)
-
 probs(d::Multinomial) = d.prob
+
+# Statistics
 
 mean(d::Multinomial) = d.n .* d.prob
 
