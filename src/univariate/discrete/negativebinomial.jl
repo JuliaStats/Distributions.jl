@@ -5,15 +5,16 @@
 # discrete survival times.
 
 immutable NegativeBinomial <: DiscreteUnivariateDistribution
-    r::Float64
-    prob::Float64
+    r::Int
+    p::Float64
 
-    function NegativeBinomial(r::Real, p::Real)
-        zero(p) < p <= one(p) || error("prob must be in (0, 1].")
-        zero(r) < r || error("r must be positive.")
-        new(float64(r), float64(p))
+    function NegativeBinomial(r::Int, p::Float64)
+        r > 0 || error("r must be positive.")
+        0.0 < p <= 1.0 || error("prob must be in (0, 1].")
+        new(r, p)
     end
 
+    NegativeBinomial(r::Real, p::Real) = NegativeBinomial(int(r), float64(p))
     NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
     NegativeBinomial() = new(1.0, 0.5)
 end
@@ -22,52 +23,48 @@ end
 
 @distr_support NegativeBinomial 0 Inf
 
+### Parameters
+
+params(d::NegativeBinomial) = (d.r, d.p)
+
+succprob(d) = d.p
+failprob(d) = 1.0 - d.p
+
+
+### Statistics
+
+mean(d::NegativeBinomial) = (p = succprob(d); (1.0 - p) * d.r / p)
+
+var(d::NegativeBinomial) = (p = succprob(d); (1.0 - p) * d.r / (p * p))
+
+std(d::NegativeBinomial) = (p = succprob(d); sqrt((1.0 - p) * d.r) / p)
+
+skewness(d::NegativeBinomial) = (p = succprob(d); (2.0 - p) / sqrt((1.0 - p) * d.r))
+
+kurtosis(d::NegativeBinomial) = (p = succprob(d); 6.0 / d.r + (p * p) / ((1.0 - p) * d.r))
+
+mode(d::NegativeBinomial) = (p = succprob(d); ifloor((1.0 - p) * (d.r - 1.) / p))
+
+
+### Evaluation
+
 immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64
     p0::Float64
 end
 
-RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, 1.0 - d.prob)
+RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
 nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
 _pdf!(r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
 
 function mgf(d::NegativeBinomial, t::Real)
-    r, p = d.r, d.prob
+    r, p = params(d)
     return ((1.0 - p) * exp(t))^r / (1.0 - p * exp(t))^r
 end
 
 function cf(d::NegativeBinomial, t::Real)
-    r, p = d.r, d.prob
+    r, p = params(d)
     return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
 end
 
-function mean(d::NegativeBinomial)
-    p = d.prob
-    (1.0 - p) * d.r / p
-end
-
-function var(d::NegativeBinomial)
-    p = d.prob
-    (1.0 - p) * d.r / (p * p)
-end
-
-function std(d::NegativeBinomial)
-    p = d.prob
-    sqrt((1.0 - p) * d.r) / p
-end
-
-function skewness(d::NegativeBinomial)
-    p = d.prob
-    (2.0 - p) / sqrt((1.0 - p) * d.r)
-end
-
-function kurtosis(d::NegativeBinomial)
-    p = d.prob
-    6.0 / d.r + (p * p) / ((1.0 - p) * d.r)
-end
-
-function mode(d::NegativeBinomial)
-    p = d.prob
-    ifloor((1.0 - p) * (d.r - 1.) / p)
-end
 

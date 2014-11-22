@@ -194,7 +194,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		r = int(get(args, 0) or 1)
 		p = get(args, 1) or 0.5
-		return (nbinom(r, p), (0, inf), {})
+		return (nbinom(r, p), (0, inf), 
+			{"succprob" : p, "failprob" : 1.0 - p})
 
 	elif dname == "Normal":
 		assert len(args) == 2
