@@ -42,6 +42,8 @@ function mode(d::NormalInverseGamma)
     return mu, sig2
 end
 
+mean(d::NormalInverseGamma) = (d.mu, mean(InverseGamma(d.shape, d.scale)))
+
 function rand(d::NormalInverseGamma)
     # Guard against invalid precisions
     sig2 = rand(InverseGamma(d.shape, d.scale))
