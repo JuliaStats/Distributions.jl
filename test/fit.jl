@@ -107,11 +107,11 @@ h = Float64[countnz(x .== i) for i = 1 : 3]
 d = fit(Categorical, (3, x))
 @test isa(d, Categorical)
 @test d.K == 3
-@test_approx_eq d.prob h / sum(h)
+@test_approx_eq probs(d) h / sum(h)
 
 d2 = fit(Categorical, x)
 @test isa(d2, Categorical)
-@test d2.prob == d.prob
+@test probs(d2) == probs(d)
 
 ss = suffstats(Categorical, (3, x), w)
 h = Float64[sum(w[x .== i]) for i = 1 : 3]
@@ -120,15 +120,15 @@ h = Float64[sum(w[x .== i]) for i = 1 : 3]
 
 d = fit(Categorical, (3, x), w)
 @test isa(d, Categorical)
-@test_approx_eq d.prob h / sum(h)
+@test_approx_eq probs(d) h / sum(h)
 
 d = fit(Categorical, suffstats(Categorical, 3, x, w))
 @test isa(d, Categorical)
-@test_approx_eq d.prob (h / sum(h))
+@test_approx_eq probs(d) (h / sum(h))
 
 d = fit(Categorical, rand(Categorical(p), N))
 @test isa(d, Categorical)
-@test_approx_eq_eps d.prob p 0.01
+@test_approx_eq_eps probs(d) p 0.01
 
 
 # Exponential

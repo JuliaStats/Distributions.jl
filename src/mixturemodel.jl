@@ -49,7 +49,7 @@ length(d::MultivariateMixture) = length(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
-probs(d::MixtureModel) = d.prior.prob
+probs(d::MixtureModel) = probs(d.prior)
 
 component_type{VF,VS,C}(d::MixtureModel{VF,VS,C}) = C
 

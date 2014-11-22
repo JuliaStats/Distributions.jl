@@ -1,6 +1,6 @@
 immutable Categorical <: DiscreteUnivariateDistribution
     K::Int
-    prob::Vector{Float64}
+    p::Vector{Float64}
 
     Categorical(p::Vector{Float64}, ::NoArgCheck) = new(length(p), p)
 
@@ -9,12 +9,16 @@ immutable Categorical <: DiscreteUnivariateDistribution
         new(length(p), p)
     end
 
-    Categorical(k::Int) = new(k, fill(1.0/k, k))
+    function Categorical(k::Integer)
+        k >= 1 || error("k must be a positive integer.")
+        new(k, fill(1.0/k, k))
+    end
 end
 
 @distr_support Categorical 1 d.K
 
-probs(d::Categorical) = d.prob
+probs(d::Categorical) = d.p
+params(d::Categorical) = (d.p,)
 
 
 ### Statistics
@@ -28,11 +32,11 @@ function categorical_mean(p::AbstractArray{Float64})
     s
 end
 
-mean(d::Categorical) = categorical_mean(d.prob)
+mean(d::Categorical) = categorical_mean(d.p)
 
 function median(d::Categorical)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     cp = 0.
     i = 0
     while cp < 0.5 && i <= k
@@ -43,8 +47,8 @@ function median(d::Categorical)
 end
 
 function var(d::Categorical)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     m = categorical_mean(p)
     s = 0.0
     for i = 1 : k
@@ -54,8 +58,8 @@ function var(d::Categorical)
 end
 
 function skewness(d::Categorical)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     m = categorical_mean(p)
     s = 0.0
     for i = 1 : k
@@ -66,8 +70,8 @@ function skewness(d::Categorical)
 end
 
 function kurtosis(d::Categorical)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     m = categorical_mean(p)
     s = 0.0
     for i = 1 : k
@@ -76,11 +80,11 @@ function kurtosis(d::Categorical)
     s / abs2(var(d)) - 3.0
 end
 
-entropy(d::Categorical) = entropy(d.prob)
+entropy(d::Categorical) = entropy(d.p)
 
 function mgf(d::Categorical, t::Real)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     s = 0.0
     for i = 1 : k
         @inbounds s += p[i] * exp(t)
@@ -89,20 +93,20 @@ function mgf(d::Categorical, t::Real)
 end
 
 function cf(d::Categorical, t::Real)
-    k = d.K
-    p = d.prob
+    k = maximum(d)
+    p = probs(d)
     s = 0.0 + 0.0im
-    for i = 1 : k
+    for i = 1:k
         @inbounds s += p[i] * exp(im * t)
     end
     s
 end
 
-mode(d::Categorical) = indmax(d.prob)
+mode(d::Categorical) = indmax(probs(d))
 
 function modes(d::Categorical)
-    K = d.K
-    p = d.prob
+    K = maximum(d)
+    p = probs(d)
     maxp = maximum(p)
     r = Array(Int, 0)
     for k = 1:K
@@ -116,21 +120,25 @@ end
 
 ### Evaluation
 
-function cdf(d::Categorical, x::Real)
-    x < one(x) && return 0.0
-    d.K <= x && return 1.0
-    p = d.prob[1]
-    for i in 2:ifloor(x)
-        p += d.prob[i]
+function cdf(d::Categorical, x::Int)
+    k = maximum(d)
+    p = probs(d)
+    x < 1 && return 0.0
+    x >= k && return 1.0
+    c = p[1]
+    for i = 2:x
+        @inbounds c += p[i]
     end
-    p
+    return c
 end
 
-pdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? d.prob[x] : 0.0
+cdf(d::Categorical, x::Real) = cdf(d, int(x))
 
-logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x]) : -Inf
+pdf(d::Categorical, x::Real) = insupport(d, x) ? d.p[x] : 0.0
 
-pdf(d::Categorical) = copy(d.prob)
+logpdf(d::Categorical, x::Real) = insupport(d, x) ? log(d.p[x]) : -Inf
+
+pdf(d::Categorical) = copy(d.p)
 
 function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
     vfirst = int(first(rgn))
@@ -157,9 +165,9 @@ end
 
 
 function quantile(d::Categorical, p::Real)
-    0. <= p <= 1. || throw(DomainError())
-    k = d.K
-    pv = d.prob
+    zero(p) <= p <= one(p) || throw(DomainError())
+    k = maximum(d)
+    pv = probs(d)
     i = 1
     v = pv[1]
     while v < p && i < k
@@ -172,7 +180,7 @@ end
 
 # sampling
 
-sampler(d::Categorical) = AliasTable(d.prob)
+sampler(d::Categorical) = AliasTable(d.p)
 
 
 ### sufficient statistics

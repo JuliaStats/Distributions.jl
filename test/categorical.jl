@@ -39,3 +39,9 @@ for p in Vector{Float64}[
     test_distr(d, 10^6)
 end
 
+d = Categorical(4)
+@test minimum(d) == 1
+@test maximum(d) == 4
+@test probs(d) == [0.25, 0.25, 0.25, 0.25]
+
+

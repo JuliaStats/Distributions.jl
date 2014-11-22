@@ -105,7 +105,7 @@ p = posterior(pri, Categorical, x)
 
 f = fit_map(pri, Categorical, x)
 @test isa(f, Categorical)
-@test_approx_eq f.prob mode(p)
+@test_approx_eq probs(f) mode(p)
 
 p = posterior(pri, Categorical, x, w)
 @test isa(p, Dirichlet)
@@ -113,7 +113,7 @@ p = posterior(pri, Categorical, x, w)
 
 f = fit_map(pri, Categorical, x, w)
 @test isa(f, Categorical)
-@test_approx_eq f.prob mode(p)
+@test_approx_eq probs(f) mode(p)
 
 
 # Dirichlet - Multinomial
