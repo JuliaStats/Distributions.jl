@@ -205,10 +205,12 @@ export
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
+    probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     sampler,            # create a Sampler object for efficient samples
     skewness,           # skewness of the distribution
+    span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability

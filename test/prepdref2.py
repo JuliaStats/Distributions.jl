@@ -133,7 +133,9 @@ def get_dinfo(dname, args):
 			a, b = 0, int(args[0])
 		else:
 			a, b = int(args[0]), int(args[1])
-		return (randint(a, b+1), (a, b), {})
+		sp = b - a + 1
+		return (randint(a, b+1), (a, b), 
+			{"span" : sp, "probval" : 1.0 / sp})
 
 	elif dname == "Erlang":
 		assert len(args) <= 2

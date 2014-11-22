@@ -1,52 +1,63 @@
 immutable DiscreteUniform <: DiscreteUnivariateDistribution
     a::Int
     b::Int
-    function DiscreteUniform(a::Real, b::Real)
-        ia = int(a); ib = int(b)
-        ia < ib || error("int(a) must be less than int(b)")
-        new(ia, ib)
-    end
-end
+    pv::Float64
 
-DiscreteUniform(b::Integer) = DiscreteUniform(0, b)
-DiscreteUniform() = DiscreteUniform(0, 1)
+    function DiscreteUniform(a::Int, b::Int)
+        a <= b || error("a and b must satisfy a <= b")
+        new(a, b, 1.0 / (b - a + 1))
+    end
+
+    DiscreteUniform(a::Real, b::Real) = DiscreteUniform(int(a), int(b))
+    DiscreteUniform(b::Real) = DiscreteUniform(0, int(b))
+    DiscreteUniform() = new(0, 1, 0.5)
+end
 
 @distr_support DiscreteUniform d.a d.b
 
+### Parameters
 
-pdf(d::DiscreteUniform) = (n = d.b - d.a + 1; fill(1.0 / n, n))
+span(d::DiscreteUniform) = d.b - d.a + 1
+probval(d::DiscreteUniform) = d.pv
 
-function cdf(d::DiscreteUniform, k::Real)
-    k < d.a ? 0. : (k > d.b ? 1. : (ifloor(k) - d.a + 1.0) / (d.b - d.a + 1.0))
-end
 
-entropy(d::DiscreteUniform) = log(d.b - d.a + 1.0)
+### Show
+
+show(io::IO, d::DiscreteUniform) = show(io, d, (:a, :b))
+
+
+### Statistics
+
+mean(d::DiscreteUniform) = middle(d.a, d.b)
+
+median(d::DiscreteUniform) = middle(d.a, d.b)
+
+var(d::DiscreteUniform) = (abs2(float64(span(d))) - 1.0) / 12.0
+
+skewness(d::DiscreteUniform) = 0.0
 
 function kurtosis(d::DiscreteUniform)
-    n = d.b - d.a + 1.0
-    return -(6.0 / 5.0) * (n^2 + 1.0) / (n^2 - 1.0)
+    n2 = abs2(float64(span(d)))
+    return -1.2 * (n2 + 1.0) / (n2 - 1.0)
 end
 
-mean(d::DiscreteUniform) = (d.a + d.b) / 2.0
-
-median(d::DiscreteUniform) = (d.a + d.b) / 2.0
-
-function mgf(d::DiscreteUniform, t::Real)
-    a, b = d.a, d.b
-    (exp(t * a) - exp(t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(t)))
-end
-
-function cf(d::DiscreteUniform, t::Real)
-    a, b = d.a, d.b
-    (exp(im * t * a) - exp(im * t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(im * t)))
-end
+entropy(d::DiscreteUniform) = log(float64(span(d)))
 
 mode(d::DiscreteUniform) = d.a
 modes(d::DiscreteUniform) = [d.a:d.b]
 
-function pdf(d::DiscreteUniform, x::Real)
-    insupport(d, x) ? (1.0 / (d.b - d.a + 1)) : 0.0
-end
+
+### Evaluation
+
+cdf(d::DiscreteUniform, x::Real) = (x < d.a ? 0.0 : 
+                                    x > d.b ? 1.0 : 
+                                    (ifloor(x) - d.a + 1.0) * d.pv)
+
+pdf(d::DiscreteUniform, x::Real) = insupport(d, x) ? d.pv : 0.0
+
+logpdf(d::DiscreteUniform, x::Real) = insupport(d, x) ? log(d.pv) : -Inf
+
+pdf(d::DiscreteUniform) = fill(probval(d), span(d))
 
 function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
     vfirst = int(first(rgn))
@@ -60,7 +71,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
     end
     fm1 = vfirst - 1
     if vl <= vr
-        pv = 1.0 / (d.b - d.a + 1)
+        pv = d.pv
         for v = vl:vr
             r[v - fm1] = pv
         end
@@ -73,16 +84,30 @@ function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
     return r
 end
 
-
-function quantile(d::DiscreteUniform, p::Real)
-    d.a + ifloor(p * (d.b - d.a + 1))
+function _logpdf!(r::AbstractArray, d::DiscreteUniform, x::AbstractArray)
+    lpv = log(probval(d))
+    for i = 1:length(x)
+        @inbounds r[i] = insupport(d, x[i]) ? lpv : -Inf
+    end
+    return r
 end
 
+quantile(d::DiscreteUniform, p::Real) = d.a + ifloor(p * span(d))
+
+function mgf(d::DiscreteUniform, t::Real)
+    a, b = d.a, d.b
+    (exp(t * a) - exp(t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(t)))
+end
+
+function cf(d::DiscreteUniform, t::Real)
+    a, b = d.a, d.b
+    (exp(im * t * a) - exp(im * t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(im * t)))
+end
+
+
+### Sampling
+
 rand(d::DiscreteUniform) = randi(d.a, d.b)
-
-skewness(d::DiscreteUniform) = 0.0
-
-var(d::DiscreteUniform) = ((d.b - d.a + 1.0)^2 - 1.0) / 12.0
 
 # Fit model
 
@@ -93,7 +118,7 @@ function fit_mle{T <: Real}(::Type{DiscreteUniform}, x::Array{T})
 
     xmin = xmax = x[1]
     for i = 2:length(x)
-        xi = x[i]
+        @inbounds xi = x[i]
         if xi < xmin
             xmin = xi
         elseif xi > xmax

@@ -446,7 +446,10 @@
       "mean": 3.0, 
       "median": 3.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "probval": 0.14285714285714285, 
+        "span": 7
+      }, 
       "points": [
         {
           "cdf": 0.14285714285714285, 
@@ -501,7 +504,10 @@
       "mean": 2.0, 
       "median": 2.0, 
       "minimum": 0, 
-      "params": {}, 
+      "params": {
+        "probval": 0.2, 
+        "span": 5
+      }, 
       "points": [
         {
           "cdf": 0.20000000000000001, 
@@ -546,7 +552,10 @@
       "mean": 5.0, 
       "median": 5.0, 
       "minimum": 2, 
-      "params": {}, 
+      "params": {
+        "probval": 0.14285714285714285, 
+        "span": 7
+      }, 
       "points": [
         {
           "cdf": 0.14285714285714285, 
