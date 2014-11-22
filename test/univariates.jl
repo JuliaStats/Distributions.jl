@@ -82,8 +82,8 @@ for c in ["discrete",
           "continuous"]
           
     title = string(uppercase(c[1]), c[2:end])
-    println("$title")
-    println("----------------------------")
+    println("    [$title]")
+    println("    ------------")
     jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json") 
     verify_and_test_drive(jsonfile, 10^6)
     println()

@@ -14,73 +14,15 @@ end
 
 @distr_support Categorical 1 d.K
 
-
-ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.prob
-probs(d::Categorical, rgn::UnitRange) = d.prob[rgn]
 
 
-# evaluation
-
-function cdf(d::Categorical, x::Real)
-    x < one(x) && return 0.0
-    d.K <= x && return 1.0
-    p = d.prob[1]
-    for i in 2:ifloor(x)
-        p += d.prob[i]
-    end
-    p
-end
-
-pdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? d.prob[x] : 0.0
-
-logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x]) : -Inf
-
-pdf(d::Categorical) = copy(d.prob)
-
-function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
-    vfirst = int(first(rgn))
-    vlast = int(last(rgn))
-    vl = max(vfirst, 1)
-    vr = min(vlast, d.K)
-    p = probs(d)
-    if vl > vfirst
-        for i = 1:(vl - vfirst)
-            r[i] = 0.0
-        end
-    end
-    fm1 = vfirst - 1
-    for v = vl:vr
-        r[v - fm1] = p[v]
-    end
-    if vr < vlast
-        for i = (vr-vfirst+2):length(rgn)
-            r[i] = 0.0
-        end
-    end
-    return r
-end
-
-
-function quantile(d::Categorical, p::Real)
-    0. <= p <= 1. || throw(DomainError())
-    k = d.K
-    pv = d.prob
-    i = 1
-    v = pv[1]
-    while v < p && i < k
-        i += 1
-        @inbounds v += pv[i]
-    end
-    i
-end
-
-# properties
+### Statistics
 
 function categorical_mean(p::AbstractArray{Float64})
     k = length(p)
     s = 0.
-    for i = 1 : k
+    for i = 1:k
         @inbounds s += p[i] * i
     end
     s
@@ -172,9 +114,66 @@ function modes(d::Categorical)
 end
 
 
+### Evaluation
+
+function cdf(d::Categorical, x::Real)
+    x < one(x) && return 0.0
+    d.K <= x && return 1.0
+    p = d.prob[1]
+    for i in 2:ifloor(x)
+        p += d.prob[i]
+    end
+    p
+end
+
+pdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? d.prob[x] : 0.0
+
+logpdf(d::Categorical, x::Real) = isinteger(x) && 1 <= x <= d.K ? log(d.prob[x]) : -Inf
+
+pdf(d::Categorical) = copy(d.prob)
+
+function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
+    vfirst = int(first(rgn))
+    vlast = int(last(rgn))
+    vl = max(vfirst, 1)
+    vr = min(vlast, d.K)
+    p = probs(d)
+    if vl > vfirst
+        for i = 1:(vl - vfirst)
+            r[i] = 0.0
+        end
+    end
+    fm1 = vfirst - 1
+    for v = vl:vr
+        r[v - fm1] = p[v]
+    end
+    if vr < vlast
+        for i = (vr-vfirst+2):length(rgn)
+            r[i] = 0.0
+        end
+    end
+    return r
+end
+
+
+function quantile(d::Categorical, p::Real)
+    0. <= p <= 1. || throw(DomainError())
+    k = d.K
+    pv = d.prob
+    i = 1
+    v = pv[1]
+    while v < p && i < k
+        i += 1
+        @inbounds v += pv[i]
+    end
+    i
+end
+
+
 # sampling
 
 sampler(d::Categorical) = AliasTable(d.prob)
+
 
 ### sufficient statistics
 
@@ -214,8 +213,7 @@ end
 suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = suffstats(Categorical, data...)
 suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Categorical, data..., w)
 
-
-### Model fitting
+# Model fitting
 
 function fit_mle(::Type{Categorical}, ss::CategoricalStats)
     Categorical(pnormalize!(ss.h))

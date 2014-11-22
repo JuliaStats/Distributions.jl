@@ -15,7 +15,7 @@ typealias MatrixvariateMixture AbstractMixtureModel{Matrixvariate}
 #### Constructors
 
 function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical)
-    length(components) == ncategories(prior) ||
+    length(components) == maximum(prior) ||
         error("Inconsistent sizes of components and prior.")
     VF = variate_form(C)
     VS = value_support(C)

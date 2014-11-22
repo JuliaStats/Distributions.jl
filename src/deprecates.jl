@@ -25,3 +25,8 @@ function probs(d::DiscreteUnivariateDistribution)
     return probs(d)
 end
 
+function ncategories(d::Categorical)
+	Base.depwarn("ncategories(d::Categorical) is deprecated. Please use maximum(d) instead.", :ncategories)
+	return maximum(d)
+end
+

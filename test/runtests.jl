@@ -2,6 +2,7 @@ tests = [
     "types",
     "utils",
     "samplers",
+    "categorical",
     "univariates", 
     "fit", 
     "multinomial",
