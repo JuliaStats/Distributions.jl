@@ -186,11 +186,11 @@ export
     posterior_rand,     # draw samples from the posterior distribution
     posterior_rand!, 
     posterior_randmodel,
-    scale,              # scale parameter of a distribution
-    invscale,           # invscale parameter of a distribution (see multivariate t-distribution)
-    rate,               # rate parameter of a distribution
+
+    invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
+    location,           # get the location parameter
     mean,               # mean of distribution
     meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
@@ -210,6 +210,7 @@ export
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
     sampler,            # create a Sampler object for efficient samples
+    scale,              # get the scale parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution

@@ -78,8 +78,13 @@ def get_dinfo(dname, args):
 	"""
 
 	if dname == "Arcsine":
-		assert len(args) == 0
-		return (arcsine(), (0.0, 1.0), {})
+		assert len(args) <= 2
+		if len(args) <= 1:
+			a = 0.0
+			b = get(args, 0) or 1.0
+		else:
+			a, b = args
+		return (arcsine(loc=a, scale=b-a), (a, b), {})
 
 	elif dname == "Beta":
 		assert len(args) <= 2

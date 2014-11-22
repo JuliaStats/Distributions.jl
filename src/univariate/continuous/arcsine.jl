@@ -1,50 +1,60 @@
-# TODO: Implement standard Arcsine(0, 1) and Arcsine(a, b)
-
 immutable Arcsine <: ContinuousUnivariateDistribution
+    a::Float64
+    b::Float64
+
+    function Arcsine(a::Float64, b::Float64)
+        a < b || error("a must be less than b.")
+        new(a, b)
+    end
+
+    Arcsine(a::Real, b::Real) = Arcsine(float64(a), float64(b))
+    Arcsine(b::Real) = Arcsine(0.0, float64(b))
+    Arcsine() = new(0.0, 1.0)
 end
 
-@distr_support Arcsine 0.0 1.0
+@distr_support Arcsine d.a d.b
 
-function cdf(d::Arcsine, x::Real)
-    x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : (2.0 / pi) * asin(sqrt(x)))
-end
+### Parameters
 
-# entropy(d::Arcsine) = log(pi) + digamma(0.5) + eulergamma
-# calculated using higher-precision arithmetic 
-entropy(d::Arcsine) = -0.24156447527049044469
+params(d::Arcsine) = (d.a, d.b)
+location(d::Arcsine) = d.a
+scale(d::Arcsine) = d.b - d.a
 
+
+### Statistics
+
+mean(d::Arcsine) = (d.a + d.b) * 0.5
+median(d::Arcsine) = mean(d)
+mode(d::Arcsine) = d.a
+modes(d::Arcsine) = [d.a, d.b]
+
+var(d::Arcsine) = 0.125 * abs2(d.b - d.a)
+skewness(d::Arcsine) = 0.0
 kurtosis(d::Arcsine) = -1.5
 
-mean(d::Arcsine) = 0.5
+entropy(d::Arcsine) = -0.24156447527049044469 + log(scale(d))
 
-median(d::Arcsine) = 0.5
 
-function mgf(d::Arcsine, t::Real)
-    s = 0.0
-    for k in 1:10
-        inner_s = 1.0
-        for r in 0:(k - 1)
-            inner_s *= (2.0 * r + 1.0) / (2.0 * r + 2.0)
-        end
-        s += t^k / factorial(k) * inner_s
-    end
-    1.0 + s
-end
+### Evaluation
 
-# cf for Arcsine requires confluent hypergeometric function
+pdf(d::Arcsine, x::Float64) = insupport(d, x) ? 1.0 / (π * sqrt((x - d.a) * (d.b - x))) : 0.0
 
-mode(d::Arcsine) = 0.0
-modes(d::Arcsine) = [0.0, 1.0]
+logpdf(d::Arcsine, x::Float64) = insupport(d, x) ? -(logπ + 0.5 * log((x - d.a) * (d.b - x))) : -Inf
 
-function pdf(d::Arcsine, x::Real)
-    zero(x) <= x <= one(x) ? 1.0 / (pi * sqrt(x * (1.0 - x))) : 0.0
-end
+cdf(d::Arcsine, x::Float64) = x < d.a ? 0.0 :
+                              x > d.b ? 1.0 :
+                              0.636619772367581343 * asin(sqrt((x - d.a) / (d.b - d.a)))
 
-quantile(d::Arcsine, p::Real) = sin((pi * p) / 2.0)^2
 
-rand(d::Arcsine) = sin(rand() * pi / 2.0)^2
+pdf(d::Arcsine, x::Real) = pdf(d, float64(x))
+logpdf(d::Arcsine, x::Real) = logpdf(d, float64(x))
+cdf(d::Arcsine, x::Real) = cdf(d, float64(x))
 
-skewness(d::Arcsine) = 0.0
+quantile(d::Arcsine, p::Float64) = location(d) + abs2(sin(halfπ * p)) * scale(d)
+quantile(d::Arcsine, p::Real) = quantile(d, float64(p))
 
-var(d::Arcsine) = 1.0 / 8.0
+
+### Sampling
+
+rand(d::Arcsine) = quantile(d, rand())
 
