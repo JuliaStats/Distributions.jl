@@ -38,8 +38,14 @@ end
 
 function mode(d::NormalInverseGamma)
     mu = d.mu
-    sig2 = mode(InverseGamma(d.shape, d.scale))
+    sig2 = d.scale / (d.shape + 1.0)
     return mu, sig2
+end
+
+function mean(d::NormalInverseGamma)
+    mu = d.mu
+    sig2 = d.shape > 1.0 ? d.scale / (d.shape - 1.0) : Inf
+    return my, sig2
 end
 
 function rand(d::NormalInverseGamma)
