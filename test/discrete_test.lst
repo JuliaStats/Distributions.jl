@@ -20,6 +20,7 @@ DiscreteUniform(0, 4)
 DiscreteUniform(2, 8)
 
 Geometric()
+Geometric(0.02)
 Geometric(0.1)
 Geometric(0.5)
 Geometric(0.9)

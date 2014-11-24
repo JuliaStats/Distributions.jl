@@ -54,8 +54,6 @@ function entropy(d::Bernoulli)
     (p0 == 0.0 || p0 == 1.0) ? 0.0 : -(p0 * log(p0) + p1 * log(p1))
 end
 
-
-
 #### Evaluation
 
 pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)

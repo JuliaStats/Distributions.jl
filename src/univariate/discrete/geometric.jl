@@ -39,10 +39,15 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 ### Evaluations
 
 function pdf(d::Geometric, x::Real)
-    !insupport(d,x) && return 0.0
-    p = succprob(d)
-    p < 0.5 ? p * exp(log1p(-p)*x) : p*(1.0-p)^x
+    if insupport(d, x) 
+        p = d.p
+        return p < 0.1 ? p * exp(log1p(-p) * x) : d.p * (1.0 - p)^x
+    else 
+        return 0.0
+    end
 end
+
+logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.p) + log1p(-d.p) * x : -Inf
 
 immutable RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
     p0::Float64
@@ -52,8 +57,6 @@ RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d
 nextpdf(s::RecursiveGeomProbEvaluator, p::Float64, x::Integer) = p * s.p0
 _pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
 
-
-logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.p) + log1p(-d.p) * x : -Inf
 
 function cdf(d::Geometric, x::Real) 
     x < zero(x) && return 0.0
