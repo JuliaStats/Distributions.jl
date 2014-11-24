@@ -1,91 +1,77 @@
 immutable Beta <: ContinuousUnivariateDistribution
-    alpha::Float64
-    beta::Float64
+    α::Float64
+    β::Float64
+
     function Beta(a::Real, b::Real)
-        (a > zero(a) && b > zero(b)) || error("alpha and beta must be positive")
+        (a > zero(a) && b > zero(b)) || error("α and β must be positive")
         new(float64(a), float64(b))
     end
-end
 
-Beta(a::Real) = Beta(a, a) # symmetric in [0, 1]
-Beta() = Beta(1.0) # uniform
+    Beta(α::Real) = Beta(α, α)
+    Beta() = new(1.0, 1.0)
+end
 
 @_jl_dist_2p Beta beta
 
 @distr_support Beta 0.0 1.0
 
-function entropy(d::Beta)
-    o = lbeta(d.alpha, d.beta)
-    o -= (d.alpha - 1.0) * digamma(d.alpha)
-    o -= (d.beta - 1.0) * digamma(d.beta)
-    o += (d.alpha + d.beta - 2.0) * digamma(d.alpha + d.beta)
-    o
+
+#### Parameters
+
+params(d::Beta) = (d.α, d.β)
+
+
+#### Statistics
+
+mean(d::Beta) = ((α, β) = params(d); α / (α + β)) 
+
+function mode(d::Beta)
+    (α, β) = params(d)
+    (α > 1.0 && β > 1.0) || error("mode is defined only when α > 1 and β > 1.")
+    return (α - 1.0) / (α + β - 2.0)
+end
+
+modes(d::Beta) = [mode(d)]
+
+function var(d::Beta)
+    (α, β) = params(d)
+    s = α + β
+    return (α * β) / (abs2(s) * (s + 1.0))
+end
+
+meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
+
+varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
+
+function skewness(d::Beta)
+    (α, β) = params(d)
+    if α == β
+        return 0.0
+    else
+        s = α + β
+        (2.0 * (β - α) * sqrt(s + 1.0)) / ((s + 2.0) * sqrt(α * β))
+    end
 end
 
 function kurtosis(d::Beta)
-    α, β = d.alpha, d.beta
-    num = 6.0 * ((α - β)^2 * (α + β + 1.0) - α * β * (α + β + 2.0))
-    den = α * β * (α + β + 2.0) * (α + β + 3.0)
-    num / den
+    α, β = params(d)
+    s = α + β
+    p = α * β
+    6.0 * (abs2(α - β) * (s + 1.0) - p * (s + 2.0)) / (p * (s + 2.0) * (s + 3.0))
 end
 
-mean(d::Beta) = d.alpha / (d.alpha + d.beta)
-
-median(d::Beta) = quantile(d, 0.5)
-
-function mode(d::Beta)
-    α, β = d.alpha, d.beta
-    if α >= 1.0
-        if β > 1.0
-            (α - 1.0) / (α + β - 2.0)
-        elseif α == 1.0 && β == 1.0
-            # Uniform[0,1]: what should be returned?
-            0.5
-        else
-            1.0
-        end
-    else
-        if β >= 1.0
-            0.0
-        else
-            # not unique: return largest
-            α > β ? 1.0 : 0.0
-        end
-    end
+function entropy(d::Beta)
+    α, β = params(d)
+    s = α + β
+    lbeta(α, β) - (α - 1.0) * digamma(α) - (β - 1.0) * digamma(β) + 
+        (s - 2.0) * digamma(s)
 end
 
-function modes(d::Beta)
-    α, β = d.alpha, d.beta
-    if α >= 1.0
-        if β > 1.0
-            [(α - 1.0) / (α + β - 2.0)]
-        elseif α == 1.0 && β == 1.0
-            # Uniform[0,1]: what should be returned?
-            Float64[]
-        else
-            [1.0]
-        end
-    else
-        if β >= 1.0
-            [0.0]
-        else
-            [0.0,1.0]
-        end
-    end
-end
 
-function skewness(d::Beta)
-    num = 2.0 * (d.beta - d.alpha) * sqrt(d.alpha + d.beta + 1.0)
-    den = (d.alpha + d.beta + 2.0) * sqrt(d.alpha * d.beta)
-    num / den
-end
+#### Evaluation
 
-function var(d::Beta)
-    ab = d.alpha + d.beta
-    d.alpha * d.beta / (ab * ab * (ab + 1.0))
-end
-
-gradlogpdf(d::Beta, x::Float64) = 0.0 <= x <= 1.0 ? (d.alpha - 1.0) / x - (d.beta - 1.0) / (1 - x) : 0.0
+gradlogpdf(d::Beta, x::Float64) = 
+    ((α, β) = params(d); 0.0 <= x <= 1.0 ? (α - 1.0) / x - (β - 1.0) / (1 - x) : 0.0)
 
 
 ## Fit model
@@ -94,10 +80,7 @@ gradlogpdf(d::Beta, x::Float64) = 0.0 <= x <= 1.0 ? (d.alpha - 1.0) / x - (d.bet
 
 # This is a moment-matching method (not MLE)
 #
-function fit(::Type{Beta}, x::Array)
-    for xi in x
-        insupport(Beta, xi) || error("Beta observations must be in [0,1]")
-    end
+function fit(::Type{Beta}, x::AbstractArray)
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     α = x_bar * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)

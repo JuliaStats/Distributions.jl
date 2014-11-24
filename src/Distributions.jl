@@ -194,6 +194,7 @@ export
     mean,               # mean of distribution
     meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
+    meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
     mode,               # the mode of a unimodal distribution
@@ -220,6 +221,7 @@ export
     test_samples,       # test a sampler
     test_distr,         # test a distribution
     var,                # variance of distribution
+    varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
     gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
 

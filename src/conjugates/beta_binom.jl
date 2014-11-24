@@ -4,8 +4,8 @@
 #   Beta - Binomial
 #
 
-posterior_canon(pri::Beta, ss::BernoulliStats) = Beta(pri.alpha + ss.cnt1, pri.beta + ss.cnt0)
-posterior_canon(pri::Beta, ss::BinomialStats) = Beta(pri.alpha + ss.ns, pri.beta + (ss.ne * ss.n - ss.ns))
+posterior_canon(pri::Beta, ss::BernoulliStats) = Beta(pri.α + ss.cnt1, pri.β + ss.cnt0)
+posterior_canon(pri::Beta, ss::BinomialStats) = Beta(pri.α + ss.ns, pri.β + (ss.ne * ss.n - ss.ns))
 
 complete(G::Type{Bernoulli}, pri::Beta, p::Float64) = Bernoulli(p)
 
