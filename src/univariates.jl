@@ -122,23 +122,23 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 
 ## pdf, cdf, and friends
 
-logpdf(d::UnivariateDistribution, x::Number) = log(pdf(d, x))
+logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 
-function cdf(d::DiscreteUnivariateDistribution, k::Real)
+function cdf(d::DiscreteUnivariateDistribution, x::Real)
     c = 0.0
-    for x = minimum(d):int(k)
+    for y = minimum(d):ifloor(x)
         c += pdf(d, x)
     end 
     return c
 end
 
-ccdf(d::UnivariateDistribution, q::Real) = 1.0 - cdf(d, q)
-cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
+ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
+logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
+logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 
-logcdf(d::UnivariateDistribution, q::Real) = log(cdf(d,q))
-logccdf(d::UnivariateDistribution, q::Real) = log(ccdf(d,q))
-invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
-invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
+cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - float64(p))
+invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(float64(lp)))
+invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(float64(lp)))
 
 # vectorized versions
 for fun in [:pdf, :logpdf, 
