@@ -7,6 +7,10 @@ immutable NoncentralChisq <: ContinuousUnivariateDistribution
     end
 end
 
+@_jl_dist_2p NoncentralChisq nchisq
+
+@distr_support NoncentralChisq 0.0 Inf
+
 mean(d::NoncentralChisq) = d.df + d.ncp
 var(d::NoncentralChisq) = 2.0*(d.df + 2.0*d.ncp)
 skewness(d::NoncentralChisq) = 2.0*sqrt2*(d.df + 3.0*d.ncp)/sqrt(d.df + 2.0*d.ncp)^3
@@ -19,7 +23,5 @@ end
 
 cf(d::NoncentralChisq, t::Real) = exp(im * d.ncp * t/(1.0 - 2.0 * im * t))*(1.0 - 2.0 * im * t)^(-d.df / 2.0)
 
-@_jl_dist_2p NoncentralChisq nchisq
 
-@distr_support NoncentralChisq 0.0 Inf
 

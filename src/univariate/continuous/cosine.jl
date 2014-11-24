@@ -25,9 +25,9 @@ median(d::Cosine) = 0.5
 
 mode(d::Cosine) = 0.5
 
-pdf(d::Cosine, x::Real) = zero(x) <= x <= one(x) ? 0.5 * cos(x) : 0.0
+pdf(d::Cosine, x::Float64) = 0.0 <= x <= 1.0 ? 0.5 * cos(x) : 0.0
 
-quantile(d::Cosine, p::Real) = asin(2.p - 1.0)
+quantile(d::Cosine, p::Float64) = asin(2.p - 1.0)
 
 rand(d::Cosine) = sin(rand() * pi / 2.0)^2
 

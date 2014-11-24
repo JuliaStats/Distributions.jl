@@ -38,8 +38,8 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
 ### Evaluations
 
-function pdf(d::Geometric, x::Real)
-    if insupport(d, x) 
+function pdf(d::Geometric, x::Int)
+    if x >= 0 
         p = d.p
         return p < 0.1 ? p * exp(log1p(-p) * x) : d.p * (1.0 - p)^x
     else 
@@ -47,7 +47,7 @@ function pdf(d::Geometric, x::Real)
     end
 end
 
-logpdf(d::Geometric, x::Real) = insupport(d,x) ? log(d.p) + log1p(-d.p) * x : -Inf
+logpdf(d::Geometric, x::Int) = x >= 0 ? log(d.p) + log1p(-d.p) * x : -Inf
 
 immutable RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
     p0::Float64
@@ -58,36 +58,36 @@ nextpdf(s::RecursiveGeomProbEvaluator, p::Float64, x::Integer) = p * s.p0
 _pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
 
 
-function cdf(d::Geometric, x::Real) 
-    x < zero(x) && return 0.0
+function cdf(d::Geometric, x::Int) 
+    x < 0 && return 0.0
     p = succprob(d)
-    n = floor(x) + 1.0
+    n = x + 1
     p < 0.5 ? -expm1(log1p(-p)*n) : 1.0-(1.0-p)^n
 end
 
-function ccdf(d::Geometric, x::Real)
-    x < zero(x) && return 1.0 
+function ccdf(d::Geometric, x::Int)
+    x < 0 && return 1.0 
     p = succprob(d)
-    n = floor(x) + 1.0
+    n = x + 1
     p < 0.5 ? exp(log1p(-p)*n) : (1.0-p)^n
 end
 
-logcdf(d::Geometric, q::Real) = q < zero(q) ? -Inf : log1mexp(log1p(-d.p) * (floor(q) + 1.0))
+logcdf(d::Geometric, x::Int) = x < 0 ? -Inf : log1mexp(log1p(-d.p) * (x + 1))
 
-logccdf(d::Geometric, q::Real) =  q < zero(q) ? 0.0 : log1p(-d.p) * (floor(q) + 1.0)
+logccdf(d::Geometric, x::Int) =  x < 0 ? 0.0 : log1p(-d.p) * (x + 1)
 
-quantile(d::Geometric, p::Real) = invlogccdf(d, log1p(-p))
+quantile(d::Geometric, p::Float64) = invlogccdf(d, log1p(-p))
 
-cquantile(d::Geometric, p::Real) = invlogccdf(d, log(p))
+cquantile(d::Geometric, p::Float64) = invlogccdf(d, log(p))
 
-invlogcdf(d::Geometric, lp::Real) = invlogccdf(d,log1mexp(lp))
+invlogcdf(d::Geometric, lp::Float64) = invlogccdf(d, log1mexp(lp))
 
-function invlogccdf(d::Geometric, lp::Real) 
-    if (lp > zero(lp)) || isnan(lp)
+function invlogccdf(d::Geometric, lp::Float64) 
+    if (lp > 0.0) || isnan(lp)
         return NaN
     elseif isinf(lp)
         return Inf
-    elseif lp == zero(lp)
+    elseif lp == 0.0
         return 0.0
     end
     max(ceil(lp/log1p(-d.p))-1.0,0.0)

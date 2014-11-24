@@ -136,11 +136,9 @@ function cdf(d::Categorical, x::Int)
     return c
 end
 
-cdf(d::Categorical, x::Real) = cdf(d, int(x))
+pdf(d::Categorical, x::Int) = insupport(d, x) ? d.p[x] : 0.0
 
-pdf(d::Categorical, x::Real) = insupport(d, x) ? d.p[x] : 0.0
-
-logpdf(d::Categorical, x::Real) = insupport(d, x) ? log(d.p[x]) : -Inf
+logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(d.p[x]) : -Inf
 
 pdf(d::Categorical) = copy(d.p)
 
@@ -168,8 +166,8 @@ function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
 end
 
 
-function quantile(d::Categorical, p::Real)
-    zero(p) <= p <= one(p) || throw(DomainError())
+function quantile(d::Categorical, p::Float64)
+    0.0 <= p <= 1.0 || throw(DomainError())
     k = ncategories(d)
     pv = probs(d)
     i = 1

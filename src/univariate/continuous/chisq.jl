@@ -34,9 +34,7 @@ cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
 
 mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
 
-function gradlogpdf(d::Chisq, x::Real)
-  insupport(Chisq, x) ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
-end
+gradlogpdf(d::Chisq, x::Float64) =  x >= 0.0 ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
 
 skewness(d::Chisq) = sqrt(8.0 / d.df)
 

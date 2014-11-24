@@ -7,7 +7,7 @@ end
 @distr_support KSOneSided 0.0 1.0
 
 # formula of Birnbaum and Tingey (1951)
-function ccdf(d::KSOneSided,x::Real)
+function ccdf(d::KSOneSided, x::Float64)
     if x >= 1.0
         return 0.0
     elseif x <= 0.0
@@ -21,5 +21,6 @@ function ccdf(d::KSOneSided,x::Real)
     end
     s*x
 end
-cdf(d::KSOneSided,x::Real) = 1.0 - ccdf(d,x)
+
+cdf(d::KSOneSided, x::Float64) = 1.0 - ccdf(d,x)
 

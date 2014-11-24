@@ -7,9 +7,9 @@ immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,Component<:Distribution}
     prior::Categorical
 end
 
-typealias UnivariateMixture    AbstractMixtureModel{Univariate} 
-typealias MultivariateMixture  AbstractMixtureModel{Multivariate}
-typealias MatrixvariateMixture AbstractMixtureModel{Matrixvariate}
+typealias UnivariateMixture{S<:ValueSupport}    AbstractMixtureModel{Univariate,S} 
+typealias MultivariateMixture{S<:ValueSupport}  AbstractMixtureModel{Multivariate,S}
+typealias MatrixvariateMixture{S<:ValueSupport} AbstractMixtureModel{Matrixvariate,S}
 
 
 #### Constructors
@@ -233,8 +233,11 @@ function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
     return r
 end
 
-pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
-logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
+pdf(d::UnivariateMixture{Continuous}, x::Float64) = _mixpdf1(d, x)
+pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
+logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)
+logpdf(d::UnivariateMixture{Discrete}, x::Int) = _mixlogpdf1(d, x)
+
 _pdf!(r::AbstractArray, d::UnivariateMixture, x::DenseArray) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray, d::UnivariateMixture, x::DenseArray) = _mixlogpdf!(r, d, x)
 

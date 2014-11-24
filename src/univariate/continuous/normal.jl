@@ -30,26 +30,26 @@ entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
 
 
 ## Functions
-zval(d::Normal, x::Real) = (x - d.μ)/d.σ
-xval(d::Normal, z::Real) = d.μ + d.σ * z
+zval(d::Normal, x::Float64) = (x - d.μ)/d.σ
+xval(d::Normal, z::Float64) = d.μ + d.σ * z
 
-pdf(d::Normal, x::Real) = φ(zval(d,x))/d.σ
-logpdf(d::Normal, x::Real) = logφ(zval(d,x)) - log(d.σ)
+pdf(d::Normal, x::Float64) = φ(zval(d,x))/d.σ
+logpdf(d::Normal, x::Float64) = logφ(zval(d,x)) - log(d.σ)
 
-cdf(d::Normal, x::Real) = Φ(zval(d,x))
-ccdf(d::Normal, x::Real) = Φc(zval(d,x))
-logcdf(d::Normal, x::Real) = logΦ(zval(d,x))
-logccdf(d::Normal, x::Real) = logΦc(zval(d,x))    
+cdf(d::Normal, x::Float64) = Φ(zval(d,x))
+ccdf(d::Normal, x::Float64) = Φc(zval(d,x))
+logcdf(d::Normal, x::Float64) = logΦ(zval(d,x))
+logccdf(d::Normal, x::Float64) = logΦc(zval(d,x))    
 
-quantile(d::Normal, p::Real) = xval(d, Φinv(p))
-cquantile(d::Normal, p::Real) = xval(d, -Φinv(p))
-invlogcdf(d::Normal, p::Real) = xval(d, logΦinv(p))
-invlogccdf(d::Normal, p::Real) = xval(d, -logΦinv(p))
+quantile(d::Normal, p::Float64) = xval(d, Φinv(p))
+cquantile(d::Normal, p::Float64) = xval(d, -Φinv(p))
+invlogcdf(d::Normal, p::Float64) = xval(d, logΦinv(p))
+invlogccdf(d::Normal, p::Float64) = xval(d, -logΦinv(p))
+
+gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
-
-gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 ## Sampling
 rand(d::Normal) = d.μ + d.σ * randn()

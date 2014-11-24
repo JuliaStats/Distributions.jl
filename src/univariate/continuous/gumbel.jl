@@ -27,24 +27,27 @@ median(d::Gumbel) = d.mu - d.beta * log(log(2.0))
 
 mode(d::Gumbel) = d.mu
 
-function pdf(d::Gumbel, x::Real)
-    z = (x - d.mu) / d.beta
-    exp(-z - exp(-z)) / d.beta
-end
-
-function logpdf(d::Gumbel, x::Real)
-    z = (x - d.mu) / d.beta
-    -z - exp(-z) - log(d.beta)
-end
-
-quantile(d::Gumbel, p::Real) = d.mu - d.beta * log(-log(p))
-
-rand(d::Gumbel) = d.mu - d.beta * log(-log(rand()))
-
 skewness(d::Gumbel) = 12.0 * sqrt(6.0) * zeta(3.0) / pi^3
 
 var(d::Gumbel) = pi^2 / 6.0 * d.beta^2
 
-function gradlogpdf(d::Gumbel, x::Real)
+function pdf(d::Gumbel, x::Float64)
+    z = (x - d.mu) / d.beta
+    exp(-z - exp(-z)) / d.beta
+end
+
+function logpdf(d::Gumbel, x::Float64)
+    z = (x - d.mu) / d.beta
+    -z - exp(-z) - log(d.beta)
+end
+
+quantile(d::Gumbel, p::Float64) = d.mu - d.beta * log(-log(p))
+
+function gradlogpdf(d::Gumbel, x::Float64)
   - (1.0 + exp((d.mu - x) / d.beta)) / d.beta
 end
+
+rand(d::Gumbel) = d.mu - d.beta * log(-log(rand()))
+
+
+

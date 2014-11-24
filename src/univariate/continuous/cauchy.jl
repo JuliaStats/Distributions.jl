@@ -25,18 +25,18 @@ kurtosis(d::Cauchy) = NaN
 entropy(d::Cauchy) = log(d.scale) + log(4.0 * pi)
 
 ## Functions
-pdf(d::Cauchy, x::Real) = 1/(pi*d.scale*(1+((x-d.location)/d.scale)^2))
-logpdf(d::Cauchy, x::Real) = -log(pi) - log(d.scale) - log1psq((x-d.location)/d.scale)
+pdf(d::Cauchy, x::Float64) = 1/(pi*d.scale*(1+((x-d.location)/d.scale)^2))
+logpdf(d::Cauchy, x::Float64) = -log(pi) - log(d.scale) - log1psq((x-d.location)/d.scale)
 
-cdf(d::Cauchy, x::Real) = atan2(one(x),-(x-d.location)/d.scale)/pi
-ccdf(d::Cauchy, x::Real) = atan2(one(x),(x-d.location)/d.scale)/pi
-logcdf(d::Cauchy, x::Real) = x <= d.location ? log(cdf(d,x)) : log1p(-ccdf(d,x))
-logccdf(d::Cauchy, x::Real) = x <= d.location ? log1p(-cdf(d,x)) : log(ccdf(d,x))
+cdf(d::Cauchy, x::Float64) = atan2(one(x),-(x-d.location)/d.scale)/pi
+ccdf(d::Cauchy, x::Float64) = atan2(one(x),(x-d.location)/d.scale)/pi
+logcdf(d::Cauchy, x::Float64) = x <= d.location ? log(cdf(d,x)) : log1p(-ccdf(d,x))
+logccdf(d::Cauchy, x::Float64) = x <= d.location ? log1p(-cdf(d,x)) : log(ccdf(d,x))
 
-quantile(d::Cauchy, p::Real) = @checkquantile p d.location - d.scale*cospi(p)/sinpi(p)
-cquantile(d::Cauchy, p::Real) = @checkquantile p d.location + d.scale*cospi(p)/sinpi(p)
-invlogcdf(d::Cauchy, lp::Real) = lp < loghalf ? quantile(d,exp(lp)) : cquantile(d,-expm1(lp))
-invlogccdf(d::Cauchy, lp::Real) = lp < loghalf ? cquantile(d,exp(lp)) : quantile(d,-expm1(lp))
+quantile(d::Cauchy, p::Float64) = @checkquantile p d.location - d.scale*cospi(p)/sinpi(p)
+cquantile(d::Cauchy, p::Float64) = @checkquantile p d.location + d.scale*cospi(p)/sinpi(p)
+invlogcdf(d::Cauchy, lp::Float64) = lp < loghalf ? quantile(d,exp(lp)) : cquantile(d,-expm1(lp))
+invlogccdf(d::Cauchy, lp::Float64) = lp < loghalf ? cquantile(d,exp(lp)) : quantile(d,-expm1(lp))
 
 mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
 cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))

@@ -17,6 +17,8 @@ immutable EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
 	var::Float64
 end
 
+@distr_support EmpiricalUnivariateDistribution d.values[1] d.values[end]
+
 function EmpiricalUnivariateDistribution(x::Vector)
     sx = sort(x)
 	EmpiricalUnivariateDistribution(sx,
@@ -31,8 +33,6 @@ function EmpiricalUnivariateDistribution(x::Vector)
 	                                var(x))
 end
 
-cdf(d::EmpiricalUnivariateDistribution, q::Real) = d.cdf(q)
-
 entropy(d::EmpiricalUnivariateDistribution) = d.entropy
 
 kurtosis(d::EmpiricalUnivariateDistribution) = d.kurtosis
@@ -43,12 +43,21 @@ median(d::EmpiricalUnivariateDistribution) = d.median
 
 modes(d::EmpiricalUnivariateDistribution) = Float64[]
 
-function pdf(d::EmpiricalUnivariateDistribution, x::Real)
+skewness(d::EmpiricalUnivariateDistribution) = NaN
+
+var(d::EmpiricalUnivariateDistribution) = d.var
+
+
+### Evaluation
+
+cdf(d::EmpiricalUnivariateDistribution, x::Float64) = d.cdf(x)
+
+function pdf(d::EmpiricalUnivariateDistribution, x::Float64)
     ## TODO: Create lookup table for discrete case
     1.0 / length(d.values)
 end
 
-function quantile(d::EmpiricalUnivariateDistribution, p::Real)
+function quantile(d::EmpiricalUnivariateDistribution, p::Float64)
     n = length(d.values)
     index = ifloor(p * n) + 1
     index > n ? d.values[n] : d.values[index]
@@ -58,22 +67,6 @@ function rand(d::EmpiricalUnivariateDistribution)
     d.values[rand(1:length(d.values))]
 end
 
-skewness(d::EmpiricalUnivariateDistribution) = NaN
-
-var(d::EmpiricalUnivariateDistribution) = d.var
-
-### handling support
-
-insupport(d::EmpiricalUnivariateDistribution, x::Real) = contains(d.support, x)
-
-isupperbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
-islowerbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
-isbounded(::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
-
-hasfinitesupport(d::Union(EmpiricalUnivariateDistribution, Type{EmpiricalUnivariateDistribution})) = true
-minimum(d::EmpiricalUnivariateDistribution) = d.values[1]
-maximum(d::EmpiricalUnivariateDistribution) = d.values[end]
-support(d::EmpiricalUnivariateDistribution) = d.support
 
 ### fit model
 

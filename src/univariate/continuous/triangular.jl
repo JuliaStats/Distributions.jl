@@ -27,7 +27,7 @@ kurtosis(d::TriangularDist) = -0.6
 entropy(d::TriangularDist) = 0.5 + log((d.b-d.a)/2.0)
 
 ## Functions
-function pdf(d::TriangularDist, x::Real)
+function pdf(d::TriangularDist, x::Float64)
     if d.a<=x<=d.c
         return 2.0*(x-d.a)/(d.b-d.a)/(d.c-d.a)
     elseif d.c<x<=d.b
@@ -37,7 +37,7 @@ function pdf(d::TriangularDist, x::Real)
     end
 end
 
-function cdf(d::TriangularDist, x::Real)
+function cdf(d::TriangularDist, x::Float64)
     if x<d.a
         return zero(x)
     elseif d.a<=x<=d.c
@@ -49,7 +49,7 @@ function cdf(d::TriangularDist, x::Real)
     end
 end
 
-function quantile(d::TriangularDist, p::Real)
+function quantile(d::TriangularDist, p::Float64)
     @checkquantile p begin
         if p <= (d.c-d.a)/(d.b-d.a)
             return d.a + sqrt((d.b-d.a)*(d.c-d.a)*p)

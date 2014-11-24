@@ -12,51 +12,52 @@ macro _jl_dist_1p(T, b)
     dc = Ty <: DiscreteDistribution
     pn = Ty.names                       # parameter names
     p  = Expr(:quote, pn[1])
+    Tx = dc ? (:Int) : (:Float64)
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
-        function pdf(d::($T), x::Real)
+        function pdf(d::($T), x::($Tx))
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Int32),
                   x, d.($p), 0)
         end
-        function logpdf(d::($T), x::Real)
+        function logpdf(d::($T), x::($Tx))
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Int32),
                   x, d.($p), 1)
         end
-        function cdf(d::($T), q::Real)
+        function cdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Int32, Int32),
-                  q, d.($p), 1, 0)
+                  x, d.($p), 1, 0)
         end
-        function logcdf(d::($T), q::Real)
+        function logcdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Int32, Int32),
-                  q, d.($p), 1, 1)
+                  x, d.($p), 1, 1)
         end
-        function ccdf(d::($T), q::Real)
+        function ccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Int32, Int32),
-                  q, d.($p), 0, 0)
+                  x, d.($p), 0, 0)
         end
-        function logccdf(d::($T), q::Real)
+        function logccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64, (Float64, Float64, Int32, Int32),
-                  q, d.($p), 0, 1)
+                  x, d.($p), 0, 1)
         end
-        function quantile(d::($T), p::Real)
+        function quantile(d::($T), p::Float64)
             ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   p, d.($p), 1, 0)
         end
-        function cquantile(d::($T), p::Real)
+        function cquantile(d::($T), p::Float64)
             ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   p, d.($p), 0, 0)
         end
-        function invlogcdf(d::($T), lp::Real)
+        function invlogcdf(d::($T), lp::Float64)
             ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   lp, d.($p), 1, 1)
         end
-        function invlogccdf(d::($T), lp::Real)
+        function invlogccdf(d::($T), lp::Float64)
             ccall(($qq, Rmath), Float64, (Float64, Float64, Int32, Int32),
                   lp, d.($p), 0, 1)
         end
@@ -82,60 +83,61 @@ macro _jl_dist_2p(T, b)
     pn = Ty.names                       # parameter names
     p1 = Expr(:quote, pn[1])
     p2 = Expr(:quote, pn[2])
+    Tx = dc ? (:Int) : (:Float64)
     if string(b) == "norm"              # normal dist has unusual names
         dd = Expr(:quote, :dnorm4)
         pp = Expr(:quote, :pnorm5)
         qq = Expr(:quote, :qnorm5)
-    end
+    end    
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
-        function pdf(d::($T), x::Real)
+        function pdf(d::($T), x::($Tx))
             ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 0)
         end
-        function logpdf(d::($T), x::Real)
+        function logpdf(d::($T), x::($Tx))
             ccall(($dd, Rmath),
                   Float64, (Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), 1)
         end
-        function cdf(d::($T), q::Real)
+        function cdf(d::($T), x::($Tx))
             ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), 1, 0)
+                  x, d.($p1), d.($p2), 1, 0)
         end
-        function logcdf(d::($T), q::Real)
+        function logcdf(d::($T), x::($Tx))
             ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), 1, 1)
+                  x, d.($p1), d.($p2), 1, 1)
         end
-        function ccdf(d::($T), q::Real)
+        function ccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), 0, 0)
+                  x, d.($p1), d.($p2), 0, 0)
         end
-        function logccdf(d::($T), q::Real)
+        function logccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), 0, 1)
+                  x, d.($p1), d.($p2), 0, 1)
         end
-        function quantile(d::($T), p::Real)
+        function quantile(d::($T), p::Float64)
             ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), 1, 0)
         end
-        function cquantile(d::($T), p::Real)
+        function cquantile(d::($T), p::Float64)
             ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), 0, 0)
         end
-        function invlogcdf(d::($T), lp::Real)
+        function invlogcdf(d::($T), lp::Float64)
             ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), 1, 1)
         end
-        function invlogccdf(d::($T), lp::Real)
+        function invlogccdf(d::($T), lp::Float64)
             ccall(($qq, Rmath),
                   Float64, (Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), 0, 1)
@@ -165,55 +167,56 @@ macro _jl_dist_3p(T, b)
     p1 = Expr(:quote, pn[1])
     p2 = Expr(:quote, pn[2])
     p3 = Expr(:quote, pn[3])
+    Tx = dc ? (:Int) : (:Float64)
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
-        function pdf(d::($T), x::Real)
+        function pdf(d::($T), x::($Tx))
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 0)
         end
-        function logpdf(d::($T), x::Real)
+        function logpdf(d::($T), x::($Tx))
             ccall(($dd, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32),
                   x, d.($p1), d.($p2), d.($p3), 1)
         end
-        function cdf(d::($T), q::Real)
+        function cdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), d.($p3), 1, 0)
+                  x, d.($p1), d.($p2), d.($p3), 1, 0)
         end
-        function logcdf(d::($T), q::Real)
+        function logcdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), d.($p3), 1, 1)
+                  x, d.($p1), d.($p2), d.($p3), 1, 1)
         end
-        function ccdf(d::($T), q::Real)
+        function ccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), d.($p3), 0, 0)
+                  x, d.($p1), d.($p2), d.($p3), 0, 0)
         end
-        function logccdf(d::($T), q::Real)
+        function logccdf(d::($T), x::($Tx))
             ccall(($pp, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
-                  q, d.($p1), d.($p2), d.($p3), 0, 1)
+                  x, d.($p1), d.($p2), d.($p3), 0, 1)
         end
-        function quantile(d::($T), p::Real)
+        function quantile(d::($T), p::Float64)
             ccall(($qq, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), d.($p3), 1, 0)
         end
-        function cquantile(d::($T), p::Real)
+        function cquantile(d::($T), p::Float64)
             ccall(($qq, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
                   p, d.($p1), d.($p2), d.($p3), 0, 0)
         end
-        function invlogcdf(d::($T), lp::Real)
+        function invlogcdf(d::($T), lp::Float64)
             ccall(($qq, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), d.($p3), 1, 1)
         end
-        function invlogccdf(d::($T), lp::Real)
+        function invlogccdf(d::($T), lp::Float64)
             ccall(($qq, Rmath), Float64,
                   (Float64, Float64, Float64, Float64, Int32, Int32),
                   lp, d.($p1), d.($p2), d.($p3), 0, 1)

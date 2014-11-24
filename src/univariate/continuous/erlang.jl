@@ -20,8 +20,6 @@ end
 
 @distr_support Erlang 0.0 Inf
 
-cdf(d::Erlang, x::Real) = cdf(d.nested_gamma, x)
-
 entropy(d::Erlang) = entropy(d.nested_gamma)
 
 kurtosis(d::Erlang) = kurtosis(d.nested_gamma)
@@ -30,18 +28,28 @@ mean(d::Erlang) = d.shape * d.scale
 
 median(d::Erlang) = median(d.nested_gamma)
 
-mgf(d::Erlang, t::Real) = mgf(d.nested_gamma, t)
-cf(d::Erlang, t::Real) = cf(d.nested_gamma, t)
-
 mode(d::Erlang) = mode(d.nested_gamma)
 modes(d::Erlang) = modes(d.nested_gamma)
 
-function pdf(d::Erlang, x::Real)
+skewness(d::Erlang) = skewness(d.nested_gamma)
+
+var(d::Erlang) = d.scale^2 * d.shape
+
+show(io::IO, d::Erlang) = show(io, d, (:shape, :scale))
+
+
+function pdf(d::Erlang, x::Float64)
     b, c = d.scale, d.shape
     ((x / b)^(c - 1.0) * exp(-x / b)) / (b * gamma(c))
 end
 
-quantile(d::Erlang, p::Real) = quantile(d.nested_gamma, p)
+cdf(d::Erlang, x::Float64) = cdf(d.nested_gamma, x)
+
+quantile(d::Erlang, p::Float64) = quantile(d.nested_gamma, p)
+
+mgf(d::Erlang, t::Real) = mgf(d.nested_gamma, t)
+cf(d::Erlang, t::Real) = cf(d.nested_gamma, t)
+
 
 function rand(d::Erlang)
     b, c = d.scale, d.shape
@@ -52,8 +60,4 @@ function rand(d::Erlang)
     -b * log(z)
 end
 
-skewness(d::Erlang) = skewness(d.nested_gamma)
 
-var(d::Erlang) = d.scale^2 * d.shape
-
-show(io::IO, d::Erlang) = show(io, d, (:shape, :scale))

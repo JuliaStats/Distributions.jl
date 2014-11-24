@@ -23,22 +23,29 @@ kurtosis(d::InverseGamma) = d.shape > 4.0 ? (30.0 * d.shape - 66.0) / ((d.shape 
 
 mode(d::InverseGamma) = d.scale / (d.shape + 1.0)
 
-cdf(d::InverseGamma, x::Real) = ccdf(_inv(d), 1.0 / x)
-ccdf(d::InverseGamma, x::Real) = cdf(_inv(d), 1.0 / x)
-logcdf(d::InverseGamma, x::Real) = logccdf(_inv(d), 1.0 / x)
-logccdf(d::InverseGamma, x::Real) = logcdf(_inv(d), 1.0 / x)
-
-quantile(d::InverseGamma, p::Real) = 1.0 / cquantile(_inv(d), p)
-cquantile(d::InverseGamma, p::Real) = 1.0 / quantile(_inv(d), p)
-invlogcdf(d::InverseGamma, p::Real) = 1.0 / invlogccdf(_inv(d), p)
-invlogccdf(d::InverseGamma, p::Real) = 1.0 / invlogcdf(_inv(d), p)
-
 function entropy(d::InverseGamma)
     a = d.shape
     b = d.scale
     a + log(b) + lgamma(a) - (1.0 + a) * digamma(a)
 end
 
+pdf(d::InverseGamma, x::Float64) = exp(logpdf(d, x))
+
+function logpdf(d::InverseGamma, x::Float64)
+    a = d.shape
+    b = d.scale
+    a * log(b) - lgamma(a) - (a + 1.0) * log(x) - b / x
+end
+
+cdf(d::InverseGamma, x::Float64) = ccdf(_inv(d), 1.0 / x)
+ccdf(d::InverseGamma, x::Float64) = cdf(_inv(d), 1.0 / x)
+logcdf(d::InverseGamma, x::Float64) = logccdf(_inv(d), 1.0 / x)
+logccdf(d::InverseGamma, x::Float64) = logcdf(_inv(d), 1.0 / x)
+
+quantile(d::InverseGamma, p::Float64) = 1.0 / cquantile(_inv(d), p)
+cquantile(d::InverseGamma, p::Float64) = 1.0 / quantile(_inv(d), p)
+invlogcdf(d::InverseGamma, p::Float64) = 1.0 / invlogccdf(_inv(d), p)
+invlogccdf(d::InverseGamma, p::Float64) = 1.0 / invlogcdf(_inv(d), p)
 
 function mgf(d::InverseGamma, t::Real)
     a = d.shape
@@ -50,14 +57,6 @@ function cf(d::InverseGamma, t::Real)
     a = d.shape
     b = d.scale
     t == zero(t) ? complex(one(float(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
-end
-
-pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))
-
-function logpdf(d::InverseGamma, x::Real)
-    a = d.shape
-    b = d.scale
-    a * log(b) - lgamma(a) - (a + 1.0) * log(x) - b / x
 end
 
 rand(d::InverseGamma) = 1.0 / rand(_inv(d))

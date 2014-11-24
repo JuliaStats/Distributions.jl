@@ -45,13 +45,7 @@ cdf(d::Arcsine, x::Float64) = x < d.a ? 0.0 :
                               x > d.b ? 1.0 :
                               0.636619772367581343 * asin(sqrt((x - d.a) / (d.b - d.a)))
 
-
-pdf(d::Arcsine, x::Real) = pdf(d, float64(x))
-logpdf(d::Arcsine, x::Real) = logpdf(d, float64(x))
-cdf(d::Arcsine, x::Real) = cdf(d, float64(x))
-
 quantile(d::Arcsine, p::Float64) = location(d) + abs2(sin(halfπ * p)) * scale(d)
-quantile(d::Arcsine, p::Real) = quantile(d, float64(p))
 
 
 ### Sampling

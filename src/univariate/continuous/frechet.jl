@@ -54,29 +54,28 @@ function entropy(d::Frechet)
 end
 
 ## Functions
-function pdf(d::Frechet, x::Real)
+function pdf(d::Frechet, x::Float64)
     x < zero(x) && return 0.0
     a = d.scale/x
     d.shape/d.scale * a^(d.shape+1.0) * exp(-a^d.shape)
 end
-function logpdf(d::Frechet, x::Real)
+function logpdf(d::Frechet, x::Float64)
     x < zero(x) && return -Inf
     a = d.scale/x
     log(d.shape/d.scale) + (d.shape+1.0)*log(a) - a^d.shape
 end
 
-cdf(d::Frechet, x::Real) = x <= zero(x) ? 0.0 : exp(-((d.scale / x)^d.shape))
-ccdf(d::Frechet, x::Real) = x <= zero(x) ? 1.0 : -expm1(-((d.scale / x)^d.shape))
-logcdf(d::Frechet, x::Real) = x <= zero(x) ? -Inf : -(d.scale / x)^d.shape
-logccdf(d::Frechet, x::Real) = x <= zero(x) ? 0.0 :  log1mexp(-((d.scale / x)^d.shape))
+cdf(d::Frechet, x::Float64) = x <= zero(x) ? 0.0 : exp(-((d.scale / x)^d.shape))
+ccdf(d::Frechet, x::Float64) = x <= zero(x) ? 1.0 : -expm1(-((d.scale / x)^d.shape))
+logcdf(d::Frechet, x::Float64) = x <= zero(x) ? -Inf : -(d.scale / x)^d.shape
+logccdf(d::Frechet, x::Float64) = x <= zero(x) ? 0.0 :  log1mexp(-((d.scale / x)^d.shape))
 
-quantile(d::Frechet, p::Real) = @checkquantile p d.scale*(-log(p))^(-1/d.shape)
-cquantile(d::Frechet, p::Real) = @checkquantile p d.scale*(-log1p(-p))^(-1/d.shape)
-invlogcdf(d::Frechet, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-lp)^(-1/d.shape)
-invlogccdf(d::Frechet, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(-1/d.shape)
+quantile(d::Frechet, p::Float64) = @checkquantile p d.scale*(-log(p))^(-1/d.shape)
+cquantile(d::Frechet, p::Float64) = @checkquantile p d.scale*(-log1p(-p))^(-1/d.shape)
+invlogcdf(d::Frechet, lp::Float64) = lp > zero(lp) ? NaN : d.scale*(-lp)^(-1/d.shape)
+invlogccdf(d::Frechet, lp::Float64) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(-1/d.shape)
 
-
-function gradlogpdf(d::Frechet, x::Real)
+function gradlogpdf(d::Frechet, x::Float64)
   insupport(Frechet, x) ? -(d.shape + 1.0) / x + d.shape * (d.scale^d.shape) * x^(-d.shape - 1.0)  : 0.0
 end
 

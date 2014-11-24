@@ -21,7 +21,7 @@ var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
 # some divergence from Smirnov's table in 6th decimal near 1.0 (e.g. 1.04): occurs in 
 # both series so assume error in table.
 
-function cdf(d::Kolmogorov,x::Real)
+function cdf(d::Kolmogorov,x::Float64)
     if x <= 0.0
         return 0.0
     elseif x > 1.0
@@ -34,7 +34,7 @@ function cdf(d::Kolmogorov,x::Real)
     sqrt2π*s/x
 end
 
-function ccdf(d::Kolmogorov,x::Real)
+function ccdf(d::Kolmogorov,x::Float64)
     if x <= 1.0
         return 1.0-cdf(d,x)
     end
@@ -46,7 +46,7 @@ function ccdf(d::Kolmogorov,x::Real)
 end
 
 # TODO: figure out how best to truncate series
-function pdf(d::Kolmogorov,x::Real)
+function pdf(d::Kolmogorov,x::Float64)
     if x <= 0.0
         return 0.0
     elseif x <= 1.0

@@ -12,11 +12,7 @@ end
 
 # Functions
 
-pdf(d::NoncentralHypergeometric, k::Real) = exp(logpdf(d,k))
-logpdf(d::NoncentralHypergeometric, k::Real) = log(pdf(d,k))
-cdf(d::NoncentralHypergeometric, k::Real) = sum([pdf(d,i) for i in minimum(d):k])
-
-function quantile(d::NoncentralHypergeometric, q::Real)
+function quantile(d::NoncentralHypergeometric, q::Float64)
     if !(zero(q) <= q <= one(q))
         NaN
     else
@@ -72,10 +68,11 @@ mean(d::FisherNoncentralHypergeometric) =_P(d,1) / _P(d,0)
 var(d::FisherNoncentralHypergeometric) = _P(d,2)/_P(d,0) - (_P(d,1) / _P(d,0))^2
 mode(d::FisherNoncentralHypergeometric) = int(floor(_mode(d)))
 
-function logpdf(d::FisherNoncentralHypergeometric, k::Real)
-    isinteger(k) || return 0.0
-    log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0))
-end
+logpdf(d::FisherNoncentralHypergeometric, k::Int) =
+    float64(log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0)))
+
+pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
+
 
 ## Wallenius' noncentral hypergeometric distribution
 
@@ -99,9 +96,14 @@ mean(d::WalleniusNoncentralHypergeometric)=sum(support(d).*pdf(d,support(d)))
 var(d::WalleniusNoncentralHypergeometric) = sum((support(d)-mean(d)).^2.*pdf(d,support(d)))
 mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf(d,support(d)))]
 
-function pdf(d::WalleniusNoncentralHypergeometric, k::Real)
+function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
     D = d.ω*(d.ns-k)+(d.nf-d.n+k)
     f(t) = (1-t^(d.ω/D))^k * (1-t^(1/D))^(d.n-k)
     I,_ = quadgk(f,0,1)
-    binomial(d.ns,k)*binomial(d.nf,d.n-k)*I
+    float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
 end
+
+logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))
+
+
+

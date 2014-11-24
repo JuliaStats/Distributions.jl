@@ -18,38 +18,40 @@ var(d::InverseGaussian) = d.mu*d.mu*d.mu/d.lambda
 skewness(d::InverseGaussian) = 3.0*sqrt(d.mu/d.lambda)
 kurtosis(d::InverseGaussian) = 15.0*d.mu/d.lambda
 
-
-function pdf(d::InverseGaussian, x::Real)
+function pdf(d::InverseGaussian, x::Float64)
     if x <= 0.0
         return 0.0
     end
     dd = x-d.mu
     sqrt(d.lambda/(twoπ*x*x*x))*exp(-d.lambda*dd*dd/(2.0*d.mu*d.mu*x))
 end
-function logpdf(d::InverseGaussian, x::Real)
+
+function logpdf(d::InverseGaussian, x::Float64)
     dd = x-d.mu
     0.5*log(d.lambda/(twoπ*x*x*x))-d.lambda*dd*dd/(2.0*d.mu*d.mu*x)
 end
 
-
-function cdf(d::InverseGaussian, x::Real)
+function cdf(d::InverseGaussian, x::Float64)
     u = sqrt(d.lambda/x)
     v = x/d.mu
     Φ(u*(v-1.0)) + exp(2.0*d.lambda/d.mu)*Φ(-u*(v+1.0))
 end
-function ccdf(d::InverseGaussian, x::Real)
+
+function ccdf(d::InverseGaussian, x::Float64)
     u = sqrt(d.lambda/x)
     v = x/d.mu
     Φc(u*(v-1.0)) - exp(2.0*d.lambda/d.mu)*Φ(-u*(v+1.0))
 end
-function logcdf(d::InverseGaussian, x::Real)
+
+function logcdf(d::InverseGaussian, x::Float64)
     u = sqrt(d.lambda/x)
     v = x/d.mu
     a = logΦ(u*(v-1.0)) 
     b = 2.0*d.lambda/d.mu + logΦ(-u*(v+1.0))
     a + log1pexp(b-a)
 end
-function logccdf(d::InverseGaussian, x::Real)
+
+function logccdf(d::InverseGaussian, x::Float64)
     u = sqrt(d.lambda/x)
     v = x/d.mu
     a = logΦc(u*(v-1.0)) 
@@ -58,7 +60,7 @@ function logccdf(d::InverseGaussian, x::Real)
 end
 
 # TODO: need a more accurate method
-function quantile(d::InverseGaussian, p::Real)
+function quantile(d::InverseGaussian, p::Float64)
     if p <= 0.0 || p >= 1.0
         if p == 1.0
             return inf(Float64)

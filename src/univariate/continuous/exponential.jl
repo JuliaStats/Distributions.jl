@@ -26,23 +26,24 @@ kurtosis(d::Exponential) = 6.0
 entropy(d::Exponential) = 1.0 - log(1.0 / d.scale)
 
 ## Functions
-pdf(d::Exponential, x::Real) = x < zero(x) ? 0.0 : exp(-x / d.scale) / d.scale
-logpdf(d::Exponential, x::Real) =  x < zero(x) ? -Inf : -x / d.scale - log(d.scale)
+pdf(d::Exponential, x::Float64) = x < zero(x) ? 0.0 : exp(-x / d.scale) / d.scale
+logpdf(d::Exponential, x::Float64) =  x < zero(x) ? -Inf : -x / d.scale - log(d.scale)
 
-cdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -expm1(-q / d.scale)
-ccdf(d::Exponential, q::Real) = q <= zero(q) ? 1.0 : exp(-q / d.scale)
-logcdf(d::Exponential, q::Real) = q > zero(q) ? log1mexp(-q / d.scale) : -Inf
-logccdf(d::Exponential, q::Real) = q <= zero(q) ? 0.0 : -q / d.scale
+cdf(d::Exponential, q::Float64) = q <= zero(q) ? 0.0 : -expm1(-q / d.scale)
+ccdf(d::Exponential, q::Float64) = q <= zero(q) ? 1.0 : exp(-q / d.scale)
+logcdf(d::Exponential, q::Float64) = q > zero(q) ? log1mexp(-q / d.scale) : -Inf
+logccdf(d::Exponential, q::Float64) = q <= zero(q) ? 0.0 : -q / d.scale
 
-quantile(d::Exponential, p::Real) = @checkquantile p -d.scale * log1p(-p)
-cquantile(d::Exponential, p::Real) = @checkquantile p -d.scale * log(p)
-invlogcdf(d::Exponential, lp::Real) = @checkinvlogcdf lp -d.scale * log1mexp(lp)
-invlogccdf(d::Exponential, lp::Real) = @checkinvlogcdf lp -d.scale * lp 
+quantile(d::Exponential, p::Float64) = @checkquantile p -d.scale * log1p(-p)
+cquantile(d::Exponential, p::Float64) = @checkquantile p -d.scale * log(p)
+invlogcdf(d::Exponential, lp::Float64) = @checkinvlogcdf lp -d.scale * log1mexp(lp)
+invlogccdf(d::Exponential, lp::Float64) = @checkinvlogcdf lp -d.scale * lp 
+
+gradlogpdf(d::Exponential, x::Float64) = insupport(Exponential, x) ? - 1.0 / d.scale : 0.0
 
 mgf(d::Exponential, t::Real) = 1.0/(1.0 - t * d.scale)
 cf(d::Exponential, t::Real) = 1.0/(1.0 - t * im * d.scale)
 
-gradlogpdf(d::Exponential, x::Real) = insupport(Exponential, x) ? - 1.0 / d.scale : 0.0
 
 ## Sampling
 rand(d::Exponential) = d.scale * Base.Random.randmtzig_exprnd()

@@ -37,17 +37,17 @@ end
 
 entropy(d::Pareto) = log(d.scale / d.shape) + 1. / d.shape + 1.
 
-function pdf(d::Pareto, q::Real)
+function pdf(d::Pareto, q::Float64)
     q >= d.scale ? d.shape * (d.scale/q)^d.shape / q : 0.0
 end
 
-ccdf(d::Pareto, q::Real) = q >= d.scale ? (d.scale / q)^d.shape : 1.0
-logccdf(d::Pareto, q::Real) = q >= d.scale ? d.shape*log(d.scale / q) : 0.0
-cdf(d::Pareto, q::Real) = 1.0 - ccdf(d,q)
-logcdf(d::Pareto, q::Real) = log1p(-ccdf(d,q))
+ccdf(d::Pareto, q::Float64) = q >= d.scale ? (d.scale / q)^d.shape : 1.0
+logccdf(d::Pareto, q::Float64) = q >= d.scale ? d.shape*log(d.scale / q) : 0.0
+cdf(d::Pareto, q::Float64) = 1.0 - ccdf(d,q)
+logcdf(d::Pareto, q::Float64) = log1p(-ccdf(d,q))
 
-cquantile(d::Pareto, p::Real) = d.scale / p^(1.0 / d.shape)
-quantile(d::Pareto, p::Real) = cquantile(d,1.0-p)
+cquantile(d::Pareto, p::Float64) = d.scale / p^(1.0 / d.shape)
+quantile(d::Pareto, p::Float64) = cquantile(d,1.0-p)
 
 rand(d::Pareto) = d.scale*exp(rand(Exponential(1.0/d.shape)))
 

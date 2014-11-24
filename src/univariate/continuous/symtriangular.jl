@@ -25,7 +25,7 @@ kurtosis(d::SymTriangularDist) = -0.6
 entropy(d::SymTriangularDist) = 0.5 + log(d.scale)
 
 ## Functions
-function pdf(d::SymTriangularDist, x::Real)
+function pdf(d::SymTriangularDist, x::Float64)
     if insupport(d, x)
         (1.0 - abs(x-d.location)/d.scale) / d.scale
     else
@@ -33,7 +33,7 @@ function pdf(d::SymTriangularDist, x::Real)
     end
 end
 
-function logpdf(d::SymTriangularDist, x::Real)
+function logpdf(d::SymTriangularDist, x::Float64)
     if insupport(d, x)
         log1p(-abs(x-d.location)/d.scale) -log(d.scale)
     else
@@ -41,7 +41,7 @@ function logpdf(d::SymTriangularDist, x::Real)
     end
 end
 
-function cdf(d::SymTriangularDist, x::Real)
+function cdf(d::SymTriangularDist, x::Float64)
     u = (x - d.location) / d.scale
     if u <= -1.0
         0.0
@@ -53,7 +53,7 @@ function cdf(d::SymTriangularDist, x::Real)
         1.0
     end
 end
-function ccdf(d::SymTriangularDist, x::Real)
+function ccdf(d::SymTriangularDist, x::Float64)
     u = (x - d.location) / d.scale
     if u <= -1.0
         1.0
@@ -66,7 +66,7 @@ function ccdf(d::SymTriangularDist, x::Real)
     end
 end
 
-function logcdf(d::SymTriangularDist, x::Real)
+function logcdf(d::SymTriangularDist, x::Float64)
     u = (x - d.location) / d.scale
     if u <= -1.0
         -Inf
@@ -78,7 +78,7 @@ function logcdf(d::SymTriangularDist, x::Real)
         0.0
     end
 end
-function logccdf(d::SymTriangularDist, x::Real)
+function logccdf(d::SymTriangularDist, x::Float64)
     u = (x - d.location) / d.scale
     if u <= -1.0
         0.0
@@ -91,7 +91,7 @@ function logccdf(d::SymTriangularDist, x::Real)
     end
 end
 
-function quantile(d::SymTriangularDist, p::Real)
+function quantile(d::SymTriangularDist, p::Float64)
     @checkquantile p begin
         if p < 0.5
             d.location - d.scale*(1.0 - sqrt(2.0*p))
@@ -100,7 +100,8 @@ function quantile(d::SymTriangularDist, p::Real)
         end
     end
 end
-function cquantile(d::SymTriangularDist, p::Real)
+
+function cquantile(d::SymTriangularDist, p::Float64)
     @checkquantile p begin
         if p > 0.5
             d.location - d.scale*(1.0 - sqrt(2.0*(1.0-p)))
@@ -109,7 +110,8 @@ function cquantile(d::SymTriangularDist, p::Real)
         end
     end
 end
-function invlogcdf(d::SymTriangularDist, lp::Real)
+
+function invlogcdf(d::SymTriangularDist, lp::Float64)
     @checkinvlogcdf lp begin
         if lp < loghalf
             d.location + d.scale*expm1(0.5*(lp-loghalf))
@@ -118,7 +120,8 @@ function invlogcdf(d::SymTriangularDist, lp::Real)
         end
     end
 end
-function invlogccdf(d::SymTriangularDist, lp::Real)
+
+function invlogccdf(d::SymTriangularDist, lp::Float64)
     @checkinvlogcdf lp begin
         if lp > loghalf
             d.location - d.scale*(1.0 - sqrt(-2.0*expm1(lp)))

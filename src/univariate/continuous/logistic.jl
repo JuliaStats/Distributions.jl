@@ -26,27 +26,26 @@ kurtosis(d::Logistic) = 1.2
 entropy(d::Logistic) = log(d.scale) + 2.0
 
 ## Functions
-function pdf(d::Logistic, x::Real)
+function pdf(d::Logistic, x::Float64)
     a = exp(-abs((x-d.location)/d.scale))
     a / (d.scale * (1+a)^2)
 end
-function logpdf(d::Logistic, x::Real)
+function logpdf(d::Logistic, x::Float64)
     u = -abs((x-d.location)/d.scale)
     u - 2*log1pexp(u) - log(d.scale)
 end
 
-cdf(d::Logistic, x::Real) = logistic((x-d.location)/d.scale)
-ccdf(d::Logistic, x::Real) = logistic((d.location-x)/d.scale)
-logcdf(d::Logistic, x::Real) = -log1pexp((d.location-x)/d.scale)
-logccdf(d::Logistic, x::Real) = -log1pexp((x-d.location)/d.scale)
+cdf(d::Logistic, x::Float64) = logistic((x-d.location)/d.scale)
+ccdf(d::Logistic, x::Float64) = logistic((d.location-x)/d.scale)
+logcdf(d::Logistic, x::Float64) = -log1pexp((d.location-x)/d.scale)
+logccdf(d::Logistic, x::Float64) = -log1pexp((x-d.location)/d.scale)
 
-quantile(d::Logistic, p::Real) = @checkquantile p d.location + d.scale*logit(p)
-cquantile(d::Logistic, p::Real) = @checkquantile p d.location - d.scale*logit(p)
-invlogcdf(d::Logistic, lp::Real) = d.location - d.scale*logexpm1(-lp)
-invlogccdf(d::Logistic, lp::Real) = d.location + d.scale*logexpm1(-lp)
+quantile(d::Logistic, p::Float64) = @checkquantile p d.location + d.scale*logit(p)
+cquantile(d::Logistic, p::Float64) = @checkquantile p d.location - d.scale*logit(p)
+invlogcdf(d::Logistic, lp::Float64) = d.location - d.scale*logexpm1(-lp)
+invlogccdf(d::Logistic, lp::Float64) = d.location + d.scale*logexpm1(-lp)
 
-
-function gradlogpdf(d::Logistic, x::Real)
+function gradlogpdf(d::Logistic, x::Float64)
   expterm = exp((d.location - x) / d.scale)
   ((2 * expterm) / (1 + expterm) - 1) / d.scale
 end

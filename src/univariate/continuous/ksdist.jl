@@ -11,7 +11,7 @@ end
 
 # TODO: implement Simard and L'Ecuyer (2011) meta-algorithm
 # requires Pomeranz and Pelz-Good algorithms
-function cdf(d::KSDist,x::Real)
+function cdf(d::KSDist,x::Float64)
     n = d.n
     b = x*n
     # known exact values
@@ -40,7 +40,7 @@ function cdf(d::KSDist,x::Real)
     end
 end
 
-function ccdf(d::KSDist,x::Real)    
+function ccdf(d::KSDist,x::Float64)    
     n = d.n
     b = x*n
     # Ruben and Gambino (1982) known exact values

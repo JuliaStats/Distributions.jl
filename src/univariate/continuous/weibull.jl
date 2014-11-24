@@ -45,29 +45,28 @@ function entropy(d::Weibull)
 end
 
 ## Functions
-function pdf(d::Weibull, x::Real)
+function pdf(d::Weibull, x::Float64)
     x < zero(x) && return 0.0
     a = x/d.scale
     d.shape/d.scale * a^(d.shape-1.0) * exp(-a^d.shape)
 end
-function logpdf(d::Weibull, x::Real)
+function logpdf(d::Weibull, x::Float64)
     x < zero(x) && return -Inf
     a = x/d.scale
     log(d.shape/d.scale) + (d.shape-1.0)*log(a) - a^d.shape
 end
 
-cdf(d::Weibull, x::Real) = x <= zero(x) ? 0.0 : -expm1(-((x / d.scale)^d.shape))
-ccdf(d::Weibull, x::Real) = x <= zero(x) ? 1.0 : exp(-((x / d.scale)^d.shape))
-logcdf(d::Weibull, x::Real) = x <= zero(x) ? -Inf : log1mexp(-((x / d.scale)^d.shape))
-logccdf(d::Weibull, x::Real) = x <= zero(x) ? 0.0 : -(x / d.scale)^d.shape
+cdf(d::Weibull, x::Float64) = x <= zero(x) ? 0.0 : -expm1(-((x / d.scale)^d.shape))
+ccdf(d::Weibull, x::Float64) = x <= zero(x) ? 1.0 : exp(-((x / d.scale)^d.shape))
+logcdf(d::Weibull, x::Float64) = x <= zero(x) ? -Inf : log1mexp(-((x / d.scale)^d.shape))
+logccdf(d::Weibull, x::Float64) = x <= zero(x) ? 0.0 : -(x / d.scale)^d.shape
 
-quantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log1p(-p))^(1/d.shape)
-cquantile(d::Weibull, p::Real) = @checkquantile p d.scale*(-log(p))^(1/d.shape)
-invlogcdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(1/d.shape)
-invlogccdf(d::Weibull, lp::Real) = lp > zero(lp) ? NaN : d.scale*(-lp)^(1/d.shape)
+quantile(d::Weibull, p::Float64) = @checkquantile p d.scale*(-log1p(-p))^(1/d.shape)
+cquantile(d::Weibull, p::Float64) = @checkquantile p d.scale*(-log(p))^(1/d.shape)
+invlogcdf(d::Weibull, lp::Float64) = lp > zero(lp) ? NaN : d.scale*(-log1mexp(lp))^(1/d.shape)
+invlogccdf(d::Weibull, lp::Float64) = lp > zero(lp) ? NaN : d.scale*(-lp)^(1/d.shape)
 
-
-function gradlogpdf(d::Weibull, x::Real)
+function gradlogpdf(d::Weibull, x::Float64)
   insupport(Weibull, x) ? (d.shape - 1.0) / x - d.shape * x^(d.shape - 1.0) / (d.scale^d.shape) : 0.0
 end
 

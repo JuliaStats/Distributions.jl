@@ -30,10 +30,10 @@ kurtosis(d::Uniform) = -1.2
 entropy(d::Uniform) = log(d.b - d.a)
 
 ## Functions
-pdf(d::Uniform, x::Real) = insupport(d,x) ? 1/(d.b-d.a) : 0.0
-logpdf(d::Uniform, x::Real) = insupport(d,x) ? -log(d.b-d.a) : -Inf 
+pdf(d::Uniform, x::Float64) = insupport(d,x) ? 1/(d.b-d.a) : 0.0
+logpdf(d::Uniform, x::Float64) = insupport(d,x) ? -log(d.b-d.a) : -Inf 
 
-function cdf(d::Uniform, q::Real) 
+function cdf(d::Uniform, q::Float64) 
     if isnan(q)
         return NaN
     elseif q <= d.a
@@ -43,7 +43,7 @@ function cdf(d::Uniform, q::Real)
     end
     (q-d.a)/(d.b-d.a)
 end
-function ccdf(d::Uniform, q::Real) 
+function ccdf(d::Uniform, q::Float64) 
     if isnan(q)
         return NaN
     elseif q <= d.a
@@ -54,8 +54,8 @@ function ccdf(d::Uniform, q::Real)
     (d.b-q)/(d.b-d.a)
 end
 
-quantile(d::Uniform, p::Real) = @checkquantile p d.a+p*(d.b-d.a)
-cquantile(d::Uniform, p::Real) = @checkquantile p d.b+p*(d.a-d.b)
+quantile(d::Uniform, p::Float64) = @checkquantile p d.a+p*(d.b-d.a)
+cquantile(d::Uniform, p::Float64) = @checkquantile p d.b+p*(d.a-d.b)
 
 
 function mgf(d::Uniform, t::Real)

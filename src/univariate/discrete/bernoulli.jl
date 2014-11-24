@@ -57,20 +57,21 @@ end
 #### Evaluation
 
 pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::Bernoulli, x::Real) = x == zero(x) ? failprob(d) : 
-                             x == one(x) ? succprob(d) : 0.0
+pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) : 
+                            x == 1 ? succprob(d) : 0.0
 
 pdf(d::Bernoulli) = Float64[failprob(d), succprob(d)]
 
-cdf(d::Bernoulli, x::Real) = x < zero(x) ? 0.0 :
-                             x < one(x) ? failprob(d) : 1.0
+cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : 1.0
+cdf(d::Bernoulli, x::Int) = x < 0 ? 0.0 :
+                            x < 1 ? failprob(d) : 1.0
 
-ccdf(d::Bernoulli, x::Real) = x < zero(x) ? 1.0 :
-                              x < one(x) ? succprob(d) : 0.0
+ccdf(d::Bernoulli, x::Bool) = x ? succprob(d) : 1.0
+ccdf(d::Bernoulli, x::Int) = x < 0 ? 1.0 :
+                             x < 1 ? succprob(d) : 0.0
 
-quantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p <= failprob(d) ? 0 : 1) : NaN
-cquantile(d::Bernoulli, p::Real) = zero(p) <= p <= one(p) ? (p >= succprob(d) ? 0 : 1) : NaN
-
+quantile(d::Bernoulli, p::Float64) = 0.0 <= p <= 1.0 ? (p <= failprob(d) ? 0 : 1) : NaN
+cquantile(d::Bernoulli, p::Float64) = 0.0 <= p <= 1.0 ? (p >= succprob(d) ? 0 : 1) : NaN
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
 cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(im * t)

@@ -23,15 +23,16 @@ median(d::TDist) = 0.0
 
 mode(d::TDist) = 0.0
 
-function pdf(d::TDist, x::Real)
-    1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) *
-        (1.0 + x^2 / d.df)^(-0.5 * (d.df + 1.0))
-end
-
 function var(d::TDist)
     d.df > 2.0 && return d.df / (d.df - 2.0)
     d.df > 1.0 && return Inf
     NaN
 end
 
-gradlogpdf(d::TDist, x::Real) = -((d.df + 1.0) * x) / (x^2 + d.df)
+
+function pdf(d::TDist, x::Float64)
+    1.0 / (sqrt(d.df) * beta(0.5, 0.5 * d.df)) *
+        (1.0 + x^2 / d.df)^(-0.5 * (d.df + 1.0))
+end
+
+gradlogpdf(d::TDist, x::Float64) = -((d.df + 1.0) * x) / (x^2 + d.df)

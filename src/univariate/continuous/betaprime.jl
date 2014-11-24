@@ -7,7 +7,7 @@
 immutable BetaPrime <: ContinuousUnivariateDistribution
     alpha::Float64
     beta::Float64
-    function BetaPrime(a::Real, b::Real)
+    function BetaPrime(a::Float64, b::Float64)
         (a > zero(a) && b > zero(b)) || error("Alpha and beta must be positive")
         new(float64(a), float64(b))
     end
@@ -23,20 +23,20 @@ end
 
 mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
 
-function pdf(d::BetaPrime, x::Real)
+function pdf(d::BetaPrime, x::Float64)
     α, β = d.alpha, d.beta
     (x^(α - 1.0) * (1.0 + x)^(-(α + β))) / beta(α, β)
 end
 
-cdf(d::BetaPrime, q::Real) = cdf(Beta(d.alpha, d.beta), q / (one(q) + q))
-ccdf(d::BetaPrime, q::Real) = ccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
-logcdf(d::BetaPrime, q::Real) = logcdf(Beta(d.alpha, d.beta), q / (one(q) + q))
-logccdf(d::BetaPrime, q::Real) = logccdf(Beta(d.alpha, d.beta), q / (one(q) + q))
+cdf(d::BetaPrime, x::Float64) = cdf(Beta(d.alpha, d.beta), x / (one(x) + x))
+ccdf(d::BetaPrime, x::Float64) = ccdf(Beta(d.alpha, d.beta), x / (one(x) + x))
+logcdf(d::BetaPrime, x::Float64) = logcdf(Beta(d.alpha, d.beta), x / (one(x) + x))
+logccdf(d::BetaPrime, x::Float64) = logccdf(Beta(d.alpha, d.beta), x / (one(x) + x))
 
-quantile(d::BetaPrime, p::Real) = (x = quantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
-cquantile(d::BetaPrime, p::Real) = (x = cquantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
-invlogcdf(d::BetaPrime, p::Real) = (x = invlogcdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
-invlogccdf(d::BetaPrime, p::Real) = (x = invlogccdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+quantile(d::BetaPrime, p::Float64) = (x = quantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+cquantile(d::BetaPrime, p::Float64) = (x = cquantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogcdf(d::BetaPrime, p::Float64) = (x = invlogcdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
+invlogccdf(d::BetaPrime, p::Float64) = (x = invlogccdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
     
 
 function rand(d::BetaPrime)
