@@ -14,8 +14,8 @@ maximum(d::Truncated{Normal}) = d.upper
 
 function mode(d::Truncated{Normal})
     μ = mean(d.untruncated)
-    d.upper < mu ? d.upper :
-    d.lower > mu ? d.lower : μ
+    d.upper < μ ? d.upper :
+    d.lower > μ ? d.lower : μ
 end
 
 modes(d::Truncated{Normal}) = [mode(d)]
