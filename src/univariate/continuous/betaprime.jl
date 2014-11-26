@@ -1,56 +1,65 @@
-##############################################################################
-#
-# REFERENCES: Forbes et al. "Statistical Distributions"
-#
-##############################################################################
-
 immutable BetaPrime <: ContinuousUnivariateDistribution
-    alpha::Float64
-    beta::Float64
-    function BetaPrime(a::Float64, b::Float64)
-        (a > zero(a) && b > zero(b)) || error("Alpha and beta must be positive")
-        new(float64(a), float64(b))
-    end
-end
+    betad::Beta
 
-BetaPrime() = BetaPrime(1.0, 1.0)
+    BetaPrime(α::Float64, β::Float64) = new(Beta(α, β))
+    BetaPrime(α::Float64) = new(Beta(α))
+    BetaPrime() = new(Beta())
+end
 
 @distr_support BetaPrime 0.0 Inf
 
-function mean(d::BetaPrime)
-    d.beta > 1.0 ? d.alpha / (d.beta - 1.0) : NaN
-end
 
-mode(d::BetaPrime) = d.alpha > 1.0 ? (d.alpha - 1.0) / (d.beta + 1.0) : 0.0
+#### Parameters
 
-function pdf(d::BetaPrime, x::Float64)
-    α, β = d.alpha, d.beta
-    (x^(α - 1.0) * (1.0 + x)^(-(α + β))) / beta(α, β)
-end
+params(d::BetaPrime) = params(d.betad)
 
-cdf(d::BetaPrime, x::Float64) = cdf(Beta(d.alpha, d.beta), x / (one(x) + x))
-ccdf(d::BetaPrime, x::Float64) = ccdf(Beta(d.alpha, d.beta), x / (one(x) + x))
-logcdf(d::BetaPrime, x::Float64) = logcdf(Beta(d.alpha, d.beta), x / (one(x) + x))
-logccdf(d::BetaPrime, x::Float64) = logccdf(Beta(d.alpha, d.beta), x / (one(x) + x))
 
-quantile(d::BetaPrime, p::Float64) = (x = quantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
-cquantile(d::BetaPrime, p::Float64) = (x = cquantile(Beta(d.alpha,d.beta),p); x / (1.0-x))
-invlogcdf(d::BetaPrime, p::Float64) = (x = invlogcdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
-invlogccdf(d::BetaPrime, p::Float64) = (x = invlogccdf(Beta(d.alpha,d.beta),p); x / (1.0-x))
-    
+#### Statistics
 
-function rand(d::BetaPrime)
-    x = rand(Gamma(d.alpha, 1))
-    y = rand(Gamma(d.beta, 1))
-    x/y
+mean(d::BetaPrime) = ((α, β) = params(d); β > 1.0 ? α / (β - 1.0) : NaN)
+
+mode(d::BetaPrime) = ((α, β) = params(d); α > 1.0 ? (α - 1.0) / (β + 1.0) : 0.0)
+
+function var(d::BetaPrime)
+    (α, β) = params(d)
+    β > 2.0 ? α * (α + β - 1.0) / ((β - 2.0) * (β - 1.0)^2) : NaN
 end
 
 function skewness(d::BetaPrime)
-    α, β = d.alpha, d.beta
-    β > 3.0 ? (2.0 * (2.0 * α + β - 1))/(β - 3.0) * sqrt((β - 2.0)/(α * (α + β - 1.0))) : NaN
+    (α, β) = params(d)
+    if β > 3.0
+        s = α + β - 1.0
+        2.0 * (α + s) / (β - 3.0) * sqrt((β - 2.0) / (α * s))
+    else
+        return NaN
+    end
 end
 
-function var(d::BetaPrime)
-    α, β = d.alpha, d.beta
-    β > 2.0 ? (α * (α + β - 1.0)) / ((β - 2.0) * (β - 1.0)^2) : NaN
+
+#### Evaluation
+
+function logpdf(d::BetaPrime, x::Float64)
+    (α, β) = params(d)
+    (α - 1.0) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
 end
+
+pdf(d::BetaPrime, x::Float64) = exp(logpdf(d, x))
+
+cdf(d::BetaPrime, x::Float64) = cdf(d.betad, x / (1.0 + x))
+ccdf(d::BetaPrime, x::Float64) = ccdf(d.betad, x / (1.0 + x))
+logcdf(d::BetaPrime, x::Float64) = logcdf(d.betad, x / (1.0 + x))
+logccdf(d::BetaPrime, x::Float64) = logccdf(d.betad, x / (1.0 + x))
+
+quantile(d::BetaPrime, p::Float64) = (x = quantile(d.betad, p); x / (1.0 - x))
+cquantile(d::BetaPrime, p::Float64) = (x = cquantile(d.betad, p); x / (1.0 - x))
+invlogcdf(d::BetaPrime, p::Float64) = (x = invlogcdf(d.betad, p); x / (1.0 - x))
+invlogccdf(d::BetaPrime, p::Float64) = (x = invlogccdf(d.betad, p); x / (1.0 - x))
+    
+
+#### Sampling
+
+function rand(d::BetaPrime) 
+    (α, β) = params(d)
+    rand(Gamma(α)) / rand(Gamma(β))
+end
+
