@@ -72,6 +72,9 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # generic testing
+    if isa(d, Cosine)
+        n_tsamples = int(floor(n_tsamples / 10))
+    end
     test_distr(d, n_tsamples)
 end
 

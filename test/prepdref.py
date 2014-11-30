@@ -2,7 +2,7 @@
 
 import re
 import numpy as np
-from numpy import sqrt, nan, inf, ceil
+from numpy import sqrt, nan, inf, ceil, pi
 import scipy.stats
 from scipy.stats import *
 import json
@@ -130,6 +130,13 @@ def get_dinfo(dname, args):
 		assert len(args) == 1
 		df = args[0]
 		return (chi2(df), (0, inf), {"dof" : df})
+
+	elif dname == "Cosine":
+		assert len(args) <= 2
+		l = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		return (cosine(loc=l, scale=s/pi), (l-s, l+s), 
+			{"location":l, "scale":s})
 
 	elif dname == "DiscreteUniform":
 		assert len(args) <= 2

@@ -181,6 +181,31 @@ logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, float64(x))
 quantile(d::UnivariateDistribution, p::Float64) = throw(MethodError(quantile, (d, p)))
 quantile(d::UnivariateDistribution, p::Real) = quantile(d, float64(p))
 
+function quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64, 
+                         lx::Float64, rx::Float64, tol::Float64)
+
+    # find quantile using bisect algorithm
+    cl = cdf(d, lx)
+    cr = cdf(d, rx)
+    @assert cl <= p <= cr
+    while rx - lx > tol
+        m = 0.5 * (lx + rx)
+        c = cdf(d, m)
+        if p > c
+            cl = c
+            lx = m
+        else
+            cr = c
+            rx = m
+        end 
+    end
+    return 0.5 * (lx + rx)
+end
+
+quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64) = 
+    quantile_bisect(d, p, minimum(d), maximum(d), 1.0e-12)
+
+
 # cquantile
 
 cquantile(d::UnivariateDistribution, p::Float64) = quantile(d, 1.0 - p)

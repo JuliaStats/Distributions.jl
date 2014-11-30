@@ -1,36 +1,72 @@
-# TODO: Implement scaled Cosine and generalized Cosine
-# TODO: This is all wrong. Replace entirely
+# Raised Cosine distribution
+#
+# Ref: http://en.wikipedia.org/wiki/Raised_cosine_distribution
+#
 
 immutable Cosine <: ContinuousUnivariateDistribution
+    μ::Float64
+    s::Float64
+
+    function Cosine(μ::Real, s::Real)
+        s > 0.0 || error("s must be positive.")
+        new(float64(μ), float64(s))
+    end
+
+    Cosine(μ::Real) = new(float64(μ), 1.0)
+    Cosine() = new(0.0, 1.0)
 end
 
-@distr_support Cosine 0.0 1.0
+@distr_support Cosine d.μ - d.s d.μ + d.s
 
-rand(d::Cosine) = asin(2.0 * rand() - 1.0)
 
-function cdf(d::Cosine, x::Real)
-    x < zero(x) ? 0.0 : (x > one(x) ? 1.0 : 0.5(1 + sin(x)))
-end
+#### Parameters
 
-entropy(d::Cosine) = log(4.0 * pi) - 1.0
+location(d::Cosine) = d.μ
+scale(d::Cosine) = d.s
 
-kurtosis(d::Cosine) = -1.5
+params(d::Cosine) = (d.μ, d.s)
 
-mean(d::Cosine) = 0.5
 
-median(d::Cosine) = 0.5
+#### Statistics
 
-# mgf(d::Cosine, t::Real)
-# cf(d::Cosine, t::Real)
+mean(d::Cosine) = d.μ
 
-mode(d::Cosine) = 0.5
+median(d::Cosine) = d.μ
 
-pdf(d::Cosine, x::Float64) = 0.0 <= x <= 1.0 ? 0.5 * cos(x) : 0.0
+mode(d::Cosine) = d.μ
 
-quantile(d::Cosine, p::Float64) = asin(2.p - 1.0)
-
-rand(d::Cosine) = sin(rand() * pi / 2.0)^2
+const _cosined_varcoef = 0.13069096604865779  # 1 / 3 - 2 / π^2
+var(d::Cosine) = d.s^2 * _cosined_varcoef
 
 skewness(d::Cosine) = 0.0
 
-var(d::Cosine) = (pi^2 - 8.0) / (4.0 * pi^2)
+kurtosis(d::Cosine) = -0.59376287559828102362
+
+
+#### Evaluation
+
+function pdf(d::Cosine, x::Float64)
+    if insupport(d, x)
+        μ, s = params(d)
+        z = (x - μ) / s
+        return (1.0 + cospi(z)) / (2 * s)
+    else
+        return 0.0
+    end
+end
+
+logpdf(d::Cosine, x::Float64) = insupport(d, x) ? log(pdf(d, x)) : -Inf
+
+function cdf(d::Cosine, x::Float64)
+    μ, s = params(d)
+    z = (x - μ) / s
+    0.5 * (1.0 + z + sinpi(z) * invπ)
+end
+
+function ccdf(d::Cosine, x::Float64)
+    μ, s = params(d)
+    nz = (μ - x) / s
+    0.5 * (1.0 + nz + sinpi(nz) * invπ)
+end
+
+quantile(d::Cosine, p::Float64) = quantile_bisect(d, p)

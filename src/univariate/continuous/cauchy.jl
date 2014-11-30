@@ -7,7 +7,7 @@ immutable Cauchy <: ContinuousUnivariateDistribution
         new(float64(x0), float64(γ))
     end
 
-    Cauchy(γ::Real) = Cauchy(0.0, γ)
+    Cauchy(x0::Real) = new(float64(x0), 1.0)
     Cauchy() = new(0.0, 1.0)
 end
 
