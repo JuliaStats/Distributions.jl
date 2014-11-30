@@ -1,47 +1,80 @@
 immutable Cauchy <: ContinuousUnivariateDistribution
-    location::Float64
-    scale::Float64
-    function Cauchy(l::Real, s::Real)
-        s > zero(s) || error("scale must be positive")
-	new(float64(l), float64(s))
+    x0::Float64
+    γ::Float64
+
+    function Cauchy(x0::Real, γ::Real)
+        γ > zero(γ) || error("scale must be positive")
+        new(float64(x0), float64(γ))
     end
+
+    Cauchy(γ::Real) = Cauchy(0.0, γ)
+    Cauchy() = new(0.0, 1.0)
 end
 
-Cauchy(l::Real) = Cauchy(l, 1.0)
-Cauchy() = Cauchy(0.0, 1.0)
-
-## Support
 @distr_support Cauchy -Inf Inf
 
-## Properties
+#### Parameters
+
+location(d::Cauchy) = d.x0
+scale(d::Cauchy) = d.γ
+
+params(d::Cauchy) = (d.x0, d.γ)
+
+
+#### Statistics
+
 mean(d::Cauchy) = NaN
-median(d::Cauchy) = d.location
-mode(d::Cauchy) = d.location
+median(d::Cauchy) = location(d)
+mode(d::Cauchy) = location(d)
 
 var(d::Cauchy) = NaN
 skewness(d::Cauchy) = NaN
 kurtosis(d::Cauchy) = NaN
 
-entropy(d::Cauchy) = log(d.scale) + log(4.0 * pi)
+entropy(d::Cauchy) = log(scale(d)) + log4π
 
-## Functions
-pdf(d::Cauchy, x::Float64) = 1/(pi*d.scale*(1+((x-d.location)/d.scale)^2))
-logpdf(d::Cauchy, x::Float64) = -log(pi) - log(d.scale) - log1psq((x-d.location)/d.scale)
 
-cdf(d::Cauchy, x::Float64) = atan2(one(x),-(x-d.location)/d.scale)/pi
-ccdf(d::Cauchy, x::Float64) = atan2(one(x),(x-d.location)/d.scale)/pi
-logcdf(d::Cauchy, x::Float64) = x <= d.location ? log(cdf(d,x)) : log1p(-ccdf(d,x))
-logccdf(d::Cauchy, x::Float64) = x <= d.location ? log1p(-cdf(d,x)) : log(ccdf(d,x))
+#### Functions
 
-quantile(d::Cauchy, p::Float64) = @checkquantile p d.location - d.scale*cospi(p)/sinpi(p)
-cquantile(d::Cauchy, p::Float64) = @checkquantile p d.location + d.scale*cospi(p)/sinpi(p)
-invlogcdf(d::Cauchy, lp::Float64) = lp < loghalf ? quantile(d,exp(lp)) : cquantile(d,-expm1(lp))
-invlogccdf(d::Cauchy, lp::Float64) = lp < loghalf ? cquantile(d,exp(lp)) : quantile(d,-expm1(lp))
+function pdf(d::Cauchy, x::Float64)
+    x0, γ = params(d)
+    z = (x - x0) / γ
+    1.0 / (π * γ * (1 + z^2))
+end
+
+function logpdf(d::Cauchy, x::Float64)
+    x0, γ = params(d)
+    z = (x - x0) / γ
+    - (logπ + log(γ) + log1psq(z))
+end
+
+function cdf(d::Cauchy, x::Float64)
+    x0, γ = params(d)
+    invπ * atan2(x - x0, γ) + 0.5
+end
+
+function ccdf(d::Cauchy, x::Float64)
+    x0, γ = params(d)
+    invπ * atan2(x0 - x, γ) + 0.5
+end
+
+function quantile(d::Cauchy, p::Float64)
+    x0, γ = params(d)
+    x0 + γ * tan(π * (p - 0.5))
+end
+
+function cquantile(d::Cauchy, p::Float64)
+    x0, γ = params(d)
+    x0 + γ * tan(π * (0.5 - p))
+end
 
 mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
+
 cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))
 
-## Fitting
+
+#### Fitting
+
 # Note: this is not a Maximum Likelihood estimator
 function fit{T <: Real}(::Type{Cauchy}, x::Array{T})
     l, u = iqr(x)
