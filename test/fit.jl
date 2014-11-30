@@ -147,15 +147,15 @@ ss = suffstats(Exponential, x, w)
 
 d = fit(Exponential, x)
 @test isa(d, Exponential)
-@test_approx_eq d.scale mean(x)
+@test_approx_eq scale(d) mean(x)
 
 d = fit(Exponential, x, w)
 @test isa(d, Exponential)
-@test_approx_eq d.scale dot(x, w) / sum(w)
+@test_approx_eq scale(d) dot(x, w) / sum(w)
 
 d = fit(Exponential, rand(Exponential(0.5), N))
 @test isa(d, Exponential)
-@test_approx_eq_eps mean(d) 0.5 0.01
+@test_approx_eq_eps scale(d) 0.5 0.01
 
 
 # Normal
