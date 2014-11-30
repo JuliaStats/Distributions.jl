@@ -1,8 +1,9 @@
 immutable Chisq <: ContinuousUnivariateDistribution
-    df::Float64 # non-integer degrees of freedom are meaningful
-    function Chisq(d::Real)
-        d > zero(d) || error("df must be positive")
-        new(float64(d))
+    df::Float64 
+
+    function Chisq(k::Real)
+        k > zero(k) || error("The degree of freedom k must be positive")
+        new(float64(k))
     end
 end
 
@@ -10,32 +11,45 @@ end
 
 @distr_support Chisq 0.0 Inf
 
-function entropy(d::Chisq)
-    x = d.df / 2.0 + log(2.0) + lgamma(d.df / 2.0)
-    x + (1.0 - d.df / 2.0) * digamma(d.df / 2.0)
-end
 
-kurtosis(d::Chisq) = 12.0 / d.df
+#### Parameters
 
-mean(d::Chisq) = d.df
+dof(d::Chisq) = d.df
+params(d::Chisq) = (d.df,)
 
-# TODO: Switch to using quantile?
-function median(d::Chisq)
-    k = d.df
-    k * (1.0 - 2.0 / (9.0 * k))^3
-end
 
-function mgf(d::Chisq, t::Real)
-    k = d.df
-    (1.0 - 2.0 * t)^(-k / 2.0)
-end
+#### Statistics
 
-cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-d.df / 2.0)
+mean(d::Chisq) = dof(d)
+
+var(d::Chisq) = 2.0 * dof(d)
+
+skewness(d::Chisq) = sqrt(8.0 / dof(d))
+
+kurtosis(d::Chisq) = 12.0 / dof(d)
 
 mode(d::Chisq) = d.df > 2.0 ? d.df - 2.0 : 0.0
 
-gradlogpdf(d::Chisq, x::Float64) =  x >= 0.0 ? (d.df / 2.0 - 1) / x - 0.5 : 0.0
+function median(d::Chisq; approx::Bool=false)
+    if approx
+        k = dof(d)
+        return k * (1.0 - 2.0 / (9.0 * k))^3
+    else
+        return quantile(d, 0.5)
+    end
+end
 
-skewness(d::Chisq) = sqrt(8.0 / d.df)
+function entropy(d::Chisq)
+    hk = 0.5 * dof(d)
+    hk + logtwo + lgamma(hk) + (1.0 - hk) * digamma(hk)
+end
 
-var(d::Chisq) = 2.0 * d.df
+
+#### Evaluation
+
+mgf(d::Chisq, t::Real) = (1.0 - 2.0 * t)^(-dof(d) / 2.0)
+
+cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-dof(d) / 2.0)
+
+gradlogpdf(d::Chisq, x::Float64) =  x >= 0.0 ? (dof(d) / 2.0 - 1) / x - 0.5 : 0.0
+

@@ -353,8 +353,8 @@ const continuous_distributions = [
     "beta",
     "betaprime",
     "cauchy",
+    "chisq",    # Chi depends on Chisq
     "chi",
-    "chisq",
     "cosine",
     "edgeworth",    
     "exponential",

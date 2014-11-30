@@ -150,6 +150,7 @@ export
     components,         # get components from a mixture model
     concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
+    dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)

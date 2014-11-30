@@ -118,17 +118,18 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (cauchy(l, s), (-inf, inf), {})
+		return (cauchy(l, s), (-inf, inf), 
+			{"location" : l, "scale" : s})
 
 	elif dname == "Chi":
 		assert len(args) == 1
 		df = args[0]
-		return (chi(df), (0, inf), {})
+		return (chi(df), (0, inf), {"dof" : df})
 
 	elif dname == "Chisq":
 		assert len(args) == 1
 		df = args[0]
-		return (chi2(df), (0, inf), {})
+		return (chi2(df), (0, inf), {"dof" : df})
 
 	elif dname == "DiscreteUniform":
 		assert len(args) <= 2

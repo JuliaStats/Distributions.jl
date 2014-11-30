@@ -1,39 +1,23 @@
 immutable Chi <: ContinuousUnivariateDistribution
-    df::Float64
-    function Chi(df::Real)
-        df > zero(df) || error("df must be positive")
-        new(float64(df))
-    end
+    chisqd::Chisq
+
+    Chi(df::Real) = new(Chisq(df))
 end
 
 @distr_support Chi 0.0 Inf
 
 
-function pdf(d::Chi, x::Float64)
-    k = d.df
-    (2.0^(1.0 - k / 2.0) * x^(k - 1.0) * exp(-x^2 / 2.0)) / gamma(k / 2.0)
-end
+#### Parameters
 
-gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.df - 1.0) / x - x : 0.0
+dof(d::Chi) = dof(d.chisqd)
+params(d::Chi) = (dof(d),)
 
-cdf(d::Chi, x::Float64) = cdf(Chisq(d.df),x^2)
-ccdf(d::Chi, x::Float64) = ccdf(Chisq(d.df),x^2)
-logcdf(d::Chi, x::Float64) = logcdf(Chisq(d.df),x^2)
-logccdf(d::Chi, x::Float64) = logccdf(Chisq(d.df),x^2)
 
-quantile(d::Chi,p::Float64) = sqrt(quantile(Chisq(d.df),p))
-cquantile(d::Chi,p::Float64) = sqrt(cquantile(Chisq(d.df),p))
-invlogcdf(d::Chi,p::Float64) = sqrt(invlogcdf(Chisq(d.df),p))
-invlogccdf(d::Chi,p::Float64) = sqrt(invlogccdf(Chisq(d.df),p))
+#### Statistics
 
-mean(d::Chi) = sqrt2 * gamma((d.df + 1.0) / 2.0) / gamma(d.df / 2.0)
+mean(d::Chi) = (k = dof(d); sqrt2 * gamma((k + 1.0) / 2.0) / gamma(k / 2.0))
 
-function mode(d::Chi)
-    d.df >= 1.0 || error("Chi distribution has no mode when df < 1")
-    sqrt(d.df - 1)
-end
-
-var(d::Chi) = d.df - mean(d)^2
+var(d::Chi) = dof(d) - mean(d)^2
 
 function skewness(d::Chi)
     μ, σ = mean(d), std(d)
@@ -46,9 +30,40 @@ function kurtosis(d::Chi)
 end
 
 function entropy(d::Chi)
-    k = d.df
+    k = dof(d)
     lgamma(k / 2.0) - log(sqrt(2.0)) -
         ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
 end
 
-rand(d::Chi) = sqrt(rand(Chisq(d.df)))
+function mode(d::Chi)
+    k = dof(d)
+    k >= 1.0 || error("Chi distribution has no mode when df < 1")
+    sqrt(k - 1.0)
+end
+
+
+#### Evaluation
+
+pdf(d::Chi, x::Float64) = exp(logpdf(d, x))
+
+function logpdf(d::Chi, x::Float64) 
+    k = dof(d)
+    (1.0 - 0.5 * k) * logtwo + (k - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * k)
+end
+
+gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (dof(d) - 1.0) / x - x : 0.0
+
+cdf(d::Chi, x::Float64) = cdf(d.chisqd, x^2)
+ccdf(d::Chi, x::Float64) = ccdf(d.chisqd, x^2)
+logcdf(d::Chi, x::Float64) = logcdf(d.chisqd, x^2)
+logccdf(d::Chi, x::Float64) = logccdf(d.chisqd, x^2)
+
+quantile(d::Chi, p::Float64) = sqrt(quantile(d.chisqd, p))
+cquantile(d::Chi, p::Float64) = sqrt(cquantile(d.chisqd, p))
+invlogcdf(d::Chi, p::Float64) = sqrt(invlogcdf(d.chisqd, p))
+invlogccdf(d::Chi, p::Float64) = sqrt(invlogccdf(d.chisqd, p))
+
+
+#### Sampling
+
+rand(d::Chi) = sqrt(rand(d.chisqd))
