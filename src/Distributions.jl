@@ -252,6 +252,7 @@ include("genericfit.jl")
 # specific samplers and distributions
 include("univariates.jl")
 include("empirical.jl")
+include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
 include("samplers.jl")

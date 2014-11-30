@@ -380,8 +380,7 @@ const continuous_distributions = [
     "cauchy",
     "chisq",    # Chi depends on Chisq
     "chi",
-    "cosine",
-    "edgeworth",    
+    "cosine",  
     "exponential",
     "fdist",
     "frechet",
