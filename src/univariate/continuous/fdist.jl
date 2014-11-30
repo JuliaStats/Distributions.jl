@@ -1,10 +1,10 @@
 immutable FDist <: ContinuousUnivariateDistribution
-    ndf::Float64
-    ddf::Float64
+    d1::Float64
+    d2::Float64
+
     function FDist(d1::Real, d2::Real)
-    	d1 > zero(d1) && d2 > zero(d2) ||
-    	    error("Numerator and denominator degrees of freedom must be positive")
-  	new(float64(d1), float64(d2))
+        d1 > zero(d1) && d2 > zero(d2) || error("Degrees of freedom must be positive")
+        new(float64(d1), float64(d2))
     end
 end
 
@@ -12,29 +12,49 @@ end
 
 @distr_support FDist 0.0 Inf
 
-mean(d::FDist) = 2.0 < d.ddf ? d.ddf / (d.ddf - 2.0) : NaN
 
-median(d::FDist) = quantile(d, 0.5)
+#### Parameters
+
+params(d::FDist) = (d.d1, d.d2)
 
 
-mode(d::FDist) = d.ndf <= 2. ? 0.0 : (d.ndf - 2.) / d.ndf * d.ddf / (d.ddf + 2.)
+#### Statistics
 
-var(d::FDist) = d.ddf > 4. ?  2.0 * d.ddf^2 *
-		       (d.ndf + d.ddf - 2.0) /
-		       (d.ndf * (d.ddf - 2.0)^2 * (d.ddf - 4.0)) : NaN
+mean(d::FDist) = (d2 = d.d2; d2 > 2.0 ? d2 / (d2 - 2.0) : NaN)
 
-skewness(d::FDist) = d.ddf > 6. ?  (2.d.ndf + d.ddf - 2.) * sqrt(8.(d.ddf - 4.)) /
-           ((d.ddf - 6.) * sqrt(d.ndf * (d.ndf + d.ddf - 2.))) : NaN
+mode(d::FDist) = ((d1, d2) = params(d); d1 > 2.0 ? ((d1 - 2.0)/d1) * (d2 / (d2 + 2.0)) : 0.0)
 
-function kurtosis(d::FDist)
-    d.ddf <= 8. && return NaN
-    a = d.ndf * (5. * d.ddf - 22.) * (d.ndf + d.ddf - 2.) +
-        (d.ddf - 4.) * (d.ddf - 2.)^2
-    b = d.ndf * (d.ddf - 6.) * (d.ddf - 8.) * (d.ndf + d.ddf - 2.)
-    12. * a / b
+function var(d::FDist)
+    (d1, d2) = params(d)
+    d2 > 4.0 ? 2.0 * d2^2 * (d1 + d2 - 2.0) / (d1 * (d2 - 2.0)^2 * (d2 - 4.0)) : NaN
 end
 
-entropy(d::FDist) = (log(d.ddf) -log(d.ndf) 
-                     +lgamma(0.5*d.ndf) +lgamma(0.5*d.ddf) -lgamma(0.5*(d.ndf+d.ddf)) 
-                     +(1.0-0.5*d.ndf)*digamma(0.5*d.ndf) +(-1.0-0.5*d.ddf)*digamma(0.5*d.ddf)
-                     +0.5*(d.ndf+d.ddf)*digamma(0.5*(d.ndf+d.ddf)))
+function skewness(d::FDist)
+    (d1, d2) = params(d)
+    if d2 > 6.0
+        return (2.0 * d1 + d2 - 2.0) * sqrt(8.0 * (d2 - 4.0)) / ((d2 - 6.0) * sqrt(d1 * (d1 + d2 - 2.0)))
+    else
+        return NaN
+    end
+end
+
+function kurtosis(d::FDist)
+    (d1, d2) = params(d)
+    if d2 > 8.0
+        a = d1 * (5. * d2 - 22.) * (d1 + d2 - 2.) + (d2 - 4.) * (d2 - 2.)^2
+        b = d1 * (d2 - 6.) * (d2 - 8.) * (d2 - 2.)
+        return 12. * a / b
+    else
+        return NaN
+    end
+end
+
+function entropy(d::FDist) 
+    (d1, d2) = params(d)
+    hd1 = d1 * 0.5
+    hd2 = d2 * 0.5
+    hs = (d1 + d2) * 0.5
+    return log(d2 / d1) + lgamma(hd1) + lgamma(hd2) - lgamma(hs) +
+        (1.0 - hd1) * digamma(hd1) + (-1.0 - hd2) * digamma(hd2) +
+        hs * digamma(hs)
+end

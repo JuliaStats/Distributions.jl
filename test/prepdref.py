@@ -161,6 +161,11 @@ def get_dinfo(dname, args):
 		s = get(args, 0) or 1.0
 		return (expon(scale=s), (0, inf), {})
 
+	elif dname == "FDist":
+		assert len(args) == 2
+		d1, d2 = args
+		return (scipy.stats.f(d1, d2), (0, inf), {})
+
 	elif dname == "Gamma":
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0

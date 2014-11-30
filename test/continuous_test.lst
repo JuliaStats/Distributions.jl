@@ -37,6 +37,9 @@ Exponential()
 Exponential(2.0)
 Exponential(6.5)
 
+FDist(6.0, 8.0)
+FDist(8.0, 6.0)
+
 Gamma(1.0, 1.0)
 Gamma(3.0, 1.0)
 Gamma(3.0, 2.0)
