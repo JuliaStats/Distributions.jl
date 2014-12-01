@@ -34,10 +34,13 @@ cf(d::VonMises, t::Real) = (besseli(abs(t), d.k) / I0κ) * exp(im * t * d.μ)
 
 ### Functions
 
-pdf(d::VonMises, x::Float64) = exp(d.κ * cos(x - d.μ)) / (twoπ * d.I0κ)
-logpdf(d::VonMises, x::Float64) = d.κ * cos(x - d.μ) - log(d.I0κ) - log2π
+pdf(d::VonMises, x::Real) = 
+    float64(x) - d.μ <= -π ? 0.0 : ( float64(x) - d.μ >= π ? 0.0 : exp(d.κ * cos(float64(x) - d.μ)) / (twoπ * d.I0κ) )
+logpdf(d::VonMises, x::Real) = 
+    float64(x) - d.μ <= -π ? -Inf : ( float64(x) - d.μ >= π ? -Inf : d.κ * cos(float64(x) - d.μ) - log(d.I0κ) - log2π )
 
-cdf(d::VonMises, x::Float64) = _vmcdf(d.κ, d.I0κ, x - d.μ, 1.0e-15)
+cdf(d::VonMises, x::Real) = 
+    float64(x) - d.μ <= -π ? 0.0 : ( float64(x) - d.μ >= π ? 1.0 :  _vmcdf(d.κ, d.I0κ, float64(x) - d.μ, 1.0e-15) )
 
 function _vmcdf(κ::Float64, I0κ::Float64, x::Float64, tol::Float64)
     j = 1
