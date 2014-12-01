@@ -101,7 +101,7 @@ function rand(s::GammaGDSampler)
 
     # Step 8
     @label step8
-    e = Base.Random.randmtzig_exprnd()
+    e = randexp()
     u = 2.0rand() - 1.0
     t = s.b + e*s.σ*sign(u)
 
@@ -157,7 +157,7 @@ function rand(s::GammaGSSampler)
     while true
         # step 1
         p = s.b*rand()
-        e = Base.Random.randmtzig_exprnd()
+        e = randexp()
         if p <= 1.0
             # step 2
             x = exp(log(p)*s.ia)
@@ -224,7 +224,7 @@ GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
 function rand(s::GammaIPSampler)
     x = rand(s.s)
-    e = Base.Random.randmtzig_exprnd()
+    e = randexp()
     x*exp(s.nia*e)
 end
 

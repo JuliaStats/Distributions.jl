@@ -80,4 +80,4 @@ function gradlogpdf(d::Frechet, x::Float64)
 end
 
 ## Sampling
-rand(d::Frechet) = d.scale*Base.Random.randmtzig_exprnd()^(-1/d.shape)
+rand(d::Frechet) = d.scale*randexp()^(-1/d.shape)

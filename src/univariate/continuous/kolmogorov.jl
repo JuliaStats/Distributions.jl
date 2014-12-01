@@ -96,7 +96,7 @@ function rand(d::Kolmogorov)
         end
     else
         while true
-            e = Base.Random.randmtzig_exprnd()
+            e = randexp()
             u = rand()
             x = sqrt(t*t+e/2)
             w = 0.0

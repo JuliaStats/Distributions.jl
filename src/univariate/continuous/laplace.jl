@@ -58,7 +58,7 @@ end
 
 ## Sampling
 function rand(d::Laplace) 
-    er = Base.Random.randmtzig_exprnd() 
+    er = randexp()
     randbool() ? d.location - d.scale * er : d.location + d.scale * er
 end
 

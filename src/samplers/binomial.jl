@@ -58,7 +58,7 @@ function rand(s::BinomialGeomSampler)
     x = 0
     n = s.n
     while true
-        er = Base.Random.randmtzig_exprnd()
+        er = randexp()
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
             break 

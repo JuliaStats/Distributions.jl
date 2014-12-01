@@ -71,4 +71,4 @@ function gradlogpdf(d::Weibull, x::Float64)
 end
 
 ## Sampling
-rand(d::Weibull) = d.scale*Base.Random.randmtzig_exprnd()^(1/d.shape)
+rand(d::Weibull) = d.scale*randexp()^(1/d.shape)
