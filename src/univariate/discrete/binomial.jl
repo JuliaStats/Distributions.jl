@@ -32,10 +32,10 @@ params(d::Binomial) = (d.n, d.p)
 
 mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
-mode(d::Binomial) = ((n, p) = params(d); n > 0 ? iround((n + 1) * d.prob) : 0)
+mode(d::Binomial) = ((n, p) = params(d); n > 0 ? round(Int,(n + 1) * d.prob) : 0)
 modes(d::Binomial) = Int[mode(d)]
 
-median(d::Binomial) = iround(mean(d))
+median(d::Binomial) = round(Int,mean(d))
 
 function skewness(d::Binomial) 
     n, p1 = params(d)

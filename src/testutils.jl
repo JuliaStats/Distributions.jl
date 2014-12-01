@@ -77,8 +77,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    rmin = ifloor(quantile(distr, 0.00001))::Int
-    rmax = ifloor(quantile(distr, 0.99999))::Int
+    rmin = floor(Int,quantile(distr, 0.00001))::Int
+    rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
     p0 = pdf(distr, rmin:rmax)  # reference probability masses
     @assert length(p0) == m
@@ -90,8 +90,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     cub = Array(Int, m)
     for i = 1:m
         bp = Binomial(n, p0[i])
-        clb[i] = ifloor(quantile(bp, q/2))
-        cub[i] = iceil(cquantile(bp, q/2))
+        clb[i] = floor(Int,quantile(bp, q/2))
+        cub[i] = ceil(Int,cquantile(bp, q/2))
         @assert cub[i] >= clb[i]
     end
 
@@ -178,8 +178,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     for i = 1:nbins
         pi = cdfs[i+1] - cdfs[i]
         bp = Binomial(n, pi)
-        clb[i] = ifloor(quantile(bp, q/2))
-        cub[i] = iceil(cquantile(bp, q/2))
+        clb[i] = floor(Int,quantile(bp, q/2))
+        cub[i] = ceil(Int,cquantile(bp, q/2))
         @assert cub[i] >= clb[i]
     end
 
@@ -231,8 +231,8 @@ end
 function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     # samples for testing evaluation functions (even spacing)
 
-    lv = (islowerbounded(d) ? minimum(d) : ifloor(quantile(d, q/2)))::Int
-    hv = (isupperbounded(d) ? maximum(d) : iceil(cquantile(d, q/2)))::Int
+    lv = (islowerbounded(d) ? minimum(d) : floor(Int,quantile(d, q/2)))::Int
+    hv = (isupperbounded(d) ? maximum(d) : ceil(Int,cquantile(d, q/2)))::Int
     @assert lv <= hv
     return lv:hv
 end

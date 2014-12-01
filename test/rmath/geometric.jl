@@ -9,8 +9,8 @@ distlist = [
     
 
 for d in distlist
-    for x in [0.0:20.0,linspace(21.0,maxintfloat()/4,1_000_000)]
-        x = iround(x)
+    for x in [0.0:20.0,linspace(21.0,float(typemax(Int32)),1_000_000)]
+        x = round(Int,x)
 
         test_rmath(pdf,d,x)
         test_rmath(logpdf,d,x)

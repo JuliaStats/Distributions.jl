@@ -144,13 +144,13 @@ logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, float64(x))
 
 function cdf(d::DiscreteUnivariateDistribution, x::Int)
     c = 0.0
-    for y = minimum(d):ifloor(x)
+    for y = minimum(d):floor(Int,x)
         c += pdf(d, y)
     end 
     return c
 end
 
-cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, ifloor(x))
+cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 
 cdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(cdf, (d, x)))
 cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, float64(x))
@@ -158,21 +158,21 @@ cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, float64(x))
 # ccdf
 
 ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, ifloor(x)) 
+ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x)) 
 ccdf(d::ContinuousUnivariateDistribution, x::Float64) = 1.0 - cdf(d, x)
 ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, float64(x))
 
 # logcdf
 
 logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
-logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, ifloor(x))
+logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 logcdf(d::ContinuousUnivariateDistribution, x::Float64) = log(cdf(d, x))
 logcdf(d::ContinuousUnivariateDistribution, x::Real) = logcdf(d, float64(x))
 
 # logccdf
 
 logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
-logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, ifloor(x))
+logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 logccdf(d::ContinuousUnivariateDistribution, x::Float64) = log(ccdf(d, x))
 logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, float64(x))
 

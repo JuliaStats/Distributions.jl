@@ -59,7 +59,7 @@ end
 
 function quantile(d::EmpiricalUnivariateDistribution, p::Float64)
     n = length(d.values)
-    index = ifloor(p * n) + 1
+    index = floor(Int,p * n) + 1
     index > n ? d.values[n] : d.values[index]
 end
 
