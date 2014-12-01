@@ -15,7 +15,7 @@ function ccdf(d::KSOneSided, x::Float64)
     end
     n = d.n
     s = 0.0
-    for j = 0:ifloor(n-n*x)
+    for j = 0:floor(Int,n-n*x)
         p = x+j/n
         s += pdf(Binomial(n,p),j) / p
     end

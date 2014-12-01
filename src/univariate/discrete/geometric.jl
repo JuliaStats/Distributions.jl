@@ -107,7 +107,7 @@ end
 
 ### Sampling
 
-rand(d::Geometric) = ifloor(-randexp() / log1p(-d.p))
+rand(d::Geometric) = floor(Int,-randexp() / log1p(-d.p))
 
 
 ### Model Fitting

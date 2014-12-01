@@ -3,6 +3,7 @@ module Distributions
 using ArrayViews
 using PDMats
 using StatsBase
+using Compat
 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!

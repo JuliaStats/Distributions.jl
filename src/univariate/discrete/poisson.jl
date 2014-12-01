@@ -26,11 +26,11 @@ rate(d::Poisson) = d.λ
 
 mean(d::Poisson) = d.λ
 
-mode(d::Poisson) = ifloor(d.λ)
+mode(d::Poisson) = floor(Int,d.λ)
 
 function modes(d::Poisson)
     λ = d.λ
-    isinteger(λ) ? [int(λ)-1,int(λ)] : [ifloor(λ)]
+    isinteger(λ) ? [int(λ)-1,int(λ)] : [floor(Int,λ)]
 end
 
 var(d::Poisson) = d.λ

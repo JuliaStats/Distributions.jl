@@ -58,12 +58,12 @@ function rand(s::BinomialGeomSampler)
     x = 0
     n = s.n
     while true
-        er = Base.Random.randmtzig_exprnd()
+        er = randexp()
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
             break 
         end
-        y += iceil(v)
+        y += ceil(Int,v)
         if y > n
             break
         end
@@ -145,7 +145,7 @@ function rand(s::BinomialTPESampler)
         u = s.p4*rand()
         v = rand()
         if u <= s.p1
-            y = ifloor(s.xM-s.p1*v+u)
+            y = floor(Int,s.xM-s.p1*v+u)
             # Goto 6
             break
         elseif u <= s.p2 # Step 2
@@ -155,10 +155,10 @@ function rand(s::BinomialTPESampler)
                 # Goto 1
                 continue
             end
-            y = ifloor(x)
+            y = floor(Int,x)
             # Goto 5
         elseif u <= s.p3 # Step 3
-            y = ifloor(s.xL + log(v)/s.λL)
+            y = floor(Int,s.xL + log(v)/s.λL)
             if y < 0
                 # Goto 1
                 continue
@@ -166,7 +166,7 @@ function rand(s::BinomialTPESampler)
             v *= (u-s.p2)*s.λL
             # Goto 5
         else # Step 4
-            y = ifloor(s.xR-log(v)/s.λR)
+            y = floor(Int,s.xR-log(v)/s.λR)
             if y > s.n
                 # Goto 1
                 continue

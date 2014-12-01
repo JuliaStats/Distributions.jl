@@ -52,14 +52,14 @@ immutable PoissonADSampler <: Sampleable{Univariate,Discrete}
 end
 
 PoissonADSampler(μ::Float64) = 
-    PoissonADSampler(μ,sqrt(μ),6.0*μ^2,ifloor(μ-1.1484))
+    PoissonADSampler(μ,sqrt(μ),6.0*μ^2,floor(Int,μ-1.1484))
 
 function rand(s::PoissonADSampler)
     # Step N
     G = s.μ + s.s*randn()
 
     if G >= 0.0
-        K = ifloor(G)
+        K = floor(Int,G)
         # Step I
         if K >= s.L
             return K
@@ -89,7 +89,7 @@ function rand(s::PoissonADSampler)
             continue
         end
 
-        K = ifloor(s.μ + s.s*T)
+        K = floor(Int,s.μ + s.s*T)
         px,py,fx,fy = procf(s.μ,K,s.s)
         c = 0.1069/s.μ
 

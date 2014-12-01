@@ -52,7 +52,7 @@ modes(d::DiscreteUniform) = [d.a:d.b]
 
 cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 : 
                                    x > d.b ? 1.0 : 
-                                   (ifloor(x) - d.a + 1.0) * d.pv)
+                                   (floor(Int,x) - d.a + 1.0) * d.pv)
 
 pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
 
@@ -93,7 +93,7 @@ function _logpdf!(r::AbstractArray, d::DiscreteUniform, x::AbstractArray)
     return r
 end
 
-quantile(d::DiscreteUniform, p::Float64) = d.a + ifloor(p * span(d))
+quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
 
 function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
