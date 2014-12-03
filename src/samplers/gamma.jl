@@ -201,10 +201,7 @@ function rand(s::GammaMTSampler)
         v *= (v * v)
         u = rand()
         x2 = x * x
-        if u < 1.0 - 0.331 * abs2(x2)
-            return v*s.κ
-        end
-        if log(u) < 0.5 * x2 + s.d * (1.0 - v + log(v)) # logmxp1
+        if u < 1.0 - 0.331 * abs2(x2) || log(u) < 0.5 * x2 + s.d * (1.0 - v + log(v))
             return v*s.κ
         end
     end

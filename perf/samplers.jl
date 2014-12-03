@@ -5,7 +5,9 @@ using Distributions
 
 ### define benchmark tasks
 
-type UnivariateSamplerRun{Spl} <: Proc end
+abstract UnivariateSamplerRun{Spl} <: Proc
+type BatchSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
+type IndivSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
 
 const batch_unit = 1000
 
@@ -13,18 +15,28 @@ Base.isvalid(::UnivariateSamplerRun, cfg) = true
 Base.length(p::UnivariateSamplerRun, cfg) = batch_unit
 Base.string{Spl}(p::UnivariateSamplerRun{Spl}) = getname(Spl)
 
-Base.start{Spl}(p::UnivariateSamplerRun{Spl}, cfg) = getsampler(Spl, cfg)
+Base.start{Spl}(p::BatchSamplerRun{Spl}, cfg) = getsampler(Spl, cfg)
+Base.start{Spl}(p::IndivSamplerRun{Spl}, cfg) = ()
 Base.done(p::UnivariateSamplerRun, cfg, s) = nothing
 
 getsampler{Spl<:Sampleable}(::Type{Spl}, cfg) = Spl(cfg...)
 
-function Base.run(p::UnivariateSamplerRun, cfg, s) 
+function Base.run(p::BatchSamplerRun, cfg, s) 
     for i = 1:batch_unit
         rand(s)
     end
 end
 
-make_procs(spltypes...) = Proc[UnivariateSamplerRun{T}() for T in spltypes]
+function Base.run{Spl}(p::IndivSamplerRun{Spl}, cfg, s) 
+    for i = 1:batch_unit
+        rand(getsampler(Spl,cfg))
+    end
+end
+
+
+make_procs(P,spltypes) = Proc[P{T}() for T in spltypes]
+
+
 
 ### specific benchmarking program
 
@@ -37,8 +49,8 @@ getsampler(::Type{AliasTable}, k::Int) = AliasTable(fill(1/k, k))
 getname(::Type{CategoricalDirectSampler}) = "direct"
 getname(::Type{AliasTable}) = "alias"
 
-benchmark_categorical() = (
-    make_procs(CategoricalDirectSampler, AliasTable),
+benchmark_categorical(P) = (
+    (CategoricalDirectSampler, AliasTable),
     "K", 2 .^ (1:12))
 
 ## binomial
@@ -52,8 +64,8 @@ getname(::Type{BinomialGeomSampler}) = "Geom"
 getname(::Type{BinomialTPESampler}) = "BTPE"
 getname(::Type{BinomialPolySampler}) = "Poly"
 
-benchmark_binomial() = (
-    make_procs(BinomialRmathSampler,
+benchmark_binomial(P) = (
+    (BinomialRmathSampler,
                BinomialAliasSampler,
                BinomialGeomSampler, 
                BinomialTPESampler, 
@@ -68,10 +80,10 @@ getname(::Type{PoissonRmathSampler}) = "rmath"
 getname(::Type{PoissonCountSampler}) = "count"
 getname(::Type{PoissonADSampler}) = "AD"
 
-Base.isvalid(::UnivariateSamplerRun{PoissonADSampler}, mu) = (mu >= 5.0)
+Base.isvalid(::BatchSamplerRun{PoissonADSampler}, mu) = (mu >= 5.0)
 
 benchmark_poisson() = (
-    make_procs(PoissonRmathSampler, PoissonCountSampler, PoissonADSampler),
+    (PoissonRmathSampler, PoissonCountSampler, PoissonADSampler),
     "μ", [0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0])
 
 ## exponential
@@ -82,7 +94,7 @@ getname(::Type{ExponentialSampler}) = "base"
 getname(::Type{ExponentialLogUSampler}) = "logu"
 
 benchmark_exponential() = (
-    make_procs(ExponentialSampler, ExponentialLogUSampler),
+    (ExponentialSampler, ExponentialLogUSampler),
     "scale", [1.0])
 
 ## gamma
@@ -97,11 +109,11 @@ getname(::Type{GammaMTSampler}) = "MT"
 getname(::Type{GammaIPSampler}) = "IP"
 
 benchmark_gamma_hi() = (
-    make_procs(GammaRmathSampler, GammaMTSampler, GammaGDSampler),
+    (GammaRmathSampler, GammaMTSampler, GammaGDSampler),
     "Dist", [(Gamma(α, 1.0),) for α in [1.5, 2.0, 3.0, 5.0, 20.0]])
 
 benchmark_gamma_lo() = (
-    make_procs(GammaRmathSampler, GammaGSSampler, GammaIPSampler),
+    (GammaRmathSampler, GammaGSSampler, GammaIPSampler),
     "Dist", [(Gamma(α, 1.0),) for α in [0.1, 0.5, 0.9]])
 
 ### main
@@ -113,9 +125,14 @@ const dnames = ["categorical",
                 "gamma_hi","gamma_lo"]
 
 function printhelp()
-    println("Require exactly one argument. Usage:")
+    println("Require exactly two arguments. Usage:")
     println()
-    println("   julia <path>/sampler.jl <distrname>")
+    println("   julia <path>/sampler.jl <proctype> <distrname>")
+    println()
+    println("   <proctype> can be:")
+    println()
+    println("      - batch : tests iteration of the sampler")
+    println("      - indiv : tests construction and iteration of the sampler")
     println()
     println("   <distrname> can be:")
     println()
@@ -126,24 +143,33 @@ function printhelp()
 end
 
 function getarg(args)
-    if length(args) == 1
-        dname = args[1]
-        if dname in dnames
-            return dname
-        else
+    if length(args) == 2
+        ptype = args[1]
+        if !(ptype in ["batch","indiv"])
+            printhelp()
+            exit(1)
+        end        
+        dname = args[2]
+        if !(dname in dnames)
             printhelp()
             exit(1)
         end
+        return ptype, dname
     else
         printhelp()
         exit(1)
     end
 end
 
-dname = getarg(ARGS)
+ptype, dname = getarg(ARGS)
 
-function do_benchmark(dname; verbose::Int=2)
-    (procs, cfghead, cfgs) = 
+function do_benchmark(ptype, dname; verbose::Int=2)
+    if ptype == "batch"
+        proc = BatchSamplerRun
+    else
+        proc = IndivSamplerRun
+    end
+    (spltypes, cfghead, cfgs) = 
         dname == "categorical" ? benchmark_categorical() :
         dname == "binomial"    ? benchmark_binomial() :
         dname == "poisson"     ? benchmark_poisson() :
@@ -152,11 +178,11 @@ function do_benchmark(dname; verbose::Int=2)
         dname == "gamma_lo"    ? benchmark_gamma_lo() :
         error("benchmarking function for $dname has not been implemented.")
 
-    r = run(procs, cfgs; duration=0.5, verbose=verbose)
+    r = run(make_procs(proc,spltypes), cfgs; duration=0.5, verbose=verbose)
     println()
     show(r; unit=:mps, cfghead=cfghead)
 end
 
-do_benchmark(dname)
+do_benchmark(ptype, dname)
 println()
 
