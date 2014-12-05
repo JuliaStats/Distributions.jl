@@ -214,6 +214,7 @@ export
     rate,               # get the rate parameter
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
+    shape,              # get the shape parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution
