@@ -149,7 +149,7 @@ pri = Gamma(1.5, 2.0)
 x = rand(Exponential(2.0), n)
 p = posterior(pri, Exponential, x)
 @test isa(p, Gamma)
-@test_approx_eq p.shape pri.shape + n
+@test_approx_eq shape(p) shape(pri) + n
 @test_approx_eq rate(p) rate(pri) + sum(x)
 
 f = fit_map(pri, Exponential, x)
@@ -158,7 +158,7 @@ f = fit_map(pri, Exponential, x)
 
 p = posterior(pri, Exponential, x, w)
 @test isa(p, Gamma)
-@test_approx_eq p.shape pri.shape + sum(w)
+@test_approx_eq shape(p) shape(pri) + sum(w)
 @test_approx_eq rate(p) rate(pri) + sum(x .* w)
 
 f = fit_map(pri, Exponential, x, w)

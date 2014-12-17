@@ -63,8 +63,8 @@ complete(G::Type{Normal}, pri::(Float64, InverseGamma), σ2::Float64) = Normal(p
 #### Gamma on precision σ^(-2) (with μ known)
 
 function posterior_canon(pri::Gamma, ss::NormalKnownMuStats)
-	α1 = pri.shape + 0.5 * ss.tw
-	β1 = pri.scale + 0.5 * ss.s2
+	α1 = shape(pri) + 0.5 * ss.tw
+	β1 = scale(pri) + 0.5 * ss.s2
 	return Gamma(α1, β1)
 end
 

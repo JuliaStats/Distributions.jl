@@ -1,63 +1,59 @@
-##############################################################################
-#
-# REFERENCES: "Statistical Distributions"
-#
-##############################################################################
-
 immutable Erlang <: ContinuousUnivariateDistribution
-    shape::Int
-    scale::Float64
-    nested_gamma::Gamma
+    gammad::Gamma
 
-    function Erlang(shape::Real, scale::Real)
-        isinteger(shape) || error("Erlang shape parameter must be an integer")
-        new(int(shape), float64(scale), Gamma(shape, scale))
+    function Erlang(α::Real, θ::Real)
+        isinteger(α) || error("Erlang shape parameter must be an integer")
+        new(Gamma(α, θ))
     end
 
-    Erlang(shape::Real) = Erlang(shape, 1.0)
-    Erlang() = Erlang(1, 1.0)
+    Erlang(α::Real) = Erlang(α, 1.0)
+    Erlang() = new(Gamma())
 end
 
 @distr_support Erlang 0.0 Inf
 
-entropy(d::Erlang) = entropy(d.nested_gamma)
+show(io::IO, d::Erlang) = ((α, θ) = params(d); show_oneline(io, d, [(:α, α), (:θ, θ)]))
 
-kurtosis(d::Erlang) = kurtosis(d.nested_gamma)
+#### Parameters
 
-mean(d::Erlang) = d.shape * d.scale
-
-median(d::Erlang) = median(d.nested_gamma)
-
-mode(d::Erlang) = mode(d.nested_gamma)
-modes(d::Erlang) = modes(d.nested_gamma)
-
-skewness(d::Erlang) = skewness(d.nested_gamma)
-
-var(d::Erlang) = d.scale^2 * d.shape
-
-show(io::IO, d::Erlang) = show(io, d, (:shape, :scale))
+shape(d::Erlang) = int(shape(d.gammad))
+scale(d::Erlang) = scale(d.gammad)
+rate(d::Erlang) = rate(d.gammad)
+params(d::Erlang) = ((α, θ) = params(d.gammad); (int(α), θ))
 
 
-function pdf(d::Erlang, x::Float64)
-    b, c = d.scale, d.shape
-    ((x / b)^(c - 1.0) * exp(-x / b)) / (b * gamma(c))
-end
+#### Statistics
 
-cdf(d::Erlang, x::Float64) = cdf(d.nested_gamma, x)
+mean(d::Erlang) = mean(d.gammad)
+var(d::Erlang) = var(d.gammad)
+median(d::Erlang) = median(d.gammad)
+skewness(d::Erlang) = skewness(d.gammad)
+kurtosis(d::Erlang) = kurtosis(d.gammad)
 
-quantile(d::Erlang, p::Float64) = quantile(d.nested_gamma, p)
+mode(d::Erlang) = mode(d.gammad)
+entropy(d::Erlang) = entropy(d.gammad)
+
+
+#### Evaluation
+
+pdf(d::Erlang, x::Float64) = pdf(d.gammad, x)
+logpdf(d::Erlang, x::Float64) = logpdf(d.gammad, x)
+
+cdf(d::Erlang, x::Float64) = cdf(d.gammad, x)
+ccdf(d::Erlang, x::Float64) = ccdf(d.gammad, x)
+logcdf(d::Erlang, x::Float64) = logcdf(d.gammad, x)
+logccdf(d::Erlang, x::Float64) = logccdf(d.gammad, x)
+
+quantile(d::Erlang, p::Float64) = quantile(d.gammad, p)
+cquantile(d::Erlang, p::Float64) = cquantile(d.gammad, p)
+invlogcdf(d::Erlang, lp::Float64) = invlogcdf(d.gammad, lp)
+invlogccdf(d::Erlang, lp::Float64) = invlogccdf(d.gammad, lp)
 
 mgf(d::Erlang, t::Real) = mgf(d.nested_gamma, t)
 cf(d::Erlang, t::Real) = cf(d.nested_gamma, t)
 
 
-function rand(d::Erlang)
-    b, c = d.scale, d.shape
-    z = 1.0
-    for i in 1:c
-        z *= rand()
-    end
-    -b * log(z)
-end
+#### Sampling
 
+rand(d::Erlang) = rand(d.gammad)
 

@@ -78,8 +78,8 @@ pri = Gamma(1.5, 2.0)
 x = rand(Normal(2.0, 3.0), n)
 p = posterior((2.0, pri), Normal, x)
 @test isa(p, Gamma)
-@test_approx_eq p.shape pri.shape + n / 2
-@test_approx_eq p.scale pri.scale + sum(abs2(x .- 2.0)) / 2
+@test_approx_eq shape(p) shape(pri) + n / 2
+@test_approx_eq scale(p) scale(pri) + sum(abs2(x .- 2.0)) / 2
 
 r = posterior_mode((2.0, pri), Normal, x)
 @test_approx_eq r mode(p)
@@ -91,8 +91,8 @@ f = fit_map((2.0, pri), Normal, x)
 
 p = posterior((2.0, pri), Normal, x, w)
 @test isa(p, Gamma)
-@test_approx_eq p.shape pri.shape + sum(w) / 2
-@test_approx_eq p.scale pri.scale + dot(w, abs2(x .- 2.0)) / 2
+@test_approx_eq shape(p) shape(pri) + sum(w) / 2
+@test_approx_eq scale(p) scale(pri) + dot(w, abs2(x .- 2.0)) / 2
 
 r = posterior_mode((2.0, pri), Normal, x, w)
 @test_approx_eq r mode(p)

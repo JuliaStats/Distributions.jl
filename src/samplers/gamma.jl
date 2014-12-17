@@ -4,7 +4,7 @@ immutable GammaRmathSampler <: Sampleable{Univariate,Continuous}
 end
 
 rand(s::GammaRmathSampler) =
-    ccall((:rgamma, "libRmath-julia"), Float64, (Float64, Float64), s.d.shape, s.d.scale)
+    ccall((:rgamma, "libRmath-julia"), Float64, (Float64, Float64), shape(s.d), scale(s.d))
 
 
 # "Generating gamma variates by a modified rejection technique"
@@ -28,7 +28,7 @@ immutable GammaGDSampler <: Sampleable{Univariate,Continuous}
 end
 
 function GammaGDSampler(g::Gamma)
-    a = g.shape
+    a = shape(g)
 
     # Step 1
     s2 = a-0.5
@@ -63,7 +63,7 @@ function GammaGDSampler(g::Gamma)
         c = 0.1515/s
     end
 
-    GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,g.scale)
+    GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
 end
 
 function rand(s::GammaGDSampler)
@@ -147,10 +147,10 @@ immutable GammaGSSampler <: Sampleable{Univariate,Continuous}
 end
 
 function GammaGSSampler(d::Gamma)
-    a = d.shape
-    ia = 1/d.shape
-    b = 1.0+0.36787944117144233*d.shape
-    GammaGSSampler(a,ia,b,d.scale)
+    a = shape(d)
+    ia = 1.0 / a
+    b = 1.0+0.36787944117144233 * a
+    GammaGSSampler(a, ia, b, scale(d))
 end
 
 function rand(s::GammaGSSampler)
@@ -184,9 +184,9 @@ immutable GammaMTSampler <: Sampleable{Univariate,Continuous}
 end
 
 function GammaMTSampler(g::Gamma)
-    d = g.shape - 1/3
+    d = shape(g) - 1/3
     c = 1.0 / sqrt(9.0 * d)
-    κ = d * g.scale
+    κ = d * scale(g)
     GammaMTSampler(d, c, κ)
 end
 
@@ -215,7 +215,7 @@ immutable GammaIPSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Uni
 end
 
 function GammaIPSampler{S<:Sampleable}(d::Gamma,::Type{S})
-    GammaIPSampler(Gamma(1.0+d.shape,d.scale), -1.0/d.shape)
+    GammaIPSampler(Gamma(1.0 + shape(d), scale(d)), -1.0 / shape(d))
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 

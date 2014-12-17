@@ -275,8 +275,8 @@ ss = suffstats(Gamma, x, w)
 
 d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
 @test isa(d, Gamma)
-@test_approx_eq_eps d.shape 3.9 0.1
-@test_approx_eq_eps d.scale 2.1 0.2
+@test_approx_eq_eps shape(d) 3.9 0.1
+@test_approx_eq_eps scale(d) 2.1 0.2
 
 
 # Geometric

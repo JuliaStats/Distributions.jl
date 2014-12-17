@@ -1,52 +1,62 @@
 immutable Gamma <: ContinuousUnivariateDistribution
-    shape::Float64
-    scale::Float64
+    α::Float64
+    θ::Float64
 
-    function Gamma(sh::Real, sc::Real)
-        sh > zero(sh) && sc > zero(sc) || 
-            error("Both shape and scale must be positive")
-        new(float64(sh), float64(sc))
+    function Gamma(α::Real, θ::Real)
+        α > zero(α) && θ > zero(θ) || error("Both shape and scale must be positive")
+        new(float64(α), float64(θ))
     end
 
-    Gamma(sh::Real) = Gamma(sh, 1.0)
-    Gamma() = Gamma(1.0, 1.0)
+    Gamma(α::Real) = Gamma(α, 1.0)
+    Gamma() = new(1.0, 1.0)
 end
-
-scale(d::Gamma) = d.scale
-rate(d::Gamma) = 1.0 / d.scale
 
 @_jl_dist_2p Gamma gamma
 
 @distr_support Gamma 0.0 Inf
 
-function entropy(d::Gamma)
-    x = (1.0 - d.shape) * digamma(d.shape)
-    x + lgamma(d.shape) + log(d.scale) + d.shape
-end
 
-kurtosis(d::Gamma) = 6.0 / d.shape
+#### Parameters
 
-mean(d::Gamma) = d.shape * d.scale
+shape(d::Gamma) = d.α
+scale(d::Gamma) = d.θ
+rate(d::Gamma) = 1.0 / d.θ
 
-median(d::Gamma) = quantile(d, 0.5)
+params(d::Gamma) = (d.α, d.θ)
 
-mgf(d::Gamma, t::Real) = (1.0 - t * d.scale)^(-d.shape)
 
-cf(d::Gamma, t::Real) = (1.0 - im * t * d.scale)^(-d.shape)
+#### Statistics
+
+mean(d::Gamma) = d.α * d.θ
+
+var(d::Gamma) = d.α * d.θ^2
+
+skewness(d::Gamma) = 2.0 / sqrt(d.α)
+
+kurtosis(d::Gamma) = 6.0 / d.α
 
 function mode(d::Gamma)
-    d.shape >= 1.0 ? d.scale * (d.shape - 1.0) : error("Gamma has no mode when shape < 1.0")
+    (α, θ) = params(d)
+    α > 1.0 ? θ * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
 
-skewness(d::Gamma) = 2.0 / sqrt(d.shape)
-
-var(d::Gamma) = d.shape * d.scale * d.scale
-
-function gradlogpdf(d::Gamma, x::Float64)
-  insupport(Gamma, x) ? (d.shape - 1.0) / x - 1.0 / d.scale : 0.0
+function entropy(d::Gamma)
+    (α, θ) = params(d)
+    α + lgamma(α) + (1.0 - α) * digamma(α) + log(θ)
 end
 
-## Fit model
+mgf(d::Gamma, t::Real) = (1.0 - t * d.θ)^(-d.α)
+
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.θ)^(-d.α)
+
+
+#### Evaluation
+
+gradlogpdf(d::Gamma, x::Float64) = 
+    insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.θ : 0.0
+
+
+#### Fit model
 
 immutable GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
