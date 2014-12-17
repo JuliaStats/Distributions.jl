@@ -40,9 +40,14 @@ Exponential(6.5)
 FDist(6.0, 8.0)
 FDist(8.0, 6.0)
 
+Gamma()
+Gamma(2.0)
 Gamma(1.0, 1.0)
 Gamma(3.0, 1.0)
 Gamma(3.0, 2.0)
+
+Gumbel()
+Gumbel(3.0)
 Gumbel(3.0, 5.0)
 Gumbel(5.0, 3.0)
 

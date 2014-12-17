@@ -154,7 +154,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1
 		s = get(args, 1) or 1.0
-		return (erlang(a, scale=s), (0, inf), {})
+		return (erlang(a, scale=s), (0, inf), 
+			{"shape" : a, "scale" : s})
 
 	elif dname == "Exponential":
 		assert len(args) <= 1
@@ -170,7 +171,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (gamma(a, scale=s), (0, inf), {})
+		return (gamma(a, scale=s), (0, inf), 
+			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
 	elif dname == "Geometric":
 		assert len(args) <= 1
@@ -182,7 +184,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (gumbel_r(l, s), (-inf, inf), {})
+		return (gumbel_r(l, s), (-inf, inf), 
+			{"location" : l, "scale" : s})
 
 	elif dname == "Hypergeometric":
 		assert len(args) == 3
