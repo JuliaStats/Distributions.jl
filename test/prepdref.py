@@ -197,7 +197,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (invgamma(a, scale=s), (0, inf), {})
+		return (invgamma(a, scale=s), (0, inf), 
+			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
 	elif dname == "Laplace":
 		assert len(args) <= 2

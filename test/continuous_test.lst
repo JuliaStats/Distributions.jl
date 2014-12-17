@@ -51,6 +51,8 @@ Gumbel(3.0)
 Gumbel(3.0, 5.0)
 Gumbel(5.0, 3.0)
 
+InverseGamma()
+InverseGamma(2.0)
 InverseGamma(1.0, 1.0)
 InverseGamma(1.0, 2.0)
 InverseGamma(2.0, 1.0)

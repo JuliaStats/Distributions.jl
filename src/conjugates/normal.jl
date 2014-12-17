@@ -39,8 +39,8 @@ complete(G::Type{Normal}, pri::(Normal, Float64), μ::Float64) = Normal(μ, pri[
 #### InverseGamma on σ^2 (with μ known)
 
 function posterior_canon(pri::InverseGamma, ss::NormalKnownMuStats)
-	α1 = pri.shape + 0.5 * ss.tw
-	β1 = pri.scale + 0.5 * ss.s2
+	α1 = shape(pri) + 0.5 * ss.tw
+	β1 = scale(pri) + 0.5 * ss.s2
 	return InverseGamma(α1, β1)
 end
 
