@@ -14,15 +14,21 @@ immutable NormalCanon <: ContinuousUnivariateDistribution
     NormalCanon() = new(0.0, 1.0, 0.0)
 end
 
+@distr_support NormalCanon -Inf Inf
+
 ## conversion between Normal and NormalCanon
 
 Base.convert(::Type{Normal}, cf::NormalCanon) = Normal(cf.μ, 1.0 / sqrt(cf.prec))
 Base.convert(::Type{NormalCanon}, d::Normal) = (J = 1.0 / abs2(σ); NormalCanon(J * d.μ, J))
 canonform(d::Normal) = convert(NormalCanon, d)
 
-## Basic properties
 
-@distr_support NormalCanon -Inf Inf
+#### Parameters
+
+params(d::NormalCanon) = (d.h, d.prec)
+
+
+#### Statistics
 
 mean(cf::NormalCanon) = cf.μ
 median(cf::NormalCanon) = mean(cf)
@@ -36,7 +42,8 @@ std(cf::NormalCanon) = sqrt(var(cf))
 
 entropy(cf::NormalCanon) = 0.5 * (log2π + 1. - log(cf.prec))
 
-# Evaluation
+
+#### Evaluation
 
 pdf(d::NormalCanon, x::Float64) = (sqrt(d.prec) / sqrt2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
 logpdf(d::NormalCanon, x::Float64) = 0.5 * (log(d.prec) - log2π - d.prec * abs2(x - d.μ))
@@ -54,7 +61,8 @@ cquantile(d::NormalCanon, p::Float64) = xval(d, -Φinv(p))
 invlogcdf(d::NormalCanon, p::Float64) = xval(d, logΦinv(p))
 invlogccdf(d::NormalCanon, p::Float64) = xval(d, -logΦinv(p))
 
-## Sampling
+
+#### Sampling
 
 rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.prec)
 rand!{T<:FloatingPoint}(cf::NormalCanon, r::Array{T}) = rand!(convert(Normal, cf), r)

@@ -21,7 +21,8 @@ typealias Gaussian Normal
 params(d::Normal) = (d.μ, d.σ)
 
 
-## Properties
+#### Statistics
+
 mean(d::Normal) = d.μ
 median(d::Normal) = d.μ
 mode(d::Normal) = d.μ
@@ -31,11 +32,12 @@ std(d::Normal) = d.σ
 skewness(d::Normal) = 0.0
 kurtosis(d::Normal) = 0.0
 
-entropy(d::Normal) = 0.5 * (log2π + 1.) + log(d.σ)
+entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 
-## Functions
-zval(d::Normal, x::Float64) = (x - d.μ)/d.σ
+#### Evaluation
+
+zval(d::Normal, x::Float64) = (x - d.μ) / d.σ
 xval(d::Normal, z::Float64) = d.μ + d.σ * z
 
 pdf(d::Normal, x::Float64) = φ(zval(d,x))/d.σ
@@ -56,10 +58,14 @@ gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
 
-## Sampling
+
+#### Sampling
+
 rand(d::Normal) = d.μ + d.σ * randn()
 
-## Fitting
+
+#### Fitting
+
 immutable NormalStats <: SufficientStats
     s::Float64    # (weighted) sum of x
     m::Float64    # (weighted) mean of x
