@@ -5381,7 +5381,9 @@
       "mean": 0.0, 
       "median": 7.9820775349995142e-17, 
       "minimum": "-inf", 
-      "params": {}, 
+      "params": {
+        "dof": 1.2
+      }, 
       "points": [
         {
           "cdf": 0.099999999999417222, 
@@ -5446,7 +5448,9 @@
       "mean": 0.0, 
       "median": 6.9760036230033171e-17, 
       "minimum": "-inf", 
-      "params": {}, 
+      "params": {
+        "dof": 5.0
+      }, 
       "points": [
         {
           "cdf": 0.10000000000544629, 
@@ -5511,7 +5515,9 @@
       "mean": 0.0, 
       "median": 6.697510348812595e-17, 
       "minimum": "-inf", 
-      "params": {}, 
+      "params": {
+        "dof": 28.0
+      }, 
       "points": [
         {
           "cdf": 0.099999999573711112, 
@@ -6236,7 +6242,10 @@
       "mean": 0.5, 
       "median": 0.5, 
       "minimum": 0.0, 
-      "params": {}, 
+      "params": {
+        "location": 0.0, 
+        "scale": 1.0
+      }, 
       "points": [
         {
           "cdf": 0.10000000000000001, 
@@ -6301,7 +6310,10 @@
       "mean": 10.0, 
       "median": 10.0, 
       "minimum": 3.0, 
-      "params": {}, 
+      "params": {
+        "location": 3.0, 
+        "scale": 14.0
+      }, 
       "points": [
         {
           "cdf": 0.10000000000000002, 
@@ -6366,7 +6378,10 @@
       "mean": 3.0499999999999998, 
       "median": 3.0499999999999998, 
       "minimum": 3.0, 
-      "params": {}, 
+      "params": {
+        "location": 3.0, 
+        "scale": 0.10000000000000009
+      }, 
       "points": [
         {
           "cdf": 0.099999999999997785, 

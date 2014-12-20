@@ -17,6 +17,9 @@ end
 
 params(d::Uniform) = (d.a, d.b)
 
+location(d::Uniform) = d.a
+scale(d::Uniform) = d.b - d.a
+
 
 #### Statistics
 

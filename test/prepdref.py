@@ -306,7 +306,7 @@ def get_dinfo(dname, args):
 			a, b = 0.0, args[0]
 		else:
 			a, b = args
-		return (uniform(a, b-a), (a, b), {})
+		return (uniform(a, b-a), (a, b), {"location" : a, "scale" : b - a})
 
 	elif dname == "Weibull":
 		assert len(args) <= 2
