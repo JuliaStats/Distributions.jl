@@ -68,6 +68,8 @@ Laplace(0.0, 1.0)
 Laplace(5.0, 1.0)
 Laplace(5.0, 1.5)
 
+Logistic()
+Logistic(2.0)
 Logistic(0.0, 1.0)
 Logistic(5.0, 1.0)
 Logistic(5.0, 1.5)
