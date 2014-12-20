@@ -1,10 +1,10 @@
 immutable Gamma <: ContinuousUnivariateDistribution
     α::Float64
-    θ::Float64
+    β::Float64
 
-    function Gamma(α::Real, θ::Real)
-        α > zero(α) && θ > zero(θ) || error("Both shape and scale must be positive")
-        new(float64(α), float64(θ))
+    function Gamma(α::Real, β::Real)
+        α > zero(α) && β > zero(β) || error("Gamma: both shape and scale must be positive")
+        new(float64(α), float64(β))
     end
 
     Gamma(α::Real) = Gamma(α, 1.0)
@@ -19,41 +19,41 @@ end
 #### Parameters
 
 shape(d::Gamma) = d.α
-scale(d::Gamma) = d.θ
-rate(d::Gamma) = 1.0 / d.θ
+scale(d::Gamma) = d.β
+rate(d::Gamma) = 1.0 / d.β
 
-params(d::Gamma) = (d.α, d.θ)
+params(d::Gamma) = (d.α, d.β)
 
 
 #### Statistics
 
-mean(d::Gamma) = d.α * d.θ
+mean(d::Gamma) = d.α * d.β
 
-var(d::Gamma) = d.α * d.θ^2
+var(d::Gamma) = d.α * d.β^2
 
 skewness(d::Gamma) = 2.0 / sqrt(d.α)
 
 kurtosis(d::Gamma) = 6.0 / d.α
 
 function mode(d::Gamma)
-    (α, θ) = params(d)
-    α > 1.0 ? θ * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
+    (α, β) = params(d)
+    α > 1.0 ? β * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
 
 function entropy(d::Gamma)
-    (α, θ) = params(d)
-    α + lgamma(α) + (1.0 - α) * digamma(α) + log(θ)
+    (α, β) = params(d)
+    α + lgamma(α) + (1.0 - α) * digamma(α) + log(β)
 end
 
-mgf(d::Gamma, t::Real) = (1.0 - t * d.θ)^(-d.α)
+mgf(d::Gamma, t::Real) = (1.0 - t * d.β)^(-d.α)
 
-cf(d::Gamma, t::Real) = (1.0 - im * t * d.θ)^(-d.α)
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.β)^(-d.α)
 
 
 #### Evaluation
 
 gradlogpdf(d::Gamma, x::Float64) = 
-    insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.θ : 0.0
+    insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.β : 0.0
 
 
 #### Fit model
