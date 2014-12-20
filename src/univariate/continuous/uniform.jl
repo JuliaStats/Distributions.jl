@@ -1,80 +1,83 @@
 immutable Uniform <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
+
     function Uniform(a::Real, b::Real)
-	a < b || error("a < b required for range [a, b]")
-	new(float64(a), float64(b))
+	   a < b || error("Uniform: a must be less than b")
+	   new(float64(a), float64(b))
     end
+
     Uniform() = new(0.0, 1.0)
 end
 
-## Support
 @distr_support Uniform d.a d.b
 
-## Properties
-mean(d::Uniform) = (d.a + d.b) / 2.0
 
-median(d::Uniform) = (d.a + d.b) / 2.0
+#### Parameters
 
+params(d::Uniform) = (d.a, d.b)
+
+
+#### Statistics
+
+mean(d::Uniform) = middle(d.a, d.b)
+median(d::Uniform) = mean(d)
 mode(d::Uniform) = mean(d)
 modes(d::Uniform) = Float64[]
 
-function var(d::Uniform)
-    w = d.b - d.a
-    w * w / 12.0
-end
+var(d::Uniform) = (w = d.b - d.a; w^2 / 12.0)
 
 skewness(d::Uniform) = 0.0
 kurtosis(d::Uniform) = -1.2
 
 entropy(d::Uniform) = log(d.b - d.a)
 
-## Functions
-pdf(d::Uniform, x::Float64) = insupport(d,x) ? 1/(d.b-d.a) : 0.0
-logpdf(d::Uniform, x::Float64) = insupport(d,x) ? -log(d.b-d.a) : -Inf 
 
-function cdf(d::Uniform, q::Float64) 
-    if isnan(q)
-        return NaN
-    elseif q <= d.a
-        return 0.0
-    elseif q >= d.b
-        return 1.0
-    end
-    (q-d.a)/(d.b-d.a)
-end
-function ccdf(d::Uniform, q::Float64) 
-    if isnan(q)
-        return NaN
-    elseif q <= d.a
-        return 1.0
-    elseif q >= d.b
-        return 0.0
-    end
-    (d.b-q)/(d.b-d.a)
+#### Evaluation
+
+pdf(d::Uniform, x::Float64) = insupport(d, x) ? 1.0 / (d.b - d.a) : 0.0
+logpdf(d::Uniform, x::Float64) = insupport(d, x) ? -log(d.b - d.a) : -Inf 
+
+function cdf(d::Uniform, x::Float64) 
+    (a, b) = params(d)
+    x <= a ? 0.0 :
+    x >= d.b ? 1.0 : (x - a) / (b - a)
 end
 
-quantile(d::Uniform, p::Float64) = @checkquantile p d.a+p*(d.b-d.a)
-cquantile(d::Uniform, p::Float64) = @checkquantile p d.b+p*(d.a-d.b)
+function ccdf(d::Uniform, x::Float64) 
+    (a, b) = params(d)
+    x <= a ? 1.0 :
+    x >= d.b ? 0.0 : (b - x) / (b - a)
+end
+
+quantile(d::Uniform, p::Float64) = d.a + p * (d.b - d.a)
+cquantile(d::Uniform, p::Float64) = d.b + p * (d.a - d.b)
 
 
 function mgf(d::Uniform, t::Real)
-    u = 0.5*(d.b-d.a)*t
+    (a, b) = params(d)
+    u = 0.5 * (b - a) * t
     u == zero(u) && return one(u)
-    v = 0.5*(d.a+d.b)*t
-    exp(v)*(sinh(u)/u)
-end
-function cf(d::Uniform, t::Real)
-    u = 0.5*(d.b-d.a)*t
-    u == zero(u) && return complex(one(u))
-    v = 0.5*(d.a+d.b)*t
-    exp(im*v)*(sin(u)/u)
+    v = 0.5 * (a + b) *t
+    exp(v) * (sinh(u) / u)
 end
 
-## Sampling
+function cf(d::Uniform, t::Real)
+    (a, b) = params(d)
+    u = 0.5 * (b - a) * t
+    u == zero(u) && return complex(one(u))
+    v = 0.5 * (a + b) * t
+    exp(im * v) * (sin(u) / u)
+end
+
+
+#### Evaluation
+
 rand(d::Uniform) = d.a + (d.b - d.a) * rand()
 
-## Fitting
+
+#### Fitting
+
 function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
@@ -92,3 +95,4 @@ function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
 
     Uniform(xmin, xmax)
 end
+

@@ -279,7 +279,7 @@ def get_dinfo(dname, args):
 	elif dname == "TDist":
 		assert len(args) == 1
 		df = args[0]
-		return (scipy.stats.t(df), (-inf, inf), {})
+		return (scipy.stats.t(df), (-inf, inf), {"dof" : df})
 
 	elif dname == "TruncatedNormal":
 		assert len(args) == 4
