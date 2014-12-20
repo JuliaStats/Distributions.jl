@@ -1,69 +1,90 @@
 immutable Laplace <: ContinuousUnivariateDistribution
-    location::Float64
-    scale::Float64
-    function Laplace(l::Real, s::Real)
-        s > zero(s) || error("scale must be positive")
-        new(float64(l), float64(s))
-    end
-end
+    μ::Float64
+    β::Float64
 
-Laplace(location::Real) = Laplace(location, 1.0)
-Laplace() = Laplace(0.0, 1.0)
+    function Laplace(μ::Real, β::Real)
+        β > zero(β) || error("Laplace's scale must be positive")
+        new(float64(μ), float64(β))
+    end
+
+    Laplace(μ::Real) = new(float64(μ), 1.0)
+    Laplace() = new(0.0, 1.0)
+end
 
 typealias Biexponential Laplace
 
-## Support
 @distr_support Laplace -Inf Inf
 
-## Properties
-mean(d::Laplace) = d.location
-median(d::Laplace) = d.location
-mode(d::Laplace) = d.location
 
-std(d::Laplace) = sqrt2 * d.scale
-var(d::Laplace) = 2.0 * d.scale^2
+#### Parameters
+
+location(d::Laplace) = d.μ
+scale(d::Laplace) = d.β
+params(d::Laplace) = (d.μ, d.β)
+
+
+#### Statistics
+
+mean(d::Laplace) = d.μ
+median(d::Laplace) = d.μ
+mode(d::Laplace) = d.μ
+
+var(d::Laplace) = 2.0 * d.β^2
+std(d::Laplace) = sqrt2 * d.β
 skewness(d::Laplace) = 0.0
 kurtosis(d::Laplace) = 3.0
 
-entropy(d::Laplace) = log(2.0 * d.scale) + 1.0
+entropy(d::Laplace) = log(2.0 * d.β) + 1.0
 
-## Functions
-pdf(d::Laplace, x::Float64) = 0.5exp(-abs(x - d.location)/d.scale) / d.scale
-logpdf(d::Laplace, x::Float64) = -log(2.0 * d.scale) - abs(x - d.location) / d.scale
 
-cdf(d::Laplace, x::Float64) = x < d.location ? 0.5*exp((x-d.location)/d.scale) : 0.5*(2.0-exp((d.location-x)/d.scale))
-ccdf(d::Laplace, x::Float64) = x < d.location ? 0.5-0.5*expm1((x-d.location)/d.scale) : 0.5*exp((d.location-x)/d.scale)
-logcdf(d::Laplace, x::Float64) = x < d.location ? loghalf + ((x-d.location)/d.scale) : loghalf + log2mexp((d.location-x)/d.scale)
-logccdf(d::Laplace, x::Float64) = x < d.location ? loghalf + log2mexp((x-d.location)/d.scale) : loghalf + ((d.location-x)/d.scale)
+#### Evaluations
 
-quantile(d::Laplace, p::Float64) = p < 0.5 ? d.location + d.scale*log(2.0*p) : d.location - d.scale*log(2.0*(1.0-p))
-cquantile(d::Laplace, p::Float64) = p >= 0.5 ? d.location + d.scale*log(2.0*(1.0-p)) : d.location - d.scale*log(2.0*p)
-invlogcdf(d::Laplace, lp::Float64) = lp < loghalf ? d.location + d.scale*(logtwo + lp) : d.location - d.scale*(logtwo + log1mexp(lp))
-invlogccdf(d::Laplace, lp::Float64) = lp >= loghalf ? d.location + d.scale*(logtwo + log1mexp(lp)) : d.location - d.scale*(logtwo + lp)
+zval(d::Laplace, x::Float64) = (x - d.μ) / d.β
+xval(d::Laplace, z::Float64) = d.μ + z * d.β
+
+pdf(d::Laplace, x::Float64) = 0.5 * exp(-abs(zval(d, x))) / scale(d)
+logpdf(d::Laplace, x::Float64) = - (abs(zval(d, x)) + log(2.0 * scale(d)))
+
+cdf(d::Laplace, x::Float64) = (z = zval(d, x); z < 0.0 ? 0.5 * exp(z) : 1.0 - 0.5 * exp(-z))
+ccdf(d::Laplace, x::Float64) = (z = zval(d, x); z > 0.0 ? 0.5 * exp(-z) : 1.0 - 0.5 * exp(z))
+logcdf(d::Laplace, x::Float64) = (z = zval(d, x); z < 0.0 ? loghalf + z : loghalf + log2mexp(-z))
+logccdf(d::Laplace, x::Float64) = (z = zval(d, x); z > 0.0 ? loghalf - z : loghalf + log2mexp(z))
+
+quantile(d::Laplace, p::Float64) = p < 0.5 ? xval(d, log(2.0 * p)) : xval(d, -log(2.0 * (1.0 - p)))
+cquantile(d::Laplace, p::Float64) = p > 0.5 ? xval(d, log(2.0 * (1.0 - p))) : xval(d, -log(2.0 * p))
+invlogcdf(d::Laplace, lp::Float64) = lp < loghalf ? xval(d, logtwo + lp) : xval(d, -(logtwo + log1mexp(lp)))
+invlogccdf(d::Laplace, lp::Float64) = lp > loghalf ? xval(d, logtwo + log1mexp(lp)) : xval(d, -(logtwo + lp))
 
 function gradlogpdf(d::Laplace, x::Float64)
-    d.location != x || error("Gradient is undefined at the location point")
-    x > d.location ? - 1.0 / d.scale : 1.0 / d.scale
+    μ, β = params(d)
+    x == μ && error("Gradient is undefined at the location point")
+    g = 1.0 / β
+    x > μ ? -g : g
 end
 
 function mgf(d::Laplace, t::Real)
-    st = d.scale*t
-    exp(t * d.location) / ((1.0-st)*(1.0+st))
+    st = d.β * t
+    exp(t * d.μ) / ((1.0 - st) * (1.0 + st))
 end
 function cf(d::Laplace, t::Real)
-    st = d.scale*t
-    exp(im * t * d.location) / ((1.0-st)*(1.0+st))
+    st = d.β * t
+    exp(im * t * d.μ) / ((1.0 - st) * (1.0 + st))
 end
 
 
-## Sampling
+#### Sampling
+
 function rand(d::Laplace) 
-    er = randexp()
-    randbool() ? d.location - d.scale * er : d.location + d.scale * er
+    z = randexp()
+    randbool() ? d.μ + d.β * z : d.μ - d.β * z 
 end
 
-## Fitting
+
+#### Fitting
+
 function fit_mle(::Type{Laplace}, x::Array)
     a = median(x)
     Laplace(a, mad(x, a))
 end
+
+

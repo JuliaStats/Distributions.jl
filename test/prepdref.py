@@ -211,7 +211,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (laplace(l, s), (-inf, inf), {})
+		return (laplace(l, s), (-inf, inf), {"location" : l, "scale" : s})
 
 	elif dname == "Logistic":
 		assert len(args) == 2

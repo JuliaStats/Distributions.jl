@@ -310,8 +310,8 @@ d = fit(Geometric, rand(Geometric(0.3), N))
 
 d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 @test isa(d, Laplace)
-@test_approx_eq_eps d.location 5.0 0.1
-@test_approx_eq_eps d.scale 3.0 0.2
+@test_approx_eq_eps location(d) 5.0 0.1
+@test_approx_eq_eps scale(d) 3.0 0.2
 
 
 # Poisson

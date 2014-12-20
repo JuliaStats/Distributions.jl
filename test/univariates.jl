@@ -5,13 +5,21 @@ import JSON
 using Base.Test
 
 
-function verify_and_test_drive(jsonfile, n_tsamples::Int)
+function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for (ex, dct) in R
-        println("    testing $(ex)")
+        dsym = symbol(dct["dtype"])
+        dname = string(dsym)
 
-        # check type
-        dtype = eval(symbol(dct["dtype"]))
+        # test whether it is included in the selected list
+        # or all are selected (when selected is empty)
+        if !isempty(selected) && !(dname in selected)
+            continue
+        end
+
+        # perform testing
+        println("    testing $(ex)")
+        dtype = eval(dsym)
         d = eval(parse(ex))
         if dtype == TruncatedNormal
             @test isa(d, Truncated{Normal})
@@ -88,7 +96,7 @@ for c in ["discrete",
     println("    [$title]")
     println("    ------------")
     jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json") 
-    verify_and_test_drive(jsonfile, 10^6)
+    verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end
 

@@ -62,6 +62,8 @@ InverseGaussian()
 InverseGaussian(0.8)
 # InverseGaussian(2.0)  ## quantile not working well 
 
+Laplace()
+Laplace(2.0)
 Laplace(0.0, 1.0)
 Laplace(5.0, 1.0)
 Laplace(5.0, 1.5)
