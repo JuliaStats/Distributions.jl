@@ -312,7 +312,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (weibull_min(a, scale=s), (0, inf), {})
+		return (weibull_min(a, scale=s), (0, inf), {"shape" : a, "scale" : s})
 
 	else:
 		raise ValueError("Unrecognized distribution name: " + dname)
