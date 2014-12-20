@@ -18,16 +18,59 @@ Common Interface
 
 A series of methods are implemented for each univariate distribution, which provide useful functionalities such as moment computation, pdf evaluation, and sampling (*i.e.* random number generation).
 
-Computation of statistics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Let ``d`` be a distribution:
+Parameter Retrieval
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. function:: params(d)
 
     Return a tuple of parameters. 
 
     **Note:** Let ``d`` be a distribution of type ``D``, then ``D(params(d)...)`` will construct exactly the same distribution as ``d``.
+
+.. function:: succprob(d)
+
+    Get the probability of success.
+
+.. function:: failprob(d)
+
+    Get the probability of failure. 
+
+.. function:: scale(d)
+
+    Get the scale parameter.
+
+.. function:: location(d)
+
+    Get the location parameter. 
+
+.. function:: shape(d)
+
+    Get the shape parameter. 
+
+.. function:: rate(d)
+
+    Get the rate parameter. 
+
+.. function:: ncategories(d)
+
+    Get the number of categories. 
+
+.. function:: ntrials(d)
+
+    Get the number of trials.  
+
+.. function:: dof(d)
+
+    Get the degrees of freedom.
+
+
+**Note:** ``params`` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details. 
+
+
+Computation of statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let ``d`` be a distribution:
 
 .. function:: mean(d)
 

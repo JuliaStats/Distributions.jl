@@ -27,8 +27,8 @@ end
 
 params(d::NegativeBinomial) = (d.r, d.p)
 
-succprob(d) = d.p
-failprob(d) = 1.0 - d.p
+succprob(d::NegativeBinomial) = d.p
+failprob(d::NegativeBinomial) = 1.0 - d.p
 
 
 ### Statistics
