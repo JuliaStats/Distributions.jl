@@ -1,13 +1,13 @@
 immutable Cauchy <: ContinuousUnivariateDistribution
-    x0::Float64
-    γ::Float64
+    μ::Float64
+    β::Float64
 
-    function Cauchy(x0::Real, γ::Real)
-        γ > zero(γ) || error("scale must be positive")
-        new(float64(x0), float64(γ))
+    function Cauchy(μ::Real, β::Real)
+        β > zero(β) || error("Cauchy: scale must be positive")
+        new(float64(μ), float64(β))
     end
 
-    Cauchy(x0::Real) = new(float64(x0), 1.0)
+    Cauchy(μ::Real) = new(float64(μ), 1.0)
     Cauchy() = new(0.0, 1.0)
 end
 
@@ -15,10 +15,10 @@ end
 
 #### Parameters
 
-location(d::Cauchy) = d.x0
-scale(d::Cauchy) = d.γ
+location(d::Cauchy) = d.μ
+scale(d::Cauchy) = d.β
 
-params(d::Cauchy) = (d.x0, d.γ)
+params(d::Cauchy) = (d.μ, d.β)
 
 
 #### Statistics
@@ -36,36 +36,30 @@ entropy(d::Cauchy) = log(scale(d)) + log4π
 
 #### Functions
 
-function pdf(d::Cauchy, x::Float64)
-    x0, γ = params(d)
-    z = (x - x0) / γ
-    1.0 / (π * γ * (1 + z^2))
-end
+zval(d::Cauchy, x::Float64) = (x - d.μ) / d.β
+xval(d::Cauchy, z::Float64) = d.μ + z * d.β
 
-function logpdf(d::Cauchy, x::Float64)
-    x0, γ = params(d)
-    z = (x - x0) / γ
-    - (logπ + log(γ) + log1psq(z))
-end
+pdf(d::Cauchy, x::Float64) = 1.0 / (π * scale(d) * (1 + zval(d, x)^2))
+logpdf(d::Cauchy, x::Float64) = - (logπ + log(scale(d)) + log1psq(zval(d, x)))
 
 function cdf(d::Cauchy, x::Float64)
-    x0, γ = params(d)
-    invπ * atan2(x - x0, γ) + 0.5
+    μ, β = params(d)
+    invπ * atan2(x - μ, β) + 0.5
 end
 
 function ccdf(d::Cauchy, x::Float64)
-    x0, γ = params(d)
-    invπ * atan2(x0 - x, γ) + 0.5
+    μ, β = params(d)
+    invπ * atan2(μ - x, β) + 0.5
 end
 
 function quantile(d::Cauchy, p::Float64)
-    x0, γ = params(d)
-    x0 + γ * tan(π * (p - 0.5))
+    μ, β = params(d)
+    μ + β * tan(π * (p - 0.5))
 end
 
 function cquantile(d::Cauchy, p::Float64)
-    x0, γ = params(d)
-    x0 + γ * tan(π * (0.5 - p))
+    μ, β = params(d)
+    μ + β * tan(π * (0.5 - p))
 end
 
 mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN

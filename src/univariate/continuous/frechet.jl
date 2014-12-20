@@ -1,12 +1,10 @@
-# Fréchet Distribution
-
 immutable Frechet <: ContinuousUnivariateDistribution
     α::Float64
-    s::Float64
+    β::Float64
 
-    function Frechet(α::Real, s::Real)
-    	α > zero(α) && s > zero(s) || error("Both shape and scale must be positive")
-    	new(float64(α), float64(s))
+    function Frechet(α::Real, β::Real)
+    	α > zero(α) && β > zero(β) || error("Both shape and scale must be positive")
+    	new(float64(α), float64(β))
     end
 
     Frechet(α::Real) = Frechet(α, 1.0)
@@ -19,22 +17,22 @@ end
 #### Parameters
 
 shape(d::Frechet) = d.α
-scale(d::Frechet) = d.s
-params(d::Frechet) = (d.α, d.s)
+scale(d::Frechet) = d.β
+params(d::Frechet) = (d.α, d.β)
 
 
 #### Statistics
 
-mean(d::Frechet) = (α = d.α; α > 1.0 ? d.s * gamma(1.0 - 1.0 / α) : Inf)
+mean(d::Frechet) = (α = d.α; α > 1.0 ? d.β * gamma(1.0 - 1.0 / α) : Inf)
 
-median(d::Frechet) = d.s * logtwo^(-1.0 / d.α)
+median(d::Frechet) = d.β * logtwo^(-1.0 / d.α)
 
-mode(d::Frechet) = (iα = -1.0/d.α; d.s * (1.0 - iα) ^ iα)
+mode(d::Frechet) = (iα = -1.0/d.α; d.β * (1.0 - iα) ^ iα)
 
 function var(d::Frechet)
     if d.α > 2.0
         iα = 1.0 / d.α    
-        return d.s^2 * (gamma(1.0 - 2.0 * iα) - gamma(1.0 - iα)^2)
+        return d.β^2 * (gamma(1.0 - 2.0 * iα) - gamma(1.0 - iα)^2)
     else    
         return Inf
     end
@@ -67,17 +65,17 @@ end
 
 function entropy(d::Frechet)
     const γ = 0.57721566490153286060  # γ is the Euler-Mascheroni constant
-    1.0 + γ / d.α + γ + log(d.s / d.α)
+    1.0 + γ / d.α + γ + log(d.β / d.α)
 end
 
 
 #### Evaluation
 
 function logpdf(d::Frechet, x::Float64)
-    (α, s) = params(d)
+    (α, β) = params(d)
     if x > 0.0
-        z = s / x
-        return log(α / s) + (1.0 + α) * log(z) - z^α
+        z = β / x
+        return log(α / β) + (1.0 + α) * log(z) - z^α
     else
         return -Inf
     end
@@ -85,23 +83,23 @@ end
 
 pdf(d::Frechet, x::Float64) = exp(logpdf(d, x))
 
-cdf(d::Frechet, x::Float64) = x > 0.0 ? exp(-((d.s / x) ^ d.α)) : 0.0
-ccdf(d::Frechet, x::Float64) = x > 0.0 ? -expm1(-((d.s / x) ^ d.α)) : 1.0
-logcdf(d::Frechet, x::Float64) = x > 0.0 ? -(d.s / x) ^ d.α : -Inf
-logccdf(d::Frechet, x::Float64) = x > 0.0 ? log1mexp(-((d.s / x) ^ d.α)) : 0.0
+cdf(d::Frechet, x::Float64) = x > 0.0 ? exp(-((d.β / x) ^ d.α)) : 0.0
+ccdf(d::Frechet, x::Float64) = x > 0.0 ? -expm1(-((d.β / x) ^ d.α)) : 1.0
+logcdf(d::Frechet, x::Float64) = x > 0.0 ? -(d.β / x) ^ d.α : -Inf
+logccdf(d::Frechet, x::Float64) = x > 0.0 ? log1mexp(-((d.β / x) ^ d.α)) : 0.0
 
-quantile(d::Frechet, p::Float64) = d.s * (-log(p)) ^ (-1.0 / d.α)
-cquantile(d::Frechet, p::Float64) = d.s * (-log1p(-p)) ^ (-1.0 / d.α)
-invlogcdf(d::Frechet, lp::Float64) = d.s * (-lp)^(-1.0 / d.α)
-invlogccdf(d::Frechet, lp::Float64) = d.s * (-log1mexp(lp))^(-1.0 / d.α)
+quantile(d::Frechet, p::Float64) = d.β * (-log(p)) ^ (-1.0 / d.α)
+cquantile(d::Frechet, p::Float64) = d.β * (-log1p(-p)) ^ (-1.0 / d.α)
+invlogcdf(d::Frechet, lp::Float64) = d.β * (-lp)^(-1.0 / d.α)
+invlogccdf(d::Frechet, lp::Float64) = d.β * (-log1mexp(lp))^(-1.0 / d.α)
 
 function gradlogpdf(d::Frechet, x::Float64)
-    (α, s) = params(d)
-    insupport(Frechet, x) ? -(α + 1.0) / x + α * (s^α) * x^(-α-1.0)  : 0.0
+    (α, β) = params(d)
+    insupport(Frechet, x) ? -(α + 1.0) / x + α * (β^α) * x^(-α-1.0)  : 0.0
 end
 
 ## Sampling
 
-rand(d::Frechet) = d.s * randexp() ^ (-1.0 / d.α)
+rand(d::Frechet) = d.β * randexp() ^ (-1.0 / d.α)
 
 

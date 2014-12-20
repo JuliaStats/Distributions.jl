@@ -42,21 +42,21 @@ entropy(d::Gumbel) = 1.57721566490153286 + log(d.β)
 
 #### Evaluation
 
-zvar(d::Gumbel, x::Float64) = (x - d.μ) / d.β
-xvar(d::Gumbel, z::Float64) = x * d.β + d.μ
+zval(d::Gumbel, x::Float64) = (x - d.μ) / d.β
+xval(d::Gumbel, z::Float64) = x * d.β + d.μ
 
 function pdf(d::Gumbel, x::Float64)
-    z = zvar(d, x)
+    z = zval(d, x)
     exp(-z - exp(-z)) / d.β
 end
 
 function logpdf(d::Gumbel, x::Float64)
-    z = zvar(d, x)
+    z = zval(d, x)
     - (z + exp(-z) + log(d.β))
 end
 
-cdf(d::Gumbel, x::Float64) = exp(-exp(-zvar(d, x)))
-logcdf(d::Gumbel, x::Float64) = -exp(-zvar(d, x))
+cdf(d::Gumbel, x::Float64) = exp(-exp(-zval(d, x)))
+logcdf(d::Gumbel, x::Float64) = -exp(-zval(d, x))
 
 quantile(d::Gumbel, p::Float64) = d.μ - d.β * log(-log(p))
 

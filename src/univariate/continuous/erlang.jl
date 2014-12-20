@@ -12,14 +12,14 @@ end
 
 @distr_support Erlang 0.0 Inf
 
-show(io::IO, d::Erlang) = ((α, θ) = params(d); show_oneline(io, d, [(:α, α), (:θ, θ)]))
+show(io::IO, d::Erlang) = ((α, β) = params(d); show_oneline(io, d, [(:α, α), (:β, β)]))
 
 #### Parameters
 
 shape(d::Erlang) = int(shape(d.gammad))
 scale(d::Erlang) = scale(d.gammad)
 rate(d::Erlang) = rate(d.gammad)
-params(d::Erlang) = ((α, θ) = params(d.gammad); (int(α), θ))
+params(d::Erlang) = ((α, β) = params(d.gammad); (int(α), β))
 
 
 #### Statistics

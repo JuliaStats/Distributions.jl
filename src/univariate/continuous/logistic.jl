@@ -1,10 +1,10 @@
 immutable Logistic <: ContinuousUnivariateDistribution
     μ::Float64
-    s::Float64
+    β::Float64
 
-    function Logistic(μ::Float64, s::Float64)
-    	s > zero(s) || error("Logistic's scale must be positive")
-    	new(float64(μ), float64(s))
+    function Logistic(μ::Float64, β::Float64)
+    	β > zero(β) || error("Logistic: scale must be positive")
+    	new(float64(μ), float64(β))
     end
 
     Logistic(μ::Real) = new(float64(μ), 1.0)
@@ -17,9 +17,9 @@ end
 #### Parameters
 
 location(d::Logistic) = d.μ
-scale(d::Logistic) = d.s
+scale(d::Logistic) = d.β
 
-params(d::Logistic) = (d.μ, d.s)
+params(d::Logistic) = (d.μ, d.β)
 
 
 #### Statistics
@@ -28,21 +28,21 @@ mean(d::Logistic) = d.μ
 median(d::Logistic) = d.μ
 mode(d::Logistic) = d.μ
 
-std(d::Logistic) = π * d.s / sqrt3
-var(d::Logistic) = (π * d.s)^2 / 3.0
+std(d::Logistic) = π * d.β / sqrt3
+var(d::Logistic) = (π * d.β)^2 / 3.0
 skewness(d::Logistic) = 0.0
 kurtosis(d::Logistic) = 1.2
 
-entropy(d::Logistic) = log(d.s) + 2.0
+entropy(d::Logistic) = log(d.β) + 2.0
 
 
 #### Evaluation
 
-zval(d::Logistic, x::Float64) = (x - d.μ) / d.s
-xval(d::Logistic, z::Float64) = d.μ + z * d.s
+zval(d::Logistic, x::Float64) = (x - d.μ) / d.β
+xval(d::Logistic, z::Float64) = d.μ + z * d.β
 
-pdf(d::Logistic, x::Float64) = (e = exp(-zval(d, x)); e / (d.s * (1.0 + e)^2))
-logpdf(d::Logistic, x::Float64) = (u = -abs(zval(d, x)); u - 2.0 * log1pexp(u) - log(d.s))
+pdf(d::Logistic, x::Float64) = (e = exp(-zval(d, x)); e / (d.β * (1.0 + e)^2))
+logpdf(d::Logistic, x::Float64) = (u = -abs(zval(d, x)); u - 2.0 * log1pexp(u) - log(d.β))
 
 cdf(d::Logistic, x::Float64) = logistic(zval(d, x))
 ccdf(d::Logistic, x::Float64) = logistic(-zval(d, x))
@@ -56,13 +56,13 @@ invlogccdf(d::Logistic, lp::Float64) = xval(d, logexpm1(-lp))
 
 function gradlogpdf(d::Logistic, x::Float64)
     e = exp(-zval(d, x))
-    ((2.0 * e) / (1.0 + e) - 1.0) / d.s
+    ((2.0 * e) / (1.0 + e) - 1.0) / d.β
 end
 
-mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.s * t)
+mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.β * t)
 
 function cf(d::Logistic, t::Real)
-    a = (π * t) * d.s
+    a = (π * t) * d.β
     a == zero(a) ? complex(one(a)) : exp(im * t * d.μ) * a / sinh(a)    
 end
 

@@ -236,6 +236,7 @@ List of Distributions
     - :ref:`normal`
     - :ref:`pareto`
     - :ref:`rayleigh`
+    - :ref:`symtriangular`
     - :ref:`tdist`
     - :ref:`triangular`
     - :ref:`uniform`
@@ -460,22 +461,30 @@ All discrete univariate distribution types are subtypes of *ContinuousUnivariate
 Arcsine Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of an `Arcsine distribution <http://en.wikipedia.org/wiki/Arcsine_distribution>`_ is:
+The probability density function of an `Arcsine distribution <http://en.wikipedia.org/wiki/Arcsine_distribution>`_ with bounded support :math:`[a, b]` is:
 
 .. math::
 
-    f(x) = \frac{1}{\pi \sqrt{x (1 - x)}}, \quad x \in [0, 1]
+    f(x) = \frac{1}{\pi \sqrt{(x - a) (b - x)}}, \quad x \in [a, b]
 
 .. code-block:: julia
     
-    Arcsine()    # Arcsine distribution
+    Arcsine()        # Arcsine distribution with support [0, 1]
+    Arcsine(b)       # Arcsine distribution with support [0, b]
+    Arcsine(a, b)    # Arcsine distribution with support [a, b]
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    minimum(d)       # Get the lower bound, i.e. a
+    maximum(d)       # Get the upper bound, i.e. b
+    location(d)      # Get the left bound, i.e. a
+    scale(d)         # Get the span of the support, i.e. b - a    
 
 .. _beta:
 
 Beta Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Beta distribution <http://en.wikipedia.org/wiki/Beta_distribution>`_ with shape parameters α and β is:
+The probability density function of a `Beta distribution <http://en.wikipedia.org/wiki/Beta_distribution>`_ with shape parameters :math:`\alpha` and :math:`\beta` is:
 
 .. math::
 
@@ -484,7 +493,13 @@ The probability density function of a `Beta distribution <http://en.wikipedia.or
 
 .. code-block:: julia
     
+    Beta()        # equivalent to Beta(1.0, 1.0)
+    Beta(a)       # equivalent to Beta(a, a)
     Beta(a, b)    # Beta distribution with shape parameters a and b
+
+    params(d)     # Get the parameters, i.e. (a, b)
+
+**Note:** If :math:`X \sim Gamma(\alpha)` and :math:`Y \sim Gamma(\beta)`, then :math:`X / (X + Y) \sim Beta(\alpha, \beta)`.  
 
 
 .. _betaprime:
@@ -492,7 +507,7 @@ The probability density function of a `Beta distribution <http://en.wikipedia.or
 Beta Prime Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Beta prime distribution <http://en.wikipedia.org/wiki/Beta_prime_distribution>`_ with shape parameters α and β is:
+The probability density function of a `Beta prime distribution <http://en.wikipedia.org/wiki/Beta_prime_distribution>`_ with shape parameters :math:`\alpha` and :math:`\beta` is:
 
 .. math::
 
@@ -501,31 +516,43 @@ The probability density function of a `Beta prime distribution <http://en.wikipe
 
 .. code-block:: julia
     
+    BetaPrime()        # equivalent to BetaPrime(0.0, 1.0)
+    BetaPrime(a)       # equivalent to BetaPrime(a, a)
     BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
+
+    params(d)          # Get the parameters, i.e. (a, b)
+
+**Note:** If :math:`X \sim Beta(\alpha, \beta)`, then :math:`\frac{X}{1 - X} \sim BetaPrime(\alpha, \beta)`.  
+
 
 .. _cauchy:
 
 Cauchy Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Cauchy distribution <http://en.wikipedia.org/wiki/Cauchy_distribution>`_ with location μ and scale θ is:
+The probability density function of a `Cauchy distribution <http://en.wikipedia.org/wiki/Cauchy_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is:
 
 .. math::
 
-    f(x; \mu, \theta) = \frac{1}{\pi \theta \left(1 + \left(\frac{x - \mu}{\theta} \right)^2 \right)}
+    f(x; \mu, \beta) = \frac{1}{\pi \beta \left(1 + \left(\frac{x - \mu}{\beta} \right)^2 \right)}
 
 .. code-block:: julia
 
-    Cauchy()         # Standard Cauchy distribution (location = 0.0, scale = 1.0)
-    Cauchy(u)        # Cauchy distribution with location u and unit scale
-    Cauchy(u, s)     # Cauchy distribution with location u and scale s
+    Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0.0, 1.0)
+    Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1.0)
+    Cauchy(u, b)     # Cauchy distribution with location u and scale b
+
+    params(d)        # Get the parameters, i.e. (u, b)
+    location(d)      # Get the location parameter, i.e. u
+    scale(d)         # Get the scale parameter, i.e. b
+
 
 .. _chi:
 
 Chi Distribution
 ~~~~~~~~~~~~~~~~~
 
-The `Chi distribution <http://en.wikipedia.org/wiki/Chi_distribution>`_ with k degrees of freedom is the distribution of the square root of the sum of squares of k independent variables that are normally distributed. The probability density function is:
+The `Chi distribution <http://en.wikipedia.org/wiki/Chi_distribution>`_ with :math:`k` degrees of freedom is the distribution of the square root of the sum of squares of :math:`k` independent variables that are normally distributed. The probability density function is:
 
 .. math::
 
@@ -535,12 +562,16 @@ The `Chi distribution <http://en.wikipedia.org/wiki/Chi_distribution>`_ with k d
 
     Chi(k)       # Chi distribution with k degrees of freedom
 
+    params(d)    # Get the parameters, i.e. (k,)
+    dof(d)       # Get the degrees of freedom, i.e. k
+
+
 .. _chisquare:
 
 Chi-square Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `Chi square distribution <http://en.wikipedia.org/wiki/Chi-squared_distribution>`_ with k degrees of freedom is the distribution of the sume of sqaures of k independent variables that are normally distributed. The probability density function is:
+The `Chi square distribution <http://en.wikipedia.org/wiki/Chi-squared_distribution>`_ with :math:`k` degrees of freedom is the distribution of the sum of squares of :math:`k` independent variables that are normally distributed. The probability density function is:
 
 .. math::
 
@@ -548,49 +579,59 @@ The `Chi square distribution <http://en.wikipedia.org/wiki/Chi-squared_distribut
 
 .. code-block:: julia
 
-    Chisq(k)      # Chi-squared distribution with k degrees of freedom
+    Chisq(k)     # Chi-squared distribution with k degrees of freedom
+
+    params(d)    # Get the parameters, i.e. (k,)
+    dof(d)       # Get the degrees of freedom, i.e. k
+
 
 .. _erlang:
 
 Erlang Distribution
 ~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of an `Erlang distribution <http://en.wikipedia.org/wiki/Erlang_distribution>`_ with shape parameter k and scale θ is
+The probability density function of an `Erlang distribution <http://en.wikipedia.org/wiki/Erlang_distribution>`_ with shape parameter :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
-    f(x; k, \theta) = \frac{x^{k-1} e^{-x/\theta}}{\Gamma(k) \theta^k}, \quad x > 0
+    f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha}, \quad x > 0
 
 .. code-block:: julia
 
-    Erlang()       # Erlang distribution with unit shape and unit scale
-    Erlang(k)      # Erlang distribution with shape parameter k and unit scale
-    Erlang(k, s)   # Erlang distribution with shape parameter k and scale s
+    Erlang()       # Erlang distribution with unit shape and unit scale, i.e. Erlang(1.0, 1.0)
+    Erlang(a)      # Erlang distribution with shape parameter a and unit scale, i.e. Erlang(a, 1.0)
+    Erlang(a, s)   # Erlang distribution with shape parameter a and scale b
 
 **Note:** The Erlang distribution is a special case of the Gamma distribution with integer shape parameter. 
+
 
 .. _exponential:
 
 Exponential Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of an `Exponential distribution <http://en.wikipedia.org/wiki/Exponential_distribution>`_ with scale θ is
+The probability density function of an `Exponential distribution <http://en.wikipedia.org/wiki/Exponential_distribution>`_ with scale :math:`\beta` is
 
 .. math::
 
-    f(x; \theta) = \frac{1}{\theta} e^{-\frac{x}{\theta}}, \quad x > 0
+    f(x; \beta) = \frac{1}{\beta} e^{-\frac{x}{\beta}}, \quad x > 0
 
 .. code-block:: julia
 
-    Exponential()      # Exponential distribution with unit scale
-    Exponential(s)     # Exponential distribution with scale s
+    Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1.0)
+    Exponential(b)     # Exponential distribution with scale b
+
+    params(d)          # Get the parameters, i.e. (b,)
+    scale(d)           # Get the scale parameter, i.e. b
+    rate(d)            # Get the rate parameter, i.e. 1 / b
+
 
 .. _fdist:
 
 F Distribution
 ~~~~~~~~~~~~~~~
 
-The probability density function of an `F distribution <http://en.wikipedia.org/wiki/F-distribution>`_ with parameters d1 and d2 is
+The probability density function of an `F distribution <http://en.wikipedia.org/wiki/F-distribution>`_ with parameters :math:`d_1` and :math:`d_2` is
 
 .. math::
 
@@ -601,23 +642,32 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 
     FDist(d1, d2)     # F-Distribution with parameters d1 and d2    
 
+    params(d)         # Get the parameters, i.e. (d1, d2)
+
+**Note:** If :math:`X \sim Chisq(d1)` and :math:`Y \sim Chisq(d2)`, then :math:`(X / d1) / (Y / d2) \sim FDist(d1, d2)`.
+
 
 .. _frechet:
 
 Fréchet Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape k>0 and scale θ>0 is 
+The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is 
 
 .. math::
 
-    f(x; k, \theta) = \frac{k}{\theta} \left( \frac{x}{\theta} \right)^{-k-1} e^{-(x/\theta)^{-k}},
+    f(x; \alpha, \beta) = \frac{\alpha}{\beta} \left( \frac{x}{\beta} \right)^{-\alpha-1} e^{-(x/\beta)^{-\alpha}},
     \quad x > 0
 
 .. code-block:: julia
 
-    Frechet(k)       # Fréchet distribution with shape k and unit scale
-    Frechet(k, s)    # Fréchet distribution with shape k and scale s
+    Frechet()        # Fréchet distribution with unit shape and unit scale, i.e. Frechet(1.0, 1.0)
+    Frechet(a)       # Fréchet distribution with shape a and unit scale, i.e. Frechet(a, 1.0)
+    Frechet(a, b)    # Fréchet distribution with shape a and scale b
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    shape(d)         # Get the shape parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b 
 
 
 .. _gamma:
@@ -625,35 +675,45 @@ The probability density function of a `Fréchet distribution <http://en.wikipedi
 Gamma Distribution
 ~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Gamma distribution <http://en.wikipedia.org/wiki/Gamma_distribution>`_ with shape parameter α and scale θ is
+The probability density function of a `Gamma distribution <http://en.wikipedia.org/wiki/Gamma_distribution>`_ with shape parameter :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
-    f(x; \alpha, \theta) = \frac{x^{\alpha-1} e^{-x/\theta}}{\Gamma(\alpha) \theta^\alpha}, 
+    f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha}, 
     \quad x > 0
 
 .. code-block:: julia
 
-    Gamma()          # Gamma distribution with unit shape and unit scale
-    Gamma(a)         # Gamma distribution with shape a and unit scale
-    Gamma(a, s)      # Gamma distribution with shape a and scale s
+    Gamma()          # Gamma distribution with unit shape and unit scale, i.e. Gamma(1.0, 1.0)
+    Gamma(a)         # Gamma distribution with shape a and unit scale, i.e. Gamma(a, 1.0)
+    Gamma(a, b)      # Gamma distribution with shape a and scale b
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    shape(d)         # Get the shape parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b 
+
 
 .. _gumbel:
 
 Gumbel Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Gumbel distribution <http://en.wikipedia.org/wiki/Gumbel_distribution>`_ with location μ and scale θ is
+The probability density function of a `Gumbel distribution <http://en.wikipedia.org/wiki/Gumbel_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is
 
 .. math::
 
-    f(x; \mu, \theta) = \frac{1}{\theta} e^{-(z + e^z)}, 
-    \quad \text{ with } z = \frac{x - \mu}{\theta}
+    f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^z)}, 
+    \quad \text{ with } z = \frac{x - \mu}{\beta}
 
 .. code-block:: julia
 
-    Gumbel()          # Gumbel distribution with zero location and unit scale
-    Gumbel(mu, s)     # Gumbel distribution with location mu and scale s
+    Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0.0, 1.0)
+    Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1.0)
+    Gumbel(u, b)        # Gumbel distribution with location u and scale b
+
+    params(d)        # Get the parameters, i.e. (u, b)
+    location(d)      # Get the location parameter, i.e. u
+    scale(d)         # Get the scale parameter, i.e. b
 
 
 .. _inversegamma:
@@ -661,23 +721,31 @@ The probability density function of a `Gumbel distribution <http://en.wikipedia.
 Inverse Gamma Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of an `inverse Gamma distribution <http://en.wikipedia.org/wiki/Inverse-gamma_distribution>`_ with shape parameter α and scale θ is
+The probability density function of an `inverse Gamma distribution <http://en.wikipedia.org/wiki/Inverse-gamma_distribution>`_ with shape parameter :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
-    f(x; \alpha, \theta) = \frac{\theta^\alpha x^{-(\alpha + 1)}}{\Gamma(\alpha)}
-    e^{-\frac{\theta}{x}}, \quad x > 0
+    f(x; \alpha, \beta) = \frac{\beta^\alpha x^{-(\alpha + 1)}}{\Gamma(\alpha)}
+    e^{-\frac{\beta}{x}}, \quad x > 0
 
 .. code-block:: julia
 
-    InverseGamma(a, s)    # Inverted Gamma distribution with shape a and scale s
+    InverseGamma()        # Inverse Gamma distribution with unit shape and unit scale, i.e. InverseGamma(1.0, 1.0)
+    InverseGamma(a)       # Inverse Gamma distribution with shape a and unit scale, i.e. InverseGamma(a, 1.0)
+    InverseGamma(a, b)    # Inverse Gamma distribution with shape a and scale b
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    shape(d)         # Get the shape parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b 
+
+**Note:** If :math:`X \sim Gamma(\alpha, \beta)`, then :math:`1 / X \sim InverseGamma(\alpha, \beta^{-1})`.
 
 
 .. _inversegaussian:
 
 Inverse Gaussian Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The probability density function of an `inverse Gaussian distribution <http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution>`_ with mean μ and shape λ is
+The probability density function of an `inverse Gaussian distribution <http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution>`_ with mean :math:`\mu` and shape :math:`\lambda` is
 
 .. math::
 
@@ -686,25 +754,35 @@ The probability density function of an `inverse Gaussian distribution <http://en
 
 .. code-block:: julia
   
-    InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape    
+    InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1.0, 1.0)
+    InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1.0)
     InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+
+    params(d)           # Get the parameters, i.e. (mu, lambda)
+    mean(d)             # Get the mean parameter, i.e. mu
+    shape(d)            # Get the shape parameter, i.e. lambda
+
 
 .. _laplace:
 
 Laplace Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Laplace distribution <http://en.wikipedia.org/wiki/Laplace_distribution>`_ with location μ and scale θ is 
+The probability density function of a `Laplace distribution <http://en.wikipedia.org/wiki/Laplace_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is 
 
 .. math::
 
-    f(x; \mu, \theta) = \frac{1}{2 \theta} \exp \left(- \frac{|x - \mu|}{\theta} \right)
+    f(x; \mu, \beta) = \frac{1}{2 \beta} \exp \left(- \frac{|x - \mu|}{\beta} \right)
 
 .. code-block:: julia
 
-    Laplace()       # Laplace distribution with zero location and unit scale
-    Laplace(u)      # Laplace distribution with location u and unit scale
-    Laplace(u, s)   # Laplace distribution with location u ans scale s
+    Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0.0, 1.0)
+    Laplace(u)      # Laplace distribution with location u and unit scale, i.e. Laplace(u, 1.0)
+    Laplace(u, b)   # Laplace distribution with location u ans scale b
+
+    params(d)       # Get the parameters, i.e. (u, b)
+    location(d)     # Get the location parameter, i.e. u
+    scale(d)        # Get the scale parameter, i.e. b
 
 
 .. _levy:
@@ -712,18 +790,21 @@ The probability density function of a `Laplace distribution <http://en.wikipedia
 Lévy Distribution
 ~~~~~~~~~~~~~~~~~~
 
-The probability density function os a `Lévy distribution <http://en.wikipedia.org/wiki/Lévy_distribution>`_ with location μ and scale θ is 
+The probability density function os a `Lévy distribution <http://en.wikipedia.org/wiki/Lévy_distribution>`_ with location :math:`\mu` and scale :math:`c` is 
 
 .. math::
 
-    f(x; \mu, \theta) = \sqrt{\frac{\theta}{2 \pi (x - \mu)^3}}
-    \exp \left( - \frac{\theta}{2 (x - \mu)} \right), \quad x > \mu
+    f(x; \mu, c) = \sqrt{\frac{c}{2 \pi (x - \mu)^3}}
+    \exp \left( - \frac{c}{2 (x - \mu)} \right), \quad x > \mu
 
 .. code-block:: julia
 
-    Levy()         # Levy distribution with zero location and unit scale
-    Levy(u)        # Levy distribution with location u and unit scale
-    Levy(u, s)     # Levy distribution with location u ans scale s    
+    Levy()         # Levy distribution with zero location and unit scale, i.e. Levy(0.0, 1.0)
+    Levy(u)        # Levy distribution with location u and unit scale, i.e. Levy(u, 1.0)
+    Levy(u, c)     # Levy distribution with location u ans scale c
+
+    params(d)      # Get the parameters, i.e. (u, c)
+    location(d)    # Get the location parameter, i.e. u  
 
 
 .. _logistic:
@@ -731,18 +812,22 @@ The probability density function os a `Lévy distribution <http://en.wikipedia.o
 Logistic Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Logistic distribution <http://en.wikipedia.org/wiki/Logistic_distribution>`_ with location μ and scale θ is
+The probability density function of a `Logistic distribution <http://en.wikipedia.org/wiki/Logistic_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is
 
 .. math:: 
 
-    f(x; \mu, \theta) = \frac{1}{4 \theta} \mathrm{sech}^2 
-    \left( \frac{x - \mu}{\theta} \right)
+    f(x; \mu, \beta) = \frac{1}{4 \beta} \mathrm{sech}^2 
+    \left( \frac{x - \mu}{\beta} \right)
 
 .. code-block:: julia
 
-    Logistic()       # Logistic distribution with zero location and unit scale
-    Logistic(u)      # Logistic distribution with location u and unit scale
-    Logistic(u, s)   # Logistic distribution with location u ans scale s     
+    Logistic()       # Logistic distribution with zero location and unit scale, i.e. Logistic(0.0, 1.0)
+    Logistic(u)      # Logistic distribution with location u and unit scale, i.e. Logistic(u, 1.0)
+    Logistic(u, b)   # Logistic distribution with location u ans scale b
+
+    params(d)       # Get the parameters, i.e. (u, b)
+    location(d)     # Get the location parameter, i.e. u
+    scale(d)        # Get the scale parameter, i.e. b
 
 
 .. _lognormal:
@@ -750,7 +835,7 @@ The probability density function of a `Logistic distribution <http://en.wikipedi
 Log-normal Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let ``Z`` be a random variable of standard normal distribution, then the distribution of ``exp(μ + σZ)`` is a `Lognormal distribution <http://en.wikipedia.org/wiki/Log-normal_distribution>`_. The probability density function is 
+Let :math:`Z` be a random variable of standard normal distribution, then the distribution of :math:`\exp(\mu + \sigma Z)` is a `Lognormal distribution <http://en.wikipedia.org/wiki/Log-normal_distribution>`_. The probability density function is 
 
 .. math::
 
@@ -763,13 +848,18 @@ Let ``Z`` be a random variable of standard normal distribution, then the distrib
     LogNormal(mu)        # Log-normal distribution with log-mean mu and unit scale
     LogNormal(mu, sig)   # Log-normal distribution with log-mean mu and scale sig 
 
+    params(d)            # Get the parameters, i.e. (mu, sig)
+    meanlogx(d)          # Get the mean of log(X), i.e. mu
+    varlogx(d)           # Get the variance of log(X), i.e. sig^2
+    stdlogx(d)           # Get the standard deviation of log(X), i.e. sig
+
 
 .. _normal:
 
 Normal Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density distribution of a `Normal distribution <http://en.wikipedia.org/wiki/Normal_distribution>`_ with mean μ and standard deviation σ is
+The probability density distribution of a `Normal distribution <http://en.wikipedia.org/wiki/Normal_distribution>`_ with mean :math:`\mu` and standard deviation :math:`\sigma` is
 
 .. math::
 
@@ -782,22 +872,31 @@ The probability density distribution of a `Normal distribution <http://en.wikipe
     Normal(mu)        # Normal distribution with mean mu and unit variance
     Normal(mu, sig)   # Normal distribution with mean mu and variance sig^2
 
+    params(d)         # Get the parameters, i.e. (mu, sig)
+    mean(d)           # Get the mean, i.e. mu
+    std(d)            # Get the standard deviation, i.e. sig
+
 
 .. _pareto:
 
 Pareto Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Pareto distribution <http://en.wikipedia.org/wiki/Pareto_distribution>`_ with scale θ and shape α is
+The probability density function of a `Pareto distribution <http://en.wikipedia.org/wiki/Pareto_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
-    f(x; \theta, \alpha) = \frac{\alpha \theta^\alpha}{x^{\alpha + 1}}, \quad x \ge \theta
+    f(x; \alpha, \beta) = \frac{\alpha \beta^\alpha}{x^{\alpha + 1}}, \quad x \ge \beta
 
 .. code-block:: julia
 
-    Pareto()          # Pareto distribution with unit scale and unit shape
-    Pareto(sh, sc)    # Pareto distribution with shape sh and scale sc
+    Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1.0, 1.0)
+    Pareto(a)           # Pareto distribution with shape a and unit scale, i.e. Pareto(a, 1.0)
+    Pareto(a, b)        # Pareto distribution with shape a and scale b
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    shape(d)         # Get the shape parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b     
 
 
 .. _rayleigh:
@@ -805,7 +904,7 @@ The probability density function of a `Pareto distribution <http://en.wikipedia.
 Rayleigh Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Rayleigh distribution <http://en.wikipedia.org/wiki/Rayleigh_distribution>`_ with scale σ is 
+The probability density function of a `Rayleigh distribution <http://en.wikipedia.org/wiki/Rayleigh_distribution>`_ with scale :math:`\sigma` is 
 
 .. math::
 
@@ -813,16 +912,44 @@ The probability density function of a `Rayleigh distribution <http://en.wikipedi
 
 .. code-block:: julia
 
-    Rayleigh()       # Rayleigh distribution with unit scale
+    Rayleigh()       # Rayleigh distribution with unit scale, i.e. Rayleigh(1.0)
     Rayleigh(s)      # Rayleigh distribution with scale s
+
+    params(d)        # Get the parameters, i.e. (s,)
+    scale(d)         # Get the scale parameter, i.e. s
+
+
+**Note:** If :math:`X, Y \sim \mathcal{N}(\sigma^2)`, then :math:`\sqrt{X^2 + Y^2} \sim Rayleigh(\sigma)`.
+
+
+.. _symtriangular:
+
+Symmetric Triangular Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a *Symmetric triangular distribution* with location :math:`\mu` and scale :math:`s` is 
+
+.. math::
+
+    f(x; \mu, s) = \frac{1}{s} \left( 1 - \left| \frac{x - \mu}{s} \right| \right), \quad \mu - s \le x \le \mu + s
+
+.. code-block:: julia
+
+    SymTriangularDist()         # Symmetric triangular distribution with zero location and unit scale
+    SymTriangularDist(u)        # Symmetric triangular distribution with location u and unit scale
+    SymTriangularDist(u, s)     # Symmetric triangular distribution with location u and scale s
+
+    params(d)       # Get the parameters, i.e. (u, s)
+    location(d)     # Get the location parameter, i.e. u
+    scale(d)        # Get the scale parameter, i.e. s
 
 
 .. _tdist:
 
 (Student's) T-Distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Students T distribution <http://en.wikipedia.org/wiki/T-distribution>`_ with d degrees of freedom is
+The probability density function of a `Students T distribution <http://en.wikipedia.org/wiki/T-distribution>`_ with :math:`d` degrees of freedom is
 
 .. math::
 
@@ -832,6 +959,10 @@ The probability density function of a `Students T distribution <http://en.wikipe
 .. code-block:: julia
 
     TDist(d)      # t-distribution with d degrees of freedom
+
+    params(d)     # Get the parameters, i.e. (d,)
+    dof(d)        # Get the degrees of freedom, i.e. d
+
 
 .. _triangular:
 
@@ -851,14 +982,21 @@ The probability density function of a `Triangular distribution <http://en.wikipe
 
 .. code-block:: julia
 
-    TriangularDist(a, b, c)     # Triangular distribution with lower limit a, upper limit b and mode c
+    TriangularDist(a, b)        # Triangular distribution with lower limit a, upper limit b, and mode (a+b)/2
+    TriangularDist(a, b, c)     # Triangular distribution with lower limit a, upper limit b, and mode c
+
+    params(d)       # Get the parameters, i.e. (a, b, c)
+    minimum(d)      # Get the lower bound, i.e. a
+    maximum(d)      # Get the upper bound, i.e. b
+    mode(d)         # Get the mode, i.e. c
+
 
 .. _uniform:
 
 Uniform Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Continuous Uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(continuous)>`_ over an interval ``[a, b]`` is
+The probability density function of a `Continuous Uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(continuous)>`_ over an interval :math:`[a, b]` is
 
 .. math::
 
@@ -868,6 +1006,13 @@ The probability density function of a `Continuous Uniform distribution <http://e
 
     Uniform()        # Uniform distribution over [0, 1]
     Uniform(a, b)    # Uniform distribution over [a, b]
+
+    params()         # Get the parameters, i.e. (a, b)
+    minimum(d)       # Get the lower bound, i.e. a
+    maximum(d)       # Get the upper bound, i.e. b
+    location(d)      # Get the location parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b - a
+
 
 .. _vonmises:
 
@@ -892,16 +1037,22 @@ The probability density function of a `von Mises distribution <http://en.wikiped
 Weibull Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Weibull distribution <http://en.wikipedia.org/wiki/Weibull_distribution>`_ with shape k and scale θ is 
+The probability density function of a `Weibull distribution <http://en.wikipedia.org/wiki/Weibull_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is 
 
 .. math::
 
-    f(x; k, \theta) = \frac{k}{\theta} \left( \frac{x}{\theta} \right)^{k-1} e^{-(x/\theta)^k},
+    f(x; \alpha, \beta) = \frac{\alpha}{\beta} \left( \frac{x}{\beta} \right)^{\alpha-1} e^{-(x/\beta)^\alpha},
     \quad x \ge 0
 
 .. code-block:: julia
 
-    Weibull(k)       # Weibull distribution with shape k and unit scale
-    Weibull(k, s)    # Weibull distribution with shape k and scale s     
+    Weibull()        # Weibull distribution with unit shape and unit scale, i.e. Weibull(1.0, 1.0)
+    Weibull(a)       # Weibull distribution with shape a and unit scale, i.e. Weibull(a, 1.0)
+    Weibull(a, b)    # Weibull distribution with shape a and scale b
+
+    params(d)        # Get the parameters, i.e. (a, b)
+    shape(d)         # Get the shape parameter, i.e. a
+    scale(d)         # Get the scale parameter, i.e. b
+
 
 
