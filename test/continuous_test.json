@@ -4838,7 +4838,7 @@
     }
   ], 
   [
-    "Rayleigh(1.0)", 
+    "Rayleigh()", 
     {
       "dtype": "Rayleigh", 
       "entropy": 0.94203424217079368, 
