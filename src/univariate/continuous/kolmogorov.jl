@@ -7,9 +7,17 @@ end
 
 @distr_support Kolmogorov 0.0 Inf
 
+params(d::Kolmogorov) = ()
+
+
+#### Statistics
+
 mean(d::Kolmogorov) = 0.5*sqrt2π*log(2.0)
 var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
 # TODO: higher-order moments also exist, can be obtained by differentiating series
+
+
+#### Evaluation
 
 # cdf and ccdf are based on series truncation.
 # two different series are available, e.g. see:
@@ -65,6 +73,9 @@ function pdf(d::Kolmogorov,x::Float64)
         return 8.0*x*s
     end
 end
+
+
+#### Sampling
 
 # Alternating series method, from:
 #   Devroye, Luc (1986) "Non-Uniform Random Variate Generation"

@@ -5,9 +5,10 @@ immutable KSDist <: ContinuousUnivariateDistribution
     n::Int
 end
 
-# support handling
-
 @distr_support KSDist 1 / (2 * d.n) 1.0
+
+
+#### Evaluation
 
 # TODO: implement Simard and L'Ecuyer (2011) meta-algorithm
 # requires Pomeranz and Pelz-Good algorithms
