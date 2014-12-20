@@ -249,7 +249,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (pareto(a, scale=s), (s, inf), {})
+		return (pareto(a, scale=s), (s, inf), {"shape" : a, "scale" : s})
 
 	elif dname == "Poisson":
 		assert len(args) <= 1

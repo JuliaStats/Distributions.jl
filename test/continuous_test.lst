@@ -86,8 +86,9 @@ NormalCanon(0.0, 1.0)
 NormalCanon(-1.0, 2.5)
 NormalCanon(2.0, 0.8)
 
-Pareto(1.0, 1.0)
-Pareto(2.0, 1.0)
+Pareto()
+Pareto(2.0)
+Pareto(2.0, 1.5)
 Pareto(3.0, 2.0)
 
 Rayleigh(1.0)
