@@ -200,6 +200,13 @@ def get_dinfo(dname, args):
 		return (invgamma(a, scale=s), (0, inf), 
 			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
+	elif dname == "InverseGaussian":
+		assert len(args) <= 2
+		mu = get(args, 0) or 1.0
+		lam = get(args, 1) or 1.0
+		assert lam == 1.0  # scipy only supports this case
+		return (invgauss(mu), (0, inf), {"shape" : lam})
+
 	elif dname == "Laplace":
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
