@@ -3,6 +3,19 @@ Distributions.jl Release Notes
 
 **Note:** We reached a relatively stable API at version *0.5.0*, and have maintained release notes since then.
 
+Changes from v0.6 to v0.7
+----------------------------
+* Bug fixes
+* Refactor file organization -- separate discrete and continuous distributions into different subdirectories
+* Deprecate ``probs`` in favor of ``pdf``. Now ``pdf`` uses efficient algorithm to evaluate probability mass functions over a ``UnitRange``.
+* Introduce macro ``@distr_supp``, which provides a uniform way to specify the support of a distribution, no matter whether the support depends on the distribution parameters or not. ([#312])
+* New samplers for Gamma distribution. ([#313])
+* New testing framework for univariate distributions. ([#314])
+* Add requirement of the package ``Compat``. ([#321])
+* Clean up the implementation of univariate distributions
+* Add ``params`` methods and other parameter retrieval methods, such as ``scale``, ``shape``, ``meanlogx``, ``stdlogx``, ``dof``, etc. 
+
+
 Changes from v0.5 to v0.6
 ---------------------------
 
@@ -40,5 +53,9 @@ Changes from v0.5 to v0.6
 [#303]: https://github.com/JuliaStats/Distributions.jl/pull/303
 [#304]: https://github.com/JuliaStats/Distributions.jl/pull/304
 [#305]: https://github.com/JuliaStats/Distributions.jl/pull/305
+[#312]: https://github.com/JuliaStats/Distributions.jl/pull/312
+[#313]: https://github.com/JuliaStats/Distributions.jl/pull/313
+[#314]: https://github.com/JuliaStats/Distributions.jl/pull/314
+[#321]: https://github.com/JuliaStats/Distributions.jl/pull/321
 
 
