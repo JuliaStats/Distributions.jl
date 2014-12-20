@@ -23,6 +23,12 @@ Computation of statistics
 
 Let ``d`` be a distribution:
 
+.. function:: params(d)
+
+    Return a tuple of parameters. 
+
+    **Note:** Let ``d`` be a distribution of type ``D``, then ``D(params(d)...)`` will construct exactly the same distribution as ``d``.
+
 .. function:: mean(d)
 
     Return the expectation of distribution ``d``.
@@ -247,19 +253,35 @@ All discrete univariate distribution types are subtypes of *DiscreteUnivariateDi
 Bernoulli Distribution 
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`_ is parameterized by a success rate p, which takes value 1 with probability p and 0 with probability 1-p. 
+A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`_ is parameterized by a success rate :math:`p`, which takes value 1 with probability :math:`p` and 0 with probability :math:`1-p`. 
+
+.. math:: 
+
+    P(X = k) = \begin{cases}
+        p & (k = 0) \\
+        1 - p & (k = 1)
+    \end{cases} 
 
 .. code-block:: julia
 
     Bernoulli()    # Bernoulli distribution with p = 0.5
     Bernoulli(p)   # Bernoulli distribution with success rate p
 
+    params(d)      # Get the parameters, i.e. (p,)
+    succprob(d)    # Get the success rate, i.e. p
+    failprob(d)    # Get the failure rate, i.e. 1 - p
+
+
 .. _binomial:
 
 Binomial Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials. It has two parameters: n, the number of trials, and p, the success rate. 
+A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials. It has two parameters: :math:`n`, the number of trials, and :math:`p`, the success rate. 
+
+.. math::
+
+    P(X = k) = {n \choose k}p^k(1-p)^{n-k},  \quad \text{ for } 0 \le k \le n
 
 .. code-block:: julia
 
@@ -267,31 +289,62 @@ A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ 
     Binomial(n)     # Binomial distribution for n trials with success rate p = 0.5
     Binomial(n, p)  # Binomial distribution for n trials with success rate p
 
+    params(d)       # Get the parameters, i.e. (n, p)
+    ntrials(d)      # Get the number of trials, i.e. n
+    succprob(d)     # Get the success rate, i.e. p
+    failprob(d)     # Get the failure rate, i.e. 1 - p
+
+
 .. _categorical:
 
 Categorical Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distribution>`_ is parameterized by a probability vector p. Particularly, ``p[k]`` is the probability of drawing ``k``. 
+A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distribution>`_ is parameterized by a probability vector :math:`p` (of length ``K``). 
+
+.. math::
+
+    P(X = k) = \begin{cases}
+        p[k] & (1 \le k \le K) \\
+        0 & (\text{otherwise})
+    \end{cases}
 
 .. code-block:: julia
 
     Categorical(p)   # Categorical distribution with probability vector p
 
+    params(d)        # Get the parameters, i.e. (p,)
+    probs(d)         # Get the probability vector, i.e. p
+    ncategories(d)   # Get the number of categories, i.e. K
+
 Here, ``p`` must be a real vector, of which all components are nonnegative and sum to one. 
 
 **Note:** The input vector ``p`` is directly used as a field of the constructed distribution, without being copied. 
+
 
 .. _discreteuniform:
 
 Discrete Uniform Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(discrete)>`_ is a uniform distribution over a consecutive sequence of integers. 
+A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(discrete)>`_ is a uniform distribution over a consecutive sequence of integers between :math:`a` and :math:`b`. 
+
+.. math::
+
+    P(X = k) = \begin{cases}
+        1 / (b - a + 1) & (a \le k \le b) \\
+        0 & (\text{otherwise}) 
+    \end{cases}
 
 .. code-block:: julia
 
     DiscreteUniform(a, b)   # a uniform distribution over {a, a+1, ..., b}
+
+    params(d)       # Get the parameters, i.e. (a, b)
+    span(d)         # Get the span of the support, i.e. (b - a + 1)
+    probval(d)      # Get the probability value, i.e. 1 / (b - a + 1)
+    minimum(d)      # Return a
+    maximum(d)      # Return b
 
 
 .. _geometric:
@@ -299,12 +352,20 @@ A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribut
 Geometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`_ characterizes the number of failures before the first success in a sequence of independent Bernoulli trials. 
+A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`_ characterizes the number of failures before the first success in a sequence of independent Bernoulli trials with success rate :math:`p`. 
+
+.. math::
+
+    P(X = k) = p (1 - p)^k
 
 .. code-block:: julia
 
     Geometric()    # Geometric distribution with success rate 0.5
     Geometric(p)   # Geometric distribution with success rate p
+
+    params(d)      # Get the parameters, i.e. (p,)
+    succprob(d)    # Get the success rate, i.e. p
+    failprob(d)    # Get the failure rate, i.e. 1 - p
 
 
 .. _hypergeometric:
@@ -312,28 +373,39 @@ A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`
 Hypergeometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in *n* draws without replacement from a finite population containing *s* successes and *f* failures. The probability mass function is:
+A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in :math:`n` draws without replacement from a finite population containing :math:`s` successes and :math:`f` failures. 
 
 .. math::
 
-    P(X=x) = {{{s \choose x} {f \choose {n-x}}}\over {s+f \choose n}}, \quad x \in [\max(0, n - f), \min(n, s)]
+    P(X = k) = {{{s \choose k} {f \choose {n-k}}}\over {s+f \choose n}}, \quad k \in [\max(0, n - f), \min(n, s)]
 
 .. code-block:: julia
 
     Hypergeometric(s, f, n)  # Hypergeometric distribution for a population with 
                              # s successes and f failures, and a sequence of n trials.
 
+    params(d)       # Get the parameters, i.e. (s, f, n)
+
+
 .. _negativebinomial:
 
 Negative Binomial Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomial_distribution>`_ describes the number of failures before the r-th success in a sequence of independent trials. It is parameterized by r, the number of successes, and p, the success rate. 
+A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomial_distribution>`_ describes the number of failures before the :math:`r`-th success in a sequence of independent trials. It is parameterized by :math:`r`, the number of successes, and :math:`p`, the success rate. 
+
+.. math::
+
+    P(X = k) = {k + r - 1 \choose k} p^r (1 - p)^k, \quad \text{ for } k \ge 0
 
 .. code-block:: julia
     
     NegativeBinomial()        # Negative binomial distribution with r = 1 and p = 0.5
     NegativeBinomial(r, p)    # Negative binomial distribution with r successes and success rate p
+
+    params(d)       # Get the parameters, i.e. (r, p)
+    succprob(d)     # Get the success rate, i.e. p
+    failprob(d)     # Get the failure rate, i.e. 1 - p
 
 
 .. _poisson:
@@ -341,12 +413,19 @@ A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomia
 Poisson Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-A `Poisson distribution <http://en.wikipedia.org/wiki/Poisson_distribution>`_ descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence.
+A `Poisson distribution <http://en.wikipedia.org/wiki/Poisson_distribution>`_ descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence :math:`\lambda`.
+
+.. math::
+
+    P(X = k) = \frac{\lambda^k}{k!} e^{-\lambda}, \quad \text{ for } k \ge 0
 
 .. code-block:: julia
 
     Poisson()            # Poisson distribution with rate parameter 1
     Poisson(lambda)      # Poisson distribution with rate parameter lambda
+
+    params(d)        # Get the parameters, i.e. (lambda,)
+    mean(d)          # Get the mean arrival rate, i.e. lambda
 
 
 .. _skellam:
@@ -354,12 +433,20 @@ A `Poisson distribution <http://en.wikipedia.org/wiki/Poisson_distribution>`_ de
 Skellam Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-A `Skellam distribution <http://en.wikipedia.org/wiki/Skellam_distribution>`_ describes the difference between two independent Poisson variables.
+A `Skellam distribution <http://en.wikipedia.org/wiki/Skellam_distribution>`_ describes the difference between two independent Poisson variables, respectively with rate :math:`\mu_1` and :math:`\mu_2`.
+
+.. math::
+
+    P(X = k) = e^{-(\mu_1 + \mu_2)} \left( \frac{\mu_1}{\mu_2} \right)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2})
+
+Here, :math:`I_k` is the modified Bessel function of the first kind.  
 
 .. code-block:: julia
 
     Skellam(mu1, mu2)   # Skellam distribution for the difference between two Poisson variables,
                         # respectively with expected values mu1 and mu2.
+
+    params(d)           # Get the parameters, i.e. (mu1, mu2)
 
 
 
