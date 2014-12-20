@@ -8,6 +8,7 @@ end
 
 @distr_support BetaPrime 0.0 Inf
 
+show(io::IO, d::BetaPrime) = ((α, β) = params(d); show_oneline(io, d, [(:α, α), (:β, β)]))
 
 #### Parameters
 

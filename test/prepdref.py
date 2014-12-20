@@ -219,6 +219,13 @@ def get_dinfo(dname, args):
 		s = get(args, 1) or 1.0
 		return (logistic(l, s), (-inf, inf), {"location" : l, "scale" : s})
 
+	elif dname == "LogNormal":
+		assert len(args) <= 2
+		mu = get(args, 0) or 0.0
+		s = get(args, 1) or 1.0
+		assert mu == 0.0  # scipy only supports this case
+		return (lognorm(s), (0, inf), {"meanlogx" : mu, "stdlogx" : s})
+
 	elif dname == "NegativeBinomial":
 		assert len(args) <= 2
 		r = int(get(args, 0) or 1)

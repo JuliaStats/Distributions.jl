@@ -205,6 +205,7 @@ export
     nsamples,           # get the number of samples contained in an array
     ncategories,        # the number of categories in a Categorical distribution
     ntrials,            # the number of trials being performed in the experiment
+    params,             # get the tuple of parameters
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
@@ -218,6 +219,7 @@ export
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution
+    stdlogx,            # standard deviation of log(x)
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)

@@ -13,8 +13,13 @@ end
 
 typealias Gaussian Normal
 
-## Support
 @distr_support Normal -Inf Inf
+
+
+#### Parameters
+
+params(d::Normal) = (d.μ, d.σ)
+
 
 ## Properties
 mean(d::Normal) = d.μ

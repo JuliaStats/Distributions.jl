@@ -1,68 +1,92 @@
 immutable LogNormal <: ContinuousUnivariateDistribution
-    meanlog::Float64
-    sdlog::Float64
-    function LogNormal(ml::Real, sdl::Real)
-    	sdl > zero(sdl) || error("sdlog must be positive")
-    	new(float64(ml), float64(sdl))
-    end
+    nrmd::Normal
+
+    LogNormal(μ::Real, σ::Real) = new(Normal(μ, σ))
+    LogNormal(μ::Real) = new(Normal(μ))
+    LogNormal() = new(Normal())
 end
 
-LogNormal(ml::Real) = LogNormal(ml, 1.0)
-LogNormal() = LogNormal(0.0, 1.0)
-
-## Support
 @distr_support LogNormal 0.0 Inf
 
-## Properties
-mean(d::LogNormal) = exp(d.meanlog + d.sdlog^2 / 2)
+show(io::IO, d::LogNormal) = ((μ, σ) = params(d); show_oneline(io, d, [(:μ, μ), (:σ, σ)]))
 
-median(d::LogNormal) = exp(d.meanlog)
+#### Parameters
 
-mode(d::LogNormal) = exp(d.meanlog - d.sdlog^2)
+params(d::LogNormal) = params(d.nrmd)
+
+
+#### Statistics
+
+meanlogx(d::LogNormal) = mean(d.nrmd)
+varlogx(d::LogNormal) = var(d.nrmd)
+stdlogx(d::LogNormal) = std(d.nrmd)
+
+mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + 0.5 * σ^2))
+median(d::LogNormal) = exp(median(d.nrmd))
+mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
 
 function var(d::LogNormal)
-    sigsq = d.sdlog^2
-    (exp(sigsq) - 1) * exp(2d.meanlog + sigsq)
+    (μ, σ) = params(d)
+    σ2 = σ^2
+    (exp(σ2) - 1.0) * exp(2.0 * μ + σ2)
 end
 
 function skewness(d::LogNormal)
-    (exp(d.sdlog^2) + 2.0) * sqrt(exp(d.sdlog^2) - 1.0)
+    σ2 = varlogx(d)
+    e = exp(σ2)
+    (e + 2.0) * sqrt(e - 1.0)
 end
 
 function kurtosis(d::LogNormal)
-   exp(4.0 * d.sdlog^2) + 2.0 * exp(3.0 * d.sdlog^2) +
-        3.0 * exp(2.0 * d.sdlog^2) - 6.0
+    σ2 = varlogx(d)
+    e = exp(σ2)
+    e2 = e * e
+    e3 = e2 * e
+    e4 = e3 * e
+    e4 + 2.0 * e3 + 3.0 * e2 - 6.0
 end
 
-entropy(d::LogNormal) = 0.5 + 0.5 * log(2.0 * pi * d.sdlog^2) + d.meanlog
+function entropy(d::LogNormal)
+    (μ, σ) = params(d)
+    0.5 * (1.0 + log(twoπ * σ^2)) + μ
+end
 
-## Functions
-pdf(d::LogNormal, x::Float64) = pdf(Normal(d.meanlog,d.sdlog),log(x))/x
-logpdf(d::LogNormal, x::Float64) = (lx = log(x); logpdf(Normal(d.meanlog,d.sdlog),lx)-lx)
 
-cdf(d::LogNormal, q::Float64) = q <= zero(q) ? 0.0 : cdf(Normal(d.meanlog,d.sdlog),log(q))
-ccdf(d::LogNormal, q::Float64) = q <= zero(q) ? 1.0 : ccdf(Normal(d.meanlog,d.sdlog),log(q))
-logcdf(d::LogNormal, q::Float64) = q <= zero(q) ? -Inf : logcdf(Normal(d.meanlog,d.sdlog),log(q))
-logccdf(d::LogNormal, q::Float64) = q <= zero(q) ? 0.0 : logccdf(Normal(d.meanlog,d.sdlog),log(q))
+#### Evalution
 
-quantile(d::LogNormal, p::Float64) = exp(quantile(Normal(d.meanlog,d.sdlog),p))
-cquantile(d::LogNormal, p::Float64) = exp(cquantile(Normal(d.meanlog,d.sdlog),p))
-invlogcdf(d::LogNormal, p::Float64) = exp(invlogcdf(Normal(d.meanlog,d.sdlog),p))
-invlogccdf(d::LogNormal, p::Float64) = exp(invlogccdf(Normal(d.meanlog,d.sdlog),p))
+pdf(d::LogNormal, x::Float64) = pdf(d.nrmd, log(x)) / x
+logpdf(d::LogNormal, x::Float64) = (lx = log(x); logpdf(d.nrmd, lx) - lx)
+
+cdf(d::LogNormal, x::Float64) = x > 0.0 ? cdf(d.nrmd, log(x)) : 0.0
+ccdf(d::LogNormal, x::Float64) = x > 0.0 ? ccdf(d.nrmd, log(x)) : 1.0
+logcdf(d::LogNormal, x::Float64) = x > 0.0 ? logcdf(d.nrmd, log(x)) : -Inf
+logccdf(d::LogNormal, x::Float64) = x > 0.0 ? logccdf(d.nrmd, log(x)) : 0.0
+
+quantile(d::LogNormal, p::Float64) = exp(quantile(d.nrmd, p))
+cquantile(d::LogNormal, p::Float64) = exp(cquantile(d.nrmd, p))
+invlogcdf(d::LogNormal, lp::Float64) = exp(invlogcdf(d.nrmd, lp))
+invlogccdf(d::LogNormal, lp::Float64) = exp(invlogccdf(d.nrmd, lp))
 
 function gradlogpdf(d::LogNormal, x::Float64)
-  insupport(LogNormal, x) ? - ((log(x) - d.meanlog) / (d.sdlog^2) + 1.0) / x : 0.0
+    (μ, σ) = params(d)
+    x > 0.0 ? - ((log(x) - μ) / (σ^2) + 1.0) / x : 0.0
 end
 
 # mgf(d::LogNormal)
 # cf(d::LogNormal)
 
 
-## Sampling
-rand(d::LogNormal) = exp(rand(Normal(d.meanlog,d.sdlog)))
+#### Sampling
+
+rand(d::LogNormal) = exp(rand(d.nrmd))
+
 
 ## Fitting
+
 function fit_mle{T <: Real}(::Type{LogNormal}, x::Array{T})
     lx = log(x)
-    LogNormal(mean(lx), std(lx))
+    μ, σ = mean_and_std(lx)
+    LogNormal(μ, σ)
 end
+
+

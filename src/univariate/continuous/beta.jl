@@ -42,6 +42,7 @@ end
 meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
 
 varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
+stdlogx(d::Beta) = sqrt(varlogx(d))
 
 function skewness(d::Beta)
     (α, β) = params(d)

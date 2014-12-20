@@ -74,6 +74,10 @@ Logistic(0.0, 1.0)
 Logistic(5.0, 1.0)
 Logistic(5.0, 1.5)
 
+LogNormal()
+LogNormal(0.0)
+LogNormal(0.0, 2.0)
+
 Normal(0.0, 1.0)
 Normal(-3.0, 2.0)
 Normal(1.0, 10.0)
