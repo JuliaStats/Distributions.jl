@@ -273,7 +273,8 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s), {})
+		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s), 
+			{"location" : l, "scale" : s})
 
 	elif dname == "TDist":
 		assert len(args) == 1
@@ -290,9 +291,12 @@ def get_dinfo(dname, args):
 		return (truncnorm(za, zb, loc=mu, scale=sig), (a, b), {})
 
 	elif dname == "TriangularDist":
-		assert len(args) == 3
-		a, b, c = args
-		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b), {})
+		assert 2 <= len(args) and len(args) <= 3
+		a = args[0]
+		b = args[1]
+		c = get(args, 2) or 0.5 * (a + b)
+		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b), 
+			{"mode" : c})
 
 	elif dname == "Uniform":
 		assert len(args) <= 2

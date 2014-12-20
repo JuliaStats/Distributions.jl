@@ -1,92 +1,119 @@
-# Triangular distribution
 immutable TriangularDist <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
     c::Float64
+
     function TriangularDist(a::Real, b::Real, c::Real)
-        a < b || error("a<b must be true")
-        a <= c <= b || error("a<=c<=b must be true")
+        a < b || error("TriangularDist: a < b must be true")
+        a <= c <= b || error("a <= c <= b must be true")
         new(float64(a), float64(b), float64(c))
+    end
+
+    function TriangularDist(a::Real, b::Real)
+        a < b || error("TriangularDist: a < b must be true")
+        a_ = float64(a)
+        b_ = float64(b)
+        c_ = middle(a_, b_)
+        new(a_, b_, c_)
     end
 end
 
-## Support
 @distr_support TriangularDist d.a d.b
 
-## Properties
-mean(d::TriangularDist) = (d.a + d.b + d.c) / 3.0
-median(d::TriangularDist) = d.c >= (d.a+d.b)/2.0 ?
-    d.a + sqrt((d.b-d.a)*(d.c-d.a))/sqrt(2.0) :
-    d.b - sqrt((d.b-d.a)*(d.b-d.c))/sqrt(2.0)
+
+#### Parameters
+
+params(d::TriangularDist) = (d.a, d.b, d.c)
+
+
+#### Statistics
+
 mode(d::TriangularDist) = d.c
 
-var(d::TriangularDist) = (d.a^2.0 + d.b^2.0 + d.c^2.0-d.a*d.b-d.a*d.c-d.b*d.c)/18.0
-skewness(d::TriangularDist) = sqrt(2.0)*(d.a+d.b-2.0d.c)*(2d.a-d.b-d.c)*(d.a-2d.b+d.c)/5.0/(d.a^2.0 + d.b^2.0 + d.c^2.0-d.a*d.b-d.a*d.c-d.b*d.c)^(3.0/2.0)
+mean(d::TriangularDist) = (d.a + d.b + d.c) / 3.0
+
+function median(d::TriangularDist)
+    (a, b, c) = params(d)
+    m = middle(a, b)
+    c >= m ? a + sqrt(0.5 * (b - a) * (c - a)) :
+             b - sqrt(0.5 * (b - a) * (b - c))
+end
+
+_pretvar(a::Float64, b::Float64, c::Float64) = a*a + b*b + c*c - a*b - a*c - b*c
+
+function var(d::TriangularDist)
+    (a, b, c) = params(d)
+    _pretvar(a, b, c) / 18.0
+end
+
+function skewness(d::TriangularDist)
+    (a, b, c) = params(d)
+    sqrt2 * (a + b - 2.0c) * (2.0a - b - c) * (a - 2.0b + c) / (5.0 * _pretvar(a, b, c)^1.5)
+end
+
 kurtosis(d::TriangularDist) = -0.6
 
-entropy(d::TriangularDist) = 0.5 + log((d.b-d.a)/2.0)
+entropy(d::TriangularDist) = 0.5 + log((d.b - d.a) / 2.0)
 
-## Functions
+
+#### Evaluation
+
 function pdf(d::TriangularDist, x::Float64)
-    if d.a<=x<=d.c
-        return 2.0*(x-d.a)/(d.b-d.a)/(d.c-d.a)
-    elseif d.c<x<=d.b
-        return 2.0*(d.b-x)/(d.b-d.a)/(d.b-d.c)
-    else
-        return zero(x)
-    end
+    (a, b, c) = params(d)
+    x <= a ? 0.0 :
+    x <  c ? 2.0 * (x - a) / ((b - a) * (c - a)) :
+    x == c ? 2.0 / (b - a) :
+    x <= b ? 2.0 * (b - x) / ((b - a) * (b - c)) : 0.0
 end
 
 function cdf(d::TriangularDist, x::Float64)
-    if x<d.a
-        return zero(x)
-    elseif d.a<=x<=d.c
-        return (x-d.a)^2/(d.b-d.a)/(d.c-d.a)
-    elseif d.c<x<=d.b
-        return 1.0-(d.b-x)^2/(d.b-d.a)/(d.b-d.c)
-    else
-        return one(x)
-    end
+    (a, b, c) = params(d)
+    x <= a ? 0.0 :
+    x <  c ? (x - a)^2 / ((b - a) * (c - a)) :
+    x == c ? (c - a) / (b - a) :
+    x <= b ? 1.0 - (b - x)^2 / ((b - a) * (b - c)) : 1.0
 end
 
 function quantile(d::TriangularDist, p::Float64)
-    @checkquantile p begin
-        if p <= (d.c-d.a)/(d.b-d.a)
-            return d.a + sqrt((d.b-d.a)*(d.c-d.a)*p)
-        else
-            return d.b - sqrt((d.b-d.a)*(d.b-d.c)*(1-p))
-        end
-    end
+    (a, b, c) = params(d)
+    c_m_a = c - a
+    b_m_a = b - a
+    rl = c_m_a / b_m_a
+    p <= rl ? a + sqrt(b_m_a * c_m_a * p) :
+              b - sqrt(b_m_a * (b - c) * (1.0 - p))
 end
 
 function mgf(d::TriangularDist, t::Real)
-    if t==zero(t)
+    if t == zero(t)
         return one(t)
     else
-        nominator = (d.b-d.c)*exp(d.a*t)-(d.b-d.a)*exp(d.c*t)+(d.c-d.a)*exp(d.b*t)
-        denominator = (d.b-d.a)*(d.c-d.a)*(d.b-d.c)*t^2
-        return 2*nominator/denominator
+        (a, b, c) = params(d)
+        u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
+        v = (b - a) * (c - a) * (b - c) * t^2
+        return 2.0 * u / v
     end
 end
 
 function cf(d::TriangularDist, t::Real)
     # Is this correct?
-    if t==zero(t)
+    if t == zero(t)
         return one(t)
     else
-        nominator = (d.b-d.c)*exp(im*d.a*t)-(d.b-d.a)*exp(im*d.c*t)+(d.c-d.a)*exp(im*d.b*t)
-        denominator = (d.b-d.a)*(d.c-d.a)*(d.b-d.c)*t^2
-        return -2*nominator/denominator
+        (a, b, c) = params(d)
+        u = (b - c) * exp(im * a * t) - (b - a) * exp(im * c * t) + (c - a) * exp(im * b * t)
+        v = (b - a) * (c - a) * (b - c) * t^2
+        return -2.0 * u / v
     end
 end
 
-## Sampling
+
+#### Sampling
+
 function rand(d::TriangularDist)
+    (a, b, c) = params(d)
+    b_m_a = b - a
     u = rand()
-
-    if u < (d.c-d.a)/(d.b-d.a)
-        return d.a + sqrt(u*(d.b-d.a)*(d.c-d.a))
-    else
-        return d.b - sqrt((1.0-u)*(d.b-d.a)*(d.b-d.c))
-    end
+    b_m_a * u < (c - a) ? d.a + sqrt(u * b_m_a * (c - a)) : 
+                          d.b - sqrt((1.0 - u) * b_m_a * (b - c))
 end
+

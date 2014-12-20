@@ -105,6 +105,8 @@ TDist(1.2)
 TDist(5.0)
 TDist(28.0)
 
+TriangularDist(0, 5)
+TriangularDist(-7, 2)
 TriangularDist(-4, 14, 3)
 TriangularDist(2, 2000, 500)
 TriangularDist(1, 3, 2)
