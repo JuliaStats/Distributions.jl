@@ -13,7 +13,7 @@ Changes from v0.6 to v0.7
 * New testing framework for univariate distributions. ([#314])
 * Add requirement of the package ``Compat``. ([#321])
 * Clean up the implementation of univariate distributions
-* Add ``params`` methods and other parameter retrieval methods, such as ``scale``, ``shape``, ``meanlogx``, ``stdlogx``, ``dof``, etc. 
+* Add ``params`` methods and other parameter retrieval methods, such as ``scale``, ``shape``, ``meanlogx``, ``stdlogx``, ``dof``, etc ([#326])
 
 
 Changes from v0.5 to v0.6
@@ -57,5 +57,6 @@ Changes from v0.5 to v0.6
 [#313]: https://github.com/JuliaStats/Distributions.jl/pull/313
 [#314]: https://github.com/JuliaStats/Distributions.jl/pull/314
 [#321]: https://github.com/JuliaStats/Distributions.jl/pull/321
+[#326]: https://github.com/JuliaStats/Distributions.jl/pull/326
 
 
