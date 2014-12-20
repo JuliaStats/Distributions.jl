@@ -1,149 +1,108 @@
-# Symmetric triangular distribution
 immutable SymTriangularDist <: ContinuousUnivariateDistribution
-    location::Float64
-    scale::Float64
-    function SymTriangularDist(l::Real, s::Real)
-        s > zero(s) || error("scale must be positive")
-        new(float64(l), float64(s))
+    μ::Float64
+    s::Float64
+
+    function SymTriangularDist(μ::Real, s::Real)
+        s > zero(s) || error("SymTriangular: scale must be positive")
+        new(float64(μ), float64(s))
     end
+
+    SymTriangularDist(μ::Real) = new(float64(μ), 1.0)
+    SymTriangularDist() = new(0.0, 1.0)
 end
 
-SymTriangularDist(location::Real) = SymTriangularDist(location, 1.0)
-SymTriangularDist() = SymTriangularDist(0.0, 1.0)
+@distr_support SymTriangularDist d.μ - d.s d.μ + d.s
 
-@distr_support SymTriangularDist d.location - d.scale d.location + d.scale
 
-## Properties
-mean(d::SymTriangularDist) = d.location
-median(d::SymTriangularDist) = d.location
-mode(d::SymTriangularDist) = d.location
+#### Parameters
 
-var(d::SymTriangularDist) = d.scale^2 / 6.0
+location(d::SymTriangularDist) = d.μ
+scale(d::SymTriangularDist) = d.s
+
+params(d::SymTriangularDist) = (d.μ, d.s)
+
+
+#### Statistics
+
+mean(d::SymTriangularDist) = d.μ
+median(d::SymTriangularDist) = d.μ
+mode(d::SymTriangularDist) = d.μ
+
+var(d::SymTriangularDist) = d.s^2 / 6.0
 skewness(d::SymTriangularDist) = 0.0
 kurtosis(d::SymTriangularDist) = -0.6
 
-entropy(d::SymTriangularDist) = 0.5 + log(d.scale)
+entropy(d::SymTriangularDist) = 0.5 + log(d.s)
 
-## Functions
-function pdf(d::SymTriangularDist, x::Float64)
-    if insupport(d, x)
-        (1.0 - abs(x-d.location)/d.scale) / d.scale
-    else
-        0.0
-    end
-end
 
-function logpdf(d::SymTriangularDist, x::Float64)
-    if insupport(d, x)
-        log1p(-abs(x-d.location)/d.scale) -log(d.scale)
-    else
-        -Inf
-    end
-end
+#### Evaluation
+
+zval(d::SymTriangularDist, x::Float64) = (x - d.μ) / d.s
+xval(d::SymTriangularDist, z::Float64) = d.μ + z * d.s
+
+
+pdf(d::SymTriangularDist, x::Float64) = insupport(d, x) ? (1.0 - abs(zval(d, x))) / scale(d) : 0.0
+
+logpdf(d::SymTriangularDist, x::Float64) = insupport(d, x) ? log((1.0 - abs(zval(d, x))) / scale(d)) : -Inf
 
 function cdf(d::SymTriangularDist, x::Float64)
-    u = (x - d.location) / d.scale
-    if u <= -1.0
-        0.0
-    elseif u <= 0.0
-        0.5*(1.0 + u)^2
-    elseif u <= 1.0
-        1.0 - 0.5*(1.0 - u)^2
-    else
-        1.0
-    end
+    (μ, s) = params(d)
+    x <= μ - s ? 0.0 :
+    x <= μ ? 0.5 * (1.0 + zval(d, x))^2 :
+    x < μ + s ? 1.0 - 0.5 * (1.0 - zval(d, x))^2 : 1.0
 end
+
 function ccdf(d::SymTriangularDist, x::Float64)
-    u = (x - d.location) / d.scale
-    if u <= -1.0
-        1.0
-    elseif u <= 0.0
-        1.0 - 0.5*(1.0 + u)^2
-    elseif u <= 1.0
-        0.5*(1.0 - u)^2
-    else
-        0.0
-    end
+    (μ, s) = params(d)
+    x <= μ - s ? 1.0 :
+    x <= μ ? 1.0 - 0.5 * (1.0 + zval(d, x))^2 :
+    x < μ + s ? 0.5 * (1.0 - zval(d, x))^2 : 0.0
 end
 
 function logcdf(d::SymTriangularDist, x::Float64)
-    u = (x - d.location) / d.scale
-    if u <= -1.0
-        -Inf
-    elseif u <= 0.0
-        loghalf + 2.0*log1p(u)
-    elseif u <= 1.0
-        log1p(-0.5*(1.0 - u)^2)
-    else
-        0.0
-    end
+    (μ, s) = params(d)
+    x <= μ - s ? -Inf :
+    x <= μ ? loghalf + 2.0 * log1p(zval(d, x)) :
+    x < μ + s ? log1p(-0.5 * (1.0 - zval(d, x))^2) : 0.0
 end
+
 function logccdf(d::SymTriangularDist, x::Float64)
-    u = (x - d.location) / d.scale
-    if u <= -1.0
-        0.0
-    elseif u <= 0.0
-        log1p(- 0.5*(1.0 + u)^2)
-    elseif u <= 1.0
-        loghalf + 2.0*log1p(-u)
-    else
-        -Inf
-    end
+    (μ, s) = params(d)
+    x <= μ - s ? 0.0 :
+    x <= μ ? log1p(-0.5 * (1.0 + zval(d, x))^2) :
+    x < μ + s ? loghalf + 2.0 * log1p(-zval(d, x)) : -Inf
 end
 
-function quantile(d::SymTriangularDist, p::Float64)
-    @checkquantile p begin
-        if p < 0.5
-            d.location - d.scale*(1.0 - sqrt(2.0*p))
-        else
-            d.location + d.scale*(1.0 - sqrt(2.0*(1.0-p)))
-        end
-    end
-end
+quantile(d::SymTriangularDist, p::Float64) = p < 0.5 ? xval(d, sqrt(2.0 * p) - 1.0) : 
+                                                       xval(d, 1.0 - sqrt(2.0 * (1.0 - p)))
 
-function cquantile(d::SymTriangularDist, p::Float64)
-    @checkquantile p begin
-        if p > 0.5
-            d.location - d.scale*(1.0 - sqrt(2.0*(1.0-p)))
-        else
-            d.location + d.scale*(1.0 - sqrt(2.0*p))
-        end
-    end
-end
+cquantile(d::SymTriangularDist, p::Float64) = p > 0.5 ? xval(d, sqrt(2.0 * (1.0-p)) - 1.0) :
+                                                        xval(d, 1.0 - sqrt(2.0 * p))                                                       
 
-function invlogcdf(d::SymTriangularDist, lp::Float64)
-    @checkinvlogcdf lp begin
-        if lp < loghalf
-            d.location + d.scale*expm1(0.5*(lp-loghalf))
-        else
-            d.location + d.scale*(1.0 - sqrt(-2.0*expm1(lp)))
-        end
-    end
-end
+invlogcdf(d::SymTriangularDist, lp::Float64) = lp < loghalf ? xval(d, expm1(0.5*(lp - loghalf))) :
+                                                              xval(d, 1.0 - sqrt(-2.0 * expm1(lp)))
 
-function invlogccdf(d::SymTriangularDist, lp::Float64)
-    @checkinvlogcdf lp begin
-        if lp > loghalf
-            d.location - d.scale*(1.0 - sqrt(-2.0*expm1(lp)))
-        else
-            d.location - d.scale*expm1(0.5*(lp-loghalf))
-        end
-    end
-end
+invlogccdf(d::SymTriangularDist, lp::Float64) = lp > loghalf ? xval(d, sqrt(-2.0 * expm1(lp)) - 1.0) :
+                                                               xval(d, -(expm1(0.5 * (lp - loghalf))))
+
 
 function mgf(d::SymTriangularDist, t::Real)
-    a = d.scale*t
+    (μ, s) = params(d)
+    a = s * t
     a == zero(a) && return one(a)
-    4.0*exp(d.location*t)*(sinh(0.5*a)/a)^2
-end
-function cf(d::SymTriangularDist, t::Real)
-    a = d.scale*t
-    a == zero(a) && return complex(one(a))
-    4.0*exp(im*d.location*t)*(sin(0.5*a)/a)^2
+    4.0 * exp(μ * t) * (sinh(0.5 * a) / a)^2
 end
 
-## Sampling
-function rand(d::SymTriangularDist)
-    ξ1, ξ2 = rand(), rand()
-    return d.location + (ξ1 - ξ2) * d.scale
+function cf(d::SymTriangularDist, t::Real)
+    (μ, s) = params(d)
+    a = s * t
+    a == zero(a) && return complex(one(a))
+    4.0 * exp(im * μ * t) * (sin(0.5 * a) / a)^2
 end
+
+
+#### Sampling
+
+rand(d::SymTriangularDist) = xval(d, rand() - rand())
+
+

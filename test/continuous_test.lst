@@ -95,9 +95,11 @@ Rayleigh()
 Rayleigh(3.0)
 Rayleigh(8.0)
 
-SymTriangularDist(3.0, 1.0)
+SymTriangularDist()
+SymTriangularDist(3.0)
+SymTriangularDist(3.0, 0.5)
 SymTriangularDist(3.0, 2.0)
-SymTriangularDist(10.0, 10.0) 
+SymTriangularDist(10.0, 8.0) 
 
 TDist(1.2)
 TDist(5.0)
