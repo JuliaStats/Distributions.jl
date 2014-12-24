@@ -37,7 +37,7 @@ kurtosis(d::Gamma) = 6.0 / d.α
 
 function mode(d::Gamma)
     (α, β) = params(d)
-    α > 1.0 ? β * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
+    α >= 1.0 ? β * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
 
 function entropy(d::Gamma)
