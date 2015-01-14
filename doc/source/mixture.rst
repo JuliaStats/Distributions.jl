@@ -134,7 +134,7 @@ In addition, for all subtypes of ``UnivariateMixture`` and ``MultivariateMixture
 
     Evaluate the (mixed) probability density function over ``x``. Here, ``x`` can be a single sample or an array of multiple samples.
 
-.. function:: pdf(d, x)
+.. function:: logpdf(d, x)
 
     Evaluate the logarithm of the (mixed) probability density function over ``x``. Here, ``x`` can be a single sample or an array of multiple samples.
 
