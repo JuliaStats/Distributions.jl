@@ -9,7 +9,7 @@ ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
 
 eltype{T}(v::ZeroVector{T}) = T
 length(v::ZeroVector) = v.len
-full(v::ZeroVector) = zeros(T, v.len)
+full{T}(v::ZeroVector{T}) = zeros(T, v.len)
 
 convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
 

@@ -139,7 +139,7 @@ end
 
 function _rand!{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
     normdim = d.dim
-    normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+    normd = MvNormal(ZeroVector(Float64, normdim), d.Σ)
     chisqd = Chisq(d.df)
     y = Array(Float64, d.dim)
     unwhiten!(normd.Σ, randn!(x))
@@ -154,7 +154,7 @@ end
 
 function _rand!{T<:Real}(d::GenericMvTDist, x::DenseMatrix{T})
     normdim = d.dim
-    normd = GenericMvNormal{typeof(d.Σ)}(normdim, true, zeros(normdim), d.Σ)
+    normd = MvNormal(ZeroVector(Float64, normdim), d.Σ)
     chisqd = Chisq(d.df)
     y = Array(Float64, d.dim)
     unwhiten!(normd.Σ, randn!(x))
