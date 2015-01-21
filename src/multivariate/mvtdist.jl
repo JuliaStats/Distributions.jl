@@ -138,31 +138,26 @@ end
 # Sampling (for GenericMvTDist)
 
 function _rand!{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
-    normdim = d.dim
-    normd = MvNormal(ZeroVector(Float64, normdim), d.Σ)
     chisqd = Chisq(d.df)
-    y = Array(Float64, d.dim)
-    unwhiten!(normd.Σ, randn!(x))
-    rand!(chisqd, y)
-    y = sqrt(y/(d.df))
+    y = sqrt(rand(chisqd)/(d.df))
+    unwhiten!(d.Σ, randn!(x))
     broadcast!(/, x, x, y)
     if !d.zeromean
-    broadcast!(+, x, x, d.μ)
+        broadcast!(+, x, x, d.μ)
     end
     x
 end
 
 function _rand!{T<:Real}(d::GenericMvTDist, x::DenseMatrix{T})
-    normdim = d.dim
-    normd = MvNormal(ZeroVector(Float64, normdim), d.Σ)
+    cols = size(x,2)
     chisqd = Chisq(d.df)
-    y = Array(Float64, d.dim)
-    unwhiten!(normd.Σ, randn!(x))
+    y = Array(Float64, 1, cols)
+    unwhiten!(d.Σ, randn!(x))
     rand!(chisqd, y)
     y = sqrt(y/(d.df))
     broadcast!(/, x, x, y)
     if !d.zeromean
-    broadcast!(+, x, x, d.μ)
+        broadcast!(+, x, x, d.μ)
     end
     x
 end
