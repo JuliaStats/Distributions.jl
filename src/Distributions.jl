@@ -72,8 +72,6 @@ export
     FullNormal,
     FullNormalCanon,
     Gamma,
-    GenericMvNormal,
-    GenericMvNormalCanon,
     Geometric,
     Gumbel,
     Hypergeometric,
