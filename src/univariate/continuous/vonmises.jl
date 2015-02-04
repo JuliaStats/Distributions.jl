@@ -32,10 +32,10 @@ params(d::VonMises) = (d.μ, d.κ)
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
-circvar(d::VonMises) = 1.0 - besseli(1, d.κ) / I0κ
+circvar(d::VonMises) = 1.0 - besseli(1, d.κ) / d.I0κ
 entropy(d::VonMises) = log(twoπ * d.I0κ) - d.κ * (besseli(1, d.κ) / d.I0κ)
 
-cf(d::VonMises, t::Real) = (besseli(abs(t), d.k) / I0κ) * exp(im * t * d.μ)
+cf(d::VonMises, t::Real) = (besseli(abs(t), d.κ) / d.I0κ) * exp(im * t * d.μ)
 
 
 #### Evaluation
