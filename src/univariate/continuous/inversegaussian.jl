@@ -105,28 +105,10 @@ function logccdf(d::InverseGaussian, x::Float64)
     end
 end
 
-# TODO: need a more accurate method
-function quantile(d::InverseGaussian, p::Float64)
-    if 0.0 < p < 1.0
-        # Whitmore and Yalovsky (1978) approximation
-        μ, λ = params(d)
-        w = Φinv(p)
-        φ = λ / μ
-        x = μ * exp(w / sqrt(φ) - 0.5 / φ)
-        # one multiplicitive Newton iteration
-        xn = x * exp((p - cdf(d, x)) / (pdf(d, x) * exp(x)))
-        # additive Newton iterations
-        while !isapprox(xn,x)
-            x = xn
-            xn = x + (p - cdf(d, x)) / pdf(d, x)
-        end
-        return xn
-    elseif p <= 0.0
-        return 0.0
-    else
-        return Inf
-    end
-end
+quantile(d::InverseGaussian, p::Float64) = quantile_newton(d,p)
+cquantile(d::InverseGaussian, p::Float64) = cquantile_newton(d,p)
+invlogcdf(d::InverseGaussian, lp::Float64) = invlogcdf_newton(d,lp)
+invlogccdf(d::InverseGaussian, lp::Float64) = invlogccdf_newton(d,lp)
 
 
 #### Sampling

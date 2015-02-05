@@ -60,7 +60,7 @@ InverseGamma(2.0, 3.0)
 
 InverseGaussian()
 InverseGaussian(0.8)
-# InverseGaussian(2.0)  ## quantile not working well 
+InverseGaussian(2.0)
 
 Laplace()
 Laplace(2.0)
