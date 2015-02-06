@@ -64,7 +64,7 @@ end
 
 function cf(d::NegativeBinomial, t::Real)
     r, p = params(d)
-    return ((1.0 - p) * exp(im * t))^r / (1.0 - p * exp(im * t))^r
+    return (((1.0 - p) * cis(t)) / (1.0 - p * cis(t)))^r
 end
 
 

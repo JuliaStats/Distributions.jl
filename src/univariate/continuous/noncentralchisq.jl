@@ -21,7 +21,9 @@ function mgf(d::NoncentralChisq, t::Real)
     exp(d.ncp * t/(1.0 - 2.0 * t))*(1.0 - 2.0 * t)^(-k / 2.0)
 end
 
-cf(d::NoncentralChisq, t::Real) = exp(im * d.ncp * t/(1.0 - 2.0 * im * t))*(1.0 - 2.0 * im * t)^(-d.df / 2.0)
+function cf(d::NoncentralChisq, t::Real)
+    cis(d.ncp * t/(1.0 - 2.0 * im * t))*(1.0 - 2.0 * im * t)^(-d.df / 2.0)
+end
 
 
 

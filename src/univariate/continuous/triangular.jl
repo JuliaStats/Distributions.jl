@@ -100,7 +100,7 @@ function cf(d::TriangularDist, t::Real)
         return one(t)
     else
         (a, b, c) = params(d)
-        u = (b - c) * exp(im * a * t) - (b - a) * exp(im * c * t) + (c - a) * exp(im * b * t)
+        u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
         v = (b - a) * (c - a) * (b - c) * t^2
         return -2.0 * u / v
     end

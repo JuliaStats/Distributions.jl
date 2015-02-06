@@ -63,7 +63,7 @@ mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.β * t)
 
 function cf(d::Logistic, t::Real)
     a = (π * t) * d.β
-    a == zero(a) ? complex(one(a)) : exp(im * t * d.μ) * a / sinh(a)    
+    a == zero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
 end
 
 

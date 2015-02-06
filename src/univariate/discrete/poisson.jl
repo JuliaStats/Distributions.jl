@@ -75,7 +75,7 @@ end
 
 function cf(d::Poisson, t::Real)
     λ = rate(d)
-    return exp(λ * (exp(im * t) - 1.0))
+    return exp(λ * (cis(t) - 1.0))
 end
 
 

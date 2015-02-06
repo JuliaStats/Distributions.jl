@@ -97,7 +97,7 @@ function cf(d::SymTriangularDist, t::Real)
     (μ, s) = params(d)
     a = s * t
     a == zero(a) && return complex(one(a))
-    4.0 * exp(im * μ * t) * (sin(0.5 * a) / a)^2
+    4.0 * cis(μ * t) * (sin(0.5 * a) / a)^2
 end
 
 

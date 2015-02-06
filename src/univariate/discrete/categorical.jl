@@ -101,7 +101,7 @@ function cf(d::Categorical, t::Real)
     p = probs(d)
     s = 0.0 + 0.0im
     for i = 1:k
-        @inbounds s += p[i] * exp(im * t)
+        @inbounds s += p[i] * cis(t)
     end
     s
 end

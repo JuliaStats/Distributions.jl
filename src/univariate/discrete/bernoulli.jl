@@ -74,7 +74,7 @@ quantile(d::Bernoulli, p::Float64) = 0.0 <= p <= 1.0 ? (p <= failprob(d) ? 0 : 1
 cquantile(d::Bernoulli, p::Float64) = 0.0 <= p <= 1.0 ? (p >= succprob(d) ? 0 : 1) : NaN
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
-cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(im * t)
+cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 
 #### Sampling

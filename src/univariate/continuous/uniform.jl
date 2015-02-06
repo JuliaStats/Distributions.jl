@@ -70,7 +70,7 @@ function cf(d::Uniform, t::Real)
     u = 0.5 * (b - a) * t
     u == zero(u) && return complex(one(u))
     v = 0.5 * (a + b) * t
-    exp(im * v) * (sin(u) / u)
+    cis(v) * (sin(u) / u)
 end
 
 

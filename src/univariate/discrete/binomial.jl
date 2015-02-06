@@ -87,7 +87,7 @@ end
 
 function cf(d::Binomial, t::Real)
     n, p = params(d)
-    (1.0 - p + p * exp(im * t)) ^ n
+    (1.0 - p + p * cis(t)) ^ n
 end
 
 

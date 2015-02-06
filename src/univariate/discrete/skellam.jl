@@ -49,7 +49,7 @@ end
 
 function cf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(-(μ1 + μ2) + μ1 * exp(im * t) + μ2 * exp(im * -t))
+    exp(-(μ1 + μ2) + μ1 * cis(t) + μ2 * cis(-t))
 end
 
 ### Sampling
