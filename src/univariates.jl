@@ -292,8 +292,8 @@ macro quantile_newton(D)
     esc(quote
         quantile(d::$D, p::Float64) = quantile_newton(d,p)
         cquantile(d::$D, p::Float64) = cquantile_newton(d,p)
-        invlogcdf(d::$D, lp::Float64) = invlogcdf_newton(d,p)
-        invlogccdf(d::$D, lp::Float64) = invlogccdf_newton(d,p)
+        invlogcdf(d::$D, lp::Float64) = invlogcdf_newton(d,lp)
+        invlogccdf(d::$D, lp::Float64) = invlogccdf_newton(d,lp)
     end)
 end
 
