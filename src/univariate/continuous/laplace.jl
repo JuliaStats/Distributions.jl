@@ -76,7 +76,7 @@ end
 
 function rand(d::Laplace) 
     z = randexp()
-    randbool() ? d.μ + d.β * z : d.μ - d.β * z 
+    rand(Bool) ? d.μ + d.β * z : d.μ - d.β * z 
 end
 
 
