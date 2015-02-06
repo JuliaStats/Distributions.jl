@@ -302,8 +302,8 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
 .. math:: 
 
     P(X = k) = \begin{cases}
-        p & (k = 0) \\
-        1 - p & (k = 1)
+        p & \quad \text{for } k = 0, \\
+        1 - p & \quad \text{for } k = 1.
     \end{cases} 
 
 .. code-block:: julia
@@ -325,7 +325,7 @@ A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ 
 
 .. math::
 
-    P(X = k) = {n \choose k}p^k(1-p)^{n-k},  \quad \text{ for } 0 \le k \le n
+    P(X = k) = {n \choose k}p^k(1-p)^{n-k},  \quad \text{ for } k = 0,1,2, \ldots, n.
 
 .. code-block:: julia
 
@@ -348,10 +348,7 @@ A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distributi
 
 .. math::
 
-    P(X = k) = \begin{cases}
-        p[k] & (1 \le k \le K) \\
-        0 & (\text{otherwise})
-    \end{cases}
+    P(X = k) = p[k]  \quad \text{for } k = 1, 2, \ldots, K.
 
 .. code-block:: julia
 
@@ -375,10 +372,7 @@ A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribut
 
 .. math::
 
-    P(X = k) = \begin{cases}
-        1 / (b - a + 1) & (a \le k \le b) \\
-        0 & (\text{otherwise}) 
-    \end{cases}
+    P(X = k) = 1 / (b - a + 1) \quad \text{for } k = a, a+1, \ldots, b.
 
 .. code-block:: julia
 
@@ -400,7 +394,7 @@ A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`
 
 .. math::
 
-    P(X = k) = p (1 - p)^k
+    P(X = k) = p (1 - p)^k, \quad \text{for } k = 0, 1, 2, \ldots.
 
 .. code-block:: julia
 
@@ -421,7 +415,7 @@ A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_dist
 
 .. math::
 
-    P(X = k) = {{{s \choose k} {f \choose {n-k}}}\over {s+f \choose n}}, \quad k \in [\max(0, n - f), \min(n, s)]
+    P(X = k) = {{{s \choose k} {f \choose {n-k}}}\over {s+f \choose n}}, \quad \text{for } k = \max(0, n - f), \ldots, \min(n, s).
 
 .. code-block:: julia
 
@@ -436,11 +430,11 @@ A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_dist
 Negative Binomial Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomial_distribution>`_ describes the number of failures before the :math:`r`-th success in a sequence of independent trials. It is parameterized by :math:`r`, the number of successes, and :math:`p`, the success rate. 
+A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomial_distribution>`_ describes the number of failures before the :math:`r`-th success in a sequence of independent Bernoulli trials. It is parameterized by :math:`r`, the number of successes, and :math:`p`, the success rate.
 
 .. math::
 
-    P(X = k) = {k + r - 1 \choose k} p^r (1 - p)^k, \quad \text{ for } k \ge 0
+    P(X = k) = {k + r - 1 \choose x} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
 
 .. code-block:: julia
     
@@ -461,7 +455,7 @@ A `Poisson distribution <http://en.wikipedia.org/wiki/Poisson_distribution>`_ de
 
 .. math::
 
-    P(X = k) = \frac{\lambda^k}{k!} e^{-\lambda}, \quad \text{ for } k \ge 0
+    P(X = k) = \frac{\lambda^k}{k!} e^{-\lambda}, \quad \text{ for } k = 0,1,2,\ldots.
 
 .. code-block:: julia
 
@@ -481,7 +475,7 @@ A `Skellam distribution <http://en.wikipedia.org/wiki/Skellam_distribution>`_ de
 
 .. math::
 
-    P(X = k) = e^{-(\mu_1 + \mu_2)} \left( \frac{\mu_1}{\mu_2} \right)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2})
+    P(X = k) = e^{-(\mu_1 + \mu_2)} \left( \frac{\mu_1}{\mu_2} \right)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}) \quad \text{for integer $k$.}
 
 Here, :math:`I_k` is the modified Bessel function of the first kind.  
 
