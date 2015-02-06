@@ -280,9 +280,9 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Float64, xs:
             end
         end
     elseif lp == -Inf
-        return minimum(d)
-    elseif lp == 0.0
         return maximum(d)
+    elseif lp == 0.0
+        return minimum(d)
     else
         return NaN
     end
