@@ -1,6 +1,5 @@
 immutable TDist <: ContinuousUnivariateDistribution
     df::Float64
-
     function TDist(d::Real)
     	d > zero(d) || error("TDist: df must be positive")
         new(float64(d))
@@ -46,6 +45,13 @@ end
 
 
 #### Evaluation
+function cf(d::TDist, t::Real)
+    t == 0 && return complex(1.0)
+    h = d.df/2
+    q = d.df/4
+    t2 = t*t
+    complex(2*(q*t2)^q*besselk(h,sqrt(d.df)*abs(t))/gamma(h))
+end
 
 gradlogpdf(d::TDist, x::Float64) = -((d.df + 1.0) * x) / (x^2 + d.df)
 
