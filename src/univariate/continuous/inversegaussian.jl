@@ -105,11 +105,7 @@ function logccdf(d::InverseGaussian, x::Float64)
     end
 end
 
-quantile(d::InverseGaussian, p::Float64) = quantile_newton(d,p)
-cquantile(d::InverseGaussian, p::Float64) = cquantile_newton(d,p)
-invlogcdf(d::InverseGaussian, lp::Float64) = invlogcdf_newton(d,lp)
-invlogccdf(d::InverseGaussian, lp::Float64) = invlogccdf_newton(d,lp)
-
+@quantile_newton InverseGaussian
 
 #### Sampling
 

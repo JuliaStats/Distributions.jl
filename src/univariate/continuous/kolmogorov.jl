@@ -16,6 +16,8 @@ mean(d::Kolmogorov) = 0.5*sqrt2π*log(2.0)
 var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
 # TODO: higher-order moments also exist, can be obtained by differentiating series
 
+mode(d::Kolmogorov) = 0.735467907916572
+
 
 #### Evaluation
 
@@ -74,6 +76,8 @@ function pdf(d::Kolmogorov,x::Float64)
     end
 end
 
+
+@quantile_newton Kolmogorov
 
 #### Sampling
 
