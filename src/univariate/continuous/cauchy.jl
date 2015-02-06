@@ -63,8 +63,7 @@ function cquantile(d::Cauchy, p::Float64)
 end
 
 mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
-
-cf(d::Cauchy, t::Real) = exp(im * t * d.location - d.scale * abs(t))
+cf(d::Cauchy, t::Real) = exp(im * t * d.μ - d.β * abs(t))
 
 
 #### Fitting

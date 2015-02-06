@@ -79,6 +79,19 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
     end
 
+    try
+        m = mgf(d,0.0)
+        @test m == 1.0
+    catch e
+        isa(e, MethodError) || throw(e)
+    end
+    try
+        c = cf(d,0.0)
+        @test c == 1.0
+    catch e
+        isa(e, MethodError) || throw(e)
+    end
+
     # generic testing
     if isa(d, Cosine)
         n_tsamples = int(floor(n_tsamples / 10))

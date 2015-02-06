@@ -49,8 +49,8 @@ cquantile(d::Erlang, p::Float64) = cquantile(d.gammad, p)
 invlogcdf(d::Erlang, lp::Float64) = invlogcdf(d.gammad, lp)
 invlogccdf(d::Erlang, lp::Float64) = invlogccdf(d.gammad, lp)
 
-mgf(d::Erlang, t::Real) = mgf(d.nested_gamma, t)
-cf(d::Erlang, t::Real) = cf(d.nested_gamma, t)
+mgf(d::Erlang, t::Real) = mgf(d.gammad, t)
+cf(d::Erlang, t::Real) = cf(d.gammad, t)
 
 
 #### Sampling

@@ -97,12 +97,14 @@ quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
 
 function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
-    (exp(t * a) - exp(t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(t)))
+    u = b - a + 1
+    t == 0 ? 1.0 : (exp(t*a) * expm1(t*u)) / (u*expm1(t))
 end
 
 function cf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
-    (exp(im * t * a) - exp(im * t * (b + 1))) / ((b - a + 1.0) * (1.0 - exp(im * t)))
+    u = b - a + 1
+    t == 0 ? complex(1.0) : (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
 end
 
 
