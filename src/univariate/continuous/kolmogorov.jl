@@ -17,7 +17,7 @@ var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
 # TODO: higher-order moments also exist, can be obtained by differentiating series
 
 mode(d::Kolmogorov) = 0.735467907916572
-
+median(d::Kolmogorov) = 0.8275735551899077
 
 #### Evaluation
 
@@ -31,29 +31,43 @@ mode(d::Kolmogorov) = 0.735467907916572
 # some divergence from Smirnov's table in 6th decimal near 1.0 (e.g. 1.04): occurs in 
 # both series so assume error in table.
 
-function cdf(d::Kolmogorov,x::Float64)
-    if x <= 0.0
-        return 0.0
-    elseif x > 1.0
-        return 1.0-ccdf(d,x)
-    end
-    s = 0.0
-    for i = 1:5
-        s += exp(-((2*i-1)*π/x)^2/8.0)
-    end
-    sqrt2π*s/x
+function cdf_raw(d::Kolmogorov, x::Float64)
+    a = -(pi*pi)/(x*x)
+    f = exp(a)
+    f2 = f*f
+    u = (1 + f*(1 + f2))
+    sqrt2π*exp(a/8)*u/x
 end
 
-function ccdf(d::Kolmogorov,x::Float64)
-    if x <= 1.0
-        return 1.0-cdf(d,x)
-    end
-    s = 0.0
-    for i = 1:5
-        s += (iseven(i) ? -1 : 1)*exp(-2.0*(i*x)^2)
-    end
-    2.0*s
+function ccdf_raw(d::Kolmogorov, x::Float64)
+    f = exp(-2*x*x)
+    f2 = f*f
+    f3 = f2*f
+    f5 = f2*f3
+    f7 = f2*f5
+    u = (1 - f3*(1 - f5*(1 - f7)))
+    2f*u
 end
+
+function cdf(d::Kolmogorov,x::Float64)
+    if x <= 0.0
+        0.0
+    elseif x <= 1.0
+        cdf_raw(d,x)
+    else
+        1.0-ccdf_raw(d,x)
+    end
+end
+function ccdf(d::Kolmogorov,x::Float64)
+    if x <= 0.0
+        1.0
+    elseif x <= 1.0
+        1.0-cdf_raw(d,x)
+    else
+        ccdf_raw(d,x)
+    end
+end
+
 
 # TODO: figure out how best to truncate series
 function pdf(d::Kolmogorov,x::Float64)
