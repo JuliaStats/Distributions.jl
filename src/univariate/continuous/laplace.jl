@@ -68,7 +68,7 @@ function mgf(d::Laplace, t::Real)
 end
 function cf(d::Laplace, t::Real)
     st = d.β * t
-    cis(t * d.μ) / ((1.0 - st) * (1.0 + st))
+    cis(t * d.μ) / (1+st*st)
 end
 
 
