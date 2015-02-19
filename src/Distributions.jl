@@ -108,6 +108,7 @@ export
     NormalWishart,
     Pareto,
     Poisson,
+    PoissonBinomial,
     QQPair,
     Rayleigh,
     Skellam,
