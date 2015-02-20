@@ -8,7 +8,7 @@
 #
 function poissonbinomial_pdf_fft(p::AbstractArray)
     n = length(p)
-    ω = 2. * pi / (n + 1)
+    ω = 2. / (n + 1)
 
     x = Array(Complex{Float64}, n+1)
     lmax = int(ceil(n/2))
@@ -17,7 +17,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
         logz = 0.
         argz = 0.
         for j=1:n
-            zjl = 1 - p[j] + p[j] * cos(ω*l) + im * p[j] * sin(ω * l)
+            zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))
             argz += atan2(imag(zjl), real(zjl))
         end
