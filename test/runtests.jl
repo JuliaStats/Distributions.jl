@@ -6,6 +6,7 @@ tests = [
     "univariates", 
     "fit", 
     "multinomial",
+    "poissonbinomial",
     "dirichlet",
     "mvnormal",
     "mvtdist",
