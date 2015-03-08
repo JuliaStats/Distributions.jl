@@ -293,7 +293,7 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = int(islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = int(isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf(d, [rmin:rmax])
+    p0 = pdf(d, collect(rmin:rmax))
     @test_approx_eq pdf(d, rmin:rmax) p0
     if rmin + 2 <= rmax
         @test_approx_eq pdf(d, rmin+1:rmax-1) p0[2:end-1]

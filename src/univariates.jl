@@ -463,7 +463,8 @@ const discrete_distributions = [
     "negativebinomial",
     "noncentralhypergeometric",
     "poisson",
-    "skellam"  
+    "skellam",
+    "poissonbinomial"
 ]
 
 const continuous_distributions = [

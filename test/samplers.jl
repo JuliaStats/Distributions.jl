@@ -16,7 +16,8 @@ import Distributions:
     GammaGDSampler,
     GammaGSSampler,
     GammaMTSampler,
-    GammaIPSampler
+    GammaIPSampler,
+    PoissBinAliasSampler
 
 n_tsamples = 10^6
 
@@ -63,6 +64,14 @@ for (S, paramlst) in [
     for μ in paramlst
         test_samples(S(μ), Poisson(μ), n_tsamples)
     end
+end
+
+## Poisson Binomial sampler
+S = PoissBinAliasSampler
+paramlst = (fill(0.2, 30), linspace(0.1, .99, 30), [fill(0.1, 10); fill(0.9, 10)])
+println("    testing $S")
+for p in paramlst
+    test_samples(S(p), PoissonBinomial(p), n_tsamples)
 end
 
 
