@@ -8,27 +8,29 @@ The Distributions package is available through the Julia package system by runni
 Starting With a Normal Distribution
 -----------
 
-We start by drawing :math:`100` observations from a standard-normal random variable. After setting up the environment through
+We start by drawing :math:`100` observations from a standard-normal random variable.
+
+The first step is to set up the environment:
 
 .. code-block:: julia
 
     julia> using Distributions
     julia> srand(123) # Setting the seed
 
-We first create a ``normal`` distribution and then obtain samples using ``rand``:
+Then, we create a standard-normal distribution ``d`` and obtain samples using ``rand``:
 
 .. code-block:: julia
 
-    julia> normal = Normal()
+    julia> d = Normal()
     Normal(μ=0.0, σ=1.0)
 
-    julia> x = rand(normal, 100)
+    julia> x = rand(d, 100)
     100-element Array{Float64,1}:
       0.376264
      -0.405272
      ...
 
-You can easily obtain a pdf, cdf, percentile, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are
+You can easily obtain the pdf, cdf, percentile, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
 
 .. code-block:: julia
 
@@ -37,7 +39,7 @@ You can easily obtain a pdf, cdf, percentile, and many other functions for a dis
      0.0
      1.64485
 
-The normal distribution is parameterized by a mean (location) and standard deviation (scale). To draw random samples from a normal distribution with mean 1 and standard deviation 2:
+The normal distribution is parameterized by its mean and standard deviation. To draw random samples from a normal distribution with mean 1 and standard deviation 2, you write:
 
 .. code-block:: julia
 
@@ -46,14 +48,13 @@ The normal distribution is parameterized by a mean (location) and standard devia
 Using Other Distributions
 -----------
 
-The package contains a large number of additional distributions of four main types:
+The package contains a large number of additional distributions of three main types:
 
 * ``Univariate``
-* ``Truncated``
 * ``Multivariate``
 * ``Matrixvariate``
 
-The ``Univariate`` random variables split further into ``Discrete`` and ``Continuous``.
+Each type splits further into ``Discrete`` and ``Continuous``.
 
 For instance, you can define the following distributions (among many others):
 
@@ -61,9 +62,14 @@ For instance, you can define the following distributions (among many others):
 
     julia> Binomial(p) # Discrete univariate
     julia> Cauchy(u, b)  # Continuous univariate
-    julia> TruncatedNormal(Normal(mu, sigma), l, u) # Truncated
-    julia> Multinomial(n, p) # Multivariate
-    julia> Wishart(nu, S) # Matrix-variate
+    julia> Multinomial(n, p) # Discrete multivariate
+    julia> Wishart(nu, S) # Continuous matrix-variate
+
+In addition, you can create truncated distributions from univariate distributions:
+
+.. code-block:: julia
+
+    julia> Truncated(Normal(mu, sigma), l, u)
 
 To find out which parameters are appropriate for a given distribution ``D``, you can use ``names(D)``:
 
@@ -87,26 +93,3 @@ It is often useful to approximate an empirical distribution with a theoretical d
     Normal(μ=0.036692077201688635, σ=1.1228280164716382)
 
 Since ``x`` is a random draw from ``Normal``, it's easy to check that the fitted values are sensible. Indeed, the estimates :math:`[0.04, 1.12]` are close to the true values of :math:`[0.0, 1.0]` that we used to generate ``x``.
-
-Create Mixture Models
-------------------
-
-Creating mixture models is simple. For instance, you can create a mixture of three normal variables with prior probabilities :math:`0.2, 0.5, 0.3` as follows:
-
-.. code-block:: julia
-
-    julia> m = MixtureModel(Normal[
-                   Normal(-2.0, 1.2),
-                   Normal(0.0, 1.0),
-                   Normal(3.0, 2.5)], [0.2, 0.5, 0.3])
-
-A mixture model can be accessed using a smaller set of functions than the pre-defined distributions. While a pdf is defined:
-
-.. code-block:: julia
-
-    julia> pdf(m, 2)
-    0.07144494659237469
-
-a quantile is not defined.
-
-This package does not provide facilities for estimating mixture models. One can resort to other packages, *e.g.* *MixtureModels.jl*, for this purpose.
