@@ -8,7 +8,7 @@ The Distributions package is available through the Julia package system by runni
 Starting With a Normal Distribution
 -----------
 
-We start by drawing :math:`100` observations from a standard-normal random variable.
+We start by drawing 100 observations from a standard-normal random variable.
 
 The first step is to set up the environment:
 
@@ -92,4 +92,4 @@ It is often useful to approximate an empirical distribution with a theoretical d
     julia> fit(Normal, x)
     Normal(μ=0.036692077201688635, σ=1.1228280164716382)
 
-Since ``x`` is a random draw from ``Normal``, it's easy to check that the fitted values are sensible. Indeed, the estimates :math:`[0.04, 1.12]` are close to the true values of :math:`[0.0, 1.0]` that we used to generate ``x``.
+Since ``x`` is a random draw from ``Normal``, it's easy to check that the fitted values are sensible. Indeed, the estimates [0.04, 1.12] are close to the true values of [0.0, 1.0] that we used to generate ``x``.
