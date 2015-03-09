@@ -14,6 +14,7 @@ The *Distributions* package provides a large collection of probabilistic distrib
 .. toctree::
    :maxdepth: 2
 
+   starting.rst
    types.rst
    univariate.rst
    truncate.rst
