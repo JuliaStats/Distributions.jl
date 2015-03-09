@@ -11,7 +11,18 @@ end
 
 @distr_support NoncentralT -Inf Inf
 
-mean(d::NoncentralT) = d.df > 1.0 ? sqrt(0.5*d.df)*d.ncp*gamma(0.5*(d.df-1))/gamma(0.5*d.df) : NaN
+function mean(d::NoncentralT)
+    if d.df > 1.0
+        if isinf(d.df)
+            d.ncp
+        else
+            sqrt(0.5*d.df)*d.ncp*gamma(0.5*(d.df-1))/gamma(0.5*d.df)
+        end
+    else
+        NaN
+    end
+end
+
 var(d::NoncentralT) = d.df > 2.0 ? d.df*(1+d.ncp^2)/(d.df-2.0) - mean(d)^2 : NaN
 
 function rand(d::NoncentralT)
