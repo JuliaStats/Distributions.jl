@@ -20,7 +20,7 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
     # Convert all Float64's into integers
     vals = Array(Int64, n)
     for i in 1:n
-        vals[i] = int(probs[i] * 64^9)
+        @compat vals[i] = round(Int, probs[i] * 64^9)
     end
 
     # Allocate digit table and digit sums as table bounds

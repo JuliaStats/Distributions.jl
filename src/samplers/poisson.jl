@@ -3,8 +3,8 @@ immutable PoissonRmathSampler <: Sampleable{Univariate,Discrete}
     mu::Float64
 end
 
-rand(s::PoissonRmathSampler) = 
-    int(ccall((:rpois, "libRmath-julia"), Float64, (Float64,), s.mu))
+rand(s::PoissonRmathSampler) =
+    round(Int, ccall((:rpois, "libRmath-julia"), Float64, (Float64,), s.mu))
 
 
 function poissonpvec(μ::Float64, n::Int)

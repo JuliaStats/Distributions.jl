@@ -8,8 +8,8 @@ immutable DiscreteUniform <: DiscreteUnivariateDistribution
         new(a, b, 1.0 / (b - a + 1))
     end
 
-    DiscreteUniform(a::Real, b::Real) = DiscreteUniform(int(a), int(b))
-    DiscreteUniform(b::Real) = DiscreteUniform(0, int(b))
+    @compat DiscreteUniform(a::Real, b::Real) = DiscreteUniform(round(Int, a), round(Int, b))
+    DiscreteUniform(b::Real) = DiscreteUniform(0, round(Int, b))
     DiscreteUniform() = new(0, 1, 0.5)
 end
 
@@ -33,16 +33,16 @@ mean(d::DiscreteUniform) = middle(d.a, d.b)
 
 median(d::DiscreteUniform) = middle(d.a, d.b)
 
-var(d::DiscreteUniform) = (abs2(float64(span(d))) - 1.0) / 12.0
+@compat var(d::DiscreteUniform) = (abs2(Float64(span(d))) - 1.0) / 12.0
 
 skewness(d::DiscreteUniform) = 0.0
 
 function kurtosis(d::DiscreteUniform)
-    n2 = abs2(float64(span(d)))
+    @compat n2 = abs2(Float64(span(d)))
     return -1.2 * (n2 + 1.0) / (n2 - 1.0)
 end
 
-entropy(d::DiscreteUniform) = log(float64(span(d)))
+@compat entropy(d::DiscreteUniform) = log(Float64(span(d)))
 
 mode(d::DiscreteUniform) = d.a
 modes(d::DiscreteUniform) = [d.a:d.b]
@@ -50,8 +50,8 @@ modes(d::DiscreteUniform) = [d.a:d.b]
 
 ### Evaluation
 
-cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 : 
-                                   x > d.b ? 1.0 : 
+cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 :
+                                   x > d.b ? 1.0 :
                                    (floor(Int,x) - d.a + 1.0) * d.pv)
 
 pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
@@ -61,8 +61,8 @@ logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
 pdf(d::DiscreteUniform) = fill(probval(d), span(d))
 
 function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
-    vfirst = int(first(rgn))
-    vlast = int(last(rgn))
+    vfirst = round(Int, first(rgn))
+    vlast = round(Int, last(rgn))
     vl = max(vfirst, d.a)
     vr = min(vlast, d.b)
     if vl > vfirst

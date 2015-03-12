@@ -7,7 +7,7 @@ immutable Skellam <: DiscreteUnivariateDistribution
         new(μ1, μ2)
     end
 
-    Skellam(μ1::Real, μ2::Real) = Skellam(float64(μ1), float64(μ2))
+    @compat Skellam(μ1::Real, μ2::Real) = Skellam(Float64(μ1), Float64(μ2))
 
     Skellam(μ::Real) = Skellam(μ, μ)
 

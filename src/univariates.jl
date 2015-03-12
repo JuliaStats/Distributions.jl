@@ -4,12 +4,12 @@ immutable RealInterval
     lb::Float64
     ub::Float64
 
-    RealInterval(lb::Real, ub::Real) = new(float64(lb), float64(ub))
+    @compat RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
 end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
-in(x::Real, r::RealInterval) = (r.lb <= float64(x) <= r.ub)
+@compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
 isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
@@ -52,7 +52,7 @@ macro distr_support(D, lb, ub)
     support_funs = if Dty <: DiscreteUnivariateDistribution
         if D_is_bounded
             quote
-                support($(paramdecl)) = int($lb):int($ub)
+                support($(paramdecl)) = round(Int, $lb):round(Int, $ub)
             end
         end
     else
@@ -125,20 +125,20 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 # pdf
 
 pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
-pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, int(x))
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, int(x)) : 0.0
+pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
+pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
 pdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(pdf, (d, x)))
-pdf(d::ContinuousUnivariateDistribution, x::Real) = pdf(d, float64(x))
+@compat pdf(d::ContinuousUnivariateDistribution, x::Real) = pdf(d, Float64(x))
 
 # logpdf
 
 logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, int(x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, int(x)) : -Inf
+logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round( Int, x))
+logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 logpdf(d::ContinuousUnivariateDistribution, x::Float64) = log(pdf(d, x))
-logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, float64(x))
+@compat logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, Float64(x))
 
 # cdf
 
@@ -153,33 +153,33 @@ end
 cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 
 cdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(cdf, (d, x)))
-cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, float64(x))
+@compat cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, Float64(x))
 
 # ccdf
 
 ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x)) 
 ccdf(d::ContinuousUnivariateDistribution, x::Float64) = 1.0 - cdf(d, x)
-ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, float64(x))
+@compat ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, Float64(x))
 
 # logcdf
 
 logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 logcdf(d::ContinuousUnivariateDistribution, x::Float64) = log(cdf(d, x))
-logcdf(d::ContinuousUnivariateDistribution, x::Real) = logcdf(d, float64(x))
+@compat logcdf(d::ContinuousUnivariateDistribution, x::Real) = logcdf(d, Float64(x))
 
 # logccdf
 
 logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 logccdf(d::ContinuousUnivariateDistribution, x::Float64) = log(ccdf(d, x))
-logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, float64(x))
+@compat logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, Float64(x))
 
 # quantile
 
 quantile(d::UnivariateDistribution, p::Float64) = throw(MethodError(quantile, (d, p)))
-quantile(d::UnivariateDistribution, p::Real) = quantile(d, float64(p))
+@compat quantile(d::UnivariateDistribution, p::Real) = quantile(d, Float64(p))
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64, 
                          lx::Float64, rx::Float64, tol::Float64)
@@ -302,22 +302,22 @@ end
 # cquantile
 
 cquantile(d::UnivariateDistribution, p::Float64) = quantile(d, 1.0 - p)
-cquantile(d::UnivariateDistribution, p::Real) = cquantile(d, float64(p))
+@compat cquantile(d::UnivariateDistribution, p::Real) = cquantile(d, Float64(p))
 
 # invlogcdf
 
 invlogcdf(d::UnivariateDistribution, lp::Float64) = quantile(d, exp(lp))
-invlogcdf(d::UnivariateDistribution, lp::Real) = invlogcdf(d, float64(lp))
+@compat invlogcdf(d::UnivariateDistribution, lp::Real) = invlogcdf(d, Float64(lp))
 
 # invlogccdf
 
 invlogccdf(d::UnivariateDistribution, lp::Float64) = quantile(d, -expm1(lp))
-invlogccdf(d::UnivariateDistribution, lp::Real) = invlogccdf(d, float64(lp))
+@compat invlogccdf(d::UnivariateDistribution, lp::Real) = invlogccdf(d, Float64(lp))
 
 # gradlogpdf
 
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(gradlogpdf, (d, x)))
-gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = gradlogpdf(d, float64(x))
+@compat gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = gradlogpdf(d, Float64(x))
 
 
 # vectorized versions

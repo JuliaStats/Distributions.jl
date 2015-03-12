@@ -4,7 +4,7 @@ immutable Frechet <: ContinuousUnivariateDistribution
 
     function Frechet(α::Real, β::Real)
     	α > zero(α) && β > zero(β) || error("Both shape and scale must be positive")
-    	new(float64(α), float64(β))
+    	@compat new(Float64(α), Float64(β))
     end
 
     Frechet(α::Real) = Frechet(α, 1.0)

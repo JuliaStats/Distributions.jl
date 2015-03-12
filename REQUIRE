@@ -1,5 +1,5 @@
 julia 0.3
-ArrayViews 0.4.8
+ArrayViews 0.4.9
 PDMats 0.3.1
 StatsBase 0.6.10
-Compat 0.2.4
+Compat 0.3.1

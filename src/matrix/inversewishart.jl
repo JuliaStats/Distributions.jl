@@ -69,7 +69,7 @@ function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
     -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
 end
 
-_logpdf{T<:Real}(d::InverseWishart, X::DenseMatrix{T}) = _logpdf(d, float64(X))
+@compat _logpdf{T<:Real}(d::InverseWishart, X::DenseMatrix{T}) = _logpdf(d, Float64(X))
 
 
 #### Sampling

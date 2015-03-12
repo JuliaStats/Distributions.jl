@@ -1,4 +1,4 @@
-#### naive sampling 
+#### naive sampling
 
 immutable CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
     prob::Vector{Float64}
@@ -41,7 +41,7 @@ function AliasTable{T<:Real}(probs::AbstractVector{T})
     AliasTable(accp, alias, RandIntSampler(n))
 end
 
-rand(s::AliasTable) = 
+rand(s::AliasTable) =
     (i = rand(s.isampler); u = rand(); @inbounds r = u < s.accept[i] ? i : s.alias[i]; r)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))

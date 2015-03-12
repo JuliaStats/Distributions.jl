@@ -7,8 +7,8 @@ immutable Arcsine <: ContinuousUnivariateDistribution
         new(a, b)
     end
 
-    Arcsine(a::Real, b::Real) = Arcsine(float64(a), float64(b))
-    Arcsine(b::Real) = Arcsine(0.0, float64(b))
+    @compat Arcsine(a::Real, b::Real) = Arcsine(Float64(a), Float64(b))
+    @compat Arcsine(b::Real) = Arcsine(0.0, Float64(b))
     Arcsine() = new(0.0, 1.0)
 end
 

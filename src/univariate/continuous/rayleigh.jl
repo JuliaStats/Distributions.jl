@@ -3,7 +3,7 @@ immutable Rayleigh <: ContinuousUnivariateDistribution
 
     function Rayleigh(σ::Real)
         σ > zero(σ) || error("Rayleigh: σ must be positive")
-        new(float64(σ))
+        @compat new(Float64(σ))
     end
 
     Rayleigh() = new(1.0)
@@ -26,11 +26,11 @@ mode(d::Rayleigh) = d.σ
 
 var(d::Rayleigh) = 0.429203673205103381 * d.σ^2   # (2.0 - π / 2) = 0.429203673205103381
 std(d::Rayleigh) = 0.655136377562033553 * d.σ
-                   
+
 skewness(d::Rayleigh) = 0.631110657818937138
 kurtosis(d::Rayleigh) = 0.245089300687638063
 
-entropy(d::Rayleigh) = 0.942034242170793776 + log(d.σ) 
+entropy(d::Rayleigh) = 0.942034242170793776 + log(d.σ)
 
 
 #### Evaluation

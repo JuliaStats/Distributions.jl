@@ -27,7 +27,7 @@ end
 # testing the implementation of a continuous univariate distribution
 #
 function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
-    
+
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
 
@@ -54,7 +54,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
                       n::Int;                                   # number of samples to generate
                       q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false)                      # show intermediate info (for debugging)
-    
+
     # The basic idea
     # ------------------
     #   Generate n samples, and count the occurences of each value within a reasonable range.
@@ -132,7 +132,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
                       nbins::Int=50,                            # divide the main interval into nbins
                       q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false)                      # show intermediate info (for debugging)
-    
+
     # The basic idea
     # ------------------
     #   Generate n samples, divide the interval [q00, q99] into nbins bins, where
@@ -290,8 +290,8 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
         @test isa(vmax, Integer)
     end
 
-    rmin = int(islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
-    rmax = int(isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
+    rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
+    rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
     p0 = pdf(d, collect(rmin:rmax))
     @test_approx_eq pdf(d, rmin:rmax) p0
@@ -321,14 +321,14 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     ci = 0.
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)    
+        p[i] = pdf(d, v)
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
         lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
-        lcc[i] = logccdf(d, v)   
+        lcc[i] = logccdf(d, v)
 
-        @assert p[i] >= 0.0 
+        @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
         ci += p[i]
@@ -387,7 +387,7 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
         # TODO: remove this line when we have more accurate implementation
         # of quantile for InverseGaussian
-        qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10  
+        qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
         if p[i] > 1.0e-6
             @test_approx_eq_eps quantile(d, c[i]) v qtol * (abs(v) + 1.0)
             @test_approx_eq_eps cquantile(d, cc[i]) v qtol * (abs(v) + 1.0)
@@ -421,7 +421,7 @@ end
 function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
-    vf = float64(vs)
+    @compat vf = Float64[Float64(v) for v in vs]
     p = pdf(d, vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2(vf .- xmean))
@@ -459,21 +459,21 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
     # using Monte Carlo methods
 
     if !(isfinite(mean(d)) && isfinite(var(d)))
-        return 
+        return
     end
     vd = var(d)
 
     n = length(xs)
     xmean = mean(xs)
     xvar = var(xs)
-    xstd = sqrt(xvar)    
+    xstd = sqrt(xvar)
 
     # we utilize central limit theorem, and consider xmean as (approximately) normally
     # distributed with std = std(d) / sqrt(n)
     #
     # For a normal distribution, it is extremely rare for a sample to deviate more
     # than 5 * std.dev, (chance < 6.0e-7)
-    mean_tol = 5.0 * (sqrt(vd / n))  
+    mean_tol = 5.0 * (sqrt(vd / n))
     @test_approx_eq_eps mean(d) xmean mean_tol
 
     # test variance

@@ -3,7 +3,7 @@ immutable Exponential <: ContinuousUnivariateDistribution
 
     function Exponential(β::Real)
         β > zero(β) || error("scale must be positive")
-        new(float64(β))
+        @compat new(Float64(β))
     end
 
     Exponential() = new(1.0)
@@ -72,7 +72,7 @@ immutable ExponentialStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     sw::Float64   # sum of sample weights
 
-    ExponentialStats(sx::Real, sw::Real) = new(float64(sx), float64(sw))
+    @compat ExponentialStats(sx::Real, sw::Real) = new(Float64(sx), Float64(sw))
 end
 
 suffstats(::Type{Exponential}, x::Array) = ExponentialStats(sum(x), length(x))

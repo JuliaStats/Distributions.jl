@@ -3,7 +3,7 @@ immutable Geometric <: DiscreteUnivariateDistribution
 
     function Geometric(p::Real)
         zero(p) < p < one(p) || error("prob must be in (0, 1)")
-    	new(float64(p))
+    	@compat new(Float64(p))
     end
 
     Geometric() = Geometric(0.5) # Flips of a fair coin
@@ -116,7 +116,7 @@ immutable GeometricStats <: SufficientStats
     sx::Float64
     tw::Float64
 
-    GeometricStats(sx::Real, tw::Real) = new(float64(sx), float64(tw))
+    @compat GeometricStats(sx::Real, tw::Real) = new(Float64(sx), Float64(tw))
 end
 
 suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}) = GeometricStats(sum(x), length(x))

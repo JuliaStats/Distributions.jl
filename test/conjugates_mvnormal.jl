@@ -7,7 +7,7 @@ using Base.Test
 
 n = 3
 p = 4
-X = reshape(Float64[1:12], p, n)
+X = reshape(Float64[1:12;], p, n)
 w = rand(n)
 Xw = X * diagm(w)
 

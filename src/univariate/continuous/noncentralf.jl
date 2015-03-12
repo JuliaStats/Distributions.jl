@@ -5,7 +5,7 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     function NoncentralF(n::Real, d::Real, nc::Real)
 	n > zero(n) && d > zero(d) && nc >= zero(nc) ||
 	    error("ndf and ddf must be > 0 and ncp >= 0")
-	new(float64(n), float64(d), float64(nc))
+	@compat new(Float64(n), Float64(d), Float64(nc))
     end
 end
 

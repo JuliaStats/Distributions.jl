@@ -13,13 +13,13 @@ immutable EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthZ{T<:UnivariateDistribution}(d::T, n::Real)
-        n > zero(n) || 
+        n > zero(n) ||
             error("n must be positive")
-        new(d, float64(n))
+        @compat new(d, Float64(n))
     end
 end
 EdgeworthZ(d::UnivariateDistribution,n::Real) = EdgeworthZ{typeof(d)}(d,n)
-           
+
 mean(d::EdgeworthZ) = 0.0
 var(d::EdgeworthZ) = 1.0
 
@@ -78,9 +78,9 @@ immutable EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthSum{T<:UnivariateDistribution}(d::T, n::Real)
-        n > zero(n) || 
+        n > zero(n) ||
             error("n must be positive")
-        new(d, float64(n))
+        @compat new(d, Float64(n))
     end
 end
 EdgeworthSum(d::UnivariateDistribution, n::Real) = EdgeworthSum{typeof(d)}(d,n)
@@ -94,9 +94,9 @@ immutable EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
     n::Float64
     function EdgeworthMean{T<:UnivariateDistribution}(d::T, n::Real)
         # although n would usually be an integer, no methods are require this
-        n > zero(n) || 
-            error("n must be positive") 
-        new(d, float64(n))
+        n > zero(n) ||
+            error("n must be positive")
+        @compat new(d, Float64(n))
     end
 end
 EdgeworthMean(d::UnivariateDistribution,n::Real) = EdgeworthMean{typeof(d)}(d,n)

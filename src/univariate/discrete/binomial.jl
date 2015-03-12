@@ -9,8 +9,8 @@ immutable Binomial <: DiscreteUnivariateDistribution
         new(n, p)
     end
 
-    Binomial(n::Integer, p::Real) = Binomial(int(n), float64(p))
-    Binomial(n::Integer) = Binomial(int(n), 0.5)
+    @compat Binomial(n::Integer, p::Real) = Binomial(round(Int, n), Float64(p))
+    @compat Binomial(n::Integer) = Binomial(round(Int, n), 0.5)
     Binomial() = new(1, 0.5)
 end
 
@@ -99,7 +99,7 @@ immutable BinomialStats <: SufficientStats
     n::Int        # the number of trials in each experiment
 
     function BinomialStats(ns::Real, ne::Real, n::Integer)
-        new(float64(ns), float64(ne), int(n))
+        @compat new(Float64(ns), Float64(ne), round(Int, n))
     end
 end
 
@@ -110,7 +110,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
         0 <= xi <= n || throw(DomainError())
         ns += xi
     end
-    BinomialStats(ns, length(x), n)    
+    BinomialStats(ns, length(x), n)
 end
 
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64})

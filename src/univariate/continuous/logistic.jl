@@ -4,10 +4,10 @@ immutable Logistic <: ContinuousUnivariateDistribution
 
     function Logistic(μ::Float64, β::Float64)
     	β > zero(β) || error("Logistic: scale must be positive")
-    	new(float64(μ), float64(β))
+    	@compat new(Float64(μ), Float64(β))
     end
 
-    Logistic(μ::Real) = new(float64(μ), 1.0)
+    @compat Logistic(μ::Real) = new(Float64(μ), 1.0)
     Logistic() = new(0.0, 1.0)
 end
 

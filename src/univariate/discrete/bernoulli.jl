@@ -11,11 +11,11 @@ immutable Bernoulli <: DiscreteUnivariateDistribution
         new(p)
     end
 
-    Bernoulli(p::Real) = Bernoulli(float64(p))
+    @compat Bernoulli(p::Real) = Bernoulli(Float64(p))
     Bernoulli() = new(0.5)
 end
 
-@distr_support Bernoulli 0 1 
+@distr_support Bernoulli 0 1
 
 
 #### Parameters
@@ -79,7 +79,7 @@ cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 #### Sampling
 
-rand(d::Bernoulli) = int(rand() <= succprob(d))
+rand(d::Bernoulli) = round(Int, rand() <= succprob(d))
 
 
 #### MLE fitting
@@ -88,7 +88,7 @@ immutable BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 
-    BernoulliStats(c0::Real, c1::Real) = new(float64(c0), float64(c1))
+    @compat BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
 end
 
 fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))

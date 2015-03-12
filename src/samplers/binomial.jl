@@ -4,8 +4,8 @@ immutable BinomialRmathSampler <: Sampleable{Univariate,Discrete}
     prob::Float64
 end
 
-rand(s::BinomialRmathSampler) = 
-    int(ccall((:rbinom, "libRmath-julia"), Float64, (Float64, Float64), s.n, s.prob))
+rand(s::BinomialRmathSampler) =
+    round(Int, ccall((:rbinom, "libRmath-julia"), Float64, (Float64, Float64), s.n, s.prob))
 
 
 # compute probability vector of a Binomial distribution
@@ -120,7 +120,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
     nrq = n*r*q
     fM = (n+1)*r #
     M = floor(fM)
-    Mi = integer(M)
+    Mi = round(Integer, M)
     p1 = floor(2.195*sqrt(nrq)-4.6*q) + 0.5
     xM = M+0.5
     xL = xM-p1
@@ -133,7 +133,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
     p2 = p1*(1.0 + 2.0*c)
     p3 = p2 + c/λL
     p4 = p3 + c/λR
-    
+
     BinomialTPESampler(comp,n,r,q,nrq,M,Mi,p1,p2,p3,p4,
                         xM,xL,xR,c,λL,λR)
 end
@@ -174,7 +174,7 @@ function rand(s::BinomialTPESampler)
             v *= (u-s.p3)*s.λR
             # Goto 5
         end
-        
+
         # Step 5
         # 5.0
         k = abs(y-s.Mi)
@@ -210,19 +210,19 @@ function rand(s::BinomialTPESampler)
                 # Goto 1
                 continue
             end
-            
+
             # 5.3
-            x1 = float64(y+1)
-            f1 = float64(s.Mi+1)
-            z = float64(s.n+1-s.Mi)
-            w = float64(s.n-y+1)
+            @compat x1 = Float64(y+1)
+            @compat f1 = Float64(s.Mi+1)
+            @compat z = Float64(s.n+1-s.Mi)
+            @compat w = Float64(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
                     lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
                 # Goto 1
                 continue
-            end                
-            
+            end
+
             # Goto 6
             break
         end
@@ -253,7 +253,7 @@ rand(s::BinomialAliasSampler) = rand(s.table) - 1
 # It is important for type-stability
 #
 type BinomialPolySampler <: Sampleable{Univariate,Discrete}
-    use_btpe::Bool 
+    use_btpe::Bool
     geom_sampler::BinomialGeomSampler
     btpe_sampler::BinomialTPESampler
 end
@@ -272,7 +272,7 @@ function BinomialPolySampler(n::Int, p::Float64)
     BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
 end
 
-BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(int(n), float64(p))
+@compat BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
 rand(s::BinomialPolySampler) = s.use_btpe ? rand(s.btpe_sampler) : rand(s.geom_sampler)
 

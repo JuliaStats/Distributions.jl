@@ -4,10 +4,10 @@ immutable Cauchy <: ContinuousUnivariateDistribution
 
     function Cauchy(μ::Real, β::Real)
         β > zero(β) || error("Cauchy: scale must be positive")
-        new(float64(μ), float64(β))
+        @compat new(Float64(μ), Float64(β))
     end
 
-    Cauchy(μ::Real) = new(float64(μ), 1.0)
+    @compat Cauchy(μ::Real) = new(Float64(μ), 1.0)
     Cauchy() = new(0.0, 1.0)
 end
 

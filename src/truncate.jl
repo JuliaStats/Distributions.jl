@@ -20,7 +20,7 @@ function Truncated(d::ContinuousUnivariateDistribution, l::Float64, u::Float64)
     Truncated{typeof(d)}(d, l, u, lcdf, ucdf, tp, log(tp))
 end
 
-Truncated(d::ContinuousUnivariateDistribution, l::Real, u::Real) = Truncated(d, float64(l), float64(u))
+@compat Truncated(d::ContinuousUnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
 
 
 ### range and support
@@ -80,13 +80,13 @@ end
 
 ## show
 
-function show(io::IO, d::Truncated) 
+function show(io::IO, d::Truncated)
     print(io, "Truncated(")
     d0 = d.untruncated
     uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals) : 
+    uml ? show_multline(io, d0, namevals) :
           show_oneline(io, d0, namevals)
-    print(io, ", range=($(d.lower), $(d.upper)))") 
+    print(io, ", range=($(d.lower), $(d.upper)))")
     uml && println(io)
 end
 

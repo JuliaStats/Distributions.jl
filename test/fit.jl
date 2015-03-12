@@ -2,7 +2,7 @@
 #
 #  - computation of sufficient statistics
 #  - distribution fitting (i.e. estimation)
-# 
+#
 
 using Distributions
 using Base.Test
@@ -74,7 +74,7 @@ ss = suffstats(Binomial, (100, x))
 
 ss = suffstats(Binomial, (100, x), w)
 @test isa(ss, Distributions.BinomialStats)
-@test_approx_eq ss.ns dot(float64(x), w)
+@test_approx_eq ss.ns dot(Float64[xx for xx in x], w)
 @test_approx_eq ss.ne sum(w)
 @test ss.n == 100
 
@@ -334,7 +334,7 @@ d = fit(Poisson, x)
 
 d = fit(Poisson, x, w)
 @test isa(d, Poisson)
-@test_approx_eq mean(d) dot(float64(x), w) / sum(w)
+@test_approx_eq mean(d) dot(Float64[xx for xx in x], w) / sum(w)
 
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)

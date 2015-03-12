@@ -4,7 +4,7 @@ immutable InverseGamma <: ContinuousUnivariateDistribution
 
     function InverseGamma(α::Real, β::Real)
         (α > zero(α) && β > zero(β)) || error("Both shape and scale must be positive.")
-        new(Gamma(α, 1.0 / β), float64(β))
+        @compat new(Gamma(α, 1.0 / β), Float64(β))
     end
 
     InverseGamma(α::Real) = InverseGamma(α, 1.0)
@@ -71,12 +71,12 @@ invlogccdf(d::InverseGamma, p::Float64) = 1.0 / invlogcdf(d.invd, p)
 
 function mgf(d::InverseGamma, t::Real)
     (a, b) = params(d)
-    t == zero(t) ? one(float(t)) : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
+    @compat t == zero(t) ? one(Float64(t)) : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
 end
 
 function cf(d::InverseGamma, t::Real)
     (a, b) = params(d)
-    t == zero(t) ? complex(one(float(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
+    @compat t == zero(t) ? complex(one(Float64(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
 end
 
 

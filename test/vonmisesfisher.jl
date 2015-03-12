@@ -64,12 +64,12 @@ end
 
 n = 1000
 ns = 10^6
-for (p, κ) in [(2, 1.0), 
+for (p, κ) in [(2, 1.0),
                (2, 5.0),
-               (3, 1.0), 
+               (3, 1.0),
                (3, 5.0),
                (5, 2.0)]
 
     test_vonmisesfisher(p, κ, n, ns)
-end 
+end
 

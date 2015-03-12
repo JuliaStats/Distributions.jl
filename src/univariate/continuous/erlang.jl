@@ -16,10 +16,10 @@ show(io::IO, d::Erlang) = ((α, β) = params(d); show_oneline(io, d, [(:α, α),
 
 #### Parameters
 
-shape(d::Erlang) = int(shape(d.gammad))
+shape(d::Erlang) = round(Int, shape(d.gammad))
 scale(d::Erlang) = scale(d.gammad)
 rate(d::Erlang) = rate(d.gammad)
-params(d::Erlang) = ((α, β) = params(d.gammad); (int(α), β))
+params(d::Erlang) = ((α, β) = params(d.gammad); (round(Int, α), β))
 
 
 #### Statistics

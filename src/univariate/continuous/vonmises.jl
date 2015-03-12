@@ -10,10 +10,10 @@ immutable VonMises <: ContinuousUnivariateDistribution
 
     function VonMises(μ::Real, κ::Real)
         κ > zero(κ) || error("kappa must be positive")
-        new(float64(μ), float64(κ), besseli(0, κ))
+        @compat new(Float64(μ), Float64(κ), besseli(0, κ))
     end
 
-    VonMises(κ::Real) = VonMises(0.0, float64(κ))
+    @compat VonMises(κ::Real) = VonMises(0.0, Float64(κ))
     VonMises() = VonMises(0.0, 1.0)
 end
 

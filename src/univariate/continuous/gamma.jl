@@ -4,7 +4,7 @@ immutable Gamma <: ContinuousUnivariateDistribution
 
     function Gamma(α::Real, β::Real)
         α > zero(α) && β > zero(β) || error("Gamma: both shape and scale must be positive")
-        new(float64(α), float64(β))
+        @compat new(Float64(α), Float64(β))
     end
 
     Gamma(α::Real) = Gamma(α, 1.0)
@@ -52,7 +52,7 @@ cf(d::Gamma, t::Real) = (1.0 - im * t * d.β)^(-d.α)
 
 #### Evaluation
 
-gradlogpdf(d::Gamma, x::Float64) = 
+gradlogpdf(d::Gamma, x::Float64) =
     insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.β : 0.0
 
 
@@ -63,7 +63,7 @@ immutable GammaStats <: SufficientStats
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight
 
-    GammaStats(sx::Real, slogx::Real, tw::Real) = new(float64(sx), float64(slogx), float64(tw))
+    @compat GammaStats(sx::Real, slogx::Real, tw::Real) = new(Float64(sx), Float64(slogx), Float64(tw))
 end
 
 function suffstats(::Type{Gamma}, x::Array)

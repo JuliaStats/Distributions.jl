@@ -13,7 +13,7 @@ immutable GenericMvTDist{Cov<:AbstractPDMat} <: AbstractMvTDist
 
     function GenericMvTDist{Cov}(df::Float64, dim::Int, zmean::Bool, μ::Vector{Float64}, Σ::Cov)
       df > zero(df) || error("df must be positive")
-      new(float64(df), dim, zmean, μ, Σ)
+      @compat new(Float64(df), dim, zmean, μ, Σ)
     end
 end
 
@@ -51,15 +51,15 @@ DiagTDist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvTDis
 
 IsoTDist(df::Float64, μ::Vector{Float64}, C::ScalMat) = GenericMvTDist(df, μ, C)
 IsoTDist(df::Float64, C::ScalMat) = GenericMvTDist(df, C)
-IsoTDist(df::Float64, μ::Vector{Float64}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(float64(σ))))
-IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(float64(σ))))
+@compat IsoTDist(df::Float64, μ::Vector{Float64}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(Float64(σ))))
+@compat IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(Float64(σ))))
 
 ## convenient function to construct distributions of proper type based on arguments
 
 mvtdist(df::Float64, μ::Vector{Float64}, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
 mvtdist(df::Float64, C::AbstractPDMat) = GenericMvTDist(df, C)
 
-mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, float64(σ))
+@compat mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, Float64(σ))
 mvtdist(df::Float64, d::Int, σ::Float64) = IsoTDist(d, σ)
 mvtdist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = DiagTDist(df, μ, σ)
 mvtdist(df::Float64, μ::Vector{Float64}, Σ::Matrix{Float64}) = MvTDist(df, μ, Σ)

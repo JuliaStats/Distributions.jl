@@ -9,10 +9,10 @@ immutable Cosine <: ContinuousUnivariateDistribution
 
     function Cosine(μ::Real, s::Real)
         s > 0.0 || error("s must be positive.")
-        new(float64(μ), float64(s))
+        @compat new(Float64(μ), Float64(s))
     end
 
-    Cosine(μ::Real) = new(float64(μ), 1.0)
+    @compat Cosine(μ::Real) = new(Float64(μ), 1.0)
     Cosine() = new(0.0, 1.0)
 end
 

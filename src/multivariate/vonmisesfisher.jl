@@ -2,10 +2,10 @@
 #
 # The implementation here follows:
 #
-#   - Wikipedia: 
+#   - Wikipedia:
 #     http://en.wikipedia.org/wiki/Von_Mises–Fisher_distribution
 #
-#   - R's movMF package's document: 
+#   - R's movMF package's document:
 #     http://cran.r-project.org/web/packages/movMF/vignettes/movMF.pdf
 #
 #   - Wenzel Jakob's notes:
@@ -18,7 +18,7 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     logCκ::Float64
 
     function VonMisesFisher(μ::Vector{Float64}, κ::Float64; checknorm::Bool=true)
-        if checknorm 
+        if checknorm
             isunitvec(μ) || error("μ must be a unit vector")
         end
         κ > 0 || error("κ must be positive.")
@@ -26,10 +26,10 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     end
 end
 
-VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(float64(μ), float64(κ))
+@compat VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(Float64(μ), Float64(κ))
 
 VonMisesFisher(θ::Vector{Float64}) = (κ = vecnorm(θ); VonMisesFisher(scale(θ, 1.0 / κ), κ))
-VonMisesFisher{T<:Real}(θ::Vector{T}) = VonMisesFisher(float64(θ))
+VonMisesFisher{T<:Real}(θ::Vector{T}) = VonMisesFisher(Float64(θ))
 
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
@@ -77,7 +77,7 @@ function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
     VonMisesFisher(μ, κ)
 end
 
-fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, float64(X))
+@compat fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, Float64(X))
 
 function _vmf_estkappa(p::Int, ρ::Float64)
     # Using the fixed-point iteration algorithm in the following paper:

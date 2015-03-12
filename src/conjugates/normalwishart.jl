@@ -22,14 +22,13 @@ immutable NormalWishart <: Distribution
                 break
             end
         end
-        new(d, zmean, mu, float64(kappa), Tchol, float64(nu))
+        @compat new(d, zmean, mu, Float64(kappa), Tchol, Float64(nu))
     end
 end
 
 function NormalWishart(mu::Vector{Float64}, kappa::Real,
                        T::Matrix{Float64}, nu::Real)
     NormalWishart(mu, kappa, cholfact(T), nu)
-    
 end
 
 function insupport(::Type{NormalWishart}, x::Vector{Float64}, Lam::Matrix{Float64})
@@ -55,9 +54,9 @@ function logpdf(nw::NormalWishart, x::Vector{Float64}, Lam::Matrix{Float64})
         Tchol = nw.Tchol
         hnu = 0.5 * nu
         hp = 0.5 * p
-    
+
         # Normalization
-        logp::Float64 = hp*(log(kappa) - float64(log2π))
+        @compat logp::Float64 = hp*(log(kappa) - Float64(log2π))
         logp -= hnu * logdet(Tchol)
         logp -= hnu * p * log(2.)
         logp -= lpgamma(p, hnu)
@@ -65,7 +64,7 @@ function logpdf(nw::NormalWishart, x::Vector{Float64}, Lam::Matrix{Float64})
         # Wishart (MvNormal contributes 0.5 as well)
         logp += (hnu - hp) * logdet(Lam)
         logp -= 0.5 * trace(Tchol \ Lam)
-        
+
         # Normal
         z = nw.zeromean ? x : x - mu
         logp -= 0.5 * kappa * dot(z, Lam * z)

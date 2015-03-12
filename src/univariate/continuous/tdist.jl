@@ -2,7 +2,7 @@ immutable TDist <: ContinuousUnivariateDistribution
     df::Float64
     function TDist(d::Real)
     	d > zero(d) || error("TDist: df must be positive")
-        new(float64(d))
+        @compat new(Float64(d))
     end
 end
 

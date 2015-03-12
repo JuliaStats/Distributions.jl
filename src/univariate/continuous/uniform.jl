@@ -4,7 +4,7 @@ immutable Uniform <: ContinuousUnivariateDistribution
 
     function Uniform(a::Real, b::Real)
 	   a < b || error("Uniform: a must be less than b")
-	   new(float64(a), float64(b))
+	   @compat new(Float64(a), Float64(b))
     end
 
     Uniform() = new(0.0, 1.0)

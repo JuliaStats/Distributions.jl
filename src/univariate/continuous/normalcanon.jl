@@ -10,7 +10,7 @@ immutable NormalCanon <: ContinuousUnivariateDistribution
     	new(h, prec, h / prec)
     end
 
-    NormalCanon(h::Real, prec::Real) = NormalCanon(float64(h), float64(prec))
+    @compat NormalCanon(h::Real, prec::Real) = NormalCanon(Float64(h), Float64(prec))
     NormalCanon() = new(0.0, 1.0, 0.0)
 end
 

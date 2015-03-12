@@ -4,10 +4,10 @@ immutable Normal <: ContinuousUnivariateDistribution
 
     function Normal(μ::Real, σ::Real)
     	σ > zero(σ) || error("std.dev. must be positive")
-    	new(float64(μ), float64(σ))
+    	@compat new(Float64(μ), Float64(σ))
     end
 
-    Normal(μ::Real) = Normal(float64(μ), 1.0)
+    @compat Normal(μ::Real) = Normal(Float64(μ), 1.0)
     Normal() = Normal(0.0, 1.0)
 end
 
@@ -72,7 +72,7 @@ immutable NormalStats <: SufficientStats
     s2::Float64   # (weighted) sum of (x - μ)^2
     tw::Float64    # total sample weight
 
-    NormalStats(s::Real, m::Real, s2::Real, tw::Real) = new(float64(s), float64(m), float64(s2), float64(tw))
+    @compat NormalStats(s::Real, m::Real, s2::Real, tw::Real) = new(Float64(s), Float64(m), Float64(s2), Float64(tw))
 end
 
 function suffstats{T<:Real}(::Type{Normal}, x::Array{T}) 
@@ -134,7 +134,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
     for i = 2:length(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
-    NormalKnownMuStats(g.μ, s2, float64(length(x)))
+    @compat NormalKnownMuStats(g.μ, s2, Float64(length(x)))
 end
 
 function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
@@ -166,11 +166,11 @@ immutable NormalKnownSigmaStats <: SufficientStats
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T})
-    NormalKnownSigmaStats(g.σ, sum(x), float64(length(x)))    
+    @compat NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T}, w::Array{T})
-    NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))    
+    NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))
 end
 
 # fit_mle based on sufficient statistics

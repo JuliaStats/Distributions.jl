@@ -4,10 +4,10 @@ immutable SymTriangularDist <: ContinuousUnivariateDistribution
 
     function SymTriangularDist(μ::Real, s::Real)
         s > zero(s) || error("SymTriangular: scale must be positive")
-        new(float64(μ), float64(s))
+        @compat new(Float64(μ), Float64(s))
     end
 
-    SymTriangularDist(μ::Real) = new(float64(μ), 1.0)
+    @compat SymTriangularDist(μ::Real) = new(Float64(μ), 1.0)
     SymTriangularDist() = new(0.0, 1.0)
 end
 

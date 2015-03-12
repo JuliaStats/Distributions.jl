@@ -143,8 +143,8 @@ logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(d.p[x]) : -Inf
 pdf(d::Categorical) = copy(d.p)
 
 function _pdf!(r::AbstractArray, d::Categorical, rgn::UnitRange)
-    vfirst = int(first(rgn))
-    vlast = int(last(rgn))
+    vfirst = round(Int, first(rgn))
+    vlast = round(Int, last(rgn))
     vl = max(vfirst, 1)
     vr = min(vlast, d.K)
     p = probs(d)

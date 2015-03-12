@@ -4,7 +4,7 @@ immutable Pareto <: ContinuousUnivariateDistribution
 
     function Pareto(α::Real, β::Real)
         (α > zero(α) && β > zero(β)) || error("Pareto: shape and scale must be positive")
-        new(float64(α), float64(β))
+        @compat new(Float64(α), Float64(β))
     end
 
     Pareto(α::Real) = Pareto(α, 1.0)

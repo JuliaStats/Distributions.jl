@@ -9,11 +9,11 @@ immutable Multinomial <: DiscreteMultivariateDistribution
         if !isprobvec(p)
             throw(ArgumentError("p = $p is not a probability vector."))
         end
-        new(int(n), p)
+        @compat new(round(Int, n), p)
     end
 
-    Multinomial(n::Integer, p::Vector{Float64}, ::NoArgCheck) = new(int(n), p)
-    Multinomial(n::Integer, k::Integer) = new(int(n), fill(1.0 / k, k))
+    @compat Multinomial(n::Integer, p::Vector{Float64}, ::NoArgCheck) = new(round(Int, n), p)
+    @compat Multinomial(n::Integer, k::Integer) = new(round(Int, n), fill(1.0 / k, k))
 end
 
 # Parameters
@@ -132,7 +132,7 @@ immutable MultinomialStats <: SufficientStats
     scnts::Vector{Float64}  # sum of counts
     tw::Float64  # total sample weight
 
-    MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, float64(tw))
+    @compat MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, Float64(tw))
 end
 
 function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})

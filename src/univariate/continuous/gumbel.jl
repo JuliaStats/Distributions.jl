@@ -4,7 +4,7 @@ immutable Gumbel <: ContinuousUnivariateDistribution
 
     function Gumbel(μ::Real, β::Real)
         β > zero(β) || error("The scale of Gumbel must be positive")
-        new(float64(μ), float64(β))
+        @compat new(Float64(μ), Float64(β))
     end
 
     Gumbel(μ::Real) = Gumbel(μ, 1.0)

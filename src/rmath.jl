@@ -63,7 +63,7 @@ macro _jl_dist_1p(T, b)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(($rr, Rmath), Float64, (Float64,), d.($p)))
+                @compat round(Int, ccall(($rr, Rmath), Float64, (Float64,), d.($p)))
             end
         else
             function rand(d::($T))
@@ -144,7 +144,7 @@ macro _jl_dist_2p(T, b)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(($rr, Rmath), Float64,
+                @compat round(Int, ccall(($rr, Rmath), Float64,
                           (Float64,Float64), d.($p1), d.($p2)))
             end
         else
@@ -223,7 +223,7 @@ macro _jl_dist_3p(T, b)
         end
         if $dc
             function rand(d::($T))
-                int(ccall(($rr, Rmath), Float64,
+                @compat round(Int, ccall(($rr, Rmath), Float64,
                           (Float64,Float64,Float64), d.($p1), d.($p2), d.($p3)))
             end
         else

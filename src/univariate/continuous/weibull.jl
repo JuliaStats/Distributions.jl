@@ -4,7 +4,7 @@ immutable Weibull <: ContinuousUnivariateDistribution
 
     function Weibull(α::Real, β::Real)
     	(zero(α) < α && zero(β) < β) || error("Weibull: both shape and scale must be positive")
-    	new(float64(α), float64(β))
+    	@compat new(Float64(α), Float64(β))
     end
 
     Weibull(α::Real) = Weibull(α, 1.0)

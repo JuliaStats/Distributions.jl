@@ -6,13 +6,13 @@ immutable TriangularDist <: ContinuousUnivariateDistribution
     function TriangularDist(a::Real, b::Real, c::Real)
         a < b || error("TriangularDist: a < b must be true")
         a <= c <= b || error("a <= c <= b must be true")
-        new(float64(a), float64(b), float64(c))
+        @compat new(Float64(a), Float64(b), Float64(c))
     end
 
     function TriangularDist(a::Real, b::Real)
         a < b || error("TriangularDist: a < b must be true")
-        a_ = float64(a)
-        b_ = float64(b)
+        @compat a_ = Float64(a)
+        @compat b_ = Float64(b)
         c_ = middle(a_, b_)
         new(a_, b_, c_)
     end

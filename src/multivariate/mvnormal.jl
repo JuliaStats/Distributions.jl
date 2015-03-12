@@ -26,15 +26,15 @@ abstract AbstractMvNormal <: ContinuousMultivariateDistribution
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 
-insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = 
+insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) =
     length(d) == length(x) && allfinite(x)
 
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
-entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (float64(log2π) + 1.0) + logdetcov(d))
+@compat entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (Float64(log2π) + 1.0) + logdetcov(d))
 
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * float64(log2π) + logdetcov(g))
+@compat mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * Float64(log2π) + logdetcov(g))
 
 sqmahal{T<:Real}(d::AbstractMvNormal, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
@@ -86,11 +86,11 @@ MvNormal{Cov<:AbstractPDMat}(Σ::Cov) = MvNormal{Cov,ZeroVector{Float64}}(ZeroVe
 
 MvNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MvNormal(μ, PDiagMat(abs2(σ)))
-MvNormal(μ::Vector{Float64}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(float64(σ))))
+@compat MvNormal(μ::Vector{Float64}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(Float64(σ))))
 
 MvNormal(Σ::Matrix{Float64}) = MvNormal(PDMat(Σ))
 MvNormal(σ::Vector{Float64}) = MvNormal(PDiagMat(abs2(σ)))
-MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(float64(σ))))
+@compat MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(Float64(σ))))
 
 ### Show
 
@@ -149,7 +149,7 @@ immutable MvNormalKnownCov{Cov<:AbstractPDMat}
 end
 
 MvNormalKnownCov{Cov<:AbstractPDMat}(C::Cov) = MvNormalKnownCov{Cov}(C)
-MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(float64(σ))))
+@compat MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(Float64(σ))))
 MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2(σ)))
 MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
 
@@ -165,7 +165,7 @@ function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::Matrix{Float
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, 2))
-    tw = float64(size(x, 2))
+    @compat tw = Float64(size(x, 2))
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
@@ -215,7 +215,7 @@ function suffstats(D::Type{MvNormal}, x::Matrix{Float64})
     m = s * inv(n)
     z = x .- m
     s2 = A_mul_Bt(z, z)
-    MvNormalStats(s, m, s2, float64(n))
+    @compat MvNormalStats(s, m, s2, Float64(n))
 end
 
 function suffstats(D::Type{MvNormal}, x::Matrix{Float64}, w::Array{Float64})

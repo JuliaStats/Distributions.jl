@@ -5,7 +5,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
 
     function Dirichlet{T <: Real}(alpha::Vector{T})
         alpha0::Float64 = 0.0
-        lmnB::Float64 = 0.0        
+        lmnB::Float64 = 0.0
         for i in 1:length(alpha)
             ai = alpha[i]
             ai > 0 || throw(ArgumentError("alpha must be a positive vector."))
@@ -13,7 +13,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
             lmnB += lgamma(ai)
         end
         lmnB -= lgamma(alpha0)
-        new(float64(alpha), alpha0, lmnB)
+        new(convert(Vector{Float64}, alpha), alpha0, lmnB)
     end
 
     function Dirichlet(d::Integer, alpha::Float64)
@@ -21,7 +21,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
         new(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
     end
 
-    Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, float64(alpha))
+    @compat Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, Float64(alpha))
 end
 
 immutable DirichletCanon
@@ -163,7 +163,7 @@ immutable DirichletStats <: SufficientStats
     slogp::Vector{Float64}   # (weighted) sum of log(p)
     tw::Float64              # total sample weights
 
-    DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, float64(tw))
+    @compat DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, Float64(tw))
 end
 
 length(ss::DirichletStats) = length(s.slogp)

@@ -62,13 +62,13 @@ w = rand(n0)
 ss = suffstats(Multinomial, x)
 @test isa(ss, Distributions.MultinomialStats)
 @test ss.n == nt
-@test ss.scnts == vec(sum(float64(x), 2))
+@test ss.scnts == vec(sum(Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], 2))
 @test ss.tw == n0
 
 ss = suffstats(Multinomial, x, w)
 @test isa(ss, Distributions.MultinomialStats)
 @test ss.n == nt
-@test_approx_eq ss.scnts float64(x) * w
+@test_approx_eq ss.scnts Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)] * w
 @test_approx_eq ss.tw sum(w)
 
 # fit

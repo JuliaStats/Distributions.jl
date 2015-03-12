@@ -3,6 +3,7 @@
 using Distributions
 import JSON
 using Base.Test
+using Compat
 
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
@@ -34,8 +35,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
 end
 
 
-_parse_x(d::DiscreteUnivariateDistribution, x) = int(x)
-_parse_x(d::ContinuousUnivariateDistribution, x) = float64(x)
+@compat _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
+@compat _parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
 
 
 function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
@@ -48,14 +49,16 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify stats
-    r_min = float64(dct["minimum"])
-    r_max = float64(dct["maximum"])
+    @compat maybestring(x::Number) = Float64(x)
+    maybestring(x::AbstractString) = parsefloat(Float64, x)
+    @compat r_min = maybestring(dct["minimum"])
+    @compat r_max = maybestring(dct["maximum"])
     @assert r_min < r_max
 
     @test_approx_eq minimum(d) r_min
     @test_approx_eq maximum(d) r_max
-    @test_approx_eq_eps mean(d) float64(dct["mean"]) 1.0e-8
-    @test_approx_eq_eps var(d) float64(dct["var"]) 1.0e-8
+    @compat @test_approx_eq_eps mean(d) maybestring(dct["mean"]) 1.0e-8
+    @compat @test_approx_eq_eps var(d) maybestring(dct["var"]) 1.0e-8
     @test_approx_eq_eps median(d) dct["median"] 1.0
 
     if applicable(entropy, d)
@@ -73,8 +76,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        lp = float64(pt["logpdf"])
-        cf = float64(pt["cdf"])
+        @compat lp = Float64(pt["logpdf"])
+        @compat cf = Float64(pt["cdf"])
         Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
         Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
     end
@@ -98,7 +101,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
 
     # generic testing
     if isa(d, Cosine)
-        n_tsamples = int(floor(n_tsamples / 10))
+        n_tsamples = floor(Int, n_tsamples / 10)
     end
     test_distr(d, n_tsamples)
 end
@@ -106,13 +109,13 @@ end
 
 ## main
 
-for c in ["discrete", 
+for c in ["discrete",
           "continuous"]
-          
+
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json") 
+    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end

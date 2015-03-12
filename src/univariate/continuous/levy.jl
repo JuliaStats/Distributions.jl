@@ -4,7 +4,7 @@ immutable Levy <: ContinuousUnivariateDistribution
 
     function Levy(μ::Real, c::Real)
         c >= zero(c) || error("scale must be non-negative")
-        new(float64(μ), float64(c))
+        @compat new(Float64(μ), Float64(c))
     end
 
     Levy(μ::Real) = new(μ, 1.0)

@@ -81,7 +81,7 @@ function _logpdf(d::Wishart, X::DenseMatrix{Float64})
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
 
-_logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, float64(X))
+@compat _logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, Float64(X))
 
 #### Sampling
 
@@ -94,7 +94,7 @@ function _wishart_genA(p::Int, df::Float64)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
-    #   
+    #
     #       A(i, j) ~ sqrt of Chisq(df - i + 1) when i == j
     #               ~ Normal()                  when i > j
     #

@@ -1,9 +1,9 @@
 
 # Computes the pdf of a poisson-binomial random variable using
 # fast fourier transform
-# 
-#     Hong, Y. (2013). 
-#     On computing the distribution function for the Poisson binomial 
+#
+#     Hong, Y. (2013).
+#     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
 function poissonbinomial_pdf_fft(p::AbstractArray)
@@ -11,7 +11,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     ω = 2. / (n + 1)
 
     x = Array(Complex{Float64}, n+1)
-    lmax = int(ceil(n/2))
+    @compat lmax = ceil(Int, n/2)
     x[1] = 1./(n+1)
     for l=1:lmax
         logz = 0.

@@ -1,9 +1,9 @@
 immutable Chisq <: ContinuousUnivariateDistribution
-    df::Float64 
+    df::Float64
 
     function Chisq(k::Real)
         k > zero(k) || error("The degree of freedom k must be positive")
-        new(float64(k))
+        @compat new(Float64(k))
     end
 end
 

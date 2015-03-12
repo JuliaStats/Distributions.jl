@@ -14,7 +14,7 @@ immutable NegativeBinomial <: DiscreteUnivariateDistribution
         new(r, p)
     end
 
-    NegativeBinomial(r::Real, p::Real) = NegativeBinomial(int(r), float64(p))
+    @compat NegativeBinomial(r::Real, p::Real) = NegativeBinomial(round(Int, r), Float64(p))
     NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
     NegativeBinomial() = new(1.0, 0.5)
 end

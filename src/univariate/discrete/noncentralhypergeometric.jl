@@ -44,7 +44,7 @@ immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric
         isinteger(n) && zero(n) < n < s + f ||
             error("n must be a positive integer <= (ns + nf)")
         zero(ω) < ω || error("ω must be a positive real value")
-        new(float64(s), float64(f), float64(n), float64(ω))
+        @compat new(Float64(s), Float64(f), Float64(n), Float64(ω))
     end
 end
 
@@ -66,10 +66,10 @@ end
 
 mean(d::FisherNoncentralHypergeometric) =_P(d,1) / _P(d,0)
 var(d::FisherNoncentralHypergeometric) = _P(d,2)/_P(d,0) - (_P(d,1) / _P(d,0))^2
-mode(d::FisherNoncentralHypergeometric) = int(floor(_mode(d)))
+@compat mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 
-logpdf(d::FisherNoncentralHypergeometric, k::Int) =
-    float64(log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0)))
+@compat logpdf(d::FisherNoncentralHypergeometric, k::Int) =
+    Float64(log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0)))
 
 pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
 
@@ -87,7 +87,7 @@ immutable WalleniusNoncentralHypergeometric <: NoncentralHypergeometric
         isinteger(n) && zero(n) < n < s + f ||
             error("n must be a positive integer <= (ns + nf)")
         zero(ω) < ω || error("ω must be a positive real value")
-        new(float64(s), float64(f), float64(n), float64(ω))
+        @compat new(Float64(s), Float64(f), Float64(n), Float64(ω))
     end
 end
 
@@ -100,7 +100,7 @@ function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
     D = d.ω*(d.ns-k)+(d.nf-d.n+k)
     f(t) = (1-t^(d.ω/D))^k * (1-t^(1/D))^(d.n-k)
     I,_ = quadgk(f,0,1)
-    float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
+    @compat Float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
 end
 
 logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))

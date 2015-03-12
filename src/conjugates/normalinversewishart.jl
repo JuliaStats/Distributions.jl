@@ -22,14 +22,13 @@ immutable NormalInverseWishart <: Distribution
                 break
             end
         end
-        new(d, zmean, mu, float64(kappa), Lamchol, float64(nu))
+        @compat new(d, zmean, mu, Float64(kappa), Lamchol, Float64(nu))
     end
 end
 
 function NormalInverseWishart(mu::Vector{Float64}, kappa::Real,
                               Lambda::Matrix{Float64}, nu::Real)
     NormalInverseWishart(mu, kappa, cholfact(Lambda), nu)
-    
 end
 
 function insupport(::Type{NormalInverseWishart}, x::Vector{Float64}, Sig::Matrix{Float64})

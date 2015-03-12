@@ -6,7 +6,7 @@ immutable Poisson <: DiscreteUnivariateDistribution
         new(λ)
     end
 
-    Poisson(λ::Real) = Poisson(float64(λ))
+    @compat Poisson(λ::Real) = Poisson(Float64(λ))
     Poisson() = new(1.0)
 end
 
@@ -30,7 +30,7 @@ mode(d::Poisson) = floor(Int,d.λ)
 
 function modes(d::Poisson)
     λ = d.λ
-    isinteger(λ) ? [int(λ)-1,int(λ)] : [floor(Int,λ)]
+    @compat isinteger(λ) ? [round(Int, λ)-1, round(Int, λ)] : [floor(Int, λ)]
 end
 
 var(d::Poisson) = d.λ
@@ -86,7 +86,7 @@ immutable PoissonStats <: SufficientStats
     tw::Float64   # total sample weight
 end
 
-suffstats(::Type{Poisson}, x::Array) = PoissonStats(float64(sum(x)), float64(length(x)))
+@compat suffstats(::Type{Poisson}, x::Array) = PoissonStats(Float64(sum(x)), Float64(length(x)))
 
 function suffstats(::Type{Poisson}, x::Array, w::Array{Float64})
     n = length(x)

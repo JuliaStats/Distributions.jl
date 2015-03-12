@@ -4,7 +4,7 @@ immutable FDist <: ContinuousUnivariateDistribution
 
     function FDist(d1::Real, d2::Real)
         d1 > zero(d1) && d2 > zero(d2) || error("Degrees of freedom must be positive")
-        new(float64(d1), float64(d2))
+        @compat new(Float64(d1), Float64(d2))
     end
 end
 
