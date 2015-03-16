@@ -376,7 +376,7 @@ function bvnuppercdf(dh::Float64, dk::Float64, r::Float64)
 	      	c = (4.0 - hk) * 0.125
 	      	d = (12.0 - hk) * 0.0625
 	      	asr = -(bs / as + hk) * 0.5
-	      	if ( asr .gt. -100 ) 
+	      	if asr .gt. -100
 	      		bvn = a * exp(asr) * (1.0 - c * (bs - as) * (1.0 - d * bs / 5.0) / 3.0 + c * d * as * as / 5.0)
 	      	end
 	      	if -hk < 100
