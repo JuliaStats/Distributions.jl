@@ -95,24 +95,24 @@ abstract HuffmanNode{T} <: Sampler{Univariate,Discrete}
 
 immutable HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
-    weight::Uint64
+    weight::UInt64
 end
 
 immutable HuffmanBranch{T} <: HuffmanNode{T}
     left::HuffmanNode{T}
     right::HuffmanNode{T}
-    weight::Uint64
+    weight::UInt64
 end
 HuffmanBranch{T}(ha::HuffmanNode{T},hb::HuffmanNode{T}) = HuffmanBranch(ha, hb, ha.weight + hb.weight)
 
 Base.isless{T}(ha::HuffmanNode{T}, hb::HuffmanNode{T}) = isless(ha.weight,hb.weight)
 Base.show{T}(io::IO, t::HuffmanNode{T}) = show(io,typeof(t))
 
-function Base.getindex{T}(h::HuffmanBranch{T},u::Uint64) 
+function Base.getindex{T}(h::HuffmanBranch{T},u::UInt64)
     while isa(h,HuffmanBranch{T})
         if u < h.left.weight
             h = h.left
-        else 
+        else
             u -= h.left.weight
             h = h.right
         end
@@ -122,34 +122,34 @@ end
 
 # build the huffman tree
 # could be slightly more efficient using a Deque.
-function huffman{T}(values::AbstractVector{T},weights::AbstractVector{Uint64})
+function huffman{T}(values::AbstractVector{T},weights::AbstractVector{UInt64})
     leafs = [HuffmanLeaf{T}(values[i],weights[i]) for i = 1:length(weights)]
     sort!(leafs; rev=true)
-    
+
     branches = Array(HuffmanBranch{T},0)
-        
+
     while !isempty(leafs) || length(branches) > 1
         left = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
         right = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
         unshift!(branches,HuffmanBranch(left,right))
     end
-    
-    pop!(branches)    
+
+    pop!(branches)
 end
 
 function rand{T}(h::HuffmanNode{T})
     w = h.weight
-    # generate uniform Uint64 objects on the range 0:(w-1)
+    # generate uniform UInt64 objects on the range 0:(w-1)
     # unfortunately we can't use Range objects, as they don't have sufficient length
-    u = rand(Uint64)
+    u = rand(UInt64)
     if (w & (w-1)) == 0
         # power of 2
         u = u & (w-1)
     else
-        m = typemax(Uint64)
+        m = typemax(UInt64)
         lim = m - (rem(m,w)+1)
         while u > lim
-            u = rand(Uint64)
+            u = rand(UInt64)
         end
         u = rem(u,w)
     end
