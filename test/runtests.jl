@@ -20,7 +20,8 @@ tests = [
     "conjugates_normal",
     "conjugates_mvnormal",
     "mixture",
-    "gradlogpdf"]
+    "gradlogpdf",
+    "tvpack"]
 
 print_with_color(:blue, "Running tests:\n")
 

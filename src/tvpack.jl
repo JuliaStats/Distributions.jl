@@ -46,7 +46,7 @@ function tvtcdf(nu::Int, h::Vector{Float64}, r::Vector{Float64})
 	elseif nu < 1 && abs(r12) + abs(r23) < eps()
 	   	tvt = cdf(Normal(), h2) * bvtcdf(nu, h1, h3, r13)
 	elseif 1.0 - r23 < eps()
-	   	tvt = bvtnorm(nu, h1, min(h2, h3), r12)
+	   	tvt = bvtcdf(nu, h1, min(h2, h3), r12)
 	elseif r23 + 1.0 < eps()
 	   	if h2 > -h3 tvt = bvtcdf(nu, h1, h2, r12) - bvtcdf(nu, h1, -h3, r12) end
 	else
