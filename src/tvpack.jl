@@ -46,7 +46,7 @@ function tvtcdf(nu::Int, h::Vector{Float64}, r::Vector{Float64})
 	elseif nu < 1 && abs(r12) + abs(r23) < eps()
 	   	tvt = cdf(Normal(), h2) * bvtcdf(nu, h1, h3, r13)
 	elseif 1.0 - r23 < eps()
-	   	tvt = bvtnorm(nu, h1, min(h2, h3), r12)
+	   	tvt = bvtcdf(nu, h1, min(h2, h3), r12)
 	elseif r23 + 1.0 < eps()
 	   	if h2 > -h3 tvt = bvtcdf(nu, h1, h2, r12) - bvtcdf(nu, h1, -h3, r12) end
 	else
@@ -376,7 +376,7 @@ function bvnuppercdf(dh::Float64, dk::Float64, r::Float64)
 	      	c = (4.0 - hk) * 0.125
 	      	d = (12.0 - hk) * 0.0625
 	      	asr = -(bs / as + hk) * 0.5
-	      	if ( asr .gt. -100 ) 
+	      	if ( asr > -100 ) 
 	      		bvn = a * exp(asr) * (1.0 - c * (bs - as) * (1.0 - d * bs / 5.0) / 3.0 + c * d * as * as / 5.0)
 	      	end
 	      	if -hk < 100
