@@ -124,7 +124,7 @@ function ks_distance{T<:Real}(x::Vector{T}, β=minimum(x); return_all::Bool=fals
     end
 end
 
-# Find best β by enumerate elements of x between (xmin, xmax), may be take a while
+# Search for the best fit parameters for the target distribution on this data, may be take a while
 function _find_xmin{T<:Real}(x::Vector{T}, xmin=minimum(x), xmax=maximum(x); return_all::Bool=false)
     D(β) = ks_distance(x, β)
     xmins = x[xmin .<= x .<= xmax]
@@ -138,7 +138,7 @@ function _find_xmin{T<:Real}(x::Vector{T}, xmin=minimum(x), xmax=maximum(x); ret
     end
 end
 
-# Find best β by enumerate elements in xmins
+# Search for the best fit parameters for the target distribution on this data
 function find_xmin{T<:Real}(x::Vector{T}, xmins::Vector{T}=x; return_all::Bool=false)
     D(β) = ks_distance(x, β)
     Ds = map(D,xmins)
@@ -150,7 +150,7 @@ function find_xmin{T<:Real}(x::Vector{T}, xmins::Vector{T}=x; return_all::Bool=f
     end
 end
 
-# Find best β effectively, recommend to use
+# Search for the best fit parameters for the target distribution on this data, should be more quickly
 function find_xmin{T<:Real}(x::Vector{T}, xmin=minimum(x), xmax=maximum(x); method::Symbol=:brent)
     D(β) = ks_distance(x, β)
     nbin = 5
@@ -166,7 +166,7 @@ end
 
 #### p-value
 
-# Generate synthetic data sets for p-value calculator
+# Generate synthetic data sets for estimating p-value
 function generate_synthetic_data{T<:Real}(xtail::Vector{T}, n::Int, d::PowerLaw)
     xx = zeros(n)
     ntail = length(xtail)
@@ -185,10 +185,7 @@ function generate_synthetic_data{T<:Real}(xtail::Vector{T}, n::Int, d::PowerLaw)
     xx
 end
 
-# Calculator p-value for empirical data
-# if p-value < 0.1, we can safely rule out the power law hypothesis
-# while p-value >= 0.1 is not a sufficient condition for a power law hypothesis
-# the higher the p-value, the stronger the power law hypothesis
+# If p-value < 0.1, we can safely rule out the power law hypothesis
 function pvalue{T<:Real}(x::Vector{T}, N::Int=1000) # N is the number of synthetic sets
     n = length(x)
     β = find_xmin(x)
