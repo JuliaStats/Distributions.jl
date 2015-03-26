@@ -94,15 +94,3 @@ function fit_mle{T <: Real}(::Type{Pareto}, x::Vector{T})
     α = n/Σ
     Pareto(α, β), α/sqrt(n)
 end
-
-
-
-
-
-
-
-
-
-
-
-

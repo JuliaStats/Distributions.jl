@@ -153,9 +153,10 @@ end
 # Find best β effectively, recommend to use
 function find_xmin{T<:Real}(x::Vector{T}, xmin=minimum(x), xmax=maximum(x); method::Symbol=:brent)
     D(β) = ks_distance(x, β)
-    xmins = linspace(xmin,xmax,11)
-    opts = zeros(10)
-    for i=1:10
+    nbin = 5
+    xmins = linspace(xmin,xmax,nbin)
+    opts = zeros(nbin-1)
+    for i=1:nbin
         opz = Optim.optimize(D, xmins[i], xmins[i+1], method=method)
         opts[i] = opz.minimum
     end
@@ -188,7 +189,7 @@ end
 # if p-value < 0.1, we can safely rule out the power law hypothesis
 # while p-value >= 0.1 is not a sufficient condition for a power law hypothesis
 # the higher the p-value, the stronger the power law hypothesis
-function pvalue{T<:Real}(x::Vector{T}, N::Int=2500) # N is the number of synthetic sets
+function pvalue{T<:Real}(x::Vector{T}, N::Int=1000) # N is the number of synthetic sets
     n = length(x)
     β = find_xmin(x)
     d = fit_mle(PowerLaw, x, β)
@@ -203,8 +204,3 @@ function pvalue{T<:Real}(x::Vector{T}, N::Int=2500) # N is the number of synthet
     end
     cnt/N
 end
-
-
-
-
-

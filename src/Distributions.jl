@@ -155,6 +155,7 @@ export
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability
+    find_xmin			# find best xmin for power law distribution
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
     fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
@@ -189,6 +190,7 @@ export
     posterior_rand,     # draw samples from the posterior distribution
     posterior_rand!, 
     posterior_randmodel,
+    pvalue,				# calculator p-value for power law distribution
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
