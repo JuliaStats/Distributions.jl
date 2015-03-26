@@ -4,6 +4,7 @@ using ArrayViews
 using PDMats
 using StatsBase
 using Compat
+using Optim
 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
@@ -107,6 +108,7 @@ export
     NormalInverseWishart,
     NormalWishart,
     Pareto,
+    PowerLaw,
     Poisson,
     PoissonBinomial,
     QQPair,
