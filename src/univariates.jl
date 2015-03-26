@@ -496,6 +496,7 @@ const continuous_distributions = [
     "normalcanon",
     "lognormal",    # LogNormal depends on Normal
     "pareto",
+    "powerlaw",
     "rayleigh",
     "symtriangular",
     "tdist",

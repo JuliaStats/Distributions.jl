@@ -55,7 +55,7 @@ end
 
 function logpdf(d::Pareto, x::Float64)
     (α, β) = params(d)
-    x >= β ? log(α) + α * log(β) - (α + 1.0) * log(x) : -Inf 
+    x >= β ? log(α) + α * log(β) - (α + 1.0) * log(x) : -Inf
 end
 
 function ccdf(d::Pareto, x::Float64)
@@ -81,4 +81,16 @@ quantile(d::Pareto, p::Float64) = cquantile(d, 1.0 - p)
 rand(d::Pareto) = d.β * exp(randexp() / d.α)
 
 
+#### Fit model
 
+function fit_mle{T <: Real}(::Type{Pareto}, x::Vector{T})
+	if isempty(x)
+		throw(ArgumentError("x cannot be empty."))
+	end
+
+	n = float(length(x))
+    β = minimum(x)
+	Σ = sum(log(x)) - n*log(β) # Σᵢ(ln(xᵢ) - ln(β))
+    α = n/Σ
+    Pareto(α, β), α/sqrt(n)
+end
