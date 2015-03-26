@@ -185,7 +185,7 @@ function generate_synthetic_data{T<:Real}(xtail::Vector{T}, n::Int, d::PowerLaw)
     xx
 end
 
-# Calculator p-value for empirical data
+# Calculate p-value for empirical data
 # if p-value < 0.1, we can safely rule out the power law hypothesis
 # while p-value >= 0.1 is not a sufficient condition for a power law hypothesis
 # the higher the p-value, the stronger the power law hypothesis
