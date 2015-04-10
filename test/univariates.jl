@@ -38,6 +38,14 @@ end
 @compat _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
 @compat _parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
 
+_json_value(x::Number) = x
+
+_json_value(x::AbstractString) =
+    x == "inf" ? Inf :
+    x == "-inf" ? -Inf :
+    x == "nan" ? NaN :
+    error("Invalid numerical value: $x")
+
 
 function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify parameters
@@ -49,17 +57,11 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify stats
-    @compat maybestring(x::Number) = Float64(x)
-    maybestring(x::AbstractString) = parsefloat(Float64, x)
-    @compat r_min = maybestring(dct["minimum"])
-    @compat r_max = maybestring(dct["maximum"])
-    @assert r_min < r_max
-
-    @test_approx_eq minimum(d) r_min
-    @test_approx_eq maximum(d) r_max
-    @compat @test_approx_eq_eps mean(d) maybestring(dct["mean"]) 1.0e-8
-    @compat @test_approx_eq_eps var(d) maybestring(dct["var"]) 1.0e-8
-    @test_approx_eq_eps median(d) dct["median"] 1.0
+    @test_approx_eq minimum(d) _json_value(dct["minimum"])
+    @test_approx_eq maximum(d) _json_value(dct["maximum"])
+    @compat @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
+    @compat @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
+    @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
 
     if applicable(entropy, d)
         @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
@@ -119,4 +121,3 @@ for c in ["discrete",
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end
-
