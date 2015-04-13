@@ -104,7 +104,7 @@ function posterior_canon(prior::NormalWishart, ss::MvNormalStats)
 
     Lam0 = TC0[:U]'*TC0[:U]
     z = prior.zeromean ? ss.m : ss.m - mu0
-    Lam = Lam0 + ss.s2 + kappa0*ss.tw/kappa*(z*z')
+    Lam = inv(Lam0 + ss.s2 + kappa0*ss.tw/kappa*(z*z'))
 
     return NormalWishart(mu, kappa, cholfact(Lam), nu)
 end
