@@ -37,7 +37,7 @@ modes(d::Binomial) = Int[mode(d)]
 
 median(d::Binomial) = round(Int,mean(d))
 
-function skewness(d::Binomial) 
+function skewness(d::Binomial)
     n, p1 = params(d)
     p0 = 1.0 - p1
     (p0 - p1) / sqrt(n * p0 * p1)
@@ -46,17 +46,17 @@ end
 function kurtosis(d::Binomial)
     n, p = params(d)
     u = p * (1.0 - p)
-    (1.0 - 6.0 * u) / (n * u) 
+    (1.0 - 6.0 * u) / (n * u)
 end
 
 function entropy(d::Binomial; approx::Bool=false)
     n, p1 = params(d)
     (p1 == 0.0 || p1 == 1.0 || n == 0) && return 0.0
     p0 = 1.0 - p1
-    if approx 
-        return 0.5 * (log(twoπ * n * p0 * p1) + 1.0) 
+    if approx
+        return 0.5 * (log(twoπ * n * p0 * p1) + 1.0)
     else
-        lg = log(p1 / p0)        
+        lg = log(p1 / p0)
         lp = n * log(p0)
         s = exp(lp) * lp
         for k = 1:n
@@ -119,20 +119,21 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     for i = 1:length(x)
         @inbounds xi = x[i]
         @inbounds wi = w[i]
-        0 <= xi <= n || throw(DomainError())        
+        0 <= xi <= n || throw(DomainError())
         ns += xi * wi
         ne += wi
     end
-    BinomialStats(ns, ne, n)   
+    BinomialStats(ns, ne, n)
 end
 
-suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = suffstats(Binomial, data...)
-suffstats{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Binomial, data..., w)
+typealias BinomData{T<:Integer} @compat Tuple{Int, Array{T}}
+
+suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
+suffstats(::Type{Binomial}, data::BinomData, w::Array{Float64}) = suffstats(Binomial, data..., w)
 
 fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
 fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
 fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
-fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T})) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle{T<:Integer}(::Type{Binomial}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
-
+fit_mle(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
+fit_mle(::Type{Binomial}, data::BinomData, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))

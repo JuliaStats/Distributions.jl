@@ -194,7 +194,7 @@ end
 function add_categorical_counts!{T<:Integer}(h::Vector{Float64}, x::AbstractArray{T})
     for i = 1 : length(x)
         @inbounds xi = x[i]
-        h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound 
+        h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h
 end
@@ -207,7 +207,7 @@ function add_categorical_counts!{T<:Integer}(h::Vector{Float64}, x::AbstractArra
     for i = 1 : n
         @inbounds xi = x[i]
         @inbounds wi = w[i]
-        h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound 
+        h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h
 end
@@ -220,8 +220,10 @@ function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T},
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
-suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = suffstats(Categorical, data...)
-suffstats{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = suffstats(Categorical, data..., w)
+typealias CategoricalData{T<:Integer} @compat Tuple{Int, Array{T}}
+
+suffstats(::Type{Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
+suffstats(::Type{Categorical}, data::CategoricalData, w::Array{Float64}) = suffstats(Categorical, data..., w)
 
 # Model fitting
 
@@ -229,18 +231,16 @@ function fit_mle(::Type{Categorical}, ss::CategoricalStats)
     Categorical(pnormalize!(ss.h))
 end
 
-function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}) 
+function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T})
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
 end
 
-function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64}) 
+function fit_mle{T<:Integer}(::Type{Categorical}, k::Integer, x::Array{T}, w::Array{Float64})
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
 end
 
-fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T})) = fit_mle(Categorical, data...)
-fit_mle{T<:Integer}(::Type{Categorical}, data::(Int, Array{T}), w::Array{Float64}) = fit_mle(Categorical, data..., w)
+fit_mle(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
+fit_mle(::Type{Categorical}, data::CategoricalData, w::Array{Float64}) = fit_mle(Categorical, data..., w)
 
 fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, maximum(x), x)
 fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_mle(Categorical, maximum(x), x, w)
-
-

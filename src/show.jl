@@ -4,28 +4,28 @@
 #
 #   Generally, this should be just the type name, e.g. Normal.
 #   Under certain circumstances, one may want to specialize
-#   this function to provide a name that is easier to read, 
-#   especially when the type is parametric. 
+#   this function to provide a name that is easier to read,
+#   especially when the type is parametric.
 #
 distrname(d::Distribution) = string(typeof(d))
 
 show(io::IO, d::Distribution) = show(io, d, typeof(d).names)
 
 # For some distributions, the fields may contain internal details,
-# which we don't want to show, this function allows one to 
+# which we don't want to show, this function allows one to
 # specify which fields to show.
 #
-function show(io::IO, d::Distribution, pnames::(Symbol...))
+function show(io::IO, d::Distribution, pnames)
     uml, namevals = _use_multline_show(d, pnames)
     uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
 end
 
-function _use_multline_show(d::Distribution, pnames::(Symbol...))
+function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
     #
     # Criteria: if total number of values is greater than 8, or
     # there are matrix-valued params, we use multi-line format
-    #    
+    #
     namevals = (Symbol, Any)[]
     multline = false
     tlen = 0

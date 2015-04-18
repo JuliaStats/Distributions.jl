@@ -77,9 +77,9 @@ export
     Hypergeometric,
     InverseWishart,
     InverseGamma,
-    InverseGaussian,  
+    InverseGaussian,
     IsoNormal,
-    IsoNormalCanon,  
+    IsoNormalCanon,
     Kolmogorov,
     KSDist,
     KSOneSided,
@@ -167,7 +167,7 @@ export
     isleptokurtic,      # Is excess kurtosis < 0.0?
     ismesokurtic,       # Is excess kurtosis = 0.0?
     isprobvec,          # Is a probability vector?
-    isupperbounded,  
+    isupperbounded,
     islowerbounded,
     isbounded,
     hasfinitesupport,
@@ -185,7 +185,7 @@ export
     posterior_canon,    # get the canonical form of the posterior distribution
     posterior_mode,     # get the mode of posterior distribution
     posterior_rand,     # draw samples from the posterior distribution
-    posterior_rand!, 
+    posterior_rand!,
     posterior_randmodel,
 
     invscale,           # Inverse scale parameter

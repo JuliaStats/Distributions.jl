@@ -10,7 +10,7 @@ macro _jl_dist_1p(T, b)
     rr = Expr(:quote, string("r", b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pn = Ty.names                       # parameter names
+    pn = fieldnames(Ty)                       # parameter names
     p  = Expr(:quote, pn[1])
     Tx = dc ? (:Int) : (:Float64)
     quote
@@ -80,7 +80,7 @@ macro _jl_dist_2p(T, b)
     rr = Expr(:quote, string("r",b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pn = Ty.names                       # parameter names
+    pn = fieldnames(Ty)                 # parameter names
     p1 = Expr(:quote, pn[1])
     p2 = Expr(:quote, pn[2])
     Tx = dc ? (:Int) : (:Float64)
@@ -88,7 +88,7 @@ macro _jl_dist_2p(T, b)
         dd = Expr(:quote, :dnorm4)
         pp = Expr(:quote, :pnorm5)
         qq = Expr(:quote, :qnorm5)
-    end    
+    end
     quote
         global pdf, logpdf, cdf, logcdf, ccdf, logccdf
         global quantile, cquantile, invlogcdf, invlogccdf, rand
@@ -163,7 +163,7 @@ macro _jl_dist_3p(T, b)
     rr = Expr(:quote, string("r", b))     # C name for random sampler
     Ty = eval(T)
     dc = Ty <: DiscreteDistribution
-    pn = Ty.names                       # parameter names
+    pn = fieldnames(Ty)                       # parameter names
     p1 = Expr(:quote, pn[1])
     p2 = Expr(:quote, pn[2])
     p3 = Expr(:quote, pn[3])

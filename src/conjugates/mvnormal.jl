@@ -2,6 +2,8 @@
 
 #### Generic MvNormal -- Generic MvNormal (Σ is known)
 
+typealias MvNormalWithCov{Pri<:MvNormal, Cov<:AbstractPDMat} @compat Tuple{Pri,Cov}
+
 function posterior_canon(prior::MvNormal, ss::MvNormalKnownCovStats)
     invΣ0 = inv(prior.Σ)
     μ0 = prior.μ
@@ -10,60 +12,61 @@ function posterior_canon(prior::MvNormal, ss::MvNormalKnownCovStats)
 	return MvNormalCanon(h, invΣp)
 end
 
-function posterior_canon{Pri<:MvNormal,Cov<:AbstractPDMat}(
-    prior::(Pri, Cov), 
-    G::Type{MvNormal}, 
-    x::Matrix) 
+function posterior_canon(
+    prior::MvNormalWithCov,
+    G::Type{MvNormal},
+    x::Matrix)
 
 	μpri::Pri, Σ::Cov = prior
 	posterior_canon(μpri, suffstats(MvNormalKnownCov{Cov}(Σ), x))
 end
 
-function posterior_canon{Pri<:MvNormal,Cov<:AbstractPDMat}(
-    prior::(Pri, Cov), 
-    G::Type{MvNormal}, 
-    x::Matrix, w::Array{Float64}) 
+function posterior_canon(
+    prior::MvNormalWithCov,
+    G::Type{MvNormal},
+    x::Matrix, w::Array{Float64})
 
     μpri::Pri, Σ::Cov = prior
     posterior_canon(μpri, suffstats(MvNormalKnownSigma{Cov}(Σ), x, w))
 end
 
-function posterior{Pri<:MvNormal,Cov<:AbstractPDMat}(
-    prior::(Pri, Cov), 
-    G::Type{MvNormal}, 
-    x::Matrix) 
+function posterior(
+    prior::MvNormalWithCov,
+    G::Type{MvNormal},
+    x::Matrix)
 
     meanform(posterior_canon(prior, G, x))
 end
 
-function posterior{Pri<:MvNormal,Cov<:AbstractPDMat}(
-    prior::(Pri, Cov), 
-    G::Type{MvNormal}, 
-    x::Matrix, w::Array{Float64}) 
+function posterior(
+    prior::MvNormalWithCov,
+    G::Type{MvNormal},
+    x::Matrix, w::Array{Float64})
 
     meanform(posterior_canon(prior, G, x, w))
 end
 
-function complete{Pri<:MvNormal,Cov<:AbstractPDMat}(
+function complete(
     G::Type{MvNormal},
-    pri::(Pri, Cov), 
+    pri::MvNormalWithCov,
     μ::Vector{Float64})
 
     MvNormal(μ, pri[2]::Cov)
 end
 
+typealias MvNormalWithCovMat{Pri<:MvNormal} @compat Tuple{MvNormal, Matrix{Float64}}
 
-function posterior_canon(pri::(MvNormal, Matrix{Float64}), G::Type{MvNormal}, args...) 
+function posterior_canon(pri::MvNormalWithCovMat, G::Type{MvNormal}, args...)
     μpri::MvNormal, Σmat::Matrix{Float64} = pri
     posterior_canon((μpri, PDMat(Σmat)), G, args...)
 end
 
-function posterior(pri::(MvNormal, Matrix{Float64}), G::Type{MvNormal}, args...) 
+function posterior(pri::MvNormalWithCovMat, G::Type{MvNormal}, args...)
     μpri::MvNormal, Σmat::Matrix{Float64} = pri
     posterior((μpri, PDMat(Σmat)), G, args...)
 end
 
-function complete(G::Type{MvNormal}, pri::(MvNormal, Matrix{Float64}), μ::Vector{Float64})
+function complete(G::Type{MvNormal}, pri::MvNormalWithCovMat, μ::Vector{Float64})
     MvNormal(μ, PDMat(pri[2]))
 end
 
@@ -87,7 +90,8 @@ function posterior_canon(prior::NormalInverseWishart, ss::MvNormalStats)
     return NormalInverseWishart(mu, kappa, cholfact(Lam), nu)
 end
 
-complete(G::Type{MvNormal}, pri::NormalInverseWishart, s::(Vector{Float64}, Matrix{Float64})) = MvNormal(s...)
+typealias MeanAndCovMat @compat Tuple{Vector{Float64}, Matrix{Float64}}
+complete(G::Type{MvNormal}, pri::NormalInverseWishart, s::MeanAndCovMat) = MvNormal(s...)
 
 
 #### NormalWishart -- Normal
@@ -109,5 +113,4 @@ function posterior_canon(prior::NormalWishart, ss::MvNormalStats)
     return NormalWishart(mu, kappa, cholfact(Lam), nu)
 end
 
-complete(G::Type{MvNormal}, pri::NormalWishart, s::(Vector{Float64}, Matrix{Float64})) = MvNormal(s[1], inv(PDMat(s[2])))
-
+complete(G::Type{MvNormal}, pri::NormalWishart, s::MeanAndCovMat) = MvNormal(s[1], inv(PDMat(s[2])))
