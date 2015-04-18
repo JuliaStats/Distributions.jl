@@ -12,10 +12,8 @@ A Julia package for probability distributions and associated functions. Particul
 * Moment generating functions and characteristic functions
 * Sampling from population or from a distribution
 * Maximum likelihood estimation
-* Posterior w.r.t. conjugate prior, and Maximum-A-Posteriori (MAP) estimation
 
 #### Resources
 
 * **Documentation**: <http://distributionsjl.readthedocs.org/en/latest/>
 * **Release Notes**: <https://github.com/JuliaStats/Distributions.jl/blob/master/NEWS.md>
-

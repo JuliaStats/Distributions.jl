@@ -22,7 +22,6 @@ The *Distributions* package provides a large collection of probabilistic distrib
    matrix.rst
    mixture.rst
    fit.rst
-   conjugates.rst
    extends.rst
 
 
@@ -32,4 +31,3 @@ The *Distributions* package provides a large collection of probabilistic distrib
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-
