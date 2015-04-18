@@ -115,4 +115,3 @@ ccdf(d::EdgeworthAbstract, x::Float64) = ccdf(EdgeworthZ(d.dist,d.n), (x-mean(d)
 
 quantile(d::EdgeworthAbstract, p::Float64) = mean(d) + std(d)*quantile(EdgeworthZ(d.dist,d.n), p)
 cquantile(d::EdgeworthAbstract, p::Float64) = mean(d) + std(d)*cquantile(EdgeworthZ(d.dist,d.n), p)
-

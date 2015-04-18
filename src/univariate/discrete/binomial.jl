@@ -126,7 +126,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, ne, n)
 end
 
-typealias BinomData{T<:Integer} @compat Tuple{Int, Array{T}}
+@compat typealias BinomData{T<:Integer} Tuple{Int, Array{T}}
 
 suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
 suffstats(::Type{Binomial}, data::BinomData, w::Array{Float64}) = suffstats(Binomial, data..., w)

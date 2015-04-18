@@ -24,7 +24,7 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type
     return r
 end
 
-insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) = 
+insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
 ## macros to declare support
@@ -47,7 +47,7 @@ macro distr_support(D, lb, ub)
                  (D_is_lbounded && !D_is_ubounded) ? :(x >= $(lb)) :
                  (!D_is_lbounded && D_is_ubounded) ? :(x <= $(ub)) : :true
 
-    support_funs = 
+    support_funs =
 
     support_funs = if Dty <: DiscreteUnivariateDistribution
         if D_is_bounded
@@ -62,7 +62,7 @@ macro distr_support(D, lb, ub)
     end
 
     insupport_funs = if Dty <: DiscreteUnivariateDistribution
-        quote 
+        quote
             insupport($(paramdecl), x::Real) = isinteger(x) && ($insuppcomp)
             insupport($(paramdecl), x::Integer) = $insuppcomp
         end
@@ -146,7 +146,7 @@ function cdf(d::DiscreteUnivariateDistribution, x::Int)
     c = 0.0
     for y = minimum(d):floor(Int,x)
         c += pdf(d, y)
-    end 
+    end
     return c
 end
 
@@ -158,7 +158,7 @@ cdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(cdf, (d
 # ccdf
 
 ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x)) 
+ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 ccdf(d::ContinuousUnivariateDistribution, x::Float64) = 1.0 - cdf(d, x)
 @compat ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, Float64(x))
 
@@ -181,7 +181,7 @@ logccdf(d::ContinuousUnivariateDistribution, x::Float64) = log(ccdf(d, x))
 quantile(d::UnivariateDistribution, p::Float64) = throw(MethodError(quantile, (d, p)))
 @compat quantile(d::UnivariateDistribution, p::Real) = quantile(d, Float64(p))
 
-function quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64, 
+function quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64,
                          lx::Float64, rx::Float64, tol::Float64)
 
     # find quantile using bisect algorithm
@@ -197,12 +197,12 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64,
         else
             cr = c
             rx = m
-        end 
+        end
     end
     return 0.5 * (lx + rx)
 end
 
-quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64) = 
+quantile_bisect(d::ContinuousUnivariateDistribution, p::Float64) =
     quantile_bisect(d, p, minimum(d), maximum(d), 1.0e-12)
 
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
@@ -321,10 +321,10 @@ gradlogpdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(
 
 
 # vectorized versions
-for fun in [:pdf, :logpdf, 
-            :cdf, :logcdf, 
-            :ccdf, :logccdf, 
-            :invlogcdf, :invlogccdf, 
+for fun in [:pdf, :logpdf,
+            :cdf, :logcdf,
+            :ccdf, :logccdf,
+            :invlogcdf, :invlogccdf,
             :quantile, :cquantile]
 
     _fun! = symbol(string('_', fun, '!'))
@@ -344,7 +344,7 @@ for fun in [:pdf, :logpdf,
             $(_fun!)(r, d, X)
         end
 
-        ($fun)(d::UnivariateDistribution, X::AbstractArray) = 
+        ($fun)(d::UnivariateDistribution, X::AbstractArray) =
             $(_fun!)(Array(Float64, size(X)), d, X)
     end
 end
@@ -353,7 +353,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
     vl = vfirst = first(X)
     vr = vlast = last(X)
     n = vlast - vfirst + 1
-    if islowerbounded(d) 
+    if islowerbounded(d)
         lb = minimum(d)
         if vl < lb
             vl = lb
@@ -395,7 +395,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
     vl = vfirst = first(X)
     vr = vlast = last(X)
     n = vlast - vfirst + 1
-    if islowerbounded(d) 
+    if islowerbounded(d)
         lb = minimum(d)
         if vl < lb
             vl = lb
@@ -434,7 +434,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 end
 
 
-pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) : 
+pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) :
                                                         error("pdf(d) is not allowed when d is unbounded.")
 
 
@@ -448,12 +448,12 @@ function _loglikelihood(d::UnivariateDistribution, X::AbstractArray)
     return ll
 end
 
-loglikelihood(d::UnivariateDistribution, X::AbstractArray) = 
+loglikelihood(d::UnivariateDistribution, X::AbstractArray) =
     _loglikelihood(d, X)
 
 ##### specific distributions #####
 
-const discrete_distributions = [ 
+const discrete_distributions = [
     "bernoulli",
     "binomial",
     "categorical",
@@ -474,7 +474,7 @@ const continuous_distributions = [
     "cauchy",
     "chisq",    # Chi depends on Chisq
     "chi",
-    "cosine",  
+    "cosine",
     "exponential",
     "fdist",
     "frechet",
@@ -513,4 +513,3 @@ end
 for dname in continuous_distributions
     include(joinpath("univariate", "continuous", "$(dname).jl"))
 end
-

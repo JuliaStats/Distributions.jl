@@ -20,7 +20,7 @@ function show(io::IO, d::Distribution, pnames)
     uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
 end
 
-typealias _NameVal @compat Tuple{Symbol,Any}
+@compat typealias _NameVal Tuple{Symbol,Any}
 
 function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
