@@ -2,6 +2,20 @@
 
 import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
 
+# auxiliary functions
+
+# to workaround issues of Base.linspace
+function _linspace(a::Float64, b::Float64, n::Int)
+    intv = (b - a) / (n - 1)
+    r = Array(Float64, n)
+    @inbounds for i = 1:n
+        r[i] = a + (i-1) * intv
+    end
+    r[n] = b
+    return r
+end
+
+
 #################################################
 #
 #   Driver functions
@@ -166,10 +180,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         rmin = vmin
         rmax = vmax
     end
-    # workaround a bug in linspace
-    intv = (rmax - rmin) / nbins
-    edges = rmin:intv:rmax
-    nbins = length(edges) - 1
+    edges = _linspace(rmin, rmax, nbins + 1)
 
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
@@ -246,7 +257,7 @@ function get_evalsamples(d::ContinuousUnivariateDistribution, q::Float64, n::Int
     lv = quantile(d, q/2)
     hv = cquantile(d, q/2)
     @assert isfinite(lv) && isfinite(hv) && lv <= hv
-    return linspace(lv, hv, n)
+    return _linspace(lv, hv, n)
 end
 
 function test_support(d::UnivariateDistribution, vs::AbstractVector)

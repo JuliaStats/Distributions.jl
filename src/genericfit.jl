@@ -1,6 +1,6 @@
 # generic functions fot distribution fitting
 
-function suffstats{D<:Distribution}(dt::Type{D}, xs...) 
+function suffstats{D<:Distribution}(dt::Type{D}, xs...)
     argtypes = tuple(D, map(typeof, xs)...)
     error("suffstats is not implemented for $argtypes.")
 end
@@ -13,4 +13,3 @@ fit_mle{D<:MultivariateDistribution}(dt::Type{D}, x::Matrix, w::Array) = fit_mle
 
 fit{D<:Distribution}(dt::Type{D}, x) = fit_mle(D, x)
 fit{D<:Distribution}(dt::Type{D}, args...) = fit_mle(D, args...)
-

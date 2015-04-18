@@ -9,7 +9,7 @@
 #
 distrname(d::Distribution) = string(typeof(d))
 
-show(io::IO, d::Distribution) = show(io, d, typeof(d).names)
+show(io::IO, d::Distribution) = show(io, d, fieldnames(typeof(d)))
 
 # For some distributions, the fields may contain internal details,
 # which we don't want to show, this function allows one to
@@ -20,18 +20,20 @@ function show(io::IO, d::Distribution, pnames)
     uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
 end
 
+typealias _NameVal @compat Tuple{Symbol,Any}
+
 function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
     #
     # Criteria: if total number of values is greater than 8, or
     # there are matrix-valued params, we use multi-line format
     #
-    namevals = (Symbol, Any)[]
+    namevals = _NameVal[]
     multline = false
     tlen = 0
     for (i, p) in enumerate(pnames)
         pv = d.(p)
-        if !(isa(pv, Number) || isa(pv, (Number...)) || isa(pv, AbstractVector))
+        if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
             multline = true
         end
         tlen += length(pv)
