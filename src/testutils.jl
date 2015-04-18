@@ -106,7 +106,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         if rmin <= si <= rmax
             cnts[si - rmin + 1] += 1
         else
-            vmin <= si <= vmax || 
+            vmin <= si <= vmax ||
                 error("Sample value out of valid range.")
         end
     end
@@ -120,7 +120,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     return samples
 end
 
-test_samples(distr::DiscreteUnivariateDistribution, n::Int; q::Float64=1.0e-6, verbose::Bool=false) = 
+test_samples(distr::DiscreteUnivariateDistribution, n::Int; q::Float64=1.0e-6, verbose::Bool=false) =
     test_samples(distr, distr, n; q=q, verbose=verbose)
 
 
@@ -166,7 +166,10 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         rmin = vmin
         rmax = vmax
     end
-    edges = linspace(rmin, rmax, nbins+1)
+    # workaround a bug in linspace
+    intv = (rmax - rmin) / nbins
+    edges = rmin:intv:rmax
+    nbins = length(edges) - 1
 
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
@@ -190,7 +193,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # check whether all samples are in the valid range
     for i = 1:n
         @inbounds si = samples[i]
-        vmin <= si <= vmax || 
+        vmin <= si <= vmax ||
             error("Sample value out of valid range.")
     end
 
@@ -370,14 +373,14 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     lcc = Array(Float64, nv)
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v) 
+        p[i] = pdf(d, v)
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
         lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
 
-        @assert p[i] >= 0.0 
+        @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
         @test_approx_eq_eps c[i] + cc[i] 1.0 1.0e-12
@@ -491,4 +494,3 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
         end
     end
 end
-
