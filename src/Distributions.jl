@@ -262,7 +262,6 @@ include("samplers.jl")
 
 # others
 include("truncate.jl")
-include("conjugates.jl")
 include("qq.jl")
 include("estimators.jl")
 include("testutils.jl")
