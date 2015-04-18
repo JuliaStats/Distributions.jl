@@ -137,3 +137,6 @@ fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}) = fit_mle(Binomia
 fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
 fit_mle(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
 fit_mle(::Type{Binomial}, data::BinomData, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+
+fit(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, data)
+fit(::Type{Binomial}, data::BinomData, w::Array{Float64}) = fit_mle(Binomial, data, w)

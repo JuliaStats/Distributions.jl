@@ -244,3 +244,6 @@ fit_mle(::Type{Categorical}, data::CategoricalData, w::Array{Float64}) = fit_mle
 
 fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}) = fit_mle(Categorical, maximum(x), x)
 fit_mle{T<:Integer}(::Type{Categorical}, x::Array{T}, w::Array{Float64}) = fit_mle(Categorical, maximum(x), x, w)
+
+fit(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
+fit(::Type{Categorical}, data::CategoricalData, w::Array{Float64}) = fit_mle(Categorical, data, w)
