@@ -74,10 +74,7 @@ end
 
 #### Sampling
 
-function rand(d::Laplace) 
-    z = randexp()
-    rand(Bool) ? d.μ + d.β * z : d.μ - d.β * z 
-end
+rand(d::Laplace) = d.μ + d.β*randexp()*ifelse(rand(Bool), 1, -1)
 
 
 #### Fitting
