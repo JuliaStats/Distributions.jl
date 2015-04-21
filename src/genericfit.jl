@@ -1,4 +1,4 @@
-# generic functions fot distribution fitting
+# generic functions for distribution fitting
 
 function suffstats{D<:Distribution}(dt::Type{D}, xs...)
     argtypes = tuple(D, map(typeof, xs)...)
