@@ -47,7 +47,7 @@ p = countnz(x) / n0
 d = fit(Bernoulli, x, w)
 p = sum(w[x .== 1]) / sum(w)
 @test isa(d, Bernoulli)
-@test_approx_eq mean(d) p 
+@test_approx_eq mean(d) p
 
 d = fit(Bernoulli, rand(Bernoulli(0.7), N))
 @test isa(d, Bernoulli)
@@ -129,6 +129,11 @@ d = fit(Categorical, suffstats(Categorical, 3, x, w))
 d = fit(Categorical, rand(Categorical(p), N))
 @test isa(d, Categorical)
 @test_approx_eq_eps probs(d) p 0.01
+
+
+# Cauchy
+
+@test fit(Cauchy, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
 
 
 # Exponential
