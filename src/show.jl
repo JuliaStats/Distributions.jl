@@ -35,8 +35,9 @@ function _use_multline_show(d::Distribution, pnames)
         pv = d.(p)
         if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
             multline = true
+        else
+            tlen += length(pv)
         end
-        tlen += length(pv)
         push!(namevals, (p, pv))
     end
     if tlen > 8
