@@ -4,6 +4,7 @@ tests = [
     "samplers",
     "categorical",
     "univariates",
+    "continuous",
     "fit",
     "multinomial",
     "poissonbinomial",
