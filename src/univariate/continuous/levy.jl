@@ -11,7 +11,7 @@ immutable Levy <: ContinuousUnivariateDistribution
     Levy() = new(0.0, 1.0)
 end
 
-@distr_support Levy d.location Inf
+@distr_support Levy location(d) Inf
 
 
 #### Parameters
