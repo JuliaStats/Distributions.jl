@@ -116,16 +116,16 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
             else
                 if $(fn == :Φinv)
                     if p <= 0f0
-                        return p == 0f0 ? -inf(Float32) : nan(Float32)
+                        return p == 0f0 ? -Inf32 : NaN32
                     elseif p >= 1f0 
-                        return p == 1f0 ? inf(Float32) : nan(Float32)
+                        return p == 1f0 ? inf(Float32) : NaN32
                     end
                     r = sqrt(q < 0f0 ? -log(p) : -log1p(-p))
                 else
                     if logp == -Inf
-                        return -inf(Float32)
+                        return -Inf32
                     elseif logp >= 0f0 
-                        return logp == 0f0 ? inf(Float32) : nan(Float32)
+                        return logp == 0f0 ? inf(Float32) : NaN32
                     end
                     r = sqrt(qf0 < 0 ? -logp : -log1mexp(logp))
                 end
@@ -185,16 +185,16 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
             else
                 if $(fn == :Φinv)
                     if p <= 0.0
-                        return p == 0.0 ? -inf(Float64) : nan(Float64)
+                        return p == 0.0 ? -Inf : NaN
                     elseif p >= 1.0 
-                        return p == 1.0 ? inf(Float64) : nan(Float64)
+                        return p == 1.0 ? Inf : NaN
                     end
                     r = sqrt(q < 0 ? -log(p) : -log1p(-p))
                 else
                     if logp == -Inf
-                        return -inf(Float64)
+                        return -Inf
                     elseif logp >= 0.0 
-                        return logp == 0.0 ? inf(Float64) : nan(Float64)
+                        return logp == 0.0 ? Inf : NaN
                     end
                     r = sqrt(q < 0 ? -logp : -log1mexp(logp))
                 end
