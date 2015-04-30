@@ -118,14 +118,14 @@ for (fn,arg) in ((:Φinv,:p),(:logΦinv,:logp))
                     if p <= 0f0
                         return p == 0f0 ? -Inf32 : NaN32
                     elseif p >= 1f0 
-                        return p == 1f0 ? inf(Float32) : NaN32
+                        return p == 1f0 ? Inf32 : NaN32
                     end
                     r = sqrt(q < 0f0 ? -log(p) : -log1p(-p))
                 else
                     if logp == -Inf
                         return -Inf32
                     elseif logp >= 0f0 
-                        return logp == 0f0 ? inf(Float32) : NaN32
+                        return logp == 0f0 ? Inf32 : NaN32
                     end
                     r = sqrt(qf0 < 0 ? -logp : -log1mexp(logp))
                 end
