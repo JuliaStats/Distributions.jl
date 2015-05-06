@@ -146,9 +146,10 @@ end
 function _mixpdf1(d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
+    @assert length(p) == K
     v = 0.0
     for i = 1:K
-        pi = p[i]
+        @inbounds pi = p[i]
         if pi > 0.0
             c = component(d, i)
             v += pdf(c, x) * pi
@@ -160,16 +161,13 @@ end
 function _mixpdf!(r::DenseArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
+    @assert length(p) == K
     fill!(r, 0.0)
     t = Array(Float64, size(r))
     for i = 1:K
-        pi = p[i]
+        @inbounds pi = p[i]
         if pi > 0.0
-            # compute pdf in batch
-            c = component(d, i)
-            pdf!(t, c, x)
-
-            # accumulate pdf in batch
+            pdf!(t, component(d, i), x)
             BLAS.axpy!(pi, t, r)
         end
     end
@@ -190,20 +188,23 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
 
     K = ncomponents(d)
     p = probs(d)
+    @assert length(p) == K
+
     lp = Array(Float64, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
     for i = 1:K
-        pi = p[i]
+        @inbounds pi = p[i]
         if pi > 0.0
             # lp[i] <- log(p(cs[i], x)) + log(pri[i])
-            lp[i] = lp_i = logpdf(component(d, i), x) + log(pi)
+            lp_i = logpdf(component(d, i), x) + log(pi)
+            @inbounds lp[i] = lp_i
             if lp_i > m
                 m = lp_i
             end
         end
     end
     v = 0.0
-    for i = 1:K
+    @inbounds for i = 1:K
         if p[i] > 0.0
             v += exp(lp[i] - m)
         end
@@ -214,11 +215,12 @@ end
 function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
+    @assert length(p) == K
     n = length(r)
     Lp = Array(Float64, n, K)
     m = fill(-Inf, n)
     for i = 1:K
-        pi = p[i]
+        @inbounds pi = p[i]
         if pi > 0.0
             lpri = log(pi)
             lp_i = view(Lp, :, i)
@@ -235,8 +237,9 @@ function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
             end
         end
     end
+
     fill!(r, 0.0)
-    for i = 1:K
+    @inbounds for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
             for j = 1:n
@@ -244,7 +247,8 @@ function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
             end
         end
     end
-    for j = 1:n
+
+    @inbounds for j = 1:n
         r[j] = log(r[j]) + m[j]
     end
     return r
