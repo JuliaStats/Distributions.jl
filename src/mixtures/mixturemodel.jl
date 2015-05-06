@@ -6,9 +6,7 @@
 #
 #  - ncomponents(d): the number of components
 #
-#  - components(d):  return an iterable collection of components
-#                    This collection does not need to be a Vector, but it should provide
-#                    the following methods: length and getindex
+#  - component(d, k):  return the k-th component
 #
 #  - probs(d):       return a vector of prior probabilities over components.
 #
@@ -18,6 +16,12 @@ abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} 
 immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::Categorical
+
+    function MixtureModel(cs::Vector{C}, pri::Categorical)
+        length(cs) == ncategories(pri) ||
+            error("The number of components does not match the length of prior.")
+        new(cs, pri)
+    end
 end
 
 typealias UnivariateMixture{S<:ValueSupport,   C<:Distribution} AbstractMixtureModel{Univariate,S,C}
@@ -29,8 +33,6 @@ component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
 #### Constructors
 
 function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical)
-    length(components) == maximum(prior) ||
-        error("Inconsistent sizes of components and prior.")
     VF = variate_form(C)
     VS = value_support(C)
     MixtureModel{VF,VS,C}(components, prior)
@@ -64,45 +66,48 @@ size(d::MatrixvariateMixture) = size(d.components[1])
 
 ncomponents(d::MixtureModel) = length(d.components)
 components(d::MixtureModel) = d.components
+component(d::MixtureModel, k::Int) = d.components[k]
+
 probs(d::MixtureModel) = probs(d.prior)
 
 function mean(d::UnivariateMixture)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
     m = 0.0
-    for i = 1:length(cs)
+    for i = 1:K
         pi = p[i]
         if pi > 0.0
-            m += mean(cs[i]) * pi
+            c = component(d, i)
+            m += mean(c) * pi
         end
     end
     return m
 end
 
 function mean(d::MultivariateMixture)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
     m = zeros(length(d))
-    for i = 1:length(cs)
+    for i = 1:K
         pi = p[i]
         if pi > 0.0
-            BLAS.axpy!(pi, mean(cs[i]), m)
+            c = component(d, i)
+            BLAS.axpy!(pi, mean(c), m)
         end
     end
     return m
 end
 
 function var(d::UnivariateMixture)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
-    K = length(cs)
     means = Array(Float64, K)
     m = 0.0
     v = 0.0
     for i = 1:K
         pi = p[i]
         if pi > 0.0
-            ci = cs[i]
+            ci = component(d, i)
             means[i] = mi = mean(ci)
             m += pi * mi
             v += pi * var(ci)
@@ -121,14 +126,13 @@ end
 #### show
 
 function show(io::IO, d::MixtureModel)
-    cs = components(d)
+    K = ncomponents(d)
     pr = probs(d)
-    K = length(cs)
     println(io, "MixtureModel{$(component_type(d))}(K = $K)")
     Ks = min(K, 8)
     for i = 1:Ks
         @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
-        println(io, cs[i])
+        println(io, component(d, i))
     end
     if Ks < K
         println(io, "The rest are omitted ...")
@@ -140,28 +144,30 @@ end
 #### Evaluation
 
 function _mixpdf1(d::AbstractMixtureModel, x)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
     v = 0.0
-    for i = 1:length(cs)
+    for i = 1:K
         pi = p[i]
         if pi > 0.0
-            v += pdf(cs[i], x) * pi
+            c = component(d, i)
+            v += pdf(c, x) * pi
         end
     end
     return v
 end
 
 function _mixpdf!(r::DenseArray, d::AbstractMixtureModel, x)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
     fill!(r, 0.0)
     t = Array(Float64, size(r))
-    for i = 1:length(cs)
+    for i = 1:K
         pi = p[i]
         if pi > 0.0
             # compute pdf in batch
-            pdf!(t, cs[i], x)
+            c = component(d, i)
+            pdf!(t, c, x)
 
             # accumulate pdf in batch
             BLAS.axpy!(pi, t, r)
@@ -178,20 +184,19 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
     #              = log(sum_i exp(logpri[i] + logpdf(cs[i], x)))
     #              = m + log(sum_i exp(logpri[i] + logpdf(cs[i], x) - m))
     #
-    #  m is chosen to be the maximum of logpri[i] + logpdf(cs[i], x) - m
+    #  m is chosen to be the maximum of logpri[i] + logpdf(cs[i], x)
     #  such that the argument of exp is in a reasonable range
     #
 
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
-    K = length(cs)
     lp = Array(Float64, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
     for i = 1:K
         pi = p[i]
         if pi > 0.0
             # lp[i] <- log(p(cs[i], x)) + log(pri[i])
-            lp[i] = lp_i = logpdf(cs[i], x) + log(pi)
+            lp[i] = lp_i = logpdf(component(d, i), x) + log(pi)
             if lp_i > m
                 m = lp_i
             end
@@ -207,9 +212,8 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
 end
 
 function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
-    cs = components(d)
+    K = ncomponents(d)
     p = probs(d)
-    K = length(cs)
     n = length(r)
     Lp = Array(Float64, n, K)
     m = fill(-Inf, n)
@@ -219,7 +223,7 @@ function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
             lpri = log(pi)
             lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
-            logpdf!(lp_i, cs[i], x)
+            logpdf!(lp_i, component(d, i), x)
 
             # in the mean time, add log(prior) to lp and
             # update the maximum for each sample
@@ -263,43 +267,39 @@ _lodpdf!(r::AbstractArray, d::MultivariateMixture, x::DenseMatrix) = _mixlogpdf!
 ## component-wise pdf and logpdf
 
 function _cwise_pdf1!(r::StridedVector, d::AbstractMixtureModel, x)
-    cs = components(d)
-    K = length(cs)
+    K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
     for i = 1:K
-        r[i] = pdf(cs[i], x)
+        r[i] = pdf(component(d, i), x)
     end
     r
 end
 
 function _cwise_logpdf1!(r::StridedVector, d::AbstractMixtureModel, x)
-    cs = components(d)
-    K = length(cs)
+    K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
     for i = 1:K
-        r[i] = logpdf(cs[i], x)
+        r[i] = logpdf(component(d, i), x)
     end
     r
 end
 
 function _cwise_pdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
-    cs = components(d)
-    K = length(cs)
+    K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        pdf!(view(r,:,i), cs[i], X)
+        pdf!(view(r,:,i), component(d, i), X)
     end
     r
 end
 
 function _cwise_logpdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
-    cs = components(d)
-    K = length(cs)
+    K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        logpdf!(view(r,:,i), cs[i], X)
+        logpdf!(view(r,:,i), component(d, i), X)
     end
     r
 end
@@ -339,9 +339,9 @@ function MixtureSampler{VF,VS}(d::MixtureModel{VF,VS})
 end
 
 
-rand(d::MixtureModel) = rand(d.components[rand(d.prior)])
+rand(d::AbstractMixtureModel) = rand(component(d, rand(d.prior)))
 
 rand(s::MixtureSampler) = rand(s.csamplers[rand(s.psampler)])
 _rand!(s::MixtureSampler{Multivariate}, x::DenseVector) = _rand!(s.csamplers[rand(s.psampler)], x)
 
-sampler(d::MixtureModel) = MixtureSampler(d)
+sampler(d::AbstractMixtureModel) = MixtureSampler(d)

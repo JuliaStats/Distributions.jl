@@ -122,6 +122,7 @@ export
     Truncated,
     TruncatedNormal,
     Uniform,
+    UnivariateGMM,
     VonMises,
     VonMisesFisher,
     WalleniusNoncentralHypergeometric,
@@ -151,6 +152,7 @@ export
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
+    component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
     componentwise_logpdf,   # component-wise logpdf for mixture models
@@ -275,6 +277,7 @@ include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
+include("mixtures/unigmm.jl")
 
 include("deprecates.jl")
 

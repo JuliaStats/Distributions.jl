@@ -10,14 +10,13 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     K = ncomponents(g)
-    cs = components(g)
     pr = probs(g)
-    @assert length(cs) == length(pr) == K
+    @assert length(pr) == K
 
     # mean
     mu = 0.0
     for k = 1:K
-        mu += pr[k] * mean(cs[k])
+        mu += pr[k] * mean(component(g, k))
     end
     @test_approx_eq mean(g) mu
 
@@ -25,7 +24,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     P0 = zeros(n, K)
     LP0 = zeros(n, K)
     for k = 1:K
-        c_k = cs[k]
+        c_k = component(g, k)
         for i = 1:n
             x_i = X[i]
             P0[i,k] = pdf(c_k, x_i)
@@ -62,14 +61,13 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
 
     K = ncomponents(g)
-    cs = components(g)
     pr = probs(g)
-    @assert length(cs) == length(pr) == K
+    @assert length(pr) == K
 
     # mean
     mu = 0.0
-    for k = 1:length(cs)
-        mu += pr[k] * mean(cs[k])
+    for k = 1:K
+        mu += pr[k] * mean(component(g, k))
     end
     @test_approx_eq mean(g) mu
 
@@ -77,7 +75,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     P0 = zeros(n, K)
     LP0 = zeros(n, K)
     for k = 1:K
-        c_k = cs[k]
+        c_k = component(g, k)
         for i = 1:n
             x_i = X[:,i]
             P0[i,k] = pdf(c_k, x_i)
@@ -116,8 +114,13 @@ println("    testing UnivariateMixture")
 
 g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
 @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
-@test length(components(g_u)) == 3
+@test ncomponents(g_u) == 3
 test_mixture(g_u, 1000, 10^6)
+
+# g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
+# @test isa(g_u, UnivariateGMM)
+# @test ncomponents(g_u) == 3
+# test_mixture(g_u, 1000, 10^6)
 
 
 println("    testing MultivariateMixture")
