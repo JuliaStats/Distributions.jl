@@ -5,45 +5,48 @@ using Base.Test
 
 function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     X = zeros(n)
-    for i = 1:10
-        X[i] = rand(g) 
+    for i = 1:n
+        X[i] = rand(g)
     end
 
+    K = ncomponents(g)
     cs = components(g)
     pr = probs(g)
-    @assert length(cs) == length(pr)
+    @assert length(cs) == length(pr) == K
 
     # mean
     mu = 0.0
-    for k = 1:length(cs)
+    for k = 1:K
         mu += pr[k] * mean(cs[k])
     end
     @test_approx_eq mean(g) mu
 
-    # ground-truth
-    p0 = zeros(n)
-    for i = 1:n
-        p0_i = 0.0
-        x_i = X[i]
-        for k = 1:length(cs)
-            p0_i += pr[k] * pdf(cs[k], x_i)
+    # evaluation
+    P0 = zeros(n, K)
+    LP0 = zeros(n, K)
+    for k = 1:K
+        c_k = cs[k]
+        for i = 1:n
+            x_i = X[i]
+            P0[i,k] = pdf(c_k, x_i)
+            LP0[i,k] = logpdf(c_k, x_i)
         end
-        p0[i] = p0_i
     end
-    lp0 = log(p0)
+
+    mix_p0 = P0 * pr
+    mix_lp0 = log(mix_p0)
 
     for i = 1:n
-        @test_approx_eq pdf(g, X[i]) p0[i]
-        @test_approx_eq logpdf(g, X[i]) lp0[i]
+        @test_approx_eq pdf(g, X[i]) mix_p0[i]
+        @test_approx_eq logpdf(g, X[i]) mix_lp0[i]
+        @test_approx_eq componentwise_pdf(g, X[i]) vec(P0[i,:])
+        @test_approx_eq componentwise_logpdf(g, X[i]) vec(LP0[i,:])
     end
 
-    p_e = pdf(g, X)
-    lp_e = logpdf(g, X)
-    @assert isa(p_e, Vector{Float64}) && length(p_e) == n
-    @assert isa(lp_e, Vector{Float64}) && length(lp_e) == n
-
-    @test_approx_eq p_e p0 
-    @test_approx_eq lp_e lp0
+    @test_approx_eq pdf(g, X) mix_p0
+    @test_approx_eq logpdf(g, X) mix_lp0
+    @test_approx_eq componentwise_pdf(g, X) P0
+    @test_approx_eq componentwise_logpdf(g, X) LP0
 
     # sampling
     Xs = rand(g, ns)
@@ -54,13 +57,14 @@ end
 
 function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     X = zeros(length(g), n)
-    for i = 1:10
-        X[:,i] = rand(g) 
+    for i = 1:n
+        X[:,i] = rand(g)
     end
 
+    K = ncomponents(g)
     cs = components(g)
     pr = probs(g)
-    @assert length(cs) == length(pr)
+    @assert length(cs) == length(pr) == K
 
     # mean
     mu = 0.0
@@ -69,30 +73,33 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
     @test_approx_eq mean(g) mu
 
-    # ground-truth
-    p0 = zeros(n)
-    for i = 1:n
-        p0_i = 0.0
-        x_i = X[:,i]
-        for k = 1:length(cs)
-            p0_i += pr[k] * pdf(cs[k], x_i)
+    # evaluation
+    P0 = zeros(n, K)
+    LP0 = zeros(n, K)
+    for k = 1:K
+        c_k = cs[k]
+        for i = 1:n
+            x_i = X[:,i]
+            P0[i,k] = pdf(c_k, x_i)
+            LP0[i,k] = logpdf(c_k, x_i)
         end
-        p0[i] = p0_i
     end
-    lp0 = log(p0)
+
+    mix_p0 = P0 * pr
+    mix_lp0 = log(mix_p0)
 
     for i = 1:n
-        @test_approx_eq pdf(g, X[:,i]) p0[i]
-        @test_approx_eq logpdf(g, X[:,i]) lp0[i]
+        x_i = X[:,i]
+        @test_approx_eq pdf(g, x_i) mix_p0[i]
+        @test_approx_eq logpdf(g, x_i) mix_lp0[i]
+        @test_approx_eq componentwise_pdf(g, x_i) vec(P0[i,:])
+        @test_approx_eq componentwise_logpdf(g, x_i) vec(LP0[i,:])
     end
 
-    p_e = pdf(g, X)
-    lp_e = logpdf(g, X)
-    @assert isa(p_e, Vector{Float64}) && length(p_e) == n
-    @assert isa(lp_e, Vector{Float64}) && length(lp_e) == n
-
-    @test_approx_eq p_e p0 
-    @test_approx_eq lp_e lp0
+    @test_approx_eq pdf(g, X) mix_p0
+    @test_approx_eq logpdf(g, X) mix_lp0
+    @test_approx_eq componentwise_pdf(g, X) P0
+    @test_approx_eq componentwise_logpdf(g, X) LP0
 
     # sampling
     Xs = rand(g, ns)
@@ -115,12 +122,11 @@ test_mixture(g_u, 1000, 10^6)
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(
-    IsoNormal[ MvNormal([0.0, 0.0], 1.0), 
-               MvNormal([0.2, 1.0], 1.0), 
-               MvNormal([-0.5, -3.0], 1.6) ], 
+    IsoNormal[ MvNormal([0.0, 0.0], 1.0),
+               MvNormal([0.2, 1.0], 1.0),
+               MvNormal([-0.5, -3.0], 1.6) ],
     [0.2, 0.5, 0.3])
 @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
 @test length(components(g_m)) == 3
 @test length(g_m) == 2
 test_mixture(g_m, 1000, 10^6)
-

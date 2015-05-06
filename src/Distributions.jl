@@ -152,6 +152,8 @@ export
     cumulant,           # cumulants of distribution
     complete,           # turn an incomplete formulation into a complete distribution
     components,         # get components from a mixture model
+    componentwise_pdf,      # component-wise pdf for mixture models
+    componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
     dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
@@ -207,6 +209,7 @@ export
     moment,             # moments of distribution
     nsamples,           # get the number of samples contained in an array
     ncategories,        # the number of categories in a Categorical distribution
+    ncomponents,        # the number of components in a mixture model
     ntrials,            # the number of trials being performed in the experiment
     params,             # get the tuple of parameters
     pdf,                # probability density function (ContinuousDistribution)

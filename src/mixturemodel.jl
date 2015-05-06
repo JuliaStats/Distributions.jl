@@ -4,6 +4,8 @@
 #
 #  All subtypes of AbstractMixtureModel should implement the following methods:
 #
+#  - ncomponents(d): the number of components
+#
 #  - components(d):  return an iterable collection of components
 #                    This collection does not need to be a Vector, but it should provide
 #                    the following methods: length and getindex
@@ -60,6 +62,7 @@ end
 length(d::MultivariateMixture) = length(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
+ncomponents(d::MixtureModel) = length(d.components)
 components(d::MixtureModel) = d.components
 probs(d::MixtureModel) = probs(d.prior)
 
@@ -136,7 +139,7 @@ end
 
 #### Evaluation
 
-function _mixpdf1(d::MixtureModel, x)
+function _mixpdf1(d::AbstractMixtureModel, x)
     cs = components(d)
     p = probs(d)
     v = 0.0
@@ -149,7 +152,7 @@ function _mixpdf1(d::MixtureModel, x)
     return v
 end
 
-function _mixpdf!(r::DenseArray, d::MixtureModel, x)
+function _mixpdf!(r::DenseArray, d::AbstractMixtureModel, x)
     cs = components(d)
     p = probs(d)
     fill!(r, 0.0)
@@ -167,7 +170,7 @@ function _mixpdf!(r::DenseArray, d::MixtureModel, x)
     return r
 end
 
-function _mixlogpdf1(d::MixtureModel, x)
+function _mixlogpdf1(d::AbstractMixtureModel, x)
     # using the formula below for numerical stability
     #
     # logpdf(d, x) = log(sum_i pri[i] * pdf(cs[i], x))
@@ -203,7 +206,7 @@ function _mixlogpdf1(d::MixtureModel, x)
     return m + log(v)
 end
 
-function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
+function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
     cs = components(d)
     p = probs(d)
     K = length(cs)
@@ -243,7 +246,7 @@ function _mixlogpdf!(r::DenseArray, d::MixtureModel, x)
     return r
 end
 
-pdf(d::UnivariateMixture{Continuous}, x::Float64) = _mixpdf1(d, x)
+pdf(d::UnivariateMixture{Continuous}, x::Real) = _mixpdf1(d, x)
 pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)
 logpdf(d::UnivariateMixture{Discrete}, x::Int) = _mixlogpdf1(d, x)
@@ -255,6 +258,71 @@ _pdf(d::MultivariateMixture, x::AbstractVector) = _mixpdf1(d, x)
 _logpdf(d::MultivariateMixture, x::AbstractVector) = _mixlogpdf1(d, x)
 _pdf!(r::AbstractArray, d::MultivariateMixture, x::DenseMatrix) = _mixpdf!(r, d, x)
 _lodpdf!(r::AbstractArray, d::MultivariateMixture, x::DenseMatrix) = _mixlogpdf!(r, d, x)
+
+
+## component-wise pdf and logpdf
+
+function _cwise_pdf1!(r::StridedVector, d::AbstractMixtureModel, x)
+    cs = components(d)
+    K = length(cs)
+    length(r) == K || error("The length of r should match the number of components.")
+    for i = 1:K
+        r[i] = pdf(cs[i], x)
+    end
+    r
+end
+
+function _cwise_logpdf1!(r::StridedVector, d::AbstractMixtureModel, x)
+    cs = components(d)
+    K = length(cs)
+    length(r) == K || error("The length of r should match the number of components.")
+    for i = 1:K
+        r[i] = logpdf(cs[i], x)
+    end
+    r
+end
+
+function _cwise_pdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
+    cs = components(d)
+    K = length(cs)
+    n = size(X, ndims(X))
+    size(r) == (n, K) || error("The size of r is incorrect.")
+    for i = 1:K
+        pdf!(view(r,:,i), cs[i], X)
+    end
+    r
+end
+
+function _cwise_logpdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
+    cs = components(d)
+    K = length(cs)
+    n = size(X, ndims(X))
+    size(r) == (n, K) || error("The size of r is incorrect.")
+    for i = 1:K
+        logpdf!(view(r,:,i), cs[i], X)
+    end
+    r
+end
+
+componentwise_pdf!(r::StridedVector, d::UnivariateMixture, x::Real) = _cwise_pdf1!(r, d, x)
+componentwise_pdf!(r::StridedVector, d::MultivariateMixture, x::AbstractVector) = _cwise_pdf1!(r, d, x)
+componentwise_pdf!(r::StridedMatrix, d::UnivariateMixture, x::AbstractVector) = _cwise_pdf!(r, d, x)
+componentwise_pdf!(r::StridedMatrix, d::MultivariateMixture, x::AbstractMatrix) = _cwise_pdf!(r, d, x)
+
+componentwise_logpdf!(r::StridedVector, d::UnivariateMixture, x::Real) = _cwise_logpdf1!(r, d, x)
+componentwise_logpdf!(r::StridedVector, d::MultivariateMixture, x::AbstractVector) = _cwise_logpdf1!(r, d, x)
+componentwise_logpdf!(r::StridedMatrix, d::UnivariateMixture, x::AbstractVector) = _cwise_logpdf!(r, d, x)
+componentwise_logpdf!(r::StridedMatrix, d::MultivariateMixture, x::AbstractMatrix) = _cwise_logpdf!(r, d, x)
+
+componentwise_pdf(d::UnivariateMixture, x::Real) = componentwise_pdf!(Array(Float64, ncomponents(d)), d, x)
+componentwise_pdf(d::UnivariateMixture, x::AbstractVector) = componentwise_pdf!(Array(Float64, length(x), ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractVector) = componentwise_pdf!(Array(Float64, ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_pdf!(Array(Float64, size(x,2), ncomponents(d)), d, x)
+
+componentwise_logpdf(d::UnivariateMixture, x::Real) = componentwise_logpdf!(Array(Float64, ncomponents(d)), d, x)
+componentwise_logpdf(d::UnivariateMixture, x::AbstractVector) = componentwise_logpdf!(Array(Float64, length(x), ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_logpdf!(Array(Float64, ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Array(Float64, size(x,2), ncomponents(d)), d, x)
 
 
 ## Sampling
