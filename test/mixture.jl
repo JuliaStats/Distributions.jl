@@ -117,11 +117,10 @@ g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3
 @test ncomponents(g_u) == 3
 test_mixture(g_u, 1000, 10^6)
 
-# g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
-# @test isa(g_u, UnivariateGMM)
-# @test ncomponents(g_u) == 3
-# test_mixture(g_u, 1000, 10^6)
-
+g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
+@test isa(g_u, UnivariateGMM)
+@test ncomponents(g_u) == 3
+test_mixture(g_u, 1000, 10^6)
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(

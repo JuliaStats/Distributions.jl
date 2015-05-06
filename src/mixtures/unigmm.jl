@@ -22,3 +22,14 @@ component(d::UnivariateGMM, k::Int) = Normal(d.means[k], d.stds[k])
 probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
+
+rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+
+immutable UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
+    means::Vector{Float64}
+    stds::Vector{Float64}
+    psampler::AliasTable
+end
+
+rand(s::UnivariateGMMSampler) = (k = rand(s.psampler); s.means[k] + randn() * s.stds[k])
+sampler(d::UnivariateGMM) = UnivariateGMMSampler(d.means, d.stds, sampler(d.prior))

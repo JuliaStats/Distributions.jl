@@ -339,9 +339,9 @@ function MixtureSampler{VF,VS}(d::MixtureModel{VF,VS})
 end
 
 
-rand(d::AbstractMixtureModel) = rand(component(d, rand(d.prior)))
+rand(d::MixtureModel) = rand(component(d, rand(d.prior)))
 
 rand(s::MixtureSampler) = rand(s.csamplers[rand(s.psampler)])
 _rand!(s::MixtureSampler{Multivariate}, x::DenseVector) = _rand!(s.csamplers[rand(s.psampler)], x)
 
-sampler(d::AbstractMixtureModel) = MixtureSampler(d)
+sampler(d::MixtureModel) = MixtureSampler(d)
