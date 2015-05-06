@@ -1,16 +1,28 @@
 # finite mixture models
 
-abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF, VS}
+####
+#
+#  All subtypes of AbstractMixtureModel should implement the following methods:
+#
+#  - components(d):  return an iterable collection of components
+#                    This collection does not need to be a Vector, but it should provide
+#                    the following methods: length and getindex
+#
+#  - probs(d):       return a vector of prior probabilities over components.
+#
 
-immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,Component<:Distribution} <: AbstractMixtureModel{VF,VS}
-    components::Vector{Component}
+abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS}
+
+immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
+    components::Vector{C}
     prior::Categorical
 end
 
-typealias UnivariateMixture{S<:ValueSupport}    AbstractMixtureModel{Univariate,S} 
-typealias MultivariateMixture{S<:ValueSupport}  AbstractMixtureModel{Multivariate,S}
-typealias MatrixvariateMixture{S<:ValueSupport} AbstractMixtureModel{Matrixvariate,S}
+typealias UnivariateMixture{S<:ValueSupport,   C<:Distribution} AbstractMixtureModel{Univariate,S,C}
+typealias MultivariateMixture{S<:ValueSupport, C<:Distribution} AbstractMixtureModel{Multivariate,S,C}
+typealias MatrixvariateMixture{S<:ValueSupport,C<:Distribution} AbstractMixtureModel{Matrixvariate,S,C}
 
+component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
 
 #### Constructors
 
@@ -22,11 +34,11 @@ function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical
     MixtureModel{VF,VS,C}(components, prior)
 end
 
-MixtureModel{C<:Distribution}(components::Vector{C}, p::Vector{Float64}) = 
+MixtureModel{C<:Distribution}(components::Vector{C}, p::Vector{Float64}) =
     MixtureModel(components, Categorical(p))
 
 # all components have the same prior probabilities
-MixtureModel{C<:Distribution}(components::Vector{C}) = 
+MixtureModel{C<:Distribution}(components::Vector{C}) =
     MixtureModel(components, Categorical(length(components)))
 
 _construct_component{C<:Distribution}(::Type{C}, arg) = C(arg)
@@ -50,8 +62,6 @@ size(d::MatrixvariateMixture) = size(d.components[1])
 
 components(d::MixtureModel) = d.components
 probs(d::MixtureModel) = probs(d.prior)
-
-component_type{VF,VS,C}(d::MixtureModel{VF,VS,C}) = C
 
 function mean(d::UnivariateMixture)
     cs = components(d)
@@ -89,7 +99,7 @@ function var(d::UnivariateMixture)
     for i = 1:K
         pi = p[i]
         if pi > 0.0
-            ci = cs[i]        
+            ci = cs[i]
             means[i] = mi = mean(ci)
             m += pi * mi
             v += pi * var(ci)
@@ -164,7 +174,7 @@ function _mixlogpdf1(d::MixtureModel, x)
     #              = log(sum_i pri[i] * exp(logpdf(cs[i], x)))
     #              = log(sum_i exp(logpri[i] + logpdf(cs[i], x)))
     #              = m + log(sum_i exp(logpri[i] + logpdf(cs[i], x) - m))
-    #     
+    #
     #  m is chosen to be the maximum of logpri[i] + logpdf(cs[i], x) - m
     #  such that the argument of exp is in a reasonable range
     #
@@ -267,4 +277,3 @@ rand(s::MixtureSampler) = rand(s.csamplers[rand(s.psampler)])
 _rand!(s::MixtureSampler{Multivariate}, x::DenseVector) = _rand!(s.csamplers[rand(s.psampler)], x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)
-
