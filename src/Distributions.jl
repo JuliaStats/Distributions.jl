@@ -274,7 +274,7 @@ include("estimators.jl")
 include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
-include("mixturemodel.jl")
+include("mixtures/mixturemodel.jl")
 
 include("deprecates.jl")
 
