@@ -20,6 +20,20 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
     @test_approx_eq mean(g) mu
 
+    # evaluation of cdf
+    cf = zeros(n)
+    for k = 1:K
+        c_k = component(g, k)
+        for i = 1:n
+            cf[i] += pr[k] * cdf(c_k, X[i])
+        end
+    end
+
+    for i = 1:n
+        @test_approx_eq cdf(g, X[i]) cf[i]
+    end
+    @test_approx_eq cdf(g, X) cf
+
     # evaluation
     P0 = zeros(n, K)
     LP0 = zeros(n, K)

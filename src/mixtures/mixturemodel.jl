@@ -143,6 +143,25 @@ end
 
 #### Evaluation
 
+function _cdf(d::UnivariateMixture, x::Real)
+    K = ncomponents(d)
+    p = probs(d)
+    @assert length(p) == K
+    r = 0.0
+    for i = 1:K
+        @inbounds pi = p[i]
+        if pi > 0.0
+            c = component(d, i)
+            r += pi * cdf(c, x)
+        end
+    end
+    return r
+end
+
+cdf(d::UnivariateMixture{Continuous}, x::Float64) = _cdf(d, x)
+cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
+
+
 function _mixpdf1(d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
