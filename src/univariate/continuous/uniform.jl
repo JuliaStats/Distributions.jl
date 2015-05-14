@@ -39,15 +39,15 @@ entropy(d::Uniform) = log(d.b - d.a)
 #### Evaluation
 
 pdf(d::Uniform, x::Float64) = insupport(d, x) ? 1.0 / (d.b - d.a) : 0.0
-logpdf(d::Uniform, x::Float64) = insupport(d, x) ? -log(d.b - d.a) : -Inf 
+logpdf(d::Uniform, x::Float64) = insupport(d, x) ? -log(d.b - d.a) : -Inf
 
-function cdf(d::Uniform, x::Float64) 
+function cdf(d::Uniform, x::Float64)
     (a, b) = params(d)
     x <= a ? 0.0 :
     x >= d.b ? 1.0 : (x - a) / (b - a)
 end
 
-function ccdf(d::Uniform, x::Float64) 
+function ccdf(d::Uniform, x::Float64)
     (a, b) = params(d)
     x <= a ? 1.0 :
     x >= d.b ? 0.0 : (b - x) / (b - a)
@@ -81,7 +81,7 @@ rand(d::Uniform) = d.a + (d.b - d.a) * rand()
 
 #### Fitting
 
-function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
+function fit_mle{T<:Real}(::Type{Uniform}, x::AbstractArray{T})
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
@@ -98,4 +98,3 @@ function fit_mle{T <: Real}(::Type{Uniform}, x::Vector{T})
 
     Uniform(xmin, xmax)
 end
-

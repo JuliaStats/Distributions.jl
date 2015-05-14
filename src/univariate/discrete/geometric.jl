@@ -39,10 +39,10 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 ### Evaluations
 
 function pdf(d::Geometric, x::Int)
-    if x >= 0 
+    if x >= 0
         p = d.p
         return p < 0.1 ? p * exp(log1p(-p) * x) : d.p * (1.0 - p)^x
-    else 
+    else
         return 0.0
     end
 end
@@ -58,7 +58,7 @@ nextpdf(s::RecursiveGeomProbEvaluator, p::Float64, x::Integer) = p * s.p0
 _pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
 
 
-function cdf(d::Geometric, x::Int) 
+function cdf(d::Geometric, x::Int)
     x < 0 && return 0.0
     p = succprob(d)
     n = x + 1
@@ -66,7 +66,7 @@ function cdf(d::Geometric, x::Int)
 end
 
 function ccdf(d::Geometric, x::Int)
-    x < 0 && return 1.0 
+    x < 0 && return 1.0
     p = succprob(d)
     n = x + 1
     p < 0.5 ? exp(log1p(-p)*n) : (1.0-p)^n
@@ -82,7 +82,7 @@ cquantile(d::Geometric, p::Float64) = invlogccdf(d, log(p))
 
 invlogcdf(d::Geometric, lp::Float64) = invlogccdf(d, log1mexp(lp))
 
-function invlogccdf(d::Geometric, lp::Float64) 
+function invlogccdf(d::Geometric, lp::Float64)
     if (lp > 0.0) || isnan(lp)
         return NaN
     elseif isinf(lp)
@@ -119,9 +119,9 @@ immutable GeometricStats <: SufficientStats
     @compat GeometricStats(sx::Real, tw::Real) = new(Float64(sx), Float64(tw))
 end
 
-suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}) = GeometricStats(sum(x), length(x))
+suffstats{T<:Integer}(::Type{Geometric}, x::AbstractArray{T}) = GeometricStats(sum(x), length(x))
 
-function suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}, w::Array{Float64})
+function suffstats{T<:Integer}(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
     if length(w) != n
         throw(ArgumentError("Inconsistent argument dimensions."))
@@ -137,4 +137,3 @@ function suffstats{T<:Integer}(::Type{Geometric}, x::Array{T}, w::Array{Float64}
 end
 
 fit_mle(::Type{Geometric}, ss::GeometricStats) = Geometric(1.0 / (ss.sx / ss.tw + 1.0))
-

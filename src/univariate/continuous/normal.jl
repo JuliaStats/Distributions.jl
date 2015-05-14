@@ -46,7 +46,7 @@ logpdf(d::Normal, x::Float64) = logφ(zval(d,x)) - log(d.σ)
 cdf(d::Normal, x::Float64) = Φ(zval(d,x))
 ccdf(d::Normal, x::Float64) = Φc(zval(d,x))
 logcdf(d::Normal, x::Float64) = logΦ(zval(d,x))
-logccdf(d::Normal, x::Float64) = logΦc(zval(d,x))    
+logccdf(d::Normal, x::Float64) = logΦc(zval(d,x))
 
 quantile(d::Normal, p::Float64) = xval(d, Φinv(p))
 cquantile(d::Normal, p::Float64) = xval(d, -Φinv(p))
@@ -75,7 +75,7 @@ immutable NormalStats <: SufficientStats
     @compat NormalStats(s::Real, m::Real, s2::Real, tw::Real) = new(Float64(s), Float64(m), Float64(s2), Float64(tw))
 end
 
-function suffstats{T<:Real}(::Type{Normal}, x::Array{T}) 
+function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T})
     n = length(x)
 
     # compute s
@@ -88,20 +88,20 @@ function suffstats{T<:Real}(::Type{Normal}, x::Array{T})
     # compute s2
     s2 = abs2(x[1] - m)
     for i = 2:n
-        @inbounds s2 += abs2(x[i] - m)  
+        @inbounds s2 += abs2(x[i] - m)
     end
 
     NormalStats(s, m, s2, n)
 end
 
-function suffstats{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}) 
+function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
 
     # compute s
     tw = w[1]
     s = w[1] * x[1]
     for i = 2:n
-        @inbounds wi = w[i] 
+        @inbounds wi = w[i]
         @inbounds s += wi * x[i]
         tw += wi
     end
@@ -128,7 +128,7 @@ immutable NormalKnownMuStats <: SufficientStats
     tw::Float64     # total sample weight
 end
 
-function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
+function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T})
     μ = g.μ
     s2 = abs2(x[1] - μ)
     for i = 2:length(x)
@@ -137,12 +137,12 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T})
     @compat NormalKnownMuStats(g.μ, s2, Float64(length(x)))
 end
 
-function suffstats{T<:Real}(g::NormalKnownMu, x::Array{T}, w::Array{Float64})
+function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64})
     μ = g.μ
     s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
     for i = 2:length(x)
-        @inbounds wi = w[i]        
+        @inbounds wi = w[i]
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi
     end
@@ -165,11 +165,11 @@ immutable NormalKnownSigmaStats <: SufficientStats
     tw::Float64     # total sample weight
 end
 
-function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T})
+function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T})
     @compat NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
-function suffstats{T<:Real}(g::NormalKnownSigma, x::Array{T}, w::Array{T})
+function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T})
     NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))
 end
 
@@ -181,13 +181,13 @@ fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, 
 
 # generic fit_mle methods
 
-function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}; mu::Float64=NaN, sigma::Float64=NaN)
+function fit_mle{T<:Real}(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Float64=NaN)
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x))
         else
             g = NormalKnownSigma(sigma)
-            fit_mle(g, suffstats(g, x)) 
+            fit_mle(g, suffstats(g, x))
         end
     else
         if isnan(sigma)
@@ -196,16 +196,16 @@ function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}; mu::Float64=NaN, sigma::F
         else
             Normal(mu, sigma)
         end
-    end    
+    end
 end
 
-function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}; mu::Float64=NaN, sigma::Float64=NaN)
+function fit_mle{T<:Real}(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}; mu::Float64=NaN, sigma::Float64=NaN)
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))
         else
             g = NormalKnownSigma(sigma)
-            fit_mle(g, suffstats(g, x, w)) 
+            fit_mle(g, suffstats(g, x, w))
         end
     else
         if isnan(sigma)
@@ -214,6 +214,5 @@ function fit_mle{T<:Real}(::Type{Normal}, x::Array{T}, w::Array{Float64}; mu::Fl
         else
             Normal(mu, sigma)
         end
-    end    
+    end
 end
-

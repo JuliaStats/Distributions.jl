@@ -126,17 +126,17 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, ne, n)
 end
 
-@compat typealias BinomData Tuple{Int, Array}
+@compat typealias BinomData Tuple{Int, AbstractArray}
 
 suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
-suffstats(::Type{Binomial}, data::BinomData, w::Array{Float64}) = suffstats(Binomial, data..., w)
+suffstats(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)
 
 fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::Array{T}, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
 fit_mle(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle(::Type{Binomial}, data::BinomData, w::Array{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+fit_mle(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 
 fit(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, data)
-fit(::Type{Binomial}, data::BinomData, w::Array{Float64}) = fit_mle(Binomial, data, w)
+fit(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, data, w)

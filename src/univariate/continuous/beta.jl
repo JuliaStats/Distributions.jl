@@ -23,7 +23,7 @@ params(d::Beta) = (d.α, d.β)
 
 #### Statistics
 
-mean(d::Beta) = ((α, β) = params(d); α / (α + β)) 
+mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
 function mode(d::Beta)
     (α, β) = params(d)
@@ -64,14 +64,14 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    lbeta(α, β) - (α - 1.0) * digamma(α) - (β - 1.0) * digamma(β) + 
+    lbeta(α, β) - (α - 1.0) * digamma(α) - (β - 1.0) * digamma(β) +
         (s - 2.0) * digamma(s)
 end
 
 
 #### Evaluation
 
-gradlogpdf(d::Beta, x::Float64) = 
+gradlogpdf(d::Beta, x::Float64) =
     ((α, β) = params(d); 0.0 <= x <= 1.0 ? (α - 1.0) / x - (β - 1.0) / (1 - x) : 0.0)
 
 
@@ -81,12 +81,10 @@ gradlogpdf(d::Beta, x::Float64) =
 
 # This is a moment-matching method (not MLE)
 #
-function fit(::Type{Beta}, x::AbstractArray)
+function fit{T<:Real}(::Type{Beta}, x::AbstractArray{T})
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     α = x_bar * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
     β = (1.0 - x_bar) * (((x_bar * (1.0 - x_bar)) / v_bar) - 1.0)
     Beta(α, β)
 end
-
-

@@ -170,7 +170,7 @@ length(ss::DirichletStats) = length(s.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
-function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
+function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
     slogp = zeros(K)
@@ -182,7 +182,7 @@ function suffstats(::Type{Dirichlet}, P::Matrix{Float64})
     DirichletStats(slogp, n)
 end
 
-function suffstats(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64})
+function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
@@ -208,7 +208,7 @@ end
 
 function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     K = length(μ)
-    
+
     α0 = 0.
     for k = 1:K
         @inbounds μk = μ[k]
@@ -218,10 +218,10 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     end
     α0 /= K
 
-    multiply!(μ, α0)     
+    multiply!(μ, α0)
 end
 
-function dirichlet_mle_init(P::Matrix{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
@@ -245,7 +245,7 @@ function dirichlet_mle_init(P::Matrix{Float64})
     _dirichlet_mle_init2(μ, γ)
 end
 
-function dirichlet_mle_init(P::Matrix{Float64}, w::Vector{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
@@ -331,7 +331,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         if debug
             prev_objv = objv
             objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
-            @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n", 
+            @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
                 t, objv, objv - prev_objv, gnorm)
         end
 
@@ -344,7 +344,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 end
 
 
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}; 
+function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     α = isempty(init) ? dirichlet_mle_init(P) : init
@@ -352,7 +352,7 @@ function fit_mle(::Type{Dirichlet}, P::Matrix{Float64};
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64}; 
+function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     n = size(P, 2)
@@ -362,5 +362,3 @@ function fit_mle(::Type{Dirichlet}, P::Matrix{Float64}, w::Vector{Float64};
     elogp = mean_logp(suffstats(Dirichlet, P, w))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
-
-

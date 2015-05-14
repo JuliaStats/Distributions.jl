@@ -86,9 +86,9 @@ immutable PoissonStats <: SufficientStats
     tw::Float64   # total sample weight
 end
 
-@compat suffstats(::Type{Poisson}, x::Array) = PoissonStats(Float64(sum(x)), Float64(length(x)))
+@compat suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}) = PoissonStats(Float64(sum(x)), Float64(length(x)))
 
-function suffstats(::Type{Poisson}, x::Array, w::Array{Float64})
+function suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
     n == length(w) || throw(ArgumentError("Inconsistent array lengths."))
     sx = 0.
@@ -102,4 +102,3 @@ function suffstats(::Type{Poisson}, x::Array, w::Array{Float64})
 end
 
 fit_mle(::Type{Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
-

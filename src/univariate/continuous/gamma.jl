@@ -66,7 +66,7 @@ immutable GammaStats <: SufficientStats
     @compat GammaStats(sx::Real, slogx::Real, tw::Real) = new(Float64(sx), Float64(slogx), Float64(tw))
 end
 
-function suffstats(::Type{Gamma}, x::Array)
+function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})
     sx = 0.
     slogx = 0.
     for xi = x
@@ -76,7 +76,7 @@ function suffstats(::Type{Gamma}, x::Array)
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{Gamma}, x::Array, w::Array{Float64})
+function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)
     if length(w) != n
         throw(ArgumentError("Inconsistent argument dimensions."))
@@ -101,7 +101,7 @@ function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
     1.0 / z
 end
 
-function fit_mle(::Type{Gamma}, ss::GammaStats; 
+function fit_mle(::Type{Gamma}, ss::GammaStats;
     alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1.0e-16)
 
     mx = ss.sx / ss.tw
@@ -110,7 +110,7 @@ function fit_mle(::Type{Gamma}, ss::GammaStats;
 
     a::Float64 = isnan(alpha0) ? 0.5 / (logmx - mlogx) : alpha0
     converged = false
-    
+
     t = 0
     while !converged && t < maxiter
         t += 1

@@ -83,10 +83,8 @@ rand(d::LogNormal) = exp(rand(d.nrmd))
 
 ## Fitting
 
-function fit_mle{T <: Real}(::Type{LogNormal}, x::Array{T})
+function fit_mle{T <: Real}(::Type{LogNormal}, x::AbstractArray{T})
     lx = log(x)
     μ, σ = mean_and_std(lx)
     LogNormal(μ, σ)
 end
-
-

@@ -54,7 +54,7 @@ xval(d::NormalCanon, z::Float64) = d.μ + z / sqrt(d.prec)
 cdf(d::NormalCanon, x::Float64) = Φ(zval(d,x))
 ccdf(d::NormalCanon, x::Float64) = Φc(zval(d,x))
 logcdf(d::NormalCanon, x::Float64) = logΦ(zval(d,x))
-logccdf(d::NormalCanon, x::Float64) = logΦc(zval(d,x))    
+logccdf(d::NormalCanon, x::Float64) = logΦc(zval(d,x))
 
 quantile(d::NormalCanon, p::Float64) = xval(d, Φinv(p))
 cquantile(d::NormalCanon, p::Float64) = xval(d, -Φinv(p))
@@ -65,4 +65,4 @@ invlogccdf(d::NormalCanon, p::Float64) = xval(d, -logΦinv(p))
 #### Sampling
 
 rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.prec)
-rand!{T<:FloatingPoint}(cf::NormalCanon, r::Array{T}) = rand!(convert(Normal, cf), r)
+rand!{T<:Real}(cf::NormalCanon, r::AbstractArray{T}) = rand!(convert(Normal, cf), r)

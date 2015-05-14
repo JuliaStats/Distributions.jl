@@ -75,7 +75,7 @@ immutable ExponentialStats <: SufficientStats
     @compat ExponentialStats(sx::Real, sw::Real) = new(Float64(sx), Float64(sw))
 end
 
-suffstats(::Type{Exponential}, x::Array) = ExponentialStats(sum(x), length(x))
-suffstats(::Type{Exponential}, x::Array, w::Array) = ExponentialStats(dot(x, w), sum(w))
+suffstats{T<:Real}(::Type{Exponential}, x::AbstractArray{T}) = ExponentialStats(sum(x), length(x))
+suffstats{T<:Real}(::Type{Exponential}, x::AbstractArray{T}, w::AbstractArray{Float64}) = ExponentialStats(dot(x, w), sum(w))
 
 fit_mle(::Type{Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)
