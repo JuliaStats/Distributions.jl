@@ -6,12 +6,6 @@ immutable MaxwellBoltzmann <: ContinuousUnivariateDistribution
         a > zero(a) || error("MaxwellBoltzmann: a must be positive")
         @compat new(Float64(a), Chisq(3.0))
     end
-
-    function MaxwellBoltzmann(m::Real, T::Real) # mass and temperature of particles
-        m > zero(m) && T > zero(T) || error("MaxwellBoltzmann: m and T must be positive")
-        @compat new(Float64(sqrt(1.3806488e-23*T/m)), Chisq(3.0))
-    end
-    MaxwellBoltzmann() = new(1.0,Chisq(3.0))
 end
 
 @distr_support MaxwellBoltzmann 0.0 Inf
@@ -40,7 +34,7 @@ entropy(d::MaxwellBoltzmann) = 0.9961541981062054 + log(d.a) # log(sqrt(2π)) + 
 pdf(d::MaxwellBoltzmann, x::Float64) = exp(logpdf(d, x))
 
 function logpdf(d::MaxwellBoltzmann, x::Float64)
-    x > 0.0 ? logsqrt2onπ + 2.0 * log(x) - 0.5 * x^2 / d.a^2 - 3.0 * log(d.a) : -Inf
+    x > 0.0 ? logsqrt2overπ + 2.0 * log(x) - 0.5 * x^2 / d.a^2 - 3.0 * log(d.a) : -Inf
 end
 
 cdf(d::MaxwellBoltzmann, x::Float64) = cdf(d.chisqd, (x/d.a)^2)
