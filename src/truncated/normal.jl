@@ -8,20 +8,20 @@ TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
 
 ### statistics
 
-minimum(d::Truncated{Normal}) = d.lower
-maximum(d::Truncated{Normal}) = d.upper
+minimum(d::Truncated{Normal,Continuous}) = d.lower
+maximum(d::Truncated{Normal,Continuous}) = d.upper
 
 
-function mode(d::Truncated{Normal})
+function mode(d::Truncated{Normal,Continuous})
     μ = mean(d.untruncated)
     d.upper < μ ? d.upper :
     d.lower > μ ? d.lower : μ
 end
 
-modes(d::Truncated{Normal}) = [mode(d)]
+modes(d::Truncated{Normal,Continuous}) = [mode(d)]
 
 
-function mean(d::Truncated{Normal})
+function mean(d::Truncated{Normal,Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -30,7 +30,7 @@ function mean(d::Truncated{Normal})
     μ + ((φ(a) - φ(b)) / d.tp) * σ
 end
 
-function var(d::Truncated{Normal})
+function var(d::Truncated{Normal,Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -46,7 +46,7 @@ function var(d::Truncated{Normal})
     abs2(σ) * (1 + t1 - t2)
 end
 
-function entropy(d::Truncated{Normal})
+function entropy(d::Truncated{Normal,Continuous})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
@@ -64,7 +64,7 @@ end
 ## Benchmarks doesn't seem to show that this specialized
 ## sampler is faster than the generic quantile-based method
 
-# function rand(d::Truncated{Normal})
+# function rand(d::Truncated{Normal,Continuous})
 #     d0 = d.untruncated
 #     μ = mean(d0)
 #     σ = std(d0)
