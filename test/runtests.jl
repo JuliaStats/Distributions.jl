@@ -18,7 +18,8 @@ tests = [
     "vonmisesfisher",
     "mixture",
     "gradlogpdf",
-    "tvpack"]
+    "tvpack",
+    "truncate"]
 
 print_with_color(:blue, "Running tests:\n")
 

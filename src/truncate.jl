@@ -1,5 +1,5 @@
 
-immutable Truncated{D<:UnivariateDistribution} <: ContinuousUnivariateDistribution
+immutable Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
@@ -12,16 +12,15 @@ end
 
 ### Constructors
 
-function Truncated(d::ContinuousUnivariateDistribution, l::Float64, u::Float64)
+function Truncated(d::UnivariateDistribution, l::Float64, u::Float64)
     l < u || error("lower bound should be less than upper bound.")
     lcdf = isinf(l) ? 0.0 : cdf(d, l)
     ucdf = isinf(u) ? 1.0 : cdf(d, u)
     tp = ucdf - lcdf
-    Truncated{typeof(d)}(d, l, u, lcdf, ucdf, tp, log(tp))
+    Truncated{typeof(d),value_support(typeof(d))}(d, l, u, lcdf, ucdf, tp, log(tp))
 end
 
-@compat Truncated(d::ContinuousUnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
-
+@compat Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
 
 ### range and support
 
@@ -60,6 +59,25 @@ logccdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
 
 quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
+pdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
+
+logpdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+
+cdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 : 
+                             x >= d.upper ? 1.0 :
+                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
+
+logcdf(d::Truncated, x::Int) = x <= d.lower ? -Inf :
+                                x >= d.upper ? 0.0 :
+                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+
+ccdf(d::Truncated, x::Int) = x <= d.lower ? 1.0 : 
+                              x >= d.upper ? 0.0 :
+                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
+
+logccdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
+                                 x >= d.upper ? -Inf :
+                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp 
 
 ## random number generation
 
