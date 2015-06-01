@@ -11,7 +11,11 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 @compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded(d::UnivariateDistribution) = isupperbounded(d) && islowerbounded(d)
+isbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = isupperbounded(d) && islowerbounded(d)
+
+islowerbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = minimum(d) > -Inf
+isupperbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = maximum(d) < +Inf
+
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 
@@ -27,61 +31,24 @@ end
 insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
+insupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = minimum(d) <= x <= maximum(d)
+insupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+
+support{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = RealInterval(minimum(d), maximum(d))
+support{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = round(Int, minimum(d)):round(Int, maximum(d))
+
 ## macros to declare support
 
 macro distr_support(D, lb, ub)
-    Dty = eval(D)
-    @assert Dty <: UnivariateDistribution
-
-    # determine whether is it upper & lower bounded
-    D_is_lbounded = !(lb == :(-Inf))
-    D_is_ubounded = !(ub == :Inf)
-    D_is_bounded = D_is_lbounded && D_is_ubounded
-
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(::Union($D, Type{$D})) : :(d::$D)
-
-    insuppcomp = (D_is_lbounded && D_is_ubounded)  ? :(($lb) <= x <= $(ub)) :
-                 (D_is_lbounded && !D_is_ubounded) ? :(x >= $(lb)) :
-                 (!D_is_lbounded && D_is_ubounded) ? :(x <= $(ub)) : :true
-
-    support_funs =
-
-    support_funs = if Dty <: DiscreteUnivariateDistribution
-        if D_is_bounded
-            quote
-                support($(paramdecl)) = round(Int, $lb):round(Int, $ub)
-            end
-        end
-    else
-        quote
-            support($(paramdecl)) = RealInterval($lb, $ub)
-        end
-    end
-
-    insupport_funs = if Dty <: DiscreteUnivariateDistribution
-        quote
-            insupport($(paramdecl), x::Real) = isinteger(x) && ($insuppcomp)
-            insupport($(paramdecl), x::Integer) = $insuppcomp
-        end
-    else
-        @assert Dty <: ContinuousUnivariateDistribution
-        quote
-            insupport($(paramdecl), x::Real) = $insuppcomp
-        end
-    end
+    paramdecl = D_has_constantbounds ? :(d::Union($D, Type{$D})) : :(d::$D)
 
     # overall
     esc(quote
-        islowerbounded(::Union($D, Type{$D})) = $(D_is_lbounded)
-        isupperbounded(::Union($D, Type{$D})) = $(D_is_ubounded)
-        isbounded(::Union($D, Type{$D})) = $(D_is_bounded)
-        minimum(d::$D) = $lb
-        maximum(d::$D) = $ub
-        $(support_funs)
-        $(insupport_funs)
+        minimum($(paramdecl)) = $lb
+        maximum($(paramdecl)) = $ub
     end)
 end
 
