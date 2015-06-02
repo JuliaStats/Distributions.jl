@@ -457,6 +457,7 @@ const continuous_distributions = [
     "laplace",
     "levy",
     "logistic",
+    "maxwellboltzmann",    # MaxwellBoltzmann depends on Chisq
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",

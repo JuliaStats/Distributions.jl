@@ -90,6 +90,7 @@ export
     Levy,
     Logistic,
     LogNormal,
+    MaxwellBoltzmann,
     MixtureModel,
     Multinomial,
     MultivariateNormal,

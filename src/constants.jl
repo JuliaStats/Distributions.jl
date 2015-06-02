@@ -15,3 +15,4 @@ import Base.@math_const
 @math_const loghalf -0.6931471805599453094 log(big(0.5))
 
 @math_const sqrthalfπ 1.2533141373155002512 sqrt(big(0.5)*π)
+@math_const logsqrt2overπ -0.225791352644727432 log(sqrt(big(2.)/π))
