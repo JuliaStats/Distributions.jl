@@ -253,6 +253,7 @@ List of Distributions
     - :ref:`geometric`
     - :ref:`hypergeometric`
     - :ref:`negativebinomial`
+    - :ref:`poissonbinomial`
     - :ref:`poisson`
     - :ref:`skellam`
 
@@ -444,6 +445,30 @@ A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomia
     params(d)       # Get the parameters, i.e. (r, p)
     succprob(d)     # Get the success rate, i.e. p
     failprob(d)     # Get the failure rate, i.e. 1 - p
+
+
+
+.. _poissonbinomial:
+
+Poisson Binomial Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A `Poisson Binomial distribution <http://en.wikipedia.org/wiki/Poisson_binomial_distribution>`_ describes the number of successes in a sequence of independent trials, wherein each trial has a different success rate. It is parameterized by a vector :math:`p` (of length ``K``), where ``K`` is the total number of trials and each entry of :math:`p` corresponds to the success rate of one trial.
+
+.. math::
+
+    P(X = k) = \sum\limits_{A\in F_k} \prod\limits_{i\in A} p[i] \prod\limits_{j\in A^c} (1-p[j]), \quad \text{ for } k = 0,1,2,\ldots,K.
+
+Here, :math:`F_k` is the set of all subsets of ``k`` integers that can be selected from :math:`\{1,2,3,...,K\}`.
+
+.. code-block:: julia
+
+    PoissonBinomial(p)   # Poisson Binomial distribution with success rate vector p
+
+    params(d)            # Get the parameters, i.e. (p,)
+    succprob(d)          # Get the vector of success rates, i.e. p
+    failprob(d)          # Get the vector of failure rates, i.e. 1-p
+
 
 
 .. _poisson:
