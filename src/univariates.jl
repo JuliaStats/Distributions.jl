@@ -11,15 +11,15 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 @compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = isupperbounded(d) && islowerbounded(d)
+isbounded(d::Union(UnivariateDistribution,Type{UnivariateDistribution})) = isupperbounded(d) && islowerbounded(d)
 
-islowerbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = minimum(d) > -Inf
-isupperbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = maximum(d) < +Inf
+islowerbounded(d::Union(UnivariateDistribution,Type{UnivariateDistribution})) = minimum(d) > -Inf
+isupperbounded(d::Union(UnivariateDistribution,Type{UnivariateDistribution})) = maximum(d) < +Inf
 
 hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
 hasfinitesupport(d::ContinuousUnivariateDistribution) = false
 
-function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+function insupport!(r::AbstractArray, d::Union(UnivariateDistribution,Type{UnivariateDistribution}), X::AbstractArray)
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -28,14 +28,18 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type
     return r
 end
 
-insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
+insupport(d::Union(UnivariateDistribution,Type{UnivariateDistribution}), X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
-insupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = minimum(d) <= x <= maximum(d)
-insupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union(ContinuousUnivariateDistribution,Type{ContinuousUnivariateDistribution}),x::Real) =
+  minimum(d) <= x <= maximum(d)
+insupport(d::Union(DiscreteUnivariateDistribution,Type{DiscreteUnivariateDistribution}),x::Real) =
+  isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = RealInterval(minimum(d), maximum(d))
-support{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = round(Int, minimum(d)):round(Int, maximum(d))
+support(d::Union(ContinuousUnivariateDistribution,Type{ContinuousUnivariateDistribution})) =
+  RealInterval(minimum(d), maximum(d))
+support(d::Union(DiscreteUnivariateDistribution,Type{DiscreteUnivariateDistribution})) =
+  round(Int, minimum(d)):round(Int, maximum(d))
 
 ## macros to declare support
 
