@@ -16,8 +16,8 @@ isbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = isupperbounded(d) &&
 islowerbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = minimum(d) > -Inf
 isupperbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = maximum(d) < +Inf
 
-hasfinitesupport(d::DiscreteUnivariateDistribution) = isbounded(d)
-hasfinitesupport(d::ContinuousUnivariateDistribution) = false
+hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = isbounded(d)
+hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = false
 
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
     length(r) == length(X) ||
