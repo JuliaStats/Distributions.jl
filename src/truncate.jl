@@ -30,7 +30,7 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport(d::Truncated, x::Real) = 
+insupport{D<:UnivariateDistribution,S<:ValueSupport}(d::Truncated{D,S}, x::Real) =
     d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 
