@@ -4,8 +4,8 @@ immutable Binomial <: DiscreteUnivariateDistribution
     p::Float64
 
     function Binomial(n::Int, p::Float64)
-        n >= 0 || error("n must be non-negative.")
-        0.0 <= p <= 1.0 || error("p must be in [0, 1]")
+        n >= 0 || error("n must be non-negative but is $n.")
+        0.0 <= p <= 1.0 || error("p must be in [0, 1] but is $p")
         new(n, p)
     end
 
@@ -76,9 +76,37 @@ immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
 end
 
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1.0 - d.p))
-nextpdf(s::RecursiveBinomProbEvaluator, p::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * p
-_pdf!(r::AbstractArray, d::Binomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveBinomProbEvaluator(d))
+nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
 
+function _pdf!(r::AbstractArray, d::Binomial, X::UnitRange)
+    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+    if succprob(d) <= 0.5
+        # fill normal
+        rpe = RecursiveBinomProbEvaluator(d::Binomial)
+
+        # fill central part: with non-zero pdf
+        if vl <= vr
+            fm1 = vfirst - 1
+            r[vl - fm1] = pv = pdf(d, vl)
+            for v = (vl+1):vr
+                r[v - fm1] = pv = nextpdf(rpe, pv, v)
+            end
+        end
+    else
+        # fill reversed to avoid 1/0 for d.p==1.
+        rpe = RecursiveBinomProbEvaluator(d.n, (1.0 - d.p) / d.p)
+
+        # fill central part: with non-zero pdf
+        if vl <= vr
+            fm1 = vfirst - 1
+            r[vr - fm1] = pv = pdf(d, vr)
+            for v = (vr-1):-1:vl
+                r[v - fm1] = pv = nextpdf(rpe, pv, d.n-v)
+            end
+        end
+    end
+    return r
+end
 
 function mgf(d::Binomial, t::Real)
     n, p = params(d)
