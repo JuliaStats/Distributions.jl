@@ -1,6 +1,6 @@
 # Useful math constants for distributions
 
-import Base.@irrational
+import Compat.@irrational
 
 @irrational halfπ  1.5707963267948966192 big(π) * 0.5
 @irrational twoπ   6.2831853071795864769 big(2.) * π
