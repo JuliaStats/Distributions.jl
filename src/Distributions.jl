@@ -121,6 +121,7 @@ export
     Triweight,
     Truncated,
     TruncatedNormal,
+    ZeroInflated,
     Uniform,
     UnivariateGMM,
     VonMises,
@@ -271,6 +272,7 @@ include("samplers.jl")
 
 # others
 include("truncate.jl")
+include("zeroinflate.jl")
 include("qq.jl")
 include("estimators.jl")
 include("testutils.jl")
