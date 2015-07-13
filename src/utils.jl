@@ -1,8 +1,8 @@
 
 ## a type to indicate zero vector
 
-immutable ZeroVector{T} 
-    len::Int 
+immutable ZeroVector{T}
+    len::Int
 end
 
 ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
@@ -13,10 +13,10 @@ full{T}(v::ZeroVector{T}) = zeros(T, v.len)
 
 convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
 
-+ (x::DenseArray, v::ZeroVector) = x
-- (x::DenseArray, v::ZeroVector) = x
-.+ (x::DenseArray, v::ZeroVector) = x
-.- (x::DenseArray, v::ZeroVector) = x
++(x::DenseArray, v::ZeroVector) = x
+-(x::DenseArray, v::ZeroVector) = x
+.+(x::DenseArray, v::ZeroVector) = x
+.-(x::DenseArray, v::ZeroVector) = x
 
 
 ##### Utility functions
@@ -53,7 +53,7 @@ function isprobvec(p::Vector{Float64})
         if pi < 0
             return false
         end
-    end      
+    end
     return abs(s - 1.0) <= 1.0e-12
 end
 
@@ -117,7 +117,4 @@ function trycholfact(a::Matrix{Float64})
         return e
     end
 end
-
-
-
 
