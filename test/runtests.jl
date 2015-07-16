@@ -7,6 +7,7 @@ tests = [
     "continuous",
     "fit",
     "multinomial",
+    "binomial",
     "poissonbinomial",
     "dirichlet",
     "mvnormal",

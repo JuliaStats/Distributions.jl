@@ -316,7 +316,8 @@ for fun in [:pdf, :logpdf,
     end
 end
 
-function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
+
+function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
     vl = vfirst = first(X)
     vr = vlast = last(X)
     n = vlast - vfirst + 1
@@ -352,6 +353,17 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
             r[i] = 0.0
         end
     end
+    return vl, vr, vfirst, vlast
+end
+
+function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
+    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+
+    # fill central part: with non-zero pdf
+    fm1 = vfirst - 1
+    for v = vl:vr
+        r[v - fm1] = pdf(d, v)
+    end
     return r
 end
 
@@ -359,28 +371,7 @@ end
 abstract RecursiveProbabilityEvaluator
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
-    vl = vfirst = first(X)
-    vr = vlast = last(X)
-    n = vlast - vfirst + 1
-    if islowerbounded(d)
-        lb = minimum(d)
-        if vl < lb
-            vl = lb
-        end
-    end
-    if isupperbounded(d)
-        ub = maximum(d)
-        if vr > ub
-            vr = ub
-        end
-    end
-
-    # fill left part
-    if vl > vfirst
-        for i = 1:(vl - vfirst)
-            r[i] = 0.0
-        end
-    end
+    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
     if vl <= vr
@@ -391,12 +382,6 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
         end
     end
 
-    # fill right part
-    if vr < vlast
-        for i = (vr-vfirst+2):n
-            r[i] = 0.0
-        end
-    end
     return r
 end
 
