@@ -24,7 +24,7 @@ Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 function _wishart_c0(df::Float64, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
-    h_df * (logdet(S) + p * logtwo) + lpgamma(p, h_df)
+    h_df * (logdet(S) + p * logtwo) + logmvgamma(p, h_df)
 end
 
 
