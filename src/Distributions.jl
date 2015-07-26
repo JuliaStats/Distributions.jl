@@ -2,6 +2,7 @@ module Distributions
 
 using ArrayViews
 using PDMats
+using StatsFuns
 using StatsBase
 using Compat
 
@@ -249,9 +250,6 @@ export
 include("common.jl")
 
 # implementation helpers
-include("constants.jl")
-include("specialfuns.jl")
-include("tvpack.jl")
 include("utils.jl")
 include("rmath.jl")
 

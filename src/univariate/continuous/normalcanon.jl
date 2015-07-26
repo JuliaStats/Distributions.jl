@@ -51,15 +51,15 @@ logpdf(d::NormalCanon, x::Float64) = 0.5 * (log(d.prec) - log2π - d.prec * abs2
 zval(d::NormalCanon, x::Float64) = (x - d.μ) * sqrt(d.prec)
 xval(d::NormalCanon, z::Float64) = d.μ + z / sqrt(d.prec)
 
-cdf(d::NormalCanon, x::Float64) = Φ(zval(d,x))
-ccdf(d::NormalCanon, x::Float64) = Φc(zval(d,x))
-logcdf(d::NormalCanon, x::Float64) = logΦ(zval(d,x))
-logccdf(d::NormalCanon, x::Float64) = logΦc(zval(d,x))
+cdf(d::NormalCanon, x::Float64) = normcdf(zval(d,x))
+ccdf(d::NormalCanon, x::Float64) = normccdf(zval(d,x))
+logcdf(d::NormalCanon, x::Float64) = normlogcdf(zval(d,x))
+logccdf(d::NormalCanon, x::Float64) = normlogccdf(zval(d,x))
 
-quantile(d::NormalCanon, p::Float64) = xval(d, Φinv(p))
-cquantile(d::NormalCanon, p::Float64) = xval(d, -Φinv(p))
-invlogcdf(d::NormalCanon, p::Float64) = xval(d, logΦinv(p))
-invlogccdf(d::NormalCanon, p::Float64) = xval(d, -logΦinv(p))
+quantile(d::NormalCanon, p::Float64) = xval(d, norminvcdf(p))
+cquantile(d::NormalCanon, p::Float64) = xval(d, norminvccdf(p))
+invlogcdf(d::NormalCanon, lp::Float64) = xval(d, norminvlogcdf(lp))
+invlogccdf(d::NormalCanon, lp::Float64) = xval(d, norminvlogccdf(lp))
 
 
 #### Sampling

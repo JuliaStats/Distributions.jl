@@ -45,7 +45,7 @@ function pdf(d::InverseGaussian, x::Float64)
         return sqrt(λ / (twoπ * x^3)) * exp(-λ * (x - μ)^2 / (2.0 * μ^2 * x))
     else
         return 0.0
-    end 
+    end
 end
 
 function logpdf(d::InverseGaussian, x::Float64)
@@ -62,7 +62,7 @@ function cdf(d::InverseGaussian, x::Float64)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
-        return Φ(u * (v - 1.0)) + exp(2.0 * λ / μ) * Φ(-u * (v + 1.0))
+        return normcdf(u * (v - 1.0)) + exp(2.0 * λ / μ) * normcdf(-u * (v + 1.0))
     else
         return 0.0
     end
@@ -73,7 +73,7 @@ function ccdf(d::InverseGaussian, x::Float64)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
-        Φc(u * (v - 1.0)) - exp(2.0 * λ / μ) * Φ(-u * (v + 1.0))
+        normccdf(u * (v - 1.0)) - exp(2.0 * λ / μ) * normcdf(-u * (v + 1.0))
     else
         return 1.0
     end
@@ -84,8 +84,8 @@ function logcdf(d::InverseGaussian, x::Float64)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
-        a = logΦ(u * (v -1.0)) 
-        b = 2.0 * λ / μ + logΦ(-u * (v + 1.0))
+        a = normlogcdf(u * (v -1.0))
+        b = 2.0 * λ / μ + normlogcdf(-u * (v + 1.0))
         a + log1pexp(b - a)
     else
         return -Inf
@@ -97,8 +97,8 @@ function logccdf(d::InverseGaussian, x::Float64)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
-        a = logΦc(u * (v - 1.0)) 
-        b = 2.0 * λ / μ + logΦ(-u * (v + 1.0))
+        a = normlogccdf(u * (v - 1.0))
+        b = 2.0 * λ / μ + normlogcdf(-u * (v + 1.0))
         a + log1mexp(b - a)
     else
         return 0.0
@@ -110,7 +110,7 @@ end
 #### Sampling
 
 # rand method from:
-#   John R. Michael, William R. Schucany and Roy W. Haas (1976) 
+#   John R. Michael, William R. Schucany and Roy W. Haas (1976)
 #   Generating Random Variates Using Transformations with Multiple Roots
 #   The American Statistician , Vol. 30, No. 2, pp. 88-90
 function rand(d::InverseGaussian)
@@ -123,4 +123,3 @@ function rand(d::InverseGaussian)
     u = rand()
     u >= p1 ? μ^2 / x1 : x1
 end
-

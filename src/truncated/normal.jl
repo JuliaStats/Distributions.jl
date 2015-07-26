@@ -27,7 +27,7 @@ function mean(d::Truncated{Normal,Continuous})
     σ = std(d0)
     a = (d.lower - μ) / σ
     b = (d.upper - μ) / σ
-    μ + ((φ(a) - φ(b)) / d.tp) * σ
+    μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
 end
 
 function var(d::Truncated{Normal,Continuous})
@@ -37,8 +37,8 @@ function var(d::Truncated{Normal,Continuous})
     a = (d.lower - μ) / σ
     b = (d.upper - μ) / σ
     z = d.tp
-    φa = φ(a)
-    φb = φ(b)
+    φa = normpdf(a)
+    φb = normpdf(b)
     aφa = isinf(a) ? 0.0 : a * φa
     bφb = isinf(b) ? 0.0 : b * φb
     t1 = (aφa - bφb) / z
@@ -53,8 +53,8 @@ function entropy(d::Truncated{Normal,Continuous})
     σ = std(d0)
     a = (d.lower - μ) / σ
     b = (d.upper - μ) / σ
-    aφa = isinf(a) ? 0.0 : a * φ(a)
-    bφb = isinf(b) ? 0.0 : b * φ(b)
+    aφa = isinf(a) ? 0.0 : a * normpdf(a)
+    bφb = isinf(b) ? 0.0 : b * normpdf(b)
     0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
 end
 
@@ -87,7 +87,7 @@ end
 #         end
 #         return r
 
-#     else 
+#     else
 #         span = ub - lb
 #         if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
 #             a = (lb + sqrt(lb^2 + 4.0))/2.0
@@ -107,7 +107,7 @@ end
 #                     return -r
 #                 end
 #             end
-#         else 
+#         else
 #             while true
 #                 r = lb + rand() * (ub - lb)
 #                 u = rand()
@@ -125,4 +125,3 @@ end
 #         end
 #     end
 # end
-

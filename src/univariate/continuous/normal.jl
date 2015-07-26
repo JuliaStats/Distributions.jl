@@ -37,21 +37,18 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 #### Evaluation
 
-zval(d::Normal, x::Float64) = (x - d.μ) / d.σ
-xval(d::Normal, z::Float64) = d.μ + d.σ * z
+pdf(d::Normal, x::Float64) = normpdf(d.μ, d.σ, x)
+logpdf(d::Normal, x::Float64) = normlogpdf(d.μ, d.σ, x)
 
-pdf(d::Normal, x::Float64) = φ(zval(d,x))/d.σ
-logpdf(d::Normal, x::Float64) = logφ(zval(d,x)) - log(d.σ)
+cdf(d::Normal, x::Float64) = normcdf(d.μ, d.σ, x)
+ccdf(d::Normal, x::Float64) = normccdf(d.μ, d.σ, x)
+logcdf(d::Normal, x::Float64) = normlogcdf(d.μ, d.σ, x)
+logccdf(d::Normal, x::Float64) = normlogccdf(d.μ, d.σ, x)
 
-cdf(d::Normal, x::Float64) = Φ(zval(d,x))
-ccdf(d::Normal, x::Float64) = Φc(zval(d,x))
-logcdf(d::Normal, x::Float64) = logΦ(zval(d,x))
-logccdf(d::Normal, x::Float64) = logΦc(zval(d,x))
-
-quantile(d::Normal, p::Float64) = xval(d, Φinv(p))
-cquantile(d::Normal, p::Float64) = xval(d, -Φinv(p))
-invlogcdf(d::Normal, p::Float64) = xval(d, logΦinv(p))
-invlogccdf(d::Normal, p::Float64) = xval(d, -logΦinv(p))
+quantile(d::Normal, p::Float64) = norminvcdf(d.μ, d.σ, p)
+cquantile(d::Normal, p::Float64) = norminvccdf(d.μ, d.σ, p)
+invlogcdf(d::Normal, lp::Float64) = norminvlogcdf(d.μ, d.σ, lp)
+invlogccdf(d::Normal, lp::Float64) = norminvlogccdf(d.μ, d.σ, lp)
 
 gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 
