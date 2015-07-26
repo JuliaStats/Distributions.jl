@@ -65,4 +65,3 @@ abstract IncompleteDistribution
 
 typealias DistributionType{D<:Distribution} Type{D}
 typealias IncompleteFormulation Union(DistributionType,IncompleteDistribution)
-
