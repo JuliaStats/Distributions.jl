@@ -403,6 +403,42 @@ end
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) =
     _loglikelihood(d, X)
 
+
+### macros to use StatsFuns for method implementation
+
+macro _delegate_statsfuns(D, fpre, T, psyms...)
+    # function names from StatsFuns
+    fpdf = symbol(string(fpre, "pdf"))
+    flogpdf = symbol(string(fpre, "logpdf"))
+    fcdf = symbol(string(fpre, "cdf"))
+    fccdf = symbol(string(fpre, "ccdf"))
+    flogcdf = symbol(string(fpre, "logcdf"))
+    flogccdf = symbol(string(fpre, "logccdf"))
+    finvcdf = symbol(string(fpre, "invcdf"))
+    finvccdf = symbol(string(fpre, "invccdf"))
+    finvlogcdf = symbol(string(fpre, "invlogcdf"))
+    finvlogccdf = symbol(string(fpre, "invlogccdf"))
+
+    # parameter fields
+    pargs = [Expr(:(.), :d, Expr(:quote, s)) for s in psyms]
+
+    esc(quote
+        pdf(d::$D, x::$T) = $(fpdf)($(pargs...), x)
+        logpdf(d::$D, x::$T) = $(flogpdf)($(pargs...), x)
+
+        cdf(d::$D, x::$T) = $(fcdf)($(pargs...), x)
+        ccdf(d::$D, x::$T) = $(fccdf)($(pargs...), x)
+        logcdf(d::$D, x::$T) = $(flogcdf)($(pargs...), x)
+        logccdf(d::$D, x::$T) = $(flogccdf)($(pargs...), x)
+
+        quantile(d::$D, p::Float64) = convert($T, $(finvcdf)($(pargs...), p))
+        cquantile(d::$D, p::Float64) = convert($T, $(finvccdf)($(pargs...), p))
+        invlogcdf(d::$D, lp::Float64) = convert($T, $(finvlogcdf)($(pargs...), lp))
+        invlogccdf(d::$D, lp::Float64) = convert($T, $(finvlogccdf)($(pargs...), lp))
+    end)
+end
+
+
 ##### specific distributions #####
 
 const discrete_distributions = [

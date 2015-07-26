@@ -37,18 +37,7 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 #### Evaluation
 
-pdf(d::Normal, x::Float64) = normpdf(d.μ, d.σ, x)
-logpdf(d::Normal, x::Float64) = normlogpdf(d.μ, d.σ, x)
-
-cdf(d::Normal, x::Float64) = normcdf(d.μ, d.σ, x)
-ccdf(d::Normal, x::Float64) = normccdf(d.μ, d.σ, x)
-logcdf(d::Normal, x::Float64) = normlogcdf(d.μ, d.σ, x)
-logccdf(d::Normal, x::Float64) = normlogccdf(d.μ, d.σ, x)
-
-quantile(d::Normal, p::Float64) = norminvcdf(d.μ, d.σ, p)
-cquantile(d::Normal, p::Float64) = norminvccdf(d.μ, d.σ, p)
-invlogcdf(d::Normal, lp::Float64) = norminvlogcdf(d.μ, d.σ, lp)
-invlogccdf(d::Normal, lp::Float64) = norminvlogccdf(d.μ, d.σ, lp)
+@_delegate_statsfuns Normal norm Float64 μ σ
 
 gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 

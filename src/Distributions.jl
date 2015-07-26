@@ -10,8 +10,9 @@ import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
-import Base.LinAlg: Cholesky
 import Base.Math.@horner
+import Base.LinAlg: Cholesky
+
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler, loglikelihood
 import PDMats: dim, PDMat, invquad
