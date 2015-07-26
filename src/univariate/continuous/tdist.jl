@@ -6,8 +6,6 @@ immutable TDist <: ContinuousUnivariateDistribution
     end
 end
 
-@_jl_dist_1p TDist t
-
 @distr_support TDist -Inf Inf
 
 
@@ -44,7 +42,12 @@ function entropy(d::TDist)
 end
 
 
-#### Evaluation
+#### Evaluation & Sampling
+
+@_delegate_statsfuns TDist tdist df
+
+rand(d::TDist) = StatsFuns.Rmath.tdistrand(d.df)
+
 function cf(d::TDist, t::Real)
     t == 0 && return complex(1.0)
     h = d.df/2
@@ -54,4 +57,3 @@ function cf(d::TDist, t::Real)
 end
 
 gradlogpdf(d::TDist, x::Float64) = -((d.df + 1.0) * x) / (x^2 + d.df)
-

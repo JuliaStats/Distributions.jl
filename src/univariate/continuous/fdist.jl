@@ -8,10 +8,7 @@ immutable FDist <: ContinuousUnivariateDistribution
     end
 end
 
-@_jl_dist_2p FDist f
-
 @distr_support FDist 0.0 Inf
-
 
 #### Parameters
 
@@ -49,7 +46,7 @@ function kurtosis(d::FDist)
     end
 end
 
-function entropy(d::FDist) 
+function entropy(d::FDist)
     (d1, d2) = params(d)
     hd1 = d1 * 0.5
     hd2 = d2 * 0.5
@@ -58,3 +55,9 @@ function entropy(d::FDist)
         (1.0 - hd1) * digamma(hd1) + (-1.0 - hd2) * digamma(hd2) +
         hs * digamma(hs)
 end
+
+#### Evaluation & Sampling
+
+@_delegate_statsfuns FDist fdist d1 d2
+
+rand(d::FDist) = StatsFuns.Rmath.fdistrand(d.d1, d.d2)

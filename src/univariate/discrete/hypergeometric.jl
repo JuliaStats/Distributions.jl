@@ -21,8 +21,6 @@ immutable Hypergeometric <: DiscreteUnivariateDistribution
     @compat Hypergeometric(ns::Real, nf::Real, n::Real) = Hypergeometric(round(Int, ns), round(Int, nf), round(Int, n))
 end
 
-@_jl_dist_3p Hypergeometric hyper
-
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 
@@ -59,7 +57,11 @@ function kurtosis(d::Hypergeometric)
 end
 
 
-### Evaluation
+### Evaluation & Sampling
+
+@_delegate_statsfuns Hypergeometric hyper ns nf n
+
+rand(d::Hypergeometric) = convert(Int, StatsFuns.Rmath.hyperrand(d.ns, d.nf, d.n))
 
 immutable RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
     ns::Float64
@@ -69,8 +71,7 @@ end
 
 RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvaluator(d.ns, d.nf, d.n)
 
-nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) = 
+nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
     ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
 
 _pdf!(r::AbstractArray, d::Hypergeometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
-

@@ -11,8 +11,6 @@ immutable Beta <: ContinuousUnivariateDistribution
     Beta() = new(1.0, 1.0)
 end
 
-@_jl_dist_2p Beta beta
-
 @distr_support Beta 0.0 1.0
 
 
@@ -71,11 +69,18 @@ end
 
 #### Evaluation
 
+@_delegate_statsfuns Beta beta α β
+
 gradlogpdf(d::Beta, x::Float64) =
     ((α, β) = params(d); 0.0 <= x <= 1.0 ? (α - 1.0) / x - (β - 1.0) / (1 - x) : 0.0)
 
 
-## Fit model
+#### Sampling
+
+rand(d::Beta) = StatsFuns.Rmath.betarand(d.α, d.β)
+
+
+#### Fit model
 
 # TODO: add MLE method (should be similar to Dirichlet)
 

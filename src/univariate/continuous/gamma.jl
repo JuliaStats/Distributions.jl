@@ -11,8 +11,6 @@ immutable Gamma <: ContinuousUnivariateDistribution
     Gamma() = new(1.0, 1.0)
 end
 
-@_jl_dist_2p Gamma gamma
-
 @distr_support Gamma 0.0 Inf
 
 
@@ -50,10 +48,14 @@ mgf(d::Gamma, t::Real) = (1.0 - t * d.β)^(-d.α)
 cf(d::Gamma, t::Real) = (1.0 - im * t * d.β)^(-d.α)
 
 
-#### Evaluation
+#### Evaluation & Sampling
+
+@_delegate_statsfuns Gamma gamma α β
 
 gradlogpdf(d::Gamma, x::Float64) =
     insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.β : 0.0
+
+rand(d::Gamma) = StatsFuns.Rmath.gammarand(d.α, d.β)
 
 
 #### Fit model

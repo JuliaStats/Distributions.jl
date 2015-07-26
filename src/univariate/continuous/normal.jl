@@ -37,7 +37,7 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 #### Evaluation
 
-@_delegate_statsfuns Normal norm Float64 μ σ
+@_delegate_statsfuns Normal norm μ σ
 
 gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 

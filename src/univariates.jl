@@ -406,7 +406,10 @@ loglikelihood(d::UnivariateDistribution, X::AbstractArray) =
 
 ### macros to use StatsFuns for method implementation
 
-macro _delegate_statsfuns(D, fpre, T, psyms...)
+macro _delegate_statsfuns(D, fpre, psyms...)
+    dt = eval(D)
+    T = dt <: DiscreteUnivariateDistribution ? :Int : :Float64
+
     # function names from StatsFuns
     fpdf = symbol(string(fpre, "pdf"))
     flogpdf = symbol(string(fpre, "logpdf"))
@@ -431,10 +434,10 @@ macro _delegate_statsfuns(D, fpre, T, psyms...)
         logcdf(d::$D, x::$T) = $(flogcdf)($(pargs...), x)
         logccdf(d::$D, x::$T) = $(flogccdf)($(pargs...), x)
 
-        quantile(d::$D, p::Float64) = convert($T, $(finvcdf)($(pargs...), p))
-        cquantile(d::$D, p::Float64) = convert($T, $(finvccdf)($(pargs...), p))
-        invlogcdf(d::$D, lp::Float64) = convert($T, $(finvlogcdf)($(pargs...), lp))
-        invlogccdf(d::$D, lp::Float64) = convert($T, $(finvlogccdf)($(pargs...), lp))
+        quantile(d::$D, q::Float64) = convert($T, $(finvcdf)($(pargs...), q))
+        cquantile(d::$D, q::Float64) = convert($T, $(finvccdf)($(pargs...), q))
+        invlogcdf(d::$D, lq::Float64) = convert($T, $(finvlogcdf)($(pargs...), lq))
+        invlogccdf(d::$D, lq::Float64) = convert($T, $(finvlogccdf)($(pargs...), lq))
     end)
 end
 

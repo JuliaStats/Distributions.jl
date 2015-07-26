@@ -19,8 +19,6 @@ immutable NegativeBinomial <: DiscreteUnivariateDistribution
     NegativeBinomial() = new(1.0, 0.5)
 end
 
-@_jl_dist_2p NegativeBinomial nbinom
-
 @distr_support NegativeBinomial 0 Inf
 
 ### Parameters
@@ -46,7 +44,11 @@ kurtosis(d::NegativeBinomial) = (p = succprob(d); 6.0 / d.r + (p * p) / ((1.0 - 
 mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1.0 - p) * (d.r - 1.) / p))
 
 
-### Evaluation
+### Evaluation & Sampling
+
+@_delegate_statsfuns NegativeBinomial nbinom r p
+
+rand(d::NegativeBinomial) = convert(Int, StatsFuns.Rmath.nbinomrand(d.r, d.p))
 
 immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64
@@ -66,5 +68,3 @@ function cf(d::NegativeBinomial, t::Real)
     r, p = params(d)
     return (((1.0 - p) * cis(t)) / (1.0 - p * cis(t)))^r
 end
-
-

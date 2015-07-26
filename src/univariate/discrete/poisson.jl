@@ -10,8 +10,6 @@ immutable Poisson <: DiscreteUnivariateDistribution
     Poisson() = new(1.0)
 end
 
-@_jl_dist_1p Poisson pois
-
 @distr_support Poisson 0 Inf
 
 
@@ -59,6 +57,10 @@ end
 
 
 ### Evaluation
+
+@_delegate_statsfuns Poisson pois λ
+
+rand(d::Poisson) = convert(Int, StatsFuns.Rmath.poisrand(d.λ))
 
 immutable RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64

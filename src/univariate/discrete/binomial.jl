@@ -16,9 +16,6 @@ end
 
 @distr_support Binomial 0 d.n
 
-@_jl_dist_2p Binomial binom
-
-
 #### Parameters
 
 ntrials(d::Binomial) = d.n
@@ -68,7 +65,11 @@ function entropy(d::Binomial; approx::Bool=false)
 end
 
 
-#### Evaluation
+#### Evaluation & Sampling
+
+@_delegate_statsfuns Binomial binom n p
+
+rand(d::Binomial) = convert(Int, StatsFuns.Rmath.binomrand(d.n, d.p))
 
 immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
     n::Int

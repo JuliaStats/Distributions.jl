@@ -7,10 +7,7 @@ immutable Chisq <: ContinuousUnivariateDistribution
     end
 end
 
-@_jl_dist_1p Chisq chisq
-
 @distr_support Chisq 0.0 Inf
-
 
 #### Parameters
 
@@ -47,9 +44,15 @@ end
 
 #### Evaluation
 
+@_delegate_statsfuns Chisq chisq df
+
 mgf(d::Chisq, t::Real) = (1.0 - 2.0 * t)^(-dof(d) / 2.0)
 
 cf(d::Chisq, t::Real) = (1.0 - 2.0 * im * t)^(-dof(d) / 2.0)
 
 gradlogpdf(d::Chisq, x::Float64) =  x >= 0.0 ? (dof(d) / 2.0 - 1) / x - 0.5 : 0.0
 
+
+#### Sampling
+
+rand(d::Chisq) = StatsFuns.Rmath.chisqrand(d.df)
