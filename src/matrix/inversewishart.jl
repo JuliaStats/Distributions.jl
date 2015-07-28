@@ -79,7 +79,7 @@ rand(d::InverseWishart) = inv(rand(Wishart(d.df, inv(d.Ψ))))
 function _rand!{M<:Matrix}(d::InverseWishart, X::AbstractArray{M})
     wd = Wishart(d.df, inv(d.Ψ))
     for i in 1:length(X)
-        X[i] = inv(rand(wd))
+        X[i] = inv(cholfact!(rand(wd)))
     end
     return X
 end
