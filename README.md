@@ -13,6 +13,9 @@ A Julia package for probability distributions and associated functions. Particul
 * Sampling from population or from a distribution
 * Maximum likelihood estimation
 
+**Note:** The functionalities related to conjugate priors have been moved to the [ConjugatePriors package](https://github.com/JuliaStats/ConjugatePriors.jl).
+
+
 #### Resources
 
 * **Documentation**: <http://distributionsjl.readthedocs.org/en/latest/>
