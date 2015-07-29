@@ -1,28 +1,30 @@
 immutable LogNormal <: ContinuousUnivariateDistribution
-    nrmd::Normal
+    μ::Float64
+    σ::Float64
 
-    LogNormal(μ::Real, σ::Real) = new(Normal(μ, σ))
-    LogNormal(μ::Real) = new(Normal(μ))
-    LogNormal() = new(Normal())
+    function LogNormal(μ::Real, σ::Real)
+        σ > zero(σ) || error("σ must be positive")
+        @compat new(Float64(μ), Float64(σ))
+    end
+
+    LogNormal(μ::Real) = @compat new(Float64(μ), 1.0)
+    LogNormal() = new(0.0, 1.0)
 end
 
 @distr_support LogNormal 0.0 Inf
 
-show(io::IO, d::LogNormal) = ((μ, σ) = params(d); show_oneline(io, d, [(:μ, μ), (:σ, σ)]))
-
 #### Parameters
 
-params(d::LogNormal) = params(d.nrmd)
-
+params(d::LogNormal) = (d.μ, d.σ)
 
 #### Statistics
 
-meanlogx(d::LogNormal) = mean(d.nrmd)
-varlogx(d::LogNormal) = var(d.nrmd)
-stdlogx(d::LogNormal) = std(d.nrmd)
+meanlogx(d::LogNormal) = d.μ
+varlogx(d::LogNormal) = abs2(d.σ)
+stdlogx(d::LogNormal) = d.σ
 
 mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + 0.5 * σ^2))
-median(d::LogNormal) = exp(median(d.nrmd))
+median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
 
 function var(d::LogNormal)
@@ -54,18 +56,18 @@ end
 
 #### Evalution
 
-pdf(d::LogNormal, x::Float64) = pdf(d.nrmd, log(x)) / x
-logpdf(d::LogNormal, x::Float64) = (lx = log(x); logpdf(d.nrmd, lx) - lx)
+pdf(d::LogNormal, x::Float64) = normpdf(d.μ, d.σ, log(x)) / x
+logpdf(d::LogNormal, x::Float64) = (lx = log(x); normlogpdf(d.μ, d.σ, lx) - lx)
 
-cdf(d::LogNormal, x::Float64) = x > 0.0 ? cdf(d.nrmd, log(x)) : 0.0
-ccdf(d::LogNormal, x::Float64) = x > 0.0 ? ccdf(d.nrmd, log(x)) : 1.0
-logcdf(d::LogNormal, x::Float64) = x > 0.0 ? logcdf(d.nrmd, log(x)) : -Inf
-logccdf(d::LogNormal, x::Float64) = x > 0.0 ? logccdf(d.nrmd, log(x)) : 0.0
+cdf(d::LogNormal, x::Float64) = x > 0.0 ? normcdf(d.μ, d.σ, log(x)) : 0.0
+ccdf(d::LogNormal, x::Float64) = x > 0.0 ? normccdf(d.μ, d.σ, log(x)) : 1.0
+logcdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogcdf(d.μ, d.σ, log(x)) : -Inf
+logccdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogccdf(d.μ, d.σ, log(x)) : 0.0
 
-quantile(d::LogNormal, p::Float64) = exp(quantile(d.nrmd, p))
-cquantile(d::LogNormal, p::Float64) = exp(cquantile(d.nrmd, p))
-invlogcdf(d::LogNormal, lp::Float64) = exp(invlogcdf(d.nrmd, lp))
-invlogccdf(d::LogNormal, lp::Float64) = exp(invlogccdf(d.nrmd, lp))
+quantile(d::LogNormal, q::Float64) = exp(norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Float64) = exp(norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogNormal, lq::Float64) = exp(norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogNormal, lq::Float64) = exp(norminvlogccdf(d.μ, d.σ, lq))
 
 function gradlogpdf(d::LogNormal, x::Float64)
     (μ, σ) = params(d)
@@ -78,8 +80,7 @@ end
 
 #### Sampling
 
-rand(d::LogNormal) = exp(rand(d.nrmd))
-
+rand(d::LogNormal) = exp(randn() * d.σ + d.μ)
 
 ## Fitting
 
