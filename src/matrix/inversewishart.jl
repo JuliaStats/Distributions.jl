@@ -74,7 +74,7 @@ end
 
 #### Sampling
 
-rand(d::InverseWishart) = inv(rand(Wishart(d.df, inv(d.Ψ))))
+rand(d::InverseWishart) = inv(cholfact!(rand(Wishart(d.df, inv(d.Ψ)))))
 
 function _rand!{M<:Matrix}(d::InverseWishart, X::AbstractArray{M})
     wd = Wishart(d.df, inv(d.Ψ))
