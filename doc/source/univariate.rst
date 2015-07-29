@@ -23,7 +23,7 @@ Parameter Retrieval
 
 .. function:: params(d)
 
-    Return a tuple of parameters. 
+    Return a tuple of parameters.
 
     **Note:** Let ``d`` be a distribution of type ``D``, then ``D(params(d)...)`` will construct exactly the same distribution as ``d``.
 
@@ -33,7 +33,7 @@ Parameter Retrieval
 
 .. function:: failprob(d)
 
-    Get the probability of failure. 
+    Get the probability of failure.
 
 .. function:: scale(d)
 
@@ -41,30 +41,30 @@ Parameter Retrieval
 
 .. function:: location(d)
 
-    Get the location parameter. 
+    Get the location parameter.
 
 .. function:: shape(d)
 
-    Get the shape parameter. 
+    Get the shape parameter.
 
 .. function:: rate(d)
 
-    Get the rate parameter. 
+    Get the rate parameter.
 
 .. function:: ncategories(d)
 
-    Get the number of categories. 
+    Get the number of categories.
 
 .. function:: ntrials(d)
 
-    Get the number of trials.  
+    Get the number of trials.
 
 .. function:: dof(d)
 
     Get the degrees of freedom.
 
 
-**Note:** ``params`` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details. 
+**Note:** ``params`` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details.
 
 
 Computation of statistics
@@ -88,9 +88,9 @@ Let ``d`` be a distribution:
 
     Return the median value of distribution ``d``.
 
-.. function:: modes(d)    
+.. function:: modes(d)
 
-    Return an array of all modes of ``d``. 
+    Return an array of all modes of ``d``.
 
 .. function:: mode(d)
 
@@ -122,7 +122,7 @@ Let ``d`` be a distribution:
 
 .. function:: entropy(d, base)
 
-    Return the entropy value of distribution ``d``, w.r.t. a given base. 
+    Return the entropy value of distribution ``d``, w.r.t. a given base.
 
 .. function:: mgf(d, t)
 
@@ -130,15 +130,15 @@ Let ``d`` be a distribution:
 
 .. function:: cf(d, t)
 
-    Evaluate the characteristic function of distribution ``d``. 
+    Evaluate the characteristic function of distribution ``d``.
 
 Probability Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. function:: insupport(d, x)
 
-    When ``x`` is a scalar, it returns whether x is within the support of ``d``. 
-    When ``x`` is an array, it returns whether every element in x is within the support of ``d``. 
+    When ``x`` is a scalar, it returns whether x is within the support of ``d``.
+    When ``x`` is an array, it returns whether every element in x is within the support of ``d``.
 
 .. function:: pdf(d, x)
 
@@ -159,7 +159,7 @@ Probability Evaluation
 
 .. function:: logpdf(d, x)
 
-    The logarithm of the pdf value(s) evaluated at x, i.e. ``log(pdf(x))``. 
+    The logarithm of the pdf value(s) evaluated at x, i.e. ``log(pdf(x))``.
 
     **Note:** The internal implementation may directly evaluate logpdf instead of first computing pdf and then taking the logarithm, for better numerical stability or efficiency.
 
@@ -171,7 +171,7 @@ Probability Evaluation
 
     The cumulative distribution function evaluated at ``x``.
 
-.. function:: logcdf(d, x)        
+.. function:: logcdf(d, x)
 
     The logarithm of the cumulative function value(s) evaluated at ``x``, i.e. ``log(cdf(x))``.
 
@@ -193,11 +193,11 @@ Probability Evaluation
 
 .. function:: invlogcdf(d, lp)
 
-    The inverse function of logcdf. 
+    The inverse function of logcdf.
 
 .. function:: invlogccdf(d, lp)
 
-    The inverse function of logccdf.    
+    The inverse function of logccdf.
 
 
 Vectorized evaluation
@@ -216,7 +216,7 @@ Vectorized computation and inplace vectorized computation are supported for the 
 * ``invlogcdf``
 * ``invlogccdf``
 
-For example, when ``x`` is an array, then ``r = pdf(d, x)`` returns an array ``r`` of the same size, such that ``r[i] = pdf(d, x[i])``. One can also use ``pdf!`` to write results to pre-allocated storage, as ``pdf!(r, d, x)``. 
+For example, when ``x`` is an array, then ``r = pdf(d, x)`` returns an array ``r`` of the same size, such that ``r[i] = pdf(d, x[i])``. One can also use ``pdf!`` to write results to pre-allocated storage, as ``pdf!(r, d, x)``.
 
 
 Sampling (Random number generation)
@@ -232,7 +232,13 @@ Sampling (Random number generation)
 
 .. function:: rand(d, dims)
 
-    Return an array of size dims that is filled with independent samples from the distribution ``d``.            
+    Return an array of size ``dims`` that is filled with independent samples from the distribution ``d``.
+
+.. function:: rand(d, dim0, dim1, ...)
+
+    Similar to ``rand(d, dims)`` above, except that the dimensions can be input as individual integers.
+
+    For example, one can write ``rand(d, 2, 3)`` or ``rand(d, (2, 3))``, which are equivalent.
 
 .. function:: rand!(d, arr)
 
@@ -295,17 +301,17 @@ All discrete univariate distribution types are subtypes of *DiscreteUnivariateDi
 
 .. _bernoulli:
 
-Bernoulli Distribution 
+Bernoulli Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`_ is parameterized by a success rate :math:`p`, which takes value 1 with probability :math:`p` and 0 with probability :math:`1-p`. 
+A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`_ is parameterized by a success rate :math:`p`, which takes value 1 with probability :math:`p` and 0 with probability :math:`1-p`.
 
-.. math:: 
+.. math::
 
     P(X = k) = \begin{cases}
         p & \quad \text{for } k = 0, \\
         1 - p & \quad \text{for } k = 1.
-    \end{cases} 
+    \end{cases}
 
 .. code-block:: julia
 
@@ -322,7 +328,7 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
 Binomial Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials. It has two parameters: :math:`n`, the number of trials, and :math:`p`, the success rate. 
+A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials. It has two parameters: :math:`n`, the number of trials, and :math:`p`, the success rate.
 
 .. math::
 
@@ -345,7 +351,7 @@ A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ 
 Categorical Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distribution>`_ is parameterized by a probability vector :math:`p` (of length ``K``). 
+A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distribution>`_ is parameterized by a probability vector :math:`p` (of length ``K``).
 
 .. math::
 
@@ -359,9 +365,9 @@ A `Categorical distribution <http://en.wikipedia.org/wiki/Categorical_distributi
     probs(d)         # Get the probability vector, i.e. p
     ncategories(d)   # Get the number of categories, i.e. K
 
-Here, ``p`` must be a real vector, of which all components are nonnegative and sum to one. 
+Here, ``p`` must be a real vector, of which all components are nonnegative and sum to one.
 
-**Note:** The input vector ``p`` is directly used as a field of the constructed distribution, without being copied. 
+**Note:** The input vector ``p`` is directly used as a field of the constructed distribution, without being copied.
 
 
 .. _discreteuniform:
@@ -369,7 +375,7 @@ Here, ``p`` must be a real vector, of which all components are nonnegative and s
 Discrete Uniform Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(discrete)>`_ is a uniform distribution over a consecutive sequence of integers between :math:`a` and :math:`b`. 
+A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribution_(discrete)>`_ is a uniform distribution over a consecutive sequence of integers between :math:`a` and :math:`b`.
 
 .. math::
 
@@ -391,7 +397,7 @@ A `Discrete uniform distribution <http://en.wikipedia.org/wiki/Uniform_distribut
 Geometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`_ characterizes the number of failures before the first success in a sequence of independent Bernoulli trials with success rate :math:`p`. 
+A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`_ characterizes the number of failures before the first success in a sequence of independent Bernoulli trials with success rate :math:`p`.
 
 .. math::
 
@@ -412,7 +418,7 @@ A `Geometric distribution <http://en.wikipedia.org/wiki/Geometric_distribution>`
 Hypergeometric Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in :math:`n` draws without replacement from a finite population containing :math:`s` successes and :math:`f` failures. 
+A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_distribution>`_ describes the number of successes in :math:`n` draws without replacement from a finite population containing :math:`s` successes and :math:`f` failures.
 
 .. math::
 
@@ -420,7 +426,7 @@ A `Hypergeometric distribution <http://en.wikipedia.org/wiki/Hypergeometric_dist
 
 .. code-block:: julia
 
-    Hypergeometric(s, f, n)  # Hypergeometric distribution for a population with 
+    Hypergeometric(s, f, n)  # Hypergeometric distribution for a population with
                              # s successes and f failures, and a sequence of n trials.
 
     params(d)       # Get the parameters, i.e. (s, f, n)
@@ -438,7 +444,7 @@ A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomia
     P(X = k) = {k + r - 1 \choose x} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
 
 .. code-block:: julia
-    
+
     NegativeBinomial()        # Negative binomial distribution with r = 1 and p = 0.5
     NegativeBinomial(r, p)    # Negative binomial distribution with r successes and success rate p
 
@@ -502,7 +508,7 @@ A `Skellam distribution <http://en.wikipedia.org/wiki/Skellam_distribution>`_ de
 
     P(X = k) = e^{-(\mu_1 + \mu_2)} \left( \frac{\mu_1}{\mu_2} \right)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}) \quad \text{for integer $k$.}
 
-Here, :math:`I_k` is the modified Bessel function of the first kind.  
+Here, :math:`I_k` is the modified Bessel function of the first kind.
 
 .. code-block:: julia
 
@@ -530,7 +536,7 @@ The probability density function of an `Arcsine distribution <http://en.wikipedi
     f(x) = \frac{1}{\pi \sqrt{(x - a) (b - x)}}, \quad x \in [a, b]
 
 .. code-block:: julia
-    
+
     Arcsine()        # Arcsine distribution with support [0, 1]
     Arcsine(b)       # Arcsine distribution with support [0, b]
     Arcsine(a, b)    # Arcsine distribution with support [a, b]
@@ -539,7 +545,7 @@ The probability density function of an `Arcsine distribution <http://en.wikipedi
     minimum(d)       # Get the lower bound, i.e. a
     maximum(d)       # Get the upper bound, i.e. b
     location(d)      # Get the left bound, i.e. a
-    scale(d)         # Get the span of the support, i.e. b - a    
+    scale(d)         # Get the span of the support, i.e. b - a
 
 .. _beta:
 
@@ -550,18 +556,18 @@ The probability density function of a `Beta distribution <http://en.wikipedia.or
 
 .. math::
 
-    f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)} 
+    f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)}
     x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad x \in [0, 1]
 
 .. code-block:: julia
-    
+
     Beta()        # equivalent to Beta(1.0, 1.0)
     Beta(a)       # equivalent to Beta(a, a)
     Beta(a, b)    # Beta distribution with shape parameters a and b
 
     params(d)     # Get the parameters, i.e. (a, b)
 
-**Note:** If :math:`X \sim Gamma(\alpha)` and :math:`Y \sim Gamma(\beta)`, then :math:`X / (X + Y) \sim Beta(\alpha, \beta)`.  
+**Note:** If :math:`X \sim Gamma(\alpha)` and :math:`Y \sim Gamma(\beta)`, then :math:`X / (X + Y) \sim Beta(\alpha, \beta)`.
 
 
 .. _betaprime:
@@ -573,18 +579,18 @@ The probability density function of a `Beta prime distribution <http://en.wikipe
 
 .. math::
 
-    f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)} 
+    f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)}
     x^{\alpha - 1} (1 + x)^{- (\alpha + \beta)}, \quad x > 0
 
 .. code-block:: julia
-    
+
     BetaPrime()        # equivalent to BetaPrime(0.0, 1.0)
     BetaPrime(a)       # equivalent to BetaPrime(a, a)
     BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
 
     params(d)          # Get the parameters, i.e. (a, b)
 
-**Note:** If :math:`X \sim Beta(\alpha, \beta)`, then :math:`\frac{X}{1 - X} \sim BetaPrime(\alpha, \beta)`.  
+**Note:** If :math:`X \sim Beta(\alpha, \beta)`, then :math:`\frac{X}{1 - X} \sim BetaPrime(\alpha, \beta)`.
 
 
 .. _cauchy:
@@ -664,7 +670,7 @@ The probability density function of an `Erlang distribution <http://en.wikipedia
     Erlang(a)      # Erlang distribution with shape parameter a and unit scale, i.e. Erlang(a, 1.0)
     Erlang(a, s)   # Erlang distribution with shape parameter a and scale b
 
-**Note:** The Erlang distribution is a special case of the Gamma distribution with integer shape parameter. 
+**Note:** The Erlang distribution is a special case of the Gamma distribution with integer shape parameter.
 
 
 .. _exponential:
@@ -697,12 +703,12 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 
 .. math::
 
-    f(x; d_1, d_2) = \frac{1}{x B(d_1/2, d_2/2)} 
+    f(x; d_1, d_2) = \frac{1}{x B(d_1/2, d_2/2)}
     \sqrt{\frac{(d_1 x)^{d_1} \cdot d_2^{d_2}}{(d_1 x + d_2)^{d_1 + d_2}}}
 
 .. code-block:: julia
 
-    FDist(d1, d2)     # F-Distribution with parameters d1 and d2    
+    FDist(d1, d2)     # F-Distribution with parameters d1 and d2
 
     params(d)         # Get the parameters, i.e. (d1, d2)
 
@@ -714,7 +720,7 @@ The probability density function of an `F distribution <http://en.wikipedia.org/
 Fréchet Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is 
+The probability density function of a `Fréchet distribution <http://en.wikipedia.org/wiki/Fréchet_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
@@ -729,7 +735,7 @@ The probability density function of a `Fréchet distribution <http://en.wikipedi
 
     params(d)        # Get the parameters, i.e. (a, b)
     shape(d)         # Get the shape parameter, i.e. a
-    scale(d)         # Get the scale parameter, i.e. b 
+    scale(d)         # Get the scale parameter, i.e. b
 
 
 .. _gamma:
@@ -741,7 +747,7 @@ The probability density function of a `Gamma distribution <http://en.wikipedia.o
 
 .. math::
 
-    f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha}, 
+    f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha},
     \quad x > 0
 
 .. code-block:: julia
@@ -752,7 +758,7 @@ The probability density function of a `Gamma distribution <http://en.wikipedia.o
 
     params(d)        # Get the parameters, i.e. (a, b)
     shape(d)         # Get the shape parameter, i.e. a
-    scale(d)         # Get the scale parameter, i.e. b 
+    scale(d)         # Get the scale parameter, i.e. b
 
 
 .. _gumbel:
@@ -764,7 +770,7 @@ The probability density function of a `Gumbel distribution <http://en.wikipedia.
 
 .. math::
 
-    f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^z)}, 
+    f(x; \mu, \beta) = \frac{1}{\beta} e^{-(z + e^z)},
     \quad \text{ with } z = \frac{x - \mu}{\beta}
 
 .. code-block:: julia
@@ -798,7 +804,7 @@ The probability density function of an `inverse Gamma distribution <http://en.wi
 
     params(d)        # Get the parameters, i.e. (a, b)
     shape(d)         # Get the shape parameter, i.e. a
-    scale(d)         # Get the scale parameter, i.e. b 
+    scale(d)         # Get the scale parameter, i.e. b
 
 **Note:** If :math:`X \sim Gamma(\alpha, \beta)`, then :math:`1 / X \sim InverseGamma(\alpha, \beta^{-1})`.
 
@@ -815,7 +821,7 @@ The probability density function of an `inverse Gaussian distribution <http://en
     \exp\!\left(\frac{-\lambda(x-\mu)^2}{2\mu^2x}\right), \quad x > 0
 
 .. code-block:: julia
-  
+
     InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1.0, 1.0)
     InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1.0)
     InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
@@ -830,7 +836,7 @@ The probability density function of an `inverse Gaussian distribution <http://en
 Laplace Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Laplace distribution <http://en.wikipedia.org/wiki/Laplace_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is 
+The probability density function of a `Laplace distribution <http://en.wikipedia.org/wiki/Laplace_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is
 
 .. math::
 
@@ -852,7 +858,7 @@ The probability density function of a `Laplace distribution <http://en.wikipedia
 Lévy Distribution
 ~~~~~~~~~~~~~~~~~~
 
-The probability density function os a `Lévy distribution <http://en.wikipedia.org/wiki/Lévy_distribution>`_ with location :math:`\mu` and scale :math:`c` is 
+The probability density function os a `Lévy distribution <http://en.wikipedia.org/wiki/Lévy_distribution>`_ with location :math:`\mu` and scale :math:`c` is
 
 .. math::
 
@@ -866,7 +872,7 @@ The probability density function os a `Lévy distribution <http://en.wikipedia.o
     Levy(u, c)     # Levy distribution with location u ans scale c
 
     params(d)      # Get the parameters, i.e. (u, c)
-    location(d)    # Get the location parameter, i.e. u  
+    location(d)    # Get the location parameter, i.e. u
 
 
 .. _logistic:
@@ -876,9 +882,9 @@ Logistic Distribution
 
 The probability density function of a `Logistic distribution <http://en.wikipedia.org/wiki/Logistic_distribution>`_ with location :math:`\mu` and scale :math:`\beta` is
 
-.. math:: 
+.. math::
 
-    f(x; \mu, \beta) = \frac{1}{4 \beta} \mathrm{sech}^2 
+    f(x; \mu, \beta) = \frac{1}{4 \beta} \mathrm{sech}^2
     \left( \frac{x - \mu}{\beta} \right)
 
 .. code-block:: julia
@@ -897,18 +903,18 @@ The probability density function of a `Logistic distribution <http://en.wikipedi
 Log-normal Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let :math:`Z` be a random variable of standard normal distribution, then the distribution of :math:`\exp(\mu + \sigma Z)` is a `Lognormal distribution <http://en.wikipedia.org/wiki/Log-normal_distribution>`_. The probability density function is 
+Let :math:`Z` be a random variable of standard normal distribution, then the distribution of :math:`\exp(\mu + \sigma Z)` is a `Lognormal distribution <http://en.wikipedia.org/wiki/Log-normal_distribution>`_. The probability density function is
 
 .. math::
 
-    f(x; \mu, \sigma) = \frac{1}{x \sqrt{2 \pi \sigma^2}} 
+    f(x; \mu, \sigma) = \frac{1}{x \sqrt{2 \pi \sigma^2}}
     \exp \left( - \frac{(\log(x) - \mu)^2}{2 \sigma^2} \right)
 
 .. code-block:: julia
 
     LogNormal()          # Log-normal distribution with zero log-mean and unit scale
     LogNormal(mu)        # Log-normal distribution with log-mean mu and unit scale
-    LogNormal(mu, sig)   # Log-normal distribution with log-mean mu and scale sig 
+    LogNormal(mu, sig)   # Log-normal distribution with log-mean mu and scale sig
 
     params(d)            # Get the parameters, i.e. (mu, sig)
     meanlogx(d)          # Get the mean of log(X), i.e. mu
@@ -958,7 +964,7 @@ The probability density function of a `Pareto distribution <http://en.wikipedia.
 
     params(d)        # Get the parameters, i.e. (a, b)
     shape(d)         # Get the shape parameter, i.e. a
-    scale(d)         # Get the scale parameter, i.e. b     
+    scale(d)         # Get the scale parameter, i.e. b
 
 
 .. _rayleigh:
@@ -966,7 +972,7 @@ The probability density function of a `Pareto distribution <http://en.wikipedia.
 Rayleigh Distribution
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Rayleigh distribution <http://en.wikipedia.org/wiki/Rayleigh_distribution>`_ with scale :math:`\sigma` is 
+The probability density function of a `Rayleigh distribution <http://en.wikipedia.org/wiki/Rayleigh_distribution>`_ with scale :math:`\sigma` is
 
 .. math::
 
@@ -989,7 +995,7 @@ The probability density function of a `Rayleigh distribution <http://en.wikipedi
 Symmetric Triangular Distribution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a *Symmetric triangular distribution* with location :math:`\mu` and scale :math:`s` is 
+The probability density function of a *Symmetric triangular distribution* with location :math:`\mu` and scale :math:`s` is
 
 .. math::
 
@@ -1034,7 +1040,7 @@ Triangular Distribution
 The probability density function of a `Triangular distribution <http://en.wikipedia.org/wiki/Triangular_distribution>`_ with lower limit a, upper limit b and mode c is
 
 .. math::
-    
+
     f(x; a, b, c)= \begin{cases}
         0 & \mathrm{for\ } x < a, \\
         \frac{2(x-a)}{(b-a)(c-a)} & \mathrm{for\ } a \le x \leq c, \\[4pt]
@@ -1099,7 +1105,7 @@ The probability density function of a `von Mises distribution <http://en.wikiped
 Weibull Distribution
 ~~~~~~~~~~~~~~~~~~~~~
 
-The probability density function of a `Weibull distribution <http://en.wikipedia.org/wiki/Weibull_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is 
+The probability density function of a `Weibull distribution <http://en.wikipedia.org/wiki/Weibull_distribution>`_ with shape :math:`\alpha` and scale :math:`\beta` is
 
 .. math::
 
@@ -1115,6 +1121,3 @@ The probability density function of a `Weibull distribution <http://en.wikipedia
     params(d)        # Get the parameters, i.e. (a, b)
     shape(d)         # Get the shape parameter, i.e. a
     scale(d)         # Get the scale parameter, i.e. b
-
-
-

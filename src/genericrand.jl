@@ -10,8 +10,12 @@ function _rand!(s::Sampleable{Univariate}, A::AbstractArray)
 end
 rand!(s::Sampleable{Univariate}, A::AbstractArray) = _rand!(s, A)
 
-rand(s::Sampleable{Univariate}, shp::Union(Int, Dims)) = 
-    _rand!(s, Array(eltype(s), shp))
+rand(s::Sampleable{Univariate}, dims::Dims) =
+    _rand!(s, Array(eltype(s), dims))
+
+rand(s::Sampleable{Univariate}, dims::Int...) =
+    _rand!(s, Array(eltype(s), dims))
+
 
 # multivariate
 
