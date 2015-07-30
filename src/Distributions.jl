@@ -255,6 +255,7 @@ include("utils.jl")
 
 # generic functions
 include("show.jl")
+include("quantilealgs.jl")
 include("genericrand.jl")
 include("functionals.jl")
 include("genericfit.jl")
