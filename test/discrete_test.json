@@ -1376,6 +1376,33 @@
     }
   ], 
   [
+    "Poisson(0.0)", 
+    {
+      "dtype": "Poisson", 
+        "entropy": 0.0,
+      "maximum": 0, 
+      "mean": 0.0, 
+      "median": 0.0, 
+      "minimum": 0, 
+      "params": {
+        "rate": 0.0
+      }, 
+      "points": [
+        {
+          "cdf": 1.0, 
+          "logpdf": 0.0, 
+          "x": 0
+        }
+      ], 
+      "q10": 0.0, 
+      "q25": 0.0, 
+      "q50": 0.0, 
+      "q75": 0.0, 
+      "q90": 0.0, 
+      "var": 0.0
+    }
+  ], 
+  [
     "Poisson(0.5)", 
     {
       "dtype": "Poisson", 
