@@ -3,11 +3,12 @@ immutable Normal <: ContinuousUnivariateDistribution
     σ::Float64
 
     function Normal(μ::Real, σ::Real)
-    	σ > zero(σ) || error("std.dev. must be positive")
+    	σ > zero(σ) ||
+            throw(ArgumentError("Normal: σ must be positive."))
     	@compat new(Float64(μ), Float64(σ))
     end
 
-    @compat Normal(μ::Real) = Normal(Float64(μ), 1.0)
+    Normal(μ::Real) = @compat Normal(Float64(μ), 1.0)
     Normal() = Normal(0.0, 1.0)
 end
 

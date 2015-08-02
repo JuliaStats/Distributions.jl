@@ -1,36 +1,36 @@
 immutable Pareto <: ContinuousUnivariateDistribution
     α::Float64
-    β::Float64
+    θ::Float64
 
-    function Pareto(α::Real, β::Real)
-        (α > zero(α) && β > zero(β)) || error("Pareto: shape and scale must be positive")
-        @compat new(Float64(α), Float64(β))
+    function Pareto(α::Real, θ::Real)
+        (α > zero(α) && θ > zero(θ)) || error("Pareto: shape and scale must be positive")
+        @compat new(Float64(α), Float64(θ))
     end
 
     Pareto(α::Real) = Pareto(α, 1.0)
     Pareto() = new(1.0, 1.0)
 end
 
-@distr_support Pareto d.β Inf
+@distr_support Pareto d.θ Inf
 
 
 #### Parameters
 
 shape(d::Pareto) = d.α
-scale(d::Pareto) = d.β
+scale(d::Pareto) = d.θ
 
-params(d::Pareto) = (d.α, d.β)
+params(d::Pareto) = (d.α, d.θ)
 
 
 #### Statistics
 
-mean(d::Pareto) = ((α, β) = params(d); α > 1.0 ? α * β / (α - 1.0) : Inf)
-median(d::Pareto) = ((α, β) = params(d); β * 2.0 ^ (1.0 / α))
-mode(d::Pareto) = d.β
+mean(d::Pareto) = ((α, θ) = params(d); α > 1.0 ? α * θ / (α - 1.0) : Inf)
+median(d::Pareto) = ((α, θ) = params(d); θ * 2.0 ^ (1.0 / α))
+mode(d::Pareto) = d.θ
 
 function var(d::Pareto)
-    (α, β) = params(d)
-    α > 2.0 ? (β^2 * α) / ((α - 1.0)^2 * (α - 2.0)) : Inf
+    (α, θ) = params(d)
+    α > 2.0 ? (θ^2 * α) / ((α - 1.0)^2 * (α - 2.0)) : Inf
 end
 
 function skewness(d::Pareto)
@@ -43,42 +43,39 @@ function kurtosis(d::Pareto)
     α > 4.0 ? (6.0 * (α^3 + α^2 - 6.0 * α - 2.0)) / (α * (α - 3.0) * (α - 4.0)) : NaN
 end
 
-entropy(d::Pareto) = ((α, β) = params(d); log(β / α) + 1.0 / α + 1.0)
+entropy(d::Pareto) = ((α, θ) = params(d); log(θ / α) + 1.0 / α + 1.0)
 
 
 #### Evaluation
 
 function pdf(d::Pareto, x::Float64)
-    (α, β) = params(d)
-    x >= β ? α * (β / x)^α * (1.0 / x) : 0.0
+    (α, θ) = params(d)
+    x >= θ ? α * (θ / x)^α * (1.0 / x) : 0.0
 end
 
 function logpdf(d::Pareto, x::Float64)
-    (α, β) = params(d)
-    x >= β ? log(α) + α * log(β) - (α + 1.0) * log(x) : -Inf 
+    (α, θ) = params(d)
+    x >= θ ? log(α) + α * log(θ) - (α + 1.0) * log(x) : -Inf
 end
 
 function ccdf(d::Pareto, x::Float64)
-    (α, β) = params(d)
-    x >= β ? (β / x)^α : 1.0
+    (α, θ) = params(d)
+    x >= θ ? (θ / x)^α : 1.0
 end
 
 cdf(d::Pareto, x::Float64) = 1.0 - ccdf(d, x)
 
 function logccdf(d::Pareto, x::Float64)
-    (α, β) = params(d)
-    x >= β ? α * log(β / x) : 0.0
+    (α, θ) = params(d)
+    x >= θ ? α * log(θ / x) : 0.0
 end
 
 logcdf(d::Pareto, x::Float64) = log1p(-ccdf(d, x))
 
-cquantile(d::Pareto, p::Float64) = d.β / p^(1.0 / d.α)
+cquantile(d::Pareto, p::Float64) = d.θ / p^(1.0 / d.α)
 quantile(d::Pareto, p::Float64) = cquantile(d, 1.0 - p)
 
 
 #### Sampling
 
-rand(d::Pareto) = d.β * exp(randexp() / d.α)
-
-
-
+rand(d::Pareto) = d.θ * exp(randexp() / d.α)
