@@ -1,16 +1,16 @@
-
 immutable Binomial <: DiscreteUnivariateDistribution
     n::Int
     p::Float64
 
-    function Binomial(n::Int, p::Float64)
-        n >= 0 || error("n must be non-negative but is $n.")
-        0.0 <= p <= 1.0 || error("p must be in [0, 1] but is $p")
-        new(n, p)
+    function Binomial(n::Int, p::Real)
+        n >= zero(n) ||
+            throw(ArgumentError("Binomial: n must be non-negative but is $n."))
+        zero(p) <= p <= one(p) ||
+            throw(ArgumentError("Binomial: p must be in [0, 1] but is $p"))
+        @compat new(Int(n), Float64(p))
     end
 
-    @compat Binomial(n::Integer, p::Real) = Binomial(round(Int, n), Float64(p))
-    @compat Binomial(n::Integer) = Binomial(round(Int, n), 0.5)
+    Binomial(n::Integer) = Binomial(n, 0.5)
     Binomial() = new(1, 0.5)
 end
 

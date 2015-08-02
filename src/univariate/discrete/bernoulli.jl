@@ -1,17 +1,13 @@
-# Bernoulli distribution
-
-
-#### Type and Constructor
-
 immutable Bernoulli <: DiscreteUnivariateDistribution
     p::Float64
 
     function Bernoulli(p::Float64)
-        0.0 <= p <= 1.0 || error("p must be in [0, 1].")
+        0.0 <= p <= 1.0 ||
+            throw(ArgumentError("Bernoulli: p must be in [0, 1]."))
         new(p)
     end
 
-    @compat Bernoulli(p::Real) = Bernoulli(Float64(p))
+    Bernoulli(p::Real) = @compat Bernoulli(Float64(p))
     Bernoulli() = new(0.5)
 end
 
@@ -48,7 +44,7 @@ function median(d::Bernoulli)
     p > 0.5 ? 1.0 : 0.5
 end
 
-function entropy(d::Bernoulli) 
+function entropy(d::Bernoulli)
     p0 = failprob(d)
     p1 = succprob(d)
     (p0 == 0.0 || p0 == 1.0) ? 0.0 : -(p0 * log(p0) + p1 * log(p1))
@@ -57,7 +53,7 @@ end
 #### Evaluation
 
 pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) : 
+pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
                             x == 1 ? succprob(d) : 0.0
 
 pdf(d::Bernoulli) = Float64[failprob(d), succprob(d)]
@@ -126,5 +122,3 @@ function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T}, w::Abstra
     end
     BernoulliStats(c0, c1)
 end
-
-
