@@ -3,11 +3,12 @@ immutable InverseGaussian <: ContinuousUnivariateDistribution
     λ::Float64
 
     function InverseGaussian(μ::Real, λ::Real)
-        (μ > zero(μ) && λ > zero(λ)) || error("InverseGaussian's μ and λ must be positive")
+        (μ > zero(μ) && λ > zero(λ)) ||
+            throw(ArgumentError("InverseGaussian: μ and λ must be positive."))
         @compat new(Float64(μ), Float64(λ))
     end
 
-    InverseGaussian(μ::Real) = InverseGaussian(μ, 1.0)
+    InverseGaussian(μ::Real) = @compat InverseGaussian(Float64(μ), 1.0)
     InverseGaussian() = new(1.0, 1.0)
 end
 
