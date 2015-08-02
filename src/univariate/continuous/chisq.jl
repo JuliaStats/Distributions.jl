@@ -55,4 +55,5 @@ gradlogpdf(d::Chisq, x::Float64) =  x >= 0.0 ? (dof(d) / 2.0 - 1) / x - 0.5 : 0.
 
 #### Sampling
 
-rand(d::Chisq) = StatsFuns.Rmath.chisqrand(d.df)
+_chisq_rand(ν::Float64) = StatsFuns.Rmath.chisqrand(ν)
+rand(d::Chisq) = _chisq_rand(d.df)
