@@ -53,7 +53,7 @@ logpdf(d::Chi, x::Float64) = (ν = d.ν;
     (1.0 - 0.5 * ν) * logtwo + (ν - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * ν)
 )
 
-gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.μ - 1.0) / x - x : 0.0
+gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.ν - 1.0) / x - x : 0.0
 
 cdf(d::Chi, x::Float64) = chisqcdf(d.ν, x^2)
 ccdf(d::Chi, x::Float64) = chisqccdf(d.ν, x^2)
