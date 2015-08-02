@@ -3,7 +3,8 @@ immutable Cauchy <: ContinuousUnivariateDistribution
     σ::Float64
 
     function Cauchy(μ::Real, σ::Real)
-        σ > zero(σ) || error("Cauchy: scale must be positive")
+        σ > zero(σ) ||
+            throw(ArgumentError("Cauchy: σ must be positive."))
         @compat new(Float64(μ), Float64(σ))
     end
 

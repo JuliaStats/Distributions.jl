@@ -3,7 +3,8 @@ immutable BetaPrime <: ContinuousUnivariateDistribution
     β::Float64
 
     function BetaPrime(α::Float64, β::Float64)
-        (α > zero(α) && β > zero(β)) || error("α and β must be positive")
+        (α > zero(α) && β > zero(β)) ||
+            throw(ArgumentError("BetaPrime: α and β must be positive."))
         @compat new(Float64(α), Float64(β))
     end
 

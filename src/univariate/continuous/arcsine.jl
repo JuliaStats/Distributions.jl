@@ -3,7 +3,7 @@ immutable Arcsine <: ContinuousUnivariateDistribution
     b::Float64
 
     function Arcsine(a::Float64, b::Float64)
-        a < b || throw(ArgumentError("a must be less than b."))
+        a < b || throw(ArgumentError("Arcsine: a must be less than b."))
         new(a, b)
     end
 
