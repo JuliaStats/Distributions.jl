@@ -3,7 +3,7 @@ immutable Arcsine <: ContinuousUnivariateDistribution
     b::Float64
 
     function Arcsine(a::Float64, b::Float64)
-        a < b || error("a must be less than b.")
+        a < b || throw(ArgumentError("a must be less than b."))
         new(a, b)
     end
 
@@ -51,4 +51,3 @@ quantile(d::Arcsine, p::Float64) = location(d) + abs2(sin(halfπ * p)) * scale(d
 ### Sampling
 
 rand(d::Arcsine) = quantile(d, rand())
-
