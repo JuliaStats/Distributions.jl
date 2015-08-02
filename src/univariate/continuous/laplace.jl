@@ -1,10 +1,10 @@
 immutable Laplace <: ContinuousUnivariateDistribution
     μ::Float64
-    β::Float64
+    θ::Float64
 
-    function Laplace(μ::Real, β::Real)
-        β > zero(β) || error("Laplace's scale must be positive")
-        @compat new(Float64(μ), Float64(β))
+    function Laplace(μ::Real, θ::Real)
+        θ > zero(θ) || error("Laplace's scale must be positive")
+        @compat new(Float64(μ), Float64(θ))
     end
 
     @compat Laplace(μ::Real) = new(Float64(μ), 1.0)
@@ -19,8 +19,8 @@ typealias Biexponential Laplace
 #### Parameters
 
 location(d::Laplace) = d.μ
-scale(d::Laplace) = d.β
-params(d::Laplace) = (d.μ, d.β)
+scale(d::Laplace) = d.θ
+params(d::Laplace) = (d.μ, d.θ)
 
 
 #### Statistics
@@ -29,18 +29,18 @@ mean(d::Laplace) = d.μ
 median(d::Laplace) = d.μ
 mode(d::Laplace) = d.μ
 
-var(d::Laplace) = 2.0 * d.β^2
-std(d::Laplace) = sqrt2 * d.β
+var(d::Laplace) = 2.0 * d.θ^2
+std(d::Laplace) = sqrt2 * d.θ
 skewness(d::Laplace) = 0.0
 kurtosis(d::Laplace) = 3.0
 
-entropy(d::Laplace) = log(2.0 * d.β) + 1.0
+entropy(d::Laplace) = log(2.0 * d.θ) + 1.0
 
 
 #### Evaluations
 
-zval(d::Laplace, x::Float64) = (x - d.μ) / d.β
-xval(d::Laplace, z::Float64) = d.μ + z * d.β
+zval(d::Laplace, x::Float64) = (x - d.μ) / d.θ
+xval(d::Laplace, z::Float64) = d.μ + z * d.θ
 
 pdf(d::Laplace, x::Float64) = 0.5 * exp(-abs(zval(d, x))) / scale(d)
 logpdf(d::Laplace, x::Float64) = - (abs(zval(d, x)) + log(2.0 * scale(d)))
@@ -56,25 +56,25 @@ invlogcdf(d::Laplace, lp::Float64) = lp < loghalf ? xval(d, logtwo + lp) : xval(
 invlogccdf(d::Laplace, lp::Float64) = lp > loghalf ? xval(d, logtwo + log1mexp(lp)) : xval(d, -(logtwo + lp))
 
 function gradlogpdf(d::Laplace, x::Float64)
-    μ, β = params(d)
+    μ, θ = params(d)
     x == μ && error("Gradient is undefined at the location point")
-    g = 1.0 / β
+    g = 1.0 / θ
     x > μ ? -g : g
 end
 
 function mgf(d::Laplace, t::Real)
-    st = d.β * t
+    st = d.θ * t
     exp(t * d.μ) / ((1.0 - st) * (1.0 + st))
 end
 function cf(d::Laplace, t::Real)
-    st = d.β * t
+    st = d.θ * t
     cis(t * d.μ) / (1+st*st)
 end
 
 
 #### Sampling
 
-rand(d::Laplace) = d.μ + d.β*randexp()*ifelse(rand(Bool), 1, -1)
+rand(d::Laplace) = d.μ + d.θ*randexp()*ifelse(rand(Bool), 1, -1)
 
 
 #### Fitting
@@ -83,5 +83,3 @@ function fit_mle(::Type{Laplace}, x::Array)
     a = median(x)
     Laplace(a, mad(x, a))
 end
-
-
