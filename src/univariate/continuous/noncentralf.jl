@@ -1,27 +1,40 @@
 immutable NoncentralF <: ContinuousUnivariateDistribution
-    ndf::Float64
-    ddf::Float64
+    ν1::Float64
+    ν2::Float64
     λ::Float64
 
-    function NoncentralF(n::Real, d::Real, nc::Real)
-        n > zero(n) && d > zero(d) && nc >= zero(nc) ||
-	       error("ndf and ddf must be > 0 and λ >= 0")
-	    @compat new(Float64(n), Float64(d), Float64(nc))
+    function NoncentralF(ν1::Real, ν2::Real, λ::Real)
+        (ν1 > zero(ν1) && ν2 > zero(ν2)) ||
+            throw(ArgumentError("NoncentralF: ν1 and ν2 must be both positive."))
+        λ > zero(λ) ||
+            throw(ArgumentError("NoncentralF: λ must be non-negative."))
+	    @compat new(Float64(ν1), Float64(ν2), Float64(λ))
     end
 end
 
 @distr_support NoncentralF 0.0 Inf
 
-mean(d::NoncentralF) = d.ddf > 2.0 ? d.ddf / (d.ddf - 2.0) * (d.ndf + d.λ) / d.ndf : NaN
 
-var(d::NoncentralF) = d.ddf > 4.0 ? 2.0 * d.ddf^2 *
-		       ((d.ndf+d.λ)^2 + (d.ddf - 2.0)*(d.ndf + 2.0*d.λ)) /
-		       (d.ndf * (d.ddf - 2.0)^2 * (d.ddf - 4.0)) : NaN
+### Parameters
 
-@_delegate_statsfuns NoncentralF nfdist ndf ddf λ
+params(d::NoncentralF) = (d.ν1, d.ν2, d.λ)
+
+
+### Statistics
+
+mean(d::NoncentralF) = d.ν2 > 2.0 ? d.ν2 / (d.ν2 - 2.0) * (d.ν1 + d.λ) / d.ν1 : NaN
+
+var(d::NoncentralF) = d.ν2 > 4.0 ? 2.0 * d.ν2^2 *
+		       ((d.ν1+d.λ)^2 + (d.ν2 - 2.0)*(d.ν1 + 2.0*d.λ)) /
+		       (d.ν1 * (d.ν2 - 2.0)^2 * (d.ν2 - 4.0)) : NaN
+
+
+### Evaluation & Sampling
+
+@_delegate_statsfuns NoncentralF nfdist ν1 ν2 λ
 
 function rand(d::NoncentralF)
-    rn = rand(NoncentralChisq(d.ndf,d.λ)) / d.ndf
-    rd = rand(Chisq(d.ddf)) / d.ddf
-    rn / rd
+    r1 = rand(NoncentralChisq(d.ν1,d.λ)) / d.ν1
+    r2 = rand(Chisq(d.ν2)) / d.ν2
+    r1 / r2
 end

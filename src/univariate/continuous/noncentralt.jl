@@ -1,33 +1,43 @@
 immutable NoncentralT <: ContinuousUnivariateDistribution
-    df::Float64
+    ν::Float64
     λ::Float64
 
-    function NoncentralT(d::Real, nc::Real)
-    	d >= zero(d) && nc >= zero(nc) || error("df and λ must be non-negative")
-        @compat new(Float64(d), Float64(nc))
+    function NoncentralT(ν::Real, λ::Real)
+    	ν > zero(ν) ||
+            throw(ArgumentError("NoncentralT: ν must be positive."))
+        λ >= zero(λ) ||
+            throw(ArgumentError("NoncentralT: λ must be non-negative."))
+        @compat new(Float64(ν), Float64(λ))
     end
 end
 
 @distr_support NoncentralT -Inf Inf
 
+### Parameters
+
+params(d::NoncentralT) = (d.ν, d.λ)
+
+
+### Statistics
+
 function mean(d::NoncentralT)
-    if d.df > 1.0
-        if isinf(d.df)
-            d.λ
-        else
-            sqrt(0.5*d.df)*d.λ*gamma(0.5*(d.df-1))/gamma(0.5*d.df)
-        end
+    if d.ν > 1.0
+        isinf(d.ν) ? d.λ :
+        sqrt(0.5*d.ν) * d.λ * gamma(0.5*(d.ν-1)) / gamma(0.5*d.ν)
     else
         NaN
     end
 end
 
-var(d::NoncentralT) = d.df > 2.0 ? d.df*(1+d.λ^2)/(d.df-2.0) - mean(d)^2 : NaN
+var(d::NoncentralT) = d.ν > 2.0 ? d.ν*(1+d.λ^2)/(d.ν-2.0) - mean(d)^2 : NaN
 
-@_delegate_statsfuns NoncentralT ntdist df λ
+
+### Evaluation & Sampling
+
+@_delegate_statsfuns NoncentralT ntdist ν λ
 
 function rand(d::NoncentralT)
     z = randn()
-    v = rand(Chisq(d.df))
-    (z+d.λ)/sqrt(v/d.df)
+    v = rand(Chisq(d.ν))
+    (z+d.λ)/sqrt(v/d.ν)
 end
