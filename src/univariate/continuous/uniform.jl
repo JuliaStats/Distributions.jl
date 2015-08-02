@@ -3,10 +3,10 @@ immutable Uniform <: ContinuousUnivariateDistribution
     b::Float64
 
     function Uniform(a::Real, b::Real)
-	   a < b || error("Uniform: a must be less than b")
-	   @compat new(Float64(a), Float64(b))
+        a < b ||
+            throw(ArgumentError("Uniform: a must be less than b"))
+	    @compat new(Float64(a), Float64(b))
     end
-
     Uniform() = new(0.0, 1.0)
 end
 
