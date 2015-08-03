@@ -1,3 +1,13 @@
+## macro for argument checking
+
+macro check_args(D, cond)
+    quote
+        if !($cond)
+            throw(ArgumentError(string(
+                $(string(D)), ": the condition ", $(string(cond)), " is not satisfied.")))
+        end
+    end
+end
 
 ## a type to indicate zero vector
 
@@ -117,4 +127,3 @@ function trycholfact(a::Matrix{Float64})
         return e
     end
 end
-

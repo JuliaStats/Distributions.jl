@@ -12,10 +12,10 @@ kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
 immutable EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
+
     function EdgeworthZ{T<:UnivariateDistribution}(d::T, n::Real)
-        n > zero(n) ||
-            error("n must be positive")
-        @compat new(d, Float64(n))
+        @check_args(EdgeworthZ, n > zero(n))
+        new(d, n)
     end
 end
 EdgeworthZ(d::UnivariateDistribution,n::Real) = EdgeworthZ{typeof(d)}(d,n)
@@ -78,9 +78,8 @@ immutable EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthSum{T<:UnivariateDistribution}(d::T, n::Real)
-        n > zero(n) ||
-            error("n must be positive")
-        @compat new(d, Float64(n))
+        @check_args(EdgeworthSum, n > zero(n))
+        new(d, n)
     end
 end
 EdgeworthSum(d::UnivariateDistribution, n::Real) = EdgeworthSum{typeof(d)}(d,n)

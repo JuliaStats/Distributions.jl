@@ -1,13 +1,9 @@
 immutable Cauchy <: ContinuousUnivariateDistribution
     μ::Float64
-    β::Float64
+    σ::Float64
 
-    function Cauchy(μ::Real, β::Real)
-        β > zero(β) || error("Cauchy: scale must be positive")
-        @compat new(Float64(μ), Float64(β))
-    end
-
-    @compat Cauchy(μ::Real) = new(Float64(μ), 1.0)
+    Cauchy(μ::Real, σ::Real) = (@check_args(Cauchy, σ > zero(σ)); new(μ, σ))
+    Cauchy(μ::Real) = new(μ, 1.0)
     Cauchy() = new(0.0, 1.0)
 end
 
@@ -16,54 +12,54 @@ end
 #### Parameters
 
 location(d::Cauchy) = d.μ
-scale(d::Cauchy) = d.β
+scale(d::Cauchy) = d.σ
 
-params(d::Cauchy) = (d.μ, d.β)
+params(d::Cauchy) = (d.μ, d.σ)
 
 
 #### Statistics
 
 mean(d::Cauchy) = NaN
-median(d::Cauchy) = location(d)
-mode(d::Cauchy) = location(d)
+median(d::Cauchy) = d.μ
+mode(d::Cauchy) = d.μ
 
 var(d::Cauchy) = NaN
 skewness(d::Cauchy) = NaN
 kurtosis(d::Cauchy) = NaN
 
-entropy(d::Cauchy) = log(scale(d)) + log4π
+entropy(d::Cauchy) = log4π + log(d.σ)
 
 
 #### Functions
 
-zval(d::Cauchy, x::Float64) = (x - d.μ) / d.β
-xval(d::Cauchy, z::Float64) = d.μ + z * d.β
+zval(d::Cauchy, x::Float64) = (x - d.μ) / d.σ
+xval(d::Cauchy, z::Float64) = d.μ + z * d.σ
 
-pdf(d::Cauchy, x::Float64) = 1.0 / (π * scale(d) * (1 + zval(d, x)^2))
-logpdf(d::Cauchy, x::Float64) = - (logπ + log(scale(d)) + log1psq(zval(d, x)))
+pdf(d::Cauchy, x::Float64) = 1.0 / (π * scale(d) * (1.0 + zval(d, x)^2))
+logpdf(d::Cauchy, x::Float64) = - (log1psq(zval(d, x)) + logπ + log(d.σ))
 
 function cdf(d::Cauchy, x::Float64)
-    μ, β = params(d)
-    invπ * atan2(x - μ, β) + 0.5
+    μ, σ = params(d)
+    invπ * atan2(x - μ, σ) + 0.5
 end
 
 function ccdf(d::Cauchy, x::Float64)
-    μ, β = params(d)
-    invπ * atan2(μ - x, β) + 0.5
+    μ, σ = params(d)
+    invπ * atan2(μ - x, σ) + 0.5
 end
 
 function quantile(d::Cauchy, p::Float64)
-    μ, β = params(d)
-    μ + β * tan(π * (p - 0.5))
+    μ, σ = params(d)
+    μ + σ * tan(π * (p - 0.5))
 end
 
 function cquantile(d::Cauchy, p::Float64)
-    μ, β = params(d)
-    μ + β * tan(π * (0.5 - p))
+    μ, σ = params(d)
+    μ + σ * tan(π * (0.5 - p))
 end
 
 mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
-cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.β * abs(t))
+cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 
 
 #### Fitting

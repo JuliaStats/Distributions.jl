@@ -1,13 +1,15 @@
 immutable Gamma <: ContinuousUnivariateDistribution
     α::Float64
-    β::Float64
+    θ::Float64
 
-    function Gamma(α::Real, β::Real)
-        α > zero(α) && β > zero(β) || error("Gamma: both shape and scale must be positive")
-        @compat new(Float64(α), Float64(β))
+    function Gamma(α::Real, θ::Real)
+        @check_args(Gamma, α > zero(α) && θ > zero(θ))
+        new(α, θ)
     end
-
-    Gamma(α::Real) = Gamma(α, 1.0)
+    function Gamma(α::Real)
+        @check_args(Gamma, α > zero(α))
+        new(α, 1.0)
+    end
     Gamma() = new(1.0, 1.0)
 end
 
@@ -17,45 +19,45 @@ end
 #### Parameters
 
 shape(d::Gamma) = d.α
-scale(d::Gamma) = d.β
-rate(d::Gamma) = 1.0 / d.β
+scale(d::Gamma) = d.θ
+rate(d::Gamma) = 1.0 / d.θ
 
-params(d::Gamma) = (d.α, d.β)
+params(d::Gamma) = (d.α, d.θ)
 
 
 #### Statistics
 
-mean(d::Gamma) = d.α * d.β
+mean(d::Gamma) = d.α * d.θ
 
-var(d::Gamma) = d.α * d.β^2
+var(d::Gamma) = d.α * d.θ^2
 
 skewness(d::Gamma) = 2.0 / sqrt(d.α)
 
 kurtosis(d::Gamma) = 6.0 / d.α
 
 function mode(d::Gamma)
-    (α, β) = params(d)
-    α >= 1.0 ? β * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
+    (α, θ) = params(d)
+    α >= 1.0 ? θ * (α - 1.0) : error("Gamma has no mode when shape < 1.0")
 end
 
 function entropy(d::Gamma)
-    (α, β) = params(d)
-    α + lgamma(α) + (1.0 - α) * digamma(α) + log(β)
+    (α, θ) = params(d)
+    α + lgamma(α) + (1.0 - α) * digamma(α) + log(θ)
 end
 
-mgf(d::Gamma, t::Real) = (1.0 - t * d.β)^(-d.α)
+mgf(d::Gamma, t::Real) = (1.0 - t * d.θ)^(-d.α)
 
-cf(d::Gamma, t::Real) = (1.0 - im * t * d.β)^(-d.α)
+cf(d::Gamma, t::Real) = (1.0 - im * t * d.θ)^(-d.α)
 
 
 #### Evaluation & Sampling
 
-@_delegate_statsfuns Gamma gamma α β
+@_delegate_statsfuns Gamma gamma α θ
 
 gradlogpdf(d::Gamma, x::Float64) =
-    insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.β : 0.0
+    insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.θ : 0.0
 
-rand(d::Gamma) = StatsFuns.Rmath.gammarand(d.α, d.β)
+rand(d::Gamma) = StatsFuns.Rmath.gammarand(d.α, d.θ)
 
 
 #### Fit model
@@ -65,7 +67,7 @@ immutable GammaStats <: SufficientStats
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight
 
-    @compat GammaStats(sx::Real, slogx::Real, tw::Real) = new(Float64(sx), Float64(slogx), Float64(tw))
+    GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
 function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})

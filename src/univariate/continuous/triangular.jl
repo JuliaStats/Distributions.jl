@@ -4,17 +4,13 @@ immutable TriangularDist <: ContinuousUnivariateDistribution
     c::Float64
 
     function TriangularDist(a::Real, b::Real, c::Real)
-        a < b || error("TriangularDist: a < b must be true")
-        a <= c <= b || error("a <= c <= b must be true")
-        @compat new(Float64(a), Float64(b), Float64(c))
+        @check_args(TriangularDist, a < b)
+        @check_args(TriangularDist, a <= c <= b)
+        new(a, b, c)
     end
-
     function TriangularDist(a::Real, b::Real)
-        a < b || error("TriangularDist: a < b must be true")
-        @compat a_ = Float64(a)
-        @compat b_ = Float64(b)
-        c_ = middle(a_, b_)
-        new(a_, b_, c_)
+        @check_args(TriangularDist, a < b)
+        new(a, b, middle(a, b))
     end
 end
 
@@ -113,7 +109,6 @@ function rand(d::TriangularDist)
     (a, b, c) = params(d)
     b_m_a = b - a
     u = rand()
-    b_m_a * u < (c - a) ? d.a + sqrt(u * b_m_a * (c - a)) : 
+    b_m_a * u < (c - a) ? d.a + sqrt(u * b_m_a * (c - a)) :
                           d.b - sqrt((1.0 - u) * b_m_a * (b - c))
 end
-

@@ -1,3 +1,4 @@
+# TODO: this distribution may need clean-up
 
 # Computes the pdf of a poisson-binomial random variable using
 # fast fourier transform

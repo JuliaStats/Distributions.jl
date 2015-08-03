@@ -2,13 +2,8 @@ immutable Arcsine <: ContinuousUnivariateDistribution
     a::Float64
     b::Float64
 
-    function Arcsine(a::Float64, b::Float64)
-        a < b || throw(ArgumentError("a must be less than b."))
-        new(a, b)
-    end
-
-    @compat Arcsine(a::Real, b::Real) = Arcsine(Float64(a), Float64(b))
-    @compat Arcsine(b::Real) = Arcsine(0.0, Float64(b))
+    Arcsine(a::Real, b::Real) = (@check_args(Arcsine, a < b); new(a, b))
+    Arcsine(b::Real) = (@check_args(Arcsine, b > zero(b)); new(0.0, b))
     Arcsine() = new(0.0, 1.0)
 end
 

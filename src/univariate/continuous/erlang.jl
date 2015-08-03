@@ -2,10 +2,9 @@ immutable Erlang <: ContinuousUnivariateDistribution
     gammad::Gamma
 
     function Erlang(α::Real, θ::Real)
-        isinteger(α) || error("Erlang shape parameter must be an integer")
+        @check_args(Erlang, isinteger(α) && α >= zero(α))
         new(Gamma(α, θ))
     end
-
     Erlang(α::Real) = Erlang(α, 1.0)
     Erlang() = new(Gamma())
 end
@@ -56,4 +55,3 @@ cf(d::Erlang, t::Real) = cf(d.gammad, t)
 #### Sampling
 
 rand(d::Erlang) = rand(d.gammad)
-

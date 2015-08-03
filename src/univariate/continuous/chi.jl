@@ -1,14 +1,10 @@
 immutable Chi <: ContinuousUnivariateDistribution
     ν::Float64
 
-    function Chi(ν::Real)
-        ν > zero(ν) || throw(ArgumentError("Chi: ν must be positive."))
-        @compat new(Float64(ν))
-    end
+    Chi(ν::Real) = (@check_args(Chi, ν > zero(ν)); new(ν))
 end
 
 @distr_support Chi 0.0 Inf
-
 
 #### Parameters
 

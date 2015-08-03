@@ -8,15 +8,13 @@ immutable NegativeBinomial <: DiscreteUnivariateDistribution
     r::Int
     p::Float64
 
-    function NegativeBinomial(r::Int, p::Float64)
-        r > 0 || error("r must be positive.")
-        0.0 < p <= 1.0 || error("prob must be in (0, 1].")
+    function NegativeBinomial(r::Real, p::Real)
+        @check_args(NegativeBinomial, r > zero(r))
+        @check_args(NegativeBinomial, zero(p) < p <= one(p))
         new(r, p)
     end
-
-    @compat NegativeBinomial(r::Real, p::Real) = NegativeBinomial(round(Int, r), Float64(p))
     NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-    NegativeBinomial() = new(1.0, 0.5)
+    NegativeBinomial() = new(1, 0.5)
 end
 
 @distr_support NegativeBinomial 0 Inf
