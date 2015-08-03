@@ -55,7 +55,7 @@ function mode(d::Wishart)
     end
 end
 
-function meanlogdet(d::Wishart) 
+function meanlogdet(d::Wishart)
     p = dim(d)
     df = d.df
     v = logdet(d.S) + p * logtwo
@@ -81,7 +81,7 @@ function _logpdf(d::Wishart, X::DenseMatrix{Float64})
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
 
-@compat _logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, Float64(X))
+_logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 #### Sampling
 

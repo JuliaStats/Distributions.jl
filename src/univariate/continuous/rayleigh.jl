@@ -1,11 +1,7 @@
 immutable Rayleigh <: ContinuousUnivariateDistribution
     σ::Float64
 
-    function Rayleigh(σ::Real)
-        σ > zero(σ) || error("Rayleigh: σ must be positive")
-        @compat new(Float64(σ))
-    end
-
+    Rayleigh(σ::Real) = (@check_args(Rayleigh, σ > zero(σ)); new(σ))
     Rayleigh() = new(1.0)
 end
 
@@ -57,4 +53,3 @@ quantile(d::Rayleigh, p::Float64) = sqrt(-2.0 * d.σ^2 * log1p(-p))
 #### Sampling
 
 rand(d::Rayleigh) = d.σ * sqrt(2.0 * randexp())
-

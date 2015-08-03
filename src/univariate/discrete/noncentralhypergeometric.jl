@@ -1,4 +1,5 @@
 # Noncentral hypergeometric distribution
+# TODO: this distribution needs clean-up and testing
 
 abstract NoncentralHypergeometric <: DiscreteUnivariateDistribution
 
@@ -38,13 +39,12 @@ immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric
     nf::Int    # number of failures in population
     n::Int     # sample size
     ω::Float64 # odds ratio
-    function FisherNoncentralHypergeometric(s::Real, f::Real, n::Real, ω::Float64)
-        isinteger(s) && zero(s) <= s || error("ns must be a non-negative integer")
-        isinteger(f) && zero(f) <= f || error("nf must be a non-negative integer")
-        isinteger(n) && zero(n) < n < s + f ||
-            error("n must be a positive integer <= (ns + nf)")
-        zero(ω) < ω || error("ω must be a positive real value")
-        @compat new(Float64(s), Float64(f), Float64(n), Float64(ω))
+
+    function FisherNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::Float64)
+        @check_args(FisherNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
+        @check_args(FisherNoncentralHypergeometric, zero(n) < n < ns + nf)
+        @check_args(FisherNoncentralHypergeometric, ω > zero(ω))
+        new(ns, nf, n, ω)
     end
 end
 
@@ -81,13 +81,11 @@ immutable WalleniusNoncentralHypergeometric <: NoncentralHypergeometric
     nf::Int    # number of failures in population
     n::Int     # sample size
     ω::Float64 # odds ratio
-    function WalleniusNoncentralHypergeometric(s::Real, f::Real, n::Real, ω::Float64)
-        isinteger(s) && zero(s) <= s || error("ns must be a non-negative integer")
-        isinteger(f) && zero(f) <= f || error("nf must be a non-negative integer")
-        isinteger(n) && zero(n) < n < s + f ||
-            error("n must be a positive integer <= (ns + nf)")
-        zero(ω) < ω || error("ω must be a positive real value")
-        @compat new(Float64(s), Float64(f), Float64(n), Float64(ω))
+    function WalleniusNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::Float64)
+        @check_args(WalleniusNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
+        @check_args(WalleniusNoncentralHypergeometric, zero(n) < n < ns + nf)
+        @check_args(WalleniusNoncentralHypergeometric, ω > zero(ω))
+        new(ns, nf, n, ω)
     end
 end
 
@@ -104,6 +102,3 @@ function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
 end
 
 logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))
-
-
-

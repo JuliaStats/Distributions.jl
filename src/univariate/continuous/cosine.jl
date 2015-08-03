@@ -5,26 +5,22 @@
 
 immutable Cosine <: ContinuousUnivariateDistribution
     μ::Float64
-    s::Float64
+    σ::Float64
 
-    function Cosine(μ::Real, s::Real)
-        s > 0.0 || error("s must be positive.")
-        @compat new(Float64(μ), Float64(s))
-    end
-
-    @compat Cosine(μ::Real) = new(Float64(μ), 1.0)
+    Cosine(μ::Real, σ::Real) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
+    Cosine(μ::Real) = new(μ, 1.0)
     Cosine() = new(0.0, 1.0)
 end
 
-@distr_support Cosine d.μ - d.s d.μ + d.s
+@distr_support Cosine d.μ - d.σ d.μ + d.σ
 
 
 #### Parameters
 
 location(d::Cosine) = d.μ
-scale(d::Cosine) = d.s
+scale(d::Cosine) = d.σ
 
-params(d::Cosine) = (d.μ, d.s)
+params(d::Cosine) = (d.μ, d.σ)
 
 
 #### Statistics
@@ -35,8 +31,7 @@ median(d::Cosine) = d.μ
 
 mode(d::Cosine) = d.μ
 
-const _cosined_varcoef = 0.13069096604865779  # 1 / 3 - 2 / π^2
-var(d::Cosine) = d.s^2 * _cosined_varcoef
+var(d::Cosine) = d.σ^2 * 0.13069096604865779  # 0.130... = 1/3 - 2 / π^2
 
 skewness(d::Cosine) = 0.0
 
@@ -47,9 +42,8 @@ kurtosis(d::Cosine) = -0.59376287559828102362
 
 function pdf(d::Cosine, x::Float64)
     if insupport(d, x)
-        μ, s = params(d)
-        z = (x - μ) / s
-        return (1.0 + cospi(z)) / (2 * s)
+        z = (x - d.μ) / d.σ
+        return (1.0 + cospi(z)) / (2 * d.σ)
     else
         return 0.0
     end
@@ -58,14 +52,12 @@ end
 logpdf(d::Cosine, x::Float64) = insupport(d, x) ? log(pdf(d, x)) : -Inf
 
 function cdf(d::Cosine, x::Float64)
-    μ, s = params(d)
-    z = (x - μ) / s
+    z = (x - d.μ) / d.σ
     0.5 * (1.0 + z + sinpi(z) * invπ)
 end
 
 function ccdf(d::Cosine, x::Float64)
-    μ, s = params(d)
-    nz = (μ - x) / s
+    nz = (d.μ - x) / d.σ
     0.5 * (1.0 + nz + sinpi(nz) * invπ)
 end
 

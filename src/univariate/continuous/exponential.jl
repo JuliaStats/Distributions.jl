@@ -1,11 +1,7 @@
 immutable Exponential <: ContinuousUnivariateDistribution
-    β::Float64 		# note: scale not rate
+    θ::Float64 		# note: scale not rate
 
-    function Exponential(β::Real)
-        β > zero(β) || error("scale must be positive")
-        @compat new(Float64(β))
-    end
-
+    Exponential(θ::Real) = (@check_args(Exponential, θ > zero(θ)); new(θ))
     Exponential() = new(1.0)
 end
 
@@ -14,33 +10,33 @@ end
 
 #### Parameters
 
-scale(d::Exponential) = d.β
-rate(d::Exponential) = 1.0 / d.β
+scale(d::Exponential) = d.θ
+rate(d::Exponential) = 1.0 / d.θ
 
-params(d::Exponential) = (d.β,)
+params(d::Exponential) = (d.θ,)
 
 
 #### Statistics
 
-mean(d::Exponential) = scale(d)
+mean(d::Exponential) = d.θ
 
-median(d::Exponential) = logtwo * scale(d)
+median(d::Exponential) = logtwo * d.θ
 
 mode(d::Exponential) = 0.0
 
-var(d::Exponential) = scale(d)^2
+var(d::Exponential) = d.θ^2
 
 skewness(d::Exponential) = 2.0
 
 kurtosis(d::Exponential) = 6.0
 
-entropy(d::Exponential) = 1.0 + log(scale(d))
+entropy(d::Exponential) = 1.0 + log(d.θ)
 
 
 #### Evaluation
 
-zval(d::Exponential, x::Float64) = x / d.β
-xval(d::Exponential, z::Float64) = z * d.β
+zval(d::Exponential, x::Float64) = x / d.θ
+xval(d::Exponential, z::Float64) = z * d.θ
 
 pdf(d::Exponential, x::Float64) = (λ = rate(d); x < 0.0 ? 0.0 : λ * exp(-λ * x))
 logpdf(d::Exponential, x::Float64) =  (λ = rate(d); x < 0.0 ? -Inf : log(λ) - λ * x)
@@ -72,7 +68,7 @@ immutable ExponentialStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     sw::Float64   # sum of sample weights
 
-    @compat ExponentialStats(sx::Real, sw::Real) = new(Float64(sx), Float64(sw))
+    ExponentialStats(sx::Real, sw::Real) = new(sx, sw)
 end
 
 suffstats{T<:Real}(::Type{Exponential}, x::AbstractArray{T}) = ExponentialStats(sum(x), length(x))

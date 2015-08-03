@@ -8,7 +8,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
         lmnB::Float64 = 0.0
         for i in 1:length(alpha)
             ai = alpha[i]
-            ai > 0 || throw(ArgumentError("alpha must be a positive vector."))
+            ai > 0 || throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
             lmnB += lgamma(ai)
         end

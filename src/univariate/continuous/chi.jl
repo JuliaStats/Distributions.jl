@@ -1,44 +1,43 @@
 immutable Chi <: ContinuousUnivariateDistribution
-    chisqd::Chisq
+    ν::Float64
 
-    Chi(df::Real) = new(Chisq(df))
+    Chi(ν::Real) = (@check_args(Chi, ν > zero(ν)); new(ν))
 end
 
 @distr_support Chi 0.0 Inf
 
-
 #### Parameters
 
-dof(d::Chi) = dof(d.chisqd)
-params(d::Chi) = (dof(d),)
+dof(d::Chi) = d.ν
+params(d::Chi) = (d.ν,)
 
 
 #### Statistics
 
-mean(d::Chi) = (k = dof(d); sqrt2 * gamma((k + 1.0) / 2.0) / gamma(k / 2.0))
+mean(d::Chi) = (h = d.ν * 0.5; sqrt2 * gamma(h + 0.5) / gamma(h))
 
-var(d::Chi) = dof(d) - mean(d)^2
+var(d::Chi) = d.ν - mean(d)^2
+_chi_skewness(μ::Float64, σ::Float64) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1.0 - 2.0 * σ2))
 
 function skewness(d::Chi)
-    μ, σ = mean(d), std(d)
-    (μ / σ^3) * (1.0 - 2.0 * σ^2)
+    μ = mean(d)
+    σ = sqrt(d.ν - μ^2)
+    _chi_skewness(μ, σ)
 end
 
 function kurtosis(d::Chi)
-    μ, σ, γ = mean(d), std(d), skewness(d)
+    μ = mean(d)
+    σ = sqrt(d.ν - μ^2)
+    γ = _chi_skewness(μ, σ)
     (2.0 / σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-function entropy(d::Chi)
-    k = dof(d)
-    lgamma(k / 2.0) - log(sqrt(2.0)) -
-        ((k - 1.0) / 2.0) * digamma(k / 2.0) + k / 2.0
-end
+entropy(d::Chi) = (ν = d.ν;
+    lgamma(ν / 2.0) - 0.5 * logtwo - ((ν - 1.0) / 2.0) * digamma(ν / 2.0) + ν / 2.0)
 
 function mode(d::Chi)
-    k = dof(d)
-    k >= 1.0 || error("Chi distribution has no mode when df < 1")
-    sqrt(k - 1.0)
+    d.ν >= 1.0 || error("Chi distribution has no mode when ν < 1")
+    sqrt(d.ν - 1.0)
 end
 
 
@@ -46,24 +45,23 @@ end
 
 pdf(d::Chi, x::Float64) = exp(logpdf(d, x))
 
-function logpdf(d::Chi, x::Float64) 
-    k = dof(d)
-    (1.0 - 0.5 * k) * logtwo + (k - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * k)
-end
+logpdf(d::Chi, x::Float64) = (ν = d.ν;
+    (1.0 - 0.5 * ν) * logtwo + (ν - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * ν)
+)
 
-gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (dof(d) - 1.0) / x - x : 0.0
+gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.ν - 1.0) / x - x : 0.0
 
-cdf(d::Chi, x::Float64) = cdf(d.chisqd, x^2)
-ccdf(d::Chi, x::Float64) = ccdf(d.chisqd, x^2)
-logcdf(d::Chi, x::Float64) = logcdf(d.chisqd, x^2)
-logccdf(d::Chi, x::Float64) = logccdf(d.chisqd, x^2)
+cdf(d::Chi, x::Float64) = chisqcdf(d.ν, x^2)
+ccdf(d::Chi, x::Float64) = chisqccdf(d.ν, x^2)
+logcdf(d::Chi, x::Float64) = chisqlogcdf(d.ν, x^2)
+logccdf(d::Chi, x::Float64) = chisqlogccdf(d.ν, x^2)
 
-quantile(d::Chi, p::Float64) = sqrt(quantile(d.chisqd, p))
-cquantile(d::Chi, p::Float64) = sqrt(cquantile(d.chisqd, p))
-invlogcdf(d::Chi, p::Float64) = sqrt(invlogcdf(d.chisqd, p))
-invlogccdf(d::Chi, p::Float64) = sqrt(invlogccdf(d.chisqd, p))
+quantile(d::Chi, p::Float64) = sqrt(chisqinvcdf(d.ν, p))
+cquantile(d::Chi, p::Float64) = sqrt(chisqinvccdf(d.ν, p))
+invlogcdf(d::Chi, p::Float64) = sqrt(chisqinvlogcdf(d.ν, p))
+invlogccdf(d::Chi, p::Float64) = sqrt(chisqinvlogccdf(d.ν, p))
 
 
 #### Sampling
 
-rand(d::Chi) = sqrt(rand(d.chisqd))
+rand(d::Chi) = sqrt(_chisq_rand(d.ν))

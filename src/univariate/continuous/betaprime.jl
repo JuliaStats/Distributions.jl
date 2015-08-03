@@ -1,18 +1,20 @@
 immutable BetaPrime <: ContinuousUnivariateDistribution
-    betad::Beta
+    α::Float64
+    β::Float64
 
-    BetaPrime(α::Float64, β::Float64) = new(Beta(α, β))
-    BetaPrime(α::Float64) = new(Beta(α))
-    BetaPrime() = new(Beta())
+    function BetaPrime(α::Real, β::Real)
+        @check_args(BetaPrime, α > zero(α) && β > zero(β))
+        new(α, β)
+    end
+    BetaPrime(α::Real) = BetaPrime(α)
+    BetaPrime() = new(1.0, 1.0)
 end
 
 @distr_support BetaPrime 0.0 Inf
 
-show(io::IO, d::BetaPrime) = ((α, β) = params(d); show_oneline(io, d, [(:α, α), (:β, β)]))
-
 #### Parameters
 
-params(d::BetaPrime) = params(d.betad)
+params(d::BetaPrime) = (d.α, d.β)
 
 
 #### Statistics
@@ -46,21 +48,20 @@ end
 
 pdf(d::BetaPrime, x::Float64) = exp(logpdf(d, x))
 
-cdf(d::BetaPrime, x::Float64) = cdf(d.betad, x / (1.0 + x))
-ccdf(d::BetaPrime, x::Float64) = ccdf(d.betad, x / (1.0 + x))
-logcdf(d::BetaPrime, x::Float64) = logcdf(d.betad, x / (1.0 + x))
-logccdf(d::BetaPrime, x::Float64) = logccdf(d.betad, x / (1.0 + x))
+cdf(d::BetaPrime, x::Float64) = betacdf(d.α, d.β, x / (1.0 + x))
+ccdf(d::BetaPrime, x::Float64) = betaccdf(d.α, d.β, x / (1.0 + x))
+logcdf(d::BetaPrime, x::Float64) = betalogcdf(d.α, d.β, x / (1.0 + x))
+logccdf(d::BetaPrime, x::Float64) = betalogccdf(d.α, d.β, x / (1.0 + x))
 
-quantile(d::BetaPrime, p::Float64) = (x = quantile(d.betad, p); x / (1.0 - x))
-cquantile(d::BetaPrime, p::Float64) = (x = cquantile(d.betad, p); x / (1.0 - x))
-invlogcdf(d::BetaPrime, p::Float64) = (x = invlogcdf(d.betad, p); x / (1.0 - x))
-invlogccdf(d::BetaPrime, p::Float64) = (x = invlogccdf(d.betad, p); x / (1.0 - x))
-    
+quantile(d::BetaPrime, p::Float64) = (x = betainvcdf(d.α, d.β, p); x / (1.0 - x))
+cquantile(d::BetaPrime, p::Float64) = (x = betainvccdf(d.α, d.β, p); x / (1.0 - x))
+invlogcdf(d::BetaPrime, p::Float64) = (x = betainvlogcdf(d.α, d.β, p); x / (1.0 - x))
+invlogccdf(d::BetaPrime, p::Float64) = (x = betainvlogccdf(d.α, d.β, p); x / (1.0 - x))
+
 
 #### Sampling
 
-function rand(d::BetaPrime) 
+function rand(d::BetaPrime)
     (α, β) = params(d)
     rand(Gamma(α)) / rand(Gamma(β))
 end
-
