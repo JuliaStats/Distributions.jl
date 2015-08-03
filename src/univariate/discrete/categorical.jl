@@ -5,12 +5,14 @@ immutable Categorical <: DiscreteUnivariateDistribution
     Categorical(p::Vector{Float64}, ::NoArgCheck) = new(length(p), p)
 
     function Categorical(p::Vector{Float64})
-        isprobvec(p) || error("p is not a valid probability vector.")
+        isprobvec(p) ||
+            throw(ArgumentError("Categorical: p is not a valid probability vector."))
         new(length(p), p)
     end
 
     function Categorical(k::Integer)
-        k >= 1 || error("k must be a positive integer.")
+        k >= 1 ||
+            throw(ArgumentError("k must be a positive integer."))
         new(k, fill(1.0/k, k))
     end
 end

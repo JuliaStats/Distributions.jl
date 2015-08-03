@@ -3,13 +3,15 @@ immutable DiscreteUniform <: DiscreteUnivariateDistribution
     b::Int
     pv::Float64
 
-    function DiscreteUniform(a::Int, b::Int)
-        a <= b || error("a and b must satisfy a <= b")
+    function DiscreteUniform(a::Real, b::Real)
+        a <= b ||
+            throw(ArgumentError("DiscreteUniform: a and b must satisfy a <= b."))
+        @compat a_ = Int(a)
+        @compat b_ = Int(b)
         new(a, b, 1.0 / (b - a + 1))
     end
 
-    @compat DiscreteUniform(a::Real, b::Real) = DiscreteUniform(round(Int, a), round(Int, b))
-    DiscreteUniform(b::Real) = DiscreteUniform(0, round(Int, b))
+    DiscreteUniform(b::Real) = DiscreteUniform(0, b)
     DiscreteUniform() = new(0, 1, 0.5)
 end
 

@@ -2,11 +2,12 @@ immutable Geometric <: DiscreteUnivariateDistribution
     p::Float64
 
     function Geometric(p::Real)
-        zero(p) < p < one(p) || error("prob must be in (0, 1)")
+        zero(p) < p < one(p) ||
+            throw(ArgumentError("Geometric: p must be in (0, 1)."))
     	@compat new(Float64(p))
     end
 
-    Geometric() = Geometric(0.5) # Flips of a fair coin
+    Geometric() = new(0.5) # Flips of a fair coin
 end
 
 @distr_support Geometric 0 Inf

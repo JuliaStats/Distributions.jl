@@ -2,20 +2,17 @@ immutable Skellam <: DiscreteUnivariateDistribution
     μ1::Float64
     μ2::Float64
 
-    function Skellam(μ1::Float64, μ2::Float64)
-        μ1 > 0.0 && μ2 > 0.0 || error("μ1 and μ2 must be positive.")
-        new(μ1, μ2)
+    function Skellam(μ1::Real, μ2::Real)
+        μ1 > zero(μ1) && μ2 > zero(μ2) ||
+            throw(ArgumentError("Skellam: μ1 and μ2 must be positive."))
+        @compat new(Float64(μ1), Float64(μ2))
     end
 
-    @compat Skellam(μ1::Real, μ2::Real) = Skellam(Float64(μ1), Float64(μ2))
-
     Skellam(μ::Real) = Skellam(μ, μ)
-
     Skellam() = new(1.0, 1.0)
 end
 
 @distr_support Skellam -Inf Inf
-
 
 ### Parameters
 
@@ -55,4 +52,3 @@ end
 ### Sampling
 
 rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
-

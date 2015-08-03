@@ -1,4 +1,5 @@
 # Noncentral hypergeometric distribution
+# TODO: this distribution needs clean-up and testing
 
 abstract NoncentralHypergeometric <: DiscreteUnivariateDistribution
 
@@ -104,6 +105,3 @@ function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
 end
 
 logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))
-
-
-

@@ -1,12 +1,11 @@
 immutable Poisson <: DiscreteUnivariateDistribution
     λ::Float64
 
-    function Poisson(λ::Float64)
-        λ > 0.0 || error("λ must be positive.")
-        new(λ)
+    function Poisson(λ::Real)
+        λ > zero(λ) ||
+            throw(ArgumentError("Poisson: λ must be positive."))
+        @compat new(Float64(λ))
     end
-
-    @compat Poisson(λ::Real) = Poisson(Float64(λ))
     Poisson() = new(1.0)
 end
 

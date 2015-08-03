@@ -11,14 +11,13 @@ immutable Hypergeometric <: DiscreteUnivariateDistribution
     nf::Int     # number of failures in population
     n::Int      # sample size
 
-    function Hypergeometric(ns::Int, nf::Int, n::Int)
-        ns >= 0 || error("ns must be non-negative.")
-        nf >= 0 || error("nf must be non-negative.")
-        0 < n < ns + nf || error("n must have 0 < n < ns + nf")
-        new(ns, nf, n)
+    function Hypergeometric(ns::Real, nf::Real, n::Real)
+        (ns >= 0 && nf >= 0) ||
+            throw(ArgumentError("Hypergeometric: ns must be non-negative."))
+        0 < n < ns + nf ||
+            throw(ArgumentError("Hypergeometric: n must have 0 < n < ns + nf."))
+        @compat new(Int(ns), Int(nf), Int(n))
     end
-
-    @compat Hypergeometric(ns::Real, nf::Real, n::Real) = Hypergeometric(round(Int, ns), round(Int, nf), round(Int, n))
 end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
