@@ -3,12 +3,13 @@ immutable Gamma <: ContinuousUnivariateDistribution
     θ::Float64
 
     function Gamma(α::Real, θ::Real)
-        α > zero(α) && θ > zero(θ) ||
-            throw(ArgumentError("Gamma: both α and Θ must be positive"))
-        @compat new(Float64(α), Float64(θ))
+        @check_args(Gamma, α > zero(α) && θ > zero(θ))
+        new(α, θ)
     end
-
-    Gamma(α::Real) = @compat Gamma(Float64(α), 1.0)
+    function Gamma(α::Real)
+        @check_args(Gamma, α > zero(α))
+        new(α, 1.0)
+    end
     Gamma() = new(1.0, 1.0)
 end
 
@@ -66,7 +67,7 @@ immutable GammaStats <: SufficientStats
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight
 
-    @compat GammaStats(sx::Real, slogx::Real, tw::Real) = new(Float64(sx), Float64(slogx), Float64(tw))
+    GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
 function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})

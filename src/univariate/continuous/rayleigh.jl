@@ -1,12 +1,7 @@
 immutable Rayleigh <: ContinuousUnivariateDistribution
     σ::Float64
 
-    function Rayleigh(σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("Rayleigh: σ must be positive."))
-        @compat new(Float64(σ))
-    end
-
+    Rayleigh(σ::Real) = (@check_args(Rayleigh, σ > zero(σ)); new(σ))
     Rayleigh() = new(1.0)
 end
 

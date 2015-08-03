@@ -3,12 +3,11 @@ immutable InverseGamma <: ContinuousUnivariateDistribution
     θ::Float64
 
     function InverseGamma(α::Real, θ::Real)
-        (α > zero(α) && θ > zero(θ)) ||
-            throw(ArgumentError("InverseGamma: both α and θ must be positive."))
-        @compat new(Gamma(α, 1.0 / θ), Float64(θ))
+        @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
+        new(Gamma(α, 1.0 / θ), θ)
     end
 
-    InverseGamma(α::Real) = @compat InverseGamma(Float64(α), 1.0)
+    InverseGamma(α::Real) = InverseGamma(α, 1.0)
     InverseGamma() = InverseGamma(1.0, 1.0)
 end
 
@@ -72,12 +71,12 @@ invlogccdf(d::InverseGamma, p::Float64) = 1.0 / invlogcdf(d.invd, p)
 
 function mgf(d::InverseGamma, t::Real)
     (a, b) = params(d)
-    @compat t == zero(t) ? one(Float64(t)) : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
+    t == zero(t) ? 1.0 : 2.0*(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*b*t))
 end
 
 function cf(d::InverseGamma, t::Real)
     (a, b) = params(d)
-    @compat t == zero(t) ? complex(one(Float64(t))) : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
+    t == zero(t) ? 1.0+0.0im : 2.0*(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4.0*im*b*t))
 end
 
 

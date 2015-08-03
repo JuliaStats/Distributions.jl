@@ -2,11 +2,9 @@ immutable NoncentralChisq <: ContinuousUnivariateDistribution
     ν::Float64
     λ::Float64
     function NoncentralChisq(ν::Real, λ::Real)
-        ν > zero(ν) ||
-            throw(ArgumentError("NoncentralChisq: ν must be positive."))
-    	λ >= zero(λ) ||
-            error("NoncentralChisq: λ must be non-negative.")
-    	@compat new(Float64(ν), Float64(λ))
+        @check_args(NoncentralChisq, ν > zero(ν))
+        @check_args(NoncentralChisq, λ >= zero(λ))
+    	new(ν, λ)
     end
 end
 

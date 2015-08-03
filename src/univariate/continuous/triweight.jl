@@ -1,17 +1,14 @@
 immutable Triweight <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
-    function Triweight(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("Triweight: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
-    end
+
+    Triweight(μ::Real, σ::Real) = (@check_args(Triweight, σ > zero(σ)); new(μ, σ))
+    Triweight(μ::Real) = new(μ, 1.0)
+    Triweight() = new(0.0, 1.0)
 end
 
-Triweight(μ::Real) = Triweight(μ, 1.0)
-Triweight() = Triweight(0.0, 1.0)
-
 @distr_support Triweight d.μ - d.σ d.μ + d.σ
+
 
 ## Parameters
 

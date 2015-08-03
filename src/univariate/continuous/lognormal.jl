@@ -2,17 +2,13 @@ immutable LogNormal <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
 
-    function LogNormal(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("LogNormal: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
-    end
-
-    LogNormal(μ::Real) = @compat new(Float64(μ), 1.0)
+    LogNormal(μ::Real, σ::Real) = (@check_args(LogNormal, σ > zero(σ)); new(μ, σ))
+    LogNormal(μ::Real) = new(μ, 1.0)
     LogNormal() = new(0.0, 1.0)
 end
 
 @distr_support LogNormal 0.0 Inf
+
 
 #### Parameters
 

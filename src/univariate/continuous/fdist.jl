@@ -3,13 +3,13 @@ immutable FDist <: ContinuousUnivariateDistribution
     ν2::Float64
 
     function FDist(ν1::Real, ν2::Real)
-        ν1 > zero(ν1) && ν2 > zero(ν2) ||
-            throw(ArgumentError("FDist: ν1 and ν2 must be positive."))
-        @compat new(Float64(ν1), Float64(ν2))
+        @check_args(FDist, ν1 > zero(ν1) && ν2 > zero(ν2))
+        new(ν1, ν2)
     end
 end
 
 @distr_support FDist 0.0 Inf
+
 
 #### Parameters
 

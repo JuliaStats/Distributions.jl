@@ -3,11 +3,9 @@ immutable Skellam <: DiscreteUnivariateDistribution
     μ2::Float64
 
     function Skellam(μ1::Real, μ2::Real)
-        μ1 > zero(μ1) && μ2 > zero(μ2) ||
-            throw(ArgumentError("Skellam: μ1 and μ2 must be positive."))
-        @compat new(Float64(μ1), Float64(μ2))
+        @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
+        new(μ1, μ2)
     end
-
     Skellam(μ::Real) = Skellam(μ, μ)
     Skellam() = new(1.0, 1.0)
 end

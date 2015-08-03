@@ -1,55 +1,54 @@
 ## Canonical Form of Normal distribution
 
 immutable NormalCanon <: ContinuousUnivariateDistribution
-    h::Float64       # σ^(-2) * μ
-    prec::Float64    # σ^(-2)
+    η::Float64       # σ^(-2) * μ
+    λ::Float64    # σ^(-2)
     μ::Float64       # μ
 
-    function NormalCanon(h::Float64, prec::Float64)
-    	prec > 0. || throw(ArgumentError("prec should be positive."))
-    	new(h, prec, h / prec)
+    function NormalCanon(η::Real, λ::Real)
+        @check_args(NormalCanon, λ > zero(λ))
+    	new(η, λ, η / λ)
     end
-
-    @compat NormalCanon(h::Real, prec::Real) = NormalCanon(Float64(h), Float64(prec))
     NormalCanon() = new(0.0, 1.0, 0.0)
 end
 
 @distr_support NormalCanon -Inf Inf
 
+
 ## conversion between Normal and NormalCanon
 
-Base.convert(::Type{Normal}, cf::NormalCanon) = Normal(cf.μ, 1.0 / sqrt(cf.prec))
-Base.convert(::Type{NormalCanon}, d::Normal) = (J = 1.0 / abs2(σ); NormalCanon(J * d.μ, J))
+Base.convert(::Type{Normal}, d::NormalCanon) = Normal(d.μ, 1.0 / sqrt(d.λ))
+Base.convert(::Type{NormalCanon}, d::Normal) = (λ = 1.0 / σ^2; NormalCanon(λ * d.μ, λ))
 canonform(d::Normal) = convert(NormalCanon, d)
 
 
 #### Parameters
 
-params(d::NormalCanon) = (d.h, d.prec)
+params(d::NormalCanon) = (d.η, d.λ)
 
 
 #### Statistics
 
-mean(cf::NormalCanon) = cf.μ
-median(cf::NormalCanon) = mean(cf)
-mode(cf::NormalCanon) = mean(cf)
+mean(d::NormalCanon) = d.μ
+median(d::NormalCanon) = mean(d)
+mode(d::NormalCanon) = mean(d)
 
-skewness(cf::NormalCanon) = 0.0
-kurtosis(cf::NormalCanon) = 0.0
+skewness(d::NormalCanon) = 0.0
+kurtosis(d::NormalCanon) = 0.0
 
-var(cf::NormalCanon) = 1.0 / cf.prec
-std(cf::NormalCanon) = sqrt(var(cf))
+var(d::NormalCanon) = 1.0 / d.λ
+std(d::NormalCanon) = sqrt(var(d))
 
-entropy(cf::NormalCanon) = 0.5 * (log2π + 1. - log(cf.prec))
+entropy(d::NormalCanon) = 0.5 * (log2π + 1.0 - log(d.λ))
 
 
 #### Evaluation
 
-pdf(d::NormalCanon, x::Float64) = (sqrt(d.prec) / sqrt2π) * exp(-0.5 * d.prec * abs2(x - d.μ))
-logpdf(d::NormalCanon, x::Float64) = 0.5 * (log(d.prec) - log2π - d.prec * abs2(x - d.μ))
+pdf(d::NormalCanon, x::Float64) = (sqrt(d.λ) / sqrt2π) * exp(-0.5 * d.λ * abs2(x - d.μ))
+logpdf(d::NormalCanon, x::Float64) = 0.5 * (log(d.λ) - log2π - d.λ * abs2(x - d.μ))
 
-zval(d::NormalCanon, x::Float64) = (x - d.μ) * sqrt(d.prec)
-xval(d::NormalCanon, z::Float64) = d.μ + z / sqrt(d.prec)
+zval(d::NormalCanon, x::Float64) = (x - d.μ) * sqrt(d.λ)
+xval(d::NormalCanon, z::Float64) = d.μ + z / sqrt(d.λ)
 
 cdf(d::NormalCanon, x::Float64) = normcdf(zval(d,x))
 ccdf(d::NormalCanon, x::Float64) = normccdf(zval(d,x))
@@ -64,5 +63,5 @@ invlogccdf(d::NormalCanon, lp::Float64) = xval(d, norminvlogccdf(lp))
 
 #### Sampling
 
-rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.prec)
+rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.λ)
 rand!{T<:Real}(cf::NormalCanon, r::AbstractArray{T}) = rand!(convert(Normal, cf), r)

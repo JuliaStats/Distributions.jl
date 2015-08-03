@@ -2,12 +2,8 @@ immutable Laplace <: ContinuousUnivariateDistribution
     μ::Float64
     θ::Float64
 
-    function Laplace(μ::Real, θ::Real)
-        θ > zero(θ) || error("Laplace's scale must be positive")
-        @compat new(Float64(μ), Float64(θ))
-    end
-
-    @compat Laplace(μ::Real) = new(Float64(μ), 1.0)
+    Laplace(μ::Real, θ::Real) = (@check_args(Laplace, θ > zero(θ)); new(μ, θ))
+    Laplace(μ::Real) = new(μ, 1.0)
     Laplace() = new(0.0, 1.0)
 end
 

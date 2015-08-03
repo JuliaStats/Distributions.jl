@@ -2,13 +2,8 @@ immutable Normal <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
 
-    function Normal(μ::Real, σ::Real)
-    	σ > zero(σ) ||
-            throw(ArgumentError("Normal: σ must be positive."))
-    	@compat new(Float64(μ), Float64(σ))
-    end
-
-    Normal(μ::Real) = @compat Normal(Float64(μ), 1.0)
+    Normal(μ::Real, σ::Real) = (@check_args(Normal, σ > zero(σ)); new(μ, σ))
+    Normal(μ::Real) = Normal(μ, 1.0)
     Normal() = Normal(0.0, 1.0)
 end
 
@@ -58,8 +53,6 @@ immutable NormalStats <: SufficientStats
     m::Float64    # (weighted) mean of x
     s2::Float64   # (weighted) sum of (x - μ)^2
     tw::Float64    # total sample weight
-
-    @compat NormalStats(s::Real, m::Real, s2::Real, tw::Real) = new(Float64(s), Float64(m), Float64(s2), Float64(tw))
 end
 
 function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T})
@@ -121,7 +114,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T})
     for i = 2:length(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
-    @compat NormalKnownMuStats(g.μ, s2, Float64(length(x)))
+    NormalKnownMuStats(g.μ, s2, length(x))
 end
 
 function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64})

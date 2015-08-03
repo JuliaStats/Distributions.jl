@@ -1,11 +1,7 @@
 immutable Exponential <: ContinuousUnivariateDistribution
     θ::Float64 		# note: scale not rate
 
-    function Exponential(θ::Real)
-        θ > zero(θ) ||
-            throw(ArgumentError("Exponential: scale must be positive"))
-        @compat new(Float64(θ))
-    end
+    Exponential(θ::Real) = (@check_args(Exponential, θ > zero(θ)); new(θ))
     Exponential() = new(1.0)
 end
 
@@ -72,7 +68,7 @@ immutable ExponentialStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     sw::Float64   # sum of sample weights
 
-    @compat ExponentialStats(sx::Real, sw::Real) = new(Float64(sx), Float64(sw))
+    ExponentialStats(sx::Real, sw::Real) = new(sx, sw)
 end
 
 suffstats{T<:Real}(::Type{Exponential}, x::AbstractArray{T}) = ExponentialStats(sum(x), length(x))

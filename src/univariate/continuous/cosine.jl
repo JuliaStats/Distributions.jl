@@ -7,12 +7,8 @@ immutable Cosine <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
 
-    function Cosine(μ::Real, σ::Real)
-        σ > 0.0 || error("Cosine: σ must be positive.")
-        @compat new(Float64(μ), Float64(σ))
-    end
-
-    Cosine(μ::Real) = @compat new(Float64(μ), 1.0)
+    Cosine(μ::Real, σ::Real) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
+    Cosine(μ::Real) = new(μ, 1.0)
     Cosine() = new(0.0, 1.0)
 end
 

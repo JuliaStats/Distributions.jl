@@ -1,11 +1,7 @@
 immutable Poisson <: DiscreteUnivariateDistribution
     λ::Float64
 
-    function Poisson(λ::Real)
-        λ > zero(λ) ||
-            throw(ArgumentError("Poisson: λ must be positive."))
-        @compat new(Float64(λ))
-    end
+    Poisson(λ::Real) = (@check_args(Poisson, λ > zero(λ)); new(λ))
     Poisson() = new(1.0)
 end
 
@@ -87,7 +83,7 @@ immutable PoissonStats <: SufficientStats
     tw::Float64   # total sample weight
 end
 
-@compat suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}) = PoissonStats(Float64(sum(x)), Float64(length(x)))
+suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}) = PoissonStats(sum(x), length(x))
 
 function suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64})
     n = length(x)

@@ -3,12 +3,10 @@ immutable SymTriangularDist <: ContinuousUnivariateDistribution
     σ::Float64
 
     function SymTriangularDist(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("SymTriangular: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
+        @check_args(SymTriangularDist, σ > zero(σ))
+        new(μ, σ)
     end
-
-    SymTriangularDist(μ::Real) = @compat new(Float64(μ), 1.0)
+    SymTriangularDist(μ::Real) = new(μ, 1.0)
     SymTriangularDist() = new(0.0, 1.0)
 end
 

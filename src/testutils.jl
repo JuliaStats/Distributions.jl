@@ -435,7 +435,7 @@ end
 function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
-    @compat vf = Float64[Float64(v) for v in vs]
+    vf = Float64[v for v in vs]
     p = pdf(d, vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2(vf .- xmean))

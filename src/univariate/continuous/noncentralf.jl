@@ -4,11 +4,9 @@ immutable NoncentralF <: ContinuousUnivariateDistribution
     λ::Float64
 
     function NoncentralF(ν1::Real, ν2::Real, λ::Real)
-        (ν1 > zero(ν1) && ν2 > zero(ν2)) ||
-            throw(ArgumentError("NoncentralF: ν1 and ν2 must be both positive."))
-        λ > zero(λ) ||
-            throw(ArgumentError("NoncentralF: λ must be non-negative."))
-	    @compat new(Float64(ν1), Float64(ν2), Float64(λ))
+        @check_args(NoncentralF, ν1 > zero(ν1) && ν2 > zero(ν2))
+        @check_args(NoncentralF, λ >= zero(λ))
+	    new(ν1, ν2, λ)
     end
 end
 

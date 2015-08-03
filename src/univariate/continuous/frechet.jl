@@ -3,11 +3,9 @@ immutable Frechet <: ContinuousUnivariateDistribution
     θ::Float64
 
     function Frechet(α::Real, θ::Real)
-    	α > zero(α) && θ > zero(θ) ||
-            throw(ArgumentError("Frechet: both α and θ must be positive."))
-    	@compat new(Float64(α), Float64(θ))
+    	@check_args(Frechet, α > zero(α) && θ > zero(θ))
+    	new(α, θ)
     end
-
     Frechet(α::Real) = Frechet(α, 1.0)
     Frechet() = new(1.0, 1.0)
 end

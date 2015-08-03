@@ -3,11 +3,9 @@ immutable Beta <: ContinuousUnivariateDistribution
     β::Float64
 
     function Beta(α::Real, β::Real)
-        (α > zero(α) && β > zero(β)) ||
-            throw(ArgumentError("Beta: α and β must be positive"))
-        @compat new(Float64(α), Float64(β))
+        @check_args(Beta, α > zero(α) && β > zero(β))
+        new(α, β)
     end
-
     Beta(α::Real) = Beta(α, α)
     Beta() = new(1.0, 1.0)
 end

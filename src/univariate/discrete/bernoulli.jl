@@ -2,9 +2,8 @@ immutable Bernoulli <: DiscreteUnivariateDistribution
     p::Float64
 
     function Bernoulli(p::Real)
-        zero(p) <= p <= one(p) ||
-            throw(ArgumentError("Bernoulli: p must be in [0, 1]."))
-        @compat new(Float64(p))
+        @check_args(Bernoulli, zero(p) <= p <= one(p))
+        new(p)
     end
     Bernoulli() = new(0.5)
 end

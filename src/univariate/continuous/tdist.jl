@@ -1,11 +1,7 @@
 immutable TDist <: ContinuousUnivariateDistribution
     ν::Float64
 
-    function TDist(ν::Real)
-    	ν > zero(ν) ||
-            throw(ArgumentError("TDist: ν must be positive."))
-        @compat new(Float64(ν))
-    end
+    TDist(ν::Real) = (@check_args(TDist, ν > zero(ν)); new(ν))
 end
 
 @distr_support TDist -Inf Inf

@@ -1,11 +1,7 @@
 immutable Chisq <: ContinuousUnivariateDistribution
     ν::Float64
 
-    function Chisq(ν::Real)
-        ν > zero(ν) ||
-            throw(ArgumentError("Chisq: ν must be positive."))
-        @compat new(Float64(ν))
-    end
+    Chisq(ν::Real) = (@check_args(Chisq, ν > zero(ν)); new(ν))
 end
 
 @distr_support Chisq 0.0 Inf

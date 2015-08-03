@@ -2,19 +2,20 @@ immutable Binomial <: DiscreteUnivariateDistribution
     n::Int
     p::Float64
 
-    function Binomial(n::Int, p::Real)
-        n >= zero(n) ||
-            throw(ArgumentError("Binomial: n must be non-negative but is $n."))
-        zero(p) <= p <= one(p) ||
-            throw(ArgumentError("Binomial: p must be in [0, 1] but is $p"))
-        @compat new(Int(n), Float64(p))
+    function Binomial(n::Real, p::Real)
+        @check_args(Binomial, n >= zero(n))
+        @check_args(Binomial, zero(p) <= p <= one(p))
+        new(n, p)
     end
-
-    Binomial(n::Integer) = Binomial(n, 0.5)
+    function Binomial(n::Real)
+        @check_args(Binomial, n >= zero(n))
+        new(n, 0.5)
+    end
     Binomial() = new(1, 0.5)
 end
 
 @distr_support Binomial 0 d.n
+
 
 #### Parameters
 
@@ -127,9 +128,7 @@ immutable BinomialStats <: SufficientStats
     ne::Float64   # the number of experiments
     n::Int        # the number of trials in each experiment
 
-    function BinomialStats(ns::Real, ne::Real, n::Integer)
-        @compat new(Float64(ns), Float64(ne), round(Int, n))
-    end
+    BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
 end
 
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T})

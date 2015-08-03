@@ -2,13 +2,8 @@ immutable Levy <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
 
-    function Levy(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("Levy: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
-    end
-
-    Levy(μ::Real) = @compat new(Float64(μ), 1.0)
+    Levy(μ::Real, σ::Real) = (@check_args(Levy, σ > zero(σ)); new(μ, σ))
+    Levy(μ::Real) = new(μ, 1.0)
     Levy() = new(0.0, 1.0)
 end
 

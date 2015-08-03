@@ -2,12 +2,7 @@ immutable Biweight <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
 
-    function Biweight(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("Biweight: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
-    end
-
+    Biweight(μ::Real, σ::Real) = (@check_args(Biweight, σ > zero(σ)); new(μ, σ))
     Biweight(μ::Real) = new(μ, 1.0)
     Biweight() = new(0.0, 1.0)
 end

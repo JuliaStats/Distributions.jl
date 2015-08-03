@@ -3,12 +3,10 @@ immutable Weibull <: ContinuousUnivariateDistribution
     θ::Float64   # scale
 
     function Weibull(α::Real, θ::Real)
-    	(zero(α) < α && zero(θ) < θ) ||
-            throw(ArgumentError("Weibull: both α and θ must be positive"))
-    	@compat new(Float64(α), Float64(θ))
+    	@check_args(Weibull, α > zero(α) && θ > zero(θ))
+    	new(α, θ)
     end
-
-    Weibull(α::Real) = @compat Weibull(Float64(α), 1.0)
+    Weibull(α::Real) = Weibull(α, 1.0)
     Weibull() = new(1.0, 1.0)
 end
 

@@ -1,13 +1,9 @@
 immutable Epanechnikov <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64
-    function Epanechnikov(μ::Real, σ::Real)
-        σ > zero(σ) ||
-            throw(ArgumentError("Epanechnikov: σ must be positive."))
-        @compat new(Float64(μ), Float64(σ))
-    end
 
-    Epanechnikov(μ::Real) = @compat new(Float64(μ), 1.0)
+    Epanechnikov(μ::Real, σ::Real) = (@check_args(Epanechnikov, σ > zero(σ)); new(μ, σ))
+    Epanechnikov(μ::Real) = new(μ, 1.0)
     Epanechnikov() = new(0.0, 1.0)
 end
 

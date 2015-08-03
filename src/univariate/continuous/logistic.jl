@@ -2,13 +2,8 @@ immutable Logistic <: ContinuousUnivariateDistribution
     μ::Float64
     θ::Float64
 
-    function Logistic(μ::Float64, θ::Float64)
-    	θ > zero(θ) ||
-            throw(ArgumentError("Logistic: θ must be positive."))
-    	@compat new(Float64(μ), Float64(θ))
-    end
-
-    Logistic(μ::Real) = @compat new(Float64(μ), 1.0)
+    Logistic(μ::Real, θ::Real) = (@check_args(Logistic, θ > zero(θ)); new(μ, θ))
+    Logistic(μ::Real) = new(μ, 1.0)
     Logistic() = new(0.0, 1.0)
 end
 

@@ -2,16 +2,16 @@ immutable NoncentralBeta <: ContinuousUnivariateDistribution
     α::Float64
     β::Float64
     λ::Float64
+    
     function NoncentralBeta(α::Real, β::Real, λ::Real)
-    	(α > 0.0 && β > 0.0) ||
-            throw(ArgumentError("NoncentralBeta: α and β must be positive."))
-        λ >= 0.0 ||
-            throw(ArgumentError("NoncentralBeta: λ must be non-negative."))
-    	@compat new(Float64(α), Float64(β), Float64(λ))
+    	@check_args(NoncentralBeta, α > zero(α) && β > zero(β))
+        @check_args(NoncentralBeta, λ >= zero(λ))
+    	new(α, β, λ)
     end
 end
 
 @distr_support NoncentralBeta 0.0 1.0
+
 
 ### Parameters
 

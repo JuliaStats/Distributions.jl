@@ -3,11 +3,9 @@ immutable NoncentralT <: ContinuousUnivariateDistribution
     λ::Float64
 
     function NoncentralT(ν::Real, λ::Real)
-    	ν > zero(ν) ||
-            throw(ArgumentError("NoncentralT: ν must be positive."))
-        λ >= zero(λ) ||
-            throw(ArgumentError("NoncentralT: λ must be non-negative."))
-        @compat new(Float64(ν), Float64(λ))
+    	@check_args(NoncentralT, ν > zero(ν))
+        @check_args(NoncentralT, λ >= zero(λ))
+        new(ν, λ)
     end
 end
 

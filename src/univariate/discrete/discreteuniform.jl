@@ -4,13 +4,9 @@ immutable DiscreteUniform <: DiscreteUnivariateDistribution
     pv::Float64
 
     function DiscreteUniform(a::Real, b::Real)
-        a <= b ||
-            throw(ArgumentError("DiscreteUniform: a and b must satisfy a <= b."))
-        @compat a_ = Int(a)
-        @compat b_ = Int(b)
+        @check_args(DiscreteUniform, a <= b)
         new(a, b, 1.0 / (b - a + 1))
     end
-
     DiscreteUniform(b::Real) = DiscreteUniform(0, b)
     DiscreteUniform() = new(0, 1, 0.5)
 end
@@ -35,16 +31,16 @@ mean(d::DiscreteUniform) = middle(d.a, d.b)
 
 median(d::DiscreteUniform) = middle(d.a, d.b)
 
-@compat var(d::DiscreteUniform) = (abs2(Float64(span(d))) - 1.0) / 12.0
+var(d::DiscreteUniform) = (span(d)^2 - 1.0) / 12.0
 
 skewness(d::DiscreteUniform) = 0.0
 
 function kurtosis(d::DiscreteUniform)
-    @compat n2 = abs2(Float64(span(d)))
-    return -1.2 * (n2 + 1.0) / (n2 - 1.0)
+    n2 = span(d)^2
+    -1.2 * (n2 + 1.0) / (n2 - 1.0)
 end
 
-@compat entropy(d::DiscreteUniform) = log(Float64(span(d)))
+entropy(d::DiscreteUniform) = log(span(d))
 
 mode(d::DiscreteUniform) = d.a
 modes(d::DiscreteUniform) = [d.a:d.b]

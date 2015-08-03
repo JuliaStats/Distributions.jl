@@ -2,13 +2,8 @@ immutable Gumbel <: ContinuousUnivariateDistribution
     μ::Float64  # location
     θ::Float64  # scale
 
-    function Gumbel(μ::Real, θ::Real)
-        θ > zero(θ) ||
-            throw(ArgumentError("Gumbel: Θ must be positive."))
-        @compat new(Float64(μ), Float64(θ))
-    end
-
-    Gumbel(μ::Real) = @compat Gumbel(Float64(μ), 1.0)
+    Gumbel(μ::Real, θ::Real) = (@check_args(Gumbel, θ > zero(θ)); new(μ, θ))
+    Gumbel(μ::Real) = new(μ, 1.0)
     Gumbel() = new(0.0, 1.0)
 end
 
