@@ -1,11 +1,11 @@
 immutable Poisson <: DiscreteUnivariateDistribution
     λ::Float64
 
-    Poisson(λ::Real) = (@check_args(Poisson, λ > zero(λ)); new(λ))
+    Poisson(λ::Real) = (@check_args(Poisson, λ >= zero(λ)); new(λ))
     Poisson() = new(1.0)
 end
 
-@distr_support Poisson 0 Inf
+@distr_support Poisson 0 (d.λ == 0.0 ? 0 : Inf)
 
 
 ### Parameters
@@ -34,7 +34,9 @@ kurtosis(d::Poisson) = 1.0 / d.λ
 
 function entropy(d::Poisson)
     λ = rate(d)
-    if λ < 50.0
+    if λ == 0.0
+        return 0.0
+    elseif λ < 50.0
         s = 0.0
         λk = 1.0
         for k = 1:100
