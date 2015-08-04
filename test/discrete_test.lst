@@ -36,6 +36,7 @@ NegativeBinomial(1, 0.5)
 NegativeBinomial(5, 0.6)
 
 Poisson()
+Poisson(0.0)
 Poisson(0.5)
 Poisson(2.0)
 Poisson(10.0)
