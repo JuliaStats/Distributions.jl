@@ -69,7 +69,7 @@ def get(a, i):
 def get_dinfo(dname, args):
 	"""Make an python object that captures all relevant quantities
 
-		Returns a tuple in the form of (d, supp, xs, pdict), where:
+		Returns a tuple in the form of (d, supp, pdict), where:
 
 		- d: the scipy.stats distribution object
 		- supp: the support in the form of (minimum, maximum)
@@ -253,8 +253,15 @@ def get_dinfo(dname, args):
 
 	elif dname == "Poisson":
 		assert len(args) <= 1
-		lam = get(args, 0) or 1.0
-		return (poisson(lam), (0, inf), {"rate":lam})
+		if len(args) == 0:
+			lam = 1.0
+		else:
+			lam = get(args, 0)
+		if lam == 0.0:
+			upper = 0
+		else:
+			upper = inf
+		return (poisson(lam), (0, upper), {"rate":lam})
 
 	elif dname == "Rayleigh":
 		assert len(args) <= 1
@@ -333,7 +340,8 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 		raise ValueError("Invalid value of the c-argument.")
 
 	r_min, r_max = mm
-	jdict = {"dtype" : distr_name,
+	try:
+		jdict = {"dtype" : distr_name,
 			"params" : pdict,
 			"minimum" : json_num(r_min),
 			"maximum" : json_num(r_max),
@@ -346,7 +354,24 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 			"q50" : d.ppf(0.50), 
 			"q75" : d.ppf(0.75), 
 			"q90" : d.ppf(0.90)} 
-
+	except IndexError:
+		# Poisson(0.0) will throw IndexError exception for entropy()
+		if distr_name == "Poisson" and pdict["rate"] == 0.0:
+			jdict = {"dtype" : distr_name,
+			"params" : pdict,
+			"minimum" : json_num(r_min),
+			"maximum" : json_num(r_max),
+			"mean" : json_num(0.0),
+			"var" : json_num(0.0),
+			"entropy" : json_num(0.0),
+			"median" : json_num(0.0), 
+			"q10" : json_num(0.0), 
+			"q25" : json_num(0.0), 
+			"q50" : json_num(0.0),
+			"q75" : json_num(0.0),
+			"q90" : json_num(0.0)}
+		else:
+			raise
 	if is_discrete:
 		if distr_name == "Geometric":
 			xs = dsamples(d, 1, inf)
@@ -374,6 +399,9 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 	elif distr_name == "Cauchy":
 		jdict["mean"] = "nan"
 		jdict["var"] = "nan"
+
+	elif distr_name == "Poisson" and pdict["rate"] == 0.0:
+		jdict["points"] = [{"x" : 0, "logpdf" : 0.0, "cdf" : 1.0}]
 
 	# output
 	return [ex, jdict]
