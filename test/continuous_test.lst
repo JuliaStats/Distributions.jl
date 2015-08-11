@@ -46,6 +46,12 @@ Gamma(1.0, 1.0)
 Gamma(3.0, 1.0)
 Gamma(3.0, 2.0)
 
+GeneralizedPareto()
+GeneralizedPareto(1.0, 1.0)
+GeneralizedPareto(1.0, 1.0, 1.0)
+GeneralizedPareto(0.1, 2.0, 0.0)
+GeneralizedPareto(-1.5, 0.5, 2.0)
+
 Gumbel()
 Gumbel(3.0)
 Gumbel(3.0, 5.0)
