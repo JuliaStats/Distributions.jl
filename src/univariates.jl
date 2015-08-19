@@ -354,6 +354,7 @@ const continuous_distributions = [
     "fdist",
     "frechet",
     "gamma", "erlang",
+    "generalizedpareto",
     "gumbel",
     "inversegamma",
     "inversegaussian",

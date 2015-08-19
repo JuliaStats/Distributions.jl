@@ -174,6 +174,17 @@ def get_dinfo(dname, args):
 		return (gamma(a, scale=s), (0, inf), 
 			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
+	elif dname == "GeneralizedPareto":
+		assert len(args) <= 3
+		a = get(args, 0) or 1.0
+		s = get(args, 1) or 1.0
+		z = get(args, 2) or 0.0
+		maxbnd = inf
+		if a < 0.0:
+			maxbnd = z - s / a
+		return (genpareto(c=a, scale=s, loc=z), (z, maxbnd),
+			{"shape" : a, "scale" : s, "location": z})
+
 	elif dname == "Geometric":
 		assert len(args) <= 1
 		p = get(args, 0) or 0.5
