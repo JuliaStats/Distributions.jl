@@ -78,3 +78,23 @@ quantile(d::Pareto, p::Float64) = cquantile(d, 1.0 - p)
 #### Sampling
 
 rand(d::Pareto) = d.θ * exp(randexp() / d.α)
+
+
+## Fitting
+
+function fit_mle{T <: Real}(::Type{Pareto}, x::AbstractArray{T})
+    # Based on
+    # https://en.wikipedia.org/wiki/Pareto_distribution#Parameter_estimation
+
+    θ = minimum(x)
+
+    n = length(x)
+    lθ = log(θ)
+    temp1 = zero(T)
+    for i=1:n
+        temp1 += log(x[i]) - lθ
+    end
+    α = n/temp1
+
+    return Pareto(α, θ)
+end
