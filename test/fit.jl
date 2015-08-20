@@ -320,7 +320,7 @@ d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 
 # Pareto
 
-x = rand(Pareto(3., 7.), n0)
+x = rand(Pareto(3., 7.), N)
 d = fit(Pareto, x)
 
 @test isa(d, Pareto)
