@@ -318,6 +318,14 @@ d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 @test_approx_eq_eps location(d) 5.0 0.1
 @test_approx_eq_eps scale(d) 3.0 0.2
 
+# Pareto
+
+x = rand(Pareto(3., 7.), N)
+d = fit(Pareto, x)
+
+@test isa(d, Pareto)
+@test_approx_eq_eps shape(d) 3. 0.1
+@test_approx_eq_eps scale(d) 7. 0.1
 
 # Poisson
 
