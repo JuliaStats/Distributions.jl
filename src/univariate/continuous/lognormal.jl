@@ -54,7 +54,14 @@ end
 #### Evalution
 
 pdf(d::LogNormal, x::Float64) = normpdf(d.μ, d.σ, log(x)) / x
-logpdf(d::LogNormal, x::Float64) = (lx = log(x); normlogpdf(d.μ, d.σ, lx) - lx)
+function logpdf(d::LogNormal, x::Float64)
+    if !insupport(d, x)
+        return -Inf
+    else
+        lx = log(x)
+        return normlogpdf(d.μ, d.σ, lx) - lx
+    end
+end
 
 cdf(d::LogNormal, x::Float64) = x > 0.0 ? normcdf(d.μ, d.σ, log(x)) : 0.0
 ccdf(d::LogNormal, x::Float64) = x > 0.0 ? normccdf(d.μ, d.σ, log(x)) : 1.0
