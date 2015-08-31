@@ -5,7 +5,7 @@
 # discrete survival times.
 
 immutable NegativeBinomial <: DiscreteUnivariateDistribution
-    r::Int
+    r::Float64
     p::Float64
 
     function NegativeBinomial(r::Real, p::Real)
