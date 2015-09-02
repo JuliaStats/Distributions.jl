@@ -2,7 +2,7 @@ Distributions.jl
 ================
 
 [![Build Status](https://travis-ci.org/JuliaStats/Distributions.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distributions.jl)
-[![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.png?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
 
 [![Distributions](http://pkg.julialang.org/badges/Distributions_0.3.svg)](http://pkg.julialang.org/?pkg=Distributions&ver=0.3)
 [![Distributions](http://pkg.julialang.org/badges/Distributions_0.4.svg)](http://pkg.julialang.org/?pkg=Distributions&ver=0.4)
