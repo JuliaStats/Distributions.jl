@@ -45,4 +45,5 @@ d = Categorical(4)
 @test maximum(d) == 4
 @test probs(d) == [0.25, 0.25, 0.25, 0.25]
 
-
+p = scale(ones(10^6), 1.0e-6)
+@test Distributions.isprobvec(p)

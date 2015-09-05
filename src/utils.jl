@@ -55,17 +55,16 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function isprobvec(p::Vector{Float64})
-    s = 0.
-    for i = 1:length(p)
-        pi = p[i]
-        s += pi
-        if pi < 0
+function allnonneg{T<:Real}(x::Array{T})
+    for i = 1 : length(x)
+        if !(x[i] >= zero(T))
             return false
         end
     end
-    return abs(s - 1.0) <= 1.0e-12
+    return true
 end
+
+isprobvec(p::Vector{Float64}) = allnonneg(p) && isapprox(sum(p), 1.0)
 
 function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
     s = 0.
