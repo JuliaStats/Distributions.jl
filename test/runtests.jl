@@ -17,6 +17,7 @@ tests = [
     "matrix",
     "noncentralhypergeometric",
     "vonmisesfisher",
+    "conversion",
     "mixture",
     "gradlogpdf",
     "truncate"]

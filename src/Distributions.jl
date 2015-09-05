@@ -273,6 +273,7 @@ include("samplers.jl")
 
 # others
 include("truncate.jl")
+include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
 include("testutils.jl")

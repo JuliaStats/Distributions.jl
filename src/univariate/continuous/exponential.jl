@@ -19,15 +19,11 @@ params(d::Exponential) = (d.θ,)
 #### Statistics
 
 mean(d::Exponential) = d.θ
-
 median(d::Exponential) = logtwo * d.θ
-
 mode(d::Exponential) = 0.0
 
 var(d::Exponential) = d.θ^2
-
 skewness(d::Exponential) = 2.0
-
 kurtosis(d::Exponential) = 6.0
 
 entropy(d::Exponential) = 1.0 + log(d.θ)
