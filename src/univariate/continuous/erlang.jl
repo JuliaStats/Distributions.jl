@@ -1,57 +1,47 @@
 immutable Erlang <: ContinuousUnivariateDistribution
-    gammad::Gamma
+    α::Int
+    θ::Float64
 
     function Erlang(α::Real, θ::Real)
         @check_args(Erlang, isinteger(α) && α >= zero(α))
-        new(Gamma(α, θ))
+        new(α, θ)
     end
     Erlang(α::Real) = Erlang(α, 1.0)
-    Erlang() = new(Gamma())
+    Erlang() = new(1, 1.0)
 end
 
 @distr_support Erlang 0.0 Inf
 
-show(io::IO, d::Erlang) = ((α, β) = params(d); show_oneline(io, d, [(:α, α), (:β, β)]))
-
 #### Parameters
 
-shape(d::Erlang) = round(Int, shape(d.gammad))
-scale(d::Erlang) = scale(d.gammad)
-rate(d::Erlang) = rate(d.gammad)
-params(d::Erlang) = ((α, β) = params(d.gammad); (round(Int, α), β))
-
+shape(d::Erlang) = d.α
+scale(d::Erlang) = d.θ
+rate(d::Erlang) = inv(d.θ)
+params(d::Erlang) = (d.α, d.θ)
 
 #### Statistics
 
-mean(d::Erlang) = mean(d.gammad)
-var(d::Erlang) = var(d.gammad)
-median(d::Erlang) = median(d.gammad)
-skewness(d::Erlang) = skewness(d.gammad)
-kurtosis(d::Erlang) = kurtosis(d.gammad)
+mean(d::Erlang) = d.α * d.θ
+var(d::Erlang) = d.α * d.θ^2
+skewness(d::Erlang) = 2.0 / sqrt(d.α)
+kurtosis(d::Erlang) = 6.0 / d.α
 
-mode(d::Erlang) = mode(d.gammad)
-entropy(d::Erlang) = entropy(d.gammad)
+function mode(d::Erlang)
+    (α, θ) = params(d)
+    α >= 1.0 ? θ * (α - 1.0) : error("Erlang has no mode when α < 1.0")
+end
 
+function entropy(d::Erlang)
+    (α, θ) = params(d)
+    α + lgamma(α) + (1.0 - α) * digamma(α) + log(θ)
+end
 
-#### Evaluation
-
-pdf(d::Erlang, x::Float64) = pdf(d.gammad, x)
-logpdf(d::Erlang, x::Float64) = logpdf(d.gammad, x)
-
-cdf(d::Erlang, x::Float64) = cdf(d.gammad, x)
-ccdf(d::Erlang, x::Float64) = ccdf(d.gammad, x)
-logcdf(d::Erlang, x::Float64) = logcdf(d.gammad, x)
-logccdf(d::Erlang, x::Float64) = logccdf(d.gammad, x)
-
-quantile(d::Erlang, p::Float64) = quantile(d.gammad, p)
-cquantile(d::Erlang, p::Float64) = cquantile(d.gammad, p)
-invlogcdf(d::Erlang, lp::Float64) = invlogcdf(d.gammad, lp)
-invlogccdf(d::Erlang, lp::Float64) = invlogccdf(d.gammad, lp)
-
-mgf(d::Erlang, t::Real) = mgf(d.gammad, t)
-cf(d::Erlang, t::Real) = cf(d.gammad, t)
+mgf(d::Erlang, t::Real) = (1.0 - t * d.θ)^(-d.α)
+cf(d::Erlang, t::Real)  = (1.0 - im * t * d.θ)^(-d.α)
 
 
-#### Sampling
+#### Evaluation & Sampling
 
-rand(d::Erlang) = rand(d.gammad)
+@_delegate_statsfuns Erlang gamma α θ
+
+rand(d::Erlang) = StatsFuns.Rmath.gammarand(d.α, d.θ)
