@@ -8,6 +8,9 @@ library(methods)
 #
 #################################################
 
+setGeneric("is.discrete",
+    function(object) standardGeneric("is.discrete"))
+
 setGeneric("properties",
     function(object) standardGeneric("properties"))
 
@@ -27,10 +30,12 @@ setGeneric("quan",
     function(object, v) standardGeneric("quan"))
 
 
-setDistr <- function(className,
+setDistr <- function(className, is_discrete,
         supp=NULL, properties=NULL,
         pd=NULL, logpd=NULL, cd=NULL, quan=NULL) {
 
+    setMethod("is.discrete", className,
+        function(object){ is_discrete })
     setMethod("supp", className, supp)
     setMethod("properties", className, properties)
     setMethod("pd", className, pd)
@@ -64,7 +69,7 @@ xlogx <- function(x) {
 setClass("Bernoulli",
     representation(p="numeric"))
 
-setDistr("Bernoulli",
+setDistr("Bernoulli", TRUE,
     supp=function(object){ c(0, 1) },
     properties=function(object) {
         p <- object@p
@@ -90,8 +95,8 @@ setDistr("Bernoulli",
 setClass("Binomial",
     representation(n="numeric", p="numeric"))
 
-setDistr("Binomial",
-    supp=function(object){ c(0, objecr@n) },
+setDistr("Binomial", TRUE,
+    supp=function(object){ c(0, object@n) },
     properties=function(object) {
         n <- object@n
         p <- object@p
@@ -116,8 +121,8 @@ setDistr("Binomial",
 setClass("DiscreteUniform",
     representation(a="numeric", b="numeric"))
 
-setDistr("DiscreteUniform",
-    supp=function(object){ c(object@a, objecr@b) },
+setDistr("DiscreteUniform", TRUE,
+    supp=function(object){ c(object@a, object@b) },
     properties=function(object) {
         a <- object@a
         b <- object@b
@@ -160,7 +165,7 @@ setDistr("DiscreteUniform",
 setClass("Geometric",
     representation(p="numeric"))
 
-setDistr("Geometric",
+setDistr("Geometric", TRUE,
     supp=function(object){ c(0, Inf) },
     properties=function(object) {
         p <- object@p
@@ -183,7 +188,7 @@ setDistr("Geometric",
 setClass("Hypergeometric",
     representation(ns="numeric", nf="numeric", n="numeric"))
 
-setDistr("Hypergeometric",
+setDistr("Hypergeometric", TRUE,
     supp=function(object){
         N <- object@ns + object@nf
         K <- object@ns
@@ -227,7 +232,7 @@ setDistr("Hypergeometric",
 setClass("NegativeBinomial",
     representation(r="numeric", p="numeric"))
 
-setDistr("NegativeBinomial",
+setDistr("NegativeBinomial", TRUE,
     supp=function(object){ c(0, Inf) },
     properties=function(object){
         r <- object@r
@@ -250,7 +255,7 @@ setDistr("NegativeBinomial",
 setClass("Poisson",
     representation(lambda="numeric"))
 
-setDistr("Poisson",
+setDistr("Poisson", TRUE,
     supp=function(object){ c(0, Inf) },
     properties=function(object) {
         lam <- object@lambda
