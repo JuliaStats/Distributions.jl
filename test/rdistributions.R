@@ -153,7 +153,7 @@ DiscreteUniform <- R6Class("DiscreteUniform",
 
 # Geometric
 
-Geometric = R6Class("Geometric",
+Geometric <- R6Class("Geometric",
     inherit = DiscreteDistribution,
     public = list(
         names = c("p"),
@@ -181,7 +181,7 @@ Geometric = R6Class("Geometric",
 
 # Hypergeometric
 
-Hypergeometric = R6Class("Hypergeometric",
+Hypergeometric <- R6Class("Hypergeometric",
     inherit = DiscreteDistribution,
     public = list(
         names = c("ns", "nf", "n"),
