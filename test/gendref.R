@@ -20,102 +20,7 @@
 #         file I/O and the computation of statistical functions.
 #
 
-source("rdistributions.R")
-
-read.entries <- function(filename) {
-    # Read a list of entries from a given file
-    lst <- read.table(filename, header=FALSE,
-        sep="\t", blank.lines.skip = TRUE, comment.char="#")
-    as.vector(lst$V1)
-}
-
-parse.entry <- function(entry) {
-    # Parse an entry into a distribution name, and
-    # a vector of argument values
-
-    terms <- unlist(strsplit(entry, "\\s*,\\s*|\\(|\\)"))
-    nt <- length(terms)
-    list(name=terms[1],
-         args=as.numeric(tail(terms, nt-1)))
-}
-
-
-get.distr <- function(entry) {
-    # Get a distribution object based on a given entry
-    parsed <- parse.entry(entry)
-    dname <- parsed$name
-    dargs <- parsed$args
-
-    switch (dname,
-        Bernoulli        = get.bernoulli(dargs),
-        Binomial         = get.binomial(dargs),
-        DiscreteUniform  = get.discrete.uniform(dargs),
-        Geometric        = get.geometric(dargs),
-        Hypergeometric   = get.hypergeometric(dargs),
-        NegativeBinomial = get.negative.binomial(dargs),
-        Poisson          = get.poisson(dargs)
-    )
-}
-
-
-########################################
-#
-#  Get Distributions
-#
-########################################
-
-get.arg <- function(a, i, v0) {
-    if (!is.na(a) && i <= length(a)) { a[i] } else { v0 }
-}
-
-get.bernoulli <- function(args) {
-    stopifnot(length(args) <= 1)
-    Bernoulli$new(p=get.arg(args, 1, 0.5))
-}
-
-get.binomial <- function(args) {
-    stopifnot(length(args) <= 2)
-    Binomial$new(
-        n=get.arg(args, 1, 1),
-        p=get.arg(args, 2, 0.5))
-}
-
-get.discrete.uniform <- function(args) {
-    stopifnot(length(args) <= 2)
-    nargs <- length(args)
-    a <- 0
-    b <- 1
-    if (nargs == 1) {
-        b <- args[1]
-    } else if (nargs == 2) {
-        a <- args[1]
-        b <- args[2]
-    }
-    DiscreteUniform$new(a, b)
-}
-
-get.geometric <- function(args) {
-    stopifnot(length(args) <= 1)
-    Geometric$new(p=get.arg(args, 1, 0.5))
-}
-
-get.hypergeometric <- function(args) {
-    stopifnot(length(args) == 3)
-    Hypergeometric$new(ns=args[1], nf=args[2], n=args[3])
-}
-
-get.negative.binomial <- function(args) {
-    stopifnot(length(args) <= 2)
-    NegativeBinomial$new(
-        r=get.arg(args, 1, 1.0),
-        p=get.arg(args, 2, 0.5))
-}
-
-get.poisson <- function(args) {
-    stopifnot(length(args) <= 1)
-    Poisson$new(lambda=get.arg(args, 1, 1.0))
-}
-
+source("parseDistrs.R")
 
 ########################################
 #
@@ -154,6 +59,12 @@ eval.points <- function(distr) {
          pd = distr$pdf(xs),
          lp = distr$logpdf(xs),
          cp = distr$cdf(xs))
+}
+
+eval.quans <- function(distr) {
+    qs <- c(0.10, 0.25, 0.50, 0.75, 0.90)
+    list(q = qs,
+         x = distr$quan(qs))
 }
 
 
@@ -204,7 +115,7 @@ cat.point <- function (prefix, points, i) {
     cd <- points$cp[i]
 
     s <- sprintf("{ \"x\": %s, \"pdf\": %s, \"logpdf\": %s, \"cdf\": %s }",
-        x, p, lp, cd)
+        x, json.str(p), json.str(lp), json.str(cd))
 
     if (i == n) {
         cat(prefix, s, "\n", sep="")
@@ -213,8 +124,25 @@ cat.point <- function (prefix, points, i) {
     }
 }
 
+cat.quan <- function (prefix, quans, i) {
+    n <- length(quans$q)
+    q <- quans$q[i]
+    x <- quans$x[i]
+    s <- sprintf("{ \"q\": %.2f, \"x\": %s }", q, json.str(x))
+    if (i == n) {
+        cat(prefix, s, "\n", sep="")
+    } else {
+        cat(prefix, s, ",\n", sep="")
+    }
+}
 
-write.json <- function(expr, distr, points, last=FALSE) {
+write.json <- function(info, last=FALSE) {
+    # extract fields
+    expr <- info$expr
+    distr <- info$distr
+    points <- info$points
+    quans <- info$quans
+
     cat("{\n")
     dname <- class(distr)[1]
     suppr <- distr$supp()
@@ -241,9 +169,21 @@ write.json <- function(expr, distr, points, last=FALSE) {
         for (i in 1:n) {
             cat.point("    ", points, i)
         }
+        cat("  ],\n")
+    } else {
+        cat("  \"points\": [],\n")
+    }
+
+    # output quantile points
+    n <- length(quans$q)
+    if (n > 0) {
+        cat("  \"quans\": [\n")
+        for (i in 1:n) {
+            cat.quan("    ", quans, i)
+        }
         cat("  ]\n")
     } else {
-        cat("  \"points\": []\n")
+        cat("  \"quans\": []\n")
     }
 
     # closing
@@ -269,8 +209,7 @@ do.main <- function(lstname) {
     entries <- read.entries(lstfile)
 
     # derive information
-    distrlist <- list()
-    ptslist <- list()
+    infolist <- list()
     n <- 0
     for (e in entries) {
         distr <- get.distr(e)
@@ -281,8 +220,12 @@ do.main <- function(lstname) {
         }
         cat("\n")
         n <- n + 1
-        distrlist[[n]] = distr
-        ptslist[[n]] = eval.points(distr)
+        info <- list(
+            expr=e,
+            distr=distr,
+            points=eval.points(distr),
+            quans=eval.quans(distr))
+        infolist[[n]] <- info
     }
 
     # output
@@ -290,7 +233,7 @@ do.main <- function(lstname) {
     sink(outfile)
     cat("[\n")
     for (i in 1:n) {
-        write.json(entries[i], distrlist[[i]], ptslist[[i]], last=(i==n))
+        write.json(infolist[[i]], last=(i==n))
     }
     cat("]\n")
     sink()
