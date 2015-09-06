@@ -20,6 +20,8 @@
 #         file I/O and the computation of statistical functions.
 #
 
+source("rdistributions.R")
+
 read.entries <- function(filename) {
     # Read a list of entries from a given file
     lst <- read.table(filename, header=FALSE,
