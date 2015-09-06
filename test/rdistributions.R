@@ -241,8 +241,8 @@ NegativeBinomial <- R6Class("NegativeBinomial",
         r = NA,
         p = NA,
         initialize = function(r, p) {
-            self$r = r
-            self$p = p
+            self$r <- r
+            self$p <- p
         },
         supp = function(){ c(0, Inf) },
         properties = function(){
@@ -270,7 +270,7 @@ Poisson <- R6Class("Poisson",
         names = c("lambda"),
         lambda = NA,
         initialize = function(lambda) {
-            self$lambda = lambda
+            self$lambda <- lambda
         },
         supp = function() { c(0, Inf) },
         properties = function() {
