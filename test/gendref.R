@@ -70,12 +70,12 @@ get.arg <- function(a, i, v0) {
 
 get.bernoulli <- function(args) {
     stopifnot(length(args) <= 1)
-    new("Bernoulli", p=get.arg(args, 1, 0.5))
+    Bernoulli$new(p=get.arg(args, 1, 0.5))
 }
 
 get.binomial <- function(args) {
     stopifnot(length(args) <= 2)
-    new("Binomial",
+    Binomial$new(
         n=get.arg(args, 1, 1),
         p=get.arg(args, 2, 0.5))
 }
@@ -91,29 +91,29 @@ get.discrete.uniform <- function(args) {
         a <- args[1]
         b <- args[2]
     }
-    new("DiscreteUniform", a=a, b=b)
+    DiscreteUniform$new(a, b)
 }
 
 get.geometric <- function(args) {
     stopifnot(length(args) <= 1)
-    new("Geometric", p=get.arg(args, 1, 0.5))
+    Geometric$new(p=get.arg(args, 1, 0.5))
 }
 
 get.hypergeometric <- function(args) {
     stopifnot(length(args) == 3)
-    new("Hypergeometric", ns=args[1], nf=args[2], n=args[3])
+    Hypergeometric$new(ns=args[1], nf=args[2], n=args[3])
 }
 
 get.negative.binomial <- function(args) {
     stopifnot(length(args) <= 2)
-    new("NegativeBinomial",
+    NegativeBinomial$new(
         r=get.arg(args, 1, 1.0),
         p=get.arg(args, 2, 0.5))
 }
 
 get.poisson <- function(args) {
     stopifnot(length(args) <= 1)
-    new("Poisson", lambda=get.arg(args, 1, 1.0))
+    Poisson$new(lambda=get.arg(args, 1, 1.0))
 }
 
 
@@ -124,17 +124,17 @@ get.poisson <- function(args) {
 ########################################
 
 eval.samples <- function(distr) {
-    if (is.discrete(distr)) {
-        su <- supp(distr)
+    if (distr$is.discrete) {
+        su <- distr$supp()
         dmin <- su[1]
         dmax <- su[2]
-        vmin <- if (is.finite(dmin)) { dmin } else { quan(distr, 0.01) }
-        vmax <- if (is.finite(dmax)) { dmax } else { quan(distr, 0.99) }
+        vmin <- if (is.finite(dmin)) { dmin } else { distr$quan(0.01) }
+        vmax <- if (is.finite(dmax)) { dmax } else { distr$quan(0.99) }
 
         if (vmax - vmin + 1 <= 10) {
             seq(vmin, vmax)
         } else {
-            xs <- unique(round(quan(distr, seq(0.1, 0.9, 0.1))))
+            xs <- unique(round(distr$quan(seq(0.1, 0.9, 0.1))))
             if (vmin < xs[1]) {
                 xs <- c(vmin, xs)
             }
@@ -144,16 +144,16 @@ eval.samples <- function(distr) {
             xs
         }
     } else {
-        quan(distr, seq(0.1, 0.9, 0.1))
+        distr$quan(seq(0.1, 0.9, 0.1))
     }
 }
 
 eval.points <- function(distr) {
     xs <- eval.samples(distr)
-    list(x=xs,
-         pd=pd(distr, xs),
-         lp=logpd(distr, xs),
-         cp=cd(distr, xs))
+    list(x  = xs,
+         pd = distr$pdf(xs),
+         lp = distr$logpdf(xs),
+         cp = distr$cdf(xs))
 }
 
 
@@ -217,7 +217,7 @@ cat.point <- function (prefix, points, i) {
 write.json <- function(expr, distr, points, last=FALSE) {
     cat("{\n")
     dname <- class(distr)[1]
-    suppr <- supp(distr)
+    suppr <- distr$supp()
     cat.attribute("  ", "expr", expr)
     cat.attribute("  ", "dtype", dname)
     cat.attribute("  ", "minimum", suppr[1])
@@ -225,7 +225,7 @@ write.json <- function(expr, distr, points, last=FALSE) {
 
     # output properties
     cat("  \"properties\": {\n")
-    props <- properties(distr)
+    props <- distr$properties()
     i <- 0
     n <- length(props)
     for (pn in names(props)) {
@@ -276,8 +276,8 @@ do.main <- function(lstname) {
         distr <- get.distr(e)
         dname <- class(distr)[1]
         cat("On ", e, " --> ", dname, ": ", sep="")
-        for (sn in slotNames(distr)) {
-            cat(sn, "=", slot(distr, sn), " ", sep="")
+        for (sn in distr$names) {
+            cat(sn, "=", distr[[sn]], " ", sep="")
         }
         cat("\n")
         n <- n + 1
