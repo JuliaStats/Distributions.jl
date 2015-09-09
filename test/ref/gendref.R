@@ -241,4 +241,5 @@ do.main <- function(lstname) {
     cat("\n")
 }
 
-do.main("discrete_test")
+# do.main("discrete_test")
+do.main("continuous_test")

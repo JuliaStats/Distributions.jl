@@ -100,6 +100,95 @@ Binomial <- R6Class("Binomial",
     )
 )
 
+# Beta
+
+Beta <- R6Class("Beta",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta"),
+        alpha = NA,
+        beta = NA,
+        initialize = function(a, b) {
+            self$alpha <- a
+            self$beta <- b
+        },
+        supp = function() { c(0.0, 1.0) },
+        properties = function() {
+            a <- self$alpha
+            b <- self$beta
+            skew <- 2 * (b - a) * sqrt(a + b + 1) / (a + b + 2) / sqrt(a * b)
+            kurt.num <- 6 * ((a - b)^2 * (a + b + 1) - a * b * (a + b + 2))
+            kurt.den <- a * b * (a + b + 2) * (a + b + 3)
+            ent <- lbeta(a, b) - (a - 1) * digamma(a) - (b - 1) * digamma(b) +
+                   (a - b + 2) * digamma(a + b)
+            list(mean=a / (a + b),
+                 meanlogx=digamma(a) - digamma(a + b),
+                 var=(a * b) / (a + b)^2 / (a + b + 1.0),
+                 varlogx=trigamma(a) - trigamma(a + b),
+                 skewness=skew,
+                 kurtosis=kurt.num / kurt.den,
+                 entropy=ent)
+        },
+        pdf = function(x){ dbeta(x, self$alpha, self$beta) },
+        logpdf = function(x){ dbeta(x, self$alpha, self$beta, log=TRUE) },
+        cdf = function(x) { pbeta(x, self$alpha, self$beta) },
+        quan = function(v) { qbeta(v, self$alpha, self$beta) }
+    )
+)
+
+# Cauchy
+
+Cauchy <- R6Class("Cauchy",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma"),
+        mu = NA,
+        sigma = NA,
+        initialize = function(u, s) {
+            self$mu <- u
+            self$sigma <- s
+        },
+        supp = function() { c(-Inf, Inf) },
+        properties = function() {
+            list(location=self$mu,
+                 scale=self$sigma,
+                 median=self$mu,
+                 entropy=log(self$sigma) + log(4 * pi))
+        },
+        pdf = function(x) { dcauchy(x, self$mu, self$sigma) },
+        logpdf = function(x) { dcauchy(x, self$mu, self$sigma, log=TRUE) },
+        cdf = function(x) { pcauchy(x, self$mu, self$sigma) },
+        quan = function(v) { qcauchy(v, self$mu, self$sigma) }
+    )
+)
+
+# Chisq
+
+Chisq <- R6Class("Chisq",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("nu"),
+        nu = NA,
+        initialize = function(nu) {
+            self$nu <- nu
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            k <- self$nu
+            list(dof=k,
+                 mean=k,
+                 var=2 * k,
+                 skewness=sqrt(8 / k),
+                 kurtosis=12 / k,
+                 entropy=k / 2 + log(2) + lgamma(k/2) + (1 - k/2) * digamma(k/2))
+        },
+        pdf = function(x) { dchisq(x, self$nu) },
+        logpdf = function(x) { dchisq(x, self$nu, log=TRUE) },
+        cdf = function(x) { pchisq(x, self$nu) },
+        quan = function(v) { qchisq(v, self$nu) }
+    )
+)
+
 # DiscreteUniform
 
 DiscreteUniform <- R6Class("DiscreteUniform",
@@ -148,6 +237,35 @@ DiscreteUniform <- R6Class("DiscreteUniform",
             b <- self$b
             floor(a + (b - a) * clamp(0.0, 1.0, v))
         }
+    )
+)
+
+# Exponential
+
+Exponential <- R6Class("Exponential",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("theta"),
+        theta = NA,
+        initialize = function(s) {
+            self$theta = s
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            s <- self$theta
+            list(scale=s,
+                 rate=1 / s,
+                 mean=s,
+                 median=s * log(2),
+                 var=s^2,
+                 skewness=2.0,
+                 kurtosis=6.0,
+                 entropy=1.0 + log(s))
+        },
+        pdf = function(x) { dexp(x, 1.0 / self$theta) },
+        logpdf = function(x) { dexp(x, 1.0 / self$theta, log=TRUE) },
+        cdf = function(x) { pexp(x, 1.0 / self$theta) },
+        quan = function(v) { qexp(v, 1.0 / self$theta) }
     )
 )
 

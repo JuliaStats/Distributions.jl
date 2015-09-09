@@ -26,15 +26,24 @@ get.distr <- function(entry) {
     dname <- parsed$name
     dargs <- parsed$args
 
-    switch (dname,
+    distr <- switch (dname,
         Bernoulli        = get.bernoulli(dargs),
+        Beta             = get.beta(dargs),
         Binomial         = get.binomial(dargs),
+        Cauchy           = get.cauchy(dargs),
+        Chisq            = get.chisq(dargs),
         DiscreteUniform  = get.discrete.uniform(dargs),
+        Exponential      = get.exponential(dargs),
         Geometric        = get.geometric(dargs),
         Hypergeometric   = get.hypergeometric(dargs),
         NegativeBinomial = get.negative.binomial(dargs),
         Poisson          = get.poisson(dargs)
     )
+
+    if (is.null(distr)) {
+        stop(paste("Unrecognized distribution name:", dname))
+    }
+    return(distr)
 }
 
 ########################################
@@ -51,10 +60,25 @@ get.bernoulli <- function(args) {
     Bernoulli$new(p=get.arg(args, 1, 0.5))
 }
 
+get.beta <- function(args) {
+    Beta$new(args[1], args[2])
+}
+
 get.binomial <- function(args) {
     Binomial$new(
         n=get.arg(args, 1, 1),
         p=get.arg(args, 2, 0.5))
+}
+
+get.cauchy <- function(args) {
+    Cauchy$new(
+        get.arg(args, 1, 0.0),
+        get.arg(args, 2, 1.0)
+    )
+}
+
+get.chisq <- function(args) {
+    Chisq$new(args[1])
 }
 
 get.discrete.uniform <- function(args) {
@@ -68,6 +92,10 @@ get.discrete.uniform <- function(args) {
         b <- args[2]
     }
     DiscreteUniform$new(a, b)
+}
+
+get.exponential <- function(args) {
+    Exponential$new(get.arg(args, 1, 1.0))
 }
 
 get.geometric <- function(args) {
