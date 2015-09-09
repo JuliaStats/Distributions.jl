@@ -91,7 +91,7 @@ json.str <- function(val) {
         if (v == floor(v)) {
             sprintf("%g", v)
         } else {
-            sprintf("%.16g", v)
+            sprintf("%.15g", v)
         }
     } else {
         sprintf("\"%s\"", v)
