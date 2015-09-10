@@ -34,10 +34,18 @@ get.distr <- function(entry) {
         Chisq            = get.chisq(dargs),
         DiscreteUniform  = get.discrete.uniform(dargs),
         Exponential      = get.exponential(dargs),
+        Erlang           = get.gamma(dargs),
+        FDist            = get.fdist(dargs),
+        Gamma            = get.gamma(dargs),
         Geometric        = get.geometric(dargs),
         Hypergeometric   = get.hypergeometric(dargs),
         NegativeBinomial = get.negative.binomial(dargs),
-        Poisson          = get.poisson(dargs)
+        Normal           = get.normal(dargs),
+        NormalCanon      = get.normalcanon(dargs),
+        Poisson          = get.poisson(dargs),
+        TDist            = get.tdist(dargs),
+        Uniform          = get.uniform(dargs),
+        Weibull          = get.weibull(dargs)
     )
 
     if (is.null(distr)) {
@@ -57,7 +65,7 @@ get.arg <- function(a, i, v0) {
 }
 
 get.bernoulli <- function(args) {
-    Bernoulli$new(p=get.arg(args, 1, 0.5))
+    Bernoulli$new(get.arg(args, 1, 0.5))
 }
 
 get.beta <- function(args) {
@@ -66,8 +74,8 @@ get.beta <- function(args) {
 
 get.binomial <- function(args) {
     Binomial$new(
-        n=get.arg(args, 1, 1),
-        p=get.arg(args, 2, 0.5))
+        get.arg(args, 1, 1),
+        get.arg(args, 2, 0.5))
 }
 
 get.cauchy <- function(args) {
@@ -98,6 +106,16 @@ get.exponential <- function(args) {
     Exponential$new(get.arg(args, 1, 1.0))
 }
 
+get.fdist <- function(args) {
+    FDist$new(args[1], args[2])
+}
+
+get.gamma <- function(args) {
+    Gammad$new(
+        get.arg(args, 1, 1.0),
+        get.arg(args, 2, 1.0))
+}
+
 get.geometric <- function(args) {
     Geometric$new(p=get.arg(args, 1, 0.5))
 }
@@ -108,10 +126,43 @@ get.hypergeometric <- function(args) {
 
 get.negative.binomial <- function(args) {
     NegativeBinomial$new(
-        r=get.arg(args, 1, 1.0),
-        p=get.arg(args, 2, 0.5))
+        get.arg(args, 1, 1.0),
+        get.arg(args, 2, 0.5))
+}
+
+get.normal <- function(args) {
+    Normal$new(
+        get.arg(args, 1, 0.0),
+        get.arg(args, 2, 1.0))
+}
+
+get.normalcanon <- function(args) {
+    h <- get.arg(args, 1, 0.0)
+    J <- get.arg(args, 2, 1.0)
+    Normal$new(h / J, sqrt(1 / J))
 }
 
 get.poisson <- function(args) {
-    Poisson$new(lambda=get.arg(args, 1, 1.0))
+    Poisson$new(get.arg(args, 1, 1.0))
+}
+
+get.tdist <- function(args) {
+    TDist$new(args[1])
+}
+
+get.uniform <- function(args) {
+    a <- 0.0
+    b <- 1.0
+    if (length(args) == 2) {
+        a <- args[1]
+        b <- args[2]
+    }
+    d <- Uniform$new(a, b)
+    Uniform$new(a, b)
+}
+
+get.weibull <- function(args) {
+    Weibull$new(
+        get.arg(args, 1, 1.0),
+        get.arg(args, 2, 1.0))
 }

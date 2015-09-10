@@ -28,17 +28,17 @@ Chisq(20)
 # Cosine()
 # Cosine(1.5)
 # Cosine(2.0, 2.8)
-#
-# Erlang(1, 1.0)
-# Erlang(3, 1.0)
-# Erlang(5, 2.0)
 
-# Exponential()
-# Exponential(2.0)
-# Exponential(6.5)
-#
-# FDist(6.0, 8.0)
-# FDist(8.0, 6.0)
+Erlang(1, 1.0)
+Erlang(3, 1.0)
+Erlang(5, 2.0)
+
+Exponential()
+Exponential(2.0)
+Exponential(6.5)
+
+FDist(6.0, 8.0)
+FDist(8.0, 6.0)
 
 Gamma()
 Gamma(2.0)
@@ -83,15 +83,15 @@ Gamma(3.0, 2.0)
 # LogNormal()
 # LogNormal(0.0)
 # LogNormal(0.0, 2.0)
-#
-# Normal(0.0, 1.0)
-# Normal(-3.0, 2.0)
-# Normal(1.0, 10.0)
-#
-# NormalCanon(0.0, 1.0)
-# NormalCanon(-1.0, 2.5)
-# NormalCanon(2.0, 0.8)
-#
+
+Normal(0.0, 1.0)
+Normal(-3.0, 2.0)
+Normal(1.0, 10.0)
+
+NormalCanon(0.0, 1.0)
+NormalCanon(-1.0, 2.5)
+NormalCanon(2.0, 0.8)
+
 # Pareto()
 # Pareto(2.0)
 # Pareto(2.0, 1.5)
@@ -106,11 +106,11 @@ Gamma(3.0, 2.0)
 # SymTriangularDist(3.0, 0.5)
 # SymTriangularDist(3.0, 2.0)
 # SymTriangularDist(10.0, 8.0)
-#
-# TDist(1.2)
-# TDist(5.0)
-# TDist(28.0)
-#
+
+TDist(1.2)
+TDist(5.0)
+TDist(28.0)
+
 # TriangularDist(0, 5)
 # TriangularDist(-7, 2)
 # TriangularDist(-4, 14, 3)
@@ -122,14 +122,15 @@ Gamma(3.0, 2.0)
 # TruncatedNormal(27, 3, 0, Inf)
 # TruncatedNormal(-5, 1, -Inf, -10)
 # TruncatedNormal(1.8, 1.2, -Inf, 0)
-#
-# Uniform(0.0, 1.0)
-# Uniform(3.0, 17.0)
-# Uniform(3.0, 3.1)
-#
-# Weibull()
-# Weibull(0.5)
-# Weibull(5.0)
-# Weibull(20.0, 1.0)
-# Weibull(1.0, 2.0)
-# Weibull(5.0, 2.0)
+
+Uniform()
+Uniform(0.0, 1.0)
+Uniform(3.0, 17.0)
+Uniform(3.0, 3.1)
+
+Weibull()
+Weibull(0.5)
+Weibull(5.0)
+Weibull(20.0, 1.0)
+Weibull(1.0, 2.0)
+Weibull(5.0, 2.0)

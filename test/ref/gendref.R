@@ -77,13 +77,11 @@ eval.quans <- function(distr) {
 json.str <- function(val) {
     # convert a value to json string
     v <- val
-    if (is.numeric(val) && !is.finite(val)) {
-        if (val > 0) {
-            v <- "inf"
-        } else if (val < 0) {
-            v <- "-inf"
-        } else {
+    if (is.numeric(val)) {
+        if (is.nan(val)) {
             v <- "nan"
+        } else if (!is.finite(val)) {
+            v <- ifelse(val > 0, "inf", "-inf")
         }
     }
 
