@@ -112,6 +112,7 @@ export
     NormalCanon,
     NormalGamma,
     NormalInverseGamma,
+    NormalInverseGaussian,
     NormalInverseWishart,
     NormalWishart,
     Pareto,

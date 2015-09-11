@@ -12,6 +12,7 @@ tests = [
     "dirichlet",
     "mvnormal",
     "mvtdist",
+    "normalinversegaussian",
     "kolmogorov",
     "edgeworth",
     "matrix",

@@ -285,6 +285,7 @@ List of Distributions
     - :ref:`logistic`
     - :ref:`lognormal`
     - :ref:`normal`
+    - :ref:`normalinversegaussian`
     - :ref:`pareto`
     - :ref:`rayleigh`
     - :ref:`symtriangular`
@@ -975,6 +976,25 @@ The probability density distribution of a `Normal distribution <http://en.wikipe
     mean(d)           # Get the mean, i.e. mu
     std(d)            # Get the standard deviation, i.e. sig
 
+
+.. _normalinversegaussian:
+
+Normal-inverse Gaussian distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density distribution of a `Normal-inverse Gaussian distribution <http://en.wikipedia.org/wiki/Normal-inverse_Gaussian_distribution>`_ with location :math:`\mu`, tail heaviness :math:`\alpha`, asymmetry parameter :math:`\beta` and scale :math:`\delta` is
+
+.. math::
+
+   f(x; \mu, \alpha, \beta, \delta) = \frac{\alpha\delta K_1 \left(\alpha\sqrt{\delta^2 + (x - \mu)^2}\right)}{\pi \sqrt{\delta^2 + (x - \mu)^2}} \; e^{\delta \gamma + \beta (x - \mu)}
+
+:math:`K_j` denotes a modified Bessel function of the third kind.
+
+.. code-block:: julia
+
+    NormalInverseGaussian(mu, alpha, beta, delta)   # Normal-inverse Gaussian distribution with
+                                                    # location mu, tail heaviness alpha, asymmetry
+                                                    # parameter beta and scale delta
 
 .. _pareto:
 

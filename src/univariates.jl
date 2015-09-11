@@ -370,6 +370,7 @@ const continuous_distributions = [
     "noncentralt",
     "normal",
     "normalcanon",
+    "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
     "pareto",
     "rayleigh",
