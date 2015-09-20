@@ -11,15 +11,15 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 @compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = isupperbounded(d) && islowerbounded(d)
+@compat isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
 
-islowerbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = minimum(d) > -Inf
-isupperbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = maximum(d) < +Inf
+@compat islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
+@compat isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
 
-hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = isbounded(d)
-hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = false
+@compat hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
+@compat hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
 
-function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+@compat function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -28,14 +28,14 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type
     return r
 end
 
-insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
+@compat insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
-insupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = minimum(d) <= x <= maximum(d)
-insupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+@compat insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
+@compat insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = RealInterval(minimum(d), maximum(d))
-support{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = round(Int, minimum(d)):round(Int, maximum(d))
+@compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
+@compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
 
 ## macros to declare support
 
@@ -43,7 +43,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union($D, Type{$D})) : :(d::$D)
+    @compat paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
 
     # overall
     esc(quote

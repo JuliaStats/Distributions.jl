@@ -144,7 +144,7 @@ We realize that the mean vector and the covariance often have special forms in p
 
 .. code-block:: julia
 
-    immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+    immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
         μ::Mean
         Σ::Cov
     end
@@ -237,7 +237,7 @@ The canonical parameterization is widely used in Bayesian analysis. We provide a
 
 .. code:: julia
 
-    immutable MvNormalCanon{P<:AbstractPDMat,V<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+    immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
         μ::V    # the mean vector
         h::V    # potential vector, i.e. inv(Σ) * μ
         J::P    # precision matrix, i.e. inv(Σ)

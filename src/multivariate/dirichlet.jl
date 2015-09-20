@@ -143,7 +143,7 @@ end
 
 # sampling
 
-function _rand!{T<:Real}(d::Union(Dirichlet,DirichletCanon), x::AbstractVector{T})
+@compat function _rand!{T<:Real}(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T})
     s = 0.0
     n = length(x)
     α = d.alpha

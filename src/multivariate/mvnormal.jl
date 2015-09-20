@@ -60,7 +60,7 @@ _pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(
 #
 ###########################################################
 
-immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+@compat immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
