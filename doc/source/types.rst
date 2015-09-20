@@ -106,7 +106,7 @@ To simplify the use in practice, we introduce a series of type alias as follows:
     typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
     typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
     typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
-    typealias NonMatrixDistribution Union(UnivariateDistribution, MultivariateDistribution)
+    typealias NonMatrixDistribution Union{UnivariateDistribution, MultivariateDistribution}
 
     typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
     typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
