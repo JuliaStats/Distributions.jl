@@ -71,9 +71,11 @@ end
 function logpdf(d::GeneralizedPareto, x::Float64)
     (ξ, σ, μ) = params(d)
 
-    z = (x - μ) / σ
-    p = 0.0
+    # The logpdf is log(0) outside the support range.
+    p = -Inf
+
     if x >= μ
+        z = (x - μ) / σ
         if abs(ξ) < eps()
             p = -z - log(σ)
         elseif ξ > 0.0 || (ξ < 0.0 && x < maximum(d))
@@ -89,7 +91,9 @@ pdf(d::GeneralizedPareto, x::Float64) = exp(logpdf(d, x))
 function logccdf(d::GeneralizedPareto, x::Float64)
     (ξ, σ, μ) = params(d)
 
-    p = 1.0
+    # The logccdf is log(0) outside the support range.
+    p = -Inf
+
     if x >= μ
         z = (x - μ) / σ
         if abs(ξ) < eps()
