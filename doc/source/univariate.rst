@@ -311,8 +311,8 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
 .. math::
 
     P(X = k) = \begin{cases}
-        p & \quad \text{for } k = 0, \\
-        1 - p & \quad \text{for } k = 1.
+        1 - p & \quad \text{for } k = 0, \\
+        p & \quad \text{for } k = 1.
     \end{cases}
 
 .. code-block:: julia
@@ -443,7 +443,7 @@ A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomia
 
 .. math::
 
-    P(X = k) = {k + r - 1 \choose x} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
+    P(X = k) = {k + r - 1 \choose k} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
 
 .. code-block:: julia
 
