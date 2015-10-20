@@ -35,6 +35,11 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 @_delegate_statsfuns Normal norm μ σ
 
+### Added by scidom: start
+logpdf(d::Normal, x::Real) = -(log(2*π)/2+log(d.σ)+abs2((x-d.μ)/d.σ)/2)
+logpdf(d::Normal, x::Number) = -(log(2*π)/2+log(d.σ)+abs2((x-d.μ)/d.σ)/2)
+### Added by scidom: end
+
 gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
