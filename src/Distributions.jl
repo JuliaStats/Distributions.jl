@@ -7,6 +7,7 @@ using PDMats
 using StatsFuns
 using StatsBase
 using Compat
+using NLsolve
 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
