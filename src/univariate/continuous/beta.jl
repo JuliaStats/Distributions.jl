@@ -81,7 +81,7 @@ rand(d::Beta) = StatsFuns.Rmath.betarand(d.α, d.β)
 #### Fit model
 
 # This is the MLE method 
-function fit_mle{T<:Real}(::Type{Beta}, x::AbstractArray{T})
+function fit_mle{T<:Real}(::Type{Beta}, data::AbstractArray{T})
     initDist = fit(Beta, data)
     s1 = sum(log(data))
     s2 = sum(log(1-data))
