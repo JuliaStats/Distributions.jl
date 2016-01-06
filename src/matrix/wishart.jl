@@ -21,7 +21,7 @@ Wishart(df::Real, S::Matrix{Float64}) = Wishart(df, PDMat(S))
 
 Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
-function _wishart_c0(df::Float64, S::AbstractPDMat)
+function _wishart_c0(df::Real, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
     h_df * (logdet(S) + p * logtwo) + logmvgamma(p, h_df)
@@ -90,7 +90,7 @@ function rand(d::Wishart)
     A_mul_Bt(Z, Z)
 end
 
-function _wishart_genA(p::Int, df::Float64)
+function _wishart_genA(p::Int, df::Real)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
