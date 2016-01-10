@@ -77,8 +77,9 @@ function cdf(d::BetaBinomial, x::Int)
     c += pdf(d, y)
   end
 
-  # this is needed due to the fact that pdf(d, y) can return values that are imprecise at higher decimal places and so due to the impl
-  # above we can end up with cdf values that are basically 1 but are either slightly greater or smaller
+  # TODO: remove when https://github.com/JuliaLang/julia/issues/14620 is resolved
+  # this is needed due to the fact that pdf(d, y) can return values that are imprecise at higher decimal places (due to https://github.com/JuliaLang/julia/issues/14620)
+  # and so due to the impl above we can end up with cdf values that are basically 1 but are either slightly greater or smaller
   if abs(c - 1.0) < 1.0e-10
     c = 1.0
   end
