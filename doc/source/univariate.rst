@@ -338,9 +338,9 @@ A `Beta-binomial distribution <https://en.wikipedia.org/wiki/Beta-binomial_distr
 
 .. code-block:: julia
 
-    BetaBinomial(n, :math:\alpha, :math:\beta)      # BetaBinomial distribution with n trials and shape parameters :math:\alpha, :math:\beta
+    BetaBinomial(n, a, b)      # BetaBinomial distribution with n trials and shape parameters a, b
 
-    params(d)       # Get the parameters, i.e. (n, \alpha, \beta)
+    params(d)       # Get the parameters, i.e. (n, a, b)
     ntrials(d)      # Get the number of trials, i.e. n
 
 .. _binomial:
