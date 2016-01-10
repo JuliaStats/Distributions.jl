@@ -253,6 +253,7 @@ List of Distributions
 * Discrete univariate distributions:
 
     - :ref:`bernoulli`
+    - :ref:`betabinomial`
     - :ref:`binomial`
     - :ref:`categorical`
     - :ref:`discreteuniform`
@@ -324,6 +325,23 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
     succprob(d)    # Get the success rate, i.e. p
     failprob(d)    # Get the failure rate, i.e. 1 - p
 
+.. _betabinomial:
+
+Beta-binomial Distribution
+~~~~~~~~~~~~~~~~~~~~~~
+
+A `Beta-binomial distribution <https://en.wikipedia.org/wiki/Beta-binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials where the probability of success is determined by the beta distribution. It has three parameters: :math:`n`, the number of trials and two shape parameters :math:`\alpha`, :math:`\beta`
+
+.. math::
+
+    P(X = k) = {n \choose k} B(k + \alpha, n - k + \beta) / B(\alpha, \beta),  \quad \text{ for } k = 0,1,2, \ldots, n.
+
+.. code-block:: julia
+
+    BetaBinomial(n, :math:\alpha, :math:\beta)      # BetaBinomial distribution with n trials and shape parameters :math:\alpha, :math:\beta
+
+    params(d)       # Get the parameters, i.e. (n, \alpha, \beta)
+    ntrials(d)      # Get the number of trials, i.e. n
 
 .. _binomial:
 
@@ -346,7 +364,6 @@ A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ 
     ntrials(d)      # Get the number of trials, i.e. n
     succprob(d)     # Get the success rate, i.e. p
     failprob(d)     # Get the failure rate, i.e. 1 - p
-
 
 .. _categorical:
 
@@ -772,10 +789,10 @@ The probability density function of a `Generalized Pareto distribution <https://
 
 .. math::
 
-    f(x; \xi, \sigma, \mu) = \begin{cases} 
+    f(x; \xi, \sigma, \mu) = \begin{cases}
         \frac{1}{\sigma}(1 + \xi \frac{x - \mu}{\sigma} )^{-\frac{1}{\xi} - 1} & \text{for } \xi \neq 0 \\
-        \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0 
-    \end{cases}~, 
+        \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0
+    \end{cases}~,
     \quad x \in \begin{cases}
         \left[ \mu, \infty \right] & \text{for } \xi \geq 0 \\
         \left[ \mu, \mu - \sigma / \xi \right] & \text{for } \xi < 0

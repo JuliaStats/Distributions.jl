@@ -53,6 +53,7 @@ export
     Arcsine,
     Bernoulli,
     Beta,
+    BetaBinomial,
     BetaPrime,
     Binomial,
     Biweight,

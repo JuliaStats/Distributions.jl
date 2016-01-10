@@ -328,6 +328,7 @@ end
 
 const discrete_distributions = [
     "bernoulli",
+    "betabinomial",
     "binomial",
     "categorical",
     "discreteuniform",
@@ -382,7 +383,6 @@ const continuous_distributions = [
     "vonmises",
     "weibull"
 ]
-
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))
