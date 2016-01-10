@@ -37,6 +37,10 @@ end
 @compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
 @compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
 
+# Type used for dispatch on finite support
+# T = true or false
+immutable FiniteSupport{T} end
+
 ## macros to declare support
 
 macro distr_support(D, lb, ub)
@@ -108,11 +112,27 @@ logpdf(d::ContinuousUnivariateDistribution, x::Float64) = log(pdf(d, x))
 @compat logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, Float64(x))
 
 # cdf
+cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
-function cdf(d::DiscreteUnivariateDistribution, x::Int)
+# Discrete univariate with infinite support
+function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{false}})
     c = 0.0
-    for y = minimum(d):floor(Int,x)
+    for y = minimum(d):x
         c += pdf(d, y)
+    end
+    return c
+end
+
+# Discrete univariate with finite support
+function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{true}})
+    # calculate from left if x < (min + max)/2
+    # (same as infinite support version)
+    x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
+
+    # otherwise, calculate from the right
+    c = 1.0
+    for y = x+1:maximum(d)
+        c -= pdf(d, y)
     end
     return c
 end
