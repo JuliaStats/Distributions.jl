@@ -16,7 +16,7 @@ The root of this type hierarchy is ``Sampleable``. The abstract type ``Sampleabl
 
 It has two type parameters that define the kind of samples that can be drawn therefrom. 
 
-- ``F <: VariateForm`` specifies the form of the variate, which can be either of the following:
+- ``F <: VariateForm`` specifies the form of the variate, which can be one of the following:
 
     ================== ========================= ======================================
        **Type**           **A single sample**       **Multiple samples**
