@@ -114,7 +114,7 @@ Let ``d`` be a distribution:
 
 .. function:: ismesokurtic(d)
 
-    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) == 0``).
+    Return whether ``d`` is mesokurtic (*i.e* ``kurtosis(d) == 0``).
 
 .. function:: entropy(d)
 
