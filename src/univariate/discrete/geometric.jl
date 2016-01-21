@@ -15,7 +15,7 @@ end
 
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1.0 - d.p
-params(d) = (d.p,)
+params(d::Geometric) = (d.p,)
 
 
 ### Statistics
