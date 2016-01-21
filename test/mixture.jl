@@ -118,6 +118,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
     @test_approx_eq_eps vec(mean(Xs, 2)) mean(g) 0.01
+    @test_approx_eq_eps cov(Xs, vardim=2) cov(g) 0.01
 end
 
 
