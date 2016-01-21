@@ -42,7 +42,7 @@ meandir(d::VonMisesFisher) = d.μ
 concentration(d::VonMisesFisher) = d.κ
 
 insupport{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = isunitvec(x)
-
+params(d::VonMisesFisher) = (d.μ, d.κ)
 
 ### Evaluation
 
@@ -51,13 +51,13 @@ function _vmflck(p, κ)
     q = hp - 1.0
     q * log(κ) - hp * log(2π) - log(besseli(q, κ))
 end
-_vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2.0 * κ) 
+_vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2.0 * κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))::Float64
 
 _logpdf{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = d.logCκ + d.κ * dot(d.μ, x)
 
 
-### Sampling 
+### Sampling
 
 sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
 
@@ -106,6 +106,4 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     return κ
 end
 
-_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ) 
-
-
+_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)

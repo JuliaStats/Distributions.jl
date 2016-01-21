@@ -9,6 +9,7 @@ n = 100
 # http://en.wikipedia.org/wiki/Fisher's_noncentral_hypergeometric_distribution
 ω = 10.0
 d = FisherNoncentralHypergeometric(ns, nf, n, ω)
+@test d == typeof(d)(params(d)...)
 
 @test_approx_eq_eps mean(d) 71.95759 1e-5
 @test mode(d) == 72
@@ -50,6 +51,7 @@ n = 100
 # http://en.wikipedia.org/wiki/Fisher's_noncentral_hypergeometric_distribution
 ω = 10.0
 d = WalleniusNoncentralHypergeometric(ns, nf, n, ω)
+@test d == typeof(d)(params(d)...)
 
 @test_approx_eq_eps mean(d) 78.82945 1e-5
 @test mode(d) == 80

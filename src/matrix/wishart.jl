@@ -11,7 +11,7 @@ end
 
 #### Constructors
 
-function Wishart{ST<:AbstractPDMat}(df::Real, S::ST)
+function Wishart{ST <: AbstractPDMat}(df::Real, S::ST)
     p = dim(S)
     df > p - 1 || error("df should be greater than dim - 1.")
     Wishart{ST}(df, S, _wishart_c0(df, S))
@@ -35,7 +35,7 @@ insupport(d::Wishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
-
+params(d::Wishart) = (d.df, d.S, d.c0)
 
 #### Show
 

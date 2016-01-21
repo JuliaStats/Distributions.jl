@@ -25,6 +25,8 @@ mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
 rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
 
+params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
+
 immutable UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
     means::Vector{Float64}
     stds::Vector{Float64}

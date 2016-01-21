@@ -11,7 +11,7 @@ end
 
 #### Constructors
 
-function InverseWishart{ST<:AbstractPDMat}(df::Real, Ψ::ST)
+function InverseWishart{ST <: AbstractPDMat}(df::Real, Ψ::ST)
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
     InverseWishart{ST}(df, Ψ, _invwishart_c0(df, Ψ))
@@ -35,7 +35,7 @@ insupport(d::InverseWishart, X::Matrix{Float64}) = size(X) == size(d) && isposde
 
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
-
+params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 
 #### Show
 
