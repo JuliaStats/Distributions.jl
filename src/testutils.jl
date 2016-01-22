@@ -35,6 +35,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int)
 
     test_stats(distr, vs)
     test_samples(distr, n)
+    test_params(distr)
 end
 
 
@@ -50,6 +51,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
 
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
+    test_params(distr)
 end
 
 
@@ -504,4 +506,23 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
             @test_approx_eq_eps var(d) xvar 5.0 * vd * (kd + 2) / sqrt(n)
         end
     end
+end
+
+function test_params(d::Distribution)
+    # simply test that params returns something sufficient to
+    # reconstruct d
+    D = typeof(d)
+    pars = params(d)
+    d_new = D(pars...)
+    @test d_new == d
+end
+
+function test_params(d::Truncated)
+    # simply test that params returns something sufficient to
+    # reconstruct d
+    d_unt = d.untruncated
+    D = typeof(d_unt)
+    pars = params(d_unt)
+    d_new = Truncated(D(pars...), d.lower, d.upper)
+    @test d_new == d
 end

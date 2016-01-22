@@ -65,6 +65,7 @@ canonform{C}(d::MvNormal{C,ZeroVector{Float64}}) = MvNormalCanon(inv(d.Σ))
 
 length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{Float64}, d.μ)
+params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = full(inv(d.J))

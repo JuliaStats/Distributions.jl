@@ -109,6 +109,7 @@ Base.show(io::IO, d::MvNormal) =
 
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = convert(Vector{Float64}, d.μ)
+params(d::MvNormal) = (d.μ, d.Σ)
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = full(d.Σ)

@@ -38,6 +38,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
+params(d::Dirichlet) = (d.alpha,)
 
 function var(d::Dirichlet)
     α = d.alpha
