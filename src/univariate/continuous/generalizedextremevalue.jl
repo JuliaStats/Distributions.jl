@@ -24,7 +24,7 @@ params(d::GeneralizedExtremeValue) = (d.μ, d.σ, d.ξ)
 
 
 #### Statistics
-g(d::GeneralizedExtremeValue, k::Real) = gamma(1 - k * d.ξ) # This is should not be exported. 
+g(d::GeneralizedExtremeValue, k::Real) = gamma(1 - k * d.ξ) # This should not be exported. 
 
 function median(d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
