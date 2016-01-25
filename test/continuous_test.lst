@@ -52,7 +52,7 @@ GeneralizedExtremeValue(0.0, 1.0, 1.1)
 GeneralizedExtremeValue(0.0, 1.0, 0.6)
 GeneralizedExtremeValue(0.0, 1.0, 0.3)
 GeneralizedExtremeValue(0.0, 1.0, 0.0)
-GeneralizedExtremeValue(1.0, 1.0, - 1.0)
+GeneralizedExtremeValue(1.0, 1.0, -1.0)
 
 GeneralizedPareto()
 GeneralizedPareto(1.0, 1.0)
