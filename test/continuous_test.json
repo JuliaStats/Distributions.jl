@@ -2483,7 +2483,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": -1.0
+        "shape": 1.0
       }, 
       "points": [
         {
@@ -2552,7 +2552,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": -1.1
+        "shape": 1.1
       }, 
       "points": [
         {
@@ -2621,7 +2621,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": -0.6
+        "shape": 0.6
       }, 
       "points": [
         {
@@ -2690,7 +2690,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": -0.3
+        "shape": 0.3
       }, 
       "points": [
         {
@@ -2759,7 +2759,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": -1.0
+        "shape": 1.0
       }, 
       "points": [
         {
@@ -2828,7 +2828,7 @@
       "params": {
         "location": 1.0, 
         "scale": 1.0, 
-        "shape": 1.0
+        "shape": -1.0
       }, 
       "points": [
         {
