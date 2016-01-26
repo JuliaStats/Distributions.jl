@@ -832,11 +832,10 @@ The probability density function of a `Generalized extreme value distribution <h
 
 .. code-block:: julia
 
-    GeneralizedExtremeValue()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(1.0, 1.0, 1.0)
     GeneralizedExtremeValue(k, s, m)      # Generalized Pareto distribution with shape k, scale s and location m.
 
     params(d)       # Get the parameters, i.e. (k, s, m)
-    shape(d)        # Get the shape parameter, i.e. k
+    shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
     scale(d)        # Get the scale parameter, i.e. s
     location(d)     # Get the location parameter, i.e. m
 
