@@ -7,8 +7,6 @@ immutable GeneralizedExtremeValue <: ContinuousUnivariateDistribution
         σ > zero(σ) || error("Scale must be positive")
         new(μ, σ, ξ)
     end
-    
-    GeneralizedExtremeValue() = new(1.0, 1.0, 1.0)
 end
 
 minimum(d::GeneralizedExtremeValue) = d.ξ > 0.0 ? d.μ - d.σ / d.ξ : -Inf

@@ -178,7 +178,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 3
                 location = get(args, 0) or 1.0
 		scale = get(args, 1) or 1.0
-		shape = get(args, 2) or 1.0
+		shape = - (get(args, 2) or 1.0) # SciPy uses the reverse convention! 
 		support_min = location - scale if shape < 0. else -inf
 		support_max = location - scale if shape > 0. else inf
 		return (scipy.stats.genextreme(shape, location, scale), 
