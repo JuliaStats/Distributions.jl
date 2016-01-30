@@ -11,6 +11,7 @@ tests = [
     "poissonbinomial",
     "dirichlet",
     "mvnormal",
+    "mvlognormal",
     "mvtdist",
     "normalinversegaussian",
     "kolmogorov",
