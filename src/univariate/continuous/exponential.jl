@@ -38,7 +38,7 @@ pdf(d::Exponential, x::Float64) = (λ = rate(d); x < 0.0 ? 0.0 : λ * exp(-λ * 
 logpdf(d::Exponential, x::Float64) =  (λ = rate(d); x < 0.0 ? -Inf : log(λ) - λ * x)
 
 cdf(d::Exponential, x::Float64) = x > 0.0 ? -expm1(-zval(d, x)) : 0.0
-ccdf(d::Exponential, x::Float64) = x > 0.0 ? exp(-zval(d, x)) : 0.0
+ccdf(d::Exponential, x::Float64) = x > 0.0 ? exp(-zval(d, x)) : 1.0
 logcdf(d::Exponential, x::Float64) = x > 0.0 ? log1mexp(-zval(d, x)) : -Inf
 logccdf(d::Exponential, x::Float64) = x > 0.0 ? -zval(d, x) : 0.0
 

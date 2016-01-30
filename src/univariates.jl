@@ -1,15 +1,27 @@
 #### Domain && Support
+comparator(::Type{Val{:closed}}) = <=
+comparator(::Type{Val{:open}}) = <
+comparator(s::Symbol) = comparator(Val{s})
 
 immutable RealInterval
     lb::Float64
     ub::Float64
+    lc::Symbol
+    uc::Symbol
 
-    @compat RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
+    @compat RealInterval(lb::Real, ub::Real, lc::Symbol = :closed, uc::Symbol = :closed) = new(Float64(lb), Float64(ub), lc, uc)
 end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
-@compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
+
+lowerboundary(r::RealInterval) = r.lc
+upperboundary(r::RealInterval) = r.uc
+
+lowercomparator(r::RealInterval) = comparator(r.lc)
+uppercomparator(r::RealInterval) = comparator(r.uc)
+
+@compat in(x::Real, r::RealInterval) = lowercomparator(r)(r.lb,Float64(x)) && uppercomparator(r)(Float64(x),r.ub)
 
 @compat isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
 
@@ -18,6 +30,12 @@ maximum(r::RealInterval) = r.ub
 
 @compat hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
 @compat hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
+
+@compat lowerboundary{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = :closed
+@compat upperboundary{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = :closed
+
+@compat lowercomparator{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = comparator(lowerboundary(d))
+@compat uppercomparator{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = comparator(upperboundary(d))
 
 @compat function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
@@ -31,11 +49,11 @@ end
 @compat insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
-@compat insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
-@compat insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+@compat insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = lowercomparator(d)(minimum(d),x) && uppercomparator(d)(x,maximum(d))
+@compat insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && lowercomparator(d)(minimum(d),x) && uppercomparator(d)(x,maximum(d))
 
-@compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
-@compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
+@compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d), lowerboundary(d), upperboundary(d))
+@compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = (isfinite(minimum(d))?round(Int,minimum(d)):typemin(Int)):(isfinite(maximum(d))?round(Int, maximum(d)):typemax(Int))
 
 # Type used for dispatch on finite support
 # T = true or false
@@ -56,6 +74,15 @@ macro distr_support(D, lb, ub)
     end)
 end
 
+macro distr_boundaries(D, l, u)
+
+    @compat paramdecl = :(d::Union{$D, Type{$D}})
+
+    esc(quote
+        lowerboundary($(paramdecl)) = $l
+        upperboundary($(paramdecl)) = $u
+    end)
+end
 
 ##### generic methods (fallback) #####
 

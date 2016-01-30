@@ -11,8 +11,7 @@ immutable GeneralizedPareto <: ContinuousUnivariateDistribution
     GeneralizedPareto() = new(1.0, 1.0, 0.0)
 end
 
-minimum(d::GeneralizedPareto) = d.μ
-maximum(d::GeneralizedPareto) = d.ξ < 0.0 ? d.μ - d.σ / d.ξ : Inf
+@distr_support GeneralizedPareto d.μ d.ξ<0.0?d.μ-d.σ/d.ξ:Inf
 
 
 #### Parameters
@@ -74,9 +73,9 @@ function logpdf(d::GeneralizedPareto, x::Float64)
     # The logpdf is log(0) outside the support range.
     p = -Inf
 
-    if x >= μ
+    if insupport(d,x)
         z = (x - μ) / σ
-        if abs(ξ) < eps()
+        if abs(ξ) < eps(x)
             p = -z - log(σ)
         elseif ξ > 0.0 || (ξ < 0.0 && x < maximum(d))
             p = (-1.0 - 1.0 / ξ) * log1p(z * ξ) - log(σ)
@@ -91,16 +90,18 @@ pdf(d::GeneralizedPareto, x::Float64) = exp(logpdf(d, x))
 function logccdf(d::GeneralizedPareto, x::Float64)
     (ξ, σ, μ) = params(d)
 
-    # The logccdf is log(0) outside the support range.
-    p = -Inf
+    p = 0.0
 
-    if x >= μ
+    if insupport(d,x)
         z = (x - μ) / σ
         if abs(ξ) < eps()
             p = -z
         elseif ξ > 0.0 || (ξ < 0.0 && x < maximum(d))
             p = (-1.0 / ξ) * log1p(z * ξ)
         end
+    end
+    if x >= maximum(d)
+        p = -Inf
     end
 
     return p

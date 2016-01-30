@@ -5,6 +5,7 @@ immutable Chi <: ContinuousUnivariateDistribution
 end
 
 @distr_support Chi 0.0 Inf
+@distr_boundaries Chi :open :closed
 
 #### Parameters
 
@@ -45,16 +46,21 @@ end
 
 pdf(d::Chi, x::Float64) = exp(logpdf(d, x))
 
-logpdf(d::Chi, x::Float64) = (ν = d.ν;
-    (1.0 - 0.5 * ν) * logtwo + (ν - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * ν)
-)
+function logpdf(d::Chi, x::Float64)
+    if insupport(d, x)
+        ν = d.ν
+        return (1.0 - 0.5 * ν) * logtwo + (ν - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * ν)
+    else
+       return -Inf
+    end
+end
 
 gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.ν - 1.0) / x - x : 0.0
 
-cdf(d::Chi, x::Float64) = chisqcdf(d.ν, x^2)
-ccdf(d::Chi, x::Float64) = chisqccdf(d.ν, x^2)
-logcdf(d::Chi, x::Float64) = chisqlogcdf(d.ν, x^2)
-logccdf(d::Chi, x::Float64) = chisqlogccdf(d.ν, x^2)
+cdf(d::Chi, x::Float64) = insupport(d,x)?chisqcdf(d.ν, x^2):0.0
+ccdf(d::Chi, x::Float64) = insupport(d,x)?chisqccdf(d.ν, x^2):1.0
+logcdf(d::Chi, x::Float64) = insupport(d,x)?chisqlogcdf(d.ν, x^2):-Inf
+logccdf(d::Chi, x::Float64) = insupport(d,x)?chisqlogccdf(d.ν, x^2):0.0
 
 quantile(d::Chi, p::Float64) = sqrt(chisqinvcdf(d.ν, p))
 cquantile(d::Chi, p::Float64) = sqrt(chisqinvccdf(d.ν, p))

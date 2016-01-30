@@ -8,7 +8,7 @@ immutable LogNormal <: ContinuousUnivariateDistribution
 end
 
 @distr_support LogNormal 0.0 Inf
-
+@distr_boundaries LogNormal :open :closed
 
 #### Parameters
 
@@ -53,20 +53,20 @@ end
 
 #### Evalution
 
-pdf(d::LogNormal, x::Float64) = normpdf(d.μ, d.σ, log(x)) / x
+pdf(d::LogNormal, x::Float64) = insupport(d,x) ? normpdf(d.μ, d.σ, log(x))/x : zero(x)
 function logpdf(d::LogNormal, x::Float64)
-    if !insupport(d, x)
-        return -Inf
-    else
+    if insupport(d, x)
         lx = log(x)
         return normlogpdf(d.μ, d.σ, lx) - lx
+    else
+        return -Inf
     end
 end
 
-cdf(d::LogNormal, x::Float64) = x > 0.0 ? normcdf(d.μ, d.σ, log(x)) : 0.0
-ccdf(d::LogNormal, x::Float64) = x > 0.0 ? normccdf(d.μ, d.σ, log(x)) : 1.0
-logcdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogcdf(d.μ, d.σ, log(x)) : -Inf
-logccdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogccdf(d.μ, d.σ, log(x)) : 0.0
+cdf(d::LogNormal, x::Float64) = insupport(d, x) ? normcdf(d.μ, d.σ, log(x)) : 0.0
+ccdf(d::LogNormal, x::Float64) = insupport(d, x) ? normccdf(d.μ, d.σ, log(x)) : 1.0
+logcdf(d::LogNormal, x::Float64) = insupport(d, x) ? normlogcdf(d.μ, d.σ, log(x)) : -Inf
+logccdf(d::LogNormal, x::Float64) = insupport(d, x) ? normlogccdf(d.μ, d.σ, log(x)) : 0.0
 
 quantile(d::LogNormal, q::Float64) = exp(norminvcdf(d.μ, d.σ, q))
 cquantile(d::LogNormal, q::Float64) = exp(norminvccdf(d.μ, d.σ, q))

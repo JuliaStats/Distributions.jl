@@ -52,13 +52,25 @@ end
 logpdf(d::Cosine, x::Float64) = insupport(d, x) ? log(pdf(d, x)) : -Inf
 
 function cdf(d::Cosine, x::Float64)
-    z = (x - d.μ) / d.σ
-    0.5 * (1.0 + z + sinpi(z) * invπ)
+    if insupport(d, x)
+        z = (x - d.μ) / d.σ
+        return 0.5 * (1.0 + z + sinpi(z) * invπ)
+    elseif x < minimum(d)
+        return 0.0
+    else
+        return 1.0
+    end
 end
 
 function ccdf(d::Cosine, x::Float64)
-    nz = (d.μ - x) / d.σ
-    0.5 * (1.0 + nz + sinpi(nz) * invπ)
+    if insupport(d, x)
+        nz = (d.μ - x) / d.σ
+        return 0.5 * (1.0 + nz + sinpi(nz) * invπ)
+    elseif x < minimum(d)
+        return 1.0
+    else
+        return 0.0
+    end
 end
 
 quantile(d::Cosine, p::Float64) = quantile_bisect(d, p)

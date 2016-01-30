@@ -11,6 +11,7 @@ immutable BetaPrime <: ContinuousUnivariateDistribution
 end
 
 @distr_support BetaPrime 0.0 Inf
+@distr_boundaries BetaPrime :open :closed
 
 #### Parameters
 
@@ -42,8 +43,12 @@ end
 #### Evaluation
 
 function logpdf(d::BetaPrime, x::Float64)
-    (α, β) = params(d)
-    (α - 1.0) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+    if insupport(d, x)
+        (α, β) = params(d)
+        (α - 1.0) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+    else
+        return -Inf
+    end
 end
 
 pdf(d::BetaPrime, x::Float64) = exp(logpdf(d, x))
