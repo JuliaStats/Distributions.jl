@@ -47,7 +47,7 @@ Computation of statistics
 
 .. function:: entropy(d)
 
-    Return the entropy of distribution ``d``. 
+    Return the entropy of distribution ``d``.
 
 
 Probability evaluation
@@ -55,30 +55,30 @@ Probability evaluation
 
 .. function:: insupport(d, x)
 
-    If ``x`` is a vector, it returns whether x is within the support of ``d``. 
-    If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``. 
+    If ``x`` is a vector, it returns whether x is within the support of ``d``.
+    If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``.
 
 .. function:: pdf(d, x)
 
     Return the probability density of distribution ``d`` evaluated at ``x``.
 
-    - If ``x`` is a vector, it returns the result as a scalar. 
+    - If ``x`` is a vector, it returns the result as a scalar.
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]`` (i.e. treating each column as a sample).
 
 .. function:: pdf!(r, d, x)
 
-    Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r. 
+    Evaluate the probability densities at columns of x, and write the results to a pre-allocated array r.
 
 .. function:: logpdf(d, x)
 
     Return the logarithm of probability density evaluated at ``x``.
 
-    - If ``x`` is a vector, it returns the result as a scalar. 
+    - If ``x`` is a vector, it returns the result as a scalar.
     - If ``x`` is a matrix with n columns, it returns a vector ``r`` of length n, where ``r[i]`` corresponds to ``x[:,i]``.
 
 .. function:: logpdf!(r, d, x)
 
-    Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r. 
+    Evaluate the logarithm of probability densities at columns of x, and write the results to a pre-allocated array r.
 
 .. function:: loglikelihood(d, x)
 
@@ -100,7 +100,7 @@ Sampling
 
 .. function:: rand!(d, x)
 
-    Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.     
+    Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of length ``dim(d)`` or a matrix with ``dim(d)`` rows.
 
 
 **Node:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
@@ -117,14 +117,14 @@ The probability mass function is given by
 
 .. math::
 
-    f(x; n, p) = \frac{n!}{x_1! \cdots x_k!} \prod_{i=1}^k p_i^{x_i}, 
+    f(x; n, p) = \frac{n!}{x_1! \cdots x_k!} \prod_{i=1}^k p_i^{x_i},
     \quad x_1 + \cdots + x_k = n
 
 .. code-block:: julia
 
     Multinomial(n, p)   # Multinomial distribution for n trials with probability vector p
 
-    Multinomial(n, k)   # Multinomial distribution for n trials with equal probabilities 
+    Multinomial(n, k)   # Multinomial distribution for n trials with equal probabilities
                         # over 1:k
 
 
@@ -133,7 +133,7 @@ The probability mass function is given by
 Multivariate Normal Distribution
 ----------------------------------
 
-The `Multivariate normal distribution <http://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_ is a multidimensional generalization of the *normal distribution*. The probability density function of a d-dimensional multivariate normal distribution with mean vector :math:`\boldsymbol{\mu}` and covariance matrix :math:`\boldsymbol{\Sigma}` is 
+The `Multivariate normal distribution <http://en.wikipedia.org/wiki/Multivariate_normal_distribution>`_ is a multidimensional generalization of the *normal distribution*. The probability density function of a d-dimensional multivariate normal distribution with mean vector :math:`\boldsymbol{\mu}` and covariance matrix :math:`\boldsymbol{\Sigma}` is
 
 .. math::
 
@@ -231,7 +231,7 @@ Multivariate normal distribution is an `exponential family distribution <http://
 
 .. math::
 
-    \mathbf{h} = \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}, \quad \text{ and } \quad \mathbf{J} = \boldsymbol{\Sigma}^{-1} 
+    \mathbf{h} = \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}, \quad \text{ and } \quad \mathbf{J} = \boldsymbol{\Sigma}^{-1}
 
 The canonical parameterization is widely used in Bayesian analysis. We provide a type ``MvNormalCanon``, which is also a subtype of ``AbstractMvNormal`` to represent a multivariate normal distribution using canonical parameters. Particularly, ``MvNormalCanon`` is defined as:
 
@@ -247,12 +247,12 @@ We also define aliases for common specializations of this parametric type:
 
 .. code:: julia
 
-    typealias FullNormalCanon MvNormalCanon{PDMat,    Vector{Float64}} 
-    typealias DiagNormalCanon MvNormalCanon{PDiagMat, Vector{Float64}} 
+    typealias FullNormalCanon MvNormalCanon{PDMat,    Vector{Float64}}
+    typealias DiagNormalCanon MvNormalCanon{PDiagMat, Vector{Float64}}
     typealias IsoNormalCanon  MvNormalCanon{ScalMat,  Vector{Float64}}
 
-    typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,    ZeroVector{Float64}} 
-    typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat, ZeroVector{Float64}} 
+    typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,    ZeroVector{Float64}}
+    typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat, ZeroVector{Float64}}
     typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat,  ZeroVector{Float64}}
 
 A multivariate distribution with canonical parameterization can be constructed using a common constructor ``MvNormalCanon`` as:
@@ -286,6 +286,85 @@ A multivariate distribution with canonical parameterization can be constructed u
 
 **Note:** ``MvNormalCanon`` share the same set of methods as ``MvNormal``.
 
+.. _multivariatelognormal:
+
+Multivariate Lognormal Distribution
+-----------------------------------
+
+The `Multivariate lognormal distribution <http://en.wikipedia.org/wiki/Log-normal_distribution>`_ is a multidimensional generalization of the *lognormal distribution*.
+
+If :math:`\boldsymbol X \sim \mathcal{N}(\boldsymbol\mu,\,\boldsymbol\Sigma)` has a multivariate normal distribution then :math:`\boldsymbol Y=\exp(\boldsymbol X)` has a multivariate lognormal distribution.
+
+Mean vector :math:`\boldsymbol{\mu}` and covariance matrix :math:`\boldsymbol{\Sigma}` of the underlying normal distribution are known as the *location* and *scale* parameters of the corresponding lognormal distribution.
+
+The package provides an implementation, ``MvLogNormal``, which wraps around ``MvNormal``:
+
+.. code-block:: julia
+
+    immutable MvLogNormal <: AbstractMvLogNormal
+      normal::MvNormal
+    end
+
+Construction
+~~~~~~~~~~~~
+
+``MvLogNormal`` provides the same constructors as ``MvNormal``. See above for details.
+
+Additional Methods
+~~~~~~~~~~~~~~~~~~
+
+In addition to the methods listed in the common interface above, we also provide the following methods:
+
+.. function:: location(d)
+
+    Return the location vector of the distribution (the mean of the underlying normal distribution).
+
+.. function:: scale(d)
+
+    Return the scale matrix of the distribution (the covariance matrix of the underlying normal distribution).
+
+.. function:: median(d)
+
+    Return the median vector of the lognormal distribution. which is strictly smaller than the mean.
+
+.. function:: mode(d)
+
+    Return the mode vector of the lognormal distribution, which is strictly smaller than the mean and median.
+
+Conversion Methods
+~~~~~~~~~~~~~~~~~~
+
+It can be necessary to calculate the parameters of the lognormal (location vector and scale matrix) from a given covariance and mean, median or mode. To that end, the following functions are provided.
+
+.. function:: location{D<:AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix)
+
+    Calculate the location vector (the mean of the underlying normal distribution).
+
+    If ``s == :meancov``, then m is taken as the mean, and S the covariance matrix of a lognormal distribution.
+
+    If ``s == :mean | :median | :mode``, then m is taken as the mean, median or mode of the lognormal respectively, and S is interpreted as the scale matrix (the covariance of the underlying normal distribution).
+
+    It is not possible to analytically calculate the location vector from e.g., median + covariance, or from mode + covariance.
+
+.. function:: location!{D<:AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector)
+
+    Calculate the location vector (as above) and store the result in ``μ``
+
+.. function:: scale{D<:AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix)
+
+    Calculate the scale parameter, as defined for the location parameter above.
+
+.. function:: scale!{D<:AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,Σ::AbstractMatrix)
+
+    Calculate the scale parameter, as defined for the location parameter above and store the result in ``Σ``.
+
+.. function:: params{D<:AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix)
+
+    Return (scale,location) for a given mean and covariance
+
+.. function:: params!{D<:AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix,μ::AbstractVector,Σ::AbstractMatrix)
+
+    Calculate (scale,location) for a given mean and covariance, and store the results in ``μ`` and ``Σ``
 
 
 .. _dirichlet:
@@ -298,7 +377,7 @@ The `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution
 .. math::
 
     f(x; \alpha) = \frac{1}{B(\alpha)} \prod_{i=1}^k x_i^{\alpha_i - 1}, \quad \text{ with }
-    B(\alpha) = \frac{\prod_{i=1}^k \Gamma(\alpha_i)}{\Gamma \left( \sum_{i=1}^k \alpha_i \right)}, 
+    B(\alpha) = \frac{\prod_{i=1}^k \Gamma(\alpha_i)}{\Gamma \left( \sum_{i=1}^k \alpha_i \right)},
     \quad x_1 + \cdots + x_k = 1
 
 
@@ -308,7 +387,7 @@ The `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution
     Dirichlet(alpha)         # Dirichlet distribution with parameter vector alpha
 
     # Let a be a positive scalar
-    Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)  
+    Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
 
 
 
