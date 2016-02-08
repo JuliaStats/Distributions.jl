@@ -35,11 +35,7 @@ function modes(d::Bernoulli)
     p > 0.5 ? [1] : [0, 1]
 end
 
-function median(d::Bernoulli)
-    p = succprob(d)
-    p < 0.5 ? 0.0 :
-    p > 0.5 ? 1.0 : 0.5
-end
+median(d::Bernoulli) = ifelse(succprob(d) <= 0.5, 0, 1)
 
 function entropy(d::Bernoulli)
     p0 = failprob(d)

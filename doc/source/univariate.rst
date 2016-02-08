@@ -114,7 +114,7 @@ Let ``d`` be a distribution:
 
 .. function:: ismesokurtic(d)
 
-    Return whether ``d`` is leptokurtic (*i.e* ``kurtosis(d) == 0``).
+    Return whether ``d`` is mesokurtic (*i.e* ``kurtosis(d) == 0``).
 
 .. function:: entropy(d)
 
@@ -253,6 +253,7 @@ List of Distributions
 * Discrete univariate distributions:
 
     - :ref:`bernoulli`
+    - :ref:`betabinomial`
     - :ref:`binomial`
     - :ref:`categorical`
     - :ref:`discreteuniform`
@@ -285,6 +286,7 @@ List of Distributions
     - :ref:`logistic`
     - :ref:`lognormal`
     - :ref:`normal`
+    - :ref:`normalinversegaussian`
     - :ref:`pareto`
     - :ref:`rayleigh`
     - :ref:`symtriangular`
@@ -310,8 +312,8 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
 .. math::
 
     P(X = k) = \begin{cases}
-        p & \quad \text{for } k = 0, \\
-        1 - p & \quad \text{for } k = 1.
+        1 - p & \quad \text{for } k = 0, \\
+        p & \quad \text{for } k = 1.
     \end{cases}
 
 .. code-block:: julia
@@ -323,6 +325,23 @@ A `Bernoulli distribution <http://en.wikipedia.org/wiki/Bernoulli_distribution>`
     succprob(d)    # Get the success rate, i.e. p
     failprob(d)    # Get the failure rate, i.e. 1 - p
 
+.. _betabinomial:
+
+Beta-binomial Distribution
+~~~~~~~~~~~~~~~~~~~~~~
+
+A `Beta-binomial distribution <https://en.wikipedia.org/wiki/Beta-binomial_distribution>`_ characterizes the number of successes in a sequence of independent trials where the probability of success is determined by the beta distribution. It has three parameters: :math:`n`, the number of trials and two shape parameters :math:`\alpha`, :math:`\beta`
+
+.. math::
+
+    P(X = k) = {n \choose k} B(k + \alpha, n - k + \beta) / B(\alpha, \beta),  \quad \text{ for } k = 0,1,2, \ldots, n.
+
+.. code-block:: julia
+
+    BetaBinomial(n, a, b)      # BetaBinomial distribution with n trials and shape parameters a, b
+
+    params(d)       # Get the parameters, i.e. (n, a, b)
+    ntrials(d)      # Get the number of trials, i.e. n
 
 .. _binomial:
 
@@ -345,7 +364,6 @@ A `Binomial distribution <http://en.wikipedia.org/wiki/Binomial_distribution>`_ 
     ntrials(d)      # Get the number of trials, i.e. n
     succprob(d)     # Get the success rate, i.e. p
     failprob(d)     # Get the failure rate, i.e. 1 - p
-
 
 .. _categorical:
 
@@ -442,7 +460,7 @@ A `Negative binomial distribution <http://en.wikipedia.org/wiki/Negative_binomia
 
 .. math::
 
-    P(X = k) = {k + r - 1 \choose x} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
+    P(X = k) = {k + r - 1 \choose k} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.
 
 .. code-block:: julia
 
@@ -771,10 +789,10 @@ The probability density function of a `Generalized Pareto distribution <https://
 
 .. math::
 
-    f(x; \xi, \sigma, \mu) = \begin{cases} 
+    f(x; \xi, \sigma, \mu) = \begin{cases}
         \frac{1}{\sigma}(1 + \xi \frac{x - \mu}{\sigma} )^{-\frac{1}{\xi} - 1} & \text{for } \xi \neq 0 \\
-        \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0 
-    \end{cases}~, 
+        \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0
+    \end{cases}~,
     \quad x \in \begin{cases}
         \left[ \mu, \infty \right] & \text{for } \xi \geq 0 \\
         \left[ \mu, \mu - \sigma / \xi \right] & \text{for } \xi < 0
@@ -975,6 +993,25 @@ The probability density distribution of a `Normal distribution <http://en.wikipe
     mean(d)           # Get the mean, i.e. mu
     std(d)            # Get the standard deviation, i.e. sig
 
+
+.. _normalinversegaussian:
+
+Normal-inverse Gaussian distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density distribution of a `Normal-inverse Gaussian distribution <http://en.wikipedia.org/wiki/Normal-inverse_Gaussian_distribution>`_ with location :math:`\mu`, tail heaviness :math:`\alpha`, asymmetry parameter :math:`\beta` and scale :math:`\delta` is
+
+.. math::
+
+   f(x; \mu, \alpha, \beta, \delta) = \frac{\alpha\delta K_1 \left(\alpha\sqrt{\delta^2 + (x - \mu)^2}\right)}{\pi \sqrt{\delta^2 + (x - \mu)^2}} \; e^{\delta \gamma + \beta (x - \mu)}
+
+:math:`K_j` denotes a modified Bessel function of the third kind.
+
+.. code-block:: julia
+
+    NormalInverseGaussian(mu, alpha, beta, delta)   # Normal-inverse Gaussian distribution with
+                                                    # location mu, tail heaviness alpha, asymmetry
+                                                    # parameter beta and scale delta
 
 .. _pareto:
 

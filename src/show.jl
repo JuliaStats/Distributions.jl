@@ -45,7 +45,10 @@ function _use_multline_show(d::Distribution, pnames)
     end
     return (multline, namevals)
 end
-_use_multline_show(d::Distribution) = _use_multline_show(d, typeof(d).names)
+
+function _use_multline_show(d::Distribution)
+    _use_multline_show(d, fieldnames(typeof(d)))
+end
 
 function show_oneline(io::IO, d::Distribution, namevals)
     print(io, distrname(d))

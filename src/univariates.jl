@@ -11,15 +11,15 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 @compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = isupperbounded(d) && islowerbounded(d)
+@compat isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
 
-islowerbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = minimum(d) > -Inf
-isupperbounded{D<:UnivariateDistribution}(d::Union(D,Type{D})) = maximum(d) < +Inf
+@compat islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
+@compat isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
 
-hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = isbounded(d)
-hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = false
+@compat hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
+@compat hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
 
-function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractArray)
+@compat function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -28,14 +28,18 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union(D,Type
     return r
 end
 
-insupport{D<:UnivariateDistribution}(d::Union(D,Type{D}), X::AbstractArray) =
+@compat insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
-insupport{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = minimum(d) <= x <= maximum(d)
-insupport{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D}),x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+@compat insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
+@compat insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support{D<:ContinuousUnivariateDistribution}(d::Union(D,Type{D})) = RealInterval(minimum(d), maximum(d))
-support{D<:DiscreteUnivariateDistribution}(d::Union(D,Type{D})) = round(Int, minimum(d)):round(Int, maximum(d))
+@compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
+@compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
+
+# Type used for dispatch on finite support
+# T = true or false
+immutable FiniteSupport{T} end
 
 ## macros to declare support
 
@@ -43,7 +47,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union($D, Type{$D})) : :(d::$D)
+    @compat paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -108,11 +112,27 @@ logpdf(d::ContinuousUnivariateDistribution, x::Float64) = log(pdf(d, x))
 @compat logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, Float64(x))
 
 # cdf
+cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
-function cdf(d::DiscreteUnivariateDistribution, x::Int)
+# Discrete univariate with infinite support
+function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{false}})
     c = 0.0
-    for y = minimum(d):floor(Int,x)
+    for y = minimum(d):x
         c += pdf(d, y)
+    end
+    return c
+end
+
+# Discrete univariate with finite support
+function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{true}})
+    # calculate from left if x < (min + max)/2
+    # (same as infinite support version)
+    x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
+
+    # otherwise, calculate from the right
+    c = 1.0
+    for y = x+1:maximum(d)
+        c -= pdf(d, y)
     end
     return c
 end
@@ -328,6 +348,7 @@ end
 
 const discrete_distributions = [
     "bernoulli",
+    "betabinomial",
     "binomial",
     "categorical",
     "discreteuniform",
@@ -370,6 +391,7 @@ const continuous_distributions = [
     "noncentralt",
     "normal",
     "normalcanon",
+    "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
     "pareto",
     "rayleigh",
@@ -381,7 +403,6 @@ const continuous_distributions = [
     "vonmises",
     "weibull"
 ]
-
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))

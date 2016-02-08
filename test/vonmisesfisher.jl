@@ -23,6 +23,7 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     @test length(d) == p
     @test meandir(d) == μ
     @test concentration(d) == κ
+    @test d == typeof(d)(params(d)...)
     # println(d)
 
     θ = κ * μ
@@ -72,4 +73,3 @@ for (p, κ) in [(2, 1.0),
 
     test_vonmisesfisher(p, κ, n, ns)
 end
-

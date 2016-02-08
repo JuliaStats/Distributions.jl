@@ -69,6 +69,7 @@ components(d::MixtureModel) = d.components
 component(d::MixtureModel, k::Int) = d.components[k]
 
 probs(d::MixtureModel) = probs(d.prior)
+params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
 
 function mean(d::UnivariateMixture)
     K = ncomponents(d)
@@ -121,6 +122,34 @@ function var(d::UnivariateMixture)
     end
     return v
 end
+
+function cov(d::MultivariateMixture)
+    K = ncomponents(d)
+    p = probs(d)
+    m = zeros(length(d))
+    md = zeros(length(d))
+    V = zeros(length(d),length(d))
+
+    for i = 1:K
+        pi = p[i]
+        if pi > 0.0
+            c = component(d, i)
+            BLAS.axpy!(pi, mean(c), m)
+            BLAS.axpy!(pi, cov(c), V)
+        end
+    end
+    for i = 1:K
+        pi = p[i]
+        if pi > 0.0
+            c = component(d, i)
+            # todo: use more in-place operations
+            md = mean(c) - m
+            BLAS.axpy!(pi, md*md', V)
+        end
+    end
+    return V
+end
+
 
 
 #### show

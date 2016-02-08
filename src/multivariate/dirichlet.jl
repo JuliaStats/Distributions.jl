@@ -38,6 +38,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
+params(d::Dirichlet) = (d.alpha,)
 
 function var(d::Dirichlet)
     α = d.alpha
@@ -143,7 +144,7 @@ end
 
 # sampling
 
-function _rand!{T<:Real}(d::Union(Dirichlet,DirichletCanon), x::AbstractVector{T})
+@compat function _rand!{T<:Real}(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T})
     s = 0.0
     n = length(x)
     α = d.alpha

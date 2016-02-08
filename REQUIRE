@@ -1,6 +1,6 @@
 julia 0.3
 ArrayViews 0.4.12
-PDMats 0.3.2
+PDMats 0.3.2 0.4
 StatsFuns 0.1.1
 StatsBase 0.7.0
 Compat 0.4.0

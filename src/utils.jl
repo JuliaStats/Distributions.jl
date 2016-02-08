@@ -46,7 +46,7 @@ end
 
 function allzeros{T<:Real}(x::Array{T})
     for i = 1 : length(x)
-        if !(x == zero(T))
+        if !(x[i] == zero(T))
             return false
         end
     end
@@ -66,7 +66,7 @@ end
 
 isprobvec(p::Vector{Float64}) = allnonneg(p) && isapprox(sum(p), 1.0)
 
-function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
+function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
     s = 0.
     n = length(v)
     for i = 1:n

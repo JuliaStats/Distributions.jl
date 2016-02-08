@@ -32,6 +32,8 @@ function quantile(d::NoncentralHypergeometric, q::Float64)
     end
 end
 
+params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
+
 ## Fisher's noncentral hypergeometric distribution
 
 immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric

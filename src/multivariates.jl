@@ -1,16 +1,15 @@
-
 ##### Generic methods #####
 
 ## sampling
 
 function rand!(d::MultivariateDistribution, x::DenseVector)
-    length(x) == length(d) || 
+    length(x) == length(d) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(d, x)
 end
 
 function rand!(d::MultivariateDistribution, A::DenseMatrix)
-    size(A,1) == length(d) || 
+    size(A,1) == length(d) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(sampler(d), A)
 end
@@ -20,7 +19,7 @@ rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), 
 
 ## domain
 
-function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union(D,Type{D}), X::AbstractMatrix)
+@compat function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix)
     n = length(r)
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
@@ -30,7 +29,7 @@ function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union(D,Ty
     return r
 end
 
-insupport{D<:MultivariateDistribution}(d::Union(D,Type{D}), X::AbstractMatrix) = 
+@compat insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, X::AbstractMatrix) =
     insupport!(BitArray(size(X,2)), d, X)
 
 ## statistics
@@ -52,7 +51,7 @@ function cor(d::MultivariateDistribution)
             @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
-    
+
     return R
 end
 
@@ -61,13 +60,13 @@ end
 _pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
 
 function logpdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) || 
+    length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, X)
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) || 
+    length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, X)
 end
@@ -131,8 +130,9 @@ end
 
 for fname in ["dirichlet.jl",
               "multinomial.jl",
-              "mvnormal.jl", 
+              "mvnormal.jl",
               "mvnormalcanon.jl",
+              "mvlognormal.jl",
               "mvtdist.jl",
               "vonmisesfisher.jl"]
     include(joinpath("multivariate", fname))

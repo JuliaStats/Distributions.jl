@@ -11,7 +11,7 @@ end
 
 #### Constructors
 
-function Wishart{ST<:AbstractPDMat}(df::Real, S::ST)
+function Wishart{ST <: AbstractPDMat}(df::Real, S::ST)
     p = dim(S)
     df > p - 1 || error("df should be greater than dim - 1.")
     Wishart{ST}(df, S, _wishart_c0(df, S))
@@ -21,7 +21,7 @@ Wishart(df::Real, S::Matrix{Float64}) = Wishart(df, PDMat(S))
 
 Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
-function _wishart_c0(df::Float64, S::AbstractPDMat)
+function _wishart_c0(df::Real, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
     h_df * (logdet(S) + p * logtwo) + logmvgamma(p, h_df)
@@ -35,7 +35,7 @@ insupport(d::Wishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
-
+params(d::Wishart) = (d.df, d.S, d.c0)
 
 #### Show
 
@@ -90,7 +90,7 @@ function rand(d::Wishart)
     A_mul_Bt(Z, Z)
 end
 
-function _wishart_genA(p::Int, df::Float64)
+function _wishart_genA(p::Int, df::Real)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
