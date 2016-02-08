@@ -174,6 +174,17 @@ def get_dinfo(dname, args):
 		return (gamma(a, scale=s), (0, inf), 
 			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
+	elif dname == "GeneralizedExtremeValue": 
+		assert len(args) <= 3
+                location = get(args, 0) or 1.0
+		scale = get(args, 1) or 1.0
+		shape = get(args, 2) or 1.0 
+		support_min = location - scale if shape > 0. else -inf
+		support_max = location - scale if shape < 0. else inf
+		return (scipy.stats.genextreme(- shape, location, scale), # SciPy uses the reverse convention for shape! 
+			(support_min, support_max), 
+			{"scale": scale, "shape": shape, "location": location})
+
 	elif dname == "GeneralizedPareto":
 		assert len(args) <= 3
 		a = get(args, 0) or 1.0
