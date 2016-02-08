@@ -104,22 +104,12 @@ end
 
 function quantile(d::GeneralizedExtremeValue, p::Float64)
     (μ, σ, ξ) = params(d)
-
-    if abs(p) < eps() # p == 0.0
-        z = ξ > 0.0 ? - 1 / ξ : - Inf
-    elseif abs(p - 1.0) < eps() # p == 1.0
-        z = ξ < 0.0 ? - 1 / ξ : Inf
-    elseif 0.0 < p < 1.0
-        if abs(ξ) < eps() # ξ == 0.0
-            z = - log(- log(p))
-        else
-            z = (- 1 + log(p) ^ (- ξ)) / ξ
-        end
+	
+    if abs(ξ) < eps() # ξ == 0.0
+        return μ + σ * (- log(- log(p)))
     else
-      z = NaN
+        return μ + σ * ((- log(p)) ^ (- ξ) - 1.0) / ξ
     end
-
-    return - μ - σ * z
 end
 
 
