@@ -80,7 +80,18 @@ rand(d::Beta) = StatsFuns.Rmath.betarand(d.α, d.β)
 
 #### Fit model
 
-# TODO: add MLE method (should be similar to Dirichlet)
+# This is the MLE method 
+function fit_mle{T<:Real}(::Type{Beta}, data::AbstractArray{T})
+    initDist = fit(Beta, data)
+    s1 = sum(log(data))
+    s2 = sum(log(1-data))
+    function f!(x, fvec)
+        fvec[1] = s1 - length(data)*(digamma(x[1])-digamma(x[1]+x[2]))
+        fvec[2] = s2 - length(data)*(digamma(x[2])-digamma(x[1]+x[2]))
+    end
+    sol = nlsolve(f!, [initDist.α, initDist.β])
+    Beta(sol.zero[1], sol.zero[2])
+end
 
 # This is a moment-matching method (not MLE)
 #

@@ -61,6 +61,11 @@ d = fit(Beta, rand(Beta(1.3, 3.7), N))
 @test_approx_eq_eps d.α 1.3 0.1
 @test_approx_eq_eps d.β 3.7 0.1
 
+d = fit_mle(Beta, rand(Beta(1.3, 3.7), N))
+@test isa(d, Beta)
+@test_approx_eq_eps d.α 1.3 0.1
+@test_approx_eq_eps d.β 3.7 0.1
+
 
 # Binomial
 
