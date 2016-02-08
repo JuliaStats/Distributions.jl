@@ -81,6 +81,7 @@ export
     FullNormalCanon,
     Gamma,
     GeneralizedPareto,
+    GeneralizedExtremeValue,
     Geometric,
     Gumbel,
     Hypergeometric,

@@ -22,7 +22,8 @@ tests = [
     "conversion",
     "mixture",
     "gradlogpdf",
-    "truncate"]
+    "truncate",
+	"generalizedextremevalue"]
 
 print_with_color(:blue, "Running tests:\n")
 
