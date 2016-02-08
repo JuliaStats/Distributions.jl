@@ -9,7 +9,7 @@ using StatsBase
 using Compat
 
 import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.Math.@horner
@@ -100,6 +100,7 @@ export
     MixtureModel,
     Multinomial,
     MultivariateNormal,
+    MvLogNormal,
     MvNormal,
     MvNormalCanon,
     MvNormalKnownCov,
@@ -208,6 +209,7 @@ export
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
     location,           # get the location parameter
+    location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
     meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
@@ -222,6 +224,7 @@ export
     ncomponents,        # the number of components in a mixture model
     ntrials,            # the number of trials being performed in the experiment
     params,             # get the tuple of parameters
+    params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
@@ -231,6 +234,7 @@ export
     rate,               # get the rate parameter
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
+    scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
     shape,              # get the shape parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)

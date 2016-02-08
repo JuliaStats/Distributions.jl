@@ -26,6 +26,7 @@ x = rand(d)
 @test insupport(d, x)
 @test size(x) == size(d)
 @test length(x) == length(d)
+@test d == typeof(d)(params(d)...)
 
 x = rand(d, 100)
 @test isa(x, Matrix{Int})
@@ -86,4 +87,3 @@ r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt
 @test length(r) == length(p)
 @test_approx_eq_eps probs(r) p 0.02
-

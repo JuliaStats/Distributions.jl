@@ -46,7 +46,7 @@ end
 
 function allzeros{T<:Real}(x::Array{T})
     for i = 1 : length(x)
-        if !(x == zero(T))
+        if !(x[i] == zero(T))
             return false
         end
     end

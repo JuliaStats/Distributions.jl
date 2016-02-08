@@ -31,7 +31,7 @@ end
 
 function GenericMvTDist{Cov<:AbstractPDMat}(df::Float64, Σ::Cov)
     d = dim(Σ)
-    GenericMvTDist{Cov}(df, d, true, zeros(d), Σ)    
+    GenericMvTDist{Cov}(df, d, true, zeros(d), Σ)
 end
 
 ## Construction of multivariate normal with specific covariance type
@@ -80,6 +80,8 @@ invscale(d::GenericMvTDist) = full(inv(d.Σ))
 invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*full(inv(d.Σ)) : NaN*ones(d.dim, d.dim)
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
+params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
+
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)
     hdf, hdim = 0.5*d.df, 0.5*d.dim
@@ -89,12 +91,12 @@ end
 
 # evaluation (for GenericMvTDist)
 
-insupport{T<:Real}(d::AbstractMvTDist, x::AbstractVector{T}) = 
+insupport{T<:Real}(d::AbstractMvTDist, x::AbstractVector{T}) =
   length(d) == length(x) && allfinite(x)
 
-function sqmahal{T<:Real}(d::GenericMvTDist, x::DenseVector{T}) 
+function sqmahal{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
     z::Vector{Float64} = d.zeromean ? x : x - d.μ
-    invquad(d.Σ, z) 
+    invquad(d.Σ, z)
 end
 
 function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvTDist, x::DenseMatrix{T})

@@ -51,7 +51,7 @@ function cor(d::MultivariateDistribution)
             @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
-    
+
     return R
 end
 
@@ -60,13 +60,13 @@ end
 _pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
 
 function logpdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) || 
+    length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, X)
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) || 
+    length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, X)
 end
@@ -130,8 +130,9 @@ end
 
 for fname in ["dirichlet.jl",
               "multinomial.jl",
-              "mvnormal.jl", 
+              "mvnormal.jl",
               "mvnormalcanon.jl",
+              "mvlognormal.jl",
               "mvtdist.jl",
               "vonmisesfisher.jl"]
     include(joinpath("multivariate", fname))

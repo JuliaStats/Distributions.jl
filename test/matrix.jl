@@ -11,6 +11,7 @@ IW = InverseWishart(v,S)
 for d in [W,IW]
     @test size(d) == size(rand(d))
     @test length(d) == length(rand(d))
+    @test typeof(d)(params(d)...) == d
 end
 
 @test_approx_eq_eps mean(rand(W,100000)) mean(W) 0.1
