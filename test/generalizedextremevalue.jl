@@ -4,7 +4,10 @@ using Base.Test
 # Mathematica code to generate this. 
 
 ### entropy[dist_] := 
-###   Expectation[-Log[PDF[dist, x]], x \[Distributed] dist];
+###  TimeConstrained[
+###   Expectation[-Log[PDF[dist, x]], x \[Distributed] dist], 5, 
+###   None];(* Stop after a few seconds, as this computation is very very \
+### slow. *)
 ### test[\[Mu]_, \[Sigma]_, \[Xi]_] :=
 ###  Module[{
 ###    dist = MaxStableDistribution[\[Mu], \[Sigma], \[Xi]], cdf, 
@@ -27,48 +30,46 @@ using Base.Test
 ###   median = Median[dist];
 ###   var = Variance[dist]; (* Can be Indeterminate. *)
 ###   
-###   points = Table[x /. Solve[cdf == cdfv, x][[1]], {cdfv, .1, .9, .1}];
+###   points = 
+###    Table[x /. FindRoot[cdf - cdfv, {x, 1}][[1]], {cdfv, .1, .9, .1}];
 ###   pointsCDF = CDF[dist, #] & /@ points;
 ###   pointsPDF = PDF[dist, #] & /@ points;
-###   (*points={};pointsCDF={};pointsPDF={};*)
 ###   
 ###   quantiles = Quantile[dist, #] & /@ q;
 ###   
 ###   (* Output test code. *)
 ###   printv[v_] := 
 ###    If[v == Infinity, "Inf", 
-###     If[v == -Infinity, "-Inf", N[v], "Inf"] // ToString; (* 
-###     Handles Indeterminate through If's fourth argument. *)
-###     
-###     code = 
-###      "d = GeneralizedExtremeValue(" <> printv[\[Mu]] <> ", " <> 
-###       printv[\[Sigma]] <> ", " <> printv[\[Xi]] <> ")\n"
-###       <> "@test_approx_eq location(d) " <> printv[\[Mu]] <> "\n"
-###       <> "@test_approx_eq scale(d) " <> printv[\[Sigma]] <> "\n"
-###       <> "@test_approx_eq shape(d) " <> printv[\[Xi]] <> "\n"
-###       <> "@test_approx_eq maximum(d) " <> printv[max] <> "\n"
-###       <> "@test_approx_eq minimum(d) " <> printv[min] <> "\n"
-###       <> "@test_approx_eq_eps entropy(d) " <> printv[ent] <> " 1e-5\n"
-###       <> "@test_approx_eq_eps mean(d) " <> printv[mean] <> " 1e-5\n"
-###       <> "@test_approx_eq_eps median(d) " <> printv[median] <> 
-###       " 1e-5\n"
-###       <> "@test_approx_eq_eps var(d) " <> printv[var] <> " 1e-5\n"
-###       <> ((
-###           
-###           "@test_approx_eq_eps pdf(d, " <> printv[points[[#]]] <> 
-###            ") " <> printv[pointsPDF[[#]]] <> " 1e-5\n"
-###            <>
-###            "@test_approx_eq_eps cdf(d, " <> printv[points[[#]]] <> 
-###            ") " <> printv[pointsCDF[[#]]] <> " 1e-5\n"
-###           ) & /@ Table[i, {i, 1, Length@points}])
-###       <> ((
-###           
-###           "@test_approx_eq_eps quantile(d, " <> printv[q[[#]]] <> 
-###            ") " <> printv[quantiles[[#]]] <> " 1e-5\n"
-###           ) & /@ Table[i, {i, 1, Length@quantiles}]);
-###     
-###     Return[code];
-###     ];
+###     If[v == -Infinity, "-Inf", TextString[N[v]]], "Inf"]; (* 
+###   Handles Indeterminate through If's fourth argument. *)
+###   
+###   code = "d = GeneralizedExtremeValue(" <> printv[\[Mu]] <> ", " <> 
+###     printv[\[Sigma]] <> ", " <> printv[\[Xi]] <> ")\n"
+###     <> "@test_approx_eq location(d) " <> printv[\[Mu]] <> "\n"
+###     <> "@test_approx_eq scale(d) " <> printv[\[Sigma]] <> "\n"
+###     <> "@test_approx_eq shape(d) " <> printv[\[Xi]] <> "\n"
+###     <> "@test_approx_eq_eps maximum(d) " <> printv[max] <> " 1e-7\n"
+###     <> "@test_approx_eq_eps minimum(d) " <> printv[min] <> " 1e-7\n"
+###     <> If[ent != None, 
+###      "@test_approx_eq_eps entropy(d) " <> printv[ent] <> " 1e-7\n", 
+###      "", ""]
+###     <> "@test_approx_eq_eps mean(d) " <> printv[mean] <> " 1e-7\n"
+###     <> "@test_approx_eq_eps median(d) " <> printv[median] <> " 1e-7\n"
+###     <> "@test_approx_eq_eps var(d) " <> printv[var] <> " 1e-7\n"
+###     <> ((
+###         "@test_approx_eq_eps pdf(d, " <> printv[points[[#]]] <> ") " <>
+###           printv[pointsPDF[[#]]] <> " 1e-7\n"
+###          <>
+###          "@test_approx_eq_eps cdf(d, " <> printv[points[[#]]] <> 
+###          ") " <> printv[pointsCDF[[#]]] <> " 1e-7\n"
+###         ) & /@ Table[i, {i, 1, Length@points}])
+###     <> ((
+###         "@test_approx_eq_eps quantile(d, " <> printv[q[[#]]] <> ") " <>
+###           printv[quantiles[[#]]] <> " 1e-7\n"
+###         ) & /@ Table[i, {i, 1, Length@quantiles}]);
+###   
+###   Return[code];
+###   ];
 
 # test[1., 1., 1.]
 d = GeneralizedExtremeValue(1.0, 1.0, 1.0)
