@@ -278,6 +278,7 @@ List of Distributions
     - :ref:`frechet`
     - :ref:`gamma`
     - :ref:`generalizedpareto`
+    - :ref:`generalizedextremevalue`
     - :ref:`gumbel`
     - :ref:`inversegamma`
     - :ref:`inversegaussian`
@@ -810,6 +811,35 @@ The probability density function of a `Generalized Pareto distribution <https://
     location(d)     # Get the location parameter, i.e. m
 
 
+.. _generalizedextremevalue:
+
+Generalized Extreme Value Distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The probability density function of a `Generalized extreme value distribution <https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution>`_ with shape parameter :math:`\xi`, scale :math:`\sigma` and location :math:`\mu` is
+
+.. math::
+
+    f(x; \xi, \sigma, \mu) = \begin{cases}
+        \frac{1}{\sigma} (1+(\tfrac{x-\mu}{\sigma})\xi\right)^{-1/\xi}^{\xi+1}e^{-(1+(\tfrac{x-\mu}{\sigma})\xi\right)^{-1/\xi}} & \text{for } \xi \neq 0 \\
+        \frac{1}{\sigma} e^{-(x-\mu)/\sigma}^{\xi+1}e^{-e^{-(x-\mu)/\sigma}} & \text{for } \xi = 0
+    \end{cases}~,
+    \quad x \in \begin{cases}
+        \left[ \mu - \frac{\sigma}{\xi}, + \infty \right) & \text{for } \xi > 0 \\
+        \left( - \infty, + \infty \right) & \text{for } \xi = 0 \\
+        \left( - \infty, \mu - \frac{\sigma}{\xi} \right] & \text{for } \xi < 0
+    \end{cases}
+
+.. code-block:: julia
+
+    GeneralizedExtremeValue(k, s, m)      # Generalized Pareto distribution with shape k, scale s and location m.
+
+    params(d)       # Get the parameters, i.e. (k, s, m)
+    shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
+    scale(d)        # Get the scale parameter, i.e. s
+    location(d)     # Get the location parameter, i.e. m
+
+
 .. _gumbel:
 
 Gumbel Distribution
@@ -1143,7 +1173,7 @@ The probability density function of a `Continuous Uniform distribution <http://e
     Uniform()        # Uniform distribution over [0, 1]
     Uniform(a, b)    # Uniform distribution over [a, b]
 
-    params()         # Get the parameters, i.e. (a, b)
+    params(d)        # Get the parameters, i.e. (a, b)
     minimum(d)       # Get the lower bound, i.e. a
     maximum(d)       # Get the upper bound, i.e. b
     location(d)      # Get the location parameter, i.e. a
