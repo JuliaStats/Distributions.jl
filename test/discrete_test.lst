@@ -27,6 +27,8 @@ Geometric(0.9)
 
 Hypergeometric(2, 2, 2)
 Hypergeometric(3, 2, 2)
+Hypergeometric(3, 2, 0)
+Hypergeometric(3, 2, 5)
 Hypergeometric(4, 5, 6)
 Hypergeometric(60, 80, 100)
 

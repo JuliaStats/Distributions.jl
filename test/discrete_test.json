@@ -1009,6 +1009,56 @@
     }
   ], 
   [
+    "Hypergeometric(3, 2, 0)",
+    {
+      "dtype": "Hypergeometric",
+      "entropy": 0.0,
+      "minimum": 0,
+      "maximum": 0,
+      "mean": 0,
+      "median": 0.0,
+      "params": {},
+      "points": [
+        {
+          "cdf": 1.0,
+          "logpdf": 0.0,
+          "x": 0
+        }
+      ],
+      "q10": 0.0,
+      "q25": 0.0,
+      "q50": 0.0,
+      "q75": 0.0,
+      "q90": 0.0,
+      "var": 0.0
+    }
+  ],
+  [
+    "Hypergeometric(3, 2, 5)",
+    {
+      "dtype": "Hypergeometric",
+      "entropy": 0.0,
+      "minimum": 3,
+      "maximum": 3,
+      "mean": 3.0,
+      "median": 3.0,
+      "params": {},
+      "points": [
+        {
+          "cdf": 1.0,
+          "logpdf": 0.0,
+          "x": 3
+        }
+      ],
+      "q10": 3.0,
+      "q25": 3.0,
+      "q50": 3.0,
+      "q75": 3.0,
+      "q90": 3.0,
+      "var": 0.0
+    }
+  ],
+  [
     "Hypergeometric(4, 5, 6)", 
     {
       "dtype": "Hypergeometric", 
