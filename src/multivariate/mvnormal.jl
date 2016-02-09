@@ -257,7 +257,8 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, 2))
     z = x .- mu
-    C = Base.LinAlg.BLAS.gemm('N', 'T', 1.0/n, z, z)
+    C = Base.LinAlg.BLAS.syrk('U', 'N', 1.0/n, z)
+    Base.LinAlg.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -276,7 +277,8 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
             @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
-    C = Base.LinAlg.BLAS.gemm('N', 'T', inv_sw, z, z)
+    C = Base.LinAlg.BLAS.syrk('U', 'N', inv_sw, z)
+    Base.LinAlg.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
