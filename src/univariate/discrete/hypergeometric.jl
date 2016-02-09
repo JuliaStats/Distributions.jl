@@ -13,7 +13,7 @@ immutable Hypergeometric <: DiscreteUnivariateDistribution
 
     function Hypergeometric(ns::Real, nf::Real, n::Real)
         @check_args(Hypergeometric, ns >= zero(ns) && nf >= zero(nf))
-        @check_args(Hypergeometric, zero(n) < n < ns + nf)
+        @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
         new(ns, nf, n)
     end
 end
