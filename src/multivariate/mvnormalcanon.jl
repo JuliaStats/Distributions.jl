@@ -8,13 +8,13 @@
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-typealias FullNormalCanon MvNormalCanon{PDMat,Vector{Float64}}
-typealias DiagNormalCanon MvNormalCanon{PDiagMat,Vector{Float64}}
-typealias IsoNormalCanon  MvNormalCanon{ScalMat,Vector{Float64}}
+typealias FullNormalCanon MvNormalCanon{PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+typealias DiagNormalCanon MvNormalCanon{PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+typealias IsoNormalCanon  MvNormalCanon{ScalMat{Float64},Vector{Float64}}
 
-typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,ZeroVector{Float64}}
-typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat,ZeroVector{Float64}}
-typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat,ZeroVector{Float64}}
+typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat{Float64},ZeroVector{Float64}}
 
 
 ### Constructors

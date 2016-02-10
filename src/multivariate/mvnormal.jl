@@ -67,13 +67,13 @@ end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-typealias IsoNormal  MvNormal{ScalMat,Vector{Float64}}
-typealias DiagNormal MvNormal{PDiagMat,Vector{Float64}}
-typealias FullNormal MvNormal{PDMat,Vector{Float64}}
+typealias IsoNormal  MvNormal{ScalMat{Float64},Vector{Float64}}
+typealias DiagNormal MvNormal{PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+typealias FullNormal MvNormal{PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-typealias ZeroMeanIsoNormal  MvNormal{ScalMat,ZeroVector{Float64}}
-typealias ZeroMeanDiagNormal MvNormal{PDiagMat,ZeroVector{Float64}}
-typealias ZeroMeanFullNormal MvNormal{PDMat,ZeroVector{Float64}}
+typealias ZeroMeanIsoNormal  MvNormal{ScalMat{Float64},ZeroVector{Float64}}
+typealias ZeroMeanDiagNormal MvNormal{PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanFullNormal MvNormal{PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
 
