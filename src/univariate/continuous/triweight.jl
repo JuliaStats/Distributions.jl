@@ -39,7 +39,7 @@ end
 
 function ccdf(d::Triweight, x::Real)
     u = (d.μ - x)/d.σ
-    u <= -1 ? 1.0 : u >= 1 ? 0.0 : 0.03125*(1+u)^4*@horner(u,16.0,-29.0,20.0,-5.0)
+    u <= -1 ? 0.0 : u >= 1 ? 1.0 : 0.03125*(1+u)^4*@horner(u,16.0,-29.0,20.0,-5.0)
 end
 
 @quantile_newton Triweight

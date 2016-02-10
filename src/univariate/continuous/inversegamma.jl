@@ -12,6 +12,7 @@ immutable InverseGamma <: ContinuousUnivariateDistribution
 end
 
 @distr_support InverseGamma 0.0 Inf
+@distr_boundaries InverseGamma :open :closed
 
 
 #### Parameters
@@ -55,14 +56,18 @@ end
 pdf(d::InverseGamma, x::Float64) = exp(logpdf(d, x))
 
 function logpdf(d::InverseGamma, x::Float64)
-    (α, θ) = params(d)
-    α * log(θ) - lgamma(α) - (α + 1.0) * log(x) - θ / x
+    if insupport(d, x)
+        (α, θ) = params(d)
+        return α * log(θ) - lgamma(α) - (α + 1.0) * log(x) - θ / x
+    else
+        return -Inf
+    end
 end
 
-cdf(d::InverseGamma, x::Float64) = ccdf(d.invd, 1.0 / x)
-ccdf(d::InverseGamma, x::Float64) = cdf(d.invd, 1.0 / x)
-logcdf(d::InverseGamma, x::Float64) = logccdf(d.invd, 1.0 / x)
-logccdf(d::InverseGamma, x::Float64) = logcdf(d.invd, 1.0 / x)
+cdf(d::InverseGamma, x::Float64) = insupport(d,x)?ccdf(d.invd, 1.0 / x):0.0
+ccdf(d::InverseGamma, x::Float64) = insupport(d,x)?cdf(d.invd, 1.0 / x):1.0
+logcdf(d::InverseGamma, x::Float64) = insupport(d,x)?logccdf(d.invd, 1.0 / x):-Inf
+logccdf(d::InverseGamma, x::Float64) = insupport(d,x)?logcdf(d.invd, 1.0 / x):0.0
 
 quantile(d::InverseGamma, p::Float64) = 1.0 / cquantile(d.invd, p)
 cquantile(d::InverseGamma, p::Float64) = 1.0 / quantile(d.invd, p)

@@ -36,8 +36,8 @@ end
 
 function ccdf(d::Biweight, x::Float64)
     u = (d.μ - x) / d.σ
-    u <= -1.0 ? 1.0 :
-    u >= 1.0 ? 0.0 :
+    u <= -1.0 ? 0.0 :
+    u >= 1.0 ? 1.0 :
     0.0625 * (u + 1.0)^3 * @horner(u,8.0,-9.0,3.0)
 end
 

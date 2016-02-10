@@ -32,16 +32,24 @@ entropy(d::Rayleigh) = 0.942034242170793776 + log(d.σ)
 #### Evaluation
 
 function pdf(d::Rayleigh, x::Float64)
-	σ2 = d.σ^2
-	x > 0.0 ? (x / σ2) * exp(- (x^2) / (2.0 * σ2)) : 0.0
+    if insupport(d,x)
+	    σ2 = d.σ^2
+	    return (x / σ2) * exp(- (x^2) / (2.0 * σ2))
+    else
+        return 0.0
+    end
 end
 
 function logpdf(d::Rayleigh, x::Float64)
-	σ2 = d.σ^2
-	x > 0.0 ? log(x / σ2) - (x^2) / (2.0 * σ2) : -Inf
+    if (insupport(d,x))
+	    σ2 = d.σ^2
+	    return log(x / σ2) - (x^2) / (2.0 * σ2)
+    else
+        return -Inf
+    end
 end
 
-logccdf(d::Rayleigh, x::Float64) = - (x^2) / (2.0 * d.σ^2)
+logccdf(d::Rayleigh, x::Float64) = insupport(d,x)?-(x^2)/(2.0*d.σ^2):0.0
 ccdf(d::Rayleigh, x::Float64) = exp(logccdf(d, x))
 
 cdf(d::Rayleigh, x::Float64) = 1.0 - ccdf(d, x)

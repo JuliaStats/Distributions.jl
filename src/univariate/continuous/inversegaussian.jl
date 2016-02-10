@@ -11,6 +11,7 @@ immutable InverseGaussian <: ContinuousUnivariateDistribution
 end
 
 @distr_support InverseGaussian 0.0 Inf
+@distr_boundaries InverseGaussian :open :closed
 
 
 #### Parameters
@@ -39,7 +40,7 @@ end
 #### Evaluation
 
 function pdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         return sqrt(λ / (twoπ * x^3)) * exp(-λ * (x - μ)^2 / (2.0 * μ^2 * x))
     else
@@ -48,7 +49,7 @@ function pdf(d::InverseGaussian, x::Float64)
 end
 
 function logpdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         return 0.5 * (log(λ) - (log2π + 3.0 * log(x)) - λ * (x - μ)^2 / (μ^2 * x))
     else
@@ -57,7 +58,7 @@ function logpdf(d::InverseGaussian, x::Float64)
 end
 
 function cdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
@@ -68,7 +69,7 @@ function cdf(d::InverseGaussian, x::Float64)
 end
 
 function ccdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
@@ -79,7 +80,7 @@ function ccdf(d::InverseGaussian, x::Float64)
 end
 
 function logcdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ
@@ -92,7 +93,7 @@ function logcdf(d::InverseGaussian, x::Float64)
 end
 
 function logccdf(d::InverseGaussian, x::Float64)
-    if x > 0.0
+    if insupport(d, x)
         μ, λ = params(d)
         u = sqrt(λ / x)
         v = x / μ

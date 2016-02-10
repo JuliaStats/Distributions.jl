@@ -268,15 +268,61 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     end
     @test all(insupport(d, vs))
 
+    @test lowerboundary(d) == :closed || lowerboundary(d) == :open
+    @test upperboundary(d) == :closed || upperboundary(d) == :open
+
+    sp = support(d)
+    if isa(d,ContinuousUnivariateDistribution)
+        @test minimum(sp) == minimum(d)
+        @test maximum(sp) == maximum(d)
+        @test lowerboundary(sp) == lowerboundary(d)
+        @test upperboundary(sp) == upperboundary(d)
+        @test lowercomparator(sp) == lowercomparator(d)
+        @test uppercomparator(sp) == uppercomparator(d)
+    end
+
+    if isa(d,DiscreteUnivariateDistribution)
+        @test (isfinite(minimum(d)) && minimum(d) == minimum(sp)) || (minimum(sp) == typemin(Int))
+        @test (isfinite(minimum(d)) && maximum(d) == maximum(sp)) || (maximum(sp) == typemax(Int))
+    end
+
     if islowerbounded(d)
         @test isfinite(minimum(d))
-        @test insupport(d, minimum(d))
+        @test (lowerboundary(d) == :closed && insupport(d, minimum(d))) || (lowerboundary(d) == :open && !insupport(d, minimum(d)))
         @test !insupport(d, minimum(d)-1)
+        if lowerboundary(d) == :open
+            @test pdf(d,minimum(d)) == 0.0
+            @test logpdf(d,minimum(d)) == -Inf
+            @test cdf(d,minimum(d)) == 0.0
+            @test logcdf(d,minimum(d)) == -Inf
+            @test ccdf(d,minimum(d)) == 1.0
+            @test logccdf(d,minimum(d)) == 0.0
+        end
+        @test pdf(d,minimum(d)-1) == 0.0
+        @test logpdf(d,minimum(d)-1) == -Inf
+        @test cdf(d,minimum(d)-1) == 0.0
+        @test logcdf(d,minimum(d)-1) == -Inf
+        @test ccdf(d,minimum(d)-1) == 1.0
+        @test logccdf(d,minimum(d)-1) == 0.0
     end
     if isupperbounded(d)
         @test isfinite(maximum(d))
-        @test insupport(d, maximum(d))
+        @test (upperboundary(d) == :closed && insupport(d, maximum(d))) || (upperboundary(d) == :open && !insupport(d, maximum(d)))
         @test !insupport(d, maximum(d)+1)
+        if upperboundary(d) == :open
+            @test pdf(d,maximum(d)) == 0.0
+            @test logpdf(d,maximum(d)) == -Inf
+        end
+        @test cdf(d,maximum(d)) == 1.0
+        @test ccdf(d,maximum(d)) == 0.0
+        @test logcdf(d,maximum(d)) == 0.0
+        @test logccdf(d,maximum(d)) == -Inf
+        @test pdf(d,maximum(d)+1) == 0.0
+        @test logpdf(d,maximum(d)+1) == -Inf
+        @test cdf(d,maximum(d)+1) == 1.0
+        @test logcdf(d,maximum(d)+1) == 0.0
+        @test ccdf(d,maximum(d)+1) == 0.0
+        @test logccdf(d,maximum(d)+1) == -Inf
     end
 
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))

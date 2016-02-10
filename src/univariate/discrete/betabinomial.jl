@@ -49,11 +49,15 @@ function kurtosis(d::BetaBinomial)
 end
 
 function pdf(d::BetaBinomial, k::Int)
-    n, α, β = d.n, d.α, d.β
-    @compat choose = Float64(binomial(n, k))
-    numerator = beta(k + α, n - k + β)
-    denominator = beta(α, β)
-    return choose * (numerator / denominator)
+    if insupport(d,k)
+        n, α, β = d.n, d.α, d.β
+        @compat choose = Float64(binomial(n, k))
+        numerator = beta(k + α, n - k + β)
+        denominator = beta(α, β)
+        return choose * (numerator / denominator)
+    else
+        return 0.0
+    end
 end
 
 function pdf(d::BetaBinomial)

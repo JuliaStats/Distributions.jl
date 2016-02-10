@@ -39,8 +39,8 @@ end
 
 function ccdf(d::Epanechnikov, x::Float64)
     u = (d.μ - x) / d.σ
-    u <= -1 ? 1.0 :
-    u >= 1 ? 0.0 :
+    u <= -1 ? 0.0 :
+    u >= 1 ? 1.0 :
     0.5 + u * (0.75 - 0.25 * u^2)
 end
 
