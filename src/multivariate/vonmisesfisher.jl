@@ -41,7 +41,7 @@ length(d::VonMisesFisher) = length(d.μ)
 meandir(d::VonMisesFisher) = d.μ
 concentration(d::VonMisesFisher) = d.κ
 
-insupport{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = isunitvec(x)
+insupport{T<:Real}(d::VonMisesFisher, x::AbstractVector{T}) = isunitvec(x)
 params(d::VonMisesFisher) = (d.μ, d.κ)
 
 ### Evaluation
@@ -54,15 +54,15 @@ end
 _vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2.0 * κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))::Float64
 
-_logpdf{T<:Real}(d::VonMisesFisher, x::DenseVector{T}) = d.logCκ + d.κ * dot(d.μ, x)
+_logpdf{T<:Real}(d::VonMisesFisher, x::AbstractVector{T}) = d.logCκ + d.κ * dot(d.μ, x)
 
 
 ### Sampling
 
 sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
 
-_rand!(d::VonMisesFisher, x::DenseVector) = _rand!(sampler(d), x)
-_rand!(d::VonMisesFisher, x::DenseMatrix) = _rand!(sampler(d), x)
+_rand!(d::VonMisesFisher, x::AbstractVector) = _rand!(sampler(d), x)
+_rand!(d::VonMisesFisher, x::AbstractMatrix) = _rand!(sampler(d), x)
 
 
 ### Estimation

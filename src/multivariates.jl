@@ -2,13 +2,13 @@
 
 ## sampling
 
-function rand!(d::MultivariateDistribution, x::DenseVector)
+function rand!(d::MultivariateDistribution, x::AbstractVector)
     length(x) == length(d) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(d, x)
 end
 
-function rand!(d::MultivariateDistribution, A::DenseMatrix)
+function rand!(d::MultivariateDistribution, A::AbstractMatrix)
     size(A,1) == length(d) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(sampler(d), A)
@@ -71,39 +71,39 @@ function pdf(d::MultivariateDistribution, X::AbstractVector)
     _pdf(d, X)
 end
 
-function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     for i in 1 : size(X,2)
         @inbounds r[i] = logpdf(d, slice(X,:,i))
     end
     return r
 end
 
-function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     for i in 1 : size(X,2)
         @inbounds r[i] = pdf(d, slice(X,:,i))
     end
     return r
 end
 
-function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     size(X) == (length(d), length(r)) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf!(r, d, X)
 end
 
-function pdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
+function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     size(X) == (length(d), length(r)) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf!(r, d, X)
 end
 
-function logpdf(d::MultivariateDistribution, X::DenseMatrix)
+function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf!(Array(Float64, size(X,2)), d, X)
 end
 
-function pdf(d::MultivariateDistribution, X::DenseMatrix)
+function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf!(Array(Float64, size(X,2)), d, X)
@@ -111,7 +111,7 @@ end
 
 ## log likelihood
 
-function _loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
+function _loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
     ll = 0.0
     for i in 1:size(X, 2)
         ll += _logpdf(d, slice(X,:,i))
@@ -119,7 +119,7 @@ function _loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
     return ll
 end
 
-function loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
+function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
     size(X,1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _loglikelihood(d, X)

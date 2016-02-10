@@ -18,7 +18,7 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     VonMisesFisherSampler(p, κ, b, x0, c, Q)
 end
 
-function _rand!(spl::VonMisesFisherSampler, x::DenseVector, t::DenseVector)
+function _rand!(spl::VonMisesFisherSampler, x::AbstractVector, t::AbstractVector)
     w = _vmf_genw(spl)
     p = spl.p
     t[1] = w
@@ -39,9 +39,9 @@ function _rand!(spl::VonMisesFisherSampler, x::DenseVector, t::DenseVector)
     return x
 end
 
-_rand!(spl::VonMisesFisherSampler, x::DenseVector) = _rand!(spl, x, Array(Float64, length(x)))
+_rand!(spl::VonMisesFisherSampler, x::AbstractVector) = _rand!(spl, x, Array(Float64, length(x)))
 
-function _rand!(spl::VonMisesFisherSampler, x::DenseMatrix)
+function _rand!(spl::VonMisesFisherSampler, x::AbstractMatrix)
     t = Array(Float64, size(x, 1))
     for j = 1:size(x, 2)
         _rand!(spl, slice(x,:,j), t)

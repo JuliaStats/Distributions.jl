@@ -23,10 +23,10 @@ full{T}(v::ZeroVector{T}) = zeros(T, v.len)
 
 convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
 
-+(x::DenseArray, v::ZeroVector) = x
--(x::DenseArray, v::ZeroVector) = x
-.+(x::DenseArray, v::ZeroVector) = x
-.-(x::DenseArray, v::ZeroVector) = x
++(x::AbstractArray, v::ZeroVector) = x
+-(x::AbstractArray, v::ZeroVector) = x
+.+(x::AbstractArray, v::ZeroVector) = x
+.-(x::AbstractArray, v::ZeroVector) = x
 
 
 ##### Utility functions
@@ -78,8 +78,8 @@ function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
     v
 end
 
-add!(x::DenseArray, y::DenseVector) = broadcast!(+, x, x, y)
-add!(x::DenseVecOrMat, y::ZeroVector) = x
+add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
+add!(x::AbstractVecOrMat, y::ZeroVector) = x
 
 function multiply!(x::AbstractArray, c::Number)
     for i = 1:length(x)
