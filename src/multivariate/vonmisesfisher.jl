@@ -26,7 +26,7 @@ immutable VonMisesFisher <: ContinuousMultivariateDistribution
     end
 end
 
-@compat VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(Float64(μ), Float64(κ))
+VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(Float64(μ), Float64(κ))
 
 VonMisesFisher(θ::Vector{Float64}) = (κ = vecnorm(θ); VonMisesFisher(scale(θ, 1.0 / κ), κ))
 VonMisesFisher{T<:Real}(θ::Vector{T}) = VonMisesFisher(Float64(θ))
@@ -77,7 +77,7 @@ function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
     VonMisesFisher(μ, κ)
 end
 
-@compat fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, Float64(X))
+fit_mle{T<:Real}(::Type{VonMisesFisher}, X::Matrix{T}) = fit_mle(VonMisesFisher, Float64(X))
 
 function _vmf_estkappa(p::Int, ρ::Float64)
     # Using the fixed-point iteration algorithm in the following paper:

@@ -12,7 +12,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     ω = 2. / (n + 1)
 
     x = Array(Complex{Float64}, n+1)
-    @compat lmax = ceil(Int, n/2)
+    lmax = ceil(Int, n/2)
     x[1] = 1./(n+1)
     for l=1:lmax
         logz = 0.

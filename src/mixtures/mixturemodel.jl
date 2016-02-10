@@ -271,7 +271,7 @@ function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
         @inbounds pi = p[i]
         if pi > 0.0
             lpri = log(pi)
-            lp_i = view(Lp, :, i)
+            lp_i = slice(Lp, :, i)
             # compute logpdf in batch and store
             logpdf!(lp_i, component(d, i), x)
 
@@ -289,7 +289,7 @@ function _mixlogpdf!(r::DenseArray, d::AbstractMixtureModel, x)
     fill!(r, 0.0)
     @inbounds for i = 1:K
         if p[i] > 0.0
-            lp_i = view(Lp, :, i)
+            lp_i = slice(Lp, :, i)
             for j = 1:n
                 r[j] += exp(lp_i[j] - m[j])
             end
@@ -341,7 +341,7 @@ function _cwise_pdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        pdf!(view(r,:,i), component(d, i), X)
+        pdf!(slice(r,:,i), component(d, i), X)
     end
     r
 end
@@ -351,7 +351,7 @@ function _cwise_logpdf!(r::StridedMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        logpdf!(view(r,:,i), component(d, i), X)
+        logpdf!(slice(r,:,i), component(d, i), X)
     end
     r
 end

@@ -19,17 +19,17 @@ rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), 
 
 ## domain
 
-@compat function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix)
+function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix)
     n = length(r)
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1:n
-        @inbounds r[i] = insupport(d, view(X, :, i))
+        @inbounds r[i] = insupport(d, slice(X, :, i))
     end
     return r
 end
 
-@compat insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, X::AbstractMatrix) =
+insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, X::AbstractMatrix) =
     insupport!(BitArray(size(X,2)), d, X)
 
 ## statistics
@@ -73,14 +73,14 @@ end
 
 function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
     for i in 1 : size(X,2)
-        @inbounds r[i] = logpdf(d, view(X,:,i))
+        @inbounds r[i] = logpdf(d, slice(X,:,i))
     end
     return r
 end
 
 function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::DenseMatrix)
     for i in 1 : size(X,2)
-        @inbounds r[i] = pdf(d, view(X,:,i))
+        @inbounds r[i] = pdf(d, slice(X,:,i))
     end
     return r
 end
@@ -114,7 +114,7 @@ end
 function _loglikelihood(d::MultivariateDistribution, X::DenseMatrix)
     ll = 0.0
     for i in 1:size(X, 2)
-        ll += _logpdf(d, view(X,:,i))
+        ll += _logpdf(d, slice(X,:,i))
     end
     return ll
 end

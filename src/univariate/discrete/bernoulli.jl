@@ -77,7 +77,7 @@ immutable BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 
-    @compat BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
+    BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
 end
 
 fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))

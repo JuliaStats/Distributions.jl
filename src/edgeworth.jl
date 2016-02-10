@@ -95,7 +95,7 @@ immutable EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
         # although n would usually be an integer, no methods are require this
         n > zero(n) ||
             error("n must be positive")
-        @compat new(d, Float64(n))
+        new(d, Float64(n))
     end
 end
 EdgeworthMean(d::UnivariateDistribution,n::Real) = EdgeworthMean{typeof(d)}(d,n)

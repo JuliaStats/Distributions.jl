@@ -2,7 +2,7 @@
 
 ### Generic types
 
-@compat immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
+immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)

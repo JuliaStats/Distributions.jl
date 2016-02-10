@@ -4,7 +4,7 @@ TruncatedNormal(mu::Float64, sigma::Float64, a::Float64, b::Float64) =
     Truncated(Normal(mu, sigma), a, b)
 
 TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
-    @compat TruncatedNormal(Float64(mu), Float64(sigma), Float64(a), Float64(b))
+    TruncatedNormal(Float64(mu), Float64(sigma), Float64(a), Float64(b))
 
 ### statistics
 

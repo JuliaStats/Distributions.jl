@@ -44,7 +44,7 @@ _rand!(spl::VonMisesFisherSampler, x::DenseVector) = _rand!(spl, x, Array(Float6
 function _rand!(spl::VonMisesFisherSampler, x::DenseMatrix)
     t = Array(Float64, size(x, 1))
     for j = 1:size(x, 2)
-        _rand!(spl, view(x,:,j), t)
+        _rand!(spl, slice(x,:,j), t)
     end
     return x
 end
@@ -84,7 +84,7 @@ function _vmf_rotmat(u::Vector{Float64})
 
     p = length(u)
     A = zeros(p, p)
-    copy!(view(A,:,1), u)
+    copy!(slice(A,:,1), u)
 
     # let k the be index of entry with max abs
     k = 1
@@ -110,7 +110,7 @@ function _vmf_rotmat(u::Vector{Float64})
 
     # perform QR factorization
     Q = full(qrfact!(A)[:Q])
-    if dot(view(Q,:,1), u) < 0.0  # the first column was negated
+    if dot(slice(Q,:,1), u) < 0.0  # the first column was negated
         for i = 1:p
             @inbounds Q[i,1] = -Q[i,1]
         end

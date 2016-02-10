@@ -50,7 +50,7 @@ end
 
 function pdf(d::BetaBinomial, k::Int)
     n, α, β = d.n, d.α, d.β
-    @compat choose = Float64(binomial(n, k))
+    choose = Float64(binomial(n, k))
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
     return choose * (numerator / denominator)

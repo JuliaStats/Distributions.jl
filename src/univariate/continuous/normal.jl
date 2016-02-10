@@ -146,7 +146,7 @@ immutable NormalKnownSigmaStats <: SufficientStats
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T})
-    @compat NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
+    NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T})
