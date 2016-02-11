@@ -1,0 +1,1 @@
+`genrst.jl` generates the rst files from Julia docstrings. This should be run *before* committing the changes to the repository.

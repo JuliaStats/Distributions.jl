@@ -1,3 +1,29 @@
+doc"""
+    Beta(α,β)
+
+The *Beta distribution* has probability density function
+
+$f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)}
+ x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad x \in [0, 1]$
+
+The Beta distribution is related to the [`Gamma`](:func:`Gamma`) distribution via the
+property that if $X \sim \operatorname{Gamma}(\alpha)$ and $Y \sim \operatorname{Gamma}
+(\beta)$ independently, then $X / (X + Y) \sim \operatorname{Beta}(\alpha, \beta)$.
+
+
+```julia
+Beta()        # equivalent to Beta(1.0, 1.0)
+Beta(a)       # equivalent to Beta(a, a)
+Beta(a, b)    # Beta distribution with shape parameters a and b
+
+params(d)     # Get the parameters, i.e. (a, b)
+```
+
+External links
+
+* [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
+
+"""
 immutable Beta <: ContinuousUnivariateDistribution
     α::Float64
     β::Float64
