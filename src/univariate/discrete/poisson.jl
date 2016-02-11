@@ -23,7 +23,7 @@ mode(d::Poisson) = floor(Int,d.λ)
 
 function modes(d::Poisson)
     λ = d.λ
-    @compat isinteger(λ) ? [round(Int, λ)-1, round(Int, λ)] : [floor(Int, λ)]
+    isinteger(λ) ? [round(Int, λ)-1, round(Int, λ)] : [floor(Int, λ)]
 end
 
 var(d::Poisson) = d.λ

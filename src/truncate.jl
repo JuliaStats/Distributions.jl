@@ -19,7 +19,7 @@ function Truncated(d::UnivariateDistribution, l::Float64, u::Float64)
     Truncated{typeof(d),value_support(typeof(d))}(d, l, u, lcdf, ucdf, tp, log(tp))
 end
 
-@compat Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
+Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
 
 ### range and support
 
@@ -29,7 +29,7 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-@compat insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) =
+insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) =
     d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 

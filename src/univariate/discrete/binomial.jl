@@ -154,7 +154,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, ne, n)
 end
 
-@compat typealias BinomData Tuple{Int, AbstractArray}
+typealias BinomData Tuple{Int, AbstractArray}
 
 suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
 suffstats(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)

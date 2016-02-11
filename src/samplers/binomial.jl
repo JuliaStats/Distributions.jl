@@ -212,10 +212,10 @@ function rand(s::BinomialTPESampler)
             end
 
             # 5.3
-            @compat x1 = Float64(y+1)
-            @compat f1 = Float64(s.Mi+1)
-            @compat z = Float64(s.n+1-s.Mi)
-            @compat w = Float64(s.n-y+1)
+            x1 = Float64(y+1)
+            f1 = Float64(s.Mi+1)
+            z = Float64(s.n+1-s.Mi)
+            w = Float64(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
                     lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
@@ -272,7 +272,7 @@ function BinomialPolySampler(n::Int, p::Float64)
     BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
 end
 
-@compat BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
+BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
 rand(s::BinomialPolySampler) = s.use_btpe ? rand(s.btpe_sampler) : rand(s.geom_sampler)
 

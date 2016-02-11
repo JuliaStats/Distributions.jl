@@ -13,7 +13,7 @@ immutable GenericMvTDist{Cov<:AbstractPDMat} <: AbstractMvTDist
 
     function GenericMvTDist{Cov}(df::Float64, dim::Int, zmean::Bool, μ::Vector{Float64}, Σ::Cov)
       df > zero(df) || error("df must be positive")
-      @compat new(Float64(df), dim, zmean, μ, Σ)
+      new(Float64(df), dim, zmean, μ, Σ)
     end
 end
 
@@ -51,15 +51,15 @@ DiagTDist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvTDis
 
 IsoTDist(df::Float64, μ::Vector{Float64}, C::ScalMat) = GenericMvTDist(df, μ, C)
 IsoTDist(df::Float64, C::ScalMat) = GenericMvTDist(df, C)
-@compat IsoTDist(df::Float64, μ::Vector{Float64}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(Float64(σ))))
-@compat IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(Float64(σ))))
+IsoTDist(df::Float64, μ::Vector{Float64}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(Float64(σ))))
+IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(Float64(σ))))
 
 ## convenient function to construct distributions of proper type based on arguments
 
 mvtdist(df::Float64, μ::Vector{Float64}, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
 mvtdist(df::Float64, C::AbstractPDMat) = GenericMvTDist(df, C)
 
-@compat mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, Float64(σ))
+mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, Float64(σ))
 mvtdist(df::Float64, d::Int, σ::Float64) = IsoTDist(d, σ)
 mvtdist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = DiagTDist(df, μ, σ)
 mvtdist(df::Float64, μ::Vector{Float64}, Σ::Matrix{Float64}) = MvTDist(df, μ, Σ)
@@ -94,17 +94,17 @@ end
 insupport{T<:Real}(d::AbstractMvTDist, x::AbstractVector{T}) =
   length(d) == length(x) && allfinite(x)
 
-function sqmahal{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
+function sqmahal{T<:Real}(d::GenericMvTDist, x::AbstractVector{T})
     z::Vector{Float64} = d.zeromean ? x : x - d.μ
     invquad(d.Σ, z)
 end
 
-function sqmahal!{T<:Real}(r::DenseArray, d::GenericMvTDist, x::DenseMatrix{T})
+function sqmahal!{T<:Real}(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{T})
     z::Matrix{Float64} = d.zeromean ? x : x .- d.μ
     invquad!(r, d.Σ, z)
 end
 
-sqmahal{T<:Real}(d::AbstractMvTDist, x::DenseMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal{T<:Real}(d::AbstractMvTDist, x::AbstractMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
 
 function mvtdist_consts(d::AbstractMvTDist)
@@ -115,12 +115,12 @@ function mvtdist_consts(d::AbstractMvTDist)
     return (shdfhdim, v)
 end
 
-function _logpdf{T<:Real}(d::AbstractMvTDist, x::DenseVector{T})
+function _logpdf{T<:Real}(d::AbstractMvTDist, x::AbstractVector{T})
     shdfhdim, v = mvtdist_consts(d)
     v - shdfhdim * log1p(sqmahal(d, x) / d.df)
 end
 
-function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvTDist, x::DenseMatrix{T})
+function _logpdf!{T<:Real}(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T})
     sqmahal!(r, d, x)
     shdfhdim, v = mvtdist_consts(d)
     for i = 1:size(x, 2)
@@ -129,9 +129,9 @@ function _logpdf!{T<:Real}(r::DenseArray, d::AbstractMvTDist, x::DenseMatrix{T})
     return r
 end
 
-_pdf!{T<:Real}(r::DenseArray, d::AbstractMvNormal, x::DenseMatrix{T}) = exp!(_logpdf!(r, d, x))
+_pdf!{T<:Real}(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
 
-function gradlogpdf{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
+function gradlogpdf{T<:Real}(d::GenericMvTDist, x::AbstractVector{T})
     z::Vector{Float64} = d.zeromean ? x : x - d.μ
     prz = invscale(d)*z
     -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
@@ -139,7 +139,7 @@ end
 
 # Sampling (for GenericMvTDist)
 
-function _rand!{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
+function _rand!{T<:Real}(d::GenericMvTDist, x::AbstractVector{T})
     chisqd = Chisq(d.df)
     y = sqrt(rand(chisqd)/(d.df))
     unwhiten!(d.Σ, randn!(x))
@@ -150,7 +150,7 @@ function _rand!{T<:Real}(d::GenericMvTDist, x::DenseVector{T})
     x
 end
 
-function _rand!{T<:Real}(d::GenericMvTDist, x::DenseMatrix{T})
+function _rand!{T<:Real}(d::GenericMvTDist, x::AbstractMatrix{T})
     cols = size(x,2)
     chisqd = Chisq(d.df)
     y = Array(Float64, 1, cols)

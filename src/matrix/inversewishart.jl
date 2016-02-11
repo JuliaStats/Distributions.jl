@@ -60,7 +60,7 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
 #### Evaluation
 
-function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
+function _logpdf(d::InverseWishart, X::AbstractMatrix{Float64})
     p = dim(d)
     df = d.df
     Xcf = cholfact(X)
@@ -69,7 +69,7 @@ function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
     -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
 end
 
-_logpdf{T<:Real}(d::InverseWishart, X::DenseMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
+_logpdf{T<:Real}(d::InverseWishart, X::AbstractMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 
 #### Sampling

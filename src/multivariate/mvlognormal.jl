@@ -112,7 +112,7 @@ immutable MvLogNormal <: AbstractMvLogNormal
 end
 
 #Constructors mirror the ones for MvNormmal
-@compat MvLogNormal(μ::Union{Vector,ZeroVector},Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
+MvLogNormal(μ::Union{Vector,ZeroVector},Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(Float64,dim(Σ)),Σ))
 MvLogNormal(μ::Vector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(μ::Vector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))

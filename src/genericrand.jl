@@ -19,9 +19,9 @@ rand(s::Sampleable{Univariate}, dims::Int...) =
 
 # multivariate
 
-function _rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
+function _rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
     for i = 1:size(A,2)
-        _rand!(s, view(A,:,i))
+        _rand!(s, slice(A,:,i))
     end
     return A
 end
@@ -32,7 +32,7 @@ function rand!(s::Sampleable{Multivariate}, A::AbstractVector)
     _rand!(s, A)
 end
 
-function rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
+function rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
     size(A,1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(s, A)

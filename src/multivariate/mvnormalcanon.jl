@@ -2,7 +2,7 @@
 
 ### Generic types
 
-@compat immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
+immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -75,14 +75,14 @@ logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 ### Evaluation
 
-sqmahal(d::MvNormalCanon, x::DenseVector{Float64}) = quad(d.J, x - d.μ)
-sqmahal!(r::DenseVector{Float64}, d::MvNormalCanon, x::DenseMatrix{Float64}) = quad!(r, d.J, x .- d.μ)
+sqmahal(d::MvNormalCanon, x::AbstractVector{Float64}) = quad(d.J, x - d.μ)
+sqmahal!(r::AbstractVector{Float64}, d::MvNormalCanon, x::AbstractMatrix{Float64}) = quad!(r, d.J, x .- d.μ)
 
 
 # Sampling (for GenericMvNormal)
 
-unwhiten_winv!(J::AbstractPDMat, x::DenseVecOrMat) = unwhiten!(inv(J), x)
-unwhiten_winv!(J::PDiagMat, x::DenseVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::ScalMat, x::DenseVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
+unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
-_rand!(d::MvNormalCanon, x::DenseVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
+_rand!(d::MvNormalCanon, x::AbstractVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)

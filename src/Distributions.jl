@@ -1,12 +1,10 @@
-VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
+__precompile__(true)
 
 module Distributions
 
-using ArrayViews
 using PDMats
 using StatsFuns
 using StatsBase
-using Compat
 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!

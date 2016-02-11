@@ -37,8 +37,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 end
 
 
-@compat _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
-@compat _parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
+_parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
+_parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
 
 _json_value(x::Number) = x
 
@@ -65,8 +65,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        @compat lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
-        @compat cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
+        lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
+        cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
         @Base.Test.test_approx_eq_eps(logpdf(d, x), lp, sqrt(eps()))
         @Base.Test.test_approx_eq_eps(cdf(d, x), cf, sqrt(eps()))
     end

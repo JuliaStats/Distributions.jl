@@ -220,7 +220,7 @@ function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T},
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
-@compat typealias CategoricalData Tuple{Int, AbstractArray}
+typealias CategoricalData Tuple{Int, AbstractArray}
 
 suffstats(::Type{Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
 suffstats(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)

@@ -4,22 +4,22 @@ immutable RealInterval
     lb::Float64
     ub::Float64
 
-    @compat RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
+    RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
 end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
-@compat in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
+in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-@compat isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
+isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
 
-@compat islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
-@compat isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
+islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
+isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
 
-@compat hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
-@compat hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
+hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
+hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
 
-@compat function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
+function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -28,14 +28,14 @@ maximum(r::RealInterval) = r.ub
     return r
 end
 
-@compat insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
+insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
 
-@compat insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
-@compat insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
+insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-@compat support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
-@compat support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
+support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
+support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
@@ -47,7 +47,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    @compat paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -100,7 +100,7 @@ pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
 pdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(pdf, (d, x)))
-@compat pdf(d::ContinuousUnivariateDistribution, x::Real) = pdf(d, Float64(x))
+pdf(d::ContinuousUnivariateDistribution, x::Real) = pdf(d, Float64(x))
 
 # logpdf
 
@@ -109,7 +109,7 @@ logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round( Int, x)
 logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 logpdf(d::ContinuousUnivariateDistribution, x::Float64) = log(pdf(d, x))
-@compat logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, Float64(x))
+logpdf(d::ContinuousUnivariateDistribution, x::Real) = logpdf(d, Float64(x))
 
 # cdf
 cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
@@ -140,53 +140,53 @@ end
 cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 
 cdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(cdf, (d, x)))
-@compat cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, Float64(x))
+cdf(d::ContinuousUnivariateDistribution, x::Real) = cdf(d, Float64(x))
 
 # ccdf
 
 ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 ccdf(d::ContinuousUnivariateDistribution, x::Float64) = 1.0 - cdf(d, x)
-@compat ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, Float64(x))
+ccdf(d::ContinuousUnivariateDistribution, x::Real) = ccdf(d, Float64(x))
 
 # logcdf
 
 logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 logcdf(d::ContinuousUnivariateDistribution, x::Float64) = log(cdf(d, x))
-@compat logcdf(d::ContinuousUnivariateDistribution, x::Real) = logcdf(d, Float64(x))
+logcdf(d::ContinuousUnivariateDistribution, x::Real) = logcdf(d, Float64(x))
 
 # logccdf
 
 logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 logccdf(d::ContinuousUnivariateDistribution, x::Float64) = log(ccdf(d, x))
-@compat logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, Float64(x))
+logccdf(d::ContinuousUnivariateDistribution, x::Real) = logccdf(d, Float64(x))
 
 # quantile
 
 quantile(d::UnivariateDistribution, p::Float64) = throw(MethodError(quantile, (d, p)))
-@compat quantile(d::UnivariateDistribution, p::Real) = quantile(d, Float64(p))
+quantile(d::UnivariateDistribution, p::Real) = quantile(d, Float64(p))
 
 # cquantile
 
 cquantile(d::UnivariateDistribution, p::Float64) = quantile(d, 1.0 - p)
-@compat cquantile(d::UnivariateDistribution, p::Real) = cquantile(d, Float64(p))
+cquantile(d::UnivariateDistribution, p::Real) = cquantile(d, Float64(p))
 
 # invlogcdf
 
 invlogcdf(d::UnivariateDistribution, lp::Float64) = quantile(d, exp(lp))
-@compat invlogcdf(d::UnivariateDistribution, lp::Real) = invlogcdf(d, Float64(lp))
+invlogcdf(d::UnivariateDistribution, lp::Real) = invlogcdf(d, Float64(lp))
 
 # invlogccdf
 
 invlogccdf(d::UnivariateDistribution, lp::Float64) = quantile(d, -expm1(lp))
-@compat invlogccdf(d::UnivariateDistribution, lp::Real) = invlogccdf(d, Float64(lp))
+invlogccdf(d::UnivariateDistribution, lp::Real) = invlogccdf(d, Float64(lp))
 
 # gradlogpdf
 
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Float64) = throw(MethodError(gradlogpdf, (d, x)))
-@compat gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = gradlogpdf(d, Float64(x))
+gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = gradlogpdf(d, Float64(x))
 
 
 # vectorized versions

@@ -41,7 +41,7 @@ abstract Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
 typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
 typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
-@compat typealias NonMatrixDistribution Union{UnivariateDistribution, MultivariateDistribution}
+typealias NonMatrixDistribution Union{UnivariateDistribution, MultivariateDistribution}
 
 typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
 typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
@@ -64,4 +64,4 @@ abstract SufficientStats
 abstract IncompleteDistribution
 
 typealias DistributionType{D<:Distribution} Type{D}
-@compat typealias IncompleteFormulation Union{DistributionType,IncompleteDistribution}
+typealias IncompleteFormulation Union{DistributionType,IncompleteDistribution}
