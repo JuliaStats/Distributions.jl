@@ -1,3 +1,24 @@
+doc"""
+    Pareto(α,θ)
+
+The *Pareto distribution* with shape `α` and scale `θ` has probability density function
+
+$f(x; \alpha, \theta) = \frac{\alpha \theta^\alpha}{x^{\alpha + 1}}, \quad x \ge \theta$
+
+```julia
+Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1.0, 1.0)
+Pareto(a)           # Pareto distribution with shape a and unit scale, i.e. Pareto(a, 1.0)
+Pareto(a, b)        # Pareto distribution with shape a and scale b
+
+params(d)        # Get the parameters, i.e. (a, b)
+shape(d)         # Get the shape parameter, i.e. a
+scale(d)         # Get the scale parameter, i.e. b
+```
+
+External links
+ * [Pareto distribution on Wikipedia](http://en.wikipedia.org/wiki/Pareto_distribution)
+
+"""
 immutable Pareto <: ContinuousUnivariateDistribution
     α::Float64
     θ::Float64

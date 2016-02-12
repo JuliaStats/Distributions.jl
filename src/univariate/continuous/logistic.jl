@@ -1,3 +1,26 @@
+doc"""
+    Logistic(μ,θ)
+
+The *Logistic distribution* with location `μ` and scale `θ` has probability density function
+
+$f(x; \mu, \theta) = \frac{1}{4 \theta} \mathrm{sech}^2
+\left( \frac{x - \mu}{\theta} \right)$
+
+```julia
+Logistic()       # Logistic distribution with zero location and unit scale, i.e. Logistic(0.0, 1.0)
+Logistic(u)      # Logistic distribution with location u and unit scale, i.e. Logistic(u, 1.0)
+Logistic(u, b)   # Logistic distribution with location u ans scale b
+
+params(d)       # Get the parameters, i.e. (u, b)
+location(d)     # Get the location parameter, i.e. u
+scale(d)        # Get the scale parameter, i.e. b
+```
+
+External links
+
+* [Logistic distribution on Wikipedia](http://en.wikipedia.org/wiki/Logistic_distribution)
+
+"""
 immutable Logistic <: ContinuousUnivariateDistribution
     μ::Float64
     θ::Float64

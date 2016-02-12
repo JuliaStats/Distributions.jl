@@ -1,3 +1,25 @@
+doc"""
+    Cauchy(μ, σ)
+
+The *Cauchy distribution* with location `μ` and scale `σ` has probability density function
+
+$f(x; \mu, \sigma) = \frac{1}{\pi \sigma \left(1 + \left(\frac{x - \mu}{\sigma} \right)^2 \right)}$
+
+```julia
+Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0.0, 1.0)
+Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1.0)
+Cauchy(u, b)     # Cauchy distribution with location u and scale b
+
+params(d)        # Get the parameters, i.e. (u, b)
+location(d)      # Get the location parameter, i.e. u
+scale(d)         # Get the scale parameter, i.e. b
+```
+
+External links
+
+* [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
+
+"""
 immutable Cauchy <: ContinuousUnivariateDistribution
     μ::Float64
     σ::Float64

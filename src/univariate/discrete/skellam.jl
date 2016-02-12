@@ -1,3 +1,23 @@
+doc"""
+    Skellam(μ1, μ2)
+
+A *Skellam distribution* describes the difference between two independent [`Poisson`](:func:`Poisson`) variables, respectively with rate `μ1` and `μ2`.
+
+$P(X = k) = e^{-(\mu_1 + \mu_2)} \left( \frac{\mu_1}{\mu_2} \right)^{k/2} I_k(2 \sqrt{\mu_1 \mu_2}) \quad \text{for integer } k$
+
+where $I_k$ is the modified Bessel function of the first kind.
+
+```julia
+Skellam(mu1, mu2)   # Skellam distribution for the difference between two Poisson variables,
+                    # respectively with expected values mu1 and mu2.
+
+params(d)           # Get the parameters, i.e. (mu1, mu2)
+```
+
+External links:
+
+* [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
+"""
 immutable Skellam <: DiscreteUnivariateDistribution
     μ1::Float64
     μ2::Float64
