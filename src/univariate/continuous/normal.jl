@@ -1,11 +1,17 @@
-immutable Normal <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
+immutable Normal{T<:Number} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
 
-    Normal(μ::Real, σ::Real) = (@check_args(Normal, σ > zero(σ)); new(μ, σ))
-    Normal(μ::Real) = Normal(μ, 1.0)
-    Normal() = Normal(0.0, 1.0)
+    Normal(μ::T, σ::T) = new(μ, σ)
 end
+
+Normal{T<:Number}(μ::T, σ::T) = Normal{T}(μ, σ)
+Normal(μ::Number, σ::Number) = Normal(promote(μ, σ)...)
+Normal(μ::Number) = Normal(μ, one(μ))
+#Normal(μ::Real, σ::Real) = (@check_args(Normal, σ > zero(σ)); Normal(μ, σ))
+Normal(μ::Real) = Normal(μ, one(μ))
+Normal() = Normal(0.0, 1.0)
+Normal(μ::Complex, σ::Complex) = error("Normal with complex mean and variance not defined")
 
 typealias Gaussian Normal
 
