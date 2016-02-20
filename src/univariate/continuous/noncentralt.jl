@@ -4,7 +4,7 @@ immutable NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
 
     function (::Type{NoncentralT{T}}){T}(ν::T, λ::T)
         @check_args(NoncentralT, ν > zero(ν))
-        @check_args(NoncentralT, λ >= zero(λ))
+        @check_args(NoncentralT, isreal(λ))
         new{T}(ν, λ)
     end
 end
