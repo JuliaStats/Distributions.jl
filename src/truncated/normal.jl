@@ -8,20 +8,20 @@ TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
 
 ### statistics
 
-minimum(d::Truncated{Normal,Continuous}) = d.lower
-maximum(d::Truncated{Normal,Continuous}) = d.upper
+minimum{T <: Real}(d::Truncated{Normal{T},Continuous}) = d.lower
+maximum{T <: Real}(d::Truncated{Normal{T},Continuous}) = d.upper
 
 
-function mode(d::Truncated{Normal,Continuous})
+function mode{T <: Real}(d::Truncated{Normal{T},Continuous})
     μ = mean(d.untruncated)
     d.upper < μ ? d.upper :
     d.lower > μ ? d.lower : μ
 end
 
-modes(d::Truncated{Normal,Continuous}) = [mode(d)]
+modes{T <: Real}(d::Truncated{Normal{T},Continuous}) = [mode(d)]
 
 
-function mean(d::Truncated{Normal,Continuous})
+function mean{T <: Real}(d::Truncated{Normal{T},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -30,7 +30,7 @@ function mean(d::Truncated{Normal,Continuous})
     μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
 end
 
-function var(d::Truncated{Normal,Continuous})
+function var{T <: Real}(d::Truncated{Normal{T},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -46,7 +46,7 @@ function var(d::Truncated{Normal,Continuous})
     abs2(σ) * (1 + t1 - t2)
 end
 
-function entropy(d::Truncated{Normal,Continuous})
+function entropy{T <: Real}(d::Truncated{Normal{T},Continuous})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)

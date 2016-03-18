@@ -23,7 +23,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         dtype = eval(dsym)
         d = eval(parse(ex))
         if dtype == TruncatedNormal
-            @test isa(d, Truncated{Normal})
+            @test isa(d, Truncated{Normal{Float64}})
         else
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtype)
@@ -99,6 +99,12 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         end
     catch e
         isa(e, MethodError) || throw(e)
+    end
+
+    # test conversions between type parameters
+    if isa(d, Normal)  # remove this check when all distributions parameterized
+        @test isa(convert(Normal{Float64}, Normal(1, 2)), Normal{Float64})
+        @test isa(convert(Normal{Float64}, 1, 2), Normal{Float64})
     end
 
     # generic testing
