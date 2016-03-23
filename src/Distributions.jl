@@ -289,4 +289,49 @@ include("mixtures/unigmm.jl")
 
 include("deprecates.jl")
 
+"""
+A Julia package for probability distributions and associated functions.
+
+API overview (major features):
+
+- `d = Dist(parameters...)` creates a distribution instance `d` for some distribution `Dist` (see choices below) with the specified `parameters`
+- `rand(d, sz)` samples from the distribution
+- `pdf(d, x)` and `logpdf(d, x)` compute the probability density or log-probability density of `d` at `x`
+- `cdf(d, x)` and `ccdf(d, x)` compute the (complementary) cumulative distribution function at `x`
+- `quantile(d, p)` is the inverse `cdf` (see also `cquantile`)
+- `mean(d)`, `var(d)`, `std(d)`, `skewness(d)`, `kurtosis(d)` compute moments of `d`
+- `fit(Dist, xs)` generates a distribution of type `Dist` that best fits the samples in `xs`
+
+These represent just a few of the operations supported by this
+package; users are encouraged to refer to the full documentation at
+http://distributionsjl.readthedocs.org/en/latest/ for further
+information.
+
+Supported distributions:
+
+    Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
+    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
+    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
+    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
+    GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
+    InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
+    Logistic, LogNormal, MixtureModel, Multinomial, MultivariateNormal,
+    MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
+    NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
+    NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
+    NormalGamma, NormalInverseGamma, NormalInverseGaussian,
+    NormalInverseWishart, NormalWishart, Pareto, Poisson, PoissonBinomial,
+    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
+    VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
+    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
+    ZeroMeanFullNormalCanon
+
+"""
+Distributions
+
 end # module
