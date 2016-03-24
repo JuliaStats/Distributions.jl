@@ -85,7 +85,7 @@ A mixture model can be constructed using the constructor ``MixtureModel``. Parti
     MixtureModel(Normal[
        Normal(-2.0, 1.2),
        Normal(0.0, 1.0),
-       Normal(3.0, 2.5)]
+       Normal(3.0, 2.5)])
 
     # Since all components have the same type, we can use a simplified syntax
     MixtureModel(Normal, [(-2.0, 1.2), (0.0, 1.0), (3.0, 2.5)], [0.2, 0.5, 0.3])
