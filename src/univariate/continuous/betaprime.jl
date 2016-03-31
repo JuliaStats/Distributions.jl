@@ -32,7 +32,7 @@ immutable BetaPrime <: ContinuousUnivariateDistribution
         @check_args(BetaPrime, α > zero(α) && β > zero(β))
         new(α, β)
     end
-    BetaPrime(α::Real) = BetaPrime(α)
+    BetaPrime(α::Real) = BetaPrime(α,α)
     BetaPrime() = new(1.0, 1.0)
 end
 
