@@ -73,11 +73,13 @@ function skewness(d::GeneralizedExtremeValue)
     
     if abs(ξ) < eps() # ξ == 0.0
         return 12.0 * sqrt(6.0) * zeta(3.0) / pi ^ 3.0
-    else
+    elseif ξ < 1.0 / 3.0
         g1 = g(d, 1)
         g2 = g(d, 2)
         g3 = g(d, 3)
         return sign(ξ) * (g3 - 3.0 * g1 * g2 + 2.0 * g1 ^ 3.0) / (g2 - g1 ^ 2.0) ^ (3.0 / 2.0)
+    else
+        return Inf
     end
 end
 
