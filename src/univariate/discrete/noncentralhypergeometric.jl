@@ -68,9 +68,9 @@ end
 
 mean(d::FisherNoncentralHypergeometric) =_P(d,1) / _P(d,0)
 var(d::FisherNoncentralHypergeometric) = _P(d,2)/_P(d,0) - (_P(d,1) / _P(d,0))^2
-@compat mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
+mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 
-@compat logpdf(d::FisherNoncentralHypergeometric, k::Int) =
+logpdf(d::FisherNoncentralHypergeometric, k::Int) =
     Float64(log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0)))
 
 pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
@@ -100,7 +100,7 @@ function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
     D = d.ω*(d.ns-k)+(d.nf-d.n+k)
     f(t) = (1-t^(d.ω/D))^k * (1-t^(1/D))^(d.n-k)
     I,_ = quadgk(f,0,1)
-    @compat Float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
+    Float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
 end
 
 logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))

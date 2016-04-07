@@ -74,14 +74,14 @@ end
 
 #### Evaluation
 
-function _logpdf(d::Wishart, X::DenseMatrix{Float64})
+function _logpdf(d::Wishart, X::AbstractMatrix{Float64})
     df = d.df
     p = dim(d)
     Xcf = cholfact(X)
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
 
-_logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
+_logpdf{T<:Real}(d::Wishart, X::AbstractMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 #### Sampling
 

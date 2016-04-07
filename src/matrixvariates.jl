@@ -8,15 +8,15 @@ rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Array(Matrix{eltype(d)}
 
 # pdf & logpdf
 
-_pdf{T<:Real}(d::MatrixDistribution, x::DenseMatrix{T}) = exp(_logpdf(d, x))
+_pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T}) = exp(_logpdf(d, x))
 
-function logpdf{T<:Real}(d::MatrixDistribution, x::DenseMatrix{T}) 
+function logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T}) 
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, x)
 end
 
-function pdf{T<:Real}(d::MatrixDistribution, x::DenseMatrix{T}) 
+function pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T}) 
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, x)

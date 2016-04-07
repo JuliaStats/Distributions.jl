@@ -1,3 +1,25 @@
+doc"""
+    Gumbel(μ, θ)
+
+The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
+
+$f(x; \mu, \theta) = \frac{1}{\theta} e^{-(z + e^z)},
+\quad \text{ with } z = \frac{x - \mu}{\theta}$
+
+```julia
+Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0.0, 1.0)
+Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1.0)
+Gumbel(u, b)        # Gumbel distribution with location u and scale b
+
+params(d)        # Get the parameters, i.e. (u, b)
+location(d)      # Get the location parameter, i.e. u
+scale(d)         # Get the scale parameter, i.e. b
+```
+
+External links
+
+* [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
+"""
 immutable Gumbel <: ContinuousUnivariateDistribution
     μ::Float64  # location
     θ::Float64  # scale

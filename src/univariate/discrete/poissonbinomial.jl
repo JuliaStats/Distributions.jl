@@ -1,37 +1,26 @@
 # TODO: this distribution may need clean-up
+doc"""
+    PoissonBinomial(p)
 
-# Computes the pdf of a poisson-binomial random variable using
-# fast fourier transform
-#
-#     Hong, Y. (2013).
-#     On computing the distribution function for the Poisson binomial
-#     distribution. Computational Statistics and Data Analysis, 59, 41–51.
-#
-function poissonbinomial_pdf_fft(p::AbstractArray)
-    n = length(p)
-    ω = 2. / (n + 1)
+A *Poisson-binomial distribution* describes the number of successes in a sequence of independent trials, wherein each trial has a different success rate. It is parameterized by a vector `p` (of length ``K``), where ``K`` is the total number of trials and `p[i]` corresponds to the probability of success of the `i`th trial.
 
-    x = Array(Complex{Float64}, n+1)
-    @compat lmax = ceil(Int, n/2)
-    x[1] = 1./(n+1)
-    for l=1:lmax
-        logz = 0.
-        argz = 0.
-        for j=1:n
-            zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
-            logz += log(abs(zjl))
-            argz += atan2(imag(zjl), real(zjl))
-        end
-        dl = exp(logz)
-        x[l+1] = dl * cos(argz) / (n+1) + dl * sin(argz) * im / (n+1)
-        if n + 1 - l > l
-            x[n+1-l+1] = conj(x[l+1])
-        end
-    end
-    fft!(x)
-    [max(0., real(xi)) for xi in x]
-end
+$P(X = k) = \sum\limits_{A\in F_k} \prod\limits_{i\in A} p[i] \prod\limits_{j\in A^c} (1-p[j]), \quad \text{ for } k = 0,1,2,\ldots,K,$
 
+where $F_k$ is the set of all subsets of $k$ integers that can be selected from $\{1,2,3,...,K\}$.
+
+```julia
+PoissonBinomial(p)   # Poisson Binomial distribution with success rate vector p
+
+params(d)            # Get the parameters, i.e. (p,)
+succprob(d)          # Get the vector of success rates, i.e. p
+failprob(d)          # Get the vector of failure rates, i.e. 1-p
+```
+
+External links:
+
+* [Poisson-binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_binomial_distribution)
+
+"""
 immutable PoissonBinomial <: DiscreteUnivariateDistribution
 
     p::Vector{Float64}
@@ -108,6 +97,39 @@ end
 pdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0.
 logpdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? log(d.pmf[k+1]) : -Inf
 pdf(d::PoissonBinomial) = copy(d.pmf)
+
+
+# Computes the pdf of a poisson-binomial random variable using
+# fast fourier transform
+#
+#     Hong, Y. (2013).
+#     On computing the distribution function for the Poisson binomial
+#     distribution. Computational Statistics and Data Analysis, 59, 41–51.
+#
+function poissonbinomial_pdf_fft(p::AbstractArray)
+    n = length(p)
+    ω = 2. / (n + 1)
+
+    x = Array(Complex{Float64}, n+1)
+    lmax = ceil(Int, n/2)
+    x[1] = 1./(n+1)
+    for l=1:lmax
+        logz = 0.
+        argz = 0.
+        for j=1:n
+            zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
+            logz += log(abs(zjl))
+            argz += atan2(imag(zjl), real(zjl))
+        end
+        dl = exp(logz)
+        x[l+1] = dl * cos(argz) / (n+1) + dl * sin(argz) * im / (n+1)
+        if n + 1 - l > l
+            x[n+1-l+1] = conj(x[l+1])
+        end
+    end
+    fft!(x)
+    [max(0., real(xi)) for xi in x]
+end
 
 #### Sampling
 

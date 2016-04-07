@@ -1,3 +1,23 @@
+doc"""
+    TDist(ν)
+
+The *Students T distribution* with `ν` degrees of freedom has probability density function
+
+$f(x; d) = \frac{1}{\sqrt{d} B(1/2, d/2)}
+\left( 1 + \frac{x^2}{d} \right)^{-\frac{d + 1}{2}}$
+
+```julia
+TDist(d)      # t-distribution with d degrees of freedom
+
+params(d)     # Get the parameters, i.e. (d,)
+dof(d)        # Get the degrees of freedom, i.e. d
+```
+
+External links
+
+[Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+
+"""
 immutable TDist <: ContinuousUnivariateDistribution
     ν::Float64
 

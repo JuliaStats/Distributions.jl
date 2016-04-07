@@ -1,3 +1,26 @@
+doc"""
+    Frechet(α,θ)
+
+The *Fréchet distribution* with shape `α` and scale `θ` has probability density function
+
+$f(x; \alpha, \theta) = \frac{\alpha}{\theta} \left( \frac{x}{\theta} \right)^{-\alpha-1} 
+e^{-(x/\theta)^{-\alpha}}, \quad x > 0$
+    
+```julia
+Frechet()        # Fréchet distribution with unit shape and unit scale, i.e. Frechet(1.0, 1.0)
+Frechet(a)       # Fréchet distribution with shape a and unit scale, i.e. Frechet(a, 1.0)
+Frechet(a, b)    # Fréchet distribution with shape a and scale b
+
+params(d)        # Get the parameters, i.e. (a, b)
+shape(d)         # Get the shape parameter, i.e. a
+scale(d)         # Get the scale parameter, i.e. b
+```
+
+External links
+
+* [Fréchet_distribution on Wikipedia](http://en.wikipedia.org/wiki/Fréchet_distribution)
+
+"""
 immutable Frechet <: ContinuousUnivariateDistribution
     α::Float64
     θ::Float64

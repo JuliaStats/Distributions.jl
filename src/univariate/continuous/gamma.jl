@@ -1,3 +1,27 @@
+doc"""
+    Gamma(α,θ)
+
+The *Gamma distribution* with shape parameter `α` and scale `θ` has probability density
+function
+
+$f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha},
+\quad x > 0$
+
+```julia
+Gamma()          # Gamma distribution with unit shape and unit scale, i.e. Gamma(1.0, 1.0)
+Gamma(a)         # Gamma distribution with shape a and unit scale, i.e. Gamma(a, 1.0)
+Gamma(a, b)      # Gamma distribution with shape a and scale b
+
+params(d)        # Get the parameters, i.e. (a, b)
+shape(d)         # Get the shape parameter, i.e. a
+scale(d)         # Get the scale parameter, i.e. b
+```
+
+External links
+
+* [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
+
+"""
 immutable Gamma <: ContinuousUnivariateDistribution
     α::Float64
     θ::Float64

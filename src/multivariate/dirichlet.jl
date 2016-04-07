@@ -21,7 +21,7 @@ immutable Dirichlet <: ContinuousMultivariateDistribution
         new(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
     end
 
-    @compat Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, Float64(alpha))
+    Dirichlet(d::Integer, alpha::Real) = Dirichlet(d, Float64(alpha))
 end
 
 immutable DirichletCanon
@@ -144,7 +144,7 @@ end
 
 # sampling
 
-@compat function _rand!{T<:Real}(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T})
+function _rand!{T<:Real}(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T})
     s = 0.0
     n = length(x)
     α = d.alpha
@@ -164,7 +164,7 @@ immutable DirichletStats <: SufficientStats
     slogp::Vector{Float64}   # (weighted) sum of log(p)
     tw::Float64              # total sample weights
 
-    @compat DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, Float64(tw))
+    DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, Float64(tw))
 end
 
 length(ss::DirichletStats) = length(s.slogp)

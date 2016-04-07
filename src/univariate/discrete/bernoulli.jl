@@ -1,3 +1,27 @@
+doc"""
+    Bernoulli(p)
+
+A *Bernoulli distribution* is parameterized by a success rate `p`, which takes value 1
+with probability `p` and 0 with probability `1-p`.
+
+$P(X = k) = \begin{cases}
+1 - p & \quad \text{for } k = 0, \\
+p & \quad \text{for } k = 1.
+\end{cases}$
+
+```julia
+Bernoulli()    # Bernoulli distribution with p = 0.5
+Bernoulli(p)   # Bernoulli distribution with success rate p
+
+params(d)      # Get the parameters, i.e. (p,)
+succprob(d)    # Get the success rate, i.e. p
+failprob(d)    # Get the failure rate, i.e. 1 - p
+```
+
+External links:
+
+* [Bernoulli distribution on Wikipedia](http://en.wikipedia.org/wiki/Bernoulli_distribution)
+"""
 immutable Bernoulli <: DiscreteUnivariateDistribution
     p::Float64
 
@@ -77,7 +101,7 @@ immutable BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 
-    @compat BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
+    BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
 end
 
 fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
