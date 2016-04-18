@@ -299,7 +299,7 @@ loglikelihood(d::UnivariateDistribution, X::AbstractArray) =
 
 macro _delegate_statsfuns(D, fpre, psyms...)
     dt = eval(D)
-    T = dt <: DiscreteUnivariateDistribution ? :Int : :Number
+    T = dt <: DiscreteUnivariateDistribution ? :Int : :Real
 
     # function names from StatsFuns
     fpdf = symbol(string(fpre, "pdf"))

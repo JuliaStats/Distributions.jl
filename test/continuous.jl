@@ -76,6 +76,7 @@ end
 # end
 
 # Test for non-Float64 input
-using DualNumbers
+using ForwardDiff
 @test string(logpdf(Normal(0,1),big(1))) == "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
-@test_approx_eq epsilon(logpdf(Normal(1.0,0.15), Dual(2.5,1.0))) -66.66666666666667
+@test_approx_eq derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) -66.66666666666667
+@test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
