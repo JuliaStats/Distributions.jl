@@ -3,21 +3,24 @@
 #   following the Wikipedia parameterization
 #
 
-immutable Wishart{ST<:AbstractPDMat} <: ContinuousMatrixDistribution
-    df::Float64     # degree of freedom
+immutable Wishart{ST<:AbstractPDMat, T<:Real} <: ContinuousMatrixDistribution
+    df::T     # degree of freedom
     S::ST           # the scale matrix
-    c0::Float64     # the logarithm of normalizing constant in pdf
+    c0::T     # the logarithm of normalizing constant in pdf
 end
 
 #### Constructors
 
 function Wishart{ST <: AbstractPDMat}(df::Real, S::ST)
     p = dim(S)
-    df > p - 1 || error("df should be greater than dim - 1.")
-    Wishart{ST}(df, S, _wishart_c0(df, S))
+    df > p - 1 || error("dpf should be greater than dim - 1.")
+    c0 = _wishart_c0(df, S)
+    prom_df, prom_c0 = promote(df, c0)
+    T = typeof(prom_df)
+    Wishart{ST, T}(prom_df, S, prom_c0)
 end
 
-Wishart(df::Real, S::Matrix{Float64}) = Wishart(df, PDMat(S))
+Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
 Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
@@ -30,8 +33,8 @@ end
 
 #### Properties
 
-insupport(::Type{Wishart}, X::Matrix{Float64}) = isposdef(X)
-insupport(d::Wishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
+insupport(::Type{Wishart}, X::Matrix) = isposdef(X)
+insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
@@ -74,14 +77,12 @@ end
 
 #### Evaluation
 
-function _logpdf(d::Wishart, X::AbstractMatrix{Float64})
+function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholfact(X)
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
-
-_logpdf{T<:Real}(d::Wishart, X::AbstractMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 #### Sampling
 

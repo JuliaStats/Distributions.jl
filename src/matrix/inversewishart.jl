@@ -3,10 +3,10 @@
 #   following Wikipedia parametrization
 #
 
-immutable InverseWishart{ST<:AbstractPDMat} <: ContinuousMatrixDistribution
-    df::Float64     # degree of freedom
+immutable InverseWishart{ST<:AbstractPDMat, T<:Real} <: ContinuousMatrixDistribution
+    df::T     # degree of freedom
     Ψ::ST           # scale matrix
-    c0::Float64     # log of normalizing constant
+    c0::T     # log of normalizing constant
 end
 
 #### Constructors
@@ -14,10 +14,13 @@ end
 function InverseWishart{ST <: AbstractPDMat}(df::Real, Ψ::ST)
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
-    InverseWishart{ST}(df, Ψ, _invwishart_c0(df, Ψ))
+    c0 = _invwishart_c0(df, Ψ)
+    prom_df, prom_c0 = promote(df, c0)
+    T = typeof(prom_df)
+    InverseWishart{ST, T}(prom_df, Ψ, prom_c0)
 end
 
-InverseWishart(df::Real, Ψ::Matrix{Float64}) = InverseWishart(df, PDMat(Ψ))
+InverseWishart(df::Real, Ψ::Matrix) = InverseWishart(df, PDMat(Ψ))
 
 InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 
@@ -30,8 +33,8 @@ end
 
 #### Properties
 
-insupport(::Type{InverseWishart}, X::Matrix{Float64}) = isposdef(X)
-insupport(d::InverseWishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
+insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
+insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
@@ -60,7 +63,7 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
 #### Evaluation
 
-function _logpdf(d::InverseWishart, X::AbstractMatrix{Float64})
+function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
     Xcf = cholfact(X)
@@ -68,8 +71,6 @@ function _logpdf(d::InverseWishart, X::AbstractMatrix{Float64})
     Ψ = full(d.Ψ)
     -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
 end
-
-_logpdf{T<:Real}(d::InverseWishart, X::AbstractMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 
 #### Sampling

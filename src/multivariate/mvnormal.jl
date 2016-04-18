@@ -59,8 +59,7 @@ _pdf!{T<:Real}(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = ex
 #   Multivariate normal distribution with mean parameters
 #
 ###########################################################
-
-immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
+immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -77,19 +76,19 @@ typealias ZeroMeanFullNormal MvNormal{PDMat{Float64,Matrix{Float64}},ZeroVector{
 
 ### Construction
 
-function MvNormal{Cov<:AbstractPDMat}(μ::Vector{Float64}, Σ::Cov)
+function MvNormal{Cov<:AbstractPDMat, T<:Real}(μ::Vector{T}, Σ::Cov)
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{Cov,Vector{Float64}}(μ, Σ)
+    MvNormal{Cov,Vector{T}}(μ, Σ)
 end
 
 MvNormal{Cov<:AbstractPDMat}(Σ::Cov) = MvNormal{Cov,ZeroVector{Float64}}(ZeroVector(Float64, dim(Σ)), Σ)
 
-MvNormal(μ::Vector{Float64}, Σ::Matrix{Float64}) = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::Vector{Float64}, σ::Vector{Float64}) = MvNormal(μ, PDiagMat(abs2(σ)))
-MvNormal(μ::Vector{Float64}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(Float64(σ))))
+MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::Matrix{S}) = MvNormal(μ, PDMat(Σ))
+MvNormal{T<:Real,S<:Real}(μ::Vector{T}, σ::Vector{S}) = MvNormal(μ, PDiagMat(abs2(σ)))
+MvNormal{T<:Real}(μ::Vector{T}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(Float64(σ))))
 
-MvNormal(Σ::Matrix{Float64}) = MvNormal(PDMat(Σ))
-MvNormal(σ::Vector{Float64}) = MvNormal(PDiagMat(abs2(σ)))
+MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
+MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(abs2(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(Float64(σ))))
 
 ### Show
