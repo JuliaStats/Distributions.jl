@@ -18,15 +18,20 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-immutable Poisson <: DiscreteUnivariateDistribution
-    λ::Float64
+immutable Poisson{T<:Real} <: DiscreteUnivariateDistribution
+    λ::T
 
     Poisson(λ::Real) = (@check_args(Poisson, λ >= zero(λ)); new(λ))
-    Poisson() = new(1.0)
 end
 
-@distr_support Poisson 0 (d.λ == 0.0 ? 0 : Inf)
+Poisson{T<:Real}(λ::T) = Poisson{T}(λ)
+Poisson() = Poisson(1.0)
 
+@distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
+
+# #### Conversions
+convert{T <: Real}(::Type{Poisson{T}}, λ::Real) = Poisson(T(λ))
+convert{T <: Real, S <: Real}(::Type{Poisson{T}}, d::Poisson{S}) = Poisson(T(d.λ))
 
 ### Parameters
 
@@ -48,13 +53,13 @@ end
 
 var(d::Poisson) = d.λ
 
-skewness(d::Poisson) = 1.0 / sqrt(d.λ)
+skewness(d::Poisson) = one(typeof(d.λ)) / sqrt(d.λ)
 
-kurtosis(d::Poisson) = 1.0 / d.λ
+kurtosis(d::Poisson) = one(typeof(d.λ)) / d.λ
 
 function entropy(d::Poisson)
     λ = rate(d)
-    if λ == 0.0
+    if λ == zero(typeof(λ))
         return 0.0
     elseif λ < 50.0
         s = 0.0

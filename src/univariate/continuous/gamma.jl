@@ -22,23 +22,26 @@ External links
 * [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
 
 """
-immutable Gamma <: ContinuousUnivariateDistribution
-    α::Float64
-    θ::Float64
+immutable Gamma{T <: Real} <: ContinuousUnivariateDistribution
+    α::T
+    θ::T
 
-    function Gamma(α::Real, θ::Real)
+    function Gamma(α, θ)
         @check_args(Gamma, α > zero(α) && θ > zero(θ))
         new(α, θ)
     end
-    function Gamma(α::Real)
-        @check_args(Gamma, α > zero(α))
-        new(α, 1.0)
-    end
-    Gamma() = new(1.0, 1.0)
 end
+
+Gamma{T<:Real}(α::T, θ::T) = Gamma{T}(α, θ)
+Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
+Gamma(α::Real) = Gamma(α, 1.0)
+Gamma() = Gamma(1.0, 1.0)
 
 @distr_support Gamma 0.0 Inf
 
+#### Conversions
+convert{T <: Real, S <: Real}(::Type{Gamma{T}}, α::S, θ::S) = Gamma(T(α), T(θ))
+convert{T <: Real, S <: Real}(::Type{Gamma{T}}, d::Gamma{S}) = Gamma(T(d.α), T(d.θ))
 
 #### Parameters
 

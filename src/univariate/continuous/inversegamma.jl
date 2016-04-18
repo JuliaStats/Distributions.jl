@@ -24,21 +24,26 @@ External links
 * [Inverse gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse-gamma_distribution)
 
 """
-immutable InverseGamma <: ContinuousUnivariateDistribution
-    invd::Gamma
-    θ::Float64
+immutable InverseGamma{T <: Real} <: ContinuousUnivariateDistribution
+    invd::Gamma{T}
+    θ::T
 
-    function InverseGamma(α::Real, θ::Real)
+    function InverseGamma(α, θ)
         @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
         new(Gamma(α, 1.0 / θ), θ)
     end
-
-    InverseGamma(α::Real) = InverseGamma(α, 1.0)
-    InverseGamma() = InverseGamma(1.0, 1.0)
 end
+
+InverseGamma{T<:Real}(α::T, θ::T) = InverseGamma{T}(α, θ)
+InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
+InverseGamma(α::Real) = InverseGamma(α, 1.0)
+InverseGamma() = InverseGamma(1.0, 1.0)
 
 @distr_support InverseGamma 0.0 Inf
 
+#### Conversions
+convert{T <: Real, S <: Real}(::Type{InverseGamma{T}}, α::S, θ::S) = InverseGamma(T(α), T(θ))
+convert{T <: Real, S <: Real}(::Type{InverseGamma{T}}, d::InverseGamma{S}) = InverseGamma(T(shape(d.invd)), T(d.θ))
 
 #### Parameters
 

@@ -107,6 +107,15 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test isa(convert(Normal{Float64}, 1, 2), Normal{Float64})
     end
 
+    if haskey(dct, "conversions")
+        for cv in dct["conversions"]
+            pars = cv["from"]
+            from = isa(pars, AbstractString) ? eval(parse(pars)) : pars
+            to = eval(parse(cv["to"]))
+            @test isa(convert(to, from...), to)
+        end
+    end
+
     # generic testing
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)

@@ -66,7 +66,7 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 @_delegate_statsfuns Normal norm μ σ
 
-gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)

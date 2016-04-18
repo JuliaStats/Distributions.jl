@@ -1,24 +1,28 @@
 ## Canonical Form of Normal distribution
 
-immutable NormalCanon <: ContinuousUnivariateDistribution
-    η::Float64       # σ^(-2) * μ
-    λ::Float64    # σ^(-2)
-    μ::Float64       # μ
+immutable NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
+    η::T       # σ^(-2) * μ
+    λ::T       # σ^(-2)
+    μ::T       # μ
 
-    function NormalCanon(η::Real, λ::Real)
+    function NormalCanon(η, λ)
         @check_args(NormalCanon, λ > zero(λ))
     	new(η, λ, η / λ)
     end
-    NormalCanon() = new(0.0, 1.0, 0.0)
 end
+NormalCanon{T<:Real}(η::T, λ::T) = NormalCanon{typeof(η/λ)}(η, λ)
+NormalCanon(η::Real, λ::Real) = NormalCanon(promote(η, λ)...)
+NormalCanon() = NormalCanon(0.0, 1.0, 0.0)
 
 @distr_support NormalCanon -Inf Inf
 
 
 ## conversion between Normal and NormalCanon
+convert{T <: Real, S <: Real}(::Type{NormalCanon{T}}, η::S, λ::S) = NormalCanon(T(η), T(λ))
+convert{T <: Real, S <: Real}(::Type{NormalCanon{T}}, d::NormalCanon{S}) = NormalCanon(T(d.η), T(d.λ))
 
-Base.convert(::Type{Normal}, d::NormalCanon) = Normal(d.μ, 1.0 / sqrt(d.λ))
-Base.convert(::Type{NormalCanon}, d::Normal) = (λ = 1.0 / σ^2; NormalCanon(λ * d.μ, λ))
+convert(::Type{Normal}, d::NormalCanon) = Normal(d.μ, 1.0 / sqrt(d.λ))
+convert(::Type{NormalCanon}, d::Normal) = (λ = 1.0 / d.σ^2; NormalCanon(λ * d.μ, λ))
 canonform(d::Normal) = convert(NormalCanon, d)
 
 
