@@ -74,3 +74,9 @@ end
 #     println("    testing $(distr)")
 #     test_samples(distr, n_tsamples)
 # end
+
+# Test for non-Float64 input
+using ForwardDiff
+@test string(logpdf(Normal(0,1),big(1))) == "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
+@test_approx_eq derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) -66.66666666666667
+@test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
