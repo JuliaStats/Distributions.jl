@@ -88,10 +88,11 @@ end
 
 function entropy(d::Multinomial)
     n, p = params(d)
-    s = -sum(log(2:n)) - n*sum(log(p.^p))
+    s = -lgamma(n+1) + n*entropy(p)
     for pr in p
+        b = Binomial(n, pr)
         for x in 0:n
-            s += binomial(n, x) * pr^x * (1 - pr)^(n - x) * sum(log(2:x))
+            s += pdf(b, x) * lgamma(x+1)
         end
     end
     return s
