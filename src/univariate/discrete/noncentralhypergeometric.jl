@@ -51,12 +51,12 @@ immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric
 end
 
 # Properties
-binomial{T<:Integer}(n::T, k::T) = Base.binomial(BigInt(n), BigInt(k))
-binomial{T<:Integer}(n::T, kR::OrdinalRange{T}) = [binomial(n,k) for k in kR]
 function _P(d::FisherNoncentralHypergeometric, k::Int)
     y = support(d)
-    p = binomial(d.ns, y) .* binomial(d.nf, d.n-y) .* d.ω.^y .* y.^k
-    sum(p)
+    p = -log(d.ns + 1) - lbeta(d.ns - y + 1, y + 1) -
+            log(d.nf + 1) - lbeta(d.nf - d.n + y + 1, d.n - y + 1) +
+            xlogy(y, d.ω) + xlogy(k, y)
+    logsumexp(p)
 end
 
 function _mode(d::FisherNoncentralHypergeometric)
@@ -66,12 +66,14 @@ function _mode(d::FisherNoncentralHypergeometric)
     -2*C / (B - sqrt(B^2-4*A*C))
 end
 
-mean(d::FisherNoncentralHypergeometric) =_P(d,1) / _P(d,0)
-var(d::FisherNoncentralHypergeometric) = _P(d,2)/_P(d,0) - (_P(d,1) / _P(d,0))^2
+mean(d::FisherNoncentralHypergeometric) = exp(_P(d,1) - _P(d,0))
+var(d::FisherNoncentralHypergeometric) = exp(_P(d,2) - _P(d,0)) - exp(2*(_P(d,1) - _P(d,0)))
 mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 
 logpdf(d::FisherNoncentralHypergeometric, k::Int) =
-    Float64(log(binomial(d.ns, k)) + log(binomial(d.nf, d.n-k)) + k*log(d.ω) - log(_P(d,0)))
+    -log(d.ns + 1) - lbeta(d.ns - k + 1, k + 1) -
+    log(d.nf + 1) - lbeta(d.nf - d.n + k + 1, d.n - k + 1) +
+    xlogy(k, d.ω) - _P(d, 0)
 
 pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
 
@@ -92,15 +94,16 @@ immutable WalleniusNoncentralHypergeometric <: NoncentralHypergeometric
 end
 
 # Properties
-mean(d::WalleniusNoncentralHypergeometric)=sum(support(d).*pdf(d,support(d)))
-var(d::WalleniusNoncentralHypergeometric) = sum((support(d)-mean(d)).^2.*pdf(d,support(d)))
-mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf(d,support(d)))]
+mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf(d, support(d)))
+var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) - mean(d)).^2 .* pdf(d, support(d)))
+mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf(d, support(d)))]
 
-function pdf(d::WalleniusNoncentralHypergeometric, k::Int)
-    D = d.ω*(d.ns-k)+(d.nf-d.n+k)
-    f(t) = (1-t^(d.ω/D))^k * (1-t^(1/D))^(d.n-k)
-    I,_ = quadgk(f,0,1)
-    Float64(binomial(d.ns,k)*binomial(d.nf,d.n-k)*I)
+function logpdf(d::WalleniusNoncentralHypergeometric, k::Int)
+    D = d.ω * (d.ns - k) + (d.nf - d.n + k)
+    f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
+    I, _ = quadgk(f, 0, 1)
+    return -log(d.ns + 1) - lbeta(d.ns - k + 1, k + 1) -
+    log(d.nf + 1) - lbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
 end
 
-logpdf(d::WalleniusNoncentralHypergeometric, k::Int) = log(pdf(d, k))
+pdf(d::WalleniusNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
