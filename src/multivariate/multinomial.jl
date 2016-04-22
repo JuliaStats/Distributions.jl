@@ -86,6 +86,18 @@ function cf(d::Multinomial, t::AbstractVector)
     return s^n
 end
 
+function entropy(d::Multinomial)
+    n, p = params(d)
+    s = -lgamma(n+1) + n*entropy(p)
+    for pr in p
+        b = Binomial(n, pr)
+        for x in 0:n
+            s += pdf(b, x) * lgamma(x+1)
+        end
+    end
+    return s
+end
+
 
 # Evaluation
 
