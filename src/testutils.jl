@@ -384,6 +384,9 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     lp = Array(Float64, nv)
     lc = Array(Float64, nv)
     lcc = Array(Float64, nv)
+    glp = Array(Float64, nv)
+    
+    hasGlp = isa(d, TDist)
 
     for (i, v) in enumerate(vs)
         p[i] = pdf(d, v)
@@ -392,6 +395,10 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
+        
+        if hasGlp
+            glp[i] = gradlogpdf(d, v)
+        end
 
         @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
@@ -418,6 +425,15 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
             v = vs[i]
             ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
             @test_approx_eq_eps p[i] ap p[i] * 1.0e-3
+        end
+    end
+
+    # check: gradlogpdf should be the derivative of logpdf
+    if hasGlp
+        for i = 2:(nv-1)
+            v = vs[i]
+            ap = (logpdf(d, v + 1.0e-6) - logpdf(d, v - 1.0e-6)) / (2.0e-6)
+            @test_approx_eq_eps glp[i] ap abs(lp[i] * 1.0e-3)
         end
     end
 

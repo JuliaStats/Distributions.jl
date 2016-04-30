@@ -22,7 +22,6 @@ External links
 
 """
 immutable TDist <: ContinuousUnivariateDistribution
-    #TODO right order?
     ν::Float64
     μ::Float64
     σ::Float64
@@ -60,7 +59,6 @@ end
 
 skewness(d::TDist) = d.ν > 3.0 ? 0.0 : NaN
 
-#TODO need to write some numerical tests to see if kurt changes
 function kurtosis(d::TDist)
     ν = d.ν
     ν > 4.0 ? 6.0 / (ν - 4.0) :
@@ -93,11 +91,11 @@ function cf(d::TDist, t::Real)
     t == 0 && return complex(1.0)
     h = d.ν * 0.5
     q = d.ν * 0.25
-    t2 = t*t/d.σ/d.σ
-    complex(2*(q*t2)^q*besselk(h,sqrt(d.ν)*abs(t/d.σ))/gamma(h)/d.σ) * exp(t*d.μ*im)
+    t2 = t*t * d.σ * d.σ
+    complex(2*(q*t2)^q*besselk(h,sqrt(d.ν)*abs(t*d.σ))/gamma(h)) * exp(t*d.μ*im)
 end
 
 function gradlogpdf(d::TDist, x::Float64)
     z = x - d.μ
-     -((d.ν + 1.0) * z) / (z^2 + d.ν) / d.σ / d.σ
+     -((d.ν + 1.0) * z) / (z^2 + d.ν * d.σ * d.σ)
 end
