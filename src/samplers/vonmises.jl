@@ -40,7 +40,7 @@ function rand(s::VonMisesSampler)
             end
         end
         acf = acos(f)
-        x = s.μ + (randbool() ? acf : -acf)
+        x = s.μ + (rand(Bool) ? acf : -acf)
     end
     return x
 end
