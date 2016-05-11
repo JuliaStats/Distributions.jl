@@ -54,10 +54,10 @@ typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discret
 typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
 
 variate_form{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VF
-variate_form{T<:Distribution}(::Type{T}) = variate_form(super(T))
+variate_form{T<:Distribution}(::Type{T}) = variate_form(supertype(T))
 
 value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VS
-value_support{T<:Distribution}(::Type{T}) = value_support(super(T))
+value_support{T<:Distribution}(::Type{T}) = value_support(supertype(T))
 
 ## TODO: the following types need to be improved
 abstract SufficientStats

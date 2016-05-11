@@ -133,7 +133,7 @@ function _logpdf!{T<:Real}(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatr
     return r
 end
 
-_pdf!{T<:Real}(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
+_pdf!{T<:Real}(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
 
 function gradlogpdf{T<:Real}(d::GenericMvTDist, x::AbstractVector{T})
     z::Vector{T} = d.zeromean ? x : x - d.μ

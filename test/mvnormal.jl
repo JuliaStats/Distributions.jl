@@ -116,7 +116,7 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     sw = sum(w)
     mu = (x * w) * (1/sw)
     z = x .- mu
-    C = (z * scale(w, z')) * (1/sw)
+    C = (z * (Diagonal(w) * z')) * (1/sw)
     Base.LinAlg.copytri!(C, 'U')
     return mu, C
 end

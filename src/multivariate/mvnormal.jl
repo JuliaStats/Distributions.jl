@@ -148,7 +148,6 @@ immutable MvNormalKnownCov{Cov<:AbstractPDMat}
     Σ::Cov
 end
 
-MvNormalKnownCov{Cov<:AbstractPDMat}(C::Cov) = MvNormalKnownCov{Cov}(C)
 MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(Float64(σ))))
 MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2(σ)))
 MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))

@@ -34,9 +34,9 @@ function MvNormalCanon{P<:AbstractPDMat, T<:Real}(h::Vector{T}, J::P)
     MvNormalCanon{P,Vector{T}}(J \ h, h, J)
 end
 
-MvNormalCanon(h::Vector, J::Matrix) = MvNormalCanon(h, PDMat(J))
-MvNormalCanon(h::Vector, prec::Vector) = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon(h::Vector, prec) = MvNormalCanon(h, ScalMat(length(h), prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec::Vector) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec) = MvNormalCanon(h, ScalMat(length(h), prec))
 
 MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
@@ -85,4 +85,4 @@ unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
 unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
-_rand!(d::MvNormalCanon, x::AbstractVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
+_rand!(d::MvNormalCanon, x::AbstractMatrix) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)

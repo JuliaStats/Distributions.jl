@@ -1,5 +1,7 @@
 # Testing discrete univariate distributions
 
+module TestTruncate
+
 using Distributions
 import JSON
 using Base.Test
@@ -9,10 +11,10 @@ using Compat
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)
     R = JSON.parsefile(jsonfile)
     for (ex, dct) in R
-        dsym = symbol(dct["dtype"])
+        dsym = Symbol(dct["dtype"])
         dname = string(dsym)
 
-        dsymt = symbol("Truncated($(dct["dtype"]),$lower,$upper")
+        dsymt = Symbol("Truncated($(dct["dtype"]),$lower,$upper")
         dnamet = string(dsym)
 
         # test whether it is included in the selected list
@@ -52,7 +54,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify parameters
     pdct = dct["params"]
     for (fname, val) in pdct
-        f = eval(symbol(fname))
+        f = eval(Symbol(fname))
         @assert isa(f, Function)
         Base.Test.test_approx_eq(f(d.untruncated), val, "$fname(d.untruncated)", "val")
     end
@@ -106,4 +108,6 @@ for c in ["discrete",
     jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6,3,5)
     println()
+end
+
 end
