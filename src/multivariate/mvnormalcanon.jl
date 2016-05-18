@@ -36,7 +36,7 @@ end
 
 MvNormalCanon(h::Vector, J::Matrix) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::Vector, prec::Vector) = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon(h::Vector, prec) = MvNormalCanon(h, ScalMat(length(h), prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec) = MvNormalCanon(h, ScalMat(length(h), prec))
 
 MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
