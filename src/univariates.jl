@@ -185,8 +185,8 @@ for fun in [:pdf, :logpdf,
             :invlogcdf, :invlogccdf,
             :quantile, :cquantile]
 
-    _fun! = symbol(string('_', fun, '!'))
-    fun! = symbol(string(fun, '!'))
+    _fun! = Symbol('_', fun, '!')
+    fun! = Symbol(fun, '!')
 
     @eval begin
         function ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
@@ -302,16 +302,16 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     T = dt <: DiscreteUnivariateDistribution ? :Int : :Real
 
     # function names from StatsFuns
-    fpdf = symbol(string(fpre, "pdf"))
-    flogpdf = symbol(string(fpre, "logpdf"))
-    fcdf = symbol(string(fpre, "cdf"))
-    fccdf = symbol(string(fpre, "ccdf"))
-    flogcdf = symbol(string(fpre, "logcdf"))
-    flogccdf = symbol(string(fpre, "logccdf"))
-    finvcdf = symbol(string(fpre, "invcdf"))
-    finvccdf = symbol(string(fpre, "invccdf"))
-    finvlogcdf = symbol(string(fpre, "invlogcdf"))
-    finvlogccdf = symbol(string(fpre, "invlogccdf"))
+    fpdf = Symbol(fpre, "pdf")
+    flogpdf = Symbol(fpre, "logpdf")
+    fcdf = Symbol(fpre, "cdf")
+    fccdf = Symbol(fpre, "ccdf")
+    flogcdf = Symbol(fpre, "logcdf")
+    flogccdf = Symbol(fpre, "logccdf")
+    finvcdf = Symbol(fpre, "invcdf")
+    finvccdf = Symbol(fpre, "invccdf")
+    finvlogcdf = Symbol(fpre, "invlogcdf")
+    finvlogccdf = Symbol(fpre, "invlogccdf")
 
     # parameter fields
     pargs = [Expr(:(.), :d, Expr(:quote, s)) for s in psyms]

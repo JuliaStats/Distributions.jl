@@ -28,7 +28,10 @@ end
 
 VonMisesFisher{T<:Real}(μ::Vector{T}, κ::Real) = VonMisesFisher(Float64(μ), Float64(κ))
 
-VonMisesFisher(θ::Vector{Float64}) = (κ = vecnorm(θ); VonMisesFisher(scale(θ, 1.0 / κ), κ))
+function VonMisesFisher(θ::Vector{Float64})
+    κ = vecnorm(θ)
+    return VonMisesFisher(θ * (1 / κ), κ)
+end
 VonMisesFisher{T<:Real}(θ::Vector{T}) = VonMisesFisher(Float64(θ))
 
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))

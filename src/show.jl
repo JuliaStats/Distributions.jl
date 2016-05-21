@@ -32,7 +32,7 @@ function _use_multline_show(d::Distribution, pnames)
     multline = false
     tlen = 0
     for (i, p) in enumerate(pnames)
-        pv = d.(p)
+        pv = getfield(d, p)
         if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
             multline = true
         else

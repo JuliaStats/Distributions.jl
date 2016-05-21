@@ -9,7 +9,7 @@ using Compat
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for (ex, dct) in R
-        dsym = symbol(dct["dtype"])
+        dsym = Symbol(dct["dtype"])
         dname = string(dsym)
 
         # test whether it is included in the selected list
@@ -51,7 +51,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify parameters
     pdct = dct["params"]
     for (fname, val) in pdct
-        f = eval(symbol(fname))
+        f = eval(Symbol(fname))
         @assert isa(f, Function)
         Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
     end
