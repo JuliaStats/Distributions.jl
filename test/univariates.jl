@@ -62,8 +62,20 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
     @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
     @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
+    
+    if applicable(mode, d) && haskey(dct, "mode")
+        @test_approx_eq_eps mode(d) _json_value(dct["mode"]) 1.0e-8
+    end
+    
+    if applicable(skewness, d) && haskey(dct, "skewness")
+        @test_approx_eq_eps skewness(d) _json_value(dct["skewness"]) 1.0e-8
+    end
+    
+    if applicable(kurtosis, d) && haskey(dct, "kurtosis")
+        @test_approx_eq_eps kurtosis(d) _json_value(dct["kurtosis"]) 1.0e-8
+    end
 
-    if applicable(entropy, d)
+    if applicable(entropy, d) 
         @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
     end
 
