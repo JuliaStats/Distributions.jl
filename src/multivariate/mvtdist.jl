@@ -30,7 +30,7 @@ end
 
 GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov) = GenericMvTDist(df, μ, Σ, allzeros(μ))
 
-GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df, zeros(d), Σ, true)
+GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df, zeros(dim(Σ)), Σ, true)
 
 ## Construction of multivariate normal with specific covariance type
 
