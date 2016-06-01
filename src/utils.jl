@@ -95,6 +95,8 @@ function exp!(x::AbstractArray)
     x
 end
 
+# get a type capable of representing computations using a distribution's paramters
+@inline partype(d::Distribution) = promote_type(map(eltype, params(d))...)
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required

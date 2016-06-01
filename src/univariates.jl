@@ -203,7 +203,7 @@ for fun in [:pdf, :logpdf,
         end
 
         ($fun)(d::UnivariateDistribution, X::AbstractArray) =
-            $(_fun!)(Array(Float64, size(X)), d, X)
+            $(_fun!)(Array(promote_type(partype(d), eltype(X)), size(X)), d, X)
     end
 end
 
