@@ -26,7 +26,7 @@ abstract AbstractMvNormal <: ContinuousMultivariateDistribution
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 
-insupport{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) =
+insupport(d::AbstractMvNormal, x::AbstractVector) =
     length(d) == length(x) && allfinite(x)
 
 mode(d::AbstractMvNormal) = mean(d)
@@ -36,20 +36,20 @@ entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (Float64(log2π) + 1.0) + logd
 
 mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * Float64(log2π) + logdetcov(g))
 
-sqmahal{T<:Real}(d::AbstractMvNormal, x::AbstractMatrix{T}) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(Float64, size(x, 2)), d, x)
 
-_logpdf{T<:Real}(d::AbstractMvNormal, x::AbstractVector{T}) = mvnormal_c0(d) - 0.5 * sqmahal(d, x)
+_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - 0.5 * sqmahal(d, x)
 
-function _logpdf!{T<:Real}(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix{T})
+function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
-    c0::Float64 = mvnormal_c0(d)
+    c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
         @inbounds r[i] = c0 - 0.5 * r[i]
     end
     r
 end
 
-_pdf!{T<:Real}(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix{T}) = exp!(_logpdf!(r, d, x))
+_pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
 
 ###########################################################
@@ -117,9 +117,9 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal{T<:Real}(d::MvNormal, x::AbstractVector{T}) = invquad(d.Σ, x - d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x - d.μ)
 
-sqmahal!{T<:Real}(r::AbstractVector, d::MvNormal, x::AbstractMatrix{T}) =
+sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, x .- d.μ)
 
 gradlogpdf(d::MvNormal, x::Vector{Float64}) = -(d.Σ \ (x - d.μ))
