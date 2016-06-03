@@ -144,12 +144,12 @@ We realize that the mean vector and the covariance often have special forms in p
 
 .. code-block:: julia
 
-    immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
+    immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
         μ::Mean
         Σ::Cov
     end
 
-Here, the mean vector can be an instance of either ``Vector{Float64}`` or ``ZeroVector{Float64}``, where the latter is simply an empty type indicating a vector filled with zeros. The covariance can be of any subtype of ``AbstractPDMat``. Particularly, one can use ``PDMat`` for full covariance, ``PDiagMat`` for diagonal covariance, and ``ScalMat`` for the isotropic covariance -- those in the form of :math:`\sigma \mathbf{I}`. (See the Julia package `PDMats <https://github.com/lindahua/PDMats.jl>`_ for details).
+Here, the mean vector can be an instance of either ``Vector`` or ``ZeroVector``, where the latter is simply an empty type indicating a vector filled with zeros. The covariance can be of any subtype of ``AbstractPDMat``. Particularly, one can use ``PDMat`` for full covariance, ``PDiagMat`` for diagonal covariance, and ``ScalMat`` for the isotropic covariance -- those in the form of :math:`\sigma \mathbf{I}`. (See the Julia package `PDMats <https://github.com/lindahua/PDMats.jl>`_ for details).
 
 We also define a set of alias for the types using different combinations of mean vectors and covariance:
 
@@ -173,23 +173,23 @@ Generally, users don't have to worry about these internal details. We provide a 
 
     Construct a multivariate normal distribution with mean ``mu`` and covariance represented by ``sig``.
 
-    :param mu:      The mean vector, of type ``Vector{Float64}``.
-    :param sig:     The covariance, which can in of either of the following forms:
+    :param mu:      The mean vector, of type ``Vector{T}``, with ``T<:Real``.
+    :param sig:     The covariance, which can in of either of the following forms (with ``T<:Real``):
 
                     - an instance of a subtype of ``AbstractPDMat``
-                    - a symmetric matrix of type ``Matrix{Float64}``
-                    - a vector of type ``Vector{Float64}``: indicating a diagonal covariance as ``diagm(abs2(sig))``.
+                    - a symmetric matrix of type ``Matrix{T}``
+                    - a vector of type ``Vector{T}``: indicating a diagonal covariance as ``diagm(abs2(sig))``.
                     - a real-valued number: indicating an isotropic covariance as ``abs2(sig) * eye(d)``.
 
 .. function:: MvNormal(sig)
 
     Construct a multivariate normal distribution with zero mean and covariance represented by ``sig``.
 
-    Here, ``sig`` can be in either of the following forms:
+    Here, ``sig`` can be in either of the following forms (with ``T<:Real``):
 
     - an instance of a subtype of ``AbstractPDMat``
-    - a symmetric matrix of type ``Matrix{Float64}``
-    - a vector of type ``Vector{Float64}``: indicating a diagonal covariance as ``diagm(abs2(sig))``.
+    - a symmetric matrix of type ``Matrix{T}``
+    - a vector of type ``Vector{T}``: indicating a diagonal covariance as ``diagm(abs2(sig))``.
 
 
 .. function:: MvNormal(d, sig)
@@ -237,7 +237,7 @@ The canonical parameterization is widely used in Bayesian analysis. We provide a
 
 .. code:: julia
 
-    immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector{Float64},ZeroVector{Float64}}} <: AbstractMvNormal
+    immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
         μ::V    # the mean vector
         h::V    # potential vector, i.e. inv(Σ) * μ
         J::P    # precision matrix, i.e. inv(Σ)
@@ -261,23 +261,23 @@ A multivariate distribution with canonical parameterization can be constructed u
 
     Construct a multivariate normal distribution with potential vector ``h`` and precision matrix represented by ``J``.
 
-    :param h:   the potential vector, of type ``Vector{Float64}``.
-    :param J:   the representation of the precision matrix, which can be in either of the following forms:
+    :param h:   the potential vector, of type ``Vector{T}`` with ``T<:Real``.
+    :param J:   the representation of the precision matrix, which can be in either of the following forms (``T<:Real``):
 
                 - an instance of a subtype of ``AbstractPDMat``
-                - a square matrix of type ``Matrix{Float64}``
-                - a vector of type ``Vector{Float64}``: indicating a diagonal precision matrix as ``diagm(J)``.
+                - a square matrix of type ``Matrix{T}``
+                - a vector of type ``Vector{T}``: indicating a diagonal precision matrix as ``diagm(J)``.
                 - a real number: indicating an isotropic precision matrix as ``J * eye(d)``.
 
 .. function:: MvNormalCanon(J)
 
     Construct a multivariate normal distribution with zero mean (thus zero potential vector) and precision matrix represented by ``J``.
 
-    Here, ``J`` represents the precision matrix, which can be in either of the following forms:
+    Here, ``J`` represents the precision matrix, which can be in either of the following forms (``T<:Real``):
 
     - an instance of a subtype of ``AbstractPDMat``
-    - a square matrix of type ``Matrix{Float64}``
-    - a vector of type ``Vector{Float64}``: indicating a diagonal precision matrix as ``diagm(J)``.
+    - a square matrix of type ``Matrix{T}``
+    - a vector of type ``Vector{T}``: indicating a diagonal precision matrix as ``diagm(J)``.
 
 
 .. function:: MvNormalCanon(d, v)
@@ -388,9 +388,3 @@ The `Dirichlet distribution <http://en.wikipedia.org/wiki/Dirichlet_distribution
 
     # Let a be a positive scalar
     Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
-
-
-
-
-
-
