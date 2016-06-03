@@ -230,6 +230,7 @@ export
     ntrials,            # the number of trials being performed in the experiment
     params,             # get the tuple of parameters
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
+    partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
