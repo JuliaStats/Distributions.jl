@@ -143,3 +143,4 @@ function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
     R = promote_type(T, S)
     (convert(Array{R}, A), convert(typeof(B).name.primary{R}, B))
 end
+promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)

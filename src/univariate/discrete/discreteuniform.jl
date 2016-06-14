@@ -39,6 +39,8 @@ end
 span(d::DiscreteUniform) = d.b - d.a + 1
 probval(d::DiscreteUniform) = d.pv
 params(d::DiscreteUniform) = (d.a, d.b)
+
+# this is a hack to get pdf, etc. to allocate the correct storage type
 partype(d::DiscreteUniform) = Float64
 
 ### Show

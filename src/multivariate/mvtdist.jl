@@ -13,7 +13,8 @@ immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
 
     function GenericMvTDist{T,Cov}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::Cov)
       df > zero(df) || error("df must be positive")
-      new(df, dim, zmean, promote_eltype(μ, Σ))
+      m, S = promote_eltype(μ, Σ)
+      new(df, dim, zmean, m, S)
     end
 end
 
@@ -25,7 +26,7 @@ end
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMvTDist{T, Cov}(df, d, zmean, promote_eltype(μ, Σ))
+    GenericMvTDist{T, Cov}(df, d, zmean, promote_eltype(μ, Σ)...)
 end
 
 GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov) = GenericMvTDist(df, μ, Σ, allzeros(μ))

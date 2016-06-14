@@ -70,6 +70,7 @@ component(d::MixtureModel, k::Int) = d.components[k]
 
 probs(d::MixtureModel) = probs(d.prior)
 params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
+partype(d::MixtureModel) = promote_type(partype(d.prior), partype(d.components[1]))
 
 function mean(d::UnivariateMixture)
     K = ncomponents(d)

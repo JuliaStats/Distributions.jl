@@ -34,7 +34,7 @@ modes(d::AbstractMvNormal) = [mean(d)]
 
 entropy(d::AbstractMvNormal) = (length(d) * (Float64(log2π) + 1) + logdetcov(d))/2
 
-mvnormal_c0(g::AbstractMvNormal) = (length(g) * Float64(log2π) + logdetcov(g))/2
+mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
 sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(promote_type(partype(d), eltype(x)), size(x, 2)), d, x)
 
@@ -75,9 +75,9 @@ typealias ZeroMeanDiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},
 typealias ZeroMeanFullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Vector{T}, Σ::Cov)
+function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov)
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{T,Cov,Vector{T}}(promote_eltype(μ, Σ))
+    MvNormal{T,Cov,Vector{T}}(promote_eltype(μ, Σ)...)
 end
 
 function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)

@@ -29,7 +29,9 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test_approx_eq mn exp(mean(g.normal) + var(g.normal)/2)
     @test_approx_eq mo exp(mean(g.normal) - var(g.normal))
     @test_approx_eq entropy(g) d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
-    @test g == typeof(g)(params(g)...)
+    gg = typeof(g)(params(g)...)
+    @test full(g.normal.μ) == full(gg.normal.μ)
+    @test full(g.normal.Σ) == full(gg.normal.Σ)
     @test insupport(g,ones(d))
     @test !insupport(g,zeros(d))
     @test !insupport(g,-ones(d))
@@ -116,7 +118,3 @@ for (g, μ, Σ) in [
     @test_approx_eq full(m) μ
     test_mvlognormal(g)
 end
-
-
-
-
