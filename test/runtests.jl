@@ -38,8 +38,12 @@ else
 end
 
 using Distributions
-@everywhere srand(345679)
-pmap(tests) do t
+# @everywhere srand(345679)
+# pmap(tests) do t
+#     include(t*".jl")
+#     nothing
+# end
+srand(345679)
+for t in tests
     include(t*".jl")
-    nothing
 end

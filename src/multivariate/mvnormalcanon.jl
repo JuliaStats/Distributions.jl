@@ -58,7 +58,7 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 meanform{C,V}(d::MvNormalCanon{C,V}) = MvNormal{C,V}(d.μ, inv(d.J))
 
 canonform{C, T<:Real}(d::MvNormal{C,Vector{T}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
-canonform{C, T<:Real}(d::MvNormal{C,ZeroVector{T}}) = MvNormalCanon(inv(d.Σ))
+# canonform{C, T<:Real}(d::MvNormal{C,ZeroVector{T}}) = MvNormalCanon(inv(d.Σ))
 
 
 ### Basic statistics
