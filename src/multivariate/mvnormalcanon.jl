@@ -2,41 +2,45 @@
 
 ### Generic types
 
-immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+immutable MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-typealias FullNormalCanon MvNormalCanon{PDMat{Float64,Matrix{Float64}},Vector{Float64}}
-typealias DiagNormalCanon MvNormalCanon{PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-typealias IsoNormalCanon  MvNormalCanon{ScalMat{Float64},Vector{Float64}}
+typealias FullNormalCanon MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+typealias DiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+typealias IsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
-typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat{Float64},ZeroVector{Float64}}
+typealias ZeroMeanFullNormalCanon MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanDiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanIsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},ZeroVector{Float64}}
 
 
 ### Constructors
 
-function MvNormalCanon{P<:AbstractPDMat, T<:Real}(μ::Vector{T}, h::Vector{T}, J::P)
+function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
     length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{P,Vector{T}}(μ, h, J)
+    MvNormalCanon{P,Vector{T}}(μ, promote_eltype(h, J))
 end
 
 function MvNormalCanon{P<:AbstractPDMat}(J::P)
-    z = ZeroVector(Float64, dim(J))
-    MvNormalCanon{P,ZeroVector{Float64}}(z, z, J)
+    z = ZeroVector(eltype(J), dim(J))
+    MvNormalCanon{P,ZeroVector{eltype(J)}}(z, z, J)
 end
 
-function MvNormalCanon{P<:AbstractPDMat, T<:Real}(h::Vector{T}, J::P)
+function MvNormalCanon{T<:Real, P<:AbstractPDMat}(h::Vector{T}, J::P)
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{P,Vector{T}}(J \ h, h, J)
+    hh, JJ = promote_eltype(h, J)
+    MvNormalCanon{P,Vector{T}}(JJ \ hh, hh, JJ)
 end
 
-MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix) = MvNormalCanon(h, PDMat(J))
-MvNormalCanon{T<:Real}(h::Vector{T}, prec::Vector) = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon{T<:Real}(h::Vector{T}, prec) = MvNormalCanon(h, ScalMat(length(h), prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix{T}) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec::Vector{T}) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec::T) = MvNormalCanon(h, ScalMat(length(h), prec))
+
+MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, J::VecOrMat{S}) = MvNormalCanon(promote_eltype(h, J)...)
+MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, prec::S) = MvNormalCanon(promote_eltype(h, prec)...)
 
 MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
@@ -55,10 +59,10 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
 ### conversion between conventional form and canonical form
 
-meanform{C,V}(d::MvNormalCanon{C,V}) = MvNormal{C,V}(d.μ, inv(d.J))
+meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))
 
-canonform{C, T<:Real}(d::MvNormal{C,Vector{T}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
-canonform{C, T<:Real}(d::MvNormal{C,ZeroVector{T}}) = MvNormalCanon(inv(d.Σ))
+canonform(d::MvNormal) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
+canonform(d::MvNormal) = MvNormalCanon(inv(d.Σ))
 
 
 ### Basic statistics

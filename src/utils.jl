@@ -129,3 +129,17 @@ function trycholfact(a::Matrix{Float64})
         return e
     end
 end
+
+# for when container inputs need to be promoted to the same eltype
+function promote_eltype{T, S}(A::Array{T}, B::Array{S})
+    R = promote_type(T, S)
+    (convert(Array{R}, A), convert(Array{R}, B))
+end
+function promote_eltype{T}(A::Array{T}, B::Real)
+    R = promote_type(T, typeof(B))
+    (convert(Array{R}, A), convert(R, B))
+end
+function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
+    R = promote_type(T, S)
+    (convert(Array{R}, A), convert(typeof(B).name.primary{R}, B))
+end
