@@ -32,19 +32,19 @@ insupport(d::AbstractMvNormal, x::AbstractVector) =
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
-entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (Float64(log2π) + 1.0) + logdetcov(d))
+entropy(d::AbstractMvNormal) = (length(d) * (Float64(log2π) + 1) + logdetcov(d))/2
 
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * Float64(log2π) + logdetcov(g))
+mvnormal_c0(g::AbstractMvNormal) = (length(g) * Float64(log2π) + logdetcov(g))/2
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(promote_type(partype(d), eltype(x)), size(x, 2)), d, x)
 
-_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - 0.5 * sqmahal(d, x)
+_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
 function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - 0.5 * r[i]
+        @inbounds r[i] = c0 - r[i]/2
     end
     r
 end
