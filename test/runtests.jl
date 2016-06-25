@@ -38,12 +38,14 @@ else
 end
 
 using Distributions
-# @everywhere srand(345679)
-# pmap(tests) do t
-#     include(t*".jl")
-#     nothing
-# end
-srand(345679)
-for t in tests
+@everywhere srand(345679)
+res = pmap(tests; err_stop=true) do t
     include(t*".jl")
+    nothing
+end
+
+# in v0.5, pmap returns the exception, but doesn't throw it, so we need
+# to test and rethrow
+if VERSION < v"0.5.0-"
+    map(x -> isa(x, Exception) ? throw(x) : nothing, res)
 end
