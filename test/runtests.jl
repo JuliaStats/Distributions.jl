@@ -39,7 +39,7 @@ end
 
 using Distributions
 @everywhere srand(345679)
-res = pmap(tests; err_stop=true) do t
+res = pmap(tests) do t
     include(t*".jl")
     nothing
 end
