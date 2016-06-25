@@ -2,6 +2,7 @@
 
 using Distributions
 using Base.Test
+using Calculus.derivative
 
 ### load reference data
 #
