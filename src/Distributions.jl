@@ -8,7 +8,7 @@ using StatsBase
 using Compat
 
 import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!, shape
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.Math.@horner
