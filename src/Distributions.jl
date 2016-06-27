@@ -8,7 +8,7 @@ using StatsBase
 using Compat
 
 import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!, shape
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.Math.@horner
@@ -234,7 +234,6 @@ export
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
     scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
-    shape,              # get the shape parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution
