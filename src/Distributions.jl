@@ -7,6 +7,7 @@ using StatsFuns
 using StatsBase
 using Compat
 
+import Compat.view 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
 if VERSION > v"0.4"
