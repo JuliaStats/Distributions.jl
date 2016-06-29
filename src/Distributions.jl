@@ -6,6 +6,7 @@ using PDMats
 using StatsFuns
 using StatsBase
 using Compat
+import Compat.view
 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
@@ -17,6 +18,10 @@ import Base.LinAlg: Cholesky
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler, loglikelihood
 import PDMats: dim, PDMat, invquad
+
+if VERSION >= v"0.5.0-dev"
+    import Base.shape
+end
 
 export
     # generic types
