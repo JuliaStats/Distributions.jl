@@ -271,7 +271,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
         @inbounds pi = p[i]
         if pi > 0.0
             lpri = log(pi)
-            lp_i = slice(Lp, :, i)
+            lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
             logpdf!(lp_i, component(d, i), x)
 
@@ -289,7 +289,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     fill!(r, 0.0)
     @inbounds for i = 1:K
         if p[i] > 0.0
-            lp_i = slice(Lp, :, i)
+            lp_i = view(Lp, :, i)
             for j = 1:n
                 r[j] += exp(lp_i[j] - m[j])
             end
@@ -342,7 +342,7 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        pdf!(slice(r,:,i), component(d, i), X)
+        pdf!(view(r,:,i), component(d, i), X)
     end
     r
 end
@@ -352,7 +352,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        logpdf!(slice(r,:,i), component(d, i), X)
+        logpdf!(view(r,:,i), component(d, i), X)
     end
     r
 end
