@@ -10,7 +10,7 @@ using Compat
 import Compat.view 
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
-if VERSION > v"0.4"
+if VERSION < v"0.5.0-"
     import Base.shape
 end
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
