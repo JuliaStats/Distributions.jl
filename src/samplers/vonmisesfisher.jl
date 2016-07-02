@@ -44,7 +44,7 @@ _rand!(spl::VonMisesFisherSampler, x::AbstractVector) = _rand!(spl, x, Array(Flo
 function _rand!(spl::VonMisesFisherSampler, x::AbstractMatrix)
     t = Array(Float64, size(x, 1))
     for j = 1:size(x, 2)
-        _rand!(spl, slice(x,:,j), t)
+        _rand!(spl, view(x,:,j), t)
     end
     return x
 end
@@ -78,13 +78,13 @@ function _vmf_rotmat(u::Vector{Float64})
     # s.t. Q * [1,0,...,0]^T --> u
     #
     # Strategy: construct a full-rank matrix
-    # with first column being u, and then 
+    # with first column being u, and then
     # perform QR factorization
     #
 
     p = length(u)
     A = zeros(p, p)
-    copy!(slice(A,:,1), u)
+    copy!(view(A,:,1), u)
 
     # let k the be index of entry with max abs
     k = 1
@@ -98,7 +98,7 @@ function _vmf_rotmat(u::Vector{Float64})
     end
 
     # other columns of A will be filled with
-    # indicator vectors, except the one 
+    # indicator vectors, except the one
     # that activates the k-th entry
     i = 1
     for j = 2:p
@@ -110,11 +110,10 @@ function _vmf_rotmat(u::Vector{Float64})
 
     # perform QR factorization
     Q = full(qrfact!(A)[:Q])
-    if dot(slice(Q,:,1), u) < 0.0  # the first column was negated
+    if dot(view(Q,:,1), u) < 0.0  # the first column was negated
         for i = 1:p
             @inbounds Q[i,1] = -Q[i,1]
         end
     end
     return Q
 end
-

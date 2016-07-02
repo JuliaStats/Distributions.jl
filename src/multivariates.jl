@@ -24,7 +24,7 @@ function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Ty
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1:n
-        @inbounds r[i] = insupport(d, slice(X, :, i))
+        @inbounds r[i] = insupport(d, view(X, :, i))
     end
     return r
 end
@@ -73,14 +73,14 @@ end
 
 function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     for i in 1 : size(X,2)
-        @inbounds r[i] = logpdf(d, slice(X,:,i))
+        @inbounds r[i] = logpdf(d, view(X,:,i))
     end
     return r
 end
 
 function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
     for i in 1 : size(X,2)
-        @inbounds r[i] = pdf(d, slice(X,:,i))
+        @inbounds r[i] = pdf(d, view(X,:,i))
     end
     return r
 end
@@ -114,7 +114,7 @@ end
 function _loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
     ll = 0.0
     for i in 1:size(X, 2)
-        ll += _logpdf(d, slice(X,:,i))
+        ll += _logpdf(d, view(X,:,i))
     end
     return ll
 end

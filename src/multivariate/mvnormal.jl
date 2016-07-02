@@ -227,8 +227,8 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float
     m = s * inv(tw)
     z = similar(x)
     for j = 1:n
-        xj = slice(x,:,j)
-        zj = slice(z,:,j)
+        xj = view(x,:,j)
+        zj = view(z,:,j)
         swj = sqrt(w[j])
         for i = 1:d
             @inbounds zj[i] = swj * (xj[i] - m[i])

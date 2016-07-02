@@ -32,14 +32,20 @@ if nworkers() > 1
 end
 
 if Base.JLOptions().code_coverage == 1
-    addprocs(CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
+    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
 else
-    addprocs(CPU_CORES, exeflags = "--check-bounds=yes")
+    addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
 end
 
 using Distributions
 @everywhere srand(345679)
-pmap(tests) do t
+res = pmap(tests) do t
     include(t*".jl")
     nothing
+end
+
+# in v0.5, pmap returns the exception, but doesn't throw it, so we need
+# to test and rethrow
+if VERSION < v"0.5.0-"
+    map(x -> isa(x, Exception) ? throw(x) : nothing, res)
 end
