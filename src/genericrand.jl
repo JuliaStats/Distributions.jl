@@ -21,7 +21,7 @@ rand(s::Sampleable{Univariate}, dims::Int...) =
 
 function _rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
     for i = 1:size(A,2)
-        @compat _rand!(s, view(A,:,i))
+        _rand!(s, view(A,:,i))
     end
     return A
 end

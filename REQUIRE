@@ -1,6 +1,6 @@
 julia 0.4
-PDMats 0.4.1 0.5
+PDMats 0.4.2 0.5
 StatsFuns 0.1.1
 Calculus
 StatsBase 0.7.0
-Compat 0.2.17
+Compat 0.8.4
