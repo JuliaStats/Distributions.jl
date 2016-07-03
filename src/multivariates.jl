@@ -40,7 +40,7 @@ function cor(d::MultivariateDistribution)
     C = cov(d)
     n = size(C, 1)
     @assert size(C, 2) == n
-    R = Array(Float64, n, n)
+    R = Array(eltype(C), n, n)
 
     for j = 1:n
         for i = 1:j-1
@@ -100,13 +100,15 @@ end
 function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    _logpdf!(Array(Float64, size(X,2)), d, X)
+    T = promote_type(partype(d), eltype(X))
+    _logpdf!(Array(T, size(X,2)), d, X)
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    _pdf!(Array(Float64, size(X,2)), d, X)
+    T = promote_type(partype(d), eltype(X))
+    _pdf!(Array(T, size(X,2)), d, X)
 end
 
 ## log likelihood

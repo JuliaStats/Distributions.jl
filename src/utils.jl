@@ -95,6 +95,9 @@ function exp!(x::AbstractArray)
     x
 end
 
+# get a type capable of representing computations using a distribution's paramters
+@inline partype(d::Distribution) = promote_type(map(_partype, params(d))...)
+@inline _partype(x) = isa(x, Real) ? typeof(x) : eltype(x)
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
@@ -126,3 +129,18 @@ function trycholfact(a::Matrix{Float64})
         return e
     end
 end
+
+# for when container inputs need to be promoted to the same eltype
+function promote_eltype{T, S}(A::Array{T}, B::Array{S})
+    R = promote_type(T, S)
+    (convert(Array{R}, A), convert(Array{R}, B))
+end
+function promote_eltype{T}(A::Array{T}, B::Real)
+    R = promote_type(T, typeof(B))
+    (convert(Array{R}, A), convert(R, B))
+end
+function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
+    R = promote_type(T, S)
+    (convert(Array{R}, A), convert(typeof(B).name.primary{R}, B))
+end
+promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)

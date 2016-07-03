@@ -4,16 +4,17 @@
 
 abstract AbstractMvTDist <: ContinuousMultivariateDistribution
 
-immutable GenericMvTDist{Cov<:AbstractPDMat, T<:Real} <: AbstractMvTDist
+immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
     dim::Int
     zeromean::Bool
     μ::Vector{T}
     Σ::Cov
 
-    function GenericMvTDist{Cov, T}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::Cov)
+    function GenericMvTDist{T,Cov}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::Cov)
       df > zero(df) || error("df must be positive")
-      new(df, dim, zmean, μ, Σ)
+      m, S = promote_eltype(μ, Σ)
+      new(df, dim, zmean, m, S)
     end
 end
 
@@ -25,7 +26,7 @@ end
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMvTDist{Cov, T}(df, d, zmean, μ, Σ)
+    GenericMvTDist{T, Cov}(df, d, zmean, promote_eltype(μ, Σ)...)
 end
 
 GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov) = GenericMvTDist(df, μ, Σ, allzeros(μ))
@@ -34,9 +35,9 @@ GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df,
 
 ## Construction of multivariate normal with specific covariance type
 
-typealias IsoTDist  GenericMvTDist{ScalMat{Float64}, Float64}
-typealias DiagTDist GenericMvTDist{PDiagMat{Float64,Vector{Float64}}, Float64}
-typealias MvTDist GenericMvTDist{PDMat{Float64,Matrix{Float64}}, Float64}
+typealias IsoTDist  GenericMvTDist{Float64, ScalMat{Float64}}
+typealias DiagTDist GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
+typealias MvTDist GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
 
 MvTDist(df::Real, μ::Vector{Float64}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
