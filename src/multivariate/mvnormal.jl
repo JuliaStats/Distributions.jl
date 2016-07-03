@@ -32,19 +32,19 @@ insupport(d::AbstractMvNormal, x::AbstractVector) =
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
-entropy(d::AbstractMvNormal) = 0.5 * (length(d) * (Float64(log2π) + 1.0) + logdetcov(d))
+entropy(d::AbstractMvNormal) = (length(d) * (Float64(log2π) + 1) + logdetcov(d))/2
 
-mvnormal_c0(g::AbstractMvNormal) = -0.5 * (length(g) * Float64(log2π) + logdetcov(g))
+mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(Float64, size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(promote_type(partype(d), eltype(x)), size(x, 2)), d, x)
 
-_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - 0.5 * sqmahal(d, x)
+_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
 function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - 0.5 * r[i]
+        @inbounds r[i] = c0 - r[i]/2
     end
     r
 end
@@ -59,37 +59,42 @@ _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(
 #   Multivariate normal distribution with mean parameters
 #
 ###########################################################
-immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
+immutable MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-typealias IsoNormal  MvNormal{ScalMat{Float64},Vector{Float64}}
-typealias DiagNormal MvNormal{PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-typealias FullNormal MvNormal{PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+typealias IsoNormal  MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
+typealias DiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+typealias FullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-typealias ZeroMeanIsoNormal  MvNormal{ScalMat{Float64},ZeroVector{Float64}}
-typealias ZeroMeanDiagNormal MvNormal{PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanFullNormal MvNormal{PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanIsoNormal  MvNormal{Float64,ScalMat{Float64},ZeroVector{Float64}}
+typealias ZeroMeanDiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanFullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-
-function MvNormal{Cov<:AbstractPDMat, T<:Real}(μ::Vector{T}, Σ::Cov)
+function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov)
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{Cov,Vector{T}}(μ, Σ)
+    MvNormal{T,Cov,Vector{T}}(promote_eltype(μ, Σ)...)
 end
 
-MvNormal{Cov<:AbstractPDMat}(Σ::Cov) = MvNormal{Cov,ZeroVector{Float64}}(ZeroVector(Float64, dim(Σ)), Σ)
+function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)
+    T = eltype(Σ)
+    MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
+end
 
-MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::Matrix{S}) = MvNormal(μ, PDMat(Σ))
-MvNormal{T<:Real,S<:Real}(μ::Vector{T}, σ::Vector{S}) = MvNormal(μ, PDiagMat(abs2(σ)))
-MvNormal{T<:Real}(μ::Vector{T}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(Float64(σ))))
+MvNormal{T<:Real}(μ::Vector{T}, Σ::Matrix{T}) = MvNormal(μ, PDMat(Σ))
+MvNormal{T<:Real}(μ::Vector{T}, σ::Vector{T}) = MvNormal(μ, PDiagMat(abs2(σ)))
+MvNormal{T<:Real}(μ::Vector{T}, σ::T) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
+
+MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::VecOrMat{S}) = MvNormal(promote_eltype(μ, Σ)...)
+MvNormal{T<:Real}(μ::Vector{T}, σ::Real) = MvNormal(promote_eltype(μ, σ)...)
 
 MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
 MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(abs2(σ)))
-MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(Float64(σ))))
+MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Show
 

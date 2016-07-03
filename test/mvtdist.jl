@@ -23,5 +23,8 @@ df = [1., 2, 3, 5, 10]
 for i = 1:length(df)
   d = MvTDist(df[i], mu, Sigma)
   @test_approx_eq_eps logpdf(d, [-2., 3]) rvalues[i] 1.0e-8
-  @test d == typeof(d)(params(d)...)
+  dd = typeof(d)(params(d)...)
+  @test d.df == dd.df
+  @test full(d.μ) == full(dd.μ)
+  @test full(d.Σ) == full(dd.Σ)
 end

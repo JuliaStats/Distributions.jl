@@ -68,7 +68,7 @@ end
 function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable instance
                       distr::DiscreteUnivariateDistribution,    # corresponding distribution
                       n::Int;                                   # number of samples to generate
-                      q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
+                      q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false)                      # show intermediate info (for debugging)
 
     # The basic idea
