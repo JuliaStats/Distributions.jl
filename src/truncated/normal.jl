@@ -64,7 +64,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(d::Truncated{Normal})
+function rand{T <: Real}(d::Truncated{Normal{T},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
