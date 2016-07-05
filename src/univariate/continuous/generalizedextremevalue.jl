@@ -111,9 +111,9 @@ function var{T<:Real}(d::GeneralizedExtremeValue{T})
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps() # ξ == 0
-        return σ ^ 2π ^ 2 / 6
+        return σ ^2 * π^2 / 6
     elseif ξ < 1/2
-        return σ ^ 2(g(d, 2) - g(d, 1) ^ 2) / ξ^2
+        return σ^2 * (g(d, 2) - g(d, 1) ^ 2) / ξ^2
     else
         return T(Inf)
     end
@@ -161,7 +161,7 @@ function quantile(d::GeneralizedExtremeValue, p::Real)
     if abs(ξ) < eps() # ξ == 0
         return μ + σ * (-log(-log(p)))
     else
-        return μ + σ * (-log(p)^-ξ - 1) / ξ
+        return μ + σ * ((-log(p))^(-ξ) - 1) / ξ
     end
 end
 
