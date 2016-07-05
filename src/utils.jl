@@ -64,7 +64,7 @@ function allnonneg{T<:Real}(x::Array{T})
     return true
 end
 
-isprobvec(p::Vector{Float64}) = allnonneg(p) && isapprox(sum(p), 1.0)
+isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
 
 function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
     s = 0.

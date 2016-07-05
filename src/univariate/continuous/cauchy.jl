@@ -6,8 +6,8 @@ The *Cauchy distribution* with location `μ` and scale `σ` has probability dens
 $f(x; \mu, \sigma) = \frac{1}{\pi \sigma \left(1 + \left(\frac{x - \mu}{\sigma} \right)^2 \right)}$
 
 ```julia
-Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0.0, 1.0)
-Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1.0)
+Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0, 1)
+Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1)
 Cauchy(u, b)     # Cauchy distribution with location u and scale b
 
 params(d)        # Get the parameters, i.e. (u, b)
@@ -20,16 +20,32 @@ External links
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
 """
-immutable Cauchy <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
 
-    Cauchy(μ::Real, σ::Real) = (@check_args(Cauchy, σ > zero(σ)); new(μ, σ))
-    Cauchy(μ::Real) = new(μ, 1.0)
-    Cauchy() = new(0.0, 1.0)
+immutable Cauchy{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
+
+    function Cauchy(μ::T, σ::T)
+        @check_args(Cauchy, σ > zero(σ))
+        new(μ, σ)
+    end
 end
 
+Cauchy{T<:Real}(μ::T, σ::T) = Cauchy{T}(μ, σ)
+Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
+Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
+Cauchy(μ::Real) = Cauchy(μ, 1.0)
+Cauchy() = Cauchy(0.0, 1.0)
+
 @distr_support Cauchy -Inf Inf
+
+#### Conversions
+function convert{T<:Real}(::Type{Cauchy{T}}, μ::Real, σ::Real)
+    Cauchy(T(μ), T(σ))
+end
+function convert{T <: Real, S <: Real}(::Type{Cauchy{T}}, d::Cauchy{S})
+    Cauchy(T(d.μ), T(d.σ))
+end
 
 #### Parameters
 
@@ -41,46 +57,46 @@ params(d::Cauchy) = (d.μ, d.σ)
 
 #### Statistics
 
-mean(d::Cauchy) = NaN
+mean{T<:Real}(d::Cauchy{T}) = T(NaN)
 median(d::Cauchy) = d.μ
 mode(d::Cauchy) = d.μ
 
-var(d::Cauchy) = NaN
-skewness(d::Cauchy) = NaN
-kurtosis(d::Cauchy) = NaN
+var{T<:Real}(d::Cauchy{T}) = T(NaN)
+skewness{T<:Real}(d::Cauchy{T}) = T(NaN)
+kurtosis{T<:Real}(d::Cauchy{T}) = T(NaN)
 
 entropy(d::Cauchy) = log4π + log(d.σ)
 
 
 #### Functions
 
-zval(d::Cauchy, x::Float64) = (x - d.μ) / d.σ
-xval(d::Cauchy, z::Float64) = d.μ + z * d.σ
+zval(d::Cauchy, x::Real) = (x - d.μ) / d.σ
+xval(d::Cauchy, z::Real) = d.μ + z * d.σ
 
-pdf(d::Cauchy, x::Float64) = 1.0 / (π * scale(d) * (1.0 + zval(d, x)^2))
-logpdf(d::Cauchy, x::Float64) = - (log1psq(zval(d, x)) + logπ + log(d.σ))
+pdf(d::Cauchy, x::Real) = 1 / (π * scale(d) * (1 + zval(d, x)^2))
+logpdf(d::Cauchy, x::Real) = - (log1psq(zval(d, x)) + logπ + log(d.σ))
 
-function cdf(d::Cauchy, x::Float64)
+function cdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan2(x - μ, σ) + 0.5
+    invπ * atan2(x - μ, σ) + 1//2
 end
 
-function ccdf(d::Cauchy, x::Float64)
+function ccdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan2(μ - x, σ) + 0.5
+    invπ * atan2(μ - x, σ) + 1//2
 end
 
-function quantile(d::Cauchy, p::Float64)
+function quantile(d::Cauchy, p::Real)
     μ, σ = params(d)
-    μ + σ * tan(π * (p - 0.5))
+    μ + σ * tan(π * (p - 1//2))
 end
 
-function cquantile(d::Cauchy, p::Float64)
+function cquantile(d::Cauchy, p::Real)
     μ, σ = params(d)
-    μ + σ * tan(π * (0.5 - p))
+    μ + σ * tan(π * (1//2 - p))
 end
 
-mgf(d::Cauchy, t::Real) = t == zero(t) ? 1.0 : NaN
+mgf{T<:Real}(d::Cauchy{T}, t::Real) = t == zero(t) ? one(T) : T(NaN)
 cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 
 
@@ -89,5 +105,5 @@ cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 # Note: this is not a Maximum Likelihood estimator
 function fit{T<:Real}(::Type{Cauchy}, x::AbstractArray{T})
     l, m, u = quantile(x, [0.25, 0.5, 0.75])
-    Cauchy(m, (u - l) / 2.0)
+    Cauchy(m, (u - l) / 2)
 end

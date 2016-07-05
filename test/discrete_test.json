@@ -12,6 +12,16 @@
         "failprob": 0.5,
         "succprob": 0.5
       },
+      "conversions": [
+        {
+          "from": "[1.0f0]",
+          "to": "Bernoulli{Float64}"
+        }, 
+        {
+          "from": "[Bernoulli(1.0f0)]",
+          "to": "Bernoulli{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.5,
@@ -110,6 +120,16 @@
       "params": {
         "ntrials": 2
       },
+      "conversions": [
+        {
+            "from": [2, 3, 4],
+            "to": "BetaBinomial{Float64}"
+        },
+        {
+            "from": "[BetaBinomial(2, 3, 4)]",
+            "to": "BetaBinomial{Float64}"
+        }
+      ],
       "points": [
          {
           "cdf": 0.47892720306513414385,
@@ -149,6 +169,16 @@
         "ntrials": 1,
         "succprob": 0.5
       },
+      "conversions": [
+        {
+          "from": "[2, 1]",
+          "to": "Binomial{Float64}"
+        }, 
+        {
+          "from": "[Binomial(2, 1.0f0)]",
+          "to": "Binomial{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.5,
@@ -651,6 +681,16 @@
         "failprob": 0.5,
         "succprob": 0.5
       },
+      "conversions": [
+        {
+          "from": "[0.4f0]",
+          "to": "Geometric{Float64}"
+        }, 
+        {
+          "from": "[Geometric(0.4f0)]",
+          "to": "Geometric{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.5,
@@ -948,6 +988,16 @@
       "median": 1.0,
       "minimum": 0,
       "params": {},
+      "conversions": [
+        {
+            "from": [2],
+            "to": "Poisson{Float64}"
+        },
+        {
+            "from": "[Poisson(2)]",
+            "to": "Poisson{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.16666666666666669,
@@ -1176,6 +1226,16 @@
         "failprob": 0.5,
         "succprob": 0.5
       },
+      "conversions": [
+        {
+            "from": [4, 1],
+            "to": "NegativeBinomial{Float64}"
+        },
+        {
+            "from": "[NegativeBinomial(4, 1)]",
+            "to": "NegativeBinomial{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.5,
@@ -1480,6 +1540,16 @@
       "params": {
         "rate": 1.0
       },
+      "conversions": [
+        {
+            "from": [2],
+            "to": "Poisson{Float64}"
+        },
+        {
+            "from": "[Poisson(2)]",
+            "to": "Poisson{Float64}"
+        }
+      ],
       "points": [
         {
           "cdf": 0.36787944117144233,

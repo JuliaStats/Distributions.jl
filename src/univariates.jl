@@ -325,10 +325,10 @@ macro _delegate_statsfuns(D, fpre, psyms...)
         logcdf(d::$D, x::$T) = $(flogcdf)($(pargs...), x)
         logccdf(d::$D, x::$T) = $(flogccdf)($(pargs...), x)
 
-        quantile(d::$D, q::Float64) = convert($T, $(finvcdf)($(pargs...), q))
-        cquantile(d::$D, q::Float64) = convert($T, $(finvccdf)($(pargs...), q))
-        invlogcdf(d::$D, lq::Float64) = convert($T, $(finvlogcdf)($(pargs...), lq))
-        invlogccdf(d::$D, lq::Float64) = convert($T, $(finvlogccdf)($(pargs...), lq))
+        quantile(d::$D, q::Real) = convert($T, $(finvcdf)($(pargs...), q))
+        cquantile(d::$D, q::Real) = convert($T, $(finvccdf)($(pargs...), q))
+        invlogcdf(d::$D, lq::Real) = convert($T, $(finvlogcdf)($(pargs...), lq))
+        invlogccdf(d::$D, lq::Real) = convert($T, $(finvlogccdf)($(pargs...), lq))
     end)
 end
 

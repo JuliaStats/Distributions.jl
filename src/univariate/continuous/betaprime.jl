@@ -12,7 +12,7 @@ relation ship that if $X \sim \operatorname{Beta}(\alpha, \beta)$ then $\frac{X}
 \sim \operatorname{BetaPrime}(\alpha, \beta)$
 
 ```julia
-BetaPrime()        # equivalent to BetaPrime(0.0, 1.0)
+BetaPrime()        # equivalent to BetaPrime(0, 1)
 BetaPrime(a)       # equivalent to BetaPrime(a, a)
 BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
 
@@ -24,19 +24,32 @@ External links
 * [Beta prime distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_prime_distribution)
 
     """
-immutable BetaPrime <: ContinuousUnivariateDistribution
-    α::Float64
-    β::Float64
 
-    function BetaPrime(α::Real, β::Real)
+immutable BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
+    α::T
+    β::T
+
+    function BetaPrime(α::T, β::T)
         @check_args(BetaPrime, α > zero(α) && β > zero(β))
         new(α, β)
     end
-    BetaPrime(α::Real) = BetaPrime(α,α)
-    BetaPrime() = new(1.0, 1.0)
 end
 
-@distr_support BetaPrime 0.0 Inf
+BetaPrime{T<:Real}(α::T, β::T) = BetaPrime{T}(α, β)
+BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
+BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))
+BetaPrime(α::Real) = BetaPrime(α, α)
+BetaPrime() = BetaPrime(1.0, 1.0)
+
+@distr_support BetaPrime 0 Inf
+
+#### Conversions
+function convert{T<:Real}(::Type{BetaPrime{T}}, α::Real, β::Real)
+    BetaPrime(T(α), T(β))
+end
+function convert{T <: Real, S <: Real}(::Type{BetaPrime{T}}, d::BetaPrime{S})
+    BetaPrime(T(d.α), T(d.β))
+end
 
 #### Parameters
 
@@ -45,44 +58,48 @@ params(d::BetaPrime) = (d.α, d.β)
 
 #### Statistics
 
-mean(d::BetaPrime) = ((α, β) = params(d); β > 1.0 ? α / (β - 1.0) : NaN)
-
-mode(d::BetaPrime) = ((α, β) = params(d); α > 1.0 ? (α - 1.0) / (β + 1.0) : 0.0)
-
-function var(d::BetaPrime)
-    (α, β) = params(d)
-    β > 2.0 ? α * (α + β - 1.0) / ((β - 2.0) * (β - 1.0)^2) : NaN
+function mean{T<:Real}(d::BetaPrime{T})
+    ((α, β) = params(d); β > 1 ? α / (β - 1) : T(NaN))
 end
 
-function skewness(d::BetaPrime)
+function mode{T<:Real}(d::BetaPrime{T})
+    ((α, β) = params(d); α > 1 ? (α - 1) / (β + 1) : zero(T))
+end
+
+function var{T<:Real}(d::BetaPrime{T})
     (α, β) = params(d)
-    if β > 3.0
-        s = α + β - 1.0
-        2.0 * (α + s) / (β - 3.0) * sqrt((β - 2.0) / (α * s))
+    β > 2 ? α * (α + β - 1) / ((β - 2) * (β - 1)^2) : T(NaN)
+end
+
+function skewness{T<:Real}(d::BetaPrime{T})
+    (α, β) = params(d)
+    if β > 3
+        s = α + β - 1
+        2(α + s) / (β - 3) * sqrt((β - 2) / (α * s))
     else
-        return NaN
+        return T(NaN)
     end
 end
 
 
 #### Evaluation
 
-function logpdf(d::BetaPrime, x::Float64)
+function logpdf(d::BetaPrime, x::Real)
     (α, β) = params(d)
-    (α - 1.0) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+    (α - 1) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
 end
 
-pdf(d::BetaPrime, x::Float64) = exp(logpdf(d, x))
+pdf(d::BetaPrime, x::Real) = exp(logpdf(d, x))
 
-cdf(d::BetaPrime, x::Float64) = betacdf(d.α, d.β, x / (1.0 + x))
-ccdf(d::BetaPrime, x::Float64) = betaccdf(d.α, d.β, x / (1.0 + x))
-logcdf(d::BetaPrime, x::Float64) = betalogcdf(d.α, d.β, x / (1.0 + x))
-logccdf(d::BetaPrime, x::Float64) = betalogccdf(d.α, d.β, x / (1.0 + x))
+cdf(d::BetaPrime, x::Real) = betacdf(d.α, d.β, x / (1 + x))
+ccdf(d::BetaPrime, x::Real) = betaccdf(d.α, d.β, x / (1 + x))
+logcdf(d::BetaPrime, x::Real) = betalogcdf(d.α, d.β, x / (1 + x))
+logccdf(d::BetaPrime, x::Real) = betalogccdf(d.α, d.β, x / (1 + x))
 
-quantile(d::BetaPrime, p::Float64) = (x = betainvcdf(d.α, d.β, p); x / (1.0 - x))
-cquantile(d::BetaPrime, p::Float64) = (x = betainvccdf(d.α, d.β, p); x / (1.0 - x))
-invlogcdf(d::BetaPrime, p::Float64) = (x = betainvlogcdf(d.α, d.β, p); x / (1.0 - x))
-invlogccdf(d::BetaPrime, p::Float64) = (x = betainvlogccdf(d.α, d.β, p); x / (1.0 - x))
+quantile(d::BetaPrime, p::Real) = (x = betainvcdf(d.α, d.β, p); x / (1 - x))
+cquantile(d::BetaPrime, p::Real) = (x = betainvccdf(d.α, d.β, p); x / (1 - x))
+invlogcdf(d::BetaPrime, p::Real) = (x = betainvlogcdf(d.α, d.β, p); x / (1 - x))
+invlogccdf(d::BetaPrime, p::Real) = (x = betainvlogccdf(d.α, d.β, p); x / (1 - x))
 
 
 #### Sampling

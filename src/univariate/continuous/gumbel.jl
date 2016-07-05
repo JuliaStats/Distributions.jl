@@ -7,8 +7,8 @@ $f(x; \mu, \theta) = \frac{1}{\theta} e^{-(z + e^z)},
 \quad \text{ with } z = \frac{x - \mu}{\theta}$
 
 ```julia
-Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0.0, 1.0)
-Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1.0)
+Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)
+Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1)
 Gumbel(u, b)        # Gumbel distribution with location u and scale b
 
 params(d)        # Get the parameters, i.e. (u, b)
@@ -20,19 +20,26 @@ External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
-immutable Gumbel <: ContinuousUnivariateDistribution
-    μ::Float64  # location
-    θ::Float64  # scale
+immutable Gumbel{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T  # location
+    θ::T  # scale
 
-    Gumbel(μ::Real, θ::Real) = (@check_args(Gumbel, θ > zero(θ)); new(μ, θ))
-    Gumbel(μ::Real) = new(μ, 1.0)
-    Gumbel() = new(0.0, 1.0)
+    Gumbel(μ::T, θ::T) = (@check_args(Gumbel, θ > zero(θ)); new(μ, θ))
 end
+
+Gumbel{T<:Real}(μ::T, θ::T) = Gumbel{T}(μ, θ)
+Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
+Gumbel(μ::Real) = Gumbel(μ, 1.0)
+Gumbel() = Gumbel(0.0, 1.0)
 
 @distr_support Gumbel -Inf Inf
 
 const DoubleExponential = Gumbel
 
+#### Conversions
+
+convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, μ::S, θ::S) = Gumbel(T(μ), T(θ))
+convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, d::Gumbel{S}) = Gumbel(T(d.μ), T(d.θ))
 
 #### Parameters
 
@@ -51,34 +58,34 @@ mode(d::Gumbel) = d.μ
 
 var(d::Gumbel) = 1.6449340668482264 * d.θ^2
 
-skewness(d::Gumbel) = 1.13954709940464866
+skewness{T<:Real}(d::Gumbel{T}) = 1.13954709940464866*one(T)
 
-kurtosis(d::Gumbel) = 2.4
+kurtosis{T<:Real}(d::Gumbel{T}) = 12/5*one(T)
 
 entropy(d::Gumbel) = 1.57721566490153286 + log(d.θ)
 
 
 #### Evaluation
 
-zval(d::Gumbel, x::Float64) = (x - d.μ) / d.θ
-xval(d::Gumbel, z::Float64) = x * d.θ + d.μ
+zval(d::Gumbel, x::Real) = (x - d.μ) / d.θ
+xval(d::Gumbel, z::Real) = x * d.θ + d.μ
 
-function pdf(d::Gumbel, x::Float64)
+function pdf(d::Gumbel, x::Real)
     z = zval(d, x)
     exp(-z - exp(-z)) / d.θ
 end
 
-function logpdf(d::Gumbel, x::Float64)
+function logpdf(d::Gumbel, x::Real)
     z = zval(d, x)
     - (z + exp(-z) + log(d.θ))
 end
 
-cdf(d::Gumbel, x::Float64) = exp(-exp(-zval(d, x)))
-logcdf(d::Gumbel, x::Float64) = -exp(-zval(d, x))
+cdf(d::Gumbel, x::Real) = exp(-exp(-zval(d, x)))
+logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 
-quantile(d::Gumbel, p::Float64) = d.μ - d.θ * log(-log(p))
+quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
 
-gradlogpdf(d::Gumbel, x::Float64) = - (1.0 + exp((d.μ - x) / d.θ)) / d.θ
+gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
 
 
 #### Sampling

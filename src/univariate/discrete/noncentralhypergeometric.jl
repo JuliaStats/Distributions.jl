@@ -1,7 +1,7 @@
 # Noncentral hypergeometric distribution
 # TODO: this distribution needs clean-up and testing
 
-abstract NoncentralHypergeometric <: DiscreteUnivariateDistribution
+abstract NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistribution
 
 ### handling support
 
@@ -13,17 +13,17 @@ end
 
 # Functions
 
-function quantile(d::NoncentralHypergeometric, q::Float64)
+function quantile{T<:Real}(d::NoncentralHypergeometric{T}, q::Real)
     if !(zero(q) <= q <= one(q))
-        NaN
+        T(NaN)
     else
         range = support(d)
-        if q > 0.5
-            q = 1-q
+        if q > 1/2
+            q = 1 - q
             range = reverse(range)
         end
 
-        qsum, i = 0.0, 0
+        qsum, i = 0, 0
         while qsum < q
             i += 1
             qsum += pdf(d, range[i])
@@ -36,18 +36,32 @@ params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
 
 ## Fisher's noncentral hypergeometric distribution
 
-immutable FisherNoncentralHypergeometric <: NoncentralHypergeometric
+immutable FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size
-    ω::Float64 # odds ratio
+    ω::T # odds ratio
 
-    function FisherNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::Float64)
+    function FisherNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::T)
         @check_args(FisherNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
         @check_args(FisherNoncentralHypergeometric, zero(n) < n < ns + nf)
         @check_args(FisherNoncentralHypergeometric, ω > zero(ω))
         new(ns, nf, n, ω)
     end
+end
+
+function FisherNoncentralHypergeometric{T<:Real}(ns::Real, nf::Real, n::Real, ω::T)
+    FisherNoncentralHypergeometric{T}(ns, nf, n, ω)
+end
+
+# Conversions
+function FisherNoncentralHypergeometric{T <: Real, S <: Real}(
+        ::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::S)
+    FisherNoncentralHypergeometric(ns, nf, n, T(ω))
+end
+function FisherNoncentralHypergeometric{T <: Real, S <: Real}(
+        ::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{S})
+    FisherNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
 end
 
 # Properties
@@ -63,12 +77,14 @@ function _mode(d::FisherNoncentralHypergeometric)
     A = d.ω - 1
     B = d.n - d.nf - (d.ns + d.n + 2)*d.ω
     C = (d.ns + 1)*(d.n + 1)*d.ω
-    -2*C / (B - sqrt(B^2-4*A*C))
+    -2C / (B - sqrt(B^2-4A*C))
 end
 
 mean(d::FisherNoncentralHypergeometric) = exp(_P(d,1) - _P(d,0))
 var(d::FisherNoncentralHypergeometric) = exp(_P(d,2) - _P(d,0)) - exp(2*(_P(d,1) - _P(d,0)))
 mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
+
+testfd(d::FisherNoncentralHypergeometric) = d.ω^3
 
 logpdf(d::FisherNoncentralHypergeometric, k::Int) =
     -log(d.ns + 1) - lbeta(d.ns - k + 1, k + 1) -
@@ -80,12 +96,13 @@ pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
 
 ## Wallenius' noncentral hypergeometric distribution
 
-immutable WalleniusNoncentralHypergeometric <: NoncentralHypergeometric
+immutable WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size
-    ω::Float64 # odds ratio
-    function WalleniusNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::Float64)
+    ω::T # odds ratio
+
+    function WalleniusNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::T)
         @check_args(WalleniusNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
         @check_args(WalleniusNoncentralHypergeometric, zero(n) < n < ns + nf)
         @check_args(WalleniusNoncentralHypergeometric, ω > zero(ω))
@@ -93,10 +110,30 @@ immutable WalleniusNoncentralHypergeometric <: NoncentralHypergeometric
     end
 end
 
+function WalleniusNoncentralHypergeometric{T<:Real}(ns::Real, nf::Real, n::Real, ω::T)
+    WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
+end
+
+# Conversions
+function WalleniusNoncentralHypergeometric{T <: Real, S <: Real}(
+        ::Type{WalleniusNoncentralHypergeometric{S}},
+        ns::Real, nf::Real, n::Real, ω::T)
+    WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
+end
+function WalleniusNoncentralHypergeometric{T <: Real, S <: Real}(
+        ::Type{WalleniusNoncentralHypergeometric{T}},
+        d::WalleniusNoncentralHypergeometric{S})
+    WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
+end
+
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf(d, support(d)))
 var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) - mean(d)).^2 .* pdf(d, support(d)))
 mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf(d, support(d)))]
+
+entropy(d::WalleniusNoncentralHypergeometric) = 1
+
+testfd(d::WalleniusNoncentralHypergeometric) = d.ω^3
 
 function logpdf(d::WalleniusNoncentralHypergeometric, k::Int)
     D = d.ω * (d.ns - k) + (d.nf - d.n + k)

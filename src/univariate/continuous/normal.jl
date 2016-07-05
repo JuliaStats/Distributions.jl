@@ -21,7 +21,7 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-immutable Normal{T <: Real} <: ContinuousUnivariateDistribution
+immutable Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
@@ -31,7 +31,7 @@ end
 #### Outer constructors
 Normal{T<:Real}(μ::T, σ::T) = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Real) = Normal(μ, one(μ))
+Normal(μ::Real) = Normal(μ, 1.0)
 Normal() = Normal(0.0, 1.0)
 
 typealias Gaussian Normal
@@ -56,10 +56,10 @@ mode(d::Normal) = d.μ
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
-skewness(d::Normal) = 0.0
-kurtosis(d::Normal) = 0.0
+skewness{T<:Real}(d::Normal{T}) = zero(T)
+kurtosis{T<:Real}(d::Normal{T}) = zero(T)
 
-entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
+entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 
 #### Evaluation
@@ -68,8 +68,8 @@ entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
 
 gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
-cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
+mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2/2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2/2 * t^2)
 
 
 #### Sampling
@@ -165,7 +165,7 @@ immutable NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)
-        σ > 0.0 || throw(ArgumentError("σ must be a positive value."))
+        σ > 0 || throw(ArgumentError("σ must be a positive value."))
         new(σ)
     end
 end

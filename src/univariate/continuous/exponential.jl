@@ -6,7 +6,7 @@ The *Exponential distribution* with scale parameter `θ` has probability density
 $f(x; \theta) = \frac{1}{\theta} e^{-\frac{x}{\theta}}, \quad x > 0$
 
 ```julia
-Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1.0)
+Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1)
 Exponential(b)     # Exponential distribution with scale b
 
 params(d)          # Get the parameters, i.e. (b,)
@@ -19,20 +19,27 @@ External links
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
 """
-immutable Exponential <: ContinuousUnivariateDistribution
-    θ::Float64 		# note: scale not rate
+immutable Exponential{T<:Real} <: ContinuousUnivariateDistribution
+    θ::T		# note: scale not rate
 
     Exponential(θ::Real) = (@check_args(Exponential, θ > zero(θ)); new(θ))
-    Exponential() = new(1.0)
 end
 
-@distr_support Exponential 0.0 Inf
+Exponential{T<:Real}(θ::T) = Exponential{T}(θ)
+Exponential(θ::Integer) = Exponential(Float64(θ))
+Exponential() = Exponential(1.0)
+
+@distr_support Exponential 0 Inf
+
+### Conversions
+convert{T <: Real, S <: Real}(::Type{Exponential{T}}, θ::S) = Exponential(T(θ))
+convert{T <: Real, S <: Real}(::Type{Exponential{T}}, d::Exponential{S}) = Exponential(T(d.θ))
 
 
 #### Parameters
 
 scale(d::Exponential) = d.θ
-rate(d::Exponential) = 1.0 / d.θ
+rate(d::Exponential) = 1 / d.θ
 
 params(d::Exponential) = (d.θ,)
 
@@ -41,37 +48,39 @@ params(d::Exponential) = (d.θ,)
 
 mean(d::Exponential) = d.θ
 median(d::Exponential) = logtwo * d.θ
-mode(d::Exponential) = 0.0
+mode{T<:Real}(d::Exponential{T}) = zero(T)
 
 var(d::Exponential) = d.θ^2
-skewness(d::Exponential) = 2.0
-kurtosis(d::Exponential) = 6.0
+skewness{T<:Real}(d::Exponential{T}) = 2*one(T)
+kurtosis{T<:Real}(d::Exponential{T}) = 6*one(T)
 
-entropy(d::Exponential) = 1.0 + log(d.θ)
+entropy(d::Exponential) = 1 + log(d.θ)
 
 
 #### Evaluation
 
-zval(d::Exponential, x::Float64) = x / d.θ
-xval(d::Exponential, z::Float64) = z * d.θ
+zval(d::Exponential, x::Real) = x / d.θ
+xval(d::Exponential, z::Real) = z * d.θ
 
-pdf(d::Exponential, x::Float64) = (λ = rate(d); x < 0.0 ? 0.0 : λ * exp(-λ * x))
-logpdf(d::Exponential, x::Float64) =  (λ = rate(d); x < 0.0 ? -Inf : log(λ) - λ * x)
+pdf(d::Exponential, x::Real) = (λ = rate(d); x < 0 ? zero(λ) : λ * exp(-λ * x))
+function logpdf{T<:Real}(d::Exponential{T}, x::Real)
+    (λ = rate(d); x < 0 ? -T(Inf) : log(λ) - λ * x)
+end
 
-cdf(d::Exponential, x::Float64) = x > 0.0 ? -expm1(-zval(d, x)) : 0.0
-ccdf(d::Exponential, x::Float64) = x > 0.0 ? exp(-zval(d, x)) : 0.0
-logcdf(d::Exponential, x::Float64) = x > 0.0 ? log1mexp(-zval(d, x)) : -Inf
-logccdf(d::Exponential, x::Float64) = x > 0.0 ? -zval(d, x) : 0.0
+cdf{T<:Real}(d::Exponential{T}, x::Real) = x > 0 ? -expm1(-zval(d, x)) : zero(T)
+ccdf{T<:Real}(d::Exponential{T}, x::Real) = x > 0 ? exp(-zval(d, x)) : zero(T)
+logcdf{T<:Real}(d::Exponential{T}, x::Real) = x > 0 ? log1mexp(-zval(d, x)) : -T(Inf)
+logccdf{T<:Real}(d::Exponential{T}, x::Real) = x > 0 ? -zval(d, x) : zero(T)
 
-quantile(d::Exponential, p::Float64) = -xval(d, log1p(-p))
-cquantile(d::Exponential, p::Float64) = -xval(d, log(p))
-invlogcdf(d::Exponential, lp::Float64) = -xval(d, log1mexp(lp))
-invlogccdf(d::Exponential, lp::Float64) = -xval(d, lp)
+quantile(d::Exponential, p::Real) = -xval(d, log1p(-p))
+cquantile(d::Exponential, p::Real) = -xval(d, log(p))
+invlogcdf(d::Exponential, lp::Real) = -xval(d, log1mexp(lp))
+invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 
-gradlogpdf(d::Exponential, x::Float64) = x > 0.0 ? -rate(d) : 0.0
+gradlogpdf{T<:Real}(d::Exponential{T}, x::Real) = x > 0 ? -rate(d) : zero(T)
 
-mgf(d::Exponential, t::Real) = 1.0/(1.0 - t * scale(d))
-cf(d::Exponential, t::Real) = 1.0/(1.0 - t * im * scale(d))
+mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
+cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling

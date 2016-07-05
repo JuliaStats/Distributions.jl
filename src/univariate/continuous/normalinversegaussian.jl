@@ -13,18 +13,32 @@ External links
 * [Normal-inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal-inverse_Gaussian_distribution)
 
 """
-immutable NormalInverseGaussian <: ContinuousUnivariateDistribution
-  μ::Float64
-  α::Float64
-  β::Float64
-  δ::Float64
+immutable NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+  μ::T
+  α::T
+  β::T
+  δ::T
 
-  function NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real)
+  function NormalInverseGaussian(μ::T, α::T, β::T, δ::T)
     new(μ, α, β, δ)
   end
 end
 
+NormalInverseGaussian{T<:Real}(μ::T, α::T, β::T, δ::T) = NormalInverseGaussian{T}(μ, α, β, δ)
+NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) = NormalInverseGaussian(promote(μ, α, β, δ)...)
+function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Integer)
+    NormalInverseGaussian(Float64(μ), Float64(α), Float64(β), Float64(δ))
+end
+
 @distr_support NormalInverseGaussian -Inf Inf
+
+#### Conversions
+function convert{T<:Real}(::Type{NormalInverseGaussian{T}}, μ::Real, α::Real, β::Real, δ::Real)
+    NormalInverseGaussian(T(μ), T(α), T(β), T(δ))
+end
+function convert{T <: Real, S <: Real}(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian{S})
+    NormalInverseGaussian(T(d.μ), T(d.α), T(d.β), T(d.δ))
+end
 
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 
@@ -32,12 +46,13 @@ mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / sqrt(d.α^2 - d.β^2)
 var(d::NormalInverseGaussian) = d.δ * d.α^2 / sqrt(d.α^2 - d.β^2)^3
 skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * sqrt(d.α^2 - d.β^2)))
 
-function pdf(d::NormalInverseGaussian, x::Float64)
+function pdf(d::NormalInverseGaussian, x::Real)
 	μ, α, β, δ = params(d)
-	α * δ * besselk(1, α*sqrt(δ^2+(x-μ)^2)) / (π*sqrt(δ^2+(x-μ)^2)) * exp(δ*sqrt(α^2-β^2) + β*(x-μ))
+	α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ*sqrt(α^2 - β^2) + β*(x - μ))
 end
 
-function logpdf(d::NormalInverseGaussian, x::Float64)
+function logpdf(d::NormalInverseGaussian, x::Real)
   μ, α, β, δ = params(d)
-  log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*sqrt(α^2-β^2) + β*(x-μ)
+  log(α*δ) + log(besselk(1, α*sqrt(δ^2 + (x - μ)^2))) - log(π*sqrt(δ^2 + (x - μ)^2))
+        + δ*sqrt(α^2 - β^2) + β*(x - μ)
 end
