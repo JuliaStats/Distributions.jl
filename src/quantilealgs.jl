@@ -33,10 +33,11 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = promote_type(partype(d), typeof(p), typeof(xs))
     if 0 < p < 1
+        x0 = T(xs)
         while true
-            x = xs + (p - cdf(d, xs)) / pdf(d, xs)
-            abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-            xs = x
+            x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
+            abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x0 = x
         end
     elseif p == 0
         return T(minimum(d))
@@ -50,10 +51,11 @@ end
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = promote_type(partype(d), typeof(p), typeof(xs))
     if 0 < p < 1
+        x0 = T(xs)
         while true
-            x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
-            abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-            xs = x
+            x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
+            abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x0 = x
         end
     elseif p == 1
         return T(minimum(d))
@@ -67,17 +69,18 @@ end
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
+        x0 = T(xs)
         if lp < logcdf(d,xs)
             while true
-                x = xs - exp(lp - logpdf(d,xs) + logexpm1(max(logcdf(d,xs)-lp,0)))
-                abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-                xs = x
+                x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
+                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+                x0 = x
             end
         else
             while true
-                x = xs + exp(lp - logpdf(d,xs) + log1mexp(min(logcdf(d,xs)-lp,0)))
-                abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-                xs = x
+                x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
+                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+                x0 = x
             end
         end
     elseif lp == -Inf
@@ -92,17 +95,18 @@ end
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
+        x0 = T(xs)
         if lp < logccdf(d,xs)
             while true
-                x = xs + exp(lp - logpdf(d,xs) + logexpm1(max(logccdf(d,xs)-lp,0)))
-                abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-                xs = x
+                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
+                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+                x0 = x
             end
         else
             while true
-                x = xs - exp(lp - logpdf(d,xs) + log1mexp(min(logccdf(d,xs)-lp,0)))
-                abs(x-xs) >= max(abs(x),abs(xs))*tol || return x
-                xs = x
+                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
+                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+                x0 = x
             end
         end
     elseif lp == -Inf
