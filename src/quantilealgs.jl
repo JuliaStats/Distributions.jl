@@ -31,7 +31,7 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(p), typeof(xs), typeof(tol))
+    T = promote_type(partype(d), typeof(p), typeof(xs))
     if 0 < p < 1
         while true
             x = xs + (p - cdf(d, xs)) / pdf(d, xs)
@@ -48,7 +48,7 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
 end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(p), typeof(xs), typeof(tol))
+    T = promote_type(partype(d), typeof(p), typeof(xs))
     if 0 < p < 1
         while true
             x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
@@ -65,7 +65,7 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
 end
 
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(lp), typeof(xs), typeof(tol))
+    T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
         if lp < logcdf(d,xs)
             while true
@@ -90,7 +90,7 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
 end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(lp), typeof(xs), typeof(tol))
+    T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
         if lp < logccdf(d,xs)
             while true
