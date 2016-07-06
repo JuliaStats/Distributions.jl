@@ -32,7 +32,10 @@ insupport(d::AbstractMvNormal, x::AbstractVector) =
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
-entropy(d::AbstractMvNormal) = (length(d) * (Float64(log2π) + 1) + logdetcov(d))/2
+function entropy(d::AbstractMvNormal)
+    ldcd = logdetcov(d)
+    (length(d) * (typeof(ldcd)(log2π) + 1) + ldcd)/2
+end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
