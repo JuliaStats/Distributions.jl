@@ -40,7 +40,7 @@ InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
 InverseGamma(α::Real) = InverseGamma(α, 1.0)
 InverseGamma() = InverseGamma(1.0, 1.0)
 
-@distr_support InverseGamma 0 Inf
+@distr_support InverseGamma 0.0 Inf
 
 #### Conversions
 convert{T <: Real, S <: Real}(::Type{InverseGamma{T}}, α::S, θ::S) = InverseGamma(T(α), T(θ))

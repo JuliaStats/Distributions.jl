@@ -29,7 +29,7 @@ Erlang{T<:Real}(α::Int, θ::T) = Erlang{T}(α, θ)
 Erlang(α::Real) = Erlang(α, 1.0)
 Erlang() = Erlang(1.0, 1.0)
 
-@distr_support Erlang 0 Inf
+@distr_support Erlang 0.0 Inf
 
 #### Conversions
 function convert{T <: Real, S <: Real}(::Type{Erlang{T}}, α::Int, θ::S)

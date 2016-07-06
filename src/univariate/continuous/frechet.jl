@@ -38,7 +38,7 @@ Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
 Frechet(α::Real) = Frechet(α, 1.0)
 Frechet() = Frechet(1.0, 1.0)
 
-@distr_support Frechet 0 Inf
+@distr_support Frechet 0.0 Inf
 
 #### Conversions
 function convert{T <: Real, S <: Real}(::Type{Frechet{T}}, α::S, θ::S)

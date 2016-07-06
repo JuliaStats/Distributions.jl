@@ -28,7 +28,7 @@ end
 Chisq{T<:Real}(ν::T) = Chisq{T}(ν)
 Chisq(ν::Integer) = Chisq(Float64(ν))
 
-@distr_support Chisq 0 Inf
+@distr_support Chisq 0.0 Inf
 
 #### Parameters
 

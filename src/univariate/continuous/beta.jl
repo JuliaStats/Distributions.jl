@@ -41,7 +41,7 @@ Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 Beta(α::Real) = Beta(α, α)
 Beta() = Beta(1, 1)
 
-@distr_support Beta 0 1
+@distr_support Beta 0.0 1.0
 
 #### Conversions
 function convert{T<:Real}(::Type{Beta{T}}, α::Real, β::Real)

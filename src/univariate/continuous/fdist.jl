@@ -36,7 +36,7 @@ FDist{T<:Real}(ν1::T, ν2::T) = FDist{T}(ν1, ν2)
 FDist(ν1::Integer, ν2::Integer) = FDist(Float64(ν1), Float64(ν2))
 FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
 
-@distr_support FDist 0 Inf
+@distr_support FDist 0.0 Inf
 
 #### Conversions
 function convert{T <: Real, S <: Real}(::Type{FDist{T}}, ν1::S, ν2::S)

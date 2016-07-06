@@ -36,7 +36,7 @@ LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
 LogNormal(μ::Real) = LogNormal(μ, 1.0)
 LogNormal() = LogNormal(0.0, 1.0)
 
-@distr_support LogNormal 0 Inf
+@distr_support LogNormal 0.0 Inf
 
 #### Conversions
 convert{T <: Real, S <: Real}(::Type{LogNormal{T}}, μ::S, σ::S) = LogNormal(T(μ), T(σ))

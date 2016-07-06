@@ -11,7 +11,7 @@ end
 NoncentralChisq{T<:Real}(ν::T, λ::T) = NoncentralChisq{T}(ν, λ)
 NoncentralChisq(ν::Real, λ::Real) = NoncentralChisq(promote(ν, λ)...)
 
-@distr_support NoncentralChisq 0 Inf
+@distr_support NoncentralChisq 0.0 Inf
 
 #### Conversions
 

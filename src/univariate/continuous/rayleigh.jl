@@ -31,7 +31,7 @@ Rayleigh{T<:Real}(σ::T) = Rayleigh{T}(σ)
 Rayleigh{T <: Integer}(σ::T) = Rayleigh(Float64(σ))
 Rayleigh() = Rayleigh(1.0)
 
-@distr_support Rayleigh 0 Inf
+@distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 

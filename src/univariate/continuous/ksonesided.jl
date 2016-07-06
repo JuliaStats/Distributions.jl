@@ -4,7 +4,7 @@ immutable KSOneSided <: ContinuousUnivariateDistribution
     n::Int
 end
 
-@distr_support KSOneSided 0 1
+@distr_support KSOneSided 0.0 1.0
 
 
 #### Evaluation

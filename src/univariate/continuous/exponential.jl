@@ -29,7 +29,7 @@ Exponential{T<:Real}(θ::T) = Exponential{T}(θ)
 Exponential(θ::Integer) = Exponential(Float64(θ))
 Exponential() = Exponential(1.0)
 
-@distr_support Exponential 0 Inf
+@distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert{T <: Real, S <: Real}(::Type{Exponential{T}}, θ::S) = Exponential(T(θ))

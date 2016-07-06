@@ -13,7 +13,7 @@ end
 NoncentralBeta{T<:Real}(α::T, β::T, λ::T) = NoncentralBeta{T}(α, β, λ)
 NoncentralBeta(α::Real, β::Real, λ::Real) = NoncentralBeta(promote(α, β, λ)...)
 
-@distr_support NoncentralBeta 0 1
+@distr_support NoncentralBeta 0.0 1.0
 
 
 ### Parameters

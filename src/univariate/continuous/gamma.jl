@@ -37,7 +37,7 @@ Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
 Gamma(α::Real) = Gamma(α, 1.0)
 Gamma() = Gamma(1.0, 1.0)
 
-@distr_support Gamma 0 Inf
+@distr_support Gamma 0.0 Inf
 
 #### Conversions
 convert{T <: Real, S <: Real}(::Type{Gamma{T}}, α::S, θ::S) = Gamma(T(α), T(θ))

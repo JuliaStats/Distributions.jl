@@ -37,7 +37,7 @@ InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64
 InverseGaussian(μ::Real) = InverseGaussian(μ, 1.0)
 InverseGaussian() = InverseGaussian(1.0, 1.0)
 
-@distr_support InverseGaussian 0 Inf
+@distr_support InverseGaussian 0.0 Inf
 
 #### Conversions
 

@@ -5,7 +5,7 @@
 immutable Kolmogorov <: ContinuousUnivariateDistribution
 end
 
-@distr_support Kolmogorov 0 Inf
+@distr_support Kolmogorov 0.0 Inf
 
 params(d::Kolmogorov) = ()
 

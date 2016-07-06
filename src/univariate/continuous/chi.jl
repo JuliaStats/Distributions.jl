@@ -29,7 +29,7 @@ end
 Chi{T<:Real}(ν::T) = Chi{T}(ν)
 Chi(ν::Integer) = Chi(Float64(ν))
 
-@distr_support Chi 0 Inf
+@distr_support Chi 0.0 Inf
 
 ### Conversions
 convert{T<:Real}(::Type{Chi{T}}, ν::Real) = Chi(T(ν))

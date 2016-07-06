@@ -37,7 +37,7 @@ Weibull(α::Integer, θ::Integer) = Weibull(Float64(α), Float64(θ))
 Weibull(α::Real) = Weibull(α, 1.0)
 Weibull() = Weibull(1.0, 1.0)
 
-@distr_support Weibull 0 Inf
+@distr_support Weibull 0.0 Inf
 
 #### Conversions
 

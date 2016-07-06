@@ -5,7 +5,7 @@ immutable KSDist <: ContinuousUnivariateDistribution
     n::Int
 end
 
-@distr_support KSDist 1 / (2 * d.n) 1
+@distr_support KSDist 1 / (2 * d.n) 1.0
 
 
 #### Evaluation

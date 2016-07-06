@@ -41,7 +41,7 @@ BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))
 BetaPrime(α::Real) = BetaPrime(α, α)
 BetaPrime() = BetaPrime(1.0, 1.0)
 
-@distr_support BetaPrime 0 Inf
+@distr_support BetaPrime 0.0 Inf
 
 #### Conversions
 function convert{T<:Real}(::Type{BetaPrime{T}}, α::Real, β::Real)
