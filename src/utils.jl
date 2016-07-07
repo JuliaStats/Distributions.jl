@@ -95,9 +95,11 @@ function exp!(x::AbstractArray)
     x
 end
 
-# get a type capable of representing computations using a distribution's paramters
-@inline partype(d::Distribution) = promote_type(map(_partype, params(d))...)
-@inline _partype(x) = isa(x, Real) ? typeof(x) : eltype(x)
+# get a type wide enough to represent all a distributions's parameters
+# (if the distribution is parametric)
+# if the distribution is not parametric, we need this to be a float so that
+# inplace pdf calculations, etc. allocate storage correctly
+@inline partype(d::Distribution) = Float64
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required

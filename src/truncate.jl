@@ -22,6 +22,7 @@ end
 Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
+partype(d::Truncated) = partype(d.untruncated)
 ### range and support
 
 islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)

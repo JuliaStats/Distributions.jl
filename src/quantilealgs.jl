@@ -70,7 +70,7 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
         x0 = T(xs)
-        if lp < logcdf(d,xs)
+        if lp < logcdf(d,x0)
             while true
                 x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
                 abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
@@ -96,7 +96,7 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Re
     T = promote_type(partype(d), typeof(lp), typeof(xs))
     if -Inf < lp < 0
         x0 = T(xs)
-        if lp < logccdf(d,xs)
+        if lp < logccdf(d,x0)
             while true
                 x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
                 abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
