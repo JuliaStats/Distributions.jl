@@ -31,14 +31,15 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(p), typeof(xs))
+    x = xs + (p - cdf(d, xs)) / pdf(d, xs)
+    T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while true
-            x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
-            abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+        while abs(x-x0) >= max(abs(x),abs(x0)) * tol
             x0 = x
+            x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
         end
+        return x
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
@@ -49,14 +50,15 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
 end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(p), typeof(xs))
+    x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
+    T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while true
-            x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
-            abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+        while abs(x-x0) >= max(abs(x),abs(x0)) * tol
             x0 = x
+            x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
         end
+        return x
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
@@ -67,22 +69,23 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
 end
 
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(lp), typeof(xs))
+    T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            while true
-                x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
+            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
                 x0 = x
+                x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
             end
         else
-            while true
-                x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
+            while abs(x-x0) >= max(abs(x),abs(x0))*tol
                 x0 = x
+                x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
             end
         end
+        return x
     elseif lp == -Inf
         return T(minimum(d))
     elseif lp == 0
@@ -93,22 +96,23 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
 end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
-    T = promote_type(partype(d), typeof(lp), typeof(xs))
+    T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            while true
-                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
+            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
                 x0 = x
+                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
             end
         else
-            while true
-                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-                abs(x-x0) >= max(abs(x),abs(x0))*tol || return x
+            x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
+            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
                 x0 = x
+                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
             end
         end
+        return x
     elseif lp == -Inf
         return T(maximum(d))
     elseif lp == 0
