@@ -1,4 +1,4 @@
-immutable Dirichlet{T <: Real} <: ContinuousMultivariateDistribution
+immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
     alpha::Vector{T}
     alpha0::T
     lmnB::T
@@ -22,9 +22,9 @@ immutable Dirichlet{T <: Real} <: ContinuousMultivariateDistribution
     end
 end
 
-Dirichlet{T <: Real}(alpha::Vector{T}) = Dirichlet{T}(alpha)
-Dirichlet{T <: Real}(d::Integer, alpha::T) = Dirichlet{T}(d, alpha)
-Dirichlet{T <: Integer}(alpha::Vector{T}) = Dirichlet{Float64}(alpha)
+Dirichlet{T<:Real}(alpha::Vector{T}) = Dirichlet{T}(alpha)
+Dirichlet{T<:Real}(d::Integer, alpha::T) = Dirichlet{T}(d, alpha)
+Dirichlet{T<:Integer}(alpha::Vector{T}) = Dirichlet{Float64}(alpha)
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
 immutable DirichletCanon
@@ -35,8 +35,8 @@ length(d::DirichletCanon) = length(d.alpha)
 
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
-convert{T <: Real, S <: Real}(::Type{Dirichlet{T}}, alpha::Vector{S}) = Dirichlet(convert(Vector{T}, alpha))
-convert{T <: Real, S <: Real}(::Type{Dirichlet{T}}, d::Dirichlet{S}) = Dirichlet(convert(Vector{T}, d.alpha))
+convert{T<:Real, S<:Real}(::Type{Dirichlet{T}}, alpha::Vector{S}) = Dirichlet(convert(Vector{T}, alpha))
+convert{T<:Real, S<:Real}(::Type{Dirichlet{T}}, d::Dirichlet{S}) = Dirichlet(convert(Vector{T}, d.alpha))
 
 
 

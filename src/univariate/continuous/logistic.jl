@@ -31,6 +31,7 @@ end
 
 Logistic{T<:Real}(μ::T, θ::T) = Logistic{T}(μ, θ)
 Logistic(μ::Real, θ::Real) = Logistic(promote(μ, θ)...)
+Logistic(μ::Integer, θ::Integer) = Logistic(Float64(μ), Float64(θ))
 Logistic(μ::Real) = Logistic(μ, 1.0)
 Logistic() = Logistic(0.0, 1.0)
 

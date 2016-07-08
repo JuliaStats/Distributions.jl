@@ -50,9 +50,9 @@ immutable FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     end
 end
 
-function FisherNoncentralHypergeometric{T<:Real}(ns::Real, nf::Real, n::Real, ω::T)
-    FisherNoncentralHypergeometric{T}(ns, nf, n, ω)
-end
+FisherNoncentralHypergeometric{T<:Real}(ns::Integer, nf::Integer, n::Integer, ω::T) = FisherNoncentralHypergeometric{T}(ns, nf, n, ω)
+
+FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = FisherNoncentralHypergeometric(ns, nf, n, Float64(ω))
 
 # Conversions
 function FisherNoncentralHypergeometric{T <: Real, S <: Real}(
@@ -110,9 +110,9 @@ immutable WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric
     end
 end
 
-function WalleniusNoncentralHypergeometric{T<:Real}(ns::Real, nf::Real, n::Real, ω::T)
-    WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
-end
+WalleniusNoncentralHypergeometric{T<:Real}(ns::Integer, nf::Integer, n::Integer, ω::T) = WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
+
+WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric{T}(ns, nf, n, Float64(ω))
 
 # Conversions
 function WalleniusNoncentralHypergeometric{T <: Real, S <: Real}(

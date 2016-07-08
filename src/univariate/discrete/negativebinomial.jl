@@ -39,6 +39,7 @@ end
 
 NegativeBinomial{T<:Real}(r::T, p::T) = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
+NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(Float64(r), Float64(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
 NegativeBinomial() = NegativeBinomial(1.0, 0.5)
 

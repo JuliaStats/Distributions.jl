@@ -3,7 +3,7 @@
 #   following Wikipedia parametrization
 #
 
-immutable InverseWishart{ST<:AbstractPDMat, T<:Real} <: ContinuousMatrixDistribution
+immutable InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     Ψ::ST           # scale matrix
     c0::T     # log of normalizing constant
@@ -11,14 +11,15 @@ end
 
 #### Constructors
 
-function InverseWishart{ST <: AbstractPDMat}(df::Real, Ψ::ST)
+function InverseWishart{T<:Real}(df::T, Ψ::AbstractPDMat{T})
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
     c0 = _invwishart_c0(df, Ψ)
     prom_df, prom_c0 = promote(df, c0)
-    T = typeof(prom_df)
-    InverseWishart{ST, T}(prom_df, Ψ, prom_c0)
+    InverseWishart{typeof(prom_df), typeof(Ψ)}(prom_df, Ψ, prom_c0)
 end
+
+InverseWishart(df::Real, Ψ::AbstractPDMat) = InverseWishart(promote_eltype(df, Ψ)...)
 
 InverseWishart(df::Real, Ψ::Matrix) = InverseWishart(df, PDMat(Ψ))
 

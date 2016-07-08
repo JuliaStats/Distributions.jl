@@ -16,7 +16,7 @@ Triweight() = Triweight(0.0, 1.0)
 ## Conversions
 
 convert{T<:Real}(::Type{Triweight{T}}, μ::Real, σ::Real) = Triweight(T(μ), T(σ))
-convert{T <: Real, S <: Real}(::Type{Triweight{T}}, d::Triweight{S}) = Triweight(T(d.μ), T(d.σ))
+convert{T<:Real, S<:Real}(::Type{Triweight{T}}, d::Triweight{S}) = Triweight(T(d.μ), T(d.σ))
 
 ## Parameters
 

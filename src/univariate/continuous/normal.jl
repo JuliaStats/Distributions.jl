@@ -31,6 +31,7 @@ end
 #### Outer constructors
 Normal{T<:Real}(μ::T, σ::T) = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
+Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
 Normal(μ::Real) = Normal(μ, 1.0)
 Normal() = Normal(0.0, 1.0)
 

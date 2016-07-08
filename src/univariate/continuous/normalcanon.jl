@@ -12,6 +12,7 @@ end
 
 NormalCanon{T<:Real}(η::T, λ::T) = NormalCanon{typeof(η/λ)}(η, λ)
 NormalCanon(η::Real, λ::Real) = NormalCanon(promote(η, λ)...)
+NormalCanon(η::Integer, λ::Integer) = NormalCanon(Float64(η), Float64(λ))
 NormalCanon() = NormalCanon(0, 1, 0)
 
 @distr_support NormalCanon -Inf Inf

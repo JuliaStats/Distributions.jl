@@ -37,7 +37,7 @@ Uniform() = Uniform(0.0, 1.0)
 
 #### Conversions
 convert{T<:Real}(::Type{Uniform{T}}, a::Real, b::Real) = Uniform(T(a), T(b))
-convert{T <: Real, S <: Real}(::Type{Uniform{T}}, d::Uniform{S}) = Uniform(T(d.a), T(d.b))
+convert{T<:Real, S<:Real}(::Type{Uniform{T}}, d::Uniform{S}) = Uniform(T(d.a), T(d.b))
 
 #### Parameters
 

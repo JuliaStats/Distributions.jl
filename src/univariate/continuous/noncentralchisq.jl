@@ -10,6 +10,7 @@ end
 
 NoncentralChisq{T<:Real}(ν::T, λ::T) = NoncentralChisq{T}(ν, λ)
 NoncentralChisq(ν::Real, λ::Real) = NoncentralChisq(promote(ν, λ)...)
+NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(Float64(ν), Float64(λ))
 
 @distr_support NoncentralChisq 0.0 Inf
 

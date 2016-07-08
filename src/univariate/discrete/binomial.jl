@@ -33,9 +33,9 @@ immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
 
 end
 
-Binomial{T<:Real}(n::Int, p::T) = Binomial{T}(n, p)
-Binomial{T <: Int}(n::Int, p::T) = Binomial(n, Float64(p))
-Binomial(n::Int) = Binomial(n, 0.5)
+Binomial{T<:Real}(n::Integer, p::T) = Binomial{T}(n, p)
+Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
+Binomial(n::Integer) = Binomial(n, 0.5)
 Binomial() = Binomial(1, 0.5)
 
 @distr_support Binomial 0 d.n

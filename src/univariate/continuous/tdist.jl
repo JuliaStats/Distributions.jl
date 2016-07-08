@@ -31,7 +31,7 @@ TDist(ν::Integer) = TDist(Float64(ν))
 
 #### Conversions
 convert{T<:Real}(::Type{TDist{T}}, ν::Real) = TDist(T(ν))
-convert{T <: Real, S <: Real}(::Type{TDist{T}}, d::TDist{S}) = TDist(T(d.ν))
+convert{T<:Real, S<:Real}(::Type{TDist{T}}, d::TDist{S}) = TDist(T(d.ν))
 
 #### Parameters
 

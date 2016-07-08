@@ -3,7 +3,7 @@
 #   following the Wikipedia parameterization
 #
 
-immutable Wishart{ST<:AbstractPDMat, T<:Real} <: ContinuousMatrixDistribution
+immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix
     c0::T     # the logarithm of normalizing constant in pdf
@@ -11,14 +11,15 @@ end
 
 #### Constructors
 
-function Wishart{ST <: AbstractPDMat}(df::Real, S::ST)
+function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
     prom_df, prom_c0 = promote(df, c0)
-    T = typeof(prom_df)
-    Wishart{ST, T}(prom_df, S, prom_c0)
+    Wishart{typeof(prom_df), typeof(S)}(prom_df, S, prom_c0)
 end
+
+Wishart(df::Real, S::AbstractPDMat) = Wishart(promote_eltype(df, PDMat(S))...)
 
 Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 

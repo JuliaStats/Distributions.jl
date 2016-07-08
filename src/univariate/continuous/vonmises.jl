@@ -37,6 +37,10 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 @distr_support VonMises d.μ - π d.μ + π
 
+#### Conversions
+
+convert{T<:Real}(::Type{VonMises{T}}, μ::Real, κ::Real) = VonMises(T(μ), T(κ))
+convert{T<:Real, S<:Real}(::Type{VonMises{T}}, d::VonMises{S}) = VonMises(T(d.μ), T(d.κ))
 
 #### Parameters
 

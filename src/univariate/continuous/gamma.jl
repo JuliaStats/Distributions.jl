@@ -34,6 +34,7 @@ end
 
 Gamma{T<:Real}(α::T, θ::T) = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
+Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
 Gamma(α::Real) = Gamma(α, 1.0)
 Gamma() = Gamma(1.0, 1.0)
 

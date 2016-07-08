@@ -19,10 +19,12 @@ typealias ZeroMeanIsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},ZeroVec
 
 ### Constructors
 
-function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
+function MvNormalCanon{T<:Real}(μ::Vector{T}, h::Vector{T}, J::AbstractPDMat{T})
     length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{T,P,Vector{T}}(μ, promote_eltype(h, J)...)
+    MvNormalCanon{T,typeof(J),Vector{T}}(μ, h, J)
 end
+
+MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P) = MvNormalCanon(μ, promote_eltype(h, J)...)
 
 function MvNormalCanon{P<:AbstractPDMat}(J::P)
     z = ZeroVector(eltype(J), dim(J))

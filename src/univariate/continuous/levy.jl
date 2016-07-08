@@ -28,6 +28,7 @@ end
 
 Levy{T<:Real}(μ::T, σ::T) = Levy{T}(μ, σ)
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
+Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
 Levy(μ::Real) = Levy(μ, 1.0)
 Levy() = Levy(0.0, 1.0)
 

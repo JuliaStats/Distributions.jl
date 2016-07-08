@@ -29,6 +29,7 @@ end
 
 Gumbel{T<:Real}(μ::T, θ::T) = Gumbel{T}(μ, θ)
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
+Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
 Gumbel(μ::Real) = Gumbel(μ, 1.0)
 Gumbel() = Gumbel(0.0, 1.0)
 

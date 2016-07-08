@@ -30,6 +30,7 @@ end
 
 Laplace{T<:Real}(μ::T, θ::T) = Laplace{T}(μ, θ)
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
+Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
 Laplace(μ::Real) = Laplace(μ, 1.0)
 Laplace() = Laplace(0.0, 1.0)
 
