@@ -15,8 +15,9 @@ function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
-    prom_df, prom_c0 = promote(df, c0)
-    Wishart{typeof(prom_df), typeof(S)}(prom_df, S, prom_c0)
+    R = promote_type(T, typeof(c0))
+    _, prom_S = promote_eltype(one(R), S)
+    Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
 end
 
 Wishart(df::Real, S::AbstractPDMat) = Wishart(promote_eltype(df, PDMat(S))...)

@@ -55,14 +55,8 @@ FisherNoncentralHypergeometric{T<:Real}(ns::Integer, nf::Integer, n::Integer, ω
 FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = FisherNoncentralHypergeometric(ns, nf, n, Float64(ω))
 
 # Conversions
-function FisherNoncentralHypergeometric{T <: Real, S <: Real}(
-        ::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::S)
-    FisherNoncentralHypergeometric(ns, nf, n, T(ω))
-end
-function FisherNoncentralHypergeometric{T <: Real, S <: Real}(
-        ::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{S})
-    FisherNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
-end
+convert{T<:Real}(::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) = FisherNoncentralHypergeometric(ns, nf, n, T(ω))
+convert{T<:Real, S<:Real}(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{S}) = FisherNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
 
 # Properties
 function _P(d::FisherNoncentralHypergeometric, k::Int)
@@ -112,19 +106,11 @@ end
 
 WalleniusNoncentralHypergeometric{T<:Real}(ns::Integer, nf::Integer, n::Integer, ω::T) = WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric{T}(ns, nf, n, Float64(ω))
+WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric(ns, nf, n, Float64(ω))
 
 # Conversions
-function WalleniusNoncentralHypergeometric{T <: Real, S <: Real}(
-        ::Type{WalleniusNoncentralHypergeometric{S}},
-        ns::Real, nf::Real, n::Real, ω::T)
-    WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
-end
-function WalleniusNoncentralHypergeometric{T <: Real, S <: Real}(
-        ::Type{WalleniusNoncentralHypergeometric{T}},
-        d::WalleniusNoncentralHypergeometric{S})
-    WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
-end
+convert{T<:Real}(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
+convert{T<:Real, S<:Real}(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{S}) = WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
 
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf(d, support(d)))

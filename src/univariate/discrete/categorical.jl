@@ -32,21 +32,15 @@ immutable Categorical{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Categorical{T<:Real}(p::Vector{T}, ::NoArgCheck) = Categorical{T}(p, NoArgCheck())
-Categorical{T<:Integer}(p::Vector{T}, ::NoArgCheck) = Categorical(Vector{Float64}(p), NoArgCheck())
 Categorical{T<:Real}(p::Vector{T}) = Categorical{T}(p)
-Categorical{T<:Integer}(p::Vector{T}) = Categorical(Vector{Float64}(p))
 Categorical(k::Integer) = Categorical{Float64}(k)
 
 @distr_support Categorical 1 d.K
 
 ### Conversions
 
-function Categorical{T <: Real, S <: Real}(::Type{Categorical{T}}, p::Vector{S})
-    Categorical(Vector{T}(p))
-end
-function Categorical{T <: Real, S <: Real}(::Type{Categorical{T}}, d::Categorical{S})
-    Categorical(Vector{T}(d.p))
-end
+convert{T<:Real, S<:Real}(::Type{Categorical{T}}, p::Vector{S}) = Categorical(Vector{T}(p))
+convert{T<:Real, S<:Real}(::Type{Categorical{T}}, d::Categorical{S}) = Categorical(Vector{T}(d.p))
 
 ### Parameters
 

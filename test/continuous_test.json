@@ -410,7 +410,7 @@
     }
   ],
   [
-    "BetaPrime(3.0, 3.0)",
+    "BetaPrime(3, 3)",
     {
       "dtype": "BetaPrime",
       "entropy": 1.2988026183378452,
@@ -485,7 +485,7 @@
     }
   ],
   [
-    "BetaPrime(3.0, 5.0)",
+    "BetaPrime(3, 5.0)",
     {
       "dtype": "BetaPrime",
       "entropy": 0.58889679270198236,
@@ -2087,7 +2087,7 @@
     }
   ],
   [
-    "FDist(6.0, 8.0)",
+    "FDist(6, 8)",
     {
       "dtype": "FDist",
       "entropy": 1.1766708435615381,
@@ -2162,7 +2162,7 @@
     }
   ],
   [
-    "FDist(8.0, 6.0)",
+    "FDist(8, 6.0)",
     {
       "dtype": "FDist",
       "entropy": 1.2679733653252017,

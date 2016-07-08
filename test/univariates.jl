@@ -67,6 +67,14 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
     end
 
+    # test conversions if distribution is parametric
+    if !isempty(typeof(d).parameters) && !isa(d, Truncated)  
+        D = typeof(d).name.primary
+        W = widen(partype(d))
+        @test typeof(convert(D{W}, d)) == D{W}
+        @test typeof(convert(D{W}, params(d)...)) == D{W}
+    end
+
     # verify quantiles
     @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
     @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8

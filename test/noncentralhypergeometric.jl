@@ -84,3 +84,14 @@ ref = Hypergeometric(ns,nf,n)
 @test_approx_eq_eps quantile(d, 0.05) quantile(ref, 0.05) 1e-7
 @test_approx_eq_eps quantile(d, 0.95) quantile(ref, 0.95) 1e-7
 @test mode(d) == mode(ref)
+
+##### Conversions and Constructors
+d = FisherNoncentralHypergeometric(ns, nf, n, 10.)
+@test FisherNoncentralHypergeometric(ns, nf, n, 10) == d
+@test typeof(convert(FisherNoncentralHypergeometric{Float32}, d)) == FisherNoncentralHypergeometric{Float32}
+@test typeof(convert(FisherNoncentralHypergeometric{Float32}, ns, nf, n, 10.)) == FisherNoncentralHypergeometric{Float32}
+
+d = WalleniusNoncentralHypergeometric(ns, nf, n, 10.)
+@test WalleniusNoncentralHypergeometric(ns, nf, n, 10) == d
+@test typeof(convert(WalleniusNoncentralHypergeometric{Float32}, d)) == WalleniusNoncentralHypergeometric{Float32}
+@test typeof(convert(WalleniusNoncentralHypergeometric{Float32}, ns, nf, n, 10.)) == WalleniusNoncentralHypergeometric{Float32}

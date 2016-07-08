@@ -27,3 +27,8 @@ d = NormalInverseGaussian(1.7, 1.8, 1.2, 2.3)
 # The solution was computed using this R code:
 # skewness(rnig(100000000, mu=1.7, alpha=1.8, beta=1.2, delta=2.3))
 @test_approx_eq_eps skewness(d) 1.138959 0.001
+
+@test NormalInverseGaussian(1, 1, 2, 2) == NormalInverseGaussian(1., 1, 2, 2)
+@test NormalInverseGaussian(1, 1, 2, 2) == NormalInverseGaussian(1., 1., 2., 2.)
+@test typeof(convert(NormalInverseGaussian{Float64}, 1.7f0, 1.8f0, 1.2f0, 2.3f0)) == NormalInverseGaussian{Float64}
+@test typeof(convert(NormalInverseGaussian{Float64}, NormalInverseGaussian(1.7f0, 1.8f0, 1.2f0, 2.3f0)))  == NormalInverseGaussian{Float64}

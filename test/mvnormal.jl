@@ -100,6 +100,10 @@ for (T, g, μ, Σ) in [
     end
 end
 
+##### Miscellany
+mu = [1., 2., 3.]
+C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+@test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
 
 ##### MLE
 
