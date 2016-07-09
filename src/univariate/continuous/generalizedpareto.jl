@@ -47,7 +47,7 @@ GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, 
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
     GeneralizedPareto(Float64(μ), Float64(σ), Float64(ξ))
 end
-GeneralizedPareto(ξ::Real, σ::Real) = GeneralizedPareto(0.0, σ, ξ)
+GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
 GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
 
 minimum(d::GeneralizedPareto) = d.μ
@@ -71,7 +71,7 @@ params(d::GeneralizedPareto) = (d.μ, d.σ, d.ξ)
 
 #### Statistics
 
-median(d::GeneralizedPareto) = d.μ + d.σ * expm1(d.ξ * log(2)) / d.ξ
+median(d::GeneralizedPareto) = d.ξ == 0 ? d.μ + d.σ * log(2) : d.μ + d.σ * expm1(d.ξ * log(2)) / d.ξ
 
 function mean{T<:Real}(d::GeneralizedPareto{T})
     if d.ξ < 1
