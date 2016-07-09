@@ -39,12 +39,8 @@ Skellam() = Skellam(1.0, 1.0)
 
 #### Conversions
 
-function Skellam{T <: Real, S <: Real}(::Type{Skellam{T}}, μ1::S, μ2::S)
-    Skellam(T(μ1), T(μ2))
-end
-function Skellam{T <: Real, S <: Real}(::Type{Skellam{T}}, d::Skellam{S})
-    Skellam(T(d.μ1), T(d.μ2))
-end
+convert{T<:Real, S<:Real}(::Type{Skellam{T}}, μ1::S, μ2::S) = Skellam(T(μ1), T(μ2))
+convert{T<:Real, S<:Real}(::Type{Skellam{T}}, d::Skellam{S}) =  Skellam(T(d.μ1), T(d.μ2))
 
 #### Parameters
 
@@ -80,6 +76,8 @@ function cf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
     exp(-(μ1 + μ2) + μ1 * cis(t) + μ2 * cis(-t))
 end
+
+cdf(d::Skellam, x) = throw(MethodError(cdf, (d, x)))
 
 #### Sampling
 
