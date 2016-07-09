@@ -81,6 +81,7 @@ for (T, g, μ, Σ) in [
     @test isa(g, T)
     @test_approx_eq mean(g) μ
     @test_approx_eq cov(g) Σ
+    @test_approx_eq invcov(g) inv(Σ)
     test_mvnormal(g, 10^4)
 
     # conversion between mean form and canonical form
@@ -100,10 +101,12 @@ for (T, g, μ, Σ) in [
     end
 end
 
-##### Miscellany
+##### Constructors and conversions
 mu = [1., 2., 3.]
 C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
+@test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
+@test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
 
 ##### MLE
 
