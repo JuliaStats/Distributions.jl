@@ -23,7 +23,7 @@ immutable VonMises{T<:Real} <: ContinuousUnivariateDistribution
 
     function VonMises(μ::T, κ::T)
         @check_args(VonMises, κ > zero(κ))
-        new(μ, κ, besseli(0, κ))
+        new(μ, κ, besseli(zero(T), κ))
     end
 end
 

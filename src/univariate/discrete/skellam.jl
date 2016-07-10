@@ -77,7 +77,7 @@ function cf(d::Skellam, t::Real)
     exp(-(μ1 + μ2) + μ1 * cis(t) + μ2 * cis(-t))
 end
 
-cdf(d::Skellam, x) = throw(MethodError(cdf, (d, x)))
+cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
 
 #### Sampling
 

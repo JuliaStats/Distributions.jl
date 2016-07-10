@@ -333,6 +333,17 @@ def get_dinfo(dname, args):
 			a, b = args
 		return (uniform(a, b-a), (a, b), {"location" : a, "scale" : b - a})
 
+	elif dname == "VonMises":
+		assert len(args) <= 2
+		if len(args) == 0:
+			m, k = 0.0, 1.0
+		elif len(args) == 1:
+			m, k = 0.0, get(args, 0)
+		else:
+			m = get(args, 0)
+			k = get(args, 1)
+		return (vonmises(k, loc=m), (m - pi, m + pi), {})
+
 	elif dname == "Weibull":
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
