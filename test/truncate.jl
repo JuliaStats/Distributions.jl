@@ -27,7 +27,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
         println("    testing Truncated($(ex),$lower,$upper)")
         dtype = eval(dsym)
         dtypet = Truncated
-        if !(dsym in [:Skellam, ])
+        if !(dsym in [:Skellam,])
             d = Truncated(eval(parse(ex)),lower,upper)
             if dtype != TruncatedNormal
                 @assert isa(dtype, Type) && dtype <: UnivariateDistribution

@@ -31,7 +31,6 @@ immutable Geometric{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Geometric{T<:Real}(p::T) = Geometric{T}(p)
-Geometric(p::Integer) = Geometric(Float64(p))
 Geometric() = Geometric(0.5)
 
 @distr_support Geometric 0 Inf

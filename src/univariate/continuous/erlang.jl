@@ -26,6 +26,7 @@ immutable Erlang{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Erlang{T<:Real}(α::Int, θ::T) = Erlang{T}(α, θ)
+Erlang(α::Int, θ::Integer) = Erlang{Float64}(α, Float64(θ))
 Erlang(α::Real) = Erlang(α, 1.0)
 Erlang() = Erlang(1.0, 1.0)
 

@@ -56,6 +56,26 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
     end
 
+    # test various constructors for promotion, all-Integer args, etc.
+    D = eval(Symbol(dct["dtype"]))  # distribution name
+    pars = params(d)
+
+    # promotion constructor:
+    float_pars = map(x -> isa(x, AbstractFloat), pars)
+    if length(pars) > 1 && sum(float_pars) > 1
+        mixed_pars = Any[pars...]
+        first_float = findfirst(float_pars)
+        mixed_pars[first_float] = Float32(mixed_pars[first_float])
+
+        @test typeof(D(mixed_pars...)) == typeof(d)
+    end
+
+    # promote integer arguments to floats, where applicable
+    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric)
+        int_pars = map(x -> ceil(Int, x), pars)
+        @test typeof(D(int_pars...)) == typeof(d)
+    end
+
     # verify stats
     @test_approx_eq minimum(d) _json_value(dct["minimum"])
     @test_approx_eq maximum(d) _json_value(dct["maximum"])
@@ -78,8 +98,6 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test typeof(convert(D{W}, d)) == D{W}
         @test typeof(convert(D{W}, params(d)...)) == D{W}
     end
-
-    # TODO: test various constructors for promotion, all-Integer args, etc.
 
     # verify quantiles
     if !isa(d, Union{Skellam, VonMises})
