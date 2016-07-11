@@ -258,9 +258,9 @@ def get_dinfo(dname, args):
 		return (norm(mu, sig), (-inf, inf), {})
 
 	elif dname == "NormalCanon":
-		assert len(args) == 2
-		h = args[0]
-		J = args[1]
+		assert len(args) <= 2
+		h = get(args, 0) or 0.0
+		J = get(args, 1) or 1.0
 		return (norm(h/J, sqrt(1.0/J)), (-inf, inf), {})
 
 	elif dname == "Pareto":

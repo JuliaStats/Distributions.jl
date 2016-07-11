@@ -88,6 +88,7 @@ Normal(0.0, 1.0)
 Normal(-3.0, 2.0)
 Normal(1.0, 10.0)
 
+NormalCanon()
 NormalCanon(0.0, 1.0)
 NormalCanon(-1.0, 2.5)
 NormalCanon(2.0, 0.8)
