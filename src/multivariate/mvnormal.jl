@@ -80,7 +80,7 @@ typealias ZeroMeanFullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Zer
 ### Construction
 function MvNormal{T<:Real}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T})
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{T,typeof(Σ),Vector{T}}(μ, Σ)
+    MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
 MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) = MvNormal(promote_eltype(μ, Σ)...)

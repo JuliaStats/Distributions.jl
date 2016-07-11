@@ -32,6 +32,8 @@ end
 v = [2.0, 1.0, 3.0]
 d = Dirichlet(v)
 
+@test Dirichlet([2, 1, 3]).alpha == d.alpha
+
 @test length(d) == length(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)

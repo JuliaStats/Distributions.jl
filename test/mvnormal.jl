@@ -104,10 +104,17 @@ end
 ##### Constructors and conversions
 mu = [1., 2., 3.]
 C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+J = inv(C)
+h = J \ mu
 @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
 @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
 @test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
 
+@test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
+@test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
+@test typeof(MvNormalCanon(h, 2.0f0)) == typeof(MvNormalCanon(h, 2.0))
+
+@test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 ##### MLE
 
 # a slow but safe way to implement MLE for verification
