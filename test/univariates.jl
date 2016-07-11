@@ -150,7 +150,8 @@ end
 ## main
 
 for c in ["discrete",
-          "continuous"]
+          "continuous",
+          "discrete_hand_coded"]
 
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
