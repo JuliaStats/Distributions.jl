@@ -39,6 +39,7 @@ convert{T <: Real, S <: Real}(::Type{Chi{T}}, d::Chi{S}) = Chi(T(d.ν))
 
 dof(d::Chi) = d.ν
 params(d::Chi) = (d.ν,)
+@inline partype{T<:Real}(d::Chi{T}) = T
 
 
 #### Statistics

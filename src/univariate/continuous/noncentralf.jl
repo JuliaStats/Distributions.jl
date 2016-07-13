@@ -28,6 +28,7 @@ end
 ### Parameters
 
 params(d::NoncentralF) = (d.ν1, d.ν2, d.λ)
+@inline partype{T<:Real}(d::NoncentralF{T}) = T
 
 
 ### Statistics

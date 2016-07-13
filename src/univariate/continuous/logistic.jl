@@ -51,6 +51,7 @@ location(d::Logistic) = d.μ
 scale(d::Logistic) = d.θ
 
 params(d::Logistic) = (d.μ, d.θ)
+@inline partype{T<:Real}(d::Logistic{T}) = T
 
 
 #### Statistics

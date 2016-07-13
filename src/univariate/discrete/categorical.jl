@@ -47,6 +47,7 @@ convert{T<:Real, S<:Real}(::Type{Categorical{T}}, d::Categorical{S}) = Categoric
 ncategories(d::Categorical) = d.K
 probs(d::Categorical) = d.p
 params(d::Categorical) = (d.p,)
+@inline partype{T<:Real}(d::Categorical{T}) = T
 
 
 ### Statistics

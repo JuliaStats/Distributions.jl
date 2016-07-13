@@ -53,6 +53,7 @@ scale(d::InverseGamma) = d.θ
 rate(d::InverseGamma) = scale(d.invd)
 
 params(d::InverseGamma) = (shape(d), scale(d))
+@inline partype{T<:Real}(d::InverseGamma{T}) = T
 
 
 #### Parameters

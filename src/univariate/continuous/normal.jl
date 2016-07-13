@@ -47,6 +47,7 @@ convert{T <: Real, S <: Real}(::Type{Normal{T}}, d::Normal{S}) = Normal(T(d.μ),
 #### Parameters
 
 params(d::Normal) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Normal{T}) = T
 
 
 #### Statistics

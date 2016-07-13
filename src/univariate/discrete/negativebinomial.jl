@@ -58,6 +58,7 @@ end
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
+@inline partype{T<:Real}(d::NegativeBinomial{T}) = T
 
 succprob(d::NegativeBinomial) = d.p
 failprob(d::NegativeBinomial) = 1 - d.p

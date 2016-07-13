@@ -26,6 +26,7 @@ end
 ### Parameters
 
 params(d::NoncentralChisq) = (d.ν, d.λ)
+@inline partype{T<:Real}(d::NoncentralChisq{T}) = T
 
 
 ### Statistics

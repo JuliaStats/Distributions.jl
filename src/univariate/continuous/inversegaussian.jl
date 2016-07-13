@@ -52,6 +52,7 @@ end
 
 shape(d::InverseGaussian) = d.λ
 params(d::InverseGaussian) = (d.μ, d.λ)
+@inline partype{T<:Real}(d::InverseGaussian{T}) = T
 
 
 #### Statistics

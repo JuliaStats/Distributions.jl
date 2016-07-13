@@ -54,6 +54,7 @@ end
 #### Parameters
 
 params(d::Beta) = (d.α, d.β)
+@inline partype{T<:Real}(d::Beta{T}) = T
 
 
 #### Statistics

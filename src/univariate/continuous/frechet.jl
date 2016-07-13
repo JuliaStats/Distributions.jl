@@ -53,6 +53,7 @@ end
 shape(d::Frechet) = d.α
 scale(d::Frechet) = d.θ
 params(d::Frechet) = (d.α, d.θ)
+@inline partype{T<:Real}(d::Frechet{T}) = T
 
 
 #### Statistics

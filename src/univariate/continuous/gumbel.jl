@@ -47,6 +47,7 @@ convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, d::Gumbel{S}) = Gumbel(T(d.μ),
 location(d::Gumbel) = d.μ
 scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
+@inline partype{T<:Real}(d::Gumbel{T}) = T
 
 
 #### Statistics

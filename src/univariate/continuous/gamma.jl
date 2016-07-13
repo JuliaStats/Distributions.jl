@@ -51,6 +51,7 @@ scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
 params(d::Gamma) = (d.α, d.θ)
+@inline partype{T<:Real}(d::Gamma{T}) = T
 
 
 #### Statistics

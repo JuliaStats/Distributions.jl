@@ -37,6 +37,7 @@ convert{T<:Real, S<:Real}(::Type{TDist{T}}, d::TDist{S}) = TDist(T(d.ν))
 
 dof(d::TDist) = d.ν
 params(d::TDist) = (d.ν,)
+@inline partype{T<:Real}(d::TDist{T}) = T
 
 
 #### Statistics

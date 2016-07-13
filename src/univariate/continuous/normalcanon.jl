@@ -31,6 +31,7 @@ canonform(d::Normal) = convert(NormalCanon, d)
 #### Parameters
 
 params(d::NormalCanon) = (d.η, d.λ)
+@inline partype{T<:Real}(d::NormalCanon{T}) = T
 
 
 #### Statistics

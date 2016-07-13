@@ -58,6 +58,7 @@ succprob(d::PoissonBinomial) = d.p
 failprob(d::PoissonBinomial) = 1 - d.p
 
 params(d::PoissonBinomial) = (d.p, )
+@inline partype{T<:Real}(d::PoissonBinomial{T}) = T
 
 #### Properties
 

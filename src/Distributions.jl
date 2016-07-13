@@ -284,7 +284,6 @@ include("truncate.jl")
 include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
-include("parametric.jl")
 include("testutils.jl")
 
 # mixture distributions (TODO: moveout)

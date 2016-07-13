@@ -49,6 +49,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
+@inline partype{T<:Real}(d::Bernoulli{T}) = T
 
 
 #### Properties

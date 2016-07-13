@@ -41,6 +41,7 @@ function convert{T <: Real, S <: Real}(::Type{NormalInverseGaussian{T}}, d::Norm
 end
 
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
+@inline partype{T<:Real}(d::NormalInverseGaussian{T}) = T
 
 mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / sqrt(d.α^2 - d.β^2)
 var(d::NormalInverseGaussian) = d.δ * d.α^2 / sqrt(d.α^2 - d.β^2)^3

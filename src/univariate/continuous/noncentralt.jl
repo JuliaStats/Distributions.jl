@@ -22,6 +22,7 @@ convert{T <: Real, S <: Real}(::Type{NoncentralT{T}}, d::NoncentralT{S}) = Nonce
 ### Parameters
 
 params(d::NoncentralT) = (d.ν, d.λ)
+@inline partype{T<:Real}(d::NoncentralT{T}) = T
 
 
 ### Statistics

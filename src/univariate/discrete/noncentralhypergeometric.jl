@@ -33,6 +33,7 @@ function quantile{T<:Real}(d::NoncentralHypergeometric{T}, q::Real)
 end
 
 params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
+@inline partype{T<:Real}(d::NoncentralHypergeometric{T}) = T
 
 ## Fisher's noncentral hypergeometric distribution
 

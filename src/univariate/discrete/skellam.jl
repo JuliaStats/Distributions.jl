@@ -45,6 +45,7 @@ convert{T<:Real, S<:Real}(::Type{Skellam{T}}, d::Skellam{S}) =  Skellam(T(d.μ1)
 #### Parameters
 
 params(d::Skellam) = (d.μ1, d.μ2)
+@inline partype{T<:Real}(d::Skellam{T}) = T
 
 
 #### Statistics

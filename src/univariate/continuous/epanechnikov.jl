@@ -27,6 +27,7 @@ end
 location(d::Epanechnikov) = d.μ
 scale(d::Epanechnikov) = d.σ
 params(d::Epanechnikov) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Epanechnikov{T}) = T
 
 ## Properties
 mean(d::Epanechnikov) = d.μ

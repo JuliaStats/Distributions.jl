@@ -67,6 +67,7 @@ location(d::GeneralizedPareto) = d.μ
 scale(d::GeneralizedPareto) = d.σ
 shape(d::GeneralizedPareto) = d.ξ
 params(d::GeneralizedPareto) = (d.μ, d.σ, d.ξ)
+@inline partype{T<:Real}(d::GeneralizedPareto{T}) = T
 
 
 #### Statistics

@@ -49,6 +49,7 @@ end
 #### Parameters
 
 params(d::FDist) = (d.ν1, d.ν2)
+@inline partype{T<:Real}(d::FDist{T}) = T
 
 
 #### Statistics

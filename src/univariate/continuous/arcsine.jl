@@ -48,9 +48,10 @@ end
 
 ### Parameters
 
-params(d::Arcsine) = (d.a, d.b)
 location(d::Arcsine) = d.a
 scale(d::Arcsine) = d.b - d.a
+params(d::Arcsine) = (d.a, d.b)
+@inline partype{T<:Real}(d::Arcsine{T}) = T
 
 
 ### Statistics

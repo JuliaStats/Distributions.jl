@@ -48,6 +48,7 @@ location(d::SymTriangularDist) = d.μ
 scale(d::SymTriangularDist) = d.σ
 
 params(d::SymTriangularDist) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::SymTriangularDist{T}) = T
 
 
 #### Statistics

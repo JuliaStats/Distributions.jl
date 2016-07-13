@@ -52,6 +52,7 @@ end
 location(d::Laplace) = d.μ
 scale(d::Laplace) = d.θ
 params(d::Laplace) = (d.μ, d.θ)
+@inline partype{T<:Real}(d::Laplace{T}) = T
 
 
 #### Statistics

@@ -42,6 +42,7 @@ convert{T <: Real, S <: Real}(::Type{Rayleigh{T}}, d::Rayleigh{S}) = Rayleigh(T(
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
+@inline partype{T<:Real}(d::Rayleigh{T}) = T
 
 
 #### Statistics

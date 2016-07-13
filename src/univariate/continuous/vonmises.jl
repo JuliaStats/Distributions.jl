@@ -45,6 +45,7 @@ convert{T<:Real, S<:Real}(::Type{VonMises{T}}, d::VonMises{S}) = VonMises(T(d.μ
 #### Parameters
 
 params(d::VonMises) = (d.μ, d.κ)
+@inline partype{T<:Real}(d::VonMises{T}) = T
 
 
 #### Statistics

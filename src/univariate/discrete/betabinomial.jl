@@ -48,6 +48,7 @@ end
 ntrials(d::BetaBinomial) = d.n
 
 params(d::BetaBinomial) = (d.n, d.α, d.β)
+@inline partype{T<:Real}(d::BetaBinomial{T}) = T
 
 #### Properties
 

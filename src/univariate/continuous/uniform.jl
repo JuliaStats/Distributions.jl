@@ -42,6 +42,7 @@ convert{T<:Real, S<:Real}(::Type{Uniform{T}}, d::Uniform{S}) = Uniform(T(d.a), T
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
+@inline partype{T<:Real}(d::Uniform{T}) = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a

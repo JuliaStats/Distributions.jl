@@ -34,6 +34,7 @@ Chisq(ν::Integer) = Chisq(Float64(ν))
 
 dof(d::Chisq) = d.ν
 params(d::Chisq) = (d.ν,)
+@inline partype{T<:Real}(d::Chisq{T}) = T
 
 ### Conversions
 convert{T<:Real}(::Type{Chisq{T}}, ν::Real) = Chisq(T(ν))

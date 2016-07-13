@@ -53,6 +53,7 @@ location(d::Cauchy) = d.μ
 scale(d::Cauchy) = d.σ
 
 params(d::Cauchy) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Cauchy{T}) = T
 
 
 #### Statistics

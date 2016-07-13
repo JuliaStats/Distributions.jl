@@ -42,6 +42,7 @@ scale(d::Exponential) = d.θ
 rate(d::Exponential) = 1 / d.θ
 
 params(d::Exponential) = (d.θ,)
+@inline partype{T<:Real}(d::Exponential{T}) = T
 
 
 #### Statistics

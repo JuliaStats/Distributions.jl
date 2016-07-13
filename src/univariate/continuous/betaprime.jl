@@ -54,7 +54,7 @@ end
 #### Parameters
 
 params(d::BetaPrime) = (d.α, d.β)
-
+@inline partype{T<:Real}(d::BetaPrime{T}) = T
 
 #### Statistics
 

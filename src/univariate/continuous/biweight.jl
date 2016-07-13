@@ -15,6 +15,7 @@ Biweight() = Biweight(0.0, 1.0)
 
 ## Parameters
 params(d::Biweight) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Biweight{T}) = T
 
 ## Properties
 mean(d::Biweight) = d.μ

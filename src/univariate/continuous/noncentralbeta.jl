@@ -20,6 +20,7 @@ NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(Float64(�
 ### Parameters
 
 params(d::NoncentralBeta) = (d.α, d.β, d.λ)
+@inline partype{T<:Real}(d::NoncentralBeta{T}) = T
 
 
 ### Evaluation & Sampling

@@ -43,6 +43,7 @@ convert{T <: Real, S <: Real}(::Type{Levy{T}}, d::Levy{S}) = Levy(T(d.μ), T(d.�
 
 location(d::Levy) = d.μ
 params(d::Levy) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Levy{T}) = T
 
 
 #### Statistics

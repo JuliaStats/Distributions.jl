@@ -46,6 +46,7 @@ shape(d::Erlang) = d.α
 scale(d::Erlang) = d.θ
 rate(d::Erlang) = inv(d.θ)
 params(d::Erlang) = (d.α, d.θ)
+@inline partype{T<:Real}(d::Erlang{T}) = T
 
 #### Statistics
 

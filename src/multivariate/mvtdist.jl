@@ -87,6 +87,7 @@ invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*full(inv(d.Σ)) : NaN*ones(
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
+@inline partype{T<:Real}(d::GenericMvTDist{T}) = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)

@@ -44,6 +44,7 @@ convert{T <: Real, S <: Real}(::Type{Geometric{T}}, d::Geometric{S}) = Geometric
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
+@inline partype{T<:Real}(d::Geometric{T}) = T
 
 
 ### Statistics

@@ -57,6 +57,7 @@ convert{T<:Real, S<:Real}(::Type{TriangularDist{T}}, d::TriangularDist{S}) = Tri
 #### Parameters
 
 params(d::TriangularDist) = (d.a, d.b, d.c)
+@inline partype{T<:Real}(d::TriangularDist{T}) = T
 
 
 #### Statistics

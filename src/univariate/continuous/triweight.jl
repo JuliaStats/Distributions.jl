@@ -23,6 +23,7 @@ convert{T<:Real, S<:Real}(::Type{Triweight{T}}, d::Triweight{S}) = Triweight(T(d
 location(d::Triweight) = d.μ
 scale(d::Triweight) = d.σ
 params(d::Triweight) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Triweight{T}) = T
 
 
 ## Properties

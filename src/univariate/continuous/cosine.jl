@@ -32,6 +32,7 @@ location(d::Cosine) = d.μ
 scale(d::Cosine) = d.σ
 
 params(d::Cosine) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Cosine{T}) = T
 
 
 #### Statistics

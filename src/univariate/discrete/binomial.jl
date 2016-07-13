@@ -57,6 +57,7 @@ succprob(d::Binomial) = d.p
 failprob(d::Binomial) = 1 - d.p
 
 params(d::Binomial) = (d.n, d.p)
+@inline partype{T<:Real}(d::Binomial{T}) = T
 
 
 #### Properties

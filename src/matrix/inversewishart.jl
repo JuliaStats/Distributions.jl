@@ -41,6 +41,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
+@inline partype{T<:Real}(d::InverseWishart{T}) = T
 
 #### Show
 

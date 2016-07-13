@@ -50,6 +50,7 @@ shape(d::Weibull) = d.α
 scale(d::Weibull) = d.θ
 
 params(d::Weibull) = (d.α, d.θ)
+@inline partype{T<:Real}(d::Weibull{T}) = T
 
 
 #### Statistics

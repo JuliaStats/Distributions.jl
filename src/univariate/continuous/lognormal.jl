@@ -45,6 +45,7 @@ convert{T <: Real, S <: Real}(::Type{LogNormal{T}}, d::LogNormal{S}) = LogNormal
 #### Parameters
 
 params(d::LogNormal) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::LogNormal{T}) = T
 
 #### Statistics
 

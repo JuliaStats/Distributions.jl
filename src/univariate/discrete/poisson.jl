@@ -37,6 +37,7 @@ convert{T <: Real, S <: Real}(::Type{Poisson{T}}, d::Poisson{S}) = Poisson(T(d.�
 ### Parameters
 
 params(d::Poisson) = (d.λ,)
+@inline partype{T<:Real}(d::Poisson{T}) = T
 
 rate(d::Poisson) = d.λ
 
