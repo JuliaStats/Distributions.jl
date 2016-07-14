@@ -35,4 +35,4 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
-rand(d::NoncentralChisq) = StatsFuns.Rmath.nchisqrand(d.ν, d.λ)
+rand(d::NoncentralChisq) = StatsFuns.RFunctions.nchisqrand(d.ν, d.λ)

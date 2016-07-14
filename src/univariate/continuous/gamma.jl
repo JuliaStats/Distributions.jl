@@ -84,7 +84,7 @@ cf(d::Gamma, t::Real) = (1.0 - im * t * d.θ)^(-d.α)
 gradlogpdf(d::Gamma, x::Float64) =
     insupport(Gamma, x) ? (d.α - 1.0) / x - 1.0 / d.θ : 0.0
 
-rand(d::Gamma) = StatsFuns.Rmath.gammarand(d.α, d.θ)
+rand(d::Gamma) = StatsFuns.RFunctions.gammarand(d.α, d.θ)
 
 
 #### Fit model

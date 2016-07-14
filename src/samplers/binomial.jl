@@ -4,8 +4,7 @@ immutable BinomialRmathSampler <: Sampleable{Univariate,Discrete}
     prob::Float64
 end
 
-rand(s::BinomialRmathSampler) =
-    round(Int, ccall((:rbinom, "libRmath-julia"), Float64, (Float64, Float64), s.n, s.prob))
+rand(s::BinomialRmathSampler) = round(Int, StatsFuns.RFunctions.binomrand(s.n, s.prob))
 
 
 # compute probability vector of a Binomial distribution

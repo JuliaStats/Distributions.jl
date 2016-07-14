@@ -60,4 +60,4 @@ cf(d::Erlang, t::Real)  = (1.0 - im * t * d.θ)^(-d.α)
 
 @_delegate_statsfuns Erlang gamma α θ
 
-rand(d::Erlang) = StatsFuns.Rmath.gammarand(d.α, d.θ)
+rand(d::Erlang) = StatsFuns.RFunctions.gammarand(d.α, d.θ)

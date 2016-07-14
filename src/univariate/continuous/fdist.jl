@@ -85,4 +85,4 @@ end
 
 @_delegate_statsfuns FDist fdist ν1 ν2
 
-rand(d::FDist) = StatsFuns.Rmath.fdistrand(d.ν1, d.ν2)
+rand(d::FDist) = StatsFuns.RFunctions.fdistrand(d.ν1, d.ν2)
