@@ -33,7 +33,7 @@ if nworkers() > 1
 end
 
 if Base.JLOptions().code_coverage == 1
-    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
+    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--check-bounds=yes"])
 else
     addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
 end
