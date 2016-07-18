@@ -10,11 +10,6 @@ using Compat
 import Compat.view
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
-if VERSION < v"0.5.0-"
-    export shape
-else
-    import Base.shape
-end
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.Math.@horner
@@ -241,6 +236,7 @@ export
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
     scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
+    shape,              # shape parameter for applicable distributions
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution

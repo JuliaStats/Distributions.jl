@@ -64,7 +64,7 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-rand(d::TDist) = StatsFuns.Rmath.tdistrand(d.ν)
+rand(d::TDist) = StatsFuns.RFunctions.tdistrand(d.ν)
 
 function cf(d::TDist, t::Real)
     t == 0 && return complex(1.0)

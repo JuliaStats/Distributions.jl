@@ -116,5 +116,5 @@ for (g, μ, Σ) in [
 
     m,s = params(g)
     @test_approx_eq full(m) μ
-    test_mvlognormal(g)
+    test_mvlognormal(g, 10^4)
 end

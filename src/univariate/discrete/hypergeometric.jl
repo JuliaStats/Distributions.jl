@@ -72,7 +72,7 @@ end
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
 
-rand(d::Hypergeometric) = convert(Int, StatsFuns.Rmath.hyperrand(d.ns, d.nf, d.n))
+rand(d::Hypergeometric) = convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
 
 immutable RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
     ns::Float64

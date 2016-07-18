@@ -92,7 +92,7 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
-rand(d::Binomial) = convert(Int, StatsFuns.Rmath.binomrand(d.n, d.p))
+rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
 
 immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
     n::Int

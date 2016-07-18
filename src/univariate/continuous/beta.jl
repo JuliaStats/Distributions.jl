@@ -101,7 +101,7 @@ gradlogpdf(d::Beta, x::Float64) =
 
 #### Sampling
 
-rand(d::Beta) = StatsFuns.Rmath.betarand(d.α, d.β)
+rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
 
 
 #### Fit model

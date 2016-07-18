@@ -66,7 +66,7 @@ mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1.0 - p) * (d.r - 1.) /
 
 @_delegate_statsfuns NegativeBinomial nbinom r p
 
-rand(d::NegativeBinomial) = convert(Int, StatsFuns.Rmath.nbinomrand(d.r, d.p))
+rand(d::NegativeBinomial) = convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
 
 immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64

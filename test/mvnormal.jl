@@ -81,7 +81,7 @@ for (T, g, μ, Σ) in [
     @test isa(g, T)
     @test_approx_eq mean(g) μ
     @test_approx_eq cov(g) Σ
-    test_mvnormal(g)
+    test_mvnormal(g, 10^4)
 
     # conversion between mean form and canonical form
     if isa(g, MvNormal)

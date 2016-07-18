@@ -82,7 +82,7 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-rand(d::Poisson) = convert(Int, StatsFuns.Rmath.poisrand(d.λ))
+rand(d::Poisson) = convert(Int, StatsFuns.RFunctions.poisrand(d.λ))
 
 immutable RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64
