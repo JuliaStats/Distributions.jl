@@ -12,12 +12,12 @@ end
 # formula of Birnbaum and Tingey (1951)
 function ccdf(d::KSOneSided, x::Float64)
     if x >= 1
-        return 0
+        return 0.0
     elseif x <= 0
-        return 1
+        return 1.0
     end
     n = d.n
-    s = 0
+    s = 0.0
     for j = 0:floor(Int,n-n*x)
         p = x+j/n
         s += pdf(Binomial(n,p),j) / p

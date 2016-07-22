@@ -55,9 +55,9 @@ kurtosis{T<:Real}(d::Levy{T}) = T(NaN)
 
 mode(d::Levy) = d.σ / 3 + d.μ
 
-entropy(d::Levy) = (1 - 3digamma(1) + log(16π * d.σ^2)) / 2
+entropy(d::Levy) = (1 - 3digamma(1) + log(16 * d.σ^2 * π)) / 2
 
-median(d::Levy) = d.μ + d.σ / 0.4549364231195728  # 0.454... = (2 * erfcinv(0.5)^2)
+median(d::Levy) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 
 #### Evaluation
@@ -71,7 +71,7 @@ end
 function logpdf(d::Levy, x::Real)
     μ, σ = params(d)
     z = x - μ
-    1/2 * (log(σ) - log2π - σ / z - 3log(z))
+    (log(σ) - log2π - σ / z - 3log(z))/2
 end
 
 cdf(d::Levy, x::Real) = erfc(sqrt(d.σ / (2(x - d.μ))))

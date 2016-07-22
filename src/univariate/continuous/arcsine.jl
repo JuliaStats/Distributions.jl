@@ -63,7 +63,7 @@ modes(d::Arcsine) = [d.a, d.b]
 
 var(d::Arcsine) = abs2(d.b - d.a) / 8
 skewness{T<:Real}(d::Arcsine{T}) = zero(T)
-kurtosis{T<:Real}(d::Arcsine{T}) = -3/2*one(T)
+kurtosis{T<:Real}(d::Arcsine{T}) = -T(3/2)
 
 entropy(d::Arcsine) = -0.24156447527049044469 + log(scale(d))
 
@@ -75,7 +75,7 @@ function pdf(d::Arcsine, x::Real)
 end
 
 function logpdf{T<:Real}(d::Arcsine{T}, x::Real)
-    insupport(d, x) ? -(logπ + 1/2*log((x - d.a) * (d.b - x))) : -T(Inf)
+    insupport(d, x) ? -(logπ + log((x - d.a) * (d.b - x))/2) : -T(Inf)
 end
 
 cdf{T<:Real}(d::Arcsine{T}, x::Real) = x < d.a ? zero(T) :

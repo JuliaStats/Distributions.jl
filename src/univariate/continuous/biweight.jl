@@ -24,26 +24,26 @@ mode(d::Biweight) = d.μ
 
 var(d::Biweight) = d.σ^2 / 7
 skewness{T<:Real}(d::Biweight{T}) = zero(T)
-kurtosis{T<:Real}(d::Biweight{T}) = -2.9523809523809526*one(T)  # = 1/21-3
+kurtosis{T<:Real}(d::Biweight{T}) = T(1)/21 - 3
 
 ## Functions
 function pdf{T<:Real}(d::Biweight{T}, x::Real)
     u = abs(x - d.μ) / d.σ
-    u >= 1 ? zero(T) : 0.9375 * (1 - u^2)^2 / d.σ
+    u >= 1 ? zero(T) : (15//16) * (1 - u^2)^2 / d.σ
 end
 
 function cdf{T<:Real}(d::Biweight{T}, x::Real)
     u = (x - d.μ) / d.σ
     u <= -1 ? zero(T) :
     u >= 1 ? one(T) :
-    0.0625(u + 1)^3 * @horner(u,8,-9,3)
+    (u + 1)^3/16 * @horner(u,8,-9,3)
 end
 
 function ccdf{T<:Real}(d::Biweight{T}, x::Real)
     u = (d.μ - x) / d.σ
     u <= -1 ? one(T) :
     u >= 1 ? zero(T) :
-    0.0625(u + 1)^3 * @horner(u,8,-9,3)
+    (u + 1)^3/16 * @horner(u,8,-9,3)
 end
 
 @quantile_newton Biweight

@@ -179,8 +179,8 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
 end
 
 function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64})
-    ns = 0
-    ne = 0
+    ns = 0.
+    ne = 0.
     for i = 1:length(x)
         @inbounds xi = x[i]
         @inbounds wi = w[i]

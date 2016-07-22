@@ -59,7 +59,7 @@ mode(d::SymTriangularDist) = d.μ
 
 var(d::SymTriangularDist) = d.σ^2 / 6
 skewness{T<:Real}(d::SymTriangularDist{T}) = zero(T)
-kurtosis{T<:Real}(d::SymTriangularDist{T}) = -3/5*one(T)
+kurtosis{T<:Real}(d::SymTriangularDist{T}) = T(-3)/5
 
 entropy(d::SymTriangularDist) = 1//2 + log(d.σ)
 
@@ -79,15 +79,15 @@ end
 function cdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
     (μ, σ) = params(d)
     x <= μ - σ ? zero(T) :
-    x <= μ ? 1/2 * (1 + zval(d, x))^2 :
-    x < μ + σ ? 1 - 1/2 * (1 - zval(d, x))^2 : one(T)
+    x <= μ ? (1 + zval(d, x))^2/2 :
+    x < μ + σ ? 1 - (1 - zval(d, x))^2/2 : one(T)
 end
 
 function ccdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
     (μ, σ) = params(d)
     x <= μ - σ ? one(T) :
-    x <= μ ? 1 - 1/2 * (1 + zval(d, x))^2 :
-    x < μ + σ ? 1/2 * (1 - zval(d, x))^2 : zero(T)
+    x <= μ ? 1 - (1 + zval(d, x))^2/2 :
+    x < μ + σ ? (1 - zval(d, x))^2/2 : zero(T)
 end
 
 function logcdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
@@ -113,8 +113,10 @@ cquantile(d::SymTriangularDist, p::Real) = p > 1/2 ? xval(d, sqrt(2(1-p)) - 1) :
 invlogcdf(d::SymTriangularDist, lp::Real) = lp < loghalf ? xval(d, expm1(1/2*(lp - loghalf))) :
                                                               xval(d, 1 - sqrt(-2expm1(lp)))
 
-invlogccdf(d::SymTriangularDist, lp::Real) = lp > loghalf ? xval(d, sqrt(-2*expm1(lp)) - 1) :
-                                                               xval(d, -(expm1(1/2*(lp - loghalf))))
+function invlogccdf(d::SymTriangularDist, lp::Real)
+    lp > loghalf ? xval(d, sqrt(-2*expm1(lp)) - 1) :
+    xval(d, -(expm1((lp - loghalf)/2)))
+end
 
 
 function mgf(d::SymTriangularDist, t::Real)

@@ -158,8 +158,8 @@ function suffstats{T<:Integer}(::Type{Geometric}, x::AbstractArray{T}, w::Abstra
     if length(w) != n
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
-    sx = 0
-    tw = 0
+    sx = 0.
+    tw = 0.
     for i = 1:n
         wi = w[i]
         sx += wi * x[i]

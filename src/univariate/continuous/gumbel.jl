@@ -52,19 +52,19 @@ params(d::Gumbel) = (d.μ, d.θ)
 
 #### Statistics
 
-mean(d::Gumbel) = d.μ + d.θ * 0.57721566490153286
+mean(d::Gumbel) = d.μ + d.θ * γ
 
-median(d::Gumbel) = d.μ + d.θ * 0.366512920581664327
+median{T<:Real}(d::Gumbel{T}) = d.μ - d.θ * log(T(logtwo))
 
 mode(d::Gumbel) = d.μ
 
-var(d::Gumbel) = 1.6449340668482264 * d.θ^2
+var{T<:Real}(d::Gumbel{T}) = T(π)^2/6 * d.θ^2
 
-skewness{T<:Real}(d::Gumbel{T}) = 1.13954709940464866*one(T)
+skewness{T<:Real}(d::Gumbel{T}) = 112*sqrt(T(6))*zeta(T(3))/π/π/π
 
-kurtosis{T<:Real}(d::Gumbel{T}) = 12/5*one(T)
+kurtosis{T<:Real}(d::Gumbel{T}) = T(12)/5
 
-entropy(d::Gumbel) = 1.57721566490153286 + log(d.θ)
+entropy(d::Gumbel) = log(d.θ) + 1 + γ
 
 
 #### Evaluation

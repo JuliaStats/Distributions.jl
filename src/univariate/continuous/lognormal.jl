@@ -53,7 +53,7 @@ meanlogx(d::LogNormal) = d.μ
 varlogx(d::LogNormal) = abs2(d.σ)
 stdlogx(d::LogNormal) = d.σ
 
-mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + 1/2*σ^2))
+mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
 median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
 
@@ -80,7 +80,7 @@ end
 
 function entropy(d::LogNormal)
     (μ, σ) = params(d)
-    1/2*(1 + log(twoπ * σ^2)) + μ
+    (1 + log(twoπ * σ^2))/2 + μ
 end
 
 

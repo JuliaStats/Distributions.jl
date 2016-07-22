@@ -43,11 +43,11 @@ median(d::Cosine) = d.μ
 
 mode(d::Cosine) = d.μ
 
-var(d::Cosine) = d.σ^2 * 0.13069096604865779  # 0.130... = 1/3 - 2 / π^2
+var{T<:Real}(d::Cosine{T}) = d.σ^2 * (1//3 - 2/T(π)^2)
 
 skewness{T<:Real}(d::Cosine{T}) = zero(T)
 
-kurtosis{T<:Real}(d::Cosine{T}) = -0.59376287559828102362*one(T)
+kurtosis{T<:Real}(d::Cosine{T}) = 6*(90-T(pi))/(5*(T(π)^2-6)^2)
 
 
 #### Evaluation

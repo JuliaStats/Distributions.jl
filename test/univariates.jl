@@ -122,13 +122,13 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
 
     try
         m = mgf(d,0.0)
-        Base.Test.test_approx_eq(m, 1.0, "mgf(d, 0.0)", "1.0")
+        @test m == 1.0
     catch e
         isa(e, MethodError) || throw(e)
     end
     try
         c = cf(d,0.0)
-        Base.Test.test_approx_eq(c, 1.0, "cf(d, 0.0)", "1.0")
+        @test c == 1.0
         # test some extra values: should all be well-defined
         for t in (0.1,-0.1,1.0,-1.0)
             @test !isnan(cf(d,t))

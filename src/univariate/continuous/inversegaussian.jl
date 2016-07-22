@@ -68,7 +68,7 @@ kurtosis(d::InverseGaussian) = 15d.μ / d.λ
 function mode(d::InverseGaussian)
     μ, λ = params(d)
     r = μ / λ
-    μ * (sqrt(1 + (9/4)*r^2) - (3/2)*r)
+    μ * (sqrt(1 + (3r/2)^2) - (3r/2))
 end
 
 
@@ -86,7 +86,7 @@ end
 function logpdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     if x > 0
         μ, λ = params(d)
-        return 1/2*(log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x))
+        return (log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x))/2
     else
         return -T(Inf)
     end

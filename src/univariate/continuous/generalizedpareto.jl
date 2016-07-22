@@ -72,7 +72,7 @@ params(d::GeneralizedPareto) = (d.μ, d.σ, d.ξ)
 
 #### Statistics
 
-median(d::GeneralizedPareto) = d.ξ == 0 ? d.μ + d.σ * log(2) : d.μ + d.σ * expm1(d.ξ * log(2)) / d.ξ
+median(d::GeneralizedPareto) = d.ξ == 0 ? d.μ + d.σ * logtwo : d.μ + d.σ * expm1(d.ξ * logtwo) / d.ξ
 
 function mean{T<:Real}(d::GeneralizedPareto{T})
     if d.ξ < 1

@@ -48,16 +48,16 @@ params(d::Rayleigh) = (d.σ,)
 #### Statistics
 
 mean(d::Rayleigh) = sqrthalfπ * d.σ
-median(d::Rayleigh) = 1.177410022515474691 * d.σ   # sqrt(log(4)) = 1.177410022515474691
+median{T<:Real}(d::Rayleigh{T}) = sqrt2 * sqrt(T(logtwo)) * d.σ # sqrt(log(4))
 mode(d::Rayleigh) = d.σ
 
-var(d::Rayleigh) = 0.429203673205103381 * d.σ^2   # (2 - π / 2) = 0.429203673205103381
-std(d::Rayleigh) = 0.655136377562033553 * d.σ
+var{T<:Real}(d::Rayleigh{T}) = (2 - T(π)/2) * d.σ^2
+std{T<:Real}(d::Rayleigh{T}) = sqrt(2 - T(π)/2) * d.σ
 
-skewness{T<:Real}(d::Rayleigh{T}) = 0.631110657818937138*one(T)
-kurtosis{T<:Real}(d::Rayleigh{T}) = 0.245089300687638063*one(T)
+skewness{T<:Real}(d::Rayleigh{T}) = 2 * sqrtπ * (T(π) - 3)/(4 - T(π))^(3/2)
+kurtosis{T<:Real}(d::Rayleigh{T}) = -(6*T(π)^2 - 24*T(π) +16)/(4 - T(π))^2
 
-entropy(d::Rayleigh) = 0.942034242170793776 + log(d.σ)
+entropy{T<:Real}(d::Rayleigh{T}) = 1 - T(logtwo)/2 + T(γ)/2 + log(d.σ)
 
 
 #### Evaluation

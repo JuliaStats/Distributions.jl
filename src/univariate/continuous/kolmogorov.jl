@@ -72,17 +72,17 @@ end
 # TODO: figure out how best to truncate series
 function pdf(d::Kolmogorov,x::Real)
     if x <= 0
-        return 0
+        return 0.0
     elseif x <= 1
         c = π/(2*x)
-        s = 0
+        s = 0.0
         for i = 1:20
             k = ((2i - 1)*c)^2
             s += (k - 1)*exp(-k/2)
         end
         return sqrt2π*s/x^2
     else
-        s = 0
+        s = 0.0
         for i = 1:20
             s += (iseven(i) ? -1 : 1)*i^2*exp(-2(i*x)^2)
         end
@@ -106,11 +106,11 @@ function rand(d::Kolmogorov)
             g = rand_trunc_gamma()
 
             x = pi/sqrt(8g)
-            w = 0
+            w = 0.0
             z = 1/(2g)
             p = exp(-g)
             n = 1
-            q = 1
+            q = 1.0
             u = rand()
             while u >= w
                 w += z*q
@@ -128,7 +128,7 @@ function rand(d::Kolmogorov)
             e = randexp()
             u = rand()
             x = sqrt(t*t+e/2)
-            w = 0
+            w = 0.0
             n = 1
             z = exp(-2*x*x)
             while u > w

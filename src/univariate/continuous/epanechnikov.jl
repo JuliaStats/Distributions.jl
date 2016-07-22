@@ -41,7 +41,7 @@ kurtosis{T<:Real}(d::Epanechnikov{T}) = -2.914285714285714*one(T)  # 3/35-3
 ## Functions
 function pdf{T<:Real}(d::Epanechnikov{T}, x::Real)
     u = abs(x - d.μ) / d.σ
-    u >= 1 ? zero(T) : (3/4) * (1 - u^2) / d.σ
+    u >= 1 ? zero(T) : 3 * (1 - u^2) / (4 * d.σ)
 end
 
 function cdf{T<:Real}(d::Epanechnikov{T}, x::Real)

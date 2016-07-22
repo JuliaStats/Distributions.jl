@@ -63,7 +63,7 @@ mode(d::Logistic) = d.μ
 std(d::Logistic) = π * d.θ / sqrt3
 var(d::Logistic) = (π * d.θ)^2 / 3
 skewness{T<:Real}(d::Logistic{T}) = zero(T)
-kurtosis{T<:Real}(d::Logistic{T}) = 6/5*one(T)
+kurtosis{T<:Real}(d::Logistic{T}) = T(6)/5
 
 entropy(d::Logistic) = log(d.θ) + 2
 

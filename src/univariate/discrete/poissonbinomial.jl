@@ -65,9 +65,9 @@ params(d::PoissonBinomial) = (d.p, )
 mean(d::PoissonBinomial) = sum(succprob(d))
 var(d::PoissonBinomial) = sum(succprob(d) .* failprob(d))
 
-function skewness(d::PoissonBinomial)
-    v = 0
-    s = 0
+function skewness{T<:Real}(d::PoissonBinomial{T})
+    v = zero(T)
+    s = zero(T)
     p,  = params(d)
     for i=1:length(p)
         v += p[i] * (1 - p[i])
@@ -76,9 +76,9 @@ function skewness(d::PoissonBinomial)
     s / sqrt(v) / v
 end
 
-function kurtosis(d::PoissonBinomial)
-    v = 0
-    s = 0
+function kurtosis{T<:Real}(d::PoissonBinomial{T})
+    v = zero(T)
+    s = zero(T)
     p,  = params(d)
     for i=1:length(p)
         v += p[i] * (1 - p[i])
@@ -128,8 +128,8 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     lmax = ceil(Int, n/2)
     x[1] = 1/(n + 1)
     for l=1:lmax
-        logz = 0
-        argz = 0
+        logz = 0.
+        argz = 0.
         for j=1:n
             zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))

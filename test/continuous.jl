@@ -58,7 +58,7 @@ for distr in [
     NoncentralF(2,2,2),
     NoncentralF(8,10,5),
     NoncentralT(2,2),
-    NoncentralT(10.,2),
+    NoncentralT(10,2),
     Triweight(),
     Triweight(2),
     Triweight(1, 3),

@@ -70,12 +70,12 @@ pdf(d::Skellam, x::Int) = exp(logpdf(d, x))
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(-(μ1 + μ2) + μ1 * exp(t) + μ2 * exp(-t))
+    exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
 end
 
 function cf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(-(μ1 + μ2) + μ1 * cis(t) + μ2 * cis(-t))
+    exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
 
 cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))

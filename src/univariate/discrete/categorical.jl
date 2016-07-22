@@ -63,10 +63,10 @@ end
 
 mean(d::Categorical) = categorical_mean(d.p)
 
-function median(d::Categorical)
+function median{T<:Real}(d::Categorical{T})
     k = ncategories(d)
     p = probs(d)
-    cp = 0
+    cp = zero(T)
     i = 0
     while cp < 1/2 && i <= k
         i += 1
@@ -86,11 +86,11 @@ function var{T<:Real}(d::Categorical{T})
     s
 end
 
-function skewness(d::Categorical)
+function skewness{T<:Real}(d::Categorical{T})
     k = ncategories(d)
     p = probs(d)
     m = categorical_mean(p)
-    s = 0
+    s = zero(T)
     for i = 1:k
         @inbounds s += (i - m)^3 * p[i]
     end
@@ -98,11 +98,11 @@ function skewness(d::Categorical)
     s / (v * sqrt(v))
 end
 
-function kurtosis(d::Categorical)
+function kurtosis{T<:Real}(d::Categorical{T})
     k = ncategories(d)
     p = probs(d)
     m = categorical_mean(p)
-    s = 0
+    s = zero(T)
     for i = 1:k
         @inbounds s += (i - m)^4 * p[i]
     end

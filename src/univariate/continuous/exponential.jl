@@ -52,8 +52,8 @@ median(d::Exponential) = logtwo * d.θ
 mode{T<:Real}(d::Exponential{T}) = zero(T)
 
 var(d::Exponential) = d.θ^2
-skewness{T<:Real}(d::Exponential{T}) = 2*one(T)
-kurtosis{T<:Real}(d::Exponential{T}) = 6*one(T)
+skewness{T<:Real}(d::Exponential{T}) = T(2)
+kurtosis{T<:Real}(d::Exponential{T}) = T(6)
 
 entropy(d::Exponential) = 1 + log(d.θ)
 

@@ -23,7 +23,7 @@ function quantile{T<:Real}(d::NoncentralHypergeometric{T}, q::Real)
             range = reverse(range)
         end
 
-        qsum, i = 0, 0
+        qsum, i = zero(T), 0
         while qsum < q
             i += 1
             qsum += pdf(d, range[i])

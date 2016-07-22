@@ -62,8 +62,8 @@ function kurtosis(d::Chi)
     (2/σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-entropy(d::Chi) = (ν = d.ν;
-    lgamma(ν/2) - 1//2*logtwo - ((ν - 1)/2) * digamma(ν/2) + ν/2)
+entropy{T<:Real}(d::Chi{T}) = (ν = d.ν;
+    lgamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
     d.ν >= 1 || error("Chi distribution has no mode when ν < 1")

@@ -72,7 +72,7 @@ function entropy{T<:Real}(d::Poisson{T})
         end
         return λ * (1 - log(λ)) + exp(-λ) * s
     else
-        return 0.5 * log(2 * pi * e * λ) -
+        return log(2 * pi * e * λ)/2 -
                (1 / (12 * λ)) -
                (1 / (24 * λ * λ)) -
                (19 / (360 * λ * λ * λ))

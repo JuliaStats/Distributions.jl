@@ -89,7 +89,7 @@ end
 function mean{T<:Real}(d::GeneralizedExtremeValue{T})
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         return μ + σ * γ
     elseif ξ < 1
         return μ + σ * (gamma(1 - ξ) - 1) / ξ
@@ -101,7 +101,7 @@ end
 function mode(d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         return μ
     else
         return μ + σ * ((1 + ξ) ^ (-ξ) - 1) / ξ
@@ -111,7 +111,7 @@ end
 function var{T<:Real}(d::GeneralizedExtremeValue{T})
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         return σ ^2 * π^2 / 6
     elseif ξ < 1/2
         return σ^2 * (g(d, 2) - g(d, 1) ^ 2) / ξ^2
@@ -123,7 +123,7 @@ end
 function skewness{T<:Real}(d::GeneralizedExtremeValue{T})
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         return 12sqrt(6) * zeta(3) / pi ^ 3 * one(T)
     elseif ξ < 1/3
         g1 = g(d, 1)
@@ -138,8 +138,8 @@ end
 function kurtosis{T<:Real}(d::GeneralizedExtremeValue{T})
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
-        return 12 / 5 * one(T)
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
+        return T(12)/5
     elseif ξ < 1 / 4
         g1 = g(d, 1)
         g2 = g(d, 2)
@@ -159,7 +159,7 @@ end
 function quantile(d::GeneralizedExtremeValue, p::Real)
     (μ, σ, ξ) = params(d)
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         return μ + σ * (-log(-log(p)))
     else
         return μ + σ * ((-log(p))^(-ξ) - 1) / ξ
@@ -181,7 +181,7 @@ function logpdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
         (μ, σ, ξ) = params(d)
 
         z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps() # ξ == 0
+        if abs(ξ) < eps(one(ξ)) # ξ == 0
             t = z
             return -log(σ) - t - exp(-t)
         else
@@ -202,7 +202,7 @@ function pdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
         (μ, σ, ξ) = params(d)
 
         z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps() # ξ == 0
+        if abs(ξ) < eps(one(ξ)) # ξ == 0
             t = exp(-z)
             return (t * exp(-t)) / σ
         else
@@ -221,8 +221,8 @@ function logcdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
         (μ, σ, ξ) = params(d)
 
         z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps() # ξ == 0
-            return - exp(- z)
+        if abs(ξ) < eps(one(ξ)) # ξ == 0
+            return -exp(- z)
         else
             return - (1 + z * ξ) ^ ( -1/ξ)
         end
@@ -238,8 +238,8 @@ function cdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
         (μ, σ, ξ) = params(d)
 
         z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps() # ξ == 0
-            t = exp(- z)
+        if abs(ξ) < eps(one(ξ)) # ξ == 0
+            t = exp(-z)
         else
             t = (1 + z * ξ) ^ (-1/ξ)
         end
@@ -263,7 +263,7 @@ function rand(d::GeneralizedExtremeValue)
     # Generate a Float64 random number uniformly in (0,1].
     u = 1 - rand()
 
-    if abs(ξ) < eps() # ξ == 0
+    if abs(ξ) < eps(one(ξ)) # ξ == 0
         rd = - log(- log(u))
     else
         rd = expm1(- ξ * log(- log(u))) / ξ

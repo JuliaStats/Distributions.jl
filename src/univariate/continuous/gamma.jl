@@ -100,8 +100,8 @@ immutable GammaStats <: SufficientStats
 end
 
 function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})
-    sx = 0
-    slogx = 0
+    sx = zero(T)
+    slogx = zero(T)
     for xi = x
         sx += xi
         slogx += log(xi)
@@ -115,9 +115,9 @@ function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray
         throw(ArgumentError("Inconsistent argument dimensions."))
     end
 
-    sx = 0
-    slogx = 0
-    tw = 0
+    sx = zero(T)
+    slogx = zero(T)
+    tw = zero(T)
     for i = 1:n
         @inbounds xi = x[i]
         @inbounds wi = w[i]
