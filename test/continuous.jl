@@ -43,9 +43,9 @@ for distr in [
     GeneralizedPareto(-1.5, 0.5, 2.0),
     InverseGaussian(1.0, 1.0),
     InverseGaussian(2.0, 7.0),
-    Levy(0.0, 1.0),
-    Levy(2.0, 8.0),
-    Levy(3.0, 3.0),
+    Levy(),
+    Levy(2, 8),
+    Levy(3.0, 3),
     LogNormal(0.0, 1.0),
     LogNormal(0.0, 2.0),
     LogNormal(3.0, 0.5),
@@ -60,7 +60,9 @@ for distr in [
     NoncentralT(2,2),
     NoncentralT(10,2),
     Triweight(),
-    Triweight(1,3),
+    Triweight(2),
+    Triweight(1, 3),
+    Triweight(1),
 ]
     println("    testing $(distr)")
     test_distr(distr, n_tsamples)

@@ -32,7 +32,10 @@ insupport(d::AbstractMvNormal, x::AbstractVector) =
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
-entropy(d::AbstractMvNormal) = (length(d) * (Float64(log2π) + 1) + logdetcov(d))/2
+function entropy(d::AbstractMvNormal)
+    ldcd = logdetcov(d)
+    (length(d) * (typeof(ldcd)(log2π) + 1) + ldcd)/2
+end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
@@ -75,10 +78,12 @@ typealias ZeroMeanDiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},
 typealias ZeroMeanFullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov)
+function MvNormal{T<:Real}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T})
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{T,Cov,Vector{T}}(promote_eltype(μ, Σ)...)
+    MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
+
+MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) = MvNormal(promote_eltype(μ, Σ)...)
 
 function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)
     T = eltype(Σ)
@@ -114,6 +119,7 @@ Base.show(io::IO, d::MvNormal) =
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = convert(Vector{Float64}, d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
+@inline partype{T<:Real}(d::MvNormal{T}) = T
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = full(d.Σ)

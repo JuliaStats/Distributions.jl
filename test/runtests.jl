@@ -45,7 +45,7 @@ res = pmap(tests) do t
     nothing
 end
 
-# in v0.5, pmap returns the exception, but doesn't throw it, so we need
+# in v0.4, pmap returns the exception, but doesn't throw it, so we need
 # to test and rethrow
 if VERSION < v"0.5.0-"
     map(x -> isa(x, Exception) ? throw(x) : nothing, res)

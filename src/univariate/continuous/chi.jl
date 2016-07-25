@@ -19,26 +19,35 @@ External links
 * [Chi distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi_distribution)
 
 """
-immutable Chi <: ContinuousUnivariateDistribution
-    ν::Float64
 
-    Chi(ν::Real) = (@check_args(Chi, ν > zero(ν)); new(ν))
+immutable Chi{T<:Real} <: ContinuousUnivariateDistribution
+    ν::T
+
+    Chi(ν::T) = (@check_args(Chi, ν > zero(ν)); new(ν))
 end
 
+Chi{T<:Real}(ν::T) = Chi{T}(ν)
+Chi(ν::Integer) = Chi(Float64(ν))
+
 @distr_support Chi 0.0 Inf
+
+### Conversions
+convert{T<:Real}(::Type{Chi{T}}, ν::Real) = Chi(T(ν))
+convert{T <: Real, S <: Real}(::Type{Chi{T}}, d::Chi{S}) = Chi(T(d.ν))
 
 #### Parameters
 
 dof(d::Chi) = d.ν
 params(d::Chi) = (d.ν,)
+@inline partype{T<:Real}(d::Chi{T}) = T
 
 
 #### Statistics
 
-mean(d::Chi) = (h = d.ν * 0.5; sqrt2 * gamma(h + 0.5) / gamma(h))
+mean(d::Chi) = (h = d.ν/2; sqrt2 * gamma(h + 1//2) / gamma(h))
 
 var(d::Chi) = d.ν - mean(d)^2
-_chi_skewness(μ::Float64, σ::Float64) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1.0 - 2.0 * σ2))
+_chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1 - 2σ2))
 
 function skewness(d::Chi)
     μ = mean(d)
@@ -50,37 +59,37 @@ function kurtosis(d::Chi)
     μ = mean(d)
     σ = sqrt(d.ν - μ^2)
     γ = _chi_skewness(μ, σ)
-    (2.0 / σ^2) * (1 - μ * σ * γ - σ^2)
+    (2/σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-entropy(d::Chi) = (ν = d.ν;
-    lgamma(ν / 2.0) - 0.5 * logtwo - ((ν - 1.0) / 2.0) * digamma(ν / 2.0) + ν / 2.0)
+entropy{T<:Real}(d::Chi{T}) = (ν = d.ν;
+    lgamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
-    d.ν >= 1.0 || error("Chi distribution has no mode when ν < 1")
-    sqrt(d.ν - 1.0)
+    d.ν >= 1 || error("Chi distribution has no mode when ν < 1")
+    sqrt(d.ν - 1)
 end
 
 
 #### Evaluation
 
-pdf(d::Chi, x::Float64) = exp(logpdf(d, x))
+pdf(d::Chi, x::Real) = exp(logpdf(d, x))
 
-logpdf(d::Chi, x::Float64) = (ν = d.ν;
-    (1.0 - 0.5 * ν) * logtwo + (ν - 1.0) * log(x) - 0.5 * x^2 - lgamma(0.5 * ν)
+logpdf(d::Chi, x::Real) = (ν = d.ν;
+    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - lgamma(ν/2)
 )
 
-gradlogpdf(d::Chi, x::Float64) = x >= 0.0 ? (d.ν - 1.0) / x - x : 0.0
+gradlogpdf{T<:Real}(d::Chi{T}, x::Real) = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
-cdf(d::Chi, x::Float64) = chisqcdf(d.ν, x^2)
-ccdf(d::Chi, x::Float64) = chisqccdf(d.ν, x^2)
-logcdf(d::Chi, x::Float64) = chisqlogcdf(d.ν, x^2)
-logccdf(d::Chi, x::Float64) = chisqlogccdf(d.ν, x^2)
+cdf(d::Chi, x::Real) = chisqcdf(d.ν, x^2)
+ccdf(d::Chi, x::Real) = chisqccdf(d.ν, x^2)
+logcdf(d::Chi, x::Real) = chisqlogcdf(d.ν, x^2)
+logccdf(d::Chi, x::Real) = chisqlogccdf(d.ν, x^2)
 
-quantile(d::Chi, p::Float64) = sqrt(chisqinvcdf(d.ν, p))
-cquantile(d::Chi, p::Float64) = sqrt(chisqinvccdf(d.ν, p))
-invlogcdf(d::Chi, p::Float64) = sqrt(chisqinvlogcdf(d.ν, p))
-invlogccdf(d::Chi, p::Float64) = sqrt(chisqinvlogccdf(d.ν, p))
+quantile(d::Chi, p::Real) = sqrt(chisqinvcdf(d.ν, p))
+cquantile(d::Chi, p::Real) = sqrt(chisqinvccdf(d.ν, p))
+invlogcdf(d::Chi, p::Real) = sqrt(chisqinvlogcdf(d.ν, p))
+invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
 
 
 #### Sampling

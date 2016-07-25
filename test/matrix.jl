@@ -14,6 +14,9 @@ for d in [W,IW]
     @test typeof(d)(params(d)...) == d
 end
 
+@test partype(Wishart(7, eye(Float32, 2))) == Float64
+@test partype(InverseWishart(7, eye(Float32, 2))) == Float64
+
 @test_approx_eq_eps mean(rand(W,100000)) mean(W) 0.1
 @test_approx_eq_eps mean(rand(IW,100000)) mean(IW) 0.1
 

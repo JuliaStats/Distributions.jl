@@ -1,93 +1,99 @@
 using Distributions
 using Base.Test
 
-# Mathematica code to generate this. 
+# Mathematica code to generate this.
 
-### entropy[dist_] := 
+### entropy[dist_] :=
 ###  TimeConstrained[
-###   Expectation[-Log[PDF[dist, x]], x \[Distributed] dist], 5, 
+###   Expectation[-Log[PDF[dist, x]], x \[Distributed] dist], 5,
 ###   None];(* Stop after a few seconds, as this computation is very very \
 ### slow. *)
 ### test[\[Mu]_, \[Sigma]_, \[Xi]_] :=
 ###  Module[{
-###    dist = MaxStableDistribution[\[Mu], \[Sigma], \[Xi]], cdf, 
+###    dist = MaxStableDistribution[\[Mu], \[Sigma], \[Xi]], cdf,
 ###    q = {10, 25, 50, 75, 90}/100,
 ###    ent, max, min, mean, median, var, skew, kurt,
 ###    points, pointsCDF, pointsPDF, quantiles,
 ###    code, printv
 ###    },
 ###   cdf = CDF[dist]@x;
-###   
+###
 ###   (* Compute reference results. *)
 ###   ent = entropy[dist];
 ###   min = If[
-###     Norm[\[Xi]] < 1 E - 15 || \[Xi] < 
+###     Norm[\[Xi]] < 1 E - 15 || \[Xi] <
 ###       0, -\[Infinity], \[Mu] - \[Sigma]/\[Xi]];
 ###   max = If[
-###     Norm[\[Xi]] < 1 E - 15 || \[Xi] > 
+###     Norm[\[Xi]] < 1 E - 15 || \[Xi] >
 ###       0, \[Infinity], \[Mu] - \[Sigma]/\[Xi]];
 ###   mean = Mean[dist]; (* Can be Indeterminate. *)
 ###   median = Median[dist];
 ###   var = Variance[dist]; (* Can be Indeterminate. *)
 ###   skew = Skewness[dist]; (* Can be Indeterminate. *)
-###   kurt = Kurtosis[dist] - 3.0; (* Can be Indeterminate. \ 
+###   kurt = Kurtosis[dist] - 3.0; (* Can be Indeterminate. \
 ###     Mathematica returns the kurtosis, \
 ###     Distributions.jl returns the excess kurtosis. *)
-###   
-###   points = 
+###
+###   points =
 ###    Table[x /. FindRoot[cdf - cdfv, {x, 1}][[1]], {cdfv, .1, .9, .1}];
 ###   pointsCDF = CDF[dist, #] & /@ points;
 ###   pointsPDF = PDF[dist, #] & /@ points;
-###   
+###
 ###   quantiles = Quantile[dist, #] & /@ q;
-###   
+###
 ###   (* Output test code. *)
-###   printv[v_] := 
-###    If[v == Infinity, "Inf", 
-###     If[v == -Infinity, "-Inf", TextString[N[v]]], "Inf"]; (* 
+###   printv[v_] :=
+###    If[v == Infinity, "Inf",
+###     If[v == -Infinity, "-Inf", TextString[N[v]]], "Inf"]; (*
 ###   Handles Indeterminate through If's fourth argument. *)
-###   
-###   code = "d = GeneralizedExtremeValue(" <> printv[\[Mu]] <> ", " <> 
+###
+###   code = "d = GeneralizedExtremeValue(" <> printv[\[Mu]] <> ", " <>
 ###     printv[\[Sigma]] <> ", " <> printv[\[Xi]] <> ")\n"
 ###     <> "@test_approx_eq location(d) " <> printv[\[Mu]] <> "\n"
 ###     <> "@test_approx_eq scale(d) " <> printv[\[Sigma]] <> "\n"
 ###     <> "@test_approx_eq shape(d) " <> printv[\[Xi]] <> "\n"
 ###     <> "@test_approx_eq_eps maximum(d) " <> printv[max] <> " 1e-5\n"
 ###     <> "@test_approx_eq_eps minimum(d) " <> printv[min] <> " 1e-5\n"
-###     <> If[ent != None, 
-###      "@test_approx_eq_eps entropy(d) " <> printv[ent] <> " 1e-5\n", 
+###     <> If[ent != None,
+###      "@test_approx_eq_eps entropy(d) " <> printv[ent] <> " 1e-5\n",
 ###      "", ""]
 ###     <> "@test_approx_eq_eps mean(d) " <> printv[mean] <> " 1e-5\n"
 ###     <> "@test_approx_eq_eps median(d) " <> printv[median] <> " 1e-5\n"
 ###     <> "@test_approx_eq_eps var(d) " <> printv[var] <> " 1e-5\n"
-###     <> "@test_approx_eq_eps skewness(d) " <> printv[skew] <> " 1e-5\n" 
-###     <> "@test_approx_eq_eps kurtosis(d) " <> printv[kurt] <> " 1e-5\n" 
+###     <> "@test_approx_eq_eps skewness(d) " <> printv[skew] <> " 1e-5\n"
+###     <> "@test_approx_eq_eps kurtosis(d) " <> printv[kurt] <> " 1e-5\n"
 ###     <> ((
 ###         "@test_approx_eq_eps pdf(d, " <> printv[points[[#]]] <> ") " <>
 ###           printv[pointsPDF[[#]]] <> " 1e-5\n"
 ###          <>
-###          "@test_approx_eq_eps cdf(d, " <> printv[points[[#]]] <> 
+###          "@test_approx_eq_eps cdf(d, " <> printv[points[[#]]] <>
 ###          ") " <> printv[pointsCDF[[#]]] <> " 1e-5\n"
 ###          <>
-###          "@test_approx_eq_eps logpdf(d, " <> printv[points[[#]]] <> 
+###          "@test_approx_eq_eps logpdf(d, " <> printv[points[[#]]] <>
 ###          ") " <> printv[Log[pointsPDF[[#]]]] <> " 1e-5\n"
 ###          <>
-###          "@test_approx_eq_eps logcdf(d, " <> printv[points[[#]]] <> 
+###          "@test_approx_eq_eps logcdf(d, " <> printv[points[[#]]] <>
 ###          ") " <> printv[Log[pointsCDF[[#]]]] <> " 1e-5\n"
 ###          <>
-###          "@test_approx_eq_eps ccdf(d, " <> printv[points[[#]]] <> 
+###          "@test_approx_eq_eps ccdf(d, " <> printv[points[[#]]] <>
 ###          ") " <> printv[1 - pointsCDF[[#]]] <> " 1e-5\n"
 ###          <>
-###          "@test_approx_eq_eps logccdf(d, " <> printv[points[[#]]] <> 
+###          "@test_approx_eq_eps logccdf(d, " <> printv[points[[#]]] <>
 ###          ") " <> printv[Log[1 - pointsCDF[[#]]]] <> " 1e-5\n"
 ###         ) & /@ Table[i, {i, 1, Length@points}])
 ###     <> ((
 ###         "@test_approx_eq_eps quantile(d, " <> printv[q[[#]]] <> ") " <>
 ###           printv[quantiles[[#]]] <> " 1e-5\n"
 ###         ) & /@ Table[i, {i, 1, Length@quantiles}]);
-###   
+###
 ###   Return[code];
 ###   ];
+
+d = GeneralizedExtremeValue(1., 1., 1.)
+@test GeneralizedExtremeValue(1., 1, 1) == d
+@test GeneralizedExtremeValue(1, 1, 1) == d
+@test typeof(convert(GeneralizedExtremeValue{Float32}, d)) == GeneralizedExtremeValue{Float32}
+@test typeof(convert(GeneralizedExtremeValue{Float32}, 1, 1, 1)) == GeneralizedExtremeValue{Float32}
 
 # test[1., 1., 1.]
 d = GeneralizedExtremeValue(1., 1., 1.)
@@ -387,7 +393,7 @@ d = GeneralizedExtremeValue(0., 1., 0.3)
 @test_approx_eq_eps mean(d) 0.993518 1e-5
 @test_approx_eq_eps median(d) 0.387422 1e-5
 @test_approx_eq_eps var(d) 5.92458 1e-5
-@test_approx_eq_eps skewness(d) 13.4836 5e-5 # Changed precision! 
+@test_approx_eq_eps skewness(d) 13.4836 5e-5 # Changed precision!
 @test_approx_eq_eps kurtosis(d) Inf 1e-5
 @test_approx_eq_eps pdf(d, -0.737875) 0.29572 1e-5
 @test_approx_eq_eps cdf(d, -0.737875) 0.1 1e-5
@@ -502,7 +508,7 @@ d = GeneralizedExtremeValue(1., 1., -1.)
 @test_approx_eq_eps logpdf(d, 1.64333) -0.356675 1e-5
 @test_approx_eq_eps logcdf(d, 1.64333) -0.356675 1e-5
 @test_approx_eq_eps ccdf(d, 1.64333) 0.3 1e-5
-@test_approx_eq_eps logccdf(d, 1.64333) -1.20397 5e-5 # Changed precision! 
+@test_approx_eq_eps logccdf(d, 1.64333) -1.20397 5e-5 # Changed precision!
 @test_approx_eq_eps pdf(d, 2.17463) 0. 1e-5
 @test_approx_eq_eps cdf(d, 2.17463) 1. 1e-5
 @test_approx_eq_eps logpdf(d, 2.17463) -Inf 1e-5

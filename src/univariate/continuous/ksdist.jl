@@ -16,52 +16,52 @@ function cdf(d::KSDist,x::Float64)
     n = d.n
     b = x*n
     # known exact values
-    if b <= 0.5
+    if b <= 1/2
         return 0.0
-    elseif b <= 1.0
+    elseif b <= 1
         # accuracy could be improved
-        return exp(lfact(n)+n*(log(2.0*b-1.0)-log(n)))
-    elseif x >= 1.0
+        return exp(lfact(n)+n*(log(2*b-1)-log(n)))
+    elseif x >= 1
         return 1.0
     elseif b >= n-1
-        return 1.0 - 2.0*(1.0-x)^n
+        return 1 - 2*(1-x)^n
     end
 
     a = b*x
-    if a >= 18.0
+    if a >= 18
         return 1.0
     elseif n <= 10_000
-        if a <= 4.0
+        if a <= 4
             return cdf_durbin(d,x)
         else
-            return 1.0 - ccdf_miller(d,x)
+            return 1 - ccdf_miller(d,x)
         end
     else
         return cdf(Kolmogorov(),sqrt(a))
     end
 end
 
-function ccdf(d::KSDist,x::Float64)    
+function ccdf(d::KSDist,x::Float64)
     n = d.n
     b = x*n
     # Ruben and Gambino (1982) known exact values
     if b <= 0.5
         return 1.0
-    elseif b <= 1.0
-        return 1.0-exp(lfact(n)+n*(log(2.0*b-1.0)-log(n)))
-    elseif x >= 1.0
+    elseif b <= 1
+        return 1-exp(lfact(n)+n*(log(2*b-1)-log(n)))
+    elseif x >= 1
         return 0.0
     elseif b >= n-1
-        return 2.0*(1.0-x)^n
+        return 2*(1-x)^n
     end
 
     a = b*x
-    if a >= 370.0
+    if a >= 370
         return 0.0
-    elseif a >= 4.0 || (n > 140 && a >= 2.2)
+    elseif a >= 4 || (n > 140 && a >= 2.2)
         return ccdf_miller(d,x)
     else
-        return 1.0-cdf(d,x)
+        return 1-cdf(d,x)
     end
 end
 
@@ -73,12 +73,12 @@ function cdf_durbin(d::KSDist,x::Float64)
     k, ch, h = ceil_rems_mult(n,x)
 
     m = 2*k-1
-    H = Array(Float64,m,m)    
+    H = Array(Float64,m,m)
     for i = 1:m, j = 1:m
-        H[i,j] = i-j+1 >= 0 ? 1.0 : 0.0        
+        H[i,j] = i-j+1 >= 0 ? 1 : 0
     end
     r = 1.0
-    for i = 1:m 
+    for i = 1:m
         # (1-h^i) = (1-h)(1+h+...+h^(i-1))
         H[i,1] = H[m,m-i+1] = ch*r
         r += h^i
@@ -99,7 +99,7 @@ end
 
 # Miller (1956) approximation
 function ccdf_miller(d::KSDist, x::Real)
-    2.0*ccdf(KSOneSided(d.n),x)
+    2*ccdf(KSOneSided(d.n),x)
 end
 
 ## these functions are used in durbin and pomeranz algorithms
@@ -120,16 +120,16 @@ function ceil_rems_mult(n,x)
 end
 
 # n!*(e/n)^n
-function stirling(n)    
+function stirling(n)
     if n < 500
         s = 1.0
         for i = 1:n
-            s *= i/n*e 
+            s *= i/n*e
         end
         return s
     else
         # 3rd-order Stirling's approximation more accurate for large n
-        twn = 12.0*n
-        return sqrt(2.0*pi*n)*(1.0 + twn\(1 + (2.0*twn)\(1 - (15.0*twn)\139.0)))
+        twn = 12*n
+        return sqrt(2*pi*n)*(1 + twn\(1 + (2*twn)\(1 - (15*twn)\139)))
     end
 end

@@ -56,23 +56,57 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
     end
 
+    # test various constructors for promotion, all-Integer args, etc.
+    D = eval(Symbol(dct["dtype"]))  # distribution name
+    pars = params(d)
+
+    # promotion constructor:
+    float_pars = map(x -> isa(x, AbstractFloat), pars)
+    if length(pars) > 1 && sum(float_pars) > 1
+        mixed_pars = Any[pars...]
+        first_float = findfirst(float_pars)
+        mixed_pars[first_float] = Float32(mixed_pars[first_float])
+
+        @test typeof(D(mixed_pars...)) == typeof(d)
+    end
+
+    # promote integer arguments to floats, where applicable
+    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric)
+        int_pars = map(x -> ceil(Int, x), pars)
+        @test typeof(D(int_pars...)) == typeof(d)
+    end
+
     # verify stats
     @test_approx_eq minimum(d) _json_value(dct["minimum"])
     @test_approx_eq maximum(d) _json_value(dct["maximum"])
     @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
-    @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
-    @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
+    if !isa(d, VonMises)
+        @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
+    end
+    if !isa(d, Skellam)
+        @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
+    end
 
-    if applicable(entropy, d)
+    if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
         @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
     end
 
+    # test conversions if distribution is parametric
+    if !isempty(typeof(d).parameters) && !isa(d, Truncated)
+        D = typeof(d).name.primary
+        W = Float32
+        @test typeof(convert(D{W}, d)) == D{W}
+        @test typeof(convert(D{W}, params(d)...)) == D{W}
+    end
+
     # verify quantiles
-    @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
+    if !isa(d, Union{Skellam, VonMises})
+        @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
+        @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
+        @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
+        @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
+        @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
+    end
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
@@ -81,7 +115,9 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         lp = Float64(pt["logpdf"])
         cf = Float64(pt["cdf"])
         Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
-        Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
+        if !isa(d, Skellam)
+            Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
+        end
     end
 
     try
@@ -101,33 +137,21 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         isa(e, MethodError) || throw(e)
     end
 
-    # test conversions between type parameters
-    if isa(d, Normal)  # remove this check when all distributions parameterized
-        @test isa(convert(Normal{Float64}, Normal(1, 2)), Normal{Float64})
-        @test isa(convert(Normal{Float64}, 1, 2), Normal{Float64})
-    end
-
-    if haskey(dct, "conversions")
-        for cv in dct["conversions"]
-            pars = cv["from"]
-            from = isa(pars, AbstractString) ? eval(parse(pars)) : pars
-            to = eval(parse(cv["to"]))
-            @test isa(convert(to, from...), to)
-        end
-    end
-
     # generic testing
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
     end
-    test_distr(d, n_tsamples)
+    if !isa(d, Union{Skellam, VonMises})
+        test_distr(d, n_tsamples)
+    end
 end
 
 
 ## main
 
 for c in ["discrete",
-          "continuous"]
+          "continuous",
+          "discrete_hand_coded"]
 
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")

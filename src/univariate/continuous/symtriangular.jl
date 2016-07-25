@@ -15,20 +15,32 @@ location(d)     # Get the location parameter, i.e. u
 scale(d)        # Get the scale parameter, i.e. s
 ```
 """
-immutable SymTriangularDist <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
+immutable SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
 
-    function SymTriangularDist(μ::Real, σ::Real)
+    function SymTriangularDist(μ::T, σ::T)
         @check_args(SymTriangularDist, σ > zero(σ))
         new(μ, σ)
     end
-    SymTriangularDist(μ::Real) = new(μ, 1.0)
-    SymTriangularDist() = new(0.0, 1.0)
 end
+
+SymTriangularDist{T<:Real}(μ::T, σ::T) = SymTriangularDist{T}(μ, σ)
+SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
+SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(Float64(μ), Float64(σ))
+SymTriangularDist(μ::Real) = SymTriangularDist(μ, 1.0)
+SymTriangularDist() = SymTriangularDist(0.0, 1.0)
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 
+#### Conversions
+
+function convert{T<:Real}(::Type{SymTriangularDist{T}}, μ::Real, σ::Real)
+    SymTriangularDist(T(μ), T(σ))
+end
+function convert{T <: Real, S <: Real}(::Type{SymTriangularDist{T}}, d::SymTriangularDist{S})
+    SymTriangularDist(T(d.μ), T(d.σ))
+end
 
 #### Parameters
 
@@ -36,6 +48,7 @@ location(d::SymTriangularDist) = d.μ
 scale(d::SymTriangularDist) = d.σ
 
 params(d::SymTriangularDist) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::SymTriangularDist{T}) = T
 
 
 #### Statistics
@@ -44,76 +57,80 @@ mean(d::SymTriangularDist) = d.μ
 median(d::SymTriangularDist) = d.μ
 mode(d::SymTriangularDist) = d.μ
 
-var(d::SymTriangularDist) = d.σ^2 / 6.0
-skewness(d::SymTriangularDist) = 0.0
-kurtosis(d::SymTriangularDist) = -0.6
+var(d::SymTriangularDist) = d.σ^2 / 6
+skewness{T<:Real}(d::SymTriangularDist{T}) = zero(T)
+kurtosis{T<:Real}(d::SymTriangularDist{T}) = T(-3)/5
 
-entropy(d::SymTriangularDist) = 0.5 + log(d.σ)
+entropy(d::SymTriangularDist) = 1//2 + log(d.σ)
 
 
 #### Evaluation
 
-zval(d::SymTriangularDist, x::Float64) = (x - d.μ) / d.σ
-xval(d::SymTriangularDist, z::Float64) = d.μ + z * d.σ
+zval(d::SymTriangularDist, x::Real) = (x - d.μ) / d.σ
+xval(d::SymTriangularDist, z::Real) = d.μ + z * d.σ
 
 
-pdf(d::SymTriangularDist, x::Float64) = insupport(d, x) ? (1.0 - abs(zval(d, x))) / scale(d) : 0.0
+pdf{T<:Real}(d::SymTriangularDist{T}, x::Real) = insupport(d, x) ? (1 - abs(zval(d, x))) / scale(d) : zero(T)
 
-logpdf(d::SymTriangularDist, x::Float64) = insupport(d, x) ? log((1.0 - abs(zval(d, x))) / scale(d)) : -Inf
-
-function cdf(d::SymTriangularDist, x::Float64)
-    (μ, σ) = params(d)
-    x <= μ - σ ? 0.0 :
-    x <= μ ? 0.5 * (1.0 + zval(d, x))^2 :
-    x < μ + σ ? 1.0 - 0.5 * (1.0 - zval(d, x))^2 : 1.0
+function logpdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
+    insupport(d, x) ? log((1 - abs(zval(d, x))) / scale(d)) : -convert(T, T(Inf))
 end
 
-function ccdf(d::SymTriangularDist, x::Float64)
+function cdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
     (μ, σ) = params(d)
-    x <= μ - σ ? 1.0 :
-    x <= μ ? 1.0 - 0.5 * (1.0 + zval(d, x))^2 :
-    x < μ + σ ? 0.5 * (1.0 - zval(d, x))^2 : 0.0
+    x <= μ - σ ? zero(T) :
+    x <= μ ? (1 + zval(d, x))^2/2 :
+    x < μ + σ ? 1 - (1 - zval(d, x))^2/2 : one(T)
 end
 
-function logcdf(d::SymTriangularDist, x::Float64)
+function ccdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
     (μ, σ) = params(d)
-    x <= μ - σ ? -Inf :
-    x <= μ ? loghalf + 2.0 * log1p(zval(d, x)) :
-    x < μ + σ ? log1p(-0.5 * (1.0 - zval(d, x))^2) : 0.0
+    x <= μ - σ ? one(T) :
+    x <= μ ? 1 - (1 + zval(d, x))^2/2 :
+    x < μ + σ ? (1 - zval(d, x))^2/2 : zero(T)
 end
 
-function logccdf(d::SymTriangularDist, x::Float64)
+function logcdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
     (μ, σ) = params(d)
-    x <= μ - σ ? 0.0 :
-    x <= μ ? log1p(-0.5 * (1.0 + zval(d, x))^2) :
-    x < μ + σ ? loghalf + 2.0 * log1p(-zval(d, x)) : -Inf
+    x <= μ - σ ? -T(Inf) :
+    x <= μ ? loghalf + 2*log1p(zval(d, x)) :
+    x < μ + σ ? log1p(-1/2 * (1 - zval(d, x))^2) : zero(T)
 end
 
-quantile(d::SymTriangularDist, p::Float64) = p < 0.5 ? xval(d, sqrt(2.0 * p) - 1.0) :
-                                                       xval(d, 1.0 - sqrt(2.0 * (1.0 - p)))
+function logccdf{T<:Real}(d::SymTriangularDist{T}, x::Real)
+    (μ, σ) = params(d)
+    x <= μ - σ ? zero(T) :
+    x <= μ ? log1p(-1/2 * (1 + zval(d, x))^2) :
+    x < μ + σ ? loghalf + 2*log1p(-zval(d, x)) : -T(Inf)
+end
 
-cquantile(d::SymTriangularDist, p::Float64) = p > 0.5 ? xval(d, sqrt(2.0 * (1.0-p)) - 1.0) :
-                                                        xval(d, 1.0 - sqrt(2.0 * p))
+quantile(d::SymTriangularDist, p::Real) = p < 1/2 ? xval(d, sqrt(2p) - 1) :
+                                                       xval(d, 1 - sqrt(2(1 - p)))
 
-invlogcdf(d::SymTriangularDist, lp::Float64) = lp < loghalf ? xval(d, expm1(0.5*(lp - loghalf))) :
-                                                              xval(d, 1.0 - sqrt(-2.0 * expm1(lp)))
+cquantile(d::SymTriangularDist, p::Real) = p > 1/2 ? xval(d, sqrt(2(1-p)) - 1) :
+                                                        xval(d, 1 - sqrt(2p))
 
-invlogccdf(d::SymTriangularDist, lp::Float64) = lp > loghalf ? xval(d, sqrt(-2.0 * expm1(lp)) - 1.0) :
-                                                               xval(d, -(expm1(0.5 * (lp - loghalf))))
+invlogcdf(d::SymTriangularDist, lp::Real) = lp < loghalf ? xval(d, expm1(1/2*(lp - loghalf))) :
+                                                              xval(d, 1 - sqrt(-2expm1(lp)))
+
+function invlogccdf(d::SymTriangularDist, lp::Real)
+    lp > loghalf ? xval(d, sqrt(-2*expm1(lp)) - 1) :
+    xval(d, -(expm1((lp - loghalf)/2)))
+end
 
 
-function mgf(d::SymTriangularDist, t::Float64)
+function mgf(d::SymTriangularDist, t::Real)
     (μ, σ) = params(d)
     a = σ * t
     a == zero(a) && return one(a)
-    4.0 * exp(μ * t) * (sinh(0.5 * a) / a)^2
+    4*exp(μ * t) * (sinh(a/2) / a)^2
 end
 
-function cf(d::SymTriangularDist, t::Float64)
+function cf(d::SymTriangularDist, t::Real)
     (μ, σ) = params(d)
     a = σ * t
     a == zero(a) && return complex(one(a))
-    4.0 * cis(μ * t) * (sin(0.5 * a) / a)^2
+    4*cis(μ * t) * (sin(a/2) / a)^2
 end
 
 

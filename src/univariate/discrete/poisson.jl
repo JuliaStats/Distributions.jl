@@ -25,17 +25,19 @@ immutable Poisson{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Poisson{T<:Real}(λ::T) = Poisson{T}(λ)
+Poisson(λ::Integer) = Poisson(Float64(λ))
 Poisson() = Poisson(1.0)
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
-# #### Conversions
-convert{T <: Real}(::Type{Poisson{T}}, λ::Real) = Poisson(T(λ))
+#### Conversions
+convert{T <: Real, S <: Real}(::Type{Poisson{T}}, λ::S) = Poisson(T(λ))
 convert{T <: Real, S <: Real}(::Type{Poisson{T}}, d::Poisson{S}) = Poisson(T(d.λ))
 
 ### Parameters
 
 params(d::Poisson) = (d.λ,)
+@inline partype{T<:Real}(d::Poisson{T}) = T
 
 rate(d::Poisson) = d.λ
 
@@ -48,7 +50,7 @@ mode(d::Poisson) = floor(Int,d.λ)
 
 function modes(d::Poisson)
     λ = d.λ
-    isinteger(λ) ? [round(Int, λ)-1, round(Int, λ)] : [floor(Int, λ)]
+    isinteger(λ) ? [round(Int, λ) - 1, round(Int, λ)] : [floor(Int, λ)]
 end
 
 var(d::Poisson) = d.λ
@@ -57,20 +59,20 @@ skewness(d::Poisson) = one(typeof(d.λ)) / sqrt(d.λ)
 
 kurtosis(d::Poisson) = one(typeof(d.λ)) / d.λ
 
-function entropy(d::Poisson)
+function entropy{T<:Real}(d::Poisson{T})
     λ = rate(d)
-    if λ == zero(typeof(λ))
-        return 0.0
-    elseif λ < 50.0
-        s = 0.0
-        λk = 1.0
+    if λ == zero(T)
+        return zero(T)
+    elseif λ < 50
+        s = zero(T)
+        λk = one(T)
         for k = 1:100
             λk *= λ
-            s += λk * lgamma(k + 1.0) / gamma(k + 1.0)
+            s += λk * lgamma(k + 1) / gamma(k + 1)
         end
-        return λ * (1.0 - log(λ)) + exp(-λ) * s
+        return λ * (1 - log(λ)) + exp(-λ) * s
     else
-        return 0.5 * log(2 * pi * e * λ) -
+        return log(2 * pi * e * λ)/2 -
                (1 / (12 * λ)) -
                (1 / (24 * λ * λ)) -
                (19 / (360 * λ * λ * λ))
@@ -94,12 +96,12 @@ _pdf!(r::AbstractArray, d::Poisson, rgn::UnitRange) = _pdf!(r, d, rgn, Recursive
 
 function mgf(d::Poisson, t::Real)
     λ = rate(d)
-    return exp(λ * (exp(t) - 1.0))
+    return exp(λ * (exp(t) - 1))
 end
 
 function cf(d::Poisson, t::Real)
     λ = rate(d)
-    return exp(λ * (cis(t) - 1.0))
+    return exp(λ * (cis(t) - 1))
 end
 
 

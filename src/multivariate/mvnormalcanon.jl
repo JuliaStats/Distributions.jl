@@ -19,10 +19,17 @@ typealias ZeroMeanIsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},ZeroVec
 
 ### Constructors
 
-function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
+function MvNormalCanon{T<:Real}(μ::Vector{T}, h::Vector{T}, J::AbstractPDMat{T})
     length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{T,P,Vector{T}}(μ, promote_eltype(h, J)...)
+    MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
 end
+
+function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
+    R = promote_type(T, eltype(J))
+    MvNormalCanon(Vector{R}(μ), promote_eltype(h, J)...)
+end
+
+MvNormalCanon{T<:Real, S<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{S}, J::P) = MvNormalCanon(promote_eltype(μ, h)..., J)
 
 function MvNormalCanon{P<:AbstractPDMat}(J::P)
     z = ZeroVector(eltype(J), dim(J))
@@ -32,7 +39,7 @@ end
 function MvNormalCanon{T<:Real, P<:AbstractPDMat}(h::Vector{T}, J::P)
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     hh, JJ = promote_eltype(h, J)
-    MvNormalCanon{T,P,Vector{T}}(JJ \ hh, hh, JJ)
+    MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
 MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix{T}) = MvNormalCanon(h, PDMat(J))
@@ -71,6 +78,7 @@ canonform{C, T<:Real}(d::MvNormal{T,C,ZeroVector{T}}) = MvNormalCanon(inv(d.Σ))
 length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
+@inline partype{T<:Real}(d::MvNormalCanon{T}) = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = full(inv(d.J))

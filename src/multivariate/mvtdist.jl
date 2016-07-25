@@ -11,25 +11,26 @@ immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     μ::Vector{T}
     Σ::Cov
 
-    function GenericMvTDist{T,Cov}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::Cov)
+    function GenericMvTDist{T}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::AbstractPDMat{T})
       df > zero(df) || error("df must be positive")
-      m, S = promote_eltype(μ, Σ)
-      new(df, dim, zmean, m, S)
+      new(df, dim, zmean, μ, Σ)
     end
-end
-
-function GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov, zmean::Bool)
-    R = promote_type(T, S)
-    GenericMvTDist(R(df), convert(Vector{R}, μ), Σ, zmean)
 end
 
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    GenericMvTDist{T, Cov}(df, d, zmean, promote_eltype(μ, Σ)...)
+    R = promote_type(T, eltype(Σ))
+    m, S = promote_eltype(μ, Σ)
+    GenericMvTDist{R, typeof(S)}(R(df), d, zmean, m, S)
 end
 
-GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov) = GenericMvTDist(df, μ, Σ, allzeros(μ))
+function GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov, zmean::Bool)
+    R = promote_type(T, S)
+    GenericMvTDist(R(df), Vector{R}(μ), Σ, zmean)
+end
+
+GenericMvTDist{Cov<:AbstractPDMat, S<:Real}(df::Real, μ::Vector{S}, Σ::Cov) = GenericMvTDist(df, μ, Σ, allzeros(μ))
 
 GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df, zeros(dim(Σ)), Σ, true)
 
@@ -86,6 +87,7 @@ invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*full(inv(d.Σ)) : NaN*ones(
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
+@inline partype{T<:Real}(d::GenericMvTDist{T}) = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)

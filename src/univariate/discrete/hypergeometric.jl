@@ -36,9 +36,6 @@ end
 
 params(d::Hypergeometric) = (d.ns, d.nf, d.n)
 
-# this is a hack to get pdf, etc. to allocate the correct storage type
-partype(d::Hypergeometric) = Float64
-
 
 ### Statistics
 

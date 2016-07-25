@@ -23,21 +23,29 @@ External links
 * [Log normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Log-normal_distribution)
 
 """
-immutable LogNormal <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
+immutable LogNormal{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
 
-    LogNormal(μ::Real, σ::Real) = (@check_args(LogNormal, σ > zero(σ)); new(μ, σ))
-    LogNormal(μ::Real) = new(μ, 1.0)
-    LogNormal() = new(0.0, 1.0)
+    LogNormal(μ::T, σ::T) = (@check_args(LogNormal, σ > zero(σ)); new(μ, σ))
 end
+
+LogNormal{T<:Real}(μ::T, σ::T) = LogNormal{T}(μ, σ)
+LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
+LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
+LogNormal(μ::Real) = LogNormal(μ, 1.0)
+LogNormal() = LogNormal(0.0, 1.0)
 
 @distr_support LogNormal 0.0 Inf
 
+#### Conversions
+convert{T <: Real, S <: Real}(::Type{LogNormal{T}}, μ::S, σ::S) = LogNormal(T(μ), T(σ))
+convert{T <: Real, S <: Real}(::Type{LogNormal{T}}, d::LogNormal{S}) = LogNormal(T(d.μ), T(d.σ))
 
 #### Parameters
 
 params(d::LogNormal) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::LogNormal{T}) = T
 
 #### Statistics
 
@@ -45,20 +53,20 @@ meanlogx(d::LogNormal) = d.μ
 varlogx(d::LogNormal) = abs2(d.σ)
 stdlogx(d::LogNormal) = d.σ
 
-mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + 0.5 * σ^2))
+mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
 median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
 
 function var(d::LogNormal)
     (μ, σ) = params(d)
     σ2 = σ^2
-    (exp(σ2) - 1.0) * exp(2.0 * μ + σ2)
+    (exp(σ2) - 1) * exp(2μ + σ2)
 end
 
 function skewness(d::LogNormal)
     σ2 = varlogx(d)
     e = exp(σ2)
-    (e + 2.0) * sqrt(e - 1.0)
+    (e + 2) * sqrt(e - 1)
 end
 
 function kurtosis(d::LogNormal)
@@ -67,40 +75,40 @@ function kurtosis(d::LogNormal)
     e2 = e * e
     e3 = e2 * e
     e4 = e3 * e
-    e4 + 2.0 * e3 + 3.0 * e2 - 6.0
+    e4 + 2*e3 + 3*e2 - 6
 end
 
 function entropy(d::LogNormal)
     (μ, σ) = params(d)
-    0.5 * (1.0 + log(twoπ * σ^2)) + μ
+    (1 + log(twoπ * σ^2))/2 + μ
 end
 
 
 #### Evalution
 
-pdf(d::LogNormal, x::Float64) = normpdf(d.μ, d.σ, log(x)) / x
-function logpdf(d::LogNormal, x::Float64)
+pdf(d::LogNormal, x::Real) = normpdf(d.μ, d.σ, log(x)) / x
+function logpdf{T<:Real}(d::LogNormal{T}, x::Real)
     if !insupport(d, x)
-        return -Inf
+        return -T(Inf)
     else
         lx = log(x)
         return normlogpdf(d.μ, d.σ, lx) - lx
     end
 end
 
-cdf(d::LogNormal, x::Float64) = x > 0.0 ? normcdf(d.μ, d.σ, log(x)) : 0.0
-ccdf(d::LogNormal, x::Float64) = x > 0.0 ? normccdf(d.μ, d.σ, log(x)) : 1.0
-logcdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogcdf(d.μ, d.σ, log(x)) : -Inf
-logccdf(d::LogNormal, x::Float64) = x > 0.0 ? normlogccdf(d.μ, d.σ, log(x)) : 0.0
+cdf{T<:Real}(d::LogNormal{T}, x::Real) = x > 0 ? normcdf(d.μ, d.σ, log(x)) : zero(T)
+ccdf{T<:Real}(d::LogNormal{T}, x::Real) = x > 0 ? normccdf(d.μ, d.σ, log(x)) : one(T)
+logcdf{T<:Real}(d::LogNormal{T}, x::Real) = x > 0 ? normlogcdf(d.μ, d.σ, log(x)) : -T(Inf)
+logccdf{T<:Real}(d::LogNormal{T}, x::Real) = x > 0 ? normlogccdf(d.μ, d.σ, log(x)) : zero(T)
 
-quantile(d::LogNormal, q::Float64) = exp(norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogNormal, q::Float64) = exp(norminvccdf(d.μ, d.σ, q))
-invlogcdf(d::LogNormal, lq::Float64) = exp(norminvlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogNormal, lq::Float64) = exp(norminvlogccdf(d.μ, d.σ, lq))
+quantile(d::LogNormal, q::Real) = exp(norminvcdf(d.μ, d.σ, q))
+cquantile(d::LogNormal, q::Real) = exp(norminvccdf(d.μ, d.σ, q))
+invlogcdf(d::LogNormal, lq::Real) = exp(norminvlogcdf(d.μ, d.σ, lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(norminvlogccdf(d.μ, d.σ, lq))
 
-function gradlogpdf(d::LogNormal, x::Float64)
+function gradlogpdf{T<:Real}(d::LogNormal{T}, x::Real)
     (μ, σ) = params(d)
-    x > 0.0 ? - ((log(x) - μ) / (σ^2) + 1.0) / x : 0.0
+    x > 0 ? - ((log(x) - μ) / (σ^2) + 1) / x : zero(T)
 end
 
 # mgf(d::LogNormal)
@@ -113,7 +121,7 @@ rand(d::LogNormal) = exp(randn() * d.σ + d.μ)
 
 ## Fitting
 
-function fit_mle{T <: Real}(::Type{LogNormal}, x::AbstractArray{T})
+function fit_mle{T<:Real}(::Type{LogNormal}, x::AbstractArray{T})
     lx = log(x)
     μ, σ = mean_and_std(lx)
     LogNormal(μ, σ)

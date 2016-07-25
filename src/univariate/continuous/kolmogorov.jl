@@ -12,8 +12,8 @@ params(d::Kolmogorov) = ()
 
 #### Statistics
 
-mean(d::Kolmogorov) = 0.5*sqrt2π*log(2.0)
-var(d::Kolmogorov) = pi*pi/12.0 - 0.5*pi*log(2.0)^2
+mean(d::Kolmogorov) = sqrt2π*log(2)/2
+var(d::Kolmogorov) = pi^2/12 - pi*log(2)^2/2
 # TODO: higher-order moments also exist, can be obtained by differentiating series
 
 mode(d::Kolmogorov) = 0.735467907916572
@@ -28,10 +28,10 @@ median(d::Kolmogorov) = 0.8275735551899077
 #   http://projecteuclid.org/euclid.aoms/1177730256
 # use one series for small x, one for large x
 # 5 terms seems to be sufficient for Float64 accuracy
-# some divergence from Smirnov's table in 6th decimal near 1.0 (e.g. 1.04): occurs in 
+# some divergence from Smirnov's table in 6th decimal near 1 (e.g. 1.04): occurs in
 # both series so assume error in table.
 
-function cdf_raw(d::Kolmogorov, x::Float64)
+function cdf_raw(d::Kolmogorov, x::Real)
     a = -(pi*pi)/(x*x)
     f = exp(a)
     f2 = f*f
@@ -39,7 +39,7 @@ function cdf_raw(d::Kolmogorov, x::Float64)
     sqrt2π*exp(a/8)*u/x
 end
 
-function ccdf_raw(d::Kolmogorov, x::Float64)
+function ccdf_raw(d::Kolmogorov, x::Real)
     f = exp(-2*x*x)
     f2 = f*f
     f3 = f2*f
@@ -49,20 +49,20 @@ function ccdf_raw(d::Kolmogorov, x::Float64)
     2f*u
 end
 
-function cdf(d::Kolmogorov,x::Float64)
-    if x <= 0.0
-        0.0
-    elseif x <= 1.0
+function cdf(d::Kolmogorov,x::Real)
+    if x <= 0
+        0
+    elseif x <= 1
         cdf_raw(d,x)
     else
-        1.0-ccdf_raw(d,x)
+        1-ccdf_raw(d,x)
     end
 end
-function ccdf(d::Kolmogorov,x::Float64)
-    if x <= 0.0
-        1.0
-    elseif x <= 1.0
-        1.0-cdf_raw(d,x)
+function ccdf(d::Kolmogorov,x::Real)
+    if x <= 0
+        1
+    elseif x <= 1
+        1-cdf_raw(d,x)
     else
         ccdf_raw(d,x)
     end
@@ -70,23 +70,23 @@ end
 
 
 # TODO: figure out how best to truncate series
-function pdf(d::Kolmogorov,x::Float64)
-    if x <= 0.0
+function pdf(d::Kolmogorov,x::Real)
+    if x <= 0
         return 0.0
-    elseif x <= 1.0
-        c = π/(2.0*x)        
+    elseif x <= 1
+        c = π/(2*x)
         s = 0.0
         for i = 1:20
-            k = ((2*i-1)*c)^2
-            s += (k-1.0)*exp(-k/2.0)
+            k = ((2i - 1)*c)^2
+            s += (k - 1)*exp(-k/2)
         end
         return sqrt2π*s/x^2
     else
         s = 0.0
         for i = 1:20
-            s += (iseven(i) ? -1 : 1)*i^2*exp(-2.0*(i*x)^2)
+            s += (iseven(i) ? -1 : 1)*i^2*exp(-2(i*x)^2)
         end
-        return 8.0*x*s
+        return 8*x*s
     end
 end
 
@@ -105,9 +105,9 @@ function rand(d::Kolmogorov)
         while true
             g = rand_trunc_gamma()
 
-            x = pi/sqrt(8.0*g)
+            x = pi/sqrt(8g)
             w = 0.0
-            z = 1/(2*g)
+            z = 1/(2g)
             p = exp(-g)
             n = 1
             q = 1.0
@@ -145,12 +145,12 @@ function rand(d::Kolmogorov)
 end
 
 # equivalent to
-# rand(Truncated(Gamma(1.5,1.0),tp,Inf))
+# rand(Truncated(Gamma(1.5,1),tp,Inf))
 function rand_trunc_gamma()
-    tp = 2.193245422464302 #pi^2/(8*t^2)    
+    tp = 2.193245422464302 #pi^2/(8*t^2)
     while true
         e0 = rand(Exponential(1.2952909208355123))
-        e1 = rand(Exponential(2.0))
+        e1 = rand(Exponential(2))
         g = tp + e0
         if (e0*e0 <= tp*e1*(g+tp)) || (g/tp - 1 - log(g/tp) <= e1)
             return g

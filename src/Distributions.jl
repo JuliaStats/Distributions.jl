@@ -236,7 +236,7 @@ export
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
     scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
-    shape,              # shape parameter for applicable distributions
+    shape,              # get the shape parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
     std,                # standard deviation of distribution

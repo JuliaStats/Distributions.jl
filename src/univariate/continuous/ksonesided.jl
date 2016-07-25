@@ -11,9 +11,9 @@ end
 
 # formula of Birnbaum and Tingey (1951)
 function ccdf(d::KSOneSided, x::Float64)
-    if x >= 1.0
+    if x >= 1
         return 0.0
-    elseif x <= 0.0
+    elseif x <= 0
         return 1.0
     end
     n = d.n
@@ -25,5 +25,4 @@ function ccdf(d::KSOneSided, x::Float64)
     s*x
 end
 
-cdf(d::KSOneSided, x::Float64) = 1.0 - ccdf(d,x)
-
+cdf(d::KSOneSided, x::Float64) = 1 - ccdf(d,x)

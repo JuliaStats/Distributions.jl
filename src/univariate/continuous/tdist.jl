@@ -18,45 +18,52 @@ External links
 [Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
 
 """
-immutable TDist <: ContinuousUnivariateDistribution
-    ν::Float64
+immutable TDist{T<:Real} <: ContinuousUnivariateDistribution
+    ν::T
 
-    TDist(ν::Real) = (@check_args(TDist, ν > zero(ν)); new(ν))
+    TDist(ν::T) = (@check_args(TDist, ν > zero(ν)); new(ν))
 end
+
+TDist{T<:Real}(ν::T) = TDist{T}(ν)
+TDist(ν::Integer) = TDist(Float64(ν))
 
 @distr_support TDist -Inf Inf
 
+#### Conversions
+convert{T<:Real}(::Type{TDist{T}}, ν::Real) = TDist(T(ν))
+convert{T<:Real, S<:Real}(::Type{TDist{T}}, d::TDist{S}) = TDist(T(d.ν))
 
 #### Parameters
 
 dof(d::TDist) = d.ν
 params(d::TDist) = (d.ν,)
+@inline partype{T<:Real}(d::TDist{T}) = T
 
 
 #### Statistics
 
-mean(d::TDist) = d.ν > 1.0 ? 0.0 : NaN
-median(d::TDist) = 0.0
-mode(d::TDist) = 0.0
+mean{T<:Real}(d::TDist{T}) = d.ν > 1 ? zero(T) : T(NaN)
+median{T<:Real}(d::TDist{T}) = zero(T)
+mode{T<:Real}(d::TDist{T}) = zero(T)
 
-function var(d::TDist)
+function var{T<:Real}(d::TDist{T})
     ν = d.ν
-    ν > 2.0 ? ν / (ν - 2.0) :
-    ν > 1.0 ? Inf : NaN
+    ν > 2 ? ν / (ν - 2) :
+    ν > 1 ? T(Inf) : T(NaN)
 end
 
-skewness(d::TDist) = d.ν > 3.0 ? 0.0 : NaN
+skewness{T<:Real}(d::TDist{T}) = d.ν > 3 ? zero(T) : T(NaN)
 
-function kurtosis(d::TDist)
+function kurtosis{T<:Real}(d::TDist{T})
     ν = d.ν
-    ν > 4.0 ? 6.0 / (ν - 4.0) :
-    ν > 2.0 ? Inf : NaN
+    ν > 4 ? 6 / (ν - 4) :
+    ν > 2 ? T(Inf) : T(NaN)
 end
 
 function entropy(d::TDist)
-    h = 0.5 * d.ν
-    h1 = h + 0.5
-    h1 * (digamma(h1) - digamma(h)) + 0.5 * log(d.ν) + lbeta(h, 0.5)
+    h = d.ν/2
+    h1 = h + 1//2
+    h1 * (digamma(h1) - digamma(h)) + log(d.ν)/2 + lbeta(h, 1//2)
 end
 
 
@@ -67,11 +74,10 @@ end
 rand(d::TDist) = StatsFuns.RFunctions.tdistrand(d.ν)
 
 function cf(d::TDist, t::Real)
-    t == 0 && return complex(1.0)
-    h = d.ν * 0.5
-    q = d.ν * 0.25
-    t2 = t*t
-    complex(2*(q*t2)^q*besselk(h,sqrt(d.ν)*abs(t))/gamma(h))
+    t == 0 && return complex(1)
+    h = d.ν/2
+    q = d.ν/4
+    complex(2(q*t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
 end
 
-gradlogpdf(d::TDist, x::Float64) = -((d.ν + 1.0) * x) / (x^2 + d.ν)
+gradlogpdf(d::TDist, x::Real) = -((d.ν + 1) * x) / (x^2 + d.ν)

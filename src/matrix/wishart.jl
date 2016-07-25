@@ -3,7 +3,7 @@
 #   following the Wikipedia parameterization
 #
 
-immutable Wishart{ST<:AbstractPDMat, T<:Real} <: ContinuousMatrixDistribution
+immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix
     c0::T     # the logarithm of normalizing constant in pdf
@@ -11,14 +11,16 @@ end
 
 #### Constructors
 
-function Wishart{ST <: AbstractPDMat}(df::Real, S::ST)
+function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
-    prom_df, prom_c0 = promote(df, c0)
-    T = typeof(prom_df)
-    Wishart{ST, T}(prom_df, S, prom_c0)
+    R = promote_type(T, typeof(c0))
+    _, prom_S = promote_eltype(one(R), S)
+    Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
 end
+
+Wishart(df::Real, S::AbstractPDMat) = Wishart(promote_eltype(df, PDMat(S))...)
 
 Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
@@ -39,6 +41,7 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 params(d::Wishart) = (d.df, d.S, d.c0)
+@inline partype{T<:Real}(d::Wishart{T}) = T
 
 #### Show
 

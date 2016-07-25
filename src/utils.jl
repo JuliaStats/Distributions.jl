@@ -64,7 +64,7 @@ function allnonneg{T<:Real}(x::Array{T})
     return true
 end
 
-isprobvec(p::Vector{Float64}) = allnonneg(p) && isapprox(sum(p), 1.0)
+isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
 
 function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
     s = 0.
@@ -95,9 +95,11 @@ function exp!(x::AbstractArray)
     x
 end
 
-# get a type capable of representing computations using a distribution's paramters
-@inline partype(d::Distribution) = promote_type(map(_partype, params(d))...)
-@inline _partype(x) = isa(x, Real) ? typeof(x) : eltype(x)
+# get a type wide enough to represent all a distributions's parameters
+# (if the distribution is parametric)
+# if the distribution is not parametric, we need this to be a float so that
+# inplace pdf calculations, etc. allocate storage correctly
+@inline partype(d::Distribution) = Float64
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
@@ -133,14 +135,22 @@ end
 # for when container inputs need to be promoted to the same eltype
 function promote_eltype{T, S}(A::Array{T}, B::Array{S})
     R = promote_type(T, S)
-    (convert(Array{R}, A), convert(Array{R}, B))
+    (Array{R}(A), Array{R}(B))
 end
 function promote_eltype{T}(A::Array{T}, B::Real)
     R = promote_type(T, typeof(B))
-    (convert(Array{R}, A), convert(R, B))
+    (Array{R}(A), R(B))
+end
+function promote_eltype(A::Real, B::Array)
+    tup = promote_eltype(B, A)
+    (tup[2], tup[1])
 end
 function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
     R = promote_type(T, S)
-    (convert(Array{R}, A), convert(typeof(B).name.primary{R}, B))
+    (Array{R}(A), convert(typeof(B).name.primary{R}, B))
+end
+function promote_eltype{S}(A::Real, B::AbstractPDMat{S})
+    R = promote_type(typeof(A), S)
+    (R(A), convert(typeof(B).name.primary{R}, B))
 end
 promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)

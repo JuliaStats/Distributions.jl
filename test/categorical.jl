@@ -47,3 +47,6 @@ d = Categorical(4)
 
 p = ones(10^6) * 1.0e-6
 @test Distributions.isprobvec(p)
+
+@test typeof(convert(Categorical{Float32}, d)) == Categorical{Float32}
+@test typeof(convert(Categorical{Float32}, d.p)) == Categorical{Float32}
