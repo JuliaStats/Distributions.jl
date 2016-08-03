@@ -79,7 +79,7 @@ end
 #  - Available at http://arxiv.org/abs/0907.4010
 
 function randnt(lb::Float64, ub::Float64, tp::Float64)
-    r::Float64
+    local r::Float64
     if tp > 0.3   # has considerable chance of falling in [lb, ub]
         r = randn()
         while r < lb || r > ub

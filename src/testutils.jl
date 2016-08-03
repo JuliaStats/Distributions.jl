@@ -173,8 +173,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    rmin::Float64
-    rmax::Float64
+    local rmin::Float64
+    local rmax::Float64
     if applicable(quantile, distr, 0.5)
         rmin = quantile(distr, 0.01)
         rmax = quantile(distr, 0.99)
