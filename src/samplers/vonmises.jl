@@ -17,7 +17,7 @@ end
 #     (Applied Statistics), 28(2), 152-157.
 function rand(s::VonMisesSampler)
     f = 0.0
-    x::Float64
+    local x::Float64
     if s.κ > 700.0
         x = s.μ + randn() / sqrt(s.κ)
     else
