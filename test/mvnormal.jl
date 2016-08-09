@@ -115,6 +115,15 @@ h = J \ mu
 @test typeof(MvNormalCanon(h, 2.0f0)) == typeof(MvNormalCanon(h, 2.0))
 
 @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+
+d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
+@test typeof(convert(MvNormal{Float64}, d)) == typeof(MvNormal(mu, PDMat(C)))
+@test typeof(convert(MvNormal{Float64}, d.μ, d.Σ)) == typeof(MvNormal(mu, PDMat(C)))
+
+d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
+@test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+@test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+
 ##### MLE
 
 # a slow but safe way to implement MLE for verification

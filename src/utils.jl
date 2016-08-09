@@ -154,3 +154,10 @@ function promote_eltype{S}(A::Real, B::AbstractPDMat{S})
     (R(A), convert(typeof(B).name.primary{R}, B))
 end
 promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)
+
+# utility function to change element type of container
+function convert_eltype{T}(::Type{T}, A::Union{AbstractArray, AbstractPDMat})
+    R = typeof(A).name.primary
+    convert(R{T}, A)
+end
+convert_eltype{T,S}(::Type{T}, Z::ZeroVector{S}) = ZeroVector{T}(length(Z))

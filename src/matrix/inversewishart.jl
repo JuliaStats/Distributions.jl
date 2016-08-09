@@ -29,7 +29,7 @@ InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 function _invwishart_c0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
     p = dim(Ψ)
-    h_df * (p * logtwo - logdet(Ψ)) + logmvgamma(p, h_df)
+    h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
 end
 
 
@@ -42,6 +42,16 @@ dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 @inline partype{T<:Real}(d::InverseWishart{T}) = T
+
+### Conversion
+function convert{T<:Real}(::Type{InverseWishart{T}}, d::InverseWishart)
+    P = convert_eltype(T, d.Ψ)
+    InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
+end
+function convert{T<:Real}(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0)
+    P = convert_eltype(T, Ψ)
+    InverseWishart{T, typeof(P)}(T(df), P, T(c0))
+end
 
 #### Show
 
