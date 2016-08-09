@@ -14,6 +14,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     S = cov(g)
     s = var(g)
     e = entropy(g)
+    @test partype(g) == Float64
     @test isa(mn, Vector{Float64})
     @test isa(md, Vector{Float64})
     @test isa(mo, Vector{Float64})

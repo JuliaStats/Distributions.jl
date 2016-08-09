@@ -12,6 +12,7 @@ for d in [W,IW]
     @test size(d) == size(rand(d))
     @test length(d) == length(rand(d))
     @test typeof(d)(params(d)...) == d
+    @test partype(d) == Float64
 
     ### conversions
     D = typeof(d).name.primary
