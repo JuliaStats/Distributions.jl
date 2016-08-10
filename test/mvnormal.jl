@@ -24,6 +24,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
 
+    # test sampling for AbstractMatrix (here, a SubArray):
+    subX = view(rand(d, 2d), :, 1:d)
+    @test isa(rand!(g, subX), SubArray)
+
     # sampling
     X = rand(g, n_tsamples)
     emp_mu = vec(mean(X, 2))
