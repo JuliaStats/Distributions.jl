@@ -3,6 +3,7 @@
 import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions
+import Compat.view
 using Base.Test
 import Distributions: distrname
 
