@@ -33,9 +33,11 @@ immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
 
 end
 
-Binomial{T<:Real}(n, p::T) = Binomial{T}(n, p)
-Binomial(n, p::Integer) = Binomial(n, Float64(p))
-Binomial(n) = Binomial(n, 0.5)
+Binomial{T<:Real}(n::Integer, p::T) = Binomial{T}(n, p)
+Binomial(n::Real, p::Real) = Base.depwarn("Binomial(n::Real, p) is deprecated. Please use Binomial(n::Integer, p) instead.", :Binomial)
+Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
+Binomial(n::Integer) = Binomial(n, 0.5)
+Binomial(n::Real) = Base.depwarn("Binomial(n::Real) is deprecated. Please use Binomial(n::Integer) instead.", :Binomial)
 Binomial() = Binomial(1, 0.5)
 
 @distr_support Binomial 0 d.n

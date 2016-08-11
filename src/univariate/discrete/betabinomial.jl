@@ -28,9 +28,10 @@ immutable BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-BetaBinomial{T<:Real}(n::Int, α::T, β::T) = BetaBinomial{T}(n, α, β)
-BetaBinomial(n::Int, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
-BetaBinomial(n::Int, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
+BetaBinomial{T<:Real}(n::Integer, α::T, β::T) = BetaBinomial{T}(n, α, β)
+BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
+BetaBinomial(n::Real, α::Real, β::Real) = Base.depwarn("BetaBinomial(n::Real, α, β) is deprecated. Please use BetaBinomial(n::Integer, α, β) instead.", :BetaBinomial)
+BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
 
 @distr_support BetaBinomial 0 d.n
 insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n
