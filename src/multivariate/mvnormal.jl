@@ -140,12 +140,16 @@ gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ (x - d.μ))
 _rand!(d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand!(d::MvNormal, x::AbstractVecOrMat)
+function _rand_abstr!(d::MvNormal, x::AbstractVecOrMat)
     for i = 1:length(x)
         @inbounds x[i] = randn()
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
+# define these separately to avoid ambiguity with
+# _rand(d::Multivariate, x::AbstractMatrix)
+_rand!(d::MvNormal, x::AbstractMatrix) = _rand_abstr!(d, x)
+_rand!(d::MvNormal, x::AbstractVector) = _rand_abstr!(d, x)
 
 ###########################################################
 #

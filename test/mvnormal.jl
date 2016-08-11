@@ -3,6 +3,7 @@
 import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions
+import Compat.view
 using Base.Test
 import Distributions: distrname
 
@@ -23,6 +24,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test_approx_eq ldcov logdet(Σ)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
+
+    # test sampling for AbstractMatrix (here, a SubArray):
+    subX = view(rand(d, 2d), :, 1:d)
+    @test isa(rand!(g, subX), SubArray)
 
     # sampling
     X = rand(g, n_tsamples)
