@@ -33,3 +33,4 @@ ZZ, DD = Distributions.promote_eltype(Z, D)
 @test Distributions.convert_eltype(Float32, A) == convert(Array{Float32}, A)
 @test Distributions.convert_eltype(Float32, Z) == Distributions.ZeroVector{Float32}(length(Z))
 @test Distributions.convert_eltype(Float64, D).mat == convert(PDMats.PDMat{Float64}, D).mat
+@test typeof(convert(Distributions.ZeroVector{Float32}, Z)) == Distributions.ZeroVector{Float32}
