@@ -101,6 +101,14 @@ MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
 MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(abs2(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
+### Conversion
+function convert{T<:Real}(::Type{MvNormal{T}}, d::MvNormal)
+    MvNormal(convert_eltype(T, d.μ), convert_eltype(T, d.Σ))
+end
+function convert{T<:Real}(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
+    MvNormal(convert_eltype(T, μ), convert_eltype(T, Σ))
+end
+
 ### Show
 
 distrname(d::IsoNormal) = "IsoNormal"    # Note: IsoNormal, etc are just alias names
@@ -117,7 +125,7 @@ Base.show(io::IO, d::MvNormal) =
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
-mean(d::MvNormal) = convert(Vector{Float64}, d.μ)
+mean(d::MvNormal) = full(d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype{T<:Real}(d::MvNormal{T}) = T
 

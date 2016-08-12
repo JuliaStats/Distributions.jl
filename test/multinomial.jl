@@ -17,6 +17,14 @@ d = Multinomial(nt, p)
 
 @test insupport(d, [1, 6, 3])
 @test !insupport(d, [2, 6, 3])
+@test partype(d) == Float64
+@test partype(Multinomial(nt, Vector{Float32}(p))) == Float32
+
+# Conversion
+@test typeof(d) == Multinomial{Float64}
+@test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32}
+@test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32}
+@test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32}
 
 # random sampling
 
@@ -52,6 +60,9 @@ for i in 1 : size(x, 2)
 	@test_approx_eq pv[i] pdf(d, x[:,i])
 	@test_approx_eq lp[i] logpdf(d, x[:,i])
 end
+
+# test type stability of logpdf
+@test typeof(logpdf(convert(Multinomial{Float32}, d), x1)) == Float32
 
 # suffstats
 

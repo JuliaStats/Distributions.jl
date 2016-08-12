@@ -64,6 +64,14 @@ distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
 distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
+### Conversion
+function convert{T<:Real}(::Type{MvNormalCanon{T}}, d::MvNormalCanon)
+    MvNormalCanon(convert_eltype(T, d.μ), convert_eltype(T, d.h), convert_eltype(T, d.J))
+end
+function convert{T<:Real,V<:Union{Vector, ZeroVector}}(::Type{MvNormalCanon{T}}, μ::V, h::V, J::AbstractPDMat)
+    MvNormalCanon(convert_eltype(T, μ), convert_eltype(T, h), convert_eltype(T, J))
+end
+
 ### conversion between conventional form and canonical form
 
 meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))

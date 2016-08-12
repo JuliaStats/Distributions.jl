@@ -35,3 +35,8 @@ end
 @test typeof(GenericMvTDist(1, Vector{Float32}(mu), PDMat(Sigma))) == typeof(GenericMvTDist(1., mu, PDMat(Sigma)))
 
 @test typeof(GenericMvTDist(1, mu, PDMat(Array{Float32}(Sigma)))) == typeof(GenericMvTDist(1., mu, PDMat(Sigma)))
+
+d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
+@test typeof(convert(GenericMvTDist{Float64}, d)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.zeromean, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test partype(d) == Float32

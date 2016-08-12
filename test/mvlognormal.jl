@@ -14,6 +14,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     S = cov(g)
     s = var(g)
     e = entropy(g)
+    @test partype(g) == Float64
     @test isa(mn, Vector{Float64})
     @test isa(md, Vector{Float64})
     @test isa(mo, Vector{Float64})
@@ -29,7 +30,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test_approx_eq mn exp(mean(g.normal) + var(g.normal)/2)
     @test_approx_eq mo exp(mean(g.normal) - var(g.normal))
     @test_approx_eq entropy(g) d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
-    gg = typeof(g)(params(g)...)
+    gg = typeof(g)(MvNormal(params(g)...))
     @test full(g.normal.μ) == full(gg.normal.μ)
     @test full(g.normal.Σ) == full(gg.normal.Σ)
     @test insupport(g,ones(d))
@@ -118,3 +119,8 @@ for (g, μ, Σ) in [
     @test_approx_eq full(m) μ
     test_mvlognormal(g, 10^4)
 end
+
+##### Constructors and conversions
+d = MvLogNormal(Array{Float32}(mu), PDMats.PDMat(Array{Float32}(C)))
+@test typeof(convert(MvLogNormal{Float64}, d)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
+@test typeof(convert(MvLogNormal{Float64}, d.normal.μ, d.normal.Σ)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
