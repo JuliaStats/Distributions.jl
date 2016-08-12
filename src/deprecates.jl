@@ -6,7 +6,7 @@ function dim(d::MultivariateDistribution)
     return length(d)
 end
 
-function binaryentropy(d::UnivariateDistribution) 
+function binaryentropy(d::UnivariateDistribution)
     Base.depwarn("binaryentropy is deprecated. Please use entropy(d, 2).", :binaryentropy)
     return entropy(d) / log(2)
 end
@@ -25,3 +25,17 @@ function probs(d::DiscreteUnivariateDistribution)
     return probs(d)
 end
 
+function Binomial(n::Real, p::Real)
+    Base.depwarn("Binomial(n::Real, p) is deprecated. Please use Binomial(n::Integer, p) instead.", :Binomial)
+    Binomial(Int(n), p)
+end
+
+function Binomial(n::Real)
+    Base.depwarn("Binomial(n::Real) is deprecated. Please use Binomial(n::Integer) instead.", :Binomial)
+    Binomial(Int(n))
+end
+
+function BetaBinomial(n::Real, α::Real, β::Real)
+    Base.depwarn("BetaBinomial(n::Real, α, β) is deprecated. Please use BetaBinomial(n::Integer, α, β) instead.", :BetaBinomial)
+    BetaBinomial(Int(n), α, β)
+end

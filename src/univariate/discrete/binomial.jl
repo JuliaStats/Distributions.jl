@@ -25,7 +25,7 @@ immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    function Binomial(n::Int, p::T)
+    function Binomial(n, p)
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))
         new(n, p)
