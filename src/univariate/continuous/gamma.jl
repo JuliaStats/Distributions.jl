@@ -4,7 +4,7 @@ doc"""
 The *Gamma distribution* with shape parameter `α` and scale `θ` has probability density
 function
 
-$f(x; \alpha, \beta) = \frac{x^{\alpha-1} e^{-x/\beta}}{\Gamma(\alpha) \beta^\alpha},
+$f(x; \alpha, \theta) = \frac{x^{\alpha-1} e^{-x/\theta}}{\Gamma(\alpha) \theta^\alpha},
 \quad x > 0$
 
 ```julia
