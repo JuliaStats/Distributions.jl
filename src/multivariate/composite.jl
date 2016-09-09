@@ -7,6 +7,7 @@ module CompositeDistributions
 if !isdefined(:Distributions) using Distributions end
 
 import Base.length, Base.mean, Base.show
+import Distributions.params
 import Distributions.mean, Distributions.mode, Distributions.var, Distributions.cov
 import Distributions.entropy, Distributions.insupport
 import Distributions._logpdf, Distributions._pdf!
@@ -14,7 +15,7 @@ import Distributions._rand!
 
 export AbstractCompositeContinuousDist, ContinuousMultivariateDistribution
 export GenericCompositeContinuousDist, CompositeDist
-export length, params, mean, mode, var, cov, entropy
+export length, params, set_params!, mean, mode, var, cov, entropy
 export insupport, _logpdf, gradlogpdf, _rand!
 
 
@@ -48,19 +49,33 @@ length(d::GenericCompositeContinuousDist)  = d.indices[end].stop
 params(d::GenericCompositeContinuousDist, idx::Integer) = params(d.dist[idx])
 function params(d::GenericCompositeContinuousDist) 
   n = length(d)
-  p = Array(Float64,n)
+  p = Array(Tuple,n)
   for i in 1:length(d.dist)
-     p[d.indices[i]] = params(d,i)
+     p[i] = params(d,i)
   end
   return p
 end
 
-#=  Seems like a good idea, but would require set_params for all distributions used
-function set_params(d::GenericCompositeContinuousDist, x::DenseVector{T}) 
-  n = length(d)
-  for i in 1:length(d.dist)
-     set_params(d.dist[i], params(d,i) )
+#= Seems like a good idea, but not clear how to do well
+function set_params!{T}(d::GenericCompositeContinuousDist, i::Integer, x::AbstractArray{Tuple,1} )
+  param = params(d.dist[i])
+  @assert length(param) = length(x)
+  for j in 1:length(param)
+     param[j] = x[j] 
   end
+  if length(param) == 1 
+     d.dist[i] = typeof(d.dist[i])(param[1])
+  elseif length(param) == 2
+  d.dist[i] = typeof(d.dist[i])(param[1],param[2])
+  elseif length(param) == 3 
+  d.dist[i] = typeof(d.dist[i])(param[1],param[3])
+  else
+     throw("Too many parameters inside Composite Distribution.")
+  end
+  return d
+end
+
+function set_params!{T}(d::GenericCompositeContinuousDist, x::DenseVector{T}) 
 end
 =#
 

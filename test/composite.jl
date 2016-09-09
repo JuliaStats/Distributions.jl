@@ -5,11 +5,21 @@ include("../src/multivariate/composite.jl")
 using CompositeDistributions
 
 d1 = Rayleigh(0.3)
-d2 = MvNormal([log(0.1),log(0.01)],[0.1,log(0.01)])
+d2 = MvNormal([log(0.1),log(0.01)],[0.2,log(0.02)])
 
 d = CompositeDist(ContinuousDistribution[d1, d2])
 
+param = params(d)
+@test d1 == Rayleigh(param[1][1])
+@test d2 == MvNormal(param[2][1], param[2][2])
+
+
 # Test basic statistics
+l1 = length(d1)
+l2 = length(d2)
+l = length(d)
+@test l1+l2 == l
+
 m1 = mean(d1)
 m2 = mean(d2)
 m = mean(d)
@@ -35,7 +45,13 @@ cv = cov(d)
 @test all(zeros(2) .== cv[2:3,1])
 @test all(cv2 .== cv[2:3,2:3])
 
-# Now sure how to test  these well
+e1 = entropy(d1)
+e2 = entropy(d2)
+esum = entropy(d)
+@test_approx_eq(e1+e2,esum) 
+
+
+# Now sure how to test these well
 r = rand(d)
 @test insupport(d,r)
 
