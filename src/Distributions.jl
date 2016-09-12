@@ -190,12 +190,6 @@ export
     logpdf!,            # evaluate log pdf to provided storage
     logpmf,             # log probability mass
     logpmf!,            # evaluate log pmf to provided storage
-    posterior,          # get posterior distribution given prior and observed data
-    posterior_canon,    # get the canonical form of the posterior distribution
-    posterior_mode,     # get the mode of posterior distribution
-    posterior_rand,     # draw samples from the posterior distribution
-    posterior_rand!,
-    posterior_randmodel,
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
