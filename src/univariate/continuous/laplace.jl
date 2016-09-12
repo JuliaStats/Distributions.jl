@@ -112,6 +112,7 @@ rand(d::Laplace) = d.μ + d.θ*randexp()*ifelse(rand(Bool), 1, -1)
 #### Fitting
 
 function fit_mle(::Type{Laplace}, x::Array)
-    a = median(x)
-    Laplace(a, mad(x, a))
+    xc = copy(x)
+    a = median!(xc)
+    Laplace(a, StatsBase.mad!(xc, a))
 end
