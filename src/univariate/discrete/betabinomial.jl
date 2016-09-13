@@ -93,7 +93,7 @@ function pdf(d::BetaBinomial)
     k = 0:n
     binoms = Float64[binomial(n, i) for i in k]
     fixed_beta = beta(α, β)
-    return binoms .* beta(k + α, n - k + β) / fixed_beta
+    return binoms .* @compat(beta.(k + α, n - k + β)) / fixed_beta
 end
 
 entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))

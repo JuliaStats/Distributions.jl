@@ -136,18 +136,21 @@ location(d::MvLogNormal) = mean(d.normal)
 scale(d::MvLogNormal) = cov(d.normal)
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-mean(d::MvLogNormal) = exp(mean(d.normal) + var(d.normal)/2)
-median(d::MvLogNormal) = exp(mean(d.normal))
-mode(d::MvLogNormal) = exp(mean(d.normal) - var(d.normal))
-cov(d::MvLogNormal) = (m = mean(d) ; m*m'.*(exp(cov(d.normal))-1))
+mean(d::MvLogNormal) = @compat(exp.(mean(d.normal) + var(d.normal)/2))
+median(d::MvLogNormal) = @compat(exp.(mean(d.normal)))
+mode(d::MvLogNormal) = @compat(exp.(mean(d.normal) - var(d.normal)))
+function cov(d::MvLogNormal)
+    m = mean(d)
+    return m*m'.*(@compat(exp.(cov(d.normal))) - 1)
+  end
 var(d::MvLogNormal) = diag(cov(d))
 
 #see Zografos & Nadarajah (2005) Stat. Prob. Let 71(1) pp71-84 DOI: 10.1016/j.spl.2004.10.023
 entropy(d::MvLogNormal) = length(d)*(1+log2π)/2 + logdetcov(d.normal)/2 + sum(mean(d.normal))
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-_rand!{T<:Real}(d::MvLogNormal,x::AbstractVecOrMat{T}) = exp!(_rand!(d.normal,x))
-_logpdf{T<:Real}(d::MvLogNormal,x::AbstractVecOrMat{T}) = insupport(d,x)?(_logpdf(d.normal,log(x))-sum(log(x))):-Inf
-_pdf{T<:Real}(d::MvLogNormal,x::AbstractVecOrMat{T}) = insupport(d,x)?_pdf(d.normal,log(x))/prod(x):0.0
+_rand!{T<:Real}(d::MvLogNormal, x::AbstractVecOrMat{T}) = @compat(exp!(_rand!(d.normal, x)))
+@compat _logpdf{T<:Real}(d::MvLogNormal, x::AbstractVecOrMat{T}) = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
+_pdf{T<:Real}(d::MvLogNormal, x::AbstractVecOrMat{T}) = insupport(d,x) ? _pdf(d.normal, @compat(log.(x)))/prod(x) : 0.0
 
-Base.show(io::IO,d::MvLogNormal) = show_multline(io,d,[(:dim,length(d)),(:μ,mean(d.normal)),(:Σ,cov(d.normal))])
+Base.show(io::IO,d::MvLogNormal) = show_multline(io, d, [(:dim, length(d)), (:μ, mean(d.normal)), (:Σ, cov(d.normal))])

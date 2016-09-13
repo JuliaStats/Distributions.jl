@@ -440,7 +440,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     vf = Float64[v for v in vs]
     p = pdf(d, vf)
     xmean = dot(p, vf)
-    xvar = dot(p, abs2(vf .- xmean))
+    xvar = dot(p, @compat(abs2.(vf .- xmean)))
     xstd = sqrt(xvar)
     xentropy = entropy(p)
     xskew = dot(p, (vf .- xmean).^3) / (xstd.^3)

@@ -2,7 +2,7 @@
 
 import PDMats: ScalMat, PDiagMat, PDMat
 
-using Distributions
+using Distributions, Compat
 import Compat.view
 using Base.Test
 import Distributions: distrname
@@ -71,8 +71,8 @@ J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 for (T, g, μ, Σ) in [
     (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, 2.0 * eye(3)),
     (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), 2.0 * eye(3)),
-    (DiagNormal, MvNormal(mu, sqrt(va)), mu, diagm(va)),
-    (ZeroMeanDiagNormal, MvNormal(sqrt(va)), zeros(3), diagm(va)),
+    (DiagNormal, MvNormal(mu, Vector{Float64}(@compat(sqrt.(va)))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (ZeroMeanDiagNormal, MvNormal(Vector{Float64}(@compat(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (FullNormal, MvNormal(mu, C), mu, C),
     (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
     (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, 0.5 * eye(3)),
