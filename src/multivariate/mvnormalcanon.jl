@@ -106,4 +106,4 @@ unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
 unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
-_rand!(d::MvNormalCanon, x::AbstractMatrix) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
+_rand!(d::MvNormalCanon, x::AbstractVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
