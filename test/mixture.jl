@@ -47,7 +47,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = log(mix_p0)
+    mix_lp0 = @compat(log.(mix_p0))
 
     for i = 1:n
         @test_approx_eq pdf(g, X[i]) mix_p0[i]
@@ -98,7 +98,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = log(mix_p0)
+    mix_lp0 = @compat(log.(mix_p0))
 
     for i = 1:n
         x_i = X[:,i]

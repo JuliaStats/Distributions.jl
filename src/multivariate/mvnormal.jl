@@ -91,14 +91,14 @@ function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)
 end
 
 MvNormal{T<:Real}(μ::Vector{T}, Σ::Matrix{T}) = MvNormal(μ, PDMat(Σ))
-MvNormal{T<:Real}(μ::Vector{T}, σ::Vector{T}) = MvNormal(μ, PDiagMat(abs2(σ)))
+MvNormal{T<:Real}(μ::Vector{T}, σ::Vector{T}) = MvNormal(μ, PDiagMat(@compat(abs2.(σ))))
 MvNormal{T<:Real}(μ::Vector{T}, σ::T) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
 MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::VecOrMat{S}) = MvNormal(promote_eltype(μ, Σ)...)
 MvNormal{T<:Real}(μ::Vector{T}, σ::Real) = MvNormal(promote_eltype(μ, σ)...)
 
 MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
-MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(abs2(σ)))
+MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(@compat(abs2.(σ))))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Conversion

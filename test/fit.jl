@@ -4,7 +4,7 @@
 #  - distribution fitting (i.e. estimation)
 #
 
-using Distributions
+using Distributions, Compat
 using Base.Test
 
 n0 = 100
@@ -269,13 +269,13 @@ x = rand(Gamma(3.9, 2.1), n0)
 ss = suffstats(Gamma, x)
 @test isa(ss, Distributions.GammaStats)
 @test_approx_eq ss.sx sum(x)
-@test_approx_eq ss.slogx sum(log(x))
+@test_approx_eq ss.slogx sum(@compat(log.(x)))
 @test_approx_eq ss.tw n0
 
 ss = suffstats(Gamma, x, w)
 @test isa(ss, Distributions.GammaStats)
 @test_approx_eq ss.sx dot(x, w)
-@test_approx_eq ss.slogx dot(log(x), w)
+@test_approx_eq ss.slogx dot(@compat(log.(x)), w)
 @test_approx_eq ss.tw sum(w)
 
 d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
