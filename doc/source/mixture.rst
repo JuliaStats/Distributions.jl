@@ -154,6 +154,6 @@ In addition, for all subtypes of ``UnivariateMixture`` and ``MultivariateMixture
 Estimation
 -----------
 
-There are a number of methods for estimating of mixture models from data, and this problem remains an open research topic. This package does not provide facilities for estimaing mixture models. One can resort to other packages, *e.g.* *MixtureModels.jl*, for this purpose.
+There are a number of methods for estimating of mixture models from data, and this problem remains an open research topic. This package does not provide facilities for estimaing mixture models. One can resort to other packages, *e.g.* *GaussianMixtures.jl*, for this purpose.
 
 
