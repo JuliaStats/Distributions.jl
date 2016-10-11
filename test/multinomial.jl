@@ -98,3 +98,6 @@ r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt
 @test length(r) == length(p)
 @test_approx_eq_eps probs(r) p 0.02
+
+# behavior for n = 0
+@test rand(Multinomial(0,p)) == [0,0,0]
