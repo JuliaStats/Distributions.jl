@@ -102,13 +102,13 @@ r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 # behavior for n = 0
 d0 = Multinomial(0, p)
 @test rand(d0) == [0, 0, 0]
-@test pdf(d0,[0, 0, 0]) == 1
-@test pdf(d0,[0, 1, 0]) == 0
+@test pdf(d0, [0, 0, 0]) == 1
+@test pdf(d0, [0, 1, 0]) == 0
 @test mean(d0) == [0, 0, 0]
 @test var(d0) == [0, 0, 0]
 @test cov(d0) == zeros(3, 3)
 @test entropy(d0) == 0
-@test insupport(d0,[0, 0, 0]) == true
-@test insupport(d0,[0, 0, 4]) == false
+@test insupport(d0, [0, 0, 0]) == true
+@test insupport(d0, [0, 0, 4]) == false
 @test length(d0) == 3
 @test size(d0) == (3,)
