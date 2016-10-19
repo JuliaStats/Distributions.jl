@@ -82,7 +82,7 @@ end
 
 function pdf(d::BetaBinomial, k::Int)
     n, α, β = d.n, d.α, d.β
-    choose = Float64(binomial(n, k))
+    choose = gamma(n+1)/(gamma(k+1) * gamma(n-k+1))
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
     return choose * (numerator / denominator)
@@ -91,7 +91,7 @@ end
 function pdf(d::BetaBinomial)
     n, α, β = d.n, d.α, d.β
     k = 0:n
-    binoms = Float64[binomial(n, i) for i in k]
+    binoms = [gamma(n+1)/(gamma(i+1) * gamma(n-i+1)) for i in k]
     fixed_beta = beta(α, β)
     return binoms .* @compat(beta.(k + α, n - k + β)) / fixed_beta
 end
