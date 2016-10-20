@@ -28,7 +28,8 @@ tests = [
     "gradlogpdf",
     "truncate",
     "truncatednormal",
-    "generalizedextremevalue"]
+    "generalizedextremevalue",
+	"largenbetabinomialpdf"]
 
 print_with_color(:blue, "Running tests:\n")
 
