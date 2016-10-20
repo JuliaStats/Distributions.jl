@@ -91,7 +91,7 @@ end
 function pdf(d::BetaBinomial)
     n, α, β = d.n, d.α, d.β
     k = 0:n
-    binoms = [1 / ((n+1) * beta(k+1, n-k+1)) for i in k]
+    binoms = [1 / ((n+1) * beta(i+1, n-i+1)) for i in k]
     fixed_beta = beta(α, β)
     return binoms .* @compat(beta.(k + α, n - k + β)) / fixed_beta
 end
