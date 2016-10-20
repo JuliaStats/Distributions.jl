@@ -29,7 +29,7 @@ tests = [
     "truncate",
     "truncatednormal",
     "generalizedextremevalue",
-	"largenbetabinomialpdf"]
+    "largenbetabinomialpdf"]
 
 print_with_color(:blue, "Running tests:\n")
 
