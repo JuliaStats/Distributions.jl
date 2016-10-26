@@ -90,12 +90,11 @@ end
 
 function pdf(d::BetaBinomial)
     n, α, β = d.n, d.α, d.β
-    k = 0:n
     denominator = beta(α, β)
-    values = Array(Float64, 1)
-    for i in k
-        numerator = beta(i + α, n - i + β)
-        chooseinv = (n+1) * beta(i+1, n-i+1)
+    values = Array{Float64, 1}()
+    for k = 0:n
+        chooseinv = (n+1) * beta(k+1, n-k+1)
+        numerator = beta(k + α, n - k + β)
         push!(values, (numerator / denominator) / chooseinv)
     end
     return values
