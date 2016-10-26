@@ -91,9 +91,14 @@ end
 function pdf(d::BetaBinomial)
     n, α, β = d.n, d.α, d.β
     k = 0:n
-    binoms = [(n+1) * beta(i+1, n-i+1) for i in k]
-    fixed_beta = beta(α, β)
-    return @compat(beta.(k + α, n - k + β)) / fixed_beta ./ binoms
+    denominator = beta(α, β)
+    values = Array(Float64, 1)
+    for i in k
+        numerator = beta(i + α, n - i + β)
+        chooseinv = (n+1) * beta(i+1, n-i+1)
+        push!(values, (numerator / denominator) / chooseinv)
+    end
+    return values
 end
 
 entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))
