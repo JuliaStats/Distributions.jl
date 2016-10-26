@@ -82,7 +82,7 @@ end
 
 function pdf(d::BetaBinomial, k::Int)
     n, α, β = d.n, d.α, d.β
-    chooseinv = (n+1) * beta(k+1, n-k+1)
+    chooseinv = (n + 1) * beta(k + 1, n - k + 1)
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
     return numerator / (denominator * chooseinv)
@@ -91,11 +91,11 @@ end
 function pdf(d::BetaBinomial)
     n, α, β = d.n, d.α, d.β
     denominator = beta(α, β)
-    values = Array(Float64, n+1)
+    values = Array{eltype(denominator)}(n+1)
     for (i,k) in enumerate(0:n)
-        chooseinv = (n+1) * beta(k+1, n-k+1)
+        chooseinv = (n + 1) * beta(k + 1, n - k + 1)
         numerator = beta(k + α, n - k + β)
-        values[i] = numerator / (denominator * chooseinv)
+        @inbounds values[i] = numerator / (denominator * chooseinv)
     end
     return values
 end
