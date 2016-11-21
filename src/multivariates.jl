@@ -132,6 +132,7 @@ end
 
 for fname in ["dirichlet.jl",
               "multinomial.jl",
+              "dirichletmultinomial.jl",
               "mvnormal.jl",
               "mvnormalcanon.jl",
               "mvlognormal.jl",

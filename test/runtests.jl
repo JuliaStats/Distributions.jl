@@ -14,6 +14,7 @@ tests = [
     "binomial",
     "poissonbinomial",
     "dirichlet",
+    "dirichletmultinomial",
     "mvnormal",
     "mvlognormal",
     "mvtdist",
