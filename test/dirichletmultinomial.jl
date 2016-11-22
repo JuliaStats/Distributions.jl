@@ -50,6 +50,7 @@ x = rand(d)
 @test insupport(d, x)
 
 x = rand(d, 50)
+@test all(x -> (x >= 0), x)
 @test size(x, 1) == length(d)
 @test size(x, 2) == 50
 @test all(sum(x, 1) .== ntrials(d))
@@ -58,5 +59,8 @@ x = rand(d, 50)
 
 # test MLE
 x = rand(d, 10_000)
+ss = suffstats(DirichletMultinomial, x)
+@test size(ss.s, 1) == length(d)
+@test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
-@test_approx_eq_eps mle.α d.α .25
+@test_approx_eq_eps mle.α d.α .2

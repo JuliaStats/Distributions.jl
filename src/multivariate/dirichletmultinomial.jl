@@ -5,8 +5,8 @@ immutable DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
 
     function DirichletMultinomial(n::Integer, α::Vector{T})
         α0 = sumabs(α)
-        sum(α) == α0 || throw(ArgumentError("DirichletMultinomial: alpha must be a positive vector."))
-        n > 0 || throw(ArgumentError("DirichletMultinomial: n must be a positive integer."))
+        sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
+        n > 0 || throw(ArgumentError("n must be a positive integer."))
         new(Int(n), α, α0)
     end
 end
@@ -58,7 +58,7 @@ end
 function _logpdf{T<:Real}(d::DirichletMultinomial, x::AbstractVector{T})
     c = log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0)
     for j in eachindex(x)
-        xj, αj = x[j], d.α[j]
+        @inbounds xj, αj = x[j], d.α[j]
         c += lgamma(xj + αj) - log(factorial(xj)) - lgamma(αj)
     end
     c
@@ -83,32 +83,27 @@ function suffstats{T<:Real}(::Type{DirichletMultinomial}, x::Matrix{T})
     n = sum(x[:, 1])
     all(sum(x, 1) .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
-    # s = [float(sum(x[i, :] .>= k)) for i in 1:size(x, 1), k in 1:n]
-    s = zeros(size(x, 1), n)
+    s = zeros(d, n)
     for k in 1:n, i in 1:m, j in 1:d
-        s[j, k] += Float64(x[j, i] >= k)
+        @inbounds s[j, k] += Float64(x[j, i] >= k)
     end
     DirichletMultinomialStats(n, s, m)
 end
 function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
-        tol::Float64 = 1e-8, maxiter::Int = 1000)
+                 tol::Float64 = 1e-8, maxiter::Int = 1000)
     k = size(ss.s, 2)
     α = ones(size(ss.s, 1))
     rng = 0.0:(k - 1)
-    tolerance = Inf
-    for iter in 1:maxiter
+    @inbounds for iter in 1:maxiter
         α_old = copy(α)
         αsum = sum(α)
-        denom = ss.tw * sum(1 ./ (αsum + rng))
+        denom = ss.tw * sum(inv, αsum + rng)
         for j in eachindex(α)
             αj = α[j]
             num = αj * sum(ss.s[j, :] ./ (αj + rng))
             α[j] = num / denom
         end
-        tolerance = maxabs(α_old - α)
-        if tolerance < tol
-            break
-        end
+        maxabs(α_old - α) < tol && break
     end
     DirichletMultinomial(ss.n, α)
 end
