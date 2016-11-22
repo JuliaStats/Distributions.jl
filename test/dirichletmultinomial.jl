@@ -54,3 +54,9 @@ x = rand(d, 50)
 @test size(x, 2) == 50
 @test all(sum(x, 1) .== ntrials(d))
 @test all(insupport(d, x))
+
+
+# test MLE
+x = rand(d, 10_000)
+mle = fit(DirichletMultinomial, x)
+@test_approx_eq_eps mle.α d.α .25

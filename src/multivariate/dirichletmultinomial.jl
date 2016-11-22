@@ -82,16 +82,13 @@ end
 function suffstats{T<:Real}(::Type{DirichletMultinomial}, x::Matrix{T})
     n = sum(x[:, 1])
     all(sum(x, 1) .== n) || error("Each sample in X should sum to the same value.")
+    d, m = size(x)
     # s = [float(sum(x[i, :] .>= k)) for i in 1:size(x, 1), k in 1:n]
     s = zeros(size(x, 1), n)
-    for k in 1:n
-        for i in 1:size(x, 2)
-            for j in 1:size(x, 1)
-                s[j, k] += Float64(x[j, i] >= k)
-            end
-        end
+    for k in 1:n, i in 1:m, j in 1:d
+        s[j, k] += Float64(x[j, i] >= k)
     end
-    DirichletMultinomialStats(n, s, size(x, 2))
+    DirichletMultinomialStats(n, s, m)
 end
 function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
         tol::Float64 = 1e-8, maxiter::Int = 1000)
@@ -110,10 +107,8 @@ function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
         end
         tolerance = maxabs(α_old - α)
         if tolerance < tol
-            println("done in $iter iterations")
             break
         end
     end
-    println("tol: $tolerance")
     DirichletMultinomial(ss.n, α)
 end
