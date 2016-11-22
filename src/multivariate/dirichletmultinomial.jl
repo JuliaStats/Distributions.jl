@@ -100,7 +100,7 @@ function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
         denom = ss.tw * sum(inv, αsum + rng)
         for j in eachindex(α)
             αj = α[j]
-            num = αj * sum(ss.s[j, :] ./ (αj + rng))
+            num = αj * sum(vec(ss.s[j, :]) ./ (αj + rng))  # vec needed for 0.4
             α[j] = num / denom
         end
         maxabs(α_old - α) < tol && break
