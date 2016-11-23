@@ -77,7 +77,7 @@ mle = fit(DirichletMultinomial, x)
 @test_approx_eq_eps mle.α d.α .2
 
 # test MLE with weights
-for w in ([.1 * ones(10_000), ones(10_000), 10 * ones(10_000)])
+for w in (.1 * ones(10_000), ones(10_000), 10 * ones(10_000))
     mle2 = fit(DirichletMultinomial, x, w)
     @test_approx_eq mle.α mle2.α
 end
