@@ -64,3 +64,9 @@ ss = suffstats(DirichletMultinomial, x)
 @test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
 @test_approx_eq_eps mle.α d.α .2
+
+# test MLE with weights
+ss2 = suffstats(DirichletMultinomial, x, ones(10_000))
+@test ss2.s == ss.s
+mle2 = fit(DirichletMultinomial, x, ones(10_000))
+@test mle.α == mle2.α
