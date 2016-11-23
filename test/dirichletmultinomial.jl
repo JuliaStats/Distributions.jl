@@ -6,9 +6,14 @@ using Base.Test
 
 srand(123)
 
+
+# Test Constructors
+d = DirichletMultinomial(10, ones(5))
+d2 = DirichletMultinomial(10, ones(Int, 5))
+@test typeof(d) == typeof(d2)
+
 α = rand(5)
 d = DirichletMultinomial(10, α)
-
 
 # test parameters
 @test length(d) == 5
@@ -22,6 +27,13 @@ d = DirichletMultinomial(10, α)
 @test_approx_eq(mean(d), α * (d.n / d.α0))
 p = d.α / d.α0
 @test_approx_eq(var(d), d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 - p))
+x = rand(d, 10_000)
+
+# test statistics with mle fit
+d = fit(DirichletMultinomial, x)
+@test_approx_eq_eps mean(d) vec(mean(x, 2)) .5
+@test_approx_eq_eps var(d) vec(var(x, 2)) .5
+@test_approx_eq_eps cov(d) cov(x, 2) .5
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)
@@ -56,7 +68,6 @@ x = rand(d, 50)
 @test all(sum(x, 1) .== ntrials(d))
 @test all(insupport(d, x))
 
-
 # test MLE
 x = rand(d, 10_000)
 ss = suffstats(DirichletMultinomial, x)
@@ -66,7 +77,7 @@ mle = fit(DirichletMultinomial, x)
 @test_approx_eq_eps mle.α d.α .2
 
 # test MLE with weights
-ss2 = suffstats(DirichletMultinomial, x, ones(10_000))
-@test ss2.s == ss.s
-mle2 = fit(DirichletMultinomial, x, ones(10_000))
-@test mle.α == mle2.α
+for w in ([.1 * ones(10_000), ones(10_000), 10 * ones(10_000)])
+    mle2 = fit(DirichletMultinomial, x, w)
+    @test_approx_eq mle.α mle2.α
+end
