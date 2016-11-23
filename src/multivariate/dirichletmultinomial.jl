@@ -38,7 +38,7 @@ end
 function cov{T <: Real}(d::DirichletMultinomial{T})
     v = var(d)
     c = d.α * d.α'
-    multiply!(c, -(d.n / d.α0 ^ 2) * ((d.n + d.α0) / (one(T) + d.α0)))
+    multiply!(c, -d.n * (d.n + d.α0) / (d.α0^2 * (one(T) + d.α0)))
     for i in 1:length(d)
         @inbounds c[i, i] = v[i]
     end
@@ -80,27 +80,29 @@ immutable DirichletMultinomialStats <: SufficientStats
     DirichletMultinomialStats(n::Int, s::Matrix{Float64}, tw::Real) = new(n, s, Float64(tw))
 end
 function suffstats{T<:Real}(::Type{DirichletMultinomial}, x::Matrix{T})
-    n = sum(x[:, 1])
-    all(sum(x, 1) .== n) || error("Each sample in X should sum to the same value.")
+    ns = sum(x, 1)  # get ntrials for each observation
+    n = ns[1]       # use ntrails from first ob., then check all equal
+    all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
     s = zeros(d, n)
-    for k in 1:n, i in 1:m, j in 1:d
+    @inbounds for k in 1:n, i in 1:m, j in 1:d
         if x[j, i] >= k
-            @inbounds s[j, k] += 1.0
+            s[j, k] += 1.0
         end
     end
     DirichletMultinomialStats(n, s, m)
 end
 function suffstats{T<:Real}(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array{Float64})
     length(w) == size(x, 2) || throw(ArgumentError("Inconsistent argument dimensions."))
-    n = sum(x[:, 1])
-    all(sum(x, 1) .== n) || error("Each sample in X should sum to the same value.")
+    ns = sum(x, 1)
+    n = ns[1]
+    all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
     s = zeros(d, n)
     tw = 0.0
-    for k in 1:n, i in 1:m, j in 1:d
+    @inbounds for k in 1:n, i in 1:m, j in 1:d
         if x[j, i] >= k
-            @inbounds s[j, k] += w[i]
+            s[j, k] += w[i]
         end
     end
     DirichletMultinomialStats(n, s, sum(w))
