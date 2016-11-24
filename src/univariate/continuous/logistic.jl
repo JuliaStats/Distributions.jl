@@ -4,7 +4,7 @@ doc"""
 The *Logistic distribution* with location `μ` and scale `θ` has probability density function
 
 $f(x; \mu, \theta) = \frac{1}{4 \theta} \mathrm{sech}^2
-\left( \frac{x - \mu}{\theta} \right)$
+\left( \frac{x - \mu}{2 \theta} \right)$
 
 ```julia
 Logistic()       # Logistic distribution with zero location and unit scale, i.e. Logistic(0, 1)
