@@ -109,13 +109,6 @@ The cases for *Normal* are more involved, as they have two parameters: the mean 
 	pri = Gamma(2.0, 1.0)
 	posterior((mu, pri), Normal, x)   # returns a Gamma distribution	
 
-	# NormalInverseGamma - Normal 
-	pri = NormalInverseGamma(mu, v, sh, r)
-	posterior(pri, Normal, x)     # returns a NormalInverseGamma distribution	
-
-	# NormalGamma - Normal 
-	pri = NormalGamma(mu, v, sh, r)
-	posterior(pri, Normal, x)     # returns a NormalGamma distribution
 
 The following examples are for multivariate normal distributions.
 
@@ -140,14 +133,6 @@ The following examples are for multivariate normal distributions.
 	pri = Wishart(df, S)
 	mu = zeros(3)
 	posterior((mu, pri), MvNormal, x)
-
-	# NormalInverseWishart -- MvNormal
-	pri = NormalInverseWishart(mu, kappa, S, nu)
-	posterior(pri, MvNormal, x)
-
-	# NormalWishart -- MvNormal
-	pri = NormalWishart(mu, kappa, S, nu)
-	posterior(pri, MvNormal, x)
 
 
 Implement New Conjugate Pairs
