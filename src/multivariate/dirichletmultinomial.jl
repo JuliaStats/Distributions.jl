@@ -55,8 +55,8 @@ function insupport{T<:Real}(d::DirichletMultinomial, x::AbstractVector{T})
     end
     return sum(x) == ntrials(d)
 end
-function _logpdf{T<:Real}(d::DirichletMultinomial, x::AbstractVector{T})
-    c = lgamma(T(d.n + 1)) + lgamma(d.α0) - lgamma(d.n + d.α0)
+function _logpdf{T<:Real, S<:Real}(d::DirichletMultinomial{S}, x::AbstractVector{T})
+    c = lgamma(S(d.n + 1)) + lgamma(d.α0) - lgamma(d.n + d.α0)
     for j in eachindex(x)
         @inbounds xj, αj = x[j], d.α[j]
         c += lgamma(xj + αj) - lgamma(xj + one(xj)) - lgamma(αj)
@@ -99,7 +99,6 @@ function suffstats{T<:Real}(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
     s = zeros(d, n)
-    tw = 0.0
     @inbounds for k in 1:n, i in 1:m, j in 1:d
         if x[j, i] >= k
             s[j, k] += w[i]
