@@ -59,7 +59,7 @@ function _logpdf{T<:Real, S<:Real}(d::DirichletMultinomial{S}, x::AbstractVector
     c = lgamma(S(d.n + 1)) + lgamma(d.α0) - lgamma(d.n + d.α0)
     for j in eachindex(x)
         @inbounds xj, αj = x[j], d.α[j]
-        c += lgamma(xj + αj) - lgamma(xj + one(xj)) - lgamma(αj)
+        c += lgamma(xj + αj) - lgamma(xj + 1) - lgamma(αj)
     end
     c
 end
