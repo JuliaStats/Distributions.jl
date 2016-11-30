@@ -28,17 +28,17 @@ params(d::DirichletMultinomial) = (d.n, d.α)
 # Statistics
 mean(d::DirichletMultinomial) = d.α .* (d.n / d.α0)
 function var{T <: Real}(d::DirichletMultinomial{T})
-    v = fill(d.n * (d.n + d.α0) / (one(T) + d.α0), length(d))
+    v = fill(d.n * (d.n + d.α0) / (1 + d.α0), length(d))
     p = d.α / d.α0
     for i in eachindex(v)
-        @inbounds v[i] *= p[i] * (one(T) - p[i])
+        @inbounds v[i] *= p[i] * (1 - p[i])
     end
     v
 end
 function cov{T <: Real}(d::DirichletMultinomial{T})
     v = var(d)
     c = d.α * d.α'
-    multiply!(c, -d.n * (d.n + d.α0) / (d.α0^2 * (one(T) + d.α0)))
+    multiply!(c, -d.n * (d.n + d.α0) / (d.α0^2 * (1 + d.α0)))
     for i in 1:length(d)
         @inbounds c[i, i] = v[i]
     end
