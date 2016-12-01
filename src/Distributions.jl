@@ -65,6 +65,7 @@ export
     DiagNormal,
     DiagNormalCanon,
     Dirichlet,
+    DirichletMultinomial,
     DiscreteUniform,
     DoubleExponential,
     EdgeworthMean,
