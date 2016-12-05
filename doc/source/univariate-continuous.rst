@@ -457,7 +457,7 @@ Univariate Continuous Distributions
    .. math::
 
        f(x; \mu, \theta) = \frac{1}{4 \theta} \mathrm{sech}^2
-       \left( \frac{x - \mu}{\theta} \right)
+       \left( \frac{x - \mu}{2 \theta} \right)
 
    .. code-block:: julia
 
