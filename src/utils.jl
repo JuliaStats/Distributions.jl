@@ -2,7 +2,7 @@
 
 macro check_args(D, cond)
     quote
-        if !($cond)
+        if !($(esc(cond)))
             throw(ArgumentError(string(
                 $(string(D)), ": the condition ", $(string(cond)), " is not satisfied.")))
         end
@@ -105,9 +105,11 @@ end
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
 macro checkquantile(p,ex)
+    p, ex = esc(p), esc(ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
 macro checkinvlogcdf(lp,ex)
+    lp, ex = esc(lp), esc(ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 
