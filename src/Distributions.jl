@@ -16,7 +16,7 @@ import Base.Math.@horner
 import Base.LinAlg: Cholesky
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
-import StatsBase: RandIntSampler, loglikelihood
+import StatsBase: RandIntSampler, loglikelihood, dof, span
 import PDMats: dim, PDMat, invquad
 
 export
