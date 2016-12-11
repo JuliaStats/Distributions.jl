@@ -151,13 +151,8 @@ export
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
     cgf,                # cumulant generating function
-    circmean,           # mean of circular distribution
-    circmedian,         # median of circular distribution
-    circmode,           # mode of circular distribution
-    circvar,            # variance of circular distribution
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
-    complete,           # turn an incomplete formulation into a complete distribution
     component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
@@ -171,8 +166,8 @@ export
     fit_mle,            # fit a distribution to data using MLE
     fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,            # fit a distribution to data using MAP
+    fit_map!,           # fit a distribution to data using MAP (inplace update to initial guess)
     freecumulant,       # free cumulants of distribution
-    gmvnormal,          # a generic function to construct multivariate normal distributions
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -195,12 +190,6 @@ export
     logpdf!,            # evaluate log pdf to provided storage
     logpmf,             # log probability mass
     logpmf!,            # evaluate log pmf to provided storage
-    posterior,          # get posterior distribution given prior and observed data
-    posterior_canon,    # get the canonical form of the posterior distribution
-    posterior_mode,     # get the mode of posterior distribution
-    posterior_rand,     # draw samples from the posterior distribution
-    posterior_rand!,
-    posterior_randmodel,
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
