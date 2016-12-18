@@ -72,6 +72,9 @@ probs(d::MixtureModel) = probs(d.prior)
 params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
 partype(d::MixtureModel) = promote_type(partype(d.prior), map(partype, d.components)...)
 
+minimum(d::MixtureModel) = minimum([minimum(dci) for dci in d.components])
+maximum(d::MixtureModel) = maximum([maximum(dci) for dci in d.components])
+
 function mean(d::UnivariateMixture)
     K = ncomponents(d)
     p = probs(d)
