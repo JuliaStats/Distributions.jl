@@ -15,6 +15,8 @@ immutable UnivariateGMM <: UnivariateMixture{Continuous,Normal}
     end
 end
 
+@distr_support UnivariateGMM -Inf Inf
+
 ncomponents(d::UnivariateGMM) = d.K
 
 component(d::UnivariateGMM, k::Int) = Normal(d.means[k], d.stds[k])
