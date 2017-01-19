@@ -117,8 +117,8 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test vec(mean(Xs, 2)) ≈ mean(g) atol=0.01
-    @test cov(Xs, 2)       ≈ cov(g)  atol=0.01
+    @test vec(mean(Xs, 2)) ≈ mean(g) atol=0.1
+    @test cov(Xs, 2)       ≈ cov(g)  atol=0.1
 end
 
 function test_params(g::AbstractMixtureModel)
