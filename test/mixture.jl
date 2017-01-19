@@ -18,7 +18,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test_approx_eq mean(g) mu
+    @test mean(g) ≈ mu
 
     # evaluation of cdf
     cf = zeros(n)
@@ -30,9 +30,9 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     for i = 1:n
-        @test_approx_eq cdf(g, X[i]) cf[i]
+        @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test_approx_eq cdf(g, X) cf
+    @test cdf(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -50,22 +50,22 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     mix_lp0 = @compat(log.(mix_p0))
 
     for i = 1:n
-        @test_approx_eq pdf(g, X[i]) mix_p0[i]
-        @test_approx_eq logpdf(g, X[i]) mix_lp0[i]
-        @test_approx_eq componentwise_pdf(g, X[i]) vec(P0[i,:])
-        @test_approx_eq componentwise_logpdf(g, X[i]) vec(LP0[i,:])
+        @test pdf(g, X[i])                  ≈ mix_p0[i]
+        @test logpdf(g, X[i])               ≈ mix_lp0[i]
+        @test componentwise_pdf(g, X[i])    ≈ vec(P0[i,:])
+        @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test_approx_eq pdf(g, X) mix_p0
-    @test_approx_eq logpdf(g, X) mix_lp0
-    @test_approx_eq componentwise_pdf(g, X) P0
-    @test_approx_eq componentwise_logpdf(g, X) LP0
+    @test pdf(g, X)                  ≈ mix_p0
+    @test logpdf(g, X)               ≈ mix_lp0
+    @test componentwise_pdf(g, X)    ≈ P0
+    @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
     Xs = rand(g, ns)
     @test isa(Xs, Vector{Float64})
     @test length(Xs) == ns
-    @test_approx_eq_eps mean(Xs) mean(g) 0.01
+    @test mean(Xs) ≈ mean(g) atol=0.01
 end
 
 function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
@@ -83,7 +83,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test_approx_eq mean(g) mu
+    @test mean(g) ≈ mu
 
     # evaluation
     P0 = zeros(n, K)
@@ -102,23 +102,23 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
 
     for i = 1:n
         x_i = X[:,i]
-        @test_approx_eq pdf(g, x_i) mix_p0[i]
-        @test_approx_eq logpdf(g, x_i) mix_lp0[i]
-        @test_approx_eq componentwise_pdf(g, x_i) vec(P0[i,:])
-        @test_approx_eq componentwise_logpdf(g, x_i) vec(LP0[i,:])
+        @test pdf(g, x_i)                  ≈ mix_p0[i]
+        @test logpdf(g, x_i)               ≈ mix_lp0[i]
+        @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
+        @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
 
-    @test_approx_eq pdf(g, X) mix_p0
-    @test_approx_eq logpdf(g, X) mix_lp0
-    @test_approx_eq componentwise_pdf(g, X) P0
-    @test_approx_eq componentwise_logpdf(g, X) LP0
+    @test pdf(g, X)                  ≈ mix_p0
+    @test logpdf(g, X)               ≈ mix_lp0
+    @test componentwise_pdf(g, X)    ≈ P0
+    @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test_approx_eq_eps vec(mean(Xs, 2)) mean(g) 0.01
-    @test_approx_eq_eps cov(Xs, 2) cov(g) 0.01
+    @test vec(mean(Xs, 2)) ≈ mean(g) atol=0.01
+    @test cov(Xs, 2)       ≈ cov(g)  atol=0.01
 end
 
 function test_params(g::AbstractMixtureModel)

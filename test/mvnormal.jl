@@ -19,10 +19,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test isa(Σ, Matrix{Float64})
     @test length(μ) == d
     @test size(Σ) == (d, d)
-    @test_approx_eq var(g) diag(Σ)
-    @test_approx_eq entropy(g) 0.5 * logdet(2π * e * Σ)
+    @test var(g)     ≈ diag(Σ)
+    @test entropy(g) ≈ 0.5 * logdet(2π * e * Σ)
     ldcov = logdetcov(g)
-    @test_approx_eq ldcov logdet(Σ)
+    @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
 
@@ -36,25 +36,25 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     Z = X .- emp_mu
     emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
     for i = 1:d
-        @test_approx_eq_eps emp_mu[i] μ[i] (sqrt(vs[i] / n_tsamples) * 8.0)
+        @test emp_mu[i] ≈ μ[i] atol=(sqrt(vs[i] / n_tsamples) * 8.0)
     end
     for i = 1:d, j = 1:d
-        @test_approx_eq_eps emp_cov[i,j] Σ[i,j] (sqrt(vs[i] * vs[j]) * 10.0) / sqrt(n_tsamples)
+        @test emp_cov[i,j] ≈ Σ[i,j] atol=(sqrt(vs[i] * vs[j]) * 10.0) / sqrt(n_tsamples)
     end
 
     # evaluation of sqmahal & logpdf
     U = X .- μ
     sqm = vec(sum(U .* (Σ \ U), 1))
     for i = 1:min(100, n_tsamples)
-        @test_approx_eq sqmahal(g, X[:,i]) sqm[i]
+        @test sqmahal(g, X[:,i]) ≈ sqm[i]
     end
-    @test_approx_eq sqmahal(g, X) sqm
+    @test sqmahal(g, X) ≈ sqm
 
     lp = -0.5 * sqm - 0.5 * (d * log(2.0 * pi) + ldcov)
     for i = 1:min(100, n_tsamples)
-        @test_approx_eq logpdf(g, X[:,i]) lp[i]
+        @test logpdf(g, X[:,i]) ≈ lp[i]
     end
-    @test_approx_eq logpdf(g, X) lp
+    @test logpdf(g, X) ≈ lp
 end
 
 
@@ -85,9 +85,9 @@ for (T, g, μ, Σ) in [
     println("    testing $(distrname(g))")
 
     @test isa(g, T)
-    @test_approx_eq mean(g) μ
-    @test_approx_eq cov(g) Σ
-    @test_approx_eq invcov(g) inv(Σ)
+    @test mean(g)   ≈ μ
+    @test cov(g)    ≈ Σ
+    @test invcov(g) ≈ inv(Σ)
     test_mvnormal(g, 10^4)
 
     # conversion between mean form and canonical form
@@ -95,15 +95,15 @@ for (T, g, μ, Σ) in [
         gc = canonform(g)
         @test isa(gc, MvNormalCanon)
         @test length(gc) == length(g)
-        @test_approx_eq mean(gc) mean(g)
-        @test_approx_eq cov(gc) cov(g)
+        @test mean(gc) ≈ mean(g)
+        @test cov(gc)  ≈ cov(g)
     else
         @assert isa(g, MvNormalCanon)
         gc = meanform(g)
         @test isa(gc, MvNormal)
         @test length(gc) == length(g)
-        @test_approx_eq mean(gc) mean(g)
-        @test_approx_eq cov(gc) cov(g)
+        @test mean(gc) ≈ mean(g)
+        @test cov(gc)  ≈ cov(g)
     end
 end
 
@@ -159,35 +159,35 @@ uw, Cw = _gauss_mle(x, w)
 
 g = fit_mle(MvNormal, suffstats(MvNormal, x))
 @test isa(g, FullNormal)
-@test_approx_eq mean(g) u
-@test_approx_eq cov(g) C
+@test mean(g) ≈ u
+@test cov(g)  ≈ C
 
 g = fit_mle(MvNormal, x)
 @test isa(g, FullNormal)
-@test_approx_eq mean(g) u
-@test_approx_eq cov(g) C
+@test mean(g) ≈ u
+@test cov(g)  ≈ C
 
 g = fit_mle(MvNormal, x, w)
 @test isa(g, FullNormal)
-@test_approx_eq mean(g) uw
-@test_approx_eq cov(g) Cw
+@test mean(g) ≈ uw
+@test cov(g)  ≈ Cw
 
 g = fit_mle(IsoNormal, x)
 @test isa(g, IsoNormal)
-@test_approx_eq g.μ u
-@test_approx_eq g.Σ.value mean(diag(C))
+@test g.μ       ≈ u
+@test g.Σ.value ≈ mean(diag(C))
 
 g = fit_mle(IsoNormal, x, w)
 @test isa(g, IsoNormal)
-@test_approx_eq g.μ uw
-@test_approx_eq g.Σ.value mean(diag(Cw))
+@test g.μ       ≈ uw
+@test g.Σ.value ≈ mean(diag(Cw))
 
 g = fit_mle(DiagNormal, x)
 @test isa(g, DiagNormal)
-@test_approx_eq g.μ u
-@test_approx_eq g.Σ.diag diag(C)
+@test g.μ      ≈ u
+@test g.Σ.diag ≈ diag(C)
 
 g = fit_mle(DiagNormal, x, w)
 @test isa(g, DiagNormal)
-@test_approx_eq g.μ uw
-@test_approx_eq g.Σ.diag diag(Cw)
+@test g.μ      ≈ uw
+@test g.Σ.diag ≈ diag(Cw)

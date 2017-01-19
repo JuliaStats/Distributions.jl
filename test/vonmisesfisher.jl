@@ -34,35 +34,35 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     θ = κ * μ
     d2 = VonMisesFisher(θ)
     @test length(d2) == p
-    @test_approx_eq meandir(d2) μ
-    @test_approx_eq concentration(d2) κ
+    @test meandir(d2) ≈ μ
+    @test concentration(d2) ≈ κ
 
-    @test_approx_eq_eps d.logCκ log(vmfCp(p, κ)) 1.0e-12
+    @test d.logCκ ≈ log(vmfCp(p, κ)) atol=1.0e-12
 
     X = gen_vmf_tdata(n, p)
     lp0 = zeros(n)
     for i = 1:n
         xi = X[:,i]
         lp0[i] = log(safe_vmfpdf(μ, κ, xi))
-        @test_approx_eq logpdf(d, xi) lp0[i]
+        @test logpdf(d, xi) ≈ lp0[i]
     end
-    @test_approx_eq logpdf(d, X) lp0
+    @test logpdf(d, X) ≈ lp0
 
     # sampling
     x = rand(d)
-    @test_approx_eq vecnorm(x) 1.0
+    @test vecnorm(x) ≈ 1.0
 
     X = rand(d, n)
     for i = 1:n
-        @test_approx_eq vecnorm(X[:,i]) 1.0
+        @test vecnorm(X[:,i]) ≈ 1.0
     end
 
     # MLE
     X = rand(d, ns)
     d_est = fit_mle(VonMisesFisher, X)
     @test isa(d_est, VonMisesFisher)
-    @test_approx_eq_eps d_est.μ μ 0.01
-    @test_approx_eq_eps d_est.κ κ κ * 0.01
+    @test d_est.μ ≈ μ atol=0.01
+    @test d_est.κ ≈ κ atol=κ * 0.01
 end
 
 

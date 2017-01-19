@@ -3,14 +3,14 @@
 using Distributions
 using Base.Test
 
-import Distributions: 
-    CategoricalDirectSampler, 
+import Distributions:
+    CategoricalDirectSampler,
     AliasTable,
-    BinomialGeomSampler, 
-    BinomialTPESampler, 
-    BinomialPolySampler, 
-    BinomialAliasSampler, 
-    PoissonADSampler, 
+    BinomialGeomSampler,
+    BinomialTPESampler,
+    BinomialPolySampler,
+    BinomialAliasSampler,
+    PoissonADSampler,
     PoissonCountSampler,
     ExponentialSampler,
     GammaGDSampler,

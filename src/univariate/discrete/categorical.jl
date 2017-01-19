@@ -137,7 +137,7 @@ function modes(d::Categorical)
     K = ncategories(d)
     p = probs(d)
     maxp = maximum(p)
-    r = Array(Int, 0)
+    r = Vector{Int}(0)
     for k = 1:K
         @inbounds if p[k] == maxp
             push!(r, k)

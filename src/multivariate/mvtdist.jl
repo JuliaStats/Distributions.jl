@@ -121,7 +121,7 @@ function sqmahal!{T<:Real}(r::AbstractArray, d::GenericMvTDist, x::AbstractMatri
     invquad!(r, d.Σ, z)
 end
 
-sqmahal{T<:Real}(d::AbstractMvTDist, x::AbstractMatrix{T}) = sqmahal!(Array(T, size(x, 2)), d, x)
+sqmahal{T<:Real}(d::AbstractMvTDist, x::AbstractMatrix{T}) = sqmahal!(Vector{T}(size(x, 2)), d, x)
 
 
 function mvtdist_consts(d::AbstractMvTDist)
@@ -170,7 +170,7 @@ end
 function _rand!{T<:Real}(d::GenericMvTDist, x::AbstractMatrix{T})
     cols = size(x,2)
     chisqd = Chisq(d.df)
-    y = Array(T, 1, cols)
+    y = Matrix{T}(1, cols)
     unwhiten!(d.Σ, randn!(x))
     rand!(chisqd, y)
     y = sqrt(y/(d.df))

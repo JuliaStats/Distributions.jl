@@ -39,7 +39,7 @@ end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(promote_type(partype(d), eltype(x)), size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(size(x, 2)), d, x)
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
@@ -291,7 +291,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
 
-    z = Array(Float64, m, n)
+    z = Matrix{Float64}(m, n)
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m
