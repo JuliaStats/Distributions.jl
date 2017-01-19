@@ -103,10 +103,10 @@ MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Conversion
 function convert{T<:Real}(::Type{MvNormal{T}}, d::MvNormal)
-    MvNormal(convert_eltype(T, d.μ), convert_eltype(T, d.Σ))
+    MvNormal(AbstractArray{T}(d.μ), AbstractArray{T}(d.Σ))
 end
 function convert{T<:Real}(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
-    MvNormal(convert_eltype(T, μ), convert_eltype(T, Σ))
+    MvNormal(AbstractArray{T}(μ), AbstractArray{T}(Σ))
 end
 
 ### Show

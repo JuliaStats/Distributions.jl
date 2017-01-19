@@ -36,12 +36,12 @@ GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df,
 
 ### Conversion
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, d::GenericMvTDist)
-    S = convert_eltype(T, d.Σ)
-    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, convert_eltype(T, d.μ), S)
+    S = AbstractArray{T}(d.Σ)
+    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, AbstractArray{T}(d.μ), S)
 end
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
-    S = convert_eltype(T, Σ)
-    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, convert_eltype(T, μ), S)
+    S = AbstractArray{T}(Σ)
+    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, AbstractArray{T}(μ), S)
 end
 
 ## Construction of multivariate normal with specific covariance type

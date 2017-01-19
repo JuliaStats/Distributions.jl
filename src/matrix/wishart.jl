@@ -45,11 +45,11 @@ params(d::Wishart) = (d.df, d.S, d.c0)
 
 ### Conversion
 function convert{T<:Real}(::Type{Wishart{T}}, d::Wishart)
-    P = convert_eltype(T, d.S)
+    P = AbstractMatrix{T}(d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
 function convert{T<:Real}(::Type{Wishart{T}}, df, S::AbstractPDMat, c0)
-    P = convert_eltype(T, S)
+    P = AbstractMatrix{T}(S)
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end
 

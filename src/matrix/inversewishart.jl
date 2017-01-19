@@ -45,11 +45,11 @@ params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 
 ### Conversion
 function convert{T<:Real}(::Type{InverseWishart{T}}, d::InverseWishart)
-    P = convert_eltype(T, d.Ψ)
+    P = Wishart{T}(d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
 function convert{T<:Real}(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0)
-    P = convert_eltype(T, Ψ)
+    P = Wishart{T}(Ψ)
     InverseWishart{T, typeof(P)}(T(df), P, T(c0))
 end
 
