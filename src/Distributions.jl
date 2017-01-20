@@ -7,6 +7,7 @@ using StatsFuns
 using StatsBase
 using Compat
 
+import QuadGK.quadgk
 import Compat.view
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
