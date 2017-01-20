@@ -46,9 +46,9 @@ d = DirichletMultinomial(10, 5)
 
 for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
     @test pdf(d, x) ≈
-        @compat factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
+        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈
-        @compat log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma.(d.α + x) - log.(factorial.(x)) - lgamma.(d.α))
+        log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma.(d.α + x) - log.(factorial.(x)) - lgamma.(d.α))
 end
 
 # test Sampling
