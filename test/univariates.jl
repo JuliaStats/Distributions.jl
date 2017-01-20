@@ -91,14 +91,6 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test entropy(d) ≈ dct["entropy"] atol=1.0e-7
     end
 
-    # test conversions if distribution is parametric
-    if !isempty(typeof(d).parameters) && !isa(d, Truncated)
-        D = typeof(d).name.primary
-        W = Float32
-        @test typeof(convert(D{W}, d)) == D{W}
-        @test typeof(convert(D{W}, params(d)...)) == D{W}
-    end
-
     # verify quantiles
     if !isa(d, Union{Skellam, VonMises})
         @test quantile(d, 0.10) ≈ dct["q10"] atol=1.0e-8
