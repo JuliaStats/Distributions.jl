@@ -15,12 +15,15 @@ function InverseWishart{T<:Real}(df::T, Ψ::AbstractPDMat{T})
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
     c0 = _invwishart_c0(df, Ψ)
-    R = promote_type(T, typeof(c0))
-    _, prom_Ψ = promote_eltype(one(R), Ψ)
+    R = Base.promote_eltype(T, c0)
+    prom_Ψ = convert(AbstractArray{R}, Ψ)
     InverseWishart{R, typeof(prom_Ψ)}(R(df), prom_Ψ, R(c0))
 end
 
-InverseWishart(df::Real, Ψ::AbstractPDMat) = InverseWishart(promote_eltype(df, Ψ)...)
+function InverseWishart(df::Real, Ψ::AbstractPDMat)
+    T = Base.promote_eltype(df, Ψ)
+    InverseWishart(T(df), convert(AbstractArray{T}, Ψ))
+end
 
 InverseWishart(df::Real, Ψ::Matrix) = InverseWishart(df, PDMat(Ψ))
 

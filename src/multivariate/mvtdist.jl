@@ -20,9 +20,9 @@ end
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    R = promote_type(T, eltype(Σ))
-    m, S = promote_eltype(μ, Σ)
-    GenericMvTDist{R, typeof(S)}(R(df), d, zmean, m, S)
+    R = Base.promote_eltype(T, Σ)
+    S = convert(AbstractArray{R}, Σ)
+    GenericMvTDist{R, typeof(S)}(R(df), d, zmean, convert(AbstractArray{R}, μ), S)
 end
 
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov, zmean::Bool)
@@ -36,12 +36,12 @@ GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df,
 
 ### Conversion
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, d::GenericMvTDist)
-    S = AbstractArray{T}(d.Σ)
-    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, AbstractArray{T}(d.μ), S)
+    S = convert(AbstractArray{T}, d.Σ)
+    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, convert(AbstractArray{T}, d.μ), S)
 end
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
-    S = AbstractArray{T}(Σ)
-    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, AbstractArray{T}(μ), S)
+    S = convert(AbstractArray{T}, Σ)
+    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, convert(AbstractArray{T}, μ), S)
 end
 
 ## Construction of multivariate normal with specific covariance type

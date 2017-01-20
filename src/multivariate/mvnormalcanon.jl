@@ -26,10 +26,13 @@ end
 
 function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
     R = promote_type(T, eltype(J))
-    MvNormalCanon(Vector{R}(μ), promote_eltype(h, J)...)
+    MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-MvNormalCanon{T<:Real, S<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{S}, J::P) = MvNormalCanon(promote_eltype(μ, h)..., J)
+function MvNormalCanon{T<:Real, S<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{S}, J::P)
+    R = Base.promote_eltype(μ, h, J)
+    MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
+end
 
 function MvNormalCanon{P<:AbstractPDMat}(J::P)
     z = ZeroVector(eltype(J), dim(J))
@@ -38,7 +41,8 @@ end
 
 function MvNormalCanon{T<:Real, P<:AbstractPDMat}(h::Vector{T}, J::P)
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    hh, JJ = promote_eltype(h, J)
+    R = Base.promote_eltype(h, J)
+    hh, JJ = convert(AbstractArray{R}, h), convert(AbstractArray{R}, J)
     MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
@@ -46,8 +50,14 @@ MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix{T}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon{T<:Real}(h::Vector{T}, prec::Vector{T}) = MvNormalCanon(h, PDiagMat(prec))
 MvNormalCanon{T<:Real}(h::Vector{T}, prec::T) = MvNormalCanon(h, ScalMat(length(h), prec))
 
-MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, J::VecOrMat{S}) = MvNormalCanon(promote_eltype(h, J)...)
-MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, prec::S) = MvNormalCanon(promote_eltype(h, prec)...)
+function MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, J::VecOrMat{S})
+    R = Base.promote_eltype(h, J)
+    MvNormalCanon(convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
+end
+function MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, prec::S)
+    R = Base.promote_eltype(h, prec)
+    MvNormalCanon(convert(AbstractArray{R}, h), R(prec))
+end
 
 MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
@@ -66,10 +76,10 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
 ### Conversion
 function convert{T<:Real}(::Type{MvNormalCanon{T}}, d::MvNormalCanon)
-    MvNormalCanon(AbstractArray{T}(d.μ), AbstractArray{T}(d.h), AbstractArray{T}(d.J))
+    MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
 function convert{T<:Real,V<:Union{Vector, ZeroVector}}(::Type{MvNormalCanon{T}}, μ::V, h::V, J::AbstractPDMat)
-    MvNormalCanon(AbstractArray{T}(μ), AbstractArray{T}(h), AbstractArray{T}(J))
+    MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end
 
 ### conversion between conventional form and canonical form

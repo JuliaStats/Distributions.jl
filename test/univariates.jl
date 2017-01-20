@@ -79,9 +79,9 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify stats
     @test minimum(d) ≈ _json_value(dct["minimum"])
     @test maximum(d) ≈ _json_value(dct["maximum"])
-    @test mean(d)    ≈ _json_value(dct["mean"]) atol=1.0e-8
+    @test mean(d)    ≈ _json_value(dct["mean"]) atol=1.0e-8 nans=true
     if !isa(d, VonMises)
-        @test var(d) ≈ _json_value(dct["var"]) atol=1.0e-8
+        @test var(d) ≈ _json_value(dct["var"]) atol=1.0e-8 nans=true
     end
     if !isa(d, Skellam)
         @test median(d) ≈ _json_value(dct["median"]) atol=1.0

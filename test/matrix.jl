@@ -13,12 +13,6 @@ for d in [W,IW]
     @test length(d) == length(rand(d))
     @test typeof(d)(params(d)...) == d
     @test partype(d) == Float64
-
-    ### conversions
-    D = typeof(d).name.primary
-    @test typeof(convert(D{Float32}, d)) == typeof(D(Float32(v), Array{Float32}(S)))
-
-    @test typeof(convert(D{Float32}, params(d)...)) == typeof(D(Float32(v), Array{Float32}(S)))
 end
 
 @test partype(Wishart(7, eye(Float32, 2))) == Float32
