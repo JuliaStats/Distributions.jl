@@ -65,7 +65,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     Xs = rand(g, ns)
     @test isa(Xs, Vector{Float64})
     @test length(Xs) == ns
-    @test mean(Xs) ≈ mean(g) atol=0.01
+    @test isapprox(mean(Xs), mean(g), atol=0.01)
 end
 
 function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
@@ -117,8 +117,8 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test vec(mean(Xs, 2)) ≈ mean(g) atol=0.1
-    @test cov(Xs, 2)       ≈ cov(g)  atol=0.1
+    @test isapprox(vec(mean(Xs, 2)), mean(g), atol=0.1)
+    @test isapprox(cov(Xs, 2)      , cov(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)

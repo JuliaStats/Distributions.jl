@@ -51,15 +51,15 @@ p = sum(w[x .== 1]) / sum(w)
 
 d = fit(Bernoulli, rand(Bernoulli(0.7), N))
 @test isa(d, Bernoulli)
-@test mean(d) ≈ 0.7 atol=0.01
+@test isapprox(mean(d), 0.7, atol=0.01)
 
 
 # Beta
 
 d = fit(Beta, rand(Beta(1.3, 3.7), N))
 @test isa(d, Beta)
-@test d.α ≈ 1.3 atol=0.1
-@test d.β ≈ 3.7 atol=0.1
+@test isapprox(d.α, 1.3, atol=0.1)
+@test isapprox(d.β, 3.7, atol=0.1)
 
 
 # Binomial
@@ -91,7 +91,7 @@ d = fit(Binomial, (100, x), w)
 d = fit(Binomial, 100, rand(Binomial(100, 0.3), N))
 @test isa(d, Binomial)
 @test ntrials(d) == 100
-@test succprob(d) ≈ 0.3 atol=0.01
+@test isapprox(succprob(d), 0.3, atol=0.01)
 
 
 # Categorical
@@ -128,7 +128,7 @@ d = fit(Categorical, suffstats(Categorical, 3, x, w))
 
 d = fit(Categorical, rand(Categorical(p), N))
 @test isa(d, Categorical)
-@test probs(d) ≈ p atol=0.01
+@test isapprox(probs(d), p, atol=0.01)
 
 
 # Cauchy
@@ -160,7 +160,7 @@ d = fit(Exponential, x, w)
 
 d = fit(Exponential, rand(Exponential(0.5), N))
 @test isa(d, Exponential)
-@test scale(d) ≈ 0.5 atol=0.01
+@test isapprox(scale(d), 0.5, atol=0.01)
 
 
 # Normal
@@ -196,8 +196,8 @@ d = fit(Normal, x, w)
 
 d = fit(Normal, rand(Normal(μ, σ), N))
 @test isa(d, Normal)
-@test d.μ ≈ μ atol=0.1
-@test d.σ ≈ σ atol=0.1
+@test isapprox(d.μ, μ, atol=0.1)
+@test isapprox(d.σ, σ, atol=0.1)
 
 import Distributions.NormalKnownMu, Distributions.NormalKnownSigma
 
@@ -258,8 +258,8 @@ d = fit(Uniform, x)
 
 d = fit(Uniform, rand(Uniform(1.2, 5.8), N))
 @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-@test minimum(d) ≈ 1.2 atol=0.02
-@test maximum(d) ≈ 5.8 atol=0.02
+@test isapprox(minimum(d), 1.2, atol=0.02)
+@test isapprox(maximum(d), 5.8, atol=0.02)
 
 
 # Gamma
@@ -280,8 +280,8 @@ ss = suffstats(Gamma, x, w)
 
 d = fit(Gamma, rand(Gamma(3.9, 2.1), N))
 @test isa(d, Gamma)
-@test shape(d) ≈ 3.9 atol=0.1
-@test scale(d) ≈ 2.1 atol=0.2
+@test isapprox(shape(d), 3.9, atol=0.1)
+@test isapprox(scale(d), 2.1, atol=0.2)
 
 
 # Geometric
@@ -308,15 +308,15 @@ d = fit(Geometric, x, w)
 
 d = fit(Geometric, rand(Geometric(0.3), N))
 @test isa(d, Geometric)
-@test succprob(d) ≈ 0.3 atol=0.01
+@test isapprox(succprob(d), 0.3, atol=0.01)
 
 
 # Laplace
 
 d = fit(Laplace, rand(Laplace(5.0, 3.0), N))
 @test isa(d, Laplace)
-@test location(d) ≈ 5.0 atol=0.1
-@test scale(d)    ≈ 3.0 atol=0.2
+@test isapprox(location(d), 5.0, atol=0.1)
+@test isapprox(scale(d)   , 3.0, atol=0.2)
 
 # Pareto
 
@@ -324,8 +324,8 @@ x = rand(Pareto(3., 7.), N)
 d = fit(Pareto, x)
 
 @test isa(d, Pareto)
-@test shape(d) ≈ 3. atol=0.1
-@test scale(d) ≈ 7. atol=0.1
+@test isapprox(shape(d), 3., atol=0.1)
+@test isapprox(scale(d), 7., atol=0.1)
 
 # Poisson
 
@@ -351,5 +351,5 @@ d = fit(Poisson, x, w)
 
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
-@test mean(d) ≈ 8.2 atol=0.2
+@test isapprox(mean(d), 8.2, atol=0.2)
 

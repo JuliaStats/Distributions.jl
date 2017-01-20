@@ -73,7 +73,7 @@ x = rand(d, n)
 x = x ./ sum(x, 1)
 
 r = fit_mle(Dirichlet, x)
-@test r.alpha ≈ d.alpha atol=0.25
+@test isapprox(r.alpha, d.alpha, atol=0.25)
 
 # r = fit_mle(Dirichlet, x, fill(2.0, n))
-# @test r.alpha ≈ d.alpha atol=0.25
+# @test isapprox(r.alpha, d.alpha, atol=0.25)

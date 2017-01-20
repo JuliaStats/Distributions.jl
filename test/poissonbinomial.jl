@@ -28,8 +28,8 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
         @test quantile(d, i) ≈ quantile(dref, i)
     end
     for i=0:n
-        @test cdf(d, i) ≈ cdf(dref, i) atol=1e-15
-        @test pdf(d, i) ≈ pdf(dref, i) atol=1e-15
+        @test isapprox(cdf(d, i), cdf(dref, i), atol=1e-15)
+        @test isapprox(pdf(d, i), pdf(dref, i), atol=1e-15)
     end
 
 end
@@ -71,6 +71,6 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test pdf(d, k) ≈ m atol=1e-15
+        @test isapprox(pdf(d, k), m, atol=1e-15)
     end
 end

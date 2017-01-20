@@ -79,25 +79,25 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify stats
     @test minimum(d) ≈ _json_value(dct["minimum"])
     @test maximum(d) ≈ _json_value(dct["maximum"])
-    @test mean(d)    ≈ _json_value(dct["mean"]) atol=1.0e-8 nans=true
+    @test Compat.isapprox(mean(d), _json_value(dct["mean"]), atol=1.0e-8, nans=true)
     if !isa(d, VonMises)
-        @test var(d) ≈ _json_value(dct["var"]) atol=1.0e-8 nans=true
+        @test Compat.isapprox(var(d), _json_value(dct["var"]), atol=1.0e-8, nans=true)
     end
     if !isa(d, Skellam)
-        @test median(d) ≈ _json_value(dct["median"]) atol=1.0
+        @test isapprox(median(d), _json_value(dct["median"]), atol=1.0)
     end
 
     if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
-        @test entropy(d) ≈ dct["entropy"] atol=1.0e-7
+        @test isapprox(entropy(d), dct["entropy"], atol=1.0e-7)
     end
 
     # verify quantiles
     if !isa(d, Union{Skellam, VonMises})
-        @test quantile(d, 0.10) ≈ dct["q10"] atol=1.0e-8
-        @test quantile(d, 0.25) ≈ dct["q25"] atol=1.0e-8
-        @test quantile(d, 0.50) ≈ dct["q50"] atol=1.0e-8
-        @test quantile(d, 0.75) ≈ dct["q75"] atol=1.0e-8
-        @test quantile(d, 0.90) ≈ dct["q90"] atol=1.0e-8
+        @test isapprox(quantile(d, 0.10), dct["q10"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.25), dct["q25"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.50), dct["q50"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.75), dct["q75"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.90), dct["q90"], atol=1.0e-8)
     end
 
     # verify logpdf and cdf at certain points

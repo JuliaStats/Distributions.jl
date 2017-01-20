@@ -44,13 +44,13 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     Z = X .- emp_mn
     emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
     for i = 1:d
-        @test emp_mn[i]    ≈ mn[i]  atol=(sqrt(s[i] / n_tsamples) * 8.0)
+        @test isapprox(emp_mn[i]   , mn[i] , atol=(sqrt(s[i] / n_tsamples) * 8.0))
     end
     for i = 1:d
-        @test emp_md[i]    ≈ md[i]  atol=(sqrt(s[i] / n_tsamples) * 8.0)
+        @test isapprox(emp_md[i]   , md[i] , atol=(sqrt(s[i] / n_tsamples) * 8.0))
     end
     for i = 1:d, j = 1:d
-        @test emp_cov[i,j] ≈ S[i,j] atol=(sqrt(s[i] * s[j]) * 20.0) / sqrt(n_tsamples)
+        @test isapprox(emp_cov[i,j], S[i,j], atol=(sqrt(s[i] * s[j]) * 20.0) / sqrt(n_tsamples))
     end
 
     # evaluation of logpdf and pdf
@@ -64,24 +64,24 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test isequal(pdf(g, -mn),0.0)
 
     # test the location and scale functions
-    @test location(g) ≈ location(MvLogNormal,:meancov,mean(g),cov(g))    atol=1e-8
-    @test location(g) ≈ location(MvLogNormal,:mean,mean(g),scale(g))     atol=1e-8
-    @test location(g) ≈ location(MvLogNormal,:median,median(g),scale(g)) atol=1e-8
-    @test location(g) ≈ location(MvLogNormal,:mode,mode(g),scale(g))     atol=1e-8
-    @test scale(g)    ≈ scale(MvLogNormal,:meancov,mean(g),cov(g))       atol=1e-8
+    @test isapprox(location(g), location(MvLogNormal,:meancov,mean(g),cov(g))   , atol=1e-8)
+    @test isapprox(location(g), location(MvLogNormal,:mean,mean(g),scale(g))    , atol=1e-8)
+    @test isapprox(location(g), location(MvLogNormal,:median,median(g),scale(g)), atol=1e-8)
+    @test isapprox(location(g), location(MvLogNormal,:mode,mode(g),scale(g))    , atol=1e-8)
+    @test isapprox(scale(g)   , scale(MvLogNormal,:meancov,mean(g),cov(g))      , atol=1e-8)
 
-    @test location(g) ≈ location!(MvLogNormal,:meancov,mean(g),cov(g),zeros(mn))    atol=1e-8
-    @test location(g) ≈ location!(MvLogNormal,:mean,mean(g),scale(g),zeros(mn))     atol=1e-8
-    @test location(g) ≈ location!(MvLogNormal,:median,median(g),scale(g),zeros(mn)) atol=1e-8
-    @test location(g) ≈ location!(MvLogNormal,:mode,mode(g),scale(g),zeros(mn))     atol=1e-8
-    @test scale(g)    ≈ scale!(MvLogNormal,:meancov,mean(g),cov(g),zeros(S))        atol=1e-8
+    @test isapprox(location(g), location!(MvLogNormal,:meancov,mean(g),cov(g),zeros(mn))   , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mean,mean(g),scale(g),zeros(mn))    , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:median,median(g),scale(g),zeros(mn)), atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mode,mode(g),scale(g),zeros(mn))    , atol=1e-8)
+    @test isapprox(scale(g)   , scale!(MvLogNormal,:meancov,mean(g),cov(g),zeros(S))       , atol=1e-8)
 
     lc1,sc1 = params(MvLogNormal,mean(g),cov(g))
     lc2,sc2 = params!(MvLogNormal,mean(g),cov(g),similar(mn),similar(S))
-    @test location(g) ≈ lc1  atol=1e-8
-    @test location(g) ≈ lc2  atol=1e-8
-    @test scale(g)    ≈ sc1  atol=1e-8
-    @test scale(g)    ≈ sc2  atol=1e-8
+    @test isapprox(location(g), lc1, atol=1e-8)
+    @test isapprox(location(g), lc2, atol=1e-8)
+    @test isapprox(scale(g)   , sc1, atol=1e-8)
+    @test isapprox(scale(g)   , sc2, atol=1e-8)
 end
 
 ####### Validate results for a single-dimension MvLogNormal by comparing with univariate LogNormal

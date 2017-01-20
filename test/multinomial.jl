@@ -50,7 +50,7 @@ x = rand(sampler(d))
 
 x1 = [1, 6, 3]
 
-@test pdf(d, x1)    ≈ 0.070875        atol=1.0e-8
+@test isapprox(pdf(d, x1), 0.070875, atol=1.0e-8)
 @test logpdf(d, x1) ≈ log(pdf(d, x1))
 
 x = rand(d, 100)
@@ -92,12 +92,12 @@ x = rand(d0, 10^5)
 r = fit(Multinomial, x)
 @test r.n == nt
 @test length(r) == length(p)
-@test probs(r) ≈ p atol=0.02
+@test isapprox(probs(r), p, atol=0.02)
 
 r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt
 @test length(r) == length(p)
-@test probs(r) ≈ p atol=0.02
+@test isapprox(probs(r), p, atol=0.02)
 
 # behavior for n = 0
 d0 = Multinomial(0, p)

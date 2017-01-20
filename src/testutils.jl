@@ -349,10 +349,10 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
 
         ci += p[i]
         @test ci ≈ c[i]
-        @test c[i] + cc[i] ≈ 1.0  atol=1.0e-12
-        @test lp[i] ≈ log(p[i])   atol=1.0e-12
-        @test lc[i] ≈ log(c[i])   atol=1.0e-12
-        @test lcc[i] ≈ log(cc[i]) atol=1.0e-12
+        @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
+        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
+        @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         ep = 1.0e-8
         if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
@@ -396,19 +396,19 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
-        @test c[i] + cc[i] ≈ 1.0  atol=1.0e-12
-        @test lp[i] ≈ log(p[i])   atol=1.0e-12
-        @test lc[i] ≈ log(c[i])   atol=1.0e-12
-        @test lcc[i] ≈ log(cc[i]) atol=1.0e-12
+        @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
+        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
+        @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         # TODO: remove this line when we have more accurate implementation
         # of quantile for InverseGaussian
         qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
         if p[i] > 1.0e-6
-            @test quantile(d, c[i])     ≈ v atol=qtol * (abs(v) + 1.0)
-            @test cquantile(d, cc[i])   ≈ v atol=qtol * (abs(v) + 1.0)
-            @test invlogcdf(d, lc[i])   ≈ v atol=qtol * (abs(v) + 1.0)
-            @test invlogccdf(d, lcc[i]) ≈ v atol=qtol * (abs(v) + 1.0)
+            @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
         end
     end
 
@@ -417,7 +417,7 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         if p[i] > 1.0e-6
             v = vs[i]
             ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test p[i] ≈ ap atol=p[i] * 1.0e-3
+            @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
         end
     end
 
@@ -447,23 +447,23 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     xkurt = dot(p, (vf .- xmean).^4) / (xvar.^2) - 3.0
 
     if isbounded(d)
-        @test mean(d) ≈ xmean  atol=1.0e-8
-        @test var(d)  ≈ xvar   atol=1.0e-8
-        @test std(d)  ≈ xstd   atol=1.0e-8
+        @test isapprox(mean(d), xmean, atol=1.0e-8)
+        @test isapprox(var(d) , xvar , atol=1.0e-8)
+        @test isapprox(std(d) , xstd , atol=1.0e-8)
 
         if isfinite(skewness(d))
-            @test skewness(d) ≈ xskew    atol=1.0e-8
+            @test isapprox(skewness(d), xskew   , atol=1.0e-8)
         end
         if isfinite(kurtosis(d))
-            @test kurtosis(d) ≈ xkurt    atol=1.0e-8
+            @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)
-            @test entropy(d)  ≈ xentropy atol=1.0e-8
+            @test isapprox(entropy(d) , xentropy, atol=1.0e-8)
         end
     else
-        @test mean(d) ≈ xmean atol=1.0e-3 * (abs(xmean) + 1.0)
-        @test var(d)  ≈ xvar  atol=0.01 * xvar
-        @test std(d)  ≈ xstd  atol=0.01 * xstd
+        @test isapprox(mean(d), xmean, atol=1.0e-3 * (abs(xmean) + 1.0))
+        @test isapprox(var(d) , xvar , atol=0.01 * xvar)
+        @test isapprox(std(d) , xstd , atol=0.01 * xstd)
     end
 end
 
@@ -490,7 +490,7 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
     # For a normal distribution, it is extremely rare for a sample to deviate more
     # than 5 * std.dev, (chance < 6.0e-7)
     mean_tol = 5.0 * (sqrt(vd / n))
-    @test mean(d) ≈ xmean atol=mean_tol
+    @test isapprox(mean(d), xmean, atol=mean_tol)
 
     # test variance
     if applicable(kurtosis, d)
@@ -503,7 +503,7 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
         # where k is the excessive kurtosis
         #
         if isfinite(kd) && kd > -2.0
-            @test var(d) ≈ xvar atol=5.0 * vd * (kd + 2) / sqrt(n)
+            @test isapprox(var(d), xvar, atol=5.0 * vd * (kd + 2) / sqrt(n))
         end
     end
 end

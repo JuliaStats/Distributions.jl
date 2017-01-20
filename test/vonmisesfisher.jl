@@ -37,7 +37,7 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     @test meandir(d2) ≈ μ
     @test concentration(d2) ≈ κ
 
-    @test d.logCκ ≈ log(vmfCp(p, κ)) atol=1.0e-12
+    @test isapprox(d.logCκ, log(vmfCp(p, κ)), atol=1.0e-12)
 
     X = gen_vmf_tdata(n, p)
     lp0 = zeros(n)
@@ -61,8 +61,8 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     X = rand(d, ns)
     d_est = fit_mle(VonMisesFisher, X)
     @test isa(d_est, VonMisesFisher)
-    @test d_est.μ ≈ μ atol=0.01
-    @test d_est.κ ≈ κ atol=κ * 0.01
+    @test isapprox(d_est.μ, μ, atol=0.01)
+    @test isapprox(d_est.κ, κ, atol=κ * 0.01)
 end
 
 

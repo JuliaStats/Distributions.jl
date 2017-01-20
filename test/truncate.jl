@@ -71,8 +71,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
         cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
-        @test logpdf(d, x) ≈ lp atol=sqrt(eps())
-        @test cdf(d, x)    ≈ cf atol=sqrt(eps())
+        @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
+        @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
     end
 
     try

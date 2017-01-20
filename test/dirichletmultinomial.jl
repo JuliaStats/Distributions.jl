@@ -32,9 +32,9 @@ x = rand(d, 10_000)
 
 # test statistics with mle fit
 d = fit(DirichletMultinomial, x)
-@test mean(d) ≈ vec(mean(x, 2)) atol=.5
-@test var(d)  ≈ vec(var(x, 2))  atol=.5
-@test cov(d)  ≈ cov(x, 2)       atol=.5
+@test isapprox(mean(d), vec(mean(x, 2)), atol=.5)
+@test isapprox(var(d) , vec(var(x, 2)) , atol=.5)
+@test isapprox(cov(d) , cov(x, 2)      , atol=.5)
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)
@@ -71,7 +71,7 @@ ss = suffstats(DirichletMultinomial, x)
 @test size(ss.s, 1) == length(d)
 @test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
-@test mle.α ≈ d.α atol=.2
+@test isapprox(mle.α, d.α, atol=.2)
 
 # test MLE with weights
 for w in (.1 * ones(10_000), ones(10_000), 10 * ones(10_000))
