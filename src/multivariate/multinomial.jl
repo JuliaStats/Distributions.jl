@@ -39,7 +39,7 @@ function var{T<:Real}(d::Multinomial{T})
     k = length(p)
     n = ntrials(d)
 
-    v = Array(T, k)
+    v = Vector{T}(k)
     for i = 1:k
         @inbounds p_i = p[i]
         v[i] = n * p_i * (1 - p_i)
@@ -52,7 +52,7 @@ function cov{T<:Real}(d::Multinomial{T})
     k = length(p)
     n = ntrials(d)
 
-    C = Array(T, k, k)
+    C = Matrix{T}(k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1

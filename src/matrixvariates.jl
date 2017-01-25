@@ -4,7 +4,7 @@
 # sampling
 
 rand!{M<:Matrix}(d::MatrixDistribution, A::AbstractArray{M}) = _rand!(sampler(d), A)
-rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Array(Matrix{eltype(d)}, n))
+rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
 
 # pdf & logpdf
 
@@ -50,12 +50,12 @@ end
 
 function logpdf{M<:Matrix}(d::MatrixDistribution, X::AbstractArray{M})
     T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array(T, size(X)), d, X)
+    _logpdf!(Array{T}(size(X)), d, X)
 end
 
 function pdf{M<:Matrix}(d::MatrixDistribution, X::AbstractArray{M})
     T = promote_type(partype(d), eltype(M))
-    _pdf!(Array(T, size(X)), d, X)
+    _pdf!(Array{T}(size(X)), d, X)
 end
 
 

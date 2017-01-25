@@ -11,10 +11,10 @@ end
 rand!(s::Sampleable{Univariate}, A::AbstractArray) = _rand!(s, A)
 
 rand(s::Sampleable{Univariate}, dims::Dims) =
-    _rand!(s, Array(eltype(s), dims))
+    _rand!(s, Array{eltype(s)}(dims))
 
 rand(s::Sampleable{Univariate}, dims::Int...) =
-    _rand!(s, Array(eltype(s), dims))
+    _rand!(s, Array{eltype(s)}(dims))
 
 
 # multivariate
@@ -39,10 +39,10 @@ function rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
 end
 
 rand(s::Sampleable{Multivariate}) =
-    _rand!(s, Array(eltype(s), length(s)))
+    _rand!(s, Vector{eltype(s)}(length(s)))
 
 rand(s::Sampleable{Multivariate}, n::Int) =
-    _rand!(s, Array(eltype(s), length(s), n))
+    _rand!(s, Matrix{eltype(s)}(length(s), n))
 
 
 # matrix-variate
@@ -58,7 +58,7 @@ rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) =
     _rand!(s, X)
 
 rand(s::Sampleable{Matrixvariate}, n::Int) =
-    rand!(s, Array(Matrix{eltype(s)}, n))
+    rand!(s, Vector{Matrix{eltype(s)}}(n))
 
 
 # sampler

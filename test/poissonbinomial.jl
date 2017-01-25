@@ -1,7 +1,7 @@
 using Distributions
 using Base.Test
 
-# Test the special base where PoissonBinomial distribution reduces 
+# Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
 
@@ -13,29 +13,29 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     @test minimum(d) == 0
     @test maximum(d) == n
     @test ntrials(d) == n
-    @test_approx_eq entropy(d) entropy(dref)
-    @test_approx_eq median(d) median(dref)
-    @test_approx_eq mean(d) mean(dref)
-    @test_approx_eq var(d) var(dref)
-    @test_approx_eq kurtosis(d) kurtosis(dref)
-    @test_approx_eq skewness(d) skewness(dref)
-    
+    @test entropy(d)  ≈ entropy(dref)
+    @test median(d)   ≈ median(dref)
+    @test mean(d)     ≈ mean(dref)
+    @test var(d)      ≈ var(dref)
+    @test kurtosis(d) ≈ kurtosis(dref)
+    @test skewness(d) ≈ skewness(dref)
+
     for t=0:5
-        @test_approx_eq mgf(d, t) mgf(dref, t)
-        @test_approx_eq cf(d, t) cf(dref, t)
+        @test mgf(d, t) ≈ mgf(dref, t)
+        @test cf(d, t)  ≈ cf(dref, t)
     end
     for i=0.1:0.1:.9
-        @test_approx_eq quantile(d, i) quantile(dref, i)
+        @test quantile(d, i) ≈ quantile(dref, i)
     end
     for i=0:n
-        @test_approx_eq_eps cdf(d, i) cdf(dref, i) 1e-15
-        @test_approx_eq_eps pdf(d, i) pdf(dref, i) 1e-15
+        @test isapprox(cdf(d, i), cdf(dref, i), atol=1e-15)
+        @test isapprox(pdf(d, i), pdf(dref, i), atol=1e-15)
     end
 
 end
 
 # Test against a sum of three Binomial distributions
-for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9), 
+for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
                                  (1, 10, 100, 0.99, 0.1, 0.05),
                                  (5, 1, 3, 0.01, 0.99, 0.999),
                                  (10, 7, 10, 0., 0.9, 0.5)]
@@ -55,11 +55,11 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
     pmf2 = pdf(b2)
     pmf3 = pdf(b3)
 
-    @test_approx_eq mean(d) (mean(b1) + mean(b2) + mean(b3))
-    @test_approx_eq var(d) (var(b1) + var(b2) + var(b3))
+    @test mean(d) ≈ (mean(b1) + mean(b2) + mean(b3))
+    @test var(d)  ≈ (var(b1) + var(b2) + var(b3))
     for t=0:5
-        @test_approx_eq mgf(d, t) (mgf(b1, t) * mgf(b2, t) * mgf(b3, t))
-        @test_approx_eq cf(d, t) (cf(b1, t) * cf(b2, t) * cf(b3, t))
+        @test mgf(d, t) ≈ (mgf(b1, t) * mgf(b2, t) * mgf(b3, t))
+        @test cf(d, t)  ≈ (cf(b1, t) * cf(b2, t) * cf(b3, t))
     end
 
     for k=0:n
@@ -71,6 +71,6 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test_approx_eq_eps pdf(d, k) m 1e-15
+        @test isapprox(pdf(d, k), m, atol=1e-15)
     end
 end

@@ -39,7 +39,7 @@ end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Array(promote_type(partype(d), eltype(x)), size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(size(x, 2)), d, x)
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
@@ -83,7 +83,10 @@ function MvNormal{T<:Real}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMa
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) = MvNormal(promote_eltype(μ, Σ)...)
+function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov)
+    R = Base.promote_eltype(μ, Σ)
+    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
+end
 
 function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)
     T = eltype(Σ)
@@ -94,8 +97,14 @@ MvNormal{T<:Real}(μ::Vector{T}, Σ::Matrix{T}) = MvNormal(μ, PDMat(Σ))
 MvNormal{T<:Real}(μ::Vector{T}, σ::Vector{T}) = MvNormal(μ, PDiagMat(@compat(abs2.(σ))))
 MvNormal{T<:Real}(μ::Vector{T}, σ::T) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::VecOrMat{S}) = MvNormal(promote_eltype(μ, Σ)...)
-MvNormal{T<:Real}(μ::Vector{T}, σ::Real) = MvNormal(promote_eltype(μ, σ)...)
+function MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::VecOrMat{S})
+    R = Base.promote_eltype(μ, Σ)
+    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
+end
+function MvNormal{T<:Real}(μ::Vector{T}, σ::Real)
+    R = Base.promote_eltype(μ, σ)
+    MvNormal(convert(AbstractArray{R}, μ), R(σ))
+end
 
 MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
 MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(@compat(abs2.(σ))))
@@ -103,10 +112,10 @@ MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Conversion
 function convert{T<:Real}(::Type{MvNormal{T}}, d::MvNormal)
-    MvNormal(convert_eltype(T, d.μ), convert_eltype(T, d.Σ))
+    MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
 function convert{T<:Real}(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
-    MvNormal(convert_eltype(T, μ), convert_eltype(T, Σ))
+    MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
 
 ### Show
@@ -291,7 +300,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
 
-    z = Array(Float64, m, n)
+    z = Matrix{Float64}(m, n)
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m

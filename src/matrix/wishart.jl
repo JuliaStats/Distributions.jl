@@ -15,12 +15,15 @@ function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
-    R = promote_type(T, typeof(c0))
-    _, prom_S = promote_eltype(one(R), S)
+    R = Base.promote_eltype(T, c0)
+    prom_S = convert(AbstractArray{T}, S)
     Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
 end
 
-Wishart(df::Real, S::AbstractPDMat) = Wishart(promote_eltype(df, PDMat(S))...)
+function Wishart(df::Real, S::AbstractPDMat)
+    T = Base.promote_eltype(df, S)
+    Wishart(T(df), convert(AbstractArray{T}, S))
+end
 
 Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
@@ -45,11 +48,11 @@ params(d::Wishart) = (d.df, d.S, d.c0)
 
 ### Conversion
 function convert{T<:Real}(::Type{Wishart{T}}, d::Wishart)
-    P = convert_eltype(T, d.S)
+    P = AbstractMatrix{T}(d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
 function convert{T<:Real}(::Type{Wishart{T}}, df, S::AbstractPDMat, c0)
-    P = convert_eltype(T, S)
+    P = AbstractMatrix{T}(S)
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end
 

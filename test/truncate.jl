@@ -62,8 +62,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify stats
-    @test_approx_eq minimum(d) max(_json_value(dct["minimum"]),d.lower)
-    @test_approx_eq maximum(d) min(_json_value(dct["maximum"]),d.upper)
+    @test minimum(d) ≈ max(_json_value(dct["minimum"]),d.lower)
+    @test maximum(d) ≈ min(_json_value(dct["maximum"]),d.upper)
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
@@ -71,8 +71,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
         cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
-        @Base.Test.test_approx_eq_eps(logpdf(d, x), lp, sqrt(eps()))
-        @Base.Test.test_approx_eq_eps(cdf(d, x), cf, sqrt(eps()))
+        @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
+        @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
     end
 
     try

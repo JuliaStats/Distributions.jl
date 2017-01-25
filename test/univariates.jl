@@ -77,35 +77,27 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 
     # verify stats
-    @test_approx_eq minimum(d) _json_value(dct["minimum"])
-    @test_approx_eq maximum(d) _json_value(dct["maximum"])
-    @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
+    @test minimum(d) ≈ _json_value(dct["minimum"])
+    @test maximum(d) ≈ _json_value(dct["maximum"])
+    @test Compat.isapprox(mean(d), _json_value(dct["mean"]), atol=1.0e-8, nans=true)
     if !isa(d, VonMises)
-        @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
+        @test Compat.isapprox(var(d), _json_value(dct["var"]), atol=1.0e-8, nans=true)
     end
     if !isa(d, Skellam)
-        @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
+        @test isapprox(median(d), _json_value(dct["median"]), atol=1.0)
     end
 
     if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
-        @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
-    end
-
-    # test conversions if distribution is parametric
-    if !isempty(typeof(d).parameters) && !isa(d, Truncated)
-        D = typeof(d).name.primary
-        W = Float32
-        @test typeof(convert(D{W}, d)) == D{W}
-        @test typeof(convert(D{W}, params(d)...)) == D{W}
+        @test isapprox(entropy(d), dct["entropy"], atol=1.0e-7)
     end
 
     # verify quantiles
     if !isa(d, Union{Skellam, VonMises})
-        @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
+        @test isapprox(quantile(d, 0.10), dct["q10"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.25), dct["q25"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.50), dct["q50"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.75), dct["q75"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.90), dct["q90"], atol=1.0e-8)
     end
 
     # verify logpdf and cdf at certain points

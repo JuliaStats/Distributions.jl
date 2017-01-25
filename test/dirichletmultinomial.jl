@@ -3,6 +3,7 @@
 
 using Distributions
 using Base.Test
+using Compat
 
 srand(123)
 
@@ -24,16 +25,16 @@ d = DirichletMultinomial(10, α)
 @test partype(d) == eltype(α)
 
 # test statistics
-@test_approx_eq(mean(d), α * (d.n / d.α0))
+@test mean(d) ≈ α * (d.n / d.α0)
 p = d.α / d.α0
-@test_approx_eq(var(d), d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 - p))
+@test var(d)  ≈ d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 - p)
 x = rand(d, 10_000)
 
 # test statistics with mle fit
 d = fit(DirichletMultinomial, x)
-@test_approx_eq_eps mean(d) vec(mean(x, 2)) .5
-@test_approx_eq_eps var(d) vec(var(x, 2)) .5
-@test_approx_eq_eps cov(d) cov(x, 2) .5
+@test isapprox(mean(d), vec(mean(x, 2)), atol=.5)
+@test isapprox(var(d) , vec(var(x, 2)) , atol=.5)
+@test isapprox(cov(d) , cov(x, 2)      , atol=.5)
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)
@@ -44,14 +45,10 @@ d = DirichletMultinomial(10, 5)
 @test !insupport(d, 3.0 * ones(5))
 
 for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
-    @test_approx_eq(
-        pdf(d, x),
-        @compat factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma(d.α + x) ./ factorial.(x) ./ gamma(d.α))
-    )
-    @test_approx_eq(
-        logpdf(d, x),
-        @compat log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma(d.α + x) - log.(factorial.(x)) - lgamma(d.α))
-    )
+    @test pdf(d, x) ≈
+        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
+    @test logpdf(d, x) ≈
+        log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma.(d.α + x) - log.(factorial.(x)) - lgamma.(d.α))
 end
 
 # test Sampling
@@ -74,10 +71,10 @@ ss = suffstats(DirichletMultinomial, x)
 @test size(ss.s, 1) == length(d)
 @test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
-@test_approx_eq_eps mle.α d.α .2
+@test isapprox(mle.α, d.α, atol=.2)
 
 # test MLE with weights
 for w in (.1 * ones(10_000), ones(10_000), 10 * ones(10_000))
     mle2 = fit(DirichletMultinomial, x, w)
-    @test_approx_eq mle.α mle2.α
+    @test mle.α ≈ mle2.α
 end
