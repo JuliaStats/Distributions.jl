@@ -86,7 +86,7 @@ Bernoulli <- R6Class("Bernoulli",
             list(succprob=p,
                  failprob=q,
                  mean=p,
-                 median= if(p<0.5) {0} else if (p > 0.5) {1} else {0.5},
+                 median= if(p<=0.5) {0} else {1},
                  var=p * q,
                  skewness=(1 - 2*p) / sqrt(p*q),
                  kurtosis=(1 - 6*p*q) / (p*q),
@@ -119,7 +119,7 @@ Binomial <- R6Class("Binomial",
                  failprob=q,
                  ntrials=n,
                  mean=n * p,
-                 median=floor(n * p),
+                 median=round(n * p),
                  var=n * p * q,
                  skewness=(q - p) / sqrt(n*p*q),
                  kurtosis=(1 - 6*p*q) / (n*p*q))
@@ -150,7 +150,7 @@ Beta <- R6Class("Beta",
             kurt.num <- 6 * ((a - b)^2 * (a + b + 1) - a * b * (a + b + 2))
             kurt.den <- a * b * (a + b + 2) * (a + b + 3)
             ent <- lbeta(a, b) - (a - 1) * digamma(a) - (b - 1) * digamma(b) +
-                   (a - b + 2) * digamma(a + b)
+                   (a + b - 2) * digamma(a + b)
             list(mean=a / (a + b),
                  meanlogx=digamma(a) - digamma(a + b),
                  var=(a * b) / (a + b)^2 / (a + b + 1.0),
@@ -263,7 +263,7 @@ DiscreteUniform <- R6Class("DiscreteUniform",
         quan = function(v) {
             a <- self$a
             b <- self$b
-            floor(a + (b - a) * clamp(0.0, 1.0, v))
+            floor(a + (b - a + 1) * clamp(0.0, 1.0, v))
         }
     )
 )
@@ -348,10 +348,8 @@ Gammad <- R6Class("Gammad",
             s <- self$theta
             list(shape=a,
                  scale=s,
-                 mean=a * s,
-                 meanlogx=digamma(a) + log(s),
+                 mean=a * s,                 
                  var=a * s^2,
-                 varlogx=trigamma(a),
                  skewness=2 / sqrt(a),
                  kurtosis=6 / a,
                  entropy=a + log(s) + lgamma(a) + (1 - a) * digamma(a)
@@ -382,7 +380,7 @@ Geometric <- R6Class("Geometric",
                  var=(1-p)/p^2,
                  skewness=(2-p)/sqrt(1-p),
                  kurtosis=6 + p^2/(1-p),
-                 entropy=-((1-p)*log2(1-p) + p * log2(p))/p)
+                 entropy=-((1-p)*log(1-p) + p * log(p))/p)
         },
         pdf = function(x, log=FALSE) { dgeom(x, self$p, log=log) },
         cdf = function(x) { pgeom(x, self$p) },
@@ -451,10 +449,10 @@ NegativeBinomial <- R6Class("NegativeBinomial",
             p <- self$p
             list(succprob=p,
                  failprob=1.0-p,
-                 mean=p * r / (1-p),
-                 var=p * r / (1-p)^2,
-                 skewness=(1 + p) / sqrt(p * r),
-                 kurtosis=6 / r + (1-p)^2 / (p*r))
+                 mean=(1-p) * r / p,
+                 var=(1-p) * r / p^2,
+                 skewness=(2-p) / sqrt((1-p) * r),
+                 kurtosis=6 / r + p^2 / ((1-p)*r))
         },
         pdf = function(x, log=FALSE){ dnbinom(x, self$r, self$p, log=log)},
         cdf = function(x) { pnbinom(x, self$r, self$p) },

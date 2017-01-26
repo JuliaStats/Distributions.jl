@@ -33,7 +33,6 @@ canonform(d::Normal) = convert(NormalCanon, d)
 params(d::NormalCanon) = (d.η, d.λ)
 @inline partype{T<:Real}(d::NormalCanon{T}) = T
 
-
 #### Statistics
 
 mean(d::NormalCanon) = d.μ
@@ -48,6 +47,8 @@ std(d::NormalCanon) = sqrt(var(d))
 
 entropy(d::NormalCanon) = (-log(d.λ) + log2π + 1) / 2
 
+location(d::NormalCanon) = mean(d)
+scale(d::NormalCanon) = std(d)
 
 #### Evaluation
 

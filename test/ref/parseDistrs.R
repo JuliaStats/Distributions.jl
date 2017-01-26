@@ -105,7 +105,7 @@ get.distr <- function(entry) {
         },
         NormalCanon = {
                  if (nargs == 0) { Normal$new(0, 1) }
-            else if (nargs == 2) { Normal$new(a1 / a2, 1 / a2) }
+            else if (nargs == 2) { Normal$new(a1 / a2, 1 / sqrt(a2)) }
         },
         Poisson = {
                  if (nargs == 0) { Poisson$new(1) }

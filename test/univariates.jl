@@ -8,8 +8,10 @@ using Compat
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
-    for (ex, dct) in R
-        dsym = Symbol(dct["dtype"])
+    for dct in R
+        ex = parse(dct["expr"])
+        @assert ex.head == :call
+        dsym = ex.args[1]
         dname = string(dsym)
 
         # test whether it is included in the selected list
@@ -21,7 +23,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         # perform testing
         println("    testing $(ex)")
         dtype = eval(dsym)
-        d = eval(parse(ex))
+        d = eval(ex)
         if dtype == TruncatedNormal
             @test isa(d, Truncated{Normal{Float64}})
         else
@@ -30,7 +32,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         end
 
         # verification and testing
-        verify_and_test(d, dct, n_tsamples)
+        verify_and_test(dtype, d, dct, n_tsamples)
     end
 end
 
@@ -47,17 +49,22 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 
-function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
-    # verify parameters
-    pdct = dct["params"]
+function verify_and_test(D::Type, d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
+    # verify properties
+    #
+    # Note: properties include all applicable params and stats
+    #
+    assert(isa(d, D))
+    
+    pdct = dct["properties"]
     for (fname, val) in pdct
+        expect_v = _json_value(val)
         f = eval(Symbol(fname))
         @assert isa(f, Function)
-        Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
+        Base.Test.test_approx_eq(f(d), expect_v, "$fname(d)", "expect_v")
     end
 
     # test various constructors for promotion, all-Integer args, etc.
-    D = eval(Symbol(dct["dtype"]))  # distribution name
     pars = params(d)
 
     # promotion constructor:
@@ -76,30 +83,6 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test typeof(D(int_pars...)) == typeof(d)
     end
 
-    # verify stats
-    @test minimum(d) ≈ _json_value(dct["minimum"])
-    @test maximum(d) ≈ _json_value(dct["maximum"])
-    @test Compat.isapprox(mean(d), _json_value(dct["mean"]), atol=1.0e-8, nans=true)
-    if !isa(d, VonMises)
-        @test Compat.isapprox(var(d), _json_value(dct["var"]), atol=1.0e-8, nans=true)
-    end
-    if !isa(d, Skellam)
-        @test isapprox(median(d), _json_value(dct["median"]), atol=1.0)
-    end
-
-    if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
-        @test isapprox(entropy(d), dct["entropy"], atol=1.0e-7)
-    end
-
-    # verify quantiles
-    if !isa(d, Union{Skellam, VonMises})
-        @test isapprox(quantile(d, 0.10), dct["q10"], atol=1.0e-8)
-        @test isapprox(quantile(d, 0.25), dct["q25"], atol=1.0e-8)
-        @test isapprox(quantile(d, 0.50), dct["q50"], atol=1.0e-8)
-        @test isapprox(quantile(d, 0.75), dct["q75"], atol=1.0e-8)
-        @test isapprox(quantile(d, 0.90), dct["q90"], atol=1.0e-8)
-    end
-
     # verify logpdf and cdf at certain points
     pts = dct["points"]
     for pt in pts
@@ -112,6 +95,14 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         else
             @test_throws MethodError cdf(d, x)
         end
+    end
+
+    # verify quantiles
+    qts = dct["quans"]
+    for qt in qts
+        q = Float64(qt["q"])
+        x = Float64(qt["x"])
+        @test isapprox(quantile(d, q), x, atol=1.0e-8)
     end
 
     try
@@ -144,13 +135,12 @@ end
 ## main
 
 for c in ["discrete",
-          "continuous",
-          "discrete_hand_coded"]
+          "continuous"]
 
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json")
+    jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end
