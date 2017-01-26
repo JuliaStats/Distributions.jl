@@ -55,7 +55,7 @@ function verify_and_test(D::Type, d::UnivariateDistribution, dct::Dict, n_tsampl
     # Note: properties include all applicable params and stats
     #
     assert(isa(d, D))
-    
+
     pdct = dct["properties"]
     for (fname, val) in pdct
         expect_v = _json_value(val)
@@ -89,7 +89,7 @@ function verify_and_test(D::Type, d::UnivariateDistribution, dct::Dict, n_tsampl
         x = _parse_x(d, pt["x"])
         lp = Float64(pt["logpdf"])
         cf = Float64(pt["cdf"])
-        Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
+        Base.Test.test_approx_eq(logpdf(d, x), lp, 1e-12, "logpdf(d, $x)", "lp")
         if !isa(d, Skellam)
             Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
         else

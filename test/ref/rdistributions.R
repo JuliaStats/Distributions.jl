@@ -53,14 +53,15 @@ Arcsine <- R6Class("Arcsine",
         },
         supp = function() { c(self$a, self$b) },
         properties = function() {
+            s <- self$b - self$a
             list(location=self$a,
-                 scale=self$b - self$a,
+                 scale=s,
                  mean=(self$a + self$b) * 0.5,
-                 var=1/8,
+                 var=1/8 * s^2,
                  skewness=0,
                  kurtosis=-1.5,
                  median=(self$a + self$b) * 0.5,
-                 entropy=log(pi/4) + log(self$b - self$a))
+                 entropy=log(pi/4) + log(s))
         },
         pdf = function(x, log=FALSE) { distr::d(self$rd)(x, log=log) },
         cdf = function(x) { distr::p(self$rd)(x) },
@@ -348,7 +349,7 @@ Gammad <- R6Class("Gammad",
             s <- self$theta
             list(shape=a,
                  scale=s,
-                 mean=a * s,                 
+                 mean=a * s,
                  var=a * s^2,
                  skewness=2 / sqrt(a),
                  kurtosis=6 / a,
