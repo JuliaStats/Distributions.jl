@@ -569,6 +569,50 @@
   ]
 },
 {
+  "expr": "Hypergeometric(3, 2, 0)",
+  "dtype": "Hypergeometric",
+  "minimum": 0,
+  "maximum": 0,
+  "properties": {
+    "mean": 0,
+    "var": 0,
+    "skewness": "-inf",
+    "kurtosis": "-inf"
+  },
+  "points": [
+    { "x": 0, "pdf": 1, "logpdf": 0, "cdf": 1 }
+  ],
+  "quans": [
+    { "q": 0.10, "x": 0 },
+    { "q": 0.25, "x": 0 },
+    { "q": 0.50, "x": 0 },
+    { "q": 0.75, "x": 0 },
+    { "q": 0.90, "x": 0 }
+  ]
+},
+{
+  "expr": "Hypergeometric(3, 2, 5)",
+  "dtype": "Hypergeometric",
+  "minimum": 3,
+  "maximum": 3,
+  "properties": {
+    "mean": 3,
+    "var": 0,
+    "skewness": "inf",
+    "kurtosis": "-inf"
+  },
+  "points": [
+    { "x": 3, "pdf": 1, "logpdf": 0, "cdf": 1 }
+  ],
+  "quans": [
+    { "q": 0.10, "x": 3 },
+    { "q": 0.25, "x": 3 },
+    { "q": 0.50, "x": 3 },
+    { "q": 0.75, "x": 3 },
+    { "q": 0.90, "x": 3 }
+  ]
+},
+{
   "expr": "Hypergeometric(4, 5, 6)",
   "dtype": "Hypergeometric",
   "minimum": 1,

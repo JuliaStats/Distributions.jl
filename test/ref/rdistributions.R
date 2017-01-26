@@ -33,9 +33,41 @@ xlogx <- function(x) {
 
 #################################################
 #
-#  Discrete distributions
+#  Specific distributions
 #
 #################################################
+
+# Arcsine
+
+Arcsine <- R6Class("Arcsine",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("a", "b"),
+        a = NA,
+        b = NA,
+        rd = NA,  # R distr object
+        initialize = function(a, b) {
+            self$a <- a
+            self$b <- b
+            self$rd <- distr::Arcsine() * ((b-a)/2) + ((a+b)/2)
+        },
+        supp = function() { c(self$a, self$b) },
+        properties = function() {
+            list(location=self$a,
+                 scale=self$b - self$a,
+                 mean=(self$a + self$b) * 0.5,
+                 var=1/8,
+                 skewness=0,
+                 kurtosis=-1.5,
+                 median=(self$a + self$b) * 0.5,
+                 entropy=log(pi/4) + log(self$b - self$a))
+        },
+        pdf = function(x, log=FALSE) { distr::d(self$rd)(x, log=log) },
+        cdf = function(x) { distr::p(self$rd)(x) },
+        quan = function(v) { distr::q(self$rd)(v) }
+    )
+)
+
 
 # Bernoulli
 
@@ -60,8 +92,7 @@ Bernoulli <- R6Class("Bernoulli",
                  kurtosis=(1 - 6*p*q) / (p*q),
                  entropy=-(xlogx(p) + xlogx(q)))
         },
-        pdf = function(x){ dbinom(x, 1, self$p) },
-        logpdf = function(x){ dbinom(x, 1, self$p, log=TRUE) },
+        pdf = function(x, log=FALSE){ dbinom(x, 1, self$p, log=log) },
         cdf = function(x){ pbinom(x, 1, self$p) },
         quan = function(v){ qbinom(v, 1, self$p) }
     )
@@ -93,8 +124,7 @@ Binomial <- R6Class("Binomial",
                  skewness=(q - p) / sqrt(n*p*q),
                  kurtosis=(1 - 6*p*q) / (n*p*q))
         },
-        pdf = function(x) { dbinom(x, self$n, self$p) },
-        logpdf = function(x) { dbinom(x, self$n, self$p, log=TRUE) },
+        pdf = function(x, log=FALSE) { dbinom(x, self$n, self$p, log=log) },
         cdf = function(x) { pbinom(x, self$n, self$p) },
         quan = function(v) { qbinom(v, self$n, self$p) }
     )
@@ -129,8 +159,7 @@ Beta <- R6Class("Beta",
                  kurtosis=kurt.num / kurt.den,
                  entropy=ent)
         },
-        pdf = function(x){ dbeta(x, self$alpha, self$beta) },
-        logpdf = function(x){ dbeta(x, self$alpha, self$beta, log=TRUE) },
+        pdf = function(x, log=FALSE){ dbeta(x, self$alpha, self$beta, log=log) },
         cdf = function(x) { pbeta(x, self$alpha, self$beta) },
         quan = function(v) { qbeta(v, self$alpha, self$beta) }
     )
@@ -155,8 +184,7 @@ Cauchy <- R6Class("Cauchy",
                  median=self$mu,
                  entropy=log(self$sigma) + log(4 * pi))
         },
-        pdf = function(x) { dcauchy(x, self$mu, self$sigma) },
-        logpdf = function(x) { dcauchy(x, self$mu, self$sigma, log=TRUE) },
+        pdf = function(x, log=FALSE) { dcauchy(x, self$mu, self$sigma, log=log) },
         cdf = function(x) { pcauchy(x, self$mu, self$sigma) },
         quan = function(v) { qcauchy(v, self$mu, self$sigma) }
     )
@@ -182,8 +210,7 @@ Chisq <- R6Class("Chisq",
                  kurtosis=12 / k,
                  entropy=k / 2 + log(2) + lgamma(k/2) + (1 - k/2) * digamma(k/2))
         },
-        pdf = function(x) { dchisq(x, self$nu) },
-        logpdf = function(x) { dchisq(x, self$nu, log=TRUE) },
+        pdf = function(x, log=FALSE) { dchisq(x, self$nu, log=log) },
         cdf = function(x) { pchisq(x, self$nu) },
         quan = function(v) { qchisq(v, self$nu) }
     )
@@ -196,16 +223,18 @@ DiscreteUniform <- R6Class("DiscreteUniform",
     public = list(
         a = NA,
         b = NA,
+        s = NA,
         names = c("a", "b"),
         initialize = function(a, b) {
             self$a <- a
             self$b <- b
+            self$s <- b - a + 1
         },
         supp = function() { c(self$a, self$b) },
         properties = function() {
             a <- self$a
             b <- self$b
-            s <- b - a + 1
+            s <- self$s
             list(span=s,
                  probval=1/s,
                  mean=(a + b)/2,
@@ -215,17 +244,16 @@ DiscreteUniform <- R6Class("DiscreteUniform",
                  kurtosis=-(6 * (s^2 + 1))/(5 * (s^2 - 1)),
                  entropy=log(s))
         },
-        pdf = function(x) {
+        pdf = function(x, log=FALSE) {
             a <- self$a
             b <- self$b
-            pv <- 1 / (b - a + 1)
-            ifelse(x >= a & x <= b, pv, 0.0)
-        },
-        logpdf = function(x) {
-            a <- self$a
-            b <- self$b
-            lpv <- -log(b - a + 1)
-            ifelse(x >= a & x <= b, lpv, -Inf)
+            s <- self$s
+            t <- x >= a & x <= b
+            if (log) {
+                ifelse(t, -log(s), -Inf)
+            } else {
+                ifelse(t, 1 / s, 0.0)
+            }
         },
         cdf = function(x) {
             a <- self$a
@@ -247,14 +275,16 @@ Exponential <- R6Class("Exponential",
     public = list(
         names = c("theta"),
         theta = NA,
+        beta = NA,
         initialize = function(s) {
             self$theta <- s
+            self$beta <- 1 / s
         },
         supp = function() { c(0, Inf) },
         properties = function() {
             s <- self$theta
             list(scale=s,
-                 rate=1 / s,
+                 rate=self$beta,
                  mean=s,
                  median=s * log(2),
                  var=s^2,
@@ -262,10 +292,9 @@ Exponential <- R6Class("Exponential",
                  kurtosis=6.0,
                  entropy=1.0 + log(s))
         },
-        pdf = function(x) { dexp(x, 1.0 / self$theta) },
-        logpdf = function(x) { dexp(x, 1.0 / self$theta, log=TRUE) },
-        cdf = function(x) { pexp(x, 1.0 / self$theta) },
-        quan = function(v) { qexp(v, 1.0 / self$theta) }
+        pdf = function(x, log=FALSE) { dexp(x, self$beta, log=log) },
+        cdf = function(x) { pexp(x, self$beta) },
+        quan = function(v) { qexp(v, self$beta) }
     )
 )
 
@@ -293,8 +322,7 @@ FDist <- R6Class("FDist",
                  var = var.num / var.den,
                  skewness = skew.num / skew.den)
         },
-        pdf = function(x) { df(x, self$nu1, self$nu2) },
-        logpdf = function(x) { df(x, self$nu1, self$nu2, log=TRUE) },
+        pdf = function(x, log=FALSE) { df(x, self$nu1, self$nu2, log=log) },
         cdf = function(x) { pf(x, self$nu1, self$nu2) },
         quan = function(v) { qf(v, self$nu1, self$nu2) }
     )
@@ -308,9 +336,11 @@ Gammad <- R6Class("Gammad",
         names = c("alpha", "theta"),
         alpha = NA,
         theta = NA,
+        beta = NA,
         initialize = function(a, s) {
             self$alpha <- a
             self$theta <- s
+            self$beta <- 1 / s
         },
         supp = function() { c(0, Inf) },
         properties = function() {
@@ -327,10 +357,9 @@ Gammad <- R6Class("Gammad",
                  entropy=a + log(s) + lgamma(a) + (1 - a) * digamma(a)
             )
         },
-        pdf = function(x) { dgamma(x, self$alpha, 1 / self$theta) },
-        logpdf = function(x) { dgamma(x, self$alpha, 1 / self$theta, log=TRUE ) },
-        cdf = function(x) { pgamma(x, self$alpha, 1 / self$theta) },
-        quan = function(v) { qgamma(v, self$alpha, 1 / self$theta) }
+        pdf = function(x, log=FALSE) { dgamma(x, self$alpha, self$beta, log=log) },
+        cdf = function(x) { pgamma(x, self$alpha, self$beta) },
+        quan = function(v) { qgamma(v, self$alpha, self$beta) }
     )
 )
 
@@ -355,8 +384,7 @@ Geometric <- R6Class("Geometric",
                  kurtosis=6 + p^2/(1-p),
                  entropy=-((1-p)*log2(1-p) + p * log2(p))/p)
         },
-        pdf = function(x) { dgeom(x, self$p) },
-        logpdf = function(x) { dgeom(x, self$p, log=TRUE) },
+        pdf = function(x, log=FALSE) { dgeom(x, self$p, log=log) },
         cdf = function(x) { pgeom(x, self$p) },
         quan = function(v){ qgeom(v, self$p) }
     )
@@ -390,7 +418,6 @@ Hypergeometric <- R6Class("Hypergeometric",
             var.val  <- n * (K / N) * ((N-K) / N) * ((N - n) / (N - 1))
             skew.val <- ((N - 2*K) * sqrt(N - 1) * (N - 2*n)) /
                 (sqrt(n * K * (N - K) * (N - n)) * (N - 2))
-
             kurt.num <- (N-1) * N^2 * (N * (N+1)- 6 * K * (N-K) - 6 * n * (N-n)) +
                 6 * n * K * (N-K) * (N-n) * (5*N-6)
             kurt.den <- n * K * (N - K) * (N - n) * (N - 2) * (N - 3)
@@ -400,18 +427,9 @@ Hypergeometric <- R6Class("Hypergeometric",
                  skewness=skew.val,
                  kurtosis=kurt.val)
         },
-        pdf = function(x){
-            dhyper(x, self$ns, self$nf, self$n)
-        },
-        logpdf = function(x){
-            dhyper(x, self$ns, self$nf, self$n, log=TRUE)
-        },
-        cdf = function(x){
-            phyper(x, self$ns, self$nf, self$n)
-        },
-        quan = function(v){
-            qhyper(v, self$ns, self$nf, self$n)
-        }
+        pdf = function(x, log=FALSE){ dhyper(x, self$ns, self$nf, self$n, log=log) },
+        cdf = function(x){ phyper(x, self$ns, self$nf, self$n) },
+        quan = function(v){ qhyper(v, self$ns, self$nf, self$n) }
     )
 )
 
@@ -438,8 +456,7 @@ NegativeBinomial <- R6Class("NegativeBinomial",
                  skewness=(1 + p) / sqrt(p * r),
                  kurtosis=6 / r + (1-p)^2 / (p*r))
         },
-        pdf = function(x){ dnbinom(x, self$r, self$p)},
-        logpdf = function(x) { dnbinom(x, self$r, self$p, log=TRUE)},
+        pdf = function(x, log=FALSE){ dnbinom(x, self$r, self$p, log=log)},
         cdf = function(x) { pnbinom(x, self$r, self$p) },
         quan = function(v) { qnbinom(v, self$r, self$p) }
     )
@@ -469,8 +486,7 @@ Normal <- R6Class("Normal",
                  kurtosis=0,
                  entropy=(log(2 * pi) + 1 + log(s^2))/2)
         },
-        pdf = function(x) { dnorm(x, self$mu, self$sigma) },
-        logpdf = function(x) { dnorm(x, self$mu, self$sigma, log=TRUE) },
+        pdf = function(x, log=FALSE) { dnorm(x, self$mu, self$sigma, log=log) },
         cdf = function(x) { pnorm(x, self$mu, self$sigma) },
         quan = function(v) { qnorm(v, self$mu, self$sigma ) }
     )
@@ -495,8 +511,7 @@ Poisson <- R6Class("Poisson",
                  skewness=1/sqrt(lam),
                  kurtosis=1/lam)
         },
-        pdf = function(x) { dpois(x, self$lambda) },
-        logpdf = function(x){ dpois(x, self$lambda, log=TRUE) },
+        pdf = function(x, log=FALSE) { dpois(x, self$lambda, log=log) },
         cdf = function(x){ ppois(x, self$lambda) },
         quan = function(v){ qpois(v, self$lambda) }
     )
@@ -528,8 +543,7 @@ TDist <- R6Class("TDist",
                             ifelse(nu > 2, Inf, NaN)),
                  entropy = ent.val)
         },
-        pdf = function(x) { dt(x, self$nu) },
-        logpdf = function(x) { dt(x, self$nu, log=TRUE) },
+        pdf = function(x, log=FALSE) { dt(x, self$nu, log=log) },
         cdf = function(x) { pt(x, self$nu) },
         quan = function(v) { qt(v, self$nu) }
     )
@@ -560,8 +574,7 @@ Uniform <- R6Class("Uniform",
                  kurtosis = -6 / 5,
                  entropy = log(b - a))
         },
-        pdf = function(x) { dunif(x, self$a, self$b) },
-        logpdf = function(x) { dunif(x, self$a, self$b, log=TRUE) },
+        pdf = function(x, log=FALSE) { dunif(x, self$a, self$b, log=log) },
         cdf = function(x) { punif(x, self$a, self$b) },
         quan = function(v) { qunif(v, self$a, self$b) }
     )
@@ -592,8 +605,7 @@ Weibull <- R6Class("Weibull",
                  var = var.val,
                  entropy = gv * (1 - 1 / a) + log(s / a) + 1)
         },
-        pdf = function(x) { dweibull(x, self$alpha, self$theta) },
-        logpdf = function(x) { dweibull(x, self$alpha, self$theta, log=TRUE) },
+        pdf = function(x, log=FALSE) { dweibull(x, self$alpha, self$theta, log=log) },
         cdf = function(x) { pweibull(x, self$alpha, self$theta) },
         quan = function(v) { qweibull(v, self$alpha, self$theta) }
     )

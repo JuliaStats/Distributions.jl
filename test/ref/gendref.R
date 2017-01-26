@@ -57,7 +57,7 @@ eval.points <- function(distr) {
     xs <- eval.samples(distr)
     list(x  = xs,
          pd = distr$pdf(xs),
-         lp = distr$logpdf(xs),
+         lp = distr$pdf(xs, log=TRUE),
          cp = distr$cdf(xs))
 }
 
@@ -239,5 +239,5 @@ do.main <- function(lstname) {
     cat("\n")
 }
 
-# do.main("discrete_test")
+do.main("discrete_test")
 do.main("continuous_test")
