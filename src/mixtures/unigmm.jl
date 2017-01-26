@@ -15,6 +15,8 @@ immutable UnivariateGMM <: UnivariateMixture{Continuous,Normal}
     end
 end
 
+@distr_support UnivariateGMM -Inf Inf
+
 ncomponents(d::UnivariateGMM) = d.K
 
 component(d::UnivariateGMM, k::Int) = Normal(d.means[k], d.stds[k])
@@ -24,6 +26,8 @@ probs(d::UnivariateGMM) = probs(d.prior)
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
 rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+
+params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
 immutable UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
     means::Vector{Float64}

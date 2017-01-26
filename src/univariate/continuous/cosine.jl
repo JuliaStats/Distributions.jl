@@ -3,17 +3,28 @@
 # Ref: http://en.wikipedia.org/wiki/Raised_cosine_distribution
 #
 
-immutable Cosine <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
+immutable Cosine{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
 
-    Cosine(μ::Real, σ::Real) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
-    Cosine(μ::Real) = new(μ, 1.0)
-    Cosine() = new(0.0, 1.0)
+    Cosine(μ::T, σ::T) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
 end
+
+Cosine{T<:Real}(μ::T, σ::T) = Cosine{T}(μ, σ)
+Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
+Cosine(μ::Integer, σ::Integer) = Cosine(Float64(μ), Float64(σ))
+Cosine(μ::Real) = Cosine(μ, 1.0)
+Cosine() = Cosine(0.0, 1.0)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 
+#### Conversions
+function convert{T<:Real}(::Type{Cosine{T}}, μ::Real, σ::Real)
+    Cosine(T(μ), T(σ))
+end
+function convert{T <: Real, S <: Real}(::Type{Cosine{T}}, d::Cosine{S})
+    Cosine(T(d.μ), T(d.σ))
+end
 
 #### Parameters
 
@@ -21,6 +32,7 @@ location(d::Cosine) = d.μ
 scale(d::Cosine) = d.σ
 
 params(d::Cosine) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Cosine{T}) = T
 
 
 #### Statistics
@@ -31,34 +43,36 @@ median(d::Cosine) = d.μ
 
 mode(d::Cosine) = d.μ
 
-var(d::Cosine) = d.σ^2 * 0.13069096604865779  # 0.130... = 1/3 - 2 / π^2
+var{T<:Real}(d::Cosine{T}) = d.σ^2 * (1//3 - 2/T(π)^2)
 
-skewness(d::Cosine) = 0.0
+skewness{T<:Real}(d::Cosine{T}) = zero(T)
 
-kurtosis(d::Cosine) = -0.59376287559828102362
+kurtosis{T<:Real}(d::Cosine{T}) = 6*(90-T(pi))/(5*(T(π)^2-6)^2)
 
 
 #### Evaluation
 
-function pdf(d::Cosine, x::Float64)
+function pdf{T<:Real}(d::Cosine{T}, x::Real)
     if insupport(d, x)
         z = (x - d.μ) / d.σ
-        return (1.0 + cospi(z)) / (2 * d.σ)
+        return (1 + cospi(z)) / (2d.σ)
     else
-        return 0.0
+        return zero(T)
     end
 end
 
-logpdf(d::Cosine, x::Float64) = insupport(d, x) ? log(pdf(d, x)) : -Inf
+function logpdf{T<:Real}(d::Cosine{T}, x::Real)
+    insupport(d, x) ? log(pdf(d, x)) : -T(Inf)
+end
 
-function cdf(d::Cosine, x::Float64)
+function cdf(d::Cosine, x::Real)
     z = (x - d.μ) / d.σ
-    0.5 * (1.0 + z + sinpi(z) * invπ)
+    (1 + z + sinpi(z) * invπ) / 2
 end
 
-function ccdf(d::Cosine, x::Float64)
+function ccdf(d::Cosine, x::Real)
     nz = (d.μ - x) / d.σ
-    0.5 * (1.0 + nz + sinpi(nz) * invπ)
+    (1 + nz + sinpi(nz) * invπ) / 2
 end
 
-quantile(d::Cosine, p::Float64) = quantile_bisect(d, p)
+quantile(d::Cosine, p::Real) = quantile_bisect(d, p)

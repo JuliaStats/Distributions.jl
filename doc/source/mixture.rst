@@ -85,7 +85,7 @@ A mixture model can be constructed using the constructor ``MixtureModel``. Parti
     MixtureModel(Normal[
        Normal(-2.0, 1.2),
        Normal(0.0, 1.0),
-       Normal(3.0, 2.5)]
+       Normal(3.0, 2.5)])
 
     # Since all components have the same type, we can use a simplified syntax
     MixtureModel(Normal, [(-2.0, 1.2), (0.0, 1.0), (3.0, 2.5)], [0.2, 0.5, 0.3])
@@ -154,6 +154,6 @@ In addition, for all subtypes of ``UnivariateMixture`` and ``MultivariateMixture
 Estimation
 -----------
 
-There are a number of methods for estimating of mixture models from data, and this problem remains an open research topic. This package does not provide facilities for estimaing mixture models. One can resort to other packages, *e.g.* *MixtureModels.jl*, for this purpose.
+There are a number of methods for estimating of mixture models from data, and this problem remains an open research topic. This package does not provide facilities for estimaing mixture models. One can resort to other packages, *e.g.* [*GaussianMixtures.jl*](https://github.com/davidavdav/GaussianMixtures.jl), for this purpose.
 
 

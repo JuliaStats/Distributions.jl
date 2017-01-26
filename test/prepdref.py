@@ -111,14 +111,14 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		n = int(get(args, 0) or 1)
 		p = get(args, 1) or 0.5
-		return (binom(n, p), (0, n), 
+		return (binom(n, p), (0, n),
 			{"succprob" : p, "failprob" : 1.0 - p, "ntrials" : n})
 
 	elif dname == "Cauchy":
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (cauchy(l, s), (-inf, inf), 
+		return (cauchy(l, s), (-inf, inf),
 			{"location" : l, "scale" : s})
 
 	elif dname == "Chi":
@@ -135,7 +135,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (cosine(loc=l, scale=s/pi), (l-s, l+s), 
+		return (cosine(loc=l, scale=s/pi), (l-s, l+s),
 			{"location":l, "scale":s})
 
 	elif dname == "DiscreteUniform":
@@ -147,14 +147,14 @@ def get_dinfo(dname, args):
 		else:
 			a, b = int(args[0]), int(args[1])
 		sp = b - a + 1
-		return (randint(a, b+1), (a, b), 
+		return (randint(a, b+1), (a, b),
 			{"span" : sp, "probval" : 1.0 / sp})
 
 	elif dname == "Erlang":
 		assert len(args) <= 2
 		a = get(args, 0) or 1
 		s = get(args, 1) or 1.0
-		return (erlang(a, scale=s), (0, inf), 
+		return (erlang(a, scale=s), (0, inf),
 			{"shape" : a, "scale" : s})
 
 	elif dname == "Exponential":
@@ -171,14 +171,21 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (gamma(a, scale=s), (0, inf), 
+		return (gamma(a, scale=s), (0, inf),
 			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
 	elif dname == "GeneralizedPareto":
 		assert len(args) <= 3
-		a = get(args, 0) or 1.0
-		s = get(args, 1) or 1.0
-		z = get(args, 2) or 0.0
+		if len(args) == 0:
+			z, s, a = 0.0, 1.0, 1.0
+		elif len(args) == 2:
+			z = 0.0
+			s = args[0]
+			a = args[1]
+		else:
+			z = get(args, 0)
+			s = get(args, 1)
+			a = get(args, 2)
 		maxbnd = inf
 		if a < 0.0:
 			maxbnd = z - s / a
@@ -188,27 +195,27 @@ def get_dinfo(dname, args):
 	elif dname == "Geometric":
 		assert len(args) <= 1
 		p = get(args, 0) or 0.5
-		return (geom(p), (0, inf), 
+		return (geom(p), (0, inf),
 			{"succprob" : p, "failprob" : 1.0 - p})
 
 	elif dname == "Gumbel":
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (gumbel_r(l, s), (-inf, inf), 
+		return (gumbel_r(l, s), (-inf, inf),
 			{"location" : l, "scale" : s})
 
 	elif dname == "Hypergeometric":
 		assert len(args) == 3
 		ns, nf, n = [int(t) for t in args]
-		return (hypergeom(ns + nf, ns, n), 
+		return (hypergeom(ns + nf, ns, n),
 			(max(n - nf, 0), min(ns, n)), {})
 
 	elif dname == "InverseGamma":
 		assert len(args) <= 2
 		a = get(args, 0) or 1.0
 		s = get(args, 1) or 1.0
-		return (invgamma(a, scale=s), (0, inf), 
+		return (invgamma(a, scale=s), (0, inf),
 			{"shape" : a, "scale" : s, "rate" : 1.0 / s})
 
 	elif dname == "InverseGaussian":
@@ -241,7 +248,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		r = get(args, 0) or 1
 		p = get(args, 1) or 0.5
-		return (nbinom(r, p), (0, inf), 
+		return (nbinom(r, p), (0, inf),
 			{"succprob" : p, "failprob" : 1.0 - p})
 
 	elif dname == "Normal":
@@ -251,9 +258,9 @@ def get_dinfo(dname, args):
 		return (norm(mu, sig), (-inf, inf), {})
 
 	elif dname == "NormalCanon":
-		assert len(args) == 2
-		h = args[0]
-		J = args[1]
+		assert len(args) <= 2
+		h = get(args, 0) or 0.0
+		J = get(args, 1) or 1.0
 		return (norm(h/J, sqrt(1.0/J)), (-inf, inf), {})
 
 	elif dname == "Pareto":
@@ -291,7 +298,7 @@ def get_dinfo(dname, args):
 		assert len(args) <= 2
 		l = get(args, 0) or 0.0
 		s = get(args, 1) or 1.0
-		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s), 
+		return (triang(0.5, loc=l-s, scale=s*2.0), (l-s, l+s),
 			{"location" : l, "scale" : s})
 
 	elif dname == "TDist":
@@ -313,7 +320,7 @@ def get_dinfo(dname, args):
 		a = args[0]
 		b = args[1]
 		c = get(args, 2) or 0.5 * (a + b)
-		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b), 
+		return (triang((c - a) / (b - a), loc=a, scale=b-a), (a, b),
 			{"mode" : c})
 
 	elif dname == "Uniform":
@@ -325,6 +332,17 @@ def get_dinfo(dname, args):
 		else:
 			a, b = args
 		return (uniform(a, b-a), (a, b), {"location" : a, "scale" : b - a})
+
+	elif dname == "VonMises":
+		assert len(args) <= 2
+		if len(args) == 0:
+			m, k = 0.0, 1.0
+		elif len(args) == 1:
+			m, k = 0.0, get(args, 0)
+		else:
+			m = get(args, 0)
+			k = get(args, 1)
+		return (vonmises(k, loc=m), (m - pi, m + pi), {})
 
 	elif dname == "Weibull":
 		assert len(args) <= 2
@@ -359,12 +377,12 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 			"mean" : json_num(d.mean()),
 			"var" : json_num(d.var()),
 			"entropy" : np.float64(d.entropy()),
-			"median" : d.median(), 
-			"q10" : d.ppf(0.10), 
-			"q25" : d.ppf(0.25), 
-			"q50" : d.ppf(0.50), 
-			"q75" : d.ppf(0.75), 
-			"q90" : d.ppf(0.90)} 
+			"median" : d.median(),
+			"q10" : d.ppf(0.10),
+			"q25" : d.ppf(0.25),
+			"q50" : d.ppf(0.50),
+			"q75" : d.ppf(0.75),
+			"q90" : d.ppf(0.90)}
 	except IndexError:
 		# Poisson(0.0) will throw IndexError exception for entropy()
 		if distr_name == "Poisson" and pdict["rate"] == 0.0:
@@ -375,12 +393,29 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 			"mean" : json_num(0.0),
 			"var" : json_num(0.0),
 			"entropy" : json_num(0.0),
-			"median" : json_num(0.0), 
-			"q10" : json_num(0.0), 
-			"q25" : json_num(0.0), 
+			"median" : json_num(0.0),
+			"q10" : json_num(0.0),
+			"q25" : json_num(0.0),
 			"q50" : json_num(0.0),
 			"q75" : json_num(0.0),
 			"q90" : json_num(0.0)}
+
+		# Hypergeometric(3, 2, 0) will throw IndexError exception for entropy()
+		elif distr_name == "Hypergeometric" and r_min == r_max == 0:
+			jdict = {"dtype" : distr_name,
+			"params" : pdict,
+			"minimum" : json_num(r_min),
+			"maximum" : json_num(r_max),
+			"mean" : json_num(0.0),
+			"var" : json_num(0.0),
+			"entropy" : json_num(0.0),
+			"median" : json_num(0.0),
+			"q10" : json_num(0.0),
+			"q25" : json_num(0.0),
+			"q50" : json_num(0.0),
+			"q75" : json_num(0.0),
+			"q90" : json_num(0.0)}
+
 		else:
 			raise
 	if is_discrete:
@@ -414,6 +449,9 @@ def make_json(ex, c, distr_name, args, d, mm, pdict):
 	elif distr_name == "Poisson" and pdict["rate"] == 0.0:
 		jdict["points"] = [{"x" : 0, "logpdf" : 0.0, "cdf" : 1.0}]
 
+	elif distr_name == "Hypergeometric" and r_min == r_max == 0:
+		jdict["points"] = [{"x" : 0, "logpdf" : 0.0, "cdf" : 1.0}]
+
 	# output
 	return [ex, jdict]
 
@@ -441,5 +479,3 @@ def do_main(c):
 if __name__ == "__main__":
 	do_main("discrete")
 	do_main("continuous")
-
-

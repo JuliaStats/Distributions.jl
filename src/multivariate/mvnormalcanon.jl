@@ -2,50 +2,71 @@
 
 ### Generic types
 
-immutable MvNormalCanon{P<:AbstractPDMat,V<:Union(Vector{Float64},ZeroVector{Float64})} <: AbstractMvNormal
+immutable MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-typealias FullNormalCanon MvNormalCanon{PDMat,Vector{Float64}} 
-typealias DiagNormalCanon MvNormalCanon{PDiagMat,Vector{Float64}} 
-typealias IsoNormalCanon  MvNormalCanon{ScalMat,Vector{Float64}}
+typealias FullNormalCanon MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+typealias DiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+typealias IsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
-typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,ZeroVector{Float64}} 
-typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat,ZeroVector{Float64}} 
-typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat,ZeroVector{Float64}}
+typealias ZeroMeanFullNormalCanon MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanDiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+typealias ZeroMeanIsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},ZeroVector{Float64}}
 
 
 ### Constructors
 
-function MvNormalCanon{P<:AbstractPDMat}(μ::Vector{Float64}, h::Vector{Float64}, J::P) 
+function MvNormalCanon{T<:Real}(μ::Vector{T}, h::Vector{T}, J::AbstractPDMat{T})
     length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{P,Vector{Float64}}(μ, h, J)
+    MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
 end
 
-function MvNormalCanon{P<:AbstractPDMat}(J::P) 
-    z = ZeroVector(Float64, dim(J))
-    MvNormalCanon{P,ZeroVector{Float64}}(z, z, J)
+function MvNormalCanon{T<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{T}, J::P)
+    R = promote_type(T, eltype(J))
+    MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-function MvNormalCanon{P<:AbstractPDMat}(h::Vector{Float64}, J::P) 
+function MvNormalCanon{T<:Real, S<:Real, P<:AbstractPDMat}(μ::Vector{T}, h::Vector{S}, J::P)
+    R = Base.promote_eltype(μ, h, J)
+    MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
+end
+
+function MvNormalCanon{P<:AbstractPDMat}(J::P)
+    z = ZeroVector(eltype(J), dim(J))
+    MvNormalCanon{eltype(J),P,ZeroVector{eltype(J)}}(z, z, J)
+end
+
+function MvNormalCanon{T<:Real, P<:AbstractPDMat}(h::Vector{T}, J::P)
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{P,Vector{Float64}}(J \ h, h, J)
+    R = Base.promote_eltype(h, J)
+    hh, JJ = convert(AbstractArray{R}, h), convert(AbstractArray{R}, J)
+    MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
-MvNormalCanon(h::Vector{Float64}, J::Matrix{Float64}) = MvNormalCanon(h, PDMat(J))
-MvNormalCanon(h::Vector{Float64}, prec::Vector{Float64}) = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon(h::Vector{Float64}, prec::Float64) = MvNormalCanon(h, ScalMat(length(h), prec)) 
+MvNormalCanon{T<:Real}(h::Vector{T}, J::Matrix{T}) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec::Vector{T}) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon{T<:Real}(h::Vector{T}, prec::T) = MvNormalCanon(h, ScalMat(length(h), prec))
 
-MvNormalCanon(J::Matrix{Float64}) = MvNormalCanon(PDMat(J))
-MvNormalCanon(prec::Vector{Float64}) = MvNormalCanon(PDiagMat(prec))
-MvNormalCanon(d::Int, prec::Float64) = MvNormalCanon(ScalMat(d, prec)) 
+function MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, J::VecOrMat{S})
+    R = Base.promote_eltype(h, J)
+    MvNormalCanon(convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
+end
+function MvNormalCanon{T<:Real, S<:Real}(h::Vector{T}, prec::S)
+    R = Base.promote_eltype(h, prec)
+    MvNormalCanon(convert(AbstractArray{R}, h), R(prec))
+end
+
+MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
+MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
+MvNormalCanon(d::Int, prec) = MvNormalCanon(ScalMat(d, prec))
 
 
 ### Show
 
-distrname(d::IsoNormalCanon) = "IsoNormalCanon"  
+distrname(d::IsoNormalCanon) = "IsoNormalCanon"
 distrname(d::DiagNormalCanon) = "DiagNormalCanon"
 distrname(d::FullNormalCanon) = "FullNormalCanon"
 
@@ -53,18 +74,29 @@ distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
 distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
+### Conversion
+function convert{T<:Real}(::Type{MvNormalCanon{T}}, d::MvNormalCanon)
+    MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
+end
+function convert{T<:Real,V<:Union{Vector, ZeroVector}}(::Type{MvNormalCanon{T}}, μ::V, h::V, J::AbstractPDMat)
+    MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
+end
+
 ### conversion between conventional form and canonical form
 
-meanform{C,V}(d::MvNormalCanon{C,V}) = MvNormal{C,V}(d.μ, inv(d.J))
+meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))
+# meanform{C, T<:Real}(d::MvNormalCanon{T,C,Vector{T}}) = MvNormal(d.μ, inv(d.J))
+# meanform{C, T<:Real}(d::MvNormalCanon{T,C,ZeroVector{T}}) = MvNormal(inv(d.J))
 
-canonform{C}(d::MvNormal{C,Vector{Float64}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
-canonform{C}(d::MvNormal{C,ZeroVector{Float64}}) = MvNormalCanon(inv(d.Σ))
-
+canonform{C, T<:Real}(d::MvNormal{T,C,Vector{T}}) = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
+canonform{C, T<:Real}(d::MvNormal{T,C,ZeroVector{T}}) = MvNormalCanon(inv(d.Σ))
 
 ### Basic statistics
 
 length(d::MvNormalCanon) = length(d.μ)
-mean(d::MvNormalCanon) = convert(Vector{Float64}, d.μ)
+mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
+params(d::MvNormalCanon) = (d.μ, d.h, d.J)
+@inline partype{T<:Real}(d::MvNormalCanon{T}) = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = full(inv(d.J))
@@ -74,16 +106,14 @@ logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 ### Evaluation
 
-sqmahal(d::MvNormalCanon, x::DenseVector{Float64}) = quad(d.J, x - d.μ)
-sqmahal!(r::DenseVector{Float64}, d::MvNormalCanon, x::DenseMatrix{Float64}) = quad!(r, d.J, x .- d.μ)
+sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, x - d.μ)
+sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J, x .- d.μ)
 
 
 # Sampling (for GenericMvNormal)
 
-unwhiten_winv!(J::AbstractPDMat, x::DenseVecOrMat) = unwhiten!(inv(J), x)
-unwhiten_winv!(J::PDiagMat, x::DenseVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::ScalMat, x::DenseVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
+unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
-_rand!(d::MvNormalCanon, x::DenseVecOrMat) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)
-
-
+_rand!(d::MvNormalCanon, x::AbstractMatrix) = add!(unwhiten_winv!(d.J, randn!(x)), d.μ)

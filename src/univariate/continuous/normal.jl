@@ -1,13 +1,45 @@
-immutable Normal <: ContinuousUnivariateDistribution
-    μ::Float64
-    σ::Float64
+doc"""
+    Normal(μ,σ)
 
-    Normal(μ::Real, σ::Real) = (@check_args(Normal, σ > zero(σ)); new(μ, σ))
-    Normal(μ::Real) = Normal(μ, 1.0)
-    Normal() = Normal(0.0, 1.0)
+The *Normal distribution* with mean `μ` and standard deviation `σ` has probability density function
+
+$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}}
+\exp \left( - \frac{(x - \mu)^2}{2 \sigma^2} \right)$
+
+```julia
+Normal()          # standard Normal distribution with zero mean and unit variance
+Normal(mu)        # Normal distribution with mean mu and unit variance
+Normal(mu, sig)   # Normal distribution with mean mu and variance sig^2
+
+params(d)         # Get the parameters, i.e. (mu, sig)
+mean(d)           # Get the mean, i.e. mu
+std(d)            # Get the standard deviation, i.e. sig
+```
+
+External links
+
+* [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
+
+"""
+immutable Normal{T<:Real} <: ContinuousUnivariateDistribution
+    μ::T
+    σ::T
+
+    Normal(μ, σ) = (@check_args(Normal, σ > zero(σ)); new(μ, σ))
 end
 
+#### Outer constructors
+Normal{T<:Real}(μ::T, σ::T) = Normal{T}(μ, σ)
+Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
+Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
+Normal(μ::Real) = Normal(μ, 1.0)
+Normal() = Normal(0.0, 1.0)
+
 typealias Gaussian Normal
+
+# #### Conversions
+convert{T <: Real, S <: Real}(::Type{Normal{T}}, μ::S, σ::S) = Normal(T(μ), T(σ))
+convert{T <: Real, S <: Real}(::Type{Normal{T}}, d::Normal{S}) = Normal(T(d.μ), T(d.σ))
 
 @distr_support Normal -Inf Inf
 
@@ -15,6 +47,7 @@ typealias Gaussian Normal
 #### Parameters
 
 params(d::Normal) = (d.μ, d.σ)
+@inline partype{T<:Real}(d::Normal{T}) = T
 
 
 #### Statistics
@@ -25,20 +58,20 @@ mode(d::Normal) = d.μ
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
-skewness(d::Normal) = 0.0
-kurtosis(d::Normal) = 0.0
+skewness{T<:Real}(d::Normal{T}) = zero(T)
+kurtosis{T<:Real}(d::Normal{T}) = zero(T)
 
-entropy(d::Normal) = 0.5 * (log2π + 1.0) + log(d.σ)
+entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 
 #### Evaluation
 
 @_delegate_statsfuns Normal norm μ σ
 
-gradlogpdf(d::Normal, x::Float64) = (d.μ - x) / d.σ^2
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + 0.5 * d.σ^2 * t^2)
-cf(d::Normal, t::Real) = exp(im * t * d.μ - 0.5 * d.σ^2 * t^2)
+mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2/2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2/2 * t^2)
 
 
 #### Sampling
@@ -134,7 +167,7 @@ immutable NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)
-        σ > 0.0 || throw(ArgumentError("σ must be a positive value."))
+        σ > 0 || throw(ArgumentError("σ must be a positive value."))
         new(σ)
     end
 end
@@ -146,7 +179,7 @@ immutable NormalKnownSigmaStats <: SufficientStats
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T})
-    @compat NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
+    NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
 function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T})

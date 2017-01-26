@@ -1,22 +1,23 @@
-VERSION >= v"0.4.0-dev+6521" && __precompile__(true)
+__precompile__(true)
 
 module Distributions
 
-using ArrayViews
 using PDMats
 using StatsFuns
 using StatsBase
 using Compat
 
+import QuadGK.quadgk
+import Compat.view
 import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -, .+, .-
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
-import StatsBase: RandIntSampler, loglikelihood
+import StatsBase: RandIntSampler, loglikelihood, dof, span
 import PDMats: dim, PDMat, invquad
 
 export
@@ -53,6 +54,7 @@ export
     Arcsine,
     Bernoulli,
     Beta,
+    BetaBinomial,
     BetaPrime,
     Binomial,
     Biweight,
@@ -64,6 +66,7 @@ export
     DiagNormal,
     DiagNormalCanon,
     Dirichlet,
+    DirichletMultinomial,
     DiscreteUniform,
     DoubleExponential,
     EdgeworthMean,
@@ -80,6 +83,7 @@ export
     FullNormalCanon,
     Gamma,
     GeneralizedPareto,
+    GeneralizedExtremeValue,
     Geometric,
     Gumbel,
     Hypergeometric,
@@ -98,6 +102,7 @@ export
     MixtureModel,
     Multinomial,
     MultivariateNormal,
+    MvLogNormal,
     MvNormal,
     MvNormalCanon,
     MvNormalKnownCov,
@@ -110,10 +115,7 @@ export
     NoncentralT,
     Normal,
     NormalCanon,
-    NormalGamma,
-    NormalInverseGamma,
-    NormalInverseWishart,
-    NormalWishart,
+    NormalInverseGaussian,
     Pareto,
     Poisson,
     PoissonBinomial,
@@ -150,13 +152,8 @@ export
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
     cgf,                # cumulant generating function
-    circmean,           # mean of circular distribution
-    circmedian,         # median of circular distribution
-    circmode,           # mode of circular distribution
-    circvar,            # variance of circular distribution
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     cumulant,           # cumulants of distribution
-    complete,           # turn an incomplete formulation into a complete distribution
     component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
@@ -170,8 +167,8 @@ export
     fit_mle,            # fit a distribution to data using MLE
     fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
     fit_map,            # fit a distribution to data using MAP
+    fit_map!,           # fit a distribution to data using MAP (inplace update to initial guess)
     freecumulant,       # free cumulants of distribution
-    gmvnormal,          # a generic function to construct multivariate normal distributions
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -194,17 +191,12 @@ export
     logpdf!,            # evaluate log pdf to provided storage
     logpmf,             # log probability mass
     logpmf!,            # evaluate log pmf to provided storage
-    posterior,          # get posterior distribution given prior and observed data
-    posterior_canon,    # get the canonical form of the posterior distribution
-    posterior_mode,     # get the mode of posterior distribution
-    posterior_rand,     # draw samples from the posterior distribution
-    posterior_rand!,
-    posterior_randmodel,
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # inplace evaluation of sqmahal
     location,           # get the location parameter
+    location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
     meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
@@ -219,6 +211,8 @@ export
     ncomponents,        # the number of components in a mixture model
     ntrials,            # the number of trials being performed in the experiment
     params,             # get the tuple of parameters
+    params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
+    partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
     pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
@@ -228,6 +222,7 @@ export
     rate,               # get the rate parameter
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
+    scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
     shape,              # get the shape parameter
     skewness,           # skewness of the distribution
     span,               # the span of the support, e.g. maximum(d) - minimum(d)
@@ -283,5 +278,49 @@ include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
 include("deprecates.jl")
+
+"""
+A Julia package for probability distributions and associated functions.
+
+API overview (major features):
+
+- `d = Dist(parameters...)` creates a distribution instance `d` for some distribution `Dist` (see choices below) with the specified `parameters`
+- `rand(d, sz)` samples from the distribution
+- `pdf(d, x)` and `logpdf(d, x)` compute the probability density or log-probability density of `d` at `x`
+- `cdf(d, x)` and `ccdf(d, x)` compute the (complementary) cumulative distribution function at `x`
+- `quantile(d, p)` is the inverse `cdf` (see also `cquantile`)
+- `mean(d)`, `var(d)`, `std(d)`, `skewness(d)`, `kurtosis(d)` compute moments of `d`
+- `fit(Dist, xs)` generates a distribution of type `Dist` that best fits the samples in `xs`
+
+These represent just a few of the operations supported by this
+package; users are encouraged to refer to the full documentation at
+http://distributionsjl.readthedocs.org/en/latest/ for further
+information.
+
+Supported distributions:
+
+    Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
+    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
+    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
+    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
+    GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
+    InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
+    Logistic, LogNormal, MixtureModel, Multinomial, MultivariateNormal,
+    MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
+    NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
+    NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
+    NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
+    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
+    VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
+    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
+    ZeroMeanFullNormalCanon
+
+"""
+Distributions
 
 end # module

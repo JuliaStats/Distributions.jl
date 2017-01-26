@@ -20,7 +20,7 @@ function show(io::IO, d::Distribution, pnames)
     uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
 end
 
-@compat typealias _NameVal Tuple{Symbol,Any}
+typealias _NameVal Tuple{Symbol,Any}
 
 function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
@@ -32,7 +32,7 @@ function _use_multline_show(d::Distribution, pnames)
     multline = false
     tlen = 0
     for (i, p) in enumerate(pnames)
-        pv = d.(p)
+        pv = getfield(d, p)
         if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
             multline = true
         else
@@ -45,7 +45,10 @@ function _use_multline_show(d::Distribution, pnames)
     end
     return (multline, namevals)
 end
-_use_multline_show(d::Distribution) = _use_multline_show(d, typeof(d).names)
+
+function _use_multline_show(d::Distribution)
+    _use_multline_show(d, fieldnames(typeof(d)))
+end
 
 function show_oneline(io::IO, d::Distribution, namevals)
     print(io, distrname(d))

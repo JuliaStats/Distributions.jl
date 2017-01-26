@@ -1,20 +1,20 @@
-immutable Multinomial <: DiscreteMultivariateDistribution
+immutable Multinomial{T<:Real} <: DiscreteMultivariateDistribution
     n::Int
-    p::Vector{Float64}
+    p::Vector{T}
 
-    function Multinomial(n::Integer, p::Vector{Float64})
-        if n <= 0
-            throw(ArgumentError("n must be a positive integer."))
+    function Multinomial(n::Integer, p::Vector{T})
+        if n < 0
+            throw(ArgumentError("n must be a nonnegative integer."))
         end
         if !isprobvec(p)
             throw(ArgumentError("p = $p is not a probability vector."))
         end
-        @compat new(round(Int, n), p)
+        new(round(Int, n), p)
     end
-
-    @compat Multinomial(n::Integer, p::Vector{Float64}, ::NoArgCheck) = new(round(Int, n), p)
-    @compat Multinomial(n::Integer, k::Integer) = new(round(Int, n), fill(1.0 / k, k))
+    Multinomial(n::Integer, p::Vector{T}, ::NoArgCheck) = new(round(Int, n), p)
 end
+Multinomial{T<:Real}(n::Integer, p::Vector{T}) = Multinomial{T}(n, p)
+Multinomial(n::Integer, k::Integer) = Multinomial{Float64}(round(Int, n), fill(1.0 / k, k))
 
 # Parameters
 
@@ -24,38 +24,42 @@ probs(d::Multinomial) = d.p
 ntrials(d::Multinomial) = d.n
 
 params(d::Multinomial) = (d.n, d.p)
+@inline partype{T<:Real}(d::Multinomial{T}) = T
 
+### Conversions
+convert{T<:Real}(::Type{Multinomial{T}}, d::Multinomial) = Multinomial(d.n, Vector{T}(d.p))
+convert{T<:Real}(::Type{Multinomial{T}}, n, p::Vector) = Multinomial(n, Vector{T}(p))
 
 # Statistics
 
 mean(d::Multinomial) = d.n .* d.p
 
-function var(d::Multinomial) 
+function var{T<:Real}(d::Multinomial{T})
     p = probs(d)
     k = length(p)
     n = ntrials(d)
 
-    v = Array(Float64, k)
+    v = Vector{T}(k)
     for i = 1:k
-        @inbounds pi = p[i]
-        v[i] = n * pi * (1.0 - pi)
+        @inbounds p_i = p[i]
+        v[i] = n * p_i * (1 - p_i)
     end
     v
 end
 
-function cov(d::Multinomial)
+function cov{T<:Real}(d::Multinomial{T})
     p = probs(d)
     k = length(p)
     n = ntrials(d)
 
-    C = Array(Float64, k, k)
+    C = Matrix{T}(k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
             @inbounds C[i,j] = - n * p[i] * pj
         end
 
-        @inbounds C[j,j] = n * pj * (1.0-pj)
+        @inbounds C[j,j] = n * pj * (1-pj)
     end
 
     for j = 1:k-1
@@ -66,24 +70,36 @@ function cov(d::Multinomial)
     C
 end
 
-function mgf(d::Multinomial, t::AbstractVector)
+function mgf{T<:Real}(d::Multinomial{T}, t::AbstractVector)
     p = probs(d)
     n = ntrials(p)
-    s = 0.0
+    s = zero(T)
     for i in 1:length(p)
         s += p[i] * exp(t[i])
     end
     return s^n
 end
 
-function cf(d::Multinomial, t::AbstractVector)
+function cf{T<:Real}(d::Multinomial{T}, t::AbstractVector)
     p = probs(d)
     n = ntrials(d)
-    s = 0.0 + 0.0im
+    s = zero(Complex{T})
     for i in 1:length(p)
         s += p[i] * exp(im * t[i])
     end
     return s^n
+end
+
+function entropy(d::Multinomial)
+    n, p = params(d)
+    s = -lgamma(n+1) + n*entropy(p)
+    for pr in p
+        b = Binomial(n, pr)
+        for x in 0:n
+            s += pdf(b, x) * lgamma(x+1)
+        end
+    end
+    return s
 end
 
 
@@ -106,16 +122,18 @@ end
 function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
     p = probs(d)
     n = ntrials(d)
-    s = lgamma(n + 1.0)
-    t = 0
+    S = eltype(p)
+    R = promote_type(T, S)
+    s = R(lgamma(n + 1))
+    t = zero(T)
     for i = 1:length(p)
         @inbounds xi = x[i]
-        @inbounds pi = p[i]
+        @inbounds p_i = p[i]
         t += xi
-        s -= lgamma(xi + 1.0)
-        @inbounds s += xi * log(pi)
+        s -= R(lgamma(xi + 1))
+        @inbounds s += xi * log(p_i)
     end
-    return ifelse(t == n, s, -Inf)::Float64
+    return ifelse(t == n, s, -R(Inf))
 end
 
 # Sampling
@@ -132,7 +150,7 @@ immutable MultinomialStats <: SufficientStats
     scnts::Vector{Float64}  # sum of counts
     tw::Float64  # total sample weight
 
-    @compat MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, Float64(tw))
+    MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, Float64(tw))
 end
 
 function suffstats{T<:Real}(::Type{Multinomial}, x::Matrix{T})
@@ -195,4 +213,3 @@ function fit_mle{T<:Real}(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64})
     ss = suffstats(Multinomial, x, w)
     Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
 end
-

@@ -3,39 +3,58 @@
 #   following the Wikipedia parameterization
 #
 
-immutable Wishart{ST<:AbstractPDMat} <: ContinuousMatrixDistribution
-    df::Float64     # degree of freedom
+immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+    df::T     # degree of freedom
     S::ST           # the scale matrix
-    c0::Float64     # the logarithm of normalizing constant in pdf
+    c0::T     # the logarithm of normalizing constant in pdf
 end
 
 #### Constructors
 
-function Wishart{ST<:AbstractPDMat}(df::Real, S::ST)
+function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
     p = dim(S)
-    df > p - 1 || error("df should be greater than dim - 1.")
-    Wishart{ST}(df, S, _wishart_c0(df, S))
+    df > p - 1 || error("dpf should be greater than dim - 1.")
+    c0 = _wishart_c0(df, S)
+    R = Base.promote_eltype(T, c0)
+    prom_S = convert(AbstractArray{T}, S)
+    Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
 end
 
-Wishart(df::Real, S::Matrix{Float64}) = Wishart(df, PDMat(S))
+function Wishart(df::Real, S::AbstractPDMat)
+    T = Base.promote_eltype(df, S)
+    Wishart(T(df), convert(AbstractArray{T}, S))
+end
+
+Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
 Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
-function _wishart_c0(df::Float64, S::AbstractPDMat)
+function _wishart_c0(df::Real, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
-    h_df * (logdet(S) + p * logtwo) + logmvgamma(p, h_df)
+    h_df * (logdet(S) + p * typeof(df)(logtwo)) + logmvgamma(p, h_df)
 end
 
 
 #### Properties
 
-insupport(::Type{Wishart}, X::Matrix{Float64}) = isposdef(X)
-insupport(d::Wishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
+insupport(::Type{Wishart}, X::Matrix) = isposdef(X)
+insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
+params(d::Wishart) = (d.df, d.S, d.c0)
+@inline partype{T<:Real}(d::Wishart{T}) = T
 
+### Conversion
+function convert{T<:Real}(::Type{Wishart{T}}, d::Wishart)
+    P = AbstractMatrix{T}(d.S)
+    Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
+end
+function convert{T<:Real}(::Type{Wishart{T}}, df, S::AbstractPDMat, c0)
+    P = AbstractMatrix{T}(S)
+    Wishart{T, typeof(P)}(T(df), P, T(c0))
+end
 
 #### Show
 
@@ -74,14 +93,12 @@ end
 
 #### Evaluation
 
-function _logpdf(d::Wishart, X::DenseMatrix{Float64})
+function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholfact(X)
     0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
 end
-
-_logpdf{T<:Real}(d::Wishart, X::DenseMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 #### Sampling
 
@@ -90,7 +107,7 @@ function rand(d::Wishart)
     A_mul_Bt(Z, Z)
 end
 
-function _wishart_genA(p::Int, df::Float64)
+function _wishart_genA(p::Int, df::Real)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with

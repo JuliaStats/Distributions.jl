@@ -21,8 +21,8 @@ for p in Vector{Float64}[
         c += p[i]
         @test pdf(d, i) == p[i]
         @test logpdf(d, i) == log(p[i])
-        @test_approx_eq cdf(d, i) c
-        @test_approx_eq ccdf(d, i) 1.0 - c
+        @test cdf(d, i)  ≈ c
+        @test ccdf(d, i) ≈ 1.0 - c
     end
 
     @test pdf(d, 0) == 0
@@ -45,5 +45,8 @@ d = Categorical(4)
 @test maximum(d) == 4
 @test probs(d) == [0.25, 0.25, 0.25, 0.25]
 
-p = scale(ones(10^6), 1.0e-6)
+p = ones(10^6) * 1.0e-6
 @test Distributions.isprobvec(p)
+
+@test typeof(convert(Categorical{Float32}, d)) == Categorical{Float32}
+@test typeof(convert(Categorical{Float32}, d.p)) == Categorical{Float32}

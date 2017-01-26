@@ -3,8 +3,7 @@ immutable GammaRmathSampler <: Sampleable{Univariate,Continuous}
     d::Gamma
 end
 
-rand(s::GammaRmathSampler) =
-    ccall((:rgamma, "libRmath-julia"), Float64, (Float64, Float64), shape(s.d), scale(s.d))
+rand(s::GammaRmathSampler) = StatsFuns.RFunctions.gammarand(shape(s.d), scale(s.d))
 
 
 # "Generating gamma variates by a modified rejection technique"

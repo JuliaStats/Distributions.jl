@@ -9,7 +9,7 @@ using Compat
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for (ex, dct) in R
-        dsym = symbol(dct["dtype"])
+        dsym = Symbol(dct["dtype"])
         dname = string(dsym)
 
         # test whether it is included in the selected list
@@ -23,7 +23,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         dtype = eval(dsym)
         d = eval(parse(ex))
         if dtype == TruncatedNormal
-            @test isa(d, Truncated{Normal})
+            @test isa(d, Truncated{Normal{Float64}})
         else
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtype)
@@ -35,8 +35,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
 end
 
 
-@compat _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
-@compat _parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
+_parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
+_parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
 
 _json_value(x::Number) = x
 
@@ -51,37 +51,67 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify parameters
     pdct = dct["params"]
     for (fname, val) in pdct
-        f = eval(symbol(fname))
+        f = eval(Symbol(fname))
         @assert isa(f, Function)
         Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
     end
 
-    # verify stats
-    @test_approx_eq minimum(d) _json_value(dct["minimum"])
-    @test_approx_eq maximum(d) _json_value(dct["maximum"])
-    @compat @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
-    @compat @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
-    @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
+    # test various constructors for promotion, all-Integer args, etc.
+    D = eval(Symbol(dct["dtype"]))  # distribution name
+    pars = params(d)
 
-    if applicable(entropy, d)
-        @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
+    # promotion constructor:
+    float_pars = map(x -> isa(x, AbstractFloat), pars)
+    if length(pars) > 1 && sum(float_pars) > 1
+        mixed_pars = Any[pars...]
+        first_float = findfirst(float_pars)
+        mixed_pars[first_float] = Float32(mixed_pars[first_float])
+
+        @test typeof(D(mixed_pars...)) == typeof(d)
+    end
+
+    # promote integer arguments to floats, where applicable
+    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric)
+        int_pars = map(x -> ceil(Int, x), pars)
+        @test typeof(D(int_pars...)) == typeof(d)
+    end
+
+    # verify stats
+    @test minimum(d) ≈ _json_value(dct["minimum"])
+    @test maximum(d) ≈ _json_value(dct["maximum"])
+    @test Compat.isapprox(mean(d), _json_value(dct["mean"]), atol=1.0e-8, nans=true)
+    if !isa(d, VonMises)
+        @test Compat.isapprox(var(d), _json_value(dct["var"]), atol=1.0e-8, nans=true)
+    end
+    if !isa(d, Skellam)
+        @test isapprox(median(d), _json_value(dct["median"]), atol=1.0)
+    end
+
+    if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
+        @test isapprox(entropy(d), dct["entropy"], atol=1.0e-7)
     end
 
     # verify quantiles
-    @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
-    @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
+    if !isa(d, Union{Skellam, VonMises})
+        @test isapprox(quantile(d, 0.10), dct["q10"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.25), dct["q25"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.50), dct["q50"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.75), dct["q75"], atol=1.0e-8)
+        @test isapprox(quantile(d, 0.90), dct["q90"], atol=1.0e-8)
+    end
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        @compat lp = Float64(pt["logpdf"])
-        @compat cf = Float64(pt["cdf"])
+        lp = Float64(pt["logpdf"])
+        cf = Float64(pt["cdf"])
         Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
-        Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
+        if !isa(d, Skellam)
+            Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
+        else
+            @test_throws MethodError cdf(d, x)
+        end
     end
 
     try
@@ -105,14 +135,17 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
     end
-    test_distr(d, n_tsamples)
+    if !isa(d, Union{Skellam, VonMises})
+        test_distr(d, n_tsamples)
+    end
 end
 
 
 ## main
 
 for c in ["discrete",
-          "continuous"]
+          "continuous",
+          "discrete_hand_coded"]
 
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")

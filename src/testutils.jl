@@ -1,13 +1,13 @@
 # Utilities to support the testing of distributions and samplers
 
-import Base.Test: @test, @test_approx_eq, @test_approx_eq_eps
+import Base.Test: @test
 
 # auxiliary functions
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
     intv = (b - a) / (n - 1)
-    r = Array(Float64, n)
+    r = Vector{Float64}(n)
     @inbounds for i = 1:n
         r[i] = a + (i-1) * intv
     end
@@ -35,6 +35,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int)
 
     test_stats(distr, vs)
     test_samples(distr, n)
+    test_params(distr)
 end
 
 
@@ -50,6 +51,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
 
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
+    test_params(distr)
 end
 
 
@@ -66,7 +68,7 @@ end
 function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable instance
                       distr::DiscreteUnivariateDistribution,    # corresponding distribution
                       n::Int;                                   # number of samples to generate
-                      q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
+                      q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false)                      # show intermediate info (for debugging)
 
     # The basic idea
@@ -100,8 +102,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Array(Int, m)
-    cub = Array(Int, m)
+    clb = Vector{Int}(m)
+    cub = Vector{Int}(m)
     for i = 1:m
         bp = Binomial(n, p0[i])
         clb[i] = floor(Int,quantile(bp, q/2))
@@ -171,8 +173,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    rmin::Float64
-    rmax::Float64
+    local rmin::Float64
+    local rmax::Float64
     if applicable(quantile, distr, 0.5)
         rmin = quantile(distr, 0.01)
         rmax = quantile(distr, 0.99)
@@ -185,8 +187,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Array(Int, nbins)
-    cub = Array(Int, nbins)
+    clb = Vector{Int}(nbins)
+    cub = Vector{Int}(nbins)
     cdfs = cdf(distr, edges)
 
     for i = 1:nbins
@@ -209,7 +211,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     end
 
     # get counts
-    cnts = hist(samples, edges)[2]
+    cnts = fit(Histogram, samples, edges).weights
     @assert length(cnts) == nbins
 
     # check the counts
@@ -308,31 +310,31 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
     p0 = pdf(d, collect(rmin:rmax))
-    @test_approx_eq pdf(d, rmin:rmax) p0
+    @test pdf(d, rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test_approx_eq pdf(d, rmin+1:rmax-1) p0[2:end-1]
+        @test pdf(d, rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test_approx_eq pdf(d) p0
-        @test_approx_eq pdf(d, rmin-2:rmax) vcat(0.0, 0.0, p0)
-        @test_approx_eq pdf(d, rmin:rmax+3) vcat(p0, 0.0, 0.0, 0.0)
-        @test_approx_eq pdf(d, rmin-2:rmax+3) vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test pdf(d) ≈ p0
+        @test pdf(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pdf(d, rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test pdf(d, rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test_approx_eq pdf(d, rmin-2:rmax) vcat(0.0, 0.0, p0)
+        @test pdf(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
-    nv = length(vs)
-    p = Array(Float64, nv)
-    c = Array(Float64, nv)
-    cc = Array(Float64, nv)
-    lp = Array(Float64, nv)
-    lc = Array(Float64, nv)
-    lcc = Array(Float64, nv)
-    ci = 0.
+    nv  = length(vs)
+    p   = Vector{Float64}(nv)
+    c   = Vector{Float64}(nv)
+    cc  = Vector{Float64}(nv)
+    lp  = Vector{Float64}(nv)
+    lc  = Vector{Float64}(nv)
+    lcc = Vector{Float64}(nv)
+    ci  = 0.
 
     for (i, v) in enumerate(vs)
         p[i] = pdf(d, v)
@@ -346,11 +348,11 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
         @assert (i == 1 || c[i] >= c[i-1])
 
         ci += p[i]
-        @test_approx_eq ci c[i]
-        @test_approx_eq_eps c[i] + cc[i] 1.0 1.0e-12
-        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
-        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
-        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+        @test ci ≈ c[i]
+        @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
+        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
+        @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         ep = 1.0e-8
         if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
@@ -364,24 +366,24 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test_approx_eq pdf(d, vs) p
-    @test_approx_eq cdf(d, vs) c
-    @test_approx_eq ccdf(d, vs) cc
+    @test pdf(d, vs)  ≈ p
+    @test cdf(d, vs)  ≈ c
+    @test ccdf(d, vs) ≈ cc
 
-    @test_approx_eq logpdf(d, vs) lp
-    @test_approx_eq logcdf(d, vs) lc
-    @test_approx_eq logccdf(d, vs) lcc
+    @test logpdf(d, vs)  ≈ lp
+    @test logcdf(d, vs)  ≈ lc
+    @test logccdf(d, vs) ≈ lcc
 end
 
 
 function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector)
-    nv = length(vs)
-    p = Array(Float64, nv)
-    c = Array(Float64, nv)
-    cc = Array(Float64, nv)
-    lp = Array(Float64, nv)
-    lc = Array(Float64, nv)
-    lcc = Array(Float64, nv)
+    nv  = length(vs)
+    p   = Vector{Float64}(nv)
+    c   = Vector{Float64}(nv)
+    cc  = Vector{Float64}(nv)
+    lp  = Vector{Float64}(nv)
+    lc  = Vector{Float64}(nv)
+    lcc = Vector{Float64}(nv)
 
     for (i, v) in enumerate(vs)
         p[i] = pdf(d, v)
@@ -394,19 +396,19 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
-        @test_approx_eq_eps c[i] + cc[i] 1.0 1.0e-12
-        @test_approx_eq_eps lp[i] log(p[i]) 1.0e-12
-        @test_approx_eq_eps lc[i] log(c[i]) 1.0e-12
-        @test_approx_eq_eps lcc[i] log(cc[i]) 1.0e-12
+        @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
+        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
+        @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         # TODO: remove this line when we have more accurate implementation
         # of quantile for InverseGaussian
         qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
         if p[i] > 1.0e-6
-            @test_approx_eq_eps quantile(d, c[i]) v qtol * (abs(v) + 1.0)
-            @test_approx_eq_eps cquantile(d, cc[i]) v qtol * (abs(v) + 1.0)
-            @test_approx_eq_eps invlogcdf(d, lc[i]) v qtol * (abs(v) + 1.0)
-            @test_approx_eq_eps invlogccdf(d, lcc[i]) v qtol * (abs(v) + 1.0)
+            @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
+            @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
         end
     end
 
@@ -415,18 +417,18 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         if p[i] > 1.0e-6
             v = vs[i]
             ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test_approx_eq_eps p[i] ap p[i] * 1.0e-3
+            @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test_approx_eq pdf(d, vs) p
-    @test_approx_eq cdf(d, vs) c
-    @test_approx_eq ccdf(d, vs) cc
+    @test pdf(d, vs)  ≈ p
+    @test cdf(d, vs)  ≈ c
+    @test ccdf(d, vs) ≈ cc
 
-    @test_approx_eq logpdf(d, vs) lp
-    @test_approx_eq logcdf(d, vs) lc
-    @test_approx_eq logccdf(d, vs) lcc
+    @test logpdf(d, vs)  ≈ lp
+    @test logcdf(d, vs)  ≈ lc
+    @test logccdf(d, vs) ≈ lcc
 end
 
 
@@ -438,30 +440,30 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     vf = Float64[v for v in vs]
     p = pdf(d, vf)
     xmean = dot(p, vf)
-    xvar = dot(p, abs2(vf .- xmean))
+    xvar = dot(p, @compat(abs2.(vf .- xmean)))
     xstd = sqrt(xvar)
     xentropy = entropy(p)
     xskew = dot(p, (vf .- xmean).^3) / (xstd.^3)
     xkurt = dot(p, (vf .- xmean).^4) / (xvar.^2) - 3.0
 
     if isbounded(d)
-        @test_approx_eq_eps mean(d)  xmean  1.0e-8
-        @test_approx_eq_eps var(d)   xvar   1.0e-8
-        @test_approx_eq_eps std(d)   xstd   1.0e-8
+        @test isapprox(mean(d), xmean, atol=1.0e-8)
+        @test isapprox(var(d) , xvar , atol=1.0e-8)
+        @test isapprox(std(d) , xstd , atol=1.0e-8)
 
         if isfinite(skewness(d))
-            @test_approx_eq_eps skewness(d) xskew 1.0e-8
+            @test isapprox(skewness(d), xskew   , atol=1.0e-8)
         end
         if isfinite(kurtosis(d))
-            @test_approx_eq_eps kurtosis(d) xkurt 1.0e-8
+            @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)
-            @test_approx_eq_eps entropy(d) xentropy 1.0e-8
+            @test isapprox(entropy(d) , xentropy, atol=1.0e-8)
         end
     else
-        @test_approx_eq_eps mean(d) xmean 1.0e-3 * (abs(xmean) + 1.0)
-        @test_approx_eq_eps var(d)  xvar  0.01 * xvar
-        @test_approx_eq_eps std(d)  xstd  0.01 * xstd
+        @test isapprox(mean(d), xmean, atol=1.0e-3 * (abs(xmean) + 1.0))
+        @test isapprox(var(d) , xvar , atol=0.01 * xvar)
+        @test isapprox(std(d) , xstd , atol=0.01 * xstd)
     end
 end
 
@@ -488,7 +490,7 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
     # For a normal distribution, it is extremely rare for a sample to deviate more
     # than 5 * std.dev, (chance < 6.0e-7)
     mean_tol = 5.0 * (sqrt(vd / n))
-    @test_approx_eq_eps mean(d) xmean mean_tol
+    @test isapprox(mean(d), xmean, atol=mean_tol)
 
     # test variance
     if applicable(kurtosis, d)
@@ -501,7 +503,26 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
         # where k is the excessive kurtosis
         #
         if isfinite(kd) && kd > -2.0
-            @test_approx_eq_eps var(d) xvar 5.0 * vd * (kd + 2) / sqrt(n)
+            @test isapprox(var(d), xvar, atol=5.0 * vd * (kd + 2) / sqrt(n))
         end
     end
+end
+
+function test_params(d::Distribution)
+    # simply test that params returns something sufficient to
+    # reconstruct d
+    D = typeof(d)
+    pars = params(d)
+    d_new = D(pars...)
+    @test d_new == d
+end
+
+function test_params(d::Truncated)
+    # simply test that params returns something sufficient to
+    # reconstruct d
+    d_unt = d.untruncated
+    D = typeof(d_unt)
+    pars = params(d_unt)
+    d_new = Truncated(D(pars...), d.lower, d.upper)
+    @test d_new == d
 end

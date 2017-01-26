@@ -18,7 +18,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test_approx_eq mean(g) mu
+    @test mean(g) ≈ mu
 
     # evaluation of cdf
     cf = zeros(n)
@@ -30,9 +30,9 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     for i = 1:n
-        @test_approx_eq cdf(g, X[i]) cf[i]
+        @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test_approx_eq cdf(g, X) cf
+    @test cdf(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -47,25 +47,25 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = log(mix_p0)
+    mix_lp0 = @compat(log.(mix_p0))
 
     for i = 1:n
-        @test_approx_eq pdf(g, X[i]) mix_p0[i]
-        @test_approx_eq logpdf(g, X[i]) mix_lp0[i]
-        @test_approx_eq componentwise_pdf(g, X[i]) vec(P0[i,:])
-        @test_approx_eq componentwise_logpdf(g, X[i]) vec(LP0[i,:])
+        @test pdf(g, X[i])                  ≈ mix_p0[i]
+        @test logpdf(g, X[i])               ≈ mix_lp0[i]
+        @test componentwise_pdf(g, X[i])    ≈ vec(P0[i,:])
+        @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test_approx_eq pdf(g, X) mix_p0
-    @test_approx_eq logpdf(g, X) mix_lp0
-    @test_approx_eq componentwise_pdf(g, X) P0
-    @test_approx_eq componentwise_logpdf(g, X) LP0
+    @test pdf(g, X)                  ≈ mix_p0
+    @test logpdf(g, X)               ≈ mix_lp0
+    @test componentwise_pdf(g, X)    ≈ P0
+    @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
     Xs = rand(g, ns)
     @test isa(Xs, Vector{Float64})
     @test length(Xs) == ns
-    @test_approx_eq_eps mean(Xs) mean(g) 0.01
+    @test isapprox(mean(Xs), mean(g), atol=0.01)
 end
 
 function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
@@ -83,7 +83,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test_approx_eq mean(g) mu
+    @test mean(g) ≈ mu
 
     # evaluation
     P0 = zeros(n, K)
@@ -98,29 +98,42 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = log(mix_p0)
+    mix_lp0 = @compat(log.(mix_p0))
 
     for i = 1:n
         x_i = X[:,i]
-        @test_approx_eq pdf(g, x_i) mix_p0[i]
-        @test_approx_eq logpdf(g, x_i) mix_lp0[i]
-        @test_approx_eq componentwise_pdf(g, x_i) vec(P0[i,:])
-        @test_approx_eq componentwise_logpdf(g, x_i) vec(LP0[i,:])
+        @test pdf(g, x_i)                  ≈ mix_p0[i]
+        @test logpdf(g, x_i)               ≈ mix_lp0[i]
+        @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
+        @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
 
-    @test_approx_eq pdf(g, X) mix_p0
-    @test_approx_eq logpdf(g, X) mix_lp0
-    @test_approx_eq componentwise_pdf(g, X) P0
-    @test_approx_eq componentwise_logpdf(g, X) LP0
+    @test pdf(g, X)                  ≈ mix_p0
+    @test logpdf(g, X)               ≈ mix_lp0
+    @test componentwise_pdf(g, X)    ≈ P0
+    @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test_approx_eq_eps vec(mean(Xs, 2)) mean(g) 0.01
+    @test isapprox(vec(mean(Xs, 2)), mean(g), atol=0.1)
+    @test isapprox(cov(Xs, 2)      , cov(g) , atol=0.1)
 end
 
+function test_params(g::AbstractMixtureModel)
+    C = eltype(g.components)
+    pars = params(g)
+    mm = MixtureModel(C, pars...)
+    @test g.prior == mm.prior
+    @test g.components == mm.components
+end
 
+function test_params(g::UnivariateGMM)
+    pars = params(g)
+    mm = UnivariateGMM(pars...)
+    @test g == mm
+end
 
 # Tests
 
@@ -130,11 +143,21 @@ g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3
 @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
 @test ncomponents(g_u) == 3
 test_mixture(g_u, 1000, 10^6)
+test_params(g_u)
+@test minimum(g_u) == -Inf
+@test maximum(g_u) == Inf
+
+g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
+@test minimum(g_u) == -2.0
+@test maximum(g_u) == 3.0
 
 g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
 @test isa(g_u, UnivariateGMM)
 @test ncomponents(g_u) == 3
 test_mixture(g_u, 1000, 10^6)
+test_params(g_u)
+@test minimum(g_u) == -Inf
+@test maximum(g_u) == Inf
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(
@@ -146,3 +169,4 @@ g_m = MixtureModel(
 @test length(components(g_m)) == 3
 @test length(g_m) == 2
 test_mixture(g_m, 1000, 10^6)
+test_params(g_m)

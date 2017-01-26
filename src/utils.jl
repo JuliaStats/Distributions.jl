@@ -2,7 +2,7 @@
 
 macro check_args(D, cond)
     quote
-        if !($cond)
+        if !($(esc(cond)))
             throw(ArgumentError(string(
                 $(string(D)), ": the condition ", $(string(cond)), " is not satisfied.")))
         end
@@ -22,11 +22,12 @@ length(v::ZeroVector) = v.len
 full{T}(v::ZeroVector{T}) = zeros(T, v.len)
 
 convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
+convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
 
-+(x::DenseArray, v::ZeroVector) = x
--(x::DenseArray, v::ZeroVector) = x
-.+(x::DenseArray, v::ZeroVector) = x
-.-(x::DenseArray, v::ZeroVector) = x
++(x::AbstractArray, v::ZeroVector) = x
+-(x::AbstractArray, v::ZeroVector) = x
+.+(x::AbstractArray, v::ZeroVector) = x
+.-(x::AbstractArray, v::ZeroVector) = x
 
 
 ##### Utility functions
@@ -46,7 +47,7 @@ end
 
 function allzeros{T<:Real}(x::Array{T})
     for i = 1 : length(x)
-        if !(x == zero(T))
+        if !(x[i] == zero(T))
             return false
         end
     end
@@ -64,9 +65,9 @@ function allnonneg{T<:Real}(x::Array{T})
     return true
 end
 
-isprobvec(p::Vector{Float64}) = allnonneg(p) && isapprox(sum(p), 1.0)
+isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
+function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
     s = 0.
     n = length(v)
     for i = 1:n
@@ -78,8 +79,8 @@ function pnormalize!{T<:FloatingPoint}(v::AbstractVector{T})
     v
 end
 
-add!(x::DenseArray, y::DenseVector) = broadcast!(+, x, x, y)
-add!(x::DenseVecOrMat, y::ZeroVector) = x
+add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
+add!(x::AbstractVecOrMat, y::ZeroVector) = x
 
 function multiply!(x::AbstractArray, c::Number)
     for i = 1:length(x)
@@ -95,13 +96,20 @@ function exp!(x::AbstractArray)
     x
 end
 
+# get a type wide enough to represent all a distributions's parameters
+# (if the distribution is parametric)
+# if the distribution is not parametric, we need this to be a float so that
+# inplace pdf calculations, etc. allocate storage correctly
+@inline partype(d::Distribution) = Float64
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
 macro checkquantile(p,ex)
+    p, ex = esc(p), esc(ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
 macro checkinvlogcdf(lp,ex)
+    lp, ex = esc(lp), esc(ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 

@@ -3,39 +3,58 @@
 #   following Wikipedia parametrization
 #
 
-immutable InverseWishart{ST<:AbstractPDMat} <: ContinuousMatrixDistribution
-    df::Float64     # degree of freedom
+immutable InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+    df::T     # degree of freedom
     Ψ::ST           # scale matrix
-    c0::Float64     # log of normalizing constant
+    c0::T     # log of normalizing constant
 end
 
 #### Constructors
 
-function InverseWishart{ST<:AbstractPDMat}(df::Real, Ψ::ST)
+function InverseWishart{T<:Real}(df::T, Ψ::AbstractPDMat{T})
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
-    InverseWishart{ST}(df, Ψ, _invwishart_c0(df, Ψ))
+    c0 = _invwishart_c0(df, Ψ)
+    R = Base.promote_eltype(T, c0)
+    prom_Ψ = convert(AbstractArray{R}, Ψ)
+    InverseWishart{R, typeof(prom_Ψ)}(R(df), prom_Ψ, R(c0))
 end
 
-InverseWishart(df::Real, Ψ::Matrix{Float64}) = InverseWishart(df, PDMat(Ψ))
+function InverseWishart(df::Real, Ψ::AbstractPDMat)
+    T = Base.promote_eltype(df, Ψ)
+    InverseWishart(T(df), convert(AbstractArray{T}, Ψ))
+end
+
+InverseWishart(df::Real, Ψ::Matrix) = InverseWishart(df, PDMat(Ψ))
 
 InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 
 function _invwishart_c0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
     p = dim(Ψ)
-    h_df * (p * logtwo - logdet(Ψ)) + logmvgamma(p, h_df)
+    h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
 end
 
 
 #### Properties
 
-insupport(::Type{InverseWishart}, X::Matrix{Float64}) = isposdef(X)
-insupport(d::InverseWishart, X::Matrix{Float64}) = size(X) == size(d) && isposdef(X)
+insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
+insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
+params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
+@inline partype{T<:Real}(d::InverseWishart{T}) = T
 
+### Conversion
+function convert{T<:Real}(::Type{InverseWishart{T}}, d::InverseWishart)
+    P = Wishart{T}(d.Ψ)
+    InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
+end
+function convert{T<:Real}(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0)
+    P = Wishart{T}(Ψ)
+    InverseWishart{T, typeof(P)}(T(df), P, T(c0))
+end
 
 #### Show
 
@@ -60,7 +79,7 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
 #### Evaluation
 
-function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
+function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
     Xcf = cholfact(X)
@@ -68,8 +87,6 @@ function _logpdf(d::InverseWishart, X::DenseMatrix{Float64})
     Ψ = full(d.Ψ)
     -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
 end
-
-_logpdf{T<:Real}(d::InverseWishart, X::DenseMatrix{T}) = _logpdf(d, convert(Matrix{Float64}, X))
 
 
 #### Sampling

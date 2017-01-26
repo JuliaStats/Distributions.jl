@@ -1,1 +1,5 @@
 JSON 0.4.0
+ForwardDiff
+Compat
+Calculus
+PDMats

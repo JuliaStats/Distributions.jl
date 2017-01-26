@@ -88,6 +88,7 @@ Normal(0.0, 1.0)
 Normal(-3.0, 2.0)
 Normal(1.0, 10.0)
 
+NormalCanon()
 NormalCanon(0.0, 1.0)
 NormalCanon(-1.0, 2.5)
 NormalCanon(2.0, 0.8)
@@ -126,6 +127,10 @@ TruncatedNormal(1.8, 1.2, -Inf, 0)
 Uniform(0.0, 1.0)
 Uniform(3.0, 17.0)
 Uniform(3.0, 3.1)
+
+VonMises()
+VonMises(4.0)
+VonMises(1.1, 2.5)
 
 Weibull()
 Weibull(0.5)

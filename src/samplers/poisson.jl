@@ -3,13 +3,12 @@ immutable PoissonRmathSampler <: Sampleable{Univariate,Discrete}
     mu::Float64
 end
 
-rand(s::PoissonRmathSampler) =
-    round(Int, ccall((:rpois, "libRmath-julia"), Float64, (Float64,), s.mu))
+rand(s::PoissonRmathSampler) = round(Int, StatsFuns.RFunctions.poisrand(s.mu))
 
 
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
-    pv = Array(Float64, n+1)
+    pv = Vector{Float64}(n+1)
     @inbounds pv[1] = p = exp(-μ)
     for i = 1:n
         @inbounds pv[i+1] = (p *= (μ / i))
