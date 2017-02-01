@@ -1,9 +1,9 @@
 doc"""
-    GeneralizedPareto(ξ, σ, μ)
+    GeneralizedPareto(μ, σ, ξ)
 
 The *Generalized Pareto distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
 
-$f(x; \xi, \sigma, \mu) = \begin{cases}
+$f(x; \mu, \sigma, \xi) = \begin{cases}
         \frac{1}{\sigma}(1 + \xi \frac{x - \mu}{\sigma} )^{-\frac{1}{\xi} - 1} & \text{for } \xi \neq 0 \\
         \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0
     \end{cases}~,
@@ -14,14 +14,14 @@ $f(x; \xi, \sigma, \mu) = \begin{cases}
 
 
 ```julia
-GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(1, 1, 0)
-GeneralizedPareto(k, s)         # Generalized Pareto distribution with shape k and scale s, i.e. GeneralizedPareto(k, s, 0)
-GeneralizedPareto(k, s, m)      # Generalized Pareto distribution with shape k, scale s and location m.
+GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
+GeneralizedPareto(k, s)         # Generalized Pareto distribution with shape k and scale s, i.e. GeneralizedPareto(0, k, s)
+GeneralizedPareto(m, k, s)      # Generalized Pareto distribution with shape k, scale s and location m.
 
-params(d)       # Get the parameters, i.e. (k, s, m)
-shape(d)        # Get the shape parameter, i.e. k
-scale(d)        # Get the scale parameter, i.e. s
+params(d)       # Get the parameters, i.e. (m, s, k)
 location(d)     # Get the location parameter, i.e. m
+scale(d)        # Get the scale parameter, i.e. s
+shape(d)        # Get the shape parameter, i.e. k
 ```
 
 External links

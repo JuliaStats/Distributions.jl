@@ -76,6 +76,11 @@ get.distr <- function(entry) {
         Chisq = {
             if (nargs == 1) { Chisq$new(a1) }
         },
+        Cosine = {
+                 if (nargs == 0) { Cosine$new(0, 1) }
+            else if (nargs == 1) { Cosine$new(a1, 1) }
+            else if (nargs == 2) { Cosine$new(a1, a2) }
+        },
         DiscreteUniform = {
                  if (nargs == 0) { DiscreteUniform$new(0, 1) }
             else if (nargs == 1) { DiscreteUniform$new(0, a1) }
@@ -103,6 +108,11 @@ get.distr <- function(entry) {
             else if (nargs == 1) { Gammad$new(a1, 1) }
             else if (nargs == 2) { Gammad$new(a1, a2) }
         },
+        GeneralizedPareto = {
+                 if (nargs == 0) { GeneralizedPareto$new(0, 1, 1) }
+            else if (nargs == 2) { GeneralizedPareto$new(0, a1, a2) }
+            else if (nargs == 3) { GeneralizedPareto$new(a1, a2, a3) }
+        },
         Geometric = {
                  if (nargs == 0) { Geometric$new(0.5) }
             else if (nargs == 1) { Geometric$new(a1) }
@@ -129,6 +139,11 @@ get.distr <- function(entry) {
                  if (nargs == 0) { Laplace$new(0, 1) }
             else if (nargs == 1) { Laplace$new(a1, 1) }
             else if (nargs == 2) { Laplace$new(a1, a2) }
+        },
+        Levy = {
+                 if (nargs == 0) { Levy$new(0, 1) }
+            else if (nargs == 1) { Levy$new(a1, 1) }
+            else if (nargs == 2) { Levy$new(a1, a2) }
         },
         Logistic = {
                  if (nargs == 0) { Logistic$new(0, 1) }
@@ -211,7 +226,7 @@ get.distr <- function(entry) {
     )
 
     if (is.null(distr)) {
-        stop(paste("Unrecognized distribution:", dname))
+        stop(paste("Unrecognized distribution:", dname, "with", nargs, "arguments"))
     }
     return(distr)
 }

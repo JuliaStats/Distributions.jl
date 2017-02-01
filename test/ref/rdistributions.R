@@ -322,6 +322,56 @@ Chisq <- R6Class("Chisq",
     )
 )
 
+# Cosine
+
+Cosine <- R6Class("Cosine",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma"),
+        mu = NA,
+        sigma = NA,
+        initialize = function(u, s) {
+            self$mu <- u
+            self$sigma <- s
+        },
+        supp = function() { c(self$mu - self$sigma, self$mu + self$sigma) },
+        properties = function() {
+            u <- self$mu
+            s <- self$sigma
+            list(location = u,
+                 scale = s,
+                 mean = u,
+                 median = u,
+                 mode = u,
+                 var = s^2 * (1/3 - 2/pi^2),
+                 skewness = 0,
+                 kurtosis = 1.2 * (90 - pi^4) / (pi^2 - 6)^2)
+        },
+        pdf = function(x, log=FALSE) {
+            s <- self$sigma
+            z <- (x - self$mu) / s
+            p <- (1 + cospi(z)) / (2 * s)
+            if (log) { base::log(p) } else { p }
+        },
+        cdf = function(x) {
+            s <- self$sigma
+            z <- (x - self$mu) / s
+            (z+1)/2 + sinpi(z) / (2*pi)
+        },
+        quan = function(v) {
+            invf <- function(u) {
+                ret <- uniroot(
+                    function(z) { (z+1)/2 + sinpi(z) / (2*pi) - u },
+                    c(-1, 1), tol=1e-13)
+                ret$root
+            }
+            r <- vapply(v, invf, 0.0)
+            self$mu + r * self$sigma
+        }
+    )
+)
+
+
 # DiscreteUniform
 
 DiscreteUniform <- R6Class("DiscreteUniform",
@@ -513,6 +563,53 @@ Gammad <- R6Class("Gammad",
         quan = function(v) { qgamma(v, self$alpha, self$beta) }
     )
 )
+
+# GeneralizedPareto
+
+GeneralizedPareto <- R6Class("GeneralizedPareto",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("xi", "sigma", "mu"),
+        xi = NA,
+        sigma = NA,
+        mu = NA,
+        initialize = function(m, s, k) {            
+            self$xi <- k
+            self$sigma <- s
+            self$mu <- m
+        },
+        supp = function() {
+            k <- self$xi
+            s <- self$sigma
+            u <- self$mu
+            if (k >= 0) { c(u, Inf) } else { c(u, u - s/k) }
+        },
+        properties = function() {
+            k <- self$xi
+            s <- self$sigma
+            u <- self$mu
+            list(location = u,
+                 scale = s,
+                 shape = k,
+                 mean = ifelse(k < 1, u + s / (1 - k), Inf),
+                 median = u + s * (2^k - 1) / k,
+                 var = if (2*k < 1) {
+                     s^2 / ((1 - k)^2 * (1 - 2*k))
+                 } else { Inf },
+                 skewness = if (3*k < 1) {
+                     2 * (1 + k) * sqrt(1 - 2*k) / (1 - 3*k)
+                 } else { Inf },
+                 kurtosis = if (4*k < 1) {
+                     3 * (1 - 2*k) * (2*k^2 + k + 3) / (1 - 3*k) / (1 - 4*k) - 3
+                 } else { Inf }
+            )
+        },
+        pdf = function(x, log=FALSE) { dgpd(x, self$mu, self$sigma, self$xi, log=log) },
+        cdf = function(x) { pgpd(x, self$mu, self$sigma, self$xi) },
+        quan = function(v) { qgpd(v, self$mu, self$sigma, self$xi) }
+    )
+)
+
 
 # Geometric
 
@@ -712,6 +809,38 @@ Laplace <- R6Class("Laplace",
         pdf = function(x, log=FALSE){ dlaplace(x, self$mu, self$beta, log=log) },
         cdf = function(x){ plaplace(x, self$mu, self$beta) },
         quan = function(v){ qlaplace(v, self$mu, self$beta) }
+    )
+)
+
+# Levy
+
+Levy <- R6Class("Levy",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma"),
+        mu = NA,
+        sigma = NA,
+        initialize = function(u, s) {
+            self$mu <- u
+            self$sigma <- s
+        },
+        supp = function() { c(self$mu, Inf) },
+        properties = function() {
+            u <- self$mu
+            s <- self$sigma
+            erfcinv <- function (x) qnorm(x/2, lower = FALSE)/sqrt(2)
+            list(location = u,
+                 mode = u + s / 3,
+                 mean = Inf,
+                 var = Inf,
+                 skewness = NaN,
+                 kurtosis = NaN,
+                 # 0.47693627620447 = erfc^{-1}(0.5)
+                 median = u + (s/2) / (0.47693627620447)^2)
+        },
+        pdf = function(x, log=FALSE){ VGAM::dlevy(x, self$mu, self$sigma, log.arg=log) },
+        cdf = function(x) { VGAM::plevy(x, self$mu, self$sigma) },
+        quan = function(v) { VGAM::qlevy(v, self$mu, self$sigma) }
     )
 )
 

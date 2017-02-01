@@ -8,3 +8,4 @@ Required R Packages
 - distr:   for Arcsine
 - statmod: for InverseGaussian
 - skellam: for Skellam
+- VGAM:    for Frechet, Levy
