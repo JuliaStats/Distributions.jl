@@ -1,7 +1,7 @@
 """
     NoncentralChisq(ν, λ)
 
-The *noncentral chi-squared distribution* (typically written χ²) with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
+The *noncentral chi-squared distribution* with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
 
 $f(x; ν, λ) = \frac{1}{2}e^{-(x + λ)/2}\frac{x}{λ}^{ν/4-1/2}I_{ν/2-1}(\sqrt{λx}) \quad x>0.$
 
