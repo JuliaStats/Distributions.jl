@@ -1,7 +1,7 @@
 """
     NoncentralChisq(ν, λ)
 
-The *Noncentral Chi-squared distribution* (typically written χ²) with `ν` degrees of freedom and non-centrality parameter `λ` has the probability density function
+The *noncentral chi-squared distribution* (typically written χ²) with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
 
 $f(x; ν, λ) = \frac{1}{2}e^{-(x + λ)/2}\frac{x}{λ}^{ν/4-1/2}I_{ν/2-1}(\sqrt{λx}) \quad x>0.$
 
@@ -10,14 +10,14 @@ It is the distribution of the sum of squares of `ν` independent [`Normal`](:fun
 $λ = \sum_{i=1}^ν{μ_i^2}$
 
 ```julia
-NoncentralChisq(ν, λ)     # Noncentral Chi-squared distribution with ν degrees of freedom and noncentrality parameter λ
+NoncentralChisq(ν, λ)     # Noncentral chi-squared distribution with ν degrees of freedom and noncentrality parameter λ
 
 params(d)    # Get the parameters, i.e. (ν, λ)
 ```
 
 External links
 
-* [Noncentral Chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
+* [Noncentral chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
 """
 immutable NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
