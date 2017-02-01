@@ -439,6 +439,47 @@ FDist <- R6Class("FDist",
     )
 )
 
+# Frechet
+
+Frechet <- R6Class("Frechet",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta"),
+        alpha = NA,
+        beta = NA,
+        initialize = function(a, b) {
+            self$alpha <- a
+            self$beta <- b
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            a <- self$alpha
+            b <- self$beta
+            g1 <- ifelse(a > 1, gamma(1 - 1/a), NaN)
+            g2 <- ifelse(a > 2, gamma(1 - 2/a), NaN)
+            g3 <- ifelse(a > 3, gamma(1 - 3/a), NaN)
+            g4 <- ifelse(a > 4, gamma(1 - 4/a), NaN)
+            gam <- 0.57721566490153286
+            list(shape = a,
+                 scale = b,
+                 mean = ifelse(a > 1, b * g1, Inf),
+                 median = b / log(2)^(1/a),
+                 mode = b * (a / (1 + a))^(1/a),
+                 var = ifelse(a > 2, b^2 * (g2 - g1^2), Inf),
+                 skewness = if (a > 3) {
+                     (g3 - 3 * g2 * g1 + 2 * g1^3) / (g2 - g1^2)^1.5
+                 } else { Inf },
+                 kurtosis = if (a > 4) {
+                     (g4 - 4 * g3 * g1 + 3 * g2^2) / (g2 - g1^2)^2 - 6
+                 } else { Inf },
+                 entropy = 1 + gam / a + gam + log(b / a))
+        },
+        pdf = function(x, log=FALSE) { VGAM::dfrechet(x, shape=self$alpha, scale=self$beta, log=log) },
+        cdf = function(x) { VGAM::pfrechet(x, shape=self$alpha, scale=self$beta) },
+        quan = function(v) { VGAM::qfrechet(v, shape=self$alpha, scale=self$beta) }
+    )
+)
+
 # Gamma
 
 Gammad <- R6Class("Gammad",
@@ -766,6 +807,90 @@ NegativeBinomial <- R6Class("NegativeBinomial",
         pdf = function(x, log=FALSE){ dnbinom(x, self$r, self$p, log=log)},
         cdf = function(x) { pnbinom(x, self$r, self$p) },
         quan = function(v) { qnbinom(v, self$r, self$p) }
+    )
+)
+
+# NoncentralBeta
+
+NoncentralBeta <- R6Class("NoncentralBeta",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta", "ncp"),
+        alpha = NA,
+        beta = NA,
+        ncp = NA,
+        initialize = function(a, b, ncp) {
+            self$alpha <- a
+            self$beta <- b
+            self$ncp <- ncp
+        },
+        supp = function() { c(0, 1) },
+        properties = function() { list() },
+        pdf = function(x, log=FALSE) { dbeta(x, self$alpha, self$beta, self$ncp, log=log) },
+        cdf = function(x) { pbeta(x, self$alpha, self$beta, self$ncp) },
+        quan = function(v) { qbeta(v, self$alpha, self$beta, self$ncp) }
+    )
+)
+
+# NoncentralChisq
+
+NoncentralChisq <- R6Class("NoncentralChisq",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("nu", "ncp"),
+        nu = NA,
+        ncp = NA,
+        initialize = function(k, ncp) {
+            self$nu <- k
+            self$ncp <- ncp
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() { list() },
+        pdf = function(x, log=FALSE) { dchisq(x, self$nu, self$ncp, log=log) },
+        cdf = function(x) { pchisq(x, self$nu, self$ncp) },
+        quan = function(v) { qchisq(v, self$nu, self$ncp) }
+    )
+)
+
+# NoncentralF
+
+NoncentralF <- R6Class("NoncentralF",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("nu1", "nu2", "ncp"),
+        nu1 = NA,
+        nu2 = NA,
+        ncp = NA,
+        initialize = function(k1, k2, ncp) {
+            self$nu1 <- k1
+            self$nu2 <- k2
+            self$ncp <- ncp
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() { list() },
+        pdf = function(x, log=FALSE) { df(x, self$nu1, self$nu2, self$ncp, log=log) },
+        cdf = function(x) { pf(x, self$nu1, self$nu2, self$ncp) },
+        quan = function(v) { qf(v, self$nu1, self$nu2, self$ncp) }
+    )
+)
+
+# NoncentralT
+
+NoncentralT <- R6Class("NoncentralT",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("nu", "ncp"),
+        nu = NA,
+        ncp = NA,
+        initialize = function(k, ncp) {
+            self$nu <- k
+            self$ncp <- ncp
+        },
+        supp = function() { c(-Inf, Inf) },
+        properties = function() { list() },
+        pdf = function(x, log=FALSE) { dt(x, self$nu, self$ncp, log=log) },
+        cdf = function(x) { pt(x, self$nu, self$ncp) },
+        quan = function(v) { qt(v, self$nu, self$ncp) }
     )
 )
 

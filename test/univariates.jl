@@ -65,7 +65,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         expect_v = _json_value(val)
         f = eval(Symbol(fname))
         @assert isa(f, Function)
-        tol_v = abs(expect_v) * 1e-12 + 1e-12
+        tol_v = abs(expect_v) * 1e-8 + 1e-12
         Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
     end
 
@@ -98,7 +98,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
         ptol = p * 1e-8 + 1e-16
         lptol = 1e-12
-        cftol = 1e-12        
+        cftol = 1e-12
         Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
         Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
 
@@ -138,7 +138,13 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # generic testing
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
+    elseif isa(d, NoncentralBeta) ||
+           isa(d, NoncentralChisq) ||
+           isa(d, NoncentralF) ||
+           isa(d, NoncentralT)
+        n_tsamples = min(n_tsamples, 100)
     end
+
     if !isa(d, Union{Skellam, VonMises})
         test_distr(d, n_tsamples)
     end

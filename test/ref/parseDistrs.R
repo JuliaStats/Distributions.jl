@@ -93,6 +93,11 @@ get.distr <- function(entry) {
         FDist = {
             if (nargs == 2) { FDist$new(a1, a2) }
         },
+        Frechet = {
+                 if (nargs == 0) { Frechet$new(1, 1) }
+            else if (nargs == 1) { Frechet$new(a1, 1) }
+            else if (nargs == 2) { Frechet$new(a1, a2) }
+        },
         Gamma = {
                  if (nargs == 0) { Gammad$new(1, 1) }
             else if (nargs == 1) { Gammad$new(a1, 1) }
@@ -139,6 +144,18 @@ get.distr <- function(entry) {
                  if (nargs == 0) { NegativeBinomial$new(1, 0.5) }
             else if (nargs == 1) { NegativeBinomial$new(a1, 0.5) }
             else if (nargs == 2) { NegativeBinomial$new(a1, a2) }
+        },
+        NoncentralBeta = {
+            if (nargs == 3) { NoncentralBeta$new(a1, a2, a3) }
+        },
+        NoncentralChisq = {
+            if (nargs == 2) { NoncentralChisq$new(a1, a2) }
+        },
+        NoncentralF = {
+            if (nargs == 3) { NoncentralF$new(a1, a2, a3) }
+        },
+        NoncentralT = {
+            if (nargs == 2) { NoncentralT$new(a1, a2) }
         },
         Normal = {
                  if (nargs == 0) { Normal$new(0, 1) }

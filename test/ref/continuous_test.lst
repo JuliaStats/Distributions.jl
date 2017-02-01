@@ -49,12 +49,13 @@ Exponential(6.5)
 FDist(6.0, 8.0)
 FDist(8.0, 6.0)
 
-# Frechet(0.5, 1.0)
-# Frechet(3.0, 1.0)
-# Frechet(20.0, 1.0)
-# Frechet(120.0, 1.0)
-# Frechet(0.5, 2.0)
-# Frechet(3.0, 2.0)
+Frechet()
+Frechet(0.5)
+Frechet(3.0)
+Frechet(20.0)
+Frechet(60.0)
+Frechet(0.5, 2.0)
+Frechet(3.0, 2.0)
 
 Gamma()
 Gamma(2.0)
@@ -113,17 +114,17 @@ LogNormal(3.0, 0.5)
 LogNormal(3.0, 1.0)
 LogNormal(3.0, 2.0)
 
-# NoncentralBeta(2, 2, 0)
-# NoncentralBeta(2, 6, 5)
-#
-# NoncentralChisq(2, 2)
-# NoncentralChisq(2, 5)
-#
-# NoncentralF(2, 2, 2)
-# NoncentralF(8, 10, 5)
-#
-# NoncentralT(2, 2)
-# NoncentralT(10, 2)
+NoncentralBeta(2, 2, 0)
+NoncentralBeta(2, 6, 5)
+
+NoncentralChisq(2, 2)
+NoncentralChisq(2, 5)
+
+NoncentralF(2, 2, 2)
+NoncentralF(8, 10, 5)
+
+NoncentralT(2, 2)
+NoncentralT(10, 2)
 
 Normal()
 Normal(2.0)
