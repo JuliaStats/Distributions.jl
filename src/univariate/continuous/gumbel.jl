@@ -60,7 +60,7 @@ mode(d::Gumbel) = d.μ
 
 var{T<:Real}(d::Gumbel{T}) = T(π)^2/6 * d.θ^2
 
-skewness{T<:Real}(d::Gumbel{T}) = 112*sqrt(T(6))*zeta(T(3))/π/π/π
+skewness{T<:Real}(d::Gumbel{T}) = 12*sqrt(T(6))*zeta(T(3))/π/π/π
 
 kurtosis{T<:Real}(d::Gumbel{T}) = T(12)/5
 

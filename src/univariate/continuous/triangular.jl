@@ -82,12 +82,12 @@ end
 
 function skewness(d::TriangularDist)
     (a, b, c) = params(d)
-    sqrt2 * (a + b - 2c) * (2a - b - c) * (a - 2b + c) / (5 * _pretvar(a, b, c)^3//2)
+    sqrt2 * (a + b - 2c) * (2a - b - c) * (a - 2b + c) / (5 * _pretvar(a, b, c)^1.5)
 end
 
 kurtosis{T<:Real}(d::TriangularDist{T}) = T(-3)/5
 
-entropy(d::TriangularDist) = 1//2 + log((d.b - d.a) / 2)
+entropy(d::TriangularDist) = 0.5 + log((d.b - d.a) / 2)
 
 
 #### Evaluation

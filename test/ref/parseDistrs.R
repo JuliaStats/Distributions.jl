@@ -34,6 +34,7 @@ get.distr <- function(entry) {
         a1 <- dargs[1]
         a2 <- ifelse(nargs >= 2, dargs[2], NA)
         a3 <- ifelse(nargs >= 3, dargs[3], NA)
+        a4 <- ifelse(nargs >= 4, dargs[4], NA)
     }
 
     distr <- switch (dname,
@@ -51,6 +52,11 @@ get.distr <- function(entry) {
             else if (nargs == 1) { Beta$new(a1, a1) }
             else if (nargs == 2) { Beta$new(a1, a2) }
         },
+        BetaPrime = {
+                 if (nargs == 0) { BetaPrime$new(1, 1) }
+            else if (nargs == 1) { BetaPrime$new(a1, a1) }
+            else if (nargs == 2) { BetaPrime$new(a1, a2) }
+        },
         Binomial = {
                  if (nargs == 0) { Binomial$new(1, 0.5) }
             else if (nargs == 1) { Binomial$new(a1, 0.5) }
@@ -60,6 +66,9 @@ get.distr <- function(entry) {
                  if (nargs == 0) { Cauchy$new(0, 1) }
             else if (nargs == 1) { Cauchy$new(a1, 1) }
             else if (nargs == 2) { Cauchy$new(a1, a2) }
+        },
+        Chi = {
+            if (nargs == 1) { Chi$new(a1) }
         },
         Chisq = {
             if (nargs == 1) { Chisq$new(a1) }
@@ -90,8 +99,38 @@ get.distr <- function(entry) {
                  if (nargs == 0) { Geometric$new(0.5) }
             else if (nargs == 1) { Geometric$new(a1) }
         },
+        Gumbel = {
+                 if (nargs == 0) { Gumbel$new(0, 1) }
+            else if (nargs == 1) { Gumbel$new(a1, 1) }
+            else if (nargs == 2) { Gumbel$new(a1, a2) }
+        },
         Hypergeometric = {
             if (nargs == 3) { Hypergeometric$new(a1, a2, a3) }
+        },
+        InverseGamma = {
+                 if (nargs == 0) { InverseGamma$new(1, 1) }
+            else if (nargs == 1) { InverseGamma$new(a1, 1) }
+            else if (nargs == 2) { InverseGamma$new(a1, a2) }
+        },
+        InverseGaussian = {
+                 if (nargs == 0) { InverseGaussian$new(1, 1) }
+            else if (nargs == 1) { InverseGaussian$new(a1, 1) }
+            else if (nargs == 2) { InverseGaussian$new(a1, a2) }
+        },
+        Laplace = {
+                 if (nargs == 0) { Laplace$new(0, 1) }
+            else if (nargs == 1) { Laplace$new(a1, 1) }
+            else if (nargs == 2) { Laplace$new(a1, a2) }
+        },
+        Logistic = {
+                 if (nargs == 0) { Logistic$new(0, 1) }
+            else if (nargs == 1) { Logistic$new(a1, 1) }
+            else if (nargs == 2) { Logistic$new(a1, a2) }
+        },
+        LogNormal = {
+                 if (nargs == 0) { LogNormal$new(0, 1) }
+            else if (nargs == 1) { LogNormal$new(a1, 1) }
+            else if (nargs == 2) { LogNormal$new(a1, a2) }
         },
         NegativeBinomial = {
                  if (nargs == 0) { NegativeBinomial$new(1, 0.5) }
@@ -107,17 +146,38 @@ get.distr <- function(entry) {
                  if (nargs == 0) { Normal$new(0, 1) }
             else if (nargs == 2) { Normal$new(a1 / a2, 1 / sqrt(a2)) }
         },
+        Pareto = {
+                 if (nargs == 0) { Pareto$new(1, 1) }
+            else if (nargs == 1) { Pareto$new(a1, 1) }
+            else if (nargs == 2) { Pareto$new(a1, a2) }
+        },
         Poisson = {
                  if (nargs == 0) { Poisson$new(1) }
             else if (nargs == 1) { Poisson$new(a1) }
+        },
+        Rayleigh = {
+                 if (nargs == 0) { Rayleigh$new(1) }
+            else if (nargs == 1) { Rayleigh$new(a1) }
         },
         Skellam = {
                  if (nargs == 0) { Skellam$new(1, 1) }
             else if (nargs == 1) { Skellam$new(a1, a1) }
             else if (nargs == 2) { Skellam$new(a1, a2) }
         },
+        SymTriangularDist = {
+                 if (nargs == 0) { TriangularDist$new(-1, 1, 0) }
+            else if (nargs == 1) { TriangularDist$new(a1 - 1, a1 + 1, a1) }
+            else if (nargs == 2) { TriangularDist$new(a1 - a2, a1 + a2, a1) }
+        },
         TDist = {
             if (nargs == 1) { TDist$new(a1) }
+        },
+        TriangularDist = {
+                 if (nargs == 2) { TriangularDist$new(a1, a2, (a1+a2)/2) }
+            else if (nargs == 3) { TriangularDist$new(a1, a2, a3) }
+        },
+        TruncatedNormal = {
+            if (nargs == 4) { TruncatedNormal$new(a1, a2, a3, a4) }
         },
         Uniform = {
                  if (nargs == 0) { Uniform$new(0, 1) }

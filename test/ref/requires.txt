@@ -1,0 +1,10 @@
+Required R Packages
+====================
+
+- R6
+- extraDistr: for a number of distributions
+
+- chi:     for Chi
+- distr:   for Arcsine
+- statmod: for InverseGaussian
+- skellam: for Skellam

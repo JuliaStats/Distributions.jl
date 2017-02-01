@@ -167,6 +167,41 @@ Beta <- R6Class("Beta",
     )
 )
 
+# BetaPrime
+
+BetaPrime <- R6Class("BetaPrime",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta"),
+        alpha = NA,
+        beta = NA,
+        initialize = function(a, b) {
+            self$alpha <- a
+            self$beta <- b
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            a <- self$alpha
+            b <- self$beta
+            list(mean = if (b > 1) { a / (b - 1) } else { NaN },
+                 mode = if (a > 1) {
+                     (a - 1) / (b + 1)
+                 } else { 0 },
+                 var = if (b > 2) {
+                     a * (a + b - 1) / ((b - 2) * (b - 1)^2)
+                 } else { NaN },
+                 skewness = if (b > 3) {
+                     2 * (2 * a + b - 1) / (b - 3) *
+                     sqrt((b - 2) / (a * (a + b - 1)))
+                 } else { NaN })
+        },
+        pdf = function(x, log=FALSE){ dbetapr(x, self$alpha, self$beta, log=log) },
+        cdf = function(x) { pbetapr(x, self$alpha, self$beta) },
+        quan = function(v) { qbetapr(v, self$alpha, self$beta) }
+    )
+)
+
+
 # Cauchy
 
 Cauchy <- R6Class("Cauchy",
@@ -189,6 +224,38 @@ Cauchy <- R6Class("Cauchy",
         pdf = function(x, log=FALSE) { dcauchy(x, self$mu, self$sigma, log=log) },
         cdf = function(x) { pcauchy(x, self$mu, self$sigma) },
         quan = function(v) { qcauchy(v, self$mu, self$sigma) }
+    )
+)
+
+# Chi
+
+Chi <- R6Class("Chi",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("nu"),
+        nu = NA,
+        initialize = function(nu) {
+            self$nu <- nu
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            k <- self$nu
+            u <- sqrt(2) * gamma((k+1)/2) / gamma(k/2)
+            v <- k - u^2
+            m3 <- u / v^1.5 * (1 - 2 * v)
+            m4 <- (2 / v) * (1 - u * sqrt(v) * m3 - v)
+            list(dof = k,
+                 mode = ifelse(k >= 1, sqrt(k - 1), NaN),
+                 mean = u,
+                 var = v,
+                 skewness = m3,
+                 kurtosis = m4,
+                 entropy = lgamma(k/2) + (k - log(2) - (k-1)*psigamma(k/2, 0)) / 2
+                )
+        },
+        pdf = function(x, log=FALSE) { chi::dchi(x, self$nu, log=log) },
+        cdf = function(x) { chi::pchi(x, self$nu) },
+        quan = function(v) { chi::qchi(v, self$nu) }
     )
 )
 
@@ -316,13 +383,18 @@ FDist <- R6Class("FDist",
         properties = function() {
             d1 <- self$nu1
             d2 <- self$nu2
-            var.num <- 2 * d2^2 * (d1 + d2 - 2)
-            var.den <- d1 * (d2 - 2)^2 * (d2 - 4)
-            skew.num <- (2 * d1 + d2 - 2) * sqrt(8 * (d2 - 4))
-            skew.den <- (d2 - 6) * sqrt(d1 * (d1 + d2 - 2))
-            list(mean = d2 / (d2 - 2),
-                 var = var.num / var.den,
-                 skewness = skew.num / skew.den)
+            list(mean = if (d2 > 2) { d2 / (d2 - 2) } else { NaN },
+                 mode = if (d1 > 2) {
+                     (d1 - 2) * d2 / (d1 * (d2 + 2))
+                 } else { 0 },
+                 var = if (d2 > 4) {
+                     2 * d2^2 * (d1 + d2 - 2) /
+                     ( d1 * (d2 - 2)^2 * (d2 - 4) )
+                 } else { NaN },
+                 skewness = if (d2 > 6) {
+                     (2 * d1 + d2 - 2) * sqrt(8 * (d2 - 4)) /
+                     ( (d2 - 6) * sqrt(d1 * (d1 + d2 - 2)) )
+                 } else { NaN })
         },
         pdf = function(x, log=FALSE) { df(x, self$nu1, self$nu2, log=log) },
         cdf = function(x) { pf(x, self$nu1, self$nu2) },
@@ -350,6 +422,7 @@ Gammad <- R6Class("Gammad",
             s <- self$theta
             list(shape=a,
                  scale=s,
+                 rate=1/s,
                  mean=a * s,
                  var=a * s^2,
                  skewness=2 / sqrt(a),
@@ -387,6 +460,38 @@ Geometric <- R6Class("Geometric",
         pdf = function(x, log=FALSE) { dgeom(x, self$p, log=log) },
         cdf = function(x) { pgeom(x, self$p) },
         quan = function(v){ qgeom(v, self$p) }
+    )
+)
+
+# Gumbel
+
+Gumbel <- R6Class("Gumbel",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "beta"),
+        mu = NA,
+        beta = NA,
+        initialize = function(u, b) {
+            self$mu <- u
+            self$beta <- b
+        },
+        supp = function(){ c(-Inf, Inf) },
+        properties = function() {
+            u <- self$mu
+            b <- self$beta
+            g <- 0.57721566490153286
+            list(location = u,
+                 scale = b,
+                 mean = u + b * g,
+                 median = u - b * log(log(2)),
+                 mode = u,
+                 var = pi^2 * b^2 / 6,
+                 skewness = 1.13954709940464866,
+                 kurtosis = 2.4)
+        },
+        pdf = function(x, log=FALSE){ dgumbel(x, self$mu, self$beta, log=log) },
+        cdf = function(x){ pgumbel(x, self$mu, self$beta) },
+        quan = function(v){ qgumbel(v, self$mu, self$beta) }
     )
 )
 
@@ -430,6 +535,171 @@ Hypergeometric <- R6Class("Hypergeometric",
         pdf = function(x, log=FALSE){ dhyper(x, self$ns, self$nf, self$n, log=log) },
         cdf = function(x){ phyper(x, self$ns, self$nf, self$n) },
         quan = function(v){ qhyper(v, self$ns, self$nf, self$n) }
+    )
+)
+
+# InverseGamma
+
+InverseGamma <- R6Class("InverseGamma",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta"),
+        alpha = NA,
+        beta = NA,
+        initialize = function(a, b) {
+            self$alpha <- a
+            self$beta <- b
+        },
+        supp = function(){ c(0, Inf) },
+        properties = function() {
+            a <- self$alpha
+            b <- self$beta
+            list(shape = a,
+                 scale = b,
+                 rate = 1 / b,
+                 mean = if (a > 1) { b / (a - 1) } else { Inf },
+                 mode = b / (a + 1),
+                 var = if (a > 2) {
+                     b^2 / ((a - 1)^2 * (a - 2))
+                 } else { Inf },
+                 skewness = if (a > 3) {
+                     4 * sqrt(a - 2) / (a - 3)
+                 } else { NaN },
+                 kurtosis = if (a > 4) {
+                     (30 * a - 66) / ((a - 3) * (a - 4))
+                 } else { NaN },
+                 entropy = a + log(b) + lgamma(a) - (1 + a) * digamma(a))
+        },
+        pdf = function(x, log=FALSE){ dinvgamma(x, self$alpha, self$beta, log=log) },
+        cdf = function(x){ pinvgamma(x, self$alpha, self$beta) },
+        quan = function(v){ qinvgamma(v, self$alpha, self$beta) }
+    )
+)
+
+# InverseGaussian (i.e. Wald distribution)
+
+InverseGaussian = R6Class("InverseGaussian",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "lambda"),
+        mu = NA,
+        lambda = NA,
+        initialize = function(u, lambda) {
+            self$mu <- u
+            self$lambda <- lambda
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            u <- self$mu
+            l <- self$lambda
+            list(shape = l,
+                 mean = u,
+                 mode = u * ( (1 + 9 * u^2 / (4 * l^2))^0.5 - (3 * u) / (2 * l) ),
+                 var = u^3 / l,
+                 skewness = 3 * sqrt(u / l),
+                 kurtosis = 15 * u / l)
+        },
+        pdf = function(x, log=FALSE){ statmod::dinvgauss(x, self$mu, self$lambda, log=log) },
+        cdf = function(x){ statmod::pinvgauss(x, self$mu, self$lambda) },
+        quan = function(v){ statmod::qinvgauss(v, self$mu, self$lambda) }
+    )
+)
+
+# Laplace
+
+Laplace <- R6Class("Laplace",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "beta"),
+        mu = NA,
+        beta = NA,
+        initialize = function(u, b) {
+            self$mu <- u
+            self$beta <- b
+        },
+        supp = function() { c(-Inf, Inf) },
+        properties = function() {
+            u <- self$mu
+            b <- self$beta
+            list(location = u,
+                 scale = b,
+                 mean = u,
+                 median = u,
+                 mode = u,
+                 var = 2 * b^2,
+                 skewness = 0,
+                 kurtosis = 3,
+                 entropy = 1 + log(2 * b))
+        },
+        pdf = function(x, log=FALSE){ dlaplace(x, self$mu, self$beta, log=log) },
+        cdf = function(x){ plaplace(x, self$mu, self$beta) },
+        quan = function(v){ qlaplace(v, self$mu, self$beta) }
+    )
+)
+
+# Logistic
+
+Logistic <- R6Class("Logistic",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma"),
+        mu = NA,
+        sigma = NA,
+        initialize = function(u, s) {
+            self$mu <- u
+            self$sigma <- s
+        },
+        supp = function() { c(-Inf, Inf) },
+        properties = function() {
+            u <- self$mu
+            s <- self$sigma
+            list(location = u,
+                 scale = s,
+                 mean = u,
+                 median = u,
+                 mode = u,
+                 var = s^2 * pi^2 / 3,
+                 skewness = 0,
+                 kurtosis = 1.2,
+                 entropy = log(s) + 2)
+        },
+        pdf = function(x, log=FALSE){ dlogis(x, self$mu, self$sigma, log=log) },
+        cdf = function(x){ plogis(x, self$mu, self$sigma) },
+        quan = function(v){ qlogis(v, self$mu, self$sigma) }
+    )
+)
+
+# LogNormal
+
+LogNormal <- R6Class("LogNormal",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma"),
+        mu = NA,
+        sigma = NA,
+        initialize = function(u, s) {
+            self$mu <- u
+            self$sigma <- s
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            u <- self$mu
+            s <- self$sigma
+            es2 <- exp(s^2)
+            list(meanlogx = u,
+                 varlogx = s^2,
+                 stdlogx = s,
+                 mean = exp(u + s^2/2),
+                 median = exp(u),
+                 mode = exp(u - s^2),
+                 var = (es2 - 1) * exp(2 * u + s^2),
+                 skewness = (es2 + 2) * sqrt(es2 - 1),
+                 kurtosis = es2^4 + 2 * es2^3 + 3 * es2^2 - 6,
+                 entropy = (u + 1/2) + log(sqrt(2 * pi) * s))
+        },
+        pdf = function(x, log=FALSE){ dlnorm(x, self$mu, self$sigma, log=log) },
+        cdf = function(x){ plnorm(x, self$mu, self$sigma) },
+        quan = function(v){ qlnorm(v, self$mu, self$sigma) }
     )
 )
 
@@ -492,6 +762,45 @@ Normal <- R6Class("Normal",
     )
 )
 
+# Pareto
+
+Pareto <- R6Class("Pareto",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("alpha", "beta"),
+        alpha = NA,
+        beta = NA,
+        initialize = function(a, b) {
+            self$alpha <- a
+            self$beta <- b
+        },
+        supp = function() { c(self$beta, Inf) },
+        properties = function() {
+            a <- self$alpha
+            b <- self$beta
+            list(shape = a,
+                 scale = b,
+                 mean = if (a > 1) { a * b / (a - 1) } else { Inf },
+                 median = b * 2^(1/a),
+                 mode = b,
+                 var = if (a > 2) {
+                     a * b^2 / ((a - 1)^2 * (a - 2))
+                 } else { Inf },
+                 skewness = if (a > 3) {
+                     2 * (1 + a) / (a - 3) * sqrt((a - 2) / a)
+                 } else { NaN },
+                 kurtosis = if (a > 4) {
+                     6 * (a^3 + a^2 - 6*a - 2) /
+                     (a * (a - 3) * (a - 4))
+                 } else { NaN },
+                 entropy = (1 + 1 / a) + log(b / a))
+        },
+        pdf = function(x, log=FALSE){ dpareto(x, self$alpha, self$beta, log=log) },
+        cdf = function(x){ ppareto(x, self$alpha, self$beta) },
+        quan = function(v){ qpareto(v, self$alpha, self$beta) }
+    )
+)
+
 # Poisson
 
 Poisson <- R6Class("Poisson",
@@ -517,7 +826,35 @@ Poisson <- R6Class("Poisson",
     )
 )
 
-# Poisson
+# Rayleigh
+
+Rayleigh <- R6Class("Rayleigh",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("sigma"),
+        sigma = NA,
+        initialize = function(s) {
+            self$sigma <- s
+        },
+        supp = function() { c(0, Inf) },
+        properties = function() {
+            s <- self$sigma
+            list(scale = s,
+                 mean = s * sqrt(pi / 2),
+                 median = s * sqrt(2 * log(2)),
+                 mode = s,
+                 var = s^2 * (4 - pi) / 2,
+                 skewness = 0.631110657818937,
+                 kurtosis = 0.245089300687638,
+                 entropy = 0.94203424217079 + log(s))
+        },
+        pdf = function(x, log=FALSE) { drayleigh(x, self$sigma, log=log) },
+        cdf = function(x){ prayleigh(x, self$sigma) },
+        quan = function(v){ qrayleigh(v, self$sigma) }
+    )
+)
+
+# Skellam
 
 Skellam <- R6Class("Skellam",
     inherit = DiscreteDistribution,
@@ -574,6 +911,85 @@ TDist <- R6Class("TDist",
         pdf = function(x, log=FALSE) { dt(x, self$nu, log=log) },
         cdf = function(x) { pt(x, self$nu) },
         quan = function(v) { qt(v, self$nu) }
+    )
+)
+
+# TriangularDist
+
+TriangularDist = R6Class("TriangularDist",
+    inherit = ContinuousDistribution,
+    public =list(
+        names = c("a", "b", "c"),
+        a = NA,
+        b = NA,
+        c = NA,
+        initialize = function(a, b, c) {
+            self$a <- a
+            self$b <- b
+            self$c <- c
+        },
+        supp = function() { c(self$a, self$b) },
+        properties = function() {
+            a <- self$a
+            b <- self$b
+            c <- self$c
+            m <- (a + b) / 2
+            list(mean = (a + b + c) / 3,
+                 mode = c,
+                 median = if (c >= m) {
+                     a + sqrt((b - a) * (c - a) / 2)
+                 } else {
+                     b - sqrt((b - a) * (b - c) / 2)
+                 },
+                 var = (a^2 + b^2 + c^2 - a*b - a*c - b*c) / 18,
+                 skewness = (sqrt(2)/5) * (a + b - 2*c) * (2*a - b - c) * (a - 2*b + c) /
+                    (a^2 + b^2 + c^2 - a*b - a*c - b*c)^1.5,
+                 kurtosis = -0.6,
+                 entropy = 0.5 + log((b - a) / 2))
+        },
+        pdf = function(x, log=FALSE) { dtriang(x, self$a, self$b, self$c, log=log) },
+        cdf = function(x) { ptriang(x, self$a, self$b, self$c) },
+        quan = function(v) { qtriang(v, self$a, self$b, self$c) }
+    )
+)
+
+# TruncatedNormal
+
+TruncatedNormal <- R6Class("TruncatedNormal",
+    inherit = ContinuousDistribution,
+    public = list(
+        names = c("mu", "sigma", "a", "b"),
+        mu = NA,
+        sigma = NA,
+        a = NA,
+        b = NA,
+        initialize = function(u, s, a, b) {
+            self$mu <- u
+            self$sigma <- s
+            self$a <- a
+            self$b <- b
+        },
+        supp = function() { c(self$a, self$b) },
+        properties = function() {
+            u <- self$mu
+            s <- self$sigma
+            a <- self$a
+            b <- self$b
+            za <- (a - u) / s
+            zb <- (b - u) / s
+            Z <- pnorm(zb) - pnorm(za)
+            pa <- dnorm(za)
+            pb <- dnorm(zb)
+            v1 <- (ifelse(pa == 0, 0, za * pa) -
+                   ifelse(pb == 0, 0, zb * pb)) / Z
+            list(mode = pmin(pmax(u, a), b),
+                 mean = u + (pa - pb) / Z * s,
+                 var = s^2 * (1 + v1 - ((pa - pb) / Z)^2),
+                 entropy = (log(2*pi) + 1) / 2 + log(s) + log(Z) + v1 / 2)
+        },
+        pdf = function(x, log=FALSE) { dtnorm(x, self$mu, self$sigma, self$a, self$b, log=log) },
+        cdf = function(x) { ptnorm(x, self$mu, self$sigma, self$a, self$b) },
+        quan = function(v) { qtnorm(v, self$mu, self$sigma, self$a, self$b) }
     )
 )
 

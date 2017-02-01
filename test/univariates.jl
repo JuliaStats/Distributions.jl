@@ -49,19 +49,24 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 
-function verify_and_test(D::Type, d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
+function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify properties
     #
     # Note: properties include all applicable params and stats
     #
-    assert(isa(d, D))
+
+    # D can be a function, e.g. TruncatedNormal
+    if isa(D, Type)
+        assert(isa(d, D))
+    end
 
     pdct = dct["properties"]
     for (fname, val) in pdct
         expect_v = _json_value(val)
         f = eval(Symbol(fname))
         @assert isa(f, Function)
-        Base.Test.test_approx_eq(f(d), expect_v, "$fname(d)", "expect_v")
+        tol_v = abs(expect_v) * 1e-12 + 1e-12
+        Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
     end
 
     # test various constructors for promotion, all-Integer args, etc.
