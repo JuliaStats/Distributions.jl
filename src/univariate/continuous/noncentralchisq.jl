@@ -3,11 +3,11 @@
 
 The *noncentral chi-squared distribution* with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
 
-$f(x; ν, λ) = \frac{1}{2}e^{-(x + λ)/2}\frac{x}{λ}^{ν/4-1/2}I_{ν/2-1}(\sqrt{λx}) \quad x>0.$
+$f(x; \nu, \lambda) = \frac{1}{2} e^{-(x + \lambda)/2} \left( \frac{x}{\lambda} \right)^{\nu/4-1/2} I_{\nu/2-1}(\sqrt{\lambda x}), \quad x > 0$
 
-It is the distribution of the sum of squares of `ν` independent [`Normal`](:func:`Normal`) variates with individual means $μ_i$ and
+It is the distribution of the sum of squares of `ν` independent [`Normal`](:func:`Normal`) variates with individual means $\mu_i$ and
 
-$λ = \sum_{i=1}^ν{μ_i^2}$
+$\lambda = \sum_{i=1}^\nu \mu_i^2$
 
 ```julia
 NoncentralChisq(ν, λ)     # Noncentral chi-squared distribution with ν degrees of freedom and noncentrality parameter λ
