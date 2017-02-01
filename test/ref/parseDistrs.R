@@ -111,6 +111,11 @@ get.distr <- function(entry) {
                  if (nargs == 0) { Poisson$new(1) }
             else if (nargs == 1) { Poisson$new(a1) }
         },
+        Skellam = {
+                 if (nargs == 0) { Skellam$new(1, 1) }
+            else if (nargs == 1) { Skellam$new(a1, a1) }
+            else if (nargs == 2) { Skellam$new(a1, a2) }
+        },
         TDist = {
             if (nargs == 1) { TDist$new(a1) }
         },

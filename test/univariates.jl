@@ -87,22 +87,30 @@ function verify_and_test(D::Type, d::UnivariateDistribution, dct::Dict, n_tsampl
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        lp = Float64(pt["logpdf"])
-        cf = Float64(pt["cdf"])
-        Base.Test.test_approx_eq(logpdf(d, x), lp, 1e-12, "logpdf(d, $x)", "lp")
+        p = _json_value(pt["pdf"])
+        lp = _json_value(pt["logpdf"])
+        cf = _json_value(pt["cdf"])
+
+        ptol = p * 1e-8 + 1e-16
+        lptol = 1e-12
+        cftol = 1e-12
+        Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
+        Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
+
+        # cdf method is not implemented for Skellam
         if !isa(d, Skellam)
-            Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
-        else
-            @test_throws MethodError cdf(d, x)
+            Base.Test.test_approx_eq(cdf(d, x), cf, cftol, "cdf(d, $x)", "cf")
         end
     end
 
     # verify quantiles
-    qts = dct["quans"]
-    for qt in qts
-        q = Float64(qt["q"])
-        x = Float64(qt["x"])
-        @test isapprox(quantile(d, q), x, atol=1.0e-8)
+    if !isa(d, Skellam)
+        qts = dct["quans"]
+        for qt in qts
+            q = Float64(qt["q"])
+            x = Float64(qt["x"])
+            @test isapprox(quantile(d, q), x, atol=1.0e-8)
+        end
     end
 
     try

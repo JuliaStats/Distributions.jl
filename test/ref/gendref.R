@@ -21,6 +21,12 @@
 #
 
 source("parseDistrs.R")
+options(
+    error = function() {
+        traceback(2)
+        q()
+    }
+)
 
 ########################################
 #
