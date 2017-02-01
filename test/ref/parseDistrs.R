@@ -52,6 +52,9 @@ get.distr <- function(entry) {
             else if (nargs == 1) { Beta$new(a1, a1) }
             else if (nargs == 2) { Beta$new(a1, a2) }
         },
+        BetaBinomial = {
+            if (nargs == 3) { BetaBinomial$new(a1, a2, a3) }
+        },
         BetaPrime = {
                  if (nargs == 0) { BetaPrime$new(1, 1) }
             else if (nargs == 1) { BetaPrime$new(a1, a1) }

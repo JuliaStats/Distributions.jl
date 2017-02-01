@@ -29,8 +29,7 @@ tests = [
     "gradlogpdf",
     "truncate",
     "truncatednormal",
-    "generalizedextremevalue",
-    "pdfbetabinomial"]
+    "generalizedextremevalue"]
 
 print_with_color(:blue, "Running tests:\n")
 
@@ -56,3 +55,4 @@ end
 # print method ambiguities
 println("Potentially stale exports: ")
 display(Base.Test.detect_ambiguities(Distributions))
+println()

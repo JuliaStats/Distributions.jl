@@ -98,7 +98,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
         ptol = p * 1e-8 + 1e-16
         lptol = 1e-12
-        cftol = 1e-12
+        cftol = 1e-12        
         Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
         Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
 

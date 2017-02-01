@@ -4,6 +4,11 @@ Bernoulli(0.75)
 Bernoulli(0.00)
 Bernoulli(1.00)
 
+BetaBinomial(2, 0.2, 0.25)
+BetaBinomial(10, 0.2, 0.25)
+BetaBinomial(10, 2, 2.5)
+BetaBinomial(10, 60, 40)
+
 Binomial()
 Binomial(3)
 Binomial(5, 0.4)
