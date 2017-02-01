@@ -1,5 +1,6 @@
-doc"""
+"""
     NoncentralChisq(ν, λ)
+
 The *Noncentral Chi-squared distribution* (typically written χ²) with `ν` degrees of freedom and non-centrality parameter `λ` has the probability density function
 
 $f(x; ν, λ) = \frac{1}{2}e^{-(x + λ)/2}\frac{x}{λ}^{ν/4-1/2}I_{ν/2-1}(\sqrt{λx}) \quad x>0.$
@@ -18,7 +19,6 @@ External links
 
 * [Noncentral Chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
 """
-
 immutable NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
