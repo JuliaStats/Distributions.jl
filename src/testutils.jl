@@ -455,10 +455,10 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
         @test isapprox(var(d) , xvar , atol=1.0e-8)
         @test isapprox(std(d) , xstd , atol=1.0e-8)
 
-        if isfinite(skewness(d))
+        if applicable(skewness, d) && isfinite(skewness(d))
             @test isapprox(skewness(d), xskew   , atol=1.0e-8)
         end
-        if isfinite(kurtosis(d))
+        if applicable(kurtosis, d) && isfinite(kurtosis(d))
             @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)

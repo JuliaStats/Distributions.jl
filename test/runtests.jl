@@ -22,7 +22,6 @@ tests = [
     "kolmogorov",
     "edgeworth",
     "matrix",
-    "noncentralhypergeometric",
     "vonmisesfisher",
     "conversion",
     "mixture",

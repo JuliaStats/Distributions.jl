@@ -60,15 +60,6 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         assert(isa(d, D))
     end
 
-    pdct = dct["properties"]
-    for (fname, val) in pdct
-        expect_v = _json_value(val)
-        f = eval(Symbol(fname))
-        @assert isa(f, Function)
-        tol_v = abs(expect_v) * 1e-8 + 1e-12
-        Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
-    end
-
     # test various constructors for promotion, all-Integer args, etc.
     pars = params(d)
 
@@ -88,6 +79,16 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @test typeof(D(int_pars...)) == typeof(d)
     end
 
+    # verify properties (params & stats)
+    pdct = dct["properties"]
+    for (fname, val) in pdct
+        expect_v = _json_value(val)
+        f = eval(Symbol(fname))
+        @assert isa(f, Function)
+        tol_v = abs(expect_v) * 1e-8 + 1e-12
+        Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
+    end
+
     # verify logpdf and cdf at certain points
     pts = dct["points"]
     for pt in pts
@@ -99,6 +100,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         ptol = p * 1e-8 + 1e-16
         lptol = 1e-12
         cftol = 1e-12
+        if isa(d, NoncentralHypergeometric)
+            lptol = 1e-4
+            cftol = 1e-8
+        end
+
         Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
         Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
 
@@ -109,7 +115,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     end
 
     # verify quantiles
-    if D ∉ [Skellam, VonMises]
+    if !isa(d, Union{Skellam, VonMises})
         qts = dct["quans"]
         for qt in qts
             q = Float64(qt["q"])
@@ -145,7 +151,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         n_tsamples = min(n_tsamples, 100)
     end
 
-    if !isa(d, Union{Skellam, VonMises})
+    if !isa(d, Union{Skellam, VonMises, NoncentralHypergeometric})
         test_distr(d, n_tsamples)
     end
 end
