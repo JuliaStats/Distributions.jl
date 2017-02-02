@@ -141,23 +141,15 @@ cat.quan <- function (prefix, quans, i) {
 }
 
 write.json <- function(info, last=FALSE) {
-    # extract fields
-    expr <- info$expr
-    distr <- info$distr
-    points <- info$points
-    quans <- info$quans
-
     cat("{\n")
-    dname <- class(distr)[1]
-    suppr <- distr$supp()
-    cat.attribute("  ", "expr", expr)
-    cat.attribute("  ", "dtype", dname)
-    cat.attribute("  ", "minimum", suppr[1])
-    cat.attribute("  ", "maximum", suppr[2])
+    cat.attribute("  ", "expr", info$expr)
+    cat.attribute("  ", "dtype", info$dtype)
+    cat.attribute("  ", "minimum", info$supp[1])
+    cat.attribute("  ", "maximum", info$supp[2])
 
     # output properties
+    props <- info$props
     cat("  \"properties\": {\n")
-    props <- distr$properties()
     i <- 0
     n <- length(props)
     for (pn in names(props)) {
@@ -167,6 +159,7 @@ write.json <- function(info, last=FALSE) {
     cat("  },\n")
 
     # output points
+    points <- info$points
     n <- length(points$x)
     if (n > 0) {
         cat("  \"points\": [\n")
@@ -179,6 +172,7 @@ write.json <- function(info, last=FALSE) {
     }
 
     # output quantile points
+    quans <- info$quans
     n <- length(quans$q)
     if (n > 0) {
         cat("  \"quans\": [\n")
@@ -217,16 +211,18 @@ do.main <- function(lstname) {
     n <- 0
     for (e in entries) {
         distr <- get.distr(e)
-        dname <- class(distr)[1]
-        cat("On ", e, " --> ", dname, ": ", sep="")
+        dtype <- class(distr)[1]
+        cat("On ", e, " --> ", dtype, ": ", sep="")
         for (sn in distr$names) {
             cat(sn, "=", distr[[sn]], " ", sep="")
         }
         cat("\n")
         n <- n + 1
         info <- list(
+            dtype=class(distr)[1],
             expr=e,
-            distr=distr,
+            supp=distr$supp(),
+            props=distr$properties(),
             points=eval.points(distr),
             quans=eval.quans(distr))
         infolist[[n]] <- info
