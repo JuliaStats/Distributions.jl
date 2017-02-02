@@ -15,11 +15,12 @@ in addition to the R language itself:
 | stringr     | For string parsing  |
 | R6          | OOP for implementing distributions |
 | extraDistr  | A number of distributions |
-| chi         | For ``Chi`` |
+| VGAM        | For ``Frechet`` and ``Levy`` |
 | distr       | For ``Arcsine`` |
+| chi         | For ``Chi`` |
+| circular    | For ``VonMises`` |
 | statmod     | For ``InverseGaussian`` |
 | skellam     | For ``Skellam`` |
-| VGAM        | For ``Frechet`` and ``Levy`` |
 
 ## Usage
 

@@ -109,7 +109,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     end
 
     # verify quantiles
-    if !isa(d, Skellam)
+    if D ∉ [Skellam, VonMises]
         qts = dct["quans"]
         for qt in qts
             q = Float64(qt["q"])
