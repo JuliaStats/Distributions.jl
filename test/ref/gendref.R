@@ -20,13 +20,81 @@
 #         file I/O and the computation of statistical functions.
 #
 
-source("parseDistrs.R")
+library(stringr)
+source("rdistributions.R")
+
 options(
     error = function() {
         traceback(2)
         q()
     }
 )
+
+########################################
+#
+#  Parse distributions
+#
+########################################
+
+read.entries <- function(filename) {
+    # Read a list of entries from a given file
+    lst <- read.table(filename, header=FALSE,
+        sep="\t", blank.lines.skip = TRUE, comment.char="#")
+    as.vector(lst$V1)
+}
+
+parse.entry <- function(entry) {
+    # Parse an entry into a distribution name, and
+    # a vector of argument values
+
+    lb <- str_locate(entry, "\\(")[1]
+    rb <- str_locate(entry, "\\)")[1]
+    stopifnot(!is.na(lb), lb > 1)
+    stopifnot(!is.na(rb), rb > lb)
+
+    name <- str_sub(entry, 1, lb-1)
+    if (rb == lb + 1) {
+        args <- NULL
+    } else {
+        argstr <- entry %>% str_sub(lb+1, rb-1) %>% str_trim
+        sl <- str_length(argstr)
+        if (sl == 0) {
+            args <- NULL
+        } else {
+            terms <- str_split(argstr, "\\s*,\\s*")[[1]]
+            args <- as.numeric(terms)
+        }
+    }
+    list(name=name, args=args)
+}
+
+
+get.distr <- function(entry) {
+    # Get a distribution object based on a given entry
+    parsed <- parse.entry(entry)
+    dname <- parsed$name
+    dargs <- parsed$args
+
+    # obtain distribution generator
+    dclass <- get(dname)
+
+    # construct distribution
+    nargs <- length(dargs)
+
+    if (nargs == 0) {
+        dclass$new()
+    } else if (nargs == 1) {
+        dclass$new(dargs[1])
+    } else if (nargs == 2) {
+        dclass$new(dargs[1], dargs[2])
+    } else if (nargs == 3) {
+        dclass$new(dargs[1], dargs[2], dargs[3])
+    } else if (nargs == 4) {
+        dclass$new(dargs[1], dargs[2], dargs[3], dargs[4])
+    } else {
+        stop(paste("Too many arguments for distribution", dname))
+    }
+}
 
 ########################################
 #

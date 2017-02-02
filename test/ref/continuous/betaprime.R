@@ -5,7 +5,7 @@ BetaPrime <- R6Class("BetaPrime",
         names = c("alpha", "beta"),
         alpha = NA,
         beta = NA,
-        initialize = function(a, b) {
+        initialize = function(a=1, b=a) {
             self$alpha <- a
             self$beta <- b
         },

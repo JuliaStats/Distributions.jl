@@ -6,7 +6,14 @@ Arcsine <- R6Class("Arcsine",
         a = NA,
         b = NA,
         rd = NA,  # R distr object
-        initialize = function(a, b) {
+        initialize = function(a1=NA, a2=NA) {
+            if (is.na(a1)) {
+                a <- 0; b <- 1
+            } else if (is.na(a2)) {
+                a <- 0; b <- a1
+            } else {
+                a <- a1; b <- a2
+            }
             self$a <- a
             self$b <- b
             self$rd <- distr::Arcsine() * ((b-a)/2) + ((a+b)/2)

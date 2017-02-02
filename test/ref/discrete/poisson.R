@@ -4,7 +4,7 @@ Poisson <- R6Class("Poisson",
     public = list(
         names = c("lambda"),
         lambda = NA,
-        initialize = function(lambda) {
+        initialize = function(lambda=1) {
             self$lambda <- lambda
         },
         supp = function() { c(0, Inf) },

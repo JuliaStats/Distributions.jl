@@ -1,12 +1,12 @@
 
-Gammad <- R6Class("Gammad",
+Gamma <- R6Class("Gamma",
     inherit = ContinuousDistribution,
     public = list(
         names = c("alpha", "theta"),
         alpha = NA,
         theta = NA,
         beta = NA,
-        initialize = function(a, s) {
+        initialize = function(a=1, s=1) {
             self$alpha <- a
             self$theta <- s
             self$beta <- 1 / s
@@ -30,3 +30,5 @@ Gammad <- R6Class("Gammad",
         quan = function(v) { qgamma(v, self$alpha, self$beta) }
     )
 )
+
+Erlang = list(new = Gamma$new)

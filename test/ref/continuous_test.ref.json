@@ -836,7 +836,7 @@
 },
 {
   "expr": "Erlang()",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -870,7 +870,7 @@
 },
 {
   "expr": "Erlang(3)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -904,7 +904,7 @@
 },
 {
   "expr": "Erlang(3, 1.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -938,7 +938,7 @@
 },
 {
   "expr": "Erlang(5, 2.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -1379,7 +1379,7 @@
 },
 {
   "expr": "Gamma()",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -1413,7 +1413,7 @@
 },
 {
   "expr": "Gamma(2.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -1447,7 +1447,7 @@
 },
 {
   "expr": "Gamma(1.0, 1.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -1481,7 +1481,7 @@
 },
 {
   "expr": "Gamma(3.0, 1.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -1515,7 +1515,7 @@
 },
 {
   "expr": "Gamma(3.0, 2.0)",
-  "dtype": "Gammad",
+  "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
   "properties": {

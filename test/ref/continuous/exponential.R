@@ -5,7 +5,7 @@ Exponential <- R6Class("Exponential",
         names = c("theta"),
         theta = NA,
         beta = NA,
-        initialize = function(s) {
+        initialize = function(s=1) {
             self$theta <- s
             self$beta <- 1 / s
         },

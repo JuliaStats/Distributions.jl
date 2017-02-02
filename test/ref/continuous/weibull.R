@@ -5,7 +5,7 @@ Weibull <- R6Class("Weibull",
         names = c("alpha", "theta"),
         alpha = NA,
         theta = NA,
-        initialize = function(a, s) {
+        initialize = function(a=1, s=1) {
             self$alpha <- a
             self$theta <- s
         },

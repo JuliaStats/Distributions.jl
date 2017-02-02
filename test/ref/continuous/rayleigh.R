@@ -4,7 +4,7 @@ Rayleigh <- R6Class("Rayleigh",
     public = list(
         names = c("sigma"),
         sigma = NA,
-        initialize = function(s) {
+        initialize = function(s=1) {
             self$sigma <- s
         },
         supp = function() { c(0, Inf) },

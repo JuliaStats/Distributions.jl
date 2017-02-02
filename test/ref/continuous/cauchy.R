@@ -5,7 +5,7 @@ Cauchy <- R6Class("Cauchy",
         names = c("mu", "sigma"),
         mu = NA,
         sigma = NA,
-        initialize = function(u, s) {
+        initialize = function(u=0, s=1) {
             self$mu <- u
             self$sigma <- s
         },

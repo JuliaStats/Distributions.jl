@@ -2,25 +2,33 @@
 GeneralizedPareto <- R6Class("GeneralizedPareto",
     inherit = ContinuousDistribution,
     public = list(
-        names = c("xi", "sigma", "mu"),
-        xi = NA,
-        sigma = NA,
+        names = c("mu", "sigma", "xi"),
         mu = NA,
-        initialize = function(m, s, k) {
-            self$xi <- k
+        sigma = NA,
+        xi = NA,
+        initialize = function(a1=NA, a2=NA, a3=NA) {
+            if (is.na(a1)) {
+                u <- 0; s <- 1; k <- 1
+            } else if (is.na(a3)) {
+                stopifnot(!is.na(a2))
+                u <- 0; s <- a1; k <- a2
+            } else {
+                u <- a1; s <- a2; k <- a3
+            }
+            self$mu <- u
             self$sigma <- s
-            self$mu <- m
+            self$xi <- k
         },
         supp = function() {
-            k <- self$xi
-            s <- self$sigma
             u <- self$mu
+            s <- self$sigma
+            k <- self$xi
             if (k >= 0) { c(u, Inf) } else { c(u, u - s/k) }
         },
         properties = function() {
-            k <- self$xi
-            s <- self$sigma
             u <- self$mu
+            s <- self$sigma
+            k <- self$xi
             list(location = u,
                  scale = s,
                  shape = k,

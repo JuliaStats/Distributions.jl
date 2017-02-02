@@ -4,7 +4,7 @@ Geometric <- R6Class("Geometric",
     public = list(
         names = c("p"),
         p = NA,
-        initialize = function(p) {
+        initialize = function(p=0.5) {
             self$p <- p
         },
         supp = function(){ c(0, Inf) },

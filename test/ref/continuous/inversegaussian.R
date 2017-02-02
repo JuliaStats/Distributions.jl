@@ -5,7 +5,7 @@ InverseGaussian = R6Class("InverseGaussian",
         names = c("mu", "lambda"),
         mu = NA,
         lambda = NA,
-        initialize = function(u, lambda) {
+        initialize = function(u=1, lambda=1) {
             self$mu <- u
             self$lambda <- lambda
         },

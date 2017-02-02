@@ -5,7 +5,7 @@ Gumbel <- R6Class("Gumbel",
         names = c("mu", "beta"),
         mu = NA,
         beta = NA,
-        initialize = function(u, b) {
+        initialize = function(u=0, b=1) {
             self$mu <- u
             self$beta <- b
         },

@@ -6,7 +6,14 @@ DiscreteUniform <- R6Class("DiscreteUniform",
         b = NA,
         s = NA,
         names = c("a", "b"),
-        initialize = function(a, b) {
+        initialize = function(a1=NA, a2=NA) {
+            if (is.na(a1)) {
+                a <- 0; b <- 1
+            } else if (is.na(a2)) {
+                a <- 0; b <- a1
+            } else {
+                a <- a1; b <- a2
+            }
             self$a <- a
             self$b <- b
             self$s <- b - a + 1

@@ -1,7 +1,8 @@
 Required R Packages
 ====================
 
-- R6
+- stringr:    for string parsing
+- R6:         all distributions are implemented as R6 classes
 - extraDistr: for a number of distributions
 
 - chi:     for Chi

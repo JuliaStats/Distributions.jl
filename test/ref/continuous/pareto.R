@@ -5,7 +5,7 @@ Pareto <- R6Class("Pareto",
         names = c("alpha", "beta"),
         alpha = NA,
         beta = NA,
-        initialize = function(a, b) {
+        initialize = function(a=1, b=1) {
             self$alpha <- a
             self$beta <- b
         },

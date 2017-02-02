@@ -5,7 +5,7 @@ Skellam <- R6Class("Skellam",
         names = c("mu1", "mu2"),
         mu1 = NA,
         mu2 = NA,
-        initialize = function(mu1, mu2) {
+        initialize = function(mu1=1, mu2=mu1) {
             self$mu1 <- mu1
             self$mu2 <- mu2
         },

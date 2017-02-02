@@ -6,7 +6,7 @@ TriangularDist = R6Class("TriangularDist",
         a = NA,
         b = NA,
         c = NA,
-        initialize = function(a, b, c) {
+        initialize = function(a, b, c=(a+b)/2) {
             self$a <- a
             self$b <- b
             self$c <- c
@@ -34,4 +34,10 @@ TriangularDist = R6Class("TriangularDist",
         cdf = function(x) { ptriang(x, self$a, self$b, self$c) },
         quan = function(v) { qtriang(v, self$a, self$b, self$c) }
     )
+)
+
+SymTriangularDist = list(
+    new = function(u=0, s=1) {
+        TriangularDist$new(u-s, u+s, u)
+    }
 )

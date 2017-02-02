@@ -5,7 +5,7 @@ Normal <- R6Class("Normal",
         names = c("mu", "sigma"),
         mu = NA,
         sigma = NA,
-        initialize = function(u, s) {
+        initialize = function(u=0, s=1) {
             self$mu <- u
             self$sigma <- s
         },
@@ -25,4 +25,10 @@ Normal <- R6Class("Normal",
         cdf = function(x) { pnorm(x, self$mu, self$sigma) },
         quan = function(v) { qnorm(v, self$mu, self$sigma ) }
     )
+)
+
+NormalCanon = list(
+    new = function(c1=0, c2=1) {
+        Normal$new(c1/c2, 1/sqrt(c2))
+    }
 )

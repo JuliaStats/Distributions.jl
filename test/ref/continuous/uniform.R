@@ -5,7 +5,14 @@ Uniform <- R6Class("Uniform",
         names = c("a", "b"),
         a = NA,
         b = NA,
-        initialize = function(a, b) {
+        initialize = function(a1=NA, a2=NA) {
+            if (is.na(a1)) {
+                a <- 0; b <- 1
+            } else if (is.na(a2)) {
+                a <- 0; b <- a1
+            } else {
+                a <- a1; b <- a2
+            }
             self$a <- a
             self$b <- b
         },

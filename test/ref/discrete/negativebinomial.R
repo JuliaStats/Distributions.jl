@@ -5,7 +5,7 @@ NegativeBinomial <- R6Class("NegativeBinomial",
         names = c("r", "p"),
         r = NA,
         p = NA,
-        initialize = function(r, p) {
+        initialize = function(r=1, p=0.5) {
             self$r <- r
             self$p <- p
         },
