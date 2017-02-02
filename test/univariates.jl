@@ -108,14 +108,14 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
         Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
 
-        # cdf method is not implemented for Skellam
-        if !isa(d, Skellam)
+        # cdf method is not implemented for Skellam & NormalInverseGaussian
+        if !isa(d, Union{Skellam, NormalInverseGaussian})
             Base.Test.test_approx_eq(cdf(d, x), cf, cftol, "cdf(d, $x)", "cf")
         end
     end
 
     # verify quantiles
-    if !isa(d, Union{Skellam, VonMises})
+    if !isa(d, Union{Skellam, VonMises, NormalInverseGaussian})
         qts = dct["quans"]
         for qt in qts
             q = Float64(qt["q"])
@@ -151,7 +151,10 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         n_tsamples = min(n_tsamples, 100)
     end
 
-    if !isa(d, Union{Skellam, VonMises, NoncentralHypergeometric})
+    if !isa(d, Union{Skellam,
+                     VonMises,
+                     NoncentralHypergeometric,
+                     NormalInverseGaussian})
         test_distr(d, n_tsamples)
     end
 end

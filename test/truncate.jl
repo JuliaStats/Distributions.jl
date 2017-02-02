@@ -13,7 +13,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
     for dct in R
         ex = dct["expr"]
         dsym = Symbol(dct["dtype"])
-        if dsym in [:Skellam]
+        if dsym in [:Skellam, :NormalInverseGaussian]
             continue
         end
 

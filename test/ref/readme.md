@@ -21,6 +21,8 @@ in addition to the R language itself:
 | circular    | For ``VonMises`` |
 | statmod     | For ``InverseGaussian`` |
 | skellam     | For ``Skellam`` |
+| BiasedUrn   | For ``NoncentralHypergeometric`` |
+| fBasics     | For ``NormalInverseGaussian`` |
 
 ## Usage
 
