@@ -25,6 +25,8 @@ in addition to the R language itself:
 
 All reference classes are in ``test/ref/continuous`` and ``test/ref/discrete``. One R file for each distribution class.
 
+The test entries are listed in ``test/ref/continuous_test.lst`` and ``test/ref/discrete_test.lst``. Each entry is a Julia statement for constructing a distribution. The entries can be commented out using ``#``.
+
 One can enter ``Rscript gendref.R`` **within the directory** ``test/ref`` to generate the reference data files: ``test/ref/continuous_test.ref.json`` and ``test/ref/discrete_test.ref.json``.
 
 The testing script ``test/univariate.jl`` loads these reference data files to verify the implementations of Julia distribution classes.
