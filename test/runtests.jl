@@ -18,19 +18,14 @@ tests = [
     "mvnormal",
     "mvlognormal",
     "mvtdist",
-    "normalinversegaussian",
     "kolmogorov",
     "edgeworth",
     "matrix",
-    "noncentralhypergeometric",
     "vonmisesfisher",
     "conversion",
     "mixture",
     "gradlogpdf",
-    "truncate",
-    "truncatednormal",
-    "generalizedextremevalue",
-    "pdfbetabinomial"]
+    "truncate"]
 
 print_with_color(:blue, "Running tests:\n")
 
@@ -56,3 +51,4 @@ end
 # print method ambiguities
 println("Potentially stale exports: ")
 display(Base.Test.detect_ambiguities(Distributions))
+println()

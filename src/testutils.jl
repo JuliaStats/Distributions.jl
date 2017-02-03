@@ -24,13 +24,13 @@ end
 
 # testing the implementation of a discrete univariate distribution
 #
-function test_distr(distr::DiscreteUnivariateDistribution, n::Int)
+function test_distr(distr::DiscreteUnivariateDistribution, n::Int; testquan::Bool=true)
 
     test_range(distr)
     vs = get_evalsamples(distr, 0.00001)
 
     test_support(distr, vs)
-    test_evaluation(distr, vs)
+    test_evaluation(distr, vs, testquan)
     test_range_evaluation(distr)
 
     test_stats(distr, vs)
@@ -41,13 +41,13 @@ end
 
 # testing the implementation of a continuous univariate distribution
 #
-function test_distr(distr::ContinuousUnivariateDistribution, n::Int)
+function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::Bool=true)
 
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
 
     test_support(distr, vs)
-    test_evaluation(distr, vs)
+    test_evaluation(distr, vs, testquan)
 
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
@@ -326,7 +326,7 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
 end
 
 
-function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
+function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
     p   = Vector{Float64}(nv)
     c   = Vector{Float64}(nv)
@@ -354,13 +354,15 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
         @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
         @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
-        ep = 1.0e-8
-        if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
-            @test quantile(d, c[i] - ep) == v
-            @test cquantile(d, cc[i] + ep) == v
-            @test invlogcdf(d, lc[i] - ep) == v
-            if 0.0 < c[i] < 1.0
-                @test invlogccdf(d, lcc[i] + ep) == v
+        if testquan
+            ep = 1.0e-8
+            if p[i] > 2 * ep   # ensure p[i] is large enough to guarantee a reliable result
+                @test quantile(d, c[i] - ep) == v
+                @test cquantile(d, cc[i] + ep) == v
+                @test invlogcdf(d, lc[i] - ep) == v
+                if 0.0 < c[i] < 1.0
+                    @test invlogccdf(d, lcc[i] + ep) == v
+                end
             end
         end
     end
@@ -376,7 +378,7 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector)
 end
 
 
-function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector)
+function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
     p   = Vector{Float64}(nv)
     c   = Vector{Float64}(nv)
@@ -401,14 +403,16 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
         @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
-        # TODO: remove this line when we have more accurate implementation
-        # of quantile for InverseGaussian
-        qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
-        if p[i] > 1.0e-6
-            @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
-            @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
-            @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
-            @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
+        if testquan
+            # TODO: remove this line when we have more accurate implementation
+            # of quantile for InverseGaussian
+            qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
+            if p[i] > 1.0e-6
+                @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
+                @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
+                @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
+                @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
+            end
         end
     end
 
@@ -451,10 +455,10 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
         @test isapprox(var(d) , xvar , atol=1.0e-8)
         @test isapprox(std(d) , xstd , atol=1.0e-8)
 
-        if isfinite(skewness(d))
+        if applicable(skewness, d) && isfinite(skewness(d))
             @test isapprox(skewness(d), xskew   , atol=1.0e-8)
         end
-        if isfinite(kurtosis(d))
+        if applicable(kurtosis, d) && isfinite(kurtosis(d))
             @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)
