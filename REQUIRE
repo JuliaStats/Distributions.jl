@@ -5,3 +5,4 @@ Calculus
 StatsBase 0.8.3
 Compat 0.14.0
 QuadGK 0.1.1
+SpecialFunctions 0.1.0
