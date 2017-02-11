@@ -91,7 +91,7 @@ Base.show(io::IO, table::DiscreteDistributionTable) = @printf io "DiscreteDistri
 
 ##### Huffman Table ######
 
-abstract HuffmanNode{T} <: Sampler{Univariate,Discrete}
+@compat abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
 
 immutable HuffmanLeaf{T} <: HuffmanNode{T}
     value::T

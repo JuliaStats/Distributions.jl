@@ -259,7 +259,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 end
 
 
-abstract RecursiveProbabilityEvaluator
+@compat abstract type RecursiveProbabilityEvaluator end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)

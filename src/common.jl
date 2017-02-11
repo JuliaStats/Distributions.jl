@@ -1,11 +1,11 @@
 ## sample space/domain
 
-abstract VariateForm
+@compat abstract type VariateForm end
 type Univariate    <: VariateForm end
 type Multivariate  <: VariateForm end
 type Matrixvariate <: VariateForm end
 
-abstract ValueSupport
+@compat abstract type ValueSupport end
 type Discrete   <: ValueSupport end
 type Continuous <: ValueSupport end
 
@@ -14,7 +14,7 @@ Base.eltype(::Type{Continuous}) = Float64
 
 ## Sampleable
 
-abstract Sampleable{F<:VariateForm,S<:ValueSupport}
+@compat abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 Base.length(::Sampleable{Univariate}) = 1
 Base.length(s::Sampleable{Multivariate}) = throw(MethodError(length, (s,)))
@@ -36,7 +36,7 @@ nsamples{D<:Sampleable{Matrixvariate},T<:Number}(::Type{D}, x::Array{Matrix{T}})
 
 ## Distribution <: Sampleable
 
-abstract Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
+@compat abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 
 typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
 typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
@@ -60,8 +60,8 @@ value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = V
 value_support{T<:Distribution}(::Type{T}) = value_support(supertype(T))
 
 ## TODO: the following types need to be improved
-abstract SufficientStats
-abstract IncompleteDistribution
+@compat abstract type SufficientStats end
+@compat abstract type IncompleteDistribution end
 
 typealias DistributionType{D<:Distribution} Type{D}
 typealias IncompleteFormulation Union{DistributionType,IncompleteDistribution}

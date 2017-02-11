@@ -11,7 +11,7 @@
 #  - probs(d):       return a vector of prior probabilities over components.
 #
 
-abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS}
+@compat abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
