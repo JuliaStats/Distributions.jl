@@ -23,7 +23,7 @@
 #
 ###########################################################
 
-abstract AbstractMvLogNormal <: ContinuousMultivariateDistribution
+@compat abstract type AbstractMvLogNormal <: ContinuousMultivariateDistribution end
 
 function insupport{T<:Real,D<:AbstractMvLogNormal}(::Type{D},x::AbstractVector{T})
     for i=1:length(x)

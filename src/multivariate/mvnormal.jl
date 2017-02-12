@@ -22,7 +22,7 @@
 #
 ###########################################################
 
-abstract AbstractMvNormal <: ContinuousMultivariateDistribution
+@compat abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 

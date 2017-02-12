@@ -20,6 +20,8 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldiverg
 import StatsBase: RandIntSampler, loglikelihood, dof, span
 import PDMats: dim, PDMat, invquad
 
+importall SpecialFunctions
+
 export
     # generic types
     VariateForm,

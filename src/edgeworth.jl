@@ -4,7 +4,7 @@
 
 # Edgeworth approximation of the Z statistic
 # EdgeworthSum and EdgeworthMean are both defined in terms of this
-abstract EdgeworthAbstract <: ContinuousUnivariateDistribution
+@compat abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n

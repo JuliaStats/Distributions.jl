@@ -2,7 +2,7 @@
 
 ## Generic multivariate t-distribution class
 
-abstract AbstractMvTDist <: ContinuousMultivariateDistribution
+@compat abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
 immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed

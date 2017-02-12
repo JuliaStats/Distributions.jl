@@ -3,7 +3,7 @@
 export Estimator, MLEstimator
 export nsamples, estimate
 
-abstract Estimator{D<:Distribution}
+@compat abstract type Estimator{D<:Distribution} end
 
 nsamples{D<:UnivariateDistribution}(e::Estimator{D}, x::Array) = length(x)
 nsamples{D<:MultivariateDistribution}(e::Estimator{D}, x::Matrix) = size(x, 2)
