@@ -13,7 +13,7 @@ end
 
 function qqbuild(x::Vector, d::UnivariateDistribution)
 	stp = inv(length(x))
-	return QQPair(quantile(d, stp/2 : step : one(step)), sort(x))
+	return QQPair(quantile(d, stp/2 : stp : one(stp)), sort(x))
 end
 
 qqbuild(d::UnivariateDistribution, x::Vector) = qqbuild(x, d)
