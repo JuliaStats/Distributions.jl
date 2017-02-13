@@ -2,7 +2,7 @@ immutable Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Biweight(μ::T, σ::T) = (@check_args(Biweight, σ > zero(σ)); new(μ, σ))
+    (::Type{Biweight{T}}){T}(μ::T, σ::T) = (@check_args(Biweight, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Biweight{T<:Real}(μ::T, σ::T) = Biweight{T}(μ, σ)

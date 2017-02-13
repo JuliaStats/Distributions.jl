@@ -21,7 +21,7 @@ External links:
 immutable Poisson{T<:Real} <: DiscreteUnivariateDistribution
     λ::T
 
-    Poisson(λ::Real) = (@check_args(Poisson, λ >= zero(λ)); new(λ))
+    (::Type{Poisson{T}}){T}(λ::Real) = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))
 end
 
 Poisson{T<:Real}(λ::T) = Poisson{T}(λ)

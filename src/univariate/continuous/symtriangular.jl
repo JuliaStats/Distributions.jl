@@ -19,9 +19,9 @@ immutable SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    function SymTriangularDist(μ::T, σ::T)
+    function (::Type{SymTriangularDist{T}}){T}(μ::T, σ::T)
         @check_args(SymTriangularDist, σ > zero(σ))
-        new(μ, σ)
+        new{T}(μ, σ)
     end
 end
 

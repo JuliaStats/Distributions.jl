@@ -26,8 +26,8 @@ This package introduces a type ``MixtureModel``, defined as follows, to represen
         prior::Categorical
     end
 
-    typealias UnivariateMixture    AbstractMixtureModel{Univariate} 
-    typealias MultivariateMixture  AbstractMixtureModel{Multivariate}
+    const UnivariateMixture    = AbstractMixtureModel{Univariate} 
+    const MultivariateMixture  = AbstractMixtureModel{Multivariate}
 
 **Remarks:**
 

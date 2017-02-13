@@ -8,13 +8,13 @@ immutable MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <:
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-typealias FullNormalCanon MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
-typealias DiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-typealias IsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
+const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
-typealias ZeroMeanFullNormalCanon MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanDiagNormalCanon MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanIsoNormalCanon  MvNormalCanon{Float64,ScalMat{Float64},ZeroVector{Float64}}
+const ZeroMeanFullNormalCanon = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+const ZeroMeanDiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+const ZeroMeanIsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},ZeroVector{Float64}}
 
 
 ### Constructors

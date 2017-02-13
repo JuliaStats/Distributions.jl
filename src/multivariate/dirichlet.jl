@@ -3,7 +3,7 @@ immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
     alpha0::T
     lmnB::T
 
-    function Dirichlet(alpha::Vector{T})
+    function (::Type{Dirichlet{T}}){T}(alpha::Vector{T})
         alpha0::T = zero(T)
         lmnB::T = zero(T)
         for i in 1:length(alpha)
@@ -13,12 +13,12 @@ immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
             lmnB += lgamma(ai)
         end
         lmnB -= lgamma(alpha0)
-        new(alpha, alpha0, lmnB)
+        new{T}(alpha, alpha0, lmnB)
     end
 
-    function Dirichlet(d::Integer, alpha::T)
+    function (::Type{Dirichlet{T}}){T}(d::Integer, alpha::T)
         alpha0 = alpha * d
-        new(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
+        new{T}(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
     end
 end
 

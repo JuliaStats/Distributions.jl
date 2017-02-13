@@ -21,7 +21,7 @@ External links
 immutable TDist{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
 
-    TDist(ν::T) = (@check_args(TDist, ν > zero(ν)); new(ν))
+    (::Type{TDist{T}}){T}(ν::T) = (@check_args(TDist, ν > zero(ν)); new{T}(ν))
 end
 
 TDist{T<:Real}(ν::T) = TDist{T}(ν)

@@ -25,7 +25,7 @@ immutable Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Normal(μ, σ) = (@check_args(Normal, σ > zero(σ)); new(μ, σ))
+    (::Type{Normal{T}}){T}(μ, σ) = (@check_args(Normal, σ > zero(σ)); new{T}(μ, σ))
 end
 
 #### Outer constructors
@@ -35,7 +35,7 @@ Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
 Normal(μ::Real) = Normal(μ, 1.0)
 Normal() = Normal(0.0, 1.0)
 
-typealias Gaussian Normal
+const Gaussian = Normal
 
 # #### Conversions
 convert{T <: Real, S <: Real}(::Type{Normal{T}}, μ::S, σ::S) = Normal(T(μ), T(σ))

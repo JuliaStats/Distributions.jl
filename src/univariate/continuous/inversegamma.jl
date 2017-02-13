@@ -28,9 +28,9 @@ immutable InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     invd::Gamma{T}
     θ::T
 
-    function InverseGamma(α, θ)
+    function (::Type{InverseGamma{T}}){T}(α, θ)
         @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
-        new(Gamma(α, 1 / θ), θ)
+        new{T}(Gamma(α, 1 / θ), θ)
     end
 end
 

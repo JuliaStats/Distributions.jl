@@ -17,14 +17,14 @@ immutable VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
     κ::T
     logCκ::T
 
-    function VonMisesFisher(μ::Vector{T}, κ::T; checknorm::Bool=true)
+    function (::Type{VonMisesFisher{T}}){T}(μ::Vector{T}, κ::T; checknorm::Bool=true)
         if checknorm
             isunitvec(μ) || error("μ must be a unit vector")
         end
         κ > 0 || error("κ must be positive.")
         logCκ = vmflck(length(μ), κ)
         S = promote_type(T, typeof(logCκ))
-        new(Vector{S}(μ), S(κ), S(logCκ))
+        new{T}(Vector{S}(μ), S(κ), S(logCκ))
     end
 end
 

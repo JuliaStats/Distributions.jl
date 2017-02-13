@@ -2,7 +2,7 @@ immutable Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Epanechnikov(μ::T, σ::T) = (@check_args(Epanechnikov, σ > zero(σ)); new(μ, σ))
+    (::Type{Epanechnikov{T}}){T}(μ::T, σ::T) = (@check_args(Epanechnikov, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Epanechnikov{T<:Real}(μ::T, σ::T) = Epanechnikov{T}(μ, σ)

@@ -7,7 +7,7 @@ immutable Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Cosine(μ::T, σ::T) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
+    (::Type{Cosine{T}}){T}(μ::T, σ::T) = (@check_args(Cosine, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Cosine{T<:Real}(μ::T, σ::T) = Cosine{T}(μ, σ)

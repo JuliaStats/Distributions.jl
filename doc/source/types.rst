@@ -103,20 +103,20 @@ To simplify the use in practice, we introduce a series of type alias as follows:
 
 .. code-block:: julia
 
-    typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
-    typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
-    typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
-    typealias NonMatrixDistribution Union{UnivariateDistribution, MultivariateDistribution}
+    const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
+    const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
+    const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
+    const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-    typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
-    typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
+    const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+    const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
-    typealias DiscreteUnivariateDistribution     Distribution{Univariate,    Discrete}
-    typealias ContinuousUnivariateDistribution   Distribution{Univariate,    Continuous}
-    typealias DiscreteMultivariateDistribution   Distribution{Multivariate,  Discrete}
-    typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
-    typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
-    typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
+    const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
+    const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
+    const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
+    const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
+    const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
+    const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
 
 All methods applicable to `Sampleable` also applies to `Distribution`. The API for distributions of different variate forms are different (refer to :ref:`univariates`, :ref:`multivariates`, and :ref:`matrix` for details).
 

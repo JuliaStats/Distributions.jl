@@ -25,7 +25,7 @@ immutable Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
 
-    Laplace(μ::T, θ::T) = (@check_args(Laplace, θ > zero(θ)); new(μ, θ))
+    (::Type{Laplace{T}}){T}(μ::T, θ::T) = (@check_args(Laplace, θ > zero(θ)); new{T}(μ, θ))
 end
 
 Laplace{T<:Real}(μ::T, θ::T) = Laplace{T}(μ, θ)
@@ -34,7 +34,7 @@ Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
 Laplace(μ::Real) = Laplace(μ, 1.0)
 Laplace() = Laplace(0.0, 1.0)
 
-typealias Biexponential Laplace
+const Biexponential = Laplace
 
 @distr_support Laplace -Inf Inf
 

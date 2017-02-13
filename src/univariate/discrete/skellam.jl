@@ -22,9 +22,9 @@ immutable Skellam{T<:Real} <: DiscreteUnivariateDistribution
     μ1::T
     μ2::T
 
-    function Skellam(μ1::T, μ2::T)
+    function (::Type{Skellam{T}}){T}(μ1::T, μ2::T)
         @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
-        new(μ1, μ2)
+        new{T}(μ1, μ2)
     end
 
 end

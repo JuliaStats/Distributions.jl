@@ -29,9 +29,9 @@ immutable BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
-    function BetaPrime(α::T, β::T)
+    function (::Type{BetaPrime{T}}){T}(α::T, β::T)
         @check_args(BetaPrime, α > zero(α) && β > zero(β))
-        new(α, β)
+        new{T}(α, β)
     end
 end
 

@@ -11,9 +11,9 @@ immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     μ::Vector{T}
     Σ::Cov
 
-    function GenericMvTDist(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::AbstractPDMat{T})
+    function (::Type{GenericMvTDist{T,Cov}}){T,Cov}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::AbstractPDMat{T})
       df > zero(df) || error("df must be positive")
-      new(df, dim, zmean, μ, Σ)
+      new{T,Cov}(df, dim, zmean, μ, Σ)
     end
 end
 
@@ -46,9 +46,9 @@ end
 
 ## Construction of multivariate normal with specific covariance type
 
-typealias IsoTDist  GenericMvTDist{Float64, ScalMat{Float64}}
-typealias DiagTDist GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
-typealias MvTDist GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
+const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}}
+const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
+const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
 
 MvTDist(df::Real, μ::Vector{Float64}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
