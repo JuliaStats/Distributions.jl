@@ -21,9 +21,9 @@ immutable VonMises{T<:Real} <: ContinuousUnivariateDistribution
     κ::T      # concentration
     I0κ::T    # I0(κ), where I0 is the modified Bessel function of order 0
 
-    function VonMises(μ::T, κ::T)
+    function (::Type{VonMises{T}}){T}(μ::T, κ::T)
         @check_args(VonMises, κ > zero(κ))
-        new(μ, κ, besseli(zero(T), κ))
+        new{T}(μ, κ, besseli(zero(T), κ))
     end
 end
 

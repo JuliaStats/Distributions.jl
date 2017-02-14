@@ -25,9 +25,9 @@ immutable InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
 
-    function InverseGaussian(μ::T, λ::T)
+    function (::Type{InverseGaussian{T}}){T}(μ::T, λ::T)
         @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
-        new(μ, λ)
+        new{T}(μ, λ)
     end
 end
 

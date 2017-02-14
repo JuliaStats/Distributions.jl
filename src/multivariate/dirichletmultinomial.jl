@@ -3,11 +3,11 @@ immutable DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
     α::Vector{T}
     α0::T
 
-    function DirichletMultinomial(n::Integer, α::Vector{T})
+    function (::Type{DirichletMultinomial{T}}){T}(n::Integer, α::Vector{T})
         α0 = sum(abs, α)
         sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
         n > 0 || throw(ArgumentError("n must be a positive integer."))
-        new(Int(n), α, α0)
+        new{T}(Int(n), α, α0)
     end
 end
 DirichletMultinomial{T <: Real}(n::Integer, α::Vector{T}) = DirichletMultinomial{T}(n, α)

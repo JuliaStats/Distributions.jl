@@ -22,9 +22,9 @@ immutable BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     α::T
     β::T
 
-    function BetaBinomial(n::Int, α::T, β::T)
+    function (::Type{BetaBinomial{T}}){T}(n::Int, α::T, β::T)
         @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
-        new(n, α, β)
+        new{T}(n, α, β)
     end
 end
 

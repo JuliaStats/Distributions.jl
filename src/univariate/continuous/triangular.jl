@@ -30,14 +30,14 @@ immutable TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     b::T
     c::T
 
-    function TriangularDist(a::T, b::T, c::T)
+    function (::Type{TriangularDist{T}}){T}(a::T, b::T, c::T)
         @check_args(TriangularDist, a < b)
         @check_args(TriangularDist, a <= c <= b)
-        new(a, b, c)
+        new{T}(a, b, c)
     end
-    function TriangularDist(a::T, b::T)
+    function (::Type{TriangularDist{T}}){T}(a::T, b::T)
         @check_args(TriangularDist, a < b)
-        new(a, b, middle(a, b))
+        new{T}(a, b, middle(a, b))
     end
 end
 

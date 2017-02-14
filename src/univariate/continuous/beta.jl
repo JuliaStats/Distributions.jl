@@ -29,9 +29,9 @@ immutable Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
-    function Beta(α::T, β::T)
+    function (::Type{Beta{T}}){T}(α::T, β::T)
         @check_args(Beta, α > zero(α) && β > zero(β))
-        new(α, β)
+        new{T}(α, β)
     end
 end
 

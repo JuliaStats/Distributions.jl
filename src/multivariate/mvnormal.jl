@@ -69,13 +69,13 @@ end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-typealias IsoNormal  MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
-typealias DiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-typealias FullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
+const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
+const FullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-typealias ZeroMeanIsoNormal  MvNormal{Float64,ScalMat{Float64},ZeroVector{Float64}}
-typealias ZeroMeanDiagNormal MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-typealias ZeroMeanFullNormal MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+const ZeroMeanIsoNormal  = MvNormal{Float64,ScalMat{Float64},ZeroVector{Float64}}
+const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
+const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
 function MvNormal{T<:Real}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T})

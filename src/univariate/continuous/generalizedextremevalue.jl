@@ -36,9 +36,9 @@ immutable GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
     ξ::T
 
-    function GeneralizedExtremeValue(μ::T, σ::T, ξ::T)
+    function (::Type{GeneralizedExtremeValue{T}}){T}(μ::T, σ::T, ξ::T)
         σ > zero(σ) || error("Scale must be positive")
-        new(μ, σ, ξ)
+        new{T}(μ, σ, ξ)
     end
 end
 

@@ -14,10 +14,10 @@ Univariate Distributions
 
 .. code-block:: julia
 
-    typealias UnivariateDistribution{S<:ValueSupport} Distribution{Univariate,S}
+    const UnivariateDistribution{S<:ValueSupport} = Distribution{Univariate,S}
 
-    typealias DiscreteUnivariateDistribution   Distribution{Univariate, Discrete}
-    typealias ContinuousUnivariateDistribution Distribution{Univariate, Continuous}
+    const DiscreteUnivariateDistribution   = Distribution{Univariate, Discrete}
+    const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
 
 
 Common Interface

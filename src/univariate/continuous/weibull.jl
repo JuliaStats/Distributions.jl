@@ -25,9 +25,9 @@ immutable Weibull{T<:Real} <: ContinuousUnivariateDistribution
     α::T   # shape
     θ::T   # scale
 
-    function Weibull(α::T, θ::T)
-    	@check_args(Weibull, α > zero(α) && θ > zero(θ))
-    	new(α, θ)
+    function (::Type{Weibull{T}}){T}(α::T, θ::T)
+        @check_args(Weibull, α > zero(α) && θ > zero(θ))
+        new{T}(α, θ)
     end
 end
 

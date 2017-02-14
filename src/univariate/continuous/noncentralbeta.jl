@@ -3,10 +3,10 @@ immutable NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     β::T
     λ::T
 
-    function NoncentralBeta(α::T, β::T, λ::T)
-    	@check_args(NoncentralBeta, α > zero(α) && β > zero(β))
+    function (::Type{NoncentralBeta{T}}){T}(α::T, β::T, λ::T)
+        @check_args(NoncentralBeta, α > zero(α) && β > zero(β))
         @check_args(NoncentralBeta, λ >= zero(λ))
-    	new(α, β, λ)
+        new{T}(α, β, λ)
     end
 end
 

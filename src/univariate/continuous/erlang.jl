@@ -19,9 +19,9 @@ immutable Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
 
-    function Erlang(α::Real, θ::T)
+    function (::Type{Erlang{T}}){T}(α::Real, θ::T)
         @check_args(Erlang, isinteger(α) && α >= zero(α))
-        new(α, θ)
+        new{T}(α, θ)
     end
 end
 

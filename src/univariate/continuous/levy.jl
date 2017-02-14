@@ -23,7 +23,7 @@ immutable Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Levy(μ::T, σ::T) = (@check_args(Levy, σ > zero(σ)); new(μ, σ))
+    (::Type{Levy{T}}){T}(μ::T, σ::T) = (@check_args(Levy, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Levy{T<:Real}(μ::T, σ::T) = Levy{T}(μ, σ)

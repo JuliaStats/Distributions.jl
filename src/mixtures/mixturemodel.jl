@@ -17,16 +17,16 @@ immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Abst
     components::Vector{C}
     prior::Categorical
 
-    function MixtureModel(cs::Vector{C}, pri::Categorical)
+    function (::Type{MixtureModel{VF,VS,C}}){VF,VS,C}(cs::Vector{C}, pri::Categorical)
         length(cs) == ncategories(pri) ||
             error("The number of components does not match the length of prior.")
-        new(cs, pri)
+        new{VF,VS,C}(cs, pri)
     end
 end
 
-typealias UnivariateMixture{S<:ValueSupport,   C<:Distribution} AbstractMixtureModel{Univariate,S,C}
-typealias MultivariateMixture{S<:ValueSupport, C<:Distribution} AbstractMixtureModel{Multivariate,S,C}
-typealias MatrixvariateMixture{S<:ValueSupport,C<:Distribution} AbstractMixtureModel{Matrixvariate,S,C}
+@compat const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
+@compat const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
+@compat const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
 
 component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
 

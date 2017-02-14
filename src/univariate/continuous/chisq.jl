@@ -22,7 +22,7 @@ External links
 immutable Chisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
 
-    Chisq(ν::T) = (@check_args(Chisq, ν > zero(ν)); new(ν))
+    (::Type{Chisq{T}}){T}(ν::T) = (@check_args(Chisq, ν > zero(ν)); new{T}(ν))
 end
 
 Chisq{T<:Real}(ν::T) = Chisq{T}(ν)

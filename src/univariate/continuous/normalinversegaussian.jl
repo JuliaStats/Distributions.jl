@@ -19,8 +19,8 @@ immutable NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
   β::T
   δ::T
 
-  function NormalInverseGaussian(μ::T, α::T, β::T, δ::T)
-    new(μ, α, β, δ)
+  function (::Type{NormalInverseGaussian{T}}){T}(μ::T, α::T, β::T, δ::T)
+    new{T}(μ, α, β, δ)
   end
 end
 

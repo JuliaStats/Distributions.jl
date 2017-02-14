@@ -24,7 +24,7 @@ immutable Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
 
-    Gumbel(μ::T, θ::T) = (@check_args(Gumbel, θ > zero(θ)); new(μ, θ))
+    (::Type{Gumbel{T}}){T}(μ::T, θ::T) = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
 end
 
 Gumbel{T<:Real}(μ::T, θ::T) = Gumbel{T}(μ, θ)

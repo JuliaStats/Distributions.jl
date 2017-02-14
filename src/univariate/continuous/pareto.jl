@@ -23,9 +23,9 @@ immutable Pareto{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
 
-    function Pareto(α::T, θ::T)
+    function (::Type{Pareto{T}}){T}(α::T, θ::T)
         @check_args(Pareto, α > zero(α) && θ > zero(θ))
-        new(α, θ)
+        new{T}(α, θ)
     end
 end
 

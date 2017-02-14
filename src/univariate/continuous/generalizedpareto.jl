@@ -35,9 +35,9 @@ immutable GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
     ξ::T
 
-    function GeneralizedPareto(μ::T, σ::T, ξ::T)
+    function (::Type{GeneralizedPareto{T}}){T}(μ::T, σ::T, ξ::T)
         @check_args(GeneralizedPareto, σ > zero(σ))
-        new(μ, σ, ξ)
+        new{T}(μ, σ, ξ)
     end
 
 end

@@ -22,10 +22,10 @@ External links
 immutable NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
-    function NoncentralChisq(ν::T, λ::T)
+    function (::Type{NoncentralChisq{T}}){T}(ν::T, λ::T)
         @check_args(NoncentralChisq, ν > zero(ν))
         @check_args(NoncentralChisq, λ >= zero(λ))
-    	new(ν, λ)
+        new{T}(ν, λ)
     end
 end
 

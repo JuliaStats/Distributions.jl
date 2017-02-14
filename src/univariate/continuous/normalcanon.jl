@@ -4,9 +4,9 @@ immutable NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     λ::T       # σ^(-2)
     μ::T       # μ
 
-    function NormalCanon(η, λ)
+    function (::Type{NormalCanon{T}}){T}(η, λ)
         @check_args(NormalCanon, λ > zero(λ))
-    	new(η, λ, η / λ)
+        new{T}(η, λ, η / λ)
     end
 end
 

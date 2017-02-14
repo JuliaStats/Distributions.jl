@@ -24,7 +24,7 @@ External links
 immutable Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
 
-    Rayleigh(σ::T) = (@check_args(Rayleigh, σ > zero(σ)); new(σ))
+    (::Type{Rayleigh{T}}){T}(σ::T) = (@check_args(Rayleigh, σ > zero(σ)); new{T}(σ))
 end
 
 Rayleigh{T<:Real}(σ::T) = Rayleigh{T}(σ)

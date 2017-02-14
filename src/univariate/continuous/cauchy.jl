@@ -25,9 +25,9 @@ immutable Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    function Cauchy(μ::T, σ::T)
+    function (::Type{Cauchy{T}}){T}(μ::T, σ::T)
         @check_args(Cauchy, σ > zero(σ))
-        new(μ, σ)
+        new{T}(μ, σ)
     end
 end
 

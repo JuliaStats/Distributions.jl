@@ -27,7 +27,7 @@ immutable Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
 
-    Arcsine(a::T, b::T) = (@check_args(Arcsine, a < b); new(a, b))
+    (::Type{Arcsine{T}}){T}(a::T, b::T) = (@check_args(Arcsine, a < b); new{T}(a, b))
 end
 
 Arcsine{T<:Real}(a::T, b::T) = Arcsine{T}(a, b)

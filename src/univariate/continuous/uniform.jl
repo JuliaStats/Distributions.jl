@@ -25,7 +25,7 @@ immutable Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
 
-    Uniform(a::T, b::T) = (@check_args(Uniform, a < b); new(a, b))
+    (::Type{Uniform{T}}){T}(a::T, b::T) = (@check_args(Uniform, a < b); new{T}(a, b))
 end
 
 Uniform{T<:Real}(a::T, b::T) = Uniform{T}(a, b)

@@ -26,9 +26,9 @@ immutable FDist{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
 
-    function FDist(ν1::T, ν2::T)
+    function (::Type{FDist{T}}){T}(ν1::T, ν2::T)
         @check_args(FDist, ν1 > zero(ν1) && ν2 > zero(ν2))
-        new(ν1, ν2)
+        new{T}(ν1, ν2)
     end
 end
 

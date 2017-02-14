@@ -29,10 +29,10 @@ immutable NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function NegativeBinomial(r::T, p::T)
+    function (::Type{NegativeBinomial{T}}){T}(r::T, p::T)
         @check_args(NegativeBinomial, r > zero(r))
         @check_args(NegativeBinomial, zero(p) < p <= one(p))
-        new(r, p)
+        new{T}(r, p)
     end
 
 end

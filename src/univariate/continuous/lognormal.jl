@@ -27,7 +27,7 @@ immutable LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    LogNormal(μ::T, σ::T) = (@check_args(LogNormal, σ > zero(σ)); new(μ, σ))
+    (::Type{LogNormal{T}}){T}(μ::T, σ::T) = (@check_args(LogNormal, σ > zero(σ)); new{T}(μ, σ))
 end
 
 LogNormal{T<:Real}(μ::T, σ::T) = LogNormal{T}(μ, σ)

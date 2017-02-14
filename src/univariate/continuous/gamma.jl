@@ -26,9 +26,9 @@ immutable Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
 
-    function Gamma(α, θ)
+    function (::Type{Gamma{T}}){T}(α, θ)
         @check_args(Gamma, α > zero(α) && θ > zero(θ))
-        new(α, θ)
+        new{T}(α, θ)
     end
 end
 
