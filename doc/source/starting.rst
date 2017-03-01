@@ -71,7 +71,7 @@ In addition, you can create truncated distributions from univariate distribution
 
     julia> Truncated(Normal(mu, sigma), l, u)
 
-To find out which parameters are appropriate for a given distribution ``D``, you can use ``names(D)``:
+To find out which parameters are appropriate for a given distribution ``D``, you can use ``fieldnames(D)``:
 
 .. code-block:: julia
 
