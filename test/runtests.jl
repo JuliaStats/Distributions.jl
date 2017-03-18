@@ -30,6 +30,7 @@ tests = [
     "truncate",
     "truncatednormal",
     "generalizedextremevalue",
+    "generalizedinversegaussian",
     "pdfbetabinomial"]
 
 print_with_color(:blue, "Running tests:\n")

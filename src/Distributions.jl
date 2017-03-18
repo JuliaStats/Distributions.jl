@@ -83,6 +83,7 @@ export
     Gamma,
     GeneralizedPareto,
     GeneralizedExtremeValue,
+    GeneralizedInverseGaussian,
     Geometric,
     Gumbel,
     Hypergeometric,
