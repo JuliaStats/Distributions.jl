@@ -16,6 +16,10 @@ import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
 
+if isdefined(Base, :scale)
+    import Base: scale
+end
+
 import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
 import StatsBase: RandIntSampler, loglikelihood, dof, span
 import PDMats: dim, PDMat, invquad
