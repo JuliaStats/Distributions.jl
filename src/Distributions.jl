@@ -10,9 +10,9 @@ using Compat
 import QuadGK.quadgk
 import Compat.view
 import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
+import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: +, -, .+, .-
+import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
 

@@ -26,8 +26,8 @@ convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
 
 +(x::AbstractArray, v::ZeroVector) = x
 -(x::AbstractArray, v::ZeroVector) = x
-.+(x::AbstractArray, v::ZeroVector) = x
-.-(x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
 
 
 ##### Utility functions
