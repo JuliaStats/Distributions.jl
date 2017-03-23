@@ -29,6 +29,11 @@ convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
 Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
 Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
 
+if VERSION < v"0.6.0-dev.1632"
+    Base.:(.+)(x::AbstractArray, v::ZeroVector) = x
+    Base.:(.-)(x::AbstractArray, v::ZeroVector) = x
+end
+
 
 ##### Utility functions
 
