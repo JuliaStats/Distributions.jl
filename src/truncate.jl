@@ -57,7 +57,6 @@ logccdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
                                  x >= d.upper ? -Inf :
                                  log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
 
-
 quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
 pdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
@@ -82,24 +81,24 @@ logccdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
 
 # Callback functions for generic type
 
-pdf(d::Truncated, x::Real) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
+pdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
 
-logpdf(d::Truncated, x::Real) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+logpdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -T(Inf)
 
-cdf(d::Truncated, x::Real) = x <= d.lower ? 0.0 :
-                            x >= d.upper ? 1.0 :
+cdf{T<:Real}(d::Truncated, x::T) = x <= d.lower ? zero(T) :
+                            x >= d.upper ? one(T) :
                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
 
-logcdf(d::Truncated, x::Real) = x <= d.lower ? -Inf :
-                               x >= d.upper ? 0.0 :
+logcdf{T<:Real}(d::Truncated, x::T) = x <= d.lower ? -T(Inf) :
+                               x >= d.upper ? zero(T) :
                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
 
-ccdf(d::Truncated, x::Real) = x <= d.lower ? 1.0 :
-                             x >= d.upper ? 0.0 :
+ccdf{T<:Real}(d::Truncated, x::T) = x <= d.lower ? one(T) :
+                             x >= d.upper ? zero(T) :
                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
 
-logccdf(d::Truncated, x::Real) = x <= d.lower ? 0.0 :
-                                x >= d.upper ? -Inf :
+logccdf{T<:Real}(d::Truncated, x::T) = x <= d.lower ? zero(T) :
+                                x >= d.upper ? -T(Inf) :
                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
 
 ## random number generation
