@@ -37,54 +37,14 @@ insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}},
 
 ### evaluation
 
-pdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
-
-logpdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
-
-cdf(d::Truncated, x::Float64) =
-    x <= d.lower ? 0.0 :
-    x >= d.upper ? 1.0 :
-    (cdf(d.untruncated, x) - d.lcdf) / d.tp
-
-logcdf(d::Truncated, x::Float64) =
-    x <= d.lower ? -Inf :
-    x >= d.upper ? 0.0 :
-    log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
-
-ccdf(d::Truncated, x::Float64) =
-    x <= d.lower ? 1.0 :
-    x >= d.upper ? 0.0 :
-    (d.ucdf - cdf(d.untruncated, x)) / d.tp
-
-logccdf(d::Truncated, x::Float64) =
-    x <= d.lower ? 0.0 :
-    x >= d.upper ? -Inf :
-    log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
-
 quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-pdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
-
-logpdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
-
-cdf(d::Truncated, x::Int) =
-    x <= d.lower ? 0.0 :
-    x >= d.upper ? 1.0 :
-    (cdf(d.untruncated, x) - d.lcdf) / d.tp
-
-logcdf(d::Truncated, x::Int) = x <= d.lower ? -Inf :
-    x >= d.upper ? 0.0 :
-    log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
-
-ccdf(d::Truncated, x::Int) = x <= d.lower ? 1.0 :
-    x >= d.upper ? 0.0 :
-    (d.ucdf - cdf(d.untruncated, x)) / d.tp
-
-logccdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
-    x >= d.upper ? -Inf :
-    log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
-
-# Callback functions for generic type
+pdf(d::Truncated, x::Int) = pdf(d, float(x))
+logpdf(d::Truncated, x::Int) = logpdf(d, float(x))
+cdf(d::Truncated, x::Int) = cdf(d, float(x))
+logcdf(d::Truncated, x::Int) = logcdf(d, float(x))
+ccdf(d::Truncated, x::Int) = ccdf(d, float(x))
+logccdf(d::Truncated, x::Int) = logccdf(d, float(x))
 
 pdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
 
