@@ -39,12 +39,9 @@ insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}},
 
 quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-pdf(d::Truncated, x::Int) = pdf(d, float(x))
-logpdf(d::Truncated, x::Int) = logpdf(d, float(x))
-cdf(d::Truncated, x::Int) = cdf(d, float(x))
-logcdf(d::Truncated, x::Int) = logcdf(d, float(x))
-ccdf(d::Truncated, x::Int) = ccdf(d, float(x))
-logccdf(d::Truncated, x::Int) = logccdf(d, float(x))
+for f in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf]
+    @eval ($f)(d::Truncated, x::Int) = ($f)(d, float(x))
+end
 
 pdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
 
