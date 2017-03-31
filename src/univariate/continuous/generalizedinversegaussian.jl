@@ -89,17 +89,71 @@ function logpdf{T<:Real}(d::GeneralizedInverseGaussian{T}, x::Real)
     end
 end
 
+
 function cdf{T<:Real}(d::GeneralizedInverseGaussian{T}, x::Real)
     if x > 0
+        # See eq. (5) in Lemonte & Cordeiro (2011) 
+        # Statistics & Probability Letters 81:506–517
+        # F(x) = 1 - (ρ + σ), where ρ and σ are infinite sums
+        # calculated up to truncation below
         a, b, p = params(d)
-        # (5) in Lemonte & Cordeiro 2011 Statistics & Probability Letters 81:506–517
+        c = (((a / b)^(p / 2)) / (2 * besselk(p, sqrt(a * b))))
+        η = a / 2
+        ω = b / 2
+        lη = log(η)
+        lω = log(ω)
+        lx = log(x)
+        # calculate first term ρ
+        ρ = 0.0
+        converged = false
+        j = 0
+        while !converged && j < 100
+            ρ_old = ρ
+            ρ += c * (-1)^j * gamma(p - j) * exp((-p + j) * lη + j * lω - lfact(j))
+            converged = abs(ρ - ρ_old) < eps()
+            j += 1
+        end
+        # calculate second term σ
+        σ = 0.0
+        converged = false
+        i = 0
+        while !converged && i < 100
+            σ_old = σ
+            j = 0
+            k = i
+            while j <= i
+                l = k * lη + j * lω + (k - j + p) * lx - lfact(k) - lfact(j) 
+                σ += (c * (-1)^(k + j + 1) * exp(l)) / (k - j + p)
+                j += 1
+                k -= 1
+            end
+            converged = abs(σ - σ_old) < eps()
+            i += 1
+        end
+        1 - (ρ + σ)
     else
         zero(T)
     end
 end
 
+function mgf{T <: Real}(d::GeneralizedInverseGaussian{T}, t::Real)
+    if t == zero(t)
+        one(T)
+    else
+        a, b, p = params(d)
+        (a / (a - 2t))^(p / 2) * besselk(p, sqrt(b * (a - 2t))) / besselk(p, sqrt(a * b))
+    end
+end
 
-@quantile_newton GeneralizedInverseGaussian
+function cf{T <: Real}(d::GeneralizedInverseGaussian{T}, t::Real)
+    if t == zero(t)
+        one(T) + zero(T) * im
+    else
+        a, b, p = params(d)
+        (a / (a - 2t * im))^(p / 2) * besselk(p, sqrt(b * (a - 2t * im))) / besselk(p, sqrt(a * b))
+    end
+end
+
 
 
 #### Sampling
