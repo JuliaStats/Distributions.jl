@@ -72,7 +72,7 @@ function logpdf{T<:Real}(d::Rayleigh{T}, x::Real)
 	x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
-logccdf(d::Rayleigh, x::Real) = - (x^2) / (2d.σ^2)
+logccdf{T<:Real}(d::Rayleigh{T}, x::Real) = x > 0 ? - (x^2) / (2d.σ^2) : zero(T)
 ccdf(d::Rayleigh, x::Real) = exp(logccdf(d, x))
 
 cdf(d::Rayleigh, x::Real) = 1 - ccdf(d, x)
