@@ -26,9 +26,9 @@ External links:
 immutable Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Bernoulli(p::T)
+    function (::Type{Bernoulli{T}}){T}(p::T)
         @check_args(Bernoulli, zero(p) <= p <= one(p))
-        new(p)
+        new{T}(p)
     end
 
 end

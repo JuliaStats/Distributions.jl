@@ -1,7 +1,7 @@
 # Noncentral hypergeometric distribution
 # TODO: this distribution needs clean-up and testing
 
-abstract NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistribution
+@compat abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistribution end
 
 ### handling support
 
@@ -43,11 +43,11 @@ immutable FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     n::Int     # sample size
     ω::T # odds ratio
 
-    function FisherNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::T)
+    function (::Type{FisherNoncentralHypergeometric{T}}){T}(ns::Real, nf::Real, n::Real, ω::T)
         @check_args(FisherNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
         @check_args(FisherNoncentralHypergeometric, zero(n) < n < ns + nf)
         @check_args(FisherNoncentralHypergeometric, ω > zero(ω))
-        new(ns, nf, n, ω)
+        new{T}(ns, nf, n, ω)
     end
 end
 
@@ -97,11 +97,11 @@ immutable WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric
     n::Int     # sample size
     ω::T # odds ratio
 
-    function WalleniusNoncentralHypergeometric(ns::Real, nf::Real, n::Real, ω::T)
+    function (::Type{WalleniusNoncentralHypergeometric{T}}){T}(ns::Real, nf::Real, n::Real, ω::T)
         @check_args(WalleniusNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
         @check_args(WalleniusNoncentralHypergeometric, zero(n) < n < ns + nf)
         @check_args(WalleniusNoncentralHypergeometric, ω > zero(ω))
-        new(ns, nf, n, ω)
+        new{T}(ns, nf, n, ω)
     end
 end
 

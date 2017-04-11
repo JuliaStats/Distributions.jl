@@ -65,10 +65,10 @@ The package implements both ``rand`` and ``rand!`` as follows (which you don't n
     end
 
     rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}) = 
-        _rand!(s, Array(eltype(S), length(s)))
+        _rand!(s, Vector{eltype(S)}(length(s)))
 
     rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}, n::Int) = 
-        _rand!(s, Array(eltype(S), length(s), n))
+        _rand!(s, Matrix{eltype(S)}(length(s), n))
 
 If there is a more efficient method to generate multiple vector samples in batch, one should provide the following method 
 
@@ -261,13 +261,13 @@ Following methods need to be implemented for each univariate distribution type (
         function logpdf(d::MultivariateDistribution, X::DenseMatrix)
             size(X, 1) == length(d) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _logpdf!(Array(Float64, size(X,2)), d, X)
+            _logpdf!(Vector{Float64}(size(X,2)), d, X)
         end
 
         function pdf(d::MultivariateDistribution, X::DenseMatrix)
             size(X, 1) == length(d) ||
                 throw(DimensionMismatch("Inconsistent array dimensions."))
-            _pdf!(Array(Float64, size(X,2)), d, X)
+            _pdf!(Vector{Float64}(size(X,2)), d, X)
         end
 
     Note that if there exists faster methods for batch evaluation, one should override ``_logpdf!`` and ``_pdf!``.

@@ -21,8 +21,8 @@ for p in Vector{Float64}[
         c += p[i]
         @test pdf(d, i) == p[i]
         @test logpdf(d, i) == log(p[i])
-        @test_approx_eq cdf(d, i) c
-        @test_approx_eq ccdf(d, i) 1.0 - c
+        @test cdf(d, i)  ≈ c
+        @test ccdf(d, i) ≈ 1.0 - c
     end
 
     @test pdf(d, 0) == 0

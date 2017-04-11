@@ -17,12 +17,12 @@ $x \in \begin{cases}
     \end{cases}$
 
 ```julia
-GeneralizedExtremeValue(k, s, m)      # Generalized Pareto distribution with shape k, scale s and location m.
+GeneralizedExtremeValue(m, s, k)      # Generalized Pareto distribution with shape k, scale s and location m.
 
-params(d)       # Get the parameters, i.e. (k, s, m)
-shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
-scale(d)        # Get the scale parameter, i.e. s
+params(d)       # Get the parameters, i.e. (m, s, k)
 location(d)     # Get the location parameter, i.e. m
+scale(d)        # Get the scale parameter, i.e. s
+shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
 ```
 
 External links
@@ -36,9 +36,9 @@ immutable GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
     ξ::T
 
-    function GeneralizedExtremeValue(μ::T, σ::T, ξ::T)
+    function (::Type{GeneralizedExtremeValue{T}}){T}(μ::T, σ::T, ξ::T)
         σ > zero(σ) || error("Scale must be positive")
-        new(μ, σ, ξ)
+        new{T}(μ, σ, ξ)
     end
 end
 

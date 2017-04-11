@@ -25,7 +25,7 @@ immutable PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
 
     p::Vector{T}
     pmf::Vector{T}
-    function PoissonBinomial(p::AbstractArray)
+    function (::Type{PoissonBinomial{T}}){T}(p::AbstractArray)
         for i=1:length(p)
             if !(0 <= p[i] <= 1)
                 error("Each element of p must be in [0, 1].")
@@ -33,7 +33,7 @@ immutable PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
         end
         pb = poissonbinomial_pdf_fft(p)
         @assert isprobvec(pb)
-        new(p, pb)
+        new{T}(p, pb)
     end
 
 end
@@ -124,7 +124,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     n = length(p)
     ω = 2 / (n + 1)
 
-    x = Array(Complex{Float64}, n+1)
+    x = Vector{Complex{Float64}}(n+1)
     lmax = ceil(Int, n/2)
     x[1] = 1/(n + 1)
     for l=1:lmax

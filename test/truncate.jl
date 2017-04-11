@@ -10,8 +10,13 @@ using Compat
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)
     R = JSON.parsefile(jsonfile)
-    for (ex, dct) in R
+    for dct in R
+        ex = dct["expr"]
         dsym = Symbol(dct["dtype"])
+        if dsym in [:Skellam, :NormalInverseGaussian]
+            continue
+        end
+
         dname = string(dsym)
 
         dsymt = Symbol("Truncated($(dct["dtype"]),$lower,$upper")
@@ -24,19 +29,22 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
         end
 
         # perform testing
-        println("    testing Truncated($(ex),$lower,$upper)")
         dtype = eval(dsym)
         dtypet = Truncated
-        if !(dsym in [:Skellam,])
-            d = Truncated(eval(parse(ex)),lower,upper)
-            if dtype != TruncatedNormal
-                @assert isa(dtype, Type) && dtype <: UnivariateDistribution
-                @test isa(d, dtypet)
-            end
-
-            # verification and testing
-            verify_and_test(d, dct, n_tsamples)
+        d0 = eval(parse(ex))
+        if minimum(d0) > lower || maximum(d0) < upper
+            continue
         end
+
+        println("    testing Truncated($(ex),$lower,$upper)")
+        d = Truncated(eval(parse(ex)),lower,upper)
+        if dtype != TruncatedNormal
+            @assert isa(dtype, Type) && dtype <: UnivariateDistribution
+            @test isa(d, dtypet)
+        end
+
+        # verification and testing
+        verify_and_test(d, dct, n_tsamples)
     end
 end
 
@@ -53,17 +61,9 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
-    # verify parameters
-    pdct = dct["params"]
-    for (fname, val) in pdct
-        f = eval(Symbol(fname))
-        @assert isa(f, Function)
-        Base.Test.test_approx_eq(f(d.untruncated), val, "$fname(d.untruncated)", "val")
-    end
-
     # verify stats
-    @test_approx_eq minimum(d) max(_json_value(dct["minimum"]),d.lower)
-    @test_approx_eq maximum(d) min(_json_value(dct["maximum"]),d.upper)
+    @test minimum(d) ≈ max(_json_value(dct["minimum"]),d.lower)
+    @test maximum(d) ≈ min(_json_value(dct["maximum"]),d.upper)
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
@@ -71,8 +71,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
         cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
-        @Base.Test.test_approx_eq_eps(logpdf(d, x), lp, sqrt(eps()))
-        @Base.Test.test_approx_eq_eps(cdf(d, x), cf, sqrt(eps()))
+        @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
+        @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
     end
 
     try
@@ -107,7 +107,7 @@ for c in ["discrete",
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json")
+    jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6,3,5)
     println()
 end

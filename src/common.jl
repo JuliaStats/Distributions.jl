@@ -1,11 +1,11 @@
 ## sample space/domain
 
-abstract VariateForm
+@compat abstract type VariateForm end
 type Univariate    <: VariateForm end
 type Multivariate  <: VariateForm end
 type Matrixvariate <: VariateForm end
 
-abstract ValueSupport
+@compat abstract type ValueSupport end
 type Discrete   <: ValueSupport end
 type Continuous <: ValueSupport end
 
@@ -14,7 +14,7 @@ Base.eltype(::Type{Continuous}) = Float64
 
 ## Sampleable
 
-abstract Sampleable{F<:VariateForm,S<:ValueSupport}
+@compat abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 Base.length(::Sampleable{Univariate}) = 1
 Base.length(s::Sampleable{Multivariate}) = throw(MethodError(length, (s,)))
@@ -36,22 +36,22 @@ nsamples{D<:Sampleable{Matrixvariate},T<:Number}(::Type{D}, x::Array{Matrix{T}})
 
 ## Distribution <: Sampleable
 
-abstract Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
+@compat abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 
-typealias UnivariateDistribution{S<:ValueSupport}   Distribution{Univariate,S}
-typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
-typealias MatrixDistribution{S<:ValueSupport}       Distribution{Matrixvariate,S}
-typealias NonMatrixDistribution Union{UnivariateDistribution, MultivariateDistribution}
+@compat const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
+@compat const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
+@compat const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
+const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-typealias DiscreteDistribution{F<:VariateForm}   Distribution{F,Discrete}
-typealias ContinuousDistribution{F<:VariateForm} Distribution{F,Continuous}
+@compat const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+@compat const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
-typealias DiscreteUnivariateDistribution     Distribution{Univariate,    Discrete}
-typealias ContinuousUnivariateDistribution   Distribution{Univariate,    Continuous}
-typealias DiscreteMultivariateDistribution   Distribution{Multivariate,  Discrete}
-typealias ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
-typealias DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
-typealias ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}
+const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
+const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
+const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
+const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
+const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
+const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
 
 variate_form{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VF
 variate_form{T<:Distribution}(::Type{T}) = variate_form(supertype(T))
@@ -60,8 +60,8 @@ value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = V
 value_support{T<:Distribution}(::Type{T}) = value_support(supertype(T))
 
 ## TODO: the following types need to be improved
-abstract SufficientStats
-abstract IncompleteDistribution
+@compat abstract type SufficientStats end
+@compat abstract type IncompleteDistribution end
 
-typealias DistributionType{D<:Distribution} Type{D}
-typealias IncompleteFormulation Union{DistributionType,IncompleteDistribution}
+@compat const DistributionType{D<:Distribution} = Type{D}
+const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}

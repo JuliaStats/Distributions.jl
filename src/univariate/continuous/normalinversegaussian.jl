@@ -19,8 +19,8 @@ immutable NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
   β::T
   δ::T
 
-  function NormalInverseGaussian(μ::T, α::T, β::T, δ::T)
-    new(μ, α, β, δ)
+  function (::Type{NormalInverseGaussian{T}}){T}(μ::T, α::T, β::T, δ::T)
+    new{T}(μ, α, β, δ)
   end
 end
 
@@ -46,6 +46,7 @@ params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / sqrt(d.α^2 - d.β^2)
 var(d::NormalInverseGaussian) = d.δ * d.α^2 / sqrt(d.α^2 - d.β^2)^3
 skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * sqrt(d.α^2 - d.β^2)))
+kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * sqrt(d.α^2 - d.β^2))
 
 function pdf(d::NormalInverseGaussian, x::Real)
 	μ, α, β, δ = params(d)

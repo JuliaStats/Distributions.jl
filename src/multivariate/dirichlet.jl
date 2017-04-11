@@ -3,7 +3,7 @@ immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
     alpha0::T
     lmnB::T
 
-    function Dirichlet(alpha::Vector{T})
+    function (::Type{Dirichlet{T}}){T}(alpha::Vector{T})
         alpha0::T = zero(T)
         lmnB::T = zero(T)
         for i in 1:length(alpha)
@@ -13,12 +13,12 @@ immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
             lmnB += lgamma(ai)
         end
         lmnB -= lgamma(alpha0)
-        new(alpha, alpha0, lmnB)
+        new{T}(alpha, alpha0, lmnB)
     end
 
-    function Dirichlet(d::Integer, alpha::T)
+    function (::Type{Dirichlet{T}}){T}(d::Integer, alpha::T)
         alpha0 = alpha * d
-        new(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
+        new{T}(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
     end
 end
 
@@ -55,7 +55,7 @@ function var(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    v = Array(Float64, k)
+    v = Vector{Float64}(k)
     for i = 1:k
         @inbounds αi = α[i]
         @inbounds v[i] = αi * (α0 - αi) * c
@@ -69,7 +69,7 @@ function cov(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    C = Array(Float64, k, k)
+    C = Matrix{Float64}(k, k)
 
     for j = 1:k
         αj = α[j]
@@ -113,7 +113,7 @@ function dirichlet_mode!{T <: Real}(r::Vector{T}, α::Vector{T}, α0::T)
     return r
 end
 
-dirichlet_mode{T <: Real}(α::Vector{T}, α0::T) = dirichlet_mode!(Array(T, length(α)), α, α0)
+dirichlet_mode{T <: Real}(α::Vector{T}, α0::T) = dirichlet_mode!(Vector{T}(length(α)), α, α0)
 
 mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
 mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
@@ -235,8 +235,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Array(Float64, K)  # E[p]
-    γ = Array(Float64, K)  # E[p^2]
+    μ = Vector{Float64}(K)  # E[p]
+    γ = Vector{Float64}(K)  # E[p^2]
 
     for i = 1:n
         for k = 1:K
@@ -259,8 +259,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Array(Float64, K)  # E[p]
-    γ = Array(Float64, K)  # E[p^2]
+    μ = Vector{Float64}(K)  # E[p]
+    γ = Vector{Float64}(K)  # E[p^2]
     tw = 0.
 
     for i = 1:n
@@ -291,8 +291,8 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     K = length(elogp)
     length(α) == K || throw(ArgumentError("Inconsistent argument dimensions."))
 
-    g = Array(Float64, K)
-    iq = Array(Float64, K)
+    g = Vector{Float64}(K)
+    iq = Vector{Float64}(K)
     α0 = sum(α)
 
     if debug

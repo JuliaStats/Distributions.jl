@@ -25,9 +25,9 @@ immutable Frechet{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
 
-    function Frechet(α::T, θ::T)
-    	@check_args(Frechet, α > zero(α) && θ > zero(θ))
-    	new(α, θ)
+    function (::Type{Frechet{T}}){T}(α::T, θ::T)
+        @check_args(Frechet, α > zero(α) && θ > zero(θ))
+        new{T}(α, θ)
     end
 
 end

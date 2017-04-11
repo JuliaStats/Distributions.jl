@@ -14,8 +14,8 @@ function rand!(d::MultivariateDistribution, A::AbstractMatrix)
     _rand!(sampler(d), A)
 end
 
-rand(d::MultivariateDistribution) = _rand!(d, Array(eltype(d), length(d)))
-rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), length(d), n))
+rand(d::MultivariateDistribution) = _rand!(d, Vector{eltype(d)}(length(d)))
+rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Matrix{eltype(d)}(length(d), n))
 
 ## domain
 
@@ -40,7 +40,7 @@ function cor(d::MultivariateDistribution)
     C = cov(d)
     n = size(C, 1)
     @assert size(C, 2) == n
-    R = Array(eltype(C), n, n)
+    R = Matrix{eltype(C)}(n, n)
 
     for j = 1:n
         for i = 1:j-1
@@ -101,14 +101,14 @@ function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
-    _logpdf!(Array(T, size(X,2)), d, X)
+    _logpdf!(Vector{T}(size(X,2)), d, X)
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
-    _pdf!(Array(T, size(X,2)), d, X)
+    _pdf!(Vector{T}(size(X,2)), d, X)
 end
 
 ## log likelihood

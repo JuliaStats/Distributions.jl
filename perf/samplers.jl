@@ -5,7 +5,7 @@ using Distributions
 
 ### define benchmark tasks
 
-abstract UnivariateSamplerRun{Spl} <: Proc
+@compat abstract type UnivariateSamplerRun{Spl} <: Proc end
 type BatchSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
 type IndivSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
 

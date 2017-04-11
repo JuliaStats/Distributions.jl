@@ -2,7 +2,7 @@ immutable Triweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Triweight(μ::T, σ::T) = (@check_args(Triweight, σ > zero(σ)); new(μ, σ))
+    (::Type{Triweight{T}}){T}(μ::T, σ::T) = (@check_args(Triweight, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Triweight{T<:Real}(μ::T, σ::T) = Triweight{T}(μ, σ)

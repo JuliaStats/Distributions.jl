@@ -8,8 +8,10 @@ using Compat
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
-    for (ex, dct) in R
-        dsym = Symbol(dct["dtype"])
+    for dct in R
+        ex = parse(dct["expr"])
+        @assert ex.head == :call
+        dsym = ex.args[1]
         dname = string(dsym)
 
         # test whether it is included in the selected list
@@ -21,7 +23,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         # perform testing
         println("    testing $(ex)")
         dtype = eval(dsym)
-        d = eval(parse(ex))
+        d = eval(ex)
         if dtype == TruncatedNormal
             @test isa(d, Truncated{Normal{Float64}})
         else
@@ -30,7 +32,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         end
 
         # verification and testing
-        verify_and_test(d, dct, n_tsamples)
+        verify_and_test(dtype, d, dct, n_tsamples)
     end
 end
 
@@ -47,17 +49,18 @@ _json_value(x::AbstractString) =
     error("Invalid numerical value: $x")
 
 
-function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
-    # verify parameters
-    pdct = dct["params"]
-    for (fname, val) in pdct
-        f = eval(Symbol(fname))
-        @assert isa(f, Function)
-        Base.Test.test_approx_eq(f(d), val, "$fname(d)", "val")
+function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
+    # verify properties
+    #
+    # Note: properties include all applicable params and stats
+    #
+
+    # D can be a function, e.g. TruncatedNormal
+    if isa(D, Type)
+        assert(isa(d, D))
     end
 
     # test various constructors for promotion, all-Integer args, etc.
-    D = eval(Symbol(dct["dtype"]))  # distribution name
     pars = params(d)
 
     # promotion constructor:
@@ -76,49 +79,48 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         @test typeof(D(int_pars...)) == typeof(d)
     end
 
-    # verify stats
-    @test_approx_eq minimum(d) _json_value(dct["minimum"])
-    @test_approx_eq maximum(d) _json_value(dct["maximum"])
-    @test_approx_eq_eps mean(d) _json_value(dct["mean"]) 1.0e-8
-    if !isa(d, VonMises)
-        @test_approx_eq_eps var(d) _json_value(dct["var"]) 1.0e-8
-    end
-    if !isa(d, Skellam)
-        @test_approx_eq_eps median(d) _json_value(dct["median"]) 1.0
-    end
-
-    if applicable(entropy, d) && !isa(d, VonMises)  # SciPy VonMises entropy is wrong
-        @test_approx_eq_eps entropy(d) dct["entropy"] 1.0e-7
-    end
-
-    # test conversions if distribution is parametric
-    if !isempty(typeof(d).parameters) && !isa(d, Truncated)
-        D = typeof(d).name.primary
-        W = Float32
-        @test typeof(convert(D{W}, d)) == D{W}
-        @test typeof(convert(D{W}, params(d)...)) == D{W}
-    end
-
-    # verify quantiles
-    if !isa(d, Union{Skellam, VonMises})
-        @test_approx_eq_eps quantile(d, 0.10) dct["q10"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.25) dct["q25"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.50) dct["q50"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.75) dct["q75"] 1.0e-8
-        @test_approx_eq_eps quantile(d, 0.90) dct["q90"] 1.0e-8
+    # verify properties (params & stats)
+    pdct = dct["properties"]
+    for (fname, val) in pdct
+        expect_v = _json_value(val)
+        f = eval(Symbol(fname))
+        @assert isa(f, Function)
+        tol_v = abs(expect_v) * 1e-8 + 1e-12
+        Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
     end
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        lp = Float64(pt["logpdf"])
-        cf = Float64(pt["cdf"])
-        Base.Test.test_approx_eq(logpdf(d, x), lp, "logpdf(d, $x)", "lp")
-        if !isa(d, Skellam)
-            Base.Test.test_approx_eq(cdf(d, x), cf, "cdf(d, $x)", "cf")
-        else
-            @test_throws MethodError cdf(d, x)
+        p = _json_value(pt["pdf"])
+        lp = _json_value(pt["logpdf"])
+        cf = _json_value(pt["cdf"])
+
+        ptol = p * 1e-8 + 1e-16
+        lptol = 1e-12
+        cftol = 1e-12
+        if isa(d, NoncentralHypergeometric)
+            lptol = 1e-4
+            cftol = 1e-8
+        end
+
+        Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
+        Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
+
+        # cdf method is not implemented for Skellam & NormalInverseGaussian
+        if !isa(d, Union{Skellam, NormalInverseGaussian})
+            Base.Test.test_approx_eq(cdf(d, x), cf, cftol, "cdf(d, $x)", "cf")
+        end
+    end
+
+    # verify quantiles
+    if !isa(d, Union{Skellam, VonMises, NormalInverseGaussian})
+        qts = dct["quans"]
+        for qt in qts
+            q = Float64(qt["q"])
+            x = Float64(qt["x"])
+            @test isapprox(quantile(d, q), x, atol=1.0e-8)
         end
     end
 
@@ -142,8 +144,17 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # generic testing
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
+    elseif isa(d, NoncentralBeta) ||
+           isa(d, NoncentralChisq) ||
+           isa(d, NoncentralF) ||
+           isa(d, NoncentralT)
+        n_tsamples = min(n_tsamples, 100)
     end
-    if !isa(d, Union{Skellam, VonMises})
+
+    if !isa(d, Union{Skellam,
+                     VonMises,
+                     NoncentralHypergeometric,
+                     NormalInverseGaussian})
         test_distr(d, n_tsamples)
     end
 end
@@ -152,13 +163,12 @@ end
 ## main
 
 for c in ["discrete",
-          "continuous",
-          "discrete_hand_coded"]
+          "continuous"]
 
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "$(c)_test.json")
+    jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end

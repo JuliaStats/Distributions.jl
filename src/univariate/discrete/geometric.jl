@@ -23,9 +23,9 @@ External links
 immutable Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Geometric(p::T)
+    function (::Type{Geometric{T}}){T}(p::T)
         @check_args(Geometric, zero(p) < p < one(p))
-    	new(p)
+        new{T}(p)
     end
 
 end

@@ -26,7 +26,7 @@ immutable Logistic{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
 
-    Logistic(μ::T, θ::T) = (@check_args(Logistic, θ > zero(θ)); new(μ, θ))
+    (::Type{Logistic{T}}){T}(μ::T, θ::T) = (@check_args(Logistic, θ > zero(θ)); new{T}(μ, θ))
 end
 
 Logistic{T<:Real}(μ::T, θ::T) = Logistic{T}(μ, θ)

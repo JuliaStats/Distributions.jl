@@ -30,14 +30,14 @@ immutable TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     b::T
     c::T
 
-    function TriangularDist(a::T, b::T, c::T)
+    function (::Type{TriangularDist{T}}){T}(a::T, b::T, c::T)
         @check_args(TriangularDist, a < b)
         @check_args(TriangularDist, a <= c <= b)
-        new(a, b, c)
+        new{T}(a, b, c)
     end
-    function TriangularDist(a::T, b::T)
+    function (::Type{TriangularDist{T}}){T}(a::T, b::T)
         @check_args(TriangularDist, a < b)
-        new(a, b, middle(a, b))
+        new{T}(a, b, middle(a, b))
     end
 end
 
@@ -80,14 +80,14 @@ function var(d::TriangularDist)
     _pretvar(a, b, c) / 18
 end
 
-function skewness(d::TriangularDist)
+function skewness{T<:Real}(d::TriangularDist{T})
     (a, b, c) = params(d)
-    sqrt2 * (a + b - 2c) * (2a - b - c) * (a - 2b + c) / (5 * _pretvar(a, b, c)^3//2)
+    sqrt2 * (a + b - 2c) * (2a - b - c) * (a - 2b + c) / ( 5 * _pretvar(a, b, c)^(T(3)/2) )
 end
 
 kurtosis{T<:Real}(d::TriangularDist{T}) = T(-3)/5
 
-entropy(d::TriangularDist) = 1//2 + log((d.b - d.a) / 2)
+entropy{T<:Real}(d::TriangularDist{T}) = one(T)/2 + log((d.b - d.a) / 2)
 
 
 #### Evaluation

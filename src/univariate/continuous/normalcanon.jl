@@ -4,9 +4,9 @@ immutable NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     λ::T       # σ^(-2)
     μ::T       # μ
 
-    function NormalCanon(η, λ)
+    function (::Type{NormalCanon{T}}){T}(η, λ)
         @check_args(NormalCanon, λ > zero(λ))
-    	new(η, λ, η / λ)
+        new{T}(η, λ, η / λ)
     end
 end
 
@@ -33,7 +33,6 @@ canonform(d::Normal) = convert(NormalCanon, d)
 params(d::NormalCanon) = (d.η, d.λ)
 @inline partype{T<:Real}(d::NormalCanon{T}) = T
 
-
 #### Statistics
 
 mean(d::NormalCanon) = d.μ
@@ -48,6 +47,8 @@ std(d::NormalCanon) = sqrt(var(d))
 
 entropy(d::NormalCanon) = (-log(d.λ) + log2π + 1) / 2
 
+location(d::NormalCanon) = mean(d)
+scale(d::NormalCanon) = std(d)
 
 #### Evaluation
 

@@ -22,7 +22,7 @@ External links
 immutable Exponential{T<:Real} <: ContinuousUnivariateDistribution
     θ::T		# note: scale not rate
 
-    Exponential(θ::Real) = (@check_args(Exponential, θ > zero(θ)); new(θ))
+    (::Type{Exponential{T}}){T}(θ::Real) = (@check_args(Exponential, θ > zero(θ)); new{T}(θ))
 end
 
 Exponential{T<:Real}(θ::T) = Exponential{T}(θ)

@@ -25,10 +25,10 @@ immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    function Binomial(n, p)
+    function (::Type{Binomial{T}}){T}(n, p)
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))
-        new(n, p)
+        new{T}(n, p)
     end
 
 end
@@ -191,7 +191,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, ne, n)
 end
 
-typealias BinomData Tuple{Int, AbstractArray}
+const BinomData = Tuple{Int, AbstractArray}
 
 suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
 suffstats(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)

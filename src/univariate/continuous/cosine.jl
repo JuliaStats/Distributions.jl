@@ -7,7 +7,7 @@ immutable Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Cosine(μ::T, σ::T) = (@check_args(Cosine, σ > zero(σ)); new(μ, σ))
+    (::Type{Cosine{T}}){T}(μ::T, σ::T) = (@check_args(Cosine, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Cosine{T<:Real}(μ::T, σ::T) = Cosine{T}(μ, σ)
@@ -47,7 +47,7 @@ var{T<:Real}(d::Cosine{T}) = d.σ^2 * (1//3 - 2/T(π)^2)
 
 skewness{T<:Real}(d::Cosine{T}) = zero(T)
 
-kurtosis{T<:Real}(d::Cosine{T}) = 6*(90-T(pi))/(5*(T(π)^2-6)^2)
+kurtosis{T<:Real}(d::Cosine{T}) = 6*(90-T(π)^4) / (5*(T(π)^2-6)^2)
 
 
 #### Evaluation

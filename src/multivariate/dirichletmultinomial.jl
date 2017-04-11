@@ -3,11 +3,11 @@ immutable DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
     α::Vector{T}
     α0::T
 
-    function DirichletMultinomial(n::Integer, α::Vector{T})
-        α0 = sumabs(α)
+    function (::Type{DirichletMultinomial{T}}){T}(n::Integer, α::Vector{T})
+        α0 = sum(abs, α)
         sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
         n > 0 || throw(ArgumentError("n must be a positive integer."))
-        new(Int(n), α, α0)
+        new{T}(Int(n), α, α0)
     end
 end
 DirichletMultinomial{T <: Real}(n::Integer, α::Vector{T}) = DirichletMultinomial{T}(n, α)
@@ -120,7 +120,7 @@ function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
             num = αj * sum(vec(ss.s[j, :]) ./ (αj + rng))  # vec needed for 0.4
             α[j] = num / denom
         end
-        maxabs(α_old - α) < tol && break
+        maximum(abs, α_old - α) < tol && break
     end
     DirichletMultinomial(ss.n, α)
 end

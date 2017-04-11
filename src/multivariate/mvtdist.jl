@@ -2,7 +2,7 @@
 
 ## Generic multivariate t-distribution class
 
-abstract AbstractMvTDist <: ContinuousMultivariateDistribution
+@compat abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
 immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
@@ -11,18 +11,18 @@ immutable GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
     μ::Vector{T}
     Σ::Cov
 
-    function GenericMvTDist(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::AbstractPDMat{T})
+    function (::Type{GenericMvTDist{T,Cov}}){T,Cov}(df::T, dim::Int, zmean::Bool, μ::Vector{T}, Σ::AbstractPDMat{T})
       df > zero(df) || error("df must be positive")
-      new(df, dim, zmean, μ, Σ)
+      new{T,Cov}(df, dim, zmean, μ, Σ)
     end
 end
 
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool)
     d = length(μ)
     dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
-    R = promote_type(T, eltype(Σ))
-    m, S = promote_eltype(μ, Σ)
-    GenericMvTDist{R, typeof(S)}(R(df), d, zmean, m, S)
+    R = Base.promote_eltype(T, Σ)
+    S = convert(AbstractArray{R}, Σ)
+    GenericMvTDist{R, typeof(S)}(R(df), d, zmean, convert(AbstractArray{R}, μ), S)
 end
 
 function GenericMvTDist{Cov<:AbstractPDMat, T<:Real, S<:Real}(df::T, μ::Vector{S}, Σ::Cov, zmean::Bool)
@@ -36,19 +36,19 @@ GenericMvTDist{Cov<:AbstractPDMat, T<:Real}(df::T, Σ::Cov) = GenericMvTDist(df,
 
 ### Conversion
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, d::GenericMvTDist)
-    S = convert_eltype(T, d.Σ)
-    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, convert_eltype(T, d.μ), S)
+    S = convert(AbstractArray{T}, d.Σ)
+    GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, convert(AbstractArray{T}, d.μ), S)
 end
 function convert{T<:Real}(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
-    S = convert_eltype(T, Σ)
-    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, convert_eltype(T, μ), S)
+    S = convert(AbstractArray{T}, Σ)
+    GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, convert(AbstractArray{T}, μ), S)
 end
 
 ## Construction of multivariate normal with specific covariance type
 
-typealias IsoTDist  GenericMvTDist{Float64, ScalMat{Float64}}
-typealias DiagTDist GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
-typealias MvTDist GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
+const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}}
+const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
+const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
 
 MvTDist(df::Real, μ::Vector{Float64}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
@@ -121,7 +121,7 @@ function sqmahal!{T<:Real}(r::AbstractArray, d::GenericMvTDist, x::AbstractMatri
     invquad!(r, d.Σ, z)
 end
 
-sqmahal{T<:Real}(d::AbstractMvTDist, x::AbstractMatrix{T}) = sqmahal!(Array(T, size(x, 2)), d, x)
+sqmahal{T<:Real}(d::AbstractMvTDist, x::AbstractMatrix{T}) = sqmahal!(Vector{T}(size(x, 2)), d, x)
 
 
 function mvtdist_consts(d::AbstractMvTDist)
@@ -170,7 +170,7 @@ end
 function _rand!{T<:Real}(d::GenericMvTDist, x::AbstractMatrix{T})
     cols = size(x,2)
     chisqd = Chisq(d.df)
-    y = Array(T, 1, cols)
+    y = Matrix{T}(1, cols)
     unwhiten!(d.Σ, randn!(x))
     rand!(chisqd, y)
     y = sqrt(y/(d.df))

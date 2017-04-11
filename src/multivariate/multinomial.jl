@@ -2,16 +2,16 @@ immutable Multinomial{T<:Real} <: DiscreteMultivariateDistribution
     n::Int
     p::Vector{T}
 
-    function Multinomial(n::Integer, p::Vector{T})
+    function (::Type{Multinomial{T}}){T}(n::Integer, p::Vector{T})
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
         end
         if !isprobvec(p)
             throw(ArgumentError("p = $p is not a probability vector."))
         end
-        new(round(Int, n), p)
+        new{T}(round(Int, n), p)
     end
-    Multinomial(n::Integer, p::Vector{T}, ::NoArgCheck) = new(round(Int, n), p)
+    (::Type{Multinomial{T}}){T}(n::Integer, p::Vector{T}, ::NoArgCheck) = new{T}(round(Int, n), p)
 end
 Multinomial{T<:Real}(n::Integer, p::Vector{T}) = Multinomial{T}(n, p)
 Multinomial(n::Integer, k::Integer) = Multinomial{Float64}(round(Int, n), fill(1.0 / k, k))
@@ -39,7 +39,7 @@ function var{T<:Real}(d::Multinomial{T})
     k = length(p)
     n = ntrials(d)
 
-    v = Array(T, k)
+    v = Vector{T}(k)
     for i = 1:k
         @inbounds p_i = p[i]
         v[i] = n * p_i * (1 - p_i)
@@ -52,7 +52,7 @@ function cov{T<:Real}(d::Multinomial{T})
     k = length(p)
     n = ntrials(d)
 
-    C = Array(T, k, k)
+    C = Matrix{T}(k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1

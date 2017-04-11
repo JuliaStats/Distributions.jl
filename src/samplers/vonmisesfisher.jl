@@ -39,10 +39,10 @@ function _rand!(spl::VonMisesFisherSampler, x::AbstractVector, t::AbstractVector
     return x
 end
 
-_rand!(spl::VonMisesFisherSampler, x::AbstractVector) = _rand!(spl, x, Array(Float64, length(x)))
+_rand!(spl::VonMisesFisherSampler, x::AbstractVector) = _rand!(spl, x, Vector{Float64}(length(x)))
 
 function _rand!(spl::VonMisesFisherSampler, x::AbstractMatrix)
-    t = Array(Float64, size(x, 1))
+    t = Vector{Float64}(size(x, 1))
     for j = 1:size(x, 2)
         _rand!(spl, view(x,:,j), t)
     end

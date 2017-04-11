@@ -3,10 +3,10 @@ immutable NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν2::T
     λ::T
 
-    function NoncentralF(ν1::T, ν2::T, λ::T)
+    function (::Type{NoncentralF{T}}){T}(ν1::T, ν2::T, λ::T)
         @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T))
         @check_args(NoncentralF, λ >= zero(T))
-	    new(ν1, ν2, λ)
+        new{T}(ν1, ν2, λ)
     end
 end
 

@@ -64,8 +64,8 @@ end
 rand(d::UnivariateDistribution) = quantile(d, rand())
 
 rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Array(eltype(d), n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Array(eltype(d), shp))
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(shp))
 
 ## statistics
 
@@ -203,7 +203,7 @@ for fun in [:pdf, :logpdf,
         end
 
         ($fun)(d::UnivariateDistribution, X::AbstractArray) =
-            $(_fun!)(Array(promote_type(partype(d), eltype(X)), size(X)), d, X)
+            $(_fun!)(Array{promote_type(partype(d), eltype(X))}(size(X)), d, X)
     end
 end
 
@@ -259,7 +259,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 end
 
 
-abstract RecursiveProbabilityEvaluator
+@compat abstract type RecursiveProbabilityEvaluator end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)

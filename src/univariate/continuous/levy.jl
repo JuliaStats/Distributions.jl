@@ -23,7 +23,7 @@ immutable Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Levy(μ::T, σ::T) = (@check_args(Levy, σ > zero(σ)); new(μ, σ))
+    (::Type{Levy{T}}){T}(μ::T, σ::T) = (@check_args(Levy, σ > zero(σ)); new{T}(μ, σ))
 end
 
 Levy{T<:Real}(μ::T, σ::T) = Levy{T}(μ, σ)
@@ -57,7 +57,7 @@ mode(d::Levy) = d.σ / 3 + d.μ
 
 entropy(d::Levy) = (1 - 3digamma(1) + log(16 * d.σ^2 * π)) / 2
 
-median(d::Levy) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
+median{T<:Real}(d::Levy{T}) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 
 #### Evaluation

@@ -12,7 +12,7 @@ relation ship that if $X \sim \operatorname{Beta}(\alpha, \beta)$ then $\frac{X}
 \sim \operatorname{BetaPrime}(\alpha, \beta)$
 
 ```julia
-BetaPrime()        # equivalent to BetaPrime(0, 1)
+BetaPrime()        # equivalent to BetaPrime(1, 1)
 BetaPrime(a)       # equivalent to BetaPrime(a, a)
 BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
 
@@ -29,9 +29,9 @@ immutable BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
-    function BetaPrime(α::T, β::T)
+    function (::Type{BetaPrime{T}}){T}(α::T, β::T)
         @check_args(BetaPrime, α > zero(α) && β > zero(β))
-        new(α, β)
+        new{T}(α, β)
     end
 end
 

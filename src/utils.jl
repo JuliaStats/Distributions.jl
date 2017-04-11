@@ -26,8 +26,13 @@ convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
 
 +(x::AbstractArray, v::ZeroVector) = x
 -(x::AbstractArray, v::ZeroVector) = x
-.+(x::AbstractArray, v::ZeroVector) = x
-.-(x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
+
+if VERSION < v"0.6.0-dev.1632"
+    Base.:(.+)(x::AbstractArray, v::ZeroVector) = x
+    Base.:(.-)(x::AbstractArray, v::ZeroVector) = x
+end
 
 
 ##### Utility functions
@@ -134,34 +139,3 @@ function trycholfact(a::Matrix{Float64})
         return e
     end
 end
-
-# for when container inputs need to be promoted to the same eltype
-function promote_eltype{T, S}(A::Array{T}, B::Array{S})
-    R = promote_type(T, S)
-    (Array{R}(A), Array{R}(B))
-end
-function promote_eltype{T}(A::Array{T}, B::Real)
-    R = promote_type(T, typeof(B))
-    (Array{R}(A), R(B))
-end
-function promote_eltype(A::Real, B::Array)
-    tup = promote_eltype(B, A)
-    (tup[2], tup[1])
-end
-function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
-    R = promote_type(T, S)
-    (Array{R}(A), convert(typeof(B).name.primary{R}, B))
-end
-function promote_eltype{S}(A::Real, B::AbstractPDMat{S})
-    R = promote_type(typeof(A), S)
-    (R(A), convert(typeof(B).name.primary{R}, B))
-end
-promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)
-
-# utility function to change element type of container
-@inline convert_eltype{T}(::Type{T}, A::AbstractArray) = convert(AbstractArray{T}, A)
-@inline function convert_eltype{T}(::Type{T}, A::AbstractPDMat)
-    R = typeof(A).name.primary
-    convert(R{T}, A)
-end
-@inline convert_eltype{T}(::Type{T}, Z::ZeroVector) = convert(ZeroVector{T}, Z)

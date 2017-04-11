@@ -18,16 +18,16 @@ immutable Categorical{T<:Real} <: DiscreteUnivariateDistribution
     K::Int
     p::Vector{T}
 
-    Categorical(p::Vector{T}, ::NoArgCheck) = new(length(p), p)
+    (::Type{Categorical{T}}){T}(p::Vector{T}, ::NoArgCheck) = new{T}(length(p), p)
 
-    function Categorical(p::Vector{T})
+    function (::Type{Categorical{T}}){T}(p::Vector{T})
         @check_args(Categorical, isprobvec(p))
-        new(length(p), p)
+        new{T}(length(p), p)
     end
 
-    function Categorical(k::Integer)
+    function (::Type{Categorical{T}}){T}(k::Integer)
         @check_args(Categorical, k >= 1)
-        new(k, fill(1/k, k))
+        new{T}(k, fill(1/k, k))
     end
 end
 
@@ -137,7 +137,7 @@ function modes(d::Categorical)
     K = ncategories(d)
     p = probs(d)
     maxp = maximum(p)
-    r = Array(Int, 0)
+    r = Vector{Int}(0)
     for k = 1:K
         @inbounds if p[k] == maxp
             push!(r, k)
@@ -245,7 +245,7 @@ function suffstats{T<:Integer}(::Type{Categorical}, k::Int, x::AbstractArray{T},
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
-typealias CategoricalData Tuple{Int, AbstractArray}
+const CategoricalData = Tuple{Int, AbstractArray}
 
 suffstats(::Type{Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
 suffstats(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)

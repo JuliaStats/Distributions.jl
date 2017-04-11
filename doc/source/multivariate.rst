@@ -7,10 +7,10 @@ Multivariate Distributions
 
 .. code-block:: julia
 
-    typealias MultivariateDistribution{S<:ValueSupport} Distribution{Multivariate,S}
+    const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 
-    typealias DiscreteMultivariateDistribution   Distribution{Multivariate, Discrete}
-    typealias ContinuousMultivariateDistribution Distribution{Multivariate, Continuous}
+    const DiscreteMultivariateDistribution   = Distribution{Multivariate, Discrete}
+    const ContinuousMultivariateDistribution = Distribution{Multivariate, Continuous}
 
 
 Common Interface
@@ -155,13 +155,13 @@ We also define a set of alias for the types using different combinations of mean
 
 .. code-block:: julia
 
-    typealias IsoNormal  MvNormal{ScalMat,  Vector{Float64}}
-    typealias DiagNormal MvNormal{PDiagMat, Vector{Float64}}
-    typealias FullNormal MvNormal{PDMat,    Vector{Float64}}
+    const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
+    const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
+    const FullNormal = MvNormal{PDMat,    Vector{Float64}}
 
-    typealias ZeroMeanIsoNormal  MvNormal{ScalMat,  ZeroVector{Float64}}
-    typealias ZeroMeanDiagNormal MvNormal{PDiagMat, ZeroVector{Float64}}
-    typealias ZeroMeanFullNormal MvNormal{PDMat,    ZeroVector{Float64}}
+    const ZeroMeanIsoNormal  = MvNormal{ScalMat,  ZeroVector{Float64}}
+    const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
+    const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
 
 
 Construction
@@ -247,13 +247,13 @@ We also define aliases for common specializations of this parametric type:
 
 .. code:: julia
 
-    typealias FullNormalCanon MvNormalCanon{PDMat,    Vector{Float64}}
-    typealias DiagNormalCanon MvNormalCanon{PDiagMat, Vector{Float64}}
-    typealias IsoNormalCanon  MvNormalCanon{ScalMat,  Vector{Float64}}
+    const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
+    const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
+    const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
 
-    typealias ZeroMeanFullNormalCanon MvNormalCanon{PDMat,    ZeroVector{Float64}}
-    typealias ZeroMeanDiagNormalCanon MvNormalCanon{PDiagMat, ZeroVector{Float64}}
-    typealias ZeroMeanIsoNormalCanon  MvNormalCanon{ScalMat,  ZeroVector{Float64}}
+    const ZeroMeanFullNormalCanon = MvNormalCanon{PDMat,    ZeroVector{Float64}}
+    const ZeroMeanDiagNormalCanon = MvNormalCanon{PDiagMat, ZeroVector{Float64}}
+    const ZeroMeanIsoNormalCanon  = MvNormalCanon{ScalMat,  ZeroVector{Float64}}
 
 A multivariate distribution with canonical parameterization can be constructed using a common constructor ``MvNormalCanon`` as:
 

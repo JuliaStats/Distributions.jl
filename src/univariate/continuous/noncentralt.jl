@@ -2,10 +2,10 @@ immutable NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
 
-    function NoncentralT(ν::T, λ::T)
-    	@check_args(NoncentralT, ν > zero(ν))
+    function (::Type{NoncentralT{T}}){T}(ν::T, λ::T)
+        @check_args(NoncentralT, ν > zero(ν))
         @check_args(NoncentralT, λ >= zero(λ))
-        new(ν, λ)
+        new{T}(ν, λ)
     end
 end
 

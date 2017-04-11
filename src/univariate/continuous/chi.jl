@@ -23,7 +23,7 @@ External links
 immutable Chi{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
 
-    Chi(ν::T) = (@check_args(Chi, ν > zero(ν)); new(ν))
+    (::Type{Chi{T}}){T}(ν::T) = (@check_args(Chi, ν > zero(ν)); new{T}(ν))
 end
 
 Chi{T<:Real}(ν::T) = Chi{T}(ν)

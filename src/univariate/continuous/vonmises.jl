@@ -21,9 +21,9 @@ immutable VonMises{T<:Real} <: ContinuousUnivariateDistribution
     κ::T      # concentration
     I0κ::T    # I0(κ), where I0 is the modified Bessel function of order 0
 
-    function VonMises(μ::T, κ::T)
+    function (::Type{VonMises{T}}){T}(μ::T, κ::T)
         @check_args(VonMises, κ > zero(κ))
-        new(μ, κ, besseli(zero(T), κ))
+        new{T}(μ, κ, besseli(zero(T), κ))
     end
 end
 
@@ -53,7 +53,9 @@ params(d::VonMises) = (d.μ, d.κ)
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
-circvar(d::VonMises) = 1 - besseli(1, d.κ) / d.I0κ
+var(d::VonMises) = 1 - besseli(1, d.κ) / d.I0κ
+# deprecated 12 September 2016
+@deprecate circvar(d) var(d)
 entropy(d::VonMises) = log(twoπ * d.I0κ) - d.κ * (besseli(1, d.κ) / d.I0κ)
 
 cf(d::VonMises, t::Real) = (besseli(abs(t), d.κ) / d.I0κ) * cis(t * d.μ)
