@@ -1133,6 +1133,19 @@
   ]
 },
 {
+    "expr": "FDist(30, 40)",
+    "dtype": "FDist",
+    "minimum": 0,
+    "maximum": "inf",
+    "properties": {
+      "kurtosis": 2.2442906574394463
+    },
+    "points": [
+    ],
+    "quans": [
+    ]
+},
+{
   "expr": "Frechet()",
   "dtype": "Frechet",
   "minimum": 0,
