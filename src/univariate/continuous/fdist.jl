@@ -79,7 +79,7 @@ function kurtosis{T<:Real}(d::FDist{T})
     (ν1, ν2) = params(d)
     if ν2 > 8
         a = ν1 * (5ν2 - 22) * (ν1 + ν2 - 2) + (ν2 - 4) * (ν2 - 2)^2
-        b = ν1 * (ν2 - 6) * (ν2 - 8) * (ν2 - 2)
+        b = ν1 * (ν2 - 6) * (ν2 - 8) * (ν1 + ν2 - 2)
         return 12a / b
     else
         return T(NaN)
