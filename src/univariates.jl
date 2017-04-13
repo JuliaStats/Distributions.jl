@@ -283,13 +283,7 @@ pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximu
 
 ## loglikelihood
 
-function _loglikelihood(d::UnivariateDistribution, X::AbstractArray)
-    ll = 0.0
-    for i in 1:length(X)
-        @inbounds ll += logpdf(d, X[i])
-    end
-    return ll
-end
+_loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
 
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) =
     _loglikelihood(d, X)
