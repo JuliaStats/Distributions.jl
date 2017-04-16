@@ -113,17 +113,9 @@ end
 
 ## log likelihood
 
-function _loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
-    ll = 0.0
-    @inbounds for i in 1:size(X, 2)
-        ll += _logpdf(d, view(X, :, i))
-    end
-    return ll
-end
-
 function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    return _loglikelihood(d, X)
+    return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
 end
 
 ##### Specific distributions #####
