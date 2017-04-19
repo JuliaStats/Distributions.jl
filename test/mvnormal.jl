@@ -55,6 +55,9 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
         @test logpdf(g, X[:,i]) ≈ lp[i]
     end
     @test logpdf(g, X) ≈ lp
+
+    # log likelihood
+    @test loglikelihood(g, X) ≈ sum([Distributions._logpdf(g, X[:,i]) for i in 1:size(X, 2)])
 end
 
 

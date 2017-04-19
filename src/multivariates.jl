@@ -115,7 +115,7 @@ end
 
 function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    return sum(x -> _logpdf(d, x), X, 2)
+    return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
 end
 
 ##### Specific distributions #####
