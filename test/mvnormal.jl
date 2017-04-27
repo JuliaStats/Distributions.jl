@@ -42,6 +42,20 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
         @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))
     end
 
+    X = rand(MersenneTwister(14), g, n_tsamples)
+    Y = rand(MersenneTwister(14), g, n_tsamples)
+    @test X == Y
+    emp_mu = vec(mean(X, 2))
+    Z = X .- emp_mu
+    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    for i = 1:d
+        @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
+    end
+    for i = 1:d, j = 1:d
+        @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))
+    end
+
+
     # evaluation of sqmahal & logpdf
     U = X .- μ
     sqm = vec(sum(U .* (Σ \ U), 1))

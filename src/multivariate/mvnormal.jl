@@ -54,6 +54,11 @@ end
 
 _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
+# Sampling with designated rng
+rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Array{eltype(d)}(length(d)))
+rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
+rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Array{eltype(d)}(length(d), n))
+
 
 ###########################################################
 #
@@ -154,19 +159,24 @@ gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ (x - d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(x)), d.μ)
+_rand!(d::MvNormal, x::VecOrMat) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand_abstr!(d::MvNormal, x::AbstractVecOrMat)
+function _rand_abstr!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
     for i = 1:length(x)
         @inbounds x[i] = randn()
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
+_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Base.GLOBAL_RNG, d, x)
 # define these separately to avoid ambiguity with
 # _rand(d::Multivariate, x::AbstractMatrix)
-_rand!(d::MvNormal, x::AbstractMatrix) = _rand_abstr!(d, x)
-_rand!(d::MvNormal, x::AbstractVector) = _rand_abstr!(d, x)
+_rand!(rng::AbstractRNG, d::MvNormal, x::AbstractMatrix) = _rand_abstr!(rng, d, x)
+_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector) = _rand_abstr!(rng, d, x)
+_rand!(d::MvNormal, x::AbstractVector) = _rand!(Base.GLOBAL_RNG, d, x)
 
 ###########################################################
 #
