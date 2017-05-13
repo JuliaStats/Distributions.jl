@@ -55,9 +55,9 @@ end
 _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
 # Sampling with designated rng
-rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Array{eltype(d)}(length(d)))
+rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(length(d)))
 rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
-rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Array{eltype(d)}(length(d), n))
+rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Matrix{eltype(d)}(length(d), n))
 
 
 ###########################################################

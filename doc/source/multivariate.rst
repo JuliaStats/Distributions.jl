@@ -223,6 +223,11 @@ In addition to the methods listed in the common interface above, we also provide
 
     Write the squared Mahalanbobis distances from each column of x to the center of d to r.
 
+.. function:: rand(rng, d)
+              rand(rng, d, n)
+              rand!(rng, d, x)
+
+    Sample from distribution ``d`` using the random number generator ``rng``.
 
 Canonical form
 ~~~~~~~~~~~~~~~
