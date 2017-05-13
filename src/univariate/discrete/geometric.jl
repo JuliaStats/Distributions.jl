@@ -139,7 +139,8 @@ end
 
 ### Sampling
 
-rand(d::Geometric) = floor(Int,-randexp() / log1p(-d.p))
+rand(d::Geometric) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
 
 
 ### Model Fitting

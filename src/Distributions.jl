@@ -7,9 +7,10 @@ using StatsFuns
 using StatsBase
 using Compat
 
+using Base.Random
+
 import QuadGK.quadgk
 import Compat.view
-import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
