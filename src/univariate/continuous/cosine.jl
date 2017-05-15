@@ -65,12 +65,24 @@ function logpdf{T<:Real}(d::Cosine{T}, x::Real)
     insupport(d, x) ? log(pdf(d, x)) : -T(Inf)
 end
 
-function cdf(d::Cosine, x::Real)
+function cdf{T<:Real}(d::Cosine{T}, x::Real)
+    if x < d.μ - d.σ 
+        return zero(T)
+    end
+    if x > d.μ + d.σ 
+        return one(T)
+    end
     z = (x - d.μ) / d.σ
     (1 + z + sinpi(z) * invπ) / 2
 end
 
-function ccdf(d::Cosine, x::Real)
+function ccdf{T<:Real}(d::Cosine{T}, x::Real)
+    if x < d.μ - d.σ 
+        return one(T)
+    end
+    if x > d.μ + d.σ 
+        return zero(T)
+    end
     nz = (d.μ - x) / d.σ
     (1 + nz + sinpi(nz) * invπ) / 2
 end
