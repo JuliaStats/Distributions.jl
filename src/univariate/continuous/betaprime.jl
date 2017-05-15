@@ -84,17 +84,21 @@ end
 
 #### Evaluation
 
-function logpdf(d::BetaPrime, x::Real)
+function logpdf{T<:Real}(d::BetaPrime{T}, x::Real)
     (α, β) = params(d)
-    (α - 1) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+    if x < 0 
+        T(-Inf)
+    else
+        (α - 1) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+    end
 end
 
 pdf(d::BetaPrime, x::Real) = exp(logpdf(d, x))
 
-cdf(d::BetaPrime, x::Real) = betacdf(d.α, d.β, x / (1 + x))
-ccdf(d::BetaPrime, x::Real) = betaccdf(d.α, d.β, x / (1 + x))
-logcdf(d::BetaPrime, x::Real) = betalogcdf(d.α, d.β, x / (1 + x))
-logccdf(d::BetaPrime, x::Real) = betalogccdf(d.α, d.β, x / (1 + x))
+cdf{T<:Real}(d::BetaPrime{T}, x::Real) = x <= 0 ? zero(T) : betacdf(d.α, d.β, x / (1 + x))
+ccdf{T<:Real}(d::BetaPrime{T}, x::Real) = x <= 0 ? one(T) : betaccdf(d.α, d.β, x / (1 + x))
+logcdf{T<:Real}(d::BetaPrime{T}, x::Real) =  x <= 0 ? T(-Inf) : betalogcdf(d.α, d.β, x / (1 + x))
+logccdf{T<:Real}(d::BetaPrime{T}, x::Real) =  x <= 0 ? zero(T) : betalogccdf(d.α, d.β, x / (1 + x))
 
 quantile(d::BetaPrime, p::Real) = (x = betainvcdf(d.α, d.β, p); x / (1 - x))
 cquantile(d::BetaPrime, p::Real) = (x = betainvccdf(d.α, d.β, p); x / (1 - x))
