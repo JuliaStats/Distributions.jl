@@ -64,18 +64,24 @@ median{T<:Real}(d::Levy{T}) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 function pdf(d::Levy, x::Real)
     μ, σ = params(d)
+    if x <= μ
+        return zero(T)
+    end
     z = x - μ
     (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3//2)
 end
 
-function logpdf(d::Levy, x::Real)
+function logpdf{T<:Real}(d::Levy{T}, x::Real)
     μ, σ = params(d)
+    if x <= μ
+        return T(-Inf)
+    end
     z = x - μ
     (log(σ) - log2π - σ / z - 3log(z))/2
 end
 
-cdf(d::Levy, x::Real) = erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf(d::Levy, x::Real) = erf(sqrt(d.σ / (2(x - d.μ))))
+cdf{T<:Real}(d::Levy{T}, x::Real) = x <= μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
+ccdf{T<:Real}(d::Levy{T}, x::Real) =  x <= μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
 quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
 cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
