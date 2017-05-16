@@ -62,7 +62,7 @@ median{T<:Real}(d::Levy{T}) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 #### Evaluation
 
-function pdf(d::Levy, x::Real)
+function pdf{T<:Real}(d::Levy{T}, x::Real)
     μ, σ = params(d)
     if x <= μ
         return zero(T)
