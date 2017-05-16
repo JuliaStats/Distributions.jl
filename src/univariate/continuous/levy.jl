@@ -80,8 +80,8 @@ function logpdf{T<:Real}(d::Levy{T}, x::Real)
     (log(σ) - log2π - σ / z - 3log(z))/2
 end
 
-cdf{T<:Real}(d::Levy{T}, x::Real) = x <= μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf{T<:Real}(d::Levy{T}, x::Real) =  x <= μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
+cdf{T<:Real}(d::Levy{T}, x::Real) = x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
+ccdf{T<:Real}(d::Levy{T}, x::Real) =  x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
 quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
 cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
