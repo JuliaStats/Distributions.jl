@@ -75,5 +75,11 @@ x = x ./ sum(x, 1)
 r = fit_mle(Dirichlet, x)
 @test isapprox(r.alpha, d.alpha, atol=0.25)
 
+x = [.1 .1; .2 .3; .7 .6]
+α = [14.77, 35.46, 92.99]
+
+r = fit_mle(Dirichlet, x)
+@test isapprox(α, r.alpha, atol=.01)
+
 # r = fit_mle(Dirichlet, x, fill(2.0, n))
 # @test isapprox(r.alpha, d.alpha, atol=0.25)

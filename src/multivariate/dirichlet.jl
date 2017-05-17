@@ -219,14 +219,15 @@ end
 function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     K = length(μ)
 
-    α0 = 0.
+    α = zeros(K) 
+
     for k = 1:K
         @inbounds μk = μ[k]
         @inbounds γk = γ[k]
         ak = (μk - γk) / (γk - μk * μk)
-        α0 += ak
+        @inbounds α[k] = ak
     end
-    α0 /= K
+    α0 = median(α)
 
     multiply!(μ, α0)
 end
