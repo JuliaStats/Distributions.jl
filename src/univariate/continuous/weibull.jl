@@ -133,4 +133,5 @@ end
 
 #### Sampling
 
-rand(d::Weibull) = xv(d, randexp())
+rand(d::Weibull) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))

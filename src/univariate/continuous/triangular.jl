@@ -143,10 +143,11 @@ end
 
 #### Sampling
 
-function rand(d::TriangularDist)
+rand(d::TriangularDist) = rand(GLOBAL_RNG, d)
+function rand(rng::AbstractRNG, d::TriangularDist)
     (a, b, c) = params(d)
     b_m_a = b - a
-    u = rand()
+    u = rand(rng)
     b_m_a * u < (c - a) ? d.a + sqrt(u * b_m_a * (c - a)) :
                           d.b - sqrt((1 - u) * b_m_a * (b - c))
 end

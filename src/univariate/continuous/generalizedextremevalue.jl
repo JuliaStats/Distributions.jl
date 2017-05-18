@@ -256,12 +256,12 @@ ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
 
 
 #### Sampling
-
-function rand(d::GeneralizedExtremeValue)
+rand(d::GeneralizedExtremeValue) = rand(GLOBAL_RNG, d)
+function rand(rng::AbstractRNG, d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
 
     # Generate a Float64 random number uniformly in (0,1].
-    u = 1 - rand()
+    u = 1 - rand(rng)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
         rd = - log(- log(u))

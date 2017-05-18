@@ -87,4 +87,5 @@ quantile(d::Arcsine, p::Real) = location(d) + abs2(sin(halfπ * p)) * scale(d)
 
 ### Sampling
 
-rand(d::Arcsine) = quantile(d, rand())
+rand(d::Arcsine) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::Arcsine) = quantile(d, rand(rng))

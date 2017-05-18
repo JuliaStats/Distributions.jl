@@ -92,4 +92,5 @@ gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
 
 #### Sampling
 
-rand(d::Gumbel) = quantile(d, rand())
+rand(d::Gumbel) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::Gumbel) = quantile(d, rand(rng))

@@ -101,4 +101,5 @@ end
 
 #### Sampling
 
-rand(d::Logistic) = quantile(d, rand())
+rand(d::Logistic) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::Logistic) = quantile(d, rand(rng))

@@ -71,5 +71,7 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 
 #### Sampling
 
-rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.λ)
-rand!{T<:Real}(cf::NormalCanon, r::AbstractArray{T}) = rand!(convert(Normal, cf), r)
+rand(cf::NormalCanon) = rand(GLOBAL_RNG, cf)
+rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)
+rand!{T<:Real}(cf::NormalCanon, r::AbstractArray{T}) = rand!(GLOBAL_RNG, cf, r)
+rand!{T<:Real}(rng::AbstractRNG, cf::NormalCanon, r::AbstractArray{T}) = rand!(rng, convert(Normal, cf), r)

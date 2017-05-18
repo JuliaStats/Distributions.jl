@@ -98,12 +98,13 @@ end
 # Alternating series method, from:
 #   Devroye, Luc (1986) "Non-Uniform Random Variate Generation"
 #   Chapter IV.5, pp. 163-165.
-function rand(d::Kolmogorov)
+rand(d::Kolmogorov) = rand(GLOBAL_RNG, d)
+function rand(rng::AbstractRNG, d::Kolmogorov)
     t = 0.75
-    if rand() < 0.3728329582237386 # cdf(d,t)
+    if rand(rng) < 0.3728329582237386 # cdf(d,t)
         # left interval
         while true
-            g = rand_trunc_gamma()
+            g = rand_trunc_gamma(rng)
 
             x = pi/sqrt(8g)
             w = 0.0
@@ -111,7 +112,7 @@ function rand(d::Kolmogorov)
             p = exp(-g)
             n = 1
             q = 1.0
-            u = rand()
+            u = rand(rng)
             while u >= w
                 w += z*q
                 if u >= w
@@ -125,8 +126,8 @@ function rand(d::Kolmogorov)
         end
     else
         while true
-            e = randexp()
-            u = rand()
+            e = randexp(rng)
+            u = rand(rng)
             x = sqrt(t*t+e/2)
             w = 0.0
             n = 1
@@ -146,11 +147,11 @@ end
 
 # equivalent to
 # rand(Truncated(Gamma(1.5,1),tp,Inf))
-function rand_trunc_gamma()
+function rand_trunc_gamma(rng::AbstractRNG)
     tp = 2.193245422464302 #pi^2/(8*t^2)
     while true
-        e0 = rand(Exponential(1.2952909208355123))
-        e1 = rand(Exponential(2))
+        e0 = rand(rng, Exponential(1.2952909208355123))
+        e1 = rand(rng, Exponential(2))
         g = tp + e0
         if (e0*e0 <= tp*e1*(g+tp)) || (g/tp - 1 - log(g/tp) <= e1)
             return g
