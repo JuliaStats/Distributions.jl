@@ -211,7 +211,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     end
 
     # get counts
-    cnts = fit(Histogram, samples, edges).weights
+    cnts = fit(Histogram, samples, edges; closed=:right).weights
     @assert length(cnts) == nbins
 
     # check the counts
