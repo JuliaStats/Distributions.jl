@@ -128,7 +128,8 @@ end
 
 ### Sampling
 
-rand(d::DiscreteUniform) = randi(d.a, d.b)
+rand(d::DiscreteUniform) = rand(GLOBAL_RNG, d)
+rand(rng::AbstractRNG, d::DiscreteUniform) = randi(rng, d.a, d.b)
 
 # Fit model
 
