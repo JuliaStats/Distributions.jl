@@ -123,7 +123,7 @@ rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
 ## Fitting
 
 function fit_mle{T<:Real}(::Type{LogNormal}, x::AbstractArray{T})
-    lx = log(x)
+    lx = log.(x)
     μ, σ = mean_and_std(lx)
     LogNormal(μ, σ)
 end
