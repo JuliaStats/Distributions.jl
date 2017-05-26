@@ -37,48 +37,35 @@ insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}},
 
 ### evaluation
 
-pdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
-
-logpdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
-
-cdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
-                             x >= d.upper ? 1.0 :
-                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
-
-logcdf(d::Truncated, x::Float64) = x <= d.lower ? -Inf :
-                                x >= d.upper ? 0.0 :
-                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
-
-ccdf(d::Truncated, x::Float64) = x <= d.lower ? 1.0 :
-                              x >= d.upper ? 0.0 :
-                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
-
-logccdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
-                                 x >= d.upper ? -Inf :
-                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
-
-
 quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-pdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
+for f in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf]
+    @eval ($f)(d::Truncated, x::Int) = ($f)(d, float(x))
+end
 
-logpdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+pdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
 
-cdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
-                             x >= d.upper ? 1.0 :
-                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
+logpdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -T(Inf)
 
-logcdf(d::Truncated, x::Int) = x <= d.lower ? -Inf :
-                                x >= d.upper ? 0.0 :
-                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+cdf{T<:Real}(d::Truncated, x::T) =
+    x <= d.lower ? zero(T) :
+    x >= d.upper ? one(T) :
+    (cdf(d.untruncated, x) - d.lcdf) / d.tp
 
-ccdf(d::Truncated, x::Int) = x <= d.lower ? 1.0 :
-                              x >= d.upper ? 0.0 :
-                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
+logcdf{T<:Real}(d::Truncated, x::T) =
+    x <= d.lower ? -T(Inf) :
+    x >= d.upper ? zero(T) :
+    log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
 
-logccdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
-                                 x >= d.upper ? -Inf :
-                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+ccdf{T<:Real}(d::Truncated, x::T) =
+    x <= d.lower ? one(T) :
+    x >= d.upper ? zero(T) :
+    (d.ucdf - cdf(d.untruncated, x)) / d.tp
+
+logccdf{T<:Real}(d::Truncated, x::T) =
+    x <= d.lower ? zero(T) :
+    x >= d.upper ? -T(Inf) :
+    log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
 
 ## random number generation
 

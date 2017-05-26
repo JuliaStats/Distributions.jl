@@ -3,6 +3,7 @@
 module TestTruncate
 
 using Distributions
+using ForwardDiff: Dual
 import JSON
 using Base.Test
 using Compat
@@ -73,10 +74,20 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
         @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
         @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
+        # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
+        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous},
+                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous},
+                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous}])
+            @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
+        end
+        # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()
+        # @test isapprox(cdf(d, Dual(x))   , cf, atol=sqrt(eps()))
     end
 
     try
         m = mgf(d,0.0)
+        @test m == 1.0
+        m = mgf(d,Dual(0.0))
         @test m == 1.0
     catch e
         isa(e, MethodError) || throw(e)
@@ -84,9 +95,12 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     try
         c = cf(d,0.0)
         @test c == 1.0
+        c = cf(d,Dual(0.0))
+        @test c == 1.0
         # test some extra values: should all be well-defined
         for t in (0.1,-0.1,1.0,-1.0)
             @test !isnan(cf(d,t))
+            @test !isnan(cf(d,Dual(t)))
         end
     catch e
         isa(e, MethodError) || throw(e)
