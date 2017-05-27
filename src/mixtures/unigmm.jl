@@ -1,12 +1,12 @@
 # Univariate Gaussian Mixture Models
 
-immutable UnivariateGMM <: UnivariateMixture{Continuous,Normal}
+immutable UnivariateGMM{T<:Real} <: UnivariateMixture{Continuous,Normal}
     K::Int
-    means::Vector{Float64}
-    stds::Vector{Float64}
+    means::Vector{T}
+    stds::Vector{T}
     prior::Categorical
 
-    function UnivariateGMM(ms::Vector{Float64}, ss::Vector{Float64}, pri::Categorical)
+    function UnivariateGMM(ms::Vector{T}, ss::Vector{T}, pri::Categorical)
         K = length(ms)
         length(ss) == K || throw(DimensionMismatch())
         ncategories(pri) == K ||
@@ -29,9 +29,9 @@ rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-immutable UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
-    means::Vector{Float64}
-    stds::Vector{Float64}
+immutable UnivariateGMMSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+    means::Vector{T}
+    stds::Vector{T}
     psampler::AliasTable
 end
 
