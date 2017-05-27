@@ -1,5 +1,6 @@
 using Distributions
 using Base.Test
+using ForwardDiff: Dual
 
 # Core testing procedure
 
@@ -151,13 +152,16 @@ g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDis
 @test minimum(g_u) == -2.0
 @test maximum(g_u) == 3.0
 
-g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
-@test isa(g_u, UnivariateGMM)
-@test ncomponents(g_u) == 3
-test_mixture(g_u, 1000, 10^6)
-test_params(g_u)
-@test minimum(g_u) == -Inf
-@test maximum(g_u) == Inf
+μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
+for T = [Float64, Dual]
+    g_u = UnivariateGMM(T[μ...], T[σ...], Categorical(T[p...]))
+    @test isa(g_u, UnivariateGMM)
+    @test ncomponents(g_u) == 3
+    test_mixture(g_u, 1000, 10^6)
+    test_params(g_u)
+    @test minimum(g_u) == -Inf
+    @test maximum(g_u) == Inf
+end
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(
