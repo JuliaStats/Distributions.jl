@@ -23,7 +23,7 @@ if isdefined(Base, :scale)
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params
+import StatsBase: loglikelihood, dof, span, params, params!
 import PDMats: dim, PDMat, invquad
 
 importall SpecialFunctions
