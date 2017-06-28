@@ -116,5 +116,5 @@ unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
 unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
-_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix) = add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
-_rand!(d::MvNormalCanon, x::AbstractMatrix) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVecOrMat) = add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
+_rand!(d::MvNormalCanon, x::AbstractVecOrMat) = _rand!(Base.GLOBAL_RNG, d, x)
