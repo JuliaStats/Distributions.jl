@@ -1,4 +1,4 @@
-julia 0.5
+julia 0.6
 PDMats 0.6.0
 StatsFuns 0.3.1
 Calculus
@@ -6,3 +6,4 @@ StatsBase 0.15.0
 Compat 0.18.0
 QuadGK 0.1.1
 SpecialFunctions 0.1.0
+FFTW
