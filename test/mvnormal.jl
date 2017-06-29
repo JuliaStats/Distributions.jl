@@ -31,6 +31,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test isa(rand!(g, subX), SubArray)
 
     # sampling
+    @test isa(rand(g), Vector{Float64})
     X = rand(g, n_tsamples)
     emp_mu = vec(mean(X, 2))
     Z = X .- emp_mu
