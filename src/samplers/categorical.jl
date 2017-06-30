@@ -28,7 +28,7 @@ end
 immutable AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
-    isampler::RandIntSampler
+    isampler::RangeGeneratorInt
 end
 ncategories(s::AliasTable) = length(s.accept)
 
@@ -38,11 +38,15 @@ function AliasTable{T<:Real}(probs::AbstractVector{T})
     accp = Vector{Float64}(n)
     alias = Vector{Int}(n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    AliasTable(accp, alias, RandIntSampler(n))
+    AliasTable(accp, alias, RangeGenerator(1:n))
 end
 
-rand(s::AliasTable) =
-    (i = rand(s.isampler); u = rand(); @inbounds r = u < s.accept[i] ? i : s.alias[i]; r)
+function rand(s::AliasTable)
+    i = rand(GLOBAL_RNG, s.isampler)
+    u = rand()
+    @inbounds r = u < s.accept[i] ? i : s.alias[i]
+    r
+end
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
 
