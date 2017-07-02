@@ -16,14 +16,14 @@ import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG
+import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
 
 if isdefined(Base, :scale)
     import Base: scale
 end
 
-import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
-import StatsBase: RandIntSampler, loglikelihood, dof, span
+import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
+import StatsBase: loglikelihood, dof, span
 import PDMats: dim, PDMat, invquad
 
 importall SpecialFunctions
