@@ -36,7 +36,9 @@ tests = [
     "qq",
     "product",
     "truncnormal",
+    "generic"
 ]
+
 
 printstyled("Running tests:\n", color=:blue)
 
