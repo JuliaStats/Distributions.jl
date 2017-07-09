@@ -52,8 +52,7 @@ mean(d::Generic) = dot(d.probs, d.vals)
 
 function var(d::Generic{T}) where T
     m = mean(d)
-    x = support(d)
-    p = probs(d)
+    x, p = params(d)
     k = length(x)
     σ² = zero(T)
     for i in 1:k
@@ -64,8 +63,7 @@ end
 
 function skewness(d::Generic{T}) where T
     m = mean(d)
-    x = support(d)
-    p = probs(d)
+    x, p = params(d)
     k = length(x)
     μ₃ = zero(T)
     σ² = zero(T)
@@ -80,8 +78,7 @@ end
 
 function kurtosis(d::Generic{T}) where T
     m = mean(d)
-    x = support(d)
-    p = probs(d)
+    x, p = params(d)
     k = length(x)
     μ₄ = zero(T)
     σ² = zero(T)
@@ -99,15 +96,19 @@ entropy(d::Generic, b::Real) = entropy(d.probs, b)
 
 mode(d::Generic) = d.vals[indmax(d.probs)]
 function modes(d::Generic{T,P}) where {T,P}
+    x, p = params(d)
+    k = length(x)
     mds = T[]
     max_p = zero(P)
-    for (v, p) in zip(d.vals, d.probs)
-        if p > max_p
-            max_p = p
-            mds = [v]
-        elseif p == max_p
-            push!(mds, v)
+    for i in 1:k
+        @inbounds pi = p[i]
+        @inbounds xi = x[i]
+        if pi > max_p
+            max_p = pi
+            mds = [xi]
+        elseif pi == max_p
+            push!(mds, xi)
         end
     end
-    return mds
+    mds
 end
