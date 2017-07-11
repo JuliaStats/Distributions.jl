@@ -8,7 +8,6 @@ using StatsBase
 using Compat
 
 import QuadGK.quadgk
-import FFTW.fft!
 import Compat.view
 import Base.Random
 import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
