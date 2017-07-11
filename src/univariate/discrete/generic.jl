@@ -7,6 +7,7 @@ struct Generic{T<:Real,P<:Real} <: DiscreteUnivariateDistribution
 
     function Generic{T,P}(vs::Vector{T}, ps::Vector{P}) where {T<:Real,P<:Real}
         @check_args(Generic, isprobvec(ps))
+        @check_args(Generic, allunique(vs))
         sort_order = sortperm(vs)
         new(vs[sort_order], ps[sort_order])
     end
