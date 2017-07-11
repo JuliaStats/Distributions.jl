@@ -104,6 +104,7 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    LocationScale,
     Logistic,
     LogNormal,
     MixtureModel,
