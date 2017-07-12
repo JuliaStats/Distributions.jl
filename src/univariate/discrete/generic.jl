@@ -1,11 +1,11 @@
-struct Generic{T<:Real,P<:Real} <: DiscreteUnivariateDistribution
-    vals::Vector{T}
+struct Generic{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistribution
+    vals::S
     probs::Vector{P}
 
-    Generic{T,P}(vs::Vector{T}, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real} =
+    Generic{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
         new(vs, ps)
 
-    function Generic{T,P}(vs::Vector{T}, ps::Vector{P}) where {T<:Real,P<:Real}
+    function Generic{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
         @check_args(Generic, isprobvec(ps))
         @check_args(Generic, allunique(vs))
         sort_order = sortperm(vs)
@@ -13,12 +13,12 @@ struct Generic{T<:Real,P<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
+Generic(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
+    Generic{T,P,S}(vs, ps)
+
 support(d::Generic) = d.vals
 probs(d::Generic)  = d.probs
 params(d::Generic) = (d.vals, d.probs)
-
-Generic(vs::Vector{T}, ps::Vector{P}) where {T<:Real, P<:Real} =
-    Generic{T,P}(vs, ps)
 
 rand(d::Generic{T,P}) where {T,P} =
     d.vals[searchsortedfirst(cumsum(d.probs), rand(P))]
