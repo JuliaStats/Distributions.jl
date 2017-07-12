@@ -128,6 +128,7 @@ export
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Shifted,
     Skellam,
     SymTriangularDist,
     TDist,
@@ -275,6 +276,7 @@ include("samplers.jl")
 
 # others
 include("truncate.jl")
+include("shifted.jl")
 include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
