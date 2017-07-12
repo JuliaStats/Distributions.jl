@@ -1,5 +1,5 @@
 doc"""
-    FDist(ν1,ν2)
+    FDist(ν1, ν2)
 
 The *F distribution* has probability density function
 
@@ -13,9 +13,9 @@ $(X_1/\nu_1) / (X_2 / \nu_2) \sim FDist(\nu_1, \nu_2)`.
 
 
 ```julia
-FDist(d1, d2)     # F-Distribution with parameters d1 and d2
+FDist(ν1, ν2)     # F-Distribution with parameters ν1 and ν2
 
-params(d)         # Get the parameters, i.e. (d1, d2)
+params(d)         # Get the parameters, i.e. (ν1, ν2)
 ```
 
 External links

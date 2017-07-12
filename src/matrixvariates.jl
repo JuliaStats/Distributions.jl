@@ -24,14 +24,14 @@ end
 
 function _logpdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
     for i = 1:length(X)
-        r[i] = logpdf(r, X[i])
+        r[i] = logpdf(d, X[i])
     end
     return r
 end
 
 function _pdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
     for i = 1:length(X)
-        r[i] = pdf(r, X[i])
+        r[i] = pdf(d, X[i])
     end
     return r
 end

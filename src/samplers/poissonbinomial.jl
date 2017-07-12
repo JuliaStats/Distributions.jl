@@ -7,7 +7,7 @@ function PoissBinAliasSampler(p::AbstractVector)
     pv = poissonbinomial_pdf_fft(p)
     alias = Vector{Int}(n+1)
     StatsBase.make_alias_table!(pv, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RandIntSampler(n+1)))
+    BinomialAliasSampler(AliasTable(pv, alias, RangeGenerator(1:n+1)))
 end
 
 function PoissBinAliasSampler(d::PoissonBinomial)
@@ -15,7 +15,7 @@ function PoissBinAliasSampler(d::PoissonBinomial)
     alias = Vector{Int}(n+1)
     pv = Vector{Float64}(n+1)
     StatsBase.make_alias_table!(d.pmf, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RandIntSampler(n+1)))
+    BinomialAliasSampler(AliasTable(pv, alias, RangeGenerator(1:n+1)))
 end
 
 rand(s::PoissBinAliasSampler) = rand(s.table) - 1
