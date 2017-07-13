@@ -1,3 +1,6 @@
+"""
+    Biweight(μ, σ)
+"""
 immutable Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T

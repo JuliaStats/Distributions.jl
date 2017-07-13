@@ -1,3 +1,6 @@
+"""
+    Triweight(μ, σ)
+"""
 immutable Triweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
@@ -33,7 +36,7 @@ mode(d::Triweight) = d.μ
 
 var(d::Triweight) = d.σ^2 / 9
 skewness{T<:Real}(d::Triweight{T}) = zero(T)
-kurtosis{T<:Real}(d::Triweight{T}) = T(1)/33 - 3  
+kurtosis{T<:Real}(d::Triweight{T}) = T(1)/33 - 3
 
 ## Functions
 function pdf{T<:Real}(d::Triweight{T}, x::Real)

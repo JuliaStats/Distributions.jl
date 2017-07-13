@@ -1,5 +1,4 @@
-Distributions Package
-=======================
+# Distributions Package
 
 The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
 
@@ -8,26 +7,3 @@ The *Distributions* package provides a large collection of probabilistic distrib
 * Moment generating functions and characteristic functions
 * Maximum likelihood estimation
 * Posterior *w.r.t.* conjugate prior, and Maximum-A-Posteriori (MAP) estimation
-
-**Contents:**
-
-.. toctree::
-   :maxdepth: 2
-
-   starting.rst
-   types.rst
-   univariate.rst
-   truncate.rst
-   multivariate.rst
-   matrix.rst
-   mixture.rst
-   fit.rst
-   extends.rst
-
-
-.. Indices and tables
-.. ==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`

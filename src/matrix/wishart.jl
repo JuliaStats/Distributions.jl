@@ -2,7 +2,13 @@
 #
 #   following the Wikipedia parameterization
 #
+"""
+    Wishart(nu, S)
 
+The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution) is a
+multidimensional generalization of the Chi-square distribution, which is characterized by
+a degree of freedom ν, and a base matrix S.
+"""
 immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix

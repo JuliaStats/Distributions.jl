@@ -1,8 +1,12 @@
-# Raised Cosine distribution
-#
-# Ref: http://en.wikipedia.org/wiki/Raised_cosine_distribution
-#
+"""
+    Cosine(μ, σ)
 
+A raised Cosine distribution.
+
+External link:
+
+* [Cosine distribution on wikipedia](http://en.wikipedia.org/wiki/Raised_cosine_distribution)
+"""
 immutable Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
@@ -66,10 +70,10 @@ function logpdf{T<:Real}(d::Cosine{T}, x::Real)
 end
 
 function cdf{T<:Real}(d::Cosine{T}, x::Real)
-    if x < d.μ - d.σ 
+    if x < d.μ - d.σ
         return zero(T)
     end
-    if x > d.μ + d.σ 
+    if x > d.μ + d.σ
         return one(T)
     end
     z = (x - d.μ) / d.σ
@@ -77,10 +81,10 @@ function cdf{T<:Real}(d::Cosine{T}, x::Real)
 end
 
 function ccdf{T<:Real}(d::Cosine{T}, x::Real)
-    if x < d.μ - d.σ 
+    if x < d.μ - d.σ
         return one(T)
     end
-    if x > d.μ + d.σ 
+    if x > d.μ + d.σ
         return zero(T)
     end
     nz = (d.μ - x) / d.σ

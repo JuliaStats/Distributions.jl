@@ -1,3 +1,6 @@
+"""
+    Epanechnikov(μ, σ)
+"""
 immutable Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T

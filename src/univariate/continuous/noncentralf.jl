@@ -1,3 +1,6 @@
+"""
+    NoncentralF(ν1, ν2, λ)
+"""
 immutable NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T

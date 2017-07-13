@@ -28,9 +28,85 @@ end
 @compat const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
 @compat const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
 
+# Interface
+
+"""
+    component_type(d::AbstractMixtureModel)
+
+The type of the components of `d`.
+"""
 component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
 
+"""
+    components(d::AbstractMixtureModel)
+
+Get a list of components of the mixture model `d`.
+"""
+components(d::AbstractMixtureModel) = throw(MethodError(components, (d,)))
+
+"""
+    probs(d::AbstractMixtureModel)
+
+Get the vector of prior probabilities of all components of `d`.
+"""
+probs(d::AbstractMixtureModel) = throw(MethodError(probs, (d,)))
+
+"""
+    mean(d::Union{UnivariateMixture, MultivariateMixture})
+
+Compute the overall mean (expectation).
+"""
+mean(d::AbstractMixtureModel) = throw(MethodError(mean, (d,)))
+
+"""
+    pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
+
+Evaluate the (mixed) probability density function over `x`. Here, `x` can be a single
+sample or an array of multiple samples.
+"""
+pdf(d::AbstractMixtureModel, x::Any) = throw(MethodError(pdf, (d, x)))
+
+"""
+    rand(d::Union{UnivariateMixture, MultivariateDistribution})
+
+Draw a sample from the mixture model `d`.
+
+    rand(d::Union{UnivariateMixture, MultivariateMixture}, n)
+
+Draw `n` samples from `d`.
+"""
+rand(d::AbstractMixtureModel) = throw(MethodError(rand, (d)))
+
+"""
+    rand!(d::Union{UnivariateMixture, MultivariateMixture}, r::AbstactArray)
+
+Draw multiple samples from `d` and write them to `r`.
+"""
+rand!(d::AbstractMixtureModel, r::AbstractArray) = throw(MethodError(rand!, (d, r)))
+
+
 #### Constructors
+
+"""
+    MixtureModel(components, [prior])
+
+Construct a mixture model with a vector of `components` and a `prior` probability vector.
+If no `prior` is provided then all components will have the same prior probabilities.
+"""
+MixtureModel{C<:Distribution}(components::Vector{C}) =
+    MixtureModel(components, Categorical(length(components)))
+
+"""
+    MixtureModel(C, params, [prior])
+
+Construct a mixture model with component type ``C``, a vector of parameters for constructing
+the components given by ``params``, and a prior probability vector.
+If no `prior` is provided then all components will have the same prior probabilities.
+"""
+function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray)
+    components = C[_construct_component(C, a) for a in params]
+    MixtureModel(components)
+end
 
 function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical)
     VF = variate_form(C)
@@ -41,10 +117,6 @@ end
 MixtureModel{C<:Distribution}(components::Vector{C}, p::Vector{Float64}) =
     MixtureModel(components, Categorical(p))
 
-# all components have the same prior probabilities
-MixtureModel{C<:Distribution}(components::Vector{C}) =
-    MixtureModel(components, Categorical(length(components)))
-
 _construct_component{C<:Distribution}(::Type{C}, arg) = C(arg)
 _construct_component{C<:Distribution}(::Type{C}, args::Tuple) = C(args...)
 
@@ -53,14 +125,16 @@ function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray, p::Vect
     MixtureModel(components, p)
 end
 
-function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray)
-    components = C[_construct_component(C, a) for a in params]
-    MixtureModel(components)
-end
+
 
 
 #### Basic properties
 
+"""
+    length(d::MultivariateMixture)
+
+The length of each sample (only for `Multivariate`).
+"""
 length(d::MultivariateMixture) = length(d.components[1])
 size(d::MatrixvariateMixture) = size(d.components[1])
 
@@ -103,6 +177,11 @@ function mean(d::MultivariateMixture)
     return m
 end
 
+"""
+    var(d::UnivariateMixture)
+
+Compute the overall variance (only for ``UnivariateMixture``).
+"""
 function var(d::UnivariateMixture)
     K = ncomponents(d)
     p = probs(d)
@@ -306,6 +385,12 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
+"""
+    logpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
+
+Evaluate the logarithm of the (mixed) probability density function over ``x``. Here, ``x`` can be a single sample or an array of multiple samples.
+"""
+logpdf(d::AbstractMixtureModel, x::Any) = throw(MethodError(logpdf, (d, x)))
 pdf(d::UnivariateMixture{Continuous}, x::Real) = _mixpdf1(d, x)
 pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)
@@ -394,7 +479,6 @@ function MixtureSampler{VF,VS}(d::MixtureModel{VF,VS})
     psampler = sampler(d.prior)
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
 end
-
 
 rand(d::MixtureModel) = rand(component(d, rand(d.prior)))
 

@@ -7,10 +7,8 @@ $f(x; \nu_1, \nu_2) = \frac{1}{x B(\nu_1/2, \nu_2/2)}
 \sqrt{\frac{(\nu_1 x)^{\nu_1} \cdot \nu_2^{\nu_2}}{(\nu_1 x + \nu_2)^{\nu_1 + \nu_2}}},
 \quad x>0$
 
-It is related to the [`Chisq`](:func:`Chisq`) distribution via the property that if $X_1
-\sim \operatorname{Chisq}(\nu_1)$ and $X_2 \sim \operatorname{Chisq}(\nu_2)$, then
-$(X_1/\nu_1) / (X_2 / \nu_2) \sim FDist(\nu_1, \nu_2)`.
-
+It is related to the [`Chisq`](:func:`Chisq`) distribution via the property that if
+``X_1 ∼ Chisq(ν_1)`` and ``X_2 ∼ Chisq(ν_2)``, then ``(X_1/ν_1) / (X_2 / ν_2) ∼ FDist(ν_1, ν_2)``.
 
 ```julia
 FDist(ν1, ν2)     # F-Distribution with parameters ν1 and ν2

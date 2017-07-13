@@ -4,16 +4,18 @@ makedocs(
     format = :html,
     sitename = "Distributions.jl",
     modules = [Distributions],
-    pages = ["index.md",
-             "starting.md",
-             "types.md",
-             "univariate.md",
-             "truncate.md",
-             "multivariate.md",
-             "matrix.md",
-             "mixture.md",
-             "fit.md",
-             "extends.md"]
+    pages = [
+        "index.md",
+        "starting.md",
+        "types.md",
+        "univariate.md",
+        "truncate.md",
+        "multivariate.md",
+        "matrix.md",
+        "mixture.md",
+        "fit.md",
+        "extends.md",
+    ]
 )
 
 deploydocs(
