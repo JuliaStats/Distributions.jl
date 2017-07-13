@@ -38,7 +38,7 @@ d = Generic([40., 80., 120., -60.],
 xs = support(d)
 ws = ProbabilityWeights(probs(d))
 @test mean(d) ≈ mean(xs, ws)
-@test var(d) ≈ var(xs, ws)
+@test var(d) ≈ var(xs, ws, corrected=false)
 @test skewness(d) ≈ skewness(xs, ws)
 @test kurtosis(d) ≈ kurtosis(xs, ws)
 @test entropy(d) ≈ 1.2798542258336676

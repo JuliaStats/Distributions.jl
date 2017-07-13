@@ -8,7 +8,8 @@ for fname in ["categorical.jl",
               "gamma.jl",
               "multinomial.jl",
               "vonmises.jl",
-              "vonmisesfisher.jl"]
+              "vonmisesfisher.jl",
+              "generic.jl"]
 
     include(joinpath("samplers", fname))
 end

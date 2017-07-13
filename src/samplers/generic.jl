@@ -1,16 +1,16 @@
-struct GenericSampler{T<:Real} <: Sampleable{Univariate,Discrete}
-    vals::Vector{T}
+struct GenericSampler{T<:Real, S<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+    support::S
     aliastable::AliasTable
 
-    GenericSampler{T}(vals::Vector{T}, probs::Vector{<:Real}) where T<:Real =
-        new(vals, AliasTable(probs))
+    GenericSampler{T,S}(support::S, probs::Vector{<:Real}) where {T<:Real,S<:AbstractVector{T}} =
+        new(support, AliasTable(probs))
 end
 
-GenericSampler(vals::Vector{T}, probs::Vector{<:Real}) where T<:Real =
-    GenericSampler{T}(vals, probs)
+GenericSampler(support::S, probs::Vector{<:Real}) where {T<:Real,S<:AbstractVector{T}} =
+    GenericSampler{T,S}(support, probs)
 
 sampler(d::Generic) =
-    GenericSampler(d.vals, d.probs)
+    GenericSampler(d.support, d.p)
 
 rand(s::GenericSampler) =
-    (@inbounds v = s.vals[rand(s.aliastable)]; v)
+    (@inbounds v = s.support[rand(s.aliastable)]; v)

@@ -1,6 +1,6 @@
 struct Generic{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistribution
-    vals::S
-    probs::Vector{P}
+    support::S
+    p::Vector{P}
 
     Generic{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
         new(vs, ps)
@@ -16,19 +16,27 @@ end
 Generic(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
     Generic{T,P,S}(vs, ps)
 
-support(d::Generic) = d.vals
-probs(d::Generic)  = d.probs
-params(d::Generic) = (d.vals, d.probs)
+# Conversion
+convert(::Type{Generic{T,P,S}}, d::Generic) where {T,P,S} =
+    Generic{T,P,S}(S(support(d)), Vector{P}(probs(d)), NoArgCheck())
+
+params(d::Generic) = (d.support, d.p)
+support(d::Generic) = d.support
+probs(d::Generic)  = d.p
 
 rand(d::Generic{T,P}) where {T,P} =
-    d.vals[searchsortedfirst(cumsum(d.probs), rand(P))]
+    support(d)[searchsortedfirst(cumsum(probs(d)), rand(P))] #TODO: Switch to single pass
+
+# Evaluation
+
+pdf(d::Generic) = copy(probs(d))
 
 # Helper functions for pdf and cdf required to fix ambiguous method
 # error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
 function _pdf(d::Generic{T,P}, x::T) where {T,P}
-    idx_range = searchsorted(d.vals, x)
+    idx_range = searchsorted(support(d), x)
     if length(idx_range) > 0
-        return d.probs[first(idx_range)]
+        return probs(d)[first(idx_range)]
     else
         return zero(P)
     end
@@ -37,23 +45,36 @@ pdf(d::Generic{T}, x::Int) where T  = _pdf(d, convert(T, x))
 pdf(d::Generic{T}, x::Real) where T = _pdf(d, convert(T, x))
 
 _cdf(d::Generic{T}, x::T) where T =
-    sum(d.probs[1:searchsortedlast(d.vals, x)])
+    sum(probs(d)[1:searchsortedlast(support(d), x)]) #TODO: Switch to single-pass
 cdf(d::Generic{T}, x::Int) where T = _cdf(d, convert(T, x))
 cdf(d::Generic{T}, x::Real) where T = _cdf(d, convert(T, x))
 
-quantile(d::Generic, q::Real) =
-    d.vals[searchsortedfirst(cumsum(d.probs), q)]
+function quantile(d::Generic, q::Real)
+    0 <= q <= 1 || throw(DomainError())
+    x = support(d)
+    p = probs(d)
+    k = length(x)
+    i = 1
+    cp = p[1]
+    while cp < q && i < k #Note: is i < k necessary?
+        i += 1
+        @inbounds cp += p[i]
+    end
+    x[i]
+end
 
-minimum(d::Generic) = d.vals[1]
-maximum(d::Generic) = d.vals[end]
+
+minimum(d::Generic) = support(d)[1]
+maximum(d::Generic) = support(d)[end]
 insupport(d::Generic, x::Real) =
-    length(searchsorted(d.vals, x)) > 0
+    length(searchsorted(support(d), x)) > 0
 
-mean(d::Generic) = dot(d.probs, d.vals)
+mean(d::Generic) = dot(probs(d), support(d))
 
 function var(d::Generic{T}) where T
     m = mean(d)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     k = length(x)
     σ² = zero(T)
     for i in 1:k
@@ -64,7 +85,8 @@ end
 
 function skewness(d::Generic{T}) where T
     m = mean(d)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     k = length(x)
     μ₃ = zero(T)
     σ² = zero(T)
@@ -79,7 +101,8 @@ end
 
 function kurtosis(d::Generic{T}) where T
     m = mean(d)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     k = length(x)
     μ₄ = zero(T)
     σ² = zero(T)
@@ -92,12 +115,13 @@ function kurtosis(d::Generic{T}) where T
     μ₄ / abs2(σ²) - 3
 end
 
-entropy(d::Generic) = entropy(d.probs)
-entropy(d::Generic, b::Real) = entropy(d.probs, b)
+entropy(d::Generic) = entropy(probs(d))
+entropy(d::Generic, b::Real) = entropy(probs(d), b)
 
-mode(d::Generic) = d.vals[indmax(d.probs)]
+mode(d::Generic) = support(d)[indmax(probs(d))]
 function modes(d::Generic{T,P}) where {T,P}
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     k = length(x)
     mds = T[]
     max_p = zero(P)
@@ -113,3 +137,10 @@ function modes(d::Generic{T,P}) where {T,P}
     end
     mds
 end
+
+mgf(d::Generic) = nothing # TODO
+cf(d::Generic) = nothing # TODO
+
+# TODO: Sufficient statistics
+
+# TODO: MLE
