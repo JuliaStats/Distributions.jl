@@ -137,8 +137,8 @@ Following methods need to be implemented for each multivariate distribution type
 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
-- [`Distributions._rand!(d::MultivariateDistribution, x::AbstractVector)`](@ref)
-- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractVector)`](@ref)
+- [`Distributions._rand!(d::MultivariateDistribution)`](@ref)
+- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 
 Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
 
@@ -160,4 +160,4 @@ Following methods need to be implemented for each matrix-variate distribution ty
 - [`size(d::MatrixDistribution)`](@ref)
 - [`rand(d::MatrixDistribution)`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
-- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractVector)`](@ref)
+- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)

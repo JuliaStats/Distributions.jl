@@ -58,13 +58,24 @@ Compute the overall mean (expectation).
 """
 mean(d::AbstractMixtureModel) = throw(MethodError(mean, (d,)))
 
+# NOTE: since the pdf(::AbstractMixtureModel) and logpdf(::AbstractMixtureModel)
+# only exist for documentation purposes we don't include `x` to avoid
+# method ambiguity issues.
 """
     pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
 
 Evaluate the (mixed) probability density function over `x`. Here, `x` can be a single
 sample or an array of multiple samples.
 """
-pdf(d::AbstractMixtureModel, x::Any) = throw(MethodError(pdf, (d, x)))
+pdf(d::AbstractMixtureModel) = throw(MethodError(pdf, (d,)))
+
+"""
+    logpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
+
+Evaluate the logarithm of the (mixed) probability density function over `x`.
+Here, `x` can be a single sample or an array of multiple samples.
+"""
+logpdf(d::AbstractMixtureModel) = throw(MethodError(logpdf, (d,)))
 
 """
     rand(d::Union{UnivariateMixture, MultivariateDistribution})
@@ -385,12 +396,6 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
-"""
-    logpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
-
-Evaluate the logarithm of the (mixed) probability density function over ``x``. Here, ``x`` can be a single sample or an array of multiple samples.
-"""
-logpdf(d::AbstractMixtureModel, x::Any) = throw(MethodError(logpdf, (d, x)))
 pdf(d::UnivariateMixture{Continuous}, x::Real) = _mixpdf1(d, x)
 pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)

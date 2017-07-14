@@ -96,11 +96,11 @@ function pdf{M<:Matrix}(d::MatrixDistribution, X::AbstractArray{M})
 end
 
 """
-    _logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+    _logpdf(d::MatrixDistribution, x::AbstractArray)
 
 Evaluate logarithm of pdf value for a given sample `x`. This function need not perform dimension checking.
 """
-_logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T}) = throw(MethodError(_logpdf, (d, x)))
+_logpdf(d::MatrixDistribution, x::AbstractArray) = throw(MethodError(_logpdf, (d, x)))
 
 ##### Specific distributions #####
 

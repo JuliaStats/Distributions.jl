@@ -296,11 +296,11 @@ excess_kurtosis(d::Distribution) = kurtosis(d)
 proper_kurtosis(d::Distribution) = kurtosis(d, false)
 
 """
-    mfg(d::UnivariateDistribution, t)
+    mgf(d::UnivariateDistribution, t)
 
 Evaluate the moment generating function of distribution `d`.
 """
-mgf(d::UnivariateDistribution, t) = throw(MethodError(mfg, (d, t)))
+mgf(d::UnivariateDistribution, t) = throw(MethodError(mgf, (d, t)))
 
 """
     cf(d::UnivariateDistribution, t)

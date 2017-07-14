@@ -25,5 +25,5 @@ InverseWishart
 ## Internal Methods (for creating your own matrix-variate distributions)
 
 ```@docs
-Distributions._logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)
 ```
