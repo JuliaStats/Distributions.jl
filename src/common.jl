@@ -31,7 +31,7 @@ Base.length(s::Sampleable{Multivariate}) = throw(MethodError(length, (s,)))
 The size (i.e. shape) of each sample. Always returns `()` when `s` is univariate, and
 `(length(s),)` when `s` is multivariate.
 """
-Base.size(s::Sampleable) = throw(MethodError(size, (s,)))
+Base.size(s::Sampleable)
 Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
@@ -52,7 +52,7 @@ Base.eltype{F}(s::Sampleable{F,Continuous}) = Float64
 The number of samples contained in `A`. Multiple samples are often organized into an array,
 depending on the variate form.
 """
-nsamples(t::Type{Sampleable}, x::Any) = throw(MethodError(nsamples, (t, x)))
+nsamples(t::Type{Sampleable}, x::Any)
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::Number) = 1
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::AbstractArray) = length(x)
 nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractVector) = 1

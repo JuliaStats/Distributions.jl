@@ -6,32 +6,32 @@
 
 Return the size of each sample from distribution `d`.
 """
-size(d::MatrixDistribution) = throw(MethodError(size, (d,)))
+size(d::MatrixDistribution)
 
 """
     length(d::MatrixDistribution)
 
 The length (*i.e* number of elements) of each sample from the distribution `d`.
 """
-Base.length(d::MatrixDistribution) = prod(size(d))
+Base.length(d::MatrixDistribution)
 
 """
     mean(d::MatrixDistribution)
 
 Return the mean matrix of `d`.
 """
-mean(d::MatrixDistribution) = throw(MethodError(size, (d,)))
+mean(d::MatrixDistribution)
 
 # sampling
 
 rand!{M<:Matrix}(d::MatrixDistribution, A::AbstractArray{M}) = _rand!(sampler(d), A)
 
 """
-    rand(d::MatrixDistribution, [n])
+    rand(d::MatrixDistribution, n)
 
 Draw a sample matrix from the distribution `d`.
 """
-rand(d::MatrixDistribution, n::Int=1) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
+rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
 
 # pdf & logpdf
 
@@ -100,7 +100,7 @@ end
 
 Evaluate logarithm of pdf value for a given sample `x`. This function need not perform dimension checking.
 """
-_logpdf(d::MatrixDistribution, x::AbstractArray) = throw(MethodError(_logpdf, (d, x)))
+_logpdf(d::MatrixDistribution, x::AbstractArray)
 
 ##### Specific distributions #####
 

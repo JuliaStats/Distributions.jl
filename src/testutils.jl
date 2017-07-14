@@ -458,24 +458,11 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
         if applicable(skewness, d) && isfinite(skewness(d))
             @test isapprox(skewness(d), xskew   , atol=1.0e-8)
         end
-
-        # applicable won't work for `kurtosis` and `entropy` because we have default
-        # `kurtosis(::UnivariateDistribution` and `entropy(::UnivariateDistribution)` methods
-        # which throw `MethodError`s for documentation purposes.
-        try
-            r = kurtosis(d)
-            if isfinite(r)
-                @test isapprox(r, xkurt, atol=1.0e-8)
-            end
-        catch ex
-            @test isa(ex, MethodError)
+        if applicable(kurtosis, d) && isfinite(kurtosis(d))
+            @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
-
-        try
-            r = entropy(d)
-            @test isapprox(r, xentropy, atol=1.0e-8)
-        catch ex
-            @test isa(ex, MethodError)
+        if applicable(entropy, d)
+            @test isapprox(entropy(d) , xentropy, atol=1.0e-8)
         end
     else
         @test isapprox(mean(d), xmean, atol=1.0e-3 * (abs(xmean) + 1.0))
@@ -510,7 +497,7 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
     @test isapprox(mean(d), xmean, atol=mean_tol)
 
     # test variance
-    try
+    if applicable(kurtosis, d)
         kd = kurtosis(d)
         # when the excessive kurtosis is sufficiently large (i.e. > 2)
         # the sample variance has a finite variance, given by
@@ -522,8 +509,6 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
         if isfinite(kd) && kd > -2.0
             @test isapprox(var(d), xvar, atol=5.0 * vd * (kd + 2) / sqrt(n))
         end
-    catch ex
-        @test isa(ex, MethodError)
     end
 end
 

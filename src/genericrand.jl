@@ -13,7 +13,7 @@ Generate `n` samples from `s`. The form of the returned object depends on the va
 - When `s` is multivariate, it returns a matrix with `n` columns.
 - When `s` is matrix-variate, it returns an array, where each element is a sample matrix.
 """
-rand(s::Sampleable) = throw(MethodError(rand, (s,)))
+rand(s::Sampleable)
 
 """
     rand!(s::Sampleable, A::AbstractArray)
@@ -28,7 +28,7 @@ form as specified above. The rules are summarized as below:
 - When `s` is matrix-variate, `A` can be a matrix to store one sample, or an array of
   matrices with each element for a sample matrix.
 """
-rand!(s::Sampleable, A::AbstractArray) = throw(MethodError(rand!, (s, A)))
+rand!(s::Sampleable, A::AbstractArray)
 
 # univariate
 

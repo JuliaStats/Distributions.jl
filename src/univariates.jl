@@ -25,84 +25,84 @@ hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = fal
 Return a tuple of parameters. Let `d` be a distribution of type `D`, then `D(params(d)...)`
 will construct exactly the same distribution as ``d``.
 """
-params(d::UnivariateDistribution) = throw(MethodError(params, (d,)))
+params(d::UnivariateDistribution)
 
 """
     succprob(d::UnivariateDistribution)
 
 Get the probability of success.
 """
-succprob(d::UnivariateDistribution) = throw(MethodError(succprob, (d,)))
+succprob(d::UnivariateDistribution)
 
 """
     failprob(d::UnivariateDistribution)
 
 Get the probability of failure.
 """
-failprob(d::UnivariateDistribution) = throw(MethodError(failprob, (d,)))
+failprob(d::UnivariateDistribution)
 
 """
     scale(d::UnivariateDistribution)
 
 Get the scale parameter.
 """
-scale(d::UnivariateDistribution) = throw(MethodError(scale, (d,)))
+scale(d::UnivariateDistribution)
 
 """
     location(d::UnivariateDistribution)
 
 Get the location parameter.
 """
-location(d::UnivariateDistribution) = throw(MethodError(location, (d,)))
+location(d::UnivariateDistribution)
 
 """
     shape(d::UnivariateDistribution)
 
 Get the shape parameter.
 """
-shape(d::UnivariateDistribution) = throw(MethodError(shape, (d,)))
+shape(d::UnivariateDistribution)
 
 """
     rate(d::UnivariateDistribution)
 
 Get the rate parameter.
 """
-rate(d::UnivariateDistribution) = throw(MethodError(rate, (d,)))
+rate(d::UnivariateDistribution)
 
 """
     ncategories(d::UnivariateDistribution)
 
 Get the number of categories.
 """
-ncategories(d::UnivariateDistribution) = throw(MethodError(ncategories, (d,)))
+ncategories(d::UnivariateDistribution)
 
 """
     ntrials(d::UnivariateDistribution)
 
 Get the number of trials.
 """
-ntrials(d::UnivariateDistribution) = throw(MethodError(ntrials, (d,)))
+ntrials(d::UnivariateDistribution)
 
 """
     dof(d::UnivariateDistribution)
 
 Get the degrees of freedom.
 """
-dof(d::UnivariateDistribution) = throw(MethodError(dof, (d,)))
+dof(d::UnivariateDistribution)
 
 """
     minimum(d::Distribution)
 
 Return the minimum of the support of `d`.
 """
-minimum(d::UnivariateDistribution) = throw(MethodError(minimum, (d,)))
+minimum(d::UnivariateDistribution)
 
 """
     maximum(d::Distribution)
 
 Return the maximum of the support of `d`.
 """
-maximum(d::UnivariateDistribution) = throw(MethodError(maximum, (d,)))
+maximum(d::UnivariateDistribution)
 
 """
     insupport(d::UnivariateDistribution, x::Any)
@@ -115,7 +115,7 @@ Generic fallback methods are provided, but it is often the case that `insupport`
 done more efficiently, and a specialized `insupport` is thus desirable.
 You should also override this function if the support is composed of multiple disjoint intervals.
 """
-insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any) = throw(MethodError(insupport, (d, x)))
+insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
 
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
@@ -192,14 +192,14 @@ sampler(d::UnivariateDistribution) = d
 
 Compute the expectation.
 """
-mean(d::UnivariateDistribution) = throw(MethodError(mean, (d,)))
+mean(d::UnivariateDistribution)
 
 """
     var(d::UnivariateDistribution)
 
 Compute the variance. (A generic std is provided as `std(d) = sqrt(var(d))`)
 """
-var(d::UnivariateDistribution) = throw(MethodError(var, (d,)))
+var(d::UnivariateDistribution)
 
 """
     std(d::UnivariateDistribution)
@@ -227,21 +227,21 @@ modes(d::UnivariateDistribution) = [mode(d)]
 
 Returns the first mode.
 """
-mode(d::UnivariateDistribution) = throw(MethodError(mode, (d,)))
+mode(d::UnivariateDistribution)
 
 """
     skewness(d::UnivariateDistribution)
 
 Compute the skewness.
 """
-skewness(d::UnivariateDistribution) = throw(MethodError(skewness, (d,)))
+skewness(d::UnivariateDistribution)
 
 """
     entropy(d::UnivariateDistribution)
 
 Compute the entropy value of distribution `d`.
 """
-entropy(d::UnivariateDistribution) = throw(MethodError(entropy, (d,)))
+entropy(d::UnivariateDistribution)
 
 """
     entropy(d::UnivariateDistribution, b::Real)
@@ -276,7 +276,7 @@ ismesokurtic(d::UnivariateDistribution) = kurtosis(d) == 0.0
 
 Compute the excessive kurtosis.
 """
-kurtosis(d::UnivariateDistribution) = throw(MethodError(kurtosis, (d,)))
+kurtosis(d::UnivariateDistribution)
 
 """
     kurtosis(d::Distribution, correction::Bool)
@@ -300,14 +300,14 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 
 Evaluate the moment generating function of distribution `d`.
 """
-mgf(d::UnivariateDistribution, t) = throw(MethodError(mgf, (d, t)))
+mgf(d::UnivariateDistribution, t)
 
 """
     cf(d::UnivariateDistribution, t)
 
 Evaluate the characteristic function of distribution `d`.
 """
-cf(d::UnivariateDistribution, t) = throw(MethodError(cf, (d, t)))
+cf(d::UnivariateDistribution, t)
 
 
 #### pdf, cdf, and friends
@@ -328,7 +328,7 @@ If there exists more efficient routine to evaluate pdf in batch (faster than rep
 calling the scalar version of `pdf`), then one can also provide a specialized
 method of `pdf!`. The vectorized version of `pdf` simply delegats to `pdf!`.
 """
-pdf(d::UnivariateDistribution, x::Real) = throw(MethodError(pdf, (d, x)))
+pdf(d::UnivariateDistribution, x::Real)
 pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
 pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
@@ -358,7 +358,7 @@ compute `ccdf`, `logcdf`, and `logccdf` in both scalar and vectorized forms.
 One may override these generic fallbacks if the specialized versions provide better
 numeric stability or higher efficiency.
 """
-cdf(d::UnivariateDistribution, x::Real) = throw(MethodError(cd, (d, x)))
+cdf(d::UnivariateDistribution, x::Real)
 cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support
@@ -426,7 +426,7 @@ versions provide better numeric stability or higher efficiency. A generic `media
 provided, as `median(d) = quantile(d, 0.5)`. However, one should implement a specialized
 version of `median` if it can be computed faster than ``quantile``.
 """
-quantile(d::UnivariateDistribution, p::Real) = throw(MethodError(quantile, (d, p)))
+quantile(d::UnivariateDistribution, p::Real)
 
 """
     cquantile(d::UnivariateDistribution, q::Real)

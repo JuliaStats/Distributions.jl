@@ -89,14 +89,14 @@ mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))
 
 Return the inversed covariance matrix of d.
 """
-invcov(d::AbstractMvNormal) = throw(MethodError(invcov, (d,)))
+invcov(d::AbstractMvNormal)
 
 """
     logdetcov(d::AbstractMvNormal)
 
 Return the log-determinant value of the covariance matrix.
 """
-logdetcov(d::AbstractMvNormal) = throw(MethodError(logdetcov, (d,)))
+logdetcov(d::AbstractMvNormal)
 
 """
     sqmahal(d, x)
@@ -106,7 +106,7 @@ When x is a vector, it returns a scalar value. When x is a matrix, it returns a 
 
 `sqmahal!(r, d, x)` with write the results to a pre-allocated array `r`.
 """
-sqmahal(d::AbstractMvNormal, x::AbstractArray) = throw(MethodError(sqmahal, (d, x)))
+sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
 sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(size(x, 2)), d, x)
 

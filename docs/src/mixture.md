@@ -94,8 +94,8 @@ In addition, for all subtypes of `UnivariateMixture` and `MultivariateMixture`, 
 mean(::AbstractMixtureModel)
 var(::UnivariateMixture)
 length(::MultivariateMixture)
-pdf(::AbstractMixtureModel)
-logpdf(::AbstractMixtureModel)
+pdf(::AbstractMixtureModel, ::Any)
+logpdf(::AbstractMixtureModel, ::Any)
 rand(::AbstractMixtureModel)
 rand!(::AbstractMixtureModel, ::AbstractArray)
 ```

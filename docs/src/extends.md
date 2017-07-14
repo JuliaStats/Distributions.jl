@@ -137,7 +137,7 @@ Following methods need to be implemented for each multivariate distribution type
 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
-- [`Distributions._rand!(d::MultivariateDistribution)`](@ref)
+- [`Distributions._rand!(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 - [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 
 Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
@@ -148,7 +148,7 @@ It is also recommended that one also implements the following statistics functio
 
 - [`mean(d::MultivariateDistribution)`](@ref)
 - [`var(d::MultivariateDistribution)`](@ref)
-- [`entropy(d::MultivariateDistribution, ::Real)`](@ref)
+- [`entropy(d::MultivariateDistribution)`](@ref)
 - [`cov(d::MultivariateDistribution)`](@ref)
 
 ## Create a Matrix-variate Distribution

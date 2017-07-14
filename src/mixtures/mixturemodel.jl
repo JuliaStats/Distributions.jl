@@ -42,32 +42,29 @@ component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel) = throw(MethodError(components, (d,)))
+components(d::AbstractMixtureModel)
 
 """
     probs(d::AbstractMixtureModel)
 
 Get the vector of prior probabilities of all components of `d`.
 """
-probs(d::AbstractMixtureModel) = throw(MethodError(probs, (d,)))
+probs(d::AbstractMixtureModel)
 
 """
     mean(d::Union{UnivariateMixture, MultivariateMixture})
 
 Compute the overall mean (expectation).
 """
-mean(d::AbstractMixtureModel) = throw(MethodError(mean, (d,)))
+mean(d::AbstractMixtureModel)
 
-# NOTE: since the pdf(::AbstractMixtureModel) and logpdf(::AbstractMixtureModel)
-# only exist for documentation purposes we don't include `x` to avoid
-# method ambiguity issues.
 """
     pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
 
 Evaluate the (mixed) probability density function over `x`. Here, `x` can be a single
 sample or an array of multiple samples.
 """
-pdf(d::AbstractMixtureModel) = throw(MethodError(pdf, (d,)))
+pdf(d::AbstractMixtureModel, x::Any)
 
 """
     logpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
@@ -75,7 +72,7 @@ pdf(d::AbstractMixtureModel) = throw(MethodError(pdf, (d,)))
 Evaluate the logarithm of the (mixed) probability density function over `x`.
 Here, `x` can be a single sample or an array of multiple samples.
 """
-logpdf(d::AbstractMixtureModel) = throw(MethodError(logpdf, (d,)))
+logpdf(d::AbstractMixtureModel, x::Any)
 
 """
     rand(d::Union{UnivariateMixture, MultivariateDistribution})
@@ -86,14 +83,14 @@ Draw a sample from the mixture model `d`.
 
 Draw `n` samples from `d`.
 """
-rand(d::AbstractMixtureModel) = throw(MethodError(rand, (d)))
+rand(d::AbstractMixtureModel)
 
 """
     rand!(d::Union{UnivariateMixture, MultivariateMixture}, r::AbstactArray)
 
 Draw multiple samples from `d` and write them to `r`.
 """
-rand!(d::AbstractMixtureModel, r::AbstractArray) = throw(MethodError(rand!, (d, r)))
+rand!(d::AbstractMixtureModel, r::AbstractArray)
 
 
 #### Constructors

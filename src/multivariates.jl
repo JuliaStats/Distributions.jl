@@ -5,14 +5,14 @@
 
 Return the sample dimension of distribution `d`.
 """
-length(d::MultivariateDistribution) = throw(MethodError(length, (d,)))
+length(d::MultivariateDistribution)
 
 """
     size(d::MultivariateDistribution)
 
 Return the sample size of distribution `d`, *i.e* `(length(d),)`.
 """
-size(d::MultivariateDistribution) = (length(d),)
+size(d::MultivariateDistribution)
 
 ## sampling
 
@@ -22,7 +22,7 @@ size(d::MultivariateDistribution) = (length(d),)
 Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of
 length `dim(d)` or a matrix with `dim(d)` rows.
 """
-rand!(d::MultivariateDistribution, x::AbstractArray) = throw(MethodError(rand!, (d, x)))
+rand!(d::MultivariateDistribution, x::AbstractArray)
 
 function rand!(d::MultivariateDistribution, x::AbstractVector)
     length(x) == length(d) ||
@@ -50,21 +50,21 @@ rand(d::MultivariateDistribution) = _rand!(d, Vector{eltype(d)}(length(d)))
 rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Matrix{eltype(d)}(length(d), n))
 
 """
-    _rand!(d::MultivariateDistribution, x)
+    _rand!(d::MultivariateDistribution, x::AbstractArray)
 
 Generate a vector sample to `x`. This function does not need to perform dimension checking.
 """
-_rand!(d::MultivariateDistribution) = throw(MethodError(_rand!, (d,)))
+_rand!(d::MultivariateDistribution, x::AbstractArray)
 
 ## domain
 
 """
-    insupport(d::MultivariateDistribution, x::Any)
+    insupport(d::MultivariateDistribution, x::AbstractArray)
 
 If ``x`` is a vector, it returns whether x is within the support of ``d``.
 If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``.
 """
-insupport{D<:MultivariateDistribution}(d::Union{D, Type{D}}, x::Any) = throw(MethodError(insupport, (d, x)))
+insupport{D<:MultivariateDistribution}(d::Union{D, Type{D}}, x::AbstractArray)
 
 function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix)
     n = length(r)
@@ -86,21 +86,21 @@ insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, X::AbstractMatrix) =
 
 Compute the mean vector of distribution `d`.
 """
-mean(d::MultivariateDistribution) = throw(MethodError(mean, (d,)))
+mean(d::MultivariateDistribution)
 
 """
     var(d::MultivariateDistribution)
 
 Compute the vector of element-wise variances for distribution `d`.
 """
-var(d::MultivariateDistribution) = throw(MethodError(var, (d,)))
+var(d::MultivariateDistribution)
 
 """
     entropy(d::MultivariateDistribution)
 
 Compute the entropy value of distribution `d`.
 """
-entropy(d::MultivariateDistribution) = throw(MethodError(entropy, (d,)))
+entropy(d::MultivariateDistribution)
 
 """
     entropy(d::MultivariateDistribution, b::Real)
@@ -114,7 +114,7 @@ entropy(d::MultivariateDistribution, b::Real) = entropy(d) / log(b)
 
 Compute the covariance matrix for distribution `d`. (`cor` is provided based on `cov`).
 """
-cov(d::MultivariateDistribution) = throw(MethodError(cov, (d,)))
+cov(d::MultivariateDistribution)
 
 """
     cor(d::MultivariateDistribution)
@@ -143,7 +143,7 @@ end
 # pdf and logpdf
 
 """
-    pdf(d::MultivariateDistribution, x)
+    pdf(d::MultivariateDistribution, x::AbstractArray)
 
 Return the probability density of distribution `d` evaluated at `x`.
 
@@ -153,10 +153,10 @@ to `x[:,i]` (i.e. treating each column as a sample).
 
 `pdf!(r, d, x)` will write the results to a pre-allocated array `r`.
 """
-pdf(d::MultivariateDistribution) = throw(MethodError(pdf, (d,)))
+pdf(d::MultivariateDistribution, x::AbstractArray)
 
 """
-    logpdf(d::MultivariateDistribution, x)
+    logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 Return the logarithm of probability density evaluated at `x`.
 
@@ -165,7 +165,7 @@ Return the logarithm of probability density evaluated at `x`.
 
 `logpdf!(r, d, x)` will write the results to a pre-allocated array `r`.
 """
-logpdf(d::MultivariateDistribution) = throw(MethodError(logpdf, (d,)))
+logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 _pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
 
@@ -227,7 +227,7 @@ end
 Evaluate logarithm of pdf value for a given vector `x`. This function need not perform dimension checking.
 Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods are provided in `src/multivariates.jl`.
 """
-_logpdf(d::MultivariateDistribution, x::AbstractArray) = throw(MethodError(_logpdf, (d, x)))
+_logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 """
     loglikelihood(d::MultivariateDistribution, x::AbstractMatrix)
