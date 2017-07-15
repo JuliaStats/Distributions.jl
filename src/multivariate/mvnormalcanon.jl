@@ -7,8 +7,8 @@
 
 Multivariate normal distribution is an [exponential family distribution](http://en.wikipedia.org/wiki/Exponential_family),
 with two *canonical parameters*: the *potential vector* ``\\mathbf{h}`` and the *precision matrix* ``\\mathbf{J}``.
-The relation between these parameters and the conventional representation (*i.e.* the one using mean ``\\boldsymbol{mu}`` and
-covariance ``\\boldsymbol{\Sigma}``) is:
+The relation between these parameters and the conventional representation (*i.e.* the one using mean ``\\boldsymbol{\\mu}`` and
+covariance ``\\boldsymbol{\\Sigma}``) is:
 
 ```math
 \\mathbf{h} = \\boldsymbol{\\Sigma}^{-1} \\boldsymbol{\\mu}, \\quad \\text{ and } \\quad \\mathbf{J} = \\boldsymbol{\\Sigma}^{-1}
@@ -46,7 +46,7 @@ Construct a multivariate normal distribution with potential vector `h` and preci
 
     MvNormalCanon(J)
 
-Construct a multivariate normal distribution with zero mean (thus zero potential vector) and precision matrix represented by ``J``.
+Construct a multivariate normal distribution with zero mean (thus zero potential vector) and precision matrix represented by `J`.
 
     MvNormalCanon(d, J)
 

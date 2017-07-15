@@ -28,7 +28,7 @@ ntrials(::UnivariateDistribution)
 dof(::UnivariateDistribution)
 ```
 
-**Note:** ``params`` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details.
+**Note:** `params` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details.
 
 
 ### Computation of statistics

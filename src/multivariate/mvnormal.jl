@@ -38,7 +38,7 @@ We realize that the mean vector and the covariance often have special forms in p
 which can be exploited to simplify the computation. For example, the mean vector is sometimes
 just a zero vector, while the covariance matrix can be a diagonal matrix or even in the form
 of ``\\sigma \\mathbf{I}``. To take advantage of such special cases, we introduce a parametric
-type ``MvNormal``, defined as below, which allows users to specify the special structure of
+type `MvNormal`, defined as below, which allows users to specify the special structure of
 the mean and covariance.
 
 ```julia
