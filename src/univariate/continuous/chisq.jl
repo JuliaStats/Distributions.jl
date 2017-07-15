@@ -5,7 +5,7 @@ probability density function
 
 $f(x; k) = \frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \Gamma(k/2)}, \quad x > 0.$
 
-If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](:func:`Normal`) variates.
+If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
 
 ```julia
 Chisq(k)     # Chi-squared distribution with k degrees of freedom

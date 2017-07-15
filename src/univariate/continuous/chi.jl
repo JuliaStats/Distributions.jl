@@ -5,7 +5,7 @@ The *Chi distribution* `ν` degrees of freedom has probability density function
 
 $f(x; k) = \frac{1}{\Gamma(k/2)} 2^{1 - k/2} x^{k-1} e^{-x^2/2}, \quad x > 0$
 
-It is the distribution of the square-root of a [`Chisq`](:func:`Chisq`) variate.
+It is the distribution of the square-root of a [`Chisq`](@ref) variate.
 
 ```julia
 Chi(k)       # Chi distribution with k degrees of freedom

@@ -1,7 +1,7 @@
 doc"""
     LogNormal(μ,σ)
 
-The *log normal distribution* is the distribution of the exponential of a [`Normal`](:func:`Normal`) variate: if $X \sim \operatorname{Normal}(\mu, \sigma)$ then $\exp(X) \sim \operatorname{LogNormal}(\mu,\sigma)$. The probability density function is
+The *log normal distribution* is the distribution of the exponential of a [`Normal`](@ref) variate: if $X \sim \operatorname{Normal}(\mu, \sigma)$ then $\exp(X) \sim \operatorname{LogNormal}(\mu,\sigma)$. The probability density function is
 
 $f(x; \mu, \sigma) = \frac{1}{x \sqrt{2 \pi \sigma^2}}
 \exp \left( - \frac{(\log(x) - \mu)^2}{2 \sigma^2} \right),

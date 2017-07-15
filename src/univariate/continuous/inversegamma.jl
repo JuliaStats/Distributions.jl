@@ -7,7 +7,7 @@ density function
 $f(x; \alpha, \theta) = \frac{\theta^\alpha x^{-(\alpha + 1)}}{\Gamma(\alpha)}
 e^{-\frac{\theta}{x}}, \quad x > 0$
 
-It is related to the [`Gamma`](:func:`Gamma`) distribution: if $X \sim \operatorname{Gamma}(\alpha, \beta)$, then $1 / X \sim \operatorname{InverseGamma}(\alpha, \beta^{-1})$.
+It is related to the [`Gamma`](@ref) distribution: if $X \sim \operatorname{Gamma}(\alpha, \beta)$, then $1 / X \sim \operatorname{InverseGamma}(\alpha, \beta^{-1})$.
 
 .. code-block:: julia
 
