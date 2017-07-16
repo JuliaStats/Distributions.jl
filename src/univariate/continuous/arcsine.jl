@@ -1,9 +1,11 @@
-doc"""
+"""
     Arcsine(a,b)
 
 The *Arcsine distribution* has probability density function
 
-$f(x) = \frac{1}{\pi \sqrt{(x - a) (b - x)}}, \quad x \in [a, b]$
+```math
+f(x) = \\frac{1}{\\pi \\sqrt{(x - a) (b - x)}}, \\quad x \\in [a, b]
+```
 
 ```julia
 Arcsine()        # Arcsine distribution with support [0, 1]
@@ -22,7 +24,6 @@ External links
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
 
 """
-
 immutable Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T

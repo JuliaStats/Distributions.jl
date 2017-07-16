@@ -1,17 +1,18 @@
-doc"""
+"""
     GeneralizedPareto(μ, σ, ξ)
 
 The *Generalized Pareto distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
 
-$f(x; \mu, \sigma, \xi) = \begin{cases}
-        \frac{1}{\sigma}(1 + \xi \frac{x - \mu}{\sigma} )^{-\frac{1}{\xi} - 1} & \text{for } \xi \neq 0 \\
-        \frac{1}{\sigma} e^{-\frac{\left( x - \mu \right) }{\sigma}} & \text{for } \xi = 0
-    \end{cases}~,
-    \quad x \in \begin{cases}
-        \left[ \mu, \infty \right] & \text{for } \xi \geq 0 \\
-        \left[ \mu, \mu - \sigma / \xi \right] & \text{for } \xi < 0
-    \end{cases}$
-
+```math
+f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
+        \\frac{1}{\\sigma}(1 + \\xi \\frac{x - \\mu}{\\sigma} )^{-\\frac{1}{\\xi} - 1} & \\text{for } \\xi \\neq 0 \\\\
+        \\frac{1}{\\sigma} e^{-\\frac{\\left( x - \\mu \\right) }{\\sigma}} & \\text{for } \\xi = 0
+    \\end{cases}~,
+    \\quad x \\in \\begin{cases}
+        \\left[ \\mu, \\infty \\right] & \\text{for } \\xi \\geq 0 \\\\
+        \\left[ \\mu, \\mu - \\sigma / \\xi \\right] & \\text{for } \\xi < 0
+    \\end{cases}
+```
 
 ```julia
 GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
@@ -29,7 +30,6 @@ External links
 * [Generalized Pareto distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_Pareto_distribution)
 
 """
-
 immutable GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T

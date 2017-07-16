@@ -1,9 +1,11 @@
-doc"""
+"""
     Exponential(θ)
 
 The *Exponential distribution* with scale parameter `θ` has probability density function
 
-$f(x; \theta) = \frac{1}{\theta} e^{-\frac{x}{\theta}}, \quad x > 0$
+```math
+f(x; \\theta) = \\frac{1}{\\theta} e^{-\\frac{x}{\\theta}}, \\quad x > 0
+```
 
 ```julia
 Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1)

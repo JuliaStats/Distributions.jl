@@ -1,4 +1,4 @@
-doc"""
+"""
     Erlang(α,θ)
 
 The *Erlang distribution* is a special case of a [`Gamma`](@ref) distribution with integer shape parameter.
@@ -14,7 +14,6 @@ External links
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
 """
-
 immutable Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T

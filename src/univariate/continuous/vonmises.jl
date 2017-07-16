@@ -1,9 +1,11 @@
-doc"""
+"""
     VonMises(μ, κ)
 
 The *von Mises distribution* with mean `μ` and concentration `κ` has probability density function
 
-$f(x; \mu, \kappa) = \frac{1}{2 \pi I_0(\kappa)} \exp \left( \kappa \cos (x - \mu) \right)$
+```math
+f(x; \mu, \\kappa) = \\frac{1}{2 \\pi I_0(\\kappa)} \\exp \\left( \\kappa \\cos (x - \\mu) \\right)
+```
 
 ```julia
 VonMises()       # von Mises distribution with zero mean and unit concentration

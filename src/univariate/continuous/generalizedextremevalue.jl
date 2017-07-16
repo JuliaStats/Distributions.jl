@@ -1,20 +1,24 @@
-doc"""
+"""
     GeneralizedExtremeValue(μ, σ, ξ)
 
 The *Generalized extreme value distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
 
-$f(x; \xi, \sigma, \mu) = \begin{cases}
-        \frac{1}{\sigma} \left[ 1+\left(\frac{x-\mu}{\sigma}\right)\xi\right]^{-1/\xi-1} \exp\left\{-\left[ 1+ \left(\frac{x-\mu}{\sigma}\right)\xi\right]^{-1/\xi} \right\} & \text{for } \xi \neq 0 \\
-        \frac{1}{\sigma} \exp\left\{-\frac{x-\mu}{\sigma}\right\} \exp\left\{-\exp\left[-\frac{x-\mu}{\sigma}\right]\right\} & \text{for } \xi = 0
-    \end{cases}$
+```math
+f(x; \\xi, \\sigma, \\mu) = \\begin{cases}
+        \\frac{1}{\\sigma} \\left[ 1+\\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi-1} \\exp\\left\\{-\\left[ 1+ \\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi} \\right\\} & \\text{for } \\xi \\neq 0  \\\\\\
+        \\frac{1}{\\sigma} \\exp\\left\\{-\\frac{x-\\mu}{\\sigma}\\right\\} \\exp\\left\\{-\\exp\\left[-\\frac{x-\\mu}{\\sigma}\\right]\\right\\} & \\text{for } \\xi = 0 \\\\
+    \\end{cases}
+```
 
 for
 
-$x \in \begin{cases}
-        \left[ \mu - \frac{\sigma}{\xi}, + \infty \right) & \text{for } \xi > 0 \\
-        \left( - \infty, + \infty \right) & \text{for } \xi = 0 \\
-        \left( - \infty, \mu - \frac{\sigma}{\xi} \right] & \text{for } \xi < 0
-    \end{cases}$
+```math
+x \\in \\begin{cases}
+        \\left[ \\mu - \\frac{\\sigma}{\\xi}, + \\infty \\right) & \\text{for } \\xi > 0 \\\\
+        \\left( - \\infty, + \\infty \\right) & \\text{for } \\xi = 0 \\\\
+        \\left( - \\infty, \\mu - \\frac{\\sigma}{\\xi} \\right] & \\text{for } \\xi < 0
+    \\end{cases}
+```
 
 ```julia
 GeneralizedExtremeValue(m, s, k)      # Generalized Pareto distribution with shape k, scale s and location m.
@@ -30,7 +34,6 @@ External links
 * [Generalized extreme value distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution)
 
 """
-
 immutable GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T

@@ -1,14 +1,16 @@
-doc"""
+"""
     TriangularDist(a,b,c)
 
 The *triangular distribution* with lower limit `a`, upper limit `b` and mode `c` has probability density function
 
-$f(x; a, b, c)= \begin{cases}
-        0 & \mathrm{for\ } x < a, \\
-        \frac{2(x-a)}{(b-a)(c-a)} & \mathrm{for\ } a \le x \leq c, \\[4pt]
-        \frac{2(b-x)}{(b-a)(b-c)} & \mathrm{for\ } c < x \le b, \\[4pt]
-        0 & \mathrm{for\ } b < x,
-        \end{cases}$
+```math
+f(x; a, b, c)= \\begin{cases}
+        0 & \\mathrm{for\\ } x < a, \\\\
+        \\frac{2(x-a)}{(b-a)(c-a)} & \\mathrm{for\\ } a \\le x \\leq c, \\\\[4pt]
+        \\frac{2(b-x)}{(b-a)(b-c)} & \\mathrm{for\\ } c < x \\le b, \\\\[4pt]
+        0 & \\mathrm{for\\ } b < x,
+        \\end{cases}
+```
 
 ```julia
 TriangularDist(a, b)        # Triangular distribution with lower limit a, upper limit b, and mode (a+b)/2
