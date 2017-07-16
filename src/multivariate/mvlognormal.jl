@@ -153,7 +153,7 @@ params{D<:AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix) = 
 The [Multivariate lognormal distribution](http://en.wikipedia.org/wiki/Log-normal_distribution)
 is a multidimensional generalization of the *lognormal distribution*.
 
-If ``\\boldsymbol X \\sim \\mathcal{N}(\\boldsymbol\\mu,\,\\boldsymbol\\Sigma)`` has a multivariate
+If ``\\boldsymbol X \\sim \\mathcal{N}(\\boldsymbol\\mu,\\,\\boldsymbol\\Sigma)`` has a multivariate
 normal distribution then ``\\boldsymbol Y=\\exp(\\boldsymbol X)`` has a multivariate lognormal
 distribution.
 

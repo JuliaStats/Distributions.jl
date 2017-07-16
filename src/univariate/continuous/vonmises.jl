@@ -4,7 +4,7 @@
 The *von Mises distribution* with mean `μ` and concentration `κ` has probability density function
 
 ```math
-f(x; \mu, \\kappa) = \\frac{1}{2 \\pi I_0(\\kappa)} \\exp \\left( \\kappa \\cos (x - \\mu) \\right)
+f(x; \\mu, \\kappa) = \\frac{1}{2 \\pi I_0(\\kappa)} \\exp \\left( \\kappa \\cos (x - \\mu) \\right)
 ```
 
 ```julia
