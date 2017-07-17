@@ -149,9 +149,9 @@ end
 if VERSION >= v"0.7.0-DEV.602"
     function _dft(x::Vector{T}) where T
         n = length(x)
-        y = Vector{complex(float(T))}(n)
+        y = zeros(complex(float(T)), n)
         @inbounds for j = 0:n-1, k = 0:n-1
-            y[k+1] += x[j+1] * cis(-2π * j * k / n)
+            y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
         end
         return y
     end
