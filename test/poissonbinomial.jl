@@ -71,7 +71,7 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test isapprox(pdf(d, k), m, atol=2e-15)
+        @test isapprox(pdf(d, k), m, atol=5e-16)
     end
 end
 
