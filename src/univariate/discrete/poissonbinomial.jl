@@ -141,8 +141,22 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
             x[n + 1 - l + 1] = conj(x[l + 1])
         end
     end
-    fft!(x)
-    [max(0, real(xi)) for xi in x]
+    [max(0, real(xi)) for xi in _dft(x)]
+end
+
+# A simple implementation of a DFT to avoid introducing a dependency
+# on an external FFT package just for this one distribution
+if VERSION >= v"0.7.0-DEV.602"
+    function _dft(x::Vector{T}) where T
+        n = length(x)
+        y = Vector{complex(float(T))}(n)
+        @inbounds for j = 0:n-1, k = 0:n-1
+            y[k+1] += x[j+1] * cis(-2π * j * k / n)
+        end
+        return y
+    end
+else
+    _dft(x) = Base.fft(x)
 end
 
 #### Sampling
