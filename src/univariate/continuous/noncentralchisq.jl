@@ -1,4 +1,4 @@
-doc"""
+"""
     NoncentralChisq(ν, λ)
 
 The *noncentral chi-squared distribution* with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
