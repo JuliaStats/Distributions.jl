@@ -2,6 +2,67 @@
 
 ### Generic types
 
+"""
+    MvNormalCanon
+
+Multivariate normal distribution is an [exponential family distribution](http://en.wikipedia.org/wiki/Exponential_family),
+with two *canonical parameters*: the *potential vector* ``\\mathbf{h}`` and the *precision matrix* ``\\mathbf{J}``.
+The relation between these parameters and the conventional representation (*i.e.* the one using mean ``\\boldsymbol{\\mu}`` and
+covariance ``\\boldsymbol{\\Sigma}``) is:
+
+```math
+\\mathbf{h} = \\boldsymbol{\\Sigma}^{-1} \\boldsymbol{\\mu}, \\quad \\text{ and } \\quad \\mathbf{J} = \\boldsymbol{\\Sigma}^{-1}
+```
+
+The canonical parameterization is widely used in Bayesian analysis. We provide a type `MvNormalCanon`,
+which is also a subtype of `AbstractMvNormal` to represent a multivariate normal distribution using
+canonical parameters. Particularly, `MvNormalCanon` is defined as:
+
+```julia
+immutable MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+    μ::V    # the mean vector
+    h::V    # potential vector, i.e. inv(Σ) * μ
+    J::P    # precision matrix, i.e. inv(Σ)
+end
+```
+
+We also define aliases for common specializations of this parametric type:
+
+```julia
+const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
+const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
+const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
+
+const ZeroMeanFullNormalCanon = MvNormalCanon{PDMat,    ZeroVector{Float64}}
+const ZeroMeanDiagNormalCanon = MvNormalCanon{PDiagMat, ZeroVector{Float64}}
+const ZeroMeanIsoNormalCanon  = MvNormalCanon{ScalMat,  ZeroVector{Float64}}
+```
+
+A multivariate distribution with canonical parameterization can be constructed using a common constructor `MvNormalCanon` as:
+
+    MvNormalCanon(h, J)
+
+Construct a multivariate normal distribution with potential vector `h` and precision matrix represented by `J`.
+
+    MvNormalCanon(J)
+
+Construct a multivariate normal distribution with zero mean (thus zero potential vector) and precision matrix represented by `J`.
+
+    MvNormalCanon(d, J)
+
+Construct a multivariate normal distribution of dimension `d`, with zero mean and a precision matrix as `J * eye(d)`.
+
+# Arguments
+- `d::Int`: dimension of distribution
+- `h::Vector{T<:Real}`: the potential vector, of type `Vector{T}` with `T<:Real`.
+- `J`: the representation of the precision matrix, which can be in either of the following forms (`T<:Real`):
+    1. an instance of a subtype of `AbstractPDMat`
+    2. a square matrix of type `Matrix{T}`
+    3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`.
+    4. a real number: indicating an isotropic precision matrix as `J * eye(d)`.
+
+**Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
+"""
 immutable MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ

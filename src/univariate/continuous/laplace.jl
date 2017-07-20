@@ -1,9 +1,11 @@
-doc"""
+"""
     Laplace(μ,θ)
 
 The *Laplace distribution* with location `μ` and scale `θ` has probability density function
 
-$f(x; \mu, \beta) = \frac{1}{2 \beta} \exp \left(- \frac{|x - \mu|}{\beta} \right)$
+```math
+f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
+```
 
 ```julia
 Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
@@ -20,7 +22,6 @@ External links
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
 """
-
 immutable Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T

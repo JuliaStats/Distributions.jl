@@ -1,5 +1,35 @@
 ### Generic rand methods
 
+"""
+    rand(s::Sampleable)
+
+Generate one sample for `s`.
+
+    rand(s::Sampleable, n::Int)
+
+Generate `n` samples from `s`. The form of the returned object depends on the variate form of `s`:
+
+- When `s` is univariate, it returns a vector of length `n`.
+- When `s` is multivariate, it returns a matrix with `n` columns.
+- When `s` is matrix-variate, it returns an array, where each element is a sample matrix.
+"""
+rand(s::Sampleable)
+
+"""
+    rand!(s::Sampleable, A::AbstractArray)
+
+Generate one or multiple samples from `s` to a pre-allocated array `A`. `A` should be in the
+form as specified above. The rules are summarized as below:
+
+- When `s` is univariate, `A` can be an array of arbitrary shape. Each element of `A` will
+  be overriden by one sample.
+- When `s` is multivariate, `A` can be a vector to store one sample, or a matrix with each
+  column for a sample.
+- When `s` is matrix-variate, `A` can be a matrix to store one sample, or an array of
+  matrices with each element for a sample matrix.
+"""
+rand!(s::Sampleable, A::AbstractArray)
+
 # univariate
 
 function _rand!(s::Sampleable{Univariate}, A::AbstractArray)
@@ -60,9 +90,11 @@ rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) =
 rand(s::Sampleable{Matrixvariate}, n::Int) =
     rand!(s, Vector{Matrix{eltype(s)}}(n))
 
+"""
+    sampler(d::Distribution) -> Sampleable
 
-# sampler
-
-# one can specialize this function to provide more efficient samplers
-# for certain distributions
+Samplers can often rely on pre-computed quantities (that are not parameters themselves) to improve efficiency.
+If such a sampler exists, it can be provide with this `sampler` method, which would be used for batch sampling.
+The general fallback is `sampler(d::Distribution) = d`.
+"""
 sampler(d::Distribution) = d

@@ -1,9 +1,11 @@
-doc"""
+"""
     Uniform(a,b)
 
-The *continuous uniform distribution* over an interval $[a, b]$ has probability density function
+The *continuous uniform distribution* over an interval ``[a, b]`` has probability density function
 
-$f(x; a, b) = \frac{1}{b - a}, \quad a \le x \le b$
+```math
+f(x; a, b) = \\frac{1}{b - a}, \\quad a \\le x \\le b
+```
 
 ```julia
 Uniform()        # Uniform distribution over [0, 1]

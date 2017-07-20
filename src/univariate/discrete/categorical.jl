@@ -1,7 +1,11 @@
-doc"""
+"""
     Categorical(p)
 A *Categorical distribution* is parameterized by a probability vector `p` (of length `K`).
-$P(X = k) = p[k]  \quad \text{for } k = 1, 2, \ldots, K.$
+
+```math
+P(X = k) = p[k]  \\quad \\text{for } k = 1, 2, \\ldots, K.
+```
+
 ```julia
 Categorical(p)   # Categorical distribution with probability vector p
 params(d)        # Get the parameters, i.e. (p,)
@@ -13,7 +17,6 @@ Here, `p` must be a real vector, of which all components are nonnegative and sum
 External links:
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-
 immutable Categorical{T<:Real} <: DiscreteUnivariateDistribution
     K::Int
     p::Vector{T}

@@ -1,7 +1,14 @@
-# Kolmogorov distribution
-# defined as the sup_{t \in [0,1]} |B(t)|, where B(t) is a Brownian bridge
-# used in the Kolmogorov--Smirnov test for large n.
+"""
+    Kolmogorov()
 
+Kolmogorov distribution defined as
+
+```math
+\\sup_{t \\in [0,1]} |B(t)|
+```
+where ``B(t)`` is a Brownian bridge used in the Kolmogorov--Smirnov
+test for large n.
+"""
 immutable Kolmogorov <: ContinuousUnivariateDistribution
 end
 

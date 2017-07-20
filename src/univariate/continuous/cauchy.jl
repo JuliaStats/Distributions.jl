@@ -1,9 +1,11 @@
-doc"""
+"""
     Cauchy(μ, σ)
 
 The *Cauchy distribution* with location `μ` and scale `σ` has probability density function
 
-$f(x; \mu, \sigma) = \frac{1}{\pi \sigma \left(1 + \left(\frac{x - \mu}{\sigma} \right)^2 \right)}$
+```math
+f(x; \\mu, \\sigma) = \\frac{1}{\\pi \\sigma \\left(1 + \\left(\\frac{x - \\mu}{\\sigma} \\right)^2 \\right)}
+```
 
 ```julia
 Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0, 1)
@@ -20,7 +22,6 @@ External links
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
 """
-
 immutable Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T

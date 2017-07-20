@@ -1,9 +1,11 @@
-doc"""
+"""
     DiscreteUniform(a,b)
 
 A *Discrete uniform distribution* is a uniform distribution over a consecutive sequence of integers between `a` and `b`, inclusive.
 
-$P(X = k) = 1 / (b - a + 1) \quad \text{for } k = a, a+1, \ldots, b.$
+```math
+P(X = k) = 1 / (b - a + 1) \\quad \\text{for } k = a, a+1, \\ldots, b.
+```
 
 ```julia
 DiscreteUniform(a, b)   # a uniform distribution over {a, a+1, ..., b}

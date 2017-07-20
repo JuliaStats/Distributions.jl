@@ -1,10 +1,12 @@
-doc"""
+"""
     Normal(μ,σ)
 
 The *Normal distribution* with mean `μ` and standard deviation `σ` has probability density function
 
-$f(x; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}}
-\exp \left( - \frac{(x - \mu)^2}{2 \sigma^2} \right)$
+```math
+f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
+\\exp \\left( - \\frac{(x - \\mu)^2}{2 \\sigma^2} \\right)
+```
 
 ```julia
 Normal()          # standard Normal distribution with zero mean and unit variance

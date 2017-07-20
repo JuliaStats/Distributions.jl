@@ -16,17 +16,43 @@ Base.eltype(::Type{Continuous}) = Float64
 
 @compat abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
+"""
+    length(s::Sampleable)
+
+The length of each sample. Always returns `1` when `s` is univariate.
+"""
+Base.length(s::Sampleable) = prod(size(s))
 Base.length(::Sampleable{Univariate}) = 1
 Base.length(s::Sampleable{Multivariate}) = throw(MethodError(length, (s,)))
-Base.length(s::Sampleable) = prod(size(s))
 
+"""
+    size(s::Sampleable)
+
+The size (i.e. shape) of each sample. Always returns `()` when `s` is univariate, and
+`(length(s),)` when `s` is multivariate.
+"""
+Base.size(s::Sampleable)
 Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
+"""
+    eltype(s::Sampleable)
+
+The default element type of a sample. This is the type of elements of the samples generated
+by the `rand` method. However, one can provide an array of different element types to
+store the samples using `rand!`.
+"""
 Base.eltype{F,S}(s::Sampleable{F,S}) = eltype(S)
 Base.eltype{F}(s::Sampleable{F,Discrete}) = Int
 Base.eltype{F}(s::Sampleable{F,Continuous}) = Float64
 
+"""
+    nsamples(s::Sampleable)
+
+The number of samples contained in `A`. Multiple samples are often organized into an array,
+depending on the variate form.
+"""
+nsamples(t::Type{Sampleable}, x::Any)
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::Number) = 1
 nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::AbstractArray) = length(x)
 nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractVector) = 1

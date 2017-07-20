@@ -1,3 +1,6 @@
+"""
+    NoncentralT(ν, λ)
+"""
 immutable NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T

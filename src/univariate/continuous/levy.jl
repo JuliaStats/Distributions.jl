@@ -1,10 +1,12 @@
-doc"""
+"""
     Levy(μ, σ)
 
 The *Lévy distribution* with location `μ` and scale `σ` has probability density function
 
-$f(x; \mu, \sigma) = \sqrt{\frac{\sigma}{2 \pi (x - \mu)^3}}
-\exp \left( - \frac{\sigma}{2 (x - \mu)} \right), \quad x > \mu$
+```math
+f(x; \\mu, \\sigma) = \\sqrt{\\frac{\\sigma}{2 \\pi (x - \\mu)^3}}
+\\exp \\left( - \\frac{\\sigma}{2 (x - \\mu)} \\right), \\quad x > \\mu
+```
 
 ```julia
 Levy()         # Levy distribution with zero location and unit scale, i.e. Levy(0, 1)

@@ -1,3 +1,6 @@
+"""
+    NoncentralBeta(α, β, λ)
+"""
 immutable NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T

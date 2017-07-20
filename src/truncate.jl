@@ -1,3 +1,13 @@
+"""
+    Truncated(d, l, u):
+
+Construct a truncated distribution.
+
+# Arguments
+- `d::UnivariateDistribution`: The original distribution.
+- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
+- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+"""
 immutable Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound

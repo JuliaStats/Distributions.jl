@@ -1,10 +1,12 @@
-doc"""
+"""
     Gumbel(μ, θ)
 
 The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
 
-$f(x; \mu, \theta) = \frac{1}{\theta} e^{-(z + e^z)},
-\quad \text{ with } z = \frac{x - \mu}{\theta}$
+```math
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^z)},
+\\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
+```
 
 ```julia
 Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)

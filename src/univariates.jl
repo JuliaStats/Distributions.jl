@@ -19,6 +19,104 @@ isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +I
 hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
 hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
 
+"""
+    params(d::UnivariateDistribution)
+
+Return a tuple of parameters. Let `d` be a distribution of type `D`, then `D(params(d)...)`
+will construct exactly the same distribution as ``d``.
+"""
+params(d::UnivariateDistribution)
+
+"""
+    succprob(d::UnivariateDistribution)
+
+Get the probability of success.
+"""
+succprob(d::UnivariateDistribution)
+
+"""
+    failprob(d::UnivariateDistribution)
+
+Get the probability of failure.
+"""
+failprob(d::UnivariateDistribution)
+
+"""
+    scale(d::UnivariateDistribution)
+
+Get the scale parameter.
+"""
+scale(d::UnivariateDistribution)
+
+"""
+    location(d::UnivariateDistribution)
+
+Get the location parameter.
+"""
+location(d::UnivariateDistribution)
+
+"""
+    shape(d::UnivariateDistribution)
+
+Get the shape parameter.
+"""
+shape(d::UnivariateDistribution)
+
+"""
+    rate(d::UnivariateDistribution)
+
+Get the rate parameter.
+"""
+rate(d::UnivariateDistribution)
+
+"""
+    ncategories(d::UnivariateDistribution)
+
+Get the number of categories.
+"""
+ncategories(d::UnivariateDistribution)
+
+"""
+    ntrials(d::UnivariateDistribution)
+
+Get the number of trials.
+"""
+ntrials(d::UnivariateDistribution)
+
+"""
+    dof(d::UnivariateDistribution)
+
+Get the degrees of freedom.
+"""
+dof(d::UnivariateDistribution)
+
+"""
+    minimum(d::Distribution)
+
+Return the minimum of the support of `d`.
+"""
+minimum(d::UnivariateDistribution)
+
+"""
+    maximum(d::Distribution)
+
+Return the maximum of the support of `d`.
+"""
+maximum(d::UnivariateDistribution)
+
+"""
+    insupport(d::UnivariateDistribution, x::Any)
+
+When `x` is a scalar, it returns whether x is within the support of `d`
+(e.g., `insupport(d, x) = minimum(d) <= x <= maximum(d)`).
+When `x` is an array, it returns whether every element in x is within the support of `d`.
+
+Generic fallback methods are provided, but it is often the case that `insupport` can be
+done more efficiently, and a specialized `insupport` is thus desirable.
+You should also override this function if the support is composed of multiple disjoint intervals.
+"""
+insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
+
 function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
@@ -27,6 +125,7 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type
     end
     return r
 end
+
 
 insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
      insupport!(BitArray(size(X)), d, X)
@@ -61,23 +160,129 @@ end
 
 ## sampling
 
+"""
+    rand(d::UnivariateDistribution)
+
+Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
+
+    rand(d::UnivariateDistribution, n::Int) -> Vector
+
+Generates a vector of `n` random scalar samples from `d`. The general fallback is to
+pick random samples from `sampler(d)`.
+"""
 rand(d::UnivariateDistribution) = quantile(d, rand())
 
+"""
+    rand!(d::UnivariateDistribution, A::AbstractArray)
+
+Populates the array `A` with scalar samples from `d`. The general fallback is to pick
+random samples from `sampler(d)`.
+"""
 rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
 rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(n))
 rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(shp))
 
+
+sampler(d::UnivariateDistribution) = d
+
 ## statistics
 
+"""
+    mean(d::UnivariateDistribution)
+
+Compute the expectation.
+"""
+mean(d::UnivariateDistribution)
+
+"""
+    var(d::UnivariateDistribution)
+
+Compute the variance. (A generic std is provided as `std(d) = sqrt(var(d))`)
+"""
+var(d::UnivariateDistribution)
+
+"""
+    std(d::UnivariateDistribution)
+
+Return the standard deviation of distribution `d`, i.e. `sqrt(var(d))`.
+"""
 std(d::UnivariateDistribution) = sqrt(var(d))
+
+"""
+    median(d::UnivariateDistribution)
+
+Return the median value of distribution `d`.
+"""
 median(d::UnivariateDistribution) = quantile(d, 0.5)
+
+"""
+    modes(d::UnivariateDistribution)
+
+Get all modes (if this makes sense).
+"""
 modes(d::UnivariateDistribution) = [mode(d)]
+
+"""
+    mode(d::UnivariateDistribution)
+
+Returns the first mode.
+"""
+mode(d::UnivariateDistribution)
+
+"""
+    skewness(d::UnivariateDistribution)
+
+Compute the skewness.
+"""
+skewness(d::UnivariateDistribution)
+
+"""
+    entropy(d::UnivariateDistribution)
+
+Compute the entropy value of distribution `d`.
+"""
+entropy(d::UnivariateDistribution)
+
+"""
+    entropy(d::UnivariateDistribution, b::Real)
+
+Compute the entropy value of distribution `d`, w.r.t. a given base.
+"""
 entropy(d::UnivariateDistribution, b::Real) = entropy(d) / log(b)
 
+"""
+    isplatykurtic(d)
+
+Return whether `d` is platykurtic (*i.e* `kurtosis(d) > 0`).
+"""
 isplatykurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
+
+"""
+    isleptokurtic(d)
+
+Return whether `d` is leptokurtic (*i.e* `kurtosis(d) < 0`).
+"""
 isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
+
+"""
+    ismesokurtic(d)
+
+Return whether `d` is mesokurtic (*i.e* `kurtosis(d) == 0`).
+"""
 ismesokurtic(d::UnivariateDistribution) = kurtosis(d) == 0.0
 
+"""
+    kurtosis(d::UnivariateDistribution)
+
+Compute the excessive kurtosis.
+"""
+kurtosis(d::UnivariateDistribution)
+
+"""
+    kurtosis(d::Distribution, correction::Bool)
+
+Computes excess kurtosis by default. Proper kurtosis can be returned with correction=false
+"""
 function kurtosis(d::Distribution, correction::Bool)
     if correction
         return kurtosis(d)
@@ -90,26 +295,70 @@ excess(d::Distribution) = kurtosis(d)
 excess_kurtosis(d::Distribution) = kurtosis(d)
 proper_kurtosis(d::Distribution) = kurtosis(d, false)
 
+"""
+    mgf(d::UnivariateDistribution, t)
+
+Evaluate the moment generating function of distribution `d`.
+"""
+mgf(d::UnivariateDistribution, t)
+
+"""
+    cf(d::UnivariateDistribution, t)
+
+Evaluate the characteristic function of distribution `d`.
+"""
+cf(d::UnivariateDistribution, t)
+
 
 #### pdf, cdf, and friends
 
 # pdf
 
+"""
+    pdf(d::UnivariateDistribution, x::Real)
+
+Evaluate the probability density (mass) at `x`.
+
+Note: The package implements the following generic methods to evaluate pdf values in batch.
+
+- `pdf!(dst::AbstractArray, d::Distribution, x::AbstractArray)`
+- `pdf(d::UnivariateDistribution, x::AbstractArray)`
+
+If there exists more efficient routine to evaluate pdf in batch (faster than repeatedly
+calling the scalar version of `pdf`), then one can also provide a specialized
+method of `pdf!`. The vectorized version of `pdf` simply delegats to `pdf!`.
+"""
+pdf(d::UnivariateDistribution, x::Real)
 pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
 pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
-pdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(pdf, (d, x)))
+"""
+    logpdf(d::UnivariateDistribution, x::Real)
 
-# logpdf
-
+Evaluate the logarithm of probability density (mass) at `x`.
+Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
+Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
+Again, the package provides vectorized version of `logpdf!` and `logpdf`.
+One may override `logpdf!` to provide more efficient vectorized evaluation.
+Furthermore, the generic `loglikelihood` function delegates to `_loglikelihood`,
+which repeatedly calls `logpdf`. If there is a better way to compute log-likelihood,
+one should override `_loglikelihood`.
+"""
+logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round( Int, x))
+logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round(Int, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
-logpdf(d::ContinuousUnivariateDistribution, x::Real) = log(pdf(d, x))
+"""
+    cdf(d::UnivariateDistribution, x::Real)
 
-# cdf
+Evaluate the cumulative probability at `x`. The package provides generic functions to
+compute `ccdf`, `logcdf`, and `logccdf` in both scalar and vectorized forms.
+One may override these generic fallbacks if the specialized versions provide better
+numeric stability or higher efficiency.
+"""
+cdf(d::UnivariateDistribution, x::Real)
 cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support
@@ -139,39 +388,65 @@ cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 
 cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x)))
 
-# ccdf
 
+"""
+    ccdf(d::UnivariateDistribution, x::Real)
+
+The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
+"""
+ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
-ccdf(d::ContinuousUnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
 
-# logcdf
+"""
+    logcdf(d::UnivariateDistribution, x::Real)
 
+The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
+"""
+logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
-logcdf(d::ContinuousUnivariateDistribution, x::Real) = log(cdf(d, x))
 
-# logccdf
+"""
+    logccdf(d::UnivariateDistribution, x::Real)
 
+The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
+"""
+logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 
-logccdf(d::ContinuousUnivariateDistribution, x::Real) = log(ccdf(d, x))
+"""
+    quantile(d::UnivariateDistribution, q::Real)
 
-# quantile
+Evaluate the inverse cumulative distribution function at `q`. The package provides
+generic functions to compute `cquantile`, `invlogcdf`, and `invlogccdf` in both
+scalar and vectorized forms. One may override these generic fallbacks if the specialized
+versions provide better numeric stability or higher efficiency. A generic `median` is
+provided, as `median(d) = quantile(d, 0.5)`. However, one should implement a specialized
+version of `median` if it can be computed faster than ``quantile``.
+"""
+quantile(d::UnivariateDistribution, p::Real)
 
-quantile(d::UnivariateDistribution, p::Real) = throw(MethodError(quantile, (d, p)))
+"""
+    cquantile(d::UnivariateDistribution, q::Real)
 
-# cquantile
-
+The complementary quantile value, i.e. `quantile(d, 1-q)`.
+"""
 cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
 
-# invlogcdf
+"""
+    invlogcdf(d::UnivariateDistribution, lp::Real)
 
+The inverse function of logcdf.
+"""
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
-# invlogccdf
+"""
+    invlogcdf(d::UnivariateDistribution, lp::Real)
 
+The inverse function of logcdf.
+"""
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 # gradlogpdf
@@ -282,7 +557,11 @@ pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximu
 
 
 ## loglikelihood
+"""
+    loglikelihood(d::UnivariateDistribution, X::AbstractArray)
 
+The log-likelihood of distribution `d` w.r.t. all samples contained in array `x`.
+"""
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
 
 ### macros to use StatsFuns for method implementation

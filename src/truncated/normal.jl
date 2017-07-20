@@ -1,5 +1,11 @@
 # Truncated normal distribution
+"""
+    TruncatedNormal(mu, sigma, l, u)
 
+The *truncated normal distribution* is a particularly important one in the family of truncated distributions.
+We provide additional support for this type with `TruncatedNormal` which calls `Truncated(Normal(mu, sigma), l, u)`.
+Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
+"""
 TruncatedNormal(mu::Float64, sigma::Float64, a::Float64, b::Float64) =
     Truncated(Normal(mu, sigma), a, b)
 
@@ -87,7 +93,7 @@ function randnt(lb::Float64, ub::Float64, tp::Float64)
         end
         return r
 
-    else 
+    else
         span = ub - lb
         if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
             a = (lb + sqrt(lb^2 + 4.0))/2.0
@@ -107,7 +113,7 @@ function randnt(lb::Float64, ub::Float64, tp::Float64)
                     return -r
                 end
             end
-        else 
+        else
             while true
                 r = lb + rand() * (ub - lb)
                 u = rand()

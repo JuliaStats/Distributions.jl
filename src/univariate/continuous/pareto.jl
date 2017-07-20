@@ -1,9 +1,11 @@
-doc"""
+"""
     Pareto(α,θ)
 
 The *Pareto distribution* with shape `α` and scale `θ` has probability density function
 
-$f(x; \alpha, \theta) = \frac{\alpha \theta^\alpha}{x^{\alpha + 1}}, \quad x \ge \theta$
+```math
+f(x; \\alpha, \\theta) = \\frac{\\alpha \\theta^\\alpha}{x^{\\alpha + 1}}, \\quad x \\ge \\theta
+```
 
 ```julia
 Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1, 1)
