@@ -6,14 +6,16 @@ immutable UnivariateGMM{T<:Real} <: UnivariateMixture{Continuous,Normal}
     stds::Vector{T}
     prior::Categorical
 
-    function UnivariateGMM(ms::Vector{T}, ss::Vector{T}, pri::Categorical)
+    (::Type{UnivariateGMM{T}}){T}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = begin
         K = length(ms)
         length(ss) == K || throw(DimensionMismatch())
         ncategories(pri) == K ||
             error("The number of categories in pri should be equal to the number of components.")
-        new(K, ms, ss, pri)
+        new{T}(K, ms, ss, pri)
     end
 end
+
+UnivariateGMM{T<:Real}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = UnivariateGMM{T}(K, ms, ss, pri)
 
 @distr_support UnivariateGMM -Inf Inf
 
