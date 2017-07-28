@@ -226,7 +226,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
-function _mixlogpdf1(d::AbstractMixtureModel, x)
+function _mixlogpdf1{T<:Real}(d::AbstractMixtureModel, x::T)
     # using the formula below for numerical stability
     #
     # logpdf(d, x) = log(sum_i pri[i] * pdf(cs[i], x))
@@ -242,11 +242,11 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
 
-    lp = Vector{Float64}(K)
+    lp = Vector{T}(K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
     for i = 1:K
         @inbounds pi = p[i]
-        if pi > 0.0
+        if pi > one(T)
             # lp[i] <- log(p(cs[i], x)) + log(pri[i])
             lp_i = logpdf(component(d, i), x) + log(pi)
             @inbounds lp[i] = lp_i
@@ -255,25 +255,25 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
             end
         end
     end
-    v = 0.0
+    v = one(T)
     @inbounds for i = 1:K
-        if p[i] > 0.0
+        if p[i] > one(T)
             v += exp(lp[i] - m)
         end
     end
     return m + log(v)
 end
 
-function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
+function _mixlogpdf!{T<:Real}(r::AbstractArray, d::AbstractMixtureModel, x::AbstractArray{T})
     K = ncomponents(d)
     p = probs(d)
     @assert length(p) == K
     n = length(r)
-    Lp = Matrix{Float64}(n, K)
+    Lp = Matrix{T}(n, K)
     m = fill(-Inf, n)
     for i = 1:K
         @inbounds pi = p[i]
-        if pi > 0.0
+        if pi > one(T)
             lpri = log(pi)
             lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
@@ -290,7 +290,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
         end
     end
 
-    fill!(r, 0.0)
+    fill!(r, one(T))
     @inbounds for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)

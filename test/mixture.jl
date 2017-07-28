@@ -1,5 +1,6 @@
 using Distributions
 using Base.Test
+using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
 using ForwardDiff: Dual
 
 # Core testing procedure
@@ -38,6 +39,71 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     # evaluation
     P0 = zeros(n, K)
     LP0 = zeros(n, K)
+    for k = 1:K
+        c_k = component(g, k)
+        for i = 1:n
+            x_i = X[i]
+            P0[i,k] = pdf(c_k, x_i)
+            LP0[i,k] = logpdf(c_k, x_i)
+        end
+    end
+
+    mix_p0 = P0 * pr
+    mix_lp0 = @compat(log.(mix_p0))
+
+    for i = 1:n
+        @test pdf(g, X[i])                  ≈ mix_p0[i]
+        @test logpdf(g, X[i])               ≈ mix_lp0[i]
+        @test componentwise_pdf(g, X[i])    ≈ vec(P0[i,:])
+        @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
+    end
+
+    @test pdf(g, X)                  ≈ mix_p0
+    @test logpdf(g, X)               ≈ mix_lp0
+    @test componentwise_pdf(g, X)    ≈ P0
+    @test componentwise_logpdf(g, X) ≈ LP0
+
+    # sampling
+    Xs = rand(g, ns)
+    @test isa(Xs, Vector{Float64})
+    @test length(Xs) == ns
+    @test isapprox(mean(Xs), mean(g), atol=0.01)
+end
+
+function test_mixture(g::UnivariateGMM{Dual}, n::Int, ns::Int)
+    X = zeros(Dual, n)
+    for i = 1:n
+        X[i] = rand(g)
+    end
+
+    K = ncomponents(g)
+    pr = probs(g)
+    @assert length(pr) == K
+
+    # mean
+    mu = 0.0
+    for k = 1:K
+        mu += pr[k] * mean(component(g, k))
+    end
+    @test mean(g) ≈ mu
+
+    # # evaluation of cdf
+    # cf = zeros(Dual, n)
+    # for k = 1:K
+    #     c_k = component(g, k)
+    #     for i = 1:n
+    #         cf[i] += pr[k] * cdf(c_k, X[i])
+    #     end
+    # end
+    #
+    # for i = 1:n
+    #     @test cdf(g, X[i]) ≈ cf[i]
+    # end
+    # @test cdf(g, X) ≈ cf
+
+    # evaluation
+    P0 = zeros(Dual, n, K)
+    LP0 = zeros(Dual, n, K)
     for k = 1:K
         c_k = component(g, k)
         for i = 1:n

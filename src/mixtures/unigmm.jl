@@ -15,7 +15,7 @@ immutable UnivariateGMM{T<:Real} <: UnivariateMixture{Continuous,Normal}
     end
 end
 
-UnivariateGMM{T<:Real}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = UnivariateGMM{T}(K, ms, ss, pri)
+UnivariateGMM{T<:Real}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = UnivariateGMM{T}(ms, ss, pri)
 
 @distr_support UnivariateGMM -Inf Inf
 
