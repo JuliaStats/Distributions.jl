@@ -59,6 +59,13 @@ Compute the overall mean (expectation).
 mean(d::AbstractMixtureModel)
 
 """
+    insupport(d::MultivariateMixture, x)
+
+Evaluate whether `x` is within the support of mixture distribution `d`.
+"""
+insupport(d::AbstractMixtureModel, x::AbstractVector)
+
+"""
     pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
 
 Evaluate the (mixed) probability density function over `x`. Here, `x` can be a single
@@ -262,6 +269,19 @@ end
 
 
 #### Evaluation
+
+function insupport(d::AbstractMixtureModel, x)
+    K = ncomponents(d)
+    p = probs(d)
+    @assert length(p) == K
+    for i = 1:K
+        @inbounds pi = p[i]
+        if pi > 0.0 && insupport(component(d, i), x)
+            return true
+        end
+    end
+    return false
+end
 
 function _cdf(d::UnivariateMixture, x::Real)
     K = ncomponents(d)
