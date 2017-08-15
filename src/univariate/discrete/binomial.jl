@@ -22,11 +22,11 @@ External links:
 
 * [Binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Binomial_distribution)
 """
-immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
+struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    function (::Type{Binomial{T}}){T}(n, p)
+    function Binomial{T}(n, p) where T
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))
         new{T}(n, p)
@@ -34,7 +34,7 @@ immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
 
 end
 
-Binomial{T<:Real}(n::Integer, p::T) = Binomial{T}(n, p)
+Binomial(n::Integer, p::T) where {T<:Real} = Binomial{T}(n, p)
 Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
 Binomial(n::Integer) = Binomial(n, 0.5)
 Binomial() = Binomial(1, 0.5)
@@ -43,10 +43,10 @@ Binomial() = Binomial(1, 0.5)
 
 #### Conversions
 
-function convert{T<:Real}(::Type{Binomial{T}}, n::Int, p::Real)
+function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     Binomial(n, T(p))
 end
-function convert{T <: Real, S <: Real}(::Type{Binomial{T}}, d::Binomial{S})
+function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
     Binomial(d.n, T(d.p))
 end
 
@@ -58,14 +58,14 @@ succprob(d::Binomial) = d.p
 failprob(d::Binomial) = 1 - d.p
 
 params(d::Binomial) = (d.n, d.p)
-@inline partype{T<:Real}(d::Binomial{T}) = T
+@inline partype(d::Binomial{T}) where {T<:Real} = T
 
 
 #### Properties
 
 mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
-function mode{T<:Real}(d::Binomial{T})
+function mode(d::Binomial{T}) where T<:Real
     (n, p) = params(d)
     n > 0 ? round(Int,(n + 1) * d.prob) : zero(T)
 end
@@ -110,7 +110,7 @@ end
 
 rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
 
-immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
     n::Int
     coef::Float64   # p / (1 - p)
 end
@@ -161,7 +161,7 @@ end
 
 #### Fit model
 
-immutable BinomialStats <: SufficientStats
+struct BinomialStats <: SufficientStats
     ns::Float64   # the total number of successes
     ne::Float64   # the number of experiments
     n::Int        # the number of trials in each experiment
@@ -169,7 +169,7 @@ immutable BinomialStats <: SufficientStats
     BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
 end
 
-function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T})
+function suffstats(::Type{Binomial}, n::Integer, x::AbstractArray{T}) where T<:Integer
     ns = zero(T)
     for i = 1:length(x)
         @inbounds xi = x[i]
@@ -179,7 +179,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     ns = 0.
     ne = 0.
     for i = 1:length(x)
@@ -199,8 +199,8 @@ suffstats(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffst
 
 fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle(::Type{Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
 fit_mle(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
 fit_mle(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 

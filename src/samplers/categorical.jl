@@ -1,6 +1,6 @@
 #### naive sampling
 
-immutable CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
     prob::Vector{Float64}
 
     function CategoricalDirectSampler(p::Vector{Float64})
@@ -25,14 +25,14 @@ end
 
 ##### Alias Table #####
 
-immutable AliasTable <: Sampleable{Univariate,Discrete}
+struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
     isampler::RangeGeneratorInt
 end
 ncategories(s::AliasTable) = length(s.accept)
 
-function AliasTable{T<:Real}(probs::AbstractVector{T})
+function AliasTable(probs::AbstractVector{T}) where T<:Real
     n = length(probs)
     n > 0 || error("The input probability vector is empty.")
     accp = Vector{Float64}(n)

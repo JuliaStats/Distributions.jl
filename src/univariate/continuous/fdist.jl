@@ -22,51 +22,51 @@ External links
 
 * [F distribution on Wikipedia](http://en.wikipedia.org/wiki/F-distribution)
 """
-immutable FDist{T<:Real} <: ContinuousUnivariateDistribution
+struct FDist{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
 
-    function (::Type{FDist{T}}){T}(ν1::T, ν2::T)
+    function FDist{T}(ν1::T, ν2::T) where T
         @check_args(FDist, ν1 > zero(ν1) && ν2 > zero(ν2))
         new{T}(ν1, ν2)
     end
 end
 
-FDist{T<:Real}(ν1::T, ν2::T) = FDist{T}(ν1, ν2)
+FDist(ν1::T, ν2::T) where {T<:Real} = FDist{T}(ν1, ν2)
 FDist(ν1::Integer, ν2::Integer) = FDist(Float64(ν1), Float64(ν2))
 FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
 
 @distr_support FDist 0.0 Inf
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{FDist{T}}, ν1::S, ν2::S)
+function convert(::Type{FDist{T}}, ν1::S, ν2::S) where {T <: Real, S <: Real}
     FDist(T(ν1), T(ν2))
 end
-function convert{T <: Real, S <: Real}(::Type{FDist{T}}, d::FDist{S})
+function convert(::Type{FDist{T}}, d::FDist{S}) where {T <: Real, S <: Real}
     FDist(T(d.ν1), T(d.ν2))
 end
 
 #### Parameters
 
 params(d::FDist) = (d.ν1, d.ν2)
-@inline partype{T<:Real}(d::FDist{T}) = T
+@inline partype(d::FDist{T}) where {T<:Real} = T
 
 
 #### Statistics
 
-mean{T<:Real}(d::FDist{T}) = (ν2 = d.ν2; ν2 > 2 ? ν2 / (ν2 - 2) : T(NaN))
+mean(d::FDist{T}) where {T<:Real} = (ν2 = d.ν2; ν2 > 2 ? ν2 / (ν2 - 2) : T(NaN))
 
-function mode{T<:Real}(d::FDist{T})
+function mode(d::FDist{T}) where T<:Real
     (ν1, ν2) = params(d)
     ν1 > 2 ? ((ν1 - 2)/ν1) * (ν2 / (ν2 + 2)) : zero(T)
 end
 
-function var{T<:Real}(d::FDist{T})
+function var(d::FDist{T}) where T<:Real
     (ν1, ν2) = params(d)
     ν2 > 4 ? 2ν2^2 * (ν1 + ν2 - 2) / (ν1 * (ν2 - 2)^2 * (ν2 - 4)) : T(NaN)
 end
 
-function skewness{T<:Real}(d::FDist{T})
+function skewness(d::FDist{T}) where T<:Real
     (ν1, ν2) = params(d)
     if ν2 > 6
         return (2ν1 + ν2 - 2) * sqrt(8(ν2 - 4)) / ((ν2 - 6) * sqrt(ν1 * (ν1 + ν2 - 2)))
@@ -75,7 +75,7 @@ function skewness{T<:Real}(d::FDist{T})
     end
 end
 
-function kurtosis{T<:Real}(d::FDist{T})
+function kurtosis(d::FDist{T}) where T<:Real
     (ν1, ν2) = params(d)
     if ν2 > 8
         a = ν1 * (5ν2 - 22) * (ν1 + ν2 - 2) + (ν2 - 4) * (ν2 - 2)^2

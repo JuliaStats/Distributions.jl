@@ -21,7 +21,7 @@ External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
-immutable DiscreteUniform <: DiscreteUnivariateDistribution
+struct DiscreteUniform <: DiscreteUnivariateDistribution
     a::Int
     b::Int
     pv::Float64
@@ -135,7 +135,7 @@ rand(rng::AbstractRNG, d::DiscreteUniform) = rand(rng, d.a:d.b)
 
 # Fit model
 
-function fit_mle{T <: Real}(::Type{DiscreteUniform}, x::AbstractArray{T})
+function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{T}) where T <: Real
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end

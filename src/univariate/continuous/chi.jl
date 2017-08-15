@@ -21,26 +21,26 @@ External links
 * [Chi distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi_distribution)
 
 """
-immutable Chi{T<:Real} <: ContinuousUnivariateDistribution
+struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
 
-    (::Type{Chi{T}}){T}(ν::T) = (@check_args(Chi, ν > zero(ν)); new{T}(ν))
+    Chi{T}(ν::T) where {T} = (@check_args(Chi, ν > zero(ν)); new{T}(ν))
 end
 
-Chi{T<:Real}(ν::T) = Chi{T}(ν)
+Chi(ν::T) where {T<:Real} = Chi{T}(ν)
 Chi(ν::Integer) = Chi(Float64(ν))
 
 @distr_support Chi 0.0 Inf
 
 ### Conversions
-convert{T<:Real}(::Type{Chi{T}}, ν::Real) = Chi(T(ν))
-convert{T <: Real, S <: Real}(::Type{Chi{T}}, d::Chi{S}) = Chi(T(d.ν))
+convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
+convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν))
 
 #### Parameters
 
 dof(d::Chi) = d.ν
 params(d::Chi) = (d.ν,)
-@inline partype{T<:Real}(d::Chi{T}) = T
+@inline partype(d::Chi{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -63,7 +63,7 @@ function kurtosis(d::Chi)
     (2/σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-entropy{T<:Real}(d::Chi{T}) = (ν = d.ν;
+entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
     lgamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
@@ -80,7 +80,7 @@ logpdf(d::Chi, x::Real) = (ν = d.ν;
     (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - lgamma(ν/2)
 )
 
-gradlogpdf{T<:Real}(d::Chi{T}, x::Real) = x >= 0 ? (d.ν - 1) / x - x : zero(T)
+gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
 cdf(d::Chi, x::Real) = chisqcdf(d.ν, x^2)
 ccdf(d::Chi, x::Real) = chisqccdf(d.ν, x^2)

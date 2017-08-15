@@ -8,7 +8,7 @@ Construct a truncated distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-immutable Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
+struct Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
@@ -41,7 +41,7 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) =
+insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution} =
     d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 
@@ -53,26 +53,26 @@ for f in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf]
     @eval ($f)(d::Truncated, x::Int) = ($f)(d, float(x))
 end
 
-pdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
+pdf(d::Truncated, x::T) where {T<:Real} = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : zero(T)
 
-logpdf{T<:Real}(d::Truncated, x::T) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -T(Inf)
+logpdf(d::Truncated, x::T) where {T<:Real} = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -T(Inf)
 
-cdf{T<:Real}(d::Truncated, x::T) =
+cdf(d::Truncated, x::T) where {T<:Real} =
     x <= d.lower ? zero(T) :
     x >= d.upper ? one(T) :
     (cdf(d.untruncated, x) - d.lcdf) / d.tp
 
-logcdf{T<:Real}(d::Truncated, x::T) =
+logcdf(d::Truncated, x::T) where {T<:Real} =
     x <= d.lower ? -T(Inf) :
     x >= d.upper ? zero(T) :
     log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
 
-ccdf{T<:Real}(d::Truncated, x::T) =
+ccdf(d::Truncated, x::T) where {T<:Real} =
     x <= d.lower ? one(T) :
     x >= d.upper ? zero(T) :
     (d.ucdf - cdf(d.untruncated, x)) / d.tp
 
-logccdf{T<:Real}(d::Truncated, x::T) =
+logccdf(d::Truncated, x::T) where {T<:Real} =
     x <= d.lower ? zero(T) :
     x >= d.upper ? -T(Inf) :
     log(d.ucdf - cdf(d.untruncated, x)) - d.logtp

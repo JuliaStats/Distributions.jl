@@ -77,14 +77,14 @@ rand(s::Sampleable{Multivariate}, n::Int) =
 
 # matrix-variate
 
-function _rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M})
+function _rand!(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) where M<:Matrix
     for i in 1:length(X)
         X[i] = rand(s)
     end
     return X
 end
 
-rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) =
+rand!(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) where {M<:Matrix} =
     _rand!(s, X)
 
 rand(s::Sampleable{Matrixvariate}, n::Int) =

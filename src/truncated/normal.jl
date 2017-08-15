@@ -14,20 +14,20 @@ TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
 
 ### statistics
 
-minimum{T <: Real}(d::Truncated{Normal{T},Continuous}) = d.lower
-maximum{T <: Real}(d::Truncated{Normal{T},Continuous}) = d.upper
+minimum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.lower
+maximum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.upper
 
 
-function mode{T <: Real}(d::Truncated{Normal{T},Continuous})
+function mode(d::Truncated{Normal{T},Continuous}) where T <: Real
     μ = mean(d.untruncated)
     d.upper < μ ? d.upper :
     d.lower > μ ? d.lower : μ
 end
 
-modes{T <: Real}(d::Truncated{Normal{T},Continuous}) = [mode(d)]
+modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
 
 
-function mean{T <: Real}(d::Truncated{Normal{T},Continuous})
+function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -36,7 +36,7 @@ function mean{T <: Real}(d::Truncated{Normal{T},Continuous})
     μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
 end
 
-function var{T <: Real}(d::Truncated{Normal{T},Continuous})
+function var(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -52,7 +52,7 @@ function var{T <: Real}(d::Truncated{Normal{T},Continuous})
     abs2(σ) * (1 + t1 - t2)
 end
 
-function entropy{T <: Real}(d::Truncated{Normal{T},Continuous})
+function entropy(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
@@ -70,7 +70,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand{T <: Real}(d::Truncated{Normal{T},Continuous})
+function rand(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)

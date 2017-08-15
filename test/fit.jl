@@ -269,13 +269,13 @@ x = rand(Gamma(3.9, 2.1), n0)
 ss = suffstats(Gamma, x)
 @test isa(ss, Distributions.GammaStats)
 @test ss.sx    ≈ sum(x)
-@test ss.slogx ≈ sum(@compat(log.(x)))
+@test ss.slogx ≈ sum(log.(x))
 @test ss.tw    ≈ n0
 
 ss = suffstats(Gamma, x, w)
 @test isa(ss, Distributions.GammaStats)
 @test ss.sx    ≈ dot(x, w)
-@test ss.slogx ≈ dot(@compat(log.(x)), w)
+@test ss.slogx ≈ dot(log.(x), w)
 @test ss.tw    ≈ sum(w)
 
 d = fit(Gamma, rand(Gamma(3.9, 2.1), N))

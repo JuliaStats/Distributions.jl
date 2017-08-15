@@ -66,7 +66,7 @@ If ``x`` is a matrix, it returns whether every column in ``x`` is within the sup
 """
 insupport{D<:MultivariateDistribution}(d::Union{D, Type{D}}, x::AbstractArray)
 
-function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix)
+function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) where D<:MultivariateDistribution
     n = length(r)
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
@@ -76,7 +76,7 @@ function insupport!{D<:MultivariateDistribution}(r::AbstractArray, d::Union{D,Ty
     return r
 end
 
-insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, X::AbstractMatrix) =
+insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D<:MultivariateDistribution} =
     insupport!(BitArray(size(X,2)), d, X)
 
 ## statistics

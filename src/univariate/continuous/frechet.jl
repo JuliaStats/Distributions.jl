@@ -23,18 +23,18 @@ External links
 * [Fréchet_distribution on Wikipedia](http://en.wikipedia.org/wiki/Fréchet_distribution)
 
 """
-immutable Frechet{T<:Real} <: ContinuousUnivariateDistribution
+struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
 
-    function (::Type{Frechet{T}}){T}(α::T, θ::T)
+    function Frechet{T}(α::T, θ::T) where T
         @check_args(Frechet, α > zero(α) && θ > zero(θ))
         new{T}(α, θ)
     end
 
 end
 
-Frechet{T<:Real}(α::T, θ::T) = Frechet{T}(α, θ)
+Frechet(α::T, θ::T) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
 Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
 Frechet(α::Real) = Frechet(α, 1.0)
@@ -43,10 +43,10 @@ Frechet() = Frechet(1.0, 1.0)
 @distr_support Frechet 0.0 Inf
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{Frechet{T}}, α::S, θ::S)
+function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
-function convert{T <: Real, S <: Real}(::Type{Frechet{T}}, d::Frechet{S})
+function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
     Frechet(T(d.α), T(d.θ))
 end
 
@@ -55,12 +55,12 @@ end
 shape(d::Frechet) = d.α
 scale(d::Frechet) = d.θ
 params(d::Frechet) = (d.α, d.θ)
-@inline partype{T<:Real}(d::Frechet{T}) = T
+@inline partype(d::Frechet{T}) where {T<:Real} = T
 
 
 #### Statistics
 
-function mean{T<:Real}(d::Frechet{T})
+function mean(d::Frechet{T}) where T<:Real
     (α = d.α; α > 1 ? d.θ * gamma(1 - 1 / α) : T(Inf))
 end
 
@@ -68,7 +68,7 @@ median(d::Frechet) = d.θ * logtwo^(-1 / d.α)
 
 mode(d::Frechet) = (iα = -1/d.α; d.θ * (1 - iα) ^ iα)
 
-function var{T<:Real}(d::Frechet{T})
+function var(d::Frechet{T}) where T<:Real
     if d.α > 2
         iα = 1 / d.α
         return d.θ^2 * (gamma(1 - 2 * iα) - gamma(1 - iα)^2)
@@ -77,7 +77,7 @@ function var{T<:Real}(d::Frechet{T})
     end
 end
 
-function skewness{T<:Real}(d::Frechet{T})
+function skewness(d::Frechet{T}) where T<:Real
     if d.α > 3
         iα = 1 / d.α
         g1 = gamma(1 - iα)
@@ -89,7 +89,7 @@ function skewness{T<:Real}(d::Frechet{T})
     end
 end
 
-function kurtosis{T<:Real}(d::Frechet{T})
+function kurtosis(d::Frechet{T}) where T<:Real
     if d.α > 3
         iα = 1 / d.α
         g1 = gamma(1 - iα)
@@ -110,7 +110,7 @@ end
 
 #### Evaluation
 
-function logpdf{T<:Real}(d::Frechet{T}, x::Real)
+function logpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)
     if x > 0
         z = θ / x
@@ -122,17 +122,17 @@ end
 
 pdf(d::Frechet, x::Real) = exp(logpdf(d, x))
 
-cdf{T<:Real}(d::Frechet{T}, x::Real) = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
-ccdf{T<:Real}(d::Frechet{T}, x::Real) = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)
-logcdf{T<:Real}(d::Frechet{T}, x::Real) = x > 0 ? -(d.θ / x) ^ d.α : -T(Inf)
-logccdf{T<:Real}(d::Frechet{T}, x::Real) = x > 0 ? log1mexp(-((d.θ / x) ^ d.α)) : zero(T)
+cdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
+ccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)
+logcdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -(d.θ / x) ^ d.α : -T(Inf)
+logccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-((d.θ / x) ^ d.α)) : zero(T)
 
 quantile(d::Frechet, p::Real) = d.θ * (-log(p)) ^ (-1 / d.α)
 cquantile(d::Frechet, p::Real) = d.θ * (-log1p(-p)) ^ (-1 / d.α)
 invlogcdf(d::Frechet, lp::Real) = d.θ * (-lp)^(-1 / d.α)
 invlogccdf(d::Frechet, lp::Real) = d.θ * (-log1mexp(lp))^(-1 / d.α)
 
-function gradlogpdf{T<:Real}(d::Frechet{T}, x::Real)
+function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)
     insupport(Frechet, x) ? -(α + 1) / x + α * (θ^α) * x^(-α-1)  : zero(T)
 end

@@ -26,17 +26,17 @@ External links
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
 """
-immutable Beta{T<:Real} <: ContinuousUnivariateDistribution
+struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
-    function (::Type{Beta{T}}){T}(α::T, β::T)
+    function Beta{T}(α::T, β::T) where T
         @check_args(Beta, α > zero(α) && β > zero(β))
         new{T}(α, β)
     end
 end
 
-Beta{T<:Real}(α::T, β::T) = Beta{T}(α, β)
+Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
 Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 Beta(α::Real) = Beta(α, α)
@@ -45,17 +45,17 @@ Beta() = Beta(1, 1)
 @distr_support Beta 0.0 1.0
 
 #### Conversions
-function convert{T<:Real}(::Type{Beta{T}}, α::Real, β::Real)
+function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
 end
-function convert{T <: Real, S <: Real}(::Type{Beta{T}}, d::Beta{S})
+function convert(::Type{Beta{T}}, d::Beta{S}) where {T <: Real, S <: Real}
     Beta(T(d.α), T(d.β))
 end
 
 #### Parameters
 
 params(d::Beta) = (d.α, d.β)
-@inline partype{T<:Real}(d::Beta{T}) = T
+@inline partype(d::Beta{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -110,7 +110,7 @@ end
 
 @_delegate_statsfuns Beta beta α β
 
-gradlogpdf{T<:Real}(d::Beta{T}, x::Real) =
+gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
     ((α, β) = params(d); 0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
 
 
@@ -125,7 +125,7 @@ rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
 
 # This is a moment-matching method (not MLE)
 #
-function fit{T<:Real}(::Type{Beta}, x::AbstractArray{T})
+function fit(::Type{Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     α = x_bar * (((x_bar * (1 - x_bar)) / v_bar) - 1)

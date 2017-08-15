@@ -14,17 +14,17 @@ External links
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
 """
-immutable Erlang{T<:Real} <: ContinuousUnivariateDistribution
+struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
 
-    function (::Type{Erlang{T}}){T}(α::Real, θ::T)
+    function Erlang{T}(α::Real, θ::T) where T
         @check_args(Erlang, isinteger(α) && α >= zero(α))
         new{T}(α, θ)
     end
 end
 
-Erlang{T<:Real}(α::Int, θ::T) = Erlang{T}(α, θ)
+Erlang(α::Int, θ::T) where {T<:Real} = Erlang{T}(α, θ)
 Erlang(α::Int, θ::Integer) = Erlang{Float64}(α, Float64(θ))
 Erlang(α::Int) = Erlang(α, 1.0)
 Erlang() = Erlang(1, 1.0)
@@ -32,10 +32,10 @@ Erlang() = Erlang(1, 1.0)
 @distr_support Erlang 0.0 Inf
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{Erlang{T}}, α::Int, θ::S)
+function convert(::Type{Erlang{T}}, α::Int, θ::S) where {T <: Real, S <: Real}
     Erlang(α, T(θ))
 end
-function convert{T <: Real, S <: Real}(::Type{Erlang{T}}, d::Erlang{S})
+function convert(::Type{Erlang{T}}, d::Erlang{S}) where {T <: Real, S <: Real}
     Erlang(d.α, T(d.θ))
 end
 
@@ -45,7 +45,7 @@ shape(d::Erlang) = d.α
 scale(d::Erlang) = d.θ
 rate(d::Erlang) = inv(d.θ)
 params(d::Erlang) = (d.α, d.θ)
-@inline partype{T<:Real}(d::Erlang{T}) = T
+@inline partype(d::Erlang{T}) where {T<:Real} = T
 
 #### Statistics
 

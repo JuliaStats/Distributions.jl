@@ -11,22 +11,22 @@
 #  - probs(d):       return a vector of prior probabilities over components.
 #
 
-@compat abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
+abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
-immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
+struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::Categorical
 
-    function (::Type{MixtureModel{VF,VS,C}}){VF,VS,C}(cs::Vector{C}, pri::Categorical)
+    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::Categorical) where {VF,VS,C}
         length(cs) == ncategories(pri) ||
             error("The number of components does not match the length of prior.")
         new{VF,VS,C}(cs, pri)
     end
 end
 
-@compat const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
-@compat const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
-@compat const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
+const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
+const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
+const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
 
 # Interface
 
@@ -35,7 +35,7 @@ end
 
 The type of the components of `d`.
 """
-component_type{VF,VS,C}(d::AbstractMixtureModel{VF,VS,C}) = C
+component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
 
 """
     components(d::AbstractMixtureModel)
@@ -101,7 +101,7 @@ rand!(d::AbstractMixtureModel, r::AbstractArray)
 Construct a mixture model with a vector of `components` and a `prior` probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
-MixtureModel{C<:Distribution}(components::Vector{C}) =
+MixtureModel(components::Vector{C}) where {C<:Distribution} =
     MixtureModel(components, Categorical(length(components)))
 
 """
@@ -111,24 +111,24 @@ Construct a mixture model with component type ``C``, a vector of parameters for 
 the components given by ``params``, and a prior probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
-function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray)
+function MixtureModel(::Type{C}, params::AbstractArray) where C<:Distribution
     components = C[_construct_component(C, a) for a in params]
     MixtureModel(components)
 end
 
-function MixtureModel{C<:Distribution}(components::Vector{C}, prior::Categorical)
+function MixtureModel(components::Vector{C}, prior::Categorical) where C<:Distribution
     VF = variate_form(C)
     VS = value_support(C)
     MixtureModel{VF,VS,C}(components, prior)
 end
 
-MixtureModel{C<:Distribution}(components::Vector{C}, p::Vector{Float64}) =
+MixtureModel(components::Vector{C}, p::Vector{Float64}) where {C<:Distribution} =
     MixtureModel(components, Categorical(p))
 
-_construct_component{C<:Distribution}(::Type{C}, arg) = C(arg)
-_construct_component{C<:Distribution}(::Type{C}, args::Tuple) = C(args...)
+_construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
+_construct_component(::Type{C}, args::Tuple) where {C<:Distribution} = C(args...)
 
-function MixtureModel{C<:Distribution}(::Type{C}, params::AbstractArray, p::Vector{Float64})
+function MixtureModel(::Type{C}, params::AbstractArray, p::Vector{Float64}) where C<:Distribution
     components = C[_construct_component(C, a) for a in params]
     MixtureModel(components, p)
 end
@@ -471,12 +471,12 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_
 
 ## Sampling
 
-immutable MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
+struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
     csamplers::Vector{Sampler}
     psampler::AliasTable
 end
 
-function MixtureSampler{VF,VS}(d::MixtureModel{VF,VS})
+function MixtureSampler(d::MixtureModel{VF,VS}) where {VF,VS}
     csamplers = map(sampler, d.components)
     psampler = sampler(d.prior)
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
