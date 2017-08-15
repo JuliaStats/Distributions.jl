@@ -63,7 +63,7 @@ mean(d::AbstractMixtureModel)
 
 Evaluate whether `x` is within the support of mixture distribution `d`.
 """
-insupport(d::AbstractMixtureModel, x::Any)
+insupport(d::AbstractMixtureModel, x::AbstractVector)
 
 """
     pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
@@ -270,7 +270,7 @@ end
 
 #### Evaluation
 
-function insupport(d::AbstractMixtureModel, x)
+function insupport(d::AbstractMixtureModel, x::AbstractVector)
     K = ncomponents(d)
     p = probs(d)
     @assert length(p) == K
