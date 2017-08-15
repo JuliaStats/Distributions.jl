@@ -150,6 +150,8 @@ test_params(g_u)
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
 @test minimum(g_u) == -2.0
 @test maximum(g_u) == 3.0
+@test insupport(g_u, 2.5) == true
+@test insupport(g_u, 3.5) == false
 
 g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
 @test isa(g_u, UnivariateGMM)
@@ -168,5 +170,6 @@ g_m = MixtureModel(
 @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
 @test length(components(g_m)) == 3
 @test length(g_m) == 2
+@test insupport(g_m, [0.0, 0.0]) == true
 test_mixture(g_m, 1000, 10^6)
 test_params(g_m)
