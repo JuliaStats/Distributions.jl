@@ -63,7 +63,7 @@ mean(d::AbstractMixtureModel)
 
 Evaluate whether `x` is within the support of mixture distribution `d`.
 """
-insupport(d::AbstractMixtureModel, x::AbstractVector)
+insupport(d::AbstractMixtureModel, x::Any)
 
 """
     pdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
