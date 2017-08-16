@@ -4,7 +4,7 @@
 #
 ##############################################################################
 
-immutable EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
+struct EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
 	values::Vector{Float64}
     support::Vector{Float64}
 	cdf::Function
@@ -70,7 +70,7 @@ end
 
 ### fit model
 
-function fit_mle{T <: Real}(::Type{EmpiricalUnivariateDistribution},
-	                    x::Vector{T})
+function fit_mle(::Type{EmpiricalUnivariateDistribution},
+             x::Vector{T}) where T <: Real
 	EmpiricalUnivariateDistribution(x)
 end

@@ -24,7 +24,7 @@ mean(d::MatrixDistribution)
 
 # sampling
 
-rand!{M<:Matrix}(d::MatrixDistribution, A::AbstractArray{M}) = _rand!(sampler(d), A)
+rand!(d::MatrixDistribution, A::AbstractArray{M}) where {M<:Matrix} = _rand!(sampler(d), A)
 
 """
     rand(d::MatrixDistribution, n)
@@ -35,14 +35,14 @@ rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)
 
 # pdf & logpdf
 
-_pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T}) = exp(_logpdf(d, x))
+_pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where {T<:Real} = exp(_logpdf(d, x))
 
 """
     logpdf(d::MatrixDistribution, AbstractMatrix)
 
 Compute the logarithm of the probability density at the input matrix `x`.
 """
-function logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+function logpdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, x)
@@ -53,44 +53,44 @@ end
 
 Compute the probability density at the input matrix `x`.
 """
-function pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+function pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, x)
 end
 
-function _logpdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
+function _logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     for i = 1:length(X)
         r[i] = logpdf(d, X[i])
     end
     return r
 end
 
-function _pdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
+function _pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     for i = 1:length(X)
         r[i] = pdf(d, X[i])
     end
     return r
 end
 
-function logpdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
+function logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     length(X) == length(r) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf!(r, d, X)
 end
 
-function pdf!{M<:Matrix}(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M})
+function pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     length(X) == length(r) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf!(r, d, X)
 end
 
-function logpdf{M<:Matrix}(d::MatrixDistribution, X::AbstractArray{M})
+function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
     _logpdf!(Array{T}(size(X)), d, X)
 end
 
-function pdf{M<:Matrix}(d::MatrixDistribution, X::AbstractArray{M})
+function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
     _pdf!(Array{T}(size(X)), d, X)
 end

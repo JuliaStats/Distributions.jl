@@ -4,16 +4,16 @@
 
 # Edgeworth approximation of the Z statistic
 # EdgeworthSum and EdgeworthMean are both defined in terms of this
-@compat abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
+abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
 
-immutable EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
 
-    function (::Type{EdgeworthZ{D}}){D<:UnivariateDistribution,T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthZ{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         @check_args(EdgeworthZ, n > zero(n))
         new{D}(d, n)
     end
@@ -74,10 +74,10 @@ end
 
 
 # Edgeworth approximation of the sum
-immutable EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function (::Type{EdgeworthSum{D}}){D<:UnivariateDistribution,T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthSum{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         @check_args(EdgeworthSum, n > zero(n))
         new{D}(d, n)
     end
@@ -88,10 +88,10 @@ mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
 
 # Edgeworth approximation of the mean
-immutable EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function (::Type{EdgeworthMean{D}}){D<:UnivariateDistribution,T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthMean{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         # although n would usually be an integer, no methods are require this
         n > zero(n) ||
             error("n must be positive")

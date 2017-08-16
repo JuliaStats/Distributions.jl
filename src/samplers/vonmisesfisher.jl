@@ -1,6 +1,6 @@
 # Sampler for von Mises-Fisher
 
-immutable VonMisesFisherSampler
+struct VonMisesFisherSampler
     p::Int          # the dimension
     κ::Float64
     b::Float64

@@ -22,17 +22,17 @@ External links
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
 """
-immutable Cauchy{T<:Real} <: ContinuousUnivariateDistribution
+struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    function (::Type{Cauchy{T}}){T}(μ::T, σ::T)
+    function Cauchy{T}(μ::T, σ::T) where T
         @check_args(Cauchy, σ > zero(σ))
         new{T}(μ, σ)
     end
 end
 
-Cauchy{T<:Real}(μ::T, σ::T) = Cauchy{T}(μ, σ)
+Cauchy(μ::T, σ::T) where {T<:Real} = Cauchy{T}(μ, σ)
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
 Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
 Cauchy(μ::Real) = Cauchy(μ, 1.0)
@@ -41,10 +41,10 @@ Cauchy() = Cauchy(0.0, 1.0)
 @distr_support Cauchy -Inf Inf
 
 #### Conversions
-function convert{T<:Real}(::Type{Cauchy{T}}, μ::Real, σ::Real)
+function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))
 end
-function convert{T <: Real, S <: Real}(::Type{Cauchy{T}}, d::Cauchy{S})
+function convert(::Type{Cauchy{T}}, d::Cauchy{S}) where {T <: Real, S <: Real}
     Cauchy(T(d.μ), T(d.σ))
 end
 
@@ -54,18 +54,18 @@ location(d::Cauchy) = d.μ
 scale(d::Cauchy) = d.σ
 
 params(d::Cauchy) = (d.μ, d.σ)
-@inline partype{T<:Real}(d::Cauchy{T}) = T
+@inline partype(d::Cauchy{T}) where {T<:Real} = T
 
 
 #### Statistics
 
-mean{T<:Real}(d::Cauchy{T}) = T(NaN)
+mean(d::Cauchy{T}) where {T<:Real} = T(NaN)
 median(d::Cauchy) = d.μ
 mode(d::Cauchy) = d.μ
 
-var{T<:Real}(d::Cauchy{T}) = T(NaN)
-skewness{T<:Real}(d::Cauchy{T}) = T(NaN)
-kurtosis{T<:Real}(d::Cauchy{T}) = T(NaN)
+var(d::Cauchy{T}) where {T<:Real} = T(NaN)
+skewness(d::Cauchy{T}) where {T<:Real} = T(NaN)
+kurtosis(d::Cauchy{T}) where {T<:Real} = T(NaN)
 
 entropy(d::Cauchy) = log4π + log(d.σ)
 
@@ -98,14 +98,14 @@ function cquantile(d::Cauchy, p::Real)
     μ + σ * tan(π * (1//2 - p))
 end
 
-mgf{T<:Real}(d::Cauchy{T}, t::Real) = t == zero(t) ? one(T) : T(NaN)
+mgf(d::Cauchy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 
 
 #### Fitting
 
 # Note: this is not a Maximum Likelihood estimator
-function fit{T<:Real}(::Type{Cauchy}, x::AbstractArray{T})
+function fit(::Type{Cauchy}, x::AbstractArray{T}) where T<:Real
     l, m, u = quantile(x, [0.25, 0.5, 0.75])
     Cauchy(m, (u - l) / 2)
 end

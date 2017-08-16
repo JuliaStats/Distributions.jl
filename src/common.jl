@@ -1,20 +1,20 @@
 ## sample space/domain
 
-@compat abstract type VariateForm end
-type Univariate    <: VariateForm end
-type Multivariate  <: VariateForm end
-type Matrixvariate <: VariateForm end
+abstract type VariateForm end
+mutable struct Univariate    <: VariateForm end
+mutable struct Multivariate  <: VariateForm end
+mutable struct Matrixvariate <: VariateForm end
 
-@compat abstract type ValueSupport end
-type Discrete   <: ValueSupport end
-type Continuous <: ValueSupport end
+abstract type ValueSupport end
+mutable struct Discrete   <: ValueSupport end
+mutable struct Continuous <: ValueSupport end
 
 Base.eltype(::Type{Discrete}) = Int
 Base.eltype(::Type{Continuous}) = Float64
 
 ## Sampleable
 
-@compat abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
+abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 """
     length(s::Sampleable)
@@ -42,9 +42,9 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype{F,S}(s::Sampleable{F,S}) = eltype(S)
-Base.eltype{F}(s::Sampleable{F,Discrete}) = Int
-Base.eltype{F}(s::Sampleable{F,Continuous}) = Float64
+Base.eltype(s::Sampleable{F,S}) where {F,S} = eltype(S)
+Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
+Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
 
 """
     nsamples(s::Sampleable)
@@ -53,24 +53,24 @@ The number of samples contained in `A`. Multiple samples are often organized int
 depending on the variate form.
 """
 nsamples(t::Type{Sampleable}, x::Any)
-nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::Number) = 1
-nsamples{D<:Sampleable{Univariate}}(::Type{D}, x::AbstractArray) = length(x)
-nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractVector) = 1
-nsamples{D<:Sampleable{Multivariate}}(::Type{D}, x::AbstractMatrix) = size(x, 2)
-nsamples{D<:Sampleable{Matrixvariate}}(::Type{D}, x::Number) = 1
-nsamples{D<:Sampleable{Matrixvariate},T<:Number}(::Type{D}, x::Array{Matrix{T}}) = length(x)
+nsamples(::Type{D}, x::Number) where {D<:Sampleable{Univariate}} = 1
+nsamples(::Type{D}, x::AbstractArray) where {D<:Sampleable{Univariate}} = length(x)
+nsamples(::Type{D}, x::AbstractVector) where {D<:Sampleable{Multivariate}} = 1
+nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = size(x, 2)
+nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
+nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
 ## Distribution <: Sampleable
 
-@compat abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
+abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 
-@compat const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
-@compat const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
-@compat const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
+const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
+const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
+const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-@compat const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
-@compat const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
 const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
 const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
@@ -79,15 +79,15 @@ const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuou
 const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
 const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
 
-variate_form{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VF
-variate_form{T<:Distribution}(::Type{T}) = variate_form(supertype(T))
+variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
+variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
 
-value_support{VF<:VariateForm,VS<:ValueSupport}(::Type{Distribution{VF,VS}}) = VS
-value_support{T<:Distribution}(::Type{T}) = value_support(supertype(T))
+value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
+value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
 
 ## TODO: the following types need to be improved
-@compat abstract type SufficientStats end
-@compat abstract type IncompleteDistribution end
+abstract type SufficientStats end
+abstract type IncompleteDistribution end
 
-@compat const DistributionType{D<:Distribution} = Type{D}
+const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}

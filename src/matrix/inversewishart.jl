@@ -5,7 +5,7 @@ The [Inverse Wishart distribution](http://en.wikipedia.org/wiki/Inverse-Wishart_
 is usually used a the conjugate prior for the covariance matrix of a multivariate normal
 distribution, which is characterized by a degree of freedom ν, and a base matrix Φ.
 """
-immutable InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     Ψ::ST           # scale matrix
     c0::T     # log of normalizing constant
@@ -13,7 +13,7 @@ end
 
 #### Constructors
 
-function InverseWishart{T<:Real}(df::T, Ψ::AbstractPDMat{T})
+function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
     c0 = _invwishart_c0(df, Ψ)
@@ -46,14 +46,14 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
-@inline partype{T<:Real}(d::InverseWishart{T}) = T
+@inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
 ### Conversion
-function convert{T<:Real}(::Type{InverseWishart{T}}, d::InverseWishart)
+function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
     P = Wishart{T}(d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
-function convert{T<:Real}(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0)
+function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0) where T<:Real
     P = Wishart{T}(Ψ)
     InverseWishart{T, typeof(P)}(T(df), P, T(c0))
 end
@@ -95,7 +95,7 @@ end
 
 rand(d::InverseWishart) = inv(cholfact!(rand(Wishart(d.df, inv(d.Ψ)))))
 
-function _rand!{M<:Matrix}(d::InverseWishart, X::AbstractArray{M})
+function _rand!(d::InverseWishart, X::AbstractArray{M}) where M<:Matrix
     wd = Wishart(d.df, inv(d.Ψ))
     for i in 1:length(X)
         X[i] = inv(cholfact!(rand(wd)))

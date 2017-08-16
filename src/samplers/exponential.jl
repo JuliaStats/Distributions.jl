@@ -1,11 +1,11 @@
-immutable ExponentialSampler <: Sampleable{Univariate,Continuous}
+struct ExponentialSampler <: Sampleable{Univariate,Continuous}
     scale::Float64
 end
 
 rand(s::ExponentialSampler) = rand(GLOBAL_RNG, s)
 rand(rng::AbstractRNG, s::ExponentialSampler) = s.scale * randexp(rng)
 
-immutable ExponentialLogUSampler <: Sampleable{Univariate,Continuous}
+struct ExponentialLogUSampler <: Sampleable{Univariate,Continuous}
     scale::Float64
 end
 

@@ -20,26 +20,26 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-immutable Poisson{T<:Real} <: DiscreteUnivariateDistribution
+struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     λ::T
 
-    (::Type{Poisson{T}}){T}(λ::Real) = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))
+    Poisson{T}(λ::Real) where {T} = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))
 end
 
-Poisson{T<:Real}(λ::T) = Poisson{T}(λ)
+Poisson(λ::T) where {T<:Real} = Poisson{T}(λ)
 Poisson(λ::Integer) = Poisson(Float64(λ))
 Poisson() = Poisson(1.0)
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 #### Conversions
-convert{T <: Real, S <: Real}(::Type{Poisson{T}}, λ::S) = Poisson(T(λ))
-convert{T <: Real, S <: Real}(::Type{Poisson{T}}, d::Poisson{S}) = Poisson(T(d.λ))
+convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
+convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ))
 
 ### Parameters
 
 params(d::Poisson) = (d.λ,)
-@inline partype{T<:Real}(d::Poisson{T}) = T
+@inline partype(d::Poisson{T}) where {T<:Real} = T
 
 rate(d::Poisson) = d.λ
 
@@ -61,7 +61,7 @@ skewness(d::Poisson) = one(typeof(d.λ)) / sqrt(d.λ)
 
 kurtosis(d::Poisson) = one(typeof(d.λ)) / d.λ
 
-function entropy{T<:Real}(d::Poisson{T})
+function entropy(d::Poisson{T}) where T<:Real
     λ = rate(d)
     if λ == zero(T)
         return zero(T)
@@ -88,7 +88,7 @@ end
 
 rand(d::Poisson) = convert(Int, StatsFuns.RFunctions.poisrand(d.λ))
 
-immutable RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64
 end
 
@@ -109,14 +109,14 @@ end
 
 ### Fitting
 
-immutable PoissonStats <: SufficientStats
+struct PoissonStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     tw::Float64   # total sample weight
 end
 
-suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}) = PoissonStats(sum(x), length(x))
+suffstats(::Type{Poisson}, x::AbstractArray{T}) where {T<:Integer} = PoissonStats(sum(x), length(x))
 
-function suffstats{T<:Integer}(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     n == length(w) || throw(ArgumentError("Inconsistent array lengths."))
     sx = 0.

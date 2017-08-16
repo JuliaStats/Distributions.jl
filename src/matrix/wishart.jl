@@ -9,7 +9,7 @@ The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution) is
 multidimensional generalization of the Chi-square distribution, which is characterized by
 a degree of freedom ν, and a base matrix S.
 """
-immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix
     c0::T     # the logarithm of normalizing constant in pdf
@@ -17,7 +17,7 @@ end
 
 #### Constructors
 
-function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
+function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
@@ -50,14 +50,14 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 params(d::Wishart) = (d.df, d.S, d.c0)
-@inline partype{T<:Real}(d::Wishart{T}) = T
+@inline partype(d::Wishart{T}) where {T<:Real} = T
 
 ### Conversion
-function convert{T<:Real}(::Type{Wishart{T}}, d::Wishart)
+function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
     P = AbstractMatrix{T}(d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
-function convert{T<:Real}(::Type{Wishart{T}}, df, S::AbstractPDMat, c0)
+function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, c0) where T<:Real
     P = AbstractMatrix{T}(S)
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end

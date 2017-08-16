@@ -1,6 +1,6 @@
 #### Domain && Support
 
-immutable RealInterval
+struct RealInterval
     lb::Float64
     ub::Float64
 
@@ -11,13 +11,13 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
+isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
-islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
-isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
+islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
+isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
-hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 """
     params(d::UnivariateDistribution)
@@ -117,7 +117,7 @@ You should also override this function if the support is composed of multiple di
 """
 insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
 
-function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
+function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) where D<:UnivariateDistribution
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -127,18 +127,18 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type
 end
 
 
-insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
+insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
      insupport!(BitArray(size(X)), d, X)
 
-insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
-insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
-support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
+support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
-immutable FiniteSupport{T} end
+struct FiniteSupport{T} end
 
 ## macros to declare support
 
@@ -534,7 +534,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 end
 
 
-@compat abstract type RecursiveProbabilityEvaluator end
+abstract type RecursiveProbabilityEvaluator end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)

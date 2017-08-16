@@ -1,5 +1,5 @@
 
-immutable PoissonRmathSampler <: Sampleable{Univariate,Discrete}
+struct PoissonRmathSampler <: Sampleable{Univariate,Discrete}
     mu::Float64
 end
 
@@ -20,7 +20,7 @@ end
 #
 # Suitable for small μ
 #
-immutable PoissonCountSampler <: Sampleable{Univariate,Discrete}
+struct PoissonCountSampler <: Sampleable{Univariate,Discrete}
     μ::Float64
 end
 
@@ -43,7 +43,7 @@ end
 #   
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
-immutable PoissonADSampler <: Sampleable{Univariate,Discrete}
+struct PoissonADSampler <: Sampleable{Univariate,Discrete}
     μ::Float64
     s::Float64
     d::Float64

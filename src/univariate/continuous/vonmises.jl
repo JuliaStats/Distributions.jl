@@ -18,18 +18,18 @@ External links
 * [von Mises distribution on Wikipedia](http://en.wikipedia.org/wiki/Von_Mises_distribution)
 
 """
-immutable VonMises{T<:Real} <: ContinuousUnivariateDistribution
+struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
     μ::T      # mean
     κ::T      # concentration
     I0κ::T    # I0(κ), where I0 is the modified Bessel function of order 0
 
-    function (::Type{VonMises{T}}){T}(μ::T, κ::T)
+    function VonMises{T}(μ::T, κ::T) where T
         @check_args(VonMises, κ > zero(κ))
         new{T}(μ, κ, besseli(zero(T), κ))
     end
 end
 
-VonMises{T<:Real}(μ::T, κ::T) = VonMises{T}(μ, κ)
+VonMises(μ::T, κ::T) where {T<:Real} = VonMises{T}(μ, κ)
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
 VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
 VonMises(κ::Real) = VonMises(0.0, κ)
@@ -41,13 +41,13 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 #### Conversions
 
-convert{T<:Real}(::Type{VonMises{T}}, μ::Real, κ::Real) = VonMises(T(μ), T(κ))
-convert{T<:Real, S<:Real}(::Type{VonMises{T}}, d::VonMises{S}) = VonMises(T(d.μ), T(d.κ))
+convert(::Type{VonMises{T}}, μ::Real, κ::Real) where {T<:Real} = VonMises(T(μ), T(κ))
+convert(::Type{VonMises{T}}, d::VonMises{S}) where {T<:Real, S<:Real} = VonMises(T(d.μ), T(d.κ))
 
 #### Parameters
 
 params(d::VonMises) = (d.μ, d.κ)
-@inline partype{T<:Real}(d::VonMises{T}) = T
+@inline partype(d::VonMises{T}) where {T<:Real} = T
 
 
 #### Statistics

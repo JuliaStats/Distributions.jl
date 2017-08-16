@@ -1,14 +1,14 @@
 """
     Biweight(μ, σ)
 """
-immutable Biweight{T<:Real} <: ContinuousUnivariateDistribution
+struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    (::Type{Biweight{T}}){T}(μ::T, σ::T) = (@check_args(Biweight, σ > zero(σ)); new{T}(μ, σ))
+    Biweight{T}(μ::T, σ::T) where {T} = (@check_args(Biweight, σ > zero(σ)); new{T}(μ, σ))
 end
 
-Biweight{T<:Real}(μ::T, σ::T) = Biweight{T}(μ, σ)
+Biweight(μ::T, σ::T) where {T<:Real} = Biweight{T}(μ, σ)
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
 Biweight(μ::Integer, σ::Integer) = Biweight(Float64(μ), Float64(σ))
 Biweight(μ::Real) = Biweight(μ, 1.0)
@@ -18,7 +18,7 @@ Biweight() = Biweight(0.0, 1.0)
 
 ## Parameters
 params(d::Biweight) = (d.μ, d.σ)
-@inline partype{T<:Real}(d::Biweight{T}) = T
+@inline partype(d::Biweight{T}) where {T<:Real} = T
 
 ## Properties
 mean(d::Biweight) = d.μ
@@ -26,23 +26,23 @@ median(d::Biweight) = d.μ
 mode(d::Biweight) = d.μ
 
 var(d::Biweight) = d.σ^2 / 7
-skewness{T<:Real}(d::Biweight{T}) = zero(T)
-kurtosis{T<:Real}(d::Biweight{T}) = T(1)/21 - 3
+skewness(d::Biweight{T}) where {T<:Real} = zero(T)
+kurtosis(d::Biweight{T}) where {T<:Real} = T(1)/21 - 3
 
 ## Functions
-function pdf{T<:Real}(d::Biweight{T}, x::Real)
+function pdf(d::Biweight{T}, x::Real) where T<:Real
     u = abs(x - d.μ) / d.σ
     u >= 1 ? zero(T) : (15//16) * (1 - u^2)^2 / d.σ
 end
 
-function cdf{T<:Real}(d::Biweight{T}, x::Real)
+function cdf(d::Biweight{T}, x::Real) where T<:Real
     u = (x - d.μ) / d.σ
     u <= -1 ? zero(T) :
     u >= 1 ? one(T) :
     (u + 1)^3/16 * @horner(u,8,-9,3)
 end
 
-function ccdf{T<:Real}(d::Biweight{T}, x::Real)
+function ccdf(d::Biweight{T}, x::Real) where T<:Real
     u = (d.μ - x) / d.σ
     u <= -1 ? one(T) :
     u >= 1 ? zero(T) :
@@ -51,14 +51,14 @@ end
 
 @quantile_newton Biweight
 
-function mgf{T<:Real}(d::Biweight{T}, t::Real)
+function mgf(d::Biweight{T}, t::Real) where T<:Real
     a = d.σ*t
     a2 = a^2
     a == 0 ? one(T) :
     15exp(d.μ * t) * (-3cosh(a) + (a + 3/a) * sinh(a)) / (a2^2)
 end
 
-function cf{T<:Real}(d::Biweight{T}, t::Real)
+function cf(d::Biweight{T}, t::Real) where T<:Real
     a = d.σ * t
     a2 = a^2
     a == 0 ? one(T)+zero(T)*im :

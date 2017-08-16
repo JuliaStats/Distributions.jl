@@ -34,34 +34,34 @@ External links
 * [Generalized extreme value distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution)
 
 """
-immutable GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
+struct GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     ξ::T
 
-    function (::Type{GeneralizedExtremeValue{T}}){T}(μ::T, σ::T, ξ::T)
+    function GeneralizedExtremeValue{T}(μ::T, σ::T, ξ::T) where T
         σ > zero(σ) || error("Scale must be positive")
         new{T}(μ, σ, ξ)
     end
 end
 
-GeneralizedExtremeValue{T<:Real}(μ::T, σ::T, ξ::T) = GeneralizedExtremeValue{T}(μ, σ, ξ)
+GeneralizedExtremeValue(μ::T, σ::T, ξ::T) where {T<:Real} = GeneralizedExtremeValue{T}(μ, σ, ξ)
 GeneralizedExtremeValue(μ::Real, σ::Real, ξ::Real) = GeneralizedExtremeValue(promote(μ, σ, ξ)...)
 function GeneralizedExtremeValue(μ::Integer, σ::Integer, ξ::Integer)
     GeneralizedExtremeValue(Float64(μ), Float64(σ), Float64(ξ))
 end
 
 #### Conversions
-function convert{T<:Real}(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real)
+function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real
     GeneralizedExtremeValue(T(μ), T(σ), T(ξ))
 end
-function convert{T <: Real, S <: Real}(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{S})
+function convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{S}) where {T <: Real, S <: Real}
     GeneralizedExtremeValue(T(d.μ), T(d.σ), T(d.ξ))
 end
 
-minimum{T<:Real}(d::GeneralizedExtremeValue{T}) =
+minimum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ > 0 ? d.μ - d.σ / d.ξ : -T(Inf)
-maximum{T<:Real}(d::GeneralizedExtremeValue{T}) =
+maximum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ < 0 ? d.μ - d.σ / d.ξ : T(Inf)
 
 
@@ -71,7 +71,7 @@ shape(d::GeneralizedExtremeValue) = d.ξ
 scale(d::GeneralizedExtremeValue) = d.σ
 location(d::GeneralizedExtremeValue) = d.μ
 params(d::GeneralizedExtremeValue) = (d.μ, d.σ, d.ξ)
-@inline partype{T<:Real}(d::GeneralizedExtremeValue{T}) = T
+@inline partype(d::GeneralizedExtremeValue{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -89,7 +89,7 @@ function median(d::GeneralizedExtremeValue)
     end
 end
 
-function mean{T<:Real}(d::GeneralizedExtremeValue{T})
+function mean(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
@@ -111,7 +111,7 @@ function mode(d::GeneralizedExtremeValue)
     end
 end
 
-function var{T<:Real}(d::GeneralizedExtremeValue{T})
+function var(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
@@ -123,7 +123,7 @@ function var{T<:Real}(d::GeneralizedExtremeValue{T})
     end
 end
 
-function skewness{T<:Real}(d::GeneralizedExtremeValue{T})
+function skewness(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
@@ -138,7 +138,7 @@ function skewness{T<:Real}(d::GeneralizedExtremeValue{T})
     end
 end
 
-function kurtosis{T<:Real}(d::GeneralizedExtremeValue{T})
+function kurtosis(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
@@ -177,7 +177,7 @@ insupport(d::GeneralizedExtremeValue, x::Real) = minimum(d) <= x <= maximum(d)
 
 #### Evaluation
 
-function logpdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
+function logpdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     if x == -Inf || x == Inf || ! insupport(d, x)
       return -T(Inf)
     else
@@ -198,7 +198,7 @@ function logpdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
     end
 end
 
-function pdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
+function pdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     if x == -Inf || x == Inf || ! insupport(d, x)
         return zero(T)
     else
@@ -219,7 +219,7 @@ function pdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
     end
 end
 
-function logcdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
+function logcdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     if insupport(d, x)
         (μ, σ, ξ) = params(d)
 
@@ -236,7 +236,7 @@ function logcdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
     end
 end
 
-function cdf{T<:Real}(d::GeneralizedExtremeValue{T}, x::Real)
+function cdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     if insupport(d, x)
         (μ, σ, ξ) = params(d)
 

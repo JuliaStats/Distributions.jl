@@ -1,4 +1,4 @@
-immutable QQPair
+struct QQPair
 	qx::Vector{Float64}
 	qy::Vector{Float64}
 end

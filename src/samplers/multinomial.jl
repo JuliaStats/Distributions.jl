@@ -1,5 +1,5 @@
 
-function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T})
+function multinom_rand!(n::Int, p::Vector{Float64}, x::AbstractVector{T}) where T<:Real
     k = length(p)
     length(x) == k || throw(ArgumentError("Invalid argument dimension."))
 
@@ -38,7 +38,7 @@ function multinom_rand!{T<:Real}(n::Int, p::Vector{Float64}, x::AbstractVector{T
     return x  
 end
 
-immutable MultinomialSampler <: Sampleable{Multivariate,Discrete}
+struct MultinomialSampler <: Sampleable{Multivariate,Discrete}
     n::Int
     prob::Vector{Float64}
     alias::AliasTable
@@ -47,7 +47,7 @@ end
 MultinomialSampler(n::Int, prob::Vector{Float64}) = 
 	MultinomialSampler(n, prob, AliasTable(prob))
 
-function _rand!{T<:Real}(s::MultinomialSampler, x::AbstractVector{T})
+function _rand!(s::MultinomialSampler, x::AbstractVector{T}) where T<:Real
     n = s.n
     k = length(s)
     if n^2 > k      
