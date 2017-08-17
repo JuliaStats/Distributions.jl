@@ -23,3 +23,19 @@ function BetaBinomial(n::Real, α::Real, β::Real)
 end
 
 
+# vectorized versions
+for fun in [:pdf, :logpdf,
+            :cdf, :logcdf,
+            :ccdf, :logccdf,
+            :invlogcdf, :invlogccdf,
+            :quantile, :cquantile]
+
+    _fun! = Symbol('_', fun, '!')
+    fun! = Symbol(fun, '!')
+
+    @eval begin
+        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
+        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+    end
+end

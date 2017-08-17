@@ -306,7 +306,11 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     for i = 1:K
         @inbounds pi = p[i]
         if pi > 0.0
-            pdf!(t, component(d, i), x)
+            if d isa UnivariateMixture
+                t .= pdf.(component(d, i), x)
+            else
+                pdf!(t, component(d, i), x)
+            end
             BLAS.axpy!(pi, t, r)
         end
     end
@@ -364,7 +368,12 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             lpri = log(pi)
             lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
-            logpdf!(lp_i, component(d, i), x)
+            if d isa UnivariateMixture
+                lp_i .= logpdf.(component(d, i), x)
+            else
+                logpdf!(lp_i, component(d, i), x)
+            end
+
 
             # in the mean time, add log(prior) to lp and
             # update the maximum for each sample
@@ -433,7 +442,11 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        pdf!(view(r,:,i), component(d, i), X)
+        if d isa UnivariateMixture
+            view(r,:,i) .= pdf.(component(d, i), X)
+        else
+            pdf!(view(r,:,i),component(d, i), X)
+        end
     end
     r
 end
@@ -443,7 +456,11 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
-        logpdf!(view(r,:,i), component(d, i), X)
+        if d isa UnivariateMixture
+            view(r,:,i) .= logpdf.(component(d, i), X)
+        else
+            logpdf!(view(r,:,i), component(d, i), X)            
+        end
     end
     r
 end

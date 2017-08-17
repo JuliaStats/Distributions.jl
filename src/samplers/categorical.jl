@@ -38,15 +38,17 @@ function AliasTable(probs::AbstractVector{T}) where T<:Real
     accp = Vector{Float64}(n)
     alias = Vector{Int}(n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    AliasTable(accp, alias, RangeGenerator(1:n))
+    un = unsigned(n)
+    AliasTable(accp, alias, Base.Random.RangeGeneratorInt(one(un),un))
 end
 
-function rand(s::AliasTable)
-    i = rand(GLOBAL_RNG, s.isampler)
+function rand(rng::AbstractRNG, s::AliasTable)
+    i = rand(GLOBAL_RNG, s.isampler) % Int
     u = rand()
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
 end
+rand(s::AliasTable) = rand(Base.Random.GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
 

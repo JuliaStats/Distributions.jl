@@ -32,7 +32,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for i = 1:n
         @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test cdf(g, X) ≈ cf
+    @test cdf.(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -56,8 +56,8 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test pdf(g, X)                  ≈ mix_p0
-    @test logpdf(g, X)               ≈ mix_lp0
+    @test pdf.(g, X)                  ≈ mix_p0
+    @test logpdf.(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
     @test componentwise_logpdf(g, X) ≈ LP0
 
@@ -108,6 +108,9 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
 
+    @show g
+    @show size(X)
+    @show size(mix_p0)
     @test pdf(g, X)                  ≈ mix_p0
     @test logpdf(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0

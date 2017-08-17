@@ -453,35 +453,6 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
 
-# vectorized versions
-for fun in [:pdf, :logpdf,
-            :cdf, :logcdf,
-            :ccdf, :logccdf,
-            :invlogcdf, :invlogccdf,
-            :quantile, :cquantile]
-
-    _fun! = Symbol('_', fun, '!')
-    fun! = Symbol(fun, '!')
-
-    @eval begin
-        function ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            for i in 1 : length(X)
-                r[i] = ($fun)(d, X[i])
-            end
-            return r
-        end
-
-        function ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            length(r) == length(X) ||
-                throw(ArgumentError("Inconsistent array dimensions."))
-            $(_fun!)(r, d, X)
-        end
-
-        ($fun)(d::UnivariateDistribution, X::AbstractArray) =
-            $(_fun!)(Array{promote_type(partype(d), eltype(X))}(size(X)), d, X)
-    end
-end
-
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
     vl = vfirst = first(X)
@@ -551,8 +522,8 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
     return r
 end
 
-
-pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) :
+# TODO: should we get rid of this?
+pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf.(d, minimum(d):maximum(d)) :
                                                         error("pdf(d) is not allowed when d is unbounded.")
 
 
