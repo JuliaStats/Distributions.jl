@@ -465,7 +465,7 @@ for fun in [:pdf, :logpdf,
 
     @eval begin
         function ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            for i in linearindices(X)
+            for i in eachindex(X)
                 r[i] = ($fun)(d, X[i])
             end
             return r
