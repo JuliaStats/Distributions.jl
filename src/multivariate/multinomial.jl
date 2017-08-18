@@ -197,7 +197,7 @@ function suffstats(::Type{Multinomial}, x::Matrix{T}) where T<:Real
 end
 
 function suffstats(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
-    length(w) == size(x, 2) || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     K = size(x, 1)
     n::T = zero(T)

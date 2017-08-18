@@ -125,7 +125,7 @@ suffstats(::Type{Poisson}, x::AbstractArray{T}) where {T<:Integer} = PoissonStat
 
 function suffstats(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
-    n == length(w) || throw(ArgumentError("Inconsistent array lengths."))
+    n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.
     tw = 0.
     for i = 1 : n

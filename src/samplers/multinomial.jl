@@ -1,7 +1,7 @@
 
 function multinom_rand!(n::Int, p::Vector{Float64}, x::AbstractVector{T}) where T<:Real
     k = length(p)
-    length(x) == k || throw(ArgumentError("Invalid argument dimension."))
+    length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
     rp = 1.0  # remaining total probability
     i = 0

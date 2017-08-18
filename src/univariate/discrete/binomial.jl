@@ -119,7 +119,7 @@ RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p 
 nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
 
 function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
-    indices(r) == indices(X) || throw(ArgumentError("Inconsistent array dimensions."))
+    indices(r) == indices(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
 
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2

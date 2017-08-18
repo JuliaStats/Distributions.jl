@@ -165,7 +165,7 @@ suffstats(::Type{Geometric}, x::AbstractArray{T}) where {T<:Integer} = Geometric
 function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
     sx = 0.
     tw = 0.

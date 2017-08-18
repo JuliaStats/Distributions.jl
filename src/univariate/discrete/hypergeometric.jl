@@ -86,6 +86,7 @@ nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
 
 Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+
 function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
     r .= pdf.(d,X)

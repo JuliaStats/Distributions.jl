@@ -371,7 +371,7 @@ end
 function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float64})
     d = size(x, 1)
     n = size(x, 2)
-    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     tw = sum(w)
     s = x * vec(w)

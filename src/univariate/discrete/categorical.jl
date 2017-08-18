@@ -206,7 +206,7 @@ end
 function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if n != length(w)
-        throw(ArgumentError("Inconsistent array lengths."))
+        throw(DimensionMismatch("Inconsistent array lengths."))
     end
     for i = 1 : n
         @inbounds xi = x[i]
