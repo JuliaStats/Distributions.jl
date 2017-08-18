@@ -90,18 +90,6 @@ function pdf(d::BetaBinomial{T}, k::Int) where T
     return numerator / (denominator * chooseinv)
 end
 
-function pdf(d::BetaBinomial)
-    n, α, β = d.n, d.α, d.β
-    denominator = beta(α, β)
-    values = Array{eltype(denominator)}(n+1)
-    for (i,k) in enumerate(0:n)
-        chooseinv = (n + 1) * beta(k + 1, n - k + 1)
-        numerator = beta(k + α, n - k + β)
-        @inbounds values[i] = numerator / (denominator * chooseinv)
-    end
-    return values
-end
-
 entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))
 median(d::BetaBinomial) = median(Categorical(pdf(d))) - 1
 mode(d::BetaBinomial{T}) where {T<:Real} = indmax(pdf(d)) - one(T)

@@ -506,11 +506,6 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
     return r
 end
 
-# TODO: should we get rid of this?
-pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf.(d, minimum(d):maximum(d)) :
-                                                        error("pdf(d) is not allowed when d is unbounded.")
-
-
 ## loglikelihood
 """
     loglikelihood(d::UnivariateDistribution, X::AbstractArray)

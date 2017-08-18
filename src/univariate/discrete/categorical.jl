@@ -168,8 +168,6 @@ pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? d.p[x] : zero
 
 logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(d.p[x]) : -Inf
 
-pdf(d::Categorical) = copy(d.p)
-
 function quantile(d::Categorical, p::Float64)
     0 <= p <= 1 || throw(DomainError())
     k = ncategories(d)

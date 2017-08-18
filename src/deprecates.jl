@@ -39,3 +39,5 @@ for fun in [:pdf, :logpdf,
         @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
     end
 end
+
+@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(d, support(d))
