@@ -15,7 +15,7 @@ scale(d)             # Get the scale parameter
 External links
 [Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
-immutable LocationScale{T<:Real} <: ContinuousUnivariateDistribution
+struct LocationScale{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     ρ::ContinuousUnivariateDistribution
@@ -23,51 +23,51 @@ immutable LocationScale{T<:Real} <: ContinuousUnivariateDistribution
     (::Type{LocationScale{T}}){T}(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) = (@check_args(LocationScale, σ > zero(σ)); new{T}(μ,σ,ρ))
 end
 
-LocationScale{T<:Real}(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) = LocationScale{T}(μ,σ,ρ)
-LocationScale{T<:Integer}(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) = LocationScale{Float64}(Float64(μ),Float64(σ),ρ)
+LocationScale(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) where {T<:Real} = LocationScale{T}(μ,σ,ρ)
+LocationScale(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) where {T<:Integer} = LocationScale{Float64}(Float64(μ),Float64(σ),ρ)
 
-minimum{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * minimum(d.ρ)
-maximum{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * maximum(d.ρ)
+minimum(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * minimum(d.ρ)
+maximum(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * maximum(d.ρ)
 
 #### Conversions
 
-convert{T<:Real}(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::ContinuousUnivariateDistribution) = LocationScale(T(μ),T(σ),ρ)
-convert{T<:Real, S<:Real}(::Type{LocationScale{T}}, d::LocationScale{S}) = LocationScale(T(d.μ),T(d.σ),d.ρ)
+convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::ContinuousUnivariateDistribution) where {T<:Real} = LocationScale(T(μ),T(σ),ρ)
+convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ)
 
 #### Parameters
 
-location{T<:Real}(d::LocationScale{T}) = d.μ
-scale{T<:Real}(d::LocationScale{T}) = d.σ
+location(d::LocationScale{T}) where {T<:Real} = d.μ
+scale(d::LocationScale{T}) where {T<:Real} = d.σ
 params(d::LocationScale) = (d.μ,d.σ,d.ρ)
-@inline partype{T<:Real}(d::LocationScale{T}) = T
+@inline partype(d::LocationScale{T}) where {T<:Real} = T
 
 #### Statistics
 
-mean{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * mean(d.ρ)
-median{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * median(d.ρ)
-mode{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * mode(d.ρ)
-modes{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * modes(d.ρ)
+mean(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * mean(d.ρ)
+median(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * median(d.ρ)
+mode(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * mode(d.ρ)
+modes(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * modes(d.ρ)
 
-var{T<:Real}(d::LocationScale{T}) = d.σ^2 * var(d.ρ)
-std{T<:Real}(d::LocationScale{T}) = d.σ * std(d.ρ)
-skewness{T<:Real}(d::LocationScale{T}) = skewness(d.ρ)
-kurtosis{T<:Real}(d::LocationScale{T}) = kurtosis(d.ρ)
+var(d::LocationScale{T}) where {T<:Real} = d.σ^2 * var(d.ρ)
+std(d::LocationScale{T}) where {T<:Real} = d.σ * std(d.ρ)
+skewness(d::LocationScale{T}) where {T<:Real} = skewness(d.ρ)
+kurtosis(d::LocationScale{T}) where {T<:Real} = kurtosis(d.ρ)
 
-isplatykurtic{T<:Real}(d::LocationScale{T}) = isplatykurtic(d.ρ)
-isleptokurtic{T<:Real}(d::LocationScale{T}) = isleptokurtic(d.ρ)
-ismesokurtic{T<:Real}(d::LocationScale{T}) = ismesokurtic(d.ρ)
+isplatykurtic(d::LocationScale{T}) where {T<:Real} = isplatykurtic(d.ρ)
+isleptokurtic(d::LocationScale{T}) where {T<:Real} = isleptokurtic(d.ρ)
+ismesokurtic(d::LocationScale{T}) where {T<:Real} = ismesokurtic(d.ρ)
 
-entropy{T<:Real}(d::LocationScale{T}) = entropy(d.ρ) + log(d.σ)
-mgf{T<:Real}(d::LocationScale{T},t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
+entropy(d::LocationScale{T}) where {T<:Real} = entropy(d.ρ) + log(d.σ)
+mgf(d::LocationScale{T},t::Real) where {T<:Real} = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
 
 #### Evaluation & Sampling
 
-pdf{T<:Real}(d::LocationScale{T},x::Real) = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
-logpdf{T<:Real}(d::LocationScale{T},x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ) - log(d.σ)
-cdf{T<:Real}(d::LocationScale{T},x::Real) = cdf(d.ρ,(x-d.μ)/d.σ)
-logcdf{T<:Real}(d::LocationScale{T},x::Real) = logcdf(d.ρ,(x-d.μ)/d.σ)
-quantile{T<:Real}(d::LocationScale{T},q::Real) = d.μ + d.σ * quantile(d.ρ,q)
+pdf(d::LocationScale{T},x::Real) where {T<:Real} = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+logpdf(d::LocationScale{T},x::Real) where {T<:Real} = logpdf(d.ρ,(x-d.μ)/d.σ) - log(d.σ)
+cdf(d::LocationScale{T},x::Real) where {T<:Real} = cdf(d.ρ,(x-d.μ)/d.σ)
+logcdf(d::LocationScale{T},x::Real) where {T<:Real} = logcdf(d.ρ,(x-d.μ)/d.σ)
+quantile(d::LocationScale{T},q::Real) where {T<:Real} = d.μ + d.σ * quantile(d.ρ,q)
 
-rand{T<:Real}(d::LocationScale{T}) = d.μ + d.σ * rand(d.ρ)
-cf{T<:Real}(d::LocationScale{T}, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
-gradlogpdf{T<:Real}(d::LocationScale{T}, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+rand(d::LocationScale{T}) where {T<:Real} = d.μ + d.σ * rand(d.ρ)
+cf(d::LocationScale{T}, t::Real) where {T<:Real} = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
+gradlogpdf(d::LocationScale{T}, x::Real) where {T<:Real} = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
