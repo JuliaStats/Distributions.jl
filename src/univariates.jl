@@ -319,14 +319,7 @@ cf(d::UnivariateDistribution, t)
 
 Evaluate the probability density (mass) at `x`.
 
-Note: The package implements the following generic methods to evaluate pdf values in batch.
-
-- `pdf!(dst::AbstractArray, d::Distribution, x::AbstractArray)`
-- `pdf(d::UnivariateDistribution, x::AbstractArray)`
-
-If there exists more efficient routine to evaluate pdf in batch (faster than repeatedly
-calling the scalar version of `pdf`), then one can also provide a specialized
-method of `pdf!`. The vectorized version of `pdf` simply delegats to `pdf!`.
+See also: [`logpdf`](@ref).
 """
 pdf(d::UnivariateDistribution, x::Real)
 pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
@@ -339,11 +332,6 @@ pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(In
 Evaluate the logarithm of probability density (mass) at `x`.
 Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
-Again, the package provides vectorized version of `logpdf!` and `logpdf`.
-One may override `logpdf!` to provide more efficient vectorized evaluation.
-Furthermore, the generic `loglikelihood` function delegates to `_loglikelihood`,
-which repeatedly calls `logpdf`. If there is a better way to compute log-likelihood,
-one should override `_loglikelihood`.
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
@@ -353,10 +341,9 @@ logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, ro
 """
     cdf(d::UnivariateDistribution, x::Real)
 
-Evaluate the cumulative probability at `x`. The package provides generic functions to
-compute `ccdf`, `logcdf`, and `logccdf` in both scalar and vectorized forms.
-One may override these generic fallbacks if the specialized versions provide better
-numeric stability or higher efficiency.
+Evaluate the cumulative probability at `x`.
+
+See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
 cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
@@ -419,12 +406,9 @@ logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 """
     quantile(d::UnivariateDistribution, q::Real)
 
-Evaluate the inverse cumulative distribution function at `q`. The package provides
-generic functions to compute `cquantile`, `invlogcdf`, and `invlogccdf` in both
-scalar and vectorized forms. One may override these generic fallbacks if the specialized
-versions provide better numeric stability or higher efficiency. A generic `median` is
-provided, as `median(d) = quantile(d, 0.5)`. However, one should implement a specialized
-version of `median` if it can be computed faster than ``quantile``.
+Evaluate the inverse cumulative distribution function at `q`.
+
+See also: [`cquantile`](@ref), [`invlogcdf`](@ref), and [`invlogccdf`](@ref).
 """
 quantile(d::UnivariateDistribution, p::Real)
 
