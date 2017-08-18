@@ -1,13 +1,16 @@
-doc"""
+"""
     LocationScale(μ,σ,ρ)
     
 A location-scale transformed distribution with location parameter `μ`,
 scale parameter `σ`, and given distribution `ρ`.
-$f(x) = \frac{1}{σ}ρ(\frac{x-μ}{σ})$
+
+```math
+f(x) = \\frac{1}{σ} ρ \\! \\left( \\frac{x-μ}{σ} \\right)
+```
 
 ```julia
 LocationScale(μ,σ,ρ) # location-scale transformed distribution
-params(d)            # Get the parameters, i.e. (μ,σ,*****)
+params(d)            # Get the parameters, i.e. (μ, σ, and the base distribution)
 location(d)          # Get the location parameter
 scale(d)             # Get the scale parameter
 ```
@@ -15,12 +18,12 @@ scale(d)             # Get the scale parameter
 External links
 [Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
-struct LocationScale{T<:Real} <: ContinuousUnivariateDistribution
+struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-    ρ::ContinuousUnivariateDistribution
+    ρ::D
 
-    (::Type{LocationScale{T}}){T}(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) = (@check_args(LocationScale, σ > zero(σ)); new{T}(μ,σ,ρ))
+    LocationScale{T}(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) where T = (@check_args(LocationScale, σ > zero(σ)); new{T}(μ,σ,ρ))
 end
 
 LocationScale(μ::T,σ::T,ρ::ContinuousUnivariateDistribution) where {T<:Real} = LocationScale{T}(μ,σ,ρ)
