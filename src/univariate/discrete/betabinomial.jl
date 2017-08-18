@@ -83,7 +83,7 @@ end
 
 function pdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
-    0 <= k <= n || return zero(T)
+    insupport(d, k) || return zero(T)
     chooseinv = (n + 1) * beta(k + 1, n - k + 1)
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
