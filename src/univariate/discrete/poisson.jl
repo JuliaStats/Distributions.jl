@@ -94,7 +94,14 @@ end
 
 RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(rate(d))
 nextpdf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
-_pdf!(r::AbstractArray, d::Poisson, rgn::UnitRange) = _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
+
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
+function Base.broadcast(::typeof(pdf), d::Poisson, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end
+
 
 function mgf(d::Poisson, t::Real)
     λ = rate(d)

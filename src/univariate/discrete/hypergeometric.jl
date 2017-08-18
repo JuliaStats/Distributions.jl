@@ -84,4 +84,9 @@ RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvalu
 nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
     ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
 
-_pdf!(r::AbstractArray, d::Hypergeometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end
