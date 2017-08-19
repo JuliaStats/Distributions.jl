@@ -34,7 +34,7 @@ for p in Vector{Float64}[
     @test ccdf(d, 0) == 1.0
     @test ccdf(d, k+1) == 0.0
 
-    @test pdf(d) == p
+    @test pdf.(d, support(d)) == p
     @test pdf.(d, 1:k) == p
 
     test_distr(d, 10^6)

@@ -316,7 +316,7 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     end
 
     if isbounded(d)
-        @test pdf(d) ≈ p0
+        @test pdf.(d, support(d)) ≈ p0
         @test pdf.(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
         @test pdf.(d, rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
         @test pdf.(d, rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
