@@ -13,8 +13,8 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 
     #### Conversions
 
-    @test convert(LocationScale{Float16}, μ, σ, ρ) == LocationScale{Float16}(Float16(μ), Float16(σ), ρ)
-    @test convert(LocationScale{Float16}, d) == LocationScale{Float16}(Float16(μ), Float16(σ), ρ)
+    @test convert(LocationScale{Float16}, μ, σ, ρ) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
+    @test convert(LocationScale{Float16}, d) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
 
     @test location(d) == μ
     @test scale(d) == σ
