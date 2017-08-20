@@ -90,9 +90,9 @@ function pdf(d::BetaBinomial{T}, k::Int) where T
     return numerator / (denominator * chooseinv)
 end
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))
-median(d::BetaBinomial) = median(Categorical(pdf(d))) - 1
-mode(d::BetaBinomial{T}) where {T<:Real} = indmax(pdf(d)) - one(T)
-modes(d::BetaBinomial) = [x - 1 for x in modes(Categorical(pdf(d)))]
+entropy(d::BetaBinomial) = entropy(Categorical(pdf.(d,support(d))))
+median(d::BetaBinomial) = median(Categorical(pdf.(d,support(d)))) - 1
+mode(d::BetaBinomial{T}) = indmax(pdf.(d,support(d))) - 1
+modes(d::BetaBinomial) = modes(Categorical(pdf.(d,support(d)))) .- 1
 
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf(d)), p) - 1
+quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(d, support(d))), p) - 1
