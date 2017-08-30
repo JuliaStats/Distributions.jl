@@ -47,7 +47,7 @@ insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:Univari
 
 ### evaluation
 
-quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
+quantile(d::Truncated, p::T) where {T<:Real} = quantile(d.untruncated, d.lcdf + p * d.tp)
 
 for f in [:pdf, :logpdf, :cdf, :logcdf, :ccdf, :logccdf]
     @eval ($f)(d::Truncated, x::Int) = ($f)(d, float(x))
