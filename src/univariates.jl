@@ -465,20 +465,20 @@ for fun in [:pdf, :logpdf,
 
     @eval begin
         function ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            for i in 1 : length(X)
+            for i in eachindex(X)
                 r[i] = ($fun)(d, X[i])
             end
             return r
         end
 
         function ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            length(r) == length(X) ||
+            indices(r) == indices(X) ||
                 throw(ArgumentError("Inconsistent array dimensions."))
             $(_fun!)(r, d, X)
         end
 
         ($fun)(d::UnivariateDistribution, X::AbstractArray) =
-            $(_fun!)(Array{promote_type(partype(d), eltype(X))}(size(X)), d, X)
+            $(_fun!)(similar(Array{promote_type(partype(d), eltype(X))}, indices(X)), d, X)
     end
 end
 

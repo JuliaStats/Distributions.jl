@@ -3,3 +3,4 @@ ForwardDiff
 Compat
 Calculus
 PDMats
+OffsetArrays
