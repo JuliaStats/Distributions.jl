@@ -4,33 +4,33 @@
 #
 ##############################################################################
 
-struct EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
-	values::Vector{Float64}
-    support::Vector{Float64}
-	cdf::Function
-	entropy::Float64
-	kurtosis::Float64
-	mean::Float64
-	median::Float64
-	modes::Vector{Float64}
-	skewness::Float64
-	var::Float64
+struct EmpiricalUnivariateDistribution{T<:Real} <: DiscreteUnivariateDistribution
+    values::Vector{T}
+    support::Vector{T}
+    cdf::Function
+    entropy::Void
+    kurtosis::Void
+    mean::T
+    median::T
+    modes::Void
+    skewness::Void
+    var::T
 end
 
 @distr_support EmpiricalUnivariateDistribution d.values[1] d.values[end]
 
-function EmpiricalUnivariateDistribution(x::Vector)
+function EmpiricalUnivariateDistribution(x::Vector{T}) where {T<:Real}
     sx = sort(x)
-	EmpiricalUnivariateDistribution(sx,
-                                    unique(sx),
-	                                ecdf(x),
-	                                NaN,
-	                                NaN,
-	                                mean(x),
-	                                median(x),
-	                                Float64[],
-	                                NaN,
-	                                var(x))
+    EmpiricalUnivariateDistribution{T}(sx,
+                                       unique(sx),
+                                       ecdf(x),
+                                       nothing,
+                                       nothing,
+                                       mean(x),
+                                       median(x),
+                                       nothing,
+                                       nothing,
+                                       var(x))
 end
 
 entropy(d::EmpiricalUnivariateDistribution) = d.entropy
@@ -41,36 +41,71 @@ mean(d::EmpiricalUnivariateDistribution) = d.mean
 
 median(d::EmpiricalUnivariateDistribution) = d.median
 
-modes(d::EmpiricalUnivariateDistribution) = Float64[]
+modes(d::EmpiricalUnivariateDistribution) = d.modes
 
-skewness(d::EmpiricalUnivariateDistribution) = NaN
+skewness(d::EmpiricalUnivariateDistribution) = d.skewness
 
 var(d::EmpiricalUnivariateDistribution) = d.var
 
 
 ### Evaluation
 
-cdf(d::EmpiricalUnivariateDistribution, x::Float64) = d.cdf(x)
+cdf(d::EmpiricalUnivariateDistribution, x::Real) = d.cdf(x)
 
-function pdf(d::EmpiricalUnivariateDistribution, x::Float64)
+function pdf(d::EmpiricalUnivariateDistribution{T}, x::Real) where {T<:Real}
     ## TODO: Create lookup table for discrete case
-    1.0 / length(d.values)
+    one(T) / length(d.values)
 end
 
-function quantile(d::EmpiricalUnivariateDistribution, p::Float64)
+# bisection step for quantile lookup
+function bisect(f::Function, p::Real, values::Vector{<:Real},
+                idx₁::Integer, idx₂::Integer)
+    x₁ = values[idx₁]
+    x₂ = values[idx₂]
+
+    xₘ = (x₁ + x₂) / 2
+    fₘ = f(xₘ)
+
+    if fₘ > p
+        idx₁, findfirst(x -> x > xₘ, values)
+    else
+        findlast(x -> x < xₘ, values), idx₂
+    end
+end
+
+function quantile(d::EmpiricalUnivariateDistribution, p::Real)
     n = length(d.values)
-    index = floor(Int,p * n) + 1
-    index > n ? d.values[n] : d.values[index]
+
+    if n == 1 # trivial
+        d.values[1]
+    elseif n == 2 # easy choice
+        p < 1 ? d.values[1] : d.values[2]
+    else # bisect until p ∈ [cdf(x₁), cdf(x₂))
+        i, j = bisect(d.cdf, p, d.values, 1, n)
+        a, b = 1, n
+        while i ≠ a || j ≠ b
+            a, b = i, j
+            i, j = bisect(d.cdf, p, d.values, i, j)
+        end
+
+        # the quantile is in one of the indexes a, a+1, ..., b
+        interval = a:b
+        idx = findlast(x -> d.cdf(x) ≤ p, d.values[interval])
+
+        if idx ≠ 0 # case p = 0
+            d.values[interval[idx]]
+        else
+            d.values[a]
+        end
+    end
 end
 
-function rand(d::EmpiricalUnivariateDistribution)
-    d.values[rand(1:length(d.values))]
-end
+rand(d::EmpiricalUnivariateDistribution) = quantile(d, rand())
 
 
 ### fit model
 
 function fit_mle(::Type{EmpiricalUnivariateDistribution},
              x::Vector{T}) where T <: Real
-	EmpiricalUnivariateDistribution(x)
+    EmpiricalUnivariateDistribution(x)
 end
