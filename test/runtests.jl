@@ -27,7 +27,8 @@ tests = [
     "gradlogpdf",
     "truncate",
     "noncentralt",
-    "locationscale"]
+    "locationscale",
+    "empirical"]
 
 print_with_color(:blue, "Running tests:\n")
 
