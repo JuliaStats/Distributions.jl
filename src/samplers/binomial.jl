@@ -237,12 +237,7 @@ struct BinomialAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 
-function BinomialAliasSampler(n::Int, p::Float64)
-    pv = binompvec(n, p)
-    alias = Vector{Int}(n+1)
-    StatsBase.make_alias_table!(pv, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RangeGenerator(1:n+1)))
-end
+BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
 rand(s::BinomialAliasSampler) = rand(s.table) - 1
 

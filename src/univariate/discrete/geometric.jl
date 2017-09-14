@@ -86,7 +86,14 @@ end
 
 RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
 nextpdf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
-_pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end
+
 
 
 function cdf(d::Geometric{T}, x::Int) where T<:Real
@@ -158,7 +165,7 @@ suffstats(::Type{Geometric}, x::AbstractArray{T}) where {T<:Integer} = Geometric
 function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
     sx = 0.
     tw = 0.

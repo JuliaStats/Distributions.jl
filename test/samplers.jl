@@ -71,7 +71,8 @@ S = PoissBinAliasSampler
 paramlst = (fill(0.2, 30), linspace(0.1, .99, 30), [fill(0.1, 10); fill(0.9, 10)])
 println("    testing $S")
 for p in paramlst
-    test_samples(S(p), PoissonBinomial(p), n_tsamples)
+    d = PoissonBinomial(p)
+    test_samples(S(d), d, n_tsamples)
 end
 
 

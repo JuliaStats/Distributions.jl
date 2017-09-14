@@ -19,7 +19,7 @@ end
 
 function GenericMvTDist(df::T, μ::Vector{T}, Σ::Cov, zmean::Bool) where {Cov<:AbstractPDMat, T<:Real}
     d = length(μ)
-    dim(Σ) == d || throw(ArgumentError("The dimensions of μ and Σ are inconsistent."))
+    dim(Σ) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
     R = Base.promote_eltype(T, Σ)
     S = convert(AbstractArray{R}, Σ)
     GenericMvTDist{R, typeof(S)}(R(df), d, zmean, convert(AbstractArray{R}, μ), S)

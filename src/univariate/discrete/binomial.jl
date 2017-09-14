@@ -118,7 +118,9 @@ end
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1 - d.p))
 nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
 
-function _pdf!(r::AbstractArray, d::Binomial, X::UnitRange)
+function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
+    indices(r) == indices(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
+
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2
         # fill normal
@@ -147,6 +149,11 @@ function _pdf!(r::AbstractArray, d::Binomial, X::UnitRange)
     end
     return r
 end
+function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end
+
 
 function mgf(d::Binomial, t::Real)
     n, p = params(d)

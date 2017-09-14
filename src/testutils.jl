@@ -96,7 +96,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     rmin = floor(Int,quantile(distr, 0.00001))::Int
     rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
-    p0 = pdf(distr, rmin:rmax)  # reference probability masses
+    p0 = pdf.(distr, rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
     # determine confidence intervals for counts:
@@ -189,7 +189,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     #
     clb = Vector{Int}(nbins)
     cub = Vector{Int}(nbins)
-    cdfs = cdf(distr, edges)
+    cdfs = cdf.(distr, edges)
 
     for i = 1:nbins
         pi = cdfs[i+1] - cdfs[i]
@@ -309,19 +309,19 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf(d, collect(rmin:rmax))
-    @test pdf(d, rmin:rmax) ≈ p0
+    p0 = pdf.(d, collect(rmin:rmax))
+    @test pdf.(d, rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test pdf(d, rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test pdf.(d, rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test pdf(d) ≈ p0
-        @test pdf(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test pdf(d, rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test pdf(d, rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test pdf.(d, support(d)) ≈ p0
+        @test pdf.(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pdf.(d, rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test pdf.(d, rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test pdf(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pdf.(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
@@ -368,13 +368,13 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf(d, vs)  ≈ p
-    @test cdf(d, vs)  ≈ c
-    @test ccdf(d, vs) ≈ cc
+    @test pdf.(d, vs)  ≈ p
+    @test cdf.(d, vs)  ≈ c
+    @test ccdf.(d, vs) ≈ cc
 
-    @test logpdf(d, vs)  ≈ lp
-    @test logcdf(d, vs)  ≈ lc
-    @test logccdf(d, vs) ≈ lcc
+    @test logpdf.(d, vs)  ≈ lp
+    @test logcdf.(d, vs)  ≈ lc
+    @test logccdf.(d, vs) ≈ lcc
 end
 
 
@@ -426,13 +426,13 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf(d, vs)  ≈ p
-    @test cdf(d, vs)  ≈ c
-    @test ccdf(d, vs) ≈ cc
+    @test pdf.(d, vs)  ≈ p
+    @test cdf.(d, vs)  ≈ c
+    @test ccdf.(d, vs) ≈ cc
 
-    @test logpdf(d, vs)  ≈ lp
-    @test logcdf(d, vs)  ≈ lc
-    @test logccdf(d, vs) ≈ lcc
+    @test logpdf.(d, vs)  ≈ lp
+    @test logcdf.(d, vs)  ≈ lc
+    @test logccdf.(d, vs) ≈ lcc
 end
 
 
@@ -442,7 +442,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]
-    p = pdf(d, vf)
+    p = pdf.(d, vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
     xstd = sqrt(xvar)

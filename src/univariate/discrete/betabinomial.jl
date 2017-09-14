@@ -81,29 +81,18 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function pdf(d::BetaBinomial, k::Int)
+function pdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
+    insupport(d, k) || return zero(T)
     chooseinv = (n + 1) * beta(k + 1, n - k + 1)
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
     return numerator / (denominator * chooseinv)
 end
 
-function pdf(d::BetaBinomial)
-    n, α, β = d.n, d.α, d.β
-    denominator = beta(α, β)
-    values = Array{eltype(denominator)}(n+1)
-    for (i,k) in enumerate(0:n)
-        chooseinv = (n + 1) * beta(k + 1, n - k + 1)
-        numerator = beta(k + α, n - k + β)
-        @inbounds values[i] = numerator / (denominator * chooseinv)
-    end
-    return values
-end
+entropy(d::BetaBinomial) = entropy(Categorical(pdf.(d,support(d))))
+median(d::BetaBinomial) = median(Categorical(pdf.(d,support(d)))) - 1
+mode(d::BetaBinomial) = indmax(pdf.(d,support(d))) - 1
+modes(d::BetaBinomial) = modes(Categorical(pdf.(d,support(d)))) .- 1
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))
-median(d::BetaBinomial) = median(Categorical(pdf(d))) - 1
-mode(d::BetaBinomial{T}) where {T<:Real} = indmax(pdf(d)) - one(T)
-modes(d::BetaBinomial) = [x - 1 for x in modes(Categorical(pdf(d)))]
-
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf(d)), p) - 1
+quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(d, support(d))), p) - 1

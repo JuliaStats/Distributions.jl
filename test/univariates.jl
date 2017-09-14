@@ -85,8 +85,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         expect_v = _json_value(val)
         f = eval(Symbol(fname))
         @assert isa(f, Function)
-        tol_v = abs(expect_v) * 1e-8 + 1e-12
-        Base.Test.test_approx_eq(f(d), expect_v, tol_v, "$fname(d)", "expect_v")
+        @test isapprox(f(d), expect_v; atol=1e-12, rtol=1e-8, nans=true)
     end
 
     # verify logpdf and cdf at certain points
@@ -97,20 +96,12 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         lp = _json_value(pt["logpdf"])
         cf = _json_value(pt["cdf"])
 
-        ptol = p * 1e-8 + 1e-16
-        lptol = 1e-12
-        cftol = 1e-12
-        if isa(d, NoncentralHypergeometric)
-            lptol = 1e-4
-            cftol = 1e-8
-        end
-
-        Base.Test.test_approx_eq(pdf(d, x), p, ptol, "logpdf(d, $x)", "lp")
-        Base.Test.test_approx_eq(logpdf(d, x), lp, lptol, "logpdf(d, $x)", "lp")
+        @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
+        @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
 
         # cdf method is not implemented for Skellam & NormalInverseGaussian
         if !isa(d, Union{Skellam, NormalInverseGaussian})
-            Base.Test.test_approx_eq(cdf(d, x), cf, cftol, "cdf(d, $x)", "cf")
+            @test isapprox(cdf(d, x), cf; atol=isa(d, NoncentralHypergeometric) ? 1e-8 : 1e-12)
         end
     end
 

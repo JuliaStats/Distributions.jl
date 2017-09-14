@@ -168,32 +168,6 @@ pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? d.p[x] : zero
 
 logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(d.p[x]) : -Inf
 
-pdf(d::Categorical) = copy(d.p)
-
-function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where T<:Real
-    vfirst = round(Int, first(rgn))
-    vlast = round(Int, last(rgn))
-    vl = max(vfirst, 1)
-    vr = min(vlast, d.K)
-    p = probs(d)
-    if vl > vfirst
-        for i = 1:(vl - vfirst)
-            r[i] = zero(T)
-        end
-    end
-    fm1 = vfirst - 1
-    for v = vl:vr
-        r[v - fm1] = p[v]
-    end
-    if vr < vlast
-        for i = (vr - vfirst + 2):length(rgn)
-            r[i] = zero(T)
-        end
-    end
-    return r
-end
-
-
 function quantile(d::Categorical, p::Float64)
     0 <= p <= 1 || throw(DomainError())
     k = ncategories(d)
@@ -230,7 +204,7 @@ end
 function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if n != length(w)
-        throw(ArgumentError("Inconsistent array lengths."))
+        throw(DimensionMismatch("Inconsistent array lengths."))
     end
     for i = 1 : n
         @inbounds xi = x[i]

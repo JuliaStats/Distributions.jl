@@ -113,7 +113,6 @@ pdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0
 function logpdf(d::PoissonBinomial{T}, k::Int) where T<:Real
     insupport(d, k) ? log(d.pmf[k + 1]) : -T(Inf)
 end
-pdf(d::PoissonBinomial) = copy(d.pmf)
 
 
 # Computes the pdf of a poisson-binomial random variable using

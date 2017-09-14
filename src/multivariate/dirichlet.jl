@@ -218,7 +218,7 @@ function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArr
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
     tw = 0.
@@ -311,7 +311,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     # This function directly overrides α
 
     K = length(elogp)
-    length(α) == K || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(α) == K || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     g = Vector{Float64}(K)
     iq = Vector{Float64}(K)
@@ -388,7 +388,7 @@ function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     n = size(P, 2)
-    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))

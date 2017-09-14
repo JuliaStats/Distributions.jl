@@ -83,8 +83,6 @@ pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
 pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
                             x == 1 ? succprob(d) : zero(d.p)
 
-pdf(d::Bernoulli) = typeof(d.p)[failprob(d), succprob(d)]
-
 cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : one(d.p)
 cdf(d::Bernoulli, x::Int) = x < 0 ? zero(d.p) :
                             x < 1 ? failprob(d) : one(d.p)

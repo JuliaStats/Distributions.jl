@@ -114,7 +114,7 @@ end
 function suffstats(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
     sx = zero(T)
