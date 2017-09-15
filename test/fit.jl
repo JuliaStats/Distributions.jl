@@ -31,8 +31,8 @@ x = rand(Bernoulli(0.7), n0)
 
 ss = suffstats(Bernoulli, x)
 @test isa(ss, Distributions.BernoulliStats)
-@test ss.cnt0 == n0 - countnz(x)
-@test ss.cnt1 == countnz(x)
+@test ss.cnt0 == n0 - count(t->t != 0, x)
+@test ss.cnt1 == count(t->t != 0, x)
 
 ss = suffstats(Bernoulli, x, w)
 @test isa(ss, Distributions.BernoulliStats)
@@ -40,7 +40,7 @@ ss = suffstats(Bernoulli, x, w)
 @test ss.cnt1 ≈ sum(w[x .== 1])
 
 d = fit(Bernoulli, x)
-p = countnz(x) / n0
+p = count(t->t != 0, x) / n0
 @test isa(d, Bernoulli)
 @test mean(d) ≈ p
 
@@ -100,7 +100,7 @@ p = [0.2, 0.5, 0.3]
 x = rand(Categorical(p), n0)
 
 ss = suffstats(Categorical, (3, x))
-h = Float64[countnz(x .== i) for i = 1 : 3]
+h = Float64[count(v->v == i, x) for i = 1 : 3]
 @test isa(ss, Distributions.CategoricalStats)
 @test ss.h ≈ h
 
@@ -352,4 +352,3 @@ d = fit(Poisson, x, w)
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
 @test isapprox(mean(d), 8.2, atol=0.2)
-

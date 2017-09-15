@@ -79,9 +79,9 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     @assert length(pr) == K
 
     # mean
-    mu = 0.0
+    mu = zeros(length(g))
     for k = 1:K
-        mu += pr[k] * mean(component(g, k))
+        mu .+= pr[k] .* mean(component(g, k))
     end
     @test mean(g) ≈ mu
 

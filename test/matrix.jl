@@ -9,6 +9,7 @@ W = Wishart(v,S)
 IW = InverseWishart(v,S)
 
 for d in [W,IW]
+    local d
     @test size(d) == size(rand(d))
     @test length(d) == length(rand(d))
     @test typeof(d)(params(d)...) == d

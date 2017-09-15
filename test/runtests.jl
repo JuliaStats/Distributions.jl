@@ -41,13 +41,15 @@ else
     addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
 end
 
-@everywhere using Distributions
-@everywhere using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-@everywhere using Base.Test
 @everywhere srand(345679)
 res = pmap(tests) do t
-    include(t*".jl")
-    nothing
+    @eval module $(Symbol("Test_", t))
+    using Distributions
+    using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
+    using Base.Test
+    include($t * ".jl")
+    end
+    return
 end
 
 # print method ambiguities

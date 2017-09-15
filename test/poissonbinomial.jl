@@ -4,6 +4,7 @@ using Base.Test
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
+    local p
 
     d = PoissonBinomial(fill(p, n))
     dref = Binomial(n, p)
@@ -71,7 +72,7 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test isapprox(pdf(d, k), m, atol=5e-16)
+        @test isapprox(pdf(d, k), m, atol=1e-15)
     end
 end
 

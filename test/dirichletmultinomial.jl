@@ -27,7 +27,7 @@ d = DirichletMultinomial(10, α)
 # test statistics
 @test mean(d) ≈ α * (d.n / d.α0)
 p = d.α / d.α0
-@test var(d)  ≈ d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 - p)
+@test var(d)  ≈ d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 .- p)
 x = rand(d, 10_000)
 
 # test statistics with mle fit
@@ -45,6 +45,7 @@ d = DirichletMultinomial(10, 5)
 @test !insupport(d, 3.0 * ones(5))
 
 for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
+    local x
     @test pdf(d, x) ≈
         factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈

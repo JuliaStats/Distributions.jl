@@ -98,7 +98,7 @@ function cdf_durbin(d::KSDist,x::Float64)
         end
         # we can avoid keeping track of the exponent by dividing by e
         # (from Stirling's approximation)
-        H[i,j] /= e
+        H[i,j] /= ℯ
     end
     Q = H^n
     s = Q[k,k]
@@ -132,7 +132,7 @@ function stirling(n)
     if n < 500
         s = 1.0
         for i = 1:n
-            s *= i/n*e
+            s *= i/n*ℯ
         end
         return s
     else

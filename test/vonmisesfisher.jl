@@ -76,6 +76,7 @@ for (p, κ) in [(2, 1.0),
                (3, 1.0),
                (3, 5.0),
                (5, 2.0)]
+    local p
 
     test_vonmisesfisher(p, κ, n, ns)
 end
