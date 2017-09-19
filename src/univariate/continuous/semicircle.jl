@@ -24,28 +24,34 @@ mode(d::Semicircle) = zero(d.r)
 entropy(d::Semicircle) = log(π * d.r) - oftype(d.r, 0.5)
 
 function pdf(d::Semicircle, x::Real)
-    if abs(x) < d.r
-        return 2 / (π * d.r^2) * sqrt(d.r^2 - x^2)
-    else
-        return 0.0
+    let x = float(x)
+        if abs(x) < d.r
+            return oftype(x, 2 / (π * d.r^2) * sqrt(d.r^2 - x^2))
+        else
+            return oftype(x, 0)
+        end
     end
 end
 
 function logpdf(d::Semicircle, x::Real)
-    if abs(x) < d.r
-        return log(2 / π) - 2 * log(d.r) + 1/2 * log(r^2 - x^2)
-    else
-        return oftype(x, Inf)
+    let x = float(x)
+        if abs(x) < d.r
+            return oftype(x, log(2 / π) - 2 * log(d.r) + 1/2 * log(r^2 - x^2))
+        else
+            return oftype(x, Inf)
+        end
     end
 end
 
 function cdf(d::Semicircle, x::Real)
-    if abs(x) < d.r
-        u = x / d.r
-        return (u * sqrt(1 - u^2) + asin(u)) / π + one(x) / 2
-    elseif x ≥ d.r
-        return one(x)
-    else
-        return zero(x)
+    let x = float(x)
+        if abs(x) < d.r
+            u = x / d.r
+            return oftype(x, (u * sqrt(1 - u^2) + asin(u)) / π + one(x) / 2)
+        elseif x ≥ d.r
+            return one(x)
+        else
+            return zero(x)
+        end
     end
 end
