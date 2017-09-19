@@ -129,6 +129,7 @@ export
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Semicircle,
     Skellam,
     SymTriangularDist,
     TDist,

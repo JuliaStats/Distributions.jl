@@ -605,6 +605,7 @@ const continuous_distributions = [
     "lognormal",    # LogNormal depends on Normal
     "pareto",
     "rayleigh",
+    "semicircle",
     "symtriangular",
     "tdist",
     "triangular",
