@@ -24,34 +24,33 @@ mode(d::Semicircle) = zero(d.r)
 entropy(d::Semicircle) = log(π * d.r) - oftype(d.r, 0.5)
 
 function pdf(d::Semicircle, x::Real)
-    let x = float(x)
-        if abs(x) < d.r
-            return oftype(x, 2 / (π * d.r^2) * sqrt(d.r^2 - x^2))
-        else
-            return oftype(x, 0)
-        end
+    xx, r = promote(x, float(d.r))
+    if insupport(d, xx)
+        return 2 / (π * r^2) * sqrt(r^2 - xx^2)
+    else
+        return oftype(r, 0)
     end
 end
 
 function logpdf(d::Semicircle, x::Real)
-    let x = float(x)
-        if abs(x) < d.r
-            return oftype(x, log(2 / π) - 2 * log(d.r) + 1/2 * log(r^2 - x^2))
-        else
-            return oftype(x, Inf)
-        end
+    xx, r = promote(x, float(d.r))
+    if insupport(d, xx)
+        return log(oftype(r, 2) / π) - 2 * log(r) + log(r^2 - xx^2) / 2
+    else
+        return oftype(r, -Inf)
     end
 end
 
 function cdf(d::Semicircle, x::Real)
-    let x = float(x)
-        if abs(x) < d.r
-            u = x / d.r
-            return oftype(x, (u * sqrt(1 - u^2) + asin(u)) / π + one(x) / 2)
-        elseif x ≥ d.r
-            return one(x)
-        else
-            return zero(x)
-        end
+    xx, r = promote(x, float(d.r))
+    if insupport(d, xx)
+        u = xx / r
+        return (u * sqrt(1 - u^2) + asin(u)) / π + one(xx) / 2
+    elseif x < minimum(d)
+        return zero(r)
+    else
+        return one(r)
     end
 end
+
+@quantile_newton Semicircle
