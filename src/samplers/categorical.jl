@@ -28,7 +28,7 @@ end
 struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
-    isampler::RangeGeneratorInt
+    isampler::RangeGeneratorInt{Int,UInt}
 end
 ncategories(s::AliasTable) = length(s.accept)
 
