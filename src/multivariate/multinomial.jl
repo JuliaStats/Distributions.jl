@@ -140,7 +140,7 @@ function insupport{T<:Real}(d::Multinomial, x::AbstractVector{T})
     return s == ntrials(d)  # integer computation would not yield truncation errors
 end
 
-function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
+function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     p = probs(d)
     n = ntrials(d)
     S = eltype(p)
@@ -151,7 +151,7 @@ function _logpdf{T<:Real}(d::Multinomial, x::AbstractVector{T})
         @inbounds xi = x[i]
         @inbounds p_i = p[i]
         s -= R(lgamma(R(xi) + 1))
-        @inbounds s += ifelse((xi==0) & (p_i==0), 0.0, xi * log(p_i)) # log(0^0)=0 not NaN
+        s += ifelse((xi== zero(T)) & (p_i == zero(T)), 0.0, xi * log(p_i)) # log(0^0)=0 not NaN
     end    
     return s
 end
