@@ -151,7 +151,7 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
         @inbounds xi = x[i]
         @inbounds p_i = p[i]
         s -= R(lgamma(R(xi) + 1))
-        s += ifelse((xi== zero(T)) & (p_i == zero(T)), 0.0, xi * log(p_i)) # log(0^0)=0 not NaN
+        s += ifelse((xi == 0) & (p_i == 0), zero(T), xi * log(p_i))
     end    
     return s
 end
