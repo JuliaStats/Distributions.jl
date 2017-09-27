@@ -22,14 +22,14 @@ External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
-immutable Gumbel{T<:Real} <: ContinuousUnivariateDistribution
+struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
 
-    (::Type{Gumbel{T}}){T}(μ::T, θ::T) = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
+    Gumbel{T}(μ::T, θ::T) where {T} = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Gumbel{T<:Real}(μ::T, θ::T) = Gumbel{T}(μ, θ)
+Gumbel(μ::T, θ::T) where {T<:Real} = Gumbel{T}(μ, θ)
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
 Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
 Gumbel(μ::Real) = Gumbel(μ, 1.0)
@@ -41,30 +41,30 @@ const DoubleExponential = Gumbel
 
 #### Conversions
 
-convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, μ::S, θ::S) = Gumbel(T(μ), T(θ))
-convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, d::Gumbel{S}) = Gumbel(T(d.μ), T(d.θ))
+convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
+convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ))
 
 #### Parameters
 
 location(d::Gumbel) = d.μ
 scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
-@inline partype{T<:Real}(d::Gumbel{T}) = T
+@inline partype(d::Gumbel{T}) where {T<:Real} = T
 
 
 #### Statistics
 
 mean(d::Gumbel) = d.μ + d.θ * γ
 
-median{T<:Real}(d::Gumbel{T}) = d.μ - d.θ * log(T(logtwo))
+median(d::Gumbel{T}) where {T<:Real} = d.μ - d.θ * log(T(logtwo))
 
 mode(d::Gumbel) = d.μ
 
-var{T<:Real}(d::Gumbel{T}) = T(π)^2/6 * d.θ^2
+var(d::Gumbel{T}) where {T<:Real} = T(π)^2/6 * d.θ^2
 
-skewness{T<:Real}(d::Gumbel{T}) = 12*sqrt(T(6))*zeta(T(3)) / π^3
+skewness(d::Gumbel{T}) where {T<:Real} = 12*sqrt(T(6))*zeta(T(3)) / π^3
 
-kurtosis{T<:Real}(d::Gumbel{T}) = T(12)/5
+kurtosis(d::Gumbel{T}) where {T<:Real} = T(12)/5
 
 entropy(d::Gumbel) = log(d.θ) + 1 + γ
 

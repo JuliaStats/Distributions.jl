@@ -1,6 +1,6 @@
 #### naive sampling
 
-immutable CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
     prob::Vector{Float64}
 
     function CategoricalDirectSampler(p::Vector{Float64})
@@ -25,28 +25,30 @@ end
 
 ##### Alias Table #####
 
-immutable AliasTable <: Sampleable{Univariate,Discrete}
+struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
-    isampler::RangeGeneratorInt
+    isampler::RangeGeneratorInt{Int,UInt}
 end
 ncategories(s::AliasTable) = length(s.accept)
 
-function AliasTable{T<:Real}(probs::AbstractVector{T})
+function AliasTable(probs::AbstractVector{T}) where T<:Real
     n = length(probs)
     n > 0 || error("The input probability vector is empty.")
     accp = Vector{Float64}(n)
     alias = Vector{Int}(n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    AliasTable(accp, alias, RangeGenerator(1:n))
+    un = unsigned(n)
+    AliasTable(accp, alias, Base.Random.RangeGeneratorInt(one(un),un))
 end
 
-function rand(s::AliasTable)
-    i = rand(GLOBAL_RNG, s.isampler)
+function rand(rng::AbstractRNG, s::AliasTable)
+    i = rand(GLOBAL_RNG, s.isampler) % Int
     u = rand()
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
 end
+rand(s::AliasTable) = rand(Base.Random.GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
 

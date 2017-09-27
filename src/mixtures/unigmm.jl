@@ -1,6 +1,6 @@
 # Univariate Gaussian Mixture Models
 
-immutable UnivariateGMM <: UnivariateMixture{Continuous,Normal}
+struct UnivariateGMM <: UnivariateMixture{Continuous,Normal}
     K::Int
     means::Vector{Float64}
     stds::Vector{Float64}
@@ -29,7 +29,7 @@ rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-immutable UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
+struct UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
     means::Vector{Float64}
     stds::Vector{Float64}
     psampler::AliasTable

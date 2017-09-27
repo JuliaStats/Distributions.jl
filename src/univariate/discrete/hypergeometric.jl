@@ -19,7 +19,7 @@ External links
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 
 """
-immutable Hypergeometric <: DiscreteUnivariateDistribution
+struct Hypergeometric <: DiscreteUnivariateDistribution
     ns::Int     # number of successes in population
     nf::Int     # number of failures in population
     n::Int      # sample size
@@ -73,7 +73,7 @@ end
 
 rand(d::Hypergeometric) = convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
 
-immutable RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
     ns::Float64
     nf::Float64
     n::Float64
@@ -84,4 +84,10 @@ RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvalu
 nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
     ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
 
-_pdf!(r::AbstractArray, d::Hypergeometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+
+function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end

@@ -1,5 +1,5 @@
 
-immutable BinomialRmathSampler <: Sampleable{Univariate,Discrete}
+struct BinomialRmathSampler <: Sampleable{Univariate,Discrete}
     n::Int
     prob::Float64
 end
@@ -33,7 +33,7 @@ end
 #   "Generating the maximum of independent identically  distributed random variables" 
 #   Computers and Marhemafics with Applicalions 6, 1960, 305-315.
 #
-immutable BinomialGeomSampler <: Sampleable{Univariate,Discrete}
+struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
     comp::Bool
     n::Int
     scale::Float64
@@ -81,7 +81,7 @@ end
 # Note: only use this sampler when n * min(p, 1-p) is large enough
 #       e.g., it is greater than 20.
 #
-immutable BinomialTPESampler <: Sampleable{Univariate,Discrete}
+struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
     comp::Bool
     n::Int
     r::Float64
@@ -233,16 +233,11 @@ end
 
 # Constructing an alias table by directly computing the probability vector
 #
-immutable BinomialAliasSampler <: Sampleable{Univariate,Discrete}
+struct BinomialAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 
-function BinomialAliasSampler(n::Int, p::Float64)
-    pv = binompvec(n, p)
-    alias = Vector{Int}(n+1)
-    StatsBase.make_alias_table!(pv, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RangeGenerator(1:n+1)))
-end
+BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
 rand(s::BinomialAliasSampler) = rand(s.table) - 1
 
@@ -251,7 +246,7 @@ rand(s::BinomialAliasSampler) = rand(s.table) - 1
 #
 # It is important for type-stability
 #
-type BinomialPolySampler <: Sampleable{Univariate,Discrete}
+mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
     use_btpe::Bool
     geom_sampler::BinomialGeomSampler
     btpe_sampler::BinomialTPESampler

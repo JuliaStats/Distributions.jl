@@ -84,6 +84,12 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         # @test isapprox(cdf(d, Dual(x))   , cf, atol=sqrt(eps()))
     end
 
+    # test if truncated quantile function can be evaluated consistently for different types at certain points
+    @test isapprox(quantile(d, 0), quantile(d, Float32(0)))
+    @test isapprox(quantile(d, 1), quantile(d, Float32(1.0)))
+    @test isapprox(quantile(d, Float64(0.3)), quantile(d, Float32(0.3)))
+    @test isapprox(quantile(d, Float64(0.7)), quantile(d, Float32(0.7)))
+
     try
         m = mgf(d,0.0)
         @test m == 1.0

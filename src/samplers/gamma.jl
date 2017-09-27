@@ -1,5 +1,5 @@
 
-immutable GammaRmathSampler <: Sampleable{Univariate,Continuous}
+struct GammaRmathSampler <: Sampleable{Univariate,Continuous}
     d::Gamma
 end
 
@@ -13,7 +13,7 @@ rand(s::GammaRmathSampler) = StatsFuns.RFunctions.gammarand(shape(s.d), scale(s.
 
 # suitable for shape >= 1.0
 
-immutable GammaGDSampler <: Sampleable{Univariate,Continuous}
+struct GammaGDSampler <: Sampleable{Univariate,Continuous}
     a::Float64
     s2::Float64
     s::Float64
@@ -138,7 +138,7 @@ end
 # doi:10.1007/BF02293108
 
 # valid for 0 < shape <= 1
-immutable GammaGSSampler <: Sampleable{Univariate,Continuous}
+struct GammaGSSampler <: Sampleable{Univariate,Continuous}
     a::Float64
     ia::Float64
     b::Float64
@@ -176,7 +176,7 @@ end
 # doi:10.1145/358407.358414
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
-immutable GammaMTSampler <: Sampleable{Univariate,Continuous}
+struct GammaMTSampler <: Sampleable{Univariate,Continuous}
     d::Float64
     c::Float64
     κ::Float64
@@ -208,12 +208,12 @@ end
 
 # Inverse Power sampler
 # uses the x*u^(1/a) trick from Marsaglia and Tsang (2000) for when shape < 1
-immutable GammaIPSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Univariate,Continuous}
+struct GammaIPSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Univariate,Continuous}
     s::S #sampler for Gamma(1+shape,scale)
     nia::Float64 #-1/scale
 end
 
-function GammaIPSampler{S<:Sampleable}(d::Gamma,::Type{S})
+function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
     GammaIPSampler(Gamma(1.0 + shape(d), scale(d)), -1.0 / shape(d))
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)

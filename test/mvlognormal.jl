@@ -26,9 +26,9 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test length(s) == d
     @test size(S) == (d, d)
     @test s          ≈ diag(S)
-    @test md         ≈ @compat(exp.(mean(g.normal)))
-    @test mn         ≈ @compat(exp.(mean(g.normal) + var(g.normal)/2))
-    @test mo         ≈ @compat(exp.(mean(g.normal) - var(g.normal)))
+    @test md         ≈ exp.(mean(g.normal))
+    @test mn         ≈ exp.(mean(g.normal) + var(g.normal)/2)
+    @test mo         ≈ exp.(mean(g.normal) - var(g.normal))
     @test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
     gg = typeof(g)(MvNormal(params(g)...))
     @test full(g.normal.μ) == full(gg.normal.μ)
@@ -57,7 +57,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     for i = 1:min(100, n_tsamples)
         @test logpdf(g, X[:,i]) ≈ log(pdf(g, X[:,i]))
     end
-    @test logpdf(g, X) ≈ @compat(log.(pdf(g, X)))
+    @test logpdf(g, X) ≈ log.(pdf(g, X))
     @test isequal(logpdf(g, zeros(d)),-Inf)
     @test isequal(logpdf(g, -mn),-Inf)
     @test isequal(pdf(g, zeros(d)),0.0)
@@ -105,11 +105,11 @@ C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
 
 for (g, μ, Σ) in [
     (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
-    (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(@compat(sqrt.(va))))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(mu, sqrt(0.2)), mu, 0.2 * eye(3)),
     (MvLogNormal(3, sqrt(0.2)), zeros(3), 0.2 * eye(3)),
-    (MvLogNormal(mu, Vector{Float64}(@compat(sqrt.(va)))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(Vector{Float64}(@compat(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(mu, C), mu, C),
     (MvLogNormal(C), zeros(3), C) ]
 

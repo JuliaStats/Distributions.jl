@@ -11,39 +11,33 @@ end
 
 ## a type to indicate zero vector
 
-immutable ZeroVector{T}
+struct ZeroVector{T}
     len::Int
 end
 
-ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
+ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
-eltype{T}(v::ZeroVector{T}) = T
+eltype(v::ZeroVector{T}) where {T} = T
 length(v::ZeroVector) = v.len
-full{T}(v::ZeroVector{T}) = zeros(T, v.len)
+full(v::ZeroVector{T}) where {T} = zeros(T, v.len)
 
-convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
-convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
+convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = full(v)
+convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
 +(x::AbstractArray, v::ZeroVector) = x
 -(x::AbstractArray, v::ZeroVector) = x
 Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
 Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
 
-if VERSION < v"0.6.0-dev.1632"
-    include_string("""
-        Base.:(.+)(x::AbstractArray, v::ZeroVector) = x
-        Base.:(.-)(x::AbstractArray, v::ZeroVector) = x
-    """)
-end
 
 
 ##### Utility functions
 
-type NoArgCheck end
+mutable struct NoArgCheck end
 
-isunitvec{T}(v::AbstractVector{T}) = (vecnorm(v) - 1.0) < 1.0e-12
+isunitvec(v::AbstractVector{T}) where {T} = (vecnorm(v) - 1.0) < 1.0e-12
 
-function allfinite{T<:Real}(x::Array{T})
+function allfinite(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(isfinite(x[i]))
             return false
@@ -52,7 +46,7 @@ function allfinite{T<:Real}(x::Array{T})
     return true
 end
 
-function allzeros{T<:Real}(x::Array{T})
+function allzeros(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] == zero(T))
             return false
@@ -63,7 +57,7 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg{T<:Real}(x::Array{T})
+function allnonneg(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] >= zero(T))
             return false
@@ -72,9 +66,9 @@ function allnonneg{T<:Real}(x::Array{T})
     return true
 end
 
-isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
+function pnormalize!(v::AbstractVector{T}) where T<:AbstractFloat
     s = 0.
     n = length(v)
     for i = 1:n

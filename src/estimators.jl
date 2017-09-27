@@ -3,13 +3,13 @@
 export Estimator, MLEstimator
 export nsamples, estimate
 
-@compat abstract type Estimator{D<:Distribution} end
+abstract type Estimator{D<:Distribution} end
 
-nsamples{D<:UnivariateDistribution}(e::Estimator{D}, x::Array) = length(x)
-nsamples{D<:MultivariateDistribution}(e::Estimator{D}, x::Matrix) = size(x, 2)
+nsamples(e::Estimator{D}, x::Array) where {D<:UnivariateDistribution} = length(x)
+nsamples(e::Estimator{D}, x::Matrix) where {D<:MultivariateDistribution} = size(x, 2)
 
-type MLEstimator{D<:Distribution} <: Estimator{D} end
-MLEstimator{D<:Distribution}(::Type{D}) = MLEstimator{D}()
+mutable struct MLEstimator{D<:Distribution} <: Estimator{D} end
+MLEstimator(::Type{D}) where {D<:Distribution} = MLEstimator{D}()
 
-estimate{D<:Distribution}(e::MLEstimator{D}, x) = fit_mle(D, x)
-estimate{D<:Distribution}(e::MLEstimator{D}, x, w) = fit_mle(D, x, w)
+estimate(e::MLEstimator{D}, x) where {D<:Distribution} = fit_mle(D, x)
+estimate(e::MLEstimator{D}, x, w) where {D<:Distribution} = fit_mle(D, x, w)

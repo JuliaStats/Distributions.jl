@@ -1,6 +1,6 @@
 #### Domain && Support
 
-immutable RealInterval
+struct RealInterval
     lb::Float64
     ub::Float64
 
@@ -11,13 +11,13 @@ minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
-isbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = isupperbounded(d) && islowerbounded(d)
+isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
-islowerbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = minimum(d) > -Inf
-isupperbounded{D<:UnivariateDistribution}(d::Union{D,Type{D}}) = maximum(d) < +Inf
+islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
+isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = isbounded(d)
-hasfinitesupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = false
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 """
     params(d::UnivariateDistribution)
@@ -117,7 +117,7 @@ You should also override this function if the support is composed of multiple di
 """
 insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
 
-function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray)
+function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) where D<:UnivariateDistribution
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1 : length(X)
@@ -127,18 +127,18 @@ function insupport!{D<:UnivariateDistribution}(r::AbstractArray, d::Union{D,Type
 end
 
 
-insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, X::AbstractArray) =
+insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
      insupport!(BitArray(size(X)), d, X)
 
-insupport{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = minimum(d) <= x <= maximum(d)
-insupport{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}},x::Real) = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support{D<:ContinuousUnivariateDistribution}(d::Union{D,Type{D}}) = RealInterval(minimum(d), maximum(d))
-support{D<:DiscreteUnivariateDistribution}(d::Union{D,Type{D}}) = round(Int, minimum(d)):round(Int, maximum(d))
+support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
-immutable FiniteSupport{T} end
+struct FiniteSupport{T} end
 
 ## macros to declare support
 
@@ -319,14 +319,7 @@ cf(d::UnivariateDistribution, t)
 
 Evaluate the probability density (mass) at `x`.
 
-Note: The package implements the following generic methods to evaluate pdf values in batch.
-
-- `pdf!(dst::AbstractArray, d::Distribution, x::AbstractArray)`
-- `pdf(d::UnivariateDistribution, x::AbstractArray)`
-
-If there exists more efficient routine to evaluate pdf in batch (faster than repeatedly
-calling the scalar version of `pdf`), then one can also provide a specialized
-method of `pdf!`. The vectorized version of `pdf` simply delegats to `pdf!`.
+See also: [`logpdf`](@ref).
 """
 pdf(d::UnivariateDistribution, x::Real)
 pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
@@ -339,11 +332,6 @@ pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(In
 Evaluate the logarithm of probability density (mass) at `x`.
 Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
-Again, the package provides vectorized version of `logpdf!` and `logpdf`.
-One may override `logpdf!` to provide more efficient vectorized evaluation.
-Furthermore, the generic `loglikelihood` function delegates to `_loglikelihood`,
-which repeatedly calls `logpdf`. If there is a better way to compute log-likelihood,
-one should override `_loglikelihood`.
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
@@ -353,10 +341,9 @@ logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, ro
 """
     cdf(d::UnivariateDistribution, x::Real)
 
-Evaluate the cumulative probability at `x`. The package provides generic functions to
-compute `ccdf`, `logcdf`, and `logccdf` in both scalar and vectorized forms.
-One may override these generic fallbacks if the specialized versions provide better
-numeric stability or higher efficiency.
+Evaluate the cumulative probability at `x`.
+
+See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
 cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
@@ -419,12 +406,9 @@ logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 """
     quantile(d::UnivariateDistribution, q::Real)
 
-Evaluate the inverse cumulative distribution function at `q`. The package provides
-generic functions to compute `cquantile`, `invlogcdf`, and `invlogccdf` in both
-scalar and vectorized forms. One may override these generic fallbacks if the specialized
-versions provide better numeric stability or higher efficiency. A generic `median` is
-provided, as `median(d) = quantile(d, 0.5)`. However, one should implement a specialized
-version of `median` if it can be computed faster than ``quantile``.
+Evaluate the inverse cumulative distribution function at `q`.
+
+See also: [`cquantile`](@ref), [`invlogcdf`](@ref), and [`invlogccdf`](@ref).
 """
 quantile(d::UnivariateDistribution, p::Real)
 
@@ -452,35 +436,6 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 # gradlogpdf
 
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
-
-# vectorized versions
-for fun in [:pdf, :logpdf,
-            :cdf, :logcdf,
-            :ccdf, :logccdf,
-            :invlogcdf, :invlogccdf,
-            :quantile, :cquantile]
-
-    _fun! = Symbol('_', fun, '!')
-    fun! = Symbol(fun, '!')
-
-    @eval begin
-        function ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            for i in 1 : length(X)
-                r[i] = ($fun)(d, X[i])
-            end
-            return r
-        end
-
-        function ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray)
-            length(r) == length(X) ||
-                throw(ArgumentError("Inconsistent array dimensions."))
-            $(_fun!)(r, d, X)
-        end
-
-        ($fun)(d::UnivariateDistribution, X::AbstractArray) =
-            $(_fun!)(Array{promote_type(partype(d), eltype(X))}(size(X)), d, X)
-    end
-end
 
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
@@ -534,7 +489,7 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 end
 
 
-@compat abstract type RecursiveProbabilityEvaluator end
+abstract type RecursiveProbabilityEvaluator end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
@@ -550,11 +505,6 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 
     return r
 end
-
-
-pdf(d::DiscreteUnivariateDistribution) = isbounded(d) ? pdf(d, minimum(d):maximum(d)) :
-                                                        error("pdf(d) is not allowed when d is unbounded.")
-
 
 ## loglikelihood
 """
@@ -643,6 +593,7 @@ const continuous_distributions = [
     "ksonesided",
     "laplace",
     "levy",
+    "locationscale",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",

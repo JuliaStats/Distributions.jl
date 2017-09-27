@@ -67,7 +67,7 @@ const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
 const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
 ```
 """
-@compat abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
+abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 
@@ -175,7 +175,7 @@ isotropic covariance as `abs2(sig) * eye(d)`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-immutable MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -191,43 +191,43 @@ const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Ze
 const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal{T<:Real}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T})
+function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T}) where T<:Real
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-function MvNormal{T<:Real, Cov<:AbstractPDMat}(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov)
+function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) where {T<:Real, Cov<:AbstractPDMat}
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
-function MvNormal{Cov<:AbstractPDMat}(Σ::Cov)
+function MvNormal(Σ::Cov) where Cov<:AbstractPDMat
     T = eltype(Σ)
     MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
 end
 
-MvNormal{T<:Real}(μ::Vector{T}, Σ::Matrix{T}) = MvNormal(μ, PDMat(Σ))
-MvNormal{T<:Real}(μ::Vector{T}, σ::Vector{T}) = MvNormal(μ, PDiagMat(@compat(abs2.(σ))))
-MvNormal{T<:Real}(μ::Vector{T}, σ::T) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
+MvNormal(μ::Vector{T}, Σ::Matrix{T}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::Vector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
+MvNormal(μ::Vector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-function MvNormal{T<:Real,S<:Real}(μ::Vector{T}, Σ::VecOrMat{S})
+function MvNormal(μ::Vector{T}, Σ::VecOrMat{S}) where {T<:Real,S<:Real}
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
-function MvNormal{T<:Real}(μ::Vector{T}, σ::Real)
+function MvNormal(μ::Vector{T}, σ::Real) where T<:Real
     R = Base.promote_eltype(μ, σ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ))
 end
 
-MvNormal{T<:Real}(Σ::Matrix{T}) = MvNormal(PDMat(Σ))
-MvNormal{T<:Real}(σ::Vector{T}) = MvNormal(PDiagMat(@compat(abs2.(σ))))
+MvNormal(Σ::Matrix{T}) where {T<:Real} = MvNormal(PDMat(Σ))
+MvNormal(σ::Vector{T}) where {T<:Real} = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Conversion
-function convert{T<:Real}(::Type{MvNormal{T}}, d::MvNormal)
+function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
-function convert{T<:Real}(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat)
+function convert(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
 
@@ -249,7 +249,7 @@ Base.show(io::IO, d::MvNormal) =
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = full(d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
-@inline partype{T<:Real}(d::MvNormal{T}) = T
+@inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = full(d.Σ)
@@ -295,7 +295,7 @@ _rand!(d::MvNormal, x::AbstractVector) = _rand!(Base.GLOBAL_RNG, d, x)
 
 ### Estimation with known covariance
 
-immutable MvNormalKnownCov{Cov<:AbstractPDMat}
+struct MvNormalKnownCov{Cov<:AbstractPDMat}
     Σ::Cov
 end
 
@@ -305,13 +305,13 @@ MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
 
 length(g::MvNormalKnownCov) = dim(g.Σ)
 
-immutable MvNormalKnownCovStats{Cov<:AbstractPDMat}
+struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance
     sx::Vector{Float64}    # (weighted) sum of vectors
     tw::Float64            # sum of weights
 end
 
-function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64})
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where Cov<:AbstractPDMat
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, 2))
@@ -319,7 +319,7 @@ function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::AbstractMatr
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
-function suffstats{Cov<:AbstractPDMat}(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) where Cov<:AbstractPDMat
     (size(x,1) == length(g) && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     invΣ = inv(g.Σ)
@@ -330,7 +330,7 @@ end
 
 ## MLE estimation with covariance known
 
-fit_mle{C<:AbstractPDMat}(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) =
+fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat} =
     MvNormal(ss.sx * inv(ss.tw), g.Σ)
 
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
@@ -351,7 +351,7 @@ end
 
 ### Estimation (both mean and cov unknown)
 
-immutable MvNormalStats <: SufficientStats
+struct MvNormalStats <: SufficientStats
     s::Vector{Float64}  # (weighted) sum of x
     m::Vector{Float64}  # (weighted) mean of x
     s2::Matrix{Float64} # (weighted) sum of (x-μ) * (x-μ)'
@@ -371,7 +371,7 @@ end
 function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float64})
     d = size(x, 1)
     n = size(x, 2)
-    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     tw = sum(w)
     s = x * vec(w)

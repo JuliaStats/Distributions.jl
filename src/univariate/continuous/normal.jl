@@ -23,15 +23,15 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-immutable Normal{T<:Real} <: ContinuousUnivariateDistribution
+struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    (::Type{Normal{T}}){T}(μ, σ) = (@check_args(Normal, σ > zero(σ)); new{T}(μ, σ))
+    Normal{T}(μ, σ) where {T} = (@check_args(Normal, σ > zero(σ)); new{T}(μ, σ))
 end
 
 #### Outer constructors
-Normal{T<:Real}(μ::T, σ::T) = Normal{T}(μ, σ)
+Normal(μ::T, σ::T) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
 Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
 Normal(μ::Real) = Normal(μ, 1.0)
@@ -40,8 +40,8 @@ Normal() = Normal(0.0, 1.0)
 const Gaussian = Normal
 
 # #### Conversions
-convert{T <: Real, S <: Real}(::Type{Normal{T}}, μ::S, σ::S) = Normal(T(μ), T(σ))
-convert{T <: Real, S <: Real}(::Type{Normal{T}}, d::Normal{S}) = Normal(T(d.μ), T(d.σ))
+convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
+convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ))
 
 @distr_support Normal -Inf Inf
 
@@ -49,7 +49,7 @@ convert{T <: Real, S <: Real}(::Type{Normal{T}}, d::Normal{S}) = Normal(T(d.μ),
 #### Parameters
 
 params(d::Normal) = (d.μ, d.σ)
-@inline partype{T<:Real}(d::Normal{T}) = T
+@inline partype(d::Normal{T}) where {T<:Real} = T
 
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
@@ -62,8 +62,8 @@ mode(d::Normal) = d.μ
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
-skewness{T<:Real}(d::Normal{T}) = zero(T)
-kurtosis{T<:Real}(d::Normal{T}) = zero(T)
+skewness(d::Normal{T}) where {T<:Real} = zero(T)
+kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
@@ -86,14 +86,14 @@ rand(rng::AbstractRNG, d::Normal) = d.μ + d.σ * randn(rng)
 
 #### Fitting
 
-immutable NormalStats <: SufficientStats
+struct NormalStats <: SufficientStats
     s::Float64    # (weighted) sum of x
     m::Float64    # (weighted) mean of x
     s2::Float64   # (weighted) sum of (x - μ)^2
     tw::Float64    # total sample weight
 end
 
-function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T})
+function suffstats(::Type{Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
@@ -112,7 +112,7 @@ function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T})
     NormalStats(s, m, s2, n)
 end
 
-function suffstats{T<:Real}(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
 
     # compute s
@@ -136,17 +136,17 @@ end
 
 # Cases where μ or σ is known
 
-immutable NormalKnownMu <: IncompleteDistribution
+struct NormalKnownMu <: IncompleteDistribution
     μ::Float64
 end
 
-immutable NormalKnownMuStats <: SufficientStats
+struct NormalKnownMuStats <: SufficientStats
     μ::Float64      # known mean
     s2::Float64     # (weighted) sum of (x - μ)^2
     tw::Float64     # total sample weight
 end
 
-function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T})
+function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     μ = g.μ
     s2 = abs2(x[1] - μ)
     for i = 2:length(x)
@@ -155,7 +155,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T})
     NormalKnownMuStats(g.μ, s2, length(x))
 end
 
-function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     μ = g.μ
     s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
@@ -168,7 +168,7 @@ function suffstats{T<:Real}(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractAr
 end
 
 
-immutable NormalKnownSigma <: IncompleteDistribution
+struct NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)
@@ -177,17 +177,17 @@ immutable NormalKnownSigma <: IncompleteDistribution
     end
 end
 
-immutable NormalKnownSigmaStats <: SufficientStats
+struct NormalKnownSigmaStats <: SufficientStats
     σ::Float64      # known std.dev
     sx::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight
 end
 
-function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T})
+function suffstats(g::NormalKnownSigma, x::AbstractArray{T}) where T<:Real
     NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
-function suffstats{T<:Real}(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T})
+function suffstats(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T}) where T<:Real
     NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))
 end
 
@@ -199,7 +199,7 @@ fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, 
 
 # generic fit_mle methods
 
-function fit_mle{T<:Real}(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Float64=NaN)
+function fit_mle(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x))
@@ -217,7 +217,7 @@ function fit_mle{T<:Real}(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, 
     end
 end
 
-function fit_mle{T<:Real}(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}; mu::Float64=NaN, sigma::Float64=NaN)
+function fit_mle(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))

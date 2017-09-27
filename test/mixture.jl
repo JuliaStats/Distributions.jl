@@ -32,7 +32,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for i = 1:n
         @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test cdf(g, X) ≈ cf
+    @test cdf.(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -47,7 +47,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = @compat(log.(mix_p0))
+    mix_lp0 = log.(mix_p0)
 
     for i = 1:n
         @test pdf(g, X[i])                  ≈ mix_p0[i]
@@ -56,8 +56,8 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test pdf(g, X)                  ≈ mix_p0
-    @test logpdf(g, X)               ≈ mix_lp0
+    @test pdf.(g, X)                  ≈ mix_p0
+    @test logpdf.(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
     @test componentwise_logpdf(g, X) ≈ LP0
 
@@ -98,7 +98,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     end
 
     mix_p0 = P0 * pr
-    mix_lp0 = @compat(log.(mix_p0))
+    mix_lp0 = log.(mix_p0)
 
     for i = 1:n
         x_i = X[:,i]
@@ -108,6 +108,9 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
 
+    @show g
+    @show size(X)
+    @show size(mix_p0)
     @test pdf(g, X)                  ≈ mix_p0
     @test logpdf(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
@@ -150,6 +153,8 @@ test_params(g_u)
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
 @test minimum(g_u) == -2.0
 @test maximum(g_u) == 3.0
+@test insupport(g_u, 2.5) == true
+@test insupport(g_u, 3.5) == false
 
 g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
 @test isa(g_u, UnivariateGMM)
@@ -168,5 +173,6 @@ g_m = MixtureModel(
 @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
 @test length(components(g_m)) == 3
 @test length(g_m) == 2
+@test insupport(g_m, [0.0, 0.0]) == true
 test_mixture(g_m, 1000, 10^6)
 test_params(g_m)

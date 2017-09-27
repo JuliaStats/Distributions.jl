@@ -20,12 +20,12 @@ Dirichlet(alpha)         # Dirichlet distribution with parameter vector alpha
 Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
 ```
 """
-immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
+struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
     alpha::Vector{T}
     alpha0::T
     lmnB::T
 
-    function (::Type{Dirichlet{T}}){T}(alpha::Vector{T})
+    function Dirichlet{T}(alpha::Vector{T}) where T
         alpha0::T = zero(T)
         lmnB::T = zero(T)
         for i in 1:length(alpha)
@@ -38,18 +38,18 @@ immutable Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
         new{T}(alpha, alpha0, lmnB)
     end
 
-    function (::Type{Dirichlet{T}}){T}(d::Integer, alpha::T)
+    function Dirichlet{T}(d::Integer, alpha::T) where T
         alpha0 = alpha * d
         new{T}(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
     end
 end
 
-Dirichlet{T<:Real}(alpha::Vector{T}) = Dirichlet{T}(alpha)
-Dirichlet{T<:Real}(d::Integer, alpha::T) = Dirichlet{T}(d, alpha)
-Dirichlet{T<:Integer}(alpha::Vector{T}) = Dirichlet{Float64}(alpha)
+Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
+Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
+Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(alpha)
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
-immutable DirichletCanon
+struct DirichletCanon
     alpha::Vector{Float64}
 end
 
@@ -57,8 +57,8 @@ length(d::DirichletCanon) = length(d.alpha)
 
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
-convert{T<:Real, S<:Real}(::Type{Dirichlet{T}}, alpha::Vector{S}) = Dirichlet(convert(Vector{T}, alpha))
-convert{T<:Real, S<:Real}(::Type{Dirichlet{T}}, d::Dirichlet{S}) = Dirichlet(convert(Vector{T}, d.alpha))
+convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, alpha))
+convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, d.alpha))
 
 
 
@@ -69,7 +69,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 params(d::Dirichlet) = (d.alpha,)
-@inline partype{T<:Real}(d::Dirichlet{T}) = T
+@inline partype(d::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)
     α = d.alpha
@@ -122,7 +122,7 @@ function entropy(d::Dirichlet)
 end
 
 
-function dirichlet_mode!{T <: Real}(r::Vector{T}, α::Vector{T}, α0::T)
+function dirichlet_mode!(r::Vector{T}, α::Vector{T}, α0::T) where T <: Real
     k = length(α)
     s = α0 - k
     for i = 1:k
@@ -135,7 +135,7 @@ function dirichlet_mode!{T <: Real}(r::Vector{T}, α::Vector{T}, α0::T)
     return r
 end
 
-dirichlet_mode{T <: Real}(α::Vector{T}, α0::T) = dirichlet_mode!(Vector{T}(length(α)), α, α0)
+dirichlet_mode(α::Vector{T}, α0::T) where {T <: Real} = dirichlet_mode!(Vector{T}(length(α)), α, α0)
 
 mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
 mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
@@ -145,7 +145,7 @@ modes(d::Dirichlet) = [mode(d)]
 
 # Evaluation
 
-function insupport{T<:Real}(d::Dirichlet, x::AbstractVector{T})
+function insupport(d::Dirichlet, x::AbstractVector{T}) where T<:Real
     n = length(x)
     if length(d.alpha) != n
         return false
@@ -164,7 +164,7 @@ function insupport{T<:Real}(d::Dirichlet, x::AbstractVector{T})
     return true
 end
 
-function _logpdf{T<:Real}(d::Dirichlet, x::AbstractVector{T})
+function _logpdf(d::Dirichlet, x::AbstractVector{T}) where T<:Real
     a = d.alpha
     s = 0.
     for i in 1:length(a)
@@ -175,7 +175,7 @@ end
 
 # sampling
 
-function _rand!{T<:Real}(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T})
+function _rand!(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T}) where T<:Real
     s = 0.0
     n = length(x)
     α = d.alpha
@@ -191,7 +191,7 @@ end
 #
 #######################################
 
-immutable DirichletStats <: SufficientStats
+struct DirichletStats <: SufficientStats
     slogp::Vector{Float64}   # (weighted) sum of log(p)
     tw::Float64              # total sample weights
 
@@ -218,7 +218,7 @@ function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArr
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
     tw = 0.
@@ -311,7 +311,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     # This function directly overrides α
 
     K = length(elogp)
-    length(α) == K || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(α) == K || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     g = Vector{Float64}(K)
     iq = Vector{Float64}(K)
@@ -388,7 +388,7 @@ function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     n = size(P, 2)
-    length(w) == n || throw(ArgumentError("Inconsistent argument dimensions."))
+    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))

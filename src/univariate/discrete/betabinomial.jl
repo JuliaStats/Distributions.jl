@@ -18,18 +18,18 @@ External links:
 
 * [Beta-binomial distribution on Wikipedia](https://en.wikipedia.org/wiki/Beta-binomial_distribution)
 """
-immutable BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     α::T
     β::T
 
-    function (::Type{BetaBinomial{T}}){T}(n::Int, α::T, β::T)
+    function BetaBinomial{T}(n::Int, α::T, β::T) where T
         @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
         new{T}(n, α, β)
     end
 end
 
-BetaBinomial{T<:Real}(n::Integer, α::T, β::T) = BetaBinomial{T}(n, α, β)
+BetaBinomial(n::Integer, α::T, β::T) where {T<:Real} = BetaBinomial{T}(n, α, β)
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
 BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
 
@@ -37,10 +37,10 @@ BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α)
 insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{BetaBinomial{T}}, n::Int, α::S, β::S)
+function convert(::Type{BetaBinomial{T}}, n::Int, α::S, β::S) where {T <: Real, S <: Real}
     BetaBinomial(n, T(α), T(β))
 end
-function convert{T <: Real, S <: Real}(::Type{BetaBinomial{T}}, d::BetaBinomial{S})
+function convert(::Type{BetaBinomial{T}}, d::BetaBinomial{S}) where {T <: Real, S <: Real}
     BetaBinomial(d.n, T(d.α), T(d.β))
 end
 
@@ -49,7 +49,7 @@ end
 ntrials(d::BetaBinomial) = d.n
 
 params(d::BetaBinomial) = (d.n, d.α, d.β)
-@inline partype{T<:Real}(d::BetaBinomial{T}) = T
+@inline partype(d::BetaBinomial{T}) where {T<:Real} = T
 
 #### Properties
 
@@ -81,29 +81,18 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function pdf(d::BetaBinomial, k::Int)
+function pdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
+    insupport(d, k) || return zero(T)
     chooseinv = (n + 1) * beta(k + 1, n - k + 1)
     numerator = beta(k + α, n - k + β)
     denominator = beta(α, β)
     return numerator / (denominator * chooseinv)
 end
 
-function pdf(d::BetaBinomial)
-    n, α, β = d.n, d.α, d.β
-    denominator = beta(α, β)
-    values = Array{eltype(denominator)}(n+1)
-    for (i,k) in enumerate(0:n)
-        chooseinv = (n + 1) * beta(k + 1, n - k + 1)
-        numerator = beta(k + α, n - k + β)
-        @inbounds values[i] = numerator / (denominator * chooseinv)
-    end
-    return values
-end
+entropy(d::BetaBinomial) = entropy(Categorical(pdf.(d,support(d))))
+median(d::BetaBinomial) = median(Categorical(pdf.(d,support(d)))) - 1
+mode(d::BetaBinomial) = indmax(pdf.(d,support(d))) - 1
+modes(d::BetaBinomial) = modes(Categorical(pdf.(d,support(d)))) .- 1
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf(d)))
-median(d::BetaBinomial) = median(Categorical(pdf(d))) - 1
-mode{T<:Real}(d::BetaBinomial{T}) = indmax(pdf(d)) - one(T)
-modes(d::BetaBinomial) = [x - 1 for x in modes(Categorical(pdf(d)))]
-
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf(d)), p) - 1
+quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(d, support(d))), p) - 1

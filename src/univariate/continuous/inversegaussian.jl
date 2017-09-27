@@ -23,17 +23,17 @@ External links
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
 """
-immutable InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
 
-    function (::Type{InverseGaussian{T}}){T}(μ::T, λ::T)
+    function InverseGaussian{T}(μ::T, λ::T) where T
         @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
         new{T}(μ, λ)
     end
 end
 
-InverseGaussian{T<:Real}(μ::T, λ::T) = InverseGaussian{T}(μ, λ)
+InverseGaussian(μ::T, λ::T) where {T<:Real} = InverseGaussian{T}(μ, λ)
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
 InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64(λ))
 InverseGaussian(μ::Real) = InverseGaussian(μ, 1.0)
@@ -43,10 +43,10 @@ InverseGaussian() = InverseGaussian(1.0, 1.0)
 
 #### Conversions
 
-function convert{T <: Real, S <: Real}(::Type{InverseGaussian{T}}, μ::S, λ::S)
+function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <: Real}
     InverseGaussian(T(μ), T(λ))
 end
-function convert{T <: Real, S <: Real}(::Type{InverseGaussian{T}}, d::InverseGaussian{S})
+function convert(::Type{InverseGaussian{T}}, d::InverseGaussian{S}) where {T <: Real, S <: Real}
     InverseGaussian(T(d.μ), T(d.λ))
 end
 
@@ -54,7 +54,7 @@ end
 
 shape(d::InverseGaussian) = d.λ
 params(d::InverseGaussian) = (d.μ, d.λ)
-@inline partype{T<:Real}(d::InverseGaussian{T}) = T
+@inline partype(d::InverseGaussian{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -76,7 +76,7 @@ end
 
 #### Evaluation
 
-function pdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function pdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         return sqrt(λ / (twoπ * x^3)) * exp(-λ * (x - μ)^2 / (2μ^2 * x))
@@ -85,7 +85,7 @@ function pdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     end
 end
 
-function logpdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function logpdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         return (log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x))/2
@@ -94,7 +94,7 @@ function logpdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     end
 end
 
-function cdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function cdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         u = sqrt(λ / x)
@@ -105,7 +105,7 @@ function cdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     end
 end
 
-function ccdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function ccdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         u = sqrt(λ / x)
@@ -116,7 +116,7 @@ function ccdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     end
 end
 
-function logcdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function logcdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         u = sqrt(λ / x)
@@ -129,7 +129,7 @@ function logcdf{T<:Real}(d::InverseGaussian{T}, x::Real)
     end
 end
 
-function logccdf{T<:Real}(d::InverseGaussian{T}, x::Real)
+function logccdf(d::InverseGaussian{T}, x::Real) where T<:Real
     if x > 0
         μ, λ = params(d)
         u = sqrt(λ / x)

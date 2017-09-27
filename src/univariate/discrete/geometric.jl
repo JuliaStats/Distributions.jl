@@ -21,31 +21,31 @@ External links
 *  [Geometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Geometric_distribution)
 
 """
-immutable Geometric{T<:Real} <: DiscreteUnivariateDistribution
+struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function (::Type{Geometric{T}}){T}(p::T)
+    function Geometric{T}(p::T) where T
         @check_args(Geometric, zero(p) < p < one(p))
         new{T}(p)
     end
 
 end
 
-Geometric{T<:Real}(p::T) = Geometric{T}(p)
+Geometric(p::T) where {T<:Real} = Geometric{T}(p)
 Geometric() = Geometric(0.5)
 
 @distr_support Geometric 0 Inf
 
 ### Conversions
-convert{T<:Real}(::Type{Geometric{T}}, p::Real) = Geometric(T(p))
-convert{T <: Real, S <: Real}(::Type{Geometric{T}}, d::Geometric{S}) = Geometric(T(d.p))
+convert(::Type{Geometric{T}}, p::Real) where {T<:Real} = Geometric(T(p))
+convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p))
 
 ### Parameters
 
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
-@inline partype{T<:Real}(d::Geometric{T}) = T
+@inline partype(d::Geometric{T}) where {T<:Real} = T
 
 
 ### Statistics
@@ -54,7 +54,7 @@ mean(d::Geometric) = failprob(d) / succprob(d)
 
 median(d::Geometric) = -fld(logtwo, log1p(-d.p)) - 1
 
-mode{T<:Real}(d::Geometric{T}) = zero(T)
+mode(d::Geometric{T}) where {T<:Real} = zero(T)
 
 var(d::Geometric) = (1 - d.p) / abs2(d.p)
 
@@ -67,7 +67,7 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
 ### Evaluations
 
-function pdf{T<:Real}(d::Geometric{T}, x::Int)
+function pdf(d::Geometric{T}, x::Int) where T<:Real
     if x >= 0
         p = d.p
         return p < one(p) / 10 ? p * exp(log1p(-p) * x) : d.p * (one(p) - p)^x
@@ -76,34 +76,41 @@ function pdf{T<:Real}(d::Geometric{T}, x::Int)
     end
 end
 
-function logpdf{T<:Real}(d::Geometric{T}, x::Int)
+function logpdf(d::Geometric{T}, x::Int) where T<:Real
     x >= 0 ? log(d.p) + log1p(-d.p) * x : -T(Inf)
 end
 
-immutable RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
     p0::Float64
 end
 
 RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
 nextpdf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
-_pdf!(r::AbstractArray, d::Geometric, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
+    r .= pdf.(d,X)
+end
 
 
-function cdf{T<:Real}(d::Geometric{T}, x::Int)
+
+function cdf(d::Geometric{T}, x::Int) where T<:Real
     x < 0 && return zero(T)
     p = succprob(d)
     n = x + 1
     p < 1/2 ? -expm1(log1p(-p)*n) : 1 - (1 - p)^n
 end
 
-function ccdf{T<:Real}(d::Geometric{T}, x::Int)
+function ccdf(d::Geometric{T}, x::Int) where T<:Real
     x < 0 && return one(T)
     p = succprob(d)
     n = x + 1
     p < 1/2 ? exp(log1p(-p)*n) : (1 - p)^n
 end
 
-function logcdf{T<:Real}(d::Geometric{T}, x::Int)
+function logcdf(d::Geometric{T}, x::Int) where T<:Real
     x < 0 ? -T(Inf) : log1mexp(log1p(-d.p) * (x + 1))
 end
 
@@ -115,7 +122,7 @@ cquantile(d::Geometric, p::Real) = invlogccdf(d, log(p))
 
 invlogcdf(d::Geometric, lp::Real) = invlogccdf(d, log1mexp(lp))
 
-function invlogccdf{T<:Real}(d::Geometric{T}, lp::Real)
+function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
     if (lp > zero(d.p)) || isnan(lp)
         return T(NaN)
     elseif isinf(lp)
@@ -146,19 +153,19 @@ rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
 
 ### Model Fitting
 
-immutable GeometricStats <: SufficientStats
+struct GeometricStats <: SufficientStats
     sx::Float64
     tw::Float64
 
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
-suffstats{T<:Integer}(::Type{Geometric}, x::AbstractArray{T}) = GeometricStats(sum(x), length(x))
+suffstats(::Type{Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
 
-function suffstats{T<:Integer}(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
     sx = 0.
     tw = 0.
