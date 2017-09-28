@@ -103,7 +103,6 @@ function kurtosis(d::Frechet{T}) where T<:Real
 end
 
 function entropy(d::Frechet)
-    γ = 0.57721566490153286060  # γ is the Euler-Mascheroni constant
     1 + γ / d.α + γ + log(d.θ / d.α)
 end
 
