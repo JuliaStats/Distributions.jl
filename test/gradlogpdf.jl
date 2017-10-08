@@ -1,5 +1,9 @@
 using Distributions
-using Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 # Test for gradlogpdf on univariate distributions
 

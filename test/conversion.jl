@@ -1,4 +1,8 @@
-using Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 using Distributions
 
 @test convert(Binomial, Bernoulli(0.75)) == Binomial(1, 0.75)

@@ -1,7 +1,11 @@
 # Testing continuous univariate distributions
 
 using Distributions
-using Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 using Calculus.derivative
 
 n_tsamples = 100

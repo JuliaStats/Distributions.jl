@@ -1,6 +1,10 @@
 using Distributions
 using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 tests = [
     "types",
@@ -45,7 +49,11 @@ end
 
 @everywhere using Distributions
 @everywhere using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-@everywhere using Test
+@everywhere if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 @everywhere srand(345679)
 res = pmap(tests) do t
     include(t*".jl")

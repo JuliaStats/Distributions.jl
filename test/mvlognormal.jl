@@ -1,7 +1,11 @@
 # Tests on Multivariate LogNormal distributions
 
 using Distributions, Compat
-using Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 
 ####### Core testing procedure
