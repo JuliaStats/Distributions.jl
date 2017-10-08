@@ -62,5 +62,10 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
+if VERSION >= v"0.7.0-DEV"
+    display(Test.detect_ambiguities(Distributions))
+else
+    display(Base.Test.detect_ambiguities(Distributions))
+end
+
 println()
