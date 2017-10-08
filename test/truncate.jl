@@ -5,7 +5,7 @@ module TestTruncate
 using Distributions
 using ForwardDiff: Dual
 import JSON
-using Base.Test
+using Test
 using Compat
 
 

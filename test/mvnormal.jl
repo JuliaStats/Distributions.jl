@@ -4,7 +4,7 @@ import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions, Compat
 import Compat.view
-using Base.Test
+using Test
 import Distributions: distrname
 
 

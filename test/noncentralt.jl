@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 @testset "non-central T-Distributions" begin
     ν = 50

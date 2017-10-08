@@ -1,7 +1,7 @@
 # Tests for Dirichlet distribution
 
 using Distributions
-using Base.Test
+using Test
 
 srand(34567)
 

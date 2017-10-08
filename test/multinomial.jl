@@ -1,7 +1,7 @@
 # Tests for Multinomial
 
 using Distributions
-using Base.Test
+using Test
 
 p = [0.2, 0.5, 0.3]
 nt = 10

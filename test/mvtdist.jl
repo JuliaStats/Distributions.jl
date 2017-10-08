@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 import Distributions: GenericMvTDist
 import PDMats: PDMat
 

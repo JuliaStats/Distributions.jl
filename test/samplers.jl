@@ -1,7 +1,7 @@
 # Testing of samplers
 
 using Distributions
-using Base.Test
+using Test
 
 import Distributions:
     CategoricalDirectSampler,

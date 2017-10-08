@@ -1,6 +1,6 @@
 using Distributions
 using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Base.Test
+using Test
 
 tests = [
     "types",
@@ -45,7 +45,7 @@ end
 
 @everywhere using Distributions
 @everywhere using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-@everywhere using Base.Test
+@everywhere using Test
 @everywhere srand(345679)
 res = pmap(tests) do t
     include(t*".jl")
@@ -54,5 +54,5 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Base.Test.detect_ambiguities(Distributions))
+display(Test.detect_ambiguities(Distributions))
 println()

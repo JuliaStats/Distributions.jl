@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 d = Kolmogorov()
 # compare to Smirnov's tabulated values

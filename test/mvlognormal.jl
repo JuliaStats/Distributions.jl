@@ -1,7 +1,7 @@
 # Tests on Multivariate LogNormal distributions
 
 using Distributions, Compat
-using Base.Test
+using Test
 
 
 ####### Core testing procedure

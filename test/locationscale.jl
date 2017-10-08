@@ -1,6 +1,6 @@
 
 using Distributions
-using Base.Test
+using Test
 
 
 function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Float64)

@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 # Test the consistency between the recursive and nonrecursive computation of the pdf 
 # of the Binomial distribution

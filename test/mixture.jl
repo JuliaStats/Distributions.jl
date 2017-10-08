@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 # Core testing procedure
 

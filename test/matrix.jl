@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 v = 7.0
 S = eye(2)

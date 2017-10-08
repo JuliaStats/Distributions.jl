@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Test
 
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution

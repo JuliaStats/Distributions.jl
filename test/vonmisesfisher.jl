@@ -1,7 +1,7 @@
 # Tests for Von-Mises Fisher distribution
 
 using Distributions
-using Base.Test
+using Test
 using SpecialFunctions
 
 vmfCp(p::Int, κ::Float64) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
