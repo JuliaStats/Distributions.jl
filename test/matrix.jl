@@ -1,5 +1,6 @@
 using Distributions
-using Base.Test
+using Compat.Test
+
 
 v = 7.0
 S = eye(2)

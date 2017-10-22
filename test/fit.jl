@@ -5,7 +5,8 @@
 #
 
 using Distributions, Compat
-using Base.Test
+using Compat.Test
+
 
 n0 = 100
 N = 10^5

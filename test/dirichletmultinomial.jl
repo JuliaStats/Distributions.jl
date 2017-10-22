@@ -2,7 +2,8 @@
 
 
 using Distributions
-using Base.Test
+using Compat.Test
+
 using Compat
 
 srand(123)
