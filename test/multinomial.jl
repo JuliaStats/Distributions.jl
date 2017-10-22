@@ -112,3 +112,6 @@ d0 = Multinomial(0, p)
 @test insupport(d0, [0, 0, 4]) == false
 @test length(d0) == 3
 @test size(d0) == (3,)
+
+# Degenerated
+@test pdf(Multinomial(2, [1.0,0.0]), [2,0]) == 1
