@@ -132,6 +132,7 @@ NormalCanon
 NormalInverseGaussian
 Pareto
 Rayleigh
+Semicircle
 SymTriangularDist
 TDist
 TriangularDist

@@ -30,6 +30,7 @@ tests = [
     "noncentralt",
     "locationscale",
     "quantile_newton",
+    "semicircle",
 ]
 
 print_with_color(:blue, "Running tests:\n")
