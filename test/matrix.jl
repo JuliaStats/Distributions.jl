@@ -1,5 +1,9 @@
 using Distributions
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 v = 7.0
 S = eye(2)

@@ -1,6 +1,10 @@
 
 using Distributions
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 
 function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Float64)

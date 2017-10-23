@@ -1,7 +1,10 @@
 # Utilities to support the testing of distributions and samplers
 
-import Base.Test: @test
-
+if VERSION >= v"0.7.0-DEV"
+    import Test: @test
+else
+    import Base.Test: @test
+end
 # auxiliary functions
 
 # to workaround issues of Base.linspace

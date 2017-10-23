@@ -1,7 +1,11 @@
 #
 
 using Distributions
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 dg = Gamma(1,1)
 
@@ -37,6 +41,3 @@ for i = 0.01:0.01:0.99
     @test isapprox(pdf(d_z, q)          , pdf(dg_za,q+mean(dg_za)), atol=0.02)
 
 end
-
-
-

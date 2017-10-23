@@ -1,7 +1,11 @@
 # Tests for Dirichlet distribution
 
 using Distributions
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 srand(34567)
 

@@ -4,7 +4,11 @@ import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions, Compat
 import Compat.view
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 import Distributions: distrname
 
 

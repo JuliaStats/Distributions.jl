@@ -5,7 +5,11 @@
 #
 
 using Distributions, Compat
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 n0 = 100
 N = 10^5
@@ -352,4 +356,3 @@ d = fit(Poisson, x, w)
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
 @test isapprox(mean(d), 8.2, atol=0.2)
-

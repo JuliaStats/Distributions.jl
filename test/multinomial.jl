@@ -1,7 +1,11 @@
 # Tests for Multinomial
 
 using Distributions
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 
 p = [0.2, 0.5, 0.3]
 nt = 10

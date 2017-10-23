@@ -5,7 +5,11 @@ module TestTruncate
 using Distributions
 using ForwardDiff: Dual
 import JSON
-using Base.Test
+if VERSION >= v"0.7.0-DEV"
+    using Test
+else
+    using Base.Test
+end
 using Compat
 
 
