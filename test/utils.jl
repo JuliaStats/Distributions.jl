@@ -1,5 +1,6 @@
 using Distributions
-using Base.Test
+using Compat.Test
+
 
 # RealInterval
 r = RealInterval(1.5, 4.0)

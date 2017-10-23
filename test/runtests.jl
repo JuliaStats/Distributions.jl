@@ -1,6 +1,7 @@
 using Distributions
 using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Base.Test
+using Compat.Test
+
 
 tests = [
     "types",
@@ -27,7 +28,9 @@ tests = [
     "gradlogpdf",
     "truncate",
     "noncentralt",
-    "locationscale"]
+    "locationscale",
+    "quantile_newton",
+]
 
 print_with_color(:blue, "Running tests:\n")
 
@@ -54,5 +57,5 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Base.Test.detect_ambiguities(Distributions))
+display(Compat.Test.detect_ambiguities(Distributions))
 println()
