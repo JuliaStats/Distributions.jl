@@ -65,6 +65,18 @@ end
 # test type stability of logpdf
 @test typeof(logpdf(convert(Multinomial{Float32}, d), x1)) == Float32
 
+# test degenerate cases of logpdf
+d1 = Multinomial(1, [0.5, 0.5, 0.0])
+d2 = Multinomial(0, [0.5, 0.5, 0.0])
+x2 = [1, 0, 0]
+x3 = [0, 0, 1]
+x4 = [1, 0, 1]
+
+@test logpdf(d1, x2) ≈ log(0.5)
+@test logpdf(d2, x2) == -Inf
+@test logpdf(d1, x3) == -Inf
+@test logpdf(d2, x3) == -Inf
+
 # suffstats
 
 d0 = d

@@ -145,16 +145,15 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     n = ntrials(d)
     S = eltype(p)
     R = promote_type(T, S)
+    insupport(d,x) || return -R(Inf)
     s = R(lgamma(n + 1))
-    t = zero(T)
     for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds p_i = p[i]
-        t += xi
-        s -= R(lgamma(xi + 1))
-        @inbounds s += xi * log(p_i)
-    end
-    return ifelse(t == n, s, -R(Inf))
+        s -= R(lgamma(R(xi) + 1))
+        s += xlogy(xi, p_i)
+    end    
+    return s
 end
 
 # Sampling
