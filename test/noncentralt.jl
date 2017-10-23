@@ -1,5 +1,6 @@
 using Distributions
-using Base.Test
+using Compat.Test
+
 
 @testset "non-central T-Distributions" begin
     ν = 50

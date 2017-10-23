@@ -1,5 +1,6 @@
 using Distributions
-using Base.Test
+using Compat.Test
+
 
 for p in Vector{Float64}[
     [0.5, 0.5],

@@ -1,7 +1,8 @@
 #
 
 using Distributions
-using Base.Test
+using Compat.Test
+
 
 dg = Gamma(1,1)
 

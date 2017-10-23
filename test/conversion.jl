@@ -1,4 +1,5 @@
-using Base.Test
+using Compat.Test
+
 using Distributions
 
 @test convert(Binomial, Bernoulli(0.75)) == Binomial(1, 0.75)

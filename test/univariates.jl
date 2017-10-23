@@ -2,7 +2,8 @@
 
 using Distributions
 import JSON
-using Base.Test
+using Compat.Test
+
 using Compat
 
 
