@@ -51,7 +51,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
     @test cdf(d,μ-0.4) ≈ cdf(dref,μ-0.4)
     @test logcdf(d,μ-0.4) ≈ logcdf(dref,μ-0.4)
     @test ccdf(d,μ-0.4) ≈ ccdf(dref,μ-0.4) atol=1e-100
-    @test logccdf(d,μ-0.4) ≈ logccdf(dref,μ-0.4) atol=1e-20
+    @test logccdf(d,μ-0.4) ≈ logccdf(dref,μ-0.4) atol=1e-16
     @test quantile(d,0.1) ≈ quantile(dref,0.1)
     @test quantile(d,0.5) ≈ quantile(dref,0.5)
     @test quantile(d,0.9) ≈ quantile(dref,0.9)

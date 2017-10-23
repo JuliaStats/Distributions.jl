@@ -21,7 +21,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test length(μ) == d
     @test size(Σ) == (d, d)
     @test var(g)     ≈ diag(Σ)
-    @test entropy(g) ≈ 0.5 * logdet(2π * e * Σ)
+    @test entropy(g) ≈ 0.5 * logdet(2π * ℯ * Σ)
     ldcov = logdetcov(g)
     @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
@@ -66,7 +66,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     end
     @test sqmahal(g, X) ≈ sqm
 
-    lp = -0.5 * sqm - 0.5 * (d * log(2.0 * pi) + ldcov)
+    lp = -0.5 .* sqm .- 0.5 * (d * log(2.0 * pi) + ldcov)
     for i = 1:min(100, n_tsamples)
         @test logpdf(g, X[:,i]) ≈ lp[i]
     end

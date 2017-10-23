@@ -27,7 +27,7 @@ abstract type AbstractMvLogNormal <: ContinuousMultivariateDistribution end
 
 function insupport(::Type{D},x::AbstractVector{T}) where {T<:Real,D<:AbstractMvLogNormal}
     for i=1:length(x)
-      @inbounds 0.0<x[i]<Inf?continue:(return false)
+      @inbounds 0.0<x[i]<Inf ? continue : (return false)
     end
     true
 end
@@ -219,7 +219,7 @@ Return the mode vector of the lognormal distribution, which is strictly smaller 
 mode(d::MvLogNormal) = exp.(mean(d.normal) - var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
-    return m*m'.*(exp.(cov(d.normal)) - 1)
+    return m*m'.*(exp.(cov(d.normal)) .- 1)
   end
 var(d::MvLogNormal) = diag(cov(d))
 

@@ -6,6 +6,7 @@ using PDMats
 using StatsFuns
 using StatsBase
 using Compat
+import Compat.MathConstants: γ
 
 import QuadGK.quadgk
 import Compat.view

@@ -58,7 +58,7 @@ end
 
 ntrials(d::PoissonBinomial) = length(d.p)
 succprob(d::PoissonBinomial) = d.p
-failprob(d::PoissonBinomial) = 1 - d.p
+failprob(d::PoissonBinomial) = 1 .- d.p
 
 params(d::PoissonBinomial) = (d.p, )
 @inline partype(d::PoissonBinomial{T}) where {T<:Real} = T
@@ -101,12 +101,12 @@ quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
 
 function mgf(d::PoissonBinomial, t::Real)
     p,  = params(d)
-    prod(1 - p + p * exp(t))
+    prod(1 .- p .+ p .* exp(t))
 end
 
 function cf(d::PoissonBinomial, t::Real)
     p,  = params(d)
-    prod(1 - p + p * cis(t))
+    prod(1 .- p .+ p .* cis(t))
 end
 
 pdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0

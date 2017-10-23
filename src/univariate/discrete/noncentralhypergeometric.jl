@@ -62,9 +62,9 @@ convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeome
 # Properties
 function _P(d::FisherNoncentralHypergeometric, k::Int)
     y = support(d)
-    p = -log.(d.ns + 1) - lbeta.(d.ns - y + 1, y + 1) -
-            log.(d.nf + 1) - lbeta.(d.nf - d.n + y + 1, d.n - y + 1) +
-            xlogy.(y, d.ω) + xlogy.(k, y)
+    p = -log(d.ns + 1) .- lbeta.(d.ns + 1 .- y, y .+ 1) .-
+            log(d.nf + 1) .- lbeta.(d.nf - d.n + 1 .+ y, d.n + 1 .- y) .+
+            xlogy.(y, d.ω) .+ xlogy.(k, y)
     logsumexp(p)
 end
 
@@ -76,7 +76,7 @@ function _mode(d::FisherNoncentralHypergeometric)
 end
 
 mean(d::FisherNoncentralHypergeometric) = exp.(_P(d,1) - _P(d,0))
-var(d::FisherNoncentralHypergeometric) = exp.(_P(d,2) - _P(d,0)) - exp.(2*(_P(d,1) - _P(d,0)))
+var(d::FisherNoncentralHypergeometric) = exp.(_P(d,2) .- _P(d,0)) .- exp.(2 .* (_P(d,1) .- _P(d,0)))
 mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 
 testfd(d::FisherNoncentralHypergeometric) = d.ω^3
@@ -115,7 +115,7 @@ convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHype
 
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(d, support(d)))
-var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) - mean(d)).^2 .* pdf.(d, support(d)))
+var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) .- mean(d)).^2 .* pdf.(d, support(d)))
 mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf.(d, support(d)))]
 
 entropy(d::WalleniusNoncentralHypergeometric) = 1

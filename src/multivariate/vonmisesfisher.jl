@@ -99,7 +99,7 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     #   Computational Statistics, 2007, Vol. 22:145-157.
     #
 
-    const maxiter = 200
+    maxiter = 200
     half_p = 0.5 * p
 
     ρ2 = abs2(ρ)

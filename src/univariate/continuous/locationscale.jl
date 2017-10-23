@@ -1,6 +1,6 @@
 """
     LocationScale(μ,σ,ρ)
-    
+
 A location-scale transformed distribution with location parameter `μ`,
 scale parameter `σ`, and given distribution `ρ`.
 
@@ -49,7 +49,7 @@ params(d::LocationScale) = (d.μ,d.σ,d.ρ)
 mean(d::LocationScale) = d.μ + d.σ * mean(d.ρ)
 median(d::LocationScale) = d.μ + d.σ * median(d.ρ)
 mode(d::LocationScale) = d.μ + d.σ * mode(d.ρ)
-modes(d::LocationScale) = d.μ + d.σ * modes(d.ρ)
+modes(d::LocationScale) = d.μ .+ d.σ .* modes(d.ρ)
 
 var(d::LocationScale) = d.σ^2 * var(d.ρ)
 std(d::LocationScale) = d.σ * std(d.ρ)
