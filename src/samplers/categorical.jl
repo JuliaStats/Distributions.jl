@@ -28,7 +28,7 @@ end
 struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
-    isampler::RangeGeneratorInt{Int,UInt}
+    isampler::RangeGeneratorInt{UInt,UInt}
 end
 ncategories(s::AliasTable) = length(s.accept)
 
@@ -50,4 +50,3 @@ end
 rand(s::AliasTable) = rand(Base.Random.GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
-
