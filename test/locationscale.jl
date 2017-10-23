@@ -44,7 +44,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 
     insupport(d,0.4) == insupport(dref,0.4)
     @test pdf(d,0.1) ≈ pdf(dref,0.1)
-    @test pdf(d,2:4) ≈ pdf(dref,2:4)
+    @test pdf.(d,2:4) ≈ pdf.(dref,2:4)
     @test logpdf(d,0.4) ≈ logpdf(dref,0.4)
     @test loglikelihood(d,[0.1,0.2,0.3]) ≈ loglikelihood(dref,[0.1,0.2,0.3])
     @test cdf(d,μ-0.4) ≈ cdf(dref,μ-0.4)

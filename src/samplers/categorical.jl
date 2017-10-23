@@ -38,8 +38,7 @@ function AliasTable(probs::AbstractVector{T}) where T<:Real
     accp = Vector{Float64}(n)
     alias = Vector{Int}(n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    un = unsigned(n)
-    AliasTable(accp, alias, Base.Random.RangeGeneratorInt(one(un),un))
+    AliasTable(accp, alias, Base.Random.RangeGenerator(1:n))
 end
 
 function rand(rng::AbstractRNG, s::AliasTable)
