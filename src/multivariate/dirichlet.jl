@@ -1,7 +1,7 @@
 """
     Dirichlet
 
-The [Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution>) is often
+The [Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution) is often
 used the conjugate prior for Categorical or Multinomial distributions.
 The probability density function of a Dirichlet distribution with parameter
 ``\\alpha = (\\alpha_1, \\ldots, \\alpha_k)`` is:
