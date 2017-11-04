@@ -6,6 +6,7 @@ struct Generic{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistri
         new(vs, ps)
 
     function Generic{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
+        @check_args(Generic, length(vs) == length(ps))
         @check_args(Generic, isprobvec(ps))
         @check_args(Generic, allunique(vs))
         sort_order = sortperm(vs)
@@ -20,12 +21,27 @@ Generic(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
 convert(::Type{Generic{T,P,S}}, d::Generic) where {T,P,S} =
     Generic{T,P,S}(S(support(d)), Vector{P}(probs(d)), NoArgCheck())
 
+# Accessors
 params(d::Generic) = (d.support, d.p)
 support(d::Generic) = d.support
 probs(d::Generic)  = d.p
 
-rand(d::Generic{T,P}) where {T,P} =
-    support(d)[searchsortedfirst(cumsum(probs(d)), rand(P))] #TODO: Switch to single pass
+# Sampling
+
+function rand(d::Generic{T,P}) where {T,P}
+    x = support(d)
+    p = probs(d)
+    draw = rand(P)
+    cp = zero(P)
+    i = 0
+    while cp < draw
+        cp += p[i +=1]
+    end
+    x[i]
+end
+
+sampler(d::Generic) =
+    GenericSampler(support(d), probs(d))
 
 # Evaluation
 
@@ -140,14 +156,95 @@ end
 
 function mgf(d::Generic, t::Real)
     x, p = params(d)
-    dot(p, exp.(t.*x))
+    s = zero(Float64)
+    for i in 1:length(x)
+        s += p[i] * exp(t*x[i])
+    end
+    s
 end
 
 function cf(d::Generic, t::Real)
     x, p = params(d)
-    dot(p, cis.(t.*x))
+    s = zero(Complex{Float64})
+    for i in 1:length(x)
+       s += p[i] * cis(t*x[i])
+    end
+    s
 end
 
-# TODO: Sufficient statistics
+# Sufficient statistics
 
-# TODO: MLE
+struct GenericStats{T<:Real,P<:Real,S<:AbstractVector{T}} <: SufficientStats
+    support::S
+    freq::Vector{P}
+end
+GenericStats(vs::S, fs::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
+    GenericStats{T,P,S}(vs, fs)
+
+function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
+
+    N = length(x)
+    N == 0 && return GenericStats(T[], Float64[])
+
+    n = 1
+    vs = Vector{T}(N)
+    ps = zeros(N)
+    x = sort(vec(x))
+
+    vs[1] = x[1]
+    ps[1] += 1.
+
+    xprev = x[1]
+    for i = 2:N
+        @inbounds xi = x[i]
+        if xi != xprev
+            n += 1
+            @inbounds vs[n] = xi
+        end
+        @inbounds ps[n] += 1.
+        xprev = xi
+    end
+
+    resize!(vs, n)
+    resize!(ps, n)
+    GenericStats(vs, ps)
+
+end
+
+function suffstats(::Type{Generic}, x::AbstractArray{T}, w::AbstractArray{<:Real}) where {T<:Real}
+
+    @check_args(Generic, length(x) == length(w))
+
+    N = length(x)
+    N == 0 && return GenericStats(T[], Float64[])
+
+    n = 1
+    vs = Vector{T}(N)
+    ps = zeros(N)
+    x = sort(vec(x))
+
+    vs[1] = x[1]
+    ps[1] += ws[1]
+
+    xprev = x[1]
+    for i = 2:N
+        @inbounds xi = x[i]
+        @inbounds wi = w[i]
+        if xi != xprev
+            n += 1
+            @inbounds vs[n] = xi
+        end
+        @inbounds ps[n] += wi
+        xprev = xi
+    end
+
+    resize!(vs, n)
+    resize!(ps, n)
+    GenericStats(vs, ps)
+
+end
+
+# # Model fitting
+
+fit_mle(::Type{Generic}, ss::GenericStats{T,P,S}) where {T,P,S} =
+    Generic{T,P,S}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())

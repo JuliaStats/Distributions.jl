@@ -48,3 +48,25 @@ ws = ProbabilityWeights(probs(d))
 @test mgf(d, 0.17) ≈ 7.262034e7
 @test cf(d, 0) ≈ 1.0
 @test cf(d, 0.17) ≈ 0.3604521478 + 0.6953481124im
+
+# Fitting
+xs = [1,2,3,4,5,4,3,2,3,2,1]
+ss = suffstats(Generic, xs)
+@test ss isa Distributions.GenericStats{Int,Float64,Vector{Int}}
+@test ss.support == [1,2,3,4,5]
+@test ss.freq == [2., 3., 3., 2., 1.]
+
+d1 = fit_mle(Generic, ss)
+@test d1 isa Generic{Int,Float64,Vector{Int}}
+@test support(d1) == ss.support
+@test probs(d1) ≈ ss.freq ./ 11
+
+d2 = fit_mle(Generic, xs)
+@test typeof(d2) == typeof(d1)
+@test support(d2) == support(d1)
+@test probs(d2) ≈ probs(d1)
+
+d3 = fit(Generic, xs)
+@test typeof(d2) == typeof(d1)
+@test support(d3) == support(d1)
+@test probs(d3) ≈ probs(d1)

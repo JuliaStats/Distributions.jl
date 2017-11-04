@@ -9,8 +9,5 @@ end
 GenericSampler(support::S, probs::Vector{<:Real}) where {T<:Real,S<:AbstractVector{T}} =
     GenericSampler{T,S}(support, probs)
 
-sampler(d::Generic) =
-    GenericSampler(d.support, d.p)
-
 rand(s::GenericSampler) =
     (@inbounds v = s.support[rand(s.aliastable)]; v)
