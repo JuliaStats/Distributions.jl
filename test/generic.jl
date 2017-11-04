@@ -44,3 +44,7 @@ ws = ProbabilityWeights(probs(d))
 @test entropy(d) ≈ 1.2798542258336676
 @test mode(d) == 40
 @test modes(d) == [40]
+@test mgf(d, 0) ≈ 1.0
+@test mgf(d, 0.17) ≈ 7.262034e7
+@test cf(d, 0) ≈ 1.0
+@test cf(d, 0.17) ≈ 0.3604521478 + 0.6953481124im

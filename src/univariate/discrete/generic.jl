@@ -138,8 +138,15 @@ function modes(d::Generic{T,P}) where {T,P}
     mds
 end
 
-mgf(d::Generic) = nothing # TODO
-cf(d::Generic) = nothing # TODO
+function mgf(d::Generic, t::Real)
+    x, p = params(d)
+    dot(p, exp.(t.*x))
+end
+
+function cf(d::Generic, t::Real)
+    x, p = params(d)
+    dot(p, cis.(t.*x))
+end
 
 # TODO: Sufficient statistics
 
