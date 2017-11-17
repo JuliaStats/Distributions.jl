@@ -13,7 +13,7 @@ end
 
 ## Assuming that discrete distributions only take integer values.
 function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pmf(distr,x)
+    f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
     sum(map(x -> f(x)*g(x), leftEnd:rightEnd))
 end
