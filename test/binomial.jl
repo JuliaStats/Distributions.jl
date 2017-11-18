@@ -23,3 +23,7 @@ for (p, n) in [(0.6, 10), (0.8, 6), (0.5, 40), (0.04, 20), (1., 100), (0., 10), 
     end
 
 end
+
+# Test calculation of expectation value for Binomial distribution
+@test Distributions.expectation(Binomial(6), identity) ≈ 3.0
+@test Distributions.expectation(Binomial(10, 0.2), x->-x) ≈ -2.0
