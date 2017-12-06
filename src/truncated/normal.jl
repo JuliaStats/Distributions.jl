@@ -97,6 +97,8 @@ function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
     μ = mean(d0)
     σ = std(d0)
     if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
+        # avoids loss of significance when truncation is far from μ.
+        # See https://github.com/cossio/TruncatedNormal.jl/blob/master/notes/normal.pdf.
         _tnmean(d.lower, d.upper, μ, σ)
     else
         a = (d.lower - μ) / σ
@@ -110,6 +112,8 @@ function var(d::Truncated{Normal{T},Continuous}) where T <: Real
     μ = mean(d0)
     σ = std(d0)
     if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
+        # avoids loss of significance when truncation is far from μ.
+        # See https://github.com/cossio/TruncatedNormal.jl/blob/master/notes/normal.pdf.
         _tnvar(d.lower, d.upper, μ, σ)
     else
         a = (d.lower - μ) / σ
