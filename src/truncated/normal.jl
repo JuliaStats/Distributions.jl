@@ -26,30 +26,103 @@ end
 
 modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
 
+# do not export. Used in mean, var
+function _F1(x::Real, y::Real; thresh=1e-7)
+    @assert 0 < thresh < Inf
+    -Inf < x < Inf && -Inf < y < Inf || throw(DomainError())
+    ϵ = exp(x^2 - y^2)
+    if abs(x) > abs(y)
+        _F1(y,x)
+    elseif abs(x - y) ≤ thresh
+        δ = y - x
+        √π*x + (√π/2 + (-√π*x/6 + (-√π/12 + x*(√π/90 + (√π*x^2)/90)δ)δ)δ)δ
+    elseif max(x,y) < 0
+        (1 - ϵ) / (ϵ * erfcx(-y) - erfcx(-x))
+    elseif min(x,y) > 0
+        (1 - ϵ) / (erfcx(x) - ϵ * erfcx(y))
+    else
+        exp(-x^2) * (1 - ϵ) / (erf(y) - erf(x))
+    end
+end
+
+# do not export. Used in mean, var
+function _F2(x::Real, y::Real; thresh=1e-7)
+    @assert 0 < thresh < Inf
+    -Inf < x < Inf && -Inf < y < Inf || throw(DomainError())
+    ϵ = exp(x^2 - y^2)
+    if abs(x) > abs(y)
+        _F2(y,x)
+    elseif abs(x - y) ≤ thresh
+        δ = y - x
+        √π*x^2 - √π/2 + (√π*x + (√π/3 - √π*x^2/3 + (((√π/30 + √π*x^2/45)x^2 - 4*√π/45)δ - √π*x/3)δ)δ)δ
+    elseif max(x,y) < 0
+        (x - ϵ * y) / (ϵ * erfcx(-y) - erfcx(-x))
+    elseif min(x,y) > 0
+        (x - ϵ * y) / (erfcx(x) - ϵ * erfcx(y))
+    else
+        exp(-x^2) * (x - ϵ * y) / (erf(y) - erf(x))
+    end
+end
+
+# do not export. Used in mean
+function _tnmean(a, b)
+    -Inf < a ≤ b < Inf || throw(DomainError())
+    √(2/π) * _F1(a/√2, b/√2)
+end
+
+# do not export. Used in mean
+function _tnmean(a, b, μ, σ)
+    -Inf < a ≤ b < Inf || throw(DomainError())
+    -Inf < μ < Inf && 0 < σ < Inf || throw(DomainError())
+    α = (a - μ)/σ; β = (b - μ)/σ
+    μ + _tnmean(α, β) * σ
+end
+
+# do not export. Used in var
+function _tnvar(a, b)
+    -Inf < a ≤ b < Inf || throw(DomainError())
+    1 + 2/√π * _F2(a/√2, b/√2) - 2/π * _F1(a/√2, b/√2)^2
+end
+
+# do not export. Used in var
+function _tnvar(a, b, μ, σ)
+    -Inf < a ≤ b < Inf || throw(DomainError())
+    -Inf < μ < Inf && 0 < σ < Inf || throw(DomainError())
+    α = (a - μ)/σ; β = (b - μ)/σ
+    _tnvar(α, β) * σ^2
+end
 
 function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
-    μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
+    if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
+        _tnmean(d.lower, d.upper, μ, σ)
+    else
+        a = (d.lower - μ) / σ
+        b = (d.upper - μ) / σ
+        μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
+    end
 end
 
 function var(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
-    z = d.tp
-    φa = normpdf(a)
-    φb = normpdf(b)
-    aφa = isinf(a) ? 0.0 : a * φa
-    bφb = isinf(b) ? 0.0 : b * φb
-    t1 = (aφa - bφb) / z
-    t2 = abs2((φa - φb) / z)
-    abs2(σ) * (1 + t1 - t2)
+    if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
+        _tnvar(d.lower, d.upper, μ, σ)
+    else
+        a = (d.lower - μ) / σ
+        b = (d.upper - μ) / σ
+        z = d.tp
+        φa = normpdf(a)
+        φb = normpdf(b)
+        aφa = isinf(a) ? 0.0 : a * φa
+        bφb = isinf(b) ? 0.0 : b * φb
+        t1 = (aφa - bφb) / z
+        t2 = abs2((φa - φb) / z)
+        abs2(σ) * (1 + t1 - t2)
+    end
 end
 
 function entropy(d::Truncated{Normal{T},Continuous}) where T <: Real
