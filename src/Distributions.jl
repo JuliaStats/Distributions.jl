@@ -68,6 +68,7 @@ export
     Biweight,
     Categorical,
     Cauchy,
+    Chernoff,
     Chi,
     Chisq,
     Cosine,
