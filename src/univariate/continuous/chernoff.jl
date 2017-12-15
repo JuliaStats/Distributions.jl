@@ -45,9 +45,9 @@ rand(rng, Chernoff())
 
 *For tail probabilities, use*
 
-survivor(Chernoff(),x::Real)
+cdf(Chernoff(),-x)
 
-instead of 1-cdf(Chernoff(),x) or cdf(Chernoff(),-x) for large x
+instead of 1-cdf(Chernoff(),x) 
 """
 
 
@@ -175,8 +175,8 @@ let
     end
    
     f(x::Real)=g(x)*g(-x)*0.5
-    F(x::Real)=(x<0.0) ? 1.0-F(-x) : 0.5+quadgk(f,0.0,x)[1] 
-    Fbar(x::Real)= quadgk(f,x,Inf)[1]
+    F(x::Real)= (x<0.0) ? Fbar(-x) : 0.5+quadgk(f,0.0,x)[1] 
+    Fbar(x::Real)= (x<0.0) ? F(x) : quadgk(f,x,Inf)[1]
 
 
 
@@ -190,7 +190,6 @@ let
     global pdf(d::Chernoff, x::Real)=f(x)
     global logpdf(d::Chernoff, x::Real)=log(g(x))+log(g(-x))+log(0.5)
     global cdf(d::Chernoff,x::Real)=F(x)
-    global survivor(d::Chernoff,x::Real)=Fbar(x)
 
 
     global function quantile(d::Chernoff, tau::Real)
@@ -340,6 +339,7 @@ end
  
 
        
+
 
 
 
