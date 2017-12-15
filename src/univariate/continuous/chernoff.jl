@@ -3,7 +3,7 @@
 
 The Chernoff distribution is the distribution of the random variable
 ```math
-\\argmax_{t \\in (-\infty,\infty)} ( G(t) - t^2 ),
+\\argmax_{t \\in (-\\infty,\\infty)} ( G(t) - t^2 ),
 ```
 where ``G`` is standard two--sided Brownian motion.  
 
@@ -70,7 +70,7 @@ struct Chernoff <: ContinuousUnivariateDistribution
 end
 
 
-
+#~ using Roots
 
 let
     ## The following arrays of constants have been precomputed to speed up computation.
