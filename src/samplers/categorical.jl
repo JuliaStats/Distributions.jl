@@ -25,7 +25,7 @@ end
 
 ##### Alias Table #####
 
-isdefined(:RangeGeneratorInt) || (RangeGeneratorInt = SamplerRangeInt)
+
 if Base.VERSION < v"0.7"
     struct AliasTable <: Sampleable{Univariate,Discrete}
         accept::Vector{Float64}
