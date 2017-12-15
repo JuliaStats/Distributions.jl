@@ -77,7 +77,7 @@ let
     ## The first two correspond to the arrays a and b in the Groeneboom and Wellner artcle.
     ## The array az contains roots of the airyai functions (atilde in the paper).
     ## Finally azp contains contains airyaiprime evaluated at the corresponding atildes.
-    const a=[
+    a=[
          0.14583333333333334
         -0.0014105902777777765
         -2.045269786155239e-5
@@ -95,7 +95,7 @@ let
          1.0102911018761945e-26
         -9.976759882474874e-29
         ]
-    const b=[
+    b=[
          0.6666666666666666
          0.021164021164021163
         -0.0007893341226674574
@@ -113,7 +113,7 @@ let
          8.543413293195206e-26
         -5.05879944592705e-28
         ]
-    const az=[
+    az=[
         -2.338107410459767
         -4.08794944413097
         -5.520559828095551
@@ -131,7 +131,7 @@ let
         -16.90563399742994
         -17.66130010569706
         ]
-    const azp=[
+    azp=[
          0.7012108227206906
         -0.8031113696548534
          0.865204025894141
@@ -149,9 +149,9 @@ let
          1.1440366732735523
         -1.156609849116565
         ]
-    const cuberoottwo=cbrt(2.0)
-    const sqrthalfpi=sqrt(0.5*pi)
-    const sqrttwopi=sqrt(2.0*pi)
+    cuberoottwo=cbrt(2.0)
+    sqrthalfpi=sqrt(0.5*pi)
+    sqrttwopi=sqrt(2.0*pi)
  
     function p(y::Real)
         if iszero(y) return -sqrt(0.5*pi) end
@@ -247,8 +247,8 @@ let
     global rand(d::Chernoff)=rand(GLOBAL_RNG,d)      
     global function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
         # constants needed for the Ziggurat algorithm
-        const A=0.03248227216266608
-        const x=[
+        A=0.03248227216266608
+        x=[
             1.4765521793744492 
             1.3583996502410562 
             1.2788224934376338 
@@ -282,7 +282,7 @@ let
             0.2358977457249061 
             1.0218214689661219e-7
            ]
-        const y=[
+        y=[
             0.02016386420423385
             0.042162593823411566
             0.06607475557706186
