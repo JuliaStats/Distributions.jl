@@ -70,7 +70,6 @@ struct Chernoff <: ContinuousUnivariateDistribution
 end
 
 
-using Roots
 
 
 let
