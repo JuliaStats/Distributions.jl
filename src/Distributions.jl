@@ -16,8 +16,8 @@ import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
-Base.VERSION<v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
-Base.VERSION>=v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
+Base.VERSION>=v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+Base.VERSION<v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
     
 if isdefined(Base, :scale)
     import Base: scale
