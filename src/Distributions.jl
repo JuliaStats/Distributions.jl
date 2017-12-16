@@ -1,4 +1,4 @@
-#__precompile__(true)
+__precompile__(true)
 
 module Distributions
 
@@ -16,13 +16,9 @@ import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
-if Base.VERSION<v"0.7"
-    import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
-    SamplerRangeInt=RangeGeneratorInt
-    else 
-    import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
-    RangeGeneratorInt=SamplerRangeInt
-end
+Base.VERSION<v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+Base.VERSION>=v"0.7" || import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
+    
 if isdefined(Base, :scale)
     import Base: scale
 end
