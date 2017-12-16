@@ -18,8 +18,10 @@ import Base.Math.@horner
 import Base.LinAlg: Cholesky
 if Base.VERSION<v"0.7"
     import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+    SamplerRangeInt=RangeGeneratorInt
     else 
     import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
+    RangeGeneratorInt=SamplerRangeInt
 end
 if isdefined(Base, :scale)
     import Base: scale
