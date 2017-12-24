@@ -4,6 +4,8 @@ Whereas this package already provides a large collection of common distributions
 
 Generally, you don't have to implement every API method listed in the documentation. This package provides a series of generic functions that turn a small number of internal methods into user-end API methods. What you need to do is to implement this small set of internal methods for your distributions.
 
+By default, `Discrete` sampleables have support of type `Int` while `Continuous` sampleables have support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
+
 **Note:** the methods need to be implemented are different for distributions of different variate forms.
 
 
