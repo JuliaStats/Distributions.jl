@@ -7,6 +7,7 @@ using StatsFuns
 using StatsBase
 using Compat
 import Compat.MathConstants: γ
+using Compat.Printf  # For @printf, which has moved to Stdlib.printf
 
 import QuadGK.quadgk
 import Compat.view
