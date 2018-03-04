@@ -6,6 +6,7 @@ using PDMats
 using StatsFuns
 using StatsBase
 using Compat
+using Compat.Printf
 import Compat.MathConstants: γ
 
 import QuadGK.quadgk
@@ -16,7 +17,13 @@ import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+
+@static if VERSION < v"0.7.0-DEV"
+    import Base.Random: GLOBAL_RNG, RangeGenerator
+    SamplerRangeInt = Base.Random.RangeGeneratorInt
+else
+    import Base.Random: GLOBAL_RNG, RangeGenerator, SamplerRangeInt
+end
 
 if isdefined(Base, :scale)
     import Base: scale
