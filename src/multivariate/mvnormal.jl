@@ -108,7 +108,7 @@ When x is a vector, it returns a scalar value. When x is a matrix, it returns a 
 """
 sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
@@ -131,9 +131,9 @@ _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(
 
 Sample from distribution `d` using the random number generator `rng`.
 """
-rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(length(d)))
+rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
 rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
-rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Matrix{eltype(d)}(length(d), n))
+rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Matrix{eltype(d)}(undef, length(d), n))
 
 
 ###########################################################
@@ -247,14 +247,14 @@ Base.show(io::IO, d::MvNormal) =
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
-mean(d::MvNormal) = full(d.μ)
+mean(d::MvNormal) = convert(Vector, d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
-cov(d::MvNormal) = full(d.Σ)
+cov(d::MvNormal) = Matrix(d.Σ)
 
-invcov(d::MvNormal) = full(inv(d.Σ))
+invcov(d::MvNormal) = Matrix(inv(d.Σ))
 logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
@@ -268,7 +268,7 @@ gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ (x - d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::VecOrMat) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::VecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 
@@ -279,13 +279,13 @@ function _rand_abstr!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
-_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Base.GLOBAL_RNG, d, x)
+_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Random.GLOBAL_RNG, d, x)
 # define these separately to avoid ambiguity with
 # _rand(d::Multivariate, x::AbstractMatrix)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractMatrix) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractVector) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractVector) = _rand!(Random.GLOBAL_RNG, d, x)
 
 ###########################################################
 #
@@ -419,7 +419,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     inv_sw = 1.0 / sum(w)
     mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
 
-    z = Matrix{Float64}(m, n)
+    z = Matrix{Float64}(undef, m, n)
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m

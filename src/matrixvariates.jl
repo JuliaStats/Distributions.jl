@@ -87,12 +87,12 @@ end
 
 function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array{T}(size(X)), d, X)
+    _logpdf!(Array{T}(undef, size(X)), d, X)
 end
 
 function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _pdf!(Array{T}(size(X)), d, X)
+    _pdf!(Array{T}(undef, size(X)), d, X)
 end
 
 """

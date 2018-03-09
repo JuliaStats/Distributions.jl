@@ -116,7 +116,7 @@ convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHype
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(d, support(d)))
 var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) .- mean(d)).^2 .* pdf.(d, support(d)))
-mode(d::WalleniusNoncentralHypergeometric) = support(d)[indmax(pdf.(d, support(d)))]
+mode(d::WalleniusNoncentralHypergeometric) = support(d)[argmax(pdf.(d, support(d)))]
 
 entropy(d::WalleniusNoncentralHypergeometric) = 1
 

@@ -92,7 +92,7 @@ end
 
 entropy(d::PoissonBinomial) = entropy(Categorical(d.pmf))
 median(d::PoissonBinomial) = median(Categorical(d.pmf)) - 1
-mode(d::PoissonBinomial) = indmax(d.pmf) - 1
+mode(d::PoissonBinomial) = argmax(d.pmf) - 1
 modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 #### Evaluation

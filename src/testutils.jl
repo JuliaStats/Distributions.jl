@@ -7,7 +7,7 @@ import Compat.Test: @test
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
     intv = (b - a) / (n - 1)
-    r = Vector{Float64}(n)
+    r = Vector{Float64}(undef, n)
     @inbounds for i = 1:n
         r[i] = a + (i-1) * intv
     end
@@ -102,8 +102,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Vector{Int}(m)
-    cub = Vector{Int}(m)
+    clb = Vector{Int}(undef, m)
+    cub = Vector{Int}(undef, m)
     for i = 1:m
         bp = Binomial(n, p0[i])
         clb[i] = floor(Int,quantile(bp, q/2))
@@ -187,8 +187,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Vector{Int}(nbins)
-    cub = Vector{Int}(nbins)
+    clb = Vector{Int}(undef, nbins)
+    cub = Vector{Int}(undef, nbins)
     cdfs = cdf.(distr, edges)
 
     for i = 1:nbins
@@ -328,12 +328,12 @@ end
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(nv)
-    c   = Vector{Float64}(nv)
-    cc  = Vector{Float64}(nv)
-    lp  = Vector{Float64}(nv)
-    lc  = Vector{Float64}(nv)
-    lcc = Vector{Float64}(nv)
+    p   = Vector{Float64}(undef, nv)
+    c   = Vector{Float64}(undef, nv)
+    cc  = Vector{Float64}(undef, nv)
+    lp  = Vector{Float64}(undef, nv)
+    lc  = Vector{Float64}(undef, nv)
+    lcc = Vector{Float64}(undef, nv)
     ci  = 0.
 
     for (i, v) in enumerate(vs)
@@ -380,12 +380,12 @@ end
 
 function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(nv)
-    c   = Vector{Float64}(nv)
-    cc  = Vector{Float64}(nv)
-    lp  = Vector{Float64}(nv)
-    lc  = Vector{Float64}(nv)
-    lcc = Vector{Float64}(nv)
+    p   = Vector{Float64}(undef, nv)
+    c   = Vector{Float64}(undef, nv)
+    cc  = Vector{Float64}(undef, nv)
+    lp  = Vector{Float64}(undef, nv)
+    lc  = Vector{Float64}(undef, nv)
+    lcc = Vector{Float64}(undef, nv)
 
     for (i, v) in enumerate(vs)
         p[i] = pdf(d, v)

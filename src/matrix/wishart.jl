@@ -64,17 +64,17 @@ end
 
 #### Show
 
-show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, full(d.S))])
+show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))])
 
 
 #### Statistics
 
-mean(d::Wishart) = d.df * full(d.S)
+mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
     r = d.df - dim(d) - 1.0
     if r > 0.0
-        return full(d.S) * r
+        return Matrix(d.S) * r
     else
         error("mode is only defined when df > p + 1")
     end

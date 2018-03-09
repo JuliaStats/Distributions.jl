@@ -109,7 +109,7 @@ function _vmf_rotmat(u::Vector{Float64})
     end
 
     # perform QR factorization
-    Q = full(qrfact!(A)[:Q])
+    Q = Matrix(qrfact!(A)[:Q])
     if dot(view(Q,:,1), u) < 0.0  # the first column was negated
         for i = 1:p
             @inbounds Q[i,1] = -Q[i,1]

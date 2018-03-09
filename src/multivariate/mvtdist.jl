@@ -90,10 +90,10 @@ mode(d::GenericMvTDist) = d.μ
 modes(d::GenericMvTDist) = [mode(d)]
 
 var(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*diag(d.Σ) : Float64[NaN for i = 1:d.dim]
-scale(d::GenericMvTDist) = full(d.Σ)
-cov(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*full(d.Σ) : NaN*ones(d.dim, d.dim)
-invscale(d::GenericMvTDist) = full(inv(d.Σ))
-invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*full(inv(d.Σ)) : NaN*ones(d.dim, d.dim)
+scale(d::GenericMvTDist) = Matrix(d.Σ)
+cov(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*Matrix(d.Σ) : NaN*ones(d.dim, d.dim)
+invscale(d::GenericMvTDist) = Matrix(inv(d.Σ))
+invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*Matrix(inv(d.Σ)) : NaN*ones(d.dim, d.dim)
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
@@ -121,7 +121,7 @@ function sqmahal!(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{T}) whe
     invquad!(r, d.Σ, z)
 end
 
-sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vector{T}(size(x, 2)), d, x)
+sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vector{T}(undef, size(x, 2)), d, x)
 
 
 function mvtdist_consts(d::AbstractMvTDist)
@@ -170,7 +170,7 @@ end
 function _rand!(d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
     chisqd = Chisq(d.df)
-    y = Matrix{T}(1, cols)
+    y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(x))
     rand!(chisqd, y)
     y = sqrt(y/(d.df))
