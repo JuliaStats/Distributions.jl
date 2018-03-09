@@ -19,9 +19,11 @@ ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
 eltype(v::ZeroVector{T}) where {T} = T
 length(v::ZeroVector) = v.len
-full(v::ZeroVector{T}) where {T} = zeros(T, v.len)
 
-convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = full(v)
+Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
+convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
+convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
+
 convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
 +(x::AbstractArray, v::ZeroVector) = x

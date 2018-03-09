@@ -83,7 +83,7 @@ function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
     r = vec(sum(X, 2))
     n = size(X, 2)
     r_nrm = vecnorm(r)
-    μ = scale!(r, 1.0 / r_nrm)
+    μ = rmul!(r, 1.0 / r_nrm)
     ρ = r_nrm / n
     κ = _vmf_estkappa(length(μ), ρ)
     VonMisesFisher(μ, κ)

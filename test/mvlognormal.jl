@@ -32,8 +32,8 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test mo         ≈ exp.(mean(g.normal) - var(g.normal))
     @test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
     gg = typeof(g)(MvNormal(params(g)...))
-    @test full(g.normal.μ) == full(gg.normal.μ)
-    @test full(g.normal.Σ) == full(gg.normal.Σ)
+    @test Vector(g.normal.μ) == Vector(gg.normal.μ)
+    @test Matrix(g.normal.Σ) == Matrix(gg.normal.Σ)
     @test insupport(g,ones(d))
     @test !insupport(g,zeros(d))
     @test !insupport(g,-ones(d))
@@ -107,8 +107,8 @@ C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
 for (g, μ, Σ) in [
     (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
     (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(mu, sqrt(0.2)), mu, 0.2 * eye(3)),
-    (MvLogNormal(3, sqrt(0.2)), zeros(3), 0.2 * eye(3)),
+    (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
+    (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
     (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(mu, C), mu, C),
@@ -117,7 +117,7 @@ for (g, μ, Σ) in [
     println("    testing $(typeof(g)) with normal distribution $(Distributions.distrname(g.normal))")
 
     m,s = params(g)
-    @test full(m) ≈ μ
+    @test Vector(m) ≈ μ
     test_mvlognormal(g, 10^4)
 end
 

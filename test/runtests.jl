@@ -1,7 +1,8 @@
 using Distributions
 using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
 using Compat.Test
-
+using Compat.Distributed
+using Compat.Random
 
 tests = [
     "types",
@@ -35,7 +36,7 @@ tests = [
     "truncnormal",
 ]
 
-print_with_color(:blue, "Running tests:\n")
+printstyled("Running tests:\n", color=:blue)
 
 if nworkers() > 1
     rmprocs(workers())
@@ -47,12 +48,15 @@ else
     addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
 end
 
+@everywhere using Compat.Random
 @everywhere srand(345679)
 res = pmap(tests) do t
     @eval module $(Symbol("Test_", t))
     using Distributions
     using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-    using Base.Test
+    using Compat.Test
+    using Compat.Random
+    using Compat.LinearAlgebra
     include($t * ".jl")
     end
     return

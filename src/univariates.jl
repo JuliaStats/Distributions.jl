@@ -128,7 +128,7 @@ end
 
 
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
-     insupport!(BitArray(size(X)), d, X)
+     insupport!(BitArray(undef, size(X)), d, X)
 
 insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
@@ -179,8 +179,8 @@ Populates the array `A` with scalar samples from `d`. The general fallback is to
 random samples from `sampler(d)`.
 """
 rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(shp))
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(undef, n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(undef, shp))
 
 
 sampler(d::UnivariateDistribution) = d
