@@ -12,17 +12,8 @@ function qqbuild(x::Vector, y::Vector)
 end
 
 function qqbuild(x::Vector, d::UnivariateDistribution)
-	n = length(x)
-	grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
-	qx = quantile(x, grid)
-	qd = quantile(d, grid)
-	return QQPair(qx, qd)
+	stp = inv(length(x))
+	return QQPair(quantile(d, stp/2 : stp : one(stp)), sort(x))
 end
 
-function qqbuild(d::UnivariateDistribution, x::Vector)
-	n = length(x)
-	grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
-	qd = quantile(d, grid)
-	qx = quantile(x, grid)
-	return QQPair(qd, qx)
-end
+qqbuild(d::UnivariateDistribution, x::Vector) = qqbuild(x, d)
