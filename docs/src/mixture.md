@@ -14,9 +14,9 @@ A *mixture model* is characterized by a set of component parameters ``\Theta=\{\
 This package introduces a type `MixtureModel`, defined as follows, to represent a *mixture model*:
 
 ```julia
-abstract AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF, VS}
+abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport} <: Distribution{VF, VS} end
 
-immutable MixtureModel{VF<:VariateForm,VS<:ValueSupport,Component<:Distribution} <: AbstractMixtureModel{VF,VS}
+struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,Component<:Distribution} <: AbstractMixtureModel{VF,VS}
     components::Vector{Component}
     prior::Categorical
 end
