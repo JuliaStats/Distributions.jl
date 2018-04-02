@@ -3,7 +3,7 @@
 The package provides a type, named `Truncated`, to represented truncated distributions, which is defined as below:
 
 ```julia
-immutable Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}
+struct Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound

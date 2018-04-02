@@ -30,7 +30,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
 
-function _rand!{T<:Real}(s::Spl, x::AbstractVector{T})
+function _rand!(s::Spl, x::AbstractVector{T}) where T<:Real
     # ... generate a single vector sample to x
 end
 ```
@@ -59,17 +59,17 @@ function rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
     _rand!(s, A)
 end
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}) =
+rand(s::Sampleable{Multivariate,S}) where {S<:ValueSupport} =
     _rand!(s, Vector{eltype(S)}(length(s)))
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}, n::Int) =
+rand(s::Sampleable{Multivariate,S}, n::Int) where {S<:ValueSupport} =
     _rand!(s, Matrix{eltype(S)}(length(s), n))
 ```
 
 If there is a more efficient method to generate multiple vector samples in batch, one should provide the following method
 
 ```julia
-function _rand!{T<:Real}(s::Spl, A::DenseMatrix{T})
+function _rand!(s::Spl, A::DenseMatrix{T}) where T<:Real
     # ... generate multiple vector samples in batch
 end
 ```
@@ -83,7 +83,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
 
-function _rand!{T<:Real}(s::Spl, x::DenseMatrix{T})
+function _rand!(s::Spl, x::DenseMatrix{T}) where T<:Real
     # ... generate a single matrix sample to x
 end
 ```

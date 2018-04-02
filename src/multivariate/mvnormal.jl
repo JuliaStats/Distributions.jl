@@ -42,7 +42,7 @@ type `MvNormal`, defined as below, which allows users to specify the special str
 the mean and covariance.
 
 ```julia
-immutable MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+struct MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
