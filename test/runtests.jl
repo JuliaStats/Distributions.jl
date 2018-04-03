@@ -31,6 +31,7 @@ tests = [
     "locationscale",
     "quantile_newton",
     "semicircle",
+    "qq",
 ]
 
 print_with_color(:blue, "Running tests:\n")
