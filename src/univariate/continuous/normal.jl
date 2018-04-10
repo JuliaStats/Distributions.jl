@@ -76,12 +76,12 @@ zval(μ::Real, σ::Real, x::Number) = (x - μ) / σ
 # pdf
 normpdf(z::Real) = exp(-abs2(z)/2) * invsqrt2π
 normpdf(μ::Real, σ::Real, x::Real) = normpdf(zval(μ, σ, x)) / σ
-pdf(d::Normal, x::Real) = normpdf(d.μ, d.σ, x) / d.σ
+pdf(d::Normal, x::Real) = normpdf(d.μ, d.σ, x)
 
 # logpdf
 normlogpdf(z::Real) = -(abs2(z) + log2π)/2
-normlogpdf(μ::Real, σ::Real, x::Real) = -(abs2(zval(μ, σ, x)) + log2π)/2
-logpdf(d::Normal, x::Real) = normlogpdf(d.μ, d.σ, x) - log(d.σ)
+normlogpdf(μ::Real, σ::Real, x::Real) = -(abs2(zval(μ, σ, x)) + log2π)/2 - log(σ)
+logpdf(d::Normal, x::Real) = normlogpdf(d.μ, d.σ, x)
 
 # cdf
 normcdf(z::Real) = erfc(-z * invsqrt2)/2
