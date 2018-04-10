@@ -74,48 +74,48 @@ xval(μ::Real, σ::Real, z::Number) = μ + σ * z
 zval(μ::Real, σ::Real, x::Number) = (x - μ) / σ
 
 # pdf
-normpdf(z::Number) = exp(-abs2(z)/2) * invsqrt2π
-normpdf(μ::Real, σ::Real, x::Number) = normpdf(zval(μ, σ, x)) / σ
+normpdf(z::Real) = exp(-abs2(z)/2) * invsqrt2π
+pdf(d::Normal, x::Real) = normpdf(zval(d.μ, d.σ, x)) / d.σ
 
 # logpdf
-normlogpdf(z::Number) = -(abs2(z) + log2π)/2
-normlogpdf(μ::Real, σ::Real, x::Number) = normlogpdf(zval(μ, σ, x)) - log(σ)
+normlogpdf(z::Real) = -(abs2(z) + log2π)/2
+logpdf(d::Normal, x::Real) = normlogpdf(zval(d.μ, d.σ, x)) - log(d.σ)
 
 # cdf
-normcdf(z::Number) = erfc(-z * invsqrt2)/2
-normcdf(μ::Real, σ::Real, x::Number) = normcdf(zval(μ, σ, x))
+normcdf(z::Real) = erfc(-z * invsqrt2)/2
+cdf(d::Normal, x::Real) = normcdf(zval(d.μ, d.σ, x))
 
 # ccdf
 normccdf(z::Number) = erfc(z * invsqrt2)/2
-normccdf(μ::Real, σ::Real, x::Number) = normccdf(zval(μ, σ, x))
+ccdf(d::Normal, x::Real) = normccdf(zval(d.μ, d.σ, x))
 
 # logcdf
-normlogcdf(z::Number) = z < -1.0 ?
+normlogcdf(z::Real) = z < -1.0 ?
     log(erfcx(-z * invsqrt2)/2) - abs2(z)/2 :
     log1p(-erfc(z * invsqrt2)/2)
-normlogcdf(μ::Real, σ::Real, x::Number) = normlogcdf(zval(μ, σ, x))
+logcdf(d::Normal, x::Real) = normlogcdf(zval(d.μ, d.σ, x))
 
 # logccdf
-normlogccdf(z::Number) = z > 1.0 ?
+normlogccdf(z::Real) = z > 1.0 ?
     log(erfcx(z * invsqrt2)/2) - abs2(z)/2 :
     log1p(-erfc(-z * invsqrt2)/2)
-normlogccdf(μ::Real, σ::Real, x::Number) = normlogccdf(zval(μ, σ, x))
+logccdf(d::Normal, x::Real) = normlogccdf(zval(d.μ, d.σ, x))
 
-norminvcdf(p::Real) = -erfcinv(2*p) * sqrt2
-norminvcdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvcdf(p))
+norminvcdf(q::Real) = -erfcinv(2*q) * sqrt2
+quantile(d::Normal, q::Real) = xval(d.μ, d.σ, norminvcdf(q))
 
-norminvccdf(p::Real) = erfcinv(2*p) * sqrt2
-norminvccdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvccdf(p))
+norminvccdf(q::Real) = erfcinv(2*q) * sqrt2
+cquantile(d::Normal, q::Real) = xval(d.μ, d.σ, norminvccdf(q))
 
 # invlogcdf. Fixme! Support more precisions than Float64
 norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(Float64(lp)))
 norminvlogcdf(lp::Real) = _norminvlogcdf_impl(Float64(lp))
-norminvlogcdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogcdf(lp))
+invlogcdf(d::Normal, lp::Real) = xval(d.μ, d.σ, norminvlogcdf(lp))
 
 # invlogccdf. Fixme! Support more precisions than Float64
 norminvlogccdf(lp::Union{Float16,Float32}) = convert(typeof(lp), -_norminvlogcdf_impl(Float64(lp)))
 norminvlogccdf(lp::Real) = -_norminvlogcdf_impl(Float64(lp))
-norminvlogccdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogccdf(lp))
+invlogccdf(d::Normal, lp::Real) = xval(d.μ, d.σ, norminvlogccdf(lp))
 
 
 # norminvcdf & norminvlogcdf implementation
