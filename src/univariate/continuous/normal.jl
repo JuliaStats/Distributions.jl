@@ -108,7 +108,7 @@ normlogccdf(μ::Real, σ::Real, x::Real) = normlogccdf(zval(μ, σ, x))
 logccdf(d::Normal, x::Real) = normlogccdf(d.μ, d.σ, x)
 
 norminvcdf(q::Real) = -erfcinv(2*q) * sqrt2
-norminvcdf(μ::Real, σ::Real, q::Real) = = xval(μ, σ, norminvcdf(q))
+norminvcdf(μ::Real, σ::Real, q::Real) = xval(μ, σ, norminvcdf(q))
 quantile(d::Normal, q::Real) = norminvcdf(d.μ, d.σ, q)
 
 norminvccdf(q::Real) = erfcinv(2*q) * sqrt2
