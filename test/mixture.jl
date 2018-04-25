@@ -33,7 +33,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for i = 1:n
         @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test cdf.(g, X) ≈ cf
+    @test cdf.(Ref(g), X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)

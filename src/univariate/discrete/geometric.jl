@@ -91,7 +91,7 @@ Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
 function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
-    r .= pdf.(d,X)
+    r .= pdf.(Ref(d),X)
 end
 
 
