@@ -80,7 +80,7 @@ _rand!(d::VonMisesFisher, x::AbstractMatrix) = _rand!(sampler(d), x)
 ### Estimation
 
 function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
-    r = vec(sum(X, 2))
+    r = vec(Compat.sum(X, dims=2))
     n = size(X, 2)
     r_nrm = vecnorm(r)
     μ = rmul!(r, 1.0 / r_nrm)

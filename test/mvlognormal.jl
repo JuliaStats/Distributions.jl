@@ -1,7 +1,7 @@
 # Tests on Multivariate LogNormal distributions
 
-using Distributions, Compat
-using Compat.Test
+using Distributions, Compat, PDMats
+using Compat.LinearAlgebra, Compat.Random, Compat.Test
 
 
 
@@ -40,10 +40,10 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
 
     # sampling
     X = rand(g, n_tsamples)
-    emp_mn = vec(mean(X, 2))
-    emp_md = vec(median(X, 2))
+    emp_mn = vec(Compat.mean(X, dims=2))
+    emp_md = vec(Compat.median(X, dims=2))
     Z = X .- emp_mn
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') ./ n_tsamples
     for i = 1:d
         @test isapprox(emp_mn[i]   , mn[i] , atol=(sqrt(s[i] / n_tsamples) * 8.0))
     end
@@ -71,11 +71,11 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test isapprox(location(g), location(MvLogNormal,:mode,mode(g),scale(g))    , atol=1e-8)
     @test isapprox(scale(g)   , scale(MvLogNormal,:meancov,mean(g),cov(g))      , atol=1e-8)
 
-    @test isapprox(location(g), location!(MvLogNormal,:meancov,mean(g),cov(g),zeros(mn))   , atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:mean,mean(g),scale(g),zeros(mn))    , atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:median,median(g),scale(g),zeros(mn)), atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:mode,mode(g),scale(g),zeros(mn))    , atol=1e-8)
-    @test isapprox(scale(g)   , scale!(MvLogNormal,:meancov,mean(g),cov(g),zeros(S))       , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:meancov,mean(g),cov(g),zero(mn))   , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mean,mean(g),scale(g),zero(mn))    , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:median,median(g),scale(g),zero(mn)), atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mode,mode(g),scale(g),zero(mn))    , atol=1e-8)
+    @test isapprox(scale(g)   , Distributions.scale!(MvLogNormal,:meancov,mean(g),cov(g),zero(S)), atol=1e-8)
 
     lc1,sc1 = params(MvLogNormal,mean(g),cov(g))
     lc2,sc2 = params!(MvLogNormal,mean(g),cov(g),similar(mn),similar(S))
@@ -106,11 +106,11 @@ C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
 
 for (g, μ, Σ) in [
     (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
-    (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(sqrt.(va)))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
     (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
-    (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
     (MvLogNormal(mu, C), mu, C),
     (MvLogNormal(C), zeros(3), C) ]
 
