@@ -110,7 +110,7 @@ end
 
 function rand(d::Wishart)
     Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df))
-    A_mul_Bt(Z, Z)
+    Z * Z'
 end
 
 function _wishart_genA(p::Int, df::Real)
