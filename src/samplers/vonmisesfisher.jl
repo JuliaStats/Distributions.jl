@@ -84,7 +84,7 @@ function _vmf_rotmat(u::Vector{Float64})
 
     p = length(u)
     A = zeros(p, p)
-    copy!(view(A,:,1), u)
+    copyto!(view(A,:,1), u)
 
     # let k the be index of entry with max abs
     k = 1
