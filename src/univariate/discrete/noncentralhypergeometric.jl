@@ -114,9 +114,9 @@ convert(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Rea
 convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{S}) where {T<:Real, S<:Real} = WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
 
 # Properties
-mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(d, support(d)))
-var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) .- mean(d)).^2 .* pdf.(d, support(d)))
-mode(d::WalleniusNoncentralHypergeometric) = support(d)[argmax(pdf.(d, support(d)))]
+mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(Ref(d), support(d)))
+var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) .- mean(d)).^2 .* pdf.(Ref(d), support(d)))
+mode(d::WalleniusNoncentralHypergeometric) = support(d)[argmax(pdf.(Ref(d), support(d)))]
 
 entropy(d::WalleniusNoncentralHypergeometric) = 1
 

@@ -15,14 +15,14 @@ function qqbuild(x::Vector, d::UnivariateDistribution)
 	n = length(x)
 	grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
 	qx = quantile(x, grid)
-	qd = quantile.(d, grid)
+	qd = quantile.(Ref(d), grid)
 	return QQPair(qx, qd)
 end
 
 function qqbuild(d::UnivariateDistribution, x::Vector)
 	n = length(x)
 	grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
-	qd = quantile.(d, grid)
+	qd = quantile.(Ref(d), grid)
 	qx = quantile(x, grid)
 	return QQPair(qd, qx)
 end

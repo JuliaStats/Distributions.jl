@@ -99,7 +99,7 @@ Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
 function Base.broadcast(::typeof(pdf), d::Poisson, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
-    r .= pdf.(d,X)
+    r .= pdf.(Ref(d),X)
 end
 
 
