@@ -1,5 +1,5 @@
 using Distributions
-using Base.Test
+using Compat, Compat.Test
 
 d = Semicircle(2.0)
 
