@@ -344,7 +344,7 @@ function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractArr
     d = length(g)
     (size(x,1) == d && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
-    μ = Base.LinAlg.BLAS.gemv('N', inv(sum(w)), x, vec(w))
+    μ = BLAS.gemv('N', inv(sum(w)), x, vec(w))
     MvNormal(μ, g.Σ)
 end
 
@@ -361,10 +361,10 @@ end
 function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
-    s = vec(sum(x,2))
+    s = vec(Compat.sum(x, dims=2))
     m = s * inv(n)
     z = x .- m
-    s2 = A_mul_Bt(z, z)
+    s2 = z * z'
     MvNormalStats(s, m, s2, Float64(n))
 end
 
@@ -385,7 +385,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float
             @inbounds zj[i] = swj * (xj[i] - m[i])
         end
     end
-    s2 = A_mul_Bt(z, z)
+    s2 = z * z'
     MvNormalStats(s, m, s2, tw)
 end
 
@@ -404,10 +404,10 @@ fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.
 
 function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
-    mu = vec(mean(x, 2))
+    mu = vec(Compat.mean(x, dims=2))
     z = x .- mu
-    C = Base.LinAlg.BLAS.syrk('U', 'N', 1.0/n, z)
-    Base.LinAlg.copytri!(C, 'U')
+    C = BLAS.syrk('U', 'N', 1.0/n, z)
+    Compat.LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -417,7 +417,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
     z = Matrix{Float64}(undef, m, n)
     for j = 1:n
@@ -426,8 +426,8 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
             @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
-    C = Base.LinAlg.BLAS.syrk('U', 'N', inv_sw, z)
-    Base.LinAlg.copytri!(C, 'U')
+    C = BLAS.syrk('U', 'N', inv_sw, z)
+    Compat.LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -435,7 +435,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(mean(x, 2))
+    mu = vec(Compat.mean(x, dims=2))
     va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
@@ -452,7 +452,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArr
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = zeros(Float64, m)
     for j = 1:n
@@ -469,7 +469,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(mean(x, 2))
+    mu = vec(Compat.mean(x, dims=2))
     va = 0.
     for j = 1:n
         va_j = 0.
@@ -488,7 +488,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractArra
 
     sw = sum(w)
     inv_sw = 1.0 / sw
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = 0.
     for j = 1:n
