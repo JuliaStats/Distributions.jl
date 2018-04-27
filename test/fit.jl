@@ -205,7 +205,7 @@ import Distributions.NormalKnownMu, Distributions.NormalKnownSigma
 ss = suffstats(NormalKnownMu(μ), x)
 @test isa(ss, Distributions.NormalKnownMuStats)
 @test ss.μ == μ
-@test ss.s2 ≈ sum((x .- μ).^2)
+@test ss.s2 ≈ sum(abs2.(x .- μ))
 @test ss.tw ≈ n0
 
 ss = suffstats(NormalKnownMu(μ), x, w)
