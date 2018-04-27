@@ -314,7 +314,7 @@ end
 function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where Cov<:AbstractPDMat
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
-    sx = vec(sum(x, 2))
+    sx = vec(Compat.sum(x, dims=2))
     tw = Float64(size(x, 2))
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
@@ -336,7 +336,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
+    μ = multiply!(vec(Compat.sum(x,dims=2)), 1.0 / size(x,2))
     MvNormal(μ, g.Σ)
 end
 
