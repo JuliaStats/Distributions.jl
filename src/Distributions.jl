@@ -222,11 +222,14 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
+    pnorm,              # Find cumulative probability for a normal distribution
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
+    qnorm,              # inverse of cdf (defined for p in (0,1))
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
+    rnorm,              # Random generation for the normal distribution
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
     scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
@@ -279,6 +282,7 @@ include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
 include("testutils.jl")
+include("rmath.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
