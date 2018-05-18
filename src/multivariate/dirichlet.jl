@@ -46,7 +46,7 @@ end
 
 Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
-Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(alpha)
+Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(convert(Vector{Float64},alpha))
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
 struct DirichletCanon
