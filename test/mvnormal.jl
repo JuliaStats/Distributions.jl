@@ -90,8 +90,8 @@ J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 for (T, g, μ, Σ) in [
     (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
     (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
-    (DiagNormal, MvNormal(mu, Vector{Float64}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (ZeroMeanDiagNormal, MvNormal(Vector{Float64}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (DiagNormal, MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
+    (ZeroMeanDiagNormal, MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
     (FullNormal, MvNormal(mu, C), mu, C),
     (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
     (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, Matrix(0.5I, 3, 3)),
