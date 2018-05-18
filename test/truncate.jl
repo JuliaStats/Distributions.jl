@@ -33,13 +33,13 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
         # perform testing
         dtype = eval(dsym)
         dtypet = Truncated
-        d0 = eval(parse(ex))
+        d0 = eval(Meta.parse(ex))
         if minimum(d0) > lower || maximum(d0) < upper
             continue
         end
 
         println("    testing Truncated($(ex),$lower,$upper)")
-        d = Truncated(eval(parse(ex)),lower,upper)
+        d = Truncated(eval(Meta.parse(ex)),lower,upper)
         if dtype != TruncatedNormal
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtypet)
