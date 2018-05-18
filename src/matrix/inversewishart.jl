@@ -85,9 +85,9 @@ function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
     Xcf = cholfact(X)
-    # we use the fact: trace(Ψ * inv(X)) = trace(inv(X) * Ψ) = trace(X \ Ψ)
+    # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
     Ψ = Matrix(d.Ψ)
-    -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
+    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) - d.c0
 end
 
 
