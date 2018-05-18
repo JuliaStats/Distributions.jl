@@ -1,6 +1,6 @@
 # Testing of samplers
 
-using Distributions
+using Compat, Distributions
 using Compat.Test
 
 
