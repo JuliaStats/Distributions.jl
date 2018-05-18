@@ -1,7 +1,7 @@
 # Tests for Dirichlet distribution
 
-using Distributions
-using Compat.Test
+using Compat, Distributions
+using Compat.Test, Compat.Random, Compat.LinearAlgebra
 
 
 srand(34567)

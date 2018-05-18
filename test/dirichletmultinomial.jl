@@ -2,7 +2,7 @@
 
 
 using Distributions, Compat
-using Compat.Test
+using Compat.Test, Compat.Random
 
 srand(123)
 

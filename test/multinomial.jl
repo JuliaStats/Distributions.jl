@@ -1,6 +1,6 @@
 # Tests for Multinomial
 
-using Distributions
+using Compat, Distributions
 using Compat.Test
 
 
