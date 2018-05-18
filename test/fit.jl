@@ -5,7 +5,7 @@
 #
 
 using Distributions, Compat
-using Compat.Test
+using Compat.Test, Compat.Random, Compat.LinearAlgebra
 
 
 n0 = 100
