@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Compat.Test, Compat.LinearAlgebra
 
 
 v = 7.0

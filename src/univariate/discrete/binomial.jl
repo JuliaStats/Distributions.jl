@@ -151,7 +151,7 @@ function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRa
 end
 function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
-    r .= pdf.(d,X)
+    r .= pdf.(Ref(d),X)
 end
 
 

@@ -1,10 +1,8 @@
 # Tests for DirichletMultinomial
 
 
-using Distributions
-using Compat.Test
-
-using Compat
+using Distributions, Compat
+using Compat.Test, Compat.Random
 
 srand(123)
 
@@ -33,9 +31,9 @@ x = rand(d, 10_000)
 
 # test statistics with mle fit
 d = fit(DirichletMultinomial, x)
-@test isapprox(mean(d), vec(mean(x, 2)), atol=.5)
-@test isapprox(var(d) , vec(var(x, 2)) , atol=.5)
-@test isapprox(cov(d) , cov(x, 2)      , atol=.5)
+@test isapprox(mean(d), vec(Compat.mean(x, dims=2)), atol=.5)
+@test isapprox(var(d) , vec(Compat.var(x, dims=2)) , atol=.5)
+@test isapprox(cov(d) , Compat.cov(x, dims=2)      , atol=.5)
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)
@@ -64,7 +62,7 @@ x = rand(d, 50)
 @test all(x -> (x >= 0), x)
 @test size(x, 1) == length(d)
 @test size(x, 2) == 50
-@test all(sum(x, 1) .== ntrials(d))
+@test all(Compat.sum(x, dims=1) .== ntrials(d))
 @test all(insupport(d, x))
 
 # test MLE

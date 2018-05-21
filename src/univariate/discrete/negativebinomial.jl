@@ -99,7 +99,7 @@ Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitR
     _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
 function Base.broadcast(::typeof(pdf), d::NegativeBinomial, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
-    r .= pdf.(d,X)
+    r .= pdf.(Ref(d),X)
 end
 
 function mgf(d::NegativeBinomial, t::Real)

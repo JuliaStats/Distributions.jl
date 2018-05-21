@@ -103,14 +103,14 @@ function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholfact(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.c0
 end
 
 #### Sampling
 
 function rand(d::Wishart)
     Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df))
-    A_mul_Bt(Z, Z)
+    Z * Z'
 end
 
 function _wishart_genA(p::Int, df::Real)

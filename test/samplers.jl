@@ -1,6 +1,6 @@
 # Testing of samplers
 
-using Distributions
+using Compat, Distributions
 using Compat.Test
 
 
@@ -72,7 +72,7 @@ end
 
 ## Poisson Binomial sampler
 S = PoissBinAliasSampler
-paramlst = (fill(0.2, 30), linspace(0.1, .99, 30), [fill(0.1, 10); fill(0.9, 10)])
+paramlst = (fill(0.2, 30), Compat.range(0.1, stop = .99, length = 30), [fill(0.1, 10); fill(0.9, 10)])
 println("    testing $S")
 for p in paramlst
     d = PoissonBinomial(p)

@@ -39,8 +39,8 @@ end
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
 ### Conversions
-convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(Vector{T}(d.μ), T(d.κ))
-convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  VonMisesFisher{T}(Vector{T}(μ), T(κ))
+convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ))
+convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  VonMisesFisher{T}(convert(Vector{T}, μ), T(κ))
 
 
 
@@ -80,7 +80,7 @@ _rand!(d::VonMisesFisher, x::AbstractMatrix) = _rand!(sampler(d), x)
 ### Estimation
 
 function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
-    r = vec(sum(X, 2))
+    r = vec(Compat.sum(X, dims=2))
     n = size(X, 2)
     r_nrm = vecnorm(r)
     μ = rmul!(r, 1.0 / r_nrm)

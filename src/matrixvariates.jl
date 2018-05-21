@@ -31,7 +31,7 @@ rand!(d::MatrixDistribution, A::AbstractArray{M}) where {M<:Matrix} = _rand!(sam
 
 Draw a sample matrix from the distribution `d`.
 """
-rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
+rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(undef, n))
 
 # pdf & logpdf
 
