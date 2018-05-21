@@ -167,7 +167,7 @@ logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 ### Evaluation
 
-sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, x - d.μ)
+sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, x .- d.μ)
 sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J, x .- d.μ)
 
 
