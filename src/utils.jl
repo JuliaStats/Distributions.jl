@@ -26,11 +26,20 @@ convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
 convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
-+(x::AbstractArray, v::ZeroVector) = x
--(x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
+for T = (:AbstractArray, :Number), op = (:+, :-)
+    @eval begin
+        Base.@deprecate ($op)(x::$T, v::ZeroVector) broadcast($op, x, v)
+        Base.@deprecate ($op)(v::ZeroVector, x::$T) broadcast($op, v, x)
+    end
+end
 
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
+Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
+
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
+Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
+Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
 
 
 ##### Utility functions
