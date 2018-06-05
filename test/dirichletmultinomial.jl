@@ -31,9 +31,9 @@ x = rand(d, 10_000)
 
 # test statistics with mle fit
 d = fit(DirichletMultinomial, x)
-@test isapprox(mean(d), vec(Compat.mean(x, dims=2)), atol=.5)
-@test isapprox(var(d) , vec(Compat.var(x, dims=2)) , atol=.5)
-@test isapprox(cov(d) , Compat.cov(x, dims=2)      , atol=.5)
+@test isapprox(mean(d), vec(StatsCompat.mean(x, dims=2)), atol=.5)
+@test isapprox(var(d) , vec(StatsCompat.var(x, dims=2)) , atol=.5)
+@test isapprox(cov(d) , StatsCompat.cov(x, dims=2)      , atol=.5)
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)

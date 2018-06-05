@@ -259,12 +259,12 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, broadcast(-, x, d.μ))
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, x .- d.μ)
+    invquad!(r, d.Σ, broadcast(-, x, d.μ))
 
-gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ (x .- d.μ))
+gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ broadcast(-, x, d.μ))
 
 # Sampling (for GenericMvNormal)
 
