@@ -110,13 +110,13 @@ end
 
 rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
 
-struct RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
     n::Int
-    coef::Float64   # p / (1 - p)
+    coef::T   # p / (1 - p)
 end
 
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1 - d.p))
-nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
+nextpdf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
 
 function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
     indices(r) == indices(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
