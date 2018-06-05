@@ -40,14 +40,6 @@ if isdefined(StatsBase, :StatsCompat)
     import StatsBase.StatsCompat: std, var, cov, cor
 end
 
-if VERSION < v"0.7.0-DEV.3449"
-    const qrfact = qr
-    const qrfact! = qr!
-    const cholfact = cholesky
-    const cholfact! = cholesky!
-end
-
-
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
 import StatsBase: loglikelihood, dof, span, params, params!
 import PDMats: dim, PDMat, invquad
