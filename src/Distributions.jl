@@ -43,6 +43,8 @@ end
 if VERSION < v"0.7.0-DEV.3449"
     const qrfact = qr
     const qrfact! = qr!
+    const cholfact = cholesky
+    const cholfact! = cholesky!
 end
 
 
