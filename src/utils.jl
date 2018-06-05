@@ -140,7 +140,7 @@ end
 # from Wishart and InverseWisharts
 hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
 
-function trycholfact(a::Matrix{Float64})
+function trycholesky(a::Matrix{Float64})
     try cholesky(a)
     catch e
         return e
