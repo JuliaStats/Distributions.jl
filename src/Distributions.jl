@@ -7,6 +7,7 @@ using StatsFuns
 using StatsBase
 using Compat
 import Compat.MathConstants: γ
+using Compat.Printf  # For @printf, which has moved to Stdlib.printf
 
 import QuadGK.quadgk
 import Compat.view
@@ -16,7 +17,7 @@ import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
 import Base.Math.@horner
 import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+import Base.Random: GLOBAL_RNG, RangeGenerator
 
 if isdefined(Base, :scale)
     import Base: scale
