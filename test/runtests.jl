@@ -3,6 +3,7 @@ using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
 using Compat.Test
 using Compat.Distributed
 using Compat.Random
+using StatsBase
 
 tests = [
     "types",
@@ -56,6 +57,7 @@ res = pmap(tests) do t
     using Compat.Test
     using Compat.Random
     using Compat.LinearAlgebra
+    using StatsBase
     include($t * ".jl")
     end
     return

@@ -9,6 +9,7 @@ using Compat.LinearAlgebra, Compat.Random, Compat.Test
 import Distributions: distrname
 
 
+
 ####### Core testing procedure
 
 function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
