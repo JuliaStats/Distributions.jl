@@ -71,7 +71,7 @@ julia> Truncated(Normal(mu, sigma), l, u)
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:
 
 ```julia
-julia> names(Cauchy)
+julia> fieldnames(Cauchy)
 2-element Array{Symbol,1}:
  :μ
  :β
