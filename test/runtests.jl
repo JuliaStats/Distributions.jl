@@ -32,6 +32,7 @@ tests = [
     "quantile_newton",
     "semicircle",
     "qq",
+    "truncnormal",
 ]
 
 print_with_color(:blue, "Running tests:\n")
