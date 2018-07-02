@@ -2,15 +2,16 @@ __precompile__(true)
 
 module Distributions
 
+using StatsBase 
 using PDMats
 using StatsFuns
-using StatsBase
+
 using Compat
 import Compat.MathConstants: γ
 
 import QuadGK: quadgk
 import Base: size, eltype, length, full, convert, show, getindex, rand
-import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
+import Base: sum, mean, median, maximum, minimum, quantile
 import Base: +, -
 import Base.Math: @horner
 
@@ -33,6 +34,10 @@ if isdefined(Compat.Random, :SamplerRangeInt)
     using Compat.Random: SamplerRangeInt
 else
     const SamplerRangeInt = Compat.Random.RangeGeneratorInt
+end
+
+if isdefined(StatsBase, :StatsCompat)
+    import StatsBase.StatsCompat: std, var, cov, cor
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence

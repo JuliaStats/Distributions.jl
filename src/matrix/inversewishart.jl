@@ -84,7 +84,7 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
-    Xcf = cholfact(X)
+    Xcf = cholesky(X)
     # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
     Ψ = Matrix(d.Ψ)
     -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) - d.c0
@@ -93,12 +93,12 @@ end
 
 #### Sampling
 
-rand(d::InverseWishart) = inv(cholfact!(rand(Wishart(d.df, inv(d.Ψ)))))
+rand(d::InverseWishart) = inv(cholesky!(rand(Wishart(d.df, inv(d.Ψ)))))
 
 function _rand!(d::InverseWishart, X::AbstractArray{M}) where M<:Matrix
     wd = Wishart(d.df, inv(d.Ψ))
     for i in 1:length(X)
-        X[i] = inv(cholfact!(rand(wd)))
+        X[i] = inv(cholesky!(rand(wd)))
     end
     return X
 end
