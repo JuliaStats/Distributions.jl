@@ -148,17 +148,13 @@ end
 
 # A simple implementation of a DFT to avoid introducing a dependency
 # on an external FFT package just for this one distribution
-if VERSION >= v"0.7.0-DEV.602"
-    function _dft(x::Vector{T}) where T
-        n = length(x)
-        y = zeros(complex(float(T)), n)
-        @inbounds for j = 0:n-1, k = 0:n-1
-            y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
-        end
-        return y
+function _dft(x::Vector{T}) where T
+    n = length(x)
+    y = zeros(complex(float(T)), n)
+    @inbounds for j = 0:n-1, k = 0:n-1
+        y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
     end
-else
-    _dft(x) = Base.fft(x)
+    return y
 end
 
 #### Sampling

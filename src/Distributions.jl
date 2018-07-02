@@ -16,10 +16,7 @@ import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
 if VERSION >= v"0.7.0-beta.85"
     import Statistics: mean, median, quantile, std, var, cov, cor
-elseif VERSION >= v"0.7.0-DEV.5238"
-    import StatsBase: mean, median, quantile, std, var, cov, cor
-else
-    import Base: mean, median, quantile, std, var, cov, cor
+elseif 
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
