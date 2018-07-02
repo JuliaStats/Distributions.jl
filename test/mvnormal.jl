@@ -4,7 +4,7 @@ import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions, Compat
 import Compat.view
-using Compat.Test
+using Compat.LinearAlgebra, Compat.Random, Compat.Test
 
 import Distributions: distrname
 
@@ -34,9 +34,9 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     # sampling
     @test isa(rand(g), Vector{Float64})
     X = rand(g, n_tsamples)
-    emp_mu = vec(mean(X, 2))
+    emp_mu = vec(Compat.mean(X, dims=2))
     Z = X .- emp_mu
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
         @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
@@ -47,9 +47,9 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     X = rand(MersenneTwister(14), g, n_tsamples)
     Y = rand(MersenneTwister(14), g, n_tsamples)
     @test X == Y
-    emp_mu = vec(mean(X, 2))
+    emp_mu = vec(Compat.mean(X, dims=2))
     Z = X .- emp_mu
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
         @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
@@ -60,7 +60,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
 
     # evaluation of sqmahal & logpdf
     U = X .- μ
-    sqm = vec(sum(U .* (Σ \ U), 1))
+    sqm = vec(Compat.sum(U .* (Σ \ U), dims=1))
     for i = 1:min(100, n_tsamples)
         @test sqmahal(g, X[:,i]) ≈ sqm[i]
     end
@@ -88,16 +88,16 @@ dv = [1.2, 3.4, 2.6]
 J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
 for (T, g, μ, Σ) in [
-    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, 2.0 * eye(3)),
-    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), 2.0 * eye(3)),
-    (DiagNormal, MvNormal(mu, Vector{Float64}(sqrt.(va))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (ZeroMeanDiagNormal, MvNormal(Vector{Float64}(sqrt.(va))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
+    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
+    (DiagNormal, MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
+    (ZeroMeanDiagNormal, MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
     (FullNormal, MvNormal(mu, C), mu, C),
     (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
-    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, 0.5 * eye(3)),
-    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), 0.5 * eye(3)),
-    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, diagm(1.0 ./ dv)),
-    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), diagm(1.0 ./ dv)),
+    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, Matrix(0.5I, 3, 3)),
+    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
+    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
     (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)),
     (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)) ]
 
@@ -154,7 +154,7 @@ d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)
 # a slow but safe way to implement MLE for verification
 
 function _gauss_mle(x::Matrix{Float64})
-    mu = vec(mean(x, 2))
+    mu = vec(Compat.mean(x, dims=2))
     z = x .- mu
     C = (z * z') * (1/size(x,2))
     return mu, C
@@ -165,7 +165,7 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     mu = (x * w) * (1/sw)
     z = x .- mu
     C = (z * (Diagonal(w) * z')) * (1/sw)
-    Base.LinAlg.copytri!(C, 'U')
+    Compat.LinearAlgebra.copytri!(C, 'U')
     return mu, C
 end
 

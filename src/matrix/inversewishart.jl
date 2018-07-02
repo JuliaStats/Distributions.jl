@@ -60,7 +60,7 @@ end
 
 #### Show
 
-show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, full(d.Ψ))])
+show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matrix(d.Ψ))])
 
 
 #### Statistics
@@ -70,7 +70,7 @@ function mean(d::InverseWishart)
     p = dim(d)
     r = df - (p + 1)
     if r > 0.0
-        return full(d.Ψ) * (1.0 / r)
+        return Matrix(d.Ψ) * (1.0 / r)
     else
         error("mean only defined for df > p + 1")
     end
@@ -85,9 +85,9 @@ function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
     Xcf = cholfact(X)
-    # we use the fact: trace(Ψ * inv(X)) = trace(inv(X) * Ψ) = trace(X \ Ψ)
-    Ψ = full(d.Ψ)
-    -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
+    # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
+    Ψ = Matrix(d.Ψ)
+    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) - d.c0
 end
 
 

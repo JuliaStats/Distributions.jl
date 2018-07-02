@@ -8,25 +8,38 @@ using StatsBase
 using Compat
 import Compat.MathConstants: γ
 
-import QuadGK.quadgk
-import Compat.view
-import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
+import QuadGK: quadgk
+import Base: size, eltype, length, full, convert, show, getindex, rand
 import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
 import Base: +, -
-import Base.Math.@horner
-import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+import Base.Math: @horner
 
-if isdefined(Base, :scale)
-    import Base: scale
+using Compat.Printf
+
+using Compat.LinearAlgebra
+import Compat.LinearAlgebra: Cholesky
+
+if isdefined(Compat.LinearAlgebra, :rmul!)
+    using Compat.LinearAlgebra: rmul!
+else
+    import Base: scale!
+    const rmul! = Base.scale!
+end
+
+using Compat.Random
+import Compat.Random: GLOBAL_RNG, RangeGenerator, rand!
+
+if isdefined(Compat.Random, :SamplerRangeInt)
+    using Compat.Random: SamplerRangeInt
+else
+    const SamplerRangeInt = Compat.Random.RangeGeneratorInt
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
 import StatsBase: loglikelihood, dof, span, params, params!
 import PDMats: dim, PDMat, invquad
 
-importall SpecialFunctions
+using SpecialFunctions
 
 export
     # generic types

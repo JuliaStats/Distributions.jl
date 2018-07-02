@@ -46,7 +46,7 @@ end
 
 Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
-Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(alpha)
+Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(convert(Vector{Float64},alpha))
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
 struct DirichletCanon
@@ -77,7 +77,7 @@ function var(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    v = Vector{Float64}(k)
+    v = Vector{Float64}(undef, k)
     for i = 1:k
         @inbounds αi = α[i]
         @inbounds v[i] = αi * (α0 - αi) * c
@@ -91,7 +91,7 @@ function cov(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    C = Matrix{Float64}(k, k)
+    C = Matrix{Float64}(undef, k, k)
 
     for j = 1:k
         αj = α[j]
@@ -135,7 +135,7 @@ function dirichlet_mode!(r::Vector{T}, α::Vector{T}, α0::T) where T <: Real
     return r
 end
 
-dirichlet_mode(α::Vector{T}, α0::T) where {T <: Real} = dirichlet_mode!(Vector{T}(length(α)), α, α0)
+dirichlet_mode(α::Vector{T}, α0::T) where {T <: Real} = dirichlet_mode!(Vector{T}(undef, length(α)), α, α0)
 
 mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
 mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
@@ -257,8 +257,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(K)  # E[p]
-    γ = Vector{Float64}(K)  # E[p^2]
+    μ = Vector{Float64}(undef, K)  # E[p]
+    γ = Vector{Float64}(undef, K)  # E[p^2]
 
     for i = 1:n
         for k = 1:K
@@ -281,8 +281,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(K)  # E[p]
-    γ = Vector{Float64}(K)  # E[p^2]
+    μ = Vector{Float64}(undef, K)  # E[p]
+    γ = Vector{Float64}(undef, K)  # E[p^2]
     tw = 0.
 
     for i = 1:n
@@ -313,8 +313,8 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     K = length(elogp)
     length(α) == K || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
-    g = Vector{Float64}(K)
-    iq = Vector{Float64}(K)
+    g = Vector{Float64}(undef, K)
+    iq = Vector{Float64}(undef, K)
     α0 = sum(α)
 
     if debug

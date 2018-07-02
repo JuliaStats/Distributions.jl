@@ -33,7 +33,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for i = 1:n
         @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test cdf.(g, X) ≈ cf
+    @test cdf.(Ref(g), X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -57,8 +57,8 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test pdf.(g, X)                  ≈ mix_p0
-    @test logpdf.(g, X)               ≈ mix_lp0
+    @test pdf.(Ref(g), X)                  ≈ mix_p0
+    @test logpdf.(Ref(g), X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
     @test componentwise_logpdf(g, X) ≈ LP0
 
@@ -108,10 +108,11 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
         @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
         @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
-
+#=
     @show g
     @show size(X)
     @show size(mix_p0)
+=#
     @test pdf(g, X)                  ≈ mix_p0
     @test logpdf(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
@@ -121,8 +122,8 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test isapprox(vec(mean(Xs, 2)), mean(g), atol=0.1)
-    @test isapprox(cov(Xs, 2)      , cov(g) , atol=0.1)
+    @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
+    @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)

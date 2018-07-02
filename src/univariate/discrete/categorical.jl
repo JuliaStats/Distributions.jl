@@ -134,7 +134,7 @@ function cf(d::Categorical{T}, t::Real) where T<:Real
     s
 end
 
-mode(d::Categorical) = indmax(probs(d))
+mode(d::Categorical) = argmax(probs(d))
 
 function modes(d::Categorical)
     K = ncategories(d)

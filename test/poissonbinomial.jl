@@ -44,18 +44,18 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
 
     n = n₁ + n₂ + n₃
     p = zeros(n)
-    p[1:n₁] = p₁
-    p[n₁+1: n₁ + n₂] = p₂
-    p[n₁ + n₂ + 1:end] = p₃
+    p[1:n₁] .= p₁
+    p[n₁+1: n₁ + n₂] .= p₂
+    p[n₁ + n₂ + 1:end] .= p₃
     d = PoissonBinomial(p)
     println("   testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
     b1 = Binomial(n₁, p₁)
     b2 = Binomial(n₂, p₂)
     b3 = Binomial(n₃, p₃)
 
-    pmf1 = pdf.(b1, support(b1))
-    pmf2 = pdf.(b2, support(b2))
-    pmf3 = pdf.(b3, support(b3))
+    pmf1 = pdf.(Ref(b1), support(b1))
+    pmf2 = pdf.(Ref(b2), support(b2))
+    pmf3 = pdf.(Ref(b3), support(b3))
 
     @test mean(d) ≈ (mean(b1) + mean(b2) + mean(b3))
     @test var(d)  ≈ (var(b1) + var(b2) + var(b3))

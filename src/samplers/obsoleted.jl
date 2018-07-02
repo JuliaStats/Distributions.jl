@@ -131,7 +131,7 @@ function huffman(values::AbstractVector{T},weights::AbstractVector{UInt64}) wher
     while !isempty(leafs) || length(branches) > 1
         left = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
         right = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
-        unshift!(branches,HuffmanBranch(left,right))
+        pushfirst!(branches,HuffmanBranch(left,right))
     end
 
     pop!(branches)

@@ -92,7 +92,7 @@ end
 
 entropy(d::PoissonBinomial) = entropy(Categorical(d.pmf))
 median(d::PoissonBinomial) = median(Categorical(d.pmf)) - 1
-mode(d::PoissonBinomial) = indmax(d.pmf) - 1
+mode(d::PoissonBinomial) = argmax(d.pmf) - 1
 modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 #### Evaluation
@@ -126,7 +126,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     n = length(p)
     ω = 2 / (n + 1)
 
-    x = Vector{Complex{Float64}}(n+1)
+    x = Vector{Complex{Float64}}(undef, n+1)
     lmax = ceil(Int, n/2)
     x[1] = 1/(n + 1)
     for l=1:lmax
