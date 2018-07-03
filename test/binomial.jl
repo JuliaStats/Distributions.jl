@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test, Compat.Random
+using Test, Random
 
 
 # Test the consistency between the recursive and nonrecursive computation of the pdf

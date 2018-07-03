@@ -1,5 +1,5 @@
 using Distributions, PDMats
-using Compat.Test, Compat.LinearAlgebra
+using Test, LinearAlgebra
 
 
 # RealInterval

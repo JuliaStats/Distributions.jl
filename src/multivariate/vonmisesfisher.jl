@@ -32,7 +32,7 @@ VonMisesFisher(μ::Vector{T}, κ::T) where {T<:Real} = VonMisesFisher{T}(μ, κ)
 VonMisesFisher(μ::Vector{T}, κ::Real) where {T<:Real} = VonMisesFisher(promote_eltype(μ, κ)...)
 
 function VonMisesFisher(θ::Vector)
-    κ = vecnorm(θ)
+    κ = norm(θ)
     return VonMisesFisher(θ * (1 / κ), κ)
 end
 
@@ -80,9 +80,9 @@ _rand!(d::VonMisesFisher, x::AbstractMatrix) = _rand!(sampler(d), x)
 ### Estimation
 
 function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
-    r = vec(Compat.sum(X, dims=2))
+    r = vec(sum(X, dims=2))
     n = size(X, 2)
-    r_nrm = vecnorm(r)
+    r_nrm = norm(r)
     μ = rmul!(r, 1.0 / r_nrm)
     ρ = r_nrm / n
     κ = _vmf_estkappa(length(μ), ρ)

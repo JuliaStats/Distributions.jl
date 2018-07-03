@@ -1,7 +1,7 @@
 # Tests on Multivariate LogNormal distributions
 
-using Distributions, Compat, PDMats
-using Compat.LinearAlgebra, Compat.Random, Compat.Test
+using Distributions,  PDMats
+using LinearAlgebra, Random, Test
 
 
 
@@ -40,8 +40,8 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
 
     # sampling
     X = rand(g, n_tsamples)
-    emp_mn = vec(Compat.mean(X, dims=2))
-    emp_md = vec(Compat.median(X, dims=2))
+    emp_mn = vec(mean(X, dims=2))
+    emp_md = vec(median(X, dims=2))
     Z = X .- emp_mn
     emp_cov = (Z * Z') ./ n_tsamples
     for i = 1:d

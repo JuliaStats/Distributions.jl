@@ -2,13 +2,13 @@
 
 using Distributions
 import JSON
-using Compat, Compat.Test
+using  Test
 
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for dct in R
-        ex = Compat.Meta.parse(dct["expr"])
+        ex = Meta.parse(dct["expr"])
         @assert ex.head == :call
         dsym = ex.args[1]
         dname = string(dsym)

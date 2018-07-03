@@ -88,6 +88,6 @@ Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRan
     _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
 
 function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
     r .= pdf.(Ref(d),X)
 end

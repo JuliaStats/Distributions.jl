@@ -119,7 +119,7 @@ RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p 
 nextpdf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
 
 function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
-    Compat.axes(r) == Compat.axes(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
+    axes(r) == axes(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
 
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2
@@ -150,7 +150,7 @@ function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRa
     return r
 end
 function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, Compat.axes(X))
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
     r .= pdf.(Ref(d),X)
 end
 

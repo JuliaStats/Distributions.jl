@@ -1,6 +1,6 @@
 
 using Distributions
-using Compat.Random, Compat.Test
+using Random, Test
 
 
 

@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 a = qqbuild(collect(1:10), collect(1:10))
 @test a.qx == collect(1.0:10)

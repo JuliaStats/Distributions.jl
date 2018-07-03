@@ -2,9 +2,8 @@
 
 import PDMats: ScalMat, PDiagMat, PDMat
 
-using Distributions, Compat
-import Compat.view
-using Compat.LinearAlgebra, Compat.Random, Compat.Test
+using Distributions
+using LinearAlgebra, Random, Test
 
 import Distributions: distrname
 
@@ -35,7 +34,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     # sampling
     @test isa(rand(g), Vector{Float64})
     X = rand(g, n_tsamples)
-    emp_mu = vec(Compat.mean(X, dims=2))
+    emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
@@ -48,7 +47,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     X = rand(MersenneTwister(14), g, n_tsamples)
     Y = rand(MersenneTwister(14), g, n_tsamples)
     @test X == Y
-    emp_mu = vec(Compat.mean(X, dims=2))
+    emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
@@ -61,7 +60,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
 
     # evaluation of sqmahal & logpdf
     U = X .- μ
-    sqm = vec(Compat.sum(U .* (Σ \ U), dims=1))
+    sqm = vec(sum(U .* (Σ \ U), dims=1))
     for i = 1:min(100, n_tsamples)
         @test sqmahal(g, X[:,i]) ≈ sqm[i]
     end
@@ -155,7 +154,7 @@ d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)
 # a slow but safe way to implement MLE for verification
 
 function _gauss_mle(x::Matrix{Float64})
-    mu = vec(Compat.mean(x, dims=2))
+    mu = vec(mean(x, dims=2))
     z = x .- mu
     C = (z * z') * (1/size(x,2))
     return mu, C
@@ -166,7 +165,7 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     mu = (x * w) * (1/sw)
     z = x .- mu
     C = (z * (Diagonal(w) * z')) * (1/sw)
-    Compat.LinearAlgebra.copytri!(C, 'U')
+    LinearAlgebra.copytri!(C, 'U')
     return mu, C
 end
 

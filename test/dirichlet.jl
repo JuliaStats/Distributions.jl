@@ -1,7 +1,7 @@
 # Tests for Dirichlet distribution
 
-using Compat, Distributions
-using Compat.Test, Compat.Random, Compat.LinearAlgebra
+using  Distributions
+using Test, Random, LinearAlgebra
 
 
 srand(34567)
@@ -71,7 +71,7 @@ x = rand(d, 10)
 
 n = 10000
 x = rand(d, n)
-x = x ./ Compat.sum(x, dims=1)
+x = x ./ sum(x, dims=1)
 
 r = fit_mle(Dirichlet, x)
 @test isapprox(r.alpha, d.alpha, atol=0.25)

@@ -1,7 +1,7 @@
 # Testing continuous univariate distributions
 
 using Distributions
-using Compat.Test
+using Test
 
 using Calculus: derivative
 

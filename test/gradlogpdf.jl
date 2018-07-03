@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 # Test for gradlogpdf on univariate distributions

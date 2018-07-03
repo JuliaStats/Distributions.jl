@@ -5,9 +5,7 @@ module TestTruncate
 using Distributions
 using ForwardDiff: Dual
 import JSON
-using Compat.Test
-
-using Compat
+using Test
 
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)

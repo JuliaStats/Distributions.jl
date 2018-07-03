@@ -1,5 +1,5 @@
-using Compat, Distributions
-using Compat.Test
+using  Distributions
+using Test
 
 
 d = Kolmogorov()

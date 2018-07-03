@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 # Test the special base where PoissonBinomial distribution reduces

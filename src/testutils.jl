@@ -1,6 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
-import Compat.Test: @test
+import Test: @test
 
 # auxiliary functions
 

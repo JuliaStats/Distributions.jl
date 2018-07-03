@@ -4,8 +4,8 @@
 #  - distribution fitting (i.e. estimation)
 #
 
-using Distributions, Compat
-using Compat.Test, Compat.Random, Compat.LinearAlgebra
+using Distributions
+using Test, Random, LinearAlgebra
 
 
 n0 = 100

@@ -1,8 +1,8 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Compat.Test
-using Compat.Distributed
-using Compat.Random
+using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using Test
+using Distributed
+using Random
 using StatsBase
 
 tests = [
@@ -49,15 +49,15 @@ else
     addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
 end
 
-@everywhere using Compat.Random
+@everywhere using Random
 @everywhere srand(345679)
 res = pmap(tests) do t
     @eval module $(Symbol("Test_", t))
     using Distributions
-    using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-    using Compat.Test
-    using Compat.Random
-    using Compat.LinearAlgebra
+    using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+    using Test
+    using Random
+    using LinearAlgebra
     using StatsBase
     include($t * ".jl")
     end
@@ -66,5 +66,5 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Compat.Test.detect_ambiguities(Distributions))
+display(Test.detect_ambiguities(Distributions))
 println()

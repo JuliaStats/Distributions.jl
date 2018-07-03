@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 for p in Vector{Float64}[

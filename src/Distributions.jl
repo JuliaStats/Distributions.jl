@@ -2,42 +2,24 @@ __precompile__(true)
 
 module Distributions
 
-using StatsBase 
-using PDMats
-using StatsFuns
-
-using Compat
-import Compat.MathConstants: γ
+using StatsBase, PDMats, StatsFuns
 
 import QuadGK: quadgk
 import Base: size, eltype, length, full, convert, show, getindex, rand
-import Base: sum, mean, median, maximum, minimum, quantile
-import Base: +, -
+import Base: sum, maximum, minimum, +, -
 import Base.Math: @horner
 
-using Compat.Printf
+using LinearAlgebra, Printf
 
-using Compat.LinearAlgebra
-import Compat.LinearAlgebra: Cholesky
+using Random
+import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
-if isdefined(Compat.LinearAlgebra, :rmul!)
-    using Compat.LinearAlgebra: rmul!
+if VERSION >= v"0.7.0-beta.85"
+    import Statistics: mean, median, quantile, std, var, cov, cor
+elseif VERSION >= v"0.7.0-DEV.5238"
+    import StatsBase: mean, median, quantile, std, var, cov, cor
 else
-    import Base: scale!
-    const rmul! = Base.scale!
-end
-
-using Compat.Random
-import Compat.Random: GLOBAL_RNG, RangeGenerator, rand!
-
-if isdefined(Compat.Random, :SamplerRangeInt)
-    using Compat.Random: SamplerRangeInt
-else
-    const SamplerRangeInt = Compat.Random.RangeGeneratorInt
-end
-
-if isdefined(StatsBase, :StatsCompat)
-    import StatsBase.StatsCompat: std, var, cov, cor
+    import Base: mean, median, quantile, std, var, cov, cor    
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
@@ -47,6 +29,9 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 
 export
+    # re-export Statistics
+    mean, median, quantile, std, var, cov, cor,
+
     # generic types
     VariateForm,
     ValueSupport,

@@ -1,7 +1,7 @@
 # Tests for Von-Mises Fisher distribution
 
 using Distributions
-using Compat.LinearAlgebra, Compat.Test
+using LinearAlgebra, Test
 
 using SpecialFunctions
 

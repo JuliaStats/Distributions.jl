@@ -314,7 +314,7 @@ end
 function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where Cov<:AbstractPDMat
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
-    sx = vec(Compat.sum(x, dims=2))
+    sx = vec(sum(x, dims=2))
     tw = Float64(size(x, 2))
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
@@ -336,7 +336,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(Compat.sum(x,dims=2)), 1.0 / size(x,2))
+    μ = multiply!(vec(sum(x,dims=2)), 1.0 / size(x,2))
     MvNormal(μ, g.Σ)
 end
 
@@ -361,7 +361,7 @@ end
 function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
-    s = vec(Compat.sum(x, dims=2))
+    s = vec(sum(x, dims=2))
     m = s * inv(n)
     z = x .- m
     s2 = z * z'
@@ -404,10 +404,10 @@ fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.
 
 function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
-    mu = vec(Compat.mean(x, dims=2))
+    mu = vec(mean(x, dims=2))
     z = x .- mu
     C = BLAS.syrk('U', 'N', 1.0/n, z)
-    Compat.LinearAlgebra.copytri!(C, 'U')
+    LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -427,7 +427,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
         end
     end
     C = BLAS.syrk('U', 'N', inv_sw, z)
-    Compat.LinearAlgebra.copytri!(C, 'U')
+    LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -435,7 +435,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(Compat.mean(x, dims=2))
+    mu = vec(mean(x, dims=2))
     va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
@@ -469,7 +469,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(Compat.mean(x, dims=2))
+    mu = vec(mean(x, dims=2))
     va = 0.
     for j = 1:n
         va_j = 0.
