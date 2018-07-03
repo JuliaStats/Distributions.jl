@@ -19,7 +19,7 @@ if VERSION >= v"0.7.0-beta.85"
 elseif VERSION >= v"0.7.0-DEV.5238"
     import StatsBase: mean, median, quantile, std, var, cov, cor
 else
-    import Base: mean, median, quantile, std, var, cov, cor    
+    import Base: mean, median, quantile, std, var, cov, cor
 end
 
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
