@@ -14,12 +14,7 @@ using LinearAlgebra, Printf
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
-if VERSION >= v"0.7.0-beta.85"
-    import Statistics: mean, median, quantile, std, var, cov, cor
-else
-    import StatsFuns: mean, median, quantile, std, var, cov, cor
-end
-
+import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
 import StatsBase: loglikelihood, dof, span, params, params!
 import PDMats: dim, PDMat, invquad
