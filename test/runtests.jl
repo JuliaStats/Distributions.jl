@@ -39,24 +39,16 @@ tests = [
 
 printstyled("Running tests:\n", color=:blue)
 
-if nworkers() > 1
-    rmprocs(workers())
-end
+using Random
+srand(345679)
 
-if Base.JLOptions().code_coverage == 1
-    addprocs(1, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
-else
-    addprocs(1, exeflags = "--check-bounds=yes")
-end
-
-@everywhere using Random
-@everywhere srand(345679)
-res = pmap(tests) do t
+res = map(tests) do t
     @eval module $(Symbol("Test_", t))
     using Distributions
     using JSON, ForwardDiff, Calculus, PDMats # test dependencies
     using Test
     using Random
+    srand(345679)
     using LinearAlgebra
     using StatsBase
     include($t * ".jl")
