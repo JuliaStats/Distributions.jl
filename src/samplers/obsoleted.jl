@@ -24,19 +24,19 @@ function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
     end
 
     # Allocate digit table and digit sums as table bounds
-    table = Vector{Vector{Int64}}(9)
+    table = Vector{Vector{Int64}}(undef, 9)
     bounds = zeros(Int64, 9)
 
     # Special case for deterministic distributions
     for i in 1:n
         if vals[i] == 64^9
-            table[1] = Vector{Int64}(64)
+            table[1] = Vector{Int64}(undef, 64)
             for j in 1:64
                 table[1][j] = i
             end
             bounds[1] = 64^9
             for j in 2:9
-                table[j] = Vector{Int64}(0)
+                table[j] = Vector{Int64}()
                 bounds[j] = 64^9
             end
             return DiscreteDistributionTable(table, bounds)
@@ -46,7 +46,7 @@ function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
     # Fill tables
     multiplier = 1
     for index in 9:-1:1
-        counts = Vector{Int64}(0)
+        counts = Vector{Int64}()
         for i in 1:n
             digit = mod(vals[i], 64)
             # vals[i] = fld(vals[i], 64)
@@ -126,12 +126,12 @@ function huffman(values::AbstractVector{T},weights::AbstractVector{UInt64}) wher
     leafs = [HuffmanLeaf{T}(values[i],weights[i]) for i = 1:length(weights)]
     sort!(leafs; rev=true)
 
-    branches = Vector{HuffmanBranch{T}}(0)
+    branches = Vector{HuffmanBranch{T}}()
 
     while !isempty(leafs) || length(branches) > 1
         left = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
         right = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
-        unshift!(branches,HuffmanBranch(left,right))
+        pushfirst!(branches,HuffmanBranch(left,right))
     end
 
     pop!(branches)

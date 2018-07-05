@@ -1,9 +1,9 @@
 # Testing continuous univariate distributions
 
 using Distributions
-using Compat.Test
+using Test
 
-using Calculus.derivative
+using Calculus: derivative
 
 n_tsamples = 100
 

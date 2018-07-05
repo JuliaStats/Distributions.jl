@@ -80,12 +80,12 @@ logpdf(d::Cauchy, x::Real) = - (log1psq(zval(d, x)) + logπ + log(d.σ))
 
 function cdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan2(x - μ, σ) + 1//2
+    invπ * atan(x - μ, σ) + 1//2
 end
 
 function ccdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan2(μ - x, σ) + 1//2
+    invπ * atan(μ - x, σ) + 1//2
 end
 
 function quantile(d::Cauchy, p::Real)

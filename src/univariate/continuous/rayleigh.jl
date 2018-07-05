@@ -59,7 +59,7 @@ std(d::Rayleigh{T}) where {T<:Real} = sqrt(2 - T(π)/2) * d.σ
 skewness(d::Rayleigh{T}) where {T<:Real} = 2 * sqrtπ * (T(π) - 3)/(4 - T(π))^(3/2)
 kurtosis(d::Rayleigh{T}) where {T<:Real} = -(6*T(π)^2 - 24*T(π) +16)/(4 - T(π))^2
 
-entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(γ)/2 + log(d.σ)
+entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(MathConstants.γ)/2 + log(d.σ)
 
 
 #### Evaluation

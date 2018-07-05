@@ -134,13 +134,13 @@ function cf(d::Categorical{T}, t::Real) where T<:Real
     s
 end
 
-mode(d::Categorical) = indmax(probs(d))
+mode(d::Categorical) = argmax(probs(d))
 
 function modes(d::Categorical)
     K = ncategories(d)
     p = probs(d)
     maxp = maximum(p)
-    r = Vector{Int}(0)
+    r = Vector{Int}()
     for k = 1:K
         @inbounds if p[k] == maxp
             push!(r, k)

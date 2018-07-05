@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 const n_samples = 5_000_001

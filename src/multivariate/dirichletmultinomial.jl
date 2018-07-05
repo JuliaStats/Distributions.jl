@@ -80,7 +80,7 @@ struct DirichletMultinomialStats <: SufficientStats
     DirichletMultinomialStats(n::Int, s::Matrix{Float64}, tw::Real) = new(n, s, Float64(tw))
 end
 function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
-    ns = sum(x, 1)  # get ntrials for each observation
+    ns = sum(x, dims=1)  # get ntrials for each observation
     n = ns[1]       # use ntrails from first ob., then check all equal
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
@@ -94,7 +94,7 @@ function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
 end
 function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
-    ns = sum(x, 1)
+    ns = sum(x, dims=1)
     n = ns[1]
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)

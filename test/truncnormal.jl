@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using Distributions
 
 @testset "Truncated normal, mean and variance" begin
