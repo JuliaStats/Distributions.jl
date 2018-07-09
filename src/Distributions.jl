@@ -2,7 +2,7 @@ __precompile__(true)
 
 module Distributions
 
-using StatsBase, PDMats, StatsFuns
+using StatsBase, PDMats, StatsFuns, Statistics
 
 import QuadGK: quadgk
 import Base: size, eltype, length, full, convert, show, getindex, rand

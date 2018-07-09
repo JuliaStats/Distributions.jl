@@ -135,7 +135,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
         for j=1:n
             zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))
-            argz += atan2(imag(zjl), real(zjl))
+            argz += atan(imag(zjl), real(zjl))
         end
         dl = exp(logz)
         x[l + 1] = dl * cos(argz) / (n + 1) + dl * sin(argz) * im / (n + 1)
