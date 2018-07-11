@@ -133,8 +133,7 @@ Sample from distribution `d` using the random number generator `rng`.
 """
 rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
 rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
-rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Matrix{eltype(d)}(undef, length(d), n))
-
+rand(rng::AbstractRNG, d::AbstractMvNormal, n::Integer) = _rand!(rng, d, Matrix{eltype(d)}(undef, length(d), n))
 
 ###########################################################
 #
