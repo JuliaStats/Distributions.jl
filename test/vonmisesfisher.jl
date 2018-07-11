@@ -12,14 +12,14 @@ safe_vmfpdf(μ::Vector, κ::Float64, x::Vector) = vmfCp(length(μ), κ) * exp(κ
 function gen_vmf_tdata(n::Int, p::Int)
     X = randn(p, n)
     for i = 1:n
-        X[:,i] = X[:,i] ./ vecnorm(X[:,i])
+        X[:,i] = X[:,i] ./ norm(X[:,i])
     end
     return X
 end
 
 function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
     μ = randn(p)
-    μ = μ ./ vecnorm(μ)
+    μ = μ ./ norm(μ)
 
     d = VonMisesFisher(μ, κ)
     @test length(d) == p
@@ -52,11 +52,11 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int)
 
     # sampling
     x = rand(d)
-    @test vecnorm(x) ≈ 1.0
+    @test norm(x) ≈ 1.0
 
     X = rand(d, n)
     for i = 1:n
-        @test vecnorm(X[:,i]) ≈ 1.0
+        @test norm(X[:,i]) ≈ 1.0
     end
 
     # MLE
