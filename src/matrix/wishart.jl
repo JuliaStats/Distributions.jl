@@ -51,6 +51,7 @@ dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 params(d::Wishart) = (d.df, d.S, d.c0)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
+LinearAlgebra.cholesky(d::Wishart) = cholesky(d.S)
 
 ### Conversion
 function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real

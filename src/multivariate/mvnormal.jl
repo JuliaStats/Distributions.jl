@@ -249,6 +249,7 @@ length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = convert(Vector, d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
+LinearAlgebra.cholesky(d::MvNormal) = cholesky(d.Σ)
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = Matrix(d.Σ)

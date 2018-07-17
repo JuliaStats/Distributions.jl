@@ -47,6 +47,7 @@ dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
+LinearAlgebra.cholesky(d::InverseWishart) = cholesky(d.Ψ)
 
 ### Conversion
 function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real

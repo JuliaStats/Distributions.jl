@@ -186,6 +186,7 @@ end
 length(d::MvLogNormal) = length(d.normal)
 params(d::MvLogNormal) = params(d.normal)
 @inline partype(d::MvLogNormal{T}) where {T<:Real} = T
+LinearAlgebra.cholesky(d::MvLogNormal) = cholesky(d.normal)
 
 """
     location(d::MvLogNormal)
