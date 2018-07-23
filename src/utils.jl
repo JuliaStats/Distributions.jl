@@ -148,9 +148,10 @@ function trycholesky(a::Matrix{Float64})
 end
 
 # Similarity function, per issue #530 (and by extension, issue #482)
-import Base.similar 
+"""
+A function to, given a distribution of type D and parameters A, B, C..., create a new D(A, B, C...).
 
-function similar(dist::Distribution, params...)
-    distType = (typeof(dist).name).wrapper
-    return distType(params...)
-end 
+Works so long as there is a type constructor for the distribution; i.e., Normal for Normal{Float64}. 
+"""
+Base.similar(dist::Distribution, params::Union{Number, AbstractArray}...) = (typeof(dist).name).wrapper(params...)
+
