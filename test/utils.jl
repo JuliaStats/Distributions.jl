@@ -24,3 +24,12 @@ Z = Distributions.ZeroVector(Float64, 5)
 L = rand(Float32, 4, 4)
 D = PDMats.PDMat(L * L')
 @test typeof(convert(Distributions.ZeroVector{Float32}, Z)) == Distributions.ZeroVector{Float32}
+
+# Test similarity function. 
+d1 = Normal()
+@test similar(d1, 1.0, 3.0) == Normal(1.0, 3.0) # Vanilla case. 
+@test_throws MethodError similar(d1, 1.0, 3.0, 4.0) # Error handling. 
+@test similar(d1, 10.0) == Normal(10.0) # Resorts to defaults in constructor. 
+d2 = MvNormal([1.0, 2.0], [1.0 0.0; 0.0 1.0]) 
+@test similar(d1, params(d1)...) == d1 # Multivariate case. 
+@test_throws DimensionMismatch similar(d2, [1.0, 2.0, 3.0], [1.0 0.0; 0.0 1.0]) # DimensionMismatch. 

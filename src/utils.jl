@@ -146,3 +146,11 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
+
+# Similarity function, per issue #530 (and by extension, issue #482)
+import Base.similar 
+
+function similar(dist::Distribution, params...)
+    distType = (typeof(dist).name).wrapper
+    return distType(params...)
+end 
