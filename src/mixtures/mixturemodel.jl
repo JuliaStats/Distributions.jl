@@ -322,7 +322,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     fill!(r, 0.0)
-    t = Array{Float64}(size(r))
+    t = Array{Float64}(undef, size(r))
     for i = 1:K
         @inbounds pi = p[i]
         if pi > 0.0
@@ -353,7 +353,7 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
 
-    lp = Vector{Float64}(K)
+    lp = Vector{Float64}(undef, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
     for i = 1:K
         @inbounds pi = p[i]
@@ -495,15 +495,15 @@ componentwise_logpdf!(r::AbstractVector, d::MultivariateMixture, x::AbstractVect
 componentwise_logpdf!(r::AbstractMatrix, d::UnivariateMixture, x::AbstractVector) = _cwise_logpdf!(r, d, x)
 componentwise_logpdf!(r::AbstractMatrix, d::MultivariateMixture, x::AbstractMatrix) = _cwise_logpdf!(r, d, x)
 
-componentwise_pdf(d::UnivariateMixture, x::Real) = componentwise_pdf!(Vector{Float64}(ncomponents(d)), d, x)
-componentwise_pdf(d::UnivariateMixture, x::AbstractVector) = componentwise_pdf!(Matrix{Float64}(length(x), ncomponents(d)), d, x)
-componentwise_pdf(d::MultivariateMixture, x::AbstractVector) = componentwise_pdf!(Vector{Float64}(ncomponents(d)), d, x)
-componentwise_pdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_pdf!(Matrix{Float64}(size(x,2), ncomponents(d)), d, x)
+componentwise_pdf(d::UnivariateMixture, x::Real) = componentwise_pdf!(Vector{Float64}(undef, ncomponents(d)), d, x)
+componentwise_pdf(d::UnivariateMixture, x::AbstractVector) = componentwise_pdf!(Matrix{Float64}(undef, length(x), ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractVector) = componentwise_pdf!(Vector{Float64}(undef, ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_pdf!(Matrix{Float64}(undef, size(x,2), ncomponents(d)), d, x)
 
-componentwise_logpdf(d::UnivariateMixture, x::Real) = componentwise_logpdf!(Vector{Float64}(ncomponents(d)), d, x)
-componentwise_logpdf(d::UnivariateMixture, x::AbstractVector) = componentwise_logpdf!(Matrix{Float64}(length(x), ncomponents(d)), d, x)
-componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_logpdf!(Vector{Float64}(ncomponents(d)), d, x)
-componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{Float64}(size(x,2), ncomponents(d)), d, x)
+componentwise_logpdf(d::UnivariateMixture, x::Real) = componentwise_logpdf!(Vector{Float64}(undef, ncomponents(d)), d, x)
+componentwise_logpdf(d::UnivariateMixture, x::AbstractVector) = componentwise_logpdf!(Matrix{Float64}(undef, length(x), ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_logpdf!(Vector{Float64}(undef, ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{Float64}(undef, size(x,2), ncomponents(d)), d, x)
 
 
 ## Sampling

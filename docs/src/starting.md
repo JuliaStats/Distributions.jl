@@ -11,7 +11,8 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Distributions
+julia> using Compat, Compat.Random, Distributions
+
 julia> srand(123) # Setting the seed
 ```
 
@@ -71,7 +72,7 @@ julia> Truncated(Normal(mu, sigma), l, u)
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:
 
 ```julia
-julia> names(Cauchy)
+julia> fieldnames(Cauchy)
 2-element Array{Symbol,1}:
  :μ
  :β

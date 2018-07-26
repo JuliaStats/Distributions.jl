@@ -108,7 +108,7 @@ When x is a vector, it returns a scalar value. When x is a matrix, it returns a 
 """
 sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
@@ -131,10 +131,9 @@ _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(
 
 Sample from distribution `d` using the random number generator `rng`.
 """
-rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(length(d)))
+rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
 rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
-rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int64) = _rand!(rng, d, Matrix{eltype(d)}(length(d), n))
-
+rand(rng::AbstractRNG, d::AbstractMvNormal, n::Integer) = _rand!(rng, d, Matrix{eltype(d)}(undef, length(d), n))
 
 ###########################################################
 #
@@ -247,28 +246,28 @@ Base.show(io::IO, d::MvNormal) =
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
-mean(d::MvNormal) = full(d.μ)
+mean(d::MvNormal) = convert(Vector, d.μ)
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
-cov(d::MvNormal) = full(d.Σ)
+cov(d::MvNormal) = Matrix(d.Σ)
 
-invcov(d::MvNormal) = full(inv(d.Σ))
+invcov(d::MvNormal) = Matrix(inv(d.Σ))
 logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x - d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, broadcast(-, x, d.μ))
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, x .- d.μ)
+    invquad!(r, d.Σ, broadcast(-, x, d.μ))
 
-gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ (x - d.μ))
+gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ broadcast(-, x, d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::VecOrMat) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::VecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 
@@ -279,13 +278,13 @@ function _rand_abstr!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
-_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Base.GLOBAL_RNG, d, x)
+_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Random.GLOBAL_RNG, d, x)
 # define these separately to avoid ambiguity with
 # _rand(d::Multivariate, x::AbstractMatrix)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractMatrix) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractVector) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractVector) = _rand!(Random.GLOBAL_RNG, d, x)
 
 ###########################################################
 #
@@ -300,7 +299,7 @@ struct MvNormalKnownCov{Cov<:AbstractPDMat}
 end
 
 MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(Float64(σ))))
-MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2(σ)))
+MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2.(σ)))
 MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
 
 length(g::MvNormalKnownCov) = dim(g.Σ)
@@ -314,7 +313,7 @@ end
 function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where Cov<:AbstractPDMat
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
-    sx = vec(sum(x, 2))
+    sx = vec(sum(x, dims=2))
     tw = Float64(size(x, 2))
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
@@ -336,7 +335,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,2)), 1.0 / size(x,2))
+    μ = multiply!(vec(sum(x,dims=2)), 1.0 / size(x,2))
     MvNormal(μ, g.Σ)
 end
 
@@ -344,7 +343,7 @@ function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractArr
     d = length(g)
     (size(x,1) == d && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
-    μ = Base.LinAlg.BLAS.gemv('N', inv(sum(w)), x, vec(w))
+    μ = BLAS.gemv('N', inv(sum(w)), x, vec(w))
     MvNormal(μ, g.Σ)
 end
 
@@ -361,10 +360,10 @@ end
 function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
-    s = vec(sum(x,2))
+    s = vec(sum(x, dims=2))
     m = s * inv(n)
     z = x .- m
-    s2 = A_mul_Bt(z, z)
+    s2 = z * z'
     MvNormalStats(s, m, s2, Float64(n))
 end
 
@@ -385,7 +384,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float
             @inbounds zj[i] = swj * (xj[i] - m[i])
         end
     end
-    s2 = A_mul_Bt(z, z)
+    s2 = z * z'
     MvNormalStats(s, m, s2, tw)
 end
 
@@ -404,10 +403,10 @@ fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.
 
 function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
-    mu = vec(mean(x, 2))
+    mu = vec(mean(x, dims=2))
     z = x .- mu
-    C = Base.LinAlg.BLAS.syrk('U', 'N', 1.0/n, z)
-    Base.LinAlg.copytri!(C, 'U')
+    C = BLAS.syrk('U', 'N', 1.0/n, z)
+    LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -417,17 +416,17 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
-    z = Matrix{Float64}(m, n)
+    z = Matrix{Float64}(undef, m, n)
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m
             @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
-    C = Base.LinAlg.BLAS.syrk('U', 'N', inv_sw, z)
-    Base.LinAlg.copytri!(C, 'U')
+    C = BLAS.syrk('U', 'N', inv_sw, z)
+    LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
 
@@ -435,7 +434,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(mean(x, 2))
+    mu = vec(mean(x, dims=2))
     va = zeros(Float64, m)
     for j = 1:n
         for i = 1:m
@@ -452,7 +451,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArr
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
     inv_sw = 1.0 / sum(w)
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = zeros(Float64, m)
     for j = 1:n
@@ -469,7 +468,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
-    mu = vec(mean(x, 2))
+    mu = vec(mean(x, dims=2))
     va = 0.
     for j = 1:n
         va_j = 0.
@@ -488,7 +487,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractArra
 
     sw = sum(w)
     inv_sw = 1.0 / sw
-    mu = Base.LinAlg.BLAS.gemv('N', inv_sw, x, w)
+    mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = 0.
     for j = 1:n

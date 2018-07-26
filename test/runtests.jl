@@ -1,7 +1,9 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Compat.Test
-
+using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using Test
+using Distributed
+using Random
+using StatsBase
 
 tests = [
     "types",
@@ -33,26 +35,23 @@ tests = [
     "semicircle",
     "qq",
     "product",
+    "truncnormal",
 ]
 
-print_with_color(:blue, "Running tests:\n")
+printstyled("Running tests:\n", color=:blue)
 
-if nworkers() > 1
-    rmprocs(workers())
-end
+using Random
+srand(345679)
 
-if Base.JLOptions().code_coverage == 1
-    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
-else
-    addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
-end
-
-@everywhere srand(345679)
-res = pmap(tests) do t
+res = map(tests) do t
     @eval module $(Symbol("Test_", t))
     using Distributions
-    using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-    using Base.Test
+    using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+    using Test
+    using Random
+    srand(345679)
+    using LinearAlgebra
+    using StatsBase
     include($t * ".jl")
     end
     return
@@ -60,5 +59,5 @@ end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Compat.Test.detect_ambiguities(Distributions))
+display(Test.detect_ambiguities(Distributions))
 println()

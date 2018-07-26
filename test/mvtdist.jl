@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 import Distributions: GenericMvTDist
 import PDMats: PDMat
@@ -28,8 +28,8 @@ for i = 1:length(df)
   @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
   dd = typeof(d)(params(d)...)
   @test d.df == dd.df
-  @test full(d.μ) == full(dd.μ)
-  @test full(d.Σ) == full(dd.Σ)
+  @test Vector(d.μ) == Vector(dd.μ)
+  @test Matrix(d.Σ) == Matrix(dd.Σ)
 end
 
 # test constructors for mixed inputs:
