@@ -4,7 +4,7 @@ using  Distributions
 using Test, Random, LinearAlgebra
 
 
-srand(34567)
+Random.seed!(34567)
 
 d = Dirichlet(3, 2.0)
 

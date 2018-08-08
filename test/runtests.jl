@@ -40,7 +40,7 @@ tests = [
 printstyled("Running tests:\n", color=:blue)
 
 using Random
-srand(345679)
+Random.seed!(345679)
 
 res = map(tests) do t
     @eval module $(Symbol("Test_", t))
@@ -48,7 +48,7 @@ res = map(tests) do t
     using JSON, ForwardDiff, Calculus, PDMats # test dependencies
     using Test
     using Random
-    srand(345679)
+    Random.seed!(345679)
     using LinearAlgebra
     using StatsBase
     include($t * ".jl")

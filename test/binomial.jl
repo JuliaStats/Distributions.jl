@@ -4,7 +4,7 @@ using Test, Random
 
 # Test the consistency between the recursive and nonrecursive computation of the pdf
 # of the Binomial distribution
-srand(1234)
+Random.seed!(1234)
 for (p, n) in [(0.6, 10), (0.8, 6), (0.5, 40), (0.04, 20), (1., 100), (0., 10), (0.999999, 1000), (1e-7, 1000)]
     local p
 

@@ -5,7 +5,7 @@ module Distributions
 using StatsBase, PDMats, StatsFuns, Statistics
 
 import QuadGK: quadgk
-import Base: size, eltype, length, full, convert, show, getindex, rand
+import Base: size, eltype, length, convert, show, getindex, rand
 import Base: sum, maximum, minimum, +, -
 import Base.Math: @horner
 
