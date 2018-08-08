@@ -13,7 +13,7 @@ The first step is to set up the environment:
 ```julia
 julia> using Compat, Compat.Random, Distributions
 
-julia> srand(123) # Setting the seed
+julia> Random.seed!(123) # Setting the seed
 ```
 
 Then, we create a standard-normal distribution `d` and obtain samples using `rand`:
