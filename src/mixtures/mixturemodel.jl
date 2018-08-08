@@ -463,7 +463,7 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= pdf.(component(d, i), X)
+            view(r,:,i) .= pdf.(Ref(component(d, i)), X)
         else
             pdf!(view(r,:,i),component(d, i), X)
         end
@@ -477,7 +477,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= logpdf.(component(d, i), X)
+            view(r,:,i) .= logpdf.(Ref(component(d, i)), X)
         else
             logpdf!(view(r,:,i), component(d, i), X)            
         end
