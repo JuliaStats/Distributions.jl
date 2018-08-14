@@ -96,7 +96,7 @@ l2 = MvLogNormal(0.1*ones(1),0.4)
 @test  entropy(l1)   ≈ entropy(l2)
 @test logpdf(l1,5.0) ≈ logpdf(l2,[5.0])
 @test pdf(l1,5.0)    ≈ pdf(l2,[5.0])
-@test (srand(78393) ; [rand(l1)]) == (srand(78393) ; rand(l2))
+@test (Random.seed!(78393) ; [rand(l1)]) == (Random.seed!(78393) ; rand(l2))
 
 ###### General Testing
 
