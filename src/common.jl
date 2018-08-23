@@ -1,13 +1,13 @@
 ## sample space/domain
 
 abstract type VariateForm end
-mutable struct Univariate    <: VariateForm end
-mutable struct Multivariate  <: VariateForm end
-mutable struct Matrixvariate <: VariateForm end
+struct Univariate    <: VariateForm end
+struct Multivariate  <: VariateForm end
+struct Matrixvariate <: VariateForm end
 
 abstract type ValueSupport end
-mutable struct Discrete   <: ValueSupport end
-mutable struct Continuous <: ValueSupport end
+struct Discrete   <: ValueSupport end
+struct Continuous <: ValueSupport end
 
 Base.eltype(::Type{Discrete}) = Int
 Base.eltype(::Type{Continuous}) = Float64
