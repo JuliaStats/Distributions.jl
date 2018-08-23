@@ -11,7 +11,7 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Compat, Compat.Random, Distributions
+julia> using Compat, Random, Distributions
 
 julia> Random.seed!(123) # Setting the seed
 ```

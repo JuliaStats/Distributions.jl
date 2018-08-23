@@ -1,5 +1,3 @@
-__precompile__(true)
-
 module Distributions
 
 using StatsBase, PDMats, StatsFuns, Statistics
