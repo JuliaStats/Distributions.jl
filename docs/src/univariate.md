@@ -11,14 +11,18 @@ const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
 
 ## Common Interface
 
-A series of methods are implemented for each univariate distribution, which provide useful functionalities such as moment computation, pdf evaluation, and sampling (*i.e.* random number generation).
+A series of methods are implemented for each univariate distribution, which provide
+useful functionalities such as moment computation, pdf evaluation, and sampling
+(*i.e.* random number generation).
 
 ### Parameter Retrieval
 
+**Note:** `params` are defined for all univariate distributions, while other parameter
+retrieval methods are only defined for those distributions for which these parameters make sense.
+See below for details.
+
 ```@docs
 params(::UnivariateDistribution)
-succprob(::UnivariateDistribution)
-failprob(::UnivariateDistribution)
 scale(::UnivariateDistribution)
 location(::UnivariateDistribution)
 shape(::UnivariateDistribution)
@@ -28,7 +32,12 @@ ntrials(::UnivariateDistribution)
 dof(::UnivariateDistribution)
 ```
 
-**Note:** `params` are defined for all univariate distributions, while other parameter retrieval methods are only defined for those distributions for which these parameters make sense. See below for details.
+For distributions for which success and failure have a meaning,
+the following methods are defined:
+```@docs
+succprob(::DiscreteUnivariateDistribution)
+failprob(::DiscreteUnivariateDistribution)
+```
 
 
 ### Computation of statistics
@@ -69,24 +78,6 @@ cquantile(::UnivariateDistribution, ::Real)
 invlogcdf(::UnivariateDistribution, ::Real)
 invlogccdf(::UnivariateDistribution, ::Real)
 ```
-
-### Vectorized evaluation
-
-Vectorized computation and inplace vectorized computation are supported for the following functions:
-
-* [`pdf`](@ref)
-* [`logpdf`](@ref)
-* [`cdf`](@ref)
-* [`logcdf`](@ref)
-* [`ccdf`](@ref)
-* [`logccdf`](@ref)
-* [`quantile`](@ref)
-* [`cquantile`](@ref)
-* [`invlogcdf`](@ref)
-* [`invlogccdf`](@ref)
-
-For example, when `x` is an array, then `r = pdf(d, x)` returns an array `r` of the same size, such that `r[i] = pdf(d, x[i])`. One can also use `pdf!` to write results to pre-allocated storage, as `pdf!(r, d, x)`.
-
 
 ### Sampling (Random number generation)
 ```@docs
@@ -146,6 +137,8 @@ Weibull
 
 ```@docs
 Bernoulli
+succprob
+failprob
 BetaBinomial
 Binomial
 Categorical
@@ -157,3 +150,7 @@ Poisson
 PoissonBinomial
 Skellam
 ```
+
+### Vectorized evaluation
+
+Vectorized computation and inplace vectorized computation have been deprecated.

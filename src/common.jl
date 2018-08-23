@@ -91,3 +91,17 @@ abstract type IncompleteDistribution end
 
 const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
+
+"""
+    succprob(d::DiscreteUnivariateDistribution)
+
+Get the probability of success.
+"""
+succprob(d::DiscreteUnivariateDistribution)
+
+"""
+    failprob(d::DiscreteUnivariateDistribution)
+
+Get the probability of failure.
+"""
+failprob(d::DiscreteUnivariateDistribution)

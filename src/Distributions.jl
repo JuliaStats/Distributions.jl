@@ -13,8 +13,10 @@ using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
-import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params, params!
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
