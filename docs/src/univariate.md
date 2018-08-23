@@ -32,6 +32,14 @@ ntrials(::UnivariateDistribution)
 dof(::UnivariateDistribution)
 ```
 
+For distributions for which success and failure have a meaning,
+the following methods are defined:
+```@docs
+succprob(::DiscreteUnivariateDistribution)
+failprob(::DiscreteUnivariateDistribution)
+```
+
+
 ### Computation of statistics
 
 ```@docs

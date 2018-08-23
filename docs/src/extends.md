@@ -120,9 +120,9 @@ It is also recommended that one also implements the following statistics functio
 - [`var(d::UnivariateDistribution)`](@ref)
 - [`modes(d::UnivariateDistribution)`](@ref)
 - [`mode(d::UnivariateDistribution)`](@ref)
-- [`StatsBase.skewness(d::UnivariateDistribution)`](@ref)
-- [`StatsBase.kurtosis(d::Distribution, ::Bool)`](@ref)
-- [`StatsBase.entropy(d::UnivariateDistribution, ::Real)`](@ref)
+- [`skewness(d::UnivariateDistribution)`](@ref)
+- [`kurtosis(d::Distribution, ::Bool)`](@ref)
+- [`entropy(d::UnivariateDistribution, ::Real)`](@ref)
 - [`mgf(d::UnivariateDistribution, ::Any)`](@ref)
 - [`cf(d::UnivariateDistribution, ::Any)`](@ref)
 

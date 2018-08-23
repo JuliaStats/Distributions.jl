@@ -13,7 +13,7 @@ using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
-import StatsBase: kurtosis, skewness, entropy, mode, modes, 
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
 

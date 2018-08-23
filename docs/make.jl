@@ -1,7 +1,5 @@
 using Documenter, Distributions
 import Random: AbstractRNG, rand!
-import Statistics: mean, var, std
-import StatsBase: entropy, kurtosis, skewness
 
 makedocs(
     format = :html,

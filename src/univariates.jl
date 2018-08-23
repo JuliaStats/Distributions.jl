@@ -255,7 +255,7 @@ isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 Return whether `d` is mesokurtic (*i.e* `kurtosis(d) == 0`).
 """
-ismesokurtic(d::UnivariateDistribution) = kurtosis(d) == 0.0
+ismesokurtic(d::UnivariateDistribution) = kurtosis(d) ≈ 0.0
 
 """
     kurtosis(d::UnivariateDistribution)
