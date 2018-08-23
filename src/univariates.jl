@@ -28,20 +28,6 @@ will construct exactly the same distribution as ``d``.
 params(d::UnivariateDistribution)
 
 """
-    succprob(d::UnivariateDistribution)
-
-Get the probability of success.
-"""
-succprob(d::UnivariateDistribution)
-
-"""
-    failprob(d::UnivariateDistribution)
-
-Get the probability of failure.
-"""
-failprob(d::UnivariateDistribution)
-
-"""
     scale(d::UnivariateDistribution)
 
 Get the scale parameter.
