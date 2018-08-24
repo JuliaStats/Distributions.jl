@@ -76,7 +76,6 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test loglikelihood(g, X) ≈ sum([Distributions._logpdf(g, X[:,i]) for i in 1:size(X, 2)])
 end
 
-
 ###### General Testing
 
 mu = [1., 2., 3.]
@@ -99,7 +98,9 @@ for (T, g, μ, Σ) in [
     (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
     (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
     (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)),
-    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)) ]
+    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)),
+    (FullNormal, MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
+    (DiagNormal, MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))) ]
 
     println("    testing $(distrname(g))")
 
