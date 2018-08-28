@@ -9,6 +9,7 @@ end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
+extrema(r::RealInterval) = (r.lb, r.ub)
 in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
@@ -138,6 +139,7 @@ macro distr_support(D, lb, ub)
     esc(quote
         minimum($(paramdecl)) = $lb
         maximum($(paramdecl)) = $ub
+        extrema($(paramdecl)) = ($lb, $ub)
     end)
 end
 
