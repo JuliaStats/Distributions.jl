@@ -2,7 +2,8 @@
 
 ## Installation
 
-The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`. Throughout, we assume that you have installed the package.
+The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`.
+Throughout, we assume that you have installed the package.
 
 ## Starting With a Normal Distribution
 
