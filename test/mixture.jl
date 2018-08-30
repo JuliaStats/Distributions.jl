@@ -153,8 +153,8 @@ test_params(g_u)
 @test maximum(g_u) == Inf
 
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
-@test minimum(g_u) == -2.0
-@test maximum(g_u) == 3.0
+@test minimum(g_u) ≈ -2.0
+@test maximum(g_u) ≈ 3.0
 @test insupport(g_u, 2.5) == true
 @test insupport(g_u, 3.5) == false
 
