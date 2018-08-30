@@ -178,3 +178,15 @@ g_m = MixtureModel(
 @test insupport(g_m, [0.0, 0.0]) == true
 test_mixture(g_m, 1000, 10^6)
 test_params(g_m)
+
+const u1 =  Uniform()
+const u2 =  Uniform(1.0, 2.0)
+const utot =Uniform(0.0, 2.0)
+ 
+# mixture supposed to be a uniform on [0.0,2.0]
+const unif_mixt =  MixtureModel([u1,u2])
+@test var(utot) ≈  var(unif_mixt)
+@test mean(utot) ≈ mean(unif_mixt)
+for x in -1.0:0.5:2.5
+	@test cdf(utot,x) ≈ cdf(utot,x)
+end
