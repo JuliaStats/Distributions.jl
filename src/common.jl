@@ -15,7 +15,7 @@ Base.eltype(::Type{Continuous}) = Float64
 ## Sampleable
 
 """
-    `Sampleable{F<:VariateForm,S<:ValueSupport}`
+    Sampleable{F<:VariateForm,S<:ValueSupport}
 
 `Sampleable` is any type able to produce random values.
 Parametrized by a `VariateForm` defining the dimension of samples
