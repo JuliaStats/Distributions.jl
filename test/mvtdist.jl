@@ -18,18 +18,18 @@ Sigma = [4. 2; 2 3]
 # Sigma <- matrix(c(4, 2, 2, 3), ncol=2)
 # dmvt(c(-2., 3.), delta=mu, sigma=Sigma, df=1)
 rvalues = [-5.6561739738159975133,
-  -5.4874952805811396672,
-  -5.4441948098568158088,
-  -5.432461875138580254,
-  -5.4585441614404803801]
+           -5.4874952805811396672,
+           -5.4441948098568158088,
+           -5.432461875138580254,
+           -5.4585441614404803801]
 df = [1., 2, 3, 5, 10]
 for i = 1:length(df)
-  d = MvTDist(df[i], mu, Sigma)
-  @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
-  dd = typeof(d)(params(d)...)
-  @test d.df == dd.df
-  @test Vector(d.μ) == Vector(dd.μ)
-  @test Matrix(d.Σ) == Matrix(dd.Σ)
+    d = MvTDist(df[i], mu, Sigma)
+    @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
+    dd = typeof(d)(params(d)...)
+    @test d.df == dd.df
+    @test Vector(d.μ) == Vector(dd.μ)
+    @test Matrix(d.Σ) == Matrix(dd.Σ)
 end
 
 # test constructors for mixed inputs:
