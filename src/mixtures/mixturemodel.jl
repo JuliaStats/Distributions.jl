@@ -12,6 +12,13 @@
 """
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
+"""
+	MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+	A mixture of distributions, parametrized on:
+	* `VF,VS` variate and support
+	* `C` distribution family of the mixture
+	* `CT` the type for probabilities of the prior
+"""
 struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::Categorical{CT}
