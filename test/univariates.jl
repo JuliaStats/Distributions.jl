@@ -95,8 +95,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         lp = _json_value(pt["logpdf"])
         cf = _json_value(pt["cdf"])
 
-        @test isapprox(pdf.(Ref(d), x),     p; atol=1e-16, rtol=1e-8)
-        @test isapprox(logpdf.(Ref(d), x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+        @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
+        @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
 
         # cdf method is not implemented for Skellam & NormalInverseGaussian
         if !isa(d, Union{Skellam, NormalInverseGaussian})

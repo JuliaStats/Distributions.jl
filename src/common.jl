@@ -85,6 +85,11 @@ variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
 value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
 value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
 
+# allow broadcasting over distribution objects
+# to be decided: how to handle multivariate/matrixvariate distributions?
+Broadcast.broadcastable(d::UnivariateDistribution) = Ref(d)
+
+
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
 abstract type IncompleteDistribution end
