@@ -14,6 +14,14 @@ Base.eltype(::Type{Continuous}) = Float64
 
 ## Sampleable
 
+"""
+    Sampleable{F<:VariateForm,S<:ValueSupport}
+
+`Sampleable` is any type able to produce random values.
+Parametrized by a `VariateForm` defining the dimension of samples
+and a `ValueSupport` defining the domain of possibly sampled values.
+Any `Sampleable` implements the `Base.rand` method.
+"""
 abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 """
@@ -49,8 +57,8 @@ Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
 """
     nsamples(s::Sampleable)
 
-The number of samples contained in `A`. Multiple samples are often organized into an array,
-depending on the variate form.
+The number of values contained in one sample of `s`. Multiple samples are often organized
+into an array, depending on the variate form.
 """
 nsamples(t::Type{Sampleable}, x::Any)
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Univariate}} = 1
@@ -60,8 +68,14 @@ nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = siz
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
-## Distribution <: Sampleable
+"""
+    Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 
+`Distribution` is a `Sampleable` generating random values from a probability
+distribution. Distributions define a Probability Distribution Function (PDF)
+to implement with `pdf` and a Cumulated Distribution Function (CDF) to implement
+with `cdf`.
+"""
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
