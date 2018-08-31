@@ -81,7 +81,7 @@ function cdf_durbin(d::KSDist,x::Float64)
     k, ch, h = ceil_rems_mult(n,x)
 
     m = 2*k-1
-    H = Matrix{Float64}(m, m)
+    H = Matrix{Float64}(undef, m, m)
     for i = 1:m, j = 1:m
         H[i,j] = i-j+1 >= 0 ? 1 : 0
     end

@@ -58,8 +58,8 @@ x = rand(d, 100)
 pv = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test pv[i] ≈ pdf(d, x[:,i])
-	@test lp[i] ≈ logpdf(d, x[:,i])
+    @test pv[i] ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
 end
 
 # test type stability of logpdf

@@ -2,7 +2,8 @@
 
 ## Installation
 
-The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`. Throughout, we assume that you have installed the package.
+The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`.
+Throughout, we assume that you have installed the package.
 
 ## Starting With a Normal Distribution
 
@@ -11,9 +12,9 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Compat, Compat.Random, Distributions
+julia> using Compat, Random, Distributions
 
-julia> srand(123) # Setting the seed
+julia> Random.seed!(123) # Setting the seed
 ```
 
 Then, we create a standard-normal distribution `d` and obtain samples using `rand`:

@@ -1,11 +1,9 @@
-__precompile__(true)
-
 module Distributions
 
 using StatsBase, PDMats, StatsFuns, Statistics
 
 import QuadGK: quadgk
-import Base: size, eltype, length, full, convert, show, getindex, rand
+import Base: size, eltype, length, convert, show, getindex, rand
 import Base: sum, maximum, minimum, +, -
 import Base.Math: @horner
 
@@ -15,8 +13,10 @@ using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
-import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params, params!
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions

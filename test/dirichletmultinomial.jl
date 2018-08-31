@@ -6,7 +6,7 @@ using Test, Random, SpecialFunctions
 
 import SpecialFunctions: factorial
 
-srand(123)
+Random.seed!(123)
 
 
 # Test Constructors

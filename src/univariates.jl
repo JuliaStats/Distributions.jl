@@ -28,20 +28,6 @@ will construct exactly the same distribution as ``d``.
 params(d::UnivariateDistribution)
 
 """
-    succprob(d::UnivariateDistribution)
-
-Get the probability of success.
-"""
-succprob(d::UnivariateDistribution)
-
-"""
-    failprob(d::UnivariateDistribution)
-
-Get the probability of failure.
-"""
-failprob(d::UnivariateDistribution)
-
-"""
     scale(d::UnivariateDistribution)
 
 Get the scale parameter.
@@ -269,7 +255,7 @@ isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 Return whether `d` is mesokurtic (*i.e* `kurtosis(d) == 0`).
 """
-ismesokurtic(d::UnivariateDistribution) = kurtosis(d) == 0.0
+ismesokurtic(d::UnivariateDistribution) = kurtosis(d) ≈ 0.0
 
 """
     kurtosis(d::UnivariateDistribution)
