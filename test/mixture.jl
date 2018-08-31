@@ -188,5 +188,5 @@ const unif_mixt =  MixtureModel([u1,u2])
 @test var(utot) ≈  var(unif_mixt)
 @test mean(utot) ≈ mean(unif_mixt)
 for x in -1.0:0.5:2.5
-	@test cdf(utot,x) ≈ cdf(utot,x)
+    @test cdf(utot,x) ≈ cdf(utot,x)
 end
