@@ -7,6 +7,7 @@ d = Semicircle(2.0)
 
 @test minimum(d) == -2.0
 @test maximum(d) == +2.0
+@test extrema(d) == (-2.0, +2.0)
 
 @test mean(d)     ==  .0
 @test var(d)      == 1.0

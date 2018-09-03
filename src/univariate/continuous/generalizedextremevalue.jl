@@ -59,10 +59,13 @@ function convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{
     GeneralizedExtremeValue(T(d.μ), T(d.σ), T(d.ξ))
 end
 
+#### Support
+
 minimum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ > 0 ? d.μ - d.σ / d.ξ : -T(Inf)
 maximum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ < 0 ? d.μ - d.σ / d.ξ : T(Inf)
+extrema(d::GeneralizedExtremeValue) = (minimum(d), maximum(d))
 
 
 #### Parameters
@@ -168,11 +171,6 @@ function quantile(d::GeneralizedExtremeValue, p::Real)
         return μ + σ * ((-log(p))^(-ξ) - 1) / ξ
     end
 end
-
-
-#### Support
-
-insupport(d::GeneralizedExtremeValue, x::Real) = minimum(d) <= x <= maximum(d)
 
 
 #### Evaluation

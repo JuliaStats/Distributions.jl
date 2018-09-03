@@ -151,10 +151,12 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
 @test minimum(g_u) == -2.0
 @test maximum(g_u) == 3.0
+@test extrema(g_u) === (-2.0, 3.0)
 @test insupport(g_u, 2.5) == true
 @test insupport(g_u, 3.5) == false
 
@@ -165,6 +167,7 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(

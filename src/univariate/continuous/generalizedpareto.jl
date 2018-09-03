@@ -50,8 +50,7 @@ end
 GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
 GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
 
-minimum(d::GeneralizedPareto) = d.μ
-maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf
+@distr_support(GeneralizedPareto, d.μ, d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf)
 
 #### Conversions
 function convert(::Type{GeneralizedPareto{T}}, μ::S, σ::S, ξ::S) where {T <: Real, S <: Real}
