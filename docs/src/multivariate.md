@@ -55,6 +55,7 @@ MvNormal
 MvNormalCanon
 MvLogNormal
 Dirichlet
+Product
 ```
 
 ## Addition Methods
