@@ -38,12 +38,7 @@ partype(d::Truncated) = partype(d.untruncated)
 islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)
 isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper)
 
-minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
-maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
-
-insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution} =
-    d.lower <= x <= d.upper && insupport(d.untruncated, x)
-
+@distr_support Truncated max(minimum(d.untruncated), d.lower)  min(maximum(d.untruncated), d.upper)
 
 ### evaluation
 

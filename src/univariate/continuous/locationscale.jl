@@ -29,8 +29,10 @@ end
 LocationScale(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale{T,D}(μ,σ,ρ)
 LocationScale(μ::T,σ::T,ρ::D) where {T<:Integer, D<:ContinuousUnivariateDistribution} = LocationScale{Float64,D}(Float64(μ),Float64(σ),ρ)
 
-minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
-maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
+@distr_support(LocationScale,
+        d.μ + d.σ * minimum(d.ρ),
+        d.μ + d.σ * maximum(d.ρ))
+
 
 #### Conversions
 

@@ -161,8 +161,9 @@ probs(d::MixtureModel) = probs(d.prior)
 params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
 partype(d::MixtureModel) = promote_type(partype(d.prior), map(partype, d.components)...)
 
-minimum(d::MixtureModel) = minimum([minimum(dci) for dci in d.components])
-maximum(d::MixtureModel) = maximum([maximum(dci) for dci in d.components])
+@distr_support(MixtureModel,
+        minimum([minimum(dci) for dci in d.components]),
+        maximum([maximum(dci) for dci in d.components]))
 
 function mean(d::UnivariateMixture)
     K = ncomponents(d)
@@ -479,7 +480,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
         if d isa UnivariateMixture
             view(r,:,i) .= logpdf.(Ref(component(d, i)), X)
         else
-            logpdf!(view(r,:,i), component(d, i), X)            
+            logpdf!(view(r,:,i), component(d, i), X)
         end
     end
     r
