@@ -109,7 +109,7 @@ end
 # evaluation (for GenericMvTDist)
 
 insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
-  length(d) == length(x) && allfinite(x)
+    length(d) == length(x) && allfinite(x)
 
 function sqmahal(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
     z = d.zeromean ? x : x - d.μ

@@ -201,7 +201,7 @@ Compute the overall variance (only for ``UnivariateMixture``).
 function var(d::UnivariateMixture)
     K = ncomponents(d)
     p = probs(d)
-    means = Vector{Float64}(K)
+    means = Vector{Float64}(undef, K)
     m = 0.0
     v = 0.0
     for i = 1:K
@@ -381,7 +381,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     n = length(r)
-    Lp = Matrix{Float64}(n, K)
+    Lp = Matrix{Float64}(undef, n, K)
     m = fill(-Inf, n)
     for i = 1:K
         @inbounds pi = p[i]
