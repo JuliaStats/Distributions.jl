@@ -78,18 +78,25 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::Distribution)
+    minimum(d::UnivariateDistribution)
 
 Return the minimum of the support of `d`.
 """
 minimum(d::UnivariateDistribution)
 
 """
-    maximum(d::Distribution)
+    maximum(d::UnivariateDistribution)
 
 Return the maximum of the support of `d`.
 """
 maximum(d::UnivariateDistribution)
+
+"""
+    extrema(d::UnivariateDistribution)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
+extrema(d::UnivariateDistribution)
 
 """
     insupport(d::UnivariateDistribution, x::Any)
