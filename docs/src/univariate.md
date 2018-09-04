@@ -45,6 +45,7 @@ failprob(::DiscreteUnivariateDistribution)
 ```@docs
 maximum(::UnivariateDistribution)
 minimum(::UnivariateDistribution)
+extrema(::UnivariateDistribution)
 mean(::UnivariateDistribution)
 var(::UnivariateDistribution)
 std(::UnivariateDistribution)
