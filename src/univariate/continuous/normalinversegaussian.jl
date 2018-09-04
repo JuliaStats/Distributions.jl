@@ -15,14 +15,14 @@ External links
 
 """
 struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
-  μ::T
-  α::T
-  β::T
-  δ::T
+    μ::T
+    α::T
+    β::T
+    δ::T
 
-  function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where T
-    new{T}(μ, α, β, δ)
-  end
+    function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where T
+        new{T}(μ, α, β, δ)
+    end
 end
 
 NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} = NormalInverseGaussian{T}(μ, α, β, δ)
@@ -50,11 +50,11 @@ skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * sqrt(d.α^2 - d
 kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * sqrt(d.α^2 - d.β^2))
 
 function pdf(d::NormalInverseGaussian, x::Real)
-	μ, α, β, δ = params(d)
-	α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ*sqrt(α^2 - β^2) + β*(x - μ))
+    μ, α, β, δ = params(d)
+    α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ*sqrt(α^2 - β^2) + β*(x - μ))
 end
 
 function logpdf(d::NormalInverseGaussian, x::Real)
-  μ, α, β, δ = params(d)
-  log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*sqrt(α^2-β^2) + β*(x-μ)
+    μ, α, β, δ = params(d)
+    log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*sqrt(α^2-β^2) + β*(x-μ)
 end

@@ -25,8 +25,8 @@ x = rand(d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test lp[i] ≈ logpdf(d, x[:,i])
-	@test p[i]  ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
+    @test p[i]  ≈ pdf(d, x[:,i])
 end
 
 v = [2.0, 1.0, 3.0]
@@ -52,8 +52,8 @@ x = rand(d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test p[i]  ≈ pdf(d, x[:,i])
-	@test lp[i] ≈ logpdf(d, x[:,i])
+    @test p[i]  ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
 end
 
 # Sampling

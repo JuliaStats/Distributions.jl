@@ -206,6 +206,8 @@ function MvNormal(Σ::Cov) where Cov<:AbstractPDMat
 end
 
 MvNormal(μ::Vector{T}, Σ::Matrix{T}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::Vector{T}, Σ::Union{Symmetric{T}, Hermitian{T}}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::Vector{T}, Σ::Diagonal{T}) where {T<:Real} = MvNormal(μ, PDiagMat(diag(Σ)))
 MvNormal(μ::Vector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
 MvNormal(μ::Vector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 

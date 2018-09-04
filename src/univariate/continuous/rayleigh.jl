@@ -65,13 +65,13 @@ entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(MathConstants.γ)/
 #### Evaluation
 
 function pdf(d::Rayleigh{T}, x::Real) where T<:Real
-	σ2 = d.σ^2
-	x > 0 ? (x / σ2) * exp(- (x^2) / (2σ2)) : zero(T)
+    σ2 = d.σ^2
+    x > 0 ? (x / σ2) * exp(- (x^2) / (2σ2)) : zero(T)
 end
 
 function logpdf(d::Rayleigh{T}, x::Real) where T<:Real
-	σ2 = d.σ^2
-	x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
+    σ2 = d.σ^2
+    x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
 logccdf(d::Rayleigh{T}, x::Real) where {T<:Real} = x > 0 ? - (x^2) / (2d.σ^2) : zero(T)

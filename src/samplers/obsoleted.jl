@@ -18,7 +18,7 @@ function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
     n = length(probs)
 
     # Convert all Float64's into integers
-    vals = Vector{Int64}(n)
+    vals = Vector{Int64}(undef, n)
     for i in 1:n
         vals[i] = round(Int, probs[i] * 64^9)
     end
