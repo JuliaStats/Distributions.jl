@@ -86,6 +86,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @assert isa(f, Function)
         @test isapprox(f(d), expect_v; atol=1e-12, rtol=1e-8, nans=true)
     end
+    @test extrema(d) == (minimum(d), maximum(d))
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]

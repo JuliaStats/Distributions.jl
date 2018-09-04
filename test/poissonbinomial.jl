@@ -14,6 +14,7 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     @test isa(d, PoissonBinomial)
     @test minimum(d) == 0
     @test maximum(d) == n
+    @test extrema(d) == (0, n)
     @test ntrials(d) == n
     @test entropy(d)  ≈ entropy(dref)
     @test median(d)   ≈ median(dref)
