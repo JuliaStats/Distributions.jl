@@ -173,7 +173,7 @@ function _rand!(d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(x))
     rand!(chisqd, y)
-    y = sqrt(y/(d.df))
+    y = sqrt.(y/(d.df))
     broadcast!(/, x, x, y)
     if !d.zeromean
         broadcast!(+, x, x, d.μ)
