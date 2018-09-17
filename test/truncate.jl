@@ -64,6 +64,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # verify stats
     @test minimum(d) ≈ max(_json_value(dct["minimum"]),d.lower)
     @test maximum(d) ≈ min(_json_value(dct["maximum"]),d.upper)
+    @test extrema(d) == (minimum(d), maximum(d))
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]

@@ -11,6 +11,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 
     @test minimum(d) == minimum(dref)
     @test maximum(d) == maximum(dref)
+    @test extrema(d) == (minimum(d), maximum(d))
 
     #### Conversions
 
