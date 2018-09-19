@@ -240,6 +240,7 @@ export
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
     gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
+    similar,            # make a distribution of similar type to a given distribution
 
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
