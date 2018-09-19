@@ -122,6 +122,7 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    Product,
     Poisson,
     PoissonBinomial,
     QQPair,

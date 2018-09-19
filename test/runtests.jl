@@ -34,6 +34,7 @@ tests = [
     "quantile_newton",
     "semicircle",
     "qq",
+    "product",
     "truncnormal",
 ]
 
