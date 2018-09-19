@@ -15,6 +15,7 @@ for p in Vector{Float64}[
     @test probs(d) == p
     @test minimum(d) == 1
     @test maximum(d) == k
+    @test extrema(d) == (1, k)
     @test ncategories(d) == k
 
     c = 0.0
@@ -35,8 +36,8 @@ for p in Vector{Float64}[
     @test ccdf(d, 0) == 1.0
     @test ccdf(d, k+1) == 0.0
 
-    @test pdf.(Ref(d), support(d)) == p
-    @test pdf.(Ref(d), 1:k) == p
+    @test pdf.(d, support(d)) == p
+    @test pdf.(d, 1:k) == p
 
     test_distr(d, 10^6)
 end
@@ -44,6 +45,7 @@ end
 d = Categorical(4)
 @test minimum(d) == 1
 @test maximum(d) == 4
+@test extrema(d) == (1, 4)
 @test probs(d) == [0.25, 0.25, 0.25, 0.25]
 
 p = ones(10^6) * 1.0e-6

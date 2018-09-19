@@ -9,6 +9,7 @@ end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
+extrema(r::RealInterval) = (r.lb, r.ub)
 in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
@@ -77,18 +78,25 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::Distribution)
+    minimum(d::UnivariateDistribution)
 
 Return the minimum of the support of `d`.
 """
 minimum(d::UnivariateDistribution)
 
 """
-    maximum(d::Distribution)
+    maximum(d::UnivariateDistribution)
 
 Return the maximum of the support of `d`.
 """
 maximum(d::UnivariateDistribution)
+
+"""
+    extrema(d::UnivariateDistribution)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
+extrema(d::UnivariateDistribution) = (minimum(d), maximum(d))
 
 """
     insupport(d::UnivariateDistribution, x::Any)

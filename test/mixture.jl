@@ -33,7 +33,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     for i = 1:n
         @test cdf(g, X[i]) ≈ cf[i]
     end
-    @test cdf.(Ref(g), X) ≈ cf
+    @test cdf.(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(n, K)
@@ -57,8 +57,8 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
         @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
     end
 
-    @test pdf.(Ref(g), X)                  ≈ mix_p0
-    @test logpdf.(Ref(g), X)               ≈ mix_lp0
+    @test pdf.(g, X)                  ≈ mix_p0
+    @test logpdf.(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
     @test componentwise_logpdf(g, X) ≈ LP0
 
@@ -151,10 +151,12 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
 @test minimum(g_u) ≈ -2.0
 @test maximum(g_u) ≈ 3.0
+@test extrema(g_u) == (minimum(g_u), maximum(g_u))
 @test insupport(g_u, 2.5) == true
 @test insupport(g_u, 3.5) == false
 
@@ -165,6 +167,7 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(
