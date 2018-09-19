@@ -4,7 +4,7 @@ using StatsBase, PDMats, StatsFuns, Statistics
 
 import QuadGK: quadgk
 import Base: size, eltype, length, convert, show, getindex, rand
-import Base: sum, maximum, minimum, extrema, +, -
+import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
 using LinearAlgebra, Printf

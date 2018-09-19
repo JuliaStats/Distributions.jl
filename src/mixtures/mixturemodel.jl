@@ -1,26 +1,32 @@
 # finite mixture models
 
-####
-#
-#  All subtypes of AbstractMixtureModel should implement the following methods:
-#
-#  - ncomponents(d): the number of components
-#
-#  - component(d, k):  return the k-th component
-#
-#  - probs(d):       return a vector of prior probabilities over components.
-#
+"""
 
+  All subtypes of `AbstractMixtureModel` should implement the following methods:
+
+  - ncomponents(d): the number of components
+
+  - component(d, k):  return the k-th component
+
+  - probs(d):       return a vector of prior probabilities over components.
+"""
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureModel{VF,VS,C}
+"""
+MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+A mixture of distributions, parametrized on:
+* `VF,VS` variate and support
+* `C` distribution family of the mixture
+* `CT` the type for probabilities of the prior
+"""
+struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
-    prior::Categorical
+    prior::Categorical{CT}
 
-    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::Categorical) where {VF,VS,C}
+    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::Categorical{CT}) where {VF,VS,C,CT}
         length(cs) == ncategories(pri) ||
             error("The number of components does not match the length of prior.")
-        new{VF,VS,C}(cs, pri)
+        new{VF,VS,C,CT}(cs, pri)
     end
 end
 
