@@ -20,6 +20,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+using KeywordDispatch
 
 export
     # re-export Statistics

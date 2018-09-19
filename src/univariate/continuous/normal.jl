@@ -9,9 +9,7 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 ```
 
 ```julia
-Normal()          # standard Normal distribution with zero mean and unit variance
-Normal(mu)        # Normal distribution with mean mu and unit variance
-Normal(mu, sig)   # Normal distribution with mean mu and variance sig^2
+Normal(μ=0,σ=1)   # standard Normal distribution with zero mean and unit variance
 
 params(d)         # Get the parameters, i.e. (mu, sig)
 mean(d)           # Get the mean, i.e. mu
@@ -33,9 +31,16 @@ end
 #### Outer constructors
 Normal(μ::T, σ::T) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
-Normal(μ::Real) = Normal(μ, 1.0)
-Normal() = Normal(0.0, 1.0)
+Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
+
+@kwdispatch Normal()
+
+@kwmethod Normal(;μ,σ) = Normal(μ,σ)
+@kwmethod Normal(;mu,sigma) = Normal(mu,sigma)
+@kwmethod Normal(;μ,σ²) = Normal(μ,sqrt(σ²))
+
+@kwmethod Normal(;mean,std) = Normal(mean,std)
+@kwmethod Normal(;mean,var) = Normal(mean,sqrt(var))
 
 const Gaussian = Normal
 

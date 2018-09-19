@@ -39,8 +39,21 @@ end
 Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
 Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
-Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1, 1)
+
+@kwdispatch Beta()
+
+@kwmethod Beta(;α,β) = Beta(α,β)
+@kwmethod Beta(;alpha,beta) = Beta(alpha,beta)
+
+@kwmethod function Beta(;mean, var)
+    @check_args(Normal, 0 < mean < 1)
+    @check_args(Normal, 0 < var < mean*(1-mean))
+    U = (mean*(1-mean))/var - 1
+    α = mean*U
+    β = U-α
+    Beta(α,β)
+end
+@kwmethod Beta(;mean, std) = Beta(mean=mean,var=sqrt(std))
 
 @distr_support Beta 0.0 1.0
 

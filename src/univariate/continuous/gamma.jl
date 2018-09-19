@@ -36,9 +36,23 @@ end
 
 Gamma(α::T, θ::T) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
-Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
-Gamma(α::Real) = Gamma(α, 1.0)
-Gamma() = Gamma(1.0, 1.0)
+Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
+
+@kwdispatch Gamma()
+
+@kwmethod Gamma(;α,θ) = Gamma(α,θ)
+@kwmethod Gamma(;alpha,theta) = Gamma(alpha,theta)
+@kwmethod Gamma(;shape,scale) = Gamma(shape,scale)
+
+@kwmethod Gamma(;α,β) = Gamma(α,1/β)
+@kwmethod Gamma(;alpha,beta) = Gamma(alpha,1/beta)
+@kwmethod Gamma(;shape,rate) = Gamma(shape,1/rate)
+
+@kwmethod function Gamma(;mean, var)
+    θ=var/mean
+    Gamma(mean/θ, θ)
+end
+@kwmethod Gamma(;mean, std) = Gamma(;mean=mean,var=std^2)
 
 @distr_support Gamma 0.0 Inf
 
