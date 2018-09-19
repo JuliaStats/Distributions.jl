@@ -33,7 +33,7 @@ julia> x = rand(d, 100)
 You can easily obtain the pdf, cdf, percentile, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
 
 ```julia
-julia> quantile(Normal(), [0.5, 0.95])
+julia> quantile.(Normal(), [0.5, 0.95])
 2-element Array{Float64,1}:
  0.0
  1.64485
