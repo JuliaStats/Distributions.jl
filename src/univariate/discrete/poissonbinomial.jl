@@ -92,7 +92,7 @@ end
 
 entropy(d::PoissonBinomial) = entropy(Categorical(d.pmf))
 median(d::PoissonBinomial) = median(Categorical(d.pmf)) - 1
-mode(d::PoissonBinomial) = indmax(d.pmf) - 1
+mode(d::PoissonBinomial) = argmax(d.pmf) - 1
 modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 #### Evaluation
@@ -126,7 +126,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
     n = length(p)
     ω = 2 / (n + 1)
 
-    x = Vector{Complex{Float64}}(n+1)
+    x = Vector{Complex{Float64}}(undef, n+1)
     lmax = ceil(Int, n/2)
     x[1] = 1/(n + 1)
     for l=1:lmax
@@ -135,7 +135,7 @@ function poissonbinomial_pdf_fft(p::AbstractArray)
         for j=1:n
             zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))
-            argz += atan2(imag(zjl), real(zjl))
+            argz += atan(imag(zjl), real(zjl))
         end
         dl = exp(logz)
         x[l + 1] = dl * cos(argz) / (n + 1) + dl * sin(argz) * im / (n + 1)
@@ -148,17 +148,13 @@ end
 
 # A simple implementation of a DFT to avoid introducing a dependency
 # on an external FFT package just for this one distribution
-if VERSION >= v"0.7.0-DEV.602"
-    function _dft(x::Vector{T}) where T
-        n = length(x)
-        y = zeros(complex(float(T)), n)
-        @inbounds for j = 0:n-1, k = 0:n-1
-            y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
-        end
-        return y
+function _dft(x::Vector{T}) where T
+    n = length(x)
+    y = zeros(complex(float(T)), n)
+    @inbounds for j = 0:n-1, k = 0:n-1
+        y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
     end
-else
-    _dft(x) = Base.fft(x)
+    return y
 end
 
 #### Sampling

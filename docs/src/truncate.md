@@ -1,6 +1,6 @@
 # Truncated Distributions
 
-The package provides a type, named `Truncated`, to represented truncated distributions, which is defined as below:
+The package provides the `Truncated` type to represented truncated distributions, which is defined as below:
 
 ```julia
 struct Truncated{D<:UnivariateDistribution,S<:ValueSupport} <: Distribution{Univariate,S}

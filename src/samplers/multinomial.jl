@@ -45,7 +45,7 @@ struct MultinomialSampler <: Sampleable{Multivariate,Discrete}
 end
 
 MultinomialSampler(n::Int, prob::Vector{Float64}) = 
-	MultinomialSampler(n, prob, AliasTable(prob))
+    MultinomialSampler(n, prob, AliasTable(prob))
 
 function _rand!(s::MultinomialSampler, x::AbstractVector{T}) where T<:Real
     n = s.n

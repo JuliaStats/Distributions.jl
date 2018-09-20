@@ -160,15 +160,15 @@ params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
-cov(d::MvNormalCanon) = full(inv(d.J))
-invcov(d::MvNormalCanon) = full(d.J)
+cov(d::MvNormalCanon) = Matrix(inv(d.J))
+invcov(d::MvNormalCanon) = Matrix(d.J)
 logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 
 ### Evaluation
 
-sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, x - d.μ)
-sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J, x .- d.μ)
+sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, broadcast(-, x, d.μ))
+sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J, broadcast(-, x, d.μ))
 
 
 # Sampling (for GenericMvNormal)
@@ -178,6 +178,6 @@ unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 
 _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix) = add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
-_rand!(d::MvNormalCanon, x::AbstractMatrix) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormalCanon, x::AbstractMatrix) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) = add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
-_rand!(d::MvNormalCanon, x::AbstractVector) = _rand!(Base.GLOBAL_RNG, d, x)
+_rand!(d::MvNormalCanon, x::AbstractVector) = _rand!(Random.GLOBAL_RNG, d, x)

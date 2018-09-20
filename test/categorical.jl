@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 for p in Vector{Float64}[
@@ -15,6 +15,7 @@ for p in Vector{Float64}[
     @test probs(d) == p
     @test minimum(d) == 1
     @test maximum(d) == k
+    @test extrema(d) == (1, k)
     @test ncategories(d) == k
 
     c = 0.0
@@ -44,6 +45,7 @@ end
 d = Categorical(4)
 @test minimum(d) == 1
 @test maximum(d) == 4
+@test extrema(d) == (1, 4)
 @test probs(d) == [0.25, 0.25, 0.25, 0.25]
 
 p = ones(10^6) * 1.0e-6

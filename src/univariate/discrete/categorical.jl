@@ -134,13 +134,13 @@ function cf(d::Categorical{T}, t::Real) where T<:Real
     s
 end
 
-mode(d::Categorical) = indmax(probs(d))
+mode(d::Categorical) = argmax(probs(d))
 
 function modes(d::Categorical)
     K = ncategories(d)
     p = probs(d)
     maxp = maximum(p)
-    r = Vector{Int}(0)
+    r = Vector{Int}()
     for k = 1:K
         @inbounds if p[k] == maxp
             push!(r, k)
@@ -249,3 +249,5 @@ fit_mle(::Type{Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) whe
 
 fit(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
 fit(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)
+
+==(c1::Categorical,c2::Categorical) = (c1.K == c2.K) && all(c1.p .== c2.p)

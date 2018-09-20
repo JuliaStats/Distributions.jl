@@ -59,19 +59,19 @@ std(d::Rayleigh{T}) where {T<:Real} = sqrt(2 - T(π)/2) * d.σ
 skewness(d::Rayleigh{T}) where {T<:Real} = 2 * sqrtπ * (T(π) - 3)/(4 - T(π))^(3/2)
 kurtosis(d::Rayleigh{T}) where {T<:Real} = -(6*T(π)^2 - 24*T(π) +16)/(4 - T(π))^2
 
-entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(γ)/2 + log(d.σ)
+entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(MathConstants.γ)/2 + log(d.σ)
 
 
 #### Evaluation
 
 function pdf(d::Rayleigh{T}, x::Real) where T<:Real
-	σ2 = d.σ^2
-	x > 0 ? (x / σ2) * exp(- (x^2) / (2σ2)) : zero(T)
+    σ2 = d.σ^2
+    x > 0 ? (x / σ2) * exp(- (x^2) / (2σ2)) : zero(T)
 end
 
 function logpdf(d::Rayleigh{T}, x::Real) where T<:Real
-	σ2 = d.σ^2
-	x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
+    σ2 = d.σ^2
+    x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
 logccdf(d::Rayleigh{T}, x::Real) where {T<:Real} = x > 0 ? - (x^2) / (2d.σ^2) : zero(T)

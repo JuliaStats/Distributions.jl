@@ -1,7 +1,7 @@
 # Tests for Multinomial
 
-using Distributions
-using Compat.Test
+using  Distributions
+using Test
 
 
 p = [0.2, 0.5, 0.3]
@@ -39,7 +39,7 @@ x = rand(d)
 
 x = rand(d, 100)
 @test isa(x, Matrix{Int})
-@test all(sum(x, 1) .== nt)
+@test all(sum(x, dims=1) .== nt)
 @test all(insupport(d, x))
 
 x = rand(sampler(d))
@@ -58,8 +58,8 @@ x = rand(d, 100)
 pv = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test pv[i] ≈ pdf(d, x[:,i])
-	@test lp[i] ≈ logpdf(d, x[:,i])
+    @test pv[i] ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
 end
 
 # test type stability of logpdf
@@ -87,7 +87,7 @@ w = rand(n0)
 ss = suffstats(Multinomial, x)
 @test isa(ss, Distributions.MultinomialStats)
 @test ss.n == nt
-@test ss.scnts == vec(sum(Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], 2))
+@test ss.scnts == vec(sum(Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], dims=2))
 @test ss.tw == n0
 
 ss = suffstats(Multinomial, x, w)
@@ -100,7 +100,7 @@ ss = suffstats(Multinomial, x, w)
 
 x = rand(d0, 10^5)
 @test size(x) == (length(d0), 10^5)
-@test all(sum(x, 1) .== nt)
+@test all(sum(x, dims=1) .== nt)
 
 r = fit(Multinomial, x)
 @test r.n == nt

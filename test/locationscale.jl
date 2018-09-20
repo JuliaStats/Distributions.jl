@@ -1,6 +1,6 @@
 
 using Distributions
-using Compat.Test
+using Random, Test
 
 
 
@@ -11,6 +11,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 
     @test minimum(d) == minimum(dref)
     @test maximum(d) == maximum(dref)
+    @test extrema(d) == (minimum(d), maximum(d))
 
     #### Conversions
 
@@ -65,7 +66,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
     @test invlogccdf(d,log(0.5)) ≈ invlogccdf(dref,log(0.5))
     @test invlogccdf(d,log(0.8)) ≈ invlogccdf(dref,log(0.8))
 
-    r = Array{Float64}(100000)
+    r = Array{Float64}(undef, 100000)
     rand!(d,r)
     @test mean(r) ≈ mean(dref) atol=0.01
     @test std(r) ≈ std(dref) atol=0.01

@@ -60,9 +60,12 @@ end
 
 skewness(d::Hypergeometric) = (d.nf-d.ns)*sqrt(d.ns+d.nf-1)*(d.ns+d.nf-2*d.n)/sqrt(d.n*d.ns*d.nf*(d.ns+d.nf-d.n))/(d.ns+d.nf-2)
 function kurtosis(d::Hypergeometric)
-    N = d.ns + d.nf
-    a = (N-1) * N^2 * (N * (N+1) - 6*d.ns * (N-d.ns) - 6*d.n*(N-d.n)) + 6*d.n*d.ns*(d.nf)*(N-d.n)*(5*N-6)
-    b = (d.n*d.ns*(N-d.ns) * (N-d.n)*(N-2)*(N-3))
+    ns = Float64(d.ns)
+    nf = Float64(d.nf)
+    n = Float64(d.n)
+    N = ns + nf
+    a = (N-1) * N^2 * (N * (N+1) - 6*ns * (N-ns) - 6*n*(N-n)) + 6*n*ns*(nf)*(N-n)*(5*N-6)
+    b = (n*ns*(N-ns) * (N-n)*(N-2)*(N-3))
     a/b
 end
 
@@ -88,6 +91,6 @@ Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRan
     _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
 
 function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
-    r .= pdf.(d,X)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
+    r .= pdf.(Ref(d),X)
 end

@@ -9,6 +9,7 @@ end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
+extrema(r::RealInterval) = (r.lb, r.ub)
 in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
@@ -26,20 +27,6 @@ Return a tuple of parameters. Let `d` be a distribution of type `D`, then `D(par
 will construct exactly the same distribution as ``d``.
 """
 params(d::UnivariateDistribution)
-
-"""
-    succprob(d::UnivariateDistribution)
-
-Get the probability of success.
-"""
-succprob(d::UnivariateDistribution)
-
-"""
-    failprob(d::UnivariateDistribution)
-
-Get the probability of failure.
-"""
-failprob(d::UnivariateDistribution)
 
 """
     scale(d::UnivariateDistribution)
@@ -91,18 +78,25 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::Distribution)
+    minimum(d::UnivariateDistribution)
 
 Return the minimum of the support of `d`.
 """
 minimum(d::UnivariateDistribution)
 
 """
-    maximum(d::Distribution)
+    maximum(d::UnivariateDistribution)
 
 Return the maximum of the support of `d`.
 """
 maximum(d::UnivariateDistribution)
+
+"""
+    extrema(d::UnivariateDistribution)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
+extrema(d::UnivariateDistribution) = (minimum(d), maximum(d))
 
 """
     insupport(d::UnivariateDistribution, x::Any)
@@ -128,7 +122,7 @@ end
 
 
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
-     insupport!(BitArray(size(X)), d, X)
+     insupport!(BitArray(undef, size(X)), d, X)
 
 insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
@@ -179,8 +173,8 @@ Populates the array `A` with scalar samples from `d`. The general fallback is to
 random samples from `sampler(d)`.
 """
 rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(shp))
+rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(undef, n))
+rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(undef, shp))
 
 
 sampler(d::UnivariateDistribution) = d
@@ -269,7 +263,7 @@ isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 Return whether `d` is mesokurtic (*i.e* `kurtosis(d) == 0`).
 """
-ismesokurtic(d::UnivariateDistribution) = kurtosis(d) == 0.0
+ismesokurtic(d::UnivariateDistribution) = kurtosis(d) ≈ 0.0
 
 """
     kurtosis(d::UnivariateDistribution)
