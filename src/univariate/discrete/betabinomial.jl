@@ -90,6 +90,14 @@ function pdf(d::BetaBinomial{T}, k::Int) where T
     return numerator / (denominator * chooseinv)
 end
 
+function logpdf(d::BetaBinomial{T}, k::Int) where T
+    n, α, β = d.n, d.α, d.β
+    logbinom = - log1p(n) - lbeta(k + 1, n - k + 1)
+    lognum   = lbeta(k + α, n - k + β)
+    logdenom = lbeta(α, β)
+    logbinom + lognum - logdenom
+end
+
 entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))
 median(d::BetaBinomial) = median(Categorical(pdf.(Ref(d),support(d)))) - 1
 mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1
