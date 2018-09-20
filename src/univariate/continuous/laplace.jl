@@ -116,5 +116,5 @@ rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, B
 function fit_mle(::Type{Laplace}, x::Array)
     xc = copy(x)
     a = median!(xc)
-    Laplace(a, StatsBase.mad!(xc, a))
+    Laplace(a, StatsBase.mad!(xc, center=a))
 end

@@ -1,34 +1,30 @@
-__precompile__(true)
-
 module Distributions
 
-using PDMats
-using StatsFuns
-using StatsBase
-using Compat
-import Compat.MathConstants: γ
+using StatsBase, PDMats, StatsFuns, Statistics
 
-import QuadGK.quadgk
-import Compat.view
-import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
-import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: +, -
-import Base.Math.@horner
-import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+import QuadGK: quadgk
+import Base: size, eltype, length, convert, show, getindex, rand
+import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base.Math: @horner
 
-if isdefined(Base, :scale)
-    import Base: scale
-end
+using LinearAlgebra, Printf
 
-import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params, params!
+using Random
+import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+
+import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+
 import PDMats: dim, PDMat, invquad
 
-importall SpecialFunctions
+using SpecialFunctions
 
 export
+    # re-export Statistics
+    mean, median, quantile, std, var, cov, cor,
+
     # generic types
     VariateForm,
     ValueSupport,
@@ -126,6 +122,7 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    Product,
     Poisson,
     PoissonBinomial,
     QQPair,

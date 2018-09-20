@@ -9,7 +9,7 @@ rand(s::BinomialRmathSampler) = round(Int, StatsFuns.RFunctions.binomrand(s.n, s
 
 # compute probability vector of a Binomial distribution
 function binompvec(n::Int, p::Float64)
-    pv = Vector{Float64}(n+1)
+    pv = Vector{Float64}(undef, n+1)
     if p == 0.0
         fill!(pv, 0.0)
         pv[1] = 1.0

@@ -79,9 +79,9 @@ end
 Calculate the location vector (as above) and store the result in ``μ``
 """
 function location!(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
-  @assert size(S) == (length(m),length(m)) && length(m) == length(μ)
-  assertinsupport(D,m)
-  _location!(D,Val{s},m,S,μ)
+    @assert size(S) == (length(m),length(m)) && length(m) == length(μ)
+    assertinsupport(D,m)
+    _location!(D,Val{s},m,S,μ)
 end
 
 """
@@ -220,7 +220,7 @@ mode(d::MvLogNormal) = exp.(mean(d.normal) - var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
     return m*m'.*(exp.(cov(d.normal)) .- 1)
-  end
+end
 var(d::MvLogNormal) = diag(cov(d))
 
 #see Zografos & Nadarajah (2005) Stat. Prob. Let 71(1) pp71-84 DOI: 10.1016/j.spl.2004.10.023

@@ -40,4 +40,4 @@ for fun in [:pdf, :logpdf,
     end
 end
 
-@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(d, support(d))
+@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))

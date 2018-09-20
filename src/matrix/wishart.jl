@@ -64,17 +64,17 @@ end
 
 #### Show
 
-show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, full(d.S))])
+show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))])
 
 
 #### Statistics
 
-mean(d::Wishart) = d.df * full(d.S)
+mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
     r = d.df - dim(d) - 1.0
     if r > 0.0
-        return full(d.S) * r
+        return Matrix(d.S) * r
     else
         error("mode is only defined when df > p + 1")
     end
@@ -102,15 +102,15 @@ end
 function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
-    Xcf = cholfact(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
+    Xcf = cholesky(X)
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.c0
 end
 
 #### Sampling
 
 function rand(d::Wishart)
     Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df))
-    A_mul_Bt(Z, Z)
+    Z * Z'
 end
 
 function _wishart_genA(p::Int, df::Real)

@@ -2,7 +2,8 @@
 
 ## Installation
 
-The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`. Throughout, we assume that you have installed the package.
+The Distributions package is available through the Julia package system by running `Pkg.add("Distributions")`.
+Throughout, we assume that you have installed the package.
 
 ## Starting With a Normal Distribution
 
@@ -11,8 +12,9 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Distributions
-julia> srand(123) # Setting the seed
+julia> using Compat, Random, Distributions
+
+julia> Random.seed!(123) # Setting the seed
 ```
 
 Then, we create a standard-normal distribution `d` and obtain samples using `rand`:
@@ -31,7 +33,7 @@ julia> x = rand(d, 100)
 You can easily obtain the pdf, cdf, percentile, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
 
 ```julia
-julia> quantile(Normal(), [0.5, 0.95])
+julia> quantile.(Normal(), [0.5, 0.95])
 2-element Array{Float64,1}:
  0.0
  1.64485
@@ -71,7 +73,7 @@ julia> Truncated(Normal(mu, sigma), l, u)
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:
 
 ```julia
-julia> names(Cauchy)
+julia> fieldnames(Cauchy)
 2-element Array{Symbol,1}:
  :μ
  :β

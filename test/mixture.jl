@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 # Core testing procedure
@@ -108,10 +108,11 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
         @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
         @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
     end
-
+#=
     @show g
     @show size(X)
     @show size(mix_p0)
+=#
     @test pdf(g, X)                  ≈ mix_p0
     @test logpdf(g, X)               ≈ mix_lp0
     @test componentwise_pdf(g, X)    ≈ P0
@@ -121,8 +122,8 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     Xs = rand(g, ns)
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
-    @test isapprox(vec(mean(Xs, 2)), mean(g), atol=0.1)
-    @test isapprox(cov(Xs, 2)      , cov(g) , atol=0.1)
+    @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
+    @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)
@@ -150,10 +151,12 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
-@test minimum(g_u) == -2.0
-@test maximum(g_u) == 3.0
+@test minimum(g_u) ≈ -2.0
+@test maximum(g_u) ≈ 3.0
+@test extrema(g_u) == (minimum(g_u), maximum(g_u))
 @test insupport(g_u, 2.5) == true
 @test insupport(g_u, 3.5) == false
 
@@ -164,6 +167,7 @@ test_mixture(g_u, 1000, 10^6)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
+@test extrema(g_u) == (-Inf, Inf)
 
 println("    testing MultivariateMixture")
 g_m = MixtureModel(
@@ -177,3 +181,15 @@ g_m = MixtureModel(
 @test insupport(g_m, [0.0, 0.0]) == true
 test_mixture(g_m, 1000, 10^6)
 test_params(g_m)
+
+const u1 =  Uniform()
+const u2 =  Uniform(1.0, 2.0)
+const utot =Uniform(0.0, 2.0)
+ 
+# mixture supposed to be a uniform on [0.0,2.0]
+const unif_mixt =  MixtureModel([u1,u2])
+@test var(utot) ≈  var(unif_mixt)
+@test mean(utot) ≈ mean(unif_mixt)
+for x in -1.0:0.5:2.5
+    @test cdf(utot,x) ≈ cdf(utot,x)
+end

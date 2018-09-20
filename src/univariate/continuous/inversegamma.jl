@@ -121,7 +121,7 @@ rand(d::InverseGamma) = 1 / rand(d.invd)
 function _rand!(d::InverseGamma, A::AbstractArray)
     s = sampler(d.invd)
     for i = 1:length(A)
-    	v = 1 / rand(s)
+        v = 1 / rand(s)
         @inbounds A[i] = v
     end
     A

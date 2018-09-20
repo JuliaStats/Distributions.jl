@@ -5,32 +5,32 @@
 ##############################################################################
 
 struct EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
-	values::Vector{Float64}
+    values::Vector{Float64}
     support::Vector{Float64}
-	cdf::Function
-	entropy::Float64
-	kurtosis::Float64
-	mean::Float64
-	median::Float64
-	modes::Vector{Float64}
-	skewness::Float64
-	var::Float64
+    cdf::Function
+    entropy::Float64
+    kurtosis::Float64
+    mean::Float64
+    median::Float64
+    modes::Vector{Float64}
+    skewness::Float64
+    var::Float64
 end
 
 @distr_support EmpiricalUnivariateDistribution d.values[1] d.values[end]
 
 function EmpiricalUnivariateDistribution(x::Vector)
     sx = sort(x)
-	EmpiricalUnivariateDistribution(sx,
+    EmpiricalUnivariateDistribution(sx,
                                     unique(sx),
-	                                ecdf(x),
-	                                NaN,
-	                                NaN,
-	                                mean(x),
-	                                median(x),
-	                                Float64[],
-	                                NaN,
-	                                var(x))
+                                    ecdf(x),
+                                    NaN,
+                                    NaN,
+                                    mean(x),
+                                    median(x),
+                                    Float64[],
+                                    NaN,
+                                    var(x))
 end
 
 entropy(d::EmpiricalUnivariateDistribution) = d.entropy
@@ -72,5 +72,5 @@ end
 
 function fit_mle(::Type{EmpiricalUnivariateDistribution},
              x::Vector{T}) where T <: Real
-	EmpiricalUnivariateDistribution(x)
+    EmpiricalUnivariateDistribution(x)
 end

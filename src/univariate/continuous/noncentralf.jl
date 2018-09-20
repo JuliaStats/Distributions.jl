@@ -41,8 +41,8 @@ function mean(d::NoncentralF{T}) where T<:Real
 end
 
 var(d::NoncentralF{T}) where {T<:Real} = d.ν2 > 4 ? 2d.ν2^2 *
-		       ((d.ν1 + d.λ)^2 + (d.ν2 - 2)*(d.ν1 + 2d.λ)) /
-		       (d.ν1 * (d.ν2 - 2)^2 * (d.ν2 - 4)) : T(NaN)
+               ((d.ν1 + d.λ)^2 + (d.ν2 - 2)*(d.ν1 + 2d.λ)) /
+               (d.ν1 * (d.ν2 - 2)^2 * (d.ν2 - 4)) : T(NaN)
 
 
 ### Evaluation & Sampling

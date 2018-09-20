@@ -1,10 +1,10 @@
 # Tests for Dirichlet distribution
 
-using Distributions
-using Compat.Test
+using  Distributions
+using Test, Random, LinearAlgebra
 
 
-srand(34567)
+Random.seed!(34567)
 
 d = Dirichlet(3, 2.0)
 
@@ -25,8 +25,8 @@ x = rand(d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test lp[i] ≈ logpdf(d, x[:,i])
-	@test p[i]  ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
+    @test p[i]  ≈ pdf(d, x[:,i])
 end
 
 v = [2.0, 1.0, 3.0]
@@ -52,8 +52,8 @@ x = rand(d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
-	@test p[i]  ≈ pdf(d, x[:,i])
-	@test lp[i] ≈ logpdf(d, x[:,i])
+    @test p[i]  ≈ pdf(d, x[:,i])
+    @test lp[i] ≈ logpdf(d, x[:,i])
 end
 
 # Sampling
@@ -71,7 +71,7 @@ x = rand(d, 10)
 
 n = 10000
 x = rand(d, n)
-x = x ./ sum(x, 1)
+x = x ./ sum(x, dims=1)
 
 r = fit_mle(Dirichlet, x)
 @test isapprox(r.alpha, d.alpha, atol=0.25)

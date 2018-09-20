@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 @testset "non-central T-Distributions" begin

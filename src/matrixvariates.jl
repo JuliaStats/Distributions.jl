@@ -31,7 +31,7 @@ rand!(d::MatrixDistribution, A::AbstractArray{M}) where {M<:Matrix} = _rand!(sam
 
 Draw a sample matrix from the distribution `d`.
 """
-rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
+rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(undef, n))
 
 # pdf & logpdf
 
@@ -87,12 +87,12 @@ end
 
 function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array{T}(size(X)), d, X)
+    _logpdf!(Array{T}(undef, size(X)), d, X)
 end
 
 function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _pdf!(Array{T}(size(X)), d, X)
+    _pdf!(Array{T}(undef, size(X)), d, X)
 end
 
 """

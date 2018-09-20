@@ -98,9 +98,9 @@ function logpdf(d::BetaBinomial{T}, k::Int) where T
     logbinom + lognum - logdenom
 end
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf.(d,support(d))))
-median(d::BetaBinomial) = median(Categorical(pdf.(d,support(d)))) - 1
-mode(d::BetaBinomial) = indmax(pdf.(d,support(d))) - 1
-modes(d::BetaBinomial) = modes(Categorical(pdf.(d,support(d)))) .- 1
+entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))
+median(d::BetaBinomial) = median(Categorical(pdf.(Ref(d),support(d)))) - 1
+mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1
+modes(d::BetaBinomial) = modes(Categorical(pdf.(Ref(d),support(d)))) .- 1
 
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(d, support(d))), p) - 1
+quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), support(d))), p) - 1

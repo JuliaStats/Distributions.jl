@@ -1,13 +1,13 @@
 # Utilities to support the testing of distributions and samplers
 
-import Compat.Test: @test
+import Test: @test
 
 # auxiliary functions
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
     intv = (b - a) / (n - 1)
-    r = Vector{Float64}(n)
+    r = Vector{Float64}(undef, n)
     @inbounds for i = 1:n
         r[i] = a + (i-1) * intv
     end
@@ -96,14 +96,14 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     rmin = floor(Int,quantile(distr, 0.00001))::Int
     rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
-    p0 = pdf.(distr, rmin:rmax)  # reference probability masses
+    p0 = pdf.(Ref(distr), rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Vector{Int}(m)
-    cub = Vector{Int}(m)
+    clb = Vector{Int}(undef, m)
+    cub = Vector{Int}(undef, m)
     for i = 1:m
         bp = Binomial(n, p0[i])
         clb[i] = floor(Int,quantile(bp, q/2))
@@ -187,9 +187,9 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # determine confidence intervals for counts:
     # with probability q, the count will be out of this interval.
     #
-    clb = Vector{Int}(nbins)
-    cub = Vector{Int}(nbins)
-    cdfs = cdf.(distr, edges)
+    clb = Vector{Int}(undef, nbins)
+    cub = Vector{Int}(undef, nbins)
+    cdfs = cdf.(Ref(distr), edges)
 
     for i = 1:nbins
         pi = cdfs[i+1] - cdfs[i]
@@ -309,31 +309,31 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf.(d, collect(rmin:rmax))
-    @test pdf.(d, rmin:rmax) ≈ p0
+    p0 = pdf.(Ref(d), collect(rmin:rmax))
+    @test pdf.(Ref(d), rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test pdf.(d, rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test pdf.(Ref(d), rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test pdf.(d, support(d)) ≈ p0
-        @test pdf.(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test pdf.(d, rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test pdf.(d, rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test pdf.(Ref(d), support(d)) ≈ p0
+        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pdf.(Ref(d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test pdf.(Ref(d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test pdf.(d, rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(nv)
-    c   = Vector{Float64}(nv)
-    cc  = Vector{Float64}(nv)
-    lp  = Vector{Float64}(nv)
-    lc  = Vector{Float64}(nv)
-    lcc = Vector{Float64}(nv)
+    p   = Vector{Float64}(undef, nv)
+    c   = Vector{Float64}(undef, nv)
+    cc  = Vector{Float64}(undef, nv)
+    lp  = Vector{Float64}(undef, nv)
+    lc  = Vector{Float64}(undef, nv)
+    lcc = Vector{Float64}(undef, nv)
     ci  = 0.
 
     for (i, v) in enumerate(vs)
@@ -368,24 +368,24 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(d, vs)  ≈ p
-    @test cdf.(d, vs)  ≈ c
-    @test ccdf.(d, vs) ≈ cc
+    @test pdf.(Ref(d), vs)  ≈ p
+    @test cdf.(Ref(d), vs)  ≈ c
+    @test ccdf.(Ref(d), vs) ≈ cc
 
-    @test logpdf.(d, vs)  ≈ lp
-    @test logcdf.(d, vs)  ≈ lc
-    @test logccdf.(d, vs) ≈ lcc
+    @test logpdf.(Ref(d), vs)  ≈ lp
+    @test logcdf.(Ref(d), vs)  ≈ lc
+    @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
 
 function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(nv)
-    c   = Vector{Float64}(nv)
-    cc  = Vector{Float64}(nv)
-    lp  = Vector{Float64}(nv)
-    lc  = Vector{Float64}(nv)
-    lcc = Vector{Float64}(nv)
+    p   = Vector{Float64}(undef, nv)
+    c   = Vector{Float64}(undef, nv)
+    cc  = Vector{Float64}(undef, nv)
+    lp  = Vector{Float64}(undef, nv)
+    lc  = Vector{Float64}(undef, nv)
+    lcc = Vector{Float64}(undef, nv)
 
     for (i, v) in enumerate(vs)
         p[i] = pdf(d, v)
@@ -426,13 +426,13 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(d, vs)  ≈ p
-    @test cdf.(d, vs)  ≈ c
-    @test ccdf.(d, vs) ≈ cc
+    @test pdf.(Ref(d), vs)  ≈ p
+    @test cdf.(Ref(d), vs)  ≈ c
+    @test ccdf.(Ref(d), vs) ≈ cc
 
-    @test logpdf.(d, vs)  ≈ lp
-    @test logcdf.(d, vs)  ≈ lc
-    @test logccdf.(d, vs) ≈ lcc
+    @test logpdf.(Ref(d), vs)  ≈ lp
+    @test logcdf.(Ref(d), vs)  ≈ lc
+    @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
 
@@ -442,7 +442,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]
-    p = pdf.(d, vf)
+    p = pdf.(Ref(d), vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
     xstd = sqrt(xvar)

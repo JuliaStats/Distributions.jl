@@ -1,9 +1,9 @@
 using Distributions
-using Compat.Test
+using Test, LinearAlgebra
 
 
 v = 7.0
-S = eye(2)
+S = Matrix(1.0I, 2, 2)
 S[1, 2] = S[2, 1] = 0.5
 
 W = Wishart(v,S)
@@ -17,8 +17,8 @@ for d in [W,IW]
     @test partype(d) == Float64
 end
 
-@test partype(Wishart(7, eye(Float32, 2))) == Float32
-@test partype(InverseWishart(7, eye(Float32, 2))) == Float32
+@test partype(Wishart(7, Matrix{Float32}(I, 2, 2))) == Float32
+@test partype(InverseWishart(7, Matrix{Float32}(I, 2, 2))) == Float32
 
 @test isapprox(mean(rand(W,100000)) , mean(W) , atol=0.1)
 @test isapprox(mean(rand(IW,100000)), mean(IW), atol=0.1)

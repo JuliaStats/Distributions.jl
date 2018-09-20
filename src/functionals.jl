@@ -15,7 +15,7 @@ end
 function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(map(x -> f(x)*g(x), leftEnd:rightEnd))
+    sum(x -> f(x)*g(x), leftEnd:rightEnd)
 end
                              
 function expectation(distr::UnivariateDistribution, g::Function)
