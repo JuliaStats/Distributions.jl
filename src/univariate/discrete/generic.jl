@@ -178,8 +178,6 @@ struct GenericStats{T<:Real,P<:Real,S<:AbstractVector{T}} <: SufficientStats
     support::S
     freq::Vector{P}
 end
-GenericStats(vs::S, fs::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
-    GenericStats{T,P,S}(vs, fs)
 
 function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
 

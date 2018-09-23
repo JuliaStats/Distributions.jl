@@ -17,7 +17,6 @@ Here, `p` must be a real vector, of which all components are nonnegative and sum
 External links:
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-
 Categorical{T} = Generic{Int,T,UnitRange{Int}}
 
 (::Type{Categorical})(p::Vector{P}, ::NoArgCheck) where P =
@@ -78,7 +77,7 @@ pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] :
 
 logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(probs(d)[x]) : -Inf
 
-function _pdf!{T<:Real}(r::AbstractArray, d::Categorical{T}, rgn::UnitRange)
+function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
     vlast = round(Int, last(rgn))
     vl = max(vfirst, 1)
