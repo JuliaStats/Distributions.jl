@@ -134,7 +134,7 @@ end
 entropy(d::Generic) = entropy(probs(d))
 entropy(d::Generic, b::Real) = entropy(probs(d), b)
 
-mode(d::Generic) = support(d)[indmax(probs(d))]
+mode(d::Generic) = support(d)[argmax(probs(d))]
 function modes(d::Generic{T,P}) where {T,P}
     x = support(d)
     p = probs(d)
@@ -185,7 +185,7 @@ function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
     N == 0 && return GenericStats(T[], Float64[])
 
     n = 1
-    vs = Vector{T}(N)
+    vs = Vector{T}(undef,N)
     ps = zeros(N)
     x = sort(vec(x))
 
