@@ -9,7 +9,7 @@ for p in Vector{Float64}[
 
     d = Categorical(p)
     k = length(p)
-    println("    testing $d")
+    println("    testing $d as Categorical")
 
     @test isa(d, Categorical)
     @test probs(d) == p
@@ -43,6 +43,7 @@ for p in Vector{Float64}[
 end
 
 d = Categorical(4)
+println("    testing $d as Categorical")
 @test minimum(d) == 1
 @test maximum(d) == 4
 @test extrema(d) == (1, 4)

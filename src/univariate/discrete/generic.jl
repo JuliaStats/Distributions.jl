@@ -3,14 +3,14 @@ struct Generic{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistri
     p::Vector{P}
 
     Generic{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
-        new(vs, ps)
+        new{T,P,S}(vs, ps)
 
     function Generic{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
         @check_args(Generic, length(vs) == length(ps))
         @check_args(Generic, isprobvec(ps))
         @check_args(Generic, allunique(vs))
         sort_order = sortperm(vs)
-        new(vs[sort_order], ps[sort_order])
+        new{T,P,S}(vs[sort_order], ps[sort_order])
     end
 end
 

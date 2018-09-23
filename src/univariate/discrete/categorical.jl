@@ -19,17 +19,19 @@ External links:
 """
 Categorical{T} = Generic{Int,T,UnitRange{Int}}
 
-(::Type{Categorical})(p::Vector{P}, ::NoArgCheck) where P =
-    Generic{Int,P,UnitRange{Int}}(1:length(p), p, NoArgCheck())
+Categorical{P}(p::Vector{P}, ::NoArgCheck) where P =
+    Categorical{P}(1:length(p), p, NoArgCheck())
+Categorical(p::Vector{P}, ::NoArgCheck) where P = Categorical{P}(p, NoArgCheck())
 
-function (::Type{Categorical})(p::Vector{P}) where P
+function Categorical{P}(p::Vector{P}) where P
     @check_args(Generic, isprobvec(p))
-    Generic{Int,P,UnitRange{Int}}(1:length(p), p, NoArgCheck())
+    Categorical{P}(1:length(p), p, NoArgCheck())
 end
+Categorical(p::Vector{P}) where P = Categorical{P}(p)
 
-function (::Type{Categorical})(k::Integer)
+function Categorical(k::Integer)
     @check_args(Generic, k >= 1)
-    Generic{Int,Float64,UnitRange{Int}}(1:k, fill(1/k, k), NoArgCheck())
+    Categorical{Float64}(1:k, fill(1/k, k), NoArgCheck())
 end
 
 @distr_support Categorical 1 support(d).stop

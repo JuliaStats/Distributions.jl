@@ -2,6 +2,7 @@ import StatsBase: ProbabilityWeights
 
 d = Generic([40., 80., 120., -60.],
             [.4, .3, .1,  .2])
+println("    testing $d")
 
 @test rand(d) ∈ [40., 80., 120., -60.]
 @test rand(sampler(d)) ∈ [40., 80., 120., -60.]
