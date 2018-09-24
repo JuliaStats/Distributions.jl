@@ -7,7 +7,7 @@ ncategories(s::AliasTable) = length(s.accept)
 
 function AliasTable(probs::AbstractVector{T}) where T<:Real
     n = length(probs)
-    n > 0 || error("The input probability vector is empty.")
+    n > 0 || throw(ArgumentError("The input probability vector is empty."))
     accp = Vector{Float64}(undef, n)
     alias = Vector{Int}(undef, n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)

@@ -24,8 +24,8 @@ n_tsamples = 10^6
 
 ## Categorical samplers
 
-@test_throws ErrorException CategoricalDirectSampler(Float64[])
-@test_throws ErrorException AliasTable(Float64[])
+@test_throws ArgumentError CategoricalDirectSampler(Float64[])
+@test_throws ArgumentError AliasTable(Float64[])
 
 for S in [CategoricalDirectSampler, AliasTable]
     local S

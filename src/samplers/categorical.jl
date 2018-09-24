@@ -4,7 +4,7 @@ struct CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
     prob::Vector{Float64}
 
     function CategoricalDirectSampler(p::Vector{Float64})
-        isempty(p) && error("p is empty.")
+        isempty(p) && throw(ArgumentError("p is empty."))
         new(p)
     end
 end

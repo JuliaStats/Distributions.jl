@@ -51,11 +51,18 @@ ws = ProbabilityWeights(probs(d))
 @test cf(d, 0.17) ≈ 0.3604521478 + 0.6953481124im
 
 # Fitting
-xs = [1,2,3,4,5,4,3,2,3,2,1]
+xs = [1, 2,3,4,5,4,3,2,3,2,1]
+ws = [1.,2,1,0,1,1,2,3,2,6,1]
+
 ss = suffstats(Generic, xs)
 @test ss isa Distributions.GenericStats{Int,Float64,Vector{Int}}
 @test ss.support == [1,2,3,4,5]
 @test ss.freq == [2., 3., 3., 2., 1.]
+
+ss2 = suffstats(Generic, xs, ws)
+@test ss2 isa Distributions.GenericStats{Int,Float64,Vector{Int}}
+@test ss2.support == [1,2,3,4,5]
+@test ss2.freq == [2., 11., 5., 1., 1.]
 
 d1 = fit_mle(Generic, ss)
 @test d1 isa Generic{Int,Float64,Vector{Int}}

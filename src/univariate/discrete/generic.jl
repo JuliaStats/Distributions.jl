@@ -106,9 +106,9 @@ function skewness(d::Generic{T}) where T
     k = length(x)
     μ₃ = zero(T)
     σ² = zero(T)
-    for i in 1:k
-        @inbounds d = x[i] - m
-        @inbounds d²w = abs2(d) * p[i]
+    @inbounds for i in 1:k
+        d = x[i] - m
+        d²w = abs2(d) * p[i]
         μ₃ += d * d²w
         σ² += d²w
     end
@@ -122,9 +122,9 @@ function kurtosis(d::Generic{T}) where T
     k = length(x)
     μ₄ = zero(T)
     σ² = zero(T)
-    for i in 1:k
-        @inbounds d² = abs2(x[i] - m)
-        @inbounds d²w = d² * p[i]
+    @inbounds for i in 1:k
+        d² = abs2(x[i] - m)
+        d²w = d² * p[i]
         μ₄ += d² * d²w
         σ² += d²w
     end
@@ -141,9 +141,9 @@ function modes(d::Generic{T,P}) where {T,P}
     k = length(x)
     mds = T[]
     max_p = zero(P)
-    for i in 1:k
-        @inbounds pi = p[i]
-        @inbounds xi = x[i]
+    @inbounds for i in 1:k
+        pi = p[i]
+        xi = x[i]
         if pi > max_p
             max_p = pi
             mds = [xi]
@@ -174,7 +174,7 @@ end
 
 # Sufficient statistics
 
-struct GenericStats{T<:Real,P<:Real,S<:AbstractVector{T}} <: SufficientStats
+struct GenericStats{T<:Real,P<:AbstractFloat,S<:AbstractVector{T}} <: SufficientStats
     support::S
     freq::Vector{P}
 end
@@ -193,13 +193,13 @@ function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
     ps[1] += 1.
 
     xprev = x[1]
-    for i = 2:N
-        @inbounds xi = x[i]
+    @inbounds for i = 2:N
+        xi = x[i]
         if xi != xprev
             n += 1
-            @inbounds vs[n] = xi
+            vs[n] = xi
         end
-        @inbounds ps[n] += 1.
+        ps[n] += 1.
         xprev = xi
     end
 
@@ -209,30 +209,33 @@ function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
 
 end
 
-function suffstats(::Type{Generic}, x::AbstractArray{T}, w::AbstractArray{<:Real}) where {T<:Real}
+function suffstats(::Type{Generic}, x::AbstractArray{T}, w::AbstractArray{P}) where {T<:Real,P<:AbstractFloat}
 
     @check_args(Generic, length(x) == length(w))
 
     N = length(x)
-    N == 0 && return GenericStats(T[], Float64[])
+    N == 0 && return GenericStats(T[], P[])
 
     n = 1
-    vs = Vector{T}(N)
-    ps = zeros(N)
-    x = sort(vec(x))
+    vs = Vector{T}(undef, N)
+    ps = zeros(P, N)
+
+    xorder = sortperm(vec(x))
+    x = vec(x)[xorder]
+    w = vec(w)[xorder]
 
     vs[1] = x[1]
-    ps[1] += ws[1]
+    ps[1] += w[1]
 
     xprev = x[1]
-    for i = 2:N
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+    @inbounds for i = 2:N
+        xi = x[i]
+        wi = w[i]
         if xi != xprev
             n += 1
-            @inbounds vs[n] = xi
+            vs[n] = xi
         end
-        @inbounds ps[n] += wi
+        ps[n] += wi
         xprev = xi
     end
 
