@@ -1,25 +1,43 @@
 module Distributions
 
-using StatsBase, PDMats, StatsFuns, Statistics
+using StatsFuns
 
 import QuadGK: quadgk
 import Base: size, eltype, length, convert, show, getindex, rand
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
-using LinearAlgebra, Printf
+using LinearAlgebra: BLAS, Symmetric, Hermitian,
+                     Diagonal, dot, diag, logdet,
+                     cholesky, cholesky!, Cholesky,
+                     tr, norm, qr!, mul!, rmul!
+
+import LinearAlgebra
+
+using Printf: @printf
 
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
 
+using Statistics: median!
 import Statistics: mean, median, quantile, std, var, cov, cor
+
+using StatsBase: Histogram, middle, mean_and_std, varm
+import StatsBase
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
 
+using PDMats:  AbstractPDMat, ScalMat, PDiagMat,
+               whiten, whiten!, unwhiten, unwhiten!,
+               invquad!, quad, quad!
+
 import PDMats: dim, PDMat, invquad
 
-using SpecialFunctions
+using SpecialFunctions: erf, erfc, erfinv, erfcinv, erfcx,
+                        beta, lbeta,
+                        besseli, besselk, zeta,
+                        trigamma, gamma, digamma, lgamma
 
 export
     # re-export Statistics
