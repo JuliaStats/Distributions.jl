@@ -74,7 +74,7 @@ entropy(d::Logistic) = log(d.θ) + 2
 zval(d::Logistic, x::Real) = (x - d.μ) / d.θ
 xval(d::Logistic, z::Real) = d.μ + z * d.θ
 
-pdf(d::Logistic, x::Real) = (e = exp(-zval(d, x)); e / (d.θ * (1 + e)^2))
+pdf(d::Logistic, x::Real) = (lz = logistic(-abs(zval(d, x))); lz*(1-lz)/d.θ)
 logpdf(d::Logistic, x::Real) = (u = -abs(zval(d, x)); u - 2*log1pexp(u) - log(d.θ))
 
 cdf(d::Logistic, x::Real) = logistic(zval(d, x))
