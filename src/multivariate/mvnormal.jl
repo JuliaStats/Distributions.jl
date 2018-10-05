@@ -219,7 +219,10 @@ function MvNormal(μ::Vector{T}, σ::Real) where T<:Real
     R = Base.promote_eltype(μ, σ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ))
 end
-
+function MvNormal(μ::Vector{T}, σ::UniformScaling{S}) where {T<:Real,S<:Real}
+    R = Base.promote_eltype(μ, σ.λ)
+    MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
+end
 MvNormal(Σ::Matrix{T}) where {T<:Real} = MvNormal(PDMat(Σ))
 MvNormal(σ::Vector{T}) where {T<:Real} = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
