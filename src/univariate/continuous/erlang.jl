@@ -1,5 +1,6 @@
 """
-    Erlang(α,θ)
+    Erlang(;α=1, θ=1)
+    Erlang(;alpha=1, theta=1)
 
 The *Erlang distribution* is a special case of a [`Gamma`](@ref) distribution with integer shape parameter.
 
@@ -25,9 +26,18 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Erlang(α::Int, θ::T) where {T<:Real} = Erlang{T}(α, θ)
-Erlang(α::Int, θ::Integer) = Erlang{Float64}(α, Float64(θ))
-Erlang(α::Int) = Erlang(α, 1.0)
-Erlang() = Erlang(1, 1.0)
+Erlang(α::Int, θ::Integer) = Erlang(α, float(θ))
+
+@kwdispatch Erlang()
+@kwdef Erlang(;α, θ) = Erlang(α, θ)
+@kwdef Erlang(;α) = Erlang(α, 1.0)
+@kwdef Erlang(;θ) = Erlang(1, θ)
+
+@kwdef Erlang(;alpha, theta) = Erlang(alpha, theta)
+@kwdef Erlang(;alpha) = Erlang(alpha, 1.0)
+@kwdef Erlang(;theta) = Erlang(1, theta)
+
+@kwdef Erlang(;) = Erlang(1, 1.0)
 
 @distr_support Erlang 0.0 Inf
 

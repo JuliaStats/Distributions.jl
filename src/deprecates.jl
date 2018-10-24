@@ -22,6 +22,19 @@ function BetaBinomial(n::Real, α::Real, β::Real)
     BetaBinomial(Int(n), α, β)
 end
 
+Base.@deprecate Arcsine(b::Real) Arcsine(;b=b)
+Base.@deprecate Beta(α::Real) Beta(;α=α, β=α)
+Base.@deprecate Beta() = Beta(α=1, β=1)
+Base.@deprecate BetaPrime(α::Real) BetaPrime(α=α, β=α)
+Base.@deprecate BetaPrime() BetaPrime(α=1.0, β=1.0)
+Base.@deprecate Biweight(μ::Real) = Biweight(μ=μ)
+Base.@deprecate Cauchy(μ::Real) Cauchy(μ=μ)
+Base.@deprecate Cosine(μ::Real) Cosine(μ=μ)
+Base.@deprecate Epanechnikov(μ::Real) Epanechnikov(μ=μ)
+Base.@deprecate Erlang(α::Int) Erlang(α=α)
+
+
+
 
 # vectorized versions
 for fun in [:pdf, :logpdf,

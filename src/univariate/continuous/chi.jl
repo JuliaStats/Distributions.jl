@@ -1,5 +1,7 @@
 """
-    Chi(ν)
+    Chi(;ν)
+    Chi(;nu)
+    Chi(;dof)
 
 The *Chi distribution* `ν` degrees of freedom has probability density function
 
@@ -28,7 +30,12 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Chi(ν::T) where {T<:Real} = Chi{T}(ν)
-Chi(ν::Integer) = Chi(Float64(ν))
+Chi(ν::Integer) = Chi(float(ν))
+
+@kwdispatch Chi()
+@kwdef Chi(;ν) = Chi(ν)
+@kwdef Chi(;nu) = Chi(nu)
+@kwdef Chi(;dof) = Chi(dof)
 
 @distr_support Chi 0.0 Inf
 

@@ -1,5 +1,6 @@
 """
-    Cauchy(μ, σ)
+    Cauchy(;μ=0, σ=1)
+    Cauchy(;mu=0, sigma=1)
 
 The *Cauchy distribution* with location `μ` and scale `σ` has probability density function
 
@@ -34,9 +35,18 @@ end
 
 Cauchy(μ::T, σ::T) where {T<:Real} = Cauchy{T}(μ, σ)
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
-Cauchy(μ::Real) = Cauchy(μ, 1.0)
-Cauchy() = Cauchy(0.0, 1.0)
+Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
+
+@kwdispatch Cauchy()
+@kwdef Cauchy(;μ,σ) = Cauchy(μ,σ)
+@kwdef Cauchy(;μ) = Cauchy(μ,1)
+@kwdef Cauchy(;σ) = Cauchy(0,σ)
+
+@kwdef Cauchy(;mu,sigma) = Cauchy(mu,sigma)
+@kwdef Cauchy(;mu) = Cauchy(mu,1)
+@kwdef Cauchy(;sigma) = Cauchy(0,sigma)
+
+@kwdef Cauchy(;) = Cauchy(0,1)
 
 @distr_support Cauchy -Inf Inf
 

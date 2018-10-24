@@ -1,5 +1,6 @@
 """
-    Cosine(μ, σ)
+    Cosine(;μ=0, σ=1)
+    Cosine(;mu=0, sigma=1)
 
 A raised Cosine distribution.
 
@@ -16,9 +17,18 @@ end
 
 Cosine(μ::T, σ::T) where {T<:Real} = Cosine{T}(μ, σ)
 Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
-Cosine(μ::Integer, σ::Integer) = Cosine(Float64(μ), Float64(σ))
-Cosine(μ::Real) = Cosine(μ, 1.0)
-Cosine() = Cosine(0.0, 1.0)
+Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
+
+@kwdispatch Cosine()
+@kwdef Cosine(;μ,σ) = Cosine(μ,σ)
+@kwdef Cosine(;μ) = Cosine(μ,1)
+@kwdef Cosine(;σ) = Cosine(0,σ)
+
+@kwdef Cosine(;mu,sigma) = Cosine(mu,sigma)
+@kwdef Cosine(;mu) = Cosine(mu,1)
+@kwdef Cosine(;sigma) = Cosine(0,sigma)
+
+@kwdef Cosine(;) = Cosine(0,1)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 

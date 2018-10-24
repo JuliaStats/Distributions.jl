@@ -1,5 +1,8 @@
 """
-    Chisq(ν)
+    Chisq(;ν)
+    Chisq(;nu)
+    Chisq(;dof)
+
 The *Chi squared distribution* (typically written χ²) with `ν` degrees of freedom has the
 probability density function
 
@@ -27,7 +30,12 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Chisq(ν::T) where {T<:Real} = Chisq{T}(ν)
-Chisq(ν::Integer) = Chisq(Float64(ν))
+Chisq(ν::Integer) = Chisq(float(ν))
+
+@kwdispatch Chisq()
+@kwdef Chisq(;ν) = Chisq(ν)
+@kwdef Chisq(;nu) = Chisq(nu)
+@kwdef Chisq(;dof) = Chisq(dof)
 
 @distr_support Chisq 0.0 Inf
 

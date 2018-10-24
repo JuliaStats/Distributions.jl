@@ -38,9 +38,12 @@ end
 
 BetaPrime(α::T, β::T) where {T<:Real} = BetaPrime{T}(α, β)
 BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))
-BetaPrime(α::Real) = BetaPrime(α, α)
-BetaPrime() = BetaPrime(1.0, 1.0)
+BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
+
+@kwdispatch BetaPrime()
+
+@kwdef BetaPrime(;α,β) = BetaPrime(α,β)
+@kwdef BetaPrime(;alpha,beta) = BetaPrime(alpha,beta)
 
 @distr_support BetaPrime 0.0 Inf
 

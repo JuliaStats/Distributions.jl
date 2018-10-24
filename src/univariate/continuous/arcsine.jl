@@ -1,5 +1,5 @@
 """
-    Arcsine(a,b)
+    Arcsine(;a=0,b=1)
 
 The *Arcsine distribution* has probability density function
 
@@ -33,9 +33,13 @@ end
 
 Arcsine(a::T, b::T) where {T<:Real} = Arcsine{T}(a, b)
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
-Arcsine(a::Integer, b::Integer) = Arcsine(Float64(a), Float64(b))
-Arcsine(b::Real) = Arcsine(0.0, b)
-Arcsine() = Arcsine(0.0, 1.0)
+Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
+
+@kwdispatch Arcsine()
+
+@kwdef Arcsine(;a,b) = Arcsine(a,b)
+@kwdef Arcsine(;b) = Arcsine(0.0,b)
+@kwdef Arcsine(;) = Arcsine(0.0,1.0)
 
 @distr_support Arcsine d.a d.b
 
