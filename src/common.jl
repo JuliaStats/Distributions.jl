@@ -9,9 +9,6 @@ abstract type ValueSupport end
 struct Discrete   <: ValueSupport end
 struct Continuous <: ValueSupport end
 
-Base.eltype(::Type{Discrete}) = Int
-Base.eltype(::Type{Continuous}) = Float64
-
 ## Sampleable
 
 """
@@ -50,7 +47,6 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,S}) where {F,S} = eltype(S)
 Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
 Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
 
