@@ -27,7 +27,10 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Normal{T}(μ, σ) where {T} = (@check_args(Normal, σ > zero(σ)); new{T}(μ, σ))
+    function Normal{T}(μ, σ) where {T}
+        @check_args(Normal, σ >= zero(σ))
+        new{T}(μ, σ)
+    end
 end
 
 #### Outer constructors
