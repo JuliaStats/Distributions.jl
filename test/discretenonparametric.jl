@@ -1,6 +1,6 @@
 import StatsBase: ProbabilityWeights
 
-d = Generic([40., 80., 120., -60.],
+d = DiscreteNonParametric([40., 80., 120., -60.],
             [.4, .3, .1,  .2])
 println("    testing $d")
 
@@ -54,27 +54,27 @@ ws = ProbabilityWeights(probs(d))
 xs = [1, 2,3,4,5,4,3,2,3,2,1]
 ws = [1.,2,1,0,1,1,2,3,2,6,1]
 
-ss = suffstats(Generic, xs)
-@test ss isa Distributions.GenericStats{Int,Float64,Vector{Int}}
+ss = suffstats(DiscreteNonParametric, xs)
+@test ss isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
 @test ss.support == [1,2,3,4,5]
 @test ss.freq == [2., 3., 3., 2., 1.]
 
-ss2 = suffstats(Generic, xs, ws)
-@test ss2 isa Distributions.GenericStats{Int,Float64,Vector{Int}}
+ss2 = suffstats(DiscreteNonParametric, xs, ws)
+@test ss2 isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
 @test ss2.support == [1,2,3,4,5]
 @test ss2.freq == [2., 11., 5., 1., 1.]
 
-d1 = fit_mle(Generic, ss)
-@test d1 isa Generic{Int,Float64,Vector{Int}}
+d1 = fit_mle(DiscreteNonParametric, ss)
+@test d1 isa DiscreteNonParametric{Int,Float64,Vector{Int}}
 @test support(d1) == ss.support
 @test probs(d1) ≈ ss.freq ./ 11
 
-d2 = fit_mle(Generic, xs)
+d2 = fit_mle(DiscreteNonParametric, xs)
 @test typeof(d2) == typeof(d1)
 @test support(d2) == support(d1)
 @test probs(d2) ≈ probs(d1)
 
-d3 = fit(Generic, xs)
+d3 = fit(DiscreteNonParametric, xs)
 @test typeof(d2) == typeof(d1)
 @test support(d3) == support(d1)
 @test probs(d3) ≈ probs(d1)

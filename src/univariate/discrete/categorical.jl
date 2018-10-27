@@ -17,20 +17,20 @@ Here, `p` must be a real vector, of which all components are nonnegative and sum
 External links:
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-Categorical{T} = Generic{Int,T,UnitRange{Int}}
+Categorical{T} = DiscreteNonParametric{Int,T,UnitRange{Int}}
 
 Categorical{P}(p::Vector{P}, ::NoArgCheck) where P =
     Categorical{P}(1:length(p), p, NoArgCheck())
 Categorical(p::Vector{P}, ::NoArgCheck) where P = Categorical{P}(p, NoArgCheck())
 
 function Categorical{P}(p::Vector{P}) where P
-    @check_args(Generic, isprobvec(p))
+    @check_args(DiscreteNonParametric, isprobvec(p))
     Categorical{P}(1:length(p), p, NoArgCheck())
 end
 Categorical(p::Vector{P}) where P = Categorical{P}(p)
 
 function Categorical(k::Integer)
-    @check_args(Generic, k >= 1)
+    @check_args(DiscreteNonParametric, k >= 1)
     Categorical{Float64}(1:k, fill(1/k, k), NoArgCheck())
 end
 

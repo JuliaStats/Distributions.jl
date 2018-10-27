@@ -36,7 +36,7 @@ tests = [
     "qq",
     "product",
     "truncnormal",
-    "generic"
+    "discretenonparametric"
 ]
 
 

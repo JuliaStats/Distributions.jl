@@ -9,7 +9,7 @@ for fname in ["aliastable.jl",
               "multinomial.jl",
               "vonmises.jl",
               "vonmisesfisher.jl",
-              "generic.jl",
+              "discretenonparametric.jl",
               "categorical.jl"]
 
     include(joinpath("samplers", fname))

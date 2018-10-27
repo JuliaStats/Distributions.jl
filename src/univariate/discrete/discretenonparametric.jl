@@ -1,34 +1,34 @@
-struct Generic{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistribution
     support::S
     p::Vector{P}
 
-    Generic{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
+    DiscreteNonParametric{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
         new{T,P,S}(vs, ps)
 
-    function Generic{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
-        @check_args(Generic, length(vs) == length(ps))
-        @check_args(Generic, isprobvec(ps))
-        @check_args(Generic, allunique(vs))
+    function DiscreteNonParametric{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
+        @check_args(DiscreteNonParametric, length(vs) == length(ps))
+        @check_args(DiscreteNonParametric, isprobvec(ps))
+        @check_args(DiscreteNonParametric, allunique(vs))
         sort_order = sortperm(vs)
         new{T,P,S}(vs[sort_order], ps[sort_order])
     end
 end
 
-Generic(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
-    Generic{T,P,S}(vs, ps)
+DiscreteNonParametric(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
+    DiscreteNonParametric{T,P,S}(vs, ps)
 
 # Conversion
-convert(::Type{Generic{T,P,S}}, d::Generic) where {T,P,S} =
-    Generic{T,P,S}(S(support(d)), Vector{P}(probs(d)), NoArgCheck())
+convert(::Type{DiscreteNonParametric{T,P,S}}, d::DiscreteNonParametric) where {T,P,S} =
+    DiscreteNonParametric{T,P,S}(S(support(d)), Vector{P}(probs(d)), NoArgCheck())
 
 # Accessors
-params(d::Generic) = (d.support, d.p)
-support(d::Generic) = d.support
-probs(d::Generic)  = d.p
+params(d::DiscreteNonParametric) = (d.support, d.p)
+support(d::DiscreteNonParametric) = d.support
+probs(d::DiscreteNonParametric)  = d.p
 
 # Sampling
 
-function rand(d::Generic{T,P}) where {T,P}
+function rand(d::DiscreteNonParametric{T,P}) where {T,P}
     x = support(d)
     p = probs(d)
     draw = rand(P)
@@ -40,16 +40,16 @@ function rand(d::Generic{T,P}) where {T,P}
     x[i]
 end
 
-sampler(d::Generic) =
-    GenericSampler(support(d), probs(d))
+sampler(d::DiscreteNonParametric) =
+    DiscreteNonParametricSampler(support(d), probs(d))
 
 # Evaluation
 
-pdf(d::Generic) = copy(probs(d))
+pdf(d::DiscreteNonParametric) = copy(probs(d))
 
 # Helper functions for pdf and cdf required to fix ambiguous method
 # error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
-function _pdf(d::Generic{T,P}, x::T) where {T,P}
+function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     idx_range = searchsorted(support(d), x)
     if length(idx_range) > 0
         return probs(d)[first(idx_range)]
@@ -57,15 +57,15 @@ function _pdf(d::Generic{T,P}, x::T) where {T,P}
         return zero(P)
     end
 end
-pdf(d::Generic{T}, x::Int) where T  = _pdf(d, convert(T, x))
-pdf(d::Generic{T}, x::Real) where T = _pdf(d, convert(T, x))
+pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
+pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
 
-_cdf(d::Generic{T}, x::T) where T =
+_cdf(d::DiscreteNonParametric{T}, x::T) where T =
     sum(probs(d)[1:searchsortedlast(support(d), x)]) #TODO: Switch to single-pass
-cdf(d::Generic{T}, x::Int) where T = _cdf(d, convert(T, x))
-cdf(d::Generic{T}, x::Real) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x::Int) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
 
-function quantile(d::Generic, q::Real)
+function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())
     x = support(d)
     p = probs(d)
@@ -80,14 +80,14 @@ function quantile(d::Generic, q::Real)
 end
 
 
-minimum(d::Generic) = support(d)[1]
-maximum(d::Generic) = support(d)[end]
-insupport(d::Generic, x::Real) =
+minimum(d::DiscreteNonParametric) = support(d)[1]
+maximum(d::DiscreteNonParametric) = support(d)[end]
+insupport(d::DiscreteNonParametric, x::Real) =
     length(searchsorted(support(d), x)) > 0
 
-mean(d::Generic) = dot(probs(d), support(d))
+mean(d::DiscreteNonParametric) = dot(probs(d), support(d))
 
-function var(d::Generic{T}) where T
+function var(d::DiscreteNonParametric{T}) where T
     m = mean(d)
     x = support(d)
     p = probs(d)
@@ -99,7 +99,7 @@ function var(d::Generic{T}) where T
     σ²
 end
 
-function skewness(d::Generic{T}) where T
+function skewness(d::DiscreteNonParametric{T}) where T
     m = mean(d)
     x = support(d)
     p = probs(d)
@@ -115,7 +115,7 @@ function skewness(d::Generic{T}) where T
     μ₃ / (σ² * sqrt(σ²))
 end
 
-function kurtosis(d::Generic{T}) where T
+function kurtosis(d::DiscreteNonParametric{T}) where T
     m = mean(d)
     x = support(d)
     p = probs(d)
@@ -131,11 +131,11 @@ function kurtosis(d::Generic{T}) where T
     μ₄ / abs2(σ²) - 3
 end
 
-entropy(d::Generic) = entropy(probs(d))
-entropy(d::Generic, b::Real) = entropy(probs(d), b)
+entropy(d::DiscreteNonParametric) = entropy(probs(d))
+entropy(d::DiscreteNonParametric, b::Real) = entropy(probs(d), b)
 
-mode(d::Generic) = support(d)[argmax(probs(d))]
-function modes(d::Generic{T,P}) where {T,P}
+mode(d::DiscreteNonParametric) = support(d)[argmax(probs(d))]
+function modes(d::DiscreteNonParametric{T,P}) where {T,P}
     x = support(d)
     p = probs(d)
     k = length(x)
@@ -154,7 +154,7 @@ function modes(d::Generic{T,P}) where {T,P}
     mds
 end
 
-function mgf(d::Generic, t::Real)
+function mgf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
     s = zero(Float64)
     for i in 1:length(x)
@@ -163,7 +163,7 @@ function mgf(d::Generic, t::Real)
     s
 end
 
-function cf(d::Generic, t::Real)
+function cf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
     s = zero(Complex{Float64})
     for i in 1:length(x)
@@ -174,15 +174,15 @@ end
 
 # Sufficient statistics
 
-struct GenericStats{T<:Real,P<:AbstractFloat,S<:AbstractVector{T}} <: SufficientStats
+struct DiscreteNonParametricStats{T<:Real,P<:AbstractFloat,S<:AbstractVector{T}} <: SufficientStats
     support::S
     freq::Vector{P}
 end
 
-function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
+function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
 
     N = length(x)
-    N == 0 && return GenericStats(T[], Float64[])
+    N == 0 && return DiscreteNonParametricStats(T[], Float64[])
 
     n = 1
     vs = Vector{T}(undef,N)
@@ -205,16 +205,16 @@ function suffstats(::Type{Generic}, x::AbstractArray{T}) where {T<:Real}
 
     resize!(vs, n)
     resize!(ps, n)
-    GenericStats(vs, ps)
+    DiscreteNonParametricStats(vs, ps)
 
 end
 
-function suffstats(::Type{Generic}, x::AbstractArray{T}, w::AbstractArray{P}) where {T<:Real,P<:AbstractFloat}
+function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}, w::AbstractArray{P}) where {T<:Real,P<:AbstractFloat}
 
-    @check_args(Generic, length(x) == length(w))
+    @check_args(DiscreteNonParametric, length(x) == length(w))
 
     N = length(x)
-    N == 0 && return GenericStats(T[], P[])
+    N == 0 && return DiscreteNonParametricStats(T[], P[])
 
     n = 1
     vs = Vector{T}(undef, N)
@@ -241,11 +241,11 @@ function suffstats(::Type{Generic}, x::AbstractArray{T}, w::AbstractArray{P}) wh
 
     resize!(vs, n)
     resize!(ps, n)
-    GenericStats(vs, ps)
+    DiscreteNonParametricStats(vs, ps)
 
 end
 
 # # Model fitting
 
-fit_mle(::Type{Generic}, ss::GenericStats{T,P,S}) where {T,P,S} =
-    Generic{T,P,S}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())
+fit_mle(::Type{DiscreteNonParametric}, ss::DiscreteNonParametricStats{T,P,S}) where {T,P,S} =
+    DiscreteNonParametric{T,P,S}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())
