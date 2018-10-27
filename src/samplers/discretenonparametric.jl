@@ -1,3 +1,9 @@
+"""
+    DiscreteNonParametricSampler(xs, ps)
+
+Data structure for efficiently sampling from an arbitrary probability mass
+function defined by support `xs` and probabilities `ps`.
+"""
 struct DiscreteNonParametricSampler{T<:Real, S<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
     support::S
     aliastable::AliasTable
