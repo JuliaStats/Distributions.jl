@@ -79,17 +79,7 @@ end
 
 isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!(v::AbstractVector{T}) where T<:AbstractFloat
-    s = 0.
-    n = length(v)
-    for i = 1:n
-        @inbounds s += v[i]
-    end
-    for i = 1:n
-        @inbounds v[i] /= s
-    end
-    v
-end
+pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
 add!(x::AbstractVecOrMat, y::ZeroVector) = x

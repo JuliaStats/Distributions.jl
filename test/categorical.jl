@@ -52,5 +52,5 @@ println("    testing $d as Categorical")
 p = ones(10^6) * 1.0e-6
 @test Distributions.isprobvec(p)
 
-@test typeof(convert(Categorical{Float32}, d)) == Categorical{Float32}
-@test typeof(convert(Categorical{Float32}, d.p)) == Categorical{Float32}
+@test typeof(convert(Categorical{Float32,Vector{Float32}}, d)) == Categorical{Float32,Vector{Float32}}
+@test typeof(convert(Categorical{Float32,Vector{Float32}}, d.p)) == Categorical{Float32,Vector{Float32}}

@@ -17,28 +17,31 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,S<:AbstractVector{T}} <: DiscreteUnivariateDistribution
-    support::S
-    p::Vector{P}
+struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+    support::Ts
+    p::Ps
 
-    DiscreteNonParametric{T,P,S}(vs::S, ps::Vector{P}, ::NoArgCheck) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
-        new{T,P,S}(vs, ps)
+    DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps, ::NoArgCheck) where {
+        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+        new{T,P,Ts,Ps}(vs, ps)
 
-    function DiscreteNonParametric{T,P,S}(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}}
+    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps) where {
+        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
         @check_args(DiscreteNonParametric, isprobvec(ps))
         @check_args(DiscreteNonParametric, allunique(vs))
         sort_order = sortperm(vs)
-        new{T,P,S}(vs[sort_order], ps[sort_order])
+        new{T,P,Ts,Ps}(vs[sort_order], ps[sort_order])
     end
 end
 
-DiscreteNonParametric(vs::S, ps::Vector{P}) where {T<:Real,P<:Real,S<:AbstractVector{T}} =
-    DiscreteNonParametric{T,P,S}(vs, ps)
+DiscreteNonParametric(vs::Ts, ps::Ps) where {
+    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
 
 # Conversion
-convert(::Type{DiscreteNonParametric{T,P,S}}, d::DiscreteNonParametric) where {T,P,S} =
-    DiscreteNonParametric{T,P,S}(S(support(d)), Vector{P}(probs(d)), NoArgCheck())
+convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
+    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), NoArgCheck())
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -110,9 +113,8 @@ function quantile(d::DiscreteNonParametric, q::Real)
     x[i]
 end
 
-
-minimum(d::DiscreteNonParametric) = support(d)[1]
-maximum(d::DiscreteNonParametric) = support(d)[end]
+minimum(d::DiscreteNonParametric) = first(support(d))
+maximum(d::DiscreteNonParametric) = last(support(d))
 insupport(d::DiscreteNonParametric, x::Real) =
     length(searchsorted(support(d), x)) > 0
 
@@ -205,9 +207,10 @@ end
 
 # Sufficient statistics
 
-struct DiscreteNonParametricStats{T<:Real,P<:AbstractFloat,S<:AbstractVector{T}} <: SufficientStats
-    support::S
-    freq::Vector{P}
+struct DiscreteNonParametricStats{T<:Real,W<:Real,Ts<:AbstractVector{T},
+                                  Ws<:AbstractVector{W}} <: SufficientStats
+    support::Ts
+    freq::Ws
 end
 
 function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
@@ -217,7 +220,7 @@ function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<
 
     n = 1
     vs = Vector{T}(undef,N)
-    ps = zeros(N)
+    ps = zeros(Float64, N)
     x = sort(vec(x))
 
     vs[1] = x[1]
@@ -240,16 +243,17 @@ function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<
 
 end
 
-function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}, w::AbstractArray{P}) where {T<:Real,P<:AbstractFloat}
+function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T},
+                   w::AbstractArray{W}) where {T<:Real,W<:Real}
 
     @check_args(DiscreteNonParametric, length(x) == length(w))
 
     N = length(x)
-    N == 0 && return DiscreteNonParametricStats(T[], P[])
+    N == 0 && return DiscreteNonParametricStats(T[], W[])
 
     n = 1
     vs = Vector{T}(undef, N)
-    ps = zeros(P, N)
+    ps = zeros(W, N)
 
     xorder = sortperm(vec(x))
     x = vec(x)[xorder]
@@ -278,5 +282,6 @@ end
 
 # # Model fitting
 
-fit_mle(::Type{DiscreteNonParametric}, ss::DiscreteNonParametricStats{T,P,S}) where {T,P,S} =
-    DiscreteNonParametric{T,P,S}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())
+fit_mle(::Type{DiscreteNonParametric},
+        ss::DiscreteNonParametricStats{T,W,Ts,Ws}) where {T,W,Ts,Ws} =
+    DiscreteNonParametric{T,W,Ts,Ws}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())

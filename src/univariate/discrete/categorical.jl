@@ -24,34 +24,39 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-Categorical{T} = DiscreteNonParametric{Int,T,UnitRange{Int}}
+Categorical{P,Ps} = DiscreteNonParametric{Int,P,UnitRange{Int},Ps}
 
-Categorical{P}(p::Vector{P}, ::NoArgCheck) where P =
-    Categorical{P}(1:length(p), p, NoArgCheck())
-Categorical(p::Vector{P}, ::NoArgCheck) where P = Categorical{P}(p, NoArgCheck())
+Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(1:length(p), p, NoArgCheck())
 
-function Categorical{P}(p::Vector{P}) where P
-    @check_args(DiscreteNonParametric, isprobvec(p))
-    Categorical{P}(1:length(p), p, NoArgCheck())
+Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p, NoArgCheck())
+
+function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
+    @check_args(Categorical, isprobvec(p))
+    Categorical{P,Ps}(1:length(p), p, NoArgCheck())
 end
-Categorical(p::Vector{P}) where P = Categorical{P}(p)
+
+Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p)
 
 function Categorical(k::Integer)
-    @check_args(DiscreteNonParametric, k >= 1)
-    Categorical{Float64}(1:k, fill(1/k, k), NoArgCheck())
+    @check_args(Categorical, k >= 1)
+    Categorical{Float64,Vector{Float64}}(1:k, fill(1/k, k), NoArgCheck())
 end
-
-@distr_support Categorical 1 support(d).stop
 
 ### Conversions
 
-convert(::Type{Categorical{T}}, p::Vector{S}) where {T<:Real, S<:Real} = Categorical(Vector{T}(p))
-convert(::Type{Categorical{T}}, d::Categorical{S}) where {T<:Real, S<:Real} = Categorical(Vector{T}(probs(d)))
+convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
+    P<:Real,Ps<:AbstractVector{P}} = Categorical{P,Ps}(Ps(x))
+
+# convert(::Type{Categorical{P,Ps}}, d::Categorical) where {
+#     P<:Real,Ps<:AbstractVector{P}} = Categorical{P,Ps}(Ps(probs(d)))
 
 ### Parameters
 
 ncategories(d::Categorical) = support(d).stop
-params(d::Categorical) = (probs(d),)
+params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
 @inline partype(d::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
@@ -112,7 +117,8 @@ end
 
 # sampling
 
-sampler(d::Categorical) = AliasTable(d.p)
+sampler(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} =
+   AliasTable(probs(d))
 
 
 ### sufficient statistics
