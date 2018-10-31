@@ -180,5 +180,3 @@ fit_mle(::Type{Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) whe
 
 fit(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
 fit(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)
-
-==(c1::Categorical,c2::Categorical) = (support(c1) == support(c2)) && all(probs(c1) .== probs(c2))

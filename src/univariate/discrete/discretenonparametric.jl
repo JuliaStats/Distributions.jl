@@ -39,6 +39,8 @@ DiscreteNonParametric(vs::Ts, ps::Ps) where {
     T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
 
+eltype(d::DiscreteNonParametric{T}) where T = T
+
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
     DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), NoArgCheck())
@@ -60,6 +62,10 @@ Get the vector of probabilities associated with the support of `d`.
 """
 probs(d::DiscreteNonParametric)  = d.p
 
+==(c1::D, c2::D) where D<:DiscreteNonParametric =
+    (support(c1) == support(c2) || all(support(c1) .== support(c2))) &&
+    (probs(c1) == probs(c2) || all(probs(c1) .== probs(c2)))
+
 # Sampling
 
 function rand(d::DiscreteNonParametric{T,P}) where {T,P}
@@ -76,6 +82,10 @@ end
 
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
+
+# Override the method in testutils.jl since it assumes
+# an evenly-spaced integer support
+get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
 
 # Evaluation
 
@@ -94,10 +104,31 @@ end
 pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
 pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
 
-_cdf(d::DiscreteNonParametric{T}, x::T) where T =
-    sum(probs(d)[1:searchsortedlast(support(d), x)]) #TODO: Switch to single-pass
+function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
+    x > maximum(d) && return 1.0
+    s = zero(P)
+    ps = probs(d)
+    stop_idx = searchsortedlast(support(d), x)
+    for i in 1:stop_idx
+        s += ps[i]
+    end
+    return s
+end
 cdf(d::DiscreteNonParametric{T}, x::Int) where T = _cdf(d, convert(T, x))
 cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
+
+function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
+    x < minimum(d) && return 1.0
+    s = zero(P)
+    ps = probs(d)
+    stop_idx = searchsortedlast(support(d), x)
+    for i in (stop_idx+1):length(ps)
+        s += ps[i]
+    end
+    return s
+end
+ccdf(d::DiscreteNonParametric{T}, x::Int) where T = _ccdf(d, convert(T, x))
+ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())

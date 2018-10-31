@@ -1,25 +1,37 @@
 import StatsBase: ProbabilityWeights
 
-d = DiscreteNonParametric([40., 80., 120., -60.],
-            [.4, .3, .1,  .2])
+d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 println("    testing $d")
+
+Distributions.test_range(d)
+vs = Distributions.get_evalsamples(d, 0.00001)
+Distributions.test_evaluation(d, vs, true)
+Distributions.test_stats(d, vs)
+Distributions.test_params(d)
 
 @test rand(d) ∈ [40., 80., 120., -60.]
 @test rand(sampler(d)) ∈ [40., 80., 120., -60.]
 
 @test pdf(d, -100.) == 0.
+@test pdf(d, -100) == 0.
 @test pdf(d, -60.) == .2
+@test pdf(d, -60) == .2
 @test pdf(d, 100.) == 0.
 @test pdf(d, 120.) == .1
-@test pdf(d, -100) == 0.
-@test pdf(d, -60) == .2
 
-@test cdf(d, -100.) == 0
+@test cdf(d, -100.) == 0.
+@test cdf(d, -100) == 0.
 @test cdf(d, 0.) ≈ .2
 @test cdf(d, 100.) ≈ .9
-@test cdf(d, 150.) ≈ 1
-@test cdf(d, -100) ≈ 0
 @test cdf(d, 100) ≈ .9
+@test cdf(d, 150.) == 1.
+
+@test ccdf(d, -100.) == 1.
+@test ccdf(d, -100) == 1.
+@test ccdf(d, 0.) ≈ .8
+@test ccdf(d, 100.) ≈ .1
+@test ccdf(d, 100) ≈ .1
+@test ccdf(d, 150.) == 0
 
 @test quantile(d, 0) == -60
 @test quantile(d, .1) == -60
@@ -30,11 +42,11 @@ println("    testing $d")
 @test maximum(d) == 120
 
 @test insupport(d, -60)
+@test insupport(d, -60.)
 @test !insupport(d, 20)
+@test !insupport(d, 20.)
 @test insupport(d, 80)
 @test !insupport(d, 150)
-@test insupport(d, -60.)
-@test !insupport(d, 20.)
 
 xs = support(d)
 ws = ProbabilityWeights(probs(d))
