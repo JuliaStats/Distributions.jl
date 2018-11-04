@@ -36,7 +36,9 @@ tests = [
     "qq",
     "product",
     "truncnormal",
+    "discretenonparametric"
 ]
+
 
 printstyled("Running tests:\n", color=:blue)
 

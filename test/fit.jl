@@ -107,7 +107,7 @@ h = Float64[count(v->v == i, x) for i = 1 : 3]
 
 d = fit(Categorical, (3, x))
 @test isa(d, Categorical)
-@test d.K == 3
+@test ncategories(d) == 3
 @test probs(d) ≈ h / sum(h)
 
 d2 = fit(Categorical, x)

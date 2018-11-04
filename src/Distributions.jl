@@ -86,6 +86,7 @@ export
     FullNormal,
     FullNormalCanon,
     Gamma,
+    DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
