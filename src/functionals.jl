@@ -30,5 +30,5 @@ end
 # end
 
 function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
-    expectation(P, x -> (pdf(P,x) > 0)*log(pdf(P,x)/pdf(Q,x)))
+    expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
 end
