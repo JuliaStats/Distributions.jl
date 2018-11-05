@@ -17,7 +17,7 @@ function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
     sum(x -> f(x)*g(x), leftEnd:rightEnd)
 end
-                             
+
 function expectation(distr::UnivariateDistribution, g::Function)
     expectation(distr, g, 1e-10)
 end
@@ -30,5 +30,5 @@ end
 # end
 
 function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
-    expectation(P, x -> log(pdf(P,x)/pdf(Q,x)))
+    expectation(P, x -> (pdf(P,x) > 0)*log(pdf(P,x)/pdf(Q,x)))
 end
