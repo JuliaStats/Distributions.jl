@@ -174,7 +174,7 @@ isotropic covariance as `abs2(sig) * eye(d)`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{AbstractVector, ZeroVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
