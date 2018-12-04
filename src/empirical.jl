@@ -7,7 +7,7 @@
 struct EmpiricalUnivariateDistribution <: ContinuousUnivariateDistribution
     values::Vector{Float64}
     support::Vector{Float64}
-    cdf::Function
+    cdf::ECDF
     entropy::Float64
     kurtosis::Float64
     mean::Float64
