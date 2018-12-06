@@ -76,7 +76,6 @@ export
     EdgeworthMean,
     EdgeworthSum,
     EdgeworthZ,
-    EmpiricalUnivariateDistribution,
     Erlang,
     Epanechnikov,
     Exponential,
@@ -265,7 +264,6 @@ include("genericfit.jl")
 
 # specific samplers and distributions
 include("univariates.jl")
-include("empirical.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
@@ -307,7 +305,7 @@ Supported distributions:
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
-    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
