@@ -15,6 +15,7 @@ tests = [
     "fit",
     "multinomial",
     "binomial",
+    "logistic",
     "poissonbinomial",
     "dirichlet",
     "dirichletmultinomial",
