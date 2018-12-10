@@ -48,7 +48,7 @@ Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
-mutable struct NoArgCheck end
+struct NoArgCheck end
 
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
