@@ -20,7 +20,7 @@ It has two type parameters that define the kind of samples that can be drawn the
 --- | --- |---
 `Univariate` | a scalar number | A numeric array of arbitrary shape, each element being a sample
 `Multivariate` | a numeric vector | A matrix, each column being a sample
-`Matrixvariate` | a numeric matrix | An array of matrices, each element being a sample matrix  
+`Matrixvariate` | a numeric matrix | An array of matrices, each element being a sample matrix
 
 ### ValueSupport
 

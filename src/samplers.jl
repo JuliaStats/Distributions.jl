@@ -1,6 +1,6 @@
 # delegation of samplers
 
-for fname in ["categorical.jl",
+for fname in ["aliastable.jl",
               "binomial.jl",
               "poissonbinomial.jl",
               "poisson.jl",
@@ -8,7 +8,9 @@ for fname in ["categorical.jl",
               "gamma.jl",
               "multinomial.jl",
               "vonmises.jl",
-              "vonmisesfisher.jl"]
+              "vonmisesfisher.jl",
+              "discretenonparametric.jl",
+              "categorical.jl"]
 
     include(joinpath("samplers", fname))
 end

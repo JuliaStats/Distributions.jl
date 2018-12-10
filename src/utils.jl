@@ -10,21 +10,25 @@ macro check_args(D, cond)
 end
 
 ## a type to indicate zero vector
-
-struct ZeroVector{T}
+"""
+An immutable vector of zeros of type T
+"""
+struct ZeroVector{T} <: AbstractVector{T}
     len::Int
 end
 
 ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
-eltype(v::ZeroVector{T}) where {T} = T
-length(v::ZeroVector) = v.len
+Base.eltype(v::ZeroVector{T}) where {T} = T
+Base.length(v::ZeroVector) = v.len
+Base.size(v::ZeroVector) = (v.len,)
+Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
 
 Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
-convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
-convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
+Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
+Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
-convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
+Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
 for T = (:AbstractArray, :Number), op = (:+, :-)
     @eval begin
@@ -40,11 +44,11 @@ Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
 Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
 Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
 Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
-
+Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
-mutable struct NoArgCheck end
+struct NoArgCheck end
 
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
@@ -79,17 +83,7 @@ end
 
 isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!(v::AbstractVector{T}) where T<:AbstractFloat
-    s = 0.
-    n = length(v)
-    for i = 1:n
-        @inbounds s += v[i]
-    end
-    for i = 1:n
-        @inbounds v[i] /= s
-    end
-    v
-end
+pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
 add!(x::AbstractVecOrMat, y::ZeroVector) = x

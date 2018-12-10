@@ -144,6 +144,7 @@ BetaBinomial
 Binomial
 Categorical
 DiscreteUniform
+DiscreteNonParametric
 Geometric
 Hypergeometric
 NegativeBinomial
