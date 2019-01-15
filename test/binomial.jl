@@ -30,3 +30,5 @@ end
 
 # Test mode
 @test Distributions.mode(Binomial(100, 0.4)) == 40
+@test Distributions.mode(Binomial(1, 0.51)) == 1
+@test Distributions.mode(Binomial(1, 0.49)) == 0
