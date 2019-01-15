@@ -67,7 +67,7 @@ mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
 function mode(d::Binomial{T}) where T<:Real
     (n, p) = params(d)
-    n > 0 ? round(Int,floor((n + 1) * d.p)) : zero(T)
+    n > 0 ? floor(Int, (n + 1) * d.p) : zero(T)
 end
 modes(d::Binomial) = Int[mode(d)]
 
