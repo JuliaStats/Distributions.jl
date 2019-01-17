@@ -353,3 +353,24 @@ d = fit(Poisson, x, w)
 d = fit(Poisson, rand(Poisson(8.2), N))
 @test isa(d, Poisson)
 @test isapprox(mean(d), 8.2, atol=0.2)
+
+# InverseGaussian
+
+x = rand(InverseGaussian(3.9, 2.1), n0)
+
+ss = suffstats(InverseGaussian, x)
+@test isa(ss, Distributions.InverseGaussianStats)
+@test ss.sx    ≈ sum(x)
+@test ss.sinvx ≈ sum(1 ./ x)
+@test ss.sw    ≈ n0
+
+ss = suffstats(InverseGaussian, x, w)
+@test isa(ss, Distributions.InverseGaussianStats)
+@test ss.sx    ≈ dot(x, w)
+@test ss.sinvx ≈ dot(1 ./ x, w)
+@test ss.sw    ≈ sum(w)
+
+d = fit(InverseGaussian, rand(InverseGaussian(3.9, 2.1), N))
+@test isa(d, InverseGaussian)
+@test isapprox(mean(d), 3.9, atol=0.1)
+@test isapprox(shape(d), 2.1, atol=0.1)
