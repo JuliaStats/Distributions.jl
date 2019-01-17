@@ -161,3 +161,37 @@ function rand(rng::AbstractRNG, d::InverseGaussian)
     u = rand(rng)
     u >= p1 ? μ^2 / x1 : x1
 end
+
+#### Fit model
+
+struct InverseGaussianStats <: SufficientStats
+    sx::Float64      # (weighted) sum of x
+    sinvx::Float64   # (weighted) sum of 1/x
+    sw::Float64      # sum of sample weight
+
+    InverseGaussianStats(sx::Real, sinvx::Real, sw::Real) = new(sx, sinvx, sw)
+end
+
+function suffstats(::Type{InverseGaussian}, x::AbstractArray{T}) where T<:Real
+    sx = sum(x)
+    sinvx = sum(1 ./ x)
+    InverseGaussianStats(sx, sinvx, length(x))
+end
+
+function suffstats(::Type{InverseGaussian}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+    n = length(x)
+    if length(w) != n
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
+    end
+
+    sx = sum(w .* x)
+    sinvx = sum(w ./ x)
+    sw = sum(w)
+    InverseGaussianStats(sx, sinvx, sw)
+end
+
+function fit_mle(::Type{InverseGaussian}, ss::InverseGaussianStats)
+    mu = ss.sx / ss.sw
+    invlambda = ss.sinvx / ss.sw  -  1/mu
+    InverseGaussian(mu, 1 / invlambda )
+end
