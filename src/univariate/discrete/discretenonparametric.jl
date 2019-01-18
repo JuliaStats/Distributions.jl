@@ -39,6 +39,10 @@ DiscreteNonParametric(vs::Ts, ps::Ps) where {
     T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
 
+DiscreteNonParametric(vs::Ts, ps::Ps, a::NoArgCheck) where {
+    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, a)
+
 eltype(d::DiscreteNonParametric{T}) where T = T
 
 # Conversion
