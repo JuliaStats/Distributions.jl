@@ -71,7 +71,7 @@ logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2�
 cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
 
 function _vmcdf(κ::Real, I0κx::Real, x::Real, tol::Real)
-    tol *= exp(κ)
+    tol *= exp(-κ)
     j = 1
     cj = besselix(j, κ) / j
     s = cj * sin(j * x)
