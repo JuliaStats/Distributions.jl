@@ -1,12 +1,16 @@
 """
     Normal(μ,σ)
 
-The *Normal distribution* with mean `μ` and standard deviation `σ` has probability density function
+The *Normal distribution* with mean `μ` and standard deviation `σ≥0` has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 \\exp \\left( - \\frac{(x - \\mu)^2}{2 \\sigma^2} \\right)
 ```
+
+Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
+Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have underflowed,
+and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
 Normal()          # standard Normal distribution with zero mean and unit variance
