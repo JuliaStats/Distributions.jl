@@ -43,33 +43,10 @@ end
 
 
 ### Parameters
-params(d::SRDist) = (ν, k)
+params(d::SRDist) = (d.ν, d.k)
 @inline partype(d::SRDist{T}) where {T <: Real} = T
-
-
-### Statistics
-
-function mean(d::SRDist{T}) where T <: Real
-end
-
-function var(d::SRDist{T}) where T <: Real
-end
-
-function skewness(d::SRDist{T}) where T <: Real
-end
-
-function kurtosis(d::SRDist{T}) where T <: Real
-end
-
-function entropy(d::SRDist{T}) where T <: Real
-end
 
 
 ### Evaluation & Sampling
 
 @_delegate_statsfuns SRDist srdist ν k
-
-function rand(d::SRDist)
-end
-
-# Looks like they intend to move everything from StatsFuns into here anyway, so maybe pdf should go here too
