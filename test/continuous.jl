@@ -30,3 +30,26 @@ using ForwardDiff
 
 # Test for numerical problems
 @test pdf(Logistic(6,0.01),-2) == 0
+
+@testset "Normal with std=0" begin
+    d = Normal(0.5,0.0)
+    @test pdf(d, 0.49) == 0.0
+    @test pdf(d, 0.5) == Inf
+    @test pdf(d, 0.51) == 0.0
+
+    @test cdf(d, 0.49) == 0.0
+    @test cdf(d, 0.5) == 1.0
+    @test cdf(d, 0.51) == 1.0
+
+    @test ccdf(d, 0.49) == 1.0
+    @test ccdf(d, 0.5) == 0.0
+    @test ccdf(d, 0.51) == 0.0
+
+    @test quantile(d, 0.0) == -Inf
+    @test quantile(d, 0.49) == 0.5
+    @test quantile(d, 0.5) == 0.5
+    @test quantile(d, 0.51) == 0.5
+    @test quantile(d, 1.0) == +Inf
+
+    @test rand(d) == 0.5
+end    
