@@ -9,8 +9,8 @@ f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{(\\frac{\\nu}
 
 where
 
-\\Phi(x) = (1 + erf(\frac{x}{\\sqrt{2}})) / 2
-\\phi(x) = derivative(\\Phi(x))
+\\Phi(x) = \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2}
+\\phi(x) = \\Phi'(x)
 ```
 
 ```julia
