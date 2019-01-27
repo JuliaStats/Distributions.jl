@@ -2,7 +2,16 @@
 """
     SRDist(ν, k)
 
-The *studentized range distribution*
+The *studentized range distribution* has probability density function:
+
+```math
+f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{(\\frac{\\nu}{2})}2^{\\nu/2 - 1}} \\int_{0}^{\\infty} {x^{\\nu}\phi(\\sqrt{\\nu}x)} [\\int_{-\\infty}^{\\infty} {\\phi(u)\\phi(u - qx)(\\Phi(u) - \\Phi(u - qx))^{k - 2}du]dx
+
+where
+
+\\Phi(x) = (1 + erf(\frac{x}{\\sqrt{2}})) / 2
+\\phi(x) = derivative(\\Phi(x))
+```
 
 ```julia
 SRDist(ν, k)     # Studentized Range Distribution with parameters ν and k
