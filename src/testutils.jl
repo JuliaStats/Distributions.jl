@@ -44,7 +44,8 @@ end
 function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::Bool=true)
 
     test_range(distr)
-    vs = get_evalsamples(distr, 0.01, 2000)
+    n = isa(distr, SRDist) ? 200 : 2000 #SRDist is slow
+    vs = get_evalsamples(distr, 0.01, n)
 
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
@@ -406,8 +407,9 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
         if testquan
             # TODO: remove this line when we have more accurate implementation
-            # of quantile for InverseGaussian
+            # of quantile for InverseGaussian and SRDist
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
+            qtol = isa(d, SRDist) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
                 @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
@@ -418,22 +420,27 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     end
 
     # check: pdf should be the derivative of cdf
-    for i = 2:(nv-1)
+    step = isa(d, SRDist) ? Int(floor(nv / 3)) : 1 # SRDist is slow
+    range = 2:step:(nv-1)
+    for i = range
         if p[i] > 1.0e-6
             v = vs[i]
+            # Underlying R implementation of qtukey is only accurate to 4th decimal place
+            atol = isa(d, SRDist) ? 1.0e-4 : p[i] * 1.0e-3
             ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+            @test isapprox(p[i], ap, atol=atol)
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
-    @test cdf.(Ref(d), vs)  ≈ c
-    @test ccdf.(Ref(d), vs) ≈ cc
+    vsreduced = vs[range] # necessary to check fewer values due to slowness of SRDist
+    @test pdf.(Ref(d), vsreduced)  ≈ p[range]
+    @test cdf.(Ref(d), vsreduced)  ≈ c[range]
+    @test ccdf.(Ref(d), vsreduced) ≈ cc[range]
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
-    @test logcdf.(Ref(d), vs)  ≈ lc
-    @test logccdf.(Ref(d), vs) ≈ lcc
+    @test logpdf.(Ref(d), vsreduced)  ≈ lp[range]
+    @test logcdf.(Ref(d), vsreduced)  ≈ lc[range]
+    @test logccdf.(Ref(d), vsreduced) ≈ lcc[range]
 end
 
 
@@ -475,6 +482,7 @@ end
 
 allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
+allow_test_stats(::SRDist) = false
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods
