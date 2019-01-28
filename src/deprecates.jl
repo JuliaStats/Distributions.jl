@@ -22,8 +22,8 @@ function BetaBinomial(n::Real, α::Real, β::Real)
     BetaBinomial(Int(n), α, β)
 end
 
-Base.@deprecate Arcsine(b::Real) Arcsine(;b=b)
-Base.@deprecate Beta(α::Real) Beta(;α=α, β=α)
+Base.@deprecate Arcsine(b::Real) Arcsine(b=b)
+Base.@deprecate Beta(α::Real) Beta(α=α, β=α)
 Base.@deprecate Beta() Beta(α=1, β=1)
 Base.@deprecate BetaPrime(α::Real) BetaPrime(α=α, β=α)
 Base.@deprecate BetaPrime() BetaPrime(α=1.0, β=1.0)
