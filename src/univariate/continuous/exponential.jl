@@ -31,7 +31,7 @@ Exponential(θ::T) where {T<:Real} = Exponential{T}(θ)
 Exponential(θ::Integer) = Exponential(float(θ))
 
 @kwdispatch Exponential()
-@kwmethod Exponential(;) = Exponential(1.0)
+@kwmethod Exponential(;) = Exponential(1)
 
 @kwmethod Exponential(;θ) = Exponential(θ)
 @kwmethod Exponential(;theta) = Exponential(theta)
@@ -41,8 +41,6 @@ Exponential(θ::Integer) = Exponential(float(θ))
 @kwmethod Exponential(;β) = Exponential(1/β)
 @kwmethod Exponential(;beta) = Exponential(1/beta)
 @kwmethod Exponential(;rate) = Exponential(1/rate)
-
-@kwmethod Exponential(;) = Exponential(1.0)
 
 @distr_support Exponential 0.0 Inf
 

@@ -35,7 +35,7 @@ Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
 
 @kwdispatch Laplace()
 
-@kwmethod(;) = Laplace(0, 1)
+@kwmethod Laplace(;) = Laplace(0, 1)
 
 @kwmethod Laplace(;μ) = Laplace(μ, 1)
 @kwmethod Laplace(;mu) = Laplace(mu, 1)
