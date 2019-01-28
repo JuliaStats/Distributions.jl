@@ -42,7 +42,7 @@ InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
 
 @kwdispatch InverseGamma()
 
-@kwmethod InverseGamma() = InverseGamma(1, 1)
+@kwmethod InverseGamma(;) = InverseGamma(1, 1)
 
 @kwmethod InverseGamma(;α) = InverseGamma(α, 1)
 @kwmethod InverseGamma(;alpha) = InverseGamma(alpha, 1)

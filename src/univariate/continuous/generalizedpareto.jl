@@ -60,10 +60,6 @@ end
 @kwmethod GeneralizedPareto(;mu,sigma,xi) = GeneralizedPareto(mu,sigma,xi)
 @kwmethod GeneralizedPareto(;location,scale,shape) = GeneralizedPareto(location,scale,shape)
 
-
-GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
-GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
-
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf
 
