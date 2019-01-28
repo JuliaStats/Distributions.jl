@@ -37,8 +37,14 @@ end
 Frechet(α::T, θ::T) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
 Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
-Frechet(α::Real) = Frechet(α, 1.0)
-Frechet() = Frechet(1.0, 1.0)
+
+@kwdispatch Frechet()
+@kwmethod Frechet(;) = Frechet(1.0, 1.0)
+@kwmethod Frechet(;α) = Frechet(α, 1)
+@kwmethod Frechet(;alpha) = Frechet(alpha, 1)
+
+@kwmethod Frechet(;α,θ) = Frechet(α, θ)
+@kwmethod Frechet(;alpha,theta) = Frechet(alpha, theta)
 
 @distr_support Frechet 0.0 Inf
 

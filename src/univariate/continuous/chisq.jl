@@ -33,9 +33,9 @@ Chisq(ν::T) where {T<:Real} = Chisq{T}(ν)
 Chisq(ν::Integer) = Chisq(float(ν))
 
 @kwdispatch Chisq()
-@kwdef Chisq(;ν) = Chisq(ν)
-@kwdef Chisq(;nu) = Chisq(nu)
-@kwdef Chisq(;dof) = Chisq(dof)
+@kwmethod Chisq(;ν) = Chisq(ν)
+@kwmethod Chisq(;nu) = Chisq(nu)
+@kwmethod Chisq(;dof) = Chisq(dof)
 
 @distr_support Chisq 0.0 Inf
 

@@ -29,15 +29,15 @@ Erlang(α::Int, θ::T) where {T<:Real} = Erlang{T}(α, θ)
 Erlang(α::Int, θ::Integer) = Erlang(α, float(θ))
 
 @kwdispatch Erlang()
-@kwdef Erlang(;α, θ) = Erlang(α, θ)
-@kwdef Erlang(;α) = Erlang(α, 1.0)
-@kwdef Erlang(;θ) = Erlang(1, θ)
+@kwmethod Erlang(;α, θ) = Erlang(α, θ)
+@kwmethod Erlang(;α) = Erlang(α, 1.0)
+@kwmethod Erlang(;θ) = Erlang(1, θ)
 
-@kwdef Erlang(;alpha, theta) = Erlang(alpha, theta)
-@kwdef Erlang(;alpha) = Erlang(alpha, 1.0)
-@kwdef Erlang(;theta) = Erlang(1, theta)
+@kwmethod Erlang(;alpha, theta) = Erlang(alpha, theta)
+@kwmethod Erlang(;alpha) = Erlang(alpha, 1.0)
+@kwmethod Erlang(;theta) = Erlang(1, theta)
 
-@kwdef Erlang(;) = Erlang(1, 1.0)
+@kwmethod Erlang(;) = Erlang(1, 1.0)
 
 @distr_support Erlang 0.0 Inf
 

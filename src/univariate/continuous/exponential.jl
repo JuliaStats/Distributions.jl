@@ -31,16 +31,18 @@ Exponential(θ::T) where {T<:Real} = Exponential{T}(θ)
 Exponential(θ::Integer) = Exponential(float(θ))
 
 @kwdispatch Exponential()
-@kwdef Exponential(;θ) = Exponential(θ)
-@kwdef Exponential(;theta) = Exponential(theta)
-@kwdef Exponential(;scale) = Exponential(scale)
-@kwdef Exponential(;mean) = Exponential(mean)
+@kwmethod Exponential(;) = Exponential(1.0)
 
-@kwdef Exponential(;β) = Exponential(1/β)
-@kwdef Exponential(;beta) = Exponential(1/beta)
-@kwdef Exponential(;rate) = Exponential(1/rate)
+@kwmethod Exponential(;θ) = Exponential(θ)
+@kwmethod Exponential(;theta) = Exponential(theta)
+@kwmethod Exponential(;scale) = Exponential(scale)
+@kwmethod Exponential(;mean) = Exponential(mean)
 
-@kwdef Exponential(;) = Exponential(1.0)
+@kwmethod Exponential(;β) = Exponential(1/β)
+@kwmethod Exponential(;beta) = Exponential(1/beta)
+@kwmethod Exponential(;rate) = Exponential(1/rate)
+
+@kwmethod Exponential(;) = Exponential(1.0)
 
 @distr_support Exponential 0.0 Inf
 

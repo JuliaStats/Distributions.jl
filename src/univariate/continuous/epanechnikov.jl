@@ -15,15 +15,15 @@ Epanechnikov(μ::Real, σ::Real) = Epanechnikov(promote(μ, σ)...)
 Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(float(μ), float(σ))
 
 @kwdispatch Epanechnikov()
-@kwdef Epanechnikov(;μ,σ) = Epanechnikov(μ,σ)
-@kwdef Epanechnikov(;μ) = Epanechnikov(μ,1)
-@kwdef Epanechnikov(;σ) = Epanechnikov(0,σ)
+@kwmethod Epanechnikov(;μ,σ) = Epanechnikov(μ,σ)
+@kwmethod Epanechnikov(;μ) = Epanechnikov(μ,1)
+@kwmethod Epanechnikov(;σ) = Epanechnikov(0,σ)
 
-@kwdef Epanechnikov(;mu,sigma) = Epanechnikov(mu,sigma)
-@kwdef Epanechnikov(;mu) = Epanechnikov(mu,1)
-@kwdef Epanechnikov(;sigma) = Epanechnikov(0,sigma)
+@kwmethod Epanechnikov(;mu,sigma) = Epanechnikov(mu,sigma)
+@kwmethod Epanechnikov(;mu) = Epanechnikov(mu,1)
+@kwmethod Epanechnikov(;sigma) = Epanechnikov(0,sigma)
 
-@kwdef Epanechnikov(;) = Epanechnikov(0,1)
+@kwmethod Epanechnikov(;) = Epanechnikov(0,1)
 
 
 

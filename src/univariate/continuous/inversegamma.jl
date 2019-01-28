@@ -38,8 +38,24 @@ end
 InverseGamma(α::T, θ::T) where {T<:Real} = InverseGamma{T}(α, θ)
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
 InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
-InverseGamma(α::Real) = InverseGamma(α, 1.0)
-InverseGamma() = InverseGamma(1.0, 1.0)
+
+
+@kwdispatch InverseGamma()
+
+@kwmethod InverseGamma() = InverseGamma(1, 1)
+
+@kwmethod InverseGamma(;α) = InverseGamma(α, 1)
+@kwmethod InverseGamma(;alpha) = InverseGamma(alpha, 1)
+@kwmethod InverseGamma(;shape) = InverseGamma(shape, 1)
+
+@kwmethod InverseGamma(;θ) = InverseGamma(1, θ)
+@kwmethod InverseGamma(;theta) = InverseGamma(1, theta)
+@kwmethod InverseGamma(;scale) = InverseGamma(1, scale)
+
+@kwmethod InverseGamma(;α,θ) = InverseGamma(α, θ)
+@kwmethod InverseGamma(;alpha,theta) = InverseGamma(alpha, theta)
+@kwmethod InverseGamma(;shape,scale) = InverseGamma(shape, scale)
+
 
 @distr_support InverseGamma 0.0 Inf
 

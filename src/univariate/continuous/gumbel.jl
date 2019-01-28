@@ -32,8 +32,31 @@ end
 Gumbel(μ::T, θ::T) where {T<:Real} = Gumbel{T}(μ, θ)
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
 Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
-Gumbel(μ::Real) = Gumbel(μ, 1.0)
-Gumbel() = Gumbel(0.0, 1.0)
+
+@kwdispatch Gumbel()
+
+@kwmethod Gumbel(;) = Gumbel(0, 1)
+
+@kwmethod Gumbel(;μ) = Gumbel(μ, 1)
+@kwmethod Gumbel(;mu) = Gumbel(mu, 1)
+
+@kwmethod Gumbel(;θ) = Gumbel(0, θ)
+@kwmethod Gumbel(;theta) = Gumbel(0, theta)
+
+@kwmethod Gumbel(;μ, θ) = Gumbel(μ, θ)
+@kwmethod Gumbel(;mu, theta) = Gumbel(mu, theta)
+
+@kwmethod function Gumbel(;mean, std)
+    θ = sqrt(6)*std/π
+    μ = mean - θ * MathConstants.γ
+    Gumbel(μ, θ)
+end
+@kwmethod function Gumbel(;mean, var)
+    θ = sqrt(6*var)/π
+    μ = mean - θ * MathConstants.γ
+    Gumbel(μ, θ)
+end
+    
 
 @distr_support Gumbel -Inf Inf
 

@@ -47,6 +47,20 @@ GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, 
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
     GeneralizedPareto(Float64(μ), Float64(σ), Float64(ξ))
 end
+
+@kwdispatch GeneralizedPareto()
+
+@kwmethod GeneralizedPareto(;) = GeneralizedPareto(0,1,1)
+
+@kwmethod GeneralizedPareto(;σ,ξ) = GeneralizedPareto(0,σ,ξ)
+@kwmethod GeneralizedPareto(;sigma,xi) = GeneralizedPareto(0,sigma,xi)
+@kwmethod GeneralizedPareto(;scale,shape) = GeneralizedPareto(0,scale,shape)
+
+@kwmethod GeneralizedPareto(;μ,σ,ξ) = GeneralizedPareto(μ,σ,ξ)
+@kwmethod GeneralizedPareto(;mu,sigma,xi) = GeneralizedPareto(mu,sigma,xi)
+@kwmethod GeneralizedPareto(;location,scale,shape) = GeneralizedPareto(location,scale,shape)
+
+
 GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
 GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
 

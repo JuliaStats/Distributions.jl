@@ -38,15 +38,15 @@ Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
 Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
 
 @kwdispatch Cauchy()
-@kwdef Cauchy(;μ,σ) = Cauchy(μ,σ)
-@kwdef Cauchy(;μ) = Cauchy(μ,1)
-@kwdef Cauchy(;σ) = Cauchy(0,σ)
+@kwmethod Cauchy(;μ,σ) = Cauchy(μ,σ)
+@kwmethod Cauchy(;μ) = Cauchy(μ,1)
+@kwmethod Cauchy(;σ) = Cauchy(0,σ)
 
-@kwdef Cauchy(;mu,sigma) = Cauchy(mu,sigma)
-@kwdef Cauchy(;mu) = Cauchy(mu,1)
-@kwdef Cauchy(;sigma) = Cauchy(0,sigma)
+@kwmethod Cauchy(;mu,sigma) = Cauchy(mu,sigma)
+@kwmethod Cauchy(;mu) = Cauchy(mu,1)
+@kwmethod Cauchy(;sigma) = Cauchy(0,sigma)
 
-@kwdef Cauchy(;) = Cauchy(0,1)
+@kwmethod Cauchy(;) = Cauchy(0,1)
 
 @distr_support Cauchy -Inf Inf
 

@@ -20,15 +20,15 @@ Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
 Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
 
 @kwdispatch Cosine()
-@kwdef Cosine(;μ,σ) = Cosine(μ,σ)
-@kwdef Cosine(;μ) = Cosine(μ,1)
-@kwdef Cosine(;σ) = Cosine(0,σ)
+@kwmethod Cosine(;μ,σ) = Cosine(μ,σ)
+@kwmethod Cosine(;μ) = Cosine(μ,1)
+@kwmethod Cosine(;σ) = Cosine(0,σ)
 
-@kwdef Cosine(;mu,sigma) = Cosine(mu,sigma)
-@kwdef Cosine(;mu) = Cosine(mu,1)
-@kwdef Cosine(;sigma) = Cosine(0,sigma)
+@kwmethod Cosine(;mu,sigma) = Cosine(mu,sigma)
+@kwmethod Cosine(;mu) = Cosine(mu,1)
+@kwmethod Cosine(;sigma) = Cosine(0,sigma)
 
-@kwdef Cosine(;) = Cosine(0,1)
+@kwmethod Cosine(;) = Cosine(0,1)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 

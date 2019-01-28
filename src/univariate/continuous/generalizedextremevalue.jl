@@ -51,6 +51,12 @@ function GeneralizedExtremeValue(μ::Integer, σ::Integer, ξ::Integer)
     GeneralizedExtremeValue(Float64(μ), Float64(σ), Float64(ξ))
 end
 
+@kwdispatch GeneralizedExtremeValue()
+@kwmethod GeneralizedExtremeValue(;μ,σ,ξ) = GeneralizedExtremeValue(μ,σ,ξ)
+@kwmethod GeneralizedExtremeValue(;mu,sigma,xi) = GeneralizedExtremeValue(mu,sigma,xi)
+@kwmethod GeneralizedExtremeValue(;location,scale,shape) = GeneralizedExtremeValue(location,scale,shape)
+
+
 #### Conversions
 function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real
     GeneralizedExtremeValue(T(μ), T(σ), T(ξ))

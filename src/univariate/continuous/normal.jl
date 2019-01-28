@@ -35,6 +35,19 @@ Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 
 @kwdispatch Normal()
 
+@kwmethod Normal(;) = Normal(0.0, 1.0)
+
+@kwmethod Normal(;μ) = Normal(μ, one(μ))
+@kwmethod Normal(;mu) = Normal(mu, one(mu))
+@kwmethod Normal(;mean) = Normal(mean, one(mean))
+
+@kwmethod Normal(;σ) = Normal(zero(σ), σ)
+@kwmethod Normal(;sigma) = Normal(zero(sigma), sigma)
+@kwmethod Normal(;std) = Normal(zero(std), std)
+
+@kwmethod Normal(;σ²) = (σ=sqrt(σ²); Normal(zero(σ), σ))
+@kwmethod Normal(;var) = (σ=sqrt(var); Normal(zero(σ), σ))
+
 @kwmethod Normal(;μ,σ) = Normal(μ,σ)
 @kwmethod Normal(;mu,sigma) = Normal(mu,sigma)
 @kwmethod Normal(;μ,σ²) = Normal(μ,sqrt(σ²))

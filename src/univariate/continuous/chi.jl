@@ -33,9 +33,9 @@ Chi(ν::T) where {T<:Real} = Chi{T}(ν)
 Chi(ν::Integer) = Chi(float(ν))
 
 @kwdispatch Chi()
-@kwdef Chi(;ν) = Chi(ν)
-@kwdef Chi(;nu) = Chi(nu)
-@kwdef Chi(;dof) = Chi(dof)
+@kwmethod Chi(;ν) = Chi(ν)
+@kwmethod Chi(;nu) = Chi(nu)
+@kwmethod Chi(;dof) = Chi(dof)
 
 @distr_support Chi 0.0 Inf
 

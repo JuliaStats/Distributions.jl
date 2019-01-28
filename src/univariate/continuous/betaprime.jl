@@ -42,8 +42,8 @@ BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
 
 @kwdispatch BetaPrime()
 
-@kwdef BetaPrime(;α,β) = BetaPrime(α,β)
-@kwdef BetaPrime(;alpha,beta) = BetaPrime(alpha,beta)
+@kwmethod BetaPrime(;α,β) = BetaPrime(α,β)
+@kwmethod BetaPrime(;alpha,beta) = BetaPrime(alpha,beta)
 
 @distr_support BetaPrime 0.0 Inf
 

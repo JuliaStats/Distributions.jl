@@ -36,8 +36,25 @@ end
 InverseGaussian(μ::T, λ::T) where {T<:Real} = InverseGaussian{T}(μ, λ)
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
 InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64(λ))
-InverseGaussian(μ::Real) = InverseGaussian(μ, 1.0)
-InverseGaussian() = InverseGaussian(1.0, 1.0)
+
+@kwdispatch InverseGaussian()
+
+@kwmethod InverseGaussian(;) = InverseGaussian(1, 1)
+
+@kwmethod InverseGaussian(;μ) = InverseGaussian(μ, 1)
+@kwmethod InverseGaussian(;mu) = InverseGaussian(mu, 1)
+@kwmethod InverseGaussian(;mean) = InverseGaussian(mean, 1)
+
+@kwmethod InverseGaussian(;λ) = InverseGaussian(1, λ)
+@kwmethod InverseGaussian(;lambda) = InverseGaussian(1, lambda)
+@kwmethod InverseGaussian(;shape) = InverseGaussian(1, shape)
+
+@kwmethod InverseGaussian(;μ,λ) = InverseGaussian(μ, λ)
+@kwmethod InverseGaussian(;mu,lambda) = InverseGaussian(mu, lambda)
+@kwmethod InverseGaussian(;mean,shape) = InverseGaussian(mean, shape)
+
+@kwmethod InverseGaussian(;mean,var) = InverseGaussian(mean, mean^3/var)
+@kwmethod InverseGaussian(;mean,std) = InverseGaussian(mean, mean^3/std^2)
 
 @distr_support InverseGaussian 0.0 Inf
 

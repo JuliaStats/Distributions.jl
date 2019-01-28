@@ -13,15 +13,15 @@ Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
 Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
 
 @kwdispatch Biweight()
-@kwdef Biweight(;μ,σ) = Biweight(μ,σ)
-@kwdef Biweight(;μ) = Biweight(μ,1)
-@kwdef Biweight(;σ) = Biweight(0,σ)
+@kwmethod Biweight(;μ,σ) = Biweight(μ,σ)
+@kwmethod Biweight(;μ) = Biweight(μ,1)
+@kwmethod Biweight(;σ) = Biweight(0,σ)
 
-@kwdef Biweight(;mu,sigma) = Biweight(mu,sigma)
-@kwdef Biweight(;mu) = Biweight(mu,1)
-@kwdef Biweight(;sigma) = Biweight(0,sigma)
+@kwmethod Biweight(;mu,sigma) = Biweight(mu,sigma)
+@kwmethod Biweight(;mu) = Biweight(mu,1)
+@kwmethod Biweight(;sigma) = Biweight(0,sigma)
 
-@kwdef Biweight(;) = Biweight(0,1)
+@kwmethod Biweight(;) = Biweight(0,1)
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 

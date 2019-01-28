@@ -40,6 +40,10 @@ Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
 
 @kwdispatch Gamma()
 
+@kwmethod Gamma(;α) = Gamma(α,1)
+@kwmethod Gamma(;alpha) = Gamma(alpha,1)
+@kwmethod Gamma(;shape) = Gamma(shape,1)
+
 @kwmethod Gamma(;α,θ) = Gamma(α,θ)
 @kwmethod Gamma(;alpha,theta) = Gamma(alpha,theta)
 @kwmethod Gamma(;shape,scale) = Gamma(shape,scale)

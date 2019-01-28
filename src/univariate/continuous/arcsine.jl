@@ -37,9 +37,9 @@ Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
 
 @kwdispatch Arcsine()
 
-@kwdef Arcsine(;a,b) = Arcsine(a,b)
-@kwdef Arcsine(;b) = Arcsine(0.0,b)
-@kwdef Arcsine(;) = Arcsine(0.0,1.0)
+@kwmethod Arcsine(;a,b) = Arcsine(a,b)
+@kwmethod Arcsine(;b) = Arcsine(0.0,b)
+@kwmethod Arcsine(;) = Arcsine(0.0,1.0)
 
 @distr_support Arcsine d.a d.b
 

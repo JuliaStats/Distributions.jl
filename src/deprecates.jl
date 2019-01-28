@@ -24,14 +24,21 @@ end
 
 Base.@deprecate Arcsine(b::Real) Arcsine(;b=b)
 Base.@deprecate Beta(α::Real) Beta(;α=α, β=α)
-Base.@deprecate Beta() = Beta(α=1, β=1)
+Base.@deprecate Beta() Beta(α=1, β=1)
 Base.@deprecate BetaPrime(α::Real) BetaPrime(α=α, β=α)
 Base.@deprecate BetaPrime() BetaPrime(α=1.0, β=1.0)
-Base.@deprecate Biweight(μ::Real) = Biweight(μ=μ)
+Base.@deprecate Biweight(μ::Real) Biweight(μ=μ)
 Base.@deprecate Cauchy(μ::Real) Cauchy(μ=μ)
 Base.@deprecate Cosine(μ::Real) Cosine(μ=μ)
 Base.@deprecate Epanechnikov(μ::Real) Epanechnikov(μ=μ)
 Base.@deprecate Erlang(α::Int) Erlang(α=α)
+Base.@deprecate Gamma(α::Real) Gamma(α=α)
+Base.@deprecate Gumbel(μ::Real) Gumbel(μ=μ)
+Base.@deprecate Frechet(α::Real) Frechet(α=α)
+Base.@deprecate GeneralizedPareto(σ::Real, ξ::Real) GeneralizedPareto(σ=σ, ξ=ξ)
+Base.@deprecate InverseGamma(α::Integer) InverseGamma(α=α)
+Base.@deprecate InverseGaussian(μ::Real) InverseGaussian(μ=μ)
+Base.@deprecate Normal(μ::Real) Normal(μ=μ)
 
 
 
