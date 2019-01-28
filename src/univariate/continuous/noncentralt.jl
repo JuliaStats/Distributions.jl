@@ -16,6 +16,11 @@ NoncentralT(ν::T, λ::T) where {T<:Real} = NoncentralT{T}(ν, λ)
 NoncentralT(ν::Real, λ::Real) = NoncentralT(promote(ν, λ)...)
 NoncentralT(ν::Integer, λ::Integer) = NoncentralT(Float64(ν), Float64(λ))
 
+@kwdispatch NoncentralT()
+@kwmethod NoncentralT(;ν,λ) = NoncentralT(ν,λ)
+@kwmethod NoncentralT(;nu,lambda) = NoncentralT(nu,lambda)
+
+
 @distr_support NoncentralT -Inf Inf
 
 ### Conversions
