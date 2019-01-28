@@ -24,9 +24,7 @@ end
 
 Base.@deprecate Arcsine(b::Real) Arcsine(b=b)
 Base.@deprecate Beta(α::Real) Beta(α=α, β=α)
-Base.@deprecate Beta() Beta(α=1, β=1)
 Base.@deprecate BetaPrime(α::Real) BetaPrime(α=α, β=α)
-Base.@deprecate BetaPrime() BetaPrime(α=1.0, β=1.0)
 Base.@deprecate Biweight(μ::Real) Biweight(μ=μ)
 Base.@deprecate Cauchy(μ::Real) Cauchy(μ=μ)
 Base.@deprecate Cosine(μ::Real) Cosine(μ=μ)
@@ -43,8 +41,6 @@ Base.@deprecate Levy(μ::Real) Levy(μ=μ)
 Base.@deprecate Logistic(μ::Real) Logistic(μ=μ)
 Base.@deprecate LogNormal(μ::Real) LogNormal(μ=μ)
 Base.@deprecate Normal(μ::Real) Normal(μ=μ)
-
-
 
 
 # vectorized versions

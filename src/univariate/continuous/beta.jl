@@ -40,6 +40,7 @@ Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 
 @kwdispatch Beta()
 
+@kwmethod Beta(;) = Beta(1,1)
 @kwmethod Beta(;α,β) = Beta(α,β)
 @kwmethod Beta(;alpha,beta) = Beta(alpha,beta)
 
