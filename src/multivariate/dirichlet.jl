@@ -180,7 +180,7 @@ function _rand!(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T}) where 
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = rand(Gamma(α[i])))
+        @inbounds s += (x[i] = rand(Gamma(α=α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
