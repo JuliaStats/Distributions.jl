@@ -32,8 +32,30 @@ end
 Laplace(μ::T, θ::T) where {T<:Real} = Laplace{T}(μ, θ)
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
 Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
-Laplace(μ::Real) = Laplace(μ, 1.0)
-Laplace() = Laplace(0.0, 1.0)
+
+@kwdispatch Laplace()
+
+@kwmethod(;) = Laplace(0, 1)
+
+@kwmethod Laplace(;μ) = Laplace(μ, 1)
+@kwmethod Laplace(;mu) = Laplace(mu, 1)
+@kwmethod Laplace(;location) = Laplace(location, 1)
+@kwmethod Laplace(;mean) = Laplace(mean, 1)
+
+@kwmethod Laplace(;θ) = Laplace(0,θ)
+@kwmethod Laplace(;theta) = Laplace(0,theta)
+@kwmethod Laplace(;scale) = Laplace(0,scale)
+
+@kwmethod Laplace(;std) = Laplace(0,std/sqrt2)
+@kwmethod Laplace(;var) = Laplace(0,sqrt(var/2))
+
+@kwmethod Laplace(;μ,θ) = Laplace(μ,θ)
+@kwmethod Laplace(;mu,theta) = Laplace(mu,theta)
+@kwmethod Laplace(;location,scale) = Laplace(location,scale)
+@kwmethod Laplace(;mean,scale) = Laplace(mean,scale)
+
+@kwmethod Laplace(;mean,std) = Laplace(mean,std/sqrt2)
+@kwmethod Laplace(;mean,var) = Laplace(mean,sqrt(var/2))
 
 const Biexponential = Laplace
 

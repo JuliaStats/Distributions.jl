@@ -11,6 +11,9 @@ struct KSOneSided <: ContinuousUnivariateDistribution
     n::Int
 end
 
+@kwdispatch KSOneSided()
+@kwmethod KSOneSided(;n) = KSOneSided(n)
+
 @distr_support KSOneSided 0.0 1.0
 
 

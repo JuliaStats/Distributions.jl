@@ -36,8 +36,19 @@ end
 LogNormal(μ::T, σ::T) where {T<:Real} = LogNormal{T}(μ, σ)
 LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
 LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
-LogNormal(μ::Real) = LogNormal(μ, 1.0)
-LogNormal() = LogNormal(0.0, 1.0)
+
+@kwdispatch LogNormal()
+
+@kwmethod LogNormal(;) = LogNormal(0,1)
+
+@kwmethod LogNormal(;μ) = LogNormal(μ,1)
+@kwmethod LogNormal(;mu) = LogNormal(mu,1)
+
+@kwmethod LogNormal(;σ) = LogNormal(0,σ)
+@kwmethod LogNormal(;sigma) = LogNormal(0,sigma)
+
+@kwmethod LogNormal(;μ,σ) = LogNormal(μ,σ)
+@kwmethod LogNormal(;mu,sigma) = LogNormal(mu,sigma)
 
 @distr_support LogNormal 0.0 Inf
 

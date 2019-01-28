@@ -31,8 +31,22 @@ end
 Levy(μ::T, σ::T) where {T<:Real} = Levy{T}(μ, σ)
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
 Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
-Levy(μ::Real) = Levy(μ, 1.0)
-Levy() = Levy(0.0, 1.0)
+
+@kwdispatch Levy()
+
+@kwmethod Levy(;) = Levy(0, 1)
+
+@kwmethod Levy(;μ) = Levy(μ, 1)
+@kwmethod Levy(;mu) = Levy(mu, 1)
+@kwmethod Levy(;location) = Levy(location, 1)
+
+@kwmethod Levy(;σ) = Levy(0,σ)
+@kwmethod Levy(;sigma) = Levy(0,sigma)
+@kwmethod Levy(;scale) = Levy(0,scale)
+
+@kwmethod Levy(;μ,σ) = Levy(μ,σ)
+@kwmethod Levy(;mu,sigma) = Levy(mu,sigma)
+@kwmethod Levy(;location,scale) = Levy(location,scale)
 
 @distr_support Levy d.μ Inf
 
