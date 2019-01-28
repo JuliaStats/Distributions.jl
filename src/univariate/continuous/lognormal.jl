@@ -58,7 +58,11 @@ LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
     μ = log(mean) - σ²/2
     LogNormal(μ,sqrt(σ²))
 end
-              
+@kwmethod function LogNormal(;mean,std)
+    σ² = log1p((std/mean)^2)
+    μ = log(mean) - σ²/2
+    LogNormal(μ,sqrt(σ²))
+end              
     
 @distr_support LogNormal 0.0 Inf
 
