@@ -45,8 +45,8 @@ Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 @kwmethod Beta(;alpha,beta) = Beta(alpha,beta)
 
 @kwmethod function Beta(;mean, var)
-    @check_args(Normal, 0 < mean < 1)
-    @check_args(Normal, 0 < var < mean*(1-mean))
+    @check_args(Beta, 0 < mean < 1)
+    @check_args(Beta, 0 < var < mean*(1-mean))
     U = (mean*(1-mean))/var - 1
     α = mean*U
     β = U-α
