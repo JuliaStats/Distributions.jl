@@ -41,7 +41,7 @@ Base.@deprecate InverseGaussian(μ::Real) InverseGaussian(μ=μ)
 Base.@deprecate Laplace(μ::Real) Laplace(μ=μ)
 Base.@deprecate Levy(μ::Real) Levy(μ=μ)
 Base.@deprecate Logistic(μ::Real) Logistic(μ=μ)
-Base.@deprecate LogNormal(μ::Real) = LogNormal(μ=μ)
+Base.@deprecate LogNormal(μ::Real) LogNormal(μ=μ)
 Base.@deprecate Normal(μ::Real) Normal(μ=μ)
 
 
