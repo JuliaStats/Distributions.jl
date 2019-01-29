@@ -47,6 +47,10 @@ Base.@deprecate SymTriangularDist(μ::Real) SymTriangularDist(μ=μ)
 Base.@deprecate Triweight(μ::Real) Triweight(μ=μ)
 Base.@deprecate VonMises(κ::Real) VonMises(κ=κ)
 Base.@deprecate Weibull(α::Real) Weibull(α=α)
+Base.@deprecate Binomial(n::Integer) Binomial(n=n)
+Base.@deprecate DiscreteUniform(b::Real) DiscreteUniform(b=b)
+Base.@deprecate NegativeBinomial(r::Real) NegativeBinomial(r=r)
+Base.@deprecate Skellam(μ::Real) Skellam(μ=μ)
 
 
 # vectorized versions

@@ -32,7 +32,11 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Geometric(p::T) where {T<:Real} = Geometric{T}(p)
-Geometric() = Geometric(0.5)
+
+@kwdispatch Geometric()
+
+@kwmethod Geometric(;p) = Geometric(p)
+@kwmethod Geometric(;) = Geometric(0.5)
 
 @distr_support Geometric 0 Inf
 

@@ -31,6 +31,10 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     end
 end
 
+@kwdispatch Hypergeometric()
+
+@kwmethod Hypergeometric(;ns,nf,n) = Hypergeometric(ns,nf,n)
+
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 

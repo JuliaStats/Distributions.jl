@@ -33,9 +33,15 @@ end
 
 Skellam(μ1::T, μ2::T) where {T<:Real} = Skellam{T}(μ1, μ2)
 Skellam(μ1::Real, μ2::Real) = Skellam(promote(μ1, μ2)...)
-Skellam(μ1::Integer, μ2::Integer) = Skellam(Float64(μ1), Float64(μ2))
-Skellam(μ::Real) = Skellam(μ, μ)
-Skellam() = Skellam(1.0, 1.0)
+Skellam(μ1::Integer, μ2::Integer) = Skellam(float(μ1), float(μ2))
+
+@kwdispatch Skellam()
+
+@kwmethod Skellam(;μ1,μ1) = Skellam(μ1, μ2)
+@kwmethod Skellam(;mu1,mu1) = Skellam(mu1, mu2)
+
+@kwmethod Skellam(;μ) = Skellam(μ, μ)
+@kwmethod Skellam(;) = Skellam(1.0, 1.0)
 
 @distr_support Skellam -Inf Inf
 

@@ -31,7 +31,13 @@ end
 
 BetaBinomial(n::Integer, α::T, β::T) where {T<:Real} = BetaBinomial{T}(n, α, β)
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
-BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
+BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, float(α), float(β))
+
+@kwdispatch BetaBinomial()
+
+@kwmethod BetaBinomial(;n,α,β) = BetaBinomial(n,α,β)
+@kwmethod BetaBinomial(;n,alpha,beta) = BetaBinomial(n,alpha,beta)
+
 
 @distr_support BetaBinomial 0 d.n
 insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n

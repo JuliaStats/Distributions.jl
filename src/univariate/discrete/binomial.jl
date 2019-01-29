@@ -35,9 +35,15 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Binomial(n::Integer, p::T) where {T<:Real} = Binomial{T}(n, p)
-Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
-Binomial(n::Integer) = Binomial(n, 0.5)
-Binomial() = Binomial(1, 0.5)
+Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
+
+@kwdispatch Binomial()
+@kwmethod Binomial(;) = Binomial(1, 0.5)
+@kwmethod Binomial(;p) = Binomial(1, p)
+@kwmethod Binomial(;n) = Binomial(n, 0.5)
+@kwmethod Binomial(;n,p) = Binomial(n, p)
+
+@kwmethod Binomial(;n,mean) = Binomial(n, mean/n)
 
 @distr_support Binomial 0 d.n
 

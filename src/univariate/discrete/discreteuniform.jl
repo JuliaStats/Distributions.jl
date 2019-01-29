@@ -30,9 +30,13 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
         @check_args(DiscreteUniform, a <= b)
         new(a, b, 1.0 / (b - a + 1))
     end
-    DiscreteUniform(b::Real) = DiscreteUniform(0, b)
-    DiscreteUniform() = new(0, 1, 0.5)
 end
+
+@kwdispatch DiscreteUniform()
+
+@kwmethod DiscreteUniform(;a,b) = DiscreteUniform(a,b)
+@kwmethod DiscreteUniform(;b) = DiscreteUniform(0,b)
+@kwmethod DiscreteUniform(;) = DiscreteUniform(0,1)
 
 @distr_support DiscreteUniform d.a d.b
 

@@ -27,8 +27,15 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Poisson(λ::T) where {T<:Real} = Poisson{T}(λ)
-Poisson(λ::Integer) = Poisson(Float64(λ))
-Poisson() = Poisson(1.0)
+Poisson(λ::Integer) = Poisson(float(λ))
+
+@kwdispatch Poisson()
+
+@kwmethod Poisson(;λ) = Poisson(λ)
+@kwmethod Poisson(;lambda) = Poisson(lambda)
+@kwmethod Poisson(;rate) = Poisson(rate)
+
+@kwmethod Poisson(;) = Poisson(1.0)
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 

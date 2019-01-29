@@ -35,8 +35,12 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Bernoulli(p::T) where {T<:Real} = Bernoulli{T}(p)
-Bernoulli(p::Integer) = Bernoulli(Float64(p))
-Bernoulli() = Bernoulli(0.5)
+Bernoulli(p::Integer) = Bernoulli(float(p))
+
+@kwdispatch Bernoulli()
+
+@kwmethod Bernoulli(;) = Bernoulli(0.5)
+@kwmethod Bernoulli(;p) = Bernoulli(p)
 
 @distr_support Bernoulli 0 1
 
