@@ -396,18 +396,23 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     lcc = Vector{Float64}(undef, nv)
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)
+        if !isa(d, StudentizedRange)
+            p[i] = pdf(d, v)
+            lp[i] = logpdf(d, v)
+            @assert p[i] >= 0.0
+        end
+
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
-        lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
 
-        @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
         @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
-        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        if !isa(d, StudentizedRange)
+            @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        end
         @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
         @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
@@ -425,28 +430,28 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         end
     end
 
-    # check: pdf should be the derivative of cdf
-    step = isa(d, StudentizedRange) ? Int(floor(nv / 30)) : 1 # StudentizedRange is slow
-    range = 2:step:(nv-1)
-    for i = range
-        if p[i] > 1.0e-6
-            v = vs[i]
-            # Underlying R implementation of qtukey is only accurate to 4th decimal place
-            atol = isa(d, StudentizedRange) ? 1.0e-4 : p[i] * 1.0e-3
-            ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test isapprox(p[i], ap, atol=atol)
+    if !isa(d, StudentizedRange)
+        # check: pdf should be the derivative of cdf
+        for i = 2:(nv-1)
+            if p[i] > 1.0e-6
+                v = vs[i]
+                ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
+                @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+            end
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    vsreduced = vs[range] # necessary to check fewer values due to slowness of StudentizedRange
-    @test pdf.(Ref(d), vsreduced)  ≈ p[range]
-    @test cdf.(Ref(d), vsreduced)  ≈ c[range]
-    @test ccdf.(Ref(d), vsreduced) ≈ cc[range]
+    if !isa(d, StudentizedRange)
+        @test pdf.(Ref(d), vs)  ≈ p
+        @test logpdf.(Ref(d), vs)  ≈ lp
+    end
 
-    @test logpdf.(Ref(d), vsreduced)  ≈ lp[range]
-    @test logcdf.(Ref(d), vsreduced)  ≈ lc[range]
-    @test logccdf.(Ref(d), vsreduced) ≈ lcc[range]
+    @test cdf.(Ref(d), vs)  ≈ c
+    @test ccdf.(Ref(d), vs) ≈ cc
+
+    @test logcdf.(Ref(d), vs)  ≈ lc
+    @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
 
