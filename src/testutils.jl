@@ -50,7 +50,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::B
     test_evaluation(distr, vs, testquan)
 
     if isa(distr, SRDist)
-        n = 2000
+        n = 2000 # must use fewer values due to performance
     end
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
