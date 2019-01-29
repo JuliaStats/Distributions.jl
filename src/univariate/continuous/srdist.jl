@@ -9,14 +9,14 @@ f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{(\\frac{\\nu}
 
 where
 
-\\Phi(x) = \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2}
-\\phi(x) = \\Phi'(x)
+\\Phi(x) = \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} (Normal Distribution CDF)
+\\phi(x) = \\Phi'(x) (Normal Distribution PDF)
 ```
 
 ```julia
 SRDist(ν, k)     # Studentized Range Distribution with parameters ν and k
 
-params(d)         # Get the parameters, i.e. (ν, k)
+params(d)        # Get the parameters, i.e. (ν, k)
 ```
 
 External links
