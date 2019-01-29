@@ -1,5 +1,5 @@
 
-SRDist <- R6Class("SRDist",
+StudentizedRange <- R6Class("StudentizedRange",
     inherit = ContinuousDistribution,
     public = list(
         names = c("nu", "k"),

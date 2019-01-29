@@ -49,7 +49,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::B
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
 
-    if isa(distr, SRDist)
+    if isa(distr, StudentizedRange)
         n = 2000 # must use fewer values due to performance
     end
     xs = test_samples(distr, n)
@@ -206,7 +206,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     samples = rand(s, n)
     @assert length(samples) == n
 
-    if isa(distr, SRDist)
+    if isa(distr, StudentizedRange)
         samples[isnan.(samples)] .= 0.0 # Underlying implementation in Rmath can't handle very low values.
     end
 
@@ -413,9 +413,9 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
         if testquan
             # TODO: remove this line when we have more accurate implementation
-            # of quantile for InverseGaussian and SRDist
+            # of quantile for InverseGaussian and StudentizedRange
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
-            qtol = isa(d, SRDist) ? 1.0e-5 : qtol
+            qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
                 @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
@@ -426,20 +426,20 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     end
 
     # check: pdf should be the derivative of cdf
-    step = isa(d, SRDist) ? Int(floor(nv / 30)) : 1 # SRDist is slow
+    step = isa(d, StudentizedRange) ? Int(floor(nv / 30)) : 1 # StudentizedRange is slow
     range = 2:step:(nv-1)
     for i = range
         if p[i] > 1.0e-6
             v = vs[i]
             # Underlying R implementation of qtukey is only accurate to 4th decimal place
-            atol = isa(d, SRDist) ? 1.0e-4 : p[i] * 1.0e-3
+            atol = isa(d, StudentizedRange) ? 1.0e-4 : p[i] * 1.0e-3
             ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
             @test isapprox(p[i], ap, atol=atol)
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    vsreduced = vs[range] # necessary to check fewer values due to slowness of SRDist
+    vsreduced = vs[range] # necessary to check fewer values due to slowness of StudentizedRange
     @test pdf.(Ref(d), vsreduced)  ≈ p[range]
     @test cdf.(Ref(d), vsreduced)  ≈ c[range]
     @test ccdf.(Ref(d), vsreduced) ≈ cc[range]
@@ -488,7 +488,7 @@ end
 
 allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
-allow_test_stats(::SRDist) = false
+allow_test_stats(::StudentizedRange) = false
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods

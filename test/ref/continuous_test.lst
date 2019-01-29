@@ -149,9 +149,9 @@ Rayleigh()
 Rayleigh(3.0)
 Rayleigh(8.0)
 
-SRDist(2.0, 2.0)
-SRDist(5.0, 10.0)
-SRDist(10.0, 5.0)
+StudentizedRange(2.0, 2.0)
+StudentizedRange(5.0, 10.0)
+StudentizedRange(10.0, 5.0)
 
 SymTriangularDist()
 SymTriangularDist(3.0)

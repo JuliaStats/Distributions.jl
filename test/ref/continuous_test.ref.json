@@ -4051,8 +4051,8 @@
   ]
 },
 {
-  "expr": "SRDist(2.0, 2.0)",
-  "dtype": "SRDist",
+  "expr": "StudentizedRange(2.0, 2.0)",
+  "dtype": "StudentizedRange",
   "minimum": 0,
   "maximum": "inf",
   "properties": { },
@@ -4077,8 +4077,8 @@
   ]
 },
 {
-  "expr": "SRDist(5.0, 10.0)",
-  "dtype": "SRDist",
+  "expr": "StudentizedRange(5.0, 10.0)",
+  "dtype": "StudentizedRange",
   "minimum": 0,
   "maximum": "inf",
   "properties": { },
@@ -4103,8 +4103,8 @@
   ]
 },
 {
-  "expr": "SRDist(10.0, 5.0)",
-  "dtype": "SRDist",
+  "expr": "StudentizedRange(10.0, 5.0)",
+  "dtype": "StudentizedRange",
   "minimum": 0,
   "maximum": "inf",
   "properties": { },
