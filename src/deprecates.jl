@@ -41,6 +41,12 @@ Base.@deprecate Levy(μ::Real) Levy(μ=μ)
 Base.@deprecate Logistic(μ::Real) Logistic(μ=μ)
 Base.@deprecate LogNormal(μ::Real) LogNormal(μ=μ)
 Base.@deprecate Normal(μ::Real) Normal(μ=μ)
+Base.@deprecate Normal(μ::Real) Normal(μ=μ)
+Base.@deprecate Pareto(α::Real) Pareto(α=α)
+Base.@deprecate SymTriangularDist(μ::Real) SymTriangularDist(μ=μ)
+Base.@deprecate Triweight(μ::Real) Triweight(μ=μ)
+Base.@deprecate VonMises(κ::Real) VonMises(κ=κ)
+Base.@deprecate Weibull(α::Real) Weibull(α=α)
 
 
 # vectorized versions

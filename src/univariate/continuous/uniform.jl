@@ -32,8 +32,12 @@ end
 
 Uniform(a::T, b::T) where {T<:Real} = Uniform{T}(a, b)
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
-Uniform() = Uniform(0.0, 1.0)
+Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
+
+@kwdispatch Uniform()
+
+@kwmethod Uniform(;) = Uniform(0, 1)
+@kwmethod Uniform(;a,b) = Uniform(a,b)
 
 @distr_support Uniform d.a d.b
 

@@ -31,6 +31,12 @@ function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Intege
     NormalInverseGaussian(Float64(μ), Float64(α), Float64(β), Float64(δ))
 end
 
+@kwdispatch NormalInverseGaussian()
+
+@kwmethod NormalInverseGaussian(;μ,α,β,δ) = NormalInverseGaussian(μ,α,β,δ)
+@kwmethod NormalInverseGaussian(;mu,alpha,beta,delta) = NormalInverseGaussian(mu,alpha,beta,delta)
+
+
 @distr_support NormalInverseGaussian -Inf Inf
 
 #### Conversions

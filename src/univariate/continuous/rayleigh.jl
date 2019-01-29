@@ -30,8 +30,15 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Rayleigh(σ::T) where {T<:Real} = Rayleigh{T}(σ)
-Rayleigh(σ::Integer) = Rayleigh(Float64(σ))
-Rayleigh() = Rayleigh(1.0)
+Rayleigh(σ::Integer) = Rayleigh(float(σ))
+
+@kwdispatch Rayleigh()
+
+@kwmethod Rayleigh(;) = Rayleigh(1)
+
+@kwmethod Rayleigh(;σ) = Rayleigh(σ)
+@kwmethod Rayleigh(;sigma) = Rayleigh(sigma)
+@kwmethod Rayleigh(;scale) = Rayleigh(scale)
 
 @distr_support Rayleigh 0.0 Inf
 

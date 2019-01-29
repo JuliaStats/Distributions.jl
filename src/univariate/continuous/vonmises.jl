@@ -31,9 +31,21 @@ end
 
 VonMises(μ::T, κ::T) where {T<:Real} = VonMises{T}(μ, κ)
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
-VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
-VonMises(κ::Real) = VonMises(0.0, κ)
-VonMises() = VonMises(0.0, 1.0)
+VonMises(μ::Integer, κ::Integer) = VonMises(float(μ), float(κ))
+
+@kwdispatch VonMises()
+
+@kwmethod VonMises(;) = VonMises(0, 1)
+
+@kwmethod VonMises(;μ) = VonMises(μ, 1)
+@kwmethod VonMises(;mu) = VonMises(mu, 1)
+
+@kwmethod VonMises(;κ) = VonMises(0, κ)
+@kwmethod VonMises(;kappa) = VonMises(0, kappa)
+
+@kwmethod VonMises(;μ,κ) = VonMises(μ, κ)
+@kwmethod VonMises(;mu,kappa) = VonMises(mu, kappa)
+
 
 show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 

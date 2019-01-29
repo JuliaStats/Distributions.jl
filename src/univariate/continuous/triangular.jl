@@ -45,10 +45,15 @@ end
 
 TriangularDist(a::T, b::T, c::T) where {T<:Real} = TriangularDist{T}(a, b, c)
 TriangularDist(a::Real, b::Real, c::Real) = TriangularDist(promote(a, b, c)...)
-TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(Float64(a), Float64(b), Float64(c))
+TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(float(a), float(b), float(c))
 TriangularDist(a::T, b::T) where {T<:Real} = TriangularDist{T}(a, b)
 TriangularDist(a::Real, b::Real) = TriangularDist(promote(a, b)...)
-TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
+TriangularDist(a::Integer, b::Integer) = TriangularDist(float(a), float(b))
+
+@kwdispatch Triangular()
+
+@kwmethod Triangular(;a,b) = Triangular(a,b)
+@kwmethod Triangular(;a,b,c) = Triangular(a,b,c)
 
 @distr_support TriangularDist d.a d.b
 

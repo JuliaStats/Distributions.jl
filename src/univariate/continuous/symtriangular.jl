@@ -29,9 +29,25 @@ end
 
 SymTriangularDist(μ::T, σ::T) where {T<:Real} = SymTriangularDist{T}(μ, σ)
 SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
-SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(Float64(μ), Float64(σ))
-SymTriangularDist(μ::Real) = SymTriangularDist(μ, 1.0)
-SymTriangularDist() = SymTriangularDist(0.0, 1.0)
+SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(float(μ), float(σ))
+
+@kwdispatch SymTriangularDist()
+
+@kwmethod SymTriangularDist(;) = SymTriangularDist(0, 1)
+
+@kwmethod SymTriangularDist(;μ) = SymTriangularDist(μ, 1)
+@kwmethod SymTriangularDist(;mu) = SymTriangularDist(mu, 1)
+@kwmethod SymTriangularDist(;mean) = SymTriangularDist(mean, 1)
+
+@kwmethod SymTriangularDist(;σ) = SymTriangularDist(0, σ)
+@kwmethod SymTriangularDist(;sigma) = SymTriangularDist(0, sigma)
+
+@kwmethod SymTriangularDist(;μ,σ) = SymTriangularDist(μ, σ)
+@kwmethod SymTriangularDist(;mu,sigma) = SymTriangularDist(mu, sigma)
+
+@kwmethod SymTriangularDist(;mean,std) = SymTriangularDist(mean, sqrt(6)*std)
+@kwmethod SymTriangularDist(;mean,var) = SymTriangularDist(mean, sqrt(6*var))
+
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 

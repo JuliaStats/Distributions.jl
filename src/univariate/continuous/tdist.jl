@@ -27,7 +27,13 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 TDist(ν::T) where {T<:Real} = TDist{T}(ν)
-TDist(ν::Integer) = TDist(Float64(ν))
+TDist(ν::Integer) = TDist(float(ν))
+
+@kwdispatch TDist()
+
+@kwmethod TDist(;ν) = TDist(ν)
+@kwmethod TDist(;nu) = TDist(nu)
+@kwmethod TDist(;dof) = TDist(dof)
 
 @distr_support TDist -Inf Inf
 

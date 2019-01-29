@@ -35,9 +35,23 @@ end
 
 Weibull(α::T, θ::T) where {T<:Real} = Weibull{T}(α, θ)
 Weibull(α::Real, θ::Real) = Weibull(promote(α, θ)...)
-Weibull(α::Integer, θ::Integer) = Weibull(Float64(α), Float64(θ))
-Weibull(α::Real) = Weibull(α, 1.0)
-Weibull() = Weibull(1.0, 1.0)
+Weibull(α::Integer, θ::Integer) = Weibull(float(α), float(θ))
+
+@kwdispatch Weibull()
+
+@kwmethod Weibull(;) = Weibull(1, 1)
+
+@kwmethod Weibull(;α) = Weibull(α, 1)
+@kwmethod Weibull(;alpha) = Weibull(alpha, 1)
+@kwmethod Weibull(;shape) = Weibull(shape, 1)
+
+@kwmethod Weibull(;θ) = Weibull(1, θ)
+@kwmethod Weibull(;theta) = Weibull(1, theta)
+@kwmethod Weibull(;scale) = Weibull(1, scale)
+
+@kwmethod Weibull(;α,θ) = Weibull(α, θ)
+@kwmethod Weibull(;alpha,theta) = Weibull(alpha, theta)
+@kwmethod Weibull(;shape,scale) = Weibull(shape, scale)
 
 @distr_support Weibull 0.0 Inf
 

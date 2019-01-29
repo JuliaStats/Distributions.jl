@@ -25,7 +25,12 @@ struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Semicircle(r::Real) = Semicircle{typeof(r)}(r)
-Semicircle(r::Integer) = Semicircle(Float64(r))
+Semicircle(r::Integer) = Semicircle(float(r))
+
+@kwdispatch Semicircle()
+@kwmethod Semicircle(;) = Semicircle(1)
+
+@kwmethod Semicircle(;r) = Semicircle(r)
 
 @distr_support Semicircle -d.r +d.r
 

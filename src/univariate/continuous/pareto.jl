@@ -33,9 +33,23 @@ end
 
 Pareto(α::T, θ::T) where {T<:Real} = Pareto{T}(α, θ)
 Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
-Pareto(α::Integer, θ::Integer) = Pareto(Float64(α), Float64(θ))
-Pareto(α::Real) = Pareto(α, 1.0)
-Pareto() = Pareto(1.0, 1.0)
+Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
+
+@kwdispatch Pareto()
+
+@kwmethod Pareto(;) = Pareto(1, 1)
+
+@kwmethod Pareto(;α) = Pareto(α, 1)
+@kwmethod Pareto(;alpha) = Pareto(alpha, 1)
+@kwmethod Pareto(;shape) = Pareto(shape, 1)
+
+@kwmethod Pareto(;θ) = Pareto(1,θ)
+@kwmethod Pareto(;theta) = Pareto(1,theta)
+@kwmethod Pareto(;scale) = Pareto(1,scale)
+
+@kwmethod Pareto(;α,θ) = Pareto(α,θ)
+@kwmethod Pareto(;alpha,theta) = Pareto(alpha,theta)
+@kwmethod Pareto(;shape,scale) = Pareto(shape,scale)
 
 @distr_support Pareto d.θ Inf
 
