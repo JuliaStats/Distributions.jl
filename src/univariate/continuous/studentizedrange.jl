@@ -58,4 +58,4 @@ params(d::StudentizedRange) = (d.ν, d.k)
 
 ### Evaluation & Sampling
 
-@_delegate_statsfuns StudentizedRange srdist ν k
+@_delegate_statsfuns StudentizedRange srdist k ν
