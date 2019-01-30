@@ -59,8 +59,8 @@ end
     d = VonMises(1.1, 1000)
     @test var(d) ≈ 0.0005001251251957198
     @test entropy(d) ≈ -2.034688918525470
-    @test isapprox(cf(d, 2.5), -0.921417 + 0.38047im, atol=1e-6)
+    @test cf(d, 2.5) ≈ -0.921417 + 0.38047im atol=1e-6
     @test pdf(d, 0.5) ≈ 1.758235814051e-75
     @test logpdf(d, 0.5) ≈ -172.1295710466005
-    @test isapprox(cdf(d, 1.0), 0.000787319, atol=1e-9)
+    @test cdf(d, 1.0) ≈ 0.000787319 atol=1e-9
 end
