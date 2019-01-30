@@ -30,3 +30,11 @@ using ForwardDiff
 
 # Test for numerical problems
 @test pdf(Logistic(6,0.01),-2) == 0
+
+# Test for parameters beyond those supported in R references
+@test var(VonMises(1.1, 1000)) ≈ 0.0005001251251957198
+@test entropy(VonMises(1.1, 1000)) ≈ -2.034688918525470
+@test isapprox(cf(VonMises(1.1, 1000), 2.5), -0.921417 + 0.38047im, atol=1e-6)
+@test pdf(VonMises(1.1, 1000), 0.5) ≈ 1.758235814051e-75
+@test logpdf(VonMises(1.1,1000),0.5) ≈ -172.1295710466005
+@test isapprox(cdf(VonMises(1.1, 1000), 1.0), 0.000787319, atol=1e-9)
