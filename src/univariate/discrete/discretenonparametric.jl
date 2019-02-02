@@ -70,6 +70,10 @@ probs(d::DiscreteNonParametric)  = d.p
     (support(c1) == support(c2) || all(support(c1) .== support(c2))) &&
     (probs(c1) == probs(c2) || all(probs(c1) .== probs(c2)))
 
+Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
+    (support(c1) ≈ support(c2) || all(support(c1) .≈ support(c2))) &&
+    (probs(c1) ≈ probs(c2) || all(probs(c1) .≈ probs(c2)))
+
 # Sampling
 
 function rand(d::DiscreteNonParametric{T,P}) where {T,P}
