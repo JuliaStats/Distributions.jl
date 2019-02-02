@@ -68,10 +68,10 @@ probs(d::DiscreteNonParametric)  = d.p
 
 # Sampling
 
-function rand(d::DiscreteNonParametric{T,P}) where {T,P}
+function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     x = support(d)
     p = probs(d)
-    draw = rand(P)
+    draw = rand(rng, P)
     cp = zero(P)
     i = 0
     while cp < draw
@@ -79,6 +79,8 @@ function rand(d::DiscreteNonParametric{T,P}) where {T,P}
     end
     x[i]
 end
+
+rand(d::DiscreteNonParametric) = rand(Random.GLOBAL_RNG, d)
 
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
