@@ -67,7 +67,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     @test extrema(d) == (minimum(d), maximum(d))
 
     # verify logpdf and cdf at certain points
-    pts = dct["points"] 
+    pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
