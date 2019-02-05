@@ -41,7 +41,6 @@ Base.@deprecate Levy(μ::Real) Levy(μ=μ)
 Base.@deprecate Logistic(μ::Real) Logistic(μ=μ)
 Base.@deprecate LogNormal(μ::Real) LogNormal(μ=μ)
 Base.@deprecate Normal(μ::Real) Normal(μ=μ)
-Base.@deprecate Normal(μ::Real) Normal(μ=μ)
 Base.@deprecate Pareto(α::Real) Pareto(α=α)
 Base.@deprecate SymTriangularDist(μ::Real) SymTriangularDist(μ=μ)
 Base.@deprecate Triweight(μ::Real) Triweight(μ=μ)
@@ -51,6 +50,13 @@ Base.@deprecate Binomial(n::Integer) Binomial(n=n)
 Base.@deprecate DiscreteUniform(b::Real) DiscreteUniform(b=b)
 Base.@deprecate NegativeBinomial(r::Real) NegativeBinomial(r=r)
 Base.@deprecate Skellam(μ::Real) Skellam(μ=μ)
+
+
+Base.@deprecate MvNormal(Σ::AbstractMatrix) MvNormal(Σ=Σ)
+Base.@deprecate MvNormal(μ::AbstractVector, σ::AbstractVector) MvNormal(μ=μ,σ=σ)
+Base.@deprecate MvNormal(μ::AbstractVector, σ::Real) MvNormal(μ=μ,σ=σ)
+Base.@deprecate MvNormal(σ::AbstractVector) MvNormal(σ=σ)
+Base.@deprecate MvNormal(n::Int, σ::Real) MvNormal(σ=σ,n=n)
 
 
 # vectorized versions

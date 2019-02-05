@@ -13,8 +13,6 @@ Triweight(μ::Real, σ::Real) = Triweight(promote(μ, σ)...)
 Triweight(μ::Integer, σ::Integer) = Triweight(float(μ), float(σ))
 
 @kwdispatch Triweight()
-
-@kwdispatch Triweight()
 @kwmethod Triweight(;μ,σ) = Triweight(μ,σ)
 @kwmethod Triweight(;μ) = Triweight(μ,1)
 @kwmethod Triweight(;σ) = Triweight(0,σ)
