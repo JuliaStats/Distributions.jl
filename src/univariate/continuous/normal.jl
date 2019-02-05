@@ -1,12 +1,16 @@
 """
     Normal(μ,σ)
 
-The *Normal distribution* with mean `μ` and standard deviation `σ` has probability density function
+The *Normal distribution* with mean `μ` and standard deviation `σ≥0` has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 \\exp \\left( - \\frac{(x - \\mu)^2}{2 \\sigma^2} \\right)
 ```
+
+Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
+Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have underflowed,
+and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
 Normal()          # standard Normal distribution with zero mean and unit variance
@@ -27,7 +31,10 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Normal{T}(μ, σ) where {T} = (@check_args(Normal, σ > zero(σ)); new{T}(μ, σ))
+    function Normal{T}(μ, σ) where {T}
+        @check_args(Normal, σ >= zero(σ))
+        new{T}(μ, σ)
+    end
 end
 
 #### Outer constructors
@@ -93,7 +100,7 @@ struct NormalStats <: SufficientStats
     tw::Float64    # total sample weight
 end
 
-function suffstats(::Type{Normal}, x::AbstractArray{T}) where T<:Real
+function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
@@ -112,7 +119,7 @@ function suffstats(::Type{Normal}, x::AbstractArray{T}) where T<:Real
     NormalStats(s, m, s2, n)
 end
 
-function suffstats(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
 
     # compute s
@@ -193,13 +200,13 @@ end
 
 # fit_mle based on sufficient statistics
 
-fit_mle(::Type{Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
+fit_mle(::Type{<:Normal}, ss::NormalStats) = Normal(ss.m, sqrt(ss.s2 / ss.tw))
 fit_mle(g::NormalKnownMu, ss::NormalKnownMuStats) = Normal(g.μ, sqrt(ss.s2 / ss.tw))
 fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, g.σ)
 
 # generic fit_mle methods
 
-function fit_mle(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x))
@@ -217,7 +224,7 @@ function fit_mle(::Type{Normal}, x::AbstractArray{T}; mu::Float64=NaN, sigma::Fl
     end
 end
 
-function fit_mle(::Type{Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float64}; mu::Float64=NaN, sigma::Float64=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))
