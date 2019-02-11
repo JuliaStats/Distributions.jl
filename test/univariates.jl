@@ -96,8 +96,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         lp = _json_value(pt["logpdf"])
         cf = _json_value(pt["cdf"])
 
-        @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
-        @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+        # pdf method is not implemented for StudentizedRange
+        if !isa(d, StudentizedRange)
+            @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
+            @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+        end
 
         # cdf method is not implemented for Skellam & NormalInverseGaussian
         if !isa(d, Union{Skellam, NormalInverseGaussian})
