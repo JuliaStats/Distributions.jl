@@ -180,6 +180,7 @@ struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: A
 end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
+const MvGaussian = MvNormal # another widely used name for the distribution
 
 const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
 const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
