@@ -158,7 +158,10 @@ end
 
 # Sampling
 
-_rand!(d::Multinomial, x::AbstractVector{T}) where {T<:Real} = multinom_rand!(ntrials(d), probs(d), x)
+_rand!(d::Multinomial, x::AbstractVector{T}) where T<:Real =
+    multinom_rand!(ntrials(d), probs(d), x)
+_rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{T}) where T<:Real =
+    multinom_rand!(rng, ntrials(d), probs(d), x)
 
 sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 

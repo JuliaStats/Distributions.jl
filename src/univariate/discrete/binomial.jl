@@ -110,6 +110,21 @@ end
 
 rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
 
+function rand(rng::AbstractRNG, d::Binomial)
+    p, n = d.p, d.n
+    if p <= 0.5
+        r = p
+    else
+        r = 1.0-p
+    end
+    if r*n <= 10.0
+        y = rand(rng, BinomialGeomSampler(n,r))
+    else
+        y = rand_btpe(rng, BinomialTPESampler(n,r))
+    end
+    p <= 0.5 ? y : n-y
+end
+
 struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
     n::Int
     coef::T   # p / (1 - p)

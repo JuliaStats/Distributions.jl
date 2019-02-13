@@ -89,7 +89,16 @@ gradlogpdf(d::Gamma{T}, x::Real) where {T<:Real} =
     insupport(Gamma, x) ? (d.α - 1) / x - 1 / d.θ : zero(T)
 
 rand(d::Gamma) = StatsFuns.RFunctions.gammarand(d.α, d.θ)
-
+function rand(rng::AbstractRNG, d::Gamma)
+    if shape(d) < 1.0
+        # TODO: shape(d) = 0.5 : use scaled chisq
+        return rand(rng, GammaIPSampler(d))
+    elseif shape(d) == 1.0
+        return rand(rng, Exponential(d.scale))
+    else
+        return rand(rng, GammaGDSampler(d))
+    end
+end
 
 #### Fit model
 

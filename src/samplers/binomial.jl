@@ -52,12 +52,13 @@ function BinomialGeomSampler(n::Int, prob::Float64)
     BinomialGeomSampler(comp, n, scale)
 end
 
-function rand(s::BinomialGeomSampler)
+rand(s::BinomialGeomSampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::BinomialGeomSampler)
     y = 0
     x = 0
     n = s.n
     while true
-        er = randexp()
+        er = randexp(rng)
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
             break
@@ -137,12 +138,13 @@ function BinomialTPESampler(n::Int, prob::Float64)
                        xM,xL,xR,c,λL,λR)
 end
 
-function rand(s::BinomialTPESampler)
+rand(s::BinomialTPESampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::BinomialTPESampler)
     y = 0
     while true
         # Step 1
-        u = s.p4*rand()
-        v = rand()
+        u = s.p4*rand(rng)
+        v = rand(rng)
         if u <= s.p1
             y = floor(Int,s.xM-s.p1*v+u)
             # Goto 6
@@ -268,6 +270,6 @@ end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
-rand(s::BinomialPolySampler) = s.use_btpe ? rand(s.btpe_sampler) : rand(s.geom_sampler)
-
-
+rand(s::BinomialPolySampler) = rand(GLOBAL_RNG, s)
+rand(rng::AbstractRNG, s::BinomialPolySampler) =
+    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)

@@ -65,14 +65,15 @@ function GammaGDSampler(g::Gamma)
     GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
 end
 
-function rand(s::GammaGDSampler)
+rand(s::GammaGDSampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::GammaGDSampler)
     # Step 2
-    t = randn()
+    t = randn(rng)
     x = s.s + 0.5t
     t >= 0.0 && return x*x*s.scale
 
     # Step 3
-    u = rand()
+    u = rand(rng)
     s.d*u <= t*t*t && return x*x*s.scale
 
     # Step 5
@@ -100,8 +101,8 @@ function rand(s::GammaGDSampler)
 
     # Step 8
     @label step8
-    e = randexp()
-    u = 2.0rand() - 1.0
+    e = randexp(rng)
+    u = 2.0rand(rng) - 1.0
     t = s.b + e*s.σ*sign(u)
 
     # Step 9
@@ -152,11 +153,12 @@ function GammaGSSampler(d::Gamma)
     GammaGSSampler(a, ia, b, scale(d))
 end
 
-function rand(s::GammaGSSampler)
+rand(s::GammaGSSampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::GammaGSSampler)
     while true
         # step 1
-        p = s.b*rand()
-        e = randexp()
+        p = s.b*rand(rng)
+        e = randexp(rng)
         if p <= 1.0
             # step 2
             x = exp(log(p)*s.ia)
@@ -189,16 +191,17 @@ function GammaMTSampler(g::Gamma)
     GammaMTSampler(d, c, κ)
 end
 
-function rand(s::GammaMTSampler)
+rand(s::GammaMTSampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::GammaMTSampler)
     while true
-        x = randn()
+        x = randn(rng)
         v = 1.0 + s.c * x
         while v <= 0.0
-            x = randn()
+            x = randn(rng)
             v = 1.0 + s.c * x
         end
         v *= (v * v)
-        u = rand()
+        u = rand(rng)
         x2 = x * x
         if u < 1.0 - 0.331 * abs2(x2) || log(u) < 0.5 * x2 + s.d * (1.0 - v + log(v))
             return v*s.κ
@@ -218,9 +221,10 @@ function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
-function rand(s::GammaIPSampler)
-    x = rand(s.s)
-    e = randexp()
+rand(s::GammaIPSampler) = rand(GLOBAL_RNG, s)
+function rand(rng::AbstractRNG, s::GammaIPSampler)
+    x = rand(rng, s.s)
+    e = randexp(rng)
     x*exp(s.nia*e)
 end
 
