@@ -152,7 +152,7 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
         @inbounds p_i = p[i]
         s -= R(lgamma(R(xi) + 1))
         s += xlogy(xi, p_i)
-    end    
+    end
     return s
 end
 

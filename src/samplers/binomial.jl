@@ -29,8 +29,8 @@ end
 
 # Geometric method:
 #
-#   Devroye. L. 
-#   "Generating the maximum of independent identically  distributed random variables" 
+#   Devroye. L.
+#   "Generating the maximum of independent identically  distributed random variables"
 #   Computers and Marhemafics with Applicalions 6, 1960, 305-315.
 #
 struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
@@ -60,7 +60,7 @@ function rand(s::BinomialGeomSampler)
         er = randexp()
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
-            break 
+            break
         end
         y += ceil(Int,v)
         if y > n
@@ -74,9 +74,9 @@ end
 
 # BTPE algorithm from:
 #
-#   Kachitvichyanukul, V.; Schmeiser, B. W. 
-#   "Binomial random variate generation." 
-#   Comm. ACM 31 (1988), no. 2, 216–222. 
+#   Kachitvichyanukul, V.; Schmeiser, B. W.
+#   "Binomial random variate generation."
+#   Comm. ACM 31 (1988), no. 2, 216–222.
 #
 # Note: only use this sampler when n * min(p, 1-p) is large enough
 #       e.g., it is greater than 20.
@@ -101,8 +101,8 @@ struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
     λR::Float64
 end
 
-BinomialTPESampler() = 
-    BinomialTPESampler(false, 0, 0., 0., 0., 0., 0, 
+BinomialTPESampler() =
+    BinomialTPESampler(false, 0, 0., 0., 0., 0., 0,
                        0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
 function BinomialTPESampler(n::Int, prob::Float64)
@@ -134,7 +134,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
     p4 = p3 + c/λR
 
     BinomialTPESampler(comp,n,r,q,nrq,M,Mi,p1,p2,p3,p4,
-                        xM,xL,xR,c,λL,λR)
+                       xM,xL,xR,c,λL,λR)
 end
 
 function rand(s::BinomialTPESampler)

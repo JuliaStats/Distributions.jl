@@ -272,7 +272,7 @@ gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ broadcast(-, x, d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::VecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::VecOrMat) = _rand!(GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 
@@ -283,13 +283,13 @@ function _rand_abstr!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
-_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Random.GLOBAL_RNG, d, x)
+_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(GLOBAL_RNG, d, x)
 # define these separately to avoid ambiguity with
 # _rand(d::Multivariate, x::AbstractMatrix)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractMatrix) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Random.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractVector) = _rand!(Random.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractVector) = _rand!(GLOBAL_RNG, d, x)
 
 ###########################################################
 #

@@ -88,7 +88,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     x[i]
 end
 
-rand(d::DiscreteNonParametric) = rand(Random.GLOBAL_RNG, d)
+rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)
 
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))

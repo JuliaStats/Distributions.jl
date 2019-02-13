@@ -20,6 +20,6 @@ function rand(rng::AbstractRNG, s::AliasTable)
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
 end
-rand(s::AliasTable) = rand(Random.GLOBAL_RNG, s)
+rand(s::AliasTable) = rand(GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
