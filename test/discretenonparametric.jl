@@ -3,6 +3,15 @@ import StatsBase: ProbabilityWeights
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 println("    testing $d")
 
+@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], Distributions.NoArgCheck()))
+@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], Distributions.NoArgCheck())
+
+# Invalid probability
+@test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
+
+# Invalid probability, but no arg check
+DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
+
 Distributions.test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
 Distributions.test_evaluation(d, vs, true)

@@ -21,11 +21,11 @@ External links
 struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
     μ::T      # mean
     κ::T      # concentration
-    I0κ::T    # I0(κ), where I0 is the modified Bessel function of order 0
+    I0κx::T   # I0(κ) * exp(-κ), where I0 is the modified Bessel function of order 0
 
     function VonMises{T}(μ::T, κ::T) where T
         @check_args(VonMises, κ > zero(κ))
-        new{T}(μ, κ, besseli(zero(T), κ))
+        new{T}(μ, κ, besselix(zero(T), κ))
     end
 end
 
@@ -67,31 +67,32 @@ params(d::VonMises) = (d.μ, d.κ)
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
-var(d::VonMises) = 1 - besseli(1, d.κ) / d.I0κ
+var(d::VonMises) = 1 - besselix(1, d.κ) / d.I0κx
 # deprecated 12 September 2016
 @deprecate circvar(d) var(d)
-entropy(d::VonMises) = log(twoπ * d.I0κ) - d.κ * (besseli(1, d.κ) / d.I0κ)
+entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - besselix(1, d.κ) / d.I0κx)
 
-cf(d::VonMises, t::Real) = (besseli(abs(t), d.κ) / d.I0κ) * cis(t * d.μ)
+cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 
 
 #### Evaluations
 
-pdf(d::VonMises, x::Real) = exp(d.κ * cos(x - d.μ)) / (twoπ * d.I0κ)
-logpdf(d::VonMises, x::Real) = d.κ * cos(x - d.μ) - log(d.I0κ) - log2π
+pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
+logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π
 
-cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κ, x - d.μ, 1e-15)
+cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
 
-function _vmcdf(κ::Real, I0κ::Real, x::Real, tol::Real)
+function _vmcdf(κ::Real, I0κx::Real, x::Real, tol::Real)
+    tol *= exp(-κ)
     j = 1
-    cj = besseli(j, κ) / j
+    cj = besselix(j, κ) / j
     s = cj * sin(j * x)
     while abs(cj) > tol
         j += 1
-        cj = besseli(j, κ) / j
+        cj = besselix(j, κ) / j
         s += cj * sin(j * x)
     end
-    return (x + 2s / I0κ) / twoπ + 1//2
+    return (x + 2s / I0κx) / twoπ + 1//2
 end
 
 
