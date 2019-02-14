@@ -1,7 +1,21 @@
 """
-    Normal(μ,σ)
+    Normal <: ContinuousUnivariateDistribution
 
-The *Normal distribution* with mean `μ` and standard deviation `σ≥0` has probability density function
+The *normal* or *Gaussian* probability distribution. 
+
+# Constructors
+
+    Normal([μ|mu|mean]=0, [σ|sigma|std]=1)
+
+Construct a `Normal` object with mean `μ` and standard deviation `σ`,
+
+    Normal([μ|mu|mean]=0, [σ²|var]=1)
+
+Construct a `Normal` object with mean `μ` and variance `σ²`.
+
+# Details
+
+The normal distribution mean `μ` and standard deviation `σ` has probability density function has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
@@ -9,15 +23,15 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 ```
 
 Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
-Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have underflowed,
-and the functions are defined by taking the pointwise limit as ``σ → 0``.
+Though not technically a continuous distribution, it is allowed so as to account for cases
+where `σ` may have underflowed, and the functions are defined by taking the pointwise
+limit as ``σ → 0``.
+
+# Examples
 
 ```julia
-Normal(μ=0,σ=1)   # standard Normal distribution with zero mean and unit variance
-
-params(d)         # Get the parameters, i.e. (mu, sig)
-mean(d)           # Get the mean, i.e. mu
-std(d)            # Get the standard deviation, i.e. sig
+Normal()   # standard Normal distribution with zero mean and unit variance
+Normal(μ=2, σ=3)
 ```
 
 External links
@@ -40,27 +54,15 @@ Normal(μ::T, σ::T) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 
-@kwdispatch Normal()
+@kwdispatch (::Type{D})(;mu=>μ, mean=>μ, sigma=>σ, std=>σ, var=>σ²) where {D<:Normal} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
 
-@kwmethod Normal(;) = Normal(0.0, 1.0)
-
-@kwmethod Normal(;μ) = Normal(μ, one(μ))
-@kwmethod Normal(;mu) = Normal(mu, one(mu))
-@kwmethod Normal(;mean) = Normal(mean, one(mean))
-
-@kwmethod Normal(;σ) = Normal(zero(σ), σ)
-@kwmethod Normal(;sigma) = Normal(zero(sigma), sigma)
-@kwmethod Normal(;std) = Normal(zero(std), std)
-
-@kwmethod Normal(;σ²) = (σ=sqrt(σ²); Normal(zero(σ), σ))
-@kwmethod Normal(;var) = (σ=sqrt(var); Normal(zero(σ), σ))
-
-@kwmethod Normal(;μ,σ) = Normal(μ,σ)
-@kwmethod Normal(;mu,sigma) = Normal(mu,sigma)
-@kwmethod Normal(;μ,σ²) = Normal(μ,sqrt(σ²))
-
-@kwmethod Normal(;mean,std) = Normal(mean,std)
-@kwmethod Normal(;mean,var) = Normal(mean,sqrt(var))
+    (σ²) -> D(0,sqrt(σ²))
+    (μ,σ²) -> D(μ,sqrt(σ²))
+end
 
 const Gaussian = Normal
 
