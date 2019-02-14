@@ -5,11 +5,11 @@ The *normal* or *Gaussian* probability distribution.
 
 # Constructors
 
-    Normal([μ|mu|mean]=0, [σ|sigma|std]=1)
+    Normal(μ/mu/mean=0, σ/sigma/std=1)
 
 Construct a `Normal` object with mean `μ` and standard deviation `σ`,
 
-    Normal([μ|mu|mean]=0, [σ²|var]=1)
+    Normal(μ/mu/mean=0, σ²/var=1)
 
 Construct a `Normal` object with mean `μ` and variance `σ²`.
 
