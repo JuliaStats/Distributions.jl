@@ -18,9 +18,10 @@ size(d::MultivariateDistribution)
 
 """
     rand!(d::MultivariateDistribution, x::AbstractArray)
+    rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 
-Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of
-length `dim(d)` or a matrix with `dim(d)` rows.
+Draw samples and output them to a pre-allocated array x. Here, x can be either
+a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
 rand!(d::MultivariateDistribution, x::AbstractArray)
 
@@ -29,25 +30,44 @@ function rand!(d::MultivariateDistribution, x::AbstractVector)
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(d, x)
 end
-
 function rand!(d::MultivariateDistribution, A::AbstractMatrix)
     size(A,1) == length(d) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(sampler(d), A)
 end
 
+function rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractVector)
+    length(x) == length(d) ||
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(rng, d, x)
+end
+function rand!(rng::AbstractRNG, d::MultivariateDistribution, A::AbstractMatrix)
+    size(A,1) == length(d) ||
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(rng, sampler(d), A)
+end
+
 """
     rand(d::MultivariateDistribution)
+    rand(rng::AbstractRNG, d::MultivariateDistribution)
 
-Sample a vector from the distribution `d`.
+Sample a vector from the distribution `d` using random number generator `rng`.
 
     rand(d::MultivariateDistribution, n::Int) -> Vector
+    rand(rng::AbstractRNG, d::MultivariateDistribution, n::Int) -> Vector
 
-Sample n vectors from the distribution `d`. This returns a matrix of size `(dim(d), n)`,
-where each column is a sample.
+Sample n vectors from the distribution `d` using random number generator `rng`.
+This returns a matrix of size `(dim(d), n)`, where each column is a sample.
 """
-rand(d::MultivariateDistribution) = _rand!(d, Vector{eltype(d)}(undef, length(d)))
-rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Matrix{eltype(d)}(undef, length(d), n))
+rand(d::MultivariateDistribution) =
+    _rand!(d, Vector{eltype(d)}(undef, length(d)))
+rand(d::MultivariateDistribution, n::Int) =
+    _rand!(sampler(d), Matrix{eltype(d)}(undef, length(d), n))
+
+rand(rng::AbstractRNG, d::MultivariateDistribution) =
+    _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
+rand(rng::AbstractRNG, d::MultivariateDistribution, n::Int) =
+    _rand!(rng, sampler(d), Matrix{eltype(d)}(undef, length(d), n))
 
 """
     _rand!(d::MultivariateDistribution, x::AbstractArray)

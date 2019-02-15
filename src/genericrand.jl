@@ -38,13 +38,25 @@ function _rand!(s::Sampleable{Univariate}, A::AbstractArray)
     end
     return A
 end
+function _rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
+    for i in 1:length(A)
+        @inbounds A[i] = rand(rng, s)
+    end
+    return A
+end
 rand!(s::Sampleable{Univariate}, A::AbstractArray) = _rand!(s, A)
+rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray) =
+    _rand!(rng, s, A)
 
 rand(s::Sampleable{Univariate}, dims::Dims) =
     _rand!(s, Array{eltype(s)}(undef, dims))
+rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
+    _rand!(rng, s, Array{eltype(s)}(undef, dims))
 
 rand(s::Sampleable{Univariate}, dims::Int...) =
     _rand!(s, Array{eltype(s)}(undef, dims))
+rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Int...) =
+    _rand!(rng, s, Array{eltype(s)}(undef, dims))
 
 
 # multivariate
@@ -55,17 +67,33 @@ function _rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
     end
     return A
 end
+function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::AbstractMatrix)
+    for i = 1:size(A,2)
+        _rand!(rng, s, view(A,:,i))
+    end
+    return A
+end
 
 function rand!(s::Sampleable{Multivariate}, A::AbstractVector)
     length(A) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(s, A)
 end
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::AbstractVector)
+    length(A) == length(s) ||
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(rng, s, A)
+end
 
 function rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
     size(A,1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(s, A)
+end
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::AbstractMatrix)
+    size(A,1) == length(s) ||
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(rng, s, A)
 end
 
 rand(s::Sampleable{Multivariate}) =
