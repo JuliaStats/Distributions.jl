@@ -25,7 +25,8 @@ probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
-rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+_rand!(rng::AbstractRNG, d::UnivariateGMM) =
+    (k = _rand!(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
@@ -35,5 +36,6 @@ struct UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
     psampler::AliasTable
 end
 
-rand(s::UnivariateGMMSampler) = (k = rand(s.psampler); s.means[k] + randn() * s.stds[k])
+_rand!(rng::AbstractRNG, s::UnivariateGMMSampler) =
+    (k = _rand!(rng, s.psampler); s.means[k] + randn(rng) * s.stds[k])
 sampler(d::UnivariateGMM) = UnivariateGMMSampler(d.means, d.stds, sampler(d.prior))
