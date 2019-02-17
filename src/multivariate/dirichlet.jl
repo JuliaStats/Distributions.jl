@@ -179,24 +179,14 @@ end
 
 # sampling
 
-function _rand!(d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG,
+                d::Union{Dirichlet,DirichletCanon},
+                x::AbstractVector{<:Real})
     s = 0.0
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = rand(Gamma(α[i])))
-    end
-    multiply!(x, inv(s)) # this returns x
-end
-
-function _rand!(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{T}) where T<:Real
-    s = 0.0
-    n = length(x)
-    α = d.alpha
-    for i in 1:n
-        @inbounds s += (x[i] = rand(rng, Gamma(α[i])))
+        @inbounds s += (x[i] = _rand!(rng, Gamma(α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
