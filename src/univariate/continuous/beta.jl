@@ -116,20 +116,72 @@ gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
 
 #### Sampling
 
-# From GSL, from Knuth
-function _rand!(rng::AbstractRNG, d::Beta)
-    if (d.α ≤ 1.0) && (d.β ≤ 1.0)
+struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
+                   S2 <: Sampleable{Univariate,Continuous}} <:
+    Sampleable{Univariate,Continuous}
+    γ::Bool
+    iα::T
+    iβ::T
+    s1::S1
+    s2::S2
+end
+
+function sampler(d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        return BetaSampler(false, inv(α), inv(β),
+                           sampler(Uniform()), sampler(Uniform()))
+    else
+        return BetaSampler(true, inv(α), inv(β),
+                           sampler(Gamma(α, one(T))),
+                           sampler(Gamma(β, one(T))))
+    end
+end
+
+# From Knuth
+function _rand!(rng::AbstractRNG, s::BetaSampler)
+    if s.γ
+        g1 = _rand!(rng, s.s1)
+        g2 = _rand!(rng, s.s2)
+        return g1 / (g1 + g2)
+    else
+        iα = s.iα
+        iβ = s.iβ
         while true
-            u = rand(rng)
+            u = rand(rng) # the Uniform sampler just calls rand()
             v = rand(rng)
-            x = u^inv(d.α)
-            y = v^inv(d.β)
+            x = u^iα
+            y = v^iβ
             if x + y ≤ one(x)
                 if (x + y > 0)
                     return x / (x + y)
                 else
-                    logX = log(u) / d.α
-                    logY = log(v) / d.β
+                    logX = log(u) * iα
+                    logY = log(v) * iβ
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    end
+end
+
+function _rand!(rng::AbstractRNG, d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        while true
+            u = rand(rng)
+            v = rand(rng)
+            x = u^inv(α)
+            y = v^inv(β)
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) / α
+                    logY = log(v) / β
                     logM = logX > logY ? logX : logY
                     logX -= logM
                     logY -= logM
@@ -138,8 +190,8 @@ function _rand!(rng::AbstractRNG, d::Beta)
             end
         end
     else
-        g1 = _rand!(rng, Gamma(d.α, one(d.α)))
-        g2 = _rand!(rng, Gamma(d.β, one(d.β)))
+        g1 = _rand!(rng, Gamma(α, one(T)))
+        g2 = _rand!(rng, Gamma(β, one(T)))
         return g1 / (g1 + g2)
     end
 end
