@@ -24,7 +24,8 @@ failprob(d)     # Get the failure rate, i.e. 1 - p
 
 External links:
 
-* [Negative binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Negative_binomial_distribution)
+* [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
+Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
 struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution

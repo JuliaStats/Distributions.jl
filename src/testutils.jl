@@ -49,6 +49,9 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::B
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
 
+    if isa(distr, StudentizedRange)
+        n = 2000 # must use fewer values due to performance
+    end
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
     test_params(distr)
@@ -202,6 +205,10 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # generate samples
     samples = rand(s, n)
     @assert length(samples) == n
+
+    if isa(distr, StudentizedRange)
+        samples[isnan.(samples)] .= 0.0 # Underlying implementation in Rmath can't handle very low values.
+    end
 
     # check whether all samples are in the valid range
     for i = 1:n
@@ -389,25 +396,31 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     lcc = Vector{Float64}(undef, nv)
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)
+        if !isa(d, StudentizedRange)
+            p[i] = pdf(d, v)
+            lp[i] = logpdf(d, v)
+            @assert p[i] >= 0.0
+        end
+
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
-        lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
 
-        @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
         @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
-        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        if !isa(d, StudentizedRange)
+            @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        end
         @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
         @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         if testquan
             # TODO: remove this line when we have more accurate implementation
-            # of quantile for InverseGaussian
+            # of quantile for InverseGaussian and StudentizedRange
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
+            qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
                 @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
@@ -417,21 +430,26 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         end
     end
 
-    # check: pdf should be the derivative of cdf
-    for i = 2:(nv-1)
-        if p[i] > 1.0e-6
-            v = vs[i]
-            ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+    if !isa(d, StudentizedRange)
+        # check: pdf should be the derivative of cdf
+        for i = 2:(nv-1)
+            if p[i] > 1.0e-6
+                v = vs[i]
+                ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
+                @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+            end
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
+    if !isa(d, StudentizedRange)
+        @test pdf.(Ref(d), vs)  ≈ p
+        @test logpdf.(Ref(d), vs)  ≈ lp
+    end
+
     @test cdf.(Ref(d), vs)  ≈ c
     @test ccdf.(Ref(d), vs) ≈ cc
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
     @test logcdf.(Ref(d), vs)  ≈ lc
     @test logccdf.(Ref(d), vs) ≈ lcc
 end
@@ -475,6 +493,7 @@ end
 
 allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
+allow_test_stats(::StudentizedRange) = false
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods
