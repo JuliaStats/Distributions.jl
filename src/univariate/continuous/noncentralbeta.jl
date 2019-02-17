@@ -1,7 +1,7 @@
 """
     NoncentralBeta(α, β, λ)
 """
-struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralBeta{T<:Real} <: ContinuousUnivariateRDist
     α::T
     β::T
     λ::T
@@ -32,8 +32,15 @@ params(d::NoncentralBeta) = (d.α, d.β, d.λ)
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
+# RFunctions
 function rand(d::NoncentralBeta)
     a = rand(NoncentralChisq(2d.α, d.β))
     b = rand(Chisq(2d.β))
+    a / (a + b)
+end
+
+function _rand!(rng::AbstractRNG, d::NoncentralBeta)
+    a = _rand!(rng, NoncentralChisq(2d.α, d.β))
+    b = _rand!(rng, Chisq(2d.β))
     a / (a + b)
 end

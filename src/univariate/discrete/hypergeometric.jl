@@ -19,7 +19,7 @@ External links
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 
 """
-struct Hypergeometric <: DiscreteUnivariateDistribution
+struct Hypergeometric <: DiscreteUnivariateRDist
     ns::Int     # number of successes in population
     nf::Int     # number of failures in population
     n::Int      # sample size
@@ -74,7 +74,8 @@ end
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
 
-rand(d::Hypergeometric) = convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
+rand(d::Hypergeometric) =
+    convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
 
 struct RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
     ns::Float64

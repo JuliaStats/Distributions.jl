@@ -20,7 +20,7 @@ External links:
 
 * [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
 """
-struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
+struct Skellam{T<:Real} <: DiscreteUnivariateRDist
     μ1::T
     μ2::T
 
@@ -84,5 +84,8 @@ cdf(d::Skellam, x::Int) = throw(MethodError(cdf, (d, x)))
 cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
 
 #### Sampling
-
+# Rfunctions
 rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
+
+_rand!(rng::AbstractRNG, d::Skellam) =
+    _rand!(rng, Poisson(d.μ1)) - _rand!(rng, Poisson(d.μ2))

@@ -1,7 +1,7 @@
 """
     NoncentralF(ν1, ν2, λ)
 """
-struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralF{T<:Real} <: ContinuousUnivariateRDist
     ν1::T
     ν2::T
     λ::T
@@ -49,6 +49,13 @@ var(d::NoncentralF{T}) where {T<:Real} = d.ν2 > 4 ? 2d.ν2^2 *
 
 @_delegate_statsfuns NoncentralF nfdist ν1 ν2 λ
 
+function _rand!(rng::AbstractRNG, d::NoncentralF)
+    r1 = _rand!(rng, NoncentralChisq(d.ν1,d.λ)) / d.ν1
+    r2 = _rand!(rng, Chisq(d.ν2)) / d.ν2
+    r1 / r2
+end
+
+# Rfunctions
 function rand(d::NoncentralF)
     r1 = rand(NoncentralChisq(d.ν1,d.λ)) / d.ν1
     r2 = rand(Chisq(d.ν2)) / d.ν2

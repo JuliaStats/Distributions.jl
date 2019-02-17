@@ -1,7 +1,7 @@
 """
     NoncentralT(ν, λ)
 """
-struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralT{T<:Real} <: ContinuousUnivariateRDist
     ν::T
     λ::T
 
@@ -47,6 +47,13 @@ end
 
 @_delegate_statsfuns NoncentralT ntdist ν λ
 
+function _rand!(rng::AbstractRNG, d::NoncentralT)
+    z = randn(rng)
+    v = rand(rng, Chisq(d.ν))
+    (z+d.λ)/sqrt(v/d.ν)
+end
+
+# Rfunctions
 function rand(d::NoncentralT)
     z = randn()
     v = rand(Chisq(d.ν))

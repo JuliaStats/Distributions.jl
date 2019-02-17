@@ -20,7 +20,7 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
+struct Poisson{T<:Real} <: DiscreteUnivariateRDist
     λ::T
 
     Poisson{T}(λ::Real) where {T} = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))

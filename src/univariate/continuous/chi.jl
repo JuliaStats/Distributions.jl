@@ -95,4 +95,7 @@ invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
 
 #### Sampling
 
+# Rfunctions
 rand(d::Chi) = sqrt(_chisq_rand(d.ν))
+
+_rand(rng::AbstractRNG, d::Chi) = sqrt(_chisq_rand(rng, d.ν))

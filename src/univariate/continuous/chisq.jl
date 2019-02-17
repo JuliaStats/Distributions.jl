@@ -20,7 +20,7 @@ External links
 
 * [Chi-squared distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi-squared_distribution)
 """
-struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
+struct Chisq{T<:Real} <: ContinuousUnivariateRDist
     ν::T
 
     Chisq{T}(ν::T) where {T} = (@check_args(Chisq, ν > zero(ν)); new{T}(ν))
@@ -83,3 +83,5 @@ gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1
 
 _chisq_rand(ν::Float64) = StatsFuns.RFunctions.chisqrand(ν)
 rand(d::Chisq) = _chisq_rand(d.ν)
+
+_rand(rng::AbstractRNG, d::Chisq) = _chisq_rand(rng, d.ν)
