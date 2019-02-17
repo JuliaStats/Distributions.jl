@@ -17,64 +17,51 @@ size(d::MultivariateDistribution)
 ## sampling
 
 """
-    rand!(d::MultivariateDistribution, x::AbstractArray)
-    rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
+    rand!([rng::AbstractRNG,] d::MultivariateDistribution, x::AbstractArray)
 
 Draw samples and output them to a pre-allocated array x. Here, x can be either
 a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
 rand!(d::MultivariateDistribution, x::AbstractArray)
 
-function rand!(d::MultivariateDistribution, x::AbstractVector)
-    length(x) == length(d) ||
+# multivariate with pre-allocated array
+function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix)
+    size(m, 1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(d, x)
-end
-function rand!(d::MultivariateDistribution, A::AbstractMatrix)
-    size(A,1) == length(d) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(sampler(d), A)
-end
-
-function rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractVector)
-    length(x) == length(d) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(rng, d, x)
-end
-function rand!(rng::AbstractRNG, d::MultivariateDistribution, A::AbstractMatrix)
-    size(A,1) == length(d) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(rng, sampler(d), A)
+    smp = sampler(s)
+    for i in Base.OneTo(size(m,2))
+        _rand!(rng, smp, view(m,:,i))
+    end
+    return m
 end
 
-"""
-    rand(d::MultivariateDistribution)
-    rand(rng::AbstractRNG, d::MultivariateDistribution)
+# single multivariate with pre-allocated vector
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, v::AbstractVector)
+    length(v) == length(s) ||
+        throw(DimensionMismatch("Output size inconsistent with sample length."))
+    _rand!(rng, s, v)
+end
 
-Sample a vector from the distribution `d` using random number generator `rng`.
+# multiple multivariates with pre-allocated array
+function rand(rng::AbstractRNG, s::Sampleable{Multivariate},
+              X::AbstractArray{V}) where V <: AbstractVector
+    smp = sampler(s)
+    for i in eachindex(X)
+        X[i] = _rand!(rng, smp, V(undef, length(s)))
+    end
+    return X
+end
 
-    rand(d::MultivariateDistribution, n::Int) -> Vector
-    rand(rng::AbstractRNG, d::MultivariateDistribution, n::Int) -> Vector
+# multiple multivariate, must allocate matrix or array of vectors
+rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
+    _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
+    rand(rng, s, Array{Vector{eltype(s)}}(undef, dims))
 
-Sample n vectors from the distribution `d` using random number generator `rng`.
-This returns a matrix of size `(dim(d), n)`, where each column is a sample.
-"""
-rand(d::MultivariateDistribution) =
-    _rand!(d, Vector{eltype(d)}(undef, length(d)))
-rand(d::MultivariateDistribution, n::Int) =
-    _rand!(sampler(d), Matrix{eltype(d)}(undef, length(d), n))
-
-rand(rng::AbstractRNG, d::MultivariateDistribution) =
-    _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
-rand(rng::AbstractRNG, d::MultivariateDistribution, n::Int) =
-    _rand!(rng, sampler(d), Matrix{eltype(d)}(undef, length(d), n))
-
-"""
-    _rand!(d::MultivariateDistribution, x::AbstractArray)
-
-Generate a vector sample to `x`. This function does not need to perform dimension checking.
-"""
-_rand!(d::MultivariateDistribution, x::AbstractArray)
+# single multivariate, must allocate vector
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =
+    _rand!(rng, s, Vector{eltype(s)}(undef, length(s)))
 
 ## domain
 

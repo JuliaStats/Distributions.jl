@@ -120,3 +120,17 @@ succprob(d::DiscreteUnivariateDistribution)
 Get the probability of failure.
 """
 failprob(d::DiscreteUnivariateDistribution)
+
+# Temporary fix to identify Rfunctions
+abstract type DiscreteUnivariateRDist <: DiscreteUnivariateDistribution end
+abstract type ContinuousUnivariateRDist <: ContinuousUnivariateDistribution end
+function rand(d::Union{DiscreteUnivariateRDist, ContinuousUnivariateRDist}, n::Int)
+    [rand(d) for i in Base.OneTo(n)]
+end
+function rand!(d::Union{DiscreteUnivariateRDist, ContinuousUnivariateRDist},
+               X::AbstractArray)
+    for i in eachindex(X)
+        X[i] = rand(d)
+    end
+    return X
+end

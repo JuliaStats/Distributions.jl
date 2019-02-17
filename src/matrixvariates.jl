@@ -22,16 +22,42 @@ Return the mean matrix of `d`.
 """
 mean(d::MatrixDistribution)
 
-# sampling
+## sampling
+# multiple matrix-variates with pre-allocated array
+function rand(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+              X::AbstractArray{M}) where M <: AbstractMatrix
+    smp = sampler(s)
+    for i in eachindex(X)
+        X[i] = _rand!(rng, smp, M(undef, size(s)))
+    end
+    return X
+end
 
-rand!(d::MatrixDistribution, A::AbstractArray{M}) where {M<:Matrix} = _rand!(sampler(d), A)
+# multiple matrix-variates with pre-allocated array of pre-allocated matrices
+function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+               X::AbstractArray{<:AbstractMatrix})
+    smp = sampler(s)
+    for x in X
+        rand!(rng, smp, x)
+    end
+    return X
+end
 
-"""
-    rand(d::MatrixDistribution, n)
+# multiple matrix-variates, must allocate array of arrays
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
+    rand(rng, s, Array{Matrix{eltype(s)}}(undef, dims))
 
-Draw a sample matrix from the distribution `d`.
-"""
-rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(undef, n))
+# single matrix-variate, must allocate one matrix
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
+    _rand!(rng, s, Matrix{eltype(s)}(undef, size(s)))
+
+# single matrix-variate with pre-allocated matrix
+function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+               A::AbstractMatrix{<:Real})
+    size(A) == size(s) ||
+        throw(DimensionMismatch("Output size inconsistent with sample size."))
+    return _rand!(rng, s, A)
+end
 
 # pdf & logpdf
 
