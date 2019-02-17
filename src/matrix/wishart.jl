@@ -108,7 +108,7 @@ end
 
 #### Sampling
 function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
-    Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df, A))
+    Z = unwhiten!(d.S, _wishart_genA!(dim(d), d.df, A))
     return Z * Z'
 end
 
