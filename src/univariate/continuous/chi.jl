@@ -1,9 +1,17 @@
 """
-    Chi(;ν)
-    Chi(;nu)
-    Chi(;dof)
+    Chi <: ContinuousUnivariateDistribution
 
-The *Chi distribution* `ν` degrees of freedom has probability density function
+The *Chi* probability distribution.
+
+# Constructors
+
+    Chi(ν|nu|dof=)
+
+Construct a `Chi` distribution object with `ν` degrees of freedom.
+
+# Details
+
+The Chi distribution `ν` degrees of freedom has probability density function
 
 ```math
 f(x; k) = \\frac{1}{\\Gamma(k/2)} 2^{1 - k/2} x^{k-1} e^{-x^2/2}, \\quad x > 0
@@ -11,14 +19,13 @@ f(x; k) = \\frac{1}{\\Gamma(k/2)} 2^{1 - k/2} x^{k-1} e^{-x^2/2}, \\quad x > 0
 
 It is the distribution of the square-root of a [`Chisq`](@ref) variate.
 
-```julia
-Chi(k)       # Chi distribution with k degrees of freedom
+# Examples
 
-params(d)    # Get the parameters, i.e. (k,)
-dof(d)       # Get the degrees of freedom, i.e. k
+```julia
+Chi(ν=3)
 ```
 
-External links
+# External links
 
 * [Chi distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi_distribution)
 
@@ -32,10 +39,9 @@ end
 Chi(ν::T) where {T<:Real} = Chi{T}(ν)
 Chi(ν::Integer) = Chi(float(ν))
 
-@kwdispatch Chi()
-@kwmethod Chi(;ν) = Chi(ν)
-@kwmethod Chi(;nu) = Chi(nu)
-@kwmethod Chi(;dof) = Chi(dof)
+@kwdispatch (::Type{D})(;nu=>ν, dof=>ν) where {D<:Chi} begin
+    (ν) -> D(ν)
+end
 
 @distr_support Chi 0.0 Inf
 

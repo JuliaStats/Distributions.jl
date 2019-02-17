@@ -1,16 +1,23 @@
 """
-    Erlang(;α=1, θ=1)
-    Erlang(;alpha=1, theta=1)
+    Erlang <: ContinuousUnivariateDistribution
+
+# Constructors
+
+    Erlang(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct an `Erlang` distribution object with shape `α` amd scale `θ`.
+
+# Details
 
 The *Erlang distribution* is a special case of a [`Gamma`](@ref) distribution with integer shape parameter.
 
 ```julia
-Erlang()       # Erlang distribution with unit shape and unit scale, i.e. Erlang(1, 1)
-Erlang(a)      # Erlang distribution with shape parameter a and unit scale, i.e. Erlang(a, 1)
-Erlang(a, s)   # Erlang distribution with shape parameter a and scale b
+Erlang()
+Erlang(α=3)
+Erlang(α=3, θ=5)
 ```
 
-External links
+# External links
 
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
@@ -28,16 +35,12 @@ end
 Erlang(α::Int, θ::T) where {T<:Real} = Erlang{T}(α, θ)
 Erlang(α::Int, θ::Integer) = Erlang(α, float(θ))
 
-@kwdispatch Erlang()
-@kwmethod Erlang(;α, θ) = Erlang(α, θ)
-@kwmethod Erlang(;α) = Erlang(α, 1.0)
-@kwmethod Erlang(;θ) = Erlang(1, θ)
-
-@kwmethod Erlang(;alpha, theta) = Erlang(alpha, theta)
-@kwmethod Erlang(;alpha) = Erlang(alpha, 1.0)
-@kwmethod Erlang(;theta) = Erlang(1, theta)
-
-@kwmethod Erlang(;) = Erlang(1, 1.0)
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ, beta=>β, rate=>β) where {D<:Erlang} begin
+    (α, θ) -> D(α,θ)
+    (α) -> D(α,1)
+    (θ) -> D(1,θ)
+    () -> D(1,1)
+end
 
 @distr_support Erlang 0.0 Inf
 

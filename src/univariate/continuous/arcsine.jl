@@ -1,25 +1,29 @@
 """
-    Arcsine(;a=0,b=1)
+    Arcsine <: ContinuousUnivariatDistribution
 
-The *Arcsine distribution* has probability density function
+The *arcsine* probability distribution 
+
+# Constructors
+
+    Arcsine(a=0,b=1)
+
+Construct an `Arcsine` distribution object with minimum `a` and maximum `b`.
+
+# Details
+The arcsine distribution has probability density function
 
 ```math
 f(x) = \\frac{1}{\\pi \\sqrt{(x - a) (b - x)}}, \\quad x \\in [a, b]
 ```
 
+# Examples
 ```julia
-Arcsine()        # Arcsine distribution with support [0, 1]
-Arcsine(b)       # Arcsine distribution with support [0, b]
-Arcsine(a, b)    # Arcsine distribution with support [a, b]
-
-params(d)        # Get the parameters, i.e. (a, b)
-minimum(d)       # Get the lower bound, i.e. a
-maximum(d)       # Get the upper bound, i.e. b
-location(d)      # Get the left bound, i.e. a
-scale(d)         # Get the span of the support, i.e. b - a
+Arcsine()
+Arcsine(b=10)
+Arcsine(a=2, b=2)
 ```
 
-External links
+# External links
 
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
 
@@ -35,11 +39,12 @@ Arcsine(a::T, b::T) where {T<:Real} = Arcsine{T}(a, b)
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
 Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
 
-@kwdispatch Arcsine()
-
-@kwmethod Arcsine(;a,b) = Arcsine(a,b)
-@kwmethod Arcsine(;b) = Arcsine(0.0,b)
-@kwmethod Arcsine(;) = Arcsine(0.0,1.0)
+@kwdispatch (::Type{D})() where {D<:Arcsine} begin
+    () -> D(0,1)
+    (a) -> D(a,1)
+    (b) -> D(0,b)
+    (a,b) -> D(a,b)
+end
 
 @distr_support Arcsine d.a d.b
 

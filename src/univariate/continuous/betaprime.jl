@@ -1,27 +1,35 @@
 """
-    BetaPrime(α,β)
+    BetaPrime <: ContinuousUnivariateDistribution
 
-The *Beta prime distribution* has probability density function
+The *beta prime* probability distribution.
+
+# Constructors
+
+    BetaPrime(α|alpha=1, β|beta=1)
+
+Construct a `BetaPrime` distribution object with parameters `α` and `β`.
+
+# Details
+
+The beta prime distribution has probability density function
 
 ```math
 f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
 x^{\\alpha - 1} (1 + x)^{- (\\alpha + \\beta)}, \\quad x > 0
 ```
 
-
-The Beta prime distribution is related to the [`Beta`](@ref) distribution via the
+The beta prime distribution is related to the [`Beta`](@ref) distribution via the
 relation ship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
 \\sim \\operatorname{BetaPrime}(\\alpha, \\beta)``
 
-```julia
-BetaPrime()        # equivalent to BetaPrime(1, 1)
-BetaPrime(a)       # equivalent to BetaPrime(a, a)
-BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
+# Examples
 
-params(d)          # Get the parameters, i.e. (a, b)
+```julia
+BetaPrime()
+BetaPrime(α=3, β=4)
 ```
 
-External links
+# External links
 
 * [Beta prime distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_prime_distribution)
 
@@ -40,11 +48,12 @@ BetaPrime(α::T, β::T) where {T<:Real} = BetaPrime{T}(α, β)
 BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
 BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
 
-@kwdispatch BetaPrime()
-
-@kwmethod BetaPrime(;) = BetaPrime(1,1)
-@kwmethod BetaPrime(;α,β) = BetaPrime(α,β)
-@kwmethod BetaPrime(;alpha,beta) = BetaPrime(alpha,beta)
+@kwdispatch (::Type{D})(;alpha=>α, beta=>β) where {D<:BetaPrime} begin
+    () -> D(1,1)
+    (β) -> D(1,β)
+    (α) -> D(α,1)
+    (α,β) -> D(α,β)
+end
 
 @distr_support BetaPrime 0.0 Inf
 

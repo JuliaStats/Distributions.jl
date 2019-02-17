@@ -7,26 +7,26 @@ The *normal* or *Gaussian* probability distribution.
 
     Normal(μ|mu|mean=0, σ|sigma|std=1)
 
-Construct a `Normal` object with mean `μ` and standard deviation `σ`,
+Construct a `Normal` distribution object with mean `μ` and standard deviation `σ`,
 
     Normal(μ|mu|mean=0, σ²|var=1)
 
-Construct a `Normal` object with mean `μ` and variance `σ²`.
+Construct a `Normal` distribution object with mean `μ` and variance `σ²`.
 
 # Details
 
 The normal distribution mean `μ` and standard deviation `σ` has probability density
-function has probability density function
+function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 \\exp \\left( - \\frac{(x - \\mu)^2}{2 \\sigma^2} \\right)
 ```
 
-Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
-Though not technically a continuous distribution, it is allowed so as to account for cases
-where `σ` may have underflowed, and the functions are defined by taking the pointwise
-limit as ``σ → 0``.
+Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.  Though
+not technically a continuous distribution, it is allowed so as to account for cases where
+`σ` may have underflowed. Distribution and density functions are defined by taking the
+pointwise limit as ``σ → 0``.
 
 # Examples
 
@@ -35,7 +35,7 @@ Normal()   # standard Normal distribution with zero mean and unit variance
 Normal(μ=2, σ=3)
 ```
 
-External links
+# External links
 
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 

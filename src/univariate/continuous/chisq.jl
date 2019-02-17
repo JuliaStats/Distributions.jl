@@ -1,10 +1,18 @@
 """
-    Chisq(;ν)
-    Chisq(;nu)
-    Chisq(;dof)
+    Chisq <: ContinuousUnivariateDistribution
 
-The *Chi squared distribution* (typically written χ²) with `ν` degrees of freedom has the
-probability density function
+The *Chi squared* or *χ²* probability distribution.
+
+# Constructors
+
+    Chisq(ν|nu|dof=)
+
+Construct a `Chisq` distribution object with `ν` degrees of freedom.
+
+# Details
+
+The Chi squared distribution with `ν` degrees of freedom has the probability density
+function
 
 ```math
 f(x; k) = \\frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \\Gamma(k/2)}, \\quad x > 0.
@@ -12,14 +20,13 @@ f(x; k) = \\frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \\Gamma(k/2)}, \\quad x > 0.
 
 If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
 
-```julia
-Chisq(k)     # Chi-squared distribution with k degrees of freedom
+# Examples
 
-params(d)    # Get the parameters, i.e. (k,)
-dof(d)       # Get the degrees of freedom, i.e. k
+```julia
+Chisq(ν=3)
 ```
 
-External links
+# External links
 
 * [Chi-squared distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi-squared_distribution)
 """
@@ -32,10 +39,9 @@ end
 Chisq(ν::T) where {T<:Real} = Chisq{T}(ν)
 Chisq(ν::Integer) = Chisq(float(ν))
 
-@kwdispatch Chisq()
-@kwmethod Chisq(;ν) = Chisq(ν)
-@kwmethod Chisq(;nu) = Chisq(nu)
-@kwmethod Chisq(;dof) = Chisq(dof)
+@kwdispatch (::Type{D})(;nu=>ν, dof=>ν) where {D<:Chisq} begin
+    (ν) -> D(ν)
+end
 
 @distr_support Chisq 0.0 Inf
 

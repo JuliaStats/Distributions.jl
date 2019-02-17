@@ -1,9 +1,22 @@
 """
-    Beta(α,β)
-    Beta(;alpha,beta)
-    Beta(;mean,std)
+    Beta <: ContinuousUnivariateDistribution
 
-The *Beta distribution* has probability density function
+The *beta* probability distribution.
+
+# Constructors
+
+    Beta(α|alpha=1, β|beta=1)
+
+Construct a `Beta` distribution object with parameters `α` and `β`.
+
+    Beta(mean=,var=)
+    Beta(mean=,std=)
+
+Construct a `Beta` distribution object matching the relevant moments.
+
+# Details
+
+The beta distribution has probability density function
 
 ```math
 f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
@@ -14,12 +27,15 @@ The Beta distribution is related to the [`Gamma`](@ref) distribution via the
 property that if ``X \\sim \\operatorname{Gamma}(\\alpha)`` and ``Y \\sim \\operatorname{Gamma}(\\beta)``
 independently, then ``X / (X + Y) \\sim Beta(\\alpha, \\beta)``.
 
+# Examples
 
 ```julia
-params(d)     # Get the parameters, i.e. (a, b)
+Beta()
+Beta(α=3, β=4)
+Beta(mean=0.2, std=0.1)
 ```
 
-External links
+# External links
 
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
@@ -36,23 +52,27 @@ end
 
 Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
+Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
 
-@kwdispatch Beta()
+@kwdispatch (::Type{D})(;alpha=>α, beta=>β) where {D<:Beta} begin
+    () -> D(1,1)
+    (β) -> D(1,β)
+    (α) -> D(α,1)
+    (α,β) -> D(α,β)
 
-@kwmethod Beta(;) = Beta(1,1)
-@kwmethod Beta(;α,β) = Beta(α,β)
-@kwmethod Beta(;alpha,beta) = Beta(alpha,beta)
+    function (mean, var)
+        @check_args(Beta, 0 < mean < 1)
+        @check_args(Beta, 0 < var < mean*(1-mean))
+        U = (mean*(1-mean))/var - 1
+        α = mean*U
+        β = U-α
+        D(α,β)
+    end
 
-@kwmethod function Beta(;mean, var)
-    @check_args(Beta, 0 < mean < 1)
-    @check_args(Beta, 0 < var < mean*(1-mean))
-    U = (mean*(1-mean))/var - 1
-    α = mean*U
-    β = U-α
-    Beta(α,β)
+    function (mean, std)
+        D(mean=mean,var=sqrt(std))
+    end
 end
-@kwmethod Beta(;mean, std) = Beta(mean=mean,var=sqrt(std))
 
 @distr_support Beta 0.0 1.0
 

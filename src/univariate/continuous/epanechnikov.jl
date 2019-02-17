@@ -14,18 +14,12 @@ Epanechnikov(μ::T, σ::T) where {T<:Real} = Epanechnikov{T}(μ, σ)
 Epanechnikov(μ::Real, σ::Real) = Epanechnikov(promote(μ, σ)...)
 Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(float(μ), float(σ))
 
-@kwdispatch Epanechnikov()
-@kwmethod Epanechnikov(;μ,σ) = Epanechnikov(μ,σ)
-@kwmethod Epanechnikov(;μ) = Epanechnikov(μ,1)
-@kwmethod Epanechnikov(;σ) = Epanechnikov(0,σ)
-
-@kwmethod Epanechnikov(;mu,sigma) = Epanechnikov(mu,sigma)
-@kwmethod Epanechnikov(;mu) = Epanechnikov(mu,1)
-@kwmethod Epanechnikov(;sigma) = Epanechnikov(0,sigma)
-
-@kwmethod Epanechnikov(;) = Epanechnikov(0,1)
-
-
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Epanechnikov} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Epanechnikov d.μ - d.σ d.μ + d.σ
 

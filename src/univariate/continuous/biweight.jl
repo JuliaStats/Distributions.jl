@@ -12,16 +12,12 @@ Biweight(μ::T, σ::T) where {T<:Real} = Biweight{T}(μ, σ)
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
 Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
 
-@kwdispatch Biweight()
-@kwmethod Biweight(;μ,σ) = Biweight(μ,σ)
-@kwmethod Biweight(;μ) = Biweight(μ,1)
-@kwmethod Biweight(;σ) = Biweight(0,σ)
-
-@kwmethod Biweight(;mu,sigma) = Biweight(mu,sigma)
-@kwmethod Biweight(;mu) = Biweight(mu,1)
-@kwmethod Biweight(;sigma) = Biweight(0,sigma)
-
-@kwmethod Biweight(;) = Biweight(0,1)
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Biweight} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 
