@@ -107,13 +107,12 @@ function _logpdf(d::Wishart, X::AbstractMatrix)
 end
 
 #### Sampling
-
-function rand(d::Wishart)
-    Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df))
-    Z * Z'
+function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
+    Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df, A))
+    return Z * Z'
 end
 
-function _wishart_genA(p::Int, df::Real)
+function _wishart_genA!(p::Int, df::Real, A::AbstractMatrix)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
@@ -121,7 +120,6 @@ function _wishart_genA(p::Int, df::Real)
     #       A(i, j) ~ sqrt of Chisq(df - i + 1) when i == j
     #               ~ Normal()                  when i > j
     #
-    A = zeros(p, p)
     for i = 1:p
         @inbounds A[i,i] = sqrt(rand(Chisq(df - i + 1.0)))
     end

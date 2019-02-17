@@ -93,12 +93,5 @@ end
 
 #### Sampling
 
-rand(d::InverseWishart) = inv(cholesky!(rand(Wishart(d.df, inv(d.Ψ)))))
-
-function _rand!(d::InverseWishart, X::AbstractArray{M}) where M<:Matrix
-    wd = Wishart(d.df, inv(d.Ψ))
-    for i in 1:length(X)
-        X[i] = inv(cholesky!(rand(wd)))
-    end
-    return X
-end
+_rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix) =
+    inv(cholesky!(_rand!(rng, Wishart(d.df, inv(d.Ψ)), A)))
