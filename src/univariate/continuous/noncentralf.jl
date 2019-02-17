@@ -55,7 +55,7 @@ function _rand!(rng::AbstractRNG, d::NoncentralF)
     r1 / r2
 end
 
-# Rfunctions
+# TODO: remove RFunctions dependency once NoncentralChisq has its removed
 function rand(d::NoncentralF)
     r1 = rand(NoncentralChisq(d.ν1,d.λ)) / d.ν1
     r2 = rand(Chisq(d.ν2)) / d.ν2

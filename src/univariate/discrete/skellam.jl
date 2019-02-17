@@ -84,7 +84,7 @@ cdf(d::Skellam, x::Int) = throw(MethodError(cdf, (d, x)))
 cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
 
 #### Sampling
-# Rfunctions
+# TODO: remove RFunctions dependency once Poisson has its removed
 rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
 
 _rand!(rng::AbstractRNG, d::Skellam) =

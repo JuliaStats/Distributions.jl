@@ -86,8 +86,15 @@ mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p)
 
 @_delegate_statsfuns NegativeBinomial nbinom r p
 
+## sampling
+# TODO: remove RFunctions dependency once Poisson has its removed
 rand(d::NegativeBinomial) =
     convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
+
+function _rand!(rng::AbstractRNG, d::NegativeBinomial)
+    lambda = _rand!(rng, Gamma(d.r, (1-d.p)/d.p))
+    return _rand!(rng, Poisson(lambda))
+end
 
 struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64
