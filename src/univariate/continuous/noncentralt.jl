@@ -1,7 +1,7 @@
 """
     NoncentralT(ν, λ)
 """
-struct NoncentralT{T<:Real} <: ContinuousUnivariateRDist
+struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
 
@@ -53,9 +53,9 @@ function _rand!(rng::AbstractRNG, d::NoncentralT)
     (z+d.λ)/sqrt(v/d.ν)
 end
 
-# Rfunctions
-function rand(d::NoncentralT)
-    z = randn()
-    v = rand(Chisq(d.ν))
-    (z+d.λ)/sqrt(v/d.ν)
+function _rand!(rng::AbstractRNG, d::NoncentralT)
+    ν = d.ν
+    z = randn(rng)
+    v = rand(rng, Chisq(ν))
+    (z+d.λ)/sqrt(v/ν)
 end

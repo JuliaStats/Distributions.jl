@@ -73,7 +73,11 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-rand(d::TDist) = StatsFuns.RFunctions.tdistrand(d.ν)
+function _rand!(rng::AbstractRNG, d::TDist)
+    z = randn(rng)
+    ν = d.ν
+    return z/sqrt(rand(rng, Chisq(ν))/ν)
+end
 
 function cf(d::TDist, t::Real)
     t == 0 && return complex(1)

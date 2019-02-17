@@ -121,7 +121,7 @@ Get the probability of failure.
 """
 failprob(d::DiscreteUnivariateDistribution)
 
-# Temporary fix to identify Rfunctions
+# Temporary fix to handle RFunctions dependencies
 abstract type DiscreteUnivariateRDist <: DiscreteUnivariateDistribution end
 abstract type ContinuousUnivariateRDist <: ContinuousUnivariateDistribution end
 function rand(d::Union{DiscreteUnivariateRDist, ContinuousUnivariateRDist}, n::Int)

@@ -22,7 +22,7 @@ External links
 
 * [F distribution on Wikipedia](http://en.wikipedia.org/wiki/F-distribution)
 """
-struct FDist{T<:Real} <: ContinuousUnivariateRDist
+struct FDist{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
 
@@ -100,4 +100,6 @@ end
 
 @_delegate_statsfuns FDist fdist ν1 ν2
 
-rand(d::FDist) = StatsFuns.RFunctions.fdistrand(d.ν1, d.ν2)
+_rand!(rng::AbstractRNG, d::FDist) =
+    ((ν1, ν2) = params(d);
+     (ν2 * _rand!(rng, Chisq(ν1))) / (ν1 * _rand!(rng, Chisq(ν2))))
