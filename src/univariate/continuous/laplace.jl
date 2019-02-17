@@ -107,8 +107,8 @@ end
 
 #### Sampling
 
-rand(d::Laplace) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
+_rand!(rng::AbstractRNG, d::Laplace) =
+    d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
 
 #### Fitting

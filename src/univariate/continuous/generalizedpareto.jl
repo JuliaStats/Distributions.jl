@@ -179,8 +179,7 @@ end
 
 #### Sampling
 
-rand(d::GeneralizedPareto) = rand(GLOBAL_RNG, d)
-function rand(rng::AbstractRNG, d::GeneralizedPareto)
+function _rand!(rng::AbstractRNG, d::GeneralizedPareto)
     # Generate a Float64 random number uniformly in (0,1].
     u = 1 - rand(rng)
 

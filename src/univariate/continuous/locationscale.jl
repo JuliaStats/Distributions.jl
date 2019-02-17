@@ -71,6 +71,6 @@ cdf(d::LocationScale,x::Real) = cdf(d.ρ,(x-d.μ)/d.σ)
 logcdf(d::LocationScale,x::Real) = logcdf(d.ρ,(x-d.μ)/d.σ)
 quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 
-rand(d::LocationScale) = d.μ + d.σ * rand(d.ρ)
+_rand!(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * _rand!(rng, d.ρ)
 cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 gradlogpdf(d::LocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ

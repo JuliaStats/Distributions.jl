@@ -120,8 +120,7 @@ end
 
 #### Sampling
 
-rand(d::LogNormal) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+_rand!(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
 
 ## Fitting
 
