@@ -525,10 +525,15 @@ function MixtureSampler(d::MixtureModel{VF,VS}) where {VF,VS}
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
 end
 
+_rand!(rng::AbstractRNG, s::MixtureSampler{Univariate}) =
+    _rand!(rng, s.csamplers[_rand!(rng, s.psampler)])
 _rand!(rng::AbstractRNG, d::MixtureModel) =
     _rand!(rng, component(d, _rand!(rng, d.prior)))
 
+# multivariate mixture sampler for a vector
 _rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector) =
     _rand!(rng, s.csamplers[_rand!(rng, s.psampler)], x)
+_rand!(rng::AbstractRNG, s::MixtureModel{Multivariate}, x::AbstractVector) =
+    _rand!(rng, sampler(s), x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)

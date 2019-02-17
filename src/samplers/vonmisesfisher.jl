@@ -18,13 +18,14 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     VonMisesFisherSampler(p, κ, b, x0, c, Q)
 end
 
-function _rand!(spl::VonMisesFisherSampler, x::AbstractVector, t::AbstractVector)
-    w = _vmf_genw(spl)
+function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler,
+                x::AbstractVector, t::AbstractVector)
+    w = _vmf_genw(rng, spl)
     p = spl.p
     t[1] = w
     s = 0.0
     for i = 2:p
-        t[i] = ti = randn()
+        t[i] = ti = randn(rng)
         s += abs2(ti)
     end
 
@@ -39,12 +40,13 @@ function _rand!(spl::VonMisesFisherSampler, x::AbstractVector, t::AbstractVector
     return x
 end
 
-_rand!(spl::VonMisesFisherSampler, x::AbstractVector) = _rand!(spl, x, Vector{Float64}(undef, length(x)))
+_rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector) =
+    _rand!(rng, spl, x, Vector{Float64}(undef, length(x)))
 
-function _rand!(spl::VonMisesFisherSampler, x::AbstractMatrix)
+function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractMatrix)
     t = Vector{Float64}(undef, size(x, 1))
     for j = 1:size(x, 2)
-        _rand!(spl, view(x,:,j), t)
+        _rand!(rng, spl, view(x,:,j), t)
     end
     return x
 end
@@ -54,7 +56,7 @@ end
 
 _vmf_bval(p::Int, κ::Real) = (p - 1) / (2.0κ + sqrt(4 * abs2(κ) + abs2(p - 1)))
 
-function _vmf_genw(p, b, x0, c, κ)
+function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
     # generate the W value -- the key step in simulating vMF
     #
     #   following movMF's document
@@ -62,16 +64,17 @@ function _vmf_genw(p, b, x0, c, κ)
 
     r = (p - 1) / 2.0
     betad = Beta(r, r)
-    z = rand(betad)
+    z = _rand!(rng, betad)
     w = (1.0 - (1.0 + b) * z) / (1.0 - (1.0 - b) * z)
     while κ * w + (p - 1) * log(1 - x0 * w) - c < log(rand())
-        z = rand(betad)
+        z = _rand!(rng, betad)
         w = (1.0 - (1.0 + b) * z) / (1.0 - (1.0 - b) * z)
     end
     return w::Float64
 end
 
-_vmf_genw(s::VonMisesFisherSampler) = _vmf_genw(s.p, s.b, s.x0, s.c, s.κ)
+_vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
+    _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
 
 function _vmf_rotmat(u::Vector{Float64})
     # construct a rotation matrix Q

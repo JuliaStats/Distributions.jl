@@ -155,11 +155,10 @@ function gradlogpdf(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
 end
 
 # Sampling (for GenericMvTDist)
-
-function _rand!(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
-    y = sqrt(rand(chisqd)/(d.df))
-    unwhiten!(d.Σ, randn!(x))
+    y = sqrt(_rand!(rng, chisqd)/(d.df))
+    unwhiten!(d.Σ, randn!(rng, x))
     broadcast!(/, x, x, y)
     if !d.zeromean
         broadcast!(+, x, x, d.μ)
@@ -167,12 +166,12 @@ function _rand!(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
     x
 end
 
-function _rand!(d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
+function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
     chisqd = Chisq(d.df)
     y = Matrix{T}(undef, 1, cols)
-    unwhiten!(d.Σ, randn!(x))
-    rand!(chisqd, y)
+    unwhiten!(d.Σ, randn!(rng, x))
+    rand!(rng, chisqd, y)
     y = sqrt.(y/(d.df))
     broadcast!(/, x, x, y)
     if !d.zeromean

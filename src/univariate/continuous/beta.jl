@@ -26,7 +26,7 @@ External links
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
 """
-struct Beta{T<:Real} <: ContinuousUnivariateRDist
+struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
@@ -116,7 +116,33 @@ gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
 
 #### Sampling
 
-rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
+# From GSL, from Knuth
+function _rand!(rng::AbstractRNG, d::Beta)
+    if (d.α ≤ 1.0) && (d.β ≤ 1.0)
+        while true
+            u = rand(rng)
+            v = rand(rng)
+            x = u^inv(d.α)
+            y = v^inv(d.β)
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) / d.α
+                    logY = log(v) / d.β
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    else
+        g1 = _rand!(rng, Gamma(d.α, one(d.α)))
+        g2 = _rand!(rng, Gamma(d.β, one(d.β)))
+        return g1 / (g1 + g2)
+    end
+end
 
 #### Fit model
 

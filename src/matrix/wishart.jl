@@ -112,7 +112,6 @@ function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     return Z * Z'
 end
 
-#danger
 function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
     # Generate the matrix A in the Bartlett decomposition
     #
@@ -123,7 +122,7 @@ function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
     #
     A .= zero(eltype(A))
     for i = 1:p
-        @inbounds A[i,i] = rand(Chi(df - i + 1.0))
+        @inbounds A[i,i] = _rand!(rng, Chi(df - i + 1.0))
     end
     for j in 1:p-1, i in j+1:p
         @inbounds A[i,j] = randn(rng)
