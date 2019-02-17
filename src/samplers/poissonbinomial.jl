@@ -4,5 +4,4 @@ end
 
 PoissBinAliasSampler(d::PoissonBinomial) = PoissBinAliasSampler(AliasTable(d.pmf))
 
-rand(s::PoissBinAliasSampler) = rand(s.table) - 1
-
+_rand!(rng::AbstractRNG, s::PoissBinAliasSampler) = _rand!(rng, s.table) - 1

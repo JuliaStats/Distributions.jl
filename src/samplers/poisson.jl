@@ -1,11 +1,4 @@
 
-struct PoissonRmathSampler <: Sampleable{Univariate,Discrete}
-    mu::Float64
-end
-
-rand(s::PoissonRmathSampler) = round(Int, StatsFuns.RFunctions.poisrand(s.mu))
-
-
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
     pv = Vector{Float64}(undef, n+1)
@@ -24,14 +17,14 @@ struct PoissonCountSampler <: Sampleable{Univariate,Discrete}
     μ::Float64
 end
 
-function rand(s::PoissonCountSampler)
+function _rand!(rng::AbstractRNG, s::PoissonCountSampler)
     μ = s.μ
     n = 0
-    c = randexp()
+    c = randexp(rng)
     while c < μ
         n += 1
-        c += randexp()
-    end 
+        c += randexp(rng)
+    end
     return n
 end
 
@@ -40,7 +33,7 @@ end
 #   J.H. Ahrens, U. Dieter (1982)
 #   "Computer Generation of Poisson Deviates from Modified Normal Distributions"
 #   ACM Transactions on Mathematical Software, 8(2):163-179
-#   
+#
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
 struct PoissonADSampler <: Sampleable{Univariate,Discrete}
@@ -50,12 +43,12 @@ struct PoissonADSampler <: Sampleable{Univariate,Discrete}
     L::Int
 end
 
-PoissonADSampler(μ::Float64) = 
+PoissonADSampler(μ::Float64) =
     PoissonADSampler(μ,sqrt(μ),6.0*μ^2,floor(Int,μ-1.1484))
 
-function rand(s::PoissonADSampler)
+function _rand!(rng::AbstractRNG, s::PoissonADSampler)
     # Step N
-    G = s.μ + s.s*randn()
+    G = s.μ + s.s*randn(rng)
 
     if G >= 0.0
         K = floor(Int,G)
@@ -65,7 +58,7 @@ function rand(s::PoissonADSampler)
         end
 
         # Step S
-        U = rand()
+        U = rand(rng)
         if s.d*U >= (s.μ-K)^3
             return K
         end
@@ -81,8 +74,8 @@ function rand(s::PoissonADSampler)
 
     while true
         # Step E
-        E = randexp()
-        U = 2.0*rand()-1.0
+        E = randexp(rng)
+        U = 2.0*rand(rng)-1.0
         T = 1.8+copysign(E,U)
         if T <= -0.6744
             continue
@@ -99,7 +92,7 @@ function rand(s::PoissonADSampler)
     end
 end
 
-# Procedure F                    
+# Procedure F
 function procf(μ::Float64, K::Int, s::Float64)
     # can be pre-computed, but does not seem to affect performance
     ω = 0.3989422804014327/s

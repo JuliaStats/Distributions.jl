@@ -1,11 +1,4 @@
 
-struct GammaRmathSampler <: Sampleable{Univariate,Continuous}
-    d::Gamma
-end
-
-rand(s::GammaRmathSampler) = StatsFuns.RFunctions.gammarand(shape(s.d), scale(s.d))
-
-
 # "Generating gamma variates by a modified rejection technique"
 # J.H. Ahrens, U. Dieter
 # Communications of the ACM, Vol 25(1), 1982, pp 47-54
@@ -65,8 +58,7 @@ function GammaGDSampler(g::Gamma)
     GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
 end
 
-rand(s::GammaGDSampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::GammaGDSampler)
+function _rand!(rng::AbstractRNG, s::GammaGDSampler)
     # Step 2
     t = randn(rng)
     x = s.s + 0.5t
@@ -153,8 +145,7 @@ function GammaGSSampler(d::Gamma)
     GammaGSSampler(a, ia, b, scale(d))
 end
 
-rand(s::GammaGSSampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::GammaGSSampler)
+function _rand!(rng::AbstractRNG, s::GammaGSSampler)
     while true
         # step 1
         p = s.b*rand(rng)
@@ -191,8 +182,7 @@ function GammaMTSampler(g::Gamma)
     GammaMTSampler(d, c, κ)
 end
 
-rand(s::GammaMTSampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::GammaMTSampler)
+function _rand!(rng::AbstractRNG, s::GammaMTSampler)
     while true
         x = randn(rng)
         v = 1.0 + s.c * x
@@ -221,9 +211,8 @@ function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
-rand(s::GammaIPSampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::GammaIPSampler)
-    x = rand(rng, s.s)
+function _rand!(rng::AbstractRNG, s::GammaIPSampler)
+    x = _rand!(rng, s.s)
     e = randexp(rng)
     x*exp(s.nia*e)
 end
@@ -238,5 +227,3 @@ end
 #         GammaGDSampler(d)
 #     end
 # end
-
-# rand(d::Gamma) = rand(sampler(d))

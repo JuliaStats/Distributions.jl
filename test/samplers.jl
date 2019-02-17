@@ -48,11 +48,12 @@ for (S, paramlst) in [
     (BinomialPolySampler, binomparams),
     (BinomialAliasSampler, binomparams) ]
     local S
-
+    rng = MersenneTwister()
     println("    testing $S")
     for pa in paramlst
         n, p = pa
         test_samples(S(n, p), Binomial(n, p), n_tsamples)
+        test_samples(rng, S(n, p), Binomial(n, p), n_tsamples)
     end
 end
 

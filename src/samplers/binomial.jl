@@ -1,12 +1,4 @@
 
-struct BinomialRmathSampler <: Sampleable{Univariate,Discrete}
-    n::Int
-    prob::Float64
-end
-
-rand(s::BinomialRmathSampler) = round(Int, StatsFuns.RFunctions.binomrand(s.n, s.prob))
-
-
 # compute probability vector of a Binomial distribution
 function binompvec(n::Int, p::Float64)
     pv = Vector{Float64}(undef, n+1)
@@ -52,8 +44,7 @@ function BinomialGeomSampler(n::Int, prob::Float64)
     BinomialGeomSampler(comp, n, scale)
 end
 
-rand(s::BinomialGeomSampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::BinomialGeomSampler)
+function _rand!(rng::AbstractRNG, s::BinomialGeomSampler)
     y = 0
     x = 0
     n = s.n
@@ -138,8 +129,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
                        xM,xL,xR,c,λL,λR)
 end
 
-rand(s::BinomialTPESampler) = rand(GLOBAL_RNG, s)
-function rand(rng::AbstractRNG, s::BinomialTPESampler)
+function _rand!(rng::AbstractRNG, s::BinomialTPESampler)
     y = 0
     while true
         # Step 1
@@ -241,7 +231,7 @@ end
 
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
-rand(s::BinomialAliasSampler) = rand(s.table) - 1
+_rand!(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 
 
 # Integrated Polyalgorithm sampler that automatically chooses the proper one
@@ -270,6 +260,5 @@ end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
-rand(s::BinomialPolySampler) = rand(GLOBAL_RNG, s)
-rand(rng::AbstractRNG, s::BinomialPolySampler) =
-    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)
+_rand!(rng::AbstractRNG, s::BinomialPolySampler) =
+    s.use_btpe ? _rand!(rng, s.btpe_sampler) : _rand!(rng, s.geom_sampler)

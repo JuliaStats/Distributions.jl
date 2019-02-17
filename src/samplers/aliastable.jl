@@ -14,12 +14,11 @@ function AliasTable(probs::AbstractVector{T}) where T<:Real
     AliasTable(accp, alias, Random.RangeGenerator(1:n))
 end
 
-function rand(rng::AbstractRNG, s::AliasTable)
+function _rand!(rng::AbstractRNG, s::AliasTable)
     i = rand(rng, s.isampler) % Int
     u = rand(rng)
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
 end
-rand(s::AliasTable) = rand(GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
