@@ -18,7 +18,7 @@ External links:
 
 * [Beta-binomial distribution on Wikipedia](https://en.wikipedia.org/wiki/Beta-binomial_distribution)
 """
-struct BetaBinomial{T<:Real} <: DiscreteUnivariateRDist
+struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     α::T
     β::T
@@ -109,6 +109,3 @@ quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), suppor
 
 _rand!(rng::AbstractRNG, d::BetaBinomial) =
     _rand!(rng, Binomial(d.n, _rand!(rng, Beta(d.α, d.β))))
-
-# RFunctions
-rand(d::BetaBinomial) = rand(Binomial(d.n, rand(Beta(d.α, d.β))))
