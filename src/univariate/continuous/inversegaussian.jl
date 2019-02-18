@@ -55,8 +55,8 @@ InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ)
     (λ) -> D(1,λ)
     (μ,λ) -> D(μ,λ)
 
-    (μ,var) = D(μ, μ^3/var)
-    (μ,std) = D(μ, μ^3/std^2)
+    (μ,var) -> D(μ, μ^3/var)
+    (μ,std) -> D(μ, μ^3/std^2)
 end
 
 
