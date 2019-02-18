@@ -1,24 +1,36 @@
 """
-    Logistic(μ,θ)
+    Logistic <: ContinuousUnivariateDistribution
 
-The *Logistic distribution* with location `μ` and scale `θ` has probability density function
+The *Logistic* probability distribution.
+
+# Constructors
+
+    Logistic(μ|mu|location|mean=0, σ|sigma|scale=1)
+
+Construct a `Logistic` distribution object with location `μ` and scale `σ`.
+
+    Logistic(μ|mu|location|mean=0, std=)
+    Logistic(μ|mu|location|mean=0, var=)
+
+Construct a `Logistic` distribution object matching the relevant parameters and moments.
+
+# Details
+
+The Logistic distribution with location `μ` and scale `θ` has probability density function
 
 ```math
 f(x; \\mu, \\theta) = \\frac{1}{4 \\theta} \\mathrm{sech}^2
 \\left( \\frac{x - \\mu}{2 \\theta} \\right)
 ```
 
-```julia
-Logistic()       # Logistic distribution with zero location and unit scale, i.e. Logistic(0, 1)
-Logistic(u)      # Logistic distribution with location u and unit scale, i.e. Logistic(u, 1)
-Logistic(u, b)   # Logistic distribution with location u ans scale b
+# Examples
 
-params(d)       # Get the parameters, i.e. (u, b)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. b
+```julia
+Logistic()
+Logistic(μ=2, σ=3)
 ```
 
-External links
+# External links
 
 * [Logistic distribution on Wikipedia](http://en.wikipedia.org/wiki/Logistic_distribution)
 
@@ -32,30 +44,19 @@ end
 
 Logistic(μ::T, θ::T) where {T<:Real} = Logistic{T}(μ, θ)
 Logistic(μ::Real, θ::Real) = Logistic(promote(μ, θ)...)
-Logistic(μ::Integer, θ::Integer) = Logistic(Float64(μ), Float64(θ))
+Logistic(μ::Integer, θ::Integer) = Logistic(float(μ), float(θ))
 
-@kwdispatch Logistic()
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, mean=>μ, sigma=>σ) where {D<:Logistic} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
 
-@kwmethod Logistic(;) = Logistic(0, 1)
-
-@kwmethod Logistic(;μ) = Logistic(μ, 1)
-@kwmethod Logistic(;mu) = Logistic(mu, 1)
-@kwmethod Logistic(;location) = Logistic(location, 1)
-@kwmethod Logistic(;mean) = Logistic(mean, 1)
-
-@kwmethod Logistic(;σ) = Logistic(0, σ)
-@kwmethod Logistic(;sigma) = Logistic(0, sigma)
-@kwmethod Logistic(;scale) = Logistic(0, scale)
-
-@kwmethod Logistic(;std) = Logistic(0, (sqrt3 * std) / π)
-@kwmethod Logistic(;var) = Logistic(0, sqrt(3*var) / π)
-
-@kwmethod Logistic(;μ,σ) = Logistic(μ, σ)
-@kwmethod Logistic(;mu,sigma) = Logistic(mu, sigma)
-@kwmethod Logistic(;location,scale) = Logistic(location, scale)
-
-@kwmethod Logistic(;mean,std) = Logistic(mean, (sqrt3 * std) / π)
-@kwmethod Logistic(;mean,var) = Logistic(mean, sqrt(3*var) / π)
+    (std) -> D(0, (sqrt3 * std) / π)
+    (var) -> D(0, sqrt(3*var) / π)
+    (μ,std) -> D(μ, (sqrt3 * std) / π)
+    (μ,var) -> D(μ, sqrt(3*var) / π)
+end
 
 @distr_support Logistic -Inf Inf
 

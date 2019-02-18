@@ -1,5 +1,15 @@
 """
+    Kolmogorov <: ContinuousUnivariateDistribution
+
+The *Kolmogorov* probability distribution.
+
+# Constructors
+
     Kolmogorov()
+
+Construct a `Kolmogorov` distribution object.
+
+# Details
 
 Kolmogorov distribution defined as
 
@@ -8,6 +18,11 @@ Kolmogorov distribution defined as
 ```
 where ``B(t)`` is a Brownian bridge used in the Kolmogorov--Smirnov
 test for large n.
+
+# External links
+
+* [Kolmogorov--Smirnov test on Wikipedia](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test)
+
 """
 struct Kolmogorov <: ContinuousUnivariateDistribution
 end

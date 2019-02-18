@@ -1,5 +1,15 @@
 """
-    KSDist(n)
+    KSDist <: ContinuousUnivariateDistribution
+
+Distribution of the (two-sided) Kolmogorov-Smirnoff statistic.
+
+# Constructors
+
+    KSDist(n=)
+
+Construct a `KSDist` distribution object of `n` observations.
+
+# Details
 
 Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
 

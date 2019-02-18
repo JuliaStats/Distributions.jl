@@ -17,9 +17,9 @@ NoncentralF(ν1::T, ν2::T, λ::T) where {T<:Real} = NoncentralF{T}(ν1, ν2, λ
 NoncentralF(ν1::Real, ν2::Real, λ::Real) = NoncentralF(promote(ν1, ν2, λ)...)
 NoncentralF(ν1::Integer, ν2::Integer, λ::Integer) = NoncentralF(Float64(ν1), Float64(ν2), Float64(λ))
 
-@kwdispatch NoncentralF()
-@kwmethod NoncentralF(;ν1,ν2,λ) = NoncentralF(ν1,ν2,λ)
-@kwmethod NoncentralF(;nu1,nu2,lambda) = NoncentralF(nu1,nu2,lambda)
+@kwdispatch (::Type{D})(;nu1=>ν1, nu2=>ν2, lambda=>λ) where {D<:NoncentralF} begin
+    (ν1,ν2,λ) -> D(ν1,ν2,λ)
+end
 
 @distr_support NoncentralF 0.0 Inf
 

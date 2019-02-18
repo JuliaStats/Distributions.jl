@@ -5,7 +5,7 @@ The *Cauchy* probability distribution.
 
 # Constructors
 
-    Cauchy(μ|mu=0, σ|sigma=1)
+    Cauchy(μ|mu|location=0, σ|sigma|scale=1)
 
 Construct a `Cauchy` distribution object, centered at `μ` with scale `σ`.
 
@@ -41,7 +41,7 @@ Cauchy(μ::T, σ::T) where {T<:Real} = Cauchy{T}(μ, σ)
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
 Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
 
-@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Cauchy} begin
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, sigma=>σ, scale=>σ) where {D<:Cauchy} begin
     () -> D(0,1)
     (μ) -> D(μ,1)
     (σ) -> D(0,σ)

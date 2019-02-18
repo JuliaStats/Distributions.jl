@@ -18,11 +18,10 @@ NormalCanon(η::T, λ::T) where {T<:Real} = NormalCanon{typeof(η/λ)}(η, λ)
 NormalCanon(η::Real, λ::Real) = NormalCanon(promote(η, λ)...)
 NormalCanon(η::Integer, λ::Integer) = NormalCanon(Float64(η), Float64(λ))
 
-@kwdispatch NormalCanon()
-
-@kwmethod NormalCanon(;) = NormalCanon(0, 1)
-@kwmethod NormalCanon(;η,λ) = NormalCanon(η, λ)
-@kwmethod NormalCanon(;eta,lambda) = NormalCanon(eta, lambda)
+@kwdispatch (::Type{D})(;eta=>η, lambda=>λ) where {D<:NormalCanon} begin
+    () -> D(0,1)
+    (η,λ) -> D(η,λ)
+end
 
 @distr_support NormalCanon -Inf Inf
 

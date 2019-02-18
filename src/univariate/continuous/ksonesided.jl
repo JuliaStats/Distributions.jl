@@ -1,5 +1,15 @@
 """
-    KSOneSided(n)
+    KSOneSided <: ContinuousUnivariateDistribution
+
+Distribution of the one-sided Kolmogorov-Smirnoff statistic.
+
+# Constructors
+
+    KSOneSided(n=)
+
+Construct a `KSOneSided` distribution object of `n` observations.
+
+# Details
 
 Distribution of the one-sided Kolmogorov-Smirnov test statistic:
 

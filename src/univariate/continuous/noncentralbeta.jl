@@ -17,9 +17,9 @@ NoncentralBeta(α::T, β::T, λ::T) where {T<:Real} = NoncentralBeta{T}(α, β, 
 NoncentralBeta(α::Real, β::Real, λ::Real) = NoncentralBeta(promote(α, β, λ)...)
 NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(Float64(α), Float64(β), Float64(λ))
 
-@kwdispatch NoncentralBeta()
-@kwmethod NoncentralBeta(;α,β,λ) = NoncentralBeta(α,β,λ)
-@kwmethod NoncentralBeta(;alpha,beta,lambda) = NoncentralBeta(alpha,beta,lambda)
+@kwdispatch (::Type{D})(;alpha=>α, beta=>β, lambda=>λ) where {D<:NoncentralBeta} begin
+    (α,β,λ) -> D(α,β,λ)
+end
 
 @distr_support NoncentralBeta 0.0 1.0
 

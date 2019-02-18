@@ -37,9 +37,9 @@ NoncentralChisq(ν::T, λ::T) where {T<:Real} = NoncentralChisq{T}(ν, λ)
 NoncentralChisq(ν::Real, λ::Real) = NoncentralChisq(promote(ν, λ)...)
 NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(Float64(ν), Float64(λ))
 
-@kwdispatch NoncentralChisq()
-@kwmethod NoncentralChisq(;ν,λ) = NoncentralChisq(ν,λ)
-@kwmethod NoncentralChisq(;nu,lambda) = NoncentralChisq(nu,lambda)
+@kwdispatch (::Type{D})(;nu=>ν, lambda=>λ) where {D<:NoncentralChisq} begin
+    (ν,λ) -> D(ν,λ)
+end
 
 @distr_support NoncentralChisq 0.0 Inf
 
