@@ -1,6 +1,12 @@
 # Modified from code provided by "Doomphoenix Qxz" on discourse.julialang.com
 """
-    StudentizedRange(ν, k)
+    StudentizedRange <: ContinuousUnivariateDistribution
+
+# Constructors
+
+    StudentizedRange(ν|nu=, k=)
+
+# Details
 
 The *studentized range distribution* has probability density function:
 
@@ -14,12 +20,10 @@ where
 ```
 
 ```julia
-StudentizedRange(ν, k)     # Studentized Range Distribution with parameters ν and k
-
-params(d)        # Get the parameters, i.e. (ν, k)
+StudentizedRange(ν=1, k=3)
 ```
 
-External links
+# External links
 
 * [Studentized range distribution on Wikipedia](http://en.wikipedia.org/wiki/Studentized_range_distribution)
 """
@@ -34,8 +38,13 @@ struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 StudentizedRange(ν::T, k::T) where {T<:Real} = StudentizedRange{T}(ν, k)
-StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(Float64(ν), Float64(k))
 StudentizedRange(ν::Real, k::Real) = StudentizedRange(promote(ν, k)...)
+StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(float(ν), float(k))
+
+@kwdispatch (::Type{D})(;nu=>ν) where {D<:StudentizedRange} begin
+    (ν,k) -> D(ν,k)
+end
+
 
 @distr_support StudentizedRange 0.0 Inf
 

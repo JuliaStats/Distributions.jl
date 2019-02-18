@@ -5,9 +5,13 @@ The *arcsine* probability distribution
 
 # Constructors
 
-    Arcsine(a=0,b=1)
+    Arcsine(a=,b=)
 
 Construct an `Arcsine` distribution object with minimum `a` and maximum `b`.
+
+    Arcsine()
+
+Construct an `Arcsine` distribution object with minimum `0` and maximum `1`.
 
 # Details
 The arcsine distribution has probability density function
@@ -19,7 +23,6 @@ f(x) = \\frac{1}{\\pi \\sqrt{(x - a) (b - x)}}, \\quad x \\in [a, b]
 # Examples
 ```julia
 Arcsine()
-Arcsine(b=10)
 Arcsine(a=2, b=2)
 ```
 
@@ -41,8 +44,6 @@ Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
 
 @kwdispatch (::Type{D})() where {D<:Arcsine} begin
     () -> D(0,1)
-    (a) -> D(a,1)
-    (b) -> D(0,b)
     (a,b) -> D(a,b)
 end
 

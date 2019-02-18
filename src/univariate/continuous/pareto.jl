@@ -1,23 +1,29 @@
 """
-    Pareto(α,θ)
+    Pareto <: ContinuousUnivariateDistribution
 
-The *Pareto distribution* with shape `α` and scale `θ` has probability density function
+The *Pareto* probability distribution.
+
+# Constructors
+
+    Pareto(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct a `Pareto` distribution object with shape `α` and scale `θ`.
+
+# Details
+
+The Pareto distribution has probability density function
 
 ```math
 f(x; \\alpha, \\theta) = \\frac{\\alpha \\theta^\\alpha}{x^{\\alpha + 1}}, \\quad x \\ge \\theta
 ```
 
+# Examples
 ```julia
-Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1, 1)
-Pareto(a)           # Pareto distribution with shape a and unit scale, i.e. Pareto(a, 1)
-Pareto(a, b)        # Pareto distribution with shape a and scale b
-
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+Pareto()
+Pareto(α=3, θ=4)
 ```
 
-External links
+# External links
  * [Pareto distribution on Wikipedia](http://en.wikipedia.org/wiki/Pareto_distribution)
 
 """
@@ -35,21 +41,12 @@ Pareto(α::T, θ::T) where {T<:Real} = Pareto{T}(α, θ)
 Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
 Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
 
-@kwdispatch Pareto()
-
-@kwmethod Pareto(;) = Pareto(1, 1)
-
-@kwmethod Pareto(;α) = Pareto(α, 1)
-@kwmethod Pareto(;alpha) = Pareto(alpha, 1)
-@kwmethod Pareto(;shape) = Pareto(shape, 1)
-
-@kwmethod Pareto(;θ) = Pareto(1,θ)
-@kwmethod Pareto(;theta) = Pareto(1,theta)
-@kwmethod Pareto(;scale) = Pareto(1,scale)
-
-@kwmethod Pareto(;α,θ) = Pareto(α,θ)
-@kwmethod Pareto(;alpha,theta) = Pareto(alpha,theta)
-@kwmethod Pareto(;shape,scale) = Pareto(shape,scale)
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ) where {D<:Pareto} begin
+    () -> D(1,1)
+    (α) -> D(α,1)
+    (θ) -> D(1,θ)
+    (α,θ) -> D(α,θ)
+end
 
 @distr_support Pareto d.θ Inf
 

@@ -1,20 +1,29 @@
 """
-    Semicircle(r)
+    Semicircle <: ContinuousUnivariateDistribution
 
-The Wigner semicircle distribution with radius parameter `r` has probability
-density function
+The Wigner semicircle distribution.
+
+# Constructors
+
+    Semicircle(r=1)
+
+Construct `Semicircle` distribution object with radius `r`.
+
+# Details
+
+The Wigner semicircle distribution has probability density function
 
 ```math
 f(x; r) = \\frac{2}{\\pi r^2} \\sqrt{r^2 - x^2}, \\quad x \\in [-r, r].
 ```
 
-```julia
-Semicircle(r)   # Wigner semicircle distribution with radius r
+# Examples
 
-params(d)       # Get the radius parameter, i.e. (r,)
+```julia
+Semicircle(r=2)
 ```
 
-External links
+# External links
 
 * [Wigner semicircle distribution on Wikipedia](https://en.wikipedia.org/wiki/Wigner_semicircle_distribution)
 """
@@ -27,10 +36,10 @@ end
 Semicircle(r::Real) = Semicircle{typeof(r)}(r)
 Semicircle(r::Integer) = Semicircle(float(r))
 
-@kwdispatch Semicircle()
-@kwmethod Semicircle(;) = Semicircle(1)
-
-@kwmethod Semicircle(;r) = Semicircle(r)
+@kwdispatch (::Type{D})(;) where {D<:Semicircle} begin
+    () -> D(1)
+    (r) -> D(r)
+end
 
 @distr_support Semicircle -d.r +d.r
 

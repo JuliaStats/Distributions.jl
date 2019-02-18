@@ -1,15 +1,24 @@
 """
-    NormalInverseGaussian(μ,α,β,δ)
+    NormalInverseGaussian <: ContinuousUnivariateDistribution
 
-The *Normal-inverse Gaussian distribution* with location `μ`, tail heaviness `α`, asymmetry parameter `β` and scale `δ` has probability density function
+The *Normal-inverse Gaussian* probability distribution.
+
+# Constructors
+
+    NormalInverseGaussian(μ|mu=,α|alpha=,β|beta=,δ|delta)
+
+Construct a `NormalInverseGaussian` with location `μ`, tail heaviness `α`, asymmetry parameter `β` and scale `δ`.
+
+# Details
+
+The *Normal-inverse Gaussian distribution* has probability density function
 
 ```math
 f(x; \\mu, \\alpha, \\beta, \\delta) = \\frac{\\alpha\\delta K_1 \\left(\\alpha\\sqrt{\\delta^2 + (x - \\mu)^2}\\right)}{\\pi \\sqrt{\\delta^2 + (x - \\mu)^2}} \\; e^{\\delta \\gamma + \\beta (x - \\mu)}
 ```
 where ``K_j`` denotes a modified Bessel function of the third kind.
 
-
-External links
+# External links
 
 * [Normal-inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal-inverse_Gaussian_distribution)
 
@@ -28,13 +37,12 @@ end
 NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} = NormalInverseGaussian{T}(μ, α, β, δ)
 NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) = NormalInverseGaussian(promote(μ, α, β, δ)...)
 function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Integer)
-    NormalInverseGaussian(Float64(μ), Float64(α), Float64(β), Float64(δ))
+    NormalInverseGaussian(float(μ), float(α), float(β), float(δ))
 end
 
-@kwdispatch NormalInverseGaussian()
-
-@kwmethod NormalInverseGaussian(;μ,α,β,δ) = NormalInverseGaussian(μ,α,β,δ)
-@kwmethod NormalInverseGaussian(;mu,alpha,beta,delta) = NormalInverseGaussian(mu,alpha,beta,delta)
+@kwdispatch (::Type{D})(;mu=>μ, alpha=>α, beta=>β, delta=>δ) where {D<:NormalInverseGaussian} begin
+    (μ,α,β,δ) -> D(μ,α,β,δ)
+end
 
 
 @distr_support NormalInverseGaussian -Inf Inf
