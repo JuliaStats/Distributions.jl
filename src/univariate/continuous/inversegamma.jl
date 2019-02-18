@@ -48,8 +48,7 @@ InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
 
 @kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ) where {D<:InverseGamma} begin
     () -> D(1,1)
-    (α) -> D(α,1)
-    
+    (α) -> D(α,1)    
     (θ) -> D(1,θ)
     (α,θ) -> D(α,θ)
 end

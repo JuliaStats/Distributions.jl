@@ -1,24 +1,36 @@
 """
-    InverseGaussian(μ,λ)
+    InverseGaussian <: ContinuousUnivariateDistribution
 
-The *inverse Gaussian distribution* with mean `μ` and shape `λ` has probability density function
+The *inverse Gaussian* probability distribution
+
+# Constructors
+
+    InverseGaussian(μ|mu|mean=1, λ|lambda|shape=1)
+
+Construct an `InverseGaussian` distribution object with mean `μ` and shape `λ`.
+
+    InverseGaussian(μ|mu|mean=, std=)
+    InverseGaussian(μ|mu|mean=, var=)
+
+Construct an `InverseGaussian` distribution object matching the relevant moments.
+
+# Details
+
+The inverse Gaussian distribution has probability density function
 
 ```math
 f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
 \\exp\\!\\left(\\frac{-\\lambda(x-\\mu)^2}{2\\mu^2x}\\right), \\quad x > 0
 ```
 
-```julia
-InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1, 1)
-InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1)
-InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+# Examples
 
-params(d)           # Get the parameters, i.e. (mu, lambda)
-mean(d)             # Get the mean parameter, i.e. mu
-shape(d)            # Get the shape parameter, i.e. lambda
+```julia
+InverseGaussian()
+InverseGaussian(mean=2, std=3)
 ```
 
-External links
+# External links
 
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
@@ -35,26 +47,18 @@ end
 
 InverseGaussian(μ::T, λ::T) where {T<:Real} = InverseGaussian{T}(μ, λ)
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
-InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64(λ))
+InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
 
-@kwdispatch InverseGaussian()
+@kwdispatch (::Type{D})(;mu=>μ, mean=>μ, lambda=>λ, shape=>λ) where {D<:InverseGaussian} begin
+    () -> D(1,1)
+    (μ) -> D(μ,1)
+    (λ) -> D(1,λ)
+    (μ,λ) -> D(μ,λ)
 
-@kwmethod InverseGaussian(;) = InverseGaussian(1, 1)
+    (μ,var) = D(μ, μ^3/var)
+    (μ,std) = D(μ, μ^3/std^2)
+end
 
-@kwmethod InverseGaussian(;μ) = InverseGaussian(μ, 1)
-@kwmethod InverseGaussian(;mu) = InverseGaussian(mu, 1)
-@kwmethod InverseGaussian(;mean) = InverseGaussian(mean, 1)
-
-@kwmethod InverseGaussian(;λ) = InverseGaussian(1, λ)
-@kwmethod InverseGaussian(;lambda) = InverseGaussian(1, lambda)
-@kwmethod InverseGaussian(;shape) = InverseGaussian(1, shape)
-
-@kwmethod InverseGaussian(;μ,λ) = InverseGaussian(μ, λ)
-@kwmethod InverseGaussian(;mu,lambda) = InverseGaussian(mu, lambda)
-@kwmethod InverseGaussian(;mean,shape) = InverseGaussian(mean, shape)
-
-@kwmethod InverseGaussian(;mean,var) = InverseGaussian(mean, mean^3/var)
-@kwmethod InverseGaussian(;mean,std) = InverseGaussian(mean, mean^3/std^2)
 
 @distr_support InverseGaussian 0.0 Inf
 
