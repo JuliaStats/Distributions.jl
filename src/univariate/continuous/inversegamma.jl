@@ -1,7 +1,17 @@
 """
-    InverseGamma(α, θ)
+    InverseGamma <: ContinuousUnivariateDistribution
 
-The *inverse Gamma distribution* with shape parameter `α` and scale `θ` has probability
+The *inverse gamma* probability distribution.
+
+# Constructors
+
+    InverseGamma(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct an `InverseGamma` distribution object with shape `α` and scale `θ`.
+
+# Details
+
+The inverse gamma distribution with shape parameter `α` and scale `θ` has probability
 density function
 
 ```math
@@ -11,17 +21,14 @@ e^{-\\frac{\\theta}{x}}, \\quad x > 0
 
 It is related to the [`Gamma`](@ref) distribution: if ``X \\sim \\operatorname{Gamma}(\\alpha, \\beta)``, then ``1 / X \\sim \\operatorname{InverseGamma}(\\alpha, \\beta^{-1})``.
 
-```julia
-InverseGamma()        # Inverse Gamma distribution with unit shape and unit scale, i.e. InverseGamma(1, 1)
-InverseGamma(α)       # Inverse Gamma distribution with shape α and unit scale, i.e. InverseGamma(α, 1)
-InverseGamma(α, θ)    # Inverse Gamma distribution with shape α and scale θ
+# Examples
 
-params(d)        # Get the parameters, i.e. (α, θ)
-shape(d)         # Get the shape parameter, i.e. α
-scale(d)         # Get the scale parameter, i.e. θ
+```julia
+InverseGamma()
+InverseGamma(α=3, θ=4)
 ```
 
-External links
+# External links
 
 * [Inverse gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse-gamma_distribution)
 """
@@ -39,23 +46,13 @@ InverseGamma(α::T, θ::T) where {T<:Real} = InverseGamma{T}(α, θ)
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
 InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
 
-
-@kwdispatch InverseGamma()
-
-@kwmethod InverseGamma(;) = InverseGamma(1, 1)
-
-@kwmethod InverseGamma(;α) = InverseGamma(α, 1)
-@kwmethod InverseGamma(;alpha) = InverseGamma(alpha, 1)
-@kwmethod InverseGamma(;shape) = InverseGamma(shape, 1)
-
-@kwmethod InverseGamma(;θ) = InverseGamma(1, θ)
-@kwmethod InverseGamma(;theta) = InverseGamma(1, theta)
-@kwmethod InverseGamma(;scale) = InverseGamma(1, scale)
-
-@kwmethod InverseGamma(;α,θ) = InverseGamma(α, θ)
-@kwmethod InverseGamma(;alpha,theta) = InverseGamma(alpha, theta)
-@kwmethod InverseGamma(;shape,scale) = InverseGamma(shape, scale)
-
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ) where {D<:InverseGamma} begin
+    () -> D(1,1)
+    (α) -> D(α,1)
+    
+    (θ) -> D(1,θ)
+    (α,θ) -> D(α,θ)
+end
 
 @distr_support InverseGamma 0.0 Inf
 

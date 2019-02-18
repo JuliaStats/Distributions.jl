@@ -7,11 +7,11 @@ The *gamma* probability distribution.
 
     Gamma(α|alpha|shape=1, θ|theta|scale=1)
 
-Construct a `Gamma` object with shape `α` and scale `θ`.
+Construct a `Gamma` distribution object with shape `α` and scale `θ`.
 
     Gamma(α|alpha|shape=1, β|beta|rate=1)
 
-Construct a `Gamma` object with shape `α` and rate `β = 1/θ`.
+Construct a `Gamma` distribution object with shape `α` and rate `β = 1/θ`.
 
     Gamma(mean=, α|alpha|shape=)
     Gamma(mean=, θ|theta|scale=)
@@ -19,7 +19,7 @@ Construct a `Gamma` object with shape `α` and rate `β = 1/θ`.
     Gamma(mean=, std=)
     Gamma(mean=, var=)
 
-Construct a `Gamma` object matching the relevant moments and parameters.
+Construct a `Gamma` distribution object matching the relevant moments and parameters.
 
 # Details
 A gamma distribution with shape parameter `α` and scale `θ` has probability density
