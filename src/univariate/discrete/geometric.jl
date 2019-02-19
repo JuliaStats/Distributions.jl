@@ -45,7 +45,7 @@ end
 
 Geometric(p::T) where {T<:Real} = Geometric{T}(p)
 
-@kwdispatch (::Type{D})(;) where {D<:Binomial} begin
+@kwdispatch (::Type{D})(;) where {D<:Geometric} begin
     () -> D(0.5)
     (p) -> D(p)
 end

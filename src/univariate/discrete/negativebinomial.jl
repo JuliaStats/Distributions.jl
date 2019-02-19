@@ -1,7 +1,17 @@
 """
-    NegativeBinomial(r,p)
+    NegativeBinomial <: DiscreteUnivariateDistribution
 
-A *Negative binomial distribution* describes the number of failures before the `r`th success in a sequence of independent Bernoulli trials. It is parameterized by `r`, the number of successes, and `p`, the probability of success in an individual trial.
+The *negative binomial* probability distribution.
+
+# Constructors
+
+    NegativeBinomial(r=1,p=0.5)
+
+Construct a `NegativeBinomial` distribution object with `r` successes and probability of success `p`.
+
+# Details
+
+A negative binomial distribution describes the number of failures before the `r`th success in a sequence of independent Bernoulli trials. It is parameterized by `r`, the number of successes, and `p`, the probability of success in an individual trial.
 
 ```math
 P(X = k) = {k + r - 1 \\choose k} p^r (1 - p)^k, \\quad \\text{for } k = 0,1,2,\\ldots.
@@ -14,15 +24,11 @@ P(X = k) = \\frac{\\Gamma(k+r)}{k! \\Gamma(r)} p^r (1 - p)^k, \\quad \\text{for 
 ```
 
 ```julia
-NegativeBinomial()        # Negative binomial distribution with r = 1 and p = 0.5
-NegativeBinomial(r, p)    # Negative binomial distribution with r successes and success rate p
-
-params(d)       # Get the parameters, i.e. (r, p)
-succprob(d)     # Get the success rate, i.e. p
-failprob(d)     # Get the failure rate, i.e. 1 - p
+NegativeBinomial()
+NegativeBinomial(r=5, p=0.2)
 ```
 
-External links:
+# External links:
 
 * [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
 Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
@@ -44,12 +50,12 @@ NegativeBinomial(r::T, p::T) where {T<:Real} = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
 NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
 
-@kwdispatch NegativeBinomial()
-
-@kwmethod NegativeBinomial(;r,p) = NegativeBinomial(r, p)
-@kwmethod NegativeBinomial(;r) = NegativeBinomial(r, 0.5)
-@kwmethod NegativeBinomial(;) = NegativeBinomial(1, 0.5)
-
+@kwdispatch (::Type{D})(;) where {D<:NegativeBinomial} begin
+    () -> D(1,0.5)
+    (p) -> D(1,p)
+    (r) -> D(r,0.5)
+    (r,p) -> D(r,p)
+end
 
 @distr_support NegativeBinomial 0 Inf
 

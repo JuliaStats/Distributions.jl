@@ -1,20 +1,27 @@
 """
-    Hypergeometric(s, f, n)
+    Hypergeometric <: DiscreteUnivariateDistribution
 
-A *Hypergeometric distribution* describes the number of successes in `n` draws without replacement from a finite population containing `s` successes and `f` failures.
+The *hypergeometric* probability distribution.
+
+# Constructors
+
+    Hypergeometric(ns=, nf=, n=)
+
+Construct a `Hypergeometric` distributuion object with `ns` successes, `nf` failures and `n` draws.
+
+# Details
+
+A hypergeometric distribution describes the number of successes in `n` draws without replacement from a finite population containing `s` successes and `f` failures.
 
 ```math
 P(X = k) = {{{s \\choose k} {f \\choose {n-k}}}\\over {s+f \\choose n}}, \\quad \\text{for } k = \\max(0, n - f), \\ldots, \\min(n, s).
 ```
 
 ```julia
-Hypergeometric(s, f, n)  # Hypergeometric distribution for a population with
-                         # s successes and f failures, and a sequence of n trials.
-
-params(d)       # Get the parameters, i.e. (s, f, n)
+Hypergeometric(ns=5, nf=10, n=7)
 ```
 
-External links
+# External links
 
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 
@@ -31,9 +38,9 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     end
 end
 
-@kwdispatch Hypergeometric()
-
-@kwmethod Hypergeometric(;ns,nf,n) = Hypergeometric(ns,nf,n)
+@kwdispatch (::Type{D})(;) where {D<:Hypergeometric} begin
+    (ns,nf,n) -> D(ns,nf,n)
+end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
