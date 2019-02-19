@@ -1,5 +1,15 @@
 """
-    Bernoulli(p)
+    Bernoulli <: DiscreteUnivariateDistribution
+
+The *Bernoulli* probability distribution
+
+# Constructors
+
+    Bernoulli(p=5)
+
+Construct a `Bernoulli` distribution object with success probability `p`.
+
+# Details
 
 A *Bernoulli distribution* is parameterized by a success rate `p`, which takes value 1
 with probability `p` and 0 with probability `1-p`.
@@ -11,16 +21,14 @@ p & \\quad \\text{for } k = 1.
 \\end{cases}
 ```
 
-```julia
-Bernoulli()    # Bernoulli distribution with p = 0.5
-Bernoulli(p)   # Bernoulli distribution with success rate p
+# Examples
 
-params(d)      # Get the parameters, i.e. (p,)
-succprob(d)    # Get the success rate, i.e. p
-failprob(d)    # Get the failure rate, i.e. 1 - p
+```julia
+Bernoulli()
+Bernoulli(p=0.2)
 ```
 
-External links:
+# External links
 
 * [Bernoulli distribution on Wikipedia](http://en.wikipedia.org/wiki/Bernoulli_distribution)
 """
@@ -37,10 +45,10 @@ end
 Bernoulli(p::T) where {T<:Real} = Bernoulli{T}(p)
 Bernoulli(p::Integer) = Bernoulli(float(p))
 
-@kwdispatch Bernoulli()
-
-@kwmethod Bernoulli(;) = Bernoulli(0.5)
-@kwmethod Bernoulli(;p) = Bernoulli(p)
+@kwdispatch (::Type{D})(;) where {D<:Bernoulli} begin
+    () -> D(0.5)
+    (p) -> D(p)
+end
 
 @distr_support Bernoulli 0 1
 

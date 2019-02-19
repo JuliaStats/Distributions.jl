@@ -1,7 +1,7 @@
 """
     Cosine <: ContinuousUnivariateDistribution
 
-The *Raised cosine* probability distribution.
+The *raised cosine* probability distribution.
 
 # Constructors
 

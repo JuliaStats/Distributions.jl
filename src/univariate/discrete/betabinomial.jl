@@ -1,20 +1,29 @@
 """
-    BetaBinomial(n,α,β)
+    BetaBinomial <: DiscreteUnivariateDistribution
 
-A *Beta-binomial distribution* is the compound distribution of the [`Binomial`](@ref) distribution where the probability of success `p` is distributed according to the [`Beta`](@ref). It has three parameters: `n`, the number of trials and two shape parameters `α`, `β`
+The *beta-binomial* probability distribution.
+
+# Constructors
+
+    BetaBinomial(n=, α|alpha=, β|beta=)
+
+Construct a `BetaBinomial` distribution object with `n` trials and shape parameters `α`, `β`.
+
+# Details
+
+A *beta-binomial distribution* is the compound distribution of the [`Binomial`](@ref) distribution where the probability of success `p` is distributed according to the [`Beta`](@ref). It has three parameters: `n`, the number of trials and two shape parameters `α`, `β`
 
 ```math
 P(X = k) = {n \\choose k} B(k + \\alpha, n - k + \\beta) / B(\\alpha, \\beta),  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
 ```
 
-```julia
-BetaBinomial(n, a, b)      # BetaBinomial distribution with n trials and shape parameters a, b
+# Examples
 
-params(d)       # Get the parameters, i.e. (n, a, b)
-ntrials(d)      # Get the number of trials, i.e. n
+```julia
+BetaBinomial(n=10, α=2, β=2)
 ```
 
-External links:
+# External links
 
 * [Beta-binomial distribution on Wikipedia](https://en.wikipedia.org/wiki/Beta-binomial_distribution)
 """
@@ -33,11 +42,9 @@ BetaBinomial(n::Integer, α::T, β::T) where {T<:Real} = BetaBinomial{T}(n, α, 
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
 BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, float(α), float(β))
 
-@kwdispatch BetaBinomial()
-
-@kwmethod BetaBinomial(;n,α,β) = BetaBinomial(n,α,β)
-@kwmethod BetaBinomial(;n,alpha,beta) = BetaBinomial(n,alpha,beta)
-
+@kwdispatch (::Type{D})(;alpha=>α, beta=>β) where {D<:BetaBinomial} begin
+    (n,α,β) -> D(n,α,β)
+end
 
 @distr_support BetaBinomial 0 d.n
 insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n
