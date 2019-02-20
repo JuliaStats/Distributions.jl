@@ -53,7 +53,7 @@ TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(float(a), fl
 
 @kwdispatch (::Type{D})(;) where {D<:TriangularDist} begin
     (a,b,c) -> D(a,b,c)
-    (a,b) -> D(a,b,middle(c))
+    (a,b) -> D(a,b,middle(a,b))
 end
 
 @distr_support TriangularDist d.a d.b
