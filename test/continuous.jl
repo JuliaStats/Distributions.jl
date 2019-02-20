@@ -1,6 +1,6 @@
 # Testing continuous univariate distributions
 
-using Distributions
+using Distributions, Random
 using Test
 
 using Calculus: derivative
@@ -8,17 +8,15 @@ using Calculus: derivative
 n_tsamples = 100
 
 # additional distributions that have no direct counterparts in R references
-for distr in [
-    Biweight(),
-    Biweight(1,3),
-    Epanechnikov(),
-    Epanechnikov(1,3),
-    Triweight(),
-    Triweight(2),
-    Triweight(1, 3),
-    Triweight(1),
-]
-    println("    testing $(distr)")
+@testset "Testing $(distr)" for distr in [Biweight(),
+                                          Biweight(1,3),
+                                          Epanechnikov(),
+                                          Epanechnikov(1,3),
+                                          Triweight(),
+                                          Triweight(2),
+                                          Triweight(1, 3),
+                                          Triweight(1)]
+    
     test_distr(distr, n_tsamples; testquan=false)
 end
 
@@ -52,6 +50,7 @@ using ForwardDiff
     @test quantile(d, 1.0) == +Inf
 
     @test rand(d) == 0.5
+    @test rand(MersenneTwister(), d) == 0.5
 end
 
 # Test for parameters beyond those supported in R references

@@ -1,7 +1,7 @@
 using Distributions, Compat.Test, Random, LinearAlgebra
 using Distributions: Product
 
-@testset "product" begin
+@testset "Testing Product distributions" begin
 let
     rng, D = MersenneTwister(123456), 11
 

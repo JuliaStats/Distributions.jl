@@ -1,4 +1,4 @@
-using Distributions
+using Distributions, Random
 using Test, LinearAlgebra
 
 
@@ -9,10 +9,16 @@ S[1, 2] = S[2, 1] = 0.5
 W = Wishart(v,S)
 IW = InverseWishart(v,S)
 
+rng = MersenneTwister()
+
+@testset "Testing matrix-variates with $key" for (key, func) in
+    Dict("rand(...)" => [rand, rand],
+         "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
+
 for d in [W,IW]
     local d
-    @test size(d) == size(rand(d))
-    @test length(d) == length(rand(d))
+    @test size(d) == size(func[1](d))
+    @test length(d) == length(func[1](d))
     @test typeof(d)(params(d)...) == d
     @test partype(d) == Float64
 end
@@ -20,8 +26,8 @@ end
 @test partype(Wishart(7, Matrix{Float32}(I, 2, 2))) == Float32
 @test partype(InverseWishart(7, Matrix{Float32}(I, 2, 2))) == Float32
 
-@test isapprox(mean(rand(W,100000)) , mean(W) , atol=0.1)
-@test isapprox(mean(rand(IW,100000)), mean(IW), atol=0.1)
+@test isapprox(mean(func[2](W,100000)) , mean(W) , atol=0.1)
+@test isapprox(mean(func[2](IW,100000)), mean(IW), atol=0.1)
 
 v = 3.0
 
@@ -64,3 +70,4 @@ v = 3.0
 @test logpdf(InverseWishart(v,S), [inv(S), inv(S)])      ≈ log.(pdf(InverseWishart(v,S), [inv(S), inv(S)]))
 @test logpdf(InverseWishart(v,inv(S)), [S, S])           ≈ log.(pdf(InverseWishart(v,inv(S)), [S, S]))
 @test logpdf(InverseWishart(v,inv(S)), [inv(S), inv(S)]) ≈ log.(pdf(InverseWishart(v,inv(S)), [inv(S), inv(S)]))
+end

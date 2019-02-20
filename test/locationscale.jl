@@ -4,7 +4,8 @@ using Random, Test
 
 
 
-function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Float64)
+function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Float64,
+                                    rng::Union{AbstractRNG, Missing} = missing)
     ρ = Normal(μD,σD)
     d = LocationScale(μ,σ,ρ)
     dref = Normal(μ+σ*μD,σ*σD)
@@ -67,7 +68,11 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
     @test invlogccdf(d,log(0.8)) ≈ invlogccdf(dref,log(0.8))
 
     r = Array{Float64}(undef, 100000)
-    rand!(d,r)
+    if ismissing(rng)
+        rand!(d,r)
+    else
+        rand!(rng,d,r)
+    end
     @test mean(r) ≈ mean(dref) atol=0.01
     @test std(r) ≈ std(dref) atol=0.01
     @test cf(d, -0.1) ≈ cf(dref,-0.1)
@@ -75,7 +80,12 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 
 end
 
-println("\ttesting LocationScale")
-test_location_scale_normal(0.3,0.2,0.1,0.2)
-test_location_scale_normal(-0.3,0.1,-0.1,0.3)
-test_location_scale_normal(1.3,0.4,-0.1,0.5)
+@testset "Testing LocationScale" begin
+    rng = MersenneTwister()
+    test_location_scale_normal(0.3,0.2,0.1,0.2)
+    test_location_scale_normal(-0.3,0.1,-0.1,0.3)
+    test_location_scale_normal(1.3,0.4,-0.1,0.5)
+    test_location_scale_normal(0.3,0.2,0.1,0.2,rng)
+    test_location_scale_normal(-0.3,0.1,-0.1,0.3,rng)
+    test_location_scale_normal(1.3,0.4,-0.1,0.5,rng)
+end
