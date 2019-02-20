@@ -210,12 +210,12 @@ MvNormal(μ::AbstractVector, Σ::UniformScaling) = MvNormal(μ, ScalMat(length(�
     (Σ) -> D(ZeroVector(eltype(Σ), size(Σ,1)), Σ)
 
     (μ::AbstractVector, σ::AbstractVector) -> D(μ,  PDiagMat(abs2.(σ)))
-    (σ::AbstractVector) -> D(ZeroVector(eltype(σ), length(σ)),  PDiagMat(abs2.(σ)))
+    (σ::AbstractVector,) -> D(ZeroVector(eltype(σ), length(σ)),  PDiagMat(abs2.(σ)))
 
     (μ::AbstractVector, σ::Real) -> D(μ, ScalMat(length(μ), abs2(σ)))
     (σ::Real, n::Integer) -> D(ZeroVector(typeof(σ), n), ScalMat(n, abs2(σ)))
 
-    (n::Integer) -> D(ZeroVector(Float64, n), ScalMat(n, 1.0))
+    (n::Integer,) -> D(ZeroVector(Float64, n), ScalMat(n, 1.0))
 end
 
 ### Conversion
