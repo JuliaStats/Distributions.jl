@@ -205,34 +205,18 @@ MvNormal(μ::AbstractVector, Σ::Union{Symmetric, Hermitian}) = MvNormal(μ, PDM
 MvNormal(μ::AbstractVector, Σ::Diagonal) = MvNormal(μ, PDiagMat(diag(Σ)))
 MvNormal(μ::AbstractVector, Σ::UniformScaling) = MvNormal(μ, ScalMat(length(μ), I.λ))
 
-@kwdispatch MvNormal()
+@kwdispatch (::Type{D})(;mu=>μ, mean=>μ, Sigma=>Σ, cov=>Σ, sigma=>σ, std=>σ) where {D<:MvNormal} begin
+    (μ::AbstractVector, Σ) -> D(μ, Σ)
+    (Σ) -> D(ZeroVector(eltype(Σ), size(Σ,1)), Σ)
 
-@kwmethod MvNormal(;μ::AbstractVector,Σ) = MvNormal(μ,Σ)
-@kwmethod MvNormal(;mu::AbstractVector,Sigma) = MvNormal(mu,Sigma)
-@kwmethod MvNormal(;mean::AbstractVector,cov) = MvNormal(mean,cov)
+    (μ::AbstractVector, σ::AbstractVector) -> D(μ,  PDiagMat(abs2.(σ)))
+    (σ::AbstractVector) -> D(ZeroVector(eltype(σ), length(σ)),  PDiagMat(abs2.(σ)))
 
-@kwmethod MvNormal(;Σ) = MvNormal(ZeroVector(eltype(Σ), size(Σ,1)), Σ)
-@kwmethod MvNormal(;Sigma) = MvNormal(ZeroVector(eltype(Sigma), size(Sigma,1)), Sigma)
-@kwmethod MvNormal(;cov) = MvNormal(ZeroVector(eltype(cov), size(cov,1)), cov)
+    (μ::AbstractVector, σ::Real) -> D(μ, ScalMat(length(μ), abs2(σ)))
+    (σ::Real, n::Integer) -> D(ZeroVector(typeof(σ), n), ScalMat(n, abs2(σ)))
 
-@kwmethod MvNormal(;μ::AbstractVector,σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
-@kwmethod MvNormal(;mu::AbstractVector,sigma::Real) = MvNormal(mu, ScalMat(length(mu), abs2(sigma)))
-@kwmethod MvNormal(;mean::AbstractVector,std::Real) = MvNormal(mean, ScalMat(length(mean), abs2(std)))
-
-@kwmethod MvNormal(;μ::AbstractVector,σ::AbstractVector) = MvNormal(μ, PDiagMat(abs2.(σ)))
-@kwmethod MvNormal(;mu::AbstractVector,sigma::AbstractVector) = MvNormal(mu, PDiagMat(abs2.(σ)))
-@kwmethod MvNormal(;mean::AbstractVector,std::AbstractVector) = MvNormal(mean, PDiagMat(abs2.(σ)))
-
-@kwmethod MvNormal(;σ::AbstractVector) = MvNormal(ZeroVector(eltype(σ), length(σ)),  PDiagMat(abs2.(σ)))
-@kwmethod MvNormal(;sigma::AbstractVector) = MvNormal(ZeroVector(eltype(sigma), length(sigma)),  PDiagMat(abs2.(sigma)))
-@kwmethod MvNormal(;std::AbstractVector) = MvNormal(ZeroVector(eltype(std), length(std)),  PDiagMat(abs2.(std)))
-
-@kwmethod MvNormal(;σ::Real, n::Integer) = MvNormal(ZeroVector(typeof(σ), n), ScalMat(n, abs2(σ)))
-@kwmethod MvNormal(;sigma::Real, n::Integer) = MvNormal(ZeroVector(typeof(sigma), n), ScalMat(n, abs2(sigma)))
-@kwmethod MvNormal(;std::Real, n::Integer) = MvNormal(ZeroVector(typeof(std), n), ScalMat(n, abs2(std)))
-
-@kwmethod MvNormal(;n::Integer) = MvNormal(ZeroVector(Float64, n), ScalMat(n, 1.0))
-
+    (n::Integer) -> D(ZeroVector(Float64, n), ScalMat(n, 1.0))
+end
 
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
