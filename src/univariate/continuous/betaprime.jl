@@ -124,5 +124,5 @@ invlogccdf(d::BetaPrime, p::Real) = (x = betainvlogccdf(d.α, d.β, p); x / (1 -
 
 function rand(d::BetaPrime)
     (α, β) = params(d)
-    rand(Gamma(α)) / rand(Gamma(β))
+    rand(Gamma(α=α)) / rand(Gamma(α=β))
 end
