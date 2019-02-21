@@ -22,51 +22,6 @@
 #
 ###########################################################
 
-"""
-
-The [Multivariate normal distribution](http://en.wikipedia.org/wiki/Multivariate_normal_distribution)
-is a multidimensional generalization of the *normal distribution*. The probability density function of
-a d-dimensional multivariate normal distribution with mean vector ``\\boldsymbol{\\mu}`` and
-covariance matrix ``\\boldsymbol{\\Sigma}`` is:
-
-```math
-f(\\mathbf{x}; \\boldsymbol{\\mu}, \\boldsymbol{\\Sigma}) = \\frac{1}{(2 \\pi)^{d/2} |\\boldsymbol{\\Sigma}|^{1/2}}
-\\exp \\left( - \\frac{1}{2} (\\mathbf{x} - \\boldsymbol{\\mu})^T \\Sigma^{-1} (\\mathbf{x} - \\boldsymbol{\\mu}) \\right)
-```
-
-We realize that the mean vector and the covariance often have special forms in practice,
-which can be exploited to simplify the computation. For example, the mean vector is sometimes
-just a zero vector, while the covariance matrix can be a diagonal matrix or even in the form
-of ``\\sigma \\mathbf{I}``. To take advantage of such special cases, we introduce a parametric
-type `MvNormal`, defined as below, which allows users to specify the special structure of
-the mean and covariance.
-
-```julia
-struct MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
-    μ::Mean
-    Σ::Cov
-end
-```
-
-Here, the mean vector can be an instance of either `Vector` or `ZeroVector`, where the
-latter is simply an empty type indicating a vector filled with zeros. The covariance can be
-of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
-`PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
-in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
-[PDMats](https://github.com/lindahua/PDMats.jl) for details).
-
-We also define a set of alias for the types using different combinations of mean vectors and covariance:
-
-```julia
-const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
-const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
-const FullNormal = MvNormal{PDMat,    Vector{Float64}}
-
-const ZeroMeanIsoNormal  = MvNormal{ScalMat,  ZeroVector{Float64}}
-const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
-const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
-```
-"""
 abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 
 ### Generic methods (for all AbstractMvNormal subtypes)
@@ -143,36 +98,89 @@ rand(rng::AbstractRNG, d::AbstractMvNormal, n::Integer) = _rand!(rng, d, Matrix{
 #
 ###########################################################
 """
-    MvNormal
+    MvNormal <: ContinuousMultivariateDistribution
 
-Generally, users don't have to worry about these internal details.
-We provide a common constructor `MvNormal`, which will construct a distribution of
-appropriate type depending on the input arguments.
+The *multivariate normal* or *multivariate Gaussian* distribution
 
-    MvNormal(sig)
+# Constructors
 
-Construct a multivariate normal distribution with zero mean and covariance represented by `sig`.
+    MvNormal(μ|mu|mean=, Σ|Sigma|cov=)
 
-    MvNormal(mu, sig)
+Construct a `MvNormal` distribution object with mean `μ` and covariance `Σ`.
 
-Construct a multivariate normal distribution with mean `mu` and covariance represented by `sig`.
+    MvNormal(Σ|Sigma|cov=)
 
-    MvNormal(d, sig)
+Construct a `MvNormal` distribution object with zero mean and covariance `Σ`.
 
-Construct a multivariate normal distribution of dimension `d`, with zero mean, and an
-isotropic covariance as `abs2(sig) * eye(d)`.
+    MvNormal(μ|mu|mean=, σ|sigma|std::AbstractVector=)
 
-# Arguments
-- `mu::Vector{T<:Real}`: The mean vector.
-- `d::Real`: dimension of distribution.
-- `sig`: The covariance, which can in of either of the following forms (with `T<:Real`):
-    1. subtype of `AbstractPDMat`
-    2. symmetric matrix of type `Matrix{T}`
-    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`.
-    4. real-valued number: indicating an isotropic covariance as `abs2(sig) * eye(d)`.
+Construct a `MvNormal` distribution object with mean `μ` and marginal standard deviation `σ`, and independent correlation structure.
 
-**Note:** The constructor will choose an appropriate covariance form internally, so that
-special structure of the covariance can be exploited.
+    MvNormal(σ|sigma|std::AbstractVector=)
+
+Construct a `MvNormal` distribution object with zero mean and marginal standard deviation `σ`, and independent correlation structure.
+
+    MvNormal(μ|mu|mean=, σ::Real=, n::Integer=)
+
+Construct a `MvNormal` distribution object of dimension `n` with mean `μ` and marginal standard deviation `σ`, and independent correlation structure.
+
+    MvNormal(σ::Real=, n::Integer=)
+
+Construct a `MvNormal` distribution object of dimension `n` with zero mean and marginal standard deviation `σ`, and independent correlation structure.
+
+    MvNormal(n::Integer=)
+
+Construct a `MvNormal` distribution object of dimension `n` with zero mean and identity covariance matrix.
+
+# Details
+
+The multivariate normal distribution is a multidimensional generalization of the *normal
+distribution*. The probability density function of a d-dimensional multivariate normal
+distribution with mean vector ``\\boldsymbol{\\mu}`` and covariance matrix
+``\\boldsymbol{\\Sigma}`` is:
+
+```math
+f(\\mathbf{x}; \\boldsymbol{\\mu}, \\boldsymbol{\\Sigma}) = \\frac{1}{(2 \\pi)^{d/2} |\\boldsymbol{\\Sigma}|^{1/2}}
+\\exp \\left( - \\frac{1}{2} (\\mathbf{x} - \\boldsymbol{\\mu})^T \\Sigma^{-1} (\\mathbf{x} - \\boldsymbol{\\mu}) \\right)
+```
+
+We realize that the mean vector and the covariance often have special forms in practice,
+which can be exploited to simplify the computation. For example, the mean vector is sometimes
+just a zero vector, while the covariance matrix can be a diagonal matrix or even in the form
+of ``\\sigma \\mathbf{I}``. To take advantage of such special cases, we introduce a parametric
+type `MvNormal`, defined as below, which allows users to specify the special structure of
+the mean and covariance.
+
+```julia
+struct MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+    μ::Mean
+    Σ::Cov
+end
+```
+
+Here, the mean vector can be an instance of either `Vector` or `ZeroVector`, where the
+latter is simply an empty type indicating a vector filled with zeros. The covariance can be
+of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
+`PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
+in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
+[PDMats](https://github.com/lindahua/PDMats.jl) for details).
+
+We also define a set of alias for the types using different combinations of mean vectors and covariance:
+
+```julia
+const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
+const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
+const FullNormal = MvNormal{PDMat,    Vector{Float64}}
+
+const ZeroMeanIsoNormal  = MvNormal{ScalMat,  ZeroVector{Float64}}
+const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
+const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
+```
+
+# External links
+
+- [Multivariate normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Multivariate_normal_distribution)
+
 """
 struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
     μ::Mean
