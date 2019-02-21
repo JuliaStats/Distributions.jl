@@ -9,7 +9,7 @@ S[1, 2] = S[2, 1] = 0.5
 W = Wishart(v,S)
 IW = InverseWishart(v,S)
 
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 
 @testset "Testing matrix-variates with $key" for (key, func) in
     Dict("rand(...)" => [rand, rand],

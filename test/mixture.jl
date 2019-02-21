@@ -162,7 +162,7 @@ end
 
 @testset "Testing Mixtures with $key" for (key, rng) in
     Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister())
+         "rand(rng, ...)" => MersenneTwister(123))
 
 @testset "Testing UnivariateMixture" begin
 g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])

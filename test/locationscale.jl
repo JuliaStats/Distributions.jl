@@ -81,7 +81,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
 end
 
 @testset "Testing LocationScale" begin
-    rng = MersenneTwister()
+    rng = MersenneTwister(123)
     test_location_scale_normal(0.3,0.2,0.1,0.2)
     test_location_scale_normal(-0.3,0.1,-0.1,0.3)
     test_location_scale_normal(1.3,0.4,-0.1,0.5)

@@ -6,7 +6,7 @@ using Test, Random, LinearAlgebra
 
 Random.seed!(34567)
 
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 
 @testset "Testing Dirichlet with $key" for (key, func) in
     Dict("rand(...)" => [rand, rand],

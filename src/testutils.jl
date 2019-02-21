@@ -44,7 +44,7 @@ end
 # testing the implementation of a continuous univariate distribution
 #
 function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
-                    testquan::Bool=true)
+                    testquan::Bool=true, rng::AbstractRNG=MersenneTwister(123))
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
 
@@ -56,7 +56,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
     end
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)
-    xs = test_samples(distr, n, rng=MersenneTwister())
+    xs = test_samples(distr, n, rng=rng)
     allow_test_stats(distr) && test_stats(distr, xs)
     test_params(distr)
 end

@@ -113,7 +113,7 @@ C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
 
 @testset "Testing MvLogNormal with $key" for (key, rng) in
     Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister())
+         "rand(rng, ...)" => MersenneTwister(123))
     
     @testset "Testing MvLogNormal with $key for $(typeof(g)) with $(Distributions.distrname(g.normal))" for (g, μ, Σ) in [
         (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),

@@ -99,7 +99,7 @@ J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
 @testset "Testing MvNormal with $key" for (key, rng) in
     Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister())
+         "rand(rng, ...)" => MersenneTwister(123))
     
     @testset "Testing MvNormal with $key for $(distrname(g))" for (T, g, μ, Σ) in [
     (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),

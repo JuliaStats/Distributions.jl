@@ -27,7 +27,7 @@ n_tsamples = 10^6
 @test_throws ArgumentError CategoricalDirectSampler(Float64[])
 @test_throws ArgumentError AliasTable(Float64[])
 
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 for S in [CategoricalDirectSampler, AliasTable]
     local S
     println("    testing $S")

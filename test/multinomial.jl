@@ -7,7 +7,7 @@ using Test
 p = [0.2, 0.5, 0.3]
 nt = 10
 d = Multinomial(nt, p)
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 
 @testset "Testing Multinomial with $key" for (key, func) in
     Dict("rand(...)" => [rand, rand],

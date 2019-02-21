@@ -11,7 +11,7 @@ using Test, Random, LinearAlgebra
 n0 = 100
 N = 10^5
 
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 
 @testset "Testing fit for $key" for (key, func) in
     Dict("rand(...)" => [rand, rand],

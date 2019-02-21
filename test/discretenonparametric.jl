@@ -1,7 +1,7 @@
 import StatsBase: ProbabilityWeights
 using Random, Distributions
 
-rng = MersenneTwister()
+rng = MersenneTwister(123)
 
 @testset "Testing matrix-variates with $key" for (key, func) in
     Dict("rand(...)" => [rand, rand],

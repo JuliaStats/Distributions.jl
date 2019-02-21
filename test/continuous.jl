@@ -50,7 +50,7 @@ using ForwardDiff
     @test quantile(d, 1.0) == +Inf
 
     @test rand(d) == 0.5
-    @test rand(MersenneTwister(), d) == 0.5
+    @test rand(MersenneTwister(123), d) == 0.5
 end
 
 # Test for parameters beyond those supported in R references

@@ -96,7 +96,7 @@ n = 1000
 ns = 10^6
 @testset "Testing VonMisesFisher with $key" for (key, rng) in
     Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister())
+         "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing VonMisesFisher with $key at ($p, $κ)" for (p, κ) in [(2, 1.0),
                                                                            (2, 5.0),
