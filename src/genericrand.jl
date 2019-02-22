@@ -40,9 +40,11 @@ form as specified above. The rules are summarized as below:
   matrices with each element for a sample matrix.
 """
 function rand! end
-rand!(s::Sampleable, X::AbstractArray{<:AbstractArray};
+rand!(s::Sampleable, X::AbstractArray{<:AbstractMatrix};
       allocate::Union{Bool, Missing} = missing) =
     rand!(GLOBAL_RNG, s, X; allocate = allocate)
+rand!(s::Sampleable, X::AbstractArray{<:AbstractArray};
+      allocate::Bool = false) = rand!(GLOBAL_RNG, s, X; allocate = allocate)
 rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
 rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
 

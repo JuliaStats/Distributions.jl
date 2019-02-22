@@ -131,3 +131,44 @@ d0 = Multinomial(0, p)
 @test length(d0) == 3
 @test size(d0) == (3,)
 end
+
+@testset "Testing Multinomial with $key" for (key, func) in
+    Dict("rand!(...; allocate = true)" => (dist, X) -> rand!(dist, X),
+         "rand!(rng, ...; allocate = true)" => (dist, X) -> rand!(rng, dist, X))
+    # random sampling
+    X = Matrix{Int}(undef, length(p), 100)
+    x = func(d, X)
+    @test x ≡ X
+    @test isa(x, Matrix{Int})
+    @test all(sum(x, dims=1) .== nt)
+    @test all(insupport(d, x))
+    pv = pdf(d, x)
+    lp = logpdf(d, x)
+    for i in 1 : size(x, 2)
+        @test pv[i] ≈ pdf(d, x[:,i])
+        @test lp[i] ≈ logpdf(d, x[:,i])
+    end
+end
+
+@testset "Testing Multinomial with $key" for (key, func) in
+    Dict("rand!(...; allocate = true)" => (dist, X) -> rand!(dist, X; allocate = true),
+         "rand!(rng, ...; allocate = true)" => (dist, X) -> rand!(rng, dist, X; allocate = true))
+    # random sampling
+    X = Vector{Vector{Int}}(undef, 100)
+    x = func(d, X)
+    @test x ≡ X
+    @test all(sum.(x) .== nt)
+    @test all(insupport(d, a) for a in x)
+end
+
+@testset "Testing Multinomial with $key" for (key, func) in
+    Dict("rand!(...; allocate = false)" => (dist, X) -> rand!(dist, X),
+         "rand!(rng, ...; allocate = false)" => (dist, X) -> rand!(rng, dist, X))
+    # random sampling
+    X = [Vector{Int}(undef, length(p)) for _ in Base.OneTo(100)]
+    x1 = X[1]
+    x = func(d, X)
+    @test x1 ≡ X[1]
+    @test all(sum.(x) .== nt)
+    @test all(insupport(d, a) for a in x)
+end

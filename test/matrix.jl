@@ -79,21 +79,29 @@ end
     for d in [W,IW]
         local d
         local m = Matrix{Float64}(undef, size(d))
-        @test size(d) == size(func[2](d, m))
+        local x = func[2](d, m)
+        @test x ≡ m
+        @test size(d) == size(x)
         @test length(d) == length(func[2](d, m))
         @test typeof(d)(params(d)...) == d
         @test partype(d) == Float64
     end
 
     m = [Matrix{partype(W)}(undef, size(W)) for _ in Base.OneTo(100000)]
-
-    @test isapprox(mean(func[1](W,m)) , mean(W) , atol=0.1)
-    @test isapprox(mean(func[1](IW,m)), mean(IW), atol=0.1)
+    x = func[1](W,m)
+    @test x ≡ m
+    @test isapprox(mean(x) , mean(W) , atol=0.1)
+    x = func[1](IW,m)
+    @test x ≡ m
+    @test isapprox(mean(x), mean(IW), atol=0.1)
 
     m3 = Array{partype(W), 3}(undef, size(W)..., 100000)
-
-    @test isapprox(mean(func[2](W,m3)) , mean(mean(W)) , atol=0.1)
-    @test isapprox(mean(func[2](IW,m3)), mean(mean(IW)), atol=0.1)
+    x = func[2](W,m3)
+    @test x ≡ m3
+    @test isapprox(mean(x) , mean(mean(W)) , atol=0.1)
+    x = func[2](IW,m3)
+    @test x ≡ m3
+    @test isapprox(mean(x), mean(mean(IW)), atol=0.1)
 end
 
 @testset "Testing matrix-variates with $key" for (key, func) in
@@ -101,9 +109,12 @@ end
          "rand!(rng, ...; allocate=true)" => (dist, X) -> rand!(rng, dist, X; allocate = true))
 
     m = Vector{Matrix{partype(W)}}(undef, 100000)
-
-    @test isapprox(mean(func(W,m)) , mean(W) , atol=0.1)
-    @test isapprox(mean(func(IW,m)), mean(IW), atol=0.1)
+    x = func(W,m)
+    @test x ≡ m
+    @test isapprox(mean(x), mean(W) , atol=0.1)
+    x = func(IW,m)
+    @test x ≡ m
+    @test isapprox(mean(x), mean(IW), atol=0.1)
 
 end
 

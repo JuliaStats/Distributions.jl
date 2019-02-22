@@ -26,7 +26,7 @@ rand!(d::MultivariateDistribution, x::AbstractArray)
 
 # multivariate with pre-allocated array
 function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix)
-    size(m, 1) == length(s) ||
+    @boundscheck size(m, 1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     smp = sampler(s)
     for i in Base.OneTo(size(m,2))
@@ -36,18 +36,33 @@ function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix
 end
 
 # single multivariate with pre-allocated vector
-function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, v::AbstractVector)
-    length(v) == length(s) ||
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+               v::AbstractVector{<:Real})
+    @boundscheck length(v) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     _rand!(rng, s, v)
 end
 
 # multiple multivariates with pre-allocated array
-function rand(rng::AbstractRNG, s::Sampleable{Multivariate},
-              X::AbstractArray{V}) where V <: AbstractVector
+function rand_!(rng::AbstractRNG, s::Sampleable{Multivariate},
+                X::AbstractArray{V}) where V <: AbstractVector
     smp = sampler(s)
     for i in eachindex(X)
         X[i] = _rand!(rng, smp, V(undef, length(s)))
+    end
+    return X
+end
+
+# multiple multivariates with pre-allocated array of pre-allocated vectors
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+               X::AbstractArray{<:AbstractVector}; allocate::Bool = false)
+    if allocate
+       return rand_!(rng, s, X)
+    end
+
+    smp = sampler(s)
+    for x in X
+       rand!(rng, smp, x)
     end
     return X
 end
