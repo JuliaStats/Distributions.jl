@@ -23,9 +23,22 @@ Return the mean matrix of `d`.
 mean(d::MatrixDistribution)
 
 ## sampling
+
+# multivariate with pre-allocated 3D array
+function _rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+                m::AbstractArray{<:Real, 3})
+    @boundscheck (size(m, 1), size(m, 2)) == (size(s, 1), size(s, 2)) ||
+        throw(DimensionMismatch("Output size inconsistent with matrix size."))
+    smp = sampler(s)
+    for i in Base.OneTo(size(m,3))
+        _rand!(rng, smp, view(m,:,:,i))
+    end
+    return m
+end
+
 # multiple matrix-variates with pre-allocated array
-function rand(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-              X::AbstractArray{M}) where M <: AbstractMatrix
+function rand_!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+                X::AbstractArray{M}) where M <: AbstractMatrix
     smp = sampler(s)
     for i in eachindex(X)
         X[i] = _rand!(rng, smp, M(undef, size(s)))
@@ -35,7 +48,16 @@ end
 
 # multiple matrix-variates with pre-allocated array of pre-allocated matrices
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-               X::AbstractArray{<:AbstractMatrix})
+               X::AbstractArray{<:AbstractMatrix};
+               allocate::Union{Bool, Missing} = missing)
+    if ismissing(allocate)
+        Base.depwarn("`rand!([rng::AbstractRNG, ]s::Sampleable{Matrixvariate}, X::AbstractArray{<:AbstractMatrix})` is deprecated as it allocates matrices. If you want to preserve this behaviour, the keyword argument `allocate` should be set to true or call Distributions.rand_!. If you want to not allocate memory, set `allocate=false` for now. This will become the default behaviour after the next release.", :rand!)
+        allocate = true
+    end
+    if allocate
+        return rand_!(rng, s, X)
+    end
+
     smp = sampler(s)
     for x in X
         rand!(rng, smp, x)
@@ -45,7 +67,7 @@ end
 
 # multiple matrix-variates, must allocate array of arrays
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
-    rand(rng, s, Array{Matrix{eltype(s)}}(undef, dims))
+    rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims); allocate = true)
 
 # single matrix-variate, must allocate one matrix
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
@@ -54,8 +76,8 @@ rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
 # single matrix-variate with pre-allocated matrix
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
                A::AbstractMatrix{<:Real})
-    size(A) == size(s) ||
-        throw(DimensionMismatch("Output size inconsistent with sample size."))
+    @boundscheck size(A) == size(s) ||
+        throw(DimensionMismatch("Output size inconsistent with matrix size."))
     return _rand!(rng, s, A)
 end
 
