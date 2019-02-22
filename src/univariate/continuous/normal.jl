@@ -87,7 +87,7 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2/2 * t^2)
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Normal) = d.μ + d.σ * randn(rng)
+_rand(rng::AbstractRNG, d::Normal) = d.μ + d.σ * randn(rng)
 
 
 #### Fitting

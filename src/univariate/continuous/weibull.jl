@@ -135,4 +135,4 @@ end
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
+_rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))

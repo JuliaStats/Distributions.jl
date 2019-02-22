@@ -100,6 +100,6 @@ end
 
 @_delegate_statsfuns FDist fdist ν1 ν2
 
-_rand!(rng::AbstractRNG, d::FDist) =
+_rand(rng::AbstractRNG, d::FDist) =
     ((ν1, ν2) = params(d);
-     (ν2 * _rand!(rng, Chisq(ν1))) / (ν1 * _rand!(rng, Chisq(ν2))))
+     (ν2 * _rand(rng, Chisq(ν1))) / (ν1 * _rand(rng, Chisq(ν2))))

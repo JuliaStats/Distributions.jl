@@ -105,7 +105,7 @@ end
 # Alternating series method, from:
 #   Devroye, Luc (1986) "Non-Uniform Random Variate Generation"
 #   Chapter IV.5, pp. 163-165.
-function _rand!(rng::AbstractRNG, d::Kolmogorov)
+function _rand(rng::AbstractRNG, d::Kolmogorov)
     t = 0.75
     if rand(rng) < 0.3728329582237386 # cdf(d,t)
         # left interval

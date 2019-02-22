@@ -138,4 +138,4 @@ end
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::SymTriangularDist) = xval(d, rand(rng) - rand(rng))
+_rand(rng::AbstractRNG, d::SymTriangularDist) = xval(d, rand(rng) - rand(rng))

@@ -107,7 +107,7 @@ end
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Laplace) =
+_rand(rng::AbstractRNG, d::Laplace) =
     d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
 

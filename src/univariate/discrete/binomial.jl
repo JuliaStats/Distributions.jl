@@ -108,7 +108,7 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
-function _rand!(rng::AbstractRNG, d::Binomial)
+function _rand(rng::AbstractRNG, d::Binomial)
     p, n = d.p, d.n
     if p <= 0.5
         r = p
@@ -116,9 +116,9 @@ function _rand!(rng::AbstractRNG, d::Binomial)
         r = 1.0-p
     end
     if r*n <= 10.0
-        y = _rand!(rng, BinomialGeomSampler(n,r))
+        y = _rand(rng, BinomialGeomSampler(n,r))
     else
-        y = _rand!(rng, BinomialTPESampler(n,r))
+        y = _rand(rng, BinomialTPESampler(n,r))
     end
     p <= 0.5 ? y : n-y
 end

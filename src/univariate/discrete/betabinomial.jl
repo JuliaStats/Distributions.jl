@@ -107,5 +107,5 @@ quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), suppor
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::BetaBinomial) =
-    _rand!(rng, Binomial(d.n, _rand!(rng, Beta(d.α, d.β))))
+_rand(rng::AbstractRNG, d::BetaBinomial) =
+    _rand(rng, Binomial(d.n, _rand(rng, Beta(d.α, d.β))))

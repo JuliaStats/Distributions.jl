@@ -154,7 +154,7 @@ end
 
 ## sampling
 # single univariate, no allocation
-rand(rng::AbstractRNG, s::Sampleable{Univariate}) = _rand!(rng, s)
+rand(rng::AbstractRNG, s::Sampleable{Univariate}) = _rand(rng, s)
 
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
@@ -164,17 +164,17 @@ rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
 function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
     smp = sampler(s)
     for i in eachindex(A)
-        @inbounds A[i] = _rand!(rng, smp)
+        @inbounds A[i] = _rand(rng, smp)
     end
     return A
 end
 
 """
-    _rand!(d::UnivariateDistribution)
+    _rand(d::UnivariateDistribution)
 
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
 """
-_rand!(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
+_rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
 
 ## statistics
 

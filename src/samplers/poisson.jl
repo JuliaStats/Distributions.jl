@@ -17,7 +17,7 @@ struct PoissonCountSampler <: Sampleable{Univariate,Discrete}
     μ::Float64
 end
 
-function _rand!(rng::AbstractRNG, s::PoissonCountSampler)
+function _rand(rng::AbstractRNG, s::PoissonCountSampler)
     μ = s.μ
     n = 0
     c = randexp(rng)
@@ -46,7 +46,7 @@ end
 PoissonADSampler(μ::Float64) =
     PoissonADSampler(μ,sqrt(μ),6.0*μ^2,floor(Int,μ-1.1484))
 
-function _rand!(rng::AbstractRNG, s::PoissonADSampler)
+function _rand(rng::AbstractRNG, s::PoissonADSampler)
     # Step N
     G = s.μ + s.s*randn(rng)
 

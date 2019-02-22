@@ -150,7 +150,7 @@ end
 #   John R. Michael, William R. Schucany and Roy W. Haas (1976)
 #   Generating Random Variates Using Transformations with Multiple Roots
 #   The American Statistician , Vol. 30, No. 2, pp. 88-90
-function _rand!(rng::AbstractRNG, d::InverseGaussian)
+function _rand(rng::AbstractRNG, d::InverseGaussian)
     μ, λ = params(d)
     z = randn(rng)
     v = z * z

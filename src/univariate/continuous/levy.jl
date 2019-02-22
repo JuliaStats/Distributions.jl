@@ -98,4 +98,4 @@ end
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Levy) = d.μ + d.σ / randn(rng)^2
+_rand(rng::AbstractRNG, d::Levy) = d.μ + d.σ / randn(rng)^2

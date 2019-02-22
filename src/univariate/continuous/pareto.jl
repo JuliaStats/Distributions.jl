@@ -111,7 +111,7 @@ quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
+_rand(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
 
 ## Fitting
 

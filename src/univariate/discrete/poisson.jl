@@ -146,7 +146,7 @@ fit_mle(::Type{Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 #   "Computer Generation of Poisson Deviates from Modified Normal Distributions"
 #   ACM Transactions on Mathematical Software, 8(2):163-179
 # TODO: implement poisson sampler
-function _rand!(rng::AbstractRNG, d::Poisson)
+function _rand(rng::AbstractRNG, d::Poisson)
     μ = d.λ
     if μ >= 10.0  # Case A
 

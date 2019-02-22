@@ -87,7 +87,7 @@ cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling
-_rand!(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
+_rand(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
 
 
 #### Fit model

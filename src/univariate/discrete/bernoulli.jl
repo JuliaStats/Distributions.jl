@@ -104,7 +104,7 @@ cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 #### Sampling
 
-_rand!(rng::AbstractRNG, d::Bernoulli) = round(Int, rand(rng) <= succprob(d))
+_rand(rng::AbstractRNG, d::Bernoulli) = round(Int, rand(rng) <= succprob(d))
 
 #### MLE fitting
 

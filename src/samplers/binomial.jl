@@ -44,7 +44,7 @@ function BinomialGeomSampler(n::Int, prob::Float64)
     BinomialGeomSampler(comp, n, scale)
 end
 
-function _rand!(rng::AbstractRNG, s::BinomialGeomSampler)
+function _rand(rng::AbstractRNG, s::BinomialGeomSampler)
     y = 0
     x = 0
     n = s.n
@@ -129,7 +129,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
                        xM,xL,xR,c,λL,λR)
 end
 
-function _rand!(rng::AbstractRNG, s::BinomialTPESampler)
+function _rand(rng::AbstractRNG, s::BinomialTPESampler)
     y = 0
     while true
         # Step 1
@@ -231,7 +231,7 @@ end
 
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
-_rand!(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
+_rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 
 
 # Integrated Polyalgorithm sampler that automatically chooses the proper one
@@ -260,5 +260,5 @@ end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
-_rand!(rng::AbstractRNG, s::BinomialPolySampler) =
-    s.use_btpe ? _rand!(rng, s.btpe_sampler) : _rand!(rng, s.geom_sampler)
+_rand(rng::AbstractRNG, s::BinomialPolySampler) =
+    s.use_btpe ? _rand(rng, s.btpe_sampler) : _rand(rng, s.geom_sampler)
