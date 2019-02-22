@@ -147,13 +147,13 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(d::Truncated{Normal{T},Continuous}) where T <: Real
+function _rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     a = (d.lower - μ) / σ
     b = (d.upper - μ) / σ
-    z = randnt(a, b, d.tp)
+    z = randnt(rng, a, b, d.tp)
     return μ + σ * z
 end
 
@@ -161,12 +161,12 @@ end
 #
 #  - Available at http://arxiv.org/abs/0907.4010
 
-function randnt(lb::Float64, ub::Float64, tp::Float64)
+function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
     local r::Float64
     if tp > 0.3   # has considerable chance of falling in [lb, ub]
-        r = randn()
+        r = randn(rng)
         while r < lb || r > ub
-            r = randn()
+            r = randn(rng)
         end
         return r
 
@@ -175,8 +175,8 @@ function randnt(lb::Float64, ub::Float64, tp::Float64)
         if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
             a = (lb + sqrt(lb^2 + 4.0))/2.0
             while true
-                r = rand(Exponential(1.0 / a)) + lb
-                u = rand()
+                r = _rand(rng, Exponential(1.0 / a)) + lb
+                u = rand(rng)
                 if u < exp(-0.5 * (r - a)^2) && r < ub
                     return r
                 end
@@ -184,16 +184,16 @@ function randnt(lb::Float64, ub::Float64, tp::Float64)
         elseif ub < 0 && ub - lb > 2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
             a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
             while true
-                r = rand(Exponential(1.0 / a)) - ub
-                u = rand()
+                r = _rand(rng, Exponential(1.0 / a)) - ub
+                u = rand(rng)
                 if u < exp(-0.5 * (r - a)^2) && r < -lb
                     return -r
                 end
             end
         else
             while true
-                r = lb + rand() * (ub - lb)
-                u = rand()
+                r = lb + rand(rng) * (ub - lb)
+                u = rand(rng)
                 if lb > 0
                     rho = exp((lb^2 - r^2) * 0.5)
                 elseif ub < 0
