@@ -36,38 +36,31 @@ function _rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
     return m
 end
 
-# multiple matrix-variates with pre-allocated array
-function rand_!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-                X::AbstractArray{M}) where M <: AbstractMatrix
-    smp = sampler(s)
-    for i in eachindex(X)
-        X[i] = _rand!(rng, smp, M(undef, size(s)))
-    end
-    return X
-end
+# multiple matrix-variates with pre-allocated array of maybe pre-allocated matrices
+rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+      X::AbstractArray{<:AbstractMatrix}) =
+          @inbounds rand!(rng, s, X,
+                          !all([isassigned(X,i) for i in eachindex(X)]) ||
+                          (sz = size(s); !all(size(x) == sz for x in X)))
 
-# multiple matrix-variates with pre-allocated array of pre-allocated matrices
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-               X::AbstractArray{<:AbstractMatrix};
-               allocate::Union{Bool, Missing} = missing)
-    if ismissing(allocate)
-        Base.depwarn("`rand!([rng::AbstractRNG, ]s::Sampleable{Matrixvariate}, X::AbstractArray{<:AbstractMatrix})` is deprecated as it allocates matrices. If you want to preserve this behaviour, the keyword argument `allocate` should be set to true or call Distributions.rand_!. If you want to not allocate memory, set `allocate=false` for now. This will become the default behaviour after the next release.", :rand!)
-        allocate = true
-    end
-    if allocate
-        return rand_!(rng, s, X)
-    end
-
+               X::AbstractArray{M}, allocate::Bool) where M <: AbstractMatrix
     smp = sampler(s)
-    for x in X
-        rand!(rng, smp, x)
+    if allocate
+        for i in eachindex(X)
+            X[i] = _rand!(rng, smp, M(undef, size(s)))
+        end
+    else
+        for x in X
+            rand!(rng, smp, x)
+        end
     end
     return X
 end
 
 # multiple matrix-variates, must allocate array of arrays
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
-    rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims); allocate = true)
+    rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims), true)
 
 # single matrix-variate, must allocate one matrix
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =

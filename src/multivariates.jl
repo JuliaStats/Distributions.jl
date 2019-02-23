@@ -43,26 +43,24 @@ function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
     _rand!(rng, s, v)
 end
 
-# multiple multivariates with pre-allocated array
-function rand_!(rng::AbstractRNG, s::Sampleable{Multivariate},
-                X::AbstractArray{V}) where V <: AbstractVector
-    smp = sampler(s)
-    for i in eachindex(X)
-        X[i] = _rand!(rng, smp, V(undef, length(s)))
-    end
-    return X
-end
+# multiple multivariates with pre-allocated array of maybe pre-allocated vectors
+rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+      X::AbstractArray{<:AbstractVector}) =
+          @inbounds rand!(rng, s, X,
+                          !all([isassigned(X,i) for i in eachindex(X)]) ||
+                          !all(length.(X) .== length(s)))
 
-# multiple multivariates with pre-allocated array of pre-allocated vectors
 function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
-               X::AbstractArray{<:AbstractVector}; allocate::Bool = false)
-    if allocate
-       return rand_!(rng, s, X)
-    end
-
+               X::AbstractArray{V}, allocate::Bool) where V <: AbstractVector
     smp = sampler(s)
-    for x in X
-       rand!(rng, smp, x)
+    if allocate
+        for i in eachindex(X)
+            X[i] = _rand!(rng, smp, V(undef, size(s)))
+        end
+    else
+        for x in X
+            rand!(rng, smp, x)
+        end
     end
     return X
 end
@@ -72,7 +70,7 @@ rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
     _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
-    rand(rng, s, Array{Vector{eltype(s)}}(undef, dims))
+    rand(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
 
 # single multivariate, must allocate vector
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =

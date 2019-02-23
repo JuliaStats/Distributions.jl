@@ -73,8 +73,8 @@ rng = MersenneTwister(123)
 end
 
 @testset "Testing matrix-variates with $key" for (key, func) in
-    Dict("rand!(...; allocate=false)" => [(dist, X) -> rand!(dist, X; allocate = false), rand!],
-         "rand!(rng, ...; allocate=false)" => [(dist, X) -> rand!(rng, dist, X; allocate = false), (dist, X) -> rand!(rng, dist, X)])
+    Dict("rand!(..., false)" => [(dist, X) -> rand!(dist, X, false), rand!],
+         "rand!(rng, ..., false)" => [(dist, X) -> rand!(rng, dist, X, false), (dist, X) -> rand!(rng, dist, X)])
 
     for d in [W,IW]
         local d
@@ -105,8 +105,8 @@ end
 end
 
 @testset "Testing matrix-variates with $key" for (key, func) in
-    Dict("rand!(...; allocate=true)" => (dist, X) -> rand!(dist, X; allocate = true),
-         "rand!(rng, ...; allocate=true)" => (dist, X) -> rand!(rng, dist, X; allocate = true))
+    Dict("rand!(..., true)" => (dist, X) -> rand!(dist, X, true),
+         "rand!(rng, true)" => (dist, X) -> rand!(rng, dist, X, true))
 
     m = Vector{Matrix{partype(W)}}(undef, 100000)
     x = func(W,m)
@@ -120,4 +120,15 @@ end
 
 repeats = 10
 m = Vector{Matrix{partype(W)}}(undef, repeats)
-@test_deprecated rand!(W, m)
+rand!(W, m)
+@test isassigned(m, 1)
+m1=m[1]
+rand!(W, m)
+@test m1 ≡ m[1]
+rand!(W, m, true)
+@test m1 ≢ m[1]
+m1 = m[1]
+rand!(W, m, false)
+@test m1 ≡ m[1]
+
+
