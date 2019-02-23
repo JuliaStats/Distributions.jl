@@ -1,7 +1,7 @@
 """
     NoncentralF(ν1, ν2, λ)
 """
-struct NoncentralF{T<:Real} <: ContinuousUnivariateRDist
+struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
     λ::T
@@ -56,8 +56,15 @@ function _rand(rng::AbstractRNG, d::NoncentralF)
 end
 
 # TODO: remove RFunctions dependency once NoncentralChisq has its removed
+@rand_rdist(NoncentralF)
 function rand(d::NoncentralF)
     r1 = rand(NoncentralChisq(d.ν1,d.λ)) / d.ν1
     r2 = rand(Chisq(d.ν2)) / d.ν2
+    r1 / r2
+end
+
+function _rand(rng::AbstractRNG, d::NoncentralF)
+    r1 = _rand(rng, NoncentralChisq(d.ν1,d.λ)) / d.ν1
+    r2 = _rand(rng, Chisq(d.ν2)) / d.ν2
     r1 / r2
 end

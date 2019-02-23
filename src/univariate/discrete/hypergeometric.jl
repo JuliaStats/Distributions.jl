@@ -19,7 +19,7 @@ External links
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 
 """
-struct Hypergeometric <: DiscreteUnivariateRDist
+struct Hypergeometric <: DiscreteUnivariateDistribution
     ns::Int     # number of successes in population
     nf::Int     # number of failures in population
     n::Int      # sample size
@@ -75,11 +75,13 @@ end
 @_delegate_statsfuns Hypergeometric hyper ns nf n
 
 ## sampling
-# TODO: Implement:
+
+# TODO: remove RFunctions dependency. Implement:
 #   V. Kachitvichyanukul & B. Schmeiser
 #   "Computer generation of hypergeometric random variates"
 #   Journal of Statistical Computation and Simulation, 22(2):127-145
 #   doi:10.1080/00949658508810839
+@rand_rdist(Hypergeometric)
 rand(d::Hypergeometric) =
     convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
 

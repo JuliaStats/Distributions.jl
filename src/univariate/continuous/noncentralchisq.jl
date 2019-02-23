@@ -23,7 +23,7 @@ External links
 
 * [Noncentral chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
 """
-struct NoncentralChisq{T<:Real} <: ContinuousUnivariateRDist
+struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
     function NoncentralChisq{T}(ν::T, λ::T) where T
@@ -74,4 +74,6 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
+# TODO: remove RFunctions dependency
+@rand_rdist(NoncentralChisq)
 rand(d::NoncentralChisq) = StatsFuns.RFunctions.nchisqrand(d.ν, d.λ)

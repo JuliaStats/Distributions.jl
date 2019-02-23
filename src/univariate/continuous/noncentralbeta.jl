@@ -1,7 +1,7 @@
 """
     NoncentralBeta(α, β, λ)
 """
-struct NoncentralBeta{T<:Real} <: ContinuousUnivariateRDist
+struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     λ::T
@@ -33,6 +33,8 @@ params(d::NoncentralBeta) = (d.α, d.β, d.λ)
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
 # TODO: remove RFunctions dependency once NoncentralChisq has its removed
+@rand_rdist(NoncentralBeta)
+
 function rand(d::NoncentralBeta)
     β = d.β
     a = rand(NoncentralChisq(2d.α, β))

@@ -20,7 +20,7 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-struct Poisson{T<:Real} <: DiscreteUnivariateRDist
+struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     λ::T
 
     Poisson{T}(λ::Real) where {T} = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))
@@ -86,11 +86,6 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-
-# TODO: remove RFunctions dependency once Poisson has been fully implemented
-# Currently depends on a quantile function for one option
-rand(d::Poisson) = convert(Int, StatsFuns.RFunctions.poisrand(d.λ))
-
 struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64
 end
@@ -140,6 +135,13 @@ function suffstats(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float6
 end
 
 fit_mle(::Type{Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
+
+## samplers
+
+# TODO: remove RFunctions dependency once Poisson has been fully implemented
+# Currently depends on a quantile function for one option
+@rand_rdist(Poisson)
+rand(d::Poisson) = convert(Int, StatsFuns.RFunctions.poisrand(d.λ))
 
 # algorithm from:
 #   J.H. Ahrens, U. Dieter (1982)

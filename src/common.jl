@@ -122,15 +122,16 @@ Get the probability of failure.
 failprob(d::DiscreteUnivariateDistribution)
 
 # Temporary fix to handle RFunctions dependencies
-abstract type DiscreteUnivariateRDist <: DiscreteUnivariateDistribution end
-abstract type ContinuousUnivariateRDist <: ContinuousUnivariateDistribution end
-function rand(d::Union{DiscreteUnivariateRDist, ContinuousUnivariateRDist}, n::Int)
-    [rand(d) for i in Base.OneTo(n)]
-end
-function rand!(d::Union{DiscreteUnivariateRDist, ContinuousUnivariateRDist},
-               X::AbstractArray)
-    for i in eachindex(X)
-        X[i] = rand(d)
-    end
-    return X
+macro rand_rdist(D)
+    esc(quote
+        function rand(d::$D, n::Int)
+            [rand(d) for i in Base.OneTo(n)]
+        end
+        function rand!(d::$D, X::AbstractArray)
+            for i in eachindex(X)
+                X[i] = rand(d)
+            end
+            return X
+        end
+    end)
 end

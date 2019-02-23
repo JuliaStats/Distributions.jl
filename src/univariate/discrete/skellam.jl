@@ -20,7 +20,7 @@ External links:
 
 * [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
 """
-struct Skellam{T<:Real} <: DiscreteUnivariateRDist
+struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
     μ1::T
     μ2::T
 
@@ -85,6 +85,7 @@ cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
 
 #### Sampling
 # TODO: remove RFunctions dependency once Poisson has its removed
+@rand_rdist(Skellam)
 rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
 
 _rand(rng::AbstractRNG, d::Skellam) =

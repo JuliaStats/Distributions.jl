@@ -28,7 +28,7 @@ External links:
 Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
-struct NegativeBinomial{T<:Real} <: DiscreteUnivariateRDist
+struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
@@ -88,6 +88,7 @@ mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p)
 
 ## sampling
 # TODO: remove RFunctions dependency once Poisson has its removed
+@rand_rdist(NegativeBinomial)
 rand(d::NegativeBinomial) =
     convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
 
