@@ -1,5 +1,6 @@
 import StatsBase: ProbabilityWeights
 using Random, Distributions
+using Test
 
 rng = MersenneTwister(123)
 
