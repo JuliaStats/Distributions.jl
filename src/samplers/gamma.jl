@@ -58,6 +58,24 @@ function GammaGDSampler(g::Gamma)
     GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
 end
 
+function calc_q(s::GammaGDSampler, t)
+    v = t*s.i2s
+    if abs(v) > 0.25
+        return s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
+    else
+        return s.q0 + 0.5*t*t*(v*@horner(v,
+                                         0.333333333,
+                                         -0.249999949,
+                                         0.199999867,
+                                         -0.1666774828,
+                                         0.142873973,
+                                         -0.124385581,
+                                         0.110368310,
+                                         -0.112750886,
+                                         0.10408986))
+    end
+end
+
 function _rand(rng::AbstractRNG, s::GammaGDSampler)
     # Step 2
     t = randn(rng)
@@ -71,54 +89,30 @@ function _rand(rng::AbstractRNG, s::GammaGDSampler)
     # Step 5
     if x > 0.0
         # Step 6
-        v = t*s.i2s
-        if abs(v) > 0.25
-            q = s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
-        else
-            q = s.q0 + 0.5*t*t*(v*@horner(v,
-                                         0.333333333,
-                                         -0.249999949,
-                                         0.199999867,
-                                         -0.1666774828,
-                                         0.142873973,
-                                         -0.124385581,
-                                         0.110368310,
-                                         -0.112750886,
-                                         0.10408986))
-        end
-
+        q = calc_q(s, t)
         # Step 7
         log1p(-u) <= q && return x*x*s.scale
     end
 
     # Step 8
-    @label step8
-    e = randexp(rng)
-    u = 2.0rand(rng) - 1.0
-    t = s.b + e*s.σ*sign(u)
+    t = 0.0
+    while true
+        e = 0.0
+        u = 0.0
+        while true
+            e = randexp(rng)
+            u = 2.0rand(rng) - 1.0
+            t = s.b + e*s.σ*sign(u)
+            # Step 9
+            t ≥ -0.718_744_837_717_19 && break
+        end
 
-    # Step 9
-    t < -0.718_744_837_717_19 && @goto step8
+        # Step 10
+        q = calc_q(s, t)
 
-    # Step 10
-    v = t*s.i2s
-    if abs(v) > 0.25
-        q = s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
-    else
-        q = s.q0 + 0.5*t*t*(v*@horner(v,
-                                      0.333333333,
-                                      -0.249999949,
-                                      0.199999867,
-                                      -0.1666774828,
-                                      0.142873973,
-                                      -0.124385581,
-                                      0.110368310,
-                                      -0.112750886,
-                                      0.10408986))
+        # Step 11
+        (q > 0.0) && (s.c*abs(u) ≤ expm1(q)*exp(e-0.5t*t)) && break
     end
-
-    # Step 11
-    (q <= 0.0 || s.c*abs(u) > expm1(q)*exp(e-0.5t*t)) && @goto step8
 
     # Step 12
     x = s.s+0.5t
