@@ -15,7 +15,7 @@ CategoricalDirectSampler(p::Ts) where {T<:Real,Ts<:AbstractVector{T}} =
 
 ncategories(s::CategoricalDirectSampler) = length(s.prob)
 
-function _rand(rng::AbstractRNG, s::CategoricalDirectSampler)
+function rand(rng::AbstractRNG, s::CategoricalDirectSampler)
     p = s.prob
     n = length(p)
     i = 1

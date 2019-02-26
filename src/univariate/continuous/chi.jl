@@ -95,14 +95,14 @@ invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
 
 #### Sampling
 
-_rand(rng::AbstractRNG, d::Chi) =
-    (ν = d.ν; sqrt(_rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
+rand(rng::AbstractRNG, d::Chi) =
+    (ν = d.ν; sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
 
 struct ChiSampler{S <: Sampleable{Univariate,Continuous}} <:
     Sampleable{Univariate,Continuous}
     s::S
 end
 
-_rand(rng::AbstractRNG, s::ChiSampler) = sqrt(_rand(rng, s.s))
+rand(rng::AbstractRNG, s::ChiSampler) = sqrt(rand(rng, s.s))
 
 sampler(d::Chi) = ChiSampler(sampler(Chisq(d.ν)))

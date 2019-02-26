@@ -48,7 +48,7 @@ end
 @_delegate_statsfuns NoncentralT ntdist ν λ
 
 ## sampling
-function _rand(rng::AbstractRNG, d::NoncentralT)
+function rand(rng::AbstractRNG, d::NoncentralT)
     ν = d.ν
     z = randn(rng)
     v = rand(rng, Chisq(ν))

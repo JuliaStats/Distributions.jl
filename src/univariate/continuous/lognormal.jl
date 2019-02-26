@@ -120,7 +120,7 @@ end
 
 #### Sampling
 
-_rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
 
 ## Fitting
 

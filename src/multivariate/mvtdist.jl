@@ -157,7 +157,7 @@ end
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
-    y = sqrt(_rand(rng, chisqd)/(d.df))
+    y = sqrt(rand(rng, chisqd)/(d.df))
     unwhiten!(d.Σ, randn!(rng, x))
     broadcast!(/, x, x, y)
     if !d.zeromean

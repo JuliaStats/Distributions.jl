@@ -139,10 +139,10 @@ function sampler(d::Beta{T}) where T
 end
 
 # From Knuth
-function _rand(rng::AbstractRNG, s::BetaSampler)
+function rand(rng::AbstractRNG, s::BetaSampler)
     if s.γ
-        g1 = _rand(rng, s.s1)
-        g2 = _rand(rng, s.s2)
+        g1 = rand(rng, s.s1)
+        g2 = rand(rng, s.s2)
         return g1 / (g1 + g2)
     else
         iα = s.iα
@@ -168,7 +168,7 @@ function _rand(rng::AbstractRNG, s::BetaSampler)
     end
 end
 
-function _rand(rng::AbstractRNG, d::Beta{T}) where T
+function rand(rng::AbstractRNG, d::Beta{T}) where T
     (α, β) = params(d)
     if (α ≤ 1.0) && (β ≤ 1.0)
         while true
@@ -190,8 +190,8 @@ function _rand(rng::AbstractRNG, d::Beta{T}) where T
             end
         end
     else
-        g1 = _rand(rng, Gamma(α, one(T)))
-        g2 = _rand(rng, Gamma(β, one(T)))
+        g1 = rand(rng, Gamma(α, one(T)))
+        g2 = rand(rng, Gamma(β, one(T)))
         return g1 / (g1 + g2)
     end
 end

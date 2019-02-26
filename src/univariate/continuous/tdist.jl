@@ -73,7 +73,7 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-function _rand(rng::AbstractRNG, d::TDist)
+function rand(rng::AbstractRNG, d::TDist)
     z = randn(rng)
     ν = d.ν
     return z/sqrt(rand(rng, Chisq(ν))/ν)

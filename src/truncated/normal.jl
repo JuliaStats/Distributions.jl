@@ -147,7 +147,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function _rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
+function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -175,7 +175,7 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
         if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
             a = (lb + sqrt(lb^2 + 4.0))/2.0
             while true
-                r = _rand(rng, Exponential(1.0 / a)) + lb
+                r = rand(rng, Exponential(1.0 / a)) + lb
                 u = rand(rng)
                 if u < exp(-0.5 * (r - a)^2) && r < ub
                     return r
@@ -184,7 +184,7 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
         elseif ub < 0 && ub - lb > 2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
             a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
             while true
-                r = _rand(rng, Exponential(1.0 / a)) - ub
+                r = rand(rng, Exponential(1.0 / a)) - ub
                 u = rand(rng)
                 if u < exp(-0.5 * (r - a)^2) && r < -lb
                     return -r

@@ -76,7 +76,7 @@ function calc_q(s::GammaGDSampler, t)
     end
 end
 
-function _rand(rng::AbstractRNG, s::GammaGDSampler)
+function rand(rng::AbstractRNG, s::GammaGDSampler)
     # Step 2
     t = randn(rng)
     x = s.s + 0.5t
@@ -139,7 +139,7 @@ function GammaGSSampler(d::Gamma)
     GammaGSSampler(a, ia, b, scale(d))
 end
 
-function _rand(rng::AbstractRNG, s::GammaGSSampler)
+function rand(rng::AbstractRNG, s::GammaGSSampler)
     while true
         # step 1
         p = s.b*rand(rng)
@@ -176,7 +176,7 @@ function GammaMTSampler(g::Gamma)
     GammaMTSampler(d, c, κ)
 end
 
-function _rand(rng::AbstractRNG, s::GammaMTSampler)
+function rand(rng::AbstractRNG, s::GammaMTSampler)
     while true
         x = randn(rng)
         v = 1.0 + s.c * x
@@ -205,8 +205,8 @@ function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
-function _rand(rng::AbstractRNG, s::GammaIPSampler)
-    x = _rand(rng, s.s)
+function rand(rng::AbstractRNG, s::GammaIPSampler)
+    x = rand(rng, s.s)
     e = randexp(rng)
     x*exp(s.nia*e)
 end

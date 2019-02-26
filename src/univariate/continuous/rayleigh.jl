@@ -85,4 +85,4 @@ quantile(d::Rayleigh, p::Real) = sqrt(-2d.σ^2 * log1p(-p))
 
 #### Sampling
 
-_rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))
+rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))

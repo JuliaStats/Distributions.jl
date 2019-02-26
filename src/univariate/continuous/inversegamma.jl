@@ -116,4 +116,4 @@ end
 
 #### Evaluation
 
-_rand(rng::AbstractRNG, d::InverseGamma) = 1 / rand(rng, d.invd)
+rand(rng::AbstractRNG, d::InverseGamma) = 1 / rand(rng, d.invd)

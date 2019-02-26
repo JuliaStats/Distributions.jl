@@ -259,7 +259,7 @@ ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
 
 
 #### Sampling
-function _rand(rng::AbstractRNG, d::GeneralizedExtremeValue)
+function rand(rng::AbstractRNG, d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
 
     # Generate a Float64 random number uniformly in (0,1].

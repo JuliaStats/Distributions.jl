@@ -105,7 +105,7 @@ end
 
 #### Sampling
 
-_rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
+rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 
 #### Fitting

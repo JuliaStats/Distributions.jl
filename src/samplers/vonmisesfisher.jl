@@ -64,10 +64,10 @@ function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
 
     r = (p - 1) / 2.0
     betad = Beta(r, r)
-    z = _rand(rng, betad)
+    z = rand(rng, betad)
     w = (1.0 - (1.0 + b) * z) / (1.0 - (1.0 - b) * z)
     while κ * w + (p - 1) * log(1 - x0 * w) - c < log(rand(rng))
-        z = _rand(rng, betad)
+        z = rand(rng, betad)
         w = (1.0 - (1.0 + b) * z) / (1.0 - (1.0 - b) * z)
     end
     return w::Float64

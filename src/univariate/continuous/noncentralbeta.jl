@@ -42,9 +42,9 @@ function rand(d::NoncentralBeta)
     a / (a + b)
 end
 
-function _rand(rng::AbstractRNG, d::NoncentralBeta)
+function rand(rng::AbstractRNG, d::NoncentralBeta)
     β = d.β
-    a = _rand(rng, NoncentralChisq(2d.α, β))
-    b = _rand(rng, Chisq(2β))
+    a = rand(rng, NoncentralChisq(2d.α, β))
+    b = rand(rng, Chisq(2β))
     a / (a + b)
 end

@@ -19,5 +19,5 @@ DiscreteNonParametricSampler(support::S, probs::AbstractVector{<:Real}
     ) where {T<:Real,S<:AbstractVector{T}} =
     DiscreteNonParametricSampler{T,S}(support, probs)
 
-_rand(rng::AbstractRNG, s::DiscreteNonParametricSampler) =
-    (@inbounds v = s.support[_rand(rng, s.aliastable)]; v)
+rand(rng::AbstractRNG, s::DiscreteNonParametricSampler) =
+    (@inbounds v = s.support[rand(rng, s.aliastable)]; v)

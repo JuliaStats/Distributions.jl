@@ -124,7 +124,7 @@ function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
     #
     A .= zero(eltype(A))
     for i = 1:p
-        @inbounds A[i,i] = _rand(rng, Chi(df - i + 1.0))
+        @inbounds A[i,i] = rand(rng, Chi(df - i + 1.0))
     end
     for j in 1:p-1, i in j+1:p
         @inbounds A[i,j] = randn(rng)
