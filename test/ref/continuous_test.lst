@@ -32,7 +32,7 @@ Cosine(µ=1.5)
 Cosine(2.0, 2.8)
 
 Erlang()
-Erlang(3)
+Erlang(α=3)
 Erlang(3, 1.0)
 Erlang(5, 2.0)
 
@@ -44,10 +44,10 @@ FDist(6.0, 8.0)
 FDist(8.0, 6.0)
 
 Frechet()
-Frechet(0.5)
-Frechet(3.0)
-Frechet(20.0)
-Frechet(60.0)
+Frechet(α=0.5)
+Frechet(α=3.0)
+Frechet(α=20.0)
+Frechet(α=60.0)
 Frechet(0.5, 2.0)
 Frechet(3.0, 2.0)
 

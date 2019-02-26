@@ -879,7 +879,7 @@
   ]
 },
 {
-  "expr": "Erlang(3)",
+  "expr": "Erlang(alpha=3)",
   "dtype": "Gamma",
   "minimum": 0,
   "maximum": "inf",
@@ -1191,7 +1191,7 @@
   ]
 },
 {
-  "expr": "Frechet(0.5)",
+  "expr": "Frechet(alpha=0.5)",
   "dtype": "Frechet",
   "minimum": 0,
   "maximum": "inf",
