@@ -1,5 +1,5 @@
 Arcsine()
-Arcsine(2.0)
+Arcsine(a=0., b=2.0)
 Arcsine(1.0, 2.5)
 Arcsine(-1.0, 1.0)
 
@@ -8,12 +8,12 @@ Beta(3.0, 4.0)
 Beta(17.0, 13.0)
 
 BetaPrime()
-BetaPrime(3.0)
+BetaPrime(α=3.0)
 BetaPrime(3.0, 5.0)
 BetaPrime(5.0, 3.0)
 
 Cauchy()
-Cauchy(2.0)
+Cauchy(µ=2.0)
 Cauchy(0.0, 1.0)
 Cauchy(10.0, 1.0)
 Cauchy(2.0, 10.0)
@@ -28,7 +28,7 @@ Chisq(8)
 Chisq(20)
 
 Cosine()
-Cosine(1.5)
+Cosine(µ=1.5)
 Cosine(2.0, 2.8)
 
 Erlang()

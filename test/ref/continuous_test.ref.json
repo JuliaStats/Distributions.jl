@@ -34,7 +34,7 @@
   ]
 },
 {
-  "expr": "Arcsine(2.0)",
+  "expr": "Arcsine(a=0.,b=2.0)",
   "dtype": "Arcsine",
   "minimum": 0,
   "maximum": 2,
@@ -266,7 +266,7 @@
   ]
 },
 {
-  "expr": "BetaPrime(3.0)",
+  "expr": "BetaPrime(alpha=0.0, beta=3.0)",
   "dtype": "BetaPrime",
   "minimum": 0,
   "maximum": "inf",
@@ -389,7 +389,7 @@
   ]
 },
 {
-  "expr": "Cauchy(2.0)",
+  "expr": "Cauchy(mu=2.0)",
   "dtype": "Cauchy",
   "minimum": "-inf",
   "maximum": "inf",
@@ -773,7 +773,7 @@
   ]
 },
 {
-  "expr": "Cosine(1.5)",
+  "expr": "Cosine(mu=1.5)",
   "dtype": "Cosine",
   "minimum": 0.5,
   "maximum": 2.5,

@@ -980,7 +980,7 @@
   ]
 },
 {
-  "expr": "NegativeBinomial(6)",
+  "expr": "NegativeBinomial(r=6)",
   "dtype": "NegativeBinomial",
   "minimum": 0,
   "maximum": "inf",
@@ -1302,7 +1302,7 @@
   ]
 },
 {
-  "expr": "Skellam(2.0)",
+  "expr": "Skellam(mu=2.0)",
   "dtype": "Skellam",
   "minimum": "-inf",
   "maximum": "inf",
