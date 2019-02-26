@@ -139,7 +139,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     _wishart_genA!(rng, dim(d), d.ν, A)
-    unwhiten!(d.S, A)
+    unwhiten!(d.Φ, A)
     A .= A * A'
 end
 
