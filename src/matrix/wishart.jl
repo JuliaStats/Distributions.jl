@@ -76,6 +76,8 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.Φ)
 size(d::Wishart) = (p = dim(d); (p, p))
+
+size(d::Wishart, i) = size(d)[i]
 params(d::Wishart) = (d.ν, d.Φ, d.c0)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
@@ -135,12 +137,13 @@ end
 
 #### Sampling
 
-function rand(d::Wishart)
-    Z = unwhiten!(d.Φ, _wishart_genA(dim(d), d.ν))
-    Z * Z'
+function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
+    _wishart_genA!(rng, dim(d), d.ν, A)
+    unwhiten!(d.S, A)
+    A .= A * A'
 end
 
-function _wishart_genA(p::Int, ν::Real)
+function _wishart_genA!(rng::AbstractRNG, p::Int, ν::Real, A::AbstractMatrix)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
@@ -148,12 +151,11 @@ function _wishart_genA(p::Int, ν::Real)
     #       A(i, j) ~ sqrt of Chisq(ν - i + 1) when i == j
     #               ~ Normal()                  when i > j
     #
-    A = zeros(p, p)
+    A .= zero(eltype(A))
     for i = 1:p
-        @inbounds A[i,i] = sqrt(rand(Chisq(ν - i + 1.0)))
+        @inbounds A[i,i] = rand(rng, Chi(ν - i + 1.0))
     end
-    for j = 1:p-1, i = j+1:p
-        @inbounds A[i,j] = randn()
+    for j in 1:p-1, i in j+1:p
+        @inbounds A[i,j] = randn(rng)
     end
-    return A
 end

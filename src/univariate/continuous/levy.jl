@@ -114,5 +114,4 @@ end
 
 #### Sampling
 
-rand(d::Levy) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Levy) = d.μ + d.σ / randn(rng)^2

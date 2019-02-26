@@ -148,8 +148,85 @@ gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
 
 #### Sampling
 
-rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
+struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
+                   S2 <: Sampleable{Univariate,Continuous}} <:
+    Sampleable{Univariate,Continuous}
+    γ::Bool
+    iα::T
+    iβ::T
+    s1::S1
+    s2::S2
+end
 
+function sampler(d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        return BetaSampler(false, inv(α), inv(β),
+                           sampler(Uniform()), sampler(Uniform()))
+    else
+        return BetaSampler(true, inv(α), inv(β),
+                           sampler(Gamma(α, one(T))),
+                           sampler(Gamma(β, one(T))))
+    end
+end
+
+# From Knuth
+function rand(rng::AbstractRNG, s::BetaSampler)
+    if s.γ
+        g1 = rand(rng, s.s1)
+        g2 = rand(rng, s.s2)
+        return g1 / (g1 + g2)
+    else
+        iα = s.iα
+        iβ = s.iβ
+        while true
+            u = rand(rng) # the Uniform sampler just calls rand()
+            v = rand(rng)
+            x = u^iα
+            y = v^iβ
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) * iα
+                    logY = log(v) * iβ
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    end
+end
+
+function rand(rng::AbstractRNG, d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        while true
+            u = rand(rng)
+            v = rand(rng)
+            x = u^inv(α)
+            y = v^inv(β)
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) / α
+                    logY = log(v) / β
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    else
+        g1 = rand(rng, Gamma(α, one(T)))
+        g2 = rand(rng, Gamma(β, one(T)))
+        return g1 / (g1 + g2)
+    end
+end
 
 #### Fit model
 

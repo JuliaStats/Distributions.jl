@@ -1,11 +1,4 @@
 
-struct GammaRmathSampler <: Sampleable{Univariate,Continuous}
-    d::Gamma
-end
-
-rand(s::GammaRmathSampler) = StatsFuns.RFunctions.gammarand(shape(s.d), scale(s.d))
-
-
 # "Generating gamma variates by a modified rejection technique"
 # J.H. Ahrens, U. Dieter
 # Communications of the ACM, Vol 25(1), 1982, pp 47-54
@@ -65,24 +58,12 @@ function GammaGDSampler(g::Gamma)
     GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
 end
 
-function rand(s::GammaGDSampler)
-    # Step 2
-    t = randn()
-    x = s.s + 0.5t
-    t >= 0.0 && return x*x*s.scale
-
-    # Step 3
-    u = rand()
-    s.d*u <= t*t*t && return x*x*s.scale
-
-    # Step 5
-    if x > 0.0
-        # Step 6
-        v = t*s.i2s
-        if abs(v) > 0.25
-            q = s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
-        else
-            q = s.q0 + 0.5*t*t*(v*@horner(v,
+function calc_q(s::GammaGDSampler, t)
+    v = t*s.i2s
+    if abs(v) > 0.25
+        return s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
+    else
+        return s.q0 + 0.5*t*t*(v*@horner(v,
                                          0.333333333,
                                          -0.249999949,
                                          0.199999867,
@@ -92,40 +73,46 @@ function rand(s::GammaGDSampler)
                                          0.110368310,
                                          -0.112750886,
                                          0.10408986))
-        end
+    end
+end
 
+function rand(rng::AbstractRNG, s::GammaGDSampler)
+    # Step 2
+    t = randn(rng)
+    x = s.s + 0.5t
+    t >= 0.0 && return x*x*s.scale
+
+    # Step 3
+    u = rand(rng)
+    s.d*u <= t*t*t && return x*x*s.scale
+
+    # Step 5
+    if x > 0.0
+        # Step 6
+        q = calc_q(s, t)
         # Step 7
         log1p(-u) <= q && return x*x*s.scale
     end
 
     # Step 8
-    @label step8
-    e = randexp()
-    u = 2.0rand() - 1.0
-    t = s.b + e*s.σ*sign(u)
+    t = 0.0
+    while true
+        e = 0.0
+        u = 0.0
+        while true
+            e = randexp(rng)
+            u = 2.0rand(rng) - 1.0
+            t = s.b + e*s.σ*sign(u)
+            # Step 9
+            t ≥ -0.718_744_837_717_19 && break
+        end
 
-    # Step 9
-    t < -0.718_744_837_717_19 && @goto step8
+        # Step 10
+        q = calc_q(s, t)
 
-    # Step 10
-    v = t*s.i2s
-    if abs(v) > 0.25
-        q = s.q0 - s.s*t + 0.25*t*t + 2.0*s.s2*log1p(v)
-    else
-        q = s.q0 + 0.5*t*t*(v*@horner(v,
-                                      0.333333333,
-                                      -0.249999949,
-                                      0.199999867,
-                                      -0.1666774828,
-                                      0.142873973,
-                                      -0.124385581,
-                                      0.110368310,
-                                      -0.112750886,
-                                      0.10408986))
+        # Step 11
+        (q > 0.0) && (s.c*abs(u) ≤ expm1(q)*exp(e-0.5t*t)) && break
     end
-
-    # Step 11
-    (q <= 0.0 || s.c*abs(u) > expm1(q)*exp(e-0.5t*t)) && @goto step8
 
     # Step 12
     x = s.s+0.5t
@@ -152,11 +139,11 @@ function GammaGSSampler(d::Gamma)
     GammaGSSampler(a, ia, b, scale(d))
 end
 
-function rand(s::GammaGSSampler)
+function rand(rng::AbstractRNG, s::GammaGSSampler)
     while true
         # step 1
-        p = s.b*rand()
-        e = randexp()
+        p = s.b*rand(rng)
+        e = randexp(rng)
         if p <= 1.0
             # step 2
             x = exp(log(p)*s.ia)
@@ -189,16 +176,16 @@ function GammaMTSampler(g::Gamma)
     GammaMTSampler(d, c, κ)
 end
 
-function rand(s::GammaMTSampler)
+function rand(rng::AbstractRNG, s::GammaMTSampler)
     while true
-        x = randn()
+        x = randn(rng)
         v = 1.0 + s.c * x
         while v <= 0.0
-            x = randn()
+            x = randn(rng)
             v = 1.0 + s.c * x
         end
         v *= (v * v)
-        u = rand()
+        u = rand(rng)
         x2 = x * x
         if u < 1.0 - 0.331 * abs2(x2) || log(u) < 0.5 * x2 + s.d * (1.0 - v + log(v))
             return v*s.κ
@@ -218,9 +205,9 @@ function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
 end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
-function rand(s::GammaIPSampler)
-    x = rand(s.s)
-    e = randexp()
+function rand(rng::AbstractRNG, s::GammaIPSampler)
+    x = rand(rng, s.s)
+    e = randexp(rng)
     x*exp(s.nia*e)
 end
 
@@ -234,5 +221,3 @@ end
 #         GammaGDSampler(d)
 #     end
 # end
-
-# rand(d::Gamma) = rand(sampler(d))

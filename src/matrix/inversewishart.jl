@@ -78,6 +78,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
+size(d::InverseWishart, i) = size(d)[i]
 params(d::InverseWishart) = (d.ν, d.Ψ, d.c0)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
@@ -126,12 +127,6 @@ end
 
 #### Sampling
 
-rand(d::InverseWishart) = inv(cholesky!(rand(Wishart(d.ν, inv(d.Ψ)))))
-
-function _rand!(d::InverseWishart, X::AbstractArray{M}) where M<:Matrix
-    wd = Wishart(d.ν, inv(d.Ψ))
-    for i in 1:length(X)
-        X[i] = inv(cholesky!(rand(wd)))
-    end
-    return X
+function _rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix)
+    A .= inv(cholesky!(_rand!(rng, Wishart(d.ν, inv(d.Ψ)), A))))
 end

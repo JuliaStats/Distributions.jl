@@ -112,4 +112,6 @@ end
 
 @_delegate_statsfuns FDist fdist ν1 ν2
 
-rand(d::FDist) = StatsFuns.RFunctions.fdistrand(d.ν1, d.ν2)
+rand(rng::AbstractRNG, d::FDist) =
+    ((ν1, ν2) = params(d);
+     (ν2 * rand(rng, Chisq(ν1))) / (ν1 * rand(rng, Chisq(ν2))))

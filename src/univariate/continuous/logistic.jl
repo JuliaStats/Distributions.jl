@@ -120,9 +120,3 @@ function cf(d::Logistic, t::Real)
     a = (π * t) * d.θ
     a == zero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
 end
-
-
-#### Sampling
-
-rand(d::Logistic) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Logistic) = quantile(d, rand(rng))

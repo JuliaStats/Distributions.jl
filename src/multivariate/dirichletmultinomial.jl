@@ -66,10 +66,8 @@ end
 
 
 # Sampling
-function _rand!(d::DirichletMultinomial, x::AbstractVector{T}) where T<:Real
-    multinom_rand!(ntrials(d), rand(Dirichlet(d.α)), x)
-end
-
+_rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
+    multinom_rand!(rng, ntrials(d), rand(rng, Dirichlet(d.α)), x)
 
 # Fit Model
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf

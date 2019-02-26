@@ -11,7 +11,8 @@ import Distributions: distrname
 
 ####### Core testing procedure
 
-function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
+function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
+                       rng::Union{AbstractRNG, Missing} = missing)
     d = length(g)
     μ = mean(g)
     Σ = cov(g)
@@ -28,12 +29,22 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test g == typeof(g)(params(g)...)
 
     # test sampling for AbstractMatrix (here, a SubArray):
-    subX = view(rand(d, 2d), :, 1:d)
-    @test isa(rand!(g, subX), SubArray)
-
+    if ismissing(rng)
+        subX = view(rand(d, 2d), :, 1:d)
+        @test isa(rand!(g, subX), SubArray)
+    else
+        subX = view(rand(rng, d, 2d), :, 1:d)
+        @test isa(rand!(rng, g, subX), SubArray)
+    end
+    
     # sampling
-    @test isa(rand(g), Vector{Float64})
-    X = rand(g, n_tsamples)
+    if ismissing(rng)
+        @test isa(rand(g), Vector{Float64})
+        X = rand(g, n_tsamples)
+    else
+        @test isa(rand(rng, g), Vector{Float64})
+        X = rand(rng, g, n_tsamples)
+    end        
     emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
@@ -86,7 +97,11 @@ h = [1., 2., 3.]
 dv = [1.2, 3.4, 2.6]
 J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-for (T, g, μ, Σ) in [
+@testset "Testing MvNormal with $key" for (key, rng) in
+    Dict("rand(...)" => missing,
+         "rand(rng, ...)" => MersenneTwister(123))
+    
+    @testset "Testing MvNormal with $key for $(distrname(g))" for (T, g, μ, Σ) in [
     (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
     (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
     (DiagNormal, MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
@@ -102,13 +117,11 @@ for (T, g, μ, Σ) in [
     (FullNormal, MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
     (DiagNormal, MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))) ]
 
-    println("    testing $(distrname(g))")
-
     @test isa(g, T)
     @test mean(g)   ≈ μ
     @test cov(g)    ≈ Σ
     @test invcov(g) ≈ inv(Σ)
-    test_mvnormal(g, 10^4)
+    test_mvnormal(g, 10^4, rng)
 
     # conversion between mean form and canonical form
     if isa(g, MvNormal)
@@ -125,6 +138,7 @@ for (T, g, μ, Σ) in [
         @test mean(gc) ≈ mean(g)
         @test cov(gc)  ≈ cov(g)
     end
+end
 end
 
 ##### Constructors and conversions
@@ -173,8 +187,7 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     return mu, C
 end
 
-println("    testing fit_mle")
-
+@testset "Testing fit_mle" begin
 x = randn(3, 200) .+ randn(3) * 2.
 w = rand(200)
 u, C = _gauss_mle(x)
@@ -214,3 +227,4 @@ g = fit_mle(DiagNormal, x, w)
 @test isa(g, DiagNormal)
 @test g.μ      ≈ uw
 @test g.Σ.diag ≈ diag(Cw)
+end

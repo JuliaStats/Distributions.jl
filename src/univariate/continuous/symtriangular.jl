@@ -160,5 +160,4 @@ end
 
 #### Sampling
 
-rand(d::SymTriangularDist) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::SymTriangularDist) = xval(d, rand(rng) - rand(rng))

@@ -122,7 +122,7 @@ invlogccdf(d::BetaPrime, p::Real) = (x = betainvlogccdf(d.α, d.β, p); x / (1 -
 
 #### Sampling
 
-function rand(d::BetaPrime)
+function rand(rng::AbstractRNG, d::BetaPrime)
     (α, β) = params(d)
-    rand(Gamma(α=α)) / rand(Gamma(α=β))
+    rand(rng, Gamma(α=α)) / rand(rng, Gamma(α=β))
 end

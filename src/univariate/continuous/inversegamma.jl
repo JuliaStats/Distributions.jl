@@ -128,13 +128,4 @@ end
 
 #### Evaluation
 
-rand(d::InverseGamma) = 1 / rand(d.invd)
-
-function _rand!(d::InverseGamma, A::AbstractArray)
-    s = sampler(d.invd)
-    for i = 1:length(A)
-        v = 1 / rand(s)
-        @inbounds A[i] = v
-    end
-    A
-end
+rand(rng::AbstractRNG, d::InverseGamma) = 1 / rand(rng, d.invd)

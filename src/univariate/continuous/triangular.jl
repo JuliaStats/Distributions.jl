@@ -151,7 +151,6 @@ end
 
 #### Sampling
 
-rand(d::TriangularDist) = rand(GLOBAL_RNG, d)
 function rand(rng::AbstractRNG, d::TriangularDist)
     (a, b, c) = params(d)
     b_m_a = b - a

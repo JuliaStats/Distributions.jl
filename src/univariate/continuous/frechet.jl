@@ -150,5 +150,4 @@ end
 
 ## Sampling
 
-rand(d::Frechet) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Frechet) = d.θ * randexp(rng) ^ (-1 / d.α)

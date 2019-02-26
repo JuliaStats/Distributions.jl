@@ -94,9 +94,3 @@ cdf(d::Arcsine{T}, x::Real) where {T<:Real} = x < d.a ? zero(T) :
                               0.636619772367581343 * asin(sqrt((x - d.a) / (d.b - d.a)))
 
 quantile(d::Arcsine, p::Real) = location(d) + abs2(sin(halfπ * p)) * scale(d)
-
-
-### Sampling
-
-rand(d::Arcsine) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Arcsine) = quantile(d, rand(rng))

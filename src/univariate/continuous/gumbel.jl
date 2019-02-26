@@ -118,9 +118,3 @@ logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
 
 gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
-
-
-#### Sampling
-
-rand(d::Gumbel) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Gumbel) = quantile(d, rand(rng))
