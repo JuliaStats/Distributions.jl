@@ -128,5 +128,5 @@ end
 #### Sampling
 
 function _rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix)
-    A .= inv(cholesky!(_rand!(rng, Wishart(d.ν, inv(d.Ψ)), A))))
+    A .= inv(cholesky!(_rand!(rng, Wishart(d.ν, inv(d.Ψ)), A)))
 end
