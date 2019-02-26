@@ -105,7 +105,6 @@ end
 
 #### Sampling
 
-rand(d::Uniform) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 

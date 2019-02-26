@@ -95,7 +95,6 @@ end
 
 ### Sampling
 
-rand(d::DiscreteUniform) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::DiscreteUniform) = rand(rng, d.a:d.b)
 
 # Fit model

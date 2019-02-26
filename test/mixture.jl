@@ -1,13 +1,18 @@
-using Distributions
+using Distributions, Random
 using Test
 
 
 # Core testing procedure
 
-function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
+function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
+                      rng::Union{AbstractRNG, Missing} = missing)
     X = zeros(n)
     for i = 1:n
-        X[i] = rand(g)
+        if ismissing(rng)
+            X[i] = rand(g)
+        else
+            X[i] = rand(rng, g)
+        end
     end
 
     K = ncomponents(g)
@@ -63,16 +68,25 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int)
     @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
-    Xs = rand(g, ns)
+    if ismissing(rng)
+        Xs = rand(g, ns)
+    else
+        Xs = rand(rng, g, ns)
+    end
     @test isa(Xs, Vector{Float64})
     @test length(Xs) == ns
     @test isapprox(mean(Xs), mean(g), atol=0.01)
 end
 
-function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
+function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
+                      rng::Union{AbstractRNG, Missing} = missing)
     X = zeros(length(g), n)
     for i = 1:n
-        X[:,i] = rand(g)
+        if ismissing(rng)
+            X[:, i] = rand(g)
+        else
+            X[:, i] = rand(rng, g)
+        end
     end
 
     K = ncomponents(g)
@@ -119,7 +133,11 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int)
     @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
-    Xs = rand(g, ns)
+    if ismissing(rng)
+        Xs = rand(g, ns)
+    else
+        Xs = rand(rng, g, ns)
+    end
     @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
@@ -142,12 +160,15 @@ end
 
 # Tests
 
-println("    testing UnivariateMixture")
+@testset "Testing Mixtures with $key" for (key, rng) in
+    Dict("rand(...)" => missing,
+         "rand(rng, ...)" => MersenneTwister(123))
 
+@testset "Testing UnivariateMixture" begin
 g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
 @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
 @test ncomponents(g_u) == 3
-test_mixture(g_u, 1000, 10^6)
+test_mixture(g_u, 1000, 10^6, rng)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
@@ -163,13 +184,14 @@ g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDis
 g_u = UnivariateGMM([0.0, 2.0, -4.0], [1.0, 1.2, 1.5], Categorical([0.2, 0.5, 0.3]))
 @test isa(g_u, UnivariateGMM)
 @test ncomponents(g_u) == 3
-test_mixture(g_u, 1000, 10^6)
+test_mixture(g_u, 1000, 10^6, rng)
 test_params(g_u)
 @test minimum(g_u) == -Inf
 @test maximum(g_u) == Inf
 @test extrema(g_u) == (-Inf, Inf)
+end
 
-println("    testing MultivariateMixture")
+@testset "Testing MultivariatevariateMixture" begin
 g_m = MixtureModel(
     IsoNormal[ MvNormal([0.0, 0.0], 1.0),
                MvNormal([0.2, 1.0], 1.0),
@@ -179,17 +201,19 @@ g_m = MixtureModel(
 @test length(components(g_m)) == 3
 @test length(g_m) == 2
 @test insupport(g_m, [0.0, 0.0]) == true
-test_mixture(g_m, 1000, 10^6)
+test_mixture(g_m, 1000, 10^6, rng)
 test_params(g_m)
 
-const u1 =  Uniform()
-const u2 =  Uniform(1.0, 2.0)
-const utot =Uniform(0.0, 2.0)
+u1 =  Uniform()
+u2 =  Uniform(1.0, 2.0)
+utot =Uniform(0.0, 2.0)
  
 # mixture supposed to be a uniform on [0.0,2.0]
-const unif_mixt =  MixtureModel([u1,u2])
+unif_mixt =  MixtureModel([u1,u2])
 @test var(utot) ≈  var(unif_mixt)
 @test mean(utot) ≈ mean(unif_mixt)
 for x in -1.0:0.5:2.5
     @test cdf(utot,x) ≈ cdf(utot,x)
+end
+end
 end

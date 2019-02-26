@@ -30,7 +30,8 @@ struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
         lmnB::T = zero(T)
         for i in 1:length(alpha)
             ai = alpha[i]
-            ai > 0 || throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
+            ai > 0 ||
+                throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
             lmnB += lgamma(ai)
         end
@@ -46,7 +47,8 @@ end
 
 Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
-Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(convert(Vector{Float64},alpha))
+Dirichlet(alpha::Vector{T}) where {T<:Integer} =
+    Dirichlet{Float64}(convert(Vector{Float64},alpha))
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
 struct DirichletCanon
@@ -57,8 +59,10 @@ length(d::DirichletCanon) = length(d.alpha)
 
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
-convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, alpha))
-convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, d.alpha))
+convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} =
+    Dirichlet(convert(Vector{T}, alpha))
+convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} =
+    Dirichlet(convert(Vector{T}, d.alpha))
 
 
 
@@ -175,12 +179,14 @@ end
 
 # sampling
 
-function _rand!(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG,
+                d::Union{Dirichlet,DirichletCanon},
+                x::AbstractVector{<:Real})
     s = 0.0
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = rand(Gamma(α[i])))
+        @inbounds s += (x[i] = rand(rng, Gamma(α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
@@ -214,7 +220,8 @@ function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64})
     DirichletStats(slogp, n)
 end
 
-function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+                   w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
@@ -384,7 +391,8 @@ function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64};
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64};
+function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+                 w::AbstractArray{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     n = size(P, 2)
