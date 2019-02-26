@@ -39,9 +39,9 @@ Hypergeometric(60, 80, 100)
 
 NegativeBinomial()
 NegativeBinomial(r=6)
-NegativeBinomial(1, 0.5)
-NegativeBinomial(5, 0.6)
-NegativeBinomial(0.5, 0.5)
+NegativeBinomial(r=1, p=0.5)
+NegativeBinomial(r=5, p=0.6)
+NegativeBinomial(r=0.5, p=0.5)
 
 Poisson()
 Poisson(0.0)
@@ -51,7 +51,7 @@ Poisson(10.0)
 Poisson(80.0)
 
 Skellam()
-Skellam(µ=2.0)
+Skellam(mu=2.0)
 Skellam(2.0, 3.0)
 Skellam(3.2, 1.8)
 

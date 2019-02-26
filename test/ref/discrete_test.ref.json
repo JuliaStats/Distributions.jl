@@ -519,7 +519,7 @@
   ]
 },
 {
-  "expr": "DiscreteUniform(6)",
+  "expr": "DiscreteUniform(b=6)",
   "dtype": "DiscreteUniform",
   "minimum": 0,
   "maximum": 6,
@@ -551,7 +551,7 @@
   ]
 },
 {
-  "expr": "DiscreteUniform(7)",
+  "expr": "DiscreteUniform(b=7)",
   "dtype": "DiscreteUniform",
   "minimum": 0,
   "maximum": 7,
