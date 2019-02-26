@@ -122,6 +122,16 @@ Get the probability of failure.
 failprob(d::DiscreteUnivariateDistribution)
 
 # Temporary fix to handle RFunctions dependencies
+"""
+    @rand_rdist(::Distribution)
+
+Mark a `Distribution` subtype as requiring RFunction calls. Since these calls
+cannot accept an arbitrary random number generator as an input, this macro
+creates new `rand(::Distribution, n::Int)` and
+`rand!(::Distribution, X::AbstractArray)` functions that call the relevant
+RFunction. Calls using another random number generator still work, but rely on
+a quantile function to operate.
+"""
 macro rand_rdist(D)
     esc(quote
         function rand(d::$D, n::Int)
