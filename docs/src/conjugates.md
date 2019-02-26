@@ -64,12 +64,12 @@ We support the conjugate pairs (the list will grow over time as development goes
 
 ```julia
 # Beta - Bernoulli
-posterior(Beta(1.0, 2.0), Bernoulli, x)  # each value in x should be either 0 or 1
+posterior(Beta(α=1.0, β=2.0), Bernoulli, x)  # each value in x should be either 0 or 1
 
 # Beta - Binomial
 # Here, 10 is the number of trials in each experiment
 # x is an array of #successes (each for one experiment)
-posterior(Beta(1.0, 2.0), Binomial, (10, x))  
+posterior(Beta(α=1.0, β=2.0), Binomial, (10, x))  
 
 # Dirichlet - Categorical
 posterior(Dirichlet(fill(2.0,k)), Categorical, x)  # each value in x is an integer in 1:k
@@ -81,32 +81,32 @@ posterior(Dirichlet(fill(2.0, k)), Multinomial, x)
 
 # Gamma - Exponential
 # Here, the Gamma prior is over the rate parameter of the Exponential distribution
-posterior(Gamma(3.0), Exponential, x)
+posterior(Gamma(α=3.0), Exponential, x)
 ```
 
 The cases for *Normal* are more involved, as they have two parameters: the mean and the variance. Sometimes, one of these parameters are known.
 
 ```julia
 # Normal (over mu) - Normal (sigma is known)
-pri = Normal(0., 10.)
+pri = Normal(μ=0., σ=10.)
 sig = 2.0
 posterior((pri, sig), Normal, x)   # returns a Normal distribution
 
 # InverseGamma (over sigma) - Normal (mu is known)
 mu = 1.5
-pri = InverseGamma(2.0, 1.0)
+pri = InverseGamma(α=2.0, θ=1.0)
 posterior((mu, pri), Normal, x)   # returns an InverseGamma distribution
 
 # Gamma (over sigma) - Normal (mu is known)
 mu = 1.5
-pri = Gamma(2.0, 1.0)
+pri = Gamma(α=2.0, θ=1.0)
 posterior((mu, pri), Normal, x)   # returns a Gamma distribution
 ```
 
 The following examples are for multivariate normal distributions.
 ```julia
 # MvNormal (over mu) -- MvNormal (covariance is known)
-pri = MvNormal(C0)
+pri = MvNormal(cov=C0)
 posterior((pri, C), MvNormal, x)
 
 # One can also use other types of multivariate normal distributions here
@@ -115,13 +115,13 @@ C = DiagNormal([1.0, 2.0, 3.0])
 posterior((pri, C), DiagNormal, x)
 
 # InverseWishart (over covariance) -- MvNormal
-pri = InverseWishart(df, S)
+pri = InverseWishart(dof=df, scale=S)
 mu = zeros(3)
 posterior((mu, pri), MvNormal, x)
 
 # Wishart (over covariance) -- MvNormal
 # Note: Wishart is usually less efficient than InverseWishart as a prior
-pri = Wishart(df, S)
+pri = Wishart(dof=df, scale=S)
 mu = zeros(3)
 posterior((mu, pri), MvNormal, x)
 ```
