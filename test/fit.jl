@@ -416,5 +416,9 @@ end
         @test isa(d, InverseGaussian)
         @test isapprox(mean(d), 3.9, atol=0.1)
         @test isapprox(shape(d), 2.1, atol=0.1)
+
+        d = fit_mle(InverseGaussian, rand(InverseGaussian(3.9, 2.1), N))
+        @test isapprox(mean(d), 3.9, atol=0.1)
+        @test isapprox(shape(d), 2.1, atol=0.1)
     end
 end
