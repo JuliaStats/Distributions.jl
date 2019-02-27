@@ -24,7 +24,8 @@ failprob(d)     # Get the failure rate, i.e. 1 - p
 
 External links:
 
-* [Negative binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Negative_binomial_distribution)
+* [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
+Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
 struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
@@ -85,7 +86,16 @@ mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p)
 
 @_delegate_statsfuns NegativeBinomial nbinom r p
 
-rand(d::NegativeBinomial) = convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
+## sampling
+# TODO: remove RFunctions dependency once Poisson has its removed
+@rand_rdist(NegativeBinomial)
+rand(d::NegativeBinomial) =
+    convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
+
+function rand(rng::AbstractRNG, d::NegativeBinomial)
+    lambda = rand(rng, Gamma(d.r, (1-d.p)/d.p))
+    return rand(rng, Poisson(lambda))
+end
 
 struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64

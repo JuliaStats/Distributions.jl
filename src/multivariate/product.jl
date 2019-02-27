@@ -24,8 +24,10 @@ struct Product{
     end
 end
 length(d::Product) = length(d.v)
-_rand!(d::Product, x::AbstractVector{<:Real}) = broadcast!(dn->rand(dn), x, d.v)
-_logpdf(d::Product, x::AbstractVector{<:Real}) = sum(n->logpdf(d.v[n], x[n]), 1:length(d))
+_rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
+    broadcast!(dn->rand(rng, dn), x, d.v)
+_logpdf(d::Product, x::AbstractVector{<:Real}) =
+    sum(n->logpdf(d.v[n], x[n]), 1:length(d))
 
 mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)

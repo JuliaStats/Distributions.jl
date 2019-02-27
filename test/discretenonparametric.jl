@@ -1,7 +1,23 @@
 import StatsBase: ProbabilityWeights
+using Random, Distributions
+using Test
+
+rng = MersenneTwister(123)
+
+@testset "Testing matrix-variates with $key" for (key, func) in
+    Dict("rand(...)" => [rand, rand],
+         "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
 
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
-println("    testing $d")
+
+@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], Distributions.NoArgCheck()))
+@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], Distributions.NoArgCheck())
+
+# Invalid probability
+@test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
+
+# Invalid probability, but no arg check
+DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
 
 Distributions.test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
@@ -9,8 +25,8 @@ Distributions.test_evaluation(d, vs, true)
 Distributions.test_stats(d, vs)
 Distributions.test_params(d)
 
-@test rand(d) ∈ [40., 80., 120., -60.]
-@test rand(sampler(d)) ∈ [40., 80., 120., -60.]
+@test func[1](d) ∈ [40., 80., 120., -60.]
+@test func[1](sampler(d)) ∈ [40., 80., 120., -60.]
 
 @test pdf(d, -100.) == 0.
 @test pdf(d, -100) == 0.
@@ -90,3 +106,5 @@ d3 = fit(DiscreteNonParametric, xs)
 @test typeof(d2) == typeof(d1)
 @test support(d3) == support(d1)
 @test probs(d3) ≈ probs(d1)
+
+end

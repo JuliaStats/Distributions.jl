@@ -24,7 +24,8 @@ end
 
 # testing the implementation of a discrete univariate distribution
 #
-function test_distr(distr::DiscreteUnivariateDistribution, n::Int; testquan::Bool=true)
+function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
+                    testquan::Bool=true)
 
     test_range(distr)
     vs = get_evalsamples(distr, 0.00001)
@@ -35,21 +36,27 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int; testquan::Boo
 
     test_stats(distr, vs)
     test_samples(distr, n)
+    test_samples(distr, n, rng=MersenneTwister())
     test_params(distr)
 end
 
 
 # testing the implementation of a continuous univariate distribution
 #
-function test_distr(distr::ContinuousUnivariateDistribution, n::Int; testquan::Bool=true)
-
+function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
+                    testquan::Bool=true, rng::AbstractRNG=MersenneTwister(123))
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
 
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
 
+    if isa(distr, StudentizedRange)
+        n = 2000 # must use fewer values due to performance
+    end
     xs = test_samples(distr, n)
+    allow_test_stats(distr) && test_stats(distr, xs)
+    xs = test_samples(distr, n, rng=rng)
     allow_test_stats(distr) && test_stats(distr, xs)
     test_params(distr)
 end
@@ -69,7 +76,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
                       distr::DiscreteUnivariateDistribution,    # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
-                      verbose::Bool=false)                      # show intermediate info (for debugging)
+                      verbose::Bool=false,                      # show intermediate info (for debugging)
+                      rng::Union{AbstractRNG, Missing}=missing) # add an rng?
 
     # The basic idea
     # ------------------
@@ -111,8 +119,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples
-    samples = rand(s, n)
+    # generate samples using RNG passed or global RNG
+    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
     @assert length(samples) == n
 
     # scan samples and get counts
@@ -136,9 +144,9 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     return samples
 end
 
-test_samples(distr::DiscreteUnivariateDistribution, n::Int; q::Float64=1.0e-6, verbose::Bool=false) =
-    test_samples(distr, distr, n; q=q, verbose=verbose)
-
+test_samples(distr::DiscreteUnivariateDistribution, n::Int;
+             q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
+    test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng)
 
 # for continuous samplers
 #
@@ -147,7 +155,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
                       n::Int;                                   # number of samples to generate
                       nbins::Int=50,                            # divide the main interval into nbins
                       q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
-                      verbose::Bool=false)                      # show intermediate info (for debugging)
+                      verbose::Bool=false,                      # show intermediate info (for debugging)
+                      rng::Union{AbstractRNG, Missing}=missing) # add an rng?
 
     # The basic idea
     # ------------------
@@ -200,8 +209,12 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     end
 
     # generate samples
-    samples = rand(s, n)
+    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
     @assert length(samples) == n
+
+    if isa(distr, StudentizedRange)
+        samples[isnan.(samples)] .= 0.0 # Underlying implementation in Rmath can't handle very low values.
+    end
 
     # check whether all samples are in the valid range
     for i = 1:n
@@ -225,8 +238,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     return samples
 end
 
-test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false) =
-    test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose)
+test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
+    test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose, rng=rng)
 
 
 #### Testing range & support methods
@@ -389,25 +402,31 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     lcc = Vector{Float64}(undef, nv)
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)
+        if !isa(d, StudentizedRange)
+            p[i] = pdf(d, v)
+            lp[i] = logpdf(d, v)
+            @assert p[i] >= 0.0
+        end
+
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
-        lp[i] = logpdf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
 
-        @assert p[i] >= 0.0
         @assert (i == 1 || c[i] >= c[i-1])
 
         @test isapprox(c[i] + cc[i], 1.0       , atol=1.0e-12)
-        @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        if !isa(d, StudentizedRange)
+            @test isapprox(lp[i]       , log(p[i]) , atol=1.0e-12)
+        end
         @test isapprox(lc[i]       , log(c[i]) , atol=1.0e-12)
         @test isapprox(lcc[i]      , log(cc[i]), atol=1.0e-12)
 
         if testquan
             # TODO: remove this line when we have more accurate implementation
-            # of quantile for InverseGaussian
+            # of quantile for InverseGaussian and StudentizedRange
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
+            qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
                 @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
                 @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
@@ -417,21 +436,26 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
         end
     end
 
-    # check: pdf should be the derivative of cdf
-    for i = 2:(nv-1)
-        if p[i] > 1.0e-6
-            v = vs[i]
-            ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
-            @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+    if !isa(d, StudentizedRange)
+        # check: pdf should be the derivative of cdf
+        for i = 2:(nv-1)
+            if p[i] > 1.0e-6
+                v = vs[i]
+                ap = (cdf(d, v + 1.0e-6) - cdf(d, v - 1.0e-6)) / (2.0e-6)
+                @test isapprox(p[i], ap, atol=p[i] * 1.0e-3)
+            end
         end
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
+    if !isa(d, StudentizedRange)
+        @test pdf.(Ref(d), vs)  ≈ p
+        @test logpdf.(Ref(d), vs)  ≈ lp
+    end
+
     @test cdf.(Ref(d), vs)  ≈ c
     @test ccdf.(Ref(d), vs) ≈ cc
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
     @test logcdf.(Ref(d), vs)  ≈ lc
     @test logccdf.(Ref(d), vs) ≈ lcc
 end
@@ -463,7 +487,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
             @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)
-            @test isapprox(entropy(d) , xentropy, atol=1.0e-8)
+            @test isapprox(entropy(d), xentropy, atol=1.0e-8)
         end
     else
         @test isapprox(mean(d), xmean, atol=1.0e-3 * (abs(xmean) + 1.0))
@@ -475,6 +499,7 @@ end
 
 allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
+allow_test_stats(::StudentizedRange) = false
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods

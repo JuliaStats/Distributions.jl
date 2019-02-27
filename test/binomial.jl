@@ -27,3 +27,8 @@ end
 # Test calculation of expectation value for Binomial distribution
 @test Distributions.expectation(Binomial(6), identity) ≈ 3.0
 @test Distributions.expectation(Binomial(10, 0.2), x->-x) ≈ -2.0
+
+# Test mode
+@test Distributions.mode(Binomial(100, 0.4)) == 40
+@test Distributions.mode(Binomial(1, 0.51)) == 1
+@test Distributions.mode(Binomial(1, 0.49)) == 0

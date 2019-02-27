@@ -1,4 +1,4 @@
-using Distributions
+using Distributions, Random
 using Test
 
 import Distributions: GenericMvTDist
@@ -44,3 +44,5 @@ d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
 
 @test size(rand(MvTDist(1., mu, Sigma))) == (2,)
 @test size(rand(MvTDist(1., mu, Sigma), 10)) == (2,10)
+@test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma))) == (2,)
+@test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma), 10)) == (2,10)
