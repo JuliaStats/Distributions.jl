@@ -163,6 +163,10 @@ end
 
 #### Fit model
 
+"""
+Sufficient statustics for `InverseGaussian`, containing the weighted
+sum of observations, the weighted sum of inverse points and sum of weights
+"""
 struct InverseGaussianStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     sinvx::Float64   # (weighted) sum of 1/x
@@ -171,13 +175,13 @@ struct InverseGaussianStats <: SufficientStats
     InverseGaussianStats(sx::Real, sinvx::Real, sw::Real) = new(sx, sinvx, sw)
 end
 
-function suffstats(::Type{InverseGaussian}, x::AbstractArray{T}) where T<:Real
+function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real})
     sx = sum(x)
-    sinvx = sum(1 ./ x)
+    sinvx = sum(inv.(x))
     InverseGaussianStats(sx, sinvx, length(x))
 end
 
-function suffstats(::Type{InverseGaussian}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::AbstractVector{<:Real})
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -191,6 +195,6 @@ end
 
 function fit_mle(::Type{InverseGaussian}, ss::InverseGaussianStats)
     mu = ss.sx / ss.sw
-    invlambda = ss.sinvx / ss.sw  -  1/mu
-    InverseGaussian(mu, 1 / invlambda )
+    invlambda = ss.sinvx / ss.sw  -  inv(mu)
+    InverseGaussian(mu, inv(invlambda))
 end
