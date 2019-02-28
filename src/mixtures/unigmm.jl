@@ -1,12 +1,12 @@
 # Univariate Gaussian Mixture Models
 
-struct UnivariateGMM <: UnivariateMixture{Continuous,Normal}
+struct UnivariateGMM{T<:Real} <: UnivariateMixture{Continuous,Normal}
     K::Int
     means::Vector{T}
     stds::Vector{T}
     prior::Categorical
 
-    (::Type{UnivariateGMM{T}}){T}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = begin
+    function UnivariateGMM{T}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) where {T<:Real}
         K = length(ms)
         length(ss) == K || throw(DimensionMismatch())
         ncategories(pri) == K ||
@@ -15,7 +15,7 @@ struct UnivariateGMM <: UnivariateMixture{Continuous,Normal}
     end
 end
 
-UnivariateGMM{T<:Real}(ms::Vector{T}, ss::Vector{T}, pri::Categorical) = UnivariateGMM{T}(ms, ss, pri)
+UnivariateGMM(ms::Vector{T}, ss::Vector{T}, pri::Categorical) where {T<:Real} = UnivariateGMM{T}(ms, ss, pri)
 
 @distr_support UnivariateGMM -Inf Inf
 
@@ -27,14 +27,16 @@ probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
+rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+
 rand(rng::AbstractRNG, d::UnivariateGMM) =
     (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-struct UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
-    means::Vector{Float64}
-    stds::Vector{Float64}
+struct UnivariateGMMSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+    means::Vector{T}
+    stds::Vector{T}
     psampler::AliasTable
 end
 
