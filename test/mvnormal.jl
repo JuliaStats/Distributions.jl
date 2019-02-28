@@ -102,11 +102,14 @@ end
         (MvNormalCanon(mu_r, 2.0), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
         (MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
         (MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+        (MvNormalCanon(mu_r, dv), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
         (MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
         (MvNormalCanon(h, J), J \ h, inv(J)),
         (MvNormalCanon(J), zeros(3), inv(J)),
         (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
-        (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))) ]
+        (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
+        (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
+        (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))) ]
 
         @test mean(g)   ≈ μ
         @test cov(g)    ≈ Σ
@@ -163,14 +166,14 @@ end
 
 # a slow but safe way to implement MLE for verification
 
-function _gauss_mle(x::Matrix{Float64})
+function _gauss_mle(x::AbstractMatrix{<:Real})
     mu = vec(mean(x, dims=2))
     z = x .- mu
     C = (z * z') * (1/size(x,2))
     return mu, C
 end
 
-function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
+function _gauss_mle(x::AbstractMatrix{<:Real}, w::AbstractVector{<:Real})
     sw = sum(w)
     mu = (x * w) * (1/sw)
     z = x .- mu
