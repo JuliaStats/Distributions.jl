@@ -76,7 +76,6 @@ export
     EdgeworthMean,
     EdgeworthSum,
     EdgeworthZ,
-    EmpiricalUnivariateDistribution,
     Erlang,
     Epanechnikov,
     Exponential,
@@ -130,6 +129,7 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    StudentizedRange,
     SymTriangularDist,
     TDist,
     TriangularDist,
@@ -265,7 +265,6 @@ include("genericfit.jl")
 
 # specific samplers and distributions
 include("univariates.jl")
-include("empirical.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
@@ -307,7 +306,7 @@ Supported distributions:
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
-    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
@@ -318,7 +317,7 @@ Supported distributions:
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

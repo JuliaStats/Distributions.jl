@@ -123,18 +123,6 @@ end
 
 _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
-# Sampling with designated rng
-"""
-    rand(rng::AbstractRNG, d::AbstractMvNormal)
-    rand(rng::AbstractRNG, d::AbstractMvNormal, n::Int)
-    rand!(rng::AbstractRNG, d::AbstractMvNormal, x::AbstractArray)
-
-Sample from distribution `d` using the random number generator `rng`.
-"""
-rand(rng::AbstractRNG, d::AbstractMvNormal) = _rand!(rng, d, Vector{eltype(d)}(undef, length(d)))
-rand!(rng::AbstractRNG, d::AbstractMvNormal, x::VecOrMat) = _rand!(rng, d, x)
-rand(rng::AbstractRNG, d::AbstractMvNormal, n::Integer) = _rand!(rng, d, Matrix{eltype(d)}(undef, length(d), n))
-
 ###########################################################
 #
 #   MvNormal
@@ -271,24 +259,16 @@ gradlogpdf(d::MvNormal, x::AbstractVector) = -(d.Σ \ broadcast(-, x, d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::AbstractVecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
-_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
-
+_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
+    add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand_abstr!(rng::AbstractRNG, d::MvNormal, x::AbstractVecOrMat)
-    for i = 1:length(x)
-        @inbounds x[i] = randn()
+function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
+    for i in eachindex(x)
+        @inbounds x[i] = randn(rng)
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
-_rand_abstr!(d::MvNormal, x::AbstractVecOrMat) = _rand_abstr!(Random.GLOBAL_RNG, d, x)
-# define these separately to avoid ambiguity with
-# _rand(d::Multivariate, x::AbstractMatrix)
-_rand!(rng::AbstractRNG, d::MvNormal, x::AbstractMatrix) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractMatrix) = _rand!(Random.GLOBAL_RNG, d, x)
-_rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector) = _rand_abstr!(rng, d, x)
-_rand!(d::MvNormal, x::AbstractVector) = _rand!(Random.GLOBAL_RNG, d, x)
 
 ###########################################################
 #

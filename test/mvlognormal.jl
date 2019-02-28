@@ -7,7 +7,8 @@ using LinearAlgebra, Random, Test
 
 ####### Core testing procedure
 
-function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
+function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
+                          rng::Union{AbstractRNG, Missing} = missing)
     d = length(g)
     mn = mean(g)
     md = median(g)
@@ -39,7 +40,11 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test !insupport(g,-ones(d))
 
     # sampling
-    X = rand(g, n_tsamples)
+    if ismissing(rng)
+        X = rand(g, n_tsamples)
+    else
+        X = rand(rng, g, n_tsamples)
+    end
     emp_mn = vec(mean(X, dims=2))
     emp_md = vec(median(X, dims=2))
     Z = X .- emp_mn
@@ -86,8 +91,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
 end
 
 ####### Validate results for a single-dimension MvLogNormal by comparing with univariate LogNormal
-@testset "Single-dimension MvLogNormal vs univariate LogNormal" begin
-    println("    comparing results from MvLogNormal with univariate LogNormal")
+@testset "Comparing results from MvLogNormal with univariate LogNormal" begin
     l1 = LogNormal(0.1,0.4)
     l2 = MvLogNormal(0.1*ones(1),0.4)
     @test [mean(l1)]     ≈ mean(l2)
@@ -98,6 +102,7 @@ end
     @test logpdf(l1,5.0) ≈ logpdf(l2,[5.0])
     @test pdf(l1,5.0)    ≈ pdf(l2,[5.0])
     @test (Random.seed!(78393) ; [rand(l1)]) == (Random.seed!(78393) ; rand(l2))
+    @test [rand(MersenneTwister(78393), l1)] == rand(MersenneTwister(78393), l2)
 end
 
 ###### General Testing

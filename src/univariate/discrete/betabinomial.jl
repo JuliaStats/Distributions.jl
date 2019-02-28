@@ -104,3 +104,8 @@ mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1
 modes(d::BetaBinomial) = modes(Categorical(pdf.(Ref(d),support(d)))) .- 1
 
 quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), support(d))), p) - 1
+
+#### Sampling
+
+rand(rng::AbstractRNG, d::BetaBinomial) =
+    rand(rng, Binomial(d.n, rand(rng, Beta(d.α, d.β))))

@@ -4,7 +4,7 @@
 The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^z)},
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
 \\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
 ```
 
@@ -90,9 +90,3 @@ logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
 
 gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
-
-
-#### Sampling
-
-rand(d::Gumbel) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Gumbel) = quantile(d, rand(rng))

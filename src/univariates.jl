@@ -153,31 +153,28 @@ end
 ##### generic methods (fallback) #####
 
 ## sampling
+# single univariate, no allocation
+rand(rng::AbstractRNG, s::Sampleable{Univariate}) = rand(rng, s)
+
+# multiple univariate, must allocate array
+rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
+    rand!(rng, sampler(s), Array{eltype(s)}(undef, dims))
+
+# multiple univariate with pre-allocated array
+function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
+    smp = sampler(s)
+    for i in eachindex(A)
+        @inbounds A[i] = rand(rng, smp)
+    end
+    return A
+end
 
 """
     rand(d::UnivariateDistribution)
 
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
-
-    rand(d::UnivariateDistribution, n::Int) -> Vector
-
-Generates a vector of `n` random scalar samples from `d`. The general fallback is to
-pick random samples from `sampler(d)`.
 """
-rand(d::UnivariateDistribution) = quantile(d, rand())
-
-"""
-    rand!(d::UnivariateDistribution, A::AbstractArray)
-
-Populates the array `A` with scalar samples from `d`. The general fallback is to pick
-random samples from `sampler(d)`.
-"""
-rand!(d::UnivariateDistribution, A::AbstractArray) = _rand!(sampler(d), A)
-rand(d::UnivariateDistribution, n::Int) = _rand!(sampler(d), Vector{eltype(d)}(undef, n))
-rand(d::UnivariateDistribution, shp::Dims) = _rand!(sampler(d), Vector{eltype(d)}(undef, shp))
-
-
-sampler(d::UnivariateDistribution) = d
+rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
 
 ## statistics
 
@@ -601,6 +598,7 @@ const continuous_distributions = [
     "pareto",
     "rayleigh",
     "semicircle",
+    "studentizedrange",
     "symtriangular",
     "tdist",
     "triangular",

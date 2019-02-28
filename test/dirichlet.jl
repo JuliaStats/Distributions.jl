@@ -6,6 +6,12 @@ using Test, Random, LinearAlgebra
 
 Random.seed!(34567)
 
+rng = MersenneTwister(123)
+
+@testset "Testing Dirichlet with $key" for (key, func) in
+    Dict("rand(...)" => [rand, rand],
+         "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
+
 d = Dirichlet(3, 2.0)
 
 @test length(d) == 3
@@ -21,7 +27,7 @@ d = Dirichlet(3, 2.0)
 @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
 @test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(2.4)
 
-x = rand(d, 100)
+x = func[2](d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
@@ -48,7 +54,7 @@ d = Dirichlet(v)
 @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.0)
 @test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(0.24)
 
-x = rand(d, 100)
+x = func[2](d, 100)
 p = pdf(d, x)
 lp = logpdf(d, x)
 for i in 1 : size(x, 2)
@@ -58,11 +64,11 @@ end
 
 # Sampling
 
-x = rand(d)
+x = func[1](d)
 @test isa(x, Vector{Float64})
 @test length(x) == 3
 
-x = rand(d, 10)
+x = func[2](d, 10)
 @test isa(x, Matrix{Float64})
 @test size(x) == (3, 10)
 
@@ -70,7 +76,7 @@ x = rand(d, 10)
 # Test MLE
 
 n = 10000
-x = rand(d, n)
+x = func[2](d, n)
 x = x ./ sum(x, dims=1)
 
 r = fit_mle(Dirichlet, x)
@@ -78,3 +84,5 @@ r = fit_mle(Dirichlet, x)
 
 # r = fit_mle(Dirichlet, x, fill(2.0, n))
 # @test isapprox(r.alpha, d.alpha, atol=0.25)
+
+end

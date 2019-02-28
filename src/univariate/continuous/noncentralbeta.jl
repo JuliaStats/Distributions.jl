@@ -32,8 +32,19 @@ params(d::NoncentralBeta) = (d.α, d.β, d.λ)
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
+# TODO: remove RFunctions dependency once NoncentralChisq has its removed
+@rand_rdist(NoncentralBeta)
+
 function rand(d::NoncentralBeta)
-    a = rand(NoncentralChisq(2d.α, d.β))
-    b = rand(Chisq(2d.β))
+    β = d.β
+    a = rand(NoncentralChisq(2d.α, β))
+    b = rand(Chisq(2β))
+    a / (a + b)
+end
+
+function rand(rng::AbstractRNG, d::NoncentralBeta)
+    β = d.β
+    a = rand(rng, NoncentralChisq(2d.α, β))
+    b = rand(rng, Chisq(2β))
     a / (a + b)
 end

@@ -125,6 +125,7 @@ NormalInverseGaussian
 Pareto
 Rayleigh
 Semicircle
+StudentizedRange
 SymTriangularDist
 TDist
 TriangularDist
