@@ -6,6 +6,8 @@ using Random
 using StatsBase
 
 tests = [
+    "mvnormal",
+    "mvlognormal",
     "types",
     "utils",
     "samplers",
@@ -18,8 +20,6 @@ tests = [
     "poissonbinomial",
     "dirichlet",
     "dirichletmultinomial",
-    "mvnormal",
-    "mvlognormal",
     "mvtdist",
     "kolmogorov",
     "edgeworth",

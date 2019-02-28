@@ -43,6 +43,8 @@ params(d::Hypergeometric) = (d.ns, d.nf, d.n)
 
 mean(d::Hypergeometric) = d.n * d.ns / (d.ns + d.nf)
 
+entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d))) # DO NOT MERGE ME
+
 function var(d::Hypergeometric)
     N = d.ns + d.nf
     p = d.ns / N

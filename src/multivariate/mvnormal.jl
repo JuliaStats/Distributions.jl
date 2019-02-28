@@ -190,36 +190,35 @@ const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Ze
 const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T}) where T<:Real
+function MvNormal(μ::Union{AbstractVector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T}) where {T<:Real}
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) where {T<:Real, Cov<:AbstractPDMat}
+function MvNormal(μ::Union{AbstractVector, ZeroVector}, Σ::AbstractPDMat)
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
-function MvNormal(Σ::Cov) where Cov<:AbstractPDMat
-    T = eltype(Σ)
+function MvNormal(Σ::Cov) where {T, Cov<:AbstractPDMat{T}}
     MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
 end
 
-MvNormal(μ::Vector{T}, Σ::Matrix{T}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::Vector{T}, Σ::Union{Symmetric{T}, Hermitian{T}}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::Vector{T}, Σ::Diagonal{T}) where {T<:Real} = MvNormal(μ, PDiagMat(diag(Σ)))
-MvNormal(μ::Vector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
-MvNormal(μ::Vector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
+MvNormal(μ::AbstractVector{T}, Σ::Matrix{T}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{T}, Σ::Union{Symmetric{T}, Hermitian{T}}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{T}, Σ::Diagonal{T}) where {T<:Real} = MvNormal(μ, PDiagMat(diag(Σ)))
+MvNormal(μ::AbstractVector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
+MvNormal(μ::AbstractVector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-function MvNormal(μ::Vector{T}, Σ::VecOrMat{S}) where {T<:Real,S<:Real}
+function MvNormal(μ::AbstractVector{T}, Σ::VecOrMat{S}) where {T<:Real,S<:Real}
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
-function MvNormal(μ::Vector{T}, σ::Real) where T<:Real
+function MvNormal(μ::AbstractVector{T}, σ::Real) where T<:Real
     R = Base.promote_eltype(μ, σ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ))
 end
-function MvNormal(μ::Vector{T}, σ::UniformScaling{S}) where {T<:Real,S<:Real}
+function MvNormal(μ::AbstractVector{T}, σ::UniformScaling{S}) where {T<:Real,S<:Real}
     R = Base.promote_eltype(μ, σ.λ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
 end
@@ -231,7 +230,7 @@ MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
-function convert(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
+function convert(::Type{MvNormal{T}}, μ::Union{AbstractVector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
 
@@ -268,11 +267,11 @@ sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, broadcast(-, x, d.μ))
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, broadcast(-, x, d.μ))
 
-gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ broadcast(-, x, d.μ))
+gradlogpdf(d::MvNormal, x::AbstractVector) = -(d.Σ \ broadcast(-, x, d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(d::MvNormal, x::VecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
+_rand!(d::MvNormal, x::AbstractVecOrMat) = _rand!(Random.GLOBAL_RNG, d, x)
 _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) = add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 

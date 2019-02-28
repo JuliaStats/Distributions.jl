@@ -166,13 +166,13 @@ struct MvLogNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{AbstractVector, ZeroVe
 end
 
 #Constructors mirror the ones for MvNormmal
-MvLogNormal(μ::Union{Vector,ZeroVector},Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
+MvLogNormal(μ::M,Σ::AbstractPDMat) where {M<:Union{AbstractVector,ZeroVector}} = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(eltype(Σ),dim(Σ)),Σ))
-MvLogNormal(μ::Vector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
-MvLogNormal(μ::Vector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
-MvLogNormal(μ::Vector,s::Real) = MvLogNormal(MvNormal(μ,s))
-MvLogNormal(Σ::Matrix) = MvLogNormal(MvNormal(Σ))
-MvLogNormal(σ::Vector) = MvLogNormal(MvNormal(σ))
+MvLogNormal(μ::AbstractVector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
+MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
+MvLogNormal(μ::AbstractVector,s::Real) = MvLogNormal(MvNormal(μ,s))
+MvLogNormal(Σ::AbstractMatrix) = MvLogNormal(MvNormal(Σ))
+MvLogNormal(σ::AbstractVector) = MvLogNormal(MvNormal(σ))
 MvLogNormal(d::Int,s::Real) = MvLogNormal(MvNormal(d,s))
 
 ### Conversion
