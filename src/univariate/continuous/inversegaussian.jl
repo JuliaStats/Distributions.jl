@@ -165,7 +165,7 @@ end
 
 """
 Sufficient statistics for `InverseGaussian`, containing the weighted
-sum of observations, the weighted sum of inverse points and sum of weights
+sum of observations, the weighted sum of inverse points and sum of weights.
 """
 struct InverseGaussianStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
