@@ -304,7 +304,7 @@ function _cdf(d::UnivariateMixture, x::Real)
     return r
 end
 
-cdf(d::UnivariateMixture{Continuous}, x::Float64) = _cdf(d, x)
+cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
 cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
 
 

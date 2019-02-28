@@ -97,19 +97,19 @@ function test_mixture(g::UnivariateGMM{T}, n::Int, ns::Int,
     end
     @test mean(g) ≈ mu
 
-    # # evaluation of cdf
-    # cf = zeros(T, n)
-    # for k = 1:K
-    #     c_k = component(g, k)
-    #     for i = 1:n
-    #         cf[i] += pr[k] * cdf(c_k, X[i])
-    #     end
-    # end
-    #
-    # for i = 1:n
-    #     @test cdf(g, X[i]) ≈ cf[i]
-    # end
-    # @test cdf(g, X) ≈ cf
+    # evaluation of cdf
+    cf = zeros(T, n)
+    for k = 1:K
+        c_k = component(g, k)
+        for i = 1:n
+            cf[i] += pr[k] * cdf(c_k, X[i])
+        end
+    end
+
+    for i = 1:n
+        @test cdf(g, X[i]) ≈ cf[i]
+    end
+    @test cdf.(g, X) ≈ cf
 
     # evaluation
     P0 = zeros(T, n, K)
