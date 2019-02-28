@@ -1,9 +1,11 @@
-doc"""
+"""
     Laplace(μ,θ)
 
 The *Laplace distribution* with location `μ` and scale `θ` has probability density function
 
-$f(x; \mu, \beta) = \frac{1}{2 \beta} \exp \left(- \frac{|x - \mu|}{\beta} \right)$
+```math
+f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
+```
 
 ```julia
 Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
@@ -20,15 +22,14 @@ External links
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
 """
-
-immutable Laplace{T<:Real} <: ContinuousUnivariateDistribution
+struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
 
-    (::Type{Laplace{T}}){T}(μ::T, θ::T) = (@check_args(Laplace, θ > zero(θ)); new{T}(μ, θ))
+    Laplace{T}(μ::T, θ::T) where {T} = (@check_args(Laplace, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Laplace{T<:Real}(μ::T, θ::T) = Laplace{T}(μ, θ)
+Laplace(μ::T, θ::T) where {T<:Real} = Laplace{T}(μ, θ)
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
 Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
 Laplace(μ::Real) = Laplace(μ, 1.0)
@@ -39,10 +40,10 @@ const Biexponential = Laplace
 @distr_support Laplace -Inf Inf
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{Laplace{T}}, μ::S, θ::S)
+function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))
 end
-function convert{T <: Real, S <: Real}(::Type{Laplace{T}}, d::Laplace{S})
+function convert(::Type{Laplace{T}}, d::Laplace{S}) where {T <: Real, S <: Real}
     Laplace(T(d.μ), T(d.θ))
 end
 
@@ -52,7 +53,7 @@ end
 location(d::Laplace) = d.μ
 scale(d::Laplace) = d.θ
 params(d::Laplace) = (d.μ, d.θ)
-@inline partype{T<:Real}(d::Laplace{T}) = T
+@inline partype(d::Laplace{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -63,8 +64,8 @@ mode(d::Laplace) = d.μ
 
 var(d::Laplace) = 2d.θ^2
 std(d::Laplace) = sqrt2 * d.θ
-skewness{T<:Real}(d::Laplace{T}) = zero(T)
-kurtosis{T<:Real}(d::Laplace{T}) = 3one(T)
+skewness(d::Laplace{T}) where {T<:Real} = zero(T)
+kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
 
@@ -106,8 +107,8 @@ end
 
 #### Sampling
 
-rand(d::Laplace) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
+rand(rng::AbstractRNG, d::Laplace) =
+    d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
 
 #### Fitting
@@ -115,5 +116,5 @@ rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, B
 function fit_mle(::Type{Laplace}, x::Array)
     xc = copy(x)
     a = median!(xc)
-    Laplace(a, StatsBase.mad!(xc, a))
+    Laplace(a, StatsBase.mad!(xc, center=a))
 end

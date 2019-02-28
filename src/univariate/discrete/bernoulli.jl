@@ -1,13 +1,15 @@
-doc"""
+"""
     Bernoulli(p)
 
 A *Bernoulli distribution* is parameterized by a success rate `p`, which takes value 1
 with probability `p` and 0 with probability `1-p`.
 
-$P(X = k) = \begin{cases}
-1 - p & \quad \text{for } k = 0, \\
-p & \quad \text{for } k = 1.
-\end{cases}$
+```math
+P(X = k) = \\begin{cases}
+1 - p & \\quad \\text{for } k = 0, \\\\
+p & \\quad \\text{for } k = 1.
+\\end{cases}
+```
 
 ```julia
 Bernoulli()    # Bernoulli distribution with p = 0.5
@@ -22,26 +24,25 @@ External links:
 
 * [Bernoulli distribution on Wikipedia](http://en.wikipedia.org/wiki/Bernoulli_distribution)
 """
-
-immutable Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
+struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function (::Type{Bernoulli{T}}){T}(p::T)
+    function Bernoulli{T}(p::T) where T
         @check_args(Bernoulli, zero(p) <= p <= one(p))
         new{T}(p)
     end
 
 end
 
-Bernoulli{T<:Real}(p::T) = Bernoulli{T}(p)
+Bernoulli(p::T) where {T<:Real} = Bernoulli{T}(p)
 Bernoulli(p::Integer) = Bernoulli(Float64(p))
 Bernoulli() = Bernoulli(0.5)
 
 @distr_support Bernoulli 0 1
 
 #### Conversions
-convert{T<:Real}(::Type{Bernoulli{T}}, p::Real) = Bernoulli(T(p))
-convert{T <: Real, S <: Real}(::Type{Bernoulli{T}}, d::Bernoulli{S}) = Bernoulli(T(d.p))
+convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
+convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p))
 
 #### Parameters
 
@@ -49,7 +50,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
-@inline partype{T<:Real}(d::Bernoulli{T}) = T
+@inline partype(d::Bernoulli{T}) where {T<:Real} = T
 
 
 #### Properties
@@ -82,8 +83,6 @@ pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
 pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
                             x == 1 ? succprob(d) : zero(d.p)
 
-pdf(d::Bernoulli) = typeof(d.p)[failprob(d), succprob(d)]
-
 cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : one(d.p)
 cdf(d::Bernoulli, x::Int) = x < 0 ? zero(d.p) :
                             x < 1 ? failprob(d) : one(d.p)
@@ -92,10 +91,10 @@ ccdf(d::Bernoulli, x::Bool) = x ? succprob(d) : one(d.p)
 ccdf(d::Bernoulli, x::Int) = x < 0 ? one(d.p) :
                              x < 1 ? succprob(d) : zero(d.p)
 
-function quantile{T<:Real}(d::Bernoulli{T}, p::Real)
+function quantile(d::Bernoulli{T}, p::Real) where T<:Real
     0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
 end
-function cquantile{T<:Real}(d::Bernoulli{T}, p::Real)
+function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
     0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 
@@ -105,13 +104,11 @@ cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 #### Sampling
 
-rand(d::Bernoulli) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Bernoulli) = round(Int, rand(rng) <= succprob(d))
-
 
 #### MLE fitting
 
-immutable BernoulliStats <: SufficientStats
+struct BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 
@@ -120,7 +117,7 @@ end
 
 fit_mle(::Type{Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
 
-function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T})
+function suffstats(::Type{Bernoulli}, x::AbstractArray{T}) where T<:Integer
     n = length(x)
     c0 = c1 = 0
     for i = 1:n
@@ -136,7 +133,7 @@ function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T})
     BernoulliStats(c0, c1)
 end
 
-function suffstats{T<:Integer}(::Type{Bernoulli}, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Bernoulli}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
     c0 = c1 = 0

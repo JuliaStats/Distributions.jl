@@ -10,40 +10,49 @@ macro check_args(D, cond)
 end
 
 ## a type to indicate zero vector
-
-immutable ZeroVector{T}
+"""
+An immutable vector of zeros of type T
+"""
+struct ZeroVector{T} <: AbstractVector{T}
     len::Int
 end
 
-ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
+ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
-eltype{T}(v::ZeroVector{T}) = T
-length(v::ZeroVector) = v.len
-full{T}(v::ZeroVector{T}) = zeros(T, v.len)
+Base.eltype(v::ZeroVector{T}) where {T} = T
+Base.length(v::ZeroVector) = v.len
+Base.size(v::ZeroVector) = (v.len,)
+Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
 
-convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
-convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
+Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
+Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
+Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
-+(x::AbstractArray, v::ZeroVector) = x
--(x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(+), x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(-), x::AbstractArray, v::ZeroVector) = x
+Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
-if VERSION < v"0.6.0-dev.1632"
-    include_string("""
-        Base.:(.+)(x::AbstractArray, v::ZeroVector) = x
-        Base.:(.-)(x::AbstractArray, v::ZeroVector) = x
-    """)
+for T = (:AbstractArray, :Number), op = (:+, :-)
+    @eval begin
+        Base.@deprecate ($op)(x::$T, v::ZeroVector) broadcast($op, x, v)
+        Base.@deprecate ($op)(v::ZeroVector, x::$T) broadcast($op, v, x)
+    end
 end
 
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
+Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
+
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
+Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
+Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
+Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
-type NoArgCheck end
+struct NoArgCheck end
 
-isunitvec{T}(v::AbstractVector{T}) = (vecnorm(v) - 1.0) < 1.0e-12
+isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite{T<:Real}(x::Array{T})
+function allfinite(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(isfinite(x[i]))
             return false
@@ -52,7 +61,7 @@ function allfinite{T<:Real}(x::Array{T})
     return true
 end
 
-function allzeros{T<:Real}(x::Array{T})
+function allzeros(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] == zero(T))
             return false
@@ -63,7 +72,7 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg{T<:Real}(x::Array{T})
+function allnonneg(x::Array{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] >= zero(T))
             return false
@@ -72,19 +81,9 @@ function allnonneg{T<:Real}(x::Array{T})
     return true
 end
 
-isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
-    s = 0.
-    n = length(v)
-    for i = 1:n
-        @inbounds s += v[i]
-    end
-    for i = 1:n
-        @inbounds v[i] /= s
-    end
-    v
-end
+pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
 add!(x::AbstractVecOrMat, y::ZeroVector) = x
@@ -133,10 +132,10 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholfact(a), Cholesky)
+hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
 
-function trycholfact(a::Matrix{Float64})
-    try cholfact(a)
+function trycholesky(a::Matrix{Float64})
+    try cholesky(a)
     catch e
         return e
     end

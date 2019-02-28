@@ -1,10 +1,12 @@
-doc"""
+"""
     Gumbel(μ, θ)
 
 The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
 
-$f(x; \mu, \theta) = \frac{1}{\theta} e^{-(z + e^z)},
-\quad \text{ with } z = \frac{x - \mu}{\theta}$
+```math
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
+\\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
+```
 
 ```julia
 Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)
@@ -20,14 +22,14 @@ External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
-immutable Gumbel{T<:Real} <: ContinuousUnivariateDistribution
+struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
 
-    (::Type{Gumbel{T}}){T}(μ::T, θ::T) = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
+    Gumbel{T}(μ::T, θ::T) where {T} = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Gumbel{T<:Real}(μ::T, θ::T) = Gumbel{T}(μ, θ)
+Gumbel(μ::T, θ::T) where {T<:Real} = Gumbel{T}(μ, θ)
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
 Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
 Gumbel(μ::Real) = Gumbel(μ, 1.0)
@@ -39,32 +41,32 @@ const DoubleExponential = Gumbel
 
 #### Conversions
 
-convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, μ::S, θ::S) = Gumbel(T(μ), T(θ))
-convert{T <: Real, S <: Real}(::Type{Gumbel{T}}, d::Gumbel{S}) = Gumbel(T(d.μ), T(d.θ))
+convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
+convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ))
 
 #### Parameters
 
 location(d::Gumbel) = d.μ
 scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
-@inline partype{T<:Real}(d::Gumbel{T}) = T
+@inline partype(d::Gumbel{T}) where {T<:Real} = T
 
 
 #### Statistics
 
-mean(d::Gumbel) = d.μ + d.θ * γ
+mean(d::Gumbel) = d.μ + d.θ * MathConstants.γ
 
-median{T<:Real}(d::Gumbel{T}) = d.μ - d.θ * log(T(logtwo))
+median(d::Gumbel{T}) where {T<:Real} = d.μ - d.θ * log(T(logtwo))
 
 mode(d::Gumbel) = d.μ
 
-var{T<:Real}(d::Gumbel{T}) = T(π)^2/6 * d.θ^2
+var(d::Gumbel{T}) where {T<:Real} = T(π)^2/6 * d.θ^2
 
-skewness{T<:Real}(d::Gumbel{T}) = 12*sqrt(T(6))*zeta(T(3)) / π^3
+skewness(d::Gumbel{T}) where {T<:Real} = 12*sqrt(T(6))*zeta(T(3)) / π^3
 
-kurtosis{T<:Real}(d::Gumbel{T}) = T(12)/5
+kurtosis(d::Gumbel{T}) where {T<:Real} = T(12)/5
 
-entropy(d::Gumbel) = log(d.θ) + 1 + γ
+entropy(d::Gumbel) = log(d.θ) + 1 + MathConstants.γ
 
 
 #### Evaluation
@@ -88,9 +90,3 @@ logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
 
 gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
-
-
-#### Sampling
-
-rand(d::Gumbel) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Gumbel) = quantile(d, rand(rng))

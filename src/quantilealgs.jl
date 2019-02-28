@@ -35,7 +35,7 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+        while abs(x-x0) > max(abs(x),abs(x0)) * tol
             x0 = x
             x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
         end
@@ -54,7 +54,7 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
-        while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+        while abs(x-x0) > max(abs(x),abs(x0)) * tol
             x0 = x
             x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
         end

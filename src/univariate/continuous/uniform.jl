@@ -1,9 +1,11 @@
-doc"""
+"""
     Uniform(a,b)
 
-The *continuous uniform distribution* over an interval $[a, b]$ has probability density function
+The *continuous uniform distribution* over an interval ``[a, b]`` has probability density function
 
-$f(x; a, b) = \frac{1}{b - a}, \quad a \le x \le b$
+```math
+f(x; a, b) = \\frac{1}{b - a}, \\quad a \\le x \\le b
+```
 
 ```julia
 Uniform()        # Uniform distribution over [0, 1]
@@ -21,14 +23,14 @@ External links
 * [Uniform distribution (continuous) on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(continuous))
 
 """
-immutable Uniform{T<:Real} <: ContinuousUnivariateDistribution
+struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
 
-    (::Type{Uniform{T}}){T}(a::T, b::T) = (@check_args(Uniform, a < b); new{T}(a, b))
+    Uniform{T}(a::T, b::T) where {T} = (@check_args(Uniform, a < b); new{T}(a, b))
 end
 
-Uniform{T<:Real}(a::T, b::T) = Uniform{T}(a, b)
+Uniform(a::T, b::T) where {T<:Real} = Uniform{T}(a, b)
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
 Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
 Uniform() = Uniform(0.0, 1.0)
@@ -36,13 +38,13 @@ Uniform() = Uniform(0.0, 1.0)
 @distr_support Uniform d.a d.b
 
 #### Conversions
-convert{T<:Real}(::Type{Uniform{T}}, a::Real, b::Real) = Uniform(T(a), T(b))
-convert{T<:Real, S<:Real}(::Type{Uniform{T}}, d::Uniform{S}) = Uniform(T(d.a), T(d.b))
+convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b))
 
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
-@inline partype{T<:Real}(d::Uniform{T}) = T
+@inline partype(d::Uniform{T}) where {T<:Real} = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a
@@ -57,24 +59,24 @@ modes(d::Uniform) = Float64[]
 
 var(d::Uniform) = (w = d.b - d.a; w^2 / 12)
 
-skewness{T<:Real}(d::Uniform{T}) = zero(T)
-kurtosis{T<:Real}(d::Uniform{T}) = -6/5*one(T)
+skewness(d::Uniform{T}) where {T<:Real} = zero(T)
+kurtosis(d::Uniform{T}) where {T<:Real} = -6/5*one(T)
 
 entropy(d::Uniform) = log(d.b - d.a)
 
 
 #### Evaluation
 
-pdf{T<:Real}(d::Uniform{T}, x::Real) = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
-logpdf{T<:Real}(d::Uniform{T}, x::Real) = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
+pdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
+logpdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
 
-function cdf{T<:Real}(d::Uniform{T}, x::Real)
+function cdf(d::Uniform{T}, x::Real) where T<:Real
     (a, b) = params(d)
     x <= a ? zero(T) :
     x >= d.b ? one(T) : (x - a) / (b - a)
 end
 
-function ccdf{T<:Real}(d::Uniform{T}, x::Real)
+function ccdf(d::Uniform{T}, x::Real) where T<:Real
     (a, b) = params(d)
     x <= a ? one(T) :
     x >= d.b ? zero(T) : (b - x) / (b - a)
@@ -101,15 +103,14 @@ function cf(d::Uniform, t::Real)
 end
 
 
-#### Evaluation
+#### Sampling
 
-rand(d::Uniform) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 
 #### Fitting
 
-function fit_mle{T<:Real}(::Type{Uniform}, x::AbstractArray{T})
+function fit_mle(::Type{Uniform}, x::AbstractArray{T}) where T<:Real
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end

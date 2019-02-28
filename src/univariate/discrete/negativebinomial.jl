@@ -1,14 +1,17 @@
-doc"""
+"""
     NegativeBinomial(r,p)
 
 A *Negative binomial distribution* describes the number of failures before the `r`th success in a sequence of independent Bernoulli trials. It is parameterized by `r`, the number of successes, and `p`, the probability of success in an individual trial.
 
-$P(X = k) = {k + r - 1 \choose k} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.$
+```math
+P(X = k) = {k + r - 1 \\choose k} p^r (1 - p)^k, \\quad \\text{for } k = 0,1,2,\\ldots.
+```
 
 The distribution remains well-defined for any positive `r`, in which case
 
-$P(X = k) = \frac{\Gamma(k+r)}{k! \Gamma(r)} p^r (1 - p)^k, \quad \text{for } k = 0,1,2,\ldots.$
-
+```math
+P(X = k) = \\frac{\\Gamma(k+r)}{k! \\Gamma(r)} p^r (1 - p)^k, \\quad \\text{for } k = 0,1,2,\\ldots.
+```
 
 ```julia
 NegativeBinomial()        # Negative binomial distribution with r = 1 and p = 0.5
@@ -21,15 +24,15 @@ failprob(d)     # Get the failure rate, i.e. 1 - p
 
 External links:
 
-* [Negative binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Negative_binomial_distribution)
+* [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
+Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
-
-immutable NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function (::Type{NegativeBinomial{T}}){T}(r::T, p::T)
+    function NegativeBinomial{T}(r::T, p::T) where T
         @check_args(NegativeBinomial, r > zero(r))
         @check_args(NegativeBinomial, zero(p) < p <= one(p))
         new{T}(r, p)
@@ -37,7 +40,7 @@ immutable NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
 
 end
 
-NegativeBinomial{T<:Real}(r::T, p::T) = NegativeBinomial{T}(r, p)
+NegativeBinomial(r::T, p::T) where {T<:Real} = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
 NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(Float64(r), Float64(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
@@ -48,17 +51,17 @@ NegativeBinomial() = NegativeBinomial(1.0, 0.5)
 
 #### Conversions
 
-function convert{T<:Real}(::Type{NegativeBinomial{T}}, r::Real, p::Real)
+function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where T<:Real
     NegativeBinomial(T(r), T(p))
 end
-function convert{T <: Real, S <: Real}(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S})
+function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
     NegativeBinomial(T(d.r), T(d.p))
 end
 
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-@inline partype{T<:Real}(d::NegativeBinomial{T}) = T
+@inline partype(d::NegativeBinomial{T}) where {T<:Real} = T
 
 succprob(d::NegativeBinomial) = d.p
 failprob(d::NegativeBinomial) = 1 - d.p
@@ -83,16 +86,31 @@ mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p)
 
 @_delegate_statsfuns NegativeBinomial nbinom r p
 
-rand(d::NegativeBinomial) = convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
+## sampling
+# TODO: remove RFunctions dependency once Poisson has its removed
+@rand_rdist(NegativeBinomial)
+rand(d::NegativeBinomial) =
+    convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
 
-immutable RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
+function rand(rng::AbstractRNG, d::NegativeBinomial)
+    lambda = rand(rng, Gamma(d.r, (1-d.p)/d.p))
+    return rand(rng, Poisson(lambda))
+end
+
+struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64
     p0::Float64
 end
 
 RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
 nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
-_pdf!(r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) = _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
+
+Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
+    _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
+function Base.broadcast(::typeof(pdf), d::NegativeBinomial, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
+    r .= pdf.(Ref(d),X)
+end
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)

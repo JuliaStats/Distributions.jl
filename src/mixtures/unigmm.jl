@@ -1,6 +1,6 @@
 # Univariate Gaussian Mixture Models
 
-immutable UnivariateGMM{T<:Real} <: UnivariateMixture{Continuous,Normal}
+struct UnivariateGMM <: UnivariateMixture{Continuous,Normal}
     K::Int
     means::Vector{T}
     stds::Vector{T}
@@ -27,15 +27,17 @@ probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
-rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+rand(rng::AbstractRNG, d::UnivariateGMM) =
+    (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-immutable UnivariateGMMSampler{T<:Real} <: Sampleable{Univariate,Continuous}
-    means::Vector{T}
-    stds::Vector{T}
+struct UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
+    means::Vector{Float64}
+    stds::Vector{Float64}
     psampler::AliasTable
 end
 
-rand(s::UnivariateGMMSampler) = (k = rand(s.psampler); s.means[k] + randn() * s.stds[k])
+rand(rng::AbstractRNG, s::UnivariateGMMSampler) =
+    (k = rand(rng, s.psampler); s.means[k] + randn(rng) * s.stds[k])
 sampler(d::UnivariateGMM) = UnivariateGMMSampler(d.means, d.stds, sampler(d.prior))

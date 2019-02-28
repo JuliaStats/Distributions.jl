@@ -1,33 +1,30 @@
-__precompile__(true)
-
 module Distributions
 
-using PDMats
-using StatsFuns
-using StatsBase
-using Compat
+using StatsBase, PDMats, StatsFuns, Statistics
 
-import QuadGK.quadgk
-import Compat.view
-import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
-import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: +, -
-import Base.Math.@horner
-import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
+import QuadGK: quadgk
+import Base: size, eltype, length, convert, show, getindex, rand
+import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base.Math: @horner
 
-if isdefined(Base, :scale)
-    import Base: scale
-end
+using LinearAlgebra, Printf
 
-import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params, params!
+using Random
+import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+
+import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+
 import PDMats: dim, PDMat, invquad
 
-importall SpecialFunctions
+using SpecialFunctions
 
 export
+    # re-export Statistics
+    mean, median, quantile, std, var, cov, cor,
+
     # generic types
     VariateForm,
     ValueSupport,
@@ -79,7 +76,6 @@ export
     EdgeworthMean,
     EdgeworthSum,
     EdgeworthZ,
-    EmpiricalUnivariateDistribution,
     Erlang,
     Epanechnikov,
     Exponential,
@@ -89,6 +85,7 @@ export
     FullNormal,
     FullNormalCanon,
     Gamma,
+    DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
@@ -104,6 +101,7 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    LocationScale,
     Logistic,
     LogNormal,
     MixtureModel,
@@ -124,11 +122,14 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    Product,
     Poisson,
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Semicircle,
     Skellam,
+    StudentizedRange,
     SymTriangularDist,
     TDist,
     TriangularDist,
@@ -196,8 +197,6 @@ export
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
-    logpmf,             # log probability mass
-    logpmf!,            # evaluate log pmf to provided storage
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
@@ -221,7 +220,6 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
-    pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
@@ -267,7 +265,6 @@ include("genericfit.jl")
 
 # specific samplers and distributions
 include("univariates.jl")
-include("empirical.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
@@ -309,7 +306,7 @@ Supported distributions:
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
-    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
@@ -320,7 +317,7 @@ Supported distributions:
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

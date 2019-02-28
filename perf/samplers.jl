@@ -5,21 +5,21 @@ using Distributions
 
 ### define benchmark tasks
 
-@compat abstract type UnivariateSamplerRun{Spl} <: Proc end
-type BatchSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
-type IndivSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
+abstract type UnivariateSamplerRun{Spl} <: Proc end
+mutable struct BatchSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
+mutable struct IndivSamplerRun{Spl} <: UnivariateSamplerRun{Spl} end
 
 const batch_unit = 1000
 
 Base.isvalid(::UnivariateSamplerRun, cfg) = true
 Base.length(p::UnivariateSamplerRun, cfg) = batch_unit
-Base.string{Spl}(p::UnivariateSamplerRun{Spl}) = getname(Spl)
+Base.string(p::UnivariateSamplerRun{Spl}) where {Spl} = getname(Spl)
 
-Base.start{Spl}(p::BatchSamplerRun{Spl}, cfg) = getsampler(Spl, cfg)
-Base.start{Spl}(p::IndivSamplerRun{Spl}, cfg) = ()
+Base.start(p::BatchSamplerRun{Spl}, cfg) where {Spl} = getsampler(Spl, cfg)
+Base.start(p::IndivSamplerRun{Spl}, cfg) where {Spl} = ()
 Base.done(p::UnivariateSamplerRun, cfg, s) = nothing
 
-getsampler{Spl<:Sampleable}(::Type{Spl}, cfg) = Spl(cfg...)
+getsampler(::Type{Spl}, cfg) where {Spl<:Sampleable} = Spl(cfg...)
 
 function Base.run(p::BatchSamplerRun, cfg, s) 
     for i = 1:batch_unit
@@ -27,7 +27,7 @@ function Base.run(p::BatchSamplerRun, cfg, s)
     end
 end
 
-function Base.run{Spl}(p::IndivSamplerRun{Spl}, cfg, s) 
+function Base.run(p::IndivSamplerRun{Spl}, cfg, s) where Spl 
     for i = 1:batch_unit
         rand(getsampler(Spl,cfg))
     end

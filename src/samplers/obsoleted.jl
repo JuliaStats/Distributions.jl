@@ -7,36 +7,36 @@
 ##### Draw Table #####
 
 # Store an alias table
-immutable DiscreteDistributionTable <: Sampler{Univariate,Discrete}
+struct DiscreteDistributionTable <: Sampler{Univariate,Discrete}
     table::Vector{Vector{Int64}}
     bounds::Vector{Int64}
 end
 
 # TODO: Test if bit operations can speed up Base64 mod's and fld's
-function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
+function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
     # Cache the cardinality of the outcome set
     n = length(probs)
 
     # Convert all Float64's into integers
-    vals = Vector{Int64}(n)
+    vals = Vector{Int64}(undef, n)
     for i in 1:n
         vals[i] = round(Int, probs[i] * 64^9)
     end
 
     # Allocate digit table and digit sums as table bounds
-    table = Vector{Vector{Int64}}(9)
+    table = Vector{Vector{Int64}}(undef, 9)
     bounds = zeros(Int64, 9)
 
     # Special case for deterministic distributions
     for i in 1:n
         if vals[i] == 64^9
-            table[1] = Vector{Int64}(64)
+            table[1] = Vector{Int64}(undef, 64)
             for j in 1:64
                 table[1][j] = i
             end
             bounds[1] = 64^9
             for j in 2:9
-                table[j] = Vector{Int64}(0)
+                table[j] = Vector{Int64}()
                 bounds[j] = 64^9
             end
             return DiscreteDistributionTable(table, bounds)
@@ -46,7 +46,7 @@ function DiscreteDistributionTable{T <: Real}(probs::Vector{T})
     # Fill tables
     multiplier = 1
     for index in 9:-1:1
-        counts = Vector{Int64}(0)
+        counts = Vector{Int64}()
         for i in 1:n
             digit = mod(vals[i], 64)
             # vals[i] = fld(vals[i], 64)
@@ -91,24 +91,24 @@ Base.show(io::IO, table::DiscreteDistributionTable) = @printf io "DiscreteDistri
 
 ##### Huffman Table ######
 
-@compat abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
+abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
 
-immutable HuffmanLeaf{T} <: HuffmanNode{T}
+struct HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
     weight::UInt64
 end
 
-immutable HuffmanBranch{T} <: HuffmanNode{T}
+struct HuffmanBranch{T} <: HuffmanNode{T}
     left::HuffmanNode{T}
     right::HuffmanNode{T}
     weight::UInt64
 end
-HuffmanBranch{T}(ha::HuffmanNode{T},hb::HuffmanNode{T}) = HuffmanBranch(ha, hb, ha.weight + hb.weight)
+HuffmanBranch(ha::HuffmanNode{T},hb::HuffmanNode{T}) where {T} = HuffmanBranch(ha, hb, ha.weight + hb.weight)
 
-Base.isless{T}(ha::HuffmanNode{T}, hb::HuffmanNode{T}) = isless(ha.weight,hb.weight)
-Base.show{T}(io::IO, t::HuffmanNode{T}) = show(io,typeof(t))
+Base.isless(ha::HuffmanNode{T}, hb::HuffmanNode{T}) where {T} = isless(ha.weight,hb.weight)
+Base.show(io::IO, t::HuffmanNode{T}) where {T} = show(io,typeof(t))
 
-function Base.getindex{T}(h::HuffmanBranch{T},u::UInt64)
+function Base.getindex(h::HuffmanBranch{T},u::UInt64) where T
     while isa(h,HuffmanBranch{T})
         if u < h.left.weight
             h = h.left
@@ -122,22 +122,22 @@ end
 
 # build the huffman tree
 # could be slightly more efficient using a Deque.
-function huffman{T}(values::AbstractVector{T},weights::AbstractVector{UInt64})
+function huffman(values::AbstractVector{T},weights::AbstractVector{UInt64}) where T
     leafs = [HuffmanLeaf{T}(values[i],weights[i]) for i = 1:length(weights)]
     sort!(leafs; rev=true)
 
-    branches = Vector{HuffmanBranch{T}}(0)
+    branches = Vector{HuffmanBranch{T}}()
 
     while !isempty(leafs) || length(branches) > 1
         left = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
         right = isempty(branches) || (!isempty(leafs) && first(leafs) < first(branches)) ? pop!(leafs) : pop!(branches)
-        unshift!(branches,HuffmanBranch(left,right))
+        pushfirst!(branches,HuffmanBranch(left,right))
     end
 
     pop!(branches)
 end
 
-function rand{T}(h::HuffmanNode{T})
+function rand(h::HuffmanNode{T}) where T
     w = h.weight
     # generate uniform UInt64 objects on the range 0:(w-1)
     # unfortunately we can't use Range objects, as they don't have sufficient length

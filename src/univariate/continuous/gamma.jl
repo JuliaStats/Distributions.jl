@@ -1,11 +1,13 @@
-doc"""
+"""
     Gamma(α,θ)
 
 The *Gamma distribution* with shape parameter `α` and scale `θ` has probability density
 function
 
-$f(x; \alpha, \theta) = \frac{x^{\alpha-1} e^{-x/\theta}}{\Gamma(\alpha) \theta^\alpha},
-\quad x > 0$
+```math
+f(x; \\alpha, \\theta) = \\frac{x^{\\alpha-1} e^{-x/\\theta}}{\\Gamma(\\alpha) \\theta^\\alpha},
+\\quad x > 0
+```
 
 ```julia
 Gamma()          # Gamma distribution with unit shape and unit scale, i.e. Gamma(1, 1)
@@ -22,17 +24,17 @@ External links
 * [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
 
 """
-immutable Gamma{T<:Real} <: ContinuousUnivariateDistribution
+struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
 
-    function (::Type{Gamma{T}}){T}(α, θ)
+    function Gamma{T}(α, θ) where T
         @check_args(Gamma, α > zero(α) && θ > zero(θ))
         new{T}(α, θ)
     end
 end
 
-Gamma{T<:Real}(α::T, θ::T) = Gamma{T}(α, θ)
+Gamma(α::T, θ::T) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
 Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
 Gamma(α::Real) = Gamma(α, 1.0)
@@ -41,8 +43,8 @@ Gamma() = Gamma(1.0, 1.0)
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
-convert{T <: Real, S <: Real}(::Type{Gamma{T}}, α::S, θ::S) = Gamma(T(α), T(θ))
-convert{T <: Real, S <: Real}(::Type{Gamma{T}}, d::Gamma{S}) = Gamma(T(d.α), T(d.θ))
+convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
+convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ))
 
 #### Parameters
 
@@ -51,7 +53,7 @@ scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
 params(d::Gamma) = (d.α, d.θ)
-@inline partype{T<:Real}(d::Gamma{T}) = T
+@inline partype(d::Gamma{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -83,15 +85,34 @@ cf(d::Gamma, t::Real) = (1 - im * t * d.θ)^(-d.α)
 
 @_delegate_statsfuns Gamma gamma α θ
 
-gradlogpdf{T<:Real}(d::Gamma{T}, x::Real) =
+gradlogpdf(d::Gamma{T}, x::Real) where {T<:Real} =
     insupport(Gamma, x) ? (d.α - 1) / x - 1 / d.θ : zero(T)
 
-rand(d::Gamma) = StatsFuns.RFunctions.gammarand(d.α, d.θ)
+function rand(rng::AbstractRNG, d::Gamma)
+    if shape(d) < 1.0
+        # TODO: shape(d) = 0.5 : use scaled chisq
+        return rand(rng, GammaIPSampler(d))
+    elseif shape(d) == 1.0
+        return rand(rng, Exponential(d.θ))
+    else
+        return rand(rng, GammaGDSampler(d))
+    end
+end
 
+function sampler(d::Gamma)
+    if shape(d) < 1.0
+        # TODO: shape(d) = 0.5 : use scaled chisq
+        return GammaIPSampler(d)
+    elseif shape(d) == 1.0
+        return sampler(Exponential(d.θ))
+    else
+        return GammaGDSampler(d)
+    end
+end
 
 #### Fit model
 
-immutable GammaStats <: SufficientStats
+struct GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight
@@ -99,7 +120,7 @@ immutable GammaStats <: SufficientStats
     GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
-function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})
+function suffstats(::Type{Gamma}, x::AbstractArray{T}) where T<:Real
     sx = zero(T)
     slogx = zero(T)
     for xi = x
@@ -109,10 +130,10 @@ function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T})
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats{T<:Real}(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
     if length(w) != n
-        throw(ArgumentError("Inconsistent argument dimensions."))
+        throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
     sx = zero(T)

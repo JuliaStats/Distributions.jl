@@ -1,11 +1,13 @@
-doc"""
+"""
     Chisq(ν)
 The *Chi squared distribution* (typically written χ²) with `ν` degrees of freedom has the
 probability density function
 
-$f(x; k) = \frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \Gamma(k/2)}, \quad x > 0.$
+```math
+f(x; k) = \\frac{x^{k/2 - 1} e^{-x/2}}{2^{k/2} \\Gamma(k/2)}, \\quad x > 0.
+```
 
-If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](:func:`Normal`) variates.
+If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
 
 ```julia
 Chisq(k)     # Chi-squared distribution with k degrees of freedom
@@ -18,14 +20,13 @@ External links
 
 * [Chi-squared distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi-squared_distribution)
 """
-
-immutable Chisq{T<:Real} <: ContinuousUnivariateDistribution
+struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
 
-    (::Type{Chisq{T}}){T}(ν::T) = (@check_args(Chisq, ν > zero(ν)); new{T}(ν))
+    Chisq{T}(ν::T) where {T} = (@check_args(Chisq, ν > zero(ν)); new{T}(ν))
 end
 
-Chisq{T<:Real}(ν::T) = Chisq{T}(ν)
+Chisq(ν::T) where {T<:Real} = Chisq{T}(ν)
 Chisq(ν::Integer) = Chisq(Float64(ν))
 
 @distr_support Chisq 0.0 Inf
@@ -34,11 +35,11 @@ Chisq(ν::Integer) = Chisq(Float64(ν))
 
 dof(d::Chisq) = d.ν
 params(d::Chisq) = (d.ν,)
-@inline partype{T<:Real}(d::Chisq{T}) = T
+@inline partype(d::Chisq{T}) where {T<:Real} = T
 
 ### Conversions
-convert{T<:Real}(::Type{Chisq{T}}, ν::Real) = Chisq(T(ν))
-convert{T <: Real, S <: Real}(::Type{Chisq{T}}, d::Chisq{S}) = Chisq(T(d.ν))
+convert(::Type{Chisq{T}}, ν::Real) where {T<:Real} = Chisq(T(ν))
+convert(::Type{Chisq{T}}, d::Chisq{S}) where {T <: Real, S <: Real} = Chisq(T(d.ν))
 
 
 #### Statistics
@@ -51,7 +52,7 @@ skewness(d::Chisq) = sqrt(8 / d.ν)
 
 kurtosis(d::Chisq) = 12 / d.ν
 
-mode{T<:Real}(d::Chisq{T}) = d.ν > 2 ? d.ν - 2 : zero(T)
+mode(d::Chisq{T}) where {T<:Real} = d.ν > 2 ? d.ν - 2 : zero(T)
 
 function median(d::Chisq; approx::Bool=false)
     if approx
@@ -75,10 +76,12 @@ mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
 
-gradlogpdf{T<:Real}(d::Chisq{T}, x::Real) =  x > 0 ? (d.ν/2 - 1) / x - 1//2 : zero(T)
+gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1//2 : zero(T)
 
 
 #### Sampling
 
-_chisq_rand(ν::Float64) = StatsFuns.RFunctions.chisqrand(ν)
-rand(d::Chisq) = _chisq_rand(d.ν)
+rand(rng::AbstractRNG, d::Chisq) =
+    (ν = d.ν; rand(rng, Gamma(ν / 2.0, 2.0one(ν))))
+
+sampler(d::Chisq) = (ν = d.ν; sampler(Gamma(ν / 2.0, 2.0one(ν))))

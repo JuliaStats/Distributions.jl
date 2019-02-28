@@ -1,6 +1,9 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-using Base.Test
+using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using Test
+using Distributed
+using Random
+using StatsBase
 
 tests = [
     "types",
@@ -25,30 +28,39 @@ tests = [
     "conversion",
     "mixture",
     "gradlogpdf",
-    "truncate"]
+    "truncate",
+    "noncentralt",
+    "locationscale",
+    "quantile_newton",
+    "semicircle",
+    "qq",
+    "product",
+    "truncnormal",
+    "discretenonparametric",
+    "functionals"
+]
 
-print_with_color(:blue, "Running tests:\n")
 
-if nworkers() > 1
-    rmprocs(workers())
-end
+printstyled("Running tests:\n", color=:blue)
 
-if Base.JLOptions().code_coverage == 1
-    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
-else
-    addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
-end
+using Random
+Random.seed!(345679)
 
-@everywhere using Distributions
-@everywhere using JSON, ForwardDiff, Calculus, PDMats, Compat # test dependencies
-@everywhere using Base.Test
-@everywhere srand(345679)
-res = pmap(tests) do t
-    include(t*".jl")
-    nothing
+res = map(tests) do t
+    @eval module $(Symbol("Test_", t))
+    using Distributions
+    using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+    using Test
+    using Random
+    Random.seed!(345679)
+    using LinearAlgebra
+    using StatsBase
+    include($t * ".jl")
+    end
+    return
 end
 
 # print method ambiguities
 println("Potentially stale exports: ")
-display(Base.Test.detect_ambiguities(Distributions))
+display(Test.detect_ambiguities(Distributions))
 println()

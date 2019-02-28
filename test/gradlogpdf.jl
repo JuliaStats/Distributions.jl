@@ -1,5 +1,6 @@
 using Distributions
-using Base.Test
+using Test
+
 
 # Test for gradlogpdf on univariate distributions
 

@@ -1,7 +1,15 @@
-# Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
-#   D_n = \sup_x |\hat{F}_n(x) -F(x)|
-#   sqrt(n) D_n converges a.s. to the Kolmogorov distribution.
-immutable KSDist <: ContinuousUnivariateDistribution
+"""
+    KSDist(n)
+
+Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
+
+```math
+D_n = \\sup_x | \\hat{F}_n(x) -F(x)| \\sqrt(n)
+```
+
+``D_n`` converges a.s. to the Kolmogorov distribution.
+"""
+struct KSDist <: ContinuousUnivariateDistribution
     n::Int
 end
 
@@ -73,7 +81,7 @@ function cdf_durbin(d::KSDist,x::Float64)
     k, ch, h = ceil_rems_mult(n,x)
 
     m = 2*k-1
-    H = Matrix{Float64}(m, m)
+    H = Matrix{Float64}(undef, m, m)
     for i = 1:m, j = 1:m
         H[i,j] = i-j+1 >= 0 ? 1 : 0
     end
@@ -90,7 +98,7 @@ function cdf_durbin(d::KSDist,x::Float64)
         end
         # we can avoid keeping track of the exponent by dividing by e
         # (from Stirling's approximation)
-        H[i,j] /= e
+        H[i,j] /= ℯ
     end
     Q = H^n
     s = Q[k,k]
@@ -124,7 +132,7 @@ function stirling(n)
     if n < 500
         s = 1.0
         for i = 1:n
-            s *= i/n*e
+            s *= i/n*ℯ
         end
         return s
     else

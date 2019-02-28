@@ -3,11 +3,15 @@
 
 The *noncentral chi-squared distribution* with `ν` degrees of freedom and noncentrality parameter `λ` has the probability density function
 
-``f(x; \nu, \lambda) = \frac{1}{2} e^{-(x + \lambda)/2} \left( \frac{x}{\lambda} \right)^{\nu/4-1/2} I_{\nu/2-1}(\sqrt{\lambda x}), \quad x > 0``
+```math
+f(x; \\nu, \\lambda) = \\frac{1}{2} e^{-(x + \\lambda)/2} \\left( \\frac{x}{\\lambda} \\right)^{\\nu/4-1/2} I_{\\nu/2-1}(\\sqrt{\\lambda x}), \\quad x > 0
+```
 
-It is the distribution of the sum of squares of `ν` independent [`Normal`](:func:`Normal`) variates with individual means ``\mu_i`` and
+It is the distribution of the sum of squares of `ν` independent [`Normal`](@ref) variates with individual means ``\\mu_i`` and
 
-``\lambda = \sum_{i=1}^\nu \mu_i^2``
+```math
+\\lambda = \\sum_{i=1}^\\nu \\mu_i^2
+```
 
 ```julia
 NoncentralChisq(ν, λ)     # Noncentral chi-squared distribution with ν degrees of freedom and noncentrality parameter λ
@@ -19,17 +23,17 @@ External links
 
 * [Noncentral chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
 """
-immutable NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
-    function (::Type{NoncentralChisq{T}}){T}(ν::T, λ::T)
+    function NoncentralChisq{T}(ν::T, λ::T) where T
         @check_args(NoncentralChisq, ν > zero(ν))
         @check_args(NoncentralChisq, λ >= zero(λ))
         new{T}(ν, λ)
     end
 end
 
-NoncentralChisq{T<:Real}(ν::T, λ::T) = NoncentralChisq{T}(ν, λ)
+NoncentralChisq(ν::T, λ::T) where {T<:Real} = NoncentralChisq{T}(ν, λ)
 NoncentralChisq(ν::Real, λ::Real) = NoncentralChisq(promote(ν, λ)...)
 NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(Float64(ν), Float64(λ))
 
@@ -37,17 +41,17 @@ NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(Float64(ν), Float64
 
 #### Conversions
 
-function convert{T <: Real, S <: Real}(::Type{NoncentralChisq{T}}, ν::S, λ::S)
+function convert(::Type{NoncentralChisq{T}}, ν::S, λ::S) where {T <: Real, S <: Real}
     NoncentralChisq(T(ν), T(λ))
 end
-function convert{T <: Real, S <: Real}(::Type{NoncentralChisq{T}}, d::NoncentralChisq{S})
+function convert(::Type{NoncentralChisq{T}}, d::NoncentralChisq{S}) where {T <: Real, S <: Real}
     NoncentralChisq(T(d.ν), T(d.λ))
 end
 
 ### Parameters
 
 params(d::NoncentralChisq) = (d.ν, d.λ)
-@inline partype{T<:Real}(d::NoncentralChisq{T}) = T
+@inline partype(d::NoncentralChisq{T}) where {T<:Real} = T
 
 
 ### Statistics
@@ -70,4 +74,6 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
+# TODO: remove RFunctions dependency
+@rand_rdist(NoncentralChisq)
 rand(d::NoncentralChisq) = StatsFuns.RFunctions.nchisqrand(d.ν, d.λ)

@@ -1,9 +1,11 @@
 using Distributions
-using Base.Test
+using Test
+
 
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
+    local p
 
     d = PoissonBinomial(fill(p, n))
     dref = Binomial(n, p)
@@ -12,6 +14,7 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     @test isa(d, PoissonBinomial)
     @test minimum(d) == 0
     @test maximum(d) == n
+    @test extrema(d) == (0, n)
     @test ntrials(d) == n
     @test entropy(d)  ≈ entropy(dref)
     @test median(d)   ≈ median(dref)
@@ -42,18 +45,18 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
 
     n = n₁ + n₂ + n₃
     p = zeros(n)
-    p[1:n₁] = p₁
-    p[n₁+1: n₁ + n₂] = p₂
-    p[n₁ + n₂ + 1:end] = p₃
+    p[1:n₁] .= p₁
+    p[n₁+1: n₁ + n₂] .= p₂
+    p[n₁ + n₂ + 1:end] .= p₃
     d = PoissonBinomial(p)
     println("   testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
     b1 = Binomial(n₁, p₁)
     b2 = Binomial(n₂, p₂)
     b3 = Binomial(n₃, p₃)
 
-    pmf1 = pdf(b1)
-    pmf2 = pdf(b2)
-    pmf3 = pdf(b3)
+    pmf1 = pdf.(b1, support(b1))
+    pmf2 = pdf.(b2, support(b2))
+    pmf3 = pdf.(b3, support(b3))
 
     @test mean(d) ≈ (mean(b1) + mean(b2) + mean(b3))
     @test var(d)  ≈ (var(b1) + var(b2) + var(b3))
@@ -73,4 +76,19 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
         end
         @test isapprox(pdf(d, k), m, atol=1e-15)
     end
+end
+
+# Test the _dft helper function
+@testset "_dft" begin
+    x = Distributions._dft(collect(1:8))
+    # Comparator computed from FFTW
+    fftw_fft = [36.0 + 0.0im,
+                -4.0 + 9.65685424949238im,
+                -4.0 + 4.0im,
+                -4.0 + 1.6568542494923806im,
+                -4.0 + 0.0im,
+                -4.0 - 1.6568542494923806im,
+                -4.0 - 4.0im,
+                -4.0 - 9.65685424949238im]
+    @test x ≈ fftw_fft
 end

@@ -1,8 +1,15 @@
-# Kolmogorov distribution
-# defined as the sup_{t \in [0,1]} |B(t)|, where B(t) is a Brownian bridge
-# used in the Kolmogorov--Smirnov test for large n.
+"""
+    Kolmogorov()
 
-immutable Kolmogorov <: ContinuousUnivariateDistribution
+Kolmogorov distribution defined as
+
+```math
+\\sup_{t \\in [0,1]} |B(t)|
+```
+where ``B(t)`` is a Brownian bridge used in the Kolmogorov--Smirnov
+test for large n.
+"""
+struct Kolmogorov <: ContinuousUnivariateDistribution
 end
 
 @distr_support Kolmogorov 0.0 Inf
@@ -98,7 +105,6 @@ end
 # Alternating series method, from:
 #   Devroye, Luc (1986) "Non-Uniform Random Variate Generation"
 #   Chapter IV.5, pp. 163-165.
-rand(d::Kolmogorov) = rand(GLOBAL_RNG, d)
 function rand(rng::AbstractRNG, d::Kolmogorov)
     t = 0.75
     if rand(rng) < 0.3728329582237386 # cdf(d,t)

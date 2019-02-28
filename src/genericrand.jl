@@ -1,68 +1,57 @@
 ### Generic rand methods
 
-# univariate
+"""
+    rand([rng::AbstractRNG,] s::Sampleable)
 
-function _rand!(s::Sampleable{Univariate}, A::AbstractArray)
-    for i in 1:length(A)
-        @inbounds A[i] = rand(s)
-    end
-    return A
-end
-rand!(s::Sampleable{Univariate}, A::AbstractArray) = _rand!(s, A)
+Generate one sample for `s`.
 
-rand(s::Sampleable{Univariate}, dims::Dims) =
-    _rand!(s, Array{eltype(s)}(dims))
+    rand([rng::AbstractRNG,] s::Sampleable, n::Int)
 
-rand(s::Sampleable{Univariate}, dims::Int...) =
-    _rand!(s, Array{eltype(s)}(dims))
+Generate `n` samples from `s`. The form of the returned object depends on the variate form of `s`:
 
+- When `s` is univariate, it returns a vector of length `n`.
+- When `s` is multivariate, it returns a matrix with `n` columns.
+- When `s` is matrix-variate, it returns an array, where each element is a sample matrix.
 
-# multivariate
+    rand([rng::AbstractRNG,] s::Sampleable, dim1::Int, dim2::Int...)
+    rand([rng::AbstractRNG,] s::Sampleable, dims::Dims)
 
-function _rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
-    for i = 1:size(A,2)
-        _rand!(s, view(A,:,i))
-    end
-    return A
-end
+Generate an array of samples from `s` whose shape is determined by the given
+dimensions.
+"""
+rand(s::Sampleable) = rand(GLOBAL_RNG, s)
+rand(s::Sampleable, dims::Dims) = rand(GLOBAL_RNG, s, dims)
+rand(s::Sampleable, dim1::Int, moredims::Int...) =
+    rand(GLOBAL_RNG, s, (dim1, moredims...))
+rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
+    rand(rng, s, (dim1, moredims...))
 
-function rand!(s::Sampleable{Multivariate}, A::AbstractVector)
-    length(A) == length(s) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(s, A)
-end
+"""
+    rand!([rng::AbstractRNG,] s::Sampleable, A::AbstractArray)
 
-function rand!(s::Sampleable{Multivariate}, A::AbstractMatrix)
-    size(A,1) == length(s) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(s, A)
-end
+Generate one or multiple samples from `s` to a pre-allocated array `A`. `A` should be in the
+form as specified above. The rules are summarized as below:
 
-rand(s::Sampleable{Multivariate}) =
-    _rand!(s, Vector{eltype(s)}(length(s)))
+- When `s` is univariate, `A` can be an array of arbitrary shape. Each element of `A` will
+  be overriden by one sample.
+- When `s` is multivariate, `A` can be a vector to store one sample, or a matrix with each
+  column for a sample.
+- When `s` is matrix-variate, `A` can be a matrix to store one sample, or an array of
+  matrices with each element for a sample matrix.
+"""
+function rand! end
+rand!(s::Sampleable, X::AbstractArray{<:AbstractArray}, allocate::Bool) =
+    rand!(GLOBAL_RNG, s, X, allocate)
+rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
+rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
 
-rand(s::Sampleable{Multivariate}, n::Int) =
-    _rand!(s, Matrix{eltype(s)}(length(s), n))
+"""
+    sampler(d::Distribution) -> Sampleable
+    sampler(s::Sampleable) -> s
 
-
-# matrix-variate
-
-function _rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M})
-    for i in 1:length(X)
-        X[i] = rand(s)
-    end
-    return X
-end
-
-rand!{M<:Matrix}(s::Sampleable{Matrixvariate}, X::AbstractArray{M}) =
-    _rand!(s, X)
-
-rand(s::Sampleable{Matrixvariate}, n::Int) =
-    rand!(s, Vector{Matrix{eltype(s)}}(n))
-
-
-# sampler
-
-# one can specialize this function to provide more efficient samplers
-# for certain distributions
-sampler(d::Distribution) = d
+Samplers can often rely on pre-computed quantities (that are not parameters
+themselves) to improve efficiency. If such a sampler exists, it can be provided
+with this `sampler` method, which would be used for batch sampling.
+The general fallback is `sampler(d::Distribution) = d`.
+"""
+sampler(s::Sampleable) = s

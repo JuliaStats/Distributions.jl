@@ -2,15 +2,17 @@
 
 import PDMats: ScalMat, PDiagMat, PDMat
 
-using Distributions, Compat
-import Compat.view
-using Base.Test
+using Distributions
+using LinearAlgebra, Random, Test
+
 import Distributions: distrname
+
 
 
 ####### Core testing procedure
 
-function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
+function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
+                       rng::Union{AbstractRNG, Missing} = missing)
     d = length(g)
     μ = mean(g)
     Σ = cov(g)
@@ -20,22 +22,32 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     @test length(μ) == d
     @test size(Σ) == (d, d)
     @test var(g)     ≈ diag(Σ)
-    @test entropy(g) ≈ 0.5 * logdet(2π * e * Σ)
+    @test entropy(g) ≈ 0.5 * logdet(2π * ℯ * Σ)
     ldcov = logdetcov(g)
     @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
 
     # test sampling for AbstractMatrix (here, a SubArray):
-    subX = view(rand(d, 2d), :, 1:d)
-    @test isa(rand!(g, subX), SubArray)
-
+    if ismissing(rng)
+        subX = view(rand(d, 2d), :, 1:d)
+        @test isa(rand!(g, subX), SubArray)
+    else
+        subX = view(rand(rng, d, 2d), :, 1:d)
+        @test isa(rand!(rng, g, subX), SubArray)
+    end
+    
     # sampling
-    @test isa(rand(g), Vector{Float64})
-    X = rand(g, n_tsamples)
-    emp_mu = vec(mean(X, 2))
+    if ismissing(rng)
+        @test isa(rand(g), Vector{Float64})
+        X = rand(g, n_tsamples)
+    else
+        @test isa(rand(rng, g), Vector{Float64})
+        X = rand(rng, g, n_tsamples)
+    end        
+    emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
         @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
@@ -46,9 +58,9 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     X = rand(MersenneTwister(14), g, n_tsamples)
     Y = rand(MersenneTwister(14), g, n_tsamples)
     @test X == Y
-    emp_mu = vec(mean(X, 2))
+    emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
         @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
@@ -59,13 +71,13 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
 
     # evaluation of sqmahal & logpdf
     U = X .- μ
-    sqm = vec(sum(U .* (Σ \ U), 1))
+    sqm = vec(sum(U .* (Σ \ U), dims=1))
     for i = 1:min(100, n_tsamples)
         @test sqmahal(g, X[:,i]) ≈ sqm[i]
     end
     @test sqmahal(g, X) ≈ sqm
 
-    lp = -0.5 * sqm - 0.5 * (d * log(2.0 * pi) + ldcov)
+    lp = -0.5 .* sqm .- 0.5 * (d * log(2.0 * pi) + ldcov)
     for i = 1:min(100, n_tsamples)
         @test logpdf(g, X[:,i]) ≈ lp[i]
     end
@@ -74,7 +86,6 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6)
     # log likelihood
     @test loglikelihood(g, X) ≈ sum([Distributions._logpdf(g, X[:,i]) for i in 1:size(X, 2)])
 end
-
 
 ###### General Testing
 
@@ -86,27 +97,31 @@ h = [1., 2., 3.]
 dv = [1.2, 3.4, 2.6]
 J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-for (T, g, μ, Σ) in [
-    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, 2.0 * eye(3)),
-    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), 2.0 * eye(3)),
-    (DiagNormal, MvNormal(mu, Vector{Float64}(@compat(sqrt.(va)))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (ZeroMeanDiagNormal, MvNormal(Vector{Float64}(@compat(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+@testset "Testing MvNormal with $key" for (key, rng) in
+    Dict("rand(...)" => missing,
+         "rand(rng, ...)" => MersenneTwister(123))
+    
+    @testset "Testing MvNormal with $key for $(distrname(g))" for (T, g, μ, Σ) in [
+    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
+    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
+    (DiagNormal, MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
+    (ZeroMeanDiagNormal, MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
     (FullNormal, MvNormal(mu, C), mu, C),
     (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
-    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, 0.5 * eye(3)),
-    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), 0.5 * eye(3)),
-    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, diagm(1.0 ./ dv)),
-    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), diagm(1.0 ./ dv)),
+    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, Matrix(0.5I, 3, 3)),
+    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
+    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
     (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)),
-    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)) ]
-
-    println("    testing $(distrname(g))")
+    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)),
+    (FullNormal, MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
+    (DiagNormal, MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))) ]
 
     @test isa(g, T)
     @test mean(g)   ≈ μ
     @test cov(g)    ≈ Σ
     @test invcov(g) ≈ inv(Σ)
-    test_mvnormal(g, 10^4)
+    test_mvnormal(g, 10^4, rng)
 
     # conversion between mean form and canonical form
     if isa(g, MvNormal)
@@ -123,6 +138,7 @@ for (T, g, μ, Σ) in [
         @test mean(gc) ≈ mean(g)
         @test cov(gc)  ≈ cov(g)
     end
+end
 end
 
 ##### Constructors and conversions
@@ -148,12 +164,15 @@ d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)
 @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
+@test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
+@test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
+@test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
 ##### MLE
 
 # a slow but safe way to implement MLE for verification
 
 function _gauss_mle(x::Matrix{Float64})
-    mu = vec(mean(x, 2))
+    mu = vec(mean(x, dims=2))
     z = x .- mu
     C = (z * z') * (1/size(x,2))
     return mu, C
@@ -164,12 +183,11 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     mu = (x * w) * (1/sw)
     z = x .- mu
     C = (z * (Diagonal(w) * z')) * (1/sw)
-    Base.LinAlg.copytri!(C, 'U')
+    LinearAlgebra.copytri!(C, 'U')
     return mu, C
 end
 
-println("    testing fit_mle")
-
+@testset "Testing fit_mle" begin
 x = randn(3, 200) .+ randn(3) * 2.
 w = rand(200)
 u, C = _gauss_mle(x)
@@ -209,3 +227,4 @@ g = fit_mle(DiagNormal, x, w)
 @test isa(g, DiagNormal)
 @test g.μ      ≈ uw
 @test g.Σ.diag ≈ diag(Cw)
+end

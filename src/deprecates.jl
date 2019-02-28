@@ -1,21 +1,3 @@
-
-#### Deprecate on 0.5 (to be removed on 0.6)
-
-function dim(d::MultivariateDistribution)
-    Base.depwarn("dim(d::MultivariateDistribution) is deprecated. Please use length(d).", :dim)
-    return length(d)
-end
-
-function binaryentropy(d::UnivariateDistribution)
-    Base.depwarn("binaryentropy is deprecated. Please use entropy(d, 2).", :binaryentropy)
-    return entropy(d) / log(2)
-end
-
-@Base.deprecate logpmf logpdf
-@Base.deprecate logpmf! logpmf!
-@Base.deprecate pmf pdf
-
-
 #### Deprecate on 0.6 (to be removed on 0.7)
 
 @Base.deprecate expected_logdet meanlogdet
@@ -39,3 +21,23 @@ function BetaBinomial(n::Real, α::Real, β::Real)
     Base.depwarn("BetaBinomial(n::Real, α, β) is deprecated. Please use BetaBinomial(n::Integer, α, β) instead.", :BetaBinomial)
     BetaBinomial(Int(n), α, β)
 end
+
+
+# vectorized versions
+for fun in [:pdf, :logpdf,
+            :cdf, :logcdf,
+            :ccdf, :logccdf,
+            :invlogcdf, :invlogccdf,
+            :quantile, :cquantile]
+
+    _fun! = Symbol('_', fun, '!')
+    fun! = Symbol(fun, '!')
+
+    @eval begin
+        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
+        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+    end
+end
+
+@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
