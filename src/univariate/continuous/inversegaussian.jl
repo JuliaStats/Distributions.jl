@@ -164,7 +164,7 @@ end
 #### Fit model
 
 """
-Sufficient statustics for `InverseGaussian`, containing the weighted
+Sufficient statistics for `InverseGaussian`, containing the weighted
 sum of observations, the weighted sum of inverse points and sum of weights
 """
 struct InverseGaussianStats <: SufficientStats
