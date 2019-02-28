@@ -144,7 +144,6 @@ end
         end
     end
 end
-end
 
 @testset "MvNormal constructor" begin
     mu = [1., 2., 3.]
