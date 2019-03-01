@@ -187,8 +187,8 @@ function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::Abstra
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
-    sx = sum(w .* x)
-    sinvx = sum(w ./ x)
+    sx = dot(w, x)
+    sinvx = dot(w, inv.(x))
     sw = sum(w)
     InverseGaussianStats(sx, sinvx, sw)
 end
