@@ -79,10 +79,11 @@ modes(d::AbstractMvNormal) = [mean(d)]
 
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
-    (length(d) * (typeof(ldcd)(log2π) + 1.) + ldcd)/2.
+    T = typeof(ldcd)
+    (length(d) * (T(log2π) + one(T)) + ldcd)/2
 end
 
-mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2.
+mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
 
 """
     invcov(d::AbstractMvNormal)
@@ -110,13 +111,13 @@ sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
 sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
 
-_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2.
+_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
 function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - r[i]/2.
+        @inbounds r[i] = c0 - r[i]/2
     end
     r
 end
@@ -162,7 +163,7 @@ isotropic covariance as `abs2(sig) * eye(d)`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector}} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -319,7 +320,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,dims=2)), 1.0 / size(x,2))
+    μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
     MvNormal(μ, g.Σ)
 end
 
@@ -389,7 +390,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, dims=2))
     z = x .- mu
-    C = BLAS.syrk('U', 'N', 1.0/n, z)
+    C = BLAS.syrk('U', 'N', inv(n), z)
     LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
@@ -399,7 +400,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
-    inv_sw = 1.0 / sum(w)
+    inv_sw = inv(sum(w))
     mu = BLAS.gemv('N', inv_sw, x, w)
 
     z = Matrix{Float64}(undef, m, n)
@@ -434,7 +435,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArr
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
-    inv_sw = 1.0 / sum(w)
+    inv_sw = inv(sum(w))
     mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = zeros(Float64, m)
