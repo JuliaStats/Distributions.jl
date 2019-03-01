@@ -177,7 +177,7 @@ end
 
 function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real})
     sx = sum(x)
-    sinvx = sum(inv.(x))
+    sinvx = sum(inv, x)
     InverseGaussianStats(sx, sinvx, length(x))
 end
 
@@ -188,7 +188,7 @@ function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::Abstra
     end
 
     sx = dot(w, x)
-    sinvx = dot(w, inv.(x))
+    sinvx = sum(w[i]/x[i] for i in eachindex(x))
     sw = sum(w)
     InverseGaussianStats(sx, sinvx, sw)
 end
