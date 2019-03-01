@@ -42,14 +42,14 @@ type `MvNormal`, defined as below, which allows users to specify the special str
 the mean and covariance.
 
 ```julia
-struct MvNormal{Cov<:AbstractPDMat,Mean<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+struct MvNormal{Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
 ```
 
-Here, the mean vector can be an instance of either `Vector` or `ZeroVector`, where the
-latter is simply an empty type indicating a vector filled with zeros. The covariance can be
+Here, the mean vector can be an instance of any `AbstractVector`, including `ZeroVector`.
+This is simply an empty type indicating a vector filled with zeros. The covariance can be
 of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
 `PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
 in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
@@ -79,10 +79,10 @@ modes(d::AbstractMvNormal) = [mean(d)]
 
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
-    (length(d) * (typeof(ldcd)(log2π) + 1) + ldcd)/2
+    (length(d) * (typeof(ldcd)(log2π) + 1.) + ldcd)/2.
 end
 
-mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
+mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2.
 
 """
     invcov(d::AbstractMvNormal)
@@ -110,13 +110,13 @@ sqmahal(d::AbstractMvNormal, x::AbstractArray)
 
 sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
 
-_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
+_logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2.
 
 function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - r[i]/2
+        @inbounds r[i] = c0 - r[i]/2.
     end
     r
 end
@@ -162,7 +162,7 @@ isotropic covariance as `abs2(sig) * eye(d)`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{AbstractVector, ZeroVector}} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector}} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -178,12 +178,12 @@ const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Ze
 const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal(μ::Union{AbstractVector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T}) where {T<:Real}
+function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-function MvNormal(μ::Union{AbstractVector, ZeroVector}, Σ::AbstractPDMat)
+function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
@@ -218,7 +218,7 @@ MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
-function convert(::Type{MvNormal{T}}, μ::Union{AbstractVector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
+function convert(::Type{MvNormal{T}}, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
 

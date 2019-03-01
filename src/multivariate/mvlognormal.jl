@@ -161,12 +161,12 @@ Mean vector ``\\boldsymbol{\\mu}`` and covariance matrix ``\\boldsymbol{\\Sigma}
 underlying normal distribution are known as the *location* and *scale*
 parameters of the corresponding lognormal distribution.
 """
-struct MvLogNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{AbstractVector, ZeroVector}} <: AbstractMvLogNormal
+struct MvLogNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvLogNormal
     normal::MvNormal{T,Cov,Mean}
 end
 
 #Constructors mirror the ones for MvNormmal
-MvLogNormal(μ::M,Σ::AbstractPDMat) where {M<:Union{AbstractVector,ZeroVector}} = MvLogNormal(MvNormal(μ,Σ))
+MvLogNormal(μ::M,Σ::AbstractPDMat) where {M<:AbstractVector} = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(eltype(Σ),dim(Σ)),Σ))
 MvLogNormal(μ::AbstractVector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
