@@ -171,8 +171,6 @@ struct InverseGaussianStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     sinvx::Float64   # (weighted) sum of 1/x
     sw::Float64      # sum of sample weight
-
-    InverseGaussianStats(sx::Real, sinvx::Real, sw::Real) = new(sx, sinvx, sw)
 end
 
 function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real})
@@ -186,9 +184,10 @@ function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::Abstra
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
-    sx = zero(eltype(x))
-    sinvx = zero(eltype(x))
-    sw = zero(eltype(x))
+    T = promote_type(eltype(x), eltype(w))
+    sx = zero(T)
+    sinvx = zero(T)
+    sw = zero(T)
     @inbounds @simd for i in eachindex(x)
         sx += w[i]*x[i]
         sinvx += w[i]/x[i]
