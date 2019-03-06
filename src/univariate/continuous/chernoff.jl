@@ -30,11 +30,9 @@ mode(Chernoff())
 entropy(Chernoff())
 rand(Chernoff())
 rand(rng, Chernoff()
-cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x) 
+cdf(Chernoff(),-x)              		#For tail probabilities, use this instead of 1-cdf(Chernoff(),x) 
 ```
 """
-
-
 
 ## chernoff.jl
 ##
@@ -48,13 +46,6 @@ cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-c
 ## Random numbers are drawn using a Ziggurat algorithm.  To obtain draws in the tails, the
 ## algorithm reverts to quantiles, which is slow.
 
-
-
-struct Chernoff <: ContinuousUnivariateDistribution
-end
-
-
-#~ using Roots
 struct Chernoff <: ContinuousUnivariateDistribution
 end
 
