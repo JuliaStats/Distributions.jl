@@ -1,10 +1,4 @@
-using Distributions
-using Compat.Test
-
-
-
 d = Chernoff()
-
 
 cdftest=[
     0.005 0.5037916689930134;
@@ -109,11 +103,9 @@ cdftest=[
     0.995 0.9746102916986603
 ]
 
-
 for i=1:size(cdftest,1)
     @test iszero(round(cdf(d,cdftest[i,1])-cdftest[i,2],7)) 
 end
-
 
 for i=1:size(cdftest,1)
     @test iszero(round(quantile(d,cdf(d,cdftest[i,1]))-cdftest[i,1],7))
