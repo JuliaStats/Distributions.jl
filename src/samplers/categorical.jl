@@ -27,8 +27,6 @@ function rand(rng::AbstractRNG, s::CategoricalDirectSampler)
     return i
 end
 
-<<<<<<< HEAD
-
 ##### Alias Table #####
 struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
@@ -56,6 +54,3 @@ end
 rand(s::AliasTable) = rand(Base.Random.GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
-
-=======
->>>>>>> master

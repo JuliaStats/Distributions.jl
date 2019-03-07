@@ -7,7 +7,6 @@ import Base: size, eltype, length, convert, show, getindex, rand
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
-<<<<<<< HEAD
 import QuadGK.quadgk
 import Compat.view
 import Base.Random
@@ -20,7 +19,7 @@ import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
 if isdefined(Base, :scale)
     import Base: scale
 end
-=======
+
 using LinearAlgebra, Printf
 
 using Random
@@ -30,7 +29,6 @@ import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
->>>>>>> master
 
 import PDMats: dim, PDMat, invquad
 
