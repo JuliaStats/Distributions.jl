@@ -7,19 +7,6 @@ import Base: size, eltype, length, convert, show, getindex, rand
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
-import QuadGK.quadgk
-import Compat.view
-import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale!, rand, rand!
-import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: +, -
-import Base.Math.@horner
-import Base.LinAlg: Cholesky
-import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
-if isdefined(Base, :scale)
-    import Base: scale
-end
-
 using LinearAlgebra, Printf
 
 using Random
