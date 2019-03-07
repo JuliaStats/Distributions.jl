@@ -49,7 +49,7 @@ end
 ```
 
 Here, the mean vector can be an instance of any `AbstractVector`, including `ZeroVector`.
-This is simply an empty type indicating a vector filled with zeros. The covariance can be
+The latter is simply an empty type indicating a vector filled with zeros. The covariance can be
 of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
 `PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
 in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
