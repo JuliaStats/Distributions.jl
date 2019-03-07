@@ -199,20 +199,20 @@ MvNormal(μ::AbstractVector{T}, Σ::Diagonal{T}) where {T<:Real} = MvNormal(μ, 
 MvNormal(μ::AbstractVector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
 MvNormal(μ::AbstractVector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-function MvNormal(μ::AbstractVector{T}, Σ::VecOrMat{S}) where {T<:Real,S<:Real}
+function MvNormal(μ::AbstractVector{<:Real}, Σ::VecOrMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
-function MvNormal(μ::AbstractVector{T}, σ::Real) where T<:Real
+function MvNormal(μ::AbstractVector{<:Real}, σ::Real)
     R = Base.promote_eltype(μ, σ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ))
 end
-function MvNormal(μ::AbstractVector{T}, σ::UniformScaling{S}) where {T<:Real,S<:Real}
+function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
     R = Base.promote_eltype(μ, σ.λ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
 end
-MvNormal(Σ::Matrix{T}) where {T<:Real} = MvNormal(PDMat(Σ))
-MvNormal(σ::Vector{T}) where {T<:Real} = MvNormal(PDiagMat(abs2.(σ)))
+MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
+MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
 ### Conversion
