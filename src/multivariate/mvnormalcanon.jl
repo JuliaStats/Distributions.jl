@@ -63,7 +63,7 @@ Construct a multivariate normal distribution of dimension `d`, with zero mean an
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
-struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{AbstractVector,ZeroVector}} <: AbstractMvNormal
+struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)

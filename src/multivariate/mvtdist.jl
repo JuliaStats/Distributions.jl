@@ -39,7 +39,7 @@ function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
     S = convert(AbstractArray{T}, d.Σ)
     GenericMvTDist{T, typeof(S)}(T(d.df), d.dim, d.zeromean, convert(AbstractArray{T}, d.μ), S)
 end
-function convert(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::Union{AbstractVector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
+function convert(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     S = convert(AbstractArray{T}, Σ)
     GenericMvTDist{T, typeof(S)}(T(df), dim, zeromean, convert(AbstractArray{T}, μ), S)
 end
