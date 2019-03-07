@@ -1,7 +1,7 @@
 """
-    Laplace(μ,θ)
+    Laplace(μ,β)
 
-The *Laplace distribution* with location `μ` and scale `θ` has probability density function
+The *Laplace distribution* with location `μ` and scale `β` has probability density function
 
 ```math
 f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
@@ -9,12 +9,12 @@ f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\bet
 
 ```julia
 Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
-Laplace(u)      # Laplace distribution with location u and unit scale, i.e. Laplace(u, 1)
-Laplace(u, b)   # Laplace distribution with location u ans scale b
+Laplace(μ)      # Laplace distribution with location μ and unit scale, i.e. Laplace(μ, 1)
+Laplace(μ, β)   # Laplace distribution with location μ and scale β
 
-params(d)       # Get the parameters, i.e. (u, b)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. b
+params(d)       # Get the parameters, i.e., (μ, β)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. β
 ```
 
 External links

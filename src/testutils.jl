@@ -487,7 +487,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
             @test isapprox(kurtosis(d), xkurt   , atol=1.0e-8)
         end
         if applicable(entropy, d)
-            @test isapprox(entropy(d) , xentropy, atol=1.0e-8)
+            @test isapprox(entropy(d), xentropy, atol=1.0e-8)
         end
     else
         @test isapprox(mean(d), xmean, atol=1.0e-3 * (abs(xmean) + 1.0))

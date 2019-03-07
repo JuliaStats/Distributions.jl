@@ -69,6 +69,7 @@ function kurtosis(d::Hypergeometric)
     a/b
 end
 
+entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
 
 ### Evaluation & Sampling
 
