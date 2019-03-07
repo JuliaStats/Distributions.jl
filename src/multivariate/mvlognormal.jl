@@ -166,7 +166,7 @@ struct MvLogNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractM
 end
 
 #Constructors mirror the ones for MvNormmal
-MvLogNormal(μ::M,Σ::AbstractPDMat) where {M<:AbstractVector} = MvLogNormal(MvNormal(μ,Σ))
+MvLogNormal(μ::AbstractVector,Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(eltype(Σ),dim(Σ)),Σ))
 MvLogNormal(μ::AbstractVector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
