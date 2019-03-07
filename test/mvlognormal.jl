@@ -1,13 +1,14 @@
 # Tests on Multivariate LogNormal distributions
 
-using Distributions, Compat
-using Compat.Test
+using Distributions,  PDMats
+using LinearAlgebra, Random, Test
 
 
 
 ####### Core testing procedure
 
-function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
+function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
+                          rng::Union{AbstractRNG, Missing} = missing)
     d = length(g)
     mn = mean(g)
     md = median(g)
@@ -32,18 +33,22 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test mo         ≈ exp.(mean(g.normal) - var(g.normal))
     @test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
     gg = typeof(g)(MvNormal(params(g)...))
-    @test full(g.normal.μ) == full(gg.normal.μ)
-    @test full(g.normal.Σ) == full(gg.normal.Σ)
+    @test Vector(g.normal.μ) == Vector(gg.normal.μ)
+    @test Matrix(g.normal.Σ) == Matrix(gg.normal.Σ)
     @test insupport(g,ones(d))
     @test !insupport(g,zeros(d))
     @test !insupport(g,-ones(d))
 
     # sampling
-    X = rand(g, n_tsamples)
-    emp_mn = vec(mean(X, 2))
-    emp_md = vec(median(X, 2))
+    if ismissing(rng)
+        X = rand(g, n_tsamples)
+    else
+        X = rand(rng, g, n_tsamples)
+    end        
+    emp_mn = vec(mean(X, dims=2))
+    emp_md = vec(median(X, dims=2))
     Z = X .- emp_mn
-    emp_cov = A_mul_Bt(Z, Z) * (1.0 / n_tsamples)
+    emp_cov = (Z * Z') ./ n_tsamples
     for i = 1:d
         @test isapprox(emp_mn[i]   , mn[i] , atol=(sqrt(s[i] / n_tsamples) * 8.0))
     end
@@ -71,11 +76,11 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
     @test isapprox(location(g), location(MvLogNormal,:mode,mode(g),scale(g))    , atol=1e-8)
     @test isapprox(scale(g)   , scale(MvLogNormal,:meancov,mean(g),cov(g))      , atol=1e-8)
 
-    @test isapprox(location(g), location!(MvLogNormal,:meancov,mean(g),cov(g),zeros(mn))   , atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:mean,mean(g),scale(g),zeros(mn))    , atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:median,median(g),scale(g),zeros(mn)), atol=1e-8)
-    @test isapprox(location(g), location!(MvLogNormal,:mode,mode(g),scale(g),zeros(mn))    , atol=1e-8)
-    @test isapprox(scale(g)   , scale!(MvLogNormal,:meancov,mean(g),cov(g),zeros(S))       , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:meancov,mean(g),cov(g),zero(mn))   , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mean,mean(g),scale(g),zero(mn))    , atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:median,median(g),scale(g),zero(mn)), atol=1e-8)
+    @test isapprox(location(g), location!(MvLogNormal,:mode,mode(g),scale(g),zero(mn))    , atol=1e-8)
+    @test isapprox(scale(g)   , Distributions.scale!(MvLogNormal,:meancov,mean(g),cov(g),zero(S)), atol=1e-8)
 
     lc1,sc1 = params(MvLogNormal,mean(g),cov(g))
     lc2,sc2 = params!(MvLogNormal,mean(g),cov(g),similar(mn),similar(S))
@@ -86,7 +91,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6)
 end
 
 ####### Validate results for a single-dimension MvLogNormal by comparing with univariate LogNormal
-println("    comparing results from MvLogNormal with univariate LogNormal")
+@testset "Comparing results from MvLogNormal with univariate LogNormal" begin
 l1 = LogNormal(0.1,0.4)
 l2 = MvLogNormal(0.1*ones(1),0.4)
 @test [mean(l1)]     ≈ mean(l2)
@@ -96,7 +101,9 @@ l2 = MvLogNormal(0.1*ones(1),0.4)
 @test  entropy(l1)   ≈ entropy(l2)
 @test logpdf(l1,5.0) ≈ logpdf(l2,[5.0])
 @test pdf(l1,5.0)    ≈ pdf(l2,[5.0])
-@test (srand(78393) ; [rand(l1)]) == (srand(78393) ; rand(l2))
+@test (Random.seed!(78393) ; [rand(l1)]) == (Random.seed!(78393) ; rand(l2))
+@test [rand(MersenneTwister(78393), l1)] == rand(MersenneTwister(78393), l2)
+end
 
 ###### General Testing
 
@@ -104,21 +111,24 @@ mu = [0.1, 0.2, 0.3]
 va = [0.16, 0.25, 0.36]
 C = [0.4 -0.2 -0.1; -0.2 0.5 -0.1; -0.1 -0.1 0.6]
 
-for (g, μ, Σ) in [
-    (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
-    (MvLogNormal(PDMats.PDiagMat(Vector{Float64}(sqrt.(va)))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(mu, sqrt(0.2)), mu, 0.2 * eye(3)),
-    (MvLogNormal(3, sqrt(0.2)), zeros(3), 0.2 * eye(3)),
-    (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), diagm(va)), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-    (MvLogNormal(mu, C), mu, C),
-    (MvLogNormal(C), zeros(3), C) ]
-
-    println("    testing $(typeof(g)) with normal distribution $(Distributions.distrname(g.normal))")
-
-    m,s = params(g)
-    @test full(m) ≈ μ
-    test_mvlognormal(g, 10^4)
+@testset "Testing MvLogNormal with $key" for (key, rng) in
+    Dict("rand(...)" => missing,
+         "rand(rng, ...)" => MersenneTwister(123))
+    
+    @testset "Testing MvLogNormal with $key for $(typeof(g)) with $(Distributions.distrname(g.normal))" for (g, μ, Σ) in [
+        (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
+        (MvLogNormal(PDMats.PDiagMat(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
+        (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
+        (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
+        (MvLogNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
+        (MvLogNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
+        (MvLogNormal(mu, C), mu, C),
+        (MvLogNormal(C), zeros(3), C) ]
+        
+        m,s = params(g)
+        @test Vector(m) ≈ μ
+        test_mvlognormal(g, 10^4, rng)
+    end
 end
 
 ##### Constructors and conversions

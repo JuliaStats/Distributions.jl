@@ -2,15 +2,13 @@
 
 using Distributions
 import JSON
-using Compat.Test
-
-using Compat
+using  Test
 
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
     for dct in R
-        ex = parse(dct["expr"])
+        ex = Meta.parse(dct["expr"])
         @assert ex.head == :call
         dsym = ex.args[1]
         dname = string(dsym)
@@ -58,7 +56,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     # D can be a function, e.g. TruncatedNormal
     if isa(D, Type)
-        assert(isa(d, D))
+        @assert isa(d, D)
     end
 
     # test various constructors for promotion, all-Integer args, etc.
@@ -88,6 +86,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @assert isa(f, Function)
         @test isapprox(f(d), expect_v; atol=1e-12, rtol=1e-8, nans=true)
     end
+    @test extrema(d) == (minimum(d), maximum(d))
 
     # verify logpdf and cdf at certain points
     pts = dct["points"]
@@ -97,8 +96,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         lp = _json_value(pt["logpdf"])
         cf = _json_value(pt["cdf"])
 
-        @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
-        @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+        # pdf method is not implemented for StudentizedRange
+        if !isa(d, StudentizedRange)
+            @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
+            @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+        end
 
         # cdf method is not implemented for Skellam & NormalInverseGaussian
         if !isa(d, Union{Skellam, NormalInverseGaussian})

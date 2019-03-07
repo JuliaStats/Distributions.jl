@@ -1,8 +1,8 @@
 """
     InverseWishart(nu, P)
 
-The [Inverse Wishart distribution](http://en.wikipedia.org/wiki/Inverse-Wishart_distribution
-is usually used a the conjugate prior for the covariance matrix of a multivariate normal
+The [Inverse Wishart distribution](http://en.wikipedia.org/wiki/Inverse-Wishart_distribution)
+is usually used as the conjugate prior for the covariance matrix of a multivariate normal
 distribution, which is characterized by a degree of freedom ν, and a base matrix Φ.
 """
 struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
@@ -45,6 +45,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
+size(d::InverseWishart, i) = size(d)[i]
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
@@ -60,7 +61,7 @@ end
 
 #### Show
 
-show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, full(d.Ψ))])
+show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matrix(d.Ψ))])
 
 
 #### Statistics
@@ -70,7 +71,7 @@ function mean(d::InverseWishart)
     p = dim(d)
     r = df - (p + 1)
     if r > 0.0
-        return full(d.Ψ) * (1.0 / r)
+        return Matrix(d.Ψ) * (1.0 / r)
     else
         error("mean only defined for df > p + 1")
     end
@@ -84,21 +85,14 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
-    Xcf = cholfact(X)
-    # we use the fact: trace(Ψ * inv(X)) = trace(inv(X) * Ψ) = trace(X \ Ψ)
-    Ψ = full(d.Ψ)
-    -0.5 * ((df + p + 1) * logdet(Xcf) + trace(Xcf \ Ψ)) - d.c0
+    Xcf = cholesky(X)
+    # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
+    Ψ = Matrix(d.Ψ)
+    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) - d.c0
 end
 
 
 #### Sampling
 
-rand(d::InverseWishart) = inv(cholfact!(rand(Wishart(d.df, inv(d.Ψ)))))
-
-function _rand!(d::InverseWishart, X::AbstractArray{M}) where M<:Matrix
-    wd = Wishart(d.df, inv(d.Ψ))
-    for i in 1:length(X)
-        X[i] = inv(cholfact!(rand(wd)))
-    end
-    return X
-end
+_rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix) =
+    (A .= inv(cholesky!(_rand!(rng, Wishart(d.df, inv(d.Ψ)), A))))

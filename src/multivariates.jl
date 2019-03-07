@@ -17,44 +17,64 @@ size(d::MultivariateDistribution)
 ## sampling
 
 """
-    rand!(d::MultivariateDistribution, x::AbstractArray)
+    rand!([rng::AbstractRNG,] d::MultivariateDistribution, x::AbstractArray)
 
-Draw samples and output them to a pre-allocated array x. Here, x can be either a vector of
-length `dim(d)` or a matrix with `dim(d)` rows.
+Draw samples and output them to a pre-allocated array x. Here, x can be either
+a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
 rand!(d::MultivariateDistribution, x::AbstractArray)
 
-function rand!(d::MultivariateDistribution, x::AbstractVector)
-    length(x) == length(d) ||
+# multivariate with pre-allocated array
+function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix)
+    @boundscheck size(m, 1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(d, x)
+    smp = sampler(s)
+    for i in Base.OneTo(size(m,2))
+        _rand!(rng, smp, view(m,:,i))
+    end
+    return m
 end
 
-function rand!(d::MultivariateDistribution, A::AbstractMatrix)
-    size(A,1) == length(d) ||
+# single multivariate with pre-allocated vector
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+               v::AbstractVector{<:Real})
+    @boundscheck length(v) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(sampler(d), A)
+    _rand!(rng, s, v)
 end
 
-"""
-    rand(d::MultivariateDistribution)
+# multiple multivariates with pre-allocated array of maybe pre-allocated vectors
+rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+      X::AbstractArray{<:AbstractVector}) =
+          @inbounds rand!(rng, s, X,
+                          !all([isassigned(X,i) for i in eachindex(X)]) ||
+                          !all(length.(X) .== length(s)))
 
-Sample a vector from the distribution `d`.
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
+               X::AbstractArray{V}, allocate::Bool) where V <: AbstractVector
+    smp = sampler(s)
+    if allocate
+        for i in eachindex(X)
+            X[i] = _rand!(rng, smp, V(undef, size(s)))
+        end
+    else
+        for x in X
+            rand!(rng, smp, x)
+        end
+    end
+    return X
+end
 
-    rand(d::MultivariateDistribution, n::Int) -> Vector
+# multiple multivariate, must allocate matrix or array of vectors
+rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
+    _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
+    rand(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
 
-Sample n vectors from the distribution `d`. This returns a matrix of size `(dim(d), n)`,
-where each column is a sample.
-"""
-rand(d::MultivariateDistribution) = _rand!(d, Vector{eltype(d)}(length(d)))
-rand(d::MultivariateDistribution, n::Int) = _rand!(sampler(d), Matrix{eltype(d)}(length(d), n))
-
-"""
-    _rand!(d::MultivariateDistribution, x::AbstractArray)
-
-Generate a vector sample to `x`. This function does not need to perform dimension checking.
-"""
-_rand!(d::MultivariateDistribution, x::AbstractArray)
+# single multivariate, must allocate vector
+rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =
+    _rand!(rng, s, Vector{eltype(s)}(undef, length(s)))
 
 ## domain
 
@@ -77,7 +97,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) wh
 end
 
 insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D<:MultivariateDistribution} =
-    insupport!(BitArray(size(X,2)), d, X)
+    insupport!(BitArray(undef, size(X,2)), d, X)
 
 ## statistics
 
@@ -125,7 +145,7 @@ function cor(d::MultivariateDistribution)
     C = cov(d)
     n = size(C, 1)
     @assert size(C, 2) == n
-    R = Matrix{eltype(C)}(n, n)
+    R = Matrix{eltype(C)}(undef, n, n)
 
     for j = 1:n
         for i = 1:j-1
@@ -211,14 +231,14 @@ function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
-    _logpdf!(Vector{T}(size(X,2)), d, X)
+    _logpdf!(Vector{T}(undef, size(X,2)), d, X)
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
-    _pdf!(Vector{T}(size(X,2)), d, X)
+    _pdf!(Vector{T}(undef, size(X,2)), d, X)
 end
 
 """
@@ -248,6 +268,7 @@ for fname in ["dirichlet.jl",
               "mvnormalcanon.jl",
               "mvlognormal.jl",
               "mvtdist.jl",
+              "product.jl",
               "vonmisesfisher.jl"]
     include(joinpath("multivariate", fname))
 end

@@ -66,10 +66,8 @@ end
 
 
 # Sampling
-function _rand!(d::DirichletMultinomial, x::AbstractVector{T}) where T<:Real
-    multinom_rand!(ntrials(d), rand(Dirichlet(d.α)), x)
-end
-
+_rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
+    multinom_rand!(rng, ntrials(d), rand(rng, Dirichlet(d.α)), x)
 
 # Fit Model
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf
@@ -80,7 +78,7 @@ struct DirichletMultinomialStats <: SufficientStats
     DirichletMultinomialStats(n::Int, s::Matrix{Float64}, tw::Real) = new(n, s, Float64(tw))
 end
 function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
-    ns = sum(x, 1)  # get ntrials for each observation
+    ns = sum(x, dims=1)  # get ntrials for each observation
     n = ns[1]       # use ntrails from first ob., then check all equal
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)
@@ -94,7 +92,7 @@ function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
 end
 function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
-    ns = sum(x, 1)
+    ns = sum(x, dims=1)
     n = ns[1]
     all(ns .== n) || error("Each sample in X should sum to the same value.")
     d, m = size(x)

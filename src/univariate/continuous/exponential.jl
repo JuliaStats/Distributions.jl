@@ -22,7 +22,7 @@ External links
 
 """
 struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
-    θ::T		# note: scale not rate
+    θ::T        # note: scale not rate
 
     Exponential{T}(θ::Real) where {T} = (@check_args(Exponential, θ > zero(θ)); new{T}(θ))
 end
@@ -87,7 +87,6 @@ cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling
-rand(d::Exponential) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
 
 

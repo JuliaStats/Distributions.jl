@@ -103,7 +103,7 @@ function kurtosis(d::Frechet{T}) where T<:Real
 end
 
 function entropy(d::Frechet)
-    1 + γ / d.α + γ + log(d.θ / d.α)
+    1 + MathConstants.γ / d.α + MathConstants.γ + log(d.θ / d.α)
 end
 
 
@@ -138,5 +138,4 @@ end
 
 ## Sampling
 
-rand(d::Frechet) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Frechet) = d.θ * randexp(rng) ^ (-1 / d.α)

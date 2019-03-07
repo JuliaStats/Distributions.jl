@@ -1,19 +1,24 @@
 ## sample space/domain
 
 abstract type VariateForm end
-mutable struct Univariate    <: VariateForm end
-mutable struct Multivariate  <: VariateForm end
-mutable struct Matrixvariate <: VariateForm end
+struct Univariate    <: VariateForm end
+struct Multivariate  <: VariateForm end
+struct Matrixvariate <: VariateForm end
 
 abstract type ValueSupport end
-mutable struct Discrete   <: ValueSupport end
-mutable struct Continuous <: ValueSupport end
-
-Base.eltype(::Type{Discrete}) = Int
-Base.eltype(::Type{Continuous}) = Float64
+struct Discrete   <: ValueSupport end
+struct Continuous <: ValueSupport end
 
 ## Sampleable
 
+"""
+    Sampleable{F<:VariateForm,S<:ValueSupport}
+
+`Sampleable` is any type able to produce random values.
+Parametrized by a `VariateForm` defining the dimension of samples
+and a `ValueSupport` defining the domain of possibly sampled values.
+Any `Sampleable` implements the `Base.rand` method.
+"""
 abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 """
@@ -42,15 +47,14 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,S}) where {F,S} = eltype(S)
 Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
 Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
 
 """
     nsamples(s::Sampleable)
 
-The number of samples contained in `A`. Multiple samples are often organized into an array,
-depending on the variate form.
+The number of values contained in one sample of `s`. Multiple samples are often organized
+into an array, depending on the variate form.
 """
 nsamples(t::Type{Sampleable}, x::Any)
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Univariate}} = 1
@@ -60,8 +64,14 @@ nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = siz
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
-## Distribution <: Sampleable
+"""
+    Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 
+`Distribution` is a `Sampleable` generating random values from a probability
+distribution. Distributions define a Probability Distribution Function (PDF)
+to implement with `pdf` and a Cumulated Distribution Function (CDF) to implement
+with `cdf`.
+"""
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
@@ -85,9 +95,53 @@ variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
 value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
 value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
 
+# allow broadcasting over distribution objects
+# to be decided: how to handle multivariate/matrixvariate distributions?
+Broadcast.broadcastable(d::UnivariateDistribution) = Ref(d)
+
+
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
 abstract type IncompleteDistribution end
 
 const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
+
+"""
+    succprob(d::DiscreteUnivariateDistribution)
+
+Get the probability of success.
+"""
+succprob(d::DiscreteUnivariateDistribution)
+
+"""
+    failprob(d::DiscreteUnivariateDistribution)
+
+Get the probability of failure.
+"""
+failprob(d::DiscreteUnivariateDistribution)
+
+# Temporary fix to handle RFunctions dependencies
+"""
+    @rand_rdist(::Distribution)
+
+Mark a `Distribution` subtype as requiring RFunction calls. Since these calls
+cannot accept an arbitrary random number generator as an input, this macro
+creates new `rand(::Distribution, n::Int)` and
+`rand!(::Distribution, X::AbstractArray)` functions that call the relevant
+RFunction. Calls using another random number generator still work, but rely on
+a quantile function to operate.
+"""
+macro rand_rdist(D)
+    esc(quote
+        function rand(d::$D, n::Int)
+            [rand(d) for i in Base.OneTo(n)]
+        end
+        function rand!(d::$D, X::AbstractArray)
+            for i in eachindex(X)
+                X[i] = rand(d)
+            end
+            return X
+        end
+    end)
+end

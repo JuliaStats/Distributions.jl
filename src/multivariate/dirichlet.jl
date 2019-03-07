@@ -30,7 +30,8 @@ struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
         lmnB::T = zero(T)
         for i in 1:length(alpha)
             ai = alpha[i]
-            ai > 0 || throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
+            ai > 0 ||
+                throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
             lmnB += lgamma(ai)
         end
@@ -46,7 +47,8 @@ end
 
 Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
-Dirichlet(alpha::Vector{T}) where {T<:Integer} = Dirichlet{Float64}(alpha)
+Dirichlet(alpha::Vector{T}) where {T<:Integer} =
+    Dirichlet{Float64}(convert(Vector{Float64},alpha))
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
 struct DirichletCanon
@@ -57,8 +59,10 @@ length(d::DirichletCanon) = length(d.alpha)
 
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
-convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, alpha))
-convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} = Dirichlet(convert(Vector{T}, d.alpha))
+convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} =
+    Dirichlet(convert(Vector{T}, alpha))
+convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} =
+    Dirichlet(convert(Vector{T}, d.alpha))
 
 
 
@@ -77,7 +81,7 @@ function var(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    v = Vector{Float64}(k)
+    v = Vector{Float64}(undef, k)
     for i = 1:k
         @inbounds αi = α[i]
         @inbounds v[i] = αi * (α0 - αi) * c
@@ -91,7 +95,7 @@ function cov(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    C = Matrix{Float64}(k, k)
+    C = Matrix{Float64}(undef, k, k)
 
     for j = 1:k
         αj = α[j]
@@ -135,7 +139,7 @@ function dirichlet_mode!(r::Vector{T}, α::Vector{T}, α0::T) where T <: Real
     return r
 end
 
-dirichlet_mode(α::Vector{T}, α0::T) where {T <: Real} = dirichlet_mode!(Vector{T}(length(α)), α, α0)
+dirichlet_mode(α::Vector{T}, α0::T) where {T <: Real} = dirichlet_mode!(Vector{T}(undef, length(α)), α, α0)
 
 mode(d::Dirichlet) = dirichlet_mode(d.alpha, d.alpha0)
 mode(d::DirichletCanon) = dirichlet_mode(d.alpha, sum(d.alpha))
@@ -175,12 +179,14 @@ end
 
 # sampling
 
-function _rand!(d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG,
+                d::Union{Dirichlet,DirichletCanon},
+                x::AbstractVector{<:Real})
     s = 0.0
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = rand(Gamma(α[i])))
+        @inbounds s += (x[i] = rand(rng, Gamma(α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end
@@ -214,7 +220,8 @@ function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64})
     DirichletStats(slogp, n)
 end
 
-function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+                   w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
@@ -257,8 +264,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(K)  # E[p]
-    γ = Vector{Float64}(K)  # E[p^2]
+    μ = Vector{Float64}(undef, K)  # E[p]
+    γ = Vector{Float64}(undef, K)  # E[p^2]
 
     for i = 1:n
         for k = 1:K
@@ -281,8 +288,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(K)  # E[p]
-    γ = Vector{Float64}(K)  # E[p^2]
+    μ = Vector{Float64}(undef, K)  # E[p]
+    γ = Vector{Float64}(undef, K)  # E[p^2]
     tw = 0.
 
     for i = 1:n
@@ -313,8 +320,8 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     K = length(elogp)
     length(α) == K || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
-    g = Vector{Float64}(K)
-    iq = Vector{Float64}(K)
+    g = Vector{Float64}(undef, K)
+    iq = Vector{Float64}(undef, K)
     α0 = sum(α)
 
     if debug
@@ -384,7 +391,8 @@ function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64};
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64}, w::AbstractArray{Float64};
+function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+                 w::AbstractArray{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
 
     n = size(P, 2)

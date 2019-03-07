@@ -1,27 +1,33 @@
 #### naive sampling
 
-struct CategoricalDirectSampler <: Sampleable{Univariate,Discrete}
-    prob::Vector{Float64}
+struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+    prob::Ts
 
-    function CategoricalDirectSampler(p::Vector{Float64})
-        isempty(p) && error("p is empty.")
-        new(p)
+    function CategoricalDirectSampler{T,Ts}(p::Ts) where {
+        T<:Real,Ts<:AbstractVector{T}}
+        isempty(p) && throw(ArgumentError("p is empty."))
+        new{T,Ts}(p)
     end
 end
+
+CategoricalDirectSampler(p::Ts) where {T<:Real,Ts<:AbstractVector{T}} =
+    CategoricalDirectSampler{T,Ts}(p)
+
 ncategories(s::CategoricalDirectSampler) = length(s.prob)
 
-function rand(s::CategoricalDirectSampler)
+function rand(rng::AbstractRNG, s::CategoricalDirectSampler)
     p = s.prob
     n = length(p)
     i = 1
     c = p[1]
-    u = rand()
+    u = rand(rng)
     while c < u && i < n
         c += p[i += 1]
     end
     return i
 end
 
+<<<<<<< HEAD
 
 ##### Alias Table #####
 struct AliasTable <: Sampleable{Univariate,Discrete}
@@ -51,3 +57,5 @@ rand(s::AliasTable) = rand(Base.Random.GLOBAL_RNG, s)
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
 
+=======
+>>>>>>> master

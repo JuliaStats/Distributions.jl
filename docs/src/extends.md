@@ -4,6 +4,8 @@ Whereas this package already provides a large collection of common distributions
 
 Generally, you don't have to implement every API method listed in the documentation. This package provides a series of generic functions that turn a small number of internal methods into user-end API methods. What you need to do is to implement this small set of internal methods for your distributions.
 
+By default, `Discrete` sampleables have support of type `Int` while `Continuous` sampleables have support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
+
 **Note:** the methods need to be implemented are different for distributions of different variate forms.
 
 
@@ -30,7 +32,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
 
-function _rand!{T<:Real}(s::Spl, x::AbstractVector{T})
+function _rand!(s::Spl, x::AbstractVector{T}) where T<:Real
     # ... generate a single vector sample to x
 end
 ```
@@ -59,17 +61,17 @@ function rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
     _rand!(s, A)
 end
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}) =
+rand(s::Sampleable{Multivariate,S}) where {S<:ValueSupport} =
     _rand!(s, Vector{eltype(S)}(length(s)))
 
-rand{S<:ValueSupport}(s::Sampleable{Multivariate,S}, n::Int) =
+rand(s::Sampleable{Multivariate,S}, n::Int) where {S<:ValueSupport} =
     _rand!(s, Matrix{eltype(S)}(length(s), n))
 ```
 
 If there is a more efficient method to generate multiple vector samples in batch, one should provide the following method
 
 ```julia
-function _rand!{T<:Real}(s::Spl, A::DenseMatrix{T})
+function _rand!(s::Spl, A::DenseMatrix{T}) where T<:Real
     # ... generate multiple vector samples in batch
 end
 ```
@@ -83,7 +85,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
 
-function _rand!{T<:Real}(s::Spl, x::DenseMatrix{T})
+function _rand!(s::Spl, x::DenseMatrix{T}) where T<:Real
     # ... generate a single matrix sample to x
 end
 ```
@@ -120,9 +122,9 @@ It is also recommended that one also implements the following statistics functio
 - [`var(d::UnivariateDistribution)`](@ref)
 - [`modes(d::UnivariateDistribution)`](@ref)
 - [`mode(d::UnivariateDistribution)`](@ref)
-- [`StatsBase.skewness(d::UnivariateDistribution)`](@ref)
-- [`StatsBase.kurtosis(d::Distribution, ::Bool)`](@ref)
-- [`StatsBase.entropy(d::UnivariateDistribution, ::Real)`](@ref)
+- [`skewness(d::UnivariateDistribution)`](@ref)
+- [`kurtosis(d::Distribution, ::Bool)`](@ref)
+- [`entropy(d::UnivariateDistribution, ::Real)`](@ref)
 - [`mgf(d::UnivariateDistribution, ::Any)`](@ref)
 - [`cf(d::UnivariateDistribution, ::Any)`](@ref)
 

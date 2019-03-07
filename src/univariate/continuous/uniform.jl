@@ -103,9 +103,8 @@ function cf(d::Uniform, t::Real)
 end
 
 
-#### Evaluation
+#### Sampling
 
-rand(d::Uniform) = rand(GLOBAL_RNG, d)
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 

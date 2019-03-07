@@ -7,7 +7,7 @@ All samplers and distributions provided in this package are organized into a typ
 The root of this type hierarchy is `Sampleable`. The abstract type `Sampleable` subsumes any types of objects from which one can draw samples, which particularly includes *samplers* and *distributions*. Formally, `Sampleable` is defined as
 
 ```julia
-abstract Sampleable{F<:VariateForm,S<:ValueSupport}
+abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 ```
 
 It has two type parameters that define the kind of samples that can be drawn therefrom.
@@ -20,7 +20,7 @@ It has two type parameters that define the kind of samples that can be drawn the
 --- | --- |---
 `Univariate` | a scalar number | A numeric array of arbitrary shape, each element being a sample
 `Multivariate` | a numeric vector | A matrix, each column being a sample
-`Matrixvariate` | a numeric matrix | An array of matrices, each element being a sample matrix  
+`Matrixvariate` | a numeric matrix | An array of matrices, each element being a sample matrix
 
 ### ValueSupport
 
@@ -49,7 +49,7 @@ rand!(::Sampleable, ::AbstractArray)
 We use `Distribution`, a subtype of `Sampleable` as defined below, to capture probabilistic distributions. In addition to being sampleable, a *distribution* typically comes with an explicit way to combine its domain, probability density functions, among many other quantities.
 
 ```julia
-abstract Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
+abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
 ```
 
 To simplify the use in practice, we introduce a series of type alias as follows:

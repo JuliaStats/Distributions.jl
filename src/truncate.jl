@@ -79,17 +79,17 @@ logccdf(d::Truncated, x::T) where {T<:Real} =
 
 ## random number generation
 
-function rand(d::Truncated)
+function _rand!(rng::AbstractRNG, d::Truncated)
     d0 = d.untruncated
     if d.tp > 0.25
         while true
-            r = rand(d0)
+            r = _rand!(rng, d0)
             if d.lower <= r <= d.upper
                 return r
             end
         end
     else
-        return quantile(d0, d.lcdf + rand() * d.tp)
+        return quantile(d0, d.lcdf + rand(rng) * d.tp)
     end
 end
 

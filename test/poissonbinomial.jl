@@ -1,5 +1,5 @@
 using Distributions
-using Compat.Test
+using Test
 
 
 # Test the special base where PoissonBinomial distribution reduces
@@ -14,6 +14,7 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     @test isa(d, PoissonBinomial)
     @test minimum(d) == 0
     @test maximum(d) == n
+    @test extrema(d) == (0, n)
     @test ntrials(d) == n
     @test entropy(d)  ≈ entropy(dref)
     @test median(d)   ≈ median(dref)
@@ -44,9 +45,9 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
 
     n = n₁ + n₂ + n₃
     p = zeros(n)
-    p[1:n₁] = p₁
-    p[n₁+1: n₁ + n₂] = p₂
-    p[n₁ + n₂ + 1:end] = p₃
+    p[1:n₁] .= p₁
+    p[n₁+1: n₁ + n₂] .= p₂
+    p[n₁ + n₂ + 1:end] .= p₃
     d = PoissonBinomial(p)
     println("   testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
     b1 = Binomial(n₁, p₁)

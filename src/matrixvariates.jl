@@ -22,16 +22,57 @@ Return the mean matrix of `d`.
 """
 mean(d::MatrixDistribution)
 
-# sampling
+## sampling
 
-rand!(d::MatrixDistribution, A::AbstractArray{M}) where {M<:Matrix} = _rand!(sampler(d), A)
+# multivariate with pre-allocated 3D array
+function _rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+                m::AbstractArray{<:Real, 3})
+    @boundscheck (size(m, 1), size(m, 2)) == (size(s, 1), size(s, 2)) ||
+        throw(DimensionMismatch("Output size inconsistent with matrix size."))
+    smp = sampler(s)
+    for i in Base.OneTo(size(m,3))
+        _rand!(rng, smp, view(m,:,:,i))
+    end
+    return m
+end
 
-"""
-    rand(d::MatrixDistribution, n)
+# multiple matrix-variates with pre-allocated array of maybe pre-allocated matrices
+rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+      X::AbstractArray{<:AbstractMatrix}) =
+          @inbounds rand!(rng, s, X,
+                          !all([isassigned(X,i) for i in eachindex(X)]) ||
+                          (sz = size(s); !all(size(x) == sz for x in X)))
 
-Draw a sample matrix from the distribution `d`.
-"""
-rand(d::MatrixDistribution, n::Int) = _rand!(sampler(d), Vector{Matrix{eltype(d)}}(n))
+function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+               X::AbstractArray{M}, allocate::Bool) where M <: AbstractMatrix
+    smp = sampler(s)
+    if allocate
+        for i in eachindex(X)
+            X[i] = _rand!(rng, smp, M(undef, size(s)))
+        end
+    else
+        for x in X
+            rand!(rng, smp, x)
+        end
+    end
+    return X
+end
+
+# multiple matrix-variates, must allocate array of arrays
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
+    rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims), true)
+
+# single matrix-variate, must allocate one matrix
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
+    _rand!(rng, s, Matrix{eltype(s)}(undef, size(s)))
+
+# single matrix-variate with pre-allocated matrix
+function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
+               A::AbstractMatrix{<:Real})
+    @boundscheck size(A) == size(s) ||
+        throw(DimensionMismatch("Output size inconsistent with matrix size."))
+    return _rand!(rng, s, A)
+end
 
 # pdf & logpdf
 
@@ -87,12 +128,12 @@ end
 
 function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array{T}(size(X)), d, X)
+    _logpdf!(Array{T}(undef, size(X)), d, X)
 end
 
 function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
     T = promote_type(partype(d), eltype(M))
-    _pdf!(Array{T}(size(X)), d, X)
+    _pdf!(Array{T}(undef, size(X)), d, X)
 end
 
 """

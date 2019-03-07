@@ -79,9 +79,9 @@ end
 Calculate the location vector (as above) and store the result in ``μ``
 """
 function location!(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector) where D<:AbstractMvLogNormal
-  @assert size(S) == (length(m),length(m)) && length(m) == length(μ)
-  assertinsupport(D,m)
-  _location!(D,Val{s},m,S,μ)
+    @assert size(S) == (length(m),length(m)) && length(m) == length(μ)
+    assertinsupport(D,m)
+    _location!(D,Val{s},m,S,μ)
 end
 
 """
@@ -220,14 +220,16 @@ mode(d::MvLogNormal) = exp.(mean(d.normal) - var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
     return m*m'.*(exp.(cov(d.normal)) .- 1)
-  end
+end
 var(d::MvLogNormal) = diag(cov(d))
 
 #see Zografos & Nadarajah (2005) Stat. Prob. Let 71(1) pp71-84 DOI: 10.1016/j.spl.2004.10.023
 entropy(d::MvLogNormal) = length(d)*(1+log2π)/2 + logdetcov(d.normal)/2 + sum(mean(d.normal))
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-_rand!(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = exp!(_rand!(d.normal, x))
+_rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real}) =
+    exp!(_rand!(rng, d.normal, x))
+
 _logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
 _pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d,x) ? _pdf(d.normal, log.(x))/prod(x) : 0.0
 

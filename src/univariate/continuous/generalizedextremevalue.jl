@@ -93,7 +93,7 @@ function mean(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
-        return μ + σ * γ
+        return μ + σ * MathConstants.γ
     elseif ξ < 1
         return μ + σ * (gamma(1 - ξ) - 1) / ξ
     else
@@ -156,7 +156,7 @@ end
 
 function entropy(d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
-    return log(σ) + γ * ξ + (1 + γ)
+    return log(σ) + MathConstants.γ * ξ + (1 + MathConstants.γ)
 end
 
 function quantile(d::GeneralizedExtremeValue, p::Real)
@@ -259,7 +259,6 @@ ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
 
 
 #### Sampling
-rand(d::GeneralizedExtremeValue) = rand(GLOBAL_RNG, d)
 function rand(rng::AbstractRNG, d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
 

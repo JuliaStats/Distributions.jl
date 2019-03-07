@@ -55,6 +55,7 @@ MvNormal
 MvNormalCanon
 MvLogNormal
 Dirichlet
+Product
 ```
 
 ## Addition Methods
@@ -88,7 +89,6 @@ location{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVe
 location!{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,μ::AbstractVector)
 scale{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix)
 scale!{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVector,S::AbstractMatrix,Σ::AbstractMatrix)
-params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix)
 params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix)
 ```
 

@@ -4,7 +4,7 @@
 The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^z)},
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
 \\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
 ```
 
@@ -54,7 +54,7 @@ params(d::Gumbel) = (d.μ, d.θ)
 
 #### Statistics
 
-mean(d::Gumbel) = d.μ + d.θ * γ
+mean(d::Gumbel) = d.μ + d.θ * MathConstants.γ
 
 median(d::Gumbel{T}) where {T<:Real} = d.μ - d.θ * log(T(logtwo))
 
@@ -66,7 +66,7 @@ skewness(d::Gumbel{T}) where {T<:Real} = 12*sqrt(T(6))*zeta(T(3)) / π^3
 
 kurtosis(d::Gumbel{T}) where {T<:Real} = T(12)/5
 
-entropy(d::Gumbel) = log(d.θ) + 1 + γ
+entropy(d::Gumbel) = log(d.θ) + 1 + MathConstants.γ
 
 
 #### Evaluation
@@ -90,9 +90,3 @@ logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
 
 gradlogpdf(d::Gumbel, x::Real) = - (1 + exp((d.μ - x) / d.θ)) / d.θ
-
-
-#### Sampling
-
-rand(d::Gumbel) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Gumbel) = quantile(d, rand(rng))

@@ -60,7 +60,7 @@ function var(d::Multinomial{T}) where T<:Real
     k = length(p)
     n = ntrials(d)
 
-    v = Vector{T}(k)
+    v = Vector{T}(undef, k)
     for i = 1:k
         @inbounds p_i = p[i]
         v[i] = n * p_i * (1 - p_i)
@@ -73,7 +73,7 @@ function cov(d::Multinomial{T}) where T<:Real
     k = length(p)
     n = ntrials(d)
 
-    C = Matrix{T}(k, k)
+    C = Matrix{T}(undef, k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
@@ -152,13 +152,16 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
         @inbounds p_i = p[i]
         s -= R(lgamma(R(xi) + 1))
         s += xlogy(xi, p_i)
-    end    
+    end
     return s
 end
 
 # Sampling
 
-_rand!(d::Multinomial, x::AbstractVector{T}) where {T<:Real} = multinom_rand!(ntrials(d), probs(d), x)
+_rand!(d::Multinomial, x::AbstractVector{T}) where T<:Real =
+    multinom_rand!(ntrials(d), probs(d), x)
+_rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{T}) where T<:Real =
+    multinom_rand!(rng, ntrials(d), probs(d), x)
 
 sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 

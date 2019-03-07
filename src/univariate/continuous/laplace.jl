@@ -107,8 +107,8 @@ end
 
 #### Sampling
 
-rand(d::Laplace) = rand(GLOBAL_RNG, d)
-rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
+rand(rng::AbstractRNG, d::Laplace) =
+    d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
 
 #### Fitting
@@ -116,5 +116,5 @@ rand(rng::AbstractRNG, d::Laplace) = d.μ + d.θ*randexp(rng)*ifelse(rand(rng, B
 function fit_mle(::Type{Laplace}, x::Array)
     xc = copy(x)
     a = median!(xc)
-    Laplace(a, StatsBase.mad!(xc, a))
+    Laplace(a, StatsBase.mad!(xc, center=a))
 end

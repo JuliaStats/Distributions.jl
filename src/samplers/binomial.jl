@@ -1,15 +1,7 @@
 
-struct BinomialRmathSampler <: Sampleable{Univariate,Discrete}
-    n::Int
-    prob::Float64
-end
-
-rand(s::BinomialRmathSampler) = round(Int, StatsFuns.RFunctions.binomrand(s.n, s.prob))
-
-
 # compute probability vector of a Binomial distribution
 function binompvec(n::Int, p::Float64)
-    pv = Vector{Float64}(n+1)
+    pv = Vector{Float64}(undef, n+1)
     if p == 0.0
         fill!(pv, 0.0)
         pv[1] = 1.0
@@ -29,8 +21,8 @@ end
 
 # Geometric method:
 #
-#   Devroye. L. 
-#   "Generating the maximum of independent identically  distributed random variables" 
+#   Devroye. L.
+#   "Generating the maximum of independent identically  distributed random variables"
 #   Computers and Marhemafics with Applicalions 6, 1960, 305-315.
 #
 struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
@@ -52,15 +44,15 @@ function BinomialGeomSampler(n::Int, prob::Float64)
     BinomialGeomSampler(comp, n, scale)
 end
 
-function rand(s::BinomialGeomSampler)
+function rand(rng::AbstractRNG, s::BinomialGeomSampler)
     y = 0
     x = 0
     n = s.n
     while true
-        er = randexp()
+        er = randexp(rng)
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
-            break 
+            break
         end
         y += ceil(Int,v)
         if y > n
@@ -74,9 +66,9 @@ end
 
 # BTPE algorithm from:
 #
-#   Kachitvichyanukul, V.; Schmeiser, B. W. 
-#   "Binomial random variate generation." 
-#   Comm. ACM 31 (1988), no. 2, 216–222. 
+#   Kachitvichyanukul, V.; Schmeiser, B. W.
+#   "Binomial random variate generation."
+#   Comm. ACM 31 (1988), no. 2, 216–222.
 #
 # Note: only use this sampler when n * min(p, 1-p) is large enough
 #       e.g., it is greater than 20.
@@ -101,8 +93,8 @@ struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
     λR::Float64
 end
 
-BinomialTPESampler() = 
-    BinomialTPESampler(false, 0, 0., 0., 0., 0., 0, 
+BinomialTPESampler() =
+    BinomialTPESampler(false, 0, 0., 0., 0., 0., 0,
                        0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
 function BinomialTPESampler(n::Int, prob::Float64)
@@ -134,15 +126,15 @@ function BinomialTPESampler(n::Int, prob::Float64)
     p4 = p3 + c/λR
 
     BinomialTPESampler(comp,n,r,q,nrq,M,Mi,p1,p2,p3,p4,
-                        xM,xL,xR,c,λL,λR)
+                       xM,xL,xR,c,λL,λR)
 end
 
-function rand(s::BinomialTPESampler)
+function rand(rng::AbstractRNG, s::BinomialTPESampler)
     y = 0
     while true
         # Step 1
-        u = s.p4*rand()
-        v = rand()
+        u = s.p4*rand(rng)
+        v = rand(rng)
         if u <= s.p1
             y = floor(Int,s.xM-s.p1*v+u)
             # Goto 6
@@ -239,7 +231,7 @@ end
 
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
-rand(s::BinomialAliasSampler) = rand(s.table) - 1
+rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 
 
 # Integrated Polyalgorithm sampler that automatically chooses the proper one
@@ -268,6 +260,5 @@ end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
-rand(s::BinomialPolySampler) = s.use_btpe ? rand(s.btpe_sampler) : rand(s.geom_sampler)
-
-
+rand(rng::AbstractRNG, s::BinomialPolySampler) =
+    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)

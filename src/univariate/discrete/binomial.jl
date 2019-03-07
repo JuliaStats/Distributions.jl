@@ -67,7 +67,7 @@ mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
 function mode(d::Binomial{T}) where T<:Real
     (n, p) = params(d)
-    n > 0 ? round(Int,(n + 1) * d.prob) : zero(T)
+    n > 0 ? floor(Int, (n + 1) * d.p) : zero(T)
 end
 modes(d::Binomial) = Int[mode(d)]
 
@@ -108,18 +108,31 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
-rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
+function rand(rng::AbstractRNG, d::Binomial)
+    p, n = d.p, d.n
+    if p <= 0.5
+        r = p
+    else
+        r = 1.0-p
+    end
+    if r*n <= 10.0
+        y = rand(rng, BinomialGeomSampler(n,r))
+    else
+        y = rand(rng, BinomialTPESampler(n,r))
+    end
+    p <= 0.5 ? y : n-y
+end
 
-struct RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
     n::Int
-    coef::Float64   # p / (1 - p)
+    coef::T   # p / (1 - p)
 end
 
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1 - d.p))
-nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
+nextpdf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
 
 function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
-    indices(r) == indices(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
+    axes(r) == axes(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
 
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2
@@ -150,8 +163,8 @@ function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRa
     return r
 end
 function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, indices(X))
-    r .= pdf.(d,X)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
+    r .= pdf.(Ref(d),X)
 end
 
 

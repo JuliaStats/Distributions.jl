@@ -1,13 +1,13 @@
-__precompile__(true)
-
 module Distributions
 
-using PDMats
-using StatsFuns
-using StatsBase
-using Compat
-import Compat.MathConstants: γ
+using StatsBase, PDMats, StatsFuns, Statistics
 
+import QuadGK: quadgk
+import Base: size, eltype, length, convert, show, getindex, rand
+import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base.Math: @horner
+
+<<<<<<< HEAD
 import QuadGK.quadgk
 import Compat.view
 import Base.Random
@@ -20,14 +20,26 @@ import Base.Random: GLOBAL_RNG, RangeGenerator, RangeGeneratorInt
 if isdefined(Base, :scale)
     import Base: scale
 end
+=======
+using LinearAlgebra, Printf
 
-import StatsBase: kurtosis, skewness, entropy, mode, modes, fit, kldivergence
-import StatsBase: loglikelihood, dof, span, params, params!
+using Random
+import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+
+import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+>>>>>>> master
+
 import PDMats: dim, PDMat, invquad
 
-importall SpecialFunctions
+using SpecialFunctions
 
 export
+    # re-export Statistics
+    mean, median, quantile, std, var, cov, cor,
+
     # generic types
     VariateForm,
     ValueSupport,
@@ -80,7 +92,6 @@ export
     EdgeworthMean,
     EdgeworthSum,
     EdgeworthZ,
-    EmpiricalUnivariateDistribution,
     Erlang,
     Epanechnikov,
     Exponential,
@@ -90,6 +101,7 @@ export
     FullNormal,
     FullNormalCanon,
     Gamma,
+    DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
@@ -126,12 +138,14 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    Product,
     Poisson,
     PoissonBinomial,
     QQPair,
     Rayleigh,
     Semicircle,
     Skellam,
+    StudentizedRange,
     SymTriangularDist,
     TDist,
     TriangularDist,
@@ -267,7 +281,6 @@ include("genericfit.jl")
 
 # specific samplers and distributions
 include("univariates.jl")
-include("empirical.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
@@ -309,7 +322,7 @@ Supported distributions:
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
-    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
@@ -320,7 +333,7 @@ Supported distributions:
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
