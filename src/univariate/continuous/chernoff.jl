@@ -195,12 +195,12 @@ function quantile(d::Chernoff, tau::Real)
 
     dnorm = Normal(0.0,1.0)
     if tau<0.001 
-        return -newton(tau-x->Fbar(x), f, quantile(dnorm,1.0-tau)*0.52) 
+        return -newton(x -> tau - Fbar(x), f, quantile(dnorm, 1.0-tau)*0.52) 
     end
     if tau>0.999 
-        return newton(x->1.0-tau-Fbar(x), f, quantile(dnorm,tau)*0.52) 
+        return newton(x -> 1.0 - tau - Fbar(x), f, quantile(dnorm, tau)*0.52) 
     end
-    return newton(x->F(x)-tau, f, quantile(dnorm,tau)*0.52)   # should consider replacing x-> construct for speed
+    return newton(x -> F(x) - tau, f, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
 end
 
 minimum(d::Chernoff) = -Inf
