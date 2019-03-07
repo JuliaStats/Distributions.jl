@@ -256,7 +256,7 @@ sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, broadcast(-, x, d.μ))
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, broadcast(-, x, d.μ))
 
-gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ x .- d.μ)
+gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
