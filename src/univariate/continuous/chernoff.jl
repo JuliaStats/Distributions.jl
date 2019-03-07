@@ -1,3 +1,14 @@
+## chernoff.jl
+##
+## The code below is intended to go with the Distributions package of Julia.
+## It was written by Joris Pinkse, joris@psu.edu, on December 12, 2017.  Caveat emptor.
+##
+## It computes pdf, cdf, moments, quantiles, and random numbers for the Chernoff distribution.
+## 
+## Most of the symbols have the same meaning as in the Groeneboom and Wellner paper.
+##
+## Random numbers are drawn using a Ziggurat algorithm.  To obtain draws in the tails, the
+## algorithm reverts to quantiles, which is slow.
 """
     Chernoff()
 
@@ -30,22 +41,9 @@ mode(Chernoff())
 entropy(Chernoff())
 rand(Chernoff())
 rand(rng, Chernoff()
-cdf(Chernoff(),-x)              		#For tail probabilities, use this instead of 1-cdf(Chernoff(),x) 
+cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x) 
 ```
 """
-
-## chernoff.jl
-##
-## The code below is intended to go with the Distributions package of Julia.
-## It was written by Joris Pinkse, joris@psu.edu, on December 12, 2017.  Caveat emptor.
-##
-## It computes pdf, cdf, moments, quantiles, and random numbers for the Chernoff distribution.
-## 
-## Most of the symbols have the same meaning as in the Groeneboom and Wellner paper.
-##
-## Random numbers are drawn using a Ziggurat algorithm.  To obtain draws in the tails, the
-## algorithm reverts to quantiles, which is slow.
-
 struct Chernoff <: ContinuousUnivariateDistribution
 end
 
@@ -151,19 +149,18 @@ function g(x::Real)
         z=2*x+y*y
         return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
     end
-    return (x<=-1.0) ? 
-    cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)]) :
+    return (x <= -1.0) ? cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)]) :
         2*x - (quadgk(gone,0.0,Inf)[1]-4*quadgk(gtwo,0.0,Inf)[1]) / sqrttwopi   # should perhaps combine integrals
 end
 
-f(x::Real)=g(x)*g(-x)*0.5
-F(x::Real)= (x<0.0) ? Fbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
-Fbar(x::Real)= (x<0.0) ? F(x) : quadgk(f,x,Inf)[1]
+global f(x::Real) = g(x)*g(-x)*0.5
+global F(x::Real) = (x<0.0) ? Fbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
+global Fbar(x::Real) = (x<0.0) ? F(x) : quadgk(f,x,Inf)[1]
 
 
-pdf(d::Chernoff, x::Real)=f(x)
-logpdf(d::Chernoff, x::Real)=log(g(x))+log(g(-x))+log(0.5)
-cdf(d::Chernoff,x::Real)=F(x)
+pdf(d::Chernoff, x::Real) = f(x)
+logpdf(d::Chernoff, x::Real) = log(g(x))+log(g(-x))+log(0.5)
+cdf(d::Chernoff, x::Real) = F(x)
 
 function quantile(d::Chernoff, tau::Real)
     # some commonly used quantiles were precomputed
