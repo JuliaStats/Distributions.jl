@@ -111,19 +111,9 @@ function MvNormalCanon(h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPD
     MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
-MvNormalCanon(h::AbstractVector{T}, J::AbstractMatrix{T}) where {T<:Real} = MvNormalCanon(h, PDMat(J))
-MvNormalCanon(h::AbstractVector{T}, prec::AbstractVector{T}) where {T<:Real} = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon(h::AbstractVector{T}, prec::T) where {T<:Real} = MvNormalCanon(h, ScalMat(length(h), prec))
-
-function MvNormalCanon(h::AbstractVector{T}, J::AbstractVecOrMat{S}) where {T<:Real, S<:Real}
-    R = Base.promote_eltype(h, J)
-    MvNormalCanon(convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
-end
-
-function MvNormalCanon(h::AbstractVector{T}, prec::S) where {T<:Real, S<:Real}
-    R = Base.promote_eltype(h, prec)
-    MvNormalCanon(convert(AbstractArray{R}, h), R(prec))
-end
+MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) = MvNormalCanon(h, ScalMat(length(h), prec))
 
 MvNormalCanon(J::AbstractMatrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::AbstractVector) = MvNormalCanon(PDiagMat(prec))
@@ -141,10 +131,10 @@ distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
 ### Conversion
-function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where T<:Real
+function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
-function convert(::Type{MvNormalCanon{T}}, μ::V, h::V, J::AbstractPDMat) where {T<:Real,V<:Union{Vector, ZeroVector}}
+function convert(::Type{MvNormalCanon{T}}, μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractPDMat) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end
 

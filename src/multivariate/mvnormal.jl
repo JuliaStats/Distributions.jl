@@ -193,20 +193,17 @@ function MvNormal(Σ::Cov) where {T, Cov<:AbstractPDMat{T}}
     MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
 end
 
-MvNormal(μ::AbstractVector{T}, Σ::Matrix{T}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::AbstractVector{T}, Σ::Union{Symmetric{T}, Hermitian{T}}) where {T<:Real} = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::AbstractVector{T}, Σ::Diagonal{T}) where {T<:Real} = MvNormal(μ, PDiagMat(diag(Σ)))
-MvNormal(μ::AbstractVector{T}, σ::Vector{T}) where {T<:Real} = MvNormal(μ, PDiagMat(abs2.(σ)))
-MvNormal(μ::AbstractVector{T}, σ::T) where {T<:Real} = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(diag(Σ)))
+MvNormal(μ::AbstractVector{<:Real}, σ::Vector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
+MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
 function MvNormal(μ::AbstractVector{<:Real}, Σ::VecOrMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
-function MvNormal(μ::AbstractVector{<:Real}, σ::Real)
-    R = Base.promote_eltype(μ, σ)
-    MvNormal(convert(AbstractArray{R}, μ), R(σ))
-end
+
 function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
     R = Base.promote_eltype(μ, σ.λ)
     MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
