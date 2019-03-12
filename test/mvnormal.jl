@@ -36,7 +36,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
         subX = view(rand(rng, d, 2d), :, 1:d)
         @test isa(rand!(rng, g, subX), SubArray)
     end
-    
+
     # sampling
     if ismissing(rng)
         @test isa(rand(g), Vector{Float64})
@@ -44,7 +44,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     else
         @test isa(rand(rng, g), Vector{Float64})
         X = rand(rng, g, n_tsamples)
-    end        
+    end
     emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
@@ -89,96 +89,102 @@ end
 
 ###### General Testing
 
-mu = [1., 2., 3.]
-va = [1.2, 3.4, 2.6]
-C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+@testset "MvNormal tests" begin
+    mu = [1., 2., 3.]
+    mu_r = 1.:3.
+    va = [1.2, 3.4, 2.6]
+    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-h = [1., 2., 3.]
-dv = [1.2, 3.4, 2.6]
-J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    h = [1., 2., 3.]
+    dv = [1.2, 3.4, 2.6]
+    J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
-@testset "Testing MvNormal with $key" for (key, rng) in
-    Dict("rand(...)" => missing,
-         "rand(rng, ...)" => MersenneTwister(123))
-    
-    @testset "Testing MvNormal with $key for $(distrname(g))" for (T, g, μ, Σ) in [
-    (IsoNormal, MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
-    (ZeroMeanIsoNormal, MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
-    (DiagNormal, MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
-    (ZeroMeanDiagNormal, MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
-    (FullNormal, MvNormal(mu, C), mu, C),
-    (ZeroMeanFullNormal, MvNormal(C), zeros(3), C),
-    (IsoNormalCanon, MvNormalCanon(h, 2.0), h / 2.0, Matrix(0.5I, 3, 3)),
-    (ZeroMeanIsoNormalCanon, MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
-    (DiagNormalCanon, MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
-    (ZeroMeanDiagNormalCanon, MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
-    (FullNormalCanon, MvNormalCanon(h, J), J \ h, inv(J)),
-    (ZeroMeanFullNormalCanon, MvNormalCanon(J), zeros(3), inv(J)),
-    (FullNormal, MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
-    (DiagNormal, MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))) ]
+    for (g, μ, Σ) in [
+        (MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
+        (MvNormal(mu_r, sqrt(2.0)), mu_r, Matrix(2.0I, 3, 3)),
+        (MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
+        (MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
+        (MvNormal(mu_r, sqrt.(va)), mu_r, Matrix(Diagonal(va))),
+        (MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
+        (MvNormal(mu, C), mu, C),
+        (MvNormal(mu_r, C), mu_r, C),
+        (MvNormal(C), zeros(3), C),
+        (MvNormalCanon(h, 2.0), h ./ 2.0, Matrix(0.5I, 3, 3)),
+        (MvNormalCanon(mu_r, 2.0), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
+        (MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
+        (MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+        (MvNormalCanon(mu_r, dv), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
+        (MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
+        (MvNormalCanon(h, J), J \ h, inv(J)),
+        (MvNormalCanon(J), zeros(3), inv(J)),
+        (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
+        (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
+        (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
+        (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))) ]
 
-    @test isa(g, T)
-    @test mean(g)   ≈ μ
-    @test cov(g)    ≈ Σ
-    @test invcov(g) ≈ inv(Σ)
-    test_mvnormal(g, 10^4, rng)
+        @test mean(g)   ≈ μ
+        @test cov(g)    ≈ Σ
+        @test invcov(g) ≈ inv(Σ)
+        test_mvnormal(g, 10^4)
 
-    # conversion between mean form and canonical form
-    if isa(g, MvNormal)
-        gc = canonform(g)
-        @test isa(gc, MvNormalCanon)
-        @test length(gc) == length(g)
-        @test mean(gc) ≈ mean(g)
-        @test cov(gc)  ≈ cov(g)
-    else
-        @assert isa(g, MvNormalCanon)
-        gc = meanform(g)
-        @test isa(gc, MvNormal)
-        @test length(gc) == length(g)
-        @test mean(gc) ≈ mean(g)
-        @test cov(gc)  ≈ cov(g)
+        # conversion between mean form and canonical form
+        if isa(g, MvNormal)
+            gc = canonform(g)
+            @test isa(gc, MvNormalCanon)
+            @test length(gc) == length(g)
+            @test mean(gc) ≈ mean(g)
+            @test cov(gc)  ≈ cov(g)
+        else
+            @assert isa(g, MvNormalCanon)
+            gc = meanform(g)
+            @test isa(gc, MvNormal)
+            @test length(gc) == length(g)
+            @test mean(gc) ≈ mean(g)
+            @test cov(gc)  ≈ cov(g)
+        end
     end
 end
+
+@testset "MvNormal constructor" begin
+    mu = [1., 2., 3.]
+    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    J = inv(C)
+    h = J \ mu
+    @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
+
+    @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
+    @test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
+    @test typeof(MvNormalCanon(h, 2.0f0)) == typeof(MvNormalCanon(h, 2.0))
+
+    @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+
+    d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
+    @test typeof(convert(MvNormal{Float64}, d)) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(convert(MvNormal{Float64}, d.μ, d.Σ)) == typeof(MvNormal(mu, PDMat(C)))
+
+    d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
+    @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+
+    @test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
+    @test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
+    @test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
 end
 
-##### Constructors and conversions
-mu = [1., 2., 3.]
-C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
-J = inv(C)
-h = J \ mu
-@test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
-@test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
-@test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
-
-@test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
-@test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
-@test typeof(MvNormalCanon(h, 2.0f0)) == typeof(MvNormalCanon(h, 2.0))
-
-@test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
-
-d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
-@test typeof(convert(MvNormal{Float64}, d)) == typeof(MvNormal(mu, PDMat(C)))
-@test typeof(convert(MvNormal{Float64}, d.μ, d.Σ)) == typeof(MvNormal(mu, PDMat(C)))
-
-d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
-@test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
-@test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
-
-@test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
-@test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
-@test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
 ##### MLE
 
 # a slow but safe way to implement MLE for verification
 
-function _gauss_mle(x::Matrix{Float64})
+function _gauss_mle(x::AbstractMatrix{<:Real})
     mu = vec(mean(x, dims=2))
     z = x .- mu
     C = (z * z') * (1/size(x,2))
     return mu, C
 end
 
-function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
+function _gauss_mle(x::AbstractMatrix{<:Real}, w::AbstractVector{<:Real})
     sw = sum(w)
     mu = (x * w) * (1/sw)
     z = x .- mu
@@ -187,44 +193,44 @@ function _gauss_mle(x::Matrix{Float64}, w::Vector{Float64})
     return mu, C
 end
 
-@testset "Testing fit_mle" begin
-x = randn(3, 200) .+ randn(3) * 2.
-w = rand(200)
-u, C = _gauss_mle(x)
-uw, Cw = _gauss_mle(x, w)
+@testset "MvNormal MLE" begin
+    x = randn(3, 200) .+ randn(3) * 2.
+    w = rand(200)
+    u, C = _gauss_mle(x)
+    uw, Cw = _gauss_mle(x, w)
 
-g = fit_mle(MvNormal, suffstats(MvNormal, x))
-@test isa(g, FullNormal)
-@test mean(g) ≈ u
-@test cov(g)  ≈ C
+    g = fit_mle(MvNormal, suffstats(MvNormal, x))
+    @test isa(g, FullNormal)
+    @test mean(g) ≈ u
+    @test cov(g)  ≈ C
 
-g = fit_mle(MvNormal, x)
-@test isa(g, FullNormal)
-@test mean(g) ≈ u
-@test cov(g)  ≈ C
+    g = fit_mle(MvNormal, x)
+    @test isa(g, FullNormal)
+    @test mean(g) ≈ u
+    @test cov(g)  ≈ C
 
-g = fit_mle(MvNormal, x, w)
-@test isa(g, FullNormal)
-@test mean(g) ≈ uw
-@test cov(g)  ≈ Cw
+    g = fit_mle(MvNormal, x, w)
+    @test isa(g, FullNormal)
+    @test mean(g) ≈ uw
+    @test cov(g)  ≈ Cw
 
-g = fit_mle(IsoNormal, x)
-@test isa(g, IsoNormal)
-@test g.μ       ≈ u
-@test g.Σ.value ≈ mean(diag(C))
+    g = fit_mle(IsoNormal, x)
+    @test isa(g, IsoNormal)
+    @test g.μ       ≈ u
+    @test g.Σ.value ≈ mean(diag(C))
 
-g = fit_mle(IsoNormal, x, w)
-@test isa(g, IsoNormal)
-@test g.μ       ≈ uw
-@test g.Σ.value ≈ mean(diag(Cw))
+    g = fit_mle(IsoNormal, x, w)
+    @test isa(g, IsoNormal)
+    @test g.μ       ≈ uw
+    @test g.Σ.value ≈ mean(diag(Cw))
 
-g = fit_mle(DiagNormal, x)
-@test isa(g, DiagNormal)
-@test g.μ      ≈ u
-@test g.Σ.diag ≈ diag(C)
+    g = fit_mle(DiagNormal, x)
+    @test isa(g, DiagNormal)
+    @test g.μ      ≈ u
+    @test g.Σ.diag ≈ diag(C)
 
-g = fit_mle(DiagNormal, x, w)
-@test isa(g, DiagNormal)
-@test g.μ      ≈ uw
-@test g.Σ.diag ≈ diag(Cw)
+    g = fit_mle(DiagNormal, x, w)
+    @test isa(g, DiagNormal)
+    @test g.μ      ≈ uw
+    @test g.Σ.diag ≈ diag(Cw)
 end

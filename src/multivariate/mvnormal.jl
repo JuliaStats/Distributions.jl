@@ -34,7 +34,8 @@ modes(d::AbstractMvNormal) = [mean(d)]
 
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
-    (length(d) * (typeof(ldcd)(log2π) + 1) + ldcd)/2
+    T = typeof(ldcd)
+    (length(d) * (T(log2π) + one(T)) + ldcd)/2
 end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
@@ -170,7 +171,7 @@ const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
 - [Multivariate normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Multivariate_normal_distribution)
 
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:Union{Vector, ZeroVector}} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -186,12 +187,12 @@ const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Ze
 const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
 
 ### Construction
-function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::AbstractPDMat{T}) where T<:Real
+function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-function MvNormal(μ::Union{Vector{T}, ZeroVector{T}}, Σ::Cov) where {T<:Real, Cov<:AbstractPDMat}
+function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
@@ -218,7 +219,7 @@ end
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
-function convert(::Type{MvNormal{T}}, μ::Union{Vector, ZeroVector}, Σ::AbstractPDMat) where T<:Real
+function convert(::Type{MvNormal{T}}, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
 
@@ -250,12 +251,12 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, broadcast(-, x, d.μ))
+sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, broadcast(-, x, d.μ))
+    invquad!(r, d.Σ, x .- d.μ)
 
-gradlogpdf(d::MvNormal, x::Vector) = -(d.Σ \ broadcast(-, x, d.μ))
+gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
@@ -319,7 +320,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,dims=2)), 1.0 / size(x,2))
+    μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
     MvNormal(μ, g.Σ)
 end
 
@@ -389,7 +390,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, dims=2))
     z = x .- mu
-    C = BLAS.syrk('U', 'N', 1.0/n, z)
+    C = BLAS.syrk('U', 'N', inv(n), z)
     LinearAlgebra.copytri!(C, 'U')
     MvNormal(mu, PDMat(C))
 end
@@ -399,7 +400,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
-    inv_sw = 1.0 / sum(w)
+    inv_sw = inv(sum(w))
     mu = BLAS.gemv('N', inv_sw, x, w)
 
     z = Matrix{Float64}(undef, m, n)
@@ -434,7 +435,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArr
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
 
-    inv_sw = 1.0 / sum(w)
+    inv_sw = inv(sum(w))
     mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = zeros(Float64, m)

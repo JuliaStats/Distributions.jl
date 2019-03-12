@@ -63,7 +63,7 @@ Construct a multivariate normal distribution of dimension `d`, with zero mean an
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
-struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -80,17 +80,21 @@ const ZeroMeanIsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},ZeroVecto
 
 ### Constructors
 
-function MvNormalCanon(μ::Vector{T}, h::Vector{T}, J::AbstractPDMat{T}) where T<:Real
+function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractPDMat{T}) where T<:Real
     length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
-    MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
+    if typeof(μ) == typeof(h)
+        return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
+    else
+        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J) 
+    end
 end
 
-function MvNormalCanon(μ::Vector{T}, h::Vector{T}, J::P) where {T<:Real, P<:AbstractPDMat}
+function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPDMat}
     R = promote_type(T, eltype(J))
     MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-function MvNormalCanon(μ::Vector{T}, h::Vector{S}, J::P) where {T<:Real, S<:Real, P<:AbstractPDMat}
+function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{S}, J::P) where {T<:Real, S<:Real, P<:AbstractPDMat}
     R = Base.promote_eltype(μ, h, J)
     MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
@@ -100,28 +104,19 @@ function MvNormalCanon(J::P) where P<:AbstractPDMat
     MvNormalCanon{eltype(J),P,ZeroVector{eltype(J)}}(z, z, J)
 end
 
-function MvNormalCanon(h::Vector{T}, J::P) where {T<:Real, P<:AbstractPDMat}
+function MvNormalCanon(h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPDMat}
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     R = Base.promote_eltype(h, J)
-    hh, JJ = convert(AbstractArray{R}, h), convert(AbstractArray{R}, J)
+    hh, JJ = collect(convert(AbstractArray{R}, h)), convert(AbstractArray{R}, J)
     MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
-MvNormalCanon(h::Vector{T}, J::Matrix{T}) where {T<:Real} = MvNormalCanon(h, PDMat(J))
-MvNormalCanon(h::Vector{T}, prec::Vector{T}) where {T<:Real} = MvNormalCanon(h, PDiagMat(prec))
-MvNormalCanon(h::Vector{T}, prec::T) where {T<:Real} = MvNormalCanon(h, ScalMat(length(h), prec))
+MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
+MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) = MvNormalCanon(h, PDiagMat(prec))
+MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) = MvNormalCanon(h, ScalMat(length(h), prec))
 
-function MvNormalCanon(h::Vector{T}, J::VecOrMat{S}) where {T<:Real, S<:Real}
-    R = Base.promote_eltype(h, J)
-    MvNormalCanon(convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
-end
-function MvNormalCanon(h::Vector{T}, prec::S) where {T<:Real, S<:Real}
-    R = Base.promote_eltype(h, prec)
-    MvNormalCanon(convert(AbstractArray{R}, h), R(prec))
-end
-
-MvNormalCanon(J::Matrix) = MvNormalCanon(PDMat(J))
-MvNormalCanon(prec::Vector) = MvNormalCanon(PDiagMat(prec))
+MvNormalCanon(J::AbstractMatrix) = MvNormalCanon(PDMat(J))
+MvNormalCanon(prec::AbstractVector) = MvNormalCanon(PDiagMat(prec))
 MvNormalCanon(d::Int, prec) = MvNormalCanon(ScalMat(d, prec))
 
 
@@ -136,10 +131,10 @@ distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
 ### Conversion
-function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where T<:Real
+function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
-function convert(::Type{MvNormalCanon{T}}, μ::V, h::V, J::AbstractPDMat) where {T<:Real,V<:Union{Vector, ZeroVector}}
+function convert(::Type{MvNormalCanon{T}}, μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractPDMat) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end
 
@@ -149,7 +144,10 @@ meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))
 # meanform{C, T<:Real}(d::MvNormalCanon{T,C,Vector{T}}) = MvNormal(d.μ, inv(d.J))
 # meanform{C, T<:Real}(d::MvNormalCanon{T,C,ZeroVector{T}}) = MvNormal(inv(d.J))
 
-canonform(d::MvNormal{T,C,Vector{T}}) where {C, T<:Real} = (J = inv(d.Σ); MvNormalCanon(d.μ, J * d.μ, J))
+function canonform(d::MvNormal{T,C,<:AbstractVector{T}}) where {C, T<:Real}
+    J = inv(d.Σ)
+    return MvNormalCanon(d.μ, J * collect(d.μ), J)
+end
 canonform(d::MvNormal{T,C,ZeroVector{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ))
 
 ### Basic statistics
