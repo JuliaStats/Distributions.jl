@@ -135,7 +135,7 @@ function MixtureModel(components::Vector{C}, prior::Categorical) where C<:Distri
     MixtureModel{VF,VS,C}(components, prior)
 end
 
-MixtureModel(components::Vector{C}, p::Vector{T}) where {C<:Distribution,T<:Real} =
+MixtureModel(components::Vector{C}, p::VT) where {C<:Distribution,VT<:AbstractVector{<:Real}} =
     MixtureModel(components, Categorical(p))
 
 _construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
