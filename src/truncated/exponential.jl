@@ -4,6 +4,16 @@
 
 function mean(d::Truncated{<:Exponential,Continuous})
     θ = d.untruncated.θ
-    I(y) = y < Inf ? (y + θ)*exp(-y/θ) : zero(y) # integral expression
-    (I(minimum(d)) - I(maximum(d))) / (d.ucdf - d.lcdf)
+    l, r = extrema(d)           # l is always finite
+    if isfinite(r)
+        if l == r
+            r
+        else
+            Δ = r - l
+            R = -Δ/θ
+            θ + middle(l, r) + Δ/2*(exp(R)+1)/expm1(R)
+        end
+    else
+        θ + l
+    end
 end

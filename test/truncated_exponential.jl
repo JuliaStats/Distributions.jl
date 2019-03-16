@@ -9,4 +9,8 @@ using Distributions, Random, Test
     # test values below calculated using symbolic integration in Maxima
     @test mean(Truncated(d, 0, r)) ≈ 0.9653092084094841
     @test mean(Truncated(d, l, r)) ≈ 1.82703493969601
+
+    # all the fun corner cases and numerical quirks
+    @test mean(Truncated(Exponential(1.0), -Inf, 0+eps())) ≈ 0    # degenerate
+    @test mean(Truncated(Exponential(1.0), 1.0, 1.0+eps())) ≈ 1.0 # near-degenerate
 end
