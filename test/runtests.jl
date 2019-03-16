@@ -36,6 +36,7 @@ tests = [
     "qq",
     "product",
     "truncnormal",
+    "truncated_exponential",
     "discretenonparametric",
     "functionals"
 ]

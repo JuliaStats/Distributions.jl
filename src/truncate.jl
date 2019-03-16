@@ -112,3 +112,4 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 ### specialized truncated distributions
 
 include(joinpath("truncated", "normal.jl"))
+include(joinpath("truncated", "exponential.jl"))
