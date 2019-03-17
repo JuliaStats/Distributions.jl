@@ -1,17 +1,17 @@
 # Univariate Gaussian Mixture Models
 
-struct UnivariateGMM <: UnivariateMixture{Continuous,Normal}
+struct UnivariateGMM{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: UnivariateMixture{Continuous,Normal}
     K::Int
-    means::Vector{Float64}
-    stds::Vector{Float64}
+    means::VT1
+    stds::VT2
     prior::Categorical
 
-    function UnivariateGMM(ms::Vector{Float64}, ss::Vector{Float64}, pri::Categorical)
+    function UnivariateGMM(ms::VT1, ss::VT2, pri::Categorical) where {VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}}
         K = length(ms)
         length(ss) == K || throw(DimensionMismatch())
         ncategories(pri) == K ||
             error("The number of categories in pri should be equal to the number of components.")
-        new(K, ms, ss, pri)
+        new{VT1,VT2}(K, ms, ss, pri)
     end
 end
 
@@ -25,14 +25,16 @@ probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
+rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
+
 rand(rng::AbstractRNG, d::UnivariateGMM) =
     (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-struct UnivariateGMMSampler <: Sampleable{Univariate,Continuous}
-    means::Vector{Float64}
-    stds::Vector{Float64}
+struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
+    means::VT1
+    stds::VT2
     psampler::AliasTable
 end
 
