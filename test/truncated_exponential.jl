@@ -11,6 +11,8 @@ using Distributions, Random, Test
     @test mean(Truncated(d, l, r)) ≈ 1.82703493969601
 
     # all the fun corner cases and numerical quirks
-    @test mean(Truncated(Exponential(1.0), -Inf, 0+eps())) ≈ 0    # degenerate
+    @test mean(Truncated(Exponential(1.0), -Inf, 0)) == 0                   # degenerate
+    @test mean(Truncated(Exponential(1.0), -Inf, 0+eps())) ≈ 0 atol = eps() # near-degenerate
     @test mean(Truncated(Exponential(1.0), 1.0, 1.0+eps())) ≈ 1.0 # near-degenerate
+    @test mean(Truncated(Exponential(1e308), 1.0, 1.0+eps())) ≈ 1.0 # near-degenerate
 end
