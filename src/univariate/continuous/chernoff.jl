@@ -125,9 +125,9 @@ azp=[
     -1.156609849116565
     ]
 
-cuberoottwo = cbrt(2.0)
-sqrthalfpi = sqrt(0.5*pi)
-sqrttwopi = sqrt(2.0*pi)
+const cuberoottwo = cbrt(2.0)
+const sqrthalfpi = sqrt(0.5*pi)
+const sqrttwopi = sqrt(2.0*pi)
 
 function p(y::Real)
     if iszero(y)
@@ -137,8 +137,11 @@ function p(y::Real)
     (y>0) || throw(DomainError(y, "y must be positive"))
     
     cnsty = y^(-1.5)
-    return (y<=1.0) ? sum([(b[k]*cnsty-a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi :
-                      sum([exp(cuberoottwo*az[k]*y) for k=1:length(az)]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
+    if (y<=1.0)
+        return sum([(b[k]*cnsty-a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
+    else
+        return sum([exp(cuberoottwo*az[k]*y) for k=1:length(az)]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
+    end
 end
 
 function g(x::Real)
