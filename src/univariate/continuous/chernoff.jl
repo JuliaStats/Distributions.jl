@@ -52,7 +52,7 @@ end
 # The array az contains roots of the airyai functions (atilde in the paper).
 # Finally azp contains contains airyaiprime evaluated at the corresponding atildes
 
-a=[
+const a=[
      0.14583333333333334
     -0.0014105902777777765
     -2.045269786155239e-5
@@ -70,7 +70,7 @@ a=[
      1.0102911018761945e-26
     -9.976759882474874e-29
     ]
-b=[
+const b=[
      0.6666666666666666
      0.021164021164021163
     -0.0007893341226674574
@@ -88,7 +88,7 @@ b=[
      8.543413293195206e-26
     -5.05879944592705e-28
     ]
-az=[
+const az=[
     -2.338107410459767
     -4.08794944413097
     -5.520559828095551
@@ -106,7 +106,7 @@ az=[
     -16.90563399742994
     -17.66130010569706
     ]
-azp=[
+const azp=[
      0.7012108227206906
     -0.8031113696548534
      0.865204025894141
@@ -140,7 +140,7 @@ function p(y::Real)
     if (y<=1.0)
         return sum([(b[k]*cnsty-a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
     else
-        return sum([exp(cuberoottwo*az[k]*y) for k=1:length(az)]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
+        return sum([exp(cuberoottwo*a*y) for a in az)]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
     end
 end
 
@@ -152,8 +152,11 @@ function g(x::Real)
         z=2*x+y*y
         return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
     end
-    return (x <= -1.0) ? cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)]) :
-        2*x - (quadgk(gone,0.0,Inf)[1]-4*quadgk(gtwo,0.0,Inf)[1]) / sqrttwopi   # should perhaps combine integrals
+    if (x <= -1.0)
+        return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)])
+    else
+        return 2*x - (quadgk(gone,0.0,Inf)[1]-4*quadgk(gtwo,0.0,Inf)[1]) / sqrttwopi   # should perhaps combine integrals
+    end
 end
 
 global f(x::Real) = g(x)*g(-x)*0.5
