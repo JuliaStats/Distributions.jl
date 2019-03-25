@@ -6,7 +6,7 @@ This package provides methods to fit a distribution to a given set of samples. G
 d = fit(D, x)
 ```
 
-This statement fits a distribution of type `D` to a given dataset `x`, where `x` should be an array comprised of all samples. The fit function will choose a reasonable way to fit the distribution, which, in most cases, is [maximum likelihood estimation] (http://en.wikipedia.org/wiki/Maximum_likelihood).
+This statement fits a distribution of type `D` to a given dataset `x`, where `x` should be an array comprised of all samples. The fit function will choose a reasonable way to fit the distribution, which, in most cases, is [maximum likelihood estimation](http://en.wikipedia.org/wiki/Maximum_likelihood).
 
 
 ## Maximum Likelihood Estimation
