@@ -80,17 +80,11 @@ scale(d::LogitNormal) = d.σ
 # varlogitx(d::LogitNormal) = abs2(d.σ)
 # stdlogitx(d::LogitNormal) = d.σ
 
-mean(d::LogitNormal) = error(
-    "not implemented yet: no analytical solution of mean for LogitNormal") 
-    #lognormal: ((μ, σ) = params(d); exp(μ + σ^2/2))
+mean(d::LogitNormal;kwargs...) = estimateMean(d,kwargs...)
 median(d::LogitNormal) = logistic(d.μ)
 mode(d::LogitNormal) = error(
     "not implemented yet: no analytical solution of mode for LogitNormal") 
-
-function var(d::LogitNormal)
-    error(
-        "not implemented yet: no analytical solution of variance for LogitNormal") 
-end
+var(d::LogitNormal;kwargs...) = estimateVariance(d)
 
 function skewness(d::LogitNormal)
     error(

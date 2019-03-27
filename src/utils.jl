@@ -140,3 +140,47 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
+
+"""
+compute mean over a function(uniformly distributed probabilities)
+    
+used to estimate moments of logitnorm
+"""
+function meanFunOfProb(d::ContinuousUnivariateDistribution;relPrec = 1e-4, maxCnt=2^18, fun=(d,p)->quantile.(d,p) )
+    δ = 1/32 # start with 31 points (32 intervals between 0 and 1)
+    p = δ:δ:(1-δ)
+    s = sum(fun.(d,p))
+    cnt = length(p)
+    m = s/cnt
+    relErr = 1
+    while cnt < maxCnt
+        mPrev = m
+        δ  = δ / 2
+        p = δ:δ*2:(1-δ) # points at the center of current intervals
+        s += sum(fun.(d,p))
+        cnt += length(p)
+        m = s/cnt
+        relErr = abs(m - mPrev)/m 
+        #println("cnt=$cnt, m=$m, mPrev=$mPrev, relErr=$relErr")
+        #if the estimate did not change much, can return
+        relErr <= relPrec && break
+    end
+    relErr > relPrec && @warn "Returning meanFunOfProb results of low relative precision of $relErr"
+    m
+end
+
+# estimate the mean by numerical integration over uniform percentiles
+estimateMean(d::ContinuousUnivariateDistribution;kwargs...) = 
+  meanFunOfProb(d;kwargs...,fun=(d,p)->quantile.(d,p))
+
+# esimtate variance by numerical integration over uniform percentiles
+function estimateVariance(d::ContinuousUnivariateDistribution; mean=missing, kwargs...)
+    if ismissing(mean) 
+        mean = estimateMean(d;kwargs...)
+    end
+    function squaredDiff(d,p)
+        t = quantile(d, p) - mean
+        t*t
+    end
+    meanFunOfProb(d;kwargs...,fun=squaredDiff)
+end

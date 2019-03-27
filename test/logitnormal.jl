@@ -12,18 +12,17 @@ end
 function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
                           rng::Union{AbstractRNG, Missing} = missing)
     d = length(g)
-    #mn = mean(g)
+    mn = mean(g)
     md = median(g)
     #mo = mode(g)
-    #s = var(g)
+    s = var(g)
     #e = entropy(g)
     @test partype(g) == Float64
-    #@test isa(mn, Float64)
+    @test isa(mn, Float64)
     @test isa(md, Float64)
     #@test isa(mo, Float64)
-    #@test isa(s, Float64)
+    @test isa(s, Float64)
     @test md         ≈ logistic.(g.μ)
-    #@test mn         ≈ exp.(mean(g.normal) + var(g.normal)/2)
     #@test mo         ≈ exp.(mean(g.normal) - var(g.normal))
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
      @test insupport(g,1e-8)
@@ -68,3 +67,14 @@ end
     typeof(rand(d, 5)) # still Float64
     @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
 end
+
+###### numerical estimation of moments
+@testset "Logitnormal numerical moments" begin
+    DN = LogitNormal(1.3)
+    x = rand(DN, 1_000_000);
+    m = mean(DN)
+    @test abs(m - mean(x))/m <= 1e-3
+    s2 = var(DN)
+    @test abs(s2 - var(x))/s2 <= 1e-2 #1e-4 too strong for random numbers
+end
+
