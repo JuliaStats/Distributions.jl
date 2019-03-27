@@ -104,6 +104,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogitNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
