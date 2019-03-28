@@ -14,16 +14,15 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     d = length(g)
     mn = mean(g)
     md = median(g)
-    #mo = mode(g)
+    mo = mode(g)
     s = var(g)
     #e = entropy(g)
     @test partype(g) == Float64
     @test isa(mn, Float64)
     @test isa(md, Float64)
-    #@test isa(mo, Float64)
+    @test isa(mo, Float64)
     @test isa(s, Float64)
-    @test md         ≈ logistic(g.μ)
-    #@test mo         ≈ exp.(mean(g.normal) - var(g.normal))
+    @test md ≈ logistic(g.μ)
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
      @test insupport(g,1e-8)
      # corner cases of 0 and 1 handled as in support
@@ -78,5 +77,28 @@ end
     @test abs(s2 - var(x))/var(x) <= 1e-2 #1e-4 too strong for random numbers
     s2m = var(DN; mean=m) # specify so that not need to recompute
     @test abs(s2m - var(x))/var(x) <= 1e-2 #1e-4 too strong for random numbers
+    sd = std(DN) # specify so that not need to recompute
+    @test abs(sd - std(x))/std(x) <= 1e-2 #1e-4 too strong for random numbers
+    # sd2 = std(DN, mean=m) # specify so that not need to recompute
+    # @test abs(sd2 - std(x))/std(x) <= 1e-2 #1e-4 too strong for random numbers
+end
+
+function test_lognormal_mode(g)
+    mo = mode(g)
+    @test pdf(g, mo-1e-6) < pdf(g,mo) && pdf(g, mo+1e-6) < pdf(g,mo)
+end
+
+###### numerical estimation of moments
+@testset "Logitnormal seek mode" begin
+    #plot(g); vline!([mode(g)])
+    # median
+    g = LogitNormal(); test_lognormal_mode(g)
+    g = LogitNormal(0,1.4); test_lognormal_mode(g) 
+    # larger one of two modes
+    g = LogitNormal(0,1.6); test_lognormal_mode(g)
+    # two modes, larger is on the right
+    g = LogitNormal(0.1,1.6); test_lognormal_mode(g)
+    # two modes, larger is on the left
+    g = LogitNormal(-0.1,1.6); test_lognormal_mode(g)
 end
 
