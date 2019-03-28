@@ -184,15 +184,13 @@ end
 
 # estimate the mean by numerical integration over uniform percentiles
 estimateMean(d::ContinuousUnivariateDistribution;kwargs...) = 
-  meanFunOfProb(d;kwargs...,fun=(d,p)->quantile.(d,p))
+  meanFunOfProb(d;kwargs...,fun=(d,p)->quantile(d,p))
 
-# esimtate variance by numerical integration over uniform percentiles
+# estimate variance by numerical integration over uniform percentiles
 function estimateVariance(d::ContinuousUnivariateDistribution; mean=missing, kwargs...)
-    if ismissing(mean) 
-        mean = Distributions.mean(d)
-    end
+    m = ismissing(mean) ? Distributions.mean(d) : mean
     function squaredDiff(d,p)
-        t = quantile(d, p) - mean
+        t = quantile(d, p) - m
         t*t
     end
     meanFunOfProb(d;kwargs...,fun=squaredDiff)

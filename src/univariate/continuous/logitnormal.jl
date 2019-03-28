@@ -85,12 +85,11 @@ median(d::LogitNormal) = logistic(d.μ)
 mode(d::LogitNormal) = error(
     "not implemented yet: no analytical solution of mode for LogitNormal") 
 function var(d::LogitNormal; kwargs...) 
-    #return(estimateVariance(d;kwargs...))
     knames = (p.first for p in kwargs)
     if Base.in(:mean, knames)
         return estimateVariance(d;kwargs...)
     else
-        # var does not pass kwargs to mean, so need to do it explicitly
+        # estimateVariance does not pass kwargs to mean, need to do it here
         m = estimateMean(d,kwargs...)
         return estimateVariance(d;kwargs...,mean=m)
     end
