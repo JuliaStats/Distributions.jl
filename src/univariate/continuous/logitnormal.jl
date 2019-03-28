@@ -84,15 +84,10 @@ mean(d::LogitNormal; kwargs...) = estimateMean(d,kwargs...)
 median(d::LogitNormal) = logistic(d.μ)
 mode(d::LogitNormal) = error(
     "not implemented yet: no analytical solution of mode for LogitNormal") 
-function var(d::LogitNormal; kwargs...) 
-    knames = (p.first for p in kwargs)
-    if Base.in(:mean, knames)
-        return estimateVariance(d;kwargs...)
-    else
-        # estimateVariance does not pass kwargs to mean, need to do it here
-        m = estimateMean(d,kwargs...)
-        return estimateVariance(d;kwargs...,mean=m)
-    end
+function var(d::LogitNormal; mean=missing, kwargs...) 
+    # estimateVariance does not pass kwargs to mean, need to do it here
+    m = ismissing(mean) ? estimateMean(d,kwargs...) : mean
+    estimateVariance(d; kwargs..., mean=m)
 end
 
 function skewness(d::LogitNormal)

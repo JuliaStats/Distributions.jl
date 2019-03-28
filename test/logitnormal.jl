@@ -6,13 +6,6 @@ using StatsFuns
 
 
 function tmpF()
-    function f1(;kwargs...)
-        knames = (p.first for p in kwargs)
-        if Base.in(:a, knames)
-            return true
-        end
-    end
-    f1(a=5,b=6)
 end
 
 ####### Core testing procedure
