@@ -6,6 +6,13 @@ using StatsFuns
 
 
 function tmpF()
+    function f1(;kwargs...)
+        knames = (p.first for p in kwargs)
+        if Base.in(:a, knames)
+            return true
+        end
+    end
+    f1(a=5,b=6)
 end
 
 ####### Core testing procedure
@@ -76,5 +83,7 @@ end
     @test abs(m - mean(x))/mean(x) <= 1e-3
     s2 = var(DN)
     @test abs(s2 - var(x))/var(x) <= 1e-2 #1e-4 too strong for random numbers
+    s2m = var(DN; mean=m) # specify so that not need to recompute
+    @test abs(s2m - var(x))/var(x) <= 1e-2 #1e-4 too strong for random numbers
 end
 

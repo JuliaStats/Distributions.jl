@@ -80,11 +80,21 @@ scale(d::LogitNormal) = d.σ
 # varlogitx(d::LogitNormal) = abs2(d.σ)
 # stdlogitx(d::LogitNormal) = d.σ
 
-mean(d::LogitNormal;kwargs...) = estimateMean(d,kwargs...)
+mean(d::LogitNormal; kwargs...) = estimateMean(d,kwargs...)
 median(d::LogitNormal) = logistic(d.μ)
 mode(d::LogitNormal) = error(
     "not implemented yet: no analytical solution of mode for LogitNormal") 
-var(d::LogitNormal;kwargs...) = estimateVariance(d)
+function var(d::LogitNormal; kwargs...) 
+    #return(estimateVariance(d;kwargs...))
+    knames = (p.first for p in kwargs)
+    if Base.in(:mean, knames)
+        return estimateVariance(d;kwargs...)
+    else
+        # var does not pass kwargs to mean, so need to do it explicitly
+        m = estimateMean(d,kwargs...)
+        return estimateVariance(d;kwargs...,mean=m)
+    end
+end
 
 function skewness(d::LogitNormal)
     error(
