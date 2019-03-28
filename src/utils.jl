@@ -158,8 +158,8 @@ function meanFunOfProb(d::ContinuousUnivariateDistribution;relPrec = 1e-4, maxCn
     # but their weight is only half, because they represents half an inverval
     #m = sum(c_i*δ) + el*(δ/2) + er*(δ/2) = (sum(c_i) + er/2 + el/2)*δ
     s = sum(fun.(d,p))   # sum at points c_i
-    el = fun.(d,δ/4)  # 
-    er = fun.(d,1-δ/4)
+    el = fun(d,δ/4)  # 
+    er = fun(d,1-δ/4)
     m = (s + el/2 + er/2)*δ
     relErr = 1
     while 1/δ < maxCnt
@@ -170,8 +170,8 @@ function meanFunOfProb(d::ContinuousUnivariateDistribution;relPrec = 1e-4, maxCn
         # only need to add the new points to the sum of central points
         p = δ:δ*2:(1-δ) # points at the center of current intervals
         s += sum(fun.(d,p))
-        el = fun.(d,δ/4)
-        er = fun.(d,1-δ/4)
+        el = fun(d,δ/4)
+        er = fun(d,1-δ/4)
         m = (s + el/2 + er/2)*δ
         relErr = abs(m - mPrev)/m 
         #println("cnt=$(1/δ), m=$m, mPrev=$mPrev, relErr=$relErr")

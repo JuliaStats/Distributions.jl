@@ -22,7 +22,7 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     @test isa(md, Float64)
     #@test isa(mo, Float64)
     @test isa(s, Float64)
-    @test md         ≈ logistic.(g.μ)
+    @test md         ≈ logistic(g.μ)
     #@test mo         ≈ exp.(mean(g.normal) - var(g.normal))
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
      @test insupport(g,1e-8)
