@@ -22,7 +22,7 @@ The distribution arises as the limit distribution of various cube-root-n consist
 including the isotonic regression estimator of Brunk, the isotonic density estimator of Grenander,
 the least median of squares estimator of Rousseeuw, and the maximum score estimator of Manski. 
 
-For theoretical results, see e.g. Pollard, Annals of Statistics, 1990.  The code for the 
+For theoretical results, see e.g. Kim and Pollard, Annals of Statistics, 1990.  The code for the 
 computation of pdf and cdf is based on the algorithm described in Groeneboom and Wellner, 
 Journal of Computational and Graphical Statistics, 2001.
 
@@ -48,7 +48,7 @@ struct Chernoff <: ContinuousUnivariateDistribution
 end
 
 # The following arrays of constants have been precomputed to speed up computation.
-# The first two correspond to the arrays a and b in the Groeneboom and Wellner artcle.
+# The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
 # The array az contains roots of the airyai functions (atilde in the paper).
 # Finally azp contains contains airyaiprime evaluated at the corresponding atildes
 
@@ -159,14 +159,14 @@ function g(x::Real)
     end
 end
 
-global f(x::Real) = g(x)*g(-x)*0.5
-global F(x::Real) = (x<0.0) ? Fbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
-global Fbar(x::Real) = (x<0.0) ? F(x) : quadgk(f,x,Inf)[1]
+_pdf(x::Real) = g(x)*g(-x)*0.5
+_cdf(x::Real) = (x<0.0) ? _cdfbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
+_cdfbar(x::Real) = (x<0.0) ? _cdf(x) : quadgk(f,x,Inf)[1]
 
 
-pdf(d::Chernoff, x::Real) = f(x)
+pdf(d::Chernoff, x::Real) = _pdf(x)
 logpdf(d::Chernoff, x::Real) = log(g(x))+log(g(-x))+log(0.5)
-cdf(d::Chernoff, x::Real) = F(x)
+cdf(d::Chernoff, x::Real) = _cdf(x)
 
 function quantile(d::Chernoff, tau::Real)
     # some commonly used quantiles were precomputed
@@ -191,7 +191,7 @@ function quantile(d::Chernoff, tau::Real)
         0.99 1.17153434157313;
         1.0 Inf
         ]
-    (0.0 <= tau && tau <= 1)|| throw(DomainError(tau, "illegal value of tau"))
+    (0.0 <= tau && tau <= 1.0) || throw(DomainError(tau, "illegal value of tau"))
     present = searchsortedfirst(precomputedquants[:, 1], tau)
     if present <= size(precomputedquants, 1)
         if tau == precomputedquants[present, 1]
@@ -201,12 +201,12 @@ function quantile(d::Chernoff, tau::Real)
 
     dnorm = Normal(0.0,1.0)
     if tau<0.001 
-        return -newton(x -> tau - Fbar(x), f, quantile(dnorm, 1.0-tau)*0.52) 
+        return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0-tau)*0.52) 
     end
     if tau>0.999 
-        return newton(x -> 1.0 - tau - Fbar(x), f, quantile(dnorm, tau)*0.52) 
+        return newton(x -> 1.0 - tau - _cdfbar(x), _pdf, quantile(dnorm, tau)*0.52) 
     end
-    return newton(x -> F(x) - tau, f, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
+    return newton(x -> _cdf(x) - tau, _pdf, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
 end
 
 minimum(d::Chernoff) = -Inf
@@ -310,7 +310,7 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
     if i>0
         return rand(rng, d) 
     end
-    F0 = F(A/y[1])
+    F0 = _cdf(A/y[1])
     tau = 2.0*rand(rng)-1
     tauabs = abs(tau)
     return quantile(d, tauabs + (1-tauabs)*F0) * sign(tau)
