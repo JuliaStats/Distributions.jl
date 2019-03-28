@@ -73,8 +73,8 @@ end
     DN = LogitNormal(1.3)
     x = rand(DN, 1_000_000);
     m = mean(DN)
-    @test abs(m - mean(x))/m <= 1e-3
+    @test abs(m - mean(x))/mean(x) <= 1e-3
     s2 = var(DN)
-    @test abs(s2 - var(x))/s2 <= 1e-2 #1e-4 too strong for random numbers
+    @test abs(s2 - var(x))/var(x) <= 1e-2 #1e-4 too strong for random numbers
 end
 
