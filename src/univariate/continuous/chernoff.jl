@@ -88,7 +88,7 @@ const b=[
      8.543413293195206e-26
     -5.05879944592705e-28
     ]
-const az=[
+const airyai_roots=[
     -2.338107410459767
     -4.08794944413097
     -5.520559828095551
@@ -106,7 +106,7 @@ const az=[
     -16.90563399742994
     -17.66130010569706
     ]
-const azp=[
+const airyai_prime=[
      0.7012108227206906
     -0.8031113696548534
      0.865204025894141
@@ -140,7 +140,7 @@ function p(y::Real)
     if (y<=1.0)
         return sum([(b[k]*cnsty-a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
     else
-        return sum([exp(cuberoottwo*a*y) for a in az]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
+        return sum([exp(cuberoottwo*a*y) for a in airyai_roots]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
     end
 end
 
@@ -153,15 +153,15 @@ function g(x::Real)
         return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
     end
     if (x <= -1.0)
-        return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)])
+        return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k=1:length(airyai_roots)])
     else
         return 2*x - (quadgk(gone,0.0,Inf)[1]-4*quadgk(gtwo,0.0,Inf)[1]) / sqrttwopi   # should perhaps combine integrals
     end
 end
 
 _pdf(x::Real) = g(x)*g(-x)*0.5
-_cdf(x::Real) = (x<0.0) ? _cdfbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
-_cdfbar(x::Real) = (x<0.0) ? _cdf(x) : quadgk(f,x,Inf)[1]
+_cdf(x::Real) = (x<0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
+_cdfbar(x::Real) = (x<0.0) ? _cdf(x) : quadgk(_pdf,x,Inf)[1]
 
 
 pdf(d::Chernoff, x::Real) = _pdf(x)
@@ -227,8 +227,8 @@ slowrand(d::Chernoff) = quantile(d,rand(GLOBAL_RNG))
 rand(d::Chernoff) = rand(GLOBAL_RNG,d)      
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
-    A=0.03248227216266608
-    x=[
+    A = 0.03248227216266608
+    x = [
         1.4765521793744492 
         1.3583996502410562 
         1.2788224934376338 
