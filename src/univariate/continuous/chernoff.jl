@@ -149,7 +149,7 @@ function g(x::Real)
         return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
     end
     function gtwo(y::Real)
-        z=2*x+y*y
+        z = 2*x + y*y
         return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
     end
     if (x <= -1.0)
