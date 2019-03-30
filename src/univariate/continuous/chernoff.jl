@@ -134,7 +134,7 @@ function p(y::Real)
         return -sqrt(0.5*pi) 
     end
     
-    (y>0) || throw(DomainError(y, "y must be positive"))
+    (y>0) || throw(DomainError(y, "argument must be positive"))
     
     cnsty = y^(-1.5)
     if (y<=1.0)
