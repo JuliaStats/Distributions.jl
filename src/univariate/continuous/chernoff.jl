@@ -134,13 +134,13 @@ function p(y::Real)
         return -sqrt(0.5*pi) 
     end
     
-    (y>0) || throw(DomainError(y, "y must be positive"))
+    (y > 0) || throw(DomainError(y, "argument must be positive"))
     
     cnsty = y^(-1.5)
-    if (y<=1.0)
-        return sum([(b[k]*cnsty-a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
+    if (y <= 1.0)
+        return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
     else
-        return sum([exp(cuberoottwo*a*y) for a in az]) * 2 * sqrttwopi* exp(-y*y*y/6) - cnsty
+        return sum([exp(cuberoottwo*a*y) for a in az]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
     end
 end
 
@@ -149,19 +149,19 @@ function g(x::Real)
         return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
     end
     function gtwo(y::Real)
-        z=2*x+y*y
-        return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
+        z = 2*x+y*y
+        return (z*y*y + 0.5 * z*z) * exp(-0.5*y*y*z*z)
     end
     if (x <= -1.0)
         return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*az[k]*x) / azp[k] for k=1:length(az)])
     else
-        return 2*x - (quadgk(gone,0.0,Inf)[1]-4*quadgk(gtwo,0.0,Inf)[1]) / sqrttwopi   # should perhaps combine integrals
+        return 2*x - (quadgk(gone, 0.0, Inf)[1] - 4*quadgk(gtwo, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
     end
 end
 
 _pdf(x::Real) = g(x)*g(-x)*0.5
-_cdf(x::Real) = (x<0.0) ? _cdfbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
-_cdfbar(x::Real) = (x<0.0) ? _cdf(x) : quadgk(f,x,Inf)[1]
+_cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
+_cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(f,x,Inf)[1]
 
 
 pdf(d::Chernoff, x::Real) = _pdf(x)
@@ -199,11 +199,11 @@ function quantile(d::Chernoff, tau::Real)
         end
     end
 
-    dnorm = Normal(0.0,1.0)
-    if tau<0.001 
-        return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0-tau)*0.52) 
+    dnorm = Normal(0.0, 1.0)
+    if tau < 0.001 
+        return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0 - tau)*0.52) 
     end
-    if tau>0.999 
+    if tau > 0.999 
         return newton(x -> 1.0 - tau - _cdfbar(x), _pdf, quantile(dnorm, tau)*0.52) 
     end
     return newton(x -> _cdf(x) - tau, _pdf, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
@@ -219,12 +219,12 @@ modes(d::Chernoff) = [0.0]
 mode(d::Chernoff) = 0.0
 skewness(d::Chernoff) = 0.0
 kurtosis(d::Chernoff) = -0.16172525511461888
-kurtosis(d::Chernoff,excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0) 
+kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0) 
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
-slowrand(d::Chernoff) = quantile(d,rand(GLOBAL_RNG))
-rand(d::Chernoff) = rand(GLOBAL_RNG,d)      
+slowrand(d::Chernoff) = quantile(d, rand(GLOBAL_RNG))
+rand(d::Chernoff) = rand(GLOBAL_RNG, d)      
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
     A=0.03248227216266608
@@ -298,16 +298,16 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         ]       
     n = length(x)
     i = rand(rng, 0:n-1)
-    r = (2.0*rand(rng)-1)*((i>0) ? x[i] : A/y[1])
+    r = (2.0*rand(rng)-1) * ((i>0) ? x[i] : A/y[1])
     rabs = abs(r)
     if rabs < x[i+1]
         return r 
     end
     s = (i>0) ? (y[i]+rand(rng)*(y[i+1]-y[i])) : rand(rng)*y[1]
-    if s <2.0*f(rabs)
+    if s < 2.0*f(rabs)
         return r 
     end
-    if i>0
+    if i > 0
         return rand(rng, d) 
     end
     F0 = _cdf(A/y[1])
