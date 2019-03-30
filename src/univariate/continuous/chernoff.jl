@@ -200,7 +200,7 @@ function quantile(d::Chernoff, tau::Real)
     end
 
     dnorm = Normal(0.0,1.0)
-    if tau<0.001 
+    if tau < 0.001 
         return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0-tau)*0.52) 
     end
     if tau>0.999 
