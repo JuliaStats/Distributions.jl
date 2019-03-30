@@ -1,7 +1,7 @@
 @testset "Chernoff tests" begin
     d = Chernoff()
 
-    cdftest=[
+    cdftest = [
         0.005 0.5037916689930134;
         0.015 0.5113737159744436;
         0.025 0.5189518911337264;
