@@ -134,7 +134,6 @@ function p(y::Real)
         return -sqrt(0.5*pi) 
     end
     
-<<<<<<< HEAD
     (y > 0) || throw(DomainError(y, "argument must be positive"))
     
     cnsty = y^(-1.5)
@@ -142,16 +141,6 @@ function p(y::Real)
         return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
     else
         return sum([exp(cuberoottwo*a*y) for a in az]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
-=======
-    (y>0) || throw(DomainError(y, "argument must be positive"))
-    
-    cnsty = y^(-1.5)
-    if (y<=1.0)
-        return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)]) - sqrthalfpi
-    else
-        return sum([exp(cuberoottwo*a*y) for a in airyai_roots]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
->>>>>>> 9e14bc56377d60961cd1ff567e504d87cef431ef
-    end
 end
 
 function g(x::Real)
@@ -159,13 +148,8 @@ function g(x::Real)
         return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
     end
     function gtwo(y::Real)
-<<<<<<< HEAD
         z = 2*x+y*y
         return (z*y*y + 0.5 * z*z) * exp(-0.5*y*y*z*z)
-=======
-        z = 2*x + y*y
-        return (z*y*y +0.5 * z*z) * exp(-0.5*y*y*z*z)
->>>>>>> 9e14bc56377d60961cd1ff567e504d87cef431ef
     end
     if (x <= -1.0)
         return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k=1:length(airyai_roots)])
@@ -175,13 +159,9 @@ function g(x::Real)
 end
 
 _pdf(x::Real) = g(x)*g(-x)*0.5
-<<<<<<< HEAD
-_cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(f,0.0,x)[1] 
-_cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(f,x,Inf)[1]
-=======
-_cdf(x::Real) = (x<0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
-_cdfbar(x::Real) = (x<0.0) ? _cdf(x) : quadgk(_pdf,x,Inf)[1]
->>>>>>> 9e14bc56377d60961cd1ff567e504d87cef431ef
+_cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
+_cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
+
 
 
 pdf(d::Chernoff, x::Real) = _pdf(x)
@@ -219,15 +199,10 @@ function quantile(d::Chernoff, tau::Real)
         end
     end
 
-<<<<<<< HEAD
     dnorm = Normal(0.0, 1.0)
     if tau < 0.001 
         return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0 - tau)*0.52) 
-=======
-    dnorm = Normal(0.0,1.0)
-    if tau < 0.001 
-        return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0-tau)*0.52) 
->>>>>>> 9e14bc56377d60961cd1ff567e504d87cef431ef
+
     end
     if tau > 0.999 
         return newton(x -> 1.0 - tau - _cdfbar(x), _pdf, quantile(dnorm, tau)*0.52) 
