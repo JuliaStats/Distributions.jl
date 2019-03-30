@@ -219,7 +219,7 @@ modes(d::Chernoff) = [0.0]
 mode(d::Chernoff) = 0.0
 skewness(d::Chernoff) = 0.0
 kurtosis(d::Chernoff) = -0.16172525511461888
-kurtosis(d::Chernoff,excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0) 
+kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0) 
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
