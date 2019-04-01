@@ -280,8 +280,8 @@ function insupport(d::AbstractMixtureModel, x::AbstractVector)
     K = ncomponents(d)
     p = probs(d)
     @assert length(p) == K
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0 && insupport(component(d, i), x)
             return true
         end
@@ -294,8 +294,8 @@ function _cdf(d::UnivariateMixture, x::Real)
     p = probs(d)
     @assert length(p) == K
     r = 0.0
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             c = component(d, i)
             r += pi * cdf(c, x)
@@ -313,8 +313,8 @@ function _mixpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     v = 0.0
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             c = component(d, i)
             v += pdf(c, x) * pi
@@ -328,9 +328,9 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     fill!(r, 0.0)
-    t = Array{Float64}(undef, size(r))
-    for i = 1:K
-        @inbounds pi = p[i]
+    t = Array{eltype(p)}(undef, size(r))
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             if d isa UnivariateMixture
                 t .= pdf.(component(d, i), x)
@@ -359,14 +359,14 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
 
-    lp = Vector{eltype(x)}(undef, K)
+    lp = Vector{eltype(p)}(undef, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             # lp[i] <- log(p(cs[i], x)) + log(pri[i])
             lp_i = logpdf(component(d, i), x) + log(pi)
-            @inbounds lp[i] = lp_i
+            lp[i] = lp_i
             if lp_i > m
                 m = lp_i
             end
@@ -386,10 +386,10 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     @assert length(p) == K
     n = length(r)
-    Lp = Matrix{eltype(x)}(undef, n, K)
+    Lp = Matrix{eltype(p)}(undef, n, K)
     m = fill(-Inf, n)
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             lpri = log(pi)
             lp_i = view(Lp, :, i)
