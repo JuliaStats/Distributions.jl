@@ -141,6 +141,7 @@ function p(y::Real)
         return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
     else
         return sum([exp(cuberoottwo*a*y) for a in az]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
+    end
 end
 
 function g(x::Real)
