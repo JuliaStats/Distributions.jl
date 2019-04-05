@@ -174,7 +174,7 @@ sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J,
 unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
 unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = PDMats.sparse(J.chol.L)' \ x
+unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.L' \ x
 
 _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) =
     add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
