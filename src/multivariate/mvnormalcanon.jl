@@ -85,7 +85,7 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractP
     if typeof(μ) == typeof(h)
         return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
     else
-        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J) 
+        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J)
     end
 end
 
@@ -174,6 +174,7 @@ sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J,
 unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
 unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
+unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = PDMats.sparse(J.chol.L)' \ x
 
 _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) =
     add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
