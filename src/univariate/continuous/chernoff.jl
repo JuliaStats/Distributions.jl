@@ -51,8 +51,8 @@ module ChernoffComputations
     import QuadGK.quadgk
     # The following arrays of constants have been precomputed to speed up computation.
     # The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
-    # The array az contains roots of the airyai functions (atilde in the paper).
-    # Finally azp contains contains airyaiprime evaluated at the corresponding atildes
+    # The array airyai_roots contains roots of the airyai functions (atilde in the paper).
+    # Finally airyai_prime contains contains airyaiprime evaluated at the corresponding atildes
     const a=[
          0.14583333333333334
         -0.0014105902777777765
