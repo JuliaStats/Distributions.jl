@@ -37,7 +37,8 @@ tests = [
     "product",
     "truncnormal",
     "discretenonparametric",
-    "functionals"
+    "functionals", 
+    "chernoff"
 ]
 
 

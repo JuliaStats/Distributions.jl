@@ -48,6 +48,7 @@ struct Chernoff <: ContinuousUnivariateDistribution
 end
 
 module ChernoffComputations
+    import QuadGK.quadgk
     # The following arrays of constants have been precomputed to speed up computation.
     # The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
     # The array az contains roots of the airyai functions (atilde in the paper).
@@ -158,17 +159,15 @@ module ChernoffComputations
             return 2*x - (quadgk(g_one, 0.0, Inf)[1] - 4*quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
         end
     end
+
+    _pdf(x::Real) = g(x)*g(-x)*0.5
+    _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
+    _cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
 end
 
-_pdf(x::Real) = g(x)*g(-x)*0.5
-_cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
-_cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
-
-
-
-pdf(d::Chernoff, x::Real) = _pdf(x)
-logpdf(d::Chernoff, x::Real) = log(g(x))+log(g(-x))+log(0.5)
-cdf(d::Chernoff, x::Real) = _cdf(x)
+pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
+logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
+cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
 
 function quantile(d::Chernoff, tau::Real)
     # some commonly used quantiles were precomputed
@@ -203,13 +202,13 @@ function quantile(d::Chernoff, tau::Real)
 
     dnorm = Normal(0.0, 1.0)
     if tau < 0.001 
-        return -newton(x -> tau - _cdfbar(x), _pdf, quantile(dnorm, 1.0 - tau)*0.52) 
+        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*0.52) 
 
     end
     if tau > 0.999 
-        return newton(x -> 1.0 - tau - _cdfbar(x), _pdf, quantile(dnorm, tau)*0.52) 
+        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*0.52) 
     end
-    return newton(x -> _cdf(x) - tau, _pdf, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
+    return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*0.52)   # should consider replacing x-> construct for speed
 end
 
 minimum(d::Chernoff) = -Inf
@@ -226,7 +225,6 @@ kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
-slowrand(d::Chernoff) = quantile(d, rand(GLOBAL_RNG))
 rand(d::Chernoff) = rand(GLOBAL_RNG, d)      
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
@@ -307,13 +305,13 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         return r 
     end
     s = (i>0) ? (y[i]+rand(rng)*(y[i+1]-y[i])) : rand(rng)*y[1]
-    if s < 2.0*f(rabs)
+    if s < 2.0*ChernoffComputations._pdf(rabs)
         return r 
     end
     if i > 0
         return rand(rng, d) 
     end
-    F0 = _cdf(A/y[1])
+    F0 = ChernoffComputations._cdf(A/y[1])
     tau = 2.0*rand(rng)-1
     tauabs = abs(tau)
     return quantile(d, tauabs + (1-tauabs)*F0) * sign(tau)
