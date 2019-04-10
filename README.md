@@ -23,5 +23,4 @@ A Julia package for probability distributions and associated functions. Particul
 
 #### Resources
 
-* **Documentation**: <https://JuliaStats.github.io/Distributions.jl/stable/>
-* **Release Notes**: <https://github.com/JuliaStats/Distributions.jl/blob/master/NEWS.md>
+* **Documentation**: <https://JuliaStats.github.io/Distributions.jl/stable/> <https://JuliaStats.github.io/Distributions.jl/latest/>
