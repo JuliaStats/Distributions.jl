@@ -38,7 +38,8 @@ tests = [
     "truncnormal",
     "truncated_exponential",
     "discretenonparametric",
-    "functionals"
+    "functionals", 
+    "chernoff"
 ]
 
 
