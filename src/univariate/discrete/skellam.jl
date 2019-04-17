@@ -1,4 +1,4 @@
-using Rmath: pnchisq
+using StatsFuns: nchisqcdf
 
 """
     Skellam(μ1, μ2)
@@ -85,7 +85,7 @@ end
 function cdf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
     t = floor(t)
-    (t < 0) ? pnchisq(2*μ2, -2*t, 2*μ1) : 1.0 - pnchisq(2*μ1, 2*(t+1), 2*μ2)
+    (t < 0) ? nchisqcdf(2*μ2, -2*t, 2*μ1) : 1.0 - nchisqcdf(2*μ1, 2*(t+1), 2*μ2)
 end
 
 cdf(d::Skellam, t::Int) = cdf(d, float(t))
