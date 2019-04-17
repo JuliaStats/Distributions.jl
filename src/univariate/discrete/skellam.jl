@@ -1,3 +1,5 @@
+using Rmath: pnchisq
+
 """
     Skellam(μ1, μ2)
 
@@ -80,13 +82,15 @@ function cf(d::Skellam, t::Real)
     exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
 
-cdf(d::Skellam, x::Int) = throw(MethodError(cdf, (d, x)))
-cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
+function cdf(d::Skellam, t::Real)
+    μ1, μ2 = params(d)
+    t = floor(t)
+    (t < 0) ? pnchisq(2*μ2, -2*t, 2*μ1) : 1.0 - pnchisq(2*μ1, 2*(t+1), 2*μ2)
+end
+
+cdf(d::Skellam, t::Int) = cdf(d, float(t))
 
 #### Sampling
-# TODO: remove RFunctions dependency once Poisson has its removed
-@rand_rdist(Skellam)
+
 rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
 
-rand(rng::AbstractRNG, d::Skellam) =
-    rand(rng, Poisson(d.μ1)) - rand(rng, Poisson(d.μ2))
