@@ -81,7 +81,7 @@ function cf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
     exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
-
+#based on SciPy: https://github.com/scipy/scipy/blob/v0.15.1/scipy/stats/_discrete_distns.py
 function cdf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
     t = floor(t)
