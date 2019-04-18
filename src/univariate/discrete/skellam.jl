@@ -96,7 +96,7 @@ Computing cdf of the Skellam distribution.
 function cdf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
     t = floor(t)
-    (t < 0) ? nchisqcdf(2*μ2, -2*t, 2*μ1) : 1.0 - nchisqcdf(2*μ1, 2*(t+1), 2*μ2)
+    (t < 0) ? nchisqcdf(-2*t, 2*μ1, 2*μ2) : 1.0 - nchisqcdf(2*(t+1), 2*μ2, 2*μ1)
 end
 
 cdf(d::Skellam, t::Int) = cdf(d, float(t))
