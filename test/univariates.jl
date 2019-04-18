@@ -102,8 +102,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
             @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
         end
 
-        # cdf method is not implemented for Skellam & NormalInverseGaussian
-        if !isa(d, Union{Skellam, NormalInverseGaussian})
+        # cdf method is not implemented for NormalInverseGaussian
+        if !isa(d, NormalInverseGaussian)
             @test isapprox(cdf(d, x), cf; atol=isa(d, NoncentralHypergeometric) ? 1e-8 : 1e-12)
         end
     end
