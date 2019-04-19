@@ -1,4 +1,4 @@
-using Distributions, Compat.Test, Random, LinearAlgebra
+using Distributions, Test, Random, LinearAlgebra
 using Distributions: Product
 
 @testset "Testing Product distributions" begin
