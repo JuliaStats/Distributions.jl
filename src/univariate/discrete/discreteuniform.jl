@@ -1,23 +1,29 @@
 """
-    DiscreteUniform(a,b)
+    DiscreteUniform <: DiscreteUnivariateDistribution
 
-A *Discrete uniform distribution* is a uniform distribution over a consecutive sequence of integers between `a` and `b`, inclusive.
+The *discrete uniform* probability distribution.
+
+# Constructors
+
+    DiscreteUniform(a=0,b=1)
+
+Construct a `DiscreteUniform` object on the range `a:b`.
+
+# Details
+
+A discrete uniform distribution is a uniform distribution over a consecutive sequence of integers between `a` and `b`, inclusive.
 
 ```math
 P(X = k) = 1 / (b - a + 1) \\quad \\text{for } k = a, a+1, \\ldots, b.
 ```
 
-```julia
-DiscreteUniform(a, b)   # a uniform distribution over {a, a+1, ..., b}
+# Examples
 
-params(d)       # Get the parameters, i.e. (a, b)
-span(d)         # Get the span of the support, i.e. (b - a + 1)
-probval(d)      # Get the probability value, i.e. 1 / (b - a + 1)
-minimum(d)      # Return a
-maximum(d)      # Return b
+```julia
+DiscreteUniform(a=1, b=10)
 ```
 
-External links
+# External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
@@ -30,8 +36,12 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
         @check_args(DiscreteUniform, a <= b)
         new(a, b, 1.0 / (b - a + 1))
     end
-    DiscreteUniform(b::Real) = DiscreteUniform(0, b)
-    DiscreteUniform() = new(0, 1, 0.5)
+end
+
+@kwdispatch (::Type{D})() where {D<:DiscreteUniform} begin
+    () -> D(0,1)
+    (b) -> D(0,b)
+    (a,b) -> D(a,b)
 end
 
 @distr_support DiscreteUniform d.a d.b

@@ -42,7 +42,7 @@ julia> quantile.(Normal(), [0.5, 0.95])
 The normal distribution is parameterized by its mean and standard deviation. To draw random samples from a normal distribution with mean 1 and standard deviation 2, you write:
 
 ```julia
-julia> rand(Normal(1, 2), 100)
+julia> rand(Normal(μ=1, σ=2), 100)
 ```
 
 ## Using Other Distributions
@@ -67,7 +67,7 @@ julia> Wishart(nu, S) # Continuous matrix-variate
 In addition, you can create truncated distributions from univariate distributions:
 
 ```julia
-julia> Truncated(Normal(mu, sigma), l, u)
+julia> Truncated(Normal(mu=mu, sigma=sigma), l, u)
 ```
 
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:

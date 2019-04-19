@@ -1,24 +1,31 @@
 """
-    Weibull(α,θ)
+    Weibull <: ContinuousUnivariateDistribution
 
-The *Weibull distribution* with shape `α` and scale `θ` has probability density function
+The *Weibull* probability distribution.
+
+# Constructors
+
+    Weibull(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct a `Weibull` distribution object with shape `α` and scale `θ`.
+
+# Details
+
+The Weibull distribution has probability density function
 
 ```math
 f(x; \\alpha, \\theta) = \\frac{\\alpha}{\\theta} \\left( \\frac{x}{\\theta} \\right)^{\\alpha-1} e^{-(x/\\theta)^\\alpha},
     \\quad x \\ge 0
 ```
 
-```julia
-Weibull()        # Weibull distribution with unit shape and unit scale, i.e. Weibull(1, 1)
-Weibull(a)       # Weibull distribution with shape a and unit scale, i.e. Weibull(a, 1)
-Weibull(a, b)    # Weibull distribution with shape a and scale b
+# Examples
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+```julia
+Weibull()
+Weibull(α=2, θ=5)
 ```
 
-External links
+# External links
 
 * [Weibull distribution on Wikipedia](http://en.wikipedia.org/wiki/Weibull_distribution)
 
@@ -35,9 +42,14 @@ end
 
 Weibull(α::T, θ::T) where {T<:Real} = Weibull{T}(α, θ)
 Weibull(α::Real, θ::Real) = Weibull(promote(α, θ)...)
-Weibull(α::Integer, θ::Integer) = Weibull(Float64(α), Float64(θ))
-Weibull(α::Real) = Weibull(α, 1.0)
-Weibull() = Weibull(1.0, 1.0)
+Weibull(α::Integer, θ::Integer) = Weibull(float(α), float(θ))
+
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ) where {D<:Weibull} begin
+    () -> D(1,1)
+    (α) -> D(α,1)
+    (θ) -> D(1,θ)
+    (α,θ) -> D(α,θ)
+end
 
 @distr_support Weibull 0.0 Inf
 

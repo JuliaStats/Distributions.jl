@@ -1,13 +1,24 @@
 """
-    Levy(μ, σ)
+    Levy <: ContinuousUnivariateDistribution
 
-The *Lévy distribution* with location `μ` and scale `σ` has probability density function
+The *Lévy* probability distribution.
+
+# Constructors
+
+    Levy(μ|mu|location=0, σ|sigma|scale=1)
+
+Construct a `Levy` distribution object with location `μ` and scale `σ`.
+
+# Details
+
+The *Lévy* distribution with location `μ` and scale `σ` has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\sqrt{\\frac{\\sigma}{2 \\pi (x - \\mu)^3}}
 \\exp \\left( - \\frac{\\sigma}{2 (x - \\mu)} \\right), \\quad x > \\mu
 ```
 
+# Examples
 ```julia
 Levy()         # Levy distribution with zero location and unit scale, i.e. Levy(0, 1)
 Levy(u)        # Levy distribution with location u and unit scale, i.e. Levy(u, 1)
@@ -17,7 +28,7 @@ params(d)      # Get the parameters, i.e. (u, c)
 location(d)    # Get the location parameter, i.e. u
 ```
 
-External links
+# External links
 
 * [Lévy distribution on Wikipedia](http://en.wikipedia.org/wiki/Lévy_distribution)
 """
@@ -30,9 +41,14 @@ end
 
 Levy(μ::T, σ::T) where {T<:Real} = Levy{T}(μ, σ)
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
-Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
-Levy(μ::Real) = Levy(μ, 1.0)
-Levy() = Levy(0.0, 1.0)
+Levy(μ::Integer, σ::Integer) = Levy(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, sigma=>σ, scale=>σ) where {D<:Levy} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Levy d.μ Inf
 

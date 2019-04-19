@@ -1,11 +1,17 @@
 """
-    Cosine(μ, σ)
+    Cosine <: ContinuousUnivariateDistribution
 
-A raised Cosine distribution.
+The *raised cosine* probability distribution.
 
-External link:
+# Constructors
 
-* [Cosine distribution on wikipedia](http://en.wikipedia.org/wiki/Raised_cosine_distribution)
+    Cosine(μ|mu=0, σ|sigma=1)
+
+Construct a `Cosine` distribution object, centered at `μ` with scale `σ`.
+
+# External link:
+
+* [Raised cosine distribution on wikipedia](http://en.wikipedia.org/wiki/Raised_cosine_distribution)
 """
 struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
@@ -16,9 +22,14 @@ end
 
 Cosine(μ::T, σ::T) where {T<:Real} = Cosine{T}(μ, σ)
 Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
-Cosine(μ::Integer, σ::Integer) = Cosine(Float64(μ), Float64(σ))
-Cosine(μ::Real) = Cosine(μ, 1.0)
-Cosine() = Cosine(0.0, 1.0)
+Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Cosine} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 

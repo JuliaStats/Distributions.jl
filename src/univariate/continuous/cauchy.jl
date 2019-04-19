@@ -1,23 +1,28 @@
 """
-    Cauchy(μ, σ)
+    Cauchy <: ContinuousUnivariateDistribution
 
-The *Cauchy distribution* with location `μ` and scale `σ` has probability density function
+The *Cauchy* probability distribution.
+
+# Constructors
+
+    Cauchy(μ|mu|location=0, σ|sigma|scale=1)
+
+Construct a `Cauchy` distribution object, centered at `μ` with scale `σ`.
+
+# Details
+
+The Cauchy distribution with location `μ` and scale `σ` has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\pi \\sigma \\left(1 + \\left(\\frac{x - \\mu}{\\sigma} \\right)^2 \\right)}
 ```
 
 ```julia
-Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0, 1)
-Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1)
-Cauchy(u, b)     # Cauchy distribution with location u and scale b
-
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+Cauchy()
+Cauchy(μ=2, σ=5)
 ```
 
-External links
+# External links
 
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
@@ -34,9 +39,14 @@ end
 
 Cauchy(μ::T, σ::T) where {T<:Real} = Cauchy{T}(μ, σ)
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
-Cauchy(μ::Real) = Cauchy(μ, 1.0)
-Cauchy() = Cauchy(0.0, 1.0)
+Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, sigma=>σ, scale=>σ) where {D<:Cauchy} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Cauchy -Inf Inf
 

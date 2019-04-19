@@ -1,7 +1,16 @@
 """
-    GeneralizedExtremeValue(μ, σ, ξ)
+    GeneralizedExtremeValue <: ContinuousUnivariateDistribution
 
-The *Generalized extreme value distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
+The *generalized extreme value* probability distribution.
+
+# Constructors
+
+    GeneralizedExtremeValue(μ|mu|location=, σ|sigma|scale=, ξ|xi|shape=)
+
+Construct a `GeneralizedExtremeValue` distribution object with shape parameter `ξ`, scale `σ` and location `μ`.
+
+# Details
+The generalized extreme value distribution has probability density function
 
 ```math
 f(x; \\xi, \\sigma, \\mu) = \\begin{cases}
@@ -20,19 +29,15 @@ x \\in \\begin{cases}
     \\end{cases}
 ```
 
-```julia
-GeneralizedExtremeValue(m, s, k)      # Generalized Pareto distribution with shape k, scale s and location m.
+# Example
 
-params(d)       # Get the parameters, i.e. (m, s, k)
-location(d)     # Get the location parameter, i.e. m
-scale(d)        # Get the scale parameter, i.e. s
-shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
+```julia
+GeneralizedExtremeValue(μ=3, σ=2, ξ=3)
 ```
 
-External links
+# External links
 
 * [Generalized extreme value distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution)
-
 """
 struct GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
@@ -48,8 +53,13 @@ end
 GeneralizedExtremeValue(μ::T, σ::T, ξ::T) where {T<:Real} = GeneralizedExtremeValue{T}(μ, σ, ξ)
 GeneralizedExtremeValue(μ::Real, σ::Real, ξ::Real) = GeneralizedExtremeValue(promote(μ, σ, ξ)...)
 function GeneralizedExtremeValue(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedExtremeValue(Float64(μ), Float64(σ), Float64(ξ))
+    GeneralizedExtremeValue(float(μ), float(σ), float(ξ))
 end
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, sigma=>σ, scale=>σ, xi=>ξ, shape=>ξ) where {D<:GeneralizedExtremeValue} begin
+    (μ,σ,ξ) -> D(μ,σ,ξ)
+end
+
 
 #### Conversions
 function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real

@@ -1,19 +1,30 @@
 """
-    VonMises(μ, κ)
+    VonMises <: ContinuousUnivariateDistribution
 
-The *von Mises distribution* with mean `μ` and concentration `κ` has probability density function
+The *von Mises* probability distribution.
+
+# Constructors
+
+    VonMises(μ|mu=0, κ|kappa=1)
+
+Construct a `VonMises` object with circular mean `μ` and concentration `κ`.
+
+# Details
+
+The *von Mises distribution* has probability density function
 
 ```math
 f(x; \\mu, \\kappa) = \\frac{1}{2 \\pi I_0(\\kappa)} \\exp \\left( \\kappa \\cos (x - \\mu) \\right)
 ```
 
+# Examples
+
 ```julia
-VonMises()       # von Mises distribution with zero mean and unit concentration
-VonMises(κ)      # von Mises distribution with zero mean and concentration κ
-VonMises(μ, κ)   # von Mises distribution with mean μ and concentration κ
+VonMises()
+VonMises(μ=1.0, κ=2.5)
 ```
 
-External links
+# External links
 
 * [von Mises distribution on Wikipedia](http://en.wikipedia.org/wiki/Von_Mises_distribution)
 
@@ -31,9 +42,14 @@ end
 
 VonMises(μ::T, κ::T) where {T<:Real} = VonMises{T}(μ, κ)
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
-VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
-VonMises(κ::Real) = VonMises(0.0, κ)
-VonMises() = VonMises(0.0, 1.0)
+VonMises(μ::Integer, κ::Integer) = VonMises(float(μ), float(κ))
+
+@kwdispatch (::Type{D})(;mu=>μ,kappa=>κ) where {D<:VonMises} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (κ) -> D(0,κ)
+    (μ,κ) -> D(μ,κ)
+end
 
 show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 

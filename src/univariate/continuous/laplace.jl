@@ -1,23 +1,35 @@
 """
-    Laplace(μ,β)
+    Laplace <: ContinuousUnivariateDistribution
 
-The *Laplace distribution* with location `μ` and scale `β` has probability density function
+The *Laplace* probability distribution.
+
+# Constructors
+
+    Laplace(μ|mu|mean|location=0, θ|theta|scale=1)
+
+Construct a `Laplace` distribution object, centered at `μ` with scale `θ`.
+
+    Laplace(μ|mu|mean|location=0, std=)
+    Laplace(μ|mu|mean|location=0, var=)
+
+Construct a `Laplace` distribution object matching the relevant parameters and moments.
+
+# Details
+
+The Laplace distribution with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
+f(x; \\mu, \\theta) = \\frac{1}{2 \\theta} \\exp \\left(- \\frac{|x - \\mu|}{\\theta} \\right)
 ```
+
+# Examples
 
 ```julia
-Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
-Laplace(μ)      # Laplace distribution with location μ and unit scale, i.e. Laplace(μ, 1)
-Laplace(μ, β)   # Laplace distribution with location μ and scale β
-
-params(d)       # Get the parameters, i.e., (μ, β)
-location(d)     # Get the location parameter, i.e. μ
-scale(d)        # Get the scale parameter, i.e. β
+Laplace()
+Laplace(μ=1, θ=3)
 ```
 
-External links
+#External links
 
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
@@ -31,9 +43,19 @@ end
 
 Laplace(μ::T, θ::T) where {T<:Real} = Laplace{T}(μ, θ)
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
-Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
-Laplace(μ::Real) = Laplace(μ, 1.0)
-Laplace() = Laplace(0.0, 1.0)
+Laplace(μ::Integer, θ::Integer) = Laplace(float(μ), float(θ))
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, mean=>μ, theta=>θ, scale=>θ) where {D<:Laplace} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+
+    (std) -> D(0,std/sqrt2)
+    (μ,std) -> D(0,std/sqrt2)
+    (var) -> D(μ,sqrt(var/2))
+    (μ,var) -> D(μ,sqrt(var/2))
+end
 
 const Biexponential = Laplace
 

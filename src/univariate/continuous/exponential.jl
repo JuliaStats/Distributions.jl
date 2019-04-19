@@ -1,22 +1,34 @@
 """
-    Exponential(θ)
+    Exponential <: ContinuousUnivariateDistribution
 
-The *Exponential distribution* with scale parameter `θ` has probability density function
+The *exponential* probability distribution.
+
+# Constructors
+
+    Exponential(θ|theta|scale=1)
+
+Construct an `Exponential` object with scale `θ`.
+
+    Exponential(β|beta|rate=1)
+
+Construct an `Exponential` object with rate `β=1/θ`.
+
+# Details
+
+The exponential distribution with scale parameter `θ` has probability density function
 
 ```math
 f(x; \\theta) = \\frac{1}{\\theta} e^{-\\frac{x}{\\theta}}, \\quad x > 0
 ```
 
-```julia
-Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1)
-Exponential(b)     # Exponential distribution with scale b
+# Examples
 
-params(d)          # Get the parameters, i.e. (b,)
-scale(d)           # Get the scale parameter, i.e. b
-rate(d)            # Get the rate parameter, i.e. 1 / b
+```julia
+Exponential()
+Exponential(θ=3)
 ```
 
-External links
+# External links
 
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
@@ -28,8 +40,13 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Exponential(θ::T) where {T<:Real} = Exponential{T}(θ)
-Exponential(θ::Integer) = Exponential(Float64(θ))
-Exponential() = Exponential(1.0)
+Exponential(θ::Integer) = Exponential(float(θ))
+
+@kwdispatch (::Type{D})(;theta=>θ, scale=>θ, beta=>β, rate=>β) where {D<:Exponential} begin
+    () -> D(1)
+    (θ) -> D(θ)
+    (β) -> D(inv(β))
+end
 
 @distr_support Exponential 0.0 Inf
 

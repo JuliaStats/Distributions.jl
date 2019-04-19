@@ -1,24 +1,31 @@
 """
-    Frechet(α,θ)
+    Frechet <: ContinuousUnivariateDistribution
 
-The *Fréchet distribution* with shape `α` and scale `θ` has probability density function
+The *Fréchet* probability distribution.
+
+# Constructors
+
+    Frechet(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct a `Frechet` distribution object with shape `α` and scale `θ`.
+
+# Details
+
+The Fréchet distribution with shape `α` and scale `θ` has probability density function
 
 ```math
 f(x; \\alpha, \\theta) = \\frac{\\alpha}{\\theta} \\left( \\frac{x}{\\theta} \\right)^{-\\alpha-1}
 e^{-(x/\\theta)^{-\\alpha}}, \\quad x > 0
 ```
 
-```julia
-Frechet()        # Fréchet distribution with unit shape and unit scale, i.e. Frechet(1, 1)
-Frechet(a)       # Fréchet distribution with shape a and unit scale, i.e. Frechet(a, 1)
-Frechet(a, b)    # Fréchet distribution with shape a and scale b
+# Examples
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+```julia
+Frechet()
+Frechet(α=3, θ=4)
 ```
 
-External links
+# External links
 
 * [Fréchet_distribution on Wikipedia](http://en.wikipedia.org/wiki/Fréchet_distribution)
 
@@ -36,9 +43,14 @@ end
 
 Frechet(α::T, θ::T) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
-Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
-Frechet(α::Real) = Frechet(α, 1.0)
-Frechet() = Frechet(1.0, 1.0)
+Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
+
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ) where {D<:Frechet} begin
+    () -> D(1, 1)
+    (α) -> D(α, 1)
+    (θ) -> D(1, θ)
+    (α,θ) -> D(α, θ)
+end
 
 @distr_support Frechet 0.0 Inf
 

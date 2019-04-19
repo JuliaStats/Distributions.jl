@@ -1,7 +1,23 @@
 """
-    LogNormal(μ,σ)
+    LogNormal <: ContinuousUnivariateDistribution
 
-The *log normal distribution* is the distribution of the exponential of a [`Normal`](@ref) variate: if ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
+The *log-normal* probability distribution.
+
+# Constructors
+
+    LogNormal(μ|mu=0, σ|sigma=1)
+
+Construct a `LogNormal` distribution object with underlying `Normal(μ,σ)` distribution.
+
+    LogNormal(mean=,σ|sigma=)
+    LogNormal(mean=,std=)
+    LogNormal(mean=,var=)
+
+Construct a `LogNormal` object matching the relevant parameters and moments.
+
+# Details
+
+The log-normal distribution is the distribution of the exponential of a [`Normal`](@ref) variate: if ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
 ``\\exp(X) \\sim \\operatorname{LogNormal}(\\mu,\\sigma)``. The probability density function is
 
 ```math
@@ -10,18 +26,15 @@ f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
 \\quad x > 0
 ```
 
-```julia
-LogNormal()          # Log-normal distribution with zero log-mean and unit scale
-LogNormal(mu)        # Log-normal distribution with log-mean mu and unit scale
-LogNormal(mu, sig)   # Log-normal distribution with log-mean mu and scale sig
+# Examples
 
-params(d)            # Get the parameters, i.e. (mu, sig)
-meanlogx(d)          # Get the mean of log(X), i.e. mu
-varlogx(d)           # Get the variance of log(X), i.e. sig^2
-stdlogx(d)           # Get the standard deviation of log(X), i.e. sig
+```julia
+LogNormal()
+LogNormal(μ=2, σ=3)
+LogNormal(mean=2, σ=3)
 ```
 
-External links
+# External links
 
 * [Log normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Log-normal_distribution)
 
@@ -36,9 +49,28 @@ end
 LogNormal(μ::T, σ::T) where {T<:Real} = LogNormal{T}(μ, σ)
 LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
 LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
-LogNormal(μ::Real) = LogNormal(μ, 1.0)
-LogNormal() = LogNormal(0.0, 1.0)
 
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:LogNormal} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+
+    (mean,σ) -> D(log(mean) - σ^2/2, σ)
+
+    function (mean,var)
+        σ² = log1p(var/mean^2)
+        μ = log(mean) - σ²/2
+        D(μ,sqrt(σ²))
+    end
+    function (mean,std)
+        σ² = log1p((std/mean)^2)
+        μ = log(mean) - σ²/2
+        D(μ,sqrt(σ²))
+    end              
+end
+
+    
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions

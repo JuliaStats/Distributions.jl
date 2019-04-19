@@ -10,9 +10,14 @@ end
 
 Triweight(μ::T, σ::T) where {T<:Real} = Triweight{T}(μ, σ)
 Triweight(μ::Real, σ::Real) = Triweight(promote(μ, σ)...)
-Triweight(μ::Integer, σ::Integer) = Triweight(Float64(μ), Float64(σ))
-Triweight(μ::Real) = Triweight(μ, 1.0)
-Triweight() = Triweight(0.0, 1.0)
+Triweight(μ::Integer, σ::Integer) = Triweight(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Triweight} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Triweight d.μ - d.σ d.μ + d.σ
 

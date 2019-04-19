@@ -519,7 +519,7 @@
   ]
 },
 {
-  "expr": "DiscreteUniform(6)",
+  "expr": "DiscreteUniform(b=6)",
   "dtype": "DiscreteUniform",
   "minimum": 0,
   "maximum": 6,
@@ -551,7 +551,7 @@
   ]
 },
 {
-  "expr": "DiscreteUniform(7)",
+  "expr": "DiscreteUniform(b=7)",
   "dtype": "DiscreteUniform",
   "minimum": 0,
   "maximum": 7,
@@ -980,7 +980,7 @@
   ]
 },
 {
-  "expr": "NegativeBinomial(6)",
+  "expr": "NegativeBinomial(r=6)",
   "dtype": "NegativeBinomial",
   "minimum": 0,
   "maximum": "inf",
@@ -1302,7 +1302,7 @@
   ]
 },
 {
-  "expr": "Skellam(2.0)",
+  "expr": "Skellam(mu=2.0)",
   "dtype": "Skellam",
   "minimum": "-inf",
   "maximum": "inf",

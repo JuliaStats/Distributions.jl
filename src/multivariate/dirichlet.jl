@@ -186,7 +186,7 @@ function _rand!(rng::AbstractRNG,
     n = length(x)
     α = d.alpha
     for i in 1:n
-        @inbounds s += (x[i] = rand(rng, Gamma(α[i])))
+        @inbounds s += (x[i] = rand(rng, Gamma(α=α[i])))
     end
     multiply!(x, inv(s)) # this returns x
 end

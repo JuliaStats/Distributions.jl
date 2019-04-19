@@ -10,9 +10,14 @@ end
 
 Biweight(μ::T, σ::T) where {T<:Real} = Biweight{T}(μ, σ)
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
-Biweight(μ::Integer, σ::Integer) = Biweight(Float64(μ), Float64(σ))
-Biweight(μ::Real) = Biweight(μ, 1.0)
-Biweight() = Biweight(0.0, 1.0)
+Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Biweight} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 

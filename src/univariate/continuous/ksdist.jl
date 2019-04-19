@@ -1,5 +1,15 @@
 """
-    KSDist(n)
+    KSDist <: ContinuousUnivariateDistribution
+
+Distribution of the (two-sided) Kolmogorov-Smirnoff statistic.
+
+# Constructors
+
+    KSDist(n=)
+
+Construct a `KSDist` distribution object of `n` observations.
+
+# Details
 
 Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
 
@@ -12,6 +22,9 @@ D_n = \\sup_x | \\hat{F}_n(x) -F(x)| \\sqrt(n)
 struct KSDist <: ContinuousUnivariateDistribution
     n::Int
 end
+
+@kwdispatch KSDist()
+@kwmethod KSDist(;n) = KSDist(n)
 
 @distr_support KSDist 1 / (2 * d.n) 1.0
 

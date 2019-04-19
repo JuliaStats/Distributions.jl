@@ -1,9 +1,28 @@
 using StatsFuns: nchisqcdf
 
 """
-    Skellam(μ1, μ2)
+    Skellam <: DiscreteUnivariateDistribution
 
-A *Skellam distribution* describes the difference between two independent [`Poisson`](@ref) variables, respectively with rate `μ1` and `μ2`.
+The *Skellam* probability distribution.
+
+# Constructors
+
+    Skellam(μ1=1, μ2=1)
+
+Construct a `Skellam` distribution object with rates `μ1` and `μ2`.
+
+    Skellam(μ=)
+
+Construct a `Skellam` distribution object with both rates `μ`.
+
+    Skellam(mean=,std=)
+    Skellam(mean=,var=)
+
+Construct a `Skellam` distribution object matching the relevant moments.
+
+# Details
+
+A Skellam distribution describes the difference between two independent [`Poisson`](@ref) variables, respectively with rate `μ1` and `μ2`.
 
 ```math
 P(X = k) = e^{-(\\mu_1 + \\mu_2)} \\left( \\frac{\\mu_1}{\\mu_2} \\right)^{k/2} I_k(2 \\sqrt{\\mu_1 \\mu_2}) \\quad \\text{for integer } k
@@ -11,14 +30,13 @@ P(X = k) = e^{-(\\mu_1 + \\mu_2)} \\left( \\frac{\\mu_1}{\\mu_2} \\right)^{k/2} 
 
 where ``I_k`` is the modified Bessel function of the first kind.
 
-```julia
-Skellam(mu1, mu2)   # Skellam distribution for the difference between two Poisson variables,
-                    # respectively with expected values mu1 and mu2.
+# Examples
 
-params(d)           # Get the parameters, i.e. (mu1, mu2)
+```julia
+Skellam(μ1=3, μ2=4)
 ```
 
-External links:
+# External links
 
 * [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
 """
@@ -35,9 +53,17 @@ end
 
 Skellam(μ1::T, μ2::T) where {T<:Real} = Skellam{T}(μ1, μ2)
 Skellam(μ1::Real, μ2::Real) = Skellam(promote(μ1, μ2)...)
-Skellam(μ1::Integer, μ2::Integer) = Skellam(Float64(μ1), Float64(μ2))
-Skellam(μ::Real) = Skellam(μ, μ)
-Skellam() = Skellam(1.0, 1.0)
+Skellam(μ1::Integer, μ2::Integer) = Skellam(float(μ1), float(μ2))
+
+
+@kwdispatch (::Type{D})(;mu1=>μ1,mu2=>μ2,mu=>μ) where {D<:Skellam} begin
+    () -> D(1.0,1.0)
+    (μ) -> D(μ,μ)
+    (μ1,μ2) -> D(μ1,μ2)
+
+    (mean,var) -> D((var+mean)/2, (var-mean)/2)
+    (mean,std) -> D((std^2+mean)/2, (std^2-mean)/2)
+end
 
 @distr_support Skellam -Inf Inf
 

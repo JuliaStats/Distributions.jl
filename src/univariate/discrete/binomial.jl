@@ -1,24 +1,34 @@
 """
-    Binomial(n,p)
+    Binomial <: DiscreteUnivariateDistribution
+    
+The *binomial* probability distribution
 
-A *Binomial distribution* characterizes the number of successes in a sequence of independent trials. It has two parameters: `n`, the number of trials, and `p`, the probability of success in an individual trial, with the distribution:
+# Constructors
+
+    Binomial(n=1,p=0.5)
+
+Construct a `Binomial` distribution object with `n` trials and probability `p` of success.
+
+    Binomial(n=, mean=)
+
+Construct a `Binomial` distribution object matching the `mean`.
+
+# Details
+
+A binomial distribution characterizes the number of successes in a sequence of independent trials. It has two parameters: `n`, the number of trials, and `p`, the probability of success in an individual trial, with the distribution:
 
 ```math
 P(X = k) = {n \\choose k}p^k(1-p)^{n-k},  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
 ```
 
-```julia
-Binomial()      # Binomial distribution with n = 1 and p = 0.5
-Binomial(n)     # Binomial distribution for n trials with success rate p = 0.5
-Binomial(n, p)  # Binomial distribution for n trials with success rate p
+# Examples
 
-params(d)       # Get the parameters, i.e. (n, p)
-ntrials(d)      # Get the number of trials, i.e. n
-succprob(d)     # Get the success rate, i.e. p
-failprob(d)     # Get the failure rate, i.e. 1 - p
+```julia
+Binomial()
+Binomial(n=10, p=0.2)
 ```
 
-External links:
+# External links
 
 * [Binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Binomial_distribution)
 """
@@ -35,9 +45,16 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Binomial(n::Integer, p::T) where {T<:Real} = Binomial{T}(n, p)
-Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
-Binomial(n::Integer) = Binomial(n, 0.5)
-Binomial() = Binomial(1, 0.5)
+Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
+
+@kwdispatch (::Type{D})(;) where {D<:Binomial} begin
+    () -> D(1,0.5)
+    (n) -> D(n,0.5)
+    (p) -> D(1,p)
+    (n,p) -> D(n,p)
+
+    (n,mean) -> D(n, mean/n)
+end
 
 @distr_support Binomial 0 d.n
 

@@ -1,11 +1,23 @@
 """
-    Geometric(p)
+    Geometric <: DiscreteUnivariateDistribution
 
-A *Geometric distribution* characterizes the number of failures before the first success in a sequence of independent Bernoulli trials with success rate `p`.
+The *geometric* probability distribution
+
+# Constructors
+
+    Geometric(p=0.5)
+
+Construct a `Geometric` distribution object with probability of success `p`.
+
+# Details
+
+A geometric distribution characterizes the number of failures before the first success in a sequence of independent Bernoulli trials with success rate `p`.
 
 ```math
 P(X = k) = p (1 - p)^k, \\quad \\text{for } k = 0, 1, 2, \\ldots.
 ```
+
+# Examples
 
 ```julia
 Geometric()    # Geometric distribution with success rate 0.5
@@ -16,7 +28,7 @@ succprob(d)    # Get the success rate, i.e. p
 failprob(d)    # Get the failure rate, i.e. 1 - p
 ```
 
-External links
+# External links
 
 *  [Geometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Geometric_distribution)
 
@@ -32,7 +44,11 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Geometric(p::T) where {T<:Real} = Geometric{T}(p)
-Geometric() = Geometric(0.5)
+
+@kwdispatch (::Type{D})(;) where {D<:Geometric} begin
+    () -> D(0.5)
+    (p) -> D(p)
+end
 
 @distr_support Geometric 0 Inf
 

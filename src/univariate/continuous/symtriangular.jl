@@ -1,20 +1,32 @@
 """
-    SymTriangularDist(μ,σ)
+    SymTriangularDist <: ContinuousUnivariateDistribution
 
-The *Symmetric triangular distribution* with location `μ` and scale `σ` has probability density function
+The *symmetric triangular* distribution.
+
+# Constructors
+
+    SymTriangularDist(μ|mu|mean|location=0, σ|sigma|scale=1)
+
+Construct a `SymTriangularDist` distribution object with location `μ` and scale `σ`.
+
+    SymTriangularDist(μ|mu|mean|location=0, std=)
+    SymTriangularDist(μ|mu|mean|location=0, var=)
+
+Construct a `SymTriangularDist` distribution object matching the relevant parameters and moments.
+
+# Details
+
+The symmetric triangular distribution with location `μ` and scale `σ` has probability density function
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{\\sigma} \\left( 1 - \\left| \\frac{x - \\mu}{\\sigma} \\right| \\right), \\quad \\mu - \\sigma \\le x \\le \\mu + \\sigma
 ```
 
-```julia
-SymTriangularDist()         # Symmetric triangular distribution with zero location and unit scale
-SymTriangularDist(u)        # Symmetric triangular distribution with location u and unit scale
-SymTriangularDist(u, s)     # Symmetric triangular distribution with location u and scale s
+# Examples
 
-params(d)       # Get the parameters, i.e. (u, s)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. s
+```julia
+SymTriangularDist()
+SymTriangularDist(μ=2, σ=3)
 ```
 """
 struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
@@ -29,9 +41,19 @@ end
 
 SymTriangularDist(μ::T, σ::T) where {T<:Real} = SymTriangularDist{T}(μ, σ)
 SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
-SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(Float64(μ), Float64(σ))
-SymTriangularDist(μ::Real) = SymTriangularDist(μ, 1.0)
-SymTriangularDist() = SymTriangularDist(0.0, 1.0)
+SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(float(μ), float(σ))
+
+@kwdispatch (::Type{D})(;mu=>μ, mean=>μ, location=>μ, sigma=>σ, scale=>σ) where {D<:SymTriangularDist} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+
+    (std) -> D(0,sqrt(6)*std)
+    (μ,std) -> D(μ,sqrt(6)*std)
+    (var) -> D(0,sqrt(6*var))
+    (μ,var) -> D(μ,sqrt(6*var))
+end
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 

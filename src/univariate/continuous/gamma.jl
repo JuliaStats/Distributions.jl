@@ -1,7 +1,28 @@
 """
-    Gamma(α,θ)
+    Gamma <: ContinuousUnivariateDistribution
 
-The *Gamma distribution* with shape parameter `α` and scale `θ` has probability density
+The *gamma* probability distribution.
+
+# Constructors
+
+    Gamma(α|alpha|shape=1, θ|theta|scale=1)
+
+Construct a `Gamma` distribution object with shape `α` and scale `θ`.
+
+    Gamma(α|alpha|shape=1, β|beta|rate=1)
+
+Construct a `Gamma` distribution object with shape `α` and rate `β = 1/θ`.
+
+    Gamma(mean=, α|alpha|shape=)
+    Gamma(mean=, θ|theta|scale=)
+    Gamma(mean=, β|beta|rate=)
+    Gamma(mean=, std=)
+    Gamma(mean=, var=)
+
+Construct a `Gamma` distribution object matching the relevant moments and parameters.
+
+# Details
+A gamma distribution with shape parameter `α` and scale `θ` has probability density
 function
 
 ```math
@@ -9,17 +30,14 @@ f(x; \\alpha, \\theta) = \\frac{x^{\\alpha-1} e^{-x/\\theta}}{\\Gamma(\\alpha) \
 \\quad x > 0
 ```
 
+# Examples
 ```julia
-Gamma()          # Gamma distribution with unit shape and unit scale, i.e. Gamma(1, 1)
-Gamma(α)         # Gamma distribution with shape α and unit scale, i.e. Gamma(α, 1)
-Gamma(α, θ)      # Gamma distribution with shape α and scale θ
-
-params(d)        # Get the parameters, i.e. (α, θ)
-shape(d)         # Get the shape parameter, i.e. α
-scale(d)         # Get the scale parameter, i.e. θ
+Gamma()
+Gamma(α=3)
+Gamma(α=3, θ=2)
 ```
 
-External links
+# External links
 
 * [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
 
@@ -36,9 +54,30 @@ end
 
 Gamma(α::T, θ::T) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
-Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
-Gamma(α::Real) = Gamma(α, 1.0)
-Gamma() = Gamma(1.0, 1.0)
+Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
+
+@kwdispatch (::Type{D})(;alpha=>α, shape=>α, theta=>θ, scale=>θ, beta=>β, rate=>β) where {D<:Gamma} begin
+    () -> D(1,1)
+    (α) -> D(α,1)
+    
+    (θ) -> D(1,θ)
+    (α,θ) -> D(α,θ)
+
+    (β) -> D(1,inv(β))
+    (α,β) -> D(α,inv(β))
+    
+    (mean, α) -> D(α, mean/α)
+    (mean, θ) -> D(mean/θ, θ)
+
+    function (mean, std)
+        θ=std^2/mean
+        D(mean/θ, θ)
+    end
+    function (mean, var)
+        θ=var/mean
+        D(mean/θ, θ)
+    end
+end
 
 @distr_support Gamma 0.0 Inf
 

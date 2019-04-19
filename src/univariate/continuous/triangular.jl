@@ -1,5 +1,15 @@
 """
-    TriangularDist(a,b,c)
+    TriangularDist <: ContinuousUnivariateDistribution
+
+The *triangular* probability distribution.
+
+# Constructors
+
+    TriangularDist(a=,b=,c=middle(a,b))
+
+Construct a `TriangularDist` object with lower limit `a`, upper limit `b` and mode `c`.
+
+# Details
 
 The *triangular distribution* with lower limit `a`, upper limit `b` and mode `c` has probability density function
 
@@ -12,17 +22,14 @@ f(x; a, b, c)= \\begin{cases}
         \\end{cases}
 ```
 
-```julia
-TriangularDist(a, b)        # Triangular distribution with lower limit a, upper limit b, and mode (a+b)/2
-TriangularDist(a, b, c)     # Triangular distribution with lower limit a, upper limit b, and mode c
+# Examples
 
-params(d)       # Get the parameters, i.e. (a, b, c)
-minimum(d)      # Get the lower bound, i.e. a
-maximum(d)      # Get the upper bound, i.e. b
-mode(d)         # Get the mode, i.e. c
+```julia
+TriangularDist(a=-1, b=1)
+TriangularDist(a=0, b=3, c=1)
 ```
 
-External links
+# External links
 
 * [Triangular distribution on Wikipedia](http://en.wikipedia.org/wiki/Triangular_distribution)
 
@@ -37,18 +44,17 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
         @check_args(TriangularDist, a <= c <= b)
         new{T}(a, b, c)
     end
-    function TriangularDist{T}(a::T, b::T) where T
-        @check_args(TriangularDist, a < b)
-        new{T}(a, b, middle(a, b))
-    end
 end
 
 TriangularDist(a::T, b::T, c::T) where {T<:Real} = TriangularDist{T}(a, b, c)
 TriangularDist(a::Real, b::Real, c::Real) = TriangularDist(promote(a, b, c)...)
-TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(Float64(a), Float64(b), Float64(c))
-TriangularDist(a::T, b::T) where {T<:Real} = TriangularDist{T}(a, b)
-TriangularDist(a::Real, b::Real) = TriangularDist(promote(a, b)...)
-TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
+TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(float(a), float(b), float(c))
+
+
+@kwdispatch (::Type{D})(;) where {D<:TriangularDist} begin
+    (a,b,c) -> D(a,b,c)
+    (a,b) -> D(a,b,middle(a,b))
+end
 
 @distr_support TriangularDist d.a d.b
 

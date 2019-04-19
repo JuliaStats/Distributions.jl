@@ -1,24 +1,36 @@
 """
-    Gumbel(μ, θ)
+    Gumbel <: ContinuousUnivariateDistribution
 
-The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
+The *Gumbel* or *double exponential* probability distribution.
+
+# Constructors
+
+    Gumbel(μ|mu|location=0, θ|theta|scale=1)
+
+Construct a Gumbel distribution with location parameter `μ` and scale `θ`.
+
+    Gumbel(mean=,std=)
+    Gumbel(mean=,var=)
+
+Construct a Gumbel distribution matching the relevant moments.
+
+# Details
+
+The Gumbel distribution  with location `μ` and scale `θ` has probability density function
 
 ```math
 f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
 \\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
 ```
 
-```julia
-Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)
-Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1)
-Gumbel(u, b)        # Gumbel distribution with location u and scale b
+# Examples
 
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+```julia
+Gumbel()
+Gumbel(μ=2,θ=3)
 ```
 
-External links
+# External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
@@ -32,8 +44,24 @@ end
 Gumbel(μ::T, θ::T) where {T<:Real} = Gumbel{T}(μ, θ)
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
 Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
-Gumbel(μ::Real) = Gumbel(μ, 1.0)
-Gumbel() = Gumbel(0.0, 1.0)
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, theta=>θ, scale=>θ) where {D<:Gumbel} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (θ) -> D(0,θ)
+    (μ,θ) -> D(μ,θ)
+
+    function (mean, std)
+        θ = sqrt(6)*std/π
+        μ = mean - θ * MathConstants.γ
+        D(μ, θ)
+    end
+    function (mean, var)
+        θ = sqrt(6*var)/π
+        μ = mean - θ * MathConstants.γ
+        D(μ, θ)
+    end
+end
 
 @distr_support Gumbel -Inf Inf
 

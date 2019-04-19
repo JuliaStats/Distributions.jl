@@ -1,7 +1,22 @@
 """
-    Beta(α,β)
+    Beta <: ContinuousUnivariateDistribution
 
-The *Beta distribution* has probability density function
+The *beta* probability distribution.
+
+# Constructors
+
+    Beta(α|alpha=1, β|beta=1)
+
+Construct a `Beta` distribution object with parameters `α` and `β`.
+
+    Beta(mean=,var=)
+    Beta(mean=,std=)
+
+Construct a `Beta` distribution object matching the relevant moments.
+
+# Details
+
+The beta distribution has probability density function
 
 ```math
 f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
@@ -12,16 +27,15 @@ The Beta distribution is related to the [`Gamma`](@ref) distribution via the
 property that if ``X \\sim \\operatorname{Gamma}(\\alpha)`` and ``Y \\sim \\operatorname{Gamma}(\\beta)``
 independently, then ``X / (X + Y) \\sim Beta(\\alpha, \\beta)``.
 
+# Examples
 
 ```julia
-Beta()        # equivalent to Beta(1, 1)
-Beta(a)       # equivalent to Beta(a, a)
-Beta(a, b)    # Beta distribution with shape parameters a and b
-
-params(d)     # Get the parameters, i.e. (a, b)
+Beta()
+Beta(α=3, β=4)
+Beta(mean=0.2, std=0.1)
 ```
 
-External links
+# External links
 
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
@@ -38,9 +52,27 @@ end
 
 Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
-Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1, 1)
+Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
+
+@kwdispatch (::Type{D})(;alpha=>α, beta=>β) where {D<:Beta} begin
+    () -> D(1,1)
+    (β) -> D(1,β)
+    (α) -> D(α,1)
+    (α,β) -> D(α,β)
+
+    function (mean, var)
+        @check_args(Beta, 0 < mean < 1)
+        @check_args(Beta, 0 < var < mean*(1-mean))
+        U = (mean*(1-mean))/var - 1
+        α = mean*U
+        β = U-α
+        D(α,β)
+    end
+
+    function (mean, std)
+        D(mean=mean,var=sqrt(std))
+    end
+end
 
 @distr_support Beta 0.0 1.0
 

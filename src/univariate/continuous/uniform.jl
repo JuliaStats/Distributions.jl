@@ -1,24 +1,34 @@
 """
     Uniform(a,b)
 
-The *continuous uniform distribution* over an interval ``[a, b]`` has probability density function
+The *continuous uniform* distribution.
+
+# Constructors
+
+    Uniform(a=,b=)
+
+Construct `Uniform` distribution object over the interval ``[a, b]``.
+
+    Uniform()
+
+Construct `Uniform` distribution object over the interval ``[0,1]``.
+
+# Details
+
+The continuous uniform distribution over an interval ``[a, b]`` has probability density function
 
 ```math
 f(x; a, b) = \\frac{1}{b - a}, \\quad a \\le x \\le b
 ```
 
-```julia
-Uniform()        # Uniform distribution over [0, 1]
-Uniform(a, b)    # Uniform distribution over [a, b]
+# Examples
 
-params(d)        # Get the parameters, i.e. (a, b)
-minimum(d)       # Get the lower bound, i.e. a
-maximum(d)       # Get the upper bound, i.e. b
-location(d)      # Get the location parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b - a
+```julia
+Uniform()
+Uniform(a=-1, b=1)
 ```
 
-External links
+# External links
 
 * [Uniform distribution (continuous) on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(continuous))
 
@@ -32,8 +42,12 @@ end
 
 Uniform(a::T, b::T) where {T<:Real} = Uniform{T}(a, b)
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
-Uniform() = Uniform(0.0, 1.0)
+Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
+
+@kwdispatch (::Type{D})() where {D<:Uniform} begin
+    () -> D(0,1)
+    (a,b) -> D(a,b)
+end
 
 @distr_support Uniform d.a d.b
 

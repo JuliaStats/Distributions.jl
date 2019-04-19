@@ -1,23 +1,32 @@
 """
-    TDist(ν)
+    TDist <: ContinuousUnivariateDistribution
 
-The *Students T distribution* with `ν` degrees of freedom has probability density function
+The *Student's t* probability distribution
+
+# Constructors 
+
+    TDist(ν|nu|dof=)
+
+Construct a `TDist` object with `ν` degrees of freedom.
+
+# Details
+
+The Student's t-distribution has probability density function
 
 ```math
 f(x; d) = \\frac{1}{\\sqrt{d} B(1/2, d/2)}
 \\left( 1 + \\frac{x^2}{d} \\right)^{-\\frac{d + 1}{2}}
 ```
 
-```julia
-TDist(d)      # t-distribution with d degrees of freedom
+# Examples
 
-params(d)     # Get the parameters, i.e. (d,)
-dof(d)        # Get the degrees of freedom, i.e. d
+```julia
+TDist(ν=4)
 ```
 
-External links
+# External links
 
-[Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
+- [Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
 
 """
 struct TDist{T<:Real} <: ContinuousUnivariateDistribution
@@ -27,7 +36,11 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 TDist(ν::T) where {T<:Real} = TDist{T}(ν)
-TDist(ν::Integer) = TDist(Float64(ν))
+TDist(ν::Integer) = TDist(float(ν))
+
+@kwdispatch (::Type{D})(;nu=>ν, dof=>ν) where {D<:TDist} begin
+    (ν) -> D(ν)
+end
 
 @distr_support TDist -Inf Inf
 

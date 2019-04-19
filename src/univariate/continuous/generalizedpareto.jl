@@ -1,7 +1,16 @@
 """
-    GeneralizedPareto(μ, σ, ξ)
+    GeneralizedPareto <: ContinuousUnivariateDistribution
 
-The *Generalized Pareto distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
+The *generalized Pareto* probability distribution.
+
+# Constructors
+
+    GeneralizedPareto(μ|mu|location=0, σ|sigma|scale=1, ξ|xi|shape=1)
+
+Construct a `GeneralizedPareto` distribution object with shape parameter `ξ`, scale `σ` and location `μ`.
+
+# Details
+The generalized Pareto distribution has probability density function
 
 ```math
 f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
@@ -14,18 +23,12 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
     \\end{cases}
 ```
 
+# Details
 ```julia
-GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
-GeneralizedPareto(k, s)         # Generalized Pareto distribution with shape k and scale s, i.e. GeneralizedPareto(0, k, s)
-GeneralizedPareto(m, k, s)      # Generalized Pareto distribution with shape k, scale s and location m.
-
-params(d)       # Get the parameters, i.e. (m, s, k)
-location(d)     # Get the location parameter, i.e. m
-scale(d)        # Get the scale parameter, i.e. s
-shape(d)        # Get the shape parameter, i.e. k
+GeneralizedPareto()
 ```
 
-External links
+# External links
 
 * [Generalized Pareto distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_Pareto_distribution)
 
@@ -39,16 +42,24 @@ struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
         @check_args(GeneralizedPareto, σ > zero(σ))
         new{T}(μ, σ, ξ)
     end
-
 end
 
 GeneralizedPareto(μ::T, σ::T, ξ::T) where {T<:Real} = GeneralizedPareto{T}(μ, σ, ξ)
 GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, σ, ξ)...)
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedPareto(Float64(μ), Float64(σ), Float64(ξ))
+    GeneralizedPareto(float(μ), float(σ), float(ξ))
 end
-GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
-GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
+
+@kwdispatch (::Type{D})(;mu=>μ, location=>μ, sigma=>σ, scale=>σ, xi=>ξ, shape=>ξ) where {D<:GeneralizedPareto} begin
+    () -> D(0,1,1)
+    (μ) -> D(μ,1,1)
+    (σ) -> D(0,σ,1)
+    (ξ) -> D(0,1,ξ)
+    (μ,σ) -> D(μ,σ,1)
+    (μ,ξ) -> D(μ,1,ξ)
+    (σ,ξ) -> D(0,σ,ξ)
+    (μ,σ,ξ) -> D(μ,σ,ξ)
+end
 
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf

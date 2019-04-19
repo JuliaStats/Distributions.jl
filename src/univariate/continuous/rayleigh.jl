@@ -1,7 +1,20 @@
 """
-    Rayleigh(σ)
+    Rayleigh <: ContinuousUnivariateDistribution
 
-The *Rayleigh distribution* with scale `σ` has probability density function
+The *Rayleigh* probability distribution.
+
+# Constructors
+
+    Rayleigh(σ|sigma|scale=1)
+
+Construct a `Rayleigh` distribution object with scale parameter `σ`.
+
+    Rayleigh(mean=)
+
+Construct a `Rayleigh` distribution object matching the `mean`.
+
+# Details
+The Rayleigh distribution with scale `σ` has probability density function
 
 ```math
 f(x; \\sigma) = \\frac{x}{\\sigma^2} e^{-\\frac{x^2}{2 \\sigma^2}}, \\quad x > 0
@@ -11,14 +24,11 @@ It is related to the [`Normal`](@ref) distribution via the property that if ``X,
 ``\\sqrt{X^2 + Y^2} \\sim \\operatorname{Rayleigh}(\\sigma)``.
 
 ```julia
-Rayleigh()       # Rayleigh distribution with unit scale, i.e. Rayleigh(1)
-Rayleigh(s)      # Rayleigh distribution with scale s
-
-params(d)        # Get the parameters, i.e. (s,)
-scale(d)         # Get the scale parameter, i.e. s
+Rayleigh()
+Rayleigh(σ=2)
 ```
 
-External links
+# External links
 
 * [Rayleigh distribution on Wikipedia](http://en.wikipedia.org/wiki/Rayleigh_distribution)
 
@@ -30,8 +40,13 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Rayleigh(σ::T) where {T<:Real} = Rayleigh{T}(σ)
-Rayleigh(σ::Integer) = Rayleigh(Float64(σ))
-Rayleigh() = Rayleigh(1.0)
+Rayleigh(σ::Integer) = Rayleigh(float(σ))
+
+@kwdispatch (::Type{D})(;sigma=>σ, scale=>σ) where {D<:Rayleigh} begin
+    () -> D(1)
+    (σ) -> D(σ)
+    (mean) -> D(mean/sqrthalfπ)
+end
 
 @distr_support Rayleigh 0.0 Inf
 

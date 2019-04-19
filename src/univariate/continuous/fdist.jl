@@ -1,7 +1,17 @@
 """
-    FDist(ν1, ν2)
+    FDist <: ContinuousUnivariateDistribution
 
-The *F distribution* has probability density function
+The *F* probability distribution.
+
+# Constructors
+
+    FDist(ν1|nu1|dof1=, ν2|nu2|dof2=)
+
+Construct an `FDist` distribution object with `ν1` and `ν2` degrees of freedom.
+
+# Details
+
+The F distribution has probability density function
 
 ```math
 f(x; \\nu_1, \\nu_2) = \\frac{1}{x B(\\nu_1/2, \\nu_2/2)}
@@ -13,12 +23,10 @@ It is related to the [`Chisq`](@ref) distribution via the property that if
 ``(X_1/\\nu_1) / (X_2 / \\nu_2) \\sim \\operatorname{FDist}(\\nu_1, \\nu_2)``.
 
 ```julia
-FDist(ν1, ν2)     # F-Distribution with parameters ν1 and ν2
-
-params(d)         # Get the parameters, i.e. (ν1, ν2)
+FDist(ν1=3, ν2=4)
 ```
 
-External links
+# External links
 
 * [F distribution on Wikipedia](http://en.wikipedia.org/wiki/F-distribution)
 """
@@ -33,8 +41,12 @@ struct FDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 FDist(ν1::T, ν2::T) where {T<:Real} = FDist{T}(ν1, ν2)
-FDist(ν1::Integer, ν2::Integer) = FDist(Float64(ν1), Float64(ν2))
+FDist(ν1::Integer, ν2::Integer) = FDist(float(ν1), float(ν2))
 FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
+
+@kwdispatch (::Type{D})(;nu1=>ν1,dof1=>ν1,nu2=>ν2,dof2=>ν2) where {D<:FDist} begin
+    (ν1,ν2) -> D(ν1,ν2)
+end
 
 @distr_support FDist 0.0 Inf
 

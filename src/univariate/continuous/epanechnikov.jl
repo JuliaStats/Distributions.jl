@@ -1,5 +1,7 @@
 """
-    Epanechnikov(μ, σ)
+    Epanechnikov(;μ=0, σ=1)
+    Epanechnikov(;mu=0, sigma=1)
+
 """
 struct Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
@@ -10,10 +12,14 @@ end
 
 Epanechnikov(μ::T, σ::T) where {T<:Real} = Epanechnikov{T}(μ, σ)
 Epanechnikov(μ::Real, σ::Real) = Epanechnikov(promote(μ, σ)...)
-Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(Float64(μ), Float64(σ))
-Epanechnikov(μ::Real) = Epanechnikov(μ, 1.0)
-Epanechnikov() = Epanechnikov(0.0, 1.0)
+Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(float(μ), float(σ))
 
+@kwdispatch (::Type{D})(;mu=>μ, sigma=>σ) where {D<:Epanechnikov} begin
+    () -> D(0,1)
+    (μ) -> D(μ,1)
+    (σ) -> D(0,σ)
+    (μ,σ) -> D(μ,σ)
+end
 
 @distr_support Epanechnikov d.μ - d.σ d.μ + d.σ
 

@@ -1,24 +1,36 @@
 """
-    InverseGaussian(μ,λ)
+    InverseGaussian <: ContinuousUnivariateDistribution
 
-The *inverse Gaussian distribution* with mean `μ` and shape `λ` has probability density function
+The *inverse Gaussian* probability distribution
+
+# Constructors
+
+    InverseGaussian(μ|mu|mean=1, λ|lambda|shape=1)
+
+Construct an `InverseGaussian` distribution object with mean `μ` and shape `λ`.
+
+    InverseGaussian(μ|mu|mean=, std=)
+    InverseGaussian(μ|mu|mean=, var=)
+
+Construct an `InverseGaussian` distribution object matching the relevant moments.
+
+# Details
+
+The inverse Gaussian distribution has probability density function
 
 ```math
 f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
 \\exp\\!\\left(\\frac{-\\lambda(x-\\mu)^2}{2\\mu^2x}\\right), \\quad x > 0
 ```
 
-```julia
-InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1, 1)
-InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1)
-InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+# Examples
 
-params(d)           # Get the parameters, i.e. (mu, lambda)
-mean(d)             # Get the mean parameter, i.e. mu
-shape(d)            # Get the shape parameter, i.e. lambda
+```julia
+InverseGaussian()
+InverseGaussian(mean=2, std=3)
 ```
 
-External links
+# External links
 
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
@@ -35,9 +47,18 @@ end
 
 InverseGaussian(μ::T, λ::T) where {T<:Real} = InverseGaussian{T}(μ, λ)
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
-InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64(λ))
-InverseGaussian(μ::Real) = InverseGaussian(μ, 1.0)
-InverseGaussian() = InverseGaussian(1.0, 1.0)
+InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
+
+@kwdispatch (::Type{D})(;mu=>μ, mean=>μ, lambda=>λ, shape=>λ) where {D<:InverseGaussian} begin
+    () -> D(1,1)
+    (μ) -> D(μ,1)
+    (λ) -> D(1,λ)
+    (μ,λ) -> D(μ,λ)
+
+    (μ,var) -> D(μ, μ^3/var)
+    (μ,std) -> D(μ, μ^3/std^2)
+end
+
 
 @distr_support InverseGaussian 0.0 Inf
 

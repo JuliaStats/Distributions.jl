@@ -1,21 +1,29 @@
 """
-    Poisson(λ)
+    Poisson <: DiscreteUnivariateDistribution
 
-A *Poisson distribution* descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
+The *Poisson* probability distribution.
+
+# Constructors
+
+    Poisson(λ|lambda|rate|mean=1.0)
+
+Construct a `Poisson` distribution object with rate parameter `λ`.
+
+# Details
+
+A Poisson distribution descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
 
 ```math
 P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
 ```
 
-```julia
-Poisson()        # Poisson distribution with rate parameter 1
-Poisson(lambda)       # Poisson distribution with rate parameter lambda
+# Examples
 
-params(d)        # Get the parameters, i.e. (λ,)
-mean(d)          # Get the mean arrival rate, i.e. λ
+```julia
+Poisson(λ=5)
 ```
 
-External links:
+# External links
 
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
@@ -27,8 +35,12 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 Poisson(λ::T) where {T<:Real} = Poisson{T}(λ)
-Poisson(λ::Integer) = Poisson(Float64(λ))
-Poisson() = Poisson(1.0)
+Poisson(λ::Integer) = Poisson(float(λ))
+
+@kwdispatch (::Type{D})(;lambda=>λ,rate=>λ,mean=>λ) where {D<:Poisson} begin
+    () -> D(1.0)
+    (λ) -> D(λ)
+end
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
