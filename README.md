@@ -22,3 +22,47 @@ A Julia package for probability distributions and associated functions. Particul
 #### Resources
 
 * **Documentation**: <https://JuliaStats.github.io/Distributions.jl/stable/>
+
+## Citing
+
+Use the most recent DOI badge above, cite as:
+```
+@misc{dahua_lin_2019_2647520,
+  author       = {Dahua Lin and
+                  John Myles White and
+                  Simon Byrne and
+                  Douglas Bates and
+                  Andreas Noack and
+                  John Pearson and
+                  Alex Arslan and
+                  Kevin Squire and
+                  David Anthoff and
+                  Theodore Papamarkou and
+                  Mathieu Besançon and
+                  Jan Drugowitsch and
+                  Moritz Schauer and
+                  Avik Sengupta and
+                  Brian J Smith and
+                  Giuseppe Ragusa and
+                  Alexey Stukalov and
+                  Gord Stephen and
+                  Christoph Dann and
+                  micklat and
+                  Martin O'Leary and
+                  Mike J Innes and
+                  Jiahao Chen and
+                  Iain Dunning and
+                  Gustavo Lacerda and
+                  Yichao Yu and
+                  Simon Kornblith and
+                  Richard Reeve and
+                  Rory Finnegan and
+                  Kai Xu},
+  title        = {{JuliaStats/Distributions.jl: Registered version 
+                   with Project file}},
+  month        = apr,
+  year         = 2019,
+  doi          = {10.5281/zenodo.2647520},
+  url          = {https://doi.org/10.5281/zenodo.2647520}
+}
+```
