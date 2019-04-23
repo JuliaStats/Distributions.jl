@@ -41,25 +41,8 @@ Use the most recent DOI badge above, cite as:
                   Mathieu Besançon and
                   Jan Drugowitsch and
                   Moritz Schauer and
-                  Avik Sengupta and
-                  Brian J Smith and
-                  Giuseppe Ragusa and
-                  Alexey Stukalov and
-                  Gord Stephen and
-                  Christoph Dann and
-                  micklat and
-                  Martin O'Leary and
-                  Mike J Innes and
-                  Jiahao Chen and
-                  Iain Dunning and
-                  Gustavo Lacerda and
-                  Yichao Yu and
-                  Simon Kornblith and
-                  Richard Reeve and
-                  Rory Finnegan and
-                  Kai Xu},
-  title        = {{JuliaStats/Distributions.jl: Registered version 
-                   with Project file}},
+                  other contributors},
+  title        = {{JuliaStats/Distributions.jl: a Julia package for probability distributions and associated functions}},
   month        = apr,
   year         = 2019,
   doi          = {10.5281/zenodo.2647520},
