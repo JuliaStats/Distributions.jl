@@ -1,6 +1,6 @@
 module Distributions
 
-using StatsBase, PDMats, StatsFuns, Statistics
+using StatsBase, PDMats, GSL, StatsFuns, Statistics
 
 import QuadGK: quadgk
 import Base: size, eltype, length, convert, show, getindex, rand
@@ -18,6 +18,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   params, params!
 
 import PDMats: dim, PDMat, invquad
+import GSL: sf_gamma_inc_P
 
 using SpecialFunctions
 
@@ -87,6 +88,7 @@ export
     FullNormalCanon,
     Gamma,
     DiscreteNonParametric,
+    GeneralizedGaussian,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
@@ -306,7 +308,7 @@ Supported distributions:
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
-    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
+    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedGaussian, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
