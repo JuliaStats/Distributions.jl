@@ -39,7 +39,7 @@ end
 GeneralizedGaussian(μ::T,α::T,β::T) where {T<:Real} = GeneralizedGaussian{T}(μ,α,β)
 GeneralizedGaussian(μ::Integer,α::Integer,β::Integer) = GeneralizedGaussian(Float64(μ),Float64(α),Float64(β))
 GeneralizedGaussian(β::Float64) = GeneralizedGaussian(0.0, 1.0, β)
-GeneralizedGaussian() = GeneralizedGaussian(0.0, 1.4142, 2.0) # approximate scale with unity std deviation and shape 2
+GeneralizedGaussian() = GeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
 
 #### Conversions
 
