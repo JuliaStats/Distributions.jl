@@ -80,26 +80,21 @@ function pdf(d::GeneralizedGaussian{T}, x::Real) where T<:Real
 end
 
 function cdf(d::GeneralizedGaussian{T}, x::Real) where T<:Real
-    """
-    To calculate the CDF, the incomplete gamma function is required. To
-    access this, the pgamma.c file in Rmath us used. The CDF on wikipedia
-    indicates the normalization by Γ(1/β), with a 0.5 coefficient.
-     """
+
+    #    To calculate the CDF, the incomplete gamma function is required. The CDF
+    #   of the Gamma distribution provides this, with the necessary 1/Γ(a) normalization.
 
     (μ, α, β) = params(d)
-    return 1/2 + sign(x - μ) * (pgamma( (1 / β), (abs(x - μ) / α)^β ) / 2)
+    return 1/2 + sign(x - μ) * ( cdf( Gamma( (1 / β), 1.0), (abs(x - μ) / α)^β) / 2 )
 end
 
 #### Sampling
 function rand(rng::AbstractRNG, d::GeneralizedGaussian)
-    """
-    Sampling Procecdure from [1]
-
-    [1]  Gonzalez-Farias, G., Molina, J. A. D., & Rodríguez-Dagnino, R. M. (2009).
-    Efficiency of the approximated shape parameter estimator in the generalized
-    Gaussian distribution. IEEE Transactions on Vehicular Technology, 58(8),
-    4214-4223.
-    """
+    #   Sampling Procecdure from [1]
+    #   [1]  Gonzalez-Farias, G., Molina, J. A. D., & Rodríguez-Dagnino, R. M. (2009).
+    #   Efficiency of the approximated shape parameter estimator in the generalized
+    #   Gaussian distribution. IEEE Transactions on Vehicular Technology, 58(8),
+    #   4214-4223.
 
     # utilizing the sampler from the Gamma distribution.
     g = Gamma((1 / d.β), 1)

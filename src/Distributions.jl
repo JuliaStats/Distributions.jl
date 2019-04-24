@@ -1,6 +1,6 @@
 module Distributions
 
-using StatsBase, PDMats, Rmath, StatsFuns, Statistics
+using StatsBase, PDMats, StatsFuns, Statistics
 
 import QuadGK: quadgk
 import Base: size, eltype, length, convert, show, getindex, rand
@@ -18,7 +18,6 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   params, params!
 
 import PDMats: dim, PDMat, invquad
-import Rmath: pgamma
 
 using SpecialFunctions
 
