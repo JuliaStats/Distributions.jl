@@ -4,10 +4,6 @@ using Distributions
 using Random, Test
 using StatsFuns
 
-
-function tmpF()
-end
-
 ####### Core testing procedure
 function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
                           rng::Union{AbstractRNG, Missing} = missing)
@@ -66,5 +62,3 @@ end
     typeof(rand(d, 5)) # still Float64
     @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
 end
-
-
