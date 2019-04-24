@@ -67,7 +67,7 @@ mode(d::GeneralizedGaussian) = d.μ
 var(d::GeneralizedGaussian{T}) where {T<:Real} = (d.α^2) * ( gamma(3 / d.β) / gamma(1 / d.β) )
 std(d::GeneralizedGaussian{T}) where {T<:Real} = (d.α) * sqrt( gamma(3 / d.β) / gamma(1 / d.β) )
 
-skewness(d::GeneralizedGaussian{T}) where {T<:Real} = 0.0
+skewness(d::GeneralizedGaussian{T}) where {T<:Real} = zero(T)
 kurtosis(d::GeneralizedGaussian{T}) where {T<:Real} = (gamma(5 / d.β) * gamma(1 / d.β)) / (gamma(3 / d.β)^2) - 3
 
 entropy(d::GeneralizedGaussian{T}) where {T<:Real} = (1 / d.β) - log( d.β / (2 * d.α * gamma(1 / d.β) ) )
