@@ -31,7 +31,7 @@ median(d)            # Get the median, i.e. logistic(mu)
 
 The following properties have no analytical solution but numerical 
 approximations. In order to avoid package dependencies for 
-numerical optimization, they currently give a warning and return missing.
+numerical optimization, they are currently not implemented.
 
 ```julia
 mean(d)      
@@ -39,6 +39,8 @@ var(d)
 std(d)
 mode(d)
 ```
+
+Similarly, skewness, kurtosis, and entropy are not implemented.
 
 External links
 
@@ -83,37 +85,14 @@ scale(d::LogitNormal) = d.σ
 # varlogitx(d::LogitNormal) = abs2(d.σ)
 # stdlogitx(d::LogitNormal) = d.σ
 
-function mean(d::LogitNormal; kwargs...) 
-    # estimateMean(d,kwargs...) # moved to NormalTransforms
-    @warn "Mean of logitnomral currently not implemented. Return missing"
-    missing
-end
+# mean, mode, and variance 
+# moved to NormalTrnasforms because
+# they depend on Optim package.
+
+# skewness, kurtosis, entropy
+# not implemented
 
 median(d::LogitNormal) = logistic(d.μ)
-function mode(d::LogitNormal)
-    @warn "median of logitnomral currently not implemented. Return missing"
-    missing
-end
-function var(d::LogitNormal; mean=missing, kwargs...) 
-    @warn "var of logitnomral currently not implemented. Return missing"
-    missing
-end
-
-function skewness(d::LogitNormal)
-    @warn "skewness of logitnomral currently not implemented. Return missing"
-    missing
-end
-
-function kurtosis(d::LogitNormal)
-    @warn "kurtosis of logitnomral currently not implemented. Return missing"
-    missing
-end
-
-function entropy(d::LogitNormal)
-    @warn "entropy of logitnomral currently not implemented. Return missing"
-    missing
-end
-
 
 #### Evalution
 
