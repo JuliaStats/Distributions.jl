@@ -85,7 +85,8 @@ function cdf(d::GeneralizedGaussian{T}, x::Real) where T<:Real
     #   of the Gamma distribution provides this, with the necessary 1/Γ(a) normalization.
 
     (μ, α, β) = params(d)
-    return 1/2 + sign(x - μ) * ( cdf( Gamma( (1 / β), 1.0), (abs(x - μ) / α)^β) / 2 )
+    v = cdf(Gamma(1 / β, 1), (abs(x - μ) / α)^β) / 2
+    return typeof(v)(1/2) + sign(x - μ) * v
 end
 
 #### Sampling
