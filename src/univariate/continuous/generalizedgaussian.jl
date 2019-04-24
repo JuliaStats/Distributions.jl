@@ -82,16 +82,12 @@ end
 function cdf(d::GeneralizedGaussian{T}, x::Real) where T<:Real
     """
     To calculate the CDF, the incomplete gamma function is required. To
-    access this, the GNU Scientific library is called via GSL. The CDF on wikipedia
-    indicates the normalization by Γ(1/β), with a 0.5 coefficient. The Normalized P
-    function in 8.2.4 of the National Institue of Standards and Technology  provides
-    the required function, as sf_gamma_inc_P in the GSL module.
-
-     * [Digital Library of Mathematical Functions] (https://dlmf.nist.gov/8.2#E6)
+    access this, the pgamma.c file in Rmath us used. The CDF on wikipedia
+    indicates the normalization by Γ(1/β), with a 0.5 coefficient.
      """
 
     (μ, α, β) = params(d)
-    return 1/2 + sign(x - μ) * (sf_gamma_inc_P( (1 / β), (abs(x - μ) / α)^β ) / 2)
+    return 1/2 + sign(x - μ) * (pgamma( (1 / β), (abs(x - μ) / α)^β ) / 2)
 end
 
 #### Sampling
