@@ -94,6 +94,7 @@ Beta
 BetaPrime
 Biweight
 Cauchy
+Chernoff
 Chi
 Chisq
 Cosine

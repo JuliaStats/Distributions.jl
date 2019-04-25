@@ -38,7 +38,8 @@ tests = [
     "truncnormal",
     "truncated_exponential",
     "discretenonparametric",
-    "functionals"
+    "functionals", 
+    "chernoff"
 ]
 
 
@@ -56,6 +57,7 @@ res = map(tests) do t
     Random.seed!(345679)
     using LinearAlgebra
     using StatsBase
+    include("testutils.jl") # to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
     include($t * ".jl")
     end
     return
