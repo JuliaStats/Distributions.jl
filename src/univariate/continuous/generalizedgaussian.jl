@@ -104,5 +104,5 @@ function rand(rng::AbstractRNG, d::GeneralizedGaussian)
     b = rand() .< 0.5
     b = convert(Float64, b[1]) * 2 - 1
 
-    return d.μ + (1 / sqrt(d.α) ) * rand(rng, g)^(1 / d.β) * b
+    return d.μ + inv(sqrt(d.α)) * rand(rng, g)^inv(d.β) * b
 end
