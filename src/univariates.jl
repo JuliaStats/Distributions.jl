@@ -244,16 +244,16 @@ entropy(d::UnivariateDistribution, b::Real) = entropy(d) / log(b)
 """
     isplatykurtic(d)
 
-Return whether `d` is platykurtic (*i.e* `kurtosis(d) > 0`).
+Return whether `d` is platykurtic (*i.e* `kurtosis(d) < 0`).
 """
-isplatykurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
+isplatykurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 """
     isleptokurtic(d)
 
-Return whether `d` is leptokurtic (*i.e* `kurtosis(d) < 0`).
+Return whether `d` is leptokurtic (*i.e* `kurtosis(d) > 0`).
 """
-isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
+isleptokurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
 
 """
     ismesokurtic(d)
