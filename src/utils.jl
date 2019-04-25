@@ -52,7 +52,7 @@ struct NoArgCheck end
 
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite(x::Array{T}) where T<:Real
+function allfinite(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(isfinite(x[i]))
             return false
@@ -61,7 +61,7 @@ function allfinite(x::Array{T}) where T<:Real
     return true
 end
 
-function allzeros(x::Array{T}) where T<:Real
+function allzeros(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] == zero(T))
             return false
@@ -72,7 +72,7 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg(x::Array{T}) where T<:Real
+function allnonneg(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] >= zero(T))
             return false
@@ -81,7 +81,7 @@ function allnonneg(x::Array{T}) where T<:Real
     return true
 end
 
-isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
 
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
@@ -120,7 +120,7 @@ macro checkinvlogcdf(lp,ex)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
+function isApproxSymmmetric(a::AbstractMatrix{Float64})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -132,9 +132,9 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
+hasCholesky(a::AbstractMatrix{Float64}) = isa(trycholesky(a), Cholesky)
 
-function trycholesky(a::Matrix{Float64})
+function trycholesky(a::AbstractMatrix{Float64})
     try cholesky(a)
     catch e
         return e
