@@ -87,7 +87,7 @@ scale(d::LogitNormal) = d.σ
 
 # mean, mode, and variance 
 # moved to NormalTransforms because
-# they depend on Optim package.
+# they depend on the Optim package.
 
 # skewness, kurtosis, entropy
 # not implemented
