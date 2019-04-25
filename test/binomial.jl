@@ -32,3 +32,7 @@ end
 @test Distributions.mode(Binomial(100, 0.4)) == 40
 @test Distributions.mode(Binomial(1, 0.51)) == 1
 @test Distributions.mode(Binomial(1, 0.49)) == 0
+
+@test isplatykurtic(Bernoulli(0.5))
+@test ismesokurtic(Normal(0.0, 1.0))
+@test isleptokurtic(Laplace(0.0, 1.0))
