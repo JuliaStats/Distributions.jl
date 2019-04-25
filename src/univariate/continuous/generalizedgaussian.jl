@@ -103,8 +103,7 @@ function rand(rng::AbstractRNG, d::GeneralizedGaussian)
     g = Gamma(inv(d.β), 1)
 
     # bernoulli random variable "b" with parameter (1/2).
-    b = rand() .< 0.5
-    b = convert(Float64, b[1]) * 2 - 1
+    b = Float64(rand(Bernoulli()))
 
     return d.μ + inv(sqrt(d.α)) * rand(rng, g)^inv(d.β) * b
 end

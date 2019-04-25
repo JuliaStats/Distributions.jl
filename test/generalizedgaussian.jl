@@ -2,9 +2,9 @@
 
     d = GeneralizedGaussian() # mean zero, scale √2, shape 2.
 
-# PDF and CDF values from MATLAB R2018b using the same default
-# mean scale and shape parameters.
-pdftest = [
+    # PDF and CDF values from MATLAB R2018b using the same default
+    # mean scale and shape parameters.
+    pdftest = [
     -2.0000 0.0539909665131881;
     -1.9596 0.0584872383949301;
     -1.9192 0.0632546051992644;
@@ -105,9 +105,9 @@ pdftest = [
     1.9192 0.0632546051992644;
     1.9596 0.0584872383949300;
     2.0000 0.0539909665131881;
-]
+    ]
 
-cdftest = [
+    cdftest = [
     -2.0000 0.0227501319481793;
     -1.9596 0.0250215170024042;
     -1.9192 0.0274800249152170;
@@ -208,25 +208,25 @@ cdftest = [
     1.9192 0.9725199750847831;
     1.9596 0.9749784829975958;
     2.0000 0.9772498680518207;
-]
+    ]
 
-# CDF test.
-for i=1:size(cdftest, 1)
-    @test isapprox(cdf(d, cdftest[i, 1]), cdftest[i, 2] ; atol = 1e-6)
-end
+    # CDF test.
+    for i=1:size(cdftest, 1)
+        @test isapprox(cdf(d, cdftest[i, 1]), cdftest[i, 2] ; atol = 1e-6)
+    end
 
-# PDF test.
-for i=1:size(pdftest, 1)
-    @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
-end
+    # PDF test.
+    for i=1:size(pdftest, 1)
+        @test isapprox(pdf(d, pdftest[i, 1]), pdftest[i, 2] ; atol = 1e-6)
+    end
 
-@test mean(d) == 0
-@test median(d) == 0
-@test mode(d) == 0
-@test var(d) == 1 # unity variance with shape 2 and scale √2
-@test std(d) == 1
-@test skewness(d) == 0
-@test kurtosis(d) ≈ 0
-@test entropy(d) ≈ 1.418938533204673
+    @test mean(d) == 0
+    @test median(d) == 0
+    @test mode(d) == 0
+    @test var(d) == 1 # unity variance with shape 2 and scale √2
+    @test std(d) == 1
+    @test skewness(d) == 0
+    @test kurtosis(d) ≈ 0
+    @test entropy(d) ≈ 1.418938533204673
 
 end
