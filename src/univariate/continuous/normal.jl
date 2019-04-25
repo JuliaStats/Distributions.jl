@@ -79,7 +79,7 @@ logpdf(d::Normal, x::Real) = -(x - d.μ)^2 / 2 / d.σ^2 - log(2π * d.σ^2) / 2
 pdf(d::Normal, x::Real) = exp(logpdf(d, x))
 cdf(d::Normal, x::Real) = (1 + erf((x - d.μ) / d.σ / √2)) / 2
 logcdf(d::Normal, x::Real) =
-    value = erf((x - d.μ) / d.σ / √2) |>
+    erf((x - d.μ) / d.σ / √2) |>
     (value -> value < -1 ? log1p(value) - log(2) : log((1 + value) / 2))
 quantile(d::Normal, p::Real) = d.μ + d.σ * √2 * erfinv(2p - 1)
 
