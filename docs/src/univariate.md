@@ -114,6 +114,7 @@ KSOneSided
 Laplace
 Levy
 Logistic
+LogitNormal
 LogNormal
 NoncentralBeta
 NoncentralChisq
