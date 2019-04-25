@@ -98,7 +98,7 @@ function rand(rng::AbstractRNG, d::GeneralizedGaussian)
     #   4214-4223.
 
     # utilizing the sampler from the Gamma distribution.
-    g = Gamma((1 / d.β), 1)
+    g = Gamma(inv(d.β), 1)
 
     # bernoulli random variable "b" with parameter (1/2).
     b = rand() .< 0.5
