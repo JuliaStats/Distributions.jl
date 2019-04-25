@@ -3,9 +3,14 @@
 """
     LogitNormal(μ,σ)
 
-The *logit normal distribution* is the distribution of the logistic function 
-of a [`Normal`](@ref) variate: if ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
-``\\exp(X) \\sim \\operatorname{LogitNormal}(\\mu,\\sigma)``. 
+The *logit normal distribution* is the distribution of 
+of a random variable whose logit has a [`Normal`](@ref) distribution.
+Or inversely, when applying the logistic function to a Normal random variable
+then the resulting random variable follows a logit normal distribution.
+
+If ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
+``\\operatorname{logistic}(X) \\sim \\operatorname{LogitNormal}(\\mu,\\sigma)``. 
+
 The probability density function is
 
 ```math
@@ -17,7 +22,7 @@ f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
 where the logit-Function is
 ```math
 logit(x) = \\ln(frac{x}{1-x})
-\\quad 0 < x > 1
+\\quad 0 < x < 1
 ```
 
 ```julia
@@ -99,7 +104,7 @@ median(d::LogitNormal) = logistic(d.μ)
 #TODO check pd and logpdf
 function pdf(d::LogitNormal{T}, x::Real) where T<:Real 
     if zero(x) < x < one(x) 
-        return normpdf(d.μ, d.σ, logit(x)) / x / (1-x)
+        return normpdf(d.μ, d.σ, logit(x)) / (x * (1-x))
     else
         return T(0)
     end
@@ -131,7 +136,7 @@ invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
 function gradlogpdf(d::LogitNormal{T}, x::Real) where T<:Real
     #TODO check
     (μ, σ) = params(d)
-    0 < x < 1 ? - ((log(x) - μ) / (σ^2) + 1) / x /(1-x) : zero(T)
+    0 < x < 1 ? - ((log(x) - μ) / ((σ^2) + 1) * x * (1-x)) : zero(T)
 end
 
 # mgf(d::LogitNormal)
