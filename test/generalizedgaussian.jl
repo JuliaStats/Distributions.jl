@@ -1,8 +1,6 @@
-using Distributions
-using Test
+@testset "generalized gaussian" begin
 
-
-d = GeneralizedGaussian() # mean zero, scale √2, shape 2.
+    d = GeneralizedGaussian() # mean zero, scale √2, shape 2.
 
 # PDF and CDF values from MATLAB R2018b using the same default
 # mean scale and shape parameters.
@@ -229,6 +227,6 @@ end
 @test std(d) == 1
 @test skewness(d) == 0
 @test kurtosis(d) ≈ 0
-@test entropy(d) ≈ 1.418938533204673  #[1]
-# [1] Nadarajah, Saralees (September 2005).  "A generalized normal distribution".
-# Journal of Applied Statistics. 32 (7): 685–694
+@test entropy(d) ≈ 1.418938533204673
+
+end

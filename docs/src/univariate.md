@@ -104,6 +104,7 @@ Exponential
 FDist
 Frechet
 Gamma
+GeneralizedGaussian
 GeneralizedExtremeValue
 GeneralizedPareto
 Gumbel

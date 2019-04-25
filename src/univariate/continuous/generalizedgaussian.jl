@@ -70,6 +70,8 @@ std(d::GeneralizedGaussian{T}) where {T<:Real} = (d.α) * sqrt( gamma(3 / d.β) 
 skewness(d::GeneralizedGaussian{T}) where {T<:Real} = zero(T)
 kurtosis(d::GeneralizedGaussian{T}) where {T<:Real} = (gamma(5 / d.β) * gamma(1 / d.β)) / (gamma(3 / d.β)^2) - 3
 
+# Skewness from Nadarajah, Saralees (September 2005).  "A generalized normal distribution".
+# Journal of Applied Statistics. 32 (7): 685–694
 entropy(d::GeneralizedGaussian{T}) where {T<:Real} = (1 / d.β) - log( d.β / (2 * d.α * gamma(1 / d.β) ) )
 
 #### Evaluation
