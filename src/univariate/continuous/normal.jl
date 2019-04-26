@@ -78,9 +78,10 @@ entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 logpdf(d::Normal, x::Real) = -(x - d.μ)^2 / 2 / d.σ^2 - log(2π * d.σ^2) / 2
 pdf(d::Normal, x::Real) = exp(logpdf(d, x))
 cdf(d::Normal, x::Real) = (1 + erf((x - d.μ) / d.σ / √2)) / 2
-logcdf(d::Normal, x::Real) =
-    erf((x - d.μ) / d.σ / √2) |>
-    (value -> value < -1 ? log1p(value) - log(2) : log((1 + value) / 2))
+function logcdf(d::Normal, x::Real)
+    value = erf((x - d.μ) / d.σ / √2)
+    value < -1 ? log1p(value) - log(2) : log((1 + value) / 2)
+end
 quantile(d::Normal, p::Real) = d.μ + d.σ * √2 * erfinv(2p - 1)
 
 #### Sampling
