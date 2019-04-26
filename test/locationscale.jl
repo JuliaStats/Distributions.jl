@@ -12,8 +12,6 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     #### Promotions and conversions
 
     @test typeof(d.µ) === typeof(d.σ)
-    # @test convert(LocationScale{Float16}, μ, σ, ρ) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
-    # @test convert(LocationScale{Float16}, d) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
 
     @test location(d) == μ
     @test scale(d) == σ
