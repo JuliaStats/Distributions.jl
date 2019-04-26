@@ -1,10 +1,5 @@
 
-using Distributions
-using Random, Test
-
-
-
-function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Float64,
+function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
                                     rng::Union{AbstractRNG, Missing} = missing)
     ρ = Normal(μD,σD)
     d = LocationScale(μ,σ,ρ)
@@ -14,15 +9,13 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
     @test maximum(d) == maximum(dref)
     @test extrema(d) == (minimum(d), maximum(d))
 
-    #### Conversions
+    #### Promotions and conversions
 
-    @test convert(LocationScale{Float16}, μ, σ, ρ) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
-    @test convert(LocationScale{Float16}, d) == LocationScale{Float16,typeof(ρ)}(Float16(μ), Float16(σ), ρ)
+    @test typeof(d.µ) === typeof(d.σ)
 
     @test location(d) == μ
     @test scale(d) == σ
     @test params(d) == (μ,σ,ρ)
-    @test partype(d) == Float64
 
     #### Statistics
 
@@ -67,7 +60,7 @@ function test_location_scale_normal(μ::Float64,σ::Float64,μD::Float64,σD::Fl
     @test invlogccdf(d,log(0.5)) ≈ invlogccdf(dref,log(0.5))
     @test invlogccdf(d,log(0.8)) ≈ invlogccdf(dref,log(0.8))
 
-    r = Array{Float64}(undef, 100000)
+    r = Array{partype(d)}(undef, 100000)
     if ismissing(rng)
         rand!(d,r)
     else
@@ -88,4 +81,5 @@ end
     test_location_scale_normal(0.3,0.2,0.1,0.2,rng)
     test_location_scale_normal(-0.3,0.1,-0.1,0.3,rng)
     test_location_scale_normal(1.3,0.4,-0.1,0.5,rng)
+    test_location_scale_normal(ForwardDiff.Dual(0.3),0.2,0.1,0.2, rng)
 end
