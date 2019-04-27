@@ -74,7 +74,7 @@ kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 #### Evaluation
-
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 logpdf(d::Normal, x::Real) = -(x - d.μ)^2 / 2 / d.σ^2 - log(2π * d.σ^2) / 2
 pdf(d::Normal, x::Real) = exp(logpdf(d, x))
 cdf(d::Normal, x::Real) = (1 + erf((x - d.μ) / d.σ / √2)) / 2
