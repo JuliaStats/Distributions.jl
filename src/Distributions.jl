@@ -1,6 +1,7 @@
 module Distributions
 
 using StatsBase, PDMats, StatsFuns, Statistics
+using StatsFuns: logtwo
 
 import QuadGK: quadgk
 import Base: size, eltype, length, convert, show, getindex, rand

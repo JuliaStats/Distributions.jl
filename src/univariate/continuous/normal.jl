@@ -78,8 +78,11 @@ gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 logpdf(d::Normal, x::Real) = -(x - d.μ)^2 / 2 / d.σ^2 - log(2π * d.σ^2) / 2
 pdf(d::Normal, x::Real) = exp(logpdf(d, x))
 cdf(d::Normal, x::Real) = (1 + erf((x - d.μ) / d.σ / √2)) / 2
-logcdf(d::Normal, x::Real) = log1p(erf((x - d.μ) / d.σ / √2)) - log(2)
-quantile(d::Normal, p::Real) = d.μ + d.σ * √2 * erfinv(2p - 1)
+logcdf(d::Normal, x::Real) = log1p(erf((x - d.μ) / d.σ / √2)) - logtwo
+quantile(d::Normal, p::Real) = p > 1 ? NaN : d.μ + d.σ * √2 * erfinv(2p - 1)
+
+mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2/2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2/2 * t^2)
 
 #### Sampling
 
