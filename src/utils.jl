@@ -140,3 +140,4 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
+
