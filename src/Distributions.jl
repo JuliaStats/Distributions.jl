@@ -307,7 +307,7 @@ Supported distributions:
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
-    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedGaussian, GeneralizedPareto,
+    Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
