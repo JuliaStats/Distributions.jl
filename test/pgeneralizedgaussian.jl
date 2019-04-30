@@ -1,6 +1,6 @@
 @testset "generalized gaussian" begin
 
-    d = GeneralizedGaussian() # mean zero, scale √2, shape 2.
+    d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
     # PDF and CDF values from R using the same default
     # mean scale and shape parameters. Format is [x, pdf, cdf].
