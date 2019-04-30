@@ -579,6 +579,7 @@ const continuous_distributions = [
     "generalizedpareto",
     "generalizedextremevalue",
     "gumbel",
+    "histogram",
     "inversegamma",
     "inversegaussian",
     "kolmogorov",

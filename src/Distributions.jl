@@ -92,6 +92,7 @@ export
     Geometric,
     Gumbel,
     Hypergeometric,
+    HistogramDist,
     InverseWishart,
     InverseGamma,
     InverseGaussian,
