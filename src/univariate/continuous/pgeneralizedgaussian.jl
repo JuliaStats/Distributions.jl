@@ -10,7 +10,7 @@ shape 'p' has the probability density function
 f(x, \\mu, \\alpha, p) = \\frac{p}{2\\alpha\\Gamma(1/p)} e^{-(\\frac{|x-\\mu|}{\\alpha})^p} \\quad x \\in (-\\infty, +\\infty) , \\alpha > 0, p > 0
 ```
 
-The Generalized Gaussian (GGD) is a parametric distribution that incorporates the
+The p-gGneralized Gaussian (GGD) is a parametric distribution that incorporates the
 Normal and Laplacian distributions as special cases where p = 1 and p = 2. As p → ∞,
 the distribution approaches the Uniform distribution on (μ-α, μ+α).
 
