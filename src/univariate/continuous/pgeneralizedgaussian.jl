@@ -26,7 +26,7 @@ location(d)                     # Get the location parameter, loc
 
 External Links
  * [Generalized Gaussian on Wikipedia](http://en.wikipedia.org/wiki/Generalized_normal_distribution)
- * [R Package reference](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
+ * [Reference implementation paper](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
  """
 
 struct PGeneralizedGaussian{T<:Real} <: ContinuousUnivariateDistribution
