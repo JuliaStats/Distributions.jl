@@ -104,7 +104,6 @@ Exponential
 FDist
 Frechet
 Gamma
-GeneralizedGaussian
 GeneralizedExtremeValue
 GeneralizedPareto
 Gumbel
@@ -125,6 +124,7 @@ Normal
 NormalCanon
 NormalInverseGaussian
 Pareto
+PGeneralizedGaussian
 Rayleigh
 Semicircle
 StudentizedRange
