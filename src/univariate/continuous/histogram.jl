@@ -18,13 +18,14 @@ ncomponents(d)       # Get the number of bins, i.e. n
 component(d,i)       # Get the ith component, i.e. Uniform(B[i],B[i+1])
 ```
 """
-struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp}} <: ContinuousUnivariateDistribution
+struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp},TA} <: ContinuousUnivariateDistribution
 	# params
 	B :: TB
 	P :: TP
 	# cache
 	_pdf :: Vector{Tp}
 	_cdf :: Vector{Tp}
+	_aliastable :: TA
 	function HistogramDist{Tp,Tb,TB,TP}(B::TB, P::TP) where {Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp}}
 		ps = probs(P)
 		typeof(axes(ps)) <: Tuple{Base.OneTo} || error("P must have 1-up indexing")
@@ -32,13 +33,14 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp
 		n = length(ps)
 		length(B)==n+1 || error("expect one more bin edge than bin probs")
 		ws = Vector{Tp}(undef, n)
-		ws .= view(B,2:n) .- view(B,1:n-1)
+		ws .= view(B,2:n+1) .- view(B,1:n)
 		all(ws .> 0) || error("bin edges must be sorted and distinct")
 		pdf = Vector{Tp}(undef, n)
 		pdf .= ps ./ ws
 		cdf = zeros(Tp, n)
-		cdf[2:end] = cumsum(ps[1:end-1])
-		new(B, P, pdf, cdf)
+		cdf[2:end] .= cumsum(ps[1:end-1])
+		aliastable = AliasTable(ps)
+		new{Tp,Tb,TB,TP,typeof(aliastable)}(B, P, pdf, cdf, aliastable)
 	end
 end
 
@@ -88,7 +90,13 @@ component(d::HistogramDist, i::Integer) = (@boundscheck 1≤i<length(d.B) || thr
 components(d::HistogramDist) = [@inbounds component(d,i) for i in 1:ncomponents(d)]
 
 #### show
-show(io::IO, d::HistogramDist) = print("HistogramDist(B=", d.B, ", P=", probs(d), ")")
+function show(io::IO, d::HistogramDist)
+	print(io, "HistogramDist(B=")
+	show(io, d.B)
+	print(io, ", P=")
+	show(io, probs(d))
+	print(io, ")")
+end
 
 #### Statistics
 mean(d::HistogramDist) =
@@ -121,10 +129,16 @@ cf(d::HistogramDist, t::Real) =
 
 #### Sampling
 function rand(rng::AbstractRNG, d::HistogramDist)
-    p = rand(rng)
-    i = searchsortedlast(d._cdf, p)
-    @inbounds convert(Float64, d.B[i] + (p - d._cdf[i]) / d._pdf[i])
+	p = rand(rng)
+	i = rand(rng, d._aliastable)
+	@inbounds d.B[i] + p*(d.B[i+1] - d.B[i])
 end
+
+# function rand(rng::AbstractRNG, d::HistogramDist)
+#     p = rand(rng)
+#     i = searchsortedlast(d._cdf, p)
+#     @inbounds convert(Float64, d.B[i] + (p - d._cdf[i]) / d._pdf[i])
+# end
 
 #### Fitting
 function fit_mle(::Type{TD}, x::AbstractArray{<:Real}, bins::AbstractArray{<:Real}) where {TD<:HistogramDist}
