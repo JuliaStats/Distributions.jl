@@ -96,6 +96,11 @@ function show(io::IO, d::HistogramDist)
 	print(io, ")")
 end
 
+#### Compare
+==(d1::HistogramDist, d2::HistogramDist) = ((d1.B == d2.B) || all(d1.B .== d2.B)) && ((d1.P == d2.P) || all(d1.P .== d2.P))
+Base.isapprox(d1::HistogramDist, d2::HistogramDist) = ((d1.B ≈ d2.B) || all(d1.B .≈ d2.B)) && ((d1.P ≈ d2.P) || all(d1.P .≈ d2.P))
+Base.hash(d::HistogramDist, h::UInt) = hash(d.P, hash(d.B, h))
+
 #### Statistics
 mean(d::HistogramDist) =
 	@inbounds convert(eltype(d), sum(p*mean(component(d,i)) for (i,p) in enumerate(probs(d))))
