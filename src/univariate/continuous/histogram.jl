@@ -63,9 +63,11 @@ HistogramDist{Tp}(B::TB, P) where {Tp,Tb,TB<:AbstractVector{Tb}} =
 HistogramDist{Tp}(B, P) where {Tp} =
 	HistogramDist{Tp,Tp}(B, P)
 
-HistogramDist(B, P::Categorical{Tp}) where {Tp} =
-	HistogramDist{Tp}(B, probs(P))
+HistogramDist(B, P::Categorical) =
+	HistogramDist(B, probs(P))
 HistogramDist(B, P::AbstractVector{Tp}) where {Tp} =
+	HistogramDist(B, float(P))
+HistogramDist(B, P::AbstractVector{Tp}) where {Tp<:AbstractFloat} =
 	HistogramDist{Tp}(B, P)
 
 @distr_support HistogramDist convert(eltype(d), @inbounds d.B[1]) convert(eltype(d), @inbounds d.B[end])
@@ -110,6 +112,7 @@ var(d::HistogramDist) = begin
 	v2 = @inbounds sum(p*abs2(mean(component(d,i)) - m) for (i,p) in enumerate(probs(d)))
 	convert(eltype(d), v1 + v2)
 end
+mode(d::HistogramDist) = @inbounds d.B[argmax(d.P)]
 
 #### Evaluation
 function pdf(d::HistogramDist{Tp}, x::Real) where {Tp}
