@@ -18,7 +18,7 @@ ncomponents(d)       # Get the number of bins, i.e. n
 component(d,i)       # Get the ith component, i.e. Uniform(B[i],B[i+1])
 ```
 """
-struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp},TA} <: ContinuousUnivariateDistribution
+struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp},TA} <: ContinuousUnivariateDistribution
 	# params
 	B :: TB
 	P :: TP
@@ -26,20 +26,20 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp
 	_pdf :: Vector{Tp}
 	_cdf :: Vector{Tp}
 	_aliastable :: TA
-	function HistogramDist{Tp,Tb,TB,TP}(B::TB, P::TP) where {Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:Categorical{Tp}}
-		ps = probs(P)
-		typeof(axes(ps)) <: Tuple{Base.OneTo} || error("P must have 1-up indexing")
-		typeof(axes(B)) <: Tuple{Base.OneTo} || error("B must have 1-up indexing")
-		n = length(ps)
-		length(B)==n+1 || error("expect one more bin edge than bin probs")
-		ws = Vector{Tp}(undef, n)
-		ws .= view(B,2:n+1) .- view(B,1:n)
-		all(ws .> 0) || error("bin edges must be sorted and distinct")
+	function HistogramDist{Tp,Tb,TB,TP}(B::TB, P::TP) where {Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp}}
+		@check_args(HistogramDist, typeof(axes(P)) <: Tuple{Base.OneTo})
+		@check_args(HistogramDist, typeof(axes(B)) <: Tuple{Base.OneTo})
+		@check_args(HistogramDist, isprobvec(P))
+		n = length(P)
+		@check_args(HistogramDist, length(B)==n+1)
+		binwidths = Vector{Tp}(undef, n)
+		binwidths .= view(B,2:n+1) .- view(B,1:n)
+		@check_args(HistogramDist, all(binwidths .> 0))
 		pdf = Vector{Tp}(undef, n)
-		pdf .= ps ./ ws
+		pdf .= P ./ binwidths
 		cdf = zeros(Tp, n)
-		cdf[2:end] .= cumsum(ps[1:end-1])
-		aliastable = AliasTable(ps)
+		cdf[2:end] .= cumsum(P[1:end-1])
+		aliastable = AliasTable(P)
 		new{Tp,Tb,TB,TP,typeof(aliastable)}(B, P, pdf, cdf, aliastable)
 	end
 end
@@ -48,12 +48,10 @@ end
 HistogramDist{Tp,Tb,TB,TP}(B, P) where {Tp,Tb,TB,TP} =
 	HistogramDist{Tp,Tb,TB,TP}(convert(TB, B), convert(TP, P))
 
-HistogramDist{Tp,Tb,TB}(B, P::TP) where {Tp,Tb,TB,TP<:Categorical{Tp}} =
-	HistogramDist{Tp,Tb,TB,TP}(B, P)
 HistogramDist{Tp,Tb,TB}(B, P::TP) where {Tp,Tb,TB,TP<:AbstractVector{Tp}} =
-	HistogramDist{Tp,Tb,TB,Categorical{Tp,TP}}(B, P)
+	HistogramDist{Tp,Tb,TB,TP}(B, P)
 HistogramDist{Tp,Tb,TB}(B, P) where {Tp,Tb,TB} =
-	HistogramDist{Tp,Tb,TB,Categorical{Tp,Vector{Tp}}}(B, P)
+	HistogramDist{Tp,Tb,TB,Vector{Tp}}(B, P)
 
 HistogramDist{Tp,Tb}(B::BT, P) where {Tp,Tb,BT<:AbstractVector{Tb}} =
 	HistogramDist{Tp,Tb,BT}(B, P)
@@ -66,11 +64,11 @@ HistogramDist{Tp}(B, P) where {Tp} =
 	HistogramDist{Tp,Tp}(B, P)
 
 HistogramDist(B, P::Categorical{Tp}) where {Tp} =
-	HistogramDist{Tp}(B, P)
+	HistogramDist{Tp}(B, probs(P))
 HistogramDist(B, P::AbstractVector{Tp}) where {Tp} =
 	HistogramDist{Tp}(B, P)
 
-@distr_support HistogramDist d.B[1] d.B[end]
+@distr_support HistogramDist convert(eltype(d), @inbounds d.B[1]) convert(eltype(d), @inbounds d.B[end])
 
 #### Conversions
 convert(::Type{TH}, B, P) where {TH<:HistogramDist} = TH(B, P)
@@ -83,10 +81,10 @@ end
 convert(::Type{H}, d::HistogramDist) where {H<:StatsBase.Histogram} = H(d.B, probs(d), :left, true)
 
 #### Parameters
-params(d::HistogramDist) = (d.B, probs(d.P))
-probs(d::HistogramDist) = probs(d.P)
-ncomponents(d::HistogramDist) = length(probs(d))
-component(d::HistogramDist, i::Integer) = (@boundscheck 1≤i<length(d.B) || throw(BoundsError(i)); @inbounds Uniform(d.B[i], d.B[i+1]))
+params(d::HistogramDist) = (d.B, d.P)
+probs(d::HistogramDist) = d.P
+ncomponents(d::HistogramDist) = length(d.P)
+component(d::HistogramDist, i::Integer) = (@boundscheck 1≤i≤ncomponents(d) || throw(BoundsError(i)); @inbounds Uniform(d.B[i], d.B[i+1]))
 components(d::HistogramDist) = [@inbounds component(d,i) for i in 1:ncomponents(d)]
 
 #### show
@@ -94,18 +92,18 @@ function show(io::IO, d::HistogramDist)
 	print(io, "HistogramDist(B=")
 	show(io, d.B)
 	print(io, ", P=")
-	show(io, probs(d))
+	show(io, d.P)
 	print(io, ")")
 end
 
 #### Statistics
 mean(d::HistogramDist) =
-	@inbounds sum(p*mean(component(d,i)) for (i,p) in enumerate(probs(d)))
+	@inbounds convert(eltype(d), sum(p*mean(component(d,i)) for (i,p) in enumerate(probs(d))))
 var(d::HistogramDist) = begin
 	v1 = @inbounds sum(p*var(component(d,i)) for (i,p) in enumerate(probs(d)))
 	m = mean(d)
 	v2 = @inbounds sum(p*abs2(mean(component(d,i)) - m) for (i,p) in enumerate(probs(d)))
-	v1 + v2
+	convert(eltype(d), v1 + v2)
 end
 
 #### Evaluation
@@ -120,7 +118,7 @@ end
 function quantile(d::HistogramDist, p::Real)
 	i = searchsortedlast(d._cdf, p)
 	(i ≤ 0 || p > 1) && throw(DomainError(p, "not a probability"))
-	@inbounds convert(Float64, d.B[i] + (p - d._cdf[i]) / d._pdf[i])
+	@inbounds convert(eltype(d), d.B[i] + (p - d._cdf[i]) / d._pdf[i])
 end
 mgf(d::HistogramDist, t::Real) =
 	@inbounds sum(p*mgf(component(d,i),t) for (i,p) in enumerate(probs(d)))
@@ -131,7 +129,7 @@ cf(d::HistogramDist, t::Real) =
 function rand(rng::AbstractRNG, d::HistogramDist)
 	p = rand(rng)
 	i = rand(rng, d._aliastable)
-	@inbounds d.B[i] + p*(d.B[i+1] - d.B[i])
+	@inbounds convert(eltype(d), d.B[i] + p*(d.B[i+1] - d.B[i]))
 end
 
 # function rand(rng::AbstractRNG, d::HistogramDist)
