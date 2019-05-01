@@ -117,12 +117,12 @@
         @test isapprox(pdf(d, test[i, 1]), test[i, 2] ; atol = 1e-6)
     end
 
-    @test mean(d) == 0
-    @test median(d) == 0
-    @test mode(d) == 0
-    @test var(d) == 1 # unity variance with shape 2 and scale √2
-    @test std(d) == 1
-    @test skewness(d) == 0
+    @test mean(d) ≈ 0
+    @test median(d) ≈ 0
+    @test mode(d) ≈ 0
+    @test var(d) ≈ 1 # unity variance with shape 2 and scale √2
+    @test std(d) ≈ 1
+    @test skewness(d) ≈ 0
     @test kurtosis(d) ≈ 0
     @test entropy(d) ≈ 1.418938533204673
 

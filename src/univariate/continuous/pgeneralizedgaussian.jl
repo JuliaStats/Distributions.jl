@@ -38,8 +38,21 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
 end
 
 PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real,T2<:Real,T3<:Real} = PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
-PGeneralizedGaussian(μ::Integer,α::Integer,p::Integer) = PGeneralizedGaussian(Float64(μ),Float64(α),Float64(p))
-PGeneralizedGaussian(p::Float64) = PGeneralizedGaussian(0.0, 1.0, p)
+
+"""
+    PGeneralizedGaussian(p)
+
+Builds a p-generalized gaussian with `μ=0.0, α=1.0`
+"""
+PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
+
+
+"""
+    PGeneralizedGaussian()
+
+Builds a default p-generalized gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
+to the normal distribution with `μ=0.0, σ=1.0`.
+"""
 PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
 
 #### Conversions
@@ -51,8 +64,7 @@ convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3
 
 
 #### Parameters
-params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
-@inline partype(d::PGeneralizedGaussian{T}) where {T<:Real} = T
+@inline partype(d::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
 
 location(d::PGeneralizedGaussian) = d.μ
 shape(d::PGeneralizedGaussian) = d.p
@@ -65,40 +77,53 @@ mean(d::PGeneralizedGaussian) = d.μ
 median(d::PGeneralizedGaussian) = d.μ
 mode(d::PGeneralizedGaussian) = d.μ
 
-var(d::PGeneralizedGaussian{T1, T2, T3}) where {T1<:Real, T2<:Real, T3<:Real} = (d.α^2) * ( gamma(3 / d.p) / gamma(1 / d.p) )
-std(d::PGeneralizedGaussian{T1, T2, T3}) where {T1<:Real, T2<:Real, T3<:Real} = (d.α) * sqrt( gamma(3 / d.p) / gamma(1 / d.p) )
+var(d::PGeneralizedGaussian) = (d.α^2) * (gamma(3.0 * inv(d.p)) / gamma(inv(d.p)))
+std(d::PGeneralizedGaussian) = (d.α) * sqrt(gamma(3.0 * inv(d.p)) / gamma(inv(d.p)))
 
-skewness(d::PGeneralizedGaussian{T1, T2, T3}) where {T1<:Real, T2<:Real, T3<:Real} = zero(T)
-kurtosis(d::PGeneralizedGaussian{T1, T2, T3}) where {T1<:Real, T2<:Real, T3<:Real} = (gamma(5 / d.p) * gamma(1 / d.p)) / (gamma(3 / d.p)^2) - 3
+skewness(d::PGeneralizedGaussian{T1, T2, T3}) where {T1,T2,T3} = zero(T1)
+kurtosis(d::PGeneralizedGaussian) = gamma(5.0 * inv(d.p)) * gamma(inv(d.p))) / (gamma(3.0 * inv(d.p))^2 - 3.0
+entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(invd.p))))
 
-# Skewness from Nadarajah, Saralees (September 2005).  "A generalized normal distribution".
-# Journal of Applied Statistics. 32 (7): 685–694
-entropy(d::PGeneralizedGaussian{T1, T2, T3}) where {T1<:Real, T2<:Real, T3<:Real} = (1 / d.p) - log( d.p / (2 * d.α * gamma(1 / d.p) ) )
 
 #### Evaluation
 
-function pdf(d::PGeneralizedGaussian{T1,T2,T3}, x::Real) where {T1<:Real, T2<:Real, T3<:Real}
+"""
+    pdf(d, x)
+
+Calculates the PDF of the specified distribution 'd'.
+"""
+function pdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
-    return ( p / ( 2 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
+    return ( p / ( 2.0 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
 end
 
-function cdf(d::PGeneralizedGaussian{T1,T2,T3}, x::Real) where {T1<:Real, T2<:Real, T3<:Real}
 
-    #    To calculate the CDF, the incomplete gamma function is required. The CDF
-    #   of the Gamma distribution provides this, with the necessary 1/Γ(a) normalization.
+"""
+    cdf(d, x)
 
+Calculates the CDF of the distribution. To determine the CDF, the incomplete
+gamma function is required. The CDF  of the Gamma distribution provides this,
+with the necessary 1/Γ(a) normalization.
+"""
+function cdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
-    v = cdf(Gamma(1 / p, 1), (abs(x - μ) / α)^p) / 2
+    v = cdf(Gamma(inv(p), 1), (abs(x - μ) / α)^p) * inv(2)
     return typeof(v)(1/2) + sign(x - μ) * v
 end
 
 #### Sampling
+
+"""
+    rand(rng, d)
+
+Extract a sample from the p-Generalized Gaussian distribution 'd'. The sampling
+procedure is implemented from from [1].
+[1]  Gonzalez-Farias, G., Molina, J. A. D., & Rodríguez-Dagnino, R. M. (2009).
+Efficiency of the approximated shape parameter estimator in the generalized
+Gaussian distribution. IEEE Transactions on Vehicular Technology, 58(8),
+4214-4223.
+"""
 function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
-    #   Sampling Procecdure from [1]
-    #   [1]  Gonzalez-Farias, G., Molina, J. A. D., & Rodríguez-Dagnino, R. M. (2009).
-    #   Efficiency of the approximated shape parameter estimator in the generalized
-    #   Gaussian distribution. IEEE Transactions on Vehicular Technology, 58(8),
-    #   4214-4223.
 
     # utilizing the sampler from the Gamma distribution.
     g = Gamma(inv(d.p), 1)
