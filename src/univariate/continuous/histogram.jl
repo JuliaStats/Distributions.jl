@@ -1,14 +1,16 @@
 """
     HistogramDist(B,P)
 
-The continuous distribution formed by sampling uniformly from a histogram with ``n`` bins described by ``n+1`` bin edges ``B`` and ``n`` bin probabilities ``P``. Its probability density function is
+The *histogram distribution* with bin edges ``B`` and bin probabilities ``P`` has density function
 
 ```math
-f(x; B, P) = \\frac{P_i}{B_{i+1}-B_i} \\quad\\text{ where } B_i ≤ x < B_{i+1}\\text.
+f(x; B, P) = \\frac{P_i}{B_{i+1}-B_i} \\quad\\text{ where } B_i ≤ x < B_{i+1}.
 ```
 
+Sampling is equivalent to selecting a bin ``i`` distributed according to ``P`` then sampling uniformly from the interval ``[B_i,B_{i+1}]``.
+
 ```julia
-HistogramDist(B,P)   # histogram distribution with bins edges B and probabilities P
+HistogramDist(B,P)   # histogram distribution with bin edges B and probabilities P
 
 params(d)            # Get the parameters, i.e. (B,P)
 minimum(d)           # Get the lower bound, i.e. B[1]
@@ -18,7 +20,7 @@ ncomponents(d)       # Get the number of bins, i.e. n
 component(d,i)       # Get the ith component, i.e. Uniform(B[i],B[i+1])
 ```
 """
-struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp},TA} <: ContinuousUnivariateDistribution
+struct HistogramDist{Tb<:Real,Tp<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp},TA} <: ContinuousUnivariateDistribution
 	# params
 	B :: TB
 	P :: TP
@@ -26,7 +28,7 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector
 	_pdf :: Vector{Tp}
 	_cdf :: Vector{Tp}
 	_aliastable :: TA
-	function HistogramDist{Tp,Tb,TB,TP}(B::TB, P::TP) where {Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp}}
+	function HistogramDist{Tb,Tp}(B::TB, P::TP) where {Tb<:Real,Tp<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp}}
 		@check_args(HistogramDist, typeof(axes(P)) <: Tuple{Base.OneTo})
 		@check_args(HistogramDist, typeof(axes(B)) <: Tuple{Base.OneTo})
 		@check_args(HistogramDist, isprobvec(P))
@@ -40,35 +42,20 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector
 		cdf = zeros(Tp, n)
 		cdf[2:end] .= cumsum(P[1:end-1])
 		aliastable = AliasTable(P)
-		new{Tp,Tb,TB,TP,typeof(aliastable)}(B, P, pdf, cdf, aliastable)
+		new{Tb,Tp,TB,TP,typeof(aliastable)}(B, P, pdf, cdf, aliastable)
 	end
 end
 
 #### Constructors
-HistogramDist{Tp,Tb,TB,TP}(B, P) where {Tp,Tb,TB,TP} =
-	HistogramDist{Tp,Tb,TB,TP}(convert(TB, B), convert(TP, P))
+HistogramDist{Tb,Tp}(B, P) where {Tb<:Real,Tp<:Real} =
+	HistogramDist{Tb,Tp}(convert(AbstractVector{Tb}, B), convert(AbstractVector{Tp}, P))
 
-HistogramDist{Tp,Tb,TB}(B, P::TP) where {Tp,Tb,TB,TP<:AbstractVector{Tp}} =
-	HistogramDist{Tp,Tb,TB,TP}(B, P)
-HistogramDist{Tp,Tb,TB}(B, P) where {Tp,Tb,TB} =
-	HistogramDist{Tp,Tb,TB,Vector{Tp}}(B, P)
-
-HistogramDist{Tp,Tb}(B::BT, P) where {Tp,Tb,BT<:AbstractVector{Tb}} =
-	HistogramDist{Tp,Tb,BT}(B, P)
-HistogramDist{Tp,Tb}(B, P) where {Tp,Tb} =
-	HistogramDist{Tp,Tb,Vector{Tb}}(B, P)
-
-HistogramDist{Tp}(B::TB, P) where {Tp,Tb,TB<:AbstractVector{Tb}} =
-	HistogramDist{Tp,Tb,TB}(B, P)
-HistogramDist{Tp}(B, P) where {Tp} =
-	HistogramDist{Tp,Tp}(B, P)
-
+HistogramDist(B::AbstractVector{Tb}, P::AbstractVector{Tp}) where {Tb<:Real,Tp<:AbstractFloat} =
+	HistogramDist{Tb,Tp}(B, P)
+HistogramDist(B, P::AbstractVector{Tp}) where {Tb<:Real,Tp<:Real} =
+	HistogramDist(B, float(P))
 HistogramDist(B, P::Categorical) =
 	HistogramDist(B, probs(P))
-HistogramDist(B, P::AbstractVector{Tp}) where {Tp} =
-	HistogramDist(B, float(P))
-HistogramDist(B, P::AbstractVector{Tp}) where {Tp<:AbstractFloat} =
-	HistogramDist{Tp}(B, P)
 
 @distr_support HistogramDist convert(eltype(d), @inbounds d.B[1]) convert(eltype(d), @inbounds d.B[end])
 
@@ -115,11 +102,11 @@ end
 mode(d::HistogramDist) = @inbounds d.B[argmax(d.P)]
 
 #### Evaluation
-function pdf(d::HistogramDist{Tp}, x::Real) where {Tp}
+function pdf(d::HistogramDist{Tb,Tp}, x::Real) where {Tb,Tp}
 	i = searchsortedlast(d.B, x)
 	@inbounds(0 < i < length(d.B) ? d._pdf[i] : zero(Tp)) :: Tp
 end
-function cdf(d::HistogramDist{Tp}, x::Real) where {Tp}
+function cdf(d::HistogramDist{Tb,Tp}, x::Real) where {Tb,Tp}
 	i = searchsortedlast(d.B, x)
 	@inbounds(i ≤ 0 ? zero(Tp) : i ≥ length(d.B) ? one(Tp) : (x-d.B[i])*d._pdf[i] + d._cdf[i]) :: Tp
 end
