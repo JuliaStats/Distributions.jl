@@ -49,11 +49,8 @@ end
 #### Constructors
 HistogramDist{Tb,Tp}(B, P) where {Tb<:Real,Tp<:Real} =
 	HistogramDist{Tb,Tp}(convert(AbstractVector{Tb}, B), convert(AbstractVector{Tp}, P))
-
-HistogramDist(B::AbstractVector{Tb}, P::AbstractVector{Tp}) where {Tb<:Real,Tp<:AbstractFloat} =
-	HistogramDist{Tb,Tp}(B, P)
-HistogramDist(B, P::AbstractVector{Tp}) where {Tb<:Real,Tp<:Real} =
-	HistogramDist(B, float(P))
+HistogramDist(B::AbstractVector{Tb}, P::AbstractVector{Tp}) where {Tb<:Real,Tp<:Real} =
+	HistogramDist{Tb,float(Tp)}(B, P)
 HistogramDist(B, P::Categorical) =
 	HistogramDist(B, probs(P))
 
