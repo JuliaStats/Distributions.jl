@@ -113,7 +113,7 @@
     end
 
     # PDF test.
-    for i=1:size(pdftest, 1)
+    for i=1:size(test, 1)
         @test isapprox(pdf(d, test[i, 1]), test[i, 2] ; atol = 1e-6)
     end
 
