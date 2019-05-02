@@ -81,7 +81,7 @@ var(d::PGeneralizedGaussian) = (d.α^2) * (gamma(3.0 * inv(d.p)) / gamma(inv(d.p
 std(d::PGeneralizedGaussian) = (d.α) * sqrt(gamma(3.0 * inv(d.p)) / gamma(inv(d.p)))
 
 skewness(d::PGeneralizedGaussian{T1, T2, T3}) where {T1,T2,T3} = zero(T1)
-kurtosis(d::PGeneralizedGaussian) = gamma(5.0 * inv(d.p)) * gamma(inv(d.p))) / (gamma(3.0 * inv(d.p))^2 - 3.0
+kurtosis(d::PGeneralizedGaussian) = gamma(5.0 * inv(d.p)) * gamma(inv(d.p)) / (gamma(3.0 * inv(d.p))^2) - 3.0
 entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(invd.p))))
 
 
