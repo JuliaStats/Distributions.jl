@@ -83,8 +83,8 @@ function show(io::IO, d::HistogramDist)
 end
 
 #### Compare
-==(d1::HistogramDist, d2::HistogramDist) = ((d1.B == d2.B) || all(d1.B .== d2.B)) && ((d1.P == d2.P) || all(d1.P .== d2.P))
-Base.isapprox(d1::HistogramDist, d2::HistogramDist) = ((d1.B ≈ d2.B) || all(d1.B .≈ d2.B)) && ((d1.P ≈ d2.P) || all(d1.P .≈ d2.P))
+==(d1::HistogramDist, d2::HistogramDist) = (d1.B == d2.B) && (d1.P == d2.P)
+Base.isapprox(d1::HistogramDist, d2::HistogramDist) = (d1.B ≈ d2.B) && (d1.P ≈ d2.P)
 Base.hash(d::HistogramDist, h::UInt) = hash(d.P, hash(d.B, h))
 
 #### Statistics
