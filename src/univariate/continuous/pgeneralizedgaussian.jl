@@ -1,4 +1,3 @@
-
 """
     PGeneralizedGaussian(α, μ, p)
 
@@ -28,7 +27,6 @@ External Links
  * [Generalized Gaussian on Wikipedia](http://en.wikipedia.org/wiki/Generalized_normal_distribution)
  * [Reference implementation paper](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
  """
-
 struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariateDistribution
     α::T1
     μ::T2
@@ -45,7 +43,6 @@ PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real,T2<:Real,T3<:Real} = P
 Builds a p-generalized gaussian with `μ=0.0, α=1.0`
 """
 PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
-
 
 """
     PGeneralizedGaussian()
@@ -82,7 +79,7 @@ std(d::PGeneralizedGaussian) = (d.α) * sqrt(gamma(3.0 * inv(d.p)) / gamma(inv(d
 
 skewness(d::PGeneralizedGaussian{T1, T2, T3}) where {T1,T2,T3} = zero(T1)
 kurtosis(d::PGeneralizedGaussian) = gamma(5.0 * inv(d.p)) * gamma(inv(d.p)) / (gamma(3.0 * inv(d.p))^2) - 3.0
-entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(invd.p))))
+entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(inv(d.p))))
 
 
 #### Evaluation
@@ -96,7 +93,6 @@ function pdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
     return ( p / ( 2.0 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
 end
-
 
 """
     cdf(d, x)
