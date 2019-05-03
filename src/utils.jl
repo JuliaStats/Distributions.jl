@@ -72,16 +72,10 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg(x::Array{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(x[i] >= zero(T))
-            return false
-        end
-    end
-    return true
-end
+allnonneg(xs::AbstractArray{T}) where T<:Real = all(x -> x >= zero(T), xs)
 
-isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{T}) where {T<:Real} =
+    allnonneg(p) && isapprox(sum(p), one(T))
 
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
@@ -140,4 +134,3 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
-
