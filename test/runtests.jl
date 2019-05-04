@@ -6,6 +6,7 @@ using Random
 using StatsBase
 
 tests = [
+    "dirac",
     "mvnormal",
     "mvlognormal",
     "types",

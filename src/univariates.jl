@@ -549,6 +549,7 @@ const discrete_distributions = [
     "bernoulli",
     "betabinomial",
     "binomial",
+    "dirac",
     "discreteuniform",
     "discretenonparametric",
     "categorical",
