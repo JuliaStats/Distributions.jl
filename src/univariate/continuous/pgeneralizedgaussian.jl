@@ -40,7 +40,7 @@ PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real,T2<:Real,T3<:Real} = P
 """
     PGeneralizedGaussian(p)
 
-Builds a p-generalized gaussian with `μ=0.0, α=1.0`
+Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
 PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
 
