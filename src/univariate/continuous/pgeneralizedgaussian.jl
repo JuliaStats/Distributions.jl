@@ -47,7 +47,7 @@ PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
 """
     PGeneralizedGaussian()
 
-Builds a default p-generalized gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
+Builds a default p-generalized Gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
 to the normal distribution with `μ=0.0, σ=1.0`.
 """
 PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
