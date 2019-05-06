@@ -72,7 +72,7 @@ end
 
 allzeros(x::ZeroVector) = true
 
-allnonneg(xs::AbstractArray{T}) where T<:Real = all(x -> x >= zero(T), xs)
+allnonneg(xs::AbstractArray{<:Real}) = all(x -> x >= 0, xs)
 
 isprobvec(p::AbstractVector{T}) where {T<:Real} =
     allnonneg(p) && isapprox(sum(p), one(T))
