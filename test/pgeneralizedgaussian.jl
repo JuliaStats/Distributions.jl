@@ -126,6 +126,9 @@
     @test kurtosis(d) ≈ 0
     @test entropy(d) ≈ 1.418938533204673
 
+    # Nongaussian case
+    @test cdf(PGeneralizedGaussian(1., 2.0, 2.5), 1.) ≈ 0.5
+
     α, β = rand(2)
     d = PGeneralizedGaussian(0.0, α, β)
     @test var(d) = α^2 * (gamma(3.0 * inv(β)) / gamma(inv(β)))
