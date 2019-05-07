@@ -10,7 +10,7 @@ f(x, \\mu, \\alpha, p) = \\frac{p}{2\\alpha\\Gamma(1/p)} e^{-(\\frac{|x-\\mu|}{\
 ```
 
 The p-Generalized Gaussian (GGD) is a parametric distribution that incorporates the
-Normal and Laplacian distributions as special cases where p = 1 and p = 2. As p → ∞,
+Normal and Laplacian distributions as special cases where `p = 1` and `p = 2`. As `p → ∞`,
 the distribution approaches the Uniform distribution on `[μ-α, μ+α]`.
 
 ```julia
