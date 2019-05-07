@@ -20,6 +20,7 @@ tests = [
     "poissonbinomial",
     "dirichlet",
     "dirichletmultinomial",
+    "logitnormal",
     "mvtdist",
     "kolmogorov",
     "edgeworth",
