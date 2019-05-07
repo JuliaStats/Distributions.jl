@@ -63,6 +63,7 @@ convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3
 #### Parameters
 @inline partype(d::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
 
+params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p,)
 location(d::PGeneralizedGaussian) = d.μ
 shape(d::PGeneralizedGaussian) = d.p
 scale(d::PGeneralizedGaussian) = d.α
