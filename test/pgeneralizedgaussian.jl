@@ -1,4 +1,4 @@
-@testset "generalized gaussian" begin
+@testset "pgeneralizedgaussian" begin
 
     d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
