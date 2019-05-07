@@ -2,7 +2,7 @@
     PGeneralizedGaussian(α, μ, p)
 
 The *p-Generalized Gaussian distribution*, more commonly known as the exponential
-power or the generalized normal distribution, with scale 'α', location 'μ', and
+power or the generalized normal distribution, with scale `α`, location `μ`, and
 shape 'p' has the probability density function
 
 ```math
