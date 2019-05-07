@@ -40,14 +40,14 @@ PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real,T2<:Real,T3<:Real} = P
 """
     PGeneralizedGaussian(p)
 
-Builds a p-generalized gaussian with `μ=0.0, α=1.0`
+Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
 PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
 
 """
     PGeneralizedGaussian()
 
-Builds a default p-generalized gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
+Builds a default p-generalized Gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
 to the normal distribution with `μ=0.0, σ=1.0`.
 """
 PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
