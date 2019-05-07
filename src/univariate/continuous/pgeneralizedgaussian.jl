@@ -3,7 +3,7 @@
 
 The *p-Generalized Gaussian distribution*, more commonly known as the exponential
 power or the generalized normal distribution, with scale `α`, location `μ`, and
-shape 'p' has the probability density function
+shape `p` has the probability density function
 
 ```math
 f(x, \\mu, \\alpha, p) = \\frac{p}{2\\alpha\\Gamma(1/p)} e^{-(\\frac{|x-\\mu|}{\\alpha})^p} \\quad x \\in (-\\infty, +\\infty) , \\alpha > 0, p > 0
