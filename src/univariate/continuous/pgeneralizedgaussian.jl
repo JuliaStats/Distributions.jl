@@ -35,8 +35,6 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1,T2,T3} = (@check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p)); new{T1,T2,T3}(μ,α,p))
 end
 
-PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real,T2<:Real,T3<:Real} = PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
-
 """
     PGeneralizedGaussian(p)
 
