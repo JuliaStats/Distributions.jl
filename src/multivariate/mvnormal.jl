@@ -236,7 +236,7 @@ Base.show(io::IO, d::MvNormal) =
 ### Basic statistics
 
 length(d::MvNormal) = length(d.μ)
-mean(d::MvNormal) = convert(Vector, d.μ)
+mean(d::MvNormal) = copy(convert(Vector, d.μ))
 params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
