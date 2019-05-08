@@ -54,7 +54,6 @@ concentration(d::VonMisesFisher) = d.κ
 insupport(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} = isunitvec(x)
 params(d::VonMisesFisher) = (d.μ, d.κ)
 @inline partype(d::VonMisesFisher{T}) where {T<:Real} = T
-eltype(::VonMisesFisher{T}) where {T<:Real} = T
 
 ### Evaluation
 

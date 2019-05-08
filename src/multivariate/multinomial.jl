@@ -46,7 +46,6 @@ ntrials(d::Multinomial) = d.n
 
 params(d::Multinomial) = (d.n, d.p)
 @inline partype(d::Multinomial{T}) where {T<:Real} = T
-eltype(::Multinomial{T}) where {T<:Real} = T
 
 ### Conversions
 convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, Vector{T}(d.p))
