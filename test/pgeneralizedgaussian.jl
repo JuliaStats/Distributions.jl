@@ -3,7 +3,7 @@ d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 # PDF and CDF values from R using the same default
 # mean scale and shape parameters. Format is [x, pdf, cdf].
 test = [
-    -2 0.053990966513188 0.0227501319481792;
+    -2.0000 0.053990966513188 0.0227501319481792;
     -1.9596 0.0584867753200998 0.0250212806912653;
     -1.9192 0.0632536242130714 0.0274795137708557;
     -1.8788 0.0682974223520507 0.0301359035293964;
