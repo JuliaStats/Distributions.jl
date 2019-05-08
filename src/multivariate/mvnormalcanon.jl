@@ -85,7 +85,7 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractP
     if typeof(μ) == typeof(h)
         return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
     else
-        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J) 
+        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J)
     end
 end
 
@@ -130,6 +130,7 @@ distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
 distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
+eltype(::MvNormalCanon{T}) where T<:Real = T
 ### Conversion
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))

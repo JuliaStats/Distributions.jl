@@ -212,6 +212,8 @@ MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
 MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
+
+eltype(::MvNormal{T}) where {T<:Real} = T
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
@@ -263,7 +265,7 @@ _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
-        @inbounds x[i] = randn(rng)
+        @inbounds x[i] = randn(rng,eltype(d))
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
