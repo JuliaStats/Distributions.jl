@@ -1,6 +1,3 @@
-using Test
-using Distributions, Random
-
 d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
 # PDF and CDF values from R using the same default
