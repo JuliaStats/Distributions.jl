@@ -1,3 +1,6 @@
+using Test
+using Distributions, Random
+
 d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
 # PDF and CDF values from R using the same default
@@ -106,11 +109,11 @@ test = [
 ]
 # CDF test.
 for i=1:size(test, 1)
-    @test isapprox(cdf(d, test[i, 1]), test[i, 3] ; atol = 1e-6)
+    @test cdf(d, test[i, 1]) ≈ test[i, 3]
 end
 # PDF test.
 for i=1:size(test, 1)
-    @test isapprox(pdf(d, test[i, 1]), test[i, 2] ; atol = 1e-6)
+    @test pdf(d, test[i, 1]) ≈ test[i, 2]
 end
 @test mean(d) ≈ 0
 @test median(d) ≈ 0
