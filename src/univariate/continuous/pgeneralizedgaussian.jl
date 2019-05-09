@@ -28,8 +28,8 @@ External Links
  * [Reference implementation paper](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
  """
 struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariateDistribution
-    α::T1
-    μ::T2
+    μ::T1
+    α::T2
     p::T3
 
     PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1,T2,T3} = (@check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p)); new{T1,T2,T3}(μ,α,p))
