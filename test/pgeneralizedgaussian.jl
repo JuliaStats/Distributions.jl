@@ -118,7 +118,7 @@ end
 @test var(d) ≈ 1 # unity variance with shape 2 and scale √2
 @test std(d) ≈ 1
 @test skewness(d) ≈ 0
-@test kurtosis(d) ≈ 0
+@test kurtosis(d) ≈ 0 atol = 10e-10
 @test entropy(d) ≈ 1.418938533204673
 
 # Non-Gaussian case
