@@ -119,9 +119,9 @@ struct PoissonStats <: SufficientStats
     tw::Float64   # total sample weight
 end
 
-suffstats(::Type{Poisson}, x::AbstractArray{T}) where {T<:Integer} = PoissonStats(sum(x), length(x))
+suffstats(::Type{<:Poisson}, x::AbstractArray{T}) where {T<:Integer} = PoissonStats(sum(x), length(x))
 
-function suffstats(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.
@@ -134,7 +134,7 @@ function suffstats(::Type{Poisson}, x::AbstractArray{T}, w::AbstractArray{Float6
     PoissonStats(sx, tw)
 end
 
-fit_mle(::Type{Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
+fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 
 ## samplers
 
