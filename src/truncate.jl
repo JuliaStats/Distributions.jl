@@ -67,7 +67,7 @@ function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<
 end
 
 function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Integer}
-    _pdf_(d, float(x))
+    _pdf(d, float(x))
 end
 
 function _logpdf(d::Truncated, x::T) where {T<:Real}
