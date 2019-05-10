@@ -57,7 +57,7 @@ function _pdf(d::Truncated, x::T) where {T<:Real}
     end
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
+function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:Real}
     _pdf(d, float(x))
 end
 
