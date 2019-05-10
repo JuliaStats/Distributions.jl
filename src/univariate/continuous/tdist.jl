@@ -65,7 +65,7 @@ end
 function entropy(d::TDist)
     h = d.ν/2
     h1 = h + 1//2
-    h1 * (digamma(h1) - digamma(h)) + log(d.ν)/2 + lbeta(h, 1//2)
+    h1 * (digamma(h1) - digamma(h)) + log(d.ν)/2 + logabsbeta(h, 1//2)[1]
 end
 
 

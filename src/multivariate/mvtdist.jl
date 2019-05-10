@@ -103,7 +103,7 @@ params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
 function entropy(d::GenericMvTDist)
     hdf, hdim = 0.5*d.df, 0.5*d.dim
     shdfhdim = hdf+hdim
-    0.5*logdet(d.Σ)+hdim*log(d.df*pi)+lbeta(hdim, hdf)-logabsgamma(hdim)[1]+shdfhdim*(digamma(shdfhdim)-digamma(hdf))
+    0.5*logdet(d.Σ)+hdim*log(d.df*pi)+logabsbeta(hdim, hdf)[1]-logabsgamma(hdim)[1]+shdfhdim*(digamma(shdfhdim)-digamma(hdf))
 end
 
 # evaluation (for GenericMvTDist)
