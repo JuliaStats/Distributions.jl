@@ -74,12 +74,12 @@ function _logpdf(d::Truncated, x::T) where {T<:Real}
     if (d.lower <= x <= d.upper)
         logpdf(d.untruncated, x) - d.logtp
     else
-        -float(T(Inf))
+        -Inf
     end
 end
 
 function logpdf(d::Truncated{D}, x::Real) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || return -float(T(Inf))
+    isinteger(x) || return -Inf
     return _logpdf(d, x)
 end
 
@@ -101,7 +101,7 @@ cdf(d::Truncated, x::Real) = _cdf(d, x)
 cdf(d::Truncated, x::Integer) = _cdf(d, x) # here for specificity
 
 _logcdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? -float(T(Inf)) :
+    x <= d.lower ? -Inf :
     x >= d.upper ? zero(T) :
     log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
 
@@ -118,7 +118,7 @@ ccdf(d::Truncated, x::Integer) = _ccdf(d, x)
 
 _logccdf(d::Truncated, x::T) where {T<:Real} =
     x <= d.lower ? zero(T) :
-    x >= d.upper ? -float(T(Inf)) :
+    x >= d.upper ? -Inf :
     log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
 
 logccdf(d::Truncated, x::Real) = _logccdf(d, x)
