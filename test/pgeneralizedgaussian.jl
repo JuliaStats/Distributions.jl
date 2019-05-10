@@ -1,3 +1,5 @@
+using SpecialFunctions
+
 d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
 # PDF and CDF values from R using the same default
@@ -118,7 +120,7 @@ end
 @test var(d) ≈ 1 # unity variance with shape 2 and scale √2
 @test std(d) ≈ 1
 @test skewness(d) ≈ 0
-@test kurtosis(d) ≈ 0
+@test kurtosis(d) ≈ 0 atol = 10e-10
 @test entropy(d) ≈ 1.418938533204673
 
 # Non-Gaussian case
@@ -126,6 +128,6 @@ end
 
 α, β = rand(2)
 d = PGeneralizedGaussian(0.0, α, β)
-@test var(d) = α^2 * (gamma(3.0 * inv(β)) / gamma(inv(β)))
-@test kurtosis(d) = gamma(5.0 * inv(β)) * gamma(inv(β)) / (gamma(3.0 * inv(β))^2) - 3.0
-@test entropy(d) = inv(β) - log( β / (2.0 * α * gamma(inv(β))))
+@test var(d) ≈ α^2 * (gamma(3.0 * inv(β)) / gamma(inv(β)))
+@test kurtosis(d) ≈ gamma(5.0 * inv(β)) * gamma(inv(β)) / (gamma(3.0 * inv(β))^2) - 3.0
+@test entropy(d) ≈ inv(β) - log( β / (2.0 * α * gamma(inv(β))))
