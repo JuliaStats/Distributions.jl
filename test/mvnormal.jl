@@ -48,7 +48,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
-        @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
+        @test isapprox(emp_mu[i], μ[i], atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
     for i = 1:d, j = 1:d
         @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))
