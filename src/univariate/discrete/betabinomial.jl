@@ -93,9 +93,9 @@ end
 
 function logpdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
-    logbinom = - log1p(n) - lbeta(k + 1, n - k + 1)
-    lognum   = lbeta(k + α, n - k + β)
-    logdenom = lbeta(α, β)
+    logbinom = - log1p(n) - logabsbeta(k + 1, n - k + 1)[1]
+    lognum   = logabsbeta(k + α, n - k + β)[1]
+    logdenom = logabsbeta(α, β)[1]
     logbinom + lognum - logdenom
 end
 

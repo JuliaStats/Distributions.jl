@@ -5,6 +5,10 @@ if isdefined(SpecialFunctions, :logabsgamma)
     logabsgamma(x) = (lgamma(x),sign(gamma(x)))
     loggamma(x) = lgamma(x)
 end
+if isdefined(SpecialFunctions, :logabsbeta)
+    logabsbeta(x, w) = (lbeta(x, w), sign(beta(x, w)))
+    logbeta(x, w) = lbeta(x, w)
+end
 
 function probs(d::DiscreteUnivariateDistribution)
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)
