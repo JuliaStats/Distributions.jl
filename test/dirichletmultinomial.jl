@@ -5,7 +5,14 @@ using Distributions
 using Test, Random, SpecialFunctions
 
 import SpecialFunctions: factorial
-
+if !isdefined(SpecialFunctions, :logabsgamma)
+    logabsgamma(x) = SpecialFunctions.lgamma_r(x)
+    loggamma(x) = lgamma(x)
+end
+if !isdefined(SpecialFunctions, :logabsbeta)
+    logabsbeta(x, w) = (lbeta(x, w), sign(beta(x, w)))
+    logbeta(x, w) = lbeta(x, w)
+end
 Random.seed!(123)
 
 rng = MersenneTwister(123)
