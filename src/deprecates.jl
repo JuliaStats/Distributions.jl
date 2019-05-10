@@ -1,11 +1,11 @@
 #### Deprecate on 0.6 (to be removed on 0.7)
 
 @Base.deprecate expected_logdet meanlogdet
-if isdefined(SpecialFunctions, :logabsgamma)
-    logabsgamma(x) = (lgamma(x),sign(gamma(x)))
+if !isdefined(SpecialFunctions, :logabsgamma)
+    logabsgamma(x) = SpecialFunctions.lgamma_r(x)
     loggamma(x) = lgamma(x)
 end
-if isdefined(SpecialFunctions, :logabsbeta)
+if !isdefined(SpecialFunctions, :logabsbeta)
     logabsbeta(x, w) = (lbeta(x, w), sign(beta(x, w)))
     logbeta(x, w) = lbeta(x, w)
 end
