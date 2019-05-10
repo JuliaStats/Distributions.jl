@@ -32,23 +32,20 @@ _validate(obs::AbstractVector, wv::AbstractWeights) = _validate(length(obs), len
 _validate(obs::AbstractMatrix, wv::AbstractWeights) = _validate(size(obs, 2), length(wv))
 
 function _validate(nobs::Int, nwv::Int)
-    nobs == nwv || throw(DimensionMismatch(
-        "Length of the weights vector ($nwv) must match the number of observations ($nobs)."
-    ))
+    if nobs != nwv
+        throw(DimensionMismatch("Length of the weights vector ($nwv) must match the " *
+                                "number of observations ($nobs)."))
+    end
 end
 
 Base.length(s::WeightedResampler{Multivariate}) = size(s.obs, 1)
 
-function Base.rand(
-    rng::AbstractRNG, s::WeightedResampler{F}
-) where F<:Union{Univariate, Matrixvariate}
+function Base.rand(rng::AbstractRNG, s::WeightedResampler{<:Union{Univariate,Matrixvariate}})
     i = sample(rng, s.wv)
     return s.obs[i]
 end
 
-function Distributions._rand!(
-    rng::AbstractRNG, s::WeightedResampler{Multivariate}, x::AbstractVector{T}
-) where T<:Real
+function _rand!(rng::AbstractRNG, s::WeightedResampler{Multivariate}, x::AbstractVector{<:Real})
     j = sample(rng, s.wv)
     for i in 1:length(s)
         @inbounds x[i] = s.obs[i, j]
