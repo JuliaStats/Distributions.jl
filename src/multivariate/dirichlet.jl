@@ -33,15 +33,15 @@ struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
             ai > 0 ||
                 throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
-            lmnB += lgamma(ai)
+            lmnB += logabsgamma(ai)[1]
         end
-        lmnB -= lgamma(alpha0)
+        lmnB -= logabsgamma(alpha0)[1]
         new{T}(alpha, alpha0, lmnB)
     end
 
     function Dirichlet{T}(d::Integer, alpha::T) where T
         alpha0 = alpha * d
-        new{T}(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
+        new{T}(fill(alpha, d), alpha0, logabsgamma(alpha)[1] * d - logabsgamma(alpha0)[1])
     end
 end
 
@@ -326,7 +326,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     α0 = sum(α)
 
     if debug
-        objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+        objv = dot(α - 1.0, elogp) + logabsgamma(α0)[1] - sum(logabsgamma(α)[1])
     end
 
     t = 0
@@ -370,7 +370,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 
         if debug
             prev_objv = objv
-            objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+            objv = dot(α - 1.0, elogp) + logabsgamma(α0)[1] - sum(logabsgamma(α)[1])
             @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
                 t, objv, objv - prev_objv, gnorm)
         end

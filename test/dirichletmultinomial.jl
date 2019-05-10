@@ -55,7 +55,7 @@ for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 
     @test pdf(d, x) ≈
         factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈
-        log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma.(d.α + x) - log.(factorial.(x)) - lgamma.(d.α))
+        log(factorial(d.n)) + logabsgamma(d.α0)[1] - logabsgamma(d.n + d.α0)[1] + sum(first, logabsgamma.(d.α + x)) - sum(first, logabsgamma.(d.α)) - sum(log.(factorial.(x)))
 end
 
 # test Sampling

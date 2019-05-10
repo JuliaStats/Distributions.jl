@@ -109,7 +109,7 @@ eltype(::GenericMvTDist{T}) where {T} = T
 function entropy(d::GenericMvTDist)
     hdf, hdim = 0.5*d.df, 0.5*d.dim
     shdfhdim = hdf+hdim
-    0.5*logdet(d.Σ)+hdim*log(d.df*pi)+lbeta(hdim, hdf)-lgamma(hdim)+shdfhdim*(digamma(shdfhdim)-digamma(hdf))
+    0.5*logdet(d.Σ)+hdim*log(d.df*pi)+lbeta(hdim, hdf)-logabsgamma(hdim)[1]+shdfhdim*(digamma(shdfhdim)-digamma(hdf))
 end
 
 # evaluation (for GenericMvTDist)
@@ -134,7 +134,7 @@ function mvtdist_consts(d::AbstractMvTDist)
     hdf = 0.5 * d.df
     hdim = 0.5 * d.dim
     shdfhdim = hdf + hdim
-    v = lgamma(shdfhdim) - lgamma(hdf) - hdim*log(d.df) - hdim*log(pi) - 0.5*logdet(d.Σ)
+    v = logabsgamma(shdfhdim)[1] - logabsgamma(hdf)[1] - hdim*log(d.df) - hdim*log(pi) - 0.5*logdet(d.Σ)
     return (shdfhdim, v)
 end
 

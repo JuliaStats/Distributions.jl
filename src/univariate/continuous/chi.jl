@@ -67,7 +67,7 @@ function kurtosis(d::Chi)
 end
 
 entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
-    lgamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
+    logabsgamma(ν/2)[1] - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
     d.ν >= 1 || error("Chi distribution has no mode when ν < 1")
@@ -80,7 +80,7 @@ end
 pdf(d::Chi, x::Real) = exp(logpdf(d, x))
 
 logpdf(d::Chi, x::Real) = (ν = d.ν;
-    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - lgamma(ν/2)
+    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - logabsgamma(ν/2)[1]
 )
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)

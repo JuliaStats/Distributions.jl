@@ -67,7 +67,7 @@ end
 
 function entropy(d::Chisq)
     hν = d.ν/2
-    hν + logtwo + lgamma(hν) + (1 - hν) * digamma(hν)
+    hν + logtwo + logabsgamma(hν)[1] + (1 - hν) * digamma(hν)
 end
 
 

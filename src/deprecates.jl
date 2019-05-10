@@ -1,6 +1,10 @@
 #### Deprecate on 0.6 (to be removed on 0.7)
 
 @Base.deprecate expected_logdet meanlogdet
+if isdefined(SpecialFunctions, :logabsgamma)
+    logabsgamma(x) = (lgamma(x),sign(gamma(x)))
+    loggamma(x) = lgamma(x)
+end
 
 function probs(d::DiscreteUnivariateDistribution)
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)

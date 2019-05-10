@@ -91,7 +91,7 @@ function entropy(d::FDist)
     hν1 = ν1/2
     hν2 = ν2/2
     hs = (ν1 + ν2)/2
-    return log(ν2 / ν1) + lgamma(hν1) + lgamma(hν2) - lgamma(hs) +
+    return log(ν2 / ν1) + logabsgamma(hν1)[1] + logabsgamma(hν2)[1] - logabsgamma(hs)[1] +
         (1 - hν1) * digamma(hν1) + (-1 - hν2) * digamma(hν2) +
         hs * digamma(hs)
 end
