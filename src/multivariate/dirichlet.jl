@@ -383,11 +383,11 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 end
 
 
-function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64};
-    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
+function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
+    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12) where {T<:Dirichlet}
 
     α = isempty(init) ? dirichlet_mle_init(P) : init
-    elogp = mean_logp(suffstats(Dirichlet, P))
+    elogp = mean_logp(suffstats(T, P))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
