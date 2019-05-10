@@ -16,8 +16,6 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     d = length(g)
     μ = mean(g)
     Σ = cov(g)
-    @test partype(g) == Float64
-    @test isa(Σ, Matrix{Float64})
     @test length(μ) == d
     @test size(Σ) == (d, d)
     @test var(g)     ≈ diag(Σ)
