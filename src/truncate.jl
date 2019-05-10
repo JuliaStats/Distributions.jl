@@ -58,28 +58,30 @@ function _pdf(d::Truncated, x::T) where {T<:Real}
 end
 
 function pdf(d::Truncated{D}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
-    _pdf(d, x)
+    _pdf(d, float(x))
 end
 
 function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || zero(T)
+    isinteger(x) || zero(float(T))
     _pdf(d, x)
 end
 
 function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Integer}
-    _pdf_(d, x)
+    _pdf_(d, float(x))
 end
 
 function _logpdf(d::Truncated, x::T) where {T<:Real}
     if (d.lower <= x <= d.upper)
         logpdf(d.untruncated, x) - d.logtp
     else
-        -Inf
+        TF = float(T)
+        -TF(Inf)
     end
 end
 
-function logpdf(d::Truncated{D}, x::Real) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || return -Inf
+function logpdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
+    TF = float(T)
+    isinteger(x) || return -TF(Inf)
     return _logpdf(d, x)
 end
 
@@ -98,12 +100,18 @@ _cdf(d::Truncated, x::T) where {T<:Real} =
     (cdf(d.untruncated, x) - d.lcdf) / d.tp
 
 cdf(d::Truncated, x::Real) = _cdf(d, x)
-cdf(d::Truncated, x::Integer) = _cdf(d, x) # here for specificity
+cdf(d::Truncated, x::Integer) = _cdf(d, float(x)) # float conversion for stability
 
-_logcdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? -Inf :
-    x >= d.upper ? zero(T) :
-    log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+function _logcdf(d::Truncated, x::T) where {T<:Real}
+    TF = float(T)
+    if x <= d.lower
+        -TF(Inf)
+    elseif x >= d.upper
+        zero(TF)
+    else
+        log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+    end
+end
 
 logcdf(d::Truncated, x::Real) = _logcdf(d, x)
 logcdf(d::Truncated, x::Integer) = _logcdf(d, x)
@@ -114,12 +122,18 @@ _ccdf(d::Truncated, x::T) where {T<:Real} =
     (d.ucdf - cdf(d.untruncated, x)) / d.tp
 
 ccdf(d::Truncated, x::Real) = _ccdf(d, x)
-ccdf(d::Truncated, x::Integer) = _ccdf(d, x)
+ccdf(d::Truncated, x::Integer) = _ccdf(d, float(x))
 
-_logccdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? zero(T) :
-    x >= d.upper ? -Inf :
-    log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+function _logccdf(d::Truncated, x::T) where {T<:Real}
+    TF = float(T)
+    if x <= d.lower
+        zero(TF)
+    elseif x >= d.upper
+        -TF(Inf)
+    else
+        log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+    end
+end
 
 logccdf(d::Truncated, x::Real) = _logccdf(d, x)
 logccdf(d::Truncated, x::Integer) = _logccdf(d, x)
