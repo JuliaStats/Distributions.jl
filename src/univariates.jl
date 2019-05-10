@@ -306,7 +306,7 @@ cf(d::UnivariateDistribution, t)
 # pdf
 
 """
-    pdf(d::UnivariateDistribution, x::T) where {T<:Real}
+    pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
 
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
 type but `x` is integer, the value is converted to `Int`.
