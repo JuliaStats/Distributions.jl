@@ -171,11 +171,6 @@ end
     @test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
     @test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
     @test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
-    # mu copy
-    mv0 = MvNormal(copy(mu), 3)
-    mu0 = mean(mv0)
-    mu0[2] == 33
-    @test mv0.μ[2] ≈ mu[2]
 end
 
 ##### MLE
