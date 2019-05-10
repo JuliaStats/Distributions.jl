@@ -62,7 +62,7 @@ function pdf(d::Truncated{D}, x::T) where {D<:ContinuousUnivariateDistribution, 
 end
 
 function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || zero(float(T))
+    isinteger(x) || return zero(float(T))
     _pdf(d, x)
 end
 
