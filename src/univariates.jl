@@ -311,17 +311,13 @@ cf(d::UnivariateDistribution, t)
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
 type but `x` is integer, the value is converted to `Int`.
 
+The version with `x::Integer` must be implemented by
+discrete distributions.
+
 See also: [`logpdf`](@ref).
 """
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
-"""
-    pdf(d::UnivariateDistribution, x::Integer)
-
-Evaluate the probability density (mass) at `x`. Must be implemented by discrete distributions.
-
-See also: [`logpdf`](@ref).
-"""
 pdf(d::DiscreteUnivariateDistribution, x::Integer)
 
 """
