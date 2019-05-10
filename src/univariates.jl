@@ -318,8 +318,6 @@ See also: [`logpdf`](@ref).
 """
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
-pdf(d::DiscreteUnivariateDistribution, x::Integer)
-
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
