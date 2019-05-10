@@ -71,7 +71,7 @@ function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<
 end
 
 function _logpdf(d::Truncated, x::T) where {T<:Real}
-    if (d.lower <= x <= d.upper)
+    if d.lower <= x <= d.upper
         logpdf(d.untruncated, x) - d.logtp
     else
         TF = float(T)
