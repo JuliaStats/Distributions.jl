@@ -70,7 +70,7 @@ function entropy(d::Poisson{T}) where T<:Real
         λk = one(T)
         for k = 1:100
             λk *= λ
-            s += λk * lgamma(k + 1) / gamma(k + 1)
+            s += λk * logabsgamma(k + 1)[1] / gamma(k + 1)
         end
         return λ * (1 - log(λ)) + exp(-λ) * s
     else

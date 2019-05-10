@@ -113,11 +113,11 @@ end
 
 function entropy(d::Multinomial)
     n, p = params(d)
-    s = -lgamma(n+1) + n*entropy(p)
+    s = -logabsgamma(n+1)[1] + n*entropy(p)
     for pr in p
         b = Binomial(n, pr)
         for x in 0:n
-            s += pdf(b, x) * lgamma(x+1)
+            s += pdf(b, x) * logabsgamma(x+1)[1]
         end
     end
     return s
@@ -146,11 +146,11 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     S = eltype(p)
     R = promote_type(T, S)
     insupport(d,x) || return -R(Inf)
-    s = R(lgamma(n + 1))
+    s = R(logabsgamma(n + 1)[1])
     for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds p_i = p[i]
-        s -= R(lgamma(R(xi) + 1))
+        s -= R(logabsgamma(R(xi) + 1)[1])
         s += xlogy(xi, p_i)
     end
     return s
