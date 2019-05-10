@@ -123,8 +123,6 @@ end
         (MvLogNormal(mu, C), mu, C),
         (MvLogNormal(C), zeros(3), C) ]
 
-        println("    testing $(typeof(g)) with normal distribution $(Distributions.distrname(g.normal))")
-
         m,s = params(g)
         @test Vector(m) ≈ μ
         test_mvlognormal(g, 10^4)

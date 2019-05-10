@@ -306,16 +306,23 @@ cf(d::UnivariateDistribution, t)
 # pdf
 
 """
-    pdf(d::UnivariateDistribution, x::Real)
+    pdf(d::UnivariateDistribution, x::T) where {T<:Real}
 
-Evaluate the probability density (mass) at `x`.
+Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
+type but `x` is integer, the value is converted to `Int`.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::UnivariateDistribution, x::Real)
-pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
-pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
 pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+
+"""
+    pdf(d::UnivariateDistribution, x::Integer)
+
+Evaluate the probability density (mass) at `x`. Must be implemented by discrete distributions.
+
+See also: [`logpdf`](@ref).
+"""
+pdf(d::DiscreteUnivariateDistribution, x::Integer)
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -325,8 +332,7 @@ Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round(Int, x))
+logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 """
@@ -337,10 +343,10 @@ Evaluate the cumulative probability at `x`.
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
-cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
+cdf(d::DiscreteUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support
-function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{false}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
     c = 0.0
     for y = minimum(d):x
         c += pdf(d, y)
@@ -349,7 +355,7 @@ function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{fal
 end
 
 # Discrete univariate with finite support
-function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{true}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
     # calculate from left if x < (min + max)/2
     # (same as infinite support version)
     x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
@@ -363,7 +369,6 @@ function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{tru
 end
 
 cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
-
 cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x)))
 
 
@@ -373,7 +378,7 @@ cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x
 The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
 """
 ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
+ccdf(d::DiscreteUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
 """
@@ -382,7 +387,7 @@ ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
 logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
-logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
+logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
@@ -391,7 +396,7 @@ logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
 logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
-logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
+logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 
 """

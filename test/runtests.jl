@@ -5,7 +5,10 @@ using Distributed
 using Random
 using StatsBase
 
-tests = [
+const tests = [
+    "truncate",
+    "truncnormal",
+    "truncated_exponential",
     "mvnormal",
     "mvlognormal",
     "types",
@@ -29,39 +32,29 @@ tests = [
     "conversion",
     "mixture",
     "gradlogpdf",
-    "truncate",
     "noncentralt",
     "locationscale",
     "quantile_newton",
     "semicircle",
     "qq",
     "product",
-    "truncnormal",
-    "truncated_exponential",
     "discretenonparametric",
-    "functionals", 
-    "chernoff"
+    "functionals",
+    "chernoff",
 ]
-
 
 printstyled("Running tests:\n", color=:blue)
 
-using Random
 Random.seed!(345679)
 
-res = map(tests) do t
-    @eval module $(Symbol("Test_", t))
-    using Distributions
-    using JSON, ForwardDiff, Calculus, PDMats # test dependencies
-    using Test
-    using Random
-    Random.seed!(345679)
-    using LinearAlgebra
-    using StatsBase
-    include("testutils.jl") # to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
-    include($t * ".jl")
+# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+include("testutils.jl")
+
+for t in tests
+    @testset "Test $t" begin
+        Random.seed!(345679)
+        include("$t.jl")
     end
-    return
 end
 
 # print method ambiguities
