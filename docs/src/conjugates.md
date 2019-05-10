@@ -47,10 +47,6 @@ Motivated by this, we design the interface as described below to support Bayesia
 
 	Returns the mode of the posterior distribution based on given data or sufficient statistics.
 
-- **fit_map** (pri, G, x[, w])
-
-	Performs Maximum-a-Posteriori (MAP) estimation based on given data or sufficient statistics.
-
 - **complete** (pri, G, param)
 
 	Returns a completed distribution based on the likelihood model `G` and a given parameter `param`.
@@ -69,7 +65,7 @@ posterior(Beta(1.0, 2.0), Bernoulli, x)  # each value in x should be either 0 or
 # Beta - Binomial
 # Here, 10 is the number of trials in each experiment
 # x is an array of #successes (each for one experiment)
-posterior(Beta(1.0, 2.0), Binomial, (10, x))  
+posterior(Beta(1.0, 2.0), Binomial, (10, x))
 
 # Dirichlet - Categorical
 posterior(Dirichlet(fill(2.0,k)), Categorical, x)  # each value in x is an integer in 1:k
@@ -77,7 +73,7 @@ posterior(Dirichlet(fill(2.0,k)), Categorical, x)  # each value in x is an integ
 # Dirichlet - Multinomial
 # x is a matrix of size (k, n)
 # each column of x is the histogram of outcomes in one experiments
-posterior(Dirichlet(fill(2.0, k)), Multinomial, x)    
+posterior(Dirichlet(fill(2.0, k)), Multinomial, x)
 
 # Gamma - Exponential
 # Here, the Gamma prior is over the rate parameter of the Exponential distribution

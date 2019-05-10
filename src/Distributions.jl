@@ -156,14 +156,11 @@ export
     RealInterval,
 
     # methods
-    binaryentropy,      # entropy of distribution in bits
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
-    cgf,                # cumulant generating function
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
-    cumulant,           # cumulants of distribution
     component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
@@ -175,10 +172,6 @@ export
     failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
-    fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
-    fit_map,            # fit a distribution to data using MAP
-    fit_map!,           # fit a distribution to data using MAP (inplace update to initial guess)
-    freecumulant,       # free cumulants of distribution
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -191,7 +184,6 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
-    kde,                # Kernel density estimator (from Stats.jl)
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
