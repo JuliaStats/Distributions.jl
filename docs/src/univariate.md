@@ -125,6 +125,7 @@ Normal
 NormalCanon
 NormalInverseGaussian
 Pareto
+PGeneralizedGaussian
 Rayleigh
 Semicircle
 StudentizedRange
