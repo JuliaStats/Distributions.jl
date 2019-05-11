@@ -35,6 +35,7 @@ tests = [
     "quantile_newton",
     "semicircle",
     "qq",
+    "pgeneralizedgaussian",
     "product",
     "truncnormal",
     "truncated_exponential",
