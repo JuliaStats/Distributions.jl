@@ -127,10 +127,10 @@ function quantile(d::Normal, p::Real)
 end
 invlogcdf(d::Normal, lp::Real) = norminvlogcdf(d.μ, d.σ, lp)
 
-norminvcdf(p::Real) = -erfcinv(2*p) * sqrt2
+norminvcdf(p::Real) = -erfcinv(2p) * sqrt2
 norminvcdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvcdf(p))
 
-norminvccdf(p::Real) = erfcinv(2*p) * sqrt2
+norminvccdf(p::Real) = erfcinv(2p) * sqrt2
 norminvccdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvccdf(p))
 
 # invlogcdf. Fixme! Support more precisions than Float64
@@ -139,8 +139,8 @@ norminvlogcdf(lp::Real) = _norminvlogcdf_impl(Float64(lp))
 norminvlogcdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogcdf(lp))
 
 # invlogccdf. Fixme! Support more precisions than Float64
-norminvlogccdf(lp::Union{Float16,Float32}) = convert(typeof(lp), -_norminvlogcdf_impl(Float64(lp)))
-norminvlogccdf(lp::Real) = -_norminvlogcdf_impl(Float64(lp))
+norminvlogccdf(lp::Union{Float16,Float32}) = convert(typeof(lp), -_norminvlogcdf_impl(convert(Float64, lp)))
+norminvlogccdf(lp::Real) = -_norminvlogcdf_impl(convert(Float64, lp))
 norminvlogccdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogccdf(lp))
 
 # norminvcdf & norminvlogcdf implementation
@@ -169,7 +169,7 @@ function _norminvlogcdf_impl(lp::Float64)
 end
 
 function _qnorm_ker1(q::Float64)
-    # pre-condition: abs(q) <= 0.425
+    # pre-condition: abs(q) ≤ 0.425
     r = 0.180625 - q*q
     return q * @horner(r,
                        3.38713_28727_96366_6080e0,
@@ -235,8 +235,8 @@ function _qnorm_ker2(r::Float64)
     end
 end
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2/2 * t^2)
-cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2/2 * t^2)
+mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
+cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
