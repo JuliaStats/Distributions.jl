@@ -77,7 +77,7 @@ struct DirichletMultinomialStats <: SufficientStats
     tw::Float64
     DirichletMultinomialStats(n::Int, s::Matrix{Float64}, tw::Real) = new(n, s, Float64(tw))
 end
-function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
+function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     ns = sum(x, dims=1)  # get ntrials for each observation
     n = ns[1]       # use ntrails from first ob., then check all equal
     all(ns .== n) || error("Each sample in X should sum to the same value.")
@@ -90,7 +90,7 @@ function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}) where T<:Real
     end
     DirichletMultinomialStats(n, s, m)
 end
-function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
     ns = sum(x, dims=1)
     n = ns[1]
@@ -104,7 +104,7 @@ function suffstats(::Type{DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}
     end
     DirichletMultinomialStats(n, s, sum(w))
 end
-function fit_mle(::Type{DirichletMultinomial}, ss::DirichletMultinomialStats;
+function fit_mle(::Type{<:DirichletMultinomial}, ss::DirichletMultinomialStats;
                  tol::Float64 = 1e-8, maxiter::Int = 1000)
     k = size(ss.s, 2)
     α = ones(size(ss.s, 1))

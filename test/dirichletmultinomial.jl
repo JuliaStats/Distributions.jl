@@ -79,6 +79,8 @@ ss = suffstats(DirichletMultinomial, x)
 @test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
 @test isapprox(mle.α, d.α, atol=.2)
+mle = fit(DirichletMultinomial{Float64}, x)
+@test isapprox(mle.α, d.α, atol=.2)
 
 # test MLE with weights
 for w in (.1 * ones(10_000), ones(10_000), 10 * ones(10_000))
