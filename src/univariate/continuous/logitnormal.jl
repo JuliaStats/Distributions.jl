@@ -149,7 +149,7 @@ rand(rng::AbstractRNG, d::LogitNormal) = logistic(randn(rng) * d.σ + d.μ)
 
 ## Fitting
 
-function fit_mle(::Type{LogitNormal}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where T<:Real
     lx = logit.(x)
     μ, σ = mean_and_std(lx)
     LogitNormal(μ, σ)

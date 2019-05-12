@@ -37,6 +37,7 @@ const tests = [
     "quantile_newton",
     "semicircle",
     "qq",
+    "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
     "functionals",

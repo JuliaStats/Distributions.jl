@@ -254,7 +254,7 @@ struct DiscreteNonParametricStats{T<:Real,W<:Real,Ts<:AbstractVector{T},
     freq::Ws
 end
 
-function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
+function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
 
     N = length(x)
     N == 0 && return DiscreteNonParametricStats(T[], Float64[])
@@ -284,7 +284,7 @@ function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<
 
 end
 
-function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T},
+function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
                    w::AbstractArray{W}) where {T<:Real,W<:Real}
 
     @check_args(DiscreteNonParametric, length(x) == length(w))
@@ -323,6 +323,6 @@ end
 
 # # Model fitting
 
-fit_mle(::Type{DiscreteNonParametric},
+fit_mle(::Type{<:DiscreteNonParametric},
         ss::DiscreteNonParametricStats{T,W,Ts,Ws}) where {T,W,Ts,Ws} =
     DiscreteNonParametric{T,W,Ts,Ws}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())

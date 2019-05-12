@@ -81,7 +81,7 @@ _rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) =
 
 ### Estimation
 
-function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
+function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{Float64})
     r = vec(sum(X, dims=2))
     n = size(X, 2)
     r_nrm = norm(r)
@@ -91,7 +91,7 @@ function fit_mle(::Type{VonMisesFisher}, X::Matrix{Float64})
     VonMisesFisher(μ, κ)
 end
 
-fit_mle(::Type{VonMisesFisher}, X::Matrix{T}) where {T<:Real} = fit_mle(VonMisesFisher, Float64(X))
+fit_mle(::Type{<:VonMisesFisher}, X::Matrix{T}) where {T<:Real} = fit_mle(VonMisesFisher, Float64(X))
 
 function _vmf_estkappa(p::Int, ρ::Float64)
     # Using the fixed-point iteration algorithm in the following paper:
