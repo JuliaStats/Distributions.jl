@@ -19,7 +19,11 @@ Base.rand(::Distributions.Sampleable)
 
 ### VariateForm
 
-`F <: VariateForm` specifies the form of the variate, which can be one of the following:
+```@doc
+Distributions.VariateForm
+```
+
+The `VariateForm` sub-types defined in `Distributions.jl` are:
 
 **Type** | **A single sample** | **Multiple samples**
 --- | --- |---
@@ -29,7 +33,11 @@ Base.rand(::Distributions.Sampleable)
 
 ### ValueSupport
 
-`S <: ValueSupport` specifies the support of sample elements, which can be either of the following:
+```@doc
+Distributions.ValueSupport
+```
+
+The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
 **Type** | **Element type** | **Descriptions**
 --- | --- | ---
