@@ -42,7 +42,7 @@ julia> Pkg.status("Distributions")
 ```
 
 Be exhaustive in your report, give the summary of the bug,
-a Minimum Working Example (MWE), what happens and what you
+a Minimal Working Example (MWE), what happens and what you
 expected to happen.
 
 ### Workflow with git and github
