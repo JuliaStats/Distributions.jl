@@ -86,4 +86,5 @@ end
 
 #### Sampling
 
+rand(rng::AbstractRNG, d::VonMises) = rand(rng, sampler(d))
 sampler(d::VonMises) = VonMisesSampler(d.μ, d.κ)

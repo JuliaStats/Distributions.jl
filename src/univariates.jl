@@ -153,8 +153,6 @@ end
 ##### generic methods (fallback) #####
 
 ## sampling
-# single univariate, no allocation
-rand(rng::AbstractRNG, s::Sampleable{Univariate}) = rand(rng, s)
 
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
@@ -170,11 +168,18 @@ function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
 end
 
 """
-    rand(d::UnivariateDistribution)
+    rand(rng::AbstractRNG, d::UnivariateDistribution)
 
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
 """
 rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
+
+"""
+    rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
+
+Sample a univariate distribution and store the results in the provided array.
+"""
+rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 
 ## statistics
 
