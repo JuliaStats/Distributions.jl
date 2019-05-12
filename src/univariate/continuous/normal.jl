@@ -74,45 +74,77 @@ kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 #### Evaluation
-gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
+
+# Helpers
+
+function xval(d::Normal, z::Real)
+    if isinf(z) && iszero(d.σ)
+        d.μ + one(d.σ) * z
+    else
+        d.μ + d.σ * z
+    end
+end
+zval(d::Normal, x::Real) = (x - d.μ) / d.σ
+
+gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
+# logpdf
 function logpdf(d::Normal, x::Real)
     if iszero(d.σ)
         d.μ == x ? Inf : -Inf
     else
-        -(((x - d.μ) / d.σ)^2 + log2π) / 2 - log(d.σ)
+        -(zval(d, x)^2 + log2π) / 2 - log(d.σ)
     end
 end
+# pdf
 function pdf(d::Normal, x::Real)
     if iszero(d.σ)
         d.μ == x ? Inf : 0.0
     else
-        exp(-((x - d.μ) / d.σ)^2 / 2) * invsqrt2π / d.σ
+        exp(-zval(d, x)^2 / 2) * invsqrt2π / d.σ
     end
 end
-function cdf(d::Normal, x::Real)
-    if iszero(d.σ)
-        float(d.μ ≤ x)
-    else
-        erfc(-(x - d.μ) / d.σ * invsqrt2) / 2
-    end
-end
+# logcdf
 function logcdf(d::Normal, x::Real)
     if iszero(d.σ)
         d.μ ≤ x ? 0.0 : -Inf
     else
-        z = (x - d.μ) / d.σ
+        z = zval(d, x)
         z < -1.0 ? log(erfcx(-z * invsqrt2)/2) - abs2(z)/2 : log1p(-erfc(z * invsqrt2)/2)
     end
 end
-
-function xval(μ::Real, σ::Real, z::Number)
-    if isinf(z) && iszero(σ)
-        μ + one(σ) * z
+# logccdf
+function logccdf(d::Normal, x::Real)
+    if iszero(d.σ) && x == d.μ
+        z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
-        μ + σ * z
+        z = zval(d, x)
+    end
+    z > 1.0 ?
+    log(erfcx(z * invsqrt2) / 2) - z^2 / 2 :
+    log1p(-erfc(-z * invsqrt2) / 2)
+end
+# cdf
+function cdf(d::Normal, x::Real)
+    if iszero(d.σ)
+        float(d.μ ≤ x)
+    else
+        erfc(-zval(d, x) * invsqrt2) / 2
     end
 end
-
+# ccdf
+function ccdf(d::Normal, x::Real)
+    z = iszero(d.σ) && x == d.μ ?
+        zval(Normal(zero(d.μ), d.σ), one(x)) :
+        zval(d, x)
+    erfc(z * invsqrt2) / 2
+end
+# invlogcdf
+norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
+norminvlogcdf(lp::Real) = _norminvlogcdf_impl(convert(Float64, lp))
+invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
+# invlogccdf
+invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
+# quantile
 function quantile(d::Normal, p::Real)
     if iszero(d.σ)
         if iszero(p)
@@ -123,25 +155,21 @@ function quantile(d::Normal, p::Real)
             0.5
         end
     end
-    norminvcdf(d.μ, d.σ, p)
+    xval(d, -erfcinv(2p) * sqrt2)
 end
-invlogcdf(d::Normal, lp::Real) = norminvlogcdf(d.μ, d.σ, lp)
-
-norminvcdf(p::Real) = -erfcinv(2p) * sqrt2
-norminvcdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvcdf(p))
-
-norminvccdf(p::Real) = erfcinv(2p) * sqrt2
-norminvccdf(μ::Real, σ::Real, p::Real) = xval(μ, σ, norminvccdf(p))
-
-# invlogcdf. Fixme! Support more precisions than Float64
-norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(Float64(lp)))
-norminvlogcdf(lp::Real) = _norminvlogcdf_impl(Float64(lp))
-norminvlogcdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogcdf(lp))
-
-# invlogccdf. Fixme! Support more precisions than Float64
-norminvlogccdf(lp::Union{Float16,Float32}) = convert(typeof(lp), -_norminvlogcdf_impl(convert(Float64, lp)))
-norminvlogccdf(lp::Real) = -_norminvlogcdf_impl(convert(Float64, lp))
-norminvlogccdf(μ::Real, σ::Real, lp::Real) = xval(μ, σ, norminvlogccdf(lp))
+# cquantile
+function cquantile(d::Normal, q::Real)
+    if iszero(d.σ)
+        if iszero(q)
+            Inf
+        elseif isone(q)
+            -Inf
+        else
+            0.5
+        end
+    end
+    xval(d, erfcinv(2q) * sqrt2)
+end
 
 # norminvcdf & norminvlogcdf implementation
 #
@@ -170,7 +198,7 @@ end
 
 function _qnorm_ker1(q::Float64)
     # pre-condition: abs(q) ≤ 0.425
-    r = 0.180625 - q*q
+    r = 0.180625 - q^2
     return q * @horner(r,
                        3.38713_28727_96366_6080e0,
                        1.33141_66789_17843_7745e2,
