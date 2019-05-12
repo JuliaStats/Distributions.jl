@@ -1,5 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
+using Printf
 import Test: @test
 
 # auxiliary functions

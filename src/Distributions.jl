@@ -64,6 +64,7 @@ export
     Biweight,
     Categorical,
     Cauchy,
+    Chernoff,
     Chi,
     Chisq,
     Cosine,
@@ -104,6 +105,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogitNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -122,6 +124,7 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    PGeneralizedGaussian,
     Product,
     Poisson,
     PoissonBinomial,
@@ -236,8 +239,6 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
-    test_samples,       # test a sampler
-    test_distr,         # test a distribution
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
@@ -275,7 +276,6 @@ include("truncate.jl")
 include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
-include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
@@ -316,7 +316,7 @@ Supported distributions:
     MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
-    NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
+    NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
     QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,

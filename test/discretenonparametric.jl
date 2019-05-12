@@ -19,11 +19,11 @@ d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 # Invalid probability, but no arg check
 DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
 
-Distributions.test_range(d)
+test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
-Distributions.test_evaluation(d, vs, true)
-Distributions.test_stats(d, vs)
-Distributions.test_params(d)
+test_evaluation(d, vs, true)
+test_stats(d, vs)
+test_params(d)
 
 @test func[1](d) ∈ [40., 80., 120., -60.]
 @test func[1](sampler(d)) ∈ [40., 80., 120., -60.]

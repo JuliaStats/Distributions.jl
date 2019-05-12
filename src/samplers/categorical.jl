@@ -26,4 +26,3 @@ function rand(rng::AbstractRNG, s::CategoricalDirectSampler)
     end
     return i
 end
-

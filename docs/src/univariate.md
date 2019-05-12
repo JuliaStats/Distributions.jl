@@ -94,6 +94,7 @@ Beta
 BetaPrime
 Biweight
 Cauchy
+Chernoff
 Chi
 Chisq
 Cosine
@@ -114,6 +115,7 @@ KSOneSided
 Laplace
 Levy
 Logistic
+LogitNormal
 LogNormal
 NoncentralBeta
 NoncentralChisq
@@ -123,6 +125,7 @@ Normal
 NormalCanon
 NormalInverseGaussian
 Pareto
+PGeneralizedGaussian
 Rayleigh
 Semicircle
 StudentizedRange

@@ -1,0 +1,33 @@
+name = "Distributions"
+uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
+authors = ["JuliaStats"]
+version = "0.19.2"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+
+[compat]
+PDMats = "0.9"
+QuadGK = "2.0"
+SpecialFunctions = "0.7"
+StatsBase = "0.30"
+StatsFuns = "0.8"
+julia = ">= 0.7"
+
+[extras]
+Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Calculus", "Distributed", "ForwardDiff", "JSON", "Test"]

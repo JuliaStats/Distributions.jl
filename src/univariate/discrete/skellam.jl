@@ -1,3 +1,5 @@
+using StatsFuns: nchisqcdf
+
 """
     Skellam(μ1, μ2)
 
@@ -80,8 +82,24 @@ function cf(d::Skellam, t::Real)
     exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
 
-cdf(d::Skellam, x::Int) = throw(MethodError(cdf, (d, x)))
-cdf(d::Skellam, x::Real) = throw(MethodError(cdf, (d, x)))
+"""
+    cdf(d::Skellam, t::Real)
+
+Implementation based on SciPy: https://github.com/scipy/scipy/blob/v0.15.1/scipy/stats/_discrete_distns.py 
+
+Refer to Eqn (5) in On an Extension of the Connexion Between Poisson and χ2 Distributions, N.L Johnson(1959)
+Vol 46, No 3/4, doi:10.2307/2333532 
+It relates the Skellam and Non-central chisquare PDFs, which is very similar to their CDFs computation as well.
+
+Computing cdf of the Skellam distribution.
+"""
+function cdf(d::Skellam, t::Real)
+    μ1, μ2 = params(d)
+    t = floor(t)
+    (t < 0) ? nchisqcdf(-2*t, 2*μ1, 2*μ2) : 1.0 - nchisqcdf(2*(t+1), 2*μ2, 2*μ1)
+end
+
+cdf(d::Skellam, t::Int) = cdf(d, float(t))
 
 #### Sampling
 # TODO: remove RFunctions dependency once Poisson has its removed

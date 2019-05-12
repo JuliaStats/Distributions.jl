@@ -111,6 +111,10 @@ r = fit(Multinomial, x)
 @test r.n == nt
 @test length(r) == length(p)
 @test isapprox(probs(r), p, atol=0.02)
+r = fit(Multinomial{Float64}, x)
+@test r.n == nt
+@test length(r) == length(p)
+@test isapprox(probs(r), p, atol=0.02)
 
 r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
 @test r.n == nt

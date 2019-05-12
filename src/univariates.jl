@@ -244,16 +244,16 @@ entropy(d::UnivariateDistribution, b::Real) = entropy(d) / log(b)
 """
     isplatykurtic(d)
 
-Return whether `d` is platykurtic (*i.e* `kurtosis(d) > 0`).
+Return whether `d` is platykurtic (*i.e* `kurtosis(d) < 0`).
 """
-isplatykurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
+isplatykurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 """
     isleptokurtic(d)
 
-Return whether `d` is leptokurtic (*i.e* `kurtosis(d) < 0`).
+Return whether `d` is leptokurtic (*i.e* `kurtosis(d) > 0`).
 """
-isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
+isleptokurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
 
 """
     ismesokurtic(d)
@@ -567,6 +567,7 @@ const continuous_distributions = [
     "betaprime",
     "biweight",
     "cauchy",
+    "chernoff",
     "chisq",    # Chi depends on Chisq
     "chi",
     "cosine",
@@ -575,6 +576,7 @@ const continuous_distributions = [
     "fdist",
     "frechet",
     "gamma", "erlang",
+    "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
     "gumbel",
@@ -595,6 +597,7 @@ const continuous_distributions = [
     "normalcanon",
     "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
+    "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
     "semicircle",
