@@ -158,9 +158,9 @@ struct GeometricStats <: SufficientStats
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
-suffstats(::Type{Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
+suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
 
-function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -175,4 +175,4 @@ function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Floa
     GeometricStats(sx, tw)
 end
 
-fit_mle(::Type{Geometric}, ss::GeometricStats) = Geometric(1 / (ss.sx / ss.tw + 1))
+fit_mle(::Type{<:Geometric}, ss::GeometricStats) = Geometric(1 / (ss.sx / ss.tw + 1))

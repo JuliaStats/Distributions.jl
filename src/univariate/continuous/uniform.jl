@@ -110,7 +110,7 @@ rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 #### Fitting
 
-function fit_mle(::Type{Uniform}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
