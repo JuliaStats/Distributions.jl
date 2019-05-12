@@ -81,6 +81,8 @@ x = x ./ sum(x, dims=1)
 
 r = fit_mle(Dirichlet, x)
 @test isapprox(r.alpha, d.alpha, atol=0.25)
+r = fit(Dirichlet{Float32}, x)
+@test isapprox(r.alpha, d.alpha, atol=0.25)
 
 # r = fit_mle(Dirichlet, x, fill(2.0, n))
 # @test isapprox(r.alpha, d.alpha, atol=0.25)
