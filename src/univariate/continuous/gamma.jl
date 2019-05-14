@@ -120,7 +120,7 @@ struct GammaStats <: SufficientStats
     GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
-function suffstats(::Type{Gamma}, x::AbstractArray{T}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where T<:Real
     sx = zero(T)
     slogx = zero(T)
     for xi = x
@@ -130,7 +130,7 @@ function suffstats(::Type{Gamma}, x::AbstractArray{T}) where T<:Real
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -155,7 +155,7 @@ function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
     1 / z
 end
 
-function fit_mle(::Type{Gamma}, ss::GammaStats;
+function fit_mle(::Type{<:Gamma}, ss::GammaStats;
     alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16)
 
     mx = ss.sx / ss.tw

@@ -115,6 +115,7 @@ KSOneSided
 Laplace
 Levy
 Logistic
+LogitNormal
 LogNormal
 NoncentralBeta
 NoncentralChisq
@@ -124,6 +125,7 @@ Normal
 NormalCanon
 NormalInverseGaussian
 Pareto
+PGeneralizedGaussian
 Rayleigh
 Semicircle
 StudentizedRange
