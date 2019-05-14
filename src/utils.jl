@@ -132,9 +132,9 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::AbstractMatrix{Float64}) = isa(trycholesky(a), Cholesky)
+hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
 
-function trycholesky(a::AbstractMatrix{Float64})
+function trycholesky(a::Matrix{Float64})
     try cholesky(a)
     catch e
         return e
