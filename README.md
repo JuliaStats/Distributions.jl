@@ -47,7 +47,7 @@ expected to happen.
 
 ### Workflow with git and github
 
-To contribute to the package, fork the repository on github,
+To contribute to the package, fork the repository on GitHub,
 clone it and make modifications on a new branch,
 **do not commit modifications on master**.
 Once your changes are made, push them on your fork and create the
