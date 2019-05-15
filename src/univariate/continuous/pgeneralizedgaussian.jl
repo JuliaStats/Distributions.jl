@@ -124,7 +124,7 @@ function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
     g = Gamma(inv(d.p), 1)
 
     # bernoulli random variable "b" with parameter (1/2).
-    b = Float64(rand(Bernoulli()))
+    b = (-1) ^ (Float64(rand(Bernoulli())))
 
     return d.μ + inv(sqrt(d.α)) * rand(rng, g)^inv(d.p) * b
 end
