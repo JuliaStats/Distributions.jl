@@ -30,13 +30,6 @@ Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
 Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
-# for T = (:AbstractArray, :Number), op = (:+, :-)
-    # @eval begin
-        # Base.@deprecate ($op)(x::$T, v::ZeroVector) broadcast($op, x, v)
-        # Base.@deprecate ($op)(v::ZeroVector, x::$T) broadcast($op, v, x)
-    # end
-# end
-
 Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
 Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
 Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
