@@ -45,7 +45,7 @@ Be exhaustive in your report, give the summary of the bug,
 a Minimal Working Example (MWE), what happens and what you
 expected to happen.
 
-### Workflow with git and github
+### Workflow with Git and GitHub
 
 To contribute to the package, fork the repository on GitHub,
 clone it and make modifications on a new branch,
