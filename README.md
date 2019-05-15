@@ -37,8 +37,7 @@ not been reported yet on the issues of the repository.
 If not, you can file a new issue, add your version of the package
 which you can get with this command in the Julia REPL:
 ```julia
-julia> import Pkg
-julia> Pkg.status("Distributions")
+julia> ]status Distributions
 ```
 
 Be exhaustive in your report, give the summary of the bug,
