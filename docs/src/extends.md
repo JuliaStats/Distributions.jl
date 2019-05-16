@@ -106,7 +106,7 @@ A univariate distribution type should be defined as a subtype of `DiscreteUnivar
 
 Following methods need to be implemented for each univariate distribution type:
 
-- [`rand(d::UnivariateDistribution)`](@ref)
+- [`rand(::AbstractRNG, d::UnivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
 - [`pdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`logpdf(d::UnivariateDistribution, x::Real)`](@ref)
@@ -139,7 +139,7 @@ Following methods need to be implemented for each multivariate distribution type
 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
-- [`Distributions._rand!(d::MultivariateDistribution, x::AbstractArray)`](@ref)
+- [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)`](@ref)
 - [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 
 Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.

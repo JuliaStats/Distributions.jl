@@ -23,6 +23,7 @@ var(::MultivariateDistribution)
 cov(::MultivariateDistribution)
 cor(::MultivariateDistribution)
 entropy(::MultivariateDistribution)
+entropy(::MultivariateDistribution, ::Real)
 ```
 
 ### Probability evaluation
@@ -39,8 +40,8 @@ loglikelihood(::MultivariateDistribution, ::AbstractMatrix)
 ### Sampling
 
 ```@docs
-rand(::MultivariateDistribution)
-rand!(::MultivariateDistribution, ::AbstractArray)
+rand(rng::AbstractRNG, ::MultivariateDistribution)
+rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 ```
 
 **Note:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
@@ -95,6 +96,5 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ## Internal Methods (for creating you own multivariate distribution)
 
 ```@docs
-Distributions._rand!(d::MultivariateDistribution, x::AbstractArray)
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```

@@ -12,9 +12,18 @@ abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
 It has two type parameters that define the kind of samples that can be drawn therefrom.
 
+```@doc
+Distributions.Sampleable
+Base.rand(::Distributions.Sampleable)
+```
+
 ### VariateForm
 
-`F <: VariateForm` specifies the form of the variate, which can be one of the following:
+```@doc
+Distributions.VariateForm
+```
+
+The `VariateForm` sub-types defined in `Distributions.jl` are:
 
 **Type** | **A single sample** | **Multiple samples**
 --- | --- |---
@@ -24,7 +33,11 @@ It has two type parameters that define the kind of samples that can be drawn the
 
 ### ValueSupport
 
-`S <: ValueSupport` specifies the support of sample elements, which can be either of the following:
+```@doc
+Distributions.ValueSupport
+```
+
+The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
 **Type** | **Element type** | **Descriptions**
 --- | --- | ---
@@ -40,8 +53,8 @@ length(::Sampleable)
 size(::Sampleable)
 nsamples(::Type{Sampleable}, x::Any)
 eltype(::Sampleable)
-rand(::Sampleable)
-rand!(::Sampleable, ::AbstractArray)
+rand(::AbstractRNG, ::Sampleable)
+rand!(::AbstractRNG, ::Sampleable, ::AbstractArray)
 ```
 
 ## Distributions
@@ -50,6 +63,10 @@ We use `Distribution`, a subtype of `Sampleable` as defined below, to capture pr
 
 ```julia
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
+```
+
+```@doc
+Distributions.Distribution
 ```
 
 To simplify the use in practice, we introduce a series of type alias as follows:
