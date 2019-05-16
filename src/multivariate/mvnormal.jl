@@ -77,6 +77,13 @@ insupport(d::AbstractMvNormal, x::AbstractVector) =
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
+"""
+    rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
+
+Sample a random vector from the provided multi-variate normal distribution.
+"""
+rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
+
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
     T = typeof(ldcd)
@@ -222,7 +229,7 @@ end
 
 ### Show
 
-distrname(d::IsoNormal) = "IsoNormal"    # Note: IsoNormal, etc are just alias names
+distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names.
 distrname(d::DiagNormal) = "DiagNormal"
 distrname(d::FullNormal) = "FullNormal"
 
