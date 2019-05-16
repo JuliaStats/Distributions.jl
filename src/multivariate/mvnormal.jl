@@ -229,7 +229,7 @@ end
 
 ### Show
 
-distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names
+distrname(d::IsoNormal)  = "IsoNormal"    # Note: IsoNormal, etc are just alias names.
 distrname(d::DiagNormal) = "DiagNormal"
 distrname(d::FullNormal) = "FullNormal"
 
