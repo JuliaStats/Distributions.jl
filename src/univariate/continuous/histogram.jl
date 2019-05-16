@@ -23,8 +23,8 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector
 	B :: TB
 	P :: TP
 	# cache
-	_pdf :: Vector{Tp}
 	_cdf :: Vector{Tp}
+	_ccdf :: Vector{Tp}
 	_aliastable :: TA
 	function HistogramDist{Tp,Tb,TB,TP}(B::TB, P::TP) where {Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector{Tp}}
 		@check_args(HistogramDist, typeof(axes(P)) <: Tuple{Base.OneTo})
@@ -35,12 +35,20 @@ struct HistogramDist{Tp<:Real,Tb<:Real,TB<:AbstractVector{Tb},TP<:AbstractVector
 		binwidths = Vector{Tp}(undef, n)
 		binwidths .= view(B,2:n+1) .- view(B,1:n)
 		@check_args(HistogramDist, all(binwidths .> 0))
-		pdf = Vector{Tp}(undef, n)
-		pdf .= P ./ binwidths
-		cdf = zeros(Tp, n)
-		cdf[2:end] .= cumsum(P[1:end-1])
+		cdf = zeros(Tp, n+1)
+		for i in 1:n
+			@inbounds cdf[i+1] = cdf[i] + P[i]
+		end
+		cdf ./= cdf[end]
+		@assert iszero(cdf[1]) && isone(cdf[end])
+		ccdf = zeros(Tp, n+1)
+		for i in n:-1:1
+		    @inbounds ccdf[i] = ccdf[i+1] + P[i]
+		end
+		ccdf ./= ccdf[1]
+		@assert iszero(ccdf[end]) && isone(ccdf[1])
 		aliastable = AliasTable(P)
-		new{Tp,Tb,TB,TP,typeof(aliastable)}(B, P, pdf, cdf, aliastable)
+		new{Tp,Tb,TB,TP,typeof(aliastable)}(B, P, cdf, ccdf, aliastable)
 	end
 end
 
@@ -115,18 +123,25 @@ end
 mode(d::HistogramDist) = @inbounds d.B[argmax(d.P)]
 
 #### Evaluation
+interplinear(a::Real, b::Real, x::Real) = interplinear(promote(a,b,x)...)
+interplinear(a::T, b::T, x::T) where {T<:Integer} = a + x*(b-a)
+interplinear(a::T, b::T, x::T) where {T<:AbstractFloat} = ((x,a,b) = x<T(0.5) ? (x,a,b) : (1-x,b,a); S=b-a; s = abs(b)>abs(a) ? (S-b)+a : (S+a)-b; (a+x*S)-x*s)
 function pdf(d::HistogramDist{Tp}, x::Real) where {Tp}
 	i = searchsortedlast(d.B, x)
-	@inbounds(0 < i < length(d.B) ? d._pdf[i] : zero(Tp)) :: Tp
+	@inbounds(0 < i < length(d.B) ? d.P[i] / (d.B[i+1] - d.B[i]) : zero(Tp)) :: Tp
 end
 function cdf(d::HistogramDist{Tp}, x::Real) where {Tp}
 	i = searchsortedlast(d.B, x)
-	@inbounds(i ≤ 0 ? zero(Tp) : i ≥ length(d.B) ? one(Tp) : (x-d.B[i])*d._pdf[i] + d._cdf[i]) :: Tp
+	@inbounds(i ≤ 0 ? zero(Tp) : i ≥ length(d.B) ? one(Tp) : interplinear(d._cdf[i], d._cdf[i+1], (x-d.B[i])/(d.B[i+1]-d.B[i]))) :: Tp
+end
+function ccdf(d::HistogramDist{Tp}, x::Real) where {Tp}
+	i = searchsortedlast(d.B, x)
+	@inbounds(i ≤ 0 ? one(Tp) : i ≥ length(d.B) ? zero(Tp) : interplinear(d._ccdf[i], d._ccdf[i+1], (x-d.B[i])/(d.B[i+1]-d.B[i]))) :: Tp
 end
 function quantile(d::HistogramDist, p::Real)
+	0 ≤ p ≤ 1 || throw(DomainError(p, "not a probability"))
 	i = searchsortedlast(d._cdf, p)
-	(i ≤ 0 || p > 1) && throw(DomainError(p, "not a probability"))
-	@inbounds convert(eltype(d), d.B[i] + (p - d._cdf[i]) / d._pdf[i])
+	@inbounds i==1 ? convert(eltype(d), d.B[1]) : i==length(d.B) ? convert(eltype(d), d.B[end]) : convert(eltype(d), interplinear(d.B[i], d.B[i+1], (p - d._cdf[i])/(d._cdf[i+1] - d._cdf[i])))
 end
 mgf(d::HistogramDist, t::Real) =
 	@inbounds sum(p*mgf(component(d,i),t) for (i,p) in enumerate(probs(d)))
@@ -137,14 +152,8 @@ cf(d::HistogramDist, t::Real) =
 function rand(rng::AbstractRNG, d::HistogramDist)
 	p = rand(rng)
 	i = rand(rng, d._aliastable)
-	@inbounds convert(eltype(d), d.B[i] + p*(d.B[i+1] - d.B[i]))
+	@inbounds convert(eltype(d), interplinear(d.B[i], d.B[i+1], p))
 end
-
-# function rand(rng::AbstractRNG, d::HistogramDist)
-#     p = rand(rng)
-#     i = searchsortedlast(d._cdf, p)
-#     @inbounds convert(Float64, d.B[i] + (p - d._cdf[i]) / d._pdf[i])
-# end
 
 #### Fitting
 function fit_mle(::Type{TD}, x::AbstractArray{<:Real}, bins::AbstractArray{<:Real}) where {TD<:HistogramDist}
