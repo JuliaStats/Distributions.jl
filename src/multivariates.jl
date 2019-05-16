@@ -22,7 +22,7 @@ size(d::MultivariateDistribution)
 Draw samples and output them to a pre-allocated array x. Here, x can be either
 a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
-rand!(d::MultivariateDistribution, x::AbstractArray)
+rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 
 # multivariate with pre-allocated array
 function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix)
