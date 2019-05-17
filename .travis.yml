@@ -12,6 +12,14 @@ matrix:
 notifications:
   email: false
 
+after_success:
+  - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
+
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
 jobs:
   include:
     - stage: "Documentation"
