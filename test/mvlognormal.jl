@@ -122,7 +122,7 @@ end
         (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
         (MvLogNormal(mu, C), mu, C),
         (MvLogNormal(C), zeros(3), C) ]
-        m,s = params(g)
+        m, s = params(g)
         @test Vector(m) ≈ μ
         test_mvlognormal(g, 10^4)
     end
