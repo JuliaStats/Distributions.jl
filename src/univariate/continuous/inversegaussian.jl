@@ -173,13 +173,13 @@ struct InverseGaussianStats <: SufficientStats
     sw::Float64      # sum of sample weight
 end
 
-function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real})
+function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real})
     sx = sum(x)
     sinvx = sum(inv, x)
     InverseGaussianStats(sx, sinvx, length(x))
 end
 
-function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::AbstractVector{<:Real})
+function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real}, w::AbstractVector{<:Real})
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -196,7 +196,7 @@ function suffstats(::Type{InverseGaussian}, x::AbstractVector{<:Real}, w::Abstra
     InverseGaussianStats(sx, sinvx, sw)
 end
 
-function fit_mle(::Type{InverseGaussian}, ss::InverseGaussianStats)
+function fit_mle(::Type{<:InverseGaussian}, ss::InverseGaussianStats)
     mu = ss.sx / ss.sw
     invlambda = ss.sinvx / ss.sw  -  inv(mu)
     InverseGaussian(mu, inv(invlambda))

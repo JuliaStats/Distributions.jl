@@ -113,7 +113,7 @@ rand(rng::AbstractRNG, d::Laplace) =
 
 #### Fitting
 
-function fit_mle(::Type{Laplace}, x::Array)
+function fit_mle(::Type{<:Laplace}, x::Array)
     xc = copy(x)
     a = median!(xc)
     Laplace(a, StatsBase.mad!(xc, center=a))

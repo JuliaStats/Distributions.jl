@@ -8,6 +8,17 @@ d = fit(D, x)
 
 This statement fits a distribution of type `D` to a given dataset `x`, where `x` should be an array comprised of all samples. The fit function will choose a reasonable way to fit the distribution, which, in most cases, is [maximum likelihood estimation](http://en.wikipedia.org/wiki/Maximum_likelihood).
 
+!!! note
+
+    One can use as first argument simply the distribution name, like `Binomial`,
+    or a concrete distribution with a type parameter, like `Normal{Float64}` or
+    `Exponential{Float32}`.  However, in the latter case the type parameter of
+    the distribution will be ignored:
+
+    ```julia
+    julia> fit(Cauchy{Float32}, collect(-4:4))
+    Cauchy{Float64}(μ=0.0, σ=2.0)
+    ```
 
 ## Maximum Likelihood Estimation
 

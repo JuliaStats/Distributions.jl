@@ -105,7 +105,7 @@ cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 #### Fitting
 
 # Note: this is not a Maximum Likelihood estimator
-function fit(::Type{Cauchy}, x::AbstractArray{T}) where T<:Real
+function fit(::Type{<:Cauchy}, x::AbstractArray{T}) where T<:Real
     l, m, u = quantile(x, [0.25, 0.5, 0.75])
     Cauchy(m, (u - l) / 2)
 end

@@ -145,38 +145,38 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::Abs
     h
 end
 
-function suffstats(::Type{Categorical}, k::Int, x::AbstractArray{T}) where T<:Integer
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x))
 end
 
-function suffstats(::Type{Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
 const CategoricalData = Tuple{Int, AbstractArray}
 
-suffstats(::Type{Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
-suffstats(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
+suffstats(::Type{<:Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
+suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
 
 # Model fitting
 
-function fit_mle(::Type{Categorical}, ss::CategoricalStats)
+function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
     Categorical(pnormalize!(ss.h))
 end
 
-function fit_mle(::Type{Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
 end
 
-function fit_mle(::Type{Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
 end
 
-fit_mle(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
-fit_mle(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data..., w)
+fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
+fit_mle(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data..., w)
 
-fit_mle(::Type{Categorical}, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x)
-fit_mle(::Type{Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
+fit_mle(::Type{<:Categorical}, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x)
+fit_mle(::Type{<:Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
 
-fit(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
-fit(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)
+fit(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
+fit(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)

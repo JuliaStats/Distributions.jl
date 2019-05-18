@@ -176,7 +176,7 @@ struct MultinomialStats <: SufficientStats
     MultinomialStats(n::Int, scnts::Vector{Float64}, tw::Real) = new(n, scnts, Float64(tw))
 end
 
-function suffstats(::Type{Multinomial}, x::Matrix{T}) where T<:Real
+function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
     K = size(x, 1)
     n::T = zero(T)
     scnts = zeros(K)
@@ -198,7 +198,7 @@ function suffstats(::Type{Multinomial}, x::Matrix{T}) where T<:Real
     MultinomialStats(n, scnts, size(x,2))
 end
 
-function suffstats(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     K = size(x, 1)
@@ -225,14 +225,14 @@ function suffstats(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64}) where T
     MultinomialStats(n, scnts, tw)
 end
 
-fit_mle(::Type{Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
+fit_mle(::Type{<:Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
 
-function fit_mle(::Type{Multinomial}, x::Matrix{T}) where T<:Real
+function fit_mle(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
     ss = suffstats(Multinomial, x)
     Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
 end
 
-function fit_mle(::Type{Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function fit_mle(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
     ss = suffstats(Multinomial, x, w)
     Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
 end

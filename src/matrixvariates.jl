@@ -6,7 +6,7 @@
 
 Return the size of each sample from distribution `d`.
 """
-size(d::MatrixDistribution)
+Base.size(d::MatrixDistribution)
 
 """
     length(d::MatrixDistribution)
@@ -21,6 +21,14 @@ Base.length(d::MatrixDistribution)
 Return the mean matrix of `d`.
 """
 mean(d::MatrixDistribution)
+
+"""
+    _rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
+
+Sample the matrix distribution and store the result in `A`.
+Must be implemented by matrix-variate distributions.
+"""
+_rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 
 ## sampling
 

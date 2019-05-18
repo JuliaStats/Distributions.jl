@@ -12,7 +12,7 @@ length(::MatrixDistribution)
 mean(::MatrixDistribution)
 pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
-rand(::MatrixDistribution, ::Int)
+Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 ```
 
 ## Distributions

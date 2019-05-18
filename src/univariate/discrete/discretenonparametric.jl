@@ -124,7 +124,7 @@ function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     end
     return s
 end
-cdf(d::DiscreteNonParametric{T}, x::Int) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
 cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
 
 function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
@@ -137,7 +137,7 @@ function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     end
     return s
 end
-ccdf(d::DiscreteNonParametric{T}, x::Int) where T = _ccdf(d, convert(T, x))
+ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
 ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)
@@ -254,7 +254,7 @@ struct DiscreteNonParametricStats{T<:Real,W<:Real,Ts<:AbstractVector{T},
     freq::Ws
 end
 
-function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
+function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
 
     N = length(x)
     N == 0 && return DiscreteNonParametricStats(T[], Float64[])
@@ -284,7 +284,7 @@ function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T}) where {T<
 
 end
 
-function suffstats(::Type{DiscreteNonParametric}, x::AbstractArray{T},
+function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
                    w::AbstractArray{W}) where {T<:Real,W<:Real}
 
     @check_args(DiscreteNonParametric, length(x) == length(w))
@@ -323,6 +323,6 @@ end
 
 # # Model fitting
 
-fit_mle(::Type{DiscreteNonParametric},
+fit_mle(::Type{<:DiscreteNonParametric},
         ss::DiscreteNonParametricStats{T,W,Ts,Ws}) where {T,W,Ts,Ws} =
     DiscreteNonParametric{T,W,Ts,Ws}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())

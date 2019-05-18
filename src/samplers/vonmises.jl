@@ -15,7 +15,7 @@ end
 #     DJ Best & NI Fisher (1979). Efficient Simulation of the von Mises
 #     Distribution. Journal of the Royal Statistical Society. Series C
 #     (Applied Statistics), 28(2), 152-157.
-function _rand!(rng::AbstractRNG, s::VonMisesSampler)
+function rand(rng::AbstractRNG, s::VonMisesSampler)
     f = 0.0
     local x::Float64
     if s.κ > 700.0

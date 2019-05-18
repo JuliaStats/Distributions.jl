@@ -30,13 +30,6 @@ Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
 Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
-for T = (:AbstractArray, :Number), op = (:+, :-)
-    @eval begin
-        Base.@deprecate ($op)(x::$T, v::ZeroVector) broadcast($op, x, v)
-        Base.@deprecate ($op)(v::ZeroVector, x::$T) broadcast($op, v, x)
-    end
-end
-
 Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
 Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
 Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
@@ -52,7 +45,7 @@ struct NoArgCheck end
 
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite(x::Array{T}) where T<:Real
+function allfinite(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(isfinite(x[i]))
             return false
@@ -61,7 +54,7 @@ function allfinite(x::Array{T}) where T<:Real
     return true
 end
 
-function allzeros(x::Array{T}) where T<:Real
+function allzeros(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] == zero(T))
             return false
@@ -72,16 +65,10 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg(x::Array{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(x[i] >= zero(T))
-            return false
-        end
-    end
-    return true
-end
+allnonneg(xs::AbstractArray{<:Real}) = all(x -> x >= 0, xs)
 
-isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{T}) where {T<:Real} =
+    allnonneg(p) && isapprox(sum(p), one(T))
 
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
@@ -120,7 +107,7 @@ macro checkinvlogcdf(lp,ex)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
+function isApproxSymmmetric(a::AbstractMatrix{Float64})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -140,4 +127,3 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
-

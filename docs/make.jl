@@ -2,10 +2,10 @@ using Documenter, Distributions
 import Random: AbstractRNG, rand!
 
 makedocs(
-    format = :html,
     sitename = "Distributions.jl",
-    modules = [Distributions],
-    pages = [
+    modules  = [Distributions],
+    doctest  = false,
+    pages    = [
         "index.md",
         "starting.md",
         "types.md",
@@ -21,8 +21,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaStats/Distributions.jl.git",
-    target = "build",
-    julia  = "1.0",
-    deps = nothing,
-    make = nothing
+    versions = ["stable" => "v^", "v#.#", "dev" => "master"]
 )
