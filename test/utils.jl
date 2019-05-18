@@ -33,3 +33,25 @@ end
 for idx in eachindex(Z)
     @test Z[idx] == zero(eltype(Z))
 end
+
+# Ensure that utilities functions works with abstract arrays
+
+@test Distributions.allfinite(GenericArray([-1, 0, Inf])) == false
+@test Distributions.allfinite(GenericArray([0, 0, 0]))
+
+@test Distributions.allzeros(GenericArray([-1, 0, 1])) == false
+@test Distributions.allzeros(GenericArray([0, 0, 0]))
+
+@test Distributions.allnonneg(GenericArray([-1, 0, 1])) == false
+@test Distributions.allnonneg(GenericArray([0, 0, 0]))
+
+@test isprobvec(GenericArray([1, 1, 1])) == false
+@test isprobvec(GenericArray([1/3, 1/3, 1/3]))
+
+# Positive definite matrix
+M = GenericArray([1.0 0.0; 0.0 1.0])
+# Non-invertible matrix
+N = GenericArray([1.0 0.0; 1.0 0.0])
+
+@test Distributions.isApproxSymmmetric(N) == false
+@test Distributions.isApproxSymmmetric(M)
