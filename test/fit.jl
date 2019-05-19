@@ -8,8 +8,8 @@ using Distributions
 using Test, Random, LinearAlgebra
 
 
-const n0 = 100
-const N = 10^5
+n0 = 100
+N = 10^5
 
 rng = MersenneTwister(123)
 
