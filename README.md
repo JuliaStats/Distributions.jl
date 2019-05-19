@@ -3,7 +3,7 @@ Distributions.jl
 
 [![Travis status](https://travis-ci.org/JuliaStats/Distributions.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distributions.jl)
 [![Appveyor status](https://ci.appveyor.com/api/projects/status/xqm07gyruflhnha7/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/distributions-jl/branch/master)
-[![](https://zenodo.org/badge/DOI/10.5281/zenodo.2647520.svg)](https://zenodo.org/record/2647520)
+[![](https://zenodo.org/badge/DOI/10.5281/zenodo.2650434.svg)](https://zenodo.org/record/2650434)
 [![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaStats.github.io/Distributions.jl/latest/)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaStats.github.io/Distributions.jl/stable/)
