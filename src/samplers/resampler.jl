@@ -1,8 +1,3 @@
-struct WeightedResampler{F<:VariateForm, S<:ValueSupport} <: Sampleable{F, S}
-    obs::AbstractArray
-    wv::AbstractWeights
-end
-
 """
     WeightedResampler(obs::AbstractArray, wv::AbstractWeights)
 
@@ -12,12 +7,17 @@ observations from the raw input data (`obs`) based on the weights (`wv`) provide
 This type supports univariate, multivariate and matrixvariate forms, so `obs` can
 be a vector of values, matrix of values or a vector of matrices.
 """
+struct WeightedResampler{F<:VariateForm, S<:ValueSupport, T<:AbstractArray} <: Sampleable{F, S}
+    obs::T
+    wv::AbstractWeights
+end
+
 function WeightedResampler(obs::T, wv::AbstractWeights) where T<:AbstractArray
     F = _variate_form(T)
     S = _value_support(eltype(T))
 
     _validate(obs, wv)
-    WeightedResampler{F, S}(obs, wv)
+    WeightedResampler{F, S, T}(obs, wv)
 end
 
 _variate_form(::Type{<:AbstractVector}) = Univariate
