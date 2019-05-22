@@ -35,9 +35,7 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int,
     @test length(d) == p
     @test meandir(d) == μ
     @test concentration(d) == κ
-#    @test d == typeof(d)(params(d)...)
     @test partype(d) == Float64
-    # println(d)
 
     # conversions
     @test typeof(convert(VonMisesFisher{Float32}, d)) == VonMisesFisher{Float32}

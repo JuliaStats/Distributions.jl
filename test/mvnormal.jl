@@ -17,9 +17,6 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     d = length(g)
     μ = mean(g)
     Σ = cov(g)
-    @test partype(g) == Float64
-    @test isa(μ, Vector{Float64})
-    @test isa(Σ, Matrix{Float64})
     @test length(μ) == d
     @test size(Σ) == (d, d)
     @test var(g)     ≈ diag(Σ)
@@ -50,7 +47,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
     for i = 1:d
-        @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
+        @test isapprox(emp_mu[i], μ[i], atol=sqrt(vs[i] / n_tsamples) * 8.0)
     end
     for i = 1:d, j = 1:d
         @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))

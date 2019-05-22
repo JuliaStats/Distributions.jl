@@ -124,7 +124,7 @@ function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     end
     return s
 end
-cdf(d::DiscreteNonParametric{T}, x::Int) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
 cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
 
 function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
@@ -137,7 +137,7 @@ function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     end
     return s
 end
-ccdf(d::DiscreteNonParametric{T}, x::Int) where T = _ccdf(d, convert(T, x))
+ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
 ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)

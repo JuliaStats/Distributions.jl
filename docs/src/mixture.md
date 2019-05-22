@@ -29,6 +29,10 @@ const MultivariateMixture  = AbstractMixtureModel{Multivariate}
 
 - We introduce `AbstractMixtureModel` as a base type, which allows one to define a mixture model with different internal implementation, while still being able to leverage the common methods defined for `AbstractMixtureModel`.
 
+```@docs
+AbstractMixtureModel
+```
+
 - The `MixtureModel` is a parametric type, with three type parameters:
 
     - `VF`: the variate form, which can be `Univariate`, `Multivariate`, or `Matrixvariate`.
@@ -46,8 +50,7 @@ MixtureModel{Univariate,Continuous,Normal}
 ## Constructors
 
 ```@docs
-MixtureModel(::Vector{Distribution})
-MixtureModel(::Type{Distribution}, ::AbstractArray)
+MixtureModel
 ```
 
 

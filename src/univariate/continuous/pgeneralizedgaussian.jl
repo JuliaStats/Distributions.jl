@@ -123,8 +123,8 @@ function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
     # utilizing the sampler from the Gamma distribution.
     g = Gamma(inv(d.p), 1)
 
-    # bernoulli random variable "b" with parameter (1/2).
-    b = Float64(rand(Bernoulli()))
+    # random variable with value -1 or 1 with probability (1/2).
+    b = 2.0 * rand(Bernoulli()) -1
 
     return d.μ + inv(sqrt(d.α)) * rand(rng, g)^inv(d.p) * b
 end
