@@ -202,7 +202,7 @@ end
 
 # This is a moment-matching method (not MLE)
 #
-function fit(::Type{Beta}, x::AbstractArray{T}) where T<:Real
+function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     α = x_bar * (((x_bar * (1 - x_bar)) / v_bar) - 1)

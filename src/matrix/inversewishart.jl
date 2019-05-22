@@ -7,7 +7,7 @@ distribution, which is characterized by a degree of freedom ν, and a base matri
 """
 struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
-    Ψ::ST           # scale matrix
+    Ψ::ST     # scale matrix
     c0::T     # log of normalizing constant
 end
 
@@ -36,7 +36,6 @@ function _invwishart_c0(df::Real, Ψ::AbstractPDMat)
     p = dim(Ψ)
     h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
 end
-
 
 #### Properties
 

@@ -187,7 +187,7 @@ end
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
         for T = [Float64, Dual]
-            g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(p))
+            g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3
             test_mixture(g_u, 1000, 10^6, rng)

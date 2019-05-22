@@ -54,11 +54,13 @@ modes(::UnivariateDistribution)
 mode(::UnivariateDistribution)
 skewness(::UnivariateDistribution)
 kurtosis(::UnivariateDistribution)
+kurtosis(::Distribution, ::Bool)
 isplatykurtic(::UnivariateDistribution)
 isleptokurtic(::UnivariateDistribution)
 ismesokurtic(::UnivariateDistribution)
 entropy(::UnivariateDistribution)
 entropy(::UnivariateDistribution, ::Bool)
+entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
 cf(::UnivariateDistribution, ::Any)
 ```
@@ -82,8 +84,8 @@ invlogccdf(::UnivariateDistribution, ::Real)
 
 ### Sampling (Random number generation)
 ```@docs
-rand(::UnivariateDistribution)
-rand!(::UnivariateDistribution, ::AbstractArray)
+rand(::AbstractRNG, ::UnivariateDistribution)
+rand!(::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 ```
 
 ## Continuous Distributions
@@ -94,6 +96,7 @@ Beta
 BetaPrime
 Biweight
 Cauchy
+Chernoff
 Chi
 Chisq
 Cosine
@@ -113,7 +116,9 @@ KSDist
 KSOneSided
 Laplace
 Levy
+LocationScale
 Logistic
+LogitNormal
 LogNormal
 NoncentralBeta
 NoncentralChisq
@@ -123,6 +128,7 @@ Normal
 NormalCanon
 NormalInverseGaussian
 Pareto
+PGeneralizedGaussian
 Rayleigh
 Semicircle
 StudentizedRange
@@ -139,8 +145,6 @@ Weibull
 
 ```@docs
 Bernoulli
-succprob
-failprob
 BetaBinomial
 Binomial
 Categorical

@@ -65,6 +65,7 @@ export
     Biweight,
     Categorical,
     Cauchy,
+    Chernoff,
     Chi,
     Chisq,
     Cosine,
@@ -105,6 +106,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogitNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -123,6 +125,7 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    PGeneralizedGaussian,
     Product,
     Poisson,
     PoissonBinomial,
@@ -155,14 +158,11 @@ export
     RealInterval,
 
     # methods
-    binaryentropy,      # entropy of distribution in bits
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
-    cgf,                # cumulant generating function
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
-    cumulant,           # cumulants of distribution
     component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
@@ -174,10 +174,6 @@ export
     failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
-    fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
-    fit_map,            # fit a distribution to data using MAP
-    fit_map!,           # fit a distribution to data using MAP (inplace update to initial guess)
-    freecumulant,       # free cumulants of distribution
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -190,7 +186,6 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
-    kde,                # Kernel density estimator (from Stats.jl)
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
@@ -237,8 +232,6 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
-    test_samples,       # test a sampler
-    test_distr,         # test a distribution
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
@@ -276,7 +269,6 @@ include("truncate.jl")
 include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
-include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
@@ -317,7 +309,7 @@ Supported distributions:
     MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
-    NormalInverseGaussian, Pareto, Poisson, PoissonBinomial,
+    NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
     QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,

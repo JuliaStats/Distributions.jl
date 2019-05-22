@@ -38,13 +38,14 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 
         println("    testing Truncated($(ex),$lower,$upper)")
         d = Truncated(eval(Meta.parse(ex)),lower,upper)
-        if dtype != TruncatedNormal
-            @assert isa(dtype, Type) && dtype <: UnivariateDistribution
-            @test isa(d, dtypet)
+        if dtype != Uniform # Uniform is truncated to Uniform
+            if dtype != TruncatedNormal
+                @assert isa(dtype, Type) && dtype <: UnivariateDistribution
+                @test isa(d, dtypet)
+            end
+            # verification and testing
+            verify_and_test(d, dct, n_tsamples)
         end
-
-        # verification and testing
-        verify_and_test(d, dct, n_tsamples)
     end
 end
 

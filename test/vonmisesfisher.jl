@@ -35,9 +35,7 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int,
     @test length(d) == p
     @test meandir(d) == μ
     @test concentration(d) == κ
-#    @test d == typeof(d)(params(d)...)
     @test partype(d) == Float64
-    # println(d)
 
     # conversions
     @test typeof(convert(VonMisesFisher{Float32}, d)) == VonMisesFisher{Float32}
@@ -84,6 +82,10 @@ function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int,
         X = rand(rng, d, ns)
     end
     d_est = fit_mle(VonMisesFisher, X)
+    @test isa(d_est, VonMisesFisher)
+    @test isapprox(d_est.μ, μ, atol=0.01)
+    @test isapprox(d_est.κ, κ, atol=κ * 0.01)
+    d_est = fit(VonMisesFisher{Float64}, X)
     @test isa(d_est, VonMisesFisher)
     @test isapprox(d_est.μ, μ, atol=0.01)
     @test isapprox(d_est.κ, κ, atol=κ * 0.01)
