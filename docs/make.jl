@@ -16,6 +16,7 @@ makedocs(
         "mixture.md",
         "fit.md",
         "extends.md",
+        "contributing.md",
     ]
 )
 
