@@ -26,6 +26,21 @@ using ForwardDiff
 @test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
 @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
 
+# issue #894:
+@testset "Normal distribution with non-standard (ie not Float64) parameter types" begin
+    n32 = Normal(1f0, 0.1f0)
+    n64 = Normal(1., 0.1)
+    nbig = Normal(big(pi), big(ℯ))
+
+    @test eltype(n32) === Float32
+    @test eltype(rand(n32)) === Float32
+    @test eltype(rand(n32, 4)) === Float32
+
+    @test eltype(n64) === Float64
+    @test eltype(rand(n64)) === Float64
+    @test eltype(rand(n64, 4)) === Float64
+end
+
 # Test for numerical problems
 @test pdf(Logistic(6,0.01),-2) == 0
 
