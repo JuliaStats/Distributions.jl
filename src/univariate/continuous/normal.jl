@@ -76,7 +76,11 @@ entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 #### Evaluation
 
 # Helpers
+"""
+    xval(d::Normal, z::Real)
 
+Computes x value based on a Normal distribution and a z-value.
+"""
 function xval(d::Normal, z::Real)
     if isinf(z) && iszero(d.σ)
         d.μ + one(d.σ) * z
@@ -84,6 +88,11 @@ function xval(d::Normal, z::Real)
         d.μ + d.σ * z
     end
 end
+"""
+    zval(d::Normal, x::Real)
+
+Computes the z value based on a Normal distribution and a x-value.
+"""
 zval(d::Normal, x::Real) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
@@ -139,8 +148,13 @@ function ccdf(d::Normal, x::Real)
     erfc(z * invsqrt2) / 2
 end
 # invlogcdf
-norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
+"""
+    norminvlogcdf(lp::Real)
+
+Helper function that calls `_norminvlogcdf_impl` used for `invlogccdf` with the Normal distributions.
+"""
 norminvlogcdf(lp::Real) = _norminvlogcdf_impl(convert(Float64, lp))
+norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
 invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
 # invlogccdf
 invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
@@ -172,13 +186,13 @@ function cquantile(d::Normal, q::Real)
 end
 
 # norminvcdf & norminvlogcdf implementation
-#
-#   Rational approximations for the inverse cdf and its logarithm, from:
-#
-#   Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
-#   Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
-#
+"""
+    _norminvlogcdf_impl(lp::Float64)
 
+Uses `_qnorm_ker1` and `_qnorm_ker2` to obtain the ational approximations for the inverse cdf and its logarithm, from:
+Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
+  Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
+"""
 function _norminvlogcdf_impl(lp::Float64)
     if isfinite(lp) && lp < 0.0
         q = exp(lp) - 0.5
@@ -195,7 +209,11 @@ function _norminvlogcdf_impl(lp::Float64)
         lp
     end
 end
+"""
+    _qnorm_ker1(r::Float64)
 
+Along with `_qnorm_ker2` these helpers enable the rational approximations for the inverse cdf and its logarithm
+"""
 function _qnorm_ker1(q::Float64)
     # pre-condition: abs(q) ≤ 0.425
     r = 0.180625 - q^2
@@ -218,7 +236,11 @@ function _qnorm_ker1(q::Float64)
             2.87290_85735_72194_2674e4,
             5.22649_52788_52854_5610e3)
 end
+"""
+    _qnorm_ker2(r::Float64)
 
+Along with `_qnorm_ker1` these helpers enable the rational approximations for the inverse cdf and its logarithm
+"""
 function _qnorm_ker2(r::Float64)
     if r < 5.0
         r -= 1.6
