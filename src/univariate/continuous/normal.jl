@@ -172,9 +172,8 @@ function quantile(d::Normal, p::Real)
         else
             0.5
         end
-    else
-        xval(d, -erfcinv(2p) * sqrt2)
     end
+    xval(d, -erfcinv(2p) * sqrt2)
 end
 # cquantile
 function cquantile(d::Normal, q::Real)
