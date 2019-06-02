@@ -79,7 +79,7 @@ entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 """
     xval(d::Normal, z::Real)
 
-Computes x value based on a Normal distribution and a z-value.
+Computes the x-value based on a Normal distribution and a z-value.
 """
 function xval(d::Normal, z::Real)
     if isinf(z) && iszero(d.σ)
@@ -91,7 +91,7 @@ end
 """
     zval(d::Normal, x::Real)
 
-Computes the z value based on a Normal distribution and a x-value.
+Computes the z-value based on a Normal distribution and a x-value.
 """
 zval(d::Normal, x::Real) = (x - d.μ) / d.σ
 
@@ -118,7 +118,11 @@ function logcdf(d::Normal, x::Real)
         d.μ ≤ x ? 0.0 : -Inf
     else
         z = zval(d, x)
-        z < -1.0 ? log(erfcx(-z * invsqrt2)/2) - abs2(z)/2 : log1p(-erfc(z * invsqrt2)/2)
+        if z < -1.0
+            log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
+        else
+            log1p(-erfc(z * invsqrt2)/2)
+        end
     end
 end
 # logccdf
@@ -168,8 +172,9 @@ function quantile(d::Normal, p::Real)
         else
             0.5
         end
+    else
+        xval(d, -erfcinv(2p) * sqrt2)
     end
-    xval(d, -erfcinv(2p) * sqrt2)
 end
 # cquantile
 function cquantile(d::Normal, q::Real)

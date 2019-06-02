@@ -9,6 +9,7 @@ const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "normal",
     "mvnormal",
     "mvlognormal",
     "types",
