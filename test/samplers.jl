@@ -192,12 +192,37 @@ end
     @testset "Matrixvariate" begin
         # NOTE: Since we've already testing the sampling behaviour we just want to
         # check that we've implement the Distributions API correctly for the
-        # Matrxivariate case
+        # Matrixvariate case
         s = WeightedResampler([rand(4, 3) for i in 1:10], aweights(rand(10)))
         X = rand(s)
     end
 
     @testset "DimensionMismatch" begin
         @test_throws DimensionMismatch WeightedResampler(rand(10), aweights(collect(1:12)))
+    end
+
+    # Explicitly test the _function for the resampler
+    @testset "_variate_form" begin
+        @test Distributions._variate_form(Vector) == Univariate
+        @test Distributions._variate_form(Matrix) == Multivariate
+        @test Distributions._variate_form(Vector{Matrix}) == Matrixvariate
+        @test_throws MethodError Distributions._variate_form(Float64)
+        @test_throws MethodError Distributions._variate_form(Array{Float64, 3})
+    end
+
+    @testset "_value_support" begin
+        @test Distributions._value_support(Int) == Discrete
+        @test Distributions._value_support(Float64) == Continuous
+        @test Distributions._value_support(Matrix{Float64}) == Continuous
+        @test_throws MethodError Distributions._value_support(String)
+        @test_throws MethodError Distributions._value_support(Vector{Float64})
+    end
+
+    @testset "_validate" begin
+        Distributions._validate(4, 4)
+        Distributions._validate(ones(4), aweights(rand(4)))
+        Distributions._validate(ones(3, 4), aweights(rand(4)))
+        @test_throws DimensionMismatch Distributions._validate(ones(3), aweights(rand(4)))
+        @test_throws DimensionMismatch Distributions._validate(ones(4, 3), aweights(rand(4)))
     end
 end
