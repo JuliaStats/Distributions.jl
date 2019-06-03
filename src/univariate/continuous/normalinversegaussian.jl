@@ -63,21 +63,19 @@ end
 #### Sampling
 
 # The Normal Inverse Gaussian distribution is a normal variance-mean
-# mixture with an inverse Gaussian as mixing distribution (albeit with a
-# different parametrization than the one in Distributions).
+# mixture with an inverse Gaussian as mixing distribution.
 #
 # Ole E. Barndorff-Nielsen (1997)
 # Normal Inverse Gaussian Distributions and Stochastic Volatility Modelling
 # Scandinavian Journal of Statistics, Vol. 24, pp. 1--13
 # DOI: http://dx.doi.org/10.1111/1467-9469.00045
 
-function Distributions.rand(d::NormalInverseGaussian)
-	μ, α, β, δ = params(d)
-	γ = sqrt(α^2 - β^2)
+function rand(rng::Random.AbstractRNG, d::NormalInverseGaussian)
+    μ, α, β, δ = params(d)
+    γ = sqrt(α^2 - β^2)
 
-	Z = InverseGaussian( δ/γ, δ^2 )
-	z = rand(Z)
-	X = Normal( μ + β*z, sqrt(z) )
-	rand(X)
+    Z = InverseGaussian(δ/γ, δ^2)
+    z = rand(rng, Z)
+    X = Normal(μ + β*z, sqrt(z))
+    return rand(rng, X)
 end
-
