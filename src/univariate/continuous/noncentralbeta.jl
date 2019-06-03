@@ -1,16 +1,19 @@
-immutable NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
+"""
+    NoncentralBeta(α, β, λ)
+"""
+struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     λ::T
 
-    function NoncentralBeta(α::T, β::T, λ::T)
-    	@check_args(NoncentralBeta, α > zero(α) && β > zero(β))
+    function NoncentralBeta{T}(α::T, β::T, λ::T) where T
+        @check_args(NoncentralBeta, α > zero(α) && β > zero(β))
         @check_args(NoncentralBeta, λ >= zero(λ))
-    	new(α, β, λ)
+        new{T}(α, β, λ)
     end
 end
 
-NoncentralBeta{T<:Real}(α::T, β::T, λ::T) = NoncentralBeta{T}(α, β, λ)
+NoncentralBeta(α::T, β::T, λ::T) where {T<:Real} = NoncentralBeta{T}(α, β, λ)
 NoncentralBeta(α::Real, β::Real, λ::Real) = NoncentralBeta(promote(α, β, λ)...)
 NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(Float64(α), Float64(β), Float64(λ))
 
@@ -20,7 +23,7 @@ NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(Float64(�
 ### Parameters
 
 params(d::NoncentralBeta) = (d.α, d.β, d.λ)
-@inline partype{T<:Real}(d::NoncentralBeta{T}) = T
+@inline partype(d::NoncentralBeta{T}) where {T<:Real} = T
 
 
 ### Evaluation & Sampling
@@ -29,8 +32,19 @@ params(d::NoncentralBeta) = (d.α, d.β, d.λ)
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
+# TODO: remove RFunctions dependency once NoncentralChisq has its removed
+@rand_rdist(NoncentralBeta)
+
 function rand(d::NoncentralBeta)
-    a = rand(NoncentralChisq(2d.α, d.β))
-    b = rand(Chisq(2d.β))
+    β = d.β
+    a = rand(NoncentralChisq(2d.α, β))
+    b = rand(Chisq(2β))
+    a / (a + b)
+end
+
+function rand(rng::AbstractRNG, d::NoncentralBeta)
+    β = d.β
+    a = rand(rng, NoncentralChisq(2d.α, β))
+    b = rand(rng, Chisq(2β))
     a / (a + b)
 end

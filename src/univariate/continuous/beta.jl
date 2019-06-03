@@ -1,14 +1,16 @@
-doc"""
+"""
     Beta(α,β)
 
 The *Beta distribution* has probability density function
 
-$f(x; \alpha, \beta) = \frac{1}{B(\alpha, \beta)}
- x^{\alpha - 1} (1 - x)^{\beta - 1}, \quad x \in [0, 1]$
+```math
+f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
+ x^{\\alpha - 1} (1 - x)^{\\beta - 1}, \\quad x \\in [0, 1]
+```
 
-The Beta distribution is related to the [`Gamma`](:func:`Gamma`) distribution via the
-property that if $X \sim \operatorname{Gamma}(\alpha)$ and $Y \sim \operatorname{Gamma}
-(\beta)$ independently, then $X / (X + Y) \sim \operatorname{Beta}(\alpha, \beta)$.
+The Beta distribution is related to the [`Gamma`](@ref) distribution via the
+property that if ``X \\sim \\operatorname{Gamma}(\\alpha)`` and ``Y \\sim \\operatorname{Gamma}(\\beta)``
+independently, then ``X / (X + Y) \\sim Beta(\\alpha, \\beta)``.
 
 
 ```julia
@@ -24,18 +26,17 @@ External links
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
 """
-
-immutable Beta{T<:Real} <: ContinuousUnivariateDistribution
+struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
 
-    function Beta(α::T, β::T)
+    function Beta{T}(α::T, β::T) where T
         @check_args(Beta, α > zero(α) && β > zero(β))
-        new(α, β)
+        new{T}(α, β)
     end
 end
 
-Beta{T<:Real}(α::T, β::T) = Beta{T}(α, β)
+Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
 Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 Beta(α::Real) = Beta(α, α)
@@ -44,17 +45,17 @@ Beta() = Beta(1, 1)
 @distr_support Beta 0.0 1.0
 
 #### Conversions
-function convert{T<:Real}(::Type{Beta{T}}, α::Real, β::Real)
+function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
 end
-function convert{T <: Real, S <: Real}(::Type{Beta{T}}, d::Beta{S})
+function convert(::Type{Beta{T}}, d::Beta{S}) where {T <: Real, S <: Real}
     Beta(T(d.α), T(d.β))
 end
 
 #### Parameters
 
 params(d::Beta) = (d.α, d.β)
-@inline partype{T<:Real}(d::Beta{T}) = T
+@inline partype(d::Beta{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -109,14 +110,91 @@ end
 
 @_delegate_statsfuns Beta beta α β
 
-gradlogpdf{T<:Real}(d::Beta{T}, x::Real) =
+gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
     ((α, β) = params(d); 0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
 
 
 #### Sampling
 
-rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
+struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
+                   S2 <: Sampleable{Univariate,Continuous}} <:
+    Sampleable{Univariate,Continuous}
+    γ::Bool
+    iα::T
+    iβ::T
+    s1::S1
+    s2::S2
+end
 
+function sampler(d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        return BetaSampler(false, inv(α), inv(β),
+                           sampler(Uniform()), sampler(Uniform()))
+    else
+        return BetaSampler(true, inv(α), inv(β),
+                           sampler(Gamma(α, one(T))),
+                           sampler(Gamma(β, one(T))))
+    end
+end
+
+# From Knuth
+function rand(rng::AbstractRNG, s::BetaSampler)
+    if s.γ
+        g1 = rand(rng, s.s1)
+        g2 = rand(rng, s.s2)
+        return g1 / (g1 + g2)
+    else
+        iα = s.iα
+        iβ = s.iβ
+        while true
+            u = rand(rng) # the Uniform sampler just calls rand()
+            v = rand(rng)
+            x = u^iα
+            y = v^iβ
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) * iα
+                    logY = log(v) * iβ
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    end
+end
+
+function rand(rng::AbstractRNG, d::Beta{T}) where T
+    (α, β) = params(d)
+    if (α ≤ 1.0) && (β ≤ 1.0)
+        while true
+            u = rand(rng)
+            v = rand(rng)
+            x = u^inv(α)
+            y = v^inv(β)
+            if x + y ≤ one(x)
+                if (x + y > 0)
+                    return x / (x + y)
+                else
+                    logX = log(u) / α
+                    logY = log(v) / β
+                    logM = logX > logY ? logX : logY
+                    logX -= logM
+                    logY -= logM
+                    return exp(logX - log(exp(logX) + exp(logY)))
+                end
+            end
+        end
+    else
+        g1 = rand(rng, Gamma(α, one(T)))
+        g2 = rand(rng, Gamma(β, one(T)))
+        return g1 / (g1 + g2)
+    end
+end
 
 #### Fit model
 
@@ -124,7 +202,7 @@ rand(d::Beta) = StatsFuns.RFunctions.betarand(d.α, d.β)
 
 # This is a moment-matching method (not MLE)
 #
-function fit{T<:Real}(::Type{Beta}, x::AbstractArray{T})
+function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
     α = x_bar * (((x_bar * (1 - x_bar)) / v_bar) - 1)

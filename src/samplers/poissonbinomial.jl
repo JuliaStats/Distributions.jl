@@ -1,22 +1,7 @@
-immutable PoissBinAliasSampler <: Sampleable{Univariate,Discrete}
+struct PoissBinAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 
-function PoissBinAliasSampler(p::AbstractVector)
-    n = length(p)
-    pv = poissonbinomial_pdf_fft(p)
-    alias = Array(Int, n+1)
-    StatsBase.make_alias_table!(pv, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RandIntSampler(n+1)))
-end
+PoissBinAliasSampler(d::PoissonBinomial) = PoissBinAliasSampler(AliasTable(d.pmf))
 
-function PoissBinAliasSampler(d::PoissonBinomial)
-    n = length(d.p)
-    alias = Array(Int, n+1)
-    pv = Array(Float64, n+1)
-    StatsBase.make_alias_table!(d.pmf, 1.0, pv, alias)
-    BinomialAliasSampler(AliasTable(pv, alias, RandIntSampler(n+1)))
-end
-
-rand(s::PoissBinAliasSampler) = rand(s.table) - 1
-
+rand(rng::AbstractRNG, s::PoissBinAliasSampler) = rand(rng, s.table) - 1

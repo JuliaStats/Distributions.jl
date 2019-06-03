@@ -1,85 +1,80 @@
 # Testing continuous univariate distributions
 
-using Distributions
-using Base.Test
-using Calculus.derivative
+using Distributions, Random
+using Test
 
-### load reference data
-#
-#   Note
-#   -------
-#   To generate the reference data:
-#   (1) make sure that python, numpy, and scipy are installed in your system
-#   (2) enter the sub-directory test
-#   (3) run: python discrete_ref.py > discrete_ref.csv
-#
-#   For most cases, you don't have. You only need to run this when you
-#   implement a new distribution and want to add new test cases, then
-#   you should add the new test cases to discrete_ref.py and run this
-#   procedure to update the reference data.
-#
+using Calculus: derivative
+
 n_tsamples = 100
 
-
-# additional distributions that have no direct counterparts in scipy
-println("    -----")
-
-for distr in [
-    Biweight(),
-    Biweight(1,3),
-    Epanechnikov(),
-    Epanechnikov(1,3),
-    Frechet(0.5, 1.0),
-    Frechet(3.0, 1.0),
-    Frechet(20.0, 1.0),
-    Frechet(120.0, 1.0),
-    Frechet(0.5, 2.0),
-    Frechet(3.0, 2.0),
-    GeneralizedPareto(),
-    GeneralizedPareto(1.0, 1.0),
-    GeneralizedPareto(1.0, 1.0, 1.0),
-    GeneralizedPareto(0.1, 2.0, 0.0),
-    GeneralizedPareto(0.0, 0.5, 0.0),
-    GeneralizedPareto(-1.5, 0.5, 2.0),
-    InverseGaussian(1.0, 1.0),
-    InverseGaussian(2.0, 7.0),
-    Levy(),
-    Levy(2, 8),
-    Levy(3.0, 3),
-    LogNormal(0.0, 1.0),
-    LogNormal(0.0, 2.0),
-    LogNormal(3.0, 0.5),
-    LogNormal(3.0, 1.0),
-    LogNormal(3.0, 2.0),
-    NoncentralBeta(2,2,0),
-    NoncentralBeta(2,6,5),
-    NoncentralChisq(2,2),
-    NoncentralChisq(2,5),
-    NoncentralF(2,2,2),
-    NoncentralF(8,10,5),
-    NoncentralT(2,2),
-    NoncentralT(10,2),
-    Triweight(),
-    Triweight(2),
-    Triweight(1, 3),
-    Triweight(1),
-]
-    println("    testing $(distr)")
-    test_distr(distr, n_tsamples)
+# additional distributions that have no direct counterparts in R references
+@testset "Testing $(distr)" for distr in [Biweight(),
+                                          Biweight(1,3),
+                                          Epanechnikov(),
+                                          Epanechnikov(1,3),
+                                          Triweight(),
+                                          Triweight(2),
+                                          Triweight(1, 3),
+                                          Triweight(1)]
+    
+    test_distr(distr, n_tsamples; testquan=false)
 end
-
-
-# for distr in [
-#     VonMises(0.0, 1.0),
-#     VonMises(0.5, 1.0),
-#     VonMises(0.5, 2.0) ]
-
-#     println("    testing $(distr)")
-#     test_samples(distr, n_tsamples)
-# end
 
 # Test for non-Float64 input
 using ForwardDiff
 @test string(logpdf(Normal(0,1),big(1))) == "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
-@test_approx_eq derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) -66.66666666666667
+@test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
 @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
+
+# issue #894:
+@testset "Normal distribution with non-standard (ie not Float64) parameter types" begin
+    n32 = Normal(1f0, 0.1f0)
+    n64 = Normal(1., 0.1)
+    nbig = Normal(big(pi), big(ℯ))
+
+    @test eltype(n32) === Float32
+    @test eltype(rand(n32)) === Float32
+    @test eltype(rand(n32, 4)) === Float32
+
+    @test eltype(n64) === Float64
+    @test eltype(rand(n64)) === Float64
+    @test eltype(rand(n64, 4)) === Float64
+end
+
+# Test for numerical problems
+@test pdf(Logistic(6,0.01),-2) == 0
+
+@testset "Normal with std=0" begin
+    d = Normal(0.5,0.0)
+    @test pdf(d, 0.49) == 0.0
+    @test pdf(d, 0.5) == Inf
+    @test pdf(d, 0.51) == 0.0
+
+    @test cdf(d, 0.49) == 0.0
+    @test cdf(d, 0.5) == 1.0
+    @test cdf(d, 0.51) == 1.0
+
+    @test ccdf(d, 0.49) == 1.0
+    @test ccdf(d, 0.5) == 0.0
+    @test ccdf(d, 0.51) == 0.0
+
+    @test quantile(d, 0.0) == -Inf
+    @test quantile(d, 0.49) == 0.5
+    @test quantile(d, 0.5) == 0.5
+    @test quantile(d, 0.51) == 0.5
+    @test quantile(d, 1.0) == +Inf
+
+    @test rand(d) == 0.5
+    @test rand(MersenneTwister(123), d) == 0.5
+end
+
+# Test for parameters beyond those supported in R references
+@testset "VonMises with large kappa" begin
+    d = VonMises(1.1, 1000)
+    @test var(d) ≈ 0.0005001251251957198
+    @test entropy(d) ≈ -2.034688918525470
+    @test cf(d, 2.5) ≈ -0.921417 + 0.38047im atol=1e-6
+    @test pdf(d, 0.5) ≈ 1.758235814051e-75
+    @test logpdf(d, 0.5) ≈ -172.1295710466005
+    @test cdf(d, 1.0) ≈ 0.000787319 atol=1e-9
+end

@@ -1,10 +1,12 @@
-doc"""
+"""
     Levy(μ, σ)
 
 The *Lévy distribution* with location `μ` and scale `σ` has probability density function
 
-$f(x; \mu, \sigma) = \sqrt{\frac{\sigma}{2 \pi (x - \mu)^3}}
-\exp \left( - \frac{\sigma}{2 (x - \mu)} \right), \quad x > \mu$
+```math
+f(x; \\mu, \\sigma) = \\sqrt{\\frac{\\sigma}{2 \\pi (x - \\mu)^3}}
+\\exp \\left( - \\frac{\\sigma}{2 (x - \\mu)} \\right), \\quad x > \\mu
+```
 
 ```julia
 Levy()         # Levy distribution with zero location and unit scale, i.e. Levy(0, 1)
@@ -19,14 +21,14 @@ External links
 
 * [Lévy distribution on Wikipedia](http://en.wikipedia.org/wiki/Lévy_distribution)
 """
-immutable Levy{T<:Real} <: ContinuousUnivariateDistribution
+struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 
-    Levy(μ::T, σ::T) = (@check_args(Levy, σ > zero(σ)); new(μ, σ))
+    Levy{T}(μ::T, σ::T) where {T} = (@check_args(Levy, σ > zero(σ)); new{T}(μ, σ))
 end
 
-Levy{T<:Real}(μ::T, σ::T) = Levy{T}(μ, σ)
+Levy(μ::T, σ::T) where {T<:Real} = Levy{T}(μ, σ)
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
 Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
 Levy(μ::Real) = Levy(μ, 1.0)
@@ -36,51 +38,57 @@ Levy() = Levy(0.0, 1.0)
 
 #### Conversions
 
-convert{T <: Real, S <: Real}(::Type{Levy{T}}, μ::S, σ::S) = Levy(T(μ), T(σ))
-convert{T <: Real, S <: Real}(::Type{Levy{T}}, d::Levy{S}) = Levy(T(d.μ), T(d.σ))
+convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
+convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ))
 
 #### Parameters
 
 location(d::Levy) = d.μ
 params(d::Levy) = (d.μ, d.σ)
-@inline partype{T<:Real}(d::Levy{T}) = T
+@inline partype(d::Levy{T}) where {T<:Real} = T
 
 
 #### Statistics
 
-mean{T<:Real}(d::Levy{T}) = T(Inf)
-var{T<:Real}(d::Levy{T}) = T(Inf)
-skewness{T<:Real}(d::Levy{T}) = T(NaN)
-kurtosis{T<:Real}(d::Levy{T}) = T(NaN)
+mean(d::Levy{T}) where {T<:Real} = T(Inf)
+var(d::Levy{T}) where {T<:Real} = T(Inf)
+skewness(d::Levy{T}) where {T<:Real} = T(NaN)
+kurtosis(d::Levy{T}) where {T<:Real} = T(NaN)
 
 mode(d::Levy) = d.σ / 3 + d.μ
 
 entropy(d::Levy) = (1 - 3digamma(1) + log(16 * d.σ^2 * π)) / 2
 
-median(d::Levy) = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
+median(d::Levy{T}) where {T<:Real} = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 
 #### Evaluation
 
-function pdf(d::Levy, x::Real)
+function pdf(d::Levy{T}, x::Real) where T<:Real
     μ, σ = params(d)
+    if x <= μ
+        return zero(T)
+    end
     z = x - μ
     (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3//2)
 end
 
-function logpdf(d::Levy, x::Real)
+function logpdf(d::Levy{T}, x::Real) where T<:Real
     μ, σ = params(d)
+    if x <= μ
+        return T(-Inf)
+    end
     z = x - μ
     (log(σ) - log2π - σ / z - 3log(z))/2
 end
 
-cdf(d::Levy, x::Real) = erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf(d::Levy, x::Real) = erf(sqrt(d.σ / (2(x - d.μ))))
+cdf(d::Levy{T}, x::Real) where {T<:Real} = x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
+ccdf(d::Levy{T}, x::Real) where {T<:Real} =  x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
 quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
 cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
 
-mgf{T<:Real}(d::Levy{T}, t::Real) = t == zero(t) ? one(T) : T(NaN)
+mgf(d::Levy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 
 function cf(d::Levy, t::Real)
     μ, σ = params(d)
@@ -90,4 +98,4 @@ end
 
 #### Sampling
 
-rand(d::Levy) = d.μ + d.σ / randn()^2
+rand(rng::AbstractRNG, d::Levy) = d.μ + d.σ / randn(rng)^2

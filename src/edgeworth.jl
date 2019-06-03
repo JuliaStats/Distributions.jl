@@ -4,18 +4,18 @@
 
 # Edgeworth approximation of the Z statistic
 # EdgeworthSum and EdgeworthMean are both defined in terms of this
-abstract EdgeworthAbstract <: ContinuousUnivariateDistribution
+abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
 
-immutable EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
 
-    function EdgeworthZ{T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthZ{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         @check_args(EdgeworthZ, n > zero(n))
-        new(d, n)
+        new{D}(d, n)
     end
 end
 EdgeworthZ(d::UnivariateDistribution,n::Real) = EdgeworthZ{typeof(d)}(d,n)
@@ -74,12 +74,12 @@ end
 
 
 # Edgeworth approximation of the sum
-immutable EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function EdgeworthSum{T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthSum{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         @check_args(EdgeworthSum, n > zero(n))
-        new(d, n)
+        new{D}(d, n)
     end
 end
 EdgeworthSum(d::UnivariateDistribution, n::Real) = EdgeworthSum{typeof(d)}(d,n)
@@ -88,14 +88,14 @@ mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
 
 # Edgeworth approximation of the mean
-immutable EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
+struct EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function EdgeworthMean{T<:UnivariateDistribution}(d::T, n::Real)
+    function EdgeworthMean{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
         # although n would usually be an integer, no methods are require this
         n > zero(n) ||
             error("n must be positive")
-        new(d, Float64(n))
+        new{D}(d, Float64(n))
     end
 end
 EdgeworthMean(d::UnivariateDistribution,n::Real) = EdgeworthMean{typeof(d)}(d,n)

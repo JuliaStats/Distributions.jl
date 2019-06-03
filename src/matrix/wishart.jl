@@ -2,8 +2,14 @@
 #
 #   following the Wikipedia parameterization
 #
+"""
+    Wishart(nu, S)
 
-immutable Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution) is a
+multidimensional generalization of the Chi-square distribution, which is characterized by
+a degree of freedom ν, and a base matrix S.
+"""
+struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix
     c0::T     # the logarithm of normalizing constant in pdf
@@ -11,16 +17,19 @@ end
 
 #### Constructors
 
-function Wishart{T<:Real}(df::T, S::AbstractPDMat{T})
+function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
     c0 = _wishart_c0(df, S)
-    R = promote_type(T, typeof(c0))
-    _, prom_S = promote_eltype(one(R), S)
+    R = Base.promote_eltype(T, c0)
+    prom_S = convert(AbstractArray{T}, S)
     Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
 end
 
-Wishart(df::Real, S::AbstractPDMat) = Wishart(promote_eltype(df, PDMat(S))...)
+function Wishart(df::Real, S::AbstractPDMat)
+    T = Base.promote_eltype(df, S)
+    Wishart(T(df), convert(AbstractArray{T}, S))
+end
 
 Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
@@ -40,32 +49,33 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
+size(d::Wishart, i) = size(d)[i]
 params(d::Wishart) = (d.df, d.S, d.c0)
-@inline partype{T<:Real}(d::Wishart{T}) = T
+@inline partype(d::Wishart{T}) where {T<:Real} = T
 
 ### Conversion
-function convert{T<:Real}(::Type{Wishart{T}}, d::Wishart)
-    P = convert_eltype(T, d.S)
+function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
+    P = AbstractMatrix{T}(d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
-function convert{T<:Real}(::Type{Wishart{T}}, df, S::AbstractPDMat, c0)
-    P = convert_eltype(T, S)
+function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, c0) where T<:Real
+    P = AbstractMatrix{T}(S)
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end
 
 #### Show
 
-show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, full(d.S))])
+show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))])
 
 
 #### Statistics
 
-mean(d::Wishart) = d.df * full(d.S)
+mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
     r = d.df - dim(d) - 1.0
     if r > 0.0
-        return full(d.S) * r
+        return Matrix(d.S) * r
     else
         error("mode is only defined when df > p + 1")
     end
@@ -93,18 +103,18 @@ end
 function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
-    Xcf = cholfact(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - trace(d.S \ X)) - d.c0
+    Xcf = cholesky(X)
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.c0
 end
 
 #### Sampling
-
-function rand(d::Wishart)
-    Z = unwhiten!(d.S, _wishart_genA(dim(d), d.df))
-    A_mul_Bt(Z, Z)
+function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
+    _wishart_genA!(rng, dim(d), d.df, A)
+    unwhiten!(d.S, A)
+    A .= A * A'
 end
 
-function _wishart_genA(p::Int, df::Real)
+function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
     # Generate the matrix A in the Bartlett decomposition
     #
     #   A is a lower triangular matrix, with
@@ -112,12 +122,11 @@ function _wishart_genA(p::Int, df::Real)
     #       A(i, j) ~ sqrt of Chisq(df - i + 1) when i == j
     #               ~ Normal()                  when i > j
     #
-    A = zeros(p, p)
+    A .= zero(eltype(A))
     for i = 1:p
-        @inbounds A[i,i] = sqrt(rand(Chisq(df - i + 1.0)))
+        @inbounds A[i,i] = rand(rng, Chi(df - i + 1.0))
     end
-    for j = 1:p-1, i = j+1:p
-        @inbounds A[i,j] = randn()
+    for j in 1:p-1, i in j+1:p
+        @inbounds A[i,j] = randn(rng)
     end
-    return A
 end

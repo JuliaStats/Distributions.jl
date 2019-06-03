@@ -1,9 +1,11 @@
-doc"""
+"""
     Binomial(n,p)
 
 A *Binomial distribution* characterizes the number of successes in a sequence of independent trials. It has two parameters: `n`, the number of trials, and `p`, the probability of success in an individual trial, with the distribution:
 
-$P(X = k) = {n \choose k}p^k(1-p)^{n-k},  \quad \text{ for } k = 0,1,2, \ldots, n.$
+```math
+P(X = k) = {n \\choose k}p^k(1-p)^{n-k},  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
+```
 
 ```julia
 Binomial()      # Binomial distribution with n = 1 and p = 0.5
@@ -20,20 +22,19 @@ External links:
 
 * [Binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Binomial_distribution)
 """
-
-immutable Binomial{T<:Real} <: DiscreteUnivariateDistribution
+struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    function Binomial(n, p)
+    function Binomial{T}(n, p) where T
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))
-        new(n, p)
+        new{T}(n, p)
     end
 
 end
 
-Binomial{T<:Real}(n::Integer, p::T) = Binomial{T}(n, p)
+Binomial(n::Integer, p::T) where {T<:Real} = Binomial{T}(n, p)
 Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
 Binomial(n::Integer) = Binomial(n, 0.5)
 Binomial() = Binomial(1, 0.5)
@@ -42,10 +43,10 @@ Binomial() = Binomial(1, 0.5)
 
 #### Conversions
 
-function convert{T<:Real}(::Type{Binomial{T}}, n::Int, p::Real)
+function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     Binomial(n, T(p))
 end
-function convert{T <: Real, S <: Real}(::Type{Binomial{T}}, d::Binomial{S})
+function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
     Binomial(d.n, T(d.p))
 end
 
@@ -57,16 +58,16 @@ succprob(d::Binomial) = d.p
 failprob(d::Binomial) = 1 - d.p
 
 params(d::Binomial) = (d.n, d.p)
-@inline partype{T<:Real}(d::Binomial{T}) = T
+@inline partype(d::Binomial{T}) where {T<:Real} = T
 
 
 #### Properties
 
 mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
-function mode{T<:Real}(d::Binomial{T})
+function mode(d::Binomial{T}) where T<:Real
     (n, p) = params(d)
-    n > 0 ? round(Int,(n + 1) * d.prob) : zero(T)
+    n > 0 ? floor(Int, (n + 1) * d.p) : zero(T)
 end
 modes(d::Binomial) = Int[mode(d)]
 
@@ -107,17 +108,32 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
-rand(d::Binomial) = convert(Int, StatsFuns.RFunctions.binomrand(d.n, d.p))
+function rand(rng::AbstractRNG, d::Binomial)
+    p, n = d.p, d.n
+    if p <= 0.5
+        r = p
+    else
+        r = 1.0-p
+    end
+    if r*n <= 10.0
+        y = rand(rng, BinomialGeomSampler(n,r))
+    else
+        y = rand(rng, BinomialTPESampler(n,r))
+    end
+    p <= 0.5 ? y : n-y
+end
 
-immutable RecursiveBinomProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
     n::Int
-    coef::Float64   # p / (1 - p)
+    coef::T   # p / (1 - p)
 end
 
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1 - d.p))
-nextpdf(s::RecursiveBinomProbEvaluator, pv::Float64, x::Integer) = ((s.n - x + 1) / x) * s.coef * pv
+nextpdf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
 
-function _pdf!(r::AbstractArray, d::Binomial, X::UnitRange)
+function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
+    axes(r) == axes(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
+
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2
         # fill normal
@@ -146,6 +162,11 @@ function _pdf!(r::AbstractArray, d::Binomial, X::UnitRange)
     end
     return r
 end
+function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
+    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
+    r .= pdf.(Ref(d),X)
+end
+
 
 function mgf(d::Binomial, t::Real)
     n, p = params(d)
@@ -160,7 +181,7 @@ end
 
 #### Fit model
 
-immutable BinomialStats <: SufficientStats
+struct BinomialStats <: SufficientStats
     ns::Float64   # the total number of successes
     ne::Float64   # the number of experiments
     n::Int        # the number of trials in each experiment
@@ -168,7 +189,7 @@ immutable BinomialStats <: SufficientStats
     BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
 end
 
-function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T})
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<:Integer
     ns = zero(T)
     for i = 1:length(x)
         @inbounds xi = x[i]
@@ -178,7 +199,7 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64})
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     ns = 0.
     ne = 0.
     for i = 1:length(x)
@@ -191,17 +212,17 @@ function suffstats{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}
     BinomialStats(ns, ne, n)
 end
 
-typealias BinomData Tuple{Int, AbstractArray}
+const BinomData = Tuple{Int, AbstractArray}
 
-suffstats(::Type{Binomial}, data::BinomData) = suffstats(Binomial, data...)
-suffstats(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)
+suffstats(::Type{<:Binomial}, data::BinomData) = suffstats(Binomial, data...)
+suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)
 
-fit_mle(::Type{Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
+fit_mle(::Type{<:Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}) = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle{T<:Integer}(::Type{Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
-fit_mle(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
+fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 
-fit(::Type{Binomial}, data::BinomData) = fit_mle(Binomial, data)
-fit(::Type{Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, data, w)
+fit(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, data)
+fit(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, data, w)

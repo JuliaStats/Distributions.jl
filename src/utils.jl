@@ -2,7 +2,7 @@
 
 macro check_args(D, cond)
     quote
-        if !($cond)
+        if !($(esc(cond)))
             throw(ArgumentError(string(
                 $(string(D)), ": the condition ", $(string(cond)), " is not satisfied.")))
         end
@@ -10,33 +10,42 @@ macro check_args(D, cond)
 end
 
 ## a type to indicate zero vector
-
-immutable ZeroVector{T}
+"""
+An immutable vector of zeros of type T
+"""
+struct ZeroVector{T} <: AbstractVector{T}
     len::Int
 end
 
-ZeroVector{T}(::Type{T}, n::Int) = ZeroVector{T}(n)
+ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
-eltype{T}(v::ZeroVector{T}) = T
-length(v::ZeroVector) = v.len
-full{T}(v::ZeroVector{T}) = zeros(T, v.len)
+Base.eltype(v::ZeroVector{T}) where {T} = T
+Base.length(v::ZeroVector) = v.len
+Base.size(v::ZeroVector) = (v.len,)
+Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
 
-convert{T}(::Type{Vector{T}}, v::ZeroVector{T}) = full(v)
-convert{T}(::Type{ZeroVector{T}}, v::ZeroVector) = ZeroVector{T}(length(v))
+Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
+Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
+Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
 
-+(x::AbstractArray, v::ZeroVector) = x
--(x::AbstractArray, v::ZeroVector) = x
-.+(x::AbstractArray, v::ZeroVector) = x
-.-(x::AbstractArray, v::ZeroVector) = x
+Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
 
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
+Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
+
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
+Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
+Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
+Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
-type NoArgCheck end
+struct NoArgCheck end
 
-isunitvec{T}(v::AbstractVector{T}) = (vecnorm(v) - 1.0) < 1.0e-12
+isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite{T<:Real}(x::Array{T})
+function allfinite(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(isfinite(x[i]))
             return false
@@ -45,7 +54,7 @@ function allfinite{T<:Real}(x::Array{T})
     return true
 end
 
-function allzeros{T<:Real}(x::Array{T})
+function allzeros(x::AbstractArray{T}) where T<:Real
     for i = 1 : length(x)
         if !(x[i] == zero(T))
             return false
@@ -56,28 +65,12 @@ end
 
 allzeros(x::ZeroVector) = true
 
-function allnonneg{T<:Real}(x::Array{T})
-    for i = 1 : length(x)
-        if !(x[i] >= zero(T))
-            return false
-        end
-    end
-    return true
-end
+allnonneg(xs::AbstractArray{<:Real}) = all(x -> x >= 0, xs)
 
-isprobvec{T<:Real}(p::Vector{T}) = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{T}) where {T<:Real} =
+    allnonneg(p) && isapprox(sum(p), one(T))
 
-function pnormalize!{T<:AbstractFloat}(v::AbstractVector{T})
-    s = 0.
-    n = length(v)
-    for i = 1:n
-        @inbounds s += v[i]
-    end
-    for i = 1:n
-        @inbounds v[i] /= s
-    end
-    v
-end
+pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
 add!(x::AbstractVecOrMat, y::ZeroVector) = x
@@ -105,14 +98,16 @@ end
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
 macro checkquantile(p,ex)
+    p, ex = esc(p), esc(ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
 macro checkinvlogcdf(lp,ex)
+    lp, ex = esc(lp), esc(ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
+function isApproxSymmmetric(a::AbstractMatrix{Float64})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -124,42 +119,11 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholfact(a), Cholesky)
+hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
 
-function trycholfact(a::Matrix{Float64})
-    try cholfact(a)
+function trycholesky(a::Matrix{Float64})
+    try cholesky(a)
     catch e
         return e
     end
 end
-
-# for when container inputs need to be promoted to the same eltype
-function promote_eltype{T, S}(A::Array{T}, B::Array{S})
-    R = promote_type(T, S)
-    (Array{R}(A), Array{R}(B))
-end
-function promote_eltype{T}(A::Array{T}, B::Real)
-    R = promote_type(T, typeof(B))
-    (Array{R}(A), R(B))
-end
-function promote_eltype(A::Real, B::Array)
-    tup = promote_eltype(B, A)
-    (tup[2], tup[1])
-end
-function promote_eltype{T, S}(A::Array{T}, B::AbstractPDMat{S})
-    R = promote_type(T, S)
-    (Array{R}(A), convert(typeof(B).name.primary{R}, B))
-end
-function promote_eltype{S}(A::Real, B::AbstractPDMat{S})
-    R = promote_type(typeof(A), S)
-    (R(A), convert(typeof(B).name.primary{R}, B))
-end
-promote_eltype{T, S}(A::ZeroVector{T}, B::AbstractPDMat{S}) = (ZeroVector{S}(A.len), B)
-
-# utility function to change element type of container
-@inline convert_eltype{T}(::Type{T}, A::AbstractArray) = convert(AbstractArray{T}, A)
-@inline function convert_eltype{T}(::Type{T}, A::AbstractPDMat)
-    R = typeof(A).name.primary
-    convert(R{T}, A)
-end
-@inline convert_eltype{T}(::Type{T}, Z::ZeroVector) = convert(ZeroVector{T}, Z)

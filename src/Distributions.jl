@@ -1,25 +1,31 @@
-__precompile__(true)
-
 module Distributions
 
-using PDMats
-using StatsFuns
-using StatsBase
-using Compat
+using StatsBase, PDMats, StatsFuns, Statistics
+using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
-import Compat.view
-import Base.Random
-import Base: size, eltype, length, full, convert, show, getindex, scale, scale!, rand, rand!
-import Base: sum, mean, median, maximum, minimum, quantile, std, var, cov, cor
-import Base: +, -, .+, .-
-import Base.Math.@horner
-import Base.LinAlg: Cholesky
+import QuadGK: quadgk
+import Base: size, eltype, length, convert, show, getindex, rand
+import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base.Math: @horner
 
-import StatsBase: kurtosis, skewness, entropy, mode, modes, randi, fit, kldivergence
-import StatsBase: RandIntSampler, loglikelihood
+using LinearAlgebra, Printf
+
+using Random
+import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+
+import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsBase: kurtosis, skewness, entropy, mode, modes,
+                  fit, kldivergence, loglikelihood, dof, span,
+                  params, params!
+
 import PDMats: dim, PDMat, invquad
 
+using SpecialFunctions
+
 export
+    # re-export Statistics
+    mean, median, quantile, std, var, cov, cor,
+
     # generic types
     VariateForm,
     ValueSupport,
@@ -59,18 +65,19 @@ export
     Biweight,
     Categorical,
     Cauchy,
+    Chernoff,
     Chi,
     Chisq,
     Cosine,
     DiagNormal,
     DiagNormalCanon,
     Dirichlet,
+    DirichletMultinomial,
     DiscreteUniform,
     DoubleExponential,
     EdgeworthMean,
     EdgeworthSum,
     EdgeworthZ,
-    EmpiricalUnivariateDistribution,
     Erlang,
     Epanechnikov,
     Exponential,
@@ -80,6 +87,7 @@ export
     FullNormal,
     FullNormalCanon,
     Gamma,
+    DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
@@ -95,8 +103,10 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    LocationScale,
     Logistic,
     LogNormal,
+    LogitNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -113,17 +123,17 @@ export
     NoncentralT,
     Normal,
     NormalCanon,
-    NormalGamma,
-    NormalInverseGamma,
     NormalInverseGaussian,
-    NormalInverseWishart,
-    NormalWishart,
     Pareto,
+    PGeneralizedGaussian,
+    Product,
     Poisson,
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Semicircle,
     Skellam,
+    StudentizedRange,
     SymTriangularDist,
     TDist,
     TriangularDist,
@@ -148,19 +158,11 @@ export
     RealInterval,
 
     # methods
-    binaryentropy,      # entropy of distribution in bits
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
     cf,                 # characteristic function
-    cgf,                # cumulant generating function
-    circmean,           # mean of circular distribution
-    circmedian,         # median of circular distribution
-    circmode,           # mode of circular distribution
-    circvar,            # variance of circular distribution
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
-    cumulant,           # cumulants of distribution
-    complete,           # turn an incomplete formulation into a complete distribution
     component,          # get the k-th component of a mixture model
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
@@ -172,10 +174,6 @@ export
     failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
-    fit_mle!,           # fit a distribution to data using MLE (inplace update to initial guess)
-    fit_map,            # fit a distribution to data using MAP
-    freecumulant,       # free cumulants of distribution
-    gmvnormal,          # a generic function to construct multivariate normal distributions
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -188,7 +186,6 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
-    kde,                # Kernel density estimator (from Stats.jl)
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
@@ -196,14 +193,6 @@ export
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
-    logpmf,             # log probability mass
-    logpmf!,            # evaluate log pmf to provided storage
-    posterior,          # get posterior distribution given prior and observed data
-    posterior_canon,    # get the canonical form of the posterior distribution
-    posterior_mode,     # get the mode of posterior distribution
-    posterior_rand,     # draw samples from the posterior distribution
-    posterior_rand!,
-    posterior_randmodel,
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
@@ -227,7 +216,6 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
-    pmf,                # probability mass function (DiscreteDistribution)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
@@ -244,8 +232,6 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
-    test_samples,       # test a sampler
-    test_distr,         # test a distribution
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
@@ -273,7 +259,6 @@ include("genericfit.jl")
 
 # specific samplers and distributions
 include("univariates.jl")
-include("empirical.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
@@ -284,7 +269,6 @@ include("truncate.jl")
 include("conversion.jl")
 include("qq.jl")
 include("estimators.jl")
-include("testutils.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
@@ -315,7 +299,7 @@ Supported distributions:
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
-    EdgeworthSum, EdgeworthZ, EmpiricalUnivariateDistribution, Erlang,
+    EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
@@ -325,9 +309,8 @@ Supported distributions:
     MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
-    NormalGamma, NormalInverseGamma, NormalInverseGaussian,
-    NormalInverseWishart, NormalWishart, Pareto, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, SymTriangularDist, TDist, TriangularDist,
+    NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
+    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

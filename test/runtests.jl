@@ -1,4 +1,17 @@
-tests = [
+using Distributions
+using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using Test
+using Distributed
+using Random
+using StatsBase
+
+const tests = [
+    "truncate",
+    "truncnormal",
+    "truncated_exponential",
+    "normal",
+    "mvnormal",
+    "mvlognormal",
     "types",
     "utils",
     "samplers",
@@ -10,47 +23,43 @@ tests = [
     "binomial",
     "poissonbinomial",
     "dirichlet",
-    "mvnormal",
-    "mvlognormal",
+    "dirichletmultinomial",
+    "logitnormal",
     "mvtdist",
-    "normalinversegaussian",
     "kolmogorov",
     "edgeworth",
     "matrix",
-    "noncentralhypergeometric",
     "vonmisesfisher",
     "conversion",
     "mixture",
     "gradlogpdf",
-    "truncate",
-    "truncatednormal",
-	"generalizedextremevalue"]
+    "noncentralt",
+    "locationscale",
+    "quantile_newton",
+    "semicircle",
+    "qq",
+    "pgeneralizedgaussian",
+    "product",
+    "discretenonparametric",
+    "functionals",
+    "chernoff",
+]
 
-print_with_color(:blue, "Running tests:\n")
+printstyled("Running tests:\n", color=:blue)
 
-if nworkers() > 1
-    rmprocs(workers())
+Random.seed!(345679)
+
+# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+include("testutils.jl")
+
+for t in tests
+    @testset "Test $t" begin
+        Random.seed!(345679)
+        include("$t.jl")
+    end
 end
 
-if Base.JLOptions().code_coverage == 1
-    addprocs(Sys.CPU_CORES, exeflags = ["--code-coverage=user", "--inline=no", "--check-bounds=yes"])
-else
-    addprocs(Sys.CPU_CORES, exeflags = "--check-bounds=yes")
-end
-
-using Distributions
-@everywhere srand(345679)
-res = pmap(tests) do t
-    include(t*".jl")
-    nothing
-end
-
-# in v0.4, pmap returns the exception, but doesn't throw it, so we need
-# to test and rethrow
-if VERSION < v"0.5.0-"
-    map(x -> isa(x, Exception) ? throw(x) : nothing, res)
-else
-    # test that there are no method ambiguities
-    println("Potentially stale exports: ")
-    Base.Test.@test length(Base.Test.detect_ambiguities(Distributions)) == 0
-end
+# print method ambiguities
+println("Potentially stale exports: ")
+display(Test.detect_ambiguities(Distributions))
+println()

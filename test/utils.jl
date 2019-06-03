@@ -1,15 +1,17 @@
-using Distributions
-using Base.Test
+using Distributions, PDMats
+using Test, LinearAlgebra
+
 
 # RealInterval
 r = RealInterval(1.5, 4.0)
 @test minimum(r) == 1.5
 @test maximum(r) == 4.0
+@test extrema(r) == (1.5, 4.0)
 
 @test partype(Gamma(1, 2)) == Float64
 @test partype(Gamma(1.1, 2)) == Float64
-@test partype(Normal(1//1, 2//1)) == Rational{Int64}
-@test partype(MvNormal(rand(Float32, 5), eye(Float32, 5))) == Float32
+@test partype(Normal(1//1, 2//1)) == Rational{Int}
+@test partype(MvNormal(rand(Float32, 5), Matrix{Float32}(I, 5, 5))) == Float32
 
 # special cases
 @test partype(Kolmogorov()) == Float64
@@ -22,15 +24,34 @@ C = 1//2
 Z = Distributions.ZeroVector(Float64, 5)
 L = rand(Float32, 4, 4)
 D = PDMats.PDMat(L * L')
-@test Distributions.promote_eltype(A, B) == (convert(Array{Float32}, A), convert(Array{Float32}, B))
-@test Distributions.promote_eltype(A, C) == (convert(Array{Rational{Int}}, A), convert(Float32, C))
-AA, DD = Distributions.promote_eltype(A, D)
-@test AA == convert(Array{Float32}, A)
-@test DD.mat == convert(PDMats.PDMat{Float32}, D).mat
-ZZ, DD = Distributions.promote_eltype(Z, D)
-@test ZZ == Distributions.ZeroVector{Float32}(5)
-@test DD.mat == convert(PDMats.PDMat{Float32}, D).mat
-@test Distributions.convert_eltype(Float32, A) == convert(Array{Float32}, A)
-@test Distributions.convert_eltype(Float32, Z) == Distributions.ZeroVector{Float32}(length(Z))
-@test Distributions.convert_eltype(Float64, D).mat == convert(PDMats.PDMat{Float64}, D).mat
 @test typeof(convert(Distributions.ZeroVector{Float32}, Z)) == Distributions.ZeroVector{Float32}
+
+for v in (15, π, 0x33, 14.0)
+    @test Z .* v == Z
+end
+
+for idx in eachindex(Z)
+    @test Z[idx] == zero(eltype(Z))
+end
+
+# Ensure that utilities functions works with abstract arrays
+
+@test Distributions.allfinite(GenericArray([-1, 0, Inf])) == false
+@test Distributions.allfinite(GenericArray([0, 0, 0]))
+
+@test Distributions.allzeros(GenericArray([-1, 0, 1])) == false
+@test Distributions.allzeros(GenericArray([0, 0, 0]))
+
+@test Distributions.allnonneg(GenericArray([-1, 0, 1])) == false
+@test Distributions.allnonneg(GenericArray([0, 0, 0]))
+
+@test isprobvec(GenericArray([1, 1, 1])) == false
+@test isprobvec(GenericArray([1/3, 1/3, 1/3]))
+
+# Positive definite matrix
+M = GenericArray([1.0 0.0; 0.0 1.0])
+# Non-invertible matrix
+N = GenericArray([1.0 0.0; 1.0 0.0])
+
+@test Distributions.isApproxSymmmetric(N) == false
+@test Distributions.isApproxSymmmetric(M)

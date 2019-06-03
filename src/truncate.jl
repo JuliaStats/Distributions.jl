@@ -1,4 +1,14 @@
-immutable Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
+"""
+    Truncated(d, l, u):
+
+Construct a truncated distribution.
+
+# Arguments
+- `d::UnivariateDistribution`: The original distribution.
+- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
+- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+"""
+struct Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
@@ -31,68 +41,116 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport{D<:UnivariateDistribution}(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) =
+insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution} =
     d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 
 ### evaluation
 
-pdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
+quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-logpdf(d::Truncated, x::Float64) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+function _pdf(d::Truncated, x::T) where {T<:Real}
+    if d.lower <= x <= d.upper
+        pdf(d.untruncated, x) / d.tp
+    else
+        zero(T)
+    end
+end
 
-cdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
-                             x >= d.upper ? 1.0 :
-                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
+function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:Real}
+    _pdf(d, float(x))
+end
 
-logcdf(d::Truncated, x::Float64) = x <= d.lower ? -Inf :
-                                x >= d.upper ? 0.0 :
-                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
+    isinteger(x) || return zero(float(T))
+    _pdf(d, x)
+end
 
-ccdf(d::Truncated, x::Float64) = x <= d.lower ? 1.0 :
-                              x >= d.upper ? 0.0 :
-                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
+function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Integer}
+    _pdf(d, float(x))
+end
 
-logccdf(d::Truncated, x::Float64) = x <= d.lower ? 0.0 :
-                                 x >= d.upper ? -Inf :
-                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+function _logpdf(d::Truncated, x::T) where {T<:Real}
+    if d.lower <= x <= d.upper
+        logpdf(d.untruncated, x) - d.logtp
+    else
+        TF = float(T)
+        -TF(Inf)
+    end
+end
 
+function logpdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
+    TF = float(T)
+    isinteger(x) || return -TF(Inf)
+    return _logpdf(d, x)
+end
 
-quantile(d::Truncated, p::Float64) = quantile(d.untruncated, d.lcdf + p * d.tp)
+function logpdf(d::Truncated{D}, x::Integer) where {D<:DiscreteUnivariateDistribution}
+    _logpdf(d, x)
+end
 
-pdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? pdf(d.untruncated, x) / d.tp : 0.0
+function logpdf(d::Truncated{D, Continuous}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
+    _logpdf(d, x)
+end
 
-logpdf(d::Truncated, x::Int) = d.lower <= x <= d.upper ? logpdf(d.untruncated, x) - d.logtp : -Inf
+# fallback to avoid method ambiguities
+_cdf(d::Truncated, x::T) where {T<:Real} =
+    x <= d.lower ? zero(T) :
+    x >= d.upper ? one(T) :
+    (cdf(d.untruncated, x) - d.lcdf) / d.tp
 
-cdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
-                             x >= d.upper ? 1.0 :
-                             (cdf(d.untruncated, x) - d.lcdf) / d.tp
+cdf(d::Truncated, x::Real) = _cdf(d, x)
+cdf(d::Truncated, x::Integer) = _cdf(d, float(x)) # float conversion for stability
 
-logcdf(d::Truncated, x::Int) = x <= d.lower ? -Inf :
-                                x >= d.upper ? 0.0 :
-                                log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+function _logcdf(d::Truncated, x::T) where {T<:Real}
+    TF = float(T)
+    if x <= d.lower
+        -TF(Inf)
+    elseif x >= d.upper
+        zero(TF)
+    else
+        log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+    end
+end
 
-ccdf(d::Truncated, x::Int) = x <= d.lower ? 1.0 :
-                              x >= d.upper ? 0.0 :
-                              (d.ucdf - cdf(d.untruncated, x)) / d.tp
+logcdf(d::Truncated, x::Real) = _logcdf(d, x)
+logcdf(d::Truncated, x::Integer) = _logcdf(d, x)
 
-logccdf(d::Truncated, x::Int) = x <= d.lower ? 0.0 :
-                                 x >= d.upper ? -Inf :
-                                 log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+_ccdf(d::Truncated, x::T) where {T<:Real} =
+    x <= d.lower ? one(T) :
+    x >= d.upper ? zero(T) :
+    (d.ucdf - cdf(d.untruncated, x)) / d.tp
+
+ccdf(d::Truncated, x::Real) = _ccdf(d, x)
+ccdf(d::Truncated, x::Integer) = _ccdf(d, float(x))
+
+function _logccdf(d::Truncated, x::T) where {T<:Real}
+    TF = float(T)
+    if x <= d.lower
+        zero(TF)
+    elseif x >= d.upper
+        -TF(Inf)
+    else
+        log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+    end
+end
+
+logccdf(d::Truncated, x::Real) = _logccdf(d, x)
+logccdf(d::Truncated, x::Integer) = _logccdf(d, x)
 
 ## random number generation
 
-function rand(d::Truncated)
+function _rand!(rng::AbstractRNG, d::Truncated)
     d0 = d.untruncated
     if d.tp > 0.25
         while true
-            r = rand(d0)
+            r = _rand!(rng, d0)
             if d.lower <= r <= d.upper
                 return r
             end
         end
     else
-        return quantile(d0, d.lcdf + rand() * d.tp)
+        return quantile(d0, d.lcdf + rand(rng) * d.tp)
     end
 end
 
@@ -115,3 +173,5 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 ### specialized truncated distributions
 
 include(joinpath("truncated", "normal.jl"))
+include(joinpath("truncated", "exponential.jl"))
+include(joinpath("truncated", "uniform.jl"))

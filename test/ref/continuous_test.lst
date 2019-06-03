@@ -1,0 +1,192 @@
+Arcsine()
+Arcsine(2.0)
+Arcsine(1.0, 2.5)
+Arcsine(-1.0, 1.0)
+
+Beta(2.0, 2.0)
+Beta(3.0, 4.0)
+Beta(17.0, 13.0)
+
+BetaPrime()
+BetaPrime(3.0)
+BetaPrime(3.0, 5.0)
+BetaPrime(5.0, 3.0)
+
+Cauchy()
+Cauchy(2.0)
+Cauchy(0.0, 1.0)
+Cauchy(10.0, 1.0)
+Cauchy(2.0, 10.0)
+
+Chi(1)
+Chi(2)
+Chi(3)
+Chi(12)
+
+Chisq(1)
+Chisq(8)
+Chisq(20)
+
+Cosine()
+Cosine(1.5)
+Cosine(2.0, 2.8)
+
+Erlang()
+Erlang(3)
+Erlang(3, 1.0)
+Erlang(5, 2.0)
+
+Exponential()
+Exponential(2.0)
+Exponential(6.5)
+
+FDist(6.0, 8.0)
+FDist(8.0, 6.0)
+
+Frechet()
+Frechet(0.5)
+Frechet(3.0)
+Frechet(20.0)
+Frechet(60.0)
+Frechet(0.5, 2.0)
+Frechet(3.0, 2.0)
+
+Gamma()
+Gamma(2.0)
+Gamma(1.0, 1.0)
+Gamma(3.0, 1.0)
+Gamma(3.0, 2.0)
+
+GeneralizedExtremeValue(1.0, 1.0, 1.0)
+GeneralizedExtremeValue(0.0, 1.0, 0.0)
+GeneralizedExtremeValue(0.0, 1.0, 1.1)
+GeneralizedExtremeValue(0.0, 1.0, 0.6)
+GeneralizedExtremeValue(0.0, 1.0, 0.3)
+GeneralizedExtremeValue(1.0, 1.0, -1.0)
+GeneralizedExtremeValue(-1.0, 0.5, 0.6)
+
+GeneralizedPareto()
+GeneralizedPareto(1.0, 1.0)
+GeneralizedPareto(0.1, 2.0)
+GeneralizedPareto(1.0, 1.0, 1.0)
+GeneralizedPareto(-1.5, 0.5, 2.0)
+
+Gumbel()
+Gumbel(3.0)
+Gumbel(3.0, 5.0)
+Gumbel(5.0, 3.0)
+
+InverseGamma()
+InverseGamma(2.0)
+InverseGamma(1.0, 1.0)
+InverseGamma(1.0, 2.0)
+InverseGamma(2.0, 1.0)
+InverseGamma(2.0, 3.0)
+
+InverseGaussian()
+InverseGaussian(0.8)
+InverseGaussian(2.0)
+InverseGaussian(1.0, 1.0)
+InverseGaussian(2.0, 1.5)
+InverseGaussian(2.0, 7.0)
+
+Laplace()
+Laplace(2.0)
+Laplace(0.0, 1.0)
+Laplace(5.0, 1.0)
+Laplace(5.0, 1.5)
+
+Levy()
+Levy(2)
+Levy(2, 8)
+Levy(3.0, 3)
+
+Logistic()
+Logistic(2.0)
+Logistic(0.0, 1.0)
+Logistic(5.0, 1.0)
+Logistic(2.0, 1.5)
+Logistic(5.0, 1.5)
+
+LogNormal()
+LogNormal(1.0)
+LogNormal(0.0, 2.0)
+LogNormal(1.0, 2.0)
+LogNormal(3.0, 0.5)
+LogNormal(3.0, 1.0)
+LogNormal(3.0, 2.0)
+
+NoncentralBeta(2, 2, 0)
+NoncentralBeta(2, 6, 5)
+
+NoncentralChisq(2, 2)
+NoncentralChisq(2, 5)
+
+NoncentralF(2, 2, 2)
+NoncentralF(8, 10, 5)
+
+NoncentralT(2, 2)
+NoncentralT(10, 2)
+
+Normal()
+Normal(2.0)
+Normal(-3.0, 2.0)
+Normal(1.0, 10.0)
+
+NormalInverseGaussian(1.7, 1.8, 1.2, 2.3)
+
+NormalCanon()
+NormalCanon(0.0, 1.0)
+NormalCanon(-1.0, 2.5)
+NormalCanon(2.0, 0.8)
+
+Pareto()
+Pareto(2.0)
+Pareto(2.0, 1.5)
+Pareto(3.0, 2.0)
+
+Rayleigh()
+Rayleigh(3.0)
+Rayleigh(8.0)
+
+StudentizedRange(2.0, 2.0)
+StudentizedRange(5.0, 10.0)
+StudentizedRange(10.0, 5.0)
+
+SymTriangularDist()
+SymTriangularDist(3.0)
+SymTriangularDist(3.0, 0.5)
+SymTriangularDist(3.0, 2.0)
+SymTriangularDist(10.0, 8.0)
+
+TDist(1.2)
+TDist(5.0)
+TDist(28.0)
+
+TriangularDist(0, 5)
+TriangularDist(-7, 2)
+TriangularDist(-4, 14, 3)
+TriangularDist(2, 2000, 500)
+TriangularDist(1, 3, 2)
+
+TruncatedNormal(0, 1, -2, 2)
+TruncatedNormal(3, 10, 7, 8)
+TruncatedNormal(27, 3, 0, Inf)
+TruncatedNormal(-5, 1, -Inf, -10)
+TruncatedNormal(1.8, 1.2, -Inf, 0)
+
+Uniform()
+Uniform(0.0, 2.0)
+Uniform(3.0, 17.0)
+Uniform(3.0, 3.1)
+
+VonMises()
+VonMises(4.0)
+VonMises(1.1, 2.5)
+
+Weibull()
+Weibull(0.5)
+Weibull(5.0)
+Weibull(20.0, 1.0)
+Weibull(1.0, 2.0)
+Weibull(5.0, 2.0)

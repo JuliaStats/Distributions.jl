@@ -1,6 +1,0 @@
-julia 0.4
-PDMats 0.4.2 0.5
-StatsFuns 0.3.0
-Calculus
-StatsBase 0.8.3
-Compat 0.8.4

@@ -1,9 +1,11 @@
-doc"""
+"""
     DiscreteUniform(a,b)
 
 A *Discrete uniform distribution* is a uniform distribution over a consecutive sequence of integers between `a` and `b`, inclusive.
 
-$P(X = k) = 1 / (b - a + 1) \quad \text{for } k = a, a+1, \ldots, b.$
+```math
+P(X = k) = 1 / (b - a + 1) \\quad \\text{for } k = a, a+1, \\ldots, b.
+```
 
 ```julia
 DiscreteUniform(a, b)   # a uniform distribution over {a, a+1, ..., b}
@@ -19,7 +21,7 @@ External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
-immutable DiscreteUniform <: DiscreteUnivariateDistribution
+struct DiscreteUniform <: DiscreteUnivariateDistribution
     a::Int
     b::Int
     pv::Float64
@@ -76,41 +78,6 @@ pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
 
 logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
 
-pdf(d::DiscreteUniform) = fill(probval(d), span(d))
-
-function _pdf!(r::AbstractArray, d::DiscreteUniform, rgn::UnitRange)
-    vfirst = round(Int, first(rgn))
-    vlast = round(Int, last(rgn))
-    vl = max(vfirst, d.a)
-    vr = min(vlast, d.b)
-    if vl > vfirst
-        for i = 1:(vl - vfirst)
-            r[i] = 0.0
-        end
-    end
-    fm1 = vfirst - 1
-    if vl <= vr
-        pv = d.pv
-        for v = vl:vr
-            r[v - fm1] = pv
-        end
-    end
-    if vr < vlast
-        for i = (vr-vfirst+2):length(rgn)
-            r[i] = 0.0
-        end
-    end
-    return r
-end
-
-function _logpdf!(r::AbstractArray, d::DiscreteUniform, x::AbstractArray)
-    lpv = log(probval(d))
-    for i = 1:length(x)
-        @inbounds r[i] = insupport(d, x[i]) ? lpv : -Inf
-    end
-    return r
-end
-
 quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
 
 function mgf(d::DiscreteUniform, t::Real)
@@ -128,11 +95,11 @@ end
 
 ### Sampling
 
-rand(d::DiscreteUniform) = randi(d.a, d.b)
+rand(rng::AbstractRNG, d::DiscreteUniform) = rand(rng, d.a:d.b)
 
 # Fit model
 
-function fit_mle{T <: Real}(::Type{DiscreteUniform}, x::AbstractArray{T})
+function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{T}) where T <: Real
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end

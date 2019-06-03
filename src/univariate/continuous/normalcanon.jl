@@ -1,16 +1,20 @@
-## Canonical Form of Normal distribution
-immutable NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
+"""
+    NormalCanon(η, λ)
+
+Canonical Form of Normal distribution
+"""
+struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     η::T       # σ^(-2) * μ
     λ::T       # σ^(-2)
     μ::T       # μ
 
-    function NormalCanon(η, λ)
+    function NormalCanon{T}(η, λ) where T
         @check_args(NormalCanon, λ > zero(λ))
-    	new(η, λ, η / λ)
+        new{T}(η, λ, η / λ)
     end
 end
 
-NormalCanon{T<:Real}(η::T, λ::T) = NormalCanon{typeof(η/λ)}(η, λ)
+NormalCanon(η::T, λ::T) where {T<:Real} = NormalCanon{typeof(η/λ)}(η, λ)
 NormalCanon(η::Real, λ::Real) = NormalCanon(promote(η, λ)...)
 NormalCanon(η::Integer, λ::Integer) = NormalCanon(Float64(η), Float64(λ))
 NormalCanon() = NormalCanon(0., 1.)
@@ -18,8 +22,8 @@ NormalCanon() = NormalCanon(0., 1.)
 @distr_support NormalCanon -Inf Inf
 
 #### Type Conversions
-convert{T <: Real, S <: Real}(::Type{NormalCanon{T}}, η::S, λ::S) = NormalCanon(T(η), T(λ))
-convert{T <: Real, S <: Real}(::Type{NormalCanon{T}}, d::NormalCanon{S}) = NormalCanon(T(d.η), T(d.λ))
+convert(::Type{NormalCanon{T}}, η::S, λ::S) where {T <: Real, S <: Real} = NormalCanon(T(η), T(λ))
+convert(::Type{NormalCanon{T}}, d::NormalCanon{S}) where {T <: Real, S <: Real} = NormalCanon(T(d.η), T(d.λ))
 
 ## conversion between Normal and NormalCanon
 
@@ -31,8 +35,7 @@ canonform(d::Normal) = convert(NormalCanon, d)
 #### Parameters
 
 params(d::NormalCanon) = (d.η, d.λ)
-@inline partype{T<:Real}(d::NormalCanon{T}) = T
-
+@inline partype(d::NormalCanon{T}) where {T<:Real} = T
 
 #### Statistics
 
@@ -40,14 +43,16 @@ mean(d::NormalCanon) = d.μ
 median(d::NormalCanon) = mean(d)
 mode(d::NormalCanon) = mean(d)
 
-skewness{T<:Real}(d::NormalCanon{T}) = zero(T)
-kurtosis{T<:Real}(d::NormalCanon{T}) = zero(T)
+skewness(d::NormalCanon{T}) where {T<:Real} = zero(T)
+kurtosis(d::NormalCanon{T}) where {T<:Real} = zero(T)
 
 var(d::NormalCanon) = 1 / d.λ
 std(d::NormalCanon) = sqrt(var(d))
 
 entropy(d::NormalCanon) = (-log(d.λ) + log2π + 1) / 2
 
+location(d::NormalCanon) = mean(d)
+scale(d::NormalCanon) = std(d)
 
 #### Evaluation
 
@@ -70,5 +75,4 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 
 #### Sampling
 
-rand(cf::NormalCanon) = cf.μ + randn() / sqrt(cf.λ)
-rand!{T<:Real}(cf::NormalCanon, r::AbstractArray{T}) = rand!(convert(Normal, cf), r)
+rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)

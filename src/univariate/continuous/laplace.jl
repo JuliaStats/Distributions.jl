@@ -1,18 +1,20 @@
-doc"""
-    Laplace(μ,θ)
+"""
+    Laplace(μ,β)
 
-The *Laplace distribution* with location `μ` and scale `θ` has probability density function
+The *Laplace distribution* with location `μ` and scale `β` has probability density function
 
-$f(x; \mu, \beta) = \frac{1}{2 \beta} \exp \left(- \frac{|x - \mu|}{\beta} \right)$
+```math
+f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
+```
 
 ```julia
 Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
-Laplace(u)      # Laplace distribution with location u and unit scale, i.e. Laplace(u, 1)
-Laplace(u, b)   # Laplace distribution with location u ans scale b
+Laplace(μ)      # Laplace distribution with location μ and unit scale, i.e. Laplace(μ, 1)
+Laplace(μ, β)   # Laplace distribution with location μ and scale β
 
-params(d)       # Get the parameters, i.e. (u, b)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. b
+params(d)       # Get the parameters, i.e., (μ, β)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. β
 ```
 
 External links
@@ -20,29 +22,28 @@ External links
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
 """
-
-immutable Laplace{T<:Real} <: ContinuousUnivariateDistribution
+struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
 
-    Laplace(μ::T, θ::T) = (@check_args(Laplace, θ > zero(θ)); new(μ, θ))
+    Laplace{T}(μ::T, θ::T) where {T} = (@check_args(Laplace, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Laplace{T<:Real}(μ::T, θ::T) = Laplace{T}(μ, θ)
+Laplace(μ::T, θ::T) where {T<:Real} = Laplace{T}(μ, θ)
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
 Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
 Laplace(μ::Real) = Laplace(μ, 1.0)
 Laplace() = Laplace(0.0, 1.0)
 
-typealias Biexponential Laplace
+const Biexponential = Laplace
 
 @distr_support Laplace -Inf Inf
 
 #### Conversions
-function convert{T <: Real, S <: Real}(::Type{Laplace{T}}, μ::S, θ::S)
+function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))
 end
-function convert{T <: Real, S <: Real}(::Type{Laplace{T}}, d::Laplace{S})
+function convert(::Type{Laplace{T}}, d::Laplace{S}) where {T <: Real, S <: Real}
     Laplace(T(d.μ), T(d.θ))
 end
 
@@ -52,7 +53,7 @@ end
 location(d::Laplace) = d.μ
 scale(d::Laplace) = d.θ
 params(d::Laplace) = (d.μ, d.θ)
-@inline partype{T<:Real}(d::Laplace{T}) = T
+@inline partype(d::Laplace{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -63,8 +64,8 @@ mode(d::Laplace) = d.μ
 
 var(d::Laplace) = 2d.θ^2
 std(d::Laplace) = sqrt2 * d.θ
-skewness{T<:Real}(d::Laplace{T}) = zero(T)
-kurtosis{T<:Real}(d::Laplace{T}) = 3one(T)
+skewness(d::Laplace{T}) where {T<:Real} = zero(T)
+kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
 
@@ -106,12 +107,14 @@ end
 
 #### Sampling
 
-rand(d::Laplace) = d.μ + d.θ*randexp()*ifelse(rand(Bool), 1, -1)
+rand(rng::AbstractRNG, d::Laplace) =
+    d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
 
 #### Fitting
 
-function fit_mle(::Type{Laplace}, x::Array)
-    a = median(x)
-    Laplace(a, mad(x, a))
+function fit_mle(::Type{<:Laplace}, x::Array)
+    xc = copy(x)
+    a = median!(xc)
+    Laplace(a, StatsBase.mad!(xc, center=a))
 end
