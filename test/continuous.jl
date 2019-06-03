@@ -26,7 +26,7 @@ using ForwardDiff
 @test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
 @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
 
-# issue #894:
+
 @testset "Normal distribution with non-standard (ie not Float64) parameter types" begin
     n32 = Normal(1f0, 0.1f0)
     n64 = Normal(1., 0.1)
@@ -77,4 +77,24 @@ end
     @test pdf(d, 0.5) ≈ 1.758235814051e-75
     @test logpdf(d, 0.5) ≈ -172.1295710466005
     @test cdf(d, 1.0) ≈ 0.000787319 atol=1e-9
+end
+
+@testset "NormalInverseGaussian random repeatable and basic metrics" begin
+    rng = Random.MersenneTwister(42)
+    rng2 = copy(rng)
+    µ = 0.0
+    α = 1.0
+    β = 0.5
+    δ = 3.0
+    g = sqrt(α^2 - β^2)
+    d = NormalInverseGaussian(μ, α, β, δ)
+    v1 = rand(rng, d)
+    v2 = rand(rng, d)
+    v3 = rand(rng2, d)
+    @test v1 ≈ v3
+    @test v1 ≉ v2
+
+    @test mean(d) ≈ µ + β * δ / g
+    @test var(d) ≈ δ * α^2 / g^3
+    @test skewness(d) ≈ 3β/(α*sqrt(δ*g))
 end
