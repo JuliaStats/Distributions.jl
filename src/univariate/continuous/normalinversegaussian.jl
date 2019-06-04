@@ -75,7 +75,7 @@ end
 function rand(rng::Random.AbstractRNG, d::NormalInverseGaussian)
     μ, α, β, δ = params(d)
 
-    Z = InverseGaussian(δ, d.γ)
+    Z = InverseGaussian(δ/d.γ, δ^2)
     z = rand(rng, Z)
     X = Normal(μ + β*z, sqrt(z))
     return rand(rng, X)
