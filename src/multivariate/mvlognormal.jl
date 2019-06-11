@@ -204,7 +204,7 @@ Return the scale matrix of the distribution (the covariance matrix of the underl
 scale(d::MvLogNormal) = cov(d.normal)
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-mean(d::MvLogNormal) = exp.(mean(d.normal) + var(d.normal)/2)
+mean(d::MvLogNormal) = exp.(mean(d.normal) .+ var(d.normal)/2)
 
 """
     median(d::MvLogNormal)
@@ -218,7 +218,7 @@ median(d::MvLogNormal) = exp.(mean(d.normal))
 
 Return the mode vector of the lognormal distribution, which is strictly smaller than the mean and median.
 """
-mode(d::MvLogNormal) = exp.(mean(d.normal) - var(d.normal))
+mode(d::MvLogNormal) = exp.(mean(d.normal) .- var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
     return m*m'.*(exp.(cov(d.normal)) .- 1)

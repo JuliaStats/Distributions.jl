@@ -115,7 +115,7 @@ rand(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
 
 ## Fitting
 
-function fit_mle(::Type{Pareto}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where T<:Real
     # Based on
     # https://en.wikipedia.org/wiki/Pareto_distribution#Parameter_estimation
 

@@ -1,10 +1,18 @@
 ## sample space/domain
 
+"""
+`F <: VariateForm` specifies the form of the variate or
+dimension of a sample, univariate (scalar), multivariate (vector), matrix-variate (matrix).
+"""
 abstract type VariateForm end
 struct Univariate    <: VariateForm end
 struct Multivariate  <: VariateForm end
 struct Matrixvariate <: VariateForm end
 
+"""
+`S <: ValueSupport` specifies the support of sample elements,
+either discrete or continuous.
+"""
 abstract type ValueSupport end
 struct Discrete   <: ValueSupport end
 struct Continuous <: ValueSupport end
