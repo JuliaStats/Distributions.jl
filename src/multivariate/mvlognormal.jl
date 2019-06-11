@@ -176,7 +176,7 @@ MvLogNormal(σ::AbstractVector) = MvLogNormal(MvNormal(σ))
 MvLogNormal(d::Int,s::Real) = MvLogNormal(MvNormal(d,s))
 
 
-eltype(::MvLogNormal{T}) where {T<:Real} = T
+eltype(::MvLogNormal{T}) where {T} = T
 ### Conversion
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real
     MvLogNormal(convert(MvNormal{T}, d.normal))

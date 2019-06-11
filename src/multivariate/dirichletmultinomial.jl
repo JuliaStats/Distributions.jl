@@ -22,7 +22,7 @@ ncategories(d::DirichletMultinomial) = length(d.α)
 length(d::DirichletMultinomial) = ncategories(d)
 ntrials(d::DirichletMultinomial) = d.n
 params(d::DirichletMultinomial) = (d.n, d.α)
-@inline partype(d::DirichletMultinomial{T}) where {T<:Real} = T
+@inline partype(d::DirichletMultinomial{T}) where {T} = T
 
 # Statistics
 mean(d::DirichletMultinomial) = d.α .* (d.n / d.α0)
