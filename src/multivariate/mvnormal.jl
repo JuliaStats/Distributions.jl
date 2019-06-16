@@ -200,7 +200,7 @@ function MvNormal(Σ::Cov) where {T, Cov<:AbstractPDMat{T}}
     MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
 end
 
-MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(diag(Σ)))
 MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
