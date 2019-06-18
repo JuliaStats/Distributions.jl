@@ -332,6 +332,7 @@ Relying on this fallback is not recommended in general, as it is prone to overfl
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
+logpdf(d::DiscreteUnivariateDistribution, x) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 """
@@ -388,6 +389,7 @@ The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cd
 logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
+logcdf(d::DiscreteUnivariateDistribution, x) = log(cdf(d, x))
 
 """
     logccdf(d::UnivariateDistribution, x::Real)
@@ -397,6 +399,7 @@ The logarithm of the complementary cumulative function values evaluated at x, i.
 logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
+logccdf(d::DiscreteUnivariateDistribution, x) = log(ccdf(d, x))
 
 """
     quantile(d::UnivariateDistribution, q::Real)
