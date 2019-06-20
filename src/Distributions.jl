@@ -4,11 +4,12 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
-import Base: size, eltype, length, convert, show, getindex, rand
+import Base: size, eltype, length, convert, show, getindex, rand, vec
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
 using LinearAlgebra, Printf
+import LinearAlgebra: rank
 
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
@@ -107,6 +108,7 @@ export
     Logistic,
     LogNormal,
     LogitNormal,
+    MatrixNormal,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -239,8 +241,10 @@ export
 
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
-    wsample, wsample!      # weighted sampling from a source array
+    wsample, wsample!,      # weighted sampling from a source array
 
+    # reexport from LinearAlgebra
+    rank
 
 ### source files
 
@@ -305,7 +309,7 @@ Supported distributions:
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
-    Logistic, LogNormal, MixtureModel, Multinomial, MultivariateNormal,
+    Logistic, LogNormal, MatrixNormal, MixtureModel, Multinomial, MultivariateNormal,
     MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
     NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
     NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
