@@ -7,10 +7,10 @@ p = 6
 M = randn(n, p)
 U = rand(InverseWishart(n + 2, Matrix(1.0I, n, n)))
 V = rand(InverseWishart(p + 2, Matrix(1.0I, p, p)))
-
 D = MatrixNormal(M, U, V)
-G = MatrixNormal(p, n)
 d = vec(D) # MvNormal(vec(M), V ⊗ U)
+
+G = MatrixNormal(p, n)
 
 MM, PDU, PDV = params(D)
 X = rand(D)
@@ -19,6 +19,14 @@ y = rand(d)
 Y = reshape(y, n, p)
 
 MM, PDU, PDV = params(D)
+
+#  Call every constructor
+
+MatrixNormal(M, PDU, V)
+MatrixNormal(M, U, PDV)
+MatrixNormal(M, U, PDV.chol)
+MatrixNormal(M, PDU.chol, V)
+MatrixNormal(M, PDU.chol, PDV.chol)
 
 @test size(D) == (n, p)
 @test rank(D) == min(n, p)
