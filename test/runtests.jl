@@ -28,7 +28,7 @@ const tests = [
     "mvtdist",
     "kolmogorov",
     "edgeworth",
-    "matrix",
+    "wisharts",
     "vonmisesfisher",
     "conversion",
     "mixture",
