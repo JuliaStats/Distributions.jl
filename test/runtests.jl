@@ -29,6 +29,7 @@ const tests = [
     "kolmogorov",
     "edgeworth",
     "wisharts",
+    "matrixnormal",
     "vonmisesfisher",
     "conversion",
     "mixture",
