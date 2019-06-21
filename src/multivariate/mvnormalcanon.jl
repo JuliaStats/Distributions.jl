@@ -130,7 +130,6 @@ distrname(d::ZeroMeanIsoNormalCanon) = "ZeroMeanIsoNormalCanon"
 distrname(d::ZeroMeanDiagNormalCanon) = "ZeroMeanDiagormalCanon"
 distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 
-eltype(::MvNormalCanon{T}) where {T} = T
 ### Conversion
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
@@ -157,6 +156,7 @@ length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
+eltype(::MvNormalCanon{T}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = Matrix(inv(d.J))
