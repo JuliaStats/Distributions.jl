@@ -14,12 +14,12 @@ Return the sample size of distribution `d`, *i.e* `(length(d),)`.
 """
 size(d::MultivariateDistribution)
 
-
 """
     eltype(d::MultivariateDistribution)
 Return the sample type of distribution `d`
 """
 eltype(d::MultivariateDistribution)
+
 
 ## sampling
 

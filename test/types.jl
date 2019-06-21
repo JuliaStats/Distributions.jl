@@ -24,10 +24,9 @@ using ForwardDiff: Dual
 @assert ContinuousMatrixDistribution <: MatrixDistribution
 
 @testset "Test Sample Type" begin
-    for T in [Float64,Float32,Dual{Nothing,Float64,0}]
-    # for T in [Float64,Float32,Float16,Tracker.TrackedReal{Float64}]
+    for T in (Float64,Float32,Dual{Nothing,Float64,0})
         @testset "Type $T" begin
-            for d in [MvNormal]#,MvLogNormal,MvNormalCanon,Dirichlet]
+            for d in (MvNormal,MvLogNormal,MvNormalCanon,Dirichlet)
                 dist = d(map(T,ones(2)))
                 @test eltype(dist) == T
                 @test eltype(rand(dist)) == eltype(dist)

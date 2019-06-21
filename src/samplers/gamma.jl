@@ -6,7 +6,7 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler{T} <: Sampleable{Univariate,Continuous}
+struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
     a::T
     s2::T
     s::T
@@ -19,11 +19,10 @@ struct GammaGDSampler{T} <: Sampleable{Univariate,Continuous}
     scale::T
 end
 
-function GammaGDSampler(g::Gamma)
+function GammaGDSampler(g::Gamma{T}) where {T}
     a = shape(g)
-    T = typeof(a)
     # Step 1
-    s2 = a-0.5
+    s2 = a - 0.5
     s = sqrt(s2)
     i2s = 0.5/s
     d = 5.656854249492381 - 12.0s # 4*sqrt(2) - 12s
