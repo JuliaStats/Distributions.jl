@@ -1,5 +1,6 @@
 """
-
+    MatrixNormal{T <: Real, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+    
 Matrix Normal Distribution
 
 `X ~ MN(M, U, V)`
