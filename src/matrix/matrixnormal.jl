@@ -2,7 +2,7 @@
 
 Matrix Normal Distribution
 
-X ~ MN(M, U, V)
+`X ~ MN(M, U, V)`
 
 M: n x p
 
