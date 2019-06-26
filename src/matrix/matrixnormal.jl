@@ -1,6 +1,6 @@
 """
     MatrixNormal{T <: Real, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
-    
+
 Matrix Normal Distribution
 
 `X ~ MN(M, U, V)`
@@ -20,7 +20,7 @@ https://en.wikipedia.org/wiki/Matrix_normal_distribution
 """
 struct MatrixNormal{T <: Real, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
-    M::Matrix{T}
+    M::AbstractMatrix{T}
     U::ST
     V::ST
 
@@ -55,7 +55,7 @@ function MatrixNormal(M::Matrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) wh
 
 end
 
-function MatrixNormal(M::Matrix, U::AbstractPDMat, V::AbstractPDMat)
+function MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat)
 
     T = Base.promote_eltype(M, U, V)
 
@@ -63,12 +63,12 @@ function MatrixNormal(M::Matrix, U::AbstractPDMat, V::AbstractPDMat)
 
 end
 
-MatrixNormal(M::Matrix, U::AbstractPDMat,          V::Matrix)                 = MatrixNormal(M, U,        PDMat(V))
-MatrixNormal(M::Matrix, U::Matrix,                 V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
-MatrixNormal(M::Matrix, U::Matrix,                 V::Matrix)                 = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::Matrix, U::Matrix,                 V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::Matrix, U::LinearAlgebra.Cholesky, V::Matrix)                 = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::Matrix, U::LinearAlgebra.Cholesky, V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::AbstractPDMat,          V::AbstractMatrix)         = MatrixNormal(M, U,        PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
+MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
 
 MatrixNormal(m::Int, n::Int) = MatrixNormal(zeros(m, n), Matrix(1.0I, m, m), Matrix(1.0I, n, n))
 
