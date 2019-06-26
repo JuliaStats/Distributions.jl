@@ -241,10 +241,7 @@ export
 
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
-    wsample, wsample!,      # weighted sampling from a source array
-
-    # reexport from LinearAlgebra
-    rank
+    wsample, wsample!       # weighted sampling from a source array
 
 ### source files
 
