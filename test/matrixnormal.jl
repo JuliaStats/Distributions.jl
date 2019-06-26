@@ -8,16 +8,18 @@ p = 6
 
 #  parameters
 
-M = randn(n, p)
-U = rand(InverseWishart(n + 2, Matrix(1.0I, n, n)))
-V = rand(InverseWishart(p + 2, Matrix(1.0I, p, p)))
-PDU = PDMat(U)
-PDV = PDMat(V)
-m   = randn(n)
-w   = randn(p)
-μ   = randn()
-σ   = 2.0rand()
-σ²  = σ ^ 2
+M    = randn(n, p)
+U    = rand(InverseWishart(n + 2, Matrix(1.0I, n, n)))
+V    = rand(InverseWishart(p + 2, Matrix(1.0I, p, p)))
+UF32 = Matrix{Float32}(U)
+VBF  = Matrix{BigFloat}(V)
+PDU  = PDMat(U)
+PDV  = PDMat(V)
+m    = randn(n)
+w    = randn(p)
+μ    = randn()
+σ    = 2.0rand()
+σ²   = σ ^ 2
 
 #  distribution instances
 
@@ -57,6 +59,12 @@ MatrixNormal(M, PDU.chol, PDV)
 MatrixNormal(M, PDU,      V)
 MatrixNormal(M, PDU,      PDV.chol)
 MatrixNormal(M, PDU,      PDV)
+
+R = MatrixNormal(M, UF32, VBF)
+@test partype(R) == BigFloat
+
+@test_throws ErrorException MatrixNormal(M, V, U)
+@test_throws ErrorException MatrixNormal(M, U, U)
 
 MM, PDUU, PDVV = params(D)
 @test MM == M
