@@ -84,17 +84,17 @@ show(io::IO, d::MatrixNormal) = show_multline(io, d, [(:M, d.M), (:U, Matrix(d.U
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T<:Real
-    MM = AbstractMatrix{T}(d.M)
-    UU = AbstractMatrix{T}(d.U)
-    VV = AbstractMatrix{T}(d.V)
+function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
+    MM = convert(AbstractArray{T}, d.M)
+    UU = convert(AbstractArray{T}, d.U)
+    VV = convert(AbstractArray{T}, d.V)
     MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.c0))
 end
 
-function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, c0) where T<:Real
-    MM = AbstractMatrix{T}(M)
-    UU = AbstractMatrix{T}(U)
-    VV = AbstractMatrix{T}(V)
+function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, c0) where T <: Real
+    MM = convert(AbstractArray{T}, M)
+    UU = convert(AbstractArray{T}, U)
+    VV = convert(AbstractArray{T}, V)
     MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(c0))
 end
 
