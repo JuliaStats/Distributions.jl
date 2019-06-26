@@ -1,5 +1,5 @@
 """
-    MatrixNormal{T <: Real, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+    MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
 Matrix Normal Distribution
 
