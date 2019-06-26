@@ -21,12 +21,14 @@ Y = reshape(y, n, p)
 MM, PDU, PDV = params(D)
 
 #  Call every constructor
-
-MatrixNormal(M, PDU, V)
-MatrixNormal(M, U, PDV)
-MatrixNormal(M, U, PDV.chol)
+MatrixNormal(M, U,        PDV.chol)
+MatrixNormal(M, U,        PDV)
 MatrixNormal(M, PDU.chol, V)
 MatrixNormal(M, PDU.chol, PDV.chol)
+MatrixNormal(M, PDU.chol, PDV)
+MatrixNormal(M, PDU,      V)
+MatrixNormal(M, PDU,      PDV.chol)
+MatrixNormal(M, PDU,      PDV)
 
 @test size(D) == (n, p)
 @test rank(D) == min(n, p)
