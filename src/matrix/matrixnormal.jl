@@ -18,9 +18,9 @@ c0   = (2pi) ^ {-np / 2} |V| ^ {-n / 2} |U| ^ {-p / 2}
 https://en.wikipedia.org/wiki/Matrix_normal_distribution
 
 """
-struct MatrixNormal{T <: Real, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
-    M::AbstractMatrix{T}
+    M::TM
     U::ST
     V::ST
 
@@ -32,7 +32,7 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function MatrixNormal(M::Matrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
+function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
 
     n = size(M, 1)
     p = size(M, 2)
@@ -51,7 +51,7 @@ function MatrixNormal(M::Matrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) wh
     prom_U = convert(AbstractArray{R}, U)
     prom_V = convert(AbstractArray{R}, V)
 
-    MatrixNormal{R, typeof(prom_U)}(prom_M, prom_U, prom_V, R(c₀))
+    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(c₀))
 
 end
 
@@ -86,14 +86,14 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T<:Real
     MM = AbstractMatrix{T}(d.M)
     UU = AbstractMatrix{T}(d.U)
     VV = AbstractMatrix{T}(d.V)
-    MatrixNormal{T, typeof(UU)}(MM, UU, VV, T(d.c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.c0))
 end
 
 function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, c0) where T<:Real
     MM = AbstractMatrix{T}(M)
     UU = AbstractMatrix{T}(U)
     VV = AbstractMatrix{T}(V)
-    MatrixNormal{T, typeof(UU)}(MM, UU, VV, T(c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(c0))
 end
 
 #  -----------------------------------------------------------------------------
