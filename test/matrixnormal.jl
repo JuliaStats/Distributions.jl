@@ -49,75 +49,93 @@ x = vec(X)
 y = vec(Y)
 z = Z[1, 1]
 
-#  Call every constructor to catch errors
+@testset "Check all MatrixNormal constructors" begin
+    @test MatrixNormal(M, U,        PDV.chol) isa MatrixNormal
+    @test MatrixNormal(M, U,        PDV)      isa MatrixNormal
+    @test MatrixNormal(M, PDU.chol, V)        isa MatrixNormal
+    @test MatrixNormal(M, PDU.chol, PDV.chol) isa MatrixNormal
+    @test MatrixNormal(M, PDU.chol, PDV)      isa MatrixNormal
+    @test MatrixNormal(M, PDU,      V)        isa MatrixNormal
+    @test MatrixNormal(M, PDU,      PDV.chol) isa MatrixNormal
+    @test MatrixNormal(M, PDU,      PDV)      isa MatrixNormal
+end
 
-MatrixNormal(M, U,        PDV.chol)
-MatrixNormal(M, U,        PDV)
-MatrixNormal(M, PDU.chol, V)
-MatrixNormal(M, PDU.chol, PDV.chol)
-MatrixNormal(M, PDU.chol, PDV)
-MatrixNormal(M, PDU,      V)
-MatrixNormal(M, PDU,      PDV.chol)
-MatrixNormal(M, PDU,      PDV)
+@testset "MatrixNormal promotion during construction" begin
+    R = MatrixNormal(M, UF32, VBF)
+    @test partype(R) == BigFloat
+end
 
-R = MatrixNormal(M, UF32, VBF)
-@test partype(R) == BigFloat
+@testset "MatrixNormal construction errors" begin
+    @test_throws ErrorException MatrixNormal(M, V, U)
+    @test_throws ErrorException MatrixNormal(M, U, U)
+end
 
-@test_throws ErrorException MatrixNormal(M, V, U)
-@test_throws ErrorException MatrixNormal(M, U, U)
+@testset "MatrixNormal params" begin
+    MM, PDUU, PDVV = params(D)
+    @test MM == M
+    @test U == PDUU.mat
+    @test V == PDVV.mat
+end
 
-MM, PDUU, PDVV = params(D)
-@test MM == M
-@test U == PDUU.mat
-@test V == PDVV.mat
+@testset "MatrixNormal size" begin
+    @test size(D) == (n, p)
+    @test size(G) == (p, n)
+    @test size(L) == (n, 1)
+    @test size(H) == (1, p)
+    @test size(K) == (1, 1)
+end
 
-@test size(D) == (n, p)
-@test size(G) == (p, n)
-@test size(L) == (n, 1)
-@test size(H) == (1, p)
-@test size(K) == (1, 1)
+@testset "MatrixNormal rank" begin
+    @test rank(D) == min(n, p)
+    @test rank(G) == min(n, p)
+    @test rank(L) == 1
+    @test rank(H) == 1
+    @test rank(K) == 1
+end
 
-@test rank(D) == min(n, p)
-@test rank(G) == min(n, p)
-@test rank(L) == 1
-@test rank(H) == 1
-@test rank(K) == 1
+@testset "MatrixNormal insupport" begin
+    @test insupport(D, rand(D))
+    @test insupport(G, rand(G))
+    @test insupport(L, rand(L))
+    @test insupport(H, rand(H))
+    @test insupport(K, rand(K))
 
-@test insupport(D, rand(D))
-@test insupport(G, rand(G))
-@test insupport(L, rand(L))
-@test insupport(H, rand(H))
-@test insupport(K, rand(K))
+    @test !insupport(D, rand(G))
+    @test !insupport(D, M + M * im)
+    @test !insupport(L, rand(H))
+    @test !insupport(H, rand(L))
+end
 
-@test !insupport(D, rand(G))
-@test !insupport(D, M + M * im)
-@test !insupport(L, rand(H))
-@test !insupport(H, rand(L))
+@testset "MatrixNormal mean" begin
+    @test mean(D) == M
+    @test mean(G) == zeros(p, n)
+    @test mean(L) == reshape(m, n, 1)
+    @test mean(H) == reshape(w, 1, p)
+    @test mean(K) == reshape([μ], 1, 1)
+end
 
-@test mean(D) == M
-@test mean(G) == zeros(p, n)
-@test mean(L) == reshape(m, n, 1)
-@test mean(H) == reshape(w, 1, p)
-@test mean(K) == reshape([μ], 1, 1)
+@testset "MatrixNormal mode" begin
+    @test mode(D) == M
+    @test mode(G) == zeros(p, n)
+    @test mode(L) == reshape(m, n, 1)
+    @test mode(H) == reshape(w, 1, p)
+    @test mode(K) == reshape([μ], 1, 1)
+end
 
-@test mode(D) == M
-@test mode(G) == zeros(p, n)
-@test mode(L) == reshape(m, n, 1)
-@test mode(H) == reshape(w, 1, p)
-@test mode(K) == reshape([μ], 1, 1)
+@testset "MatrixNormal logpdf" begin
+    @test logpdf(D, A) ≈ logpdf(d, a)
+    @test logpdf(G, B) ≈ logpdf(g, b)
+    @test logpdf(L, X) ≈ logpdf(l, x)
+    @test logpdf(H, Y) ≈ logpdf(h, y)
+    @test logpdf(K, Z) ≈ logpdf(k, z)
+end
 
-@test logpdf(D, A) ≈ logpdf(d, a)
-@test logpdf(G, B) ≈ logpdf(g, b)
-@test logpdf(L, X) ≈ logpdf(l, x)
-@test logpdf(H, Y) ≈ logpdf(h, y)
-@test logpdf(K, Z) ≈ logpdf(k, z)
+@testset "MatrixNormal sample moments" begin
+    @test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
+    @test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), kron(V, U) , atol = 0.1)
+end
 
-@test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
-@test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), kron(V, U) , atol = 0.1)
-
-#  test conversion
-
-for elty in (Float32, Float64, BigFloat)
+@testset "MatrixNormal conversion" for elty in (Float32, Float64, BigFloat)
 
     Del1 = convert(MatrixNormal{elty}, D)
     Del2 = convert(MatrixNormal{elty}, M, PDU, PDV, D.c0)
