@@ -20,6 +20,7 @@ Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 ```@docs
 Wishart
 InverseWishart
+MatrixNormal
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
