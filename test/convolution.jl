@@ -136,4 +136,91 @@ end
 end
 
 @testset "continuous multivariate" begin
+
+    @testset "iso-normal" begin
+
+        in1 = MvNormal([1.2, 0.3], 2)
+        in2 = MvNormal([-2.0, 6.9], 0.5)
+
+        zm1 = MvNormal(2, 1.9)
+        zm2 = MvNormal(2, 5.2)
+
+        for (d1, d2) in ((in1, in2), (zm1, zm2), (in1, zm1))
+            d3 = convolve(d1, d2)
+            expected_Σ = dot(d1.Σ.value + d2.Σ.value, d1.Σ.value + d2.Σ.value)
+
+            @test isa(d3, IsoNormal)
+            @test d3.μ == d1.μ .+ d2.μ
+            @test d3.Σ == ScalMat(2, expected_Σ)
+        end
+
+        # erroring
+        in3 = MvNormal([1, 2, 3], 0.2)
+        @test_throws ArgumentError convolve(in1, in3)
+    end
+
+    @testset "diag-normal" begin
+
+        dn1 = MvNormal([0.0, 4.7], [0.1, 1.8])
+        dn2 = MvNormal([-3.4, 1.2], [3.2, 0.2])
+
+        zm1 = MvNormal([1.2, 0.3])
+        zm2 = MvNormal([-0.8, 1.0])
+
+
+        for (d1, d2) in ((dn1, dn2), (zm1, zm2), (dn1, zm1))
+            d3 = convolve(d1, d2)
+            expected_Σ = dot.(d1.Σ.diag + d2.Σ.diag, d1.Σ.diag + d2.Σ.diag)
+
+            @test isa(d3, DiagNormal)
+            @test d3.μ == d1.μ .+ d2.μ
+            @test d3.Σ.diag == expected_Σ  # == not defined for PDiagMat
+        end
+
+        # erroring
+        dn3 =  MvNormal([1, 2, 3], [4.2, 5.3, 2.1])
+        @test_throws ArgumentError convolve(dn1, dn3)
+    end
+
+    @testset "full-normal" begin
+
+        L1 = [1 0; 2 1]
+        fn1 = MvNormal(ones(2), cov(L1 * L1'))
+        L2 = [1.2 0; 3.4 6.6]
+        fn2 = MvNormal([2.1, 0.4], cov(L2 * L2'))
+        L3 = [2.1 0; 0.3 1.2]
+        zm1 = MvNormal(cov(L3 * L3'))
+        L4 = [4.1 0; 1.7 6.4]
+        zm2 = MvNormal(cov(L4 * L4'))
+
+        for (d1, d2) in ((fn1, fn2), (zm1, zm2), (fn1, zm1))
+            d3 = convolve(d1, d2)
+            expected_Σ = d1.Σ.mat + d2.Σ.mat
+
+            @test isa(d3, FullNormal)
+            @test d3.μ == d1.μ .+ d2.μ
+            @test d3.Σ.mat == expected_Σ  # == not defined for PDMat
+        end
+
+        # erroring
+        L5 = [4.1 0 0; 1.7 6.4 0; 2.1 8.5 0]
+        fn3 =  MvNormal(zeros(3), cov(L5 * L5'))
+        @test_throws ArgumentError convolve(fn1, fn3)
+    end
+
+    @testset "mixed" begin
+        iso = MvNormal([1.2, 0.3], 2)
+        diag = MvNormal([0.0, 4.7], [0.1, 1.8])
+        L1 = [1 0; 2 1]
+        full = MvNormal(ones(2), cov(L1 * L1'))
+
+        for (d1, d2) in ((iso, diag), (diag, full), (full, iso))
+            d3 = convolve(d1, d2)
+            expected_Σ = Matrix(d1.Σ) + Matrix(d2.Σ)
+
+            @test isa(d3, MvNormal)
+            @test d3.μ == d1.μ .+ d2.μ
+            @test d3.Σ.mat == expected_Σ  # == not defined for PDMat
+        end
+    end
 end

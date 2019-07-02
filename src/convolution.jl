@@ -61,25 +61,34 @@ function convolve(d1::Gamma, d2::Gamma)
 end
 
 # continuous multivariate
-# convolve(d1::T, d2::T) where T<:Union{IsoNormal, ZeroMeanIsoNormal}
-#     _check_convolution_shape(d1, d2)
-#     return MvNormal(d1.μ + d2.μ, d1.Σ.value + d2.Σ.value)
-# end
-#
-# convolve(d1::T, d2::T) where T<:Union{DiagNormal, ZeroMeanDiagNormal}
-#     _check_convolution_shape(d1, d2)
-#     return MvNormal(d1.μ + d2.μ, d1.Σ.diag + d2.Σ.diag)
-# end
-#
-# convolve(d1::T, d2::T) where T<:Union{FullNormal, ZeroMeanFullNormal}
-#     _check_convolution_shape(d1, d2)
-#     return MvNormal(d1.μ + d2.μ, d1.Σ.mat + d2.Σ.mat)
-# end
-#
-# convolve(d1::MvNormal, d2::MvNormal)
-#     _check_convolution_shape(d1, d2)
-#     return MvNormal(d1.μ + d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ.mat))
-# end
+function convolve(
+    d1::Union{IsoNormal, ZeroMeanIsoNormal},
+    d2::Union{IsoNormal, ZeroMeanIsoNormal},
+    )
+    _check_convolution_shape(d1, d2)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.value + d2.Σ.value)
+end
+
+function convolve(
+    d1::Union{DiagNormal, ZeroMeanDiagNormal},
+    d2::Union{DiagNormal, ZeroMeanDiagNormal},
+    )
+    _check_convolution_shape(d1, d2)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.diag + d2.Σ.diag)
+end
+
+function convolve(
+    d1::Union{FullNormal, ZeroMeanFullNormal},
+    d2::Union{FullNormal, ZeroMeanFullNormal},
+    )
+    _check_convolution_shape(d1, d2)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
+end
+
+function convolve(d1::MvNormal, d2::MvNormal)
+    _check_convolution_shape(d1, d2)
+    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ))
+end
 
 
 function _check_convolution_args(p1, p2)
