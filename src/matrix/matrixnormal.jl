@@ -1,7 +1,7 @@
 """
     MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
-Matrix Normal Distribution
+[Matrix Normal Distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution)
 
 `X ~ MN(M, U, V)`
 
@@ -14,8 +14,6 @@ V: p x p positive definite
 f(X) = c0 * exp( -0.5 tr[inv(V) (X - M)' inv(U) (X - M)] )
 
 c0   = (2pi) ^ {-np / 2} |V| ^ {-n / 2} |U| ^ {-p / 2}
-
-[wiki](https://en.wikipedia.org/wiki/Matrix_normal_distribution)
 
 """
 struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
