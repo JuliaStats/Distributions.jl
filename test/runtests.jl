@@ -31,6 +31,7 @@ const tests = [
     "matrix",
     "vonmisesfisher",
     "conversion",
+    "convolution",
     "mixture",
     "gradlogpdf",
     "noncentralt",
