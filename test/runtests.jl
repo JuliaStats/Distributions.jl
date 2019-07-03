@@ -4,6 +4,7 @@ using Test
 using Distributed
 using Random
 using StatsBase
+using LinearAlgebra
 
 const tests = [
     "truncate",

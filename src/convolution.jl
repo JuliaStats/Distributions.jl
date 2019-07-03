@@ -7,19 +7,18 @@ sum of independent random variables drawn from the underlying distributions.
 The function is only defined in the cases where the convolution has a closed form as
 defined here https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions
 
-* Bernoulli
-* Binomial
-* Negative Binomial
-* Geometric
-* Poisson
-* Normal
-* Cauchy
-* Chisq
-* Exponential
-* Gamma
-* Multi-variate Normal
+* `Bernoulli`
+* `Binomial`
+* `NegativeBinomial`
+* `Geometric`
+* `Poisson`
+* `Normal`
+* `Cauchy`
+* `Chisq`
+* `Exponential`
+* `Gamma`
+* `MultivariateNormal`
 """
-#convolve(d1, d2) = throw(ArgumentError("`convolve` is not defined for $(typeof(d1)) and $(typeof(d2))"))
 
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
@@ -47,7 +46,7 @@ convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
 
 # continuous univariate
 convolve(d1::Normal, d2::Normal) = Normal(d1.μ + d2.μ, hypot(d1.σ, d2.σ))
-convolve(d1::Cauchy{T}, d2::Cauchy{T}) where T = Cauchy(d1.μ + d2.μ, d1.σ + d2.σ)
+convolve(d1::Cauchy, d2::Cauchy) = Cauchy(d1.μ + d2.μ, d1.σ + d2.σ)
 convolve(d1::Chisq, d2::Chisq) = Chisq(d1.ν + d2.ν)
 
 function convolve(d1::Exponential, d2::Exponential)
@@ -62,19 +61,11 @@ end
 
 # continuous multivariate
 function convolve(
-    d1::Union{IsoNormal, ZeroMeanIsoNormal},
-    d2::Union{IsoNormal, ZeroMeanIsoNormal},
+    d1::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
+    d2::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
     )
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.value + d2.Σ.value)
-end
-
-function convolve(
-    d1::Union{DiagNormal, ZeroMeanDiagNormal},
-    d2::Union{DiagNormal, ZeroMeanDiagNormal},
-    )
-    _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.diag + d2.Σ.diag)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ + d2.Σ)
 end
 
 function convolve(
@@ -82,17 +73,17 @@ function convolve(
     d2::Union{FullNormal, ZeroMeanFullNormal},
     )
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat + 1e-12 * I)  # ensures positive definite
 end
 
 function convolve(d1::MvNormal, d2::MvNormal)
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ))
+    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ) + 1e-12 * I)
 end
 
 
 function _check_convolution_args(p1, p2)
-    p1 == p2 || throw(ArgumentError("$(p1)!=$(p2): distribution parameters must be equal"))
+    p1 == p2 || throw(ArgumentError("$(p1) != $(p2): distribution parameters must be equal"))
 end
 
 function _check_convolution_shape(d1, d2)
