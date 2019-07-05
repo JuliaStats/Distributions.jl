@@ -60,6 +60,8 @@ function convolve(d1::Gamma, d2::Gamma)
 end
 
 # continuous multivariate
+# The first two methods exist for performance reasons to avoid unnecessarily converting
+# PDMats to a Matrix
 function convolve(
     d1::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
     d2::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
@@ -73,7 +75,9 @@ function convolve(
     d2::Union{FullNormal, ZeroMeanFullNormal},
     )
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat + 1e-12 * I)  # ensures positive definite
+    # + ϵI protects against numerical instability in the cholesky method and ensures
+    # positive definite-ness
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat + 1e-12 * I)
 end
 
 function convolve(d1::MvNormal, d2::MvNormal)
