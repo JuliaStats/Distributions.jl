@@ -16,6 +16,14 @@ The length (*i.e* number of elements) of each sample from the distribution `d`.
 Base.length(d::MatrixDistribution)
 
 """
+    vec(d::MatrixDistribution)
+
+If known, returns a `MultivariateDistribution` instance representing the
+distribution of vec(X), where X is a random matrix with distribution `d`.
+"""
+Base.vec(d::MatrixDistribution)
+
+"""
     mean(d::MatrixDistribution)
 
 Return the mean matrix of `d`.

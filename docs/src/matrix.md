@@ -13,6 +13,7 @@ mean(::MatrixDistribution)
 pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
+vec(d::MatrixDistribution)
 ```
 
 ## Distributions
