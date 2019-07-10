@@ -1,6 +1,12 @@
 """
-    MatrixTDist(ν, M, Σ, Ω)
+```julia
+MatrixTDist(ν, M, Σ, Ω)
 
+ν:  positive Real
+M:  n x p matrix
+Σ:  n x n positive definite matrix
+Ω:  p x p positive definite matrix
+```
 The [Matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
 generalizes the Multivariate *t*-Distribution from vectors to matrices. An
 ``n\\times p`` matrix ``\\mathbf{X}`` with the matrix *t*-distribution has density
