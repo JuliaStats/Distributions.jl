@@ -13,6 +13,7 @@ mean(::MatrixDistribution)
 pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
+vec(d::MatrixDistribution)
 ```
 
 ## Distributions
@@ -20,6 +21,7 @@ Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 ```@docs
 Wishart
 InverseWishart
+MatrixNormal
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
