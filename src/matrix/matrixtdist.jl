@@ -138,13 +138,13 @@ function _matrixtdist_c0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     n = dim(Σ)
     p = dim(Ω)
 
-    term₁ = logmvgamma(p, (ν + n + p - 1) / 2)
-    term₂ = - (n * p / 2) * logπ
-    term₃ = - logmvgamma(p, (ν + p - 1) / 2)
-    term₄ = (-n / 2) * logdet(Ω)
-    term₅ = (-p / 2) * logdet(Σ)
+    term1 = logmvgamma(p, (ν + n + p - 1) / 2)
+    term2 = - (n * p / 2) * logπ
+    term3 = - logmvgamma(p, (ν + p - 1) / 2)
+    term4 = (-n / 2) * logdet(Ω)
+    term5 = (-p / 2) * logdet(Σ)
 
-    term₁ + term₂ + term₃ + term₄ + term₅
+    term1 + term2 + term3 + term4 + term5
 
 end
 
