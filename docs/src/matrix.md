@@ -22,6 +22,7 @@ vec(d::MatrixDistribution)
 Wishart
 InverseWishart
 MatrixNormal
+MatrixT
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
