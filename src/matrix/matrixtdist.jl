@@ -151,12 +151,10 @@ end
 
 function logkernel(d::MatrixTDist, X::AbstractMatrix)
 
-    A  = (X - d.M)
-    At = Matrix(A')
-
     n, p = size(d)
+    A = X - d.M
 
-    (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ At) )
+    (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ A') )
 
 end
 
