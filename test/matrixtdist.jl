@@ -128,7 +128,7 @@ end
 
 @testset "MatrixTDist conversion" for elty in (Float32, Float64, BigFloat)
     Del1 = convert(MatrixTDist{elty}, D)
-    Del2 = convert(MatrixTDist{elty}, v, M, PDΣ, PDΩ, D.c0)
+    Del2 = convert(MatrixTDist{elty}, v, M, PDΣ, PDΩ, D.logc0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty

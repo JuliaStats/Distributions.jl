@@ -38,7 +38,7 @@ struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: Cont
     Σ::ST
     Ω::ST
 
-    c0::T
+    logc0::T
 
 end
 
@@ -54,13 +54,13 @@ function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abst
     n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
     p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
 
-    c0 = _matrixtdist_c0(Σ, Ω, ν)
-    R = Base.promote_eltype(T, c0)
+    logc0 = _matrixtdist_logc0(Σ, Ω, ν)
+    R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
 
-    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(c0))
+    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(logc0))
 
 end
 
@@ -95,14 +95,14 @@ function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     ΣΣ = convert(AbstractArray{T}, d.Σ)
     ΩΩ = convert(AbstractArray{T}, d.Ω)
-    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.c0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
 
-function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, c0) where T <: Real
+function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     ΣΣ = convert(AbstractArray{T}, Σ)
     ΩΩ = convert(AbstractArray{T}, Ω)
-    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(ν), MM, ΣΣ, ΩΩ, T(c0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(ν), MM, ΣΣ, ΩΩ, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -133,7 +133,7 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function _matrixtdist_c0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
+function _matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     #  returns the natural log of the normalizing constant for the pdf
 
     n = dim(Σ)
@@ -160,7 +160,7 @@ function logkernel(d::MatrixTDist, X::AbstractMatrix)
 
 end
 
-_logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.c0
+_logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 
 #  -----------------------------------------------------------------------------
 #  Sampling
