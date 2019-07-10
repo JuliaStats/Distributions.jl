@@ -19,8 +19,10 @@ The matrix *t*-distribution arises as the marginal distribution of ``\\mathbf{X}
 from ``p(\\mathbf{S},\\mathbf{X})=p(\\mathbf{S})p(\\mathbf{X}|\\mathbf{S})``, where
 
 ```math
-\\mathbf{S}\\sim IW(\\nu + n - 1, \\boldsymbol{\\Sigma})
-\\mathbf{X}|\\mathbf{S}\\sim MN(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega})
+\\begin{align*}
+\\mathbf{S}&\\sim IW(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
+\\mathbf{X}|\\mathbf{S}&\\sim MN(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega})
+\\end{align*}
 ```
 """
 struct MatrixT{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
