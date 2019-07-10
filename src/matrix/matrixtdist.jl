@@ -134,6 +134,7 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 #  -----------------------------------------------------------------------------
 
 function _matrixtdist_c0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
+    #  returns the natural log of the normalizing constant for the pdf
 
     n = dim(Σ)
     p = dim(Ω)
@@ -179,6 +180,9 @@ end
 
 #  -----------------------------------------------------------------------------
 #  Relationship with Multivariate t
+#  -----------------------------------------------------------------------------
+#  if a t-distributed random matrix is in fact just a row or column,
+#  it is equivalent to a t-distributed random vector.
 #  -----------------------------------------------------------------------------
 
 function MvTDist(MT::MatrixTDist)
