@@ -50,20 +50,17 @@ function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abst
 
     n, p = size(M)
 
-    n₀ = dim(Σ)
-    p₀ = dim(Ω)
+    ν > 0       || throw(ArgumentError("degrees of freedom must be positive."))
+    n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
+    p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
 
-    ν > 0   || throw(ArgumentError("degrees of freedom must be positive."))
-    n == n₀ || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
-    p == p₀ || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
-
-    c₀ = _matrixt_c₀(Σ, Ω, ν)
-    R = Base.promote_eltype(T, c₀)
+    c0 = _matrixtdist_c0(Σ, Ω, ν)
+    R = Base.promote_eltype(T, c0)
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
 
-    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(c₀))
+    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(c0))
 
 end
 
@@ -136,7 +133,7 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function _matrixt_c₀(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
+function _matrixtdist_c0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
 
     n = dim(Σ)
     p = dim(Ω)
