@@ -30,7 +30,7 @@ const tests = [
     "edgeworth",
     "wisharts",
     "matrixnormal",
-    "matrixt",
+    "matrixtdist",
     "vonmisesfisher",
     "conversion",
     "mixture",

@@ -22,10 +22,10 @@ PDΩ  = PDMat(Ω)
 
 #  distribution instances
 
-D = MatrixT(v, M, Σ, Ω)                                   #  n x p
-L = MatrixT(v, reshape(μ, n, 1), Σ, reshape([σ²], 1, 1))  #  n x 1
-H = MatrixT(v, reshape(θ, 1, p), reshape([σ²], 1, 1), Ω)  #  1 x p
-K = MatrixT(1000, M, 1000Σ, Ω)
+D = MatrixTDist(v, M, Σ, Ω)                                   #  n x p
+L = MatrixTDist(v, reshape(μ, n, 1), Σ, reshape([σ²], 1, 1))  #  n x 1
+H = MatrixTDist(v, reshape(θ, 1, p), reshape([σ²], 1, 1), Ω)  #  1 x p
+K = MatrixTDist(1000, M, 1000Σ, Ω)
 
 l  = MvTDist(L)
 h  = MvTDist(H)
@@ -41,30 +41,30 @@ Y = rand(H)
 x = vec(X)
 y = vec(Y)
 
-@testset "Check all MatrixT constructors" begin
-    @test MatrixT(v, M, Σ,        PDΩ.chol) isa MatrixT
-    @test MatrixT(v, M, Σ,        PDΩ)      isa MatrixT
-    @test MatrixT(v, M, PDΣ.chol, Ω)        isa MatrixT
-    @test MatrixT(v, M, PDΣ.chol, PDΩ.chol) isa MatrixT
-    @test MatrixT(v, M, PDΣ.chol, PDΩ)      isa MatrixT
-    @test MatrixT(v, M, PDΣ,      Ω)        isa MatrixT
-    @test MatrixT(v, M, PDΣ,      PDΩ.chol) isa MatrixT
-    @test MatrixT(v, M, PDΣ,      PDΩ)      isa MatrixT
+@testset "Check all MatrixTDist constructors" begin
+    @test MatrixTDist(v, M, Σ,        PDΩ.chol) isa MatrixTDist
+    @test MatrixTDist(v, M, Σ,        PDΩ)      isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ.chol, Ω)        isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ.chol, PDΩ.chol) isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ.chol, PDΩ)      isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ,      Ω)        isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ,      PDΩ.chol) isa MatrixTDist
+    @test MatrixTDist(v, M, PDΣ,      PDΩ)      isa MatrixTDist
 end
 
-@testset "MatrixT promotion during construction" begin
-    R = MatrixT(v, M, ΣF32, ΩBF)
+@testset "MatrixTDist promotion during construction" begin
+    R = MatrixTDist(v, M, ΣF32, ΩBF)
     @test partype(R) == BigFloat
 end
 
-@testset "MatrixT construction errors" begin
-    @test_throws ArgumentError MatrixT(-1, M, Σ, Ω)
-    @test_throws ArgumentError MatrixT(v, M, Ω, Σ)
-    @test_throws ArgumentError MatrixT(v, M, Ω, Ω)
-    @test_throws ArgumentError MatrixT(v, M, Σ, Σ)
+@testset "MatrixTDist construction errors" begin
+    @test_throws ArgumentError MatrixTDist(-1, M, Σ, Ω)
+    @test_throws ArgumentError MatrixTDist(v, M, Ω, Σ)
+    @test_throws ArgumentError MatrixTDist(v, M, Ω, Ω)
+    @test_throws ArgumentError MatrixTDist(v, M, Σ, Σ)
 end
 
-@testset "MatrixT params" begin
+@testset "MatrixTDist params" begin
     vv, MM, PDΣΣ, PDΩΩ = params(D)
     @test v == vv
     @test M == MM
@@ -72,13 +72,13 @@ end
     @test Ω == PDΩΩ.mat
 end
 
-@testset "MatrixT size" begin
+@testset "MatrixTDist size" begin
     @test size(D) == (n, p)
     @test size(L) == (n, 1)
     @test size(H) == (1, p)
 end
 
-@testset "MatrixT rank" begin
+@testset "MatrixTDist rank" begin
     @test rank(D) == min(n, p)
     @test rank(L) == 1
     @test rank(H) == 1
@@ -87,7 +87,7 @@ end
     @test rank(H) == rank(rand(H))
 end
 
-@testset "MatrixT insupport" begin
+@testset "MatrixTDist insupport" begin
     @test insupport(D, rand(D))
     @test insupport(L, rand(L))
     @test insupport(H, rand(H))
@@ -98,21 +98,21 @@ end
     @test !insupport(H, rand(L))
 end
 
-@testset "MatrixT mean" begin
+@testset "MatrixTDist mean" begin
     @test mean(D) == M
     @test mean(L) == reshape(μ, n, 1)
     @test mean(H) == reshape(θ, 1, p)
 
-    @test_throws ArgumentError mean( MatrixT(1, M, Σ, Ω) )
+    @test_throws ArgumentError mean( MatrixTDist(1, M, Σ, Ω) )
 end
 
-@testset "MatrixT mode" begin
+@testset "MatrixTDist mode" begin
     @test mode(D) == M
     @test mode(L) == reshape(μ, n, 1)
     @test mode(H) == reshape(θ, 1, p)
 end
 
-@testset "MatrixT logpdf" begin
+@testset "MatrixTDist logpdf" begin
     #  Check against MvTDist
     @test logpdf(L, X) ≈ logpdf(l, x)
     @test logpdf(H, Y) ≈ logpdf(h, y)
@@ -121,14 +121,14 @@ end
     @test isapprox(logpdf(K, A), logpdf(MN, A), atol = 0.1)
 end
 
-@testset "MatrixT sample moments" begin
+@testset "MatrixTDist sample moments" begin
     @test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
     @test isapprox(cov(hcat(vec.(transpose.(rand(D, 100000)))...)'), kron(Σ, Ω) ./ (v - 2), atol = 0.1)
 end
 
-@testset "MatrixT conversion" for elty in (Float32, Float64, BigFloat)
-    Del1 = convert(MatrixT{elty}, D)
-    Del2 = convert(MatrixT{elty}, v, M, PDΣ, PDΩ, D.c0)
+@testset "MatrixTDist conversion" for elty in (Float32, Float64, BigFloat)
+    Del1 = convert(MatrixTDist{elty}, D)
+    Del2 = convert(MatrixTDist{elty}, v, M, PDΣ, PDΩ, D.c0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty

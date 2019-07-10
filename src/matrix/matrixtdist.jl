@@ -1,5 +1,5 @@
 """
-    MatrixT(ν, M, Σ, Ω)
+    MatrixTDist(ν, M, Σ, Ω)
 
 The [Matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
 generalizes the Multivariate *t*-Distribution from vectors to matrices. An
@@ -25,7 +25,7 @@ from ``p(\\mathbf{S},\\mathbf{X})=p(\\mathbf{S})p(\\mathbf{X}|\\mathbf{S})``, wh
 \\end{align*}
 ```
 """
-struct MatrixT{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
     ν::T
     M::TM
@@ -40,7 +40,7 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function MatrixT(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}) where T <: Real
+function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}) where T <: Real
 
     n, p = size(M)
 
@@ -57,62 +57,62 @@ function MatrixT(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abstract
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
 
-    MatrixT{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(c₀))
+    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(c₀))
 
 end
 
-function MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat)
+function MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat)
 
     T = Base.promote_eltype(ν, M, Σ, Ω)
 
-    MatrixT(convert(T, ν), convert(AbstractArray{T}, M), convert(AbstractArray{T}, Σ), convert(AbstractArray{T}, Ω))
+    MatrixTDist(convert(T, ν), convert(AbstractArray{T}, M), convert(AbstractArray{T}, Σ), convert(AbstractArray{T}, Ω))
 
 end
 
-MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractMatrix)         = MatrixT(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractPDMat)          = MatrixT(ν, M, PDMat(Σ), Ω)
-MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::LinearAlgebra.Cholesky) = MatrixT(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixT(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractMatrix)         = MatrixT(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixT(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractPDMat)          = MatrixT(ν, M, PDMat(Σ), Ω)
-MatrixT(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::LinearAlgebra.Cholesky) = MatrixT(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::AbstractMatrix)         = MatrixT(ν, M, Σ,        PDMat(Ω))
-MatrixT(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::LinearAlgebra.Cholesky) = MatrixT(ν, M, Σ,        PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractMatrix)         = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractPDMat)          = MatrixTDist(ν, M, PDMat(Σ), Ω)
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractMatrix)         = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractPDMat)          = MatrixTDist(ν, M, PDMat(Σ), Ω)
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::AbstractMatrix)         = MatrixTDist(ν, M, Σ,        PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, Σ,        PDMat(Ω))
 
 #  -----------------------------------------------------------------------------
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixT) = show_multline(io, d, [(:ν, d.ν), (:M, d.M), (:Σ, Matrix(d.Σ)), (:Ω, Matrix(d.Ω))])
+ show(io::IO, d::MatrixTDist) = show_multline(io, d, [(:ν, d.ν), (:M, d.M), (:Σ, Matrix(d.Σ)), (:Ω, Matrix(d.Ω))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixT{T}}, d::MatrixT) where T <: Real
+function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     ΣΣ = convert(AbstractArray{T}, d.Σ)
     ΩΩ = convert(AbstractArray{T}, d.Ω)
-    MatrixT{T, typeof(MM), typeof(ΣΣ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.c0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.c0))
 end
 
-function convert(::Type{MatrixT{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, c0) where T <: Real
+function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, c0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     ΣΣ = convert(AbstractArray{T}, Σ)
     ΩΩ = convert(AbstractArray{T}, Ω)
-    MatrixT{T, typeof(MM), typeof(ΣΣ)}(T(ν), MM, ΣΣ, ΩΩ, T(c0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(ν), MM, ΣΣ, ΩΩ, T(c0))
 end
 
 #  -----------------------------------------------------------------------------
 #  Properties
 #  -----------------------------------------------------------------------------
 
-size(d::MatrixT) = size(d.M)
+size(d::MatrixTDist) = size(d.M)
 
-rank(d::MatrixT) = minimum( size(d) )
+rank(d::MatrixTDist) = minimum( size(d) )
 
-insupport(d::MatrixT, X::Matrix) = isreal(X) && size(X) == size(d)
+insupport(d::MatrixTDist, X::Matrix) = isreal(X) && size(X) == size(d)
 
-function mean(d::MatrixT)
+function mean(d::MatrixTDist)
 
   n, p = size(d)
 
@@ -120,11 +120,11 @@ function mean(d::MatrixT)
 
 end
 
-mode(d::MatrixT) = d.M
+mode(d::MatrixTDist) = d.M
 
-params(d::MatrixT) = (d.ν, d.M, d.Σ, d.Ω)
+params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
-@inline partype(d::MatrixT{T}) where {T <: Real} = T
+@inline partype(d::MatrixTDist{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
@@ -145,7 +145,7 @@ function _matrixt_c₀(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
 
 end
 
-function logkernel(d::MatrixT, X::AbstractMatrix)
+function logkernel(d::MatrixTDist, X::AbstractMatrix)
 
     A  = (X - d.M)
     At = Matrix(A')
@@ -156,7 +156,7 @@ function logkernel(d::MatrixT, X::AbstractMatrix)
 
 end
 
-_logpdf(d::MatrixT, X::AbstractMatrix) = logkernel(d, X) + d.c0
+_logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.c0
 
 #  -----------------------------------------------------------------------------
 #  Sampling
@@ -164,7 +164,7 @@ _logpdf(d::MatrixT, X::AbstractMatrix) = logkernel(d, X) + d.c0
 
 #  Theorem 4.2.1 in Gupta and Nagar (1999)
 
-function _rand!(rng::AbstractRNG, d::MatrixT, A::AbstractMatrix)
+function _rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix)
 
     n, p = size(d)
 
@@ -178,11 +178,11 @@ end
 #  Relationship with Multivariate t
 #  -----------------------------------------------------------------------------
 
-function MvTDist(MT::MatrixT)
+function MvTDist(MT::MatrixTDist)
 
     n, p = size(MT)
 
-    all([n, p] .> 1) && error("Row or col dim of `MatrixT` must be 1 to coerce to `MvTDist`")
+    all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
 
     ν, M, Σ, Ω = params(MT)
 
