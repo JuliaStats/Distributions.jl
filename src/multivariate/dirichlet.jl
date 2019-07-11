@@ -57,6 +57,7 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
+eltype(::Dirichlet{T}) where {T} = T
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} =

@@ -85,7 +85,7 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractP
     if typeof(μ) == typeof(h)
         return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
     else
-        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J) 
+        return MvNormalCanon{T,typeof(J),Vector{T}}(collect(μ), collect(h), J)
     end
 end
 
@@ -156,6 +156,7 @@ length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
+eltype(::MvNormalCanon{T}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = Matrix(inv(d.J))

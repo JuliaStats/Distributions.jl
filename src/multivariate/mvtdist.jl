@@ -32,7 +32,10 @@ end
 
 GenericMvTDist(df::Real, μ::Vector{S}, Σ::Cov) where {Cov<:AbstractPDMat, S<:Real} = GenericMvTDist(df, μ, Σ, allzeros(μ))
 
-GenericMvTDist(df::T, Σ::Cov) where {Cov<:AbstractPDMat, T<:Real} = GenericMvTDist(df, zeros(dim(Σ)), Σ, true)
+function GenericMvTDist(df::T, Σ::Cov) where {Cov<:AbstractPDMat, T<:Real}
+    R = Base.promote_eltype(T, Σ)
+    GenericMvTDist(df, zeros(R,dim(Σ)), Σ, true)
+end
 
 ### Conversion
 function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
@@ -50,19 +53,19 @@ const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}}
 const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
 const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
 
-MvTDist(df::Real, μ::Vector{Float64}, C::PDMat) = GenericMvTDist(df, μ, C)
+MvTDist(df::Real, μ::Vector{<:Real}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
-MvTDist(df::Real, μ::Vector{Float64}, Σ::Matrix{Float64}) = GenericMvTDist(df, μ, PDMat(Σ))
-MvTDist(df::Float64, Σ::Matrix{Float64}) = GenericMvTDist(df, PDMat(Σ))
+MvTDist(df::Real, μ::Vector{<:Real}, Σ::Matrix{<:Real}) = GenericMvTDist(df, μ, PDMat(Σ))
+MvTDist(df::Real, Σ::Matrix{<:Real}) = GenericMvTDist(df, PDMat(Σ))
 
-DiagTDist(df::Float64, μ::Vector{Float64}, C::PDiagMat) = GenericMvTDist(df, μ, C)
-DiagTDist(df::Float64, C::PDiagMat) = GenericMvTDist(df, C)
-DiagTDist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
+DiagTDist(df::Real, μ::Vector{<:Real}, C::PDiagMat) = GenericMvTDist(df, μ, C)
+DiagTDist(df::Real, C::PDiagMat) = GenericMvTDist(df, C)
+DiagTDist(df::Real, μ::Vector{<:Real}, σ::Vector{<:Real}) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
 
-IsoTDist(df::Float64, μ::Vector{Float64}, C::ScalMat) = GenericMvTDist(df, μ, C)
-IsoTDist(df::Float64, C::ScalMat) = GenericMvTDist(df, C)
-IsoTDist(df::Float64, μ::Vector{Float64}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(Float64(σ))))
-IsoTDist(df::Float64, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(Float64(σ))))
+IsoTDist(df::Real, μ::Vector{<:Real}, C::ScalMat) = GenericMvTDist(df, μ, C)
+IsoTDist(df::Real, C::ScalMat) = GenericMvTDist(df, C)
+IsoTDist(df::Real, μ::Vector{<:Real}, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
+IsoTDist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(σ)))
 
 ## convenient function to construct distributions of proper type based on arguments
 
@@ -75,11 +78,11 @@ mvtdist(df::Real, μ::Vector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2
 mvtdist(df::Real, μ::Vector, Σ::Matrix) = GenericMvTDist(df, μ, PDMat(Σ))
 mvtdist(df::Real, Σ::Matrix) = GenericMvTDist(df, PDMat(Σ))
 
-mvtdist(df::Float64, μ::Vector{Float64}, σ::Real) = IsoTDist(df, μ, Float64(σ))
-mvtdist(df::Float64, d::Int, σ::Float64) = IsoTDist(d, σ)
-mvtdist(df::Float64, μ::Vector{Float64}, σ::Vector{Float64}) = DiagTDist(df, μ, σ)
-mvtdist(df::Float64, μ::Vector{Float64}, Σ::Matrix{Float64}) = MvTDist(df, μ, Σ)
-mvtdist(df::Float64, Σ::Matrix{Float64}) = MvTDist(df, Σ)
+# mvtdist(df::Real, μ::Vector{<:Real}, σ::Real) = IsoTDist(df, μ, σ)
+# mvtdist(df::Real, d::Int, σ::Real) = IsoTDist(d, σ)
+mvtdist(df::Real, μ::Vector{<:Real}, σ::Vector{<:Real}) = DiagTDist(df, μ, σ)
+mvtdist(df::Real, μ::Vector{<:Real}, Σ::Matrix{<:Real}) = MvTDist(df, μ, Σ)
+mvtdist(df::Real, Σ::Matrix{<:Real}) = MvTDist(df, Σ)
 
 # Basic statistics
 
@@ -97,7 +100,8 @@ invcov(d::GenericMvTDist) = d.df>2 ? ((d.df-2)/d.df)*Matrix(inv(d.Σ)) : NaN*one
 logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
-@inline partype(d::GenericMvTDist{T}) where {T<:Real} = T
+@inline partype(d::GenericMvTDist{T}) where {T} = T
+eltype(::GenericMvTDist{T}) where {T} = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)
