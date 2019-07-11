@@ -2,14 +2,15 @@
 ```julia
 MatrixTDist(ν, M, Σ, Ω)
 
-ν:  positive Real
-M:  n x p matrix
-Σ:  n x n positive definite matrix
-Ω:  p x p positive definite matrix
+ν::Real            positive degrees of freedom
+M::AbstractMatrix  n x p location
+Σ::PDMat           n x n scale
+Ω::PDMat           p x p scale
 ```
-The [Matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
-generalizes the Multivariate *t*-Distribution from vectors to matrices. An
-``n\\times p`` matrix ``\\mathbf{X}`` with the matrix *t*-distribution has density
+The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
+generalizes the multivariate *t*-Distribution to ``n\\times p`` real
+matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim MT(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
+\\boldsymbol{\\Omega})``, then its probability density function is
 
 ```math
 f(\\mathbf{X} ; \\nu,\\mathbf{M},\\boldsymbol{\\Sigma}, \\boldsymbol{\\Omega}) =
@@ -21,15 +22,19 @@ where
 ```math
 c_0=\\frac{\\Gamma_p\\left(\\frac{\\nu+n+p-1}{2}\\right)}{(\\pi)^\\frac{np}{2} \\Gamma_p\\left(\\frac{\\nu+p-1}{2}\\right)} |\\boldsymbol{\\Omega}|^{-\\frac{n}{2}} |\\boldsymbol{\\Sigma}|^{-\\frac{p}{2}}.
 ```
-The matrix *t*-distribution arises as the marginal distribution of ``\\mathbf{X}``
-from ``p(\\mathbf{S},\\mathbf{X})=p(\\mathbf{S})p(\\mathbf{X}|\\mathbf{S})``, where
+
+If the joint distribution ``p(\\mathbf{S},\\mathbf{X})=p(\\mathbf{S})p(\\mathbf{X}|\\mathbf{S})``
+is given by
 
 ```math
 \\begin{align*}
 \\mathbf{S}&\\sim IW(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
-\\mathbf{X}|\\mathbf{S}&\\sim MN(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega})
+\\mathbf{X}|\\mathbf{S}&\\sim MN(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
 \\end{align*}
 ```
+
+then the marginal distribution of ``\\mathbf{X}`` is
+``MT(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
 struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
