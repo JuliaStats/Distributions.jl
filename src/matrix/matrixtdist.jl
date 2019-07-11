@@ -54,7 +54,7 @@ function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abst
     n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
     p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
 
-    logc0 = _matrixtdist_logc0(Σ, Ω, ν)
+    logc0 = matrixtdist_logc0(Σ, Ω, ν)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
@@ -72,14 +72,9 @@ function MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::Abstrac
 
 end
 
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractMatrix)         = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::AbstractPDMat)          = MatrixTDist(ν, M, PDMat(Σ), Ω)
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractMatrix,         Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractMatrix)         = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::AbstractPDMat)          = MatrixTDist(ν, M, PDMat(Σ), Ω)
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::LinearAlgebra.Cholesky, Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::AbstractMatrix)         = MatrixTDist(ν, M, Σ,        PDMat(Ω))
-MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat,          Ω::LinearAlgebra.Cholesky) = MatrixTDist(ν, M, Σ,        PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky}, Ω::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixTDist(ν, M, Σ, PDMat(Ω))
+MatrixTDist(ν::Real, M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky}, Ω::AbstractPDMat) = MatrixTDist(ν, M, PDMat(Σ), Ω)
 
 #  -----------------------------------------------------------------------------
 #  REPL display
@@ -133,7 +128,7 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function _matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
+function matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     #  returns the natural log of the normalizing constant for the pdf
 
     n = dim(Σ)
