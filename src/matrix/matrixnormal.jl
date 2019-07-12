@@ -32,14 +32,10 @@ end
 
 function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
 
-    n = size(M, 1)
-    p = size(M, 2)
+    n, p = size(M)
 
-    n₀ = size(U, 1)
-    p₀ = size(V, 1)
-
-    n != n₀ && error("Number of rows of M must equal dim of U.")
-    p != p₀ && error("Number of columns of M must equal dim of V.")
+    n == dim(U) || throw(ArgumentError("Number of rows of M must equal dim of U."))
+    p == dim(V) || throw(ArgumentError("Number of columns of M must equal dim of V."))
 
     logc0 = matrixnormal_logc0(U, V)
 

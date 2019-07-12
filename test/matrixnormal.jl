@@ -66,8 +66,8 @@ end
 end
 
 @testset "MatrixNormal construction errors" begin
-    @test_throws ErrorException MatrixNormal(M, V, U)
-    @test_throws ErrorException MatrixNormal(M, U, U)
+    @test_throws ArgumentError MatrixNormal(M, V, U)
+    @test_throws ArgumentError MatrixNormal(M, U, U)
 end
 
 @testset "MatrixNormal params" begin
