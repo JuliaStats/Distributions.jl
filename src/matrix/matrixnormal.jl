@@ -22,7 +22,7 @@ struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: Con
     U::ST
     V::ST
 
-    c0::T
+    logc0::T
 
 end
 
@@ -41,15 +41,15 @@ function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMa
     n != n₀ && error("Number of rows of M must equal dim of U.")
     p != p₀ && error("Number of columns of M must equal dim of V.")
 
-    c₀ = _matrixnormal_c₀(U, V)
+    logc0 = matrixnormal_logc0(U, V)
 
-    R = Base.promote_eltype(T, c₀)
+    R = Base.promote_eltype(T, logc0)
 
     prom_M = convert(AbstractArray{R}, M)
     prom_U = convert(AbstractArray{R}, U)
     prom_V = convert(AbstractArray{R}, V)
 
-    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(c₀))
+    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(logc0))
 
 end
 
@@ -86,14 +86,14 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     UU = convert(AbstractArray{T}, d.U)
     VV = convert(AbstractArray{T}, d.V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.logc0))
 end
 
-function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, c0) where T <: Real
+function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     UU = convert(AbstractArray{T}, U)
     VV = convert(AbstractArray{T}, V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -118,7 +118,7 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function _matrixnormal_c₀(U::AbstractPDMat, V::AbstractPDMat)
+function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
 
     n = dim(U)
     p = dim(V)
@@ -136,7 +136,7 @@ function logkernel(d::MatrixNormal, X::AbstractMatrix)
 
 end
 
-_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.c0
+_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 
 #  -----------------------------------------------------------------------------
 #  Sampling
