@@ -121,9 +121,8 @@ end
 function logkernel(d::MatrixNormal, X::AbstractMatrix)
 
     A  = X - d.M
-    At = Matrix(A')
 
-    -0.5 * tr( (d.V \ At) * (d.U \ A) )
+    -0.5 * tr( (d.V \ A') * (d.U \ A) )
 
 end
 
