@@ -18,6 +18,7 @@ const tests = [
     "categorical",
     "univariates",
     "continuous",
+    "edgecases",
     "fit",
     "multinomial",
     "binomial",
