@@ -95,7 +95,7 @@ size(d::MatrixNormal) = size(d.M)
 
 rank(d::MatrixNormal) = minimum( size(d) )
 
-insupport(d::MatrixNormal, X::Matrix) = isreal(X) && size(X) == size(d)
+insupport(d::MatrixNormal, X::AbstractMatrix) = isreal(X) && size(X) == size(d)
 
 mean(d::MatrixNormal) = d.M
 
