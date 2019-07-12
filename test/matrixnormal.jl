@@ -91,6 +91,12 @@ end
     @test rank(L) == 1
     @test rank(H) == 1
     @test rank(K) == 1
+
+    @test rank(D) == rank(rand(D))
+    @test rank(G) == rank(rand(G))
+    @test rank(L) == rank(rand(L))
+    @test rank(H) == rank(rand(H))
+    @test rank(K) == rank(rand(K))
 end
 
 @testset "MatrixNormal insupport" begin
