@@ -55,7 +55,7 @@ function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abst
 
     n, p = size(M)
 
-    ν > 0       || throw(ArgumentError("degrees of freedom must be positive."))
+    0 < ν < Inf || throw(ArgumentError("degrees of freedom must be positive and finite."))
     n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
     p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
 

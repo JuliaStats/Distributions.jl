@@ -59,6 +59,7 @@ end
 
 @testset "MatrixTDist construction errors" begin
     @test_throws ArgumentError MatrixTDist(-1, M, Σ, Ω)
+    @test_throws ArgumentError MatrixTDist(Inf, M, Σ, Ω)
     @test_throws ArgumentError MatrixTDist(v, M, Ω, Σ)
     @test_throws ArgumentError MatrixTDist(v, M, Ω, Ω)
     @test_throws ArgumentError MatrixTDist(v, M, Σ, Σ)
