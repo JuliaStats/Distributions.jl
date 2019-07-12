@@ -57,14 +57,9 @@ function MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat)
 
 end
 
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
-MatrixNormal(M::AbstractMatrix, U::AbstractPDMat,          V::AbstractMatrix)         = MatrixNormal(M, U,        PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractPDMat,          V::LinearAlgebra.Cholesky) = MatrixNormal(M, U,        PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::Union{AbstractMatrix, LinearAlgebra.Cholesky}, V::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::Union{AbstractMatrix, LinearAlgebra.Cholesky}, V::AbstractPDMat) = MatrixNormal(M, PDMat(U), V)
+MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixNormal(M, U, PDMat(V))
 
 MatrixNormal(m::Int, n::Int) = MatrixNormal(zeros(m, n), Matrix(1.0I, m, m), Matrix(1.0I, n, n))
 
