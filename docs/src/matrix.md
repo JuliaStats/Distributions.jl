@@ -4,7 +4,7 @@
 
 ## Common Interface
 
-Both distributions implement the same set of methods:
+All distributions implement the same set of methods:
 
 ```@docs
 size(::MatrixDistribution)
@@ -22,6 +22,7 @@ vec(d::MatrixDistribution)
 Wishart
 InverseWishart
 MatrixNormal
+MatrixTDist
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
