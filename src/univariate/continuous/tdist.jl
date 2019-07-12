@@ -50,6 +50,7 @@ mode(d::TDist{T}) where {T<:Real} = zero(T)
 
 function var(d::TDist{T}) where T<:Real
     ν = d.ν
+    isinf(ν) && return one(T)
     ν > 2 ? ν / (ν - 2) :
     ν > 1 ? T(Inf) : T(NaN)
 end

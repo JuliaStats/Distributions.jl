@@ -10,7 +10,7 @@ using Test, Distributions, StatsBase
     @test mean(T) == mean(N)
     @test median(T) == median(N)
     @test mode(T) == mode(N)
-    #@test var(T) == var(N)
+    @test var(T) == var(N)
     @test skewness(T) == skewness(N)
     @test kurtosis(T) == kurtosis(N)
     #@test entropy(T) == entropy(N)
