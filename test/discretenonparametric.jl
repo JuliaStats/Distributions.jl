@@ -107,4 +107,9 @@ d3 = fit(DiscreteNonParametric, xs)
 @test support(d3) == support(d1)
 @test probs(d3) ≈ probs(d1)
 
+# Numerical stability; see issue #872 and PR #926
+p = [1 - eps(Float32), eps(Float32)]
+d = Categorical(p)
+@test ([rand(d) for _ = 1:100_000_000]; true)   
+
 end
