@@ -110,6 +110,6 @@ d3 = fit(DiscreteNonParametric, xs)
 # Numerical stability; see issue #872 and PR #926
 p = [1 - eps(Float32), eps(Float32)]
 d = Categorical(p)
-@test ([rand(d) for _ = 1:100_000_000]; true)   
+@test ([rand(d) for _ = 1:100_000]; true)   
 
 end
