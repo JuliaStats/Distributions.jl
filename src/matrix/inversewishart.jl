@@ -50,11 +50,11 @@ params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 
 ### Conversion
 function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
-    P = Wishart{T}(d.Ψ)
+    P = convert(AbstractArray{T}, d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
 function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0) where T<:Real
-    P = Wishart{T}(Ψ)
+    P = convert(AbstractArray{T}, Ψ)
     InverseWishart{T, typeof(P)}(T(df), P, T(c0))
 end
 

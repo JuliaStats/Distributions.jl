@@ -55,11 +55,11 @@ params(d::Wishart) = (d.df, d.S, d.c0)
 
 ### Conversion
 function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
-    P = AbstractMatrix{T}(d.S)
+    P = convert(AbstractArray{T}, d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
 end
 function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, c0) where T<:Real
-    P = AbstractMatrix{T}(S)
+    P = convert(AbstractArray{T}, S)
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end
 
