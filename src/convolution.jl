@@ -19,6 +19,7 @@ defined here https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_d
 * `Gamma`
 * `MultivariateNormal`
 """
+function convolve end
 
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
@@ -77,12 +78,12 @@ function convolve(
     _check_convolution_shape(d1, d2)
     # + ϵI protects against numerical instability in the cholesky method and ensures
     # positive definite-ness
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat + 1e-12 * I)
+    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
 end
 
 function convolve(d1::MvNormal, d2::MvNormal)
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ) + 1e-12 * I)
+    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ))
 end
 
 

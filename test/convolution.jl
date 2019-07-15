@@ -168,14 +168,21 @@ end
 
     @testset "full-normal" begin
 
-        L1 = [1 0; 2 1]
-        fn1 = MvNormal(ones(2), cov(L1 * L1'))
-        L2 = [1.2 0; 3.4 6.6]
-        fn2 = MvNormal([2.1, 0.4], cov(L2 * L2'))
-        L3 = [2.1 0; 0.3 1.2]
-        zm1 = MvNormal(cov(L3 * L3'))
-        L4 = [4.1 0; 1.7 6.4]
-        zm2 = MvNormal(cov(L4 * L4'))
+        m1 = Symmetric(rand(2,2))
+        m1sq = m1^2
+        fn1 = MvNormal(ones(2), m1sq.data)
+
+        m2 = Symmetric(rand(2,2))
+        m2sq = m2^2
+        fn2 = MvNormal([2.1, 0.4], m2sq.data)
+
+        m3 = Symmetric(rand(2,2))
+        m3sq = m3^2
+        zm1 = MvNormal(m3sq.data)
+
+        m4 = Symmetric(rand(2,2))
+        m4sq = m4^2
+        zm2 = MvNormal(m4sq.data)
 
         dist_list = (fn1, fn2, zm1, zm2)
 
@@ -183,12 +190,13 @@ end
             d3 = convolve(d1, d2)
             @test isa(d3, FullNormal)
             @test d3.μ == d1.μ .+ d2.μ
-            @test d3.Σ.mat == d1.Σ.mat + d2.Σ.mat + 1e-12 * I  # isequal not defined for PDMats
+            @test d3.Σ.mat == d1.Σ.mat + d2.Σ.mat # isequal not defined for PDMats
         end
 
         # erroring
-        L5 = [4.1 0 0; 1.7 6.4 0; 2.1 8.5 0]
-        fn3 =  MvNormal(zeros(3), cov(L5 * L5'))
+        m5 = Symmetric(rand(3, 3))
+        m5sq = m5^2
+        fn3 =  MvNormal(zeros(3), m5sq.data)
         @test_throws ArgumentError convolve(fn1, fn3)
     end
 
@@ -198,8 +206,9 @@ end
         zmin1 = MvNormal(2, 1.9)
         dn1 = MvNormal([0.0, 4.7], [0.1, 1.8])
         zmdn1 = MvNormal([1.2, 0.3])
-        L1 = [1 0; 2 1]
-        full = MvNormal(ones(2), cov(L1 * L1'))
+        m1 = Symmetric(rand(2, 2))
+        m1sq = m1^2
+        full = MvNormal(ones(2), m1sq.data)
 
         dist_list = (in1, zmin1, dn1, zmdn1)
 
@@ -207,7 +216,7 @@ end
             d3 = convolve(d1, d2)
             @test isa(d3, MvNormal)
             @test d3.μ == d1.μ .+ d2.μ
-            @test Matrix(d3.Σ) == Matrix(d1.Σ + d2.Σ) + 1e-12 * I  # isequal not defined for PDMats
+            @test Matrix(d3.Σ) == Matrix(d1.Σ + d2.Σ)  # isequal not defined for PDMats
         end
     end
 end
