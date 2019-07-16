@@ -1,20 +1,20 @@
 """
-    MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+```julia
+MatrixNormal(M, U, V)
 
-[Matrix Normal Distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution)
+M::AbstractMatrix  n x p mean
+U::PDMat           n x n row covariance
+V::PDMat           p x p column covariance
+```
+The [matrix normal distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution) generalizes the multivariate normal distribution to ``n\\times p`` real matrices ``\\mathbf{X}``.
+If ``\\mathbf{X}\\sim MN(\\mathbf{M}, \\mathbf{U}, \\mathbf{V})``, then its
+probability density function is
 
-`X ~ MN(M, U, V)`
+```math
+f(\\mathbf{X};\\mathbf{M}, \\mathbf{U}, \\mathbf{V}) = \\frac{\\exp\\left( -\\frac{1}{2} \\, \\mathrm{tr}\\left[ \\mathbf{V}^{-1} (\\mathbf{X} - \\mathbf{M})^{\\rm{T}} \\mathbf{U}^{-1} (\\mathbf{X} - \\mathbf{M}) \\right] \\right)}{(2\\pi)^{np/2} |\\mathbf{V}|^{n/2} |\\mathbf{U}|^{p/2}}.
+```
 
-M: n x p
-
-U: n x n positive definite
-
-V: p x p positive definite
-
-f(X) = c0 * exp( -0.5 tr[inv(V) (X - M)' inv(U) (X - M)] )
-
-c0   = (2pi) ^ {-np / 2} |V| ^ {-n / 2} |U| ^ {-p / 2}
-
+``\\mathbf{X}\\sim MN(\\mathbf{M},\\mathbf{U},\\mathbf{V})`` if and only if ``\\text{vec}(\\mathbf{X})\\sim N(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
 """
 struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
@@ -22,7 +22,7 @@ struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: Con
     U::ST
     V::ST
 
-    c0::T
+    logc0::T
 
 end
 
@@ -32,24 +32,20 @@ end
 
 function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
 
-    n = size(M, 1)
-    p = size(M, 2)
+    n, p = size(M)
 
-    n₀ = size(U, 1)
-    p₀ = size(V, 1)
+    n == dim(U) || throw(ArgumentError("Number of rows of M must equal dim of U."))
+    p == dim(V) || throw(ArgumentError("Number of columns of M must equal dim of V."))
 
-    n != n₀ && error("Number of rows of M must equal dim of U.")
-    p != p₀ && error("Number of columns of M must equal dim of V.")
+    logc0 = matrixnormal_logc0(U, V)
 
-    c₀ = _matrixnormal_c₀(U, V)
-
-    R = Base.promote_eltype(T, c₀)
+    R = Base.promote_eltype(T, logc0)
 
     prom_M = convert(AbstractArray{R}, M)
     prom_U = convert(AbstractArray{R}, U)
     prom_V = convert(AbstractArray{R}, V)
 
-    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(c₀))
+    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(logc0))
 
 end
 
@@ -61,14 +57,9 @@ function MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat)
 
 end
 
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractMatrix,         V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::AbstractMatrix)         = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::LinearAlgebra.Cholesky) = MatrixNormal(M, PDMat(U), PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::LinearAlgebra.Cholesky, V::AbstractPDMat)          = MatrixNormal(M, PDMat(U), V)
-MatrixNormal(M::AbstractMatrix, U::AbstractPDMat,          V::AbstractMatrix)         = MatrixNormal(M, U,        PDMat(V))
-MatrixNormal(M::AbstractMatrix, U::AbstractPDMat,          V::LinearAlgebra.Cholesky) = MatrixNormal(M, U,        PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::Union{AbstractMatrix, LinearAlgebra.Cholesky}, V::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixNormal(M, PDMat(U), PDMat(V))
+MatrixNormal(M::AbstractMatrix, U::Union{AbstractMatrix, LinearAlgebra.Cholesky}, V::AbstractPDMat) = MatrixNormal(M, PDMat(U), V)
+MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixNormal(M, U, PDMat(V))
 
 MatrixNormal(m::Int, n::Int) = MatrixNormal(zeros(m, n), Matrix(1.0I, m, m), Matrix(1.0I, n, n))
 
@@ -86,14 +77,14 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     UU = convert(AbstractArray{T}, d.U)
     VV = convert(AbstractArray{T}, d.V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.logc0))
 end
 
-function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, c0) where T <: Real
+function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     UU = convert(AbstractArray{T}, U)
     VV = convert(AbstractArray{T}, V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(c0))
+    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -104,7 +95,7 @@ size(d::MatrixNormal) = size(d.M)
 
 rank(d::MatrixNormal) = minimum( size(d) )
 
-insupport(d::MatrixNormal, X::Matrix) = isreal(X) && size(X) == size(d)
+insupport(d::MatrixNormal, X::AbstractMatrix) = isreal(X) && size(X) == size(d)
 
 mean(d::MatrixNormal) = d.M
 
@@ -118,7 +109,7 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function _matrixnormal_c₀(U::AbstractPDMat, V::AbstractPDMat)
+function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
 
     n = dim(U)
     p = dim(V)
@@ -130,13 +121,12 @@ end
 function logkernel(d::MatrixNormal, X::AbstractMatrix)
 
     A  = X - d.M
-    At = Matrix(A')
 
-    -0.5 * tr( (d.V \ At) * (d.U \ A) )
+    -0.5 * tr( (d.V \ A') * (d.U \ A) )
 
 end
 
-_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.c0
+_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 
 #  -----------------------------------------------------------------------------
 #  Sampling

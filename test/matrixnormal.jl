@@ -66,8 +66,8 @@ end
 end
 
 @testset "MatrixNormal construction errors" begin
-    @test_throws ErrorException MatrixNormal(M, V, U)
-    @test_throws ErrorException MatrixNormal(M, U, U)
+    @test_throws ArgumentError MatrixNormal(M, V, U)
+    @test_throws ArgumentError MatrixNormal(M, U, U)
 end
 
 @testset "MatrixNormal params" begin
@@ -91,6 +91,12 @@ end
     @test rank(L) == 1
     @test rank(H) == 1
     @test rank(K) == 1
+
+    @test rank(D) == rank(rand(D))
+    @test rank(G) == rank(rand(G))
+    @test rank(L) == rank(rand(L))
+    @test rank(H) == rank(rand(H))
+    @test rank(K) == rank(rand(K))
 end
 
 @testset "MatrixNormal insupport" begin
@@ -138,7 +144,7 @@ end
 @testset "MatrixNormal conversion" for elty in (Float32, Float64, BigFloat)
 
     Del1 = convert(MatrixNormal{elty}, D)
-    Del2 = convert(MatrixNormal{elty}, M, PDU, PDV, D.c0)
+    Del2 = convert(MatrixNormal{elty}, M, PDU, PDV, D.logc0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty
