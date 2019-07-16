@@ -88,7 +88,9 @@ end
 
 
 function _check_convolution_args(p1, p2)
-    p1 == p2 || throw(ArgumentError("$(p1) != $(p2): distribution parameters must be equal"))
+    p1 ≈ p2 || throw(ArgumentError(
+    "$(p1) !≈ $(p2): distribution parameters must be approximately equal",
+    ))
 end
 
 function _check_convolution_shape(d1, d2)
