@@ -29,6 +29,7 @@ const tests = [
     "kolmogorov",
     "edgeworth",
     "wisharts",
+    "matrixbeta",
     "matrixnormal",
     "matrixtdist",
     "vonmisesfisher",
