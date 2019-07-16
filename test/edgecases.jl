@@ -13,11 +13,11 @@ using Test, Distributions, StatsBase
     @test var(T) == var(N)
     @test skewness(T) == skewness(N)
     @test kurtosis(T) == kurtosis(N)
-    #@test entropy(T) == entropy(N)
+    @test entropy(T) == entropy(N)
     @test pdf(T, x) ≈ pdf(N, x)
     @test logpdf(T, x) ≈ logpdf(N, x)
-    #@test gradlogpdf(T, x) ≈ gradlogpdf(N, x)
-    #@test cf(T, x) ≈ cf(N, x)
+    @test gradlogpdf(T, x) ≈ gradlogpdf(N, x)
+    @test cf(T, x) ≈ cf(N, x)
 
     fnecdf = ecdf(z)
     y = [-1.96, -1.644854, -1.281552, -0.6744898, 0, 0.6744898, 1.281552, 1.644854, 1.96]
