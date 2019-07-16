@@ -11,7 +11,7 @@
         # cannot convolve a Binomial with a Bernoulli
         @test_throws MethodError convolve(d1, d2)
 
-        # only works if p1 == p2
+        # only works if p1 ≈ p2
         d3 = Bernoulli(0.2)
         @test_throws ArgumentError convolve(d1, d3)
 
@@ -26,7 +26,7 @@
         @test d3.n == 7
         @test d3.p == 0.1
 
-        # only works if p1 == p2
+        # only works if p1 ≈ p2
         d4 = Binomial(2, 0.2)
         @test_throws ArgumentError convolve(d1, d4)
 
@@ -56,7 +56,7 @@
         # cannot convolve a Geometric with a NegativeBinomial
         @test_throws MethodError convolve(d1, d2)
 
-        # only works if p1 == p2
+        # only works if p1 ≈ p2
         d3 = Geometric(0.5)
         @test_throws ArgumentError convolve(d1, d3)
     end
@@ -114,7 +114,7 @@ end
         # cannot convolve an Exponential with a Gamma
         @test_throws MethodError convolve(d1, d2)
 
-        # only works if θ1 == θ2
+        # only works if θ1 ≈ θ2
         d3 = Exponential(0.2)
         @test_throws ArgumentError convolve(d1, d3)
     end
@@ -128,7 +128,7 @@ end
         @test d3.α == 0.6
         @test d3.θ == 1.7
 
-        # only works if θ1 == θ4
+        # only works if θ1 ≈ θ4
         d4 = Gamma(1.2, 0.4)
         @test_throws ArgumentError convolve(d1, d4)
     end

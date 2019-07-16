@@ -76,8 +76,6 @@ function convolve(
     d2::Union{FullNormal, ZeroMeanFullNormal},
     )
     _check_convolution_shape(d1, d2)
-    # + ϵI protects against numerical instability in the cholesky method and ensures
-    # positive definite-ness
     return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
 end
 
