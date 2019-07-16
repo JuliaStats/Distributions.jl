@@ -23,6 +23,7 @@ Wishart
 InverseWishart
 MatrixNormal
 MatrixTDist
+MatrixBeta
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
