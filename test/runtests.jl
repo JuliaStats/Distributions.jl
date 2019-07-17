@@ -4,6 +4,7 @@ using Test
 using Distributed
 using Random
 using StatsBase
+using LinearAlgebra
 
 const tests = [
     "truncate",
@@ -33,6 +34,7 @@ const tests = [
     "matrixtdist",
     "vonmisesfisher",
     "conversion",
+    "convolution",
     "mixture",
     "gradlogpdf",
     "noncentralt",
