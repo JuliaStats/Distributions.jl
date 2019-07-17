@@ -89,6 +89,8 @@ insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) &&
 
 params(d::MatrixBeta) = (d.W1.df, d.W2.df)
 
+mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d), dim(d)))
+
 @inline partype(d::MatrixBeta{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
