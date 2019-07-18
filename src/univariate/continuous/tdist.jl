@@ -50,6 +50,7 @@ mode(d::TDist{T}) where {T<:Real} = zero(T)
 
 function var(d::TDist{T}) where T<:Real
     ν = d.ν
+    isinf(ν) && return one(T)
     ν > 2 ? ν / (ν - 2) :
     ν > 1 ? T(Inf) : T(NaN)
 end
@@ -62,7 +63,8 @@ function kurtosis(d::TDist{T}) where T<:Real
     ν > 2 ? T(Inf) : T(NaN)
 end
 
-function entropy(d::TDist)
+function entropy(d::TDist{T}) where T <: Real
+    isinf(d.ν) && return entropy( Normal(zero(T), one(T)) )
     h = d.ν/2
     h1 = h + 1//2
     h1 * (digamma(h1) - digamma(h)) + log(d.ν)/2 + lbeta(h, 1//2)
@@ -73,13 +75,14 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-rand(rng::AbstractRNG, d::TDist) = randn(rng) / sqrt(rand(rng, Chisq(d.ν))/d.ν)
+rand(rng::AbstractRNG, d::TDist) = randn(rng) / ( isinf(d.ν) ? 1 : sqrt(rand(rng, Chisq(d.ν))/d.ν) )
 
-function cf(d::TDist, t::Real)
+function cf(d::TDist{T}, t::Real) where T <: Real
+    isinf(d.ν) && return cf(Normal(zero(T), one(T)), t)
     t == 0 && return complex(1)
     h = d.ν/2
     q = d.ν/4
     complex(2(q*t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
 end
 
-gradlogpdf(d::TDist, x::Real) = -((d.ν + 1) * x) / (x^2 + d.ν)
+gradlogpdf(d::TDist{T}, x::Real) where {T<:Real} = isinf(d.ν) ? gradlogpdf(Normal(zero(T), one(T)), x) : -((d.ν + 1) * x) / (x^2 + d.ν)
