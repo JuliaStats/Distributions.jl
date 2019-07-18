@@ -63,8 +63,8 @@ end
 end
 
 @testset "MatrixBeta sample moments" begin
-    @test isapprox(mean(rand(B, 50000)), mean(B) , atol = 0.1)
-    @test isapprox(mean(rand(C, 50000))[1, 1], mean(c) , atol = 0.1)
+    @test isapprox(mean(rand(B, 10000)), mean(B) , atol = 0.1)
+    @test isapprox(mean(rand(C, 10000))[1, 1], mean(c) , atol = 0.1)
 end
 
 @testset "MatrixBeta conversion" for elty in (Float32, Float64, BigFloat)
