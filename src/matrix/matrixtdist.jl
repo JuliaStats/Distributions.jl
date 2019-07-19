@@ -9,12 +9,12 @@ M::AbstractMatrix  n x p location
 ```
 The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
 generalizes the multivariate *t*-Distribution to ``n\\times p`` real
-matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim MT(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
+matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
 \\boldsymbol{\\Omega})``, then its probability density function is
 
 ```math
 f(\\mathbf{X} ; \\nu,\\mathbf{M},\\boldsymbol{\\Sigma}, \\boldsymbol{\\Omega}) =
-c_0 \\left|\\mathbf{I}_n + \\boldsymbol{\\Sigma}^{-1}(\\mathbf{X} - \\mathbf{M})\\boldsymbol{\\Omega}^{-1}(\\mathbf{X}-\\mathbf{M})'\\right|^{-\\frac{\\nu+n+p-1}{2}},
+c_0 \\left|\\mathbf{I}_n + \\boldsymbol{\\Sigma}^{-1}(\\mathbf{X} - \\mathbf{M})\\boldsymbol{\\Omega}^{-1}(\\mathbf{X}-\\mathbf{M})^{\\rm{T}}\\right|^{-\\frac{\\nu+n+p-1}{2}},
 ```
 
 where
@@ -28,13 +28,13 @@ is given by
 
 ```math
 \\begin{align*}
-\\mathbf{S}&\\sim IW(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
-\\mathbf{X}|\\mathbf{S}&\\sim MN(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
+\\mathbf{S}&\\sim IW_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
+\\mathbf{X}|\\mathbf{S}&\\sim MN_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
 \\end{align*}
 ```
 
 then the marginal distribution of ``\\mathbf{X}`` is
-``MT(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
+``MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
 struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
 
