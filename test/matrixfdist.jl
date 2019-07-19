@@ -53,7 +53,6 @@ end
     @test !insupport(G, rand(G) + rand(G) * im)
     @test !insupport(G, randn(p, p + 1))
     @test !insupport(G, randn(p, p))
-
 end
 
 @testset "MatrixFDist logpdf" begin
