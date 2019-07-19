@@ -14,7 +14,7 @@ If ``\\boldsymbol{\\Sigma}\\sim MF_{p}(n_1/2,n_2/2,\\mathbf{B})``, then its prob
 ```math
 f(\\boldsymbol{\\Sigma} ; n_1,n_2,\\mathbf{B}) =
 \\frac{\\Gamma_p(\\frac{n_1+n_2}{2})}{\\Gamma_p(\\frac{n_1}{2})\\Gamma_p(\\frac{n_2}{2})}
-|\\mathbf{B}|^{n_2/2}|\\boldsymbol{\\Sigma}|^{(n_1-p-1)/2}|\\mathbf{B}+\\boldsymbol{\\Sigma}|^{-(n_1+n_2)/2}
+|\\mathbf{B}|^{n_2/2}|\\boldsymbol{\\Sigma}|^{(n_1-p-1)/2}|\\mathbf{B}+\\boldsymbol{\\Sigma}|^{-(n_1+n_2)/2}.
 ```
 
 If the joint distribution ``p(\\boldsymbol{\\Psi},\\boldsymbol{\\Sigma})=p(\\boldsymbol{\\Psi})p(\\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi})``
