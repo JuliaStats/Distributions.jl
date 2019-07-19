@@ -1,7 +1,6 @@
 """
+    MatrixFDist(n1, n2, B)
 ```julia
-MatrixFDist(n1, n2, B)
-
 n1::Real  degrees of freedom (greater than p - 1)
 n2::Real  degrees of freedom (greater than p - 1)
 B::PDMat  p x p scale
