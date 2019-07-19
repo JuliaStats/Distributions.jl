@@ -21,7 +21,7 @@ f(\\mathbf{H};\\nu,\\mathbf{S}) = \\frac{1}{2^{\\nu p/2} \\left|\\mathbf{S}\\rig
 If ``\\nu`` is an integer, then a random matrix ``\\mathbf{H}`` given by
 
 ```math
-\\mathbf{H} = \\mathbf{X}\\mathbf{X}', \\quad\\mathbf{X} \\sim MN_{p,\\nu}(\\mathbf{0}, \\mathbf{S}, \\mathbf{I}_{\\nu})
+\\mathbf{H} = \\mathbf{X}\\mathbf{X}^{\\rm{T}}, \\quad\\mathbf{X} \\sim MN_{p,\\nu}(\\mathbf{0}, \\mathbf{S}, \\mathbf{I}_{\\nu})
 ```
 
 has ``\\mathbf{H}\\sim W_p(\\nu, \\mathbf{S})``. For non-integer degrees of freedom,
