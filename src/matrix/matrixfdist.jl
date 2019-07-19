@@ -41,19 +41,14 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixFDist(n1::Real, n2::Real, B::AbstractPDMat)
-
     p = dim(B)
-
     n1 > p - 1 || throw(ArgumentError("first degrees of freedom must be larger than $(p - 1)"))
     n2 > p - 1 || throw(ArgumentError("second degrees of freedom must be larger than $(p - 1)"))
-
     logc0 = matrixfdist_logc0(n1, n2, B)
     T = Base.promote_eltype(n1, n2, logc0, B)
     prom_B = convert(AbstractArray{T}, B)
     W = Wishart(T(n1), prom_B)
-
     MatrixFDist{T, typeof(W)}(W, T(n2), T(logc0))
-
 end
 
 MatrixFDist(n1::Real, n2::Real, B::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixFDist(n1, n2, PDMat(B))
@@ -114,12 +109,9 @@ function matrixfdist_logc0(n1::Real, n2::Real, B::AbstractPDMat)
 end
 
 function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
-
     p = dim(d)
     n1, n2, B = params(d)
-
     ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
-
 end
 
 _logpdf(d::MatrixFDist, Σ::AbstractMatrix) = logkernel(d, Σ) + d.logc0
@@ -129,10 +121,8 @@ _logpdf(d::MatrixFDist, Σ::AbstractMatrix) = logkernel(d, Σ) + d.logc0
 #  -----------------------------------------------------------------------------
 
 function _rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix)
-
     Ψ = rand(rng, d.W)
     A .= rand(rng, InverseWishart(d.n2, Ψ) )
-
 end
 
 #  -----------------------------------------------------------------------------
