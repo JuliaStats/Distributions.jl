@@ -1,0 +1,131 @@
+"""
+```julia
+MatrixBeta(p, n1, n2)
+
+p::Int    dimension
+n1::Real  degrees of freedom (greater than p - 1)
+n2::Real  degrees of freedom (greater than p - 1)
+```
+The [matrix beta distribution](https://en.wikipedia.org/wiki/Matrix_variate_beta_distribution)
+generalizes the beta distribution to ``p\\times p`` real matrices ``\\mathbf{U}``
+for which ``\\mathbf{U}`` and ``\\mathbf{I}_p-\\mathbf{U}`` are both positive definite.
+If ``\\mathbf{U}\\sim MB(n_1/2, n_2/2)``, then its probability density function is
+
+```math
+f(\\mathbf{U}; n_1,n_2) = \\frac{\\Gamma_p(\\frac{n_1+n_2}{2})}{\\Gamma_p(\\frac{n_1}{2})\\Gamma_p(\\frac{n_2}{2})}
+|\\mathbf{U}|^{(n_1-p-1)/2}\\left|\\mathbf{I}_p-\\mathbf{U}\\right|^{(n_2-p-1)/2}.
+```
+
+If ``\\mathbf{S}_1\\sim W(n_1,\\mathbf{I}_p)`` and ``\\mathbf{S}_2\\sim W(n_2,\\mathbf{I}_p)``
+are independent, and we use ``\\mathcal{L}(\\cdot)`` to denote the lower Cholesky factor, then
+
+```math
+\\mathbf{U}=\\mathcal{L}(\\mathbf{S}_1+\\mathbf{S}_2)^{-1}\\mathbf{S}_1\\mathcal{L}(\\mathbf{S}_1+\\mathbf{S}_2)^{-\\rm{T}}
+```
+
+has ``\\mathbf{U}\\sim MB(n_1/2, n_2/2)``.
+"""
+struct MatrixBeta{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
+    W1::TW
+    W2::TW
+    logc0::T
+end
+
+#  -----------------------------------------------------------------------------
+#  Constructors
+#  -----------------------------------------------------------------------------
+
+function MatrixBeta(p::Int, n1::Real, n2::Real)
+
+    p > 0 || throw(ArgumentError("dim must be positive: got $(p)."))
+
+    logc0 = matrixbeta_logc0(p, n1, n2)
+
+    T = Base.promote_eltype(n1, n2, logc0)
+    Ip = PDMat( Matrix{T}(I, p, p) )
+    W1 = Wishart(T(n1), Ip)
+    W2 = Wishart(T(n2), Ip)
+
+    MatrixBeta{T, typeof(W1)}(W1, W2, T(logc0))
+
+end
+
+#  -----------------------------------------------------------------------------
+#  REPL display
+#  -----------------------------------------------------------------------------
+
+ show(io::IO, d::MatrixBeta) = show_multline(io, d, [(:n1, d.W1.df), (:n2, d.W2.df)])
+
+#  -----------------------------------------------------------------------------
+#  Conversion
+#  -----------------------------------------------------------------------------
+
+function convert(::Type{MatrixBeta{T}}, d::MatrixBeta) where T <: Real
+    W1 = convert(Wishart{T}, d.W1)
+    W2 = convert(Wishart{T}, d.W2)
+    MatrixBeta{T, typeof(W1)}(W1, W2, T(d.logc0))
+end
+
+function convert(::Type{MatrixBeta{T}}, W1::Wishart, W2::Wishart, logc0) where T <: Real
+    WW1 = convert(Wishart{T}, W1)
+    WW2 = convert(Wishart{T}, W2)
+    MatrixBeta{T, typeof(WW1)}(WW1, WW2, T(logc0))
+end
+
+#  -----------------------------------------------------------------------------
+#  Properties
+#  -----------------------------------------------------------------------------
+
+dim(d::MatrixBeta) = dim(d.W1)
+
+size(d::MatrixBeta) = size(d.W1)
+
+rank(d::MatrixBeta) = dim(d)
+
+insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
+
+params(d::MatrixBeta) = (d.W1.df, d.W2.df)
+
+mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d), dim(d)))
+
+@inline partype(d::MatrixBeta{T}) where {T <: Real} = T
+
+#  -----------------------------------------------------------------------------
+#  Evaluation
+#  -----------------------------------------------------------------------------
+
+function matrixbeta_logc0(p::Int, n1::Real, n2::Real)
+    #  returns the natural log of the normalizing constant for the pdf
+
+    return logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
+    #return -logmvbeta(p, n1 / 2, n2 / 2)
+
+end
+
+function logkernel(d::MatrixBeta, U::AbstractMatrix)
+
+    p = dim(d)
+    n1, n2 = params(d)
+
+    ((n1 - p - 1) / 2) * logdet(U) + ((n2 - p - 1) / 2) * logdet(I - U)
+
+end
+
+_logpdf(d::MatrixBeta, U::AbstractMatrix) = logkernel(d, U) + d.logc0
+
+#  -----------------------------------------------------------------------------
+#  Sampling
+#  -----------------------------------------------------------------------------
+
+#  Mitra (1970 Sankhyā)
+
+function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
+
+    S1   = PDMat( rand(rng, d.W1) )
+    S2   = PDMat( rand(rng, d.W2) )
+    S    = S1 + S2
+    invL = Matrix( inv(S.chol.L) )
+
+    A .= X_A_Xt(S1, invL)
+
+end
