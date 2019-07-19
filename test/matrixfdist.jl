@@ -70,6 +70,8 @@ end
     Gel1 = convert(MatrixFDist{elty}, G)
     Gel2 = convert(MatrixFDist{elty}, G.W, n2, G.logc0)
 
+    @test Gel1 isa MatrixFDist{elty, Wishart{elty, PDMat{elty,Array{elty,2}}}}
+    @test Gel2 isa MatrixFDist{elty, Wishart{elty, PDMat{elty,Array{elty,2}}}}
     @test partype(Gel1) == elty
     @test partype(Gel2) == elty
 end
