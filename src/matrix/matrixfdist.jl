@@ -96,7 +96,7 @@ function mean(d::MatrixFDist)
     p = dim(d)
     n1, n2, B = params(d)
 
-    (n2 > p + 1) ? (return (n1 / (n2 - p - 1)) * B.mat) : throw(ArgumentError("mean only defined for df2 > dim + 1"))
+    (n2 <= p + 1) ? throw(ArgumentError("mean only defined for df2 > dim + 1")) : (return (n1 / (n2 - p - 1)) * B.mat)
 end
 
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
