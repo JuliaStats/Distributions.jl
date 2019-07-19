@@ -1,7 +1,6 @@
 """
+    InverseWishart(ν, Ψ)
 ```julia
-InverseWishart(ν, Ψ)
-
 ν::Real   degrees of freedom (greater than p - 1)
 Ψ::PDMat  p x p scale matrix
 ```
