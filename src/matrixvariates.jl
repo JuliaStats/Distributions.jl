@@ -24,6 +24,14 @@ distribution of vec(X), where X is a random matrix with distribution `d`.
 Base.vec(d::MatrixDistribution)
 
 """
+    inv(d::MatrixDistribution)
+
+If known, returns a `MatrixDistribution` instance representing the
+distribution of inv(X), where X is a random matrix with distribution `d`.
+"""
+Base.inv(d::MatrixDistribution)
+
+"""
     mean(d::MatrixDistribution)
 
 Return the mean matrix of `d`.
@@ -161,6 +169,7 @@ _logpdf(d::MatrixDistribution, x::AbstractArray)
 
 ##### Specific distributions #####
 
-for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl", "matrixtdist.jl", "matrixbeta.jl"]
+for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
+              "matrixtdist.jl", "matrixbeta.jl", "matrixfdist.jl"]
     include(joinpath("matrix", fname))
 end
