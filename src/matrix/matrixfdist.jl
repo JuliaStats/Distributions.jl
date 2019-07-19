@@ -111,7 +111,6 @@ function matrixfdist_logc0(n1::Real, n2::Real, B::AbstractPDMat)
     term1 = logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
     term2 = (n2 / 2) * logdet(B)
     return term1 + term2
-    #-logmvbeta(dim(B), n1 / 2, n2 / 2) + (n2 / 2) * logdet(B)
 end
 
 function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
