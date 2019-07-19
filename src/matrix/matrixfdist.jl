@@ -95,10 +95,7 @@ params(d::MatrixFDist) = (d.W.df, d.n2, d.W.S)
 function mean(d::MatrixFDist)
     p = dim(d)
     n1, n2, B = params(d)
-
-    if n2 <= p + 1
-        throw(ArgumentError("mean only defined for df2 > dim + 1"))
-    end
+    n2 > p + 1 || throw(ArgumentError("mean only defined for df2 > dim + 1"))
     return (n1 / (n2 - p - 1)) * B.mat
 end
 
