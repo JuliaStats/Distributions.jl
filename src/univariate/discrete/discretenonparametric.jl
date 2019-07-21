@@ -85,7 +85,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     while cp < draw
         cp += p[i +=1]
     end
-    x[i]
+    x[max(i,1)]
 end
 
 rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)

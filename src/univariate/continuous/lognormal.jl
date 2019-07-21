@@ -99,15 +99,15 @@ function logpdf(d::LogNormal{T}, x::Real) where T<:Real
     end
 end
 
-cdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normcdf(d.μ, d.σ, log(x)) : zero(T)
-ccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normccdf(d.μ, d.σ, log(x)) : one(T)
-logcdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normlogcdf(d.μ, d.σ, log(x)) : -T(Inf)
-logccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normlogccdf(d.μ, d.σ, log(x)) : zero(T)
+cdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? cdf(Normal(params(d)...), log(x)) : zero(T)
+ccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? ccdf(Normal(params(d)...), log(x)) : one(T)
+logcdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? logcdf(Normal(params(d)...), log(x)) : -T(Inf)
+logccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? logccdf(Normal(params(d)...), log(x)) : zero(T)
 
-quantile(d::LogNormal, q::Real) = exp(norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogNormal, q::Real) = exp(norminvccdf(d.μ, d.σ, q))
-invlogcdf(d::LogNormal, lq::Real) = exp(norminvlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogNormal, lq::Real) = exp(norminvlogccdf(d.μ, d.σ, lq))
+quantile(d::LogNormal, q::Real) = exp(quantile(Normal(params(d)...), q))
+cquantile(d::LogNormal, q::Real) = exp(cquantile(Normal(params(d)...), q))
+invlogcdf(d::LogNormal, lq::Real) = exp(invlogcdf(Normal(params(d)...), lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(invlogccdf(Normal(params(d)...), lq))
 
 function gradlogpdf(d::LogNormal{T}, x::Real) where T<:Real
     (μ, σ) = params(d)

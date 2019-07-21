@@ -4,11 +4,13 @@ using Test
 using Distributed
 using Random
 using StatsBase
+using LinearAlgebra
 
 const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "normal",
     "mvnormal",
     "mvlognormal",
     "types",
@@ -17,6 +19,7 @@ const tests = [
     "categorical",
     "univariates",
     "continuous",
+    "edgecases",
     "fit",
     "multinomial",
     "binomial",
@@ -27,9 +30,13 @@ const tests = [
     "mvtdist",
     "kolmogorov",
     "edgeworth",
-    "matrix",
+    "wisharts",
+    "matrixbeta",
+    "matrixnormal",
+    "matrixtdist",
     "vonmisesfisher",
     "conversion",
+    "convolution",
     "mixture",
     "gradlogpdf",
     "noncentralt",

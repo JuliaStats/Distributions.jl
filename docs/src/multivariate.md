@@ -18,6 +18,7 @@ The methods listed as below are implemented for each multivariate distribution, 
 ```@docs
 length(::MultivariateDistribution)
 size(::MultivariateDistribution)
+eltype(d::MultivariateDistribution)
 mean(::MultivariateDistribution)
 var(::MultivariateDistribution)
 cov(::MultivariateDistribution)

@@ -139,6 +139,7 @@ Following methods need to be implemented for each multivariate distribution type
 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
+- [`eltype(d::Distribution)`](@ref)
 - [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)`](@ref)
 - [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 
