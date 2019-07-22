@@ -2,6 +2,13 @@
 
 *Matrix-variate distributions* are the distributions whose variate forms are `Matrixvariate` (*i.e* each sample is a matrix). Abstract types for matrix-variate distributions:
 
+```julia
+const MatrixDistribution{S<:ValueSupport} = Distribution{Matrixvariate,S}
+
+const DiscreteMatrixDistribution   = Distribution{Matrixvariate, Discrete}
+const ContinuousMatrixDistribution = Distribution{Matrixvariate, Continuous}
+```
+
 ## Common Interface
 
 All distributions implement the same set of methods:
@@ -24,6 +31,7 @@ InverseWishart
 MatrixNormal
 MatrixTDist
 MatrixBeta
+MatrixFDist
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
