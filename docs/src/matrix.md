@@ -9,6 +9,9 @@ const DiscreteMatrixDistribution   = Distribution{Matrixvariate, Discrete}
 const ContinuousMatrixDistribution = Distribution{Matrixvariate, Continuous}
 ```
 
+More advanced functionalities related to random matrices can be found in the
+[RandomMatrices.jl](https://github.com/JuliaMath/RandomMatrices.jl) package.
+
 ## Common Interface
 
 All distributions implement the same set of methods:
