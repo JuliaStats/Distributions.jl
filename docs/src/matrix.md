@@ -31,6 +31,7 @@ InverseWishart
 MatrixNormal
 MatrixTDist
 MatrixBeta
+MatrixFDist
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
