@@ -3,9 +3,8 @@
 #   following the Wikipedia parameterization
 #
 """
+    Wishart(ν, S)
 ```julia
-Wishart(ν, S)
-
 ν::Real   degrees of freedom (greater than p - 1)
 S::PDMat  p x p scale matrix
 ```

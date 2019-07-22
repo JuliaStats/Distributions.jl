@@ -1,7 +1,6 @@
 """
+    MatrixBeta(p, n1, n2)
 ```julia
-MatrixBeta(p, n1, n2)
-
 p::Int    dimension
 n1::Real  degrees of freedom (greater than p - 1)
 n2::Real  degrees of freedom (greater than p - 1)
@@ -36,18 +35,13 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixBeta(p::Int, n1::Real, n2::Real)
-
     p > 0 || throw(ArgumentError("dim must be positive: got $(p)."))
-
     logc0 = matrixbeta_logc0(p, n1, n2)
-
     T = Base.promote_eltype(n1, n2, logc0)
     Ip = PDMat( Matrix{T}(I, p, p) )
     W1 = Wishart(T(n1), Ip)
     W2 = Wishart(T(n2), Ip)
-
     MatrixBeta{T, typeof(W1)}(W1, W2, T(logc0))
-
 end
 
 #  -----------------------------------------------------------------------------
@@ -96,19 +90,13 @@ mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d)
 
 function matrixbeta_logc0(p::Int, n1::Real, n2::Real)
     #  returns the natural log of the normalizing constant for the pdf
-
     return logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
-    #return -logmvbeta(p, n1 / 2, n2 / 2)
-
 end
 
 function logkernel(d::MatrixBeta, U::AbstractMatrix)
-
     p = dim(d)
     n1, n2 = params(d)
-
     ((n1 - p - 1) / 2) * logdet(U) + ((n2 - p - 1) / 2) * logdet(I - U)
-
 end
 
 _logpdf(d::MatrixBeta, U::AbstractMatrix) = logkernel(d, U) + d.logc0
@@ -120,12 +108,9 @@ _logpdf(d::MatrixBeta, U::AbstractMatrix) = logkernel(d, U) + d.logc0
 #  Mitra (1970 Sankhyā)
 
 function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
-
     S1   = PDMat( rand(rng, d.W1) )
     S2   = PDMat( rand(rng, d.W2) )
     S    = S1 + S2
     invL = Matrix( inv(S.chol.L) )
-
     A .= X_A_Xt(S1, invL)
-
 end
