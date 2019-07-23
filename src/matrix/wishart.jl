@@ -67,6 +67,7 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 size(d::Wishart, i) = size(d)[i]
+rank(d::Wishart) = dim(d)
 params(d::Wishart) = (d.df, d.S, d.c0)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
