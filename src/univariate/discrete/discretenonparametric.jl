@@ -2,7 +2,7 @@
     DiscreteNonParametric(xs, ps)
 
 A *Discrete nonparametric distribution* explicitly defines an arbitrary
-probability mass function in terms of a list of real support values and their
+probability mass function in terms of a list of support values and their
 corresponding probabilities
 
 ```julia
@@ -17,16 +17,16 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
     support::Ts
     p::Ps
 
     DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps, ::NoArgCheck) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+        T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
         new{T,P,Ts,Ps}(vs, ps)
 
     function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
+        T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
         @check_args(DiscreteNonParametric, isprobvec(ps))
         @check_args(DiscreteNonParametric, allunique(vs))
@@ -36,11 +36,11 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
 end
 
 DiscreteNonParametric(vs::Ts, ps::Ps) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
 
 DiscreteNonParametric(vs::Ts, ps::Ps, a::NoArgCheck) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, a)
 
 eltype(d::DiscreteNonParametric{T}) where T = T
@@ -113,6 +113,7 @@ function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
 end
 pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
 pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
+pdf(d::DiscreteNonParametric{T}, x) where T = _pdf(d, convert(T, x))
 
 function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x > maximum(d) && return 1.0
@@ -126,6 +127,7 @@ function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
 end
 cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
 cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x) where T = _cdf(d, convert(T, x))
 
 function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x < minimum(d) && return 1.0
@@ -139,6 +141,7 @@ function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
 end
 ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
 ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
+ccdf(d::DiscreteNonParametric{T}, x) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())

@@ -9,31 +9,47 @@ rng = MersenneTwister(123)
          "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
 
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
+d_string = DiscreteNonParametric(["forty", "eighty", "one hundred and twenty", "negative sixty"], [.4, .3, .1,  .2])
 
 @test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], Distributions.NoArgCheck()))
 @test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], Distributions.NoArgCheck())
 
 # Invalid probability
 @test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
+@test_throws ArgumentError DiscreteNonParametric(["forty", "eighty", "one hundred and twenty", "negative sixty"], [.5, .3, .1, .2])
 
 # Invalid probability, but no arg check
 DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
+DiscreteNonParametric(["forty", "eighty", "one hundred and twenty", "negative sixty"], [.5, .3, .1, .2], Distributions.NoArgCheck())
 
 test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
+vs_string = Distributions.get_evalsamples(d_string, 0.00001)
 test_evaluation(d, vs, true)
+test_evaluation(d_string, vs_string, true)
 test_stats(d, vs)
 test_params(d)
+test_params(d_string)
 
 @test func[1](d) ∈ [40., 80., 120., -60.]
+@test func[1](d_string) ∈ ["forty", "eighty", "one hundred and twenty", "negative sixty"]
+@test func[1](d) ∈ [40., 80., 120., -60.]
+@test func[1](d_string) ∈ ["forty", "eighty", "one hundred and twenty", "negative sixty"]
 @test func[1](sampler(d)) ∈ [40., 80., 120., -60.]
+@test func[1](sampler(d_string)) ∈ ["forty", "eighty", "one hundred and twenty", "negative sixty"]
 
 @test pdf(d, -100.) == 0.
+@test pdf(d_string, "negative one hundred") == 0.
 @test pdf(d, -100) == 0.
+@test pdf(d_string, "negative one hundred") == 0.
 @test pdf(d, -60.) == .2
+@test pdf(d_string, "negative sixty") == .2
 @test pdf(d, -60) == .2
+@test pdf(d_string, "negative sixty") == .2
 @test pdf(d, 100.) == 0.
+@test pdf(d_string, "one hundred") == 0.
 @test pdf(d, 120.) == .1
+@test pdf(d_string, "one hundred and twenty") == .1
 
 @test cdf(d, -100.) == 0.
 @test cdf(d, -100) == 0.
@@ -59,20 +75,28 @@ test_params(d)
 
 @test insupport(d, -60)
 @test insupport(d, -60.)
+@test in("negative sixty", support(d_string))
 @test !insupport(d, 20)
 @test !insupport(d, 20.)
+@test !in("twenty", support(d_string))
 @test insupport(d, 80)
+@test in("eighty", support(d_string))
 @test !insupport(d, 150)
+@test !in("one hundred and fifty", support(d_string))
 
 xs = support(d)
+xs_string = support(d_string)
 ws = ProbabilityWeights(probs(d))
+ws_string = ProbabilityWeights(probs(d_string))
 @test mean(d) ≈ mean(xs, ws)
 @test var(d) ≈ var(xs, ws, corrected=false)
 @test skewness(d) ≈ skewness(xs, ws)
 @test kurtosis(d) ≈ kurtosis(xs, ws)
 @test entropy(d) ≈ 1.2798542258336676
 @test mode(d) == 40
+@test mode(d_string) == "forty"
 @test modes(d) == [40]
+@test modes(d_string) == ["forty"]
 @test mgf(d, 0) ≈ 1.0
 @test mgf(d, 0.17) ≈ 7.262034e7
 @test cf(d, 0) ≈ 1.0
