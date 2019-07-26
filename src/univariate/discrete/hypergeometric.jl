@@ -69,7 +69,7 @@ function kurtosis(d::Hypergeometric)
     a/b
 end
 
-entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
+entropy(d::Hypergeometric) = entropy(pmf.(Ref(d), support(d)))
 
 ### Evaluation & Sampling
 
@@ -94,13 +94,13 @@ end
 
 RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvaluator(d.ns, d.nf, d.n)
 
-nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
+nextpmf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
     ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
 
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
+Base.broadcast!(::typeof(pmf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
+    _pmf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
 
-function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
+function Base.broadcast(::typeof(pmf), d::Hypergeometric, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
+    r .= pmf.(Ref(d),X)
 end

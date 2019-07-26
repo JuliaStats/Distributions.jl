@@ -91,13 +91,13 @@ struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
 end
 
 RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(rate(d))
-nextpdf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
+nextpmf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
 
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::Poisson, X::UnitRange)
+Base.broadcast!(::typeof(pmf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
+    _pmf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
+function Base.broadcast(::typeof(pmf), d::Poisson, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
+    r .= pmf.(Ref(d),X)
 end
 
 

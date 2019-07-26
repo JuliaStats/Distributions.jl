@@ -129,42 +129,42 @@ struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
 end
 
 RecursiveBinomProbEvaluator(d::Binomial) = RecursiveBinomProbEvaluator(d.n, d.p / (1 - d.p))
-nextpdf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
+nextpmf(s::RecursiveBinomProbEvaluator, pv::T, x::Integer) where T <: Real = ((s.n - x + 1) / x) * s.coef * pv
 
-function Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Binomial, X::UnitRange)
+function Base.broadcast!(::typeof(pmf), r::AbstractArray, d::Binomial, X::UnitRange)
     axes(r) == axes(X) || throw(DimensionMismatch("Inconsistent array dimensions."))
 
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+    vl,vr, vfirst, vlast = _pmf_fill_outside!(r, d, X)
     if succprob(d) <= 1/2
         # fill normal
         rpe = RecursiveBinomProbEvaluator(d::Binomial)
 
-        # fill central part: with non-zero pdf
+        # fill central part: with non-zero pmf
         if vl <= vr
             fm1 = vfirst - 1
-            r[vl - fm1] = pv = pdf(d, vl)
+            r[vl - fm1] = pv = pmf(d, vl)
             for v = (vl + 1):vr
-                r[v - fm1] = pv = nextpdf(rpe, pv, v)
+                r[v - fm1] = pv = nextpmf(rpe, pv, v)
             end
         end
     else
         # fill reversed to avoid 1/0 for d.p==1.
         rpe = RecursiveBinomProbEvaluator(d.n, (1 - d.p) / d.p)
 
-        # fill central part: with non-zero pdf
+        # fill central part: with non-zero pmf
         if vl <= vr
             fm1 = vfirst - 1
-            r[vr - fm1] = pv = pdf(d, vr)
+            r[vr - fm1] = pv = pmf(d, vr)
             for v = (vr-1):-1:vl
-                r[v - fm1] = pv = nextpdf(rpe, pv, d.n-v)
+                r[v - fm1] = pv = nextpmf(rpe, pv, d.n-v)
             end
         end
     end
     return r
 end
-function Base.broadcast(::typeof(pdf), d::Binomial, X::UnitRange)
+function Base.broadcast(::typeof(pmf), d::Binomial, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
+    r .= pmf.(Ref(d),X)
 end
 
 

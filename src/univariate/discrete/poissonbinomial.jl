@@ -34,7 +34,7 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
                 error("Each element of p must be in [0, 1].")
             end
         end
-        pb = poissonbinomial_pdf_fft(p)
+        pb = poissonbinomial_pmf_fft(p)
         @assert isprobvec(pb)
         new{T}(p, pb)
     end
@@ -109,20 +109,20 @@ function cf(d::PoissonBinomial, t::Real)
     prod(1 .- p .+ p .* cis(t))
 end
 
-pdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0
-function logpdf(d::PoissonBinomial{T}, k::Int) where T<:Real
+pmf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0
+function logpmf(d::PoissonBinomial{T}, k::Int) where T<:Real
     insupport(d, k) ? log(d.pmf[k + 1]) : -T(Inf)
 end
 
 
-# Computes the pdf of a poisson-binomial random variable using
+# Computes the pmf of a poisson-binomial random variable using
 # fast fourier transform
 #
 #     Hong, Y. (2013).
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray)
+function poissonbinomial_pmf_fft(p::AbstractArray)
     n = length(p)
     ω = 2 / (n + 1)
 

@@ -17,7 +17,9 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T,P<:Real,
+                             Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <:
+                                 UnivariateDistribution{CountableSupport{T}}
     support::Ts
     p::Ps
 
@@ -43,7 +45,13 @@ DiscreteNonParametric(vs::Ts, ps::Ps, a::NoArgCheck) where {
     T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, a)
 
-eltype(d::DiscreteNonParametric{T}) where T = T
+DiscreteNonParametric(dict::Dict{K, V}) where {K,V<:Real} =
+    DiscreteNonParametric{K,V,Vector{K},Vector{V}}(collect(keys(dict)),
+                                                   collect(values(dict)))
+
+DiscreteNonParametric(dict::Dict{K, V}, a::NoArgCheck) where {K,V<:Real} =
+    DiscreteNonParametric{K,V,Vector{K},Vector{V}}(collect(keys(dict)),
+                                                   collect(values(dict)), a)
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
@@ -99,11 +107,11 @@ get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
 
 # Evaluation
 
-pdf(d::DiscreteNonParametric) = copy(probs(d))
+pmf(d::DiscreteNonParametric) = copy(probs(d))
 
 # Helper functions for pdf and cdf required to fix ambiguous method
-# error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
-function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
+# error involving [pc]mf(::DisceteUnivariateDistribution, ::Int)
+function _pmf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     idx_range = searchsorted(support(d), x)
     if length(idx_range) > 0
         return probs(d)[first(idx_range)]
@@ -111,9 +119,9 @@ function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
         return zero(P)
     end
 end
-pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
-pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
-pdf(d::DiscreteNonParametric{T}, x) where T = _pdf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x::Int) where T  = _pmf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x::Real) where T = _pmf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x) where T = _pmf(d, convert(T, x))
 
 function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x > maximum(d) && return 1.0

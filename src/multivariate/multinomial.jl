@@ -117,7 +117,7 @@ function entropy(d::Multinomial)
     for pr in p
         b = Binomial(n, pr)
         for x in 0:n
-            s += pdf(b, x) * lgamma(x+1)
+            s += pmf(b, x) * lgamma(x+1)
         end
     end
     return s
@@ -140,7 +140,7 @@ function insupport(d::Multinomial, x::AbstractVector{T}) where T<:Real
     return s == ntrials(d)  # integer computation would not yield truncation errors
 end
 
-function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
+function _logpmf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     p = probs(d)
     n = ntrials(d)
     S = eltype(p)

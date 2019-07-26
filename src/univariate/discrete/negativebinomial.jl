@@ -103,13 +103,13 @@ struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
 end
 
 RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
-nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
+nextpmf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
 
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::NegativeBinomial, X::UnitRange)
+Base.broadcast!(::typeof(pmf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
+    _pmf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
+function Base.broadcast(::typeof(pmf), d::NegativeBinomial, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
+    r .= pmf.(Ref(d),X)
 end
 
 function mgf(d::NegativeBinomial, t::Real)

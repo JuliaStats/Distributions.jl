@@ -54,7 +54,7 @@ function insupport(d::DirichletMultinomial, x::AbstractVector{T}) where T<:Real
     end
     return sum(x) == ntrials(d)
 end
-function _logpdf(d::DirichletMultinomial{S}, x::AbstractVector{T}) where {T<:Real, S<:Real}
+function _logpmf(d::DirichletMultinomial{S}, x::AbstractVector{T}) where {T<:Real, S<:Real}
     c = lgamma(S(d.n + 1)) + lgamma(d.α0) - lgamma(d.n + d.α0)
     for j in eachindex(x)
         @inbounds xj, αj = x[j], d.α[j]
