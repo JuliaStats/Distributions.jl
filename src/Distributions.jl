@@ -30,11 +30,16 @@ export
     # generic types
     VariateForm,
     ValueSupport,
+    CountableSupport,
+    ContinuousSupport,
+    DiscontinuousSupport,
+    UnionSupport,
     Univariate,
     Multivariate,
     Matrixvariate,
     Discrete,
     Continuous,
+    Discontinuous,
     Sampleable,
     Distribution,
     UnivariateDistribution,
@@ -44,6 +49,9 @@ export
     NonMatrixDistribution,
     DiscreteDistribution,
     ContinuousDistribution,
+    CountableUnivariateDistribution,
+    CountableMultivariateDistribution,
+    CountableMatrixDistribution,
     DiscreteUnivariateDistribution,
     DiscreteMultivariateDistribution,
     DiscreteMatrixDistribution,
@@ -172,6 +180,8 @@ export
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
     componentwise_logpdf,   # component-wise logpdf for mixture models
+    componentwise_pmf,      # component-wise pmf for mixture models
+    componentwise_logpmf,   # component-wise logpmf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
     dim,                # sample dimension of multivariate distribution
@@ -199,6 +209,8 @@ export
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
+    logpmf,             # log probability mass
+    logpmf!,            # evaluate log pmf to provided storage
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
@@ -221,7 +233,8 @@ export
     params,             # get the tuple of parameters
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
-    pdf,                # probability density function (ContinuousDistribution)
+    pdf,                # probability density function (non-CountableSupport)
+    pmf,                # probability mass function (non-ContinuousSupport)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
@@ -290,6 +303,7 @@ API overview (major features):
 - `d = Dist(parameters...)` creates a distribution instance `d` for some distribution `Dist` (see choices below) with the specified `parameters`
 - `rand(d, sz)` samples from the distribution
 - `pdf(d, x)` and `logpdf(d, x)` compute the probability density or log-probability density of `d` at `x`
+- `pmf(d, x)` and `logpmf(d, x)` compute the probability mass or log-probability mass of `d` at `x`
 - `cdf(d, x)` and `ccdf(d, x)` compute the (complementary) cumulative distribution function at `x`
 - `quantile(d, p)` is the inverse `cdf` (see also `cquantile`)
 - `mean(d)`, `var(d)`, `std(d)`, `skewness(d)`, `kurtosis(d)` compute moments of `d`

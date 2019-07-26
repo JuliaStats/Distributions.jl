@@ -13,9 +13,21 @@ struct Matrixvariate <: VariateForm end
 `S <: ValueSupport` specifies the support of sample elements,
 either discrete or continuous.
 """
-abstract type ValueSupport end
-struct Discrete   <: ValueSupport end
-struct Continuous <: ValueSupport end
+abstract type ValueSupport{N} end
+struct ContinuousSupport{N <: Number} <: ValueSupport{N} end
+struct CountableSupport{C} <: ValueSupport{C} end
+struct UnionSupport{N1, N2,
+                    S1 <: ValueSupport{N1},
+                    S2 <: ValueSupport{N2}} <:
+                        ValueSupport{Union{N1, N2}} end
+
+const Discrete = CountableSupport{Int}
+const Continuous = ContinuousSupport{Float64}
+const DiscontinuousSupport{F, I} =
+    UnionSupport{F, I, ContinuousSupport{F},
+                 CountableSupport{I}} where {F <: Number,
+                                             I <: Number}
+const Discontinuous = DiscontinuousSupport{Float64, Int}
 
 ## Sampleable
 
@@ -55,8 +67,7 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
-Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
+Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
 
 """
     nsamples(s::Sampleable)
@@ -85,17 +96,34 @@ abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} en
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
-const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
+const NonMatrixDistribution = Union{UnivariateDistribution,
+                                    MultivariateDistribution}
 
-const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+const CountableDistribution{F<:VariateForm,
+                            C<:CountableSupport} = Distribution{F,C}
+const DiscreteDistribution{F<:VariateForm} = CountableDistribution{F,Discrete}
 const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
-const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
-const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
-const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
-const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
-const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
-const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
+const CountableUnivariateDistribution{C<:CountableSupport} =
+    UnivariateDistribution{C}
+const DiscreteUnivariateDistribution =
+    CountableUnivariateDistribution{Discrete}
+const ContinuousUnivariateDistribution   = UnivariateDistribution{Continuous}
+
+const CountableMultivariateDistribution{C<:CountableSupport} =
+    MultivariateDistribution{C}
+const DiscreteMultivariateDistribution =
+    CountableMultivariateDistribution{Discrete}
+const ContinuousMultivariateDistribution = MultivariateDistribution{Continuous}
+
+const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
+const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
+const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
+
+pdf(d::CountableDistribution) = pmf(d)
+pdf(d::CountableDistribution, x) = pmf(d, x)
+logpdf(d::CountableDistribution) = logpmf(d)
+logpdf(d::CountableDistribution, x) = logpmf(d, x)
 
 variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
 variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))

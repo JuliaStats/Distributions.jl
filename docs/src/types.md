@@ -41,8 +41,10 @@ The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
 **Type** | **Element type** | **Descriptions**
 --- | --- | ---
-`Discrete` | `Int` | Samples take discrete values
-`Continuous` | `Float64` | Samples take continuous real values
+`DiscreteSupport{T}` | `T` | Samples take any discrete values
+`Discrete = DiscreteSupport{Int}` | `Int` | Samples take `Int` values
+`ContinuousSupport{T <: Number}` | `T` | Samples take continuous values
+`Continuous = ContinuousSupport{Float64}` | `Float64` | Samples take continuous `Float64` values
 
 Multiple samples are often organized into an array, depending on the variate form.
 
@@ -69,22 +71,28 @@ abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} en
 Distributions.Distribution
 ```
 
-To simplify the use in practice, we introduce a series of type alias as follows:
+To simplify the use in practice, we introduce a series of type aliases as follows:
 ```julia
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
-const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+const CountableDistribution{F<:VariateForm, C<:CountableSupport} = Distribution{F,C}
+const DiscreteDistribution{F<:VariateForm}                       = CountableDistribution{F,Discrete}
+const ContinuousDistribution{F<:VariateForm}                     = Distribution{F,Continuous}
 
-const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
-const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
-const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
-const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
-const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
-const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
+const CountableUnivariateDistribution{C<:CountableSupport} = UnivariateDistribution{C}
+const DiscreteUnivariateDistribution                       = CountableUnivariateDistribution{Discrete}
+const ContinuousUnivariateDistribution                     = UnivariateDistribution{Continuous}
+
+const CountableMultivariateDistribution{C<:CountableSupport} = MultivariateDistribution{C}
+const DiscreteMultivariateDistribution                       = CountableMultivariateDistribution{Discrete}
+const ContinuousMultivariateDistribution                     = MultivariateDistribution{Continuous}
+
+const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
+const DiscreteMatrixDistribution                       = CountableMatrixDistribution{Discrete}
+const ContinuousMatrixDistribution                     = MatrixDistribution{Continuous}
 ```
 
 All methods applicable to `Sampleable` also applies to `Distribution`. The API for distributions of different variate forms are different (refer to [univariates](@ref univariates), [multivariates](@ref multivariates), and [matrix](@ref matrix-variates) for details).
