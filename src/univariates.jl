@@ -405,20 +405,20 @@ ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
-logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
+logcdf(d::UnivariateDistribution, x) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
-logcdf(d::DiscreteUnivariateDistribution, x) = log(cdf(d, x))
+logcdf(d::CountableUnivariateDistribution, x) = log(cdf(d, x))
 
 """
     logccdf(d::UnivariateDistribution, x::Real)
 
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
-logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
+logccdf(d::UnivariateDistribution, x) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
-logccdf(d::DiscreteUnivariateDistribution, x) = log(ccdf(d, x))
+logccdf(d::CountableUnivariateDistribution, x) = log(ccdf(d, x))
 
 """
     quantile(d::UnivariateDistribution, q::Real)
