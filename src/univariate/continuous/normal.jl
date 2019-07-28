@@ -168,11 +168,11 @@ invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
 function quantile(d::Normal, p::Real)
     if iszero(d.σ)
         if iszero(p)
-            -Inf
+            return -Inf
         elseif isone(p)
-            Inf
+            return Inf
         else
-            0.5
+            return d.μ
         end
     end
     xval(d, -erfcinv(2p) * sqrt2)
@@ -181,11 +181,11 @@ end
 function cquantile(d::Normal, q::Real)
     if iszero(d.σ)
         if iszero(q)
-            Inf
+            return Inf
         elseif isone(q)
-            -Inf
+            return -Inf
         else
-            0.5
+            return d.μ
         end
     end
     xval(d, erfcinv(2q) * sqrt2)

@@ -103,7 +103,8 @@ median(d::BetaBinomial) = median(Categorical(pmf.(Ref(d),support(d)))) - 1
 mode(d::BetaBinomial) = argmax(pmf.(Ref(d),support(d))) - 1
 modes(d::BetaBinomial) = modes(Categorical(pmf.(Ref(d),support(d)))) .- 1
 
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pmf.(Ref(d), support(d))), p) - 1
+quantile(d::BetaBinomial, p::Real) =
+    quantile(Categorical(pmf.(Ref(d), support(d))), p) - 1
 
 #### Sampling
 

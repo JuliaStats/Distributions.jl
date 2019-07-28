@@ -97,7 +97,7 @@ modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 #### Evaluation
 
-quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
+quantile(d::PoissonBinomial, x::Real) = quantile(Categorical(d.pmf), x) - 1
 
 function mgf(d::PoissonBinomial, t::Real)
     p,  = params(d)

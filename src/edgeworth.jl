@@ -55,7 +55,7 @@ end
 
 
 # Cornish-Fisher expansion.
-function quantile(d::EdgeworthZ, p::Float64)
+function quantile(d::EdgeworthZ, p::Real)
     s = skewness(d)
     k = kurtosis(d)
     z = quantile(Normal(0,1),p)
@@ -63,7 +63,7 @@ function quantile(d::EdgeworthZ, p::Float64)
     z + s*(z2-1)/6.0 + k*z*(z2-3)/24.0 - s*s/36.0*z*(2.0*z2-5.0)
 end
 
-function cquantile(d::EdgeworthZ, p::Float64)
+function cquantile(d::EdgeworthZ, p::Real)
     s = skewness(d)
     k = kurtosis(d)
     z = cquantile(Normal(0,1),p)
@@ -112,5 +112,5 @@ cdf(d::EdgeworthAbstract, x::Float64) = cdf(EdgeworthZ(d.dist,d.n), (x-mean(d))/
 
 ccdf(d::EdgeworthAbstract, x::Float64) = ccdf(EdgeworthZ(d.dist,d.n), (x-mean(d))/std(d))
 
-quantile(d::EdgeworthAbstract, p::Float64) = mean(d) + std(d)*quantile(EdgeworthZ(d.dist,d.n), p)
-cquantile(d::EdgeworthAbstract, p::Float64) = mean(d) + std(d)*cquantile(EdgeworthZ(d.dist,d.n), p)
+quantile(d::EdgeworthAbstract, p::Real) = mean(d) + std(d)*quantile(EdgeworthZ(d.dist,d.n), p)
+cquantile(d::EdgeworthAbstract, p::Real) = mean(d) + std(d)*cquantile(EdgeworthZ(d.dist,d.n), p)

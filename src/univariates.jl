@@ -434,7 +434,7 @@ quantile(d::UnivariateDistribution, p::Real)
 
 The complementary quantile value, i.e. `quantile(d, 1-q)`.
 """
-cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
+cquantile(d::UnivariateDistribution, p::Real) = quantile(d, one(p) - p)
 
 """
     invlogcdf(d::UnivariateDistribution, lp::Real)
