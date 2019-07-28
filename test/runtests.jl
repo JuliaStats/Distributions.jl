@@ -7,6 +7,7 @@ using StatsBase
 using LinearAlgebra
 
 const tests = [
+    "dirac",
     "truncate",
     "truncnormal",
     "truncated_exponential",
