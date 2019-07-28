@@ -24,25 +24,28 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
+const Categorical{P,Ps,I <: Integer} =
+    DiscreteNonParametric{I,P,Base.OneTo{I},Ps}
 
-Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real,
+                                              Ps<:AbstractVector{P}} =
+    Categorical{P,Ps,Int}(Base.OneTo(length(p)), p, NoArgCheck())
 
 Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
     Categorical{P,Ps}(p, NoArgCheck())
 
 function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
     @check_args(Categorical, isprobvec(p))
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+    Categorical{P,Ps,Int}(Base.OneTo(length(p)), p, NoArgCheck())
 end
 
 Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
     Categorical{P,Ps}(p)
 
-function Categorical(k::Integer)
+function Categorical(k::I) where I <: Integer
     @check_args(Categorical, k >= 1)
-    Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), NoArgCheck())
+    Categorical{Float64,Vector{Float64},I}(Base.OneTo(k), fill(1/k, k),
+                                           NoArgCheck())
 end
 
 ### Conversions
