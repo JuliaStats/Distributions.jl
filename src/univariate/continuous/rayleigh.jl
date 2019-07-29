@@ -36,16 +36,15 @@ function Rayleigh(σ::T, ::NoArgCheck) where {T <: Real}
     return Rayleigh{T}(σ)
 end
 
-Rayleigh(σ::T) where {T<:Real} = Rayleigh{T}(σ)
 Rayleigh(σ::Integer) = Rayleigh(Float64(σ))
-Rayleigh() = Rayleigh(1.0)
+Rayleigh() = Rayleigh(1.0, NoArgCheck())
 
 @distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ))
+convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), NoArgCheck())
 
 #### Parameters
 
