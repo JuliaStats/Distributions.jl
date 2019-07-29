@@ -4,25 +4,28 @@
 struct Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    Epanechnikov{T}(μ::T, σ::T) where {T} = (@check_args(Epanechnikov, σ > zero(σ)); new{T}(μ, σ))
 end
 
-Epanechnikov(μ::T, σ::T) where {T<:Real} = Epanechnikov{T}(μ, σ)
+function Epanechnikov(μ::T, σ::T) where {T<:Real}
+    @check_args(Epanechnikov, σ > zero(σ))
+    return Epanechnikov{T}(μ, σ)
+end
+
+Epanechnikov(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Epanechnikov{T}(μ, σ)
+
 Epanechnikov(μ::Real, σ::Real) = Epanechnikov(promote(μ, σ)...)
 Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(Float64(μ), Float64(σ))
-Epanechnikov(μ::Real) = Epanechnikov(μ, 1.0)
-Epanechnikov() = Epanechnikov(0.0, 1.0)
-
+Epanechnikov(μ::T) where {T <: Real} = Epanechnikov(μ, one(T))
+Epanechnikov() = Epanechnikov(0.0, 1.0, ::NoArgCheck)
 
 @distr_support Epanechnikov d.μ - d.σ d.μ + d.σ
 
 #### Conversions
 function convert(::Type{Epanechnikov{T}}, μ::Real, σ::Real) where T<:Real
-    Epanechnikov(T(μ), T(σ))
+    Epanechnikov(T(μ), T(σ), NoArgCheck())
 end
 function convert(::Type{Epanechnikov{T}}, d::Epanechnikov{S}) where {T <: Real, S <: Real}
-    Epanechnikov(T(d.μ), T(d.σ))
+    Epanechnikov(T(d.μ), T(d.σ), NoArgCheck())
 end
 
 ## Parameters

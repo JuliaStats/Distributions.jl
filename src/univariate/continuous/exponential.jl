@@ -23,25 +23,28 @@ External links
 """
 struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     θ::T        # note: scale not rate
-
-    Exponential{T}(θ::Real) where {T} = (@check_args(Exponential, θ > zero(θ)); new{T}(θ))
 end
 
-Exponential(θ::T) where {T<:Real} = Exponential{T}(θ)
+function Exponential(θ::T) where {T <: Real}
+    @check_args(Exponential, θ > zero(θ))
+    return Exponential{T}(θ)
+end
+
+Exponential(θ::T, ::NoArgCheck) where {T <: Real} = Exponential{T}(θ)
+
 Exponential(θ::Integer) = Exponential(Float64(θ))
-Exponential() = Exponential(1.0)
+Exponential() = Exponential(1.0, NoArgCheck())
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ))
-
+convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), NoArgCheck())
 
 #### Parameters
 
 scale(d::Exponential) = d.θ
-rate(d::Exponential) = 1 / d.θ
+rate(d::Exponential) = inv(d.θ)
 
 params(d::Exponential) = (d.θ,)
 @inline partype(d::Exponential{T}) where {T<:Real} = T
@@ -54,10 +57,10 @@ median(d::Exponential) = logtwo * d.θ
 mode(d::Exponential{T}) where {T<:Real} = zero(T)
 
 var(d::Exponential) = d.θ^2
-skewness(d::Exponential{T}) where {T<:Real} = T(2)
-kurtosis(d::Exponential{T}) where {T<:Real} = T(6)
+skewness(d::Exponential{T}) where {T} = T(2)
+kurtosis(d::Exponential{T}) where {T} = T(6)
 
-entropy(d::Exponential) = 1 + log(d.θ)
+entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
 
 #### Evaluation
@@ -67,7 +70,8 @@ xval(d::Exponential, z::Real) = z * d.θ
 
 pdf(d::Exponential, x::Real) = (λ = rate(d); x < 0 ? zero(λ) : λ * exp(-λ * x))
 function logpdf(d::Exponential{T}, x::Real) where T<:Real
-    (λ = rate(d); x < 0 ? -T(Inf) : log(λ) - λ * x)
+    λ = rate(d)
+    x < 0 ? -T(Inf) : log(λ) - λ * x
 end
 
 cdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-zval(d, x)) : zero(T)
