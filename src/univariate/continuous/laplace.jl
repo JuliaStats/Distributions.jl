@@ -25,15 +25,21 @@ External links
 struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
-
-    Laplace{T}(μ::T, θ::T) where {T} = (@check_args(Laplace, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Laplace(μ::T, θ::T) where {T<:Real} = Laplace{T}(μ, θ)
+function Laplace(μ::T, θ::T) where {T <: Real}
+    @check_args(Laplace, θ > zero(θ))
+    return Laplace{T}(μ, θ)
+end
+
+function Laplace(μ::T, θ::T, ::NoArgCheck) where {T <: Real}
+    return Laplace{T}(μ, θ)
+end
+
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
 Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
-Laplace(μ::Real) = Laplace(μ, 1.0)
-Laplace() = Laplace(0.0, 1.0)
+Laplace(μ::T) where {T <: Real} = Laplace(μ, one(T))
+Laplace() = Laplace(0.0, 1.0, NoArgCheck())
 
 const Biexponential = Laplace
 
@@ -44,9 +50,8 @@ function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))
 end
 function convert(::Type{Laplace{T}}, d::Laplace{S}) where {T <: Real, S <: Real}
-    Laplace(T(d.μ), T(d.θ))
+    Laplace(T(d.μ), T(d.θ), NoArgCheck())
 end
-
 
 #### Parameters
 
@@ -68,7 +73,6 @@ skewness(d::Laplace{T}) where {T<:Real} = zero(T)
 kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
-
 
 #### Evaluations
 

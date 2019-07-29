@@ -25,15 +25,21 @@ External links
 struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
-
-    Gumbel{T}(μ::T, θ::T) where {T} = (@check_args(Gumbel, θ > zero(θ)); new{T}(μ, θ))
 end
 
-Gumbel(μ::T, θ::T) where {T<:Real} = Gumbel{T}(μ, θ)
+function Gumbel(μ::T, θ::T) where {T <: Real}
+    @check_args(Gumbel, θ > zero(θ))
+    return Gumbel{T}(μ, θ)
+end
+
+function Gumbel(μ::T, θ::T, ::NoArgCheck) where {T<:Real}
+    return Gumbel{T}(μ, θ)
+end
+
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
 Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
-Gumbel(μ::Real) = Gumbel(μ, 1.0)
-Gumbel() = Gumbel(0.0, 1.0)
+Gumbel(μ::T) where {T <: Real} = Gumbel(μ, one(T))
+Gumbel() = Gumbel(0.0, 1.0, NoArgCheck())
 
 @distr_support Gumbel -Inf Inf
 
@@ -42,7 +48,7 @@ const DoubleExponential = Gumbel
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
-convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ))
+convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ), NoArgCheck())
 
 #### Parameters
 

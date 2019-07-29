@@ -28,18 +28,21 @@ External links
 struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     invd::Gamma{T}
     θ::T
-
-    function InverseGamma{T}(α, θ) where T
-        @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
-        new{T}(Gamma(α, 1 / θ), θ)
-    end
 end
 
-InverseGamma(α::T, θ::T) where {T<:Real} = InverseGamma{T}(α, θ)
+function InverseGamma(α, θ) where {T <: Real}
+    @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
+    return InverseGamma{T}(Gamma(α, inv(θ)), θ)
+end
+
+function InverseGamma(α::T, θ::T) where {T<:Real}
+    return InverseGamma{T}(α, θ)
+end
+
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
 InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
-InverseGamma(α::Real) = InverseGamma(α, 1.0)
-InverseGamma() = InverseGamma(1.0, 1.0)
+InverseGamma(α::T) where {T <: Real} = InverseGamma(α, one(T))
+InverseGamma() = InverseGamma(1.0, 1.0, NoArgCheck())
 
 @distr_support InverseGamma 0.0 Inf
 

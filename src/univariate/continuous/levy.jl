@@ -24,22 +24,26 @@ External links
 struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    Levy{T}(μ::T, σ::T) where {T} = (@check_args(Levy, σ > zero(σ)); new{T}(μ, σ))
 end
 
-Levy(μ::T, σ::T) where {T<:Real} = Levy{T}(μ, σ)
+function Levy(μ::T, σ::T) where {T}
+    @check_args(Levy, σ > zero(σ))
+    return Levy{T}(μ, σ)
+end
+
+Levy(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Levy{T}(μ, σ)
+
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
 Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
-Levy(μ::Real) = Levy(μ, 1.0)
-Levy() = Levy(0.0, 1.0)
+Levy(μ::T) where {T <: Real} = Levy(μ, one(T))
+Levy() = Levy(0.0, 1.0, NoArgCheck())
 
 @distr_support Levy d.μ Inf
 
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
-convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ))
+convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), NoArgCheck)
 
 #### Parameters
 
