@@ -11,18 +11,18 @@ function Triweight(μ::T, σ::T) where {T <: Real}
     return Triweight{T}(μ, σ)
 end
 
-Triweight(μ::T, σ::T) where {T<:Real} = Triweight{T}(μ, σ)
+Triweight(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Triweight{T}(μ, σ)
 Triweight(μ::Real, σ::Real) = Triweight(promote(μ, σ)...)
 Triweight(μ::Integer, σ::Integer) = Triweight(Float64(μ), Float64(σ))
-Triweight(μ::Real) = Triweight(μ, 1.0)
-Triweight() = Triweight(0.0, 1.0)
+Triweight(μ::T) where {T <: Real} = Triweight(μ, one(T))
+Triweight() = Triweight(0.0, 1.0, NoArgCheck())
 
 @distr_support Triweight d.μ - d.σ d.μ + d.σ
 
 ## Conversions
 
 convert(::Type{Triweight{T}}, μ::Real, σ::Real) where {T<:Real} = Triweight(T(μ), T(σ))
-convert(::Type{Triweight{T}}, d::Triweight{S}) where {T<:Real, S<:Real} = Triweight(T(d.μ), T(d.σ))
+convert(::Type{Triweight{T}}, d::Triweight{S}) where {T<:Real, S<:Real} = Triweight(T(d.μ), T(d.σ), NoArgCheck())
 
 ## Parameters
 

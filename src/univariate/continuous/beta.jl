@@ -43,7 +43,7 @@ end
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
 Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
 Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1.0, 1.0)
+Beta() = Beta(1.0, 1.0, NoArgCheck())
 
 @distr_support Beta 0.0 1.0
 
