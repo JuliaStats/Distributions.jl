@@ -29,6 +29,7 @@ External links
 struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
+    Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
 function Beta(α::T, β::T) where {T<:Real}

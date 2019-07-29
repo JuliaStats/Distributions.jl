@@ -34,6 +34,7 @@ struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     ξ::T
+    GeneralizedPareto{T}(μ::T, σ::T, ξ::T) where {T} = new{T}(μ, σ, ξ)
 end
 
 function GeneralizedPareto(μ::T, σ::T, ξ::T) where {T <: Real}

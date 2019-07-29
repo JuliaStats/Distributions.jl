@@ -25,6 +25,7 @@ External links
 struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
+    Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
 function Laplace(μ::T, θ::T) where {T <: Real}

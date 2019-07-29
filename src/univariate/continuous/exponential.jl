@@ -23,6 +23,7 @@ External links
 """
 struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     θ::T        # note: scale not rate
+    Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
 function Exponential(θ::T) where {T <: Real}

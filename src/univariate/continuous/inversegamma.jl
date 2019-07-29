@@ -28,15 +28,16 @@ External links
 struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     invd::Gamma{T}
     θ::T
+    InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
 end
 
 function InverseGamma(α::T, θ::T) where {T <: Real}
     @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
-    return InverseGamma{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
+    return InverseGamma{T}(α, θ)
 end
 
 function InverseGamma(α::T, θ::T, ::NoArgCheck) where {T<:Real}
-    return InverseGamma{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
+    return InverseGamma{T}(α, θ)
 end
 
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)

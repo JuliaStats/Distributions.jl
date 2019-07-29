@@ -29,6 +29,7 @@ External links
 struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
+    BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
 function BetaPrime(α::T, β::T) where {T<:Real}

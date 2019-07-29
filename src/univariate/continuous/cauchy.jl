@@ -25,6 +25,7 @@ External links
 struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
 function Cauchy(μ::T, σ::T) where {T<:Real}

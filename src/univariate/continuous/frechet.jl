@@ -26,6 +26,7 @@ External links
 struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
+    Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
 function Frechet(α::T, θ::T) where {T <: Real}

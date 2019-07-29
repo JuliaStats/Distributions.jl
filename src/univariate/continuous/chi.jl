@@ -23,6 +23,7 @@ External links
 """
 struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
+    Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
 function Chi(ν::T) where {T<:Real}

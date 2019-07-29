@@ -26,6 +26,7 @@ External links
 struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
+    Logistic{T}(µ::T, θ::T) where {T} = new{T}(µ, θ) 
 end
 
 

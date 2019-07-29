@@ -25,6 +25,7 @@ External links
 struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     μ::T  # location
     θ::T  # scale
+    Gumbel{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
 function Gumbel(μ::T, θ::T) where {T <: Real}

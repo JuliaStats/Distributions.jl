@@ -5,6 +5,7 @@ struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     λ::T
+    NoncentralBeta{T}(α::T, β::T, λ::T) = new{T}(α, β, λ)
 end
 
 function NoncentralBeta(α::T, β::T, λ::T) where {T <: Real}

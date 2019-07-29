@@ -31,6 +31,7 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     μ::T1
     α::T2
     p::T3
+    PGeneralizedGaussian{T1,T2,T3}(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real} = new{T1,T2,T3}(µ, α, p)
 end
 
 function PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real}

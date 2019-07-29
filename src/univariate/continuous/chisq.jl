@@ -22,6 +22,7 @@ External links
 """
 struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
+    Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
 function Chisq(ν::T) where {T <: Real}

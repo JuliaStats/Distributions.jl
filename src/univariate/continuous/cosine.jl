@@ -10,6 +10,7 @@ External link:
 struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Cosine{T}(μ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
 function Cosine(μ::T, σ::T) where {T <: Real}
