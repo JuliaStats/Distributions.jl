@@ -31,7 +31,7 @@ SymTriangularDist(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = SymTriangularDis
 SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
 SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(Float64(μ), Float64(σ))
 SymTriangularDist(μ::T) where {T <: Real} = SymTriangularDist(μ, one(T))
-SymTriangularDist() = SymTriangularDist(0.0, 1.0, NoArgCheck)
+SymTriangularDist() = SymTriangularDist(0.0, 1.0, NoArgCheck())
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 

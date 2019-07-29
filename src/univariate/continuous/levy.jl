@@ -43,7 +43,7 @@ Levy() = Levy(0.0, 1.0, NoArgCheck())
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
-convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), NoArgCheck)
+convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), NoArgCheck())
 
 #### Parameters
 
