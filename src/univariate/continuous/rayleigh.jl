@@ -25,8 +25,15 @@ External links
 """
 struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
+end
 
-    Rayleigh{T}(σ::T) where {T} = (@check_args(Rayleigh, σ > zero(σ)); new{T}(σ))
+function Rayleigh(σ::T) where {T <: Real}
+    @check_args(Rayleigh, σ > zero(σ))
+    return Rayleigh{T}(σ)
+end
+
+function Rayleigh(σ::T, ::NoArgCheck) where {T <: Real}
+    return Rayleigh{T}(σ)
 end
 
 Rayleigh(σ::T) where {T<:Real} = Rayleigh{T}(σ)

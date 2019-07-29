@@ -31,8 +31,15 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     μ::T1
     α::T2
     p::T3
+end
 
-    PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1,T2,T3} = (@check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p)); new{T1,T2,T3}(μ,α,p))
+function PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real}
+    @check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p))
+    return PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
+end
+
+function PGeneralizedGaussian(μ::T1,α::T2,p::T3, ::NoArgCheck) where {T1<:Real, T2<:Real, T3<:Real}
+    return PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
 end
 
 """
@@ -40,7 +47,7 @@ end
 
 Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
-PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
+PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(zero(T), one(T), p)
 
 """
     PGeneralizedGaussian()
@@ -48,12 +55,14 @@ PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
 Builds a default p-generalized Gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
 to the normal distribution with `μ=0.0, σ=1.0`.
 """
-PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
+PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0, NoArgCheck()) # approximate scale with unity std deviation and shape 2
 
 #### Conversions
 
 convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, μ::S1, α::S2, p::S3) where {T1 <: Real, T2 <: Real, T3 <:Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(μ),T2(α),T3(p))
-convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p))
+function convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real}
+    return PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p), NoArgCheck())
+end
 
 @distr_support PGeneralizedGaussian -Inf Inf
 
