@@ -36,7 +36,7 @@ function InverseGamma(α::T, θ::T) where {T <: Real}
 end
 
 function InverseGamma(α::T, θ::T, ::NoArgCheck()) where {T<:Real}
-    return InverseGamma{T}(α, θ)
+    return InverseGamma{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
 end
 
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
