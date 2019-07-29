@@ -7,13 +7,12 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     λ::T
 end
 
-function NoncentralF{T}(ν1::T, ν2::T, λ::T) where T
-    @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T))
-    @check_args(NoncentralF, λ >= zero(T))
-    new{T}(ν1, ν2, λ)
+function NoncentralF(ν1::T, ν2::T, λ::T) where {T <: Real}
+    @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T) && λ >= zero(T))
+    return NoncentralF{T}(ν1, ν2, λ)
 end
 
-NoncentralF(ν1::T, ν2::T, λ::T) where {T<:Real} = NoncentralF{T}(ν1, ν2, λ)
+NoncentralF(ν1::T, ν2::T, λ::T, ::NoArgCheck) where {T<:Real} = NoncentralF{T}(ν1, ν2, λ)
 NoncentralF(ν1::Real, ν2::Real, λ::Real) = NoncentralF(promote(ν1, ν2, λ)...)
 NoncentralF(ν1::Integer, ν2::Integer, λ::Integer) = NoncentralF(Float64(ν1), Float64(ν2), Float64(λ))
 
@@ -25,14 +24,13 @@ function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real
     NoncentralF(T(ν1), T(ν2), T(λ))
 end
 function convert(::Type{NoncentralF{T}}, d::NoncentralF{S}) where {T <: Real, S <: Real}
-    NoncentralF(T(d.ν1), T(d.ν2), T(d.λ))
+    NoncentralF(T(d.ν1), T(d.ν2), T(d.λ), NoArgCheck())
 end
 
 ### Parameters
 
 params(d::NoncentralF) = (d.ν1, d.ν2, d.λ)
 @inline partype(d::NoncentralF{T}) where {T<:Real} = T
-
 
 ### Statistics
 

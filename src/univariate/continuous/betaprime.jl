@@ -29,15 +29,14 @@ External links
 struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
-
 end
-
-BetaPrime(α::T, β::T, ::NoArgCheck) where {T<:Real} = BetaPrime{T}(α, β)
 
 function BetaPrime(α::T, β::T) where {T<:Real}
     @check_args(BetaPrime, α > zero(α) && β > zero(β))
-    return new{T}(α, β)
+    return BetaPrime{T}(α, β)
 end
+
+BetaPrime(α::T, β::T, ::NoArgCheck) where {T<:Real} = BetaPrime{T}(α, β)
 
 BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
 BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))

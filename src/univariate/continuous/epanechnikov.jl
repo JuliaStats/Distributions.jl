@@ -16,7 +16,7 @@ Epanechnikov(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Epanechnikov{T}(μ, �
 Epanechnikov(μ::Real, σ::Real) = Epanechnikov(promote(μ, σ)...)
 Epanechnikov(μ::Integer, σ::Integer) = Epanechnikov(Float64(μ), Float64(σ))
 Epanechnikov(μ::T) where {T <: Real} = Epanechnikov(μ, one(T))
-Epanechnikov() = Epanechnikov(0.0, 1.0, ::NoArgCheck)
+Epanechnikov() = Epanechnikov(0.0, 1.0, NoArgCheck())
 
 @distr_support Epanechnikov d.μ - d.σ d.μ + d.σ
 
