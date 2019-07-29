@@ -29,6 +29,7 @@ External links
 struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
 function LogNormal(μ::T, σ::T) where {T <: Real}

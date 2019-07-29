@@ -4,6 +4,7 @@
 struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
+    NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)
 end
 
 function NoncentralT(ν::T, λ::T) where {T <: Real}

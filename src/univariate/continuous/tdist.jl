@@ -22,6 +22,7 @@ External links
 """
 struct TDist{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
+    TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end
 
 function TDist(ν::T) where {T <: Real}

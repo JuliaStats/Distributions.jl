@@ -4,10 +4,10 @@
 struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-
-function Biweight{T}(μ::T, σ::T) where {T<:Real}
+function Biweight(μ::T, σ::T) where {T<:Real}
     @check_args(Biweight, σ > zero(σ))
     return Biweight{T}(μ, σ)
 end

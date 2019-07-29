@@ -26,6 +26,7 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
+    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
 function Uniform(a::T, b::T) where {T <: Real}

@@ -28,10 +28,10 @@ Use `Arcsine(a, b, ::NoArgCheck)` to bypass argument checks.
 struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Arcsine{T}(a::T, b::T) where {T} = new{T}(a, b)
+    Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-Arcsine(a::T, b::T) where {T} = (@check_args(Arcsine, a < b); Arcsine{T}(a, b))
+Arcsine(a::T, b::T) where {T <: Real} = (@check_args(Arcsine, a < b); Arcsine{T}(a, b))
 Arcsine(a::T, b::T, ::NoArgCheck) where {T} = Arcsine{T}(a, b)
 
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)

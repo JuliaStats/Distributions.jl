@@ -17,6 +17,7 @@ External links
 struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
+    Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
 function Erlang(α::Real, θ::T) where {T <: Real}

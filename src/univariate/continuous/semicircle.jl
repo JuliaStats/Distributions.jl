@@ -20,6 +20,7 @@ External links
 """
 struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
     r::T
+    Semicircle{T}(r::T) where {T <: Real} = new{T}(r)
 end
 
 

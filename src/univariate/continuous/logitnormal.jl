@@ -55,6 +55,7 @@ External links
 struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
 function LogitNormal(μ::T, σ::T) where {T <: Real}

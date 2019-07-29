@@ -25,6 +25,7 @@ External links
 """
 struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
+    Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end
 
 function Rayleigh(σ::T) where {T <: Real}

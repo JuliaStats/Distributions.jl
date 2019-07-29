@@ -30,6 +30,7 @@ External links
 struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
 function Normal(μ::T, σ::T) where {T <: Real}

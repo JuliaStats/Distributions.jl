@@ -24,6 +24,7 @@ External links
 struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
+    Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
 function Pareto(α::T, θ::T) where {T <: Real}

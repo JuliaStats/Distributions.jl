@@ -26,6 +26,7 @@ External links
 struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     k::T
+    StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)
 end
 
 function StudentizedRange(ν::T, k::T) where {T <: Real}

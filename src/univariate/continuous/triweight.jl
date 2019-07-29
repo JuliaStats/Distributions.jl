@@ -4,6 +4,7 @@
 struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Triweight{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
 function Triweight(μ::T, σ::T) where {T <: Real}

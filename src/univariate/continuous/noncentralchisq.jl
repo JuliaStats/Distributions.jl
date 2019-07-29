@@ -26,6 +26,7 @@ External links
 struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
+    NoncentralChisq{T}(ν::T, λ::T) where {T <: Real} = new{T}(ν, λ)
 end
 
 function NoncentralChisq(ν::T, λ::T) where {T <: Real}

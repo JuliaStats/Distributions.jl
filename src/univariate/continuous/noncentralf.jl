@@ -5,6 +5,7 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
     λ::T
+    NoncentralF{T}(ν1::T, ν2::T, λ::T) where {T} = new{T}(ν1, ν2, λ)
 end
 
 function NoncentralF(ν1::T, ν2::T, λ::T) where {T <: Real}
@@ -30,7 +31,7 @@ end
 ### Parameters
 
 params(d::NoncentralF) = (d.ν1, d.ν2, d.λ)
-@inline partype(d::NoncentralF{T}) where {T<:Real} = T
+partype(::NoncentralF{T}) where {T<:Real} = T
 
 ### Statistics
 
