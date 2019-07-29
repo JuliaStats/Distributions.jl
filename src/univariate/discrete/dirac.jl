@@ -8,11 +8,11 @@ d = Dirac(2.0)  # Dirac distribution with value = 2.
 rand(d)         # Always returns the same value
 ```
 """
-struct Dirac{T} <: DiscreteUnivariateDistribution
+struct Dirac{T <: Number} <:
+    CountableUnivariateDistribution{CountableSupport{T}}
     value::T
 end
 
-eltype(::Dirac{T}) where {T} = T
 rand(::AbstractRNG, d::Dirac) = d.value
 pdf(d::Dirac, x) = x == d.value ? 1.0 : 0.0
 cdf(d::Dirac, x) = x < d.value ? 0.0 : 1.0

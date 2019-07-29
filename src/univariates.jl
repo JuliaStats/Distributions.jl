@@ -344,8 +344,9 @@ Evaluate the cumulative probability at `x`.
 
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
-cdf(d::UnivariateDistribution, x::Real)
-cdf(d::CountableUnivariateDistribution, x::Real) =
+cdf(d::UnivariateDistribution, x)
+
+cdf(d::CountableUnivariateDistribution, x) =
     cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support

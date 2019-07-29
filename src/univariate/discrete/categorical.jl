@@ -27,20 +27,21 @@ External links:
 const Categorical{P,Ps,I <: Integer} =
     DiscreteNonParametric{I,P,Base.OneTo{I},Ps}
 
-Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real,
-                                              Ps<:AbstractVector{P}} =
-    Categorical{P,Ps,Int}(Base.OneTo(length(p)), p, NoArgCheck())
+Categorical{P,Ps,I}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}, I} =
+    Categorical{P,Ps,I}(Base.OneTo(I(length(p))), p, NoArgCheck())
 
 Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, NoArgCheck())
+    Categorical{P,Ps,Int}(p, NoArgCheck())
 
-function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
+function Categorical{P,Ps,I}(p::Ps) where {P<:Real, Ps<:AbstractVector{P},I}
     @check_args(Categorical, isprobvec(p))
-    Categorical{P,Ps,Int}(Base.OneTo(length(p)), p, NoArgCheck())
+    Categorical{P,Ps,I}(Base.OneTo(I(length(p))), p, NoArgCheck())
 end
 
 Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p)
+    Categorical{P,Ps,Int}(p)
+Categorical{I}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}, I<:Integer} =
+    Categorical{P,Ps,I}(p)
 
 function Categorical(k::I) where I <: Integer
     @check_args(Categorical, k >= 1)
@@ -50,13 +51,14 @@ end
 
 ### Conversions
 
-convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
-    P<:Real,Ps<:AbstractVector{P}} = Categorical{P,Ps}(Ps(x))
+convert(::Type{Categorical{P,Ps,I}}, x::AbstractVector{<:Real}) where {
+    P<:Real,Ps<:AbstractVector{P},I} = Categorical{P,Ps,I}(Ps(x))
 
 ### Parameters
 
 ncategories(d::Categorical) = support(d).stop
-params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
+params(d::Categorical{P,Ps,I}) where {P<:Real, Ps<:AbstractVector{P}, I} =
+    (probs(d),)
 @inline partype(d::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
@@ -75,7 +77,7 @@ end
 
 ### Evaluation
 
-function cdf(d::Categorical{T}, x::Int) where T<:Real
+function _cdf(d::Categorical{T}, x::T) where T<:Real
     k = ncategories(d)
     p = probs(d)
     x < 1 && return zero(T)
@@ -117,7 +119,7 @@ end
 
 # sampling
 
-sampler(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} =
+sampler(d::Categorical{P,Ps,I}) where {P<:Real,Ps<:AbstractVector{P},I} =
    AliasTable(probs(d))
 
 
