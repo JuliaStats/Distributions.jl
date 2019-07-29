@@ -29,11 +29,11 @@ function VonMises(μ::T, κ::T) where {T <: Real}
     return VonMises{T}(μ, κ, besselix(zero(T), κ))
 end
 
-VonMises(μ::T, κ::T) where {T<:Real} = VonMises{T}(μ, κ)
+VonMises(μ::T, κ::T, ::NoArgCheck) where {T<:Real} = VonMises{T}(μ, κ, besselix(zero(T), κ))
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
 VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
-VonMises(κ::Real) = VonMises(0.0, κ)
-VonMises() = VonMises(0.0, 1.0)
+VonMises(κ::T) where {T <: Real} = VonMises(zero(T), κ)
+VonMises() = VonMises(0.0, 1.0, NoArgCheck())
 
 show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
