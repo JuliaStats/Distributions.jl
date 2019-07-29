@@ -5,12 +5,12 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
     λ::T
+end
 
-    function NoncentralF{T}(ν1::T, ν2::T, λ::T) where T
-        @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T))
-        @check_args(NoncentralF, λ >= zero(T))
-        new{T}(ν1, ν2, λ)
-    end
+function NoncentralF{T}(ν1::T, ν2::T, λ::T) where T
+    @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T))
+    @check_args(NoncentralF, λ >= zero(T))
+    new{T}(ν1, ν2, λ)
 end
 
 NoncentralF(ν1::T, ν2::T, λ::T) where {T<:Real} = NoncentralF{T}(ν1, ν2, λ)

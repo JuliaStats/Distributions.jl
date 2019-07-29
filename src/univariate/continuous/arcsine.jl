@@ -31,7 +31,7 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 Arcsine(a::T, b::T) where {T} = (@check_args(Arcsine, a < b); new{T}(a, b))
-Arcsine(a::T, b::T, ::NoArgCheck) where {T} = Arcsine{T}(a, b))
+Arcsine(a::T, b::T, ::NoArgCheck) where {T} = Arcsine{T}(a, b)
 
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
 Arcsine(a::Integer, b::Integer) = Arcsine(Float64(a), Float64(b))
