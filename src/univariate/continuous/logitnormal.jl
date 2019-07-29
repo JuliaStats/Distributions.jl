@@ -3,13 +3,13 @@
 """
     LogitNormal(μ,σ)
 
-The *logit normal distribution* is the distribution of 
+The *logit normal distribution* is the distribution of
 of a random variable whose logit has a [`Normal`](@ref) distribution.
 Or inversely, when applying the logistic function to a Normal random variable
 then the resulting random variable follows a logit normal distribution.
 
 If ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)`` then
-``\\operatorname{logistic}(X) \\sim \\operatorname{LogitNormal}(\\mu,\\sigma)``. 
+``\\operatorname{logistic}(X) \\sim \\operatorname{LogitNormal}(\\mu,\\sigma)``.
 
 The probability density function is
 
@@ -34,13 +34,13 @@ params(d)            # Get the parameters, i.e. (mu, sig)
 median(d)            # Get the median, i.e. logistic(mu)
 ```
 
-The following properties have no analytical solution but numerical 
-approximations. In order to avoid package dependencies for 
+The following properties have no analytical solution but numerical
+approximations. In order to avoid package dependencies for
 numerical optimization, they are currently not implemented.
 
 ```julia
-mean(d)      
-var(d)      
+mean(d)
+var(d)
 std(d)
 mode(d)
 ```
@@ -55,15 +55,18 @@ External links
 struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    LogitNormal{T}(μ::T, σ::T) where {T} = (@check_args(LogitNormal, σ > zero(σ)); new{T}(μ, σ))
 end
 
-LogitNormal(μ::T, σ::T) where {T<:Real} = LogitNormal{T}(μ, σ)
+function LogitNormal(μ::T, σ::T) where {T <: Real}
+    @check_args(LogitNormal, σ > zero(σ))
+    return LogitNormal{T}(μ, σ)
+end
+
+LogitNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogitNormal{T}(μ, σ)
 LogitNormal(μ::Real, σ::Real) = LogitNormal(promote(μ, σ)...)
 LogitNormal(μ::Integer, σ::Integer) = LogitNormal(Float64(μ), Float64(σ))
-LogitNormal(μ::Real) = LogitNormal(μ, convert(typeof(μ),1.0))
-LogitNormal() = LogitNormal(0.0, 1.0)
+LogitNormal(μ::T) where {T} = LogitNormal(μ, one(T))
+LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
 
 # minimum and maximum not defined for logitnormal
 # but see https://github.com/JuliaStats/Distributions.jl/pull/457
@@ -72,10 +75,10 @@ LogitNormal() = LogitNormal(0.0, 1.0)
 
 
 #### Conversions
-convert(::Type{LogitNormal{T}}, μ::S, σ::S) where 
+convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
   {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
-convert(::Type{LogitNormal{T}}, d::LogitNormal{S}) where 
-  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ))
+convert(::Type{LogitNormal{T}}, d::LogitNormal{S}) where
+  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), NoArgCheck())
 
 #### Parameters
 
@@ -90,7 +93,7 @@ scale(d::LogitNormal) = d.σ
 # varlogitx(d::LogitNormal) = abs2(d.σ)
 # stdlogitx(d::LogitNormal) = d.σ
 
-# mean, mode, and variance 
+# mean, mode, and variance
 # moved to NormalTransforms because
 # they depend on the Optim package.
 
@@ -102,8 +105,8 @@ median(d::LogitNormal) = logistic(d.μ)
 #### Evalution
 
 #TODO check pd and logpdf
-function pdf(d::LogitNormal{T}, x::Real) where T<:Real 
-    if zero(x) < x < one(x) 
+function pdf(d::LogitNormal{T}, x::Real) where T<:Real
+    if zero(x) < x < one(x)
         return normpdf(d.μ, d.σ, logit(x)) / (x * (1-x))
     else
         return T(0)
@@ -111,7 +114,7 @@ function pdf(d::LogitNormal{T}, x::Real) where T<:Real
 end
 
 function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
-    if zero(x) < x < one(x) 
+    if zero(x) < x < one(x)
         lx = logit(x)
         return normlogpdf(d.μ, d.σ, lx) - log(x) - log1p(-x)
     else
@@ -119,13 +122,13 @@ function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
     end
 end
 
-cdf(d::LogitNormal{T}, x::Real) where {T<:Real} = 
+cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
   0 < x < 1 ? normcdf(d.μ, d.σ, logit(x)) : zero(T)
-ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} = 
+ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
   0 < x < 1 ? normccdf(d.μ, d.σ, logit(x)) : one(T)
-logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} = 
+logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
   0 < x < 1 ? normlogcdf(d.μ, d.σ, logit(x)) : -T(Inf)
-logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} = 
+logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
   0 < x < 1 ? normlogccdf(d.μ, d.σ, logit(x)) : zero(T)
 
 quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
@@ -154,5 +157,3 @@ function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where T<:Real
     μ, σ = mean_and_std(lx)
     LogitNormal(μ, σ)
 end
-
-
