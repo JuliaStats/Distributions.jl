@@ -31,22 +31,21 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
     c::T
-
-    function TriangularDist{T}(a::T, b::T, c::T) where T
-        @check_args(TriangularDist, a < b)
-        @check_args(TriangularDist, a <= c <= b)
-        new{T}(a, b, c)
-    end
-    function TriangularDist{T}(a::T, b::T) where T
-        @check_args(TriangularDist, a < b)
-        new{T}(a, b, middle(a, b))
-    end
 end
 
-TriangularDist(a::T, b::T, c::T) where {T<:Real} = TriangularDist{T}(a, b, c)
+function TriangularDist(a::T, b::T, c::T) where {T <: Real}
+    @check_args(TriangularDist, a <= c <= b)
+    return TriangularDist{T}(a, b, c)
+end
+
+function TriangularDist(a::T, b::T, c::T, ::NoArgCheck) where {T <: Real}
+    return TriangularDist{T}(a, b, c)
+end
+
+TriangularDist(a::T, b::T) where {T <: Real} = TriangularDist(a, b, middle(a, b))
+
 TriangularDist(a::Real, b::Real, c::Real) = TriangularDist(promote(a, b, c)...)
 TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(Float64(a), Float64(b), Float64(c))
-TriangularDist(a::T, b::T) where {T<:Real} = TriangularDist{T}(a, b)
 TriangularDist(a::Real, b::Real) = TriangularDist(promote(a, b)...)
 TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
 
@@ -54,7 +53,7 @@ TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
 
 #### Conversions
 convert(::Type{TriangularDist{T}}, a::Real, b::Real, c::Real) where {T<:Real} = TriangularDist(T(a), T(b), T(c))
-convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c))
+convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c), NoArgCheck())
 
 #### Parameters
 

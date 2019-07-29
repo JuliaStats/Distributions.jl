@@ -35,7 +35,7 @@ function InverseGamma(α::T, θ::T) where {T <: Real}
     return InverseGamma{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
 end
 
-function InverseGamma(α::T, θ::T, ::NoArgCheck()) where {T<:Real}
+function InverseGamma(α::T, θ::T, ::NoArgCheck) where {T<:Real}
     return InverseGamma{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
 end
 
