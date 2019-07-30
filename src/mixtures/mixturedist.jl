@@ -303,6 +303,24 @@ end
 CompoundDistribution(dict::Dict) = CompoundDistribution(values(dict),
                                                         keys(dict))
 
+function ZeroInflated(pZero::Float64, dist::D) where D <: UnivariateDistribution
+    z = zero(eltype(D))
+    insupport(dist, z) ||
+        throw(DomainError(z,
+                          "ZeroInflated distribution must have $z in support."))
+    return CompoundDistribution([pZero, 1.0 - pZero],
+                                [Dirac(z), dist])
+end
+
+function Hurdle(pVal::Float64, dist::D; val = zero(eltype(D))) where
+    D <: UnivariateDistribution
+    insupport(dist, val) &&
+        throw(DomainError(val,
+                          "Hurdle distribution must not have $val in support."))
+    return CompoundDistribution([pVal, 1.0 - pVal],
+                                [Dirac(val), dist])
+end
+
 components(cd::CompoundDistribution) = [cd.continuous..., cd.discrete...]
 probs(cd::CompoundDistribution) = probs(cd.choice)
 # Probability mass always beats density!

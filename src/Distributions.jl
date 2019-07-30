@@ -103,6 +103,7 @@ export
     GeneralizedExtremeValue,
     Geometric,
     Gumbel,
+    Hurdle,
     Hypergeometric,
     InverseWishart,
     InverseGamma,
@@ -163,6 +164,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    ZeroInflated,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
@@ -327,7 +329,7 @@ Supported distributions:
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
-    GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
+    GeneralizedExtremeValue, Geometric, Gumbel, Hurdle, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
@@ -340,7 +342,7 @@ Supported distributions:
     StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
-    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    Wishart, ZeroInflated, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon
 
