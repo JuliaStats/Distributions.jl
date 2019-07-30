@@ -77,6 +77,7 @@ export
     Chernoff,
     Chi,
     Chisq,
+    CompoundDistribution,
     Cosine,
     DiagNormal,
     DiagNormalCanon,
@@ -147,6 +148,7 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    SpikeSlab,
     StudentizedRange,
     SymTriangularDist,
     TDist,
@@ -291,6 +293,7 @@ include("qq.jl")
 include("estimators.jl")
 
 # mixture distributions (TODO: moveout)
+include("mixtures/mixturedist.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
@@ -318,7 +321,8 @@ information.
 Supported distributions:
 
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
-    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Categorical, Cauchy, Chi, Chisq, CompoundDistribution,
+    Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
@@ -326,12 +330,14 @@ Supported distributions:
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
-    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal, MatrixTDist, MixtureModel,
-    Multinomial, MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
-    MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
+    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    MatrixTDist, MixtureModel, Multinomial, MultivariateNormal, MvLogNormal,
+    MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist, NegativeBinomial,
+    NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
-    NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    NormalInverseGaussian, Pareto, PGeneralizedGaussian,
+    Poisson, PoissonBinomial, QQPair, Rayleigh, Skellam, SpikeSlab,
+    StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

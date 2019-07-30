@@ -2,15 +2,21 @@
 
 """
 
-  All subtypes of `AbstractMixtureModel` should implement the following methods:
+  All subtypes of `AbstractMixtureModel` must implement the following methods:
+
+  - components(d):  return the distribution components
+
+  - probs(d):       return a vector of prior probabilities over components.
+
+  And may implement these:
 
   - ncomponents(d): the number of components
 
   - component(d, k):  return the k-th component
 
-  - probs(d):       return a vector of prior probabilities over components.
+Mixture models are subtypes of AbstractMixtureDistributions, where all of the distributions being mixed are of the same form (though their parameters may be different).
 """
-abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
+abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: AbstractMixtureDistribution{VF, VS} end
 
 """
 MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
@@ -42,20 +48,6 @@ const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureMod
 The type of the components of `d`.
 """
 component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
-
-"""
-    components(d::AbstractMixtureModel)
-
-Get a list of components of the mixture model `d`.
-"""
-components(d::AbstractMixtureModel)
-
-"""
-    probs(d::AbstractMixtureModel)
-
-Get the vector of prior probabilities of all components of `d`.
-"""
-probs(d::AbstractMixtureModel)
 
 """
     mean(d::Union{UnivariateMixture, MultivariateMixture})
@@ -167,94 +159,6 @@ probs(d::MixtureModel) = probs(d.prior)
 params(d::MixtureModel) = ([params(c) for c in d.components], params(d.prior)[1])
 partype(d::MixtureModel) = promote_type(partype(d.prior), map(partype, d.components)...)
 
-minimum(d::MixtureModel) = minimum([minimum(dci) for dci in d.components])
-maximum(d::MixtureModel) = maximum([maximum(dci) for dci in d.components])
-
-function mean(d::UnivariateMixture)
-    K = ncomponents(d)
-    p = probs(d)
-    m = 0.0
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            m += mean(c) * pi
-        end
-    end
-    return m
-end
-
-function mean(d::MultivariateMixture)
-    K = ncomponents(d)
-    p = probs(d)
-    m = zeros(length(d))
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
-        end
-    end
-    return m
-end
-
-"""
-    var(d::UnivariateMixture)
-
-Compute the overall variance (only for ``UnivariateMixture``).
-"""
-function var(d::UnivariateMixture)
-    K = ncomponents(d)
-    p = probs(d)
-    means = Vector{Float64}(undef, K)
-    m = 0.0
-    v = 0.0
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            ci = component(d, i)
-            means[i] = mi = mean(ci)
-            m += pi * mi
-            v += pi * var(ci)
-        end
-    end
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            v += pi * abs2(means[i] - m)
-        end
-    end
-    return v
-end
-
-function cov(d::MultivariateMixture)
-    K = ncomponents(d)
-    p = probs(d)
-    m = zeros(length(d))
-    md = zeros(length(d))
-    V = zeros(length(d),length(d))
-
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
-            BLAS.axpy!(pi, cov(c), V)
-        end
-    end
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            # todo: use more in-place operations
-            md = mean(c) - m
-            BLAS.axpy!(pi, md*md', V)
-        end
-    end
-    return V
-end
-
-
 
 #### show
 
@@ -271,8 +175,6 @@ function show(io::IO, d::MixtureModel)
         println(io, "The rest are omitted ...")
     end
 end
-
-
 
 #### Evaluation
 
