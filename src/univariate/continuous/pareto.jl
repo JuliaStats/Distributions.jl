@@ -34,7 +34,7 @@ end
 
 Pareto(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Pareto{T}(α, θ)
 Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
-Pareto(α::Integer, θ::Integer) = Pareto(Float64(α), Float64(θ))
+Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
 Pareto(α::T) where {T <: Real} = Pareto(α, one(T))
 Pareto() = Pareto(1.0, 1.0, NoArgCheck())
 

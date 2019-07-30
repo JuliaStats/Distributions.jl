@@ -41,7 +41,7 @@ function InverseGamma(α::T, θ::T, ::NoArgCheck) where {T<:Real}
 end
 
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
-InverseGamma(α::Integer, θ::Integer) = InverseGamma(Float64(α), Float64(θ))
+InverseGamma(α::Integer, θ::Integer) = InverseGamma(float(α), float(θ))
 InverseGamma(α::T) where {T <: Real} = InverseGamma(α, one(T))
 InverseGamma() = InverseGamma(1.0, 1.0, NoArgCheck())
 

@@ -39,7 +39,7 @@ end
 
 LogNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogNormal{T}(μ, σ)
 LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
-LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
+LogNormal(μ::Integer, σ::Integer) = LogNormal(float(μ), float(σ))
 LogNormal(μ::T) where {T <: Real} = LogNormal(μ, one(T))
 LogNormal() = LogNormal(0.0, 1.0, NoArgCheck())
 

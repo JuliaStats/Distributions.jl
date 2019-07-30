@@ -31,7 +31,7 @@ function Chisq(ν::T) where {T <: Real}
 end
 
 Chisq(ν::T, ::NoArgCheck) where {T <: Real} = Chisq{T}(ν)
-Chisq(ν::Integer) = Chisq(Float64(ν))
+Chisq(ν::Integer) = Chisq(float(ν))
 
 @distr_support Chisq 0.0 Inf
 

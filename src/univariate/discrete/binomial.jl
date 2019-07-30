@@ -36,7 +36,7 @@ function Binomial(n::Integer, p::T) where {T <: Real}
 end
 
 Binomial(n::Integer, p::T, ::NoArgCheck) where {T<:Real} = Binomial{T}(n, p)
-Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
+Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
 Binomial(n::Integer) = Binomial(n, 0.5)
 Binomial() = Binomial(1, 0.5, NoArgCheck())
 

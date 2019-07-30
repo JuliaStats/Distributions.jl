@@ -34,7 +34,11 @@ function Erlang(α::Integer, θ::T, ::NoArgCheck) where {T <: Real}
     return Erlang{T}(α, θ)
 end
 
-Erlang(α::Integer, θ::Integer) = Erlang{Float64}(α, Float64(θ))
+function Erlang(α::Integer, θ::Integer)
+    θf = float(θ)
+    return Erlang{typeof(θf)}(α, θf)
+end
+
 Erlang(α::Integer) = Erlang(α, 1.0)
 Erlang() = Erlang(1, 1.0, NoArgCheck())
 

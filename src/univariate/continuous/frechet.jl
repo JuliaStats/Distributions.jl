@@ -36,7 +36,7 @@ end
 
 Frechet(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
-Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
+Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
 Frechet(α::T) where {T <: Real} = Frechet(α, one(T))
 Frechet() = Frechet(1.0, 1.0, NoArgCheck())
 

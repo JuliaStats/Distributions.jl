@@ -33,7 +33,7 @@ end
 
 Chi(ν::T, ::NoArgCheck) where {T<:Real} = Chi{T}(ν)
 
-Chi(ν::Integer) = Chi(Float64(ν))
+Chi(ν::Integer) = Chi(float(ν))
 
 @distr_support Chi 0.0 Inf
 

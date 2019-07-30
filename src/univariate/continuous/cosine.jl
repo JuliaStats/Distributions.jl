@@ -20,7 +20,7 @@ end
 
 Cosine(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Cosine{T}(μ, σ)
 Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
-Cosine(μ::Integer, σ::Integer) = Cosine(Float64(μ), Float64(σ))
+Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
 Cosine(μ::T) where {T <: Real} = Cosine(μ, one(µ))
 Cosine() = Cosine(0.0, 1.0, NoArgCheck())
 

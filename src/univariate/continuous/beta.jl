@@ -42,7 +42,7 @@ function Beta(α::T, β::T, ::NoArgCheck) where {T<:Real}
 end
 
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
+Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
 Beta(α::Real) = Beta(α, α)
 Beta() = Beta(1.0, 1.0, NoArgCheck())
 

@@ -33,7 +33,7 @@ end
 
 Exponential(θ::T, ::NoArgCheck) where {T <: Real} = Exponential{T}(θ)
 
-Exponential(θ::Integer) = Exponential(Float64(θ))
+Exponential(θ::Integer) = Exponential(float(θ))
 Exponential() = Exponential(1.0, NoArgCheck())
 
 @distr_support Exponential 0.0 Inf

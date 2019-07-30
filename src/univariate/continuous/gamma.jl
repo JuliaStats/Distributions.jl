@@ -31,12 +31,12 @@ end
 
 function Gamma(α, θ) where {T <: Real}
     @check_args(Gamma, α > zero(α) && θ > zero(θ))
-    Gamma{T}(α, θ)
+    return Gamma{T}(α, θ)
 end
 
 Gamma(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
-Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
+Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
 Gamma(α::T) where {T <: Real} = Gamma(α, one(T))
 Gamma() = Gamma(1.0, 1.0, NoArgCheck())
 

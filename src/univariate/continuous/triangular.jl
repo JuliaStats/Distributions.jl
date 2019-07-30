@@ -46,7 +46,7 @@ end
 TriangularDist(a::T, b::T) where {T <: Real} = TriangularDist(a, b, middle(a, b))
 
 TriangularDist(a::Real, b::Real, c::Real) = TriangularDist(promote(a, b, c)...)
-TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(Float64(a), Float64(b), Float64(c))
+TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(float(a), float(b), float(c))
 TriangularDist(a::Real, b::Real) = TriangularDist(promote(a, b)...)
 TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
 

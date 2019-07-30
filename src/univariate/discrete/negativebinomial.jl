@@ -45,7 +45,7 @@ end
 
 NegativeBinomial(r::T, p::T, ::NoArgCheck) where {T<:Real} = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
-NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(Float64(r), Float64(p))
+NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
 NegativeBinomial() = NegativeBinomial(1.0, 0.5, NoArgCheck())
 

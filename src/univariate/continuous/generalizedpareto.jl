@@ -47,8 +47,9 @@ function GeneralizedPareto(μ::T, σ::T, ξ::T, ::NoArgCheck) where {T<:Real}
 end
 
 GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, σ, ξ)...)
+
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedPareto(Float64(μ), Float64(σ), Float64(ξ))
+    GeneralizedPareto(float(μ), float(σ), float(ξ))
 end
 GeneralizedPareto(σ::T, ξ::Real) where {T <: Real} = GeneralizedPareto(zero(T), σ, ξ)
 GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0, NoArgCheck())

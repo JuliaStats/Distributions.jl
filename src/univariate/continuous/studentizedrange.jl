@@ -35,7 +35,7 @@ function StudentizedRange(ν::T, k::T) where {T <: Real}
 end
 
 StudentizedRange(ν::T, k::T, ::NoArgCheck) where {T<:Real} = StudentizedRange{T}(ν, k)
-StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(Float64(ν), Float64(k))
+StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(float(ν), float(k))
 StudentizedRange(ν::Real, k::Real) = StudentizedRange(promote(ν, k)...)
 
 @distr_support StudentizedRange 0.0 Inf

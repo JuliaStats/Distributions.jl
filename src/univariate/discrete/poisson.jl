@@ -32,7 +32,7 @@ function Poisson(λ::T) where {T <: Real}
 end
 
 Poisson(λ::T, ::NoArgCheck) where {T<:Real} = Poisson{T}(λ)
-Poisson(λ::Integer) = Poisson(Float64(λ))
+Poisson(λ::Integer) = Poisson(float(λ))
 Poisson() = Poisson(1.0, NoArgCheck())
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)

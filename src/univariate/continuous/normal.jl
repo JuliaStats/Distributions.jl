@@ -41,7 +41,7 @@ end
 #### Outer constructors
 Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
+Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
 Normal() = Normal(0.0, 1.0, NoArgCheck())
 

@@ -15,7 +15,7 @@ end
 Biweight(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Biweight{T}(μ, σ)
 
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
-Biweight(μ::Integer, σ::Integer) = Biweight(Float64(μ), Float64(σ))
+Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
 Biweight(μ::T) where {T<:Real} = Biweight(μ, one(T))
 Biweight() = Biweight(0.0, 1.0, NoArgCheck())
 

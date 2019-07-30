@@ -38,7 +38,7 @@ function Gumbel(μ::T, θ::T, ::NoArgCheck) where {T<:Real}
 end
 
 Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
-Gumbel(μ::Integer, θ::Integer) = Gumbel(Float64(μ), Float64(θ))
+Gumbel(μ::Integer, θ::Integer) = Gumbel(float(μ), float(θ))
 Gumbel(μ::T) where {T <: Real} = Gumbel(μ, one(T))
 Gumbel() = Gumbel(0.0, 1.0, NoArgCheck())
 

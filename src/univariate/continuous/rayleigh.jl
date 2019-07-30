@@ -37,7 +37,7 @@ function Rayleigh(σ::T, ::NoArgCheck) where {T <: Real}
     return Rayleigh{T}(σ)
 end
 
-Rayleigh(σ::Integer) = Rayleigh(Float64(σ))
+Rayleigh(σ::Integer) = Rayleigh(float(σ))
 Rayleigh() = Rayleigh(1.0, NoArgCheck())
 
 @distr_support Rayleigh 0.0 Inf
@@ -51,7 +51,7 @@ convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayl
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
-@inline partype(d::Rayleigh{T}) where {T<:Real} = T
+@inline partype(::Rayleigh{T}) where {T<:Real} = T
 
 
 #### Statistics

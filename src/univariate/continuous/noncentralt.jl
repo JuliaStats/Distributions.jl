@@ -14,7 +14,7 @@ end
 
 NoncentralT(ν::T, λ::T, ::NoArgCheck) where {T<:Real} = NoncentralT{T}(ν, λ)
 NoncentralT(ν::Real, λ::Real) = NoncentralT(promote(ν, λ)...)
-NoncentralT(ν::Integer, λ::Integer) = NoncentralT(Float64(ν), Float64(λ))
+NoncentralT(ν::Integer, λ::Integer) = NoncentralT(float(ν), float(λ))
 
 @distr_support NoncentralT -Inf Inf
 

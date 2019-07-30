@@ -36,7 +36,7 @@ function Bernoulli(p::T) where {T <: Real}
 end
 
 Bernoulli(p::T, ::NoArgCheck) where {T<:Real} = Bernoulli{T}(p)
-Bernoulli(p::Integer) = Bernoulli(Float64(p))
+Bernoulli(p::Integer) = Bernoulli(float(p))
 Bernoulli() = Bernoulli(0.5, NoArgCheck())
 
 @distr_support Bernoulli 0 1

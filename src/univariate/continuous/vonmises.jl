@@ -31,7 +31,7 @@ end
 
 VonMises(μ::T, κ::T, ::NoArgCheck) where {T<:Real} = VonMises{T}(μ, κ, besselix(zero(T), κ))
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
-VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
+VonMises(μ::Integer, κ::Integer) = VonMises(float(μ), float(κ))
 VonMises(κ::T) where {T <: Real} = VonMises(zero(T), κ)
 VonMises() = VonMises(0.0, 1.0, NoArgCheck())
 

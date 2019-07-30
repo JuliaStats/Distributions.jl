@@ -15,7 +15,7 @@ end
 
 NoncentralBeta(α::T, β::T, λ::T, ::NoArgCheck) where {T<:Real} = NoncentralBeta{T}(α, β, λ)
 NoncentralBeta(α::Real, β::Real, λ::Real) = NoncentralBeta(promote(α, β, λ)...)
-NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(Float64(α), Float64(β), Float64(λ))
+NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(float(α), float(β), float(λ))
 
 @distr_support NoncentralBeta 0.0 1.0
 

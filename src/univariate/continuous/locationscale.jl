@@ -34,7 +34,10 @@ function LocationScale(μ::T,σ::T,ρ::D, ::NoArgCheck) where {T<:Real, D<:Conti
     return LocationScale{T,D}(μ,σ,ρ)
 end
 
-LocationScale(μ::T, σ::T, ρ::D) where {T<:Integer, D<:ContinuousUnivariateDistribution} = LocationScale{Float64,D}(Float64(μ), Float64(σ), ρ)
+function LocationScale(μ::Integer, σ::Integer, ρ::ContinuousUnivariateDistribution)
+    return LocationScale(float(μ), float(σ), ρ)
+end
+
 LocationScale(μ::Real, σ::Real, ρ::D) where {D<:ContinuousUnivariateDistribution} = LocationScale(promote(μ,σ)...,ρ)
 
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)

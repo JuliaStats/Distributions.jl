@@ -65,7 +65,7 @@ end
 
 LogitNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogitNormal{T}(μ, σ)
 LogitNormal(μ::Real, σ::Real) = LogitNormal(promote(μ, σ)...)
-LogitNormal(μ::Integer, σ::Integer) = LogitNormal(Float64(μ), Float64(σ))
+LogitNormal(μ::Integer, σ::Integer) = LogitNormal(float(μ), float(σ))
 LogitNormal(μ::T) where {T} = LogitNormal(μ, one(T))
 LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
 

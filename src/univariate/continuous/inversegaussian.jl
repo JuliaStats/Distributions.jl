@@ -38,7 +38,7 @@ function InverseGaussian(μ::T, λ::T, ::NoArgCheck) where {T<:Real}
 end
 
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
-InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(Float64(μ), Float64(λ))
+InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
 InverseGaussian(μ::T) where {T <: Real} = InverseGaussian(μ, one(T))
 InverseGaussian() = InverseGaussian(1.0, 1.0, NoArgCheck())
 

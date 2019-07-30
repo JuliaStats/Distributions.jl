@@ -40,7 +40,7 @@ end
 BetaPrime(α::T, β::T, ::NoArgCheck) where {T<:Real} = BetaPrime{T}(α, β)
 
 BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))
+BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
 BetaPrime(α::Real) = BetaPrime(α, α)
 BetaPrime() = BetaPrime(1.0, 1.0, NoArgCheck())
 

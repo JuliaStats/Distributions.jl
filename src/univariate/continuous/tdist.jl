@@ -31,7 +31,7 @@ function TDist(ν::T) where {T <: Real}
 end
 
 TDist(ν::T, ::NoArgCheck) where {T<:Real} = TDist{T}(ν)
-TDist(ν::Integer) = TDist(Float64(ν))
+TDist(ν::Integer) = TDist(float(ν))
 
 @distr_support TDist -Inf Inf
 

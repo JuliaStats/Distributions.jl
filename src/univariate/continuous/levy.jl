@@ -34,7 +34,7 @@ end
 Levy(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Levy{T}(μ, σ)
 
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
-Levy(μ::Integer, σ::Integer) = Levy(Float64(μ), Float64(σ))
+Levy(μ::Integer, σ::Integer) = Levy(float(μ), float(σ))
 Levy(μ::T) where {T <: Real} = Levy(μ, one(T))
 Levy() = Levy(0.0, 1.0, NoArgCheck())
 

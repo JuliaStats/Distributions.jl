@@ -33,7 +33,7 @@ end
 
 BetaBinomial(n::Integer, α::T, β::T, ::NoArgCheck) where {T<:Real} = BetaBinomial{T}(n, α, β)
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
-BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
+BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, float(α), float(β))
 
 @distr_support BetaBinomial 0 d.n
 insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n

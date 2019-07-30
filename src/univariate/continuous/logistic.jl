@@ -26,7 +26,7 @@ External links
 struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
-    Logistic{T}(µ::T, θ::T) where {T} = new{T}(µ, θ) 
+    Logistic{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
 
@@ -37,7 +37,7 @@ end
 
 Logistic(μ::T, θ::T, ::NoArgCheck) where {T<:Real} = Logistic{T}(μ, θ)
 Logistic(μ::Real, θ::Real) = Logistic(promote(μ, θ)...)
-Logistic(μ::Integer, θ::Integer) = Logistic(Float64(μ), Float64(θ))
+Logistic(μ::Integer, θ::Integer) = Logistic(float(μ), float(θ))
 Logistic(μ::T) where {T <: Real} = Logistic(μ, one(T))
 Logistic() = Logistic(0.0, 1.0, NoArgCheck())
 

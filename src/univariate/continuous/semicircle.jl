@@ -30,7 +30,7 @@ function Semicircle(r::T) where {T <: Real}
 end
 
 Semicircle(r::T, ::NoArgCheck) where {T <: Real} = Semicircle{T}(r)
-Semicircle(r::Integer) = Semicircle(Float64(r))
+Semicircle(r::Integer) = Semicircle(float(r))
 
 @distr_support Semicircle -d.r +d.r
 

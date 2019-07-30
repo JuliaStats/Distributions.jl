@@ -38,7 +38,7 @@ function Cauchy(μ::T, σ::T, ::NoArgCheck) where {T<:Real}
 end
 
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
+Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
 Cauchy(μ::T) where {T<:Real} = Cauchy(μ, one(T))
 Cauchy() = Cauchy(0.0, 1.0, NoArgCheck())
 

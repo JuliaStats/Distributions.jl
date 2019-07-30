@@ -69,7 +69,7 @@ end
 
 
 #### Parameters
-@inline partype(d::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
+@inline partype(::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
 
 params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
 location(d::PGeneralizedGaussian) = d.μ

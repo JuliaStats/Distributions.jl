@@ -38,7 +38,7 @@ function Laplace(μ::T, θ::T, ::NoArgCheck) where {T <: Real}
 end
 
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
-Laplace(μ::Integer, θ::Integer) = Laplace(Float64(μ), Float64(θ))
+Laplace(μ::Integer, θ::Integer) = Laplace(float(μ), float(θ))
 Laplace(μ::T) where {T <: Real} = Laplace(μ, one(T))
 Laplace() = Laplace(0.0, 1.0, NoArgCheck())
 

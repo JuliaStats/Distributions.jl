@@ -39,7 +39,7 @@ function Uniform(a::T, b::T, ::NoArgCheck) where {T <: Real}
 end
 
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
+Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
 Uniform() = Uniform(0.0, 1.0, NoArgCheck())
 
 @distr_support Uniform d.a d.b
