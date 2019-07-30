@@ -22,7 +22,7 @@ struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     γ::T
     function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where T
         γ = sqrt(α^2 - β^2)
-         
+
         new{T}(μ, α, β, δ, γ)
     end
 end
@@ -30,7 +30,7 @@ end
 NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} = NormalInverseGaussian{T}(μ, α, β, δ)
 NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) = NormalInverseGaussian(promote(μ, α, β, δ)...)
 function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Integer)
-    NormalInverseGaussian(float(μ), float(α), float(β), float(δ))
+    return NormalInverseGaussian(float(μ), float(α), float(β), float(δ))
 end
 
 @distr_support NormalInverseGaussian -Inf Inf

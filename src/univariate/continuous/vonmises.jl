@@ -22,18 +22,18 @@ struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
     μ::T      # mean
     κ::T      # concentration
     I0κx::T   # I0(κ) * exp(-κ), where I0 is the modified Bessel function of order 0
-
-    function VonMises{T}(μ::T, κ::T) where T
-        @check_args(VonMises, κ > zero(κ))
-        new{T}(μ, κ, besselix(zero(T), κ))
-    end
 end
 
-VonMises(μ::T, κ::T) where {T<:Real} = VonMises{T}(μ, κ)
+function VonMises(μ::T, κ::T) where {T <: Real}
+    @check_args(VonMises, κ > zero(κ))
+    return VonMises{T}(μ, κ, besselix(zero(T), κ))
+end
+
+VonMises(μ::T, κ::T, ::NoArgCheck) where {T<:Real} = VonMises{T}(μ, κ, besselix(zero(T), κ))
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
-VonMises(μ::Integer, κ::Integer) = VonMises(Float64(μ), Float64(κ))
-VonMises(κ::Real) = VonMises(0.0, κ)
-VonMises() = VonMises(0.0, 1.0)
+VonMises(μ::Integer, κ::Integer) = VonMises(float(μ), float(κ))
+VonMises(κ::T) where {T <: Real} = VonMises(zero(T), κ)
+VonMises() = VonMises(0.0, 1.0, NoArgCheck())
 
 show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 

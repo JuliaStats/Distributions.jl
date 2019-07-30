@@ -4,15 +4,20 @@
 struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    Biweight{T}(μ::T, σ::T) where {T} = (@check_args(Biweight, σ > zero(σ)); new{T}(μ, σ))
+    Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-Biweight(μ::T, σ::T) where {T<:Real} = Biweight{T}(μ, σ)
+function Biweight(μ::T, σ::T) where {T<:Real}
+    @check_args(Biweight, σ > zero(σ))
+    return Biweight{T}(μ, σ)
+end
+
+Biweight(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Biweight{T}(μ, σ)
+
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
-Biweight(μ::Integer, σ::Integer) = Biweight(Float64(μ), Float64(σ))
-Biweight(μ::Real) = Biweight(μ, 1.0)
-Biweight() = Biweight(0.0, 1.0)
+Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
+Biweight(μ::T) where {T<:Real} = Biweight(μ, one(T))
+Biweight() = Biweight(0.0, 1.0, NoArgCheck())
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 
@@ -46,7 +51,7 @@ function ccdf(d::Biweight{T}, x::Real) where T<:Real
     u = (d.μ - x) / d.σ
     u <= -1 ? one(T) :
     u >= 1 ? zero(T) :
-    (u + 1)^3/16 * @horner(u,8,-9,3)
+    (u + 1)^3/16 * @horner(u, 8, -9, 3)
 end
 
 @quantile_newton Biweight

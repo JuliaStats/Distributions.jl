@@ -17,26 +17,39 @@ External links
 struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
-
-    function Erlang{T}(α::Real, θ::T) where T
-        @check_args(Erlang, isinteger(α) && α >= zero(α))
-        new{T}(α, θ)
-    end
+    Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
-Erlang(α::Int, θ::T) where {T<:Real} = Erlang{T}(α, θ)
-Erlang(α::Int, θ::Integer) = Erlang{Float64}(α, Float64(θ))
-Erlang(α::Int) = Erlang(α, 1.0)
-Erlang() = Erlang(1, 1.0)
+function Erlang(α::Real, θ::T) where {T <: Real}
+    @check_args(Erlang, isinteger(α) && α >= zero(α))
+    return Erlang{T}(α, θ)
+end
+
+function Erlang(α::Integer, θ::T) where {T <: Real}
+    @check_args(Erlang, α >= zero(α))
+    return Erlang{T}(α, θ)
+end
+
+function Erlang(α::Integer, θ::T, ::NoArgCheck) where {T <: Real}
+    return Erlang{T}(α, θ)
+end
+
+function Erlang(α::Integer, θ::Integer)
+    θf = float(θ)
+    return Erlang{typeof(θf)}(α, θf)
+end
+
+Erlang(α::Integer) = Erlang(α, 1.0)
+Erlang() = Erlang(1, 1.0, NoArgCheck())
 
 @distr_support Erlang 0.0 Inf
 
 #### Conversions
-function convert(::Type{Erlang{T}}, α::Int, θ::S) where {T <: Real, S <: Real}
-    Erlang(α, T(θ))
+function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
+    Erlang(α, T(θ), NoArgCheck())
 end
 function convert(::Type{Erlang{T}}, d::Erlang{S}) where {T <: Real, S <: Real}
-    Erlang(d.α, T(d.θ))
+    Erlang(d.α, T(d.θ), NoArgCheck())
 end
 
 #### Parameters

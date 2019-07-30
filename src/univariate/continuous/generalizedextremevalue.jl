@@ -48,7 +48,7 @@ end
 GeneralizedExtremeValue(μ::T, σ::T, ξ::T) where {T<:Real} = GeneralizedExtremeValue{T}(μ, σ, ξ)
 GeneralizedExtremeValue(μ::Real, σ::Real, ξ::Real) = GeneralizedExtremeValue(promote(μ, σ, ξ)...)
 function GeneralizedExtremeValue(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedExtremeValue(Float64(μ), Float64(σ), Float64(ξ))
+    return GeneralizedExtremeValue(float(μ), float(σ), float(ξ))
 end
 
 #### Conversions

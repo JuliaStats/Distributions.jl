@@ -22,18 +22,22 @@ External links
 """
 struct TDist{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
-
-    TDist{T}(ν::T) where {T} = (@check_args(TDist, ν > zero(ν)); new{T}(ν))
+    TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end
 
-TDist(ν::T) where {T<:Real} = TDist{T}(ν)
-TDist(ν::Integer) = TDist(Float64(ν))
+function TDist(ν::T) where {T <: Real}
+    @check_args(TDist, ν > zero(ν))
+    return TDist{T}(ν)
+end
+
+TDist(ν::T, ::NoArgCheck) where {T<:Real} = TDist{T}(ν)
+TDist(ν::Integer) = TDist(float(ν))
 
 @distr_support TDist -Inf Inf
 
 #### Conversions
 convert(::Type{TDist{T}}, ν::Real) where {T<:Real} = TDist(T(ν))
-convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν))
+convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν), NoArgCheck())
 
 #### Parameters
 

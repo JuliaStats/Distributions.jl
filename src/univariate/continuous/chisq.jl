@@ -22,12 +22,16 @@ External links
 """
 struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
-
-    Chisq{T}(ν::T) where {T} = (@check_args(Chisq, ν > zero(ν)); new{T}(ν))
+    Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
-Chisq(ν::T) where {T<:Real} = Chisq{T}(ν)
-Chisq(ν::Integer) = Chisq(Float64(ν))
+function Chisq(ν::T) where {T <: Real}
+    @check_args(Chisq, ν > zero(ν))
+    return Chisq{T}(ν)
+end
+
+Chisq(ν::T, ::NoArgCheck) where {T <: Real} = Chisq{T}(ν)
+Chisq(ν::Integer) = Chisq(float(ν))
 
 @distr_support Chisq 0.0 Inf
 

@@ -24,28 +24,31 @@ External links
 struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Geometric{T}(p::T) where T
-        @check_args(Geometric, zero(p) < p < one(p))
+    function Geometric{T}(p::T) where {T <: Real}
         new{T}(p)
     end
-
 end
 
-Geometric(p::T) where {T<:Real} = Geometric{T}(p)
-Geometric() = Geometric(0.5)
+function Geometric(p::T) where {T <: Real}
+    @check_args(Geometric, zero(p) < p < one(p))
+    return Geometric{T}(p)
+end
+
+Geometric(p::T, ::NoArgCheck) where {T<:Real} = Geometric{T}(p)
+Geometric() = Geometric(0.5, NoArgCheck())
 
 @distr_support Geometric 0 Inf
 
 ### Conversions
 convert(::Type{Geometric{T}}, p::Real) where {T<:Real} = Geometric(T(p))
-convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p))
+convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p), NoArgCheck())
 
 ### Parameters
 
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
-@inline partype(d::Geometric{T}) where {T<:Real} = T
+@inline partype(::Geometric{T}) where {T<:Real} = T
 
 
 ### Statistics

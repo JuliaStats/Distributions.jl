@@ -20,12 +20,17 @@ External links
 """
 struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
     r::T
-
-    Semicircle{T}(r) where {T} = (@check_args(Semicircle, r > 0); new{T}(r))
+    Semicircle{T}(r::T) where {T <: Real} = new{T}(r)
 end
 
-Semicircle(r::Real) = Semicircle{typeof(r)}(r)
-Semicircle(r::Integer) = Semicircle(Float64(r))
+
+function Semicircle(r::T) where {T <: Real}
+    @check_args(Semicircle, r > 0)
+    return Semicircle{T}(r)
+end
+
+Semicircle(r::T, ::NoArgCheck) where {T <: Real} = Semicircle{T}(r)
+Semicircle(r::Integer) = Semicircle(float(r))
 
 @distr_support Semicircle -d.r +d.r
 

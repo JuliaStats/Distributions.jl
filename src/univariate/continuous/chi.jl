@@ -23,18 +23,23 @@ External links
 """
 struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
-
-    Chi{T}(ν::T) where {T} = (@check_args(Chi, ν > zero(ν)); new{T}(ν))
+    Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
-Chi(ν::T) where {T<:Real} = Chi{T}(ν)
-Chi(ν::Integer) = Chi(Float64(ν))
+function Chi(ν::T) where {T<:Real}
+    @check_args(Chi, ν > zero(ν))
+    return Chi{T}(ν)
+end
+
+Chi(ν::T, ::NoArgCheck) where {T<:Real} = Chi{T}(ν)
+
+Chi(ν::Integer) = Chi(float(ν))
 
 @distr_support Chi 0.0 Inf
 
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν))
+convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), NoArgCheck())
 
 #### Parameters
 
