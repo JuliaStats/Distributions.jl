@@ -23,26 +23,30 @@ External links:
 struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     λ::T
 
-    Poisson{T}(λ::Real) where {T} = (@check_args(Poisson, λ >= zero(λ)); new{T}(λ))
+    Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
 end
 
-Poisson(λ::T) where {T<:Real} = Poisson{T}(λ)
-Poisson(λ::Integer) = Poisson(Float64(λ))
-Poisson() = Poisson(1.0)
+function Poisson(λ::T) where {T <: Real}
+    @check_args(Poisson, λ >= zero(λ))
+    return Poisson{T}(λ)
+end
+
+Poisson(λ::T, ::NoArgCheck) where {T<:Real} = Poisson{T}(λ)
+Poisson(λ::Integer) = Poisson(float(λ))
+Poisson() = Poisson(1.0, NoArgCheck())
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 #### Conversions
 convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
-convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ))
+convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), NoArgCheck())
 
 ### Parameters
 
 params(d::Poisson) = (d.λ,)
-@inline partype(d::Poisson{T}) where {T<:Real} = T
+@inline partype(::Poisson{T}) where {T} = T
 
 rate(d::Poisson) = d.λ
-
 
 ### Statistics
 

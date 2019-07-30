@@ -25,26 +25,33 @@ External links
 """
 struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
-
-    Rayleigh{T}(σ::T) where {T} = (@check_args(Rayleigh, σ > zero(σ)); new{T}(σ))
+    Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end
 
-Rayleigh(σ::T) where {T<:Real} = Rayleigh{T}(σ)
-Rayleigh(σ::Integer) = Rayleigh(Float64(σ))
-Rayleigh() = Rayleigh(1.0)
+function Rayleigh(σ::T) where {T <: Real}
+    @check_args(Rayleigh, σ > zero(σ))
+    return Rayleigh{T}(σ)
+end
+
+function Rayleigh(σ::T, ::NoArgCheck) where {T <: Real}
+    return Rayleigh{T}(σ)
+end
+
+Rayleigh(σ::Integer) = Rayleigh(float(σ))
+Rayleigh() = Rayleigh(1.0, NoArgCheck())
 
 @distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ))
+convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), NoArgCheck())
 
 #### Parameters
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
-@inline partype(d::Rayleigh{T}) where {T<:Real} = T
+@inline partype(::Rayleigh{T}) where {T<:Real} = T
 
 
 #### Statistics

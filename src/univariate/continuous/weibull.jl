@@ -27,24 +27,28 @@ struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     α::T   # shape
     θ::T   # scale
 
-    function Weibull{T}(α::T, θ::T) where T
-        @check_args(Weibull, α > zero(α) && θ > zero(θ))
+    function Weibull{T}(α::T, θ::T) where {T <: Real}
         new{T}(α, θ)
     end
 end
 
-Weibull(α::T, θ::T) where {T<:Real} = Weibull{T}(α, θ)
+function Weibull(α::T, θ::T) where {T <: Real}
+    @check_args(Weibull, α > zero(α) && θ > zero(θ))
+    return Weibull{T}(α, θ)
+end
+
+Weibull(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Weibull{T}(α, θ)
 Weibull(α::Real, θ::Real) = Weibull(promote(α, θ)...)
-Weibull(α::Integer, θ::Integer) = Weibull(Float64(α), Float64(θ))
-Weibull(α::Real) = Weibull(α, 1.0)
-Weibull() = Weibull(1.0, 1.0)
+Weibull(α::Integer, θ::Integer) = Weibull(float(α), float(θ))
+Weibull(α::T) where {T <: Real} = Weibull(α, one(T))
+Weibull() = Weibull(1.0, 1.0, NoArgCheck())
 
 @distr_support Weibull 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T<:Real} = Weibull(T(α), T(θ))
-convert(::Type{Weibull{T}}, d::Weibull{S}) where {T <: Real, S <: Real} = Weibull(T(d.α), T(d.θ))
+convert(::Type{Weibull{T}}, d::Weibull{S}) where {T <: Real, S <: Real} = Weibull(T(d.α), T(d.θ), NoArgCheck())
 
 #### Parameters
 
@@ -52,7 +56,7 @@ shape(d::Weibull) = d.α
 scale(d::Weibull) = d.θ
 
 params(d::Weibull) = (d.α, d.θ)
-@inline partype(d::Weibull{T}) where {T<:Real} = T
+@inline partype(::Weibull{T}) where {T<:Real} = T
 
 
 #### Statistics

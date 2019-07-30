@@ -24,7 +24,7 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
+const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
     Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())

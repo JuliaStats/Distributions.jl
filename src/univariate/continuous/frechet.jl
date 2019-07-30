@@ -26,19 +26,19 @@ External links
 struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
-
-    function Frechet{T}(α::T, θ::T) where T
-        @check_args(Frechet, α > zero(α) && θ > zero(θ))
-        new{T}(α, θ)
-    end
-
+    Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-Frechet(α::T, θ::T) where {T<:Real} = Frechet{T}(α, θ)
+function Frechet(α::T, θ::T) where {T <: Real}
+    @check_args(Frechet, α > zero(α) && θ > zero(θ))
+    return Frechet{T}(α, θ)
+end
+
+Frechet(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
-Frechet(α::Integer, θ::Integer) = Frechet(Float64(α), Float64(θ))
-Frechet(α::Real) = Frechet(α, 1.0)
-Frechet() = Frechet(1.0, 1.0)
+Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
+Frechet(α::T) where {T <: Real} = Frechet(α, one(T))
+Frechet() = Frechet(1.0, 1.0, NoArgCheck())
 
 @distr_support Frechet 0.0 Inf
 
@@ -47,7 +47,7 @@ function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
 function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ))
+    Frechet(T(d.α), T(d.θ), NoArgCheck())
 end
 
 #### Parameters
@@ -55,7 +55,7 @@ end
 shape(d::Frechet) = d.α
 scale(d::Frechet) = d.θ
 params(d::Frechet) = (d.α, d.θ)
-@inline partype(d::Frechet{T}) where {T<:Real} = T
+@inline partype(d::Frechet{T}) where {T} = T
 
 
 #### Statistics
