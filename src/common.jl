@@ -97,8 +97,7 @@ abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} en
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
-const NonMatrixDistribution = Union{UnivariateDistribution,
-                                    MultivariateDistribution}
+const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
 const CountableDistribution{F<:VariateForm,
                             C<:CountableSupport} = Distribution{F,C}
