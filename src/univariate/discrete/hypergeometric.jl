@@ -29,7 +29,11 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
         @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
         new(ns, nf, n)
     end
+    function Hypergeometric(ns::Real, nf::Real, n::Real, ::NoArgCheck)
+        new(ns, nf, n)
+    end
 end
+
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
@@ -59,6 +63,7 @@ function modes(d::Hypergeometric)
 end
 
 skewness(d::Hypergeometric) = (d.nf-d.ns)*sqrt(d.ns+d.nf-1)*(d.ns+d.nf-2*d.n)/sqrt(d.n*d.ns*d.nf*(d.ns+d.nf-d.n))/(d.ns+d.nf-2)
+
 function kurtosis(d::Hypergeometric)
     ns = Float64(d.ns)
     nf = Float64(d.nf)

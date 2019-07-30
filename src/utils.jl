@@ -41,21 +41,26 @@ Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
+"""
+    NoArgCheck
+
+Flag structure used on distribution constructors to bypass parameter validation.
+"""
 struct NoArgCheck end
 
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite(x::AbstractArray{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(isfinite(x[i]))
+function allfinite(x::AbstractArray{T}) where {T<:Real}
+    for i in eachindex(x)
+        if !isfinite(x[i])
             return false
         end
     end
     return true
 end
 
-function allzeros(x::AbstractArray{T}) where T<:Real
-    for i = 1 : length(x)
+function allzeros(x::AbstractArray{T}) where {T<:Real}
+    for i in eachindex(x)
         if !(x[i] == zero(T))
             return false
         end
@@ -76,24 +81,24 @@ add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
 add!(x::AbstractVecOrMat, y::ZeroVector) = x
 
 function multiply!(x::AbstractArray, c::Number)
-    for i = 1:length(x)
+    for i in eachindex(x)
         @inbounds x[i] *= c
     end
-    x
+    return x
 end
 
 function exp!(x::AbstractArray)
-    for i = 1:length(x)
+    for i in eachindex(x)
         @inbounds x[i] = exp(x[i])
     end
-    x
+    return x
 end
 
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
 # inplace pdf calculations, etc. allocate storage correctly
-@inline partype(d::Distribution) = Float64
+@inline partype(::Distribution) = Float64
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
@@ -101,6 +106,7 @@ macro checkquantile(p,ex)
     p, ex = esc(p), esc(ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
+
 macro checkinvlogcdf(lp,ex)
     lp, ex = esc(lp), esc(ex)
     :($lp <= zero($lp) ? $ex : NaN)

@@ -25,9 +25,9 @@ External links:
 
 """
 struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
-
     p::Vector{T}
     pmf::Vector{T}
+    
     function PoissonBinomial{T}(p::AbstractArray) where T
         for i=1:length(p)
             if !(0 <= p[i] <= 1)

@@ -24,7 +24,7 @@ External links
 struct DiscreteUniform <: DiscreteUnivariateDistribution
     a::Int
     b::Int
-    pv::Float64
+    pv::Float64 # individual probabilities
 
     function DiscreteUniform(a::Real, b::Real)
         @check_args(DiscreteUniform, a <= b)

@@ -27,22 +27,23 @@ External links:
 struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Bernoulli{T}(p::T) where T
-        @check_args(Bernoulli, zero(p) <= p <= one(p))
-        new{T}(p)
-    end
-
+    Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
 end
 
-Bernoulli(p::T) where {T<:Real} = Bernoulli{T}(p)
+function Bernoulli(p::T) where {T <: Real}
+    @check_args(Bernoulli, zero(p) <= p <= one(p))
+    return Bernoulli{T}(p)
+end
+
+Bernoulli(p::T, ::NoArgCheck) where {T<:Real} = Bernoulli{T}(p)
 Bernoulli(p::Integer) = Bernoulli(Float64(p))
-Bernoulli() = Bernoulli(0.5)
+Bernoulli() = Bernoulli(0.5, NoArgCheck())
 
 @distr_support Bernoulli 0 1
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
-convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p))
+convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), NoArgCheck())
 
 #### Parameters
 
@@ -50,7 +51,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
-@inline partype(d::Bernoulli{T}) where {T<:Real} = T
+@inline partype(::Bernoulli{T}) where {T} = T
 
 
 #### Properties

@@ -51,7 +51,7 @@ function ccdf(d::Biweight{T}, x::Real) where T<:Real
     u = (d.μ - x) / d.σ
     u <= -1 ? one(T) :
     u >= 1 ? zero(T) :
-    (u + 1)^3/16 * @horner(u,8,-9,3)
+    (u + 1)^3/16 * @horner(u, 8, -9,3)
 end
 
 @quantile_newton Biweight

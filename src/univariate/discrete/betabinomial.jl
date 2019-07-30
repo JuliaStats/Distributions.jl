@@ -23,13 +23,15 @@ struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     α::T
     β::T
 
-    function BetaBinomial{T}(n::Int, α::T, β::T) where T
-        @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
-        new{T}(n, α, β)
-    end
+    BetaBinomial{T}(n::Integer, α::T, β::T) where {T <: Real} = new{T}(n, α, β)
 end
 
-BetaBinomial(n::Integer, α::T, β::T) where {T<:Real} = BetaBinomial{T}(n, α, β)
+function BetaBinomial(n::Integer, α::T, β::T) where {T <: Real}
+    @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
+    return BetaBinomial{T}(n, α, β)
+end
+
+BetaBinomial(n::Integer, α::T, β::T, ::NoArgCheck) where {T<:Real} = BetaBinomial{T}(n, α, β)
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
 BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
 
@@ -41,7 +43,7 @@ function convert(::Type{BetaBinomial{T}}, n::Int, α::S, β::S) where {T <: Real
     BetaBinomial(n, T(α), T(β))
 end
 function convert(::Type{BetaBinomial{T}}, d::BetaBinomial{S}) where {T <: Real, S <: Real}
-    BetaBinomial(d.n, T(d.α), T(d.β))
+    BetaBinomial(d.n, T(d.α), T(d.β), NoArgCheck())
 end
 
 #### Parameters
@@ -49,7 +51,7 @@ end
 ntrials(d::BetaBinomial) = d.n
 
 params(d::BetaBinomial) = (d.n, d.α, d.β)
-@inline partype(d::BetaBinomial{T}) where {T<:Real} = T
+@inline partype(::BetaBinomial{T}) where {T} = T
 
 #### Properties
 
