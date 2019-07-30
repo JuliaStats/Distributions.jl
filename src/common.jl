@@ -13,9 +13,20 @@ struct Matrixvariate <: VariateForm end
 `S <: ValueSupport` specifies the support of sample elements,
 either discrete or continuous.
 """
-abstract type ValueSupport end
-struct Discrete   <: ValueSupport end
-struct Continuous <: ValueSupport end
+abstract type ValueSupport{N} end
+struct ContinuousSupport{N <: Number} <: ValueSupport{N} end
+struct CountableSupport{C} <: ValueSupport{C} end
+struct UnionSupport{N1, N2,
+                    S1 <: ValueSupport{N1},
+                    S2 <: ValueSupport{N2}} <:
+                        ValueSupport{Union{N1, N2}} end
+
+const Discrete = CountableSupport{Int}
+const Continuous = ContinuousSupport{Float64}
+const DiscontinuousSupport{I, F} =
+    UnionSupport{I, F, CountableSupport{I},
+                 ContinuousSupport{F}} where {I <: Number, F <: Number}
+const Discontinuous = DiscontinuousSupport{Int, Float64}
 
 ## Sampleable
 
@@ -50,13 +61,14 @@ Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
     eltype(s::Sampleable)
+    eltype(::ValueSupport)
 
 The default element type of a sample. This is the type of elements of the samples generated
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
-Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
+Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
+Base.eltype(::ValueSupport{N}) where N = N
 
 """
     nsamples(s::Sampleable)
@@ -87,15 +99,27 @@ const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+const CountableDistribution{F<:VariateForm,
+                            C<:CountableSupport} = Distribution{F,C}
+const DiscreteDistribution{F<:VariateForm} = CountableDistribution{F,Discrete}
 const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
-const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
-const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
-const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
-const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
-const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
-const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
+const CountableUnivariateDistribution{C<:CountableSupport} =
+    UnivariateDistribution{C}
+const DiscreteUnivariateDistribution =
+    CountableUnivariateDistribution{Discrete}
+const ContinuousUnivariateDistribution   = UnivariateDistribution{Continuous}
+
+const CountableMultivariateDistribution{C<:CountableSupport} =
+    MultivariateDistribution{C}
+const DiscreteMultivariateDistribution =
+    CountableMultivariateDistribution{Discrete}
+const ContinuousMultivariateDistribution = MultivariateDistribution{Continuous}
+
+const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
+const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
+const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
+
 
 variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
 variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
