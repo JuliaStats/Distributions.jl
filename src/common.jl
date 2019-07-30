@@ -23,11 +23,10 @@ struct UnionSupport{N1, N2,
 
 const Discrete = CountableSupport{Int}
 const Continuous = ContinuousSupport{Float64}
-const DiscontinuousSupport{F, I} =
-    UnionSupport{F, I, ContinuousSupport{F},
-                 CountableSupport{I}} where {F <: Number,
-                                             I <: Number}
-const Discontinuous = DiscontinuousSupport{Float64, Int}
+const DiscontinuousSupport{I, F} =
+    UnionSupport{I, F, CountableSupport{I},
+                 ContinuousSupport{F}} where {I <: Number, F <: Number}
+const Discontinuous = DiscontinuousSupport{Int, Float64}
 
 ## Sampleable
 
@@ -62,12 +61,14 @@ Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
     eltype(s::Sampleable)
+    eltype(::ValueSupport)
 
 The default element type of a sample. This is the type of elements of the samples generated
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
 Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
+Base.eltype(::ValueSupport{N}) where N = N
 
 """
     nsamples(s::Sampleable)

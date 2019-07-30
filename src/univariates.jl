@@ -17,7 +17,7 @@ isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounde
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
 isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:CountableUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 """
