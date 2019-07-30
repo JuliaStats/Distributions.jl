@@ -14,11 +14,12 @@ struct Dirac{T <: Number} <:
 end
 
 rand(::AbstractRNG, d::Dirac) = d.value
-pdf(d::Dirac, x) = x == d.value ? 1.0 : 0.0
-cdf(d::Dirac, x) = x < d.value ? 0.0 : 1.0
+pmf(d::Dirac, x) = x ≈ d.value ? 1.0 : 0.0
+cmf(d::Dirac, x) = x < d.value ? 0.0 : 1.0
 quantile(d::Dirac{T}, p::Real) where T = 0 ≤ p ≤ 1 ? d.value : T(NaN)
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
+support(d::Dirac) = [d.value]
 insupport(d::Dirac, x) = x == d.value
 mean(d::Dirac) = d.value
 var(d::Dirac) = 0.0

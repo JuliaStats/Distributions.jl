@@ -96,8 +96,6 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     x[max(i,1)]
 end
 
-rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)
-
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
 
