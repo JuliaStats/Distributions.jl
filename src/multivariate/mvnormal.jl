@@ -67,7 +67,7 @@ const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
 const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
 ```
 """
-abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
+abstract type AbstractMvNormal{T<:Real} <: MultivariateDistribution{ContinuousSupport{T}} end
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 
@@ -170,7 +170,7 @@ isotropic covariance as `abs2(sig) * eye(d)`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal{T}
     μ::Mean
     Σ::Cov
 end
@@ -219,8 +219,6 @@ MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
 MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
 
-
-eltype(::MvNormal{T}) where {T} = T
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))

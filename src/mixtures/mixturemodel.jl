@@ -125,7 +125,7 @@ the components given by ``params``, and a prior probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
 function MixtureModel(::Type{C}, params::AbstractArray) where C<:Distribution
-    components = C[_construct_component(C, a) for a in params]
+    components = [_construct_component(C, a) for a in params]
     MixtureModel(components)
 end
 
@@ -142,7 +142,7 @@ _construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
 _construct_component(::Type{C}, args::Tuple) where {C<:Distribution} = C(args...)
 
 function MixtureModel(::Type{C}, params::AbstractArray, p::Vector{T}) where {C<:Distribution,T<:Real}
-    components = C[_construct_component(C, a) for a in params]
+    components = [_construct_component(C, a) for a in params]
     MixtureModel(components, p)
 end
 

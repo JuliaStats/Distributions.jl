@@ -20,7 +20,7 @@ Dirichlet(alpha)         # Dirichlet distribution with parameter vector alpha
 Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
 ```
 """
-struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
+struct Dirichlet{T<:Real} <: MultivariateDistribution{ContinuousSupport{T}}
     alpha::Vector{T}
     alpha0::T
     lmnB::T
@@ -57,7 +57,6 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
-eltype(::Dirichlet{T}) where {T} = T
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} =

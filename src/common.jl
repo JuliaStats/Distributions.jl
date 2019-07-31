@@ -121,11 +121,8 @@ const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
 const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
 
 
-variate_form(::Type{Distribution{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
-variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
-
-value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
-value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
+variate_form(::Type{<:Sampleable{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
+value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:ValueSupport} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?
