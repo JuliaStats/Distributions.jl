@@ -48,9 +48,9 @@ end
 
 ## Construction of multivariate normal with specific covariance type
 
-const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}}
-const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}}
-const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}}
+const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}, Vector{Float64}}
+const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
+const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}, Vector{Float64}}
 
 MvTDist(df::Real, μ::Vector{<:Real}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
