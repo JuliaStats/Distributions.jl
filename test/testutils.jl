@@ -297,12 +297,15 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 
     if isbounded(d)
-        if isa(d, DiscreteUnivariateDistribution)
+        if isa(d, CountableUnivariateDistribution)
             s = support(d)
             @test isa(s, AbstractUnitRange)
             @test first(s) == minimum(d)
             @test last(s) == maximum(d)
         end
+    end
+    if isa(d, UnivariateDistribution{<:ContinuousSupport})
+        @test support(d) == RealInterval(minimum(d), maximum(d))
     end
 end
 
