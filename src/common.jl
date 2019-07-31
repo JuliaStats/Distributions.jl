@@ -121,7 +121,7 @@ const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
 const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
 
 
-variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
+variate_form(::Type{Distribution{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
 variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
 
 value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
