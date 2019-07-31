@@ -1,4 +1,4 @@
-using Distributions, Random
+using Distributions, Random, StaticArrays, LinearAlgebra
 using Test
 
 import Distributions: GenericMvTDist
@@ -46,3 +46,16 @@ d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
 @test size(rand(MvTDist(1., mu, Sigma), 10)) == (2,10)
 @test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma))) == (2,)
 @test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma), 10)) == (2,10)
+
+# static array for mean/variance
+mu_static = @SVector [1., 2]
+# depends on PDMats#101 (merged but not released)
+# Sigma_static = @SMatrix [4. 2; 2 3]
+
+for i in 1:length(df)
+    d = GenericMvTDist(df[i], mu_static, PDMat(Sigma))
+    @test d.μ isa SVector
+    @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
+    # can't round-trip:
+    @test_broken dd = typeof(d)(params(d))
+end
