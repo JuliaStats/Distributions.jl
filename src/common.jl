@@ -68,7 +68,7 @@ by the `rand` method. However, one can provide an array of different element typ
 store the samples using `rand!`.
 """
 Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
-Base.eltype(::ValueSupport{N}) where N = N
+Base.eltype(::ValueSupport{N}) where {N} = N
 
 """
     nsamples(s::Sampleable)
