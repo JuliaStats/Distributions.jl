@@ -46,7 +46,6 @@ export
     MultivariateDistribution,
     MatrixDistribution,
     NoncentralHypergeometric,
-    NonMatrixDistribution,
     DiscreteDistribution,
     ContinuousDistribution,
     CountableUnivariateDistribution,
