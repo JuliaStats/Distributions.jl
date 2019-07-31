@@ -27,7 +27,7 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-struct Normal{T<:Real} <: ContinuousUnivariateDistribution
+struct Normal{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
@@ -60,8 +60,6 @@ params(d::Normal) = (d.μ, d.σ)
 
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
-
-eltype(::Normal{T}) where {T} = T
 
 #### Statistics
 

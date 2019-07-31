@@ -2,9 +2,9 @@
 
 ## Generic multivariate t-distribution class
 
-abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
+abstract type AbstractMvTDist{T} <: MultivariateDistribution{ContinuousSupport{T}} end
 
-struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist
+struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat} <: AbstractMvTDist{T}
     df::T # non-integer degrees of freedom allowed
     dim::Int
     zeromean::Bool
@@ -101,7 +101,6 @@ logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
 @inline partype(d::GenericMvTDist{T}) where {T} = T
-eltype(::GenericMvTDist{T}) where {T} = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)

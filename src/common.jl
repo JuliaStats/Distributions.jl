@@ -68,7 +68,7 @@ by the `rand` method. However, one can provide an array of different element typ
 store the samples using `rand!`.
 """
 Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
-Base.eltype(::ValueSupport{N}) where N = N
+Base.eltype(::ValueSupport{N}) where {N} = N
 
 """
     nsamples(s::Sampleable)
@@ -109,7 +109,6 @@ const CountableUnivariateDistribution{C<:CountableSupport} =
 const DiscreteUnivariateDistribution =
     CountableUnivariateDistribution{Discrete}
 const ContinuousUnivariateDistribution   = UnivariateDistribution{Continuous}
-
 const CountableMultivariateDistribution{C<:CountableSupport} =
     MultivariateDistribution{C}
 const DiscreteMultivariateDistribution =
@@ -125,11 +124,19 @@ pdf(d::CountableDistribution, x) = pmf(d, x)
 logpdf(d::CountableDistribution) = logpmf(d)
 logpdf(d::CountableDistribution, x) = logpmf(d, x)
 
-variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
-variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
+const CountableMultivariateDistribution{C<:CountableSupport} =
+    MultivariateDistribution{C}
+const DiscreteMultivariateDistribution =
+    CountableMultivariateDistribution{Discrete}
+const ContinuousMultivariateDistribution = MultivariateDistribution{Continuous}
 
-value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
-value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
+const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
+const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
+const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
+
+
+variate_form(::Type{<:Sampleable{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
+value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:ValueSupport} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?
