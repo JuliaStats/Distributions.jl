@@ -34,6 +34,9 @@ function GenericMvTDist(df::T, Σ::Cov) where {Cov<:AbstractPDMat, T<:Real}
     GenericMvTDist(df, zeros(R,dim(Σ)), Σ, true)
 end
 
+GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
+    GenericMvTDist(convert(T,df), convert(Mean, μ), convert(Cov, Σ))
+
 ### Conversion
 function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
     S = convert(AbstractArray{T}, d.Σ)

@@ -56,6 +56,8 @@ for i in 1:length(df)
     d = GenericMvTDist(df[i], mu_static, PDMat(Sigma))
     @test d.μ isa SVector
     @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
-    # can't round-trip:
-    @test_broken dd = typeof(d)(params(d))
+    dd = typeof(d)(params(d)...)
+    @test d.df == dd.df
+    @test d.μ == dd.μ
+    @test Matrix(d.Σ) == Matrix(dd.Σ)
 end
