@@ -10,6 +10,7 @@ p = 6
 
 M    = randn(n, p)
 U    = rand(InverseWishart(n + 2, Matrix(1.0I, n, n)))
+@test nsamples(InverseWishart, U) == 1
 V    = rand(InverseWishart(p + 2, Matrix(1.0I, p, p)))
 UF32 = Matrix{Float32}(U)
 VBF  = Matrix{BigFloat}(V)
@@ -138,6 +139,7 @@ end
 
 @testset "MatrixNormal sample moments" begin
     @test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
+    @test nsamples(typeof(D), rand(D, 100)) == 100
     @test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), kron(V, U) , atol = 0.1)
 end
 
