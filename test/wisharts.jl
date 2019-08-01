@@ -19,6 +19,7 @@ rng = MersenneTwister(123)
         local d
         @test size(d) == size(func[1](d))
         @test length(d) == length(func[1](d))
+        @test rank(d) == rank(func[1](d))
         @test typeof(d)(params(d)...) == d
         @test partype(d) == Float64
     end
