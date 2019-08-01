@@ -19,6 +19,7 @@ All distributions implement the same set of methods:
 ```@docs
 size(::MatrixDistribution)
 length(::MatrixDistribution)
+rank(::MatrixDistribution)
 mean(::MatrixDistribution)
 pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
 logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
