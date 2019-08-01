@@ -169,7 +169,7 @@ end
          "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing UnivariateMixture" begin
-        g_u32 = MixtureModel(Normal, [(0.0f0, 1.0f0), (2.0f0, 1.0f0), (-4.0f0, 1.5f0)], [0.2, 0.5, 0.3])
+        g_u32 = MixtureModel(Normal, [(0.0f0, 1.0f0), (2.0f0, 1.0f0), (-4.0f0, 1.5f0)])
         @test isa(g_u32, MixtureModel{Univariate,
                                       <: ContinuousSupport,
                                       <: Normal})

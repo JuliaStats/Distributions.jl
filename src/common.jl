@@ -79,10 +79,11 @@ into an array, depending on the variate form.
 nsamples(t::Type{Sampleable}, x::Any)
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Univariate}} = 1
 nsamples(::Type{D}, x::AbstractArray) where {D<:Sampleable{Univariate}} = length(x)
-nsamples(::Type{D}, x::AbstractVector) where {D<:Sampleable{Multivariate}} = 1
+nsamples(::Type{D}, x::AbstractArray{<:AbstractVector}) where {D<:Sampleable{Multivariate}} = length(x)
+nsamples(::Type{D}, x::AbstractVector{<:Number}) where {D<:Sampleable{Multivariate}} = 1
 nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = size(x, 2)
-nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
-nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
+nsamples(::Type{D}, x::AbstractMatrix{<:Number}) where {D<:Sampleable{Matrixvariate}} = 1
+nsamples(::Type{D}, x::AbstractArray{<:AbstractMatrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
@@ -97,7 +98,6 @@ abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} en
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
-const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
 const CountableDistribution{F<:VariateForm,
                             C<:CountableSupport} = Distribution{F,C}
