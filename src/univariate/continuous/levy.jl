@@ -21,7 +21,7 @@ External links
 
 * [Lévy distribution on Wikipedia](http://en.wikipedia.org/wiki/Lévy_distribution)
 """
-struct Levy{T<:Real} <: ContinuousUnivariateDistribution
+struct Levy{T<:Real} <: ContinuousUnivariateDistribution{T}
     μ::T
     σ::T
 end

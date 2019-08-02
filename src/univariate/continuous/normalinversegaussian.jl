@@ -14,7 +14,7 @@ External links
 * [Normal-inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal-inverse_Gaussian_distribution)
 
 """
-struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution{T}
     μ::T
     α::T
     β::T

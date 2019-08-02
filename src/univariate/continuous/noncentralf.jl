@@ -1,7 +1,7 @@
 """
     NoncentralF(ν1, ν2, λ)
 """
-struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution{T}
     ν1::T
     ν2::T
     λ::T

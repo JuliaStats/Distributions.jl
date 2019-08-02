@@ -24,7 +24,7 @@ are independent, and we use ``\\mathcal{L}(\\cdot)`` to denote the lower Cholesk
 
 has ``\\mathbf{U}\\sim MB_p(n_1/2, n_2/2)``.
 """
-struct MatrixBeta{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
+struct MatrixBeta{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution{T}
     W1::TW
     W2::TW
     logc0::T

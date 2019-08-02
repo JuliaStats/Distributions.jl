@@ -12,7 +12,7 @@
 #     http://www.mitsuba-renderer.org/~wenzel/files/vmf.pdf
 #
 
-struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
+struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution{T}
     μ::Vector{T}
     κ::T
     logCκ::T

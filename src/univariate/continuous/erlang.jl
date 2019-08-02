@@ -14,7 +14,7 @@ External links
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
 """
-struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
+struct Erlang{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::Int
     θ::T
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)

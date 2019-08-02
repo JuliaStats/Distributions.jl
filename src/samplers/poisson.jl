@@ -13,7 +13,7 @@ end
 #
 # Suitable for small μ
 #
-struct PoissonCountSampler <: Sampleable{Univariate,Discrete}
+struct PoissonCountSampler <: Sampleable{Univariate,CountableSupport{Int}}
     μ::Float64
 end
 
@@ -36,7 +36,7 @@ end
 #
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
-struct PoissonADSampler <: Sampleable{Univariate,Discrete}
+struct PoissonADSampler <: Sampleable{Univariate,CountableSupport{Int}}
     μ::Float64
     s::Float64
     d::Float64

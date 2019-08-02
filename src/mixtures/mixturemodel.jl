@@ -304,8 +304,8 @@ function _cdf(d::UnivariateMixture, x::Real)
     return r
 end
 
-cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
-cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
+cdf(d::UnivariateMixture{ContinuousSupport{Float64}}, x::Real) = _cdf(d, x)
+cdf(d::UnivariateMixture{CountableSupport{Int}}, x::Int) = _cdf(d, x)
 
 
 function _mixpdf1(d::AbstractMixtureModel, x)
@@ -428,12 +428,12 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
-pdf(d::UnivariateMixture{Continuous}, x::Real) = _mixpdf1(d, x)
-pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
-logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)
-logpdf(d::UnivariateMixture{Discrete}, x::Int) = _mixlogpdf1(d, x)
+pdf(d::UnivariateMixture{ContinuousSupport{Float64}}, x::Real) = _mixpdf1(d, x)
+pdf(d::UnivariateMixture{CountableSupport{Int}}, x::Int) = _mixpdf1(d, x)
+logpdf(d::UnivariateMixture{ContinuousSupport{Float64}}, x::Real) = _mixlogpdf1(d, x)
+logpdf(d::UnivariateMixture{CountableSupport{Int}}, x::Int) = _mixlogpdf1(d, x)
 
-_pdf!(r::AbstractArray, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
+_pdf!(r::AbstractArray, d::UnivariateMixture{CountableSupport{Int}}, x::UnitRange) = _mixpdf!(r, d, x)
 _pdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixlogpdf!(r, d, x)
 

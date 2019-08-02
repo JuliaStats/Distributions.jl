@@ -30,7 +30,7 @@ External links
 * [Generalized Pareto distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_Pareto_distribution)
 
 """
-struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
+struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution{T}
     μ::T
     σ::T
     ξ::T

@@ -5,17 +5,26 @@ function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
     (leftEnd, rightEnd)
 end
 
-function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
+function expectation(distr::UnivariateDistribution{<:ContinuousSupport},
+                     g::Function, epsilon::Real) 
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
     integrate(x -> f(x)*g(x), leftEnd, rightEnd)
 end
 
-## Assuming that discrete distributions only take integer values.
-function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
+## Assuming that integer distributions don't have gaps in support
+function expectation(distr::UnivariateDistribution{CountableSupport{<:Integer}},
+                     g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
     sum(x -> f(x)*g(x), leftEnd:rightEnd)
+end
+
+## Any countable distribution that is finite
+function expectation(distr::UnivariateDistribution{<:CountableSupport},
+                     g::Function, epsilon::Real)
+    f = x->pdf(distr,x)
+    sum(x -> f(x)*g(x), support(distr))
 end
 
 function expectation(distr::UnivariateDistribution, g::Function)
@@ -29,6 +38,7 @@ end
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
+function kldivergence(P::UnivariateDistribution{S},
+                      Q::UnivariateDistribution{S}) where {S <: ValueSupport}
     expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
 end

@@ -18,7 +18,7 @@ External links
 * [von Mises distribution on Wikipedia](http://en.wikipedia.org/wiki/Von_Mises_distribution)
 
 """
-struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
+struct VonMises{T<:Real} <: ContinuousUnivariateDistribution{T}
     μ::T      # mean
     κ::T      # concentration
     I0κx::T   # I0(κ) * exp(-κ), where I0 is the modified Bessel function of order 0

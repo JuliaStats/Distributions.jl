@@ -24,7 +24,7 @@ External links
 * [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
 
 """
-struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
+struct Gamma{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T
     θ::T
 end
@@ -86,7 +86,7 @@ cf(d::Gamma, t::Real) = (1 - im * t * d.θ)^(-d.α)
 @_delegate_statsfuns Gamma gamma α θ
 
 gradlogpdf(d::Gamma{T}, x::Real) where {T<:Real} =
-    insupport(Gamma, x) ? (d.α - 1) / x - 1 / d.θ : zero(T)
+    insupport(Gamma{T}, x) ? (d.α - 1) / x - 1 / d.θ : zero(T)
 
 function rand(rng::AbstractRNG, d::Gamma)
     if shape(d) < 1.0

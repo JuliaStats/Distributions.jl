@@ -199,4 +199,4 @@ d = Multinomial(nt, p)
 @test_throws DimensionMismatch rand!(d, m, false)
 @test_nowarn rand!(d, m)
 @test Distributions.variate_form(typeof(d)) ≡ Multivariate
-@test Distributions.value_support(typeof(d)) ≡ Discrete
+@test Distributions.value_support(typeof(d)) ≡ CountableSupport{Int}

@@ -18,7 +18,7 @@ External links
 
 * [Wigner semicircle distribution on Wikipedia](https://en.wikipedia.org/wiki/Wigner_semicircle_distribution)
 """
-struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
+struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution{T}
     r::T
     Semicircle{T}(r::T) where {T <: Real} = new{T}(r)
 end

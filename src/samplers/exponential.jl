@@ -1,10 +1,10 @@
-struct ExponentialSampler <: Sampleable{Univariate,Continuous}
+struct ExponentialSampler <: Sampleable{Univariate,ContinuousSupport{Float64}}
     scale::Float64
 end
 
 rand(rng::AbstractRNG, s::ExponentialSampler) = s.scale * randexp(rng)
 
-struct ExponentialLogUSampler <: Sampleable{Univariate,Continuous}
+struct ExponentialLogUSampler <: Sampleable{Univariate,ContinuousSupport{Float64}}
     scale::Float64
 end
 

@@ -21,12 +21,9 @@ struct UnionSupport{N1, N2,
                     S2 <: ValueSupport{N2}} <:
                         ValueSupport{Union{N1, N2}} end
 
-const Discrete = CountableSupport{Int}
-const Continuous = ContinuousSupport{Float64}
 const DiscontinuousSupport{I, F} =
     UnionSupport{I, F, CountableSupport{I},
                  ContinuousSupport{F}} where {I <: Number, F <: Number}
-const Discontinuous = DiscontinuousSupport{Int, Float64}
 
 ## Sampleable
 
@@ -68,7 +65,8 @@ by the `rand` method. However, one can provide an array of different element typ
 store the samples using `rand!`.
 """
 Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
-Base.eltype(::ValueSupport{N}) where {N} = N
+Base.eltype(::Type{<:Sampleable{F, <: ValueSupport{N}}}) where {F, N} = N
+Base.eltype(::Type{<:ValueSupport{N}}) where {N} = N
 
 """
     nsamples(s::Sampleable)
@@ -101,24 +99,26 @@ const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 
 const CountableDistribution{F<:VariateForm,
                             C<:CountableSupport} = Distribution{F,C}
-const DiscreteDistribution{F<:VariateForm} = CountableDistribution{F,Discrete}
-const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+const IntegerDistribution{F<:VariateForm, S<:Integer} =
+    CountableDistribution{F,CountableSupport{S}}
+const ContinuousDistribution{F<:VariateForm, T<:Number} = Distribution{F,ContinuousSupport{T}}
 
 const CountableUnivariateDistribution{C<:CountableSupport} =
     UnivariateDistribution{C}
-const DiscreteUnivariateDistribution =
-    CountableUnivariateDistribution{Discrete}
-const ContinuousUnivariateDistribution   = UnivariateDistribution{Continuous}
+const IntegerUnivariateDistribution{S<:Integer} =
+    CountableUnivariateDistribution{CountableSupport{S}}
+const ContinuousUnivariateDistribution{T<:Number} = UnivariateDistribution{ContinuousSupport{T}}
 
 const CountableMultivariateDistribution{C<:CountableSupport} =
     MultivariateDistribution{C}
-const DiscreteMultivariateDistribution =
-    CountableMultivariateDistribution{Discrete}
-const ContinuousMultivariateDistribution = MultivariateDistribution{Continuous}
+const IntegerMultivariateDistribution{S<:Integer} =
+    CountableMultivariateDistribution{CountableSupport{S}}
+const ContinuousMultivariateDistribution{T<:Number} = MultivariateDistribution{ContinuousSupport{T}}
 
 const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
-const DiscreteMatrixDistribution = CountableMatrixDistribution{Discrete}
-const ContinuousMatrixDistribution = MatrixDistribution{Continuous}
+const IntegerMatrixDistribution{S<:Integer} =
+    CountableMatrixDistribution{CountableSupport{S}}
+const ContinuousMatrixDistribution{T<:Number} = MatrixDistribution{ContinuousSupport{T}}
 
 
 variate_form(::Type{<:Sampleable{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
@@ -137,18 +137,18 @@ const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
 
 """
-    succprob(d::DiscreteUnivariateDistribution)
+    succprob(d::IntegerUnivariateDistribution)
 
 Get the probability of success.
 """
-succprob(d::DiscreteUnivariateDistribution)
+succprob(d::IntegerUnivariateDistribution)
 
 """
-    failprob(d::DiscreteUnivariateDistribution)
+    failprob(d::IntegerUnivariateDistribution)
 
 Get the probability of failure.
 """
-failprob(d::DiscreteUnivariateDistribution)
+failprob(d::IntegerUnivariateDistribution)
 
 # Temporary fix to handle RFunctions dependencies
 """

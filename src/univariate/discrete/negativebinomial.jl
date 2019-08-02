@@ -28,7 +28,7 @@ External links:
 Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
-struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct NegativeBinomial{T<:Real} <: IntegerUnivariateDistribution{Int}
     r::T
     p::T
 

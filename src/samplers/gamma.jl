@@ -6,7 +6,7 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,ContinuousSupport{T}}
     a::T
     s2::T
     s::T
@@ -124,14 +124,14 @@ end
 # doi:10.1007/BF02293108
 
 # valid for 0 < shape <= 1
-struct GammaGSSampler <: Sampleable{Univariate,Continuous}
-    a::Float64
-    ia::Float64
-    b::Float64
-    scale::Float64
+struct GammaGSSampler{T<:Real} <: Sampleable{Univariate,ContinuousSupport{T}}
+    a::T
+    ia::T
+    b::T
+    scale::T
 end
 
-function GammaGSSampler(d::Gamma)
+function GammaGSSampler(d::Gamma{T}) where {T}
     a = shape(d)
     ia = 1.0 / a
     b = 1.0+0.36787944117144233 * a
@@ -162,13 +162,13 @@ end
 # doi:10.1145/358407.358414
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
-struct GammaMTSampler <: Sampleable{Univariate,Continuous}
-    d::Float64
-    c::Float64
-    κ::Float64
+struct GammaMTSampler{T<:Real} <: Sampleable{Univariate,ContinuousSupport{T}}
+    d::T
+    c::T
+    κ::T
 end
 
-function GammaMTSampler(g::Gamma)
+function GammaMTSampler(g::Gamma{T}) where {T}
     d = shape(g) - 1/3
     c = 1.0 / sqrt(9.0 * d)
     κ = d * scale(g)
@@ -194,15 +194,15 @@ end
 
 # Inverse Power sampler
 # uses the x*u^(1/a) trick from Marsaglia and Tsang (2000) for when shape < 1
-struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleable{Univariate,Continuous}
+struct GammaIPSampler{T<:Real,S<:Sampleable{Univariate,ContinuousSupport{T}}} <: Sampleable{Univariate,ContinuousSupport{T}}
     s::S #sampler for Gamma(1+shape,scale)
     nia::T #-1/scale
 end
 
-function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
-    GammaIPSampler(Gamma(1.0 + shape(d), scale(d)), -1.0 / shape(d))
+function GammaIPSampler(d::Gamma{T},::Type{S}) where {T<:Real, S<:Sampleable}
+    GammaIPSampler(Gamma(one(T) + shape(d), scale(d)), -one(T) / shape(d))
 end
-GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
+GammaIPSampler(d::Gamma{T}) where {T} = GammaIPSampler(d,GammaMTSampler{T})
 
 function rand(rng::AbstractRNG, s::GammaIPSampler)
     x = rand(rng, s.s)

@@ -14,17 +14,17 @@ TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
 
 ### statistics
 
-minimum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.lower
-maximum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.upper
+minimum(d::Truncated{Normal{T},ContinuousSupport{T}}) where {T <: Real} = d.lower
+maximum(d::Truncated{Normal{T},ContinuousSupport{T}}) where {T <: Real} = d.upper
 
 
-function mode(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mode(d::Truncated{Normal{T},ContinuousSupport{T}}) where T <: Real
     μ = mean(d.untruncated)
     d.upper < μ ? d.upper :
     d.lower > μ ? d.lower : μ
 end
 
-modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
+modes(d::Truncated{Normal{T},ContinuousSupport{T}}) where {T <: Real} = [mode(d)]
 
 # do not export. Used in mean, var
 function _F1(x::Real, y::Real; thresh=1e-7)
@@ -92,7 +92,7 @@ function _tnvar(a, b, μ, σ)
     _tnvar(α, β) * σ^2
 end
 
-function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mean(d::Truncated{Normal{T},ContinuousSupport{T}}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -107,7 +107,7 @@ function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
     end
 end
 
-function var(d::Truncated{Normal{T},Continuous}) where T <: Real
+function var(d::Truncated{Normal{T},ContinuousSupport{T}}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -129,7 +129,7 @@ function var(d::Truncated{Normal{T},Continuous}) where T <: Real
     end
 end
 
-function entropy(d::Truncated{Normal{T},Continuous}) where T <: Real
+function entropy(d::Truncated{Normal{T},ContinuousSupport{T}}) where T <: Real
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
@@ -147,7 +147,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
+function rand(rng::AbstractRNG, d::Truncated{Normal{T},ContinuousSupport{T}}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)

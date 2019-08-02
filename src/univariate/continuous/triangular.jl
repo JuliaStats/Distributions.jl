@@ -27,7 +27,7 @@ External links
 * [Triangular distribution on Wikipedia](http://en.wikipedia.org/wiki/Triangular_distribution)
 
 """
-struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
+struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution{T}
     a::T
     b::T
     c::T

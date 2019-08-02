@@ -21,7 +21,7 @@ External links
 * [Chi distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi_distribution)
 
 """
-struct Chi{T<:Real} <: ContinuousUnivariateDistribution
+struct Chi{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     ν::T
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
@@ -103,8 +103,8 @@ invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
 rand(rng::AbstractRNG, d::Chi) =
     (ν = d.ν; sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
 
-struct ChiSampler{S <: Sampleable{Univariate,Continuous}} <:
-    Sampleable{Univariate,Continuous}
+struct ChiSampler{T <: Real, S <: Sampleable{Univariate,ContinuousSupport{T}}} <:
+    Sampleable{Univariate,ContinuousSupport{T}}
     s::S
 end
 

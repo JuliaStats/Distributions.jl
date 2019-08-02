@@ -22,7 +22,7 @@ External links:
 
 * [Binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Binomial_distribution)
 """
-struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
+struct Binomial{T<:Real} <: IntegerUnivariateDistribution{Int}
     n::Int
     p::T
 

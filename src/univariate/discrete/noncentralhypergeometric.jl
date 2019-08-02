@@ -1,7 +1,7 @@
 # Noncentral hypergeometric distribution
 # TODO: this distribution needs clean-up and testing
 
-abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistribution end
+abstract type NoncentralHypergeometric{T<:Real} <: IntegerUnivariateDistribution{Int} end
 
 ### handling support
 

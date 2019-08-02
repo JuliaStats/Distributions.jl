@@ -19,7 +19,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-struct Multinomial{T<:Real} <: DiscreteMultivariateDistribution
+struct Multinomial{T<:Real} <: IntegerMultivariateDistribution{Int}
     n::Int
     p::Vector{T}
 

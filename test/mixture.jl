@@ -214,7 +214,7 @@ end
                        MvNormal([0.2, 1.0], 1.0),
                        MvNormal([-0.5, -3.0], 1.6) ],
             [0.2, 0.5, 0.3])
-        @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
+        @test isa(g_m, MixtureModel{Multivariate, <: ContinuousSupport, IsoNormal})
         @test length(components(g_m)) == 3
         @test length(g_m) == 2
         @test insupport(g_m, [0.0, 0.0]) == true

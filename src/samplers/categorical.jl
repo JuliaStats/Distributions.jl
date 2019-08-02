@@ -1,6 +1,6 @@
 #### naive sampling
 
-struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,CountableSupport{Int}}
     prob::Ts
 
     function CategoricalDirectSampler{T,Ts}(p::Ts) where {

@@ -34,7 +34,7 @@ External links
 * [Generalized extreme value distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_extreme_value_distribution)
 
 """
-struct GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution
+struct GeneralizedExtremeValue{T<:Real} <: ContinuousUnivariateDistribution{T}
     μ::T
     σ::T
     ξ::T
