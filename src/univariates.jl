@@ -311,6 +311,15 @@ cf(d::UnivariateDistribution, t)
 # pdf
 
 """
+    pdf(d::UnivariateDistribution, x::Real)
+
+Evaluate the probability density (mass) at `x`.
+
+See also: [`logpdf`](@ref).
+"""
+pdf(d::UnivariateDistribution, x::Real)
+
+"""
     pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
 
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`

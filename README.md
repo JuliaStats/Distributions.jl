@@ -8,7 +8,7 @@ Distributions.jl
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaStats.github.io/Distributions.jl/latest/)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaStats.github.io/Distributions.jl/stable/)
 
-A Julia package for probability distributions and associated functions. Particularly, Distributions implements:
+A Julia package for probability distributions and associated functions. Particularly, *Distributions* implements:
 
 * Moments (e.g mean, variance, skewness, and kurtosis), entropy, and other properties
 * Probability density/mass functions (pdf) and their logarithm (logpdf)
@@ -23,16 +23,18 @@ A Julia package for probability distributions and associated functions. Particul
 
 * **Documentation**: <https://JuliaStats.github.io/Distributions.jl/stable/>
 
+* **Support**: We use GitHub for the development of the Julia package *Distributions* itself. 
+For support and questions, please use the [Julia Discourse forum](https://discourse.julialang.org).
+Also, for casual conversation and quick questions, there are the channels `#helpdesk` and `#statistics` in the official Julia chat (https://julialang.slack.com). To get an invitation, please visit [https://slackinvite.julialang.org](https://slackinvite.julialang.org).
+
+
 ## Contributing
 
-### Reporting issues & discussing
+### Reporting issues
 
-1. If you need explanation on how to do X, Y using Distributions,
-feel free to ask on the Julia [Discourse](https://discourse.julialang.org/c/domain/stats)
-or [Slack](https://julialang.slack.com), get an invitation
-[here](https://slackinvite.julialang.org/).
+* If you need help or an explanation how to use *Distributions* ask in the forum (https://discourse.julialang.org) or, for informal questions, visit the chat (https://julialang.slack.com).
 
-2. If you have a bug linked with Distributions, check that it has
+If you have a bug linked with *Distributions*, check that it has
 not been reported yet on the issues of the repository.
 If not, you can file a new issue, add your version of the package
 which you can get with this command in the Julia REPL:

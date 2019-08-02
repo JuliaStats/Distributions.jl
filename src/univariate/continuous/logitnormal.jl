@@ -15,13 +15,13 @@ The probability density function is
 
 ```math
 f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
-\\exp \\left( - \\frac{(\\logit(x) - \\mu)^2}{2 \\sigma^2} \\right),
+\\exp \\left( - \\frac{(\\text{logit}(x) - \\mu)^2}{2 \\sigma^2} \\right),
 \\quad x > 0
 ```
 
 where the logit-Function is
 ```math
-logit(x) = \\ln(frac{x}{1-x})
+\\text{logit}(x) = \\ln\\left(\\frac{x}{1-x}\\right)
 \\quad 0 < x < 1
 ```
 
