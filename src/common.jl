@@ -121,7 +121,7 @@ const ContinuousMultivariateDistribution{T<:Number} =
 
 const CountableMatrixDistribution{C<:CountableSupport} =
     MatrixDistribution{C}
-const IntegerMatrixDistribution{S<:Integer} =
+const ContiguousMatrixDistribution{S<:Integer} =
     CountableMatrixDistribution{ContiguousSupport{S}}
 const ContinuousMatrixDistribution{T<:Number} =
     MatrixDistribution{ContinuousSupport{T}}
@@ -142,18 +142,18 @@ const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
 
 """
-    succprob(d::IntegerUnivariateDistribution)
+    succprob(d::ContiguousUnivariateDistribution)
 
 Get the probability of success.
 """
-succprob(d::IntegerUnivariateDistribution)
+succprob(d::ContiguousUnivariateDistribution)
 
 """
-    failprob(d::IntegerUnivariateDistribution)
+    failprob(d::ContiguousUnivariateDistribution)
 
 Get the probability of failure.
 """
-failprob(d::IntegerUnivariateDistribution)
+failprob(d::ContiguousUnivariateDistribution)
 
 # Temporary fix to handle RFunctions dependencies
 """

@@ -17,7 +17,7 @@ isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounde
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
 isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport(d::Union{D,Type{D}}) where {D<:IntegerUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContiguousUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 """
@@ -125,7 +125,7 @@ insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistributio
      insupport!(BitArray(undef, size(X)), d, X)
 
 insupport(d::Union{D,Type{D}},x::Real) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = minimum(d) <= x <= maximum(d)
-insupport(d::Union{D,Type{D}},x) where {D<:CountableUnivariateDistribution} = x ∈ support(d)
+insupport(d::D,x::T) where {T, D<:UnivariateDistribution{CountableSupport{T}}} = x ∈ support(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:ContiguousUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
 support(d::Union{D,Type{D}}) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = RealInterval(minimum(d), maximum(d))

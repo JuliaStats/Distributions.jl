@@ -7,19 +7,19 @@ using ForwardDiff: Dual
 @assert MultivariateDistribution <: Distribution
 @assert MatrixDistribution <: Distribution
 
-@assert IntegerDistribution <: Distribution
+@assert ContiguousDistribution <: Distribution
 @assert ContinuousDistribution <: Distribution
 
-@assert IntegerUnivariateDistribution <: IntegerDistribution 
-@assert IntegerUnivariateDistribution <: UnivariateDistribution
+@assert ContiguousUnivariateDistribution <: ContiguousDistribution 
+@assert ContiguousUnivariateDistribution <: UnivariateDistribution
 @assert ContinuousUnivariateDistribution <: ContinuousDistribution
 @assert ContinuousUnivariateDistribution <: UnivariateDistribution
-@assert IntegerMultivariateDistribution <: IntegerDistribution
-@assert IntegerMultivariateDistribution <: MultivariateDistribution
+@assert ContiguousMultivariateDistribution <: ContiguousDistribution
+@assert ContiguousMultivariateDistribution <: MultivariateDistribution
 @assert ContinuousMultivariateDistribution <: ContinuousDistribution
 @assert ContinuousMultivariateDistribution <: MultivariateDistribution
-@assert IntegerMatrixDistribution <: IntegerDistribution
-@assert IntegerMatrixDistribution <: MatrixDistribution
+@assert ContiguousMatrixDistribution <: ContiguousDistribution
+@assert ContiguousMatrixDistribution <: MatrixDistribution
 @assert ContinuousMatrixDistribution <: ContinuousDistribution
 @assert ContinuousMatrixDistribution <: MatrixDistribution
 

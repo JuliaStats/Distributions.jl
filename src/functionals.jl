@@ -13,7 +13,7 @@ function expectation(distr::UnivariateDistribution{<:ContinuousSupport},
 end
 
 ## Assuming that integer distributions don't have gaps in support
-function expectation(distr::UnivariateDistribution{CountableSupport{<:Integer}},
+function expectation(distr::ContiguousUnivariateDistribution,
                      g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
@@ -21,7 +21,7 @@ function expectation(distr::UnivariateDistribution{CountableSupport{<:Integer}},
 end
 
 ## Any countable distribution that is finite
-function expectation(distr::UnivariateDistribution{<:CountableSupport},
+function expectation(distr::CountableUnivariateDistribution,
                      g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     sum(x -> f(x)*g(x), support(distr))
