@@ -15,16 +15,17 @@ either discrete or continuous.
 """
 abstract type ValueSupport{N} end
 struct ContinuousSupport{N <: Number} <: ValueSupport{N} end
-struct CountableSupport{C} <: ValueSupport{C} end
+abstract type CountableSupport{C} <: ValueSupport{C} end
+struct ContiguousSupport{C <: Integer} <: CountableSupport{C} end
 struct UnionSupport{N1, N2,
                     S1 <: ValueSupport{N1},
                     S2 <: ValueSupport{N2}} <:
                         ValueSupport{Union{N1, N2}} end
 
-const Discrete = CountableSupport{Int}
+const Discrete = ContiguousSupport{Int}
 const Continuous = ContinuousSupport{Float64}
 const DiscontinuousSupport{I, F} =
-    UnionSupport{I, F, CountableSupport{I},
+    UnionSupport{I, F, <: CountableSupport{I},
                  ContinuousSupport{F}} where {I <: Number, F <: Number}
 const Discontinuous = DiscontinuousSupport{Int, Float64}
 

@@ -31,6 +31,7 @@ export
     VariateForm,
     ValueSupport,
     CountableSupport,
+    ContiguousSupport,
     ContinuousSupport,
     DiscontinuousSupport,
     UnionSupport,
