@@ -5,12 +5,16 @@
 The *studentized range distribution* has probability density function:
 
 ```math
-f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{(\\frac{\\nu}{2})}2^{\\nu/2 - 1}} \\int_{0}^{\\infty} {x^{\\nu}\\phi(\\sqrt{\\nu}x)} [\\int_{-\\infty}^{\\infty} {\\phi(u)\\phi(u - qx)(\\Phi(u) - \\Phi(u - qx))^{k - 2}du]dx
+f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{\\left(\\frac{\\nu}{2}\\right)}2^{\\nu/2 - 1}} \\int_{0}^{\\infty} {x^{\\nu}\\phi(\\sqrt{\\nu}x)} \\left[\\int_{-\\infty}^{\\infty} {\\phi(u)\\phi(u - qx)[\\Phi(u) - \\Phi(u - qx)]^{k - 2}}du\\right]dx
+```
 
 where
 
-\\Phi(x) = \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} (Normal Distribution CDF)
-\\phi(x) = \\Phi'(x) (Normal Distribution PDF)
+```math
+\\begin{align*}
+\\Phi(x) &= \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} &&(\\text{Normal Distribution CDF})\\\\
+\\phi(x) &= \\Phi'(x) &&(\\text{Normal Distribution PDF})
+\\end{align*}
 ```
 
 ```julia

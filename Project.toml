@@ -27,7 +27,8 @@ Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Calculus", "Distributed", "ForwardDiff", "JSON", "Test"]
+test = ["Calculus", "Distributed", "ForwardDiff", "JSON", "StaticArrays", "Test"]

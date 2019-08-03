@@ -125,6 +125,7 @@ insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistributio
      insupport!(BitArray(undef, size(X)), d, X)
 
 insupport(d::Union{D,Type{D}},x::Real) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = minimum(d) <= x <= maximum(d)
+insupport(d::D,x::T) where {T, D<:UnivariateDistribution{CountableSupport{T}}} = x ∈ support(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
 support(d::Union{D,Type{D}}) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = RealInterval(minimum(d), maximum(d))
@@ -311,7 +312,16 @@ cf(d::UnivariateDistribution, t)
 # pmf
 
 """
-    pmf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
+    pdf(d::UnivariateDistribution, x::Real)
+
+Evaluate the probability density (mass) at `x`.
+
+See also: [`logpdf`](@ref).
+"""
+pdf(d::UnivariateDistribution, x::Real)
+
+"""
+    pmf(d::CountableUnivariateDistribution, x::T) where {T<:Real}
 
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
 type but `x` is integer, the value is converted to `Int`.

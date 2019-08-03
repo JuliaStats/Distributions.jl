@@ -16,6 +16,13 @@ The length (*i.e* number of elements) of each sample from the distribution `d`.
 Base.length(d::MatrixDistribution)
 
 """
+    rank(d::MatrixDistribution)
+
+The rank of each sample from the distribution `d`.
+"""
+LinearAlgebra.rank(d::MatrixDistribution)
+
+"""
     vec(d::MatrixDistribution)
 
 If known, returns a `MultivariateDistribution` instance representing the
