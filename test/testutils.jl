@@ -25,7 +25,7 @@ end
 
 # testing the implementation of a discrete univariate distribution
 #
-function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
+function test_distr(distr::CountableUnivariateDistribution, n::Int;
                     testquan::Bool=true)
 
     test_range(distr)
@@ -44,7 +44,7 @@ end
 
 # testing the implementation of a continuous univariate distribution
 #
-function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
+function test_distr(distr::UnivariateDistribution{<:ContinuousSupport}, n::Int;
                     testquan::Bool=true, rng::AbstractRNG=MersenneTwister(123))
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
@@ -73,12 +73,12 @@ end
 
 # for discrete samplers
 #
-function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable instance
-                      distr::DiscreteUnivariateDistribution,    # corresponding distribution
-                      n::Int;                                   # number of samples to generate
-                      q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
-                      verbose::Bool=false,                      # show intermediate info (for debugging)
-                      rng::Union{AbstractRNG, Missing}=missing) # add an rng?
+function test_samples(s::Sampleable{Univariate, <:CountableSupport}, # the sampleable instance
+                      distr::CountableUnivariateDistribution,        # corresponding distribution
+                      n::Int;                                        # number of samples to generate
+                      q::Float64=1.0e-7,                             # confidence interval, 1 - q as confidence
+                      verbose::Bool=false,                           # show intermediate info (for debugging)
+                      rng::Union{AbstractRNG, Missing}=missing)      # add an rng?
 
     # The basic idea
     # ------------------
@@ -105,7 +105,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     rmin = floor(Int,quantile(distr, 0.00001))::Int
     rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
-    p0 = pdf.(Ref(distr), rmin:rmax)  # reference probability masses
+    p0 = pmf.(Ref(distr), rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
     # determine confidence intervals for counts:
@@ -145,13 +145,13 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     return samples
 end
 
-test_samples(distr::DiscreteUnivariateDistribution, n::Int;
+test_samples(distr::CountableUnivariateDistribution, n::Int;
              q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
     test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng)
 
 # for continuous samplers
 #
-function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable instance
+function test_samples(s::Sampleable{Univariate, <: ContinuousSupport}, # the sampleable instance
                       distr::ContinuousUnivariateDistribution,  # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       nbins::Int=50,                            # divide the main interval into nbins
@@ -239,7 +239,9 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     return samples
 end
 
-test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
+test_samples(distr::UnivariateDistribution{<:ContinuousSupport},
+             n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false,
+             rng=missing) =
     test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose, rng=rng)
 
 
@@ -258,7 +260,7 @@ function test_range(d::UnivariateDistribution)
     @test isbounded(d) == (is_lb && is_ub)
 end
 
-function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
+function get_evalsamples(d::CountableUnivariateDistribution, q::Float64)
     # samples for testing evaluation functions (even spacing)
 
     T = eltype(d)
@@ -268,7 +270,8 @@ function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     return lv:hv
 end
 
-function get_evalsamples(d::ContinuousUnivariateDistribution, q::Float64, n::Int)
+function get_evalsamples(d::UnivariateDistribution{<:ContinuousSupport},
+                         q::Float64, n::Int)
     # samples for testing evaluation functions (even spacing)
 
     lv = quantile(d, q/2)
@@ -280,8 +283,11 @@ end
 function test_support(d::UnivariateDistribution, vs::AbstractVector)
     for v in vs
         @test insupport(d, v)
+        @test nsamples(typeof(d), v) == 1
     end
+    @test length(d) == 1
     @test all(insupport(d, vs))
+    @test nsamples(typeof(d), collect(vs)) == length(vs)
 
     if islowerbounded(d)
         @test isfinite(minimum(d))
@@ -297,20 +303,23 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 
     if isbounded(d)
-        if isa(d, DiscreteUnivariateDistribution)
+        if isa(d, CountableUnivariateDistribution)
             s = support(d)
             @test isa(s, AbstractUnitRange)
             @test first(s) == minimum(d)
             @test last(s) == maximum(d)
         end
     end
+    if isa(d, UnivariateDistribution{<:ContinuousSupport})
+        @test support(d) == RealInterval(minimum(d), maximum(d))
+    end
 end
 
 
 #### Testing evaluation methods
 
-function test_range_evaluation(d::DiscreteUnivariateDistribution)
-    # check the consistency between range-based and ordinary pdf
+function test_range_evaluation(d::CountableUnivariateDistribution)
+    # check the consistency between range-based and ordinary pmf
     vmin = minimum(d)
     vmax = maximum(d)
     @test vmin <= vmax
@@ -324,24 +333,25 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf.(Ref(d), collect(rmin:rmax))
-    @test pdf.(Ref(d), rmin:rmax) ≈ p0
+    p0 = pmf.(Ref(d), collect(rmin:rmax))
+    @test pmf.(Ref(d), rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test pdf.(Ref(d), rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test pmf.(Ref(d), rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test pdf.(Ref(d), support(d)) ≈ p0
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test pdf.(Ref(d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test pdf.(Ref(d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test pmf.(Ref(d), support(d)) ≈ p0
+        @test pmf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pmf.(Ref(d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test pmf.(Ref(d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test pmf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
 
-function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
+function test_evaluation(d::CountableUnivariateDistribution,
+                         vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
     p   = Vector{Float64}(undef, nv)
     c   = Vector{Float64}(undef, nv)
@@ -352,10 +362,10 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     ci  = 0.
 
     for (i, v) in enumerate(vs)
-        p[i] = pdf(d, v)
+        p[i] = pmf(d, v)
         c[i] = cdf(d, v)
         cc[i] = ccdf(d, v)
-        lp[i] = logpdf(d, v)
+        lp[i] = logpmf(d, v)
         lc[i] = logcdf(d, v)
         lcc[i] = logccdf(d, v)
 
@@ -383,17 +393,18 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
+    @test pmf.(Ref(d), vs)  ≈ p
     @test cdf.(Ref(d), vs)  ≈ c
     @test ccdf.(Ref(d), vs) ≈ cc
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
+    @test logpmf.(Ref(d), vs)  ≈ lp
     @test logcdf.(Ref(d), vs)  ≈ lc
     @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
 
-function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
+function test_evaluation(d::UnivariateDistribution{<:ContinuousSupport},
+                         vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
     p   = Vector{Float64}(undef, nv)
     c   = Vector{Float64}(undef, nv)
@@ -429,10 +440,14 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
             qtol = isa(d, InverseGaussian) ? 1.0e-4 : 1.0e-10
             qtol = isa(d, StudentizedRange) ? 1.0e-5 : qtol
             if p[i] > 1.0e-6
-                @test isapprox(quantile(d, c[i])    , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(cquantile(d, cc[i])  , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(invlogcdf(d, lc[i])  , v, atol=qtol * (abs(v) + 1.0))
-                @test isapprox(invlogccdf(d, lcc[i]), v, atol=qtol * (abs(v) + 1.0))
+                @test isapprox(quantile(d, c[i])    , v,
+                               atol=qtol * (abs(v) + 1.0))
+                @test isapprox(cquantile(d, cc[i])  , v,
+                               atol=qtol * (abs(v) + 1.0))
+                @test isapprox(invlogcdf(d, lc[i])  , v,
+                               atol=qtol * (abs(v) + 1.0))
+                @test isapprox(invlogccdf(d, lcc[i]), v,
+                               atol=qtol * (abs(v) + 1.0))
             end
         end
     end
@@ -464,11 +479,11 @@ end
 
 #### Testing statistics methods
 
-function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
+function test_stats(d::CountableUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]
-    p = pdf.(Ref(d), vf)
+    p = pmf.(Ref(d), vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
     xstd = sqrt(xvar)
@@ -502,7 +517,8 @@ allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
 allow_test_stats(::StudentizedRange) = false
 
-function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
+function test_stats(d::UnivariateDistribution{<:ContinuousSupport},
+                    xs::AbstractVector{Float64})
     # using Monte Carlo methods
 
     if !(isfinite(mean(d)) && isfinite(var(d)))
@@ -511,6 +527,7 @@ function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Floa
     vd = var(d)
 
     n = length(xs)
+    @test length(d) == 1
     xmean = mean(xs)
     xvar = var(xs)
     xstd = sqrt(xvar)

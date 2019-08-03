@@ -74,11 +74,11 @@ cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 :
                                    x > d.b ? 1.0 :
                                    (floor(Int,x) - d.a + 1.0) * d.pv)
 
-pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
+pmf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
 
-logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
+logpmf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
 
-quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
+quantile(d::DiscreteUniform, p::Real) = d.a + floor(Int,p * span(d))
 
 function mgf(d::DiscreteUniform, t::T) where {T <: Real}
     a, b = d.a, d.b

@@ -83,7 +83,7 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function pdf(d::BetaBinomial{T}, k::Int) where T
+function pmf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
     insupport(d, k) || return zero(T)
     chooseinv = (n + 1) * beta(k + 1, n - k + 1)
@@ -92,7 +92,7 @@ function pdf(d::BetaBinomial{T}, k::Int) where T
     return numerator / (denominator * chooseinv)
 end
 
-function logpdf(d::BetaBinomial{T}, k::Int) where T
+function logpmf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
     logbinom = - log1p(n) - lbeta(k + 1, n - k + 1)
     lognum   = lbeta(k + α, n - k + β)
@@ -100,12 +100,13 @@ function logpdf(d::BetaBinomial{T}, k::Int) where T
     logbinom + lognum - logdenom
 end
 
-entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))
-median(d::BetaBinomial) = median(Categorical(pdf.(Ref(d),support(d)))) - 1
-mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1
-modes(d::BetaBinomial) = modes(Categorical(pdf.(Ref(d),support(d)))) .- 1
+entropy(d::BetaBinomial) = entropy(Categorical(pmf.(Ref(d),support(d))))
+median(d::BetaBinomial) = median(Categorical(pmf.(Ref(d),support(d)))) - 1
+mode(d::BetaBinomial) = argmax(pmf.(Ref(d),support(d))) - 1
+modes(d::BetaBinomial) = modes(Categorical(pmf.(Ref(d),support(d)))) .- 1
 
-quantile(d::BetaBinomial, p::Float64) = quantile(Categorical(pdf.(Ref(d), support(d))), p) - 1
+quantile(d::BetaBinomial, p::Real) =
+    quantile(Categorical(pmf.(Ref(d), support(d))), p) - 1
 
 #### Sampling
 

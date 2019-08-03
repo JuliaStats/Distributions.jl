@@ -170,7 +170,8 @@ end
 # pdf and logpdf
 
 """
-    pdf(d::MultivariateDistribution, x::AbstractArray)
+    pdf(d::ContinuousMultivariateDistribution, x::AbstractArray)
+    pmf(d::CountableMultivariateDistribution, x::AbstractArray)
 
 Return the probability density of distribution `d` evaluated at `x`.
 
@@ -180,10 +181,12 @@ to `x[:,i]` (i.e. treating each column as a sample).
 
 `pdf!(r, d, x)` will write the results to a pre-allocated array `r`.
 """
-pdf(d::MultivariateDistribution, x::AbstractArray)
+pdf(d::ContinuousMultivariateDistribution, x::AbstractArray)
+# pmf(d::CountableMultivariateDistribution, x::AbstractArray)
 
 """
-    logpdf(d::MultivariateDistribution, x::AbstractArray)
+    logpdf(d::ContinuousMultivariateDistribution, x::AbstractArray)
+    logpmf(d::CountableMultivariateDistribution, x::AbstractArray)
 
 Return the logarithm of probability density evaluated at `x`.
 
@@ -192,69 +195,134 @@ Return the logarithm of probability density evaluated at `x`.
 
 `logpdf!(r, d, x)` will write the results to a pre-allocated array `r`.
 """
-logpdf(d::MultivariateDistribution, x::AbstractArray)
+logpdf(d::ContinuousMultivariateDistribution, x::AbstractArray)
+# logpmf(d::CountableMultivariateDistribution, x::AbstractArray)
 
-_pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
+_pdf(d::ContinuousMultivariateDistribution, X::AbstractVector) =
+    exp(_logpdf(d, X))
+_pmf(d::CountableMultivariateDistribution, X::AbstractVector) =
+    exp(_logpmf(d, X))
 
-function logpdf(d::MultivariateDistribution, X::AbstractVector)
+function logpdf(d::ContinuousMultivariateDistribution, X::AbstractVector)
     length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, X)
 end
+function logpmf(d::CountableMultivariateDistribution, X::AbstractVector)
+    length(X) == length(d) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    _logpmf(d, X)
+end
 
-function pdf(d::MultivariateDistribution, X::AbstractVector)
+function pdf(d::ContinuousMultivariateDistribution, X::AbstractVector)
     length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, X)
 end
 
-function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
+function pmf(d::CountableMultivariateDistribution, X::AbstractVector)
+    length(X) == length(d) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    _pmf(d, X)
+end
+
+function _logpdf!(r::AbstractArray, d::ContinuousMultivariateDistribution,
+                  X::AbstractMatrix)
     for i in 1 : size(X,2)
         @inbounds r[i] = logpdf(d, view(X,:,i))
     end
     return r
 end
 
-function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
+function _logpmf!(r::AbstractArray, d::CountableMultivariateDistribution,
+                  X::AbstractMatrix)
+    for i in 1 : size(X,2)
+        @inbounds r[i] = logpmf(d, view(X,:,i))
+    end
+    return r
+end
+
+function _pdf!(r::AbstractArray, d::ContinuousMultivariateDistribution,
+               X::AbstractMatrix)
     for i in 1 : size(X,2)
         @inbounds r[i] = pdf(d, view(X,:,i))
     end
     return r
 end
 
-function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
+function _pmf!(r::AbstractArray, d::CountableMultivariateDistribution,
+               X::AbstractMatrix)
+    for i in 1 : size(X,2)
+        @inbounds r[i] = pmf(d, view(X,:,i))
+    end
+    return r
+end
+
+function logpdf!(r::AbstractArray, d::ContinuousMultivariateDistribution,
+                 X::AbstractMatrix)
     size(X) == (length(d), length(r)) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf!(r, d, X)
 end
 
-function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
+function logpmf!(r::AbstractArray, d::CountableMultivariateDistribution,
+                 X::AbstractMatrix)
+    size(X) == (length(d), length(r)) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    _logpmf!(r, d, X)
+end
+
+function pdf!(r::AbstractArray, d::ContinuousMultivariateDistribution,
+              X::AbstractMatrix)
     size(X) == (length(d), length(r)) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf!(r, d, X)
 end
 
-function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
+function pmf!(r::AbstractArray, d::CountableMultivariateDistribution,
+              X::AbstractMatrix)
+    size(X) == (length(d), length(r)) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    _pmf!(r, d, X)
+end
+
+function logpdf(d::ContinuousMultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
     _logpdf!(Vector{T}(undef, size(X,2)), d, X)
 end
 
-function pdf(d::MultivariateDistribution, X::AbstractMatrix)
+function logpmf(d::CountableMultivariateDistribution, X::AbstractMatrix)
+    size(X, 1) == length(d) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    T = promote_type(partype(d), eltype(X))
+    _logpmf!(Vector{T}(undef, size(X,2)), d, X)
+end
+
+function pdf(d::ContinuousMultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     T = promote_type(partype(d), eltype(X))
     _pdf!(Vector{T}(undef, size(X,2)), d, X)
 end
 
-"""
-    _logpdf{T<:Real}(d::MultivariateDistribution, x::AbstractArray)
+function pmf(d::CountableMultivariateDistribution, X::AbstractMatrix)
+    size(X, 1) == length(d) ||
+        throw(DimensionMismatch("Inconsistent array dimensions."))
+    T = promote_type(partype(d), eltype(X))
+    _pmf!(Vector{T}(undef, size(X,2)), d, X)
+end
 
-Evaluate logarithm of pdf value for a given vector `x`. This function need not perform dimension checking.
+"""
+    _logpdf{T<:Real}(d::ContinuousMultivariateDistribution, x::AbstractArray)
+    _logpmf{T<:Real}(d::CountableMultivariateDistribution, x::AbstractArray)
+
+Evaluate logarithm of pdf/pmf value for a given vector `x`. This function need not perform dimension checking.
 Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods are provided in `src/multivariates.jl`.
 """
-_logpdf(d::MultivariateDistribution, x::AbstractArray)
+_logpdf(d::ContinuousMultivariateDistribution, x::AbstractArray)
+# _logpmf(d::CountableMultivariateDistribution, x::AbstractArray)
 
 """
     loglikelihood(d::MultivariateDistribution, x::AbstractMatrix)

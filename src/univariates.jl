@@ -17,7 +17,7 @@ isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounde
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
 isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(d) < +Inf
 
-hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
+hasfinitesupport(d::Union{D,Type{D}}) where {D<:CountableUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
 """
@@ -124,10 +124,11 @@ end
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
      insupport!(BitArray(undef, size(X)), d, X)
 
-insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = minimum(d) <= x <= maximum(d)
+insupport(d::D,x::T) where {T, D<:UnivariateDistribution{CountableSupport{T}}} = x ∈ support(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = RealInterval(minimum(d), maximum(d))
 support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
@@ -308,7 +309,7 @@ cf(d::UnivariateDistribution, t)
 
 #### pdf, cdf, and friends
 
-# pdf
+# pmf
 
 """
     pdf(d::UnivariateDistribution, x::Real)
@@ -320,7 +321,7 @@ See also: [`logpdf`](@ref).
 pdf(d::UnivariateDistribution, x::Real)
 
 """
-    pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
+    pmf(d::CountableUnivariateDistribution, x::T) where {T<:Real}
 
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
 type but `x` is integer, the value is converted to `Int`.
@@ -328,9 +329,11 @@ type but `x` is integer, the value is converted to `Int`.
 The version with `x::Integer` must be implemented by
 discrete distributions.
 
-See also: [`logpdf`](@ref).
+See also: [`logpmf`](@ref).
 """
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pmf(d::UnivariateDistribution{C}, x::Real) where {I <: Integer,
+                                                  C <: CountableSupport{I}} =
+    insupport(d, x) ? pmf(d, round(Int, x)) : 0.0
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -339,9 +342,10 @@ Evaluate the logarithm of probability density (mass) at `x`.
 Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
 """
-logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
+logpdf(d::ContinuousUnivariateDistribution, x::Real) = log(pdf(d, x))
+logpmf(d::DiscreteUnivariateDistribution, x::Integer) = log(pmf(d, x))
+logpmf(d::CountableUnivariateDistribution, x) = log(pmf(d, x))
+logpmf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpmf(d, round(Int, x)) : -Inf
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -350,20 +354,27 @@ Evaluate the cumulative probability at `x`.
 
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
-cdf(d::UnivariateDistribution, x::Real)
-cdf(d::DiscreteUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
+cdf(d::UnivariateDistribution, x)
+
+cdf(d::CountableUnivariateDistribution, x) =
+    cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support
-function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer,
+             ::Type{FiniteSupport{false}})
     c = 0.0
     for y = minimum(d):x
-        c += pdf(d, y)
+        c += pmf(d, y)
     end
     return c
 end
 
+cdf(d::DiscreteUnivariateDistribution, x::Real, ::Type{FiniteSupport{false}}) =
+    cdf(d, floor(Int,x), FiniteSupport{false})
+
 # Discrete univariate with finite support
-function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer,
+             ::Type{FiniteSupport{true}})
     # calculate from left if x < (min + max)/2
     # (same as infinite support version)
     x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
@@ -376,7 +387,18 @@ function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport
     return c
 end
 
-cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
+function cdf(d::CountableUnivariateDistribution, x, ::Type{FiniteSupport{true}})
+    # calculate from left if in first half of support
+    s = support(d)
+    val = s[floor(Int, length(s) / 2 + 1)]
+    if x <= val
+        return reduce(+, pmf(d, y) for y in s if y <= x; init = 0.0)
+    else
+        # otherwise, calculate from the right
+        return 1.0 - reduce(+, pmf(d, y) for y in s if y > x; init = 0.0)
+    end
+end
+
 cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x)))
 
 
@@ -385,7 +407,7 @@ cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x
 
 The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
 """
-ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
+ccdf(d::UnivariateDistribution, x) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
@@ -394,18 +416,20 @@ ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
-logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
+logcdf(d::UnivariateDistribution, x) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
+logcdf(d::CountableUnivariateDistribution, x) = log(cdf(d, x))
 
 """
     logccdf(d::UnivariateDistribution, x::Real)
 
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
-logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
+logccdf(d::UnivariateDistribution, x) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
+logccdf(d::CountableUnivariateDistribution, x) = log(ccdf(d, x))
 
 """
     quantile(d::UnivariateDistribution, q::Real)
@@ -421,7 +445,7 @@ quantile(d::UnivariateDistribution, p::Real)
 
 The complementary quantile value, i.e. `quantile(d, 1-q)`.
 """
-cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
+cquantile(d::UnivariateDistribution, p::Real) = quantile(d, one(p) - p)
 
 """
     invlogcdf(d::UnivariateDistribution, lp::Real)
@@ -495,15 +519,15 @@ end
 
 abstract type RecursiveProbabilityEvaluator end
 
-function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+function _pmf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
+    vl,vr, vfirst, vlast = _pmf_fill_outside!(r, d, X)
 
-    # fill central part: with non-zero pdf
+    # fill central part: with non-zero pmf
     if vl <= vr
         fm1 = vfirst - 1
-        r[vl - fm1] = pv = pdf(d, vl)
+        r[vl - fm1] = pv = pmf(d, vl)
         for v = (vl+1):vr
-            r[v - fm1] = pv = nextpdf(rpe, pv, v)
+            r[v - fm1] = pv = nextpmf(rpe, pv, v)
         end
     end
 
@@ -527,6 +551,8 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     # function names from StatsFuns
     fpdf = Symbol(fpre, "pdf")
     flogpdf = Symbol(fpre, "logpdf")
+    fpmf = Symbol(fpre, "pdf")
+    flogpmf = Symbol(fpre, "logpdf")
     fcdf = Symbol(fpre, "cdf")
     fccdf = Symbol(fpre, "ccdf")
     flogcdf = Symbol(fpre, "logcdf")
@@ -542,6 +568,8 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     esc(quote
         pdf(d::$D, x::$T) = $(fpdf)($(pargs...), x)
         logpdf(d::$D, x::$T) = $(flogpdf)($(pargs...), x)
+        pmf(d::$D, x::$T) = $(fpmf)($(pargs...), x)
+        logpmf(d::$D, x::$T) = $(flogpmf)($(pargs...), x)
 
         cdf(d::$D, x::$T) = $(fcdf)($(pargs...), x)
         ccdf(d::$D, x::$T) = $(fccdf)($(pargs...), x)
@@ -562,6 +590,7 @@ const discrete_distributions = [
     "bernoulli",
     "betabinomial",
     "binomial",
+    "dirac",
     "discreteuniform",
     "discretenonparametric",
     "categorical",

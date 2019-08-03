@@ -70,7 +70,7 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
 ### Evaluations
 
-function pdf(d::Geometric{T}, x::Int) where T<:Real
+function pmf(d::Geometric{T}, x::Int) where T<:Real
     if x >= 0
         p = d.p
         return p < one(p) / 10 ? p * exp(log1p(-p) * x) : d.p * (one(p) - p)^x
@@ -79,7 +79,7 @@ function pdf(d::Geometric{T}, x::Int) where T<:Real
     end
 end
 
-function logpdf(d::Geometric{T}, x::Int) where T<:Real
+function logpmf(d::Geometric{T}, x::Int) where T<:Real
     x >= 0 ? log(d.p) + log1p(-d.p) * x : -T(Inf)
 end
 
@@ -88,13 +88,13 @@ struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
 end
 
 RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
-nextpdf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
+nextpmf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
 
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
+Base.broadcast!(::typeof(pmf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
+    _pmf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
+function Base.broadcast(::typeof(pmf), d::Geometric, X::UnitRange)
     r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
+    r .= pmf.(Ref(d),X)
 end
 
 

@@ -11,7 +11,7 @@ Distributions.jl
 A Julia package for probability distributions and associated functions. Particularly, *Distributions* implements:
 
 * Moments (e.g mean, variance, skewness, and kurtosis), entropy, and other properties
-* Probability density/mass functions (pdf) and their logarithm (logpdf)
+* Probability density/mass functions (pdf/pmf) and their logarithm (logpdf/logpmf)
 * Moment generating functions and characteristic functions
 * Sampling from population or from a distribution
 * Maximum likelihood estimation

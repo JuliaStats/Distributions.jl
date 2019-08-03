@@ -27,7 +27,7 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-struct Normal{T<:Real} <: ContinuousUnivariateDistribution
+struct Normal{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
@@ -60,8 +60,6 @@ params(d::Normal) = (d.μ, d.σ)
 
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
-
-eltype(::Normal{T}) where {T} = T
 
 #### Statistics
 
@@ -169,11 +167,11 @@ invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
 function quantile(d::Normal, p::Real)
     if iszero(d.σ)
         if iszero(p)
-            -Inf
+            return -Inf
         elseif isone(p)
-            Inf
+            return Inf
         else
-            0.5
+            return d.μ
         end
     end
     xval(d, -erfcinv(2p) * sqrt2)
@@ -182,11 +180,11 @@ end
 function cquantile(d::Normal, q::Real)
     if iszero(d.σ)
         if iszero(q)
-            Inf
+            return Inf
         elseif isone(q)
-            -Inf
+            return -Inf
         else
-            0.5
+            return d.μ
         end
     end
     xval(d, erfcinv(2q) * sqrt2)

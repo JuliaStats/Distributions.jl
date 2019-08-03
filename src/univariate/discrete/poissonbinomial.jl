@@ -27,9 +27,8 @@ External links:
 struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     p::Vector{T}
     pmf::Vector{T}
-
     function PoissonBinomial{T}(p::AbstractArray) where {T <: Real}
-        pb = poissonbinomial_pdf_fft(p)
+        pb = poissonbinomial_pmf_fft(p)
         @assert isprobvec(pb)
         new{T}(p, pb)
     end
@@ -98,7 +97,7 @@ modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 #### Evaluation
 
-quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
+quantile(d::PoissonBinomial, x::Real) = quantile(Categorical(d.pmf), x) - 1
 
 function mgf(d::PoissonBinomial{T}, t::Real) where {T}
     p,  = params(d)
@@ -110,20 +109,20 @@ function cf(d::PoissonBinomial{T}, t::Real) where {T}
     prod(one(T) .- p .+ p .* cis(t))
 end
 
-pdf(d::PoissonBinomial, k::Integer) = insupport(d, k) ? d.pmf[k+1] : 0
-function logpdf(d::PoissonBinomial{T}, k::Int) where T<:Real
+pmf(d::PoissonBinomial, k::Integer) = insupport(d, k) ? d.pmf[k+1] : 0
+function logpmf(d::PoissonBinomial{T}, k::Int) where T<:Real
     insupport(d, k) ? log(d.pmf[k + 1]) : -T(Inf)
 end
 
 
-# Computes the pdf of a poisson-binomial random variable using
+# Computes the pmf of a poisson-binomial random variable using
 # fast fourier transform
 #
 #     Hong, Y. (2013).
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray)
+function poissonbinomial_pmf_fft(p::AbstractArray)
     n = length(p)
     ω = 2 / (n + 1)
 

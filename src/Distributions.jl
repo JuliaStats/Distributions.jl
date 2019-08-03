@@ -30,20 +30,28 @@ export
     # generic types
     VariateForm,
     ValueSupport,
+    CountableSupport,
+    ContiguousSupport,
+    ContinuousSupport,
+    DiscontinuousSupport,
+    UnionSupport,
     Univariate,
     Multivariate,
     Matrixvariate,
     Discrete,
     Continuous,
+    Discontinuous,
     Sampleable,
     Distribution,
     UnivariateDistribution,
     MultivariateDistribution,
     MatrixDistribution,
     NoncentralHypergeometric,
-    NonMatrixDistribution,
     DiscreteDistribution,
     ContinuousDistribution,
+    CountableUnivariateDistribution,
+    CountableMultivariateDistribution,
+    CountableMatrixDistribution,
     DiscreteUnivariateDistribution,
     DiscreteMultivariateDistribution,
     DiscreteMatrixDistribution,
@@ -69,9 +77,11 @@ export
     Chernoff,
     Chi,
     Chisq,
+    CompoundDistribution,
     Cosine,
     DiagNormal,
     DiagNormalCanon,
+    Dirac,
     Dirichlet,
     DirichletMultinomial,
     DiscreteUniform,
@@ -93,6 +103,7 @@ export
     GeneralizedExtremeValue,
     Geometric,
     Gumbel,
+    Hurdle,
     Hypergeometric,
     InverseWishart,
     InverseGamma,
@@ -138,6 +149,7 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    SpikeSlab,
     StudentizedRange,
     SymTriangularDist,
     TDist,
@@ -152,6 +164,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    ZeroInflated,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
@@ -172,6 +185,8 @@ export
     components,         # get components from a mixture model
     componentwise_pdf,      # component-wise pdf for mixture models
     componentwise_logpdf,   # component-wise logpdf for mixture models
+    componentwise_pmf,      # component-wise pmf for mixture models
+    componentwise_logpmf,   # component-wise logpmf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
     dim,                # sample dimension of multivariate distribution
@@ -199,6 +214,8 @@ export
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
+    logpmf,             # log probability mass
+    logpmf!,            # evaluate log pmf to provided storage
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
@@ -221,7 +238,8 @@ export
     params,             # get the tuple of parameters
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
-    pdf,                # probability density function (ContinuousDistribution)
+    pdf,                # probability density function (non-CountableSupport)
+    pmf,                # probability mass function (non-ContinuousSupport)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     quantile,           # inverse of cdf (defined for p in (0,1))
@@ -277,6 +295,7 @@ include("qq.jl")
 include("estimators.jl")
 
 # mixture distributions (TODO: moveout)
+include("mixtures/mixturedist.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
@@ -290,6 +309,7 @@ API overview (major features):
 - `d = Dist(parameters...)` creates a distribution instance `d` for some distribution `Dist` (see choices below) with the specified `parameters`
 - `rand(d, sz)` samples from the distribution
 - `pdf(d, x)` and `logpdf(d, x)` compute the probability density or log-probability density of `d` at `x`
+- `pmf(d, x)` and `logpmf(d, x)` compute the probability mass or log-probability mass of `d` at `x`
 - `cdf(d, x)` and `ccdf(d, x)` compute the (complementary) cumulative distribution function at `x`
 - `quantile(d, p)` is the inverse `cdf` (see also `cquantile`)
 - `mean(d)`, `var(d)`, `std(d)`, `skewness(d)`, `kurtosis(d)` compute moments of `d`
@@ -303,23 +323,26 @@ information.
 Supported distributions:
 
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
-    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Categorical, Cauchy, Chi, Chisq, CompoundDistribution,
+    Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
-    GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
+    GeneralizedExtremeValue, Geometric, Gumbel, Hurdle, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
-    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal, MatrixTDist, MixtureModel,
-    Multinomial, MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
-    MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
+    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    MatrixTDist, MixtureModel, Multinomial, MultivariateNormal, MvLogNormal,
+    MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist, NegativeBinomial,
+    NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
-    NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    NormalInverseGaussian, Pareto, PGeneralizedGaussian,
+    Poisson, PoissonBinomial, QQPair, Rayleigh, Skellam, SpikeSlab,
+    StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
-    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    Wishart, ZeroInflated, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon
 

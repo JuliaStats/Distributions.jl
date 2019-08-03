@@ -80,8 +80,8 @@ end
 
 #### Evaluation
 
-pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
+pmf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
+pmf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
                             x == 1 ? succprob(d) : zero(d.p)
 
 cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : one(d.p)

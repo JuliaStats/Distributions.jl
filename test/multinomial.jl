@@ -142,6 +142,7 @@ end
     # random sampling
     X = Matrix{Int}(undef, length(p), 100)
     x = func(d, X)
+    @test nsamples(typeof(d), x) == 100
     @test x ≡ X
     @test isa(x, Matrix{Int})
     @test all(sum(x, dims=1) .== nt)
@@ -163,6 +164,7 @@ end
     @test x ≡ X
     @test all(sum.(x) .== nt)
     @test all(insupport(d, a) for a in x)
+    @test nsamples(typeof(d), x) == 100
 end
 
 @testset "Testing Multinomial with $key" for (key, func) in
@@ -175,6 +177,7 @@ end
     @test x1 ≡ X[1]
     @test all(sum.(x) .== nt)
     @test all(insupport(d, a) for a in x)
+    @test nsamples(typeof(d), x) == 100
 end
 
 repeats = 10
@@ -195,3 +198,5 @@ nt = 10
 d = Multinomial(nt, p)
 @test_throws DimensionMismatch rand!(d, m, false)
 @test_nowarn rand!(d, m)
+@test Distributions.variate_form(typeof(d)) ≡ Multivariate
+@test Distributions.value_support(typeof(d)) ≡ Discrete

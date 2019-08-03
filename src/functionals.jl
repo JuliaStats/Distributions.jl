@@ -18,6 +18,12 @@ function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon
     sum(x -> f(x)*g(x), leftEnd:rightEnd)
 end
 
+function expectation(distr::CountableUnivariateDistribution,
+                     g::Function, epsilon::Real)
+    f = x->pdf(distr,x)
+    sum(x -> f(x)*g(x), support(distr))
+end
+
 function expectation(distr::UnivariateDistribution, g::Function)
     expectation(distr, g, 1e-10)
 end

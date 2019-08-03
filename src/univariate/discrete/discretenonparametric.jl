@@ -2,7 +2,7 @@
     DiscreteNonParametric(xs, ps)
 
 A *Discrete nonparametric distribution* explicitly defines an arbitrary
-probability mass function in terms of a list of real support values and their
+probability mass function in terms of a list of support values and their
 corresponding probabilities
 
 ```julia
@@ -17,16 +17,18 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T,P<:Real,
+                             Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <:
+                                 UnivariateDistribution{CountableSupport{T}}
     support::Ts
     p::Ps
 
     DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps, ::NoArgCheck) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+        T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
         new{T,P,Ts,Ps}(vs, ps)
 
     function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
+        T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
         @check_args(DiscreteNonParametric, isprobvec(ps))
         @check_args(DiscreteNonParametric, allunique(vs))
@@ -36,14 +38,20 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
 end
 
 DiscreteNonParametric(vs::Ts, ps::Ps) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
 
 DiscreteNonParametric(vs::Ts, ps::Ps, a::NoArgCheck) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, a)
 
-eltype(d::DiscreteNonParametric{T}) where T = T
+DiscreteNonParametric(dict::Dict{K, V}) where {K,V<:Real} =
+    DiscreteNonParametric{K,V,Vector{K},Vector{V}}(collect(keys(dict)),
+                                                   collect(values(dict)))
+
+DiscreteNonParametric(dict::Dict{K, V}, a::NoArgCheck) where {K,V<:Real} =
+    DiscreteNonParametric{K,V,Vector{K},Vector{V}}(collect(keys(dict)),
+                                                   collect(values(dict)), a)
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
@@ -88,8 +96,6 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     x[max(i,1)]
 end
 
-rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)
-
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
 
@@ -99,11 +105,11 @@ get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
 
 # Evaluation
 
-pdf(d::DiscreteNonParametric) = copy(probs(d))
+pmf(d::DiscreteNonParametric) = copy(probs(d))
 
 # Helper functions for pdf and cdf required to fix ambiguous method
-# error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
-function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
+# error involving [pc]mf(::DisceteUnivariateDistribution, ::Int)
+function _pmf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     idx_range = searchsorted(support(d), x)
     if length(idx_range) > 0
         return probs(d)[first(idx_range)]
@@ -111,8 +117,9 @@ function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
         return zero(P)
     end
 end
-pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
-pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x::Int) where T  = _pmf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x::Real) where T = _pmf(d, convert(T, x))
+pmf(d::DiscreteNonParametric{T}, x) where T = _pmf(d, convert(T, x))
 
 function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x > maximum(d) && return 1.0
@@ -126,6 +133,7 @@ function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
 end
 cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
 cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
+cdf(d::DiscreteNonParametric{T}, x) where T = _cdf(d, convert(T, x))
 
 function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x < minimum(d) && return 1.0
@@ -139,6 +147,7 @@ function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
 end
 ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
 ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
+ccdf(d::DiscreteNonParametric{T}, x) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())
@@ -156,8 +165,10 @@ end
 
 minimum(d::DiscreteNonParametric) = first(support(d))
 maximum(d::DiscreteNonParametric) = last(support(d))
-insupport(d::DiscreteNonParametric, x::Real) =
+insupport(d::DiscreteNonParametric{T}, x::T) where {T} =
     length(searchsorted(support(d), x)) > 0
+insupport(d::DiscreteNonParametric{T}, x::Number) where {T<:Number} =
+    length(searchsorted(support(d), convert(T, x))) > 0
 
 mean(d::DiscreteNonParametric) = dot(probs(d), support(d))
 
