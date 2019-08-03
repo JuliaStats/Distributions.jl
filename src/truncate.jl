@@ -61,12 +61,12 @@ function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:R
     _pdf(d, float(x))
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:IntegerUnivariateDistribution{Int}, T<:Real}
+function pdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Real}
     isinteger(x) || return zero(float(T))
     _pdf(d, x)
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:IntegerUnivariateDistribution{Int}, T<:Integer}
+function pdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Integer}
     _pdf(d, float(x))
 end
 
@@ -79,13 +79,13 @@ function _logpdf(d::Truncated, x::T) where {T<:Real}
     end
 end
 
-function logpdf(d::Truncated{D}, x::T) where {D<:IntegerUnivariateDistribution{Int}, T<:Real}
+function logpdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Real}
     TF = float(T)
     isinteger(x) || return -TF(Inf)
     return _logpdf(d, x)
 end
 
-function logpdf(d::Truncated{D}, x::Integer) where {D<:IntegerUnivariateDistribution{Int}}
+function logpdf(d::Truncated{D}, x::Integer) where {D<:ContiguousUnivariateDistribution{Int}}
     _logpdf(d, x)
 end
 

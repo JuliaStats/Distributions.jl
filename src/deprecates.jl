@@ -2,7 +2,7 @@
 
 @Base.deprecate expected_logdet meanlogdet
 
-function probs(d::IntegerUnivariateDistribution)
+function probs(d::ContiguousUnivariateDistribution)
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)
     return probs(d)
 end
@@ -40,4 +40,4 @@ for fun in [:pdf, :logpdf,
     end
 end
 
-@deprecate pdf(d::IntegerUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::ContiguousUnivariateDistribution) pdf.(Ref(d), support(d))

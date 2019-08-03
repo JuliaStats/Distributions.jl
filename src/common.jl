@@ -15,14 +15,15 @@ either discrete or continuous.
 """
 abstract type ValueSupport{N} end
 struct ContinuousSupport{N <: Number} <: ValueSupport{N} end
-struct CountableSupport{C} <: ValueSupport{C} end
+abstract type CountableSupport{C} <: ValueSupport{C} end
+struct ContiguousSupport{C <: Integer} <: CountableSupport{C} end
 struct UnionSupport{N1, N2,
                     S1 <: ValueSupport{N1},
                     S2 <: ValueSupport{N2}} <:
                         ValueSupport{Union{N1, N2}} end
 
 const DiscontinuousSupport{I, F} =
-    UnionSupport{I, F, CountableSupport{I},
+    UnionSupport{I, F, <: CountableSupport{I},
                  ContinuousSupport{F}} where {I <: Number, F <: Number}
 
 ## Sampleable
@@ -99,27 +100,31 @@ const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 
 const CountableDistribution{F<:VariateForm,
                             C<:CountableSupport} = Distribution{F,C}
-const IntegerDistribution{F<:VariateForm, S<:Integer} =
-    CountableDistribution{F,CountableSupport{S}}
-const ContinuousDistribution{F<:VariateForm, T<:Number} = Distribution{F,ContinuousSupport{T}}
+const ContiguousDistribution{F<:VariateForm, S<:Integer} =
+    CountableDistribution{F,ContiguousSupport{S}}
+const ContinuousDistribution{F<:VariateForm, T<:Number} =
+    Distribution{F,ContinuousSupport{T}}
 
 const CountableUnivariateDistribution{C<:CountableSupport} =
     UnivariateDistribution{C}
-const IntegerUnivariateDistribution{S<:Integer} =
-    CountableUnivariateDistribution{CountableSupport{S}}
-const ContinuousUnivariateDistribution{T<:Number} = UnivariateDistribution{ContinuousSupport{T}}
+const ContiguousUnivariateDistribution{S<:Integer} =
+    CountableUnivariateDistribution{ContiguousSupport{S}}
+const ContinuousUnivariateDistribution{T<:Number} =
+    UnivariateDistribution{ContinuousSupport{T}}
 
 const CountableMultivariateDistribution{C<:CountableSupport} =
     MultivariateDistribution{C}
-const IntegerMultivariateDistribution{S<:Integer} =
-    CountableMultivariateDistribution{CountableSupport{S}}
-const ContinuousMultivariateDistribution{T<:Number} = MultivariateDistribution{ContinuousSupport{T}}
+const ContiguousMultivariateDistribution{S<:Integer} =
+    CountableMultivariateDistribution{ContiguousSupport{S}}
+const ContinuousMultivariateDistribution{T<:Number} =
+    MultivariateDistribution{ContinuousSupport{T}}
 
-const CountableMatrixDistribution{C<:CountableSupport} = MatrixDistribution{C}
+const CountableMatrixDistribution{C<:CountableSupport} =
+    MatrixDistribution{C}
 const IntegerMatrixDistribution{S<:Integer} =
-    CountableMatrixDistribution{CountableSupport{S}}
-const ContinuousMatrixDistribution{T<:Number} = MatrixDistribution{ContinuousSupport{T}}
-
+    CountableMatrixDistribution{ContiguousSupport{S}}
+const ContinuousMatrixDistribution{T<:Number} =
+    MatrixDistribution{ContinuousSupport{T}}
 
 variate_form(::Type{<:Sampleable{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
 value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:ValueSupport} = VS

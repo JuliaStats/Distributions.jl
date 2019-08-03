@@ -19,7 +19,7 @@ External links
 * [Hypergeometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Hypergeometric_distribution)
 
 """
-struct Hypergeometric <: IntegerUnivariateDistribution{Int}
+struct Hypergeometric <: ContiguousUnivariateDistribution{Int}
     ns::Int     # number of successes in population
     nf::Int     # number of failures in population
     n::Int      # sample size

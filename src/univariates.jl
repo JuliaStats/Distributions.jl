@@ -125,10 +125,11 @@ insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistributio
      insupport!(BitArray(undef, size(X)), d, X)
 
 insupport(d::Union{D,Type{D}},x::Real) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = minimum(d) <= x <= maximum(d)
-insupport(d::Union{D,Type{D}},x::Real) where {D<:IntegerUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x) where {D<:CountableUnivariateDistribution} = x ∈ support(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:ContiguousUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
 support(d::Union{D,Type{D}}) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = RealInterval(minimum(d), maximum(d))
-support(d::Union{D,Type{D}}) where {D<:IntegerUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
+support(d::Union{D,Type{D}}) where {D<:ContiguousUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
@@ -320,7 +321,7 @@ See also: [`logpdf`](@ref).
 pdf(d::UnivariateDistribution, x::Real)
 
 """
-    pdf(d::IntegerUnivariateDistribution, x::T) where {T<:Real}
+    pdf(d::ContiguousUnivariateDistribution, x::T) where {T<:Real}
 
 Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
 type but `x` is integer, the value is converted to `Int`.
@@ -330,7 +331,7 @@ discrete distributions.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::IntegerUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pdf(d::ContiguousUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -340,8 +341,8 @@ Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
 """
 logpdf(d::UnivariateDistribution, x) = log(pdf(d, x))
-logpdf(d::IntegerUnivariateDistribution, x::Integer) = log(pdf(d, x))
-logpdf(d::IntegerUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
+logpdf(d::ContiguousUnivariateDistribution, x::Integer) = log(pdf(d, x))
+logpdf(d::ContiguousUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -351,10 +352,10 @@ Evaluate the cumulative probability at `x`.
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
-cdf(d::IntegerUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
+cdf(d::ContiguousUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
-# Integer univariate with infinite support
-function cdf(d::IntegerUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
+# Contiguous univariate with infinite support
+function cdf(d::ContiguousUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
     c = 0.0
     for y = minimum(d):x
         c += pdf(d, y)
@@ -362,8 +363,8 @@ function cdf(d::IntegerUnivariateDistribution, x::Integer, ::Type{FiniteSupport{
     return c
 end
 
-# Integer univariate with finite support
-function cdf(d::IntegerUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
+# Contiguous univariate with finite support
+function cdf(d::ContiguousUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
     # calculate from left if x < (min + max)/2
     # (same as infinite support version)
     x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
@@ -376,7 +377,7 @@ function cdf(d::IntegerUnivariateDistribution, x::Integer, ::Type{FiniteSupport{
     return c
 end
 
-cdf(d::IntegerUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
+cdf(d::ContiguousUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 
 """
     ccdf(d::UnivariateDistribution, x::Real)
@@ -384,8 +385,8 @@ cdf(d::IntegerUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
 The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
 """
 ccdf(d::UnivariateDistribution, x) = 1.0 - cdf(d, x)
-ccdf(d::IntegerUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
-ccdf(d::IntegerUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
+ccdf(d::ContiguousUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
+ccdf(d::ContiguousUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
 """
     logcdf(d::UnivariateDistribution, x::Real)
@@ -393,8 +394,8 @@ ccdf(d::IntegerUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
 logcdf(d::UnivariateDistribution, x) = log(cdf(d, x))
-logcdf(d::IntegerUnivariateDistribution, x::Integer) = log(cdf(d, x))
-logcdf(d::IntegerUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
+logcdf(d::ContiguousUnivariateDistribution, x::Integer) = log(cdf(d, x))
+logcdf(d::ContiguousUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
     logccdf(d::UnivariateDistribution, x::Real)
@@ -402,8 +403,8 @@ logcdf(d::IntegerUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
 logccdf(d::UnivariateDistribution, x) = log(ccdf(d, x))
-logccdf(d::IntegerUnivariateDistribution, x::Integer) = log(ccdf(d, x))
-logccdf(d::IntegerUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
+logccdf(d::ContiguousUnivariateDistribution, x::Integer) = log(ccdf(d, x))
+logccdf(d::ContiguousUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 
 """
     quantile(d::UnivariateDistribution, q::Real)
@@ -440,7 +441,7 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
 
 
-function _pdf_fill_outside!(r::AbstractArray, d::IntegerUnivariateDistribution, X::UnitRange)
+function _pdf_fill_outside!(r::AbstractArray, d::ContiguousUnivariateDistribution, X::UnitRange)
     vl = vfirst = first(X)
     vr = vlast = last(X)
     n = vlast - vfirst + 1
@@ -479,7 +480,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::IntegerUnivariateDistribution, 
     return vl, vr, vfirst, vlast
 end
 
-function _pdf!(r::AbstractArray, d::IntegerUnivariateDistribution, X::UnitRange)
+function _pdf!(r::AbstractArray, d::ContiguousUnivariateDistribution, X::UnitRange)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
@@ -493,7 +494,7 @@ end
 
 abstract type RecursiveProbabilityEvaluator end
 
-function _pdf!(r::AbstractArray, d::IntegerUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
+function _pdf!(r::AbstractArray, d::ContiguousUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
