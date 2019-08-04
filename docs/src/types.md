@@ -41,8 +41,9 @@ The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
 **Type** | **Element type** | **Descriptions**
 --- | --- | ---
-`DiscreteSupport{T}` | `T` | Samples take any discrete values
-`Discrete = DiscreteSupport{Int}` | `Int` | Samples take `Int` values
+`CountableSupport{T}` | `T` | Samples take any discrete values
+`ContiguousSupport{T <: Integer}` | `T` | Samples take any contiguous integer values
+`Discrete = ContiguousSupport{Int}` | `Int` | Samples take `Int` values
 `ContinuousSupport{T <: Number}` | `T` | Samples take continuous values
 `Continuous = ContinuousSupport{Float64}` | `Float64` | Samples take continuous `Float64` values
 
@@ -76,7 +77,6 @@ To simplify the use in practice, we introduce a series of type aliases as follow
 const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
-const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
 const CountableDistribution{F<:VariateForm, C<:CountableSupport} = Distribution{F,C}
 const DiscreteDistribution{F<:VariateForm}                       = CountableDistribution{F,Discrete}
