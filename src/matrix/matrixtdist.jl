@@ -1,7 +1,6 @@
 """
+    MatrixTDist(ν, M, Σ, Ω)
 ```julia
-MatrixTDist(ν, M, Σ, Ω)
-
 ν::Real            positive degrees of freedom
 M::AbstractMatrix  n x p location
 Σ::PDMat           n x n scale
@@ -37,14 +36,11 @@ then the marginal distribution of ``\\mathbf{X}`` is
 ``MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
 struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
-
     ν::T
     M::TM
     Σ::ST
     Ω::ST
-
     logc0::T
-
 end
 
 #  -----------------------------------------------------------------------------
@@ -52,29 +48,21 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}) where T <: Real
-
     n, p = size(M)
-
     0 < ν < Inf || throw(ArgumentError("degrees of freedom must be positive and finite."))
     n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
     p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
-
     logc0 = matrixtdist_logc0(Σ, Ω, ν)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
-
     MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(logc0))
-
 end
 
 function MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat)
-
     T = Base.promote_eltype(ν, M, Σ, Ω)
-
     MatrixTDist(convert(T, ν), convert(AbstractArray{T}, M), convert(AbstractArray{T}, Σ), convert(AbstractArray{T}, Ω))
-
 end
 
 MatrixTDist(ν::Real, M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky}, Ω::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
@@ -116,11 +104,9 @@ rank(d::MatrixTDist) = minimum( size(d) )
 insupport(d::MatrixTDist, X::Matrix) = isreal(X) && size(X) == size(d)
 
 function mean(d::MatrixTDist)
-
-  n, p = size(d)
-
-  (d.ν + p - n > 1) ? (return d.M) : throw(ArgumentError("mean only defined for df + p - n > 1"))
-
+    n, p = size(d)
+    d.ν + p - n > 1 || throw(ArgumentError("mean only defined for df + p - n > 1"))
+    return d.M
 end
 
 mode(d::MatrixTDist) = d.M
@@ -135,27 +121,20 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
 function matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     #  returns the natural log of the normalizing constant for the pdf
-
     n = dim(Σ)
     p = dim(Ω)
-
     term1 = logmvgamma(p, (ν + n + p - 1) / 2)
     term2 = - (n * p / 2) * logπ
     term3 = - logmvgamma(p, (ν + p - 1) / 2)
     term4 = (-n / 2) * logdet(Ω)
     term5 = (-p / 2) * logdet(Σ)
-
     term1 + term2 + term3 + term4 + term5
-
 end
 
 function logkernel(d::MatrixTDist, X::AbstractMatrix)
-
     n, p = size(d)
     A = X - d.M
-
     (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ A') )
-
 end
 
 _logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.logc0
@@ -167,13 +146,9 @@ _logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 #  Theorem 4.2.1 in Gupta and Nagar (1999)
 
 function _rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix)
-
     n, p = size(d)
-
     S = rand(rng, InverseWishart(d.ν + n - 1, d.Σ) )
-
     A .= rand(rng, MatrixNormal(d.M, S, d.Ω) )
-
 end
 
 #  -----------------------------------------------------------------------------
@@ -184,13 +159,8 @@ end
 #  -----------------------------------------------------------------------------
 
 function MvTDist(MT::MatrixTDist)
-
     n, p = size(MT)
-
     all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
-
     ν, M, Σ, Ω = params(MT)
-
-    return MvTDist(ν, vec(M), (1 / ν) * kron(Σ.mat, Ω.mat))
-
+    MvTDist(ν, vec(M), (1 / ν) * kron(Σ.mat, Ω.mat))
 end

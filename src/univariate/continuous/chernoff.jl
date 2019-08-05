@@ -4,7 +4,7 @@
 ## It was written by Joris Pinkse, joris@psu.edu, on December 12, 2017.  Caveat emptor.
 ##
 ## It computes pdf, cdf, moments, quantiles, and random numbers for the Chernoff distribution.
-## 
+##
 ## Most of the symbols have the same meaning as in the Groeneboom and Wellner paper.
 ##
 ## Random numbers are drawn using a Ziggurat algorithm.  To obtain draws in the tails, the
@@ -14,16 +14,16 @@
 
 The *Chernoff distribution* is the distribution of the random variable
 ```math
-\\argmax_{t \\in (-\\infty,\\infty)} ( G(t) - t^2 ),
+\\underset{t \\in (-\\infty,\\infty)}{\\arg\\max} ( G(t) - t^2 ),
 ```
-where ``G`` is standard two--sided Brownian motion.  
+where ``G`` is standard two--sided Brownian motion.
 
 The distribution arises as the limit distribution of various cube-root-n consistent estimators,
 including the isotonic regression estimator of Brunk, the isotonic density estimator of Grenander,
-the least median of squares estimator of Rousseeuw, and the maximum score estimator of Manski. 
+the least median of squares estimator of Rousseeuw, and the maximum score estimator of Manski.
 
-For theoretical results, see e.g. Kim and Pollard, Annals of Statistics, 1990.  The code for the 
-computation of pdf and cdf is based on the algorithm described in Groeneboom and Wellner, 
+For theoretical results, see e.g. Kim and Pollard, Annals of Statistics, 1990.  The code for the
+computation of pdf and cdf is based on the algorithm described in Groeneboom and Wellner,
 Journal of Computational and Graphical Statistics, 2001.
 
 ```julia
@@ -35,13 +35,13 @@ survivor(Chernoff(),x::Real)
 mean(Chernoff())
 var(Chernoff())
 skewness(Chernoff())
-kurtosis(Chernoff())                  
+kurtosis(Chernoff())
 kurtosis(Chernoff(), excess::Bool)
 mode(Chernoff())
 entropy(Chernoff())
 rand(Chernoff())
 rand(rng, Chernoff()
-cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x) 
+cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x)
 ```
 """
 struct Chernoff <: ContinuousUnivariateDistribution
@@ -132,7 +132,7 @@ module ChernoffComputations
 
     function p(y::Real)
         if iszero(y)
-            return -sqrt(0.5*pi) 
+            return -sqrt(0.5*pi)
         end
 
         (y > 0) || throw(DomainError(y, "argument must be positive"))
@@ -161,7 +161,7 @@ module ChernoffComputations
     end
 
     _pdf(x::Real) = g(x)*g(-x)*0.5
-    _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1] 
+    _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1]
     _cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
 end
 
@@ -179,7 +179,7 @@ function quantile(d::Chernoff, tau::Real)
         0.1 -0.6642351964332931;
         0.2 -0.43982766604886553;
         0.25 -0.353308035220429;
-        0.3 -0.2751512847290148; 
+        0.3 -0.2751512847290148;
         0.4 -0.13319637678583637;
         0.5 0.0;
         0.6 0.13319637678583637;
@@ -196,19 +196,19 @@ function quantile(d::Chernoff, tau::Real)
     present = searchsortedfirst(precomputedquants[:, 1], tau)
     if present <= size(precomputedquants, 1)
         if tau == precomputedquants[present, 1]
-            return precomputedquants[present, 2] 
+            return precomputedquants[present, 2]
         end
     end
-    
+
     # one good approximation of the quantiles can be computed using Normal(0.0, stdapprox) with stdapprox = 0.52
     stdapprox = 0.52
     dnorm = Normal(0.0, 1.0)
-    if tau < 0.001 
-        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox) 
+    if tau < 0.001
+        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox)
 
     end
-    if tau > 0.999 
-        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox) 
+    if tau > 0.999
+        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)
     end
     return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)   # should consider replacing x-> construct for speed
 end
@@ -223,46 +223,46 @@ modes(d::Chernoff) = [0.0]
 mode(d::Chernoff) = 0.0
 skewness(d::Chernoff) = 0.0
 kurtosis(d::Chernoff) = -0.16172525511461888
-kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0) 
+kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
-rand(d::Chernoff) = rand(GLOBAL_RNG, d)      
+rand(d::Chernoff) = rand(GLOBAL_RNG, d)
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
     A = 0.03248227216266608
     x = [
-        1.4765521793744492 
-        1.3583996502410562 
-        1.2788224934376338 
-        1.2167121025431031 
-        1.164660153310361  
-        1.1191528874523227 
-        1.0782281238946987 
-        1.0406685077375248 
-        1.0056599129954287 
-        0.9726255909850547 
-        0.9411372703351518 
-        0.910863725882819  
-        0.8815390956471935 
-        0.8529422519848634 
-        0.8248826278765808 
-        0.7971898990526088 
-        0.769705944382039  
-        0.7422780374708061 
-        0.7147524811697309 
-        0.6869679724643997 
-        0.6587479056872714 
-        0.6298905501492661 
-        0.6001554584431008 
-        0.5692432986584453 
-        0.5367639126935895 
-        0.5021821750911241 
-        0.4647187417226889 
+        1.4765521793744492
+        1.3583996502410562
+        1.2788224934376338
+        1.2167121025431031
+        1.164660153310361
+        1.1191528874523227
+        1.0782281238946987
+        1.0406685077375248
+        1.0056599129954287
+        0.9726255909850547
+        0.9411372703351518
+        0.910863725882819
+        0.8815390956471935
+        0.8529422519848634
+        0.8248826278765808
+        0.7971898990526088
+        0.769705944382039
+        0.7422780374708061
+        0.7147524811697309
+        0.6869679724643997
+        0.6587479056872714
+        0.6298905501492661
+        0.6001554584431008
+        0.5692432986584453
+        0.5367639126935895
+        0.5021821750911241
+        0.4647187417226889
         0.42314920361072667
         0.37533885097957154
         0.31692143952775814
-        0.2358977457249061 
+        0.2358977457249061
         1.0218214689661219e-7
        ]
     y=[
@@ -298,20 +298,20 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         1.2764995726449935
         1.3789927085182485
         1.516689116183566
-        ]       
+        ]
     n = length(x)
     i = rand(rng, 0:n-1)
     r = (2.0*rand(rng)-1) * ((i>0) ? x[i] : A/y[1])
     rabs = abs(r)
     if rabs < x[i+1]
-        return r 
+        return r
     end
     s = (i>0) ? (y[i]+rand(rng)*(y[i+1]-y[i])) : rand(rng)*y[1]
     if s < 2.0*ChernoffComputations._pdf(rabs)
-        return r 
+        return r
     end
     if i > 0
-        return rand(rng, d) 
+        return rand(rng, d)
     end
     F0 = ChernoffComputations._cdf(A/y[1])
     tau = 2.0*rand(rng)-1 # ~ U(-1,1)

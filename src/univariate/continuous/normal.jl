@@ -30,25 +30,26 @@ External links
 struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
+end
 
-    function Normal{T}(μ, σ) where {T}
-        @check_args(Normal, σ >= zero(σ))
-        new{T}(μ, σ)
-    end
+function Normal(μ::T, σ::T) where {T <: Real}
+    @check_args(Normal, σ >= zero(σ))
+    return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::T, σ::T) where {T<:Real} = Normal{T}(μ, σ)
+Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(Float64(μ), Float64(σ))
-Normal(μ::Real) = Normal(μ, 1.0)
-Normal() = Normal(0.0, 1.0)
+Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
+Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
+Normal() = Normal(0.0, 1.0, NoArgCheck())
 
 const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ))
+convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), NoArgCheck())
 
 @distr_support Normal -Inf Inf
 

@@ -27,24 +27,24 @@ External links
 struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
-
-    function Gamma{T}(α, θ) where T
-        @check_args(Gamma, α > zero(α) && θ > zero(θ))
-        new{T}(α, θ)
-    end
 end
 
-Gamma(α::T, θ::T) where {T<:Real} = Gamma{T}(α, θ)
+function Gamma(α, θ) where {T <: Real}
+    @check_args(Gamma, α > zero(α) && θ > zero(θ))
+    return Gamma{T}(α, θ)
+end
+
+Gamma(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
-Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
-Gamma(α::Real) = Gamma(α, 1.0)
-Gamma() = Gamma(1.0, 1.0)
+Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
+Gamma(α::T) where {T <: Real} = Gamma(α, one(T))
+Gamma() = Gamma(1.0, 1.0, NoArgCheck())
 
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
-convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ))
+convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), NoArgCheck())
 
 #### Parameters
 

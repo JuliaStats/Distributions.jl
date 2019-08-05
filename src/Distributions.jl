@@ -4,7 +4,7 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
-import Base: size, eltype, length, convert, show, getindex, rand, vec
+import Base: size, eltype, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
@@ -109,6 +109,7 @@ export
     LogNormal,
     LogitNormal,
     MatrixBeta,
+    MatrixFDist,
     MatrixNormal,
     MatrixTDist,
     MixtureModel,
@@ -310,7 +311,7 @@ Supported distributions:
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
-    Logistic, LogNormal, MatrixBeta, MatrixNormal, MatrixTDist, MixtureModel,
+    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal, MatrixTDist, MixtureModel,
     Multinomial, MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,

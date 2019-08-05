@@ -26,28 +26,29 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    function Binomial{T}(n, p) where T
-        @check_args(Binomial, n >= zero(n))
-        @check_args(Binomial, zero(p) <= p <= one(p))
-        new{T}(n, p)
-    end
-
+    Binomial{T}(n, p) where {T <: Real} = new{T}(n, p)
 end
 
-Binomial(n::Integer, p::T) where {T<:Real} = Binomial{T}(n, p)
-Binomial(n::Integer, p::Integer) = Binomial(n, Float64(p))
+function Binomial(n::Integer, p::T) where {T <: Real}
+    @check_args(Binomial, n >= zero(n))
+    @check_args(Binomial, zero(p) <= p <= one(p))
+    Binomial{T}(n, p)
+end
+
+Binomial(n::Integer, p::T, ::NoArgCheck) where {T<:Real} = Binomial{T}(n, p)
+Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
 Binomial(n::Integer) = Binomial(n, 0.5)
-Binomial() = Binomial(1, 0.5)
+Binomial() = Binomial(1, 0.5, NoArgCheck())
 
 @distr_support Binomial 0 d.n
 
 #### Conversions
 
 function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
-    Binomial(n, T(p))
+    return Binomial(n, T(p))
 end
 function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
-    Binomial(d.n, T(d.p))
+    return Binomial(d.n, T(d.p), NoArgCheck())
 end
 
 
@@ -55,10 +56,10 @@ end
 
 ntrials(d::Binomial) = d.n
 succprob(d::Binomial) = d.p
-failprob(d::Binomial) = 1 - d.p
+failprob(d::Binomial{T}) where {T} = one(T) - d.p
 
 params(d::Binomial) = (d.n, d.p)
-@inline partype(d::Binomial{T}) where {T<:Real} = T
+@inline partype(::Binomial{T}) where {T<:Real} = T
 
 
 #### Properties

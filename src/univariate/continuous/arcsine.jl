@@ -23,18 +23,24 @@ External links
 
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
 
+Use `Arcsine(a, b, ::NoArgCheck)` to bypass argument checks.
 """
 struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-
-    Arcsine{T}(a::T, b::T) where {T} = (@check_args(Arcsine, a < b); new{T}(a, b))
+    Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-Arcsine(a::T, b::T) where {T<:Real} = Arcsine{T}(a, b)
+function Arcsine(a::T, b::T) where {T <: Real}
+    @check_args(Arcsine, a < b)
+    return Arcsine{T}(a, b)
+end
+
+Arcsine(a::T, b::T, ::NoArgCheck) where {T <: Real} = Arcsine{T}(a, b)
+
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
-Arcsine(a::Integer, b::Integer) = Arcsine(Float64(a), Float64(b))
-Arcsine(b::Real) = Arcsine(0.0, b)
+Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
+Arcsine(b::T) where {T <: Real} = Arcsine(zero(T), b)
 Arcsine() = Arcsine(0.0, 1.0)
 
 @distr_support Arcsine d.a d.b

@@ -33,7 +33,7 @@ struct FDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 FDist(ν1::T, ν2::T) where {T<:Real} = FDist{T}(ν1, ν2)
-FDist(ν1::Integer, ν2::Integer) = FDist(Float64(ν1), Float64(ν2))
+FDist(ν1::Integer, ν2::Integer) = FDist(float(ν1), float(ν2))
 FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
 
 @distr_support FDist 0.0 Inf

@@ -32,54 +32,56 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function NegativeBinomial{T}(r::T, p::T) where T
-        @check_args(NegativeBinomial, r > zero(r))
-        @check_args(NegativeBinomial, zero(p) < p <= one(p))
-        new{T}(r, p)
+    function NegativeBinomial{T}(r::T, p::T) where {T <: Real}
+        return new{T}(r, p)
     end
-
 end
 
-NegativeBinomial(r::T, p::T) where {T<:Real} = NegativeBinomial{T}(r, p)
-NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
-NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(Float64(r), Float64(p))
-NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-NegativeBinomial() = NegativeBinomial(1.0, 0.5)
+function NegativeBinomial(r::T, p::T) where {T <: Real}
+    @check_args(NegativeBinomial, r > zero(r))
+    @check_args(NegativeBinomial, zero(p) < p <= one(p))
+    return NegativeBinomial{T}(r, p)
+end
 
+NegativeBinomial(r::T, p::T, ::NoArgCheck) where {T<:Real} = NegativeBinomial{T}(r, p)
+NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
+NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
+NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
+NegativeBinomial() = NegativeBinomial(1.0, 0.5, NoArgCheck())
 
 @distr_support NegativeBinomial 0 Inf
 
 #### Conversions
 
-function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where T<:Real
-    NegativeBinomial(T(r), T(p))
+function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
+    return NegativeBinomial(T(r), T(p))
 end
 function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    NegativeBinomial(T(d.r), T(d.p))
+    return NegativeBinomial(T(d.r), T(d.p), NoArgCheck())
 end
 
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-@inline partype(d::NegativeBinomial{T}) where {T<:Real} = T
+@inline partype(::NegativeBinomial{T}) where {T} = T
 
 succprob(d::NegativeBinomial) = d.p
-failprob(d::NegativeBinomial) = 1 - d.p
+failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p
 
 
 #### Statistics
 
-mean(d::NegativeBinomial) = (p = succprob(d); (1 - p) * d.r / p)
+mean(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (one(T) - p) * d.r / p)
 
-var(d::NegativeBinomial) = (p = succprob(d); (1 - p) * d.r / (p * p))
+var(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); (one(T) - p) * d.r / (p * p))
 
-std(d::NegativeBinomial) = (p = succprob(d); sqrt((1 - p) * d.r) / p)
+std(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); sqrt((one(T) - p) * d.r) / p)
 
-skewness(d::NegativeBinomial) = (p = succprob(d); (2 - p) / sqrt((1 - p) * d.r))
+skewness(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.r))
 
-kurtosis(d::NegativeBinomial) = (p = succprob(d); 6 / d.r + (p * p) / ((1 - p) * d.r))
+kurtosis(d::NegativeBinomial{T}) where {T} = (p = succprob(d); T(6) / d.r + (p * p) / ((one(T) - p) * d.r))
 
-mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p))
+mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p) * (d.r - one(T)) / p))
 
 
 #### Evaluation & Sampling

@@ -142,11 +142,9 @@ end
 end
 
 @testset "MatrixNormal conversion" for elty in (Float32, Float64, BigFloat)
-
     Del1 = convert(MatrixNormal{elty}, D)
     Del2 = convert(MatrixNormal{elty}, M, PDU, PDV, D.logc0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty
-
 end

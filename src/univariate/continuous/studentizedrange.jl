@@ -5,12 +5,16 @@
 The *studentized range distribution* has probability density function:
 
 ```math
-f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{(\\frac{\\nu}{2})}2^{\\nu/2 - 1}} \\int_{0}^{\\infty} {x^{\\nu}\\phi(\\sqrt{\\nu}x)} [\\int_{-\\infty}^{\\infty} {\\phi(u)\\phi(u - qx)(\\Phi(u) - \\Phi(u - qx))^{k - 2}du]dx
+f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{\\left(\\frac{\\nu}{2}\\right)}2^{\\nu/2 - 1}} \\int_{0}^{\\infty} {x^{\\nu}\\phi(\\sqrt{\\nu}x)} \\left[\\int_{-\\infty}^{\\infty} {\\phi(u)\\phi(u - qx)[\\Phi(u) - \\Phi(u - qx)]^{k - 2}}du\\right]dx
+```
 
 where
 
-\\Phi(x) = \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} (Normal Distribution CDF)
-\\phi(x) = \\Phi'(x) (Normal Distribution PDF)
+```math
+\\begin{align*}
+\\Phi(x) &= \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} &&(\\text{Normal Distribution CDF})\\\\
+\\phi(x) &= \\Phi'(x) &&(\\text{Normal Distribution PDF})
+\\end{align*}
 ```
 
 ```julia
@@ -26,15 +30,16 @@ External links
 struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     k::T
-
-    function StudentizedRange{T}(ν::T, k::T) where T
-        @check_args(StudentizedRange, ν > zero(ν) && k > one(k))
-        new{T}(ν, k)
-    end
+    StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)
 end
 
-StudentizedRange(ν::T, k::T) where {T<:Real} = StudentizedRange{T}(ν, k)
-StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(Float64(ν), Float64(k))
+function StudentizedRange(ν::T, k::T) where {T <: Real}
+    @check_args(StudentizedRange, ν > zero(ν) && k > one(k))
+    return StudentizedRange{T}(ν, k)
+end
+
+StudentizedRange(ν::T, k::T, ::NoArgCheck) where {T<:Real} = StudentizedRange{T}(ν, k)
+StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(float(ν), float(k))
 StudentizedRange(ν::Real, k::Real) = StudentizedRange(promote(ν, k)...)
 
 @distr_support StudentizedRange 0.0 Inf
@@ -47,9 +52,8 @@ function convert(::Type{StudentizedRange{T}}, ν::S, k::S) where {T <: Real, S <
 end
 
 function convert(::Type{StudentizedRange{T}}, d::StudentizedRange{S}) where {T <: Real, S <: Real}
-    StudentizedRange(T(d.ν), T(d.k))
+    StudentizedRange(T(d.ν), T(d.k), NoArgCheck())
 end
-
 
 ### Parameters
 params(d::StudentizedRange) = (d.ν, d.k)

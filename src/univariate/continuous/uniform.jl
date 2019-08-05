@@ -26,20 +26,27 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-
-    Uniform{T}(a::T, b::T) where {T} = (@check_args(Uniform, a < b); new{T}(a, b))
+    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-Uniform(a::T, b::T) where {T<:Real} = Uniform{T}(a, b)
+function Uniform(a::T, b::T) where {T <: Real}
+    @check_args(Uniform, a < b)
+    return Uniform{T}(a, b)
+end
+
+function Uniform(a::T, b::T, ::NoArgCheck) where {T <: Real}
+    return Uniform{T}(a, b)
+end
+
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
-Uniform() = Uniform(0.0, 1.0)
+Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
+Uniform() = Uniform(0.0, 1.0, NoArgCheck())
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b))
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), NoArgCheck())
 
 #### Parameters
 

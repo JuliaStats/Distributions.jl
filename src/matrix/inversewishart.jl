@@ -1,7 +1,6 @@
 """
+    InverseWishart(ν, Ψ)
 ```julia
-InverseWishart(ν, Ψ)
-
 ν::Real   degrees of freedom (greater than p - 1)
 Ψ::PDMat  p x p scale matrix
 ```
@@ -57,6 +56,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 size(d::InverseWishart, i) = size(d)[i]
+rank(d::InverseWishart) = dim(d)
 params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
