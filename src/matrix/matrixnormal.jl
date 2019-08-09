@@ -122,4 +122,4 @@ end
 #  Transformation
 #  -----------------------------------------------------------------------------
 
-vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V.mat, d.U.mat))
+vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))

@@ -162,5 +162,5 @@ function MvTDist(MT::MatrixTDist)
     n, p = size(MT)
     all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
     ν, M, Σ, Ω = params(MT)
-    MvTDist(ν, vec(M), (1 / ν) * kron(Σ.mat, Ω.mat))
+    MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
 end
