@@ -84,6 +84,7 @@ mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d)
 
 @inline partype(d::MatrixBeta{T}) where {T <: Real} = T
 
+#  Konno (1988 JJSS) Corollary 3.3.i
 function cov(d::MatrixBeta, i::Int, j::Int, k::Int, l::Int)
     n1, n2 = params(d)
     n = n1 + n2

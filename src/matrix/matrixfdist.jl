@@ -95,6 +95,7 @@ end
 
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
 
+#  Konno (1988 JJSS) Corollary 2.4.i
 function cov(d::MatrixFDist, i::Int, j::Int, k::Int, l::Int)
     p = dim(d)
     n1, n2, PDB = params(d)

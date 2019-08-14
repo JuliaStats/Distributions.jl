@@ -90,6 +90,7 @@ end
 
 mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
+#  https://en.wikipedia.org/wiki/Inverse-Wishart_distribution#Moments
 function cov(d::InverseWishart, i::Int, j::Int, k::Int, l::Int)
     p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("cov only defined for df > dim + 3"))
