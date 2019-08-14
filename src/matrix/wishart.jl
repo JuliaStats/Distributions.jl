@@ -115,7 +115,7 @@ function entropy(d::Wishart)
     d.c0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
 end
 
-#  Gupta/Nagar (1999) Theroem 3.3.15.i
+#  Gupta/Nagar (1999) Theorem 3.3.15.i
 function cov(d::Wishart, i::Int, j::Int, k::Int, l::Int)
     S = Matrix(d.S)
     d.df * (S[i, k] * S[j, l] + S[i, l] * S[j, k])
