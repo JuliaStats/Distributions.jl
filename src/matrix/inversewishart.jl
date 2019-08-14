@@ -90,35 +90,16 @@ end
 
 mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
-function cov(d::InverseWishart)
-    ν = d.df
-    p = dim(d)
+function cov(d::InverseWishart, i::Int, j::Int, k::Int, l::Int)
+    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("cov only defined for df > dim + 3"))
-    M = length(d)
-    Ψ = Matrix(d.Ψ)
-    V = zeros(partype(d), M, M)
-    iter = CartesianIndices(Ψ)
-    for el1 = 1:M
-        for el2 = 1:el1
-            i, j = Tuple(iter[el1])
-            k, l = Tuple(iter[el2])
-            V[el1, el2] = 2 * Ψ[i,j] * Ψ[k,l] + (ν-p-1) * (Ψ[i,k] * Ψ[j,l] + Ψ[i,l] * Ψ[k,j])
-        end
-    end
-    return inv( (ν-p) * (ν-p-3) * (ν-p-1)^2 ) * (V + tril(V, -1)')
+    inv( (ν-p) * (ν-p-3) * (ν-p-1)^2 ) * (2 * Ψ[i,j] * Ψ[k,l] + (ν-p-1) * (Ψ[i,k] * Ψ[j,l] + Ψ[i,l] * Ψ[k,j]))
 end
 
-function var(d::InverseWishart)
-    ν = d.df
-    p = dim(d)
+function var(d::InverseWishart, i::Int, j::Int)
+    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("var only defined for df > dim + 3"))
-    Ψ = Matrix(d.Ψ)
-    V = zeros(partype(d), size(d))
-    for m in CartesianIndices(V)
-        i, j = Tuple(m)
-        V[m] = (ν-p+1) * Ψ[i,j]^2 + (ν-p-1) * Ψ[i,i] * Ψ[j,j]
-    end
-    return inv( (ν-p) * (ν-p-3) * (ν-p-1)^2 ) * V
+    inv( (ν-p) * (ν-p-3) * (ν-p-1)^2 ) * (ν-p+1) * Ψ[i,j]^2 + (ν-p-1) * Ψ[i,i] * Ψ[j,j]
 end
 
 #### Evaluation
