@@ -128,6 +128,15 @@ end
     @test mode(K) == reshape([μ], 1, 1)
 end
 
+@testset "MatrixNormal cov and var" begin
+    @test vec(var(D)) ≈ diag(cov(D))
+    @test cov(D) ≈ cov(d)
+    @test cov(G) ≈ cov(g)
+    @test cov(L) ≈ cov(l)
+    @test cov(H) ≈ cov(h)
+    @test var(K)[1] ≈ var(k)
+end
+
 @testset "MatrixNormal logpdf" begin
     @test logpdf(D, A) ≈ logpdf(d, a)
     @test logpdf(G, B) ≈ logpdf(g, b)
@@ -138,7 +147,7 @@ end
 
 @testset "MatrixNormal sample moments" begin
     @test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
-    @test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), kron(V, U) , atol = 0.1)
+    @test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), cov(D) , atol = 0.1)
 end
 
 @testset "MatrixNormal conversion" for elty in (Float32, Float64, BigFloat)

@@ -29,6 +29,8 @@ rng = MersenneTwister(123)
 
     @test isapprox(mean(func[2](W,100000)) , mean(W) , atol=0.1)
     @test isapprox(mean(func[2](IW,100000)), mean(IW), atol=0.1)
+    @test isapprox(cov(hcat(vec.(func[2](W, 1000000))...)'), cov(W) , atol=0.1)
+    @test isapprox(cov(hcat(vec.(func[2](IW, 1000000))...)'), cov(IW), atol=0.1)
 
     v = 3.0
 

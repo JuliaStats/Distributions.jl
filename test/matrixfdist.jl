@@ -61,8 +61,15 @@ end
     @test logpdf(F, Z) ≈ logpdf(f, z)
 end
 
+@testset "MatrixFDist cov and var" begin
+    @test vec(var(G)) ≈ diag(cov(G))
+    @test cov(F)[1] ≈ var(f)
+    @test_throws ArgumentError cov(MatrixFDist(n1, p + 1, B))
+end
+
 @testset "MatrixFDist sample moments" begin
     @test isapprox(mean(rand(G, 100000)), mean(G) , atol = 0.1)
+    @test isapprox(cov(hcat(vec.(rand(G, 100000))...)'), cov(G) , atol = 0.1)
 end
 
 @testset "MatrixFDist conversion" for elty in (Float32, Float64, BigFloat)

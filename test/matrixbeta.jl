@@ -62,9 +62,17 @@ end
     @test logpdf(C, Z) ≈ logpdf(c, z)
 end
 
+@testset "MatrixBeta cov and var" begin
+    @test vec(var(B)) ≈ diag(cov(B))
+    @test cov(C)[1] ≈ var(c)
+end
+
 @testset "MatrixBeta sample moments" begin
     @test isapprox(mean(rand(B, 10000)), mean(B) , atol = 0.1)
     @test isapprox(mean(rand(C, 10000))[1, 1], mean(c) , atol = 0.1)
+
+    @test isapprox(cov(hcat(vec.(rand(B, 100000))...)'), cov(B) , atol = 0.1)
+    @test isapprox(cov(hcat(vec.(rand(C, 100000))...)'), cov(C) , atol = 0.1)
 end
 
 @testset "MatrixBeta conversion" for elty in (Float32, Float64, BigFloat)
