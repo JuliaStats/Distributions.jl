@@ -46,6 +46,20 @@ Return the mean matrix of `d`.
 mean(d::MatrixDistribution)
 
 """
+    var(d::MatrixDistribution)
+
+Compute the matrix of element-wise variances for distribution `d`.
+"""
+var(d::MatrixDistribution)
+
+"""
+    cov(d::MatrixDistribution)
+
+Compute the covariance matrix for vec(X), where X is a random matrix with distribution `d`.
+"""
+cov(d::MatrixDistribution)
+
+"""
     _rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 
 Sample the matrix distribution and store the result in `A`.
