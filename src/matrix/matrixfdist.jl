@@ -95,6 +95,39 @@ end
 
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
 
+function cov(d::MatrixFDist)
+    M = length(d)
+    p = dim(d)
+    n1, n2, PDB = params(d)
+    n2 > p + 3 || throw(ArgumentError("cov only defined for df2 > dim + 3"))
+    n = n1 + n2
+    B = Matrix(PDB)
+    V = zeros(partype(d), M, M)
+    iter = CartesianIndices(B)
+    for el1 = 1:M
+        for el2 = 1:el1
+            i, j = Tuple(iter[el1])
+            k, l = Tuple(iter[el2])
+            V[el1, el2] = 2inv(n2-p-1) * B[i,j] * B[k,l] + B[j,l] * B[i,k] + B[i,l] * B[k,j]
+        end
+    end
+    return n1 * (n - p - 1) * inv((n2-p) * (n2-p-1) * (n2-p-3)) * (V + tril(V, -1)')
+end
+
+function var(d::MatrixFDist)
+    p = dim(d)
+    n1, n2, PDB = params(d)
+    n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
+    n = n1 + n2
+    B = Matrix(PDB)
+    V = zeros(partype(d), size(d))
+    for m in CartesianIndices(V)
+        i, j = Tuple(m)
+        V[m] = (2inv(n2-p-1) + 1) * B[i,j]^2 + B[j,j] * B[i,i]
+    end
+    return n1 * (n - p - 1) * inv((n2-p) * (n2-p-1) * (n2-p-3)) * V
+end
+
 #  -----------------------------------------------------------------------------
 #  Evaluation
 #  -----------------------------------------------------------------------------

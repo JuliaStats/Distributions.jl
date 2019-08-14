@@ -115,6 +115,30 @@ function entropy(d::Wishart)
     d.c0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
 end
 
+function cov(d::Wishart)
+    M = length(d)
+    S = Matrix(d.S)
+    V = zeros(partype(d), M, M)
+    iter = CartesianIndices(S)
+    for el1 = 1:M
+        for el2 = 1:el1
+            i, j = Tuple(iter[el1])
+            k, l = Tuple(iter[el2])
+            V[el1, el2] = S[i, k] * S[j, l] + S[i, l] * S[j, k]
+        end
+    end
+    return d.df * (V + tril(V, -1)')
+end
+
+function var(d::Wishart)
+    S = Matrix(d.S)
+    V = zeros(partype(d), size(d))
+    for m in CartesianIndices(S)
+        i, j = Tuple(m)
+        V[m] = S[i, i] * S[j, j] + S[i, j] ^ 2
+    end
+    return d.df * V
+end
 
 #### Evaluation
 

@@ -84,6 +84,37 @@ mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d)
 
 @inline partype(d::MatrixBeta{T}) where {T <: Real} = T
 
+function cov(d::MatrixBeta)
+    M = length(d)
+    n1, n2 = params(d)
+    n = n1 + n2
+    p = dim(d)
+    Ω = Matrix{partype(d)}(I, p, p)
+    V = zeros(partype(d), M, M)
+    iter = CartesianIndices(Ω)
+    for el1 = 1:M
+        for el2 = 1:el1
+            i, j = Tuple(iter[el1])
+            k, l = Tuple(iter[el2])
+            V[el1, el2] = -(2/n) * Ω[i,j] * Ω[k,l] + Ω[j,l] * Ω[i,k] + Ω[i,l] * Ω[k,j]
+        end
+    end
+    return n1 * n2 * inv(n * (n-1) * (n+2)) * (V + tril(V, -1)')
+end
+
+function var(d::MatrixBeta)
+    n1, n2 = params(d)
+    n = n1 + n2
+    p = dim(d)
+    Ω = Matrix{partype(d)}(I, p, p)
+    V = zeros(partype(d), size(d))
+    for m in CartesianIndices(V)
+        i, j = Tuple(m)
+        V[m] = (1-(2/n)) * Ω[i,j]^2 + Ω[j,j] * Ω[i,i]
+    end
+    return n1 * n2 * inv(n * (n-1) * (n+2)) * V
+end
+
 #  -----------------------------------------------------------------------------
 #  Evaluation
 #  -----------------------------------------------------------------------------
