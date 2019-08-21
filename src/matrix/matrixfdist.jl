@@ -96,7 +96,7 @@ end
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
 
 #  Konno (1988 JJSS) Corollary 2.4.i
-function cov(d::MatrixFDist, i::Int, j::Int, k::Int, l::Int)
+function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
     p = dim(d)
     n1, n2, PDB = params(d)
     n2 > p + 3 || throw(ArgumentError("cov only defined for df2 > dim + 3"))
@@ -105,7 +105,7 @@ function cov(d::MatrixFDist, i::Int, j::Int, k::Int, l::Int)
     n1 * (n - p - 1) * inv((n2-p) * (n2-p-1) * (n2-p-3)) * (2inv(n2-p-1) * B[i,j] * B[k,l] + B[j,l] * B[i,k] + B[i,l] * B[k,j])
 end
 
-function var(d::MatrixFDist, i::Int, j::Int)
+function var(d::MatrixFDist, i::Integer, j::Integer)
     p = dim(d)
     n1, n2, PDB = params(d)
     n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
