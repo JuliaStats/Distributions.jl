@@ -6,17 +6,17 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
-    a::T
-    s2::T
-    s::T
-    i2s::T
-    d::T
-    q0::T
-    b::T
-    σ::T
-    c::T
-    scale::T
+struct GammaGDSampler <: Sampleable{Univariate,Continuous}
+    a::Real
+    s2::Real
+    s::Real
+    i2s::Real
+    d::Real
+    q0::Real
+    b::Real
+    σ::Real
+    c::Real
+    scale::Real
 end
 
 function GammaGDSampler(g::Gamma{T}) where {T}
