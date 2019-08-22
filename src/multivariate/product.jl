@@ -11,7 +11,7 @@ Product(Normal.(randn(10), 1)) # A 10-dimensional Product from 10 independent No
 ```
 """
 struct Product{
-    S<:ValueSupport,
+    S<:Support,
     T<:UnivariateDistribution{S},
     V<:AbstractVector{T},
 } <: MultivariateDistribution{S}
@@ -19,7 +19,7 @@ struct Product{
     function Product(v::V) where
         V<:AbstractVector{T} where
         T<:UnivariateDistribution{S} where
-        S<:ValueSupport
+        S<:Support
         return new{S, T, V}(v)
     end
 end

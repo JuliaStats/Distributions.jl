@@ -10,17 +10,17 @@ struct Multivariate  <: VariateForm end
 struct Matrixvariate <: VariateForm end
 
 """
-`S <: ValueSupport` specifies the support of sample elements,
-either discrete or continuous.
+`S <: Support{T}` specifies the support of sample elements as T,
+either discrete, continuous or other.
 """
-abstract type ValueSupport{N} end
-struct ContinuousSupport{N <: Number} <: ValueSupport{N} end
-abstract type CountableSupport{C} <: ValueSupport{C} end
+abstract type Support{N} end
+struct ContinuousSupport{N <: Number} <: Support{N} end
+abstract type CountableSupport{C} <: Support{C} end
 struct ContiguousSupport{C <: Integer} <: CountableSupport{C} end
 struct UnionSupport{N1, N2,
-                    S1 <: ValueSupport{N1},
-                    S2 <: ValueSupport{N2}} <:
-                        ValueSupport{Union{N1, N2}} end
+                    S1 <: Support{N1},
+                    S2 <: Support{N2}} <:
+                        Support{Union{N1, N2}} end
 
 const DiscontinuousSupport{I, F} =
     UnionSupport{I, F, <: CountableSupport{I},
@@ -29,14 +29,14 @@ const DiscontinuousSupport{I, F} =
 ## Sampleable
 
 """
-    Sampleable{F<:VariateForm,S<:ValueSupport}
+    Sampleable{F<:VariateForm,S<:Support}
 
 `Sampleable` is any type able to produce random values.
 Parametrized by a `VariateForm` defining the dimension of samples
-and a `ValueSupport` defining the domain of possibly sampled values.
+and a `Support` defining the domain of possibly sampled values.
 Any `Sampleable` implements the `Base.rand` method.
 """
-abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
+abstract type Sampleable{F<:VariateForm,S<:Support} end
 
 """
     length(s::Sampleable)
@@ -59,15 +59,15 @@ Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
     eltype(s::Sampleable)
-    eltype(::ValueSupport)
+    eltype(::Support)
 
 The default element type of a sample. This is the type of elements of the samples generated
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(::Sampleable{F, <: ValueSupport{N}}) where {F, N} = N
-Base.eltype(::Type{<:Sampleable{F, <: ValueSupport{N}}}) where {F, N} = N
-Base.eltype(::Type{<:ValueSupport{N}}) where {N} = N
+Base.eltype(::Sampleable{F, <: Support{N}}) where {F, N} = N
+Base.eltype(::Type{<:Sampleable{F, <: Support{N}}}) where {F, N} = N
+Base.eltype(::Type{<:Support{N}}) where {N} = N
 
 """
     nsamples(s::Sampleable)
@@ -85,18 +85,18 @@ nsamples(::Type{D}, x::AbstractMatrix{<:Number}) where {D<:Sampleable{Matrixvari
 nsamples(::Type{D}, x::AbstractArray{<:AbstractMatrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
 """
-    Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
+    Distribution{F<:VariateForm,S<:Support} <: Sampleable{F,S}
 
 `Distribution` is a `Sampleable` generating random values from a probability
 distribution. Distributions define a Probability Distribution Function (PDF)
 to implement with `pdf` and a Cumulated Distribution Function (CDF) to implement
 with `cdf`.
 """
-abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
+abstract type Distribution{F<:VariateForm,S<:Support} <: Sampleable{F,S} end
 
-const UnivariateDistribution{S<:ValueSupport}   = Distribution{Univariate,S}
-const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
-const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
+const UnivariateDistribution{S<:Support}   = Distribution{Univariate,S}
+const MultivariateDistribution{S<:Support} = Distribution{Multivariate,S}
+const MatrixDistribution{S<:Support}       = Distribution{Matrixvariate,S}
 
 const CountableDistribution{F<:VariateForm,
                             C<:CountableSupport} = Distribution{F,C}
@@ -105,29 +105,8 @@ const ContiguousDistribution{F<:VariateForm, S<:Integer} =
 const ContinuousDistribution{F<:VariateForm, T<:Number} =
     Distribution{F,ContinuousSupport{T}}
 
-const CountableUnivariateDistribution{C<:CountableSupport} =
-    UnivariateDistribution{C}
-const ContiguousUnivariateDistribution{S<:Integer} =
-    CountableUnivariateDistribution{ContiguousSupport{S}}
-const ContinuousUnivariateDistribution{T<:Number} =
-    UnivariateDistribution{ContinuousSupport{T}}
-
-const CountableMultivariateDistribution{C<:CountableSupport} =
-    MultivariateDistribution{C}
-const ContiguousMultivariateDistribution{S<:Integer} =
-    CountableMultivariateDistribution{ContiguousSupport{S}}
-const ContinuousMultivariateDistribution{T<:Number} =
-    MultivariateDistribution{ContinuousSupport{T}}
-
-const CountableMatrixDistribution{C<:CountableSupport} =
-    MatrixDistribution{C}
-const ContiguousMatrixDistribution{S<:Integer} =
-    CountableMatrixDistribution{ContiguousSupport{S}}
-const ContinuousMatrixDistribution{T<:Number} =
-    MatrixDistribution{ContinuousSupport{T}}
-
-variate_form(::Type{<:Sampleable{VF, <:ValueSupport}}) where {VF<:VariateForm} = VF
-value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:ValueSupport} = VS
+variate_form(::Type{<:Sampleable{VF, <:Support}}) where {VF<:VariateForm} = VF
+value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:Support} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?

@@ -41,3 +41,27 @@ for fun in [:pdf, :logpdf,
 end
 
 @deprecate pdf(d::ContiguousUnivariateDistribution) pdf.(Ref(d), support(d))
+
+# No longer proposing use of many const aliases
+const ValueSupport = Support{Float64}
+
+const CountableUnivariateDistribution{C<:CountableSupport} =
+    UnivariateDistribution{C}
+const ContiguousUnivariateDistribution{S<:Integer} =
+    CountableUnivariateDistribution{ContiguousSupport{S}}
+const ContinuousUnivariateDistribution{T<:Number} =
+    UnivariateDistribution{ContinuousSupport{T}}
+
+const CountableMultivariateDistribution{C<:CountableSupport} =
+    MultivariateDistribution{C}
+const ContiguousMultivariateDistribution{S<:Integer} =
+    CountableMultivariateDistribution{ContiguousSupport{S}}
+const ContinuousMultivariateDistribution{T<:Number} =
+    MultivariateDistribution{ContinuousSupport{T}}
+
+const CountableMatrixDistribution{C<:CountableSupport} =
+    MatrixDistribution{C}
+const ContiguousMatrixDistribution{S<:Integer} =
+    CountableMatrixDistribution{ContiguousSupport{S}}
+const ContinuousMatrixDistribution{T<:Number} =
+    MatrixDistribution{ContinuousSupport{T}}

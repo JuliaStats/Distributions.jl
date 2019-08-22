@@ -12,19 +12,21 @@ function expectation(distr::UnivariateDistribution{<:ContinuousSupport},
     integrate(x -> f(x)*g(x), leftEnd, rightEnd)
 end
 
-## Assuming that integer distributions don't have gaps in support
+## Assuming that contiguous integer distributions don't have gaps in support
 function expectation(distr::ContiguousUnivariateDistribution,
                      g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(x -> f(x)*g(x), leftEnd:rightEnd)
+    sum(leftEnd:rightEnd) do x
+        pdf(distr,x) * g(x)
+    end
 end
 
 ## Any countable distribution that is finite
 function expectation(distr::CountableUnivariateDistribution,
                      g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    sum(x -> f(x)*g(x), support(distr))
+    sum(support(distr)) do x
+        pdf(distr,x) * g(x)
+    end
 end
 
 function expectation(distr::UnivariateDistribution, g::Function)
@@ -39,6 +41,6 @@ end
 # end
 
 function kldivergence(P::UnivariateDistribution{S},
-                      Q::UnivariateDistribution{S}) where {S <: ValueSupport}
+                      Q::UnivariateDistribution{S}) where {S <: Support}
     expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
 end
