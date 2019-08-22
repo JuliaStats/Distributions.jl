@@ -21,7 +21,7 @@ External links
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
 """
-struct Exponential{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Exponential{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     θ::T        # note: scale not rate
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end

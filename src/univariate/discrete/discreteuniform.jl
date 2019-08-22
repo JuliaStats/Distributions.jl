@@ -21,7 +21,7 @@ External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
-struct DiscreteUniform <: ContiguousUnivariateDistribution{Int}
+struct DiscreteUniform <: UnivariateDistribution{ContiguousSupport{Int}}
     a::Int
     b::Int
     pv::Float64 # individual probabilities

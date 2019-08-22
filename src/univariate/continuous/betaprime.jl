@@ -26,7 +26,7 @@ External links
 * [Beta prime distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_prime_distribution)
 
 """
-struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct BetaPrime{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T
     β::T
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)

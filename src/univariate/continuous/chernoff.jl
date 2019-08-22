@@ -44,7 +44,7 @@ rand(rng, Chernoff()
 cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x)
 ```
 """
-struct Chernoff <: ContinuousUnivariateDistribution{Float64}
+struct Chernoff <: UnivariateDistribution{ContinuousSupport{Float64}}
 end
 
 module ChernoffComputations

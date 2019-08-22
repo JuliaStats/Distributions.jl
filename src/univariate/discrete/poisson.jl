@@ -20,7 +20,7 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-struct Poisson{T<:Real} <: ContiguousUnivariateDistribution{Int}
+struct Poisson{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     λ::T
 
     Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)

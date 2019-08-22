@@ -25,7 +25,7 @@ end
 
 # testing the implementation of a discrete univariate distribution
 #
-function test_distr(distr::CountableUnivariateDistribution, n::Int;
+function test_distr(distr::UnivariateDistribution{<:CountableSupport}, n::Int;
                     testquan::Bool=true)
 
     test_range(distr)
@@ -73,8 +73,8 @@ end
 
 # for discrete samplers
 #
-function test_samples(s::Sampleable{Univariate, <:CountableSupport}, # the sampleable instance
-                      distr::CountableUnivariateDistribution,        # corresponding distribution
+function test_samples(s::Sampleable{Univariate, <:CountableSupport},     # the sampleable instance
+                      distr::UnivariateDistribution{<:CountableSupport}, # corresponding distribution
                       n::Int;                                        # number of samples to generate
                       q::Float64=1.0e-7,                             # confidence interval, 1 - q as confidence
                       verbose::Bool=false,                           # show intermediate info (for debugging)
@@ -145,14 +145,14 @@ function test_samples(s::Sampleable{Univariate, <:CountableSupport}, # the sampl
     return samples
 end
 
-test_samples(distr::CountableUnivariateDistribution, n::Int;
+test_samples(distr::UnivariateDistribution{<:CountableSupport}, n::Int;
              q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
     test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng)
 
 # for continuous samplers
 #
-function test_samples(s::Sampleable{Univariate, <: ContinuousSupport}, # the sampleable instance
-                      distr::ContinuousUnivariateDistribution,  # corresponding distribution
+function test_samples(s::Sampleable{Univariate, <: ContinuousSupport},     # the sampleable instance
+                      distr::UnivariateDistribution{<:ContinuousSupport},  # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       nbins::Int=50,                            # divide the main interval into nbins
                       q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
@@ -260,7 +260,8 @@ function test_range(d::UnivariateDistribution)
     @test isbounded(d) == (is_lb && is_ub)
 end
 
-function get_evalsamples(d::CountableUnivariateDistribution, q::Float64)
+function get_evalsamples(d::UnivariateDistribution{<:CountableSupport},
+                         q::Float64)
     # samples for testing evaluation functions (even spacing)
 
     T = eltype(d)
@@ -303,7 +304,7 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 
     if isbounded(d)
-        if isa(d, CountableUnivariateDistribution)
+        if isa(d, UnivariateDistribution{<:CountableSupport})
             s = support(d)
             @test isa(s, AbstractUnitRange)
             @test first(s) == minimum(d)
@@ -350,7 +351,7 @@ function test_range_evaluation(d::UnivariateDistribution{<:CountableSupport})
 end
 
 
-function test_evaluation(d::CountableUnivariateDistribution,
+function test_evaluation(d::UnivariateDistribution{<:CountableSupport},
                          vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
     p   = Vector{Float64}(undef, nv)
@@ -479,7 +480,8 @@ end
 
 #### Testing statistics methods
 
-function test_stats(d::CountableUnivariateDistribution, vs::AbstractVector)
+function test_stats(d::UnivariateDistribution{<:CountableSupport},
+                    vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]

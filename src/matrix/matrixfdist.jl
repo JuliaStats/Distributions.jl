@@ -29,7 +29,8 @@ is given by
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is
 ``MF_{p}(n_1/2,n_2/2,\\mathbf{B})``.
 """
-struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution{T}
+struct MatrixFDist{T <: Real, TW <: Wishart} <:
+    MatrixDistribution{ContinuousSupport{T}}
     W::TW
     n2::T
     logc0::T

@@ -1,7 +1,8 @@
 # Noncentral hypergeometric distribution
 # TODO: this distribution needs clean-up and testing
 
-abstract type NoncentralHypergeometric{T<:Real} <: ContiguousUnivariateDistribution{Int} end
+abstract type NoncentralHypergeometric{T<:Real} <:
+    UnivariateDistribution{ContiguousSupport{Int}} end
 
 ### handling support
 

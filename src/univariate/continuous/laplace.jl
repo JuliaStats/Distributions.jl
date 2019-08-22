@@ -22,7 +22,7 @@ External links
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
 """
-struct Laplace{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Laplace{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     θ::T
     Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)

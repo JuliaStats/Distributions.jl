@@ -1,4 +1,5 @@
-struct DirichletMultinomial{T <: Real} <: ContiguousMultivariateDistribution{Int}
+struct DirichletMultinomial{T <: Real} <:
+    MultivariateDistribution{ContiguousSupport{Int}}
     n::Int
     α::Vector{T}
     α0::T

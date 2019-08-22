@@ -9,7 +9,7 @@ Kolmogorov distribution defined as
 where ``B(t)`` is a Brownian bridge used in the Kolmogorov--Smirnov
 test for large n.
 """
-struct Kolmogorov <: ContinuousUnivariateDistribution{Float64}
+struct Kolmogorov <: UnivariateDistribution{ContinuousSupport{Float64}}
 end
 
 @distr_support Kolmogorov 0.0 Inf

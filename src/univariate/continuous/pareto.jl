@@ -21,7 +21,7 @@ External links
  * [Pareto distribution on Wikipedia](http://en.wikipedia.org/wiki/Pareto_distribution)
 
 """
-struct Pareto{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Pareto{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T
     θ::T
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)

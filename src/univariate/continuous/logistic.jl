@@ -23,7 +23,7 @@ External links
 * [Logistic distribution on Wikipedia](http://en.wikipedia.org/wiki/Logistic_distribution)
 
 """
-struct Logistic{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Logistic{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     θ::T
     Logistic{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)

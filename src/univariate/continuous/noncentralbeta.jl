@@ -1,7 +1,7 @@
 """
     NoncentralBeta(α, β, λ)
 """
-struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct NoncentralBeta{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T
     β::T
     λ::T

@@ -18,34 +18,41 @@ scale(d)             # Get the scale parameter
 External links
 [Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
-struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: ContinuousUnivariateDistribution{T}
+struct LocationScale{T<:Real, D<:UnivariateDistribution{<:ContinuousSupport}} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     ρ::D
-    LocationScale{T, D}(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = new{T, D}(μ, σ, ρ)
+    LocationScale{T, D}(μ::T,σ::T,ρ::D) where
+    {T<:Real, D<:UnivariateDistribution{<:ContinuousSupport}} =
+        new{T, D}(μ, σ, ρ)
 end
 
-function LocationScale(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution}
+function LocationScale(μ::T,σ::T,ρ::D) where
+    {T<:Real, D<:UnivariateDistribution{<:ContinuousSupport}}
     @check_args(LocationScale, σ > zero(σ))
     return LocationScale{T,D}(μ,σ,ρ)
 end
 
-function LocationScale(μ::T,σ::T,ρ::D, ::NoArgCheck) where {T<:Real, D<:ContinuousUnivariateDistribution}
+function LocationScale(μ::T,σ::T,ρ::D, ::NoArgCheck) where
+    {T<:Real, D<:UnivariateDistribution{<:ContinuousSupport}}
     return LocationScale{T,D}(μ,σ,ρ)
 end
 
-function LocationScale(μ::Integer, σ::Integer, ρ::ContinuousUnivariateDistribution)
+function LocationScale(μ::Integer, σ::Integer,
+                       ρ::UnivariateDistribution{<:ContinuousSupport})
     return LocationScale(float(μ), float(σ), ρ)
 end
 
-LocationScale(μ::Real, σ::Real, ρ::D) where {D<:ContinuousUnivariateDistribution} = LocationScale(promote(μ,σ)...,ρ)
+LocationScale(μ::Real, σ::Real, ρ::D) where
+{D<:UnivariateDistribution{<:ContinuousSupport}} =
+    LocationScale(promote(μ,σ)...,ρ)
 
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
 
 #### Conversions
 
-convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale(T(μ),T(σ),ρ)
+convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:UnivariateDistribution{ContinuousSupport{T}}} = LocationScale(T(μ),T(σ),ρ)
 convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ, NoArgCheck())
 
 #### Parameters

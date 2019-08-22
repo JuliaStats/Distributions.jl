@@ -98,13 +98,6 @@ const UnivariateDistribution{S<:Support}   = Distribution{Univariate,S}
 const MultivariateDistribution{S<:Support} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:Support}       = Distribution{Matrixvariate,S}
 
-const CountableDistribution{F<:VariateForm,
-                            C<:CountableSupport} = Distribution{F,C}
-const ContiguousDistribution{F<:VariateForm, S<:Integer} =
-    CountableDistribution{F,ContiguousSupport{S}}
-const ContinuousDistribution{F<:VariateForm, T<:Number} =
-    Distribution{F,ContinuousSupport{T}}
-
 variate_form(::Type{<:Sampleable{VF, <:Support}}) where {VF<:VariateForm} = VF
 value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS<:Support} = VS
 
@@ -121,18 +114,18 @@ const DistributionType{D<:Distribution} = Type{D}
 const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
 
 """
-    succprob(d::ContiguousUnivariateDistribution)
+    succprob(d::UnivariateDistribution{ContiguousSupport{T}})
 
 Get the probability of success.
 """
-succprob(d::ContiguousUnivariateDistribution)
+succprob(d::UnivariateDistribution{<:ContiguousSupport})
 
 """
-    failprob(d::ContiguousUnivariateDistribution)
+    failprob(d::UnivariateDistribution{ContiguousSupport{T}})
 
 Get the probability of failure.
 """
-failprob(d::ContiguousUnivariateDistribution)
+failprob(d::UnivariateDistribution{<:ContiguousSupport})
 
 # Temporary fix to handle RFunctions dependencies
 """

@@ -2,7 +2,7 @@
 
 @Base.deprecate expected_logdet meanlogdet
 
-function probs(d::ContiguousUnivariateDistribution)
+function probs(d::UnivariateDistribution{<:ContiguousSupport})
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)
     return probs(d)
 end
@@ -40,28 +40,19 @@ for fun in [:pdf, :logpdf,
     end
 end
 
-@deprecate pdf(d::ContiguousUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::UnivariateDistribution{<:ContiguousSupport}) pdf.(Ref(d), support(d))
 
 # No longer proposing use of many const aliases
 const ValueSupport = Support{Float64}
+const Discrete = ContiguousSupport{Int}
+const Continuous = ContinuousSupport{Float64}
 
-const CountableUnivariateDistribution{C<:CountableSupport} =
-    UnivariateDistribution{C}
-const ContiguousUnivariateDistribution{S<:Integer} =
-    CountableUnivariateDistribution{ContiguousSupport{S}}
-const ContinuousUnivariateDistribution{T<:Number} =
-    UnivariateDistribution{ContinuousSupport{T}}
+const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
 
-const CountableMultivariateDistribution{C<:CountableSupport} =
-    MultivariateDistribution{C}
-const ContiguousMultivariateDistribution{S<:Integer} =
-    CountableMultivariateDistribution{ContiguousSupport{S}}
-const ContinuousMultivariateDistribution{T<:Number} =
-    MultivariateDistribution{ContinuousSupport{T}}
-
-const CountableMatrixDistribution{C<:CountableSupport} =
-    MatrixDistribution{C}
-const ContiguousMatrixDistribution{S<:Integer} =
-    CountableMatrixDistribution{ContiguousSupport{S}}
-const ContinuousMatrixDistribution{T<:Number} =
-    MatrixDistribution{ContinuousSupport{T}}
+const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
+const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
+const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
+const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
+const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
+const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}

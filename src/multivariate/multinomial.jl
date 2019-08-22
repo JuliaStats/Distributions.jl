@@ -19,7 +19,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-struct Multinomial{T<:Real} <: ContiguousMultivariateDistribution{Int}
+struct Multinomial{T<:Real} <: MultivariateDistribution{ContiguousSupport{Int}}
     n::Int
     p::Vector{T}
 

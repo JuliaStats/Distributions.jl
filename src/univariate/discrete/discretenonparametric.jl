@@ -17,7 +17,7 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: CountableUnivariateDistribution{CountableSupport{T}}
+struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: UnivariateDistribution{CountableSupport{T}}
     support::Ts
     p::Ps
 

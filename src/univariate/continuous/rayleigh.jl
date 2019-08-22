@@ -23,7 +23,7 @@ External links
 * [Rayleigh distribution on Wikipedia](http://en.wikipedia.org/wiki/Rayleigh_distribution)
 
 """
-struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Rayleigh{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     σ::T
     Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end

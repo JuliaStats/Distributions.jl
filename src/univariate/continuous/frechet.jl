@@ -23,7 +23,7 @@ External links
 * [Fréchet_distribution on Wikipedia](http://en.wikipedia.org/wiki/Fréchet_distribution)
 
 """
-struct Frechet{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Frechet{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T
     θ::T
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)

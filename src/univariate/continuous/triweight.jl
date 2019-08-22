@@ -1,7 +1,7 @@
 """
     Triweight(μ, σ)
 """
-struct Triweight{T<:Real} <: ContinuousUnivariateDistribution{T}
+struct Triweight{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     Triweight{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)

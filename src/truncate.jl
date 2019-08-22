@@ -8,7 +8,8 @@ Construct a truncated distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:Support} <: UnivariateDistribution{S}
+struct Truncated{D<:UnivariateDistribution, S<:Support} <:
+    UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
@@ -57,16 +58,18 @@ function _pdf(d::Truncated, x::T) where {T<:Real}
     end
 end
 
-function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:Real}
+function pdf(d::Truncated{<:UnivariateDistribution{<:ContinuousSupport}}, x::T) where {T<:Real}
     _pdf(d, float(x))
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Real}
+function pdf(d::Truncated{D}, x::T) where
+    {D<:UnivariateDistribution{ContiguousSupport{Int}}, T<:Real}
     isinteger(x) || return zero(float(T))
     _pdf(d, x)
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Integer}
+function pdf(d::Truncated{D}, x::T) where
+    {D<:UnivariateDistribution{ContiguousSupport{Int}}, T<:Integer}
     _pdf(d, float(x))
 end
 
@@ -79,17 +82,20 @@ function _logpdf(d::Truncated, x::T) where {T<:Real}
     end
 end
 
-function logpdf(d::Truncated{D}, x::T) where {D<:ContiguousUnivariateDistribution{Int}, T<:Real}
+function logpdf(d::Truncated{D}, x::T) where
+    {D<:UnivariateDistribution{ContiguousSupport{Int}}, T<:Real}
     TF = float(T)
     isinteger(x) || return -TF(Inf)
     return _logpdf(d, x)
 end
 
-function logpdf(d::Truncated{D}, x::Integer) where {D<:ContiguousUnivariateDistribution{Int}}
+function logpdf(d::Truncated{D}, x::Integer) where
+    {D<:UnivariateDistribution{ContiguousSupport{Int}}}
     _logpdf(d, x)
 end
 
-function logpdf(d::Truncated{D, ContinuousSupport{Float64}}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
+function logpdf(d::Truncated{D, <:ContinuousSupport}, x::T) where
+    {D<:UnivariateDistribution{<:ContinuousSupport}, T<:Real}
     _logpdf(d, x)
 end
 
