@@ -111,7 +111,7 @@ function var(d::MatrixFDist, i::Integer, j::Integer)
     n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
     n = n1 + n2
     B = Matrix(PDB)
-    n1 * (n - p - 1) * inv((n2-p) * (n2-p-1) * (n2-p-3)) * ((2inv(n2-p-1) + 1) * B[i,j]^2 + B[j,j] * B[i,i])
+    n1*(n - p - 1)*inv((n2 - p)*(n2 - p - 1)*(n2 - p - 3))*((2inv(n2 - p - 1) + 1)*B[i,j]^2 + B[j,j]*B[i,i])
 end
 
 #  -----------------------------------------------------------------------------
