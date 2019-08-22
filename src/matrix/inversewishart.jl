@@ -91,6 +91,18 @@ end
 
 mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
 
+#  https://en.wikipedia.org/wiki/Inverse-Wishart_distribution#Moments
+function cov(d::InverseWishart, i::Integer, j::Integer, k::Integer, l::Integer)
+    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
+    ν > p + 3 || throw(ArgumentError("cov only defined for df > dim + 3"))
+    inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*(2Ψ[i,j]*Ψ[k,l] + (ν-p-1)*(Ψ[i,k]*Ψ[j,l] + Ψ[i,l]*Ψ[k,j]))
+end
+
+function var(d::InverseWishart, i::Integer, j::Integer)
+    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
+    ν > p + 3 || throw(ArgumentError("var only defined for df > dim + 3"))
+    inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*(ν - p + 1)*Ψ[i,j]^2 + (ν - p - 1)*Ψ[i,i]*Ψ[j,j]
+end
 
 #### Evaluation
 

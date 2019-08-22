@@ -54,7 +54,7 @@ function GammaGDSampler(g::Gamma{T}) where {T}
         c = 0.1515/s
     end
 
-    GammaGDSampler(a,s2,s,i2s,d,q0,T(b),T(σ),T(c),scale(g))
+    GammaGDSampler(T(a), T(s2), T(s), T(i2s), T(d), T(q0), T(b), T(σ), T(c), scale(g))
 end
 
 function calc_q(s::GammaGDSampler, t)

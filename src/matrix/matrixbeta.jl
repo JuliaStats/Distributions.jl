@@ -85,6 +85,23 @@ mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d)
 
 @inline partype(d::MatrixBeta{T}) where {T <: Real} = T
 
+#  Konno (1988 JJSS) Corollary 3.3.i
+function cov(d::MatrixBeta, i::Integer, j::Integer, k::Integer, l::Integer)
+    n1, n2 = params(d)
+    n = n1 + n2
+    p = dim(d)
+    Ω = Matrix{partype(d)}(I, p, p)
+    n1*n2*inv(n*(n - 1)*(n + 2))*(-(2/n)*Ω[i,j]*Ω[k,l] + Ω[j,l]*Ω[i,k] + Ω[i,l]*Ω[k,j])
+end
+
+function var(d::MatrixBeta, i::Integer, j::Integer)
+    n1, n2 = params(d)
+    n = n1 + n2
+    p = dim(d)
+    Ω = Matrix{partype(d)}(I, p, p)
+    n1*n2*inv(n*(n - 1)*(n + 2))*((1 - (2/n))*Ω[i,j]^2 + Ω[j,j]*Ω[i,i])
+end
+
 #  -----------------------------------------------------------------------------
 #  Evaluation
 #  -----------------------------------------------------------------------------
