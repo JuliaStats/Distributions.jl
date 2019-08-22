@@ -1,7 +1,5 @@
 module Distributions
 
-Base.ceil(::Type{Any}, x) = error("nonsensical")
-
 using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
