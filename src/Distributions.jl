@@ -29,6 +29,7 @@ export
 
     # generic types
     VariateForm,
+    Support,
     ValueSupport,
     CountableSupport,
     ContiguousSupport,

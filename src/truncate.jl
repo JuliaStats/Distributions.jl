@@ -8,7 +8,7 @@ Construct a truncated distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
+struct Truncated{D<:UnivariateDistribution, S<:Support} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::Float64      # lower bound
     upper::Float64      # upper bound
@@ -41,7 +41,7 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport(d::Truncated{D,VS}, x::Real) where {VS<:ValueSupport, D<:UnivariateDistribution{VS}} =
+insupport(d::Truncated{D,VS}, x::Real) where {VS<:Support, D<:UnivariateDistribution{VS}} =
     d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 
