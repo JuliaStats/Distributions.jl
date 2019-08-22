@@ -1,25 +1,25 @@
-function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
+function support(distr::DiscreteUnivariateDistribution, epsilon::Real)
     (left,right) = map(x -> quantile(distr,x), (0,1))
     leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
     rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
-    (leftEnd, rightEnd)
+    leftEnd:rightEnd
+end
+function support(distr::ContinuousUnivariateDistribution, epsilon::Real)
+    (left,right) = map(x -> quantile(distr,x), (0,1))
+    leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
+    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
+    RealInterval(leftEnd, rightEnd)
 end
 
-function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    integrate(x -> f(x)*g(x), leftEnd, rightEnd)
+
+function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real=1e-10)
+    s = support(distr, epsilon)
+    integrate(x -> pdf(distr, x)*g(x), s.lb, s.ub)
 end
 
-## Assuming that discrete distributions only take integer values.
-function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(x -> f(x)*g(x), leftEnd:rightEnd)
-end
-
-function expectation(distr::UnivariateDistribution, g::Function)
-    expectation(distr, g, 1e-10)
+## Not assuming that discrete distributions only take integer values.
+function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real = 0)
+    sum(x -> pdf(distr, x)*g(x), support(distr, epsilon))
 end
 
 ## Leave undefined until we've implemented a numerical integration procedure

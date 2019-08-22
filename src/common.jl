@@ -10,12 +10,14 @@ struct Multivariate  <: VariateForm end
 struct Matrixvariate <: VariateForm end
 
 """
-`S <: ValueSupport` specifies the support of sample elements,
-either discrete or continuous.
+`S <: ValueSupport` specifies the type of the Distribution, whether it is
+discrete, continuous or a mixture of those.
 """
 abstract type ValueSupport end
 struct Discrete   <: ValueSupport end
 struct Continuous <: ValueSupport end
+struct Mixture <: ValueSupport end
+
 
 ## Sampleable
 
@@ -55,7 +57,7 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
+#Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
 Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
 
 """

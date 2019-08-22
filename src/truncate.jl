@@ -41,9 +41,8 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution} =
-    d.lower <= x <= d.upper && insupport(d.untruncated, x)
-
+insupport(d::Truncated{D,VS}, x::Real) where {VS<:ValueSupport, D<:UnivariateDistribution{VS}} =
+	    d.lower <= x <= d.upper && insupport(d.untruncated, x)
 
 ### evaluation
 
