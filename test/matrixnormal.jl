@@ -130,6 +130,7 @@ end
 
 @testset "MatrixNormal cov and var" begin
     @test vec(var(D)) ≈ diag(cov(D))
+    @test reshape(cov(D), n, p, n, p) ≈ cov(D, Val(false))
     @test cov(D) ≈ cov(d)
     @test cov(G) ≈ cov(g)
     @test cov(L) ≈ cov(l)

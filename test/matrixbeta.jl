@@ -64,6 +64,7 @@ end
 
 @testset "MatrixBeta cov and var" begin
     @test vec(var(B)) ≈ diag(cov(B))
+    @test reshape(cov(B), p, p, p, p) ≈ cov(B, Val(false))
     @test cov(C)[1] ≈ var(c)
 end
 

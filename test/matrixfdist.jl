@@ -63,6 +63,7 @@ end
 
 @testset "MatrixFDist cov and var" begin
     @test vec(var(G)) ≈ diag(cov(G))
+    @test reshape(cov(G), p, p, p, p) ≈ cov(G, Val(false))
     @test cov(F)[1] ≈ var(f)
     @test_throws ArgumentError cov(MatrixFDist(n1, p + 1, B))
 end

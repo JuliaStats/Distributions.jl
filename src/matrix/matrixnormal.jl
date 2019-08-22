@@ -87,7 +87,9 @@ mean(d::MatrixNormal) = d.M
 
 mode(d::MatrixNormal) = d.M
 
-cov(d::MatrixNormal) = kron(Matrix(d.V), Matrix(d.U))
+cov(d::MatrixNormal, ::Val{true}=Val(true)) = kron(Matrix(d.V), Matrix(d.U))
+
+cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
 var(d::MatrixNormal) = reshape(diag(cov(d)), size(d))
 

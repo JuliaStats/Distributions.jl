@@ -115,6 +115,7 @@ end
 
 @testset "MatrixTDist cov and var" begin
     @test vec(var(D)) ≈ diag(cov(D))
+    @test reshape(cov(D), n, p, n, p) ≈ cov(D, Val(false))
     @test cov(L) ≈ cov(l)
     @test cov(H) ≈ cov(h)
 

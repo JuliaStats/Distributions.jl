@@ -50,21 +50,14 @@ mean(d::MatrixDistribution)
 
 Compute the matrix of element-wise variances for distribution `d`.
 """
-function var(d::MatrixDistribution)
-    V = zeros(partype(d), size(d))
-    for m in CartesianIndices(V)
-        i, j = Tuple(m)
-        V[m] = var(d, i, j)
-    end
-    return V
-end
+var(d::MatrixDistribution) = ((n, p) = size(d); [var(d, i, j) for i in 1:n, j in 1:p])
 
 """
     cov(d::MatrixDistribution)
 
 Compute the covariance matrix for `vec(X)`, where `X` is a random matrix with distribution `d`.
 """
-function cov(d::MatrixDistribution)
+function cov(d::MatrixDistribution, ::Val{true}=Val(true))
     M = length(d)
     V = zeros(partype(d), M, M)
     iter = CartesianIndices(size(d))
@@ -76,6 +69,16 @@ function cov(d::MatrixDistribution)
         end
     end
     return V + tril(V, -1)'
+end
+
+"""
+    cov(d::MatrixDistribution, flattened = Val(false))
+
+Compute the 4-dimensional array whose `(i, j, k, l)` element is `cov(X[i,j], X[k, l])`.
+"""
+function cov(d::MatrixDistribution, ::Val{false})
+    n, p = size(d)
+    [cov(d, i, j, k, l) for i in 1:n, j in 1:p, k in 1:n, l in 1:p]
 end
 
 """
