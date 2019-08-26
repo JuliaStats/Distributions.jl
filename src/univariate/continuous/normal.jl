@@ -84,11 +84,11 @@ entropy(d::Normal{T}) where {T<:Real} = (log2π + 1)/2 + log(d.σ)
 
 Computes the x-value based on a Normal distribution and a z-value.
 """
-function xval(d::Normal, z::Real)
+function xval(d::Normal{T}, z::Real) where {T}
     if isinf(z) && iszero(d.σ)
         d.μ + one(d.σ) * z
     else
-        d.μ + d.σ * z
+        d.μ + d.σ * typeof(one(T))(z)
     end
 end
 """
@@ -162,9 +162,9 @@ Helper function that calls `_norminvlogcdf_impl` used for `invlogccdf` with the 
 """
 norminvlogcdf(lp::Real) = _norminvlogcdf_impl(convert(Float64, lp))
 norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
-_invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
+invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
 # invlogccdf
-_invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
+invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
 # quantile
 function quantile(d::Normal{T}, p::Real) where {T}
     if iszero(d.σ)
