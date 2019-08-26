@@ -27,20 +27,21 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-struct Normal{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
+struct Normal{T<:Number} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
-    Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
+    Normal{T}(µ::T, σ::T) where {T<:Number} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T) where {T <: Real}
+function Normal(μ::T, σ::T) where {T <: Number}
+    @check_uncountable(Normal, μ)
     @check_args(Normal, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
 Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
+Normal(μ::Number, σ::Number) = Normal(promote(μ, σ)...)
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
 Normal() = Normal(0.0, 1.0, NoArgCheck())
@@ -69,10 +70,10 @@ mode(d::Normal) = d.μ
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
-skewness(d::Normal{T}) where {T<:Real} = zero(T)
-kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
+skewness(d::Normal{T}) where {T} = zero(one(T))
+kurtosis(d::Normal{T}) where {T} = zero(one(T))
 
-entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
+entropy(d::Normal{T}) where {T<:Real} = (log2π + 1)/2 + log(d.σ)
 
 #### Evaluation
 
@@ -94,7 +95,7 @@ end
 
 Computes the z-value based on a Normal distribution and a x-value.
 """
-zval(d::Normal, x::Real) = (x - d.μ) / d.σ
+zval(d::Normal, x::Number) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
 # logpdf
@@ -160,34 +161,34 @@ Helper function that calls `_norminvlogcdf_impl` used for `invlogccdf` with the 
 """
 norminvlogcdf(lp::Real) = _norminvlogcdf_impl(convert(Float64, lp))
 norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
-invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
+_invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
 # invlogccdf
-invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
+_invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
 # quantile
-function quantile(d::Normal, p::Real)
+function quantile(d::Normal{T}, p::Real) where {T}
     if iszero(d.σ)
         if iszero(p)
-            -Inf
+            T(-Inf)
         elseif isone(p)
-            Inf
+            T(Inf)
         else
-            0.5
+            T(0.5)
         end
     end
-    xval(d, -erfcinv(2p) * sqrt2)
+    T(xval(d, -erfcinv(2p) * sqrt2))
 end
 # cquantile
-function cquantile(d::Normal, q::Real)
+function cquantile(d::Normal{T}, q::Real) where {T}
     if iszero(d.σ)
         if iszero(q)
-            Inf
+            T(Inf)
         elseif isone(q)
-            -Inf
+            T(-Inf)
         else
-            0.5
+            T(0.5)
         end
     end
-    xval(d, erfcinv(2q) * sqrt2)
+    T(xval(d, erfcinv(2q) * sqrt2))
 end
 
 # norminvcdf & norminvlogcdf implementation
@@ -295,7 +296,8 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
+rand(rng::AbstractRNG, d::Normal{T}) where {T} =
+    d.μ + d.σ * randn(rng, typeof(one(T)))
 
 #### Fitting
 

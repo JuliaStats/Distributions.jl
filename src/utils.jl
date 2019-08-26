@@ -9,6 +9,38 @@ macro check_args(D, cond)
     end
 end
 
+isuncountable(x) = false
+isuncountable(x::Number) = typeof(float(one(x))) ≡ typeof(one(x))
+isuncountablereal(x) = isuncountable(x) && typeof(one(x)) <: Real
+
+iscountable(x) = false
+iscountable(x::Number) = !isuncountable(x)
+iscountablereal(x) = iscountable(x) && typeof(one(x)) <: Real
+
+macro check_uncountable(D, var)
+    quote
+        if !isuncountablereal($(esc(var)))
+            throw(ArgumentError(string($(string(D)),
+                                       ": the type of variable ",
+                                       $(string(var)), " (",
+                                       string(typeof($(esc(var)))),
+                                       ") is not uncountable.")))
+        end
+    end
+end
+
+macro check_countable(D, var)
+    quote
+        if !iscountablereal($(esc(var)))
+            throw(ArgumentError(string($(string(D)),
+                                       ": the type of variable ",
+                                       $(string(var)), " (",
+                                       string(typeof($(esc(var)))),
+                                       ") is not countable.")))
+        end
+    end
+end
+
 ## a type to indicate zero vector
 """
 An immutable vector of zeros of type T
