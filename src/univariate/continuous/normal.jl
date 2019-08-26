@@ -44,7 +44,7 @@ Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Number, σ::Number) = Normal(promote(μ, σ)...)
 Normal(μ::Rational, σ::Rational) = Normal(float(μ), float(σ))
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
+Normal(μ::T) where {T <: Number} = Normal(μ, T(one(T)))
 Normal() = Normal(0.0, 1.0, NoArgCheck())
 
 const Gaussian = Normal
