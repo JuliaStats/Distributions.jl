@@ -156,16 +156,16 @@ Construct a multivariate normal distribution with mean `mu` and covariance repre
     MvNormal(d, sig)
 
 Construct a multivariate normal distribution of dimension `d`, with zero mean, and an
-isotropic covariance as `abs2(sig) * eye(d)`.
+isotropic covariance matrix corresponding `abs2(sig)*I`.
 
 # Arguments
 - `mu::Vector{T<:Real}`: The mean vector.
 - `d::Real`: dimension of distribution.
 - `sig`: The covariance, which can in of either of the following forms (with `T<:Real`):
-    1. subtype of `AbstractPDMat`
-    2. symmetric matrix of type `Matrix{T}`
-    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`.
-    4. real-valued number: indicating an isotropic covariance as `abs2(sig) * eye(d)`.
+    1. subtype of `AbstractPDMat`,
+    2. symmetric matrix of type `Matrix{T}`,
+    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`,
+    4. real-valued number: indicating an isotropic covariance matrix corresponding `abs2(sig) * I`.
 
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
