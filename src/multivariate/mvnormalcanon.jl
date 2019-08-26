@@ -50,16 +50,17 @@ Construct a multivariate normal distribution with zero mean (thus zero potential
 
     MvNormalCanon(d, J)
 
-Construct a multivariate normal distribution of dimension `d`, with zero mean and a precision matrix as `J * eye(d)`.
+Construct a multivariate normal distribution of dimension `d`, with zero mean and
+an isotropic precision matrix corresponding `J*I`.
 
 # Arguments
 - `d::Int`: dimension of distribution
 - `h::Vector{T<:Real}`: the potential vector, of type `Vector{T}` with `T<:Real`.
 - `J`: the representation of the precision matrix, which can be in either of the following forms (`T<:Real`):
-    1. an instance of a subtype of `AbstractPDMat`
-    2. a square matrix of type `Matrix{T}`
-    3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`.
-    4. a real number: indicating an isotropic precision matrix as `J * eye(d)`.
+    1. an instance of a subtype of `AbstractPDMat`,
+    2. a square matrix of type `Matrix{T}`,
+    3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`,
+    4. a real number: indicating an isotropic precision matrix corresponding `J*I`.
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
