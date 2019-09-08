@@ -123,11 +123,11 @@ end
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray)
+function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T}
     n = length(p)
     ω = 2 / (n + 1)
 
-    x = Vector{Complex{Float64}}(undef, n+1)
+    x = Vector{Complex{T}}(undef, n+1)
     lmax = ceil(Int, n/2)
     x[1] = 1/(n + 1)
     for l=1:lmax
