@@ -48,6 +48,7 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
+    "discretenormal",
     "functionals",
     "chernoff",
 ]

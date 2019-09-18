@@ -563,6 +563,7 @@ const discrete_distributions = [
     "betabinomial",
     "binomial",
     "discreteuniform",
+    "discretenormal",
     "discretenonparametric",
     "categorical",
     "geometric",
