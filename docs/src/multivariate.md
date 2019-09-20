@@ -99,3 +99,12 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ```@docs
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```
+
+## Product distributions
+
+```@docs
+Distributions.product_distribution
+```
+
+Using `product_distribution` is advised to construct product, for some distributions
+it creates a special multivariate type.

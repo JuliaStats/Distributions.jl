@@ -33,3 +33,15 @@ mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
+
+"""
+    product_distribution(dists::AbstractVector{<:UnivariateDistribution})
+
+Creates a multivariate product distribution `P` from a vector of univariate distributions.
+Fallback is the `Product constructor`, but specialized methods can be defined
+for distributions with a special multivariate product. The product of univariate
+Gaussian distributions is a multivariate Gaussian with diagonal covariance matrix.
+"""
+function product_distribution(dists::AbstractVector{<:UnivariateDistribution})
+    return Product(dists)
+end
