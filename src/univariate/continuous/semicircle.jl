@@ -24,12 +24,11 @@ struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 
-function Semicircle(r::T) where {T <: Real}
-    @check_args(Semicircle, r > 0)
+function Semicircle(r::T; arg_check = true) where {T <: Real}
+    check_arg && @check_args(Semicircle, r > 0)
     return Semicircle{T}(r)
 end
 
-Semicircle(r::T, ::NoArgCheck) where {T <: Real} = Semicircle{T}(r)
 Semicircle(r::Integer) = Semicircle(float(r))
 
 @distr_support Semicircle -d.r +d.r

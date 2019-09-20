@@ -33,12 +33,11 @@ struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)
 end
 
-function StudentizedRange(ν::T, k::T) where {T <: Real}
-    @check_args(StudentizedRange, ν > zero(ν) && k > one(k))
+function StudentizedRange(ν::T, k::T; arg_check = true) where {T <: Real}
+    check_arg && @check_args(StudentizedRange, ν > zero(ν) && k > one(k))
     return StudentizedRange{T}(ν, k)
 end
 
-StudentizedRange(ν::T, k::T, ::NoArgCheck) where {T<:Real} = StudentizedRange{T}(ν, k)
 StudentizedRange(ν::Integer, k::Integer) = StudentizedRange(float(ν), float(k))
 StudentizedRange(ν::Real, k::Real) = StudentizedRange(promote(ν, k)...)
 
@@ -52,7 +51,7 @@ function convert(::Type{StudentizedRange{T}}, ν::S, k::S) where {T <: Real, S <
 end
 
 function convert(::Type{StudentizedRange{T}}, d::StudentizedRange{S}) where {T <: Real, S <: Real}
-    StudentizedRange(T(d.ν), T(d.k), NoArgCheck())
+    StudentizedRange(T(d.ν), T(d.k), arg_check = false)
 end
 
 ### Parameters
