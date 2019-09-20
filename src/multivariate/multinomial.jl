@@ -23,18 +23,21 @@ struct Multinomial{T<:Real} <: DiscreteMultivariateDistribution
     n::Int
     p::Vector{T}
 
-    function Multinomial{T}(n::Integer, p::Vector{T}) where T
+    Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(round(Int, n), p)
+end
+
+function Multinomial(n::Integer, p::Vector{T}; arg_check = true) where {T<:Real}
+    if arg_check
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
         end
         if !isprobvec(p)
             throw(ArgumentError("p = $p is not a probability vector."))
         end
-        new{T}(round(Int, n), p)
     end
-    Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(round(Int, n), p)
+    return Multinomial{T}(n, p)
 end
-Multinomial(n::Integer, p::Vector{T}) where {T<:Real} = Multinomial{T}(n, p)
+
 Multinomial(n::Integer, k::Integer) = Multinomial{Float64}(round(Int, n), fill(1.0 / k, k))
 
 # Parameters
