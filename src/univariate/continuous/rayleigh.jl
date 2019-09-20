@@ -29,7 +29,7 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Rayleigh(σ::T; arg_check = true) where {T <: Real}
-    check_arg && @check_args(Rayleigh, σ > zero(σ))
+    arg_check && @check_args(Rayleigh, σ > zero(σ))
     return Rayleigh{T}(σ)
 end
 

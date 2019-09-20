@@ -24,7 +24,7 @@ struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function SymTriangularDist(μ::T, σ::T; arg_check = false) where {T <: Real}
-    check_arg && @check_args(SymTriangularDist, σ > zero(σ))
+    arg_check && @check_args(SymTriangularDist, σ > zero(σ))
     return SymTriangularDist{T}(μ, σ)
 end
 

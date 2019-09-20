@@ -9,7 +9,7 @@ struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralBeta(α::T, β::T, λ::T; arg_check = true) where {T <: Real}
-    check_arg && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
+    arg_check && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
     return NoncentralBeta{T}(α, β, λ)
 end
 

@@ -25,7 +25,7 @@ end
 
 
 function Semicircle(r::T; arg_check = true) where {T <: Real}
-    check_arg && @check_args(Semicircle, r > 0)
+    arg_check && @check_args(Semicircle, r > 0)
     return Semicircle{T}(r)
 end
 

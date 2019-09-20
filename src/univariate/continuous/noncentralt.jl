@@ -8,7 +8,7 @@ struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralT(ν::T, λ::T; arg_check = true) where {T <: Real}
-    check_arg && @check_args(NoncentralT, ν > zero(ν))
+    arg_check && @check_args(NoncentralT, ν > zero(ν))
     return NoncentralT{T}(ν, λ)
 end
 

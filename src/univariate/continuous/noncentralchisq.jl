@@ -30,7 +30,7 @@ struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralChisq(ν::T, λ::T; arg_check = true) where {T <: Real}
-    check_arg && @check_args(NoncentralChisq, ν > zero(ν) && λ >= zero(λ))
+    arg_check && @check_args(NoncentralChisq, ν > zero(ν) && λ >= zero(λ))
     return NoncentralChisq{T}(ν, λ)
 end
 
