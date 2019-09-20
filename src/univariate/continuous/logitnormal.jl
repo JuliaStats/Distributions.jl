@@ -58,16 +58,15 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T) where {T <: Real}
-    @check_args(LogitNormal, σ > zero(σ))
+function LogitNormal(μ::T, σ::T; arg_check = true) where {T <: Real}
+    check_arg && @check_args(LogitNormal, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
-LogitNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogitNormal{T}(μ, σ)
 LogitNormal(μ::Real, σ::Real) = LogitNormal(promote(μ, σ)...)
 LogitNormal(μ::Integer, σ::Integer) = LogitNormal(float(μ), float(σ))
 LogitNormal(μ::T) where {T} = LogitNormal(μ, one(T))
-LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
+LogitNormal() = LogitNormal(0.0, 1.0, arg_check = false)
 
 # minimum and maximum not defined for logitnormal
 # but see https://github.com/JuliaStats/Distributions.jl/pull/457
@@ -79,7 +78,7 @@ LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
   {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
 convert(::Type{LogitNormal{T}}, d::LogitNormal{S}) where
-  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), NoArgCheck())
+  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), arg_check = false)
 
 #### Parameters
 

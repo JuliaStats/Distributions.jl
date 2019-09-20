@@ -26,21 +26,19 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::T) where {T <: Real}
-    @check_args(Exponential, θ > zero(θ))
+function Exponential(θ::T; arg_check = true) where {T <: Real}
+    arg_check && @check_args(Exponential, θ > zero(θ))
     return Exponential{T}(θ)
 end
 
-Exponential(θ::T, ::NoArgCheck) where {T <: Real} = Exponential{T}(θ)
-
 Exponential(θ::Integer) = Exponential(float(θ))
-Exponential() = Exponential(1.0, NoArgCheck())
+Exponential() = Exponential(1.0, arg_check = false)
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), NoArgCheck())
+convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), arg_check = false)
 
 #### Parameters
 
@@ -48,21 +46,19 @@ scale(d::Exponential) = d.θ
 rate(d::Exponential) = inv(d.θ)
 
 params(d::Exponential) = (d.θ,)
-@inline partype(d::Exponential{T}) where {T<:Real} = T
-
+partype(::Exponential{T}) where {T<:Real} = T
 
 #### Statistics
 
 mean(d::Exponential) = d.θ
 median(d::Exponential) = logtwo * d.θ
-mode(d::Exponential{T}) where {T<:Real} = zero(T)
+mode(::Exponential{T}) where {T<:Real} = zero(T)
 
 var(d::Exponential) = d.θ^2
-skewness(d::Exponential{T}) where {T} = T(2)
-kurtosis(d::Exponential{T}) where {T} = T(6)
+skewness(::Exponential{T}) where {T} = T(2)
+kurtosis(::Exponential{T}) where {T} = T(6)
 
 entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
-
 
 #### Evaluation
 

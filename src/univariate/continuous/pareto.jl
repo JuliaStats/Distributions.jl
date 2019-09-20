@@ -27,22 +27,21 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T) where {T <: Real}
-    @check_args(Pareto, α > zero(α) && θ > zero(θ))
+function Pareto(α::T, θ::T; arg_check = true) where {T <: Real}
+    check_arg && @check_args(Pareto, α > zero(α) && θ > zero(θ))
     return Pareto{T}(α, θ)
 end
 
-Pareto(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Pareto{T}(α, θ)
 Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
 Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
 Pareto(α::T) where {T <: Real} = Pareto(α, one(T))
-Pareto() = Pareto(1.0, 1.0, NoArgCheck())
+Pareto() = Pareto(1.0, 1.0, arg_check = false)
 
 @distr_support Pareto d.θ Inf
 
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), NoArgCheck())
+convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), arg_check = false)
 
 #### Parameters
 

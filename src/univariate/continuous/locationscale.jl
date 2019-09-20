@@ -25,12 +25,8 @@ struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: Continuous
     LocationScale{T, D}(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = new{T, D}(μ, σ, ρ)
 end
 
-function LocationScale(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution}
-    @check_args(LocationScale, σ > zero(σ))
-    return LocationScale{T,D}(μ,σ,ρ)
-end
-
-function LocationScale(μ::T,σ::T,ρ::D, ::NoArgCheck) where {T<:Real, D<:ContinuousUnivariateDistribution}
+function LocationScale(μ::T,σ::T,ρ::D; arg_check = true) where {T<:Real, D<:ContinuousUnivariateDistribution}
+    check_arg && @check_args(LocationScale, σ > zero(σ))
     return LocationScale{T,D}(μ,σ,ρ)
 end
 
@@ -46,14 +42,14 @@ maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
 #### Conversions
 
 convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale(T(μ),T(σ),ρ)
-convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ, NoArgCheck())
+convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ, arg_check = false)
 
 #### Parameters
 
 location(d::LocationScale) = d.μ
 scale(d::LocationScale) = d.σ
 params(d::LocationScale) = (d.μ,d.σ,d.ρ)
-@inline partype(d::LocationScale{T}) where {T<:Real} = T
+partype(::LocationScale{T}) where {T} = T
 
 #### Statistics
 

@@ -28,19 +28,15 @@ struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     λ::T
 end
 
-function InverseGaussian(μ::T, λ::T) where T
-    @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
-    return InverseGaussian{T}(μ, λ)
-end
-
-function InverseGaussian(μ::T, λ::T, ::NoArgCheck) where {T<:Real}
+function InverseGaussian(μ::T, λ::T; arg_check = true) where {T}
+    arg_check && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
 
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
 InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
 InverseGaussian(μ::T) where {T <: Real} = InverseGaussian(μ, one(T))
-InverseGaussian() = InverseGaussian(1.0, 1.0, NoArgCheck())
+InverseGaussian() = InverseGaussian(1.0, 1.0, arg_check = false)
 
 @distr_support InverseGaussian 0.0 Inf
 
@@ -50,15 +46,14 @@ function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <
     InverseGaussian(T(μ), T(λ))
 end
 function convert(::Type{InverseGaussian{T}}, d::InverseGaussian{S}) where {T <: Real, S <: Real}
-    InverseGaussian(T(d.μ), T(d.λ), NoArgCheck())
+    InverseGaussian(T(d.μ), T(d.λ), arg_check = false)
 end
 
 #### Parameters
 
 shape(d::InverseGaussian) = d.λ
 params(d::InverseGaussian) = (d.μ, d.λ)
-@inline partype(d::InverseGaussian{T}) where {T<:Real} = T
-
+partype(::InverseGaussian{T}) where {T} = T
 
 #### Statistics
 

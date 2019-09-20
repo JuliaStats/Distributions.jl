@@ -28,19 +28,15 @@ struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Laplace(μ::T, θ::T) where {T <: Real}
-    @check_args(Laplace, θ > zero(θ))
-    return Laplace{T}(μ, θ)
-end
-
-function Laplace(μ::T, θ::T, ::NoArgCheck) where {T <: Real}
+function Laplace(μ::T, θ::T; arg_check = false) where {T <: Real}
+    check_arg && @check_args(Laplace, θ > zero(θ))
     return Laplace{T}(μ, θ)
 end
 
 Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
 Laplace(μ::Integer, θ::Integer) = Laplace(float(μ), float(θ))
 Laplace(μ::T) where {T <: Real} = Laplace(μ, one(T))
-Laplace() = Laplace(0.0, 1.0, NoArgCheck())
+Laplace() = Laplace(0.0, 1.0, arg_check = false)
 
 const Biexponential = Laplace
 
@@ -51,7 +47,7 @@ function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))
 end
 function convert(::Type{Laplace{T}}, d::Laplace{S}) where {T <: Real, S <: Real}
-    Laplace(T(d.μ), T(d.θ), NoArgCheck())
+    Laplace(T(d.μ), T(d.θ), arg_check = false)
 end
 
 #### Parameters

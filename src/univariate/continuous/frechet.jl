@@ -29,16 +29,15 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-function Frechet(α::T, θ::T) where {T <: Real}
-    @check_args(Frechet, α > zero(α) && θ > zero(θ))
+function Frechet(α::T, θ::T; arg_check = true) where {T <: Real}
+    arg_check && @check_args(Frechet, α > zero(α) && θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 
-Frechet(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Frechet{T}(α, θ)
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
 Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
 Frechet(α::T) where {T <: Real} = Frechet(α, one(T))
-Frechet() = Frechet(1.0, 1.0, NoArgCheck())
+Frechet() = Frechet(1.0, 1.0, arg_check = false)
 
 @distr_support Frechet 0.0 Inf
 
@@ -47,7 +46,7 @@ function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
 function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ), NoArgCheck())
+    Frechet(T(d.α), T(d.θ), arg_check = false)
 end
 
 #### Parameters
@@ -55,20 +54,21 @@ end
 shape(d::Frechet) = d.α
 scale(d::Frechet) = d.θ
 params(d::Frechet) = (d.α, d.θ)
-@inline partype(d::Frechet{T}) where {T} = T
+partype(::Frechet{T}) where {T} = T
 
 
 #### Statistics
 
-function mean(d::Frechet{T}) where T<:Real
-    (α = d.α; α > 1 ? d.θ * gamma(1 - 1 / α) : T(Inf))
+function mean(d::Frechet{T}) where {T}
+    α = d.α
+    return α > 1 ? d.θ * gamma(1 - 1 / α) : T(Inf)
 end
 
 median(d::Frechet) = d.θ * logtwo^(-1 / d.α)
 
 mode(d::Frechet) = (iα = -1/d.α; d.θ * (1 - iα) ^ iα)
 
-function var(d::Frechet{T}) where T<:Real
+function var(d::Frechet{T}) where {T<:Real}
     if d.α > 2
         iα = 1 / d.α
         return d.θ^2 * (gamma(1 - 2 * iα) - gamma(1 - iα)^2)

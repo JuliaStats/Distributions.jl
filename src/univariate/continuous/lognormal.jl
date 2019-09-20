@@ -32,27 +32,26 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogNormal(μ::T, σ::T) where {T <: Real}
-    @check_args(LogNormal, σ > zero(σ))
+function LogNormal(μ::T, σ::T; arg_check = true) where {T <: Real}
+    check_arg && @check_args(LogNormal, σ > zero(σ))
     return LogNormal{T}(μ, σ)
 end
 
-LogNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogNormal{T}(μ, σ)
 LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
 LogNormal(μ::Integer, σ::Integer) = LogNormal(float(μ), float(σ))
 LogNormal(μ::T) where {T <: Real} = LogNormal(μ, one(T))
-LogNormal() = LogNormal(0.0, 1.0, NoArgCheck())
+LogNormal() = LogNormal(0.0, 1.0, arg_check = false)
 
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ), NoArgCheck())
+convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ), arg_check = false)
 
 #### Parameters
 
 params(d::LogNormal) = (d.μ, d.σ)
-@inline partype(d::LogNormal{T}) where {T<:Real} = T
+partype(::LogNormal{T}) where {T} = T
 
 #### Statistics
 
