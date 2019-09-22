@@ -39,9 +39,21 @@ entropy(d::Product) = sum(entropy, d.v)
 
 Creates a multivariate product distribution `P` from a vector of univariate distributions.
 Fallback is the `Product constructor`, but specialized methods can be defined
-for distributions with a special multivariate product. The product of univariate
-Gaussian distributions is a multivariate Gaussian with diagonal covariance matrix.
+for distributions with a special multivariate product.
 """
 function product_distribution(dists::AbstractVector{<:UnivariateDistribution})
     return Product(dists)
+end
+
+"""
+    product_distribution(dists::AbstractVector{<:Normal})
+
+Computes the multivariate Normal distribution obtained by stacking the univariate
+normal distributions. The result is a multivariate Gaussian with a diagonal
+covariance matrix.
+"""
+function product_distribution(dists::AbstractVector{<:Normal})
+    µ = mean.(dists)
+    σ = std.(dists)
+    return MvNormal(µ, σ)
 end
