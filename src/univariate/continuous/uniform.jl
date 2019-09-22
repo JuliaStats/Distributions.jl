@@ -29,29 +29,25 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T) where {T <: Real}
-    @check_args(Uniform, a < b)
-    return Uniform{T}(a, b)
-end
-
-function Uniform(a::T, b::T, ::NoArgCheck) where {T <: Real}
+function Uniform(a::T, b::T; arg_check = true) where {T <: Real}
+    arg_check && @check_args(Uniform, a < b)
     return Uniform{T}(a, b)
 end
 
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
 Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
-Uniform() = Uniform(0.0, 1.0, NoArgCheck())
+Uniform() = Uniform(0.0, 1.0, arg_check = false)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), NoArgCheck())
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), arg_check = false)
 
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
-@inline partype(d::Uniform{T}) where {T<:Real} = T
+partype(::Uniform{T}) where {T<:Real} = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a

@@ -7,23 +7,22 @@ struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
     Triweight{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-function Triweight(μ::T, σ::T) where {T <: Real}
-    @check_args(Triweight, σ > zero(σ))
+function Triweight(μ::T, σ::T; arg_check = true) where {T <: Real}
+    arg_check && @check_args(Triweight, σ > zero(σ))
     return Triweight{T}(μ, σ)
 end
 
-Triweight(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Triweight{T}(μ, σ)
 Triweight(μ::Real, σ::Real) = Triweight(promote(μ, σ)...)
 Triweight(μ::Integer, σ::Integer) = Triweight(float(μ), float(σ))
 Triweight(μ::T) where {T <: Real} = Triweight(μ, one(T))
-Triweight() = Triweight(0.0, 1.0, NoArgCheck())
+Triweight() = Triweight(0.0, 1.0, arg_check = false)
 
 @distr_support Triweight d.μ - d.σ d.μ + d.σ
 
 ## Conversions
 
 convert(::Type{Triweight{T}}, μ::Real, σ::Real) where {T<:Real} = Triweight(T(μ), T(σ))
-convert(::Type{Triweight{T}}, d::Triweight{S}) where {T<:Real, S<:Real} = Triweight(T(d.μ), T(d.σ), NoArgCheck())
+convert(::Type{Triweight{T}}, d::Triweight{S}) where {T<:Real, S<:Real} = Triweight(T(d.μ), T(d.σ), arg_check = false)
 
 ## Parameters
 

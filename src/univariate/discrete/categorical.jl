@@ -26,23 +26,17 @@ External links:
 """
 const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
-
-Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, NoArgCheck())
-
-function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
-    @check_args(Categorical, isprobvec(p))
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+function Categorical{P,Ps}(p::Ps; arg_check = true) where {P<:Real, Ps<:AbstractVector{P}}
+    arg_check && @check_args(Categorical, isprobvec(p))
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
 end
 
-Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p)
+Categorical(p::Ps; arg_check = true) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p, arg_check = arg_check)
 
-function Categorical(k::Integer)
-    @check_args(Categorical, k >= 1)
-    Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), NoArgCheck())
+function Categorical(k::Integer; arg_check = true)
+    arg_check && @check_args(Categorical, k >= 1)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), arg_check = arg_check)
 end
 
 ### Conversions
@@ -54,7 +48,7 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 
 ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
-@inline partype(d::Categorical{T}) where {T<:Real} = T
+partype(::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
 
