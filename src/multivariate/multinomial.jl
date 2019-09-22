@@ -23,7 +23,7 @@ struct Multinomial{T<:Real} <: DiscreteMultivariateDistribution
     n::Int
     p::Vector{T}
 
-    Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(round(Int, n), p)
+    Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(Int(n), p)
 end
 
 function Multinomial(n::Integer, p::Vector{T}; arg_check = true) where {T<:Real}
