@@ -24,12 +24,11 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     nf::Int     # number of failures in population
     n::Int      # sample size
 
-    function Hypergeometric(ns::Real, nf::Real, n::Real)
-        @check_args(Hypergeometric, ns >= zero(ns) && nf >= zero(nf))
-        @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
-        new(ns, nf, n)
-    end
-    function Hypergeometric(ns::Real, nf::Real, n::Real, ::NoArgCheck)
+    function Hypergeometric(ns::Real, nf::Real, n::Real; arg_check = true)
+        if arg_check
+            @check_args(Hypergeometric, ns >= zero(ns) && nf >= zero(nf))
+            @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
+        end
         new(ns, nf, n)
     end
 end

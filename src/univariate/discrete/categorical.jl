@@ -28,7 +28,7 @@ const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 function Categorical{P,Ps}(p::Ps; arg_check = true) where {P<:Real, Ps<:AbstractVector{P}}
     arg_check && @check_args(Categorical, isprobvec(p))
-    return Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, arg_check = arg_check)
 end
 
 Categorical(p::Ps; arg_check = true) where {P<:Real, Ps<:AbstractVector{P}} =
@@ -159,11 +159,11 @@ function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), arg_check = false)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), arg_check = false)
 end
 
 fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)

@@ -10,14 +10,14 @@ rng = MersenneTwister(123)
 
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 
-@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], Distributions.NoArgCheck()))
-@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], Distributions.NoArgCheck())
+@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], arg_check = false))
+@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], arg_check = false)
 
 # Invalid probability
 @test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
 
 # Invalid probability, but no arg check
-DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
+DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], arg_check = false)
 
 test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
@@ -110,6 +110,6 @@ d3 = fit(DiscreteNonParametric, xs)
 # Numerical stability; see issue #872 and PR #926
 p = [1 - eps(Float32), eps(Float32)]
 d = Categorical(p)
-@test ([rand(d) for _ = 1:100_000]; true)   
+@test ([rand(d) for _ = 1:100_000]; true)
 
 end
