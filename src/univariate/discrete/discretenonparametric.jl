@@ -23,11 +23,10 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
 
     function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; arg_check = true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
-        if arg_check
-            @check_args(DiscreteNonParametric, length(vs) == length(ps))
-            @check_args(DiscreteNonParametric, isprobvec(ps))
-            @check_args(DiscreteNonParametric, allunique(vs))
-        end
+        arg_check || return new{T,P,Ts,Ps}(vs, ps)
+        @check_args(DiscreteNonParametric, length(vs) == length(ps))
+        @check_args(DiscreteNonParametric, isprobvec(ps))
+        @check_args(DiscreteNonParametric, allunique(vs))
         sort_order = sortperm(vs)
         new{T,P,Ts,Ps}(vs[sort_order], ps[sort_order])
     end
