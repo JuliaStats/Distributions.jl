@@ -7,7 +7,7 @@ An N dimensional `MultivariateDistribution` constructed from a vector of N indep
 `UnivariateDistribution`s.
 
 ```julia
-Product(Normal.(randn(10), 1)) # A 10-dimensional Product from 10 independent Normals.
+Product(Uniform.(rand(10), 1)) # A 10-dimensional Product from 10 independent `Uniform` distributions.
 ```
 """
 struct Product{
