@@ -32,7 +32,7 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function Beta(α::T, β::T; arg_check = true) where {T<:Real}
+function Beta(α::T, β::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(Beta, α > zero(α) && β > zero(β))
     return Beta{T}(α, β)
 end
@@ -62,7 +62,7 @@ params(d::Beta) = (d.α, d.β)
 
 mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
-function mode(d::Beta; arg_check = true)
+function mode(d::Beta; arg_check=true)
     (α, β) = params(d)
     if arg_check
         (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")

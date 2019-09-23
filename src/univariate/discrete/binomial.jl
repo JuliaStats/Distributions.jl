@@ -29,7 +29,7 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     Binomial{T}(n, p) where {T <: Real} = new{T}(n, p)
 end
 
-function Binomial(n::Integer, p::T; arg_check = true) where {T <: Real}
+function Binomial(n::Integer, p::T; arg_check=true) where {T <: Real}
     if arg_check
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))

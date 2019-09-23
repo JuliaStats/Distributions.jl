@@ -27,7 +27,7 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T; arg_check = true) where {T <: Real}
+function Pareto(α::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Pareto, α > zero(α) && θ > zero(θ))
     return Pareto{T}(α, θ)
 end

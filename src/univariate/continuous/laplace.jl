@@ -28,7 +28,7 @@ struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Laplace(μ::T, θ::T; arg_check = true) where {T <: Real}
+function Laplace(μ::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Laplace, θ > zero(θ))
     return Laplace{T}(μ, θ)
 end

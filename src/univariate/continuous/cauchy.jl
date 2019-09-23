@@ -28,7 +28,7 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-function Cauchy(μ::T, σ::T; arg_check = true) where {T<:Real}
+function Cauchy(μ::T, σ::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(Cauchy, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end

@@ -7,7 +7,7 @@ struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
     Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function Biweight(μ::T, σ::T; arg_check = true) where {T<:Real}
+function Biweight(μ::T, σ::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(Biweight, σ > zero(σ))
     return Biweight{T}(μ, σ)
 end

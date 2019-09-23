@@ -30,7 +30,7 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     Gamma{T}(α, θ) where {T} = new{T}(α, θ)
 end
 
-function Gamma(α::T, θ::T; arg_check = true) where {T <: Real}
+function Gamma(α::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Gamma, α > zero(α) && θ > zero(θ))
     return Gamma{T}(α, θ)
 end

@@ -26,7 +26,7 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chi(ν::T; arg_check = true) where {T<:Real}
+function Chi(ν::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(Chi, ν > zero(ν))
     return Chi{T}(ν)
 end

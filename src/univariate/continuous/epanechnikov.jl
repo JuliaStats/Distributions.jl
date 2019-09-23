@@ -7,7 +7,7 @@ struct Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
     Epanechnikov{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-function Epanechnikov(μ::T, σ::T; arg_check = true) where {T<:Real}
+function Epanechnikov(μ::T, σ::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(Epanechnikov, σ > zero(σ))
     return Epanechnikov{T}(μ, σ)
 end

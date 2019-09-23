@@ -28,7 +28,7 @@ struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     Gumbel{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Gumbel(μ::T, θ::T; arg_check = true) where {T <: Real}
+function Gumbel(μ::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Gumbel, θ > zero(θ))
     return Gumbel{T}(μ, θ)
 end

@@ -20,12 +20,12 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Erlang(α::Real, θ::T; arg_check = true) where {T <: Real}
+function Erlang(α::Real, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Erlang, isinteger(α) && α >= zero(α))
     return Erlang{T}(α, θ)
 end
 
-function Erlang(α::Integer, θ::T; arg_check = true) where {T <: Real}
+function Erlang(α::Integer, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Erlang, α >= zero(α))
     return Erlang{T}(α, θ)
 end

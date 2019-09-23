@@ -26,7 +26,7 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
 end
 
-function Poisson(λ::T; arg_check = true) where {T <: Real}
+function Poisson(λ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Poisson, λ >= zero(λ))
     return Poisson{T}(λ)
 end

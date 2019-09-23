@@ -30,7 +30,7 @@ struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 
-function Logistic(μ::T, θ::T; arg_check = true) where {T <: Real}
+function Logistic(μ::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Logistic, θ > zero(θ))
     return Logistic{T}(μ, θ)
 end

@@ -13,7 +13,7 @@ struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
     Cosine{T}(μ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-function Cosine(μ::T, σ::T; arg_check = true) where {T <: Real}
+function Cosine(μ::T, σ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Cosine, σ > zero(σ))
     return Cosine{T}(μ, σ)
 end

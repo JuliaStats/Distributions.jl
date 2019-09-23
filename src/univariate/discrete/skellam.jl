@@ -32,7 +32,7 @@ struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
 
 end
 
-function Skellam(μ1::T, μ2::T; arg_check = true) where {T <: Real}
+function Skellam(μ1::T, μ2::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
     return Skellam{T}(μ1, μ2)
 end

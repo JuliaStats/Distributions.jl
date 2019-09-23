@@ -29,7 +29,7 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; arg_check = true) where {T <: Real}
+function Uniform(a::T, b::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Uniform, a < b)
     return Uniform{T}(a, b)
 end

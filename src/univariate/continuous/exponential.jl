@@ -26,7 +26,7 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::T; arg_check = true) where {T <: Real}
+function Exponential(θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Exponential, θ > zero(θ))
     return Exponential{T}(θ)
 end

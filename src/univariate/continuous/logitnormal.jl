@@ -58,7 +58,7 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T; arg_check = true) where {T <: Real}
+function LogitNormal(μ::T, σ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(LogitNormal, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end

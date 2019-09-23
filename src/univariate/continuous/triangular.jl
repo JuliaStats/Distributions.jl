@@ -34,7 +34,7 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     TriangularDist{T}(a::T, b::T, c::T) where {T <: Real} = new{T}(a, b, c)
 end
 
-function TriangularDist(a::T, b::T, c::T; arg_check = true) where {T <: Real}
+function TriangularDist(a::T, b::T, c::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(TriangularDist, a <= c <= b)
     return TriangularDist{T}(a, b, c)
 end

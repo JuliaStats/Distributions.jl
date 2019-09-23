@@ -32,7 +32,7 @@ struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     end
 end
 
-function Weibull(α::T, θ::T; arg_check = false) where {T <: Real}
+function Weibull(α::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Weibull, α > zero(α) && θ > zero(θ))
     return Weibull{T}(α, θ)
 end

@@ -25,7 +25,7 @@ struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: Continuous
     LocationScale{T, D}(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = new{T, D}(μ, σ, ρ)
 end
 
-function LocationScale(μ::T,σ::T,ρ::D; arg_check = true) where {T<:Real, D<:ContinuousUnivariateDistribution}
+function LocationScale(μ::T,σ::T,ρ::D; arg_check=true) where {T<:Real, D<:ContinuousUnivariateDistribution}
     arg_check && @check_args(LocationScale, σ > zero(σ))
     return LocationScale{T,D}(μ,σ,ρ)
 end

@@ -33,7 +33,7 @@ struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)
 end
 
-function StudentizedRange(ν::T, k::T; arg_check = true) where {T <: Real}
+function StudentizedRange(ν::T, k::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(StudentizedRange, ν > zero(ν) && k > one(k))
     return StudentizedRange{T}(ν, k)
 end

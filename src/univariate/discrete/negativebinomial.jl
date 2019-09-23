@@ -37,7 +37,7 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function NegativeBinomial(r::T, p::T; arg_check = true) where {T <: Real}
+function NegativeBinomial(r::T, p::T; arg_check=true) where {T <: Real}
     if arg_check
         @check_args(NegativeBinomial, r > zero(r))
         @check_args(NegativeBinomial, zero(p) < p <= one(p))

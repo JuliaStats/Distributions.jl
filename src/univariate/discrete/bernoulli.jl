@@ -30,7 +30,7 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
 end
 
-function Bernoulli(p::T; arg_check = true) where {T <: Real}
+function Bernoulli(p::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Bernoulli, zero(p) <= p <= one(p))
     return Bernoulli{T}(p)
 end

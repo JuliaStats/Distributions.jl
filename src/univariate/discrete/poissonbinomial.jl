@@ -35,7 +35,7 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function PoissonBinomial(p::AbstractArray{T}; arg_check = true) where {T <: Real}
+function PoissonBinomial(p::AbstractArray{T}; arg_check=true) where {T <: Real}
     if arg_check
         for i in eachindex(p)
             @check_args(PoissonBinomial, 0 <= p[i] <= 1)

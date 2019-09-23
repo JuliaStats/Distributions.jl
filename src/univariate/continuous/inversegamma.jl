@@ -31,7 +31,7 @@ struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), arg_check = false), θ)
 end
 
-function InverseGamma(α::T, θ::T; arg_check = true) where {T <: Real}
+function InverseGamma(α::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
     return InverseGamma{T}(α, θ)
 end

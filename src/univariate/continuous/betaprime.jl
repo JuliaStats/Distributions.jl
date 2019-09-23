@@ -32,7 +32,7 @@ struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function BetaPrime(α::T, β::T; arg_check = true) where {T<:Real}
+function BetaPrime(α::T, β::T; arg_check=true) where {T<:Real}
     arg_check && @check_args(BetaPrime, α > zero(α) && β > zero(β))
     return BetaPrime{T}(α, β)
 end

@@ -28,7 +28,7 @@ struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     λ::T
 end
 
-function InverseGaussian(μ::T, λ::T; arg_check = true) where {T}
+function InverseGaussian(μ::T, λ::T; arg_check=true) where {T}
     arg_check && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end

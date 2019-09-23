@@ -25,7 +25,7 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chisq(ν::T; arg_check = true) where {T <: Real}
+function Chisq(ν::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Chisq, ν > zero(ν))
     return Chisq{T}(ν)
 end

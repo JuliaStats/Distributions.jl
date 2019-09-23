@@ -29,7 +29,7 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-function Frechet(α::T, θ::T; arg_check = true) where {T <: Real}
+function Frechet(α::T, θ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Frechet, α > zero(α) && θ > zero(θ))
     return Frechet{T}(α, θ)
 end

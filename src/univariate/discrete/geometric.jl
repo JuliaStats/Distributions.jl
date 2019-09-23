@@ -29,7 +29,7 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function Geometric(p::T; arg_check = true) where {T <: Real}
+function Geometric(p::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Geometric, zero(p) < p < one(p))
     return Geometric{T}(p)
 end

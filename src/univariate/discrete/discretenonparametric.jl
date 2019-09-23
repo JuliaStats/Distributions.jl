@@ -21,7 +21,7 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     support::Ts
     p::Ps
 
-    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; arg_check = true) where {
+    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; arg_check=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         arg_check || return new{T,P,Ts,Ps}(vs, ps)
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
@@ -32,7 +32,7 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     end
 end
 
-DiscreteNonParametric(vs::Ts, ps::Ps; arg_check = true) where {
+DiscreteNonParametric(vs::Ts, ps::Ps; arg_check=true) where {
         T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, arg_check = arg_check)
 

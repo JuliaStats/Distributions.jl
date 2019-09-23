@@ -26,7 +26,7 @@ struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     BetaBinomial{T}(n::Integer, α::T, β::T) where {T <: Real} = new{T}(n, α, β)
 end
 
-function BetaBinomial(n::Integer, α::T, β::T; arg_check = false) where {T <: Real}
+function BetaBinomial(n::Integer, α::T, β::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
     return BetaBinomial{T}(n, α, β)
 end

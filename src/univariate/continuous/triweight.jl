@@ -7,7 +7,7 @@ struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
     Triweight{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-function Triweight(μ::T, σ::T; arg_check = true) where {T <: Real}
+function Triweight(μ::T, σ::T; arg_check=true) where {T <: Real}
     arg_check && @check_args(Triweight, σ > zero(σ))
     return Triweight{T}(μ, σ)
 end
