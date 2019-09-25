@@ -8,8 +8,8 @@ struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralBeta{T}(α::T, β::T, λ::T) where {T} = new{T}(α, β, λ)
 end
 
-function NoncentralBeta(α::T, β::T, λ::T; check_arg=true) where {T <: Real}
-    check_arg && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
+function NoncentralBeta(α::T, β::T, λ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
     return NoncentralBeta{T}(α, β, λ)
 end
 

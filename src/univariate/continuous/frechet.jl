@@ -29,15 +29,15 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-function Frechet(α::T, θ::T; check_arg=true) where {T <: Real}
-    check_arg && @check_args(Frechet, α > zero(α) && θ > zero(θ))
+function Frechet(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Frechet, α > zero(α) && θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 
 Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
 Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
 Frechet(α::T) where {T <: Real} = Frechet(α, one(T))
-Frechet() = Frechet(1.0, 1.0, check_arg = false)
+Frechet() = Frechet(1.0, 1.0, check_args=false)
 
 @distr_support Frechet 0.0 Inf
 
@@ -46,7 +46,7 @@ function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
 function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ), check_arg = false)
+    Frechet(T(d.α), T(d.θ), check_args=false)
 end
 
 #### Parameters

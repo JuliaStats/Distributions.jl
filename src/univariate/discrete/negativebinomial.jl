@@ -37,8 +37,8 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function NegativeBinomial(r::T, p::T; check_arg=true) where {T <: Real}
-    if check_arg
+function NegativeBinomial(r::T, p::T; check_args=true) where {T <: Real}
+    if check_args
         @check_args(NegativeBinomial, r > zero(r))
         @check_args(NegativeBinomial, zero(p) < p <= one(p))
     end
@@ -48,7 +48,7 @@ end
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
 NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-NegativeBinomial() = NegativeBinomial(1.0, 0.5, check_arg = false)
+NegativeBinomial() = NegativeBinomial(1.0, 0.5, check_args=false)
 
 @distr_support NegativeBinomial 0 Inf
 
@@ -58,7 +58,7 @@ function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
     return NegativeBinomial(T(r), T(p))
 end
 function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    return NegativeBinomial(T(d.r), T(d.p), check_arg = false)
+    return NegativeBinomial(T(d.r), T(d.p), check_args=false)
 end
 
 #### Parameters

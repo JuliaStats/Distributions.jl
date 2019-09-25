@@ -26,8 +26,8 @@ struct Multinomial{T<:Real} <: DiscreteMultivariateDistribution
     Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(Int(n), p)
 end
 
-function Multinomial(n::Integer, p::Vector{T}; check_arg=true) where {T<:Real}
-    if check_arg
+function Multinomial(n::Integer, p::Vector{T}; check_args=true) where {T<:Real}
+    if check_args
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
         end

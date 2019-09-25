@@ -7,8 +7,8 @@ struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)
 end
 
-function NoncentralT(ν::T, λ::T; check_arg=true) where {T <: Real}
-    check_arg && @check_args(NoncentralT, ν > zero(ν))
+function NoncentralT(ν::T, λ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(NoncentralT, ν > zero(ν))
     return NoncentralT{T}(ν, λ)
 end
 
@@ -19,7 +19,7 @@ NoncentralT(ν::Integer, λ::Integer) = NoncentralT(float(ν), float(λ))
 
 ### Conversions
 convert(::Type{NoncentralT{T}}, ν::S, λ::S) where {T <: Real, S <: Real} = NoncentralT(T(ν), T(λ))
-convert(::Type{NoncentralT{T}}, d::NoncentralT{S}) where {T <: Real, S <: Real} = NoncentralT(T(d.ν), T(d.λ), check_arg = false)
+convert(::Type{NoncentralT{T}}, d::NoncentralT{S}) where {T <: Real, S <: Real} = NoncentralT(T(d.ν), T(d.λ), check_args=false)
 
 ### Parameters
 

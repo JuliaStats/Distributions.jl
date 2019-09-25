@@ -30,21 +30,21 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     Gamma{T}(α, θ) where {T} = new{T}(α, θ)
 end
 
-function Gamma(α::T, θ::T; check_arg=true) where {T <: Real}
-    check_arg && @check_args(Gamma, α > zero(α) && θ > zero(θ))
+function Gamma(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
     return Gamma{T}(α, θ)
 end
 
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
 Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
 Gamma(α::T) where {T <: Real} = Gamma(α, one(T))
-Gamma() = Gamma(1.0, 1.0, check_arg = false)
+Gamma() = Gamma(1.0, 1.0, check_args=false)
 
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
-convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), check_arg = false)
+convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), check_args=false)
 
 #### Parameters
 

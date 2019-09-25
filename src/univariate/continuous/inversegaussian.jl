@@ -28,15 +28,15 @@ struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     λ::T
 end
 
-function InverseGaussian(μ::T, λ::T; check_arg=true) where {T}
-    check_arg && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
+function InverseGaussian(μ::T, λ::T; check_args=true) where {T}
+    check_args && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
 
 InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
 InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
 InverseGaussian(μ::T) where {T <: Real} = InverseGaussian(μ, one(T))
-InverseGaussian() = InverseGaussian(1.0, 1.0, check_arg = false)
+InverseGaussian() = InverseGaussian(1.0, 1.0, check_args=false)
 
 @distr_support InverseGaussian 0.0 Inf
 
@@ -46,7 +46,7 @@ function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <
     InverseGaussian(T(μ), T(λ))
 end
 function convert(::Type{InverseGaussian{T}}, d::InverseGaussian{S}) where {T <: Real, S <: Real}
-    InverseGaussian(T(d.μ), T(d.λ), check_arg = false)
+    InverseGaussian(T(d.μ), T(d.λ), check_args=false)
 end
 
 #### Parameters
