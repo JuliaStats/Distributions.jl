@@ -28,15 +28,15 @@ const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
     check_args && @check_args(Categorical, isprobvec(p))
-    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_args = check_arg)
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_args=check_args)
 end
 
 Categorical(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, check_args = check_arg)
+    Categorical{P,Ps}(p, check_args=check_args)
 
 function Categorical(k::Integer; check_args=true)
     check_args && @check_args(Categorical, k >= 1)
-    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args = check_arg)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
 
 ### Conversions
