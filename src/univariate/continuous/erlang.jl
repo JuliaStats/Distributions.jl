@@ -20,13 +20,13 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Erlang(α::Real, θ::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(Erlang, isinteger(α) && α >= zero(α))
+function Erlang(α::Real, θ::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(Erlang, isinteger(α) && α >= zero(α))
     return Erlang{T}(α, θ)
 end
 
-function Erlang(α::Integer, θ::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(Erlang, α >= zero(α))
+function Erlang(α::Integer, θ::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(Erlang, α >= zero(α))
     return Erlang{T}(α, θ)
 end
 
@@ -36,16 +36,16 @@ function Erlang(α::Integer, θ::Integer)
 end
 
 Erlang(α::Integer) = Erlang(α, 1.0)
-Erlang() = Erlang(1, 1.0, arg_check = false)
+Erlang() = Erlang(1, 1.0, check_arg = false)
 
 @distr_support Erlang 0.0 Inf
 
 #### Conversions
 function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
-    Erlang(α, T(θ), arg_check = false)
+    Erlang(α, T(θ), check_arg = false)
 end
 function convert(::Type{Erlang{T}}, d::Erlang{S}) where {T <: Real, S <: Real}
-    Erlang(d.α, T(d.θ), arg_check = false)
+    Erlang(d.α, T(d.θ), check_arg = false)
 end
 
 #### Parameters

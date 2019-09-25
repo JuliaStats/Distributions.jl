@@ -29,8 +29,8 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     Binomial{T}(n, p) where {T <: Real} = new{T}(n, p)
 end
 
-function Binomial(n::Integer, p::T; arg_check=true) where {T <: Real}
-    if arg_check
+function Binomial(n::Integer, p::T; check_arg=true) where {T <: Real}
+    if check_arg
         @check_args(Binomial, n >= zero(n))
         @check_args(Binomial, zero(p) <= p <= one(p))
     end
@@ -39,7 +39,7 @@ end
 
 Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
 Binomial(n::Integer) = Binomial(n, 0.5)
-Binomial() = Binomial(1, 0.5, arg_check = false)
+Binomial() = Binomial(1, 0.5, check_arg = false)
 
 @distr_support Binomial 0 d.n
 
@@ -49,7 +49,7 @@ function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     return Binomial(n, T(p))
 end
 function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
-    return Binomial(d.n, T(d.p), arg_check = false)
+    return Binomial(d.n, T(d.p), check_arg = false)
 end
 
 

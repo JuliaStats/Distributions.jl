@@ -34,8 +34,8 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     TriangularDist{T}(a::T, b::T, c::T) where {T <: Real} = new{T}(a, b, c)
 end
 
-function TriangularDist(a::T, b::T, c::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(TriangularDist, a <= c <= b)
+function TriangularDist(a::T, b::T, c::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(TriangularDist, a <= c <= b)
     return TriangularDist{T}(a, b, c)
 end
 
@@ -50,7 +50,7 @@ TriangularDist(a::Integer, b::Integer) = TriangularDist(float(a), float(b))
 
 #### Conversions
 convert(::Type{TriangularDist{T}}, a::Real, b::Real, c::Real) where {T<:Real} = TriangularDist(T(a), T(b), T(c))
-convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c), arg_check = false)
+convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c), check_arg = false)
 
 #### Parameters
 

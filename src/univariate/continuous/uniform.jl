@@ -29,20 +29,20 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(Uniform, a < b)
+function Uniform(a::T, b::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(Uniform, a < b)
     return Uniform{T}(a, b)
 end
 
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
 Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
-Uniform() = Uniform(0.0, 1.0, arg_check = false)
+Uniform() = Uniform(0.0, 1.0, check_arg = false)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), arg_check = false)
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_arg = false)
 
 #### Parameters
 

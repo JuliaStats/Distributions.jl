@@ -26,19 +26,19 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(Exponential, θ > zero(θ))
+function Exponential(θ::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(Exponential, θ > zero(θ))
     return Exponential{T}(θ)
 end
 
 Exponential(θ::Integer) = Exponential(float(θ))
-Exponential() = Exponential(1.0, arg_check = false)
+Exponential() = Exponential(1.0, check_arg = false)
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), arg_check = false)
+convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), check_arg = false)
 
 #### Parameters
 

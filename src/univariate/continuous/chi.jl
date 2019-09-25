@@ -26,8 +26,8 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chi(ν::T; arg_check=true) where {T<:Real}
-    arg_check && @check_args(Chi, ν > zero(ν))
+function Chi(ν::T; check_arg=true) where {T<:Real}
+    check_arg && @check_args(Chi, ν > zero(ν))
     return Chi{T}(ν)
 end
 
@@ -37,7 +37,7 @@ Chi(ν::Integer) = Chi(float(ν))
 
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), arg_check = false)
+convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), check_arg = false)
 
 #### Parameters
 

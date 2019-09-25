@@ -26,17 +26,17 @@ External links:
 """
 const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-function Categorical{P,Ps}(p::Ps; arg_check=true) where {P<:Real, Ps<:AbstractVector{P}}
-    arg_check && @check_args(Categorical, isprobvec(p))
-    return Categorical{P,Ps}(Base.OneTo(length(p)), p, arg_check = arg_check)
+function Categorical{P,Ps}(p::Ps; check_arg=true) where {P<:Real, Ps<:AbstractVector{P}}
+    check_arg && @check_args(Categorical, isprobvec(p))
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_arg = check_arg)
 end
 
-Categorical(p::Ps; arg_check=true) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, arg_check = arg_check)
+Categorical(p::Ps; check_arg=true) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p, check_arg = check_arg)
 
-function Categorical(k::Integer; arg_check=true)
-    arg_check && @check_args(Categorical, k >= 1)
-    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), arg_check = arg_check)
+function Categorical(k::Integer; check_arg=true)
+    check_arg && @check_args(Categorical, k >= 1)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_arg = check_arg)
 end
 
 ### Conversions
@@ -159,11 +159,11 @@ function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), arg_check = false)
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), check_arg = false)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), arg_check = false)
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), check_arg = false)
 end
 
 fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)

@@ -30,19 +30,19 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
 end
 
-function Bernoulli(p::T; arg_check=true) where {T <: Real}
-    arg_check && @check_args(Bernoulli, zero(p) <= p <= one(p))
+function Bernoulli(p::T; check_arg=true) where {T <: Real}
+    check_arg && @check_args(Bernoulli, zero(p) <= p <= one(p))
     return Bernoulli{T}(p)
 end
 
 Bernoulli(p::Integer) = Bernoulli(float(p))
-Bernoulli() = Bernoulli(0.5, arg_check = false)
+Bernoulli() = Bernoulli(0.5, check_arg = false)
 
 @distr_support Bernoulli 0 1
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
-convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), arg_check = false)
+convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), check_arg = false)
 
 #### Parameters
 
