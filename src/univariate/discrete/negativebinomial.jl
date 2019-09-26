@@ -38,17 +38,18 @@ struct NegativeBinomial{T<:Real} <:
     end
 end
 
-function NegativeBinomial(r::T, p::T) where {T <: Real}
-    @check_args(NegativeBinomial, r > zero(r))
-    @check_args(NegativeBinomial, zero(p) < p <= one(p))
+function NegativeBinomial(r::T, p::T; check_args=true) where {T <: Real}
+    if check_args
+        @check_args(NegativeBinomial, r > zero(r))
+        @check_args(NegativeBinomial, zero(p) < p <= one(p))
+    end
     return NegativeBinomial{T}(r, p)
 end
 
-NegativeBinomial(r::T, p::T, ::NoArgCheck) where {T<:Real} = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
 NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-NegativeBinomial() = NegativeBinomial(1.0, 0.5, NoArgCheck())
+NegativeBinomial() = NegativeBinomial(1.0, 0.5, check_args=false)
 
 @distr_support NegativeBinomial 0 Inf
 
@@ -58,13 +59,13 @@ function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
     return NegativeBinomial(T(r), T(p))
 end
 function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    return NegativeBinomial(T(d.r), T(d.p), NoArgCheck())
+    return NegativeBinomial(T(d.r), T(d.p), check_args=false)
 end
 
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-@inline partype(::NegativeBinomial{T}) where {T} = T
+partype(::NegativeBinomial{T}) where {T} = T
 
 succprob(d::NegativeBinomial) = d.p
 failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p

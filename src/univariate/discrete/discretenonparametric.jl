@@ -21,12 +21,9 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     support::Ts
     p::Ps
 
-    DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps, ::NoArgCheck) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
-        new{T,P,Ts,Ps}(vs, ps)
-
-    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
+    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; check_args=true) where {
+            T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
+        check_args || return new{T,P,Ts,Ps}(vs, ps)
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
         @check_args(DiscreteNonParametric, isprobvec(ps))
         @check_args(DiscreteNonParametric, allunique(vs))
@@ -35,19 +32,15 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     end
 end
 
-DiscreteNonParametric(vs::Ts, ps::Ps) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
-    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps)
+DiscreteNonParametric(vs::Ts, ps::Ps; check_args=true) where {
+        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
+    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, check_args=check_args)
 
-DiscreteNonParametric(vs::Ts, ps::Ps, a::NoArgCheck) where {
-    T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
-    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, a)
-
-eltype(d::DiscreteNonParametric{T}) where T = T
+eltype(::DiscreteNonParametric{T}) where T = T
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
-    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), NoArgCheck())
+    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), check_args=false)
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -327,4 +320,4 @@ end
 
 fit_mle(::Type{<:DiscreteNonParametric},
         ss::DiscreteNonParametricStats{T,W,Ts,Ws}) where {T,W,Ts,Ws} =
-    DiscreteNonParametric{T,W,Ts,Ws}(ss.support, pnormalize!(copy(ss.freq)), NoArgCheck())
+    DiscreteNonParametric{T,W,Ts,Ws}(ss.support, pnormalize!(copy(ss.freq)), check_args=false)

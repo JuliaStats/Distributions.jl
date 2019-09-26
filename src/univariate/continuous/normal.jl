@@ -33,25 +33,26 @@ struct Normal{T<:Number} <: UnivariateDistribution{ContinuousSupport{T}}
     Normal{T}(µ::T, σ::T) where {T<:Number} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T) where {T <: Number}
-    @check_uncountable(Normal, μ)
-    @check_args(Normal, σ >= zero(σ))
+function Normal(μ::T, σ::T; check_args=true) where {T <: Number}
+    if check_args
+        @check_uncountable(Normal, μ)
+        @check_args(Normal, σ >= zero(σ))
+    end
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Number, σ::Number) = Normal(promote(μ, σ)...)
 Normal(μ::Rational, σ::Rational) = Normal(float(μ), float(σ))
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 Normal(μ::T) where {T <: Number} = Normal(μ, T(one(T)))
-Normal() = Normal(0.0, 1.0, NoArgCheck())
+Normal() = Normal(0.0, 1.0, check_args=false)
 
 const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), NoArgCheck())
+convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), check_args=false)
 
 @distr_support Normal -Inf Inf
 

@@ -29,26 +29,25 @@ struct Geometric{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     end
 end
 
-function Geometric(p::T) where {T <: Real}
-    @check_args(Geometric, zero(p) < p < one(p))
+function Geometric(p::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Geometric, zero(p) < p < one(p))
     return Geometric{T}(p)
 end
 
-Geometric(p::T, ::NoArgCheck) where {T<:Real} = Geometric{T}(p)
-Geometric() = Geometric(0.5, NoArgCheck())
+Geometric() = Geometric(0.5, check_args=false)
 
 @distr_support Geometric 0 Inf
 
 ### Conversions
 convert(::Type{Geometric{T}}, p::Real) where {T<:Real} = Geometric(T(p))
-convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p), NoArgCheck())
+convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p), check_args=false)
 
 ### Parameters
 
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
-@inline partype(::Geometric{T}) where {T<:Real} = T
+partype(::Geometric{T}) where {T<:Real} = T
 
 
 ### Statistics

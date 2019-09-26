@@ -73,13 +73,6 @@ Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
 
 ##### Utility functions
 
-"""
-    NoArgCheck
-
-Flag structure used on distribution constructors to bypass parameter validation.
-"""
-struct NoArgCheck end
-
 isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
 
 function allfinite(x::AbstractArray{T}) where {T<:Real}

@@ -30,16 +30,15 @@ struct Logistic{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
 end
 
 
-function Logistic(μ::T, θ::T) where {T <: Real}
-    @check_args(Logistic, θ > zero(θ))
-    Logistic{T}(μ, θ)
+function Logistic(μ::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Logistic, θ > zero(θ))
+    return Logistic{T}(μ, θ)
 end
 
-Logistic(μ::T, θ::T, ::NoArgCheck) where {T<:Real} = Logistic{T}(μ, θ)
 Logistic(μ::Real, θ::Real) = Logistic(promote(μ, θ)...)
 Logistic(μ::Integer, θ::Integer) = Logistic(float(μ), float(θ))
 Logistic(μ::T) where {T <: Real} = Logistic(μ, one(T))
-Logistic() = Logistic(0.0, 1.0, NoArgCheck())
+Logistic() = Logistic(0.0, 1.0, check_args=false)
 
 @distr_support Logistic -Inf Inf
 
@@ -48,7 +47,7 @@ function convert(::Type{Logistic{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Logistic(T(μ), T(θ))
 end
 function convert(::Type{Logistic{T}}, d::Logistic{S}) where {T <: Real, S <: Real}
-    Logistic(T(d.μ), T(d.θ), NoArgCheck())
+    Logistic(T(d.μ), T(d.θ), check_args=false)
 end
 
 #### Parameters

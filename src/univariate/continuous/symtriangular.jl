@@ -24,16 +24,15 @@ struct SymTriangularDist{T<:Real} <:
     SymTriangularDist{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function SymTriangularDist(μ::T, σ::T) where {T <: Real}
-    @check_args(SymTriangularDist, σ > zero(σ))
+function SymTriangularDist(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(SymTriangularDist, σ > zero(σ))
     return SymTriangularDist{T}(μ, σ)
 end
 
-SymTriangularDist(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = SymTriangularDist{T}(μ, σ)
 SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
 SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(float(μ), float(σ))
 SymTriangularDist(μ::T) where {T <: Real} = SymTriangularDist(μ, one(T))
-SymTriangularDist() = SymTriangularDist(0.0, 1.0, NoArgCheck())
+SymTriangularDist() = SymTriangularDist(0.0, 1.0, check_args=false)
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 
@@ -43,7 +42,7 @@ function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where T<:Real
     SymTriangularDist(T(μ), T(σ))
 end
 function convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{S}) where {T <: Real, S <: Real}
-    SymTriangularDist(T(d.μ), T(d.σ), NoArgCheck())
+    SymTriangularDist(T(d.μ), T(d.σ), check_args=false)
 end
 
 #### Parameters

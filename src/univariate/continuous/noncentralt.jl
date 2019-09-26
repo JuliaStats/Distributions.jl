@@ -7,12 +7,11 @@ struct NoncentralT{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)
 end
 
-function NoncentralT(ν::T, λ::T) where {T <: Real}
-    @check_args(NoncentralT, ν > zero(ν))
+function NoncentralT(ν::T, λ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(NoncentralT, ν > zero(ν))
     return NoncentralT{T}(ν, λ)
 end
 
-NoncentralT(ν::T, λ::T, ::NoArgCheck) where {T<:Real} = NoncentralT{T}(ν, λ)
 NoncentralT(ν::Real, λ::Real) = NoncentralT(promote(ν, λ)...)
 NoncentralT(ν::Integer, λ::Integer) = NoncentralT(float(ν), float(λ))
 
@@ -20,12 +19,12 @@ NoncentralT(ν::Integer, λ::Integer) = NoncentralT(float(ν), float(λ))
 
 ### Conversions
 convert(::Type{NoncentralT{T}}, ν::S, λ::S) where {T <: Real, S <: Real} = NoncentralT(T(ν), T(λ))
-convert(::Type{NoncentralT{T}}, d::NoncentralT{S}) where {T <: Real, S <: Real} = NoncentralT(T(d.ν), T(d.λ), NoArgCheck())
+convert(::Type{NoncentralT{T}}, d::NoncentralT{S}) where {T <: Real, S <: Real} = NoncentralT(T(d.ν), T(d.λ), check_args=false)
 
 ### Parameters
 
 params(d::NoncentralT) = (d.ν, d.λ)
-@inline partype(d::NoncentralT{T}) where {T<:Real} = T
+partype(::NoncentralT{T}) where {T} = T
 
 
 ### Statistics

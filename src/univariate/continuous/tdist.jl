@@ -25,19 +25,18 @@ struct TDist{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end
 
-function TDist(ν::T) where {T <: Real}
-    @check_args(TDist, ν > zero(ν))
+function TDist(ν::T; check_args=true) where {T <: Real}
+    check_args && @check_args(TDist, ν > zero(ν))
     return TDist{T}(ν)
 end
 
-TDist(ν::T, ::NoArgCheck) where {T<:Real} = TDist{T}(ν)
 TDist(ν::Integer) = TDist(float(ν))
 
 @distr_support TDist -Inf Inf
 
 #### Conversions
 convert(::Type{TDist{T}}, ν::Real) where {T<:Real} = TDist(T(ν))
-convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν), NoArgCheck())
+convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν), check_args=false)
 
 #### Parameters
 

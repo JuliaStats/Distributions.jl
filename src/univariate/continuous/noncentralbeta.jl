@@ -8,22 +8,20 @@ struct NoncentralBeta{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     NoncentralBeta{T}(α::T, β::T, λ::T) where {T} = new{T}(α, β, λ)
 end
 
-function NoncentralBeta(α::T, β::T, λ::T) where {T <: Real}
-    @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
+function NoncentralBeta(α::T, β::T, λ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
     return NoncentralBeta{T}(α, β, λ)
 end
 
-NoncentralBeta(α::T, β::T, λ::T, ::NoArgCheck) where {T<:Real} = NoncentralBeta{T}(α, β, λ)
 NoncentralBeta(α::Real, β::Real, λ::Real) = NoncentralBeta(promote(α, β, λ)...)
 NoncentralBeta(α::Integer, β::Integer, λ::Integer) = NoncentralBeta(float(α), float(β), float(λ))
 
 @distr_support NoncentralBeta 0.0 1.0
 
-
 ### Parameters
 
 params(d::NoncentralBeta) = (d.α, d.β, d.λ)
-@inline partype(d::NoncentralBeta{T}) where {T<:Real} = T
+partype(::NoncentralBeta{T}) where {T} = T
 
 
 ### Evaluation & Sampling

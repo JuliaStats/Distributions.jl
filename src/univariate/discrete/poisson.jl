@@ -26,25 +26,24 @@ struct Poisson{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
 end
 
-function Poisson(λ::T) where {T <: Real}
-    @check_args(Poisson, λ >= zero(λ))
+function Poisson(λ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Poisson, λ >= zero(λ))
     return Poisson{T}(λ)
 end
 
-Poisson(λ::T, ::NoArgCheck) where {T<:Real} = Poisson{T}(λ)
 Poisson(λ::Integer) = Poisson(float(λ))
-Poisson() = Poisson(1.0, NoArgCheck())
+Poisson() = Poisson(1.0, check_args=false)
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 #### Conversions
 convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
-convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), NoArgCheck())
+convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), check_args=false)
 
 ### Parameters
 
 params(d::Poisson) = (d.λ,)
-@inline partype(::Poisson{T}) where {T} = T
+partype(::Poisson{T}) where {T} = T
 
 rate(d::Poisson) = d.λ
 

@@ -28,19 +28,15 @@ struct Cauchy{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-function Cauchy(μ::T, σ::T) where {T<:Real}
-    @check_args(Cauchy, σ > zero(σ))
-    return Cauchy{T}(μ, σ)
-end
-
-function Cauchy(μ::T, σ::T, ::NoArgCheck) where {T<:Real}
+function Cauchy(μ::T, σ::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Cauchy, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end
 
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
 Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
 Cauchy(μ::T) where {T<:Real} = Cauchy(μ, one(T))
-Cauchy() = Cauchy(0.0, 1.0, NoArgCheck())
+Cauchy() = Cauchy(0.0, 1.0, check_args=false)
 
 @distr_support Cauchy -Inf Inf
 
@@ -49,7 +45,7 @@ function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))
 end
 function convert(::Type{Cauchy{T}}, d::Cauchy{S}) where {T <: Real, S <: Real}
-    Cauchy(T(d.μ), T(d.σ), NoArgCheck())
+    Cauchy(T(d.μ), T(d.σ), check_args=false)
 end
 
 #### Parameters

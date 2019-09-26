@@ -32,28 +32,27 @@ struct Skellam{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
 
 end
 
-function Skellam(μ1::T, μ2::T) where {T <: Real}
-    @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
+function Skellam(μ1::T, μ2::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
     return Skellam{T}(μ1, μ2)
 end
 
-Skellam(μ1::T, μ2::T, ::NoArgCheck) where {T<:Real} = Skellam{T}(μ1, μ2)
 Skellam(μ1::Real, μ2::Real) = Skellam(promote(μ1, μ2)...)
 Skellam(μ1::Integer, μ2::Integer) = Skellam(float(μ1), float(μ2))
 Skellam(μ::Real) = Skellam(μ, μ)
-Skellam() = Skellam(1.0, 1.0, NoArgCheck())
+Skellam() = Skellam(1.0, 1.0, check_args=false)
 
 @distr_support Skellam -Inf Inf
 
 #### Conversions
 
 convert(::Type{Skellam{T}}, μ1::S, μ2::S) where {T<:Real, S<:Real} = Skellam(T(μ1), T(μ2))
-convert(::Type{Skellam{T}}, d::Skellam{S}) where {T<:Real, S} =  Skellam(T(d.μ1), T(d.μ2), NoArgCheck())
+convert(::Type{Skellam{T}}, d::Skellam{S}) where {T<:Real, S} =  Skellam(T(d.μ1), T(d.μ2), check_args=false)
 
 #### Parameters
 
 params(d::Skellam) = (d.μ1, d.μ2)
-@inline partype(::Skellam{T}) where {T} = T
+partype(::Skellam{T}) where {T} = T
 
 
 #### Statistics

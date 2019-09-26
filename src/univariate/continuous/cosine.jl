@@ -13,16 +13,15 @@ struct Cosine{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     Cosine{T}(μ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-function Cosine(μ::T, σ::T) where {T <: Real}
-    @check_args(Cosine, σ > zero(σ))
+function Cosine(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Cosine, σ > zero(σ))
     return Cosine{T}(μ, σ)
 end
 
-Cosine(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Cosine{T}(μ, σ)
 Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
 Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
 Cosine(μ::T) where {T <: Real} = Cosine(μ, one(µ))
-Cosine() = Cosine(0.0, 1.0, NoArgCheck())
+Cosine() = Cosine(0.0, 1.0, check_args=false)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 
@@ -31,7 +30,7 @@ function convert(::Type{Cosine{T}}, μ::Real, σ::Real) where T<:Real
     Cosine(T(μ), T(σ))
 end
 function convert(::Type{Cosine{T}}, d::Cosine{S}) where {T <: Real, S <: Real}
-    Cosine(T(d.μ), T(d.σ), NoArgCheck())
+    Cosine(T(d.μ), T(d.σ), check_args=false)
 end
 
 #### Parameters

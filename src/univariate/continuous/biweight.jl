@@ -7,17 +7,15 @@ struct Biweight{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function Biweight(μ::T, σ::T) where {T<:Real}
-    @check_args(Biweight, σ > zero(σ))
+function Biweight(μ::T, σ::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Biweight, σ > zero(σ))
     return Biweight{T}(μ, σ)
 end
-
-Biweight(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Biweight{T}(μ, σ)
 
 Biweight(μ::Real, σ::Real) = Biweight(promote(μ, σ)...)
 Biweight(μ::Integer, σ::Integer) = Biweight(float(μ), float(σ))
 Biweight(μ::T) where {T<:Real} = Biweight(μ, one(T))
-Biweight() = Biweight(0.0, 1.0, NoArgCheck())
+Biweight() = Biweight(0.0, 1.0, check_args=false)
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 
