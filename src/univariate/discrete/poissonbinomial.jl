@@ -35,14 +35,14 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function PoissonBinomial(p::AbstractArray{T}) where {T <: Real}
-    for i in eachindex(p)
-        @check_args(PoissonBinomial, 0 <= p[i] <= 1)
+function PoissonBinomial(p::AbstractArray{T}; check_args=true) where {T <: Real}
+    if check_args
+        for i in eachindex(p)
+            @check_args(PoissonBinomial, 0 <= p[i] <= 1)
+        end
     end
-    PoissonBinomial{T}(p)
+    return PoissonBinomial{T}(p)
 end
-
-PoissonBinomial(p::AbstractArray{T}, ::NoArgCheck) where {T<:Real} = PoissonBinomial{T}(p)
 
 @distr_support PoissonBinomial 0 length(d.p)
 
@@ -52,7 +52,7 @@ function PoissonBinomial(::Type{PoissonBinomial{T}}, p::Vector{S}) where {T, S}
     return PoissonBinomial(Vector{T}(p))
 end
 function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T, S}
-    return PoissonBinomial(Vector{T}(d.p), NoArgCheck())
+    return PoissonBinomial(Vector{T}(d.p), check_args=false)
 end
 
 #### Parameters
@@ -62,7 +62,7 @@ succprob(d::PoissonBinomial) = d.p
 failprob(d::PoissonBinomial{T}) where {T} = one(T) .- d.p
 
 params(d::PoissonBinomial) = (d.p,)
-@inline partype(::PoissonBinomial{T}) where {T} = T
+partype(::PoissonBinomial{T}) where {T} = T
 
 #### Properties
 
