@@ -9,17 +9,12 @@ macro check_args(D, cond)
     end
 end
 
-isuncountable(x) = false
+isuncountable(x) = missing
 isuncountable(x::Number) = typeof(float(one(x))) ≡ typeof(one(x))
-isuncountablereal(x) = isuncountable(x) && typeof(one(x)) <: Real
-
-iscountable(x) = false
-iscountable(x::Number) = !isuncountable(x)
-iscountablereal(x) = iscountable(x) && typeof(one(x)) <: Real
 
 macro check_uncountable(D, var)
     quote
-        if !isuncountablereal($(esc(var)))
+        if !isuncountable($(esc(var)))
             throw(ArgumentError(string($(string(D)),
                                        ": the type of variable ",
                                        $(string(var)), " (",
@@ -31,7 +26,7 @@ end
 
 macro check_countable(D, var)
     quote
-        if !iscountablereal($(esc(var)))
+        if isuncountable($(esc(var)))
             throw(ArgumentError(string($(string(D)),
                                        ": the type of variable ",
                                        $(string(var)), " (",
@@ -40,6 +35,7 @@ macro check_countable(D, var)
         end
     end
 end
+
 
 ## a type to indicate zero vector
 """

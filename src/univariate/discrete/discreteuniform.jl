@@ -28,6 +28,8 @@ struct DiscreteUniform <: UnivariateDistribution{ContiguousSupport{Int}}
 
     function DiscreteUniform(a::Real, b::Real)
         @check_args(DiscreteUniform, a <= b)
+        @check_countable(DiscreteUniform, a)
+        @check_countable(DiscreteUniform, b)
         new(a, b, 1.0 / (b - a + 1))
     end
     DiscreteUniform(b::Real) = DiscreteUniform(0, b)
