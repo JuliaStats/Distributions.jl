@@ -1,5 +1,5 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using JSON, ForwardDiff, PDMats # test dependencies
 using Test
 using Distributed
 using Random
