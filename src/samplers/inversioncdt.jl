@@ -1,7 +1,7 @@
 """
 A small helper struct representing an identity permutation.
 
-The only supported operation is IdentityPermute()[x] -> x for all x.
+The only supported operation is `IdentityPermute()[x]` -> x for all x.
 """
 struct IdentityPermute; end
 Base.getindex(id::IdentityPermute, idx::Int) = idx
