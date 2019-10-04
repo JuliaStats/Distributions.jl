@@ -38,5 +38,7 @@ let
     @test var(d_product) == var.(ds)
     @test cov(d_product) == Diagonal(var.(ds))
     @test entropy(d_product) == sum(entropy.(ds))
+    @test insupport(d_product, ubound) == true
+    @test insupport(d_product, ubound .+ 1) == false
 end
 end
