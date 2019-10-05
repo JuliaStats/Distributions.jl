@@ -19,14 +19,14 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-struct Multinomial{T<:Real} <: DiscreteMultivariateDistribution
+struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
-    p::Vector{T}
+    p::TV
 
-    Multinomial{T}(n::Integer, p::Vector{T}) where {T} = new{T}(Int(n), p)
+    Multinomial{T}(n::Integer, p::TV) where {T, TV<:AbstractVector{T}} = new{T, TV}(Int(n), p)
 end
 
-function Multinomial(n::Integer, p::Vector{T}; check_args=true) where {T<:Real}
+function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T<:Real}
     if check_args
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
@@ -51,8 +51,8 @@ params(d::Multinomial) = (d.n, d.p)
 @inline partype(d::Multinomial{T}) where {T<:Real} = T
 
 ### Conversions
-convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, Vector{T}(d.p))
-convert(::Type{Multinomial{T}}, n, p::Vector) where {T<:Real} = Multinomial(n, Vector{T}(p))
+convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))
+convert(::Type{Multinomial{T, TV}}, n, p::Vector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
 
 # Statistics
 
