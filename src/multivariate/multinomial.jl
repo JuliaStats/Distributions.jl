@@ -22,10 +22,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
 struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
-
-    Multinomial{T}(n::Integer, p::TV) where {T, TV<:AbstractVector{T}} = new{T, TV}(Int(n), p)
 end
-
 function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T<:Real}
     if check_args
         if n < 0
@@ -52,8 +49,9 @@ params(d::Multinomial) = (d.n, d.p)
 
 ### Conversions
 convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))
-convert(::Type{Multinomial{T, TV}}, n, p::Vector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
-
+convert(::Type{Multinomial{T, TV}}, n, p::AbstractVector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
+convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, T.(d.p))
+convert(::Type{Multinomial{T}}, n, p::AbstractVector) where {T<:Real} = Multinomial(n, T.(p))
 # Statistics
 
 mean(d::Multinomial) = d.n .* d.p

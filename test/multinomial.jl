@@ -27,10 +27,12 @@ rng = MersenneTwister(123)
 @test partype(Multinomial(nt, Vector{Float32}(p))) == Float32
 
 # Conversion
-@test typeof(d) == Multinomial{Float64}
-@test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32}
-@test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32}
-@test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32}
+@test typeof(d) == Multinomial{Float64, Vector{Float64}}
+@test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32, Vector{Float32}}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
 
 # random sampling
 
