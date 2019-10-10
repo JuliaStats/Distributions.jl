@@ -50,6 +50,7 @@ const tests = [
     "discretenonparametric",
     "functionals",
     "chernoff",
+    "univariate_bounds"
 ]
 
 printstyled("Running tests:\n", color=:blue)

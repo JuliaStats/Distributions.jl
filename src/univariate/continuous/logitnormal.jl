@@ -124,13 +124,13 @@ function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
 end
 
 cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normcdf(d.μ, d.σ, logit(x)) : zero(T)
+    x ≤ 0 ? zero(T) : x ≥ 1 ? one(T) : normcdf(d.μ, d.σ, logit(x))
 ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normccdf(d.μ, d.σ, logit(x)) : one(T)
+    x ≤ 0 ? one(T) : x ≥ 1 ? zero(T) : normccdf(d.μ, d.σ, logit(x))
 logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normlogcdf(d.μ, d.σ, logit(x)) : -T(Inf)
+    x ≤ 0 ? -T(Inf) : x ≥ 1 ? zero(T) : normlogcdf(d.μ, d.σ, logit(x))
 logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normlogccdf(d.μ, d.σ, logit(x)) : zero(T)
+    x ≤ 0 ? zero(T) : x ≥ 1 ? -T(Inf) : normlogccdf(d.μ, d.σ, logit(x))
 
 quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
 cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))
