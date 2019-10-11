@@ -1,7 +1,8 @@
 using Distributions
+using InteractiveUtils
 using Test
 
-dists = InteractiveUtils.subtypes(UnivariateDistribution)
+dists = subtypes(UnivariateDistribution)
 filter!(x -> hasmethod(x, ()), dists)
 filter!(x -> isbounded(x()), dists)
 
