@@ -49,12 +49,12 @@ end
 
 function cdf(d::Triweight{T}, x::Real) where T<:Real
     u = (x - d.μ)/d.σ
-    u <= -1 ? zero(T) : u >= 1 ? one(T) : 0.03125*(1 + u)^4*@horner(u,16,-29,20,-5)
+    u ≤ -1 ? zero(T) : u ≥ 1 ? one(T) : 0.03125*(1 + u)^4*@horner(u,16,-29,20,-5)
 end
 
 function ccdf(d::Triweight{T}, x::Real) where T<:Real
     u = (d.μ - x)/d.σ
-    u <= -1 ? one(T) : u >= 1 ? zero(T) : 0.03125*(1 + u)^4*@horner(u,16,-29,20,-5)
+    u ≤ -1 ? zero(T) : u ≥ 1 ? one(T) : 0.03125*(1 + u)^4*@horner(u,16,-29,20,-5)
 end
 
 @quantile_newton Triweight

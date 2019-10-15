@@ -51,15 +51,15 @@ end
 
 function cdf(d::Epanechnikov{T}, x::Real) where T<:Real
     u = (x - d.μ) / d.σ
-    u <= -1 ? one(T) :
-    u >= 1 ? zero(T) :
+    u <= -1 ? zero(T) :
+    u >= 1 ? one(T) :
     1//2 + u * (3//4 - u^2/4)
 end
 
 function ccdf(d::Epanechnikov{T}, x::Real) where T<:Real
     u = (d.μ - x) / d.σ
-    u <= -1 ? one(T) :
-    u >= 1 ? zero(T) :
+    u <= -1 ? zero(T) :
+    u >= 1 ? one(T) :
     1//2 + u * (3//4 - u^2/4)
 end
 
