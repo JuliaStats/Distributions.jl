@@ -30,4 +30,8 @@ using Test, Distributions
     @test isnan(invlogcdf(Normal(), NaN))
     @test Inf === invlogccdf(Normal(), -Inf)
     @test isnan(invlogccdf(Normal(), NaN))
+    # test for #996 being fixed
+    let d = Normal(0, 1), x = 1.0, ∂x = 2.0
+        @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈ ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
+    end
 end
