@@ -1,15 +1,18 @@
 language: julia
+
+notifications:
+  email: false
+
 os:
   - linux
   - osx
 julia:
   - 1.0
   - nightly
-matrix:
-  allow_failures:
-    julia: nightly
-notifications:
-  email: false
+stages:
+  - build
+  - coverage
+  - documentation
 
 after_success:
   - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
@@ -20,8 +23,19 @@ branches:
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 jobs:
+  allow_failures:
+    julia: nightly
   include:
-    - stage: "Documentation"
+    - stage: build
+      julia: 1.0
+      os: linux
+    - stage: coverage
+      julia: 1.0
+      os: linux
+      script:
+        - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
+      after_success: skip
+    - stage: documentation
       julia: 1.0
       os: linux
       script:
