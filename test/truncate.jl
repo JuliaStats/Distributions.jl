@@ -136,4 +136,10 @@ for c in ["discrete",
     println()
 end
 
+## automatic differentiation
+
+f = x -> logpdf(Truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
+at = [0.0, 1.0, 0.0, 1.0]
+@test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
+
 end

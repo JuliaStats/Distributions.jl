@@ -96,5 +96,4 @@ end
 # Test autodiff using ForwardDiff
 f = x -> logpdf(PoissonBinomial(x), 0)
 at = [0.5, 0.5]
-fdm(i) = central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
-@test isapprox(ForwardDiff.gradient(f, at), fdm.(1:2), atol=1e-6)
+@test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
