@@ -3,7 +3,7 @@
 module TestTruncate
 
 using Distributions
-using ForwardDiff: Dual
+using ForwardDiff: Dual, ForwardDiff
 import JSON
 using Test
 
