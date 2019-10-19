@@ -87,6 +87,12 @@ mean(d::MatrixNormal) = d.M
 
 mode(d::MatrixNormal) = d.M
 
+cov(d::MatrixNormal, ::Val{true}=Val(true)) = kron(Matrix(d.V), Matrix(d.U))
+
+cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
+
+var(d::MatrixNormal) = reshape(diag(cov(d)), size(d))
+
 params(d::MatrixNormal) = (d.M, d.U, d.V)
 
 @inline partype(d::MatrixNormal{T}) where {T<:Real} = T
@@ -122,4 +128,4 @@ end
 #  Transformation
 #  -----------------------------------------------------------------------------
 
-vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V.mat, d.U.mat))
+vec(d::MatrixNormal) = MvNormal(vec(d.M), cov(d))

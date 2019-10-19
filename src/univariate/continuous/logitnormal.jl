@@ -58,16 +58,15 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T) where {T <: Real}
-    @check_args(LogitNormal, σ > zero(σ))
+function LogitNormal(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(LogitNormal, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
-LogitNormal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = LogitNormal{T}(μ, σ)
 LogitNormal(μ::Real, σ::Real) = LogitNormal(promote(μ, σ)...)
 LogitNormal(μ::Integer, σ::Integer) = LogitNormal(float(μ), float(σ))
 LogitNormal(μ::T) where {T} = LogitNormal(μ, one(T))
-LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
+LogitNormal() = LogitNormal(0.0, 1.0, check_args=false)
 
 # minimum and maximum not defined for logitnormal
 # but see https://github.com/JuliaStats/Distributions.jl/pull/457
@@ -79,7 +78,7 @@ LogitNormal() = LogitNormal(0.0, 1.0, NoArgCheck())
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
   {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
 convert(::Type{LogitNormal{T}}, d::LogitNormal{S}) where
-  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), NoArgCheck())
+  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), check_args=false)
 
 #### Parameters
 
@@ -124,13 +123,13 @@ function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
 end
 
 cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normcdf(d.μ, d.σ, logit(x)) : zero(T)
+    x ≤ 0 ? zero(T) : x ≥ 1 ? one(T) : normcdf(d.μ, d.σ, logit(x))
 ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normccdf(d.μ, d.σ, logit(x)) : one(T)
+    x ≤ 0 ? one(T) : x ≥ 1 ? zero(T) : normccdf(d.μ, d.σ, logit(x))
 logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normlogcdf(d.μ, d.σ, logit(x)) : -T(Inf)
+    x ≤ 0 ? -T(Inf) : x ≥ 1 ? zero(T) : normlogcdf(d.μ, d.σ, logit(x))
 logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
-  0 < x < 1 ? normlogccdf(d.μ, d.σ, logit(x)) : zero(T)
+    x ≤ 0 ? zero(T) : x ≥ 1 ? -T(Inf) : normlogccdf(d.μ, d.σ, logit(x))
 
 quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
 cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))

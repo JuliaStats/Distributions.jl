@@ -33,23 +33,22 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T) where {T <: Real}
-    @check_args(Normal, σ >= zero(σ))
+function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Normal, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Normal{T}(μ, σ)
 Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
 Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
-Normal() = Normal(0.0, 1.0, NoArgCheck())
+Normal() = Normal(0.0, 1.0, check_args=false)
 
 const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), NoArgCheck())
+convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), check_args=false)
 
 @distr_support Normal -Inf Inf
 
@@ -140,9 +139,9 @@ function logccdf(d::Normal, x::Real)
     log1p(-erfc(-z * invsqrt2) / 2)
 end
 # cdf
-function cdf(d::Normal, x::Real)
+function cdf(d::Normal{T}, x::S) where {T, S <: Real}
     if iszero(d.σ)
-        float(d.μ ≤ x)
+        convert(promote_type(T, S), d.μ ≤ x)
     else
         erfc(-zval(d, x) * invsqrt2) / 2
     end

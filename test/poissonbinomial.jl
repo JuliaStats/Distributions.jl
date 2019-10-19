@@ -1,6 +1,6 @@
 using Distributions
+using FiniteDifferences, ForwardDiff
 using Test
-
 
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
@@ -92,3 +92,9 @@ end
                 -4.0 - 9.65685424949238im]
     @test x ≈ fftw_fft
 end
+
+# Test autodiff using ForwardDiff
+f = x -> logpdf(PoissonBinomial(x), 0)
+at = [0.5, 0.5]
+fdm(i) = central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+@test isapprox(ForwardDiff.gradient(f, at), fdm.(1:2), atol=1e-6)
