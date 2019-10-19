@@ -1,6 +1,6 @@
 # Tests for Multinomial
 
-using Distributions, Random
+using Distributions, Random, StaticArrays
 using Test
 
 
@@ -136,6 +136,11 @@ d0 = Multinomial(0, p)
 @test insupport(d0, [0, 0, 4]) == false
 @test length(d0) == 3
 @test size(d0) == (3,)
+
+# Abstract vector p
+
+@test typeof(Multinomial(nt, SVector{length(p), Float64}(p))) == Multinomial{Float64, SVector{3, Float64}}
+
 end
 
 @testset "Testing Multinomial with $key" for (key, func) in
