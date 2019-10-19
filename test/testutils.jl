@@ -1,6 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
-using Printf
+using Printf, FiniteDifferences
 import Test: @test
 
 # auxiliary functions

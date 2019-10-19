@@ -6,7 +6,7 @@ using Distributions
 using ForwardDiff: Dual, ForwardDiff
 import JSON
 using Test
-
+using ..Main: fdm
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)
     R = JSON.parsefile(jsonfile)

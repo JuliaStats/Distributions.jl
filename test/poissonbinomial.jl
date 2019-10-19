@@ -1,5 +1,4 @@
 using Distributions
-using FiniteDifferences, ForwardDiff
 using Test
 
 # Test the special base where PoissonBinomial distribution reduces
