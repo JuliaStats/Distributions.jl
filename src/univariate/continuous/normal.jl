@@ -141,9 +141,9 @@ function logccdf(d::Normal, x::Real)
     log1p(-erfc(-z * invsqrt2) / 2)
 end
 # cdf
-function cdf(d::Normal, x::Real)
+function cdf(d::Normal{T}, x::S) where {T, S <: Real}
     if iszero(d.σ)
-        float(d.μ ≤ x)
+        convert(promote_type(T, S), d.μ ≤ x)
     else
         erfc(-zval(d, x) * invsqrt2) / 2
     end

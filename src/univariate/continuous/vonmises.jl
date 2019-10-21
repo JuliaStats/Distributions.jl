@@ -64,8 +64,11 @@ cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 
 #### Evaluations
 
-pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
-logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π
+#pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
+pdf(d::VonMises{T}, x::Real) where T<:Real =
+    -π ≤ x ≤ π ? exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx) : zero(T)
+logpdf(d::VonMises{T}, x::Real) where T<:Real =
+    -π ≤ x ≤ π ? d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π : -T(Inf)
 
 cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
 
