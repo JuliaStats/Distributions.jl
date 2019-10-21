@@ -1,6 +1,6 @@
 # Tests for Multinomial
 
-using Distributions, Random
+using Distributions, Random, StaticArrays
 using Test
 
 
@@ -27,10 +27,12 @@ rng = MersenneTwister(123)
 @test partype(Multinomial(nt, Vector{Float32}(p))) == Float32
 
 # Conversion
-@test typeof(d) == Multinomial{Float64}
-@test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32}
-@test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32}
-@test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32}
+@test typeof(d) == Multinomial{Float64, Vector{Float64}}
+@test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
+@test typeof(convert(Multinomial{Float32, Vector{Float32}}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
 
 # random sampling
 
@@ -134,6 +136,11 @@ d0 = Multinomial(0, p)
 @test insupport(d0, [0, 0, 4]) == false
 @test length(d0) == 3
 @test size(d0) == (3,)
+
+# Abstract vector p
+
+@test typeof(Multinomial(nt, SVector{length(p), Float64}(p))) == Multinomial{Float64, SVector{3, Float64}}
+
 end
 
 @testset "Testing Multinomial with $key" for (key, func) in
