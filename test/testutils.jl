@@ -1,9 +1,8 @@
 # Utilities to support the testing of distributions and samplers
 
-using Printf, FiniteDifferences
-import Test: @test
-
-# auxiliary functions
+using Printf: @printf
+using Test: @test
+import FiniteDifferences
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -560,7 +559,7 @@ end
 
 # Finite difference differentiation
 function fdm(f, at)
-    map(1:length(at)) do i 
-        central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+    map(1:length(at)) do i
+        FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
     end
 end
