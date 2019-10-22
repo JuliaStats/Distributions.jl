@@ -1,6 +1,6 @@
 # Utilities to support the testing of distributions and samplers
 
-using Printf
+using Printf, FiniteDifferences
 import Test: @test
 
 # auxiliary functions
@@ -556,4 +556,11 @@ function test_params(d::Truncated)
     pars = params(d_unt)
     d_new = Truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
+end
+
+# Finite difference differentiation
+function fdm(f, at)
+    map(1:length(at)) do i 
+        central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+    end
 end
