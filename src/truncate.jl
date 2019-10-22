@@ -8,29 +8,31 @@ Construct a truncated distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:Support} <:
-    UnivariateDistribution{S}
+struct Truncated{D<:UnivariateDistribution, S<:Support, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
-    lower::Float64      # lower bound
-    upper::Float64      # upper bound
-    lcdf::Float64       # cdf of lower bound
-    ucdf::Float64       # cdf of upper bound
+    lower::T      # lower bound
+    upper::T      # upper bound
+    lcdf::T       # cdf of lower bound
+    ucdf::T       # cdf of upper bound
 
-    tp::Float64         # the probability of the truncated part, i.e. ucdf - lcdf
-    logtp::Float64      # log(tp), i.e. log(ucdf - lcdf)
+    tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
+    logtp::T      # log(tp), i.e. log(ucdf - lcdf)
+    function Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real}
+        new{typeof(d), value_support(typeof(d)), T}(d, l, u, lcdf, ucdf, tp, logtp)
+    end
 end
 
 ### Constructors
-
-function Truncated(d::UnivariateDistribution, l::Float64, u::Float64)
+function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l < u || error("lower bound should be less than upper bound.")
-    lcdf = isinf(l) ? 0.0 : cdf(d, l)
-    ucdf = isinf(u) ? 1.0 : cdf(d, u)
+    T2 = promote_type(T, eltype(d))
+    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
+    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
     tp = ucdf - lcdf
-    Truncated{typeof(d),value_support(typeof(d))}(d, l, u, lcdf, ucdf, tp, log(tp))
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
 end
-
-Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
+Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, promote(l, u)...)
+Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, Float64.((l, u))...)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)

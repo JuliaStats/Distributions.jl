@@ -1,10 +1,13 @@
 using Distributions
-using JSON, ForwardDiff, PDMats # test dependencies
+using PDMats # test dependencies
 using Test
 using Distributed
 using Random
 using StatsBase
 using LinearAlgebra
+
+import JSON
+import ForwardDiff
 
 const tests = [
     "eltypes",

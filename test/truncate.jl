@@ -3,10 +3,10 @@
 module TestTruncate
 
 using Distributions
-using ForwardDiff: Dual
+using ForwardDiff: Dual, ForwardDiff
 import JSON
 using Test
-
+using ..Main: fdm
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)
     R = JSON.parsefile(jsonfile)
@@ -79,10 +79,10 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         end
         @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.ContinuousSupport{Float64}},
-                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.ContinuousSupport{Float64}},
-                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.ContinuousSupport{Float64}},
-                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.ContinuousSupport{Float64}}])
+        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.ContinuousSupport{Float64}, Float64},
+                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.ContinuousSupport{Float64}, Float64},
+                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.ContinuousSupport{Float64}, Float64},
+                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.ContinuousSupport{Float64}, Float64}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()
@@ -136,5 +136,11 @@ for c in ["discrete",
     verify_and_test_drive(jsonfile, ARGS, 10^6,3,5)
     println()
 end
+
+## automatic differentiation
+
+f = x -> logpdf(Truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
+at = [0.0, 1.0, 0.0, 1.0]
+@test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
 
 end
