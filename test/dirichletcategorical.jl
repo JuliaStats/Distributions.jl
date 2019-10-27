@@ -26,6 +26,9 @@ end
     @test_throws ArgumentError DirichletCategorical([-1, 0], [0, 0])
     @test_throws ArgumentError DirichletCategorical([0, 0], [-1, 0])
     @test_throws ArgumentError DirichletCategorical([0], [0, 0])
+    @test_throws ArgumentError DirichletCategorical([0, 0], [1, 1])
+    @test_throws ArgumentError DirichletCategorical([-1, 2], [0, 0])
+    @test_throws ArgumentError DirichletCategorical([1.0, 1.0], [2, -1])
 end
 
 @testset "ncategories" for (d,n) in [(d1, 3), (d2, 3), (d3, 5), (d4, 4)]
@@ -68,7 +71,6 @@ end
         @test begin
             r = rand(d, 10000)
             counts = map(x -> sum(r .== x), 1:maximum(d))
-            @show counts
             counts == n
         end
     end
@@ -174,7 +176,7 @@ end
     end
 
     @testset "rand" begin
-        d = DirichletCategorical([10, 0, 0, 0])
+        d = DirichletCategorical([10, 0.0001, 0.0001, 0.0001])
         a = rand(d, 100)
         update!(d, ones(Int, 10000) .* 4)
         b = rand(d, 100)

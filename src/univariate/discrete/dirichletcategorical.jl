@@ -26,8 +26,8 @@ struct DirichletCategorical{T <: Real, U <: Integer} <: DiscreteUnivariateDistri
     function DirichletCategorical(α::Vector{T}, n::Vector{U}) where {T, U}
         α0 = sum(abs, α)
         N = sum(abs, n)
-        sum(α) == α0 || throw(ArgumentError("alpha must be a positive vector."))
-        sum(n) == N || throw(ArgumentError("n must be a positive vector."))
+        all(x -> x > 0, α) || throw(ArgumentError("all elemnts in α must be greater than zero"))
+        all(x -> x >= 0, n) || throw(ArgumentError("all elements in n must be greater or equal than zero"))
         length(n) == length(α) || throw(ArgumentError("n and α must be of same length"))
         new{T,U}(α, α0, n)
     end
