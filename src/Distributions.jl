@@ -65,6 +65,7 @@ export
     Binomial,
     Biweight,
     Categorical,
+    DirichletCategorical,
     Cauchy,
     Chernoff,
     Chi,
@@ -239,6 +240,7 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
+    update!,            # updating DirichletCategorical distribution with observation(s)
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant

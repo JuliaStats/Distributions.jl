@@ -20,6 +20,7 @@ const tests = [
     "utils",
     "samplers",
     "categorical",
+    "dirichletcategorical",
     "univariates",
     "continuous",
     "edgecases",
