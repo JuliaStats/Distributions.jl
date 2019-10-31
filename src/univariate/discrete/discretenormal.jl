@@ -1,4 +1,6 @@
 """
+    DiscreteNormal{S<:Real, M<:Real}
+
 Represents the (truncated) discrete normal distribution.
 
 For an integer `x` in the support, the probability is proportional to
