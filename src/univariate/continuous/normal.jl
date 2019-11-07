@@ -60,7 +60,7 @@ params(d::Normal) = (d.μ, d.σ)
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
 
-eltype(::Normal{T}) where {T} = T
+Base.eltype(::Type{Normal{T}}) where {T} = T
 
 #### Statistics
 
