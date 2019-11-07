@@ -62,8 +62,8 @@ convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeome
 # Properties
 function _P(d::FisherNoncentralHypergeometric, k::Int)
     y = support(d)
-    p = -log(d.ns + 1) .- map(first, logabsbeta.(d.ns + 1 .- y, y .+ 1)) .-
-            log(d.nf + 1) .- map(first, logabsbeta.(d.nf - d.n + 1 .+ y, d.n + 1 .- y)) .+
+    p = -log(d.ns + 1) .- logbeta.(d.ns + 1 .- y, y .+ 1) .-
+            log(d.nf + 1) .- logbeta.(d.nf - d.n + 1 .+ y, d.n + 1 .- y) .+
             xlogy.(y, d.ω) .+ xlogy.(k, y)
     logsumexp(p)
 end
@@ -82,8 +82,8 @@ mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 testfd(d::FisherNoncentralHypergeometric) = d.ω^3
 
 logpdf(d::FisherNoncentralHypergeometric, k::Int) =
-    -log(d.ns + 1) - logabsbeta(d.ns - k + 1, k + 1)[1] -
-    log(d.nf + 1) - logabsbeta(d.nf - d.n + k + 1, d.n - k + 1)[1] +
+    -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
+    log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) +
     xlogy(k, d.ω) - _P(d, 0)
 
 pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
@@ -126,8 +126,8 @@ function logpdf(d::WalleniusNoncentralHypergeometric, k::Int)
     D = d.ω * (d.ns - k) + (d.nf - d.n + k)
     f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
     I, _ = quadgk(f, 0, 1)
-    return -log(d.ns + 1) - logabsbeta(d.ns - k + 1, k + 1)[1] -
-    log(d.nf + 1) - logabsbeta(d.nf - d.n + k + 1, d.n - k + 1)[1] + log(I)
+    return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
+    log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
 end
 
 pdf(d::WalleniusNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))

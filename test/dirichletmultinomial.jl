@@ -5,14 +5,6 @@ using Distributions
 using Test, Random, SpecialFunctions
 
 import SpecialFunctions: factorial
-if !isdefined(SpecialFunctions, :logabsgamma)
-    logabsgamma(x) = SpecialFunctions.lgamma_r(x)
-    loggamma(x) = lgamma(x)
-end
-if !isdefined(SpecialFunctions, :logabsbeta)
-    logabsbeta(x, w) = (lbeta(x, w), sign(beta(x, w)))
-    logbeta(x, w) = lbeta(x, w)
-end
 Random.seed!(123)
 
 rng = MersenneTwister(123)
@@ -62,7 +54,7 @@ for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 
     @test pdf(d, x) ≈
         factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈
-        log(factorial(d.n)) + logabsgamma(d.α0)[1] - logabsgamma(d.n + d.α0)[1] + sum(first, logabsgamma.(d.α + x)) - sum(first, logabsgamma.(d.α)) - sum(log.(factorial.(x)))
+        log(factorial(d.n)) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(log.(factorial.(x)))
 end
 
 # test Sampling

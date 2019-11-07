@@ -90,7 +90,7 @@ function logpdf(d::BetaPrime{T}, x::Real) where T<:Real
     if x < 0
         T(-Inf)
     else
-        (α - 1) * log(x) - (α + β) * log1p(x) - logabsbeta(α, β)[1]
+        (α - 1) * log(x) - (α + β) * log1p(x) - logbeta(α, β)
     end
 end
 

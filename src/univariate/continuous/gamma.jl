@@ -72,7 +72,7 @@ end
 
 function entropy(d::Gamma)
     (α, θ) = params(d)
-    α + logabsgamma(α)[1] + (1 - α) * digamma(α) + log(θ)
+    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
 mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
