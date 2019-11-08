@@ -80,7 +80,7 @@ end
 
 function entropy(d::InverseGamma)
     (α, θ) = params(d)
-    α + lgamma(α) - (1 + α) * digamma(α) + log(θ)
+    α + loggamma(α) - (1 + α) * digamma(α) + log(θ)
 end
 
 
@@ -90,7 +90,7 @@ pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))
 
 function logpdf(d::InverseGamma, x::Real)
     (α, θ) = params(d)
-    α * log(θ) - lgamma(α) - (α + 1) * log(x) - θ / x
+    α * log(θ) - loggamma(α) - (α + 1) * log(x) - θ / x
 end
 
 cdf(d::InverseGamma, x::Real) = ccdf(d.invd, 1 / x)

@@ -103,7 +103,7 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    lbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
+    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
         (s - 2) * digamma(s)
 end
 
