@@ -22,7 +22,9 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
 struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
+    Multinomial{T<:Real, TV<:AbstractVector{T}}(n::Int, p::TV) = new{T, TV}(n, p)
 end
+
 function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T<:Real}
     if check_args
         if n < 0
