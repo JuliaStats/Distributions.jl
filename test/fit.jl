@@ -431,5 +431,9 @@ end
 
         @test isa(d, dist)
         @test isapprox(mode(d), 3.6, atol=0.1)
+
+        # Test automatic differentiation
+        f(x) = mean(fit(Rayleigh, x))
+        @test all(ForwardDiff.gradient(f, x) .>= 0)
     end
 end
