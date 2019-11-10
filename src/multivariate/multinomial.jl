@@ -22,8 +22,10 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
 struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
+    Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)
 end
-function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T<:Real}
+
+function Multinomial(n::Integer, p::TV; check_args=true) where {T <: Real, TV <: AbstractVector{T}}
     if check_args
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
@@ -32,10 +34,10 @@ function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T
             throw(ArgumentError("p = $p is not a probability vector."))
         end
     end
-    return Multinomial{T}(n, p)
+    return Multinomial{T, TV}(n, p)
 end
 
-Multinomial(n::Integer, k::Integer) = Multinomial{Float64}(round(Int, n), fill(1.0 / k, k))
+Multinomial(n::Integer, k::Integer) = Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
 
 # Parameters
 
