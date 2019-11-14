@@ -106,6 +106,8 @@ end
         (MvNormal(mu, C), mu, C),
         (MvNormal(mu_r, C), mu_r, C),
         (MvNormal(C), zeros(3), C),
+        (MvNormal(Symmetric(C)), zeros(3), Matrix(Symmetric(C))),
+        (MvNormal(Diagonal(dv)), zeros(3), Matrix(Diagonal(dv))),
         (MvNormalCanon(h, 2.0), h ./ 2.0, Matrix(0.5I, 3, 3)),
         (MvNormalCanon(mu_r, 2.0), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
         (MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
