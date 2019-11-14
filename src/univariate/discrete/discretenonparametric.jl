@@ -36,7 +36,7 @@ DiscreteNonParametric(vs::Ts, ps::Ps; check_args=true) where {
         T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
     DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, check_args=check_args)
 
-eltype(::DiscreteNonParametric{T}) where T = T
+Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
