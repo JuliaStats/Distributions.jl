@@ -1,4 +1,5 @@
-using Test, Distributions
+using Test, Distributions, ForwardDiff
+
 @testset "Normal" begin
     @test isa(convert(Normal{Float64}, Float16(0), Float16(1)),
               Normal{Float64})
@@ -34,4 +35,32 @@ using Test, Distributions
     let d = Normal(0, 1), x = 1.0, ∂x = 2.0
         @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈ ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
     end
+end
+
+@testset "Normal logpdf & pdf type inference" begin
+    @inferred logpdf(Normal(0.0, 0.0), 0.0)
+    @inferred logpdf(Normal(0.0, 0.0), 0.0f0)
+    @inferred logpdf(Normal(0.0, 0.0), NaN)
+    @inferred logpdf(Normal(0.0f0, 0.0f0), 0.0)
+    @inferred logpdf(Normal(0.0f0, 0.0f0), 0.0f0)
+    @inferred logpdf(Normal(0.0, 0.0), NaN)
+    @inferred logpdf(Normal(0.0, 0.0), NaN)
+    @inferred logpdf(Normal(1 // 1, 1 // 1), 1 // 1)
+    @inferred logpdf(Normal(1 // 1, 1 // 1), NaN)
+    @inferred logpdf(Normal(0.0, 0.0), BigInt(1))
+    @inferred logpdf(Normal(0.0, 0.0), BigFloat(1))
+    @inferred logpdf(Normal(0.0, 0.0), BigFloat(NaN))
+
+    @inferred pdf(Normal(0.0, 0.0), 0.0)
+    @inferred pdf(Normal(0.0, 0.0), 0.0f0)
+    @inferred pdf(Normal(0.0, 0.0), NaN)
+    @inferred pdf(Normal(0.0f0, 0.0f0), 0.0)
+    @inferred pdf(Normal(0.0f0, 0.0f0), 0.0f0)
+    @inferred pdf(Normal(0.0, 0.0), NaN)
+    @inferred pdf(Normal(0.0, 0.0), NaN)
+    @inferred pdf(Normal(1 // 1, 1 // 1), 1 // 1)
+    @inferred pdf(Normal(1 // 1, 1 // 1), NaN)
+    @inferred pdf(Normal(0.0, 0.0), BigInt(1))
+    @inferred pdf(Normal(0.0, 0.0), BigFloat(1))
+    @inferred pdf(Normal(0.0, 0.0), BigFloat(NaN))
 end

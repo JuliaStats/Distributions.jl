@@ -98,22 +98,30 @@ Computes the z-value based on a Normal distribution and a x-value.
 zval(d::Normal, x::Real) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
+
 # logpdf
-function logpdf(d::Normal, x::Real)
-    if iszero(d.σ)
-        d.μ == x ? Inf : -Inf
+
+function logpdf(d::Normal, x::TX) where {TX <: Real}
+    T = promote_type(TX, eltype(d))
+    if iszero(mean(d))
+        mean(d) == x ? T(Inf) : T(-Inf)
     else
-        -(zval(d, x)^2 + log2π) / 2 - log(d.σ)
+        -(zval(d, x)^2 + log2π) / 2 - log(std(d))
     end
 end
+logpdf(d::Normal, x::Union{Integer, Rational}) = logpdf(d, float(x))
+
 # pdf
-function pdf(d::Normal, x::Real)
+function pdf(d::Normal, x::TX) where {TX <: Real}
+    T = promote_type(TX, eltype(d))
     if iszero(d.σ)
-        d.μ == x ? Inf : 0.0
+        d.μ == x ? T(Inf) : zero(T)
     else
         exp(-zval(d, x)^2 / 2) * invsqrt2π / d.σ
     end
 end
+pdf(d::Normal, x::Union{Integer, Rational}) = pdf(d, float(x))
+
 # logcdf
 function logcdf(d::Normal, x::Real)
     if iszero(d.σ)
