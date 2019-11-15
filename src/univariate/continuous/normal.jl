@@ -103,7 +103,7 @@ gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
 
 function logpdf(d::Normal, x::TX) where {TX <: Real}
     T = promote_type(TX, eltype(d))
-    if iszero(mean(d))
+    if iszero(d.σ)
         mean(d) == x ? T(Inf) : T(-Inf)
     else
         -(zval(d, x)^2 + log2π) / 2 - log(std(d))
