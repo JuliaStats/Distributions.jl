@@ -76,7 +76,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     draw = rand(rng, P)
     cp = zero(P)
     i = 0
-    while cp < draw && i <= n
+    while cp < draw && i < n
         cp += p[i +=1]
     end
     x[max(i,1)]
