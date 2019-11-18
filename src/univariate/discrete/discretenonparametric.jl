@@ -72,10 +72,11 @@ Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
 function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     x = support(d)
     p = probs(d)
+    n = length(p)
     draw = rand(rng, P)
     cp = zero(P)
     i = 0
-    while cp < draw
+    while cp < draw && i <= n
         cp += p[i +=1]
     end
     x[max(i,1)]
