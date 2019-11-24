@@ -167,9 +167,9 @@ end
     @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
     @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
-    @test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
-    @test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
-    @test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
+    @test MvNormal(mu, I) === MvNormal(mu, 1)
+    @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)
+    @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
 end
 
 ##### MLE

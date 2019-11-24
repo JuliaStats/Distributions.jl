@@ -196,31 +196,24 @@ function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
-function MvNormal(Σ::Cov) where {T, Cov<:AbstractPDMat{T}}
-    MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
-end
-
-MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
+# constructor with general covariance matrix
+MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(diag(Σ)))
-MvNormal(μ::AbstractVector{<:Real}, σ::Vector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
+MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
+    MvNormal(μ, ScalMat(length(μ), Σ.λ))
+
+# constructor with vector of standard deviations
+MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
+
+# constructor with scalar standard deviation
 MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-function MvNormal(μ::AbstractVector{<:Real}, Σ::VecOrMat{<:Real})
-    R = Base.promote_eltype(μ, Σ)
-    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
-end
+# constructor without mean vector
+MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(ZeroVector(eltype(Σ), size(Σ, 1)), Σ)
 
-function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
-    R = Base.promote_eltype(μ, σ.λ)
-    MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
-end
-MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
-MvNormal(Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(PDMat(Σ))
-MvNormal(Σ::Diagonal{<:Real}) = MvNormal(PDiagMat(diag(Σ)))
-MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
-MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
-
+# special constructor
+MvNormal(d::Int, σ::Real) = MvNormal(ZeroVector(typeof(σ), d), σ)
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
