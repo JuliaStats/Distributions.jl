@@ -56,7 +56,7 @@ end
     @test @inferred(logpdf(Normal(0.0, 0.0), 0.0))           === Inf
     @test @inferred(logpdf(Normal(0.0, 0.0), -1.0))          === -Inf
     @test @inferred(logpdf(Normal(0.0, 0.0), 0.0f0))         === Inf
-    @test @inferred(isnan(logpdf(Normal(0.0, 0.0), NaN)))
+    @test @inferred(logpdf(Normal(0.0, 0.0), NaN))           === NaN
     @test @inferred(logpdf(Normal(0.0f0, 0.0f0), 0.0))       === Inf
     @test @inferred(logpdf(Normal(0.0f0, 0.0f0), 0.0f0))     === Inf32
     @test @inferred(logpdf(Normal(0.0, 0.0), NaN))           === NaN
