@@ -155,7 +155,7 @@ end
 
         for (d1, d2) in Iterators.product(dist_list, dist_list)
             d3 = convolve(d1, d2)
-            @test isa(d3, IsoNormal) || isa(d3, DiagNormal)
+            @test d3 isa Union{IsoNormal,DiagNormal,ZeroMeanIsoNormal,ZeroMeanDiagNormal}
             @test d3.μ == d1.μ .+ d2.μ
             @test Matrix(d3.Σ) == Matrix(d1.Σ + d2.Σ)  # isequal not defined for PDMats
         end
@@ -188,7 +188,7 @@ end
 
         for (d1, d2) in Iterators.product(dist_list, dist_list)
             d3 = convolve(d1, d2)
-            @test isa(d3, FullNormal)
+            @test d3 isa Union{FullNormal,ZeroMeanFullNormal}
             @test d3.μ == d1.μ .+ d2.μ
             @test d3.Σ.mat == d1.Σ.mat + d2.Σ.mat # isequal not defined for PDMats
         end

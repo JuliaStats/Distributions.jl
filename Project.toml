@@ -4,6 +4,7 @@ authors = ["JuliaStats"]
 version = "0.21.9"
 
 [deps]
+FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
