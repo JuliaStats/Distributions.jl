@@ -16,7 +16,7 @@ n_tsamples = 100
                                           Triweight(2),
                                           Triweight(1, 3),
                                           Triweight(1)]
-    
+
     test_distr(distr, n_tsamples; testquan=false)
 end
 
@@ -32,11 +32,11 @@ using ForwardDiff
     n64 = Normal(1., 0.1)
     nbig = Normal(big(pi), big(ℯ))
 
-    @test eltype(n32) === Float32
+    @test eltype(typeof(n32)) === Float32
     @test eltype(rand(n32)) === Float32
     @test eltype(rand(n32, 4)) === Float32
 
-    @test eltype(n64) === Float64
+    @test eltype(typeof(n64)) === Float64
     @test eltype(rand(n64)) === Float64
     @test eltype(rand(n64, 4)) === Float64
 end

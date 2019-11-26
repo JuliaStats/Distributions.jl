@@ -33,7 +33,7 @@ mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
-insupport(d::Product, x::AbstractArray) = all(insupport.(d.v, x))
+insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})

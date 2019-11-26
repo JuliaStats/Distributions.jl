@@ -158,6 +158,8 @@ mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
 
+Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
+
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = Matrix(inv(d.J))
 invcov(d::MvNormalCanon) = Matrix(d.J)

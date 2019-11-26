@@ -263,7 +263,7 @@ function get_evalsamples(d::UnivariateDistribution{<:CountableSupport},
                          q::Float64)
     # samples for testing evaluation functions (even spacing)
 
-    T = eltype(d)
+    T = eltype(typeof(d))
     lv = (islowerbounded(d) ? minimum(d) : floor(T,quantile(d, q/2)))::T
     hv = (isupperbounded(d) ? maximum(d) : ceil(T,cquantile(d, q/2)))::T
     @assert lv <= hv

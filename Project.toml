@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.21.5"
+version = "0.21.9"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -17,9 +17,9 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 [compat]
 PDMats = "0.9"
 QuadGK = "2"
-SpecialFunctions = "0.7"
+SpecialFunctions = "0.8"
 StatsBase = "0.32"
-StatsFuns = "0.8"
+StatsFuns = "0.8, 0.9"
 julia = "1"
 
 [extras]

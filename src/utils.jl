@@ -47,7 +47,6 @@ end
 
 ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
 
-Base.eltype(v::ZeroVector{T}) where {T} = T
 Base.length(v::ZeroVector) = v.len
 Base.size(v::ZeroVector) = (v.len,)
 Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)

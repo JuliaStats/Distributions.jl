@@ -31,7 +31,7 @@ for v in (15, π, 0x33, 14.0)
 end
 
 for idx in eachindex(Z)
-    @test Z[idx] == zero(eltype(Z))
+    @test Z[idx] == zero(eltype(typeof(Z)))
 end
 
 # Ensure that utilities functions works with abstract arrays

@@ -216,8 +216,12 @@ function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
     MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
 end
 MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
+MvNormal(Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(PDMat(Σ))
+MvNormal(Σ::Diagonal{<:Real}) = MvNormal(PDiagMat(diag(Σ)))
 MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
+
+Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real

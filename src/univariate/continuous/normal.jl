@@ -64,6 +64,8 @@ params(d::Normal) = (d.μ, d.σ)
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
 
+Base.eltype(::Type{Normal{T}}) where {T} = T
+
 #### Statistics
 
 mean(d::Normal) = d.μ
@@ -100,197 +102,141 @@ Computes the z-value based on a Normal distribution and a x-value.
 zval(d::Normal, x::Number) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
+
 # logpdf
+_normlogpdf(z::Real) = -(abs2(z) + log2π)/2
+
 function logpdf(d::Normal, x::Real)
+    μ, σ = d.μ, d.σ
     if iszero(d.σ)
-        d.μ == x ? Inf : -Inf
+        if x == μ
+            z = zval(Normal(μ, one(σ)), x)
+        else
+            z = zval(d, x)
+            σ = one(σ)
+        end
     else
-        -(zval(d, x)^2 + log2π) / 2 - log(d.σ)
+        z = zval(Normal(μ, σ), x)
     end
+    return _normlogpdf(z) - log(σ)
 end
+
 # pdf
+_normpdf(z::Real) = exp(-abs2(z)/2) * invsqrt2π
+
 function pdf(d::Normal, x::Real)
-    if iszero(d.σ)
-        d.μ == x ? Inf : 0.0
+    μ, σ = d.μ, d.σ
+    if iszero(σ)
+        if x == μ
+            z = zval(Normal(μ, one(σ)), x)
+        else
+            z = zval(d, x)
+            σ = one(σ)
+        end
     else
-        exp(-zval(d, x)^2 / 2) * invsqrt2π / d.σ
+        z = zval(Normal(μ, σ), x)
+    end
+    return _normpdf(z) / σ
+end
+
+# logcdf
+function _normlogcdf(z::Real)
+    if z < -one(z)
+        return log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
+    else
+        return log1p(-erfc(z * invsqrt2)/2)
     end
 end
-# logcdf
+
 function logcdf(d::Normal, x::Real)
-    if iszero(d.σ)
-        d.μ ≤ x ? 0.0 : -Inf
+    if iszero(d.σ) && x == d.μ
+        z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
         z = zval(d, x)
-        if z < -1.0
-            log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
-        else
-            log1p(-erfc(z * invsqrt2)/2)
-        end
+    end
+    return _normlogcdf(z)
+end
+
+# logccdf
+function _normlogccdf(z::Real)
+    if z > one(z)
+        return log(erfcx(z * invsqrt2)/2) - abs2(z)/2
+    else
+        return log1p(-erfc(-z * invsqrt2)/2)
     end
 end
-# logccdf
+
 function logccdf(d::Normal, x::Real)
     if iszero(d.σ) && x == d.μ
         z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
         z = zval(d, x)
     end
-    z > 1.0 ?
-    log(erfcx(z * invsqrt2) / 2) - z^2 / 2 :
-    log1p(-erfc(-z * invsqrt2) / 2)
+    return _normlogccdf(z)
 end
+
 # cdf
-function cdf(d::Normal{T}, x::S) where {T, S <: Real}
-    if iszero(d.σ)
-        convert(promote_type(T, S), d.μ ≤ x)
+_normcdf(z::Real) = erfc(-z * invsqrt2)/2
+
+function cdf(d::Normal, x::Real)
+    if iszero(d.σ) && x == d.μ
+        z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
-        erfc(-zval(d, x) * invsqrt2) / 2
+        z = zval(d, x)
     end
+    return _normcdf(z)
 end
+
 # ccdf
+_normccdf(z::Real) = erfc(z * invsqrt2)/2
+
 function ccdf(d::Normal, x::Real)
-    z = iszero(d.σ) && x == d.μ ?
-        zval(Normal(zero(d.μ), d.σ), one(x)) :
-        zval(d, x)
-    erfc(z * invsqrt2) / 2
-end
-# invlogcdf
-"""
-    norminvlogcdf(lp::Real)
-
-Helper function that calls `_norminvlogcdf_impl` used for `invlogccdf` with the Normal distributions.
-"""
-norminvlogcdf(lp::Real) = _norminvlogcdf_impl(convert(Float64, lp))
-norminvlogcdf(lp::Union{Float16,Float32}) = convert(typeof(lp), _norminvlogcdf_impl(convert(Float64, lp)))
-invlogcdf(d::Normal, lp::Real) = xval(d, norminvlogcdf(lp))
-# invlogccdf
-invlogccdf(d::Normal, lp::Real) = xval(d, -norminvlogcdf(lp))
-# quantile
-function quantile(d::Normal{T}, p::Real) where {T}
-    if iszero(d.σ)
-        if iszero(p)
-            T(-Inf)
-        elseif isone(p)
-            T(Inf)
-        else
-            T(0.5)
-        end
-    end
-    T(xval(d, -erfcinv(2p) * sqrt2))
-end
-# cquantile
-function cquantile(d::Normal{T}, q::Real) where {T}
-    if iszero(d.σ)
-        if iszero(q)
-            T(Inf)
-        elseif isone(q)
-            T(-Inf)
-        else
-            T(0.5)
-        end
-    end
-    T(xval(d, erfcinv(2q) * sqrt2))
-end
-
-# norminvcdf & norminvlogcdf implementation
-"""
-    _norminvlogcdf_impl(lp::Float64)
-
-Uses `_qnorm_ker1` and `_qnorm_ker2` to obtain the ational approximations for the inverse cdf and its logarithm, from:
-Wichura, M.J. (1988) Algorithm AS 241: The Percentage Points of the Normal Distribution
-  Journal of the Royal Statistical Society. Series C (Applied Statistics), Vol. 37, No. 3, pp. 477-484
-"""
-function _norminvlogcdf_impl(lp::Float64)
-    if isfinite(lp) && lp < 0.0
-        q = exp(lp) - 0.5
-        # qnorm_kernel(lp, q, true)
-        if abs(q) ≤ 0.425
-            _qnorm_ker1(q)
-        else
-            r = sqrt(q < 0 ? -lp : -log1mexp(lp))
-            return copysign(_qnorm_ker2(r), q)
-        end
-    elseif lp ≥ 0.0
-        iszero(lp) ? Inf : NaN
-    else # lp is -Inf or NaN
-        lp
-    end
-end
-"""
-    _qnorm_ker1(r::Float64)
-
-Along with `_qnorm_ker2` these helpers enable the rational approximations for the inverse cdf and its logarithm
-"""
-function _qnorm_ker1(q::Float64)
-    # pre-condition: abs(q) ≤ 0.425
-    r = 0.180625 - q^2
-    return q * @horner(r,
-                       3.38713_28727_96366_6080e0,
-                       1.33141_66789_17843_7745e2,
-                       1.97159_09503_06551_4427e3,
-                       1.37316_93765_50946_1125e4,
-                       4.59219_53931_54987_1457e4,
-                       6.72657_70927_00870_0853e4,
-                       3.34305_75583_58812_8105e4,
-                       2.50908_09287_30122_6727e3) /
-    @horner(r,
-            1.0,
-            4.23133_30701_60091_1252e1,
-            6.87187_00749_20579_0830e2,
-            5.39419_60214_24751_1077e3,
-            2.12137_94301_58659_5867e4,
-            3.93078_95800_09271_0610e4,
-            2.87290_85735_72194_2674e4,
-            5.22649_52788_52854_5610e3)
-end
-"""
-    _qnorm_ker2(r::Float64)
-
-Along with `_qnorm_ker1` these helpers enable the rational approximations for the inverse cdf and its logarithm
-"""
-function _qnorm_ker2(r::Float64)
-    if r < 5.0
-        r -= 1.6
-        @horner(r,
-                1.42343_71107_49683_57734e0,
-                4.63033_78461_56545_29590e0,
-                5.76949_72214_60691_40550e0,
-                3.64784_83247_63204_60504e0,
-                1.27045_82524_52368_38258e0,
-                2.41780_72517_74506_11770e-1,
-                2.27238_44989_26918_45833e-2,
-                7.74545_01427_83414_07640e-4) /
-        @horner(r,
-                1.0,
-                2.05319_16266_37758_82187e0,
-                1.67638_48301_83803_84940e0,
-                6.89767_33498_51000_04550e-1,
-                1.48103_97642_74800_74590e-1,
-                1.51986_66563_61645_71966e-2,
-                5.47593_80849_95344_94600e-4,
-                1.05075_00716_44416_84324e-9)
+    if iszero(d.σ) && x == d.μ
+        z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
-        r -= 5.0
-        @horner(r,
-                6.65790_46435_01103_77720e0,
-                5.46378_49111_64114_36990e0,
-                1.78482_65399_17291_33580e0,
-                2.96560_57182_85048_91230e-1,
-                2.65321_89526_57612_30930e-2,
-                1.24266_09473_88078_43860e-3,
-                2.71155_55687_43487_57815e-5,
-                2.01033_43992_92288_13265e-7) /
-        @horner(r,
-                1.0,
-                5.99832_20655_58879_37690e-1,
-                1.36929_88092_27358_05310e-1,
-                1.48753_61290_85061_48525e-2,
-                7.86869_13114_56132_59100e-4,
-                1.84631_83175_10054_68180e-5,
-                1.42151_17583_16445_88870e-7,
-                2.04426_31033_89939_78564e-15)
+        z = zval(d, x)
     end
+    return _normccdf(z)
+end
+
+# quantile
+function quantile(d::Normal, p::Real)
+    # Promote to ensure that we don't compute erfcinv in low precision and then promote
+    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    q = xval(d, -erfcinv(2*_p) * sqrt2)
+    if isnan(_p)
+        return oftype(q, _p)
+    elseif iszero(_σ)
+        # Quantile not uniquely defined at p=0 and p=1 when σ=0
+        if iszero(_p)
+            return oftype(q, -Inf)
+        elseif isone(_p)
+            return oftype(q, Inf)
+        else
+            return oftype(q, _μ)
+        end
+    end
+    return q
+end
+
+# cquantile
+function cquantile(d::Normal, p::Real)
+    # Promote to ensure that we don't compute erfcinv in low precision and then promote
+    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    q = xval(d, erfcinv(2*_p) * sqrt2)
+    if isnan(_p)
+        return oftype(q, _p)
+    elseif iszero(d.σ)
+        # Quantile not uniquely defined at p=0 and p=1 when σ=0
+        if iszero(_p)
+            return oftype(q, Inf)
+        elseif isone(_p)
+            return oftype(q, -Inf)
+        else
+            return oftype(q, _μ)
+        end
+    end
+    return q
 end
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)

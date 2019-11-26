@@ -22,9 +22,10 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
 struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: MultivariateDistribution{ContiguousSupport{Int}}
     n::Int
     p::TV
+    Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)
 end
 
-function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T<:Real}
+function Multinomial(n::Integer, p::TV; check_args=true) where {T <: Real, TV <: AbstractVector{T}}
     if check_args
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
@@ -33,10 +34,10 @@ function Multinomial(n::Integer, p::AbstractVector{T}; check_args=true) where {T
             throw(ArgumentError("p = $p is not a probability vector."))
         end
     end
-    return Multinomial{T}(n, p)
+    return Multinomial{T, TV}(n, p)
 end
 
-Multinomial(n::Integer, k::Integer) = Multinomial{Float64}(round(Int, n), fill(1.0 / k, k))
+Multinomial(n::Integer, k::Integer) = Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
 
 # Parameters
 
@@ -115,11 +116,11 @@ end
 
 function entropy(d::Multinomial)
     n, p = params(d)
-    s = -lgamma(n+1) + n*entropy(p)
+    s = -loggamma(n+1) + n*entropy(p)
     for pr in p
         b = Binomial(n, pr)
         for x in 0:n
-            s += pdf(b, x) * lgamma(x+1)
+            s += pdf(b, x) * loggamma(x+1)
         end
     end
     return s
@@ -148,11 +149,11 @@ function _logpdf(d::Multinomial, x::AbstractVector{T}) where T<:Real
     S = eltype(p)
     R = promote_type(T, S)
     insupport(d,x) || return -R(Inf)
-    s = R(lgamma(n + 1))
+    s = R(loggamma(n + 1))
     for i = 1:length(p)
         @inbounds xi = x[i]
         @inbounds p_i = p[i]
-        s -= R(lgamma(R(xi) + 1))
+        s -= R(loggamma(R(xi) + 1))
         s += xlogy(xi, p_i)
     end
     return s

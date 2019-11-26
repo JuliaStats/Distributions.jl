@@ -40,11 +40,11 @@ using Test
         @testset "Type $T" begin
             for d in (MvNormal,MvLogNormal,MvNormalCanon,Dirichlet)
                 dist = d(map(T,ones(2)))
-                @test eltype(dist) == T
+                @test eltype(typeof(dist)) == T
                 @test eltype(rand(dist)) == eltype(dist)
             end
             dist = Distributions.mvtdist(map(T,1.0),map(T,[1.0 0.0; 0.0 1.0]))
-            @test eltype(dist) == T
+            @test eltype(typeof(dist)) == T
             @test eltype(rand(dist)) == eltype(dist)
         end
     end

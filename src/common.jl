@@ -58,14 +58,13 @@ Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
-    eltype(s::Sampleable)
-    eltype(::Support)
+    eltype(::Type{<:Sampleable})
+    eltype(::Type{<:Support{N}})
 
 The default element type of a sample. This is the type of elements of the samples generated
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(::Sampleable{F, <: Support{N}}) where {F, N} = N
 Base.eltype(::Type{<:Sampleable{F, <: Support{N}}}) where {F, N} = N
 Base.eltype(::Type{<:Support{N}}) where {N} = N
 

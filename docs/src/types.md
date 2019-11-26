@@ -52,8 +52,8 @@ The basic functionalities that a sampleable object provides is to *retrieve info
 ```@docs
 length(::Sampleable)
 size(::Sampleable)
-nsamples(::Type{Sampleable}, x::Any)
-eltype(::Sampleable)
+nsamples(::Type{Sampleable}, ::Any)
+eltype(::Type{Sampleable})
 rand(::AbstractRNG, ::Sampleable)
 rand!(::AbstractRNG, ::Sampleable, ::AbstractArray)
 ```
