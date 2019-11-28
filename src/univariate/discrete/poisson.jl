@@ -141,101 +141,18 @@ fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 
 ## samplers
 
-# TODO: remove RFunctions dependency once Poisson has been fully implemented
-# Currently depends on a quantile function for one option
-@rand_rdist(Poisson)
-rand(d::Poisson) = convert(Int, StatsFuns.RFunctions.poisrand(d.λ))
-
-# algorithm from:
-#   J.H. Ahrens, U. Dieter (1982)
-#   "Computer Generation of Poisson Deviates from Modified Normal Distributions"
-#   ACM Transactions on Mathematical Software, 8(2):163-179
-# TODO: implement poisson sampler
 function rand(rng::AbstractRNG, d::Poisson)
-    μ = d.λ
-    if μ >= 10.0  # Case A
-
-        s = sqrt(μ)
-        d = 6.0*μ^2
-        L = floor(Int64, μ-1.1484)
-
-        # Step N
-        T = randn(rng)
-        G = μ + s*T
-
-        if G >= 0.0
-            K = floor(Int64, G)
-            # Step I
-            if K >= L
-                return K
-            end
-
-            # Step S
-            U = rand(rng)
-            if d*U >= (μ-K)^3
-                return K
-            end
-
-            # Step P
-            px,py,fx,fy = procf(μ,K,s)
-
-            # Step Q
-            if fy*(1-U) <= py*exp(px-fx)
-                return K
-            end
-        end
-
-        while true
-            # Step E
-            E = randexp(rng)
-            U = rand(rng)
-            U = 2.0*U-1.0
-            T = 1.8+copysign(E,U)
-            if T <= -0.6744
-                continue
-            end
-
-            K = floor(Int64, μ + s*T)
-            px,py,fx,fy = procf(μ,K,s)
-            c = 0.1069/μ
-
-            # Step H
-            if c*abs(U) <= py*exp(px+E)-fy*exp(fx+E)
-                return K
-            end
-        end
-    else # Case B
-        # Ahrens & Dieter use a sequential method for tabulating and looking up quantiles.
-        # TODO: check which is more efficient.
-        return quantile(d,rand(rng))
+    if rate(d) < 6
+        return rand(rng, PoissonCountSampler(d))
+    else
+        return rand(rng, PoissonADSampler(d))
     end
 end
 
-
-# Procedure F
-function procf(μ,K,s)
-    ω = 0.3989422804014327/s
-    b1 = 0.041666666666666664/μ
-    b2 = 0.3*b1^2
-    c3 = 0.14285714285714285*b1*b2
-    c2 = b2 - 15.0*c3
-    c1 = b1 - 6.0*b2 + 45.0*c3
-    c0 = 1.0 - b1 + 3.0*b2 - 15.0*c3
-
-    if K < 10
-        px = -μ
-        py = μ^K/factorial(K) # replace with loopup?
+function sampler(d::Poisson)
+    if rate(d) < 6
+        return PoissonCountSampler(d)
     else
-        δ = 0.08333333333333333/K
-        δ -= 4.8*δ^3
-        V = (μ-K)/K
-        px = K*log1pmx(V) - δ # avoids need for table
-        py = 0.3989422804014327/sqrt(K)
-
+        return PoissonADSampler(d)
     end
-    X = (K-μ+0.5)/s
-    X2 = X^2
-    fx = -0.5*X2 # missing negation in paper
-    fy = ω*(((c3*X2+c2)*X2+c1)*X2+c0)
-    return px,py,fx,fy
 end
