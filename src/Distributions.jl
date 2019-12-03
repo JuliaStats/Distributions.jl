@@ -145,6 +145,7 @@ export
     TDist,
     TriangularDist,
     Triweight,
+    truncate,
     Truncated,
     TruncatedNormal,
     Uniform,
