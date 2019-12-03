@@ -1,5 +1,5 @@
 """
-    truncate(d, l, u):
+    truncated(d, l, u):
 
 Truncate a distribution between `l` and `u`.
 Builds the most appropriate distribution for the type of `d`,
@@ -16,11 +16,11 @@ should be implemented.
 
 Throws an error if `l >= u`.
 """
-function truncate(d::UnivariateDistribution, l::Real, u::Real)
-    return truncate(d, promote(l, u)...)
+function truncated(d::UnivariateDistribution, l::Real, u::Real)
+    return truncated(d, promote(l, u)...)
 end
 
-function truncate(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
+function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l < u || error("lower bound should be less than upper bound.")
     T2 = promote_type(T, eltype(d))
     lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
@@ -29,7 +29,7 @@ function truncate(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
 end
 
-truncate(d::UnivariateDistribution, l::Integer, u::Integer) = truncate(d, float(l), float(u))
+truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
 
 """
     Truncated(d, l, u):
@@ -66,8 +66,9 @@ function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
 end
 
-@deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncate(d, l, u)
-@deprecate Truncated(d::UnivariateDistribution, l::Integer, u::Integer) truncate(d, l, u)
+Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
+
+@deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)
