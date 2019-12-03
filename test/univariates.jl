@@ -23,10 +23,10 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         println("    testing $(ex)")
         dtype = eval(dsym)
         d = eval(ex)
-        if dtype == TruncatedNormal
+        if dsym == :truncated
             @test isa(d, Truncated{Normal{Float64}})
         else
-            @test isa(dtype, Type) && dtype <: UnivariateDistribution
+            @test dtype isa Type && dtype <: UnivariateDistribution
             @test d isa dtype
         end
 
