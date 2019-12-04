@@ -35,7 +35,8 @@ truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, floa
     Truncated(d, l, u):
 
 Create a generic wrapper for a truncated distribution.
-Prefer calling the generic `truncated(d, l, u)`.
+Prefer calling the function `truncated(d, l, u)`, which can choose the appropriate
+representation of the truncated distribution.
 
 # Arguments
 - `d::UnivariateDistribution`: The original distribution.
