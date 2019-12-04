@@ -13,9 +13,17 @@ end
 
 ## Assuming that discrete distributions only take integer values.
 function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(x -> f(x)*g(x), leftEnd:rightEnd)
+    sum(leftEnd:rightEnd) do x
+        pdf(distr,x) * g(x)
+    end
+end
+
+function expectation(distr::CountableUnivariateDistribution,
+                     g::Function, epsilon::Real)
+    sum(support(distr)) do x
+        pdf(distr,x) * g(x)
+    end
 end
 
 function expectation(distr::UnivariateDistribution, g::Function)

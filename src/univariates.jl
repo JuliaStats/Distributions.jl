@@ -124,10 +124,11 @@ end
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
      insupport!(BitArray(undef, size(X)), d, X)
 
-insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}},x::Real) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = minimum(d) <= x <= maximum(d)
+insupport(d::D,x::T) where {T, D<:UnivariateDistribution{CountableSupport{T}}} = x ∈ support(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:UnivariateDistribution{ContinuousSupport{T}}} where {T} = RealInterval(minimum(d), maximum(d))
 support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support

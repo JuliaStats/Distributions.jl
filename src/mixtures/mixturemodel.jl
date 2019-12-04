@@ -10,16 +10,16 @@
 
   - probs(d):       return a vector of prior probabilities over components.
 """
-abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
+abstract type AbstractMixtureModel{VF<:VariateForm,VS<:Support,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+MixtureModel{VF<:VariateForm,VS<:Support,C<:Distribution,CT<:Real}
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
 * `CT` the type for probabilities of the prior
 """
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
+struct MixtureModel{VF<:VariateForm,VS<:Support,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::Categorical{CT}
 
@@ -30,9 +30,9 @@ struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <
     end
 end
 
-const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
-const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
-const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
+const UnivariateMixture{S<:Support,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
+const MultivariateMixture{S<:Support, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
+const MatrixvariateMixture{S<:Support,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
 
 # Interface
 
@@ -125,7 +125,7 @@ the components given by ``params``, and a prior probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
 function MixtureModel(::Type{C}, params::AbstractArray) where C<:Distribution
-    components = C[_construct_component(C, a) for a in params]
+    components = [_construct_component(C, a) for a in params]
     MixtureModel(components)
 end
 
@@ -142,7 +142,7 @@ _construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
 _construct_component(::Type{C}, args::Tuple) where {C<:Distribution} = C(args...)
 
 function MixtureModel(::Type{C}, params::AbstractArray, p::Vector{T}) where {C<:Distribution,T<:Real}
-    components = C[_construct_component(C, a) for a in params]
+    components = [_construct_component(C, a) for a in params]
     MixtureModel(components, p)
 end
 

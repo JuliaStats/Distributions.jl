@@ -20,7 +20,7 @@ Dirichlet(alpha)         # Dirichlet distribution with parameter vector alpha
 Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
 ```
 """
-struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
+struct Dirichlet{T<:Real} <: MultivariateDistribution{ContinuousSupport{T}}
     alpha::Vector{T}
     alpha0::T
     lmnB::T

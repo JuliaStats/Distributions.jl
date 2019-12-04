@@ -66,7 +66,7 @@ const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zeros{Float64,1,Axes}}
 const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zeros{Float64,1,Axes}}
 ```
 """
-abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
+abstract type AbstractMvNormal{T<:Real} <: MultivariateDistribution{ContinuousSupport{T}} end
 
 ### Generic methods (for all AbstractMvNormal subtypes)
 
@@ -169,7 +169,7 @@ isotropic covariance matrix corresponding `abs2(sig)*I`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal{T}
     μ::Mean
     Σ::Cov
 end
