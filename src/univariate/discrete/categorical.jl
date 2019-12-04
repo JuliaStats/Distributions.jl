@@ -80,8 +80,6 @@ end
 
 pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
 
-logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(probs(d)[x]) : -Inf
-
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
     vlast = round(Int, last(rgn))
