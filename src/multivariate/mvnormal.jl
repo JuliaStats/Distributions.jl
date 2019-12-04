@@ -48,8 +48,7 @@ struct MvNormal{Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
 end
 ```
 
-Here, the mean vector can be an instance of any `AbstractVector`, including `ZeroVector`.
-The latter is simply an empty type indicating a vector filled with zeros. The covariance can be
+Here, the mean vector can be an instance of any `AbstractVector`. The covariance can be
 of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
 `PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
 in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
@@ -62,9 +61,9 @@ const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
 const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
 const FullNormal = MvNormal{PDMat,    Vector{Float64}}
 
-const ZeroMeanIsoNormal  = MvNormal{ScalMat,  ZeroVector{Float64}}
-const ZeroMeanDiagNormal = MvNormal{PDiagMat, ZeroVector{Float64}}
-const ZeroMeanFullNormal = MvNormal{PDMat,    ZeroVector{Float64}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zeros{Float64,1,Axes}}
 ```
 """
 abstract type AbstractMvNormal{T<:Real} <: MultivariateDistribution{ContinuousSupport{T}} end
@@ -72,7 +71,7 @@ abstract type AbstractMvNormal{T<:Real} <: MultivariateDistribution{ContinuousSu
 ### Generic methods (for all AbstractMvNormal subtypes)
 
 insupport(d::AbstractMvNormal, x::AbstractVector) =
-    length(d) == length(x) && allfinite(x)
+    length(d) == length(x) && all(isfinite, x)
 
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
@@ -156,16 +155,16 @@ Construct a multivariate normal distribution with mean `mu` and covariance repre
     MvNormal(d, sig)
 
 Construct a multivariate normal distribution of dimension `d`, with zero mean, and an
-isotropic covariance as `abs2(sig) * eye(d)`.
+isotropic covariance matrix corresponding `abs2(sig)*I`.
 
 # Arguments
 - `mu::Vector{T<:Real}`: The mean vector.
 - `d::Real`: dimension of distribution.
 - `sig`: The covariance, which can in of either of the following forms (with `T<:Real`):
-    1. subtype of `AbstractPDMat`
-    2. symmetric matrix of type `Matrix{T}`
-    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`.
-    4. real-valued number: indicating an isotropic covariance as `abs2(sig) * eye(d)`.
+    1. subtype of `AbstractPDMat`,
+    2. symmetric matrix of type `Matrix{T}`,
+    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`,
+    4. real-valued number: indicating an isotropic covariance matrix corresponding `abs2(sig) * I`.
 
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
@@ -181,9 +180,9 @@ const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
 const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const FullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-const ZeroMeanIsoNormal  = MvNormal{Float64,ScalMat{Float64},ZeroVector{Float64}}
-const ZeroMeanDiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-const ZeroMeanFullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
@@ -196,9 +195,7 @@ function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
-function MvNormal(Σ::Cov) where {T, Cov<:AbstractPDMat{T}}
-    MvNormal{T,Cov,ZeroVector{T}}(ZeroVector(T, dim(Σ)), Σ)
-end
+MvNormal(Σ::AbstractPDMat) = MvNormal(Zeros{eltype(Σ)}(dim(Σ)), Σ)
 
 MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(μ, PDMat(Σ))
@@ -216,8 +213,13 @@ function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
     MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
 end
 MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
+MvNormal(Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(PDMat(Σ))
+MvNormal(Σ::Diagonal{<:Real}) = MvNormal(PDiagMat(diag(Σ)))
 MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
 MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
+
+
+Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real

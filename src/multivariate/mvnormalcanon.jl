@@ -19,7 +19,7 @@ which is also a subtype of `AbstractMvNormal` to represent a multivariate normal
 canonical parameters. Particularly, `MvNormalCanon` is defined as:
 
 ```julia
-struct MvNormalCanon{P<:AbstractPDMat,V<:Union{Vector,ZeroVector}} <: AbstractMvNormal
+struct MvNormalCanon{P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -33,9 +33,9 @@ const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
 const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
 const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
 
-const ZeroMeanFullNormalCanon = MvNormalCanon{PDMat,    ZeroVector{Float64}}
-const ZeroMeanDiagNormalCanon = MvNormalCanon{PDiagMat, ZeroVector{Float64}}
-const ZeroMeanIsoNormalCanon  = MvNormalCanon{ScalMat,  ZeroVector{Float64}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{Float64,1}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{Float64,1}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  Zeros{Float64,1,Axes}}
 ```
 
 A multivariate distribution with canonical parameterization can be constructed using a common constructor `MvNormalCanon` as:
@@ -50,16 +50,17 @@ Construct a multivariate normal distribution with zero mean (thus zero potential
 
     MvNormalCanon(d, J)
 
-Construct a multivariate normal distribution of dimension `d`, with zero mean and a precision matrix as `J * eye(d)`.
+Construct a multivariate normal distribution of dimension `d`, with zero mean and
+an isotropic precision matrix corresponding `J*I`.
 
 # Arguments
 - `d::Int`: dimension of distribution
 - `h::Vector{T<:Real}`: the potential vector, of type `Vector{T}` with `T<:Real`.
 - `J`: the representation of the precision matrix, which can be in either of the following forms (`T<:Real`):
-    1. an instance of a subtype of `AbstractPDMat`
-    2. a square matrix of type `Matrix{T}`
-    3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`.
-    4. a real number: indicating an isotropic precision matrix as `J * eye(d)`.
+    1. an instance of a subtype of `AbstractPDMat`,
+    2. a square matrix of type `Matrix{T}`,
+    3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`,
+    4. a real number: indicating an isotropic precision matrix corresponding `J*I`.
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
@@ -73,9 +74,9 @@ const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Ve
 const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
-const ZeroMeanFullNormalCanon = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},ZeroVector{Float64}}
-const ZeroMeanDiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},ZeroVector{Float64}}
-const ZeroMeanIsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},ZeroVector{Float64}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
 
 
 ### Constructors
@@ -99,9 +100,9 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{S}, J::P) where 
     MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-function MvNormalCanon(J::P) where P<:AbstractPDMat
-    z = ZeroVector(eltype(J), dim(J))
-    MvNormalCanon{eltype(J),P,ZeroVector{eltype(J)}}(z, z, J)
+function MvNormalCanon(J::AbstractPDMat)
+    z = Zeros{eltype(J)}(dim(J))
+    MvNormalCanon(z, z, J)
 end
 
 function MvNormalCanon(h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPDMat}
@@ -142,13 +143,13 @@ end
 
 meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))
 # meanform{C, T<:Real}(d::MvNormalCanon{T,C,Vector{T}}) = MvNormal(d.μ, inv(d.J))
-# meanform{C, T<:Real}(d::MvNormalCanon{T,C,ZeroVector{T}}) = MvNormal(inv(d.J))
+# meanform{C, T<:Real}(d::MvNormalCanon{T,C,Zeros{T}}) = MvNormal(inv(d.J))
 
 function canonform(d::MvNormal{T,C,<:AbstractVector{T}}) where {C, T<:Real}
     J = inv(d.Σ)
     return MvNormalCanon(d.μ, J * collect(d.μ), J)
 end
-canonform(d::MvNormal{T,C,ZeroVector{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ))
+canonform(d::MvNormal{T,C,Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ))
 
 ### Basic statistics
 
@@ -156,6 +157,8 @@ length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
+
+Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = Matrix(inv(d.J))

@@ -88,7 +88,7 @@ Here, `x` can be a single sample or an array of multiple samples.
 logpdf(d::AbstractMixtureModel, x::Any)
 
 """
-    rand(d::Union{UnivariateMixture, MultivariateDistribution})
+    rand(d::Union{UnivariateMixture, MultivariateMixture})
 
 Draw a sample from the mixture model `d`.
 

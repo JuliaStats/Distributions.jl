@@ -30,20 +30,19 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
 end
 
-function Bernoulli(p::T) where {T <: Real}
-    @check_args(Bernoulli, zero(p) <= p <= one(p))
+function Bernoulli(p::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Bernoulli, zero(p) <= p <= one(p))
     return Bernoulli{T}(p)
 end
 
-Bernoulli(p::T, ::NoArgCheck) where {T<:Real} = Bernoulli{T}(p)
 Bernoulli(p::Integer) = Bernoulli(float(p))
-Bernoulli() = Bernoulli(0.5, NoArgCheck())
+Bernoulli() = Bernoulli(0.5, check_args=false)
 
 @distr_support Bernoulli 0 1
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
-convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), NoArgCheck())
+convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), check_args=false)
 
 #### Parameters
 
@@ -51,7 +50,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
-@inline partype(::Bernoulli{T}) where {T} = T
+partype(::Bernoulli{T}) where {T} = T
 
 
 #### Properties

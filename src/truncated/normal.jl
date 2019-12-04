@@ -6,11 +6,8 @@ The *truncated normal distribution* is a particularly important one in the famil
 We provide additional support for this type with `TruncatedNormal` which calls `Truncated(Normal(mu, sigma), l, u)`.
 Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
 """
-TruncatedNormal(mu::Float64, sigma::Float64, a::Float64, b::Float64) =
-    Truncated(Normal(mu, sigma), a, b)
-
 TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
-    TruncatedNormal(Float64(mu), Float64(sigma), Float64(a), Float64(b))
+    Truncated(Normal(mu, sigma), a, b)
 
 ### statistics
 

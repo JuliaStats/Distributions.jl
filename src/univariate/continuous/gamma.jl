@@ -27,24 +27,24 @@ External links
 struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
+    Gamma{T}(α, θ) where {T} = new{T}(α, θ)
 end
 
-function Gamma(α, θ) where {T <: Real}
-    @check_args(Gamma, α > zero(α) && θ > zero(θ))
+function Gamma(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
     return Gamma{T}(α, θ)
 end
 
-Gamma(α::T, θ::T, ::NoArgCheck) where {T<:Real} = Gamma{T}(α, θ)
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
 Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
 Gamma(α::T) where {T <: Real} = Gamma(α, one(T))
-Gamma() = Gamma(1.0, 1.0, NoArgCheck())
+Gamma() = Gamma(1.0, 1.0, check_args=false)
 
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
-convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), NoArgCheck())
+convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), check_args=false)
 
 #### Parameters
 
@@ -53,8 +53,7 @@ scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
 params(d::Gamma) = (d.α, d.θ)
-@inline partype(d::Gamma{T}) where {T<:Real} = T
-
+partype(::Gamma{T}) where {T} = T
 
 #### Statistics
 
@@ -73,7 +72,7 @@ end
 
 function entropy(d::Gamma)
     (α, θ) = params(d)
-    α + lgamma(α) + (1 - α) * digamma(α) + log(θ)
+    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
 mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)

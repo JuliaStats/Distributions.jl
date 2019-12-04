@@ -28,22 +28,18 @@ External links
 struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     invd::Gamma{T}
     θ::T
-    InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), NoArgCheck()), θ)
+    InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), check_args=false), θ)
 end
 
-function InverseGamma(α::T, θ::T) where {T <: Real}
-    @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
-    return InverseGamma{T}(α, θ)
-end
-
-function InverseGamma(α::T, θ::T, ::NoArgCheck) where {T<:Real}
+function InverseGamma(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
     return InverseGamma{T}(α, θ)
 end
 
 InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
 InverseGamma(α::Integer, θ::Integer) = InverseGamma(float(α), float(θ))
 InverseGamma(α::T) where {T <: Real} = InverseGamma(α, one(T))
-InverseGamma() = InverseGamma(1.0, 1.0, NoArgCheck())
+InverseGamma() = InverseGamma(1.0, 1.0, check_args=false)
 
 @distr_support InverseGamma 0.0 Inf
 
@@ -58,12 +54,12 @@ scale(d::InverseGamma) = d.θ
 rate(d::InverseGamma) = scale(d.invd)
 
 params(d::InverseGamma) = (shape(d), scale(d))
-@inline partype(d::InverseGamma{T}) where {T<:Real} = T
+partype(::InverseGamma{T}) where {T} = T
 
 
 #### Parameters
 
-mean(d::InverseGamma{T}) where {T<:Real} = ((α, θ) = params(d); α  > 1 ? θ / (α - 1) : T(Inf))
+mean(d::InverseGamma{T}) where {T} = ((α, θ) = params(d); α  > 1 ? θ / (α - 1) : T(Inf))
 
 mode(d::InverseGamma) = scale(d) / (shape(d) + 1)
 
@@ -84,7 +80,7 @@ end
 
 function entropy(d::InverseGamma)
     (α, θ) = params(d)
-    α + lgamma(α) - (1 + α) * digamma(α) + log(θ)
+    α + loggamma(α) - (1 + α) * digamma(α) + log(θ)
 end
 
 
@@ -94,7 +90,7 @@ pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))
 
 function logpdf(d::InverseGamma, x::Real)
     (α, θ) = params(d)
-    α * log(θ) - lgamma(α) - (α + 1) * log(x) - θ / x
+    α * log(θ) - loggamma(α) - (α + 1) * log(x) - θ / x
 end
 
 cdf(d::InverseGamma, x::Real) = ccdf(d.invd, 1 / x)

@@ -167,7 +167,7 @@ end
 
 #Constructors mirror the ones for MvNormmal
 MvLogNormal(μ::AbstractVector,Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
-MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(eltype(Σ),dim(Σ)),Σ))
+MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(Zeros{eltype(Σ)}(dim(Σ)),Σ))
 MvLogNormal(μ::AbstractVector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
 MvLogNormal(μ::AbstractVector,s::Real) = MvLogNormal(MvNormal(μ,s))
@@ -175,6 +175,8 @@ MvLogNormal(Σ::AbstractMatrix) = MvLogNormal(MvNormal(Σ))
 MvLogNormal(σ::AbstractVector) = MvLogNormal(MvNormal(σ))
 MvLogNormal(d::Int,s::Real) = MvLogNormal(MvNormal(d,s))
 
+
+Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
 
 ### Conversion
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real

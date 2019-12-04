@@ -19,8 +19,8 @@ end
 
 @testset "MatrixBeta construction errors" begin
     @test_throws ArgumentError MatrixBeta(-2, n1, n2)
-    @test_throws ErrorException MatrixBeta(p, p - 2, n2)
-    @test_throws ErrorException MatrixBeta(p, n1, p - 2)
+    @test_throws DomainError MatrixBeta(p, p - 2, n2)
+    @test_throws DomainError MatrixBeta(p, n1, p - 2)
 end
 
 @testset "MatrixBeta params" begin

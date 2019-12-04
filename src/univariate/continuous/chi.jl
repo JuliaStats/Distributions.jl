@@ -26,12 +26,10 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chi(ν::T) where {T<:Real}
-    @check_args(Chi, ν > zero(ν))
+function Chi(ν::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Chi, ν > zero(ν))
     return Chi{T}(ν)
 end
-
-Chi(ν::T, ::NoArgCheck) where {T<:Real} = Chi{T}(ν)
 
 Chi(ν::Integer) = Chi(float(ν))
 
@@ -39,7 +37,7 @@ Chi(ν::Integer) = Chi(float(ν))
 
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), NoArgCheck())
+convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), check_args=false)
 
 #### Parameters
 
@@ -69,7 +67,7 @@ function kurtosis(d::Chi)
 end
 
 entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
-    lgamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
+    loggamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
     d.ν >= 1 || error("Chi distribution has no mode when ν < 1")
@@ -82,7 +80,7 @@ end
 pdf(d::Chi, x::Real) = exp(logpdf(d, x))
 
 logpdf(d::Chi, x::Real) = (ν = d.ν;
-    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - lgamma(ν/2)
+    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
 )
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)

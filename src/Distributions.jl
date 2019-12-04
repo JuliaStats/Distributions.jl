@@ -4,9 +4,11 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
-import Base: size, eltype, length, convert, show, getindex, rand, vec, inv
+import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
+
+using FillArrays
 
 using LinearAlgebra, Printf
 import LinearAlgebra: rank
@@ -233,6 +235,7 @@ export
     pdf,                # probability density function (ContinuousDistribution)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
+    product_distribution, # product of univariate distributions
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
