@@ -1,7 +1,7 @@
 # Truncated Distributions
 
 The package provides the `truncated` function which creates the most
-appropriate distribution to represente a truncated version of a given
+appropriate distribution to represent a truncated version of a given
 distribution.
 
 
