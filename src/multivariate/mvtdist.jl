@@ -26,12 +26,12 @@ function GenericMvTDist(df::T, μ::Mean, Σ::Cov, zmean::Bool) where {Cov<:Abstr
     GenericMvTDist{R, typeof(S), typeof(m)}(R(df), d, zmean, m, S)
 end
 
-GenericMvTDist(df::Real, μ::Mean, Σ::Cov) where {Cov<:AbstractPDMat, Mean<:AbstractVector} =
-    GenericMvTDist(df, μ, Σ, allzeros(μ))
+GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractPDMat) =
+    GenericMvTDist(df, μ, Σ, all(iszero, μ))
 
-function GenericMvTDist(df::T, Σ::Cov) where {Cov<:AbstractPDMat, T<:Real}
-    R = Base.promote_eltype(T, Σ)
-    GenericMvTDist(df, zeros(R,dim(Σ)), Σ, true)
+function GenericMvTDist(df::Real, Σ::AbstractPDMat)
+    R = Base.promote_eltype(df, Σ)
+    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ, true)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -116,7 +116,7 @@ end
 # evaluation (for GenericMvTDist)
 
 insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
-    length(d) == length(x) && allfinite(x)
+    length(d) == length(x) && all(isfinite, x)
 
 function sqmahal(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
     z = d.zeromean ? x : x - d.μ
