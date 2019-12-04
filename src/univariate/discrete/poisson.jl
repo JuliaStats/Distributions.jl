@@ -141,8 +141,10 @@ fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 
 ## samplers
 
+const poissonsampler_threshold = 6
+
 function sampler(d::Poisson)
-    if rate(d) < 6
+    if rate(d) < poissonsampler_threshold
         return PoissonCountSampler(d)
     else
         return PoissonADSampler(d)
