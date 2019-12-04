@@ -102,7 +102,7 @@ function rand(rng::AbstractRNG, sampler::PoissonADSampler)
         c = 0.1069 / μ
 
         # Step H
-        if c * abs(U) <= py * exp(px + E) - fy * exp(fx + E)
+        if c*abs(U) <= py*exp(px + E) - fy*exp(fx + E)
             return K
         end
     end
