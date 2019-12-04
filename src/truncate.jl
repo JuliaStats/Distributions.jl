@@ -3,7 +3,7 @@
 
 Truncate a distribution between `l` and `u`.
 Builds the most appropriate distribution for the type of `d`,
-the fallback is constructing a `Truncated` distribution.
+the fallback is constructing a `Truncated` wrapper.
 
 To implement a specialized truncated form for a distribution `D`,
 the method `truncate(d::D, l::T, u::T) where {T <: Real}`
@@ -34,7 +34,7 @@ truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, floa
 """
     Truncated(d, l, u):
 
-Construct a truncated distribution.
+Create a generic wrapper for a truncated distribution.
 Prefer calling the generic `truncated(d, l, u)`.
 
 # Arguments
