@@ -141,14 +141,6 @@ fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)
 
 ## samplers
 
-function rand(rng::AbstractRNG, d::Poisson)
-    if rate(d) < 6
-        return rand(rng, PoissonCountSampler(d))
-    else
-        return rand(rng, PoissonADSampler(d))
-    end
-end
-
 function sampler(d::Poisson)
     if rate(d) < 6
         return PoissonCountSampler(d)
