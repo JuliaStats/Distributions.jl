@@ -61,4 +61,8 @@ p = ones(10^6) * 1.0e-6
 @test typeof(convert(Categorical{Float32,Vector{Float32}}, d)) == Categorical{Float32,Vector{Float32}}
 @test typeof(convert(Categorical{Float32,Vector{Float32}}, d.p)) == Categorical{Float32,Vector{Float32}}
 
+@testset "test args... constructor" begin
+    @test Categorical(0.3, 0.7) == Categorical([0.3, 0.7])
+end
+
 end
