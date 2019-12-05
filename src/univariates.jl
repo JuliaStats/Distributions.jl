@@ -353,11 +353,11 @@ Evaluate the logarithm of probability density (mass) at `x`.
 Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
 Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
 """
-logpdf(d::UnivariateDistribution, x) = log(pdf(d, x))
+logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::UnivariateDistribution{<:ContiguousSupport}, x::Integer) =
     log(pdf(d, x))
 logpdf(d::UnivariateDistribution{<:ContiguousSupport}, x::Real) =
-    isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
+    isinteger(x) ? logpdf(d, round(Int, x)) : partype(d)(-Inf)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
