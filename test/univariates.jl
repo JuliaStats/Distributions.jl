@@ -36,8 +36,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
 end
 
 
-_parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
-_parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
+_parse_x(d::UnivariateDistribution{ContiguousSupport{T}}, x) where {T} = round(T, x)
+_parse_x(d::UnivariateDistribution{ContinuousSupport{T}}, x) where {T} = T(x)
 
 _json_value(x::Number) = x
 

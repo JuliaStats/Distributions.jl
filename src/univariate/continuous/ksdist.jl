@@ -9,7 +9,7 @@ D_n = \\sup_x | \\hat{F}_n(x) -F(x)| \\sqrt(n)
 
 ``D_n`` converges a.s. to the Kolmogorov distribution.
 """
-struct KSDist <: ContinuousUnivariateDistribution
+struct KSDist <: UnivariateDistribution{ContinuousSupport{Float64}}
     n::Int
 end
 

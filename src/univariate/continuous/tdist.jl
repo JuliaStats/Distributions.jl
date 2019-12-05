@@ -20,7 +20,7 @@ External links
 [Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
 
 """
-struct TDist{T<:Real} <: ContinuousUnivariateDistribution
+struct TDist{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     ν::T
     TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end

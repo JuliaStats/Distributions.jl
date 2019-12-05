@@ -2,7 +2,7 @@
 
 @Base.deprecate expected_logdet meanlogdet
 
-function probs(d::DiscreteUnivariateDistribution)
+function probs(d::UnivariateDistribution{<:ContiguousSupport})
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)
     return pdf(d)
 end
@@ -40,4 +40,19 @@ for fun in [:pdf, :logpdf,
     end
 end
 
-@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::UnivariateDistribution{<:ContiguousSupport}) pdf.(Ref(d), support(d))
+
+# No longer proposing use of many const aliases
+Base.@deprecate_binding ValueSupport Support{Float64}
+Base.@deprecate_binding Discrete     ContiguousSupport{Int}
+Base.@deprecate_binding Continuous   ContinuousSupport{Float64}
+
+const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
+const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+
+Base.@deprecate_binding DiscreteUnivariateDistribution     Distribution{Univariate,    Discrete}
+Base.@deprecate_binding ContinuousUnivariateDistribution   Distribution{Univariate,    Continuous}
+Base.@deprecate_binding DiscreteMultivariateDistribution   Distribution{Multivariate,  Discrete}
+Base.@deprecate_binding ContinuousMultivariateDistribution Distribution{Multivariate,  Continuous}
+Base.@deprecate_binding DiscreteMatrixDistribution         Distribution{Matrixvariate, Discrete}
+Base.@deprecate_binding ContinuousMatrixDistribution       Distribution{Matrixvariate, Continuous}

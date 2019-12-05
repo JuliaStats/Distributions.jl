@@ -1,7 +1,7 @@
 """
     NoncentralT(ν, λ)
 """
-struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralT{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     ν::T
     λ::T
     NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)

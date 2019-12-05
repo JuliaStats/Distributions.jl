@@ -27,7 +27,7 @@ External Links
  * [Generalized Gaussian on Wikipedia](http://en.wikipedia.org/wiki/Generalized_normal_distribution)
  * [Reference implementation paper](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
  """
-struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariateDistribution
+struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: UnivariateDistribution{ContinuousSupport{T1}}
     μ::T1
     α::T2
     p::T3

@@ -23,7 +23,7 @@ External links
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
 """
-struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+struct InverseGaussian{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     λ::T
 end

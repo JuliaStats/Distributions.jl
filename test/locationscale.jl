@@ -39,6 +39,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     #### Evaluation & Sampling
 
     insupport(d,0.4) == insupport(dref,0.4)
+    insupport(d,0.4) == insupport(dref,Dual(0.4))
     @test pdf(d,0.1) ≈ pdf(dref,0.1)
     @test pdf.(d,2:4) ≈ pdf.(dref,2:4)
     @test logpdf(d,0.4) ≈ logpdf(dref,0.4)

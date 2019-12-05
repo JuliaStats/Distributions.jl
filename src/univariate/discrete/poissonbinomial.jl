@@ -24,7 +24,8 @@ External links:
 * [Poisson-binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_binomial_distribution)
 
 """
-struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct PoissonBinomial{T<:Real} <:
+    UnivariateDistribution{ContiguousSupport{Int}}
     p::Vector{T}
     pmf::Vector{T}
 

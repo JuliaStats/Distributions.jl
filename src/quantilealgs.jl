@@ -1,7 +1,7 @@
 # Various algorithms for computing quantile
 
-function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
-                         lx::Real, rx::Real, tol::Real)
+function quantile_bisect(d::UnivariateDistribution{<:ContinuousSupport},
+                         p::Real, lx::Real, rx::Real, tol::Real)
 
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
@@ -21,7 +21,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
     return (lx + rx)/2
 end
 
-quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
+quantile_bisect(d::UnivariateDistribution{<:ContinuousSupport}, p::Real) =
     quantile_bisect(d, p, minimum(d), maximum(d), 1.0e-12)
 
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
@@ -30,7 +30,8 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function quantile_newton(d::UnivariateDistribution{<:ContinuousSupport},
+                         p::Real, xs::Real=mode(d), tol::Real=1e-12)
     x = xs + (p - cdf(d, xs)) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
@@ -49,7 +50,8 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     end
 end
 
-function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function cquantile_newton(d::UnivariateDistribution{<:ContinuousSupport},
+                          p::Real, xs::Real=mode(d), tol::Real=1e-12)
     x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
@@ -68,7 +70,8 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     end
 end
 
-function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogcdf_newton(d::UnivariateDistribution{<:ContinuousSupport},
+                          lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)
@@ -95,7 +98,8 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     end
 end
 
-function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogccdf_newton(d::UnivariateDistribution{<:ContinuousSupport},
+                           lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
     if -Inf < lp < 0
         x0 = T(xs)

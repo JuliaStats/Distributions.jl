@@ -21,7 +21,7 @@ External links
 *  [Geometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Geometric_distribution)
 
 """
-struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
+struct Geometric{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     p::T
 
     function Geometric{T}(p::T) where {T <: Real}

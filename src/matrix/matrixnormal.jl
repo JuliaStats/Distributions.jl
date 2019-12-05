@@ -15,7 +15,8 @@ f(\\mathbf{X};\\mathbf{M}, \\mathbf{U}, \\mathbf{V}) = \\frac{\\exp\\left( -\\fr
 
 ``\\mathbf{X}\\sim MN_{n,p}(\\mathbf{M},\\mathbf{U},\\mathbf{V})`` if and only if ``\\text{vec}(\\mathbf{X})\\sim N(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
 """
-struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <:
+    MatrixDistribution{ContinuousSupport{T}}
     M::TM
     U::ST
     V::ST

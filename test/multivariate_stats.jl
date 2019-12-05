@@ -26,6 +26,7 @@ for d in [
     dent = entropy(d)
 
     x = rand(d, n_samples)
+    @test nsamples(d, x) == n_samples
     xmean = vec(mean(x, 2))
     z = x .- xmean
     xcov = (z * z') * (1 / n_samples)

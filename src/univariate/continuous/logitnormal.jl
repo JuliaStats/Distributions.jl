@@ -52,7 +52,7 @@ External links
 * [Logit normal distribution on Wikipedia](https://en.wikipedia.org/wiki/Logit-normal_distribution)
 
 """
-struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
+struct LogitNormal{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)

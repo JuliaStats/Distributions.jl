@@ -20,7 +20,7 @@ External links
 
 * [Chi-squared distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi-squared_distribution)
 """
-struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
+struct Chisq{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     ν::T
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end

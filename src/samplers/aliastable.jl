@@ -1,4 +1,4 @@
-struct AliasTable{S} <: Sampleable{Univariate,Discrete}
+struct AliasTable{S} <: Sampleable{Univariate,CountableSupport{Int}}
     accept::Vector{Float64}
     alias::Vector{Int}
     isampler::S

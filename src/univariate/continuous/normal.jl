@@ -27,21 +27,25 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-struct Normal{T<:Real} <: ContinuousUnivariateDistribution
+struct Normal{T<:Number} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
-    Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
+    Normal{T}(µ::T, σ::T) where {T<:Number} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Normal, σ >= zero(σ))
+function Normal(μ::T, σ::T; check_args=true) where {T <: Number}
+    if check_args
+        @check_uncountable(Normal, μ)
+        @check_args(Normal, σ >= zero(σ))
+    end
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
+Normal(μ::Number, σ::Number) = Normal(promote(μ, σ)...)
+Normal(μ::Rational, σ::Rational) = Normal(float(μ), float(σ))
 Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
+Normal(μ::T) where {T <: Number} = Normal(μ, T(one(T)))
 Normal() = Normal(0.0, 1.0, check_args=false)
 
 const Gaussian = Normal
@@ -70,10 +74,10 @@ mode(d::Normal) = d.μ
 
 var(d::Normal) = abs2(d.σ)
 std(d::Normal) = d.σ
-skewness(d::Normal{T}) where {T<:Real} = zero(T)
-kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
+skewness(d::Normal{T}) where {T} = zero(one(T))
+kurtosis(d::Normal{T}) where {T} = zero(one(T))
 
-entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
+entropy(d::Normal{T}) where {T<:Real} = (log2π + 1)/2 + log(d.σ)
 
 #### Evaluation
 
@@ -83,11 +87,11 @@ entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 Computes the x-value based on a Normal distribution and a z-value.
 """
-function xval(d::Normal, z::Real)
+function xval(d::Normal{T}, z::Real) where {T}
     if isinf(z) && iszero(d.σ)
         d.μ + one(d.σ) * z
     else
-        d.μ + d.σ * z
+        d.μ + d.σ * typeof(one(T))(z)
     end
 end
 """
@@ -95,7 +99,7 @@ end
 
 Computes the z-value based on a Normal distribution and a x-value.
 """
-zval(d::Normal, x::Real) = (x - d.μ) / d.σ
+zval(d::Normal, x::Number) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
 
@@ -240,7 +244,8 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
+rand(rng::AbstractRNG, d::Normal{T}) where {T} =
+    d.μ + d.σ * randn(rng, typeof(one(T)))
 
 #### Fitting
 

@@ -26,7 +26,8 @@ If ``\\nu`` is an integer, then a random matrix ``\\mathbf{H}`` given by
 has ``\\mathbf{H}\\sim W_p(\\nu, \\mathbf{S})``. For non-integer degrees of freedom,
 Wishart matrices can be generated via the [Bartlett decomposition](https://en.wikipedia.org/wiki/Wishart_distribution#Bartlett_decomposition).
 """
-struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+struct Wishart{T<:Real, ST<:AbstractPDMat} <:
+    MatrixDistribution{ContinuousSupport{T}}
     df::T     # degree of freedom
     S::ST           # the scale matrix
     c0::T     # the logarithm of normalizing constant in pdf

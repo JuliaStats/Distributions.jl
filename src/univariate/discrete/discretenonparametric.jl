@@ -17,7 +17,7 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: UnivariateDistribution{CountableSupport{T}}
     support::Ts
     p::Ps
 
@@ -150,8 +150,10 @@ end
 
 minimum(d::DiscreteNonParametric) = first(support(d))
 maximum(d::DiscreteNonParametric) = last(support(d))
-insupport(d::DiscreteNonParametric, x::Real) =
+insupport(d::DiscreteNonParametric{T}, x::T) where {T} =
     length(searchsorted(support(d), x)) > 0
+insupport(d::DiscreteNonParametric{T}, x::Number) where {T<:Number} =
+    length(searchsorted(support(d), convert(T, x))) > 0
 
 mean(d::DiscreteNonParametric) = dot(probs(d), support(d))
 

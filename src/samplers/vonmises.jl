@@ -1,10 +1,10 @@
 
-struct VonMisesSampler <: Sampleable{Univariate,Continuous}
-    μ::Float64
-    κ::Float64
-    r::Float64
+struct VonMisesSampler{T<:Real} <: Sampleable{Univariate,ContinuousSupport{T}}
+    μ::T
+    κ::T
+    r::T
 
-    function VonMisesSampler(μ::Float64, κ::Float64)
+    function VonMisesSampler{T}(μ::T, κ::T) where {T}
         τ = 1.0 + sqrt(1.0 + 4 * abs2(κ))
         ρ = (τ - sqrt(2.0 * τ)) / (2.0 * κ)
         new(μ, κ, (1.0 + abs2(ρ)) / (2.0 * ρ))
@@ -15,9 +15,9 @@ end
 #     DJ Best & NI Fisher (1979). Efficient Simulation of the von Mises
 #     Distribution. Journal of the Royal Statistical Society. Series C
 #     (Applied Statistics), 28(2), 152-157.
-function rand(rng::AbstractRNG, s::VonMisesSampler)
+function rand(rng::AbstractRNG, s::VonMisesSampler{T}) where {T}
     f = 0.0
-    local x::Float64
+    local x::T
     if s.κ > 700.0
         x = s.μ + randn(rng) / sqrt(s.κ)
     else

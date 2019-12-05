@@ -22,7 +22,7 @@ External links
 
 * [Gumbel distribution on Wikipedia](http://en.wikipedia.org/wiki/Gumbel_distribution)
 """
-struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
+struct Gumbel{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T  # location
     θ::T  # scale
     Gumbel{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)

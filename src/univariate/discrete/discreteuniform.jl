@@ -21,13 +21,15 @@ External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
-struct DiscreteUniform <: DiscreteUnivariateDistribution
+struct DiscreteUniform <: UnivariateDistribution{ContiguousSupport{Int}}
     a::Int
     b::Int
     pv::Float64 # individual probabilities
 
     function DiscreteUniform(a::Real, b::Real)
         @check_args(DiscreteUniform, a <= b)
+        @check_countable(DiscreteUniform, a)
+        @check_countable(DiscreteUniform, b)
         new(a, b, 1.0 / (b - a + 1))
     end
     DiscreteUniform(b::Real) = DiscreteUniform(0, b)

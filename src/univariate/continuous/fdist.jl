@@ -22,7 +22,7 @@ External links
 
 * [F distribution on Wikipedia](http://en.wikipedia.org/wiki/F-distribution)
 """
-struct FDist{T<:Real} <: ContinuousUnivariateDistribution
+struct FDist{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     ν1::T
     ν2::T
 

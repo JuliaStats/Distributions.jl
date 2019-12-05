@@ -22,7 +22,7 @@ External links:
 
 * [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
 """
-struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
+struct Skellam{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     μ1::T
     μ2::T
 

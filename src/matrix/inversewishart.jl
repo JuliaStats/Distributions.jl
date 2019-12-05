@@ -16,7 +16,8 @@ f(\\boldsymbol{\\Sigma}; \\nu,\\boldsymbol{\\Psi}) =
 
 ``\\mathbf{H}\\sim W_p(\\nu, \\mathbf{S})`` if and only if ``\\mathbf{H}^{-1}\\sim IW_p(\\nu, \\mathbf{S}^{-1})``.
 """
-struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+struct InverseWishart{T<:Real, ST<:AbstractPDMat} <:
+    MatrixDistribution{ContinuousSupport{T}}
     df::T     # degree of freedom
     Ψ::ST     # scale matrix
     c0::T     # log of normalizing constant

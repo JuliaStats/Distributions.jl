@@ -24,7 +24,7 @@ External links:
 
 * [Bernoulli distribution on Wikipedia](http://en.wikipedia.org/wiki/Bernoulli_distribution)
 """
-struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
+struct Bernoulli{T<:Real} <: UnivariateDistribution{ContiguousSupport{Int}}
     p::T
 
     Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)

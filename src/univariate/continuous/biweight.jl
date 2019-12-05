@@ -1,7 +1,7 @@
 """
     Biweight(μ, σ)
 """
-struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
+struct Biweight{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     μ::T
     σ::T
     Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)

@@ -7,7 +7,7 @@ Distribution of the one-sided Kolmogorov-Smirnov test statistic:
 D^+_n = \\sup_x (\\hat{F}_n(x) -F(x))
 ```
 """
-struct KSOneSided <: ContinuousUnivariateDistribution
+struct KSOneSided <: UnivariateDistribution{ContinuousSupport{Float64}}
     n::Int
 end
 

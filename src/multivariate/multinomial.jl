@@ -19,7 +19,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
+struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: MultivariateDistribution{ContiguousSupport{Int}}
     n::Int
     p::TV
     Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)

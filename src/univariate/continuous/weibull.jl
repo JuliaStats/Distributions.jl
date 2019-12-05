@@ -23,7 +23,7 @@ External links
 * [Weibull distribution on Wikipedia](http://en.wikipedia.org/wiki/Weibull_distribution)
 
 """
-struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
+struct Weibull{T<:Real} <: UnivariateDistribution{ContinuousSupport{T}}
     α::T   # shape
     θ::T   # scale
 
@@ -127,7 +127,7 @@ invlogcdf(d::Weibull, lp::Real) = xv(d, -log1mexp(lp))
 invlogccdf(d::Weibull, lp::Real) = xv(d, -lp)
 
 function gradlogpdf(d::Weibull{T}, x::Real) where T<:Real
-    if insupport(Weibull, x)
+    if insupport(Weibull{T}, x)
         α, θ = params(d)
         (α - 1) / x - α * x^(α - 1) / (θ^α)
     else

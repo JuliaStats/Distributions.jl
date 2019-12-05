@@ -2,26 +2,38 @@
 
 using Distributions
 using ForwardDiff: Dual
+using Test
 
-@assert UnivariateDistribution <: Distribution
-@assert MultivariateDistribution <: Distribution
-@assert MatrixDistribution <: Distribution
+@test UnivariateDistribution <: Distribution
+@test MultivariateDistribution <: Distribution
+@test MatrixDistribution <: Distribution
 
-@assert DiscreteDistribution <: Distribution
-@assert ContinuousDistribution <: Distribution
+@test DiscreteDistribution <: Distribution
+@test ContinuousDistribution <: Distribution
 
-@assert DiscreteUnivariateDistribution <: DiscreteDistribution
-@assert DiscreteUnivariateDistribution <: UnivariateDistribution
-@assert ContinuousUnivariateDistribution <: ContinuousDistribution
-@assert ContinuousUnivariateDistribution <: UnivariateDistribution
-@assert DiscreteMultivariateDistribution <: DiscreteDistribution
-@assert DiscreteMultivariateDistribution <: MultivariateDistribution
-@assert ContinuousMultivariateDistribution <: ContinuousDistribution
-@assert ContinuousMultivariateDistribution <: MultivariateDistribution
-@assert DiscreteMatrixDistribution <: DiscreteDistribution
-@assert DiscreteMatrixDistribution <: MatrixDistribution
-@assert ContinuousMatrixDistribution <: ContinuousDistribution
-@assert ContinuousMatrixDistribution <: MatrixDistribution
+@test DiscreteUnivariateDistribution <: DiscreteDistribution 
+@test DiscreteUnivariateDistribution <: UnivariateDistribution
+@test ContinuousUnivariateDistribution <: ContinuousDistribution
+@test ContinuousUnivariateDistribution <: UnivariateDistribution
+@test DiscreteMultivariateDistribution <: DiscreteDistribution
+@test DiscreteMultivariateDistribution <: MultivariateDistribution
+@test ContinuousMultivariateDistribution <: ContinuousDistribution
+@test ContinuousMultivariateDistribution <: MultivariateDistribution
+@test DiscreteMatrixDistribution <: DiscreteDistribution
+@test DiscreteMatrixDistribution <: MatrixDistribution
+@test ContinuousMatrixDistribution <: ContinuousDistribution
+@test ContinuousMatrixDistribution <: MatrixDistribution
+
+@test_skip ValueSupport
+@test_skip Discrete
+@test_skip Continuous
+
+@test_skip DiscreteUnivariateDistribution
+@test_skip ContinuousUnivariateDistribution
+@test_skip DiscreteMultivariateDistribution
+@test_skip ContinuousMultivariateDistribution
+@test_skip DiscreteMatrixDistribution
+@test_skip ContinuousMatrixDistribution
 
 @testset "Test Sample Type" begin
     for T in (Float64,Float32,Dual{Nothing,Float64,0})

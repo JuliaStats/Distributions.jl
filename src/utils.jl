@@ -9,6 +9,63 @@ macro check_args(D, cond)
     end
 end
 
+isuncountable(x) = missing
+isuncountable(x::Number) = typeof(float(one(x))) ≡ typeof(one(x))
+
+macro check_uncountable(D, var)
+    quote
+        if !isuncountable($(esc(var)))
+            throw(ArgumentError(string($(string(D)),
+                                       ": the type of variable ",
+                                       $(string(var)), " (",
+                                       string(typeof($(esc(var)))),
+                                       ") is not uncountable.")))
+        end
+    end
+end
+
+macro check_countable(D, var)
+    quote
+        if isuncountable($(esc(var)))
+            throw(ArgumentError(string($(string(D)),
+                                       ": the type of variable ",
+                                       $(string(var)), " (",
+                                       string(typeof($(esc(var)))),
+                                       ") is not countable.")))
+        end
+    end
+end
+
+
+## a type to indicate zero vector
+"""
+An immutable vector of zeros of type T
+"""
+struct ZeroVector{T} <: AbstractVector{T}
+    len::Int
+end
+
+ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
+
+Base.length(v::ZeroVector) = v.len
+Base.size(v::ZeroVector) = (v.len,)
+Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
+
+Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
+Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
+Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
+
+Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
+
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
+Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
+Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
+
+Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
+Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
+Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
+Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
+
 ##### Utility functions
 
 isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12

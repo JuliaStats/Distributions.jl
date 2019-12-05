@@ -10,6 +10,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "eltypes",
     "truncate",
     "truncnormal",
     "truncated_exponential",
