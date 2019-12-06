@@ -39,6 +39,8 @@ function Categorical(k::Integer; check_args=true)
     return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
 
+Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
+
 ### Conversions
 
 convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
