@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.21.10"
+version = "0.21.11"
 
 [deps]
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
