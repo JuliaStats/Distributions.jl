@@ -29,7 +29,7 @@ struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
 end
 
 VonMisesFisher(μ::Vector{T}, κ::T) where {T<:Real} = VonMisesFisher{T}(μ, κ)
-VonMisesFisher(μ::Vector{T}, κ::Real) where {T<:Real} = VonMisesFisher(promote_eltype(μ, κ)...)
+VonMisesFisher(μ::Vector{T}, κ::Real) where {T<:Real} = VonMisesFisher(Base.promote_eltype(μ, κ)...)
 
 function VonMisesFisher(θ::Vector)
     κ = norm(θ)
