@@ -5,9 +5,9 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-vmfCp(p::Int, κ::Float64) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
+vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
 
-safe_vmfpdf(μ::Vector, κ::Float64, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
+safe_vmfpdf(μ::Vector, κ::Real, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
 
 function gen_vmf_tdata(n::Int, p::Int,
                        rng::Union{AbstractRNG, Missing} = missing)
@@ -22,7 +22,7 @@ function gen_vmf_tdata(n::Int, p::Int,
     return X
 end
 
-function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int,
+function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
                              rng::Union{AbstractRNG, Missing} = missing)
     if ismissing(rng)
         μ = randn(p)
