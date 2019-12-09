@@ -1,6 +1,5 @@
-
-function multinom_rand!(n::Int, p::AbstractVector{PT},
-                        x::AbstractVector{T}) where {T<:Real, PT<:Real}
+function multinom_rand!(n::Int, p::AbstractVector{<:Real},
+                        x::AbstractVector{<:Real})
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
@@ -30,17 +29,16 @@ function multinom_rand!(n::Int, p::AbstractVector{PT},
     if i == km1
         @inbounds x[k] = n
     else  # n must have been zero
-        z = zero(T)
         for j = i+1 : k
-            @inbounds x[j] = z
+            @inbounds x[j] = 0
         end
     end
 
     return x
 end
 
-function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{PT},
-                        x::AbstractVector{T}) where {T<:Real, PT<:Real}
+function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
+                        x::AbstractVector{<:Real})
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
@@ -70,9 +68,8 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{PT},
     if i == km1
         @inbounds x[k] = n
     else  # n must have been zero
-        z = zero(T)
         for j = i+1 : k
-            @inbounds x[j] = z
+            @inbounds x[j] = 0
         end
     end
 
