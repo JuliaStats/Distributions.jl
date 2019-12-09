@@ -4,11 +4,9 @@ os:
   - osx
 julia:
   - 1.0
-  - 1.2
+  - 1.3
   - nightly
-matrix:
-  allow_failures:
-    julia: nightly
+
 notifications:
   email: false
 
@@ -21,6 +19,9 @@ branches:
     - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 jobs:
+  allow_failures:
+  - julia: nightly
+  fast_finish: true
   include:
     - stage: "Documentation"
       julia: 1.0

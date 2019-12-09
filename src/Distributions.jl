@@ -8,6 +8,8 @@ import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
+using FillArrays
+
 using LinearAlgebra, Printf
 import LinearAlgebra: rank
 
@@ -144,7 +146,6 @@ export
     TriangularDist,
     Triweight,
     Truncated,
-    TruncatedNormal,
     Uniform,
     UnivariateGMM,
     VonMises,
@@ -239,6 +240,7 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
+    truncated,          # truncate a distribution with a lower and upper bound
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant

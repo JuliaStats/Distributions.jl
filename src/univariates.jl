@@ -330,7 +330,7 @@ discrete distributions.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : zero(partype(d))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -341,7 +341,6 @@ Relying on this fallback is not recommended in general, as it is prone to overfl
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 """
     cdf(d::UnivariateDistribution, x::Real)

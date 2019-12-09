@@ -39,6 +39,8 @@ function Categorical(k::Integer; check_args=true)
     return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
 
+Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
+
 ### Conversions
 
 convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
@@ -79,8 +81,6 @@ function cdf(d::Categorical{T}, x::Int) where T<:Real
 end
 
 pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
-
-logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(probs(d)[x]) : -Inf
 
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
