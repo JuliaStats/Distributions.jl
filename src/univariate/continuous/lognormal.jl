@@ -101,6 +101,10 @@ function logpdf(d::LogNormal{T}, x::Real) where T<:Real
         return normlogpdf(d.μ, d.σ, lx) - lx
     end
 end
+function logpdf(d::LogNormal{T}, x::Number) where T<:Real
+    lx = log(x)
+    return normlogpdf(d.μ, d.σ, lx) - lx
+end
 
 cdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? cdf(Normal(params(d)...), log(x)) : zero(T)
 ccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? ccdf(Normal(params(d)...), log(x)) : one(T)
