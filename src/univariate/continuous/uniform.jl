@@ -38,6 +38,10 @@ Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
 Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
 Uniform() = Uniform(0.0, 1.0, check_args=false)
 
+function Uniform(::Type{T}, a, b) where {T <: Real}
+    return Uniform(T(a), T(b))
+end
+
 @distr_support Uniform d.a d.b
 
 #### Conversions
