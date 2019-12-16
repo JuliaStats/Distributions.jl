@@ -1,42 +1,5 @@
-function multinom_rand!(n::Int, p::AbstractVector{<:Real},
-                        x::AbstractVector{<:Real})
-    k = length(p)
-    length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
-
-    rp = 1.0  # remaining total probability
-    i = 0
-    km1 = k - 1
-
-    while i < km1 && n > 0
-        i += 1
-        @inbounds pi = p[i]
-        if pi < rp
-            xi = rand(Binomial(n, pi / rp))
-            @inbounds x[i] = xi
-            n -= xi
-            rp -= pi
-        else
-            # In this case, we don't even have to sample
-            # from Binomial. Just assign remaining counts
-            # to xi.
-
-            @inbounds x[i] = n
-            n = 0
-            # rp = 0.0 (no need for this, as rp is no longer needed)
-        end
-    end
-
-    if i == km1
-        @inbounds x[k] = n
-    else  # n must have been zero
-        for j = i+1 : k
-            @inbounds x[j] = 0
-        end
-    end
-
-    return x
-end
-
+multinom_rand!(n::Int, p::AbstractVector{<:Real}, x::AbstractVector{<:Real}) =
+    multinom_rand!(GLOBAL_RNG, n, p, x)
 function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
                         x::AbstractVector{<:Real})
     k = length(p)
