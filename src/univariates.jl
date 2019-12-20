@@ -441,9 +441,9 @@ The inverse function of logcdf.
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
 """
-    invlogcdf(d::UnivariateDistribution, lp::Real)
+    invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logcdf.
+The inverse function of logccdf.
 """
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
