@@ -74,7 +74,7 @@ logpdf(::UnivariateDistribution, ::Real)
 loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
-logdiffcdf(::UnivariateDistribution, ::Real, ::Real)
+logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}
 ccdf(::UnivariateDistribution, ::Real)
 logccdf(::UnivariateDistribution, ::Real)
 quantile(::UnivariateDistribution, ::Real)
