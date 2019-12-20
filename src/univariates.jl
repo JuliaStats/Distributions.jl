@@ -405,7 +405,7 @@ The logarithm of the difference between the cumulative density function at `x` a
 function logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
     x <= y && throw(ArgumentError("requires x > y."))
     u, v = logcdf(d, x), logcdf(d, y)
-    return u + log1p(-exp(v - u)
+    return u + log1p(-exp(v - u))
 end
 
 """
