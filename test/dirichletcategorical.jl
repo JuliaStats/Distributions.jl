@@ -151,7 +151,7 @@ end
             (d4, 4, [0, 0, 0, 1])]
         @test begin
             d = deepcopy(d)
-            update!(d, o)
+            Distributions.update!(d, o)
 
             d.n == n
         end
@@ -164,21 +164,21 @@ end
             (d4, [4, 4, 1, 4, 4, 4, 2, 1, 3, 2], [2, 2, 1, 5])]
         @test begin
             d = deepcopy(d)
-            update!(d, o)
+            Distributions.update!(d, o)
 
             d.n == n
         end
     end
 
     @testset "throws" begin
-        @test_throws ArgumentError update!(d1, -1)
-        @test_throws ArgumentError update!(d1, 5)
+        @test_throws ArgumentError Distributions.update!(d1, -1)
+        @test_throws ArgumentError Distributions.update!(d1, 5)
     end
 
     @testset "rand" begin
         d = DirichletCategorical([10, 0.0001, 0.0001, 0.0001])
         a = rand(d, 100)
-        update!(d, ones(Int, 10000) .* 4)
+        Distributions.update!(d, ones(Int, 10000) .* 4)
         b = rand(d, 100)
 
         all(a .== 1) && all(b .== 4)
