@@ -400,7 +400,7 @@ logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 """
     logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
 
-The logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
+The natural logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
 """
 function logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
     x <= y && throw(ArgumentError("requires x > y."))
