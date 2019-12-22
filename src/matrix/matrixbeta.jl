@@ -107,7 +107,7 @@ end
 
 function matrixbeta_logc0(p::Int, n1::Real, n2::Real)
     #  returns the natural log of the normalizing constant for the pdf
-    return logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
+    return -logmvbeta(p, n1 / 2, n2 / 2)
 end
 
 function logkernel(d::MatrixBeta, U::AbstractMatrix)
