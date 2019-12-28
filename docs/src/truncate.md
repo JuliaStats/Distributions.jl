@@ -28,6 +28,7 @@ are defined for all truncated univariate distributions:
 - [`logpdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`cdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`logcdf(::UnivariateDistribution, ::Real)`](@ref)
+- [`logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}`](@ref)
 - [`ccdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`logccdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`quantile(::UnivariateDistribution, ::Real)`](@ref)

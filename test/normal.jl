@@ -7,6 +7,15 @@ using Test, Distributions, ForwardDiff
     @test -Inf === logpdf(Normal(), Inf)
     @test iszero(logcdf(Normal(0, 0), 0))
     @test iszero(logcdf(Normal(), Inf))
+    @test logdiffcdf(Normal(), Float32(5), Float32(3)) ≈ -6.6079385945968929 rtol=1e-12
+    @test logdiffcdf(Normal(), Float64(5), Float64(3)) ≈ -6.6079385945968929 rtol=1e-12
+    let d = Normal(Float64(0), Float64(1)), x = Float64(-60), y = Float64(-60.001)
+        float_res = logdiffcdf(d, x, y)
+        big_float_res = log(cdf(d, BigFloat(x, 100)) - cdf(d, BigFloat(y, 100)))
+        @test float_res ≈ big_float_res
+    end
+    @test_throws ArgumentError logdiffcdf(Normal(), 1.0, 2.0)
+    @test_throws MethodError logdiffcdf(Normal(), Float32(2), Float64(1))
     @test -Inf === logccdf(Normal(0, 0), 0)
     @test iszero(logccdf(Normal(eps(), 0), 0))
     @test -Inf === quantile(Normal(), 0)
