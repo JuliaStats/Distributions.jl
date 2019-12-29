@@ -94,6 +94,17 @@ end
 
 ## General testing
 
+@testset "Testing VonMisesFisher argument promotions" begin
+    d = VonMisesFisher(Int[1, 0], Float32(5))
+    @test d isa VonMisesFisher{Float32}
+    d = VonMisesFisher(Int[1, 0], Float64(5))
+    @test d isa VonMisesFisher{Float64}
+    d = VonMisesFisher(Float64[1, 0], 5)
+    @test d isa VonMisesFisher{Float64}
+    d = VonMisesFisher(Float64[1, 0], Float32(5))
+    @test d isa VonMisesFisher{Float64}
+end
+
 n = 1000
 ns = 10^6
 @testset "Testing VonMisesFisher with $key" for (key, rng) in
