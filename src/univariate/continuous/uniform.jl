@@ -1,15 +1,17 @@
 """
     Uniform(a,b)
 
-The *continuous uniform distribution* over an interval ``[a, b]`` has probability density function
+The *continuous uniform distribution* over an interval ``(a, b)`` has probability density function
 
 ```math
 f(x; a, b) = \\frac{1}{b - a}, \\quad a \\le x \\le b
 ```
 
 ```julia
-Uniform()        # Uniform distribution over [0, 1]
-Uniform(a, b)    # Uniform distribution over [a, b]
+Uniform()        # Uniform distribution over (0, 1) - Float64
+Uniform(a, b)    # Uniform distribution over (a, b) - Float64
+Uniform{T}(a, b) # Uniform distribution over (a, b) - with T type
+Uniform(T, a, b) # Uniform distribution over (a, b) - with T type
 
 params(d)        # Get the parameters, i.e. (a, b)
 minimum(d)       # Get the lower bound, i.e. a
