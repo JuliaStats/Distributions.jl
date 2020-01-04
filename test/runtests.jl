@@ -55,6 +55,7 @@ const tests = [
     "chernoff",
     "univariate_bounds",
     "negativebinomial",
+    "bernoulli",
 ]
 
 printstyled("Running tests:\n", color=:blue)
