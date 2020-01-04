@@ -2,6 +2,10 @@ import StatsBase: ProbabilityWeights
 using Random, Distributions
 using Test
 
+# A dummy RNG that always outputs 1
+struct AllOneRNG <: AbstractRNG end
+Base.rand(::AllOneRNG, ::Type{T}) where {T<:Number} = one(T)
+
 rng = MersenneTwister(123)
 
 @testset "Testing matrix-variates with $key" for (key, func) in
@@ -111,5 +115,13 @@ d3 = fit(DiscreteNonParametric, xs)
 p = [1 - eps(Float32), eps(Float32)]
 d = Categorical(p)
 @test ([rand(d) for _ = 1:100_000]; true)
+
+# Numerical stability w/ large prob vectors;
+# see issue #1017
+n = 20000 # large vector length
+p = Float32[0.5; fill(0.5/(n ÷ 2) - 3e-8, n ÷ 2); fill(eps(Float64), n ÷ 2)]
+d = Categorical(p)
+rng = AllOneRNG()
+@test (rand(rng, d); true)
 
 end

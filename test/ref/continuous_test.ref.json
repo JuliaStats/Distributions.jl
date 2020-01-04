@@ -4558,7 +4558,7 @@
   ]
 },
 {
-  "expr": "TruncatedNormal(0, 1, -2, 2)",
+  "expr": "truncated(Normal(0, 1), -2, 2)",
   "dtype": "TruncatedNormal",
   "minimum": -2,
   "maximum": 2,
@@ -4588,7 +4588,7 @@
   ]
 },
 {
-  "expr": "TruncatedNormal(3, 10, 7, 8)",
+  "expr": "truncated(Normal(3, 10), 7, 8)",
   "dtype": "TruncatedNormal",
   "minimum": 7,
   "maximum": 8,
@@ -4618,7 +4618,7 @@
   ]
 },
 {
-  "expr": "TruncatedNormal(27, 3, 0, Inf)",
+  "expr": "truncated(Normal(27, 3), 0, Inf)",
   "dtype": "TruncatedNormal",
   "minimum": 0,
   "maximum": "inf",
@@ -4648,7 +4648,7 @@
   ]
 },
 {
-  "expr": "TruncatedNormal(-5, 1, -Inf, -10)",
+  "expr": "truncated(Normal(-5, 1), -Inf, -10)",
   "dtype": "TruncatedNormal",
   "minimum": "-inf",
   "maximum": -10,
@@ -4678,7 +4678,7 @@
   ]
 },
 {
-  "expr": "TruncatedNormal(1.8, 1.2, -Inf, 0)",
+  "expr": "truncated(Normal(1.8, 1.2), -Inf, 0)",
   "dtype": "TruncatedNormal",
   "minimum": "-inf",
   "maximum": 0,

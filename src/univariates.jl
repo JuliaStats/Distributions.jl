@@ -330,7 +330,7 @@ discrete distributions.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : zero(partype(d))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -341,7 +341,6 @@ Relying on this fallback is not recommended in general, as it is prone to overfl
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -399,6 +398,17 @@ logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
+    logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
+
+The natural logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
+"""
+function logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
+    x <= y && throw(ArgumentError("requires x > y."))
+    u, v = logcdf(d, x), logcdf(d, y)
+    return u + log1p(-exp(v - u))
+end
+
+"""
     logccdf(d::UnivariateDistribution, x::Real)
 
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
@@ -431,9 +441,9 @@ The inverse function of logcdf.
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
 """
-    invlogcdf(d::UnivariateDistribution, lp::Real)
+    invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logcdf.
+The inverse function of logccdf.
 """
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 

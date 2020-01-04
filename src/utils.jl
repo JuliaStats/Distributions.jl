@@ -9,82 +9,21 @@ macro check_args(D, cond)
     end
 end
 
-## a type to indicate zero vector
-"""
-An immutable vector of zeros of type T
-"""
-struct ZeroVector{T} <: AbstractVector{T}
-    len::Int
-end
-
-ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
-
-Base.length(v::ZeroVector) = v.len
-Base.size(v::ZeroVector) = (v.len,)
-Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
-
-Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
-Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
-Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
-
-Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
-
-Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
-Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
-
-Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
-Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
-Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
-Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
-
 ##### Utility functions
 
-isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
+isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
 
-function allfinite(x::AbstractArray{T}) where {T<:Real}
-    for i in eachindex(x)
-        if !isfinite(x[i])
-            return false
-        end
-    end
-    return true
-end
-
-function allzeros(x::AbstractArray{T}) where {T<:Real}
-    for i in eachindex(x)
-        if !(x[i] == zero(T))
-            return false
-        end
-    end
-    return true
-end
-
-allzeros(x::ZeroVector) = true
-
-allnonneg(xs::AbstractArray{<:Real}) = all(x -> x >= 0, xs)
-
-isprobvec(p::AbstractVector{T}) where {T<:Real} =
-    allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{<:Real}) =
+    all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))
 
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
-add!(x::AbstractVecOrMat, y::ZeroVector) = x
+add!(x::AbstractArray, y::Zeros) = x
 
-function multiply!(x::AbstractArray, c::Number)
-    for i in eachindex(x)
-        @inbounds x[i] *= c
-    end
-    return x
-end
+multiply!(x::AbstractArray, c::Number) = (x .*= c; x)
 
-function exp!(x::AbstractArray)
-    for i in eachindex(x)
-        @inbounds x[i] = exp(x[i])
-    end
-    return x
-end
+exp!(x::AbstractArray) = (x .= exp.(x); x)
 
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)

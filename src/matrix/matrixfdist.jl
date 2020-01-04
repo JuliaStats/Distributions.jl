@@ -121,7 +121,7 @@ end
 function matrixfdist_logc0(n1::Real, n2::Real, B::AbstractPDMat)
     #  returns the natural log of the normalizing constant for the pdf
     p = dim(B)
-    term1 = logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
+    term1 = -logmvbeta(p, n1 / 2, n2 / 2)
     term2 = (n2 / 2) * logdet(B)
     return term1 + term2
 end

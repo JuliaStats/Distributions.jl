@@ -43,6 +43,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Categorical`](@ref)
 - [`DiscreteUniform`](@ref)
 - [`Exponential`](@ref)
+- [`LogNormal`](@ref)
 - [`Normal`](@ref)
 - [`Gamma`](@ref)
 - [`Geometric`](@ref)
