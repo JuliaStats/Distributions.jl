@@ -37,7 +37,7 @@ f(\\mathbf{x}; \\boldsymbol{\\mu}, \\boldsymbol{\\Sigma}) = \\frac{1}{(2 \\pi)^{
 We realize that the mean vector and the covariance often have special forms in practice,
 which can be exploited to simplify the computation. For example, the mean vector is sometimes
 just a zero vector, while the covariance matrix can be a diagonal matrix or even in the form
-of ``\\sigma \\mathbf{I}``. To take advantage of such special cases, we introduce a parametric
+of ``\\sigma^2 \\mathbf{I}``. To take advantage of such special cases, we introduce a parametric
 type `MvNormal`, defined as below, which allows users to specify the special structure of
 the mean and covariance.
 
@@ -195,29 +195,23 @@ function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
-MvNormal(Σ::AbstractPDMat) = MvNormal(Zeros{eltype(Σ)}(dim(Σ)), Σ)
-
-MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(μ, PDMat(Σ))
+# constructor with general covariance matrix
+MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(diag(Σ)))
-MvNormal(μ::AbstractVector{<:Real}, σ::Vector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
+MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
+    MvNormal(μ, ScalMat(length(μ), Σ.λ))
+
+# constructor with vector of standard deviations
+MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
+
+# constructor with scalar standard deviation
 MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
-function MvNormal(μ::AbstractVector{<:Real}, Σ::VecOrMat{<:Real})
-    R = Base.promote_eltype(μ, Σ)
-    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
-end
+# constructor without mean vector
+MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
-function MvNormal(μ::AbstractVector{<:Real}, σ::UniformScaling{<:Real})
-    R = Base.promote_eltype(μ, σ.λ)
-    MvNormal(convert(AbstractArray{R}, μ), R(σ.λ))
-end
-MvNormal(Σ::Matrix{<:Real}) = MvNormal(PDMat(Σ))
-MvNormal(Σ::Union{Symmetric{<:Real}, Hermitian{<:Real}}) = MvNormal(PDMat(Σ))
-MvNormal(Σ::Diagonal{<:Real}) = MvNormal(PDiagMat(diag(Σ)))
-MvNormal(σ::Vector{<:Real}) = MvNormal(PDiagMat(abs2.(σ)))
-MvNormal(d::Int, σ::Real) = MvNormal(ScalMat(d, abs2(σ)))
-
+# special constructor
+MvNormal(d::Int, σ::Real) = MvNormal(Zeros{typeof(σ)}(d), σ)
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
