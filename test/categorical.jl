@@ -3,12 +3,12 @@ using Test
 
 @testset "Categorical" begin
 
-    @testset "Categorical $i" for (idx, p) in Any[
+    @testset "Categorical $idx" for (idx, p) in enumerate(Any[
             [0.5, 0.5],
             [0.5f0, 0.5f0],
             [1//2, 1//2],
             [0.1, 0.3, 0.2, 0.4],
-            [0.15, 0.25, 0.6] ]
+            [0.15, 0.25, 0.6] ])
 
         d = Categorical(p)
         k = length(p)
