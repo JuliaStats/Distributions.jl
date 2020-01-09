@@ -122,10 +122,10 @@ _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)
 function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
-    for i = 1:size(x, 2)
+    for i in 1:size(x, 2)
         @inbounds r[i] = c0 - r[i]/2
     end
-    r
+    return r
 end
 
 _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
@@ -180,9 +180,9 @@ const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
 const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const FullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},FillArrays.Zeros{Float64,1,Axes}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
@@ -208,10 +208,10 @@ MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, 
 MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
 # constructor without mean vector
-MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
+MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(FillArrays.Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
 # special constructor
-MvNormal(d::Int, σ::Real) = MvNormal(Zeros{typeof(σ)}(d), σ)
+MvNormal(d::Int, σ::Real) = MvNormal(FillArrays.Zeros{typeof(σ)}(d), σ)
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
@@ -241,7 +241,7 @@ Base.show(io::IO, d::MvNormal) =
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = d.μ
 params(d::MvNormal) = (d.μ, d.Σ)
-@inline partype(d::MvNormal{T}) where {T<:Real} = T
+partype(::MvNormal{T}) where {T} = T
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = Matrix(d.Σ)
@@ -295,7 +295,7 @@ struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
     tw::Float64            # sum of weights
 end
 
-function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where Cov<:AbstractPDMat
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where {Cov<:AbstractPDMat}
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, dims=2))
@@ -303,7 +303,7 @@ function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where C
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
-function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) where Cov<:AbstractPDMat
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) where {Cov<:AbstractPDMat}
     (size(x,1) == length(g) && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     invΣ = inv(g.Σ)
@@ -314,14 +314,15 @@ end
 
 ## MLE estimation with covariance known
 
-fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat} =
-    MvNormal(ss.sx * inv(ss.tw), g.Σ)
+function fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat}
+    return MvNormal(ss.sx * inv(ss.tw), g.Σ)
+end
 
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
     μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
-    MvNormal(μ, g.Σ)
+    return MvNormal(μ, g.Σ)
 end
 
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
@@ -329,7 +330,7 @@ function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractArr
     (size(x,1) == d && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     μ = BLAS.gemv('N', inv(sum(w)), x, vec(w))
-    MvNormal(μ, g.Σ)
+    return MvNormal(μ, g.Σ)
 end
 
 
@@ -361,16 +362,16 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float
     s = x * vec(w)
     m = s * inv(tw)
     z = similar(x)
-    for j = 1:n
+    for j in 1:n
         xj = view(x,:,j)
         zj = view(z,:,j)
         swj = sqrt(w[j])
-        for i = 1:d
+        for i in 1:d
             @inbounds zj[i] = swj * (xj[i] - m[i])
         end
     end
     s2 = z * z'
-    MvNormalStats(s, m, s2, tw)
+    return MvNormalStats(s, m, s2, tw)
 end
 
 
@@ -392,7 +393,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     z = x .- mu
     C = BLAS.syrk('U', 'N', inv(n), z)
     LinearAlgebra.copytri!(C, 'U')
-    MvNormal(mu, PDMat(C))
+    return MvNormal(mu, PDMat(C))
 end
 
 function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVector{Float64})
@@ -406,7 +407,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
     z = Matrix{Float64}(undef, m, n)
     for j = 1:n
         cj = sqrt(w[j])
-        for i = 1:m
+        for i in 1:m
             @inbounds z[i,j] = (x[i,j] - mu[i]) * cj
         end
     end
@@ -421,13 +422,13 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
 
     mu = vec(mean(x, dims=2))
     va = zeros(Float64, m)
-    for j = 1:n
-        for i = 1:m
+    for j in 1:n
+        for i in 1:m
             @inbounds va[i] += abs2(x[i,j] - mu[i])
         end
     end
     multiply!(va, inv(n))
-    MvNormal(mu, PDiagMat(va))
+    return MvNormal(mu, PDiagMat(va))
 end
 
 function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
@@ -439,14 +440,14 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArr
     mu = BLAS.gemv('N', inv_sw, x, w)
 
     va = zeros(Float64, m)
-    for j = 1:n
+    for j in 1:n
         @inbounds wj = w[j]
-        for i = 1:m
+        for i in 1:m
             @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
         end
     end
     multiply!(va, inv_sw)
-    MvNormal(mu, PDiagMat(va))
+    return MvNormal(mu, PDiagMat(va))
 end
 
 function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
@@ -454,15 +455,15 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
 
     mu = vec(mean(x, dims=2))
-    va = 0.
-    for j = 1:n
-        va_j = 0.
-        for i = 1:m
+    va = 0.0
+    for j in 1:n
+        va_j = 0.0
+        for i in 1:m
             @inbounds va_j += abs2(x[i,j] - mu[i])
         end
         va += va_j
     end
-    MvNormal(mu, ScalMat(m, va / (m * n)))
+    return MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
 function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
@@ -474,14 +475,14 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractArra
     inv_sw = 1.0 / sw
     mu = BLAS.gemv('N', inv_sw, x, w)
 
-    va = 0.
-    for j = 1:n
+    va = 0.0
+    for j in 1:n
         @inbounds wj = w[j]
-        va_j = 0.
-        for i = 1:m
+        va_j = 0.0
+        for i in 1:m
             @inbounds va_j += abs2(x[i,j] - mu[i]) * wj
         end
         va += va_j
     end
-    MvNormal(mu, ScalMat(m, va / (m * sw)))
+    return MvNormal(mu, ScalMat(m, va / (m * sw)))
 end

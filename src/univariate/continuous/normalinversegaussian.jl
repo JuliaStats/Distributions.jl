@@ -53,12 +53,12 @@ kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * d.γ)
 
 function pdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ * d.γ + β*(x - μ))
+    return α * δ * SpecialFunctions.besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ * d.γ + β*(x - μ))
 end
 
 function logpdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*d.γ + β*(x-μ)
+    log(α*δ) + log(SpecialFunctions.besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*d.γ + β*(x-μ)
 end
 
 

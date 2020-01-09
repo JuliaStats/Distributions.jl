@@ -78,9 +78,16 @@ function var(d::Beta)
     return (α * β) / (abs2(s) * (s + 1))
 end
 
-meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
+function meanlogx(d::Beta)
+    (α, β) = params(d)
+    return SpecialFunctions.digamma(α) - SpecialFunctions.digamma(α + β)
+end
 
-varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
+function varlogx(d::Beta)
+    (α, β) = params(d)
+    return SpecialFunctions.trigamma(α) - SpecialFunctions.trigamma(α + β)
+end
+
 stdlogx(d::Beta) = sqrt(varlogx(d))
 
 function skewness(d::Beta)
@@ -103,8 +110,8 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
-        (s - 2) * digamma(s)
+    SpecialFunctions.logbeta(α, β) - (α - 1) * SpecialFunctions.digamma(α) - (β - 1) * SpecialFunctions.digamma(β) +
+        (s - 2) * SpecialFunctions.digamma(s)
 end
 
 

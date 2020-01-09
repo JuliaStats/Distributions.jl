@@ -8,7 +8,8 @@ import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
-using FillArrays
+using FillArrays # TODO remove
+import FillArrays
 
 using LinearAlgebra, Printf
 import LinearAlgebra: rank
@@ -23,7 +24,8 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 
 import PDMats: dim, PDMat, invquad
 
-using SpecialFunctions
+using SpecialFunctions # TODO remove
+import SpecialFunctions
 
 export
     # re-export Statistics
