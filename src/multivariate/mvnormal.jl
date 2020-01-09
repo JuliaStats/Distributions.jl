@@ -69,7 +69,7 @@ const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zeros{Float64,1,Axes}}
 Multivariate normal distributions support affine transformations:
 ```julia
 d = MvNormal(μ, Σ)
-c + B * d    # == MvNormal(B * μ, c + B * Σ * B')
+c + B * d    # == MvNormal(B * μ + c, B * Σ * B')
 dot(b, d)    # == Normal(dot(b, μ), b' * Σ * b)
 ```
 """
