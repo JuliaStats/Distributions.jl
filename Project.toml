@@ -21,7 +21,7 @@ PDMats = "0.9"
 QuadGK = "2"
 SpecialFunctions = "0.8, 0.9"
 StatsBase = "0.32"
-StatsFuns = "0.8, 0.9"
+StatsFuns = ">= 0.9.3"
 julia = "1"
 
 [extras]
