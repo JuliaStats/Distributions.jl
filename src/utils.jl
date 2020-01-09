@@ -19,7 +19,7 @@ isprobvec(p::AbstractVector{<:Real}) =
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
-add!(x::AbstractArray, y::Zeros) = x
+add!(x::AbstractArray, y::FillArrays.Zeros) = x
 
 multiply!(x::AbstractArray, c::Number) = (x .*= c; x)
 

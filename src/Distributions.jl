@@ -4,12 +4,11 @@ using StatsBase, Statistics
 using StatsFuns # TODO remove and qualify import in @_delegate_statsfuns
 using StatsFuns: logtwo, invsqrt2, invsqrt2π, nchisqcdf, logmvbeta
 
-import QuadGK: quadgk
+using QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, ==
 import Base.Math: @horner
 
-using FillArrays # TODO remove
 import FillArrays
 
 using LinearAlgebra, Printf

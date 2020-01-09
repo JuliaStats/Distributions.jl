@@ -31,7 +31,7 @@ GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractPDMat) =
 
 function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     R = Base.promote_eltype(df, Σ)
-    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ, true)
+    GenericMvTDist(df, FillArrays.Zeros{R}(dim(Σ)), Σ, true)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =

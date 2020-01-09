@@ -33,9 +33,9 @@ const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
 const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
 const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{Float64,1}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{Float64,1}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    FillArrays.Zeros{Float64,1}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, FillArrays.Zeros{Float64,1}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  FillArrays.Zeros{Float64,1,Axes}}
 ```
 
 A multivariate distribution with canonical parameterization can be constructed using a common constructor `MvNormalCanon` as:
@@ -74,9 +74,9 @@ const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Ve
 const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},FillArrays.Zeros{Float64,1,Axes}}
 
 
 ### Constructors
@@ -101,7 +101,7 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{S}, J::P) where 
 end
 
 function MvNormalCanon(J::AbstractPDMat)
-    z = Zeros{eltype(J)}(dim(J))
+    z = FillArrays.Zeros{eltype(J)}(dim(J))
     MvNormalCanon(z, z, J)
 end
 
@@ -143,13 +143,13 @@ end
 
 meanform(d::MvNormalCanon) = MvNormal(d.μ, inv(d.J))
 # meanform{C, T<:Real}(d::MvNormalCanon{T,C,Vector{T}}) = MvNormal(d.μ, inv(d.J))
-# meanform{C, T<:Real}(d::MvNormalCanon{T,C,Zeros{T}}) = MvNormal(inv(d.J))
+# meanform{C, T<:Real}(d::MvNormalCanon{T,C,FillArrays.Zeros{T}}) = MvNormal(inv(d.J))
 
 function canonform(d::MvNormal{T,C,<:AbstractVector{T}}) where {C, T<:Real}
     J = inv(d.Σ)
     return MvNormalCanon(d.μ, J * collect(d.μ), J)
 end
-canonform(d::MvNormal{T,C,Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ))
+canonform(d::MvNormal{T,C,FillArrays.Zeros{T}}) where {C, T<:Real} = MvNormalCanon(inv(d.Σ))
 
 ### Basic statistics
 
