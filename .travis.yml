@@ -27,9 +27,9 @@ jobs:
       julia: 1.0
       os: linux
       script:
-        - julia --project=pSFunc.erf/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
+        - julia --project=perf/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
                                                Pkg.instantiate()'
-        - julia --project=pSFunc.erf/ pSFunc.erf/samplers.jl
+        - julia --project=perf/ perf/samplers.jl
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
                                                Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
