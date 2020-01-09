@@ -70,7 +70,7 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::MatrixBeta) = dim(d.W1)
+PDMats.dim(d::MatrixBeta) = dim(d.W1)
 
 size(d::MatrixBeta) = size(d.W1)
 
@@ -129,5 +129,5 @@ function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
     S2   = PDMat( rand(rng, d.W2) )
     S    = S1 + S2
     invL = Matrix( inv(S.chol.L) )
-    A .= X_A_Xt(S1, invL)
+    A .= PDMats.X_A_Xt(S1, invL)
 end

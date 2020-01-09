@@ -1,7 +1,8 @@
 module Distributions
 
-using StatsBase, PDMats, StatsFuns, Statistics
-using StatsFuns: logtwo, invsqrt2, invsqrt2π
+using StatsBase, Statistics
+using StatsFuns # TODO remove and qualify import in @_delegate_statsfuns
+using StatsFuns: logtwo, invsqrt2, invsqrt2π, nchisqcdf, logmvbeta
 
 import QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec, inv
@@ -22,7 +23,8 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
 
-import PDMats: dim, PDMat, invquad
+import PDMats
+using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat
 
 using SpecialFunctions # TODO remove
 import SpecialFunctions

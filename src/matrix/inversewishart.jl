@@ -53,7 +53,7 @@ end
 insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
 insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
-dim(d::InverseWishart) = dim(d.Ψ)
+PDMats.dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 size(d::InverseWishart, i) = size(d)[i]
 rank(d::InverseWishart) = dim(d)

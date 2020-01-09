@@ -76,7 +76,7 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::MatrixFDist) = dim(d.W)
+PDMats.dim(d::MatrixFDist) = dim(d.W)
 
 size(d::MatrixFDist) = size(d.W)
 
@@ -129,7 +129,7 @@ end
 function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
     p = dim(d)
     n1, n2, B = params(d)
-    ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
+    ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(PDMats.pdadd(Σ, B))
 end
 
 _logpdf(d::MatrixFDist, Σ::AbstractMatrix) = logkernel(d, Σ) + d.logc0

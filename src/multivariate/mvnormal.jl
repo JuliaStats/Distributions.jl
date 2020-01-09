@@ -251,24 +251,25 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = PDMats.invquad(d.Σ, x .- d.μ)
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, x .- d.μ)
+    PDMats.invquad!(r, d.Σ, x .- d.μ)
 
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
-    add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+    add!(PDMats.unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+end
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds x[i] = randn(rng,eltype(d))
     end
-    add!(unwhiten!(d.Σ, x), d.μ)
+    add!(PDMats.unwhiten!(d.Σ, x), d.μ)
 end
 
 ###########################################################

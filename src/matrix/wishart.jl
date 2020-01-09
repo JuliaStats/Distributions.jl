@@ -64,12 +64,12 @@ end
 insupport(::Type{Wishart}, X::Matrix) = isposdef(X)
 insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
-dim(d::Wishart) = dim(d.S)
+PDMats.dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 size(d::Wishart, i) = size(d)[i]
 rank(d::Wishart) = dim(d)
 params(d::Wishart) = (d.df, d.S, d.c0)
-@inline partype(d::Wishart{T}) where {T<:Real} = T
+partype(::Wishart{T}) where {T} = T
 
 ### Conversion
 function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
@@ -138,7 +138,7 @@ end
 #### Sampling
 function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     _wishart_genA!(rng, dim(d), d.df, A)
-    unwhiten!(d.S, A)
+    PDMats.unwhiten!(d.S, A)
     A .= A * A'
 end
 
@@ -151,7 +151,7 @@ function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
     #               ~ Normal()                  when i > j
     #
     A .= zero(eltype(A))
-    for i = 1:p
+    for i in 1:p
         @inbounds A[i,i] = rand(rng, Chi(df - i + 1.0))
     end
     for j in 1:p-1, i in j+1:p

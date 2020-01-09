@@ -167,15 +167,15 @@ logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 ### Evaluation
 
-sqmahal(d::MvNormalCanon, x::AbstractVector) = quad(d.J, broadcast(-, x, d.μ))
-sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J, broadcast(-, x, d.μ))
+sqmahal(d::MvNormalCanon, x::AbstractVector) = PDMats.quad(d.J, broadcast(-, x, d.μ))
+sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = PDMats.quad!(r, d.J, broadcast(-, x, d.μ))
 
 
 # Sampling (for GenericMvNormal)
-
-unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
-unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
+# TODO should this move to PDMats?
+unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = PDMats.unwhiten!(inv(J), x)
+unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = PDMats.whiten!(J, x)
+unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = PDMats.whiten!(J, x)
 
 _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) =
     add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)

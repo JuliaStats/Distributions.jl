@@ -1,5 +1,3 @@
-using StatsFuns: nchisqcdf
-
 """
     Skellam(μ1, μ2)
 

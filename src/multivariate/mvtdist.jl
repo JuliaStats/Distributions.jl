@@ -119,12 +119,12 @@ insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
 
 function sqmahal(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
     z = d.zeromean ? x : x - d.μ
-    invquad(d.Σ, z)
+    PDMats.invquad(d.Σ, z)
 end
 
 function sqmahal!(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     z = d.zeromean ? x : x .- d.μ
-    invquad!(r, d.Σ, z)
+    PDMats.invquad!(r, d.Σ, z)
 end
 
 sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vector{T}(undef, size(x, 2)), d, x)
@@ -164,24 +164,24 @@ end
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
     y = sqrt(rand(rng, chisqd)/(d.df))
-    unwhiten!(d.Σ, randn!(rng, x))
+    PDMats.unwhiten!(d.Σ, randn!(rng, x))
     broadcast!(/, x, x, y)
     if !d.zeromean
         broadcast!(+, x, x, d.μ)
     end
-    x
+    return x
 end
 
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
     chisqd = Chisq(d.df)
     y = Matrix{T}(undef, 1, cols)
-    unwhiten!(d.Σ, randn!(rng, x))
+    PDMats.unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
     y = sqrt.(y/(d.df))
     broadcast!(/, x, x, y)
     if !d.zeromean
         broadcast!(+, x, x, d.μ)
     end
-    x
+    return x
 end
