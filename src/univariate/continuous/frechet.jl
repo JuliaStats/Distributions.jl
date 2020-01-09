@@ -61,7 +61,7 @@ partype(::Frechet{T}) where {T} = T
 
 function mean(d::Frechet{T}) where {T}
     α = d.α
-    return α > 1 ? d.θ * gamma(1 - 1 / α) : T(Inf)
+    return α > 1 ? d.θ * SFunc.gamma(1 - 1 / α) : T(Inf)
 end
 
 median(d::Frechet) = d.θ * logtwo^(-1 / d.α)
@@ -71,7 +71,7 @@ mode(d::Frechet) = (iα = -1/d.α; d.θ * (1 - iα) ^ iα)
 function var(d::Frechet{T}) where {T<:Real}
     if d.α > 2
         iα = 1 / d.α
-        return d.θ^2 * (gamma(1 - 2 * iα) - gamma(1 - iα)^2)
+        return d.θ^2 * (SFunc.gamma(1 - 2 * iα) - SFunc.gamma(1 - iα)^2)
     else
         return T(Inf)
     end
@@ -80,9 +80,9 @@ end
 function skewness(d::Frechet{T}) where T<:Real
     if d.α > 3
         iα = 1 / d.α
-        g1 = gamma(1 - iα)
-        g2 = gamma(1 - 2 * iα)
-        g3 = gamma(1 - 3 * iα)
+        g1 = SFunc.gamma(1 - iα)
+        g2 = SFunc.gamma(1 - 2 * iα)
+        g3 = SFunc.gamma(1 - 3 * iα)
         return (g3 - 3g2 * g1 + 2 * g1^3) / ((g2 - g1^2)^1.5)
     else
         return T(Inf)
@@ -92,10 +92,10 @@ end
 function kurtosis(d::Frechet{T}) where T<:Real
     if d.α > 3
         iα = 1 / d.α
-        g1 = gamma(1 - iα)
-        g2 = gamma(1 - 2iα)
-        g3 = gamma(1 - 3iα)
-        g4 = gamma(1 - 4iα)
+        g1 = SFunc.gamma(1 - iα)
+        g2 = SFunc.gamma(1 - 2iα)
+        g3 = SFunc.gamma(1 - 3iα)
+        g4 = SFunc.gamma(1 - 4iα)
         return (g4 - 4g3 * g1 + 3 * g2^2) / ((g2 - g1^2)^2) - 6
     else
         return T(Inf)

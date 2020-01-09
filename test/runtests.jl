@@ -5,6 +5,8 @@ using Distributed
 using Random
 using StatsBase
 using LinearAlgebra
+import SpecialFunctions
+const SFunc = SpecialFunctions
 
 import JSON
 import ForwardDiff

@@ -10,7 +10,7 @@ Chi <- R6Class("Chi",
         supp = function() { c(0, Inf) },
         properties = function() {
             k <- self$nu
-            u <- sqrt(2) * gamma((k+1)/2) / gamma(k/2)
+            u <- sqrt(2) * SFunc.gamma((k+1)/2) / SFunc.gamma(k/2)
             v <- k - u^2
             m3 <- u / v^1.5 * (1 - 2 * v)
             m4 <- (2 / v) * (1 - u * sqrt(v) * m3 - v)

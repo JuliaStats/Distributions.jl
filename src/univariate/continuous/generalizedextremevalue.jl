@@ -77,7 +77,7 @@ params(d::GeneralizedExtremeValue) = (d.μ, d.σ, d.ξ)
 #### Statistics
 
 testfd(d::GeneralizedExtremeValue) = d.ξ^3
-g(d::GeneralizedExtremeValue, k::Real) = gamma(1 - k * d.ξ) # This should not be exported.
+g(d::GeneralizedExtremeValue, k::Real) = SFunc.gamma(1 - k * d.ξ) # This should not be exported.
 
 function median(d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
@@ -95,7 +95,7 @@ function mean(d::GeneralizedExtremeValue{T}) where T<:Real
     if abs(ξ) < eps(one(ξ)) # ξ == 0
         return μ + σ * MathConstants.γ
     elseif ξ < 1
-        return μ + σ * (gamma(1 - ξ) - 1) / ξ
+        return μ + σ * (SFunc.gamma(1 - ξ) - 1) / ξ
     else
         return T(Inf)
     end
@@ -127,7 +127,7 @@ function skewness(d::GeneralizedExtremeValue{T}) where T<:Real
     (μ, σ, ξ) = params(d)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0
-        return 12sqrt(6) * zeta(3) / pi ^ 3 * one(T)
+        return 12sqrt(6) * SFunc.zeta(3) / pi ^ 3 * one(T)
     elseif ξ < 1/3
         g1 = g(d, 1)
         g2 = g(d, 2)

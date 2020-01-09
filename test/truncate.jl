@@ -10,7 +10,7 @@ using ..Main: fdm
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,upper::Int)
     R = JSON.parsefile(jsonfile)
-    for dct in R
+    @testset "$(dct["expr"])" for dct in R
         ex = dct["expr"]
         dsym = Symbol(dct["dtype"])
         if dsym in [:Skellam, :NormalInverseGaussian]
@@ -36,7 +36,6 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
             continue
         end
 
-        println("    testing Truncated($(ex),$lower,$upper)")
         d = Truncated(eval(Meta.parse(ex)),lower,upper)
         if dtype != Uniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
@@ -123,21 +122,17 @@ end
 
 ## main
 
-for c in ["discrete",
-          "continuous"]
-
-    title = string(uppercase(c[1]), c[2:end])
-    println("    [$title]")
-    println("    ------------")
+@testset "Truncated $c" for c in ["discrete", "continuous"]
     jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6,3,5)
-    println()
 end
 
 ## automatic differentiation
 
-f = x -> logpdf(truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
-at = [0.0, 1.0, 0.0, 1.0]
-@test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
-
+@testset "Truncated AD" begin
+    f = x -> logpdf(truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
+    at = [0.0, 1.0, 0.0, 1.0]
+    @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
 end
+
+end # module

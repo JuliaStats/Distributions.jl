@@ -81,7 +81,7 @@ MixtureModel(Normal, [(-2.0, 1.2), (0.0, 1.0), (3.0, 2.5)])
 MixtureModel(map(u -> Normal(u, 1.0), [-2.0, 0.0, 3.0]))
 ```
 
-## Common Interface
+## Common IntSFunc.erface
 
 All subtypes of `AbstractMixtureModel` (obviously including `MixtureModel`) provide the following two methods:
 

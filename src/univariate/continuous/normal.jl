@@ -9,7 +9,7 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 ```
 
 Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
-Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have underflowed,
+Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have undSFunc.erflowed,
 and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
@@ -138,9 +138,9 @@ end
 # logcdf
 function _normlogcdf(z::Real)
     if z < -one(z)
-        return log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
+        return log(SFunc.erfcx(-z * invsqrt2)/2) - abs2(z)/2
     else
-        return log1p(-erfc(z * invsqrt2)/2)
+        return log1p(-SFunc.erfc(z * invsqrt2)/2)
     end
 end
 
@@ -156,9 +156,9 @@ end
 # logccdf
 function _normlogccdf(z::Real)
     if z > one(z)
-        return log(erfcx(z * invsqrt2)/2) - abs2(z)/2
+        return log(SFunc.erfcx(z * invsqrt2)/2) - abs2(z)/2
     else
-        return log1p(-erfc(-z * invsqrt2)/2)
+        return log1p(-SFunc.erfc(-z * invsqrt2)/2)
     end
 end
 
@@ -172,7 +172,7 @@ function logccdf(d::Normal, x::Real)
 end
 
 # cdf
-_normcdf(z::Real) = erfc(-z * invsqrt2)/2
+_normcdf(z::Real) = SFunc.erfc(-z * invsqrt2)/2
 
 function cdf(d::Normal, x::Real)
     if iszero(d.σ) && x == d.μ
@@ -184,7 +184,7 @@ function cdf(d::Normal, x::Real)
 end
 
 # ccdf
-_normccdf(z::Real) = erfc(z * invsqrt2)/2
+_normccdf(z::Real) = SFunc.erfc(z * invsqrt2)/2
 
 function ccdf(d::Normal, x::Real)
     if iszero(d.σ) && x == d.μ
@@ -197,9 +197,9 @@ end
 
 # quantile
 function quantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
+    # Promote to ensure that we don't compute SFunc.erfcinv in low precision and then promote
     _p, _μ, _σ = promote(float(p), d.μ, d.σ)
-    q = xval(d, -erfcinv(2*_p) * sqrt2)
+    q = xval(d, -SFunc.erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
     elseif iszero(_σ)
@@ -217,9 +217,9 @@ end
 
 # cquantile
 function cquantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
+    # Promote to ensure that we don't compute SFunc.erfcinv in low precision and then promote
     _p, _μ, _σ = promote(float(p), d.μ, d.σ)
-    q = xval(d, erfcinv(2*_p) * sqrt2)
+    q = xval(d, SFunc.erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
     elseif iszero(d.σ)

@@ -5,7 +5,7 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
+vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * SFunc.besseli(p/2-1, κ))
 
 safe_vmfpdf(μ::Vector, κ::Real, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
 

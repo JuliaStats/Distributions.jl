@@ -60,7 +60,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`MvNormal`](@ref)
 - [`Dirichlet`](@ref)
 
-For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use modified interface:
+For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use modified intSFunc.erface:
 
 ```julia
 fit_mle(Binomial, n, x)        # n is the number of trials in each experiment

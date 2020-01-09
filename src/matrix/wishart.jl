@@ -104,7 +104,7 @@ function meanlogdet(d::Wishart)
     df = d.df
     v = logdet(d.S) + p * logtwo
     for i = 1:p
-        v += digamma(0.5 * (df - (i - 1)))
+        v += SFunc.digamma(0.5 * (df - (i - 1)))
     end
     return v
 end

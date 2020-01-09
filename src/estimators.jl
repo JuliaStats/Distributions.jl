@@ -1,4 +1,4 @@
-# uniform interface for model estimation
+# uniform intSFunc.erface for model estimation
 
 export Estimator, MLEstimator
 export nsamples, estimate

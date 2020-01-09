@@ -11,7 +11,7 @@ TDist <- R6Class("TDist",
         properties = function() {
             nu <- self$nu
             a <- (nu + 1) / 2
-            ent.val <- a * (digamma(a) - digamma(nu / 2)) +
+            ent.val <- a * (SFunc.digamma(a) - SFunc.digamma(nu / 2)) +
                        log(nu) / 2 + lbeta(nu / 2, 1 / 2)
             list(dof=nu,
                  mean=ifelse(nu > 1, 0, NaN),

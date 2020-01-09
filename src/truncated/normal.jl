@@ -35,11 +35,11 @@ function _F1(x::Real, y::Real; thresh=1e-7)
         δ = y - x
         √π*x + (√π/2 + (-√π*x/6 + (-√π/12 + x*(√π/90 + (√π*x^2)/90)δ)δ)δ)δ
     elseif max(x,y) < 0
-        (1 - ϵ) / (ϵ * erfcx(-y) - erfcx(-x))
+        (1 - ϵ) / (ϵ * SFunc.erfcx(-y) - SFunc.erfcx(-x))
     elseif min(x,y) > 0
-        (1 - ϵ) / (erfcx(x) - ϵ * erfcx(y))
+        (1 - ϵ) / (SFunc.erfcx(x) - ϵ * SFunc.erfcx(y))
     else
-        exp(-x^2) * (1 - ϵ) / (erf(y) - erf(x))
+        exp(-x^2) * (1 - ϵ) / (SFunc.erf(y) - SFunc.erf(x))
     end
 end
 
@@ -54,11 +54,11 @@ function _F2(x::Real, y::Real; thresh=1e-7)
         δ = y - x
         √π*x^2 - √π/2 + (√π*x + (√π/3 - √π*x^2/3 + (((√π/30 + √π*x^2/45)x^2 - 4*√π/45)δ - √π*x/3)δ)δ)δ
     elseif max(x,y) < 0
-        (x - ϵ * y) / (ϵ * erfcx(-y) - erfcx(-x))
+        (x - ϵ * y) / (ϵ * SFunc.erfcx(-y) - SFunc.erfcx(-x))
     elseif min(x,y) > 0
-        (x - ϵ * y) / (erfcx(x) - ϵ * erfcx(y))
+        (x - ϵ * y) / (SFunc.erfcx(x) - ϵ * SFunc.erfcx(y))
     else
-        exp(-x^2) * (x - ϵ * y) / (erf(y) - erf(x))
+        exp(-x^2) * (x - ϵ * y) / (SFunc.erf(y) - SFunc.erf(x))
     end
 end
 

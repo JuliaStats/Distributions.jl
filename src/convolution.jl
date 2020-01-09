@@ -61,7 +61,7 @@ function convolve(d1::Gamma, d2::Gamma)
 end
 
 # continuous multivariate
-# The first two methods exist for performance reasons to avoid unnecessarily converting
+# The first two methods exist for pSFunc.erformance reasons to avoid unnecessarily converting
 # PDMats to a Matrix
 function convolve(
     d1::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},

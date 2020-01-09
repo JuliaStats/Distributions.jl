@@ -68,7 +68,7 @@ kurtosis(d::Skellam) = 1 / var(d)
 
 function logpdf(d::Skellam, x::Integer)
     μ1, μ2 = params(d)
-    - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+    - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(SFunc.besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
 end
 
 pdf(d::Skellam, x::Integer) = exp(logpdf(d, x))

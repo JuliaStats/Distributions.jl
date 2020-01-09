@@ -9,7 +9,7 @@ const DiscreteUnivariateDistribution   = Distribution{Univariate, Discrete}
 const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
 ```
 
-## Common Interface
+## Common IntSFunc.erface
 
 A series of methods are implemented for each univariate distribution, which provide
 useful functionalities such as moment computation, pdf evaluation, and sampling

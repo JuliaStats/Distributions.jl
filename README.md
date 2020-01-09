@@ -58,7 +58,7 @@ Pull Request on the main repository.
 
 Distributions is a central package which many rely on,
 the following are required for contributions to be accepted:
-1. Docstrings must be added to all interface and non-trivial functions.
+1. Docstrings must be added to all intSFunc.erface and non-trivial functions.
 2. Tests validating the modified behavior in the `test` folder. If new test files are added, do not forget to add them in `test/runtests.jl`. Cover possible edge cases. Run the tests locally before submitting the PR.
 3. At the end of the tests, `Test.detect_ambiguities(Distributions)` is run to check method ambiguities. Verify that your modified code did not yield method ambiguities.
 4. Make according modifications to the `docs` folder, build the documentation locally with `$ julia docs/make.jl`, verify that your modifications display correctly and did not yield warnings.

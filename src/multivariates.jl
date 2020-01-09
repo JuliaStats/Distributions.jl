@@ -244,7 +244,7 @@ end
 """
     _logpdf{T<:Real}(d::MultivariateDistribution, x::AbstractArray)
 
-Evaluate logarithm of pdf value for a given vector `x`. This function need not perform dimension checking.
+Evaluate logarithm of pdf value for a given vector `x`. This function need not pSFunc.erform dimension checking.
 Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods are provided in `src/multivariates.jl`.
 """
 _logpdf(d::MultivariateDistribution, x::AbstractArray)

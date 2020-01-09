@@ -16,12 +16,12 @@ Beta <- R6Class("Beta",
             skew <- 2 * (b - a) * sqrt(a + b + 1) / (a + b + 2) / sqrt(a * b)
             kurt.num <- 6 * ((a - b)^2 * (a + b + 1) - a * b * (a + b + 2))
             kurt.den <- a * b * (a + b + 2) * (a + b + 3)
-            ent <- lbeta(a, b) - (a - 1) * digamma(a) - (b - 1) * digamma(b) +
-                   (a + b - 2) * digamma(a + b)
+            ent <- lbeta(a, b) - (a - 1) * SFunc.digamma(a) - (b - 1) * SFunc.digamma(b) +
+                   (a + b - 2) * SFunc.digamma(a + b)
             list(mean=a / (a + b),
-                 meanlogx=digamma(a) - digamma(a + b),
+                 meanlogx=SFunc.digamma(a) - SFunc.digamma(a + b),
                  var=(a * b) / (a + b)^2 / (a + b + 1.0),
-                 varlogx=trigamma(a) - trigamma(a + b),
+                 varlogx=trigamma(a) - SFunc.trigamma(a + b),
                  skewness=skew,
                  kurtosis=kurt.num / kurt.den,
                  entropy=ent)

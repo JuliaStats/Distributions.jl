@@ -123,4 +123,4 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     return κ
 end
 
-_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)
+_vmfA(half_p::Float64, κ::Float64) = SFunc.besseli(half_p, κ) / SFunc.besseli(half_p - 1.0, κ)

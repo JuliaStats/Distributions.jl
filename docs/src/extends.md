@@ -37,7 +37,7 @@ function _rand!(s::Spl, x::AbstractVector{T}) where T<:Real
 end
 ```
 
-This function can assume that the dimension of `x` is correct, and doesn't need to perform dimension checking.
+This function can assume that the dimension of `x` is correct, and doesn't need to pSFunc.erform dimension checking.
 
 The package implements both `rand` and `rand!` as follows (which you don't need to implement in general):
 
@@ -90,7 +90,7 @@ function _rand!(s::Spl, x::DenseMatrix{T}) where T<:Real
 end
 ```
 
-Note that you can assume `x` has correct dimensions in `_rand!` and don't have to perform dimension checking, the generic `rand` and `rand!` will do dimension checking and array allocation for you.
+Note that you can assume `x` has correct dimensions in `_rand!` and don't have to pSFunc.erform dimension checking, the generic `rand` and `rand!` will do dimension checking and array allocation for you.
 
 ## Create a Distribution
 

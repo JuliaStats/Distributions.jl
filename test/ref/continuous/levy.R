@@ -13,14 +13,14 @@ Levy <- R6Class("Levy",
         properties = function() {
             u <- self$mu
             s <- self$sigma
-            erfcinv <- function (x) qnorm(x/2, lower = FALSE)/sqrt(2)
+            SFunc.erfcinv <- function (x) qnorm(x/2, lower = FALSE)/sqrt(2)
             list(location = u,
                  mode = u + s / 3,
                  mean = Inf,
                  var = Inf,
                  skewness = NaN,
                  kurtosis = NaN,
-                 # 0.47693627620447 = erfc^{-1}(0.5)
+                 # 0.47693627620447 = SFunc.erfc^{-1}(0.5)
                  median = u + (s/2) / (0.47693627620447)^2)
         },
         pdf = function(x, log=FALSE){ VGAM::dlevy(x, self$mu, self$sigma, log.arg=log) },

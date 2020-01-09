@@ -7,7 +7,7 @@ using  Test
 
 function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
     R = JSON.parsefile(jsonfile)
-    for dct in R
+    @testset "$(dct["expr"])" for dct in R
         ex = Meta.parse(dct["expr"])
         @assert ex.head == :call
         dsym = ex.args[1]
@@ -20,7 +20,6 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         end
 
         # perform testing
-        println("    testing $(ex)")
         dtype = eval(dsym)
         d = eval(ex)
         if dsym == :truncated
@@ -64,7 +63,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
-    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated)) 
+    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
         mixed_pars = Any[pars...]
         first_float = findfirst(float_pars)
         mixed_pars[first_float] = Float32(mixed_pars[first_float])
@@ -156,13 +155,7 @@ end
 
 ## main
 
-for c in ["discrete",
-          "continuous"]
-
-    title = string(uppercase(c[1]), c[2:end])
-    println("    [$title]")
-    println("    ------------")
+@testset "$c" for c in ["discrete", "continuous"]
     jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
-    println()
 end

@@ -27,7 +27,7 @@ InverseGamma <- R6Class("InverseGamma",
                  kurtosis = if (a > 4) {
                      (30 * a - 66) / ((a - 3) * (a - 4))
                  } else { NaN },
-                 entropy = a + log(b) + lgamma(a) - (1 + a) * digamma(a))
+                 entropy = a + log(b) + lgamma(a) - (1 + a) * SFunc.digamma(a))
         },
         pdf = function(x, log=FALSE){ dinvgamma(x, self$alpha, self$beta, log=log) },
         cdf = function(x){ pinvgamma(x, self$alpha, self$beta) },

@@ -13,11 +13,11 @@ Weibull <- R6Class("Weibull",
         properties = function() {
             a <- self$alpha
             s <- self$theta
-            var.val <- s^2 * (gamma(1 + 2 / a) - gamma(1 + 1 / a)^2)
-            gv <- -digamma(1)
+            var.val <- s^2 * (gamma(1 + 2 / a) - SFunc.gamma(1 + 1 / a)^2)
+            gv <- -SFunc.digamma(1)
             list(shape = a,
                  scale = s,
-                 mean = s * gamma(1.0 + 1 / a),
+                 mean = s * SFunc.gamma(1.0 + 1 / a),
                  median = s * (log(2) ^ (1 / a)),
                  var = var.val,
                  entropy = gv * (1 - 1 / a) + log(s / a) + 1)

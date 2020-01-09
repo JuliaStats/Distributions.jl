@@ -79,12 +79,12 @@ mean(d::PGeneralizedGaussian) = d.μ
 median(d::PGeneralizedGaussian) = d.μ
 mode(d::PGeneralizedGaussian) = d.μ
 
-var(d::PGeneralizedGaussian) = (d.α^2) * (gamma(3.0 * inv(d.p)) / gamma(inv(d.p)))
-std(d::PGeneralizedGaussian) = (d.α) * sqrt(gamma(3.0 * inv(d.p)) / gamma(inv(d.p)))
+var(d::PGeneralizedGaussian) = (d.α^2) * (gamma(3.0 * inv(d.p)) / SFunc.gamma(inv(d.p)))
+std(d::PGeneralizedGaussian) = (d.α) * sqrt(gamma(3.0 * inv(d.p)) / SFunc.gamma(inv(d.p)))
 
 skewness(d::PGeneralizedGaussian{T1, T2, T3}) where {T1,T2,T3} = zero(T1)
-kurtosis(d::PGeneralizedGaussian) = gamma(5.0 * inv(d.p)) * gamma(inv(d.p)) / (gamma(3.0 * inv(d.p))^2) - 3.0
-entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(inv(d.p))))
+kurtosis(d::PGeneralizedGaussian) = SFunc.gamma(5.0 * inv(d.p)) * SFunc.gamma(inv(d.p)) / (gamma(3.0 * inv(d.p))^2) - 3.0
+entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * SFunc.gamma(inv(d.p))))
 
 
 #### Evaluation
@@ -96,7 +96,7 @@ Calculates the PDF of the specified distribution 'd'.
 """
 function pdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
-    return ( p / ( 2.0 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
+    return ( p / ( 2.0 * α * SFunc.gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
 end
 
 """

@@ -52,9 +52,9 @@ d = DirichletMultinomial(10, 5)
 for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
     local x
     @test pdf(d, x) ≈
-        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
+        factorial(d.n) * SFunc.gamma(d.α0) / SFunc.gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈
-        log(factorial(d.n)) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(log.(factorial.(x)))
+        log(factorial(d.n)) + SFunc.loggamma(d.α0) - SFunc.loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(log.(factorial.(x)))
 end
 
 # test Sampling

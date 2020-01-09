@@ -70,7 +70,7 @@ end
 
 function entropy(d::Erlang)
     (α, θ) = params(d)
-    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
+    α + SFunc.loggamma(α) + (1 - α) * SFunc.digamma(α) + log(θ)
 end
 
 mgf(d::Erlang, t::Real) = (1 - t * d.θ)^(-d.α)

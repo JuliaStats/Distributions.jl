@@ -32,7 +32,7 @@ partype(::NoncentralT{T}) where {T} = T
 function mean(d::NoncentralT{T}) where T<:Real
     if d.ν > 1
         isinf(d.ν) ? d.λ :
-        sqrt(d.ν/2) * d.λ * gamma((d.ν - 1)/2) / gamma(d.ν/2)
+        sqrt(d.ν/2) * d.λ * SFunc.gamma((d.ν - 1)/2) / SFunc.gamma(d.ν/2)
     else
         T(NaN)
     end

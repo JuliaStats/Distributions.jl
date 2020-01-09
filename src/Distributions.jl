@@ -25,8 +25,8 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats
 using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat
 
-using SpecialFunctions # TODO remove
 import SpecialFunctions
+const SFunc = SpecialFunctions
 
 export
     # re-export Statistics
@@ -199,7 +199,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
-    logdiffcdf,         # log of difference between cdf at two values 
+    logdiffcdf,         # log of difference between cdf at two values
     logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
@@ -222,7 +222,7 @@ export
     nsamples,           # get the number of samples contained in an array
     ncategories,        # the number of categories in a Categorical distribution
     ncomponents,        # the number of components in a mixture model
-    ntrials,            # the number of trials being performed in the experiment
+    ntrials,            # the number of trials being pSFunc.erformed in the experiment
     params,             # get the tuple of parameters
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
