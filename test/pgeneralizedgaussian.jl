@@ -1,4 +1,5 @@
 using SpecialFunctions
+const SFunc = SpecialFunctions
 
 d = PGeneralizedGaussian() # mean zero, scale √2, shape 2.
 
@@ -129,5 +130,5 @@ end
 α, β = rand(2)
 d = PGeneralizedGaussian(0.0, α, β)
 @test var(d) ≈ α^2 * (gamma(3.0 * inv(β)) / SFunc.gamma(inv(β)))
-@test kurtosis(d) ≈ SFunc.gamma(5.0 * inv(β)) * SFunc.gamma(inv(β)) / (gamma(3.0 * inv(β))^2) - 3.0
+@test kurtosis(d) ≈ SFunc.gamma(5.0 * inv(β)) * SFunc.gamma(inv(β)) / (SFunc.gamma(3.0 * inv(β))^2) - 3.0
 @test entropy(d) ≈ inv(β) - log( β / (2.0 * α * SFunc.gamma(inv(β))))
