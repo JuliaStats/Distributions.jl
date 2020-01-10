@@ -337,7 +337,7 @@ pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(In
 
 Evaluate the logarithm of probability density (mass) at `x`.
 Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
-Relying on this fallback is not recommended in general, as it is prone to ovSFunc.erflow or undSFunc.erflow.
+Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
 """
 logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
 logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))

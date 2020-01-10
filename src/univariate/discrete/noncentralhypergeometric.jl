@@ -62,8 +62,8 @@ convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeome
 # Properties
 function _P(d::FisherNoncentralHypergeometric, k::Int)
     y = support(d)
-    p = -log(d.ns + 1) .- SFunc.logbeta.(d.ns + 1 .- y, y .+ 1) .-
-            log(d.nf + 1) .- SFunc.logbeta.(d.nf - d.n + 1 .+ y, d.n + 1 .- y) .+
+    p = -log(d.ns + 1) .- logbeta.(d.ns + 1 .- y, y .+ 1) .-
+            log(d.nf + 1) .- logbeta.(d.nf - d.n + 1 .+ y, d.n + 1 .- y) .+
             xlogy.(y, d.ω) .+ xlogy.(k, y)
     logsumexp(p)
 end

@@ -9,7 +9,7 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sqrt{2 \\pi \\sigma^2}}
 ```
 
 Note that if `σ == 0`, then the distribution is a point mass concentrated at `μ`.
-Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have undSFunc.erflowed,
+Though not technically a continuous distribution, it is allowed so as to account for cases where `σ` may have underflowed,
 and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia

@@ -20,7 +20,7 @@ Levy <- R6Class("Levy",
                  var = Inf,
                  skewness = NaN,
                  kurtosis = NaN,
-                 # 0.47693627620447 = SFunc.erfc^{-1}(0.5)
+                 # 0.47693627620447 = erfc^{-1}(0.5)
                  median = u + (s/2) / (0.47693627620447)^2)
         },
         pdf = function(x, log=FALSE){ VGAM::dlevy(x, self$mu, self$sigma, log.arg=log) },
