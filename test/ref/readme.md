@@ -40,7 +40,7 @@ The testing script ``test/univariate.jl`` loads these reference data files to ve
 
 Each reference distribution class is implemented as an
 [R6 class](https://cran.r-project.org/web/packages/R6/vignettes/Introduction.html),
-and provides a uniform intSFunc.erface described as follows:
+and provides a uniform interface described as follows:
 
 Let ``D`` be the reference class, and ``d`` be an reference object:
 

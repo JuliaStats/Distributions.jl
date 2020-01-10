@@ -11,7 +11,7 @@ const ContinuousMultivariateDistribution = Distribution{Multivariate, Continuous
 
 ## Common Interface
 
-The methods listed as below are implemented for each multivariate distribution, which provides a consistent intSFunc.erface to work with multivariate distributions.
+The methods listed as below are implemented for each multivariate distribution, which provides a consistent interface to work with multivariate distributions.
 
 ### Computation of statistics
 
@@ -64,7 +64,7 @@ Product
 
 ### AbstractMvNormal
 
-In addition to the methods listed in the common intSFunc.erface above, we also provide the following methods for all multivariate distributions under the base type `AbstractMvNormal`:
+In addition to the methods listed in the common interface above, we also provide the following methods for all multivariate distributions under the base type `AbstractMvNormal`:
 
 ```@docs
 invcov(::Distributions.AbstractMvNormal)
@@ -75,7 +75,7 @@ rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
 
 ### MvLogNormal
 
-In addition to the methods listed in the common intSFunc.erface above, we also provide the following methods:
+In addition to the methods listed in the common interface above, we also provide the following methods:
 
 ```@docs
 location(::MvLogNormal)
