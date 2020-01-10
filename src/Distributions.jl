@@ -5,13 +5,13 @@ using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec, inv
-import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using FillArrays
 
 using LinearAlgebra, Printf
-import LinearAlgebra: rank
+import LinearAlgebra: dot, rank
 
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
@@ -196,7 +196,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
-    logdiffcdf,         # log of difference between cdf at two values 
+    logdiffcdf,         # log of difference between cdf at two values
     logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density

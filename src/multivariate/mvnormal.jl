@@ -65,6 +65,13 @@ const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  Zeros{Float64,1,Axes}}
 const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zeros{Float64,1,Axes}}
 const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zeros{Float64,1,Axes}}
 ```
+
+Multivariate normal distributions support affine transformations:
+```julia
+d = MvNormal(μ, Σ)
+c + B * d    # == MvNormal(B * μ + c, B * Σ * B')
+dot(b, d)    # == Normal(dot(b, μ), b' * Σ * b)
+```
 """
 abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 
@@ -270,6 +277,18 @@ function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
+
+### Affine transformations
+
++(d::MvNormal, c::AbstractVector) = MvNormal(d.μ .+ c, d.Σ)
+
++(c::AbstractVector, d::MvNormal) = d + c
+
+*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
+
+dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
+
+dot(d::MvNormal, b::AbstractVector) = dot(b, d)
 
 ###########################################################
 #
