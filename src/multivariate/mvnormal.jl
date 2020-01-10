@@ -280,15 +280,15 @@ end
 
 ### Affine transformations
 
-+(c::AbstractVector, d::MvNormal) = MvNormal(d.μ .+ c, d.Σ)
++(d::MvNormal, c::AbstractVector) = MvNormal(d.μ .+ c, d.Σ)
 
-@inline +(d::MvNormal, c::AbstractVector) = c + d
++(c::AbstractVector, d::MvNormal) = d + c
 
 *(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
 
 dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
 
-@inline dot(d::MvNormal, b::AbstractVector) = dot(b, d)
+dot(d::MvNormal, b::AbstractVector) = dot(b, d)
 
 ###########################################################
 #
