@@ -34,7 +34,7 @@ const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureMod
 const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
 const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
 
-# IntSFunc.erface
+# Interface
 
 """
     component_type(d::AbstractMixtureModel)
