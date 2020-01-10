@@ -52,7 +52,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
     test_evaluation(distr, vs, testquan)
 
     if isa(distr, StudentizedRange)
-        n = 2000 # must use fewer values due to pSFunc.erformance
+        n = 2000 # must use fewer values due to performance
     end
     xs = test_samples(distr, n)
     allow_test_stats(distr) && test_stats(distr, xs)

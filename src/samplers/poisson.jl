@@ -110,7 +110,7 @@ end
 
 # Procedure F
 function procf(μ, K::Int, s)
-    # can be pre-computed, but does not seem to affect pSFunc.erformance
+    # can be pre-computed, but does not seem to affect performance
     ω = 0.3989422804014327/s
     b1 = 0.041666666666666664/μ
     b2 = 0.3*b1*b1

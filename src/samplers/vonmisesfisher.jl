@@ -82,7 +82,7 @@ function _vmf_rotmat(u::Vector{Float64})
     #
     # Strategy: construct a full-rank matrix
     # with first column being u, and then
-    # pSFunc.erform QR factorization
+    # perform QR factorization
     #
 
     p = length(u)
@@ -111,7 +111,7 @@ function _vmf_rotmat(u::Vector{Float64})
         A[i, j] = 1.0
     end
 
-    # pSFunc.erform QR factorization
+    # perform QR factorization
     Q = Matrix(qr!(A).Q)
     if dot(view(Q,:,1), u) < 0.0  # the first column was negated
         for i = 1:p

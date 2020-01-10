@@ -9,7 +9,7 @@ const DiscreteMultivariateDistribution   = Distribution{Multivariate, Discrete}
 const ContinuousMultivariateDistribution = Distribution{Multivariate, Continuous}
 ```
 
-## Common IntSFunc.erface
+## Common Interface
 
 The methods listed as below are implemented for each multivariate distribution, which provides a consistent intSFunc.erface to work with multivariate distributions.
 
@@ -35,7 +35,7 @@ pdf(::MultivariateDistribution, ::AbstractArray)
 logpdf(::MultivariateDistribution, ::AbstractArray)
 loglikelihood(::MultivariateDistribution, ::AbstractMatrix)
 ```
-**Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to pSFunc.erform probability computation in log-scale.
+**Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
 
 
 ### Sampling

@@ -206,7 +206,7 @@ end
 """
     _logpdf(d::MatrixDistribution, x::AbstractArray)
 
-Evaluate logarithm of pdf value for a given sample `x`. This function need not pSFunc.erform dimension checking.
+Evaluate logarithm of pdf value for a given sample `x`. This function need not perform dimension checking.
 """
 _logpdf(d::MatrixDistribution, x::AbstractArray)
 
