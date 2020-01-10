@@ -60,18 +60,18 @@ partype(::Weibull{T}) where {T<:Real} = T
 
 #### Statistics
 
-mean(d::Weibull) = d.θ * SFunc.gamma(1 + 1/d.α)
+mean(d::Weibull) = d.θ * gamma(1 + 1/d.α)
 median(d::Weibull) = d.θ * logtwo ^ (1/d.α)
 mode(d::Weibull{T}) where {T<:Real} = d.α > 1 ? (iα = 1 / d.α; d.θ * (1 - iα)^iα) : zero(T)
 
-var(d::Weibull) = d.θ^2 * SFunc.gamma(1 + 2/d.α) - mean(d)^2
+var(d::Weibull) = d.θ^2 * gamma(1 + 2/d.α) - mean(d)^2
 
 function skewness(d::Weibull)
     μ = mean(d)
     σ2 = var(d)
     σ = sqrt(σ2)
     r = μ / σ
-    SFunc.gamma(1 + 3/d.α) * (d.θ/σ)^3 - 3r - r^3
+    gamma(1 + 3/d.α) * (d.θ/σ)^3 - 3r - r^3
 end
 
 function kurtosis(d::Weibull)
@@ -82,7 +82,7 @@ function kurtosis(d::Weibull)
     r = μ / σ
     r2 = r^2
     r4 = r2^2
-    (θ/σ)^4 * SFunc.gamma(1 + 4/α) - 4γ*r - 6r2 - r4 - 3
+    (θ/σ)^4 * gamma(1 + 4/α) - 4γ*r - 6r2 - r4 - 3
 end
 
 function entropy(d::Weibull)

@@ -27,6 +27,11 @@ using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat
 
 import SpecialFunctions
 const SFunc = SpecialFunctions
+using SpecialFunctions: gamma, digamma, trigamma, loggamma,
+                        erf, erfc, erfcx,
+                        erfinv, erfcinv,
+                        besseli, besselix, besselk, zeta,
+                        beta, logbeta, log1p
 
 export
     # re-export Statistics

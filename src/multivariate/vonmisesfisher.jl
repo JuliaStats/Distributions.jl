@@ -64,7 +64,7 @@ function _vmflck(p, κ)
     T = typeof(κ)
     hp = T(p/2)
     q = hp - 1
-    q * log(κ) - hp * log2π - log(SFunc.besseli(q, κ))
+    q * log(κ) - hp * log2π - log(besseli(q, κ))
 end
 _vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))
@@ -123,4 +123,4 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     return κ
 end
 
-_vmfA(half_p::Float64, κ::Float64) = SFunc.besseli(half_p, κ) / SFunc.besseli(half_p - 1.0, κ)
+_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)

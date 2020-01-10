@@ -26,7 +26,7 @@ end
 
 function VonMises(μ::T, κ::T; check_args=true) where {T <: Real}
     check_args && @check_args(VonMises, κ > zero(κ))
-    return VonMises{T}(μ, κ, SFunc.besselix(zero(T), κ))
+    return VonMises{T}(μ, κ, besselix(zero(T), κ))
 end
 
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
@@ -54,12 +54,12 @@ partype(::VonMises{T}) where {T<:Real} = T
 mean(d::VonMises) = d.μ
 median(d::VonMises) = d.μ
 mode(d::VonMises) = d.μ
-var(d::VonMises) = 1 - SFunc.besselix(1, d.κ) / d.I0κx
+var(d::VonMises) = 1 - besselix(1, d.κ) / d.I0κx
 # deprecated 12 September 2016
 @deprecate circvar(d) var(d)
-entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - SFunc.besselix(1, d.κ) / d.I0κx)
+entropy(d::VonMises) = log(twoπ * d.I0κx) + d.κ * (1 - besselix(1, d.κ) / d.I0κx)
 
-cf(d::VonMises, t::Real) = (SFunc.besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
+cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 
 
 #### Evaluations
@@ -75,11 +75,11 @@ cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
 function _vmcdf(κ::Real, I0κx::Real, x::Real, tol::Real)
     tol *= exp(-κ)
     j = 1
-    cj = SFunc.besselix(j, κ) / j
+    cj = besselix(j, κ) / j
     s = cj * sin(j * x)
     while abs(cj) > tol
         j += 1
-        cj = SFunc.besselix(j, κ) / j
+        cj = besselix(j, κ) / j
         s += cj * sin(j * x)
     end
     return (x + 2s / I0κx) / twoπ + 1//2

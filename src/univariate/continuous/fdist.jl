@@ -91,9 +91,9 @@ function entropy(d::FDist)
     hν1 = ν1/2
     hν2 = ν2/2
     hs = (ν1 + ν2)/2
-    return log(ν2 / ν1) + SFunc.loggamma(hν1) + SFunc.loggamma(hν2) - SFunc.loggamma(hs) +
-        (1 - hν1) * SFunc.digamma(hν1) + (-1 - hν2) * SFunc.digamma(hν2) +
-        hs * SFunc.digamma(hs)
+    return log(ν2 / ν1) + loggamma(hν1) + loggamma(hν2) - loggamma(hs) +
+        (1 - hν1) * digamma(hν1) + (-1 - hν2) * digamma(hν2) +
+        hs * digamma(hs)
 end
 
 #### Evaluation & Sampling

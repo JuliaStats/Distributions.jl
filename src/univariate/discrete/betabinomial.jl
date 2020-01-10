@@ -85,17 +85,17 @@ end
 function pdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
     insupport(d, k) || return zero(T)
-    chooseinv = (n + 1) * SFunc.beta(k + 1, n - k + 1)
-    numerator = SFunc.beta(k + α, n - k + β)
-    denominator = SFunc.beta(α, β)
+    chooseinv = (n + 1) * beta(k + 1, n - k + 1)
+    numerator = beta(k + α, n - k + β)
+    denominator = beta(α, β)
     return numerator / (denominator * chooseinv)
 end
 
 function logpdf(d::BetaBinomial{T}, k::Int) where T
     n, α, β = d.n, d.α, d.β
-    logbinom = - SFunc.log1p(n) - SFunc.logbeta(k + 1, n - k + 1)
-    lognum   = SFunc.logbeta(k + α, n - k + β)
-    logdenom = SFunc.logbeta(α, β)
+    logbinom = - log1p(n) - logbeta(k + 1, n - k + 1)
+    lognum   = logbeta(k + α, n - k + β)
+    logdenom = logbeta(α, β)
     logbinom + lognum - logdenom
 end
 

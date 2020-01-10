@@ -48,7 +48,7 @@ params(d::Chi) = (d.ν,)
 
 #### Statistics
 
-mean(d::Chi) = (h = d.ν/2; sqrt2 * SFunc.gamma(h + 1//2) / SFunc.gamma(h))
+mean(d::Chi) = (h = d.ν/2; sqrt2 * gamma(h + 1//2) / gamma(h))
 
 var(d::Chi) = d.ν - mean(d)^2
 _chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1 - 2σ2))
@@ -67,7 +67,7 @@ function kurtosis(d::Chi)
 end
 
 entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
-    SFunc.loggamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * SFunc.digamma(ν/2) + ν/2)
+    loggamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
 function mode(d::Chi)
     d.ν >= 1 || error("Chi distribution has no mode when ν < 1")
@@ -80,7 +80,7 @@ end
 pdf(d::Chi, x::Real) = exp(logpdf(d, x))
 
 logpdf(d::Chi, x::Real) = (ν = d.ν;
-    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - SFunc.loggamma(ν/2)
+    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
 )
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)

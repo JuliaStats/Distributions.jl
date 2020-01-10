@@ -33,15 +33,15 @@ struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
             ai > 0 ||
                 throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
-            lmnB += SFunc.loggamma(ai)
+            lmnB += loggamma(ai)
         end
-        lmnB -= SFunc.loggamma(alpha0)
+        lmnB -= loggamma(alpha0)
         new{T}(alpha, alpha0, lmnB)
     end
 
     function Dirichlet{T}(d::Integer, alpha::T) where T
         alpha0 = alpha * d
-        new{T}(fill(alpha, d), alpha0, SFunc.loggamma(alpha) * d - SFunc.loggamma(alpha0))
+        new{T}(fill(alpha, d), alpha0, loggamma(alpha) * d - loggamma(alpha0))
     end
 end
 
@@ -119,10 +119,10 @@ function entropy(d::Dirichlet)
     α0 = d.alpha0
     k = length(α)
 
-    en = d.lmnB + (α0 - k) * SFunc.digamma(α0)
+    en = d.lmnB + (α0 - k) * digamma(α0)
     for j in 1:k
         @inbounds αj = α[j]
-        en -= (αj - 1.0) * SFunc.digamma(αj)
+        en -= (αj - 1.0) * digamma(αj)
     end
     return en
 end
@@ -327,7 +327,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     α0 = sum(α)
 
     if debug
-        objv = dot(α - 1.0, elogp) + SFunc.loggamma(α0) - sum(SFunc.loggamma(α))
+        objv = dot(α - 1.0, elogp) + loggamma(α0) - sum(loggamma(α))
     end
 
     t = 0
@@ -338,16 +338,16 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         # compute gradient & Hessian
         # (b is computed as well)
 
-        digam_α0 = SFunc.digamma(α0)
-        iz = 1.0 / SFunc.trigamma(α0)
+        digam_α0 = digamma(α0)
+        iz = 1.0 / trigamma(α0)
         gnorm = 0.
         b = 0.
         iqs = 0.
 
         for k = 1:K
             @inbounds ak = α[k]
-            @inbounds g[k] = gk = digam_α0 - SFunc.digamma(ak) + elogp[k]
-            @inbounds iq[k] = - 1.0 / SFunc.trigamma(ak)
+            @inbounds g[k] = gk = digam_α0 - digamma(ak) + elogp[k]
+            @inbounds iq[k] = - 1.0 / trigamma(ak)
 
             @inbounds b += gk * iq[k]
             @inbounds iqs += iq[k]
@@ -371,7 +371,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 
         if debug
             prev_objv = objv
-            objv = dot(α - 1.0, elogp) + SFunc.loggamma(α0) - sum(SFunc.loggamma(α))
+            objv = dot(α - 1.0, elogp) + loggamma(α0) - sum(loggamma(α))
             @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
                 t, objv, objv - prev_objv, gnorm)
         end

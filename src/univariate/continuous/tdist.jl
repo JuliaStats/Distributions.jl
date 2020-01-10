@@ -70,7 +70,7 @@ function entropy(d::TDist{T}) where T <: Real
     isinf(d.ν) && return entropy( Normal(zero(T), one(T)) )
     h = d.ν/2
     h1 = h + 1//2
-    h1 * (SFunc.digamma(h1) - SFunc.digamma(h)) + log(d.ν)/2 + SFunc.logbeta(h, 1//2)
+    h1 * (digamma(h1) - digamma(h)) + log(d.ν)/2 + logbeta(h, 1//2)
 end
 
 
@@ -85,7 +85,7 @@ function cf(d::TDist{T}, t::Real) where T <: Real
     t == 0 && return complex(1)
     h = d.ν/2
     q = d.ν/4
-    complex(2(q*t^2)^q * SFunc.besselk(h, sqrt(d.ν) * abs(t)) / SFunc.gamma(h))
+    complex(2(q*t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
 end
 
 gradlogpdf(d::TDist{T}, x::Real) where {T<:Real} = isinf(d.ν) ? gradlogpdf(Normal(zero(T), one(T)), x) : -((d.ν + 1) * x) / (x^2 + d.ν)

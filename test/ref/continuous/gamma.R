@@ -22,7 +22,7 @@ Gamma <- R6Class("Gamma",
                  var=a * s^2,
                  skewness=2 / sqrt(a),
                  kurtosis=6 / a,
-                 entropy=a + log(s) + lgamma(a) + (1 - a) * SFunc.digamma(a)
+                 entropy=a + log(s) + lgamma(a) + (1 - a) * digamma(a)
             )
         },
         pdf = function(x, log=FALSE) { dgamma(x, self$alpha, self$beta, log=log) },

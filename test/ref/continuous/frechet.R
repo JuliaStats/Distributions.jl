@@ -13,10 +13,10 @@ Frechet <- R6Class("Frechet",
         properties = function() {
             a <- self$alpha
             b <- self$beta
-            g1 <- ifelse(a > 1, SFunc.gamma(1 - 1/a), NaN)
-            g2 <- ifelse(a > 2, SFunc.gamma(1 - 2/a), NaN)
-            g3 <- ifelse(a > 3, SFunc.gamma(1 - 3/a), NaN)
-            g4 <- ifelse(a > 4, SFunc.gamma(1 - 4/a), NaN)
+            g1 <- ifelse(a > 1, gamma(1 - 1/a), NaN)
+            g2 <- ifelse(a > 2, gamma(1 - 2/a), NaN)
+            g3 <- ifelse(a > 3, gamma(1 - 3/a), NaN)
+            g4 <- ifelse(a > 4, gamma(1 - 4/a), NaN)
             gam <- 0.57721566490153286
             list(shape = a,
                  scale = b,

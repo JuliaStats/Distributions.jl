@@ -15,7 +15,7 @@ Chisq <- R6Class("Chisq",
                  var=2 * k,
                  skewness=sqrt(8 / k),
                  kurtosis=12 / k,
-                 entropy=k / 2 + log(2) + lgamma(k/2) + (1 - k/2) * SFunc.digamma(k/2))
+                 entropy=k / 2 + log(2) + lgamma(k/2) + (1 - k/2) * digamma(k/2))
         },
         pdf = function(x, log=FALSE) { dchisq(x, self$nu, log=log) },
         cdf = function(x) { pchisq(x, self$nu) },

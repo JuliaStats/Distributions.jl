@@ -13,7 +13,7 @@ Levy <- R6Class("Levy",
         properties = function() {
             u <- self$mu
             s <- self$sigma
-            SFunc.erfcinv <- function (x) qnorm(x/2, lower = FALSE)/sqrt(2)
+            erfcinv <- function (x) qnorm(x/2, lower = FALSE)/sqrt(2)
             list(location = u,
                  mode = u + s / 3,
                  mean = Inf,

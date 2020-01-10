@@ -80,12 +80,12 @@ end
 
 function meanlogx(d::Beta)
     (α, β) = params(d)
-    return SFunc.digamma(α) - SFunc.digamma(α + β)
+    return digamma(α) - digamma(α + β)
 end
 
 function varlogx(d::Beta)
     (α, β) = params(d)
-    return SFunc.trigamma(α) - SFunc.trigamma(α + β)
+    return trigamma(α) - trigamma(α + β)
 end
 
 stdlogx(d::Beta) = sqrt(varlogx(d))
@@ -110,8 +110,8 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    SFunc.logbeta(α, β) - (α - 1) * SFunc.digamma(α) - (β - 1) * SFunc.digamma(β) +
-        (s - 2) * SFunc.digamma(s)
+    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
+        (s - 2) * digamma(s)
 end
 
 

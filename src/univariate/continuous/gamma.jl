@@ -72,7 +72,7 @@ end
 
 function entropy(d::Gamma)
     (α, θ) = params(d)
-    α + SFunc.loggamma(α) + (1 - α) * SFunc.digamma(α) + log(θ)
+    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
 mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
@@ -150,7 +150,7 @@ end
 
 function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
     ia = 1 / a
-    z = ia + (mlogx - logmx + log(a) - SFunc.digamma(a)) / (abs2(a) * (ia - SFunc.trigamma(a)))
+    z = ia + (mlogx - logmx + log(a) - digamma(a)) / (abs2(a) * (ia - trigamma(a)))
     1 / z
 end
 

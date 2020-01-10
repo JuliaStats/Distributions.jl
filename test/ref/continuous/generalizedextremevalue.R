@@ -27,10 +27,10 @@ GeneralizedExtremeValue <- R6Class("GeneralizedExtremeValue",
             k <- self$xi
             gam <- 0.57721566490153286
             zeta3 <- 1.202056903159594
-            g1 <- if (k < 1) SFunc.gamma(1 - k)
-            g2 <- if (2*k < 1) SFunc.gamma(1 - 2*k)
-            g3 <- if (3*k < 1) SFunc.gamma(1 - 3*k)
-            g4 <- if (4*k < 1) SFunc.gamma(1 - 4*k)
+            g1 <- if (k < 1) gamma(1 - k)
+            g2 <- if (2*k < 1) gamma(1 - 2*k)
+            g3 <- if (3*k < 1) gamma(1 - 3*k)
+            g4 <- if (4*k < 1) gamma(1 - 4*k)
             ent <- log(s) + gam * k + (gam + 1)
             if (k == 0) {
                 list(location = u,

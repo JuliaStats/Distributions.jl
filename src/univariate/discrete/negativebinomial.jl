@@ -95,7 +95,7 @@ function logpdf(d::NegativeBinomial, k::Int)
     elseif k < 0
         return oftype(r, -Inf)
     else
-        return r - log(k + d.r) - Distributions.SFunc.logbeta(d.r, k + 1)
+        return r - log(k + d.r) - Distributions.logbeta(d.r, k + 1)
     end
 end
 pdf(d::NegativeBinomial, k::Int) = exp(logpdf(d, k))

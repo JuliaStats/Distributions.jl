@@ -59,9 +59,9 @@ kurtosis(d::Levy{T}) where {T<:Real} = T(NaN)
 
 mode(d::Levy) = d.σ / 3 + d.μ
 
-entropy(d::Levy) = (1 - 3SFunc.digamma(1) + log(16 * d.σ^2 * π)) / 2
+entropy(d::Levy) = (1 - 3digamma(1) + log(16 * d.σ^2 * π)) / 2
 
-median(d::Levy{T}) where {T<:Real} = d.μ + d.σ / (2 * T(SFunc.erfcinv(0.5))^2)
+median(d::Levy{T}) where {T<:Real} = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 
 #### Evaluation
@@ -84,11 +84,11 @@ function logpdf(d::Levy{T}, x::Real) where T<:Real
     (log(σ) - log2π - σ / z - 3log(z))/2
 end
 
-cdf(d::Levy{T}, x::Real) where {T<:Real} = x <= d.μ ? zero(T) : SFunc.erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf(d::Levy{T}, x::Real) where {T<:Real} =  x <= d.μ ? one(T) : SFunc.erf(sqrt(d.σ / (2(x - d.μ))))
+cdf(d::Levy{T}, x::Real) where {T<:Real} = x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
+ccdf(d::Levy{T}, x::Real) where {T<:Real} =  x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
-quantile(d::Levy, p::Real) = d.μ + d.σ / (2*SFunc.erfcinv(p)^2)
-cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*SFunc.erfinv(p)^2)
+quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
+cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
 
 mgf(d::Levy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 

@@ -12,7 +12,7 @@ where
 
 ```math
 \\begin{align*}
-\\Phi(x) &= \\frac{1 + SFunc.erf(\\frac{x}{\\sqrt{2}})}{2} &&(\\text{Normal Distribution CDF})\\\\
+\\Phi(x) &= \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} &&(\\text{Normal Distribution CDF})\\\\
 \\phi(x) &= \\Phi'(x) &&(\\text{Normal Distribution PDF})
 \\end{align*}
 ```
