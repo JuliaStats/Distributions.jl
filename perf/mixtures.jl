@@ -1,6 +1,6 @@
 using BenchmarkTools: @btime
 import Random
-using Distributions: AbstractMixtureModel, MixtureModel, Normal, pdf, ncomponents, probs, component, components
+using Distributions: AbstractMixtureModel, MixtureModel, LogNormal, Normal, pdf, ncomponents, probs, component, components, ContinuousUnivariateDistribution
 
 # v0.22.1
 function current_master(d::AbstractMixtureModel, x)
@@ -65,6 +65,8 @@ priors = [0.25, 0.25, 0.5]
 
 gmm_normal = MixtureModel(distributions, priors)
 
+@info "Small Gausian mixture"
+
 Random.seed!(42)
 for x in rand(5)
     @info "sampling $x"
@@ -89,6 +91,8 @@ large_probs .= large_probs ./ sum(large_probs)
 
 gmm_large = MixtureModel(large_normals, large_probs)
 
+@info "Large Gausian mixture"
+
 Random.seed!(42)
 for x in rand(5)
     @info "sampling $x"
@@ -104,5 +108,35 @@ for x in rand(5)
     v3 = @btime improved_zipped($gmm_large, $x)
     @info "improved_indexed"
     v4 = @btime improved_indexed($gmm_large, $x)
+    @assert vman ≈ vmaster ≈ v1 ≈ v2 ≈ v3 ≈ v4
+end
+
+large_het = append!(
+    ContinuousUnivariateDistribution[Normal(rand(), rand()) for _ in 1:1000],
+    ContinuousUnivariateDistribution[LogNormal(rand(), rand()) for _ in 1:1000],
+)
+
+large_het_probs = [rand() for _ in 1:2000]
+large_het_probs .= large_het_probs ./ sum(large_het_probs)
+
+gmm_het = MixtureModel(large_het, large_het_probs)
+
+@info "Heterogeneous distributions"
+
+Random.seed!(42)
+for x in rand(5)
+    @info "sampling $x"
+    @info "evaluate_manual_pdf"
+    vman = @btime evaluate_manual_pdf($large_het, $large_het_probs, $x)
+    @info "current_master"
+    vmaster = @btime current_master($gmm_het, $x)
+    @info "improved_version"
+    v1 = @btime improved_version($gmm_het, $x)
+    @info "improved_no_inbound"
+    v2 = @btime improved_no_inbound($gmm_het, $x)
+    @info "improved_zipped"
+    v3 = @btime improved_zipped($gmm_het, $x)
+    @info "improved_indexed"
+    v4 = @btime improved_indexed($gmm_het, $x)
     @assert vman ≈ vmaster ≈ v1 ≈ v2 ≈ v3 ≈ v4
 end
