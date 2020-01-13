@@ -48,7 +48,7 @@ component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel)
+components(d::AbstractMixtureModel) = [component(d, k) for k in Base.OneTo(ncomponents(d))]
 
 """
     probs(d::AbstractMixtureModel)
