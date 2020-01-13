@@ -305,22 +305,12 @@ function _cdf(d::UnivariateMixture, x::Real)
 end
 
 cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
-cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
-
+cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 
 function _mixpdf1(d::AbstractMixtureModel, x)
-    K = ncomponents(d)
-    p = probs(d)
-    @assert length(p) == K
-    v = 0.0
-    @inbounds for i in eachindex(p)
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            v += pdf(c, x) * pi
-        end
-    end
-    return v
+   ps = probs(d)
+   cs = components(d)
+   return sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps))
 end
 
 function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
