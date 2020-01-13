@@ -287,7 +287,7 @@ end
 
 *(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, PDMats.X_A_Xt(d.Σ, B))
 
-dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
+dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), sqrt(PDMats.quad(d.Σ, b)))
 
 dot(d::MvNormal, b::AbstractVector) = dot(b, d)
 
