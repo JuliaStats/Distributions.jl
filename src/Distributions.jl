@@ -6,13 +6,13 @@ using StatsFuns: logtwo, invsqrt2, invsqrt2π, nchisqcdf, logmvbeta
 
 using QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec, inv
-import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 import FillArrays
 
 using LinearAlgebra, Printf
-import LinearAlgebra: rank
+import LinearAlgebra: dot, rank
 
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt

@@ -233,3 +233,49 @@ end
     @test g.μ      ≈ uw
     @test g.Σ.diag ≈ diag(Cw)
 end
+
+@testset "MvNormal affine tranformations" begin
+    @testset "moment identities" begin
+        for n in 1:5                       # dimension
+            # distribution
+            μ = randn(n)
+            for Σ in (randn(n, n) |> A -> A*A',  # dense
+                      Diagonal(abs2.(randn(n))), # diagonal
+                      abs2(randn()) * I)         # scaled unit
+                d = MvNormal(μ, Σ)
+
+                # random arrays for transformations
+                c = randn(n)
+                m = rand(1:n)
+                B = randn(m, n)
+                b = randn(n)
+
+                d_c = d + c
+                c_d = c + d
+                @test mean(d_c) == mean(c_d) == μ .+ c
+                @test cov(c_d) == cov(d_c) == cov(d)
+
+                B_d = B * d
+                @test B_d isa MvNormal
+                @test length(B_d) == m
+                @test mean(B_d) == B * μ
+                @test cov(B_d) ≈ B * Σ * B'
+
+                b_d = dot(b, d)
+                d_b = dot(b, d)
+                @test b_d isa Normal && d_b isa Normal
+                @test mean(b_d) ≈ mean(d_b) ≈ dot(b, μ)
+                @test var(b_d) ≈ var(d_b) ≈ dot(b, Σ * b)
+            end
+        end
+    end
+
+    @testset "dimension mismatch errors" begin
+        d4 = MvNormal(zeros(4), Diagonal(ones(4)))
+        o3 = ones(3)
+        @test_throws DimensionMismatch d4 + o3
+        @test_throws DimensionMismatch o3 + d4
+        @test_throws DimensionMismatch ones(3, 3) * d4
+        @test_throws DimensionMismatch dot(o3, d4)
+    end
+end
