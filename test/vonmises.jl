@@ -1,7 +1,7 @@
 # Tests for Von-Mises distribution
 
 using Distributions
-using Compat.Test
+using Test
 
 function test_vonmises(μ::Float64, κ::Float64)
     d = VonMises(μ, κ)
