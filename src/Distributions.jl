@@ -23,7 +23,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   params, params!
 
 import PDMats
-using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat
+using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat, Zeros
 
 import SpecialFunctions
 const SFunc = SpecialFunctions

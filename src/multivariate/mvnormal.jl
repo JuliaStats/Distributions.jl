@@ -61,9 +61,9 @@ const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
 const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
 const FullNormal = MvNormal{PDMat,    Vector{Float64}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  FillArrays.Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, FillArrays.Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  Zers{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zers{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zers{Float64,1,Axes}}
 ```
 
 Multivariate normal distributions support affine transformations:
@@ -187,9 +187,9 @@ const IsoNormal  = MvNormal{Float64,ScalMat{Float64},Vector{Float64}}
 const DiagNormal = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const FullNormal = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},FillArrays.FillArrays.Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},FillArrays.FillArrays.Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},FillArrays.FillArrays.Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64,ScalMat{Float64},FillArrays.Zers{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float64}},FillArrays.Zers{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},FillArrays.Zers{Float64,1,Axes}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
@@ -215,10 +215,10 @@ MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, 
 MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
 
 # constructor without mean vector
-MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(FillArrays.FillArrays.Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
+MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(FillArrays.Zers{eltype(Σ)}(size(Σ, 1)), Σ)
 
 # special constructor
-MvNormal(d::Int, σ::Real) = MvNormal(FillArrays.FillArrays.Zeros{typeof(σ)}(d), σ)
+MvNormal(d::Int, σ::Real) = MvNormal(FillArrays.Zers{typeof(σ)}(d), σ)
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
