@@ -26,24 +26,20 @@ External links:
 """
 const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
-
-Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, NoArgCheck())
-
-function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
-    @check_args(Categorical, isprobvec(p))
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
+    check_args && @check_args(Categorical, isprobvec(p))
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_args=check_args)
 end
 
-Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p)
+Categorical(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p, check_args=check_args)
 
-function Categorical(k::Integer)
-    @check_args(Categorical, k >= 1)
-    Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), NoArgCheck())
+function Categorical(k::Integer; check_args=true)
+    check_args && @check_args(Categorical, k >= 1)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
+
+Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
 
 ### Conversions
 
@@ -54,7 +50,7 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 
 ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
-@inline partype(d::Categorical{T}) where {T<:Real} = T
+partype(::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
 
@@ -85,8 +81,6 @@ function cdf(d::Categorical{T}, x::Int) where T<:Real
 end
 
 pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
-
-logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(probs(d)[x]) : -Inf
 
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
@@ -165,11 +159,11 @@ function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), check_args=false)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), check_args=false)
 end
 
 fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)

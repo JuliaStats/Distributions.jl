@@ -26,30 +26,28 @@ struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
 end
 
-function Levy(μ::T, σ::T) where {T}
-    @check_args(Levy, σ > zero(σ))
+function Levy(μ::T, σ::T; check_args=true) where {T}
+    check_args && @check_args(Levy, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
-
-Levy(μ::T, σ::T, ::NoArgCheck) where {T<:Real} = Levy{T}(μ, σ)
 
 Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
 Levy(μ::Integer, σ::Integer) = Levy(float(μ), float(σ))
 Levy(μ::T) where {T <: Real} = Levy(μ, one(T))
-Levy() = Levy(0.0, 1.0, NoArgCheck())
+Levy() = Levy(0.0, 1.0, check_args=false)
 
 @distr_support Levy d.μ Inf
 
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
-convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), NoArgCheck())
+convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), check_args=false)
 
 #### Parameters
 
 location(d::Levy) = d.μ
 params(d::Levy) = (d.μ, d.σ)
-@inline partype(d::Levy{T}) where {T<:Real} = T
+partype(::Levy{T}) where {T} = T
 
 
 #### Statistics

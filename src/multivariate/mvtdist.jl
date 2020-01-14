@@ -26,12 +26,12 @@ function GenericMvTDist(df::T, μ::Mean, Σ::Cov, zmean::Bool) where {Cov<:Abstr
     GenericMvTDist{R, typeof(S), typeof(m)}(R(df), d, zmean, m, S)
 end
 
-GenericMvTDist(df::Real, μ::Mean, Σ::Cov) where {Cov<:AbstractPDMat, Mean<:AbstractVector} =
-    GenericMvTDist(df, μ, Σ, allzeros(μ))
+GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractPDMat) =
+    GenericMvTDist(df, μ, Σ, all(iszero, μ))
 
-function GenericMvTDist(df::T, Σ::Cov) where {Cov<:AbstractPDMat, T<:Real}
-    R = Base.promote_eltype(T, Σ)
-    GenericMvTDist(df, zeros(R,dim(Σ)), Σ, true)
+function GenericMvTDist(df::Real, Σ::AbstractPDMat)
+    R = Base.promote_eltype(df, Σ)
+    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ, true)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -103,19 +103,19 @@ logdet_cov(d::GenericMvTDist) = d.df>2 ? logdet((d.df/(d.df-2))*d.Σ) : NaN
 
 params(d::GenericMvTDist) = (d.df, d.μ, d.Σ)
 @inline partype(d::GenericMvTDist{T}) where {T} = T
-eltype(::GenericMvTDist{T}) where {T} = T
+Base.eltype(::Type{<:GenericMvTDist{T}}) where {T} = T
 
 # For entropy calculations see "Multivariate t Distributions and their Applications", S. Kotz & S. Nadarajah
 function entropy(d::GenericMvTDist)
     hdf, hdim = 0.5*d.df, 0.5*d.dim
     shdfhdim = hdf+hdim
-    0.5*logdet(d.Σ)+hdim*log(d.df*pi)+lbeta(hdim, hdf)-lgamma(hdim)+shdfhdim*(digamma(shdfhdim)-digamma(hdf))
+    0.5*logdet(d.Σ) + hdim*log(d.df*pi) + logbeta(hdim, hdf) - loggamma(hdim) + shdfhdim*(digamma(shdfhdim) - digamma(hdf))
 end
 
 # evaluation (for GenericMvTDist)
 
 insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
-    length(d) == length(x) && allfinite(x)
+    length(d) == length(x) && all(isfinite, x)
 
 function sqmahal(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
     z = d.zeromean ? x : x - d.μ
@@ -134,7 +134,7 @@ function mvtdist_consts(d::AbstractMvTDist)
     hdf = 0.5 * d.df
     hdim = 0.5 * d.dim
     shdfhdim = hdf + hdim
-    v = lgamma(shdfhdim) - lgamma(hdf) - hdim*log(d.df) - hdim*log(pi) - 0.5*logdet(d.Σ)
+    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*log(pi) - 0.5*logdet(d.Σ)
     return (shdfhdim, v)
 end
 

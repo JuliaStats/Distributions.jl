@@ -10,7 +10,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     if g isa UnivariateGMM
         T = eltype(g.means)
     else
-        T = eltype(g)
+        T = eltype(typeof(g))
     end
     X = zeros(T, n)
     for i = 1:n

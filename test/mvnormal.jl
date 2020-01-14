@@ -107,6 +107,8 @@ end
         (MvNormal(mu, C), mu, C),
         (MvNormal(mu_r, C), mu_r, C),
         (MvNormal(C), zeros(3), C),
+        (MvNormal(Symmetric(C)), zeros(3), Matrix(Symmetric(C))),
+        (MvNormal(Diagonal(dv)), zeros(3), Matrix(Diagonal(dv))),
         (MvNormalCanon(h, 2.0), h ./ 2.0, Matrix(0.5I, 3, 3)),
         (MvNormalCanon(mu_r, 2.0), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
         (MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
@@ -168,9 +170,9 @@ end
     @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
     @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
-    @test typeof(MvNormal(mu, I)) == typeof(MvNormal(mu, 1))
-    @test typeof(MvNormal(mu, 3 * I)) == typeof(MvNormal(mu, 3))
-    @test typeof(MvNormal(mu, 0.1f0 * I)) == typeof(MvNormal(mu, 0.1))
+    @test MvNormal(mu, I) === MvNormal(mu, 1)
+    @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)
+    @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
 end
 
 ##### Random sampling from MvNormalCanon with sparse precision matrix
@@ -256,4 +258,50 @@ end
     @test isa(g, DiagNormal)
     @test g.μ      ≈ uw
     @test g.Σ.diag ≈ diag(Cw)
+end
+
+@testset "MvNormal affine tranformations" begin
+    @testset "moment identities" begin
+        for n in 1:5                       # dimension
+            # distribution
+            μ = randn(n)
+            for Σ in (randn(n, n) |> A -> A*A',  # dense
+                      Diagonal(abs2.(randn(n))), # diagonal
+                      abs2(randn()) * I)         # scaled unit
+                d = MvNormal(μ, Σ)
+
+                # random arrays for transformations
+                c = randn(n)
+                m = rand(1:n)
+                B = randn(m, n)
+                b = randn(n)
+
+                d_c = d + c
+                c_d = c + d
+                @test mean(d_c) == mean(c_d) == μ .+ c
+                @test cov(c_d) == cov(d_c) == cov(d)
+
+                B_d = B * d
+                @test B_d isa MvNormal
+                @test length(B_d) == m
+                @test mean(B_d) == B * μ
+                @test cov(B_d) ≈ B * Σ * B'
+
+                b_d = dot(b, d)
+                d_b = dot(b, d)
+                @test b_d isa Normal && d_b isa Normal
+                @test mean(b_d) ≈ mean(d_b) ≈ dot(b, μ)
+                @test var(b_d) ≈ var(d_b) ≈ dot(b, Σ * b)
+            end
+        end
+    end
+
+    @testset "dimension mismatch errors" begin
+        d4 = MvNormal(zeros(4), Diagonal(ones(4)))
+        o3 = ones(3)
+        @test_throws DimensionMismatch d4 + o3
+        @test_throws DimensionMismatch o3 + d4
+        @test_throws DimensionMismatch ones(3, 3) * d4
+        @test_throws DimensionMismatch dot(o3, d4)
+    end
 end

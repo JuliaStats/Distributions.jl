@@ -37,17 +37,18 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function NegativeBinomial(r::T, p::T) where {T <: Real}
-    @check_args(NegativeBinomial, r > zero(r))
-    @check_args(NegativeBinomial, zero(p) < p <= one(p))
+function NegativeBinomial(r::T, p::T; check_args=true) where {T <: Real}
+    if check_args
+        @check_args(NegativeBinomial, r > zero(r))
+        @check_args(NegativeBinomial, zero(p) < p <= one(p))
+    end
     return NegativeBinomial{T}(r, p)
 end
 
-NegativeBinomial(r::T, p::T, ::NoArgCheck) where {T<:Real} = NegativeBinomial{T}(r, p)
 NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
 NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
 NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-NegativeBinomial() = NegativeBinomial(1.0, 0.5, NoArgCheck())
+NegativeBinomial() = NegativeBinomial(1.0, 0.5, check_args=false)
 
 @distr_support NegativeBinomial 0 Inf
 
@@ -57,13 +58,13 @@ function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
     return NegativeBinomial(T(r), T(p))
 end
 function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    return NegativeBinomial(T(d.r), T(d.p), NoArgCheck())
+    return NegativeBinomial(T(d.r), T(d.p), check_args=false)
 end
 
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-@inline partype(::NegativeBinomial{T}) where {T} = T
+partype(::NegativeBinomial{T}) where {T} = T
 
 succprob(d::NegativeBinomial) = d.p
 failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p
@@ -86,7 +87,28 @@ mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p
 
 #### Evaluation & Sampling
 
-@_delegate_statsfuns NegativeBinomial nbinom r p
+# Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
+function logpdf(d::NegativeBinomial, k::Int)
+    r = d.r*log(d.p) + k*log1p(-d.p)
+    if isone(d.p) && iszero(k)
+        return zero(r)
+    elseif k < 0
+        return oftype(r, -Inf)
+    else
+        return r - log(k + d.r) - Distributions.logbeta(d.r, k + 1)
+    end
+end
+pdf(d::NegativeBinomial, k::Int) = exp(logpdf(d, k))
+
+# cdf and quantile functions are more involved so we still rely on Rmath
+cdf(       d::NegativeBinomial,  x::Int)  =              nbinomcdf(       d.r, d.p, x)
+ccdf(      d::NegativeBinomial,  x::Int)  =              nbinomccdf(      d.r, d.p, x)
+logcdf(    d::NegativeBinomial,  x::Int)  =              nbinomlogcdf(    d.r, d.p, x)
+logccdf(   d::NegativeBinomial,  x::Int)  =              nbinomlogccdf(   d.r, d.p, x)
+quantile(  d::NegativeBinomial,  q::Real) = convert(Int, nbinominvcdf(    d.r, d.p, q))
+cquantile( d::NegativeBinomial,  q::Real) = convert(Int, nbinominvccdf(   d.r, d.p, q))
+invlogcdf( d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf( d.r, d.p, lq))
+invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
 # TODO: remove RFunctions dependency once Poisson has its removed

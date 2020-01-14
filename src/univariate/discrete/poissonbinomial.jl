@@ -35,14 +35,14 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function PoissonBinomial(p::AbstractArray{T}) where {T <: Real}
-    for i in eachindex(p)
-        @check_args(PoissonBinomial, 0 <= p[i] <= 1)
+function PoissonBinomial(p::AbstractArray{T}; check_args=true) where {T <: Real}
+    if check_args
+        for i in eachindex(p)
+            @check_args(PoissonBinomial, 0 <= p[i] <= 1)
+        end
     end
-    PoissonBinomial{T}(p)
+    return PoissonBinomial{T}(p)
 end
-
-PoissonBinomial(p::AbstractArray{T}, ::NoArgCheck) where {T<:Real} = PoissonBinomial{T}(p)
 
 @distr_support PoissonBinomial 0 length(d.p)
 
@@ -52,7 +52,7 @@ function PoissonBinomial(::Type{PoissonBinomial{T}}, p::Vector{S}) where {T, S}
     return PoissonBinomial(Vector{T}(p))
 end
 function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T, S}
-    return PoissonBinomial(Vector{T}(d.p), NoArgCheck())
+    return PoissonBinomial(Vector{T}(d.p), check_args=false)
 end
 
 #### Parameters
@@ -62,7 +62,7 @@ succprob(d::PoissonBinomial) = d.p
 failprob(d::PoissonBinomial{T}) where {T} = one(T) .- d.p
 
 params(d::PoissonBinomial) = (d.p,)
-@inline partype(::PoissonBinomial{T}) where {T} = T
+partype(::PoissonBinomial{T}) where {T} = T
 
 #### Properties
 
@@ -123,16 +123,16 @@ end
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray)
+function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T <: Real}
     n = length(p)
-    ω = 2 / (n + 1)
+    ω = 2 * one(T) / (n + 1)
 
-    x = Vector{Complex{Float64}}(undef, n+1)
+    x = Vector{Complex{T}}(undef, n+1)
     lmax = ceil(Int, n/2)
-    x[1] = 1/(n + 1)
+    x[1] = one(T)/(n + 1)
     for l=1:lmax
-        logz = 0.
-        argz = 0.
+        logz = zero(T)
+        argz = zero(T)
         for j=1:n
             zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))

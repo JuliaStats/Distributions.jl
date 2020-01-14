@@ -28,30 +28,26 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end
 
-function Rayleigh(σ::T) where {T <: Real}
-    @check_args(Rayleigh, σ > zero(σ))
-    return Rayleigh{T}(σ)
-end
-
-function Rayleigh(σ::T, ::NoArgCheck) where {T <: Real}
+function Rayleigh(σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Rayleigh, σ > zero(σ))
     return Rayleigh{T}(σ)
 end
 
 Rayleigh(σ::Integer) = Rayleigh(float(σ))
-Rayleigh() = Rayleigh(1.0, NoArgCheck())
+Rayleigh() = Rayleigh(1.0, check_args=false)
 
 @distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), NoArgCheck())
+convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), check_args=false)
 
 #### Parameters
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
-@inline partype(::Rayleigh{T}) where {T<:Real} = T
+partype(::Rayleigh{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -93,3 +89,17 @@ quantile(d::Rayleigh, p::Real) = sqrt(-2d.σ^2 * log1p(-p))
 #### Sampling
 
 rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))
+
+
+#### Fitting
+
+function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T<:Real}
+    # Compute MLE (and unbiasd estimator) of σ^2
+    s2 = zero(T)
+    for xi in x
+        s2 += xi^2
+    end
+
+    s2 /= (2*length(x))
+    return Rayleigh(sqrt(s2))
+end

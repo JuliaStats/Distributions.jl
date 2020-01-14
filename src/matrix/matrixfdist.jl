@@ -95,6 +95,25 @@ end
 
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
 
+#  Konno (1988 JJSS) Corollary 2.4.i
+function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
+    p = dim(d)
+    n1, n2, PDB = params(d)
+    n2 > p + 3 || throw(ArgumentError("cov only defined for df2 > dim + 3"))
+    n = n1 + n2
+    B = Matrix(PDB)
+    n1*(n - p - 1)*inv((n2 - p)*(n2 - p - 1)*(n2 - p - 3))*(2inv(n2 - p - 1)*B[i,j]*B[k,l] + B[j,l]*B[i,k] + B[i,l]*B[k,j])
+end
+
+function var(d::MatrixFDist, i::Integer, j::Integer)
+    p = dim(d)
+    n1, n2, PDB = params(d)
+    n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
+    n = n1 + n2
+    B = Matrix(PDB)
+    n1*(n - p - 1)*inv((n2 - p)*(n2 - p - 1)*(n2 - p - 3))*((2inv(n2 - p - 1) + 1)*B[i,j]^2 + B[j,j]*B[i,i])
+end
+
 #  -----------------------------------------------------------------------------
 #  Evaluation
 #  -----------------------------------------------------------------------------
@@ -102,7 +121,7 @@ end
 function matrixfdist_logc0(n1::Real, n2::Real, B::AbstractPDMat)
     #  returns the natural log of the normalizing constant for the pdf
     p = dim(B)
-    term1 = logmvgamma(p, (n1 + n2)/2) - logmvgamma(p, n1/2) - logmvgamma(p, n2/2)
+    term1 = -logmvbeta(p, n1 / 2, n2 / 2)
     term2 = (n2 / 2) * logdet(B)
     return term1 + term2
 end

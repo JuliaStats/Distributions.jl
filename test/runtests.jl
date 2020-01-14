@@ -1,10 +1,13 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using PDMats # test dependencies
 using Test
 using Distributed
 using Random
 using StatsBase
 using LinearAlgebra
+
+import JSON
+import ForwardDiff
 
 const tests = [
     "truncate",
@@ -50,6 +53,9 @@ const tests = [
     "discretenonparametric",
     "functionals",
     "chernoff",
+    "univariate_bounds",
+    "negativebinomial",
+    "bernoulli",
 ]
 
 printstyled("Running tests:\n", color=:blue)

@@ -5,9 +5,9 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-vmfCp(p::Int, κ::Float64) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
+vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
 
-safe_vmfpdf(μ::Vector, κ::Float64, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
+safe_vmfpdf(μ::Vector, κ::Real, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
 
 function gen_vmf_tdata(n::Int, p::Int,
                        rng::Union{AbstractRNG, Missing} = missing)
@@ -22,7 +22,7 @@ function gen_vmf_tdata(n::Int, p::Int,
     return X
 end
 
-function test_vonmisesfisher(p::Int, κ::Float64, n::Int, ns::Int,
+function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
                              rng::Union{AbstractRNG, Missing} = missing)
     if ismissing(rng)
         μ = randn(p)
@@ -94,6 +94,17 @@ end
 
 ## General testing
 
+@testset "Testing VonMisesFisher argument promotions" begin
+    d = VonMisesFisher(Int[1, 0], Float32(5))
+    @test d isa VonMisesFisher{Float32}
+    d = VonMisesFisher(Int[1, 0], Float64(5))
+    @test d isa VonMisesFisher{Float64}
+    d = VonMisesFisher(Float64[1, 0], 5)
+    @test d isa VonMisesFisher{Float64}
+    d = VonMisesFisher(Float64[1, 0], Float32(5))
+    @test d isa VonMisesFisher{Float64}
+end
+
 n = 1000
 ns = 10^6
 @testset "Testing VonMisesFisher with $key" for (key, rng) in
@@ -104,7 +115,8 @@ ns = 10^6
                                                                            (2, 5.0),
                                                                            (3, 1.0),
                                                                            (3, 5.0),
-                                                                           (5, 2.0)]
+                                                                           (5, 2.0),
+                                                                           (2, 2)]
         test_vonmisesfisher(p, κ, n, ns, rng)
     end
 end

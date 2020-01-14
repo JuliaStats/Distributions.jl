@@ -24,16 +24,15 @@ struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
     I0κx::T   # I0(κ) * exp(-κ), where I0 is the modified Bessel function of order 0
 end
 
-function VonMises(μ::T, κ::T) where {T <: Real}
-    @check_args(VonMises, κ > zero(κ))
+function VonMises(μ::T, κ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(VonMises, κ > zero(κ))
     return VonMises{T}(μ, κ, besselix(zero(T), κ))
 end
 
-VonMises(μ::T, κ::T, ::NoArgCheck) where {T<:Real} = VonMises{T}(μ, κ, besselix(zero(T), κ))
 VonMises(μ::Real, κ::Real) = VonMises(promote(μ, κ)...)
 VonMises(μ::Integer, κ::Integer) = VonMises(float(μ), float(κ))
 VonMises(κ::T) where {T <: Real} = VonMises(zero(T), κ)
-VonMises() = VonMises(0.0, 1.0, NoArgCheck())
+VonMises() = VonMises(0.0, 1.0, check_args=false)
 
 show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
@@ -42,12 +41,12 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 #### Conversions
 
 convert(::Type{VonMises{T}}, μ::Real, κ::Real) where {T<:Real} = VonMises(T(μ), T(κ))
-convert(::Type{VonMises{T}}, d::VonMises{S}) where {T<:Real, S<:Real} = VonMises(T(d.μ), T(d.κ))
+convert(::Type{VonMises{T}}, d::VonMises{S}) where {T<:Real, S<:Real} = VonMises(T(d.μ), T(d.κ), check_args=false)
 
 #### Parameters
 
 params(d::VonMises) = (d.μ, d.κ)
-@inline partype(d::VonMises{T}) where {T<:Real} = T
+partype(::VonMises{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -65,8 +64,11 @@ cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 
 #### Evaluations
 
-pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
-logpdf(d::VonMises, x::Real) = d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π
+#pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
+pdf(d::VonMises{T}, x::Real) where T<:Real =
+    minimum(d) ≤ x ≤ maximum(d) ? exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx) : zero(T)
+logpdf(d::VonMises{T}, x::Real) where T<:Real =
+    minimum(d) ≤ x ≤ maximum(d) ? d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π : -T(Inf)
 
 cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
 

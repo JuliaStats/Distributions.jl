@@ -4,12 +4,14 @@ using StatsBase, PDMats, StatsFuns, Statistics
 using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
-import Base: size, eltype, length, convert, show, getindex, rand, vec, inv
-import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base: size, length, convert, show, getindex, rand, vec, inv
+import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
+using FillArrays
+
 using LinearAlgebra, Printf
-import LinearAlgebra: rank
+import LinearAlgebra: dot, rank
 
 using Random
 import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
@@ -144,7 +146,6 @@ export
     TriangularDist,
     Triweight,
     Truncated,
-    TruncatedNormal,
     Uniform,
     UnivariateGMM,
     VonMises,
@@ -195,6 +196,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
+    logdiffcdf,         # log of difference between cdf at two values
     logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
@@ -224,6 +226,7 @@ export
     pdf,                # probability density function (ContinuousDistribution)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
+    product_distribution, # product of univariate distributions
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
@@ -238,6 +241,7 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
+    truncated,          # truncate a distribution with a lower and upper bound
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
