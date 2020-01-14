@@ -18,7 +18,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     e = entropy(g)
     @test partype(g) == Float64
     @test isa(mn, Vector{Float64})
-    if g.normal.μ isa Zers{Float64,1}
+    if g.normal.μ isa Zeros{Float64,1}
         @test md isa FillArrays.Fill{Float64,1}
     else
         @test md isa Vector{Float64}
