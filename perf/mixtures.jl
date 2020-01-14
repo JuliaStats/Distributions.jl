@@ -65,7 +65,7 @@ priors = [0.25, 0.25, 0.5]
 
 gmm_normal = MixtureModel(distributions, priors)
 
-@info "Small Gausian mixture"
+@info "Small Gaussian mixture"
 
 Random.seed!(42)
 for x in rand(5)
