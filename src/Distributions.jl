@@ -10,6 +10,7 @@ import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 import FillArrays
+using FillArrays: Zeros
 
 using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
@@ -23,7 +24,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   params, params!
 
 import PDMats
-using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat, Zeros
+using PDMats: dim, PDMat,AbstractPDMat, ScalMat, PDiagMat
 
 import SpecialFunctions
 const SFunc = SpecialFunctions
