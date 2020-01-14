@@ -267,8 +267,8 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
- _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
-    add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
+    add!(PDMats.unwhiten!(d.Σ, randn!(rng, x)), d.μ)
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
@@ -333,9 +333,8 @@ end
 
 ## MLE estimation with covariance known
 
-function fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat}
-    return MvNormal(ss.sx * inv(ss.tw), g.Σ)
-end
+fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat} =
+    MvNormal(ss.sx * inv(ss.tw), g.Σ)
 
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
