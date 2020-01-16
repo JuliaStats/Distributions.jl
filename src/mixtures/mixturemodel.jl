@@ -48,7 +48,7 @@ component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel)
+components(d::AbstractMixtureModel) = [component(d, k) for k in 1:ncomponents(d)]
 
 """
     probs(d::AbstractMixtureModel)
@@ -279,7 +279,6 @@ end
 function insupport(d::AbstractMixtureModel, x::AbstractVector)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     @inbounds for i in eachindex(p)
         pi = p[i]
         if pi > 0.0 && insupport(component(d, i), x)
@@ -292,7 +291,6 @@ end
 function _cdf(d::UnivariateMixture, x::Real)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     r = 0.0
     @inbounds for i in eachindex(p)
         pi = p[i]
@@ -305,28 +303,17 @@ function _cdf(d::UnivariateMixture, x::Real)
 end
 
 cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
-cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
-
+cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 
 function _mixpdf1(d::AbstractMixtureModel, x)
-    K = ncomponents(d)
-    p = probs(d)
-    @assert length(p) == K
-    v = 0.0
-    @inbounds for i in eachindex(p)
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            v += pdf(c, x) * pi
-        end
-    end
-    return v
+    ps = probs(d)
+    cs = components(d)
+    return sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     fill!(r, 0.0)
     t = Array{eltype(p)}(undef, size(r))
     @inbounds for i in eachindex(p)
@@ -357,8 +344,6 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
 
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
-
     lp = Vector{eltype(p)}(undef, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
     @inbounds for i in eachindex(p)
@@ -384,7 +369,6 @@ end
 function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     n = length(r)
     Lp = Matrix{eltype(p)}(undef, n, K)
     m = fill(-Inf, n)
