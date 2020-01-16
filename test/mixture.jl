@@ -196,6 +196,22 @@ end
             @test maximum(g_u) == Inf
             @test extrema(g_u) == (-Inf, Inf)
         end
+
+        @testset "Product 0 NaN in mixtures" begin
+            distributions = [
+                Normal(-1.0, 0.3),
+                Normal(0.0, 0.5),
+                Normal(3.0, 1.0),
+                Normal(NaN, 1.0),
+            ]
+            priors = [0.25, 0.25, 0.5, 0.0]
+            gmm_normal = MixtureModel(distributions, priors)
+            for x in rand(10)
+                result = pdf(gmm_normal, x)
+                @info "$(@which pdf(gmm_normal, x))"
+                @test !isnan(result)
+            end
+        end
     end
 
     @testset "Testing MultivariatevariateMixture" begin

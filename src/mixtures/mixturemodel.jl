@@ -308,7 +308,7 @@ cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 function _mixpdf1(d::AbstractMixtureModel, x)
     ps = probs(d)
     cs = components(d)
-    return sum((ps[i] > 0) * ps[i] * pdf(cs[i], x) for i in eachindex(ps))
+    return sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
