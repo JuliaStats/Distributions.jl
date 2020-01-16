@@ -47,7 +47,7 @@ using Test, Distributions, ForwardDiff
 end
 
 @testset "Normal logpdf & pdf type inference" begin
-    @test isnan(@inferred(pdf(Normal(0.0, 0.0), 0.0)))
+    @test @inferred(pdf(Normal(0.0, 0.0), 0.0))           === Inf
     @test @inferred(pdf(Normal(0.0, 0.0), -1.0))          === 0.0
     @test @inferred(pdf(Normal(0.0, 0.0), 0.0f0))         === Inf
     @test isnan(@inferred(pdf(Normal(0.0, 0.0), NaN)))
