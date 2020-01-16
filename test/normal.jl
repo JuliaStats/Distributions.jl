@@ -47,113 +47,113 @@ using Test, Distributions, ForwardDiff
 end
 
 @testset "Normal logpdf & pdf type inference" begin
-    @test @inferred(pdf(Normal(0.0, 0.0), 0.0))           === Inf
+    @test isnan(@inferred(pdf(Normal(0.0, 0.0), 0.0)))
     @test @inferred(pdf(Normal(0.0, 0.0), -1.0))          === 0.0
     @test @inferred(pdf(Normal(0.0, 0.0), 0.0f0))         === Inf
-    @test @inferred(pdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(pdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(pdf(Normal(0.0f0, 0.0f0), 0.0))       === Inf
     @test @inferred(pdf(Normal(0.0f0, 0.0f0), 0.0f0))     === Inf32
-    @test @inferred(pdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(pdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(pdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(pdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(pdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(pdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(pdf(Normal(0 // 1, 0 // 1), 0 // 1))  === Inf
-    @test @inferred(pdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(pdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(pdf(Normal(0.0, 0.0), BigInt(1)))     == big(0.0)
     @test @inferred(pdf(Normal(0.0, 0.0), BigFloat(1)))   == big(0.0)
-    @test isequal(@inferred(pdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(pdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(logpdf(Normal(0.0, 0.0), 0.0))           === Inf
     @test @inferred(logpdf(Normal(0.0, 0.0), -1.0))          === -Inf
     @test @inferred(logpdf(Normal(0.0, 0.0), 0.0f0))         === Inf
-    @test @inferred(logpdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(logpdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(logpdf(Normal(0.0f0, 0.0f0), 0.0))       === Inf
     @test @inferred(logpdf(Normal(0.0f0, 0.0f0), 0.0f0))     === Inf32
-    @test @inferred(logpdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(logpdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(logpdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(logpdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(logpdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(logpdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(logpdf(Normal(0 // 1, 0 // 1), 0 // 1))  === Inf
-    @test @inferred(logpdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(logpdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(logpdf(Normal(0.0, 0.0), BigInt(1)))     == big(-Inf)
     @test @inferred(logpdf(Normal(0.0, 0.0), BigFloat(1)))   == big(-Inf)
-    @test isequal(@inferred(logpdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(logpdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(cdf(Normal(0.0, 0.0), 0.0))           === 1.0
     @test @inferred(cdf(Normal(0.0, 0.0), -1.0))          === 0.0
     @test @inferred(cdf(Normal(0.0, 0.0), 0.0f0))         === 1.0
-    @test @inferred(cdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(cdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(cdf(Normal(0.0f0, 0.0f0), 0.0))       === 1.0
     @test @inferred(cdf(Normal(0.0f0, 0.0f0), 0.0f0))     === 1.0f0
-    @test @inferred(cdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(cdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(cdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(cdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(cdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(cdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(cdf(Normal(0 // 1, 0 // 1), 0 // 1))  === 1.0
-    @test @inferred(cdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(cdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(cdf(Normal(0.0, 0.0), BigInt(1)))     == big(1.0)
     @test @inferred(cdf(Normal(0.0, 0.0), BigFloat(1)))   == big(1.0)
-    @test isequal(@inferred(cdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(cdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(logcdf(Normal(0.0, 0.0), 0.0))           === -0.0
     @test @inferred(logcdf(Normal(0.0, 0.0), -1.0))          === -Inf
     @test @inferred(logcdf(Normal(0.0, 0.0), 0.0f0))         === -0.0
-    @test @inferred(logcdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(logcdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(logcdf(Normal(0.0f0, 0.0f0), 0.0))       === -0.0
     @test @inferred(logcdf(Normal(0.0f0, 0.0f0), 0.0f0))     === -0.0f0
-    @test @inferred(logcdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(logcdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(logcdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(logcdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(logcdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(logcdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(logcdf(Normal(0 // 1, 0 // 1), 0 // 1))  === -0.0
-    @test @inferred(logcdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(logcdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(logcdf(Normal(0.0, 0.0), BigInt(1)))     == big(0.0)
     @test @inferred(logcdf(Normal(0.0, 0.0), BigFloat(1)))   == big(0.0)
-    @test isequal(@inferred(logcdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(logcdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(ccdf(Normal(0.0, 0.0), 0.0))           === 0.0
     @test @inferred(ccdf(Normal(0.0, 0.0), -1.0))          === 1.0
     @test @inferred(ccdf(Normal(0.0, 0.0), 0.0f0))         === 0.0
-    @test @inferred(ccdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(ccdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(ccdf(Normal(0.0f0, 0.0f0), 0.0))       === 0.0
     @test @inferred(ccdf(Normal(0.0f0, 0.0f0), 0.0f0))     === 0.0f0
-    @test @inferred(ccdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(ccdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(ccdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(ccdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(ccdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(ccdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(ccdf(Normal(0 // 1, 0 // 1), 0 // 1))  === 0.0
-    @test @inferred(ccdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(ccdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(ccdf(Normal(0.0, 0.0), BigInt(1)))     == big(0.0)
     @test @inferred(ccdf(Normal(0.0, 0.0), BigFloat(1)))   == big(0.0)
-    @test isequal(@inferred(ccdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(ccdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(logccdf(Normal(0.0, 0.0), 0.0))           === -Inf
     @test @inferred(logccdf(Normal(0.0, 0.0), -1.0))          === -0.0
     @test @inferred(logccdf(Normal(0.0, 0.0), 0.0f0))         === -Inf
-    @test @inferred(logccdf(Normal(0.0, 0.0), NaN))           === NaN
+    @test isnan(@inferred(logccdf(Normal(0.0, 0.0), NaN)))
     @test @inferred(logccdf(Normal(0.0f0, 0.0f0), 0.0))       === -Inf
     @test @inferred(logccdf(Normal(0.0f0, 0.0f0), 0.0f0))     === -Inf32
-    @test @inferred(logccdf(Normal(0.0, 0.0), NaN))           === NaN
-    @test @inferred(logccdf(Normal(NaN, 0.0), 0.0f0))         === NaN
-    @test @inferred(logccdf(Normal(NaN32, 0.0f0), 0.0f0))     === NaN32
+    @test isnan(@inferred(logccdf(Normal(0.0, 0.0), NaN)))
+    @test isnan(@inferred(logccdf(Normal(NaN, 0.0), 0.0f0)))
+    @test isnan(@inferred(logccdf(Normal(NaN32, 0.0f0), 0.0f0)))
     @test @inferred(logccdf(Normal(0 // 1, 0 // 1), 0 // 1))  === -Inf
-    @test @inferred(logccdf(Normal(0 // 1, 0 // 1), NaN))     === NaN
+    @test isnan(@inferred(logccdf(Normal(0 // 1, 0 // 1), NaN)))
     @test @inferred(logccdf(Normal(0.0, 0.0), BigInt(1)))     == big(-Inf)
     @test @inferred(logccdf(Normal(0.0, 0.0), BigFloat(1)))   == big(-Inf)
-    @test isequal(@inferred(logccdf(Normal(0.0, 0.0), BigFloat(NaN))), big(NaN))
+    @test isnan(@inferred(logccdf(Normal(0.0, 0.0), BigFloat(NaN))))
 
     @test @inferred(quantile(Normal(1.0, 0.0), 0.0f0))     === -Inf
     @test @inferred(quantile(Normal(1.0, 0.0f0), 1.0))     ===  Inf
     @test @inferred(quantile(Normal(1.0f0, 0.0), 0.5))     ===  1.0
-    @test @inferred(quantile(Normal(1.0f0, 0.0), NaN))     ===  NaN
+    @test isnan(@inferred(quantile(Normal(1.0f0, 0.0), NaN)))
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.0f0)) === -Inf32
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 1.0f0)) ===  Inf32
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
-    @test @inferred(quantile(Normal(1.0f0, 0.0f0), NaN32)) ===  NaN32
+    @test isnan(@inferred(quantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(quantile(Normal(1//1, 0//1), 1//2))    ===  1.0
 
     @test @inferred(cquantile(Normal(1.0, 0.0), 0.0f0))     ===  Inf
     @test @inferred(cquantile(Normal(1.0, 0.0f0), 1.0))     === -Inf
     @test @inferred(cquantile(Normal(1.0f0, 0.0), 0.5))     ===  1.0
-    @test @inferred(cquantile(Normal(1.0f0, 0.0), NaN))     ===  NaN
+    @test isnan(@inferred(cquantile(Normal(1.0f0, 0.0), NaN)))
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.0f0)) ===  Inf32
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 1.0f0)) === -Inf32
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
-    @test @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)) ===  NaN32
+    @test isnan(@inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
 end
