@@ -208,7 +208,6 @@ end
             gmm_normal = MixtureModel(distributions, priors)
             for x in rand(10)
                 result = pdf(gmm_normal, x)
-                @info "$(@which pdf(gmm_normal, x))"
                 @test !isnan(result)
             end
         end
