@@ -1,6 +1,6 @@
 using Test, Distributions, ForwardDiff
 
-isnan_type(::Type{T}, v) where {T} = isnan_type(T, v) && v isa T
+isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
 @testset "Normal" begin
     @test isa(convert(Normal{Float64}, Float16(0), Float16(1)),
