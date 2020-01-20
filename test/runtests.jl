@@ -14,6 +14,7 @@ const tests = [
     "truncnormal",
     "truncated_exponential",
     "normal",
+    "lognormal",
     "mvnormal",
     "mvlognormal",
     "types",
