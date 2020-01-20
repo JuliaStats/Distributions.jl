@@ -92,29 +92,57 @@ end
 
 #### Evalution
 
-pdf(d::LogNormal, x::Real) = normpdf(d.μ, d.σ, log(x)) / x
-function logpdf(d::LogNormal{T}, x::Real) where T<:Real
-    if !insupport(d, x)
-        return -T(Inf)
+function pdf(d::LogNormal, x::Real)
+    if x ≤ zero(x)
+        logx = log(zero(x))
+        x = one(x)
     else
-        lx = log(x)
-        return normlogpdf(d.μ, d.σ, lx) - lx
+        logx = log(x)
     end
+    return pdf(Normal(d.μ, d.σ), logx) / x
 end
 
-cdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? cdf(Normal(params(d)...), log(x)) : zero(T)
-ccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? ccdf(Normal(params(d)...), log(x)) : one(T)
-logcdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? logcdf(Normal(params(d)...), log(x)) : -T(Inf)
-logccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? logccdf(Normal(params(d)...), log(x)) : zero(T)
+function logpdf(d::LogNormal, x::Real)
+    if x ≤ zero(x)
+        logx = log(zero(x))
+        b = zero(logx)
+    else
+        logx = log(x)
+        b = logx
+    end
+    return logpdf(Normal(d.μ, d.σ), logx) - b
+end
+
+function cdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return cdf(Normal(d.μ, d.σ), logx)
+end
+
+function ccdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return ccdf(Normal(d.μ, d.σ), logx)
+    end
+
+function logcdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return logcdf(Normal(d.μ, d.σ), logx)
+end
+
+function logccdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return logccdf(Normal(d.μ, d.σ), logx)
+end
 
 quantile(d::LogNormal, q::Real) = exp(quantile(Normal(params(d)...), q))
 cquantile(d::LogNormal, q::Real) = exp(cquantile(Normal(params(d)...), q))
 invlogcdf(d::LogNormal, lq::Real) = exp(invlogcdf(Normal(params(d)...), lq))
 invlogccdf(d::LogNormal, lq::Real) = exp(invlogccdf(Normal(params(d)...), lq))
 
-function gradlogpdf(d::LogNormal{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x > 0 ? - ((log(x) - μ) / (σ^2) + 1) / x : zero(T)
+function gradlogpdf(d::LogNormal, x::Real)
+    outofsupport = x ≤ zero(x)
+    y = outofsupport ? one(x) : x
+    z = (gradlogpdf(Normal(d.μ, d.σ), log(y)) - 1) / y
+    return outofsupport ? zero(z) : z
 end
 
 # mgf(d::LogNormal)
