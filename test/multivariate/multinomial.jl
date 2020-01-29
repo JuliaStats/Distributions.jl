@@ -1,6 +1,6 @@
 # Tests for Multinomial
 
-using Distributions, Random, StaticArrays
+using Distributions, Random, StaticArrays, ForwardDiff
 using Test
 
 
@@ -210,3 +210,9 @@ p_v = [0.1, 0.4, 0.3, 0.8]
 @test_throws DomainError Multinomial(10, p_v)
 @test_throws DomainError Multinomial(10, p_v; check_args=true)
 Multinomial(10, p_v; check_args=false) # should not warn
+
+# check different prob vector types
+p = [0.2, 0.4, 0.3, 0.1]
+@test (rand(Multinomial(10, p)); true)
+@test (rand(Multinomial(10, convert.(Float32, p))); true)
+# @test (rand(Multinomial(10, convert.(ForwardDiff.Dual{Float64}, p))); true)
