@@ -212,4 +212,3 @@ Multinomial(10, p_v; check_args=false) # should not warn
 p = [0.2, 0.4, 0.3, 0.1]
 @test (rand(Multinomial(10, p)); true)
 @test (rand(Multinomial(10, convert.(Float32, p))); true)
-# @test (rand(Multinomial(10, convert.(ForwardDiff.Dual{Float64}, p))); true)
