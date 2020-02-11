@@ -5,6 +5,7 @@ using Distributed
 using Random
 using StatsBase
 using LinearAlgebra
+using HypothesisTests
 
 import JSON
 import ForwardDiff
@@ -39,6 +40,7 @@ const tests = [
     "matrixfdist",
     "matrixnormal",
     "matrixtdist",
+    "lkj",
     "vonmisesfisher",
     "conversion",
     "convolution",
