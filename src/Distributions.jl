@@ -106,6 +106,7 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    LKJ,
     LocationScale,
     Logistic,
     LogNormal,
