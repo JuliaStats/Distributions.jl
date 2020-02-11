@@ -38,6 +38,7 @@ MatrixNormal
 MatrixTDist
 MatrixBeta
 MatrixFDist
+LKJ
 ```
 
 ## Internal Methods (for creating your own matrix-variate distributions)
