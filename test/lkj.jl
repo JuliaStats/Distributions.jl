@@ -146,10 +146,7 @@ end
     M = 20000
     f = LKJ(d, 2)
     g = LKJ(d, 1)
-    R = rand(g, M)
-    fvals = [pdf(f, R[m]) for m in 1:M]
-    gvals = [pdf(g, R[m]) for m in 1:M]
     h = mean(logdet.(rand(f, M)))
-    ĥ = sum(logdet.(R) .* fvals ./ gvals) / M
+    ĥ = mean(logdet(R) * pdf(f, R) / pdf(g, R) for R in (rand(g) for i in 1:M))
     @test isapprox(h, ĥ, atol = 0.1)
 end
