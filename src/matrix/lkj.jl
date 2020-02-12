@@ -91,6 +91,7 @@ params(d::LKJ) = d.η
 #  -----------------------------------------------------------------------------
 
 function lkj_logc0(d::Integer, η::Real)
+    d > 1 || return zero(η)
     if isone(η)
         if iseven(d)
             logc0 = -lkj_onion_loginvconst_uniform_even(d)
