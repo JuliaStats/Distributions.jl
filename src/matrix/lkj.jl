@@ -2,24 +2,20 @@
     LKJ(d, η)
 ```julia
 d::Int   dimension
-η::Real  positive scale
+η::Real  positive shape
 ```
 The [LKJ](https://doi.org/10.1016/j.jmva.2009.04.008) distribution is a distribution over
 ``d\\times d`` real correlation matrices (positive-definite matrices with ones on the diagonal).
 If ``\\mathbf{R}\\sim \\textrm{LKJ}_{d}(\\eta)``, then its probability density function is
 
 ```math
-f(\\mathbf{R};\\eta) = c_0 |\\mathbf{R}|^{\\eta-1},
+f(\\mathbf{R};\\eta) = \\left[\\prod_{k=1}^{d-1}\\pi^{\\frac{k}{2}}
+\\frac{\\Gamma\\left(\\eta+\\frac{d-1-k}{2}\\right)}{\\Gamma\\left(\\eta+\\frac{d-1}{2}\\right)}\\right]^{-1}
+|\\mathbf{R}|^{\\eta-1}.
 ```
 
-where (among many equivalent expressions)
-
-```math
-c_0 = \\prod_{k=1}^{d-1}\\pi^{\\frac{k}{2}}
-\\frac{\\Gamma\\left(\\eta+\\frac{d-1-k}{2}\\right)}{\\Gamma\\left(\\eta+\\frac{d-1}{2}\\right)}.
-```
-
-If ``\\eta = 1``, then the LKJ distribution is uniform over the space of correlation matrices.
+If ``\\eta = 1``, then the LKJ distribution is uniform over
+[the space of correlation matrices](https://www.jstor.org/stable/2684832).
 """
 struct LKJ{T <: Real, D <: Integer} <: ContinuousMatrixDistribution
     d::D
@@ -86,12 +82,12 @@ params(d::LKJ) = d.η
 function lkj_logc0(d::Integer, η::Real)
     if isone(η)
         if iseven(d)
-            logc0 = lkj_onion_logc0_uniform_even(d)
+            logc0 = -lkj_onion_loginvconst_uniform_even(d)
         else
-            logc0 = lkj_onion_logc0_uniform_odd(d)
+            logc0 = -lkj_onion_loginvconst_uniform_odd(d)
         end
     else
-        logc0 = lkj_onion_logc0(d, η)
+        logc0 = -lkj_onion_loginvconst(d, η)
     end
     return logc0
 end
@@ -149,41 +145,43 @@ function _marginal(lkj::LKJ)
 end
 
 #  -----------------------------------------------------------------------------
-#  Several redundant implementations of the integrating constant
-#  used for unit testing
+#  Several redundant implementations of the recipricol integrating constant.
+#  If f(R; n) = c₀ |R|ⁿ⁻¹, these give log(1 / c₀).
+#  Every integrating constant formula given in LKJ (2009 JMA) is an expression
+#  for 1 / c₀, even if they say that it is not.
 #  -----------------------------------------------------------------------------
 
-function lkj_onion_logc0(d::Integer, η::Real)
+function lkj_onion_loginvconst(d::Integer, η::Real)
     #  Equation (17) in LKJ (2009 JMA)
     sumlogs = zero(η)
     for k in 2:d - 1
         sumlogs += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k))
     end
     α = η + 0.5d - 1
-    logc0 = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + 0.5(d - 1))
-    return logc0
+    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + 0.5(d - 1))
+    return loginvconst
 end
 
-function lkj_onion_logc0_uniform_odd(d::Integer)
+function lkj_onion_loginvconst_uniform_odd(d::Integer)
     #  Theorem 5 in LKJ (2009 JMA)
     sumlogs = 0.0
     for k in 1:div(d - 1, 2)
         sumlogs += loggamma(2k)
     end
-    logc0 = 0.25(d^2 - 1)*logπ + sumlogs - 0.25(d - 1)^2*logtwo - (d - 1)*loggamma(0.5(d + 1))
-    return logc0
+    loginvconst = 0.25(d^2 - 1)*logπ + sumlogs - 0.25(d - 1)^2*logtwo - (d - 1)*loggamma(0.5(d + 1))
+    return loginvconst
 end
 
-function lkj_onion_logc0_uniform_even(d::Integer)
+function lkj_onion_loginvconst_uniform_even(d::Integer)
     #  Theorem 5 in LKJ (2009 JMA)
     sumlogs = 0.0
     for k in 1:div(d - 2, 2)
         sumlogs += loggamma(2k)
     end
-    logc0 = 0.25d*(d - 2)*logπ + 0.25(3d^2 - 4d)*logtwo + d*loggamma(0.5d) + sumlogs - (d - 1)*loggamma(d)
+    loginvconst = 0.25d*(d - 2)*logπ + 0.25(3d^2 - 4d)*logtwo + d*loggamma(0.5d) + sumlogs - (d - 1)*loggamma(d)
 end
 
-function lkj_vine_logc0(d::Integer, η::Real)
+function lkj_vine_loginvconst(d::Integer, η::Real)
     #  Equation (16) in LKJ (2009 JMA)
     expsum = zero(η)
     betasum = zero(η)
@@ -192,11 +190,11 @@ function lkj_vine_logc0(d::Integer, η::Real)
         expsum += (2η - 2 + d - k) * (d - k)
         betasum += (d - k) * logbeta(α, α)
     end
-    logc0 = expsum * logtwo + betasum
-    return logc0
+    loginvconst = expsum * logtwo + betasum
+    return loginvconst
 end
 
-function lkj_vine_logc0_uniform(d::Integer)
+function lkj_vine_loginvconst_uniform(d::Integer)
     #  Equation after (16) in LKJ (2009 JMA)
     expsum = 0.0
     betasum = 0.0
@@ -205,15 +203,24 @@ function lkj_vine_logc0_uniform(d::Integer)
         expsum += k ^ 2
         betasum += k * logbeta(α, α)
     end
-    logc0 = expsum * logtwo + betasum
-    return logc0
+    loginvconst = expsum * logtwo + betasum
+    return loginvconst
 end
 
-function lkj_logc0_alt(d::Integer, η::Real)
+function lkj_loginvconst_alt(d::Integer, η::Real)
     #  Third line in first proof of Section 3.3 in LKJ (2009 JMA)
-    logc0 = zero(η)
+    loginvconst = zero(η)
     for k in 1:d - 1
-        logc0 += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
+        loginvconst += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
     end
-    return logc0
+    return loginvconst
+end
+
+function corr_logvolume(n::Integer)
+    #  https://doi.org/10.4169/amer.math.monthly.123.9.909
+    logvol = 0.0
+    for k in 1:n - 1
+        logvol += 0.5k*logπ + k*loggamma((k+1)/2) - k*loggamma((k+2)/2)
+    end
+    return logvol
 end
