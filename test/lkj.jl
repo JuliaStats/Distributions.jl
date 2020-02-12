@@ -47,6 +47,11 @@ end
     @test !insupport(G, randn(d, d))
 end
 
+@testset "LKJ mode" begin
+    @test mode(LKJ(5, 1.5)) == mean(LKJ(5, 1.5))
+    @test_throws ArgumentError mode( LKJ(5, 0.5) )
+end
+
 @testset "LKJ sample moments" begin
     @test isapprox(mean(rand(G, 100000)), mean(G) , atol = 0.1)
     @test isapprox(var(rand(G, 100000)), var(G) , atol = 0.1)
@@ -77,6 +82,12 @@ end
     @test Gel2 isa LKJ{elty, typeof(d)}
     @test partype(Gel1) == elty
     @test partype(Gel2) == elty
+end
+
+@testset "check d = 1 edge case" begin
+    lkj = LKJ(1, 2abs(randn()))
+    @test var(lkj) == zeros(1, 1)
+    @test rand(lkj) == ones(1, 1)
 end
 
 @testset "LKJ integrating constant" begin
