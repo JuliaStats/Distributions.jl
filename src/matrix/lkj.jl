@@ -67,9 +67,20 @@ insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(
 
 mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 
-mode(d::LKJ) = mean(d)
+function mode(d::LKJ; check_args = true)
+    η = params(d)
+    if check_args
+        η > 1 || throw(ArgumentError("mode is defined only when η > 1."))
+    end
+    return mean(d)
+end
 
-var(d::LKJ) = (σ² = var(_marginal(d)); σ² * (ones(size(d)) - I))
+function var(lkj::LKJ)
+    d = dim(lkj)
+    d > 1 || return zeros(d, d)
+    σ² = var(_marginal(lkj))
+    σ² * (ones(partype(lkj), d, d) - I)
+end
 
 params(d::LKJ) = d.η
 
@@ -108,6 +119,7 @@ function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.GLOB
     #  Section 3.2 in LKJ (2009 JMA)
     #  1. Initialization
     R = ones(typeof(η), d, d)
+    d > 1 || return R
     β = η + 0.5d - 1
     u = rand(rng, Beta(β, β))
     R[1, 2] = 2u - 1
