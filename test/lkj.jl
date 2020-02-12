@@ -86,38 +86,70 @@ end
     d = 5
     η = 2.3
     lkj = LKJ(d, η)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_onion_logc0(d, η)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_logc0_alt(d, η)
-    @test lkj.logc0 == Distributions.lkj_onion_logc0(d, η)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
+    @test lkj.logc0 == -Distributions.lkj_onion_loginvconst(d, η)
     #  =============
     #  odd uniform
     #  =============
     d = 5
     η = 1.0
     lkj = LKJ(d, η)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_onion_logc0(d, η)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_onion_logc0_uniform_odd(d)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_vine_logc0_uniform(d)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_logc0_alt(d, η)
-    @test lkj.logc0 == Distributions.lkj_onion_logc0_uniform_odd(d)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_odd(d)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
+    @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d)
     #  =============
     #  even non-uniform
     #  =============
     d = 6
     η = 2.3
     lkj = LKJ(d, η)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_onion_logc0(d, η)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_logc0_alt(d, η)
-    @test lkj.logc0 == Distributions.lkj_onion_logc0(d, η)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
+    @test lkj.logc0 == -Distributions.lkj_onion_loginvconst(d, η)
     #  =============
     #  even uniform
     #  =============
     d = 6
     η = 1.0
     lkj = LKJ(d, η)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_onion_logc0(d, η)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_onion_logc0_uniform_even(d)
-    @test Distributions.lkj_vine_logc0(d, η) ≈ Distributions.lkj_vine_logc0_uniform(d)
-    @test Distributions.lkj_onion_logc0(d, η) ≈ Distributions.lkj_logc0_alt(d, η)
-    @test lkj.logc0 == Distributions.lkj_onion_logc0_uniform_even(d)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_even(d)
+    @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
+    @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
+    @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d)
+end
+
+@testset "check integrating constant as a volume" begin
+    #  d = 2: Lebesgue measure of the set of correlation matrices is 2.
+    volume2D = 2
+    @test volume2D ≈ exp( Distributions.lkj_onion_loginvconst(2, 1) )
+    @test 1 / volume2D ≈ exp( LKJ(2, 1).logc0 )
+    #  d = 3: Lebesgue measure of the set of correlation matrices is π²/2.
+    #  See here: https://www.jstor.org/stable/2684832
+    volume3D = 0.5π^2
+    @test volume3D ≈ exp( Distributions.lkj_onion_loginvconst(3, 1) )
+    @test 1 / volume3D ≈ exp( LKJ(3, 1).logc0 )
+    #  d = 4: Lebesgue measure of the set of correlation matrices is (32/27)π².
+    #  See here: https://doi.org/10.4169/amer.math.monthly.123.9.909
+    volume4D = (32 / 27)*π^2
+    @test volume4D ≈ exp( Distributions.lkj_onion_loginvconst(4, 1) )
+    @test 1 / volume4D ≈ exp( LKJ(4, 1).logc0 )
+end
+
+@testset "importance sampling check" begin
+    d = 3
+    M = 20000
+    f = LKJ(d, 2)
+    g = LKJ(d, 1)
+    R = rand(g, M)
+    fvals = [pdf(f, R[m]) for m in 1:M]
+    gvals = [pdf(g, R[m]) for m in 1:M]
+    h = mean(logdet.(rand(f, M)))
+    ĥ = sum(logdet.(R) .* fvals ./ gvals) / M
+    @test isapprox(h, ĥ, atol = 0.1)
 end
