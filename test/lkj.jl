@@ -12,6 +12,7 @@ F = LKJ(d, η₀)
 @testset "LKJ construction errors" begin
     @test_throws ArgumentError LKJ(-1, η)
     @test_throws ArgumentError LKJ(d, -1)
+    @test LKJ(-1, η, check_args = false) isa LKJ{typeof(η), typeof(-1)}
 end
 
 @testset "LKJ params" begin
