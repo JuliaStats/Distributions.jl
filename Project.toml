@@ -26,6 +26,7 @@ julia = "1"
 
 [extras]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
@@ -34,4 +35,6 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Calculus", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test"]
+test = ["Calculus", "Distances", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test"]
+
+

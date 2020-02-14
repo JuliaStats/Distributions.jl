@@ -1,6 +1,7 @@
 # Testing of samplers
 
-using  Distributions
+using Distributions
+using Distances
 using Test
 
 
@@ -18,7 +19,8 @@ import Distributions:
     GammaGSSampler,
     GammaMTSampler,
     GammaIPSampler,
-    PoissBinAliasSampler
+    PoissBinAliasSampler,
+    WeightedResampler
 
 n_tsamples = 10^6
 
@@ -115,5 +117,112 @@ for S in [GammaGSSampler, GammaIPSampler]
     for d in [Gamma(0.1,1.0),Gamma(0.9,1.0)]
         test_samples(S(d), d, n_tsamples)
         test_samples(S(d), d, n_tsamples, rng=rng)
+    end
+end
+
+@testset "WeightedResampler" begin
+    rng = MersenneTwister(1234)
+
+    @testset "Univariate" begin
+        obs = collect(1:12)
+
+        @testset "Equally Weighted" begin
+            # Constant analytic weights
+            wv = aweights(ones(12))
+
+            s = WeightedResampler(obs, wv)
+            X = rand(rng, s, 100000)
+
+            # The mean values of the samples should roughly match the mean of the
+            # original observation
+            @test isapprox(mean(X), mean(obs); atol=0.01)
+        end
+
+        @testset "Linearly Weighted" begin
+            # Linearly increasing analytic weights
+            wv = aweights(collect(1/12:1/12:1.0))
+
+            s = WeightedResampler(obs, wv)
+            X = rand(rng, s, 100000)
+
+            # The mean of the samples should not match the mean of the
+            # original observation
+            @test !isapprox(mean(X), mean(obs); atol=0.01)
+
+            # 12 should be sampled the most
+            @test mode(X) == 12
+        end
+    end
+
+    @testset "Multivariate" begin
+        v = [1.2, 0.7, -0.3, 5.4, -2.8]
+        # Define different observations via arbitrary operations on v
+        obs = hcat(
+            v, reverse(v), sort(v), sin.(v), cos.(v), tan.(v),
+            v / 100, v * 2, abs.(v), log.(abs.(v)), v .^ 2, v * 10,
+        )
+
+        @testset "Equally Weighted" begin
+            # Constant analytic weights
+            wv = aweights(ones(12))
+
+            s = WeightedResampler(obs, wv)
+            X = rand(rng, s, 100000)
+
+            # The mean values of each variable in the samples should roughly match
+            # the means of the original observation
+            @test nrmsd(mean(X; dims=2), mean(obs; dims=2)) < 0.001
+        end
+
+        @testset "Linearly Weighted" begin
+            # Linearly increasing analytic weights
+            wv = aweights(collect(0.083:0.083:1.0))
+
+            s = WeightedResampler(obs, wv)
+            X = rand(rng, s, 100000)
+
+            # The mean values of each variable of the samples should not match the
+            # means of the original observation
+            @test nrmsd(mean(X; dims=2), mean(obs; dims=2)) > 0.1
+
+            # v * 10 should be sampled the most
+            @test vec(mapslices(mode, X; dims=2)) == v * 10
+        end
+    end
+    @testset "Matrixvariate" begin
+        # NOTE: Since we've already testing the sampling behaviour we just want to
+        # check that we've implement the Distributions API correctly for the
+        # Matrixvariate case
+        s = WeightedResampler([rand(4, 3) for i in 1:10], aweights(rand(10)))
+        X = rand(s)
+    end
+
+    @testset "DimensionMismatch" begin
+        @test_throws DimensionMismatch WeightedResampler(rand(10), aweights(collect(1:12)))
+    end
+
+    # Explicitly test the _function for the resampler
+    @testset "_variate_form" begin
+        @test Distributions._variate_form(Vector) == Univariate
+        @test Distributions._variate_form(Matrix) == Multivariate
+        @test Distributions._variate_form(Vector{Matrix}) == Matrixvariate
+        @test_throws MethodError Distributions._variate_form(Float64)
+        @test_throws MethodError Distributions._variate_form(Array{Float64, 3})
+    end
+
+    @testset "_value_support" begin
+        @test Distributions._value_support(Int) == Discrete
+        @test Distributions._value_support(Float64) == Continuous
+        @test Distributions._value_support(Matrix{Float64}) == Continuous
+        @test_throws MethodError Distributions._value_support(String)
+        @test_throws MethodError Distributions._value_support(Vector{Float64})
+    end
+
+    @testset "_validate" begin
+        Distributions._validate(4, 4)
+        Distributions._validate(ones(4), aweights(rand(4)))
+        Distributions._validate(ones(3, 4), aweights(rand(4)))
+        @test_throws DimensionMismatch Distributions._validate(ones(3), aweights(rand(4)))
+        @test_throws DimensionMismatch Distributions._validate(ones(4, 3), aweights(rand(4)))
     end
 end
