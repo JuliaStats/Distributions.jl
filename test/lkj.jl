@@ -153,6 +153,16 @@ end
     @test 1 / volume4D ≈ exp( LKJ(4, 1).logc0 )
 end
 
+@testset "check logpdf against archived Stan output" begin
+    R = [1 0.962395133838894 -0.436307195544856;
+         0.962395133838894 1 -0.301102833786894;
+        -0.436307195544856 -0.301102833786894 1]
+    n = size(R, 1)
+    @test isapprox(logpdf(LKJ(n, 0.5), R), -0.9874823, atol = 1e-6)
+    @test isapprox(logpdf(LKJ(n, 1),   R), -1.596313, atol = 1e-6)
+    @test isapprox(logpdf(LKJ(n, 3.4), R), -7.253798, atol = 1e-6)
+end
+
 @testset "importance sampling check" begin
     d = 3
     M = 20000
