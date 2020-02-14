@@ -1,5 +1,6 @@
 """
     LKJ(d, η)
+
 ```julia
 d::Int   dimension
 η::Real  positive shape
@@ -27,9 +28,11 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJ(d::Integer, η::Real)
-    d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
-    η > 0 || throw(ArgumentError("Shape parameter must be positive."))
+function LKJ(d::Integer, η::Real; check_args = true)
+    if check_args
+        d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
+        η > 0 || throw(ArgumentError("Shape parameter must be positive."))
+    end
     logc0 = lkj_logc0(d, η)
     T = Base.promote_eltype(η, logc0)
     LKJ{T, typeof(d)}(d, T(η), T(logc0))
