@@ -154,6 +154,9 @@ end
 end
 
 @testset "check logpdf against archived Stan output" begin
+    #  Compare to archived output from Stan's lkj_corr_lpdf function.
+    #  https://mc-stan.org/docs/2_22/functions-reference/lkj-correlation.html
+    #  https://mc-stan.org/math/db/d4f/lkj__corr__lpdf_8hpp_source.html
     R = [1 0.962395133838894 -0.436307195544856;
          0.962395133838894 1 -0.301102833786894;
         -0.436307195544856 -0.301102833786894 1]
