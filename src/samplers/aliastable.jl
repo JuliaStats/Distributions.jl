@@ -1,5 +1,5 @@
-struct AliasTable{S} <: Sampleable{Univariate,Discrete}
-    accept::Vector{Float64}
+struct AliasTable{S, T<:Real} <: Sampleable{Univariate,Discrete}
+    accept::Vector{T}
     alias::Vector{Int}
     isampler::S
 end
@@ -8,9 +8,9 @@ ncategories(s::AliasTable) = length(s.accept)
 function AliasTable(probs::AbstractVector{T}) where T<:Real
     n = length(probs)
     n > 0 || throw(ArgumentError("The input probability vector is empty."))
-    accp = Vector{Float64}(undef, n)
+    accp = Vector{T}(undef, n)
     alias = Vector{Int}(undef, n)
-    StatsBase.make_alias_table!(probs, 1.0, accp, alias)
+    StatsBase.make_alias_table!(probs, one(T), accp, alias)
     AliasTable(accp, alias, Random.RangeGenerator(1:n))
 end
 
