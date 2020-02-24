@@ -449,7 +449,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArray)
+function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
