@@ -1,5 +1,5 @@
 using Distributions
 using Test, Random
 
-@test typeof(rand(Bernoulli())) == Int
+@test rand(Bernoulli()) isa Bool
 @test typeof(rand(Bernoulli(), 10)) == Vector{Int}
