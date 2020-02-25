@@ -38,7 +38,9 @@ end
 Bernoulli(p::Integer) = Bernoulli(float(p))
 Bernoulli() = Bernoulli(0.5, check_args=false)
 
-@distr_support Bernoulli 0 1
+@distr_support Bernoulli false true
+
+Base.eltype(::Type{<:Bernoulli}) = Bool
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
