@@ -1,9 +1,9 @@
 """
     MatrixFDist(n1, n2, B)
 ```julia
-n1::Real  degrees of freedom (greater than p - 1)
-n2::Real  degrees of freedom (greater than p - 1)
-B::PDMat  p x p scale
+n1::Real          degrees of freedom (greater than p - 1)
+n2::Real          degrees of freedom (greater than p - 1)
+B::AbstractPDMat  p x p scale
 ```
 The [matrix *F*-Distribution](https://projecteuclid.org/euclid.ba/1515747744)
 (sometimes called the matrix beta type II distribution) generalizes the
@@ -56,7 +56,7 @@ MatrixFDist(n1::Real, n2::Real, B::Union{AbstractMatrix, LinearAlgebra.Cholesky}
 #  REPL display
 #  -----------------------------------------------------------------------------
 
- show(io::IO, d::MatrixFDist) = show_multline(io, d, [(:n1, d.W.df), (:n2, d.n2), (:B, d.W.S.mat)])
+ show(io::IO, d::MatrixFDist) = show_multline(io, d, [(:n1, d.W.df), (:n2, d.n2), (:B, Matrix(d.W.S))])
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -90,7 +90,7 @@ function mean(d::MatrixFDist)
     p = dim(d)
     n1, n2, B = params(d)
     n2 > p + 1 || throw(ArgumentError("mean only defined for df2 > dim + 1"))
-    return (n1 / (n2 - p - 1)) * B.mat
+    return (n1 / (n2 - p - 1)) * Matrix(B)
 end
 
 @inline partype(d::MatrixFDist{T}) where {T <: Real} = T
