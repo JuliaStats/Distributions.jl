@@ -5,8 +5,8 @@
 """
     Wishart(ν, S)
 ```julia
-ν::Real   degrees of freedom (greater than p - 1)
-S::PDMat  p x p scale matrix
+ν::Real           degrees of freedom (greater than p - 1)
+S::AbstractPDMat  p x p scale matrix
 ```
 The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution)
 generalizes the gamma distribution to ``p\\times p`` real, positive definite
