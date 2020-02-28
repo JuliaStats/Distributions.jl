@@ -322,7 +322,7 @@ function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}) where C
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
-function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) where Cov<:AbstractPDMat
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{Float64}, w::AbstractVector) where Cov<:AbstractPDMat
     (size(x,1) == length(g) && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     invΣ = inv(g.Σ)
@@ -343,7 +343,7 @@ function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     MvNormal(μ, g.Σ)
 end
 
-function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64}, w::AbstractVector)
     d = length(g)
     (size(x,1) == d && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -371,7 +371,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     MvNormalStats(s, m, s2, Float64(n))
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::Array{Float64})
+function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     d = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -414,7 +414,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, PDMat(C))
 end
 
-function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVector{Float64})
+function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -449,7 +449,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -484,7 +484,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
-function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
