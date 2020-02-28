@@ -85,11 +85,11 @@ pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
 pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
                             x == 1 ? succprob(d) : zero(d.p)
 
-cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : one(d.p)
+cdf(d::Bernoulli, x::Bool) = x ? one(d.p) : failprob(d)
 cdf(d::Bernoulli, x::Int) = x < 0 ? zero(d.p) :
                             x < 1 ? failprob(d) : one(d.p)
 
-ccdf(d::Bernoulli, x::Bool) = x ? succprob(d) : one(d.p)
+ccdf(d::Bernoulli, x::Bool) = x ? zero(d.p) : succprob(d)
 ccdf(d::Bernoulli, x::Int) = x < 0 ? one(d.p) :
                              x < 1 ? succprob(d) : zero(d.p)
 
