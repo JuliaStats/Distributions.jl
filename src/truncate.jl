@@ -73,7 +73,7 @@ Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, floa
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)
-Base.eltype(::Type{Truncated{D, S, T} } ) where {D, S} = T
+Base.eltype(::Type{Truncated{D, S, T} } ) where {D, S, T} = T
 
 ### range and support
 
