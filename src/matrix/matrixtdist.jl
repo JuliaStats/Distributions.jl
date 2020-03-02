@@ -140,8 +140,7 @@ end
 function logkernel(d::MatrixTDist, X::AbstractMatrix)
     n, p = size(d)
     A = X - d.M
-    At = Matrix(A')
-    (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ At) )
+    (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ A') )
 end
 
 _logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.logc0
