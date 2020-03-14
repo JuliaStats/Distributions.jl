@@ -133,3 +133,22 @@ end
 #  -----------------------------------------------------------------------------
 
 vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixNormal)
+    check_univariate(d)
+    M, U, V = params(d)
+    μ = M[1]
+    σ = sqrt( Matrix(U)[1] * Matrix(V)[1] )
+    return Normal(μ, σ)
+end
+
+function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
+    M = randn(elty, n, p)
+    U = (X = randn(elty, n, n); X * X')
+    V = (Y = randn(elty, p, p); Y * Y')
+    return M, U, V
+end

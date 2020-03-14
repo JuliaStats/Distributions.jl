@@ -161,6 +161,21 @@ function _marginal(lkj::LKJ)
 end
 
 #  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::LKJ)
+    check_univariate(d)
+    return Normal(one(d.η), zero(d.η))
+end
+
+function _rand_params(::Type{LKJ}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for LKJ"))
+    η = abs(3randn(elty))
+    return n, η
+end
+
+#  -----------------------------------------------------------------------------
 #  Several redundant implementations of the recipricol integrating constant.
 #  If f(R; n) = c₀ |R|ⁿ⁻¹, these give log(1 / c₀).
 #  Every integrating constant formula given in LKJ (2009 JMA) is an expression

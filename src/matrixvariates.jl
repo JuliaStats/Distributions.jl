@@ -210,6 +210,10 @@ Evaluate logarithm of pdf value for a given sample `x`. This function need not p
 """
 _logpdf(d::MatrixDistribution, x::AbstractArray)
 
+#  for testing
+is_univariate(d::MatrixDistribution) = size(d) == (1, 1)
+check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentError("not 1 x 1"))
+
 ##### Specific distributions #####
 
 for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",

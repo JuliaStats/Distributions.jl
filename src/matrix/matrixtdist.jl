@@ -170,3 +170,23 @@ function MvTDist(MT::MatrixTDist)
     ν, M, Σ, Ω = params(MT)
     MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
 end
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixTDist)
+    check_univariate(d)
+    ν, M, Σ, Ω = params(d)
+    μ = M[1]
+    σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
+    return LocationScale(μ, σ, TDist(ν))
+end
+
+function _rand_params(::Type{MatrixTDist}, elty, n::Int, p::Int)
+    ν = elty( n + p + 1 + abs(10randn()) )
+    M = randn(elty, n, p)
+    Σ = (X = randn(elty, n, n); X * X')
+    Ω = (Y = randn(elty, p, p); Y * Y')
+    return ν, M, Σ, Ω
+end

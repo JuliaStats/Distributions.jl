@@ -158,3 +158,22 @@ function _wishart_genA!(rng::AbstractRNG, p::Int, df::Real, A::AbstractMatrix)
         @inbounds A[i,j] = randn(rng)
     end
 end
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::Wishart)
+    check_univariate(d)
+    df, S, c0 = params(d)
+    α = df / 2
+    β = 2Matrix(S)[1]
+    return Gamma(α, β)
+end
+
+function _rand_params(::Type{Wishart}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for Wishart"))
+    ν = elty( n + 1 + abs(10randn()) )
+    S = (X = randn(elty, n, n); X * X')
+    return ν, S
+end

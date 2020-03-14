@@ -148,3 +148,23 @@ end
 #  -----------------------------------------------------------------------------
 
 inv(d::MatrixFDist) = ( (n1, n2, B) = params(d); MatrixFDist(n2, n1, inv(B)) )
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixFDist)
+    check_univariate(d)
+    n1, n2, B = params(d)
+    μ = zero(partype(d))
+    σ = (n1 / n2) * Matrix(B)[1]
+    return LocationScale(μ, σ, FDist(n1, n2))
+end
+
+function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for MatrixFDist"))
+    n1 = elty( n + 1 + abs(10randn()) )
+    n2 = elty( n + 1 + abs(10randn()) )
+    B = (X = randn(elty, n, n); X * X')
+    return n1, n2, B
+end

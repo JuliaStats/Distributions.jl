@@ -131,3 +131,20 @@ function _rand!(rng::AbstractRNG, d::MatrixBeta, A::AbstractMatrix)
     invL = Matrix( inv(S.chol.L) )
     A .= X_A_Xt(S1, invL)
 end
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixBeta)
+    check_univariate(d)
+    n1, n2 = params(d)
+    return Beta(n1 / 2, n2 / 2)
+end
+
+function _rand_params(::Type{MatrixBeta}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for MatrixBeta"))
+    n1 = elty( n + 1 + abs(10randn()) )
+    n2 = elty( n + 1 + abs(10randn()) )
+    return n, n1, n2
+end

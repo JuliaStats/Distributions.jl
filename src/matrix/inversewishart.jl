@@ -119,3 +119,22 @@ end
 
 _rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix) =
     (A .= inv(cholesky!(_rand!(rng, Wishart(d.df, inv(d.Ψ)), A))))
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::InverseWishart)
+    check_univariate(d)
+    ν, Ψ, c0 = params(d)
+    α = ν / 2
+    β = Matrix(Ψ)[1] / 2
+    return InverseGamma(α, β)
+end
+
+function _rand_params(::Type{InverseWishart}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for InverseWishart"))
+    ν = elty( n + 3 + abs(10randn()) )
+    Ψ = (X = randn(elty, n, n); X * X')
+    return ν, Ψ
+end
