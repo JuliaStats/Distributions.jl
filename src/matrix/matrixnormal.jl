@@ -2,8 +2,8 @@
     MatrixNormal(M, U, V)
 ```julia
 M::AbstractMatrix  n x p mean
-U::PDMat           n x n row covariance
-V::PDMat           p x p column covariance
+U::AbstractPDMat   n x n row covariance
+V::AbstractPDMat   p x p column covariance
 ```
 The [matrix normal distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution) generalizes the multivariate normal distribution to ``n\\times p`` real matrices ``\\mathbf{X}``.
 If ``\\mathbf{X}\\sim MN_{n,p}(\\mathbf{M}, \\mathbf{U}, \\mathbf{V})``, then its
@@ -15,10 +15,10 @@ f(\\mathbf{X};\\mathbf{M}, \\mathbf{U}, \\mathbf{V}) = \\frac{\\exp\\left( -\\fr
 
 ``\\mathbf{X}\\sim MN_{n,p}(\\mathbf{M},\\mathbf{U},\\mathbf{V})`` if and only if ``\\text{vec}(\\mathbf{X})\\sim N(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
 """
-struct MatrixNormal{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+struct MatrixNormal{T <: Real, TM <: AbstractMatrix, TU <: AbstractPDMat, TV <: AbstractPDMat} <: ContinuousMatrixDistribution
     M::TM
-    U::ST
-    V::ST
+    U::TU
+    V::TV
     logc0::T
 end
 
@@ -35,7 +35,7 @@ function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMa
     prom_M = convert(AbstractArray{R}, M)
     prom_U = convert(AbstractArray{R}, U)
     prom_V = convert(AbstractArray{R}, V)
-    MatrixNormal{R, typeof(prom_M), typeof(prom_U)}(prom_M, prom_U, prom_V, R(logc0))
+    MatrixNormal{R, typeof(prom_M), typeof(prom_U), typeof(prom_V)}(prom_M, prom_U, prom_V, R(logc0))
 end
 
 function MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat)
@@ -63,14 +63,14 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     UU = convert(AbstractArray{T}, d.U)
     VV = convert(AbstractArray{T}, d.V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(d.logc0))
+    MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(d.logc0))
 end
 
 function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     UU = convert(AbstractArray{T}, U)
     VV = convert(AbstractArray{T}, V)
-    MatrixNormal{T, typeof(MM), typeof(UU)}(MM, UU, VV, T(logc0))
+    MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ mean(d::MatrixNormal) = d.M
 
 mode(d::MatrixNormal) = d.M
 
-cov(d::MatrixNormal, ::Val{true}=Val(true)) = kron(Matrix(d.V), Matrix(d.U))
+cov(d::MatrixNormal, ::Val{true}=Val(true)) = Matrix(kron(d.V, d.U))
 
 cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
@@ -118,14 +118,18 @@ _logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function _rand!(rng::AbstractRNG, d::MatrixNormal, A::AbstractMatrix)
+#  https://en.wikipedia.org/wiki/Matrix_normal_distribution#Drawing_values_from_the_distribution
+
+function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
     n, p = size(d)
     X = randn(rng, n, p)
-    A .= d.M + d.U.chol.L * X * d.V.chol.U
+    A = cholesky(d.U).L
+    B = cholesky(d.V).U
+    Y .= d.M + A * X * B
 end
 
 #  -----------------------------------------------------------------------------
 #  Transformation
 #  -----------------------------------------------------------------------------
 
-vec(d::MatrixNormal) = MvNormal(vec(d.M), cov(d))
+vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))

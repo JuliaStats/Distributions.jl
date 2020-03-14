@@ -3,8 +3,8 @@
 ```julia
 ν::Real            positive degrees of freedom
 M::AbstractMatrix  n x p location
-Σ::PDMat           n x n scale
-Ω::PDMat           p x p scale
+Σ::AbstractPDMat   n x n scale
+Ω::AbstractPDMat   p x p scale
 ```
 The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
 generalizes the multivariate *t*-Distribution to ``n\\times p`` real
@@ -35,11 +35,11 @@ is given by
 then the marginal distribution of ``\\mathbf{X}`` is
 ``MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
-struct MatrixTDist{T <: Real, TM <: AbstractMatrix, ST <: AbstractPDMat} <: ContinuousMatrixDistribution
+struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <: ContinuousMatrixDistribution
     ν::T
     M::TM
-    Σ::ST
-    Ω::ST
+    Σ::TΣ
+    Ω::TΩ
     logc0::T
 end
 
@@ -57,7 +57,7 @@ function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::Abst
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
-    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ)}(R(ν), prom_M, prom_Σ, prom_Ω, R(logc0))
+    MatrixTDist{R, typeof(prom_M), typeof(prom_Σ), typeof(prom_Ω)}(R(ν), prom_M, prom_Σ, prom_Ω, R(logc0))
 end
 
 function MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat)
@@ -83,14 +83,14 @@ function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     MM = convert(AbstractArray{T}, d.M)
     ΣΣ = convert(AbstractArray{T}, d.Σ)
     ΩΩ = convert(AbstractArray{T}, d.Ω)
-    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
 
 function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
     ΣΣ = convert(AbstractArray{T}, Σ)
     ΩΩ = convert(AbstractArray{T}, Ω)
-    MatrixTDist{T, typeof(MM), typeof(ΣΣ)}(T(ν), MM, ΣΣ, ΩΩ, T(logc0))
+    MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(ν), MM, ΣΣ, ΩΩ, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -111,7 +111,7 @@ end
 
 mode(d::MatrixTDist) = d.M
 
-cov(d::MatrixTDist, ::Val{true}=Val(true)) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : kron(Matrix(d.Ω), Matrix(d.Σ)) ./ (d.ν - 2)
+cov(d::MatrixTDist, ::Val{true}=Val(true)) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : Matrix(kron(d.Ω, d.Σ)) ./ (d.ν - 2)
 
 cov(d::MatrixTDist, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
@@ -168,5 +168,5 @@ function MvTDist(MT::MatrixTDist)
     n, p = size(MT)
     all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
     ν, M, Σ, Ω = params(MT)
-    MvTDist(ν, vec(M), (1 / ν) * kron(Σ.mat, Ω.mat))
+    MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
 end

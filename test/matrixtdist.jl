@@ -144,3 +144,34 @@ end
     @test partype(Del1) == elty
     @test partype(Del2) == elty
 end
+
+@testset "PDMat mixing and matching" begin
+    n = 3
+    p = 4
+
+    ν = max(n, p) + 1
+
+    M = randn(n, p)
+
+    u = rand()
+    U_scale = ScalMat(n, u)
+    U_dense = Matrix(U_scale)
+    U_pd    = PDMat(U_dense)
+    U_pdiag = PDiagMat(u*ones(n))
+
+    v = rand(p)
+    V_pdiag = PDiagMat(v)
+    V_dense = Matrix(V_pdiag)
+    V_pd    = PDMat(V_dense)
+
+    UV = kron(V_dense, U_dense) ./ (ν - 2)
+    baseeval = logpdf(MatrixTDist(ν, M, U_dense, V_dense), M)
+
+    for U in [U_scale, U_dense, U_pd, U_pdiag]
+        for V in [V_pdiag, V_dense, V_pd]
+            d = MatrixTDist(ν, M, U, V)
+            @test cov(d) ≈ UV
+            @test logpdf(d, M) ≈ baseeval
+        end
+    end
+end

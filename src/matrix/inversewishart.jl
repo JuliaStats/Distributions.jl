@@ -1,8 +1,8 @@
 """
     InverseWishart(ν, Ψ)
 ```julia
-ν::Real   degrees of freedom (greater than p - 1)
-Ψ::PDMat  p x p scale matrix
+ν::Real           degrees of freedom (greater than p - 1)
+Ψ::AbstractPDMat  p x p scale matrix
 ```
 The [inverse Wishart distribution](http://en.wikipedia.org/wiki/Inverse-Wishart_distribution)
 generalizes the inverse gamma distribution to ``p\\times p`` real, positive definite
