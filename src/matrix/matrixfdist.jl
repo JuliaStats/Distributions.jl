@@ -164,7 +164,7 @@ end
 function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)
     n == p || throw(ArgumentError("dims must be equal for MatrixFDist"))
     n1 = elty( n + 1 + abs(10randn()) )
-    n2 = elty( n + 1 + abs(10randn()) )
+    n2 = elty( n + 3 + abs(10randn()) )
     B = (X = randn(elty, n, n); X * X')
     return n1, n2, B
 end
