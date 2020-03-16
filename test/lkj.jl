@@ -16,8 +16,8 @@ F = LKJ(d, η₀)
 end
 
 @testset "LKJ params" begin
-    η̃ = params(G)
-    η̃₀ = params(F)
+    d̃, η̃ = params(G)
+    d̃₀, η̃₀ = params(F)
     @test η̃ == η
     @test η̃₀ == η₀
 end

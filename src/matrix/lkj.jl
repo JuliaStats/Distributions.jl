@@ -85,7 +85,7 @@ function var(lkj::LKJ)
     σ² * (ones(partype(lkj), d, d) - I)
 end
 
-params(d::LKJ) = d.η
+params(d::LKJ) = (d.d, d.η)
 
 @inline partype(d::LKJ{T}) where {T <: Real} = T
 

@@ -24,7 +24,7 @@ end
 end
 
 @testset "MatrixBeta params" begin
-    df1, df2 = params(B)
+    Bdim, df1, df2 = params(B)
     @test df1 == n1
     @test df2 == n2
 end

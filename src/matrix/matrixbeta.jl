@@ -78,7 +78,7 @@ rank(d::MatrixBeta) = dim(d)
 
 insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
 
-params(d::MatrixBeta) = (d.W1.df, d.W2.df)
+params(d::MatrixBeta) = (dim(d), d.W1.df, d.W2.df)
 
 mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d), dim(d)))
 
