@@ -32,12 +32,14 @@ struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     c0::T     # the logarithm of normalizing constant in pdf
 end
 
-#### Constructors
+#  -----------------------------------------------------------------------------
+#  Constructors
+#  -----------------------------------------------------------------------------
 
 function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
-    c0 = _wishart_c0(df, S)
+    c0 = wishart_c0(df, S)
     R = Base.promote_eltype(T, c0)
     prom_S = convert(AbstractArray{T}, S)
     Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
@@ -52,25 +54,16 @@ Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
 
 Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
-function _wishart_c0(df::Real, S::AbstractPDMat)
-    h_df = df / 2
-    p = dim(S)
-    h_df * (logdet(S) + p * typeof(df)(logtwo)) + logmvgamma(p, h_df)
-end
+#  -----------------------------------------------------------------------------
+#  REPL display
+#  -----------------------------------------------------------------------------
 
+show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))])
 
-#### Properties
+#  -----------------------------------------------------------------------------
+#  Conversion
+#  -----------------------------------------------------------------------------
 
-insupport(::Type{Wishart}, X::Matrix) = isposdef(X)
-insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
-
-dim(d::Wishart) = dim(d.S)
-size(d::Wishart) = (p = dim(d); (p, p))
-rank(d::Wishart) = dim(d)
-params(d::Wishart) = (d.df, d.S, d.c0)
-@inline partype(d::Wishart{T}) where {T<:Real} = T
-
-### Conversion
 function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
     P = convert(AbstractArray{T}, d.S)
     Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
@@ -80,12 +73,18 @@ function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, c0) where T<:Real
     Wishart{T, typeof(P)}(T(df), P, T(c0))
 end
 
-#### Show
+#  -----------------------------------------------------------------------------
+#  Properties
+#  -----------------------------------------------------------------------------
 
-show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))])
+insupport(::Type{Wishart}, X::Matrix) = isposdef(X)
+insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
-
-#### Statistics
+dim(d::Wishart) = dim(d.S)
+size(d::Wishart) = (p = dim(d); (p, p))
+rank(d::Wishart) = dim(d)
+params(d::Wishart) = (d.df, d.S, d.c0)
+@inline partype(d::Wishart{T}) where {T<:Real} = T
 
 mean(d::Wishart) = d.df * Matrix(d.S)
 
@@ -125,7 +124,15 @@ function var(d::Wishart, i::Integer, j::Integer)
     d.df * (S[i, i] * S[j, j] + S[i, j] ^ 2)
 end
 
-#### Evaluation
+#  -----------------------------------------------------------------------------
+#  Evaluation
+#  -----------------------------------------------------------------------------
+
+function wishart_c0(df::Real, S::AbstractPDMat)
+    h_df = df / 2
+    p = dim(S)
+    h_df * (logdet(S) + p * typeof(df)(logtwo)) + logmvgamma(p, h_df)
+end
 
 function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
@@ -134,7 +141,10 @@ function _logpdf(d::Wishart, X::AbstractMatrix)
     0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.c0
 end
 
-#### Sampling
+#  -----------------------------------------------------------------------------
+#  Sampling
+#  -----------------------------------------------------------------------------
+
 function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     _wishart_genA!(rng, dim(d), d.df, A)
     unwhiten!(d.S, A)
