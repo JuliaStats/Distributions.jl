@@ -8,6 +8,8 @@ Return the size of each sample from distribution `d`.
 """
 Base.size(d::MatrixDistribution)
 
+size(d::MatrixDistribution, i) = size(d)[i]
+
 """
     length(d::MatrixDistribution)
 
