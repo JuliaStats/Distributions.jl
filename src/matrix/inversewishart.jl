@@ -22,12 +22,14 @@ struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistributio
     c0::T     # log of normalizing constant
 end
 
-#### Constructors
+#  -----------------------------------------------------------------------------
+#  Constructors
+#  -----------------------------------------------------------------------------
 
 function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
     p = dim(Ψ)
     df > p - 1 || error("df should be greater than dim - 1.")
-    c0 = _invwishart_c0(df, Ψ)
+    c0 = invwishart_c0(df, Ψ)
     R = Base.promote_eltype(T, c0)
     prom_Ψ = convert(AbstractArray{R}, Ψ)
     InverseWishart{R, typeof(prom_Ψ)}(R(df), prom_Ψ, R(c0))
@@ -42,24 +44,16 @@ InverseWishart(df::Real, Ψ::Matrix) = InverseWishart(df, PDMat(Ψ))
 
 InverseWishart(df::Real, Ψ::Cholesky) = InverseWishart(df, PDMat(Ψ))
 
-function _invwishart_c0(df::Real, Ψ::AbstractPDMat)
-    h_df = df / 2
-    p = dim(Ψ)
-    h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
-end
+#  -----------------------------------------------------------------------------
+#  REPL display
+#  -----------------------------------------------------------------------------
 
-#### Properties
+show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matrix(d.Ψ))])
 
-insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
-insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
+#  -----------------------------------------------------------------------------
+#  Conversion
+#  -----------------------------------------------------------------------------
 
-dim(d::InverseWishart) = dim(d.Ψ)
-size(d::InverseWishart) = (p = dim(d); (p, p))
-rank(d::InverseWishart) = dim(d)
-params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
-@inline partype(d::InverseWishart{T}) where {T<:Real} = T
-
-### Conversion
 function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
     P = convert(AbstractArray{T}, d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.c0))
@@ -69,12 +63,18 @@ function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, c0) where T<:
     InverseWishart{T, typeof(P)}(T(df), P, T(c0))
 end
 
-#### Show
+#  -----------------------------------------------------------------------------
+#  Properties
+#  -----------------------------------------------------------------------------
 
-show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matrix(d.Ψ))])
+insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
+insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
-
-#### Statistics
+dim(d::InverseWishart) = dim(d.Ψ)
+size(d::InverseWishart) = (p = dim(d); (p, p))
+rank(d::InverseWishart) = dim(d)
+params(d::InverseWishart) = (d.df, d.Ψ, d.c0)
+@inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
 function mean(d::InverseWishart)
     df = d.df
@@ -102,7 +102,15 @@ function var(d::InverseWishart, i::Integer, j::Integer)
     inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*((ν - p + 1)*Ψ[i,j]^2 + (ν - p - 1)*Ψ[i,i]*Ψ[j,j])
 end
 
-#### Evaluation
+#  -----------------------------------------------------------------------------
+#  Evaluation
+#  -----------------------------------------------------------------------------
+
+function invwishart_c0(df::Real, Ψ::AbstractPDMat)
+    h_df = df / 2
+    p = dim(Ψ)
+    h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
+end
 
 function _logpdf(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
@@ -114,7 +122,9 @@ function _logpdf(d::InverseWishart, X::AbstractMatrix)
 end
 
 
-#### Sampling
+#  -----------------------------------------------------------------------------
+#  Sampling
+#  -----------------------------------------------------------------------------
 
 _rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix) =
     (A .= inv(cholesky!(_rand!(rng, Wishart(d.df, inv(d.Ψ)), A))))
