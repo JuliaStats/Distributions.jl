@@ -10,8 +10,8 @@ S::AbstractPDMat  p x p scale matrix
 ```
 The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution)
 generalizes the gamma distribution to ``p\\times p`` real, positive definite
-matrices ``\\mathbf{H}``. If ``\\mathbf{H}\\sim W_p(\\nu,\\mathbf{S})``, then its
-probability density function is
+matrices ``\\mathbf{H}``. If ``\\mathbf{H}\\sim \\textrm{W}_p(\\nu,\\mathbf{S})``,
+then its probability density function is
 
 ```math
 f(\\mathbf{H};\\nu,\\mathbf{S}) = \\frac{1}{2^{\\nu p/2} \\left|\\mathbf{S}\\right|^{\\nu/2} \\Gamma_p\\left(\\frac {\\nu}{2}\\right ) }{\\left|\\mathbf{H}\\right|}^{(\\nu-p-1)/2} e^{-(1/2)\\operatorname{tr}(\\mathbf{S}^{-1}\\mathbf{H})}.
@@ -20,10 +20,10 @@ f(\\mathbf{H};\\nu,\\mathbf{S}) = \\frac{1}{2^{\\nu p/2} \\left|\\mathbf{S}\\rig
 If ``\\nu`` is an integer, then a random matrix ``\\mathbf{H}`` given by
 
 ```math
-\\mathbf{H} = \\mathbf{X}\\mathbf{X}^{\\rm{T}}, \\quad\\mathbf{X} \\sim MN_{p,\\nu}(\\mathbf{0}, \\mathbf{S}, \\mathbf{I}_{\\nu})
+\\mathbf{H} = \\mathbf{X}\\mathbf{X}^{\\rm{T}}, \\quad\\mathbf{X} \\sim \\textrm{MN}_{p,\\nu}(\\mathbf{0}, \\mathbf{S}, \\mathbf{I}_{\\nu})
 ```
 
-has ``\\mathbf{H}\\sim W_p(\\nu, \\mathbf{S})``. For non-integer degrees of freedom,
+has ``\\mathbf{H}\\sim \\textrm{W}_p(\\nu, \\mathbf{S})``. For non-integer degrees of freedom,
 Wishart matrices can be generated via the [Bartlett decomposition](https://en.wikipedia.org/wiki/Wishart_distribution#Bartlett_decomposition).
 """
 struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution

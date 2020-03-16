@@ -8,7 +8,7 @@ M::AbstractMatrix  n x p location
 ```
 The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
 generalizes the multivariate *t*-Distribution to ``n\\times p`` real
-matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
+matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim \\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
 \\boldsymbol{\\Omega})``, then its probability density function is
 
 ```math
@@ -27,13 +27,13 @@ is given by
 
 ```math
 \\begin{align*}
-\\mathbf{S}&\\sim IW_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
-\\mathbf{X}|\\mathbf{S}&\\sim MN_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
+\\mathbf{S}&\\sim \\textrm{IW}_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
+\\mathbf{X}|\\mathbf{S}&\\sim \\textrm{MN}_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
 \\end{align*}
 ```
 
 then the marginal distribution of ``\\mathbf{X}`` is
-``MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
+``\\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
 struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <: ContinuousMatrixDistribution
     ν::T

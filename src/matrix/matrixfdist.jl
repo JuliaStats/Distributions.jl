@@ -8,7 +8,8 @@ B::AbstractPDMat  p x p scale
 The [matrix *F*-Distribution](https://projecteuclid.org/euclid.ba/1515747744)
 (sometimes called the matrix beta type II distribution) generalizes the
 *F*-Distribution to ``p\\times p`` real, positive definite matrices ``\\boldsymbol{\\Sigma}``.
-If ``\\boldsymbol{\\Sigma}\\sim MF_{p}(n_1/2,n_2/2,\\mathbf{B})``, then its probability density function is
+If ``\\boldsymbol{\\Sigma}\\sim \\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``,
+then its probability density function is
 
 ```math
 f(\\boldsymbol{\\Sigma} ; n_1,n_2,\\mathbf{B}) =
@@ -21,13 +22,13 @@ is given by
 
 ```math
 \\begin{align*}
-\\boldsymbol{\\Psi}&\\sim W_p(n_1, \\mathbf{B})\\\\
-\\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi}&\\sim IW_p(n_2, \\boldsymbol{\\Psi}),
+\\boldsymbol{\\Psi}&\\sim \\textrm{W}_p(n_1, \\mathbf{B})\\\\
+\\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi}&\\sim \\textrm{IW}_p(n_2, \\boldsymbol{\\Psi}),
 \\end{align*}
 ```
 
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is
-``MF_{p}(n_1/2,n_2/2,\\mathbf{B})``.
+``\\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``.
 """
 struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
     W::TW
