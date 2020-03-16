@@ -107,7 +107,7 @@ end
 function entropy(d::Wishart)
     p = dim(d)
     df = d.df
-    d.logc0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
+    -d.logc0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
 end
 
 #  Gupta/Nagar (1999) Theorem 3.3.15.i
@@ -128,14 +128,14 @@ end
 function wishart_logc0(df::Real, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
-    h_df * (logdet(S) + p * typeof(df)(logtwo)) + logmvgamma(p, h_df)
+    -h_df * (logdet(S) + p * typeof(df)(logtwo)) - logmvgamma(p, h_df)
 end
 
 function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholesky(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.logc0
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) + d.logc0
 end
 
 #  -----------------------------------------------------------------------------

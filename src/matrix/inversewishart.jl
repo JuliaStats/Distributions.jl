@@ -106,7 +106,7 @@ end
 function invwishart_logc0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
     p = dim(Ψ)
-    h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) + logmvgamma(p, h_df)
+    -h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) - logmvgamma(p, h_df)
 end
 
 function _logpdf(d::InverseWishart, X::AbstractMatrix)
@@ -115,7 +115,7 @@ function _logpdf(d::InverseWishart, X::AbstractMatrix)
     Xcf = cholesky(X)
     # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
     Ψ = Matrix(d.Ψ)
-    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) - d.logc0
+    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) + d.logc0
 end
 
 
