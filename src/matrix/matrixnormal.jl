@@ -112,8 +112,6 @@ function logkernel(d::MatrixNormal, X::AbstractMatrix)
     -0.5 * tr( (d.V \ A') * (d.U \ A) )
 end
 
-_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------

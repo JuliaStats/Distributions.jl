@@ -131,11 +131,11 @@ function wishart_logc0(df::Real, S::AbstractPDMat)
     -h_df * (logdet(S) + p * typeof(df)(logtwo)) - logmvgamma(p, h_df)
 end
 
-function _logpdf(d::Wishart, X::AbstractMatrix)
+function logkernel(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholesky(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) + d.logc0
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X))
 end
 
 #  -----------------------------------------------------------------------------

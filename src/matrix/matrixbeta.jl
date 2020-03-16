@@ -116,8 +116,6 @@ function logkernel(d::MatrixBeta, U::AbstractMatrix)
     ((n1 - p - 1) / 2) * logdet(U) + ((n2 - p - 1) / 2) * logdet(I - U)
 end
 
-_logpdf(d::MatrixBeta, U::AbstractMatrix) = logkernel(d, U) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------

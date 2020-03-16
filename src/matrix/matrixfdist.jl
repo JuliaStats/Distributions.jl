@@ -132,8 +132,6 @@ function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
     ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
 end
 
-_logpdf(d::MatrixFDist, Σ::AbstractMatrix) = logkernel(d, Σ) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------

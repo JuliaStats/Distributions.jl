@@ -109,15 +109,14 @@ function invwishart_logc0(df::Real, Ψ::AbstractPDMat)
     -h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) - logmvgamma(p, h_df)
 end
 
-function _logpdf(d::InverseWishart, X::AbstractMatrix)
+function logkernel(d::InverseWishart, X::AbstractMatrix)
     p = dim(d)
     df = d.df
     Xcf = cholesky(X)
     # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)
     Ψ = Matrix(d.Ψ)
-    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ)) + d.logc0
+    -0.5 * ((df + p + 1) * logdet(Xcf) + tr(Xcf \ Ψ))
 end
-
 
 #  -----------------------------------------------------------------------------
 #  Sampling

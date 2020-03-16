@@ -145,6 +145,8 @@ end
 
 # pdf & logpdf
 
+_logpdf(d::MatrixDistribution, X::AbstractMatrix) = logkernel(d, X) + d.logc0
+
 _pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where {T<:Real} = exp(_logpdf(d, x))
 
 """
