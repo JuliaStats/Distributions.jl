@@ -20,7 +20,7 @@ rng = MersenneTwister(123)
         @test size(d) == size(func[1](d))
         @test length(d) == length(func[1](d))
         @test rank(d) == rank(func[1](d))
-        @test typeof(d)(params(d)...) == d
+        @test typeof(d)(params(d)..., d.logc0) == d
         @test partype(d) == Float64
     end
 
@@ -86,7 +86,7 @@ end
         @test x ≡ m
         @test size(d) == size(x)
         @test length(d) == length(func[2](d, m))
-        @test typeof(d)(params(d)...) == d
+        @test typeof(d)(params(d)..., d.logc0) == d
         @test partype(d) == Float64
     end
 
