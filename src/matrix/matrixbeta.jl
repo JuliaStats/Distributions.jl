@@ -80,23 +80,21 @@ insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) &&
 
 params(d::MatrixBeta) = (dim(d), d.W1.df, d.W2.df)
 
-mean(d::MatrixBeta) = ((n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, dim(d), dim(d)))
+mean(d::MatrixBeta) = ((p, n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, p, p))
 
 @inline partype(d::MatrixBeta{T}) where {T <: Real} = T
 
 #  Konno (1988 JJSS) Corollary 3.3.i
 function cov(d::MatrixBeta, i::Integer, j::Integer, k::Integer, l::Integer)
-    n1, n2 = params(d)
+    p, n1, n2 = params(d)
     n = n1 + n2
-    p = dim(d)
     Ω = Matrix{partype(d)}(I, p, p)
     n1*n2*inv(n*(n - 1)*(n + 2))*(-(2/n)*Ω[i,j]*Ω[k,l] + Ω[j,l]*Ω[i,k] + Ω[i,l]*Ω[k,j])
 end
 
 function var(d::MatrixBeta, i::Integer, j::Integer)
-    n1, n2 = params(d)
+    p, n1, n2 = params(d)
     n = n1 + n2
-    p = dim(d)
     Ω = Matrix{partype(d)}(I, p, p)
     n1*n2*inv(n*(n - 1)*(n + 2))*((1 - (2/n))*Ω[i,j]^2 + Ω[j,j]*Ω[i,i])
 end
@@ -111,8 +109,7 @@ function matrixbeta_logc0(p::Int, n1::Real, n2::Real)
 end
 
 function logkernel(d::MatrixBeta, U::AbstractMatrix)
-    p = dim(d)
-    n1, n2 = params(d)
+    p, n1, n2 = params(d)
     ((n1 - p - 1) / 2) * logdet(U) + ((n2 - p - 1) / 2) * logdet(I - U)
 end
 
@@ -136,7 +133,7 @@ end
 
 function _univariate(d::MatrixBeta)
     check_univariate(d)
-    n1, n2 = params(d)
+    p, n1, n2 = params(d)
     return Beta(n1 / 2, n2 / 2)
 end
 

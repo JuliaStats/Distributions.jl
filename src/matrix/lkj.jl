@@ -71,7 +71,7 @@ insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(
 mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 
 function mode(d::LKJ; check_args = true)
-    η = params(d)
+    p, η = params(d)
     if check_args
         η > 1 || throw(ArgumentError("mode is defined only when η > 1."))
     end
