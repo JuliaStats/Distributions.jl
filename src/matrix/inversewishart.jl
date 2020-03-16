@@ -28,7 +28,7 @@ end
 
 function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
     p = dim(Ψ)
-    df > p - 1 || error("df should be greater than dim - 1.")
+    df > p - 1 || throw(ArgumentError("df should be greater than dim - 1."))
     logc0 = invwishart_logc0(df, Ψ)
     R = Base.promote_eltype(T, logc0)
     prom_Ψ = convert(AbstractArray{R}, Ψ)
@@ -80,11 +80,8 @@ function mean(d::InverseWishart)
     df = d.df
     p = dim(d)
     r = df - (p + 1)
-    if r > 0.0
-        return Matrix(d.Ψ) * (1.0 / r)
-    else
-        error("mean only defined for df > p + 1")
-    end
+    r > 0.0 || throw(ArgumentError("mean only defined for df > p + 1"))
+    return Matrix(d.Ψ) * (1.0 / r)
 end
 
 mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)

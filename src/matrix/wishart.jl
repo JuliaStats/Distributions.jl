@@ -38,7 +38,7 @@ end
 
 function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     p = dim(S)
-    df > p - 1 || error("dpf should be greater than dim - 1.")
+    df > p - 1 || throw(ArgumentError("df should be greater than dim - 1."))
     logc0 = wishart_logc0(df, S)
     R = Base.promote_eltype(T, logc0)
     prom_S = convert(AbstractArray{T}, S)
@@ -90,11 +90,8 @@ mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
     r = d.df - dim(d) - 1.0
-    if r > 0.0
-        return Matrix(d.S) * r
-    else
-        error("mode is only defined when df > p + 1")
-    end
+    r > 0.0 || throw(ArgumentError("mode is only defined when df > p + 1"))
+    return Matrix(d.S) * r
 end
 
 function meanlogdet(d::Wishart)
