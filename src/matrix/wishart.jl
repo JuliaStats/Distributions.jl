@@ -28,8 +28,8 @@ Wishart matrices can be generated via the [Bartlett decomposition](https://en.wi
 """
 struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
-    S::ST           # the scale matrix
-    logc0::T     # the logarithm of normalizing constant in pdf
+    S::ST     # the scale matrix
+    logc0::T  # the logarithm of normalizing constant in pdf
 end
 
 #  -----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 rank(d::Wishart) = dim(d)
-params(d::Wishart) = (d.df, d.S, d.logc0)
+params(d::Wishart) = (d.df, d.S)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
 mean(d::Wishart) = d.df * Matrix(d.S)
@@ -171,7 +171,7 @@ end
 
 function _univariate(d::Wishart)
     check_univariate(d)
-    df, S, logc0 = params(d)
+    df, S = params(d)
     α = df / 2
     β = 2Matrix(S)[1]
     return Gamma(α, β)

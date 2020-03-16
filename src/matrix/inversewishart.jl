@@ -19,7 +19,7 @@ f(\\boldsymbol{\\Sigma}; \\nu,\\boldsymbol{\\Psi}) =
 struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     Ψ::ST     # scale matrix
-    logc0::T     # log of normalizing constant
+    logc0::T  # log of normalizing constant
 end
 
 #  -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::InverseWishart) = dim(d.Ψ)
 size(d::InverseWishart) = (p = dim(d); (p, p))
 rank(d::InverseWishart) = dim(d)
-params(d::InverseWishart) = (d.df, d.Ψ, d.logc0)
+params(d::InverseWishart) = (d.df, d.Ψ)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
 function mean(d::InverseWishart)
@@ -131,7 +131,7 @@ _rand!(rng::AbstractRNG, d::InverseWishart, A::AbstractMatrix) =
 
 function _univariate(d::InverseWishart)
     check_univariate(d)
-    ν, Ψ, logc0 = params(d)
+    ν, Ψ = params(d)
     α = ν / 2
     β = Matrix(Ψ)[1] / 2
     return InverseGamma(α, β)
