@@ -29,7 +29,7 @@ Wishart matrices can be generated via the [Bartlett decomposition](https://en.wi
 struct Wishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     S::ST           # the scale matrix
-    c0::T     # the logarithm of normalizing constant in pdf
+    logc0::T     # the logarithm of normalizing constant in pdf
 end
 
 #  -----------------------------------------------------------------------------
@@ -39,10 +39,10 @@ end
 function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     p = dim(S)
     df > p - 1 || error("dpf should be greater than dim - 1.")
-    c0 = wishart_c0(df, S)
-    R = Base.promote_eltype(T, c0)
+    logc0 = wishart_logc0(df, S)
+    R = Base.promote_eltype(T, logc0)
     prom_S = convert(AbstractArray{T}, S)
-    Wishart{R, typeof(prom_S)}(R(df), prom_S, R(c0))
+    Wishart{R, typeof(prom_S)}(R(df), prom_S, R(logc0))
 end
 
 function Wishart(df::Real, S::AbstractPDMat)
@@ -66,11 +66,11 @@ show(io::IO, d::Wishart) = show_multline(io, d, [(:df, d.df), (:S, Matrix(d.S))]
 
 function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
     P = convert(AbstractArray{T}, d.S)
-    Wishart{T, typeof(P)}(T(d.df), P, T(d.c0))
+    Wishart{T, typeof(P)}(T(d.df), P, T(d.logc0))
 end
-function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, c0) where T<:Real
+function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, logc0) where T<:Real
     P = convert(AbstractArray{T}, S)
-    Wishart{T, typeof(P)}(T(df), P, T(c0))
+    Wishart{T, typeof(P)}(T(df), P, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -83,7 +83,7 @@ insupport(d::Wishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 dim(d::Wishart) = dim(d.S)
 size(d::Wishart) = (p = dim(d); (p, p))
 rank(d::Wishart) = dim(d)
-params(d::Wishart) = (d.df, d.S, d.c0)
+params(d::Wishart) = (d.df, d.S, d.logc0)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
 mean(d::Wishart) = d.df * Matrix(d.S)
@@ -110,7 +110,7 @@ end
 function entropy(d::Wishart)
     p = dim(d)
     df = d.df
-    d.c0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
+    d.logc0 - 0.5 * (df - p - 1) * meanlogdet(d) + 0.5 * df * p
 end
 
 #  Gupta/Nagar (1999) Theorem 3.3.15.i
@@ -128,7 +128,7 @@ end
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function wishart_c0(df::Real, S::AbstractPDMat)
+function wishart_logc0(df::Real, S::AbstractPDMat)
     h_df = df / 2
     p = dim(S)
     h_df * (logdet(S) + p * typeof(df)(logtwo)) + logmvgamma(p, h_df)
@@ -138,7 +138,7 @@ function _logpdf(d::Wishart, X::AbstractMatrix)
     df = d.df
     p = dim(d)
     Xcf = cholesky(X)
-    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.c0
+    0.5 * ((df - (p + 1)) * logdet(Xcf) - tr(d.S \ X)) - d.logc0
 end
 
 #  -----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ end
 
 function _univariate(d::Wishart)
     check_univariate(d)
-    df, S, c0 = params(d)
+    df, S, logc0 = params(d)
     α = df / 2
     β = 2Matrix(S)[1]
     return Gamma(α, β)

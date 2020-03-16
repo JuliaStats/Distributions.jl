@@ -137,7 +137,7 @@ rand!(W, m, false)
 @testset "Wishart conversion" for elty in (Float32, Float64, BigFloat)
 
     Del1 = convert(Wishart{elty}, W)
-    Del2 = convert(Wishart{elty}, v, PDMat(S), W.c0)
+    Del2 = convert(Wishart{elty}, v, PDMat(S), W.logc0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty
@@ -147,7 +147,7 @@ end
 @testset "InverseWishart conversion" for elty in (Float32, Float64, BigFloat)
 
     Del1 = convert(InverseWishart{elty}, IW)
-    Del2 = convert(InverseWishart{elty}, v, PDMat(S), IW.c0)
+    Del2 = convert(InverseWishart{elty}, v, PDMat(S), IW.logc0)
 
     @test partype(Del1) == elty
     @test partype(Del2) == elty
