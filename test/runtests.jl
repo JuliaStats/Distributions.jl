@@ -41,6 +41,7 @@ const tests = [
     "matrixnormal",
     "matrixtdist",
     "lkj",
+    "matrixvariates",
     "vonmisesfisher",
     "conversion",
     "convolution",
