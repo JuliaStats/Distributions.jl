@@ -142,6 +142,6 @@ end
 function _rand_params(::Type{InverseWishart}, elty, n::Int, p::Int)
     n == p || throw(ArgumentError("dims must be equal for InverseWishart"))
     ν = elty( n + 3 + abs(10randn()) )
-    Ψ = (X = randn(elty, n, n); X * X')
+    Ψ = (X = 2rand(elty, n, n) .- 1 ; X * X')
     return ν, Ψ
 end

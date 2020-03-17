@@ -148,7 +148,7 @@ end
 
 function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
     M = randn(elty, n, p)
-    U = (X = randn(elty, n, n); X * X')
-    V = (Y = randn(elty, p, p); Y * Y')
+    U = (X = 2rand(elty, n, n) .- 1; X * X')
+    V = (Y = 2rand(elty, p, p) .- 1; Y * Y')
     return M, U, V
 end

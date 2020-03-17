@@ -184,7 +184,7 @@ end
 function _rand_params(::Type{MatrixTDist}, elty, n::Int, p::Int)
     ν = elty( n + p + 1 + abs(10randn()) )
     M = randn(elty, n, p)
-    Σ = (X = randn(elty, n, n); X * X')
-    Ω = (Y = randn(elty, p, p); Y * Y')
+    Σ = (X = 2rand(elty, n, n) .- 1; X * X')
+    Ω = (Y = 2rand(elty, p, p) .- 1; Y * Y')
     return ν, M, Σ, Ω
 end
