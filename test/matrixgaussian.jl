@@ -53,20 +53,16 @@ z = Z[1, 1]
     @test MatrixGaussian(M, PDΣ.chol) isa MatrixGaussian
 end
 
-@testset "MatrixGaussian promotion during construction" begin
-    R1 = MatrixGaussian(M, ΣBF)
-    R2 = MatrixGaussian(M, Σ32)
-    @test partype(R1) == BigFloat
-    @test partype(R2) == Float64
-end
 
 @testset "MatrixGaussian construction errors" begin
     @test_throws ArgumentError MatrixGaussian(M, [1 0; 0 1.0])
 end
 
 @testset "MatrixGaussian params" begin
-    MM, PDΣΣ = params(D)
-    @test MM == M
+    mm, nn, MM, PDΣΣ = params(D)
+    @test m == mm
+    @test n == nn
+    @test M == reshape(MM, m, n)
     @test Σ == PDΣΣ.mat
 end
 
@@ -141,14 +137,6 @@ end
 @testset "MatrixGaussian sample moments" begin
     @test isapprox(mean(rand(D, 100000)), mean(D) , atol = 0.1)
     @test isapprox(cov(hcat(vec.(rand(D, 100000))...)'), cov(D) , atol = 0.1)
-end
-
-@testset "MatrixGaussian conversion" for elty in (Float32, Float64, BigFloat)
-    Del1 = convert(MatrixGaussian{elty}, D)
-    Del2 = convert(MatrixGaussian{elty}, M, PDΣ, D.logc0)
-
-    @test partype(Del1) == elty
-    @test partype(Del2) == elty
 end
 
 
