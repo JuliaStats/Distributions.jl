@@ -19,7 +19,11 @@ struct MatrixGaussian <: ContinuousMatrixDistribution
     N::MvNormal
 end
 
+<<<<<<< HEAD
 function MatrixGaussian(M::AbstractMatrixT}, Σ::AbstractPDMat{T}) where T <: Real
+=======
+function MatrixGaussian(M::AbstractMatrix{T}, Σ::AbstractPDMat{T}) where T <: Real
+>>>>>>> Fixed typo in constructor definition
     m, n = size(M)
     (n*m, n*m) == size(Σ) || throw(ArgumentError("$(m) by $(n) mean matrix M requires covariance of size $(n*m) by $(n*m), not $(size(Σ))"))
     MatrixGaussian(size(M)..., MvNormal(vec(M), Σ))
