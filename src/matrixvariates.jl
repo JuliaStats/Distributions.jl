@@ -213,7 +213,7 @@ _logpdf(d::MatrixDistribution, x::AbstractArray)
 ##### Specific distributions #####
 
 for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
-              "matrigaussian.jl", "matrixtdist.jl", "matrixbeta.jl", 
+              "matrixgaussian.jl", "matrixtdist.jl", "matrixbeta.jl", 
               "matrixfdist.jl", "lkj.jl"]
     include(joinpath("matrix", fname))
 end
