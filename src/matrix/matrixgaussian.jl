@@ -24,6 +24,7 @@ function MatrixGaussian(M::AbstractMatrix{T}, Σ::AbstractPDMat{T}) where T <: R
     (n*m, n*m) == size(Σ) || throw(ArgumentError("$(m) by $(n) mean matrix M requires covariance of size $(n*m) by $(n*m), not $(size(Σ))"))
     MatrixGaussian(size(M)..., MvNormal(vec(M), Σ))
 end
+MatrixNormal(M::AbstractMatrix, Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky}) = MatrixNormal(M, PDMat(Σ))
 MatrixGaussian(m::Integer, n::Integer) = MatrixGaussian(m, n, MvNormal(zeros(m*n), Matrix(1.0I, m*n, m*n)))
 
 show(io::IO, d::MatrixGaussian) = show_multline(io, d, [(:m, d.m), (:n, d.n), (:N, d.N)])
