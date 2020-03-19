@@ -39,6 +39,7 @@ const tests = [
     "matrixbeta",
     "matrixfdist",
     "matrixnormal",
+    "matrixgaussian",
     "matrixtdist",
     "lkj",
     "vonmisesfisher",
