@@ -38,7 +38,7 @@ size(d::MatrixGaussian) = (d.m, d.n)
 
 rank(d::MatrixGaussian) = minimum(size(d))
 
-insupport(d::MatrixGaussian, X::AbstractMatrix) = insupport(d.N, vec(X))
+insupport(d::MatrixGaussian, X::AbstractMatrix) = insupport(d.N, vec(X)) && size(d) == size(X)
 
 mean(d::MatrixGaussian) = reshape(mean(d.N), size(d))
 
