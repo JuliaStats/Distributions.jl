@@ -146,6 +146,12 @@ function _univariate(d::MatrixNormal)
     return Normal(μ, σ)
 end
 
+function _multivariate(d::MatrixNormal)
+    n, p = size(d)
+    all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixNormal` must be 1 to coerce to `MvNormal`"))
+    return vec(d)
+end
+
 function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
     M = randn(elty, n, p)
     U = (X = 2rand(elty, n, n) .- 1; X * X')

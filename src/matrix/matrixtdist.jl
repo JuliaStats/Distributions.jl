@@ -164,7 +164,7 @@ end
 
 function MvTDist(MT::MatrixTDist)
     n, p = size(MT)
-    all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
+    all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`"))
     ν, M, Σ, Ω = params(MT)
     MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
 end
@@ -180,6 +180,8 @@ function _univariate(d::MatrixTDist)
     σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
     return LocationScale(μ, σ, TDist(ν))
 end
+
+_multivariate(d::MatrixTDist) = MvTDist(d)
 
 function _rand_params(::Type{MatrixTDist}, elty, n::Int, p::Int)
     ν = elty( n + p + 1 + abs(10randn()) )
