@@ -6,8 +6,8 @@ M::AbstractMatrix  n x p location
 Σ::AbstractPDMat   n x n scale
 Ω::AbstractPDMat   p x p scale
 ```
-The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
-generalizes the multivariate *t*-Distribution to ``n\\times p`` real
+The [matrix *t*-distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
+generalizes the multivariate *t*-distribution to ``n\\times p`` real
 matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim \\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
 \\boldsymbol{\\Omega})``, then its probability density function is
 

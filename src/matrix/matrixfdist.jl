@@ -5,7 +5,7 @@ n1::Real          degrees of freedom (greater than p - 1)
 n2::Real          degrees of freedom (greater than p - 1)
 B::AbstractPDMat  p x p scale
 ```
-The [matrix *F*-Distribution](https://projecteuclid.org/euclid.ba/1515747744)
+The [matrix *F*-distribution](https://projecteuclid.org/euclid.ba/1515747744)
 (sometimes called the matrix beta type II distribution) generalizes the
 *F*-Distribution to ``p\\times p`` real, positive definite matrices ``\\boldsymbol{\\Sigma}``.
 If ``\\boldsymbol{\\Sigma}\\sim \\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``,
