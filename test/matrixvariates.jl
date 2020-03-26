@@ -227,13 +227,13 @@ test_against_multivariate(dist::Type{<:MatrixDistribution}, n::Integer, p::Integ
 
 function jsonparams2dist(dist::Type{Wishart}, dict)
     ν = dict["params"][1][1]
-    S = Matrix{Float64}(reshape(dict["params"][2], dict["dims"]...))
+    S = reshape(Vector{Float64}( dict["params"][2] ), dict["dims"]...)
     return Wishart(ν, S)
 end
 
 function jsonparams2dist(dist::Type{InverseWishart}, dict)
     ν = dict["params"][1][1]
-    S = Matrix{Float64}(reshape(dict["params"][2], dict["dims"]...))
+    S = reshape(Vector{Float64}( dict["params"][2] ), dict["dims"]...)
     return InverseWishart(ν, S)
 end
 
@@ -245,7 +245,7 @@ end
 
 function unpack_matvar_json_dict(dist::Type{<:MatrixDistribution}, dict)
     d = jsonparams2dist(dist, dict)
-    X = Matrix{Float64}(reshape(dict["X"], dict["dims"]...))
+    X = reshape(Vector{Float64}(dict["X"]), dict["dims"]...)
     lpdf = dict["lpdf"][1]
     return d, X, lpdf
 end
