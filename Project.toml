@@ -20,7 +20,7 @@ FillArrays = "0.8"
 PDMats = "0.9.12"
 QuadGK = "2"
 SpecialFunctions = "0.8, 0.9, 0.10"
-StatsBase = "0.32"
+StatsBase = "0.32, 0.33"
 StatsFuns = "0.8, 0.9"
 julia = "1"
 
