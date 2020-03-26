@@ -145,11 +145,13 @@ end
 end
 
 @testset "MvNormal constructor" begin
-    mu = [1., 2., 3.]
-    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    mu = [1., 2., 3.] # Mean Vector
+    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.] # Covariance Matrix
+    cholesky_of_C = cholesky(C) # Cholesky Decomposition of C
     J = inv(C)
     h = J \ mu
     @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(MvNormal(mu, PDMat(Array{Float64}(C), cholesky_of_C))) == typeof(MvNormal(mu, PDMat(C, cholesky(C))))
     @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
     @test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
 
@@ -171,6 +173,8 @@ end
     @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)
     @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
 end
+
+
 
 ##### MLE
 
