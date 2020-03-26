@@ -164,7 +164,7 @@ end
 
 function _univariate(d::LKJ)
     check_univariate(d)
-    return Normal(one(d.η), zero(d.η))
+    return DiscreteNonParametric([one(d.η)], [one(d.η)])
 end
 
 function _rand_params(::Type{LKJ}, elty, n::Int, p::Int)
