@@ -5,15 +5,17 @@ M::AbstractMatrix  n x p mean
 U::AbstractPDMat   n x n row covariance
 V::AbstractPDMat   p x p column covariance
 ```
-The [matrix normal distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution) generalizes the multivariate normal distribution to ``n\\times p`` real matrices ``\\mathbf{X}``.
-If ``\\mathbf{X}\\sim MN_{n,p}(\\mathbf{M}, \\mathbf{U}, \\mathbf{V})``, then its
+The [matrix normal distribution](https://en.wikipedia.org/wiki/Matrix_normal_distribution)
+generalizes the multivariate normal distribution to ``n\\times p`` real matrices ``\\mathbf{X}``.
+If ``\\mathbf{X}\\sim \\textrm{MN}_{n,p}(\\mathbf{M}, \\mathbf{U}, \\mathbf{V})``, then its
 probability density function is
 
 ```math
 f(\\mathbf{X};\\mathbf{M}, \\mathbf{U}, \\mathbf{V}) = \\frac{\\exp\\left( -\\frac{1}{2} \\, \\mathrm{tr}\\left[ \\mathbf{V}^{-1} (\\mathbf{X} - \\mathbf{M})^{\\rm{T}} \\mathbf{U}^{-1} (\\mathbf{X} - \\mathbf{M}) \\right] \\right)}{(2\\pi)^{np/2} |\\mathbf{V}|^{n/2} |\\mathbf{U}|^{p/2}}.
 ```
 
-``\\mathbf{X}\\sim MN_{n,p}(\\mathbf{M},\\mathbf{U},\\mathbf{V})`` if and only if ``\\text{vec}(\\mathbf{X})\\sim N(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
+``\\mathbf{X}\\sim \\textrm{MN}_{n,p}(\\mathbf{M},\\mathbf{U},\\mathbf{V})``
+if and only if ``\\text{vec}(\\mathbf{X})\\sim \\textrm{N}(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
 """
 struct MatrixNormal{T <: Real, TM <: AbstractMatrix, TU <: AbstractPDMat, TV <: AbstractPDMat} <: ContinuousMatrixDistribution
     M::TM
@@ -112,8 +114,6 @@ function logkernel(d::MatrixNormal, X::AbstractMatrix)
     -0.5 * tr( (d.V \ A') * (d.U \ A) )
 end
 
-_logpdf(d::MatrixNormal, X::AbstractMatrix) = logkernel(d, X) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------
@@ -133,3 +133,28 @@ end
 #  -----------------------------------------------------------------------------
 
 vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixNormal)
+    check_univariate(d)
+    M, U, V = params(d)
+    μ = M[1]
+    σ = sqrt( Matrix(U)[1] * Matrix(V)[1] )
+    return Normal(μ, σ)
+end
+
+function _multivariate(d::MatrixNormal)
+    n, p = size(d)
+    all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixNormal` must be 1 to coerce to `MvNormal`"))
+    return vec(d)
+end
+
+function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
+    M = randn(elty, n, p)
+    U = (X = 2rand(elty, n, n) .- 1; X * X')
+    V = (Y = 2rand(elty, p, p) .- 1; Y * Y')
+    return M, U, V
+end

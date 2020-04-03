@@ -6,9 +6,9 @@ M::AbstractMatrix  n x p location
 Σ::AbstractPDMat   n x n scale
 Ω::AbstractPDMat   p x p scale
 ```
-The [matrix *t*-Distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
-generalizes the multivariate *t*-Distribution to ``n\\times p`` real
-matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
+The [matrix *t*-distribution](https://en.wikipedia.org/wiki/Matrix_t-distribution)
+generalizes the multivariate *t*-distribution to ``n\\times p`` real
+matrices ``\\mathbf{X}``. If ``\\mathbf{X}\\sim \\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},
 \\boldsymbol{\\Omega})``, then its probability density function is
 
 ```math
@@ -27,13 +27,13 @@ is given by
 
 ```math
 \\begin{align*}
-\\mathbf{S}&\\sim IW_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
-\\mathbf{X}|\\mathbf{S}&\\sim MN_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
+\\mathbf{S}&\\sim \\textrm{IW}_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
+\\mathbf{X}|\\mathbf{S}&\\sim \\textrm{MN}_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
 \\end{align*}
 ```
 
 then the marginal distribution of ``\\mathbf{X}`` is
-``MT_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
+``\\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
 struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <: ContinuousMatrixDistribution
     ν::T
@@ -143,8 +143,6 @@ function logkernel(d::MatrixTDist, X::AbstractMatrix)
     (-(d.ν + n + p - 1) / 2) * logdet( I + (d.Σ \ A) * (d.Ω \ A') )
 end
 
-_logpdf(d::MatrixTDist, X::AbstractMatrix) = logkernel(d, X) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------
@@ -166,7 +164,29 @@ end
 
 function MvTDist(MT::MatrixTDist)
     n, p = size(MT)
-    all([n, p] .> 1) && error("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`")
+    all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`"))
     ν, M, Σ, Ω = params(MT)
     MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
+end
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixTDist)
+    check_univariate(d)
+    ν, M, Σ, Ω = params(d)
+    μ = M[1]
+    σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
+    return LocationScale(μ, σ, TDist(ν))
+end
+
+_multivariate(d::MatrixTDist) = MvTDist(d)
+
+function _rand_params(::Type{MatrixTDist}, elty, n::Int, p::Int)
+    ν = elty( n + p + 1 + abs(10randn()) )
+    M = randn(elty, n, p)
+    Σ = (X = 2rand(elty, n, n) .- 1; X * X')
+    Ω = (Y = 2rand(elty, p, p) .- 1; Y * Y')
+    return ν, M, Σ, Ω
 end
