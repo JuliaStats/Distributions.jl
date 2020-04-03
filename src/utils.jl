@@ -64,3 +64,57 @@ function trycholesky(a::Matrix{Float64})
         return e
     end
 end
+
+"""
+    ispossemdef(A, k) -> Bool
+Test whether a matrix is positive semi-definite with specified rank `k` by
+checking that `k` of its eigenvalues are positive and the rest are zero.
+# Examples
+```jldoctest
+julia> A = [1 0; 0 0]
+2×2 Array{Int64,2}:
+ 1  0
+ 0  0
+julia> ispossemdef(A, 1)
+true
+julia> ispossemdef(A, 2)
+false
+```
+"""
+function ispossemdef(X::AbstractMatrix, k::Int;
+                     atol::Real=0.0,
+                     rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    _check_rank_range(k, minimum(size(X)))
+    ishermitian(X) || return false
+    dp, dz, dn = eigsigns(Hermitian(X), atol, rtol)
+    return dn == 0 && dp == k
+end
+function ispossemdef(X::AbstractMatrix;
+                     atol::Real=0.0,
+                     rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    ishermitian(X) || return false
+    dp, dz, dn = eigsigns(Hermitian(X), atol, rtol)
+    return dn == 0
+end
+
+function _check_rank_range(k::Int, n::Int)
+    0 <= k <= n || throw(ArgumentError("rank must be between 0 and $(n) (inclusive)"))
+    nothing
+end
+
+function eigsigns(X::AbstractMatrix,
+                  atol::Real=0.0,
+                  rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    eigs = eigvals(X)
+    eigsigns(eigs, atol, rtol)
+end
+function eigsigns(eigs::Vector{<: Real}, atol::Real, rtol::Real)
+    tol = max(atol, rtol * eigs[end])
+    eigsigns(eigs, tol)
+end
+function eigsigns(eigs::Vector{<: Real}, tol::Real)
+    dp = sum(tol .< eigs)
+    dz = sum(-tol .< eigs .< tol)
+    dn = sum(eigs .< -tol)
+    return dp, dz, dn
+end
