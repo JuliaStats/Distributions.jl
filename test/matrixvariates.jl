@@ -331,17 +331,25 @@ function test_special(dist::Type{Wishart})
         @test pvalue(kstest) >= α
     end
     @testset "H ~ W(ν, I) ⟹ H[i, i] ~ χ²(ν)" begin
-        ν = n + 1
-        ρ = Chisq(ν)
-        d = Wishart(ν, ScalMat(n, 1))
+        κ = n + 1
+        ρ = Chisq(κ)
+        g = Wishart(κ, ScalMat(n, 1))
         mymats = zeros(n, n, M)
         for m in 1:M
-            mymats[:, :, m] = rand(d)
+            mymats[:, :, m] = rand(g)
         end
         for i in 1:n
             kstest = ExactOneSampleKSTest(mymats[i, i, :], ρ)
             @test pvalue(kstest) >= α / n
         end
+    end
+    @testset "Check Singular Branch" begin
+        X = H[1]
+        test_draw(Wishart(n - 1, Σ, false))
+        test_draw(Wishart(n - 2, Σ, false))
+        @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
+        @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
+        @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
     end
     nothing
 end
