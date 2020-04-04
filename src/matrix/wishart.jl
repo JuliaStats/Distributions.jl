@@ -239,7 +239,7 @@ end
 
 function _rand_params(::Type{Wishart}, elty, n::Int, p::Int)
     n == p || throw(ArgumentError("dims must be equal for Wishart"))
-    ν = elty( n + 1 + abs(10randn()) )
+    ν = elty( n - 1 + abs(10randn()) )
     S = (X = 2rand(elty, n, n) .- 1; X * X')
     return ν, S
 end
