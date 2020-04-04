@@ -28,7 +28,6 @@ import Distributions: _univariate, _multivariate, _rand_params
 
 function test_draw(d::MatrixDistribution, X::AbstractMatrix)
     @test size(d) == size(X)
-    @test size(d) == size(mean(d))
     @test size(d, 1) == size(X, 1)
     @test size(d, 2) == size(X, 2)
     @test length(d) == length(X)
