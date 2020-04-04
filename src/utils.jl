@@ -102,6 +102,7 @@ function _check_rank_range(k::Int, n::Int)
     nothing
 end
 
+#  return counts of the number of positive, zero, and negative eigenvalues
 function eigsigns(X::AbstractMatrix,
                   atol::Real=0.0,
                   rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
@@ -113,8 +114,8 @@ function eigsigns(eigs::Vector{<: Real}, atol::Real, rtol::Real)
     eigsigns(eigs, tol)
 end
 function eigsigns(eigs::Vector{<: Real}, tol::Real)
-    dp = sum(tol .< eigs)
-    dz = sum(-tol .< eigs .< tol)
-    dn = sum(eigs .< -tol)
+    dp = sum(tol .< eigs)         #  number of positive eigenvalues
+    dz = sum(-tol .< eigs .< tol) #  number of numerically zero eigenvalues
+    dn = sum(eigs .< -tol)        #  number of negative eigenvalues
     return dp, dz, dn
 end
