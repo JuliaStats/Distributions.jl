@@ -116,7 +116,7 @@ function mode(d::Wishart)
 end
 
 function meanlogdet(d::Wishart)
-    d.singular && return 0
+    d.singular && return -Inf
     p = dim(d)
     df = d.df
     v = logdet(d.S) + p * logtwo
