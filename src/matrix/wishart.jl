@@ -201,7 +201,7 @@ end
 function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     if d.singular
         A .= zero(eltype(A))
-        A[:, 1:rank(d)] = randn(dim(d), rank(d))
+        A[:, 1:rank(d)] = randn(rng, dim(d), rank(d))
     else
         _wishart_genA!(rng, dim(d), d.df, A)
     end
