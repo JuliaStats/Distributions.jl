@@ -114,8 +114,8 @@ function eigsigns(eigs::Vector{<: Real}, atol::Real, rtol::Real)
     eigsigns(eigs, tol)
 end
 function eigsigns(eigs::Vector{<: Real}, tol::Real)
-    dp = sum(tol .< eigs)         #  number of positive eigenvalues
-    dz = sum(-tol .< eigs .< tol) #  number of numerically zero eigenvalues
-    dn = sum(eigs .< -tol)        #  number of negative eigenvalues
+    dp = count(x -> tol < x, eigs)        #  number of positive eigenvalues
+    dz = count(x -> -tol < x < tol, eigs) #  number of numerically zero eigenvalues
+    dn = count(x -> x < -tol, eigs)       #  number of negative eigenvalues
     return dp, dz, dn
 end
