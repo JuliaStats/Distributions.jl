@@ -316,7 +316,7 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
