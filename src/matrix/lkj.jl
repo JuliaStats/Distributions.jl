@@ -71,7 +71,7 @@ insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(
 mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 
 function mode(d::LKJ; check_args = true)
-    η = params(d)
+    p, η = params(d)
     if check_args
         η > 1 || throw(ArgumentError("mode is defined only when η > 1."))
     end
@@ -85,7 +85,7 @@ function var(lkj::LKJ)
     σ² * (ones(partype(lkj), d, d) - I)
 end
 
-params(d::LKJ) = d.η
+params(d::LKJ) = (d.d, d.η)
 
 @inline partype(d::LKJ{T}) where {T <: Real} = T
 
@@ -108,8 +108,6 @@ function lkj_logc0(d::Integer, η::Real)
 end
 
 logkernel(d::LKJ, R::AbstractMatrix) = (d.η - 1) * logdet(R)
-
-_logpdf(d::LKJ, R::AbstractMatrix) = logkernel(d, R) + d.logc0
 
 #  -----------------------------------------------------------------------------
 #  Sampling
@@ -158,6 +156,21 @@ function _marginal(lkj::LKJ)
     η = lkj.η
     α = η + 0.5d - 1
     LocationScale(-1, 2, Beta(α, α))
+end
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::LKJ)
+    check_univariate(d)
+    return DiscreteNonParametric([one(d.η)], [one(d.η)])
+end
+
+function _rand_params(::Type{LKJ}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for LKJ"))
+    η = abs(3randn(elty))
+    return n, η
 end
 
 #  -----------------------------------------------------------------------------

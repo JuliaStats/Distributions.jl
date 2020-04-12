@@ -32,6 +32,7 @@ vec(d::MatrixDistribution)
 ## Distributions
 
 ```@docs
+MatrixNormal
 Wishart
 InverseWishart
 MatrixNormal

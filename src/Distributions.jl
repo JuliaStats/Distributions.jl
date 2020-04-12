@@ -318,7 +318,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
-    MatrixGaussian, MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,

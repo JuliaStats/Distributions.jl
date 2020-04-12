@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "arcsine",
     "truncate",
     "truncnormal",
     "truncated_exponential",
@@ -42,6 +43,7 @@ const tests = [
     "matrixreshaped",
     "matrixtdist",
     "lkj",
+    "matrixvariates",
     "vonmisesfisher",
     "conversion",
     "convolution",

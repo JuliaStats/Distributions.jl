@@ -5,10 +5,11 @@ n1::Real          degrees of freedom (greater than p - 1)
 n2::Real          degrees of freedom (greater than p - 1)
 B::AbstractPDMat  p x p scale
 ```
-The [matrix *F*-Distribution](https://projecteuclid.org/euclid.ba/1515747744)
+The [matrix *F*-distribution](https://projecteuclid.org/euclid.ba/1515747744)
 (sometimes called the matrix beta type II distribution) generalizes the
 *F*-Distribution to ``p\\times p`` real, positive definite matrices ``\\boldsymbol{\\Sigma}``.
-If ``\\boldsymbol{\\Sigma}\\sim MF_{p}(n_1/2,n_2/2,\\mathbf{B})``, then its probability density function is
+If ``\\boldsymbol{\\Sigma}\\sim \\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``,
+then its probability density function is
 
 ```math
 f(\\boldsymbol{\\Sigma} ; n_1,n_2,\\mathbf{B}) =
@@ -21,13 +22,13 @@ is given by
 
 ```math
 \\begin{align*}
-\\boldsymbol{\\Psi}&\\sim W_p(n_1, \\mathbf{B})\\\\
-\\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi}&\\sim IW_p(n_2, \\boldsymbol{\\Psi}),
+\\boldsymbol{\\Psi}&\\sim \\textrm{W}_p(n_1, \\mathbf{B})\\\\
+\\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi}&\\sim \\textrm{IW}_p(n_2, \\boldsymbol{\\Psi}),
 \\end{align*}
 ```
 
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is
-``MF_{p}(n_1/2,n_2/2,\\mathbf{B})``.
+``\\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``.
 """
 struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
     W::TW
@@ -132,8 +133,6 @@ function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
     ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
 end
 
-_logpdf(d::MatrixFDist, Σ::AbstractMatrix) = logkernel(d, Σ) + d.logc0
-
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------
@@ -148,3 +147,23 @@ end
 #  -----------------------------------------------------------------------------
 
 inv(d::MatrixFDist) = ( (n1, n2, B) = params(d); MatrixFDist(n2, n1, inv(B)) )
+
+#  -----------------------------------------------------------------------------
+#  Test utils
+#  -----------------------------------------------------------------------------
+
+function _univariate(d::MatrixFDist)
+    check_univariate(d)
+    n1, n2, B = params(d)
+    μ = zero(partype(d))
+    σ = (n1 / n2) * Matrix(B)[1]
+    return LocationScale(μ, σ, FDist(n1, n2))
+end
+
+function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)
+    n == p || throw(ArgumentError("dims must be equal for MatrixFDist"))
+    n1 = elty( n + 1 + abs(10randn()) )
+    n2 = elty( n + 3 + abs(10randn()) )
+    B = (X = 2rand(elty, n, n) .- 1; X * X')
+    return n1, n2, B
+end

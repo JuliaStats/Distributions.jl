@@ -8,6 +8,8 @@ Return the size of each sample from distribution `d`.
 """
 Base.size(d::MatrixDistribution)
 
+size(d::MatrixDistribution, i) = size(d)[i]
+
 """
     length(d::MatrixDistribution)
 
@@ -143,6 +145,8 @@ end
 
 # pdf & logpdf
 
+_logpdf(d::MatrixDistribution, X::AbstractMatrix) = logkernel(d, X) + d.logc0
+
 _pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where {T<:Real} = exp(_logpdf(d, x))
 
 """
@@ -209,6 +213,10 @@ end
 Evaluate logarithm of pdf value for a given sample `x`. This function need not perform dimension checking.
 """
 _logpdf(d::MatrixDistribution, x::AbstractArray)
+
+#  for testing
+is_univariate(d::MatrixDistribution) = size(d) == (1, 1)
+check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentError("not 1 x 1"))
 
 ##### Specific distributions #####
 
