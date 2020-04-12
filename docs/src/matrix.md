@@ -35,7 +35,6 @@ vec(d::MatrixDistribution)
 MatrixNormal
 Wishart
 InverseWishart
-MatrixNormal
 MatrixReshaped
 MatrixTDist
 MatrixBeta
