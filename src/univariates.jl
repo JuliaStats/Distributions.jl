@@ -624,6 +624,7 @@ const continuous_distributions = [
     "pareto",
     "rayleigh",
     "semicircle",
+    "skewnormal",       # SkewNormal depends on Normal
     "studentizedrange",
     "symtriangular",
     "tdist",
