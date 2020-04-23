@@ -132,6 +132,7 @@ Pareto
 PGeneralizedGaussian
 Rayleigh
 Semicircle
+SkewNormal
 StudentizedRange
 SymTriangularDist
 TDist
