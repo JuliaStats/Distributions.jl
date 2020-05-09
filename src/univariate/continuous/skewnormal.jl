@@ -8,7 +8,6 @@ External links
 * [Discourse](https://discourse.julialang.org/t/skew-normal-distribution/21549/7)
 * [SkewDist.jl](https://github.com/STOR-i/SkewDist.jl)
 """
-
 struct SkewNormal{T<:Real} <: ContinuousUnivariateDistribution
     ξ::T
     ω::T
