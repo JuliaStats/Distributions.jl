@@ -1,7 +1,7 @@
 """
     Wishart(ν, S)
 ```julia
-ν::Real           degrees of freedom in {1, 2, ..., p - 1} ∪ (p - 1, ∞)
+ν::Real           degrees of freedom (whole number or a real number greater than p - 1)
 S::AbstractPDMat  p x p scale matrix
 ```
 The [Wishart distribution](http://en.wikipedia.org/wiki/Wishart_distribution)
