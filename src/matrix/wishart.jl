@@ -15,8 +15,9 @@ has rank ``p`` and its probability density function is
 f(\\mathbf{H};\\nu,\\mathbf{S}) = \\frac{1}{2^{\\nu p/2} \\left|\\mathbf{S}\\right|^{\\nu/2} \\Gamma_p\\left(\\frac {\\nu}{2}\\right ) }{\\left|\\mathbf{H}\\right|}^{(\\nu-p-1)/2} e^{-(1/2)\\operatorname{tr}(\\mathbf{S}^{-1}\\mathbf{H})}.
 ```
 
-If ``\\nu\\leq p-1``, then ``\\mathbf{H}`` has rank ``\\nu`` and
-a density is given [here](https://doi.org/10.1214/aos/1176325375).
+If ``\\nu\\leq p-1``, then ``\\mathbf{H}`` is rank ``\\nu`` and it has
+a density with respect to a suitably chosen volume element on the space of
+positive semidefinite matrices. See [here](https://doi.org/10.1214/aos/1176325375).
 
 For integer ``\\nu``, a random matrix given by
 
