@@ -105,10 +105,7 @@ rank(d::Wishart) = d.rank
 params(d::Wishart) = (d.df, d.S)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
 
-function mean(d::Wishart)
-    d.singular && throw(ArgumentError("mean not defined for singular Wishart."))
-    d.df * Matrix(d.S)
-end
+mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
     r = d.df - dim(d) - 1.0
