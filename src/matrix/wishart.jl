@@ -133,13 +133,11 @@ end
 
 #  Gupta/Nagar (1999) Theorem 3.3.15.i
 function cov(d::Wishart, i::Integer, j::Integer, k::Integer, l::Integer)
-    d.singular && throw(ArgumentError("cov not defined for singular Wishart."))
     S = Matrix(d.S)
     d.df * (S[i, k] * S[j, l] + S[i, l] * S[j, k])
 end
 
 function var(d::Wishart, i::Integer, j::Integer)
-    d.singular && throw(ArgumentError("var not defined for singular Wishart."))
     S = Matrix(d.S)
     d.df * (S[i, i] * S[j, j] + S[i, j] ^ 2)
 end
