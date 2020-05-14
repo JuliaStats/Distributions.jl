@@ -43,11 +43,11 @@ end
 #  -----------------------------------------------------------------------------
 
 function Wishart(df::T, S::AbstractPDMat{T}, warn::Bool = true) where T<:Real
+    df > 0 || throw(ArgumentError("df must be positive. got $(df)."))
     p = dim(S)
     rnk = p
     singular = df <= p - 1
     if singular
-        df > 0 || throw(ArgumentError("df must be positive. got $(df)."))
         isinteger(df) || throw(ArgumentError("singular df must be an integer. got $(df)."))
         rnk = convert(Integer, df)
         warn && @warn("got df <= dim - 1; returning a singular Wishart")
