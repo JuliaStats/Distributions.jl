@@ -344,8 +344,14 @@ function test_special(dist::Type{Wishart})
     end
     @testset "Check Singular Branch" begin
         X = H[1]
-        test_draw(Wishart(n - 1, Σ, false))
-        test_draw(Wishart(n - 2, Σ, false))
+        rank1 = Wishart(n - 2, Σ, false)
+        rank2 = Wishart(n - 1, Σ, false)
+        test_draw(rank1)
+        test_draw(rank2)
+        test_draws(rank1, rand(rank1, 10^6))
+        test_draws(rank2, rand(rank2, 10^6))
+        test_cov(rank1)
+        test_cov(rank2)
         @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
         @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
         @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
