@@ -12,22 +12,19 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Random, Distributions
+julia> using Random, Distributions, Gadfly # Gadfly is a plotting package
 
 julia> Random.seed!(123) # Setting the seed
 ```
 
-Then, we create a standard-normal distribution `d` and obtain samples using `rand`:
+Then, we create a standard-normal distribution `d`, obtain samples using `rand`, and visualize density using `plot`:
 
-```julia
-julia> d = Normal()
-Normal(μ=0.0, σ=1.0)
+```@example std_norm
+d = Normal()
 
-julia> x = rand(d, 100)
-100-element Array{Float64,1}:
-  0.376264
- -0.405272
- ...
+x = rand(d, 100)
+
+plot(x = x, Geom.density)
 ```
 
 You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for a distribution. For instance, the median (50th percentile) and the 95th percentile for the standard-normal distribution are given by:
