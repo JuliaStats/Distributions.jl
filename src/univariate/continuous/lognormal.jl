@@ -24,7 +24,11 @@ stdlogx(d)           # Get the standard deviation of log(X), i.e. sig
 External links
 
 * [Log normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Log-normal_distribution)
-
+```@example lognormal_0_1
+using Random, Distributions, Gadfly
+Random.seed!(123)
+plot(x = rand(LogNormal(0, 1), 1000), Geom.density,Coord.cartesian(xmin = -1, xmax = 5, ymax = 1.0))
+```
 """
 struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
