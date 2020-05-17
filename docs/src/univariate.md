@@ -90,13 +90,37 @@ rand!(::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 ```
 
 ## Continuous Distributions
-
 ```@docs
 Arcsine
+```
+Density plot `Arcsine(0, 1)`
+
+```@example Arcsine
+using Random, Distributions, Gadfly # hide
+Random.seed!(123) # hide
+d = Arcsine(0,1) # hide
+x = rand(d, 100) # hide
+plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 3.5)) # hide
+```
+
+```@docs
 Beta
 BetaPrime
 Biweight
+```
+```@docs
 Cauchy
+```
+Density `Cauchy(-2,1)`
+```@example cauchy
+using Random, Distributions, Gadfly # hide
+Random.seed!(123) # hide
+d = Cauchy(-2,1) # hide
+x = rand(d, 100) # hide
+plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = -10, xmax = 10, ymax = 0.36)) #hide
+```
+
+```@docs
 Chernoff
 Chi
 Chisq
@@ -120,7 +144,19 @@ Levy
 LocationScale
 Logistic
 LogitNormal
+```
+```@docs
 LogNormal
+```
+Density `LogNormal(0,1)`
+```@example lognormal
+using Random, Distributions, Gadfly # hide
+Random.seed!(123) # hide
+d = LogNormal(0, 1) # hide
+x = rand(d, 100) # hide
+plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = 0, xmax = 5, ymax = 0.7)) # hide
+```
+```@docs
 NoncentralBeta
 NoncentralChisq
 NoncentralF
@@ -130,7 +166,19 @@ NormalCanon
 NormalInverseGaussian
 Pareto
 PGeneralizedGaussian
+```
+```@docs
 Rayleigh
+```
+Density distribution `Rayleigh(0.5)`
+```@example rayleigh
+using Random, Distributions, Gadfly # hide
+Random.seed!(123) # hide
+d = Rayleigh(0.5) # hide
+x = rand(d, 100) # hide
+plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(xmin = -1, xmax = 5, ymax = 1.2)) # hide
+```
+```@docs
 Semicircle
 StudentizedRange
 SymTriangularDist
@@ -139,7 +187,17 @@ TriangularDist
 Triweight
 Uniform
 VonMises
+```
+```@docs
 Weibull
+```
+Density plot `Weibull(0.5,1)`
+```@example weibull
+using Random, Distributions, Gadfly # hide
+Random.seed!(123) # hide
+d = Weibull(0.5, 1) # hide
+x = rand(d, 100) # hide
+plot(x = x, y = pdf.(d, x), Geom.line,Coord.cartesian(xmin = 0, xmax = 2, ymax = 2.0)) # hide
 ```
 
 ## Discrete Distributions
