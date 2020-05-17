@@ -23,15 +23,8 @@ External links
 
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
 
-Use `Arcsine(a, b, check_args=false)` to bypass argument checks.
+Use `Arcsine(a, b, check_args=false)` to bypass argument checks. 
 
-Density plot Arcsine(0, 1)
-
-```@example arcsine_0_1
-using Random, Distributions, Gadfly
-Random.seed!(123)
-plot(x = rand(Arcsine(0,1), 100), Geom.density)
-```
 """
 struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T

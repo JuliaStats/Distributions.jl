@@ -21,13 +21,6 @@ External links
 
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
-Density plot:
-
-```@example cauchy
-using Random, Distributions, Gadfly
-Random.seed!(123)
-plot(x = rand(Cauchy(-2,1), 100), Geom.density, Coord.cartesian(xmin = -10, xmax = 10))
-```
 """
 struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T

@@ -22,11 +22,6 @@ External links
 
 * [Rayleigh distribution on Wikipedia](http://en.wikipedia.org/wiki/Rayleigh_distribution)
 
-```@example rayleigh_0.5
-using Random, Distributions, Gadfly
-Random.seed!(123)
-plot(x = rand(Rayleigh(0.5), 100), Geom.density, Coord.cartesian(xmin = -1, xmax = 5, ymax = 1.2))
-```
 """
 struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T

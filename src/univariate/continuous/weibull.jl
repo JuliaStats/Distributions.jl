@@ -21,11 +21,7 @@ scale(d)         # Get the scale parameter, i.e. b
 External links
 
 * [Weibull distribution on Wikipedia](http://en.wikipedia.org/wiki/Weibull_distribution)
-```@example weibull_5_1
-using Random, Distributions, Gadfly
-Random.seed!(123)
-plot(x = rand(Weibull(5, 1), 1000), Geom.density,Coord.cartesian(xmin = 0, xmax = 2, ymax = 2.0))
-````
+
 """
 struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     α::T   # shape
