@@ -28,7 +28,6 @@ import Distributions: _univariate, _multivariate, _rand_params
 
 function test_draw(d::MatrixDistribution, X::AbstractMatrix)
     @test size(d) == size(X)
-    @test size(d) == size(mean(d))
     @test size(d, 1) == size(X, 1)
     @test size(d, 2) == size(X, 2)
     @test length(d) == length(X)
@@ -331,17 +330,31 @@ function test_special(dist::Type{Wishart})
         @test pvalue(kstest) >= α
     end
     @testset "H ~ W(ν, I) ⟹ H[i, i] ~ χ²(ν)" begin
-        ν = n + 1
-        ρ = Chisq(ν)
-        d = Wishart(ν, ScalMat(n, 1))
+        κ = n + 1
+        ρ = Chisq(κ)
+        g = Wishart(κ, ScalMat(n, 1))
         mymats = zeros(n, n, M)
         for m in 1:M
-            mymats[:, :, m] = rand(d)
+            mymats[:, :, m] = rand(g)
         end
         for i in 1:n
             kstest = ExactOneSampleKSTest(mymats[i, i, :], ρ)
             @test pvalue(kstest) >= α / n
         end
+    end
+    @testset "Check Singular Branch" begin
+        X = H[1]
+        rank1 = Wishart(n - 2, Σ, false)
+        rank2 = Wishart(n - 1, Σ, false)
+        test_draw(rank1)
+        test_draw(rank2)
+        test_draws(rank1, rand(rank1, 10^6))
+        test_draws(rank2, rand(rank2, 10^6))
+        test_cov(rank1)
+        test_cov(rank2)
+        @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
+        @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
+        @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
     end
     nothing
 end

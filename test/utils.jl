@@ -1,6 +1,6 @@
 using Distributions, PDMats
 using Test, LinearAlgebra
-
+import Distributions: ispossemdef
 
 # RealInterval
 r = RealInterval(1.5, 4.0)
@@ -36,3 +36,33 @@ N = GenericArray([1.0 0.0; 1.0 0.0])
 
 @test Distributions.isApproxSymmmetric(N) == false
 @test Distributions.isApproxSymmmetric(M)
+
+
+n = 10
+areal = randn(n,n)/2
+aimg  = randn(n,n)/2
+@testset "For A containing $eltya" for eltya in (Float32, Float64, ComplexF32, ComplexF64, Int)
+    ainit = eltya == Int ? rand(1:7, n, n) : convert(Matrix{eltya}, eltya <: Complex ? complex.(areal, aimg) : areal)
+    @testset "Positive semi-definiteness" begin
+        notsymmetric = ainit
+        notsquare    = [ainit ainit]
+        @test !ispossemdef(notsymmetric)
+        @test !ispossemdef(notsquare)
+        for truerank in 0:n
+            X = ainit[:, 1:truerank]
+            A = truerank == 0 ? zeros(eltya, n, n) : X * X'
+            @test ispossemdef(A)
+            for testrank in 0:n
+                if testrank == truerank
+                    @test ispossemdef(A, testrank)
+                else
+                    @test !ispossemdef(A, testrank)
+                end
+            end
+            @test !ispossemdef(notsymmetric, truerank)
+            @test !ispossemdef(notsquare, truerank)
+            @test_throws ArgumentError ispossemdef(A, -1)
+            @test_throws ArgumentError ispossemdef(A, n + 1)
+        end
+    end
+end
