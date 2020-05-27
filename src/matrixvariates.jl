@@ -221,7 +221,7 @@ check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentErro
 ##### Specific distributions #####
 
 for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
-              "matrixtdist.jl", "matrixbeta.jl", "matrixfdist.jl",
-              "lkj.jl"]
+              "matrixreshaped.jl", "matrixtdist.jl", "matrixbeta.jl", 
+              "matrixfdist.jl", "lkj.jl"]
     include(joinpath("matrix", fname))
 end
