@@ -140,7 +140,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{<:$D}}) : :(d::$D)
 
     # overall
     esc(quote
