@@ -8,6 +8,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     @test minimum(d) == minimum(dref)
     @test maximum(d) == maximum(dref)
     @test extrema(d) == (minimum(d), maximum(d))
+    @test d == deepcopy(d)
 
     #### Promotions and conversions
 

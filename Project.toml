@@ -4,6 +4,7 @@ authors = ["JuliaStats"]
 version = "0.23.3"
 
 [deps]
+AutoHashEquals = "15f4f7f2-30c1-5605-9d31-71845cf9641f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
@@ -17,7 +18,7 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
 FillArrays = "0.8"
-PDMats = "0.9.12"
+PDMats = "0.10"
 QuadGK = "2"
 SpecialFunctions = "0.8, 0.9, 0.10"
 StatsBase = "0.32, 0.33"

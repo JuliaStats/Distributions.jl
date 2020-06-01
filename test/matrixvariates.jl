@@ -105,6 +105,7 @@ end
 function test_convert(d::MatrixDistribution)
     distname = getproperty(parentmodule(typeof(d)), nameof(typeof(d)))
     @test distname(params(d)...) == d
+    @test d == deepcopy(d)
     for elty in (Float32, Float64, BigFloat)
         del1 = convert(distname{elty}, d)
         del2 = convert(distname{elty}, getfield.(Ref(d), fieldnames(typeof(d)))...)

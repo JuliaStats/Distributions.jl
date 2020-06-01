@@ -154,12 +154,14 @@ function test_params(g::AbstractMixtureModel)
     mm = MixtureModel(C, pars...)
     @test g.prior == mm.prior
     @test g.components == mm.components
+    @test g == deepcopy(g)
 end
 
 function test_params(g::UnivariateGMM)
     pars = params(g)
     mm = UnivariateGMM(pars...)
     @test g == mm
+    @test g == deepcopy(g)
 end
 
 # Tests

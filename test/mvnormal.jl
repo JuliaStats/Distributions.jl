@@ -24,6 +24,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
+    @test g == deepcopy(g)
 
     # test sampling for AbstractMatrix (here, a SubArray):
     if ismissing(rng)
