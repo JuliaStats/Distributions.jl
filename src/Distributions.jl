@@ -24,6 +24,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+using AutoHashEquals
 
 export
     # re-export Statistics

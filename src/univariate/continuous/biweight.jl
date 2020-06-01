@@ -1,7 +1,7 @@
 """
     Biweight(μ, σ)
 """
-struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     Biweight{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)

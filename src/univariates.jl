@@ -1,6 +1,6 @@
 #### Domain && Support
 
-struct RealInterval
+@auto_hash_equals struct RealInterval
     lb::Float64
     ub::Float64
 

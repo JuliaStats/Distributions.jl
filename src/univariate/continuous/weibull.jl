@@ -23,7 +23,7 @@ External links
 * [Weibull distribution on Wikipedia](http://en.wikipedia.org/wiki/Weibull_distribution)
 
 """
-struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     α::T   # shape
     θ::T   # scale
 

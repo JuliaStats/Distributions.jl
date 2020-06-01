@@ -43,7 +43,7 @@ representation of the truncated distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
+@auto_hash_equals struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::T      # lower bound
     upper::T      # upper bound

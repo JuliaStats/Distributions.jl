@@ -176,7 +176,7 @@ isotropic covariance matrix corresponding `abs2(sig)*I`.
 **Note:** The constructor will choose an appropriate covariance form internally, so that
 special structure of the covariance can be exploited.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
+@auto_hash_equals struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -195,6 +195,11 @@ const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}}
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
     dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
+end
+
+function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat)
+    R = Base.promote_eltype(μ, Σ)
+    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
 function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
@@ -298,7 +303,7 @@ dot(d::MvNormal, b::AbstractVector) = dot(b, d)
 
 ### Estimation with known covariance
 
-struct MvNormalKnownCov{Cov<:AbstractPDMat}
+@auto_hash_equals struct MvNormalKnownCov{Cov<:AbstractPDMat}
     Σ::Cov
 end
 
@@ -308,7 +313,7 @@ MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
 
 length(g::MvNormalKnownCov) = dim(g.Σ)
 
-struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
+@auto_hash_equals struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance
     sx::Vector{Float64}    # (weighted) sum of vectors
     tw::Float64            # sum of weights
@@ -354,7 +359,7 @@ end
 
 ### Estimation (both mean and cov unknown)
 
-struct MvNormalStats <: SufficientStats
+@auto_hash_equals struct MvNormalStats <: SufficientStats
     s::Vector{Float64}  # (weighted) sum of x
     m::Vector{Float64}  # (weighted) mean of x
     s2::Matrix{Float64} # (weighted) sum of (x-μ) * (x-μ)'

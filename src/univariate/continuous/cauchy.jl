@@ -22,7 +22,7 @@ External links
 * [Cauchy distribution on Wikipedia](http://en.wikipedia.org/wiki/Cauchy_distribution)
 
 """
-struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)

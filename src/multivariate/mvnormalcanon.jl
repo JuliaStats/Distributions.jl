@@ -19,7 +19,7 @@ which is also a subtype of `AbstractMvNormal` to represent a multivariate normal
 canonical parameters. Particularly, `MvNormalCanon` is defined as:
 
 ```julia
-struct MvNormalCanon{P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
+@auto_hash_equals struct MvNormalCanon{P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -64,7 +64,7 @@ an isotropic precision matrix corresponding `J*I`.
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
-struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
+@auto_hash_equals struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)

@@ -1,5 +1,5 @@
 
-struct VonMisesSampler <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct VonMisesSampler <: Sampleable{Univariate,Continuous}
     μ::Float64
     κ::Float64
     r::Float64

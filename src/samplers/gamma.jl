@@ -6,7 +6,7 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
     a::T
     s2::T
     s::T
@@ -124,7 +124,7 @@ end
 # doi:10.1007/BF02293108
 
 # valid for 0 < shape <= 1
-struct GammaGSSampler <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct GammaGSSampler <: Sampleable{Univariate,Continuous}
     a::Float64
     ia::Float64
     b::Float64
@@ -162,7 +162,7 @@ end
 # doi:10.1145/358407.358414
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
-struct GammaMTSampler <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct GammaMTSampler <: Sampleable{Univariate,Continuous}
     d::Float64
     c::Float64
     κ::Float64
@@ -194,7 +194,7 @@ end
 
 # Inverse Power sampler
 # uses the x*u^(1/a) trick from Marsaglia and Tsang (2000) for when shape < 1
-struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleable{Univariate,Continuous}
     s::S #sampler for Gamma(1+shape,scale)
     nia::T #-1/scale
 end

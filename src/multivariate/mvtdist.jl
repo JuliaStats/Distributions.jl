@@ -1,10 +1,11 @@
+
 # Multivariate t-distribution
 
 ## Generic multivariate t-distribution class
 
 abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
-struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
+@auto_hash_equals struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
     dim::Int
     zeromean::Bool

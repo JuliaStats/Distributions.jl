@@ -30,7 +30,7 @@ has ``\\mathbf{H}\\sim \\textrm{W}_p(\\nu, \\mathbf{S})``.
 For non-integer ``\\nu``, Wishart matrices can be generated via the
 [Bartlett decomposition](https://en.wikipedia.org/wiki/Wishart_distribution#Bartlett_decomposition).
 """
-struct Wishart{T<:Real, ST<:AbstractPDMat, R<:Integer} <: ContinuousMatrixDistribution
+@auto_hash_equals struct Wishart{T<:Real, ST<:AbstractPDMat, R<:Integer} <: ContinuousMatrixDistribution
     df::T          # degree of freedom
     S::ST          # the scale matrix
     logc0::T       # the logarithm of normalizing constant in pdf

@@ -19,7 +19,7 @@ A mixture of distributions, parametrized on:
 * `C` distribution family of the mixture
 * `CT` the type for probabilities of the prior
 """
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
+@auto_hash_equals struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::Categorical{CT}
 
@@ -498,7 +498,7 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_
 
 ## Sampling
 
-struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
+@auto_hash_equals struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
     csamplers::Vector{Sampler}
     psampler::AliasTable
 end

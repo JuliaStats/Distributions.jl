@@ -20,7 +20,7 @@ External links
 [Student's T distribution on Wikipedia](https://en.wikipedia.org/wiki/Student%27s_t-distribution)
 
 """
-struct TDist{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct TDist{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end

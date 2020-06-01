@@ -25,7 +25,7 @@ External links
 
 Use `Arcsine(a, b, check_args=false)` to bypass argument checks.
 """
-struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
     Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)

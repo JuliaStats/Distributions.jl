@@ -18,7 +18,7 @@ scale(d)             # Get the scale parameter
 External links
 [Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
-struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     ρ::D

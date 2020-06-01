@@ -17,7 +17,7 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
+@auto_hash_equals struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: DiscreteUnivariateDistribution
     support::Ts
     p::Ps
 
@@ -242,7 +242,7 @@ end
 
 # Sufficient statistics
 
-struct DiscreteNonParametricStats{T<:Real,W<:Real,Ts<:AbstractVector{T},
+@auto_hash_equals struct DiscreteNonParametricStats{T<:Real,W<:Real,Ts<:AbstractVector{T},
                                   Ws<:AbstractVector{W}} <: SufficientStats
     support::Ts
     freq::Ws

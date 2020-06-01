@@ -20,7 +20,7 @@ Dirichlet(alpha)         # Dirichlet distribution with parameter vector alpha
 Dirichlet(k, a)          # Dirichlet distribution with parameter a * ones(k)
 ```
 """
-struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
+@auto_hash_equals struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
     alpha::Vector{T}
     alpha0::T
     lmnB::T
@@ -51,7 +51,7 @@ Dirichlet(alpha::Vector{T}) where {T<:Integer} =
     Dirichlet{Float64}(convert(Vector{Float64},alpha))
 Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
 
-struct DirichletCanon
+@auto_hash_equals struct DirichletCanon
     alpha::Vector{Float64}
 end
 
@@ -199,7 +199,7 @@ end
 #
 #######################################
 
-struct DirichletStats <: SufficientStats
+@auto_hash_equals struct DirichletStats <: SufficientStats
     slogp::Vector{Float64}   # (weighted) sum of log(p)
     tw::Float64              # total sample weights
 

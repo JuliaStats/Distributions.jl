@@ -27,7 +27,7 @@ External links
 
 * [Studentized range distribution on Wikipedia](http://en.wikipedia.org/wiki/Studentized_range_distribution)
 """
-struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     k::T
     StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)

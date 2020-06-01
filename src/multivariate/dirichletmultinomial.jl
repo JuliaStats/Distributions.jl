@@ -1,4 +1,4 @@
-struct DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
+@auto_hash_equals struct DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
     n::Int
     α::Vector{T}
     α0::T
@@ -70,7 +70,7 @@ _rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
 
 # Fit Model
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf
-struct DirichletMultinomialStats <: SufficientStats
+@auto_hash_equals struct DirichletMultinomialStats <: SufficientStats
     n::Int
     s::Matrix{Float64}  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
     tw::Float64

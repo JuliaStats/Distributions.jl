@@ -37,7 +37,7 @@ params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
 
 ## Fisher's noncentral hypergeometric distribution
 
-struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
+@auto_hash_equals struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size
@@ -91,7 +91,7 @@ pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
 
 ## Wallenius' noncentral hypergeometric distribution
 
-struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
+@auto_hash_equals struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size

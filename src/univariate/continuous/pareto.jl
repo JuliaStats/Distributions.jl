@@ -21,7 +21,7 @@ External links
  * [Pareto distribution on Wikipedia](http://en.wikipedia.org/wiki/Pareto_distribution)
 
 """
-struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)

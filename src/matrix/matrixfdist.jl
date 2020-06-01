@@ -30,7 +30,7 @@ is given by
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is
 ``\\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``.
 """
-struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
+@auto_hash_equals struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
     W::TW
     n2::T
     logc0::T

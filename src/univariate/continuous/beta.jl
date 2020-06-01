@@ -26,7 +26,7 @@ External links
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
 
 """
-struct Beta{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
@@ -118,7 +118,7 @@ gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
 
 #### Sampling
 
-struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
+@auto_hash_equals struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
                    S2 <: Sampleable{Univariate,Continuous}} <:
     Sampleable{Univariate,Continuous}
     γ::Bool

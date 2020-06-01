@@ -1,6 +1,6 @@
 # Univariate Gaussian Mixture Models
 
-struct UnivariateGMM{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: UnivariateMixture{Continuous,Normal}
+@auto_hash_equals struct UnivariateGMM{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: UnivariateMixture{Continuous,Normal}
     K::Int
     means::VT1
     stds::VT2
@@ -32,7 +32,7 @@ rand(rng::AbstractRNG, d::UnivariateGMM) =
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
-struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
+@auto_hash_equals struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: Sampleable{Univariate,Continuous}
     means::VT1
     stds::VT2
     psampler::AliasTable

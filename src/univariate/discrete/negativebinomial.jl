@@ -28,7 +28,7 @@ External links:
 Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
 
 """
-struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
+@auto_hash_equals struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
@@ -121,7 +121,7 @@ function rand(rng::AbstractRNG, d::NegativeBinomial)
     return rand(rng, Poisson(lambda))
 end
 
-struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
+@auto_hash_equals struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::Float64
     p0::Float64
 end

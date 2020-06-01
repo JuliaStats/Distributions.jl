@@ -9,7 +9,7 @@ abstract type EdgeworthAbstract <: ContinuousUnivariateDistribution end
 skewness(d::EdgeworthAbstract) = skewness(d.dist) / sqrt(d.n)
 kurtosis(d::EdgeworthAbstract) = kurtosis(d.dist) / d.n
 
-struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
+@auto_hash_equals struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
 
@@ -74,7 +74,7 @@ end
 
 
 # Edgeworth approximation of the sum
-struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
+@auto_hash_equals struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthSum{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
@@ -88,7 +88,7 @@ mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
 
 # Edgeworth approximation of the mean
-struct EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
+@auto_hash_equals struct EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthMean{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}

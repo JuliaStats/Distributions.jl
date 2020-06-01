@@ -1,4 +1,4 @@
-struct PoissBinAliasSampler <: Sampleable{Univariate,Discrete}
+@auto_hash_equals struct PoissBinAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 

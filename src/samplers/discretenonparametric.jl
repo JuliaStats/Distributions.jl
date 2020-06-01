@@ -4,7 +4,7 @@
 Data structure for efficiently sampling from an arbitrary probability mass
 function defined by support `xs` and probabilities `ps`.
 """
-struct DiscreteNonParametricSampler{T<:Real, S<:AbstractVector{T}, A<:AliasTable} <: Sampleable{Univariate,Discrete}
+@auto_hash_equals struct DiscreteNonParametricSampler{T<:Real, S<:AbstractVector{T}, A<:AliasTable} <: Sampleable{Univariate,Discrete}
     support::S
     aliastable::A
 

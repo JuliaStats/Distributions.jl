@@ -1,6 +1,6 @@
 # Sampler for von Mises-Fisher
 
-struct VonMisesFisherSampler
+@auto_hash_equals struct VonMisesFisherSampler
     p::Int          # the dimension
     κ::Float64
     b::Float64

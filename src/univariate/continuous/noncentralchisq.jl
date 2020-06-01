@@ -23,7 +23,7 @@ External links
 
 * [Noncentral chi-squared distribution on Wikipedia](https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution)
 """
-struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
     NoncentralChisq{T}(ν::T, λ::T) where {T <: Real} = new{T}(ν, λ)

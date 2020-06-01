@@ -21,7 +21,7 @@ External links
 *  [Geometric distribution on Wikipedia](http://en.wikipedia.org/wiki/Geometric_distribution)
 
 """
-struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
+@auto_hash_equals struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
     function Geometric{T}(p::T) where {T <: Real}
@@ -82,7 +82,7 @@ function logpdf(d::Geometric{T}, x::Int) where T<:Real
     x >= 0 ? log(d.p) + log1p(-d.p) * x : -T(Inf)
 end
 
-struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
+@auto_hash_equals struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
     p0::Float64
 end
 
@@ -153,7 +153,7 @@ rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
 
 ### Model Fitting
 
-struct GeometricStats <: SufficientStats
+@auto_hash_equals struct GeometricStats <: SufficientStats
     sx::Float64
     tw::Float64
 

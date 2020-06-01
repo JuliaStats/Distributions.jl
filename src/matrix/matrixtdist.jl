@@ -35,7 +35,7 @@ is given by
 then the marginal distribution of ``\\mathbf{X}`` is
 ``\\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
-struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <: ContinuousMatrixDistribution
+@auto_hash_equals struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <: ContinuousMatrixDistribution
     ν::T
     M::TM
     Σ::TΣ

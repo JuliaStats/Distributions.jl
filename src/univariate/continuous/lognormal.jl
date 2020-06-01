@@ -26,7 +26,7 @@ External links
 * [Log normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Log-normal_distribution)
 
 """
-struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)

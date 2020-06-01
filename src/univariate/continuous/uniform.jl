@@ -23,7 +23,7 @@ External links
 * [Uniform distribution (continuous) on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(continuous))
 
 """
-struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
     Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)

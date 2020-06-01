@@ -23,7 +23,7 @@ External links
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
 """
-struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
 end
@@ -165,7 +165,7 @@ end
 Sufficient statistics for `InverseGaussian`, containing the weighted
 sum of observations, the weighted sum of inverse points and sum of weights.
 """
-struct InverseGaussianStats <: SufficientStats
+@auto_hash_equals struct InverseGaussianStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     sinvx::Float64   # (weighted) sum of 1/x
     sw::Float64      # sum of sample weight

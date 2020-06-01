@@ -1,7 +1,7 @@
 """
     NoncentralT(ν, λ)
 """
-struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
+@auto_hash_equals struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     λ::T
     NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)
