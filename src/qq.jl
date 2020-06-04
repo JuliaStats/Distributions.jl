@@ -1,4 +1,4 @@
-@auto_hash_equals struct QQPair
+struct QQPair
     qx::Vector{Float64}
     qy::Vector{Float64}
 end

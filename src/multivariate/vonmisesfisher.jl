@@ -12,7 +12,7 @@
 #     http://www.mitsuba-renderer.org/~wenzel/files/vmf.pdf
 #
 
-@auto_hash_equals struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
+struct VonMisesFisher{T<:Real} <: ContinuousMultivariateDistribution
     μ::Vector{T}
     κ::T
     logCκ::T

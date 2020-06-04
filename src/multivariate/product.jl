@@ -10,7 +10,7 @@ An N dimensional `MultivariateDistribution` constructed from a vector of N indep
 Product(Uniform.(rand(10), 1)) # A 10-dimensional Product from 10 independent `Uniform` distributions.
 ```
 """
-@auto_hash_equals struct Product{
+struct Product{
     S<:ValueSupport,
     T<:UnivariateDistribution{S},
     V<:AbstractVector{T},

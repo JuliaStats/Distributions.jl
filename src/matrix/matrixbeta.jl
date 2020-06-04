@@ -25,7 +25,7 @@ are independent, and we use ``\\mathcal{L}(\\cdot)`` to denote the lower Cholesk
 
 has ``\\mathbf{U}\\sim \\textrm{MB}_p(n_1/2, n_2/2)``.
 """
-@auto_hash_equals struct MatrixBeta{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
+struct MatrixBeta{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
     W1::TW
     W2::TW
     logc0::T

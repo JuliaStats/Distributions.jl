@@ -27,7 +27,7 @@ External links
 * [Triangular distribution on Wikipedia](http://en.wikipedia.org/wiki/Triangular_distribution)
 
 """
-@auto_hash_equals struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
+struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
     c::T

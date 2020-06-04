@@ -27,7 +27,7 @@ External links
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
 
 """
-@auto_hash_equals struct Normal{T<:Real} <: ContinuousUnivariateDistribution
+struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
@@ -244,7 +244,7 @@ rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
 
 #### Fitting
 
-@auto_hash_equals struct NormalStats <: SufficientStats
+struct NormalStats <: SufficientStats
     s::Float64    # (weighted) sum of x
     m::Float64    # (weighted) mean of x
     s2::Float64   # (weighted) sum of (x - μ)^2
@@ -294,11 +294,11 @@ end
 
 # Cases where μ or σ is known
 
-@auto_hash_equals struct NormalKnownMu <: IncompleteDistribution
+struct NormalKnownMu <: IncompleteDistribution
     μ::Float64
 end
 
-@auto_hash_equals struct NormalKnownMuStats <: SufficientStats
+struct NormalKnownMuStats <: SufficientStats
     μ::Float64      # known mean
     s2::Float64     # (weighted) sum of (x - μ)^2
     tw::Float64     # total sample weight
@@ -325,7 +325,7 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float
     NormalKnownMuStats(g.μ, s2, tw)
 end
 
-@auto_hash_equals struct NormalKnownSigma <: IncompleteDistribution
+struct NormalKnownSigma <: IncompleteDistribution
     σ::Float64
 
     function NormalKnownSigma(σ::Float64)
@@ -334,7 +334,7 @@ end
     end
 end
 
-@auto_hash_equals struct NormalKnownSigmaStats <: SufficientStats
+struct NormalKnownSigmaStats <: SufficientStats
     σ::Float64      # known std.dev
     sx::Float64      # (weighted) sum of x
     tw::Float64     # total sample weight

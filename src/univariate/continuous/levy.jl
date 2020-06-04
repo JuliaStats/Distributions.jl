@@ -21,7 +21,7 @@ External links
 
 * [Lévy distribution on Wikipedia](http://en.wikipedia.org/wiki/Lévy_distribution)
 """
-@auto_hash_equals struct Levy{T<:Real} <: ContinuousUnivariateDistribution
+struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
 end

@@ -3,7 +3,7 @@
 
 Canonical Form of Normal distribution
 """
-@auto_hash_equals struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
+struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     η::T       # σ^(-2) * μ
     λ::T       # σ^(-2)
     μ::T       # μ

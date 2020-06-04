@@ -23,7 +23,7 @@ External links
 * [Rayleigh distribution on Wikipedia](http://en.wikipedia.org/wiki/Rayleigh_distribution)
 
 """
-@auto_hash_equals struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
+struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
     Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end

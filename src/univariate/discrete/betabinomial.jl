@@ -18,7 +18,7 @@ External links:
 
 * [Beta-binomial distribution on Wikipedia](https://en.wikipedia.org/wiki/Beta-binomial_distribution)
 """
-@auto_hash_equals struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     α::T
     β::T

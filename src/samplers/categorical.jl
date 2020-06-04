@@ -1,6 +1,6 @@
 #### naive sampling
 
-@auto_hash_equals struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
     prob::Ts
 
     function CategoricalDirectSampler{T,Ts}(p::Ts) where {

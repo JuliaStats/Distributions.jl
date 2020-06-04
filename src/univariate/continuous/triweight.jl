@@ -1,7 +1,7 @@
 """
     Triweight(μ, σ)
 """
-@auto_hash_equals struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
+struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     Triweight{T}(µ::T, σ::T) where {T} = new{T}(µ, σ)

@@ -5,7 +5,7 @@
 
 abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
-@auto_hash_equals struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
+struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
     dim::Int
     zeromean::Bool

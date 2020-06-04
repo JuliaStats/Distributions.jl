@@ -23,7 +23,7 @@ External links
 * [Fréchet_distribution on Wikipedia](http://en.wikipedia.org/wiki/Fréchet_distribution)
 
 """
-@auto_hash_equals struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
+struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)

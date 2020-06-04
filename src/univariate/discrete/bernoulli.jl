@@ -24,7 +24,7 @@ External links:
 
 * [Bernoulli distribution on Wikipedia](http://en.wikipedia.org/wiki/Bernoulli_distribution)
 """
-@auto_hash_equals struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
+struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
     Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
@@ -110,7 +110,7 @@ rand(rng::AbstractRNG, d::Bernoulli) = rand(rng) <= succprob(d)
 
 #### MLE fitting
 
-@auto_hash_equals struct BernoulliStats <: SufficientStats
+struct BernoulliStats <: SufficientStats
     cnt0::Float64
     cnt1::Float64
 

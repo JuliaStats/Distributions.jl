@@ -17,7 +17,7 @@ location(d)     # Get the location parameter, i.e. u
 scale(d)        # Get the scale parameter, i.e. s
 ```
 """
-@auto_hash_equals struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
+struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     SymTriangularDist{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)

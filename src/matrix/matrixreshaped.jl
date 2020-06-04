@@ -9,7 +9,7 @@ Reshapes a multivariate distribution into a matrix distribution with n rows and
 p columns.
 
 """
-@auto_hash_equals struct MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} <:
+struct MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} <:
        MatrixDistribution{S}
     d::D
     num_rows::Int

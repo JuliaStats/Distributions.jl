@@ -21,7 +21,7 @@ External links
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
 """
-@auto_hash_equals struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
+struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     θ::T        # note: scale not rate
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
@@ -93,7 +93,7 @@ rand(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
 
 #### Fit model
 
-@auto_hash_equals struct ExponentialStats <: SufficientStats
+struct ExponentialStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     sw::Float64   # sum of sample weights
 

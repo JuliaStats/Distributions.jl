@@ -14,7 +14,7 @@ External links
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
 """
-@auto_hash_equals struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
+struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)

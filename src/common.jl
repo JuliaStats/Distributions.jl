@@ -72,6 +72,9 @@ nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = siz
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
+Base.:(==)(d1::T, d2::T) where {T<:Sampleable} = all(i -> getfield(d1, i) == getfield(d2, i), 1:fieldcount(T))
+Base.:(==)(d1::Sampleable, d2::Sampleable) = false
+
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 

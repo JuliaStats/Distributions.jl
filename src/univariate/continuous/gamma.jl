@@ -24,7 +24,7 @@ External links
 * [Gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Gamma_distribution)
 
 """
-@auto_hash_equals struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
+struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
     Gamma{T}(α, θ) where {T} = new{T}(α, θ)
@@ -111,7 +111,7 @@ end
 
 #### Fit model
 
-@auto_hash_equals struct GammaStats <: SufficientStats
+struct GammaStats <: SufficientStats
     sx::Float64      # (weighted) sum of x
     slogx::Float64   # (weighted) sum of log(x)
     tw::Float64      # total sample weight

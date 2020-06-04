@@ -20,7 +20,7 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-@auto_hash_equals struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
+struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     λ::T
 
     Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
@@ -89,7 +89,7 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-@auto_hash_equals struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
+struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
     λ::Float64
 end
 
@@ -117,7 +117,7 @@ end
 
 ### Fitting
 
-@auto_hash_equals struct PoissonStats <: SufficientStats
+struct PoissonStats <: SufficientStats
     sx::Float64   # (weighted) sum of x
     tw::Float64   # total sample weight
 end

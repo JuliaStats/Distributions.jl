@@ -114,7 +114,7 @@ sampler(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} =
 
 ### sufficient statistics
 
-@auto_hash_equals struct CategoricalStats <: SufficientStats
+struct CategoricalStats <: SufficientStats
     h::Vector{Float64}
 end
 

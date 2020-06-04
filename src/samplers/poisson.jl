@@ -13,7 +13,7 @@ end
 #
 # Suitable for small μ
 #
-@auto_hash_equals struct PoissonCountSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+struct PoissonCountSampler{T<:Real} <: Sampleable{Univariate,Discrete}
     μ::T
 end
 
@@ -39,7 +39,7 @@ end
 #
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
-@auto_hash_equals struct PoissonADSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+struct PoissonADSampler{T<:Real} <: Sampleable{Univariate,Discrete}
     μ::T
     s::T
     d::T

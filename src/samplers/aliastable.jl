@@ -1,4 +1,4 @@
-@auto_hash_equals struct AliasTable{S} <: Sampleable{Univariate,Discrete}
+struct AliasTable{S} <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
     isampler::S

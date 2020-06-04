@@ -25,7 +25,7 @@ External links
 
 * [Inverse gamma distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse-gamma_distribution)
 """
-@auto_hash_equals struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
+struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     invd::Gamma{T}
     θ::T
     InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), check_args=false), θ)

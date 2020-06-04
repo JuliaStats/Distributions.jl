@@ -19,7 +19,7 @@ Multinomial(n, k)   # Multinomial distribution for n trials with equal probabili
                     # over 1:k
 ```
 """
-@auto_hash_equals struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
+struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistribution
     n::Int
     p::TV
     Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)
@@ -171,7 +171,7 @@ sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 
 ## Fit model
 
-@auto_hash_equals struct MultinomialStats <: SufficientStats
+struct MultinomialStats <: SufficientStats
     n::Int  # number of trials in each experiment
     scnts::Vector{Float64}  # sum of counts
     tw::Float64  # total sample weight

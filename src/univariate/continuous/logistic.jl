@@ -23,7 +23,7 @@ External links
 * [Logistic distribution on Wikipedia](http://en.wikipedia.org/wiki/Logistic_distribution)
 
 """
-@auto_hash_equals struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
+struct Logistic{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
     Logistic{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)

@@ -22,7 +22,7 @@ External links:
 
 * [Binomial distribution on Wikipedia](http://en.wikipedia.org/wiki/Binomial_distribution)
 """
-@auto_hash_equals struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
+struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
@@ -125,7 +125,7 @@ function rand(rng::AbstractRNG, d::Binomial)
     p <= 0.5 ? y : n-y
 end
 
-@auto_hash_equals struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
+struct RecursiveBinomProbEvaluator{T<:Real} <: RecursiveProbabilityEvaluator
     n::Int
     coef::T   # p / (1 - p)
 end
@@ -183,7 +183,7 @@ end
 
 #### Fit model
 
-@auto_hash_equals struct BinomialStats <: SufficientStats
+struct BinomialStats <: SufficientStats
     ns::Float64   # the total number of successes
     ne::Float64   # the number of experiments
     n::Int        # the number of trials in each experiment
