@@ -121,6 +121,7 @@ LocationScale
 Logistic
 LogitNormal
 LogNormal
+MaxwellBoltzmann
 NoncentralBeta
 NoncentralChisq
 NoncentralF
