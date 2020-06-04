@@ -37,3 +37,20 @@ using ForwardDiff: Dual
         end
     end
 end
+
+@testset "equality" begin
+    dist1 = MvNormal(map(Float64,ones(2)))
+    dist2 = MvNormal(map(Float32,ones(2)))
+
+    @test dist1 == deepcopy(dist1)
+    @test dist1 == dist2
+    @test isequal(dist1, dist2)
+
+    dist3 = MvNormal(map(Float64,ones(3)))
+    @test dist1 != dist3
+    @test !isequal(dist1, dist3)
+
+    dist4 = MvLogNormal(map(Float64,ones(2)))
+    @test dist1 != dist4
+    @test !isequal(dist1, dist4)
+end

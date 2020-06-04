@@ -72,8 +72,32 @@ nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = siz
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
-Base.:(==)(d1::T, d2::T) where {T<:Sampleable} = all(i -> getfield(d1, i) == getfield(d2, i), 1:fieldcount(T))
-Base.:(==)(d1::Sampleable, d2::Sampleable) = false
+function Base.:(==)(s1::A, s2::B) where {A<:Sampleable, B<:Sampleable}
+    nameof(A) == nameof(B) || return false
+    fields = fieldnames(A)
+    fields == fieldnames(B) || return false
+
+    for f in fields
+        isdefined(s1, f) && isdefined(s2, f) || return false
+        getfield(s1, f) == getfield(s2, f) || return false
+    end
+
+    return true
+end
+
+function Base.isequal(s1::A, s2::B) where {A<:Sampleable, B<:Sampleable}
+    nameof(A) == nameof(B) || return false
+    fields = fieldnames(A)
+    fields == fieldnames(B) || return false
+
+    for f in fields
+        isdefined(s1, f) && isdefined(s2, f) || return false
+        isequal(getfield(s1, f), getfield(s2, f)) || return false
+    end
+
+    return true
+end
+
 
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
