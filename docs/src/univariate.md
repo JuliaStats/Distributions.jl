@@ -164,7 +164,7 @@ Density `Chi(1)`
 using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Chi(1) # hide
-xgrid = 0:0.1:3 # hide
+xgrid = 0:0.001:3 # hide
 plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
@@ -363,7 +363,7 @@ using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d1 = Normal(0,1) # hide
 d = LocationScale(2.0,1.0, d1) # hide
-xgrid = -2:0.1:5 # hide
+xgrid = -2:0.001:5 # hide
 plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
@@ -375,7 +375,7 @@ Density `Logistic(2,1)`
 using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Logistic(2,1) # hide
-xgrid = -4:0.1:8 # hide
+xgrid = -4:0.001:8 # hide
 plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
@@ -419,7 +419,7 @@ Density `NoncentralChisq(0.5,1,1)`
 ```@example NoncentralChisq
 using Distributions, Gadfly # hide
 d = NoncentralChisq(2,3) # hide
-xgrid = 0:0.1:20 # hide
+xgrid = 0:0.001:20 # hide
 plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) #hide
 ```
 
@@ -435,7 +435,7 @@ Density `Normal(0,1)`
 ```@example Normal
 using Distributions, Gadfly # hide
 d = Normal(0, 1) # hide
-xgrid = -4:0.1:4 # hide
+xgrid = -4:0.001:4 # hide
 plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
@@ -522,10 +522,10 @@ plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```@docs
 TriangularDist
 ```
-Density `TriangularDist(1,1)`
+Density `TriangularDist(0,1,0.5)`
 ```@example TriangularDist
 using Distributions, Gadfly # hide
-d = TriangularDist(1,1) # hide
+d = TriangularDist(0,1,0.5) # hide
 xgrid = 0.5:0.001:1.5 # hide
 plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
@@ -548,7 +548,7 @@ Density `Uniform(0,1)`
 using Distributions, Gadfly # hide
 d = Uniform(0,1) # hide
 xgrid = 0:0.1:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(ymin = 0, ymax = 1.5)) # hide
 ```
 
 ```@docs
@@ -559,7 +559,7 @@ Density `VonMises(0.5)` with support `[- π, π]`
 using Distributions, Gadfly # hide
 d = VonMises(0.5) # hide
 xgrid = -pi:0.001:pi #hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(xmin = -pi, xmax = pi), Guide.xticks(ticks = [-π:π; ])) # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(xmin = -pi, xmax = pi, ymin = 0,ymax = 0.35), Guide.xticks(ticks = [-π:π; ])) # hide
 ```
 
 ```@docs
