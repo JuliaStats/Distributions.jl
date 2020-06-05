@@ -96,12 +96,11 @@ Arcsine
 Density `Arcsine(0,1)`
 
 ```@example Arcsine
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Arcsine(0,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 3.5)) # hide
+xgrid = 0:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -110,12 +109,11 @@ Beta
 Density `Beta(2,2)`
 
 ```@example Beta
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Beta(2,2) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 2.2)) # hide
+xgrid = 0:0.001:1  # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -123,12 +121,11 @@ BetaPrime
 ```
 Density `BetaPrime(1,2)`
 ```@example BetaPrime
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = BetaPrime(1,2) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 2)) # hide
+xgrid = 0:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -137,24 +134,22 @@ Biweight
 Density `Biweight(1,2)`
 
 ```@example Biweight
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Biweight(1,2) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 0.5)) # hide
+xgrid = -1:0.001:3 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 ```@docs
 Cauchy
 ```
 Density `Cauchy(-2,1)`
 ```@example cauchy
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Cauchy(-2,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = -10, xmax = 10, ymax = 0.36)) #hide
+xgrid = -10.5:0.001:5 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
@@ -166,12 +161,11 @@ Chi
 ```
 Density `Chi(1)`
 ```@example Chi
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Chi(1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.8)) #hide
+xgrid = 0:0.1:3 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
@@ -179,12 +173,11 @@ Chisq
 ```
 Density `Chisq(3)`
 ```@example chisq
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Chisq(3) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.27)) #hide
+xgrid = 0:0.1:9 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
@@ -192,25 +185,23 @@ Cosine
 ```
 Density `Cosine(0,1)`
 ```@example Cosine
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Cosine(0, 1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 1)) #hide
+xgrid = -1:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
 Epanechnikov
 ```
 Density `Epanechnikov(0,1)`
-```@example Cosine
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+```@example Epanechnikov
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Epanechnikov(0, 1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 1)) #hide
+xgrid = -1:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
@@ -218,12 +209,11 @@ Erlang
 ```
 Density `Erlang(7,0.5)`
 ```@example Erlang
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Erlang(7, 0.5) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.4)) #hide
+xgrid = 0:0.001:8 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -231,12 +221,11 @@ Exponential
 ```
 Density `Exponential(0.5)`
 ```@example Exponential
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Exponential(0.5) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.55)) #hide
+xgrid = 0:0.001:3.5 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -244,12 +233,11 @@ FDist
 ```
 Density `FDist(10,1)`
 ```@example FDist
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = FDist(10,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = 0, xmax = 10, ymin = 0, ymax = 0.55)) #hide
+xgrid = 0:0.001:10 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -257,12 +245,11 @@ Frechet
 ```
 Density `Frechet(1,1)`
 ```@example Frechet
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Frechet(1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = 0, xmax = 50,ymin = 0, ymax = 0.55)) #hide
+xgrid = 0:0.001:20 # hide
+plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
 ```
 
 ```@docs
@@ -270,12 +257,11 @@ Gamma
 ```
 Density `Gamma(7.5, 1.0)`
 ```@example Gamma
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Gamma(7.5, 1.0) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.16)) #hide
+xgrid = 0:0.001:18 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -283,12 +269,11 @@ GeneralizedExtremeValue
 ```
 Density `GeneralizedExtremeValue(0,1,1)`
 ```@example GeneralizedExtremeValue
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = GeneralizedExtremeValue(0,1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = 0, xmax = 50, ymin = 0, ymax = 0.16)) #hide
+xgrid = 0:0.001:30 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -296,12 +281,11 @@ GeneralizedPareto
 ```
 Density `GeneralizedPareto(0,1,1)`
 ```@example GeneralizedPareto
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = GeneralizedPareto(0,1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.16)) #hide
+xgrid = 0:0.001:20 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -309,12 +293,11 @@ Gumbel
 ```
 Density `Gumbel(0,1)`
 ```@example Gumbel
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Gumbel(0,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.5)) #hide
+xgrid = -2:0.001:5 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -322,12 +305,11 @@ InverseGamma
 ```
 Density `InverseGamma(3,0.5)`
 ```@example InverseGamma
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = InverseGamma(3,0.5) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 5)) #hide
+xgrid = 0:0.001:1 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -335,12 +317,11 @@ InverseGaussian
 ```
 Density `InverseGaussian(1,1)`
 ```@example InverseGaussian
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = InverseGaussian(1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 1.3)) #hide
+xgrid = 0:0.001:5 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -354,12 +335,11 @@ Laplace
 ```
 Density `Laplace(0,4)`
 ```@example Laplace
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Laplace(0,4) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.15)) #hide
+xgrid = -20:0.01:20# hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -367,12 +347,11 @@ Levy
 ```
 Density `Levy(0,1)`
 ```@example Levy
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Levy(0,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(xmin = 0, xmax = 20, ymin = 0, ymax = 0.6)) #hide
+xgrid = 0:0.1:20 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -380,13 +359,12 @@ LocationScale
 ```
 Density `LocationScale(2,1,Normal(0,1))`
 ```@example LocationScale
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d1 = Normal(0,1) # hide
 d = LocationScale(2.0,1.0, d1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.5)) #hide
+xgrid = -2:0.1:5 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -394,12 +372,11 @@ Logistic
 ```
 Density `Logistic(2,1)`
 ```@example Logistic
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 set_default_plot_size(10cm, 10cm) # hide
 d = Logistic(2,1) # hide
-x = rand(d, 100) # hide
-plot(x = x,y = pdf.(d,x),  Geom.line, Coord.cartesian(ymin = 0, ymax = 0.25)) #hide
+xgrid = -4:0.1:8 # hide
+plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -407,11 +384,10 @@ LogitNormal
 ```
 Density `LogitNormal(0,1)`
 ```@example LogitNormal
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = LogitNormal(1.78) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = 0, xmax = 1, ymax = 4.8)) # hide
+xgrid = 0:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -419,11 +395,10 @@ LogNormal
 ```
 Density `LogNormal(0,1)`
 ```@example LogNormal
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = LogNormal(0, 1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = 0, xmax = 10, ymax = 0.7)) # hide
+xgrid = 0:0.001:5 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -431,11 +406,10 @@ NoncentralBeta
 ```
 Density `NoncentralBeta(2,3,1)`
 ```@example NoncentralBeta
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = NoncentralBeta(0.5,1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line) # hide
+xgrid = 0:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -443,11 +417,10 @@ NoncentralChisq
 ```
 Density `NoncentralChisq(0.5,1,1)`
 ```@example NoncentralChisq
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = NoncentralChisq(2,3) # hide
-x = rand(d, 1000) # hide
-plot(x = x, Geom.density) #hide
+xgrid = 0:0.1:20 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -460,11 +433,10 @@ Normal
 ```
 Density `Normal(0,1)`
 ```@example Normal
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Normal(0, 1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = -4, xmax = 4, ymax = 0.42)) # hide
+xgrid = -4:0.1:4 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -476,11 +448,10 @@ NormalInverseGaussian
 ```
 Density `NormalInverseGaussian(0,0.5,0.2,0.1)`
 ```@example NormalInverseGaussian
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = NormalInverseGaussian(0,0.5,0.2,0.1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = -4, xmax = 4, ymax = 3.5)) # hide
+xgrid = -2:0.001:2 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -488,11 +459,10 @@ Pareto
 ```
 Density `Pareto(1,1)`
 ```@example Pareto
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Pareto(1,1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d,x), Geom.line, Coord.cartesian(xmin = 0, xmax = 8, ymax = 1)) # hide
+xgrid = 1:0.001:8 # hide
+plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -500,11 +470,10 @@ PGeneralizedGaussian
 ```
 Density `PGeneralizedGaussian(0.2)`
 ```@example Pareto
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = PGeneralizedGaussian(0.2) # hide
-x = rand(d, 1000) # hide
-plot(x = x, Geom.density) #hide
+xgrid = 0:0.001:20 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) #hide
 ```
 
 ```@docs
@@ -512,46 +481,32 @@ Rayleigh
 ```
 Density `Rayleigh(0.5)`
 ```@example Rayleigh
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Rayleigh(0.5) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(xmin = 0, xmax = 1.8, ymax = 1.2)) # hide
+xgrid =  0:0.001:2# hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 ```@docs
 Semicircle
 ```
 Density `Semicircle(1)`
 ```@example Semicircle
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Semicircle(1) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = -1:0.001:1 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
 StudentizedRange
-```
-Density `StudentizedRange(5,2)`
-```@example Semicircle
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
-d = StudentizedRange(5,2) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
-```
-
-```@docs
 SymTriangularDist
 ```
 Density `SymTriangularDist(0,1)`
 ```@example SymTriangularDist
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = SymTriangularDist(0,1) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = -1:0.1:1 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -559,22 +514,20 @@ TDist
 ```
 Density `TDist(5)`
 ```@example TDist
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = TDist(5) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = -5:0.001:5 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 ```@docs
 TriangularDist
 ```
 Density `TriangularDist(1,1)`
 ```@example TriangularDist
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = TriangularDist(1,1) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = 0.5:0.001:1.5 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
@@ -582,34 +535,31 @@ Triweight
 ```
 Density `Triweight(1,1)`
 ```@example Triweight
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Triweight(1,1) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = 0:0.001:2 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 ```@docs
 Uniform
 ```
 Density `Uniform(0,1)`
 ```@example Uniform
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Uniform(0,1) # hide
-x = rand(d, 10000) # hide
-plot(x = x, Geom.density) # hide
+xgrid = 0:0.1:1 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ```@docs
 VonMises
 ```
-Density `VonMises(0.5)`
+Density `VonMises(0.5)` with support `[- π, π]`
 ```@example VonMises
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = VonMises(0.5) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(ymin = 0, ymax = 0.25)) # hide
+xgrid = -pi:0.001:pi #hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(xmin = -pi, xmax = pi), Guide.xticks(ticks = [-π:π; ])) # hide
 ```
 
 ```@docs
@@ -617,11 +567,10 @@ Weibull
 ```
 Density `Weibull(0.5,1)`
 ```@example Weibull
-using Random, Distributions, Gadfly # hide
-Random.seed!(123) # hide
+using Distributions, Gadfly # hide
 d = Weibull(0.5, 1) # hide
-x = rand(d, 100) # hide
-plot(x = x, y = pdf.(d, x), Geom.line, Coord.cartesian(xmin = 0, xmax = 2, ymax = 2.0)) # hide
+xgrid = 0:0.001:2 # hide
+plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 
 ## Discrete Distributions
