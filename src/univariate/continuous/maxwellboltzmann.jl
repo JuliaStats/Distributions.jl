@@ -1,6 +1,21 @@
 """
     MaxwellBoltzmann(a)
-The *Maxwell-Boltzmann distribution* is the chi distribution with three degrees of freedom and scale parameter `a`. The scale parameter is related to the mass and temperature of particles a = √(kT/m) where k is Boltzmann's constant, T is the temperature of the gas in Kelvin, and m is the mass of the particle in kilograms.
+
+The *Maxwell-Boltzmann distribution* has probability density function
+
+```math
+f(x) = \\sqrt{\\frac{2}{\\pi}}\\frac{x^2e^{-x^2/\\left(2a^2\\right)}}{a^3}, \\quad x \\in [0, \\infty] \\
+```
+where the parameter
+```math
+a = \\sqrt{\\frac{kT}{m}}
+```
+
+```julia
+MaxwellBoltamann()        # Maxwell-Boltzmann distribution with a = 1
+MaxwellBoltzmann(a)       # Maxwell-Boltzmann distribution with chosen parameter a
+MaxwellBoltzmann(T, m)    # Maxwell-Boltzmann distribution with chosen temperature T and mass m
+```
 
 External links
 
@@ -18,7 +33,8 @@ end
 
 MaxwellBoltmann() = MaxwellBoltzmann(1.0)
 
-MaxwellBoltzmann(a::Integer) = MaxwellBoltzmann(float(a))
+MaxwellBoltzmann(a::T) where {T<:Real} = MaxwellBoltzmann(float(a))
+MaxwellBoltzmann(temp::T, mass::T) where {T<:Real} = MaxwellBoltzmann(sqrt(k_B * temp / mass))
 
 @distr_support MaxwellBoltzmann 0.0 Inf
 

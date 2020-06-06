@@ -25,6 +25,8 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
+import PhysicalConstants.CODATA2018: k_B
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -116,6 +118,7 @@ export
     MatrixNormal,
     MatrixReshaped,
     MatrixTDist,
+    MaxwellBoltzmann
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -318,7 +321,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
-    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MatrixReshaped, MatrixTDist, MaxwellBoltzmann, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
