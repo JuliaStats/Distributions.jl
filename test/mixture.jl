@@ -159,7 +159,10 @@ end
 function test_params(g::UnivariateGMM)
     pars = params(g)
     mm = UnivariateGMM(pars...)
-    @test g == mm
+    @test g.K == mm.K
+    @test g.means == mm.means
+    @test g.stds == mm.stds
+    @test g.prior == mm.prior
 end
 
 # Tests
@@ -187,7 +190,8 @@ end
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
         for T = [Float64, Dual]
-            g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(map(Dual, p)))
+            g_u = @inferred UnivariateGMM(map(Dual, μ), map(Dual, σ),
+                                          Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3
             test_mixture(g_u, 1000, 10^6, rng)
@@ -196,6 +200,9 @@ end
             @test maximum(g_u) == Inf
             @test extrema(g_u) == (-Inf, Inf)
         end
+
+        # https://github.com/JuliaStats/Distributions.jl/issues/1121
+        @test @inferred(logpdf(UnivariateGMM(μ, σ, Categorical(p)), 42)) isa Float64
 
         @testset "Product 0 NaN in mixtures" begin
             distributions = [
