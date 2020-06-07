@@ -4,7 +4,7 @@
 The *Maxwell-Boltzmann distribution* has probability density function
 
 ```math
-f(x; a) = \\sqrt{\\frac{2}{\\pi}}\\frac{x^2e^{-x^2/(2a^2)}}{a^3}, \\quad x \\in [0, \\infty] \\
+f(x; a) = \\sqrt{\\frac{2}{\\pi}}
 ```
 where the parameter
 ```math
