@@ -43,8 +43,8 @@ for p in Any[
     @test pdf.(d, support(d)) == p
     @test pdf.(d, 1:k) == p
 
-    # The test utilities are currently only able to handle Float64s
-    if partype(d) === Float64
+    # The test utilities are currently only able to handle AbstractFloats
+    if partype(d) === AbstractFloat
         test_distr(d, 10^6)
     end
 end

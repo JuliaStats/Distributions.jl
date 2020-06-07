@@ -84,7 +84,7 @@ _rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) =
 
 ### Estimation
 
-function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{Float64})
+function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{AbstractFloat})
     r = vec(sum(X, dims=2))
     n = size(X, 2)
     r_nrm = norm(r)
@@ -94,9 +94,9 @@ function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{Float64})
     VonMisesFisher(μ, κ)
 end
 
-fit_mle(::Type{<:VonMisesFisher}, X::Matrix{T}) where {T<:Real} = fit_mle(VonMisesFisher, Float64(X))
+fit_mle(::Type{<:VonMisesFisher}, X::Matrix{T}) where {T<:Real} = fit_mle(VonMisesFisher, AbstractFloat(X))
 
-function _vmf_estkappa(p::Int, ρ::Float64)
+function _vmf_estkappa(p::Int, ρ::AbstractFloat)
     # Using the fixed-point iteration algorithm in the following paper:
     #
     #   Akihiro Tanabe, Kenji Fukumizu, and Shigeyuki Oba, Takashi Takenouchi, and Shin Ishii
@@ -123,4 +123,4 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     return κ
 end
 
-_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)
+_vmfA(half_p::AbstractFloattFloaAbstractFloatbstractFloat) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)

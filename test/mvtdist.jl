@@ -38,8 +38,8 @@ end
 @test typeof(GenericMvTDist(1, mu, PDMat(Array{Float32}(Sigma)))) == typeof(GenericMvTDist(1., mu, PDMat(Sigma)))
 
 d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
-@test typeof(convert(GenericMvTDist{Float64}, d)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
-@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.zeromean, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test typeof(convert(GenericMvTDist{AbstractFloat}, d)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test typeof(convert(GenericMvTDist{AbstractFloat}, d.df, d.dim, d.zeromean, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
 @test partype(d) == Float32
 
 @test size(rand(MvTDist(1., mu, Sigma))) == (2,)

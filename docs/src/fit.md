@@ -17,7 +17,7 @@ This statement fits a distribution of type `D` to a given dataset `x`, where `x`
 
     ```julia
     julia> fit(Cauchy{Float32}, collect(-4:4))
-    Cauchy{AbstractFloattFloat}(μ=0.0, σ=2.0)
+    Cauchy{AbstractFloat}(μ=0.0, σ=2.0)
     ```
 
 ## Maximum Likelihood Estimation

@@ -65,11 +65,11 @@ end
 # Sampling
 
 x = func[1](d)
-@test isa(x, Vector{Float64})
+@test isa(x, Vector{AbstractFloat})
 @test length(x) == 3
 
 x = func[2](d, 10)
-@test isa(x, Matrix{Float64})
+@test isa(x, Matrix{AbstractFloat})
 @test size(x) == (3, 10)
 
 v = [2.0, 1.0, 3.0]

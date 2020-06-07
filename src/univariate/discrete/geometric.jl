@@ -154,15 +154,15 @@ rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
 ### Model Fitting
 
 struct GeometricStats <: SufficientStats
-    sx::AbstractFloattFloat
-    tw::AbstractFloattFloat
+    sx::AbstractFloat
+    tw::AbstractFloat
 
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
 suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
 
-function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
+function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Integer
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))

@@ -78,7 +78,7 @@ pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
 
 logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
 
-quantile(d::DiscreteUniform, p::AbstractFloattFloat) = d.a + floor(Int,p * span(d))
+quantile(d::DiscreteUniform, p::AbstractFloat) = d.a + floor(Int,p * span(d))
 
 function mgf(d::DiscreteUniform, t::T) where {T <: Real}
     a, b = d.a, d.b

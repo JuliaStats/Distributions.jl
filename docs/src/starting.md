@@ -34,7 +34,7 @@ You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for
 
 ```julia
 julia> quantile.(Normal(), [0.5, 0.95])
-2-element Array{AbstractFloattFloat,1}:
+2-element Array{AbstractFloat,1}:
  0.0
  1.64485
 ```

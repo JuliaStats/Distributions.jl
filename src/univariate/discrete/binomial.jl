@@ -185,7 +185,7 @@ end
 
 struct BinomialStats <: SufficientStats
     ns::AbstractFloat   # the total number of successes
-    ne::AbstractFloattFloat   # the number of experiments
+    ne::AbstractFloat   # the number of experiments
     n::Int        # the number of trials in each experiment
 
     BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
@@ -201,7 +201,7 @@ function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Integer
     ns = 0.
     ne = 0.
     for i = 1:length(x)
@@ -217,14 +217,14 @@ end
 const BinomData = Tuple{Int, AbstractArray}
 
 suffstats(::Type{<:Binomial}, data::BinomData) = suffstats(Binomial, data...)
-suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloattFloat}) = suffstats(Binomial, data..., w)
+suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloat}) = suffstats(Binomial, data..., w)
 
 fit_mle(::Type{<:Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
 fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
 fit_mle(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloattFloat}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloat}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 
 fit(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, data)
-fit(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloattFloat}) = fit_mle(Binomial, data, w)
+fit(::Type{<:Binomial}, data::BinomData, w::AbstractArray{AbstractFloat}) = fit_mle(Binomial, data, w)

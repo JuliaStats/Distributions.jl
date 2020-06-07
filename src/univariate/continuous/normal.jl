@@ -246,9 +246,9 @@ rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
 
 struct NormalStats <: SufficientStats
     s::AbstractFloat    # (weighted) sum of x
-    m::AbstractFloattFloat    # (weighted) mean of x
-    s2::AbstractFloattFloat   # (weighted) sum of (x - μ)^2
-    tw::AbstractFloattFloat    # total sample weight
+    m::AbstractFloat    # (weighted) mean of x
+    s2::AbstractFloat   # (weighted) sum of (x - μ)^2
+    tw::AbstractFloat    # total sample weight
 end
 
 function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
@@ -270,7 +270,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     NormalStats(s, m, s2, n)
 end
 
-function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Real
+function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Real
     n = length(x)
 
     # compute s
@@ -295,13 +295,13 @@ end
 # Cases where μ or σ is known
 
 struct NormalKnownMu <: IncompleteDistribution
-    μ::AbstractFloattFloat
+    μ::AbstractFloat
 end
 
 struct NormalKnownMuStats <: SufficientStats
-    μ::AbstractFloattFloat      # known mean
-    s2::AbstractFloattFloat     # (weighted) sum of (x - μ)^2
-    tw::AbstractFloattFloat     # total sample weight
+    μ::AbstractFloat      # known mean
+    s2::AbstractFloat     # (weighted) sum of (x - μ)^2
+    tw::AbstractFloat     # total sample weight
 end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
@@ -313,7 +313,7 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     NormalKnownMuStats(g.μ, s2, length(x))
 end
 
-function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Real
+function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Real
     μ = g.μ
     s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
@@ -326,22 +326,22 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Abstr
 end
 
 struct NormalKnownSigma <: IncompleteDistribution
-    σ::AbstractFloattFloat
+    σ::AbstractFloat
 
-    function NormalKnownSigma(σ::AbstractFloattFloat)
+    function NormalKnownSigma(σ::AbstractFloat)
         σ > 0 || throw(ArgumentError("σ must be a positive value."))
         new(σ)
     end
 end
 
 struct NormalKnownSigmaStats <: SufficientStats
-    σ::AbstractFloattFloat      # known std.dev
-    sx::AbstractFloattFloat      # (weighted) sum of x
-    tw::AbstractFloattFloat     # total sample weight
+    σ::AbstractFloat      # known std.dev
+    sx::AbstractFloat      # (weighted) sum of x
+    tw::AbstractFloat     # total sample weight
 end
 
 function suffstats(g::NormalKnownSigma, x::AbstractArray{T}) where T<:Real
-    NormalKnownSigmaStats(g.σ, sum(x), AbstractFloattFloat(length(x)))
+    NormalKnownSigmaStats(g.σ, sum(x), AbstractFloat(length(x)))
 end
 
 function suffstats(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T}) where T<:Real
@@ -356,7 +356,7 @@ fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, 
 
 # generic fit_mle methods
 
-function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloattFloat=NaN, sAbstractFloatbstractFloat=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloat=NaN, sAbstractFloatbstractFloat=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x))
@@ -374,7 +374,7 @@ function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloattFloat=
     end
 end
 
-function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}AbstractFloatbstractFloat=AbstractFloatgma::AbstractFloat=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}AbstractFloatbstractFloat=AbstractFloatgma::AbstractFloat=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))

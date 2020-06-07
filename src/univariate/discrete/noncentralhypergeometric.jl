@@ -107,7 +107,7 @@ end
 
 WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::T) where {T<:Real} = WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric(ns, nf, n, AbstractFloattFloat(ω))
+WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric(ns, nf, n, AbstractFloat(ω))
 
 # Conversions
 convert(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))

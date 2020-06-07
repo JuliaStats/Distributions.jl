@@ -155,8 +155,8 @@ end
 #
 #  - Available at http://arxiv.org/abs/0907.4010
 
-function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
-    local r::Float64
+function randnt(rng::AbstractRNG, lb::AbstractFloat, ub::AbstractFloat, tp::AbstractFloat)
+    local r::AbstractFloat
     if tp > 0.3   # has considerable chance of falling in [lb, ub]
         r = randn(rng)
         while r < lb || r > ub

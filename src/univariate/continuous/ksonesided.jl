@@ -32,4 +32,4 @@ function ccdf(d::KSOneSided, x::AbstractFloat)
     s*x
 end
 
-cdf(d::KSOneSided, x::AbstractFloattFloat) = 1 - ccdf(d,x)
+cdf(d::KSOneSided, x::AbstractFloat) = 1 - ccdf(d,x)

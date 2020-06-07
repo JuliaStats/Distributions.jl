@@ -123,11 +123,11 @@ end
 
 struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
     r::AbstractFloat
-    p0::AbstractFloattFloat
+    p0::AbstractFloat
 end
 
 RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
-nextpdf(s::RecursiveNegBinomProbEvaluator, p::AbstractFloattFloat, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
+nextpdf(s::RecursiveNegBinomProbEvaluator, p::AbstractFloat, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
 
 Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))

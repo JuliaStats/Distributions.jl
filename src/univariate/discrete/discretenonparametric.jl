@@ -224,7 +224,7 @@ end
 
 function mgf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
-    s = zero(AbstractFloattFloat)
+    s = zero(AbstractFloat)
     for i in 1:length(x)
         s += p[i] * exp(t*x[i])
     end
@@ -233,7 +233,7 @@ end
 
 function cf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
-    s = zero(Complex{AbstractFloattFloat})
+    s = zero(Complex{AbstractFloat})
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])
     end
@@ -251,11 +251,11 @@ end
 function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
 
     N = length(x)
-    N == 0 && return DiscreteNonParametricStats(T[], AbstractFloattFloat[])
+    N == 0 && return DiscreteNonParametricStats(T[], AbstractFloat[])
 
     n = 1
     vs = Vector{T}(undef,N)
-    ps = zeros(AbstractFloattFloat, N)
+    ps = zeros(AbstractFloat, N)
     x = sort(vec(x))
 
     vs[1] = x[1]

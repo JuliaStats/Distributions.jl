@@ -2,15 +2,15 @@
 
 struct RealInterval
     lb::AbstractFloat
-    ub::AbstractFloattFloat
+    ub::AbstractFloat
 
-    RealInterval(lb::Real, ub::Real) = new(AbstractFloattFloatAbstractFloatbstractFloat(ub))
+    RealInterval(lb::Real, ub::Real) = new(AbstractFloatAbstractFloatbstractFloat(ub))
 end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)
-in(x::Real, r::RealInterval) = (r.lb <= AbstractFloattFloat(x) <= r.ub)
+in(x::Real, r::RealInterval) = (r.lb <= AbstractFloat(x) <= r.ub)
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 

@@ -87,17 +87,17 @@ xs = [1, 2,3,4,5,4,3,2,3,2,1]
 ws = [1.,2,1,0,1,1,2,3,2,6,1]
 
 ss = suffstats(DiscreteNonParametric, xs)
-@test ss isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
+@test ss isa Distributions.DiscreteNonParametricStats{Int,AbstractFloat,Vector{Int}}
 @test ss.support == [1,2,3,4,5]
 @test ss.freq == [2., 3., 3., 2., 1.]
 
 ss2 = suffstats(DiscreteNonParametric, xs, ws)
-@test ss2 isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
+@test ss2 isa Distributions.DiscreteNonParametricStats{Int,AbstractFloat,Vector{Int}}
 @test ss2.support == [1,2,3,4,5]
 @test ss2.freq == [2., 11., 5., 1., 1.]
 
 d1 = fit_mle(DiscreteNonParametric, ss)
-@test d1 isa DiscreteNonParametric{Int,Float64,Vector{Int}}
+@test d1 isa DiscreteNonParametric{Int,AbstractFloat,Vector{Int}}
 @test support(d1) == ss.support
 @test probs(d1) ≈ ss.freq ./ 11
 
@@ -119,7 +119,7 @@ d = Categorical(p)
 # Numerical stability w/ large prob vectors;
 # see issue #1017
 n = 20000 # large vector length
-p = Float32[0.5; fill(0.5/(n ÷ 2) - 3e-8, n ÷ 2); fill(eps(Float64), n ÷ 2)]
+p = Float32[0.5; fill(0.5/(n ÷ 2) - 3e-8, n ÷ 2); fill(eps(AbstractFloat), n ÷ 2)]
 d = Categorical(p)
 rng = AllOneRNG()
 @test (rand(rng, d); true)

@@ -1,7 +1,7 @@
 
 # compute probability vector of a Binomial distribution
-function binompvec(n::Int, p::Float64)
-    pv = Vector{Float64}(undef, n+1)
+function binompvec(n::Int, p::AbstractFloat)
+    pv = Vector{AbstractFloat}(undef, n+1)
     if p == 0.0
         fill!(pv, 0.0)
         pv[1] = 1.0
@@ -28,12 +28,12 @@ end
 struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
     comp::Bool
     n::Int
-    scale::Float64
+    scale::AbstractFloat
 end
 
 BinomialGeomSampler() = BinomialGeomSampler(false, 0, 0.0)
 
-function BinomialGeomSampler(n::Int, prob::Float64)
+function BinomialGeomSampler(n::Int, prob::AbstractFloat)
     if prob <= 0.5
         comp = false
         scale = -1.0/log1p(-prob)
@@ -76,28 +76,28 @@ end
 struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
     comp::Bool
     n::Int
-    r::Float64
-    q::Float64
-    nrq::Float64
-    M::Float64
+    r::AbstractFloat
+    q::AbstractFloat
+    nrq::AbstractFloat
+    M::AbstractFloat
     Mi::Int
-    p1::Float64
-    p2::Float64
-    p3::Float64
-    p4::Float64
-    xM::Float64
-    xL::Float64
-    xR::Float64
-    c::Float64
-    λL::Float64
-    λR::Float64
+    p1::AbstractFloat
+    p2::AbstractFloat
+    p3::AbstractFloat
+    p4::AbstractFloat
+    xM::AbstractFloat
+    xL::AbstractFloat
+    xR::AbstractFloat
+    c::AbstractFloat
+    λL::AbstractFloat
+    λR::AbstractFloat
 end
 
 BinomialTPESampler() =
     BinomialTPESampler(false, 0, 0., 0., 0., 0., 0,
                        0., 0., 0., 0., 0., 0., 0., 0., 0., 0.)
 
-function BinomialTPESampler(n::Int, prob::Float64)
+function BinomialTPESampler(n::Int, prob::AbstractFloat)
     if prob <= 0.5
         comp = false
         r = prob
@@ -203,10 +203,10 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             end
 
             # 5.3
-            x1 = Float64(y+1)
-            f1 = Float64(s.Mi+1)
-            z = Float64(s.n+1-s.Mi)
-            w = Float64(s.n-y+1)
+            x1 = AbstractFloat(y+1)
+            f1 = AbstractFloat(s.Mi+1)
+            z = AbstractFloat(s.n+1-s.Mi)
+            w = AbstractFloat(s.n-y+1)
 
             if A > (s.xM*log(f1/x1) + ((s.n-s.Mi)+0.5)*log(z/w) + (y-s.Mi)*log(w*s.r/(x1*s.q)) +
                     lstirling_asym(f1) + lstirling_asym(z) + lstirling_asym(x1) + lstirling_asym(w))
@@ -229,7 +229,7 @@ struct BinomialAliasSampler <: Sampleable{Univariate,Discrete}
     table::AliasTable
 end
 
-BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
+BinomialAliasSampler(n::Int, p::AbstractFloat) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
 rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 
@@ -244,7 +244,7 @@ mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
     btpe_sampler::BinomialTPESampler
 end
 
-function BinomialPolySampler(n::Int, p::Float64)
+function BinomialPolySampler(n::Int, p::AbstractFloat)
     q = 1.0 - p
     if n * min(p, q) > 20
         use_btpe = true
@@ -258,7 +258,7 @@ function BinomialPolySampler(n::Int, p::Float64)
     BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
 end
 
-BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
+BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), AbstractFloat(p))
 
 rand(rng::AbstractRNG, s::BinomialPolySampler) =
     s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)

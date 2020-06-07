@@ -65,7 +65,7 @@ function mgf(d::Triweight{T}, t::AbstractFloat) where T<:Real
     a == 0 ? one(T) : 105*exp(d.μ*t)*((15/a2+1)*cosh(a)-(15/a2-6)/a*sinh(a))/(a2*a2)
 end
 
-function cf(d::Triweight{T}, t::AbstractFloattFloat) where T<:Real
+function cf(d::Triweight{T}, t::AbstractFloat) where T<:Real
     a = d.σ*t
     a2 = a*a
     a == 0 ? complex(one(T)) : 105*cis(d.μ*t)*((1-15/a2)*cos(a)+(15/a2-6)/a*sin(a))/(a2*a2)

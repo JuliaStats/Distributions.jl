@@ -1,8 +1,8 @@
 
 struct VonMisesSampler <: Sampleable{Univariate,Continuous}
     μ::AbstractFloat
-    κ::AbstractFloattFloat
-    r::AbstractFloattFloat
+    κ::AbstractFloat
+    r::AbstractFloat
 
     function VonMisesSampler(μ::AbstractFloattFloaAbstractFloatbstractFloat)
         τ = 1.0 + sqrt(1.0 + 4 * abs2(κ))
@@ -17,7 +17,7 @@ end
 #     (Applied Statistics), 28(2), 152-157.
 function rand(rng::AbstractRNG, s::VonMisesSampler)
     f = 0.0
-    local x::AbstractFloattFloat
+    local x::AbstractFloat
     if s.κ > 700.0
         x = s.μ + randn(rng) / sqrt(s.κ)
     else

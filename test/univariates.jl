@@ -24,7 +24,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         dtype = eval(dsym)
         d = eval(ex)
         if dsym == :truncated
-            @test isa(d, Truncated{Normal{Float64}})
+            @test isa(d, Truncated{Normal{AbstractFloat}})
         else
             @test dtype isa Type && dtype <: UnivariateDistribution
             @test d isa dtype
@@ -37,7 +37,7 @@ end
 
 
 _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
-_parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
+_parse_x(d::ContinuousUnivariateDistribution, x) = AbstractFloat(x)
 
 _json_value(x::Number) = x
 
@@ -112,8 +112,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     if !isa(d, Union{Skellam, VonMises, NormalInverseGaussian})
         qts = dct["quans"]
         for qt in qts
-            q = Float64(qt["q"])
-            x = Float64(qt["x"])
+            q = AbstractFloat(qt["q"])
+            x = AbstractFloat(qt["x"])
             @test isapprox(quantile(d, q), x, atol=1.0e-8)
         end
     end

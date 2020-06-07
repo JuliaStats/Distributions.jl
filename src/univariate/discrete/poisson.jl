@@ -94,7 +94,7 @@ struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
 end
 
 RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(rate(d))
-nextpdf(s::RecursivePoissonProbEvaluator, p::AbstractFloattFloat, x::Integer) = p * s.λ / x
+nextpdf(s::RecursivePoissonProbEvaluator, p::AbstractFloat, x::Integer) = p * s.λ / x
 
 Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
@@ -118,13 +118,13 @@ end
 ### Fitting
 
 struct PoissonStats <: SufficientStats
-    sx::AbstractFloattFloat   # (weighted) sum of x
-    tw::AbstractFloattFloat   # total sample weight
+    sx::AbstractFloat   # (weighted) sum of x
+    tw::AbstractFloat   # total sample weight
 end
 
 suffstats(::Type{<:Poisson}, x::AbstractArray{T}) where {T<:Integer} = PoissonStats(sum(x), length(x))
 
-function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
+function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Integer
     n = length(x)
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.

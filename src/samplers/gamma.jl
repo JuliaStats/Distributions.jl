@@ -125,10 +125,10 @@ end
 
 # valid for 0 < shape <= 1
 struct GammaGSSampler <: Sampleable{Univariate,Continuous}
-    a::Float64
-    ia::Float64
-    b::Float64
-    scale::Float64
+    a::AbstractFloat
+    ia::AbstractFloat
+    b::AbstractFloat
+    scale::AbstractFloat
 end
 
 function GammaGSSampler(d::Gamma)
@@ -163,9 +163,9 @@ end
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
 struct GammaMTSampler <: Sampleable{Univariate,Continuous}
-    d::Float64
-    c::Float64
-    κ::Float64
+    d::AbstractFloat
+    c::AbstractFloat
+    κ::AbstractFloat
 end
 
 function GammaMTSampler(g::Gamma)

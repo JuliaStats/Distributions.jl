@@ -186,7 +186,7 @@ end
         @test insupport(g_u, 3.5) == false
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
-        for T = [AbstractFloattFloat, Dual]
+        for T = [AbstractFloat, Dual]
             g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3

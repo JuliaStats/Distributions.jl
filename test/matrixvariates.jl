@@ -157,7 +157,7 @@ function test_distr(dist::Type{<:MatrixDistribution},
                     n::Integer,
                     p::Integer,
                     M::Integer)
-    d = dist(_rand_params(dist, AbstractFloattFloat, n, p)...)
+    d = dist(_rand_params(dist, AbstractFloat, n, p)...)
     test_distr(d, M)
     nothing
 end
@@ -187,7 +187,7 @@ end
 test_draws_against_univariate_cdf(D::LKJ, d::UnivariateDistribution) = nothing
 
 function test_against_univariate(dist::Type{<:MatrixDistribution})
-    D = dist(_rand_params(dist, AbstractFloattFloat, 1, 1)...)
+    D = dist(_rand_params(dist, AbstractFloat, 1, 1)...)
     d = _univariate(D)
     test_against_univariate(D, d)
     test_draws_against_univariate_cdf(D, d)
@@ -209,10 +209,10 @@ function test_against_multivariate(D::MatrixDistribution, d::MultivariateDistrib
 end
 
 function test_against_multivariate(dist::Union{Type{MatrixNormal}, Type{MatrixTDist}}, n::Integer, p::Integer)
-    D = dist(_rand_params(dist, AbstractFloattFloat, n, 1)...)
+    D = dist(_rand_params(dist, AbstractFloat, n, 1)...)
     d = _multivariate(D)
     test_against_multivariate(D, d)
-    D = dist(_rand_params(dist, AbstractFloattFloat, 1, p)...)
+    D = dist(_rand_params(dist, AbstractFloat, 1, p)...)
     d = _multivariate(D)
     test_against_multivariate(D, d)
     nothing
@@ -226,15 +226,15 @@ test_against_multivariate(dist::Type{<:MatrixDistribution}, n::Integer, p::Integ
 
 function jsonparams2dist(dist::Type{Wishart}, dict)
     ν = dict["params"][1][1]
-    S = zeros(AbstractFloattFloat, dict["dims"]...)
-    S[:] = Vector{AbstractFloattFloat}( dict["params"][2] )
+    S = zeros(AbstractFloat, dict["dims"]...)
+    S[:] = Vector{AbstractFloat}( dict["params"][2] )
     return Wishart(ν, S)
 end
 
 function jsonparams2dist(dist::Type{InverseWishart}, dict)
     ν = dict["params"][1][1]
-    S = zeros(AbstractFloattFloat, dict["dims"]...)
-    S[:] = Vector{AbstractFloattFloat}( dict["params"][2] )
+    S = zeros(AbstractFloat, dict["dims"]...)
+    S[:] = Vector{AbstractFloat}( dict["params"][2] )
     return InverseWishart(ν, S)
 end
 
@@ -246,8 +246,8 @@ end
 
 function unpack_matvar_json_dict(dist::Type{<:MatrixDistribution}, dict)
     d = jsonparams2dist(dist, dict)
-    X = zeros(AbstractFloattFloat, dict["dims"]...)
-    X[:] = Vector{AbstractFloattFloat}(dict["X"])
+    X = zeros(AbstractFloat, dict["dims"]...)
+    X[:] = Vector{AbstractFloat}(dict["X"])
     lpdf = dict["lpdf"][1]
     return d, X, lpdf
 end
@@ -277,7 +277,7 @@ end
 test_special(dist::Type{<:MatrixDistribution}) = nothing
 
 function test_special(dist::Type{MatrixNormal})
-    D = MatrixNormal(_rand_params(MatrixNormal, AbstractFloattFloat, 2, 2)...)
+    D = MatrixNormal(_rand_params(MatrixNormal, AbstractFloat, 2, 2)...)
     @testset "X ~ MN(M, U, V) ⟺ vec(X) ~ N(vec(M), V ⊗ U)" begin
         d = vec(D)
         test_against_multivariate(D, d)
@@ -315,7 +315,7 @@ function test_special(dist::Type{Wishart})
     n = 3
     M = 5000
     α = 0.05
-    ν, Σ = _rand_params(Wishart, AbstractFloattFloat, n, n)
+    ν, Σ = _rand_params(Wishart, AbstractFloat, n, n)
     d = Wishart(ν, Σ)
     H = rand(d, M)
     @testset "meanlogdet" begin
@@ -362,7 +362,7 @@ end
 function test_special(dist::Type{MatrixTDist})
     @testset "MT(v, M, vΣ, Ω) → MN(M, Σ, Ω) as v → ∞" begin
         n, p = (6, 3)
-        M, Σ, Ω = _rand_params(MatrixNormal, AbstractFloattFloat, n, p)
+        M, Σ, Ω = _rand_params(MatrixNormal, AbstractFloat, n, p)
         MT = MatrixTDist(1000, M, 1000Σ, Ω)
         MN = MatrixNormal(M, Σ, Ω)
         A = rand(MN)

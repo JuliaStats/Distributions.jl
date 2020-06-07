@@ -36,10 +36,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
 
     # sampling
     if ismissing(rng)
-        @test isa(rand(g), Vector{Float64})
+        @test isa(rand(g), Vector{AbstractFloat})
         X = rand(g, n_tsamples)
     else
-        @test isa(rand(rng, g), Vector{Float64})
+        @test isa(rand(rng, g), Vector{AbstractFloat})
         X = rand(rng, g, n_tsamples)
     end
     emp_mu = vec(mean(X, dims=2))
@@ -160,12 +160,12 @@ end
     @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
-    @test typeof(convert(MvNormal{Float64}, d)) == typeof(MvNormal(mu, PDMat(C)))
-    @test typeof(convert(MvNormal{Float64}, d.μ, d.Σ)) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(convert(MvNormal{AbstractFloat}, d)) == typeof(MvNormal(mu, PDMat(C)))
+    @test typeof(convert(MvNormal{AbstractFloat}, d.μ, d.Σ)) == typeof(MvNormal(mu, PDMat(C)))
 
     d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
-    @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
-    @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(convert(MvNormalCanon{AbstractFloat}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(convert(MvNormalCanon{AbstractFloat}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     @test MvNormal(mu, I) === MvNormal(mu, 1)
     @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)

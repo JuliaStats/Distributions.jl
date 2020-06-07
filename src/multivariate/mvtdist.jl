@@ -52,8 +52,8 @@ end
 ## Construction of multivariate normal with specific covariance type
 
 const IsoTDist  = GenericMvTDist{AbstractFloat, ScalMat{AbstractFloat}, Vector{AbstractFloat}}
-const DiagTDist = GenericMvTDist{AbstractFloattFloat, PDiAbstractFloatbstractFAbstractFloatctor{AbstraAbstractFloat}}, Vector{AbstractFloat}}
-const MvTDist = GenericMvTDist{AbstractFloattFloat, AbstractFloatbstractFAbstractFloattrix{AbstraAbstractFloat}}, Vector{AbstractFloat}}
+const DiagTDist = GenericMvTDist{AbstractFloat, PDiAbstractFloatbstractFAbstractFloatctor{AbstraAbstractFloat}}, Vector{AbstractFloat}}
+const MvTDist = GenericMvTDist{AbstractFloat, AbstractFloatbstractFAbstractFloattrix{AbstraAbstractFloat}}, Vector{AbstractFloat}}
 
 MvTDist(df::Real, μ::Vector{<:Real}, C::PDMat) = GenericMvTDist(df, μ, C)
 MvTDist(df::Real, C::PDMat) = GenericMvTDist(df, C)
@@ -94,7 +94,7 @@ mean(d::GenericMvTDist) = d.df>1 ? d.μ : NaN
 mode(d::GenericMvTDist) = d.μ
 modes(d::GenericMvTDist) = [mode(d)]
 
-var(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*diag(d.Σ) : AbstractFloattFloat[NaN for i = 1:d.dim]
+var(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*diag(d.Σ) : AbstractFloat[NaN for i = 1:d.dim]
 scale(d::GenericMvTDist) = Matrix(d.Σ)
 cov(d::GenericMvTDist) = d.df>2 ? (d.df/(d.df-2))*Matrix(d.Σ) : NaN*ones(d.dim, d.dim)
 invscale(d::GenericMvTDist) = Matrix(inv(d.Σ))

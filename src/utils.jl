@@ -44,7 +44,7 @@ macro checkinvlogcdf(lp,ex)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::AbstractMatrix{AbstractFloattFloat})
+function isApproxSymmmetric(a::AbstractMatrix{AbstractFloat})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -56,9 +56,9 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::Matrix{AbstractFloattFloat}) = isa(trycholesky(a), Cholesky)
+hasCholesky(a::Matrix{AbstractFloat}) = isa(trycholesky(a), Cholesky)
 
-function trycholesky(a::Matrix{AbstractFloattFloat})
+function trycholesky(a::Matrix{AbstractFloat})
     try cholesky(a)
     catch e
         return e

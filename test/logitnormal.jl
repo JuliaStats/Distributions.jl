@@ -14,10 +14,10 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     #s = var(g)
     #e = entropy(g)
     @test partype(g) == AbstractFloat
-    #@test isa(mn, AbstractFloattFloat)
-    @test isa(md, AbstractFloattFloat)
-    #@test isa(mo, AbstractFloattFloat)
-    #@test isa(s, AbstractFloattFloat)
+    #@test isa(mn, AbstractFloat)
+    @test isa(md, AbstractFloat)
+    #@test isa(mo, AbstractFloat)
+    #@test isa(s, AbstractFloat)
     @test md ≈ logistic(g.μ)
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
      @test insupport(g,1e-8)
@@ -37,7 +37,7 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     else
         X = rand(rng, g, n_tsamples)
     end
-    @test isa(X, Array{AbstractFloattFloat,1})
+    @test isa(X, Array{AbstractFloat,1})
 
     # evaluation of logpdf and pdf
     for i = 1:min(100, n_tsamples)
@@ -59,6 +59,6 @@ end
     test_logitnormal( LogitNormal() )
     test_logitnormal( LogitNormal(2,0.5) )
     d = LogitNormal(Float32(2))
-    typeof(rand(d, 5)) # still AbstractFloattFloat
-    @test typeof(convert(LogitNormal{AbstractFloattFloat}, d)) == typeof(LogitNormal(2,1))
+    typeof(rand(d, 5)) # still AbstractFloat
+    @test typeof(convert(LogitNormal{AbstractFloat}, d)) == typeof(LogitNormal(2,1))
 end
