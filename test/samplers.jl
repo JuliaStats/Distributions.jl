@@ -24,8 +24,8 @@ n_tsamples = 10^6
 
 ## Categorical samplers
 
-@test_throws ArgumentError CategoricalDirectSampler(Float64[])
-@test_throws ArgumentError AliasTable(Float64[])
+@test_throws ArgumentError CategoricalDirectSampler(AbstractFloat[])
+@test_throws ArgumentError AliasTable(AbstractFloattFloat[])
 
 rng = MersenneTwister(123)
 for S in [CategoricalDirectSampler, AliasTable]

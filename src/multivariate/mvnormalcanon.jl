@@ -29,13 +29,13 @@ end
 We also define aliases for common specializations of this parametric type:
 
 ```julia
-const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
-const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
-const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
+const FullNormalCanon = MvNormalCanon{PDMat,    Vector{AbstractFloat}}
+const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{AbstractFloattFloat}}
+const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{AbstractFloattFloat}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{Float64,1}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{Float64,1}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{AbstractFloattFloat,1}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{AbstractFloattFloat,1}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  Zeros{AbstractFloattFloat,1,Axes}}
 ```
 
 A multivariate distribution with canonical parameterization can be constructed using a common constructor `MvNormalCanon` as:
@@ -70,13 +70,13 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
-const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
-const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
+const FullNormalCanon = MvNormalCanon{AbstractFloattFloat, AbstractFloatbstractFAbstractFloattrix{AbstrAbstractFloatt}},Vector{AbstractFloat}}
+const DiagNormalCanon = MvNormalCanon{AbstractFloattFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstrAbstractFloatt}},Vector{AbstractFloat}}
+const IsoNormalCanon  = MvNormalCanon{AbstractFloattFloat,ScAbstractFloatbstractFlAbstractFloatctor{AbstractFloat}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Zeros{Float64,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{AbstractFloattFloat,AbstractFloatbstractFAbstractFloattrix{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{AbstractFloattFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{AbstractFloattFloat,ScAbstractFloatbstractFAbstractFloateros{AbstractFloat,1,Axes}}
 
 
 ### Constructors

@@ -112,9 +112,9 @@ end
 #### Fit model
 
 struct GammaStats <: SufficientStats
-    sx::Float64      # (weighted) sum of x
-    slogx::Float64   # (weighted) sum of log(x)
-    tw::Float64      # total sample weight
+    sx::AbstractFloat      # (weighted) sum of x
+    slogx::AbstractFloattFloat   # (weighted) sum of log(x)
+    tw::AbstractFloattFloat      # total sample weight
 
     GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
@@ -129,7 +129,7 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where T<:Real
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Real
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -148,20 +148,20 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float6
     GammaStats(sx, slogx, tw)
 end
 
-function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
+function gamma_mle_update(logmx::AbstractFloattFloat, mAbstractFloatbstraAbstractFloat, a::AbstractFloat)
     ia = 1 / a
     z = ia + (mlogx - logmx + log(a) - digamma(a)) / (abs2(a) * (ia - trigamma(a)))
     1 / z
 end
 
 function fit_mle(::Type{<:Gamma}, ss::GammaStats;
-    alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16)
+    alpha0::AbstractFloattFloat=NaN, maxiter::Int=1000,AbstractFloatbstractFloat=1e-16)
 
     mx = ss.sx / ss.tw
     logmx = log(mx)
     mlogx = ss.slogx / ss.tw
 
-    a::Float64 = isnan(alpha0) ? (logmx - mlogx)/2 : alpha0
+    a::AbstractFloattFloat = isnan(alpha0) ? (logmx - mlogx)/2 : alpha0
     converged = false
 
     t = 0

@@ -48,11 +48,11 @@ end
 Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
 Dirichlet(alpha::Vector{T}) where {T<:Integer} =
-    Dirichlet{Float64}(convert(Vector{Float64},alpha))
-Dirichlet(d::Integer, alpha::Integer) = Dirichlet{Float64}(d, Float64(alpha))
+    Dirichlet{AbstractFloat}(convert(Vector{AbstractFloat},alpha))
+Dirichlet(d::Integer, alpha::Integer) = Dirichlet{AbstractFloattFloaAbstractFloatbstractFloat(alpha))
 
 struct DirichletCanon
-    alpha::Vector{Float64}
+    alpha::Vector{AbstractFloattFloat}
 end
 
 length(d::DirichletCanon) = length(d.alpha)
@@ -60,7 +60,7 @@ length(d::DirichletCanon) = length(d.alpha)
 Base.eltype(::Type{Dirichlet{T}}) where {T} = T
 
 #### Conversions
-convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
+convert(::Type{Dirichlet{AbstractFloattFloat}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
 convert(::Type{Dirichlet{T}}, alpha::Vector{S}) where {T<:Real, S<:Real} =
     Dirichlet(convert(Vector{T}, alpha))
 convert(::Type{Dirichlet{T}}, d::Dirichlet{S}) where {T<:Real, S<:Real} =
@@ -83,7 +83,7 @@ function var(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    v = Vector{Float64}(undef, k)
+    v = Vector{AbstractFloattFloat}(undef, k)
     for i = 1:k
         @inbounds αi = α[i]
         @inbounds v[i] = αi * (α0 - αi) * c
@@ -97,7 +97,7 @@ function cov(d::Dirichlet)
     c = 1.0 / (α0 * α0 * (α0 + 1.0))
 
     k = length(α)
-    C = Matrix{Float64}(undef, k, k)
+    C = Matrix{AbstractFloattFloat}(undef, k, k)
 
     for j = 1:k
         αj = α[j]
@@ -200,17 +200,17 @@ end
 #######################################
 
 struct DirichletStats <: SufficientStats
-    slogp::Vector{Float64}   # (weighted) sum of log(p)
-    tw::Float64              # total sample weights
+    slogp::Vector{AbstractFloattFloat}   # (weighted) sum of log(p)
+    tw::AbstractFloattFloat              # total sample weights
 
-    DirichletStats(slogp::Vector{Float64}, tw::Real) = new(slogp, Float64(tw))
+    DirichletStats(slogp::Vector{AbstractFloattFloat}, tw::Real) = new(sAbstractFloatbstractFloat(tw))
 end
 
 length(ss::DirichletStats) = length(s.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
-function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
+function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{AbstractFloattFloat})
     K = size(P, 1)
     n = size(P, 2)
     slogp = zeros(K)
@@ -222,8 +222,8 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
     DirichletStats(slogp, n)
 end
 
-function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                   w::AbstractArray{Float64})
+function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{AbstractFloattFloat},
+                   w::AbstractArray{AbstractFloattFloat})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
@@ -247,7 +247,7 @@ end
 
 ## Initialization
 
-function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
+function _dirichlet_mle_init2(μ::Vector{AbstractFloattFloat}, γ::VAbstractFloatbstractFloat})
     K = length(μ)
 
     α0 = 0.
@@ -262,12 +262,12 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     multiply!(μ, α0)
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{AbstractFloattFloat})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(undef, K)  # E[p]
-    γ = Vector{Float64}(undef, K)  # E[p^2]
+    μ = Vector{AbstractFloattFloat}(undef, K)  # E[p]
+    γ = Vector{AbstractFloattFloat}(undef, K)  # E[p^2]
 
     for i = 1:n
         for k = 1:K
@@ -286,12 +286,12 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     _dirichlet_mle_init2(μ, γ)
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{AbstractFloattFloat}, w::AbstractAbstractFloatbstractFloat})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(undef, K)  # E[p]
-    γ = Vector{Float64}(undef, K)  # E[p^2]
+    μ = Vector{AbstractFloattFloat}(undef, K)  # E[p]
+    γ = Vector{AbstractFloattFloat}(undef, K)  # E[p^2]
     tw = 0.
 
     for i = 1:n
@@ -315,15 +315,15 @@ end
 
 ## Newton-Ralphson algorithm
 
-function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
-    maxiter::Int=25, tol::Float64=1.0e-12, debug::Bool=false)
+function fit_dirichlet!(elogp::Vector{AbstractFloattFloat}, α::VAbstractFloatbstractFloat};
+    maxiter::Int=25, tol::AbstractFloattFloat=1.0e-12, debug::Bool=false)
     # This function directly overrides α
 
     K = length(elogp)
     length(α) == K || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
-    g = Vector{Float64}(undef, K)
-    iq = Vector{Float64}(undef, K)
+    g = Vector{AbstractFloattFloat}(undef, K)
+    iq = Vector{AbstractFloattFloat}(undef, K)
     α0 = sum(α)
 
     if debug
@@ -385,17 +385,17 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 end
 
 
-function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
-    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12) where {T<:Dirichlet}
+function fit_mle(::Type{T}, P::AbstractMatrix{AbstractFloattFloat};
+    init::Vector{AbstractFloattFAbstractFloatbstractFloat[], maxiter::IAbstractFloattol::AbstractFloat=1.0e-12) where {T<:Dirichlet}
 
     α = isempty(init) ? dirichlet_mle_init(P) : init
     elogp = mean_logp(suffstats(T, P))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
 end
 
-function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                 w::AbstractArray{Float64};
-    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
+function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{AbstractFloattFloat},
+                 w::AbstractArray{AbstractFloattFloat};
+    init::Vector{AbstractFloattFAbstractFloatbstractFloat[], maxiter::IAbstractFloattol::AbstractFloat=1.0e-12)
 
     n = size(P, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))

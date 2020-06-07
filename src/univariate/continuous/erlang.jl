@@ -81,5 +81,5 @@ cf(d::Erlang, t::Real)  = (1 - im * t * d.θ)^(-d.α)
 
 @_delegate_statsfuns Erlang gamma α θ
 
-rand(rng, ::AbstractRNG, d::Erlang) = rand(rng, Gamma(Float64(d.α), d.θ))
-sampler(d::Erlang) = Gamma(Float64(d.α), d.θ)
+rand(rng, ::AbstractRNG, d::Erlang) = rand(rng, Gamma(AbstractFloat(d.α), d.θ))
+sampler(d::Erlang) = Gamma(AbstractFloattFloat(d.α), d.θ)

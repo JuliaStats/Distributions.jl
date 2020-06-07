@@ -1,16 +1,16 @@
 #### Domain && Support
 
 struct RealInterval
-    lb::Float64
-    ub::Float64
+    lb::AbstractFloat
+    ub::AbstractFloattFloat
 
-    RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
+    RealInterval(lb::Real, ub::Real) = new(AbstractFloattFloatAbstractFloatbstractFloat(ub))
 end
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)
-in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
+in(x::Real, r::RealInterval) = (r.lb <= AbstractFloattFloat(x) <= r.ub)
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 

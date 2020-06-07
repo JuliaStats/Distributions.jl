@@ -5,9 +5,9 @@ using Test: @test
 import FiniteDifferences
 
 # to workaround issues of Base.linspace
-function _linspace(a::Float64, b::Float64, n::Int)
+function _linspace(a::AbstractFloat, b::AbstractFloat, n::Int)
     intv = (b - a) / (n - 1)
-    r = Vector{Float64}(undef, n)
+    r = Vector{AbstractFloattFloat}(undef, n)
     @inbounds for i = 1:n
         r[i] = a + (i-1) * intv
     end
@@ -75,7 +75,7 @@ end
 function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable instance
                       distr::DiscreteUnivariateDistribution,    # corresponding distribution
                       n::Int;                                   # number of samples to generate
-                      q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
+                      q::AbstractFloattFloat=1.0e-7,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false,                      # show intermediate info (for debugging)
                       rng::Union{AbstractRNG, Missing}=missing) # add an rng?
 
@@ -145,7 +145,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
 end
 
 test_samples(distr::DiscreteUnivariateDistribution, n::Int;
-             q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
+             q::AbstractFloattFloat=1.0e-6, verbose::Bool=false, rng=missing) =
     test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng)
 
 # for continuous samplers
@@ -154,7 +154,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
                       distr::ContinuousUnivariateDistribution,  # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       nbins::Int=50,                            # divide the main interval into nbins
-                      q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
+                      q::AbstractFloattFloat=1.0e-6,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false,                      # show intermediate info (for debugging)
                       rng::Union{AbstractRNG, Missing}=missing) # add an rng?
 
@@ -182,8 +182,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     vmin = minimum(distr)
     vmax = maximum(distr)
 
-    local rmin::Float64
-    local rmax::Float64
+    local rmin::AbstractFloattFloat
+    local rmax::AbstractFloattFloat
     if applicable(quantile, distr, 0.5)
         rmin = quantile(distr, 0.01)
         rmax = quantile(distr, 0.99)
@@ -238,7 +238,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     return samples
 end
 
-test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
+test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::AbstractFloattFloat=1.0e-6, verbose::Bool=false, rng=missing) =
     test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose, rng=rng)
 
 
@@ -257,7 +257,7 @@ function test_range(d::UnivariateDistribution)
     @test isbounded(d) == (is_lb && is_ub)
 end
 
-function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
+function get_evalsamples(d::DiscreteUnivariateDistribution, q::AbstractFloattFloat)
     # samples for testing evaluation functions (even spacing)
 
     T = eltype(typeof(d))
@@ -267,7 +267,7 @@ function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     return lv:hv
 end
 
-function get_evalsamples(d::ContinuousUnivariateDistribution, q::Float64, n::Int)
+function get_evalsamples(d::ContinuousUnivariateDistribution, q::AbstractFloattFloat, n::Int)
     # samples for testing evaluation functions (even spacing)
 
     lv = quantile(d, q/2)
@@ -342,12 +342,12 @@ end
 
 function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(undef, nv)
-    c   = Vector{Float64}(undef, nv)
-    cc  = Vector{Float64}(undef, nv)
-    lp  = Vector{Float64}(undef, nv)
-    lc  = Vector{Float64}(undef, nv)
-    lcc = Vector{Float64}(undef, nv)
+    p   = Vector{AbstractFloattFloat}(undef, nv)
+    c   = Vector{AbstractFloattFloat}(undef, nv)
+    cc  = Vector{AbstractFloattFloat}(undef, nv)
+    lp  = Vector{AbstractFloattFloat}(undef, nv)
+    lc  = Vector{AbstractFloattFloat}(undef, nv)
+    lcc = Vector{AbstractFloattFloat}(undef, nv)
     ci  = 0.
 
     for (i, v) in enumerate(vs)
@@ -394,12 +394,12 @@ end
 
 function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector, testquan::Bool=true)
     nv  = length(vs)
-    p   = Vector{Float64}(undef, nv)
-    c   = Vector{Float64}(undef, nv)
-    cc  = Vector{Float64}(undef, nv)
-    lp  = Vector{Float64}(undef, nv)
-    lc  = Vector{Float64}(undef, nv)
-    lcc = Vector{Float64}(undef, nv)
+    p   = Vector{AbstractFloattFloat}(undef, nv)
+    c   = Vector{AbstractFloattFloat}(undef, nv)
+    cc  = Vector{AbstractFloattFloat}(undef, nv)
+    lp  = Vector{AbstractFloattFloat}(undef, nv)
+    lc  = Vector{AbstractFloattFloat}(undef, nv)
+    lcc = Vector{AbstractFloattFloat}(undef, nv)
 
     for (i, v) in enumerate(vs)
         if !isa(d, StudentizedRange)
@@ -466,7 +466,7 @@ end
 function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
-    vf = Float64[v for v in vs]
+    vf = AbstractFloattFloat[v for v in vs]
     p = pdf.(Ref(d), vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
@@ -501,7 +501,7 @@ allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
 allow_test_stats(::StudentizedRange) = false
 
-function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
+function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{AbstractFloattFloat})
     # using Monte Carlo methods
 
     if !(isfinite(mean(d)) && isfinite(var(d)))

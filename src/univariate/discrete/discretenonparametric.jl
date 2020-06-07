@@ -89,7 +89,7 @@ sampler(d::DiscreteNonParametric) =
 
 # Override the method in testutils.jl since it assumes
 # an evenly-spaced integer support
-get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
+get_evalsamples(d::DiscreteNonParametric, ::AbstractFloat) = support(d)
 
 # Evaluation
 
@@ -224,7 +224,7 @@ end
 
 function mgf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
-    s = zero(Float64)
+    s = zero(AbstractFloattFloat)
     for i in 1:length(x)
         s += p[i] * exp(t*x[i])
     end
@@ -233,7 +233,7 @@ end
 
 function cf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
-    s = zero(Complex{Float64})
+    s = zero(Complex{AbstractFloattFloat})
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])
     end
@@ -251,11 +251,11 @@ end
 function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
 
     N = length(x)
-    N == 0 && return DiscreteNonParametricStats(T[], Float64[])
+    N == 0 && return DiscreteNonParametricStats(T[], AbstractFloattFloat[])
 
     n = 1
     vs = Vector{T}(undef,N)
-    ps = zeros(Float64, N)
+    ps = zeros(AbstractFloattFloat, N)
     x = sort(vec(x))
 
     vs[1] = x[1]

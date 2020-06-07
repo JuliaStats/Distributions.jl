@@ -24,7 +24,7 @@ julia> d = Normal()
 Normal(μ=0.0, σ=1.0)
 
 julia> x = rand(d, 100)
-100-element Array{Float64,1}:
+100-element Array{AbstractFloat,1}:
   0.376264
  -0.405272
  ...
@@ -34,7 +34,7 @@ You can easily obtain the `pdf`, `cdf`, `quantile`, and many other functions for
 
 ```julia
 julia> quantile.(Normal(), [0.5, 0.95])
-2-element Array{Float64,1}:
+2-element Array{AbstractFloattFloat,1}:
  0.0
  1.64485
 ```

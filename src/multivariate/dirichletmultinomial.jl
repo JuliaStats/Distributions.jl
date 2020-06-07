@@ -72,9 +72,9 @@ _rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf
 struct DirichletMultinomialStats <: SufficientStats
     n::Int
-    s::Matrix{Float64}  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
-    tw::Float64
-    DirichletMultinomialStats(n::Int, s::Matrix{Float64}, tw::Real) = new(n, s, Float64(tw))
+    s::Matrix{AbstractFloat}  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
+    tw::AbstractFloattFloat
+    DirichletMultinomialStats(n::Int, s::Matrix{AbstractFloattFloat}, tw::Real) = new(AbstractFloatbstractFloat(tw))
 end
 function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     ns = sum(x, dims=1)  # get ntrials for each observation
@@ -89,7 +89,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     end
     DirichletMultinomialStats(n, s, m)
 end
-function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{AbstractFloattFloat}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
     ns = sum(x, dims=1)
     n = ns[1]
@@ -104,7 +104,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{Float6
     DirichletMultinomialStats(n, s, sum(w))
 end
 function fit_mle(::Type{<:DirichletMultinomial}, ss::DirichletMultinomialStats;
-                 tol::Float64 = 1e-8, maxiter::Int = 1000)
+                 tol::AbstractFloattFloat = 1e-8, maxiter::Int = 1000)
     k = size(ss.s, 2)
     α = ones(size(ss.s, 1))
     rng = 0.0:(k - 1)

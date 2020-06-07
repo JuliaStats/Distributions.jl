@@ -36,7 +36,7 @@ Categorical(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}} =
 
 function Categorical(k::Integer; check_args=true)
     check_args && @check_args(Categorical, k >= 1)
-    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
+    return Categorical{AbstractFloat,Vector{AbstractFloat}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
 
 Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
@@ -115,10 +115,10 @@ sampler(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} =
 ### sufficient statistics
 
 struct CategoricalStats <: SufficientStats
-    h::Vector{Float64}
+    h::Vector{AbstractFloattFloat}
 end
 
-function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where T<:Integer
+function add_categorical_counts!(h::Vector{AbstractFloattFloat}, x::AbstractArray{T}) where T<:Integer
     for i = 1 : length(x)
         @inbounds xi = x[i]
         h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound
@@ -126,7 +126,7 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where 
     h
 end
 
-function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function add_categorical_counts!(h::Vector{AbstractFloattFloat}, x::AbstractArray{T}, w::AbstractAbstractFloatbstractFloat}) where T<:Integer
     n = length(x)
     if n != length(w)
         throw(DimensionMismatch("Inconsistent array lengths."))
@@ -143,14 +143,14 @@ function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}) where T<:
     CategoricalStats(add_categorical_counts!(zeros(k), x))
 end
 
-function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
 const CategoricalData = Tuple{Int, AbstractArray}
 
 suffstats(::Type{<:Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
-suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
+suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{AbstractFloattFloat}) = suffstats(Categorical, data..., w)
 
 # Model fitting
 
@@ -162,15 +162,15 @@ function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), check_args=false)
 end
 
-function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
     Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), check_args=false)
 end
 
 fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
-fit_mle(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data..., w)
+fit_mle(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{AbstractFloattFloat}) = fit_mle(Categorical, data..., w)
 
 fit_mle(::Type{<:Categorical}, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x)
-fit_mle(::Type{<:Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
+fit_mle(::Type{<:Categorical}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
 
 fit(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
-fit(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)
+fit(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{AbstractFloattFloat}) = fit_mle(Categorical, data, w)

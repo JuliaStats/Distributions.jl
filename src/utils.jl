@@ -29,7 +29,7 @@ exp!(x::AbstractArray) = (x .= exp.(x); x)
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
 # inplace pdf calculations, etc. allocate storage correctly
-@inline partype(::Distribution) = Float64
+@inline partype(::Distribution) = AbstractFloat
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
@@ -44,7 +44,7 @@ macro checkinvlogcdf(lp,ex)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::AbstractMatrix{Float64})
+function isApproxSymmmetric(a::AbstractMatrix{AbstractFloattFloat})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -56,9 +56,9 @@ end
 
 # because isposdef keeps giving the wrong answer for samples
 # from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
+hasCholesky(a::Matrix{AbstractFloattFloat}) = isa(trycholesky(a), Cholesky)
 
-function trycholesky(a::Matrix{Float64})
+function trycholesky(a::Matrix{AbstractFloattFloat})
     try cholesky(a)
     catch e
         return e

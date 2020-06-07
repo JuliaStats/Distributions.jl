@@ -20,7 +20,7 @@ end
 
 # TODO: implement Simard and L'Ecuyer (2011) meta-algorithm
 # requires Pomeranz and Pelz-Good algorithms
-function cdf(d::KSDist,x::Float64)
+function cdf(d::KSDist,x::AbstractFloat)
     n = d.n
     b = x*n
     # known exact values
@@ -49,7 +49,7 @@ function cdf(d::KSDist,x::Float64)
     end
 end
 
-function ccdf(d::KSDist,x::Float64)
+function ccdf(d::KSDist,x::AbstractFloattFloat)
     n = d.n
     b = x*n
     # Ruben and Gambino (1982) known exact values
@@ -76,12 +76,12 @@ end
 
 # Durbin matrix CDF method, based on Marsaglia, Tsang and Wang (2003)
 # modified to avoid need for exponent tracking
-function cdf_durbin(d::KSDist,x::Float64)
+function cdf_durbin(d::KSDist,x::AbstractFloattFloat)
     n = d.n
     k, ch, h = ceil_rems_mult(n,x)
 
     m = 2*k-1
-    H = Matrix{Float64}(undef, m, m)
+    H = Matrix{AbstractFloattFloat}(undef, m, m)
     for i = 1:m, j = 1:m
         H[i,j] = i-j+1 >= 0 ? 1 : 0
     end

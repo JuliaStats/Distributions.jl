@@ -122,12 +122,12 @@ function rand(rng::AbstractRNG, d::NegativeBinomial)
 end
 
 struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
-    r::Float64
-    p0::Float64
+    r::AbstractFloat
+    p0::AbstractFloattFloat
 end
 
 RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
-nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
+nextpdf(s::RecursiveNegBinomProbEvaluator, p::AbstractFloattFloat, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
 
 Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
     _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))

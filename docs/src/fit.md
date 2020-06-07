@@ -11,13 +11,13 @@ This statement fits a distribution of type `D` to a given dataset `x`, where `x`
 !!! note
 
     One can use as first argument simply the distribution name, like `Binomial`,
-    or a concrete distribution with a type parameter, like `Normal{Float64}` or
+    or a concrete distribution with a type parameter, like `Normal{AbstractFloat}` or
     `Exponential{Float32}`.  However, in the latter case the type parameter of
     the distribution will be ignored:
 
     ```julia
     julia> fit(Cauchy{Float32}, collect(-4:4))
-    Cauchy{Float64}(μ=0.0, σ=2.0)
+    Cauchy{AbstractFloattFloat}(μ=0.0, σ=2.0)
     ```
 
 ## Maximum Likelihood Estimation

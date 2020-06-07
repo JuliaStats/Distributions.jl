@@ -2,14 +2,14 @@
 
 struct VonMisesFisherSampler
     p::Int          # the dimension
-    κ::Float64
-    b::Float64
-    x0::Float64
-    c::Float64
-    Q::Matrix{Float64}
+    κ::AbstractFloat
+    b::AbstractFloattFloat
+    x0::AbstractFloattFloat
+    c::AbstractFloattFloat
+    Q::Matrix{AbstractFloattFloat}
 end
 
-function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
+function VonMisesFisherSampler(μ::Vector{AbstractFloattFloatAbstractFloatbstractFloat)
     p = length(μ)
     b = _vmf_bval(p, κ)
     x0 = (1.0 - b) / (1.0 + b)
@@ -41,10 +41,10 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler,
 end
 
 _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector) =
-    _rand!(rng, spl, x, Vector{Float64}(undef, length(x)))
+    _rand!(rng, spl, x, Vector{AbstractFloattFloat}(undef, length(x)))
 
 function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractMatrix)
-    t = Vector{Float64}(undef, size(x, 1))
+    t = Vector{AbstractFloattFloat}(undef, size(x, 1))
     for j = 1:size(x, 2)
         _rand!(rng, spl, view(x,:,j), t)
     end
@@ -70,13 +70,13 @@ function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
         z = rand(rng, betad)
         w = (1.0 - (1.0 + b) * z) / (1.0 - (1.0 - b) * z)
     end
-    return w::Float64
+    return w::AbstractFloattFloat
 end
 
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
     _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
 
-function _vmf_rotmat(u::Vector{Float64})
+function _vmf_rotmat(u::Vector{AbstractFloattFloat})
     # construct a rotation matrix Q
     # s.t. Q * [1,0,...,0]^T --> u
     #

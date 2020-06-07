@@ -83,7 +83,7 @@ function logpdf(d::Geometric{T}, x::Int) where T<:Real
 end
 
 struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
-    p0::Float64
+    p0::AbstractFloat
 end
 
 RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
@@ -154,15 +154,15 @@ rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
 ### Model Fitting
 
 struct GeometricStats <: SufficientStats
-    sx::Float64
-    tw::Float64
+    sx::AbstractFloattFloat
+    tw::AbstractFloattFloat
 
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
 suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
 
-function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{AbstractFloattFloat}) where T<:Integer
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))

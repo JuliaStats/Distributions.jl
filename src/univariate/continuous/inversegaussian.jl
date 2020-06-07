@@ -166,9 +166,9 @@ Sufficient statistics for `InverseGaussian`, containing the weighted
 sum of observations, the weighted sum of inverse points and sum of weights.
 """
 struct InverseGaussianStats <: SufficientStats
-    sx::Float64      # (weighted) sum of x
-    sinvx::Float64   # (weighted) sum of 1/x
-    sw::Float64      # sum of sample weight
+    sx::AbstractFloat      # (weighted) sum of x
+    sinvx::AbstractFloattFloat   # (weighted) sum of 1/x
+    sw::AbstractFloattFloat      # sum of sample weight
 end
 
 function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real})

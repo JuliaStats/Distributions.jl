@@ -20,14 +20,14 @@ n_tsamples = 100
     test_distr(distr, n_tsamples; testquan=false)
 end
 
-# Test for non-Float64 input
+# Test for non-AbstractFloat input
 using ForwardDiff
 @test string(logpdf(Normal(0,1),big(1))) == "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
 @test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
 @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
 
 
-@testset "Normal distribution with non-standard (ie not Float64) parameter types" begin
+@testset "Normal distribution with non-standard (ie not AbstractFloattFloat) parameter types" begin
     n32 = Normal(1f0, 0.1f0)
     n64 = Normal(1., 0.1)
     nbig = Normal(big(pi), big(ℯ))
@@ -36,9 +36,9 @@ using ForwardDiff
     @test eltype(rand(n32)) === Float32
     @test eltype(rand(n32, 4)) === Float32
 
-    @test eltype(typeof(n64)) === Float64
-    @test eltype(rand(n64)) === Float64
-    @test eltype(rand(n64, 4)) === Float64
+    @test eltype(typeof(n64)) === AbstractFloattFloat
+    @test eltype(rand(n64)) === AbstractFloattFloat
+    @test eltype(rand(n64, 4)) === AbstractFloattFloat
 end
 
 # Test for numerical problems

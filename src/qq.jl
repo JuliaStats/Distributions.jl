@@ -1,6 +1,6 @@
 struct QQPair
-    qx::Vector{Float64}
-    qy::Vector{Float64}
+    qx::Vector{AbstractFloat}
+    qy::Vector{AbstractFloattFloat}
 end
 
 function qqbuild(x::Vector, y::Vector)

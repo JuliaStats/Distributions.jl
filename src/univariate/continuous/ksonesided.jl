@@ -17,7 +17,7 @@ end
 #### Evaluation
 
 # formula of Birnbaum and Tingey (1951)
-function ccdf(d::KSOneSided, x::Float64)
+function ccdf(d::KSOneSided, x::AbstractFloat)
     if x >= 1
         return 0.0
     elseif x <= 0
@@ -32,4 +32,4 @@ function ccdf(d::KSOneSided, x::Float64)
     s*x
 end
 
-cdf(d::KSOneSided, x::Float64) = 1 - ccdf(d,x)
+cdf(d::KSOneSided, x::AbstractFloattFloat) = 1 - ccdf(d,x)

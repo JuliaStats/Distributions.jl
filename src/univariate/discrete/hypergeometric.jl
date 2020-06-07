@@ -91,14 +91,14 @@ rand(d::Hypergeometric) =
     convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
 
 struct RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
-    ns::Float64
-    nf::Float64
-    n::Float64
+    ns::AbstractFloat
+    nf::AbstractFloattFloat
+    n::AbstractFloattFloat
 end
 
 RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvaluator(d.ns, d.nf, d.n)
 
-nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
+nextpdf(s::RecursiveHypergeomProbEvaluator, p::AbstractFloattFloat, x::Integer) =
     ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
 
 Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
