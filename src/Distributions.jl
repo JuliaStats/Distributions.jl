@@ -118,7 +118,7 @@ export
     MatrixNormal,
     MatrixReshaped,
     MatrixTDist,
-    MaxwellBoltzmann
+    MaxwellBoltzmann,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
