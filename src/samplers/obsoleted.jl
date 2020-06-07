@@ -17,7 +17,7 @@ function DiscreteDistributionTable(probs::Vector{T}) where T <: Real
     # Cache the cardinality of the outcome set
     n = length(probs)
 
-    # Convert all Float64's into integers
+    # Convert all AbstractFloat's into integers
     vals = Vector{Int64}(undef, n)
     for i in 1:n
         vals[i] = round(Int, probs[i] * 64^9)

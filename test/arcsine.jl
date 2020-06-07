@@ -6,7 +6,7 @@ using ForwardDiff
     @test_throws ArgumentError Arcsine(5, 3)
     d = Arcsine(3, 5)
     d2 = Arcsine(3.5f0, 5)
-    @test partype(d) == Float64
+    @test partype(d) == AbstractFloat
     @test partype(d2) == Float32
 
     @test logpdf(d, 4.0) ≈ log(pdf(d, 4.0))

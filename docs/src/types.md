@@ -42,7 +42,7 @@ The `ValueSupport` sub-types defined in `Distributions.jl` are:
 **Type** | **Element type** | **Descriptions**
 --- | --- | ---
 `Discrete` | `Int` | Samples take discrete values
-`Continuous` | `Float64` | Samples take continuous real values
+`Continuous` | `AbstractFloat` | Samples take continuous real values
 
 Multiple samples are often organized into an array, depending on the variate form.
 

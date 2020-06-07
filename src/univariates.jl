@@ -4,7 +4,7 @@ struct RealInterval
     lb::AbstractFloat
     ub::AbstractFloat
 
-    RealInterval(lb::Real, ub::Real) = new(AbstractFloatAbstractFloatbstractFloat(ub))
+    RealInterval(lb::Real, ub::Real) = new(AbstractFloat(lb), AbstractFloat(ub))
 end
 
 minimum(r::RealInterval) = r.lb

@@ -114,7 +114,7 @@ struct BernoulliStats <: SufficientStats
     cnt0::AbstractFloat
     cnt1::AbstractFloat
 
-    BernoulliStats(c0::Real, c1::Real) = new(AbstractFloatAbstractFloatbstractFloat(c1))
+    BernoulliStats(c0::Real, c1::Real) = new(AbstractFloat(c0), AbstractFloat(c1))
 end
 
 fit_mle(::Type{<:Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))

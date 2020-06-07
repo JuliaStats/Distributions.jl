@@ -123,4 +123,4 @@ function _vmf_estkappa(p::Int, ρ::AbstractFloat)
     return κ
 end
 
-_vmfA(half_p::AbstractFloattFloaAbstractFloatbstractFloat) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)
+_vmfA(half_p::AbstractFloat, κ::AbstractFloat) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)

@@ -34,7 +34,7 @@ end
         @test abs(median(func.r(trunc, repeats))) < 0.01
         @test abs(var(func.r(trunc, repeats)) - var(trunc)) < 0.01
 
-        X = Matrix{Float64}(undef, 1000, 1000)
+        X = Matrix{AbstractFloat}(undef, 1000, 1000)
         func.r!(trunc, X)
         @test abs(mean(X)) < 0.01
         @test abs(median(X)) < 0.01

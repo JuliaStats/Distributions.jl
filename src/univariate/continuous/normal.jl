@@ -356,7 +356,7 @@ fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, 
 
 # generic fit_mle methods
 
-function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloat=NaN, sAbstractFloatbstractFloat=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloat=NaN, sigma::AbstractFloat=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x))
@@ -374,7 +374,7 @@ function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloat=NaN, s
     end
 end
 
-function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}AbstractFloatbstractFloat=AbstractFloatgma::AbstractFloat=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}; mu::AbstractFloat=NaN, sigma::AbstractFloat=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))

@@ -262,7 +262,7 @@ ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
 function rand(rng::AbstractRNG, d::GeneralizedExtremeValue)
     (μ, σ, ξ) = params(d)
 
-    # Generate a Float64 random number uniformly in (0,1].
+    # Generate a AbstractFloat random number uniformly in (0,1].
     u = 1 - rand(rng)
 
     if abs(ξ) < eps(one(ξ)) # ξ == 0

@@ -49,7 +49,7 @@ Dirichlet(alpha::Vector{T}) where {T<:Real} = Dirichlet{T}(alpha)
 Dirichlet(d::Integer, alpha::T) where {T<:Real} = Dirichlet{T}(d, alpha)
 Dirichlet(alpha::Vector{T}) where {T<:Integer} =
     Dirichlet{AbstractFloat}(convert(Vector{AbstractFloat},alpha))
-Dirichlet(d::Integer, alpha::Integer) = Dirichlet{AbstractFloattFloaAbstractFloatbstractFloat(alpha))
+Dirichlet(d::Integer, alpha::Integer) = Dirichlet{AbstractFloat}(d, AbstractFloat(alpha))
 
 struct DirichletCanon
     alpha::Vector{AbstractFloat}
@@ -203,7 +203,7 @@ struct DirichletStats <: SufficientStats
     slogp::Vector{AbstractFloat}   # (weighted) sum of log(p)
     tw::AbstractFloat              # total sample weights
 
-    DirichletStats(slogp::Vector{AbstractFloat}, tw::Real) = new(sAbstractFloatbstractFloat(tw))
+    DirichletStats(slogp::Vector{AbstractFloat}, tw::Real) = new(slogp, AbstractFloat(tw))
 end
 
 length(ss::DirichletStats) = length(s.slogp)
@@ -247,7 +247,7 @@ end
 
 ## Initialization
 
-function _dirichlet_mle_init2(μ::Vector{AbstractFloat}, γ::VAbstractFloatbstractFloat})
+function _dirichlet_mle_init2(μ::Vector{AbstractFloat}, γ::Vector{AbstractFloat})
     K = length(μ)
 
     α0 = 0.
@@ -286,7 +286,7 @@ function dirichlet_mle_init(P::AbstractMatrix{AbstractFloat})
     _dirichlet_mle_init2(μ, γ)
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{AbstractFloat}, w::AbstractAbstractFloatbstractFloat})
+function dirichlet_mle_init(P::AbstractMatrix{AbstractFloat}, w::AbstractArray{AbstractFloat})
     K = size(P, 1)
     n = size(P, 2)
 
@@ -315,7 +315,7 @@ end
 
 ## Newton-Ralphson algorithm
 
-function fit_dirichlet!(elogp::Vector{AbstractFloat}, α::VAbstractFloatbstractFloat};
+function fit_dirichlet!(elogp::Vector{AbstractFloat}, α::Vector{AbstractFloat};
     maxiter::Int=25, tol::AbstractFloat=1.0e-12, debug::Bool=false)
     # This function directly overrides α
 
@@ -386,7 +386,7 @@ end
 
 
 function fit_mle(::Type{T}, P::AbstractMatrix{AbstractFloat};
-    init::Vector{AbstractFloattFAbstractFloatbstractFloat[], maxiter::IAbstractFloattol::AbstractFloat=1.0e-12) where {T<:Dirichlet}
+    init::Vector{AbstractFloat}=AbstractFloat[], maxiter::Int=25, tol::AbstractFloat=1.0e-12) where {T<:Dirichlet}
 
     α = isempty(init) ? dirichlet_mle_init(P) : init
     elogp = mean_logp(suffstats(T, P))
@@ -395,7 +395,7 @@ end
 
 function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{AbstractFloat},
                  w::AbstractArray{AbstractFloat};
-    init::Vector{AbstractFloattFAbstractFloatbstractFloat[], maxiter::IAbstractFloattol::AbstractFloat=1.0e-12)
+    init::Vector{AbstractFloat}=AbstractFloat[], maxiter::Int=25, tol::AbstractFloat=1.0e-12)
 
     n = size(P, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))

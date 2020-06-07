@@ -4,7 +4,7 @@ struct VonMisesSampler <: Sampleable{Univariate,Continuous}
     κ::AbstractFloat
     r::AbstractFloat
 
-    function VonMisesSampler(μ::AbstractFloattFloaAbstractFloatbstractFloat)
+    function VonMisesSampler(μ::AbstractFloat, κ::AbstractFloat)
         τ = 1.0 + sqrt(1.0 + 4 * abs2(κ))
         ρ = (τ - sqrt(2.0 * τ)) / (2.0 * κ)
         new(μ, κ, (1.0 + abs2(ρ)) / (2.0 * ρ))

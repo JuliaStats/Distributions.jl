@@ -206,7 +206,7 @@ Compute the overall variance (only for ``UnivariateMixture``).
 function var(d::UnivariateMixture)
     K = ncomponents(d)
     p = probs(d)
-    means = Vector{Float64}(undef, K)
+    means = Vector{AbstractFloat}(undef, K)
     m = 0.0
     v = 0.0
     for i = 1:K

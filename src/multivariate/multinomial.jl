@@ -176,7 +176,7 @@ struct MultinomialStats <: SufficientStats
     scnts::Vector{AbstractFloat}  # sum of counts
     tw::AbstractFloat  # total sample weight
 
-    MultinomialStats(n::Int, scnts::Vector{AbstractFloat}, tw::Real) = new(n, sAbstractFloatbstractFloat(tw))
+    MultinomialStats(n::Int, scnts::Vector{AbstractFloat}, tw::Real) = new(n, scnts, AbstractFloat(tw))
 end
 
 function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real

@@ -58,7 +58,7 @@ scale(d::Uniform) = d.b - d.a
 mean(d::Uniform) = middle(d.a, d.b)
 median(d::Uniform) = mean(d)
 mode(d::Uniform) = mean(d)
-modes(d::Uniform) = Float64[]
+modes(d::Uniform) = AbstractFloat[]
 
 var(d::Uniform) = (w = d.b - d.a; w^2 / 12)
 

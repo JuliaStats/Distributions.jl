@@ -70,13 +70,13 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-const FullNormalCanon = MvNormalCanon{AbstractFloat, AbstractFloatbstractFAbstractFloattrix{AbstrAbstractFloatt}},Vector{AbstractFloat}}
-const DiagNormalCanon = MvNormalCanon{AbstractFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstrAbstractFloatt}},Vector{AbstractFloat}}
-const IsoNormalCanon  = MvNormalCanon{AbstractFloat,ScAbstractFloatbstractFlAbstractFloatctor{AbstractFloat}}
+const FullNormalCanon = MvNormalCanon{AbstractFloat, PDMat{AbstractFloat,Matrix{AbstractFloat}},Vector{AbstractFloat}}
+const DiagNormalCanon = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Vector{AbstractFloat}}
+const IsoNormalCanon  = MvNormalCanon{AbstractFloat,ScalMat{AbstractFloat},Vector{AbstractFloat}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{AbstractFloat,AbstractFloatbstractFAbstractFloattrix{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{AbstractFloat,ScAbstractFloatbstractFAbstractFloateros{AbstractFloat,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{AbstractFloat,ScalMat{AbstractFloat},Zeros{AbstractFloat,1,Axes}}
 
 
 ### Constructors

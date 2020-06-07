@@ -148,14 +148,14 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Abstra
     GammaStats(sx, slogx, tw)
 end
 
-function gamma_mle_update(logmx::AbstractFloat, mAbstractFloatbstraAbstractFloat, a::AbstractFloat)
+function gamma_mle_update(logmx::AbstractFloat, mlogx::AbstractFloat, a::AbstractFloat)
     ia = 1 / a
     z = ia + (mlogx - logmx + log(a) - digamma(a)) / (abs2(a) * (ia - trigamma(a)))
     1 / z
 end
 
 function fit_mle(::Type{<:Gamma}, ss::GammaStats;
-    alpha0::AbstractFloat=NaN, maxiter::Int=1000,AbstractFloatbstractFloat=1e-16)
+    alpha0::AbstractFloat=NaN, maxiter::Int=1000, tol::AbstractFloat=1e-16)
 
     mx = ss.sx / ss.tw
     logmx = log(mx)

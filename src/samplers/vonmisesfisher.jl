@@ -9,7 +9,7 @@ struct VonMisesFisherSampler
     Q::Matrix{AbstractFloat}
 end
 
-function VonMisesFisherSampler(μ::Vector{AbstractFloatAbstractFloatbstractFloat)
+function VonMisesFisherSampler(μ::Vector{AbstractFloat}, κ::AbstractFloat)
     p = length(μ)
     b = _vmf_bval(p, κ)
     x0 = (1.0 - b) / (1.0 + b)

@@ -183,13 +183,13 @@ end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-const IsoNormal  = MvNormal{AbstractFloat,ScAbstractFloatbstractFlAbstractFloatctor{AbstractFloat}}
-const DiagNormal = MvNormal{AbstractFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstrAbstractFloatt}},Vector{AbstractFloat}}
-const FullNormal = MvNormal{AbstractFloat,AbstractFloatbstractFAbstractFloattrix{AbstrAbstractFloatt}},Vector{AbstractFloat}}
+const IsoNormal  = MvNormal{AbstractFloat,ScalMat{AbstractFloat},Vector{AbstractFloat}}
+const DiagNormal = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Vector{AbstractFloat}}
+const FullNormal = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Vector{AbstractFloat}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{AbstractFloat,ScAbstractFloatbstractFAbstractFloateros{AbstractFloat,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{AbstractFloat,PDiAbstractFloatbstractFAbstractFloatctor{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{AbstractFloat,AbstractFloatbstractFAbstractFloattrix{AbstAbstractFloatat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{AbstractFloat,ScalMat{AbstractFloat},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
@@ -401,7 +401,7 @@ end
 
 fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = fit_mle(FullNormal, ss)
 fit_mle(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}) = fit_mle(FullNormal, x)
-fit_mle(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractAbstractFloatbstractFloat}) = fit_mle(FullNormal, x, w)
+fit_mle(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractArray{AbstractFloat}) = fit_mle(FullNormal, x, w)
 
 fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 

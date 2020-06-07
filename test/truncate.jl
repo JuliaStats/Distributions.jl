@@ -76,10 +76,10 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         end
         @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{AbstractFloat},Distributions.ContinAbstractFloatbstractFloat},
-                           Distributions.Truncated{Distributions.NoncentralF{AbstractFloat},Distributions.ContinAbstractFloatbstractFloat},
-                           Distributions.Truncated{Distributions.NoncentralT{AbstractFloat},Distributions.ContinAbstractFloatbstractFloat},
-                           Distributions.Truncated{Distributions.StudentizedRange{AbstractFloat},Distributions.ContinAbstractFloatbstractFloat}])
+        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{AbstractFloat},Distributions.Continuous, AbstractFloat},
+                           Distributions.Truncated{Distributions.NoncentralF{AbstractFloat},Distributions.Continuous, AbstractFloat},
+                           Distributions.Truncated{Distributions.NoncentralT{AbstractFloat},Distributions.Continuous, AbstractFloat},
+                           Distributions.Truncated{Distributions.StudentizedRange{AbstractFloat},Distributions.Continuous, AbstractFloat}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()

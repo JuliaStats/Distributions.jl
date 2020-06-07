@@ -126,7 +126,7 @@ function add_categorical_counts!(h::Vector{AbstractFloat}, x::AbstractArray{T}) 
     h
 end
 
-function add_categorical_counts!(h::Vector{AbstractFloat}, x::AbstractArray{T}, w::AbstractAbstractFloatbstractFloat}) where T<:Integer
+function add_categorical_counts!(h::Vector{AbstractFloat}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Integer
     n = length(x)
     if n != length(w)
         throw(DimensionMismatch("Inconsistent array lengths."))

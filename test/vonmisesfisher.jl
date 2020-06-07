@@ -35,7 +35,7 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test length(d) == p
     @test meandir(d) == μ
     @test concentration(d) == κ
-    @test partype(d) == Float64
+    @test partype(d) == AbstractFloat
 
     # conversions
     @test typeof(convert(VonMisesFisher{Float32}, d)) == VonMisesFisher{Float32}
@@ -85,7 +85,7 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test isa(d_est, VonMisesFisher)
     @test isapprox(d_est.μ, μ, atol=0.01)
     @test isapprox(d_est.κ, κ, atol=κ * 0.01)
-    d_est = fit(VonMisesFisher{Float64}, X)
+    d_est = fit(VonMisesFisher{AbstractFloat}, X)
     @test isa(d_est, VonMisesFisher)
     @test isapprox(d_est.μ, μ, atol=0.01)
     @test isapprox(d_est.κ, κ, atol=κ * 0.01)
@@ -97,12 +97,12 @@ end
 @testset "Testing VonMisesFisher argument promotions" begin
     d = VonMisesFisher(Int[1, 0], Float32(5))
     @test d isa VonMisesFisher{Float32}
-    d = VonMisesFisher(Int[1, 0], Float64(5))
-    @test d isa VonMisesFisher{Float64}
-    d = VonMisesFisher(Float64[1, 0], 5)
-    @test d isa VonMisesFisher{Float64}
-    d = VonMisesFisher(Float64[1, 0], Float32(5))
-    @test d isa VonMisesFisher{Float64}
+    d = VonMisesFisher(Int[1, 0], AbstractFloat(5))
+    @test d isa VonMisesFisher{AbstractFloat}
+    d = VonMisesFisher(AbstractFloat[1, 0], 5)
+    @test d isa VonMisesFisher{AbstractFloat}
+    d = VonMisesFisher(AbstractFloat[1, 0], Float32(5))
+    @test d isa VonMisesFisher{AbstractFloat}
 end
 
 n = 1000

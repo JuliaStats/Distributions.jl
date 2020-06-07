@@ -34,7 +34,7 @@ median(d::Kolmogorov) = 0.8275735551899077
 #   The Annals of Mathematical Statistics , Vol. 19, No. 2 (Jun., 1948), pp. 279-281
 #   http://projecteuclid.org/euclid.aoms/1177730256
 # use one series for small x, one for large x
-# 5 terms seems to be sufficient for Float64 accuracy
+# 5 terms seems to be sufficient for AbstractFloat accuracy
 # some divergence from Smirnov's table in 6th decimal near 1 (e.g. 1.04): occurs in
 # both series so assume error in table.
 

@@ -122,8 +122,8 @@ end
         (MvLogNormal(PDMats.PDiagMat(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
         (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
         (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
-        (MvLogNormal(mu, Vector{AbstractFloat}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so VAbstractFloatbstractFloat} can be dropped when we don't support 0.4
-        (MvLogNormal(Vector{AbstractFloat}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so VAbstractFloatbstractFloat} can be dropped when we don't support 0.4
+        (MvLogNormal(mu, Vector{AbstractFloat}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{AbstractFloat} can be dropped when we don't support 0.4
+        (MvLogNormal(Vector{AbstractFloat}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{AbstractFloat} can be dropped when we don't support 0.4
         (MvLogNormal(mu, C), mu, C),
         (MvLogNormal(C), zeros(3), C) ]
         m, s = params(g)

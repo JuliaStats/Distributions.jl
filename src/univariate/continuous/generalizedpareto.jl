@@ -179,7 +179,7 @@ end
 #### Sampling
 
 function rand(rng::AbstractRNG, d::GeneralizedPareto)
-    # Generate a Float64 random number uniformly in (0,1].
+    # Generate a AbstractFloat random number uniformly in (0,1].
     u = 1 - rand(rng)
 
     if abs(d.ξ) < eps()

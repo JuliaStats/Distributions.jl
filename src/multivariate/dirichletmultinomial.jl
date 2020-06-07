@@ -74,7 +74,7 @@ struct DirichletMultinomialStats <: SufficientStats
     n::Int
     s::Matrix{AbstractFloat}  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
     tw::AbstractFloat
-    DirichletMultinomialStats(n::Int, s::Matrix{AbstractFloat}, tw::Real) = new(AbstractFloatbstractFloat(tw))
+    DirichletMultinomialStats(n::Int, s::Matrix{AbstractFloat}, tw::Real) = new(n, s, AbstractFloat(tw))
 end
 function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     ns = sum(x, dims=1)  # get ntrials for each observation
