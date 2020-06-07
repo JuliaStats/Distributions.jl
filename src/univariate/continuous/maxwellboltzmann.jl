@@ -60,7 +60,5 @@ entropy(d::MaxwellBoltzmann) = log(d.a * sqrt(2π)) + (-digamma(1)) - 0.5
 
 #### Evaluation
 
-@_delegate_statsfun MaxwellBoltzmann maxwellboltzmann a
-
 pdf(d::MaxwellBoltzmann, x::Real) = sqrt(2 / π) * x^2 * exp(-x^2 / (2d.a^2)) / d.a^3
 cdf(d::MaxwellBoltzmann, x::Real) = erf(x / (sqrt(2) * d.a)) - sqrt(2 / π) * x * exp(-x^2 / 2d.a^2) / d.a
