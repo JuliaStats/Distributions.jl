@@ -2,9 +2,8 @@
     MaxwellBoltzmann(a)
 
 The *Maxwell-Boltzmann distribution* has probability density function
-
 ```math
-f(x; a) = \\sqrt{\\frac{2}{\\pi}}
+f(x; a) = \\sqrt{\\frac{2}{\\pi}}\\frac{x^2}{a^3}\\exp\\left(-\\frac{x^2}{2a^2}\\right)
 ```
 where the parameter
 ```math
