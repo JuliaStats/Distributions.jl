@@ -581,6 +581,7 @@ const discrete_distributions = [
     "noncentralhypergeometric",
     "poisson",
     "skellam",
+    "soliton",
     "poissonbinomial"
 ]
 

@@ -56,6 +56,7 @@ const tests = [
     "univariate_bounds",
     "negativebinomial",
     "bernoulli",
+    "soliton",
 ]
 
 printstyled("Running tests:\n", color=:blue)
