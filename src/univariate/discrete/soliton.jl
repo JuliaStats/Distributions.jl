@@ -72,7 +72,7 @@ end
 
 """Ideal component of the Soliton distribution."""
 function ρ(K::Integer, i::Integer)::Float64
-    i <= K || throw(ArgumentError("Expected i <=K, but got $i."))
+    i <= K || throw(ArgumentError("Expected i <= K, but got i=$i, K=$K."))
     if i == 1
         return 1 / K
     else # i <= K
