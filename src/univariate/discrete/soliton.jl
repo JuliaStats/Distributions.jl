@@ -90,7 +90,7 @@ function Distributions.pdf(Ω::Soliton, i::Integer)::Float64
 end
 
 function Distributions.cdf(Ω::Soliton, i::Integer)
-    if i < Ω.degrees[1] return 0.0 end
+    i < Ω.degrees[1] && return 0.0
     i > Ω.degrees[end] && return 1.0
     j = searchsortedfirst(Ω.degrees, i)
     if Ω.degrees[j] == i return Ω.CDF[j] end
