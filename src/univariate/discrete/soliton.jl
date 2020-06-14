@@ -36,7 +36,7 @@ struct Soliton <: DiscreteUnivariateDistribution
         0 < K || throw(ArgumentError("Expected 0 < K, but got $K."))
         0 < δ < 1 || throw(ArgumentError("Expected 0 < δ < 1, but got $δ."))
         0 < M <= K || throw(ArgumentError("Expected 0 < M <= K, but got $M."))
-        0 <= atol < 1 || throw(ArgumentError("Expected 0 <= atol < 1, but got $atol."))
+        0 <= atol < 1 || throw(DomainError(atol, "Expected 0 <= atol < 1."))
         PDF = [τ(K, M, δ, i)+ρ(K, i) for i in 1:K]
         PDF ./= sum(PDF)
         degrees = [i for i in 1:K if PDF[i] > atol]
