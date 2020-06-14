@@ -85,7 +85,9 @@ function Distributions.pdf(Ω::Soliton, i::Integer)::Float64
     j = searchsortedfirst(Ω.degrees, i)
     if j > length(Ω.degrees) || Ω.degrees[j] != i return 0.0 end
     rv = Ω.CDF[j]
-    if j > 1 rv -= Ω.CDF[j-1] end
+    if j > 1 
+        rv -= Ω.CDF[j-1] 
+    end
     return rv
 end
 
