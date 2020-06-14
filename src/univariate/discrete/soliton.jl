@@ -59,7 +59,7 @@ degrees(Ω::Soliton) = copy(Ω.degrees)
 
 """Robust component of the Soliton distribution."""
 function τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
-    i <= K || throw(ArgumentError("Expected i <= K, but got i=$i, K=$K."))
+    i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     R = K / M
     if i < M
         return 1 / (i * M)
@@ -72,7 +72,7 @@ end
 
 """Ideal component of the Soliton distribution."""
 function ρ(K::Integer, i::Integer)::Float64
-    i <= K || throw(ArgumentError("Expected i <= K, but got i=$i, K=$K."))
+    i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     if i == 1
         return 1 / K
     else # i <= K
