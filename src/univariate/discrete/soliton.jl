@@ -112,7 +112,7 @@ function Statistics.var(Ω::Soliton)
 end
 
 function Statistics.quantile(Ω::Soliton, v::Real)::Int
-    0 <= v <= 1 || throw(ArgumentError("Expected 0 <= v <= 1, but got $v."))
+    0 <= v <= 1 || throw(DomainError(v, "Expected 0 <= v <= 1."))
     j = searchsortedfirst(Ω.CDF, v)
     j = min(length(Ω.degrees), j)
     return Ω.degrees[j]
