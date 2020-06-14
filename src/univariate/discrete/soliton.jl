@@ -1,6 +1,6 @@
 """
 
-Soliton(K::Integer, M::Integer, δ::Real, atol::Real=0) <: Distribution{Univariate, Discrete}
+    Soliton(K::Integer, M::Integer, δ::Real, atol::Real=0) <: Distribution{Univariate, Discrete}
 
 The Robust Soliton distribution of length `K`, mode `M` (i.e., the
 location of the robust component spike), peeling process failure
