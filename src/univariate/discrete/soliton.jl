@@ -32,6 +32,7 @@ struct Soliton <: DiscreteUnivariateDistribution
     atol::Float64 # Minimum non-zero probability assigned to a degree
     degrees::Vector{Int} # Degrees with non-zero probability
     CDF::Vector{Float64} # CDF evaluated at each element in degrees
+
     function Soliton(K::Integer, M::Integer, δ::Real, atol::Real=0)
         0 < K || throw(ArgumentError("Expected 0 < K, but got $K."))
         0 < δ < 1 || throw(ArgumentError("Expected 0 < δ < 1, but got $δ."))
