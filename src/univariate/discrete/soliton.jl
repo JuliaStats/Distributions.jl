@@ -97,7 +97,7 @@ function Distributions.cdf(Ω::Soliton, i::Integer)
     return Ω.CDF[j-1]
 end
 
-Statistics.mean(Ω::Soliton) = sum(i*pdf(Ω, i) for i in Ω.degrees)
+Statistics.mean(Ω::Soliton) = sum(i -> i*pdf(Ω, i), Ω.degrees)
 
 function Statistics.var(Ω::Soliton)
     μ = mean(Ω)
