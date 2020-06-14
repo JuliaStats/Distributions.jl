@@ -34,9 +34,9 @@ struct Soliton <: DiscreteUnivariateDistribution
     CDF::Vector{Float64} # CDF evaluated at each element in degrees
 
     function Soliton(K::Integer, M::Integer, δ::Real, atol::Real=0)
-        0 < K || throw(ArgumentError("Expected 0 < K, but got $K."))
-        0 < δ < 1 || throw(ArgumentError("Expected 0 < δ < 1, but got $δ."))
-        0 < M <= K || throw(ArgumentError("Expected 0 < M <= K, but got $M."))
+        0 < K || throw(DomainError(K, "Expected 0 < K."))
+        0 < δ < 1 || throw(DomainError(δ, "Expected 0 < δ < 1."))
+        0 < M <= K || throw(DomainError(M, "Expected 0 < M <= K."))
         0 <= atol < 1 || throw(DomainError(atol, "Expected 0 <= atol < 1."))
         PDF = [τ(K, M, δ, i)+ρ(K, i) for i in 1:K]
         PDF ./= sum(PDF)
