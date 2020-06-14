@@ -38,7 +38,7 @@ struct Soliton <: DiscreteUnivariateDistribution
         0 < δ < 1 || throw(DomainError(δ, "Expected 0 < δ < 1."))
         0 < M <= K || throw(DomainError(M, "Expected 0 < M <= K."))
         0 <= atol < 1 || throw(DomainError(atol, "Expected 0 <= atol < 1."))
-        PDF = [τ(K, M, δ, i)+ρ(K, i) for i in 1:K]
+        PDF = [soliton_τ(K, M, δ, i)+soliton_ρ(K, i) for i in 1:K]
         PDF ./= sum(PDF)
         degrees = [i for i in 1:K if PDF[i] > atol]
         CDF = cumsum([PDF[i] for i in degrees])
@@ -58,7 +58,7 @@ Return a vector composed of the degrees with non-zero probability.
 degrees(Ω::Soliton) = copy(Ω.degrees)
 
 """Robust component of the Soliton distribution."""
-function τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
+function soliton_τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
     i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     R = K / M
     if i < M
@@ -71,7 +71,7 @@ function τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
 end
 
 """Ideal component of the Soliton distribution."""
-function ρ(K::Integer, i::Integer)::Float64
+function soliton_ρ(K::Integer, i::Integer)::Float64
     i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     if i == 1
         return 1 / K
