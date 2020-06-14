@@ -84,7 +84,7 @@ StatsBase.params(Ω::Soliton) = (Ω.K, Ω.M, Ω.δ, Ω.atol)
 
 function Distributions.pdf(Ω::Soliton, i::Integer)::Float64
     j = searchsortedfirst(Ω.degrees, i)
-    j > length(Ω.degrees) || Ω.degrees[j] != i && return 0.0
+    (j > length(Ω.degrees) || Ω.degrees[j] != i) && return 0.0
     rv = Ω.CDF[j]
     if j > 1
         rv -= Ω.CDF[j-1]
