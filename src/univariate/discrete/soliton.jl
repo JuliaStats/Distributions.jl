@@ -93,7 +93,7 @@ function Distributions.cdf(Ω::Soliton, i::Integer)
     i < Ω.degrees[1] && return 0.0
     i > Ω.degrees[end] && return 1.0
     j = searchsortedfirst(Ω.degrees, i)
-    if Ω.degrees[j] == i return Ω.CDF[j] end
+    Ω.degrees[j] == i && return Ω.CDF[j]
     return Ω.CDF[j-1]
 end
 
