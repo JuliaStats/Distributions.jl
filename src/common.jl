@@ -74,9 +74,9 @@ nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:
 
 for func in (:(==), :isequal, :isapprox)
     @eval function Base.$func(s1::A, s2::B; kwargs...) where {A<:Sampleable, B<:Sampleable}
-        nameof(A) == nameof(B) || return false
+        nameof(A) === nameof(B) || return false
         fields = fieldnames(A)
-        fields == fieldnames(B) || return false
+        fields === fieldnames(B) || return false
 
         for f in fields
             isdefined(s1, f) && isdefined(s2, f) || return false
@@ -87,6 +87,15 @@ for func in (:(==), :isequal, :isapprox)
     end
 end
 
+function Base.hash(s::S, h::UInt) where S <: Sampleable
+    hashed = hash(nameof(S), h)
+
+    for f in fieldnames(S)
+        hashed = hash(getfield(s, f), hashed)
+    end
+
+    return hashed
+end
 
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}

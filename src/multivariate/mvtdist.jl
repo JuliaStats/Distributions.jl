@@ -1,4 +1,3 @@
-
 # Multivariate t-distribution
 
 ## Generic multivariate t-distribution class
