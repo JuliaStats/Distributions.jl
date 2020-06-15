@@ -398,14 +398,17 @@ logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
-    logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
+    logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
 
 The natural logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
 """
-function logdiffcdf(d::UnivariateDistribution, x::T, y::T) where {T <: Real}
-    x <= y && throw(ArgumentError("requires x > y."))
-    u, v = logcdf(d, x), logcdf(d, y)
-    return u + log1p(-exp(v - u))
+function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
+    # Promote to ensure that we don't compute logcdf in low precision and then promote
+    _x, _y = promote(x, y)
+    _x <= _y && throw(ArgumentError("requires x > y."))
+    u = logcdf(d, _x)
+    v = logcdf(d, _y)
+    return u + log1mexp(v - u)
 end
 
 """
