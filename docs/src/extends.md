@@ -23,7 +23,7 @@ function rand(rng::AbstractRNG, s::Spl)
 end
 ```
 
-The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the he scalar version to generate multiple samples; as wells as a one arg version that uses the default random number generator.
+The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the scalar version to generate multiple samples; as wells as a one arg version that uses the default random number generator.
 
 ### Multivariate Sampler
 
