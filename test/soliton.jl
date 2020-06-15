@@ -14,6 +14,8 @@ using Distributions
     @test maximum(Ω) == K
     @test quantile(Ω, 0) == 1
     @test quantile(Ω, 1) == K
+    @test insupport(Ω, 1) && insupport(Ω, 2) && insupport(Ω, K)
+    @test !insupport(Ω, 0) && !insupport(Ω, 2.1) && !insupport(Ω, K + 1)
 
     K, M, δ, atol = 100, 60, 0.2, 1e-3
     Ω = Soliton(K, M, δ, atol)
