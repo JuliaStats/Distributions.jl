@@ -1,5 +1,5 @@
 
-function multinom_rand!(n::Int, p::AbstractVector{AbstractFloat},
+function multinom_rand!(n::Int, p::AbstractVector,
                         x::AbstractVector{T}) where T<:Real
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
@@ -39,7 +39,7 @@ function multinom_rand!(n::Int, p::AbstractVector{AbstractFloat},
     return x
 end
 
-function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{AbstractFloat},
+function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector,
                         x::AbstractVector{T}) where T<:Real
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))

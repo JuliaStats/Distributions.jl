@@ -6,10 +6,10 @@ struct VonMisesFisherSampler
     b::AbstractFloat
     x0::AbstractFloat
     c::AbstractFloat
-    Q::Matrix{AbstractFloat}
+    Q::Matrix
 end
 
-function VonMisesFisherSampler(μ::Vector{AbstractFloat}, κ::AbstractFloat)
+function VonMisesFisherSampler(μ::Vector, κ::AbstractFloat)
     p = length(μ)
     b = _vmf_bval(p, κ)
     x0 = (1.0 - b) / (1.0 + b)
@@ -41,10 +41,10 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler,
 end
 
 _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector) =
-    _rand!(rng, spl, x, Vector{AbstractFloat}(undef, length(x)))
+    _rand!(rng, spl, x, Vector(undef, length(x)))
 
 function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractMatrix)
-    t = Vector{AbstractFloat}(undef, size(x, 1))
+    t = Vector(undef, size(x, 1))
     for j = 1:size(x, 2)
         _rand!(rng, spl, view(x,:,j), t)
     end
@@ -76,7 +76,7 @@ end
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
     _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
 
-function _vmf_rotmat(u::Vector{AbstractFloat})
+function _vmf_rotmat(u::Vector)
     # construct a rotation matrix Q
     # s.t. Q * [1,0,...,0]^T --> u
     #

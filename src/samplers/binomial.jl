@@ -1,7 +1,7 @@
 
 # compute probability vector of a Binomial distribution
 function binompvec(n::Int, p::AbstractFloat)
-    pv = Vector{AbstractFloat}(undef, n+1)
+    pv = Vector(undef, n+1)
     if p == 0.0
         fill!(pv, 0.0)
         pv[1] = 1.0

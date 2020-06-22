@@ -233,7 +233,7 @@ end
 
 function cf(d::DiscreteNonParametric, t::Real)
     x, p = params(d)
-    s = zero(Complex{AbstractFloat})
+    s = zero(Complex)
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])
     end

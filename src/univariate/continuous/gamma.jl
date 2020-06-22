@@ -129,7 +129,7 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where T<:Real
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray) where T<:Real
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))

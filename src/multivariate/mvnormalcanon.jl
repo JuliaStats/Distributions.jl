@@ -29,9 +29,9 @@ end
 We also define aliases for common specializations of this parametric type:
 
 ```julia
-const FullNormalCanon = MvNormalCanon{PDMat,    Vector{AbstractFloat}}
-const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{AbstractFloat}}
-const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{AbstractFloat}}
+const FullNormalCanon = MvNormalCanon{PDMat,    Vector}
+const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector}
+const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector}
 
 const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{AbstractFloat,1}}
 const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{AbstractFloat,1}}
@@ -70,13 +70,13 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-const FullNormalCanon = MvNormalCanon{AbstractFloat, PDMat{AbstractFloat,Matrix{AbstractFloat}},Vector{AbstractFloat}}
-const DiagNormalCanon = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Vector{AbstractFloat}}
-const IsoNormalCanon  = MvNormalCanon{AbstractFloat,ScalMat{AbstractFloat},Vector{AbstractFloat}}
+const FullNormalCanon = MvNormalCanon{AbstractFloat, PDMat{AbstractFloat,Matrix},Vector}
+const DiagNormalCanon = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector},Vector}
+const IsoNormalCanon  = MvNormalCanon{AbstractFloat,ScalMat,Vector}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{AbstractFloat,ScalMat{AbstractFloat},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDMat{AbstractFloat,Matrix},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{AbstractFloat,PDiagMat{AbstractFloat,Vector},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{AbstractFloat,ScalMat,Zeros{AbstractFloat,1,Axes}}
 
 
 ### Constructors

@@ -72,9 +72,9 @@ _rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf
 struct DirichletMultinomialStats <: SufficientStats
     n::Int
-    s::Matrix{AbstractFloat}  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
+    s::Matrix  # s_{jk} = ∑_i x_{ij} ≥ (k - 1),  k = 1,...,(n - 1)
     tw::AbstractFloat
-    DirichletMultinomialStats(n::Int, s::Matrix{AbstractFloat}, tw::Real) = new(n, s, AbstractFloat(tw))
+    DirichletMultinomialStats(n::Int, s::Matrix, tw::Real) = new(n, s, AbstractFloat(tw))
 end
 function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     ns = sum(x, dims=1)  # get ntrials for each observation
@@ -89,7 +89,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     end
     DirichletMultinomialStats(n, s, m)
 end
-function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{AbstractFloat}) where T<:Real
+function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
     ns = sum(x, dims=1)
     n = ns[1]

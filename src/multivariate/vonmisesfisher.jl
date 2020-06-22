@@ -84,7 +84,7 @@ _rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) =
 
 ### Estimation
 
-function fit_mle(::Type{<:VonMisesFisher}, X::Matrix{AbstractFloat})
+function fit_mle(::Type{<:VonMisesFisher}, X::Matrix)
     r = vec(sum(X, dims=2))
     n = size(X, 2)
     r_nrm = norm(r)

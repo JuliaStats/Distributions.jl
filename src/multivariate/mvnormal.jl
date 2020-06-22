@@ -57,9 +57,9 @@ in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
 We also define a set of alias for the types using different combinations of mean vectors and covariance:
 
 ```julia
-const IsoNormal  = MvNormal{ScalMat,  Vector{AbstractFloat}}
-const DiagNormal = MvNormal{PDiagMat, Vector{AbstractFloat}}
-const FullNormal = MvNormal{PDMat,    Vector{AbstractFloat}}
+const IsoNormal  = MvNormal{ScalMat,  Vector}
+const DiagNormal = MvNormal{PDiagMat, Vector}
+const FullNormal = MvNormal{PDMat,    Vector}
 
 const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  Zeros{AbstractFloat,1,Axes}}
 const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zeros{AbstractFloat,1,Axes}}
@@ -183,13 +183,13 @@ end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
 
-const IsoNormal  = MvNormal{AbstractFloat,ScalMat{AbstractFloat},Vector{AbstractFloat}}
-const DiagNormal = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Vector{AbstractFloat}}
-const FullNormal = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Vector{AbstractFloat}}
+const IsoNormal  = MvNormal{AbstractFloat,ScalMat,Vector}
+const DiagNormal = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector},Vector}
+const FullNormal = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix},Vector}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{AbstractFloat,ScalMat{AbstractFloat},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix{AbstractFloat}},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{AbstractFloat,ScalMat,Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{AbstractFloat,PDiagMat{AbstractFloat,Vector},Zeros{AbstractFloat,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{AbstractFloat,PDMat{AbstractFloat,Matrix},Zeros{AbstractFloat,1,Axes}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
@@ -303,18 +303,18 @@ struct MvNormalKnownCov{Cov<:AbstractPDMat}
 end
 
 MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(AbstractFloat(σ))))
-MvNormalKnownCov(σ::Vector{AbstractFloat}) = MvNormalKnownCov(PDiagMat(abs2.(σ)))
-MvNormalKnownCov(Σ::Matrix{AbstractFloat}) = MvNormalKnownCov(PDMat(Σ))
+MvNormalKnownCov(σ::Vector) = MvNormalKnownCov(PDiagMat(abs2.(σ)))
+MvNormalKnownCov(Σ::Matrix) = MvNormalKnownCov(PDMat(Σ))
 
 length(g::MvNormalKnownCov) = dim(g.Σ)
 
 struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance
-    sx::Vector{AbstractFloat}    # (weighted) sum of vectors
+    sx::Vector    # (weighted) sum of vectors
     tw::AbstractFloat            # sum of weights
 end
 
-function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{AbstractFloat}) where Cov<:AbstractPDMat
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix) where Cov<:AbstractPDMat
     size(x,1) == length(g) || throw(DimensionMismatch("Invalid argument dimensions."))
     invΣ = inv(g.Σ)
     sx = vec(sum(x, dims=2))
@@ -322,7 +322,7 @@ function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{AbstractFloat}) w
     MvNormalKnownCovStats{Cov}(invΣ, sx, tw)
 end
 
-function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix{AbstractFloat}, w::AbstractVector) where Cov<:AbstractPDMat
+function suffstats(g::MvNormalKnownCov{Cov}, x::AbstractMatrix, w::AbstractVector) where Cov<:AbstractPDMat
     (size(x,1) == length(g) && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     invΣ = inv(g.Σ)
@@ -336,14 +336,14 @@ end
 fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:AbstractPDMat} =
     MvNormal(ss.sx * inv(ss.tw), g.Σ)
 
-function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{AbstractFloat})
+function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix)
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
     μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
     MvNormal(μ, g.Σ)
 end
 
-function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{AbstractFloat}, w::AbstractVector)
+function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix, w::AbstractVector)
     d = length(g)
     (size(x,1) == d && size(x,2) == length(w)) ||
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -355,13 +355,13 @@ end
 ### Estimation (both mean and cov unknown)
 
 struct MvNormalStats <: SufficientStats
-    s::Vector{AbstractFloat}  # (weighted) sum of x
-    m::Vector{AbstractFloat}  # (weighted) mean of x
-    s2::Matrix{AbstractFloat} # (weighted) sum of (x-μ) * (x-μ)'
+    s::Vector  # (weighted) sum of x
+    m::Vector  # (weighted) mean of x
+    s2::Matrix # (weighted) sum of (x-μ) * (x-μ)'
     tw::AbstractFloat         # total sample weight
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat})
+function suffstats(D::Type{MvNormal}, x::AbstractMatrix)
     d = size(x, 1)
     n = size(x, 2)
     s = vec(sum(x, dims=2))
@@ -371,7 +371,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat})
     MvNormalStats(s, m, s2, AbstractFloat(n))
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractVector)
+function suffstats(D::Type{MvNormal}, x::AbstractMatrix, w::AbstractVector)
     d = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -400,12 +400,12 @@ end
 #
 
 fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = fit_mle(FullNormal, ss)
-fit_mle(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}) = fit_mle(FullNormal, x)
-fit_mle(D::Type{MvNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractArray{AbstractFloat}) = fit_mle(FullNormal, x, w)
+fit_mle(D::Type{MvNormal}, x::AbstractMatrix) = fit_mle(FullNormal, x)
+fit_mle(D::Type{MvNormal}, x::AbstractMatrix, w::AbstractArray) = fit_mle(FullNormal, x, w)
 
 fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
-function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{AbstractFloat})
+function fit_mle(D::Type{FullNormal}, x::AbstractMatrix)
     n = size(x, 2)
     mu = vec(mean(x, dims=2))
     z = x .- mu
@@ -414,7 +414,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{AbstractFloat})
     MvNormal(mu, PDMat(C))
 end
 
-function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractVector)
+function fit_mle(D::Type{FullNormal}, x::AbstractMatrix, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -422,7 +422,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{AbstractFloat}, w::Abstr
     inv_sw = inv(sum(w))
     mu = BLAS.gemv('N', inv_sw, x, w)
 
-    z = Matrix{AbstractFloat}(undef, m, n)
+    z = Matrix(undef, m, n)
     for j = 1:n
         cj = sqrt(w[j])
         for i = 1:m
@@ -434,7 +434,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{AbstractFloat}, w::Abstr
     MvNormal(mu, PDMat(C))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{AbstractFloat})
+function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix)
     m = size(x, 1)
     n = size(x, 2)
 
@@ -449,7 +449,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{AbstractFloat})
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractVector)
+function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -468,7 +468,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{AbstractFloat}, w::Abstr
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{AbstractFloat})
+function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix)
     m = size(x, 1)
     n = size(x, 2)
 
@@ -484,7 +484,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{AbstractFloat})
     MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
-function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{AbstractFloat}, w::AbstractVector)
+function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))

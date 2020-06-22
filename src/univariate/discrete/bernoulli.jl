@@ -135,7 +135,7 @@ function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}) where T<:Integer
     BernoulliStats(c0, c1)
 end
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Integer
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray) where T<:Integer
     n = length(x)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
     c0 = c1 = 0

@@ -37,7 +37,7 @@ function Multinomial(n::Integer, p::TV; check_args=true) where {T <: Real, TV <:
     return Multinomial{T, TV}(n, p)
 end
 
-Multinomial(n::Integer, k::Integer) = Multinomial{AbstractFloat, Vector{AbstractFloat}}(round(Int, n), fill(1.0 / k, k))
+Multinomial(n::Integer, k::Integer) = Multinomial{AbstractFloat, Vector}(round(Int, n), fill(1.0 / k, k))
 
 # Parameters
 
@@ -173,10 +173,10 @@ sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 
 struct MultinomialStats <: SufficientStats
     n::Int  # number of trials in each experiment
-    scnts::Vector{AbstractFloat}  # sum of counts
+    scnts::Vector  # sum of counts
     tw::AbstractFloat  # total sample weight
 
-    MultinomialStats(n::Int, scnts::Vector{AbstractFloat}, tw::Real) = new(n, scnts, AbstractFloat(tw))
+    MultinomialStats(n::Int, scnts::Vector, tw::Real) = new(n, scnts, AbstractFloat(tw))
 end
 
 function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
@@ -201,7 +201,7 @@ function suffstats(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
     MultinomialStats(n, scnts, size(x,2))
 end
 
-function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array{AbstractFloat}) where T<:Real
+function suffstats(::Type{<:Multinomial}, x::Matrix{T}, w::Array) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     K = size(x, 1)
@@ -235,7 +235,7 @@ function fit_mle(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
     Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
 end
 
-function fit_mle(::Type{<:Multinomial}, x::Matrix{T}, w::Array{AbstractFloat}) where T<:Real
+function fit_mle(::Type{<:Multinomial}, x::Matrix{T}, w::Array) where T<:Real
     ss = suffstats(Multinomial, x, w)
     Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
 end

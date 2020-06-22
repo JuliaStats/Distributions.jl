@@ -56,7 +56,7 @@ by the `rand` method. However, one can provide an array of different element typ
 store the samples using `rand!`.
 """
 Base.eltype(::Type{<:Sampleable{F,Discrete}}) where {F} = Int
-Base.eltype(::Type{<:Sampleable{F,Continuous}}) where {F} = AbstractFloat
+Base.eltype(::Type{<:Sampleable{F,Continuous}}) where {F} = Float
 
 """
     nsamples(s::Sampleable)

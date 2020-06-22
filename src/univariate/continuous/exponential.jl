@@ -101,6 +101,6 @@ struct ExponentialStats <: SufficientStats
 end
 
 suffstats(::Type{<:Exponential}, x::AbstractArray{T}) where {T<:Real} = ExponentialStats(sum(x), length(x))
-suffstats(::Type{<:Exponential}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where {T<:Real} = ExponentialStats(dot(x, w), sum(w))
+suffstats(::Type{<:Exponential}, x::AbstractArray{T}, w::AbstractArray) where {T<:Real} = ExponentialStats(dot(x, w), sum(w))
 
 fit_mle(::Type{<:Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)

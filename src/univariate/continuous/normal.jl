@@ -270,7 +270,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     NormalStats(s, m, s2, n)
 end
 
-function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Real
+function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray) where T<:Real
     n = length(x)
 
     # compute s
@@ -313,7 +313,7 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     NormalKnownMuStats(g.μ, s2, length(x))
 end
 
-function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}) where T<:Real
+function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray) where T<:Real
     μ = g.μ
     s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
@@ -374,7 +374,7 @@ function fit_mle(::Type{<:Normal}, x::AbstractArray{T}; mu::AbstractFloat=NaN, s
     end
 end
 
-function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{AbstractFloat}; mu::AbstractFloat=NaN, sigma::AbstractFloat=NaN) where T<:Real
+function fit_mle(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray; mu::AbstractFloat=NaN, sigma::AbstractFloat=NaN) where T<:Real
     if isnan(mu)
         if isnan(sigma)
             fit_mle(Normal, suffstats(Normal, x, w))
