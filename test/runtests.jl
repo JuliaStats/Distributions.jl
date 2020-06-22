@@ -56,6 +56,7 @@ const tests = [
     "univariate_bounds",
     "negativebinomial",
     "bernoulli",
+    "trapezoidal",
 ]
 
 printstyled("Running tests:\n", color=:blue)
