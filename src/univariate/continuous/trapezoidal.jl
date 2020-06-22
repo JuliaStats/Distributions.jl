@@ -119,6 +119,3 @@ function rand(rng::AbstractRNG, d::TrapezoidalDist)
         u < p_ac ? rand(rng, Uniform(b, c)) :
         rand(rng, TriangularDist(c, d, c))
 end
-
-
-var(d)
