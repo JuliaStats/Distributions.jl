@@ -88,6 +88,16 @@ function cdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
         c <= x <= d ? 1 - 1/(d+c-a-b) * (d-x)^2/(d-c) : one(T)
 end
 
+function quantile(d::TrapezoidalDist, p::Real)
+    (a, b, c, d) = params(d)
+    p_b = (b-a) / (d+c-a-b)
+    p_c = (2*c-b-a) / (d+c-a-b)
+    p < p_b ? sqrt(p*(b-a)*(d+c-a-b)) + a :
+        p_b <= p < p_c ? 1/2*(p*(d+c-a-b) + a +b) :
+        d - sqrt((1-p)*(d+c-a-b)*(d-c))
+end
+
+
 function mgf(d::TrapezoidalDist{T}, t::Real) where T<:Real
     if t == zero(t)
         return one(T)

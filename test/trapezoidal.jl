@@ -30,4 +30,13 @@ using Distributions
 
     @test mean(d) ≈ 2.5
     @test var(d) ≈ 0.41666666666666696
+
+    # cdf and quantile
+    for x in range(1, 4, length=20)
+        @test quantile(d, cdf(d, x)) ≈ x
+    end
+
+    for p in range(0, 1, length=20)
+        @test cdf(d, quantile(d, p)) ≈ p
+    end
 end
