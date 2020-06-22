@@ -49,7 +49,7 @@ end
 
 
 _parse_x(d::DiscreteUnivariateDistribution, x) = round(Int, x)
-_parse_x(d::ContinuousUnivariateDistribution, x) = AbstractFloat(x)
+_parse_x(d::ContinuousUnivariateDistribution, x) = Float64(x)
 
 _json_value(x::Number) = x
 
@@ -69,17 +69,17 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     pts = dct["points"]
     for pt in pts
         x = _parse_x(d, pt["x"])
-        lp = d.lower <= x <= d.upper ? AbstractFloat(pt["logpdf"]) - d.logtp : -Inf
-        cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (AbstractFloat(pt["cdf"]) - d.lcdf)/d.tp
-        if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{AbstractFloat},Distributions.Continuous})
+        lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
+        cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
+        if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous})
             @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
         end
         @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{AbstractFloat},Distributions.Continuous, AbstractFloat},
-                           Distributions.Truncated{Distributions.NoncentralF{AbstractFloat},Distributions.Continuous, AbstractFloat},
-                           Distributions.Truncated{Distributions.NoncentralT{AbstractFloat},Distributions.Continuous, AbstractFloat},
-                           Distributions.Truncated{Distributions.StudentizedRange{AbstractFloat},Distributions.Continuous, AbstractFloat}])
+        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
+                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
+                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
+                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()
@@ -89,8 +89,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     # test if truncated quantile function can be evaluated consistently for different types at certain points
     @test isapprox(quantile(d, 0), quantile(d, Float32(0)))
     @test isapprox(quantile(d, 1), quantile(d, Float32(1.0)))
-    @test isapprox(quantile(d, AbstractFloat(0.3)), quantile(d, Float32(0.3)))
-    @test isapprox(quantile(d, AbstractFloat(0.7)), quantile(d, Float32(0.7)))
+    @test isapprox(quantile(d, Float64(0.3)), quantile(d, Float32(0.3)))
+    @test isapprox(quantile(d, Float64(0.7)), quantile(d, Float32(0.7)))
 
     try
         m = mgf(d,0.0)

@@ -3,14 +3,14 @@
 using Distributions
 using Test
 
-function test_vonmises(μ::AbstractFloat, κ::AbstractFloat)
+function test_vonmises(μ::Float64, κ::Float64)
     d = VonMises(μ, κ)
     @test length(d) == 1
     @test mean(d) == μ
     @test median(d) == μ
     @test mode(d) == μ
     @test d == typeof(d)(params(d)...,d.I0κx)
-    @test partype(d) == AbstractFloat
+    @test partype(d) == Float64
     # println(d)
 
     # conversions

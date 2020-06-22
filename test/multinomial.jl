@@ -23,11 +23,11 @@ rng = MersenneTwister(123)
 
 @test insupport(d, [1, 6, 3])
 @test !insupport(d, [2, 6, 3])
-@test partype(d) == AbstractFloat
+@test partype(d) == Float64
 @test partype(Multinomial(nt, Vector{Float32}(p))) == Float32
 
 # Conversion
-@test typeof(d) == Multinomial{AbstractFloat, Vector{AbstractFloat}}
+@test typeof(d) == Multinomial{Float64, Vector{Float64}}
 @test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
@@ -94,13 +94,13 @@ w = func[1](n0)
 ss = suffstats(Multinomial, x)
 @test isa(ss, Distributions.MultinomialStats)
 @test ss.n == nt
-@test ss.scnts == vec(sum(AbstractFloat[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], dims=2))
+@test ss.scnts == vec(sum(Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], dims=2))
 @test ss.tw == n0
 
 ss = suffstats(Multinomial, x, w)
 @test isa(ss, Distributions.MultinomialStats)
 @test ss.n == nt
-@test ss.scnts ≈ AbstractFloat[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)] * w
+@test ss.scnts ≈ Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)] * w
 @test ss.tw    ≈ sum(w)
 
 # fit
@@ -113,7 +113,7 @@ r = fit(Multinomial, x)
 @test r.n == nt
 @test length(r) == length(p)
 @test isapprox(probs(r), p, atol=0.02)
-r = fit(Multinomial{AbstractFloat}, x)
+r = fit(Multinomial{Float64}, x)
 @test r.n == nt
 @test length(r) == length(p)
 @test isapprox(probs(r), p, atol=0.02)
@@ -139,7 +139,7 @@ d0 = Multinomial(0, p)
 
 # Abstract vector p
 
-@test typeof(Multinomial(nt, SVector{length(p), AbstractFloat}(p))) == Multinomial{AbstractFloat, SVector{3, AbstractFloat}}
+@test typeof(Multinomial(nt, SVector{length(p), Float64}(p))) == Multinomial{Float64, SVector{3, Float64}}
 
 end
 

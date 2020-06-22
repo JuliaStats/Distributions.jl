@@ -75,7 +75,7 @@ d1s = [MatrixReshaped(d1, s...) for s in sizes]
     end
     @testset "MatrixReshaped partype" begin
         for d in d1s
-            @test partype(d) == AbstractFloat
+            @test partype(d) == Float64
         end
     end
     @testset "MatrixReshaped logpdf" begin
@@ -163,7 +163,7 @@ d1s = [MatrixReshaped(d1, s...) for s in sizes]
     end
     @testset "MatrixReshaped partype" begin
         for d in d1s
-            @test partype(d) == AbstractFloat
+            @test partype(d) == Float64
         end
     end
     @testset "MatrixReshaped logpdf" begin

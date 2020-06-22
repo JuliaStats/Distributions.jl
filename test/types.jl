@@ -24,7 +24,7 @@ using ForwardDiff: Dual
 @assert ContinuousMatrixDistribution <: MatrixDistribution
 
 @testset "Test Sample Type" begin
-    for T in (AbstractFloat,Float32,Dual{Nothing,AbstractFloat,0})
+    for T in (Float64,Float32,Dual{Nothing,Float64,0})
         @testset "Type $T" begin
             for d in (MvNormal,MvLogNormal,MvNormalCanon,Dirichlet)
                 dist = d(map(T,ones(2)))

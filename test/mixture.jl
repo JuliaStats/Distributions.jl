@@ -142,7 +142,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     else
         Xs = rand(rng, g, ns)
     end
-    @test isa(Xs, Matrix{AbstractFloat})
+    @test isa(Xs, Matrix{Float64})
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
     @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
@@ -186,7 +186,7 @@ end
         @test insupport(g_u, 3.5) == false
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
-        for T = [AbstractFloat, Dual]
+        for T = [Float64, Dual]
             g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3

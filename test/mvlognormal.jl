@@ -16,16 +16,16 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     S = cov(g)
     s = var(g)
     e = entropy(g)
-    @test partype(g) == AbstractFloat
-    @test isa(mn, Vector{AbstractFloat})
-    if g.normal.μ isa Zeros{AbstractFloat,1}
-        @test md isa Fill{AbstractFloat,1}
+    @test partype(g) == Float64
+    @test isa(mn, Vector{Float64})
+    if g.normal.μ isa Zeros{Float64,1}
+        @test md isa Fill{Float64,1}
     else
-        @test md isa Vector{AbstractFloat}
+        @test md isa Vector{Float64}
     end
-    @test isa(mo, Vector{AbstractFloat})
-    @test isa(s, Vector{AbstractFloat})
-    @test isa(S, Matrix{AbstractFloat})
+    @test isa(mo, Vector{Float64})
+    @test isa(s, Vector{Float64})
+    @test isa(S, Matrix{Float64})
     @test length(mn) == d
     @test length(md) == d
     @test length(mo) == d
@@ -122,8 +122,8 @@ end
         (MvLogNormal(PDMats.PDiagMat(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
         (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
         (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
-        (MvLogNormal(mu, Vector{AbstractFloat}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{AbstractFloat} can be dropped when we don't support 0.4
-        (MvLogNormal(Vector{AbstractFloat}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{AbstractFloat} can be dropped when we don't support 0.4
+        (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+        (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
         (MvLogNormal(mu, C), mu, C),
         (MvLogNormal(C), zeros(3), C) ]
         m, s = params(g)
@@ -131,6 +131,6 @@ end
         test_mvlognormal(g, 10^4)
     end
     d = MvLogNormal(Array{Float32}(mu), PDMats.PDMat(Array{Float32}(C)))
-    @test typeof(convert(MvLogNormal{AbstractFloat}, d)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
-    @test typeof(convert(MvLogNormal{AbstractFloat}, d.normal.μ, d.normal.Σ)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
+    @test typeof(convert(MvLogNormal{Float64}, d)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
+    @test typeof(convert(MvLogNormal{Float64}, d.normal.μ, d.normal.Σ)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
 end

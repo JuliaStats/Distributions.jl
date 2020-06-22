@@ -8,15 +8,15 @@ r = RealInterval(1.5, 4.0)
 @test maximum(r) == 4.0
 @test extrema(r) == (1.5, 4.0)
 
-@test partype(Gamma(1, 2)) == AbstractFloat
-@test partype(Gamma(1.1, 2)) == AbstractFloat
+@test partype(Gamma(1, 2)) == Float64
+@test partype(Gamma(1.1, 2)) == Float64
 @test partype(Normal(1//1, 2//1)) == Rational{Int}
 @test partype(MvNormal(rand(Float32, 5), Matrix{Float32}(I, 5, 5))) == Float32
 
 # special cases
-@test partype(Kolmogorov()) == AbstractFloat
-@test partype(Hypergeometric(2, 2, 2)) == AbstractFloat
-@test partype(DiscreteUniform(0, 4)) == AbstractFloat
+@test partype(Kolmogorov()) == Float64
+@test partype(Hypergeometric(2, 2, 2)) == Float64
+@test partype(DiscreteUniform(0, 4)) == Float64
 
 A = rand(1:10, 5, 5)
 B = rand(Float32, 4)
@@ -41,7 +41,7 @@ N = GenericArray([1.0 0.0; 1.0 0.0])
 n = 10
 areal = randn(n,n)/2
 aimg  = randn(n,n)/2
-@testset "For A containing $eltya" for eltya in (Float32, AbstractFloat, ComplexF32, ComplexF64, Int)
+@testset "For A containing $eltya" for eltya in (Float32, Float64, ComplexF32, ComplexF64, Int)
     ainit = eltya == Int ? rand(1:7, n, n) : convert(Matrix{eltya}, eltya <: Complex ? complex.(areal, aimg) : areal)
     @testset "Positive semi-definiteness" begin
         notsymmetric = ainit

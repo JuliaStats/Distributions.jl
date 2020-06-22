@@ -43,7 +43,7 @@ d = fit(DirichletMultinomial, x)
 
 # test Evaluation
 d = DirichletMultinomial(10, 5)
-@test typeof(d) == DirichletMultinomial{AbstractFloat}
+@test typeof(d) == DirichletMultinomial{Float64}
 @test !insupport(d, func[1](5))
 @test insupport(d, [2, 2, 2, 2, 2])
 @test insupport(d, 2.0 * ones(5))
@@ -78,7 +78,7 @@ ss = suffstats(DirichletMultinomial, x)
 @test size(ss.s, 2) == ntrials(d)
 mle = fit(DirichletMultinomial, x)
 @test isapprox(mle.α, d.α, atol=.2)
-mle = fit(DirichletMultinomial{AbstractFloat}, x)
+mle = fit(DirichletMultinomial{Float64}, x)
 @test isapprox(mle.α, d.α, atol=.2)
 
 # test MLE with weights

@@ -33,7 +33,7 @@ end
 
 
 @testset "Testing fit for Bernoulli" begin
-    for func in funcs, dist in (Bernoulli, Bernoulli{AbstractFloat})
+    for func in funcs, dist in (Bernoulli, Bernoulli{Float64})
         w = func[1](n0)
         x = func[2](dist(0.7), n0)
 
@@ -64,7 +64,7 @@ end
 end
 
 @testset "Testing fit for Beta" begin
-    for func in funcs, dist in (Beta, Beta{AbstractFloat})
+    for func in funcs, dist in (Beta, Beta{Float64})
         d = fit(dist, func[2](dist(1.3, 3.7), N))
         @test isa(d, dist)
         @test isapprox(d.α, 1.3, atol=0.1)
@@ -73,7 +73,7 @@ end
 end
 
 @testset "Testing fit for Binomial" begin
-    for func in funcs, dist in (Binomial, Binomial{AbstractFloat})
+    for func in funcs, dist in (Binomial, Binomial{Float64})
         w = func[1](n0)
 
         x = func[2](dist(100, 0.3), n0)
@@ -86,7 +86,7 @@ end
 
         ss = suffstats(dist, (100, x), w)
         @test isa(ss, Distributions.BinomialStats)
-        @test ss.ns ≈ dot(AbstractFloat[xx for xx in x], w)
+        @test ss.ns ≈ dot(Float64[xx for xx in x], w)
         @test ss.ne ≈ sum(w)
         @test ss.n == 100
 
@@ -116,7 +116,7 @@ end
         w = func[1](n0)
 
         ss = suffstats(Categorical, (3, x))
-        h = AbstractFloat[count(v->v == i, x) for i = 1 : 3]
+        h = Float64[count(v->v == i, x) for i = 1 : 3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 
@@ -130,7 +130,7 @@ end
         @test probs(d2) == probs(d)
 
         ss = suffstats(Categorical, (3, x), w)
-        h = AbstractFloat[sum(w[x .== i]) for i = 1 : 3]
+        h = Float64[sum(w[x .== i]) for i = 1 : 3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 
@@ -150,11 +150,11 @@ end
 
 @testset "Testing fit for Cauchy" begin
     @test fit(Cauchy, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
-    @test fit(Cauchy{AbstractFloat}, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
+    @test fit(Cauchy{Float64}, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
 end
 
 @testset "Testing fit for Exponential" begin
-    for func in funcs, dist in (Exponential, Exponential{AbstractFloat})
+    for func in funcs, dist in (Exponential, Exponential{Float64})
         w = func[1](n0)
         x = func[2](dist(0.5), n0)
 
@@ -183,7 +183,7 @@ end
 end
 
 @testset "Testing fit for Normal" begin
-    for func in funcs, dist in (Normal, Normal{AbstractFloat})
+    for func in funcs, dist in (Normal, Normal{Float64})
         μ = 11.3
         σ = 3.2
         w = func[1](n0)
@@ -279,7 +279,7 @@ end
 end
 
 @testset "Testing fit for Uniform" begin
-    for func in funcs, dist in (Uniform, Uniform{AbstractFloat})
+    for func in funcs, dist in (Uniform, Uniform{Float64})
         x = func[2](dist(1.2, 5.8), n0)
         d = fit(dist, x)
         @test isa(d, dist)
@@ -295,7 +295,7 @@ end
 end
 
 @testset "Testing fit for Gamma" begin
-    for func in funcs, dist in (Gamma, Gamma{AbstractFloat})
+    for func in funcs, dist in (Gamma, Gamma{Float64})
         x = func[2](dist(3.9, 2.1), n0)
         w = func[1](n0)
 
@@ -319,7 +319,7 @@ end
 end
 
 @testset "Testing fit for Geometric" begin
-    for func in funcs, dist in (Geometric, Geometric{AbstractFloat})
+    for func in funcs, dist in (Geometric, Geometric{Float64})
         x = func[2](dist(0.3), n0)
         w = func[1](n0)
 
@@ -348,7 +348,7 @@ end
 end
 
 @testset "Testing fit for Laplace" begin
-    for func in funcs, dist in (Laplace, Laplace{AbstractFloat})
+    for func in funcs, dist in (Laplace, Laplace{Float64})
         d = fit(dist, func[2](dist(5.0, 3.0), N))
         @test isa(d, dist)
         @test isapprox(location(d), 5.0, atol=0.1)
@@ -357,7 +357,7 @@ end
 end
 
 @testset "Testing fit for Pareto" begin
-    for func in funcs, dist in (Pareto, Pareto{AbstractFloat})
+    for func in funcs, dist in (Pareto, Pareto{Float64})
         x = func[2](dist(3., 7.), N)
         d = fit(dist, x)
 
@@ -368,7 +368,7 @@ end
 end
 
 @testset "Testing fit for Poisson" begin
-    for func in funcs, dist in (Poisson, Poisson{AbstractFloat})
+    for func in funcs, dist in (Poisson, Poisson{Float64})
         x = func[2](dist(8.2), n0)
         w = func[1](n0)
 
@@ -388,7 +388,7 @@ end
 
         d = fit(dist, x, w)
         @test isa(d, dist)
-        @test mean(d) ≈ dot(AbstractFloat[xx for xx in x], w) / sum(w)
+        @test mean(d) ≈ dot(Float64[xx for xx in x], w) / sum(w)
 
         d = fit(dist, func[2](dist(8.2), N))
         @test isa(d, dist)
@@ -397,7 +397,7 @@ end
 end
 
 @testset "Testing fit for InverseGaussian" begin
-    for func in funcs, dist in (InverseGaussian, InverseGaussian{AbstractFloat})
+    for func in funcs, dist in (InverseGaussian, InverseGaussian{Float64})
         x = rand(dist(3.9, 2.1), n0)
         w = func[1](n0)
 
@@ -425,7 +425,7 @@ end
 end
 
 @testset "Testing fit for Rayleigh" begin
-    for func in funcs, dist in (Rayleigh, Rayleigh{AbstractFloat})
+    for func in funcs, dist in (Rayleigh, Rayleigh{Float64})
         x = func[2](dist(3.6), N)
         d = fit(dist, x)
 
