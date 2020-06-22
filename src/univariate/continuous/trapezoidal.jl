@@ -77,7 +77,7 @@ function pdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
     x <= a ? zero(T) :
         a <= x <  b ? 2 / (d+c-a-b) * (x-a)/(b-a) :
         b <= x <  c ? 2 / (d+c-a-b) :
-        c <= x <= d ? 2 / (d+c-a-b) * (d-a)/(d-c) : zero(T)
+        c <= x <= d ? 2 / (d+c-a-b) * (d-x)/(d-c) : zero(T)
 end
 
 function cdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
@@ -109,3 +109,6 @@ function rand(rng::AbstractRNG, d::TrapezoidalDist)
         u < p_ac ? rand(rng, Uniform(b, c)) :
         rand(rng, TriangularDist(c, d, c))
 end
+
+
+var(d)
