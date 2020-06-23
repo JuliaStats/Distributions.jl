@@ -4,11 +4,11 @@
 The *trapezoidal distribution* with lower limit `a`, upper limit `d`, and a plateau between `b` and `c`. The probability density function is
 
 ```math
-f(x; a, b, c)= \\begin{cases}
-                   \\frac{2}{d+c-a-b}\\frac{x-a}{b-a}  & \\text{for } a\\le x < b \\\\
-                   \\frac{2}{d+c-a-b}  & \\text{for } b\\le x < c \\\\
-                   \\frac{2}{d+c-a-b}\\frac{d-x}{d-c}  & \\text{for } c\\le x \\le d
-               \\end{cases}
+f(x; a, b, c, d) = \\begin{cases}
+                     \\frac{2}{d+c-a-b}\\frac{x-a}{b-a}  & \\text{for } a\\le x < b \\\\
+                     \\frac{2}{d+c-a-b}  & \\text{for } b\\le x < c \\\\
+                     \\frac{2}{d+c-a-b}\\frac{d-x}{d-c}  & \\text{for } c\\le x \\le d
+                   \\end{cases}
 ```
 
 ```julia
