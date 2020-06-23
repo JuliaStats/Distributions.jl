@@ -111,11 +111,5 @@ end
 #### Sampling
 
 function rand(rng::AbstractRNG, d::TrapezoidalDist)
-    (a, b, c, d) = params(d)
-    p_ab = (b-a) / (d+c-a-b)
-    p_ac = (2*c-a-b) / (d+c-a-b)
-    u = rand(rng)
-    u < p_ab ? rand(rng, TriangularDist(a, b, b)) :
-        u < p_ac ? rand(rng, Uniform(b, c)) :
-        rand(rng, TriangularDist(c, d, c))
+    quantile(d, rand(rng))
 end
