@@ -1,5 +1,5 @@
 """
-    TrapezoidalDist(a,b,c)
+    TrapezoidalDist(a,b,c,d)
 
 The *trapezoidal distribution* with lower limit `a`, upper limit `d`, and a plateau between `b` and `c`. The probability density function is
 
