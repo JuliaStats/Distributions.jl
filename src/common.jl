@@ -88,7 +88,8 @@ for func in (:(==), :isequal, :isapprox)
 end
 
 function Base.hash(s::S, h::UInt) where S <: Sampleable
-    hashed = hash(nameof(S), h)
+    hashed = hash(Sampleable, h)
+    hashed = hash(nameof(S), hashed)
 
     for f in fieldnames(S)
         hashed = hash(getfield(s, f), hashed)
