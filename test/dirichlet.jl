@@ -44,6 +44,7 @@ d = Dirichlet(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)
 @test d == typeof(d)(params(d)...)
+@test d == deepcopy(d)
 
 @test mean(d) ≈ v / sum(v)
 @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)

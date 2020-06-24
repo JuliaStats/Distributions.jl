@@ -10,6 +10,7 @@ function test_vonmises(μ::Float64, κ::Float64)
     @test median(d) == μ
     @test mode(d) == μ
     @test d == typeof(d)(params(d)...,d.I0κx)
+    @test d == deepcopy(d)
     @test partype(d) == Float64
     # println(d)
 
@@ -20,7 +21,7 @@ function test_vonmises(μ::Float64, κ::Float64)
     @test support(d) == RealInterval(d.μ-π,d.μ+π)
     @test pdf(d, d.μ-2π) == 0.0
     @test pdf(d, d.μ+2π) == 0.0
-    
+
 end
 
 
