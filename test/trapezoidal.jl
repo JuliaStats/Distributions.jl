@@ -1,5 +1,6 @@
 using Test
 using Distributions
+using HypothesisTests: ExactOneSampleKSTest, pvalue
 
 
 @testset "Trapezoidal" begin
@@ -249,5 +250,12 @@ using Distributions
     for (i, ps) in enumerate(p)
         @test quantile(d, ps) ≈ qref[i]
     end
+
+
+    # - rand -
+    n = 100_000
+    α = 0.05
+    kt = ExactOneSampleKSTest(rand(d, n), d)
+    @test pvalue(kt) >= α
 
 end
