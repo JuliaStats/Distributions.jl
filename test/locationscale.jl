@@ -44,6 +44,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     @test pdf.(d,2:4) ≈ pdf.(dref,2:4)
     @test logpdf(d,0.4) ≈ logpdf(dref,0.4)
     @test loglikelihood(d,[0.1,0.2,0.3]) ≈ loglikelihood(dref,[0.1,0.2,0.3])
+    @test loglikelihood(d, 0.4) ≈ loglikelihood(dref, 0.4)
     @test cdf(d,μ-0.4) ≈ cdf(dref,μ-0.4)
     @test logcdf(d,μ-0.4) ≈ logcdf(dref,μ-0.4)
     @test ccdf(d,μ-0.4) ≈ ccdf(dref,μ-0.4) atol=1e-100
