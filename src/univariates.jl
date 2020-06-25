@@ -522,11 +522,14 @@ end
 
 ## loglikelihood
 """
-    loglikelihood(d::UnivariateDistribution, X::AbstractArray)
+    loglikelihood(d::UnivariateDistribution, x::Union{Real,AbstractArray})
 
-The log-likelihood of distribution `d` w.r.t. all samples contained in array `x`.
+The log-likelihood of distribution `d` with respect to all samples contained in `x`.
+
+Here `x` can be a single scalar sample or an array of samples.
 """
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
+loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### macros to use StatsFuns for method implementation
 
