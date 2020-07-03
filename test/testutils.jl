@@ -545,6 +545,7 @@ function test_params(d::Distribution)
     pars = params(d)
     d_new = D(pars...)
     @test d_new == d
+    @test d_new == deepcopy(d)
 end
 
 function test_params(d::Truncated)
@@ -555,6 +556,7 @@ function test_params(d::Truncated)
     pars = params(d_unt)
     d_new = Truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
+    @test d == deepcopy(d)
 end
 
 # Finite difference differentiation

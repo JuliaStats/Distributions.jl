@@ -8,6 +8,7 @@ using ForwardDiff
     d2 = Arcsine(3.5f0, 5)
     @test partype(d) == Float64
     @test partype(d2) == Float32
+    @test d == deepcopy(d)
 
     @test logpdf(d, 4.0) ≈ log(pdf(d, 4.0))
     # out of support
