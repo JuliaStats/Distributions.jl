@@ -18,6 +18,17 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
     #@test cdf(d, 4.5) ≈ 1.0 #when we get Owen's T
     @test mean(d1) ≈ 2.513879513212096
     @test std(d1) ≈ 1.306969326142243
+    #
+    d0 = SkewNormal(0.0, 1.0, 0.0)
+    @test SkewNormal() == d0
+    d3 = SkewNormal(0.5, 2.2, 0.0)
+    d4 = Normal(0.5, 2.2)
+    #
+    @test pdf(d3, 3.3) == Distributions.pdf(d4, 3.3)
+    @test pdf.(d3, 1:3) == Distributions.pdf.(d4, 1:3)
+    a = mean(d3), var(d3), std(d3)
+    b = Distributions.mean(d4), Distributions.var(d4), Distributions.std(d4)
+    @test  a == b
 end
 
 # R code using Azzalini's package sn
