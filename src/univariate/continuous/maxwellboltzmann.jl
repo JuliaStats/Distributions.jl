@@ -32,7 +32,7 @@ function MaxwellBoltzmann(a::T; check_args=true) where {T<:Real}
 end
 
 MaxwellBoltzmann() = MaxwellBoltzmann(1.0)
-MaxwellBoltzmann(temp::T, mass::T) where {T<:Real} = MaxwellBoltzmann(sqrt(k_B * temp / mass))
+MaxwellBoltzmann(temp::T, mass::T) where {T<:Real} = MaxwellBoltzmann(sqrt(ustrip(k_B) * temp / mass))
 
 @distr_support MaxwellBoltzmann 0.0 Inf
 

@@ -26,6 +26,7 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 
 import PhysicalConstants.CODATA2018: k_B
+using Unitful
 
 export
     # re-export Statistics
