@@ -5,13 +5,14 @@ The *Maxwell-Boltzmann distribution* has probability density function
 ```math
 f(x; a) = \\sqrt{\\frac{2}{\\pi}}\\frac{x^2}{a^3}\\exp\\left(-\\frac{x^2}{2a^2}\\right)
 ```
-where the parameter
+where
 ```math
 a = \\sqrt{\\frac{kT}{m}}
 ```
+`k` is the Boltzmann constant and `m` is the particle mass.
 
 ```julia
-MaxwellBoltamann()        # Maxwell-Boltzmann distribution with a = 1
+MaxwellBoltzmann()        # Maxwell-Boltzmann distribution with a = 1
 MaxwellBoltzmann(a)       # Maxwell-Boltzmann distribution with chosen parameter a
 MaxwellBoltzmann(T, m)    # Maxwell-Boltzmann distribution with chosen temperature T and mass m
 ```
@@ -30,9 +31,7 @@ function MaxwellBoltzmann(a::T; check_args=true) where {T<:Real}
     return MaxwellBoltzmann{T}(a)
 end
 
-MaxwellBoltmann() = MaxwellBoltzmann(1.0)
-
-MaxwellBoltzmann(a::T) where {T<:Real} = MaxwellBoltzmann(float(a))
+MaxwellBoltzmann() = MaxwellBoltzmann(1.0)
 MaxwellBoltzmann(temp::T, mass::T) where {T<:Real} = MaxwellBoltzmann(sqrt(k_B * temp / mass))
 
 @distr_support MaxwellBoltzmann 0.0 Inf
