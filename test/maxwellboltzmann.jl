@@ -1,4 +1,5 @@
 using Test, Distributions
+using Random
 
 @testset "MaxwellBoltzmann" begin
     d1 = MaxwellBoltzmann()
@@ -11,4 +12,5 @@ using Test, Distributions
     @test dof(d1) == 3
     @test params(d1) == (1.0,)
     @test params(d2) == (2.0,)
+    @test rand(MersenneTwister(123), d1) ≈ 2.0718603776231967
 end

@@ -13,8 +13,10 @@ a = \\sqrt{\\frac{kT}{m}}
 
 ```julia
 MaxwellBoltzmann()        # Maxwell-Boltzmann distribution with a = 1
-MaxwellBoltzmann(a)       # Maxwell-Boltzmann distribution with chosen parameter a
-MaxwellBoltzmann(T, m)    # Maxwell-Boltzmann distribution with chosen temperature T and mass m
+MaxwellBoltzmann(a)       # Maxwell-Boltzmann distribution with parameter a
+MaxwellBoltzmann(T, m)    # Maxwell-Boltzmann distribution with temperature T and mass m
+
+params(d)                 # Get the parameters, i.e. (a,)
 ```
 
 External links
@@ -60,3 +62,23 @@ entropy(d::MaxwellBoltzmann) = log(d.a * sqrt(2π)) + (-digamma(1)) - 0.5
 
 pdf(d::MaxwellBoltzmann, x::Real) = sqrt(2 / π) * x^2 * exp(-x^2 / (2d.a^2)) / d.a^3
 cdf(d::MaxwellBoltzmann, x::Real) = erf(x / (sqrt(2) * d.a)) - sqrt(2 / π) * x * exp(-x^2 / 2d.a^2) / d.a
+
+#### Sampling
+
+function rand(rng::AbstractRNG, d::MaxwellBoltzmann; tol=1e-6)
+    r = rand(rng)
+    x0 = d.a
+
+    return _find_zero(r, x0, d::MaxwellBoltzmann, tol)
+end
+
+# Method taken from https://sciencehouse.wordpress.com/2015/06/20/sampling-from-a-probability-distribution/
+function _find_zero(r, x0, d::MaxwellBoltzmann, tol)
+    nextx = x0 - (cdf(d, x0) - r) / pdf(d, x0)
+    while abs(nextx - x0) > tol
+        x0 = nextx - (cdf(d, nextx) - r) / pdf(d, nextx)
+        nextx = x0 - (cdf(d, x0) - r) / pdf(d, x0)
+    end
+
+    return nextx
+end
