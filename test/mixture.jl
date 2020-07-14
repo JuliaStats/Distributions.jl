@@ -146,6 +146,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
     @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
+    @test isapprox(var(Xs, dims=2)      , var(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)

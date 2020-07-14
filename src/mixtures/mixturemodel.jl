@@ -227,6 +227,10 @@ function var(d::UnivariateMixture)
     return v
 end
 
+function var(d::MultivariateMixture)
+    return diag(cov(d))
+end
+
 function cov(d::MultivariateMixture)
     K = ncomponents(d)
     p = probs(d)
