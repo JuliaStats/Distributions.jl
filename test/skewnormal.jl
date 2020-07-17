@@ -27,9 +27,8 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
     @test pdf(d3, 3.3) == Distributions.pdf(d4, 3.3)
     @test pdf.(d3, 1:3) == Distributions.pdf.(d4, 1:3)
     a = mean(d3), var(d3), std(d3)
-    #b = mean(d4), var(d4), std(d4)
     b = Distributions.mean(d4), Distributions.var(d4), Distributions.std(d4)
-    @test  a == b
+    @test a == b
     @test skewness(d3) == Distributions.skewness(d4)
     @test kurtosis(d3) == Distributions.kurtosis(d4)
     @test mgf(d3, 2.25) == Distributions.mgf(d4, 2.25)
