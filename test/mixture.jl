@@ -70,7 +70,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
-    if (T isa AbstractFloat)
+    if (T <: AbstractFloat)
         if ismissing(rng)
             Xs = rand(g, ns)
         else
