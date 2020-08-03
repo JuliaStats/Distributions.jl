@@ -145,7 +145,8 @@ Following methods need to be implemented for each multivariate distribution type
 
 Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
 
-Furthermore, the generic `loglikelihood` function delegates to `_loglikelihood`, which repeatedly calls `_logpdf`. If there is a better way to compute log-likelihood, one should override `_loglikelihood`.
+Furthermore, the generic `loglikelihood` function repeatedly calls `_logpdf`. If there is
+a better way to compute the log-likelihood, one should override `loglikelihood`.
 
 It is also recommended that one also implements the following statistics functions:
 
