@@ -630,6 +630,7 @@ const continuous_distributions = [
     "pareto",
     "rayleigh",
     "semicircle",
+    "skewnormal",
     "studentizedrange",
     "symtriangular",
     "tdist",
