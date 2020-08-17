@@ -15,7 +15,7 @@ function AliasTable(probs::AbstractVector{T}) where T<:Real
 end
 
 function rand(rng::AbstractRNG, s::AliasTable)
-    i = rand(rng, Random.Sampler(rng, s.sample_space)) % Int
+    i = rand(rng, s.sample_space) % Int
     u = rand(rng)
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
