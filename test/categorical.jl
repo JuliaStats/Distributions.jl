@@ -1,5 +1,6 @@
 using Distributions
 using Test
+using StableRNGs
 
 @testset "Categorical" begin
 
@@ -64,6 +65,12 @@ p = ones(10^6) * 1.0e-6
 
 @testset "test args... constructor" begin
     @test Categorical(0.3, 0.7) == Categorical([0.3, 0.7])
+end
+
+@testset "reproducibility across julia versions" begin
+    d= Categorical([0.1, 0.2, 0.7])
+    rng = StableRNGs.StableRNG(600)
+    @test rand(rng, d, 10) == [2, 1, 3, 3, 2, 3, 3, 3, 3, 3]
 end
 
 end
