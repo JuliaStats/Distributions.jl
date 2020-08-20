@@ -4,7 +4,7 @@ struct AliasTable{N} <: Sampleable{Univariate,Discrete}
 end
 ncategories(s::AliasTable{N}) where N = N
 
-function AliasTable(probs::AbstractVector{T}) where T<:Real
+function AliasTable(probs::AbstractVector)
     N = length(probs)
     N > 0 || throw(ArgumentError("The input probability vector is empty."))
     accp = Vector{Float64}(undef, N)
