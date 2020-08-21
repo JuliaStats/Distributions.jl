@@ -146,7 +146,7 @@ end
 
 _pdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = exp!(_logpdf!(r, d, x))
 
-function gradlogpdf(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
+function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
     z = x - d.μ
     prz = invscale(d)*z
     -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
