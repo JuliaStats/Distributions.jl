@@ -155,7 +155,7 @@ end
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
-    y = sqrt(rand(rng, chisqd)/(d.df))
+    y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
     x .= x ./ y .+ d.μ
     x
@@ -167,7 +167,6 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
-    y = sqrt.(y/(d.df))
-    x .= x ./ y .+ d.μ
+    x .= x ./ sqrt.(y ./ d.df) .+ d.μ
     x
 end
