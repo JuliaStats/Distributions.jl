@@ -157,8 +157,7 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
     y = sqrt(rand(rng, chisqd)/(d.df))
     unwhiten!(d.Σ, randn!(rng, x))
-    broadcast!(/, x, x, y)
-    broadcast!(+, x, x, d.μ)
+    x .= x ./ y .+ d.μ
     x
 end
 
@@ -169,7 +168,6 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
     y = sqrt.(y/(d.df))
-    broadcast!(/, x, x, y)
-    broadcast!(+, x, x, d.μ)
+    x .= x ./ y .+ d.μ
     x
 end
