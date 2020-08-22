@@ -64,7 +64,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
-    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated)) 
+    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
         mixed_pars = Any[pars...]
         first_float = findfirst(float_pars)
         mixed_pars[first_float] = Float32(mixed_pars[first_float])

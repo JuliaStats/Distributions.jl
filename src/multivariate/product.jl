@@ -23,7 +23,13 @@ struct Product{
         return new{S, T, V}(v)
     end
 end
+
 length(d::Product) = length(d.v)
+function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
+                                                    T<:UnivariateDistribution{S}}
+    return eltype(T)
+end
+
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
     broadcast!(dn->rand(rng, dn), x, d.v)
 _logpdf(d::Product, x::AbstractVector{<:Real}) =

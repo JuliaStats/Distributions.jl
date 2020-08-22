@@ -133,4 +133,5 @@ end
     d = MvLogNormal(Array{Float32}(mu), PDMats.PDMat(Array{Float32}(C)))
     @test typeof(convert(MvLogNormal{Float64}, d)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
     @test typeof(convert(MvLogNormal{Float64}, d.normal.μ, d.normal.Σ)) == typeof(MvLogNormal(mu, PDMats.PDMat(C)))
+    @test d == deepcopy(d)
 end
