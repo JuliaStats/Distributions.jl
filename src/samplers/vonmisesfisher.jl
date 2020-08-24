@@ -36,8 +36,8 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler,
     end
 
     # rotate
-    scale = 2.0 * (spl.v' * t)
     copyto!(x, t)
+    scale = 2.0 * (spl.v' * t)
     @. x -= (scale * spl.v)
     return x
 end
@@ -84,8 +84,19 @@ end
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
     _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
 
-function _vmf_householder_vec(u::Vector{Float64})
-    u = normalize(u)
-    u[1] -= 1.0
-    return normalize!(u)
+function _vmf_householder_vec(μ::Vector{Float64})
+    # assuming μ is a unit-vector (which it should be)
+    #  can compute v in a single pass over μ
+
+    p = length(μ)
+    v = zeros(p)
+    v[1] = μ[1] - 1.0
+    s = sqrt(-2*v[1])
+    v[1] /= s
+
+    @inbounds for i in 2:p
+        v[i] = μ[i] / s
+    end
+
+    return v
 end
