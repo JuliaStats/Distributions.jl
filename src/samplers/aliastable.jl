@@ -2,7 +2,7 @@ struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
 end
-ncategories(s::AliasTable) = s.n
+ncategories(s::AliasTable) = length(s.alias)
 
 function AliasTable(probs::AbstractVector)
     n = length(probs)
