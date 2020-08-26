@@ -1,7 +1,6 @@
 struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
-    n::Int
 end
 ncategories(s::AliasTable) = s.n
 
