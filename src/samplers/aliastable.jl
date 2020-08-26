@@ -1,20 +1,21 @@
-struct AliasTable{N} <: Sampleable{Univariate,Discrete}
+struct AliasTable <: Sampleable{Univariate,Discrete}
     accept::Vector{Float64}
     alias::Vector{Int}
+    n::Int
 end
-ncategories(s::AliasTable{N}) where N = N
+ncategories(s::AliasTable) = s.n
 
 function AliasTable(probs::AbstractVector)
-    N = length(probs)
-    N > 0 || throw(ArgumentError("The input probability vector is empty."))
-    accp = Vector{Float64}(undef, N)
-    alias = Vector{Int}(undef, N)
+    n = length(probs)
+    n > 0 || throw(ArgumentError("The input probability vector is empty."))
+    accp = Vector{Float64}(undef, n)
+    alias = Vector{Int}(undef, n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    AliasTable{N}(accp, alias)
+    AliasTable(accp, alias, n)
 end
 
-function rand(rng::AbstractRNG, s::AliasTable{N}) where N
-    i = rand(rng, 1:N) % Int
+function rand(rng::AbstractRNG, s::AliasTable)
+    i = rand(rng, 1:(s.n)) % Int
     u = rand(rng)
     @inbounds r = u < s.accept[i] ? i : s.alias[i]
     r
