@@ -10,7 +10,7 @@ function AliasTable(probs::AbstractVector)
     accp = Vector{Float64}(undef, n)
     alias = Vector{Int}(undef, n)
     StatsBase.make_alias_table!(probs, 1.0, accp, alias)
-    AliasTable(accp, alias, n)
+    AliasTable(accp, alias)
 end
 
 function rand(rng::AbstractRNG, s::AliasTable)
