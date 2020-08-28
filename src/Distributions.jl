@@ -93,6 +93,7 @@ export
     DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
+    GeneralizedGamma,
     Geometric,
     Gumbel,
     Hypergeometric,

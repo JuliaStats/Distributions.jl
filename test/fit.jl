@@ -437,3 +437,17 @@ end
         @test all(ForwardDiff.gradient(f, x) .>= 0)
     end
 end
+
+@testset "Testing fit for GeneralizedGamma" begin
+    for func in funcs, dist in (GeneralizedGamma, GeneralizedGamma{Float64})
+        x = func[2](dist(3.5, 4.7, 1.6), N)
+
+        d = fit_mle(dist, x)
+        @test isa(d, dist)
+        logx = log.(x)
+        ## exact log likelihood as a function of anly p.
+        llike(p) = Distributions.gengamma_MLE_update_function(p, N, x, logx, sum(logx))[6]
+        @test sum(logpdf.(d, x)) > maximum(llike.(0.001:0.2:2.5))
+        @test isapprox(mean(d), mean(dist(3.5, 4.7, 1.6)), atol=0.1)
+    end
+end
