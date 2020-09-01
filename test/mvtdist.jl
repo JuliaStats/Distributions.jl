@@ -39,7 +39,7 @@ end
 
 d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
 @test typeof(convert(GenericMvTDist{Float64}, d)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
-@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.zeromean, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
 @test partype(d) == Float32
 @test d == deepcopy(d)
 
@@ -61,4 +61,23 @@ for i in 1:length(df)
     @test d.df == dd.df
     @test d.μ == dd.μ
     @test Matrix(d.Σ) == Matrix(dd.Σ)
+end
+
+@testset "zero-mean" begin
+
+    X_implicit = GenericMvTDist(2.0, PDMat(Sigma))
+    X_expicit = GenericMvTDist(2.0, zeros(2), PDMat(Sigma))
+
+    # Check that the means equal the same thing.
+    @test mean(X_expicit) == mean(X_implicit)
+
+    # Check that generated random numbers are the same.
+    @test isapprox(
+        rand(MersenneTwister(123456), X_expicit),
+        rand(MersenneTwister(123456), X_implicit),
+    )
+
+    # Check that the logpdf computed is the same.
+    x = rand(X_implicit)
+    @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
 end
