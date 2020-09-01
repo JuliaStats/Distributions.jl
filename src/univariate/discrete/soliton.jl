@@ -53,20 +53,22 @@ Base.show(io::IO, Ω::Soliton) = print(io, "Soliton(K=$(Ω.K), M=$(Ω.M), δ=$(�
     degrees(Ω)
 
 Return a vector composed of the degrees with non-zero probability.
-
 """
 degrees(Ω::Soliton) = copy(Ω.degrees)
 
-"""Robust component of the Soliton distribution."""
+"""
+Robust component of the Soliton distribution.
+"""
 function soliton_τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
     i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
+    T = promote_type(typeof(δ), Float64)
     R = K / M
     if i < M
-        return 1 / (i * M)
+        return T(inv(i * M))
     elseif i == M
-        return log(R / δ) / M
+        return T(log(R / δ) / M)
     else # i <= K
-        return 0.0
+        return zero(T)
     end
 end
 
