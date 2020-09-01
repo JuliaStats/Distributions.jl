@@ -71,7 +71,7 @@ cf(::UnivariateDistribution, ::Any)
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
-loglikelihood(::UnivariateDistribution, ::AbstractArray)
+loglikelihood(::UnivariateDistribution, ::Union{Real,AbstractArray})
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
 logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}

@@ -37,3 +37,31 @@ using ForwardDiff: Dual
         end
     end
 end
+
+@testset "equality" begin
+    dist1 = Normal(1, 1)
+    dist2 = Normal(1.0, 1.0)
+
+    # Check h is used
+    @test hash(dist1, UInt(1)) != hash(dist1, UInt(2))
+
+    @test dist1 == deepcopy(dist1)
+    @test hash(dist1) == hash(deepcopy(dist1))
+    @test dist1 == dist2
+    @test isequal(dist1, dist2)
+    @test isapprox(dist1, dist2)
+    @test hash(dist1) == hash(dist2)
+
+    dist3 = Normal(1, 0.8)
+    @test dist1 != dist3
+    @test !isequal(dist1, dist3)
+    @test !isapprox(dist1, dist3)
+    @test hash(dist1) != hash(dist3)
+    @test isapprox(dist1, dist3, atol=0.3)
+
+    dist4 = LogNormal(1, 1)
+    @test dist1 != dist4
+    @test !isequal(dist1, dist4)
+    @test !isapprox(dist1, dist4)
+    @test hash(dist1) != hash(dist4)
+end

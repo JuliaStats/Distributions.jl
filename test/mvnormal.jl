@@ -24,6 +24,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     @test ldcov ≈ logdet(Σ)
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
+    @test g == deepcopy(g)
 
     # test sampling for AbstractMatrix (here, a SubArray):
     if ismissing(rng)
@@ -82,6 +83,8 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
 
     # log likelihood
     @test loglikelihood(g, X) ≈ sum([Distributions._logpdf(g, X[:,i]) for i in 1:size(X, 2)])
+    @test loglikelihood(g, X[:, 1]) ≈ logpdf(g, X[:, 1])
+    @test loglikelihood(g, [X[:, i] for i in axes(X, 2)]) ≈ loglikelihood(g, X)
 end
 
 ###### General Testing

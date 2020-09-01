@@ -14,7 +14,7 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+import Random: GLOBAL_RNG, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
@@ -142,6 +142,7 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    SkewNormal,
     Soliton,
     StudentizedRange,
     SymTriangularDist,
