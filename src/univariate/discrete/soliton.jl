@@ -59,7 +59,7 @@ degrees(Ω::Soliton) = copy(Ω.degrees)
 """
 Robust component of the Soliton distribution.
 """
-function soliton_τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
+function soliton_τ(K::Integer, M::Integer, δ::Real, i::Integer)
     i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     T = promote_type(typeof(δ), Float64)
     R = K / M
@@ -72,8 +72,10 @@ function soliton_τ(K::Integer, M::Integer, δ::Real, i::Integer)::Float64
     end
 end
 
-"""Ideal component of the Soliton distribution."""
-function soliton_ρ(K::Integer, i::Integer)::Float64
+"""
+Ideal component of the Soliton distribution.
+"""
+function soliton_ρ(K::Integer, i::Integer)
     i <= K || throw(DomainError(i, "Expected i <= K, but got i=$i, K=$K."))
     if i == 1
         return 1 / K
@@ -84,7 +86,7 @@ end
 
 StatsBase.params(Ω::Soliton) = (Ω.K, Ω.M, Ω.δ, Ω.atol)
 
-function Distributions.pdf(Ω::Soliton, i::Integer)::Float64
+function Distributions.pdf(Ω::Soliton, i::Integer)
     j = searchsortedfirst(Ω.degrees, i)
     (j > length(Ω.degrees) || Ω.degrees[j] != i) && return 0.0
     rv = Ω.CDF[j]
@@ -113,7 +115,7 @@ function Statistics.var(Ω::Soliton)
     return rv
 end
 
-function Statistics.quantile(Ω::Soliton, v::Real)::Int
+function Statistics.quantile(Ω::Soliton, v::Real)
     0 <= v <= 1 || throw(DomainError(v, "Expected 0 <= v <= 1."))
     j = searchsortedfirst(Ω.CDF, v)
     j = min(length(Ω.degrees), j)
