@@ -32,7 +32,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
 
-function _rand!(s::Spl, x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{T}) where T<:Real
     # ... generate a single vector sample to x
 end
 ```
