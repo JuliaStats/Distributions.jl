@@ -46,6 +46,7 @@ function pdf(d::Triweight{T}, x::Real) where T<:Real
     u = abs(x - d.μ)/d.σ
     u >= 1 ? zero(T) : 1.09375*(1 - u*u)^3/d.σ
 end
+logpdf(d::Triweight, x::Real) = log(pdf(d, x))
 
 function cdf(d::Triweight{T}, x::Real) where T<:Real
     u = (x - d.μ)/d.σ

@@ -94,8 +94,6 @@ function logpdf(d::BetaPrime{T}, x::Real) where T<:Real
     end
 end
 
-pdf(d::BetaPrime, x::Real) = exp(logpdf(d, x))
-
 cdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? zero(T) : betacdf(d.α, d.β, x / (1 + x))
 ccdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? one(T) : betaccdf(d.α, d.β, x / (1 + x))
 logcdf(d::BetaPrime{T}, x::Real) where {T<:Real} =  x <= 0 ? T(-Inf) : betalogcdf(d.α, d.β, x / (1 + x))

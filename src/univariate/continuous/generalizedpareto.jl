@@ -132,8 +132,6 @@ function logpdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     return p
 end
 
-pdf(d::GeneralizedPareto, x::Real) = exp(logpdf(d, x))
-
 function logccdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     (μ, σ, ξ) = params(d)
 

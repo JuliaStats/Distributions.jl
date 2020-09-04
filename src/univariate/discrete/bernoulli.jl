@@ -82,8 +82,10 @@ end
 #### Evaluation
 
 pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
-                            x == 1 ? succprob(d) : zero(d.p)
+pdf(d::Bernoulli, x::Real) = x == 0 ? failprob(d) :
+                             x == 1 ? succprob(d) : zero(d.p)
+
+logpdf(d::Bernoulli, x::Real) = log(pdf(d, x))
 
 cdf(d::Bernoulli, x::Bool) = x ? one(d.p) : failprob(d)
 cdf(d::Bernoulli, x::Int) = x < 0 ? zero(d.p) :
