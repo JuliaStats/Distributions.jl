@@ -108,7 +108,6 @@ Following methods need to be implemented for each univariate distribution type:
 
 - [`rand(::AbstractRNG, d::UnivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
-- [`pdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`logpdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`cdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`quantile(d::UnivariateDistribution, q::Real)`](@ref)
