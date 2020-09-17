@@ -7,31 +7,27 @@ abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
     dim::Int
-    zeromean::Bool
     μ::Mean
     Σ::Cov
 
-    function GenericMvTDist{T,Cov,Mean}(df::T, dim::Int, zmean::Bool, μ::Mean, Σ::AbstractPDMat{T}) where {T,Cov,Mean}
+    function GenericMvTDist{T,Cov,Mean}(df::T, dim::Int, μ::Mean, Σ::AbstractPDMat{T}) where {T,Cov,Mean}
       df > zero(df) || error("df must be positive")
-      new{T,Cov,Mean}(df, dim, zmean, μ, Σ)
+      new{T,Cov,Mean}(df, dim, μ, Σ)
     end
 end
 
-function GenericMvTDist(df::T, μ::Mean, Σ::Cov, zmean::Bool) where {Cov<:AbstractPDMat, Mean<:AbstractVector, T<:Real}
+function GenericMvTDist(df::T, μ::Mean, Σ::Cov) where {Cov<:AbstractPDMat, Mean<:AbstractVector, T<:Real}
     d = length(μ)
     dim(Σ) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
     R = Base.promote_eltype(T, μ, Σ)
     S = convert(AbstractArray{R}, Σ)
     m = convert(AbstractArray{R}, μ)
-    GenericMvTDist{R, typeof(S), typeof(m)}(R(df), d, zmean, m, S)
+    GenericMvTDist{R, typeof(S), typeof(m)}(R(df), d, m, S)
 end
-
-GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractPDMat) =
-    GenericMvTDist(df, μ, Σ, all(iszero, μ))
 
 function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     R = Base.promote_eltype(df, Σ)
-    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ, true)
+    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -41,12 +37,12 @@ GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
 function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
     S = convert(AbstractArray{T}, d.Σ)
     m = convert(AbstractArray{T}, d.μ)
-    GenericMvTDist{T, typeof(S), typeof(m)}(T(d.df), d.dim, d.zeromean, m, S)
+    GenericMvTDist{T, typeof(S), typeof(m)}(T(d.df), d.dim, m, S)
 end
-function convert(::Type{GenericMvTDist{T}}, df, dim, zeromean, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
+function convert(::Type{GenericMvTDist{T}}, df, dim, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     S = convert(AbstractArray{T}, Σ)
     m = convert(AbstractArray{T}, μ)
-    GenericMvTDist{T, typeof(S), typeof(m)}(T(df), dim, zeromean, m, S)
+    GenericMvTDist{T, typeof(S), typeof(m)}(T(df), dim, m, S)
 end
 
 ## Construction of multivariate normal with specific covariance type
@@ -117,14 +113,10 @@ end
 insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
     length(d) == length(x) && all(isfinite, x)
 
-function sqmahal(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
-    z = d.zeromean ? x : x - d.μ
-    invquad(d.Σ, z)
-end
+sqmahal(d::GenericMvTDist, x::AbstractVector{<:Real}) = invquad(d.Σ, x - d.μ)
 
-function sqmahal!(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
-    z = d.zeromean ? x : x .- d.μ
-    invquad!(r, d.Σ, z)
+function sqmahal!(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{<:Real})
+    invquad!(r, d.Σ, x .- d.μ)
 end
 
 sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vector{T}(undef, size(x, 2)), d, x)
@@ -143,7 +135,7 @@ function _logpdf(d::AbstractMvTDist, x::AbstractVector{T}) where T<:Real
     v - shdfhdim * log1p(sqmahal(d, x) / d.df)
 end
 
-function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) where T<:Real
+function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix)
     sqmahal!(r, d, x)
     shdfhdim, v = mvtdist_consts(d)
     for i = 1:size(x, 2)
@@ -154,8 +146,8 @@ end
 
 _pdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = exp!(_logpdf!(r, d, x))
 
-function gradlogpdf(d::GenericMvTDist, x::AbstractVector{T}) where T<:Real
-    z::Vector{T} = d.zeromean ? x : x - d.μ
+function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
+    z = x - d.μ
     prz = invscale(d)*z
     -((d.df + d.dim) / (d.df + dot(z, prz))) * prz
 end
@@ -163,12 +155,9 @@ end
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq(d.df)
-    y = sqrt(rand(rng, chisqd)/(d.df))
+    y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
-    broadcast!(/, x, x, y)
-    if !d.zeromean
-        broadcast!(+, x, x, d.μ)
-    end
+    x .= x ./ y .+ d.μ
     x
 end
 
@@ -178,10 +167,6 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
-    y = sqrt.(y/(d.df))
-    broadcast!(/, x, x, y)
-    if !d.zeromean
-        broadcast!(+, x, x, d.μ)
-    end
+    x .= x ./ sqrt.(y ./ d.df) .+ d.μ
     x
 end

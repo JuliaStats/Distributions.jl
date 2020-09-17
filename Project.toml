@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.23.3"
+version = "0.23.11"
 
 [deps]
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
@@ -19,9 +19,14 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
+<<<<<<< HEAD
 FillArrays = "0.8"
 HypothesisTests = "0.10"
 PDMats = "0.9.12"
+=======
+FillArrays = "0.9"
+PDMats = "0.10"
+>>>>>>> 7eeee622565a8abb6540edae7ce5d42cd7586b5d
 QuadGK = "2"
 SpecialFunctions = "0.8, 0.9, 0.10"
 StatsBase = "0.32, 0.33"
@@ -35,8 +40,9 @@ FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Calculus", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "HypothesisTests", "Test"]
+test = ["StableRNGs", "Calculus", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "HypothesisTests", "Test"]

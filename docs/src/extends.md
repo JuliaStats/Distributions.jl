@@ -18,12 +18,12 @@ Unlike a full fledged distributions, a sampler, in general, only provides limite
 To implement a univariate sampler, one can define a sub type (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
 
 ```julia
-function rand(s::Spl)
+function rand(rng::AbstractRNG, s::Spl)
     # ... generate a single sample from s
 end
 ```
 
-The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the he scalar version to generate multiple samples.
+The package already implements a vectorized version of `rand!` and `rand` that repeatedly calls the scalar version to generate multiple samples; as wells as a one arg version that uses the default random number generator.
 
 ### Multivariate Sampler
 
@@ -145,7 +145,8 @@ Following methods need to be implemented for each multivariate distribution type
 
 Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
 
-Furthermore, the generic `loglikelihood` function delegates to `_loglikelihood`, which repeatedly calls `_logpdf`. If there is a better way to compute log-likelihood, one should override `_loglikelihood`.
+Furthermore, the generic `loglikelihood` function repeatedly calls `_logpdf`. If there is
+a better way to compute the log-likelihood, one should override `loglikelihood`.
 
 It is also recommended that one also implements the following statistics functions:
 

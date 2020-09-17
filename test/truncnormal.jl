@@ -19,6 +19,9 @@ rng = MersenneTwister(123)
     @test mean(truncated(Normal(1000000,1),0,1000)) ≈ 999.999998998998999001005011019018990904720462367106
     @test var(truncated(Normal(),999000,1e6)) ≥ 0
     @test var(truncated(Normal(1000000,1),0,1000)) ≥ 0
+    # https://github.com/JuliaStats/Distributions.jl/issues/624
+    @test rand(truncated(Normal(+Inf, 1), 0, 1)) ≈ 1
+    @test rand(truncated(Normal(-Inf, 1), 0, 1)) ≈ 0
 end
 @testset "Truncated normal $trunc" begin
     trunc = truncated(Normal(0, 1), -2, 2)
