@@ -405,7 +405,8 @@ The natural logarithm of the difference between the cumulative density function 
 function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
     # Promote to ensure that we don't compute logcdf in low precision and then promote
     _x, _y = promote(x, y)
-    _x <= _y && throw(ArgumentError("requires x > y."))
+    _x == _y && return -Inf
+    _x < _y && throw(ArgumentError("requires x >= y."))
     u = logcdf(d, _x)
     v = logcdf(d, _y)
     return u + log1mexp(v - u)
