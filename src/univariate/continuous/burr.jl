@@ -47,8 +47,9 @@ end
 
 #### Parameters
 
-shape1(d::Burr) = d.k
-shape2(d::Burr) = d.c
+# shape1 and shape2 not defined in the package -> ignore these. params is sufficient
+# shape1(d::Burr) = d.k
+# shape2(d::Burr) = d.c
 scale(d::Burr) = d.λ
 params(d::Burr) = (d.k, d.c, d.λ)
 partype(::Burr{T}) where {T<:Real} = T
@@ -130,7 +131,9 @@ end
 #### Evaluation
 
 function pdf(d::Burr{T}, x::Real) where T<:Real
-    if x > 0
+    if isinf(x)
+        return zero(T)
+    elseif x > 0
         (k, c, λ) = params(d)
         return k*c/λ * (x/λ)^(c-1) * ( 1 + (x/λ)^c )^(-k-1)
     else
@@ -139,7 +142,9 @@ function pdf(d::Burr{T}, x::Real) where T<:Real
 end
 
 function logpdf(d::Burr{T}, x::Real) where T<:Real
-    if x > 0
+    if isinf(x)
+        return -T(Inf)
+    elseif x > 0
         (k, c, λ) = params(d)
         return log(k) + log(c) - log(λ) + (c-1)*log(x) - (c-1)*log(λ) - (k+1)*log1p( (x/λ)^c )
     else
