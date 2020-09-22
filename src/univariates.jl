@@ -596,6 +596,7 @@ const continuous_distributions = [
     "beta",
     "betaprime",
     "biweight",
+    "burr",
     "cauchy",
     "chernoff",
     "chisq",    # Chi depends on Chisq
