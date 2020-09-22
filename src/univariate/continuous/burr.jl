@@ -55,11 +55,11 @@ partype(::Burr{T}) where {T<:Real} = T
 
 #### Statistics
 
-function m(d::Burr, g::Real) # The calculating moments: this should not be exported.
+function m(d::Burr{T}, g::Real) where T<:Real # The calculating moments: this should not be exported.
     (k, c, λ) = params(d)
 
     if (g-(-c))*(g-k*c) < 0
-        λ^g * gamma(1 + g*c) * gamma(k - g/c) / gamma(k)
+        λ^g * gamma(1 + g/c) * gamma(k - g/c) / gamma(k)
     else
         return T(Inf)
     end
