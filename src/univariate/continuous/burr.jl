@@ -80,7 +80,7 @@ end
 function mode(d::Burr{T}) where T<:Real
     (k, c, λ) = params(d)
 
-    if c > 1
+    if c > 1.0
         return λ * ( (c-1) / (k*c+1) )^(1/c)
     else
         return 0.0
@@ -109,7 +109,7 @@ end
 function kurtosis(d::Burr{T}) where T<:Real
     if isinf(m(d, 3))
         return T(Inf)
-    else ξ < 1 / 4
+    else
         g1 = m(d, 1)
         g2 = m(d, 2)
         g3 = m(d, 3)
@@ -132,7 +132,7 @@ end
 function pdf(d::Burr{T}, x::Real) where T<:Real
     if x > 0
         (k, c, λ) = params(d)
-        return k*c/λ * (x/λ)^c * ( 1 + (x/λ)^c )^(-k-1)
+        return k*c/λ * (x/λ)^(c-1) * ( 1 + (x/λ)^c )^(-k-1)
     else
         return zero(T)
     end
@@ -141,7 +141,7 @@ end
 function logpdf(d::Burr{T}, x::Real) where T<:Real
     if x > 0
         (k, c, λ) = params(d)
-        return log(k) + log(c) - log(λ) + c*log(x) - c*log(λ) - (k+1)*log1p( (x/λ)^c )
+        return log(k) + log(c) - log(λ) + (c-1)*log(x) - (c-1)*log(λ) - (k+1)*log1p( (x/λ)^c )
     else
         return -T(Inf)
     end
