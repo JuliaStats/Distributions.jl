@@ -9,9 +9,6 @@ Burr()                  # Burr distribution with k = 1, c = 1 and λ = 1, i.e. B
 Burr(k, c)              # Burr distribution with λ = 1, i.e. Burr(k, c, 1)
 Burr(k, c, λ)           # Burr distribution with shape1 k, shape2 c and scale λ
 params(d)        # Get the parameters, i.e. (k, c, λ)
-shape1(d)        # Get the shape1 parameter, i.e. k
-shape2(d)        # Get the shape2 parameter, i.e. c
-scale(d)         # Get the scale parameter, i.e. λ
 ```
 External links
 * [Burr distribution on Wikipedia](https://en.wikipedia.org/wiki/Burr_distribution)
@@ -50,7 +47,7 @@ end
 # shape1 and shape2 not defined in the package -> ignore these. params is sufficient
 # shape1(d::Burr) = d.k
 # shape2(d::Burr) = d.c
-scale(d::Burr) = d.λ
+# scale(d::Burr) = d.λ
 params(d::Burr) = (d.k, d.c, d.λ)
 partype(::Burr{T}) where {T<:Real} = T
 
