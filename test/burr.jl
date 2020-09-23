@@ -25,8 +25,8 @@ d = Burr(6.0, 4.5)
 @test params(d) == (6.0, 4.5, 1)
 d = Burr(2, 3, 5.0)
 @test params(d) == (2, 3, 5.0)
-d = Burr(1.5, 6.3, 4.2)
-@test scale(d) == 4.20
+# d = Burr(1.5, 6.3, 4.2)
+# @test scale(d) == 4.20
 
 # Non-extreme case: mean, variance, median
 n = 50
