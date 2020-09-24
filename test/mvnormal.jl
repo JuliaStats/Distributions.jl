@@ -4,6 +4,7 @@ import PDMats: ScalMat, PDiagMat, PDMat
 
 using Distributions
 using LinearAlgebra, Random, Test
+using SparseArrays
 
 import Distributions: distrname
 
@@ -147,6 +148,7 @@ end
     end
 end
 
+
 @testset "MvNormal constructor" begin
     mu = [1., 2., 3.]
     C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
@@ -173,6 +175,29 @@ end
     @test MvNormal(mu, I) === MvNormal(mu, 1)
     @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)
     @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
+end
+
+##### Random sampling from MvNormalCanon with sparse precision matrix
+@testset "Sparse MvNormalCanon random sampling" begin
+    # Random samples from MvNormalCanon and MvNormal diverge as
+    # 1) Dimension of cov/prec matrix increases (n)
+    # 2) Determinant of J increases
+    # ...hence, the relative tolerance for testing their equality
+    n = 10
+    k = 0.1
+    rtol = n*k^2
+    seed = 1234
+    J = sprandn(n, n, 0.25) * k
+    J = J'J + I
+    Σ = inv(Matrix(J))
+    J = PDSparseMat(J)
+    μ = zeros(n)
+    d = MvNormalCanon(μ, J*μ, J)
+    d1 = MvNormal(μ, PDMat(Symmetric(Σ)))
+    r = rand(MersenneTwister(seed), d)
+    r1 = rand(MersenneTwister(seed), d1)
+    @test all(isapprox.(r, r1, rtol=rtol))
+    @test mean(abs2.(r .- r1)) < rtol
 end
 
 ##### MLE
