@@ -40,7 +40,7 @@ Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
-    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), check_args=false)
+    DiscreteNonParametric{T,P,Ts,Ps}(convert(Ts, support(d)), convert(Ps, probs(d)), check_args=false)
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
