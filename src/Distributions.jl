@@ -163,6 +163,7 @@ export
     ZeroMeanDiagNormalCanon,
     ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon,
+    ZipfMandelbrot,
 
     # auxiliary types
     RealInterval,
@@ -330,7 +331,7 @@ Supported distributions:
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
-    ZeroMeanFullNormalCanon
+    ZeroMeanFullNormalCanon, ZipfMandelbrot
 
 """
 Distributions

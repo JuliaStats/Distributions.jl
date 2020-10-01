@@ -588,7 +588,8 @@ const discrete_distributions = [
     "poisson",
     "skellam",
     "soliton",
-    "poissonbinomial"
+    "poissonbinomial",
+    "zipfmandelbrot"
 ]
 
 const continuous_distributions = [
