@@ -5,10 +5,6 @@ abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistributio
 
 ### handling support
 
-function insupport(d::NoncentralHypergeometric, x::Real)
-    isinteger(x) && minimum(d) <= x <= maximum(d)
-end
-
 @distr_support NoncentralHypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
 # Functions
@@ -81,13 +77,15 @@ mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
 
 testfd(d::FisherNoncentralHypergeometric) = d.ω^3
 
-logpdf(d::FisherNoncentralHypergeometric, k::Int) =
-    -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
-    log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) +
-    xlogy(k, d.ω) - _P(d, 0)
-
-pdf(d::FisherNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))
-
+function logpdf(d::FisherNoncentralHypergeometric, k::Real)
+    if insupport(d, k)
+        return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
+            log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) +
+            xlogy(k, d.ω) - _P(d, 0)
+    else
+        return log(zero(k))
+    end
+end
 
 ## Wallenius' noncentral hypergeometric distribution
 
@@ -122,12 +120,14 @@ entropy(d::WalleniusNoncentralHypergeometric) = 1
 
 testfd(d::WalleniusNoncentralHypergeometric) = d.ω^3
 
-function logpdf(d::WalleniusNoncentralHypergeometric, k::Int)
-    D = d.ω * (d.ns - k) + (d.nf - d.n + k)
-    f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
-    I, _ = quadgk(f, 0, 1)
-    return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
-    log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
+function logpdf(d::WalleniusNoncentralHypergeometric, k::Real)
+    if insupport(d, k)
+        D = d.ω * (d.ns - k) + (d.nf - d.n + k)
+        f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
+        I, _ = quadgk(f, 0, 1)
+        return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
+            log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
+    else
+        return log(zero(k))
+    end
 end
-
-pdf(d::WalleniusNoncentralHypergeometric, k::Int) = exp(logpdf(d, k))

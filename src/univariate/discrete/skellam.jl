@@ -68,12 +68,14 @@ kurtosis(d::Skellam) = 1 / var(d)
 
 #### Evaluation
 
-function logpdf(d::Skellam, x::Integer)
+function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
-    - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+    if insupport(d, x)
+        return - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+    else
+        return one(x) / 2 * log(zero(μ1/μ2))
+    end
 end
-
-pdf(d::Skellam, x::Integer) = exp(logpdf(d, x))
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)

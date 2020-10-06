@@ -26,8 +26,8 @@ External links:
 
 """
 struct Soliton <: DiscreteUnivariateDistribution
-    K::Int64 # Number of input symbols
-    M::Int64 # Location of the robust component spike
+    K::Int # Number of input symbols
+    M::Int # Location of the robust component spike
     δ::Float64 # Peeling process failure probability
     atol::Float64 # Minimum non-zero probability assigned to a degree
     degrees::Vector{Int} # Degrees with non-zero probability
@@ -86,15 +86,16 @@ end
 
 StatsBase.params(Ω::Soliton) = (Ω.K, Ω.M, Ω.δ, Ω.atol)
 
-function Distributions.pdf(Ω::Soliton, i::Integer)
+function pdf(Ω::Soliton, i::Real)
     j = searchsortedfirst(Ω.degrees, i)
-    (j > length(Ω.degrees) || Ω.degrees[j] != i) && return 0.0
+    (j > length(Ω.degrees) || Ω.degrees[j] != i) && return zero(eltype(Ω.CDF))
     rv = Ω.CDF[j]
     if j > 1
         rv -= Ω.CDF[j-1]
     end
     return rv
 end
+logpdf(Ω::Soliton, i::Real) = log(pdf(Ω, i))
 
 function Distributions.cdf(Ω::Soliton, i::Integer)
     i < Ω.degrees[1] && return 0.0

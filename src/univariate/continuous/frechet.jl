@@ -119,8 +119,6 @@ function logpdf(d::Frechet{T}, x::Real) where T<:Real
     end
 end
 
-pdf(d::Frechet, x::Real) = exp(logpdf(d, x))
-
 cdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
 ccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)
 logcdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -(d.θ / x) ^ d.α : -T(Inf)

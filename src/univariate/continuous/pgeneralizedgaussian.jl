@@ -89,15 +89,11 @@ entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(inv
 
 #### Evaluation
 
-"""
-    pdf(d, x)
-
-Calculates the PDF of the specified distribution 'd'.
-"""
 function pdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
     return ( p / ( 2.0 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
 end
+logpdf(d::PGeneralizedGaussian, x::Real) = log(pdf(d, x))
 
 """
     cdf(d, x)

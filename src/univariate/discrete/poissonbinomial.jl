@@ -110,11 +110,8 @@ function cf(d::PoissonBinomial{T}, t::Real) where {T}
     prod(one(T) .- p .+ p .* cis(t))
 end
 
-pdf(d::PoissonBinomial, k::Integer) = insupport(d, k) ? d.pmf[k+1] : 0
-function logpdf(d::PoissonBinomial{T}, k::Int) where T<:Real
-    insupport(d, k) ? log(d.pmf[k + 1]) : -T(Inf)
-end
-
+pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[k+1] : zero(eltype(d.pmf))
+logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
 # Computes the pdf of a poisson-binomial random variable using
 # fast fourier transform
