@@ -214,6 +214,23 @@ Evaluate logarithm of pdf value for a given sample `x`. This function need not p
 """
 _logpdf(d::MatrixDistribution, x::AbstractArray)
 
+"""
+    loglikelihood(d::MatrixDistribution, x::AbstractArray)
+
+The log-likelihood of distribution `d` with respect to all samples contained in array `x`.
+
+Here, `x` can be a matrix of size `size(d)`, a three-dimensional array with `size(d, 1)`
+rows and `size(d, 2)` columns, or an array of matrices of size `size(d)`.
+"""
+loglikelihood(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logpdf(d, X)
+function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:Real,3})
+    (size(X, 1), size(X, 2)) == size(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
+    return sum(i -> _logpdf(d, view(X, :, :, i)), axes(X, 3))
+end
+function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
+    return sum(x -> logpdf(d, x), X)
+end
+
 #  for testing
 is_univariate(d::MatrixDistribution) = size(d) == (1, 1)
 check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentError("not 1 x 1"))
