@@ -116,6 +116,7 @@ MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCa
 MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) = MvNormalCanon(h, PDiagMat(prec))
 MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) = MvNormalCanon(h, ScalMat(length(h), prec))
 
+MvNormalCanon(J::AbstractSparseMatrix) = MvNormalCanon(PDSparseMat(J))
 MvNormalCanon(J::AbstractMatrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::AbstractVector) = MvNormalCanon(PDiagMat(prec))
 MvNormalCanon(d::Int, prec) = MvNormalCanon(ScalMat(d, prec))
