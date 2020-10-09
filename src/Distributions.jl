@@ -23,6 +23,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 
 import PDMats: dim, PDMat, invquad
 
+using SparseArrays
 using SpecialFunctions
 
 export
