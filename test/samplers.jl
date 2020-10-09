@@ -63,7 +63,7 @@ end
 
 for (S, paramlst) in [
     (PoissonCountSampler, [0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0]),
-    (PoissonADSampler, [5.0, 10.0, 15.0, 20.0, 30.0])]
+    (PoissonADSampler, [10.0, 15.0, 20.0, 30.0])]
     local S
 
     println("    testing $S")
