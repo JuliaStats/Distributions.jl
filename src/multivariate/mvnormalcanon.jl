@@ -112,6 +112,9 @@ function MvNormalCanon(h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPD
     MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
+MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractSparseMatrix{<:Real}) = MvNormalCanon(μ, PDSparseMat(J))
+MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractSparseMatrix{<:Real}) = MvNormalCanon(h, PDSparseMat(J))
+
 MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) = MvNormalCanon(h, PDiagMat(prec))
 MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) = MvNormalCanon(h, ScalMat(length(h), prec))
