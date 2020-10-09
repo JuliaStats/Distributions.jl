@@ -58,18 +58,13 @@ end
 
 _vmf_bval(p::Int, κ::Real) = (p - 1) / (2.0κ + sqrt(4 * abs2(κ) + abs2(p - 1)))
 
-function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
-    # generate the W value -- the key step in simulating vMF
-    #
-    #   following movMF's document for the p > 3 case
-    #   and Wenzel Jakob's document for the p == 3 case
-    #
-    if p == 3
-        ξ = rand(rng)
-        w = 1.0 + (log(ξ + (1.0 - ξ)*exp(-2κ))/κ)
-        return w::Float64
-    end
+function _vmf_genw3(rng::AbstractRNG, p, b, x0, c, κ)
+    ξ = rand(rng)
+    w = 1.0 + (log(ξ + (1.0 - ξ)*exp(-2κ))/κ)
+    return w::Float64
+end
 
+function _vmf_genwp(rng::AbstractRNG, p, b, x0, c, κ)
     r = (p - 1) / 2.0
     betad = Beta(r, r)
     z = rand(rng, betad)
@@ -80,6 +75,13 @@ function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
     end
     return w::Float64
 end
+
+# generate the W value -- the key step in simulating vMF
+#
+#   following movMF's document for the p != 3 case
+#   and Wenzel Jakob's document for the p == 3 case
+_vmf_genw(rng::AbstractRNG, p, b, x0, c, κ) = (p == 3) ? _vmf_genw3(rng, p, b, x0, c, κ) : _vmf_genwp(rng, p, b, x0, c, κ)
+
 
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
     _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
