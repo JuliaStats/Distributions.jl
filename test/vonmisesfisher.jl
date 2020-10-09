@@ -22,6 +22,25 @@ function gen_vmf_tdata(n::Int, p::Int,
     return X
 end
 
+function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
+    if ismissing(rng)
+        μ = randn(p)
+        x = randn(p)
+    else
+        μ = randn(rng, p)
+        x = randn(rng, p)
+    end
+    κ = norm(μ)
+    μ = μ ./ κ
+
+    s = Distributions.VonMisesFisherSampler(μ, κ)
+    H = I - 2*s.v*s.v'
+
+    @test Distributions._vmf_rot!(s, copy(x)) ≈ (H*x)
+
+end
+
+
 
 function test_genw3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missing)
     p = 3
@@ -149,6 +168,7 @@ ns = 10^6
                                                                            (5, 2.0),
                                                                            (2, 2)]
         test_vonmisesfisher(p, κ, n, ns, rng)
+        test_vmf_rot(p, rng)
     end
 
     if !ismissing(rng)

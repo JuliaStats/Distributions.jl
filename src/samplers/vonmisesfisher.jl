@@ -18,37 +18,37 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     VonMisesFisherSampler(p, κ, b, x0, c, v)
 end
 
-function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler,
-                x::AbstractVector, t::AbstractVector)
-    w = _vmf_genw(rng, spl)
-    p = spl.p
-    t[1] = w
-    s = 0.0
-    for i = 2:p
-        t[i] = ti = randn(rng)
-        s += abs2(ti)
-    end
-
-    # normalize t[2:p]
-    r = sqrt((1.0 - abs2(w)) / s)
-    for i = 2:p
-        t[i] *= r
-    end
-
+@inline function _vmf_rot!(spl::VonMisesFisherSampler, x::AbstractVector)
     # rotate
-    copyto!(x, t)
-    scale = 2.0 * (spl.v' * t)
+    scale = 2.0 * (spl.v' * x)
     @. x -= (scale * spl.v)
     return x
 end
 
-_rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector) =
-    _rand!(rng, spl, x, Vector{Float64}(undef, length(x)))
+
+function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector)
+    w = _vmf_genw(rng, spl)
+    p = spl.p
+    x[1] = w
+    s = 0.0
+    @inbounds for i = 2:p
+        x[i] = xi = randn(rng)
+        s += abs2(xi)
+    end
+
+    # normalize x[2:p]
+    r = sqrt((1.0 - abs2(w)) / s)
+    @inbounds for i = 2:p
+        x[i] *= r
+    end
+
+    return _vmf_rot!(spl, x)
+end
+
 
 function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractMatrix)
-    t = Vector{Float64}(undef, size(x, 1))
-    for j = 1:size(x, 2)
-        _rand!(rng, spl, view(x,:,j), t)
+    @inbounds for j in axes(x, 2)
+        _rand!(rng, spl, view(x,:,j))
     end
     return x
 end
@@ -80,7 +80,13 @@ end
 #
 #   following movMF's document for the p != 3 case
 #   and Wenzel Jakob's document for the p == 3 case
-_vmf_genw(rng::AbstractRNG, p, b, x0, c, κ) = (p == 3) ? _vmf_genw3(rng, p, b, x0, c, κ) : _vmf_genwp(rng, p, b, x0, c, κ)
+function _vmf_genw(rng::AbstractRNG, p, b, x0, c, κ)
+    if p == 3
+        return _vmf_genw3(rng, p, b, x0, c, κ)
+    else
+        return _vmf_genwp(rng, p, b, x0, c, κ)
+    end
+end
 
 
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
@@ -91,7 +97,7 @@ function _vmf_householder_vec(μ::Vector{Float64})
     #  can compute v in a single pass over μ
 
     p = length(μ)
-    v = zeros(p)
+    v = similar(μ)
     v[1] = μ[1] - 1.0
     s = sqrt(-2*v[1])
     v[1] /= s
