@@ -18,10 +18,10 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     VonMisesFisherSampler(p, κ, b, x0, c, v)
 end
 
-@inline function _vmf_rot!(spl::VonMisesFisherSampler, x::AbstractVector)
+@inline function _vmf_rot!(v::AbstractVector, x::AbstractVector)
     # rotate
-    scale = 2.0 * (spl.v' * x)
-    @. x -= (scale * spl.v)
+    scale = 2.0 * (v' * x)
+    @. x -= (scale * v)
     return x
 end
 
@@ -42,7 +42,7 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector)
         x[i] *= r
     end
 
-    return _vmf_rot!(spl, x)
+    return _vmf_rot!(spl.v, x)
 end
 
 

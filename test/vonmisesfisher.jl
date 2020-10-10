@@ -34,9 +34,10 @@ function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
     μ = μ ./ κ
 
     s = Distributions.VonMisesFisherSampler(μ, κ)
-    H = I - 2*s.v*s.v'
+    v = μ - vcat(1, zeros(p-1))
+    H = I - 2*v*v'/(v'*v)
 
-    @test Distributions._vmf_rot!(s, copy(x)) ≈ (H*x)
+    @test Distributions._vmf_rot!(s.v, copy(x)) ≈ (H*x)
 
 end
 
