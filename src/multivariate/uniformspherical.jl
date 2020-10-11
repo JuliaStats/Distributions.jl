@@ -26,7 +26,7 @@ UniformSpherical(n::Int) = UniformSpherical{Float64}(n)
 
 show(io::IO, d::UniformSpherical) = show(io, d, (:n,))
 
-# eltype(d::UniformSpherical{T}) where T = Vector{T}
+eltype(d::UniformSpherical{T}) where T = Vector{T}
 
 ### Conversions
 convert(::Type{UniformSpherical{T}}, d::UniformSpherical) where {T<:Real} = UniformSpherical{T}(d.n)

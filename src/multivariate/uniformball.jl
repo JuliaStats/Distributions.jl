@@ -24,7 +24,7 @@ UniformBall(n::Int) = UniformBall{Float64}(n)
 
 show(io::IO, d::UniformBall) = show(io, d, (:n,))
 
-# eltype(d::UniformBall{T}) where T = Vector{T}
+eltype(d::UniformBall{T}) where T = Vector{T}
 
 ### Conversions
 convert(::Type{UniformBall{T}}, d::UniformBall) where {T<:Real} = UniformBall{T}(d.n)
