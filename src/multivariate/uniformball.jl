@@ -60,7 +60,7 @@ for A in [:AbstractVector, :AbstractMatrix]
         if length(d) == 1
             # in 1D, reduces to U[-1, 1]
             for i in eachindex(x)
-                x[i] = 2*rand(rng) - 1
+                @inbounds x[i] = 2*rand(rng) - 1
             end
         else
             _rand!(rng, sampler(d), x)
