@@ -7,7 +7,7 @@ function test_uniformspherical(n::Int)
     d = UniformSpherical(n)
     @test length(d) == n+1
     @test mean(d) == zeros(length(d))
-    @test cov(d) == diagm(var(d))
+    @test diag(cov(d)) == var(d)
     @test d == typeof(d)(params(d)...)
     @test d == deepcopy(d)
     @test partype(d) == Float64
@@ -37,6 +37,6 @@ end
 
 ## General testing
 
-for n in 2:10
+@testset "Testing UniformSpherical at $n" for n in 0:10
     test_uniformspherical(n)
 end

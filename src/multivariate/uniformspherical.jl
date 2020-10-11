@@ -26,8 +26,6 @@ UniformSpherical(n::Int) = UniformSpherical{Float64}(n)
 
 show(io::IO, d::UniformSpherical) = show(io, d, (:n,))
 
-eltype(d::UniformSpherical{T}) where T = Vector{T}
-
 ### Conversions
 convert(::Type{UniformSpherical{T}}, d::UniformSpherical) where {T<:Real} = UniformSpherical{T}(d.n)
 
@@ -65,7 +63,7 @@ for A in [:AbstractVector, :AbstractMatrix]
         if length(d) == 1
             # in 1D, reduces to a U{-1, 1}
             for i in eachindex(x)
-                @inbounds x[i] = rand(rng, (-1, 1))
+                @inbounds x[i] = 2*rand(rng, Bool) - 1
             end
         else
             _rand!(rng, sampler(d), x)

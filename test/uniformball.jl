@@ -7,7 +7,7 @@ function test_uniformball(n::Int)
     d = UniformBall(n)
     @test length(d) == n
     @test mean(d) == zeros(length(d))
-    @test cov(d) == diagm(var(d))
+    @test diag(cov(d)) == var(d)
     @test d == typeof(d)(params(d)...)
     @test d == deepcopy(d)
     @test partype(d) == Float64
@@ -18,8 +18,13 @@ function test_uniformball(n::Int)
     # Support
     x = normalize(rand(length(d)))
 
-    @test !insupport(d, 100*x)
-    @test pdf(d, 100*x) == 0.0
+    if length(d) > 0
+        @test !insupport(d, 100*x)
+        @test pdf(d, 100*x) == 0.0
+    else
+        @test insupport(d, 100*x)
+        @test pdf(d, 100*x) == 1.0
+    end
 
     @test insupport(d, x)
     @test pdf(d, x) != 0.0
@@ -37,6 +42,6 @@ end
 
 ## General testing
 
-@testset "Testing UniformBall at $n" for n in 1:10
+@testset "Testing UniformBall at $n" for n in 0:10
     test_uniformball(n)
 end
