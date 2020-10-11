@@ -7,6 +7,8 @@ function test_uniformball(n::Int)
     d = UniformBall(n)
     @test length(d) == n
     @test mean(d) == zeros(length(d))
+    @test meandir(d) == zeros(length(d))
+    @test isdiag(cov(d))
     @test diag(cov(d)) == var(d)
     @test d == typeof(d)(params(d)...)
     @test d == deepcopy(d)
@@ -33,14 +35,30 @@ function test_uniformball(n::Int)
     @test pdf(d, 0.1*x) != 0.0
 
     # Sampling
-    X = [rand(d) for _ in 1:100_000]
-    @test isapprox(mean(d), mean(X), atol=0.01)
-    @test isapprox(var(d), var(X), atol=0.01)
-    @test isapprox(cov(d), cov(X), atol=0.01)
+    X = rand(d, 100_000)
+    @test isapprox(mean(d), mean(X; dims=2), atol=0.01)
+    @test isapprox(var(d), var(X; dims=2), atol=0.01)
+    if length(d) > 0
+        @test isapprox(cov(d), cov(X; dims=2), atol=0.01)
+    end
+
+    # "Fitting"
+    X = randn(n, 100)
+    U = fit_mle(UniformBall, X)
+    @test length(U) == size(X, 1)
+
 end
 
 
 ## General testing
+
+@testset "Entropy/Normalization for UniformBall" begin
+    @test iszero(entropy(UniformBall(0)))
+    @test exp(entropy(UniformBall(1))) ≈ 2
+    @test exp(entropy(UniformBall(2))) ≈ π
+    @test exp(entropy(UniformBall(3))) ≈ 4π/3
+end
+
 
 @testset "Testing UniformBall at $n" for n in 0:10
     test_uniformball(n)

@@ -34,7 +34,6 @@ length(d::UniformBall) = d.n
 
 mean(d::UniformBall{T}) where T = zeros(T, length(d))
 meandir(d::UniformBall) = mean(d)
-concentration(d::UniformBall{T}) where T = zero(T)
 
 cov(d::UniformBall{T}) where T = Diagonal{T}(var(d))
 var(d::UniformBall{T}) where T = ones(T, length(d)) / (2 + length(d))
