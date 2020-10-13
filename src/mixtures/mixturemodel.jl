@@ -500,6 +500,21 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_
 componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
 
 
+function quantile(d::UnivariateMixture{Continuous}, p::Real)
+    ps = probs(d)
+    cs = [component(d,i) for i in eachindex(ps) if ps[i] > 0.0]
+    qs = quantile.(cs, p)
+    min_q, max_q = extrema(qs)
+
+    if iszero(p)
+        return(min_q)
+    elseif isone(p)
+        return(max_q)
+    end
+
+    quantile_bisect(d, p, min_q, max_q, 1.0e-12)
+end
+
 ## Sampling
 
 struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
