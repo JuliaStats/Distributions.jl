@@ -108,6 +108,21 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
     end
 end
 
+# Test the _dft helper function
+@testset "_dft" begin
+    x = Distributions._dft(collect(1:8))
+    # Comparator computed from FFTW
+    fftw_fft = [36.0 + 0.0im,
+                -4.0 + 9.65685424949238im,
+                -4.0 + 4.0im,
+                -4.0 + 1.6568542494923806im,
+                -4.0 + 0.0im,
+                -4.0 - 1.6568542494923806im,
+                -4.0 - 4.0im,
+                -4.0 - 9.65685424949238im]
+    @test x ≈ fftw_fft
+end
+
 # Test autodiff using ForwardDiff
 f = x -> logpdf(PoissonBinomial(x), 0)
 at = [0.5, 0.5]
