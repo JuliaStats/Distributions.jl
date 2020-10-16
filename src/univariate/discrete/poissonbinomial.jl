@@ -29,7 +29,7 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     pmf::Vector{T}
 
     function PoissonBinomial{T}(p::AbstractArray) where {T <: Real}
-        pb = poissonbinomial_pdf_fft(p)
+        pb = poissonbinomial_pdf(p)
         @assert isprobvec(pb)
         new{T}(p, pb)
     end
@@ -114,45 +114,25 @@ pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[k+1] : zero(eltype(d.
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
 # Computes the pdf of a poisson-binomial random variable using
-# fast fourier transform
+# simple, fast recursive formula
 #
-#     Hong, Y. (2013).
-#     On computing the distribution function for the Poisson binomial
-#     distribution. Computational Statistics and Data Analysis, 59, 41–51.
+#      Marlin A. Thomas & Audrey E. Taub (1982) 
+#      Calculating binomial probabilities when the trial probabilities are unequal, 
+#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534 
 #
-function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T <: Real}
-    n = length(p)
-    ω = 2 * one(T) / (n + 1)
-
-    x = Vector{Complex{T}}(undef, n+1)
-    lmax = ceil(Int, n/2)
-    x[1] = one(T)/(n + 1)
-    for l=1:lmax
-        logz = zero(T)
-        argz = zero(T)
-        for j=1:n
-            zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
-            logz += log(abs(zjl))
-            argz += atan(imag(zjl), real(zjl))
-        end
-        dl = exp(logz)
-        x[l + 1] = dl * cos(argz) / (n + 1) + dl * sin(argz) * im / (n + 1)
-        if n + 1 - l > l
-            x[n + 1 - l + 1] = conj(x[l + 1])
-        end
+function poissonbinomial_pdf(p::AbstractArray{T,1}) where {T <: Real}
+  n = length(p)
+  S = zeros(T, n+1)
+  S[1] = 1-p[1]
+  S[2] = p[1]
+  @inbounds for col in 2:n
+    for r in 1:col
+        row = col - r + 1 
+        S[row+1] = (1-p[col])*S[row+1] + p[col] * S[row]
     end
-    [max(0, real(xi)) for xi in _dft(x)]
-end
-
-# A simple implementation of a DFT to avoid introducing a dependency
-# on an external FFT package just for this one distribution
-function _dft(x::Vector{T}) where T
-    n = length(x)
-    y = zeros(complex(float(T)), n)
-    @inbounds for j = 0:n-1, k = 0:n-1
-        y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
-    end
-    return y
+    S[1] *= 1-p[col]
+  end
+  return S
 end
 
 #### Sampling
