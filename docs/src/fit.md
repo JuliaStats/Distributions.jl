@@ -72,9 +72,9 @@ fit_mle(Categorical, k, x, w)
 fit_mle(Categorical, x)        # equivalent to fit_mle(Categorical, max(x), x)
 fit_mle(Categorical, x, w)
 ```
-!!! note
+!!! warning
 
-    Laplace distribution currently does not support weighted fit_mle.
+     Laplace distribution currently does not support weighted fit_mle.
 ## Sufficient Statistics
 
 For many distributions, estimation can be based on (sum of) sufficient statistics computed from a dataset. To simplify implementation, for such distributions, we implement `suffstats` method instead of `fit_mle` directly:
