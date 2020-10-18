@@ -1,5 +1,7 @@
 # Utilities to support the testing of distributions and samplers
 
+using Distributions
+using Random
 using Printf: @printf
 using Test: @test
 import FiniteDifferences
