@@ -29,7 +29,7 @@ struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
     pmf::Vector{T}
 
     function PoissonBinomial{T}(p::AbstractArray) where {T <: Real}
-        pb = poissonbinomial_pdf_fft(p)
+        pb = poissonbinomial_pdf(p)
         @assert isprobvec(pb)
         new{T}(p, pb)
     end
@@ -112,6 +112,28 @@ end
 
 pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[k+1] : zero(eltype(d.pmf))
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
+
+# Computes the pdf of a poisson-binomial random variable using
+# simple, fast recursive formula
+#
+#      Marlin A. Thomas & Audrey E. Taub (1982) 
+#      Calculating binomial probabilities when the trial probabilities are unequal, 
+#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534 
+#
+function poissonbinomial_pdf(p::AbstractArray{T,1}) where {T <: Real}
+  n = length(p)
+  S = zeros(T, n+1)
+  S[1] = 1-p[1]
+  S[2] = p[1]
+  @inbounds for col in 2:n
+    for r in 1:col
+        row = col - r + 1 
+        S[row+1] = (1-p[col])*S[row+1] + p[col] * S[row]
+    end
+    S[1] *= 1-p[col]
+  end
+  return S
+end
 
 # Computes the pdf of a poisson-binomial random variable using
 # fast fourier transform
