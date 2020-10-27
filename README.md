@@ -24,7 +24,7 @@ A Julia package for probability distributions and associated functions. Particul
 
 * **Support**: We use GitHub for the development of the Julia package *Distributions* itself. 
 For support and questions, please use the [Julia Discourse forum](https://discourse.julialang.org).
-Also, for casual conversation and quick questions, there are the channels `#helpdesk` and `#statistics` in the official Julia chat (https://julialang.slack.com). To get an invitation, please visit [https://slackinvite.julialang.org](https://slackinvite.julialang.org).
+Also, for casual conversation and quick questions, there are the channels `#helpdesk` and `#statistics` in the official Julia chat (https://julialang.slack.com). To get an invitation, please visit [https://julialang.org/slack/](https://julialang.org/slack/).
 
 
 ## Contributing
