@@ -55,6 +55,7 @@ const tests = [
     "univariate_bounds",
     "negativebinomial",
     "bernoulli",
+    "skewtdist"
 ]
 
 printstyled("Running tests:\n", color=:blue)
