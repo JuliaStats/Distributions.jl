@@ -58,6 +58,7 @@ const tests = [
     "bernoulli",
     "soliton",
     "skewnormal",
+    "skewtdist",
 ]
 
 printstyled("Running tests:\n", color=:blue)
