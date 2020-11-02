@@ -1,9 +1,9 @@
-struct QQPair
-    qx::Vector{Float64}
-    qy::Vector{Float64}
+struct QQPair{U<:AbstractVector, V<:AbstractVector}
+    qx::U
+    qy::V
 end
 
-function qqbuild(x::Vector, y::Vector)
+function qqbuild(x::AbstractVector, y::AbstractVector)
     n = min(length(x), length(y))
     grid = [0.0:(1 / (n - 1)):1.0;]
     qx = quantile(x, grid)
@@ -11,7 +11,7 @@ function qqbuild(x::Vector, y::Vector)
     return QQPair(qx, qy)
 end
 
-function qqbuild(x::Vector, d::UnivariateDistribution)
+function qqbuild(x::AbstractVector, d::UnivariateDistribution)
     n = length(x)
     grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
     qx = quantile(x, grid)
@@ -19,7 +19,7 @@ function qqbuild(x::Vector, d::UnivariateDistribution)
     return QQPair(qx, qd)
 end
 
-function qqbuild(d::UnivariateDistribution, x::Vector)
+function qqbuild(d::UnivariateDistribution, x::AbstractVector)
     n = length(x)
     grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
     qd = quantile.(Ref(d), grid)
