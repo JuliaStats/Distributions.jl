@@ -178,6 +178,15 @@ end
          "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing UnivariateMixture" begin
+        g_u = MixtureModel([Normal(), Normal()])
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+
         g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
         @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
         @test ncomponents(g_u) == 3

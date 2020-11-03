@@ -512,7 +512,7 @@ function quantile(d::UnivariateMixture{Continuous}, p::Real)
         return(max_q)
     end
 
-    quantile_bisect(d, p, min_q, max_q, 1.0e-12)
+    quantile_bisect(d, p, min_q - 0.01*abs(min_q), max_q + 0.01*abs(max_q), 1.0e-12)
 end
 
 ## Sampling
