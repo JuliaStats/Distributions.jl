@@ -101,6 +101,10 @@ function pdf(d::LogNormal, x::Real)
     end
     return pdf(Normal(d.μ, d.σ), logx) / x
 end
+function logpdf(d::LogNormal{T}, x::Number) where T<:Real
+    lx = log(x)
+    return normlogpdf(d.μ, d.σ, lx) - lx
+end
 
 function logpdf(d::LogNormal, x::Real)
     if x ≤ zero(x)
