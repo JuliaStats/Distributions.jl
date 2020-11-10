@@ -10,7 +10,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     d_dict = Dict( # Different ways to construct the LocationScale object
                   "original" => d,
                   "sugar" => σ * ρ + μ,
-                  "composed" =>  μ + (ρ * 2σ - 2) / 2 + 1
+                  "composed" =>  μ + ((2 * ρ) * σ - 2) / 2 + 1
                  )
     dref = Normal(μ+σ*μD,σ*σD)
 
