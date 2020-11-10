@@ -97,6 +97,7 @@ function pdf(d::TriangularDist{T}, x::Real) where T<:Real
     x == c ? 2 / (b - a) :
     x <= b ? 2 * (b - x) / ((b - a) * (b - c)) : zero(T)
 end
+logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist{T}, x::Real) where T<:Real
     (a, b, c) = params(d)

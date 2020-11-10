@@ -40,7 +40,7 @@ Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
-    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), check_args=false)
+    DiscreteNonParametric{T,P,Ts,Ps}(convert(Ts, support(d)), convert(Ps, probs(d)), check_args=false)
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -95,19 +95,20 @@ get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
 
 pdf(d::DiscreteNonParametric) = copy(probs(d))
 
-# Helper functions for pdf and cdf required to fix ambiguous method
-# error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
-function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    idx_range = searchsorted(support(d), x)
-    if length(idx_range) > 0
-        return probs(d)[first(idx_range)]
+function pdf(d::DiscreteNonParametric, x::Real)
+    s = support(d)
+    idx = searchsortedfirst(s, x)
+    ps = probs(d)
+    if idx <= length(ps) && s[idx] == x
+        return ps[idx]
     else
-        return zero(P)
+        return zero(eltype(ps))
     end
 end
-pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
-pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
+logpdf(d::DiscreteNonParametric, x::Real) = log(pdf(d, x))
 
+# Helper functions for cdf and ccdf required to fix ambiguous method
+# error involving [c]cdf(::DisceteUnivariateDistribution, ::Int)
 function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
     x > maximum(d) && return 1.0
     s = zero(P)

@@ -35,6 +35,14 @@ function test_draw(d::MatrixDistribution, X::AbstractMatrix)
     @test insupport(d, X)
     @test logpdf(d, X) ≈ log(pdf(d, X))
     @test logpdf(d, [X, X]) ≈ log.(pdf(d, [X, X]))
+    @test loglikelihood(d, X) ≈ logpdf(d, X)
+    @test loglikelihood(d, [X, X]) ≈ 2 * logpdf(d, X)
+    if d isa MatrixFDist
+        # Broken since `pdadd` is not defined for SubArray
+        @test_broken loglikelihood(d, cat(X, X; dims=3)) ≈ 2 * logpdf(d, X)
+    else
+        @test loglikelihood(d, cat(X, X; dims=3)) ≈ 2 * logpdf(d, X)
+    end
     nothing
 end
 

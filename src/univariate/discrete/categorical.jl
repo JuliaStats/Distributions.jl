@@ -24,7 +24,7 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
+const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
     check_args && @check_args(Categorical, isprobvec(p))
@@ -80,7 +80,10 @@ function cdf(d::Categorical{T}, x::Int) where T<:Real
     return c
 end
 
-pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
+function pdf(d::Categorical, x::Real)
+    ps = probs(d)
+    return insupport(d, x) ? ps[round(Int, x)] : zero(eltype(ps))
+end
 
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))

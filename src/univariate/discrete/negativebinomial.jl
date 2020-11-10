@@ -88,17 +88,16 @@ mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p
 #### Evaluation & Sampling
 
 # Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
-function logpdf(d::NegativeBinomial, k::Int)
-    r = d.r*log(d.p) + k*log1p(-d.p)
+function logpdf(d::NegativeBinomial, k::Real)
+    r = d.r * log(d.p) + k * log1p(-d.p)
     if isone(d.p) && iszero(k)
         return zero(r)
-    elseif k < 0
+    elseif !insupport(d, k)
         return oftype(r, -Inf)
     else
-        return r - log(k + d.r) - Distributions.logbeta(d.r, k + 1)
+        return r - log(k + d.r) - logbeta(d.r, k + 1)
     end
 end
-pdf(d::NegativeBinomial, k::Int) = exp(logpdf(d, k))
 
 # cdf and quantile functions are more involved so we still rely on Rmath
 cdf(       d::NegativeBinomial,  x::Int)  =              nbinomcdf(       d.r, d.p, x)

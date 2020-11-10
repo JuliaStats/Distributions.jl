@@ -86,8 +86,6 @@ end
 
 #### Evaluation
 
-pdf(d::InverseGamma, x::Real) = exp(logpdf(d, x))
-
 function logpdf(d::InverseGamma, x::Real)
     (α, θ) = params(d)
     α * log(θ) - loggamma(α) - (α + 1) * log(x) - θ / x

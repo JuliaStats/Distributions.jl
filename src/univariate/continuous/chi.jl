@@ -77,8 +77,6 @@ end
 
 #### Evaluation
 
-pdf(d::Chi, x::Real) = exp(logpdf(d, x))
-
 logpdf(d::Chi, x::Real) = (ν = d.ν;
     (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
 )
