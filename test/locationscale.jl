@@ -5,6 +5,8 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
                                     rng::Union{AbstractRNG, Missing} = missing)
     ρ = Normal(μD,σD)
     d = LocationScale(μ,σ,ρ)
+    @test params(d) == (μ,σ,ρ)
+    
     d_dict = Dict( # Different ways to construct the LocationScale object
                   "original" => d,
                   "sugar" => σ * ρ + μ,
@@ -23,7 +25,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
             @test extrema(d) == (minimum(d), maximum(d))
         end
         @testset "$k" for (k,dtest) in d_dict
-            test_support(d, dref)
+            test_support(dtest, dref)
         end
     end
 
@@ -32,12 +34,11 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     @testset "Promotions and conversions" begin
         function test_promotions_and_conversions(d, dref)
             @test typeof(d.µ) === typeof(d.σ)
-            @test location(d) == μ
-            @test scale(d) == σ
-            @test params(d) == (μ,σ,ρ)
+            @test location(d) ≈ μ atol=1e-15
+            @test    scale(d) ≈ σ atol=1e-15
         end
         @testset "$k" for (k,dtest) in d_dict
-            test_promotions_and_conversions(d, dref)
+            test_promotions_and_conversions(dtest, dref)
         end
     end
 
