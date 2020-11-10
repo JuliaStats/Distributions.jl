@@ -188,7 +188,7 @@ end
     Σ = inv(Matrix(J))
     J = PDSparseMat(J)
     μ = zeros(n)
-    
+
     d_prec_sparse = MvNormalCanon(μ, J*μ, J)
     d_prec_dense = MvNormalCanon(μ, J*μ, PDMat(Matrix(J)))
     d_cov_dense = MvNormal(μ, PDMat(Symmetric(Σ)))
@@ -219,7 +219,7 @@ end
         @test mean((loglik_ii .- loglik_ji).^2) < tol
     end
 end
-end
+
 
 ##### MLE
 
