@@ -139,7 +139,7 @@ invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
 function gradlogpdf(d::LogitNormal{T}, x::Real) where T<:Real
     #TODO check
     (μ, σ) = params(d)
-    0 < x < 1 ? - ((log(x) - μ) / ((σ^2) + 1) * x * (1-x)) : zero(T)
+    0 < x < 1 ? (μ - logit(x)) / (σ^2 * x * (1-x)) - 1/(x-1) - 1/x : zero(T)
 end
 
 # mgf(d::LogitNormal)
