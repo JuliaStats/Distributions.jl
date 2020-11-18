@@ -12,7 +12,7 @@ using Test
 @test isapprox(heslogpdf(Gumbel(3.5, 1.0), 4.0) ,  0.6065306597126334 , atol=1.0e-8)
 @test isapprox(heslogpdf(Laplace(7.0), 34.0)    ,  0.0                , atol=1.0e-8)
 @test isapprox(heslogpdf(Logistic(-6.0), 1.0)   , -0.00182044236024365, atol=1.0e-8)
-@test isapprox(heslogpdf(Logitnormal(3.0), 5.0) , -4.257529394046549  , atol=1.0e-8)
+@test isapprox(heslogpdf(LogitNormal(3.0), 5.0) , -4.257529394046549  , atol=1.0e-8)
 @test isapprox(heslogpdf(LogNormal(5.5), 2.0)   , -1.2017132048600137 , atol=1.0e-8)
 @test isapprox(heslogpdf(Normal(-4.5, 2.0), 1.6), -0.25               , atol=1.0e-8)
 @test isapprox(heslogpdf(TDist(8.0), 9.1)       ,  0.0816459812355031 , atol=1.0e-8)
