@@ -72,6 +72,7 @@ function test_location_scale_normal(μ::Real, σ::Real, μD::Real, σD::Real,
     @test std(r) ≈ std(dref) atol=0.01
     @test cf(d, -0.1) ≈ cf(dref,-0.1)
     @test gradlogpdf(d, 0.1) ≈ gradlogpdf(dref, 0.1)
+    @test heslogpdf(d, 0.1) ≈ heslogpdf(dref, 0.1)
 
 end
 

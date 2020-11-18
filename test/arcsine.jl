@@ -24,4 +24,11 @@ using ForwardDiff
         glog = gradlogpdf(d, v)
         @test fgrad ≈ glog
     end
+
+    # second derivative
+    for v in 3.01:0.1:4.99
+        fhes = ForwardDiff.derivative(x -> gradlogpdf(d, x), v)
+        glog = heslogpdf(d, v)
+        @test fhes ≈ glog
+    end
 end

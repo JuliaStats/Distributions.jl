@@ -17,6 +17,7 @@ using Test, Distributions, StatsBase
     @test pdf(T, x) ≈ pdf(N, x)
     @test logpdf(T, x) ≈ logpdf(N, x)
     @test gradlogpdf(T, x) ≈ gradlogpdf(N, x)
+    @test heslogpdf(T, x) ≈ heslogpdf(N, x)
     @test cf(T, x) ≈ cf(N, x)
 
     fnecdf = ecdf(z)

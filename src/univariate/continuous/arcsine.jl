@@ -99,3 +99,13 @@ function gradlogpdf(d::Arcsine{T}, x::R) where {T, R <: Real}
     x == b && return TP(Inf)
     return TP(0.5 * (inv(b - x) - inv(x - a)))
 end
+function heslogpdf(d::Arcsine{T}, x::R) where {T, R <: Real}
+    TP = promote_type(T, R)
+    (a, b) = extrema(d)
+    # on the bounds, we consider the gradient limit inside the domain
+    # right side for the left bound,
+    # left side for the right bound
+    a < x <= b || return TP(-Inf)
+    x == b && return TP(Inf)
+    return TP(0.5 * (inv((x - a)^2) + inv((x - b)^2)))
+end

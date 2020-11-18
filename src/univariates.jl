@@ -440,6 +440,13 @@ invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
 gradlogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(gradlogpdf, (d, x)))
 
+"""
+    heslogpdf(d::ContinuousUnivariateDistribution, x::Real)
+
+The second derivative of the logarithm of probability density (mass) w.r.t `x` evaluated at `x`.
+"""
+heslogpdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(heslogpdf, (d, x)))
+
 
 function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
     vl = vfirst = first(X)

@@ -141,6 +141,11 @@ function gradlogpdf(d::LogitNormal{T}, x::Real) where T<:Real
     (μ, σ) = params(d)
     0 < x < 1 ? - ((log(x) - μ) / ((σ^2) + 1) * x * (1-x)) : zero(T)
 end
+function heslogpdf(d::LogitNormal{T}, x::Real) where T<:Real
+    #TODO check
+    (μ, σ) = params(d)
+    0 < x < 1 ? ((2 * x - 1) * log(x) + (1 - 2 * μ) * x + μ - 1) / (σ^2 + 1) : zero(T)
+end
 
 # mgf(d::LogitNormal)
 # cf(d::LogitNormal)

@@ -134,7 +134,14 @@ function gradlogpdf(d::Weibull{T}, x::Real) where T<:Real
         zero(T)
     end
 end
-
+function heslogpdf(d::Weibull{T}, x::Real) where T<:Real
+    if insupport(Weibull, x)
+        α, θ = params(d)
+        - (α - 1) / x^2 - α * (α - 1) * x^(α - 2) / (θ^α)
+    else
+        zero(T)
+    end
+end
 
 #### Sampling
 

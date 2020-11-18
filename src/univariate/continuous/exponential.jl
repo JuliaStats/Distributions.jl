@@ -82,6 +82,7 @@ invlogcdf(d::Exponential, lp::Real) = -xval(d, log1mexp(lp))
 invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 
 gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
+heslogpdf(d::Exponential{T}, x::Real) where {T<:Real} = zero(T)
 
 mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
 cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))

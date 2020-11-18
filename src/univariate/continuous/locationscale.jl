@@ -81,3 +81,4 @@ quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 rand(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * rand(rng, d.ρ)
 cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 gradlogpdf(d::LocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+heslogpdf(d::LocationScale, x::Real) = heslogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ^2

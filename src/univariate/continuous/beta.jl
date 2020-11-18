@@ -114,7 +114,8 @@ end
 
 gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
     ((α, β) = params(d); 0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
-
+heslogpdf(d::Beta{T}, x::Real) where {T<:Real} =
+    ((α, β) = params(d); 0 <= x <= 1 ? - (α - 1) / x^2 - (β - 1) / (1 - x)^2 : zero(T))
 
 #### Sampling
 

@@ -131,7 +131,11 @@ invlogccdf(d::Frechet, lp::Real) = d.θ * (-log1mexp(lp))^(-1 / d.α)
 
 function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)
-    insupport(Frechet, x) ? -(α + 1) / x + α * (θ^α) * x^(-α-1)  : zero(T)
+    insupport(Frechet, x) ? -(α + 1) / x + α * (θ^α) * x^(-α-1) : zero(T)
+end
+function heslogpdf(d::Frechet{T}, x::Real) where T<:Real
+    (α, θ) = params(d)
+    insupport(Frechet, x) ? -(α + 1) / x^2 + α * (θ^α) * (-α-1) * x^(-α-2) : zero(T)
 end
 
 ## Sampling

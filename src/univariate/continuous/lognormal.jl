@@ -144,6 +144,8 @@ function gradlogpdf(d::LogNormal, x::Real)
     z = (gradlogpdf(Normal(d.μ, d.σ), log(y)) - 1) / y
     return outofsupport ? zero(z) : z
 end
+heslogpdf(d::LogNormal, x::Real) =
+    x > zero(x) ? (log(x) + d.σ^2 - d.μ - 1) / (d.σ^2 * x^2) : zero(x)
 
 # mgf(d::LogNormal)
 # cf(d::LogNormal)
