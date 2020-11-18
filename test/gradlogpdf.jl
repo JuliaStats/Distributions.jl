@@ -13,7 +13,7 @@ using Test
 @test isapprox(gradlogpdf(Gumbel(3.5, 1.0), 4.0) , -1.6065306597126334 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Laplace(7.0), 34.0)    , -1.0                , atol=1.0e-8)
 @test isapprox(gradlogpdf(Logistic(-6.0), 1.0)   , -0.9981778976111987 , atol=1.0e-8)
-@test isapprox(gradlogpdf(LogitNormal(3.0), 5.0) , -13.905620875658997 , atol=1.0e-8)
+@test isapprox(gradlogpdf(LogitNormal(0.8), 0.4) ,  0.2059548878248986 , atol=1.0e-8)
 @test isapprox(gradlogpdf(LogNormal(5.5), 2.0)   ,  1.9034264097200273 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Normal(-4.5, 2.0), 1.6), -1.525              , atol=1.0e-8)
 @test isapprox(gradlogpdf(TDist(8.0), 9.1)       , -0.9018830525272548 , atol=1.0e-8)
