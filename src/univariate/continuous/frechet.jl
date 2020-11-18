@@ -135,7 +135,7 @@ function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
 end
 function heslogpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)
-    insupport(Frechet, x) ? -(α + 1) / x^2 + α * (θ^α) * (-α-1) * x^(-α-2) : zero(T)
+    insupport(Frechet, x) ? (α + 1) / x^2 - (α + α^2 ) * θ^α * x^(-α-2) : zero(T)
 end
 
 ## Sampling
