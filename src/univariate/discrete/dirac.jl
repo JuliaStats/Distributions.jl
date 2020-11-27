@@ -1,30 +1,54 @@
 """
-    Dirac(value)
+    Dirac(x)
 
-A *Dirac distribution* is parametrized by its only value, and takes its value with probability 1.
+A *Dirac distribution* is parameterized by its only value `x`, and takes its value with probability 1.
+
+```math
+P(X = \\hat{x}) = \\begin{cases}
+1 & \\quad \\text{for } \\hat{x} = x, \\\\
+0 & \\quad \\text{for } \\hat{x} \\neq x.
+\\end{cases}
+```
 
 ```julia
-d = Dirac(2.0)  # Dirac distribution with value = 2.
-rand(d)         # Always returns the same value
+Dirac(2.5)   # Dirac distribution with value x = 2.5
 ```
+
+External links:
+
+* [Dirac measure on Wikipedia](http://en.wikipedia.org/wiki/Dirac_measure)
 """
 struct Dirac{T} <: DiscreteUnivariateDistribution
     value::T
 end
 
-eltype(::Dirac{T}) where {T} = T
-rand(rng::AbstractRNG, d::Dirac) = d.value
-pdf(d::Dirac, x::Real) = x == d.value ? 1.0 : 0.0
-cdf(d::Dirac, x::Real) = x < d.value ? 0.0 : 1.0
-quantile(d::Dirac{T}, p) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
+Base.eltype(::Type{Dirac{T}}) where {T} = T
+
+insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
-insupport(d::Dirac, x) = x == d.value
+
+#### Properties
+
 mean(d::Dirac) = d.value
 var(d::Dirac) = 0.0
+
 mode(d::Dirac) = d.value
-skewness(d::Dirac) = 0.0
-kurtosis(d::Dirac) = 0.0
+
 entropy(d::Dirac) = 0.0
+
+#### Evaluation
+
+pdf(d::Dirac, x::Real) = insupport(d, x) ? 1.0 : 0.0
+logpdf(d::Dirac, x::Real) = insupport(d, x) ? 0.0 : -Inf
+
+cdf(d::Dirac, x::Real) = x < d.value ? 0.0 : 1.0
+
+quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
+
 mgf(d::Dirac, t) = exp(t * d.value)
-cf(d::Dirac, t) = exp(im * t * d.value)
+cf(d::Dirac, t) = cis(t * d.value)
+
+#### Sampling
+
+rand(rng::AbstractRNG, d::Dirac) = d.value
