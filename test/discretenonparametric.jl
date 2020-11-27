@@ -2,6 +2,10 @@ import StatsBase: ProbabilityWeights
 using Random, Distributions
 using Test
 
+# A dummy RNG that always outputs 1
+struct AllOneRNG <: AbstractRNG end
+Base.rand(::AllOneRNG, ::Type{T}) where {T<:Number} = one(T)
+
 rng = MersenneTwister(123)
 
 @testset "Testing matrix-variates with $key" for (key, func) in
@@ -10,14 +14,14 @@ rng = MersenneTwister(123)
 
 d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 
-@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], Distributions.NoArgCheck()))
-@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], Distributions.NoArgCheck())
+@test !(d ≈ DiscreteNonParametric([40., 80, 120, -60], [.4, .3, .1, .2], check_args=false))
+@test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], check_args=false)
 
 # Invalid probability
 @test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
 
 # Invalid probability, but no arg check
-DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], Distributions.NoArgCheck())
+DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], check_args=false)
 
 test_range(d)
 vs = Distributions.get_evalsamples(d, 0.00001)
@@ -107,4 +111,23 @@ d3 = fit(DiscreteNonParametric, xs)
 @test support(d3) == support(d1)
 @test probs(d3) ≈ probs(d1)
 
+# Numerical stability; see issue #872 and PR #926
+p = [1 - eps(Float32), eps(Float32)]
+d = Categorical(p)
+@test ([rand(d) for _ = 1:100_000]; true)
+
+# Numerical stability w/ large prob vectors;
+# see issue #1017
+n = 20000 # large vector length
+p = Float32[0.5; fill(0.5/(n ÷ 2) - 3e-8, n ÷ 2); fill(eps(Float64), n ÷ 2)]
+d = Categorical(p)
+rng = AllOneRNG()
+@test (rand(rng, d); true)
+
+# Sampling with values of zero probability; see issue #1105
+d = DiscreteNonParametric([0, 1, 2, 3, 4], [0.0f0, 0.1f0, 0.2f0, 0.3f0, 0.4f0])
+@test iszero(count(iszero(rand(d)) for _ in 1:100_000_000))
+
+d = DiscreteNonParametric([4, 3, 2, 1, 0], [0.4f0, 0.3f0, 0.2f0, 0.1f0, 0.0f0])
+@test iszero(count(iszero(rand(d)) for _ in 1:100_000_000))
 end

@@ -31,35 +31,31 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
     c::T
-
-    function TriangularDist{T}(a::T, b::T, c::T) where T
-        @check_args(TriangularDist, a < b)
-        @check_args(TriangularDist, a <= c <= b)
-        new{T}(a, b, c)
-    end
-    function TriangularDist{T}(a::T, b::T) where T
-        @check_args(TriangularDist, a < b)
-        new{T}(a, b, middle(a, b))
-    end
+    TriangularDist{T}(a::T, b::T, c::T) where {T <: Real} = new{T}(a, b, c)
 end
 
-TriangularDist(a::T, b::T, c::T) where {T<:Real} = TriangularDist{T}(a, b, c)
+function TriangularDist(a::T, b::T, c::T; check_args=true) where {T <: Real}
+    check_args && @check_args(TriangularDist, a <= c <= b)
+    return TriangularDist{T}(a, b, c)
+end
+
+TriangularDist(a::T, b::T) where {T <: Real} = TriangularDist(a, b, middle(a, b))
+
 TriangularDist(a::Real, b::Real, c::Real) = TriangularDist(promote(a, b, c)...)
-TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(Float64(a), Float64(b), Float64(c))
-TriangularDist(a::T, b::T) where {T<:Real} = TriangularDist{T}(a, b)
+TriangularDist(a::Integer, b::Integer, c::Integer) = TriangularDist(float(a), float(b), float(c))
 TriangularDist(a::Real, b::Real) = TriangularDist(promote(a, b)...)
-TriangularDist(a::Integer, b::Integer) = TriangularDist(Float64(a), Float64(b))
+TriangularDist(a::Integer, b::Integer) = TriangularDist(float(a), float(b))
 
 @distr_support TriangularDist d.a d.b
 
 #### Conversions
 convert(::Type{TriangularDist{T}}, a::Real, b::Real, c::Real) where {T<:Real} = TriangularDist(T(a), T(b), T(c))
-convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c))
+convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c), check_args=false)
 
 #### Parameters
 
 params(d::TriangularDist) = (d.a, d.b, d.c)
-@inline partype(d::TriangularDist{T}) where {T<:Real} = T
+partype(::TriangularDist{T}) where {T<:Real} = T
 
 
 #### Statistics
@@ -101,6 +97,7 @@ function pdf(d::TriangularDist{T}, x::Real) where T<:Real
     x == c ? 2 / (b - a) :
     x <= b ? 2 * (b - x) / ((b - a) * (b - c)) : zero(T)
 end
+logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist{T}, x::Real) where T<:Real
     (a, b, c) = params(d)

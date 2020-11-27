@@ -34,21 +34,21 @@ struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     ξ::T
-
-    function GeneralizedPareto{T}(μ::T, σ::T, ξ::T) where T
-        @check_args(GeneralizedPareto, σ > zero(σ))
-        new{T}(μ, σ, ξ)
-    end
-
+    GeneralizedPareto{T}(μ::T, σ::T, ξ::T) where {T} = new{T}(μ, σ, ξ)
 end
 
-GeneralizedPareto(μ::T, σ::T, ξ::T) where {T<:Real} = GeneralizedPareto{T}(μ, σ, ξ)
+function GeneralizedPareto(μ::T, σ::T, ξ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(GeneralizedPareto, σ > zero(σ))
+    return GeneralizedPareto{T}(μ, σ, ξ)
+end
+
 GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, σ, ξ)...)
+
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedPareto(Float64(μ), Float64(σ), Float64(ξ))
+    GeneralizedPareto(float(μ), float(σ), float(ξ))
 end
-GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(0.0, σ, ξ)
-GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0)
+GeneralizedPareto(σ::T, ξ::Real) where {T <: Real} = GeneralizedPareto(zero(T), σ, ξ)
+GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0, check_args=false)
 
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf
@@ -58,7 +58,7 @@ function convert(::Type{GeneralizedPareto{T}}, μ::S, σ::S, ξ::S) where {T <: 
     GeneralizedPareto(T(μ), T(σ), T(ξ))
 end
 function convert(::Type{GeneralizedPareto{T}}, d::GeneralizedPareto{S}) where {T <: Real, S <: Real}
-    GeneralizedPareto(T(d.μ), T(d.σ), T(d.ξ))
+    GeneralizedPareto(T(d.μ), T(d.σ), T(d.ξ), check_args=false)
 end
 
 #### Parameters
@@ -67,14 +67,13 @@ location(d::GeneralizedPareto) = d.μ
 scale(d::GeneralizedPareto) = d.σ
 shape(d::GeneralizedPareto) = d.ξ
 params(d::GeneralizedPareto) = (d.μ, d.σ, d.ξ)
-@inline partype(d::GeneralizedPareto{T}) where {T<:Real} = T
-
+partype(::GeneralizedPareto{T}) where {T} = T
 
 #### Statistics
 
 median(d::GeneralizedPareto) = d.ξ == 0 ? d.μ + d.σ * logtwo : d.μ + d.σ * expm1(d.ξ * logtwo) / d.ξ
 
-function mean(d::GeneralizedPareto{T}) where T<:Real
+function mean(d::GeneralizedPareto{T}) where {T<:Real}
     if d.ξ < 1
         return d.μ + d.σ / (1 - d.ξ)
     else
@@ -82,7 +81,7 @@ function mean(d::GeneralizedPareto{T}) where T<:Real
     end
 end
 
-function var(d::GeneralizedPareto{T}) where T<:Real
+function var(d::GeneralizedPareto{T}) where {T<:Real}
     if d.ξ < 0.5
         return d.σ^2 / ((1 - d.ξ)^2 * (1 - 2 * d.ξ))
     else
@@ -90,7 +89,7 @@ function var(d::GeneralizedPareto{T}) where T<:Real
     end
 end
 
-function skewness(d::GeneralizedPareto{T}) where T<:Real
+function skewness(d::GeneralizedPareto{T}) where {T<:Real}
     (μ, σ, ξ) = params(d)
 
     if ξ < (1/3)
@@ -132,8 +131,6 @@ function logpdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
 
     return p
 end
-
-pdf(d::GeneralizedPareto, x::Real) = exp(logpdf(d, x))
 
 function logccdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     (μ, σ, ξ) = params(d)

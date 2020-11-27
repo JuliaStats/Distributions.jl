@@ -1,15 +1,23 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using PDMats # test dependencies
 using Test
 using Distributed
 using Random
 using StatsBase
+using LinearAlgebra
+using HypothesisTests
+
+import JSON
+import ForwardDiff
 
 const tests = [
+    "arcsine",
     "dirac",
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "normal",
+    "lognormal",
     "mvnormal",
     "mvlognormal",
     "types",
@@ -18,6 +26,7 @@ const tests = [
     "categorical",
     "univariates",
     "continuous",
+    "edgecases",
     "fit",
     "multinomial",
     "binomial",
@@ -28,9 +37,11 @@ const tests = [
     "mvtdist",
     "kolmogorov",
     "edgeworth",
-    "matrix",
+    "matrixreshaped",
+    "matrixvariates",
     "vonmisesfisher",
     "conversion",
+    "convolution",
     "mixture",
     "gradlogpdf",
     "noncentralt",
@@ -43,6 +54,11 @@ const tests = [
     "discretenonparametric",
     "functionals",
     "chernoff",
+    "univariate_bounds",
+    "negativebinomial",
+    "bernoulli",
+    "soliton",
+    "skewnormal",
 ]
 
 printstyled("Running tests:\n", color=:blue)

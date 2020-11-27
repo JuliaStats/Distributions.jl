@@ -33,7 +33,7 @@ struct FDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 FDist(ν1::T, ν2::T) where {T<:Real} = FDist{T}(ν1, ν2)
-FDist(ν1::Integer, ν2::Integer) = FDist(Float64(ν1), Float64(ν2))
+FDist(ν1::Integer, ν2::Integer) = FDist(float(ν1), float(ν2))
 FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
 
 @distr_support FDist 0.0 Inf
@@ -91,7 +91,7 @@ function entropy(d::FDist)
     hν1 = ν1/2
     hν2 = ν2/2
     hs = (ν1 + ν2)/2
-    return log(ν2 / ν1) + lgamma(hν1) + lgamma(hν2) - lgamma(hs) +
+    return log(ν2 / ν1) + loggamma(hν1) + loggamma(hν2) - loggamma(hs) +
         (1 - hν1) * digamma(hν1) + (-1 - hν2) * digamma(hν2) +
         hs * digamma(hs)
 end

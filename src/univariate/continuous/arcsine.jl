@@ -23,18 +23,22 @@ External links
 
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
 
+Use `Arcsine(a, b, check_args=false)` to bypass argument checks.
 """
 struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-
-    Arcsine{T}(a::T, b::T) where {T} = (@check_args(Arcsine, a < b); new{T}(a, b))
+    Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-Arcsine(a::T, b::T) where {T<:Real} = Arcsine{T}(a, b)
+function Arcsine(a::T, b::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Arcsine, a < b)
+    return Arcsine{T}(a, b)
+end
+
 Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
-Arcsine(a::Integer, b::Integer) = Arcsine(Float64(a), Float64(b))
-Arcsine(b::Real) = Arcsine(0.0, b)
+Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
+Arcsine(b::T) where {T <: Real} = Arcsine(zero(T), b)
 Arcsine() = Arcsine(0.0, 1.0)
 
 @distr_support Arcsine d.a d.b
@@ -52,7 +56,7 @@ end
 location(d::Arcsine) = d.a
 scale(d::Arcsine) = d.b - d.a
 params(d::Arcsine) = (d.a, d.b)
-@inline partype(d::Arcsine{T}) where {T<:Real} = T
+partype(::Arcsine{T}) where {T} = T
 
 
 ### Statistics
@@ -63,8 +67,8 @@ mode(d::Arcsine) = d.a
 modes(d::Arcsine) = [d.a, d.b]
 
 var(d::Arcsine) = abs2(d.b - d.a) / 8
-skewness(d::Arcsine{T}) where {T<:Real} = zero(T)
-kurtosis(d::Arcsine{T}) where {T<:Real} = -T(3/2)
+skewness(d::Arcsine{T}) where {T} = zero(T)
+kurtosis(d::Arcsine{T}) where {T} = -T(3/2)
 
 entropy(d::Arcsine) = -0.24156447527049044469 + log(scale(d))
 
@@ -84,3 +88,14 @@ cdf(d::Arcsine{T}, x::Real) where {T<:Real} = x < d.a ? zero(T) :
                               0.636619772367581343 * asin(sqrt((x - d.a) / (d.b - d.a)))
 
 quantile(d::Arcsine, p::Real) = location(d) + abs2(sin(halfπ * p)) * scale(d)
+
+function gradlogpdf(d::Arcsine{T}, x::R) where {T, R <: Real}
+    TP = promote_type(T, R)
+    (a, b) = extrema(d)
+    # on the bounds, we consider the gradient limit inside the domain
+    # right side for the left bound,
+    # left side for the right bound
+    a < x <= b || return TP(-Inf)
+    x == b && return TP(Inf)
+    return TP(0.5 * (inv(b - x) - inv(x - a)))
+end

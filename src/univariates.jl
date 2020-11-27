@@ -140,7 +140,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{<:$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -311,28 +311,22 @@ cf(d::UnivariateDistribution, t)
 # pdf
 
 """
-    pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
+    pdf(d::UnivariateDistribution, x::Real)
 
-Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
-type but `x` is integer, the value is converted to `Int`.
-
-The version with `x::Integer` must be implemented by
-discrete distributions.
+Evaluate the probability density (mass) at `x`.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
 Evaluate the logarithm of probability density (mass) at `x`.
-Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
-Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
+
+See also: [`pdf`](@ref).
 """
-logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
+logpdf(d::UnivariateDistribution, x::Real)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -390,6 +384,20 @@ logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
+    logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
+
+The natural logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
+"""
+function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
+    # Promote to ensure that we don't compute logcdf in low precision and then promote
+    _x, _y = promote(x, y)
+    _x <= _y && throw(ArgumentError("requires x > y."))
+    u = logcdf(d, _x)
+    v = logcdf(d, _y)
+    return u + log1mexp(v - u)
+end
+
+"""
     logccdf(d::UnivariateDistribution, x::Real)
 
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
@@ -422,9 +430,9 @@ The inverse function of logcdf.
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
 """
-    invlogcdf(d::UnivariateDistribution, lp::Real)
+    invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logcdf.
+The inverse function of logccdf.
 """
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
@@ -503,11 +511,14 @@ end
 
 ## loglikelihood
 """
-    loglikelihood(d::UnivariateDistribution, X::AbstractArray)
+    loglikelihood(d::UnivariateDistribution, x::Union{Real,AbstractArray})
 
-The log-likelihood of distribution `d` w.r.t. all samples contained in array `x`.
+The log-likelihood of distribution `d` with respect to all samples contained in `x`.
+
+Here `x` can be a single scalar sample or an array of samples.
 """
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
+loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### macros to use StatsFuns for method implementation
 
@@ -563,6 +574,7 @@ const discrete_distributions = [
     "noncentralhypergeometric",
     "poisson",
     "skellam",
+    "soliton",
     "poissonbinomial"
 ]
 
@@ -606,6 +618,7 @@ const continuous_distributions = [
     "pareto",
     "rayleigh",
     "semicircle",
+    "skewnormal",
     "studentizedrange",
     "symtriangular",
     "tdist",

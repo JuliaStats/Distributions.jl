@@ -13,17 +13,20 @@ end
 #
 # Suitable for small μ
 #
-struct PoissonCountSampler <: Sampleable{Univariate,Discrete}
-    μ::Float64
+struct PoissonCountSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+    μ::T
 end
+
+PoissonCountSampler(d::Poisson) = PoissonCountSampler(rate(d))
 
 function rand(rng::AbstractRNG, s::PoissonCountSampler)
     μ = s.μ
+    T = typeof(μ)
     n = 0
-    c = randexp(rng)
+    c = randexp(rng, T)
     while c < μ
         n += 1
-        c += randexp(rng)
+        c += randexp(rng, T)
     end
     return n
 end
@@ -36,72 +39,85 @@ end
 #
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
-struct PoissonADSampler <: Sampleable{Univariate,Discrete}
-    μ::Float64
-    s::Float64
-    d::Float64
+struct PoissonADSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+    μ::T
+    s::T
+    d::T
     L::Int
 end
 
-PoissonADSampler(μ::Float64) =
-    PoissonADSampler(μ,sqrt(μ),6.0*μ^2,floor(Int,μ-1.1484))
+PoissonADSampler(d::Poisson) = PoissonADSampler(rate(d))
 
-function rand(rng::AbstractRNG, s::PoissonADSampler)
+function PoissonADSampler(μ::Real)
+    s = sqrt(μ)
+    d = 6 * μ^2
+    L = floor(Int, μ - 1.1484)
+
+    PoissonADSampler(promote(μ, s, d)..., L)
+end
+
+function rand(rng::AbstractRNG, sampler::PoissonADSampler)
+    μ = sampler.μ
+    s = sampler.s
+    d = sampler.d
+    L = sampler.L
+    μType = typeof(μ)
+
     # Step N
-    G = s.μ + s.s*randn(rng)
+    G = μ + s * randn(rng, μType)
 
-    if G >= 0.0
-        K = floor(Int,G)
+    if G >= zero(G)
+        K = floor(Int, G)
         # Step I
-        if K >= s.L
+        if K >= L
             return K
         end
 
         # Step S
-        U = rand(rng)
-        if s.d*U >= (s.μ-K)^3
+        U = rand(rng, μType)
+        if d * U >= (μ - K)^3
             return K
         end
 
         # Step P
-        px,py,fx,fy = procf(s.μ,K,s.s)
+        px, py, fx, fy = procf(μ, K, s)
 
         # Step Q
-        if fy*(1-U) <= py*exp(px-fx)
+        if fy * (1 - U) <= py * exp(px - fx)
             return K
         end
     end
 
     while true
         # Step E
-        E = randexp(rng)
-        U = 2.0*rand(rng)-1.0
-        T = 1.8+copysign(E,U)
+        E = randexp(rng, μType)
+        U = 2 * rand(rng, μType) - one(μType)
+        T = 1.8 + copysign(E, U)
         if T <= -0.6744
             continue
         end
 
-        K = floor(Int,s.μ + s.s*T)
-        px,py,fx,fy = procf(s.μ,K,s.s)
-        c = 0.1069/s.μ
+        K = floor(Int, μ + s * T)
+        px, py, fx, fy = procf(μ, K, s)
+        c = 0.1069 / μ
 
         # Step H
-        if c*abs(U) <= py*exp(px+E)-fy*exp(fx+E)
+        if c*abs(U) <= py*exp(px + E) - fy*exp(fx + E)
             return K
         end
     end
 end
 
 # Procedure F
-function procf(μ::Float64, K::Int, s::Float64)
+function procf(μ, K::Int, s)
     # can be pre-computed, but does not seem to affect performance
     ω = 0.3989422804014327/s
     b1 = 0.041666666666666664/μ
     b2 = 0.3*b1*b1
     c3 = 0.14285714285714285*b1*b2
-    c2 = b2 - 15.0*c3
-    c1 = b1 - 6.0*b2 + 45.0*c3
-    c0 = 1.0 - b1 + 3.0*b2 - 15.0*c3
+    c2 = b2 - 15 * c3
+    c1 = b1 - 6 * b2 + 45 * c3
+    c0 = 1 - b1 + 3 * b2 - 15 * c3
 
     if K < 10
         px = -μ
@@ -116,7 +132,7 @@ function procf(μ::Float64, K::Int, s::Float64)
     end
     X = (K-μ+0.5)/s
     X2 = X^2
-    fx = -0.5*X2 # missing negation in pseudo-algorithm, but appears in fortran code.
+    fx = -X2 / 2 # missing negation in pseudo-algorithm, but appears in fortran code.
     fy = ω*(((c3*X2+c2)*X2+c1)*X2+c0)
     return px,py,fx,fy
 end

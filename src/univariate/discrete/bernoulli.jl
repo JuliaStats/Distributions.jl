@@ -27,22 +27,24 @@ External links:
 struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Bernoulli{T}(p::T) where T
-        @check_args(Bernoulli, zero(p) <= p <= one(p))
-        new{T}(p)
-    end
-
+    Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
 end
 
-Bernoulli(p::T) where {T<:Real} = Bernoulli{T}(p)
-Bernoulli(p::Integer) = Bernoulli(Float64(p))
-Bernoulli() = Bernoulli(0.5)
+function Bernoulli(p::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Bernoulli, zero(p) <= p <= one(p))
+    return Bernoulli{T}(p)
+end
 
-@distr_support Bernoulli 0 1
+Bernoulli(p::Integer) = Bernoulli(float(p))
+Bernoulli() = Bernoulli(0.5, check_args=false)
+
+@distr_support Bernoulli false true
+
+Base.eltype(::Type{<:Bernoulli}) = Bool
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
-convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p))
+convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), check_args=false)
 
 #### Parameters
 
@@ -50,7 +52,7 @@ succprob(d::Bernoulli) = d.p
 failprob(d::Bernoulli) = 1 - d.p
 
 params(d::Bernoulli) = (d.p,)
-@inline partype(d::Bernoulli{T}) where {T<:Real} = T
+partype(::Bernoulli{T}) where {T} = T
 
 
 #### Properties
@@ -80,14 +82,16 @@ end
 #### Evaluation
 
 pdf(d::Bernoulli, x::Bool) = x ? succprob(d) : failprob(d)
-pdf(d::Bernoulli, x::Int) = x == 0 ? failprob(d) :
-                            x == 1 ? succprob(d) : zero(d.p)
+pdf(d::Bernoulli, x::Real) = x == 0 ? failprob(d) :
+                             x == 1 ? succprob(d) : zero(d.p)
 
-cdf(d::Bernoulli, x::Bool) = x ? failprob(d) : one(d.p)
+logpdf(d::Bernoulli, x::Real) = log(pdf(d, x))
+
+cdf(d::Bernoulli, x::Bool) = x ? one(d.p) : failprob(d)
 cdf(d::Bernoulli, x::Int) = x < 0 ? zero(d.p) :
                             x < 1 ? failprob(d) : one(d.p)
 
-ccdf(d::Bernoulli, x::Bool) = x ? succprob(d) : one(d.p)
+ccdf(d::Bernoulli, x::Bool) = x ? zero(d.p) : succprob(d)
 ccdf(d::Bernoulli, x::Int) = x < 0 ? one(d.p) :
                              x < 1 ? succprob(d) : zero(d.p)
 

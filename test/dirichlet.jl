@@ -44,6 +44,7 @@ d = Dirichlet(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)
 @test d == typeof(d)(params(d)...)
+@test d == deepcopy(d)
 
 @test mean(d) ≈ v / sum(v)
 @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
@@ -72,8 +73,22 @@ x = func[2](d, 10)
 @test isa(x, Matrix{Float64})
 @test size(x) == (3, 10)
 
+v = [2.0, 1.0, 3.0]
+d = Dirichlet(Float32.(v))
+
+x = func[1](d)
+@test isa(x, Vector{Float32})
+@test length(x) == 3
+
+x = func[2](d, 10)
+@test isa(x, Matrix{Float32})
+@test size(x) == (3, 10)
+
 
 # Test MLE
+
+v = [2.0, 1.0, 3.0]
+d = Dirichlet(v)
 
 n = 10000
 x = func[2](d, n)

@@ -1,9 +1,10 @@
 # Utilities to support the testing of distributions and samplers
 
-using Printf
-import Test: @test
-
-# auxiliary functions
+using Distributions
+using Random
+using Printf: @printf
+using Test: @test
+import FiniteDifferences
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -261,7 +262,7 @@ end
 function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     # samples for testing evaluation functions (even spacing)
 
-    T = eltype(d)
+    T = eltype(typeof(d))
     lv = (islowerbounded(d) ? minimum(d) : floor(T,quantile(d, q/2)))::T
     hv = (isupperbounded(d) ? maximum(d) : ceil(T,cquantile(d, q/2)))::T
     @assert lv <= hv
@@ -546,6 +547,7 @@ function test_params(d::Distribution)
     pars = params(d)
     d_new = D(pars...)
     @test d_new == d
+    @test d_new == deepcopy(d)
 end
 
 function test_params(d::Truncated)
@@ -556,4 +558,12 @@ function test_params(d::Truncated)
     pars = params(d_unt)
     d_new = Truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
+    @test d == deepcopy(d)
+end
+
+# Finite difference differentiation
+function fdm(f, at)
+    map(1:length(at)) do i
+        FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+    end
 end

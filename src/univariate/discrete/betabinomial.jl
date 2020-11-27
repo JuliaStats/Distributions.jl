@@ -23,25 +23,25 @@ struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
     α::T
     β::T
 
-    function BetaBinomial{T}(n::Int, α::T, β::T) where T
-        @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
-        new{T}(n, α, β)
-    end
+    BetaBinomial{T}(n::Integer, α::T, β::T) where {T <: Real} = new{T}(n, α, β)
 end
 
-BetaBinomial(n::Integer, α::T, β::T) where {T<:Real} = BetaBinomial{T}(n, α, β)
+function BetaBinomial(n::Integer, α::T, β::T; check_args=true) where {T <: Real}
+    check_args && @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
+    return BetaBinomial{T}(n, α, β)
+end
+
 BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)...)
-BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, Float64(α), Float64(β))
+BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, float(α), float(β))
 
 @distr_support BetaBinomial 0 d.n
-insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n
 
 #### Conversions
 function convert(::Type{BetaBinomial{T}}, n::Int, α::S, β::S) where {T <: Real, S <: Real}
     BetaBinomial(n, T(α), T(β))
 end
 function convert(::Type{BetaBinomial{T}}, d::BetaBinomial{S}) where {T <: Real, S <: Real}
-    BetaBinomial(d.n, T(d.α), T(d.β))
+    BetaBinomial(d.n, T(d.α), T(d.β), check_args=false)
 end
 
 #### Parameters
@@ -49,7 +49,7 @@ end
 ntrials(d::BetaBinomial) = d.n
 
 params(d::BetaBinomial) = (d.n, d.α, d.β)
-@inline partype(d::BetaBinomial{T}) where {T<:Real} = T
+partype(::BetaBinomial{T}) where {T} = T
 
 #### Properties
 
@@ -81,21 +81,15 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function pdf(d::BetaBinomial{T}, k::Int) where T
+function logpdf(d::BetaBinomial, k::Real)
     n, α, β = d.n, d.α, d.β
-    insupport(d, k) || return zero(T)
-    chooseinv = (n + 1) * beta(k + 1, n - k + 1)
-    numerator = beta(k + α, n - k + β)
-    denominator = beta(α, β)
-    return numerator / (denominator * chooseinv)
-end
-
-function logpdf(d::BetaBinomial{T}, k::Int) where T
-    n, α, β = d.n, d.α, d.β
-    logbinom = - log1p(n) - lbeta(k + 1, n - k + 1)
-    lognum   = lbeta(k + α, n - k + β)
-    logdenom = lbeta(α, β)
-    logbinom + lognum - logdenom
+    _insupport = insupport(d, k)
+    _k = _insupport ? round(Int, k) : 0
+    logbinom = - log1p(n) - logbeta(_k + 1, n - _k + 1)
+    lognum   = logbeta(_k + α, n - _k + β)
+    logdenom = logbeta(α, β)
+    result = logbinom + lognum - logdenom
+    return _insupport ? result : oftype(result, -Inf)
 end
 
 entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))

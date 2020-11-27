@@ -18,6 +18,7 @@ The methods listed as below are implemented for each multivariate distribution, 
 ```@docs
 length(::MultivariateDistribution)
 size(::MultivariateDistribution)
+eltype(::Type{MultivariateDistribution})
 mean(::MultivariateDistribution)
 var(::MultivariateDistribution)
 cov(::MultivariateDistribution)
@@ -32,7 +33,7 @@ entropy(::MultivariateDistribution, ::Real)
 insupport(::MultivariateDistribution, ::AbstractArray)
 pdf(::MultivariateDistribution, ::AbstractArray)
 logpdf(::MultivariateDistribution, ::AbstractArray)
-loglikelihood(::MultivariateDistribution, ::AbstractMatrix)
+loglikelihood(::MultivariateDistribution, ::AbstractArray)
 ```
 **Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
 
@@ -98,3 +99,12 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ```@docs
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```
+
+## Product distributions
+
+```@docs
+Distributions.product_distribution
+```
+
+Using `product_distribution` is advised to construct product distributions. 
+For some distributions, it constructs a special multivariate type.

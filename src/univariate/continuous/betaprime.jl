@@ -29,18 +29,18 @@ External links
 struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
-
-    function BetaPrime{T}(α::T, β::T) where T
-        @check_args(BetaPrime, α > zero(α) && β > zero(β))
-        new{T}(α, β)
-    end
+    BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-BetaPrime(α::T, β::T) where {T<:Real} = BetaPrime{T}(α, β)
+function BetaPrime(α::T, β::T; check_args=true) where {T<:Real}
+    check_args && @check_args(BetaPrime, α > zero(α) && β > zero(β))
+    return BetaPrime{T}(α, β)
+end
+
 BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(Float64(α), Float64(β))
+BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
 BetaPrime(α::Real) = BetaPrime(α, α)
-BetaPrime() = BetaPrime(1.0, 1.0)
+BetaPrime() = BetaPrime(1.0, 1.0, check_args=false)
 
 @distr_support BetaPrime 0.0 Inf
 
@@ -49,7 +49,7 @@ function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where T<:Real
     BetaPrime(T(α), T(β))
 end
 function convert(::Type{BetaPrime{T}}, d::BetaPrime{S}) where {T <: Real, S <: Real}
-    BetaPrime(T(d.α), T(d.β))
+    BetaPrime(T(d.α), T(d.β), check_args=false)
 end
 
 #### Parameters
@@ -90,11 +90,9 @@ function logpdf(d::BetaPrime{T}, x::Real) where T<:Real
     if x < 0
         T(-Inf)
     else
-        (α - 1) * log(x) - (α + β) * log1p(x) - lbeta(α, β)
+        (α - 1) * log(x) - (α + β) * log1p(x) - logbeta(α, β)
     end
 end
-
-pdf(d::BetaPrime, x::Real) = exp(logpdf(d, x))
 
 cdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? zero(T) : betacdf(d.α, d.β, x / (1 + x))
 ccdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? one(T) : betaccdf(d.α, d.β, x / (1 + x))

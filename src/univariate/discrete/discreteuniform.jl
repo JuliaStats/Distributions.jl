@@ -24,7 +24,7 @@ External links
 struct DiscreteUniform <: DiscreteUnivariateDistribution
     a::Int
     b::Int
-    pv::Float64
+    pv::Float64 # individual probabilities
 
     function DiscreteUniform(a::Real, b::Real)
         @check_args(DiscreteUniform, a <= b)
@@ -74,22 +74,21 @@ cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 :
                                    x > d.b ? 1.0 :
                                    (floor(Int,x) - d.a + 1.0) * d.pv)
 
-pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
-
-logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
+pdf(d::DiscreteUniform, x::Real) = insupport(d, x) ? d.pv : zero(d.pv)
+logpdf(d::DiscreteUniform, x::Real) = log(pdf(d, x))
 
 quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
 
-function mgf(d::DiscreteUniform, t::Real)
+function mgf(d::DiscreteUniform, t::T) where {T <: Real}
     a, b = d.a, d.b
     u = b - a + 1
-    t == 0 ? 1.0 : (exp(t*a) * expm1(t*u)) / (u*expm1(t))
+    t == 0 ? one(T) : (exp(t*a) * expm1(t*u)) / (u*expm1(t))
 end
 
-function cf(d::DiscreteUniform, t::Real)
+function cf(d::DiscreteUniform, t::T) where {T <: Real}
     a, b = d.a, d.b
     u = b - a + 1
-    t == 0 ? complex(1.0) : (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
+    t == 0 ? complex(one(T)) : (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
 end
 
 
@@ -114,5 +113,5 @@ function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{T}) where T <: Real
         end
     end
 
-    DiscreteUniform(xmin, xmax)
+    return DiscreteUniform(xmin, xmax)
 end

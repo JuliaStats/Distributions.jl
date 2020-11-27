@@ -67,7 +67,7 @@ julia> Wishart(nu, S) # Continuous matrix-variate
 In addition, you can create truncated distributions from univariate distributions:
 
 ```julia
-julia> Truncated(Normal(mu, sigma), l, u)
+julia> truncated(Normal(mu, sigma), l, u)
 ```
 
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:

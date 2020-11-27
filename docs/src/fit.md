@@ -38,17 +38,18 @@ The `fit_mle` method has been implemented for the following distributions:
 **Univariate:**
 
 - [`Bernoulli`](@ref)
-- [`Beta`](@ref)
 - [`Binomial`](@ref)
 - [`Categorical`](@ref)
 - [`DiscreteUniform`](@ref)
 - [`Exponential`](@ref)
+- [`LogNormal`](@ref)
 - [`Normal`](@ref)
 - [`Gamma`](@ref)
 - [`Geometric`](@ref)
 - [`Laplace`](@ref)
 - [`Pareto`](@ref)
 - [`Poisson`](@ref)
+- [`Rayleigh`](@ref)
 - [`InverseGaussian`](@ref)
 - [`Uniform`](@ref)
 

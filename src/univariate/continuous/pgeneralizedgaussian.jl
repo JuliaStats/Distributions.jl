@@ -31,8 +31,12 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     μ::T1
     α::T2
     p::T3
+    PGeneralizedGaussian{T1,T2,T3}(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real} = new{T1,T2,T3}(µ, α, p)
+end
 
-    PGeneralizedGaussian(μ::T1,α::T2,p::T3) where {T1,T2,T3} = (@check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p)); new{T1,T2,T3}(μ,α,p))
+function PGeneralizedGaussian(μ::T1,α::T2,p::T3; check_args=true) where {T1<:Real, T2<:Real, T3<:Real}
+    check_args && @check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p))
+    return PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
 end
 
 """
@@ -40,7 +44,7 @@ end
 
 Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
-PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
+PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(zero(T), one(T), p)
 
 """
     PGeneralizedGaussian()
@@ -48,18 +52,20 @@ PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(0.0, 1.0, p)
 Builds a default p-generalized Gaussian with `μ=0.0, α=√2, p=2.0`, corresponding
 to the normal distribution with `μ=0.0, σ=1.0`.
 """
-PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
+PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0, check_args=false) # approximate scale with unity std deviation and shape 2
 
 #### Conversions
 
 convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, μ::S1, α::S2, p::S3) where {T1 <: Real, T2 <: Real, T3 <:Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(μ),T2(α),T3(p))
-convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p))
+function convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real}
+    return PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p), check_args=false)
+end
 
 @distr_support PGeneralizedGaussian -Inf Inf
 
 
 #### Parameters
-@inline partype(d::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
+partype(::PGeneralizedGaussian{T1,T2,T3}) where {T1,T2,T3} = promote_type(T1,T2,T3)
 
 params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
 location(d::PGeneralizedGaussian) = d.μ
@@ -83,15 +89,11 @@ entropy(d::PGeneralizedGaussian) = inv(d.p) - log( d.p / (2.0 * d.α * gamma(inv
 
 #### Evaluation
 
-"""
-    pdf(d, x)
-
-Calculates the PDF of the specified distribution 'd'.
-"""
 function pdf(d::PGeneralizedGaussian, x::Real)
     (μ, α, p) = params(d)
     return ( p / ( 2.0 * α * gamma(1 / p) ) ) * exp( -( abs(x - μ) / α )^p )
 end
+logpdf(d::PGeneralizedGaussian, x::Real) = log(pdf(d, x))
 
 """
     cdf(d, x)

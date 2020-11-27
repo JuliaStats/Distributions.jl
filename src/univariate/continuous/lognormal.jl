@@ -29,26 +29,29 @@ External links
 struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    LogNormal{T}(μ::T, σ::T) where {T} = (@check_args(LogNormal, σ > zero(σ)); new{T}(μ, σ))
+    LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-LogNormal(μ::T, σ::T) where {T<:Real} = LogNormal{T}(μ, σ)
+function LogNormal(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(LogNormal, σ ≥ zero(σ))
+    return LogNormal{T}(μ, σ)
+end
+
 LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
-LogNormal(μ::Integer, σ::Integer) = LogNormal(Float64(μ), Float64(σ))
-LogNormal(μ::Real) = LogNormal(μ, 1.0)
-LogNormal() = LogNormal(0.0, 1.0)
+LogNormal(μ::Integer, σ::Integer) = LogNormal(float(μ), float(σ))
+LogNormal(μ::T) where {T <: Real} = LogNormal(μ, one(T))
+LogNormal() = LogNormal(0.0, 1.0, check_args=false)
 
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ))
+convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ), check_args=false)
 
 #### Parameters
 
 params(d::LogNormal) = (d.μ, d.σ)
-@inline partype(d::LogNormal{T}) where {T<:Real} = T
+partype(::LogNormal{T}) where {T} = T
 
 #### Statistics
 
@@ -89,29 +92,57 @@ end
 
 #### Evalution
 
-pdf(d::LogNormal, x::Real) = normpdf(d.μ, d.σ, log(x)) / x
-function logpdf(d::LogNormal{T}, x::Real) where T<:Real
-    if !insupport(d, x)
-        return -T(Inf)
+function pdf(d::LogNormal, x::Real)
+    if x ≤ zero(x)
+        logx = log(zero(x))
+        x = one(x)
     else
-        lx = log(x)
-        return normlogpdf(d.μ, d.σ, lx) - lx
+        logx = log(x)
     end
+    return pdf(Normal(d.μ, d.σ), logx) / x
 end
 
-cdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normcdf(d.μ, d.σ, log(x)) : zero(T)
-ccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normccdf(d.μ, d.σ, log(x)) : one(T)
-logcdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normlogcdf(d.μ, d.σ, log(x)) : -T(Inf)
-logccdf(d::LogNormal{T}, x::Real) where {T<:Real} = x > 0 ? normlogccdf(d.μ, d.σ, log(x)) : zero(T)
+function logpdf(d::LogNormal, x::Real)
+    if x ≤ zero(x)
+        logx = log(zero(x))
+        b = zero(logx)
+    else
+        logx = log(x)
+        b = logx
+    end
+    return logpdf(Normal(d.μ, d.σ), logx) - b
+end
 
-quantile(d::LogNormal, q::Real) = exp(norminvcdf(d.μ, d.σ, q))
-cquantile(d::LogNormal, q::Real) = exp(norminvccdf(d.μ, d.σ, q))
-invlogcdf(d::LogNormal, lq::Real) = exp(norminvlogcdf(d.μ, d.σ, lq))
-invlogccdf(d::LogNormal, lq::Real) = exp(norminvlogccdf(d.μ, d.σ, lq))
+function cdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return cdf(Normal(d.μ, d.σ), logx)
+end
 
-function gradlogpdf(d::LogNormal{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x > 0 ? - ((log(x) - μ) / (σ^2) + 1) / x : zero(T)
+function ccdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return ccdf(Normal(d.μ, d.σ), logx)
+    end
+
+function logcdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return logcdf(Normal(d.μ, d.σ), logx)
+end
+
+function logccdf(d::LogNormal, x::Real)
+    logx = x ≤ zero(x) ? log(zero(x)) : log(x)
+    return logccdf(Normal(d.μ, d.σ), logx)
+end
+
+quantile(d::LogNormal, q::Real) = exp(quantile(Normal(params(d)...), q))
+cquantile(d::LogNormal, q::Real) = exp(cquantile(Normal(params(d)...), q))
+invlogcdf(d::LogNormal, lq::Real) = exp(invlogcdf(Normal(params(d)...), lq))
+invlogccdf(d::LogNormal, lq::Real) = exp(invlogccdf(Normal(params(d)...), lq))
+
+function gradlogpdf(d::LogNormal, x::Real)
+    outofsupport = x ≤ zero(x)
+    y = outofsupport ? one(x) : x
+    z = (gradlogpdf(Normal(d.μ, d.σ), log(y)) - 1) / y
+    return outofsupport ? zero(z) : z
 end
 
 # mgf(d::LogNormal)

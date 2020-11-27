@@ -250,13 +250,20 @@ Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods 
 _logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 """
-    loglikelihood(d::MultivariateDistribution, x::AbstractMatrix)
+    loglikelihood(d::MultivariateDistribution, x::AbstractArray)
 
-The log-likelihood of distribution `d` w.r.t. all columns contained in matrix `x`.
+The log-likelihood of distribution `d` with respect to all samples contained in array `x`.
+
+Here, `x` can be a vector of length `dim(d)`, a matrix with `dim(d)` rows, or an array of
+vectors of length `dim(d)`.
 """
-function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix)
+loglikelihood(d::MultivariateDistribution, X::AbstractVector{<:Real}) = logpdf(d, X)
+function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix{<:Real})
     size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
     return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
+end
+function loglikelihood(d::MultivariateDistribution, X::AbstractArray{<:AbstractVector})
+    return sum(x -> logpdf(d, x), X)
 end
 
 ##### Specific distributions #####

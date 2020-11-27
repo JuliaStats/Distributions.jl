@@ -5,7 +5,6 @@ using Distributions
 using Test, Random, SpecialFunctions
 
 import SpecialFunctions: factorial
-
 Random.seed!(123)
 
 rng = MersenneTwister(123)
@@ -18,6 +17,7 @@ rng = MersenneTwister(123)
 d = DirichletMultinomial(10, ones(5))
 d2 = DirichletMultinomial(10, ones(Int, 5))
 @test typeof(d) == typeof(d2)
+@test d == deepcopy(d)
 
 α = func[1](5)
 d = DirichletMultinomial(10, α)
@@ -55,7 +55,7 @@ for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 
     @test pdf(d, x) ≈
         factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
     @test logpdf(d, x) ≈
-        log(factorial(d.n)) + lgamma(d.α0) - lgamma(d.n + d.α0) + sum(lgamma.(d.α + x) - log.(factorial.(x)) - lgamma.(d.α))
+        log(factorial(d.n)) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(log.(factorial.(x)))
 end
 
 # test Sampling

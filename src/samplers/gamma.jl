@@ -6,24 +6,23 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler <: Sampleable{Univariate,Continuous}
-    a::Float64
-    s2::Float64
-    s::Float64
-    i2s::Float64
-    d::Float64
-    q0::Float64
-    b::Float64
-    σ::Float64
-    c::Float64
-    scale::Float64
+struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+    a::T
+    s2::T
+    s::T
+    i2s::T
+    d::T
+    q0::T
+    b::T
+    σ::T
+    c::T
+    scale::T
 end
 
-function GammaGDSampler(g::Gamma)
+function GammaGDSampler(g::Gamma{T}) where {T}
     a = shape(g)
-
     # Step 1
-    s2 = a-0.5
+    s2 = a - 0.5
     s = sqrt(s2)
     i2s = 0.5/s
     d = 5.656854249492381 - 12.0s # 4*sqrt(2) - 12s
@@ -55,7 +54,7 @@ function GammaGDSampler(g::Gamma)
         c = 0.1515/s
     end
 
-    GammaGDSampler(a,s2,s,i2s,d,q0,b,σ,c,scale(g))
+    GammaGDSampler(T(a), T(s2), T(s), T(i2s), T(d), T(q0), T(b), T(σ), T(c), scale(g))
 end
 
 function calc_q(s::GammaGDSampler, t)
@@ -195,9 +194,9 @@ end
 
 # Inverse Power sampler
 # uses the x*u^(1/a) trick from Marsaglia and Tsang (2000) for when shape < 1
-struct GammaIPSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Univariate,Continuous}
+struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleable{Univariate,Continuous}
     s::S #sampler for Gamma(1+shape,scale)
-    nia::Float64 #-1/scale
+    nia::T #-1/scale
 end
 
 function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable

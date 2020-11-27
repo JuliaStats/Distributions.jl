@@ -1,38 +1,80 @@
 """
+    truncated(d, l, u):
+
+Truncate a distribution between `l` and `u`.
+Builds the most appropriate distribution for the type of `d`,
+the fallback is constructing a `Truncated` wrapper.
+
+To implement a specialized truncated form for a distribution `D`,
+the method `truncate(d::D, l::T, u::T) where {T <: Real}`
+should be implemented.
+
+# Arguments
+- `d::UnivariateDistribution`: The original distribution.
+- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
+- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+
+Throws an error if `l >= u`.
+"""
+function truncated(d::UnivariateDistribution, l::Real, u::Real)
+    return truncated(d, promote(l, u)...)
+end
+
+function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
+    l < u || error("lower bound should be less than upper bound.")
+    T2 = promote_type(T, eltype(d))
+    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
+    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
+    tp = ucdf - lcdf
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
+end
+
+truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
+
+"""
     Truncated(d, l, u):
 
-Construct a truncated distribution.
+Create a generic wrapper for a truncated distribution.
+Prefer calling the function `truncated(d, l, u)`, which can choose the appropriate
+representation of the truncated distribution.
 
 # Arguments
 - `d::UnivariateDistribution`: The original distribution.
 - `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
 - `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
 """
-struct Truncated{D<:UnivariateDistribution, S<:ValueSupport} <: UnivariateDistribution{S}
+struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
-    lower::Float64      # lower bound
-    upper::Float64      # upper bound
-    lcdf::Float64       # cdf of lower bound
-    ucdf::Float64       # cdf of upper bound
+    lower::T      # lower bound
+    upper::T      # upper bound
+    lcdf::T       # cdf of lower bound
+    ucdf::T       # cdf of upper bound
 
-    tp::Float64         # the probability of the truncated part, i.e. ucdf - lcdf
-    logtp::Float64      # log(tp), i.e. log(ucdf - lcdf)
+    tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
+    logtp::T      # log(tp), i.e. log(ucdf - lcdf)
+    function Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real}
+        new{typeof(d), value_support(typeof(d)), T}(d, l, u, lcdf, ucdf, tp, logtp)
+    end
 end
 
 ### Constructors
-
-function Truncated(d::UnivariateDistribution, l::Float64, u::Float64)
+function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l < u || error("lower bound should be less than upper bound.")
-    lcdf = isinf(l) ? 0.0 : cdf(d, l)
-    ucdf = isinf(u) ? 1.0 : cdf(d, u)
+    T2 = promote_type(T, eltype(d))
+    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
+    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
     tp = ucdf - lcdf
-    Truncated{typeof(d),value_support(typeof(d))}(d, l, u, lcdf, ucdf, tp, log(tp))
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
 end
 
-Truncated(d::UnivariateDistribution, l::Real, u::Real) = Truncated(d, Float64(l), Float64(u))
+Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
+
+@deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)
+Base.eltype(::Type{Truncated{D, S, T} } ) where {D, S, T} = T
+
 ### range and support
 
 islowerbounded(d::Truncated) = islowerbounded(d.untruncated) || isfinite(d.lower)
@@ -41,9 +83,9 @@ isupperbounded(d::Truncated) = isupperbounded(d.untruncated) || isfinite(d.upper
 minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-insupport(d::Truncated{D,Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution} =
-    d.lower <= x <= d.upper && insupport(d.untruncated, x)
-
+function insupport(d::Truncated{D,<:Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution}
+    return d.lower <= x <= d.upper && insupport(d.untruncated, x)
+end
 
 ### evaluation
 

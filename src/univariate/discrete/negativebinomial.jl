@@ -32,59 +32,82 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function NegativeBinomial{T}(r::T, p::T) where T
-        @check_args(NegativeBinomial, r > zero(r))
-        @check_args(NegativeBinomial, zero(p) < p <= one(p))
-        new{T}(r, p)
+    function NegativeBinomial{T}(r::T, p::T) where {T <: Real}
+        return new{T}(r, p)
     end
-
 end
 
-NegativeBinomial(r::T, p::T) where {T<:Real} = NegativeBinomial{T}(r, p)
-NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
-NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(Float64(r), Float64(p))
-NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
-NegativeBinomial() = NegativeBinomial(1.0, 0.5)
+function NegativeBinomial(r::T, p::T; check_args=true) where {T <: Real}
+    if check_args
+        @check_args(NegativeBinomial, r > zero(r))
+        @check_args(NegativeBinomial, zero(p) < p <= one(p))
+    end
+    return NegativeBinomial{T}(r, p)
+end
 
+NegativeBinomial(r::Real, p::Real) = NegativeBinomial(promote(r, p)...)
+NegativeBinomial(r::Integer, p::Integer) = NegativeBinomial(float(r), float(p))
+NegativeBinomial(r::Real) = NegativeBinomial(r, 0.5)
+NegativeBinomial() = NegativeBinomial(1.0, 0.5, check_args=false)
 
 @distr_support NegativeBinomial 0 Inf
 
 #### Conversions
 
-function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where T<:Real
-    NegativeBinomial(T(r), T(p))
+function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
+    return NegativeBinomial(T(r), T(p))
 end
 function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    NegativeBinomial(T(d.r), T(d.p))
+    return NegativeBinomial(T(d.r), T(d.p), check_args=false)
 end
 
 #### Parameters
 
 params(d::NegativeBinomial) = (d.r, d.p)
-@inline partype(d::NegativeBinomial{T}) where {T<:Real} = T
+partype(::NegativeBinomial{T}) where {T} = T
 
 succprob(d::NegativeBinomial) = d.p
-failprob(d::NegativeBinomial) = 1 - d.p
+failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p
 
 
 #### Statistics
 
-mean(d::NegativeBinomial) = (p = succprob(d); (1 - p) * d.r / p)
+mean(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (one(T) - p) * d.r / p)
 
-var(d::NegativeBinomial) = (p = succprob(d); (1 - p) * d.r / (p * p))
+var(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); (one(T) - p) * d.r / (p * p))
 
-std(d::NegativeBinomial) = (p = succprob(d); sqrt((1 - p) * d.r) / p)
+std(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); sqrt((one(T) - p) * d.r) / p)
 
-skewness(d::NegativeBinomial) = (p = succprob(d); (2 - p) / sqrt((1 - p) * d.r))
+skewness(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.r))
 
-kurtosis(d::NegativeBinomial) = (p = succprob(d); 6 / d.r + (p * p) / ((1 - p) * d.r))
+kurtosis(d::NegativeBinomial{T}) where {T} = (p = succprob(d); T(6) / d.r + (p * p) / ((one(T) - p) * d.r))
 
-mode(d::NegativeBinomial) = (p = succprob(d); floor(Int,(1 - p) * (d.r - 1) / p))
+mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p) * (d.r - one(T)) / p))
 
 
 #### Evaluation & Sampling
 
-@_delegate_statsfuns NegativeBinomial nbinom r p
+# Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
+function logpdf(d::NegativeBinomial, k::Real)
+    r = d.r * log(d.p) + k * log1p(-d.p)
+    if isone(d.p) && iszero(k)
+        return zero(r)
+    elseif !insupport(d, k)
+        return oftype(r, -Inf)
+    else
+        return r - log(k + d.r) - logbeta(d.r, k + 1)
+    end
+end
+
+# cdf and quantile functions are more involved so we still rely on Rmath
+cdf(       d::NegativeBinomial,  x::Int)  =              nbinomcdf(       d.r, d.p, x)
+ccdf(      d::NegativeBinomial,  x::Int)  =              nbinomccdf(      d.r, d.p, x)
+logcdf(    d::NegativeBinomial,  x::Int)  =              nbinomlogcdf(    d.r, d.p, x)
+logccdf(   d::NegativeBinomial,  x::Int)  =              nbinomlogccdf(   d.r, d.p, x)
+quantile(  d::NegativeBinomial,  q::Real) = convert(Int, nbinominvcdf(    d.r, d.p, q))
+cquantile( d::NegativeBinomial,  q::Real) = convert(Int, nbinominvccdf(   d.r, d.p, q))
+invlogcdf( d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf( d.r, d.p, lq))
+invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
 # TODO: remove RFunctions dependency once Poisson has its removed

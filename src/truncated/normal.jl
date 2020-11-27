@@ -6,11 +6,9 @@ The *truncated normal distribution* is a particularly important one in the famil
 We provide additional support for this type with `TruncatedNormal` which calls `Truncated(Normal(mu, sigma), l, u)`.
 Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
 """
-TruncatedNormal(mu::Float64, sigma::Float64, a::Float64, b::Float64) =
-    Truncated(Normal(mu, sigma), a, b)
+TruncatedNormal
 
-TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) =
-    TruncatedNormal(Float64(mu), Float64(sigma), Float64(a), Float64(b))
+@deprecate TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) truncated(Normal(mu, sigma), a, b)
 
 ### statistics
 
@@ -26,84 +24,85 @@ end
 
 modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
 
-# do not export. Used in mean, var
-function _F1(x::Real, y::Real; thresh=1e-7)
-    @assert 0 < thresh < Inf
-    -Inf < x < Inf && -Inf < y < Inf || throw(DomainError())
-    ϵ = exp(x^2 - y^2)
-    if abs(x) > abs(y)
-        _F1(y,x)
-    elseif abs(x - y) ≤ thresh
-        δ = y - x
-        √π*x + (√π/2 + (-√π*x/6 + (-√π/12 + x*(√π/90 + (√π*x^2)/90)δ)δ)δ)δ
-    elseif max(x,y) < 0
-        (1 - ϵ) / (ϵ * erfcx(-y) - erfcx(-x))
-    elseif min(x,y) > 0
-        (1 - ϵ) / (erfcx(x) - ϵ * erfcx(y))
-    else
-        exp(-x^2) * (1 - ϵ) / (erf(y) - erf(x))
-    end
-end
-
-# do not export. Used in mean, var
-function _F2(x::Real, y::Real; thresh=1e-7)
-    @assert 0 < thresh < Inf
-    -Inf < x < Inf && -Inf < y < Inf || throw(DomainError())
-    ϵ = exp(x^2 - y^2)
-    if abs(x) > abs(y)
-        _F2(y,x)
-    elseif abs(x - y) ≤ thresh
-        δ = y - x
-        √π*x^2 - √π/2 + (√π*x + (√π/3 - √π*x^2/3 + (((√π/30 + √π*x^2/45)x^2 - 4*√π/45)δ - √π*x/3)δ)δ)δ
-    elseif max(x,y) < 0
-        (x - ϵ * y) / (ϵ * erfcx(-y) - erfcx(-x))
-    elseif min(x,y) > 0
-        (x - ϵ * y) / (erfcx(x) - ϵ * erfcx(y))
-    else
-        exp(-x^2) * (x - ϵ * y) / (erf(y) - erf(x))
-    end
-end
-
 # do not export. Used in mean
-function _tnmean(a, b)
-    -Inf < a ≤ b < Inf || throw(DomainError())
-    √(2/π) * _F1(a/√2, b/√2)
-end
-
-# do not export. Used in mean
-function _tnmean(a, b, μ, σ)
-    -Inf < a ≤ b < Inf || throw(DomainError())
-    -Inf < μ < Inf && 0 < σ < Inf || throw(DomainError())
-    α = (a - μ)/σ; β = (b - μ)/σ
-    μ + _tnmean(α, β) * σ
+# computes mean of standard normal distribution truncated to [a, b]
+function _tnmom1(a, b)
+    if !(a ≤ b)
+        return oftype(middle(a, b), NaN)
+    elseif a == b
+        return middle(a, b)
+    elseif abs(a) > abs(b)
+        return -_tnmom1(-b, -a)
+    elseif isinf(a) && isinf(b)
+        return zero(middle(a, b))
+    end
+    Δ = (b - a) * middle(a, b)
+    if a ≤ 0 ≤ b
+        m = √(2/π) * expm1(-Δ) * exp(-a^2 / 2) / (erf(a/√2) - erf(b/√2))
+    elseif 0 < a < b
+        z = exp(-Δ) * erfcx(b/√2) - erfcx(a/√2)
+        iszero(z) && return middle(a, b)
+        m = √(2/π) * expm1(-Δ) / z
+    end
+    return clamp(m, a, b)
 end
 
 # do not export. Used in var
-function _tnvar(a, b)
-    -Inf < a ≤ b < Inf || throw(DomainError())
-    1 + 2/√π * _F2(a/√2, b/√2) - 2/π * _F1(a/√2, b/√2)^2
+# computes 2nd moment of standard normal distribution truncated to [a, b]
+function _tnmom2(a::Real, b::Real)
+    if !(a ≤ b)
+        return oftype(middle(a, b), NaN)
+    elseif a == b
+        return middle(a, b)^2
+    elseif abs(a) > abs(b)
+        return _tnmom2(-b, -a)
+    elseif isinf(a) && isinf(b)
+        return one(middle(a, b))
+    elseif isinf(b)
+        return 1 + √(2 / π) * a / erfcx(a / √2)
+    end
+
+    if a ≤ 0 ≤ b
+        ea = √(π/2) * erf(a / √2)
+        eb = √(π/2) * erf(b / √2)
+        fa = ea - a * exp(-a^2 / 2)
+        fb = eb - b * exp(-b^2 / 2)
+        m2 = (fb - fa) / (eb - ea)
+        return m2
+    else # 0 ≤ a ≤ b
+        exΔ = exp((a - b)middle(a, b))
+        ea = √(π/2) * erfcx(a / √2)
+        eb = √(π/2) * erfcx(b / √2)
+        fa = ea + a
+        fb = eb + b
+        m2 = (fa - fb * exΔ) / (ea - eb * exΔ)
+        return m2
+    end
 end
 
 # do not export. Used in var
-function _tnvar(a, b, μ, σ)
-    -Inf < a ≤ b < Inf || throw(DomainError())
-    -Inf < μ < Inf && 0 < σ < Inf || throw(DomainError())
-    α = (a - μ)/σ; β = (b - μ)/σ
-    _tnvar(α, β) * σ^2
+function _tnvar(a::Real, b::Real)
+    if a == b
+        return zero(middle(a, b))
+    elseif a < b
+        m1 = _tnmom1(a, b)
+        m2 = √_tnmom2(a, b)
+        return (m2 - m1) * (m2 + m1)
+    else
+        return oftype(middle(a, b), NaN)
+    end
 end
 
 function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
-        # avoids loss of significance when truncation is far from μ.
-        # See https://github.com/cossio/TruncatedNormal.jl/blob/master/notes/normal.pdf.
-        _tnmean(d.lower, d.upper, μ, σ)
+    if iszero(σ)
+        return mode(d)
     else
         a = (d.lower - μ) / σ
         b = (d.upper - μ) / σ
-        μ + ((normpdf(a) - normpdf(b)) / d.tp) * σ
+        return μ + _tnmom1(a, b) * σ
     end
 end
 
@@ -111,21 +110,12 @@ function var(d::Truncated{Normal{T},Continuous}) where T <: Real
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    if isfinite(d.lower) && isfinite(d.upper) && isfinite(μ) && isfinite(σ)
-        # avoids loss of significance when truncation is far from μ.
-        # See https://github.com/cossio/TruncatedNormal.jl/blob/master/notes/normal.pdf.
-        _tnvar(d.lower, d.upper, μ, σ)
+    if iszero(σ)
+        return σ
     else
         a = (d.lower - μ) / σ
         b = (d.upper - μ) / σ
-        z = d.tp
-        φa = normpdf(a)
-        φb = normpdf(b)
-        aφa = isinf(a) ? 0.0 : a * φa
-        bφb = isinf(b) ? 0.0 : b * φb
-        t1 = (aφa - bφb) / z
-        t2 = abs2((φa - φb) / z)
-        abs2(σ) * (1 + t1 - t2)
+        return _tnvar(a, b) * σ^2
     end
 end
 
@@ -151,10 +141,14 @@ function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: R
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
-    z = randnt(rng, a, b, d.tp)
-    return μ + σ * z
+    if isfinite(μ)
+        a = (d.lower - μ) / σ
+        b = (d.upper - μ) / σ
+        z = randnt(rng, a, b, d.tp)
+        return μ + σ * z
+    else
+        return clamp(μ, d.lower, d.upper)
+    end
 end
 
 # Rejection sampler based on algorithm from Robert (1995)

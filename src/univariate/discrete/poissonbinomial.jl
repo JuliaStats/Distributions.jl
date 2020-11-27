@@ -25,67 +25,68 @@ External links:
 
 """
 struct PoissonBinomial{T<:Real} <: DiscreteUnivariateDistribution
-
     p::Vector{T}
     pmf::Vector{T}
-    function PoissonBinomial{T}(p::AbstractArray) where T
-        for i=1:length(p)
-            if !(0 <= p[i] <= 1)
-                error("Each element of p must be in [0, 1].")
-            end
-        end
-        pb = poissonbinomial_pdf_fft(p)
+
+    function PoissonBinomial{T}(p::AbstractArray) where {T <: Real}
+        pb = poissonbinomial_pdf(p)
         @assert isprobvec(pb)
         new{T}(p, pb)
     end
-
 end
 
-PoissonBinomial(p::AbstractArray{T}) where {T<:Real} = PoissonBinomial{T}(p)
+function PoissonBinomial(p::AbstractArray{T}; check_args=true) where {T <: Real}
+    if check_args
+        for i in eachindex(p)
+            @check_args(PoissonBinomial, 0 <= p[i] <= 1)
+        end
+    end
+    return PoissonBinomial{T}(p)
+end
 
 @distr_support PoissonBinomial 0 length(d.p)
 
 #### Conversions
 
-function PoissonBinomial(::Type{PoissonBinomial{T}}, p::Vector{S}) where {T <: Real, S <: Real}
-    PoissonBinomial(Vector{T}(p))
+function PoissonBinomial(::Type{PoissonBinomial{T}}, p::Vector{S}) where {T, S}
+    return PoissonBinomial(Vector{T}(p))
 end
-function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T <: Real, S <: Real}
-    PoissonBinomial(Vector{T}(d.p))
+function PoissonBinomial(::Type{PoissonBinomial{T}}, d::PoissonBinomial{S}) where {T, S}
+    return PoissonBinomial(Vector{T}(d.p), check_args=false)
 end
 
 #### Parameters
 
 ntrials(d::PoissonBinomial) = length(d.p)
 succprob(d::PoissonBinomial) = d.p
-failprob(d::PoissonBinomial) = 1 .- d.p
+failprob(d::PoissonBinomial{T}) where {T} = one(T) .- d.p
 
-params(d::PoissonBinomial) = (d.p, )
-@inline partype(d::PoissonBinomial{T}) where {T<:Real} = T
+params(d::PoissonBinomial) = (d.p,)
+partype(::PoissonBinomial{T}) where {T} = T
 
 #### Properties
 
 mean(d::PoissonBinomial) = sum(succprob(d))
 var(d::PoissonBinomial) = sum(succprob(d) .* failprob(d))
 
-function skewness(d::PoissonBinomial{T}) where T<:Real
+function skewness(d::PoissonBinomial{T}) where {T}
     v = zero(T)
     s = zero(T)
     p,  = params(d)
-    for i=1:length(p)
-        v += p[i] * (1 - p[i])
-        s += p[i] * (1 - p[i]) * (1 - 2 * p[i])
+    for i in eachindex(p)
+        v += p[i] * (one(T) - p[i])
+        s += p[i] * (one(T) - p[i]) * (one(T) - T(2) * p[i])
     end
-    s / sqrt(v) / v
+    return s / sqrt(v) / v
 end
 
-function kurtosis(d::PoissonBinomial{T}) where T<:Real
+function kurtosis(d::PoissonBinomial{T}) where {T}
     v = zero(T)
     s = zero(T)
     p,  = params(d)
-    for i=1:length(p)
-        v += p[i] * (1 - p[i])
-        s += p[i] * (1 - p[i]) * (1 - 6 * (1 - p[i] ) * p[i])
+    for i in eachindex(p)
+        v += p[i] * (one(T) - p[i])
+        s += p[i] * (one(T) - p[i]) * (one(T) - T(6) * (one(T) - p[i]) * p[i])
     end
     s / v / v
 end
@@ -99,21 +100,40 @@ modes(d::PoissonBinomial) = [x  - 1 for x in modes(Categorical(d.pmf))]
 
 quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
 
-function mgf(d::PoissonBinomial, t::Real)
+function mgf(d::PoissonBinomial{T}, t::Real) where {T}
     p,  = params(d)
-    prod(1 .- p .+ p .* exp(t))
+    prod(one(T) .- p .+ p .* exp(t))
 end
 
-function cf(d::PoissonBinomial, t::Real)
+function cf(d::PoissonBinomial{T}, t::Real) where {T}
     p,  = params(d)
-    prod(1 .- p .+ p .* cis(t))
+    prod(one(T) .- p .+ p .* cis(t))
 end
 
-pdf(d::PoissonBinomial, k::Int) = insupport(d, k) ? d.pmf[k+1] : 0
-function logpdf(d::PoissonBinomial{T}, k::Int) where T<:Real
-    insupport(d, k) ? log(d.pmf[k + 1]) : -T(Inf)
-end
+pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[k+1] : zero(eltype(d.pmf))
+logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
+# Computes the pdf of a poisson-binomial random variable using
+# simple, fast recursive formula
+#
+#      Marlin A. Thomas & Audrey E. Taub (1982) 
+#      Calculating binomial probabilities when the trial probabilities are unequal, 
+#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534 
+#
+function poissonbinomial_pdf(p::AbstractArray{T,1}) where {T <: Real}
+  n = length(p)
+  S = zeros(T, n+1)
+  S[1] = 1-p[1]
+  S[2] = p[1]
+  @inbounds for col in 2:n
+    for r in 1:col
+        row = col - r + 1 
+        S[row+1] = (1-p[col])*S[row+1] + p[col] * S[row]
+    end
+    S[1] *= 1-p[col]
+  end
+  return S
+end
 
 # Computes the pdf of a poisson-binomial random variable using
 # fast fourier transform
@@ -122,16 +142,16 @@ end
 #     On computing the distribution function for the Poisson binomial
 #     distribution. Computational Statistics and Data Analysis, 59, 41–51.
 #
-function poissonbinomial_pdf_fft(p::AbstractArray)
+function poissonbinomial_pdf_fft(p::AbstractArray{T}) where {T <: Real}
     n = length(p)
-    ω = 2 / (n + 1)
+    ω = 2 * one(T) / (n + 1)
 
-    x = Vector{Complex{Float64}}(undef, n+1)
+    x = Vector{Complex{T}}(undef, n+1)
     lmax = ceil(Int, n/2)
-    x[1] = 1/(n + 1)
+    x[1] = one(T)/(n + 1)
     for l=1:lmax
-        logz = 0.
-        argz = 0.
+        logz = zero(T)
+        argz = zero(T)
         for j=1:n
             zjl = 1 - p[j] + p[j] * cospi(ω*l) + im * p[j] * sinpi(ω * l)
             logz += log(abs(zjl))

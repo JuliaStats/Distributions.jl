@@ -1,17 +1,17 @@
 # Univariate Gaussian Mixture Models
 
-struct UnivariateGMM{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}} <: UnivariateMixture{Continuous,Normal}
+struct UnivariateGMM{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real},C<:Categorical} <: UnivariateMixture{Continuous,Normal}
     K::Int
     means::VT1
     stds::VT2
-    prior::Categorical
+    prior::C
 
-    function UnivariateGMM(ms::VT1, ss::VT2, pri::Categorical) where {VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real}}
+    function UnivariateGMM(ms::VT1, ss::VT2, pri::C) where {VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Real},C<:Categorical}
         K = length(ms)
         length(ss) == K || throw(DimensionMismatch())
         ncategories(pri) == K ||
             error("The number of categories in pri should be equal to the number of components.")
-        new{VT1,VT2}(K, ms, ss, pri)
+        new{VT1,VT2,C}(K, ms, ss, pri)
     end
 end
 

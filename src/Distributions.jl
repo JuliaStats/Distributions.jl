@@ -1,16 +1,20 @@
 module Distributions
 
 using StatsBase, PDMats, StatsFuns, Statistics
+using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
-import Base: size, eltype, length, convert, show, getindex, rand
-import Base: sum, maximum, minimum, extrema, +, -, ==
+import Base: size, length, convert, show, getindex, rand, vec, inv
+import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
+using FillArrays
+
 using LinearAlgebra, Printf
+import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+import Random: GLOBAL_RNG, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
@@ -103,10 +107,16 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    LKJ,
     LocationScale,
     Logistic,
     LogNormal,
     LogitNormal,
+    MatrixBeta,
+    MatrixFDist,
+    MatrixNormal,
+    MatrixReshaped,
+    MatrixTDist,
     MixtureModel,
     Multinomial,
     MultivariateNormal,
@@ -133,13 +143,14 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    SkewNormal,
+    Soliton,
     StudentizedRange,
     SymTriangularDist,
     TDist,
     TriangularDist,
     Triweight,
     Truncated,
-    TruncatedNormal,
     Uniform,
     UnivariateGMM,
     VonMises,
@@ -168,6 +179,7 @@ export
     componentwise_pdf,      # component-wise pdf for mixture models
     componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
+    convolve,           # convolve distributions of the same type
     dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
@@ -189,6 +201,7 @@ export
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
+    logdiffcdf,         # log of difference between cdf at two values
     logdetcov,          # log-determinant of covariance
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
@@ -218,6 +231,7 @@ export
     pdf,                # probability density function (ContinuousDistribution)
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
+    product_distribution, # product of univariate distributions
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
@@ -232,6 +246,7 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
+    truncated,          # truncate a distribution with a lower and upper bound
     var,                # variance of distribution
     varlogx,            # variance of log(x)
     expected_logdet,    # expected logarithm of random matrix determinant
@@ -239,8 +254,7 @@ export
 
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
-    wsample, wsample!      # weighted sampling from a source array
-
+    wsample, wsample!       # weighted sampling from a source array
 
 ### source files
 
@@ -267,6 +281,7 @@ include("samplers.jl")
 # others
 include("truncate.jl")
 include("conversion.jl")
+include("convolution.jl")
 include("qq.jl")
 include("estimators.jl")
 
@@ -304,13 +319,14 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy,
-    Logistic, LogNormal, MixtureModel, Multinomial, MultivariateNormal,
-    MvLogNormal, MvNormal, MvNormalCanon, MvNormalKnownCov, MvTDist,
-    NegativeBinomial, NoncentralBeta, NoncentralChisq, NoncentralF,
-    NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
+    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
+    MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
+    NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
