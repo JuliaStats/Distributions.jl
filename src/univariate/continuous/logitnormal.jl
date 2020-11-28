@@ -136,10 +136,12 @@ cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))
 invlogcdf(d::LogitNormal, lq::Real) = logistic(norminvlogcdf(d.μ, d.σ, lq))
 invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
 
-function gradlogpdf(d::LogitNormal{T}, x::Real) where T<:Real
-    #TODO check
-    (μ, σ) = params(d)
-    0 < x < 1 ? (μ - logit(x)) / (σ^2 * x * (1-x)) - 1/(x-1) - 1/x : zero(T)
+function gradlogpdf(d::LogitNormal, x::Real)
+    μ, σ = params(d)
+    _insupport = insupport(d, x)
+    _x = _insupport ? x : zero(x)
+    z = (μ - logit(_x) + σ^2 * (2 * _x - 1)) / (σ^2 * _x * (1 - _x))
+    return _insupport ? z : oftype(z, NaN)
 end
 
 # mgf(d::LogitNormal)
