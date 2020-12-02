@@ -79,8 +79,8 @@ mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
 
-gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1//2 : zero(T)
-
+gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} = x > 0 ? (d.ν/2 - 1) / x - 1//2 : zero(T)
+heslogpdf(d::Chisq{T}, x::Real) where {T<:Real} = x > 0 ? - (d.ν/2 - 1) / x^2 : zero(T)
 
 #### Sampling
 

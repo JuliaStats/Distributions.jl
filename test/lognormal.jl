@@ -285,6 +285,12 @@ end
     @test @inferred(gradlogpdf(LogNormal(0.0f0, 1.0f0), 1.0)) === -1.0
     @test @inferred(gradlogpdf(LogNormal(0.0f0, 1.0f0), 1.0f0)) === -1.0f0
 
+    # heslogpdf
+    @test @inferred(heslogpdf(LogNormal(0.0, 1.0), 1.0)) === 0.0
+    @test @inferred(heslogpdf(LogNormal(0.0, 1.0), exp(-1))) ≈ -7.3890560989306495
+    @test @inferred(heslogpdf(LogNormal(0.0, 1.0), 0.0)) === 0.0
+    @test @inferred(heslogpdf(LogNormal(0.0, 1.0), -0.5)) === 0.0
+
     @test isnan_type(Float64, @inferred(logccdf(LogNormal(0.0, 1.0), NaN)))
     @test isnan_type(Float64, @inferred(logccdf(LogNormal(NaN, 1.0), 1.0f0)))
     @test isnan_type(Float64, @inferred(logccdf(LogNormal(NaN, 1.0), 0.0f0)))

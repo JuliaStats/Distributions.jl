@@ -98,6 +98,7 @@ Computes the z-value based on a Normal distribution and a x-value.
 zval(d::Normal, x::Real) = (x - d.μ) / d.σ
 
 gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
+heslogpdf(d::Normal, x::Real) = - 1 / d.σ^2
 
 # logpdf
 _normlogpdf(z::Real) = -(abs2(z) + log2π)/2

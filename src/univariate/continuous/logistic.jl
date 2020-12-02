@@ -95,6 +95,10 @@ function gradlogpdf(d::Logistic, x::Real)
     e = exp(-zval(d, x))
     ((2e) / (1 + e) - 1) / d.θ
 end
+function heslogpdf(d::Logistic, x::Real)
+    e = exp(-zval(d,x))
+    - ((2e) / (1 + e)^2) / d.θ^2
+end
 
 mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.θ * t)
 

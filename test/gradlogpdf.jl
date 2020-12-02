@@ -8,14 +8,17 @@ using Test
 @test isapprox(gradlogpdf(Chi(5.0), 5.5)         , -4.7727272727272725 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Chisq(7.0), 12.0)      , -0.29166666666666663, atol=1.0e-8)
 @test isapprox(gradlogpdf(Exponential(2.0), 7.0) , -0.5                , atol=1.0e-8)
+@test isapprox(gradlogpdf(Frechet(2.0,4.0), 9.0) , -0.289437585733882  , atol=1.0e-8)
 @test isapprox(gradlogpdf(Gamma(9.0, 0.5), 11.0) , -1.2727272727272727 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Gumbel(3.5, 1.0), 4.0) , -1.6065306597126334 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Laplace(7.0), 34.0)    , -1.0                , atol=1.0e-8)
 @test isapprox(gradlogpdf(Logistic(-6.0), 1.0)   , -0.9981778976111987 , atol=1.0e-8)
+@test isapprox(gradlogpdf(LogitNormal(0.8), 0.4) ,  0.2059548878248986 , atol=1.0e-8)
 @test isapprox(gradlogpdf(LogNormal(5.5), 2.0)   ,  1.9034264097200273 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Normal(-4.5, 2.0), 1.6), -1.525              , atol=1.0e-8)
 @test isapprox(gradlogpdf(TDist(8.0), 9.1)       , -0.9018830525272548 , atol=1.0e-8)
 @test isapprox(gradlogpdf(Weibull(2.0), 3.5)     , -6.714285714285714  , atol=1.0e-8)
+@test isapprox(gradlogpdf(Weibull(2.0), -3.5)    ,  0.0                , atol=1.0e-8)
 
 # Test for gradlogpdf on multivariate distributions
 

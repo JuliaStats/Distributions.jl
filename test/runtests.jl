@@ -43,6 +43,7 @@ const tests = [
     "convolution",
     "mixture",
     "gradlogpdf",
+    "heslogpdf",
     "noncentralt",
     "locationscale",
     "quantile_newton",

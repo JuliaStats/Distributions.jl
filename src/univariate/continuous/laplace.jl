@@ -95,6 +95,7 @@ function gradlogpdf(d::Laplace, x::Real)
     g = 1 / θ
     x > μ ? -g : g
 end
+heslogpdf(d::Laplace{T}, x::Real) where {T<:Real} = zero(T)
 
 function mgf(d::Laplace, t::Real)
     st = d.θ * t

@@ -82,6 +82,7 @@ logpdf(d::Chi, x::Real) = (ν = d.ν;
 )
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
+heslogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? - (d.ν - 1) / x^2 - 1 : zero(T)
 
 cdf(d::Chi, x::Real) = chisqcdf(d.ν, x^2)
 ccdf(d::Chi, x::Real) = chisqccdf(d.ν, x^2)
