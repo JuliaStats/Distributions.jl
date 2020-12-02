@@ -35,6 +35,9 @@ end
 
 ZipfMandelbrot(N::Int, q::Real, s::Real) = ZipfMandelbrot(N, promote(q, s)...)
 ZipfMandelbrot(N::Int, q::Int, s::Int) = ZipfMandelbrot(N, float(q), float(s))
+ZipfMandelbrot(N::Real, q, s) = ZipfMandelbrot(Int(N), q, s)
+
+@distr_support ZipfMandelbrot 1 d.N
 
 #### Conversions
 
@@ -65,4 +68,3 @@ end
 
 pdf(d::ZipfMandelbrot, k::Int) = 1 / ((k+d.q)^d.s * H(d.N, d.q, d.s))
 cdf(d::ZipfMandelbrot, k::Int) = H(k, d.q, d.s) / H(d.N, d.q, d.s)
-

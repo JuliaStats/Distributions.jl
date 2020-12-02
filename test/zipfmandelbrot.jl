@@ -5,6 +5,7 @@ using Distributions
     N, q, s= 100, 2, 3
     d = ZipfMandelbrot(N, q, s)
     @test params(d) == (100, 2.0, 3.0)
+    @test params(ZipfMandelbrot(100.0, q, s)) == (100, 2.0, 3.0)
     @test partype(d) == Float64
     @test pdf(d, 2) ≈ 0.2028975363526503
     @test cdf(d, 2) ≈ 0.6838398447441176
