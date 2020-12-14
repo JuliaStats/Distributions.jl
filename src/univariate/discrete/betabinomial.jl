@@ -35,7 +35,6 @@ BetaBinomial(n::Integer, α::Real, β::Real) = BetaBinomial(n, promote(α, β)..
 BetaBinomial(n::Integer, α::Integer, β::Integer) = BetaBinomial(n, float(α), float(β))
 
 @distr_support BetaBinomial 0 d.n
-insupport(d::BetaBinomial, x::Real) = 0 <= x <= d.n
 
 #### Conversions
 function convert(::Type{BetaBinomial{T}}, n::Int, α::S, β::S) where {T <: Real, S <: Real}
@@ -82,21 +81,15 @@ function kurtosis(d::BetaBinomial)
     return (left * right) - 3
 end
 
-function pdf(d::BetaBinomial{T}, k::Int) where T
+function logpdf(d::BetaBinomial, k::Real)
     n, α, β = d.n, d.α, d.β
-    insupport(d, k) || return zero(T)
-    chooseinv = (n + 1) * beta(k + 1, n - k + 1)
-    numerator = beta(k + α, n - k + β)
-    denominator = beta(α, β)
-    return numerator / (denominator * chooseinv)
-end
-
-function logpdf(d::BetaBinomial{T}, k::Int) where T
-    n, α, β = d.n, d.α, d.β
-    logbinom = - log1p(n) - logbeta(k + 1, n - k + 1)
-    lognum   = logbeta(k + α, n - k + β)
+    _insupport = insupport(d, k)
+    _k = _insupport ? round(Int, k) : 0
+    logbinom = - log1p(n) - logbeta(_k + 1, n - _k + 1)
+    lognum   = logbeta(_k + α, n - _k + β)
     logdenom = logbeta(α, β)
-    logbinom + lognum - logdenom
+    result = logbinom + lognum - logdenom
+    return _insupport ? result : oftype(result, -Inf)
 end
 
 entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))

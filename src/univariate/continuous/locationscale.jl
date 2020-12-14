@@ -39,6 +39,8 @@ LocationScale(μ::Real, σ::Real, ρ::D) where {D<:ContinuousUnivariateDistribut
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
 
+LocationScale(μ::Real, σ::Real, d::LocationScale) = LocationScale(μ + d.μ * σ, σ * d.σ, d.ρ)
+
 #### Conversions
 
 convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale(T(μ),T(σ),ρ)
@@ -81,3 +83,14 @@ quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 rand(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * rand(rng, d.ρ)
 cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 gradlogpdf(d::LocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+
+#### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
+
+Base.:+(d::ContinuousUnivariateDistribution, x::Real) = LocationScale(x, one(x), d)
+Base.:+(x::Real, d::ContinuousUnivariateDistribution) = d + x
+Base.:*(x::Real, d::ContinuousUnivariateDistribution) = LocationScale(zero(x), x, d)
+Base.:*(d::ContinuousUnivariateDistribution, x::Real) = x * d
+Base.:-(d::ContinuousUnivariateDistribution, x::Real) = d + -x
+Base.:/(d::ContinuousUnivariateDistribution, x::Real) = 1/x * d
+Base.:+(d::ContinuousUnivariateDistribution, x::Int) = d + float(x)
+Base.:*(x::Int, d::ContinuousUnivariateDistribution) = float(x) * d

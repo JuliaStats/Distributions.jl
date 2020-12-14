@@ -1,10 +1,10 @@
 Distributions.jl
 ================
 
-[![Travis status](https://travis-ci.org/JuliaStats/Distributions.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/Distributions.jl)
-[![Appveyor status](https://ci.appveyor.com/api/projects/status/xqm07gyruflhnha7/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/distributions-jl/branch/master)
+[![Build Status](https://github.com/JuliaStats/Distributions.jl/workflows/CI/badge.svg)](https://github.com/JuliaStats/Distributions.jl/actions)
 [![](https://zenodo.org/badge/DOI/10.5281/zenodo.2647458.svg)](https://zenodo.org/record/2647458)
 [![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
+
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaStats.github.io/Distributions.jl/latest/)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaStats.github.io/Distributions.jl/stable/)
 
@@ -25,7 +25,7 @@ A Julia package for probability distributions and associated functions. Particul
 
 * **Support**: We use GitHub for the development of the Julia package *Distributions* itself. 
 For support and questions, please use the [Julia Discourse forum](https://discourse.julialang.org).
-Also, for casual conversation and quick questions, there are the channels `#helpdesk` and `#statistics` in the official Julia chat (https://julialang.slack.com). To get an invitation, please visit [https://slackinvite.julialang.org](https://slackinvite.julialang.org).
+Also, for casual conversation and quick questions, there are the channels `#helpdesk` and `#statistics` in the official Julia chat (https://julialang.slack.com). To get an invitation, please visit [https://julialang.org/slack/](https://julialang.org/slack/).
 
 
 ## Contributing

@@ -14,7 +14,7 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+import Random: GLOBAL_RNG, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
@@ -142,6 +142,8 @@ export
     Rayleigh,
     Semicircle,
     Skellam,
+    SkewNormal,
+    Soliton,
     StudentizedRange,
     SymTriangularDist,
     TDist,
@@ -324,7 +326,7 @@ Supported distributions:
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

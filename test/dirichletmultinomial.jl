@@ -17,6 +17,7 @@ rng = MersenneTwister(123)
 d = DirichletMultinomial(10, ones(5))
 d2 = DirichletMultinomial(10, ones(Int, 5))
 @test typeof(d) == typeof(d2)
+@test d == deepcopy(d)
 
 α = func[1](5)
 d = DirichletMultinomial(10, α)

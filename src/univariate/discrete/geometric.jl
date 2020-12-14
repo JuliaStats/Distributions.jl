@@ -69,17 +69,8 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
 ### Evaluations
 
-function pdf(d::Geometric{T}, x::Int) where T<:Real
-    if x >= 0
-        p = d.p
-        return p < one(p) / 10 ? p * exp(log1p(-p) * x) : d.p * (one(p) - p)^x
-    else
-        return zero(T)
-    end
-end
-
-function logpdf(d::Geometric{T}, x::Int) where T<:Real
-    x >= 0 ? log(d.p) + log1p(-d.p) * x : -T(Inf)
+function logpdf(d::Geometric, x::Real)
+    insupport(d, x) ? log(d.p) + log1p(-d.p) * x : log(zero(d.p))
 end
 
 struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator

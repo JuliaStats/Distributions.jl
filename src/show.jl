@@ -33,7 +33,7 @@ function _use_multline_show(d::Distribution, pnames)
     tlen = 0
     for (i, p) in enumerate(pnames)
         pv = getfield(d, p)
-        if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
+        if isa(pv, NTuple) || isa(pv, Array)
             multline = true
         else
             tlen += length(pv)

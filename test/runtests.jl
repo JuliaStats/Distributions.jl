@@ -57,6 +57,8 @@ const tests = [
     "negativebinomial",
     "bernoulli",
     "trapezoidal",
+    "soliton",
+    "skewnormal",
 ]
 
 printstyled("Running tests:\n", color=:blue)

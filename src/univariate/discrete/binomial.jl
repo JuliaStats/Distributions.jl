@@ -110,6 +110,18 @@ end
 
 @_delegate_statsfuns Binomial binom n p
 
+function pdf(d::Binomial, x::Real)
+    _insupport = insupport(d, x)
+    s = pdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : zero(s)
+end
+
+function logpdf(d::Binomial, x::Real)
+    _insupport = insupport(d, x)
+    s = logpdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : oftype(s, -Inf)
+end
+
 function rand(rng::AbstractRNG, d::Binomial)
     p, n = d.p, d.n
     if p <= 0.5

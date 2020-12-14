@@ -79,6 +79,18 @@ entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
 
+function pdf(d::Hypergeometric, x::Real)
+    _insupport = insupport(d, x)
+    s = pdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : zero(s)
+end
+
+function logpdf(d::Hypergeometric, x::Real)
+    _insupport = insupport(d, x)
+    s = logpdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : oftype(s, -Inf)
+end
+
 ## sampling
 
 # TODO: remove RFunctions dependency. Implement:
