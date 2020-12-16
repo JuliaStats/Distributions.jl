@@ -74,6 +74,7 @@ export
     Cosine,
     DiagNormal,
     DiagNormalCanon,
+    Dirac,
     Dirichlet,
     DirichletMultinomial,
     DiscreteUniform,

@@ -12,6 +12,7 @@ import ForwardDiff
 
 const tests = [
     "arcsine",
+    "dirac",
     "truncate",
     "truncnormal",
     "truncated_exponential",
