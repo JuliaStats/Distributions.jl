@@ -133,8 +133,8 @@ d = DiscreteNonParametric([4, 3, 2, 1, 0], [0.4f0, 0.3f0, 0.2f0, 0.1f0, 0.0f0])
 
 # Sampling with integer-valued probabilities; see issue #1111
 d = DiscreteNonParametric([1, 2], [0, 1])
-@test iszero(count(isone(rand(d)) for _ in 1:100_000_000))
+@test iszero(count(isone(rand(d)) for _ in 1:100))
 
 d = DiscreteNonParametric([2, 1], [1, 0])
-@test iszero(count(isone(rand(d)) for _ in 1:100_000_000))
+@test iszero(count(isone(rand(d)) for _ in 1:100))
 end
