@@ -31,11 +31,11 @@ maximum(d::Dirac) = d.value
 #### Properties
 
 mean(d::Dirac) = d.value
-var(d::Dirac) = 0.0
+var(d::Dirac{T}) where {T} = zero(T)
 
 mode(d::Dirac) = d.value
 
-entropy(d::Dirac) = 0.0
+entropy(d::Dirac{T}) where {T} = zero(T)
 
 #### Evaluation
 
