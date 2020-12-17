@@ -72,20 +72,22 @@ end
 
 #### Evaluation
 
-function pdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
-    (a, b, c, d) = params(d)
-    x <= a ? zero(T) :
+function pdf(d::TrapezoidalDist, x::T) where T<:Real
+    a, b, c, d, x = promote(params(d)..., x)
+    x <= a ? zero(x) :
         a <= x <  b ? 2 / (d+c-a-b) * (x-a)/(b-a) :
-        b <= x <  c ? 2 / (d+c-a-b) :
-        c <= x <= d ? 2 / (d+c-a-b) * (d-x)/(d-c) : zero(T)
+        b <= x <  c ? 2*one(x) / (d+c-a-b) :
+        c <= x <= d ? 2 / (d+c-a-b) * (d-x)/(d-c) : zero(x)
 end
+
 logpdf(d::TrapezoidalDist, x::Real) = log(pdf(d, x))
-function cdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
-    (a, b, c, d) = params(d)
-    x <= a ? zero(T) :
-        a <= x <  b ? 1/(d+c-a-b) * (x-a)^2/(b-a) :
-        b <= x <  c ? 1/(d+c-a-b) * (2*x-a-b)  :
-        c <= x <= d ? 1 - 1/(d+c-a-b) * (d-x)^2/(d-c) : one(T)
+
+function cdf(d::TrapezoidalDist, x::T) where T<:Real
+    a, b, c, d, x = promote(params(d)..., x)
+    x <= a ? zero(x) :
+        a <= x <  b ? 1 / (d+c-a-b) * (x-a)^2/(b-a) :
+        b <= x <  c ? 1 / (d+c-a-b) * (2*x-a-b)  :
+        c <= x <= d ? 1 - 1/(d+c-a-b) * (d-x)^2/(d-c) : one(x)
 end
 
 function quantile(d::TrapezoidalDist, p::Real)
