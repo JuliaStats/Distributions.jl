@@ -79,7 +79,7 @@ function pdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
         b <= x <  c ? 2 / (d+c-a-b) :
         c <= x <= d ? 2 / (d+c-a-b) * (d-x)/(d-c) : zero(T)
 end
-
+logpdf(d::TrapezoidalDist, x::Real) = log(pdf(d, x))
 function cdf(d::TrapezoidalDist{T}, x::Real) where T<:Real
     (a, b, c, d) = params(d)
     x <= a ? zero(T) :
