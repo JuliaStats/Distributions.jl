@@ -502,9 +502,7 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_
 
 function quantile(d::UnivariateMixture{Continuous}, p::Real)
     ps = probs(d)
-    cs = [component(d,i) for i in eachindex(ps) if ps[i] > 0.0]
-    qs = quantile.(cs, p)
-    min_q, max_q = extrema(qs)
+    min_q, max_q = extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
 
     if iszero(p)
         return(min_q)
