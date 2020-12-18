@@ -170,11 +170,14 @@ function insupport(d::Dirichlet, x::AbstractVector{T}) where T<:Real
     return true
 end
 
-function _logpdf(d::Dirichlet, x::AbstractVector{T}) where T<:Real
+function _logpdf(d::Dirichlet{S}, x::AbstractVector{T}) where {S, T<:Real}
+    if !insupport(d, x)
+        return convert(promote_type(S, T), -Inf)
+    end
     a = d.alpha
-    s = 0.
+    s = zero(promote_type(S, T))
     for i in 1:length(a)
-        @inbounds s += (a[i] - 1.0) * log(x[i])
+        @inbounds s += xlogy(a[i] - one(S), x[i])
     end
     return s - d.lmnB
 end
