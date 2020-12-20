@@ -22,6 +22,12 @@ d = Dirichlet(3, 2.0)
 @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
 @test var(d)  ≈ diag(cov(d))
 
+@test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1.0
+@test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1.0f0
+@test typeof(pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0])) == Float32
+
+@test pdf(d, [-1, 1, 0])         ≈ 0.0
+@test pdf(d, [0, 0, 1])          ≈ 0.0
 @test pdf(d, [0.2, 0.3, 0.5])    ≈ 3.6
 @test pdf(d, [0.4, 0.5, 0.1])    ≈ 2.4
 @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
