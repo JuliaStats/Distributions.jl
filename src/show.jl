@@ -26,14 +26,15 @@ function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
     #
     # Criteria: if total number of values is greater than 8, or
-    # there are matrix-valued params, we use multi-line format
+    # there are params that are neither numbers, tuples, or vectors,
+    # we use multi-line format
     #
     namevals = _NameVal[]
     multline = false
     tlen = 0
     for (i, p) in enumerate(pnames)
         pv = getfield(d, p)
-        if isa(pv, NTuple) || isa(pv, Array)
+        if !(isa(pv, Number) || isa(pv, NTuple) || isa(pv, AbstractVector))
             multline = true
         else
             tlen += length(pv)
