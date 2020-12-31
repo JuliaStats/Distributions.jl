@@ -26,7 +26,6 @@ External links
 struct Landau{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
-    Landau{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
 
