@@ -34,7 +34,7 @@ function Landau(μ::T, θ::T; check_args=true) where {T <: Real}
     return Landau{T}(μ, θ)
 end
 
-Landau(μ::Real, θ::Real) = Landau(promote(μ, θ)...)
+Landau(μ::Real, θ::Real; check_args=true) = Landau(promote(μ, θ)...; check_args=check_args)
 Landau(μ::Integer, θ::Integer) = Landau(float(μ), float(θ))
 Landau(μ::T) where {T <: Real} = Landau(μ, one(T))
 Landau() = Landau(0.0, 1.0, check_args=false)
