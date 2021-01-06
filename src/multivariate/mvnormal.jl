@@ -96,7 +96,7 @@ function entropy(d::AbstractMvNormal)
     (length(d) * (T(log2π) + one(T)) + ldcd)/2
 end
 
-mvnormal_c0(g::AbstractMvNormal) = -(length(g) * Float64(log2π) + logdetcov(g))/2
+mvnormal_c0(g::AbstractMvNormal) = -(length(g) * convert(eltype(g), log2π) + logdetcov(g))/2
 
 """
     invcov(d::AbstractMvNormal)

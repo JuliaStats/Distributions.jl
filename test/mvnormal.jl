@@ -180,6 +180,20 @@ end
     @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
 end
 
+@testset "MvNormal 32-bit logpdf" begin
+    # Test 32-bit logpdf
+    mu = [1., 2., 3.]
+    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    d = MvNormal(mu, PDMat(C))
+    X = [1., 2., 3.]
+
+    d32 = convert(MvNormal{Float32}, d)
+    X32 = convert(AbstractArray{Float32}, X)
+
+    @test isa(logpdf(d32, X32), Float32)
+    @test logpdf(d32, X32) ≈ logpdf(d, X)
+end
+
 ##### Random sampling from MvNormalCanon with sparse precision matrix
 if isdefined(PDMats, :PDSparseMat)
     @testset "Sparse MvNormalCanon random sampling" begin
