@@ -19,16 +19,18 @@ struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     δ::T
-
+    γ::T
     function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where T
-        new{T}(μ, α, β, δ)
+        γ = sqrt(α^2 - β^2)
+
+        new{T}(μ, α, β, δ, γ)
     end
 end
 
 NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} = NormalInverseGaussian{T}(μ, α, β, δ)
 NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) = NormalInverseGaussian(promote(μ, α, β, δ)...)
 function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Integer)
-    NormalInverseGaussian(Float64(μ), Float64(α), Float64(β), Float64(δ))
+    return NormalInverseGaussian(float(μ), float(α), float(β), float(δ))
 end
 
 @distr_support NormalInverseGaussian -Inf Inf
@@ -44,17 +46,37 @@ end
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 @inline partype(d::NormalInverseGaussian{T}) where {T<:Real} = T
 
-mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / sqrt(d.α^2 - d.β^2)
-var(d::NormalInverseGaussian) = d.δ * d.α^2 / sqrt(d.α^2 - d.β^2)^3
-skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * sqrt(d.α^2 - d.β^2)))
-kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * sqrt(d.α^2 - d.β^2))
+mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / d.γ
+var(d::NormalInverseGaussian) = d.δ * d.α^2 / d.γ^3
+skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * d.γ))
+kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * d.γ)
 
 function pdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ*sqrt(α^2 - β^2) + β*(x - μ))
+    α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ * d.γ + β*(x - μ))
 end
 
 function logpdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*sqrt(α^2-β^2) + β*(x-μ)
+    log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*d.γ + β*(x-μ)
+end
+
+
+#### Sampling
+
+# The Normal Inverse Gaussian distribution is a normal variance-mean
+# mixture with an inverse Gaussian as mixing distribution.
+#
+# Ole E. Barndorff-Nielsen (1997)
+# Normal Inverse Gaussian Distributions and Stochastic Volatility Modelling
+# Scandinavian Journal of Statistics, Vol. 24, pp. 1--13
+# DOI: http://dx.doi.org/10.1111/1467-9469.00045
+
+function rand(rng::Random.AbstractRNG, d::NormalInverseGaussian)
+    μ, α, β, δ = params(d)
+
+    Z = InverseGaussian(δ/d.γ, δ^2)
+    z = rand(rng, Z)
+    X = Normal(μ + β*z, sqrt(z))
+    return rand(rng, X)
 end

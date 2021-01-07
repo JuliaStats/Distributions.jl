@@ -24,28 +24,30 @@ External links
 struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    function Geometric{T}(p::T) where T
-        @check_args(Geometric, zero(p) < p < one(p))
+    function Geometric{T}(p::T) where {T <: Real}
         new{T}(p)
     end
-
 end
 
-Geometric(p::T) where {T<:Real} = Geometric{T}(p)
-Geometric() = Geometric(0.5)
+function Geometric(p::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Geometric, zero(p) < p < one(p))
+    return Geometric{T}(p)
+end
+
+Geometric() = Geometric(0.5, check_args=false)
 
 @distr_support Geometric 0 Inf
 
 ### Conversions
 convert(::Type{Geometric{T}}, p::Real) where {T<:Real} = Geometric(T(p))
-convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p))
+convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p), check_args=false)
 
 ### Parameters
 
 succprob(d::Geometric) = d.p
 failprob(d::Geometric) = 1 - d.p
 params(d::Geometric) = (d.p,)
-@inline partype(d::Geometric{T}) where {T<:Real} = T
+partype(::Geometric{T}) where {T<:Real} = T
 
 
 ### Statistics
@@ -67,17 +69,8 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
 ### Evaluations
 
-function pdf(d::Geometric{T}, x::Int) where T<:Real
-    if x >= 0
-        p = d.p
-        return p < one(p) / 10 ? p * exp(log1p(-p) * x) : d.p * (one(p) - p)^x
-    else
-        return zero(T)
-    end
-end
-
-function logpdf(d::Geometric{T}, x::Int) where T<:Real
-    x >= 0 ? log(d.p) + log1p(-d.p) * x : -T(Inf)
+function logpdf(d::Geometric, x::Real)
+    insupport(d, x) ? log(d.p) + log1p(-d.p) * x : log(zero(d.p))
 end
 
 struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
@@ -158,9 +151,9 @@ struct GeometricStats <: SufficientStats
     GeometricStats(sx::Real, tw::Real) = new(sx, tw)
 end
 
-suffstats(::Type{Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
+suffstats(::Type{<:Geometric}, x::AbstractArray{T}) where {T<:Integer} = GeometricStats(sum(x), length(x))
 
-function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Geometric}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -175,4 +168,4 @@ function suffstats(::Type{Geometric}, x::AbstractArray{T}, w::AbstractArray{Floa
     GeometricStats(sx, tw)
 end
 
-fit_mle(::Type{Geometric}, ss::GeometricStats) = Geometric(1 / (ss.sx / ss.tw + 1))
+fit_mle(::Type{<:Geometric}, ss::GeometricStats) = Geometric(1 / (ss.sx / ss.tw + 1))

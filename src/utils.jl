@@ -9,104 +9,27 @@ macro check_args(D, cond)
     end
 end
 
-## a type to indicate zero vector
-"""
-An immutable vector of zeros of type T
-"""
-struct ZeroVector{T} <: AbstractVector{T}
-    len::Int
-end
-
-ZeroVector(::Type{T}, n::Int) where {T} = ZeroVector{T}(n)
-
-Base.eltype(v::ZeroVector{T}) where {T} = T
-Base.length(v::ZeroVector) = v.len
-Base.size(v::ZeroVector) = (v.len,)
-Base.getindex(v::ZeroVector{T}, i) where {T} = zero(T)
-
-Base.Vector(v::ZeroVector{T}) where {T} = zeros(T, v.len)
-Base.convert(::Type{Vector{T}}, v::ZeroVector{T}) where {T} = Vector(v)
-Base.convert(::Type{<:Vector}, v::ZeroVector{T}) where {T} = Vector(v)
-
-Base.convert(::Type{ZeroVector{T}}, v::ZeroVector) where {T} = ZeroVector{T}(length(v))
-
-for T = (:AbstractArray, :Number), op = (:+, :-)
-    @eval begin
-        Base.@deprecate ($op)(x::$T, v::ZeroVector) broadcast($op, x, v)
-        Base.@deprecate ($op)(v::ZeroVector, x::$T) broadcast($op, v, x)
-    end
-end
-
-Base.broadcast(::Union{typeof(+),typeof(-)}, x::AbstractArray, v::ZeroVector) = x
-Base.broadcast(::typeof(+), v::ZeroVector, x::AbstractArray) = x
-Base.broadcast(::typeof(-), v::ZeroVector, x::AbstractArray) = -x
-
-Base.broadcast(::Union{typeof(+),typeof(-)}, x::Number, v::ZeroVector) = fill(x, v.len)
-Base.broadcast(::typeof(+), v::ZeroVector, x::Number) = fill(x, v.len)
-Base.broadcast(::typeof(-), v::ZeroVector, x::Number) = fill(-x, v.len)
-Base.broadcast(::typeof(*), v::ZeroVector, ::Number) = v
-
 ##### Utility functions
 
-struct NoArgCheck end
+isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
 
-isunitvec(v::AbstractVector{T}) where {T} = (norm(v) - 1.0) < 1.0e-12
-
-function allfinite(x::Array{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(isfinite(x[i]))
-            return false
-        end
-    end
-    return true
-end
-
-function allzeros(x::Array{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(x[i] == zero(T))
-            return false
-        end
-    end
-    return true
-end
-
-allzeros(x::ZeroVector) = true
-
-function allnonneg(x::Array{T}) where T<:Real
-    for i = 1 : length(x)
-        if !(x[i] >= zero(T))
-            return false
-        end
-    end
-    return true
-end
-
-isprobvec(p::Vector{T}) where {T<:Real} = allnonneg(p) && isapprox(sum(p), one(T))
+isprobvec(p::AbstractVector{<:Real}) =
+    all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))
 
 pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
 
 add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
-add!(x::AbstractVecOrMat, y::ZeroVector) = x
+add!(x::AbstractArray, y::Zeros) = x
 
-function multiply!(x::AbstractArray, c::Number)
-    for i = 1:length(x)
-        @inbounds x[i] *= c
-    end
-    x
-end
+multiply!(x::AbstractArray, c::Number) = (x .*= c; x)
 
-function exp!(x::AbstractArray)
-    for i = 1:length(x)
-        @inbounds x[i] = exp(x[i])
-    end
-    x
-end
+exp!(x::AbstractArray) = (x .= exp.(x); x)
 
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
 # inplace pdf calculations, etc. allocate storage correctly
-@inline partype(d::Distribution) = Float64
+@inline partype(::Distribution) = Float64
 
 # for checking the input range of quantile functions
 # comparison with NaN is always false, so no explicit check is required
@@ -114,13 +37,14 @@ macro checkquantile(p,ex)
     p, ex = esc(p), esc(ex)
     :(zero($p) <= $p <= one($p) ? $ex : NaN)
 end
+
 macro checkinvlogcdf(lp,ex)
     lp, ex = esc(lp), esc(ex)
     :($lp <= zero($lp) ? $ex : NaN)
 end
 
 # because X == X' keeps failing due to floating point nonsense
-function isApproxSymmmetric(a::Matrix{Float64})
+function isApproxSymmmetric(a::AbstractMatrix{Float64})
     tmp = true
     for j in 2:size(a, 1)
         for i in 1:(j - 1)
@@ -139,4 +63,59 @@ function trycholesky(a::Matrix{Float64})
     catch e
         return e
     end
+end
+
+"""
+    ispossemdef(A, k) -> Bool
+Test whether a matrix is positive semi-definite with specified rank `k` by
+checking that `k` of its eigenvalues are positive and the rest are zero.
+# Examples
+```jldoctest
+julia> A = [1 0; 0 0]
+2×2 Array{Int64,2}:
+ 1  0
+ 0  0
+julia> ispossemdef(A, 1)
+true
+julia> ispossemdef(A, 2)
+false
+```
+"""
+function ispossemdef(X::AbstractMatrix, k::Int;
+                     atol::Real=0.0,
+                     rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    _check_rank_range(k, minimum(size(X)))
+    ishermitian(X) || return false
+    dp, dz, dn = eigsigns(Hermitian(X), atol, rtol)
+    return dn == 0 && dp == k
+end
+function ispossemdef(X::AbstractMatrix;
+                     atol::Real=0.0,
+                     rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    ishermitian(X) || return false
+    dp, dz, dn = eigsigns(Hermitian(X), atol, rtol)
+    return dn == 0
+end
+
+function _check_rank_range(k::Int, n::Int)
+    0 <= k <= n || throw(ArgumentError("rank must be between 0 and $(n) (inclusive)"))
+    nothing
+end
+
+#  return counts of the number of positive, zero, and negative eigenvalues
+function eigsigns(X::AbstractMatrix,
+                  atol::Real=0.0,
+                  rtol::Real=(minimum(size(X))*eps(real(float(one(eltype(X))))))*iszero(atol))
+    eigs = eigvals(X)
+    eigsigns(eigs, atol, rtol)
+end
+function eigsigns(eigs::Vector{<: Real}, atol::Real, rtol::Real)
+    tol = max(atol, rtol * eigs[end])
+    eigsigns(eigs, tol)
+end
+function eigsigns(eigs::Vector{<: Real}, tol::Real)
+    dp = count(x -> tol < x, eigs)        #  number of positive eigenvalues
+    dz = count(x -> -tol < x < tol, eigs) #  number of numerically zero eigenvalues
+    dn = count(x -> x < -tol, eigs)       #  number of negative eigenvalues
+    return dp, dz, dn
 end

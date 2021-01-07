@@ -167,13 +167,16 @@ end
 
 #Constructors mirror the ones for MvNormmal
 MvLogNormal(μ::AbstractVector,Σ::AbstractPDMat) = MvLogNormal(MvNormal(μ,Σ))
-MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(ZeroVector(eltype(Σ),dim(Σ)),Σ))
+MvLogNormal(Σ::AbstractPDMat) = MvLogNormal(MvNormal(Zeros{eltype(Σ)}(dim(Σ)),Σ))
 MvLogNormal(μ::AbstractVector,Σ::Matrix) = MvLogNormal(MvNormal(μ,Σ))
 MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))
 MvLogNormal(μ::AbstractVector,s::Real) = MvLogNormal(MvNormal(μ,s))
 MvLogNormal(Σ::AbstractMatrix) = MvLogNormal(MvNormal(Σ))
 MvLogNormal(σ::AbstractVector) = MvLogNormal(MvNormal(σ))
 MvLogNormal(d::Int,s::Real) = MvLogNormal(MvNormal(d,s))
+
+
+Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
 
 ### Conversion
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real
@@ -202,7 +205,7 @@ Return the scale matrix of the distribution (the covariance matrix of the underl
 scale(d::MvLogNormal) = cov(d.normal)
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-mean(d::MvLogNormal) = exp.(mean(d.normal) + var(d.normal)/2)
+mean(d::MvLogNormal) = exp.(mean(d.normal) .+ var(d.normal)/2)
 
 """
     median(d::MvLogNormal)
@@ -216,7 +219,7 @@ median(d::MvLogNormal) = exp.(mean(d.normal))
 
 Return the mode vector of the lognormal distribution, which is strictly smaller than the mean and median.
 """
-mode(d::MvLogNormal) = exp.(mean(d.normal) - var(d.normal))
+mode(d::MvLogNormal) = exp.(mean(d.normal) .- var(d.normal))
 function cov(d::MvLogNormal)
     m = mean(d)
     return m*m'.*(exp.(cov(d.normal)) .- 1)

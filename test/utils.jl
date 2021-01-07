@@ -1,6 +1,6 @@
 using Distributions, PDMats
 using Test, LinearAlgebra
-
+import Distributions: ispossemdef
 
 # RealInterval
 r = RealInterval(1.5, 4.0)
@@ -21,15 +21,48 @@ r = RealInterval(1.5, 4.0)
 A = rand(1:10, 5, 5)
 B = rand(Float32, 4)
 C = 1//2
-Z = Distributions.ZeroVector(Float64, 5)
 L = rand(Float32, 4, 4)
 D = PDMats.PDMat(L * L')
-@test typeof(convert(Distributions.ZeroVector{Float32}, Z)) == Distributions.ZeroVector{Float32}
 
-for v in (15, π, 0x33, 14.0)
-    @test Z .* v == Z
-end
+# Ensure that utilities functions works with abstract arrays
 
-for idx in eachindex(Z)
-    @test Z[idx] == zero(eltype(Z))
+@test isprobvec(GenericArray([1, 1, 1])) == false
+@test isprobvec(GenericArray([1/3, 1/3, 1/3]))
+
+# Positive definite matrix
+M = GenericArray([1.0 0.0; 0.0 1.0])
+# Non-invertible matrix
+N = GenericArray([1.0 0.0; 1.0 0.0])
+
+@test Distributions.isApproxSymmmetric(N) == false
+@test Distributions.isApproxSymmmetric(M)
+
+
+n = 10
+areal = randn(n,n)/2
+aimg  = randn(n,n)/2
+@testset "For A containing $eltya" for eltya in (Float32, Float64, ComplexF32, ComplexF64, Int)
+    ainit = eltya == Int ? rand(1:7, n, n) : convert(Matrix{eltya}, eltya <: Complex ? complex.(areal, aimg) : areal)
+    @testset "Positive semi-definiteness" begin
+        notsymmetric = ainit
+        notsquare    = [ainit ainit]
+        @test !ispossemdef(notsymmetric)
+        @test !ispossemdef(notsquare)
+        for truerank in 0:n
+            X = ainit[:, 1:truerank]
+            A = truerank == 0 ? zeros(eltya, n, n) : X * X'
+            @test ispossemdef(A)
+            for testrank in 0:n
+                if testrank == truerank
+                    @test ispossemdef(A, testrank)
+                else
+                    @test !ispossemdef(A, testrank)
+                end
+            end
+            @test !ispossemdef(notsymmetric, truerank)
+            @test !ispossemdef(notsquare, truerank)
+            @test_throws ArgumentError ispossemdef(A, -1)
+            @test_throws ArgumentError ispossemdef(A, n + 1)
+        end
+    end
 end

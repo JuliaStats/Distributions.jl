@@ -10,7 +10,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     if g isa UnivariateGMM
         T = eltype(g.means)
     else
-        T = eltype(g)
+        T = eltype(typeof(g))
     end
     X = zeros(T, n)
     for i = 1:n
@@ -70,7 +70,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test componentwise_logpdf(g, X) ≈ LP0
 
     # sampling
-    if (T isa AbstractFloat)
+    if (T <: AbstractFloat)
         if ismissing(rng)
             Xs = rand(g, ns)
         else
@@ -146,6 +146,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
     @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
+    @test isapprox(var(Xs, dims=2)      , var(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)
@@ -154,12 +155,14 @@ function test_params(g::AbstractMixtureModel)
     mm = MixtureModel(C, pars...)
     @test g.prior == mm.prior
     @test g.components == mm.components
+    @test g == deepcopy(g)
 end
 
 function test_params(g::UnivariateGMM)
     pars = params(g)
     mm = UnivariateGMM(pars...)
     @test g == mm
+    @test g == deepcopy(g)
 end
 
 # Tests
@@ -187,7 +190,8 @@ end
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
         for T = [Float64, Dual]
-            g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(p))
+            g_u = @inferred UnivariateGMM(map(Dual, μ), map(Dual, σ),
+                                          Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3
             test_mixture(g_u, 1000, 10^6, rng)
@@ -195,6 +199,24 @@ end
             @test minimum(g_u) == -Inf
             @test maximum(g_u) == Inf
             @test extrema(g_u) == (-Inf, Inf)
+        end
+
+        # https://github.com/JuliaStats/Distributions.jl/issues/1121
+        @test @inferred(logpdf(UnivariateGMM(μ, σ, Categorical(p)), 42)) isa Float64
+
+        @testset "Product 0 NaN in mixtures" begin
+            distributions = [
+                Normal(-1.0, 0.3),
+                Normal(0.0, 0.5),
+                Normal(3.0, 1.0),
+                Normal(NaN, 1.0),
+            ]
+            priors = [0.25, 0.25, 0.5, 0.0]
+            gmm_normal = MixtureModel(distributions, priors)
+            for x in rand(10)
+                result = pdf(gmm_normal, x)
+                @test !isnan(result)
+            end
         end
     end
 

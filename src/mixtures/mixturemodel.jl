@@ -48,7 +48,7 @@ component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel)
+components(d::AbstractMixtureModel) = [component(d, k) for k in 1:ncomponents(d)]
 
 """
     probs(d::AbstractMixtureModel)
@@ -88,7 +88,7 @@ Here, `x` can be a single sample or an array of multiple samples.
 logpdf(d::AbstractMixtureModel, x::Any)
 
 """
-    rand(d::Union{UnivariateMixture, MultivariateDistribution})
+    rand(d::Union{UnivariateMixture, MultivariateMixture})
 
 Draw a sample from the mixture model `d`.
 
@@ -227,6 +227,10 @@ function var(d::UnivariateMixture)
     return v
 end
 
+function var(d::MultivariateMixture)
+    return diag(cov(d))
+end
+
 function cov(d::MultivariateMixture)
     K = ncomponents(d)
     p = probs(d)
@@ -279,9 +283,8 @@ end
 function insupport(d::AbstractMixtureModel, x::AbstractVector)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0 && insupport(component(d, i), x)
             return true
         end
@@ -292,10 +295,9 @@ end
 function _cdf(d::UnivariateMixture, x::Real)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     r = 0.0
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             c = component(d, i)
             r += pi * cdf(c, x)
@@ -305,32 +307,21 @@ function _cdf(d::UnivariateMixture, x::Real)
 end
 
 cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
-cdf(d::UnivariateMixture{Discrete}, x::Int) = _cdf(d, x)
-
+cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 
 function _mixpdf1(d::AbstractMixtureModel, x)
-    K = ncomponents(d)
-    p = probs(d)
-    @assert length(p) == K
-    v = 0.0
-    for i = 1:K
-        @inbounds pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            v += pdf(c, x) * pi
-        end
-    end
-    return v
+    ps = probs(d)
+    cs = components(d)
+    return sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     fill!(r, 0.0)
-    t = Array{Float64}(undef, size(r))
-    for i = 1:K
-        @inbounds pi = p[i]
+    t = Array{eltype(p)}(undef, size(r))
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             if d isa UnivariateMixture
                 t .= pdf.(component(d, i), x)
@@ -357,16 +348,14 @@ function _mixlogpdf1(d::AbstractMixtureModel, x)
 
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
-
-    lp = Vector{eltype(x)}(undef, K)
+    lp = Vector{eltype(p)}(undef, K)
     m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             # lp[i] <- log(p(cs[i], x)) + log(pri[i])
             lp_i = logpdf(component(d, i), x) + log(pi)
-            @inbounds lp[i] = lp_i
+            lp[i] = lp_i
             if lp_i > m
                 m = lp_i
             end
@@ -384,12 +373,11 @@ end
 function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     p = probs(d)
-    @assert length(p) == K
     n = length(r)
-    Lp = Matrix{eltype(x)}(undef, n, K)
+    Lp = Matrix{eltype(p)}(undef, n, K)
     m = fill(-Inf, n)
-    for i = 1:K
-        @inbounds pi = p[i]
+    @inbounds for i in eachindex(p)
+        pi = p[i]
         if pi > 0.0
             lpri = log(pi)
             lp_i = view(Lp, :, i)

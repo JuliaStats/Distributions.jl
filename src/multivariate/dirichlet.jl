@@ -2,7 +2,7 @@
     Dirichlet
 
 The [Dirichlet distribution](http://en.wikipedia.org/wiki/Dirichlet_distribution) is often
-used the conjugate prior for Categorical or Multinomial distributions.
+used as the conjugate prior for Categorical or Multinomial distributions.
 The probability density function of a Dirichlet distribution with parameter
 ``\\alpha = (\\alpha_1, \\ldots, \\alpha_k)`` is:
 
@@ -33,15 +33,15 @@ struct Dirichlet{T<:Real} <: ContinuousMultivariateDistribution
             ai > 0 ||
                 throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
             alpha0 += ai
-            lmnB += lgamma(ai)
+            lmnB += loggamma(ai)
         end
-        lmnB -= lgamma(alpha0)
+        lmnB -= loggamma(alpha0)
         new{T}(alpha, alpha0, lmnB)
     end
 
     function Dirichlet{T}(d::Integer, alpha::T) where T
         alpha0 = alpha * d
-        new{T}(fill(alpha, d), alpha0, lgamma(alpha) * d - lgamma(alpha0))
+        new{T}(fill(alpha, d), alpha0, loggamma(alpha) * d - loggamma(alpha0))
     end
 end
 
@@ -56,6 +56,8 @@ struct DirichletCanon
 end
 
 length(d::DirichletCanon) = length(d.alpha)
+
+Base.eltype(::Type{Dirichlet{T}}) where {T} = T
 
 #### Conversions
 convert(::Type{Dirichlet{Float64}}, cf::DirichletCanon) = Dirichlet(cf.alpha)
@@ -168,11 +170,14 @@ function insupport(d::Dirichlet, x::AbstractVector{T}) where T<:Real
     return true
 end
 
-function _logpdf(d::Dirichlet, x::AbstractVector{T}) where T<:Real
+function _logpdf(d::Dirichlet{S}, x::AbstractVector{T}) where {S, T<:Real}
+    if !insupport(d, x)
+        return convert(promote_type(S, T), -Inf)
+    end
     a = d.alpha
-    s = 0.
+    s = zero(promote_type(S, T))
     for i in 1:length(a)
-        @inbounds s += (a[i] - 1.0) * log(x[i])
+        @inbounds s += xlogy(a[i] - one(S), x[i])
     end
     return s - d.lmnB
 end
@@ -208,7 +213,7 @@ length(ss::DirichletStats) = length(s.slogp)
 
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
-function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64})
+function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
     slogp = zeros(K)
@@ -220,7 +225,7 @@ function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64})
     DirichletStats(slogp, n)
 end
 
-function suffstats(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
                    w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
@@ -264,22 +269,12 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(undef, K)  # E[p]
-    γ = Vector{Float64}(undef, K)  # E[p^2]
-
-    for i = 1:n
-        for k = 1:K
-            @inbounds pk = P[k, i]
-            @inbounds μ[k] += pk
-            @inbounds γ[k] += pk * pk
-        end
-    end
+    μ = vec(sum(P, dims=2))       # E[p]
+    γ = vec(sum(abs2, P, dims=2)) # E[p^2]
 
     c = 1.0 / n
-    for k = 1:K
-        μ[k] *= c
-        γ[k] *= c
-    end
+    μ .*= c
+    γ .*= c
 
     _dirichlet_mle_init2(μ, γ)
 end
@@ -288,14 +283,14 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     K = size(P, 1)
     n = size(P, 2)
 
-    μ = Vector{Float64}(undef, K)  # E[p]
-    γ = Vector{Float64}(undef, K)  # E[p^2]
-    tw = 0.
+    μ = zeros(K)  # E[p]
+    γ = zeros(K)  # E[p^2]
+    tw = 0.0
 
-    for i = 1:n
+    for i in 1:n
         @inbounds wi = w[i]
         tw += wi
-        for k = 1:K
+        for k in 1:K
             pk = P[k, i]
             @inbounds μ[k] += pk * wi
             @inbounds γ[k] += pk * pk * wi
@@ -303,10 +298,8 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     end
 
     c = 1.0 / tw
-    for k = 1:K
-        μ[k] *= c
-        γ[k] *= c
-    end
+    μ .*= c
+    γ .*= c
 
     _dirichlet_mle_init2(μ, γ)
 end
@@ -325,7 +318,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
     α0 = sum(α)
 
     if debug
-        objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+        objv = dot(α .- 1.0, elogp) + loggamma(α0) - sum(loggamma, α)
     end
 
     t = 0
@@ -369,7 +362,7 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
 
         if debug
             prev_objv = objv
-            objv = dot(α - 1.0, elogp) + lgamma(α0) - sum(lgamma(α))
+            objv = dot(α .- 1.0, elogp) + loggamma(α0) - sum(loggamma, α)
             @printf("Iter %4d: objv = %.4e  ch = %.3e  gnorm = %.3e\n",
                 t, objv, objv - prev_objv, gnorm)
         end
@@ -379,26 +372,32 @@ function fit_dirichlet!(elogp::Vector{Float64}, α::Vector{Float64};
         converged = gnorm < tol
     end
 
+    if !converged
+        throw(ErrorException("No convergence after $maxiter (maxiter) iterations."))
+    end
+
     Dirichlet(α)
 end
 
 
-function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64};
-    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
+function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
+    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
+    debug::Bool=false) where {T<:Dirichlet}
 
     α = isempty(init) ? dirichlet_mle_init(P) : init
-    elogp = mean_logp(suffstats(Dirichlet, P))
-    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
+    elogp = mean_logp(suffstats(T, P))
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end
 
-function fit_mle(::Type{Dirichlet}, P::AbstractMatrix{Float64},
+function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
                  w::AbstractArray{Float64};
-    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12)
+    init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
+    debug::Bool=false)
 
     n = size(P, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
-    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol)
+    fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
 end

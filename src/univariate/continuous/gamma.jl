@@ -27,24 +27,24 @@ External links
 struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
-
-    function Gamma{T}(α, θ) where T
-        @check_args(Gamma, α > zero(α) && θ > zero(θ))
-        new{T}(α, θ)
-    end
+    Gamma{T}(α, θ) where {T} = new{T}(α, θ)
 end
 
-Gamma(α::T, θ::T) where {T<:Real} = Gamma{T}(α, θ)
+function Gamma(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
+    return Gamma{T}(α, θ)
+end
+
 Gamma(α::Real, θ::Real) = Gamma(promote(α, θ)...)
-Gamma(α::Integer, θ::Integer) = Gamma(Float64(α), Float64(θ))
-Gamma(α::Real) = Gamma(α, 1.0)
-Gamma() = Gamma(1.0, 1.0)
+Gamma(α::Integer, θ::Integer) = Gamma(float(α), float(θ))
+Gamma(α::T) where {T <: Real} = Gamma(α, one(T))
+Gamma() = Gamma(1.0, 1.0, check_args=false)
 
 @distr_support Gamma 0.0 Inf
 
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
-convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ))
+convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), check_args=false)
 
 #### Parameters
 
@@ -53,8 +53,7 @@ scale(d::Gamma) = d.θ
 rate(d::Gamma) = 1 / d.θ
 
 params(d::Gamma) = (d.α, d.θ)
-@inline partype(d::Gamma{T}) where {T<:Real} = T
-
+partype(::Gamma{T}) where {T} = T
 
 #### Statistics
 
@@ -73,7 +72,7 @@ end
 
 function entropy(d::Gamma)
     (α, θ) = params(d)
-    α + lgamma(α) + (1 - α) * digamma(α) + log(θ)
+    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
 mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
@@ -120,7 +119,7 @@ struct GammaStats <: SufficientStats
     GammaStats(sx::Real, slogx::Real, tw::Real) = new(sx, slogx, tw)
 end
 
-function suffstats(::Type{Gamma}, x::AbstractArray{T}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}) where T<:Real
     sx = zero(T)
     slogx = zero(T)
     for xi = x
@@ -130,7 +129,7 @@ function suffstats(::Type{Gamma}, x::AbstractArray{T}) where T<:Real
     GammaStats(sx, slogx, length(x))
 end
 
-function suffstats(::Type{Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -155,7 +154,7 @@ function gamma_mle_update(logmx::Float64, mlogx::Float64, a::Float64)
     1 / z
 end
 
-function fit_mle(::Type{Gamma}, ss::GammaStats;
+function fit_mle(::Type{<:Gamma}, ss::GammaStats;
     alpha0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16)
 
     mx = ss.sx / ss.tw

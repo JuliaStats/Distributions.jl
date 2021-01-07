@@ -18,11 +18,13 @@ The methods listed as below are implemented for each multivariate distribution, 
 ```@docs
 length(::MultivariateDistribution)
 size(::MultivariateDistribution)
+eltype(::Type{MultivariateDistribution})
 mean(::MultivariateDistribution)
 var(::MultivariateDistribution)
 cov(::MultivariateDistribution)
 cor(::MultivariateDistribution)
 entropy(::MultivariateDistribution)
+entropy(::MultivariateDistribution, ::Real)
 ```
 
 ### Probability evaluation
@@ -31,7 +33,7 @@ entropy(::MultivariateDistribution)
 insupport(::MultivariateDistribution, ::AbstractArray)
 pdf(::MultivariateDistribution, ::AbstractArray)
 logpdf(::MultivariateDistribution, ::AbstractArray)
-loglikelihood(::MultivariateDistribution, ::AbstractMatrix)
+loglikelihood(::MultivariateDistribution, ::AbstractArray)
 ```
 **Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
 
@@ -39,8 +41,8 @@ loglikelihood(::MultivariateDistribution, ::AbstractMatrix)
 ### Sampling
 
 ```@docs
-rand(::MultivariateDistribution)
-rand!(::MultivariateDistribution, ::AbstractArray)
+rand(rng::AbstractRNG, ::MultivariateDistribution)
+rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 ```
 
 **Note:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
@@ -95,6 +97,14 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ## Internal Methods (for creating you own multivariate distribution)
 
 ```@docs
-Distributions._rand!(d::MultivariateDistribution, x::AbstractArray)
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```
+
+## Product distributions
+
+```@docs
+Distributions.product_distribution
+```
+
+Using `product_distribution` is advised to construct product distributions. 
+For some distributions, it constructs a special multivariate type.

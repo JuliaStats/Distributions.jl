@@ -1,9 +1,13 @@
 using Distributions
 using Test
+using StableRNGs
 
+@testset "Categorical" begin
 
-for p in Vector{Float64}[
+for p in Any[
     [0.5, 0.5],
+    [0.5f0, 0.5f0],
+    [1//2, 1//2],
     [0.1, 0.3, 0.2, 0.4],
     [0.15, 0.25, 0.6] ]
 
@@ -22,7 +26,8 @@ for p in Vector{Float64}[
     for i = 1:k
         c += p[i]
         @test pdf(d, i) == p[i]
-        @test logpdf(d, i) == log(p[i])
+        @test @inferred(logpdf(d, i)) === log(p[i])
+        @test @inferred(logpdf(d, float(i))) === log(p[i])
         @test cdf(d, i)  ≈ c
         @test ccdf(d, i) ≈ 1.0 - c
     end
@@ -39,7 +44,10 @@ for p in Vector{Float64}[
     @test pdf.(d, support(d)) == p
     @test pdf.(d, 1:k) == p
 
-    test_distr(d, 10^6)
+    # The test utilities are currently only able to handle Float64s
+    if partype(d) === Float64
+        test_distr(d, 10^6)
+    end
 end
 
 d = Categorical(4)
@@ -54,3 +62,15 @@ p = ones(10^6) * 1.0e-6
 
 @test typeof(convert(Categorical{Float32,Vector{Float32}}, d)) == Categorical{Float32,Vector{Float32}}
 @test typeof(convert(Categorical{Float32,Vector{Float32}}, d.p)) == Categorical{Float32,Vector{Float32}}
+
+@testset "test args... constructor" begin
+    @test Categorical(0.3, 0.7) == Categorical([0.3, 0.7])
+end
+
+@testset "reproducibility across julia versions" begin
+    d= Categorical([0.1, 0.2, 0.7])
+    rng = StableRNGs.StableRNG(600)
+    @test rand(rng, d, 10) == [2, 1, 3, 3, 2, 3, 3, 3, 3, 3]
+end
+
+end

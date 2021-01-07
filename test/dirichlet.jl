@@ -22,6 +22,12 @@ d = Dirichlet(3, 2.0)
 @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
 @test var(d)  ≈ diag(cov(d))
 
+@test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1.0
+@test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1.0f0
+@test typeof(pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0])) == Float32
+
+@test pdf(d, [-1, 1, 0])         ≈ 0.0
+@test pdf(d, [0, 0, 1])          ≈ 0.0
 @test pdf(d, [0.2, 0.3, 0.5])    ≈ 3.6
 @test pdf(d, [0.4, 0.5, 0.1])    ≈ 2.4
 @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
@@ -44,6 +50,7 @@ d = Dirichlet(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)
 @test d == typeof(d)(params(d)...)
+@test d == deepcopy(d)
 
 @test mean(d) ≈ v / sum(v)
 @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
@@ -72,14 +79,30 @@ x = func[2](d, 10)
 @test isa(x, Matrix{Float64})
 @test size(x) == (3, 10)
 
+v = [2.0, 1.0, 3.0]
+d = Dirichlet(Float32.(v))
+
+x = func[1](d)
+@test isa(x, Vector{Float32})
+@test length(x) == 3
+
+x = func[2](d, 10)
+@test isa(x, Matrix{Float32})
+@test size(x) == (3, 10)
+
 
 # Test MLE
+
+v = [2.0, 1.0, 3.0]
+d = Dirichlet(v)
 
 n = 10000
 x = func[2](d, n)
 x = x ./ sum(x, dims=1)
 
 r = fit_mle(Dirichlet, x)
+@test isapprox(r.alpha, d.alpha, atol=0.25)
+r = fit(Dirichlet{Float32}, x)
 @test isapprox(r.alpha, d.alpha, atol=0.25)
 
 # r = fit_mle(Dirichlet, x, fill(2.0, n))

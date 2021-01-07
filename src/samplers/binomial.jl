@@ -23,7 +23,7 @@ end
 #
 #   Devroye. L.
 #   "Generating the maximum of independent identically  distributed random variables"
-#   Computers and Marhemafics with Applicalions 6, 1960, 305-315.
+#   Computers & Mathematics with Applications, Volume 6, Issue 3, 1980, Pages 305-315.
 #
 struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
     comp::Bool

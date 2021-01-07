@@ -4,7 +4,7 @@
 
 function probs(d::DiscreteUnivariateDistribution)
     Base.depwarn("probs(d::$(typeof(d))) is deprecated. Please use pdf(d) instead.", :probs)
-    return probs(d)
+    return pdf(d)
 end
 
 function Binomial(n::Real, p::Real)

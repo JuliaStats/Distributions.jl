@@ -12,7 +12,7 @@ We start by drawing 100 observations from a standard-normal random variable.
 The first step is to set up the environment:
 
 ```julia
-julia> using Compat, Random, Distributions
+julia> using Random, Distributions
 
 julia> Random.seed!(123) # Setting the seed
 ```
@@ -67,7 +67,7 @@ julia> Wishart(nu, S) # Continuous matrix-variate
 In addition, you can create truncated distributions from univariate distributions:
 
 ```julia
-julia> Truncated(Normal(mu, sigma), l, u)
+julia> truncated(Normal(mu, sigma), l, u)
 ```
 
 To find out which parameters are appropriate for a given distribution `D`, you can use `fieldnames(D)`:

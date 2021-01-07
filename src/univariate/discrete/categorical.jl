@@ -24,26 +24,22 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
+const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-Categorical{P,Ps}(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
-
-Categorical(p::Ps, ::NoArgCheck) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, NoArgCheck())
-
-function Categorical{P,Ps}(p::Ps) where {P<:Real, Ps<:AbstractVector{P}}
-    @check_args(Categorical, isprobvec(p))
-    Categorical{P,Ps}(Base.OneTo(length(p)), p, NoArgCheck())
+function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
+    check_args && @check_args(Categorical, isprobvec(p))
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_args=check_args)
 end
 
-Categorical(p::Ps) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p)
+Categorical(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}} =
+    Categorical{P,Ps}(p, check_args=check_args)
 
-function Categorical(k::Integer)
-    @check_args(Categorical, k >= 1)
-    Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), NoArgCheck())
+function Categorical(k::Integer; check_args=true)
+    check_args && @check_args(Categorical, k >= 1)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
 end
+
+Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
 
 ### Conversions
 
@@ -54,7 +50,7 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 
 ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
-@inline partype(d::Categorical{T}) where {T<:Real} = T
+partype(::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
 
@@ -84,9 +80,10 @@ function cdf(d::Categorical{T}, x::Int) where T<:Real
     return c
 end
 
-pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
-
-logpdf(d::Categorical, x::Int) = insupport(d, x) ? log(probs(d)[x]) : -Inf
+function pdf(d::Categorical, x::Real)
+    ps = probs(d)
+    return insupport(d, x) ? ps[round(Int, x)] : zero(eltype(ps))
+end
 
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
@@ -145,38 +142,38 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::Abs
     h
 end
 
-function suffstats(::Type{Categorical}, k::Int, x::AbstractArray{T}) where T<:Integer
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x))
 end
 
-function suffstats(::Type{Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
 const CategoricalData = Tuple{Int, AbstractArray}
 
-suffstats(::Type{Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
-suffstats(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
+suffstats(::Type{<:Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
+suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
 
 # Model fitting
 
-function fit_mle(::Type{Categorical}, ss::CategoricalStats)
+function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
     Categorical(pnormalize!(ss.h))
 end
 
-function fit_mle(::Type{Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), NoArgCheck())
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), check_args=false)
 end
 
-function fit_mle(::Type{Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), NoArgCheck())
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
+    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), check_args=false)
 end
 
-fit_mle(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
-fit_mle(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data..., w)
+fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)
+fit_mle(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data..., w)
 
-fit_mle(::Type{Categorical}, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x)
-fit_mle(::Type{Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
+fit_mle(::Type{<:Categorical}, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x)
+fit_mle(::Type{<:Categorical}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Categorical, maximum(x), x, w)
 
-fit(::Type{Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
-fit(::Type{Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)
+fit(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data)
+fit(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = fit_mle(Categorical, data, w)

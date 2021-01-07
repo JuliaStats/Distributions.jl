@@ -97,6 +97,7 @@ function pdf(d::Kolmogorov,x::Real)
     end
 end
 
+logpdf(d::Kolmogorov, x::Real) = log(pdf(d, x))
 
 @quantile_newton Kolmogorov
 

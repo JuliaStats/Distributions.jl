@@ -1,4 +1,4 @@
-using Distributions, Random
+using Distributions, Random, StaticArrays, LinearAlgebra
 using Test
 
 import Distributions: GenericMvTDist
@@ -39,10 +39,45 @@ end
 
 d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
 @test typeof(convert(GenericMvTDist{Float64}, d)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
-@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.zeromean, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+@test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.μ, d.Σ)) == typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
 @test partype(d) == Float32
+@test d == deepcopy(d)
 
 @test size(rand(MvTDist(1., mu, Sigma))) == (2,)
 @test size(rand(MvTDist(1., mu, Sigma), 10)) == (2,10)
 @test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma))) == (2,)
 @test size(rand(MersenneTwister(123), MvTDist(1., mu, Sigma), 10)) == (2,10)
+
+# static array for mean/variance
+mu_static = @SVector [1., 2]
+# depends on PDMats#101 (merged but not released)
+# Sigma_static = @SMatrix [4. 2; 2 3]
+
+for i in 1:length(df)
+    d = GenericMvTDist(df[i], mu_static, PDMat(Sigma))
+    @test d.μ isa SVector
+    @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
+    dd = typeof(d)(params(d)...)
+    @test d.df == dd.df
+    @test d.μ == dd.μ
+    @test Matrix(d.Σ) == Matrix(dd.Σ)
+end
+
+@testset "zero-mean" begin
+
+    X_implicit = GenericMvTDist(2.0, PDMat(Sigma))
+    X_expicit = GenericMvTDist(2.0, zeros(2), PDMat(Sigma))
+
+    # Check that the means equal the same thing.
+    @test mean(X_expicit) == mean(X_implicit)
+
+    # Check that generated random numbers are the same.
+    @test isapprox(
+        rand(MersenneTwister(123456), X_expicit),
+        rand(MersenneTwister(123456), X_implicit),
+    )
+
+    # Check that the logpdf computed is the same.
+    x = rand(X_implicit)
+    @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
+end

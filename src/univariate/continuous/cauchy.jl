@@ -25,18 +25,18 @@ External links
 struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    function Cauchy{T}(μ::T, σ::T) where T
-        @check_args(Cauchy, σ > zero(σ))
-        new{T}(μ, σ)
-    end
+    Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-Cauchy(μ::T, σ::T) where {T<:Real} = Cauchy{T}(μ, σ)
+function Cauchy(μ::T, σ::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Cauchy, σ > zero(σ))
+    return Cauchy{T}(μ, σ)
+end
+
 Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(Float64(μ), Float64(σ))
-Cauchy(μ::Real) = Cauchy(μ, 1.0)
-Cauchy() = Cauchy(0.0, 1.0)
+Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
+Cauchy(μ::T) where {T<:Real} = Cauchy(μ, one(T))
+Cauchy() = Cauchy(0.0, 1.0, check_args=false)
 
 @distr_support Cauchy -Inf Inf
 
@@ -45,7 +45,7 @@ function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))
 end
 function convert(::Type{Cauchy{T}}, d::Cauchy{S}) where {T <: Real, S <: Real}
-    Cauchy(T(d.μ), T(d.σ))
+    Cauchy(T(d.μ), T(d.σ), check_args=false)
 end
 
 #### Parameters
@@ -105,7 +105,7 @@ cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 #### Fitting
 
 # Note: this is not a Maximum Likelihood estimator
-function fit(::Type{Cauchy}, x::AbstractArray{T}) where T<:Real
+function fit(::Type{<:Cauchy}, x::AbstractArray{T}) where T<:Real
     l, m, u = quantile(x, [0.25, 0.5, 0.75])
     Cauchy(m, (u - l) / 2)
 end

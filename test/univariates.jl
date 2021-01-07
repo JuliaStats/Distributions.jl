@@ -23,11 +23,11 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         println("    testing $(ex)")
         dtype = eval(dsym)
         d = eval(ex)
-        if dtype == TruncatedNormal
+        if dsym == :truncated
             @test isa(d, Truncated{Normal{Float64}})
         else
-            @assert isa(dtype, Type) && dtype <: UnivariateDistribution
-            @test isa(d, dtype)
+            @test dtype isa Type && dtype <: UnivariateDistribution
+            @test d isa dtype
         end
 
         # verification and testing
@@ -64,7 +64,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
-    if length(pars) > 1 && sum(float_pars) > 1
+    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
         mixed_pars = Any[pars...]
         first_float = findfirst(float_pars)
         mixed_pars[first_float] = Float32(mixed_pars[first_float])
@@ -73,7 +73,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     end
 
     # promote integer arguments to floats, where applicable
-    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric)
+    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric) && !isa(D, typeof(truncated))
         int_pars = map(x -> ceil(Int, x), pars)
         @test typeof(D(int_pars...)) == typeof(d)
     end
@@ -102,8 +102,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
             @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
         end
 
-        # cdf method is not implemented for Skellam & NormalInverseGaussian
-        if !isa(d, Union{Skellam, NormalInverseGaussian})
+        # cdf method is not implemented for NormalInverseGaussian
+        if !isa(d, NormalInverseGaussian)
             @test isapprox(cdf(d, x), cf; atol=isa(d, NoncentralHypergeometric) ? 1e-8 : 1e-12)
         end
     end

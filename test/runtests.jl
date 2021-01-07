@@ -1,11 +1,23 @@
 using Distributions
-using JSON, ForwardDiff, Calculus, PDMats # test dependencies
+using PDMats # test dependencies
 using Test
 using Distributed
 using Random
 using StatsBase
+using LinearAlgebra
+using HypothesisTests
 
-tests = [
+import JSON
+import ForwardDiff
+
+const tests = [
+    "arcsine",
+    "dirac",
+    "truncate",
+    "truncnormal",
+    "truncated_exponential",
+    "normal",
+    "lognormal",
     "mvnormal",
     "mvlognormal",
     "types",
@@ -14,51 +26,53 @@ tests = [
     "categorical",
     "univariates",
     "continuous",
+    "edgecases",
     "fit",
     "multinomial",
     "binomial",
     "poissonbinomial",
     "dirichlet",
     "dirichletmultinomial",
+    "logitnormal",
     "mvtdist",
     "kolmogorov",
     "edgeworth",
-    "matrix",
+    "matrixreshaped",
+    "matrixvariates",
     "vonmisesfisher",
     "conversion",
+    "convolution",
     "mixture",
     "gradlogpdf",
-    "truncate",
     "noncentralt",
     "locationscale",
     "quantile_newton",
     "semicircle",
     "qq",
+    "pgeneralizedgaussian",
     "product",
-    "truncnormal",
-    "truncated_exponential",
     "discretenonparametric",
-    "functionals"
+    "functionals",
+    "chernoff",
+    "univariate_bounds",
+    "negativebinomial",
+    "bernoulli",
+    "soliton",
+    "skewnormal",
 ]
-
 
 printstyled("Running tests:\n", color=:blue)
 
-using Random
 Random.seed!(345679)
 
-res = map(tests) do t
-    @eval module $(Symbol("Test_", t))
-    using Distributions
-    using JSON, ForwardDiff, Calculus, PDMats # test dependencies
-    using Test
-    using Random
-    Random.seed!(345679)
-    using LinearAlgebra
-    using StatsBase
-    include($t * ".jl")
+# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+include("testutils.jl")
+
+for t in tests
+    @testset "Test $t" begin
+        Random.seed!(345679)
+        include("$t.jl")
     end
-    return
 end
 
 # print method ambiguities

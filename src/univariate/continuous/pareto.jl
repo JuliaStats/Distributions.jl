@@ -24,24 +24,24 @@ External links
 struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
-
-    function Pareto{T}(α::T, θ::T) where T
-        @check_args(Pareto, α > zero(α) && θ > zero(θ))
-        new{T}(α, θ)
-    end
+    Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-Pareto(α::T, θ::T) where {T<:Real} = Pareto{T}(α, θ)
+function Pareto(α::T, θ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Pareto, α > zero(α) && θ > zero(θ))
+    return Pareto{T}(α, θ)
+end
+
 Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
-Pareto(α::Integer, θ::Integer) = Pareto(Float64(α), Float64(θ))
-Pareto(α::Real) = Pareto(α, 1.0)
-Pareto() = Pareto(1.0, 1.0)
+Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
+Pareto(α::T) where {T <: Real} = Pareto(α, one(T))
+Pareto() = Pareto(1.0, 1.0, check_args=false)
 
 @distr_support Pareto d.θ Inf
 
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ))
+convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), check_args=false)
 
 #### Parameters
 
@@ -115,7 +115,7 @@ rand(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
 
 ## Fitting
 
-function fit_mle(::Type{Pareto}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where T<:Real
     # Based on
     # https://en.wikipedia.org/wiki/Pareto_distribution#Parameter_estimation
 

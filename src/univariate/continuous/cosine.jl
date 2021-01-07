@@ -10,15 +10,18 @@ External link:
 struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-
-    Cosine{T}(μ::T, σ::T) where {T} = (@check_args(Cosine, σ > zero(σ)); new{T}(μ, σ))
+    Cosine{T}(μ::T, σ::T) where {T} = new{T}(µ, σ)
 end
 
-Cosine(μ::T, σ::T) where {T<:Real} = Cosine{T}(μ, σ)
+function Cosine(μ::T, σ::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Cosine, σ > zero(σ))
+    return Cosine{T}(μ, σ)
+end
+
 Cosine(μ::Real, σ::Real) = Cosine(promote(μ, σ)...)
-Cosine(μ::Integer, σ::Integer) = Cosine(Float64(μ), Float64(σ))
-Cosine(μ::Real) = Cosine(μ, 1.0)
-Cosine() = Cosine(0.0, 1.0)
+Cosine(μ::Integer, σ::Integer) = Cosine(float(μ), float(σ))
+Cosine(μ::T) where {T <: Real} = Cosine(μ, one(µ))
+Cosine() = Cosine(0.0, 1.0, check_args=false)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 
@@ -27,7 +30,7 @@ function convert(::Type{Cosine{T}}, μ::Real, σ::Real) where T<:Real
     Cosine(T(μ), T(σ))
 end
 function convert(::Type{Cosine{T}}, d::Cosine{S}) where {T <: Real, S <: Real}
-    Cosine(T(d.μ), T(d.σ))
+    Cosine(T(d.μ), T(d.σ), check_args=false)
 end
 
 #### Parameters
@@ -65,9 +68,7 @@ function pdf(d::Cosine{T}, x::Real) where T<:Real
     end
 end
 
-function logpdf(d::Cosine{T}, x::Real) where T<:Real
-    insupport(d, x) ? log(pdf(d, x)) : -T(Inf)
-end
+logpdf(d::Cosine, x::Real) = log(pdf(d, x))
 
 function cdf(d::Cosine{T}, x::Real) where T<:Real
     if x < d.μ - d.σ

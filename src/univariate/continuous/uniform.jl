@@ -26,25 +26,28 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-
-    Uniform{T}(a::T, b::T) where {T} = (@check_args(Uniform, a < b); new{T}(a, b))
+    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-Uniform(a::T, b::T) where {T<:Real} = Uniform{T}(a, b)
+function Uniform(a::T, b::T; check_args=true) where {T <: Real}
+    check_args && @check_args(Uniform, a < b)
+    return Uniform{T}(a, b)
+end
+
 Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(Float64(a), Float64(b))
-Uniform() = Uniform(0.0, 1.0)
+Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
+Uniform() = Uniform(0.0, 1.0, check_args=false)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b))
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
 
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
-@inline partype(d::Uniform{T}) where {T<:Real} = T
+partype(::Uniform{T}) where {T<:Real} = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a
@@ -69,6 +72,7 @@ entropy(d::Uniform) = log(d.b - d.a)
 
 pdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
 logpdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
+gradlogpdf(d::Uniform{T}, x::Real) where {T<:Real} = zero(T)
 
 function cdf(d::Uniform{T}, x::Real) where T<:Real
     (a, b) = params(d)
@@ -110,7 +114,7 @@ rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 #### Fitting
 
-function fit_mle(::Type{Uniform}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end

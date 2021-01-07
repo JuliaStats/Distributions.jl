@@ -1,10 +1,18 @@
 ## sample space/domain
 
+"""
+`F <: VariateForm` specifies the form of the variate or
+dimension of a sample, univariate (scalar), multivariate (vector), matrix-variate (matrix).
+"""
 abstract type VariateForm end
 struct Univariate    <: VariateForm end
 struct Multivariate  <: VariateForm end
 struct Matrixvariate <: VariateForm end
 
+"""
+`S <: ValueSupport` specifies the support of sample elements,
+either discrete or continuous.
+"""
 abstract type ValueSupport end
 struct Discrete   <: ValueSupport end
 struct Continuous <: ValueSupport end
@@ -41,14 +49,14 @@ Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
-    eltype(s::Sampleable)
+    eltype(::Type{Sampleable})
 
 The default element type of a sample. This is the type of elements of the samples generated
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(s::Sampleable{F,Discrete}) where {F} = Int
-Base.eltype(s::Sampleable{F,Continuous}) where {F} = Float64
+Base.eltype(::Type{<:Sampleable{F,Discrete}}) where {F} = Int
+Base.eltype(::Type{<:Sampleable{F,Continuous}}) where {F} = Float64
 
 """
     nsamples(s::Sampleable)
@@ -63,6 +71,32 @@ nsamples(::Type{D}, x::AbstractVector) where {D<:Sampleable{Multivariate}} = 1
 nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = size(x, 2)
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
+
+for func in (:(==), :isequal, :isapprox)
+    @eval function Base.$func(s1::A, s2::B; kwargs...) where {A<:Sampleable, B<:Sampleable}
+        nameof(A) === nameof(B) || return false
+        fields = fieldnames(A)
+        fields === fieldnames(B) || return false
+
+        for f in fields
+            isdefined(s1, f) && isdefined(s2, f) || return false
+            $func(getfield(s1, f), getfield(s2, f); kwargs...) || return false
+        end
+
+        return true
+    end
+end
+
+function Base.hash(s::S, h::UInt) where S <: Sampleable
+    hashed = hash(Sampleable, h)
+    hashed = hash(nameof(S), hashed)
+
+    for f in fieldnames(S)
+        hashed = hash(getfield(s, f), hashed)
+    end
+
+    return hashed
+end
 
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}

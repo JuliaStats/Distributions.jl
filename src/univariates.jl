@@ -140,7 +140,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{<:$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -153,8 +153,6 @@ end
 ##### generic methods (fallback) #####
 
 ## sampling
-# single univariate, no allocation
-rand(rng::AbstractRNG, s::Sampleable{Univariate}) = rand(rng, s)
 
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
@@ -170,11 +168,18 @@ function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
 end
 
 """
-    rand(d::UnivariateDistribution)
+    rand(rng::AbstractRNG, d::UnivariateDistribution)
 
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
 """
 rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
+
+"""
+    rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
+
+Sample a univariate distribution and store the results in the provided array.
+"""
+rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 
 ## statistics
 
@@ -244,16 +249,16 @@ entropy(d::UnivariateDistribution, b::Real) = entropy(d) / log(b)
 """
     isplatykurtic(d)
 
-Return whether `d` is platykurtic (*i.e* `kurtosis(d) > 0`).
+Return whether `d` is platykurtic (*i.e* `kurtosis(d) < 0`).
 """
-isplatykurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
+isplatykurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
 
 """
     isleptokurtic(d)
 
-Return whether `d` is leptokurtic (*i.e* `kurtosis(d) < 0`).
+Return whether `d` is leptokurtic (*i.e* `kurtosis(d) > 0`).
 """
-isleptokurtic(d::UnivariateDistribution) = kurtosis(d) < 0.0
+isleptokurtic(d::UnivariateDistribution) = kurtosis(d) > 0.0
 
 """
     ismesokurtic(d)
@@ -312,22 +317,16 @@ Evaluate the probability density (mass) at `x`.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::UnivariateDistribution, x::Real)
-pdf(d::DiscreteUnivariateDistribution, x::Int) = throw(MethodError(pdf, (d, x)))
-pdf(d::DiscreteUnivariateDistribution, x::Integer) = pdf(d, round(Int, x))
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : 0.0
+pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
 Evaluate the logarithm of probability density (mass) at `x`.
-Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
-Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
+
+See also: [`pdf`](@ref).
 """
-logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Int) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = logpdf(d, round(Int, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? logpdf(d, round(Int, x)) : -Inf
+logpdf(d::UnivariateDistribution, x::Real)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -337,10 +336,10 @@ Evaluate the cumulative probability at `x`.
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
-cdf(d::DiscreteUnivariateDistribution, x::Int) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
+cdf(d::DiscreteUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
 # Discrete univariate with infinite support
-function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{false}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
     c = 0.0
     for y = minimum(d):x
         c += pdf(d, y)
@@ -349,7 +348,7 @@ function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{fal
 end
 
 # Discrete univariate with finite support
-function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{true}})
+function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
     # calculate from left if x < (min + max)/2
     # (same as infinite support version)
     x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
@@ -363,7 +362,6 @@ function cdf(d::DiscreteUnivariateDistribution, x::Int, ::Type{FiniteSupport{tru
 end
 
 cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
-
 cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x)))
 
 
@@ -373,7 +371,7 @@ cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x
 The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
 """
 ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Int) = 1.0 - cdf(d, x)
+ccdf(d::DiscreteUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
 ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 
 """
@@ -382,8 +380,22 @@ ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
 logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
-logcdf(d::DiscreteUnivariateDistribution, x::Int) = log(cdf(d, x))
+logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
 logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
+
+"""
+    logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
+
+The natural logarithm of the difference between the cumulative density function at `x` and `y`, i.e. `log(cdf(x) - cdf(y))`.
+"""
+function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
+    # Promote to ensure that we don't compute logcdf in low precision and then promote
+    _x, _y = promote(x, y)
+    _x <= _y && throw(ArgumentError("requires x > y."))
+    u = logcdf(d, _x)
+    v = logcdf(d, _y)
+    return u + log1mexp(v - u)
+end
 
 """
     logccdf(d::UnivariateDistribution, x::Real)
@@ -391,7 +403,7 @@ logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
 logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
-logccdf(d::DiscreteUnivariateDistribution, x::Int) = log(ccdf(d, x))
+logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
 logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 
 """
@@ -418,9 +430,9 @@ The inverse function of logcdf.
 invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 
 """
-    invlogcdf(d::UnivariateDistribution, lp::Real)
+    invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logcdf.
+The inverse function of logccdf.
 """
 invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
 
@@ -499,11 +511,14 @@ end
 
 ## loglikelihood
 """
-    loglikelihood(d::UnivariateDistribution, X::AbstractArray)
+    loglikelihood(d::UnivariateDistribution, x::Union{Real,AbstractArray})
 
-The log-likelihood of distribution `d` w.r.t. all samples contained in array `x`.
+The log-likelihood of distribution `d` with respect to all samples contained in `x`.
+
+Here `x` can be a single scalar sample or an array of samples.
 """
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
+loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### macros to use StatsFuns for method implementation
 
@@ -549,6 +564,7 @@ const discrete_distributions = [
     "bernoulli",
     "betabinomial",
     "binomial",
+    "dirac",
     "discreteuniform",
     "discretenonparametric",
     "categorical",
@@ -558,6 +574,7 @@ const discrete_distributions = [
     "noncentralhypergeometric",
     "poisson",
     "skellam",
+    "soliton",
     "poissonbinomial"
 ]
 
@@ -567,6 +584,7 @@ const continuous_distributions = [
     "betaprime",
     "biweight",
     "cauchy",
+    "chernoff",
     "chisq",    # Chi depends on Chisq
     "chi",
     "cosine",
@@ -575,6 +593,7 @@ const continuous_distributions = [
     "fdist",
     "frechet",
     "gamma", "erlang",
+    "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
     "gumbel",
@@ -595,9 +614,11 @@ const continuous_distributions = [
     "normalcanon",
     "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
+    "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
     "semicircle",
+    "skewnormal",
     "studentizedrange",
     "symtriangular",
     "tdist",

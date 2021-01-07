@@ -29,18 +29,18 @@ External links
 struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
-
-    function Beta{T}(α::T, β::T) where T
-        @check_args(Beta, α > zero(α) && β > zero(β))
-        new{T}(α, β)
-    end
+    Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-Beta(α::T, β::T) where {T<:Real} = Beta{T}(α, β)
+function Beta(α::T, β::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Beta, α > zero(α) && β > zero(β))
+    return Beta{T}(α, β)
+end
+
 Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(Float64(α), Float64(β))
+Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
 Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1, 1)
+Beta() = Beta(1.0, 1.0, check_args=false)
 
 @distr_support Beta 0.0 1.0
 
@@ -49,7 +49,7 @@ function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
 end
 function convert(::Type{Beta{T}}, d::Beta{S}) where {T <: Real, S <: Real}
-    Beta(T(d.α), T(d.β))
+    Beta(T(d.α), T(d.β), check_args=false)
 end
 
 #### Parameters
@@ -62,9 +62,11 @@ params(d::Beta) = (d.α, d.β)
 
 mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
-function mode(d::Beta)
+function mode(d::Beta; check_args=true)
     (α, β) = params(d)
-    (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")
+    if check_args
+        (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")
+    end
     return (α - 1) / (α + β - 2)
 end
 
@@ -101,7 +103,7 @@ end
 function entropy(d::Beta)
     α, β = params(d)
     s = α + β
-    lbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
+    logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
         (s - 2) * digamma(s)
 end
 
@@ -200,12 +202,16 @@ end
 
 # TODO: add MLE method (should be similar to Dirichlet)
 
-# This is a moment-matching method (not MLE)
-#
-function fit(::Type{Beta}, x::AbstractArray{T}) where T<:Real
+"""
+    fit(::Type{<:Beta}, x::AbstractArray{T})
+
+fit a `Beta` distribution
+"""
+function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
-    α = x_bar * (((x_bar * (1 - x_bar)) / v_bar) - 1)
-    β = (1 - x_bar) * (((x_bar * (1 - x_bar)) / v_bar) - 1)
-    Beta(α, β)
+    temp = ((x_bar * (one(T) - x_bar)) / v_bar) - one(T)
+    α = x_bar * temp
+    β = (one(T) - x_bar) * temp
+    return Beta(α, β)
 end

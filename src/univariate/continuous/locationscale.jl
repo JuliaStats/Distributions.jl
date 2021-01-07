@@ -22,27 +22,36 @@ struct LocationScale{T<:Real, D<:ContinuousUnivariateDistribution} <: Continuous
     μ::T
     σ::T
     ρ::D
-
-    LocationScale{T,D}(μ::T,σ::T,ρ::D) where {T, D} = (@check_args(LocationScale, σ > zero(σ)); new{T,D}(μ,σ,ρ))
+    LocationScale{T, D}(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = new{T, D}(μ, σ, ρ)
 end
 
-LocationScale(μ::T,σ::T,ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale{T,D}(μ,σ,ρ)
-LocationScale(μ::T,σ::T,ρ::D) where {T<:Integer, D<:ContinuousUnivariateDistribution} = LocationScale{Float64,D}(Float64(μ),Float64(σ),ρ)
+function LocationScale(μ::T,σ::T,ρ::D; check_args=true) where {T<:Real, D<:ContinuousUnivariateDistribution}
+    check_args && @check_args(LocationScale, σ > zero(σ))
+    return LocationScale{T,D}(μ,σ,ρ)
+end
+
+function LocationScale(μ::Integer, σ::Integer, ρ::ContinuousUnivariateDistribution)
+    return LocationScale(float(μ), float(σ), ρ)
+end
+
+LocationScale(μ::Real, σ::Real, ρ::D) where {D<:ContinuousUnivariateDistribution} = LocationScale(promote(μ,σ)...,ρ)
 
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
 
+LocationScale(μ::Real, σ::Real, d::LocationScale) = LocationScale(μ + d.μ * σ, σ * d.σ, d.ρ)
+
 #### Conversions
 
 convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:ContinuousUnivariateDistribution} = LocationScale(T(μ),T(σ),ρ)
-convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ)
+convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ, check_args=false)
 
 #### Parameters
 
 location(d::LocationScale) = d.μ
 scale(d::LocationScale) = d.σ
 params(d::LocationScale) = (d.μ,d.σ,d.ρ)
-@inline partype(d::LocationScale{T}) where {T<:Real} = T
+partype(::LocationScale{T}) where {T} = T
 
 #### Statistics
 
@@ -74,3 +83,14 @@ quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 rand(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * rand(rng, d.ρ)
 cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 gradlogpdf(d::LocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+
+#### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
+
+Base.:+(d::ContinuousUnivariateDistribution, x::Real) = LocationScale(x, one(x), d)
+Base.:+(x::Real, d::ContinuousUnivariateDistribution) = d + x
+Base.:*(x::Real, d::ContinuousUnivariateDistribution) = LocationScale(zero(x), x, d)
+Base.:*(d::ContinuousUnivariateDistribution, x::Real) = x * d
+Base.:-(d::ContinuousUnivariateDistribution, x::Real) = d + -x
+Base.:/(d::ContinuousUnivariateDistribution, x::Real) = 1/x * d
+Base.:+(d::ContinuousUnivariateDistribution, x::Int) = d + float(x)
+Base.:*(x::Int, d::ContinuousUnivariateDistribution) = float(x) * d
