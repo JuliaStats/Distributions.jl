@@ -230,15 +230,13 @@ end
 function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    T = promote_type(partype(d), eltype(X))
-    _logpdf!(Vector{T}(undef, size(X,2)), d, X)
+    map(i -> _logpdf(d, view(X, :, i)), axes(X, 2))
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    T = promote_type(partype(d), eltype(X))
-    _pdf!(Vector{T}(undef, size(X,2)), d, X)
+    map(i -> _pdf(d, view(X, :, i)), axes(X, 2))
 end
 
 """
