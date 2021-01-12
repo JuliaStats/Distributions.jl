@@ -49,7 +49,7 @@ d = Dirichlet(v)
 @test length(d) == length(v)
 @test d.alpha == v
 @test d.alpha0 == sum(v)
-@test d == typeof(d)(params(d)...)
+@test d == Dirichlet{eltype(d)}(params(d)...)
 @test d == deepcopy(d)
 
 @test mean(d) ≈ v / sum(v)
