@@ -163,89 +163,49 @@ end
 # pdf and logpdf
 
 """
-    pdf(d::MultivariateDistribution, x::AbstractArray)
+    _logpdf(d::MultivariateDistribution, x::AbstractVector)
+
+Return the logarithm of the probability density of distribution `d` evaluated at `x`.
+
+This function does not need to perform dimension checking.
+"""
+_logpdf(d::MultivariateDistribution, x::AbstractVector)
+
+"""
+    _pdf(d::MultivariateDistribution, x::AbstractVector)
 
 Return the probability density of distribution `d` evaluated at `x`.
 
-- If `x` is a vector, it returns the result as a scalar.
-- If `x` is a matrix with n columns, it returns a vector `r` of length n, where `r[i]` corresponds
-to `x[:,i]` (i.e. treating each column as a sample).
-
-`pdf!(r, d, x)` will write the results to a pre-allocated array `r`.
+This function does not need to perform dimension checking. , this method falls
+back to [`_logpdf`](@ref) and does not need to be implemented.
 """
-pdf(d::MultivariateDistribution, x::AbstractArray)
-
-"""
-    logpdf(d::MultivariateDistribution, x::AbstractArray)
-
-Return the logarithm of probability density evaluated at `x`.
-
-- If `x` is a vector, it returns the result as a scalar.
-- If `x` is a matrix with n columns, it returns a vector `r` of length n, where `r[i]` corresponds to `x[:,i]`.
-
-`logpdf!(r, d, x)` will write the results to a pre-allocated array `r`.
-"""
-logpdf(d::MultivariateDistribution, x::AbstractArray)
-
 _pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
 
+"""
+    logpdf(d::MultivariateDistribution, x::AbstractVector)
+
+Return the logarithm of the probability density of distribution `d` evaluated at `x`.
+
+The default implementation performs dimension checking and falls back to [`_logpdf`](@ref).
+"""
 function logpdf(d::MultivariateDistribution, X::AbstractVector)
     length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, X)
 end
 
+"""
+    pdf(d::MultivariateDistribution, x::AbstractVector)
+
+Return the probability density of distribution `d` evaluated at `x`.
+
+The default implementation performs dimension checking and falls back to [`_pdf`](@ref).
+"""
 function pdf(d::MultivariateDistribution, X::AbstractVector)
     length(X) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, X)
 end
-
-function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1 : size(X,2)
-        @inbounds r[i] = logpdf(d, view(X,:,i))
-    end
-    return r
-end
-
-function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1 : size(X,2)
-        @inbounds r[i] = pdf(d, view(X,:,i))
-    end
-    return r
-end
-
-function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    size(X) == (length(d), length(r)) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _logpdf!(r, d, X)
-end
-
-function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    size(X) == (length(d), length(r)) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _pdf!(r, d, X)
-end
-
-function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
-    size(X, 1) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    map(i -> _logpdf(d, view(X, :, i)), axes(X, 2))
-end
-
-function pdf(d::MultivariateDistribution, X::AbstractMatrix)
-    size(X, 1) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    map(i -> _pdf(d, view(X, :, i)), axes(X, 2))
-end
-
-"""
-    _logpdf{T<:Real}(d::MultivariateDistribution, x::AbstractArray)
-
-Evaluate logarithm of pdf value for a given vector `x`. This function need not perform dimension checking.
-Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods are provided in `src/multivariates.jl`.
-"""
-_logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 """
     loglikelihood(d::MultivariateDistribution, x::AbstractArray)

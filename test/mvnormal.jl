@@ -77,7 +77,6 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     for i = 1:min(100, n_tsamples)
         @test sqmahal(g, X[:,i]) ≈ sqm[i]
     end
-    @test sqmahal(g, X) ≈ sqm
 
     lp = -0.5 .* sqm .- 0.5 * (d * log(2.0 * pi) + ldcov)
     for i = 1:min(100, n_tsamples)

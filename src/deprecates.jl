@@ -34,10 +34,46 @@ for fun in [:pdf, :logpdf,
     fun! = Symbol(fun, '!')
 
     @eval begin
-        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(Ref(d), X) false
+        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(Ref(d), X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(Ref(d), X)
     end
 end
 
 @deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+
+# multivariate distributions
+for fun in (:pdf, :logpdf)
+    _fun! = Symbol('_', fun, '!')
+    fun! = Symbol(fun, '!')
+
+    # `eachcol` requires Julia 1.1
+    @static if VERSION < v"1.1"
+        @eval begin
+            @deprecate ($_fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2))) false
+            @deprecate ($fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2)))
+            @deprecate ($fun)(d::MultivariateDistribution, X::AbstractMatrix) ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2)))
+        end
+    else
+        @eval begin
+            @deprecate ($_fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), eachcol(X)) false
+            @deprecate ($fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), eachcol(X))
+            @deprecate ($fun)(d::MultivariateDistribution, X::AbstractMatrix) ($fun).(Ref(d), eachcol(X))
+        end
+    end
+end
+
+# matrix distributions
+for fun in (:pdf, :logpdf)
+    _fun! = Symbol('_', fun, '!')
+    fun! = Symbol(fun, '!')
+
+    @eval begin
+        @deprecate ($_fun!)(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix}) r .= ($fun).(Ref(d), X) false
+        @deprecate ($_fun!)(r::AbstractArray, d::MatrixDistribution, X::AbstractMatrix{<:AbstractMatrix}) r .= ($fun).(Ref(d), X) false
+        @deprecate ($fun!)(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix}) r .= ($fun).(Ref(d), X)
+        @deprecate ($fun!)(r::AbstractArray, d::MatrixDistribution, X::AbstractMatrix{<:AbstractMatrix}) r .= ($fun).(Ref(d), X)
+        @deprecate ($fun)(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix}) ($fun).(Ref(d), X)
+        @deprecate ($fun)(d::MatrixDistribution, X::AbstractMatrix{<:AbstractMatrix}) ($fun).(Ref(d), X)
+    end
+end

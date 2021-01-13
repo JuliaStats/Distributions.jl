@@ -145,72 +145,53 @@ end
 
 # pdf & logpdf
 
+"""
+    _logpdf(d::MatrixDistribution, X::AbstractMatrix)
+
+Return the logarithm of the probability density of distribution `d` evaluated at `X`.
+
+This function does not need to perform dimension checking. Its default implementation is
+`logkernel(d, X) + d.logc0`.
+"""
 _logpdf(d::MatrixDistribution, X::AbstractMatrix) = logkernel(d, X) + d.logc0
 
-_pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where {T<:Real} = exp(_logpdf(d, x))
+"""
+    _pdf(d::MultivariateDistribution, X::AbstractMatrix)
+
+Return the probability density of distribution `d` evaluated at `X`.
+
+This function does not need to perform dimension checking. It does not need to be
+implemented and falls back to `exp(_logpdf(d, X))`.
+
+See also: [`_logpdf`](@ref)
+"""
+_pdf(d::MatrixDistribution, X::AbstractMatrix) = exp(_logpdf(d, X))
 
 """
-    logpdf(d::MatrixDistribution, AbstractMatrix)
+    logpdf(d::MatrixDistribution, X::AbstractMatrix)
 
-Compute the logarithm of the probability density at the input matrix `x`.
+Compute the logarithm of the probability density at the input matrix `X`.
+
+The default implementation performs dimension checking and falls back to [`_logpdf`](@ref).
 """
-function logpdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
+function logpdf(d::MatrixDistribution, x::AbstractMatrix)
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, x)
 end
 
 """
-    pdf(d::MatrixDistribution, x::AbstractArray)
+    pdf(d::MatrixDistribution, X::AbstractMatrix)
 
-Compute the probability density at the input matrix `x`.
+Compute the probability density at the input matrix `X`.
+
+The default implementation performs dimension checking and falls back to [`_pdf`](@ref).
 """
-function pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
+function pdf(d::MatrixDistribution, x::AbstractMatrix)
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, x)
 end
-
-function _logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    for i = 1:length(X)
-        r[i] = logpdf(d, X[i])
-    end
-    return r
-end
-
-function _pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    for i = 1:length(X)
-        r[i] = pdf(d, X[i])
-    end
-    return r
-end
-
-function logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    length(X) == length(r) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _logpdf!(r, d, X)
-end
-
-function pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    length(X) == length(r) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _pdf!(r, d, X)
-end
-
-function logpdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
-    map(Base.Fix1(logpdf, d), X)
-end
-
-function pdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
-    map(Base.Fix1(pdf, d), X)
-end
-
-"""
-    _logpdf(d::MatrixDistribution, x::AbstractArray)
-
-Evaluate logarithm of pdf value for a given sample `x`. This function need not perform dimension checking.
-"""
-_logpdf(d::MatrixDistribution, x::AbstractArray)
 
 """
     loglikelihood(d::MatrixDistribution, x::AbstractArray)
