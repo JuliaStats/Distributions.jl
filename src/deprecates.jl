@@ -50,9 +50,9 @@ for fun in (:pdf, :logpdf)
     # `eachcol` requires Julia 1.1
     @static if VERSION < v"1.1"
         @eval begin
-            @deprecate ($_fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2))) false
-            @deprecate ($fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2)))
-            @deprecate ($fun)(d::MultivariateDistribution, X::AbstractMatrix) ($fun).(Ref(d), (view(x, :, i) for i in axes(x, 2)))
+            @deprecate ($_fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(X, :, i) for i in axes(X, 2))) false
+            @deprecate ($fun!)(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix) r .= ($fun).(Ref(d), (view(X, :, i) for i in axes(X, 2)))
+            @deprecate ($fun)(d::MultivariateDistribution, X::AbstractMatrix) ($fun).(Ref(d), (view(X, :, i) for i in axes(X, 2)))
         end
     else
         @eval begin
