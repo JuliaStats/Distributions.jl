@@ -197,14 +197,12 @@ function pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) wher
     _pdf!(r, d, X)
 end
 
-function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array{T}(undef, size(X)), d, X)
+function logpdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
+    map(Base.Fix1(logpdf, d), X)
 end
 
-function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    T = promote_type(partype(d), eltype(M))
-    _pdf!(Array{T}(undef, size(X)), d, X)
+function pdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
+    map(Base.Fix1(pdf, d), X)
 end
 
 """
