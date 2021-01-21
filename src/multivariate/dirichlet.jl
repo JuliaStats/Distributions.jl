@@ -46,7 +46,7 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
-Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
+Base.eltype(::Type{<:Dirichlet{T}}) where {T} = float(T)
 
 #### Conversions
 convert(::Type{Dirichlet{T}}, cf::DirichletCanon) where {T<:Real} =
