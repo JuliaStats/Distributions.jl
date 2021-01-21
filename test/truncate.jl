@@ -130,7 +130,7 @@ for c in ["discrete",
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
+    jsonfile = joinpath(@__DIR__, "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6,3,5)
     println()
 end
