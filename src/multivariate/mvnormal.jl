@@ -13,7 +13,6 @@
 #   - invcov(d):        inverse of covariance
 #   - logdetcov(d):     log-determinant of covariance
 #   - sqmahal(d, x):        Squared Mahalanobis distance to center
-#   - sqmahal!(r, d, x):    Squared Mahalanobis distances
 #   - gradlogpdf(d, x):     Gradient of logpdf w.r.t. x
 #   - _rand!(d, x):         Sample random vector(s)
 #
@@ -113,29 +112,13 @@ Return the log-determinant value of the covariance matrix.
 logdetcov(d::AbstractMvNormal)
 
 """
-    sqmahal(d, x)
+    sqmahal(d, x::AbstractVector)
 
-Return the squared Mahalanobis distance from x to the center of d, w.r.t. the covariance.
-When x is a vector, it returns a scalar value. When x is a matrix, it returns a vector of length size(x,2).
-
-`sqmahal!(r, d, x)` with write the results to a pre-allocated array `r`.
+Return the squared Mahalanobis distance from `x` to the center of `d` w.r.t. the covariance.
 """
-sqmahal(d::AbstractMvNormal, x::AbstractArray)
-
-sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(partype(d), eltype(x))}(undef, size(x, 2)), d, x)
+sqmahal(d::AbstractMvNormal, x::AbstractVector)
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
-
-function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
-    sqmahal!(r, d, x)
-    c0 = mvnormal_c0(d)
-    for i = 1:size(x, 2)
-        @inbounds r[i] = c0 - r[i]/2
-    end
-    r
-end
-
-_pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
 ###########################################################
 #
@@ -264,9 +247,6 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 ### Evaluation
 
 sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
-
-sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, x .- d.μ)
 
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 

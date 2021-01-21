@@ -23,8 +23,8 @@ Distributions.rank(::MatrixDistribution)
 mean(::MatrixDistribution)
 var(::MatrixDistribution)
 cov(::MatrixDistribution)
-pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
-logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+pdf(d::MatrixDistribution, x::AbstractMatrix)
+logpdf(d::MatrixDistribution, x::AbstractMatrix)
 Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 vec(d::MatrixDistribution)
 ```
@@ -45,5 +45,5 @@ LKJ
 ## Internal Methods (for creating your own matrix-variate distributions)
 
 ```@docs
-Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)
+Distributions._logpdf(d::MatrixDistribution, x::AbstractMatrix)
 ```

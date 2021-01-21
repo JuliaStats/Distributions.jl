@@ -115,13 +115,6 @@ insupport(d::AbstractMvTDist, x::AbstractVector{T}) where {T<:Real} =
 
 sqmahal(d::GenericMvTDist, x::AbstractVector{<:Real}) = invquad(d.Σ, x - d.μ)
 
-function sqmahal!(r::AbstractArray, d::GenericMvTDist, x::AbstractMatrix{<:Real})
-    invquad!(r, d.Σ, x .- d.μ)
-end
-
-sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vector{T}(undef, size(x, 2)), d, x)
-
-
 function mvtdist_consts(d::AbstractMvTDist)
     H = convert(eltype(d), 0.5)
     logpi = convert(eltype(d), log(pi))
@@ -132,21 +125,10 @@ function mvtdist_consts(d::AbstractMvTDist)
     return (shdfhdim, v)
 end
 
-function _logpdf(d::AbstractMvTDist, x::AbstractVector{T}) where T<:Real
+function _logpdf(d::AbstractMvTDist, x::AbstractVector)
     shdfhdim, v = mvtdist_consts(d)
     v - shdfhdim * log1p(sqmahal(d, x) / d.df)
 end
-
-function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix)
-    sqmahal!(r, d, x)
-    shdfhdim, v = mvtdist_consts(d)
-    for i = 1:size(x, 2)
-        r[i] = v - shdfhdim * log1p(r[i] / d.df)
-    end
-    return r
-end
-
-_pdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = exp!(_logpdf!(r, d, x))
 
 function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
     z = x - d.μ

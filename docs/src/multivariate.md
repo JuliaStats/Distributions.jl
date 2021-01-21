@@ -31,8 +31,8 @@ entropy(::MultivariateDistribution, ::Real)
 
 ```@docs
 insupport(::MultivariateDistribution, ::AbstractArray)
-pdf(::MultivariateDistribution, ::AbstractArray)
-logpdf(::MultivariateDistribution, ::AbstractArray)
+pdf(::MultivariateDistribution, ::AbstractVector)
+logpdf(::MultivariateDistribution, ::AbstractVector)
 loglikelihood(::MultivariateDistribution, ::AbstractArray)
 ```
 **Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
@@ -69,7 +69,7 @@ In addition to the methods listed in the common interface above, we also provide
 ```@docs
 invcov(::Distributions.AbstractMvNormal)
 logdetcov(::Distributions.AbstractMvNormal)
-sqmahal(::Distributions.AbstractMvNormal, ::AbstractArray)
+sqmahal(::Distributions.AbstractMvNormal, ::AbstractVector)
 rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
 ```
 
@@ -97,7 +97,7 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ## Internal Methods (for creating you own multivariate distribution)
 
 ```@docs
-Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
+Distributions._logpdf(d::MultivariateDistribution, x::AbstractVector)
 ```
 
 ## Product distributions

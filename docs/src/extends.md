@@ -140,12 +140,10 @@ Following methods need to be implemented for each multivariate distribution type
 - [`sampler(d::Distribution)`](@ref)
 - [`eltype(d::Distribution)`](@ref)
 - [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)`](@ref)
-- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
+- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractVector)`](@ref)
 
-Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
-
-Furthermore, the generic `loglikelihood` function repeatedly calls `_logpdf`. If there is
-a better way to compute the log-likelihood, one should override `loglikelihood`.
+The generic `loglikelihood` function repeatedly calls `_logpdf`. If there is a better way
+to compute the log-likelihood, one should override `loglikelihood`.
 
 It is also recommended that one also implements the following statistics functions:
 
@@ -163,4 +161,4 @@ Following methods need to be implemented for each matrix-variate distribution ty
 - [`size(d::MatrixDistribution)`](@ref)
 - [`rand(d::MatrixDistribution)`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
-- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)
+- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractMatrix)`](@ref)
