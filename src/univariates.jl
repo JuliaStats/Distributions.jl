@@ -157,6 +157,8 @@ end
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
     rand!(rng, sampler(s), Array{eltype(s)}(undef, dims))
+rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
+    rand!(rng, sampler(s), Array{float(eltype(s))}(undef, dims))
 
 # multiple univariate with pre-allocated array
 function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)

@@ -159,3 +159,10 @@ end
     @test isnan_type(Float32, @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
 end
+
+@testset "Normal: Sampling with integer-valued parameters" begin
+    d = Normal{Int}(0, 1)
+    @test rand(d) isa Float64
+    @test rand(d, 10) isa Vector{Float64}
+    @test rand(d, (3, 2)) isa Matrix{Float64}
+end

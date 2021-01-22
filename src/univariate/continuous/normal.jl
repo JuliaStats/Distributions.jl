@@ -240,7 +240,7 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
+rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
 
 #### Fitting
 

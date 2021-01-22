@@ -130,10 +130,14 @@ end
 # multiple matrix-variates, must allocate array of arrays
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
     rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims), true)
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}, dims::Dims) =
+    rand!(rng, s, Array{Matrix{float(eltype(s))}}(undef, dims), true)
 
 # single matrix-variate, must allocate one matrix
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
     _rand!(rng, s, Matrix{eltype(s)}(undef, size(s)))
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}) =
+    _rand!(rng, s, Matrix{float(eltype(s))}(undef, size(s)))
 
 # single matrix-variate with pre-allocated matrix
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
