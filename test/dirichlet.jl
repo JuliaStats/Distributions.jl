@@ -16,7 +16,7 @@ rng = MersenneTwister(123)
         d = Dirichlet(3, T(2))
 
         @test length(d) == 3
-        @test eltype(d) === Float64
+        @test eltype(d) === T
         @test d.alpha == [2, 2, 2]
         @test d.alpha0 == 6
 
@@ -46,7 +46,7 @@ rng = MersenneTwister(123)
         v = [2, 1, 3]
         d = Dirichlet(T.(v))
 
-        @test eltype(d) === Float64
+        @test eltype(d) === T
         @test Dirichlet([2, 1, 3]).alpha == d.alpha
 
         @test length(d) == length(v)

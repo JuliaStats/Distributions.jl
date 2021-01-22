@@ -278,7 +278,7 @@ _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
-        @inbounds x[i] = randn(rng,eltype(d))
+        @inbounds x[i] = randn(rng, eltype(x))
     end
     add!(unwhiten!(d.Σ, x), d.μ)
 end
