@@ -69,6 +69,12 @@ end
         @test isa(d, dist)
         @test isapprox(d.α, 1.3, atol=0.1)
         @test isapprox(d.β, 3.7, atol=0.1)
+
+        d = fit_mle(dist, func[2](dist(1.3, 3.7), N))
+        @test isa(d, dist)
+        @test isapprox(d.α, 1.3, atol=0.1)
+        @test isapprox(d.β, 3.7, atol=0.1)
+
     end
 end
 
