@@ -162,3 +162,9 @@ Skellam
 ### Vectorized evaluation
 
 Vectorized computation and inplace vectorized computation have been deprecated.
+
+## Index
+
+```@index
+Pages = ["univariate.md"]
+```
