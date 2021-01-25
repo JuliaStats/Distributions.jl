@@ -109,8 +109,7 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
-
+rand(rng::AbstractRNG, d::Uniform, dims::Dims) = d.a .+ (d.b - d.a) .* rand(rng, Float64, Dims(dims))
 
 #### Fitting
 
