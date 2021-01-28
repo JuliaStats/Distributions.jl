@@ -113,3 +113,12 @@ rng = MersenneTwister(123)
         # @test r.alpha ≈ d.alpha atol=0.25
     end
 end
+
+@testset "Dirichlet: entropy" begin
+    α = exp.(rand(2))
+    @test entropy(Dirichlet(α)) ≈ entropy(Beta(α...))
+
+    N = 10
+    @test entropy(Dirichlet(N, 1)) ≈ -loggamma(N)
+    @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
+end
