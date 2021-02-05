@@ -165,37 +165,46 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
         return r
 
     else
+        # cb and fb (close and far bounds) extend lb and ub to be sign-agnostic.
+        @inline function _check_helper(cb::Float64, span::Float64)
+            return cb > 0 && span > 2.0 / (cb + sqrt(cb^2 + 4.0)) * exp((cb^2 - cb * sqrt(cb^2 + 4.0)) / 4.0)
+        end
+
         span = ub - lb
-        if lb > 0 && span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
-            a = (lb + sqrt(lb^2 + 4.0))/2.0
-            while true
-                r = rand(rng, Exponential(1.0 / a)) + lb
-                u = rand(rng)
-                if u < exp(-0.5 * (r - a)^2) && r < ub
-                    return r
-                end
-            end
-        elseif ub < 0 && ub - lb > 2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
-            a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
-            while true
-                r = rand(rng, Exponential(1.0 / a)) - ub
-                u = rand(rng)
-                if u < exp(-0.5 * (r - a)^2) && r < -lb
-                    return -r
-                end
-            end
+
+        if _check_helper(lb, span)
+            use_exponential = true
+            cb, fb = lb, ub
+        elseif _check_helper(-ub, span)
+            use_exponential = true
+            cb, fb = -ub, -lb
         else
+            use_exponential = false
+        end
+
+        if use_exponential
+            a = (cb + sqrt(cb^2 + 4.0))/2.0
+            while true
+                r = rand(rng, Exponential(1.0 / a)) + cb
+                u = rand(rng)
+                if u < exp(-0.5 * (r - a)^2) && r < fb
+                    return sign(cb) * r 
+                end
+            end
+            
+        else # use uniform-based sampling
             while true
                 r = lb + rand(rng) * (ub - lb)
                 u = rand(rng)
                 if lb > 0
-                    rho = exp((lb^2 - r^2) * 0.5)
+                    cb = lb
                 elseif ub < 0
-                    rho = exp((ub^2 - r^2) * 0.5)
+                    cb = ub
                 else
-                    rho = exp(-r^2 * 0.5)
+                    cb = 0
                 end
-                if u < rho
+
+                if u < exp((cb^2 - r^2) * 0.5)
                     return r
                 end
             end
