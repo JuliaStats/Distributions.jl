@@ -1,10 +1,10 @@
 """
     Gumbel(μ, θ)
 
-The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
+The *Gumbel (maxima) distribution*  with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^{-z})},
 \\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
 ```
 
