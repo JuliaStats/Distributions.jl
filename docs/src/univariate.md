@@ -108,6 +108,7 @@ FDist
 Frechet
 Gamma
 GeneralizedExtremeValue
+GeneralizedInverseGaussian
 GeneralizedPareto
 Gumbel
 InverseGamma
