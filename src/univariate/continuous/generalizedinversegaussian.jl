@@ -84,26 +84,11 @@ function logpdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real}
         bot = log(2*besselk(p,sqrt(a*b)))
         left = (p - 1)*log(x)
         right = -(a*x + (b/x))/2
-        return top - bot + left - right
+        return top - bot + left + right
     end
     return -T(Inf)
 end
 
-function mgf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
-    (a,b,p) = params(d)
-    left = (a / (a - 2*t))^(p/2)
-    top = besselk(p,sqrt(b*(a - 2*t)))
-    bot = besselk(p,sqrt(a*b))
-    return left * (top/bot)
-end
-
-function cf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
-    (a,b,p) = params(d)
-    left = (a / (a - 2*im*t))^(p/2)
-    top = besselk(p,sqrt(b * (a - 2*im*t)))
-    bot = besselk(p,sqrt(a*b))
-    return left * (top/bot)
-end
 
 #### Sampling 
 
@@ -114,26 +99,27 @@ Extract a sample from the GeneralizedInverseGaussian distribution 'd'.
 The sampling procedure is implemented from [1].
 One of the following conditions must be satisfied:
 
-1. 0 < a*b < min(1/2, (2/3)*sqrt(1-p)) and 0 ≤ p < 1
-2. min(1/2, (2/3)*sqrt(1-p)) ≤ a*b ≤ 1 and 0 ≤ p < 1
-3. β > 1 and p > 1
+1. β > 1 or p > 1
+2. min(1/2, (2/3)*sqrt(1-p)) ≤ a*b ≤ 1 and abs(p) < 1
+3. 0 < a*b < min(1/2, (2/3)*sqrt(1-p)) and abs(p) < 1
 
 [1] Hörmann, W., Leydold, J. (2014).
 Generating generalized inverse Gaussian random variates. 
 Stat Comput 24, 547–557. 
 https://doi.org/10.1007/s11222-013-9387-3
 """
-function rand(d::GeneralizedInverseGaussian)
+function rand(rng::Random.AbstractRNG,d::GeneralizedInverseGaussian)
     (a,b,p) = params(d)
     β = sqrt(a*b)
+    λ = abs(p)
     # TODO: better ifs here so as not to check the "p"s twice
     β_bound = min(1/2, (2/3)*sqrt(1 - p))
-    if(β < β_bound && β > 0 && p >= 0 && p < 1) 
+    if(β > 1 || λ > 1)
+        return sample_unif_mode_shift(λ,β)
+    elseif(β >= β_bound)
+        return sample_unif_no_mode_shift(λ,β)
+    elseif(β < β_bound && β > 0 && λ < 1) 
         return concave_sample(p,β)
-    elseif(β >= β_bound && β <= 1 && p >= 0 && p < 1)
-        return sample_unif_no_mode_shift(p,β)
-    elseif(β > 1 && p > 1)
-        return sample_unif_mode_shift(p,β)
     else
         throw(ArgumentError("None of the required conditions on the parameters are satisfied"))
     end
@@ -207,7 +193,7 @@ function sample_unif_mode_shift(p::Real,β::Real)
     c = m
     p2 = b - (a^2)/3
     q = (2*a^3)/27 - (a*b/3) + c
-    ϕ = arccos(-(q/2) * sqrt(-27 / (p2^3)))
+    ϕ = acos(-(q/2) * sqrt(-27 / (p2^3)))
     x⁻ = sqrt((-4/3)*p2)*cos(ϕ/3 + (4/3)π) - (a / 3)
     x⁺ = sqrt((-4/3)*p2)*cos(ϕ/3) - (a/3)
     v⁺ = sqrt(g(m,p,β))
