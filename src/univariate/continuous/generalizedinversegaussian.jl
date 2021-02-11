@@ -1,4 +1,22 @@
+"""
+    GeneralizedInverseGaussian(a, b, p)
+The *Generalized Inverse Gaussian distribution* has probability density function 
+```math
+f(x; a,b,p) = \\frac{(a/b)^{p/2}}{2K_p(\\sqrt{ab})}x^{(p-1)}e^{-(ax + b/x)/2}
+x > 0
+```
 
+```julia
+GeneralizedInverseGaussian(a,b,p)   # GeneralizedInverseGaussian distribution with parametrs a, b, and p
+
+params(d)                           # Get the parameters, i.e. (a, b, p)
+```
+
+External Links
+
+* [generalized inverse Gaussian distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_inverse_Gaussian_distribution)
+* [Sampling implementation paper](https://doi.org/10.1007/s11222-013-9387-3)
+"""
 struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
@@ -28,7 +46,7 @@ end
 #### Parameters
 
 params(d::GeneralizedInverseGaussian) = (d.a, d.b, d.p)
-@inline partype(d::GeneralizedInverseGaussian) where {T<:Real} = T
+@inline partype(d::GeneralizedInverseGaussian{T}) where {T<:Real} = T
 
 #### Statistics
 
@@ -79,7 +97,7 @@ function mgf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
     return left * (top/bot)
 end
 
-function cf(d::GeneralizedInverseGaussian{T}, t::Real)
+function cf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
     (a,b,p) = params(d)
     left = (a / (a - 2*im*t))^(p/2)
     top = besselk(p,sqrt(b * (a - 2*im*t)))
@@ -94,6 +112,11 @@ end
 
 Extract a sample from the GeneralizedInverseGaussian distribution 'd'. 
 The sampling procedure is implemented from [1].
+One of the following conditions must be satisfied:
+
+1. 0 < a*b < min(1/2, (2/3)*sqrt(1-p)) and 0 ≤ p < 1
+2. min(1/2, (2/3)*sqrt(1-p)) ≤ a*b ≤ 1 and 0 ≤ p < 1
+3. β > 1 and p > 1
 
 [1] Hörmann, W., Leydold, J. (2014).
 Generating generalized inverse Gaussian random variates. 
@@ -112,7 +135,7 @@ function rand(d::GeneralizedInverseGaussian)
     elseif(β > 1 && p > 1)
         return sample_unif_mode_shift(p,β)
     else
-        # return error
+        throw(ArgumentError("None of the required conditions on the parameters are satisfied"))
     end
 end
 
