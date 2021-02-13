@@ -193,6 +193,7 @@ export
     isplatykurtic,      # Is excess kurtosis > 0.0?
     isleptokurtic,      # Is excess kurtosis < 0.0?
     ismesokurtic,       # Is excess kurtosis = 0.0?
+    isperiodic,         # Has a periodic pdf?
     isprobvec,          # Is a probability vector?
     isupperbounded,
     islowerbounded,
