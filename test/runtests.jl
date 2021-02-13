@@ -3,6 +3,7 @@ using PDMats # test dependencies
 using Test
 using Distributed
 using Random
+using SpecialFunctions
 using StatsBase
 using LinearAlgebra
 using HypothesisTests

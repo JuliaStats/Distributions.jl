@@ -104,7 +104,9 @@ end
 
 function entropy(d::Dirichlet)
     α0 = d.alpha0
-    en = d.lmnB + (α0 - k) * digamma(α0) - sum(αj -> (αj - 1) * digamma(αj), d.alpha)
+    α = d.alpha
+    k = length(d.alpha)
+    en = d.lmnB + (α0 - k) * digamma(α0) - sum(αj -> (αj - 1) * digamma(αj), α)
     return en
 end
 
