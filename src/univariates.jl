@@ -161,8 +161,7 @@ rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
     rand!(rng, sampler(s), Array{float(eltype(s))}(undef, dims))
 
 # multiple univariate with pre-allocated array
-function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
-    smp = sampler(s)
+function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray;smp=sampler(s))
     for i in eachindex(A)
         @inbounds A[i] = rand(rng, smp)
     end
