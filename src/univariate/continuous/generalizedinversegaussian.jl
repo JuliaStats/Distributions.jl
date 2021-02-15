@@ -110,18 +110,26 @@ https://doi.org/10.1007/s11222-013-9387-3
 """
 function rand(rng::Random.AbstractRNG,d::GeneralizedInverseGaussian)
     (a,b,p) = params(d)
+    α = sqrt(a/b)
     β = sqrt(a*b)
     λ = abs(p)
     # TODO: better ifs here so as not to check the "p"s twice
-    β_bound = min(1/2, (2/3)*sqrt(1 - p))
     if(β > 1 || λ > 1)
-        return sample_unif_mode_shift(λ,β)
-    elseif(β >= β_bound)
-        return sample_unif_no_mode_shift(λ,β)
-    elseif(β < β_bound && β > 0 && λ < 1) 
-        return concave_sample(p,β)
+        x = sample_unif_mode_shift(λ,β)
     else
-        throw(ArgumentError("None of the required conditions on the parameters are satisfied"))
+        β_bound = min(1/2, (2/3)*sqrt(1 - p))
+        if(β < 1 && β >= β_bound)
+            x = sample_unif_no_mode_shift(λ,β)
+        elseif(β < β_bound && β > 0) 
+            x = concave_sample(λ,β)
+        else
+            throw(ArgumentError("None of the required conditions on the parameters are satisfied"))
+        end
+    end
+    if (p >= 0)
+        return x/α
+    else
+        return 1 / (α*x)
     end
 end
 
@@ -189,12 +197,11 @@ end
 function sample_unif_mode_shift(p::Real,β::Real)
     m = (sqrt((p - 1)^2 + β^2) + (p-1)) / β
     a = -(2*(p+1)/β) - m
-    b = -(2*(p-1)/β) * m - 1
-    c = m
+    b = (2*(p-1)/β) * m - 1
     p2 = b - (a^2)/3
-    q = (2*a^3)/27 - (a*b/3) + c
+    q = (2*a^3)/27 - (a*b/3) + m
     ϕ = acos(-(q/2) * sqrt(-27 / (p2^3)))
-    x⁻ = sqrt((-4/3)*p2)*cos(ϕ/3 + (4/3)π) - (a / 3)
+    x⁻ = sqrt((-4/3)*p2)*cos(ϕ/3 + (4/3)*π) - (a / 3)
     x⁺ = sqrt((-4/3)*p2)*cos(ϕ/3) - (a/3)
     v⁺ = sqrt(g(m,p,β))
     u⁻ = (x⁻ - m)*sqrt(g(x⁻,p,β))
@@ -204,7 +211,7 @@ function sample_unif_mode_shift(p::Real,β::Real)
         u = rand(Uniform(u⁻,u⁺))
         v = rand(Uniform(0,v⁺))
         x = (u / v) + m
-        if(v^2 <= g(x,p,β))
+        if(x > 0 && v^2 <= g(x,p,β))
             return x
         end
     end

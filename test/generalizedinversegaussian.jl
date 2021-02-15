@@ -1,6 +1,7 @@
 #using Distributions
 #using SpecialFunctions
-using Test,Random
+using Test,Random, Statistics
+using Plots
 
 #include("../src/utils.jl")
 #include("../src/univariates.jl")
@@ -47,8 +48,3 @@ end
     @test Distributions.var(d) ≈ 4.841391484
 end
 
-
-@testset "random" begin
-    Random.seed!(7447)
-    print(rand(d,10))
-end
