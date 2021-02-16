@@ -49,6 +49,7 @@ end
 
 module ChernoffComputations
     import QuadGK.quadgk
+    import Roots.newton
     # The following arrays of constants have been precomputed to speed up computation.
     # The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
     # The array airyai_roots contains roots of the airyai functions (atilde in the paper).
@@ -131,6 +132,7 @@ module ChernoffComputations
     const sqrttwopi = sqrt(2.0*pi)
 
     function p(y::Real)
+        res = 0.0
         if iszero(y)
             return -sqrt(0.5*pi)
         end
@@ -139,13 +141,22 @@ module ChernoffComputations
 
         cnsty = y^(-1.5)
         if (y <= 1.0)
-            return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
+            res = 0.0
+            for k in 1:length(a)
+                res += (b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k)
+            end
+            return res-sqrthalfpi
         else
-            return sum([exp(cuberoottwo*a*y) for a in airyai_roots]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
+            res = 0.0
+            for a in airyai_roots
+                res += exp(cuberoottwo*a*y)
+            end
+            return res * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
         end
     end
 
     function g(x::Real)
+        res = 0.0
         function g_one(y::Real)
             return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
         end
@@ -154,7 +165,11 @@ module ChernoffComputations
             return (z*y*y + 0.5 * z*z) * exp(-0.5*y*y*z*z)
         end
         if (x <= -1.0)
-            return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k=1:length(airyai_roots)])
+            res = 0.0
+            for k in 1:length(airyai_roots)
+                res += exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k]
+            end
+            return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * res
         else
             return 2*x - (quadgk(g_one, 0.0, Inf)[1] - 4*quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
         end
