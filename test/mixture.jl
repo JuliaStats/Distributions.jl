@@ -72,7 +72,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     # quantile
     αs = [0.0; 0.49; 0.5; 0.51; 1.0]
     for α in αs
-        @test cdf(g, quantile(g, α)) ≈ α atol=1e-12
+        @test cdf(g, quantile(g, α)) ≈ α
     end
 
     # sampling

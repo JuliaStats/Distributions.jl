@@ -500,9 +500,6 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_
 componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
 
 
-_default_tol(p::Real) = 1e-12
-_default_tol(p::AbstractFloat) = 10eps(eltype(p))
-
 function quantile(d::UnivariateMixture{Continuous}, p::Real)
     ps = probs(d)
     min_q, max_q = extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
@@ -513,7 +510,7 @@ function quantile(d::UnivariateMixture{Continuous}, p::Real)
         return(max_q)
     end
 
-    tol =  _default_tol(p)
+    tol =  Base.rtoldefault(typeof(p)) * abs(p)
 
     if abs(cdf(d, min_q) - p) < tol
         return(min_q)
