@@ -199,8 +199,36 @@ function rand(rng::AbstractRNG, d::Beta{T}) where T
 end
 
 #### Fit model
+"""
+    fit_mle(::Type{<:Beta}, x::AbstractArray{T})
 
-# TODO: add MLE method (should be similar to Dirichlet)
+Maximum Likelihood Estimate of `Beta` Distribution via Newton's Method
+"""
+function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
+    maxiter::Int=1000, tol::Float64=1e-14) where T<:Real
+
+    α₀,β₀ = params(fit(Beta,x)) #initial guess of parameters
+    g₁ = mean(log.(x))
+    g₂ = mean(log.(one(T) .- x))
+    θ= [α₀ ; β₀ ]
+
+    converged = false
+    t=0
+    while !converged && t < maxiter #newton method
+        t+=1
+        temp1 = digamma(θ[1]+θ[2])
+        temp2 = trigamma(θ[1]+θ[2])
+        grad = [g₁+temp1-digamma(θ[1])
+               temp1+g₂-digamma(θ[2])]
+        hess = [temp2-trigamma(θ[1]) temp2
+                temp2 temp2-trigamma(θ[2])]
+        Δθ = hess\grad #newton step
+        θ .-= Δθ
+        converged = dot(Δθ,Δθ) < 2*tol #stopping criterion
+    end
+
+    return Beta(θ[1], θ[2])
+end
 
 """
     fit(::Type{<:Beta}, x::AbstractArray{T})
