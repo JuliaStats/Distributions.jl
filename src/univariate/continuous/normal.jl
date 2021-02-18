@@ -222,7 +222,7 @@ function cquantile(d::Normal, p::Real)
     q = xval(d, erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
-    elseif iszero(d.σ)
+    elseif iszero(_σ)
         # Quantile not uniquely defined at p=0 and p=1 when σ=0
         if iszero(_p)
             return oftype(q, Inf)
