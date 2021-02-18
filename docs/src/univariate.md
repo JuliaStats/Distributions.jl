@@ -71,10 +71,10 @@ cf(::UnivariateDistribution, ::Any)
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
-loglikelihood(::UnivariateDistribution, ::Union{Real,AbstractArray})
+loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
-logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}
+logdiffcdf(::UnivariateDistribution, ::Real, ::Real)
 ccdf(::UnivariateDistribution, ::Real)
 logccdf(::UnivariateDistribution, ::Real)
 quantile(::UnivariateDistribution, ::Real)
@@ -162,3 +162,9 @@ Skellam
 ### Vectorized evaluation
 
 Vectorized computation and inplace vectorized computation have been deprecated.
+
+## Index
+
+```@index
+Pages = ["univariate.md"]
+```
