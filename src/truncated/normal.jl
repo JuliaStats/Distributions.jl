@@ -199,7 +199,7 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
                 elseif ub < 0
                     cb = ub
                 else
-                    cb = 0
+                    cb = 0.0
                 end
 
                 if u < exp((cb^2 - r^2) * 0.5)
