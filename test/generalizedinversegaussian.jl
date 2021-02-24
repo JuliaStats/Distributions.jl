@@ -1,12 +1,7 @@
-#using Distributions
-#using SpecialFunctions
+using Distributions
 using Test,Random, Statistics
 using Plots
 
-#include("../src/utils.jl")
-#include("../src/univariates.jl")
-#include("../src/univariate/continuous/generalizedinversegaussian.jl")
-include("../src/Distributions.jl")
 
 d = Distributions.GeneralizedInverseGaussian(1,2,1)
 
