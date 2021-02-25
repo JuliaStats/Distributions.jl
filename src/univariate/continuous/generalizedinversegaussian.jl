@@ -111,7 +111,6 @@ function rand(rng::Random.AbstractRNG,d::GeneralizedInverseGaussian)
     α = sqrt(a/b)
     β = sqrt(a*b)
     λ = abs(p)
-    # TODO: better ifs here so as not to check the "p"s twice
     if β > 1 || λ > 1
         x = sample_unif_mode_shift(λ,β)
     else
