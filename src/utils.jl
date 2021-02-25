@@ -70,7 +70,7 @@ end
 Test whether a matrix is positive semi-definite with specified rank `k` by
 checking that `k` of its eigenvalues are positive and the rest are zero.
 # Examples
-```jldoctest
+```jldoctest; setup = :(using Distributions: ispossemdef)
 julia> A = [1 0; 0 0]
 2×2 Array{Int64,2}:
  1  0

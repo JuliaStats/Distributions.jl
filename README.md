@@ -61,7 +61,13 @@ the following are required for contributions to be accepted:
 1. Docstrings must be added to all interface and non-trivial functions.
 2. Tests validating the modified behavior in the `test` folder. If new test files are added, do not forget to add them in `test/runtests.jl`. Cover possible edge cases. Run the tests locally before submitting the PR.
 3. At the end of the tests, `Test.detect_ambiguities(Distributions)` is run to check method ambiguities. Verify that your modified code did not yield method ambiguities.
-4. Make according modifications to the `docs` folder, build the documentation locally with `$ julia docs/make.jl`, verify that your modifications display correctly and did not yield warnings.
+4. Make according modifications to the `docs` folder, build the documentation locally and verify that your modifications display correctly and did not yield warnings. To build the documentation locally, you first need to instantiate the `docs/` project:
+
+       julia --project=docs/
+       pkg> instantiate
+       pkg> dev .
+
+   Then use `julia --project=docs/ docs/make.jl` to build the documentation.
 
 ## Citing
 

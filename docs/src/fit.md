@@ -38,6 +38,7 @@ The `fit_mle` method has been implemented for the following distributions:
 **Univariate:**
 
 - [`Bernoulli`](@ref)
+- [`Beta`](@ref)
 - [`Binomial`](@ref)
 - [`Categorical`](@ref)
 - [`DiscreteUniform`](@ref)
