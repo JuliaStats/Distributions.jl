@@ -76,9 +76,8 @@ end
 
 cdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real} = throw(MethodError(cdf, (d, x)))
 
-
 function logpdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real}
-    if (x > 0)
+    if x > 0
         (a,b,p) = params(d)
         top = (p/2)*(log(a) - log(b))
         bot = log(2*besselk(p,sqrt(a*b)))
@@ -88,7 +87,6 @@ function logpdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real}
     end
     return -T(Inf)
 end
-
 
 #### Sampling 
 
@@ -114,19 +112,19 @@ function rand(rng::Random.AbstractRNG,d::GeneralizedInverseGaussian)
     β = sqrt(a*b)
     λ = abs(p)
     # TODO: better ifs here so as not to check the "p"s twice
-    if(β > 1 || λ > 1)
+    if β > 1 || λ > 1
         x = sample_unif_mode_shift(λ,β)
     else
         β_bound = min(1/2, (2/3)*sqrt(1 - p))
-        if(β < 1 && β >= β_bound)
+        if β < 1 && β >= β_bound
             x = sample_unif_no_mode_shift(λ,β)
-        elseif(β < β_bound && β > 0) 
+        elseif β < β_bound && β > 0 
             x = concave_sample(λ,β)
         else
             throw(ArgumentError("None of the required conditions on the parameters are satisfied"))
         end
     end
-    if (p >= 0)
+    if p >= 0
         return x/α
     else
         return 1 / (α*x)
@@ -141,9 +139,9 @@ function concave_sample(p::Real,β::Real)
     A1 = k1 * x_naut
     k2 = 0
     A2 = 0
-    if (x_naut < 2/β)
+    if x_naut < 2/β
         k2 = exp(-β)
-        if (p > 0)
+        if p > 0
             A2 = k2 * ((2/β)^p - x_naut^p) / p
         else
             A2 = k2 * log(2/β^2)
@@ -157,12 +155,12 @@ function concave_sample(p::Real,β::Real)
         u = rand(Uniform(0,1))
         v = rand(Uniform(0,A))
         h = Inf
-        if(v <= A1)
+        if v <= A1
             x = x_naut * v / A1
             h = k1
-        elseif(v <= A1 + A2)
+        elseif v <= A1 + A2
             v = v - A1
-            if (p > 0)
+            if p > 0
                 x = (x_naut^p + (v*p/k2))^(1/p)
             else
                 x = β*exp(v * exp(β))
@@ -173,7 +171,7 @@ function concave_sample(p::Real,β::Real)
             x = -2 * log(exp(-x_star * β / 2) - (v * β) / (2 * k3)) / β
             h = k3 * exp(-x * β / 2)
         end
-        if(u * h <= g(x,p,β))
+        if (u * h) <= g(x,p,β)
             return x
         end
     end
@@ -188,7 +186,7 @@ function sample_unif_no_mode_shift(p::Real,β::Real)
         u = rand(Uniform(0,u⁺))
         v = rand(Uniform(0,v⁺))
         x = u/v
-        if (v^2 <= g(x,p,β))
+        if v^2 <= g(x,p,β)
             return x
         end
     end
@@ -211,7 +209,7 @@ function sample_unif_mode_shift(p::Real,β::Real)
         u = rand(Uniform(u⁻,u⁺))
         v = rand(Uniform(0,v⁺))
         x = (u / v) + m
-        if(x > 0 && v^2 <= g(x,p,β))
+        if x > 0 && v^2 <= g(x,p,β)
             return x
         end
     end
