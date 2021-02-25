@@ -152,7 +152,7 @@ function concave_sample(p::Real,β::Real)
 
     while true
         u = rand(Uniform(0,1))
-        v = rand(Uniform(0,A))
+        v = rand(Uniform(0,1))*A
         h = Inf
         if v <= A1
             x = x_naut * v / A1
@@ -182,8 +182,8 @@ function sample_unif_no_mode_shift(p::Real,β::Real)
     v⁺= sqrt(g(m,p,β))
     u⁺= x⁺ * sqrt(g(x⁺,p,β))
     while true
-        u = rand(Uniform(0,u⁺))
-        v = rand(Uniform(0,v⁺))
+        u = rand(Uniform(0,1))*u⁺
+        v = rand(Uniform(0,1))*v⁺
         x = u/v
         if v^2 <= g(x,p,β)
             return x
@@ -205,8 +205,8 @@ function sample_unif_mode_shift(p::Real,β::Real)
     u⁺ = (x⁺ - m)*sqrt(g(x⁺,p,β))
 
     while true
-        u = rand(Uniform(u⁻,u⁺))
-        v = rand(Uniform(0,v⁺))
+        u = rand(Uniform(0,1))*(u⁺ - u⁻) + u⁻
+        v = rand(Uniform(0,1))*v⁺
         x = (u / v) + m
         if x > 0 && v^2 <= g(x,p,β)
             return x
