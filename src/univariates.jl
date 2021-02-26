@@ -608,6 +608,7 @@ const continuous_distributions = [
     "levy",
     "locationscale",
     "logistic",
+    "marchenkopastur",
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",
