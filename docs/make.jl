@@ -21,6 +21,7 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/JuliaStats/Distributions.jl.git",
+    #repo = "github.com/JuliaStats/Distributions.jl.git",
+    repo = "github.com/bgctw/Distributions.jl.git",
     versions = ["stable" => "v^", "v#.#", "dev" => "master"]
 )
