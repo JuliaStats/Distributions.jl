@@ -15,6 +15,7 @@ makedocs(
         "matrix.md",
         "mixture.md",
         "fit.md",
+        "fitstats.md",
         "extends.md",
     ]
 )

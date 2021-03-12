@@ -8,7 +8,7 @@ import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
-using FillArrays
+using FillArrays, StaticArrays
 
 using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
@@ -252,6 +252,13 @@ export
     expected_logdet,    # expected logarithm of random matrix determinant
     gradlogpdf,         # gradient (or derivative) of logpdf(d,x) wrt x
 
+    # fitting distributions
+    AbstractMoments, Moments, n_moments, moments,
+    QuantilePoint, 
+    fit_mean_quantile, fit_mode_quantile, fit_median_quantile,
+    @qp, @qp_ll, @qp_l, @qp_m, @qp_u, @qp_uu, 
+    @qs_cf90, @qs_cf95,
+
     # reexport from StatsBase
     sample, sample!,        # sample from a source array
     wsample, wsample!       # weighted sampling from a source array
@@ -263,6 +270,9 @@ include("common.jl")
 
 # implementation helpers
 include("utils.jl")
+
+# fitting distributions to stats
+include("fitstats.jl")
 
 # generic functions
 include("show.jl")
@@ -290,6 +300,7 @@ include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
 include("deprecates.jl")
+
 
 """
 A Julia package for probability distributions and associated functions.
