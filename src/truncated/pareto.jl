@@ -37,7 +37,11 @@ function _kmom(α::T, θ::T, u::T, k::Int) where {T <: Real}
             in Enterprise Risk Management Symposium - April 22-24, 2013
     """
     p = θ/u
-    return (α*θ^k/(α-k)) * (1-p^(α-k))/(1-p^α)
+    if (a == k) || (a == 0):
+        return log(p^-1)
+    else
+        return (α*θ^k/(α-k)) * (1-p^(α-k))/(1-p^α)
+    end
 end
 
 function mean(d::Truncated{Pareto{T},Continuous}) where {T <: Real}
@@ -57,5 +61,5 @@ function var(d::Truncated{Pareto{T},Continuous}) where {T <: Real}
     α = d0.α
     θ = d0.θ
     u = d.upper
-    return _kmom(α, θ, u, 2) - _kmom(α, θ, u, 1)^2
+    return _kmom(α, θ, u, 1) * _kmom(α-1, θ, u, 1)  - _kmom(α, θ, u, 1)^2
 end
