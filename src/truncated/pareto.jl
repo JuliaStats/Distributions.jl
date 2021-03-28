@@ -68,7 +68,7 @@ end
 
 # Sampling
 
-function rand(rng::AbstractRng, d::Trunacted{Pareto,Continuous})
+function rand(rng::AbstractRng, d::Trunacted{Pareto{T},Continuous}) where {T <: Real}
     α = d.untruncated.α
     ν = d.upper
     θ = d.lower
