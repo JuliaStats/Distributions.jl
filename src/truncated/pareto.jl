@@ -63,7 +63,7 @@ function quantile(d::Truncated{Pareto{T},Continuous}, p::Real) where {T <: Real}
     θ = d0.θ
     ν = d.upper
 
-    θ(1-p*(1-(θ/ν)^α))^-(1/α)
+    θ*(1-p*(1-(θ/ν)^α))^-(1/α)
 end
 
 # Sampling
