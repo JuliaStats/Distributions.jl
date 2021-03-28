@@ -77,15 +77,6 @@ end
 
 # Moments
 
-function mean(d::Truncated{Pareto{T},Continuous}) where {T <: Real}
-    d0 = d.untruncated
-    α = d0.α
-    θ = d0.θ
-    ν = d.upper
-    α == 1 ? ((ν*θ)/(ν-θ)) * log(ν/θ) : _kmom(α, θ, ν, 1)
-    #return (θ^α)/(1-(θ/u)^α) * α/(α-1) * (θ^(1-α) - u^(1-α))
-end
-
 function _kmom(α::T, θ::T, ν::T, k::Int) where {T <: Real}
     """
     Returns the k'th moment of a truncated Pareto distribution.
