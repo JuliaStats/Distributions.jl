@@ -33,14 +33,14 @@ function cdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? zero(T) :
     x >= d.upper ? one(T) :
-    (1-(d.lower^d0.α) * x^(-d0.α)) / (1-(d.lower/d.upper)^d0.α)
+    (1-(d.lower/x)^d0.α) / (1-(d.lower/d.upper)^d0.α)
 end
 
 function logcdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? T(-Inf) :
     x >= d.upper ? zero(T) :
-    log(1-(d.lower^d0.α) + log(x)*(-d0.α)) - log(1-(d.lower/d.upper)^d0.α)
+    log(1-(d.lower/x)^d0.α) - log(1-(d.lower/d.upper)^d0.α)
 end
 
 function pdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
