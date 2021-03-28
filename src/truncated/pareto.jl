@@ -26,4 +26,6 @@ External links
 minimum(d::Truncated{Pareto{T},Continuous}) where {T <: Real} = d.lower
 maximum(d::Truncated{Pareto{T},Continuous}) where {T <: Real} = d.upper
 
-truncated(d::Pareto, u::T) where T{ <: Real} = truncated(d::Pareto, d.θ, u)
+function truncated(d::Pareto, u::T) where T{ <: Real}
+    return truncated(d::UnivariateDistribution, d.θ, u)
+end
