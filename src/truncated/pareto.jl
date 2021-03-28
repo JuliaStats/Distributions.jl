@@ -38,7 +38,7 @@ end
 
 function logcdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? T(-Inf):
+    x <= d.lower ? -Inf:
     x >= d.upper ? zero(T) :
     log(1-(d.lower^d0.α) + log(x)*(-d0.α)) - log(1-(d.lower/d.upper)^α)
 end
