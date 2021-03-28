@@ -33,28 +33,28 @@ function cdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? zero(T) :
     x >= d.upper ? one(T) :
-    (1-(d.lower^d0.α) * x^(-d0.α)) / (1-(d.lower/d.upper)^α)
+    (1-(d.lower^d0.α) * x^(-d0.α)) / (1-(d.lower/d.upper)^d0.α)
 end
 
 function logcdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? T(-Inf) :
     x >= d.upper ? zero(T) :
-    log(1-(d.lower^d0.α) + log(x)*(-d0.α)) - log(1-(d.lower/d.upper)^α)
+    log(1-(d.lower^d0.α) + log(x)*(-d0.α)) - log(1-(d.lower/d.upper)^d0.α)
 end
 
 function pdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? zero(T) :
     x >= d.upper ? zero(T) :
-    α*d.lower^d0.α*x^(-d0.α-1) / (1-(d.lower/d.upper)^α)
+    d0.α*d.lower^d0.α*x^(-d0.α-1) / (1-(d.lower/d.upper)^d0.α)
 end
 
 function logpdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
     x <= d.lower ? zero(T) :
     x >= d.upper ? zero(T) :
-    log(α)+d0.α*log(d.lower)+log(x)*(-d0.α-1) - log(1-(d.lower/d.upper)^α)
+    log(d0.α)+d0.α*log(d.lower)+log(x)*(-d0.α-1) - log(1-(d.lower/d.upper)^d0.α)
 end
 
 function quantile(d::Truncated{Pareto{T},Continuous}, p::Real) where {T <: Real}
