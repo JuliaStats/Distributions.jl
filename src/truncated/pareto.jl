@@ -94,7 +94,7 @@ function _kmom(α::T, θ::T, ν::T, k::Int) where {T <: Real}
             in Enterprise Risk Management Symposium - April 22-24, 2013
     """
     p = θ/ν
-    ((a == k) || (a == 0)) ? log(p^-1) : (α*θ^k/(α-k)) * (1-p^(α-k))/(1-p^α
+    ((a == k) || (a == 0)) ? log(p^-1) : (α*θ^k/(α-k)) * (1-p^(α-k))/(1-p^α)
 end
 
 function mean(d::Truncated{Pareto{T},Continuous}) where {T <: Real}
