@@ -72,7 +72,8 @@ function rand(rng::AbstractRNG, d::Truncated{Pareto{T},Continuous}) where {T <: 
     α = d.untruncated.α
     ν = d.upper
     θ = d.lower
-    (rand(rng)*ν^α+θ^α*rand(rng)+ν/(ν*θ)^α)^(-1/α)
+    U = rand(rng)
+    (-U/θ^α + U/ν^α + θ^-α)^(-1/α)
 end
 
 # Moments
