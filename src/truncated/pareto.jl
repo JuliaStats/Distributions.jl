@@ -68,12 +68,12 @@ end
 
 # Sampling
 
-# function rand(rng::AbstractRng, d::Trunacted{Pareto{T},Continuous}) {where T <: Real}
-#      α = d.untruncated.α
-#      ν = d.upper
-#      θ = d.lower
-#      (rand(rng)*ν^α+θ^α*rand(rng)+ν/(ν*θ)^α)^(-1/α)
-#  end
+function rand(rng::AbstractRNG, d::Truncated{Pareto{T},Continuous}) where {T <: Real}
+    α = d.untruncated.α
+    ν = d.upper
+    θ = d.lower
+    (rand(rng)*ν^α+θ^α*rand(rng)+ν/(ν*θ)^α)^(-1/α)
+end
 
 # Moments
 
