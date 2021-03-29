@@ -52,7 +52,7 @@ end
 
 function logpdf(d::Truncated{Pareto{T},Continuous},x::T) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? zero(T) :
+    x <= d.lower ? T(-Inf) :
     x >= d.upper ? zero(T) :
     log(d0.α)+d0.α*log(d.lower)+log(x)*(-d0.α-1) - log(1-(d.lower/d.upper)^d0.α)
 end
@@ -63,7 +63,7 @@ function quantile(d::Truncated{Pareto{T},Continuous}, p::Real) where {T <: Real}
     θ = d0.θ
     ν = d.upper
 
-    θ*(1-p*(1-(θ/ν)^α))^-(1/α)
+    θ*(1-p*(θ/ν)^α+p)^-(1/α)
 end
 
 # Sampling
