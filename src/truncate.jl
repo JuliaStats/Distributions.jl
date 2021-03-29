@@ -30,6 +30,7 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
 end
 
 truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
+truncated(d::Pareto, u::T) where {T <: Real} = truncated(d, d.θ, u)
 
 """
     Truncated(d, l, u):

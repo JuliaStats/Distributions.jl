@@ -22,10 +22,6 @@ External links
 * [Truncated Pareto distribution on Wikipedia](https://en.wikipedia.org/wiki/Pareto_distribution#Bounded_Pareto_distribution)
 
 """
-function truncated(d::Pareto, ν::T) where {T <: Real}
-    return truncated(d, d.θ, ν)
-end
-
 minimum(d::Truncated{Pareto{T},Continuous}) where {T <: Real} = d.lower
 maximum(d::Truncated{Pareto{T},Continuous}) where {T <: Real} = d.upper
 
