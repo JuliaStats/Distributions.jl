@@ -31,29 +31,29 @@ maximum(d::Truncated{Pareto{T},Continuous}) where {T <: Real} = d.upper
 
 function cdf(d::Truncated{Pareto{T},Continuous}, x::Real) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? zero(T) :
-    x >= d.upper ? one(T) :
+    x < d.lower ? zero(T) :
+    x > d.upper ? one(T) :
     (1-(d.lower/x)^d0.α) / (1-(d.lower/d.upper)^d0.α)
 end
 
 function logcdf(d::Truncated{Pareto{T},Continuous}, x::Real) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? T(-Inf) :
-    x >= d.upper ? zero(T) :
+    x < d.lower ? T(-Inf) :
+    x > d.upper ? zero(T) :
     log(1-(d.lower/x)^d0.α) - log(1-(d.lower/d.upper)^d0.α)
 end
 
 function pdf(d::Truncated{Pareto{T},Continuous}, x::Real) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? zero(T) :
-    x >= d.upper ? zero(T) :
+    x < d.lower ? zero(T) :
+    x > d.upper ? zero(T) :
     d0.α*d.lower^d0.α*x^(-d0.α-1) / (1-(d.lower/d.upper)^d0.α)
 end
 
 function logpdf(d::Truncated{Pareto{T},Continuous}, x::Real) where {T <: Real}
     d0 = d.untruncated
-    x <= d.lower ? -T(Inf) :
-    x >= d.upper ? -T(Inf) :
+    x < d.lower ? -T(Inf) :
+    x > d.upper ? -T(Inf) :
     log(d0.α)+d0.α*log(d.lower)+log(x)*(-d0.α-1) - log(1-(d.lower/d.upper)^d0.α)
 end
 
