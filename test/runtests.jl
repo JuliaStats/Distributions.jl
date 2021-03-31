@@ -60,6 +60,7 @@ const tests = [
     "bernoulli",
     "soliton",
     "skewnormal",
+    "generalizedinversegaussian",
 ]
 
 printstyled("Running tests:\n", color=:blue)
