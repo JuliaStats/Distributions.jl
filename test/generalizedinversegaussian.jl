@@ -1,6 +1,4 @@
 using Distributions
-using Test,Random, Statistics
-using Plots
 
 
 d = Distributions.GeneralizedInverseGaussian(1,2,1)
