@@ -15,7 +15,8 @@ params(d)                           # Get the parameters, i.e. (a, b, p)
 External Links
 
 * [generalized inverse Gaussian distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_inverse_Gaussian_distribution)
-* [Sampling implementation paper](https://doi.org/10.1007/s11222-013-9387-3)
+* [Sampling implementation paper (Hörmann & Leydold)](https://doi.org/10.1007/s11222-013-9387-3)
+* [Ratio-of-Uniforms with Mode Shift sampling (Dagpunar)](https://doi.org/10.1080/03610918908812785)
 """
 struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     a::T
@@ -95,7 +96,7 @@ end
 
 Extract a sample from the GeneralizedInverseGaussian distribution 'd'. 
 The sampling procedure is implemented from [1].
-One of the following conditions must be satisfied:
+Different algorithms are used for the following scenarios:
 
 1. β > 1 or p > 1
 2. min(1/2, (2/3)*sqrt(1-p)) ≤ a*b ≤ 1 and abs(p) < 1
@@ -130,6 +131,12 @@ function rand(rng::Random.AbstractRNG,d::GeneralizedInverseGaussian)
     end
 end
 
+"""
+    concave_sample(p, β)
+
+Sample the 2-parameter GeneralizedInverseGaussian distribution with parameters p and β using the Rejection method
+as described by Hörmann & Leydold (2014). 
+"""
 function concave_sample(p::Real,β::Real)
     m = β/((1 - p) + sqrt((1 - p)^2 + β^2))
     x_naut = β/(1 - p)
@@ -176,6 +183,12 @@ function concave_sample(p::Real,β::Real)
     end
 end
 
+"""
+    sample_unif_no_mode_shift(p, β)
+
+Sample the 2-parameter GeneralizedInverseGaussian distribution with parameters p and β using the 
+Ratio-of-Uniforms without mode shift as described by Hörmann & Leydold (2014). 
+"""
 function sample_unif_no_mode_shift(p::Real,β::Real)
     m = β/((1 - p) + sqrt((1 - p)^2 + β^2))
     x⁺= ((1 + p) + sqrt((1 + p)^2 + β^2))/β
@@ -191,6 +204,12 @@ function sample_unif_no_mode_shift(p::Real,β::Real)
     end
 end
 
+"""
+    sample_unif_mode_shift(p, β)
+
+Sample the 2-parameter GeneralizedInverseGaussian distribution with parameters p and β using the 
+Ratio-of-Uniforms with mode shift as described by Hörmann & Leydold (2014) (originally from Dagpunar (1989)). 
+"""
 function sample_unif_mode_shift(p::Real,β::Real)
     m = (sqrt((p - 1)^2 + β^2) + (p-1)) / β
     a = -(2*(p+1)/β) - m
