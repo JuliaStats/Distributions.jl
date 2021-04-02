@@ -3,3 +3,5 @@ docs/site
 .Rhistory
 Manifest.toml
 .vscode
+src/scratch.jl
+build
