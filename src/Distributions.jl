@@ -306,7 +306,7 @@ API overview (major features):
 
 These represent just a few of the operations supported by this
 package; users are encouraged to refer to the full documentation at
-http://distributionsjl.readthedocs.org/en/latest/ for further
+https://JuliaStats.github.io/Distributions.jl/stable/ for further
 information.
 
 Supported distributions:
