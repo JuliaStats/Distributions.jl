@@ -621,6 +621,7 @@ const continuous_distributions = [
     "rayleigh",
     "semicircle",
     "skewnormal",
+    "skewtdist",
     "studentizedrange",
     "symtriangular",
     "tdist",
