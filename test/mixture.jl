@@ -69,6 +69,12 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test componentwise_pdf(g, X)    ≈ P0
     @test componentwise_logpdf(g, X) ≈ LP0
 
+    # quantile
+    αs = [0.0; 0.49; 0.5; 0.51; 1.0]
+    for α in αs
+        @test cdf(g, quantile(g, α)) ≈ α
+    end
+
     # sampling
     if (T <: AbstractFloat)
         if ismissing(rng)
@@ -172,6 +178,15 @@ end
          "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing UnivariateMixture" begin
+        g_u = MixtureModel([Normal(), Normal()])
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+
         g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
         @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
         @test ncomponents(g_u) == 3
