@@ -42,6 +42,8 @@ Gumbel() = Gumbel(0.0, 1.0, check_args=false)
 
 const DoubleExponential = Gumbel
 
+Base.eltype(::Type{Gumbel{T}}) where {T} = T
+
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
@@ -54,6 +56,14 @@ scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
 partype(::Gumbel{T}) where {T} = T
 
+function Base.rand(rng::Random.AbstractRNG, d::Gumbel)
+    return d.μ - d.θ * log(randexp(rng, float(eltype(d))))
+end
+function Random.rand!(rng::Random.AbstractRNG, d::Gumbel, x::AbstractArray)
+    randexp!(rng, x)
+    x .= d.μ .- d.θ .* log.(x)
+    return x
+end
 
 #### Statistics
 
