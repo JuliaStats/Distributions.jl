@@ -6,15 +6,15 @@
     end
 
     @testset "rand" begin
-        d = Gumbel(randn(), rand())
+        d = Gumbel(rand(), rand())
 
         samples = [rand(d) for _ in 1:10_000]
-        @test mean(samples) ≈ mean(d) atol=1e-2
-        @test std(samples) ≈ std(d) atol=1e-2
+        @test mean(samples) ≈ mean(d) rtol=5e-2
+        @test std(samples) ≈ std(d) rtol=5e-2
 
         samples = rand(d, 10_000)
-        @test mean(samples) ≈ mean(d) atol=1e-2
-        @test std(samples) ≈ std(d) atol=1e-2
+        @test mean(samples) ≈ mean(d) rtol=5e-2
+        @test std(samples) ≈ std(d) rtol=5e-2
 
         d = Gumbel{Int}(0, 1)
         @test rand(d) isa Float64
