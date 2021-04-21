@@ -114,8 +114,13 @@ rand(rng::AbstractRNG, d::Laplace) =
 
 #### Fitting
 
-function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}) where {T <: Real}
+function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}) where {T<:Real}
     μ = median(x)
+    θ = zero(T)
+    for v ∈ x
+        θ += abs(v - μ)
+    end
+    θ /= length(x)
     return Laplace(μ, mean(abs.(x .- μ)))
 end
 
@@ -135,6 +140,10 @@ function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}, w::AbstractArray{T}) wh
         end
     end
     μ = x[idx]
-    θ = sum(w .* abs.(x .- μ)) / sw
+    θ = zero(T)
+    for i = 1:length(x)
+        θ += w[i] * abs(x[i] - μ)
+    end
+    θ /= sw
     return Laplace(μ, θ)
 end
