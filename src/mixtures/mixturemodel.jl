@@ -311,16 +311,6 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 end
 
 function _mixlogpdf1(d::AbstractMixtureModel, x)
-    # using the formula below for numerical stability
-    #
-    # logpdf(d, x) = log(sum_i pri[i] * pdf(cs[i], x))
-    #              = log(sum_i pri[i] * exp(logpdf(cs[i], x)))
-    #              = log(sum_i exp(logpri[i] + logpdf(cs[i], x)))
-    #              = m + log(sum_i exp(logpri[i] + logpdf(cs[i], x) - m))
-    #
-    #  m is chosen to be the maximum of logpri[i] + logpdf(cs[i], x)
-    #  such that the argument of exp is in a reasonable range
-    #
     p = probs(d)
     lp = logsumexp(log(pi) + logpdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
     return lp
