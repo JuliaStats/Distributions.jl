@@ -121,7 +121,7 @@ function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}) where {T<:Real}
         θ += abs(v - μ)
     end
     θ /= length(x)
-    return Laplace(μ, mean(abs.(x .- μ)))
+    return Laplace(μ, θ)
 end
 
 function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}, w::AbstractArray{T}) where {T <: Real}
