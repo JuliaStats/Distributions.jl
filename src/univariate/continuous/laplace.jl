@@ -121,3 +121,27 @@ function fit_mle(::Type{<:Laplace}, x::AbstractArray{<:Real})
     xc .= abs.(x .- m)
     return Laplace(m, mean(xc))
 end
+
+function fit_mle(::Type{<:Laplace}, x::AbstractArray{T}, w::AbstractArray{T}) where {T <: Real}
+    sp = sortperm(x)
+    n = length(x)
+    sw = sum(w)
+    highsum = sw
+    lowsum = zero(T)
+    idx = 0
+    for i = 1:n
+        lowsum += w[sp[i]]
+        highsum -= w[sp[i]]
+        if lowsum >= highsum
+            idx = sp[i]
+            break
+        end
+    end
+    μ = x[idx]
+    θ = zero(T)
+    for i = 1:length(x)
+        θ += w[i] * abs(x[i] - μ)
+    end
+    θ /= sw
+    return Laplace(μ, θ)
+end

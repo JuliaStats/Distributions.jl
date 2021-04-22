@@ -362,6 +362,15 @@ end
     end
 end
 
+@testset "Testing fit for Laplace with weights" begin
+    for func in funcs, dist in (Laplace, Laplace{Float64})
+        d = fit(dist, func[2](dist(5.0, 3.0), N + 1), ones(Float64, N+1))
+        @test isa(d, dist)
+        @test isapprox(location(d), 5.0, atol=0.01)
+        @test isapprox(scale(d)   , 3.0, atol=0.01)
+    end
+end
+
 @testset "Testing fit for Pareto" begin
     for func in funcs, dist in (Pareto, Pareto{Float64})
         x = func[2](dist(3., 7.), N)
