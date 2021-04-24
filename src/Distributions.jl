@@ -31,6 +31,7 @@ export
 
     # generic types
     VariateForm,
+    NVariate,
     ValueSupport,
     Univariate,
     Multivariate,
