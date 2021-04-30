@@ -10,7 +10,7 @@ abstract type VariateForm end
 variates with an array-like shape, e.g. univariate (scalar, `N == 0`),
 multivariate (vector, `N == 1`), matrix-variate (matrix, , `N == 2`).
 """
-abstract type NVariate{N} <:VariateForm end
+abstract type NVariate{N} <: VariateForm end
 
 const Univariate    = NVariate{0}
 const Multivariate  = NVariate{1}
