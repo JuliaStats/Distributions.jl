@@ -6,7 +6,6 @@ using Random
 using SpecialFunctions
 using StatsBase
 using LinearAlgebra
-using HypothesisTests
 
 import JSON
 import ForwardDiff

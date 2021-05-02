@@ -606,7 +606,6 @@ const continuous_distributions = [
     "ksonesided",
     "laplace",
     "levy",
-    "locationscale",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
@@ -630,6 +629,8 @@ const continuous_distributions = [
     "vonmises",
     "weibull"
 ]
+
+include(joinpath("univariate", "locationscale.jl"))
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))
