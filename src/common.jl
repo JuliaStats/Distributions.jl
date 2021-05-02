@@ -6,15 +6,15 @@
 abstract type VariateForm end
 
 """
-`F <: NVariate{N}` specifies the form of the variate a sample for
-variates with an array-like shape, e.g. univariate (scalar, `N == 0`),
-multivariate (vector, `N == 1`), matrix-variate (matrix, , `N == 2`).
+`F <: ArrayLikeVariate{N}` specifies the number of axes of a variate or
+a sample with an array-like shape, e.g. univariate (scalar, `N == 0`),
+multivariate (vector, `N == 1`) or matrix-variate (matrix, `N == 2`).
 """
-abstract type NVariate{N} <: VariateForm end
+abstract type ArrayLikeVariate{N} <: VariateForm end
 
-const Univariate    = NVariate{0}
-const Multivariate  = NVariate{1}
-const Matrixvariate = NVariate{2}
+const Univariate    = ArrayLikeVariate{0}
+const Multivariate  = ArrayLikeVariate{1}
+const Matrixvariate = ArrayLikeVariate{2}
 
 """
 `S <: ValueSupport` specifies the support of sample elements,
