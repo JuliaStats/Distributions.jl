@@ -19,11 +19,11 @@ A mixture of distributions, parametrized on:
 * `C` distribution family of the mixture
 * `CT` the type for probabilities of the prior
 """
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real} <: AbstractMixtureModel{VF,VS,C}
+struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Categorical} <: AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
-    prior::Categorical{CT}
+    prior::CT
 
-    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::Categorical{CT}) where {VF,VS,C,CT}
+    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::CT) where {VF,VS,C,CT}
         length(cs) == ncategories(pri) ||
             error("The number of components does not match the length of prior.")
         new{VF,VS,C,CT}(cs, pri)
@@ -171,16 +171,8 @@ minimum(d::MixtureModel) = minimum([minimum(dci) for dci in d.components])
 maximum(d::MixtureModel) = maximum([maximum(dci) for dci in d.components])
 
 function mean(d::UnivariateMixture)
-    K = ncomponents(d)
     p = probs(d)
-    m = 0.0
-    for i = 1:K
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            m += mean(c) * pi
-        end
-    end
+    m = sum(pi * mean(component(d, i)) for (i, pi) in enumerate(p) if !iszero(pi))
     return m
 end
 
@@ -281,28 +273,13 @@ end
 #### Evaluation
 
 function insupport(d::AbstractMixtureModel, x::AbstractVector)
-    K = ncomponents(d)
     p = probs(d)
-    @inbounds for i in eachindex(p)
-        pi = p[i]
-        if pi > 0.0 && insupport(component(d, i), x)
-            return true
-        end
-    end
-    return false
+    return any(insupport(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
 end
 
 function _cdf(d::UnivariateMixture, x::Real)
-    K = ncomponents(d)
     p = probs(d)
-    r = 0.0
-    @inbounds for i in eachindex(p)
-        pi = p[i]
-        if pi > 0.0
-            c = component(d, i)
-            r += pi * cdf(c, x)
-        end
-    end
+    r = sum(pi * cdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
     return r
 end
 
@@ -310,9 +287,8 @@ cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
 cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 
 function _mixpdf1(d::AbstractMixtureModel, x)
-    ps = probs(d)
-    cs = components(d)
-    return sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
+    p = probs(d)
+    return sum(pi * pdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
 end
 
 function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
@@ -335,39 +311,9 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 end
 
 function _mixlogpdf1(d::AbstractMixtureModel, x)
-    # using the formula below for numerical stability
-    #
-    # logpdf(d, x) = log(sum_i pri[i] * pdf(cs[i], x))
-    #              = log(sum_i pri[i] * exp(logpdf(cs[i], x)))
-    #              = log(sum_i exp(logpri[i] + logpdf(cs[i], x)))
-    #              = m + log(sum_i exp(logpri[i] + logpdf(cs[i], x) - m))
-    #
-    #  m is chosen to be the maximum of logpri[i] + logpdf(cs[i], x)
-    #  such that the argument of exp is in a reasonable range
-    #
-
-    K = ncomponents(d)
     p = probs(d)
-    lp = Vector{eltype(p)}(undef, K)
-    m = -Inf   # m <- the maximum of log(p(cs[i], x)) + log(pri[i])
-    @inbounds for i in eachindex(p)
-        pi = p[i]
-        if pi > 0.0
-            # lp[i] <- log(p(cs[i], x)) + log(pri[i])
-            lp_i = logpdf(component(d, i), x) + log(pi)
-            lp[i] = lp_i
-            if lp_i > m
-                m = lp_i
-            end
-        end
-    end
-    v = 0.0
-    @inbounds for i = 1:K
-        if p[i] > 0.0
-            v += exp(lp[i] - m)
-        end
-    end
-    return m + log(v)
+    lp = logsumexp(log(pi) + logpdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
+    return lp
 end
 
 function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
