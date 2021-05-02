@@ -133,6 +133,16 @@ end
 ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
 ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
 
+# fix incorrect defaults
+for f in (:cdf, :ccdf)
+    _f = Symbol(:_, f)
+    logf = Symbol(:log, f)
+    @eval begin
+        $logf(d::DiscreteNonParametric{T}, x::Integer) where T = log($_f(d, convert(T, x)))
+        $logf(d::DiscreteNonParametric{T}, x::Real) where T = log($_f(d, convert(T, x)))
+    end
+end
+
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())
     x = support(d)
