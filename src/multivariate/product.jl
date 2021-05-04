@@ -40,6 +40,9 @@ var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
+minimum(d::Product) = minimum.(d.v)
+maximum(d::Product) = maximum.(d.v)
+extrema(d::Product) = minimum(d), maximum(d)
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})
