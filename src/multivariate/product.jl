@@ -40,8 +40,26 @@ var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
+
+"""
+    minimum(d::AbstractMvNormal)
+
+Return the minimum of the support of `d`.
+"""
 minimum(d::Product) = minimum.(d.v)
+
+"""
+    maximum(d::AbstractMvNormal)
+
+Return the maximum of the support of `d`.
+"""
 maximum(d::Product) = maximum.(d.v)
+
+"""
+    extrema(d::AbstractMvNormal)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
 extrema(d::Product) = minimum(d), maximum(d)
 
 """

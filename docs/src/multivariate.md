@@ -71,6 +71,9 @@ invcov(::Distributions.AbstractMvNormal)
 logdetcov(::Distributions.AbstractMvNormal)
 sqmahal(::Distributions.AbstractMvNormal, ::AbstractArray)
 rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
+minimum(::Distributions.AbstractMvNormal)
+maximum(::Distributions.AbstractMvNormal)
+extrema(::Distributions.AbstractMvNormal)
 ```
 
 ### MvLogNormal
