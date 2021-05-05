@@ -285,6 +285,7 @@ include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
 include("estimators.jl")
+include("pdfnorm.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
