@@ -76,6 +76,7 @@ maximum(::Distributions.AbstractMvNormal)
 extrema(::Distributions.AbstractMvNormal)
 ```
 
+
 ### MvLogNormal
 
 In addition to the methods listed in the common interface above, we also provide the following methods:

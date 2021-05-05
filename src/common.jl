@@ -134,6 +134,20 @@ value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
 Broadcast.broadcastable(d::UnivariateDistribution) = Ref(d)
 
 """
+    minimum(d::Distribution)
+
+Return the minimum of the support of `d`.
+"""
+minimum(d::Distribution)
+
+"""
+    maximum(d::Distribution)
+
+Return the maximum of the support of `d`.
+"""
+maximum(d::Distribution)
+
+"""
     extrema(d::Distribution)
 
 Return the minimum and maximum of the support of `d` as a 2-tuple.
