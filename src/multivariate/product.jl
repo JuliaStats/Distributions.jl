@@ -40,27 +40,8 @@ var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
-
-"""
-    minimum(d::Product)
-
-Return the minimum of the support of each dimension of `d`.
-"""
-minimum(d::Product) = minimum.(d.v)
-
-"""
-    maximum(d::Product)
-
-Return the maximum of the support of each dimension of `d`.
-"""
-maximum(d::Product) = maximum.(d.v)
-
-"""
-    extrema(d::Product)
-
-Return the minimum and maximum of the support of each dimension of `d` as a 2-tuple.
-"""
-extrema(d::Product) = minimum(d), maximum(d)
+minimum(d::Product) = map(minimum, d.v)
+maximum(d::Product) = map(maximum, d.v)
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})
