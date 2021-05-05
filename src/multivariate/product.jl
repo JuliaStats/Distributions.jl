@@ -42,23 +42,23 @@ entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
 
 """
-    minimum(d::AbstractMvNormal)
+    minimum(d::Product)
 
-Return the minimum of the support of `d`.
+Return the minimum of the support of each dimension of `d`.
 """
 minimum(d::Product) = minimum.(d.v)
 
 """
-    maximum(d::AbstractMvNormal)
+    maximum(d::Product)
 
-Return the maximum of the support of `d`.
+Return the maximum of the support of each dimension of `d`.
 """
 maximum(d::Product) = maximum.(d.v)
 
 """
-    extrema(d::AbstractMvNormal)
+    extrema(d::Product)
 
-Return the minimum and maximum of the support of `d` as a 2-tuple.
+Return the minimum and maximum of the support of each dimension of `d` as a 2-tuple.
 """
 extrema(d::Product) = minimum(d), maximum(d)
 
