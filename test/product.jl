@@ -46,6 +46,7 @@ end
     @test minimum(d_product) == -ubound
     @test maximum(d_product) == ubound
     @test extrema(d_product) == (-ubound, ubound)
+    @test isless(extrema(d_product)...)
 
     y = rand(d_product)
     @test y isa typeof(x)
