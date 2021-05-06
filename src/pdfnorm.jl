@@ -1,58 +1,50 @@
-export pdfL2norm
-
 """
-    pdfL2norm(d::Distribution)
+    pdfsquaredL2norm(d::Distribution)
 
-Return the L2 norm of the probability distribution function `f(x)` of the distribution `d`:
+Return the square of the L2 norm of the probability density function ``f(x)`` of the distribution `d`:
 
 ```math
 \\int_{S} f(x)^{2} \\mathrm{d} x
 ```
 
-where `S` is the support of `f(x)`.
+where ``S`` is the support of ``f(x)``.
 """
-pdfL2norm
+pdfsquaredL2norm
 
-pdfL2norm(d::Distribution) = throw(ArgumentError("L2 norm not implemented for $(d)"))
-
-function pdfL2norm(d::Beta{T}) where T
-    if d.α > 0.5 && d.β > 0.5
-        return beta(2 * d.α - 1, 2 * d.β - 1) / beta(d.α, d.β) ^ 2
-    else
-        return T(Inf)
-    end
+function pdfsquaredL2norm(d::Beta)
+    α, β = params(d)
+    z = beta(2 * α - 1, 2 * β - 1) / beta(α, β) ^ 2
+    # L2 norm of the pdf converges only for α > 0.5 and β > 0.5
+    return α > 0.5 && β > 0.5 ? z : oftype(z, Inf)
 end
 
-pdfL2norm(d::Cauchy) =  1 / (d.σ * 2 * π)
+pdfsquaredL2norm(d::Cauchy) = inv(twoπ * d.σ)
 
-function pdfL2norm(d::Chi{T}) where {T}
-    if d.ν > 0.5
-        return (2 ^ (1 - d.ν) * gamma((2 * d.ν - 1) / 2)) / gamma(d.ν / 2) ^ 2
-    else
-        return T(Inf)
-    end
+function pdfsquaredL2norm(d::Chi)
+    ν = d.ν
+    z = (2 ^ (1 - ν) * gamma((2 * ν - 1) / 2)) / gamma(ν / 2) ^ 2
+    # L2 norm of the pdf converges only for ν > 0.5
+    return d.ν > 0.5 ? z : oftype(z, Inf)
 end
 
-function pdfL2norm(d::Chisq{T}) where {T}
-    if d.ν > 1
-        return gamma(d.ν - 1) / (gamma(d.ν / 2) ^ 2 * 2 ^ d.ν)
-    else
-        return T(Inf)
-    end
+function pdfsquaredL2norm(d::Chisq)
+    ν = d.ν
+    z = gamma(d.ν - 1) / (gamma(d.ν / 2) ^ 2 * 2 ^ d.ν)
+    # L2 norm of the pdf converges only for ν > 1
+    return ν > 1 ? z : oftype(z, Inf)
 end
 
-pdfL2norm(d::Exponential) = 1 / (2 * d.θ)
+pdfsquaredL2norm(d::Exponential) = 1 / (2 * d.θ)
 
-function pdfL2norm(d::Gamma{T}) where {T}
-    if d.α > 0.5
-        return (2^(1 - 2 * d.α) * gamma(2 * d.α - 1)) / (gamma(d.α) ^ 2 * d.θ)
-    else
-        return T(Inf)
-    end
+function pdfsquaredL2norm(d::Gamma{T}) where {T}
+    α, θ = params(d)
+    z = (2^(1 - 2 * α) * gamma(2 * α - 1)) / (gamma(α) ^ 2 * θ)
+    # L2 norm of the pdf converges only for α > 0.5
+    return α > 0.5 ? z : oftype(z, Inf)
 end
 
-pdfL2norm(d::Logistic) = 1 / (6 * d.θ)
+pdfsquaredL2norm(d::Logistic) = 1 / (6 * d.θ)
 
-pdfL2norm(d::Normal{T}) where {T} = 1 / (2 * sqrt(T(π)) * d.σ)
+pdfsquaredL2norm(d::Normal) = inv(sqrt4π * d.σ)
 
-pdfL2norm(d::Uniform) = 1 / (d.b - d.a)
+pdfsquaredL2norm(d::Uniform) = 1 / (d.b - d.a)

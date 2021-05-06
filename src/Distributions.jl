@@ -230,6 +230,7 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
+    pdfsquaredL2norm,   # squared L2 norm of the probability density function
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     product_distribution, # product of univariate distributions
