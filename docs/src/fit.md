@@ -47,7 +47,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Normal`](@ref)
 - [`Gamma`](@ref)
 - [`Geometric`](@ref)
-- [`Laplace`](@ref) 
+- [`Laplace`](@ref)
 - [`Pareto`](@ref)
 - [`Poisson`](@ref)
 - [`Rayleigh`](@ref)
