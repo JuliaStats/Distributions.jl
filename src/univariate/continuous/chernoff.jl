@@ -155,7 +155,7 @@ module ChernoffComputations
             return (z*y^2 + 0.5 * z^2) * exp(-0.5*y^2*z^2)
         end
         if (x <= -1.0)
-            return cuberoottwo^2 * exp(2.0*x^3/3.0) * sum(exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k in 1:length(airyai_roots))
+            return cuberoottwo^2 * exp(2*x^3/3) * sum(exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k in 1:length(airyai_roots))
         else
             return 2*x - (quadgk(g_one, 0.0, Inf)[1] - 4*quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
         end
