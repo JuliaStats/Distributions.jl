@@ -140,7 +140,7 @@ module ChernoffComputations
 
         cnsty = inv(sqrt(y^3))
         if (y <= 1.0)
-            return sum((b[k]*cnsty - a[k]*sqrthalfpi)*y^(3.0*k) for k in 1:length(a)) - sqrthalfpi
+            return sum((b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k in 1:length(a)) - sqrthalfpi
         else
             return sum(exp(cuberoottwo*a*y) for a in airyai_roots) * 2.0 * sqrttwopi * exp(-y^3 / 6.0) - cnsty
         end
