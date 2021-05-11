@@ -210,6 +210,21 @@ function rand(rng::AbstractRNG, s::GammaIPSampler)
     x*exp(s.nia*e)
 end
 
+struct ChisqNaiveSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+    ν::T
+end
+function rand(rng::AbstractRNG, s::ChisqNaiveSampler)
+    ν = s.ν
+    if ν == 1.0
+        randn(rng) ^ 2
+    elseif ν == 3.0
+        randn(rng) ^ 2 + randn(rng) ^ 2 + randn(rng) ^ 2
+    elseif ν == 4.0
+        randn(rng) ^ 2 + randn(rng) ^ 2 + randn(rng) ^ 2 + randn(rng) ^ 2
+    end
+end
+
+
 # function sampler(d::Gamma)
 #     if d.shape < 1.0
 #         # TODO: d.shape = 0.5 : use scaled chisq
