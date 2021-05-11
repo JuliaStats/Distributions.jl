@@ -257,5 +257,7 @@
      0.971375,
      0.972706,
      0.973988]
+#    From: Groeneboom, Piet; Wellner, Jon A. (2001). "Computing Chernoff's Distribution".
+#     Journal of Computational and Graphical Statistics
      @test isapprox(quantile.(Chernoff(), qs),collect(0:0.01:0.99), atol = 1e-5)
 end
