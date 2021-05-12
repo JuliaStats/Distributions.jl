@@ -106,9 +106,5 @@ end
 cdf(d::Skellam, t::Real) = cdf(d, floor(Int, t))
 
 #### Sampling
-# TODO: remove RFunctions dependency once Poisson has its removed
-@rand_rdist(Skellam)
-rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
-
 rand(rng::AbstractRNG, d::Skellam) =
     rand(rng, Poisson(d.μ1)) - rand(rng, Poisson(d.μ2))

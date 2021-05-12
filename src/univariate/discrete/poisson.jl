@@ -162,3 +162,5 @@ function sampler(d::Poisson)
         return PoissonADSampler(d)
     end
 end
+
+rand(rng::AbstractRNG, d::Poisson) = rand(rng, sampler(d))
