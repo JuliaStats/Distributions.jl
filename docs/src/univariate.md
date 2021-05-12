@@ -149,6 +149,7 @@ Bernoulli
 BetaBinomial
 Binomial
 Categorical
+Dirac
 DiscreteUniform
 DiscreteNonParametric
 Geometric
