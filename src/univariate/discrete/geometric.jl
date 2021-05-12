@@ -73,22 +73,6 @@ function logpdf(d::Geometric, x::Real)
     insupport(d, x) ? log(d.p) + log1p(-d.p) * x : log(zero(d.p))
 end
 
-struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
-    p0::Float64
-end
-
-RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
-nextpdf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end
-
-
-
 function cdf(d::Geometric{T}, x::Int) where T<:Real
     x < 0 && return zero(T)
     p = succprob(d)
