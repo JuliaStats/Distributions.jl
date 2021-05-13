@@ -1,7 +1,7 @@
 ## sample space/domain
 
 """
-`F <: VariateForm` specifies the form of the variate or a sample.
+`F <: VariateForm` specifies the form or shape of the variate or a sample.
 """
 abstract type VariateForm end
 
