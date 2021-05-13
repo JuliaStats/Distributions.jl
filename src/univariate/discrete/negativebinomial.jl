@@ -120,21 +120,6 @@ function rand(rng::AbstractRNG, d::NegativeBinomial)
     return rand(rng, Poisson(lambda))
 end
 
-struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
-    r::Float64
-    p0::Float64
-end
-
-RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
-nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::NegativeBinomial, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end
-
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)
     return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
