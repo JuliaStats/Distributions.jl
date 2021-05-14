@@ -10,12 +10,12 @@ f(x; \\mu, \\theta) = \\frac{1}{4 \\theta} \\mathrm{sech}^2
 
 ```julia
 Logistic()       # Logistic distribution with zero location and unit scale, i.e. Logistic(0, 1)
-Logistic(u)      # Logistic distribution with location u and unit scale, i.e. Logistic(u, 1)
-Logistic(u, b)   # Logistic distribution with location u ans scale b
+Logistic(μ)      # Logistic distribution with location μ and unit scale, i.e. Logistic(μ, 1)
+Logistic(μ, θ)   # Logistic distribution with location μ and scale θ
 
-params(d)       # Get the parameters, i.e. (u, b)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. b
+params(d)       # Get the parameters, i.e. (μ, θ)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. θ
 ```
 
 External links

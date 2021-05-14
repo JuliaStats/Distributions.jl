@@ -26,12 +26,12 @@ where the logit-Function is
 ```
 
 ```julia
-LogitNormal()          # Logit-normal distribution with zero logit-mean and unit scale
-LogitNormal(mu)        # Logit-normal distribution with logit-mean mu and unit scale
-LogitNormal(mu, sig)   # Logit-normal distribution with logit-mean mu and scale sig
+LogitNormal()        # Logit-normal distribution with zero logit-mean and unit scale
+LogitNormal(μ)       # Logit-normal distribution with logit-mean μ and unit scale
+LogitNormal(μ, σ)    # Logit-normal distribution with logit-mean μ and scale σ
 
-params(d)            # Get the parameters, i.e. (mu, sig)
-median(d)            # Get the median, i.e. logistic(mu)
+params(d)            # Get the parameters, i.e. (μ, σ)
+median(d)            # Get the median, i.e. logistic(μ)
 ```
 
 The following properties have no analytical solution but numerical

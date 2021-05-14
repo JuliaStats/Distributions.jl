@@ -9,12 +9,12 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sigma} \\left( 1 - \\left| \\frac{x - \\mu}{\\
 
 ```julia
 SymTriangularDist()         # Symmetric triangular distribution with zero location and unit scale
-SymTriangularDist(u)        # Symmetric triangular distribution with location u and unit scale
-SymTriangularDist(u, s)     # Symmetric triangular distribution with location u and scale s
+SymTriangularDist(u)        # Symmetric triangular distribution with location μ and unit scale
+SymTriangularDist(u, s)     # Symmetric triangular distribution with location μ and scale σ
 
-params(d)       # Get the parameters, i.e. (u, s)
-location(d)     # Get the location parameter, i.e. u
-scale(d)        # Get the scale parameter, i.e. s
+params(d)       # Get the parameters, i.e. (μ, σ)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. σ
 ```
 """
 struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution

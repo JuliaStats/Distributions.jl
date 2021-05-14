@@ -10,12 +10,12 @@ f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
 
 ```julia
 InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1, 1)
-InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1)
-InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+InverseGaussian(μ),            # Inverse Gaussian distribution with mean μ and unit shape, i.e. InverseGaussian(μ, 1)
+InverseGaussian(μ, λ)          # Inverse Gaussian distribution with mean μ and shape λ
 
-params(d)           # Get the parameters, i.e. (mu, lambda)
-mean(d)             # Get the mean parameter, i.e. mu
-shape(d)            # Get the shape parameter, i.e. lambda
+params(d)           # Get the parameters, i.e. (μ, λ)
+mean(d)             # Get the mean parameter, i.e. μ
+shape(d)            # Get the shape parameter, i.e. λ
 ```
 
 External links

@@ -12,13 +12,13 @@ f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
 
 ```julia
 LogNormal()          # Log-normal distribution with zero log-mean and unit scale
-LogNormal(mu)        # Log-normal distribution with log-mean mu and unit scale
-LogNormal(mu, sig)   # Log-normal distribution with log-mean mu and scale sig
+LogNormal(μ)         # Log-normal distribution with log-mean mu and unit scale
+LogNormal(μ, σ)      # Log-normal distribution with log-mean mu and scale sig
 
-params(d)            # Get the parameters, i.e. (mu, sig)
-meanlogx(d)          # Get the mean of log(X), i.e. mu
-varlogx(d)           # Get the variance of log(X), i.e. sig^2
-stdlogx(d)           # Get the standard deviation of log(X), i.e. sig
+params(d)            # Get the parameters, i.e. (μ,σ)
+meanlogx(d)          # Get the mean of log(X), i.e. μ
+varlogx(d)           # Get the variance of log(X), i.e. σ^2
+stdlogx(d)           # Get the standard deviation of log(X), i.e. σ
 ```
 
 External links
