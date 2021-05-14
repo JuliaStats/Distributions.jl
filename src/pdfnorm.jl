@@ -4,7 +4,7 @@
 Return the square of the L2 norm of the probability density function ``f(x)`` of the distribution `d`:
 
 ```math
-\\int_{S} f(x)^{2} \\mathrm{d} x
+\\big(\\int_{S} f(x)^{2} \\mathrm{d} x \\big)^{1/2}
 ```
 
 where ``S`` is the support of ``f(x)``.
@@ -18,7 +18,7 @@ function pdfsquaredL2norm(d::Beta)
     return α > 0.5 && β > 0.5 ? z : oftype(z, Inf)
 end
 
-pdfsquaredL2norm(d::Cauchy) = inv(twoπ * d.σ)
+pdfsquaredL2norm(d::Cauchy) = inv2π / d.σ
 
 function pdfsquaredL2norm(d::Chi)
     ν = d.ν
