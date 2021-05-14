@@ -10,7 +10,7 @@ f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
 
 The Beta distribution is related to the [`Gamma`](@ref) distribution via the
 property that if ``X \\sim \\operatorname{Gamma}(\\alpha)`` and ``Y \\sim \\operatorname{Gamma}(\\beta)``
-independently, then ``X / (X + Y) \\sim Beta(\\alpha, \\beta)``.
+independently, then ``X / (X + Y) \\sim \\operatorname{Beta}(\\alpha, \\beta)``.
 
 
 ```julia

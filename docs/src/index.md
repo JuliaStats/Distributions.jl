@@ -1,6 +1,6 @@
 # Distributions Package
 
-The *Distributions* package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
+The [*Distributions*](https://github.com/JuliaStats/Distributions.jl) package provides a large collection of probabilistic distributions and related functions. Particularly, *Distributions* implements:
 
 * Sampling from distributions
 * Moments (*e.g* mean, variance, skewness, and kurtosis), entropy, and other properties

@@ -10,11 +10,11 @@ f(x; \\mu, \\sigma) = \\sqrt{\\frac{\\sigma}{2 \\pi (x - \\mu)^3}}
 
 ```julia
 Levy()         # Levy distribution with zero location and unit scale, i.e. Levy(0, 1)
-Levy(u)        # Levy distribution with location u and unit scale, i.e. Levy(u, 1)
-Levy(u, c)     # Levy distribution with location u ans scale c
+Levy(μ)        # Levy distribution with location μ and unit scale, i.e. Levy(μ, 1)
+Levy(μ, σ)     # Levy distribution with location μ and scale σ
 
-params(d)      # Get the parameters, i.e. (u, c)
-location(d)    # Get the location parameter, i.e. u
+params(d)      # Get the parameters, i.e. (μ, σ)
+location(d)    # Get the location parameter, i.e. μ
 ```
 
 External links

@@ -15,12 +15,12 @@ the distribution approaches the Uniform distribution on `[μ-α, μ+α]`.
 
 ```julia
 PGeneralizedGaussian()           # GGD with shape 2, scale 1, location 0, (the Normal distribution)
-PGeneralizedGaussian(loc,s,sh)   # GGD with location loc, scale s, and shape sh
+PGeneralizedGaussian(α, μ, p)    # GGD with location α, scale μ, and shape p
 
-params(d)                       # Get the parameters, i.e. (loc,s,sh,)
-shape(d)                        # Get the shape parameter, sh
-scale(d)                        # Get the scale parameter, s
-location(d)                     # Get the location parameter, loc
+params(d)                       # Get the parameters, i.e. (α, μ, p)
+shape(d)                        # Get the shape parameter, p
+scale(d)                        # Get the scale parameter, α
+location(d)                     # Get the location parameter, μ
 ```
 
 External Links

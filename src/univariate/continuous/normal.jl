@@ -14,12 +14,12 @@ and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
 Normal()          # standard Normal distribution with zero mean and unit variance
-Normal(mu)        # Normal distribution with mean mu and unit variance
-Normal(mu, sig)   # Normal distribution with mean mu and variance sig^2
+Normal(μ)         # Normal distribution with mean μ and unit variance
+Normal(μ, σ)      # Normal distribution with mean μ and variance σ^2
 
-params(d)         # Get the parameters, i.e. (mu, sig)
-mean(d)           # Get the mean, i.e. mu
-std(d)            # Get the standard deviation, i.e. sig
+params(d)         # Get the parameters, i.e. (μ, σ)
+mean(d)           # Get the mean, i.e. μ
+std(d)            # Get the standard deviation, i.e. σ
 ```
 
 External links

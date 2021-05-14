@@ -10,12 +10,12 @@ f(x; \\alpha, \\theta) = \\frac{\\alpha}{\\theta} \\left( \\frac{x}{\\theta} \\r
 
 ```julia
 Weibull()        # Weibull distribution with unit shape and unit scale, i.e. Weibull(1, 1)
-Weibull(a)       # Weibull distribution with shape a and unit scale, i.e. Weibull(a, 1)
-Weibull(a, b)    # Weibull distribution with shape a and scale b
+Weibull(α)       # Weibull distribution with shape α and unit scale, i.e. Weibull(α, 1)
+Weibull(α, θ)    # Weibull distribution with shape α and scale θ
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (α, θ)
+shape(d)         # Get the shape parameter, i.e. α
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links

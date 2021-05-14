@@ -12,10 +12,10 @@ It is related to the [`Normal`](@ref) distribution via the property that if ``X,
 
 ```julia
 Rayleigh()       # Rayleigh distribution with unit scale, i.e. Rayleigh(1)
-Rayleigh(s)      # Rayleigh distribution with scale s
+Rayleigh(σ)      # Rayleigh distribution with scale σ
 
-params(d)        # Get the parameters, i.e. (s,)
-scale(d)         # Get the scale parameter, i.e. s
+params(d)        # Get the parameters, i.e. (σ,)
+scale(d)         # Get the scale parameter, i.e. σ
 ```
 
 External links

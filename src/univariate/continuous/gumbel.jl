@@ -10,12 +10,12 @@ f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^{-z})},
 
 ```julia
 Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)
-Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1)
-Gumbel(u, b)        # Gumbel distribution with location u and scale b
+Gumbel(μ)           # Gumbel distribution with location μ and unit scale, i.e. Gumbel(μ, 1)
+Gumbel(μ, θ)        # Gumbel distribution with location μ and scale θ
 
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (μ, θ)
+location(d)      # Get the location parameter, i.e. μ
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links

@@ -9,12 +9,12 @@ f(x; \\alpha, \\theta) = \\frac{\\alpha \\theta^\\alpha}{x^{\\alpha + 1}}, \\qua
 
 ```julia
 Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1, 1)
-Pareto(a)           # Pareto distribution with shape a and unit scale, i.e. Pareto(a, 1)
-Pareto(a, b)        # Pareto distribution with shape a and scale b
+Pareto(α)           # Pareto distribution with shape α and unit scale, i.e. Pareto(α, 1)
+Pareto(α, θ)        # Pareto distribution with shape α and scale θ
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (α, θ)
+shape(d)         # Get the shape parameter, i.e. α
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links

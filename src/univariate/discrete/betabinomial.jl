@@ -8,9 +8,9 @@ P(X = k) = {n \\choose k} B(k + \\alpha, n - k + \\beta) / B(\\alpha, \\beta),  
 ```
 
 ```julia
-BetaBinomial(n, a, b)      # BetaBinomial distribution with n trials and shape parameters a, b
+BetaBinomial(n, α, β)      # BetaBinomial distribution with n trials and shape parameters α, β
 
-params(d)       # Get the parameters, i.e. (n, a, b)
+params(d)       # Get the parameters, i.e. (n, α, β)
 ntrials(d)      # Get the number of trials, i.e. n
 ```
 

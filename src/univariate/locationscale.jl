@@ -25,7 +25,7 @@ f(x) = \\frac{1}{σ} ρ \\! \\left( \\frac{x-μ}{σ} \\right).
 
 ```julia
 LocationScale(μ,σ,ρ) # location-scale transformed distribution
-params(d)            # Get the parameters, i.e. (μ, σ, and the base distribution)
+params(d)            # Get the parameters, i.e. (μ, σ, and the base distribution ρ)
 location(d)          # Get the location parameter
 scale(d)             # Get the scale parameter
 ```
