@@ -4,7 +4,7 @@
 Return the square of the L2 norm of the probability density function ``f(x)`` of the distribution `d`:
 
 ```math
-\\big(\\int_{S} f(x)^{2} \\mathrm{d} x \\big)^{1/2}
+\\int_{S} f(x)^{2} \\mathrm{d} x
 ```
 
 where ``S`` is the support of ``f(x)``.
@@ -36,7 +36,7 @@ end
 
 pdfsquaredL2norm(d::Exponential) = 1 / (2 * d.θ)
 
-function pdfsquaredL2norm(d::Gamma{T}) where {T}
+function pdfsquaredL2norm(d::Gamma)
     α, θ = params(d)
     z = (2^(1 - 2 * α) * gamma(2 * α - 1)) / (gamma(α) ^ 2 * θ)
     # L2 norm of the pdf converges only for α > 0.5
