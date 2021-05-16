@@ -596,6 +596,7 @@ const continuous_distributions = [
     "beta",
     "betaprime",
     "biweight",
+    "burr",
     "cauchy",
     "chernoff",
     "chisq",    # Chi depends on Chisq
@@ -606,7 +607,6 @@ const continuous_distributions = [
     "fdist",
     "frechet",
     "gamma", "erlang",
-    "generalizedbetaprime",
     "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
