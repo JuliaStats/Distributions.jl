@@ -1,6 +1,6 @@
 """
     Burr(k, c, λ)
-The *Burr distribution*  with shape1 `k`, shape2 `c` and scale `λ` has probability density function
+The *Burr distribution*  with shapes `k` and `c` and scale `λ` has probability density function
 ```math
 f(x; k, c, \\lambda) = \\frac{ck}{\\lambda} \\left(\\frac{x}{\\lambda}\\right)^{c-1} \\left[ 1+\\left(\\frac{x}{\\lambda}\\right)^{c} \\right]^{-k-1}, \\quad x > 0
 ```
@@ -27,15 +27,17 @@ function Burr(k::T, c::T, λ::T; check_args=true) where {T}
 end
 
 Burr(k::Real, c::Real, λ::Real) = Burr(promote(k, c, λ)...)
-Burr(k::Integer, c::Integer, λ::Integer) = Burr(float(k), float(c), float(λ))
 Burr(k::T, c::T) where {T <: Real} = Burr(k, c, one(T))
-Burr() = Burr(1.0, 1.0, 1.0, check_args=false)
+Burr(k::Real, c::Real) = Burr(promote(k, c)...)
+Burr(k::T) where {T <: Real} = Burr(k, one(T), one(T))
+Burr(k::Real) = Burr(promote(k)...)
+Burr() = Burr(1, 1, 1; check_args=false)
 
 @distr_support Burr 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{Burr{T}}, k::S, c::S, λ::S) where {T <: Real, S <: Real}
+function convert(::Type{Burr{T}}, k::Real, c::Real, λ::Real) where {T<:Real}
     Burr(T(k), T(c), T(λ))
 end
 function convert(::Type{Burr{T}}, d::Burr{S}) where {T <: Real, S <: Real}
@@ -44,75 +46,86 @@ end
 
 #### Parameters
 
-# shape1 and shape2 not defined in the package -> ignore these. params is sufficient
-# shape1(d::Burr) = d.k
-# shape2(d::Burr) = d.c
-# scale(d::Burr) = d.λ
+shape(d::Burr) = (d.k, d.c)
+scale(d::Burr) = d.λ
 params(d::Burr) = (d.k, d.c, d.λ)
 partype(::Burr{T}) where {T<:Real} = T
 
 #### Statistics
 
-function m(d::Burr{T}, g::Real) where T<:Real # The calculating moments: this should not be exported.
-    (k, c, λ) = params(d)
+function burr_moment(d::Burr, g::Real) # The calculating moments: this should not be exported.
+    k, c, λ = params(d)
 
-    if (g-(-c))*(g-k*c) < 0
-        λ^g * gamma(1 + g/c) * gamma(k - g/c) / gamma(k)
+    tmp1 = max(0, 1 + g/c)
+    tmp2 = max(0, k - g/c)
+    result = λ^g * gamma(tmp1) * gamma(tmp2) / gamma(k)
+    return if (g + c)*(g - k*c) < 0
+        result
     else
-        return T(Inf)
+        oftype(result, Inf)
     end
-
 end
 
 
-function median(d::Burr{T}) where T<:Real
-    (k, c, λ) = params(d)
+function median(d::Burr)
+    k, c, λ = params(d)
 
     return λ * (2^(1/k) - 1)^(1/c)
 end
 
-function mean(d::Burr{T}) where T<:Real
-    return m(d, 1)
-end
+mean(d::Burr) = burr_moment(d, 1)
 
-function mode(d::Burr{T}) where T<:Real
-    (k, c, λ) = params(d)
+function mode(d::Burr)
+    k, c, λ = params(d)
 
-    if c > 1.0
-        return λ * ( (c-1) / (k*c+1) )^(1/c)
+    cmax = max(c, 1)
+    result = λ * ((cmax - 1)/(k*c + 1))^(1/c)
+    return if c > 1
+        result
     else
-        return 0.0
+        zero(result)
     end
 end
 
-function var(d::Burr{T}) where T<:Real
-    if isinf(m(d, 1))
-        return T(Inf)
+function var(d::Burr)
+
+    result = burr_moment(d, 2) - (burr_moment(d, 1))^2
+
+    return if isinf(burr_moment(d, 1))
+        oftype(result, Inf)
     else
-        return m(d, 2) - (m(d, 1))^2
+        result
     end
 end
 
-function skewness(d::Burr{T}) where T<:Real
-    if isinf(m(d, 2))
-        return T(Inf)
+function skewness(d::Burr)
+
+    g1 = burr_moment(d, 1)
+    g2 = burr_moment(d, 2)
+    g3 = burr_moment(d, 3)
+
+    result = (g3 - 3g1 * g2 + 2g1^3) / (g2 - g1^2) ^ (3/2)
+
+    return if isinf(burr_moment(d, 2))
+        oftype(result, Inf)
     else
-        g1 = m(d, 1)
-        g2 = m(d, 2)
-        g3 = m(d, 3)
-        return (g3 - 3g1 * g2 + 2g1^3) / (g2 - g1^2) ^ (3/2)
+        result
     end
 end
 
-function kurtosis(d::Burr{T}) where T<:Real
-    if isinf(m(d, 3))
-        return T(Inf)
+function kurtosis(d::Burr)
+
+    g1 = burr_moment(d, 1)
+    g2 = burr_moment(d, 2)
+    g3 = burr_moment(d, 3)
+    g4 = burr_moment(d, 4)
+
+    result = (g4 - 4g1 * g3 + 6g2 * g1^2 - 3 * g1^4) / (g2 - g1^2)^2 - 3
+
+    return if isinf(burr_moment(d, 3))
+        oftype(result, Inf)
     else
-        g1 = m(d, 1)
-        g2 = m(d, 2)
-        g3 = m(d, 3)
-        g4 = m(d, 4)
-        return (g4 - 4g1 * g3 + 6g2 * g1^2 - 3 * g1^4) / (g2 - g1^2)^2 - 3
+        result
     end
 end
 
@@ -120,68 +133,68 @@ end
 # end
 
 function quantile(d::Burr, p::Real)
-    (k, c, λ) = params(d)
+    k, c, λ = params(d)
 
     return λ * ( (1-p)^(-1/k) - 1 )^(1/c)
 end
 
 #### Evaluation
 
-function pdf(d::Burr{T}, x::Real) where T<:Real
+function pdf(d::Burr, x::Real)
     if isinf(x)
-        return zero(T)
+        return 0
     elseif x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return k*c/λ * (x/λ)^(c-1) * ( 1 + (x/λ)^c )^(-k-1)
     else
-        return zero(T)
+        return 0
     end
 end
 
-function logpdf(d::Burr{T}, x::Real) where T<:Real
+function logpdf(d::Burr, x::Real)
     if isinf(x)
-        return -T(Inf)
+        return -Inf
     elseif x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return log(k) + log(c) - log(λ) + (c-1)*log(x) - (c-1)*log(λ) - (k+1)*log1p( (x/λ)^c )
     else
-        return -T(Inf)
+        return -Inf
     end
 end
 
-function cdf(d::Burr{T}, x::Real) where T<:Real
+function cdf(d::Burr, x::Real)
     if x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return 1 - ( 1 + (x/λ)^c )^(-k)
     else
-        return zero(T)
+        return 0
     end
 end
 
-function ccdf(d::Burr{T}, x::Real) where T<:Real
+function ccdf(d::Burr, x::Real)
     if x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return ( 1 + (x/λ)^c )^(-k)
     else
-        return one(T)
+        return 1
     end
 end
 
-function logcdf(d::Burr{T}, x::Real) where T<:Real
+function logcdf(d::Burr, x::Real)
     if x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return log1p( - ( 1 + (x/λ)^c )^(-k) )
     else
-        return -T(Inf)
+        return -Inf
     end
 end
 
-function logccdf(d::Burr{T}, x::Real) where T<:Real
+function logccdf(d::Burr, x::Real)
     if x > 0
-        (k, c, λ) = params(d)
+        k, c, λ = params(d)
         return -k * log1p( (x/λ)^c )
     else
-        return zero(T)
+        return 0
     end
 end
 

@@ -7,9 +7,9 @@ using Random
 Random.seed!(1234)
 
 # test constructors
-d = Burr(1, 1, 1)
-d2 = Burr(3.0, 2, 5.0)
-@test typeof(d) == typeof(d2)
+# d = Burr(1, 1, 1)
+# d2 = Burr(3.0, 2, 5.0)
+# @test typeof(d) == typeof(d2)
 
 # test Sampling
 g = Gamma(5, 2)
@@ -25,8 +25,10 @@ d = Burr(6.0, 4.5)
 @test params(d) == (6.0, 4.5, 1)
 d = Burr(2, 3, 5.0)
 @test params(d) == (2, 3, 5.0)
-# d = Burr(1.5, 6.3, 4.2)
-# @test scale(d) == 4.20
+d = Burr(1.5, 6.3, 4.2)
+@test scale(d) == 4.20
+d = Burr(1.5, 6.3, 4.2)
+@test shape(d) == (1.50, 6.30)
 
 # Non-extreme case: mean, variance, median
 n = 50
