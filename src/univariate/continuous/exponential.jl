@@ -9,11 +9,11 @@ f(x; \\theta) = \\frac{1}{\\theta} e^{-\\frac{x}{\\theta}}, \\quad x > 0
 
 ```julia
 Exponential()      # Exponential distribution with unit scale, i.e. Exponential(1)
-Exponential(b)     # Exponential distribution with scale b
+Exponential(θ)     # Exponential distribution with scale θ
 
-params(d)          # Get the parameters, i.e. (b,)
-scale(d)           # Get the scale parameter, i.e. b
-rate(d)            # Get the rate parameter, i.e. 1 / b
+params(d)          # Get the parameters, i.e. (θ,)
+scale(d)           # Get the scale parameter, i.e. θ
+rate(d)            # Get the rate parameter, i.e. 1 / θ
 ```
 
 External links

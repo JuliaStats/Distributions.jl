@@ -4,16 +4,16 @@
 The *Chi distribution* `ν` degrees of freedom has probability density function
 
 ```math
-f(x; k) = \\frac{1}{\\Gamma(k/2)} 2^{1 - k/2} x^{k-1} e^{-x^2/2}, \\quad x > 0
+f(x; \\nu) = \\frac{1}{\\Gamma(\\nu/2)} 2^{1 - \\nu/2} x^{\\nu-1} e^{-x^2/2}, \\quad x > 0
 ```
 
 It is the distribution of the square-root of a [`Chisq`](@ref) variate.
 
 ```julia
-Chi(k)       # Chi distribution with k degrees of freedom
+Chi(ν)       # Chi distribution with ν degrees of freedom
 
-params(d)    # Get the parameters, i.e. (k,)
-dof(d)       # Get the degrees of freedom, i.e. k
+params(d)    # Get the parameters, i.e. (ν,)
+dof(d)       # Get the degrees of freedom, i.e. ν
 ```
 
 External links
@@ -48,7 +48,7 @@ params(d::Chi) = (d.ν,)
 
 #### Statistics
 
-mean(d::Chi) = (h = d.ν/2; sqrt2 * gamma(h + 1//2) / gamma(h))
+mean(d::Chi) = (h = d.ν/2; sqrt2 * exp(loggamma(h + 1//2) - loggamma(h)))
 
 var(d::Chi) = d.ν - mean(d)^2
 _chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1 - 2σ2))
@@ -76,8 +76,6 @@ end
 
 
 #### Evaluation
-
-pdf(d::Chi, x::Real) = exp(logpdf(d, x))
 
 logpdf(d::Chi, x::Real) = (ν = d.ν;
     (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)

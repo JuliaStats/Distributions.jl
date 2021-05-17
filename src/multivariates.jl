@@ -69,12 +69,18 @@ end
 rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
     _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
+    _rand!(rng, s, Matrix{float(eltype(s))}(undef, length(s), n))
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
-    rand(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
+    rand!(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, dims::Dims) =
+    rand!(rng, s, Array{Vector{float(eltype(s))}}(undef, dims), true)
 
 # single multivariate, must allocate vector
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =
     _rand!(rng, s, Vector{eltype(s)}(undef, length(s)))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}) =
+    _rand!(rng, s, Vector{float(eltype(s))}(undef, length(s)))
 
 ## domain
 
@@ -230,15 +236,13 @@ end
 function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    T = promote_type(partype(d), eltype(X))
-    _logpdf!(Vector{T}(undef, size(X,2)), d, X)
+    map(i -> _logpdf(d, view(X, :, i)), axes(X, 2))
 end
 
 function pdf(d::MultivariateDistribution, X::AbstractMatrix)
     size(X, 1) == length(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    T = promote_type(partype(d), eltype(X))
-    _pdf!(Vector{T}(undef, size(X,2)), d, X)
+    map(i -> _pdf(d, view(X, :, i)), axes(X, 2))
 end
 
 """
@@ -257,12 +261,13 @@ The log-likelihood of distribution `d` with respect to all samples contained in 
 Here, `x` can be a vector of length `dim(d)`, a matrix with `dim(d)` rows, or an array of
 vectors of length `dim(d)`.
 """
-function loglikelihood(d::MultivariateDistribution, X::AbstractVecOrMat{<:Real})
+loglikelihood(d::MultivariateDistribution, X::AbstractVector{<:Real}) = logpdf(d, X)
+function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix{<:Real})
     size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
     return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
 end
 function loglikelihood(d::MultivariateDistribution, X::AbstractArray{<:AbstractVector})
-    return sum(x -> _logpdf(d, x), X)
+    return sum(x -> logpdf(d, x), X)
 end
 
 ##### Specific distributions #####

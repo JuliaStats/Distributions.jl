@@ -1,6 +1,9 @@
 # Tests on Multivariate Normal distributions
 
 import PDMats: ScalMat, PDiagMat, PDMat
+if isdefined(PDMats, :PDSparseMat)
+    import PDMats: PDSparseMat
+end
 
 using Distributions
 using LinearAlgebra, Random, Test
@@ -177,28 +180,65 @@ end
     @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
 end
 
-##### Random sampling from MvNormalCanon with sparse precision matrix
-@testset "Sparse MvNormalCanon random sampling" begin
-    # Random samples from MvNormalCanon and MvNormal diverge as
-    # 1) Dimension of cov/prec matrix increases (n)
-    # 2) Determinant of J increases
-    # ...hence, the relative tolerance for testing their equality
-    n = 10
-    k = 0.1
-    rtol = n*k^2
-    seed = 1234
-    J = sprandn(n, n, 0.25) * k
-    J = J'J + I
-    Σ = inv(Matrix(J))
-    J = PDSparseMat(J)
-    μ = zeros(n)
-    d = MvNormalCanon(μ, J*μ, J)
-    d1 = MvNormal(μ, PDMat(Symmetric(Σ)))
-    r = rand(MersenneTwister(seed), d)
-    r1 = rand(MersenneTwister(seed), d1)
-    @test all(isapprox.(r, r1, rtol=rtol))
-    @test mean(abs2.(r .- r1)) < rtol
+@testset "MvNormal 32-bit logpdf" begin
+    # Test 32-bit logpdf
+    mu = [1., 2., 3.]
+    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    d = MvNormal(mu, PDMat(C))
+    X = [1., 2., 3.]
+
+    d32 = convert(MvNormal{Float32}, d)
+    X32 = convert(AbstractArray{Float32}, X)
+
+    @test isa(logpdf(d32, X32), Float32)
+    @test logpdf(d32, X32) ≈ logpdf(d, X)
 end
+
+##### Random sampling from MvNormalCanon with sparse precision matrix
+if isdefined(PDMats, :PDSparseMat)
+    @testset "Sparse MvNormalCanon random sampling" begin
+        n = 20
+        nsamp = 100_000
+        Random.seed!(1234)
+
+        J = sprandn(n, n, 0.25)
+        J = J'J + I
+        Σ = inv(Matrix(J))
+        J = PDSparseMat(J)
+        μ = zeros(n)
+
+        d_prec_sparse = MvNormalCanon(μ, J*μ, J)
+        d_prec_dense = MvNormalCanon(μ, J*μ, PDMat(Matrix(J)))
+        d_cov_dense = MvNormal(μ, PDMat(Symmetric(Σ)))
+
+        x_prec_sparse = rand(d_prec_sparse, nsamp)
+        x_prec_dense = rand(d_prec_dense, nsamp)
+        x_cov_dense = rand(d_cov_dense, nsamp)
+
+        dists = [d_prec_sparse, d_prec_dense, d_cov_dense]
+        samples = [x_prec_sparse, x_prec_dense, x_cov_dense]
+        tol = 1e-16
+        se = sqrt.(diag(Σ) ./ nsamp)
+        #=
+        The cholesky decomposition of sparse matrices is performed by `SuiteSparse.CHOLMOD`,
+        which returns a different decomposition than the `Base.LinearAlgebra` function (which uses
+        LAPACK). These different Cholesky routines produce different factorizations (since the
+        Cholesky factorization is not in general unique).  As a result, the random samples from
+        an `MvNormalCanon` distribution with a sparse precision matrix are not in general
+        identical to those from an `MvNormalCanon` or `MvNormal`, even if the seeds are
+        identical.  As a result, these tests only check for approximate statistical equality,
+        rather than strict numerical equality of the samples.
+        =#
+        for i in 1:3, j in 1:3
+            @test all(abs.(mean(samples[i]) .- μ) .< 2se)
+            loglik_ii = [logpdf(dists[i], samples[i][:, k]) for k in 1:100_000]
+            loglik_ji = [logpdf(dists[j], samples[i][:, k]) for k in 1:100_000]
+            # test average likelihood ratio between distribution i and sample j are small
+            @test mean((loglik_ii .- loglik_ji).^2) < tol
+        end
+    end
+end
+
 
 ##### MLE
 
@@ -306,4 +346,11 @@ end
         @test_throws DimensionMismatch ones(3, 3) * d4
         @test_throws DimensionMismatch dot(o3, d4)
     end
+end
+
+@testset "MvNormal: Sampling with integer-valued parameters (#1004)" begin
+    d = MvNormal([0, 0], [1, 1])
+    @test rand(d) isa Vector{Float64}
+    @test rand(d, 10) isa Matrix{Float64}
+    @test rand(d, (3, 2)) isa Matrix{Vector{Float64}}
 end

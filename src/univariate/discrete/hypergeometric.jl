@@ -79,6 +79,18 @@ entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
 
+function pdf(d::Hypergeometric, x::Real)
+    _insupport = insupport(d, x)
+    s = pdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : zero(s)
+end
+
+function logpdf(d::Hypergeometric, x::Real)
+    _insupport = insupport(d, x)
+    s = logpdf(d, _insupport ? round(Int, x) : 0)
+    return _insupport ? s : oftype(s, -Inf)
+end
+
 ## sampling
 
 # TODO: remove RFunctions dependency. Implement:
@@ -89,22 +101,3 @@ entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
 @rand_rdist(Hypergeometric)
 rand(d::Hypergeometric) =
     convert(Int, StatsFuns.RFunctions.hyperrand(d.ns, d.nf, d.n))
-
-struct RecursiveHypergeomProbEvaluator <: RecursiveProbabilityEvaluator
-    ns::Float64
-    nf::Float64
-    n::Float64
-end
-
-RecursiveHypergeomProbEvaluator(d::Hypergeometric) = RecursiveHypergeomProbEvaluator(d.ns, d.nf, d.n)
-
-nextpdf(s::RecursiveHypergeomProbEvaluator, p::Float64, x::Integer) =
-    ((s.ns - x + 1) / x) * ((s.n - x + 1) / (s.nf - s.n + x)) * p
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Hypergeometric, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveHypergeomProbEvaluator(d))
-
-function Base.broadcast(::typeof(pdf), d::Hypergeometric, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end

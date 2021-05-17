@@ -72,6 +72,7 @@ entropy(d::Uniform) = log(d.b - d.a)
 
 pdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
 logpdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
+gradlogpdf(d::Uniform{T}, x::Real) where {T<:Real} = zero(T)
 
 function cdf(d::Uniform{T}, x::Real) where T<:Real
     (a, b) = params(d)
@@ -109,6 +110,9 @@ end
 #### Sampling
 
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
+
+rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
+    A .= quantile.(d, rand!(rng, A))
 
 
 #### Fitting

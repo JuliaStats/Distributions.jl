@@ -69,6 +69,12 @@ end
         @test isa(d, dist)
         @test isapprox(d.α, 1.3, atol=0.1)
         @test isapprox(d.β, 3.7, atol=0.1)
+
+        d = fit_mle(dist, func[2](dist(1.3, 3.7), N))
+        @test isa(d, dist)
+        @test isapprox(d.α, 1.3, atol=0.1)
+        @test isapprox(d.β, 3.7, atol=0.1)
+
     end
 end
 
@@ -349,10 +355,10 @@ end
 
 @testset "Testing fit for Laplace" begin
     for func in funcs, dist in (Laplace, Laplace{Float64})
-        d = fit(dist, func[2](dist(5.0, 3.0), N))
+        d = fit(dist, func[2](dist(5.0, 3.0), N + 1))
         @test isa(d, dist)
-        @test isapprox(location(d), 5.0, atol=0.1)
-        @test isapprox(scale(d)   , 3.0, atol=0.2)
+        @test isapprox(location(d), 5.0, atol=0.02)
+        @test isapprox(scale(d)   , 3.0, atol=0.02)
     end
 end
 

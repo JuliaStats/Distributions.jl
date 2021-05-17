@@ -12,10 +12,10 @@ P(X = k) = e^{-(\\mu_1 + \\mu_2)} \\left( \\frac{\\mu_1}{\\mu_2} \\right)^{k/2} 
 where ``I_k`` is the modified Bessel function of the first kind.
 
 ```julia
-Skellam(mu1, mu2)   # Skellam distribution for the difference between two Poisson variables,
-                    # respectively with expected values mu1 and mu2.
+Skellam(μ1, μ2)     # Skellam distribution for the difference between two Poisson variables,
+                    # respectively with expected values μ1 and μ2.
 
-params(d)           # Get the parameters, i.e. (mu1, mu2)
+params(d)           # Get the parameters, i.e. (μ1, μ2)
 ```
 
 External links:
@@ -68,12 +68,14 @@ kurtosis(d::Skellam) = 1 / var(d)
 
 #### Evaluation
 
-function logpdf(d::Skellam, x::Integer)
+function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
-    - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+    if insupport(d, x)
+        return - (μ1 + μ2) + (x/2) * log(μ1/μ2) + log(besseli(x, 2*sqrt(μ1)*sqrt(μ2)))
+    else
+        return one(x) / 2 * log(zero(μ1/μ2))
+    end
 end
-
-pdf(d::Skellam, x::Integer) = exp(logpdf(d, x))
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
@@ -104,9 +106,5 @@ end
 cdf(d::Skellam, t::Real) = cdf(d, floor(Int, t))
 
 #### Sampling
-# TODO: remove RFunctions dependency once Poisson has its removed
-@rand_rdist(Skellam)
-rand(d::Skellam) = rand(Poisson(d.μ1)) - rand(Poisson(d.μ2))
-
 rand(rng::AbstractRNG, d::Skellam) =
     rand(rng, Poisson(d.μ1)) - rand(rng, Poisson(d.μ2))

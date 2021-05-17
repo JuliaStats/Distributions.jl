@@ -10,12 +10,12 @@ e^{-(x/\\theta)^{-\\alpha}}, \\quad x > 0
 
 ```julia
 Frechet()        # Fréchet distribution with unit shape and unit scale, i.e. Frechet(1, 1)
-Frechet(a)       # Fréchet distribution with shape a and unit scale, i.e. Frechet(a, 1)
-Frechet(a, b)    # Fréchet distribution with shape a and scale b
+Frechet(α)       # Fréchet distribution with shape α and unit scale, i.e. Frechet(α, 1)
+Frechet(α, θ)    # Fréchet distribution with shape α and scale θ
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (α, θ)
+shape(d)         # Get the shape parameter, i.e. α
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links
@@ -118,8 +118,6 @@ function logpdf(d::Frechet{T}, x::Real) where T<:Real
         return -T(Inf)
     end
 end
-
-pdf(d::Frechet, x::Real) = exp(logpdf(d, x))
 
 cdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
 ccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)

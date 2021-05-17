@@ -16,13 +16,13 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
 
 ```julia
 GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
-GeneralizedPareto(k, s)         # Generalized Pareto distribution with shape k and scale s, i.e. GeneralizedPareto(0, k, s)
-GeneralizedPareto(m, k, s)      # Generalized Pareto distribution with shape k, scale s and location m.
+GeneralizedPareto(μ, σ)         # Generalized Pareto distribution with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
+GeneralizedPareto(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
 
-params(d)       # Get the parameters, i.e. (m, s, k)
-location(d)     # Get the location parameter, i.e. m
-scale(d)        # Get the scale parameter, i.e. s
-shape(d)        # Get the shape parameter, i.e. k
+params(d)       # Get the parameters, i.e. (μ, σ, ξ)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. σ
+shape(d)        # Get the shape parameter, i.e. ξ
 ```
 
 External links
@@ -131,8 +131,6 @@ function logpdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
 
     return p
 end
-
-pdf(d::GeneralizedPareto, x::Real) = exp(logpdf(d, x))
 
 function logccdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     (μ, σ, ξ) = params(d)

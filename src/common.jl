@@ -1,13 +1,20 @@
 ## sample space/domain
 
 """
-`F <: VariateForm` specifies the form of the variate or
-dimension of a sample, univariate (scalar), multivariate (vector), matrix-variate (matrix).
+`F <: VariateForm` specifies the form or shape of the variate or a sample.
 """
 abstract type VariateForm end
-struct Univariate    <: VariateForm end
-struct Multivariate  <: VariateForm end
-struct Matrixvariate <: VariateForm end
+
+"""
+`F <: ArrayLikeVariate{N}` specifies the number of axes of a variate or
+a sample with an array-like shape, e.g. univariate (scalar, `N == 0`),
+multivariate (vector, `N == 1`) or matrix-variate (matrix, `N == 2`).
+"""
+abstract type ArrayLikeVariate{N} <: VariateForm end
+
+const Univariate    = ArrayLikeVariate{0}
+const Multivariate  = ArrayLikeVariate{1}
+const Matrixvariate = ArrayLikeVariate{2}
 
 """
 `S <: ValueSupport` specifies the support of sample elements,

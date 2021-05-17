@@ -88,17 +88,16 @@ mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p
 #### Evaluation & Sampling
 
 # Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
-function logpdf(d::NegativeBinomial, k::Int)
-    r = d.r*log(d.p) + k*log1p(-d.p)
+function logpdf(d::NegativeBinomial, k::Real)
+    r = d.r * log(d.p) + k * log1p(-d.p)
     if isone(d.p) && iszero(k)
         return zero(r)
-    elseif k < 0
+    elseif !insupport(d, k)
         return oftype(r, -Inf)
     else
-        return r - log(k + d.r) - Distributions.logbeta(d.r, k + 1)
+        return r - log(k + d.r) - logbeta(d.r, k + 1)
     end
 end
-pdf(d::NegativeBinomial, k::Int) = exp(logpdf(d, k))
 
 # cdf and quantile functions are more involved so we still rely on Rmath
 cdf(       d::NegativeBinomial,  x::Int)  =              nbinomcdf(       d.r, d.p, x)
@@ -111,30 +110,7 @@ invlogcdf( d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf( d.r, d
 invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
-# TODO: remove RFunctions dependency once Poisson has its removed
-@rand_rdist(NegativeBinomial)
-rand(d::NegativeBinomial) =
-    convert(Int, StatsFuns.RFunctions.nbinomrand(d.r, d.p))
-
-function rand(rng::AbstractRNG, d::NegativeBinomial)
-    lambda = rand(rng, Gamma(d.r, (1-d.p)/d.p))
-    return rand(rng, Poisson(lambda))
-end
-
-struct RecursiveNegBinomProbEvaluator <: RecursiveProbabilityEvaluator
-    r::Float64
-    p0::Float64
-end
-
-RecursiveNegBinomProbEvaluator(d::NegativeBinomial) = RecursiveNegBinomProbEvaluator(d.r, failprob(d))
-nextpdf(s::RecursiveNegBinomProbEvaluator, p::Float64, x::Integer) = ((x + s.r - 1) / x) * s.p0 * p
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::NegativeBinomial, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveNegBinomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::NegativeBinomial, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end
+rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)

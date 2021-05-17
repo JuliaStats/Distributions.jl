@@ -157,6 +157,8 @@ end
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
     rand!(rng, sampler(s), Array{eltype(s)}(undef, dims))
+rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
+    rand!(rng, sampler(s), Array{float(eltype(s))}(undef, dims))
 
 # multiple univariate with pre-allocated array
 function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
@@ -317,30 +319,16 @@ Evaluate the probability density (mass) at `x`.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::UnivariateDistribution, x::Real)
-
-"""
-    pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
-
-Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
-type but `x` is integer, the value is converted to `Int`.
-
-The version with `x::Integer` must be implemented by
-discrete distributions.
-
-See also: [`logpdf`](@ref).
-"""
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : zero(partype(d))
+pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
 Evaluate the logarithm of probability density (mass) at `x`.
-Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
-Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
+
+See also: [`pdf`](@ref).
 """
-logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
+logpdf(d::UnivariateDistribution, x::Real)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -578,6 +566,7 @@ const discrete_distributions = [
     "bernoulli",
     "betabinomial",
     "binomial",
+    "dirac",
     "discreteuniform",
     "discretenonparametric",
     "categorical",
@@ -618,7 +607,6 @@ const continuous_distributions = [
     "ksonesided",
     "laplace",
     "levy",
-    "locationscale",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
@@ -642,6 +630,8 @@ const continuous_distributions = [
     "vonmises",
     "weibull"
 ]
+
+include(joinpath("univariate", "locationscale.jl"))
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))
