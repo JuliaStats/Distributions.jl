@@ -61,6 +61,7 @@ const tests = [
     "skewnormal",
     "chi",
     "gumbel",
+    "pdfnorm",
 ]
 
 printstyled("Running tests:\n", color=:blue)
