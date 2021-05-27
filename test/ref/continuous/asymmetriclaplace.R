@@ -25,8 +25,8 @@ AsymmetricLaplace <- R6Class("Asymmetriclaplace",
                  kurtosis = 6 * (1 + k^8) / (1 + k^4)^2,
                  entropy = log(exp(1) * (1 + k) / (l * k))
         },
-        pdf = function(x){ ifelse(test=x > self$mu, yes=self$lambda / (self$kappa + 1 / self$kappa) * exp(-self$lambda * self$kappa * (x - self$mu)), no=self$lambda / (self$kappa + 1 / self$kappa) * exp(self$lambda / self$kappa * (x - self$mu))) },
-        cdf = function(x){ ifelse(test=x > self$mu, yes=1 - 1 / (1 + self$kappa^2) * exp(-self$lambda * self$kappa * (x - self$mu)), no=self$kappa^2 / (1 + self$kappa^2) * exp(self$lambda / self$kappa * (x - self$mu))) },
-        quan = function(v){ ifelse(test=v > self$cdf(self$mu), yes=self$mu - (log(1 - v) + log(1 + self$kappa^2)) / (self$lambda * self$kappa), no=self$mu + (self$kappa / self$lambda) * (log(v) + log(1 + self$kappa^2) - 2 * log(self$kappa))) }
+        pdf = function(x){ ifelse(test=x > self$mu, yes=exp(-self$kappa / self$lambda * (x - self$mu)) / self$lambda / (self$kappa + 1 / self$kappa), no=exp((x - self$mu) / (self$lambda * self$kappa)) / self$lambda / (self$kappa + 1 / self$kappa)) },
+        cdf = function(x){ ifelse(test=x > self$mu, yes=1 - 1 / (1 + self$kappa^2) * exp(-self$kappa / self$lambda * (x - self$mu)), no=self$kappa^2 / (1 + self$kappa^2) * exp((x - self$mu) / (self$lambda * self$kappa))) },
+        quan = function(v){ ifelse(test=v > self$cdf(self$mu), yes=self$mu - (log(1 - v) + log(1 + self$kappa^2)) * self$lambda / self$kappa, no=self$mu + self$kappa * self$lambda * (log(v) + log(1 + self$kappa^2) - 2 * log(self$kappa))) }
     )
 )
