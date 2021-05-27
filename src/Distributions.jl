@@ -61,6 +61,7 @@ export
 
     # distribution types
     Arcsine,
+    AsymmetricLaplace,
     Bernoulli,
     Beta,
     BetaBinomial,
@@ -314,7 +315,7 @@ information.
 
 Supported distributions:
 
-    Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
+    Arcsine, AsymmetricLaplace, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
     Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
