@@ -79,6 +79,7 @@ export
     Dirichlet,
     DirichletMultinomial,
     DiscreteUniform,
+    DiscreteNormal,
     DoubleExponential,
     EdgeworthMean,
     EdgeworthSum,
