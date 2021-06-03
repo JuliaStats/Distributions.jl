@@ -39,6 +39,7 @@ function Dirichlet(alpha::AbstractVector{<:Real}; check_args=true)
     Dirichlet{eltype(alpha)}(alpha; check_args=check_args)
 end
 Dirichlet(d::Integer, alpha::Real; kwargs...) = Dirichlet(Fill(alpha, d); kwargs...)
+Dirichlet(d::Integer, alpha::Integer; kwargs...) = Dirichlet(Fill(Float64(alpha), d); kwargs...)
 
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts
