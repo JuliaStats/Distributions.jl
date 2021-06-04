@@ -598,6 +598,7 @@ const continuous_distributions = [
     "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
+    "generalizedgamma",
     "gumbel",
     "inversegamma",
     "inversegaussian",

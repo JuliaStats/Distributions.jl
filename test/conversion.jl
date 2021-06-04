@@ -6,3 +6,4 @@ using Distributions
 
 @test convert(Gamma, Exponential(3.0)) == Gamma(1.0, 3.0)
 @test convert(Gamma, Erlang(5, 2.0)) == Gamma(5.0, 2.0)
+@test convert(GeneralizedGamma,  Weibull(2,3)) == GeneralizedGamma(3.0, 2.0, 2.0)
