@@ -39,3 +39,22 @@ params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
 @inline partype(::LKJCholesky{T}) where {T <: Real} = T
 
+#  -----------------------------------------------------------------------------
+#  Evaluation
+#  -----------------------------------------------------------------------------
+
+function logkernel(d::LKJCholesky, x::Cholesky)
+    factors = x.factors
+    p, η = params(d)
+    c = p + 2(η - 1)
+    T = typeof(one(c) * log(one(eltype(factors))))
+    logp = zero(T)
+    di = diagind(factors)
+    for i in 2:p
+        logp += (c - i) * log(factors[di[i]])
+    end
+    return logp
+end
+
+logpdf(d::LKJCholesky, x::Cholesky) = logkernel(d, x) + d.logc0
+
