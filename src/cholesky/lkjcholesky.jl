@@ -25,6 +25,23 @@ _as_char(c::Char) = c
 _as_char(x) = only(string(x))
 
 #  -----------------------------------------------------------------------------
+#  REPL display
+#  -----------------------------------------------------------------------------
+
+show(io::IO, d::LKJCholesky) = show_multline(io, d, [(:d, d.d), (:η, d.η), (:uplo, d.uplo)])
+
+#  -----------------------------------------------------------------------------
+#  Conversion
+#  -----------------------------------------------------------------------------
+
+function convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
+    return LKJCholesky{T, typeof(d.d)}(d.d, T(d.η), d.uplo, T(d.logc0))
+end
+function convert(::Type{LKJCholesky{T}}, d::Integer, η, logc0) where T <: Real
+    return LKJCholesky{T, typeof(d)}(d, T(η), d.uplo, T(logc0))
+end
+
+#  -----------------------------------------------------------------------------
 #  Properties
 #  -----------------------------------------------------------------------------
 
