@@ -35,6 +35,33 @@ function size(d::LKJCholesky)
     return (p, p)
 end
 
+function insupport(d::LKJCholesky, R::Cholesky)
+    p = dim(d)
+    factors = R.factors
+    (isreal(factors) && size(factors, 1) == p) || return false
+    iinds, jinds = axes(factors)
+    T = typeof(one(eltype(R))^2)
+    # check that the diagonal of U'*U or L*L' is all ones
+    @inbounds if R.uplo === 'U'
+        for j in 1:p
+            s = zero(T)
+            for i in 1:j
+                s += factors[iinds[i], jinds[j]]^2
+            end
+            isapprox(s, 1) || return false
+        end
+    else  # R.uplo === 'L'
+        for i in 1:p
+            s = zero(T)
+            for j in 1:i
+                s += factors[iinds[i], jinds[j]]^2
+            end
+            isapprox(s, 1) || return false
+        end
+    end
+    return true
+end
+
 params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
 @inline partype(::LKJCholesky{T}) where {T <: Real} = T
