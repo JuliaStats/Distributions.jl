@@ -62,6 +62,12 @@ function insupport(d::LKJCholesky, R::Cholesky)
     return true
 end
 
+function mode(d::LKJCholesky)
+    p = dim(d)
+    factors = Matrix{partype(d)}(I, p, p)
+    return Cholesky(factors, d.uplo, 0)
+end
+
 params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
 @inline partype(::LKJCholesky{T}) where {T <: Real} = T
