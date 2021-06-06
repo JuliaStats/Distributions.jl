@@ -58,3 +58,72 @@ end
 
 logpdf(d::LKJCholesky, x::Cholesky) = logkernel(d, x) + d.logc0
 
+#  -----------------------------------------------------------------------------
+#  Sampling
+#  -----------------------------------------------------------------------------
+
+function rand(rng::AbstractRNG, d::LKJCholesky)
+    p = dim(d)
+    T = eltype(d)
+    factors = Matrix{T}(undef, p, p)
+    R = Cholesky(factors, d.uplo, 0)
+    return rand!(rng, d, R)
+end
+function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
+    p = dim(d)
+    uplo = d.uplo
+    T = eltype(d)
+    TChol = Cholesky{T,Matrix{T}}
+    Rs = Array{TChol}(undef, dims)
+    for i in eachindex(Rs)
+        factors = Matrix{T}(undef, p, p)
+        Rs[i] = R = Cholesky(factors, uplo, 0)
+        rand!(rng, d, R)
+    end
+    return Rs
+end
+
+rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_vine_sampler!(rng, d, R)
+
+function _lkj_cholesky_vine_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
+    p, η = params(d)
+    factors = R.factors
+    if R.uplo === 'U'
+        cpcs = _lkj_vine_rand_cpcs!(transpose(factors), p, η, rng)
+        _cpcs_to_cholesky!(factors, cpcs, p)
+    else  # uplo === 'L'
+        cpcs = _lkj_vine_rand_cpcs!(factors, p, η, rng)
+        _cpcs_to_cholesky!(transpose(factors), cpcs, p)
+    end
+    return R
+end
+
+# sample partial canonical correlations using the vine method from Section 2.4 in LKJ (2009 JMA)
+# storage 
+function _lkj_vine_rand_cpcs!(cpcs, d::Integer, η::Real, rng::AbstractRNG)
+    T = eltype(cpcs)
+    β = η + T(d - 1) / 2
+    @inbounds for i in 1:(d - 1)
+        β -= T(0.5)
+        for j in (i + 1):d
+            cpcs[i, j] = 2 * rand(rng, Beta(β, β)) - 1
+        end
+    end
+    return cpcs
+end
+
+# map partial canonical correlations stored in the upper triangle of a matrix
+# to the corresponding upper triangular cholesky factor w
+# adapted from https://github.com/TuringLang/Bijectors.jl/blob/v0.9.4/src/bijectors/corr.jl
+function _cpcs_to_cholesky!(w, z, d::Integer)
+    @inbounds for j in 1:d
+        w[1, j] = 1
+        for i in 1:(j-1)
+            wij = w[i, j]
+            zij = z[i, j]
+            w[i, j] = zij * wij
+            w[i+1, j] = wij * sqrt(1 - zij^2)
+        end
+    end
+    return w
+end
