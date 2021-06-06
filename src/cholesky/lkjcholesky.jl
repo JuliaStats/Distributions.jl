@@ -23,3 +23,19 @@ end
 
 _as_char(c::Char) = c
 _as_char(x) = only(string(x))
+
+#  -----------------------------------------------------------------------------
+#  Properties
+#  -----------------------------------------------------------------------------
+
+dim(d::LKJCholesky) = d.d
+
+function size(d::LKJCholesky)
+    p = dim(d)
+    return (p, p)
+end
+
+params(d::LKJCholesky) = (d.d, d.η, d.uplo)
+
+@inline partype(::LKJCholesky{T}) where {T <: Real} = T
+
