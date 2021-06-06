@@ -93,8 +93,8 @@ params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function logkernel(d::LKJCholesky, x::Cholesky)
-    factors = x.factors
+function logkernel(d::LKJCholesky, R::Cholesky)
+    factors = R.factors
     p, η = params(d)
     c = p + 2(η - 1)
     T = typeof(one(c) * log(one(eltype(factors))))
@@ -106,7 +106,7 @@ function logkernel(d::LKJCholesky, x::Cholesky)
     return logp
 end
 
-logpdf(d::LKJCholesky, x::Cholesky) = logkernel(d, x) + d.logc0
+logpdf(d::LKJCholesky, R::Cholesky) = logkernel(d, R) + d.logc0
 
 #  -----------------------------------------------------------------------------
 #  Sampling
