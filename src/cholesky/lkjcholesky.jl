@@ -108,6 +108,13 @@ end
 
 logpdf(d::LKJCholesky, R::Cholesky) = logkernel(d, R) + d.logc0
 
+pdf(d::LKJCholesky, R::Cholesky) = exp(logpdf(d, R))
+
+loglikelihood(d::LKJCholesky, R::Cholesky) = logpdf(d, R)
+function loglikelihood(d::LKJCholesky, Rs::AbstractArray{<:Cholesky})
+    return sum(R -> logpdf(d, R), Rs)
+end
+
 #  -----------------------------------------------------------------------------
 #  Sampling
 #  -----------------------------------------------------------------------------
