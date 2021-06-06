@@ -36,6 +36,7 @@ export
     Univariate,
     Multivariate,
     Matrixvariate,
+    CholeskyVariate,
     Discrete,
     Continuous,
     Sampleable,
