@@ -110,6 +110,7 @@ export
     Laplace,
     Levy,
     LKJ,
+    LKJCholesky,
     LocationScale,
     Logistic,
     LogNormal,
@@ -279,6 +280,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
@@ -323,7 +325,7 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
