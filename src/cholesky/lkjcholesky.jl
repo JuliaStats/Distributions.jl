@@ -146,30 +146,29 @@ function _lkj_cholesky_vine_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Choles
     p, η = params(d)
     factors = R.factors
     if R.uplo === 'U'
-        cpcs = _lkj_vine_rand_cpcs!(transpose(factors), p, η, rng)
-        _cpcs_to_cholesky!(factors, cpcs, p)
+        z = _lkj_vine_rand_cpcs!(transpose(factors), p, η, rng)
+        _cpcs_to_cholesky!(factors, z, p)
     else  # uplo === 'L'
-        cpcs = _lkj_vine_rand_cpcs!(factors, p, η, rng)
-        _cpcs_to_cholesky!(transpose(factors), cpcs, p)
+        z = _lkj_vine_rand_cpcs!(factors, p, η, rng)
+        _cpcs_to_cholesky!(transpose(factors), z, p)
     end
     return R
 end
 
-# sample partial canonical correlations using the vine method from Section 2.4 in LKJ (2009 JMA)
-# storage 
-function _lkj_vine_rand_cpcs!(cpcs, d::Integer, η::Real, rng::AbstractRNG)
-    T = eltype(cpcs)
+# sample partial canonical correlations z using the vine method from Section 2.4 in LKJ (2009 JMA)
+function _lkj_vine_rand_cpcs!(z, d::Integer, η::Real, rng::AbstractRNG)
+    T = eltype(z)
     β = η + T(d - 1) / 2
     @inbounds for i in 1:(d - 1)
         β -= T(0.5)
         for j in (i + 1):d
-            cpcs[i, j] = 2 * rand(rng, Beta(β, β)) - 1
+            z[i, j] = 2 * rand(rng, Beta(β, β)) - 1
         end
     end
-    return cpcs
+    return z
 end
 
-# map partial canonical correlations stored in the upper triangle of a matrix
+# map partial canonical correlations z stored in the upper triangle of a matrix
 # to the corresponding upper triangular cholesky factor w
 # adapted from https://github.com/TuringLang/Bijectors.jl/blob/v0.9.4/src/bijectors/corr.jl
 function _cpcs_to_cholesky!(w, z, d::Integer)
