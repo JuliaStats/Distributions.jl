@@ -47,8 +47,8 @@ show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 function convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
     return LKJCholesky{T, typeof(d.d)}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
-function convert(::Type{LKJCholesky{T}}, d::Integer, η, logc0) where T <: Real
-    return LKJCholesky{T, typeof(d)}(d, T(η), d.uplo, T(logc0))
+function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
+    return LKJCholesky{T, typeof(d)}(d, T(η), uplo, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
