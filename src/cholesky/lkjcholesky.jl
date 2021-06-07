@@ -83,8 +83,7 @@ function insupport(d::LKJCholesky, R::Cholesky)
 end
 
 function mode(d::LKJCholesky)
-    p = dim(d)
-    factors = Matrix{partype(d)}(I, p, p)
+    factors = Matrix{eltype(d)}(I, size(d))
     return Cholesky(factors, d.uplo, 0)
 end
 
@@ -120,9 +119,7 @@ end
 #  -----------------------------------------------------------------------------
 
 function rand(rng::AbstractRNG, d::LKJCholesky)
-    p = dim(d)
-    T = eltype(d)
-    factors = Matrix{T}(undef, p, p)
+    factors = Matrix{eltype(d)}(undef, size(d))
     R = Cholesky(factors, d.uplo, 0)
     return rand!(rng, d, R)
 end
