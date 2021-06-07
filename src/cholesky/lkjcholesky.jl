@@ -156,9 +156,19 @@ end
 # sample partial canonical correlations z using the vine method from Section 2.4 in LKJ (2009 JMA)
 function _lkj_vine_rand_cpcs!(rng::AbstractRNG, z::AbstractMatrix, d::Integer, η::Real)
     β = η + (d - 1) // 2
-    @inbounds for i in 1:(d - 1)
+    for i in 1:(d - 1)
         β -= 1 // 2
-        z[i, (i + 1):d] .= 2 .* rand.(rng, Ref(Beta(β, β))) .- 1
+        spl = sampler(Beta(β, β))
+        # use function barrier since sampler(Beta(β, β)) is not type-stable
+        # see https://github.com/JuliaStats/Distributions.jl/pull/1281#issue-573169822
+        _lkj_vine_rand_cpcs_loop!(rng, spl, z, i, (i + 1):d)
+    end
+    return z
+end
+
+function _lkj_vine_rand_cpcs_loop!(rng, sampler, z, i, js)
+    @inbounds for j in js
+        z[i, j] = 2 * rand(rng, sampler) - 1
     end
     return z
 end
