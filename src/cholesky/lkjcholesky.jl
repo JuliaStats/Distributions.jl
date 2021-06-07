@@ -9,20 +9,30 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Integer, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
+function LKJCholesky(d::Integer, _η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
     if check_args
         d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
-        η > 0 || throw(ArgumentError("Shape parameter must be positive."))
+        _η > 0 || throw(ArgumentError("Shape parameter must be positive."))
     end
     logc0 = lkj_logc0(d, η)
     uplo = _as_char(_uplo)
     uplo ∈ ('U', 'L') || throw(ArgumentError("uplo must be 'U' or 'L'."))
-    _η, _logc0 = promote(η, logc0)
-    return LKJCholesky(d, _η, uplo, _logc0)
+    η, logc0 = promote(_η, _logc0)
+    return LKJCholesky(d, η, uplo, logc0)
 end
 
-_as_char(c::Char) = c
-_as_char(x) = only(string(x))
+# adapted from LinearAlgebra.char_uplo
+function _char_uplo(_uplo::Union{Symbol,Char})
+    uplo = if _uplo === :U
+        'U'
+    elseif _uplo === :L
+        'L'
+    else
+        _uplo
+    end
+    uplo ∈ ('U', 'L') && return uplo
+    throw(ArgumentError("uplo argument must be either 'U' (upper) or 'L' (lower)"))
+end
 
 #  -----------------------------------------------------------------------------
 #  REPL display
