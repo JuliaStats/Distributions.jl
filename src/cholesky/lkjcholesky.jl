@@ -14,7 +14,7 @@ function LKJCholesky(d::Integer, _η::Real, _uplo::Union{Char,Symbol} = 'L'; che
         d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
         _η > 0 || throw(ArgumentError("Shape parameter must be positive."))
     end
-    logc0 = lkj_logc0(d, η)
+    _logc0 = lkj_logc0(d, _η)
     uplo = _as_char(_uplo)
     uplo ∈ ('U', 'L') || throw(ArgumentError("uplo must be 'U' or 'L'."))
     η, logc0 = promote(_η, _logc0)
