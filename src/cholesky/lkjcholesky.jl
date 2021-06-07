@@ -161,9 +161,7 @@ function _lkj_vine_rand_cpcs!(z, d::Integer, η::Real, rng::AbstractRNG)
     β = η + T(d - 1) / 2
     @inbounds for i in 1:(d - 1)
         β -= T(0.5)
-        for j in (i + 1):d
-            z[i, j] = 2 * rand(rng, Beta(β, β)) - 1
-        end
+        z[i, (i + 1):d] .= 2 .* rand.(rng, Ref(Beta(β, β))) .- 1
     end
     return z
 end
