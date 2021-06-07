@@ -138,6 +138,20 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
 end
 
 rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_vine_sampler!(rng, d, R)
+function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,TM}}) where {T,TM}
+    p = dim(d)
+    uplo = d.uplo
+    for i in eachindex(Rs)
+        if isassigned(Rs, i)
+            R = Rs[i]
+        else
+            factors = TM(undef, p, p)
+            R = Rs[i] = Cholesky(factors, uplo, 0)
+        end
+        _lkj_cholesky_vine_sampler!(rng, d, R)
+    end
+    return Rs
+end
 
 function _lkj_cholesky_vine_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
     p, η = params(d)
