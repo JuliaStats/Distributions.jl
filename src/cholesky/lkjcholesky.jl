@@ -157,14 +157,10 @@ end
 
 # sample partial canonical correlations z using the vine method from Section 2.4 in LKJ (2009 JMA)
 function _lkj_vine_rand_cpcs!(z, d::Integer, η::Real, rng::AbstractRNG)
-    T = eltype(z)
-    β = η + T(d - 1) / 2
+    β = η + (d - 1) // 2
     @inbounds for i in 1:(d - 1)
-        β -= T(1//2)
-        spl = sampler(Beta(β, β))
-        for j in (i + 1):d
-            z[i, j] = 2 * rand(rng, spl) - 1
-        end
+        β -= 1 // 2
+        z[i, (i + 1):d] .= 2 .* rand.(rng, Ref(Beta(β, β))) .- 1
     end
     return z
 end
