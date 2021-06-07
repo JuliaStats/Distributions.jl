@@ -127,10 +127,11 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     p = dim(d)
     uplo = d.uplo
     T = eltype(d)
-    TChol = Cholesky{T,Matrix{T}}
+    TM = Matrix{T}
+    TChol = Cholesky{T,TM}
     Rs = Array{TChol}(undef, dims)
     for i in eachindex(Rs)
-        factors = Matrix{T}(undef, p, p)
+        factors = TM(undef, p, p)
         Rs[i] = R = Cholesky(factors, uplo, 0)
         rand!(rng, d, R)
     end
