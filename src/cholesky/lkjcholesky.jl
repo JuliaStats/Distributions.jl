@@ -99,6 +99,7 @@ function logkernel(d::LKJCholesky, R::Cholesky)
     factors = R.factors
     p, η = params(d)
     c = p + 2(η - 1)
+    p == 1 && return c * log(first(factors))
     logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di) 
         return (c - i) * log(factors[di])
     end
