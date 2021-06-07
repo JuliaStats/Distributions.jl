@@ -121,19 +121,18 @@ end
 function rand(rng::AbstractRNG, d::LKJCholesky)
     factors = Matrix{eltype(d)}(undef, size(d))
     R = Cholesky(factors, d.uplo, 0)
-    return rand!(rng, d, R)
+    return _lkj_cholesky_vine_sampler!(rng, d, R)
 end
 function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     p = dim(d)
     uplo = d.uplo
     T = eltype(d)
     TM = Matrix{T}
-    TChol = Cholesky{T,TM}
-    Rs = Array{TChol}(undef, dims)
+    Rs = Array{Cholesky{T,TM}}(undef, dims)
     for i in eachindex(Rs)
         factors = TM(undef, p, p)
         Rs[i] = R = Cholesky(factors, uplo, 0)
-        rand!(rng, d, R)
+        _lkj_cholesky_vine_sampler!(rng, d, R)
     end
     return Rs
 end
