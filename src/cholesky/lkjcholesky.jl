@@ -17,8 +17,8 @@ function LKJCholesky(d::Integer, η::Real, _uplo::Union{Char,Symbol} = 'L'; chec
     logc0 = lkj_logc0(d, η)
     uplo = _as_char(_uplo)
     uplo ∈ ('U', 'L') || throw(ArgumentError("uplo must be 'U' or 'L'."))
-    T = Base.promote_eltype(η, logc0)
-    LKJCholesky{T, typeof(d)}(d, T(η), uplo, T(logc0))
+    _η, _logc0 = promote(η, logc0)
+    return LKJCholesky(d, _η, uplo, _logc0)
 end
 
 _as_char(c::Char) = c
@@ -28,7 +28,7 @@ _as_char(x) = only(string(x))
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::LKJCholesky) = show_multline(io, d, [(:d, d.d), (:η, d.η), (:uplo, d.uplo)])
+show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 
 #  -----------------------------------------------------------------------------
 #  Conversion
@@ -57,23 +57,14 @@ function insupport(d::LKJCholesky, R::Cholesky)
     factors = R.factors
     (isreal(factors) && size(factors, 1) == p) || return false
     iinds, jinds = axes(factors)
-    T = typeof(one(eltype(R))^2)
     # check that the diagonal of U'*U or L*L' is all ones
     @inbounds if R.uplo === 'U'
-        for j in 1:p
-            s = zero(T)
-            for i in 1:j
-                s += factors[iinds[i], jinds[j]]^2
-            end
-            isapprox(s, 1) || return false
+        for (j, jind) in enumerate(jinds)
+            sum(factors[iind, jind]^2 for (iind, _) in zip(iinds, 1:j)) ≈ 1 || return false
         end
     else  # R.uplo === 'L'
-        for i in 1:p
-            s = zero(T)
-            for j in 1:i
-                s += factors[iinds[i], jinds[j]]^2
-            end
-            isapprox(s, 1) || return false
+        for (i, iind) in enumerate(iinds)
+            sum(factors[iind, jind]^2 for (jind, _) in zip(iinds, 1:i)) ≈ 1 || return false
         end
     end
     return true
@@ -160,8 +151,11 @@ function _lkj_vine_rand_cpcs!(z, d::Integer, η::Real, rng::AbstractRNG)
     T = eltype(z)
     β = η + T(d - 1) / 2
     @inbounds for i in 1:(d - 1)
-        β -= T(0.5)
-        z[i, (i + 1):d] .= 2 .* rand.(rng, Ref(Beta(β, β))) .- 1
+        β -= T(1//2)
+        spl = sampler(Beta(β, β))
+        for j in (i + 1):d
+            z[i, j] = 2 * rand(rng, spl) - 1
+        end
     end
     return z
 end
