@@ -70,11 +70,13 @@ function insupport(d::LKJCholesky, R::Cholesky)
     # check that the diagonal of U'*U or L*L' is all ones
     @inbounds if R.uplo === 'U'
         for (j, jind) in enumerate(jinds)
-            sum(factors[iind, jind]^2 for (iind, _) in zip(iinds, 1:j)) ≈ 1 || return false
+            col_iinds = view(iinds, 1:j)
+            sum(abs2(factors[iind, jind]) for iind in col_iinds) ≈ 1 || return false
         end
     else  # R.uplo === 'L'
         for (i, iind) in enumerate(iinds)
-            sum(factors[iind, jind]^2 for (jind, _) in zip(iinds, 1:i)) ≈ 1 || return false
+            row_jinds = view(jinds, 1:i)
+            sum(abs2(factors[iind, jind]) for jind in row_jinds) ≈ 1 || return false
         end
     end
     return true
