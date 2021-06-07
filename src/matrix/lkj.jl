@@ -96,7 +96,7 @@ params(d::LKJ) = (d.d, d.η)
 function lkj_logc0(d::Integer, η::Real)
     d > 1 || return zero(η)
     if isone(η)
-        T = float(Base.promote_type(d, η))
+        T = float(Base.promote_eltype(d, η))
         if iseven(d)
             logc0 = -T(lkj_onion_loginvconst_uniform_even(d))
         else
