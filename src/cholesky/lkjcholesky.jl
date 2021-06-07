@@ -105,7 +105,12 @@ function logkernel(d::LKJCholesky, R::Cholesky)
     return logp
 end
 
-logpdf(d::LKJCholesky, R::Cholesky) = logkernel(d, R) + d.logc0
+function logpdf(d::LKJCholesky, R::Cholesky)
+    insupport(d, R) || throw(ArgumentError("Provided point is not in the support."))
+    return _logpdf(d, R)
+end
+
+_logpdf(d::LKJCholesky, R::Cholesky) = logkernel(d, R) + d.logc0
 
 pdf(d::LKJCholesky, R::Cholesky) = exp(logpdf(d, R))
 
