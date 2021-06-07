@@ -96,11 +96,10 @@ params(d::LKJ) = (d.d, d.η)
 function lkj_logc0(d::Integer, η::Real)
     d > 1 || return zero(η)
     if isone(η)
-        T = float(Base.promote_type(d, η))
         if iseven(d)
-            logc0 = -T(lkj_onion_loginvconst_uniform_even(d))
+            logc0 = -lkj_onion_loginvconst_uniform_even(d)
         else
-            logc0 = -T(lkj_onion_loginvconst_uniform_odd(d))
+            logc0 = -lkj_onion_loginvconst_uniform_odd(d)
         end
     else
         logc0 = -lkj_onion_loginvconst(d, η)
@@ -183,13 +182,12 @@ end
 
 function lkj_onion_loginvconst(d::Integer, η::Real)
     #  Equation (17) in LKJ (2009 JMA)
-    T = typeof(log(one(η + d)))
-    sumlogs = zero(T)
+    sumlogs = zero(η)
     for k in 2:d - 1
-        sumlogs += T(0.5k)*logπ + loggamma(η + T(0.5(d - 1 - k)))
+        sumlogs += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k))
     end
-    α = η + T(0.5d) - 1
-    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + T(0.5(d - 1)))
+    α = η + 0.5d - 1
+    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + 0.5(d - 1))
     return loginvconst
 end
 
@@ -214,11 +212,10 @@ end
 
 function lkj_vine_loginvconst(d::Integer, η::Real)
     #  Equation (16) in LKJ (2009 JMA)
-    T = typeof(log(one(η + d)))
-    expsum = zero(T)
-    betasum = zero(T)
+    expsum = zero(η)
+    betasum = zero(η)
     for k in 1:d - 1
-        α = η + T(0.5(d - k - 1))
+        α = η + 0.5(d - k - 1)
         expsum += (2η - 2 + d - k) * (d - k)
         betasum += (d - k) * logbeta(α, α)
     end
@@ -241,10 +238,9 @@ end
 
 function lkj_loginvconst_alt(d::Integer, η::Real)
     #  Third line in first proof of Section 3.3 in LKJ (2009 JMA)
-    T = typeof(log(one(η + d)))
-    loginvconst = zero(T)
+    loginvconst = zero(η)
     for k in 1:d - 1
-        loginvconst += T(0.5k)*logπ + loggamma(η + T(0.5(d - 1 - k))) - loggamma(η + T(0.5(d - 1)))
+        loginvconst += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
     end
     return loginvconst
 end
