@@ -142,6 +142,7 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     return Rs
 end
 
+rand!(d::LKJCholesky, R::Cholesky) = rand!(GLOBAL_RNG, d, R)
 rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_vine_sampler!(rng, d, R)
 
 function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,TM}}, allocate::Bool) where {T,TM}
