@@ -137,15 +137,17 @@ end
                 rand!(d, xs)
                 test_draws(d, xs)
 
-                xs2 = fill(cholesky(exp(Symmetric(randn(p, p)))), 10^5)
+                F2 = cholesky(exp(Symmetric(randn(p, p))))
+                xs2 = [deepcopy(F2) for _ in 1:10^5]
                 xs2[1] = cholesky(exp(Symmetric(randn(p + 1, p + 1))))
                 rand!(d, xs2)
                 test_draws(d, xs2)
 
                 # non-allocating
-                xs3 = fill(cholesky(exp(Symmetric(randn(p, p)))), 10^5)
+                F3 = cholesky(exp(Symmetric(randn(p, p))))
+                xs3 = [deepcopy(F3) for _ in 1:10^5]
                 rand!(d, xs3)
-                test_draws(d, xs3)
+                test_draws(d, xs3; check_uplo = uplo == 'U')
             end
         end
     end
