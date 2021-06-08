@@ -126,7 +126,7 @@ end
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(d))
-                test_draws(d, rand(d, 10^3))
+                test_draws(d, rand(d, 10^4))
             end
             @test_broken rand(LKJCholesky(5, Inf)) ≈ I
         end
