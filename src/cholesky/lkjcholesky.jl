@@ -152,7 +152,7 @@ end
 function rand(rng::AbstractRNG, d::LKJCholesky)
     factors = Matrix{eltype(d)}(undef, size(d))
     R = Cholesky(factors, d.uplo, 0)
-    return _lkj_cholesky_vine_sampler!(rng, d, R)
+    return _lkj_cholesky_onion_sampler!(rng, d, R)
 end
 function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     p = dim(d)
@@ -163,24 +163,24 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     for i in eachindex(Rs)
         factors = TM(undef, p, p)
         Rs[i] = R = Cholesky(factors, uplo, 0)
-        _lkj_cholesky_vine_sampler!(rng, d, R)
+        _lkj_cholesky_onion_sampler!(rng, d, R)
     end
     return Rs
 end
 
 rand!(d::LKJCholesky, R::Cholesky) = rand!(GLOBAL_RNG, d, R)
-rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_vine_sampler!(rng, d, R)
+rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_onion_sampler!(rng, d, R)
 
 function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,TM}}, allocate::Bool) where {T,TM}
     p = dim(d)
     uplo = d.uplo
     if allocate
         for i in eachindex(Rs)
-            Rs[i] = _lkj_cholesky_vine_sampler!(rng, d, Cholesky(TM(undef, p, p), uplo, 0))
+            Rs[i] = _lkj_cholesky_onion_sampler!(rng, d, Cholesky(TM(undef, p, p), uplo, 0))
         end
     else
         for i in eachindex(Rs)
-            _lkj_cholesky_vine_sampler!(rng, d, Rs[i])
+            _lkj_cholesky_onion_sampler!(rng, d, Rs[i])
         end
     end
     return Rs
