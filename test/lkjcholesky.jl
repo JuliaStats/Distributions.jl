@@ -10,11 +10,21 @@ end
 function test_draws(d::LKJCholesky, xs; check_uplo=true)
     @test all(x -> insupport(d, x), xs)
     check_uplo && @test all(x -> x.uplo == d.uplo, xs)
-    # test dense form of draws against LKJ
-    dmat = LKJ(d.d, d.η)
-    zs = Matrix.(xs)
-    @test isapprox(mean(zs), mean(dmat); atol = 0.1)
-    @test isapprox(var(zs), var(dmat); atol = 0.1)
+    @testset "LKJCholesky marginals" begin
+        ndraws = length(xs)
+        p = dim(d)    
+        dmat = LKJ(p, d.η)
+        marginal = Distributions._marginal(dmat)    
+        α = 0.05
+        L = sum(1:(p - 1))
+        zs = Array{eltype(d)}(undef, p, p, ndraws)
+        for k in 1:ndraws
+            zs[:, :, k] = Matrix(xs[k])
+        end
+        for i in 1:p, j in 1:(i-1)
+            @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L
+        end
+    end
 end
 
 @testset "LKJCholesky" begin
@@ -113,16 +123,16 @@ end
 
     @testset "Sampling" begin
         @testset "rand" begin
-            @testset for p in (1, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
+            @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(d))
-                test_draws(d, rand(d, 10^5))
+                test_draws(d, rand(d, 10^3))
             end
             @test_broken rand(LKJCholesky(5, Inf)) ≈ I
         end
 
         @testset "rand!" begin
-            @testset for p in (1, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
+            @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 x = Cholesky(Matrix{Float64}(undef, p, p), uplo, 0)
                 rand!(d, x)
@@ -133,19 +143,19 @@ end
                 test_draw(d, x2; check_uplo = false)
 
                 # allocating
-                xs = Vector{typeof(x)}(undef, 10^5)
+                xs = Vector{typeof(x)}(undef, 10^4)
                 rand!(d, xs)
                 test_draws(d, xs)
 
                 F2 = cholesky(exp(Symmetric(randn(p, p))))
-                xs2 = [deepcopy(F2) for _ in 1:10^5]
+                xs2 = [deepcopy(F2) for _ in 1:10^4]
                 xs2[1] = cholesky(exp(Symmetric(randn(p + 1, p + 1))))
                 rand!(d, xs2)
                 test_draws(d, xs2)
 
                 # non-allocating
                 F3 = cholesky(exp(Symmetric(randn(p, p))))
-                xs3 = [deepcopy(F3) for _ in 1:10^5]
+                xs3 = [deepcopy(F3) for _ in 1:10^4]
                 rand!(d, xs3)
                 test_draws(d, xs3; check_uplo = uplo == 'U')
             end
