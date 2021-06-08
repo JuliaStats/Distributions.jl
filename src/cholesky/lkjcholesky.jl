@@ -272,7 +272,7 @@ function _lkj_cholesky_onion_tril!(rng::AbstractRNG, A::AbstractMatrix, d::Integ
         #  (c)-(e)
         # w is directionally uniform vector of length √y
         @inbounds w = @view A[k + 1, 1:k]
-        randn!(rng, w)
+        w .= randn.(rng)
         rmul!(w, sqrt(y / dot(w, w)))
         # normalize so new row has unit norm
         @inbounds A[k + 1, k + 1] = sqrt(1 - y)
