@@ -1,6 +1,7 @@
 using Distributions
 using Random
 using LinearAlgebra
+using Test
 
 function test_draw(d::LKJCholesky, x; check_uplo=true)
     @test insupport(d, x)
