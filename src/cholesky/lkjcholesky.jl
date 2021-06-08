@@ -248,7 +248,6 @@ end
 #
 
 function _lkj_cholesky_onion_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
-    F = cholesky(rand(rng, LKJ(d.d, d.η)))
     _lkj_cholesky_onion_tril!(rng, R.uplo === 'U' ? transpose(R.factors) : R.factors, d.d, d.η)
     return R        
 end
