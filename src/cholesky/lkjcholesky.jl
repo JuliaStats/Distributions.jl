@@ -185,8 +185,8 @@ function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,
     end
     return Rs
 end
-function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky})
-    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> !insupport(d, R), Rs)
+function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{<:Real}})
+    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != dim(d), Rs)
     return rand!(rng, d, Rs, allocate)
 end
 
