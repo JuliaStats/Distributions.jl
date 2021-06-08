@@ -42,7 +42,8 @@ end
     end
 
     @testset "REPL display" begin
-        @test sprint(show, LKJCholesky(5, 1)) == "LKJCholesky{Float64, Int64}(\nd: 5\nη: 1.0\nuplo: L\n)\n"
+        d = LKJCholesky(5, 1)
+        @test sprint(show, d) == "$(typeof(d))(\nd: 5\nη: 1.0\nuplo: L\n)\n"
     end
 
     @testset "Conversion" begin
