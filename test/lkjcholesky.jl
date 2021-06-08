@@ -114,6 +114,7 @@ end
                 test_draw(d, rand(d))
                 test_draws(d, rand(d, 10^5))
             end
+            @test_broken rand(LKJCholesky(5, Inf)) ≈ I
         end
 
         @testset "rand!" begin
