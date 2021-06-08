@@ -1,26 +1,27 @@
 """
     LKJCholesky(d, η, uplo='L')
 
-The [`LKJ`](@ref) distribution of dimension ``d`` with shape parameter ``\\eta`` is a
-distribution over ``d\\times d`` real correlation matrices (positive-definite matrices
-with ones on the diagonal).
+The `LKJCholesky` distribution of size ``d`` with shape parameter ``\\eta`` is a
+distribution over `Cholesky` factors of ``d\\times d`` real correlation matrices
+(positive-definite matrices with ones on the diagonal).
 
-While [`LKJ`](@ref)'s variates or samples are correlation matrices ``R``, this distribution's
-variates or samples are `LinearAlgebra.Cholesky` factorizations as might be returned by
-`F = cholesky(R)`, so that `Matrix(F)` is a variate or sample of `LKJ`.
-`LKJCholesky` is much more efficient than `LKJ` when working with the cholesky factors
-of correlation matrices.
+Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
+be returned by `F = cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or sample of
+[`LKJ`](@ref). `LKJCholesky` is more efficient than `LKJ` when working with the Cholesky
+factors of correlation matrices.
 
 The `uplo` parameter specifies in which triangle in `F` (either `'U'` for upper or `'L'`
-for lower) the cholesky factor should be stored when randomly generating samples. Set `uplo`
+for lower) the Cholesky factor should be stored when randomly generating samples. Set `uplo`
 to `'U'` if the upper factor is desired to avoid allocating a copy when calling `F.U`.
+
+See [`LKJ`](@ref) for more details.
 
 External links
 
 * Lewandowski D, Kurowicka D, Joe H.
   Generating random correlation matrices based on vines and extended onion method,
   Journal of Multivariate Analysis (2009), 100(9): 1989-2001
-  https://doi.org/10.1016/j.jmva.2009.04.008
+  doi: [10.1016/j.jmva.2009.04.008](https://doi.org/10.1016/j.jmva.2009.04.008)
 """
 struct LKJCholesky{T <: Real, D <: Integer} <: Distribution{CholeskyVariate,Continuous}
     d::D
