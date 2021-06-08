@@ -190,10 +190,6 @@ function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{<:
     return rand!(rng, d, Rs, allocate)
 end
 
-#
-# vine method
-#
-
 function _lkj_cholesky_vine_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
     p, η = params(d)
     factors = R.factors
@@ -241,43 +237,4 @@ function _cpcs_to_cholesky!(w, z, d::Integer)
         end
     end
     return w
-end
-
-#
-# onion method
-#
-
-function _lkj_cholesky_onion_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
-    F = cholesky(rand(rng, LKJ(d.d, d.η)))
-    _lkj_cholesky_onion_tril!(rng, R.uplo === 'U' ? transpose(R.factors) : R.factors, d.d, d.η)
-    return R        
-end
-
-function _lkj_cholesky_onion_tril!(rng::AbstractRNG, A::AbstractMatrix, d::Integer, η::Real)
-    # Section 3.2 in LKJ (2009 JMA)
-    # reformulated to incrementally construct Cholesky factor as mentioned in Section 5
-    # equivalent steps in algorithm in reference are marked.
-    @assert size(A) == (d, d)
-    A[1, 1] = 1
-    d > 1 || return R
-    β = η + (d - 2)//2
-    #  1. Initialization
-    @inbounds A[2, 1] = w0 = 2 * rand(rng, Beta(β, β)) - 1
-    @inbounds A[2, 2] = sqrt(1 - w0^2)
-    #  2. Loop, each iteration k adds row k+1
-    for k in 2:(d - 1)
-        #  (a)
-        β -= 1//2
-        #  (b)
-        y = rand(rng, Beta(k//2, β))
-        #  (c)-(e)
-        # w is directionally uniform vector of length √y
-        @inbounds w = @view A[k + 1, 1:k]
-        randn!(rng, w)
-        rmul!(w, sqrt(y / dot(w, w)))
-        # normalize so new row has unit norm
-        @inbounds A[k + 1, k + 1] = sqrt(1 - y)
-    end
-    #  3.
-    return A
 end
