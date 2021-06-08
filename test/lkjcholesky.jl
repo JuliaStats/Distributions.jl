@@ -10,17 +10,29 @@ end
 function test_draws(d::LKJCholesky, xs; check_uplo=true)
     @test all(x -> insupport(d, x), xs)
     check_uplo && @test all(x -> x.uplo == d.uplo, xs)
-    @testset "LKJCholesky marginals" begin
-        ndraws = length(xs)
-        p = dim(d)    
-        dmat = LKJ(p, d.η)
-        marginal = Distributions._marginal(dmat)    
+
+    p = dim(d)
+    dmat = LKJ(p, d.η)
+    marginal = Distributions._marginal(dmat)    
+    ndraws = length(xs)
+    zs = Array{eltype(d)}(undef, p, p, ndraws)
+    for k in 1:ndraws
+        zs[:, :, k] = Matrix(xs[k])
+    end
+
+    @testset "LKJCholesky marginal moments" begin
+        @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1
+        @test var(zs; dims=3)[:, :, 1] ≈ var(marginal) * (ones(p, p) - I) atol=0.1
+        @testset for n in 2:5
+            for i in 1:p, j in 1:(i-1)
+                @test moment(zs[i, j, :], n) ≈ moment(rand(marginal, ndraws), n) atol=0.1
+            end
+        end
+    end
+
+    @testset "LKJCholesky marginal KS test" begin
         α = 0.05
         L = sum(1:(p - 1))
-        zs = Array{eltype(d)}(undef, p, p, ndraws)
-        for k in 1:ndraws
-            zs[:, :, k] = Matrix(xs[k])
-        end
         for i in 1:p, j in 1:(i-1)
             @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L
         end
