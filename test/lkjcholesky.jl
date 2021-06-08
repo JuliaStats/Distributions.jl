@@ -7,8 +7,9 @@ function test_draw(d::LKJCholesky, x; check_uplo=true)
     @test insupport(d, x)
     check_uplo && @test x.uplo == d.uplo
 end
-function test_draws(d::LKJCholesky, xs; kwargs...)
-    test_draw.(Ref(d), xs; kwargs...)
+function test_draws(d::LKJCholesky, xs; check_uplo=true)
+    @test all(x -> insupport(d, x), xs)
+    check_uplo && @test all(x -> x.uplo == d.uplo, xs)
     # test dense form of draws against LKJ
     dmat = LKJ(d.d, d.η)
     zs = Matrix.(xs)
