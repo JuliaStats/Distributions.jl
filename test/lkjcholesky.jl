@@ -102,7 +102,8 @@ end
 
             @test pdf(dchol, x) ≈ exp(logpdf(dchol, x))
             @test pdf(dchol, x_L) ≈ pdf(dchol, x)
-            
+
+            @test loglikelihood(dchol, x) ≈ logpdf(dchol, x)
             xs = cholesky.(rand(d, 10))
             @test loglikelihood(dchol, xs) ≈ sum(logpdf(dchol, x) for x in xs)
         end
