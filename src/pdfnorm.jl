@@ -20,7 +20,7 @@ function pdfsquaredL2norm(d::Beta)
     return α > 0.5 && β > 0.5 ? z : oftype(z, Inf)
 end
 
-pdfsquaredL2norm(d::Categorical) = dot(probs(d), probs(d))
+pdfsquaredL2norm(d::DiscreteNonParametric) = dot(probs(d), probs(d))
 
 pdfsquaredL2norm(d::Cauchy) = inv2π / d.σ
 
