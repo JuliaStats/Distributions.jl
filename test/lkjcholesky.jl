@@ -134,41 +134,42 @@ end
     end
 
     @testset "Sampling" begin
+        rng = MersenneTwister(67)
         @testset "rand" begin
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
-                test_draw(d, rand(d))
-                test_draws(d, rand(d, 10^4))
+                test_draw(d, rand(rng, d))
+                test_draws(d, rand(rng, d, 10^4))
             end
-            @test_broken rand(LKJCholesky(5, Inf)) ≈ I
+            @test_broken rand(rng, LKJCholesky(5, Inf)) ≈ I
         end
 
         @testset "rand!" begin
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 x = Cholesky(Matrix{Float64}(undef, p, p), uplo, 0)
-                rand!(d, x)
+                rand!(rng, d, x)
                 test_draw(d, x)
                 # test that uplo of Cholesky object is respected
                 x2 = Cholesky(Matrix{Float64}(undef, p, p), uplo == 'L' ? 'U' : 'L', 0)
-                rand!(d, x2)
+                rand!(rng, d, x2)
                 test_draw(d, x2; check_uplo = false)
 
                 # allocating
                 xs = Vector{typeof(x)}(undef, 10^4)
-                rand!(d, xs)
+                rand!(rng, d, xs)
                 test_draws(d, xs)
 
-                F2 = cholesky(exp(Symmetric(randn(p, p))))
+                F2 = cholesky(exp(Symmetric(randn(rng, p, p))))
                 xs2 = [deepcopy(F2) for _ in 1:10^4]
-                xs2[1] = cholesky(exp(Symmetric(randn(p + 1, p + 1))))
-                rand!(d, xs2)
+                xs2[1] = cholesky(exp(Symmetric(randn(rng, p + 1, p + 1))))
+                rand!(rng, d, xs2)
                 test_draws(d, xs2)
 
                 # non-allocating
-                F3 = cholesky(exp(Symmetric(randn(p, p))))
+                F3 = cholesky(exp(Symmetric(randn(rng, p, p))))
                 xs3 = [deepcopy(F3) for _ in 1:10^4]
-                rand!(d, xs3)
+                rand!(rng, d, xs3)
                 test_draws(d, xs3; check_uplo = uplo == 'U')
             end
         end
