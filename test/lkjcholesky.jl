@@ -152,6 +152,10 @@ end
                 x = Cholesky(Matrix{Float64}(undef, p, p), uplo, 0)
                 rand!(rng, d, x)
                 test_draw(d, x)
+                x = Cholesky(Matrix{Float64}(undef, p, p), uplo, 0)
+                rand!(d, x)
+                test_draw(d, x)
+
                 # test that uplo of Cholesky object is respected
                 x2 = Cholesky(Matrix{Float64}(undef, p, p), uplo == 'L' ? 'U' : 'L', 0)
                 rand!(rng, d, x2)
