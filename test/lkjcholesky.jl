@@ -2,6 +2,7 @@ using Distributions
 using Random
 using LinearAlgebra
 using Test
+using FiniteDifferences
 
 function test_draw(d::LKJCholesky, x; check_uplo=true)
     @test insupport(d, x)
@@ -37,6 +38,34 @@ function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
             @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
         end
     end
+end
+
+# Compute logdetjac of ϕ: L → L L' where only strict lower triangle of L and L L' are unique
+function cholesky_inverse_logdetjac(L)
+    size(L, 1) == 1 && return 0.0
+    J = jacobian(central_fdm(5, 1), cholesky_vec_to_corr_vec, stricttril_to_vec(L))[1]
+    return logabsdet(J)[1]
+end
+stricttril_to_vec(L) = [L[i, j] for i in axes(L, 1) for j in 1:(i - 1)]
+function vec_to_stricttril(l)
+    n = length(l)
+    p = Int((1 + sqrt(8n + 1)) / 2)
+    L = similar(l, p, p)
+    fill!(L, 0)
+    k = 1
+    for i in 1:p, j in 1:(i - 1)
+        L[i, j] = l[k]
+        k += 1
+    end
+    return L
+end
+function cholesky_vec_to_corr_vec(l)
+    L = vec_to_stricttril(l)
+    for i in axes(L, 1)
+        w = view(L, i, 1:(i-1))
+        L[i, i] = sqrt(1 - norm(w)^2)
+    end
+    return stricttril_to_vec(L * L')
 end
 
 @testset "LKJCholesky" begin
@@ -119,9 +148,11 @@ end
             z = rand(d)
             x = cholesky(z)
             x_L = typeof(x)(Matrix(x.L), 'L', x.info)
-            logdetJ = sum(i -> (i - p) * log(x.UL[i, i]), 1:p)
+            logdetJ = sum(i -> (p - i) * log(x.UL[i, i]), 1:p)
+            logdetJ_approx = cholesky_inverse_logdetjac(x.L)
+            @test logdetJ ≈ logdetJ_approx
 
-            @test logpdf(dchol, x) ≈ logpdf(d, z) - logdetJ
+            @test logpdf(dchol, x) ≈ logpdf(d, z) + logdetJ
             @test logpdf(dchol, x_L) ≈ logpdf(dchol, x)
 
             @test pdf(dchol, x) ≈ exp(logpdf(dchol, x))
