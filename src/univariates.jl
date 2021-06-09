@@ -607,6 +607,7 @@ const continuous_distributions = [
     "laplace",
     "levy",
     "logistic",
+    "maxwellboltzmann",
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",
