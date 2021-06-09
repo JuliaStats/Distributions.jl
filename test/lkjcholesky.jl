@@ -7,7 +7,7 @@ function test_draw(d::LKJCholesky, x; check_uplo=true)
     @test insupport(d, x)
     check_uplo && @test x.uplo == d.uplo
 end
-function test_draws(d::LKJCholesky, xs; check_uplo=true)
+function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
     @test all(x -> insupport(d, x), xs)
     check_uplo && @test all(x -> x.uplo == d.uplo, xs)
 
@@ -34,7 +34,7 @@ function test_draws(d::LKJCholesky, xs; check_uplo=true)
         α = 0.05
         L = sum(1:(p - 1))
         for i in 1:p, j in 1:(i-1)
-            @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L
+            @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
         end
     end
 end
@@ -134,12 +134,14 @@ end
     end
 
     @testset "Sampling" begin
-        rng = MersenneTwister(67)
+        rng = MersenneTwister(66)
+        nkstests = 4 # use for appropriate Bonferroni correction for KS test
+
         @testset "rand" begin
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(rng, d))
-                test_draws(d, rand(rng, d, 10^4))
+                test_draws(d, rand(rng, d, 10^4); nkstests=nkstests)
             end
             @test_broken rand(rng, LKJCholesky(5, Inf)) ≈ I
         end
@@ -158,19 +160,19 @@ end
                 # allocating
                 xs = Vector{typeof(x)}(undef, 10^4)
                 rand!(rng, d, xs)
-                test_draws(d, xs)
+                test_draws(d, xs; nkstests=nkstests)
 
                 F2 = cholesky(exp(Symmetric(randn(rng, p, p))))
                 xs2 = [deepcopy(F2) for _ in 1:10^4]
                 xs2[1] = cholesky(exp(Symmetric(randn(rng, p + 1, p + 1))))
                 rand!(rng, d, xs2)
-                test_draws(d, xs2)
+                test_draws(d, xs2; nkstests=nkstests)
 
                 # non-allocating
                 F3 = cholesky(exp(Symmetric(randn(rng, p, p))))
                 xs3 = [deepcopy(F3) for _ in 1:10^4]
                 rand!(rng, d, xs3)
-                test_draws(d, xs3; check_uplo = uplo == 'U')
+                test_draws(d, xs3; check_uplo = uplo == 'U', nkstests=nkstests)
             end
         end
     end
