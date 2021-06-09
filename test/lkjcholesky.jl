@@ -31,7 +31,7 @@ function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
     end
 
     @testset "LKJCholesky marginal KS test" begin
-        α = 0.05
+        α = 0.01
         L = sum(1:(p - 1))
         for i in 1:p, j in 1:(i-1)
             @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
