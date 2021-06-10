@@ -195,11 +195,18 @@ end
 #
 
 function _lkj_cholesky_onion_sampler!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky)
-    _lkj_cholesky_onion_tril!(rng, R.uplo === 'U' ? transpose(R.factors) : R.factors, d.d, d.η)
-    return R        
+    TTri = R.uplo === 'U' ? UpperTriangular : LowerTriangular
+    _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, TTri)
+    return R
 end
 
-function _lkj_cholesky_onion_tril!(rng::AbstractRNG, A::AbstractMatrix, d::Integer, η::Real)
+function _lkj_cholesky_onion_tri!(
+    rng::AbstractRNG,
+    A::AbstractMatrix,
+    d::Integer,
+    η::Real,
+    ::Type{TTri},
+) where {TTri<:LinearAlgebra.AbstractTriangular}
     # Section 3.2 in LKJ (2009 JMA)
     # reformulated to incrementally construct Cholesky factor as mentioned in Section 5
     # equivalent steps in algorithm in reference are marked.
@@ -208,9 +215,14 @@ function _lkj_cholesky_onion_tril!(rng::AbstractRNG, A::AbstractMatrix, d::Integ
     d > 1 || return R
     β = η + (d - 2)//2
     #  1. Initialization
-    @inbounds A[2, 1] = w0 = 2 * rand(rng, Beta(β, β)) - 1
+    w0 = 2 * rand(rng, Beta(β, β)) - 1
+    @inbounds if TTri <: LowerTriangular
+        A[2, 1] = w0
+    else
+        A[1, 2] = w0
+    end
     @inbounds A[2, 2] = sqrt(1 - w0^2)
-    #  2. Loop, each iteration k adds row k+1
+    #  2. Loop, each iteration k adds row/column k+1
     for k in 2:(d - 1)
         #  (a)
         β -= 1//2
@@ -218,10 +230,10 @@ function _lkj_cholesky_onion_tril!(rng::AbstractRNG, A::AbstractMatrix, d::Integ
         y = rand(rng, Beta(k//2, β))
         #  (c)-(e)
         # w is directionally uniform vector of length √y
-        @inbounds w = @view A[k + 1, 1:k]
+        @inbounds w = @views TTri <: LowerTriangular ? A[k + 1, 1:k] : A[1:k, k + 1]
         w .= randn.(Ref(rng))
         rmul!(w, sqrt(y) / norm(w))
-        # normalize so new row has unit norm
+        # normalize so new row/column has unit norm
         @inbounds A[k + 1, k + 1] = sqrt(1 - y)
     end
     #  3.
