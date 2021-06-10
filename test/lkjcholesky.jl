@@ -63,7 +63,12 @@ function cholesky_vec_to_corr_vec(l)
     L = vec_to_stricttril(l)
     for i in axes(L, 1)
         w = view(L, i, 1:(i-1))
-        L[i, i] = sqrt(1 - norm(w)^2)
+        wnorm = norm(w)
+        if wnorm > 1
+            w ./= wnorm
+            wnorm = 1
+        end
+        L[i, i] = sqrt(1 - wnorm^2)
     end
     return stricttril_to_vec(L * L')
 end
