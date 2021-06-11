@@ -139,3 +139,41 @@ end
 #### Sampling
 
 rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
+
+#### Fit model
+
+"""
+    fit_mle(::Type{<:Weibull}, x::AbstractArray{T}; 
+    α0::Float64 = 1.0, maxiter::Int = 1000, tol::Float64 = 1e-16)
+
+Maximum Likelihood Estimate of `Weibull` Distribution via Newton's Method
+
+"""
+function fit_mle(::Type{<:Weibull}, x::AbstractArray{T};
+    α0::Float64 = 1.0, maxiter::Int = 1000, tol::Float64 = 1e-16) where T <: Real
+
+    ϵ = Inf
+    N = 0
+
+    α = α0
+
+    lnx = log.(x)
+    n = length(x)
+
+    while ϵ > tol && N < maxiter
+
+        xpow = x.^α
+
+        fx = sum(xpow .* lnx) / (sum(xpow)) - (1 / n) * sum(lnx) - 1 / α
+        ∂fx = (-sum(xpow .* lnx)^2 + sum(xpow) * sum((lnx.^2) .* xpow)) / (sum(xpow)^2) + 1 / α^2
+
+        αold = α
+        α -= fx / ∂fx
+
+        ϵ = abs(α - αold)
+        N += 1
+    end
+
+    θ = sum((x.^α) ./ n)^(1 / α)
+    return Weibull(α, θ)
+end
