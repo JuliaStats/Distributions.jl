@@ -153,16 +153,26 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
 
     N = 0
 
-    param_type = typeof(AbstractFloat(alpha0))
-    α::param_type = alpha0
-
     lnx = map(log, x)
     lnxsq = lnx.^2
     mean_lnx = mean(lnx)
     n = length(x)
 
-    convergence = false
-    while !convergence && N < maxiter
+    # first iteration outside loop, prevents type instabililty in α, ϵ
+
+    xpow0 = x.^alpha0
+    sum_xpow0 = sum(xpow0)
+    dot_xpowlnx0 = dot(xpow0, lnx)
+
+    fx = dot_xpowlnx0 / sum_xpow0 - mean_lnx - 1 / alpha0
+    ∂fx = (-dot_xpowlnx0^2 + sum_xpow0 * dot(lnxsq, xpow0)) / (sum_xpow0^2) + 1 / alpha0^2
+
+    α = alpha0 - fx / ∂fx
+
+    ϵ = abs(α - alpha0)
+    N += 1
+
+    while ϵ > tol && N < maxiter
 
         xpow = x.^α
         sum_xpow = sum(xpow)
@@ -174,10 +184,10 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
         αold = α
         α -= fx / ∂fx
 
-        convergence = abs(α - αold) < tol
+        ϵ = abs(α - αold)
         N += 1
     end
 
-    θ::param_type = sum((x.^α) ./ n)^(1 / α)
+    θ = sum((x.^α) ./ n)^(1 / α)
     return Weibull(α, θ)
 end
