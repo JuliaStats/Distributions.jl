@@ -151,28 +151,33 @@ Compute the maximum likelihood estimate of the [`Weibull`](@ref) distribution wi
 function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
     alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
 
-    ϵ = Inf
     N = 0
 
-    α = α0
+    param_type = typeof(AbstractFloat(alpha0))
+    α::param_type = alpha0
 
     lnx = map(log, x)
+    lnxsq = lnx.^2
+    mean_lnx = mean(lnx)
     n = length(x)
 
-    while ϵ > tol && N < maxiter
+    convergence = false
+    while !convergence && N < maxiter
 
         xpow = x.^α
+        sum_xpow = sum(xpow)
+        dot_xpowlnx = dot(xpow, lnx)
 
-        fx = sum(xpow .* lnx) / (sum(xpow)) - (1 / n) * sum(lnx) - 1 / α
-        ∂fx = (-sum(xpow .* lnx)^2 + sum(xpow) * sum((lnx.^2) .* xpow)) / (sum(xpow)^2) + 1 / α^2
+        fx = dot_xpowlnx / sum_xpow - mean_lnx - 1 / α
+        ∂fx = (-dot_xpowlnx^2 + sum_xpow * dot(lnxsq, xpow)) / (sum_xpow^2) + 1 / α^2
 
         αold = α
         α -= fx / ∂fx
 
-        ϵ = abs(α - αold)
+        convergence = abs(α - αold) < tol
         N += 1
     end
 
-    θ = sum((x.^α) ./ n)^(1 / α)
+    θ::param_type = sum((x.^α) ./ n)^(1 / α)
     return Weibull(α, θ)
 end
