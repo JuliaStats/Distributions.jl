@@ -143,14 +143,13 @@ rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
 #### Fit model
 
 """
-    fit_mle(::Type{<:Weibull}, x::AbstractArray{T}; 
-    α0::Float64 = 1.0, maxiter::Int = 1000, tol::Float64 = 1e-16)
+    fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real}; 
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
 
-Maximum Likelihood Estimate of `Weibull` Distribution via Newton's Method
-
+Compute the maximum likelihood estimate of the [`Weibull`](@ref) distribution with Newton's method.
 """
-function fit_mle(::Type{<:Weibull}, x::AbstractArray{T};
-    α0::Float64 = 1.0, maxiter::Int = 1000, tol::Float64 = 1e-16) where T <: Real
+function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
 
     ϵ = Inf
     N = 0
