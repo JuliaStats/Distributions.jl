@@ -156,7 +156,7 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
 
     α = α0
 
-    lnx = log.(x)
+    lnx = map(log, x)
     n = length(x)
 
     while ϵ > tol && N < maxiter
