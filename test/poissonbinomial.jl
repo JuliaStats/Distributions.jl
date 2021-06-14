@@ -62,8 +62,12 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
         @test @inferred(quantile(d, i)) ≈ quantile(dref, i)
     end
     for i=0:n
-        @test isapprox(@inferred(cdf(d, i)), cdf(dref, i), atol=1e-15)
-        @test isapprox(@inferred(pdf(d, i)), pdf(dref, i), atol=1e-15)
+        @test @inferred(cdf(d, i)) ≈ cdf(dref, i) atol=1e-15
+        @test @inferred(cdf(d, i//1)) ≈ cdf(dref, i) atol=1e-15
+        @test @inferred(pdf(d, i)) ≈ pdf(dref, i) atol=1e-15
+        @test @inferred(pdf(d, i//1)) ≈ pdf(dref, i) atol=1e-15
+        @test @inferred(logpdf(d, i)) ≈ logpdf(dref, i)
+        @test @inferred(logpdf(d, i//1)) ≈ logpdf(dref, i)
     end
 
 end
@@ -105,7 +109,10 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test isapprox(@inferred(pdf(d, k)), m, atol=1e-15)
+        @test @inferred(pdf(d, k)) ≈ m atol=1e-15
+        @test @inferred(pdf(d, k//1)) ≈ m atol=1e-15
+        @test @inferred(logpdf(d, k)) ≈ log(m)
+        @test @inferred(logpdf(d, k//1)) ≈ log(m)
     end
 end
 

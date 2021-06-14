@@ -123,15 +123,15 @@ function cf(d::PoissonBinomial, t::Real)
     end
 end
 
-pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[k+1] : zero(eltype(d.pmf))
+pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k+1)] : zero(eltype(d.pmf))
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
 # Computes the pdf of a poisson-binomial random variable using
 # simple, fast recursive formula
 #
-#      Marlin A. Thomas & Audrey E. Taub (1982) 
-#      Calculating binomial probabilities when the trial probabilities are unequal, 
-#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534 
+#      Marlin A. Thomas & Audrey E. Taub (1982)
+#      Calculating binomial probabilities when the trial probabilities are unequal,
+#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534
 #
 function poissonbinomial_pdf(p)
     S = zeros(eltype(p), length(p) + 1)
