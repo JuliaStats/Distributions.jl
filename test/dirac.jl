@@ -10,6 +10,7 @@ using Test
         @test !insupport(d, prevfloat(val))
         @test insupport(d, val)
         @test !insupport(d, nextfloat(val))
+        @test support(d) == (val,)
 
         @test iszero(pdf(d, prevfloat(val)))
         @test isone(pdf(d, val))

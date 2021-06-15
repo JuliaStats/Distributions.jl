@@ -27,9 +27,9 @@ Base.eltype(::Type{Dirac{T}}) where {T} = T
 insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
+support(d::Dirac) = (d.value,)
 
 #### Properties
-
 mean(d::Dirac) = d.value
 var(d::Dirac{T}) where {T} = zero(T)
 
