@@ -68,14 +68,12 @@ function test_location_scale(
             @test var(d) ≈ var(dref)
             @test std(d) ≈ std(dref)
 
-            if !(dref isa Dirac)
-                @test skewness(d) ≈ skewness(dref)
-                @test kurtosis(d) ≈ kurtosis(dref)
+            @test skewness(d) ≈ skewness(dref)
+            @test kurtosis(d) ≈ kurtosis(dref)
 
-                @test isplatykurtic(d) == isplatykurtic(dref)
-                @test isleptokurtic(d) == isleptokurtic(dref)
-                @test ismesokurtic(d) == ismesokurtic(dref)
-            end
+            @test isplatykurtic(d) == isplatykurtic(dref)
+            @test isleptokurtic(d) == isleptokurtic(dref)
+            @test ismesokurtic(d) == ismesokurtic(dref)
 
             @test entropy(d) ≈ entropy(dref)
             @test mgf(d,-0.1) ≈ mgf(dref,-0.1)
@@ -159,14 +157,6 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-function test_location_scale_dirac(
-    rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, support,
-)
-    ρ = Dirac(support)
-    dref = Dirac(μ + σ * support)
-    return test_location_scale(rng, μ, σ, ρ, dref)
-end
-
 @testset "LocationScale" begin
     rng = MersenneTwister(123)
 
@@ -182,11 +172,5 @@ end
         test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
         test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
-    end
-
-    for _rng in (missing, rng)
-        test_location_scale_dirac(_rng, 1//3, 1//2, 1)
-        test_location_scale_dirac(_rng, -1//4, 1//3, 2)
-        test_location_scale_dirac(_rng, 6//5, 3//2, 3)
     end
 end

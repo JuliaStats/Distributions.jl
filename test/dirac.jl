@@ -2,7 +2,7 @@ using Distributions
 using Test
 
 @testset "Dirac tests" begin
-    for val in [3, 3.0, -3.5]
+    for val in (3, 3.0, -3.5)
         d = Dirac(val)
 
         @test minimum(d) == val
