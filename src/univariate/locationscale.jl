@@ -60,6 +60,11 @@ Base.eltype(::Type{<:LocationScale{T}}) where T = T
 
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
+support(d::LocationScale) = locationscale_support(d.μ, d.σ, support(d.ρ))
+function locationscale_support(μ::Real, σ::Real, support::RealInterval)
+    return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
+end
+locationscale_support(μ::Real, σ::Real, support) = μ .+ σ .* support
 
 LocationScale(μ::Real, σ::Real, d::LocationScale) = LocationScale(μ + d.μ * σ, σ * d.σ, d.ρ)
 

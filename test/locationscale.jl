@@ -31,6 +31,12 @@ function test_location_scale(
             @test minimum(d) == minimum(dref)
             @test maximum(d) == maximum(dref)
             @test extrema(d) == (minimum(d), maximum(d))
+            @test extrema(support(d)) == extrema(d)
+            if support(d.ρ) isa RealInterval
+                @test support(d) isa RealInterval
+            elseif hasfinitesupport(d.ρ)
+                @test support(d) == d.μ .+ d.σ .* support(d.ρ)
+            end
         end
         @testset "$k" for (k,dtest) in d_dict
             test_support(dtest, dref)
@@ -61,6 +67,7 @@ function test_location_scale(
 
             @test var(d) ≈ var(dref)
             @test std(d) ≈ std(dref)
+
             @test skewness(d) ≈ skewness(dref)
             @test kurtosis(d) ≈ kurtosis(dref)
 

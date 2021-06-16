@@ -27,9 +27,9 @@ Base.eltype(::Type{Dirac{T}}) where {T} = T
 insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
+support(d::Dirac) = (d.value,)
 
 #### Properties
-
 mean(d::Dirac) = d.value
 var(d::Dirac{T}) where {T} = zero(T)
 
@@ -43,6 +43,7 @@ pdf(d::Dirac, x::Real) = insupport(d, x) ? 1.0 : 0.0
 logpdf(d::Dirac, x::Real) = insupport(d, x) ? 0.0 : -Inf
 
 cdf(d::Dirac, x::Real) = x < d.value ? 0.0 : 1.0
+cdf(d::Dirac, x::Integer) = x < d.value ? 0.0 : 1.0
 
 quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
 
