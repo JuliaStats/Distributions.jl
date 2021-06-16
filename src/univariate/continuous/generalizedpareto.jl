@@ -132,26 +132,22 @@ function logpdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     return p
 end
 
-function logccdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
-    (μ, σ, ξ) = params(d)
-
-    # The logccdf is log(0) outside the support range.
-    p = -T(Inf)
-
-    if x >= μ
-        z = (x - μ) / σ
-        if abs(ξ) < eps()
-            p = -z
-        elseif ξ > 0 || (ξ < 0 && x < maximum(d))
-            p = (-1 / ξ) * log1p(z * ξ)
-        end
+function logccdf(d::GeneralizedPareto, x::Real)
+    μ, σ, ξ = params(d)
+    z = max((x - μ) / σ, 0) # z(x) = z(μ) = 0 if x < μ (lower bound)
+    return if abs(ξ) < eps(one(ξ)) # ξ == 0
+        -z
+    elseif ξ < 0
+        # y(x) = y(μ - σ / ξ) = -1 if x > μ - σ / ξ (upper bound)
+        -log1p(max(z * ξ, -1)) / ξ
+    else
+        -log1p(z * ξ) / ξ
     end
-
-    return p
 end
-
 ccdf(d::GeneralizedPareto, x::Real) = exp(logccdf(d, x))
+
 cdf(d::GeneralizedPareto, x::Real) = -expm1(logccdf(d, x))
+logcdf(d::GeneralizedPareto, x::Real) = log1mexp(logccdf(d, x))
 
 function quantile(d::GeneralizedPareto{T}, p::Real) where T<:Real
     (μ, σ, ξ) = params(d)

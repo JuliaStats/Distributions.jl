@@ -277,14 +277,11 @@ function insupport(d::AbstractMixtureModel, x::AbstractVector)
     return any(insupport(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
 end
 
-function _cdf(d::UnivariateMixture, x::Real)
+function cdf(d::UnivariateMixture, x::Real)
     p = probs(d)
     r = sum(pi * cdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
     return r
 end
-
-cdf(d::UnivariateMixture{Continuous}, x::Real) = _cdf(d, x)
-cdf(d::UnivariateMixture{Discrete}, x::Integer) = _cdf(d, x)
 
 function _mixpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
@@ -362,10 +359,8 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
-pdf(d::UnivariateMixture{Continuous}, x::Real) = _mixpdf1(d, x)
-pdf(d::UnivariateMixture{Discrete}, x::Int) = _mixpdf1(d, x)
-logpdf(d::UnivariateMixture{Continuous}, x::Real) = _mixlogpdf1(d, x)
-logpdf(d::UnivariateMixture{Discrete}, x::Int) = _mixlogpdf1(d, x)
+pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
+logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
 
 _pdf!(r::AbstractArray, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
 _pdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixpdf!(r, d, x)
@@ -374,7 +369,7 @@ _logpdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixlogpdf!
 _pdf(d::MultivariateMixture, x::AbstractVector) = _mixpdf1(d, x)
 _logpdf(d::MultivariateMixture, x::AbstractVector) = _mixlogpdf1(d, x)
 _pdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixpdf!(r, d, x)
-_lodpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogpdf!(r, d, x)
+_logpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogpdf!(r, d, x)
 
 
 ## component-wise pdf and logpdf

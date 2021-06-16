@@ -100,10 +100,12 @@ Computing cdf of the Skellam distribution.
 """
 function cdf(d::Skellam, t::Integer)
     μ1, μ2 = params(d)
-    (t < 0) ? nchisqcdf(-2*t, 2*μ1, 2*μ2) : 1.0 - nchisqcdf(2*(t+1), 2*μ2, 2*μ1)
+    return if t < 0
+        nchisqcdf(-2*t, 2*μ1, 2*μ2)
+    else
+        1 - nchisqcdf(2*(t+1), 2*μ2, 2*μ1)
+    end
 end
-
-cdf(d::Skellam, t::Real) = cdf(d, floor(Int, t))
 
 #### Sampling
 rand(rng::AbstractRNG, d::Skellam) =

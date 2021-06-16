@@ -83,16 +83,13 @@ logpdf(d::Chi, x::Real) = (ν = d.ν;
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
-cdf(d::Chi, x::Real) = chisqcdf(d.ν, x^2)
-ccdf(d::Chi, x::Real) = chisqccdf(d.ν, x^2)
-logcdf(d::Chi, x::Real) = chisqlogcdf(d.ν, x^2)
-logccdf(d::Chi, x::Real) = chisqlogccdf(d.ν, x^2)
+for f in (:cdf, :ccdf, :logcdf, :logccdf)
+    @eval $f(d::Chi, x::Real) = $f(Chisq(d.ν; check_args=false), max(x, 0)^2)
+end
 
-quantile(d::Chi, p::Real) = sqrt(chisqinvcdf(d.ν, p))
-cquantile(d::Chi, p::Real) = sqrt(chisqinvccdf(d.ν, p))
-invlogcdf(d::Chi, p::Real) = sqrt(chisqinvlogcdf(d.ν, p))
-invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
-
+for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
+    @eval $f(d::Chi, p::Real) = sqrt($f(Chisq(d.ν; check_args=false), p))
+end
 
 #### Sampling
 

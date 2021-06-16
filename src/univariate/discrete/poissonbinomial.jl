@@ -126,6 +126,16 @@ end
 pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k+1)] : zero(eltype(d.pmf))
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
+cdf(d::PoissonBinomial, k::Int) = integerunitrange_cdf(d, k)
+
+# leads to numerically more accurate results
+for f in (:ccdf, :logcdf, :logccdf)
+    @eval begin
+        $f(d::PoissonBinomial, k::Real) = $(Symbol(f, :_int))(d, k)
+        $f(d::PoissonBinomial, k::Int) = $(Symbol(:integerunitrange_, f))(d, k)
+    end
+end
+
 # Computes the pdf of a poisson-binomial random variable using
 # simple, fast recursive formula
 #

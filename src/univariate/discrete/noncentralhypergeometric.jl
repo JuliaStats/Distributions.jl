@@ -119,7 +119,7 @@ function pdf(d::FisherNoncentralHypergeometric, k::Integer)
     return fₖ/s
 end
 
-logpdf(d::FisherNoncentralHypergeometric, k::Integer) = log(pdf(d, k))
+logpdf(d::FisherNoncentralHypergeometric, k::Real) = log(pdf(d, k))
 
 function cdf(d::FisherNoncentralHypergeometric, k::Integer)
     ω, _ = promote(d.ω, float(k))
@@ -166,8 +166,6 @@ function cdf(d::FisherNoncentralHypergeometric, k::Integer)
 
     return Fₖ/s
 end
-
-logcdf(d::FisherNoncentralHypergeometric, k::Integer) = log(cdf(d, k))
 
 function _expectation(f, d::FisherNoncentralHypergeometric)
     ω = float(d.ω)
@@ -257,5 +255,16 @@ function logpdf(d::WalleniusNoncentralHypergeometric, k::Real)
             log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
     else
         return log(zero(k))
+    end
+end
+
+cdf(d::WalleniusNoncentralHypergeometric, k::Integer) = integerunitrange_cdf(d, k)
+
+for f in (:ccdf, :logcdf, :logccdf)
+    @eval begin
+        $f(d::WalleniusNoncentralHypergeometric, k::Real) = $(Symbol(f, :_int))(d, k)
+        function $f(d::WalleniusNoncentralHypergeometric, k::Integer)
+            return $(Symbol(:integerunitrange_, f))(d, k)
+        end
     end
 end
