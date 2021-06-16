@@ -156,7 +156,6 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
     lnx = map(log, x)
     lnxsq = lnx.^2
     mean_lnx = mean(lnx)
-    n = length(x)
 
     # first iteration outside loop, prevents type instabililty in α, ϵ
 
@@ -167,9 +166,10 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
     fx = dot_xpowlnx0 / sum_xpow0 - mean_lnx - 1 / alpha0
     ∂fx = (-dot_xpowlnx0^2 + sum_xpow0 * dot(lnxsq, xpow0)) / (sum_xpow0^2) + 1 / alpha0^2
 
-    α = alpha0 - fx / ∂fx
+    Δα = fx / ∂fx
+    α = alpha0 - Δα
 
-    ϵ = abs(α - alpha0)
+    ϵ = abs(Δα)
     N += 1
 
     while ϵ > tol && N < maxiter
@@ -181,10 +181,10 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
         fx = dot_xpowlnx / sum_xpow - mean_lnx - 1 / α
         ∂fx = (-dot_xpowlnx^2 + sum_xpow * dot(lnxsq, xpow)) / (sum_xpow^2) + 1 / α^2
 
-        αold = α
-        α -= fx / ∂fx
+        Δα = fx / ∂fx
+        α -= Δα
 
-        ϵ = abs(α - αold)
+        ϵ = abs(Δα)
         N += 1
     end
 
