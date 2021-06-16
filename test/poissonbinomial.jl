@@ -62,14 +62,28 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
         @test @inferred(quantile(d, i)) ≈ quantile(dref, i)
     end
     for i=0:n
-        @test @inferred(cdf(d, i)) ≈ cdf(dref, i) atol=1e-15
-        @test @inferred(cdf(d, i//1)) ≈ cdf(dref, i) atol=1e-15
         @test @inferred(pdf(d, i)) ≈ pdf(dref, i) atol=1e-15
         @test @inferred(pdf(d, i//1)) ≈ pdf(dref, i) atol=1e-15
         @test @inferred(logpdf(d, i)) ≈ logpdf(dref, i)
         @test @inferred(logpdf(d, i//1)) ≈ logpdf(dref, i)
+        for f in (cdf, ccdf, logcdf, logccdf)
+            @test @inferred(f(d, i)) ≈ f(dref, i) rtol=1e-6
+            @test @inferred(f(d, i//1)) ≈ f(dref, i) rtol=1e-6
+            @test @inferred(f(d, i + 0.5)) ≈ f(dref, i) rtol=1e-6
+        end
     end
 
+    @test iszero(@inferred(cdf(d, -Inf)))
+    @test isone(@inferred(cdf(d, Inf)))
+    @test @inferred(logcdf(d, -Inf)) == -Inf
+    @test iszero(@inferred(logcdf(d, Inf)))
+    @test isone(@inferred(ccdf(d, -Inf)))
+    @test iszero(@inferred(ccdf(d, Inf)))
+    @test iszero(@inferred(logccdf(d, -Inf)))
+    @test @inferred(logccdf(d, Inf)) == -Inf
+    for f in (cdf, ccdf, logcdf, logccdf)
+        @test isnan(f(d, NaN))
+    end
 end
 
 # Test against a sum of three Binomial distributions
