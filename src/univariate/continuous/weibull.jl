@@ -188,6 +188,6 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
         N += 1
     end
 
-    θ = sum((x.^α) ./ n)^(1 / α)
+    θ = mean(x.^α)^(1 / α)
     return Weibull(α, θ)
 end
