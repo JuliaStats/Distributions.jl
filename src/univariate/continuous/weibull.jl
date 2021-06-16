@@ -138,4 +138,4 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
+rand(rng::AbstractRNG, d::Weibull) = xval(d, randexp(rng))
