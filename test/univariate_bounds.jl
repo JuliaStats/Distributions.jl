@@ -58,6 +58,7 @@ get_subtypes(x::Type) = _subtypes_in(Base.loaded_modules_array(), x)
 dists = get_subtypes(UnivariateDistribution)
 filter!(x -> hasmethod(x, ()), dists)
 filter!(x -> isbounded(x()), dists)
+filter!(x -> !isperiodic(x()), dists)
 
 @testset "bound checking $dist" for dist in dists
     d = dist()

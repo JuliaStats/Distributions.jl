@@ -20,6 +20,8 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
+isperiodic(d::UnivariateDistribution) = false
+
 """
     params(d::UnivariateDistribution)
 
