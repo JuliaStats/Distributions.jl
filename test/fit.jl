@@ -443,3 +443,13 @@ end
         @test all(ForwardDiff.gradient(f, x) .>= 0)
     end
 end
+
+@testset "Testing fit for Weibull" begin
+    for func in funcs, dist in (Weibull, Weibull{Float64})
+        d = fit(dist, func[2](dist(8.1, 4.3), N))
+        @test isa(d, dist)
+        @test isapprox(d.α, 8.1, atol = 0.1)
+        @test isapprox(d.θ, 4.3, atol = 0.1)
+
+    end
+end
