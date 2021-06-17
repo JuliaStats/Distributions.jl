@@ -582,6 +582,7 @@ const discrete_distributions = [
 
 const continuous_distributions = [
     "arcsine",
+    "asymmetriclaplace",
     "beta",
     "betaprime",
     "biweight",

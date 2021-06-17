@@ -3,6 +3,12 @@ Arcsine(2.0)
 Arcsine(1.0, 2.5)
 Arcsine(-1.0, 1.0)
 
+AsymmetricLaplace()
+AsymmetricLaplace(2.0)
+AsymmetricLaplace(0.0, 1.0)
+AsymmetricLaplace(5.0, 1.0)
+AsymmetricLaplace(5.0, 1.5)
+
 Beta(2.0, 2.0)
 Beta(3.0, 4.0)
 Beta(17.0, 13.0)
