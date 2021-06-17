@@ -139,3 +139,55 @@ end
 #### Sampling
 
 rand(rng::AbstractRNG, d::Weibull) = xval(d, randexp(rng))
+
+#### Fit model
+
+"""
+    fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real}; 
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
+
+Compute the maximum likelihood estimate of the [`Weibull`](@ref) distribution with Newton's method.
+"""
+function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
+
+    N = 0
+
+    lnx = map(log, x)
+    lnxsq = lnx.^2
+    mean_lnx = mean(lnx)
+
+    # first iteration outside loop, prevents type instabililty in α, ϵ
+
+    xpow0 = x.^alpha0
+    sum_xpow0 = sum(xpow0)
+    dot_xpowlnx0 = dot(xpow0, lnx)
+
+    fx = dot_xpowlnx0 / sum_xpow0 - mean_lnx - 1 / alpha0
+    ∂fx = (-dot_xpowlnx0^2 + sum_xpow0 * dot(lnxsq, xpow0)) / (sum_xpow0^2) + 1 / alpha0^2
+
+    Δα = fx / ∂fx
+    α = alpha0 - Δα
+
+    ϵ = abs(Δα)
+    N += 1
+
+    while ϵ > tol && N < maxiter
+
+        xpow = x.^α
+        sum_xpow = sum(xpow)
+        dot_xpowlnx = dot(xpow, lnx)
+
+        fx = dot_xpowlnx / sum_xpow - mean_lnx - 1 / α
+        ∂fx = (-dot_xpowlnx^2 + sum_xpow * dot(lnxsq, xpow)) / (sum_xpow^2) + 1 / α^2
+
+        Δα = fx / ∂fx
+        α -= Δα
+
+        ϵ = abs(Δα)
+        N += 1
+    end
+
+    θ = mean(x.^α)^(1 / α)
+    return Weibull(α, θ)
+end
