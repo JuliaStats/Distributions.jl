@@ -122,6 +122,13 @@ Compute the vector of element-wise variances for distribution `d`.
 var(d::MultivariateDistribution)
 
 """
+    std(d::MultivariateDistribution)
+
+Compute the vector of element-wise standard deviations for distribution `d`.
+"""
+std(d::MultivariateDistribution) = sqrt.(var(d))
+
+"""
     entropy(d::MultivariateDistribution)
 
 Compute the entropy value of distribution `d`.
