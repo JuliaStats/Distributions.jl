@@ -156,15 +156,20 @@ end
 
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
-    rand!(rng, sampler(s), Array{eltype(s)}(undef, dims))
+    rand!(rng, s, Array{eltype(s)}(undef, dims))
 rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
-    rand!(rng, sampler(s), Array{float(eltype(s))}(undef, dims))
+    rand!(rng, s, Array{float(eltype(s))}(undef, dims))
 
 # multiple univariate with pre-allocated array
+# we use a function barrier since for some distributions `sampler(s)` is not type-stable:
+# https://github.com/JuliaStats/Distributions.jl/pull/1281
 function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
-    smp = sampler(s)
+    return _rand_loops!(rng, sampler(s), A)
+end
+
+function _rand_loops!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray)
     for i in eachindex(A)
-        @inbounds A[i] = rand(rng, smp)
+        @inbounds A[i] = rand(rng, sampler)
     end
     return A
 end
