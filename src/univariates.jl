@@ -575,6 +575,7 @@ const discrete_distributions = [
     "discreteuniform",
     "discretenonparametric",
     "categorical",
+    "dirichletcategorical",
     "geometric",
     "hypergeometric",
     "negativebinomial",
