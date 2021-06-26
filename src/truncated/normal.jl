@@ -142,10 +142,14 @@ function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: R
     μ = mean(d0)
     σ = std(d0)
     if isfinite(μ)
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
-        z = randnt(rng, a, b, d.tp)
-        return μ + σ * z
+        if σ > 0
+            a = (d.lower - μ) / σ
+            b = (d.upper - μ) / σ
+            z = randnt(rng, a, b, d.tp)
+            return μ + σ * z
+        else
+            return μ
+        end
     else
         return clamp(μ, d.lower, d.upper)
     end
