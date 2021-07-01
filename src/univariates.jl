@@ -20,12 +20,6 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
-struct HasNonIntegerSupport end
-struct HasIntegerSupport end
-struct HasIntegerUnitrangeSupport end
-
-supporttype(::UnivariateDistribution) = HasNonIntegerSupport()
-
 """
     params(d::UnivariateDistribution)
 
