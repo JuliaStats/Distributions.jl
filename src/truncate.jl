@@ -91,94 +91,59 @@ end
 
 quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-function _pdf(d::Truncated, x::T) where {T<:Real}
-    if d.lower <= x <= d.upper
-        pdf(d.untruncated, x) / d.tp
-    else
-        zero(T)
-    end
+function pdf(d::Truncated, x::Real)
+    result = pdf(d.untruncated, x) / d.tp
+    return d.lower <= x <= d.upper ? result : zero(result)
 end
 
-function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:Real}
-    _pdf(d, float(x))
+function logpdf(d::Truncated, x::Real)
+    result = logpdf(d.untruncated, x) - d.logtp
+    return d.lower <= x <= d.upper ? result : oftype(result, -Inf)
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || return zero(float(T))
-    _pdf(d, x)
-end
-
-function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Integer}
-    _pdf(d, float(x))
-end
-
-function _logpdf(d::Truncated, x::T) where {T<:Real}
-    if d.lower <= x <= d.upper
-        logpdf(d.untruncated, x) - d.logtp
-    else
-        TF = float(T)
-        -TF(Inf)
-    end
-end
-
-function logpdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    TF = float(T)
-    isinteger(x) || return -TF(Inf)
-    return _logpdf(d, x)
-end
-
-function logpdf(d::Truncated{D}, x::Integer) where {D<:DiscreteUnivariateDistribution}
-    _logpdf(d, x)
-end
-
-function logpdf(d::Truncated{D, Continuous}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
-    _logpdf(d, x)
-end
-
-# fallback to avoid method ambiguities
-_cdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? zero(T) :
-    x >= d.upper ? one(T) :
-    (cdf(d.untruncated, x) - d.lcdf) / d.tp
-
-cdf(d::Truncated, x::Real) = _cdf(d, x)
-cdf(d::Truncated, x::Integer) = _cdf(d, float(x)) # float conversion for stability
-
-function _logcdf(d::Truncated, x::T) where {T<:Real}
-    TF = float(T)
-    if x <= d.lower
-        -TF(Inf)
+function cdf(d::Truncated, x::Real)
+    result = (cdf(d.untruncated, x) - d.lcdf) / d.tp
+    return if x < d.lower
+        zero(result)
     elseif x >= d.upper
-        zero(TF)
+        one(result)
     else
-        log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+        result
     end
 end
 
-logcdf(d::Truncated, x::Real) = _logcdf(d, x)
-logcdf(d::Truncated, x::Integer) = _logcdf(d, x)
-
-_ccdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? one(T) :
-    x >= d.upper ? zero(T) :
-    (d.ucdf - cdf(d.untruncated, x)) / d.tp
-
-ccdf(d::Truncated, x::Real) = _ccdf(d, x)
-ccdf(d::Truncated, x::Integer) = _ccdf(d, float(x))
-
-function _logccdf(d::Truncated, x::T) where {T<:Real}
-    TF = float(T)
-    if x <= d.lower
-        zero(TF)
+function logcdf(d::Truncated, x::Real)
+    result = logsubexp(logcdf(d.untruncated, x), log(d.lcdf)) - d.logtp
+    return if x < d.lower
+        oftype(result, -Inf)
     elseif x >= d.upper
-        -TF(Inf)
+        zero(result)
     else
-        log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+        result
     end
 end
 
-logccdf(d::Truncated, x::Real) = _logccdf(d, x)
-logccdf(d::Truncated, x::Integer) = _logccdf(d, x)
+function ccdf(d::Truncated, x::Real)
+    result = (d.ucdf - cdf(d.untruncated, x)) / d.tp
+    return if x <= d.lower
+        one(result)
+    elseif x > d.upper
+        zero(result)
+    else
+        result
+    end
+end
+
+function logccdf(d::Truncated, x::Real)
+    result = logsubexp(logccdf(d.untruncated, x), log1p(-d.ucdf)) - d.logtp
+    return if x <= d.lower
+        zero(result)
+    elseif x > d.upper
+        oftype(result, -Inf)
+    else
+        result
+    end
+end
 
 ## random number generation
 

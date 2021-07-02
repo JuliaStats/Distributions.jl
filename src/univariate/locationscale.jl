@@ -103,21 +103,14 @@ mgf(d::LocationScale,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
 
 #### Evaluation & Sampling
 
-pdf(d::ContinuousLocationScale,x::Real) = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+pdf(d::ContinuousLocationScale, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
 pdf(d::DiscreteLocationScale, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ)
 
 logpdf(d::ContinuousLocationScale,x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ) - log(d.σ)
 logpdf(d::DiscreteLocationScale, x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ)
 
-# additional definitions are required to fix ambiguity errors and incorrect defaults
 for f in (:cdf, :ccdf, :logcdf, :logccdf)
-    _f = Symbol(:_, f)
-    @eval begin
-        $f(d::LocationScale, x::Real) = $_f(d, x)
-        $f(d::DiscreteLocationScale, x::Real) = $_f(d, x)
-        $f(d::DiscreteLocationScale, x::Integer) = $_f(d, x)
-        $_f(d::LocationScale, x::Real) = $f(d.ρ, (x - d.μ) / d.σ)
-    end
+    @eval $f(d::LocationScale, x::Real) = $f(d.ρ, (x - d.μ) / d.σ)
 end
 
 quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
@@ -134,4 +127,3 @@ Base.:*(x::Real, d::UnivariateDistribution) = LocationScale(zero(x), x, d)
 Base.:*(d::UnivariateDistribution, x::Real) = x * d
 Base.:-(d::UnivariateDistribution, x::Real) = d + -x
 Base.:/(d::UnivariateDistribution, x::Real) = inv(x) * d
-

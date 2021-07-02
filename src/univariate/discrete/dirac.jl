@@ -42,8 +42,10 @@ entropy(d::Dirac{T}) where {T} = zero(T)
 pdf(d::Dirac, x::Real) = insupport(d, x) ? 1.0 : 0.0
 logpdf(d::Dirac, x::Real) = insupport(d, x) ? 0.0 : -Inf
 
-cdf(d::Dirac, x::Real) = x < d.value ? 0.0 : 1.0
-cdf(d::Dirac, x::Integer) = x < d.value ? 0.0 : 1.0
+cdf(d::Dirac, x::Real) = x < d.value ? 0.0 : isnan(x) ? NaN : 1.0
+logcdf(d::Dirac, x::Real) = x < d.value ? -Inf : isnan(x) ? NaN : 0.0
+ccdf(d::Dirac, x::Real) = x < d.value ? 1.0 : isnan(x) ? NaN : 0.0
+logccdf(d::Dirac, x::Real) = x < d.value ? 0.0 : isnan(x) ? NaN : -Inf
 
 quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
 

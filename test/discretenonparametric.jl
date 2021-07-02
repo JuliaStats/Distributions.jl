@@ -39,19 +39,45 @@ test_params(d)
 @test pdf(d, 100.) == 0.
 @test pdf(d, 120.) == .1
 
+@test iszero(cdf(d, -Inf))
 @test cdf(d, -100.) == 0.
 @test cdf(d, -100) == 0.
 @test cdf(d, 0.) ≈ .2
 @test cdf(d, 100.) ≈ .9
 @test cdf(d, 100) ≈ .9
 @test cdf(d, 150.) == 1.
+@test isone(cdf(d, Inf))
+@test isnan(cdf(d, NaN))
 
+@test isone(ccdf(d, -Inf))
 @test ccdf(d, -100.) == 1.
 @test ccdf(d, -100) == 1.
 @test ccdf(d, 0.) ≈ .8
 @test ccdf(d, 100.) ≈ .1
 @test ccdf(d, 100) ≈ .1
 @test ccdf(d, 150.) == 0
+@test iszero(ccdf(d, Inf))
+@test isnan(ccdf(d, NaN))
+
+@test logcdf(d, -Inf) == -Inf
+@test logcdf(d, -100.) == -Inf
+@test logcdf(d, -100) == -Inf
+@test logcdf(d, 0.) ≈ log(0.2)
+@test logcdf(d, 100.) ≈ log(0.9)
+@test logcdf(d, 100) ≈ log(0.9)
+@test iszero(logcdf(d, 150.))
+@test iszero(logcdf(d, Inf))
+@test isnan(logcdf(d, NaN))
+
+@test iszero(logccdf(d, -Inf))
+@test iszero(logccdf(d, -100.))
+@test iszero(logccdf(d, -100))
+@test logccdf(d, 0.) ≈ log(0.8)
+@test logccdf(d, 100.) ≈ log(0.1)
+@test logccdf(d, 100) ≈ log(0.1)
+@test logccdf(d, 150.) == -Inf
+@test logccdf(d, Inf) == -Inf
+@test isnan(logccdf(d, NaN))
 
 @test quantile(d, 0) == -60
 @test quantile(d, .1) == -60

@@ -68,42 +68,30 @@ entropy(d::SymTriangularDist) = 1//2 + log(d.σ)
 
 #### Evaluation
 
-zval(d::SymTriangularDist, x::Real) = (x - d.μ) / d.σ
+zval(d::SymTriangularDist, x::Real) = min(abs(x - d.μ) / d.σ, 1)
 xval(d::SymTriangularDist, z::Real) = d.μ + z * d.σ
 
+pdf(d::SymTriangularDist, x::Real) = (1 - zval(d, x)) / scale(d)
+logpdf(d::SymTriangularDist, x::Real) = log(pdf(d, x))
 
-pdf(d::SymTriangularDist{T}, x::Real) where {T<:Real} = insupport(d, x) ? (1 - abs(zval(d, x))) / scale(d) : zero(T)
-
-function logpdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    insupport(d, x) ? log((1 - abs(zval(d, x))) / scale(d)) : -convert(T, T(Inf))
+function cdf(d::SymTriangularDist, x::Real)
+    r = (1 - zval(d, x))^2/2
+    return x < d.μ ? r : 1 - r
 end
 
-function cdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? zero(T) :
-    x <= μ ? (1 + zval(d, x))^2/2 :
-    x < μ + σ ? 1 - (1 - zval(d, x))^2/2 : one(T)
+function ccdf(d::SymTriangularDist, x::Real)
+    r = (1 - zval(d, x))^2/2
+    return x < d.μ ? 1 - r : r
 end
 
-function ccdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? one(T) :
-    x <= μ ? 1 - (1 + zval(d, x))^2/2 :
-    x < μ + σ ? (1 - zval(d, x))^2/2 : zero(T)
+function logcdf(d::SymTriangularDist, x::Real)
+    log_r = 2 * log1p(- zval(d, x)) + loghalf
+    return x < d.μ ? log_r : log1mexp(log_r)
 end
 
-function logcdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? -T(Inf) :
-    x <= μ ? loghalf + 2*log1p(zval(d, x)) :
-    x < μ + σ ? log1p(-1/2 * (1 - zval(d, x))^2) : zero(T)
-end
-
-function logccdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? zero(T) :
-    x <= μ ? log1p(-1/2 * (1 + zval(d, x))^2) :
-    x < μ + σ ? loghalf + 2*log1p(-zval(d, x)) : -T(Inf)
+function logccdf(d::SymTriangularDist, x::Real)
+    log_r = 2 * log1p(- zval(d, x)) + loghalf
+    return x < d.μ ? log1mexp(log_r) : log_r
 end
 
 quantile(d::SymTriangularDist, p::Real) = p < 1/2 ? xval(d, sqrt(2p) - 1) :
