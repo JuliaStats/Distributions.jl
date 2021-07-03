@@ -95,7 +95,7 @@ end
 # sum values of the probability mass function
 cdf(d::BetaBinomial, k::Int) = integerunitrange_cdf(d, k)
 
-for f in (:cdf, :logcdf, :logccdf)
+for f in (:ccdf, :logcdf, :logccdf)
     @eval begin
         $f(d::BetaBinomial, k::Real) = $(Symbol(f, :_int))(d, k)
         $f(d::BetaBinomial, k::Int) = $(Symbol(:integerunitrange_, f))(d, k)
