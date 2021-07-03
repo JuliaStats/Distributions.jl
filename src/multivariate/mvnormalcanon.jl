@@ -56,9 +56,10 @@ an isotropic precision matrix corresponding `J*I`.
 # Arguments
 - `d::Int`: dimension of distribution
 - `h::Vector{T<:Real}`: the potential vector, of type `Vector{T}` with `T<:Real`.
-- `J`: the representation of the precision matrix, which can be in either of the following forms (`T<:Real`):
+- `J`: the representation of the precision matrix, which can be in any of the following forms (`T<:Real`):
     1. an instance of a subtype of `AbstractPDMat`,
     2. a square matrix of type `Matrix{T}`,
+    3. a square matrix of type SparseMatrixCSC{Tv,Ti}
     3. a vector of type `Vector{T}`: indicating a diagonal precision matrix as `diagm(J)`,
     4. a real number: indicating an isotropic precision matrix corresponding `J*I`.
 
@@ -112,10 +113,14 @@ function MvNormalCanon(h::AbstractVector{T}, J::P) where {T<:Real, P<:AbstractPD
     MvNormalCanon{eltype(hh),typeof(JJ),typeof(hh)}(JJ \ hh, hh, JJ)
 end
 
+MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractSparseMatrix{<:Real}) = MvNormalCanon(μ, PDSparseMat(J))
+MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractSparseMatrix{<:Real}) = MvNormalCanon(h, PDSparseMat(J))
+
 MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) = MvNormalCanon(h, PDiagMat(prec))
 MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) = MvNormalCanon(h, ScalMat(length(h), prec))
 
+MvNormalCanon(J::AbstractSparseMatrix) = MvNormalCanon(PDSparseMat(J))
 MvNormalCanon(J::AbstractMatrix) = MvNormalCanon(PDMat(J))
 MvNormalCanon(prec::AbstractVector) = MvNormalCanon(PDiagMat(prec))
 MvNormalCanon(d::Int, prec) = MvNormalCanon(ScalMat(d, prec))
