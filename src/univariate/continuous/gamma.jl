@@ -88,7 +88,9 @@ gradlogpdf(d::Gamma{T}, x::Real) where {T<:Real} =
     insupport(Gamma, x) ? (d.α - 1) / x - 1 / d.θ : zero(T)
 
 function rand(rng::AbstractRNG, d::Gamma)
-    if shape(d) < 1.0
+    if scale(d) == 2.0 && shape(d) ∈ (1.0/2.0,3.0/2.0,4.0/2.0)
+        return rand(rng, ChisqNaiveSampler(shape(d) * 2.0))
+    elseif shape(d) < 1.0
         # TODO: shape(d) = 0.5 : use scaled chisq
         return rand(rng, GammaIPSampler(d))
     elseif shape(d) == 1.0
@@ -99,7 +101,9 @@ function rand(rng::AbstractRNG, d::Gamma)
 end
 
 function sampler(d::Gamma)
-    if shape(d) < 1.0
+    if scale(d) == 2.0 && shape(d) ∈ (1.0/2.0,3.0/2.0,4.0/2.0)
+        return ChisqNaiveSampler(shape(d) * 2.0)
+    elseif shape(d) < 1.0
         # TODO: shape(d) = 0.5 : use scaled chisq
         return GammaIPSampler(d)
     elseif shape(d) == 1.0
