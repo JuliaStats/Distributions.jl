@@ -166,3 +166,12 @@ for c in ["discrete",
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end
+
+# #1358
+@testset "Poisson quantile" begin
+    d = Poisson(1)
+    @test quantile(d, 0.2) isa Int
+    @test cquantile(d, 0.4) isa Int
+    @test invlogcdf(d, log(0.2)) isa Int
+    @test invlogccdf(d, log(0.6)) isa Int
+end
