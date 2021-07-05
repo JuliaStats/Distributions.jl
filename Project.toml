@@ -17,7 +17,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
-FillArrays = "0.9, 0.10, 0.11"
+FillArrays = "0.9, 0.10, 0.11, 0.12"
 PDMats = "0.10, 0.11"
 QuadGK = "2"
 SpecialFunctions = "0.8, 0.9, 0.10, 1.0"
