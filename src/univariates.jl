@@ -646,7 +646,7 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     pargs = [Expr(:(.), :d, Expr(:quote, s)) for s in psyms]
 
     # output type of `quantile` etc.
-    T = :($D isa DiscreteUnivariateDistribution ? Int : Real)
+    T = :($D <: DiscreteUnivariateDistribution ? Int : Real)
 
     return quote
         $Distributions.pdf(d::$D, x::Real) = $(fpdf)($(pargs...), x)
