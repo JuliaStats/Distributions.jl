@@ -24,11 +24,12 @@ end
 
 
 # vectorized versions
+# N.B. quantile.() excluded; see #1150
 for fun in [:pdf, :logpdf,
             :cdf, :logcdf,
             :ccdf, :logccdf,
             :invlogcdf, :invlogccdf,
-            :quantile, :cquantile]
+            :cquantile]
 
     _fun! = Symbol('_', fun, '!')
     fun! = Symbol(fun, '!')
