@@ -29,7 +29,7 @@ end
     N = 11
     # Construct independent distributions and `Product` distribution from these.
     ubound = rand(N)
-    ds = Uniform.(0.0, ubound)
+    ds = Uniform.(-ubound, ubound)
     x = rand.(ds)
     d_product = product_distribution(ds)
     @test d_product isa Product
@@ -43,6 +43,10 @@ end
     @test entropy(d_product) == sum(entropy.(ds))
     @test insupport(d_product, ubound) == true
     @test insupport(d_product, ubound .+ 1) == false
+    @test minimum(d_product) == -ubound
+    @test maximum(d_product) == ubound
+    @test extrema(d_product) == (-ubound, ubound)
+    @test isless(extrema(d_product)...)
 
     y = rand(d_product)
     @test y isa typeof(x)

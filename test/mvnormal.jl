@@ -29,6 +29,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
     @test g == deepcopy(g)
+    @test minimum(g) == fill(-Inf, d)
+    @test maximum(g) == fill(Inf, d)
+    @test extrema(g) == (minimum(g), maximum(g))
+    @test isless(extrema(g)...)
 
     # test sampling for AbstractMatrix (here, a SubArray):
     if ismissing(rng)
