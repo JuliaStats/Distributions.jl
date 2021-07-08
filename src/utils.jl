@@ -11,7 +11,7 @@ end
 
 ##### Utility functions
 
-isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
+isunitvec(v::AbstractVector) = abs(norm(v) - 1.0) < 1.0e-12
 
 isprobvec(p::AbstractVector{<:Real}) =
     all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))

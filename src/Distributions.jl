@@ -153,6 +153,8 @@ export
     Triweight,
     Truncated,
     Uniform,
+    UniformSpherical,
+    UniformBall,
     UnivariateGMM,
     VonMises,
     VonMisesFisher,
