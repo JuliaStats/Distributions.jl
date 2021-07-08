@@ -148,33 +148,9 @@ _pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(
     MvNormal
 
 Generally, users don't have to worry about these internal details.
+
 We provide a common constructor `MvNormal`, which will construct a distribution of
 appropriate type depending on the input arguments.
-
-    MvNormal(sig)
-
-Construct a multivariate normal distribution with zero mean and covariance represented by `sig`.
-
-    MvNormal(mu, sig)
-
-Construct a multivariate normal distribution with mean `mu` and covariance represented by `sig`.
-
-    MvNormal(d, sig)
-
-Construct a multivariate normal distribution of dimension `d`, with zero mean, and an
-isotropic covariance matrix corresponding `abs2(sig)*I`.
-
-# Arguments
-- `mu::Vector{T<:Real}`: The mean vector.
-- `d::Real`: dimension of distribution.
-- `sig`: The covariance, which can in of either of the following forms (with `T<:Real`):
-    1. subtype of `AbstractPDMat`,
-    2. symmetric matrix of type `Matrix{T}`,
-    3. vector of type `Vector{T}`: indicating a diagonal covariance as `diagm(abs2(sig))`,
-    4. real-valued number: indicating an isotropic covariance matrix corresponding `abs2(sig) * I`.
-
-**Note:** The constructor will choose an appropriate covariance form internally, so that
-special structure of the covariance can be exploited.
 """
 struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
@@ -197,33 +173,40 @@ function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
-function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat)
-    R = Base.promote_eltype(μ, Σ)
-    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
-end
-
-function MvNormal(μ::AbstractVector, Σ::AbstractPDMat)
+function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
 end
 
 # constructor with general covariance matrix
+"""
+    MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real})
+
+Construct a multivariate normal distribution with mean `μ` and covariance matrix `Σ`.
+"""
 MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
-MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(diag(Σ)))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
     MvNormal(μ, ScalMat(length(μ), Σ.λ))
-
-# constructor with vector of standard deviations
-MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) = MvNormal(μ, PDiagMat(abs2.(σ)))
-
-# constructor with scalar standard deviation
-MvNormal(μ::AbstractVector{<:Real}, σ::Real) = MvNormal(μ, ScalMat(length(μ), abs2(σ)))
+function MvNormal(
+    μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real,<:FillArrays.AbstractFill{<:Real,1}}
+)
+    return MvNormal(μ, ScalMat(size(Σ, 1), FillArrays.getindex_value(Σ.diag)))
+end
 
 # constructor without mean vector
-MvNormal(Σ::AbstractVecOrMat{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
+"""
+    MvNormal(Σ::AbstractMatrix{<:Real})
 
-# special constructor
-MvNormal(d::Int, σ::Real) = MvNormal(Zeros{typeof(σ)}(d), σ)
+Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
+"""
+MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
+
+# deprecated constructors with standard deviations
+Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
+Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(Fill(σ^2, d)))
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
