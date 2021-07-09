@@ -1,15 +1,17 @@
 """
     Uniform(a,b)
 
-The *continuous uniform distribution* over an interval ``[a, b]`` has probability density function
+The *continuous uniform distribution* over an interval ``(a, b)`` has probability density function
 
 ```math
 f(x; a, b) = \\frac{1}{b - a}, \\quad a \\le x \\le b
 ```
 
 ```julia
-Uniform()        # Uniform distribution over [0, 1]
-Uniform(a, b)    # Uniform distribution over [a, b]
+Uniform()        # Uniform distribution over (0, 1) - Float64
+Uniform(a, b)    # Uniform distribution over (a, b) - Float64
+Uniform{T}(a, b) # Uniform distribution over (a, b) - with T type
+Uniform(T, a, b) # Uniform distribution over (a, b) - with T type
 
 params(d)        # Get the parameters, i.e. (a, b)
 minimum(d)       # Get the lower bound, i.e. a
@@ -24,25 +26,35 @@ External links
 
 """
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
-    a::T
-    b::T
-    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
+    a::T1 where {T1 <: Real}
+    b::T2 where {T2 <: Real}
+
+    # Uniform{T}(a, b) constructor
+    function Uniform{T}(a, b; check_args=true) where {T <: Real}
+        check_args && @check_args(Uniform, a < b)
+        new{T}(a, b)
+    end
 end
 
-function Uniform(a::T, b::T; check_args=true) where {T <: Real}
+# zeros() like constructor (Uniform(T, a, b))
+function Uniform(::Type{T}, a, b; check_args=true) where {T <: Real}
     check_args && @check_args(Uniform, a < b)
     return Uniform{T}(a, b)
 end
 
-Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
+# No type specified constructor:
+function Uniform(a, b; check_args=true)
+    check_args && @check_args(Uniform, a < b)
+    return Uniform{Float64}(a, b)
+ end
+
 Uniform() = Uniform(0.0, 1.0, check_args=false)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
-convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
+convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T, a, b)
+convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T, d.a, d.b, check_args=false)
 
 #### Parameters
 
@@ -109,7 +121,7 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
+rand(rng::AbstractRNG, d::Uniform{T}) where {T} =  convert(T, d.a + (d.b - d.a) * rand(rng))
 
 rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
     A .= quantile.(d, rand!(rng, A))
