@@ -23,6 +23,7 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     @test length(μ) == d
     @test size(Σ) == (d, d)
     @test var(g)     ≈ diag(Σ)
+    @test std(g)     ≈ sqrt.(var(g))
     @test entropy(g) ≈ 0.5 * logdet(2π * ℯ * Σ)
     ldcov = logdetcov(g)
     @test ldcov ≈ logdet(Σ)
