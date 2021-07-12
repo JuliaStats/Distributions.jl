@@ -257,14 +257,14 @@ end
 function show(io::IO, d::AbstractMixtureModel)
     K = ncomponents(d)
     pr = probs(d)
-    println(io, "MixtureModel{$(component_type(d))}(K = $K)")
+    println(io, "Mixture Model{$(component_type(d))}(K = $K)")
     Ks = min(K, 8)
     for i = 1:Ks
         @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
-        println(io, component(d, i))
+        print(io, component(d, i), i < Ks ? "\n" : "")
     end
     if Ks < K
-        println(io, "The rest are omitted ...")
+        print(io, "The rest are omitted ...")
     end
 end
 
