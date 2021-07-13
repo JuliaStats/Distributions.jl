@@ -254,7 +254,7 @@ end
 
 #### show
 
-function show(io::IO, d::AbstractMixtureModel)
+function show(io::IO, ::MIME"text/plain", d::AbstractMixtureModel)
     K = ncomponents(d)
     pr = probs(d)
     println(io, "Mixture Model{$(component_type(d))}(K = $K)")
