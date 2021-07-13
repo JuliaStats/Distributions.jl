@@ -261,7 +261,7 @@ function show(io::IO, d::AbstractMixtureModel)
     Ks = min(K, 8)
     for i = 1:Ks
         @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
-        print(io, component(d, i), i < Ks ? "\n" : "")
+        print(io, component(d, i), i < Ks || Ks < K ? "\n" : "")
     end
     if Ks < K
         print(io, "The rest are omitted ...")
