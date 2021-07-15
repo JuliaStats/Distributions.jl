@@ -99,7 +99,7 @@ Draw `n` samples from `d`.
 rand(d::AbstractMixtureModel)
 
 """
-    rand!(d::Union{UnivariateMixture, MultivariateMixture}, r::AbstactArray)
+    rand!(d::Union{UnivariateMixture, MultivariateMixture}, r::AbstractArray)
 
 Draw multiple samples from `d` and write them to `r`.
 """
