@@ -17,6 +17,9 @@ f(\\mathbf{R};\\eta) = \\left[\\prod_{k=1}^{d-1}\\pi^{\\frac{k}{2}}
 
 If ``\\eta = 1``, then the LKJ distribution is uniform over
 [the space of correlation matrices](https://www.jstor.org/stable/2684832).
+
+Note: if a Cholesky factor of the correlation matrix is desired, it is more efficient
+to use [`LKJCholesky`](@ref).
 """
 struct LKJ{T <: Real, D <: Integer} <: ContinuousMatrixDistribution
     d::D

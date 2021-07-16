@@ -39,6 +39,7 @@ const tests = [
     "edgeworth",
     "matrixreshaped",
     "matrixvariates",
+    "lkjcholesky",
     "vonmisesfisher",
     "conversion",
     "convolution",
