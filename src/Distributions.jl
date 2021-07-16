@@ -137,6 +137,7 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
+    PiecewiseLinearDist,
     Product,
     Poisson,
     PoissonBinomial,
