@@ -29,6 +29,13 @@ export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
 
+    # re-export from LinearAlgebra
+    Diagonal,
+    I,
+
+    # re-export from FillArrays
+    Fill,
+
     # generic types
     VariateForm,
     ArrayLikeVariate,
