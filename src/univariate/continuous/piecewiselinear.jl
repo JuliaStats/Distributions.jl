@@ -4,6 +4,7 @@ struct PiecewiseLinearDist{T<:Real} <: ContinuousUnivariateDistribution
 
     function PiecewiseLinearDist(x::AbstractVector{T}, Fx::AbstractVector{<:Real}) where {T<:Real}
         length(x)==length(Fx) || throw(ArgumentError("`x` and `Fx` must have the same length."))
+        allunique(x) || throw(ArgumentError("`x` cannot have duplicate values."))
         issorted(x) || throw(ArgumentError("`x` must be sorted."))
         issorted(Fx) || throw(ArgumentError("`Fx` must be sorted."))
 
