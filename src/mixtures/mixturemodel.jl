@@ -219,6 +219,26 @@ function var(d::UnivariateMixture)
     return v
 end
 
+"""
+    quantile(d::UnivariateMixture, p::Real; tol=1e-12)
+
+Compute `p`th quantile of a `UnivariateMixture`.
+"""
+function quantile(d::UnivariateMixture, p::Real; tol=1e-12)
+    # The quantile of the mixture is
+    # greater than the smallest quantile of its components (`x_left`)
+    # and less than the greatest quantile of its components (`x_right`)
+    components_quantiles = [
+        quantile(c, p)
+        for c ∈ components(d)
+    ]
+    x_left = minimum(components_quantiles)
+    x_right = maximum(components_quantiles)
+	
+    # Search for the quantile ∀x ∈ [x_left, x_right]
+	quantile_bisect(d, p, x_left, x_right, tol)
+end
+
 function var(d::MultivariateMixture)
     return diag(cov(d))
 end

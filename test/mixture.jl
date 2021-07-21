@@ -42,6 +42,12 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
     @test cdf.(g, X) ≈ cf
 
+    # quantiles
+    for i = 1:n
+        @test @inferred(quantile(g, cf[i])) ≈ X[i]
+    end
+    @test quantile.(g, cf) ≈ X
+
     # evaluation
     P0 = zeros(T, n, K)
     LP0 = zeros(T, n, K)
