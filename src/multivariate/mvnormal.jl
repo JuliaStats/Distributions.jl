@@ -239,9 +239,9 @@ params(d::MvNormal) = (d.μ, d.Σ)
 @inline partype(d::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
-cov(d::MvNormal) = Matrix(d.Σ)
+cov(d::MvNormal) = d.Σ
 
-invcov(d::MvNormal) = Matrix(inv(d.Σ))
+invcov(d::MvNormal) = inv(d.Σ)
 logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
