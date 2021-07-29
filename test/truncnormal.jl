@@ -41,3 +41,13 @@ end
         @test abs(var(X) - var(trunc)) < 0.01
     end
 end
+
+@testset "Truncated normal should be numerically stable at probability regions" begin
+    original = Normal(-5.0, 0.2)
+    test_point = 0.5
+    trunc = truncated(original, 0.0, 5.0)
+    for x in LinRange(0.0, 5.0, 100)
+        @test isfinite(logpdf(original, test_point))
+        @test isfinite(logpdf(trunc, test_point))
+    end
+end
