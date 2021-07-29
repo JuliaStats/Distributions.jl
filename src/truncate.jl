@@ -22,11 +22,10 @@ end
 
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    logcdf_l = isinf(l) ? T2(-Inf) : T2(logcdf(d, l))
-    logcdf_u = isinf(u) ? zero(T2) : T2(logcdf(d, u))
+    logcdf_l = logcdf(d, l)
+    logcdf_u = logcdf(d, u)
+    lcdf = exp(logcdf_l)
+    ucdf = exp(logcdf_u)
     log_tp = logsubexp(logcdf_l, logcdf_u)
     tp = exp(log_tp)
     Truncated(d, promote(l, u, lcdf, ucdf, tp, log_tp)...)
