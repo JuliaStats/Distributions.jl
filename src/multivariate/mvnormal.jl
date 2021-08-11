@@ -42,7 +42,7 @@ type `MvNormal`, defined as below, which allows users to specify the special str
 the mean and covariance.
 
 ```julia
-struct MvNormal{Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 end
@@ -51,19 +51,19 @@ end
 Here, the mean vector can be an instance of any `AbstractVector`. The covariance can be
 of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
 `PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
-in the form of ``\\sigma \\mathbf{I}``. (See the Julia package
-[PDMats](https://github.com/lindahua/PDMats.jl) for details).
+in the form of ``\\sigma^2 \\mathbf{I}``. (See the Julia package
+[PDMats](https://github.com/JuliaStats/PDMats.jl/) for details).
 
-We also define a set of alias for the types using different combinations of mean vectors and covariance:
+We also define a set of aliases for the types using different combinations of mean vectors and covariance:
 
 ```julia
-const IsoNormal  = MvNormal{ScalMat,  Vector{Float64}}
-const DiagNormal = MvNormal{PDiagMat, Vector{Float64}}
-const FullNormal = MvNormal{PDMat,    Vector{Float64}}
+const IsoNormal  = MvNormal{Float64, ScalMat{Float64},                  Vector{Float64}}
+const DiagNormal = MvNormal{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
+const FullNormal = MvNormal{Float64, PDMat{Float64,Matrix{Float64}},    Vector{Float64}}
 
-const ZeroMeanIsoNormal{Axes}  = MvNormal{ScalMat,  Zeros{Float64,1,Axes}}
-const ZeroMeanDiagNormal{Axes} = MvNormal{PDiagMat, Zeros{Float64,1,Axes}}
-const ZeroMeanFullNormal{Axes} = MvNormal{PDMat,    Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormal{Axes}  = MvNormal{Float64, ScalMat{Float64},                  Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormal{Axes} = MvNormal{Float64, PDiagMat{Float64,Vector{Float64}}, Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormal{Axes} = MvNormal{Float64, PDMat{Float64,Matrix{Float64}},    Zeros{Float64,1,Axes}}
 ```
 
 Multivariate normal distributions support affine transformations:
