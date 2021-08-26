@@ -59,13 +59,7 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univa
     end
 end
 
-### Constructors
-function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    truncated(d, l, u)
-end
-
-Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
-
+### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)

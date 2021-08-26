@@ -579,7 +579,7 @@ function test_params(d::Truncated)
     d_unt = d.untruncated
     D = typeof(d_unt)
     pars = params(d_unt)
-    d_new = Truncated(D(pars...), d.lower, d.upper)
+    d_new = truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
     @test d == deepcopy(d)
 end

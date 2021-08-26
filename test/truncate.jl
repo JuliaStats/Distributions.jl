@@ -19,7 +19,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 
         dname = string(dsym)
 
-        dsymt = Symbol("Truncated($(dct["dtype"]),$lower,$upper")
+        dsymt = Symbol("truncated($(dct["dtype"]),$lower,$upper")
         dnamet = string(dsym)
 
         # test whether it is included in the selected list
@@ -36,8 +36,8 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
             continue
         end
 
-        println("    testing Truncated($(ex),$lower,$upper)")
-        d = Truncated(eval(Meta.parse(ex)),lower,upper)
+        println("    testing truncated($(ex),$lower,$upper)")
+        d = truncated(eval(Meta.parse(ex)),lower,upper)
         if dtype != Uniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtypet)
