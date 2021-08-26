@@ -1,6 +1,8 @@
 using Distributions
+using ForwardDiff
 using Test
 
+@testset "poissonbinomial" begin
 function naive_esf(x::AbstractVector{T}) where T <: Real
     n = length(x)
     S = zeros(T, n+1)
@@ -36,8 +38,6 @@ naive_sol = naive_pb(p)
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
-    local p
-
     d = PoissonBinomial(fill(p, n))
     dref = Binomial(n, p)
     println("   testing PoissonBinomial p=$p, n=$n")
@@ -149,3 +149,4 @@ end
 f = x -> logpdf(PoissonBinomial(x), 0)
 at = [0.5, 0.5]
 @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
+end

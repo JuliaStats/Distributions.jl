@@ -362,7 +362,7 @@ end
 end
 
 @testset "MvNormal: Sampling with integer-valued parameters (#1004)" begin
-    d = MvNormal([0, 0], [1, 1])
+    d = MvNormal([0, 0], Diagonal([1, 1]))
     @test rand(d) isa Vector{Float64}
     @test rand(d, 10) isa Matrix{Float64}
     @test rand(d, (3, 2)) isa Matrix{Vector{Float64}}

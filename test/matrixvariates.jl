@@ -7,6 +7,7 @@ using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
 
+@testset "matrixvariates" begin
 #=
     1. baseline tests
     2. compare 1 x 1 matrix-variate with univariate
@@ -200,7 +201,7 @@ function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
 end
 
 function test_draws_against_univariate_cdf(D::MatrixDistribution, d::UnivariateDistribution)
-    α = 0.05
+    α = 0.025
     M = 100000
     matvardraws = [rand(D)[1] for m in 1:M]
     @test pvalue_kolmogorovsmirnoff(matvardraws, d) >= α
@@ -536,4 +537,5 @@ for distribution in matrixvariates
     @testset "$(dist)" begin
         test_matrixvariate(dist, n, p, M)
     end
+end
 end

@@ -96,8 +96,8 @@ end
 
 ####### Validate results for a single-dimension MvLogNormal by comparing with univariate LogNormal
 @testset "Comparing results from MvLogNormal with univariate LogNormal" begin
-    l1 = LogNormal(0.1,0.4)
-    l2 = MvLogNormal(0.1*ones(1),0.4)
+    l1 = LogNormal(0.1, 0.4)
+    l2 = MvLogNormal([0.1], 0.16 * I)
     @test [mean(l1)]     ≈ mean(l2)
     @test [median(l1)]   ≈ median(l2)
     @test [mode(l1)]     ≈ mode(l2)
