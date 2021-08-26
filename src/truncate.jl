@@ -57,18 +57,7 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univa
     end
 end
 
-### Constructors
-function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    tp = ucdf - lcdf
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
-end
-
-Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
-
+### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
