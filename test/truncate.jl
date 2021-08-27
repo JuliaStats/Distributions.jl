@@ -4,6 +4,7 @@ module TestTruncate
 
 using Distributions
 using ForwardDiff: Dual, ForwardDiff
+using StatsFuns
 import JSON
 using Test
 using ..Main: fdm
@@ -71,11 +72,11 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     for pt in pts
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
-        cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
+        cf = x < d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
         if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous})
-            @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
+            @test logpdf(d, x) ≈ lp atol=sqrt(eps())
         end
-        @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
+        @test cdf(d, x) ≈ cf atol=sqrt(eps())
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
         if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
@@ -141,4 +142,21 @@ f = x -> logpdf(truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
 at = [0.0, 1.0, 0.0, 1.0]
 @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
 
+    @testset "errors" begin
+        @test_throws ErrorException truncated(Normal(), 1, 0)
+        @test_throws ArgumentError truncated(Uniform(), 1, 2)
+        @test_throws ErrorException truncated(Exponential(), 3, 1)
+    end
+
+    @testset "#1328" begin
+        dist = Poisson(2.0)
+        dist_zeroinflated = MixtureModel([Dirac(0.0), dist], [0.4, 0.6])
+        dist_zerotruncated = truncated(dist, 1, Inf)
+        dist_zeromodified = MixtureModel([Dirac(0.0), dist_zerotruncated], [0.4, 0.6])
+
+        @test logsumexp(logpdf(dist, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zeroinflated, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zerotruncated, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zeromodified, x) for x in 0:1000) ≈ 0 atol=1e-15
+    end
 end
