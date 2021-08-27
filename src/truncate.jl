@@ -1,56 +1,65 @@
 """
-    truncated(d, l, u):
+    truncated(d::UnivariateDistribution, l::Real, u::Real)
 
-Truncate a distribution between `l` and `u`.
-Builds the most appropriate distribution for the type of `d`,
-the fallback is constructing a `Truncated` wrapper.
+Truncate a univariate distribution `d` to the interval `[l, u]`.
 
-To implement a specialized truncated form for a distribution `D`,
-the method `truncate(d::D, l::T, u::T) where {T <: Real}`
-should be implemented.
+The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
+`Inf`. The function throws an error if `l > u` or if the support of `d` does not cover
+`[l, u]`.
 
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
-Throws an error if `l >= u`.
+# Implementation
+
+To implement a specialized truncated form for distributions of type `D`, the method
+`truncate(d::D, l::T, u::T) where {T <: Real}` should be implemented.
 """
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
 
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    logcdf_l = logcdf(d, l)
-    logcdf_u = logcdf(d, u)
-    lcdf = exp(logcdf_l)
-    ucdf = exp(logcdf_u)
-    log_tp = logsubexp(logcdf_l, logcdf_u)
-    tp = exp(log_tp)
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log_tp)...)
+    l <= u || error("the lower bound must be less or equal than the upper bound")
+
+    # (log)lcdf = (log) P(X < l) where X ~ d
+    loglcdf = if value_support(typeof(d)) === Discrete
+        logsubexp(logcdf(d, l), logpdf(d, l))
+    else
+        logcdf(d, l)
+    end
+    lcdf = exp(loglcdf)
+
+    # (log)ucdf = (log) P(X ≤ u) where X ~ d
+    logucdf = logcdf(d, u)
+    ucdf = exp(logucdf)
+
+    # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
+    logtp = logsubexp(loglcdf, logucdf)
+    tp = exp(logtp)
+
+    # check that support of d covers [l, u]
+    # for continuous distributions logtp can be -Inf if only the upper or lower bound are
+    # inside the support
+    if isinf(logtp) && !(insupport(d, l) || insupport(d, u))
+        error("support of the distribution does not cover the given interval")
+    end
+
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
 end
 
 truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
 
 """
-    Truncated(d, l, u):
+    Truncated
 
-Create a generic wrapper for a truncated distribution.
-Prefer calling the function `truncated(d, l, u)`, which can choose the appropriate
-representation of the truncated distribution.
-
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+Generic wrapper for a truncated distribution.
 """
 struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::T      # lower bound
     upper::T      # upper bound
-    lcdf::T       # cdf of lower bound
-    ucdf::T       # cdf of upper bound
+    lcdf::T       # cdf of lower bound (exclusive): P(X < lower)
+    ucdf::T       # cdf of upper bound (inclusive): P(X ≤ upper)
 
     tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)

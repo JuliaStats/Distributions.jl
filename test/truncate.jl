@@ -71,11 +71,11 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     for pt in pts
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
-        cf = x <= d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
+        cf = x < d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
         if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous})
-            @test isapprox(logpdf(d, x), lp, atol=sqrt(eps()))
+            @test logpdf(d, x) ≈ lp atol=sqrt(eps())
         end
-        @test isapprox(cdf(d, x)   , cf, atol=sqrt(eps()))
+        @test cdf(d, x) ≈ cf atol=sqrt(eps())
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
         if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
