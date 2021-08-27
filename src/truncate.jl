@@ -4,8 +4,7 @@
 Truncate a univariate distribution `d` to the interval `[l, u]`.
 
 The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
-`Inf`. The function throws an error if `l > u` or if the support of `d` does not cover
-`[l, u]`.
+`Inf`. The function throws an error if `l > u`.
 
 The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
@@ -36,13 +35,6 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
     logtp = logsubexp(loglcdf, logucdf)
     tp = exp(logtp)
-
-    # check that support of d covers [l, u]
-    # for continuous distributions logtp can be -Inf if only the upper or lower bound are
-    # inside the support
-    if isinf(logtp) && (value_support(typeof(d)) === Discrete || !(insupport(d, l) || insupport(d, u)))
-        error("support of the distribution does not cover the given interval")
-    end
 
     Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
 end

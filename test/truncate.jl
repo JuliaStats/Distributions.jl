@@ -145,20 +145,7 @@ at = [0.0, 1.0, 0.0, 1.0]
     @testset "errors" begin
         @test_throws ErrorException truncated(Normal(), 1, 0)
         @test_throws ArgumentError truncated(Uniform(), 1, 2)
-        @test_throws ErrorException truncated(Exponential(), -Inf, -1)
-        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), -Inf, 0.9)
-        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), 1.2, 1.8)
-        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), 3.3, Inf)
-
-        # no error
-        truncated(Normal(), 0, 0)
-        truncated(Normal(), 1.3, 1.3)
-        truncated(Exponential(), 0, 0)
-        truncated(Exponential(), 2.7, 2.7)
-        truncated(Exponential(), -Inf, 0)
-        truncated(Categorical([0.2, 0.3, 0.5]), -Inf, 1)
-        truncated(Categorical([0.2, 0.3, 0.5]), 1, 1.8)
-        truncated(Categorical([0.2, 0.3, 0.5]), 3, 5)
+        @test_throws ErrorException truncated(Exponential(), 3, 1)
     end
 
     @testset "#1328" begin
