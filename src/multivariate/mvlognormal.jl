@@ -168,6 +168,7 @@ end
 # Constructors mirror the ones for MvNormmal
 MvLogNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvLogNormal(MvNormal(μ, Σ))
 MvLogNormal(Σ::AbstractMatrix{<:Real}) = MvLogNormal(MvNormal(Σ))
+MvLogNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) = MvLogNormal(MvNormal(μ, Σ))
 
 # Deprecated constructors
 MvLogNormal(μ::AbstractVector,σ::Vector) = MvLogNormal(MvNormal(μ,σ))

@@ -222,9 +222,9 @@ end
 
     @testset "Testing MultivariatevariateMixture" begin
         g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], 1.0),
-                       MvNormal([0.2, 1.0], 1.0),
-                       MvNormal([-0.5, -3.0], 1.6) ],
+            IsoNormal[ MvNormal([0.0, 0.0], I),
+                       MvNormal([0.2, 1.0], I),
+                       MvNormal([-0.5, -3.0], 1.6 * I) ],
             [0.2, 0.5, 0.3])
         @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
         @test length(components(g_m)) == 3

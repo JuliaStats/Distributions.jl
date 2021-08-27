@@ -4,6 +4,7 @@ using Test
 import Distributions: GenericMvTDist
 import PDMats: PDMat
 
+@testset "mvtdist" begin
 # Set location vector mu and scale matrix Sigma as in
 # Hofert M. On Sampling from the Multivariate t Distribution. The R Journal
 mu = [1., 2]
@@ -83,4 +84,5 @@ end
     # Check that the logpdf computed is the same.
     x = rand(X_implicit)
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
+end
 end
