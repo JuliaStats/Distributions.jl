@@ -4,6 +4,7 @@ module TestTruncate
 
 using Distributions
 using ForwardDiff: Dual, ForwardDiff
+using StatsFuns
 import JSON
 using Test
 using ..Main: fdm
@@ -141,4 +142,34 @@ f = x -> logpdf(truncated(Normal(x[1], x[2]), x[3], x[4]), mean(x))
 at = [0.0, 1.0, 0.0, 1.0]
 @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
 
+    @testset "errors" begin
+        @test_throws ErrorException truncated(Normal(), 1, 0)
+        @test_throws ArgumentError truncated(Uniform(), 1, 2)
+        @test_throws ErrorException truncated(Exponential(), -Inf, -1)
+        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), -Inf, 0.9)
+        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), 1.2, 1.8)
+        @test_throws ErrorException truncated(Categorical([0.2, 0.3, 0.5]), 3.3, Inf)
+
+        # no error
+        truncated(Normal(), 0, 0)
+        truncated(Normal(), 1.3, 1.3)
+        truncated(Exponential(), 0, 0)
+        truncated(Exponential(), 2.7, 2.7)
+        truncated(Exponential(), -Inf, 0)
+        truncated(Categorical([0.2, 0.3, 0.5]), -Inf, 1)
+        truncated(Categorical([0.2, 0.3, 0.5]), 1, 1.8)
+        truncated(Categorical([0.2, 0.3, 0.5]), 3, 5)
+    end
+
+    @testset "#1328" begin
+        dist = Poisson(2.0)
+        dist_zeroinflated = MixtureModel([Dirac(0.0), dist], [0.4, 0.6])
+        dist_zerotruncated = truncated(dist, 1, Inf)
+        dist_zeromodified = MixtureModel([Dirac(0.0), dist_zerotruncated], [0.4, 0.6])
+
+        @test logsumexp(logpdf(dist, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zeroinflated, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zerotruncated, x) for x in 0:1000) ≈ 0 atol=1e-15
+        @test logsumexp(logpdf(dist_zeromodified, x) for x in 0:1000) ≈ 0 atol=1e-15
+    end
 end
