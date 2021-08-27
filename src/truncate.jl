@@ -40,7 +40,7 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     # check that support of d covers [l, u]
     # for continuous distributions logtp can be -Inf if only the upper or lower bound are
     # inside the support
-    if isinf(logtp) && !(insupport(d, l) || insupport(d, u))
+    if isinf(logtp) && (value_support(typeof(d)) === Discrete || !(insupport(d, l) || insupport(d, u)))
         error("support of the distribution does not cover the given interval")
     end
 
