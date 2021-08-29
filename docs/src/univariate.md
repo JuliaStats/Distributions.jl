@@ -132,6 +132,7 @@ NormalInverseGaussian
 Pareto
 PGeneralizedGaussian
 Rayleigh
+Rician
 Semicircle
 StudentizedRange
 SymTriangularDist

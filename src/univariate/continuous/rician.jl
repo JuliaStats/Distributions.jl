@@ -1,0 +1,152 @@
+"""
+    Rician(ν, σ)
+
+The *Rician distribution* with parameters `ν` and `σ` has probability density function:
+
+```math
+f(x; \\nu, \\sigma) = \\frac{x}{\\sigma^2} \\exp\\left( \\frac{-(x^2 + \\nu^2)}{2\\sigma^2} \\right) I_0\\left( \\frac{x\\nu}{\\sigma^2} \\right).
+```
+
+```julia
+Rician()         # Rician distribution with parameters ν=0 and σ=1
+Rician(ν, σ)     # Rician distribution with parameters ν and σ
+Rician(; K, Ω)   # Rician distribution with shape K and scale Ω
+
+params(d)        # Get the parameters, i.e. (ν, σ)
+shape(d)         # Get the shape parameter K = ν²/2σ²
+scale(d)         # Get the scale parameter Ω = ν² + 2σ²
+```
+
+External links:
+
+* [Rician distribution on Wikipedia](https://en.wikipedia.org/wiki/Rice_distribution)
+
+"""
+struct Rician{T<:Real} <: ContinuousUnivariateDistribution
+    ν::T
+    σ::T
+    Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
+end
+
+function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
+    check_args && @check_args(Rician, ν ≥ zero(ν) && σ ≥ zero(σ))
+    return Rician{T}(ν, σ)
+end
+
+Rician(ν::Real, σ::Real) = Rician(promote(ν, σ)...)
+Rician(ν::Integer, σ::Integer) = Rician(float(ν), float(σ))
+
+function Rician(; K=0.0, Ω=2.0)
+    σ = sqrt(Ω / (K + 1) / 2)
+    ν = √2 * σ * sqrt(K)
+    Rician(ν, σ)
+end
+
+@distr_support Rician 0.0 Inf
+
+#### Conversions
+
+function convert(::Type{Rician{T}}, ν::Real, σ::Real) where T<:Real
+    Rician(T(ν), T(σ))
+end
+
+function convert(::Type{Rician{T}}, d::Rician{S}) where {T <: Real, S <: Real}
+    Rician(T(d.ν), T(d.σ); check_args=false)
+end
+
+#### Parameters
+
+shape(d::Rician) = d.ν^2 / (2 * d.σ^2)
+scale(d::Rician) = d.ν^2 + 2 * d.σ^2
+
+params(d::Rician) = (d.ν, d.σ)
+@inline partype(d::Rician{T}) where {T<:Real} = T
+
+#### Statistics
+
+# helper
+L½(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
+
+mean(d::Rician{T}) where T = d.σ * √T(π/2) * L½(-d.ν^2/(2 * d.σ^2))
+var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * L½(-d.ν^2/(2 * d.σ^2))^2
+
+quantile(d::Rician, q::Real) = quantile_newton(d, q, mean(d))
+mode(d::Rician{T}) where T = _minimize_gss(x -> -pdf(d, x), zero(T), mean(d))
+
+# helper: 1D minimization using Golden-section search
+function _minimize_gss(f, a, b; tol=1e-12)
+    ϕ = (√5 + 1) / 2
+    c = b - (b - a) / ϕ
+    d = a + (b - a) / ϕ
+    while abs(b - a) > tol
+        if f(c) < f(d)
+            b = d
+        else
+            a = c
+        end
+        c = b - (b - a) / ϕ
+        d = a + (b - a) / ϕ
+    end
+    (b + a) / 2
+end
+
+#### PDF/CDF
+
+function logpdf(d::Rician, x::Real)
+    isnan(x) && return x
+    x ≤ 0.0 && return -convert(eltype(x), Inf)
+    isinf(x) && return -convert(eltype(x), Inf)
+    σ² = d.σ^2
+    log.(x) - log(σ²) - (x.^2 + d.ν^2)/(2σ²) + log.(besseli.(zero(eltype(x)), x .* (d.ν / σ²)))
+end
+
+pdf(d::Rician, x::Real) = exp.(logpdf(d, x))
+
+function cdf(d::Rician, x::Real)
+    isnan(x) && return x
+    x ≤ 0.0 && return zero(eltype(x))
+    isinf(x) && return one(eltype(x))
+    first(quadgk(x -> pdf(d, x), zero(eltype(x)), x; rtol=1e-8))
+end
+
+#### Sampling
+
+function rand(rng::AbstractRNG, d::Rician)
+    x = randn(rng) * d.σ + d.ν
+    y = randn(rng) * d.σ
+    hypot(x, y)
+end
+
+#### Fitting
+
+# implementation based on the Koay inversion technique
+function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) where T
+    μ₁ = mean(x)
+    μ₂ = var(x)
+    r = μ₁ / √μ₂
+    if r < sqrt(π/(4-π))
+        ν = zero(T)
+        σ = scale(fit(Rayleigh, x))
+    else
+        ξ(θ) = 2 + θ^2 - T(π)/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
+        g(θ) = sqrt(ξ(θ) * (1+r^2) - 2)
+        θ = one(T)
+        for j ∈ 1:maxiters
+            θ⁻ = θ
+            θ = g(θ)
+            abs(θ - θ⁻) < tol && break
+        end
+        ξθ = ξ(θ)
+        σ = sqrt(μ₂ / ξθ)
+        ν = sqrt(μ₁^2 + (ξθ - 2) * σ^2)
+    end
+    Rician(ν, σ)
+end
+
+# Not implemented:
+#   skewness(d::Rician)
+#   kurtosis(d::Rician)
+#   entropy(d::Rician)
+#   mgf(d::Rician, t::Real)
+#   cf(d::Rician, t::Real)
+
