@@ -1,4 +1,5 @@
 using Distributions
+using ChainRulesTestUtils
 using ForwardDiff
 using Test
 
@@ -145,8 +146,16 @@ end
     @test x ≈ fftw_fft
 end
 
-# Test autodiff using ForwardDiff
-f = x -> logpdf(PoissonBinomial(x), 0)
-at = [0.5, 0.5]
-@test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
+@testset "automatic differentiation" begin
+    # Test autodiff using ForwardDiff
+    f = x -> logpdf(PoissonBinomial(x), 0)
+    at = [0.5, 0.5]
+    @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
+
+    # Test ChainRules definition
+    for f in (Distributions.poissonbinomial_pdf, Distributions.poissonbinomial_pdf_fft)
+        test_frule(f, rand(50))
+        test_rrule(f, rand(50))
+    end
+end
 end
