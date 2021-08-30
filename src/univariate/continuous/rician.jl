@@ -101,8 +101,6 @@ function logpdf(d::Rician, x::Real)
     log.(x) - log(σ²) - (x.^2 + d.ν^2)/(2σ²) + log.(besseli.(zero(eltype(x)), x .* (d.ν / σ²)))
 end
 
-pdf(d::Rician, x::Real) = exp.(logpdf(d, x))
-
 function cdf(d::Rician, x::Real)
     isnan(x) && return x
     x ≤ 0.0 && return zero(eltype(x))
