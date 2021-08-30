@@ -58,7 +58,7 @@ shape(d::Rician) = d.ν^2 / (2 * d.σ^2)
 scale(d::Rician) = d.ν^2 + 2 * d.σ^2
 
 params(d::Rician) = (d.ν, d.σ)
-@inline partype(d::Rician{T}) where {T<:Real} = T
+partype(d::Rician{T}) where {T<:Real} = T
 
 #### Statistics
 
