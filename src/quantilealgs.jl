@@ -1,7 +1,7 @@
 # Various algorithms for computing quantile
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
-                         lx::Real, rx::Real, tol::Real)
+                         lx::Real, rx::Real, tol::Real=1e-12)
 
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
@@ -22,7 +22,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
 end
 
 quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
-    quantile_bisect(d, p, minimum(d), maximum(d), 1.0e-12)
+    quantile_bisect(d, p, minimum(d), maximum(d))
 
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
 #   Göknur Giner, Gordon K. Smyth (2014)
