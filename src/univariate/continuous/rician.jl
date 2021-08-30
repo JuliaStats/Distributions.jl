@@ -7,10 +7,16 @@ The *Rician distribution* with parameters `ν` and `σ` has probability density 
 f(x; \\nu, \\sigma) = \\frac{x}{\\sigma^2} \\exp\\left( \\frac{-(x^2 + \\nu^2)}{2\\sigma^2} \\right) I_0\\left( \\frac{x\\nu}{\\sigma^2} \\right).
 ```
 
+If shape and scale parameters `K` and `Ω` are given instead, `ν` and `σ` may be computed from them:
+
+```math
+\\sigma = \\sqrt{\frac{\\Omega}{2(K + 1)}}\\
+\nu = \\sigma\\sqrt{2K}
+```
+
 ```julia
 Rician()         # Rician distribution with parameters ν=0 and σ=1
 Rician(ν, σ)     # Rician distribution with parameters ν and σ
-Rician(; K, Ω)   # Rician distribution with shape K and scale Ω
 
 params(d)        # Get the parameters, i.e. (ν, σ)
 shape(d)         # Get the shape parameter K = ν²/2σ²
@@ -33,12 +39,6 @@ function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
 end
 
 Rician(ν::Real, σ::Real) = Rician(promote(ν, σ)...)
-
-function Rician(; K=0.0, Ω=2.0)
-    σ = sqrt(Ω / (K + 1) / 2)
-    ν = √2 * σ * sqrt(K)
-    Rician(ν, σ)
-end
 
 @distr_support Rician 0.0 Inf
 
@@ -63,10 +63,10 @@ params(d::Rician) = (d.ν, d.σ)
 #### Statistics
 
 # helper
-L½(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
+_Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
 
-mean(d::Rician{T}) where T = d.σ * √T(π/2) * L½(-d.ν^2/(2 * d.σ^2))
-var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * L½(-d.ν^2/(2 * d.σ^2))^2
+mean(d::Rician{T}) where T = d.σ * √T(π/2) * _Lhalf(-d.ν^2/(2 * d.σ^2))
+var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
 
 quantile(d::Rician, q::Real) = quantile_newton(d, q, mean(d))
 mode(d::Rician{T}) where T = _minimize_gss(x -> -pdf(d, x), zero(T), mean(d))
