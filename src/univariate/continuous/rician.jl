@@ -69,7 +69,10 @@ mean(d::Rician{T}) where T = d.σ * √T(π/2) * L½(-d.ν^2/(2 * d.σ^2))
 var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * L½(-d.ν^2/(2 * d.σ^2))^2
 
 quantile(d::Rician, q::Real) = quantile_newton(d, q, mean(d))
-mode(d::Rician{T}) where T = _minimize_gss(x -> -pdf(d, x), zero(T), mean(d))
+function mode(d::Rician)
+    m = mean(d)
+    _minimize_gss(x -> -pdf(d, x), zero(m), m)
+end
 
 # helper: 1D minimization using Golden-section search
 function _minimize_gss(f, a, b; tol=1e-12)
