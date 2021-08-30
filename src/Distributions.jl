@@ -31,6 +31,7 @@ export
 
     # generic types
     VariateForm,
+    ArrayLikeVariate,
     ValueSupport,
     Univariate,
     Multivariate,
@@ -74,6 +75,7 @@ export
     Cosine,
     DiagNormal,
     DiagNormalCanon,
+    Dirac,
     Dirichlet,
     DirichletMultinomial,
     DiscreteUniform,
@@ -228,6 +230,7 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
+    pdfsquaredL2norm,   # squared L2 norm of the probability density function
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     product_distribution, # product of univariate distributions
@@ -283,6 +286,7 @@ include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
 include("estimators.jl")
+include("pdfnorm.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
@@ -305,7 +309,7 @@ API overview (major features):
 
 These represent just a few of the operations supported by this
 package; users are encouraged to refer to the full documentation at
-http://distributionsjl.readthedocs.org/en/latest/ for further
+https://JuliaStats.github.io/Distributions.jl/stable/ for further
 information.
 
 Supported distributions:

@@ -16,13 +16,13 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
 
 ```julia
 GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
-GeneralizedPareto(k, s)         # Generalized Pareto distribution with shape k and scale s, i.e. GeneralizedPareto(0, k, s)
-GeneralizedPareto(m, k, s)      # Generalized Pareto distribution with shape k, scale s and location m.
+GeneralizedPareto(μ, σ)         # Generalized Pareto distribution with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
+GeneralizedPareto(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
 
-params(d)       # Get the parameters, i.e. (m, s, k)
-location(d)     # Get the location parameter, i.e. m
-scale(d)        # Get the scale parameter, i.e. s
-shape(d)        # Get the shape parameter, i.e. k
+params(d)       # Get the parameters, i.e. (μ, σ, ξ)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. σ
+shape(d)        # Get the shape parameter, i.e. ξ
 ```
 
 External links
@@ -132,26 +132,22 @@ function logpdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
     return p
 end
 
-function logccdf(d::GeneralizedPareto{T}, x::Real) where T<:Real
-    (μ, σ, ξ) = params(d)
-
-    # The logccdf is log(0) outside the support range.
-    p = -T(Inf)
-
-    if x >= μ
-        z = (x - μ) / σ
-        if abs(ξ) < eps()
-            p = -z
-        elseif ξ > 0 || (ξ < 0 && x < maximum(d))
-            p = (-1 / ξ) * log1p(z * ξ)
-        end
+function logccdf(d::GeneralizedPareto, x::Real)
+    μ, σ, ξ = params(d)
+    z = max((x - μ) / σ, 0) # z(x) = z(μ) = 0 if x < μ (lower bound)
+    return if abs(ξ) < eps(one(ξ)) # ξ == 0
+        -z
+    elseif ξ < 0
+        # y(x) = y(μ - σ / ξ) = -1 if x > μ - σ / ξ (upper bound)
+        -log1p(max(z * ξ, -1)) / ξ
+    else
+        -log1p(z * ξ) / ξ
     end
-
-    return p
 end
-
 ccdf(d::GeneralizedPareto, x::Real) = exp(logccdf(d, x))
+
 cdf(d::GeneralizedPareto, x::Real) = -expm1(logccdf(d, x))
+logcdf(d::GeneralizedPareto, x::Real) = log1mexp(logccdf(d, x))
 
 function quantile(d::GeneralizedPareto{T}, p::Real) where T<:Real
     (μ, σ, ξ) = params(d)

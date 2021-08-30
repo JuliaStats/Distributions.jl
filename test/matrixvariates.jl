@@ -3,11 +3,11 @@ using Random
 using LinearAlgebra
 using PDMats
 using Statistics
-using HypothesisTests
 using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
 
+@testset "matrixvariates" begin
 #=
     1. baseline tests
     2. compare 1 x 1 matrix-variate with univariate
@@ -185,11 +185,26 @@ function test_against_univariate(D::MatrixDistribution, d::UnivariateDistributio
     nothing
 end
 
+# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
+# We implement it here to avoid a circular dependency on HypothesisTests
+# that causes test failures when preparing a breaking release of Distributions
+function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
+    # compute maximum absolute deviation from the empirical cdf
+    n = length(x)
+    cdfs = sort!(map(Base.Fix1(cdf, d), x))
+    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
+        return max(cdf - lower, upper - cdf)
+    end
+
+    # compute asymptotic p-value (see `KSDist`)
+    return ccdf(KSDist(n), dmax)
+end
+
 function test_draws_against_univariate_cdf(D::MatrixDistribution, d::UnivariateDistribution)
-    α = 0.05
+    α = 0.025
     M = 100000
     matvardraws = [rand(D)[1] for m in 1:M]
-    @test pvalue(ExactOneSampleKSTest(matvardraws, d)) >= α
+    @test pvalue_kolmogorovsmirnoff(matvardraws, d) >= α
     nothing
 end
 
@@ -262,7 +277,7 @@ function unpack_matvar_json_dict(dist::Type{<:MatrixDistribution}, dict)
 end
 
 function test_against_stan(dist::Type{<:MatrixDistribution})
-    filename = joinpath(dirname(@__FILE__), "ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
+    filename = joinpath(@__DIR__, "ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
     stan_output = JSON.parsefile(filename)
     K = length(stan_output)
     for k in 1:K
@@ -335,8 +350,7 @@ function test_special(dist::Type{Wishart})
         ρ = Chisq(ν)
         A = rand(q, M)
         z = [A[:, m]'*H[m]*A[:, m] / (A[:, m]'*Σ*A[:, m]) for m in 1:M]
-        kstest = ExactOneSampleKSTest(z, ρ)
-        @test pvalue(kstest) >= α
+        @test pvalue_kolmogorovsmirnoff(z, ρ) >= α
     end
     @testset "H ~ W(ν, I) ⟹ H[i, i] ~ χ²(ν)" begin
         κ = n + 1
@@ -347,8 +361,7 @@ function test_special(dist::Type{Wishart})
             mymats[:, :, m] = rand(g)
         end
         for i in 1:n
-            kstest = ExactOneSampleKSTest(mymats[i, i, :], ρ)
-            @test pvalue(kstest) >= α / n
+            @test pvalue_kolmogorovsmirnoff(mymats[i, i, :], ρ) >= α / n
         end
     end
     @testset "Check Singular Branch" begin
@@ -423,8 +436,7 @@ function test_special(dist::Type{LKJ})
         end
         for i in 1:d
             for j in 1:i-1
-                kstest = ExactOneSampleKSTest(mymats[i, j, :], ρ)
-                @test pvalue(kstest) >= α / L
+                @test pvalue_kolmogorovsmirnoff(mymats[i, j, :], ρ) >= α / L
             end
         end
     end
@@ -525,4 +537,5 @@ for distribution in matrixvariates
     @testset "$(dist)" begin
         test_matrixvariate(dist, n, p, M)
     end
+end
 end

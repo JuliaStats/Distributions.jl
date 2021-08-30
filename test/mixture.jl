@@ -18,7 +18,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
 
     K = ncomponents(g)
-    pr = probs(g)
+    pr = @inferred(probs(g))
     @assert length(pr) == K
 
     # mean
@@ -26,7 +26,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test mean(g) ≈ mu
+    @test @inferred(mean(g)) ≈ mu
 
     # evaluation of cdf
     cf = zeros(T, n)
@@ -38,7 +38,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
 
     for i = 1:n
-        @test cdf(g, X[i]) ≈ cf[i]
+        @test @inferred(cdf(g, X[i])) ≈ cf[i]
     end
     @test cdf.(g, X) ≈ cf
 
@@ -58,16 +58,16 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     mix_lp0 = log.(mix_p0)
 
     for i = 1:n
-        @test pdf(g, X[i])                  ≈ mix_p0[i]
-        @test logpdf(g, X[i])               ≈ mix_lp0[i]
-        @test componentwise_pdf(g, X[i])    ≈ vec(P0[i,:])
-        @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
+        @test @inferred(pdf(g, X[i])) ≈ mix_p0[i]
+        @test @inferred(logpdf(g, X[i])) ≈ mix_lp0[i]
+        @test @inferred(componentwise_pdf(g, X[i])) ≈ vec(P0[i,:])
+        @test @inferred(componentwise_logpdf(g, X[i])) ≈ vec(LP0[i,:])
     end
 
-    @test pdf.(g, X)                  ≈ mix_p0
-    @test logpdf.(g, X)               ≈ mix_lp0
-    @test componentwise_pdf(g, X)    ≈ P0
-    @test componentwise_logpdf(g, X) ≈ LP0
+    @test @inferred(map(Base.Fix1(pdf, g), X)) ≈ mix_p0
+    @test @inferred(map(Base.Fix1(logpdf, g), X)) ≈ mix_lp0
+    @test @inferred(componentwise_pdf(g, X)) ≈ P0
+    @test @inferred(componentwise_logpdf(g, X)) ≈ LP0
 
     # quantile
     αs = [0.0; 0.49; 0.5; 0.51; 1.0]
@@ -100,7 +100,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     end
 
     K = ncomponents(g)
-    pr = probs(g)
+    pr = @inferred(probs(g))
     @assert length(pr) == K
 
     # mean
@@ -108,7 +108,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     for k = 1:K
         mu .+= pr[k] .* mean(component(g, k))
     end
-    @test mean(g) ≈ mu
+    @test @inferred(mean(g)) ≈ mu
 
     # evaluation
     P0 = zeros(n, K)
@@ -127,20 +127,20 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
 
     for i = 1:n
         x_i = X[:,i]
-        @test pdf(g, x_i)                  ≈ mix_p0[i]
-        @test logpdf(g, x_i)               ≈ mix_lp0[i]
-        @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
-        @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
+        @test @inferred(pdf(g, x_i)) ≈ mix_p0[i]
+        @test @inferred(logpdf(g, x_i)) ≈ mix_lp0[i]
+        @test @inferred(componentwise_pdf(g, x_i)) ≈ vec(P0[i,:])
+        @test @inferred(componentwise_logpdf(g, x_i)) ≈ vec(LP0[i,:])
     end
 #=
     @show g
     @show size(X)
     @show size(mix_p0)
 =#
-    @test pdf(g, X)                  ≈ mix_p0
-    @test logpdf(g, X)               ≈ mix_lp0
-    @test componentwise_pdf(g, X)    ≈ P0
-    @test componentwise_logpdf(g, X) ≈ LP0
+    @test @inferred(pdf(g, X)) ≈ mix_p0
+    @test @inferred(logpdf(g, X)) ≈ mix_lp0
+    @test @inferred(componentwise_pdf(g, X)) ≈ P0
+    @test @inferred(componentwise_logpdf(g, X)) ≈ LP0
 
     # sampling
     if ismissing(rng)
@@ -187,8 +187,8 @@ end
         @test maximum(g_u) == Inf
         @test extrema(g_u) == (-Inf, Inf)
 
-        g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
-        @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
+        g_u = MixtureModel(Normal{Float64}, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
+        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
         @test ncomponents(g_u) == 3
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -237,9 +237,9 @@ end
 
     @testset "Testing MultivariatevariateMixture" begin
         g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], 1.0),
-                       MvNormal([0.2, 1.0], 1.0),
-                       MvNormal([-0.5, -3.0], 1.6) ],
+            IsoNormal[ MvNormal([0.0, 0.0], I),
+                       MvNormal([0.2, 1.0], I),
+                       MvNormal([-0.5, -3.0], 1.6 * I) ],
             [0.2, 0.5, 0.3])
         @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
         @test length(components(g_m)) == 3

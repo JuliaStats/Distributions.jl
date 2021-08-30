@@ -130,10 +130,14 @@ end
 # multiple matrix-variates, must allocate array of arrays
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
     rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims), true)
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}, dims::Dims) =
+    rand!(rng, s, Array{Matrix{float(eltype(s))}}(undef, dims), true)
 
 # single matrix-variate, must allocate one matrix
 rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
     _rand!(rng, s, Matrix{eltype(s)}(undef, size(s)))
+rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}) =
+    _rand!(rng, s, Matrix{float(eltype(s))}(undef, size(s)))
 
 # single matrix-variate with pre-allocated matrix
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
@@ -197,14 +201,12 @@ function pdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) wher
     _pdf!(r, d, X)
 end
 
-function logpdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    T = promote_type(partype(d), eltype(M))
-    _logpdf!(Array{T}(undef, size(X)), d, X)
+function logpdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
+    map(Base.Fix1(logpdf, d), X)
 end
 
-function pdf(d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
-    T = promote_type(partype(d), eltype(M))
-    _pdf!(Array{T}(undef, size(X)), d, X)
+function pdf(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
+    map(Base.Fix1(pdf, d), X)
 end
 
 """

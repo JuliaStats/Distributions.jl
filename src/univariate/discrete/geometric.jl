@@ -73,41 +73,24 @@ function logpdf(d::Geometric, x::Real)
     insupport(d, x) ? log(d.p) + log1p(-d.p) * x : log(zero(d.p))
 end
 
-struct RecursiveGeomProbEvaluator <: RecursiveProbabilityEvaluator
-    p0::Float64
-end
-
-RecursiveGeomProbEvaluator(d::Geometric) = RecursiveGeomProbEvaluator(failprob(d))
-nextpdf(s::RecursiveGeomProbEvaluator, p::Real, x::Integer) = p * s.p0
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Geometric, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursiveGeomProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::Geometric, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end
-
-
-
-function cdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 && return zero(T)
+function cdf(d::Geometric, x::Int)
     p = succprob(d)
-    n = x + 1
+    n = max(x + 1, 0)
     p < 1/2 ? -expm1(log1p(-p)*n) : 1 - (1 - p)^n
 end
 
-function ccdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 && return one(T)
+ccdf(d::Geometric, x::Real) = ccdf_int(d, x)
+function ccdf(d::Geometric, x::Int)
     p = succprob(d)
-    n = x + 1
+    n = max(x + 1, 0)
     p < 1/2 ? exp(log1p(-p)*n) : (1 - p)^n
 end
 
-function logcdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 ? -T(Inf) : log1mexp(log1p(-d.p) * (x + 1))
-end
+logcdf(d::Geometric, x::Real) = logcdf_int(d, x)
+logcdf(d::Geometric, x::Int) = log1mexp(log1p(-d.p) * max(x + 1, 0))
 
-logccdf(d::Geometric, x::Int) =  x < 0 ? zero(d.p) : log1p(-d.p) * (x + 1)
+logccdf(d::Geometric, x::Real) = logccdf_int(d, x)
+logccdf(d::Geometric, x::Int) =  log1p(-d.p) * max(x + 1, 0)
 
 quantile(d::Geometric, p::Real) = invlogccdf(d, log1p(-p))
 

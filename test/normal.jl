@@ -14,7 +14,9 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test logdiffcdf(Normal(), Float64(5), Float64(3)) ≈ -6.607938594596893 rtol=1e-12
     let d = Normal(Float64(0), Float64(1)), x = Float64(-60), y = Float64(-60.001)
         float_res = logdiffcdf(d, x, y)
-        big_float_res = log(cdf(d, BigFloat(x, 100)) - cdf(d, BigFloat(y, 100)))
+        big_x = VERSION < v"1.1" ? BigFloat(x, 100) : BigFloat(x; precision=100)
+        big_y = VERSION < v"1.1" ? BigFloat(y, 100) : BigFloat(y; precision=100)
+        big_float_res = log(cdf(d, big_x) - cdf(d, big_y))
         @test float_res ≈ big_float_res
     end
     @test_throws ArgumentError logdiffcdf(Normal(), 1.0, 2.0)
@@ -158,4 +160,11 @@ end
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
     @test isnan_type(Float32, @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
+end
+
+@testset "Normal: Sampling with integer-valued parameters" begin
+    d = Normal{Int}(0, 1)
+    @test rand(d) isa Float64
+    @test rand(d, 10) isa Vector{Float64}
+    @test rand(d, (3, 2)) isa Matrix{Float64}
 end

@@ -69,11 +69,11 @@ Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
 
 # Sampling
 
-function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
+function rand(rng::AbstractRNG, d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
     n = length(p)
-    draw = rand(rng, P)
+    draw = rand(rng, float(eltype(p)))
     cp = p[1]
     i = 1
     while cp <= draw && i < n
@@ -81,8 +81,6 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     end
     return x[i]
 end
-
-rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)
 
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
@@ -107,33 +105,57 @@ function pdf(d::DiscreteNonParametric, x::Real)
 end
 logpdf(d::DiscreteNonParametric, x::Real) = log(pdf(d, x))
 
-# Helper functions for cdf and ccdf required to fix ambiguous method
-# error involving [c]cdf(::DisceteUnivariateDistribution, ::Int)
-function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    x > maximum(d) && return 1.0
-    s = zero(P)
+function cdf(d::DiscreteNonParametric, x::Real)
     ps = probs(d)
-    stop_idx = searchsortedlast(support(d), x)
-    for i in 1:stop_idx
-        s += ps[i]
-    end
-    return s
-end
-cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
-cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
+    P = float(eltype(ps))
 
-function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    x < minimum(d) && return 1.0
-    s = zero(P)
-    ps = probs(d)
+    # trivial cases
+    x < minimum(d) && return zero(P)
+    x >= maximum(d) && return one(P)
+    isnan(x) && return P(NaN)
+
+    n = length(ps)
     stop_idx = searchsortedlast(support(d), x)
-    for i in (stop_idx+1):length(ps)
-        s += ps[i]
+    s = zero(P)
+    if stop_idx < div(n, 2)
+        @inbounds for i in 1:stop_idx
+            s += ps[i]
+        end
+    else
+        @inbounds for i in (stop_idx + 1):n
+            s += ps[i]
+        end
+        s = 1 - s
     end
+
     return s
 end
-ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
-ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
+
+function ccdf(d::DiscreteNonParametric, x::Real)
+    ps = probs(d)
+    P = float(eltype(ps))
+
+    # trivial cases
+    x < minimum(d) && return one(P)
+    x >= maximum(d) && return zero(P)
+    isnan(x) && return P(NaN)
+
+    n = length(ps)
+    stop_idx = searchsortedlast(support(d), x)
+    s = zero(P)
+    if stop_idx < div(n, 2)
+        @inbounds for i in 1:stop_idx
+            s += ps[i]
+        end
+        s = 1 - s
+    else
+        @inbounds for i in (stop_idx + 1):n
+            s += ps[i]
+        end
+    end
+
+    return s
+end
 
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())

@@ -4,6 +4,7 @@ using Test
 import Distributions: GenericMvTDist
 import PDMats: PDMat
 
+@testset "mvtdist" begin
 # Set location vector mu and scale matrix Sigma as in
 # Hofert M. On Sampling from the Multivariate t Distribution. The R Journal
 mu = [1., 2]
@@ -55,8 +56,11 @@ mu_static = @SVector [1., 2]
 
 for i in 1:length(df)
     d = GenericMvTDist(df[i], mu_static, PDMat(Sigma))
+    d32 = convert(GenericMvTDist{Float32}, d)
     @test d.μ isa SVector
     @test isapprox(logpdf(d, [-2., 3]), rvalues[i], atol=1.0e-8)
+    @test isa(logpdf(d32, [-2f0, 3f0]), Float32)
+    @test isapprox(logpdf(d32, [-2f0, 3f0]), convert(Float32, rvalues[i]), atol=1.0e-4)
     dd = typeof(d)(params(d)...)
     @test d.df == dd.df
     @test d.μ == dd.μ
@@ -80,4 +84,5 @@ end
     # Check that the logpdf computed is the same.
     x = rand(X_implicit)
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
+end
 end

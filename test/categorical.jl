@@ -25,21 +25,34 @@ for p in Any[
     c = 0.0
     for i = 1:k
         c += p[i]
-        @test pdf(d, i) == p[i]
+        @test @inferred(pdf(d, i)) == p[i]
+        @test @inferred(pdf(d, float(i))) == p[i]
         @test @inferred(logpdf(d, i)) === log(p[i])
         @test @inferred(logpdf(d, float(i))) === log(p[i])
-        @test cdf(d, i)  ≈ c
-        @test ccdf(d, i) ≈ 1.0 - c
+        @test @inferred(cdf(d, i))  ≈ c
+        @test @inferred(cdf(d, i + 0.5)) ≈ c
+        @test @inferred(ccdf(d, i)) ≈ 1 - c
+        @test @inferred(ccdf(d, i + 0.5)) ≈ 1 - c
+        @test @inferred(logcdf(d, i)) ≈ log(c)
+        @test @inferred(logcdf(d, i + 0.5)) ≈ log(c)
+        @test @inferred(logccdf(d, i)) ≈ log1p(-c)
+        @test @inferred(logccdf(d, i + 0.5)) ≈ log1p(-c)
     end
 
     @test pdf(d, 0) == 0
     @test pdf(d, k+1) == 0
     @test logpdf(d, 0) == -Inf
     @test logpdf(d, k+1) == -Inf
-    @test cdf(d, 0) == 0.0
-    @test cdf(d, k+1) == 1.0
-    @test ccdf(d, 0) == 1.0
-    @test ccdf(d, k+1) == 0.0
+    @test iszero(cdf(d, -Inf))
+    @test iszero(cdf(d, 0))
+    @test isone(cdf(d, k+1))
+    @test isone(cdf(d, Inf))
+    @test isnan(cdf(d, NaN))
+    @test isone(ccdf(d, -Inf))
+    @test isone(ccdf(d, 0))
+    @test iszero(ccdf(d, k+1))
+    @test iszero(ccdf(d, Inf))
+    @test isnan(ccdf(d, NaN))
 
     @test pdf.(d, support(d)) == p
     @test pdf.(d, 1:k) == p

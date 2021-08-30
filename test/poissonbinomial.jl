@@ -1,6 +1,8 @@
 using Distributions
+using ForwardDiff
 using Test
 
+@testset "poissonbinomial" begin
 function naive_esf(x::AbstractVector{T}) where T <: Real
     n = length(x)
     S = zeros(T, n+1)
@@ -29,14 +31,13 @@ naive_sol = naive_pb(p)
 
 @test Distributions.poissonbinomial_pdf_fft(p) ≈ naive_sol
 @test Distributions.poissonbinomial_pdf(p) ≈ naive_sol
+@test Distributions.poissonbinomial_pdf(Tuple(p)) ≈ naive_sol
 
 @test Distributions.poissonbinomial_pdf_fft(p) ≈ Distributions.poissonbinomial_pdf(p)
 
 # Test the special base where PoissonBinomial distribution reduces
 # to Binomial distribution
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
-    local p
-
     d = PoissonBinomial(fill(p, n))
     dref = Binomial(n, p)
     println("   testing PoissonBinomial p=$p, n=$n")
@@ -46,25 +47,43 @@ for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     @test maximum(d) == n
     @test extrema(d) == (0, n)
     @test ntrials(d) == n
-    @test entropy(d)  ≈ entropy(dref)
-    @test median(d)   ≈ median(dref)
-    @test mean(d)     ≈ mean(dref)
-    @test var(d)      ≈ var(dref)
-    @test kurtosis(d) ≈ kurtosis(dref)
-    @test skewness(d) ≈ skewness(dref)
+    @test @inferred(entropy(d))  ≈ entropy(dref)
+    @test @inferred(median(d))   ≈ median(dref)
+    @test @inferred(mean(d))     ≈ mean(dref)
+    @test @inferred(var(d))      ≈ var(dref)
+    @test @inferred(kurtosis(d)) ≈ kurtosis(dref)
+    @test @inferred(skewness(d)) ≈ skewness(dref)
 
     for t=0:5
-        @test mgf(d, t) ≈ mgf(dref, t)
-        @test cf(d, t)  ≈ cf(dref, t)
+        @test @inferred(mgf(d, t)) ≈ mgf(dref, t)
+        @test @inferred(cf(d, t))  ≈ cf(dref, t)
     end
     for i=0.1:0.1:.9
-        @test quantile(d, i) ≈ quantile(dref, i)
+        @test @inferred(quantile(d, i)) ≈ quantile(dref, i)
     end
     for i=0:n
-        @test isapprox(cdf(d, i), cdf(dref, i), atol=1e-15)
-        @test isapprox(pdf(d, i), pdf(dref, i), atol=1e-15)
+        @test @inferred(pdf(d, i)) ≈ pdf(dref, i) atol=1e-15
+        @test @inferred(pdf(d, i//1)) ≈ pdf(dref, i) atol=1e-15
+        @test @inferred(logpdf(d, i)) ≈ logpdf(dref, i)
+        @test @inferred(logpdf(d, i//1)) ≈ logpdf(dref, i)
+        for f in (cdf, ccdf, logcdf, logccdf)
+            @test @inferred(f(d, i)) ≈ f(dref, i) rtol=1e-6
+            @test @inferred(f(d, i//1)) ≈ f(dref, i) rtol=1e-6
+            @test @inferred(f(d, i + 0.5)) ≈ f(dref, i) rtol=1e-6
+        end
     end
 
+    @test iszero(@inferred(cdf(d, -Inf)))
+    @test isone(@inferred(cdf(d, Inf)))
+    @test @inferred(logcdf(d, -Inf)) == -Inf
+    @test iszero(@inferred(logcdf(d, Inf)))
+    @test isone(@inferred(ccdf(d, -Inf)))
+    @test iszero(@inferred(ccdf(d, Inf)))
+    @test iszero(@inferred(logccdf(d, -Inf)))
+    @test @inferred(logccdf(d, Inf)) == -Inf
+    for f in (cdf, ccdf, logcdf, logccdf)
+        @test isnan(f(d, NaN))
+    end
 end
 
 # Test against a sum of three Binomial distributions
@@ -88,11 +107,11 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
     pmf2 = pdf.(b2, support(b2))
     pmf3 = pdf.(b3, support(b3))
 
-    @test mean(d) ≈ (mean(b1) + mean(b2) + mean(b3))
-    @test var(d)  ≈ (var(b1) + var(b2) + var(b3))
+    @test @inferred(mean(d)) ≈ (mean(b1) + mean(b2) + mean(b3))
+    @test @inferred(var(d))  ≈ (var(b1) + var(b2) + var(b3))
     for t=0:5
-        @test mgf(d, t) ≈ (mgf(b1, t) * mgf(b2, t) * mgf(b3, t))
-        @test cf(d, t)  ≈ (cf(b1, t) * cf(b2, t) * cf(b3, t))
+        @test @inferred(mgf(d, t)) ≈ (mgf(b1, t) * mgf(b2, t) * mgf(b3, t))
+        @test @inferred(cf(d, t))  ≈ (cf(b1, t) * cf(b2, t) * cf(b3, t))
     end
 
     for k=0:n
@@ -104,7 +123,10 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
             end
             m += pmf1[i+1] * mc
         end
-        @test isapprox(pdf(d, k), m, atol=1e-15)
+        @test @inferred(pdf(d, k)) ≈ m atol=1e-15
+        @test @inferred(pdf(d, k//1)) ≈ m atol=1e-15
+        @test @inferred(logpdf(d, k)) ≈ log(m)
+        @test @inferred(logpdf(d, k//1)) ≈ log(m)
     end
 end
 
@@ -127,3 +149,4 @@ end
 f = x -> logpdf(PoissonBinomial(x), 0)
 at = [0.5, 0.5]
 @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
+end

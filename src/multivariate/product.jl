@@ -61,6 +61,6 @@ covariance matrix.
 """
 function product_distribution(dists::AbstractVector{<:Normal})
     µ = mean.(dists)
-    σ = std.(dists)
-    return MvNormal(µ, σ)
+    σ2 = var.(dists)
+    return MvNormal(µ, Diagonal(σ2))
 end

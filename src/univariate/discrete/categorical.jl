@@ -68,17 +68,12 @@ end
 
 ### Evaluation
 
-function cdf(d::Categorical{T}, x::Int) where T<:Real
-    k = ncategories(d)
-    p = probs(d)
-    x < 1 && return zero(T)
-    x >= k && return one(T)
-    c = p[1]
-    for i = 2:x
-        @inbounds c += p[i]
-    end
-    return c
-end
+# the fallbacks are overridden by `DiscreteNonParameteric`
+cdf(d::Categorical, x::Real) = cdf_int(d, x)
+ccdf(d::Categorical, x::Real) = ccdf_int(d, x)
+
+cdf(d::Categorical, x::Int) = integerunitrange_cdf(d, x)
+ccdf(d::Categorical, x::Int) = integerunitrange_ccdf(d, x)
 
 function pdf(d::Categorical, x::Real)
     ps = probs(d)

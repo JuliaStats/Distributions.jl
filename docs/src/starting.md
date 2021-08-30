@@ -49,9 +49,9 @@ julia> rand(Normal(1, 2), 100)
 
 The package contains a large number of additional distributions of three main types:
 
-* `Univariate`
-* `Multivariate`
-* `Matrixvariate`
+* `Univariate == ArrayLikeVariate{0}`
+* `Multivariate == ArrayLikeVariate{1}`
+* `Matrixvariate == ArrayLikeVariate{2}`
 
 Each type splits further into `Discrete` and `Continuous`.
 

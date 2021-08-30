@@ -8,9 +8,9 @@ P(X = k) = {n \\choose k} B(k + \\alpha, n - k + \\beta) / B(\\alpha, \\beta),  
 ```
 
 ```julia
-BetaBinomial(n, a, b)      # BetaBinomial distribution with n trials and shape parameters a, b
+BetaBinomial(n, α, β)      # BetaBinomial distribution with n trials and shape parameters α, β
 
-params(d)       # Get the parameters, i.e. (n, a, b)
+params(d)       # Get the parameters, i.e. (n, α, β)
 ntrials(d)      # Get the number of trials, i.e. n
 ```
 
@@ -90,6 +90,16 @@ function logpdf(d::BetaBinomial, k::Real)
     logdenom = logbeta(α, β)
     result = logbinom + lognum - logdenom
     return _insupport ? result : oftype(result, -Inf)
+end
+
+# sum values of the probability mass function
+cdf(d::BetaBinomial, k::Int) = integerunitrange_cdf(d, k)
+
+for f in (:ccdf, :logcdf, :logccdf)
+    @eval begin
+        $f(d::BetaBinomial, k::Real) = $(Symbol(f, :_int))(d, k)
+        $f(d::BetaBinomial, k::Int) = $(Symbol(:integerunitrange_, f))(d, k)
+    end
 end
 
 entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))

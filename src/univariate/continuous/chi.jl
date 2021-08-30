@@ -4,16 +4,16 @@
 The *Chi distribution* `ν` degrees of freedom has probability density function
 
 ```math
-f(x; k) = \\frac{1}{\\Gamma(k/2)} 2^{1 - k/2} x^{k-1} e^{-x^2/2}, \\quad x > 0
+f(x; \\nu) = \\frac{1}{\\Gamma(\\nu/2)} 2^{1 - \\nu/2} x^{\\nu-1} e^{-x^2/2}, \\quad x > 0
 ```
 
 It is the distribution of the square-root of a [`Chisq`](@ref) variate.
 
 ```julia
-Chi(k)       # Chi distribution with k degrees of freedom
+Chi(ν)       # Chi distribution with ν degrees of freedom
 
-params(d)    # Get the parameters, i.e. (k,)
-dof(d)       # Get the degrees of freedom, i.e. k
+params(d)    # Get the parameters, i.e. (ν,)
+dof(d)       # Get the degrees of freedom, i.e. ν
 ```
 
 External links
@@ -48,7 +48,7 @@ params(d::Chi) = (d.ν,)
 
 #### Statistics
 
-mean(d::Chi) = (h = d.ν/2; sqrt2 * gamma(h + 1//2) / gamma(h))
+mean(d::Chi) = (h = d.ν/2; sqrt2 * exp(loggamma(h + 1//2) - loggamma(h)))
 
 var(d::Chi) = d.ν - mean(d)^2
 _chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1 - 2σ2))
@@ -83,16 +83,13 @@ logpdf(d::Chi, x::Real) = (ν = d.ν;
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
-cdf(d::Chi, x::Real) = chisqcdf(d.ν, x^2)
-ccdf(d::Chi, x::Real) = chisqccdf(d.ν, x^2)
-logcdf(d::Chi, x::Real) = chisqlogcdf(d.ν, x^2)
-logccdf(d::Chi, x::Real) = chisqlogccdf(d.ν, x^2)
+for f in (:cdf, :ccdf, :logcdf, :logccdf)
+    @eval $f(d::Chi, x::Real) = $f(Chisq(d.ν; check_args=false), max(x, 0)^2)
+end
 
-quantile(d::Chi, p::Real) = sqrt(chisqinvcdf(d.ν, p))
-cquantile(d::Chi, p::Real) = sqrt(chisqinvccdf(d.ν, p))
-invlogcdf(d::Chi, p::Real) = sqrt(chisqinvlogcdf(d.ν, p))
-invlogccdf(d::Chi, p::Real) = sqrt(chisqinvlogccdf(d.ν, p))
-
+for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
+    @eval $f(d::Chi, p::Real) = sqrt($f(Chisq(d.ν; check_args=false), p))
+end
 
 #### Sampling
 

@@ -35,6 +35,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
     test_range_evaluation(distr)
+    test_nonfinite(distr)
 
     test_stats(distr, vs)
     test_samples(distr, n)
@@ -52,6 +53,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
 
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
+    test_nonfinite(distr)
 
     if isa(distr, StudentizedRange)
         n = 2000 # must use fewer values due to performance
@@ -462,6 +464,27 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
+function test_nonfinite(distr::UnivariateDistribution)
+    # non-finite bounds
+    @test iszero(@inferred(cdf(distr, -Inf)))
+    @test isone(@inferred(cdf(distr, Inf)))
+    @test isone(@inferred(ccdf(distr, -Inf)))
+    @test iszero(@inferred(ccdf(distr, Inf)))
+    @test @inferred(logcdf(distr, -Inf)) == -Inf
+    @test iszero(@inferred(logcdf(distr, Inf)))
+    @test iszero(@inferred(logccdf(distr, -Inf)))
+    @test @inferred(logccdf(distr, Inf)) == -Inf
+
+    # NaN
+    for f in (cdf, ccdf, logcdf, logccdf)
+        if distr isa NoncentralT
+            # broken in StatsFuns/R
+            @test_broken isnan(f(distr, NaN))
+        else
+            @test isnan(f(distr, NaN))
+        end
+    end
+end
 
 #### Testing statistics methods
 
@@ -556,7 +579,7 @@ function test_params(d::Truncated)
     d_unt = d.untruncated
     D = typeof(d_unt)
     pars = params(d_unt)
-    d_new = Truncated(D(pars...), d.lower, d.upper)
+    d_new = truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
     @test d == deepcopy(d)
 end

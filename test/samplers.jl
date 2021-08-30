@@ -100,4 +100,20 @@ import Distributions:
             test_samples(S(d), d, n_tsamples, rng=rng)
         end
     end
+
+    @testset "Random.Sampler" begin
+        for dist in (
+            Binomial(5, 0.3),
+            Exponential(2.0),
+            Gamma(0.1, 1.0),
+            Gamma(2.0, 1.0),
+            MatrixNormal(3, 4),
+            MvNormal(zeros(3), I),
+            Normal(1.5, 2.0),
+            Poisson(0.5),
+        )
+            @test Random.Sampler(rng, dist, Val(1)) == dist
+            @test Random.Sampler(rng, dist) == sampler(dist)
+        end
+    end
 end

@@ -5,7 +5,7 @@ The *Generalized extreme value distribution* with shape parameter `ξ`, scale `�
 
 ```math
 f(x; \\xi, \\sigma, \\mu) = \\begin{cases}
-        \\frac{1}{\\sigma} \\left[ 1+\\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi-1} \\exp\\left\\{-\\left[ 1+ \\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi} \\right\\} & \\text{for } \\xi \\neq 0  \\\\\\
+        \\frac{1}{\\sigma} \\left[ 1+\\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi-1} \\exp\\left\\{-\\left[ 1+ \\left(\\frac{x-\\mu}{\\sigma}\\right)\\xi\\right]^{-1/\\xi} \\right\\} & \\text{for } \\xi \\neq 0  \\\\
         \\frac{1}{\\sigma} \\exp\\left\\{-\\frac{x-\\mu}{\\sigma}\\right\\} \\exp\\left\\{-\\exp\\left[-\\frac{x-\\mu}{\\sigma}\\right]\\right\\} & \\text{for } \\xi = 0 \\\\
     \\end{cases}
 ```
@@ -21,12 +21,12 @@ x \\in \\begin{cases}
 ```
 
 ```julia
-GeneralizedExtremeValue(m, s, k)      # Generalized Pareto distribution with shape k, scale s and location m.
+GeneralizedExtremeValue(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
 
-params(d)       # Get the parameters, i.e. (m, s, k)
-location(d)     # Get the location parameter, i.e. m
-scale(d)        # Get the scale parameter, i.e. s
-shape(d)        # Get the shape parameter, i.e. k (sometimes called c)
+params(d)       # Get the parameters, i.e. (μ, σ, ξ)
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. σ
+shape(d)        # Get the shape parameter, i.e. ξ (sometimes called c)
 ```
 
 External links
@@ -219,43 +219,21 @@ function pdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     end
 end
 
-function logcdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
-    if insupport(d, x)
-        (μ, σ, ξ) = params(d)
-
-        z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps(one(ξ)) # ξ == 0
-            return -exp(- z)
-        else
-            return - (1 + z * ξ) ^ ( -1/ξ)
-        end
-    elseif x <= minimum(d)
-        return -T(Inf)
+function logcdf(d::GeneralizedExtremeValue, x::Real)
+    μ, σ, ξ = params(d)
+    z = (x - μ) / σ
+    return if abs(ξ) < eps(one(ξ)) # ξ == 0
+        -exp(- z)
     else
-        return zero(T)
+        # y(x) = y(bound) = 0 if x is not in the support with lower/upper bound
+        y = max(1 + z * ξ, 0)
+        - y^(-1/ξ)
     end
 end
+cdf(d::GeneralizedExtremeValue, x::Real) = exp(logcdf(d, x))
 
-function cdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
-    if insupport(d, x)
-        (μ, σ, ξ) = params(d)
-
-        z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps(one(ξ)) # ξ == 0
-            t = exp(-z)
-        else
-            t = (1 + z * ξ) ^ (-1/ξ)
-        end
-        return exp(- t)
-    elseif x <= minimum(d)
-        return zero(T)
-    else
-        return one(T)
-    end
-end
-
-logccdf(d::GeneralizedExtremeValue, x::Real) = log1p(- cdf(d, x))
 ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
+logccdf(d::GeneralizedExtremeValue, x::Real) = log1mexp(logcdf(d, x))
 
 
 #### Sampling
