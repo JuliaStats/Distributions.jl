@@ -1,8 +1,12 @@
 # Various algorithms for computing quantile
 
-function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
-                         lx::Real, rx::Real, tol::Real=1e-12)
-
+function quantile_bisect(
+    d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real,
+    # base tolerance on types to support e.g. `Float32` (avoids an infinite loop)
+    # ≈ 3.7e-11 for Float64
+    # ≈ 2.4e-5 for Float32
+    tol::Real=(eps(Base.promote_typeof(float(lx), float(rx))))^(2 / 3),
+)
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)

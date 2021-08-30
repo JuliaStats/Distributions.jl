@@ -216,7 +216,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 
 Return the median value of distribution `d`.
 """
-median(d::UnivariateDistribution) = quantile(d, 0.5)
+median(d::UnivariateDistribution) = quantile(d, 1//2)
 
 """
     modes(d::UnivariateDistribution)
