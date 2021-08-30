@@ -34,7 +34,6 @@ function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
 end
 
 Rician(ν::Real, σ::Real) = Rician(promote(ν, σ)...)
-Rician(ν::Integer, σ::Integer) = Rician(float(ν), float(σ))
 
 function Rician(; K=0.0, Ω=2.0)
     σ = sqrt(Ω / (K + 1) / 2)
