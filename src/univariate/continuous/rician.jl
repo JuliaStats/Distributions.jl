@@ -25,7 +25,6 @@ External links:
 struct Rician{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     σ::T
-    Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
 end
 
 function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
