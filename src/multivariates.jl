@@ -280,6 +280,8 @@ for fname in ["dirichlet.jl",
               "mvlognormal.jl",
               "mvtdist.jl",
               "product.jl",
+              "uniformspherical.jl",
+              "uniformball.jl",
               "vonmisesfisher.jl"]
     include(joinpath("multivariate", fname))
 end

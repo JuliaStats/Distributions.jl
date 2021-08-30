@@ -39,6 +39,8 @@ const tests = [
     "edgeworth",
     "matrixreshaped",
     "matrixvariates",
+    "uniformspherical",
+    "uniformball",
     "vonmisesfisher",
     "conversion",
     "convolution",
