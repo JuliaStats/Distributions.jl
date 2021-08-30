@@ -38,6 +38,7 @@ function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
     return Rician{T}(ν, σ)
 end
 
+Rician() = Rician(0.0, 1.0)
 Rician(ν::Real, σ::Real) = Rician(promote(ν, σ)...)
 Rician(ν::Integer, σ::Integer) = Rician(float(ν), float(σ))
 

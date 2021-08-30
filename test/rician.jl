@@ -37,11 +37,4 @@
     @test d1 isa Rician{Float64}
     @test params(d1) == (0.0, 1.0)
 
-    d1 = Rician(K=0.5, Ω=300.0)
-    @test d1 isa Rician{Float64}
-    @test params(d1)[1] ≈ 10.0
-    @test params(d1)[2] ≈ 10.0
-    @test shape(d1) ≈ 0.5
-    @test scale(d1) ≈ 300.0
-
 end
