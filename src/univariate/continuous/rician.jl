@@ -10,8 +10,7 @@ f(x; \\nu, \\sigma) = \\frac{x}{\\sigma^2} \\exp\\left( \\frac{-(x^2 + \\nu^2)}{
 If shape and scale parameters `K` and `Ω` are given instead, `ν` and `σ` may be computed from them:
 
 ```math
-\\sigma = \\sqrt{\frac{\\Omega}{2(K + 1)}}\\
-\nu = \\sigma\\sqrt{2K}
+\\sigma = \\sqrt{\\frac{\\Omega}{2(K + 1)}}, \\quad \\nu = \\sigma\\sqrt{2K}
 ```
 
 ```julia
@@ -31,6 +30,7 @@ External links:
 struct Rician{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     σ::T
+    Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
 end
 
 function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
@@ -94,18 +94,18 @@ end
 #### PDF/CDF
 
 function logpdf(d::Rician, x::Real)
-    isnan(x) && return x
-    x ≤ 0.0 && return -convert(eltype(x), Inf)
-    isinf(x) && return -convert(eltype(x), Inf)
+    (x ≤ 0 || isinf(x)) && return oftype(float(x), -Inf)
     σ² = d.σ^2
-    log.(x) - log(σ²) - (x.^2 + d.ν^2)/(2σ²) + log.(besseli.(zero(eltype(x)), x .* (d.ν / σ²)))
+    log(x) - log(σ²) - (x^2 + d.ν^2)/(2σ²) + log(besseli(zero(x), x .* (d.ν / σ²)))
 end
 
 function cdf(d::Rician, x::Real)
-    isnan(x) && return x
-    x ≤ 0.0 && return zero(eltype(x))
-    isinf(x) && return one(eltype(x))
-    first(quadgk(x -> pdf(d, x), zero(eltype(x)), x; rtol=1e-8))
+    let x = float(x)
+        isnan(x) && return x
+        x ≤ 0.0 && return zero(x)
+        isinf(x) && return one(x)
+        oftype(x, first(quadgk(x -> pdf(d, x), zero(x), x; rtol=1e-8)))
+    end
 end
 
 #### Sampling
@@ -124,20 +124,20 @@ function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) whe
     μ₂ = var(x)
     r = μ₁ / √μ₂
     if r < sqrt(π/(4-π))
-        ν = zero(T)
-        σ = scale(fit(Rayleigh, x))
+        ν = zero(float(T))
+        σ = scale(fit(Rayleigh, float.(x)))
     else
-        ξ(θ) = 2 + θ^2 - T(π)/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
+        ξ(θ) = 2 + θ^2 - π/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
         g(θ) = sqrt(ξ(θ) * (1+r^2) - 2)
-        θ = one(T)
+        θ = 1.0
         for j ∈ 1:maxiters
             θ⁻ = θ
             θ = g(θ)
             abs(θ - θ⁻) < tol && break
         end
         ξθ = ξ(θ)
-        σ = sqrt(μ₂ / ξθ)
-        ν = sqrt(μ₁^2 + (ξθ - 2) * σ^2)
+        σ = convert(float(T), sqrt(μ₂ / ξθ))
+        ν = convert(float(T), sqrt(μ₁^2 + (ξθ - 2) * σ^2))
     end
     Rician(ν, σ)
 end
