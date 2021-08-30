@@ -153,7 +153,9 @@ end
     @test isapprox(ForwardDiff.gradient(f, at), fdm(f, at), atol=1e-6)
 
     # Test ChainRules definition
-    test_rrule(Distributions.poissonbinomial_pdf_fft, rand(50))
-    test_rrule(Distributions.poissonbinomial_pdf, rand(50))
+    for f in (Distributions.poissonbinomial_pdf, Distributions.poissonbinomial_pdf_fft)
+        test_frule(f, rand(50))
+        test_rrule(f, rand(50))
+    end
 end
 end

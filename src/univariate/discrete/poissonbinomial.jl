@@ -244,28 +244,27 @@ function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
     return A
 end
 
-function ChainRulesCore.rrule(::typeof(poissonbinomial_pdf_fft), p::AbstractVector{<:Real})
-    y = poissonbinomial_pdf_fft(p)
-    A = poissonbinomial_pdf_partialderivatives(p)
-    function poissonbinomial_pdf_fft_pullback(Δy)
-        p̄ = ChainRulesCore.InplaceableThunk(
-            Δ -> LinearAlgebra.mul!(Δ, A, Δy, true, true),
-            ChainRulesCore.@thunk(A * Δy),
+for f in (:poissonbinomial_pdf, :poissonbinomial_pdf_fft)
+    pullback = Symbol(f, :_pullback)
+    @eval begin
+        function ChainRulesCore.frule(
+            (_, Δp)::Tuple{<:Any,<:AbstractVector{<:Real}}, ::typeof($f), p::AbstractVector{<:Real}
         )
-        return ChainRulesCore.NoTangent(), p̄
+            y = $f(p)
+            A = poissonbinomial_pdf_partialderivatives(p)
+            return y, A' * Δp
+        end
+        function ChainRulesCore.rrule(::typeof($f), p::AbstractVector{<:Real})
+            y = $f(p)
+            A = poissonbinomial_pdf_partialderivatives(p)
+            function $pullback(Δy)
+                p̄ = ChainRulesCore.InplaceableThunk(
+                    Δ -> LinearAlgebra.mul!(Δ, A, Δy, true, true),
+                    ChainRulesCore.@thunk(A * Δy),
+                )
+                return ChainRulesCore.NoTangent(), p̄
+            end
+            return y, $pullback
+        end
     end
-    return y, poissonbinomial_pdf_fft_pullback
-end
-
-function ChainRulesCore.rrule(::typeof(poissonbinomial_pdf), p::AbstractVector{<:Real})
-    y = poissonbinomial_pdf(p)
-    A = poissonbinomial_pdf_partialderivatives(p)
-    function poissonbinomial_pdf_pullback(Δy)
-        p̄ = ChainRulesCore.InplaceableThunk(
-            Δ -> LinearAlgebra.mul!(Δ, A, Δy, true, true),
-            ChainRulesCore.@thunk(A * Δy),
-        )
-        return ChainRulesCore.NoTangent(), p̄
-    end
-    return y, poissonbinomial_pdf_pullback
 end
