@@ -1,7 +1,3 @@
-# Eric Feltham (https://github.com/emfeltham)
-# zero-inflated distributions.jl
-# logpdf for ZeroInflatedPoisson written by Chris Fisher (https://github.com/itsdfish)
-
 """
     ZeroInflatedPoisson(λ, p)
 A *Zero-Inflated Poisson distribution* is a mixture distribution in which data arise from two processes. The first process is is a Poisson distribution, with mean λ, that descibes the number of independent events occurring within a unit time interval. Zeros may arise from this process, or modeleled as a Bernoulli trial, with probability of observing an excess zero p. As p approaches 0, the distribution tends toward Poisson(λ).
@@ -23,13 +19,6 @@ External links:
 * McElreath, R. (2020). Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9780429029608
 
 """
-
-using Distributions, Random, SpecialFunctions, LambertW
-using LogExpFunctions
-
-# explicit imports to add methods
-import Distributions: cdf, logpdf, rand, @check_args, suffstats, fit_mle
-import Statistics: mean, var, quantile
 
 struct ZeroInflatedPoisson{T<:Real} <: DiscreteUnivariateDistribution
   λ::T
@@ -78,11 +67,6 @@ partype(::ZeroInflatedPoisson{T}) where {T} = T
 
 #### Evaluation
 
-#= 
-if ( y[i] == 0 ) target += log_mix(p, 0, poisson_lpmf(0 | lambda));
-<=> if ( y[i] == 0 ) target += log( p + (1-p)*exp(-lambda) );
-if ( y[i] > 0 ) target += log1m(p) + poisson_lpmf(y[i] | lambda); (Stan code from McElreath Ch. 12)
-=#
 function logpdf(d::ZeroInflatedPoisson, y::Int)
   LL = 0.0
   if y == 0
@@ -96,8 +80,6 @@ function logpdf(d::ZeroInflatedPoisson, y::Int)
   return LL
 end
 
-# cdf
-# reference pzipois(q, lambda, pstr0 = 0) from VGAM R Pkg.
 function cdf(d::ZeroInflatedPoisson, x::Int)
   pd = Poisson(d.λ)
 
@@ -105,7 +87,7 @@ function cdf(d::ZeroInflatedPoisson, x::Int)
 
   if x < 0
     out = 0
-  elseif d.p < deflat_limit # is this condition already resolved by @check args?
+  elseif d.p < deflat_limit
     out = NaN
   else
     out = d.p + (1 - d.p) * cdf(pd, x)
@@ -114,7 +96,6 @@ function cdf(d::ZeroInflatedPoisson, x::Int)
 end
 
 # quantile
-# reference qzipois() from VGAM R Pkg.
 function quantile(d::ZeroInflatedPoisson, q::Real)
 
   deflat_limit = -1.0 / expm1(d.λ)
@@ -181,7 +162,6 @@ function fit_mle(::Type{<:ZeroInflatedPoisson}, ss::ZeroInflatedPoissonStats)
   return ZeroInflatedPoisson(λhat, phat)
 end
 
-# write a method that allows fit_mle(dtype, x), fit_mle(dtype, x, w) for ZeroInflatedPoisson AND Poisson (it is missing -- it does exist for Normal)
 function fit_mle(::Type{<:ZeroInflatedPoisson}, x::AbstractArray{T}) where T<:Real
   pstat = suffstats(ZeroInflatedPoisson, x)
   return fit_mle(ZeroInflatedPoisson, pstat)
