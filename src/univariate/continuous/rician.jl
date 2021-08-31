@@ -70,7 +70,6 @@ _Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x),
 mean(d::Rician{T}) where T = d.σ * √T(π/2) * _Lhalf(-d.ν^2/(2 * d.σ^2))
 var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
 
-quantile(d::Rician, q::Real) = quantile_newton(d, q, mean(d))
 function mode(d::Rician)
     m = mean(d)
     _minimize_gss(x -> -pdf(d, x), zero(m), m)
@@ -93,21 +92,44 @@ function _minimize_gss(f, a, b; tol=1e-12)
     (b + a) / 2
 end
 
-#### PDF/CDF
+#### PDF/CDF/quantile delegated to NoncentralChisq
+
+# NOTE:
+# 1.0ν and 1.0x used to support x::Float32, since the underlying NoncentralChisq delegates
+# to StatsFuns(rmath.jl) which doesn't have support for Float32
+
+function quantile(d::Rician, x::Real)
+    ν, σ = params(d)
+    return sqrt(quantile(NoncentralChisq(2, (1.0ν / σ)^2), 1.0x)) * σ
+end
+
+function cquantile(d::Rician, x::Real)
+    ν, σ = params(d)
+    return sqrt(cquantile(NoncentralChisq(2, (1.0ν / σ)^2), 1.0x)) * σ
+end
+
+function pdf(d::Rician, x::Real)
+    (x ≤ 0 || isinf(x)) && return zero(1.0x)
+    ν, σ = params(d)
+    return 2 * x / σ^2 * pdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+end
 
 function logpdf(d::Rician, x::Real)
-    (x ≤ 0 || isinf(x)) && return oftype(float(x), -Inf)
-    σ² = d.σ^2
-    log(x) - log(σ²) - (x^2 + d.ν^2)/(2σ²) + log(besseli(zero(x), x .* (d.ν / σ²)))
+    (x ≤ 0 || isinf(x)) && return oftype(1.0x, -Inf)
+    ν, σ = params(d)
+    return log(2 * x / σ^2) + logpdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
 end
 
 function cdf(d::Rician, x::Real)
-    let x = float(x)
-        isnan(x) && return x
-        x ≤ 0.0 && return zero(x)
-        isinf(x) && return one(x)
-        oftype(x, first(quadgk(x -> pdf(d, x), zero(x), x; rtol=1e-8)))
-    end
+    x ≤ 0 && return zero(1.0x)
+    ν, σ = params(d)
+    return cdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+end
+
+function logcdf(d::Rician, x::Real)
+    x ≤ 0 && return oftype(1.0x, -Inf)
+    ν, σ = params(d)
+    return logcdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
 end
 
 #### Sampling
