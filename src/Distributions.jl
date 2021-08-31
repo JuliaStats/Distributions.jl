@@ -23,7 +23,9 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 
 import PDMats: dim, PDMat, invquad
 
-using SpecialFunctions
+using SpecialFunctions, LambertW
+
+using LogExpFunctions: log1p, logsumexp
 
 import ChainRulesCore
 
@@ -161,6 +163,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    ZeroInflatedPoisson,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
@@ -334,7 +337,7 @@ Supported distributions:
     QQPair, Rayleigh, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
-    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    Wishart, ZeroInflatedPoisson, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon
 
