@@ -283,6 +283,7 @@ include("matrixvariates.jl")
 include("samplers.jl")
 
 # others
+include("product.jl")
 include("truncate.jl")
 include("conversion.jl")
 include("convolution.jl")
