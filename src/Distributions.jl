@@ -139,7 +139,6 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
-    Product,
     Poisson,
     PoissonBinomial,
     QQPair,
