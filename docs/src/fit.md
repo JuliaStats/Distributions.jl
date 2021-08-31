@@ -54,6 +54,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`InverseGaussian`](@ref)
 - [`Uniform`](@ref)
 - [`Weibull`](@ref)
+- [`ZeroInflatedPoisson`](@ref)
 
 **Multivariate:**
 

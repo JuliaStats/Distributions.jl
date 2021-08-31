@@ -159,6 +159,7 @@ NegativeBinomial
 Poisson
 PoissonBinomial
 Skellam
+ZeroInflatedPoisson
 ```
 
 ### Vectorized evaluation
