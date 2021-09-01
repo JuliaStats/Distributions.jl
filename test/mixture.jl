@@ -72,8 +72,9 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     # quantile
     αs = float(partype(g))[0.0; 0.49; 0.5; 0.51; 1.0]
     for α in αs
-        @test cdf(g, quantile(g, α)) ≈ α
+        @test cdf(g, @inferred(quantile(g, α))) ≈ α
     end
+    @test @inferred(median(g)) ≈ quantile(g, 1//2)
 
     # sampling
     # sampling does not work with `Float32` since `AliasTable` does not support `Float32`
