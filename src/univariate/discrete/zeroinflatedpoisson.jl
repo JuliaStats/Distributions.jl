@@ -12,7 +12,7 @@ As p approaches 0, the distribution tends toward Poisson(λ).
 ```julia
 ZeroInflatedPoisson()        # Zero-Inflated Poisson distribution with rate parameter 1, and probability of observing a zero 0.5
 ZeroInflatedPoisson(λ)       # ZeroInflatedPoisson distribution with rate parameter λ, and probability of observing a zero 0.5
-params(d)                    # Get the parameters, i.e. (λ, w)
+params(d)                    # Get the parameters, i.e. (λ, p)
 mean(d)                      # Get the mean of the mixture distribution
 var(d)                       # Get the variance of the mixture distribution
 ```
