@@ -151,8 +151,8 @@ function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) whe
     else
         ξ(θ) = 2 + θ^2 - π/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
         g(θ) = sqrt(ξ(θ) * (1+r^2) - 2)
-        θ = 1.0
-        for j ∈ 1:maxiters
+        θ = g(1)
+        for j in 1:maxiters
             θ⁻ = θ
             θ = g(θ)
             abs(θ - θ⁻) < tol && break
