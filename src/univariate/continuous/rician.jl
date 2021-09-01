@@ -121,9 +121,8 @@ function logpdf(d::Rician, x::Real)
 end
 
 function cdf(d::Rician, x::Real)
-    x ≤ 0 && return zero(1.0x)
     ν, σ = params(d)
-    return cdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+    return cdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
 end
 
 function logcdf(d::Rician, x::Real)
