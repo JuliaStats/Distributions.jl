@@ -109,9 +109,9 @@ function cquantile(d::Rician, x::Real)
 end
 
 function pdf(d::Rician, x::Real)
-    (x ≤ 0 || isinf(x)) && return zero(1.0x)
     ν, σ = params(d)
-    return 2 * x / σ^2 * pdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+    result = 2 * x / σ^2 * pdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 || isinf(x) ? zero(result) : result
 end
 
 function logpdf(d::Rician, x::Real)
