@@ -94,10 +94,6 @@ end
 
 #### PDF/CDF/quantile delegated to NoncentralChisq
 
-# NOTE:
-# 1.0ν and 1.0x used to support x::Float32, since the underlying NoncentralChisq delegates
-# to StatsFuns(rmath.jl) which doesn't have support for Float32
-
 function quantile(d::Rician, x::Real)
     ν, σ = params(d)
     return sqrt(quantile(NoncentralChisq(2, (1.0ν / σ)^2), 1.0x)) * σ
@@ -116,18 +112,20 @@ end
 
 function logpdf(d::Rician, x::Real)
     ν, σ = params(d)
-    result = log(2 * x / σ^2) + logpdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    result = log(2 * abs(x) / σ^2) + logpdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
     return x < 0 || isinf(x) ? oftype(result, -Inf) : result
 end
 
 function cdf(d::Rician, x::Real)
     ν, σ = params(d)
-    return cdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    result = cdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 ? zero(result) : result
 end
 
 function logcdf(d::Rician, x::Real)
     ν, σ = params(d)
-    return logcdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    result = logcdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 ? oftype(result, -Inf) : result
 end
 
 #### Sampling
