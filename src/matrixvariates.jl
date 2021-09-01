@@ -149,16 +149,16 @@ end
 
 # pdf & logpdf
 
-_logpdf(d::MatrixDistribution, X::AbstractMatrix) = logkernel(d, X) + d.logc0
+_logpdf(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logkernel(d, X) + d.logc0
 
-_pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where {T<:Real} = exp(_logpdf(d, x))
+_pdf(d::MatrixDistribution, x::AbstractMatrix{<:Real}) = exp(_logpdf(d, x))
 
 """
     logpdf(d::MatrixDistribution, AbstractMatrix)
 
 Compute the logarithm of the probability density at the input matrix `x`.
 """
-function logpdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
+function logpdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _logpdf(d, x)
@@ -169,13 +169,13 @@ end
 
 Compute the probability density at the input matrix `x`.
 """
-function pdf(d::MatrixDistribution, x::AbstractMatrix{T}) where T<:Real
+function pdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
     size(x) == size(d) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     _pdf(d, x)
 end
 
-function _logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{M}) where M<:Matrix
+function _logpdf!(r::AbstractArray, d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
     for i = 1:length(X)
         r[i] = logpdf(d, X[i])
     end
