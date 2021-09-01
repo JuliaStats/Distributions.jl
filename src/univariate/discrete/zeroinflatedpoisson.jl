@@ -77,7 +77,7 @@ function logpdf(d::ZeroInflatedPoisson, y::Int)
     LLs[2] = log1p(-d.p) - d.λ
     LL = logsumexp(LLs)
   else
-    LL = log1p(-d.p) + logpdf(LogPoisson(log(d.λ)), y)
+    LL = log1p(-d.p) + logpdf(Poisson(d.λ), y)
   end
   return LL
 end
@@ -88,7 +88,7 @@ function cdf(d::ZeroInflatedPoisson, x::Int)
   deflat_limit = -1.0 / expm1(d.λ)
 
   if x < 0
-    out = 0
+    out = 0.0
   elseif d.p < deflat_limit
     out = NaN
   else
@@ -105,13 +105,11 @@ function quantile(d::ZeroInflatedPoisson, q::Real)
   if (q <= d.p)
     out = 0
   elseif (d.p < deflat_limit)
-    out = NaN
-  elseif (d.p < q) & (deflat_limit <= d.p) & (q < 1)
-    qp = (q - d.p) / (1 - d.p)
+    out = convert(Int64, NaN)
+  elseif (d.p < q) & (deflat_limit <= d.p) & (q < 1.0)
+    qp = (q - d.p) / (1.0 - d.p)
     pd = Poisson(d.λ)
-    out = quantile(pd, qp)
-  elseif p == 1
-    out = Inf
+    out = quantile(pd, qp) # handles d.p == 1 as InexactError(Inf)
   end
   return out
 end
