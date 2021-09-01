@@ -115,9 +115,9 @@ function pdf(d::Rician, x::Real)
 end
 
 function logpdf(d::Rician, x::Real)
-    (x ≤ 0 || isinf(x)) && return oftype(1.0x, -Inf)
     ν, σ = params(d)
-    return log(2 * x / σ^2) + logpdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+    result = log(2 * x / σ^2) + logpdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
+    return x < 0 || isinf(x) ? oftype(result, -Inf) : result
 end
 
 function cdf(d::Rician, x::Real)
