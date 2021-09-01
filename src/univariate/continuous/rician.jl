@@ -126,9 +126,8 @@ function cdf(d::Rician, x::Real)
 end
 
 function logcdf(d::Rician, x::Real)
-    x ≤ 0 && return oftype(1.0x, -Inf)
     ν, σ = params(d)
-    return logcdf(NoncentralChisq(2, (1.0ν / σ)^2), (1.0x / σ)^2)
+    return logcdf(NoncentralChisq(2, (ν / σ)^2), (x / σ)^2)
 end
 
 #### Sampling
