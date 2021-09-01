@@ -25,8 +25,6 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions, LambertW
 
-using LogExpFunctions: log1p, logsumexp
-
 import ChainRulesCore
 
 export
