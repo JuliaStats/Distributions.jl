@@ -46,7 +46,7 @@ ZeroInflatedPoisson() = ZeroInflatedPoisson(1.0, 0.5, check_args = false)
 
 ### Statistics
 
-mean(d::ZeroInflatedPoisson) = (1 - d.p) * d.λ # check
+mean(d::ZeroInflatedPoisson) = (1 - d.p) * d.λ
 
 var(d::ZeroInflatedPoisson) = d.λ * log1p(-d.p) * log1p(d.p * d.λ)
 
