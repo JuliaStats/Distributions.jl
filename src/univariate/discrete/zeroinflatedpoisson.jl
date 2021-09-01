@@ -1,17 +1,20 @@
 """
     ZeroInflatedPoisson(λ, p)
-A *Zero-Inflated Poisson distribution* is a mixture distribution in which data arise from two processes. The first process is is a Poisson distribution, with mean λ, that descibes the number of independent events occurring within a unit time interval. Zeros may arise from this process, or modeleled as a Bernoulli trial, with probability of observing an excess zero p. As p approaches 0, the distribution tends toward Poisson(λ).
+A *Zero-Inflated Poisson distribution* is a mixture distribution in which data arise from two processes. The first process is is a Poisson distribution, with mean λ, that descibes the number of independent events occurring within a unit time interval:
 ```math
-P(X = 0) = p + (1 - p) e^{-\\lambda}
-
 P(X = k) = (1 - p) \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
 ```
+Zeros may arise from this process, an additional Bernoulli process, where the probability of observing an excess zero is given as p:
+```math
+P(X = 0) = p + (1 - p) e^{-\\lambda}
+```
+As p approaches 0, the distribution tends toward Poisson(λ).
 ```julia
-ZeroInflatedPoisson()      # Zero-Inflated Poisson distribution with rate parameter 1, and probability of observing a zero 0.5
+ZeroInflatedPoisson()        # Zero-Inflated Poisson distribution with rate parameter 1, and probability of observing a zero 0.5
 ZeroInflatedPoisson(λ)       # ZeroInflatedPoisson distribution with rate parameter λ, and probability of observing a zero 0.5
-params(d)        # Get the parameters, i.e. (λ, w)
-mean(d)          # Get the mean of the mixture distribution
-var(d)           # Get the variance of the mixture distribution
+params(d)                    # Get the parameters, i.e. (λ, w)
+mean(d)                      # Get the mean of the mixture distribution
+var(d)                       # Get the variance of the mixture distribution
 ```
 External links:
 * [Zero-inflated Poisson Regression on UCLA IDRE Statistical Consulting](https://stats.idre.ucla.edu/stata/dae/zero-inflated-poisson-regression/)
@@ -19,7 +22,6 @@ External links:
 * McElreath, R. (2020). Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.). Chapman and Hall/CRC. https://doi.org/10.1201/9780429029608
 
 """
-
 struct ZeroInflatedPoisson{T<:Real} <: DiscreteUnivariateDistribution
   λ::T
   p::T
@@ -38,7 +40,7 @@ function ZeroInflatedPoisson(λ::T, p::T; check_args = true) where {T <: Real}
 end
 
 ZeroInflatedPoisson(λ::Real, p::Real) = ZeroInflatedPoisson(promote(λ, p)...)
-ZeroInflatedPoisson(λ::Integer, p::Integer) = ZeroInflatedPoisson(float(λ), float(w))
+ZeroInflatedPoisson(λ::Integer, p::Integer) = ZeroInflatedPoisson(float(λ), float(p))
 ZeroInflatedPoisson(λ::Real) = ZeroInflatedPoisson(λ, 0.5)
 ZeroInflatedPoisson() = ZeroInflatedPoisson(1.0, 0.5, check_args = false)
 
@@ -46,7 +48,7 @@ ZeroInflatedPoisson() = ZeroInflatedPoisson(1.0, 0.5, check_args = false)
 
 mean(d::ZeroInflatedPoisson) = (1 - d.p) * d.λ # check
 
-var(d::ZeroInflatedPoisson) = λ * log1p(-p) * log1p(p * λ)
+var(d::ZeroInflatedPoisson) = d.λ * log1p(-d.p) * log1p(d.p * d.λ)
 
 #### Conversions
 
