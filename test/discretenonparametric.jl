@@ -163,4 +163,11 @@ d = DiscreteNonParametric([1, 2], [0, 1])
 
 d = DiscreteNonParametric([2, 1], [1, 0])
 @test iszero(count(isone(rand(d)) for _ in 1:100))
+
+    @testset "type stability" begin
+        d = DiscreteNonParametric([0, 1], [0.5, 0.5])
+        @inferred(var(d))
+        @inferred(kurtosis(d))
+        @inferred(skewness(d))
+    end
 end
