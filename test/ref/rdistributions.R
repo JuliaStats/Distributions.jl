@@ -33,6 +33,7 @@ source("discrete/negativebinomial.R")
 source("discrete/noncentralhypergeometric.R")
 source("discrete/poisson.R")
 source("discrete/skellam.R")
+source("discrete/zeroinflatedpoisson.R")
 
 #################################################
 #
