@@ -41,14 +41,16 @@ end
 
 ZeroInflatedPoisson(λ::Real, p::Real) = ZeroInflatedPoisson(promote(λ, p)...)
 ZeroInflatedPoisson(λ::Integer, p::Integer) = ZeroInflatedPoisson(float(λ), float(p))
-ZeroInflatedPoisson(λ::Real) = ZeroInflatedPoisson(λ, 0.5)
-ZeroInflatedPoisson() = ZeroInflatedPoisson(1.0, 0.5, check_args = false)
+ZeroInflatedPoisson(λ::Real) = ZeroInflatedPoisson(λ, 0.0)
+ZeroInflatedPoisson() = ZeroInflatedPoisson(1.0, 0.0, check_args = false)
+
+@distr_support ZeroInflatedPoisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 ### Statistics
 
 mean(d::ZeroInflatedPoisson) = (1 - d.p) * d.λ
 
-var(d::ZeroInflatedPoisson) = d.λ * log1p(-d.p) * log1p(d.p * d.λ)
+var(d::ZeroInflatedPoisson) = d.λ * (1 - d.p) * (1 + d.p * d.λ)
 
 #### Conversions
 
@@ -67,9 +69,12 @@ import StatsBase:params
 params(d::ZeroInflatedPoisson) = (d.λ, d.p,)
 partype(::ZeroInflatedPoisson{T}) where {T} = T
 
+rate(d::ZeroInflatedPoisson) = d.λ
+excessprob(d::ZeroInflatedPoisson) = d.p
+
 #### Evaluation
 
-function logpdf(d::ZeroInflatedPoisson, y::Int)
+function logpdf(d::ZeroInflatedPoisson, y::Real)
   LL = 0.0
   if y == 0
     LLs = zeros(typeof(log(d.λ)), 2)
@@ -82,7 +87,7 @@ function logpdf(d::ZeroInflatedPoisson, y::Int)
   return LL
 end
 
-function cdf(d::ZeroInflatedPoisson, x::Int)
+function cdf(d::ZeroInflatedPoisson, x::Real)
   pd = Poisson(d.λ)
 
   deflat_limit = -1.0 / expm1(d.λ)
