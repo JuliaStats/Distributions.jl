@@ -64,8 +64,6 @@ end
 
 #### Parameters
 
-import StatsBase:params
-
 params(d::ZeroInflatedPoisson) = (d.λ, d.p,)
 partype(::ZeroInflatedPoisson{T}) where {T} = T
 
@@ -75,16 +73,12 @@ excessprob(d::ZeroInflatedPoisson) = d.p
 #### Evaluation
 
 function logpdf(d::ZeroInflatedPoisson, y::Real)
-  LL = 0.0
-  if y == 0
-    LLs = zeros(typeof(log(d.λ)), 2)
-    LLs[1] = log(d.p)
-    LLs[2] = log1p(-d.p) - d.λ
-    LL = logsumexp(LLs)
-  else
-    LL = log1p(-d.p) + logpdf(Poisson(d.λ), y)
-  end
-  return LL
+    lp = if iszero(y)
+        logaddexp(log(d.p), log1p(-d.p) - d.λ)
+    else
+        log1p(-d.p) + logpdf(Poisson(d.λ), y)
+    end
+    return lp
 end
 
 function cdf(d::ZeroInflatedPoisson, x::Real)
@@ -119,13 +113,6 @@ function quantile(d::ZeroInflatedPoisson, q::Real)
   return out
 end
 
-## Sampling
-
-function rand(rng::AbstractRNG, d::ZeroInflatedPoisson)
-  zo = rand(rng, Uniform(0, 1))
-  return quantile(d, zo)
-end
-
 #### Fitting
 
 struct ZeroInflatedPoissonStats <: SufficientStats
@@ -136,7 +123,7 @@ end
 
 suffstats(::Type{<:ZeroInflatedPoisson}, x::AbstractArray{T}) where {T<:Integer} = ZeroInflatedPoissonStats(
     sum(x),
-    sum(x .== 0) / length(x),
+    mean(iszero, x),
     length(x)
   )
 
