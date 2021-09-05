@@ -67,7 +67,7 @@ partype(d::Rician{T}) where {T<:Real} = T
 # helper
 _Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
 
-mean(d::Rician{T}) where T = d.σ * √T(π/2) * _Lhalf(-d.ν^2/(2 * d.σ^2))
+mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2/(2 * d.σ^2))
 var(d::Rician) = 2 * d.σ^2 + d.ν^2 - (π * d.σ^2 / 2) * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
 
 function mode(d::Rician)
