@@ -96,7 +96,7 @@ end
 
 function quantile(d::Rician, x::Real)
     ν, σ = params(d)
-    return sqrt(quantile(NoncentralChisq(2, (1.0ν / σ)^2), 1.0x)) * σ
+    return sqrt(quantile(NoncentralChisq(2, (ν / σ)^2), x)) * σ
 end
 
 function cquantile(d::Rician, x::Real)
