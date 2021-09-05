@@ -23,7 +23,7 @@
     x = quantile.(d1, [0.25, 0.45, 0.60, 0.80, 0.90])
     @test all(cdf.(d1, x) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
 
-    x = rand(Rician(5.0, 5.0), 100000)
+    x = rand(MersenneTwister(3456789), Rician(5.0, 5.0), 100000)
     d1 = fit(Rician, x)
     @test d1 isa Rician{Float64}
     @test params(d1)[1] ≈ 5.0 atol=1e-1
