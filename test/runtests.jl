@@ -52,6 +52,7 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
+    "discretenormal",
     "functionals",
     "chernoff",
     "univariate_bounds",
