@@ -91,24 +91,12 @@ filter!(x -> isbounded(x()), dists)
     @test isnan(logccdf(d, NaN))
 
     @test iszero(pdf(d, lb))
-    if dist === Binomial
-        # https://github.com/JuliaStats/StatsFuns.jl/issues/115
-        @test_broken iszero(pdf(d, ub))
-        @test iszero(pdf(d, ub + 1e-6))
-    else
-        @test iszero(pdf(d, ub))
-    end
+    @test iszero(pdf(d, ub))
 
     lb_lpdf = logpdf(d, lb)
-    @test isinf(lb_lpdf) & (lb_lpdf < 0)
+    @test isinf(lb_lpdf) && lb_lpdf < 0
     ub_lpdf = logpdf(d, ub)
-    if dist === Binomial
-        # https://github.com/JuliaStats/StatsFuns.jl/issues/115
-        @test_broken isinf(ub_lpdf) & (ub_lpdf < 0)
-        @test logpdf(d, ub + 1e-6) == -Inf
-    else
-        @test isinf(ub_lpdf) & (ub_lpdf < 0)
-    end
+    @test isinf(ub_lpdf) && ub_lpdf < 0
     @test logpdf(d, -Inf) == -Inf
     @test logpdf(d, Inf) == -Inf
 end
