@@ -441,6 +441,20 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_
 componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
 
 
+function quantile(d::UnivariateMixture{Continuous}, p::Real)
+    ps = probs(d)
+    min_q, max_q = extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
+    quantile_bisect(d, p, min_q, max_q)
+end
+
+# we also implement `median` since `median` is implemented more efficiently than
+# `quantile(d, 1//2)` for some distributions
+function median(d::UnivariateMixture{Continuous})
+    ps = probs(d)
+    min_q, max_q = extrema(median(component(d, i)) for (i, pi) in enumerate(ps) if pi > 0)
+    quantile_bisect(d, 1//2, min_q, max_q)
+end
+
 ## Sampling
 
 struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}

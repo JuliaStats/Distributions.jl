@@ -150,6 +150,8 @@ end
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
     @test isnan_type(Float32, @inferred(quantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(quantile(Normal(1//1, 0//1), 1//2))    ===  1.0
+    @test @inferred(quantile(Normal(1f0, 0f0), 1//2))      ===  1f0
+    @test @inferred(quantile(Normal(1f0, 0.0), 1//2))      ===  1.0
 
     @test @inferred(cquantile(Normal(1.0, 0.0), 0.0f0))     ===  Inf
     @test @inferred(cquantile(Normal(1.0, 0.0f0), 1.0))     === -Inf
@@ -160,6 +162,8 @@ end
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
     @test isnan_type(Float32, @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
     @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
+    @test @inferred(cquantile(Normal(1f0, 0f0), 1//2))      ===  1f0
+    @test @inferred(cquantile(Normal(1f0, 0.0), 1//2))      ===  1.0
 end
 
 @testset "Normal: Sampling with integer-valued parameters" begin

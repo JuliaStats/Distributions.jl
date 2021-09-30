@@ -198,7 +198,7 @@ end
 # quantile
 function quantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, -erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
@@ -218,7 +218,7 @@ end
 # cquantile
 function cquantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
