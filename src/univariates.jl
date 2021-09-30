@@ -722,6 +722,7 @@ const continuous_distributions = [
     "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
+    "rician",
     "semicircle",
     "skewnormal",
     "studentizedrange",
