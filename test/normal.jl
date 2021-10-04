@@ -172,3 +172,12 @@ end
     @test rand(d, 10) isa Vector{Float64}
     @test rand(d, (3, 2)) isa Matrix{Float64}
 end
+
+@testset "NormalCanon and conversion" begin
+    @test canonform(Normal()) == NormalCanon()
+    @test meanform(NormalCanon()) == Normal()
+    @test meanform(canonform(Normal(0.25, 0.7))) ≈ Normal(0.25, 0.7)
+    @test convert(NormalCanon, convert(Normal, NormalCanon(0.3, 0.8))) ≈ NormalCanon(0.3, 0.8)
+    @test mean(canonform(Normal(0.25, 0.7))) ≈ 0.25
+    @test std(canonform(Normal(0.25, 0.7))) ≈ 0.7
+end
