@@ -1,5 +1,5 @@
 """
-    Laplace(μ,β)
+    Laplace(μ,θ)
 
 The *Laplace distribution* with location `μ` and scale `θ` has probability density function
 
