@@ -1,7 +1,9 @@
 """
     NormalCanon(η, λ)
 
-Canonical Form of Normal distribution
+The canonical form of the normal distribution, which is an [exponential family distribution](http://en.wikipedia.org/wiki/Exponential_family).
+The two *canonical parameters* are ``\\eta = \\sigma^{-1} \\mu`` and ``\\lambda = \\sigma^{-1}``,
+where ``\\mu`` is the mean and ``\\sigma`` is the standard deviation.
 """
 struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     η::T       # σ^(-2) * μ
