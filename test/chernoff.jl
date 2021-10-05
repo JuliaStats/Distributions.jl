@@ -148,7 +148,7 @@
         2.000 0.0001212
     ]
 
-    for i=1:size(cdftest,1)
+    for i=1:size(cdftest, 1)
         @test isapprox(cdf(d, cdftest[i, 1]), cdftest[i, 2]) 
     end
     
