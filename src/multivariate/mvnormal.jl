@@ -80,6 +80,8 @@ abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 insupport(d::AbstractMvNormal, x::AbstractVector) =
     length(d) == length(x) && all(isfinite, x)
 
+minimum(d::AbstractMvNormal) = fill(eltype(d)(-Inf), length(d))
+maximum(d::AbstractMvNormal) = fill(eltype(d)(Inf), length(d))
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
