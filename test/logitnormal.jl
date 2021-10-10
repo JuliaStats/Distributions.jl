@@ -52,6 +52,7 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     @test location(g) == g.μ
     @test scale(g) == g.σ
     @test params(g) == (g.μ, g.σ)
+    @test g == deepcopy(g)
 end
 
 ###### General Testing

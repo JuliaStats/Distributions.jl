@@ -55,3 +55,7 @@ with this `sampler` method, which would be used for batch sampling.
 The general fallback is `sampler(d::Distribution) = d`.
 """
 sampler(s::Sampleable) = s
+
+# Random API
+Random.Sampler(::Type{<:AbstractRNG}, s::Sampleable, ::Val{1}) = s
+Random.Sampler(::Type{<:AbstractRNG}, s::Sampleable, ::Val{Inf}) = sampler(s)

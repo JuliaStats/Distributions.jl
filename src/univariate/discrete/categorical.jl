@@ -24,7 +24,7 @@ External links:
 
 * [Categorical distribution on Wikipedia](http://en.wikipedia.org/wiki/Categorical_distribution)
 """
-const Categorical{P,Ps} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
+const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
     check_args && @check_args(Categorical, isprobvec(p))
@@ -68,19 +68,17 @@ end
 
 ### Evaluation
 
-function cdf(d::Categorical{T}, x::Int) where T<:Real
-    k = ncategories(d)
-    p = probs(d)
-    x < 1 && return zero(T)
-    x >= k && return one(T)
-    c = p[1]
-    for i = 2:x
-        @inbounds c += p[i]
-    end
-    return c
-end
+# the fallbacks are overridden by `DiscreteNonParameteric`
+cdf(d::Categorical, x::Real) = cdf_int(d, x)
+ccdf(d::Categorical, x::Real) = ccdf_int(d, x)
 
-pdf(d::Categorical{T}, x::Int) where {T<:Real} = insupport(d, x) ? probs(d)[x] : zero(T)
+cdf(d::Categorical, x::Int) = integerunitrange_cdf(d, x)
+ccdf(d::Categorical, x::Int) = integerunitrange_ccdf(d, x)
+
+function pdf(d::Categorical, x::Real)
+    ps = probs(d)
+    return insupport(d, x) ? ps[round(Int, x)] : zero(eltype(ps))
+end
 
 function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))

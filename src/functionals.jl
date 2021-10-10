@@ -8,7 +8,7 @@ end
 function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
     f = x->pdf(distr,x)
     (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    integrate(x -> f(x)*g(x), leftEnd, rightEnd)
+    quadgk(x -> f(x)*g(x), leftEnd, rightEnd)[1]
 end
 
 ## Assuming that discrete distributions only take integer values.

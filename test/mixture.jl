@@ -18,7 +18,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
 
     K = ncomponents(g)
-    pr = probs(g)
+    pr = @inferred(probs(g))
     @assert length(pr) == K
 
     # mean
@@ -26,7 +26,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
-    @test mean(g) ≈ mu
+    @test @inferred(mean(g)) ≈ mu
 
     # evaluation of cdf
     cf = zeros(T, n)
@@ -38,7 +38,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     end
 
     for i = 1:n
-        @test cdf(g, X[i]) ≈ cf[i]
+        @test @inferred(cdf(g, X[i])) ≈ cf[i]
     end
     @test cdf.(g, X) ≈ cf
 
@@ -58,19 +58,28 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     mix_lp0 = log.(mix_p0)
 
     for i = 1:n
-        @test pdf(g, X[i])                  ≈ mix_p0[i]
-        @test logpdf(g, X[i])               ≈ mix_lp0[i]
-        @test componentwise_pdf(g, X[i])    ≈ vec(P0[i,:])
-        @test componentwise_logpdf(g, X[i]) ≈ vec(LP0[i,:])
+        @test @inferred(pdf(g, X[i])) ≈ mix_p0[i]
+        @test @inferred(logpdf(g, X[i])) ≈ mix_lp0[i]
+        @test @inferred(componentwise_pdf(g, X[i])) ≈ vec(P0[i,:])
+        @test @inferred(componentwise_logpdf(g, X[i])) ≈ vec(LP0[i,:])
     end
 
-    @test pdf.(g, X)                  ≈ mix_p0
-    @test logpdf.(g, X)               ≈ mix_lp0
-    @test componentwise_pdf(g, X)    ≈ P0
-    @test componentwise_logpdf(g, X) ≈ LP0
+    @test @inferred(map(Base.Fix1(pdf, g), X)) ≈ mix_p0
+    @test @inferred(map(Base.Fix1(logpdf, g), X)) ≈ mix_lp0
+    @test @inferred(componentwise_pdf(g, X)) ≈ P0
+    @test @inferred(componentwise_logpdf(g, X)) ≈ LP0
+
+    # quantile
+    αs = float(partype(g))[0.0; 0.49; 0.5; 0.51; 1.0]
+    for α in αs
+        @test cdf(g, @inferred(quantile(g, α))) ≈ α
+    end
+    @test @inferred(median(g)) ≈ quantile(g, 1//2)
 
     # sampling
-    if (T isa AbstractFloat)
+    # sampling does not work with `Float32` since `AliasTable` does not support `Float32`
+    # Ref: https://github.com/JuliaStats/StatsBase.jl/issues/158
+    if T <: AbstractFloat && eltype(probs(g)) === Float64
         if ismissing(rng)
             Xs = rand(g, ns)
         else
@@ -94,7 +103,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     end
 
     K = ncomponents(g)
-    pr = probs(g)
+    pr = @inferred(probs(g))
     @assert length(pr) == K
 
     # mean
@@ -102,7 +111,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     for k = 1:K
         mu .+= pr[k] .* mean(component(g, k))
     end
-    @test mean(g) ≈ mu
+    @test @inferred(mean(g)) ≈ mu
 
     # evaluation
     P0 = zeros(n, K)
@@ -121,20 +130,20 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
 
     for i = 1:n
         x_i = X[:,i]
-        @test pdf(g, x_i)                  ≈ mix_p0[i]
-        @test logpdf(g, x_i)               ≈ mix_lp0[i]
-        @test componentwise_pdf(g, x_i)    ≈ vec(P0[i,:])
-        @test componentwise_logpdf(g, x_i) ≈ vec(LP0[i,:])
+        @test @inferred(pdf(g, x_i)) ≈ mix_p0[i]
+        @test @inferred(logpdf(g, x_i)) ≈ mix_lp0[i]
+        @test @inferred(componentwise_pdf(g, x_i)) ≈ vec(P0[i,:])
+        @test @inferred(componentwise_logpdf(g, x_i)) ≈ vec(LP0[i,:])
     end
 #=
     @show g
     @show size(X)
     @show size(mix_p0)
 =#
-    @test pdf(g, X)                  ≈ mix_p0
-    @test logpdf(g, X)               ≈ mix_lp0
-    @test componentwise_pdf(g, X)    ≈ P0
-    @test componentwise_logpdf(g, X) ≈ LP0
+    @test @inferred(pdf(g, X)) ≈ mix_p0
+    @test @inferred(logpdf(g, X)) ≈ mix_lp0
+    @test @inferred(componentwise_pdf(g, X)) ≈ P0
+    @test @inferred(componentwise_logpdf(g, X)) ≈ LP0
 
     # sampling
     if ismissing(rng)
@@ -146,6 +155,7 @@ function test_mixture(g::MultivariateMixture, n::Int, ns::Int,
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims=2)), mean(g), atol=0.1)
     @test isapprox(cov(Xs, dims=2)      , cov(g) , atol=0.1)
+    @test isapprox(var(Xs, dims=2)      , var(g) , atol=0.1)
 end
 
 function test_params(g::AbstractMixtureModel)
@@ -154,12 +164,14 @@ function test_params(g::AbstractMixtureModel)
     mm = MixtureModel(C, pars...)
     @test g.prior == mm.prior
     @test g.components == mm.components
+    @test g == deepcopy(g)
 end
 
 function test_params(g::UnivariateGMM)
     pars = params(g)
     mm = UnivariateGMM(pars...)
     @test g == mm
+    @test g == deepcopy(g)
 end
 
 # Tests
@@ -169,14 +181,36 @@ end
          "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing UnivariateMixture" begin
-        g_u = MixtureModel(Normal, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
-        @test isa(g_u, MixtureModel{Univariate, Continuous, Normal})
+        g_u = MixtureModel([Normal(), Normal()])
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+        @test @inferred(median(g_u)) === 0.0
+        @test @inferred(quantile(g_u, 0.5f0)) === 0.0
+
+        g_u = MixtureModel(Normal{Float64}, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
+        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
         @test ncomponents(g_u) == 3
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
         @test minimum(g_u) == -Inf
         @test maximum(g_u) == Inf
         @test extrema(g_u) == (-Inf, Inf)
+
+        g_u = MixtureModel(Normal{Float32}, [(0f0, 1f0), (0f0, 2f0)], [0.4f0, 0.6f0])
+        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+        @test @inferred(median(g_u)) === 0f0
+        @test @inferred(quantile(g_u, 0.5f0)) === 0f0
 
         g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
         @test minimum(g_u) ≈ -2.0
@@ -187,7 +221,8 @@ end
 
         μ = [0.0, 2.0, -4.0]; σ = [1.0, 1.2, 1.5]; p = [0.2, 0.5, 0.3]
         for T = [Float64, Dual]
-            g_u = UnivariateGMM(map(Dual, μ), map(Dual, σ), Categorical(map(Dual, p)))
+            g_u = @inferred UnivariateGMM(map(Dual, μ), map(Dual, σ),
+                                          Categorical(map(Dual, p)))
             @test isa(g_u, UnivariateGMM)
             @test ncomponents(g_u) == 3
             test_mixture(g_u, 1000, 10^6, rng)
@@ -196,6 +231,9 @@ end
             @test maximum(g_u) == Inf
             @test extrema(g_u) == (-Inf, Inf)
         end
+
+        # https://github.com/JuliaStats/Distributions.jl/issues/1121
+        @test @inferred(logpdf(UnivariateGMM(μ, σ, Categorical(p)), 42)) isa Float64
 
         @testset "Product 0 NaN in mixtures" begin
             distributions = [
@@ -215,9 +253,9 @@ end
 
     @testset "Testing MultivariatevariateMixture" begin
         g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], 1.0),
-                       MvNormal([0.2, 1.0], 1.0),
-                       MvNormal([-0.5, -3.0], 1.6) ],
+            IsoNormal[ MvNormal([0.0, 0.0], I),
+                       MvNormal([0.2, 1.0], I),
+                       MvNormal([-0.5, -3.0], 1.6 * I) ],
             [0.2, 0.5, 0.3])
         @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
         @test length(components(g_m)) == 3

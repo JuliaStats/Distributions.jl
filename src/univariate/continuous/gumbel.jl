@@ -1,21 +1,21 @@
 """
     Gumbel(μ, θ)
 
-The *Gumbel distribution*  with location `μ` and scale `θ` has probability density function
+The *Gumbel (maxima) distribution*  with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^-z)},
+f(x; \\mu, \\theta) = \\frac{1}{\\theta} e^{-(z + e^{-z})},
 \\quad \\text{ with } z = \\frac{x - \\mu}{\\theta}
 ```
 
 ```julia
 Gumbel()            # Gumbel distribution with zero location and unit scale, i.e. Gumbel(0, 1)
-Gumbel(u)           # Gumbel distribution with location u and unit scale, i.e. Gumbel(u, 1)
-Gumbel(u, b)        # Gumbel distribution with location u and scale b
+Gumbel(μ)           # Gumbel distribution with location μ and unit scale, i.e. Gumbel(μ, 1)
+Gumbel(μ, θ)        # Gumbel distribution with location μ and scale θ
 
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (μ, θ)
+location(d)      # Get the location parameter, i.e. μ
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links
@@ -42,6 +42,8 @@ Gumbel() = Gumbel(0.0, 1.0, check_args=false)
 
 const DoubleExponential = Gumbel
 
+Base.eltype(::Type{Gumbel{T}}) where {T} = T
+
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
@@ -54,6 +56,14 @@ scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
 partype(::Gumbel{T}) where {T} = T
 
+function Base.rand(rng::Random.AbstractRNG, d::Gumbel)
+    return d.μ - d.θ * log(randexp(rng, float(eltype(d))))
+end
+function Random.rand!(rng::Random.AbstractRNG, d::Gumbel, x::AbstractArray)
+    randexp!(rng, x)
+    x .= d.μ .- d.θ .* log.(x)
+    return x
+end
 
 #### Statistics
 

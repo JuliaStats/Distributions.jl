@@ -26,12 +26,12 @@ where the logit-Function is
 ```
 
 ```julia
-LogitNormal()          # Logit-normal distribution with zero logit-mean and unit scale
-LogitNormal(mu)        # Logit-normal distribution with logit-mean mu and unit scale
-LogitNormal(mu, sig)   # Logit-normal distribution with logit-mean mu and scale sig
+LogitNormal()        # Logit-normal distribution with zero logit-mean and unit scale
+LogitNormal(μ)       # Logit-normal distribution with logit-mean μ and unit scale
+LogitNormal(μ, σ)    # Logit-normal distribution with logit-mean μ and scale σ
 
-params(d)            # Get the parameters, i.e. (mu, sig)
-median(d)            # Get the median, i.e. logistic(mu)
+params(d)            # Get the parameters, i.e. (μ, σ)
+median(d)            # Get the median, i.e. logistic(μ)
 ```
 
 The following properties have no analytical solution but numerical
@@ -136,10 +136,12 @@ cquantile(d::LogitNormal, q::Real) = logistic(norminvccdf(d.μ, d.σ, q))
 invlogcdf(d::LogitNormal, lq::Real) = logistic(norminvlogcdf(d.μ, d.σ, lq))
 invlogccdf(d::LogitNormal, lq::Real) = logistic(norminvlogccdf(d.μ, d.σ, lq))
 
-function gradlogpdf(d::LogitNormal{T}, x::Real) where T<:Real
-    #TODO check
-    (μ, σ) = params(d)
-    0 < x < 1 ? - ((log(x) - μ) / ((σ^2) + 1) * x * (1-x)) : zero(T)
+function gradlogpdf(d::LogitNormal, x::Real)
+    μ, σ = params(d)
+    _insupport = insupport(d, x)
+    _x = _insupport ? x : zero(x)
+    z = (μ - logit(_x) + σ^2 * (2 * _x - 1)) / (σ^2 * _x * (1 - _x))
+    return _insupport ? z : oftype(z, NaN)
 end
 
 # mgf(d::LogitNormal)

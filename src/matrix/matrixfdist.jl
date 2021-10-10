@@ -21,10 +21,10 @@ If the joint distribution ``p(\\boldsymbol{\\Psi},\\boldsymbol{\\Sigma})=p(\\bol
 is given by
 
 ```math
-\\begin{align*}
+\\begin{aligned}
 \\boldsymbol{\\Psi}&\\sim \\textrm{W}_p(n_1, \\mathbf{B})\\\\
 \\boldsymbol{\\Sigma}|\\boldsymbol{\\Psi}&\\sim \\textrm{IW}_p(n_2, \\boldsymbol{\\Psi}),
-\\end{align*}
+\\end{aligned}
 ```
 
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is

@@ -1,13 +1,20 @@
 ## sample space/domain
 
 """
-`F <: VariateForm` specifies the form of the variate or
-dimension of a sample, univariate (scalar), multivariate (vector), matrix-variate (matrix).
+`F <: VariateForm` specifies the form or shape of the variate or a sample.
 """
 abstract type VariateForm end
-struct Univariate    <: VariateForm end
-struct Multivariate  <: VariateForm end
-struct Matrixvariate <: VariateForm end
+
+"""
+`F <: ArrayLikeVariate{N}` specifies the number of axes of a variate or
+a sample with an array-like shape, e.g. univariate (scalar, `N == 0`),
+multivariate (vector, `N == 1`) or matrix-variate (matrix, `N == 2`).
+"""
+abstract type ArrayLikeVariate{N} <: VariateForm end
+
+const Univariate    = ArrayLikeVariate{0}
+const Multivariate  = ArrayLikeVariate{1}
+const Matrixvariate = ArrayLikeVariate{2}
 
 """
 `S <: ValueSupport` specifies the support of sample elements,
@@ -72,6 +79,32 @@ nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = siz
 nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
 nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} = length(x)
 
+for func in (:(==), :isequal, :isapprox)
+    @eval function Base.$func(s1::A, s2::B; kwargs...) where {A<:Sampleable, B<:Sampleable}
+        nameof(A) === nameof(B) || return false
+        fields = fieldnames(A)
+        fields === fieldnames(B) || return false
+
+        for f in fields
+            isdefined(s1, f) && isdefined(s2, f) || return false
+            $func(getfield(s1, f), getfield(s2, f); kwargs...) || return false
+        end
+
+        return true
+    end
+end
+
+function Base.hash(s::S, h::UInt) where S <: Sampleable
+    hashed = hash(Sampleable, h)
+    hashed = hash(nameof(S), hashed)
+
+    for f in fieldnames(S)
+        hashed = hash(getfield(s, f), hashed)
+    end
+
+    return hashed
+end
+
 """
     Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S}
 
@@ -97,16 +130,34 @@ const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuou
 const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
 const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
 
-variate_form(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VF
-variate_form(::Type{T}) where {T<:Distribution} = variate_form(supertype(T))
+variate_form(::Type{<:Distribution{VF}}) where {VF} = VF
 
-value_support(::Type{Distribution{VF,VS}}) where {VF<:VariateForm,VS<:ValueSupport} = VS
-value_support(::Type{T}) where {T<:Distribution} = value_support(supertype(T))
+value_support(::Type{<:Distribution{VF,VS}}) where {VF,VS} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?
 Broadcast.broadcastable(d::UnivariateDistribution) = Ref(d)
 
+"""
+    minimum(d::Distribution)
+
+Return the minimum of the support of `d`.
+"""
+minimum(d::Distribution)
+
+"""
+    maximum(d::Distribution)
+
+Return the maximum of the support of `d`.
+"""
+maximum(d::Distribution)
+
+"""
+    extrema(d::Distribution)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
+Base.extrema(d::Distribution) = minimum(d), maximum(d)
 
 ## TODO: the following types need to be improved
 abstract type SufficientStats end

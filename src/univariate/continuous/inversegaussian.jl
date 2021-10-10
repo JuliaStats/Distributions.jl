@@ -10,12 +10,12 @@ f(x; \\mu, \\lambda) = \\sqrt{\\frac{\\lambda}{2\\pi x^3}}
 
 ```julia
 InverseGaussian()              # Inverse Gaussian distribution with unit mean and unit shape, i.e. InverseGaussian(1, 1)
-InverseGaussian(mu),           # Inverse Gaussian distribution with mean mu and unit shape, i.e. InverseGaussian(u, 1)
-InverseGaussian(mu, lambda)    # Inverse Gaussian distribution with mean mu and shape lambda
+InverseGaussian(μ),            # Inverse Gaussian distribution with mean μ and unit shape, i.e. InverseGaussian(μ, 1)
+InverseGaussian(μ, λ)          # Inverse Gaussian distribution with mean μ and shape λ
 
-params(d)           # Get the parameters, i.e. (mu, lambda)
-mean(d)             # Get the mean parameter, i.e. mu
-shape(d)            # Get the shape parameter, i.e. lambda
+params(d)           # Get the parameters, i.e. (μ, λ)
+mean(d)             # Get the mean parameter, i.e. μ
+shape(d)            # Get the shape parameter, i.e. λ
 ```
 
 External links
@@ -92,52 +92,54 @@ function logpdf(d::InverseGaussian{T}, x::Real) where T<:Real
     end
 end
 
-function cdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        return normcdf(u * (v - 1)) + exp(2λ / μ) * normcdf(-u * (v + 1))
-    else
-        return zero(T)
-    end
+function cdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+    z = normcdf(u * (v - 1)) + exp(2λ / μ) * normcdf(-u * (v + 1))
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? one(z) : z
 end
 
-function ccdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        normccdf(u * (v - 1)) - exp(2λ / μ) * normcdf(-u * (v + 1))
-    else
-        return one(T)
-    end
+function ccdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+    z = normccdf(u * (v - 1)) - exp(2λ / μ) * normcdf(-u * (v + 1))
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? zero(z) : z
 end
 
-function logcdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        a = normlogcdf(u * (v -1))
-        b = 2λ / μ + normlogcdf(-u * (v + 1))
-        a + log1pexp(b - a)
-    else
-        return -T(Inf)
-    end
+function logcdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+
+    a = normlogcdf(u * (v - 1))
+    b = 2λ / μ + normlogcdf(-u * (v + 1))
+    z = logaddexp(a, b)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? zero(z) : z
 end
 
-function logccdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        a = normlogccdf(u * (v - 1))
-        b = 2λ / μ + normlogcdf(-u * (v + 1))
-        a + log1mexp(b - a)
-    else
-        return zero(T)
-    end
+function logccdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+
+    a = normlogccdf(u * (v - 1))
+    b = 2λ / μ + normlogcdf(-u * (v + 1))
+    z = logsubexp(a, b)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? oftype(z, -Inf) : z
 end
 
 @quantile_newton InverseGaussian

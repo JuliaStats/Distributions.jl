@@ -1,7 +1,10 @@
 """
     NormalCanon(η, λ)
 
-Canonical Form of Normal distribution
+Canonical parametrisation of the Normal distribution with canonical parameters `η` and `λ`.
+
+The two *canonical parameters* of a normal distribution ``\\mathcal{N}(\\mu, \\sigma^2)`` with mean ``\\mu`` and
+standard deviation ``\\sigma`` are ``\\eta = \\sigma^{-2} \\mu`` and ``\\lambda = \\sigma^{-2}``.
 """
 struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     η::T       # σ^(-2) * μ
@@ -29,6 +32,7 @@ convert(::Type{NormalCanon{T}}, d::NormalCanon{S}) where {T <: Real, S <: Real} 
 
 convert(::Type{Normal}, d::NormalCanon) = Normal(d.μ, 1 / sqrt(d.λ))
 convert(::Type{NormalCanon}, d::Normal) = (λ = 1 / d.σ^2; NormalCanon(λ * d.μ, λ))
+meanform(d::NormalCanon) = convert(Normal, d)
 canonform(d::Normal) = convert(NormalCanon, d)
 
 

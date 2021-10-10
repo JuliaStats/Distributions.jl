@@ -14,12 +14,12 @@ and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
 Normal()          # standard Normal distribution with zero mean and unit variance
-Normal(mu)        # Normal distribution with mean mu and unit variance
-Normal(mu, sig)   # Normal distribution with mean mu and variance sig^2
+Normal(μ)         # Normal distribution with mean μ and unit variance
+Normal(μ, σ)      # Normal distribution with mean μ and variance σ^2
 
-params(d)         # Get the parameters, i.e. (mu, sig)
-mean(d)           # Get the mean, i.e. mu
-std(d)            # Get the standard deviation, i.e. sig
+params(d)         # Get the parameters, i.e. (μ, σ)
+mean(d)           # Get the mean, i.e. μ
+std(d)            # Get the standard deviation, i.e. σ
 ```
 
 External links
@@ -198,7 +198,7 @@ end
 # quantile
 function quantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, -erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
@@ -218,11 +218,11 @@ end
 # cquantile
 function cquantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
-    elseif iszero(d.σ)
+    elseif iszero(_σ)
         # Quantile not uniquely defined at p=0 and p=1 when σ=0
         if iszero(_p)
             return oftype(q, Inf)
@@ -240,7 +240,7 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, T)
+rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
 
 #### Fitting
 

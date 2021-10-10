@@ -48,6 +48,7 @@ function pdf(d::Epanechnikov{T}, x::Real) where T<:Real
     u = abs(x - d.μ) / d.σ
     u >= 1 ? zero(T) : 3 * (1 - u^2) / (4 * d.σ)
 end
+logpdf(d::Epanechnikov, x::Real) = log(pdf(d, x))
 
 function cdf(d::Epanechnikov{T}, x::Real) where T<:Real
     u = (x - d.μ) / d.σ

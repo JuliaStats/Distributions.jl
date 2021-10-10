@@ -12,10 +12,10 @@ It is related to the [`Normal`](@ref) distribution via the property that if ``X,
 
 ```julia
 Rayleigh()       # Rayleigh distribution with unit scale, i.e. Rayleigh(1)
-Rayleigh(s)      # Rayleigh distribution with scale s
+Rayleigh(σ)      # Rayleigh distribution with scale σ
 
-params(d)        # Get the parameters, i.e. (s,)
-scale(d)         # Get the scale parameter, i.e. s
+params(d)        # Get the parameters, i.e. (σ,)
+scale(d)         # Get the scale parameter, i.e. σ
 ```
 
 External links
@@ -77,10 +77,13 @@ function logpdf(d::Rayleigh{T}, x::Real) where T<:Real
     x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
-logccdf(d::Rayleigh{T}, x::Real) where {T<:Real} = x > 0 ? - (x^2) / (2d.σ^2) : zero(T)
+function logccdf(d::Rayleigh, x::Real)
+    z = - x^2 / (2 * d.σ^2)
+    return x > 0 ? z : isnan(x) ? oftype(z, NaN) : zero(x)
+end
 ccdf(d::Rayleigh, x::Real) = exp(logccdf(d, x))
 
-cdf(d::Rayleigh, x::Real) = 1 - ccdf(d, x)
+cdf(d::Rayleigh, x::Real) = -expm1(logccdf(d, x))
 logcdf(d::Rayleigh, x::Real) = log1mexp(logccdf(d, x))
 
 quantile(d::Rayleigh, p::Real) = sqrt(-2d.σ^2 * log1p(-p))

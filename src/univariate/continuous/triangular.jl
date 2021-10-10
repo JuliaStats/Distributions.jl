@@ -90,20 +90,23 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 #### Evaluation
 
-function pdf(d::TriangularDist{T}, x::Real) where T<:Real
-    (a, b, c) = params(d)
-    x <= a ? zero(T) :
-    x <  c ? 2 * (x - a) / ((b - a) * (c - a)) :
-    x == c ? 2 / (b - a) :
-    x <= b ? 2 * (b - x) / ((b - a) * (b - c)) : zero(T)
+function pdf(d::TriangularDist, x::Real)
+    a, b, c = params(d)
+    return if x < c
+        2 * max(x - a, 0) / ((b - a) * (c - a))
+    else
+        2 * max(b - x, 0) / ((b - a) * (b - c))
+    end
 end
+logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
-function cdf(d::TriangularDist{T}, x::Real) where T<:Real
-    (a, b, c) = params(d)
-    x <= a ? zero(T) :
-    x <  c ? (x - a)^2 / ((b - a) * (c - a)) :
-    x == c ? (c - a) / (b - a) :
-    x <= b ? 1 - (b - x)^2 / ((b - a) * (b - c)) : one(T)
+function cdf(d::TriangularDist, x::Real)
+    a, b, c = params(d)
+    return if x < c
+        max(x - a, 0)^2 / ((b - a) * (c - a))
+    else
+        1 - max(b - x, 0)^2 / ((b - a) * (b - c))
+    end
 end
 
 function quantile(d::TriangularDist, p::Real)
