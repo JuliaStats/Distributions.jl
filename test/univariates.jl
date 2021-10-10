@@ -64,7 +64,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
-    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated)) 
+    if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
         mixed_pars = Any[pars...]
         first_float = findfirst(float_pars)
         mixed_pars[first_float] = Float32(mixed_pars[first_float])
@@ -162,7 +162,16 @@ for c in ["discrete",
     title = string(uppercase(c[1]), c[2:end])
     println("    [$title]")
     println("    ------------")
-    jsonfile = joinpath(dirname(@__FILE__), "ref", "$(c)_test.ref.json")
+    jsonfile = joinpath(@__DIR__, "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
+end
+
+# #1358
+@testset "Poisson quantile" begin
+    d = Poisson(1)
+    @test quantile(d, 0.2) isa Int
+    @test cquantile(d, 0.4) isa Int
+    @test invlogcdf(d, log(0.2)) isa Int
+    @test invlogccdf(d, log(0.6)) isa Int
 end

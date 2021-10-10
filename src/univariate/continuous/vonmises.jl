@@ -70,7 +70,11 @@ pdf(d::VonMises{T}, x::Real) where T<:Real =
 logpdf(d::VonMises{T}, x::Real) where T<:Real =
     minimum(d) ≤ x ≤ maximum(d) ? d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π : -T(Inf)
 
-cdf(d::VonMises, x::Real) = _vmcdf(d.κ, d.I0κx, x - d.μ, 1e-15)
+function cdf(d::VonMises, x::Real)
+    # handle `±Inf` for which `sin` can't be evaluated
+    z = clamp(x, extrema(d)...)
+    return _vmcdf(d.κ, d.I0κx, z - d.μ, 1e-15)
+end
 
 function _vmcdf(κ::Real, I0κx::Real, x::Real, tol::Real)
     tol *= exp(-κ)

@@ -14,7 +14,7 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, RangeGenerator, rand!, SamplerRangeInt
+import Random: GLOBAL_RNG, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
@@ -25,12 +25,15 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
+import ChainRulesCore
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
 
     # generic types
     VariateForm,
+    ArrayLikeVariate,
     ValueSupport,
     Univariate,
     Multivariate,
@@ -74,6 +77,7 @@ export
     Cosine,
     DiagNormal,
     DiagNormalCanon,
+    Dirac,
     Dirichlet,
     DirichletMultinomial,
     DiscreteUniform,
@@ -114,6 +118,7 @@ export
     MatrixBeta,
     MatrixFDist,
     MatrixNormal,
+    MatrixReshaped,
     MatrixTDist,
     MixtureModel,
     Multinomial,
@@ -139,8 +144,11 @@ export
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Rician,
     Semicircle,
     Skellam,
+    SkewNormal,
+    Soliton,
     StudentizedRange,
     SymTriangularDist,
     TDist,
@@ -225,6 +233,7 @@ export
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
     pdf,                # probability density function (ContinuousDistribution)
+    pdfsquaredL2norm,   # squared L2 norm of the probability density function
     probs,              # Get the vector of probabilities
     probval,            # The pdf/pmf value for a uniform distribution
     product_distribution, # product of univariate distributions
@@ -280,6 +289,7 @@ include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
 include("estimators.jl")
+include("pdfnorm.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
@@ -302,7 +312,7 @@ API overview (major features):
 
 These represent just a few of the operations supported by this
 package; users are encouraged to refer to the full documentation at
-http://distributionsjl.readthedocs.org/en/latest/ for further
+https://JuliaStats.github.io/Distributions.jl/stable/ for further
 information.
 
 Supported distributions:
@@ -316,12 +326,13 @@ Supported distributions:
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
-    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal, MatrixTDist, MixtureModel,
-    Multinomial, MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
+    Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
+    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

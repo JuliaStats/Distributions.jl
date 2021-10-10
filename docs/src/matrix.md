@@ -35,6 +35,7 @@ vec(d::MatrixDistribution)
 MatrixNormal
 Wishart
 InverseWishart
+MatrixReshaped
 MatrixTDist
 MatrixBeta
 MatrixFDist
@@ -45,4 +46,10 @@ LKJ
 
 ```@docs
 Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)
+```
+
+## Index
+
+```@index
+Pages = ["matrix.md"]
 ```

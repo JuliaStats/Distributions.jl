@@ -3,15 +3,16 @@ using PDMats # test dependencies
 using Test
 using Distributed
 using Random
+using SpecialFunctions
 using StatsBase
 using LinearAlgebra
-using HypothesisTests
 
 import JSON
 import ForwardDiff
 
 const tests = [
     "arcsine",
+    "dirac",
     "truncate",
     "truncnormal",
     "truncated_exponential",
@@ -36,6 +37,7 @@ const tests = [
     "mvtdist",
     "kolmogorov",
     "edgeworth",
+    "matrixreshaped",
     "matrixvariates",
     "vonmisesfisher",
     "conversion",
@@ -55,6 +57,12 @@ const tests = [
     "univariate_bounds",
     "negativebinomial",
     "bernoulli",
+    "soliton",
+    "skewnormal",
+    "chi",
+    "gumbel",
+    "pdfnorm",
+    "rician",
 ]
 
 printstyled("Running tests:\n", color=:blue)

@@ -43,6 +43,7 @@ x = func[1](d)
 @test size(x) == size(d)
 @test length(x) == length(d)
 @test d == typeof(d)(params(d)...)
+@test d == deepcopy(d)
 
 x = func[2](d, 100)
 @test isa(x, Matrix{Int})

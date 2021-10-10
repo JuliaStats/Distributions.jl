@@ -19,6 +19,9 @@ rng = MersenneTwister(123)
     @test mean(truncated(Normal(1000000,1),0,1000)) ≈ 999.999998998998999001005011019018990904720462367106
     @test var(truncated(Normal(),999000,1e6)) ≥ 0
     @test var(truncated(Normal(1000000,1),0,1000)) ≥ 0
+    # https://github.com/JuliaStats/Distributions.jl/issues/624
+    @test rand(truncated(Normal(+Inf, 1), 0, 1)) ≈ 1
+    @test rand(truncated(Normal(-Inf, 1), 0, 1)) ≈ 0
 end
 @testset "Truncated normal $trunc" begin
     trunc = truncated(Normal(0, 1), -2, 2)
@@ -36,5 +39,15 @@ end
         @test abs(mean(X)) < 0.01
         @test abs(median(X)) < 0.01
         @test abs(var(X) - var(trunc)) < 0.01
+    end
+end
+
+@testset "Truncated normal should be numerically stable at low probability regions" begin
+    original = Normal(-5.0, 0.2)
+    trunc = truncated(original, 0.0, 5.0)
+    for x in LinRange(0.0, 5.0, 100)
+        @test isfinite(logpdf(original, x))
+        @test isfinite(logpdf(trunc, x))
+        @test isfinite(pdf(trunc, x))
     end
 end

@@ -26,10 +26,10 @@ If the joint distribution ``p(\\mathbf{S},\\mathbf{X})=p(\\mathbf{S})p(\\mathbf{
 is given by
 
 ```math
-\\begin{align*}
+\\begin{aligned}
 \\mathbf{S}&\\sim \\textrm{IW}_n(\\nu + n - 1, \\boldsymbol{\\Sigma})\\\\
 \\mathbf{X}|\\mathbf{S}&\\sim \\textrm{MN}_{n,p}(\\mathbf{M}, \\mathbf{S}, \\boldsymbol{\\Omega}),
-\\end{align*}
+\\end{aligned}
 ```
 
 then the marginal distribution of ``\\mathbf{X}`` is

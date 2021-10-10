@@ -141,10 +141,14 @@ function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: R
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
-    z = randnt(rng, a, b, d.tp)
-    return μ + σ * z
+    if isfinite(μ)
+        a = (d.lower - μ) / σ
+        b = (d.upper - μ) / σ
+        z = randnt(rng, a, b, d.tp)
+        return μ + σ * z
+    else
+        return clamp(μ, d.lower, d.upper)
+    end
 end
 
 # Rejection sampler based on algorithm from Robert (1995)

@@ -23,7 +23,13 @@ struct Product{
         return new{S, T, V}(v)
     end
 end
+
 length(d::Product) = length(d.v)
+function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
+                                                    T<:UnivariateDistribution{S}}
+    return eltype(T)
+end
+
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
     broadcast!(dn->rand(rng, dn), x, d.v)
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
@@ -34,6 +40,8 @@ var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
+minimum(d::Product) = map(minimum, d.v)
+maximum(d::Product) = map(maximum, d.v)
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})
@@ -55,6 +63,6 @@ covariance matrix.
 """
 function product_distribution(dists::AbstractVector{<:Normal})
     µ = mean.(dists)
-    σ = std.(dists)
-    return MvNormal(µ, σ)
+    σ2 = var.(dists)
+    return MvNormal(µ, Diagonal(σ2))
 end

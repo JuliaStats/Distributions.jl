@@ -63,6 +63,7 @@ entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
 cf(::UnivariateDistribution, ::Any)
+pdfsquaredL2norm
 ```
 
 ### Probability Evaluation
@@ -74,7 +75,7 @@ logpdf(::UnivariateDistribution, ::Real)
 loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
-logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}
+logdiffcdf(::UnivariateDistribution, ::Real, ::Real)
 ccdf(::UnivariateDistribution, ::Real)
 logccdf(::UnivariateDistribution, ::Real)
 quantile(::UnivariateDistribution, ::Real)
@@ -487,6 +488,7 @@ xgrid =  0:0.001:2# hide
 plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
 ```
 ```@docs
+Rician
 Semicircle
 ```
 Density `Semicircle(1)`
@@ -580,6 +582,7 @@ Bernoulli
 BetaBinomial
 Binomial
 Categorical
+Dirac
 DiscreteUniform
 DiscreteNonParametric
 Geometric
@@ -593,3 +596,9 @@ Skellam
 ### Vectorized evaluation
 
 Vectorized computation and inplace vectorized computation have been deprecated.
+
+## Index
+
+```@index
+Pages = ["univariate.md"]
+```

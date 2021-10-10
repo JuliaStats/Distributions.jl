@@ -3,11 +3,11 @@ using Random
 using LinearAlgebra
 using PDMats
 using Statistics
-using HypothesisTests
 using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
 
+@testset "matrixvariates" begin
 #=
     1. baseline tests
     2. compare 1 x 1 matrix-variate with univariate
@@ -28,7 +28,6 @@ import Distributions: _univariate, _multivariate, _rand_params
 
 function test_draw(d::MatrixDistribution, X::AbstractMatrix)
     @test size(d) == size(X)
-    @test size(d) == size(mean(d))
     @test size(d, 1) == size(X, 1)
     @test size(d, 2) == size(X, 2)
     @test length(d) == length(X)
@@ -36,6 +35,14 @@ function test_draw(d::MatrixDistribution, X::AbstractMatrix)
     @test insupport(d, X)
     @test logpdf(d, X) ≈ log(pdf(d, X))
     @test logpdf(d, [X, X]) ≈ log.(pdf(d, [X, X]))
+    @test loglikelihood(d, X) ≈ logpdf(d, X)
+    @test loglikelihood(d, [X, X]) ≈ 2 * logpdf(d, X)
+    if d isa MatrixFDist
+        # Broken since `pdadd` is not defined for SubArray
+        @test_broken loglikelihood(d, cat(X, X; dims=3)) ≈ 2 * logpdf(d, X)
+    else
+        @test loglikelihood(d, cat(X, X; dims=3)) ≈ 2 * logpdf(d, X)
+    end
     nothing
 end
 
@@ -106,6 +113,7 @@ end
 function test_convert(d::MatrixDistribution)
     distname = getproperty(parentmodule(typeof(d)), nameof(typeof(d)))
     @test distname(params(d)...) == d
+    @test d == deepcopy(d)
     for elty in (Float32, Float64, BigFloat)
         del1 = convert(distname{elty}, d)
         del2 = convert(distname{elty}, getfield.(Ref(d), fieldnames(typeof(d)))...)
@@ -177,11 +185,26 @@ function test_against_univariate(D::MatrixDistribution, d::UnivariateDistributio
     nothing
 end
 
+# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
+# We implement it here to avoid a circular dependency on HypothesisTests
+# that causes test failures when preparing a breaking release of Distributions
+function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
+    # compute maximum absolute deviation from the empirical cdf
+    n = length(x)
+    cdfs = sort!(map(Base.Fix1(cdf, d), x))
+    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
+        return max(cdf - lower, upper - cdf)
+    end
+
+    # compute asymptotic p-value (see `KSDist`)
+    return ccdf(KSDist(n), dmax)
+end
+
 function test_draws_against_univariate_cdf(D::MatrixDistribution, d::UnivariateDistribution)
-    α = 0.05
+    α = 0.025
     M = 100000
     matvardraws = [rand(D)[1] for m in 1:M]
-    @test pvalue(ExactOneSampleKSTest(matvardraws, d)) >= α
+    @test pvalue_kolmogorovsmirnoff(matvardraws, d) >= α
     nothing
 end
 
@@ -254,7 +277,7 @@ function unpack_matvar_json_dict(dist::Type{<:MatrixDistribution}, dict)
 end
 
 function test_against_stan(dist::Type{<:MatrixDistribution})
-    filename = joinpath(dirname(@__FILE__), "ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
+    filename = joinpath(@__DIR__, "ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
     stan_output = JSON.parsefile(filename)
     K = length(stan_output)
     for k in 1:K
@@ -327,21 +350,33 @@ function test_special(dist::Type{Wishart})
         ρ = Chisq(ν)
         A = rand(q, M)
         z = [A[:, m]'*H[m]*A[:, m] / (A[:, m]'*Σ*A[:, m]) for m in 1:M]
-        kstest = ExactOneSampleKSTest(z, ρ)
-        @test pvalue(kstest) >= α
+        @test pvalue_kolmogorovsmirnoff(z, ρ) >= α
     end
     @testset "H ~ W(ν, I) ⟹ H[i, i] ~ χ²(ν)" begin
-        ν = n + 1
-        ρ = Chisq(ν)
-        d = Wishart(ν, ScalMat(n, 1))
+        κ = n + 1
+        ρ = Chisq(κ)
+        g = Wishart(κ, ScalMat(n, 1))
         mymats = zeros(n, n, M)
         for m in 1:M
-            mymats[:, :, m] = rand(d)
+            mymats[:, :, m] = rand(g)
         end
         for i in 1:n
-            kstest = ExactOneSampleKSTest(mymats[i, i, :], ρ)
-            @test pvalue(kstest) >= α / n
+            @test pvalue_kolmogorovsmirnoff(mymats[i, i, :], ρ) >= α / n
         end
+    end
+    @testset "Check Singular Branch" begin
+        X = H[1]
+        rank1 = Wishart(n - 2, Σ, false)
+        rank2 = Wishart(n - 1, Σ, false)
+        test_draw(rank1)
+        test_draw(rank2)
+        test_draws(rank1, rand(rank1, 10^6))
+        test_draws(rank2, rand(rank2, 10^6))
+        test_cov(rank1)
+        test_cov(rank2)
+        @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
+        @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
+        @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
     end
     nothing
 end
@@ -401,8 +436,7 @@ function test_special(dist::Type{LKJ})
         end
         for i in 1:d
             for j in 1:i-1
-                kstest = ExactOneSampleKSTest(mymats[i, j, :], ρ)
-                @test pvalue(kstest) >= α / L
+                @test pvalue_kolmogorovsmirnoff(mymats[i, j, :], ρ) >= α / L
             end
         end
     end
@@ -503,4 +537,5 @@ for distribution in matrixvariates
     @testset "$(dist)" begin
         test_matrixvariate(dist, n, p, M)
     end
+end
 end
