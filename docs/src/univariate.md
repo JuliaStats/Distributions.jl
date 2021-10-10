@@ -107,6 +107,7 @@ function plotdensity(
     kwargs...,
 )
     figure(;
+        title=title,
         xlabel="x",
         ylabel="density",
         grid=false,
