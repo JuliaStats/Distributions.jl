@@ -91,242 +91,193 @@ rand!(::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 ```
 
 ## Continuous Distributions
+
+```@setup plotdensity
+using Distributions, GR
+
+# display figures as SVGs
+GR.inline("svg")
+
+# plot probability density of continuous distributions
+function plotdensity(
+    (xmin, xmax),
+    dist::ContinuousUnivariateDistribution;
+    nsamples=1_000,
+    title="",
+    kwargs...,
+)
+    figure(;
+        xlabel="x",
+        ylabel="density",
+        grid=false,
+        backgroundcolor=0, # white instead of transparent background for dark Documenter scheme
+        font="Helvetica_Regular", # work around https://github.com/JuliaPlots/Plots.jl/issues/2596
+        linewidth=2.0, # thick lines
+        kwargs...,
+    )
+    return plot(range(xmin, xmax; length=nsamples), Base.Fix1(pdf, dist))
+end
+
+# convenience function with automatic title
+function plotdensity(
+    xmin_xmax,
+    ::Type{T},
+    args=();
+    title=string(T) * "(" * join(args, ", ") * ")",
+    kwargs...
+) where {T<:ContinuousUnivariateDistribution}
+    return plotdensity(xmin_xmax, T(args...); title=title, kwargs...)
+end
+```
+
 ```@docs
 Arcsine
 ```
-Density `Arcsine(0,1)`
-
-```@example Arcsine
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Arcsine(0,1) # hide
-xgrid = 0:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0.001, 0.999), Arcsine, (0, 1)) # hide
 ```
 
 ```@docs
 Beta
 ```
-Density `Beta(2,2)`
-
-```@example Beta
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Beta(2,2) # hide
-xgrid = 0:0.001:1  # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 1), Beta, (2, 2)) # hide
 ```
 
 ```@docs
 BetaPrime
 ```
-Density `BetaPrime(1,2)`
-```@example BetaPrime
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = BetaPrime(1,2) # hide
-xgrid = 0:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 1), BetaPrime, (1, 2)) # hide
 ```
 
 ```@docs
 Biweight
 ```
-Density `Biweight(1,2)`
-
-```@example Biweight
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Biweight(1,2) # hide
-xgrid = -1:0.001:3 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-1, 3), Biweight, (1, 2)) # hide
 ```
+
 ```@docs
 Cauchy
 ```
-Density `Cauchy(-2,1)`
-```@example cauchy
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Cauchy(-2,1) # hide
-xgrid = -10.5:0.001:5 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((-12, 5), Cauchy, (-2, 1)) # hide
 ```
 
 ```@docs
 Chernoff
 ```
+```@example plotdensity
+plotdensity((-3, 3), Chernoff) # hide
+```
 
 ```@docs
 Chi
 ```
-Density `Chi(1)`
-```@example Chi
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Chi(1) # hide
-xgrid = 0:0.001:3 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((0.001, 3), Chi, (1,)) # hide
 ```
 
 ```@docs
 Chisq
 ```
-Density `Chisq(3)`
-```@example chisq
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Chisq(3) # hide
-xgrid = 0:0.1:9 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 9), Chisq, (3,)) # hide
 ```
 
 ```@docs
 Cosine
 ```
-Density `Cosine(0,1)`
-```@example Cosine
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Cosine(0, 1) # hide
-xgrid = -1:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((-1, 1), Cosine, (0, 1)) # hide
 ```
 
 ```@docs
 Epanechnikov
 ```
-Density `Epanechnikov(0,1)`
-```@example Epanechnikov
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Epanechnikov(0, 1) # hide
-xgrid = -1:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((-1, 1), Epanechnikov, (0, 1)) # hide
 ```
 
 ```@docs
 Erlang
 ```
-Density `Erlang(7,0.5)`
-```@example Erlang
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Erlang(7, 0.5) # hide
-xgrid = 0:0.001:8 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 8), Erlang, (7, 0.5)) # hide
 ```
 
 ```@docs
 Exponential
 ```
-Density `Exponential(0.5)`
-```@example Exponential
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Exponential(0.5) # hide
-xgrid = 0:0.001:3.5 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 3.5), Exponential, (0.5,)) # hide
 ```
 
 ```@docs
 FDist
 ```
-Density `FDist(10,1)`
-```@example FDist
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = FDist(10,1) # hide
-xgrid = 0:0.001:10 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 10), FDist, (10, 1)) # hide
 ```
 
 ```@docs
 Frechet
 ```
-Density `Frechet(1,1)`
-```@example Frechet
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Frechet(1,1) # hide
-xgrid = 0:0.001:20 # hide
-plot(x = xgrid, y = pdf.(d,xgrid),  Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 20), Frechet, (1, 1)) # hide
 ```
 
 ```@docs
 Gamma
 ```
-Density `Gamma(7.5, 1.0)`
-```@example Gamma
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Gamma(7.5, 1.0) # hide
-xgrid = 0:0.001:18 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 18), Gamma, (7.5, 1)) # hide
 ```
 
 ```@docs
 GeneralizedExtremeValue
 ```
-Density `GeneralizedExtremeValue(0,1,1)`
-```@example GeneralizedExtremeValue
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = GeneralizedExtremeValue(0,1,1) # hide
-xgrid = 0:0.001:30 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 30), GeneralizedExtremeValue, (0, 1, 1)) # hide
 ```
 
 ```@docs
 GeneralizedPareto
 ```
-Density `GeneralizedPareto(0,1,1)`
-```@example GeneralizedPareto
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = GeneralizedPareto(0,1,1) # hide
-xgrid = 0:0.001:20 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 20), GeneralizedPareto, (0, 1, 1)) # hide
 ```
 
 ```@docs
 Gumbel
 ```
-Density `Gumbel(0,1)`
-```@example Gumbel
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Gumbel(0,1) # hide
-xgrid = -2:0.001:5 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((-2, 5), Gumbel, (0, 1)) # hide
 ```
 
 ```@docs
 InverseGamma
 ```
-Density `InverseGamma(3,0.5)`
-```@example InverseGamma
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = InverseGamma(3,0.5) # hide
-xgrid = 0:0.001:1 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0.001, 1), InverseGamma, (3, 0.5)) # hide
 ```
 
 ```@docs
 InverseGaussian
 ```
-Density `InverseGaussian(1,1)`
-```@example InverseGaussian
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = InverseGaussian(1,1) # hide
-xgrid = 0:0.001:5 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 5), InverseGaussian, (1, 1)) # hide
 ```
 
 ```@docs
 Kolmogorov
+```
+```@example plotdensity
+plotdensity((0, 2), Kolmogorov) # hide
+```
+
+```@docs
 KSDist
 KSOneSided
 ```
@@ -334,245 +285,179 @@ KSOneSided
 ```@docs
 Laplace
 ```
-Density `Laplace(0,4)`
-```@example Laplace
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Laplace(0,4) # hide
-xgrid = -20:0.01:20# hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((-20, 20), Laplace, (0, 4)) # hide
 ```
 
 ```@docs
 Levy
 ```
-Density `Levy(0,1)`
-```@example Levy
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Levy(0,1) # hide
-xgrid = 0:0.1:20 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 20), Levy, (0, 1)) # hide
 ```
 
 ```@docs
 LocationScale
 ```
-Density `LocationScale(2,1,Normal(0,1))`
-```@example LocationScale
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d1 = Normal(0,1) # hide
-d = LocationScale(2.0,1.0, d1) # hide
-xgrid = -2:0.001:5 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity(
+    (-2, 5), LocationScale(2, 1, Normal(0, 1)); title="LocationScale(2, 1, Normal(0, 1))",
+) # hide
 ```
 
 ```@docs
 Logistic
 ```
-Density `Logistic(2,1)`
-```@example Logistic
-using Distributions, Gadfly # hide
-set_default_plot_size(10cm, 10cm) # hide
-d = Logistic(2,1) # hide
-xgrid = -4:0.001:8 # hide
-plot(x = xgrid,y = pdf.(d,xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((-4, 8), Logistic, (2, 1)) # hide
 ```
 
 ```@docs
 LogitNormal
 ```
-Density `LogitNormal(0,1)`
-```@example LogitNormal
-using Distributions, Gadfly # hide
-d = LogitNormal(1.78) # hide
-xgrid = 0:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 1), LogitNormal, (0, 1)) # hide
 ```
 
 ```@docs
 LogNormal
 ```
-Density `LogNormal(0,1)`
-```@example LogNormal
-using Distributions, Gadfly # hide
-d = LogNormal(0, 1) # hide
-xgrid = 0:0.001:5 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 5), LogNormal, (0, 1)) # hide
 ```
 
 ```@docs
 NoncentralBeta
 ```
-Density `NoncentralBeta(2,3,1)`
-```@example NoncentralBeta
-using Distributions, Gadfly # hide
-d = NoncentralBeta(0.5,1,1) # hide
-xgrid = 0:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 1), NoncentralBeta, (2, 3, 1)) # hide
 ```
 
 ```@docs
 NoncentralChisq
 ```
-Density `NoncentralChisq(0.5,1,1)`
-```@example NoncentralChisq
-using Distributions, Gadfly # hide
-d = NoncentralChisq(2,3) # hide
-xgrid = 0:0.001:20 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 20), NoncentralChisq, (2, 3)) # hide
 ```
 
 ```@docs
 NoncentralF
+```
+```@example plotdensity
+plotdensity((0, 10), NoncentralF, (2, 3, 1)) # hide
+```
+
+```@docs
 NoncentralT
+```
+```@example plotdensity
+plotdensity((-1, 20), NoncentralT, (2, 3)) # hide
 ```
 
 ```@docs
 Normal
 ```
-Density `Normal(0,1)`
-```@example Normal
-using Distributions, Gadfly # hide
-d = Normal(0, 1) # hide
-xgrid = -4:0.001:4 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-4, 4), Normal, (0, 1)) # hide
 ```
 
 ```@docs
 NormalCanon
 ```
+```@example plotdensity
+plotdensity((-4, 4), NormalCanon, (0, 1)) # hide
+```
 
 ```@docs
 NormalInverseGaussian
 ```
-Density `NormalInverseGaussian(0,0.5,0.2,0.1)`
-```@example NormalInverseGaussian
-using Distributions, Gadfly # hide
-d = NormalInverseGaussian(0,0.5,0.2,0.1) # hide
-xgrid = -2:0.001:2 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-2, 2), NormalInverseGaussian, (0, 0.5, 0.2, 0.1)) # hide
 ```
 
 ```@docs
 Pareto
 ```
-Density `Pareto(1,1)`
-```@example Pareto
-using Distributions, Gadfly # hide
-d = Pareto(1,1) # hide
-xgrid = 1:0.001:8 # hide
-plot(x = xgrid, y = pdf.(d,xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((1, 8), Pareto, (1, 1)) # hide
 ```
 
 ```@docs
 PGeneralizedGaussian
 ```
-Density `PGeneralizedGaussian(0.2)`
-```@example Pareto
-using Distributions, Gadfly # hide
-d = PGeneralizedGaussian(0.2) # hide
-xgrid = 0:0.001:20 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) #hide
+```@example plotdensity
+plotdensity((0, 20), PGeneralizedGaussian, (0.2)) # hide
 ```
 
 ```@docs
 Rayleigh
 ```
-Density `Rayleigh(0.5)`
-```@example Rayleigh
-using Distributions, Gadfly # hide
-d = Rayleigh(0.5) # hide
-xgrid =  0:0.001:2# hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 2), Rayleigh, (0.5)) # hide
 ```
+
 ```@docs
 Rician
+```
+```@example plotdensity
+plotdensity((0, 5), Rician, (0.5, 1)) # hide
+```
+
+```@docs
 Semicircle
 ```
-Density `Semicircle(1)`
-```@example Semicircle
-using Distributions, Gadfly # hide
-d = Semicircle(1) # hide
-xgrid = -1:0.001:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-1, 1), Semicircle, (1,)) # hide
 ```
 
 ```@docs
 StudentizedRange
 SymTriangularDist
 ```
-Density `SymTriangularDist(0,1)`
-```@example SymTriangularDist
-using Distributions, Gadfly # hide
-d = SymTriangularDist(0,1) # hide
-xgrid = -1:0.1:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-2, 2), SymTriangularDist, (0, 1); nsamples=5) # hide
 ```
 
 ```@docs
 TDist
 ```
-Density `TDist(5)`
-```@example TDist
-using Distributions, Gadfly # hide
-d = TDist(5) # hide
-xgrid = -5:0.001:5 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-5, 5), TDist, (5,)) # hide
 ```
+
 ```@docs
 TriangularDist
 ```
-Density `TriangularDist(0,1,0.5)`
-```@example TriangularDist
-using Distributions, Gadfly # hide
-d = TriangularDist(0,1,0.5) # hide
-xgrid = 0.5:0.001:1.5 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((-0.5, 1.5), TriangularDist, (0, 1, 0.5); nsamples=5) # hide
 ```
 
 ```@docs
 Triweight
 ```
-Density `Triweight(1,1)`
-```@example Triweight
-using Distributions, Gadfly # hide
-d = Triweight(1,1) # hide
-xgrid = 0:0.001:2 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0, 2), Triweight, (1, 1)) # hide
 ```
+
 ```@docs
 Uniform
 ```
-Density `Uniform(0,1)`
-```@example Uniform
-using Distributions, Gadfly # hide
-d = Uniform(0,1) # hide
-xgrid = 0:0.1:1 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(ymin = 0, ymax = 1.5)) # hide
+```@example plotdensity
+plotdensity((-0.5, 1.5), Uniform, (0, 1)) # hide
 ```
 
 ```@docs
 VonMises
 ```
-Density `VonMises(0.5)` with support `[- π, π]`
-```@example VonMises
-using Distributions, Gadfly # hide
-d = VonMises(0.5) # hide
-xgrid = -pi:0.001:pi #hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line, Coord.cartesian(xmin = -pi, xmax = pi, ymin = 0,ymax = 0.35), Guide.xticks(ticks = [-π:π; ])) # hide
+```@example plotdensity
+plotdensity((-π, π), VonMises, (0.5,); xlim=(-π, π), xticks=(π/5, 5), xticklabels=x -> x ≈ -π ? "-π" : (x ≈ π ? "π" : "0")) # hide
 ```
 
 ```@docs
 Weibull
 ```
-Density `Weibull(0.5,1)`
-```@example Weibull
-using Distributions, Gadfly # hide
-d = Weibull(0.5, 1) # hide
-xgrid = 0:0.001:2 # hide
-plot(x = xgrid, y = pdf.(d, xgrid), Geom.line) # hide
+```@example plotdensity
+plotdensity((0.001, 3), Weibull, (0.5, 1)) # hide
 ```
 
 ## Discrete Distributions
