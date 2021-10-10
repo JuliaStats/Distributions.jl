@@ -40,7 +40,7 @@ Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
-    DiscreteNonParametric{T,P,Ts,Ps}(Ts(support(d)), Ps(probs(d)), check_args=false)
+    DiscreteNonParametric{T,P,Ts,Ps}(convert(Ts, support(d)), convert(Ps, probs(d)), check_args=false)
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -69,11 +69,11 @@ Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
 
 # Sampling
 
-function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
+function rand(rng::AbstractRNG, d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
     n = length(p)
-    draw = rand(rng, P)
+    draw = rand(rng, float(eltype(p)))
     cp = p[1]
     i = 1
     while cp <= draw && i < n
@@ -81,8 +81,6 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric{T,P}) where {T,P}
     end
     return x[i]
 end
-
-rand(d::DiscreteNonParametric) = rand(GLOBAL_RNG, d)
 
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
@@ -95,44 +93,69 @@ get_evalsamples(d::DiscreteNonParametric, ::Float64) = support(d)
 
 pdf(d::DiscreteNonParametric) = copy(probs(d))
 
-# Helper functions for pdf and cdf required to fix ambiguous method
-# error involving [pc]df(::DisceteUnivariateDistribution, ::Int)
-function _pdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    idx_range = searchsorted(support(d), x)
-    if length(idx_range) > 0
-        return probs(d)[first(idx_range)]
+function pdf(d::DiscreteNonParametric, x::Real)
+    s = support(d)
+    idx = searchsortedfirst(s, x)
+    ps = probs(d)
+    if idx <= length(ps) && s[idx] == x
+        return ps[idx]
     else
-        return zero(P)
+        return zero(eltype(ps))
     end
 end
-pdf(d::DiscreteNonParametric{T}, x::Int) where T  = _pdf(d, convert(T, x))
-pdf(d::DiscreteNonParametric{T}, x::Real) where T = _pdf(d, convert(T, x))
+logpdf(d::DiscreteNonParametric, x::Real) = log(pdf(d, x))
 
-function _cdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    x > maximum(d) && return 1.0
-    s = zero(P)
+function cdf(d::DiscreteNonParametric, x::Real)
     ps = probs(d)
+    P = float(eltype(ps))
+
+    # trivial cases
+    x < minimum(d) && return zero(P)
+    x >= maximum(d) && return one(P)
+    isnan(x) && return P(NaN)
+
+    n = length(ps)
     stop_idx = searchsortedlast(support(d), x)
-    for i in 1:stop_idx
-        s += ps[i]
+    s = zero(P)
+    if stop_idx < div(n, 2)
+        @inbounds for i in 1:stop_idx
+            s += ps[i]
+        end
+    else
+        @inbounds for i in (stop_idx + 1):n
+            s += ps[i]
+        end
+        s = 1 - s
     end
+
     return s
 end
-cdf(d::DiscreteNonParametric{T}, x::Integer) where T = _cdf(d, convert(T, x))
-cdf(d::DiscreteNonParametric{T}, x::Real) where T = _cdf(d, convert(T, x))
 
-function _ccdf(d::DiscreteNonParametric{T,P}, x::T) where {T,P}
-    x < minimum(d) && return 1.0
-    s = zero(P)
+function ccdf(d::DiscreteNonParametric, x::Real)
     ps = probs(d)
+    P = float(eltype(ps))
+
+    # trivial cases
+    x < minimum(d) && return one(P)
+    x >= maximum(d) && return zero(P)
+    isnan(x) && return P(NaN)
+
+    n = length(ps)
     stop_idx = searchsortedlast(support(d), x)
-    for i in (stop_idx+1):length(ps)
-        s += ps[i]
+    s = zero(P)
+    if stop_idx < div(n, 2)
+        @inbounds for i in 1:stop_idx
+            s += ps[i]
+        end
+        s = 1 - s
+    else
+        @inbounds for i in (stop_idx + 1):n
+            s += ps[i]
+        end
     end
+
     return s
 end
-ccdf(d::DiscreteNonParametric{T}, x::Integer) where T = _ccdf(d, convert(T, x))
-ccdf(d::DiscreteNonParametric{T}, x::Real) where T = _ccdf(d, convert(T, x))
 
 function quantile(d::DiscreteNonParametric, q::Real)
     0 <= q <= 1 || throw(DomainError())
@@ -155,71 +178,36 @@ insupport(d::DiscreteNonParametric, x::Real) =
 
 mean(d::DiscreteNonParametric) = dot(probs(d), support(d))
 
-function var(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function var(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    σ² = zero(T)
-    for i in 1:k
-        @inbounds σ² += abs2(x[i] - m) * p[i]
-    end
-    σ²
+    return var(x, Weights(p, one(eltype(p))); corrected=false)
 end
 
-function skewness(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function skewness(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    μ₃ = zero(T)
-    σ² = zero(T)
-    @inbounds for i in 1:k
-        d = x[i] - m
-        d²w = abs2(d) * p[i]
-        μ₃ += d * d²w
-        σ² += d²w
-    end
-    μ₃ / (σ² * sqrt(σ²))
+    return skewness(x, Weights(p, one(eltype(p))))
 end
 
-function kurtosis(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function kurtosis(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    μ₄ = zero(T)
-    σ² = zero(T)
-    @inbounds for i in 1:k
-        d² = abs2(x[i] - m)
-        d²w = d² * p[i]
-        μ₄ += d² * d²w
-        σ² += d²w
-    end
-    μ₄ / abs2(σ²) - 3
+    return kurtosis(x, Weights(p, one(eltype(p))))
 end
 
 entropy(d::DiscreteNonParametric) = entropy(probs(d))
 entropy(d::DiscreteNonParametric, b::Real) = entropy(probs(d), b)
 
-mode(d::DiscreteNonParametric) = support(d)[argmax(probs(d))]
-function modes(d::DiscreteNonParametric{T,P}) where {T,P}
+function mode(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    mds = T[]
-    max_p = zero(P)
-    @inbounds for i in 1:k
-        pi = p[i]
-        xi = x[i]
-        if pi > max_p
-            max_p = pi
-            mds = [xi]
-        elseif pi == max_p
-            push!(mds, xi)
-        end
-    end
-    mds
+    return mode(x, Weights(p, one(eltype(p))))
+end
+function modes(d::DiscreteNonParametric)
+    x = support(d)
+    p = probs(d)
+    return modes(x, Weights(p, one(eltype(p))))
 end
 
 function mgf(d::DiscreteNonParametric, t::Real)

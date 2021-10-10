@@ -1,16 +1,16 @@
 #### Domain && Support
 
-struct RealInterval
-    lb::Float64
-    ub::Float64
-
-    RealInterval(lb::Real, ub::Real) = new(Float64(lb), Float64(ub))
+struct RealInterval{T<:Real}
+    lb::T
+    ub::T
 end
+
+RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
 
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)
-in(x::Real, r::RealInterval) = (r.lb <= Float64(x) <= r.ub)
+in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
@@ -78,27 +78,6 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::UnivariateDistribution)
-
-Return the minimum of the support of `d`.
-"""
-minimum(d::UnivariateDistribution)
-
-"""
-    maximum(d::UnivariateDistribution)
-
-Return the maximum of the support of `d`.
-"""
-maximum(d::UnivariateDistribution)
-
-"""
-    extrema(d::UnivariateDistribution)
-
-Return the minimum and maximum of the support of `d` as a 2-tuple.
-"""
-extrema(d::UnivariateDistribution) = (minimum(d), maximum(d))
-
-"""
     insupport(d::UnivariateDistribution, x::Any)
 
 When `x` is a scalar, it returns whether x is within the support of `d`
@@ -156,13 +135,20 @@ end
 
 # multiple univariate, must allocate array
 rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
-    rand!(rng, sampler(s), Array{eltype(s)}(undef, dims))
+    rand!(rng, s, Array{eltype(s)}(undef, dims))
+rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
+    rand!(rng, s, Array{float(eltype(s))}(undef, dims))
 
 # multiple univariate with pre-allocated array
+# we use a function barrier since for some distributions `sampler(s)` is not type-stable:
+# https://github.com/JuliaStats/Distributions.jl/pull/1281
 function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
-    smp = sampler(s)
+    return _rand_loops!(rng, sampler(s), A)
+end
+
+function _rand_loops!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray)
     for i in eachindex(A)
-        @inbounds A[i] = rand(rng, smp)
+        @inbounds A[i] = rand(rng, sampler)
     end
     return A
 end
@@ -209,7 +195,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 
 Return the median value of distribution `d`.
 """
-median(d::UnivariateDistribution) = quantile(d, 0.5)
+median(d::UnivariateDistribution) = quantile(d, 1//2)
 
 """
     modes(d::UnivariateDistribution)
@@ -317,30 +303,16 @@ Evaluate the probability density (mass) at `x`.
 
 See also: [`logpdf`](@ref).
 """
-pdf(d::UnivariateDistribution, x::Real)
-
-"""
-    pdf(d::DiscreteUnivariateDistribution, x::T) where {T<:Real}
-
-Evaluate the probability density (mass) at `x`. If `T` is not an `Integer`
-type but `x` is integer, the value is converted to `Int`.
-
-The version with `x::Integer` must be implemented by
-discrete distributions.
-
-See also: [`logpdf`](@ref).
-"""
-pdf(d::DiscreteUnivariateDistribution, x::Real) = isinteger(x) ? pdf(d, round(Int, x)) : zero(partype(d))
+pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
 Evaluate the logarithm of probability density (mass) at `x`.
-Whereas there is a fallback implemented `logpdf(d, x) = log(pdf(d, x))`.
-Relying on this fallback is not recommended in general, as it is prone to overflow or underflow.
+
+See also: [`pdf`](@ref).
 """
-logpdf(d::UnivariateDistribution, x::Real) = log(pdf(d, x))
-logpdf(d::DiscreteUnivariateDistribution, x::Integer) = log(pdf(d, x))
+logpdf(d::UnivariateDistribution, x::Real)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -350,43 +322,19 @@ Evaluate the cumulative probability at `x`.
 See also [`ccdf`](@ref), [`logcdf`](@ref), and [`logccdf`](@ref).
 """
 cdf(d::UnivariateDistribution, x::Real)
-cdf(d::DiscreteUnivariateDistribution, x::Integer) = cdf(d, x, FiniteSupport{hasfinitesupport(d)})
 
-# Discrete univariate with infinite support
-function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{false}})
-    c = 0.0
-    for y = minimum(d):x
-        c += pdf(d, y)
-    end
-    return c
-end
-
-# Discrete univariate with finite support
-function cdf(d::DiscreteUnivariateDistribution, x::Integer, ::Type{FiniteSupport{true}})
-    # calculate from left if x < (min + max)/2
-    # (same as infinite support version)
-    x <= div(minimum(d) + maximum(d),2) && return cdf(d, x, FiniteSupport{false})
-
-    # otherwise, calculate from the right
-    c = 1.0
-    for y = x+1:maximum(d)
-        c -= pdf(d, y)
-    end
-    return c
-end
-
-cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf(d, floor(Int,x))
-cdf(d::ContinuousUnivariateDistribution, x::Real) = throw(MethodError(cdf, (d, x)))
-
+# fallback for discrete distribution:
+# base computation on `cdf(d, floor(Int, x))` and handle `NaN` and `±Inf`
+# this is only correct for distributions with integer-valued support but will error if
+# `cdf(d, ::Int)` is not defined (so it should not return incorrect values silently)
+cdf(d::DiscreteUnivariateDistribution, x::Real) = cdf_int(d, x)
 
 """
     ccdf(d::UnivariateDistribution, x::Real)
 
 The complementary cumulative function evaluated at `x`, i.e. `1 - cdf(d, x)`.
 """
-ccdf(d::UnivariateDistribution, x::Real) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Integer) = 1.0 - cdf(d, x)
-ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
+ccdf(d::UnivariateDistribution, x::Real) = 1 - cdf(d, x)
 
 """
     logcdf(d::UnivariateDistribution, x::Real)
@@ -394,8 +342,6 @@ ccdf(d::DiscreteUnivariateDistribution, x::Real) = ccdf(d, floor(Int,x))
 The logarithm of the cumulative function value(s) evaluated at `x`, i.e. `log(cdf(x))`.
 """
 logcdf(d::UnivariateDistribution, x::Real) = log(cdf(d, x))
-logcdf(d::DiscreteUnivariateDistribution, x::Integer) = log(cdf(d, x))
-logcdf(d::DiscreteUnivariateDistribution, x::Real) = logcdf(d, floor(Int,x))
 
 """
     logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
@@ -417,8 +363,6 @@ end
 The logarithm of the complementary cumulative function values evaluated at x, i.e. `log(ccdf(x))`.
 """
 logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
-logccdf(d::DiscreteUnivariateDistribution, x::Integer) = log(ccdf(d, x))
-logccdf(d::DiscreteUnivariateDistribution, x::Real) = logccdf(d, floor(Int,x))
 
 """
     quantile(d::UnivariateDistribution, q::Real)
@@ -534,12 +478,137 @@ Here `x` can be a single scalar sample or an array of samples.
 loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
 loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
+### special definitions for distributions with integer-valued support
+
+function cdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # handle `NaN` and `±Inf` which can't be truncated to `Int`
+    isfinite_x = isfinite(x)
+    _x = isfinite_x ? x : zero(x)
+    c = float(cdf(d, floor(Int, _x)))
+    return if isfinite_x
+        c
+    elseif isnan(x)
+        oftype(c, NaN)
+    elseif x < 0
+        zero(c)
+    else
+        one(c)
+    end
+end
+
+function ccdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # handle `NaN` and `±Inf` which can't be truncated to `Int`
+    isfinite_x = isfinite(x)
+    _x = isfinite_x ? x : zero(x)
+    c = float(ccdf(d, floor(Int, _x)))
+    return if isfinite_x
+        c
+    elseif isnan(x)
+        oftype(c, NaN)
+    elseif x < 0
+        one(c)
+    else
+        zero(c)
+    end
+end
+
+function logcdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # handle `NaN` and `±Inf` which can't be truncated to `Int`
+    isfinite_x = isfinite(x)
+    _x = isfinite_x ? x : zero(x)
+    c = float(logcdf(d, floor(Int, _x)))
+    return if isfinite_x
+        c
+    elseif isnan(x)
+        oftype(c, NaN)
+    elseif x < 0
+        oftype(c, -Inf)
+    else
+        zero(c)
+    end
+end
+
+function logccdf_int(d::DiscreteUnivariateDistribution, x::Real)
+    # handle `NaN` and `±Inf` which can't be truncated to `Int`
+    isfinite_x = isfinite(x)
+    _x = isfinite_x ? x : zero(x)
+    c = float(logccdf(d, floor(Int, _x)))
+    return if isfinite_x
+        c
+    elseif isnan(x)
+        oftype(c, NaN)
+    elseif x < 0
+        zero(c)
+    else
+        oftype(c, -Inf)
+    end
+end
+
+# implementation of the cdf for distributions whose support is a unitrange of integers
+# note: incorrect for discrete distributions whose support includes non-integer numbers
+function integerunitrange_cdf(d::DiscreteUnivariateDistribution, x::Integer)
+    minimum_d, maximum_d = extrema(d)
+    isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
+
+    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+        c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+        x < minimum_d ? zero(c) : c
+    else
+        c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+        x >= maximum_d ? one(c) : c
+    end
+
+    return result
+end
+
+function integerunitrange_ccdf(d::DiscreteUnivariateDistribution, x::Integer)
+    minimum_d, maximum_d = extrema(d)
+    isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
+
+    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+        c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+        x < minimum_d ? one(c) : c
+    else
+        c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+        x >= maximum_d ? zero(c) : c
+    end
+
+    return result
+end
+
+function integerunitrange_logcdf(d::DiscreteUnivariateDistribution, x::Integer)
+    minimum_d, maximum_d = extrema(d)
+    isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
+
+    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+        c = logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d)))
+        x < minimum_d ? oftype(c, -Inf) : c
+    else
+        c = log1mexp(logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d))
+        x >= maximum_d ? zero(c) : c
+    end
+
+    return result
+end
+
+function integerunitrange_logccdf(d::DiscreteUnivariateDistribution, x::Integer)
+    minimum_d, maximum_d = extrema(d)
+    isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
+
+    result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
+        c = log1mexp(logsumexp(logpdf(d, y) for y in minimum_d:(max(x, minimum_d))))
+        x < minimum_d ? zero(c) : c
+    else
+        c = logsumexp(logpdf(d, y) for y in (min(x + 1, maximum_d)):maximum_d)
+        x >= maximum_d ? oftype(c, -Inf) : c
+    end
+
+    return result
+end
+
 ### macros to use StatsFuns for method implementation
 
 macro _delegate_statsfuns(D, fpre, psyms...)
-    dt = eval(D)
-    T = dt <: DiscreteUnivariateDistribution ? :Int : :Real
-
     # function names from StatsFuns
     fpdf = Symbol(fpre, "pdf")
     flogpdf = Symbol(fpre, "logpdf")
@@ -555,22 +624,24 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     # parameter fields
     pargs = [Expr(:(.), :d, Expr(:quote, s)) for s in psyms]
 
-    esc(quote
-        pdf(d::$D, x::$T) = $(fpdf)($(pargs...), x)
-        logpdf(d::$D, x::$T) = $(flogpdf)($(pargs...), x)
+    # output type of `quantile` etc.
+    T = :($D <: DiscreteUnivariateDistribution ? Int : Real)
 
-        cdf(d::$D, x::$T) = $(fcdf)($(pargs...), x)
-        ccdf(d::$D, x::$T) = $(fccdf)($(pargs...), x)
-        logcdf(d::$D, x::$T) = $(flogcdf)($(pargs...), x)
-        logccdf(d::$D, x::$T) = $(flogccdf)($(pargs...), x)
+    return quote
+        $Distributions.pdf(d::$D, x::Real) = $(fpdf)($(pargs...), x)
+        $Distributions.logpdf(d::$D, x::Real) = $(flogpdf)($(pargs...), x)
 
-        quantile(d::$D, q::Real) = convert($T, $(finvcdf)($(pargs...), q))
-        cquantile(d::$D, q::Real) = convert($T, $(finvccdf)($(pargs...), q))
-        invlogcdf(d::$D, lq::Real) = convert($T, $(finvlogcdf)($(pargs...), lq))
-        invlogccdf(d::$D, lq::Real) = convert($T, $(finvlogccdf)($(pargs...), lq))
-    end)
+        $Distributions.cdf(d::$D, x::Real) = $(fcdf)($(pargs...), x)
+        $Distributions.logcdf(d::$D, x::Real) = $(flogcdf)($(pargs...), x)
+        $Distributions.ccdf(d::$D, x::Real) = $(fccdf)($(pargs...), x)
+        $Distributions.logccdf(d::$D, x::Real) = $(flogccdf)($(pargs...), x)
+
+        $Distributions.quantile(d::$D, q::Real) = convert($T, $(finvcdf)($(pargs...), q))
+        $Distributions.cquantile(d::$D, q::Real) = convert($T, $(finvccdf)($(pargs...), q))
+        $Distributions.invlogcdf(d::$D, lq::Real) = convert($T, $(finvlogcdf)($(pargs...), lq))
+        $Distributions.invlogccdf(d::$D, lq::Real) = convert($T, $(finvlogccdf)($(pargs...), lq))
+    end
 end
-
 
 ##### specific distributions #####
 
@@ -578,6 +649,7 @@ const discrete_distributions = [
     "bernoulli",
     "betabinomial",
     "binomial",
+    "dirac",
     "discreteuniform",
     "discretenonparametric",
     "categorical",
@@ -617,7 +689,6 @@ const continuous_distributions = [
     "ksonesided",
     "laplace",
     "levy",
-    "locationscale",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
@@ -630,6 +701,7 @@ const continuous_distributions = [
     "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
+    "rician",
     "semicircle",
     "skewnormal",
     "studentizedrange",
@@ -641,6 +713,8 @@ const continuous_distributions = [
     "vonmises",
     "weibull"
 ]
+
+include(joinpath("univariate", "locationscale.jl"))
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))

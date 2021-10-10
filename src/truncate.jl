@@ -1,54 +1,57 @@
 """
-    truncated(d, l, u):
+    truncated(d::UnivariateDistribution, l::Real, u::Real)
 
-Truncate a distribution between `l` and `u`.
-Builds the most appropriate distribution for the type of `d`,
-the fallback is constructing a `Truncated` wrapper.
+Truncate a univariate distribution `d` to the interval `[l, u]`.
 
-To implement a specialized truncated form for a distribution `D`,
-the method `truncate(d::D, l::T, u::T) where {T <: Real}`
-should be implemented.
+The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
+`Inf`. The function throws an error if `l > u`.
 
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
-Throws an error if `l >= u`.
+# Implementation
+
+To implement a specialized truncated form for distributions of type `D`, the method
+`truncate(d::D, l::T, u::T) where {T <: Real}` should be implemented.
 """
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
 
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    tp = ucdf - lcdf
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
+    l <= u || error("the lower bound must be less or equal than the upper bound")
+
+    # (log)lcdf = (log) P(X < l) where X ~ d
+    loglcdf = if value_support(typeof(d)) === Discrete
+        logsubexp(logcdf(d, l), logpdf(d, l))
+    else
+        logcdf(d, l)
+    end
+    lcdf = exp(loglcdf)
+
+    # (log)ucdf = (log) P(X ≤ u) where X ~ d
+    logucdf = logcdf(d, u)
+    ucdf = exp(logucdf)
+
+    # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
+    logtp = logsubexp(loglcdf, logucdf)
+    tp = exp(logtp)
+
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
 end
 
 truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
 
 """
-    Truncated(d, l, u):
+    Truncated
 
-Create a generic wrapper for a truncated distribution.
-Prefer calling the function `truncated(d, l, u)`, which can choose the appropriate
-representation of the truncated distribution.
-
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+Generic wrapper for a truncated distribution.
 """
 struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::T      # lower bound
     upper::T      # upper bound
-    lcdf::T       # cdf of lower bound
-    ucdf::T       # cdf of upper bound
+    lcdf::T       # cdf of lower bound (exclusive): P(X < lower)
+    ucdf::T       # cdf of upper bound (inclusive): P(X ≤ upper)
 
     tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
@@ -57,18 +60,7 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univa
     end
 end
 
-### Constructors
-function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    tp = ucdf - lcdf
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
-end
-
-Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
-
+### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
@@ -91,94 +83,59 @@ end
 
 quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
 
-function _pdf(d::Truncated, x::T) where {T<:Real}
-    if d.lower <= x <= d.upper
-        pdf(d.untruncated, x) / d.tp
-    else
-        zero(T)
-    end
+function pdf(d::Truncated, x::Real)
+    result = pdf(d.untruncated, x) / d.tp
+    return d.lower <= x <= d.upper ? result : zero(result)
 end
 
-function pdf(d::Truncated{<:ContinuousUnivariateDistribution}, x::T) where {T<:Real}
-    _pdf(d, float(x))
+function logpdf(d::Truncated, x::Real)
+    result = logpdf(d.untruncated, x) - d.logtp
+    return d.lower <= x <= d.upper ? result : oftype(result, -Inf)
 end
 
-function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    isinteger(x) || return zero(float(T))
-    _pdf(d, x)
-end
-
-function pdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Integer}
-    _pdf(d, float(x))
-end
-
-function _logpdf(d::Truncated, x::T) where {T<:Real}
-    if d.lower <= x <= d.upper
-        logpdf(d.untruncated, x) - d.logtp
-    else
-        TF = float(T)
-        -TF(Inf)
-    end
-end
-
-function logpdf(d::Truncated{D}, x::T) where {D<:DiscreteUnivariateDistribution, T<:Real}
-    TF = float(T)
-    isinteger(x) || return -TF(Inf)
-    return _logpdf(d, x)
-end
-
-function logpdf(d::Truncated{D}, x::Integer) where {D<:DiscreteUnivariateDistribution}
-    _logpdf(d, x)
-end
-
-function logpdf(d::Truncated{D, Continuous}, x::T) where {D<:ContinuousUnivariateDistribution, T<:Real}
-    _logpdf(d, x)
-end
-
-# fallback to avoid method ambiguities
-_cdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? zero(T) :
-    x >= d.upper ? one(T) :
-    (cdf(d.untruncated, x) - d.lcdf) / d.tp
-
-cdf(d::Truncated, x::Real) = _cdf(d, x)
-cdf(d::Truncated, x::Integer) = _cdf(d, float(x)) # float conversion for stability
-
-function _logcdf(d::Truncated, x::T) where {T<:Real}
-    TF = float(T)
-    if x <= d.lower
-        -TF(Inf)
+function cdf(d::Truncated, x::Real)
+    result = (cdf(d.untruncated, x) - d.lcdf) / d.tp
+    return if x < d.lower
+        zero(result)
     elseif x >= d.upper
-        zero(TF)
+        one(result)
     else
-        log(cdf(d.untruncated, x) - d.lcdf) - d.logtp
+        result
     end
 end
 
-logcdf(d::Truncated, x::Real) = _logcdf(d, x)
-logcdf(d::Truncated, x::Integer) = _logcdf(d, x)
-
-_ccdf(d::Truncated, x::T) where {T<:Real} =
-    x <= d.lower ? one(T) :
-    x >= d.upper ? zero(T) :
-    (d.ucdf - cdf(d.untruncated, x)) / d.tp
-
-ccdf(d::Truncated, x::Real) = _ccdf(d, x)
-ccdf(d::Truncated, x::Integer) = _ccdf(d, float(x))
-
-function _logccdf(d::Truncated, x::T) where {T<:Real}
-    TF = float(T)
-    if x <= d.lower
-        zero(TF)
+function logcdf(d::Truncated, x::Real)
+    result = logsubexp(logcdf(d.untruncated, x), log(d.lcdf)) - d.logtp
+    return if x < d.lower
+        oftype(result, -Inf)
     elseif x >= d.upper
-        -TF(Inf)
+        zero(result)
     else
-        log(d.ucdf - cdf(d.untruncated, x)) - d.logtp
+        result
     end
 end
 
-logccdf(d::Truncated, x::Real) = _logccdf(d, x)
-logccdf(d::Truncated, x::Integer) = _logccdf(d, x)
+function ccdf(d::Truncated, x::Real)
+    result = (d.ucdf - cdf(d.untruncated, x)) / d.tp
+    return if x <= d.lower
+        one(result)
+    elseif x > d.upper
+        zero(result)
+    else
+        result
+    end
+end
+
+function logccdf(d::Truncated, x::Real)
+    result = logsubexp(logccdf(d.untruncated, x), log1p(-d.ucdf)) - d.logtp
+    return if x <= d.lower
+        zero(result)
+    elseif x > d.upper
+        oftype(result, -Inf)
+    else
+        result
+    end
+end
 
 ## random number generation
 

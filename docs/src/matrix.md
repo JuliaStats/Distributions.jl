@@ -47,3 +47,9 @@ LKJ
 ```@docs
 Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)
 ```
+
+## Index
+
+```@index
+Pages = ["matrix.md"]
+```

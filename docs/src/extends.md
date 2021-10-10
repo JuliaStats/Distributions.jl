@@ -32,7 +32,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
 
-function _rand!(s::Spl, x::AbstractVector{T}) where T<:Real
+function _rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{T}) where T<:Real
     # ... generate a single vector sample to x
 end
 ```
@@ -42,36 +42,36 @@ This function can assume that the dimension of `x` is correct, and doesn't need 
 The package implements both `rand` and `rand!` as follows (which you don't need to implement in general):
 
 ```julia
-function _rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
+function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::DenseMatrix)
     for i = 1:size(A,2)
-        _rand!(s, view(A,:,i))
+        _rand!(rng, s, view(A,:,i))
     end
     return A
 end
 
-function rand!(s::Sampleable{Multivariate}, A::AbstractVector)
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::AbstractVector)
     length(A) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(s, A)
+    _rand!(rng, s, A)
 end
 
-function rand!(s::Sampleable{Multivariate}, A::DenseMatrix)
+function rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, A::DenseMatrix)
     size(A,1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(s, A)
+    _rand!(rng, s, A)
 end
 
-rand(s::Sampleable{Multivariate,S}) where {S<:ValueSupport} =
-    _rand!(s, Vector{eltype(S)}(length(s)))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,S}) where {S<:ValueSupport} =
+    _rand!(rng, s, Vector{eltype(S)}(length(s)))
 
-rand(s::Sampleable{Multivariate,S}, n::Int) where {S<:ValueSupport} =
-    _rand!(s, Matrix{eltype(S)}(length(s), n))
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,S}, n::Int) where {S<:ValueSupport} =
+    _rand!(rng, s, Matrix{eltype(S)}(length(s), n))
 ```
 
 If there is a more efficient method to generate multiple vector samples in batch, one should provide the following method
 
 ```julia
-function _rand!(s::Spl, A::DenseMatrix{T}) where T<:Real
+function _rand!(rng::AbstractRNG, s::Spl, A::DenseMatrix{T}) where T<:Real
     # ... generate multiple vector samples in batch
 end
 ```
@@ -85,7 +85,7 @@ To implement a multivariate sampler, one can define a sub type of `Sampleable{Mu
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
 
-function _rand!(s::Spl, x::DenseMatrix{T}) where T<:Real
+function _rand!(rng::AbstractRNG, s::Spl, x::DenseMatrix{T}) where T<:Real
     # ... generate a single matrix sample to x
 end
 ```
@@ -108,7 +108,6 @@ Following methods need to be implemented for each univariate distribution type:
 
 - [`rand(::AbstractRNG, d::UnivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
-- [`pdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`logpdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`cdf(d::UnivariateDistribution, x::Real)`](@ref)
 - [`quantile(d::UnivariateDistribution, q::Real)`](@ref)

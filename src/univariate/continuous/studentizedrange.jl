@@ -11,10 +11,10 @@ f(q; k, \\nu) = \\frac{\\sqrt{2\\pi}k(k - 1)\\nu^{\\nu/2}}{\\Gamma{\\left(\\frac
 where
 
 ```math
-\\begin{align*}
+\\begin{aligned}
 \\Phi(x) &= \\frac{1 + erf(\\frac{x}{\\sqrt{2}})}{2} &&(\\text{Normal Distribution CDF})\\\\
 \\phi(x) &= \\Phi'(x) &&(\\text{Normal Distribution PDF})
-\\end{align*}
+\\end{aligned}
 ```
 
 ```julia

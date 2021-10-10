@@ -68,9 +68,7 @@ function pdf(d::Cosine{T}, x::Real) where T<:Real
     end
 end
 
-function logpdf(d::Cosine{T}, x::Real) where T<:Real
-    insupport(d, x) ? log(pdf(d, x)) : -T(Inf)
-end
+logpdf(d::Cosine, x::Real) = log(pdf(d, x))
 
 function cdf(d::Cosine{T}, x::Real) where T<:Real
     if x < d.μ - d.σ

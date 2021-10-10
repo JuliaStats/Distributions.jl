@@ -70,13 +70,20 @@ modes(d::DiscreteUniform) = [d.a:d.b]
 
 ### Evaluation
 
-cdf(d::DiscreteUniform, x::Int) = (x < d.a ? 0.0 :
-                                   x > d.b ? 1.0 :
-                                   (floor(Int,x) - d.a + 1.0) * d.pv)
+pdf(d::DiscreteUniform, x::Real) = insupport(d, x) ? d.pv : zero(d.pv)
+logpdf(d::DiscreteUniform, x::Real) = log(pdf(d, x))
 
-pdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? d.pv : 0.0
-
-logpdf(d::DiscreteUniform, x::Int) = insupport(d, x) ? log(d.pv) : -Inf
+function cdf(d::DiscreteUniform, x::Int)
+    a = d.a
+    result = (x - a + 1) * d.pv
+    return if x < a
+        zero(result)
+    elseif x >= d.b
+        one(result)
+    else
+        result
+    end
+end
 
 quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
 

@@ -9,12 +9,12 @@ f(x; \\alpha, \\theta) = \\frac{\\alpha \\theta^\\alpha}{x^{\\alpha + 1}}, \\qua
 
 ```julia
 Pareto()            # Pareto distribution with unit shape and unit scale, i.e. Pareto(1, 1)
-Pareto(a)           # Pareto distribution with shape a and unit scale, i.e. Pareto(a, 1)
-Pareto(a, b)        # Pareto distribution with shape a and scale b
+Pareto(α)           # Pareto distribution with shape α and unit scale, i.e. Pareto(α, 1)
+Pareto(α, θ)        # Pareto distribution with shape α and scale θ
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (α, θ)
+shape(d)         # Get the shape parameter, i.e. α
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links
@@ -91,19 +91,17 @@ function logpdf(d::Pareto{T}, x::Real) where T<:Real
     x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
 end
 
-function ccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? (θ / x)^α : one(T)
+function ccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return (θ / max(x, θ))^α
 end
-
 cdf(d::Pareto, x::Real) = 1 - ccdf(d, x)
 
-function logccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? α * log(θ / x) : zero(T)
+function logccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return xlogy(α, θ / max(x, θ))
 end
-
-logcdf(d::Pareto, x::Real) = log1p(-ccdf(d, x))
+logcdf(d::Pareto, x::Real) = log1mexp(logccdf(d, x))
 
 cquantile(d::Pareto, p::Real) = d.θ / p^(1 / d.α)
 quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)

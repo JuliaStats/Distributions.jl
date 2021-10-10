@@ -63,6 +63,7 @@ entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
 cf(::UnivariateDistribution, ::Any)
+pdfsquaredL2norm
 ```
 
 ### Probability Evaluation
@@ -71,10 +72,10 @@ cf(::UnivariateDistribution, ::Any)
 insupport(::UnivariateDistribution, x::Any)
 pdf(::UnivariateDistribution, ::Real)
 logpdf(::UnivariateDistribution, ::Real)
-loglikelihood(::UnivariateDistribution, ::Union{Real,AbstractArray})
+loglikelihood(::UnivariateDistribution, ::AbstractArray)
 cdf(::UnivariateDistribution, ::Real)
 logcdf(::UnivariateDistribution, ::Real)
-logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}
+logdiffcdf(::UnivariateDistribution, ::Real, ::Real)
 ccdf(::UnivariateDistribution, ::Real)
 logccdf(::UnivariateDistribution, ::Real)
 quantile(::UnivariateDistribution, ::Real)
@@ -131,6 +132,7 @@ NormalInverseGaussian
 Pareto
 PGeneralizedGaussian
 Rayleigh
+Rician
 Semicircle
 StudentizedRange
 SymTriangularDist
@@ -149,6 +151,7 @@ Bernoulli
 BetaBinomial
 Binomial
 Categorical
+Dirac
 DiscreteUniform
 DiscreteNonParametric
 Geometric
@@ -162,3 +165,9 @@ Skellam
 ### Vectorized evaluation
 
 Vectorized computation and inplace vectorized computation have been deprecated.
+
+## Index
+
+```@index
+Pages = ["univariate.md"]
+```
