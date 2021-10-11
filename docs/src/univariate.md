@@ -446,7 +446,7 @@ plotdensity((0, 2), Triweight, (1, 1)) # hide
 Uniform
 ```
 ```@example plotdensity
-plotdensity((-0.5, 1.5), Uniform, (0, 1)) # hide
+plotdensity((-0.5, 1.5), Uniform, (0, 1); ylim=(0, 1.5)) # hide
 ```
 
 ```@docs
