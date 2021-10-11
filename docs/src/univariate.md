@@ -102,7 +102,7 @@ GR.inline("svg")
 function plotdensity(
     (xmin, xmax),
     dist::ContinuousUnivariateDistribution;
-    nsamples=1_000,
+    npoints=300,
     title="",
     kwargs...,
 )
@@ -116,7 +116,7 @@ function plotdensity(
         linewidth=2.0, # thick lines
         kwargs...,
     )
-    return plot(range(xmin, xmax; length=nsamples), Base.Fix1(pdf, dist))
+    return plot(range(xmin, xmax; length=npoints), Base.Fix1(pdf, dist))
 end
 
 # convenience function with automatic title
@@ -416,7 +416,7 @@ StudentizedRange
 SymTriangularDist
 ```
 ```@example plotdensity
-plotdensity((-2, 2), SymTriangularDist, (0, 1); nsamples=5) # hide
+plotdensity((-2, 2), SymTriangularDist, (0, 1); npoints=5) # hide
 ```
 
 ```@docs
@@ -430,7 +430,7 @@ plotdensity((-5, 5), TDist, (5,)) # hide
 TriangularDist
 ```
 ```@example plotdensity
-plotdensity((-0.5, 1.5), TriangularDist, (0, 1, 0.5); nsamples=5) # hide
+plotdensity((-0.5, 2), TriangularDist, (0, 1.5, 0.5); npoints=6) # hide
 ```
 
 ```@docs
