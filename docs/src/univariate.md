@@ -102,7 +102,7 @@ GR.inline("svg")
 function plotdensity(
     (xmin, xmax),
     dist::ContinuousUnivariateDistribution;
-    npoints=300,
+    npoints=299,
     title="",
     kwargs...,
 )
@@ -416,6 +416,7 @@ StudentizedRange
 SymTriangularDist
 ```
 ```@example plotdensity
+# we only need to plot 5 equally spaced points for these parameters and limits # hide
 plotdensity((-2, 2), SymTriangularDist, (0, 1); npoints=5) # hide
 ```
 
@@ -430,6 +431,7 @@ plotdensity((-5, 5), TDist, (5,)) # hide
 TriangularDist
 ```
 ```@example plotdensity
+# we only need to plot 6 equally spaced points for these parameters and limits # hide
 plotdensity((-0.5, 2), TriangularDist, (0, 1.5, 0.5); npoints=6) # hide
 ```
 
