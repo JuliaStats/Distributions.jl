@@ -51,7 +51,7 @@ normal distribution. The Unicode names have higher precedence, i.e., if both `μ
 `mu` or `σ` and `sigma` are given a normal distribution with parameters `μ` and `σ`
 is constructed.
 """
-function Normal(; mu::Real=0.0, μ::Real=mu, sigma::Real=one(mu), σ::Real=sigma, kwargs...)
+function Normal(; mu::Real=0.0, μ::Real=mu, sigma::Real=one(μ), σ::Real=sigma, kwargs...)
     return Normal(μ, σ; kwargs...)
 end
 
