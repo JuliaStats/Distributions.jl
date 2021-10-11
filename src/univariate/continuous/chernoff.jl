@@ -16,7 +16,7 @@ The *Chernoff distribution* is the distribution of the random variable
 ```math
 \\underset{t \\in (-\\infty,\\infty)}{\\arg\\max} ( G(t) - t^2 ),
 ```
-where ``G`` is standard two--sided Brownian motion.
+where ``G`` is standard two-sided Brownian motion.
 
 The distribution arises as the limit distribution of various cube-root-n consistent estimators,
 including the isotonic regression estimator of Brunk, the isotonic density estimator of Grenander,

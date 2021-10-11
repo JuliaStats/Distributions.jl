@@ -1,5 +1,5 @@
 """
-    Beta(α,β)
+    Beta(α, β)
 
 The *Beta distribution* has probability density function
 
@@ -15,10 +15,10 @@ independently, then ``X / (X + Y) \\sim \\operatorname{Beta}(\\alpha, \\beta)``.
 
 ```julia
 Beta()        # equivalent to Beta(1, 1)
-Beta(a)       # equivalent to Beta(a, a)
-Beta(a, b)    # Beta distribution with shape parameters a and b
+Beta(α)       # equivalent to Beta(α, α)
+Beta(α, β)    # Beta distribution with shape parameters α and β
 
-params(d)     # Get the parameters, i.e. (a, b)
+params(d)     # Get the parameters, i.e. (α, β)
 ```
 
 External links
