@@ -1,5 +1,5 @@
 """
-    BetaPrime(α, β)
+    BetaPrime <: ContinuousUnivariateDistribution
 
 The *Beta prime distribution* has probability density function
 
@@ -8,23 +8,17 @@ f(x; \\alpha, \\beta) = \\frac{1}{B(\\alpha, \\beta)}
 x^{\\alpha - 1} (1 + x)^{- (\\alpha + \\beta)}, \\quad x > 0
 ```
 
-
 The Beta prime distribution is related to the [`Beta`](@ref) distribution via the
 relation ship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
 \\sim \\operatorname{BetaPrime}(\\alpha, \\beta)``
 
 ```julia
-BetaPrime()        # equivalent to BetaPrime(1, 1)
-BetaPrime(α)       # equivalent to BetaPrime(α, α)
-BetaPrime(α, β)    # Beta prime distribution with shape parameters α and β
-
 params(d)          # Get the parameters, i.e. (α, β)
 ```
 
 External links
 
 * [Beta prime distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_prime_distribution)
-
 """
 struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     α::T
@@ -32,15 +26,32 @@ struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function BetaPrime(α::T, β::T; check_args=true) where {T<:Real}
+# constructors with positional arguments
+function BetaPrime(α::T, β::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(BetaPrime, α > zero(α) && β > zero(β))
     return BetaPrime{T}(α, β)
 end
+BetaPrime(α::Real, β::Real=α; kwargs...) = BetaPrime(promote(α, β)...; kwargs...)
+BetaPrime(α::Integer, β::Integer; kwargs...) = BetaPrime(float(α), float(β); kwargs...)
 
-BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
-BetaPrime(α::Real) = BetaPrime(α, α)
-BetaPrime() = BetaPrime(1.0, 1.0, check_args=false)
+# constructor with keyword arguments and ASCII alternatives
+"""
+    BetaPrime(; α::Real=1.0, β::Real=α, check_args::Bool=true)
+
+Construct a [`BetaPrime`](@ref) distribution with parameters `α` and `β`.
+
+Use `check_args=false` to bypass the check if `α` and `β` are positive.
+
+# ASCII keyword arguments
+
+You can use `alpha` and `beta` instead of `α` and `β` to specify the parameters
+of the Beta prime distribution. The Unicode names have higher precedence, i.e., if
+both `α` and `alpha` or `β` and `beta` are given a Beta prime distribution with
+parameters `α` and `β` is constructed.
+"""
+function BetaPrime(; alpha::Real=1.0, α::Real=alpha, beta::Real=α, β::Real=beta, kwargs...)
+    return BetaPrime(α, β; kwargs...)
+end
 
 @distr_support BetaPrime 0.0 Inf
 

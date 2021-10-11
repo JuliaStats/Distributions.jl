@@ -1,5 +1,5 @@
 """
-    Arcsine(a,b)
+    Arcsine <: ContinuousUnivariateDistribution
 
 The *Arcsine distribution* has probability density function
 
@@ -8,10 +8,6 @@ f(x) = \\frac{1}{\\pi \\sqrt{(x - a) (b - x)}}, \\quad x \\in [a, b]
 ```
 
 ```julia
-Arcsine()        # Arcsine distribution with support [0, 1]
-Arcsine(b)       # Arcsine distribution with support [0, b]
-Arcsine(a, b)    # Arcsine distribution with support [a, b]
-
 params(d)        # Get the parameters, i.e. (a, b)
 minimum(d)       # Get the lower bound, i.e. a
 maximum(d)       # Get the upper bound, i.e. b
@@ -22,8 +18,6 @@ scale(d)         # Get the span of the support, i.e. b - a
 External links
 
 * [Arcsine distribution on Wikipedia](http://en.wikipedia.org/wiki/Arcsine_distribution)
-
-Use `Arcsine(a, b, check_args=false)` to bypass argument checks.
 """
 struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     a::T
@@ -31,15 +25,24 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-function Arcsine(a::T, b::T; check_args=true) where {T <: Real}
+# constructors with positional arguments
+function Arcsine(a::T, b::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(Arcsine, a < b)
     return Arcsine{T}(a, b)
 end
+Arcsine(a::Real, b::Real; kwargs...) = Arcsine(promote(a, b)...; kwargs...)
+Arcsine(a::Integer, b::Integer; kwargs...) = Arcsine(float(a), float(b); kwargs...)
+Arcsine(b::Real; kwargs...) = Arcsine(zero(b), b; kwargs...)
 
-Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
-Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
-Arcsine(b::T) where {T <: Real} = Arcsine(zero(T), b)
-Arcsine() = Arcsine(0.0, 1.0)
+# constructor with keyword arguments
+"""
+    Arcsine(; a::Real=zero(b), b::Real=1.0, check_args::Bool=true)
+
+Construct an [`Arcsine`](@ref) distribution with parameters `a` and `b`.
+
+Use `check_args=false` to bypass the check if `a < b`.
+"""
+Arcsine(; b::Real=1.0, a::Real=zero(b), kwargs...) = Arcsine(a, b; kwargs...)
 
 @distr_support Arcsine d.a d.b
 

@@ -1,5 +1,5 @@
 """
-    Normal(μ,σ)
+    Normal <: ContinuousUnivariateDistribution
 
 The *Normal distribution* with mean `μ` and standard deviation `σ≥0` has probability density function
 
@@ -13,10 +13,6 @@ Though not technically a continuous distribution, it is allowed so as to account
 and the functions are defined by taking the pointwise limit as ``σ → 0``.
 
 ```julia
-Normal()          # standard Normal distribution with zero mean and unit variance
-Normal(μ)         # Normal distribution with mean μ and unit variance
-Normal(μ, σ)      # Normal distribution with mean μ and variance σ^2
-
 params(d)         # Get the parameters, i.e. (μ, σ)
 mean(d)           # Get the mean, i.e. μ
 std(d)            # Get the standard deviation, i.e. σ
@@ -25,7 +21,6 @@ std(d)            # Get the standard deviation, i.e. σ
 External links
 
 * [Normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Normal_distribution)
-
 """
 struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
@@ -33,16 +28,32 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
+# constructors with positional arguments
+function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(Normal, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
+Normal(μ::Real, σ::Real=one(μ); kwargs...) = Normal(promote(μ, σ)...; kwargs...)
+Normal(μ::Integer, σ::Integer; kwargs...) = Normal(float(μ), float(σ); kwargs...)
 
-#### Outer constructors
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
-Normal() = Normal(0.0, 1.0, check_args=false)
+# constructor with keyword arguments and ASCII alternatives
+"""
+    Normal(; μ::Real=0.0, σ::Real=one(μ), check_args::Bool=true)
+
+Construct a [`Normal`](@ref) distribution with mean `μ` and standard deviation `σ`.
+
+Use `check_args=false` to bypass the check if `σ` is non-negative.
+
+# ASCII keyword arguments
+
+You can use `mu` and `sigma` instead of `μ` and `σ` to specify the parameters of the
+normal distribution. The Unicode names have higher precedence, i.e., if both `μ` and
+`mu` or `σ` and `sigma` are given a normal distribution with parameters `μ` and `σ`
+is constructed.
+"""
+function Normal(; mu::Real=0.0, μ::Real=mu, sigma::Real=one(mu), σ::Real=sigma, kwargs...)
+    return Normal(μ, σ; kwargs...)
+end
 
 const Gaussian = Normal
 
