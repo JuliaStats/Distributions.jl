@@ -1,3 +1,9 @@
+using Distributions
+using FillArrays
+
+using LinearAlgebra
+using Test
+
 @testset "discrete univariate" begin
 
     @testset "Bernoulli" begin
@@ -139,17 +145,17 @@ end
 
     @testset "iso-/diag-normal" begin
 
-        in1 = MvNormal([1.2, 0.3], 2)
-        in2 = MvNormal([-2.0, 6.9], 0.5)
+        in1 = MvNormal([1.2, 0.3], 2 * I)
+        in2 = MvNormal([-2.0, 6.9], 0.5 * I)
 
-        zmin1 = MvNormal(2, 1.9)
-        zmin2 = MvNormal(2, 5.2)
+        zmin1 = MvNormal(Zeros(2), 1.9 * I)
+        zmin2 = MvNormal(Diagonal(Fill(5.2, 2)))
 
-        dn1 = MvNormal([0.0, 4.7], [0.1, 1.8])
-        dn2 = MvNormal([-3.4, 1.2], [3.2, 0.2])
+        dn1 = MvNormal([0.0, 4.7], Diagonal([0.1, 1.8]))
+        dn2 = MvNormal([-3.4, 1.2], Diagonal([3.2, 0.2]))
 
-        zmdn1 = MvNormal([1.2, 0.3])
-        zmdn2 = MvNormal([-0.8, 1.0])
+        zmdn1 = MvNormal(Diagonal([1.2, 0.3]))
+        zmdn2 = MvNormal(Diagonal([-0.8, 1.0]))
 
         dist_list = (in1, in2, zmin1, zmin2, dn1, dn2, zmdn1, zmdn2)
 
@@ -161,7 +167,7 @@ end
         end
 
         # erroring
-        in3 = MvNormal([1, 2, 3], 0.2)
+        in3 = MvNormal([1, 2, 3], 0.2 * I)
         @test_throws ArgumentError convolve(in1, in3)
     end
 
@@ -202,10 +208,10 @@ end
 
     @testset "mixed" begin
 
-        in1 = MvNormal([1.2, 0.3], 2)
-        zmin1 = MvNormal(2, 1.9)
-        dn1 = MvNormal([0.0, 4.7], [0.1, 1.8])
-        zmdn1 = MvNormal([1.2, 0.3])
+        in1 = MvNormal([1.2, 0.3], 2 * I)
+        zmin1 = MvNormal(Zeros(2), 1.9 * I)
+        dn1 = MvNormal([0.0, 4.7], Diagonal([0.1, 1.8]))
+        zmdn1 = MvNormal(Diagonal([1.2, 0.3]))
         m1 = Symmetric(rand(2, 2))
         m1sq = m1^2
         full = MvNormal(ones(2), m1sq.data)

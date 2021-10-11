@@ -10,12 +10,12 @@ e^{-(x/\\theta)^{-\\alpha}}, \\quad x > 0
 
 ```julia
 Frechet()        # Fréchet distribution with unit shape and unit scale, i.e. Frechet(1, 1)
-Frechet(a)       # Fréchet distribution with shape a and unit scale, i.e. Frechet(a, 1)
-Frechet(a, b)    # Fréchet distribution with shape a and scale b
+Frechet(α)       # Fréchet distribution with shape α and unit scale, i.e. Frechet(α, 1)
+Frechet(α, θ)    # Fréchet distribution with shape α and scale θ
 
-params(d)        # Get the parameters, i.e. (a, b)
-shape(d)         # Get the shape parameter, i.e. a
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (α, θ)
+shape(d)         # Get the shape parameter, i.e. α
+scale(d)         # Get the scale parameter, i.e. θ
 ```
 
 External links
@@ -119,17 +119,18 @@ function logpdf(d::Frechet{T}, x::Real) where T<:Real
     end
 end
 
-pdf(d::Frechet, x::Real) = exp(logpdf(d, x))
+zval(d::Frechet, x::Real) = (d.θ / max(x, 0))^d.α
+xval(d::Frechet, z::Real) = d.θ * z^(- 1 / d.α)
 
-cdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
-ccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)
-logcdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -(d.θ / x) ^ d.α : -T(Inf)
-logccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-((d.θ / x) ^ d.α)) : zero(T)
+cdf(d::Frechet, x::Real) = exp(- zval(d, x))
+ccdf(d::Frechet, x::Real) = -expm1(- zval(d, x))
+logcdf(d::Frechet, x::Real) = - zval(d, x)
+logccdf(d::Frechet, x::Real) = log1mexp(- zval(d, x))
 
-quantile(d::Frechet, p::Real) = d.θ * (-log(p)) ^ (-1 / d.α)
-cquantile(d::Frechet, p::Real) = d.θ * (-log1p(-p)) ^ (-1 / d.α)
-invlogcdf(d::Frechet, lp::Real) = d.θ * (-lp)^(-1 / d.α)
-invlogccdf(d::Frechet, lp::Real) = d.θ * (-log1mexp(lp))^(-1 / d.α)
+quantile(d::Frechet, p::Real) = xval(d, -log(p))
+cquantile(d::Frechet, p::Real) = xval(d, -log1p(-p))
+invlogcdf(d::Frechet, lp::Real) = xval(d, -lp)
+invlogccdf(d::Frechet, lp::Real) = xval(d, -log1mexp(lp))
 
 function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)

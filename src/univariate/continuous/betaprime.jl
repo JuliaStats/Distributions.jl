@@ -85,27 +85,28 @@ end
 
 #### Evaluation
 
-function logpdf(d::BetaPrime{T}, x::Real) where T<:Real
-    (α, β) = params(d)
-    if x < 0
-        T(-Inf)
-    else
-        (α - 1) * log(x) - (α + β) * log1p(x) - logbeta(α, β)
-    end
+function logpdf(d::BetaPrime, x::Real)
+    α, β = params(d)
+    _x = max(0, x)
+    z = xlogy(α - 1, _x) - (α + β) * log1p(_x) - logbeta(α, β)
+    return x < 0 ? oftype(z, -Inf) : z
 end
 
-pdf(d::BetaPrime, x::Real) = exp(logpdf(d, x))
+function zval(::BetaPrime, x::Real)
+    y = max(x, 0)
+    z = y / (1 + y)
+    # map `Inf` to `Inf` (otherwise it returns `NaN`)
+    return isinf(x) && x > 0 ? oftype(z, Inf) : z
+end
+xval(::BetaPrime, z::Real) = z / (1 - z)
 
-cdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? zero(T) : betacdf(d.α, d.β, x / (1 + x))
-ccdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? one(T) : betaccdf(d.α, d.β, x / (1 + x))
-logcdf(d::BetaPrime{T}, x::Real) where {T<:Real} =  x <= 0 ? T(-Inf) : betalogcdf(d.α, d.β, x / (1 + x))
-logccdf(d::BetaPrime{T}, x::Real) where {T<:Real} =  x <= 0 ? zero(T) : betalogccdf(d.α, d.β, x / (1 + x))
+for f in (:cdf, :ccdf, :logcdf, :logccdf)
+    @eval $f(d::BetaPrime, x::Real) = $f(Beta(d.α, d.β; check_args=false), zval(d, x))
+end
 
-quantile(d::BetaPrime, p::Real) = (x = betainvcdf(d.α, d.β, p); x / (1 - x))
-cquantile(d::BetaPrime, p::Real) = (x = betainvccdf(d.α, d.β, p); x / (1 - x))
-invlogcdf(d::BetaPrime, p::Real) = (x = betainvlogcdf(d.α, d.β, p); x / (1 - x))
-invlogccdf(d::BetaPrime, p::Real) = (x = betainvlogccdf(d.α, d.β, p); x / (1 - x))
-
+for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
+    @eval $f(d::BetaPrime, p::Real) = xval(d, $f(Beta(d.α, d.β; check_args=false), p))
+end
 
 #### Sampling
 

@@ -1,8 +1,12 @@
 # Various algorithms for computing quantile
 
-function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
-                         lx::Real, rx::Real, tol::Real)
-
+function quantile_bisect(
+    d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real,
+    # base tolerance on types to support e.g. `Float32` (avoids an infinite loop)
+    # ≈ 3.7e-11 for Float64
+    # ≈ 2.4e-5 for Float32
+    tol::Real=(eps(Base.promote_typeof(float(lx), float(rx))))^(2 / 3),
+)
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)
@@ -22,7 +26,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real,
 end
 
 quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
-    quantile_bisect(d, p, minimum(d), maximum(d), 1.0e-12)
+    quantile_bisect(d, p, minimum(d), maximum(d))
 
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
 #   Göknur Giner, Gordon K. Smyth (2014)

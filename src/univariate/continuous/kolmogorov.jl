@@ -97,6 +97,7 @@ function pdf(d::Kolmogorov,x::Real)
     end
 end
 
+logpdf(d::Kolmogorov, x::Real) = log(pdf(d, x))
 
 @quantile_newton Kolmogorov
 
@@ -152,7 +153,7 @@ function rand(rng::AbstractRNG, d::Kolmogorov)
 end
 
 # equivalent to
-# rand(Truncated(Gamma(1.5,1),tp,Inf))
+# rand(truncated(Gamma(1.5,1),tp,Inf))
 function rand_trunc_gamma(rng::AbstractRNG)
     tp = 2.193245422464302 #pi^2/(8*t^2)
     while true

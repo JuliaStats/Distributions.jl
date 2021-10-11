@@ -1,20 +1,20 @@
 """
-    Laplace(μ,β)
+    Laplace(μ,θ)
 
-The *Laplace distribution* with location `μ` and scale `β` has probability density function
+The *Laplace distribution* with location `μ` and scale `θ` has probability density function
 
 ```math
-f(x; \\mu, \\beta) = \\frac{1}{2 \\beta} \\exp \\left(- \\frac{|x - \\mu|}{\\beta} \\right)
+f(x; \\mu, \\theta) = \\frac{1}{2 \\theta} \\exp \\left(- \\frac{|x - \\mu|}{\\theta} \\right)
 ```
 
 ```julia
 Laplace()       # Laplace distribution with zero location and unit scale, i.e. Laplace(0, 1)
 Laplace(μ)      # Laplace distribution with location μ and unit scale, i.e. Laplace(μ, 1)
-Laplace(μ, β)   # Laplace distribution with location μ and scale β
+Laplace(μ, θ)   # Laplace distribution with location μ and scale θ
 
-params(d)       # Get the parameters, i.e., (μ, β)
+params(d)       # Get the parameters, i.e., (μ, θ)
 location(d)     # Get the location parameter, i.e. μ
-scale(d)        # Get the scale parameter, i.e. β
+scale(d)        # Get the scale parameter, i.e. θ
 ```
 
 External links
@@ -114,8 +114,10 @@ rand(rng::AbstractRNG, d::Laplace) =
 
 #### Fitting
 
-function fit_mle(::Type{<:Laplace}, x::Array)
-    xc = copy(x)
-    a = median!(xc)
-    Laplace(a, StatsBase.mad!(xc, center=a))
+function fit_mle(::Type{<:Laplace}, x::AbstractArray{<:Real})
+    xc = similar(x)
+    copyto!(xc, x)
+    m = median!(xc)
+    xc .= abs.(x .- m)
+    return Laplace(m, mean(xc))
 end

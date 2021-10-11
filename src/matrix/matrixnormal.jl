@@ -125,7 +125,7 @@ function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
     X = randn(rng, n, p)
     A = cholesky(d.U).L
     B = cholesky(d.V).U
-    Y .= d.M + A * X * B
+    Y .= d.M .+ A * X * B
 end
 
 #  -----------------------------------------------------------------------------
@@ -154,7 +154,7 @@ end
 
 function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
     M = randn(elty, n, p)
-    U = (X = 2rand(elty, n, n) .- 1; X * X')
-    V = (Y = 2rand(elty, p, p) .- 1; Y * Y')
+    U = (X = 2 .* rand(elty, n, n) .- 1; X * X')
+    V = (Y = 2 .* rand(elty, p, p) .- 1; Y * Y')
     return M, U, V
 end

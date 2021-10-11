@@ -66,23 +66,37 @@ filter!(x -> isbounded(x()), dists)
     ub = nextfloat(ub)
     @test iszero(cdf(d, lb))
     @test isone(cdf(d, ub))
+    @test iszero(cdf(d, -Inf))
+    @test isone(cdf(d, Inf))
+    @test isnan(cdf(d, NaN))
 
     lb_lcdf = logcdf(d,lb)
     @test isinf(lb_lcdf) & (lb_lcdf < 0)
     @test iszero(logcdf(d, ub))
+    @test logcdf(d, -Inf) == -Inf
+    @test iszero(logcdf(d, Inf))
+    @test isnan(logcdf(d, NaN))
 
     @test isone(ccdf(d, lb))
     @test iszero(ccdf(d, ub))
+    @test isone(ccdf(d, -Inf))
+    @test iszero(ccdf(d, Inf))
+    @test isnan(ccdf(d, NaN))
 
     ub_lccdf = logccdf(d,ub)
     @test isinf(ub_lccdf) & (ub_lccdf < 0)
     @test iszero(logccdf(d, lb))
+    @test iszero(logccdf(d, -Inf))
+    @test logccdf(d, Inf) == -Inf
+    @test isnan(logccdf(d, NaN))
 
     @test iszero(pdf(d, lb))
     @test iszero(pdf(d, ub))
 
     lb_lpdf = logpdf(d, lb)
-    @test isinf(lb_lpdf) & (lb_lpdf < 0)
+    @test isinf(lb_lpdf) && lb_lpdf < 0
     ub_lpdf = logpdf(d, ub)
-    @test isinf(ub_lpdf) & (ub_lpdf < 0)
+    @test isinf(ub_lpdf) && ub_lpdf < 0
+    @test logpdf(d, -Inf) == -Inf
+    @test logpdf(d, Inf) == -Inf
 end

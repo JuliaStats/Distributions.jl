@@ -12,93 +12,113 @@ rng = MersenneTwister(123)
     Dict("rand(...)" => [rand, rand],
          "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
 
-d = Dirichlet(3, 2.0)
+    for T in (Int, Float64)
+        d = Dirichlet(3, T(2))
 
-@test length(d) == 3
-@test d.alpha == [2.0, 2.0, 2.0]
-@test d.alpha0 == 6.0
+        @test length(d) == 3
+        @test eltype(d) === T
+        @test d.alpha == [2, 2, 2]
+        @test d.alpha0 == 6
 
-@test mean(d) ≈ fill(1.0/3, 3)
-@test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
-@test var(d)  ≈ diag(cov(d))
+        @test mean(d) ≈ fill(1/3, 3)
+        @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
+        @test var(d)  ≈ diag(cov(d))
 
-@test pdf(d, [0.2, 0.3, 0.5])    ≈ 3.6
-@test pdf(d, [0.4, 0.5, 0.1])    ≈ 2.4
-@test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
-@test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(2.4)
+        @test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1
+        @test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1
+        @test typeof(pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0])) === Float32
 
-x = func[2](d, 100)
-p = pdf(d, x)
-lp = logpdf(d, x)
-for i in 1 : size(x, 2)
-    @test lp[i] ≈ logpdf(d, x[:,i])
-    @test p[i]  ≈ pdf(d, x[:,i])
+        @test iszero(pdf(d, [-1, 1, 0]))
+        @test iszero(pdf(d, [0, 0, 1]))
+        @test pdf(d, [0.2, 0.3, 0.5]) ≈ 3.6
+        @test pdf(d, [0.4, 0.5, 0.1]) ≈ 2.4
+        @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
+        @test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(2.4)
+
+        x = func[2](d, 100)
+        p = pdf(d, x)
+        lp = logpdf(d, x)
+        for i in 1 : size(x, 2)
+            @test lp[i] ≈ logpdf(d, x[:,i])
+            @test p[i]  ≈ pdf(d, x[:,i])
+        end
+
+        v = [2, 1, 3]
+        d = Dirichlet(T.(v))
+
+        @test eltype(d) === T
+        @test Dirichlet([2, 1, 3]).alpha == d.alpha
+
+        @test length(d) == length(v)
+        @test d.alpha == v
+        @test d.alpha0 == sum(v)
+        @test d == Dirichlet{T}(params(d)...)
+        @test d == deepcopy(d)
+
+        @test mean(d) ≈ v / sum(v)
+        @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
+        @test var(d)  ≈ diag(cov(d))
+
+        @test pdf(d, [0.2, 0.3, 0.5]) ≈ 3
+        @test pdf(d, [0.4, 0.5, 0.1]) ≈ 0.24
+        @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3)
+        @test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(0.24)
+
+        x = func[2](d, 100)
+        p = pdf(d, x)
+        lp = logpdf(d, x)
+        for i in 1 : size(x, 2)
+            @test p[i]  ≈ pdf(d, x[:,i])
+            @test lp[i] ≈ logpdf(d, x[:,i])
+        end
+
+        # Sampling
+
+        x = func[1](d)
+        @test isa(x, Vector{Float64})
+        @test length(x) == 3
+
+        x = func[2](d, 10)
+        @test isa(x, Matrix{Float64})
+        @test size(x) == (3, 10)
+
+        v = [2, 1, 3]
+        d = Dirichlet(Float32.(v))
+        @test eltype(d) === Float32
+
+        x = func[1](d)
+        @test isa(x, Vector{Float32})
+        @test length(x) == 3
+
+        x = func[2](d, 10)
+        @test isa(x, Matrix{Float32})
+        @test size(x) == (3, 10)
+
+
+        # Test MLE
+
+        v = [2, 1, 3]
+        d = Dirichlet(v)
+
+        n = 10000
+        x = func[2](d, n)
+        x = x ./ sum(x, dims=1)
+
+        r = fit_mle(Dirichlet, x)
+        @test r.alpha ≈ d.alpha atol=0.25
+        r = fit(Dirichlet{Float32}, x)
+        @test r.alpha ≈ d.alpha atol=0.25
+
+        # r = fit_mle(Dirichlet, x, fill(2.0, n))
+        # @test r.alpha ≈ d.alpha atol=0.25
+    end
 end
 
-v = [2.0, 1.0, 3.0]
-d = Dirichlet(v)
+@testset "Dirichlet: entropy" begin
+    α = exp.(rand(2))
+    @test entropy(Dirichlet(α)) ≈ entropy(Beta(α...))
 
-@test Dirichlet([2, 1, 3]).alpha == d.alpha
-
-@test length(d) == length(v)
-@test d.alpha == v
-@test d.alpha0 == sum(v)
-@test d == typeof(d)(params(d)...)
-
-@test mean(d) ≈ v / sum(v)
-@test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
-@test var(d)  ≈ diag(cov(d))
-
-@test pdf(d, [0.2, 0.3, 0.5])    ≈ 3.0
-@test pdf(d, [0.4, 0.5, 0.1])    ≈ 0.24
-@test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.0)
-@test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(0.24)
-
-x = func[2](d, 100)
-p = pdf(d, x)
-lp = logpdf(d, x)
-for i in 1 : size(x, 2)
-    @test p[i]  ≈ pdf(d, x[:,i])
-    @test lp[i] ≈ logpdf(d, x[:,i])
-end
-
-# Sampling
-
-x = func[1](d)
-@test isa(x, Vector{Float64})
-@test length(x) == 3
-
-x = func[2](d, 10)
-@test isa(x, Matrix{Float64})
-@test size(x) == (3, 10)
-
-v = [2.0, 1.0, 3.0]
-d = Dirichlet(Float32.(v))
-
-x = func[1](d)
-@test isa(x, Vector{Float32})
-@test length(x) == 3
-
-x = func[2](d, 10)
-@test isa(x, Matrix{Float32})
-@test size(x) == (3, 10)
-
-
-# Test MLE
-
-v = [2.0, 1.0, 3.0]
-d = Dirichlet(v)
-
-n = 10000
-x = func[2](d, n)
-x = x ./ sum(x, dims=1)
-
-r = fit_mle(Dirichlet, x)
-@test isapprox(r.alpha, d.alpha, atol=0.25)
-r = fit(Dirichlet{Float32}, x)
-@test isapprox(r.alpha, d.alpha, atol=0.25)
-
-# r = fit_mle(Dirichlet, x, fill(2.0, n))
-# @test isapprox(r.alpha, d.alpha, atol=0.25)
-
+    N = 10
+    @test entropy(Dirichlet(N, 1)) ≈ -loggamma(N)
+    @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
 end

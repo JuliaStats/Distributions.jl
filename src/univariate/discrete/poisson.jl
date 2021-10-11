@@ -89,21 +89,6 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-struct RecursivePoissonProbEvaluator <: RecursiveProbabilityEvaluator
-    λ::Float64
-end
-
-RecursivePoissonProbEvaluator(d::Poisson) = RecursivePoissonProbEvaluator(rate(d))
-nextpdf(s::RecursivePoissonProbEvaluator, p::Float64, x::Integer) = p * s.λ / x
-
-Base.broadcast!(::typeof(pdf), r::AbstractArray, d::Poisson, rgn::UnitRange) =
-    _pdf!(r, d, rgn, RecursivePoissonProbEvaluator(d))
-function Base.broadcast(::typeof(pdf), d::Poisson, X::UnitRange)
-    r = similar(Array{promote_type(partype(d), eltype(X))}, axes(X))
-    r .= pdf.(Ref(d),X)
-end
-
-
 function mgf(d::Poisson, t::Real)
     λ = rate(d)
     return exp(λ * (exp(t) - 1))
@@ -150,3 +135,5 @@ function sampler(d::Poisson)
         return PoissonADSampler(d)
     end
 end
+
+rand(rng::AbstractRNG, d::Poisson) = rand(rng, sampler(d))
