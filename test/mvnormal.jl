@@ -8,6 +8,7 @@ end
 using Distributions
 using LinearAlgebra, Random, Test
 using SparseArrays
+using FillArrays
 
 import Distributions: distrname
 
@@ -29,6 +30,10 @@ function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
     vs = diag(Σ)
     @test g == typeof(g)(params(g)...)
     @test g == deepcopy(g)
+    @test minimum(g) == fill(-Inf, d)
+    @test maximum(g) == fill(Inf, d)
+    @test extrema(g) == (minimum(g), maximum(g))
+    @test isless(extrema(g)...)
 
     # test sampling for AbstractMatrix (here, a SubArray):
     if ismissing(rng)
@@ -104,23 +109,23 @@ end
     J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
 
     for (g, μ, Σ) in [
-        (MvNormal(mu, sqrt(2.0)), mu, Matrix(2.0I, 3, 3)),
-        (MvNormal(mu_r, sqrt(2.0)), mu_r, Matrix(2.0I, 3, 3)),
-        (MvNormal(3, sqrt(2.0)), zeros(3), Matrix(2.0I, 3, 3)),
-        (MvNormal(mu, sqrt.(va)), mu, Matrix(Diagonal(va))),
-        (MvNormal(mu_r, sqrt.(va)), mu_r, Matrix(Diagonal(va))),
-        (MvNormal(sqrt.(va)), zeros(3), Matrix(Diagonal(va))),
+        (@test_deprecated(MvNormal(mu, sqrt(2.0))), mu, Matrix(2.0I, 3, 3)),
+        (@test_deprecated(MvNormal(mu_r, sqrt(2.0))), mu_r, Matrix(2.0I, 3, 3)),
+        (@test_deprecated(MvNormal(3, sqrt(2.0))), zeros(3), Matrix(2.0I, 3, 3)),
+        (@test_deprecated(MvNormal(mu, sqrt.(va))), mu, Matrix(Diagonal(va))),
+        (@test_deprecated(MvNormal(mu_r, sqrt.(va))), mu_r, Matrix(Diagonal(va))),
+        (@test_deprecated(MvNormal(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
         (MvNormal(mu, C), mu, C),
         (MvNormal(mu_r, C), mu_r, C),
         (MvNormal(C), zeros(3), C),
         (MvNormal(Symmetric(C)), zeros(3), Matrix(Symmetric(C))),
         (MvNormal(Diagonal(dv)), zeros(3), Matrix(Diagonal(dv))),
-        (MvNormalCanon(h, 2.0), h ./ 2.0, Matrix(0.5I, 3, 3)),
-        (MvNormalCanon(mu_r, 2.0), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
-        (MvNormalCanon(3, 2.0), zeros(3), Matrix(0.5I, 3, 3)),
-        (MvNormalCanon(h, dv), h ./ dv, Matrix(Diagonal(inv.(dv)))),
-        (MvNormalCanon(mu_r, dv), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
-        (MvNormalCanon(dv), zeros(3), Matrix(Diagonal(inv.(dv)))),
+        (@test_deprecated(MvNormalCanon(h, 2.0)), h ./ 2.0, Matrix(0.5I, 3, 3)),
+        (@test_deprecated(MvNormalCanon(mu_r, 2.0)), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
+        (@test_deprecated(MvNormalCanon(3, 2.0)), zeros(3), Matrix(0.5I, 3, 3)),
+        (@test_deprecated(MvNormalCanon(h, dv)), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+        (@test_deprecated(MvNormalCanon(mu_r, dv)), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
+        (@test_deprecated(MvNormalCanon(dv)), zeros(3), Matrix(Diagonal(inv.(dv)))),
         (MvNormalCanon(h, J), J \ h, inv(J)),
         (MvNormalCanon(J), zeros(3), inv(J)),
         (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
@@ -159,11 +164,11 @@ end
     h = J \ mu
     @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
     @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
-    @test typeof(MvNormal(mu, 2.0f0)) == typeof(MvNormal(mu, 2.0))
+    @test typeof(@test_deprecated(MvNormal(mu, 2.0f0))) == typeof(@test_deprecated(MvNormal(mu, 2.0)))
 
     @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
     @test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
-    @test typeof(MvNormalCanon(h, 2.0f0)) == typeof(MvNormalCanon(h, 2.0))
+    @test typeof(@test_deprecated(MvNormalCanon(h, 2.0f0))) == typeof(@test_deprecated(MvNormalCanon(h, 2.0)))
 
     @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
@@ -175,9 +180,21 @@ end
     @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
     @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
 
-    @test MvNormal(mu, I) === MvNormal(mu, 1)
-    @test MvNormal(mu, 9 * I) === MvNormal(mu, 3)
-    @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, 0.5)
+    @test MvNormal(mu, I) === @test_deprecated(MvNormal(mu, 1))
+    @test MvNormal(mu, 9 * I) === @test_deprecated(MvNormal(mu, 3))
+    @test MvNormal(mu, 0.25f0 * I) === @test_deprecated(MvNormal(mu, 0.5))
+
+    @test MvNormal(mu, I) === MvNormal(mu, Diagonal(Ones(length(mu))))
+    @test MvNormal(mu, 9 * I) === MvNormal(mu, Diagonal(Fill(9, length(mu))))
+    @test MvNormal(mu, 0.25f0 * I) === MvNormal(mu, Diagonal(Fill(0.25f0, length(mu))))
+
+    @test MvNormalCanon(h, I) == MvNormalCanon(h, Diagonal(Ones(length(h))))
+    @test MvNormalCanon(h, 9 * I) == MvNormalCanon(h, Diagonal(Fill(9, length(h))))
+    @test MvNormalCanon(h, 0.25f0 * I) == MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h))))
+
+    @test typeof(MvNormalCanon(h, I)) === typeof(MvNormalCanon(h, Diagonal(Ones(length(h)))))
+    @test typeof(MvNormalCanon(h, 9 * I)) === typeof(MvNormalCanon(h, Diagonal(Fill(9, length(h)))))
+    @test typeof(MvNormalCanon(h, 0.25f0 * I)) === typeof(MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h)))))
 end
 
 @testset "MvNormal 32-bit logpdf" begin
@@ -349,7 +366,7 @@ end
 end
 
 @testset "MvNormal: Sampling with integer-valued parameters (#1004)" begin
-    d = MvNormal([0, 0], [1, 1])
+    d = MvNormal([0, 0], Diagonal([1, 1]))
     @test rand(d) isa Vector{Float64}
     @test rand(d, 10) isa Matrix{Float64}
     @test rand(d, (3, 2)) isa Matrix{Vector{Float64}}

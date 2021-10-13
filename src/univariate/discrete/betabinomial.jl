@@ -92,6 +92,16 @@ function logpdf(d::BetaBinomial, k::Real)
     return _insupport ? result : oftype(result, -Inf)
 end
 
+# sum values of the probability mass function
+cdf(d::BetaBinomial, k::Int) = integerunitrange_cdf(d, k)
+
+for f in (:ccdf, :logcdf, :logccdf)
+    @eval begin
+        $f(d::BetaBinomial, k::Real) = $(Symbol(f, :_int))(d, k)
+        $f(d::BetaBinomial, k::Int) = $(Symbol(:integerunitrange_, f))(d, k)
+    end
+end
+
 entropy(d::BetaBinomial) = entropy(Categorical(pdf.(Ref(d),support(d))))
 median(d::BetaBinomial) = median(Categorical(pdf.(Ref(d),support(d)))) - 1
 mode(d::BetaBinomial) = argmax(pdf.(Ref(d),support(d))) - 1

@@ -96,8 +96,8 @@ end
 
 ####### Validate results for a single-dimension MvLogNormal by comparing with univariate LogNormal
 @testset "Comparing results from MvLogNormal with univariate LogNormal" begin
-    l1 = LogNormal(0.1,0.4)
-    l2 = MvLogNormal(0.1*ones(1),0.4)
+    l1 = LogNormal(0.1, 0.4)
+    l2 = MvLogNormal([0.1], 0.16 * I)
     @test [mean(l1)]     ≈ mean(l2)
     @test [median(l1)]   ≈ median(l2)
     @test [mode(l1)]     ≈ mode(l2)
@@ -120,10 +120,10 @@ end
         (MvLogNormal(mu,PDMats.PDMat(C)), mu, C),
         (MvLogNormal(mu_r,PDMats.PDMat(C)), mu_r, C),
         (MvLogNormal(PDMats.PDiagMat(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
-        (MvLogNormal(mu, sqrt(0.2)), mu, Matrix(0.2I, 3, 3)),
-        (MvLogNormal(3, sqrt(0.2)), zeros(3), Matrix(0.2I, 3, 3)),
-        (MvLogNormal(mu, Vector{Float64}(sqrt.(va))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
-        (MvLogNormal(Vector{Float64}(sqrt.(va))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+        (@test_deprecated(MvLogNormal(mu, sqrt(0.2))), mu, Matrix(0.2I, 3, 3)),
+        (@test_deprecated(MvLogNormal(3, sqrt(0.2))), zeros(3), Matrix(0.2I, 3, 3)),
+        (@test_deprecated(MvLogNormal(mu, Vector{Float64}(sqrt.(va)))), mu, Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
+        (@test_deprecated(MvLogNormal(Vector{Float64}(sqrt.(va)))), zeros(3), Matrix(Diagonal(va))), # Julia 0.4 loses type information so Vector{Float64} can be dropped when we don't support 0.4
         (MvLogNormal(mu, C), mu, C),
         (MvLogNormal(C), zeros(3), C) ]
         m, s = params(g)

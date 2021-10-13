@@ -25,6 +25,8 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
+import ChainRulesCore
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -144,6 +146,7 @@ export
     PoissonBinomial,
     QQPair,
     Rayleigh,
+    Rician,
     Semicircle,
     Skellam,
     SkewNormal,
@@ -332,7 +335,7 @@ Supported distributions:
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
-    QQPair, Rayleigh, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
+    QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,

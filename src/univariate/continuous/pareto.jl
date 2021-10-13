@@ -91,19 +91,17 @@ function logpdf(d::Pareto{T}, x::Real) where T<:Real
     x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
 end
 
-function ccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? (θ / x)^α : one(T)
+function ccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return (θ / max(x, θ))^α
 end
-
 cdf(d::Pareto, x::Real) = 1 - ccdf(d, x)
 
-function logccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? α * log(θ / x) : zero(T)
+function logccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return xlogy(α, θ / max(x, θ))
 end
-
-logcdf(d::Pareto, x::Real) = log1p(-ccdf(d, x))
+logcdf(d::Pareto, x::Real) = log1mexp(logccdf(d, x))
 
 cquantile(d::Pareto, p::Real) = d.θ / p^(1 / d.α)
 quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)

@@ -20,7 +20,8 @@ makedocs(
     ]
 )
 
-deploydocs(
+deploydocs(;
     repo = "github.com/JuliaStats/Distributions.jl.git",
-    versions = ["stable" => "v^", "v#.#", "dev" => "master"]
+    versions = ["stable" => "v^", "v#.#", "dev" => "master"],
+    push_preview=true,
 )

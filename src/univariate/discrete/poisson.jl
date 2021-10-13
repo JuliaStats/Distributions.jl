@@ -89,18 +89,6 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-function pdf(d::Poisson, x::Real)
-    _insupport = insupport(d, x)
-    s = pdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : zero(s)
-end
-
-function logpdf(d::Poisson, x::Real)
-    _insupport = insupport(d, x)
-    s = logpdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : oftype(s, -Inf)
-end
-
 function mgf(d::Poisson, t::Real)
     λ = rate(d)
     return exp(λ * (exp(t) - 1))

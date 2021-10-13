@@ -113,18 +113,18 @@ function logpdf(d::Weibull{T}, x::Real) where T<:Real
     end
 end
 
-zv(d::Weibull, x::Real) = (x / d.θ) ^ d.α
-xv(d::Weibull, z::Real) = d.θ * z ^ (1 / d.α)
+zval(d::Weibull, x::Real) = (max(x, 0) / d.θ) ^ d.α
+xval(d::Weibull, z::Real) = d.θ * z ^ (1 / d.α)
 
-cdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-zv(d, x)) : zero(T)
-ccdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? exp(-zv(d, x)) : one(T)
-logcdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-zv(d, x)) : -T(Inf)
-logccdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? -zv(d, x) : zero(T)
+cdf(d::Weibull, x::Real) = -expm1(- zval(d, x))
+ccdf(d::Weibull, x::Real) = exp(- zval(d, x))
+logcdf(d::Weibull, x::Real) = log1mexp(- zval(d, x))
+logccdf(d::Weibull, x::Real) = - zval(d, x)
 
-quantile(d::Weibull, p::Real) = xv(d, -log1p(-p))
-cquantile(d::Weibull, p::Real) = xv(d, -log(p))
-invlogcdf(d::Weibull, lp::Real) = xv(d, -log1mexp(lp))
-invlogccdf(d::Weibull, lp::Real) = xv(d, -lp)
+quantile(d::Weibull, p::Real) = xval(d, -log1p(-p))
+cquantile(d::Weibull, p::Real) = xval(d, -log(p))
+invlogcdf(d::Weibull, lp::Real) = xval(d, -log1mexp(lp))
+invlogccdf(d::Weibull, lp::Real) = xval(d, -lp)
 
 function gradlogpdf(d::Weibull{T}, x::Real) where T<:Real
     if insupport(Weibull, x)
@@ -138,4 +138,56 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
+rand(rng::AbstractRNG, d::Weibull) = xval(d, randexp(rng))
+
+#### Fit model
+
+"""
+    fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real}; 
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
+
+Compute the maximum likelihood estimate of the [`Weibull`](@ref) distribution with Newton's method.
+"""
+function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
+    alpha0::Real = 1, maxiter::Int = 1000, tol::Real = 1e-16)
+
+    N = 0
+
+    lnx = map(log, x)
+    lnxsq = lnx.^2
+    mean_lnx = mean(lnx)
+
+    # first iteration outside loop, prevents type instabililty in α, ϵ
+
+    xpow0 = x.^alpha0
+    sum_xpow0 = sum(xpow0)
+    dot_xpowlnx0 = dot(xpow0, lnx)
+
+    fx = dot_xpowlnx0 / sum_xpow0 - mean_lnx - 1 / alpha0
+    ∂fx = (-dot_xpowlnx0^2 + sum_xpow0 * dot(lnxsq, xpow0)) / (sum_xpow0^2) + 1 / alpha0^2
+
+    Δα = fx / ∂fx
+    α = alpha0 - Δα
+
+    ϵ = abs(Δα)
+    N += 1
+
+    while ϵ > tol && N < maxiter
+
+        xpow = x.^α
+        sum_xpow = sum(xpow)
+        dot_xpowlnx = dot(xpow, lnx)
+
+        fx = dot_xpowlnx / sum_xpow - mean_lnx - 1 / α
+        ∂fx = (-dot_xpowlnx^2 + sum_xpow * dot(lnxsq, xpow)) / (sum_xpow^2) + 1 / α^2
+
+        Δα = fx / ∂fx
+        α -= Δα
+
+        ϵ = abs(Δα)
+        N += 1
+    end
+
+    θ = mean(x.^α)^(1 / α)
+    return Weibull(α, θ)
+end
