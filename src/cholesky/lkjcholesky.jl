@@ -56,13 +56,13 @@ end
 #  REPL display
 #  -----------------------------------------------------------------------------
 
-show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
+Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 
 #  -----------------------------------------------------------------------------
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
+function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
     return LKJCholesky{T, typeof(d.d)}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
 function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
@@ -73,15 +73,15 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::LKJCholesky) = d.d
+Base.eltype(::Type{LKJCholesky{T}}) where {T} = T
 
-function size(d::LKJCholesky)
-    p = dim(d)
+function Base.size(d::LKJCholesky)
+    p = d.d
     return (p, p)
 end
 
 function insupport(d::LKJCholesky, R::Cholesky)
-    p = dim(d)
+    p = d.d
     factors = R.factors
     (isreal(factors) && size(factors, 1) == p) || return false
     iinds, jinds = axes(factors)
@@ -100,12 +100,12 @@ function insupport(d::LKJCholesky, R::Cholesky)
     return true
 end
 
-function mode(d::LKJCholesky)
+function StatsBase.mode(d::LKJCholesky)
     factors = Matrix{eltype(d)}(I, size(d))
     return Cholesky(factors, d.uplo, 0)
 end
 
-params(d::LKJCholesky) = (d.d, d.η, d.uplo)
+StatsBase.params(d::LKJCholesky) = (d.d, d.η, d.uplo)
 
 @inline partype(::LKJCholesky{T}) where {T <: Real} = T
 
@@ -142,13 +142,13 @@ end
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function rand(rng::AbstractRNG, d::LKJCholesky)
+function Base.rand(rng::AbstractRNG, d::LKJCholesky)
     factors = Matrix{eltype(d)}(undef, size(d))
     R = Cholesky(factors, d.uplo, 0)
     return _lkj_cholesky_onion_sampler!(rng, d, R)
 end
-function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
-    p = dim(d)
+function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
+    p = d.d
     uplo = d.uplo
     T = eltype(d)
     TM = Matrix{T}
@@ -161,11 +161,11 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     return Rs
 end
 
-rand!(d::LKJCholesky, R::Cholesky) = rand!(GLOBAL_RNG, d, R)
-rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_onion_sampler!(rng, d, R)
+Random.rand!(d::LKJCholesky, R::Cholesky) = Random.rand!(GLOBAL_RNG, d, R)
+Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::Cholesky) = _lkj_cholesky_onion_sampler!(rng, d, R)
 
-function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,TM}}, allocate::Bool) where {T,TM}
-    p = dim(d)
+function Random.rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,TM}}, allocate::Bool) where {T,TM}
+    p = d.d
     uplo = d.uplo
     if allocate
         for i in eachindex(Rs)
@@ -178,9 +178,9 @@ function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{T,
     end
     return Rs
 end
-function rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{<:Real}})
-    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != dim(d), Rs)
-    return rand!(rng, d, Rs, allocate)
+function Random.rand!(rng::AbstractRNG, d::LKJCholesky, Rs::AbstractArray{<:Cholesky{<:Real}})
+    allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
+    return Random.rand!(rng, d, Rs, allocate)
 end
 
 #
@@ -224,7 +224,7 @@ function _lkj_cholesky_onion_tri!(
         #  (c)-(e)
         # w is directionally uniform vector of length √y
         @inbounds w = @views TTri <: LowerTriangular ? A[k + 1, 1:k] : A[1:k, k + 1]
-        randn!(rng, w)
+        Random.randn!(rng, w)
         rmul!(w, sqrt(y) / norm(w))
         # normalize so new row/column has unit norm
         @inbounds A[k + 1, k + 1] = sqrt(1 - y)
