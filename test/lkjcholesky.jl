@@ -29,7 +29,7 @@ using FiniteDifferences
         @test all(x -> insupport(d, x), xs)
         check_uplo && @test all(x -> x.uplo == d.uplo, xs)
 
-        p = dim(d)
+        p = d.d
         dmat = LKJ(p, d.η)
         marginal = Distributions._marginal(dmat)    
         ndraws = length(xs)
@@ -140,7 +140,7 @@ using FiniteDifferences
     @testset "properties" begin
         @testset for p in (4, 5), η in (2, 3.5), uplo in ('L', 'U')
             d = LKJCholesky(p, η, uplo)
-            @test dim(d) == p
+            @test d.d == p
             @test size(d) == (p, p)
             @test Distributions.params(d) == (d.d, d.η, d.uplo)
             @test partype(d) <: Float64
