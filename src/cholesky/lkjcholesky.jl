@@ -89,12 +89,12 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     @inbounds if R.uplo === 'U'
         for (j, jind) in enumerate(jinds)
             col_iinds = view(iinds, 1:j)
-            sum(abs2(factors[iind, jind]) for iind in col_iinds) ≈ 1 || return false
+            sum(abs2, view(factors, col_iinds, jind)) ≈ 1 || return false
         end
     else  # R.uplo === 'L'
         for (i, iind) in enumerate(iinds)
             row_jinds = view(jinds, 1:i)
-            sum(abs2(factors[iind, jind]) for jind in row_jinds) ≈ 1 || return false
+            sum(abs2, view(factors, iind, row_jinds)) ≈ 1 || return false
         end
     end
     return true
