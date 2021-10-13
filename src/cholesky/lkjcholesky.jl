@@ -118,6 +118,8 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     p, η = params(d)
     c = p + 2(η - 1)
     p == 1 && return c * log(first(factors))
+    # assuming D = diag(factors) with length(D) = p,
+    # logp = sum(i -> (c - i) * log(D[i]), 2:p)
     logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di) 
         return (c - i) * log(factors[di])
     end
