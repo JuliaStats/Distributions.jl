@@ -2,11 +2,11 @@
     LKJCholesky(d, η, uplo='L')
 
 The `LKJCholesky` distribution of size ``d`` with shape parameter ``\\eta`` is a
-distribution over `Cholesky` factors of ``d\\times d`` real correlation matrices
+distribution over `LinearAlgebra.Cholesky` factors of ``d\\times d`` real correlation matrices
 (positive-definite matrices with ones on the diagonal).
 
 Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
-be returned by `F = cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or sample of
+be returned by `F = LinearAlgebra.cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or sample of
 [`LKJ`](@ref). `LKJCholesky` is more efficient than `LKJ` when working with the Cholesky
 factors of correlation matrices.
 
@@ -36,8 +36,8 @@ end
 
 function LKJCholesky(d::Integer, _η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
     if check_args
-        d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
-        _η > 0 || throw(ArgumentError("Shape parameter must be positive."))
+        d > 0 || throw(ArgumentError("matrix dimension must be positive"))
+        _η > 0 || throw(ArgumentError("shape parameter must be positive"))
     end
     _logc0 = lkj_logc0(d, _η)
     uplo = _char_uplo(_uplo)
@@ -132,7 +132,7 @@ function logkernel(d::LKJCholesky, R::Cholesky)
 end
 
 function logpdf(d::LKJCholesky, R::Cholesky)
-    insupport(d, R) || throw(ArgumentError("Provided point is not in the support."))
+    insupport(d, R) || throw(ArgumentError("provided point is not in the support"))
     return _logpdf(d, R)
 end
 
