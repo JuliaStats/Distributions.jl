@@ -4,76 +4,92 @@ using LinearAlgebra
 using Test
 using FiniteDifferences
 
-function test_draw(d::LKJCholesky, x; check_uplo=true)
-    @test insupport(d, x)
-    check_uplo && @test x.uplo == d.uplo
-end
-function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
-    @test all(x -> insupport(d, x), xs)
-    check_uplo && @test all(x -> x.uplo == d.uplo, xs)
+@testset "LKJCholesky" begin
 
-    p = dim(d)
-    dmat = LKJ(p, d.η)
-    marginal = Distributions._marginal(dmat)    
-    ndraws = length(xs)
-    zs = Array{eltype(d)}(undef, p, p, ndraws)
-    for k in 1:ndraws
-        zs[:, :, k] = Matrix(xs[k])
+    # Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
+    # We implement it here to avoid a circular dependency on HypothesisTests
+    # that causes test failures when preparing a breaking release of Distributions
+    function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
+        # compute maximum absolute deviation from the empirical cdf
+        n = length(x)
+        cdfs = sort!(map(Base.Fix1(cdf, d), x))
+        dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
+            return max(cdf - lower, upper - cdf)
+        end
+
+        # compute asymptotic p-value (see `KSDist`)
+        return ccdf(KSDist(n), dmax)
     end
 
-    @testset "LKJCholesky marginal moments" begin
-        @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1
-        @test var(zs; dims=3)[:, :, 1] ≈ var(marginal) * (ones(p, p) - I) atol=0.1
-        @testset for n in 2:5
+    function test_draw(d::LKJCholesky, x; check_uplo=true)
+        @test insupport(d, x)
+        check_uplo && @test x.uplo == d.uplo
+    end
+    function test_draws(d::LKJCholesky, xs; check_uplo=true, nkstests=1)
+        @test all(x -> insupport(d, x), xs)
+        check_uplo && @test all(x -> x.uplo == d.uplo, xs)
+
+        p = dim(d)
+        dmat = LKJ(p, d.η)
+        marginal = Distributions._marginal(dmat)    
+        ndraws = length(xs)
+        zs = Array{eltype(d)}(undef, p, p, ndraws)
+        for k in 1:ndraws
+            zs[:, :, k] = Matrix(xs[k])
+        end
+
+        @testset "LKJCholesky marginal moments" begin
+            @test mean(zs; dims=3)[:, :, 1] ≈ I atol=0.1
+            @test var(zs; dims=3)[:, :, 1] ≈ var(marginal) * (ones(p, p) - I) atol=0.1
+            @testset for n in 2:5
+                for i in 1:p, j in 1:(i-1)
+                    @test moment(zs[i, j, :], n) ≈ moment(rand(marginal, ndraws), n) atol=0.1
+                end
+            end
+        end
+
+        @testset "LKJCholesky marginal KS test" begin
+            α = 0.01
+            L = sum(1:(p - 1))
             for i in 1:p, j in 1:(i-1)
-                @test moment(zs[i, j, :], n) ≈ moment(rand(marginal, ndraws), n) atol=0.1
+                @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
             end
         end
     end
 
-    @testset "LKJCholesky marginal KS test" begin
-        α = 0.01
-        L = sum(1:(p - 1))
-        for i in 1:p, j in 1:(i-1)
-            @test pvalue_kolmogorovsmirnoff(zs[i, j, :], marginal) >= α / L / nkstests
+    # Compute logdetjac of ϕ: L → L L' where only strict lower triangle of L and L L' are unique
+    function cholesky_inverse_logdetjac(L)
+        size(L, 1) == 1 && return 0.0
+        J = jacobian(central_fdm(5, 1), cholesky_vec_to_corr_vec, stricttril_to_vec(L))[1]
+        return logabsdet(J)[1]
+    end
+    stricttril_to_vec(L) = [L[i, j] for i in axes(L, 1) for j in 1:(i - 1)]
+    function vec_to_stricttril(l)
+        n = length(l)
+        p = Int((1 + sqrt(8n + 1)) / 2)
+        L = similar(l, p, p)
+        fill!(L, 0)
+        k = 1
+        for i in 1:p, j in 1:(i - 1)
+            L[i, j] = l[k]
+            k += 1
         end
+        return L
     end
-end
-
-# Compute logdetjac of ϕ: L → L L' where only strict lower triangle of L and L L' are unique
-function cholesky_inverse_logdetjac(L)
-    size(L, 1) == 1 && return 0.0
-    J = jacobian(central_fdm(5, 1), cholesky_vec_to_corr_vec, stricttril_to_vec(L))[1]
-    return logabsdet(J)[1]
-end
-stricttril_to_vec(L) = [L[i, j] for i in axes(L, 1) for j in 1:(i - 1)]
-function vec_to_stricttril(l)
-    n = length(l)
-    p = Int((1 + sqrt(8n + 1)) / 2)
-    L = similar(l, p, p)
-    fill!(L, 0)
-    k = 1
-    for i in 1:p, j in 1:(i - 1)
-        L[i, j] = l[k]
-        k += 1
-    end
-    return L
-end
-function cholesky_vec_to_corr_vec(l)
-    L = vec_to_stricttril(l)
-    for i in axes(L, 1)
-        w = view(L, i, 1:(i-1))
-        wnorm = norm(w)
-        if wnorm > 1
-            w ./= wnorm
-            wnorm = 1
+    function cholesky_vec_to_corr_vec(l)
+        L = vec_to_stricttril(l)
+        for i in axes(L, 1)
+            w = view(L, i, 1:(i-1))
+            wnorm = norm(w)
+            if wnorm > 1
+                w ./= wnorm
+                wnorm = 1
+            end
+            L[i, i] = sqrt(1 - wnorm^2)
         end
-        L[i, i] = sqrt(1 - wnorm^2)
+        return stricttril_to_vec(L * L')
     end
-    return stricttril_to_vec(L * L')
-end
 
-@testset "LKJCholesky" begin
     @testset "Constructors" begin
         @testset for p in (4, 5), η in (2, 3.5)
             d = LKJCholesky(p, η)
