@@ -1,5 +1,5 @@
 """
-    LKJCholesky(d, η, uplo='L')
+    LKJCholesky(d::Int, η::Real, uplo='L')
 
 The `LKJCholesky` distribution of size ``d`` with shape parameter ``\\eta`` is a
 distribution over `LinearAlgebra.Cholesky` factors of ``d\\times d`` real correlation matrices
@@ -23,8 +23,8 @@ External links
   Journal of Multivariate Analysis (2009), 100(9): 1989-2001
   doi: [10.1016/j.jmva.2009.04.008](https://doi.org/10.1016/j.jmva.2009.04.008)
 """
-struct LKJCholesky{T <: Real, D <: Integer} <: Distribution{CholeskyVariate,Continuous}
-    d::D
+struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate,Continuous}
+    d::Int
     η::T
     uplo::Char
     logc0::T
@@ -34,28 +34,21 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Integer, _η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
+function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
     if check_args
         d > 0 || throw(ArgumentError("matrix dimension must be positive"))
-        _η > 0 || throw(ArgumentError("shape parameter must be positive"))
+        η > 0 || throw(ArgumentError("shape parameter must be positive"))
     end
-    _logc0 = lkj_logc0(d, _η)
+    logc0 = lkj_logc0(d, η)
     uplo = _char_uplo(_uplo)
-    uplo ∈ ('U', 'L') || throw(ArgumentError("uplo must be 'U' or 'L'."))
-    η, logc0 = promote(_η, _logc0)
-    return LKJCholesky(d, η, uplo, logc0)
+    T = Base.promote_eltype(η, logc0)
+    return LKJCholesky(d, T(η), uplo, T(logc0))
 end
 
 # adapted from LinearAlgebra.char_uplo
-function _char_uplo(_uplo::Union{Symbol,Char})
-    uplo = if _uplo === :U
-        'U'
-    elseif _uplo === :L
-        'L'
-    else
-        _uplo
-    end
-    uplo ∈ ('U', 'L') && return uplo
+function _char_uplo(uplo::Union{Symbol,Char})
+    uplo ∈ (:U, 'U') && return 'U'
+    uplo ∈ (:L, 'L') && return 'L'
     throw(ArgumentError("uplo argument must be either 'U' (upper) or 'L' (lower)"))
 end
 
