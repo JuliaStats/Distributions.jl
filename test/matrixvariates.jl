@@ -185,21 +185,6 @@ function test_against_univariate(D::MatrixDistribution, d::UnivariateDistributio
     nothing
 end
 
-# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
-# We implement it here to avoid a circular dependency on HypothesisTests
-# that causes test failures when preparing a breaking release of Distributions
-function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
-    # compute maximum absolute deviation from the empirical cdf
-    n = length(x)
-    cdfs = sort!(map(Base.Fix1(cdf, d), x))
-    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
-        return max(cdf - lower, upper - cdf)
-    end
-
-    # compute asymptotic p-value (see `KSDist`)
-    return ccdf(KSDist(n), dmax)
-end
-
 function test_draws_against_univariate_cdf(D::MatrixDistribution, d::UnivariateDistribution)
     α = 0.025
     M = 100000

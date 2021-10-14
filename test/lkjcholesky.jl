@@ -5,22 +5,6 @@ using Test
 using FiniteDifferences
 
 @testset "LKJCholesky" begin
-
-    # Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
-    # We implement it here to avoid a circular dependency on HypothesisTests
-    # that causes test failures when preparing a breaking release of Distributions
-    function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
-        # compute maximum absolute deviation from the empirical cdf
-        n = length(x)
-        cdfs = sort!(map(Base.Fix1(cdf, d), x))
-        dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
-            return max(cdf - lower, upper - cdf)
-        end
-
-        # compute asymptotic p-value (see `KSDist`)
-        return ccdf(KSDist(n), dmax)
-    end
-
     function test_draw(d::LKJCholesky, x; check_uplo=true)
         @test insupport(d, x)
         check_uplo && @test x.uplo == d.uplo
