@@ -2,7 +2,7 @@
     LKJCholesky(d::Int, η::Real, uplo='L')
 
 The `LKJCholesky` distribution of size ``d`` with shape parameter ``\\eta`` is a
-distribution over `LinearAlgebra.Cholesky` factors of ``d\\times d`` real correlation
+distribution over `LinearAlgebra.Cholesky` factorisations of ``d\\times d`` real correlation
 matrices (positive-definite matrices with ones on the diagonal).
 
 Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
