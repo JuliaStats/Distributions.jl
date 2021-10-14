@@ -7,8 +7,10 @@ matrices (positive-definite matrices with ones on the diagonal).
 
 Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
 be returned by `F = LinearAlgebra.cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or
-sample of [`LKJ`](@ref). `LKJCholesky` is more efficient than `LKJ`, especially when one has
-or wants a Cholesky factorisation.
+sample of [`LKJ`](@ref). 
+
+Sampling `LKJCholesky` is faster than sampling `LKJ`, and often having the correlation
+matrix in factorized form makes subsequent computations cheaper as well.
 
 !!! note
     `LinearAlgebra.Cholesky` stores either the upper or lower Cholesky factor, related by
