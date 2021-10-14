@@ -7,12 +7,16 @@ matrices (positive-definite matrices with ones on the diagonal).
 
 Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
 be returned by `F = LinearAlgebra.cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or
-sample of [`LKJ`](@ref). `LKJCholesky` is more efficient than `LKJ` when working with the
-Cholesky factors of correlation matrices.
+sample of [`LKJ`](@ref). `LKJCholesky` is more efficient than `LKJ`, especially when one has
+or wants a Cholesky factorisation.
 
-The `uplo` parameter specifies in which triangle in `F` (either `'U'` for upper or `'L'`
-for lower) the Cholesky factor should be stored when randomly generating samples. Set `uplo`
-to `'U'` if the upper factor is desired to avoid allocating a copy when calling `F.U`.
+!!! note
+    `LinearAlgebra.Cholesky` stores either the upper or lower Cholesky factor, related by
+    `F.U == F.L'`. Both can be accessed with `F.U` and `F.L`, but if the factor
+    not stored is requested, then a copy is made. The `uplo` parameter specifies whether the
+    upper (`'U'`) or lower (`'L'`) Cholesky factor is stored when randomly generating
+    samples. Set `uplo` to `'U'` if the upper factor is desired to avoid allocating a copy
+    when calling `F.U`.
 
 See [`LKJ`](@ref) for more details.
 

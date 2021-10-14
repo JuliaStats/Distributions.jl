@@ -20,7 +20,7 @@ If ``\\eta = 1``, then the LKJ distribution is uniform over
 
 !!! note
     if a Cholesky factor of the correlation matrix is desired, it is more efficient to
-    use [`LKJCholesky`](@ref).
+    use [`LKJCholesky`](@ref), which avoids factorizing the matrix.
 """
 struct LKJ{T <: Real, D <: Integer} <: ContinuousMatrixDistribution
     d::D
