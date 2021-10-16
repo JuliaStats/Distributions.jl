@@ -264,7 +264,7 @@ function show(io::IO, ::MIME"text/plain", d::AbstractMixtureModel)
         print(io, component(d, i), i < Ks || Ks < K ? "\n" : "")
     end
     if Ks < K
-        print(io, "The rest are omitted ...")
+        println(io, "The rest are omitted ...")
     end
 end
 
