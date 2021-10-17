@@ -101,6 +101,11 @@ end
 mgf(d::Cauchy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 
+#### Affine transformations
+
+Base.:+(d::Cauchy, c::Real) = Cauchy(d.μ + c, d.σ)
+Base.:+(c::Real, d::Cauchy) = d + c
+Base.:*(c::Real, d::Cauchy) = Cauchy(c * d.μ, abs(c) * d.σ)
 
 #### Fitting
 

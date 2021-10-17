@@ -605,3 +605,33 @@ function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
     # compute asymptotic p-value (see `KSDist`)
     return ccdf(KSDist(n), dmax)
 end
+
+function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateDistribution}
+    @testset "affine tranformations ($T)" begin
+        # distribution
+        d = T(params...)
+
+        # random shift and scale
+        c = randn()
+
+        # addition
+        d_c = @inferred(d + c)
+        c_d = @inferred(c + d)
+        @test d_c isa T
+        @test c_d isa T
+        @test location(d_c) == location(c_d) == location(d) + c
+        @test scale(c_d) == scale(d_c) == scale(d)
+
+        # multiplication (negative and positive values)
+        for s in (-abs(c), abs(c))
+            s_d = @inferred(s * d)
+            @test s_d isa T
+            if d isa Uniform
+                @test location(s_d) == (s > 0 ? s * minimum(d) : s * maximum(d))
+            else
+                @test location(s_d) == s * location(d)
+            end
+            @test scale(s_d) == abs(s) * scale(d)
+        end
+    end
+end
