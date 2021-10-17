@@ -238,6 +238,12 @@ end
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
+#### Affine transformations
+
+Base.:+(d::Normal, c::Real) = Normal(d.μ + c, d.σ)
+Base.:+(c::Real, d::Normal) = d + c
+Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
+
 #### Sampling
 
 rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))

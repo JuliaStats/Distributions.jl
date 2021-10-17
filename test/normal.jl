@@ -181,3 +181,28 @@ end
     @test mean(canonform(Normal(0.25, 0.7))) ≈ 0.25
     @test std(canonform(Normal(0.25, 0.7))) ≈ 0.7
 end
+
+@testset "Normal affine tranformations" begin
+    # distribution
+    d = Normal(randn(), randn()^2)
+
+    # random shift and scale
+    c = randn()
+
+    # addition
+    d_c = @inferred(d + c)
+    c_d = @inferred(c + d)
+    @test d_c isa Normal
+    @test c_d isa Normal
+    @test mean(d_c) == mean(c_d) == mean(d) + c
+    @test var(c_d) == var(d_c) == var(d)
+
+    # multiplication (negative and positive values)
+    for s in (-abs(c), abs(c))
+        s_d = @inferred(s * d)
+        @test s_d isa Normal
+        @test mean(s_d) == s * mean(d)
+        @test var(s_d) ≈ s^2 * var(d)
+    end
+end
+
