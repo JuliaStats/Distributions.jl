@@ -643,6 +643,8 @@ macro _delegate_statsfuns(D, fpre, psyms...)
     end
 end
 
+pmf(d ::DiscreteUnivariateDistribution,x) = pdf(d,x)
+
 ##### specific distributions #####
 
 const discrete_distributions = [
