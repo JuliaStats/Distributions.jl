@@ -475,7 +475,11 @@ The log-likelihood of distribution `d` with respect to all samples contained in 
 
 Here `x` can be a single scalar sample or an array of samples.
 """
-loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
+function loglikelihood(d::UnivariateDistribution, X::AbstractArray)
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    broadcasted = Broadcast.broadcasted(logpdf, (d,), X)
+    return sum(Broadcast.instantiate(broadcasted))
+end
 loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### special definitions for distributions with integer-valued support
@@ -550,11 +554,12 @@ function integerunitrange_cdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+        c = sum(Broadcast.instantiate(Broadcast.broadcasted(pdf, (d,), minimum_d:(max(x, minimum_d)))))
         x < minimum_d ? zero(c) : c
     else
-        c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+        c = 1 - sum(Broadcast.instantiate(Broadcast.broadcasted(pdf, (d,), min(x + 1, maximum_d):maximum_d)))
         x >= maximum_d ? one(c) : c
     end
 
@@ -565,11 +570,12 @@ function integerunitrange_ccdf(d::DiscreteUnivariateDistribution, x::Integer)
     minimum_d, maximum_d = extrema(d)
     isfinite(minimum_d) || isfinite(maximum_d) || error("support is unbounded")
 
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     result = if isfinite(minimum_d) && !(isfinite(maximum_d) && x >= div(minimum_d + maximum_d, 2))
-        c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
+        c = 1 - sum(Broadcast.instantiate(Broadcast.broadcasted(pdf, (d,), minimum_d:(max(x, minimum_d)))))
         x < minimum_d ? one(c) : c
     else
-        c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+        c = sum(Broadcast.instantiate(Broadcast.broadcasted(pdf, (d,), min(x + 1, maximum_d):maximum_d)))
         x >= maximum_d ? zero(c) : c
     end
 

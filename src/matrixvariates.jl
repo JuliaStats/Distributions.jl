@@ -226,11 +226,15 @@ rows and `size(d, 2)` columns, or an array of matrices of size `size(d)`.
 """
 loglikelihood(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logpdf(d, X)
 function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:Real,3})
-    (size(X, 1), size(X, 2)) == size(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    return sum(i -> _logpdf(d, view(X, :, :, i)), axes(X, 3))
+    (size(X, 1), size(X, 2)) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    broadcasted = Broadcast.broadcasted(_logpdf, (d,), (view(X, :, :, i) for i in axes(X, 3)))
+    return sum(Broadcast.instantiate(broadcasted))
 end
 function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
-    return sum(x -> logpdf(d, x), X)
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    broadcasted = Broadcast.broadcasted(logpdf, (d,), X)
+    return sum(Broadcast.instantiate(broadcasted))
 end
 
 #  for testing

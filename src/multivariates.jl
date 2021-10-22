@@ -263,11 +263,15 @@ vectors of length `dim(d)`.
 """
 loglikelihood(d::MultivariateDistribution, X::AbstractVector{<:Real}) = logpdf(d, X)
 function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix{<:Real})
-    size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
+    size(X, 1) == length(d) || throw(DimensionMismatch("inconsistent array dimensions"))
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    broadcasted = Broadcast.broadcasted(_logpdf, (d,), (view(X, :, i) for i in axes(X, 2)))
+    return sum(Broadcast.instantiate(broadcasted))
 end
 function loglikelihood(d::MultivariateDistribution, X::AbstractArray{<:AbstractVector})
-    return sum(x -> logpdf(d, x), X)
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    broadcasted = Broadcast.broadcasted(logpdf, (d,), X)
+    return sum(Broadcast.instantiate(broadcasted))
 end
 
 ##### Specific distributions #####
