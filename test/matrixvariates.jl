@@ -327,6 +327,11 @@ function test_special(dist::Type{Wishart})
     ν, Σ = _rand_params(Wishart, Float64, n, n)
     d = Wishart(ν, Σ)
     H = rand(d, M)
+    @testset "deprecations" begin
+        for warn in (true, false)
+            @test @test_deprecated(Wishart(n - 1, Σ, warn)) == Wishart(n - 1, Σ)
+        end
+    end
     @testset "meanlogdet" begin
         @test isapprox(Distributions.meanlogdet(d), mean(logdet.(H)), atol = 0.1)
     end
@@ -350,15 +355,17 @@ function test_special(dist::Type{Wishart})
         end
     end
     @testset "Check Singular Branch" begin
-        X = H[1]
-        rank1 = Wishart(n - 2, Σ, false)
-        rank2 = Wishart(n - 1, Σ, false)
+        # Check that no warnings are shown: #1410
+        rank1 = @test_logs Wishart(n - 2, Σ)
+        rank2 = @test_logs Wishart(n - 1, Σ)
         test_draw(rank1)
         test_draw(rank2)
         test_draws(rank1, rand(rank1, 10^6))
         test_draws(rank2, rand(rank2, 10^6))
         test_cov(rank1)
         test_cov(rank2)
+
+        X = H[1]
         @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
         @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
         @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))

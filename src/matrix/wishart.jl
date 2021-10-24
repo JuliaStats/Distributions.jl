@@ -42,7 +42,7 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function Wishart(df::T, S::AbstractPDMat{T}, warn::Bool = true) where T<:Real
+function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     df > 0 || throw(ArgumentError("df must be positive. got $(df)."))
     p = dim(S)
     singular = df <= p - 1
@@ -53,18 +53,17 @@ function Wishart(df::T, S::AbstractPDMat{T}, warn::Bool = true) where T<:Real
     end
     rnk::Integer = ifelse(singular, df, p)
     logc0 = wishart_logc0(df, S, rnk)
-    R = Base.promote_eltype(T, logc0)
-    prom_S = convert(AbstractArray{T}, S)
-    Wishart{R, typeof(prom_S), typeof(rnk)}(R(df), prom_S, R(logc0), rnk, singular)
+    _df, _logc0 = promote(df, logc0)
+    Wishart{typeof(_df), typeof(S), typeof(rnk)}(_df, S, _logc0, rnk, singular)
 end
 
-function Wishart(df::Real, S::AbstractPDMat, warn::Bool = true)
+function Wishart(df::Real, S::AbstractPDMat)
     T = Base.promote_eltype(df, S)
-    Wishart(T(df), convert(AbstractArray{T}, S), warn)
+    Wishart(T(df), convert(AbstractArray{T}, S))
 end
 
-Wishart(df::Real, S::Matrix, warn::Bool = true) = Wishart(df, PDMat(S), warn)
-Wishart(df::Real, S::Cholesky, warn::Bool = true) = Wishart(df, PDMat(S), warn)
+Wishart(df::Real, S::Matrix) = Wishart(df, PDMat(S))
+Wishart(df::Real, S::Cholesky) = Wishart(df, PDMat(S))
 
 #  -----------------------------------------------------------------------------
 #  REPL display
