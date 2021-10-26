@@ -41,3 +41,8 @@ for fun in [:pdf, :logpdf,
 end
 
 @deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+
+# Wishart constructors
+@deprecate Wishart(df::Real, S::AbstractPDMat, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Matrix, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Cholesky, warn::Bool) Wishart(df, S)
