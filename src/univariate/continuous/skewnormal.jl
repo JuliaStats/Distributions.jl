@@ -55,7 +55,8 @@ logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω
 
 #cdf closed form requires Owen's T function.
 function cdf(dist::SkewNormal, x::Real)
-    quadgk(t->pdf(dist,t), -Inf, x)[1]
+    float_x = float(x)
+    return first(quadgk(Base.Fix1(pdf, dist), oftype(float_x, -Inf), float_x))
 end
 
 #cdf/quantile etc 
