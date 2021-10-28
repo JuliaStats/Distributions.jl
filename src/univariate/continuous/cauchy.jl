@@ -9,12 +9,12 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\pi \\sigma \\left(1 + \\left(\\frac{x - \\mu}{
 
 ```julia
 Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0, 1)
-Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1)
-Cauchy(u, b)     # Cauchy distribution with location u and scale b
+Cauchy(μ)        # Cauchy distribution with location μ and unit scale, i.e. Cauchy(μ, 1)
+Cauchy(μ, σ)     # Cauchy distribution with location μ and scale σ
 
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (μ, σ)
+location(d)      # Get the location parameter, i.e. μ
+scale(d)         # Get the scale parameter, i.e. σ
 ```
 
 External links
