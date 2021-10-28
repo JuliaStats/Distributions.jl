@@ -41,7 +41,9 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf, cdf
         0.006369452573950052,
         0.0108418482378097
     ]
-    @test cdf.(d1, gridx) ≈ cdfx
+    for (x, y) in zip(gridx, cdfx)
+        @test cdf(d1, x) ≈ y
+    end
 end
 
 
