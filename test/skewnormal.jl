@@ -33,7 +33,7 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf, cdf
     @test kurtosis(d3) == Distributions.kurtosis(d4)
     @test mgf(d3, 2.25) == Distributions.mgf(d4, 2.25)
     @test cf(d3, 2.25) == Distributions.cf(d4, 2.25)
-    #
+    # reference values computed with Mathematica
     gridx = [-0.15, 0.0, 0, 0.15] 
     cdfx = [
         0.003579417457235501,
