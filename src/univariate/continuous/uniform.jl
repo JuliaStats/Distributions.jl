@@ -78,7 +78,7 @@ function logpdf(d::Uniform, x::Real)
     diff = d.b - d.a
     return insupport(d, x) ? -log(diff) : log(zero(diff))
 end
-gradlogpdf(d::Uniform{T}, x::Real) where {T<:Real} = zero(T)
+gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
 function cdf(d::Uniform, x::Real)
     a, b = params(d)
