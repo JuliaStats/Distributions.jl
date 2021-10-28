@@ -40,6 +40,7 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
 end
 
 truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
+truncated(d::Pareto, u::T) where {T <: Real} = truncated(d, d.θ, u)
 
 """
     Truncated
@@ -174,3 +175,4 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 include(joinpath("truncated", "normal.jl"))
 include(joinpath("truncated", "exponential.jl"))
 include(joinpath("truncated", "uniform.jl"))
+include(joinpath("truncated", "pareto.jl"))
