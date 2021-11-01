@@ -64,6 +64,7 @@ const tests = [
     "gumbel",
     "pdfnorm",
     "rician",
+    "kldivergences", 
 ]
 
 printstyled("Running tests:\n", color=:blue)
