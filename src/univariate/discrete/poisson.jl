@@ -85,6 +85,19 @@ function entropy(d::Poisson{T}) where T<:Real
 end
 
 
+"""
+    kldivergence(p::Poisson, q::Poisson)
+
+See [KL Poisson](https://en.wikipedia.org/wiki/Poisson_distribution#Other_properties)
+"""
+function kldivergence(p::Poisson, q::Poisson)
+    λp, λq = rate.((p, q))
+    return λq - λp + λp * (log(λp) - log(λq))
+end
+
+
+
+
 ### Evaluation
 
 @_delegate_statsfuns Poisson pois λ

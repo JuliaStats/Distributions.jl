@@ -83,6 +83,16 @@ function entropy(d::InverseGamma)
     α + loggamma(α) - (1 + α) * digamma(α) + log(θ)
 end
 
+"""
+    kldivergence(p::InverseGamma, q::InverseGamma)
+
+See [KL Inverse-Gamma](https://en.wikipedia.org/wiki/Inverse-gamma_distribution#Properties)
+"""
+function kldivergence(p::InverseGamma, q::InverseGamma)
+    # We can reuse the implementation of Gamma
+    return kldivergence(Gamma(shape(p), rate(p)), Gamma(shape(q), rate(q)))
+end
+
 
 #### Evaluation
 

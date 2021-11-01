@@ -32,3 +32,12 @@ end
 function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
     expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
 end
+
+function kldivergence(P::MultivariateDistribution, Q::MultivariateDistribution; n_samples=100)
+    mcexpectation(P, x -> let p = pdf(P,x); (p > 0) * log(p / pdf(Q, x)) end; n_samples)
+end
+
+function mcexpectation(distr::MultivariateDistribution, f; n_samples::Int=100)
+    n_samples > 0 || throw(ArgumentError("number of samples should be > 0"))
+    sum(f, eachcol(rand(distr, n_samples))) / n_samples
+end

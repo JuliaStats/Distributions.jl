@@ -100,6 +100,13 @@ end
 
 mvnormal_c0(g::AbstractMvNormal) = -(length(g) * convert(eltype(g), log2π) + logdetcov(g))/2
 
+function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
+    # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
+    length(p) == length(q) || 
+        throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
+    return 0.5 * (tr(cov(q) \ cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
+end
+
 """
     invcov(d::AbstractMvNormal)
 
@@ -245,6 +252,13 @@ cov(d::MvNormal) = Matrix(d.Σ)
 
 invcov(d::MvNormal) = Matrix(inv(d.Σ))
 logdetcov(d::MvNormal) = logdet(d.Σ)
+
+function kldivergence(p::MvNormal, q::MvNormal)
+    # We use p.Σ and q.Σ to take the advantage that they are defined as PDMats objects
+    length(p) == length(q) || 
+        throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
+    return 0.5 * (tr(q.Σ \ p.Σ) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
+end
 
 ### Evaluation
 

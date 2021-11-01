@@ -107,6 +107,17 @@ function entropy(d::Beta)
         (s - 2) * digamma(s)
 end
 
+"""
+    kldivergence(p::Beta, q::Beta)
+
+See [KL Beta](https://en.wikipedia.org/wiki/Beta_distribution#Quantities_of_information_(entropy))
+"""
+function kldivergence(p::Beta, q::Beta)
+    αp, βp = params(p)
+    αq, βq = params(q)
+    return logbeta(αq, βq) - logbeta(αp, βp) + (αp - αq) * digamma(αp) +
+        (βp - βq) * digamma(βp) + (αq - αp + βq - βp) * digamma(αp + βp)
+end
 
 #### Evaluation
 
