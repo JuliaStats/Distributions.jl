@@ -1,7 +1,9 @@
 @testset "KL divergences" begin
     function test_kl(p, q)
         @test kldivergence(p, q) > 0
-        @test kldivergence(p, q) ≈ Distributions.mcexpectation(p, x -> let p = pdf(P,x); (p > 0) * log(p / pdf(Q, x)) end; n_samples=100_000)
+        @test kldivergence(p, p) ≈ 0 atol=1e-1
+        @test kldivergence(q, q) ≈ 0 atol=1e-1
+        @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{MultivariateDistribution,MultivariateDistribution}, p, q; nsamples=10000) atol=1e-1
     end
     @testset "univariate" begin
         @testset "Beta" begin
@@ -45,7 +47,7 @@
         Distributions.cov(p::CholeskyMvNormal) = p.L * p.L'
         Distributions.logdetcov(p::CholeskyMvNormal) = 2 * sum(log, diag(p.L))
         Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector) = sum(abs2, p.L \ (mean(p) - x))
-        Distributions.rand(p::CholeskyMvNormal, n::Int) = p.m .+ p.L * randn(length(p), n) 
+        Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector) = x .= p.m .+ p.L * randn!(rng, x) 
         Distributions.length(p::CholeskyMvNormal) = length(p.m)
         function Distributions.logpdf(p::CholeskyMvNormal, x::AbstractVector)
             return -0.5 * (length(p) * log(2π) + 2 * logdet(p.L) + sum(abs2, p.L \ (x .- p.m)))

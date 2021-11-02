@@ -22,6 +22,13 @@ function expectation(distr::UnivariateDistribution, g::Function)
     expectation(distr, g, 1e-10)
 end
 
+function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
+    nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
+    return mcexpectation(rng, g, sampler(distr), nsamples)
+end
+
+mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
+
 ## Leave undefined until we've implemented a numerical integration procedure
 # function entropy(distr::UnivariateDistribution)
 #     pf = typeof(distr)<:ContinuousDistribution ? pdf : pmf
@@ -30,14 +37,9 @@ end
 # end
 
 function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
-    expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
+    expectation(P, x -> let p = pdf(P, x); (p > 0) * log(p / pdf(Q, x)) end)
 end
 
-function kldivergence(P::MultivariateDistribution, Q::MultivariateDistribution; n_samples=100)
-    mcexpectation(P, x -> let p = pdf(P,x); (p > 0) * log(p) - logpdf(Q, x) end; n_samples)
-end
-
-function mcexpectation(distr::Distribution, f; n_samples::Int=100)
-    n_samples > 0 || throw(ArgumentError("number of samples should be > 0"))
-    sum(f, rand(distr) for _ in 1:n_samples) / n_samples
+function kldivergence(P::MultivariateDistribution, Q::MultivariateDistribution; kwargs...)
+    expectation(P, x -> let p = pdf(P, x); (p > 0) * log(p) - logpdf(Q, x) end; kwargs...)
 end

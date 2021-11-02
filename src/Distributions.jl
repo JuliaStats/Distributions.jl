@@ -204,6 +204,7 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
+    kldivergence,       # kl divergence between distributions
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability

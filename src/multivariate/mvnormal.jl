@@ -104,8 +104,13 @@ function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
     length(p) == length(q) || 
         throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
-    return 0.5 * (tr(cov(q) \ cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
+    # logdetcov is used separately from _cov for any potential optimization done there
+    return 0.5 * (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
 end
+
+# This is a workaround to take advantage of the PDMats objects for MvNormal and avoid copies as Matrix
+# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object 
+_cov(d::AbstractMvNormal) = cov(d)
 
 """
     invcov(d::AbstractMvNormal)
@@ -249,16 +254,10 @@ params(d::MvNormal) = (d.μ, d.Σ)
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = Matrix(d.Σ)
+_cov(d::MvNormal) = d.Σ
 
 invcov(d::MvNormal) = Matrix(inv(d.Σ))
 logdetcov(d::MvNormal) = logdet(d.Σ)
-
-function kldivergence(p::MvNormal, q::MvNormal)
-    # We use p.Σ and q.Σ to take the advantage that they are defined as PDMats objects
-    length(p) == length(q) || 
-        throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
-    return 0.5 * (tr(q.Σ \ p.Σ) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
-end
 
 ### Evaluation
 
