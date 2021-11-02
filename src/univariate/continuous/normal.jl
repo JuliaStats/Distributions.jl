@@ -76,9 +76,11 @@ kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
 function kldivergence(p::Normal, q::Normal)
-    μp, σp = params(p)
-    μq, σq = params(q)
-    return 0.5 * (abs2(σp / σq) + abs2((μp - μq) / σq) - 1 + 2 * (log(σq) - log(σp)))
+    μp = mean(p)
+    σ²p = var(p)
+    μq = mean(q)
+    σ²q = var(q)
+    return ((abs2(μp - μq) + σ²p) / σ²q - 1 + log(σq / σp)) / 2
 end
 
 #### Evaluation

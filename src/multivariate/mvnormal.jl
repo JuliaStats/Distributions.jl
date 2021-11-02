@@ -105,7 +105,7 @@ function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     length(p) == length(q) || 
         throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
     # logdetcov is used separately from _cov for any potential optimization done there
-    return 0.5 * (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p))
+    return (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p)) / 2
 end
 
 # This is a workaround to take advantage of the PDMats objects for MvNormal and avoid copies as Matrix
