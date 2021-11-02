@@ -11,8 +11,8 @@ function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon
     return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10, kwargs...)
-    return expectation(distr, g, ϵ)
+function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10)
+    return expectation(distr, g, epsilon)
 end
 
 function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
