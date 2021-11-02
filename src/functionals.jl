@@ -24,6 +24,7 @@ end
 
 function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
     nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
+    # We use a function barrier to work around type instability of `sampler(dist)`
     return mcexpectation(rng, g, sampler(distr), nsamples)
 end
 
@@ -36,7 +37,7 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
+function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
     expectation(P, x -> let p = pdf(P, x); (p > 0) * log(p / pdf(Q, x)) end)
 end
 
