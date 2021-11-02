@@ -37,10 +37,17 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 #     expectation(distr, x -> -log(f(x)))
 # end
 
+function safe_logdiff(P, Q)
+    return function _safe_logdiff(x)
+        logp = logpdf(P, Q)
+        return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
+    end
+end
+
 function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
-    expectation(P, x -> let p = pdf(P, x); (p > 0) * log(p / pdf(Q, x)) end)
+    expectation(P, safe_logdiff(P, Q))
 end
 
 function kldivergence(P::MultivariateDistribution, Q::MultivariateDistribution; kwargs...)
-    expectation(P, x -> let p = pdf(P, x); (p > 0) * log(p / pdf(Q, x)) end; kwargs...)
+    expectation(P, safe_logdiff(P, Q); kwargs...)
 end
