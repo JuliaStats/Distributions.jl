@@ -87,11 +87,8 @@ end
 function kldivergence(p::Poisson, q::Poisson)
     λp = rate(p)
     λq = rate(q)
-    return λq - λp + xlogy(λp, λp / λq)
+    return λq - λp + xlogx(λp) - xlogy(λp, λq)
 end
-
-
-
 
 ### Evaluation
 
