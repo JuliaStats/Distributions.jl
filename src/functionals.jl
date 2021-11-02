@@ -3,16 +3,12 @@ function expectation(distr::ContinuousUnivariateDistribution, g::Function; kwarg
 end
 
 ## Assuming that discrete distributions only take integer values.
-function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
+function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10)
     mindist, maxdist = extrema(distr)
     # We want to avoid taking values up to infinity
     minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
     maxval = isfinite(maxdist) ? maxdist : quantile(distr, 1 - epsilon)
     return sum(x -> pdf(distr, x) * g(x), minval:maxval)
-end
-
-function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10)
-    return expectation(distr, g, epsilon)
 end
 
 function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
