@@ -1,25 +1,18 @@
-function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
-    mindist, maxdist = extrema(distr)
-    minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
-    maxval = isfinite(maxdist) ? maxdist : quantile(distr, 1 - epsilon)
-    return minval, maxval
-end
-
-function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
-    f = Base.Fix1(pdf, distr)
-    leftEnd, rightEnd = getEndpoints(distr, epsilon)
-    quadgk(x -> f(x) * g(x), leftEnd, rightEnd)[1]
+function expectation(distr::ContinuousUnivariateDistribution, g::Function; kwargs...)
+    return first(quadgk(x -> pdf(distr, x) * g(x), extrema(distr)...; kwargs...))
 end
 
 ## Assuming that discrete distributions only take integer values.
 function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = Base.Fix1(pdf, distr)
-    leftEnd, rightEnd = getEndpoints(distr, epsilon)
-    sum(x -> f(x) * g(x), leftEnd:rightEnd)
+    mindist, maxdist = extrema(distr)
+    # We want to avoid taking values up to infinity
+    minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
+    maxval = isfinite(maxdist) ? maxdist : quantile(distr, 1 - epsilon)
+    return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(distr::UnivariateDistribution, g::Function)
-    expectation(distr, g, 1e-10)
+function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10, kwargs...)
+    return expectation(distr, g, ϵ)
 end
 
 function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
