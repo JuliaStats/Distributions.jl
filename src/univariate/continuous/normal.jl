@@ -80,7 +80,8 @@ function kldivergence(p::Normal, q::Normal)
     σ²p = var(p)
     μq = mean(q)
     σ²q = var(q)
-    return ((abs2(μp - μq) + σ²p) / σ²q - 1 + log(σ²q / σ²p)) / 2
+    σ²p_over_σ²q = σ²p / σ²q
+    return (abs2(μp - μq) / σ²q - logmxp1(σ²p_over_σ²q)) / 2
 end
 
 #### Evaluation
