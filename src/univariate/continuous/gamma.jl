@@ -83,7 +83,7 @@ function kldivergence(p::Gamma, q::Gamma)
     # We use the parametrization with the scale θ
     αp, θp = params(p)
     αq, θq = params(q)
-    θp_over_θq = θp - θq
+    θp_over_θq = θp / θq
     return (αp - αq) * digamma(αp) - loggamma(αp) + loggamma(αq) -
         αq * log(θp_over_θq) + αp * (θp_over_θq - 1)
 end
