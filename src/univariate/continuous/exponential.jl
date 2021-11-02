@@ -62,7 +62,7 @@ entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
 function kldivergence(p::Exponential, q::Exponential)
     λq_over_λp = scale(q) / scale(p)
-    return -log(λq_over_λp) + λq_over_λp - 1
+    return -logmxp1(λq_over_λp)
 end
 
 #### Evaluation
