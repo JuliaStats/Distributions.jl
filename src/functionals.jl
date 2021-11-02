@@ -42,5 +42,5 @@ function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {
         logp = logpdf(P, x)
         return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
     end
-    expectation(P, safe_logdiff(P, Q); kwargs...)
+    expectation(P, logdiff; kwargs...)
 end
