@@ -39,6 +39,9 @@
             p = Poisson(4.0)
             q = Poisson(3.0)
             test_kl(p, q)
+
+            p_0 = Poisson(0.0)
+            test_kl(p_0, p)
         end
     end
     @testset "multivariate" begin

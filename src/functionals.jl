@@ -1,21 +1,21 @@
 function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
-    (left,right) = map(x -> quantile(distr,x), (0,1))
-    leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
-    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
-    (leftEnd, rightEnd)
+    mindist, maxdist = extrema(distr)
+    minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
+    maxval = isfinite(maxdist) ? maxdist : quantile(distr, 1 - epsilon)
+    return minval, maxval
 end
 
 function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    quadgk(x -> f(x)*g(x), leftEnd, rightEnd)[1]
+    f = Base.Fix1(pdf, distr)
+    leftEnd, rightEnd = getEndpoints(distr, epsilon)
+    quadgk(x -> f(x) * g(x), leftEnd, rightEnd)[1]
 end
 
 ## Assuming that discrete distributions only take integer values.
 function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(x -> f(x)*g(x), leftEnd:rightEnd)
+    f = Base.Fix1(pdf, distr)
+    leftEnd, rightEnd = getEndpoints(distr, epsilon)
+    sum(x -> f(x) * g(x), leftEnd:rightEnd)
 end
 
 function expectation(distr::UnivariateDistribution, g::Function)
@@ -37,17 +37,10 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function safe_logdiff(P, Q)
-    return function _safe_logdiff(x)
+function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
+    function logdiff(x)
         logp = logpdf(P, x)
         return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
     end
-end
-
-function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
-    expectation(P, safe_logdiff(P, Q))
-end
-
-function kldivergence(P::MultivariateDistribution, Q::MultivariateDistribution; kwargs...)
     expectation(P, safe_logdiff(P, Q); kwargs...)
 end
