@@ -9,6 +9,14 @@
             @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{MultivariateDistribution,MultivariateDistribution}, p, q; nsamples=10000) atol=1e-1
         end
     end
+    
+    @testset "Categorical" begin
+        @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
+        @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
+            kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
+        @test expectation(Normal(0.0, 1.0), identity, 1e-10) ≤ 1e-9
+    end
+
     @testset "univariate" begin
         @testset "Beta" begin
             p = Beta(2, 10)
