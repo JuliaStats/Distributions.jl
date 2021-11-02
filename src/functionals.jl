@@ -39,7 +39,7 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 
 function safe_logdiff(P, Q)
     return function _safe_logdiff(x)
-        logp = logpdf(P, Q)
+        logp = logpdf(P, x)
         return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
     end
 end
