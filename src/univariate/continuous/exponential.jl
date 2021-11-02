@@ -61,8 +61,8 @@ kurtosis(::Exponential{T}) where {T} = T(6)
 entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
 function kldivergence(p::Exponential, q::Exponential)
-    λp_over_λq = scale(p) / scale(q)
-    return log(λp_over_λq) + λp_over_λq - 1
+    λq_over_λp = scale(q) / scale(p)
+    return -log(λq_over_λp) + λq_over_λp - 1
 end
 
 #### Evaluation
