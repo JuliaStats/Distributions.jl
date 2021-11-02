@@ -3,7 +3,11 @@
         @test kldivergence(p, q) > 0
         @test kldivergence(p, p) ≈ 0 atol=1e-1
         @test kldivergence(q, q) ≈ 0 atol=1e-1
-        @test kldivergence(p, q) ≈ Distributions.mcexpectation(Random.GLOBAL_RNG, Distributions.safe_logdiff(p, q), sampler(p), 10000) atol=1e-1
+        if p isa UnivariateDistribution
+            @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{UnivariateDistribution,UnivariateDistribution}, p, q) atol=1e-1
+        elseif p isa MultivariateDistribution
+            @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{MultivariateDistribution,MultivariateDistribution}, p, q; nsamples=10000) atol=1e-1
+        end
     end
     @testset "univariate" begin
         @testset "Beta" begin
