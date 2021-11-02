@@ -1,9 +1,14 @@
 @testset "KL divergences" begin
+    function logdiff(P, Q, x)
+        return let p = pdf(P, x)
+            (p > 0) * log(p / pdf(Q, x))
+        end
+    end
     function test_kl(p, q)
         @test kldivergence(p, q) > 0
         @test kldivergence(p, p) ≈ 0 atol=1e-1
         @test kldivergence(q, q) ≈ 0 atol=1e-1
-        @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{MultivariateDistribution,MultivariateDistribution}, p, q; nsamples=10000) atol=1e-1
+        @test kldivergence(p, q) ≈ Distributions.mcexpectation(Random.GLOBAL_RNG, x -> logdiff(p, q, x), sampler(p), 10000) atol=1e-1
     end
     @testset "univariate" begin
         @testset "Beta" begin
