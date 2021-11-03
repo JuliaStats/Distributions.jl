@@ -1,3 +1,19 @@
+# Struct to test AbstractMvNormal methods
+struct CholeskyMvNormal{TL,Tm} <: Distributions.AbstractMvNormal
+    m::Tm
+    L::TL
+end
+Distributions.mean(p::CholeskyMvNormal) = p.m
+Distributions.cov(p::CholeskyMvNormal) = p.L * p.L'
+Distributions.logdetcov(p::CholeskyMvNormal) = 2 * sum(log, diag(p.L))
+Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector) = sum(abs2, p.L \ (mean(p) - x))
+Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector) = x .= p.m .+ p.L * randn!(rng, x) 
+Distributions.length(p::CholeskyMvNormal) = length(p.m)
+function Distributions.logpdf(p::CholeskyMvNormal, x::AbstractVector)
+    return -0.5 * (length(p) * log(2π) + 2 * logdet(p.L) + sum(abs2, p.L \ (x .- p.m)))
+end
+
+
 @testset "KL divergences" begin
     function test_kl(p, q)
         @test kldivergence(p, q) > 0
@@ -9,11 +25,8 @@
             @test kldivergence(p, q) ≈ invoke(kldivergence, Tuple{MultivariateDistribution,MultivariateDistribution}, p, q; nsamples=10000) atol=1e-1
         end
     end
-    
-    @testset "Categorical" begin
-        @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
-        @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
-            kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
+
+    @testset "Expectations" begin
         @test expectation(Normal(0.0, 1.0), identity, 1e-10) ≤ 1e-9
     end
 
@@ -22,6 +35,11 @@
             p = Beta(2, 10)
             q = Beta(3, 5)
             test_kl(p, q)
+        end
+        @testset "Categorical" begin
+            @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
+            @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
+                kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
         end
         @testset "Exponential" begin
             p = Exponential(2.0)
@@ -53,20 +71,6 @@
         end
     end
     @testset "multivariate" begin
-        # We try on a newly created AbstractMvNormal
-        struct CholeskyMvNormal{TL,Tm} <: Distributions.AbstractMvNormal
-            m::Tm
-            L::TL
-        end
-        Distributions.mean(p::CholeskyMvNormal) = p.m
-        Distributions.cov(p::CholeskyMvNormal) = p.L * p.L'
-        Distributions.logdetcov(p::CholeskyMvNormal) = 2 * sum(log, diag(p.L))
-        Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector) = sum(abs2, p.L \ (mean(p) - x))
-        Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector) = x .= p.m .+ p.L * randn!(rng, x) 
-        Distributions.length(p::CholeskyMvNormal) = length(p.m)
-        function Distributions.logpdf(p::CholeskyMvNormal, x::AbstractVector)
-            return -0.5 * (length(p) * log(2π) + 2 * logdet(p.L) + sum(abs2, p.L \ (x .- p.m)))
-        end
         @testset "AbstractMvNormal" begin
             n_dim = 2
             X1 = cholesky(Matrix(0.5 * I(n_dim))).L
