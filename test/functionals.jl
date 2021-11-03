@@ -26,8 +26,18 @@ end
         end
     end
 
+    function test_expec(p)
+        @test expectation(p, identity) ≈ mean(p) atol=1e-3
+        if p isa UnivariateDistribution
+            @test_deprecated expectation(p, identity, 1e-10)
+        end
+    end
+
     @testset "Expectations" begin
-        @test expectation(Normal(0.0, 1.0), identity, 1e-10) ≤ 1e-9
+        test_expec(Normal())
+        test_expec(Poisson(2.0))
+        test_expec(Binomial(10, 0.4))
+        test_expec(MvNormal(ones(2)))
     end
 
     @testset "univariate" begin
