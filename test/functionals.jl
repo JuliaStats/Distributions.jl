@@ -5,14 +5,21 @@ struct CholeskyMvNormal{M,T} <: Distributions.AbstractMvNormal
 end
 
 # Constructor for diagonal covariance matrices used in the tests belows
-CholeskyMvNormal(m::Vector, Σ::Diagonal) = CholeskyMvNormal(m, Diagonal(map(sqrt, Σ.diag)))
+function CholeskyMvNormal(m::Vector, Σ::Diagonal)
+    L = Diagonal(map(sqrt, Σ.diag))
+    return CholeskyMvNormal{typeof(m),typeof(L)}(m, L)
+end
 
 Distributions.length(p::CholeskyMvNormal) = length(p.m)
 Distributions.mean(p::CholeskyMvNormal) = p.m
 Distributions.cov(p::CholeskyMvNormal) = p.L * p.L'
 Distributions.logdetcov(p::CholeskyMvNormal) = 2 * logdet(p.L)
-Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector) = sum(abs2, p.L \ (mean(p) - x))
-Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector) = x .= p.m .+ p.L * randn!(rng, x) 
+function Distributions.sqmahal(p::CholeskyMvNormal, x::AbstractVector)
+    return sum(abs2, p.L \ (mean(p) - x))
+end
+function Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector)
+    return x .= p.m .+ p.L * randn!(rng, x)
+end
 
 @testset "Expectations" begin
     # univariate distributions
@@ -20,10 +27,10 @@ Distributions._rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::Vector) = x .= p.
         @test expectation(d, identity) ≈ mean(d) atol=1e-3
         @test @test_deprecated(expectation(d, identity, 1e-10)) ≈ mean(d) atol=1e-3
     end
-    
+
     # multivariate distribution
     d = MvNormal([1.5, -0.5], I)
-    @test expectation(d, identity; nsamples=10_000) ≈ mean(d) atol=1e-3
+    @test expectation(d, identity; nsamples=10_000) ≈ mean(d) atol=1e-2
 end
 
 @testset "KL divergences" begin
@@ -85,11 +92,11 @@ end
             p_mvnormal = MvNormal([0.2, -0.8], Diagonal([0.5, 0.75]))
             q_mvnormal = MvNormal([1.5, 0.5], Diagonal([1.0, 0.2]))
             test_kl(p_mvnormal, q_mvnormal)
-            
+
             p_cholesky = CholeskyMvNormal([0.2, -0.8], Diagonal([0.5, 0.75]))
             q_cholesky = CholeskyMvNormal([1.5, 0.5], Diagonal([1.0, 0.2]))
             test_kl(p_cholesky, q_cholesky)
-            
+
             # check consistency and mixed computations
             v = kldivergence(p_mvnormal, q_mvnormal)
             @test kldivergence(p_mvnormal, q_cholesky) ≈ v
