@@ -63,7 +63,8 @@ const tests = [
     "gumbel",
     "pdfnorm",
     "rician",
-    "functionals", 
+    "functionals",
+    "density_interface",
 ]
 
 printstyled("Running tests:\n", color=:blue)

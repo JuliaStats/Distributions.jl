@@ -27,6 +27,8 @@ using SpecialFunctions
 
 import ChainRulesCore
 
+import DensityInterface
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -298,6 +300,9 @@ include("pdfnorm.jl")
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
+
+# Implementation of DensityInterface API
+include("density_interface.jl")
 
 include("deprecates.jl")
 
