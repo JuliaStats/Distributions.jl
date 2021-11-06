@@ -23,6 +23,7 @@ rng = MersenneTwister(123)
         @test mean(d) ≈ fill(1/3, 3)
         @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
         @test var(d)  ≈ diag(cov(d))
+        @test std(d)  ≈ sqrt.(var(d))
 
         @test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1
         @test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1
@@ -58,6 +59,7 @@ rng = MersenneTwister(123)
         @test mean(d) ≈ v / sum(v)
         @test cov(d)  ≈ [8 -2 -6; -2 5 -3; -6 -3 9] / (36 * 7)
         @test var(d)  ≈ diag(cov(d))
+        @test std(d)  ≈ sqrt.(var(d))
 
         @test pdf(d, [0.2, 0.3, 0.5]) ≈ 3
         @test pdf(d, [0.4, 0.5, 0.1]) ≈ 0.24

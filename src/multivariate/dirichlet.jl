@@ -79,6 +79,17 @@ function var(d::Dirichlet)
     return v
 end
 
+# the default implementation fails if `var` returns a `Fill` array
+# happens if `d.alpha` is a `Fill` array
+function std(d::Dirichlet)
+    α0 = d.alpha0
+    c = inv(α0^2 * (α0 + 1))
+    s = map(d.alpha) do αi
+        sqrt(αi * (α0 - αi) * c)
+    end
+    return s
+end
+
 function cov(d::Dirichlet)
     α = d.alpha
     α0 = d.alpha0
