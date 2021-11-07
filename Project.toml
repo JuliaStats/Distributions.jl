@@ -20,7 +20,7 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
 ChainRulesCore = "1"
-DensityInterface = "0.3"
+DensityInterface = "0.3.2"
 FillArrays = "0.9, 0.10, 0.11, 0.12"
 PDMats = "0.10, 0.11"
 QuadGK = "2"
