@@ -22,10 +22,11 @@ end
 """
     IIDDensity(distribution::Distribution)
 
-Represents the probability density of an implicit product distribution of variates that are identically and
-independently distributed according to `distribution`.
+Represents the probability density of an implicit product distribution of
+variates that are identically and independently distributed according to
+`distribution`.
 
-Use `DensityInterface.logdensityof(d, x)` to compute the logarithm density
+Use `DensityInterface.logdensityof(d, x)` to compute the logarithmic density
 value at `x`. `x` may be a single variate of `d` or a whole set of variates
 of `d`.
 
