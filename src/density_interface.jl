@@ -4,13 +4,15 @@ for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
     @eval begin
         DensityInterface.$di_func(d::Distribution, x) = $d_func(d, x)
 
-        DensityInterface.$di_func(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where N = $d_func(d, x)
-
-        function DensityInterface.$di_func(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real}) where N
+        function DensityInterface.$di_func(d::UnivariateDistribution, x::AbstractArray)
             throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
         end
 
-        function DensityInterface.$di_func(d::Distribution{ArrayLikeVariate{N}}, x::AbstractVector{<:AbstractArray{<:Real}}) where N
+        function DensityInterface.$di_func(d::MultivariateDistribution, x::AbstractMatrix)
+            throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
+        end
+
+        function DensityInterface.$di_func(d::MatrixDistribution, x::AbstractArray{<:AbstractMatrix{<:Real}})
             throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
         end
     end
@@ -20,8 +22,8 @@ end
 """
     IIDDensity(distribution::Distribution)
 
-Represents the probability density of `d` and implicit product distributions
-over d.
+Represents the probability density of an implicit product distribution of variates that are identically and
+independently distributed according to `distribution`.
 
 Use `DensityInterface.logdensityof(d, x)` to compute the logarithm density
 value at `x`. `x` may be a single variate of `d` or a whole set of variates
@@ -39,8 +41,6 @@ the set.
 struct IIDDensity{D<:Distribution}
     distribution::D
 end
-
-export IIDDensity
 
 @inline DensityInterface.hasdensity(d::IIDDensity) = true
 
