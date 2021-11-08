@@ -26,7 +26,7 @@
     @testset "IIDDensity" begin
         x = [rand(d_mv) for i in 1:3]
         ref_logd_at_x = loglikelihood(d_mv, x)
-        d = IIDDensity(d_mv)
+        d = Distributions.IIDDensity(d_mv)
 
         DensityInterface.test_density_interface(d, x, ref_logd_at_x)
         DensityInterface.test_density_interface(d, hcat(x...), ref_logd_at_x)
