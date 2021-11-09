@@ -41,15 +41,10 @@ function pdf(d::LogUniform, x::Real)
     res = inv(x * log(b / a))
     return insupport(d, x) ? res : zero(res)
 end
-function cdf(d::LogUniform{T}, x) where {T}
-    a = d.a; b = d.b
-    if x <= a
-        zero(T)
-    elseif x <= b
-        log(x/a) / log(x/b)
-    else
-        one(T)
-    end
+function cdf(d::LogUniform, x::Real)
+    a, b = params(d)
+    _x = clamp(x, a, b)
+    return log(_x / a) / log(b / a)
 end
 
 #### Sampling
