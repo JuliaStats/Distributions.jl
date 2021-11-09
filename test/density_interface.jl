@@ -22,16 +22,4 @@
             @test_throws ArgumentError di_func(d_av, [rand(d_av) for i in 1:3])
         end
     end
-
-    @testset "IIDDensity" begin
-        x = [rand(d_mv) for i in 1:3]
-        ref_logd_at_x = loglikelihood(d_mv, x)
-        d = Distributions.IIDDensity(d_mv)
-
-        DensityInterface.test_density_interface(d, x, ref_logd_at_x)
-        DensityInterface.test_density_interface(d, hcat(x...), ref_logd_at_x)
-
-        # Stricter than required by test_density_interface:
-        @test logfuncdensity(logdensityof(d)) === d
-    end
 end
