@@ -45,4 +45,6 @@ end
 
 @inline DensityInterface.hasdensity(d::IIDDensity) = true
 
+# ToDo: Move documentation of behavior of `logdensityof(d::IIDDensity, x)` to
+# a method docstring of logdensityof here if/when IIDDensity becomes exported.
 DensityInterface.logdensityof(d::IIDDensity, x) = loglikelihood(d.distribution, x)
