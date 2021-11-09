@@ -30,7 +30,7 @@ function mean(d::LogUniform)
     (b - a) / log(b/a)
 end
 function var(d::LogUniform)
-    a = d.a; b = d.b
+    a, b = params(d)
     log_ba = log(b/a)
     (b^2 - a^2) / (2*log_ba) - ((b-a)/ log_ba)^2
 end
