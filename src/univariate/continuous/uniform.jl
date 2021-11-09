@@ -70,20 +70,23 @@ entropy(d::Uniform) = log(d.b - d.a)
 
 #### Evaluation
 
-pdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
-logpdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
-gradlogpdf(d::Uniform{T}, x::Real) where {T<:Real} = zero(T)
-
-function cdf(d::Uniform{T}, x::Real) where T<:Real
-    (a, b) = params(d)
-    x <= a ? zero(T) :
-    x >= d.b ? one(T) : (x - a) / (b - a)
+function pdf(d::Uniform, x::Real)
+    val = inv(d.b - d.a)
+    return insupport(d, x) ? val : zero(val)
 end
+function logpdf(d::Uniform, x::Real)
+    diff = d.b - d.a
+    return insupport(d, x) ? -log(diff) : log(zero(diff))
+end
+gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
-function ccdf(d::Uniform{T}, x::Real) where T<:Real
-    (a, b) = params(d)
-    x <= a ? one(T) :
-    x >= d.b ? zero(T) : (b - x) / (b - a)
+function cdf(d::Uniform, x::Real)
+    a, b = params(d)
+    return clamp((x - a) / (b - a), 0, 1)
+end
+function ccdf(d::Uniform, x::Real)
+    a, b = params(d)
+    return clamp((b - x) / (b - a), 0, 1)
 end
 
 quantile(d::Uniform, p::Real) = d.a + p * (d.b - d.a)

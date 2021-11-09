@@ -83,6 +83,11 @@ function entropy(d::InverseGamma)
     α + loggamma(α) - (1 + α) * digamma(α) + log(θ)
 end
 
+function kldivergence(p::InverseGamma, q::InverseGamma)
+    # We can reuse the implementation of Gamma
+    return kldivergence(p.invd, q.invd)
+end
+
 
 #### Evaluation
 

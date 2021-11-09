@@ -60,6 +60,11 @@ kurtosis(::Exponential{T}) where {T} = T(6)
 
 entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
+function kldivergence(p::Exponential, q::Exponential)
+    λq_over_λp = scale(q) / scale(p)
+    return -logmxp1(λq_over_λp)
+end
+
 #### Evaluation
 
 zval(d::Exponential, x::Real) = max(x / d.θ, 0)

@@ -11,6 +11,7 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test logpdf(LogNormal(), Inf) === -Inf
     @test iszero(logcdf(LogNormal(0, 0), 1))
     @test iszero(logcdf(LogNormal(), Inf))
+    @test logdiffcdf(LogNormal(), Float32(exp(3)), Float32(exp(3))) === -Inf
     @test logdiffcdf(LogNormal(), Float32(exp(5)), Float32(exp(3))) ≈ -6.607938594596893 rtol=1e-12
     @test logdiffcdf(LogNormal(), Float32(exp(5)), Float64(exp(3))) ≈ -6.60793859457367 rtol=1e-12
     @test logdiffcdf(LogNormal(), Float64(exp(5)), Float64(exp(3))) ≈ -6.607938594596893 rtol=1e-12

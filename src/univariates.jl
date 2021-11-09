@@ -78,27 +78,6 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::UnivariateDistribution)
-
-Return the minimum of the support of `d`.
-"""
-minimum(d::UnivariateDistribution)
-
-"""
-    maximum(d::UnivariateDistribution)
-
-Return the maximum of the support of `d`.
-"""
-maximum(d::UnivariateDistribution)
-
-"""
-    extrema(d::UnivariateDistribution)
-
-Return the minimum and maximum of the support of `d` as a 2-tuple.
-"""
-extrema(d::UnivariateDistribution) = (minimum(d), maximum(d))
-
-"""
     insupport(d::UnivariateDistribution, x::Any)
 
 When `x` is a scalar, it returns whether x is within the support of `d`
@@ -216,7 +195,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 
 Return the median value of distribution `d`.
 """
-median(d::UnivariateDistribution) = quantile(d, 0.5)
+median(d::UnivariateDistribution) = quantile(d, 1//2)
 
 """
     modes(d::UnivariateDistribution)
@@ -372,7 +351,7 @@ The natural logarithm of the difference between the cumulative density function 
 function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
     # Promote to ensure that we don't compute logcdf in low precision and then promote
     _x, _y = promote(x, y)
-    _x <= _y && throw(ArgumentError("requires x > y."))
+    _x < _y && throw(ArgumentError("requires x >= y."))
     u = logcdf(d, _x)
     v = logcdf(d, _y)
     return u + log1mexp(v - u)
@@ -722,6 +701,7 @@ const continuous_distributions = [
     "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
+    "rician",
     "semicircle",
     "skewnormal",
     "studentizedrange",

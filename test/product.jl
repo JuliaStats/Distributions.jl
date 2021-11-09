@@ -65,6 +65,11 @@ end
         @test !insupport(d_product, maximum.(ds) .+ 1)
         @test !insupport(d_product, zeros(N + 1))
 
+        @test minimum(d_product) == -ubound
+        @test maximum(d_product) == ubound
+        @test extrema(d_product) == (-ubound, ubound)
+        @test isless(extrema(d_product)...)
+
         x = @inferred(rand(d_product))
         @test x isa typeof(rand.(collect(ds)))
         @test length(x) == length(d_product)

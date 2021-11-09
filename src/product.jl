@@ -141,6 +141,8 @@ entropy(d::VectorOfUnivariateDistribution) = sum(entropy, d.v)
 function insupport(d::VectorOfUnivariateDistribution, x::AbstractVector)
     length(d) == length(x) && all(insupport(vi, xi) for (vi, xi) in zip(d.v, x))
 end
+minimum(d::Product) = map(minimum, d.v)
+maximum(d::Product) = map(maximum, d.v)
 
 """
     product_distribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N})

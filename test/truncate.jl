@@ -81,7 +81,8 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64}])
+                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64},
+                           Distributions.Truncated{Distributions.Rician{Float64},Distributions.Continuous, Float64}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()

@@ -178,71 +178,36 @@ insupport(d::DiscreteNonParametric, x::Real) =
 
 mean(d::DiscreteNonParametric) = dot(probs(d), support(d))
 
-function var(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function var(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    σ² = zero(T)
-    for i in 1:k
-        @inbounds σ² += abs2(x[i] - m) * p[i]
-    end
-    σ²
+    return var(x, Weights(p, one(eltype(p))); corrected=false)
 end
 
-function skewness(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function skewness(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    μ₃ = zero(T)
-    σ² = zero(T)
-    @inbounds for i in 1:k
-        d = x[i] - m
-        d²w = abs2(d) * p[i]
-        μ₃ += d * d²w
-        σ² += d²w
-    end
-    μ₃ / (σ² * sqrt(σ²))
+    return skewness(x, Weights(p, one(eltype(p))))
 end
 
-function kurtosis(d::DiscreteNonParametric{T}) where T
-    m = mean(d)
+function kurtosis(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    μ₄ = zero(T)
-    σ² = zero(T)
-    @inbounds for i in 1:k
-        d² = abs2(x[i] - m)
-        d²w = d² * p[i]
-        μ₄ += d² * d²w
-        σ² += d²w
-    end
-    μ₄ / abs2(σ²) - 3
+    return kurtosis(x, Weights(p, one(eltype(p))))
 end
 
 entropy(d::DiscreteNonParametric) = entropy(probs(d))
 entropy(d::DiscreteNonParametric, b::Real) = entropy(probs(d), b)
 
-mode(d::DiscreteNonParametric) = support(d)[argmax(probs(d))]
-function modes(d::DiscreteNonParametric{T,P}) where {T,P}
+function mode(d::DiscreteNonParametric)
     x = support(d)
     p = probs(d)
-    k = length(x)
-    mds = T[]
-    max_p = zero(P)
-    @inbounds for i in 1:k
-        pi = p[i]
-        xi = x[i]
-        if pi > max_p
-            max_p = pi
-            mds = [xi]
-        elseif pi == max_p
-            push!(mds, xi)
-        end
-    end
-    mds
+    return mode(x, Weights(p, one(eltype(p))))
+end
+function modes(d::DiscreteNonParametric)
+    x = support(d)
+    p = probs(d)
+    return modes(x, Weights(p, one(eltype(p))))
 end
 
 function mgf(d::DiscreteNonParametric, t::Real)
