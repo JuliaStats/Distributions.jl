@@ -36,13 +36,10 @@ function var(d::LogUniform)
 end
 
 #### Evaluation
-function pdf(d::LogUniform{T}, x) where {T}
-    a = d.a; b = d.b
-    if insupport(d, x)
-        1/(x*log(b/a))
-    else
-        zero(T)
-    end
+function pdf(d::LogUniform, x::Real)
+    a, b = params(d)
+    res = inv(x * log(b / a))
+    return insupport(d, x) ? res : zero(res)
 end
 function cdf(d::LogUniform{T}, x) where {T}
     a = d.a; b = d.b
