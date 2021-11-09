@@ -17,6 +17,7 @@ makedocs(
         "mixture.md",
         "fit.md",
         "extends.md",
+        "density_interface.md",
     ]
 )
 
