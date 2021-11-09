@@ -3,6 +3,7 @@ struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
     b::T
     LogUniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
+Base.eltype(::Type{LogUniform{T}}) where {T} = float(T)
 
 function LogUniform(a::T, b::T; check_args=true) where {T <: Real}
     check_args && @check_args(LogUniform, 0 < a < b)
@@ -17,7 +18,8 @@ end
 function convert(::Type{LogUniform{T}}, d::LogUniform) where {T}
     LogUniform(T(d.a), T(d.b))::LogUniform{T}
 end
-
+Base.minimum(d::LogUniform) = d.a
+Base.maximum(d::LogUniform) = d.b
 
 #### Parameters
 params(d::LogUniform) = (d.a, d.b)
@@ -34,6 +36,9 @@ function var(d::LogUniform)
     log_ba = log(b/a)
     (b^2 - a^2) / (2*log_ba) - ((b-a)/ log_ba)^2
 end
+StatsBase.median(d::LogUniform) = quantile(d, 1//2)
+StatsBase.mode(d::LogUniform)   = d.a
+StatsBase.modes(d::LogUniform)  = FillArrays.Fill(mode(d), 0)
 
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
@@ -46,15 +51,19 @@ function cdf(d::LogUniform, x::Real)
     _x = clamp(x, a, b)
     return log(_x / a) / log(b / a)
 end
+logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 
-#### Sampling
-function rand(rng::AbstractRNG, d::LogUniform)
-    u = Uniform(log(d.a), log(d.b))
-    exp(rand(rng, u))
+function quantile(d::LogUniform{T}, p::U) where {T,U<:Real}
+    a,b = params(d)
+    exp(p * log(b/a)) * a
 end
-function rand!(rng::AbstractRNG, d::LogUniform, out::AbstractArray)
-    u = Uniform(log(d.a), log(d.b))
-    rand!(rng, u, out)
-    out .= exp.(out)
-    out
+
+truncated(d::LogUniform, lo, hi) = truncated_LogUniform(d, promote(lo, hi)...)
+function truncated(d::LogUniform, lo::T, hi::T) where {T<:Integer}
+    # this method is needed to fix ambiguities
+    truncated_LogUniform(d, promote(lo, hi)...)
+end
+function truncated_LogUniform(d::LogUniform, lo::T, hi::T) where {T}
+    a,b = params(d)
+    LogUniform(max(a, lo), min(b, hi))
 end

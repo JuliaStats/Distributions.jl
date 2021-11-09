@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "loguniform",
     "arcsine",
     "dirac",
     "truncate",
@@ -63,7 +64,7 @@ const tests = [
     "gumbel",
     "pdfnorm",
     "rician",
-    "functionals", 
+    "functionals",
 ]
 
 printstyled("Running tests:\n", color=:blue)
