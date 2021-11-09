@@ -37,7 +37,8 @@ and array of arrays), the density is the PDF of an implicit product
 distribution over `d`, the size of the product is implied by the size of
 the set.
 
-`DensityInterface.logdensityof(d, x)` is equivalent to `loglikelihood(d, x)`.
+`DensityInterface.logdensityof(IIDDensity(d::Distribution), x)` is equivalent
+to `loglikelihood(d, x)`.
 """
 struct IIDDensity{D<:Distribution}
     distribution::D
