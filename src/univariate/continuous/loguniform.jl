@@ -44,9 +44,8 @@ function var(d::LogUniform)
     log_ba = log(b/a)
     (b^2 - a^2) / (2*log_ba) - ((b-a)/ log_ba)^2
 end
-StatsBase.median(d::LogUniform) = quantile(d, 1//2)
-StatsBase.mode(d::LogUniform)   = d.a
-StatsBase.modes(d::LogUniform)  = FillArrays.Fill(mode(d), 0)
+mode(d::LogUniform)   = d.a
+modes(d::LogUniform)  = partype(d)[]
 
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
