@@ -1,3 +1,16 @@
+"""
+    LogUniform(a,b)
+
+The *log uniform* distribution also known as *reciprocal distribution* is the exponential
+of the [`Uniform`](@ref) distribution `Uniform(log(a), log(b))`.
+```julia
+LogUniform(1,10)
+```
+
+External links
+
+* [Log uniform distribution on Wikipedia](https://en.wikipedia.org/wiki/Reciprocal_distribution)
+"""
 struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
