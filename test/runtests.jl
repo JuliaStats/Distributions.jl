@@ -65,6 +65,7 @@ const tests = [
     "pdfnorm",
     "rician",
     "functionals",
+    "density_interface",
 ]
 
 printstyled("Running tests:\n", color=:blue)
