@@ -21,10 +21,7 @@ function LogUniform(a::T, b::T; check_args=true) where {T <: Real}
     LogUniform{T}(a, b)
 end
 
-function LogUniform(a::Real, b::Real)
-    a1,b1 = promote(float(a), float(b))
-    LogUniform(a1,b2)
-end
+LogUniform(a::Real, b::Real) = LogUniform(promote(a, b)...)
 
 function convert(::Type{LogUniform{T}}, d::LogUniform) where {T}
     LogUniform(T(d.a), T(d.b))::LogUniform{T}
