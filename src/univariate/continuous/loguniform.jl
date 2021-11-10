@@ -15,7 +15,6 @@ struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
     b::T
     LogUniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
-Base.eltype(::Type{LogUniform{T}}) where {T} = float(T)
 
 function LogUniform(a::T, b::T; check_args=true) where {T <: Real}
     check_args && @check_args(LogUniform, 0 < a < b)
