@@ -5,6 +5,13 @@ using LinearAlgebra
 using Random
 using Test
 
+
+__rand(::Nothing, args...) = rand(args...)
+__rand(rng::AbstractRNG, args...) = rand(rng, args...)
+
+__rand!(::Nothing, args...) = rand!(args...)
+__rand!(rng::AbstractRNG, args...) = rand!(rng, args...)
+
 """
     test_mvnormal(
         g::AbstractMvNormal, n_tsamples::Int=10^6, rng::AbstractRNG=Random.GLOBAL_RNG
@@ -13,7 +20,7 @@ using Test
 Test that `AbstractMvNormal` implements the expected API.
 """
 function test_mvnormal(
-    g::AbstractMvNormal, n_tsamples::Int=10^6, rng::AbstractRNG=Random.GLOBAL_RNG
+    g::AbstractMvNormal, n_tsamples::Int=10^6, rng::Union{AbstractRNG, Nothing}=nothing
 )
     d = length(g)
     μ = mean(g)
@@ -33,12 +40,12 @@ function test_mvnormal(
     @test isless(extrema(g)...)
 
     # test sampling for AbstractMatrix (here, a SubArray):
-    subX = view(rand(rng, d, 2d), :, 1:d)
-    @test isa(rand!(rng, g, subX), SubArray)
+    subX = view(__rand(rng, d, 2d), :, 1:d)
+    @test isa(__rand!(rng, g, subX), SubArray)
 
     # sampling
-    @test isa(rand(rng, g), Vector{Float64})
-    X = rand(rng, g, n_tsamples)
+    @test isa(__rand(rng, g), Vector{Float64})
+    X = __rand(rng, g, n_tsamples)
     emp_mu = vec(mean(X, dims=2))
     Z = X .- emp_mu
     emp_cov = (Z * Z') * inv(n_tsamples)
