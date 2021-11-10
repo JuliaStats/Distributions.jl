@@ -53,7 +53,6 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
-    "functionals",
     "chernoff",
     "univariate_bounds",
     "negativebinomial",
@@ -64,6 +63,8 @@ const tests = [
     "gumbel",
     "pdfnorm",
     "rician",
+    "functionals",
+    "density_interface",
 ]
 
 printstyled("Running tests:\n", color=:blue)

@@ -39,8 +39,6 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
 end
 
-truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
-
 """
     Truncated
 
