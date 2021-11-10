@@ -36,7 +36,7 @@ partype(::LogUniform{T}) where {T<:Real} = T
 #### Statistics
 
 function mean(d::LogUniform)
-    a = d.a; b = d.b
+    a, b = params(d)
     (b - a) / log(b/a)
 end
 function var(d::LogUniform)
