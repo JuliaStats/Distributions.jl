@@ -49,18 +49,18 @@ modes(d::LogUniform)  = partype(d)[]
 
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
-    x, a, b = promote(x, params(d)...)
-    res = inv(x * log(b / a))
-    return insupport(d, x) ? res : zero(res)
+    x1, a, b = promote(x, params(d)...) # ensure e.g. pfd(LogUniform(1,2), 1f0)::Float32
+    res = inv(x1 * log(b / a))
+    return insupport(d, x1) ? res : zero(res)
 end
 function cdf(d::LogUniform, x::Real)
-    x, a, b = promote(x, params(d)...)
-    _x = clamp(x, a, b)
-    return log(_x / a) / log(b / a)
+    x1, a, b = promote(x, params(d)...)
+    x2 = clamp(x, a, b)
+    return log(x2 / a) / log(b / a)
 end
 logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 
 function quantile(d::LogUniform, p::Real)
-    p,a,b = promote(p, params(d)...)
-    exp(p * log(b/a)) * a
+    p1,a,b = promote(p, params(d)...)
+    exp(p1 * log(b/a)) * a
 end
