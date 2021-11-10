@@ -12,7 +12,7 @@ import Random
     @test quantile(d, 0.5) ≈ sqrt(10) # geomean
     @test quantile(d, 1) ≈ 10
     @test mode(d) ≈ 1
-    @test insupport(d, 0) == false
+    @test !insupport(d, 0)
 
     # numbers obtained by calling scipy.stats.loguniform
     @test std(d)  ≈ 2.49399867607628
