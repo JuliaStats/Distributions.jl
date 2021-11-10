@@ -49,28 +49,18 @@ modes(d::LogUniform)  = partype(d)[]
 
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
-    a, b = params(d)
+    x, a, b = promote(x, params(d)...)
     res = inv(x * log(b / a))
     return insupport(d, x) ? res : zero(res)
 end
 function cdf(d::LogUniform, x::Real)
-    a, b = params(d)
+    x, a, b = promote(x, params(d)...)
     _x = clamp(x, a, b)
     return log(_x / a) / log(b / a)
 end
 logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 
 function quantile(d::LogUniform, p::Real)
-    a,b = params(d)
+    p,a,b = promote(p, params(d)...)
     exp(p * log(b/a)) * a
-end
-
-truncated(d::LogUniform, lo, hi) = truncated_LogUniform(d, promote(lo, hi)...)
-function truncated(d::LogUniform, lo::T, hi::T) where {T<:Integer}
-    # this method is needed to fix ambiguities
-    truncated_LogUniform(d, promote(lo, hi)...)
-end
-function truncated_LogUniform(d::LogUniform, lo::T, hi::T) where {T}
-    a,b = params(d)
-    LogUniform(max(a, lo), min(b, hi))
 end
