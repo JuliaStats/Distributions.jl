@@ -60,7 +60,7 @@ function cdf(d::LogUniform, x::Real)
 end
 logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 
-function quantile(d::LogUniform{T}, p::U) where {T,U<:Real}
+function quantile(d::LogUniform, p::Real)
     a,b = params(d)
     exp(p * log(b/a)) * a
 end
