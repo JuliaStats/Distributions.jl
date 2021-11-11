@@ -21,7 +21,7 @@ function LogUniform(a::T, b::T; check_args=true) where {T <: Real}
     LogUniform{T}(a, b)
 end
 
-LogUniform(a::Real, b::Real) = LogUniform(promote(a, b)...)
+LogUniform(a::Real, b::Real; kwargs...) = LogUniform(promote(a, b)...; kwargs...)
 
 convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} = LogUniform(T(d.a), T(d.b))
 Base.minimum(d::LogUniform) = d.a
