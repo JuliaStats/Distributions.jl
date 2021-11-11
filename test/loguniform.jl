@@ -58,6 +58,8 @@ import Random
         @test exp(median(u)) ≈ median(dist)
         x = rand(rng, dist)
         @test cdf(u, log(x)) ≈ cdf(dist, x)
+
+        @test @inferred(entropy(dist)) ≈  Distributions.expectation(dist, x->-logpdf(dist,x))
     end
 end
 

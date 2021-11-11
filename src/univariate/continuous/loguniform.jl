@@ -45,6 +45,10 @@ end
 mode(d::LogUniform)   = d.a
 modes(d::LogUniform)  = partype(d)[]
 
+function entropy(d::LogUniform)
+    a,b = params(d)
+    log(a * b) / 2 + log(log(b / a))
+end
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
     x1, a, b = promote(x, params(d)...) # ensure e.g. pdf(LogUniform(1,2), 1f0)::Float32
