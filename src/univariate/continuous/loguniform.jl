@@ -23,9 +23,7 @@ end
 
 LogUniform(a::Real, b::Real) = LogUniform(promote(a, b)...)
 
-function convert(::Type{LogUniform{T}}, d::LogUniform) where {T}
-    LogUniform(T(d.a), T(d.b))::LogUniform{T}
-end
+convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} = LogUniform(T(d.a), T(d.b))
 Base.minimum(d::LogUniform) = d.a
 Base.maximum(d::LogUniform) = d.b
 
