@@ -69,7 +69,7 @@ end
 
 function kldivergence(p::LogUniform, q::LogUniform)
     ap, bp, aq, bq = promote(params(p)..., params(q)...)
-    finite = (0 < aq <= ap < bp <= bq)
+    finite = aq <= ap < bp <= bq
     res = log(log(bq / aq) / log(bp / ap))
     if finite
         return res
