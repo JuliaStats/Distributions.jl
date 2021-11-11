@@ -66,3 +66,14 @@ function quantile(d::LogUniform, p::Real)
     p1,a,b = promote(p, params(d)...) # ensure e.g. quantile(LogUniform(1,2), 1f0)::Float32
     exp(p1 * log(b/a)) * a
 end
+
+function kldivergence(p::LogUniform, q::LogUniform)
+    ap, bp, aq, bq = promote(params(p)..., params(q)...)
+    finite = (0 < aq <= ap < bp <= bq)
+    res = log(log(bq / aq) / log(bp / ap))
+    if finite
+        return res
+    else
+        return typeof(res)(Inf)
+    end
+end
