@@ -53,8 +53,8 @@ function pdf(d::LogUniform, x::Real)
 end
 function cdf(d::LogUniform, x::Real)
     x1, a, b = promote(x, params(d)...)
-    x2 = clamp(x, a, b)
-    return log(x2 / a) / log(b / a)
+    x1 = clamp(x1, a, b)
+    return log(x1 / a) / log(b / a)
 end
 logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 
