@@ -118,6 +118,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogUniform,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
