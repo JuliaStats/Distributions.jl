@@ -45,6 +45,10 @@ end
 mode(d::LogUniform)   = d.a
 modes(d::LogUniform)  = partype(d)[]
 
+function entropy(d::LogUniform)
+    a,b = params(d)
+    log(a * b) / 2 + log(log(b / a))
+end
 #### Evaluation
 function pdf(d::LogUniform, x::Real)
     x1, a, b = promote(x, params(d)...) # ensure e.g. pdf(LogUniform(1,2), 1f0)::Float32
@@ -61,4 +65,11 @@ logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
 function quantile(d::LogUniform, p::Real)
     p1,a,b = promote(p, params(d)...) # ensure e.g. quantile(LogUniform(1,2), 1f0)::Float32
     exp(p1 * log(b/a)) * a
+end
+
+function kldivergence(p::LogUniform, q::LogUniform)
+    ap, bp, aq, bq = promote(params(p)..., params(q)...)
+    finite = aq <= ap < bp <= bq
+    res = log(log(bq / aq) / log(bp / ap))
+    return finite ? res : oftype(res, Inf)
 end
