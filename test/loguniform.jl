@@ -58,6 +58,26 @@ import Random
         @test exp(median(u)) ≈ median(dist)
         x = rand(rng, dist)
         @test cdf(u, log(x)) ≈ cdf(dist, x)
+
+        @test @inferred(entropy(dist)) ≈  Distributions.expectation(dist, x->-logpdf(dist,x))
+    end
+
+    @test kldivergence(LogUniform(1,2), LogUniform(1,2)) ≈ 0 atol=100eps(Float64)
+    @test isfinite(kldivergence(LogUniform(1,2), LogUniform(1,10)))
+    @test kldivergence(LogUniform(1.1,10), LogUniform(1,2)) === Inf
+    @test kldivergence(LogUniform(0.1,10), LogUniform(1,2)) === Inf
+    @test kldivergence(LogUniform(0.1,1), LogUniform(1,2))  === Inf
+    @test @inferred(kldivergence(LogUniform(0.1f0,1), LogUniform(1,2)))  === Inf32
+
+    for _ in 1:10
+        aq = 10*rand(rng)
+        ap = aq + 10*rand(rng)
+        bp = ap + 10*rand(rng)
+        bq = bp + 10*rand(rng)
+        p = LogUniform(ap, bp)
+        q = LogUniform(aq, bq)
+        @test @inferred(kldivergence(p, q)) ≈
+            kldivergence(Uniform(log(ap), log(bp)), Uniform(log(aq), log(bq)))
     end
 end
 
