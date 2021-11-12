@@ -47,6 +47,7 @@ end
 @deprecate Wishart(df::Real, S::Matrix, warn::Bool) Wishart(df, S)
 @deprecate Wishart(df::Real, S::Cholesky, warn::Bool) Wishart(df, S)
 
-# Deprecate 3 arguments expectation
-@deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(distr, g; epsilon=epsilon) false
-@deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(distr, g) false
+# Deprecate 3 arguments expectation and once with function in second place
+@deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr; epsilon=epsilon) false
+@deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr) false
+@deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false

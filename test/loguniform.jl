@@ -59,7 +59,7 @@ import Random
         x = rand(rng, dist)
         @test cdf(u, log(x)) ≈ cdf(dist, x)
 
-        @test @inferred(entropy(dist)) ≈  Distributions.expectation(dist, x->-logpdf(dist,x))
+        @test @inferred(entropy(dist)) ≈  Distributions.expectation(x->-logpdf(dist,x), dist)
     end
 
     @test kldivergence(LogUniform(1,2), LogUniform(1,2)) ≈ 0 atol=100eps(Float64)

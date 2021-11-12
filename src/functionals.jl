@@ -1,9 +1,9 @@
-function expectation(distr::ContinuousUnivariateDistribution, g::Function; kwargs...)
+function expectation(g, distr::ContinuousUnivariateDistribution; kwargs...)
     return first(quadgk(x -> pdf(distr, x) * g(x), extrema(distr)...; kwargs...))
 end
 
 ## Assuming that discrete distributions only take integer values.
-function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon::Real=1e-10)
+function expectation(g, distr::DiscreteUnivariateDistribution; epsilon::Real=1e-10)
     mindist, maxdist = extrema(distr)
     # We want to avoid taking values up to infinity
     minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
@@ -11,7 +11,7 @@ function expectation(distr::DiscreteUnivariateDistribution, g::Function; epsilon
     return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(distr::MultivariateDistribution, g::Function; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
+function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
     nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
     # We use a function barrier to work around type instability of `sampler(dist)`
     return mcexpectation(rng, g, sampler(distr), nsamples)
@@ -27,9 +27,8 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 # end
 
 function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
-    function logdiff(x)
+    return expectation(P; kwargs...) do x
         logp = logpdf(P, x)
         return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
     end
-    expectation(P, logdiff; kwargs...)
 end

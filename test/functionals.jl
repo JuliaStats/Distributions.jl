@@ -24,13 +24,18 @@ end
 @testset "Expectations" begin
     # univariate distributions
     for d in (Normal(), Poisson(2.0), Binomial(10, 0.4))
-        @test Distributions.expectation(d, identity) ≈ mean(d) atol=1e-3
-        @test @test_deprecated(Distributions.expectation(d, identity, 1e-10)) ≈ mean(d) atol=1e-3
+        m = Distributions.expectation(identity, d)
+        @test m ≈ mean(d) atol=1e-3
+        @test Distributions.expectation(x -> (x - mean(d))^2, d) ≈ var(d) atol=1e-3
+
+        @test @test_deprecated(Distributions.expectation(d, identity, 1e-10)) == m
+        @test @test_deprecated(Distributions.expectation(d, identity)) == m
     end
 
     # multivariate distribution
     d = MvNormal([1.5, -0.5], I)
-    @test Distributions.expectation(d, identity; nsamples=10_000) ≈ mean(d) atol=1e-2
+    @test Distributions.expectation(identity, d; nsamples=10_000) ≈ mean(d) atol=5e-2
+    @test @test_deprecated(Distributions.expectation(d, identity; nsamples=10_000)) ≈ mean(d) atol=5e-2
 end
 
 @testset "KL divergences" begin
