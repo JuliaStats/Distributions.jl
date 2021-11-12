@@ -228,11 +228,13 @@ loglikelihood(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logpdf(d, X)
 function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:Real,3})
     (size(X, 1), size(X, 2)) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # to compute `sum(Base.Fix1(_logpdf, d), eachslice(X; dims=3))`
     broadcasted = Broadcast.broadcasted(_logpdf, (d,), (view(X, :, :, i) for i in axes(X, 3)))
     return sum(Broadcast.instantiate(broadcasted))
 end
 function loglikelihood(d::MatrixDistribution, X::AbstractArray{<:AbstractMatrix{<:Real}})
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # to compute `sum(Base.Fix1(logpdf, d), X)`
     broadcasted = Broadcast.broadcasted(logpdf, (d,), X)
     return sum(Broadcast.instantiate(broadcasted))
 end
