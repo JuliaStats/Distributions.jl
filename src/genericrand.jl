@@ -19,10 +19,8 @@ Generate `n` samples from `s`. The form of the returned object depends on the va
 Generate an array of samples from `s` whose shape is determined by the given
 dimensions.
 """
-rand(s::Sampleable) = rand(GLOBAL_RNG, s)
+rand(s::Sampleable, dims::Int...) = rand(GLOBAL_RNG, s, dims...)
 rand(s::Sampleable, dims::Dims) = rand(GLOBAL_RNG, s, dims)
-rand(s::Sampleable, dim1::Int, moredims::Int...) =
-    rand(GLOBAL_RNG, s, (dim1, moredims...))
 rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
     rand(rng, s, (dim1, moredims...))
 
@@ -117,15 +115,6 @@ function _rand!(
         rand!(rng, s, xi)
     end
     return x
-end
-
-Base.@propagate_inbounds function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
-    # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
 end
 
 Base.@propagate_inbounds function rand!(
