@@ -27,28 +27,38 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
     rand(rng, s, (dim1, moredims...))
 
 # default fallback (redefined for univariate distributions)
-function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
-    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
-end
-function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Discrete})
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
     return @inbounds rand!(rng, sampler(s), Array{eltype(s)}(undef, size(s)))
 end
 
-# multiple samples (redefined for univariate distributions)
-function rand(
-    rng::AbstractRNG, s::Sampleable{ArrayLikeVariate{N},Discrete}, dims::Dims,
-) where {N}
-    sz = size(s)
-    ax = map(Base.OneTo, dims)
-    out = [Array{eltype(s),N}(undef, sz) for _ in Iterators.product(ax)]
+# multiple samples
+function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
+    out = Array{eltype(s)}(undef, dims)
     return @inbounds rand!(rng, sampler(s), out)
 end
 function rand(
-    rng::AbstractRNG, s::Sampleable{ArrayLikeVariate{N},Continuous}, dims::Dims,
-) where {N}
+    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
+)
     sz = size(s)
     ax = map(Base.OneTo, dims)
-    out = [Array{float(eltype(s)),N}(undef, sz) for _ in Iterators.product(ax)]
+    out = [Array{eltype(T)}(undef, sz) for _ in Iterators.product(ax)]
+    return @inbounds rand!(rng, sampler(s), out)
+end
+
+# these are workarounds for sampleables that incorrectly base `eltype` on the parameters
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
+    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+end
+function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
+    out = Array{float(eltype(s))}(undef, dims)
+    return @inbounds rand!(rng, sampler(s), out)
+end
+function rand(
+    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
+)
+    sz = size(s)
+    ax = map(Base.OneTo, dims)
+    out = [Array{float(eltype(T))}(undef, sz) for _ in Iterators.product(ax)]
     return @inbounds rand!(rng, sampler(s), out)
 end
 
