@@ -322,7 +322,7 @@ end
 function _gpd_empirical_prior(μ, xsorted, n=length(x))
     xmax = xsorted[n]
     μ_star = -inv(xmax - μ)
-    x_25 = quantile(xsorted, oftype(μ_star, 0.25); sorted=true, alpha=0, beta=1)
+    x_25 = xsorted[fld(n + 2, 4)]
     σ_star = inv(6 * (x_25 - μ))
     ξ_star = 1//2
     return GeneralizedPareto(μ_star, σ_star, ξ_star)
@@ -333,7 +333,12 @@ function _gpd_empirical_prior_improved(μ, xsorted, n=length(x))
     xmax = xsorted[n]
     μ_star = -inv(xmax - μ) * ((n - 1) // (n + 1))
     p = (3:9) ./ oftype(μ_star, 10)
-    xquantiles = quantile(xsorted, [1 .- p; 1 .- p .^2]; sorted=true, alpha=0, beta=1)
+    q = [1 .- p; 1 .- p .^2]
+    xquantiles = if VERSION ≥ v"1.5.0"
+        quantile(xsorted, q; sorted=true, alpha=0, beta=1)
+    else
+        quantile(xsorted, q; sorted=true)
+    end
     x1mp, x1mp2 = @views xquantiles[1:7], xquantiles[8:14]
     expkp = @. (x1mp2 - x1mp) / (x1mp - μ)
     σp = @. log(p, expkp) * (x1mp - μ) / (1 - expkp)
