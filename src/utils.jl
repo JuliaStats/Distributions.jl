@@ -19,7 +19,9 @@ Base.size(x::EachVariate) = map(length, x.axes)
 Base.size(x::EachVariate, d::Int) = 1 <= ndims(x) ? length(axes(x)[d]) : 1
 
 # We don't need `setindex!` (currently), therefore only `getindex` is implemented
-function Base.getindex(x::EachVariate{V,P,A,T,N}, I::Vararg{Int,N}) where {V,P,A,T,N}
+Base.@propagate_inbounds function Base.getindex(
+    x::EachVariate{V,P,A,T,N}, I::Vararg{Int,N},
+) where {V,P,A,T,N}
     return view(x.parent, ntuple(_ -> Colon(), Val(V))..., I...)
 end
 
