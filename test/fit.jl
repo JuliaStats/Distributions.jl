@@ -344,6 +344,27 @@ end
     end
 end
 
+@testset "Testing fit for GeneralizedPareto" begin
+    for func in funcs, dist in (GeneralizedPareto, GeneralizedPareto{Float64})
+        for (μ, σ, ξ) in ((-1.5, 0.5, 2.0), (-10.0, 1.0, -0.5)), improved in (true, false)
+            x = func[2](dist(μ, σ, ξ), N)
+            d = @inferred fit(dist, x; μ=μ, improved=improved)
+            @test isa(d, dist)
+            @test minimum(d) == μ
+            @test isapprox(scale(d), σ, rtol=0.1)
+            @test isapprox(shape(d), ξ, rtol=0.1)
+
+            d2 = fit(dist, sort(x); μ=μ, improved=improved, sorted=true)
+            @test d2 == d
+        end
+        x = ones(N)
+        d = fit(dist, x; μ=1.0)
+        @test minimum(d) == 1.0
+        @test scale(d) ≈ eps(0.0)
+        @test shape(d) ≈ -1
+    end
+end
+
 @testset "Testing fit for Geometric" begin
     for func in funcs, dist in (Geometric, Geometric{Float64})
         x = func[2](dist(0.3), n0)
