@@ -118,6 +118,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogUniform,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
@@ -303,6 +304,9 @@ include("mixtures/unigmm.jl")
 
 # Implementation of DensityInterface API
 include("density_interface.jl")
+
+# Testing utilities for other packages which implement distributions.
+include("test_utils.jl")
 
 include("deprecates.jl")
 

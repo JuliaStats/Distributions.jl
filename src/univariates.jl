@@ -699,6 +699,7 @@ const continuous_distributions = [
     "triangular",
     "triweight",
     "uniform",
+    "loguniform", # depends on Uniform
     "vonmises",
     "weibull"
 ]
