@@ -45,15 +45,6 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector)
     return _vmf_rot!(spl.v, x)
 end
 
-
-function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractMatrix)
-    @inbounds for j in axes(x, 2)
-        _rand!(rng, spl, view(x,:,j))
-    end
-    return x
-end
-
-
 ### Core computation
 
 _vmf_bval(p::Int, κ::Real) = (p - 1) / (2.0κ + sqrt(4 * abs2(κ) + abs2(p - 1)))

@@ -26,6 +26,32 @@ rand(s::Sampleable, dim1::Int, moredims::Int...) =
 rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
     rand(rng, s, (dim1, moredims...))
 
+# default fallback (redefined for univariate distributions)
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
+    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+end
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Discrete})
+    return @inbounds rand!(rng, sampler(s), Array{eltype(s)}(undef, size(s)))
+end
+
+# multiple samples (redefined for univariate distributions)
+function rand(
+    rng::AbstractRNG, s::Sampleable{ArrayLikeVariate{N},Discrete}, dims::Dims,
+) where {N}
+    sz = size(s)
+    ax = map(Base.OneTo, dims)
+    out = [Array{eltype(s),N}(undef, sz) for _ in Iterators.product(ax)]
+    return @inbounds rand!(rng, sampler(s), out)
+end
+function rand(
+    rng::AbstractRNG, s::Sampleable{ArrayLikeVariate{N},Continuous}, dims::Dims,
+) where {N}
+    sz = size(s)
+    ax = map(Base.OneTo, dims)
+    out = [Array{float(eltype(s)),N}(undef, sz) for _ in Iterators.product(ax)]
+    return @inbounds rand!(rng, sampler(s), out)
+end
+
 """
     rand!([rng::AbstractRNG,] s::Sampleable, A::AbstractArray)
 
@@ -40,10 +66,77 @@ form as specified above. The rules are summarized as below:
   matrices with each element for a sample matrix.
 """
 function rand! end
-rand!(s::Sampleable, X::AbstractArray{<:AbstractArray}, allocate::Bool) =
-    rand!(GLOBAL_RNG, s, X, allocate)
-rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
+Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
 rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
+
+# default definitions for arraylike variates
+@inline function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real,N},
+) where {N}
+    @boundscheck begin
+        size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x)
+end
+
+@inline function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `s` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(s) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _rand!(rng, sampler(s), x)
+end
+
+function _rand!(
+    rng::AbstractRNG,
+    s::Sampleable{<:ArrayLikeVariate},
+    x::AbstractArray{<:Real},
+)
+    @inbounds for xi in eachvariate(x, variate_form(typeof(s)))
+        rand!(rng, s, xi)
+    end
+    return x
+end
+
+Base.@propagate_inbounds function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x)
+end
+
+Base.@propagate_inbounds function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x)
+end
+
+Base.@propagate_inbounds function _rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    for xi in x
+        rand!(rng, s, xi)
+    end
+    return x
+end
 
 """
     sampler(d::Distribution) -> Sampleable

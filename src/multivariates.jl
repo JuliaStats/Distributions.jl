@@ -24,25 +24,6 @@ a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
 rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 
-# multivariate with pre-allocated array
-function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix)
-    @boundscheck size(m, 1) == length(s) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    smp = sampler(s)
-    for i in Base.OneTo(size(m,2))
-        _rand!(rng, smp, view(m,:,i))
-    end
-    return m
-end
-
-# single multivariate with pre-allocated vector
-function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
-               v::AbstractVector{<:Real})
-    @boundscheck length(v) == length(s) ||
-        throw(DimensionMismatch("Output size inconsistent with sample length."))
-    _rand!(rng, s, v)
-end
-
 # multiple multivariates with pre-allocated array of maybe pre-allocated vectors
 rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
       X::AbstractArray{<:AbstractVector}) =
@@ -65,22 +46,11 @@ function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
     return X
 end
 
-# multiple multivariate, must allocate matrix or array of vectors
-rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
+# multiple multivariate, must allocate matrix
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
-    _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
+    @inbounds rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
 rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
-    _rand!(rng, s, Matrix{float(eltype(s))}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
-    rand!(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{Vector{float(eltype(s))}}(undef, dims), true)
-
-# single multivariate, must allocate vector
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =
-    _rand!(rng, s, Vector{eltype(s)}(undef, length(s)))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}) =
-    _rand!(rng, s, Vector{float(eltype(s))}(undef, length(s)))
+    @inbounds rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
 
 ## domain
 
@@ -192,83 +162,6 @@ Return the logarithm of probability density evaluated at `x`.
 `logpdf!(r, d, x)` will write the results to a pre-allocated array `r`.
 """
 logpdf(d::MultivariateDistribution, x::AbstractArray)
-
-_pdf(d::MultivariateDistribution, X::AbstractVector) = exp(_logpdf(d, X))
-
-function logpdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _logpdf(d, X)
-end
-
-function pdf(d::MultivariateDistribution, X::AbstractVector)
-    length(X) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _pdf(d, X)
-end
-
-function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1 : size(X,2)
-        @inbounds r[i] = logpdf(d, view(X,:,i))
-    end
-    return r
-end
-
-function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1 : size(X,2)
-        @inbounds r[i] = pdf(d, view(X,:,i))
-    end
-    return r
-end
-
-function logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    size(X) == (length(d), length(r)) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _logpdf!(r, d, X)
-end
-
-function pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    size(X) == (length(d), length(r)) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    _pdf!(r, d, X)
-end
-
-function logpdf(d::MultivariateDistribution, X::AbstractMatrix)
-    size(X, 1) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    map(i -> _logpdf(d, view(X, :, i)), axes(X, 2))
-end
-
-function pdf(d::MultivariateDistribution, X::AbstractMatrix)
-    size(X, 1) == length(d) ||
-        throw(DimensionMismatch("Inconsistent array dimensions."))
-    map(i -> _pdf(d, view(X, :, i)), axes(X, 2))
-end
-
-"""
-    _logpdf{T<:Real}(d::MultivariateDistribution, x::AbstractArray)
-
-Evaluate logarithm of pdf value for a given vector `x`. This function need not perform dimension checking.
-Generally, one does not need to implement `pdf` (or `_pdf`) as fallback methods are provided in `src/multivariates.jl`.
-"""
-_logpdf(d::MultivariateDistribution, x::AbstractArray)
-
-"""
-    loglikelihood(d::MultivariateDistribution, x::AbstractArray)
-
-The log-likelihood of distribution `d` with respect to all samples contained in array `x`.
-
-Here, `x` can be a vector of length `dim(d)`, a matrix with `dim(d)` rows, or an array of
-vectors of length `dim(d)`.
-"""
-loglikelihood(d::MultivariateDistribution, X::AbstractVector{<:Real}) = logpdf(d, X)
-function loglikelihood(d::MultivariateDistribution, X::AbstractMatrix{<:Real})
-    size(X, 1) == length(d) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    return sum(i -> _logpdf(d, view(X, :, i)), 1:size(X, 2))
-end
-function loglikelihood(d::MultivariateDistribution, X::AbstractArray{<:AbstractVector})
-    return sum(x -> logpdf(d, x), X)
-end
 
 ##### Specific distributions #####
 

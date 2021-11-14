@@ -65,10 +65,9 @@ end
         @test !insupport(d_product, maximum.(ds) .+ 1)
         @test !insupport(d_product, zeros(N + 1))
 
-        @test minimum(d_product) == -ubound
-        @test maximum(d_product) == ubound
-        @test extrema(d_product) == (-ubound, ubound)
-        @test isless(extrema(d_product)...)
+        @test minimum(d_product) == map(minimum, ds)
+        @test maximum(d_product) == map(maximum, ds)
+        @test extrema(d_product) == (map(minimum, ds), map(maximum, ds))
 
         x = @inferred(rand(d_product))
         @test x isa typeof(rand.(collect(ds)))
@@ -99,14 +98,16 @@ end
             @test length(d_product) == length(ds)
             @test eltype(d_product) === eltype(ds[1])
             @test @inferred(mean(d_product)) == mean.(ds)
-            @show typeof(d_product)
-            @show @inferred(map(probs, d_product.v))
             @test @inferred(var(d_product)) == var.(ds)
             @test @inferred(cov(d_product)) == Diagonal(var.(ds))
             @test @inferred(entropy(d_product)) == sum(entropy.(ds))
             @test insupport(d_product, fill(a[2], N))
             @test !insupport(d_product, fill(a[2] + 1, N))
             @test !insupport(d_product, fill(a[2], N + 1))
+
+            @test minimum(d_product) == map(minimum, ds)
+            @test maximum(d_product) == map(maximum, ds)
+            @test extrema(d_product) == (map(minimum, ds), map(maximum, ds))
 
             x = @inferred(rand(d_product))
             @test x isa typeof(rand.(collect(ds)))
@@ -143,6 +144,10 @@ end
         @test @inferred(cov(d_product)) == Diagonal(vec(var.(ds)))
         @test @inferred(cov(d_product, Val(false))) == reshape(Diagonal(vec(var.(ds))), M, N, M, N)
 
+        @test minimum(d_product) == map(minimum, ds)
+        @test maximum(d_product) == map(maximum, ds)
+        @test extrema(d_product) == (map(minimum, ds), map(maximum, ds))
+
         x = @inferred(rand(d_product))
         @test size(x) == size(d_product)
         @test x isa typeof(rand.(collect(ds)))
@@ -152,35 +157,49 @@ end
     end
 end
 
-@testset "Testing generic VectorOfMultivariateDistribution" begin
+@testset "Testing generic array of multivariate distribution" begin
     Random.seed!(123456)
-    M, N = 3, 11
+    M = 3
 
-    # Construct independent distributions and `ProductDistribution` from these.
-    alphas = [normalize!(rand(M), 1) for _ in 1:N]
+    for N in ((11,), (11, 3))
+        # Construct independent distributions and `ProductDistribution` from these.
+        alphas = [normalize!(rand(M), 1) for _ in Iterators.product(map(x -> 1:x, N)...)]
 
-    ds1 = Dirichlet.(alphas)
-    d_product1 = @inferred(product_distribution(ds1))
-    @test d_product1 isa Distributions.VectorOfMultivariateDistribution{Continuous,<:Dirichlet{Float64},<:Vector}
+        ds1 = Dirichlet.(alphas)
+        d_product1 = @inferred(product_distribution(ds1))
+        @test d_product1 isa Distributions.ProductDistribution{length(N) + 1,Continuous,<:Dirichlet{Float64},<:Array{<:Dirichlet{Float64},length(N)}}
 
-    ds2 = Fill(Dirichlet(first(alphas)), N)
-    d_product2 = @inferred(product_distribution(ds2))
-    @test d_product2 isa Distributions.VectorOfMultivariateDistribution{Continuous,<:Dirichlet{Float64},<:Fill{<:Dirichlet{Float64},1}}
+        ds2 = Fill(Dirichlet(first(alphas)), N...)
+        d_product2 = @inferred(product_distribution(ds2))
+        @test d_product2 isa Distributions.ProductDistribution{length(N) + 1,Continuous,<:Dirichlet{Float64},<:Fill{<:Dirichlet{Float64},length(N)}}
 
-    # Check that methods for `VectorOfMultivariateDistribution` are consistent.
-    for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
-        @test size(d_product) == (length(ds[1]), length(ds))
-        @test eltype(d_product) === eltype(ds[1])
-        @test @inferred(mean(d_product)) == reduce(hcat, mean.(ds))
-        @test @inferred(var(d_product)) == reduce(hcat, var.(ds))
-        @test @inferred(cov(d_product)) == Diagonal(reduce(vcat, var.(ds)))
-        @test @inferred(cov(d_product, Val(false))) == reshape(Diagonal(reduce(vcat, var.(ds))), M, N, M, N)
+        # Check that methods for `VectorOfMultivariateDistribution` are consistent.
+        for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
+            @test size(d_product) == (length(ds[1]), size(ds)...)
+            @test eltype(d_product) === eltype(ds[1])
+            @test @inferred(mean(d_product)) == reshape(mapreduce(mean, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
+            @test @inferred(var(d_product)) == reshape(mapreduce(var, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
+            @test @inferred(cov(d_product)) == Diagonal(mapreduce(var, vcat, ds))
 
-        x = @inferred(rand(d_product))
-        @test size(x) == size(d_product)
-        @test x isa typeof(mapreduce(rand, hcat, ds))
-        @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf(d, x[:, i]) for (i, d) in enumerate(ds))
-        # ensure that samples are different, in particular if `Fill` is used
-        @test length(unique(x)) == length(d_product)
+            if d_product isa MatrixDistribution
+                @test @inferred(cov(d_product, Val(false))) == reshape(
+                    Diagonal(mapreduce(var, vcat, ds)), M, length(ds), M, length(ds)
+                )
+            end
+
+            x = @inferred(rand(d_product))
+            @test size(x) == size(d_product)
+            @test x isa typeof(mapreduce(rand, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds))
+
+            # inference broken for non-Fill arrays
+            y = reshape(x, Val(2))
+            if ds isa Fill
+                @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
+            else
+                @test logpdf(d_product, x) ≈ sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
+            end
+            # ensure that samples are different, in particular if `Fill` is used
+            @test length(unique(x)) == length(d_product)
+        end
     end
 end

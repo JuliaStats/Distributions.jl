@@ -29,8 +29,17 @@ const VectorOfUnivariateDistribution{S<:ValueSupport,T<:UnivariateDistribution{S
     ProductDistribution{1,S,T,V}
 const MatrixOfUnivariateDistribution{S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractMatrix{T}} =
     ProductDistribution{2,S,T,V}
+const ArrayOfUnivariateDistribution{N,S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractArray{T,N}} =
+    ProductDistribution{N,S,T,V}
+const FillArrayOfUnivariateDistribution{N,S<:ValueSupport,T<:UnivariateDistribution{S},V<:Fill{T,N}} =
+    ProductDistribution{N,S,T,V}
 const VectorOfMultivariateDistribution{S<:ValueSupport,T<:MultivariateDistribution{S},V<:AbstractVector{T}} =
     ProductDistribution{2,S,T,V}
+const ArrayOfMultivariateDistribution{N,S<:ValueSupport,T<:MultivariateDistribution{S},V<:AbstractArray{T}} =
+    ProductDistribution{N,S,T,V}
+const FillArrayOfMultivariateDistribution{N,S<:ValueSupport,T<:MultivariateDistribution{S},V<:Fill{T}} =
+    ProductDistribution{N,S,T,V}
+
 
 ## deprecations
 # type parameters can't be deprecated it seems: https://github.com/JuliaLang/julia/issues/9830
@@ -55,94 +64,132 @@ var(d::ProductDistribution) = reshape(mapreduce(vec ∘ var, vcat, d.v), size(d)
 cov(d::ProductDistribution) = Diagonal(vec(var(d)))
 
 ## For product distributions of univariate distributions
-function mean(d::ProductDistribution{N,S,<:UnivariateDistribution{S}}) where {N,S<:ValueSupport}
-    return map(mean, d.v)
-end
-function var(d::ProductDistribution{N,S,<:UnivariateDistribution{S}}) where {N,S<:ValueSupport}
-    return map(var, d.v)
+mean(d::ArrayOfUnivariateDistribution) = map(mean, d.v)
+var(d::ArrayOfUnivariateDistribution) = map(var, d.v)
+function insupport(d::ArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
+    size(d) == size(x) && all(insupport(vi, xi) for (vi, xi) in zip(d.v, x))
 end
 
+minimum(d::ArrayOfUnivariateDistribution) = map(minimum, d.v)
+maximum(d::ArrayOfUnivariateDistribution) = map(maximum, d.v)
+
+function entropy(d::ArrayOfUnivariateDistribution)
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    return sum(Broadcast.instantiate(Broadcast.broadcasted(entropy, d.v)))
+end
+
+## Vector of univariate distributions
+length(d::VectorOfUnivariateDistribution) = length(d.v)
+
+## For matrix distributions
+cov(d::ProductDistribution{2}, ::Val{false}) = reshape(cov(d), size(d)..., size(d)...)
+
+# `_rand!` for arrays of univariate distributions
 function _rand!(
     rng::AbstractRNG,
-    d::ProductDistribution{N,S,<:UnivariateDistribution{S}},
+    d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport}
+) where {N}
     @inbounds for (i, di) in zip(eachindex(x), d.v)
         x[i] = rand(rng, di)
     end
     return x
 end
-function _logpdf(
-    d::ProductDistribution{N,S,T,<:AbstractArray{T,N}}, x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport,T<:UnivariateDistribution{S}}
-    return sum(logpdf(di, xi) for (di, xi) in zip(d.v, x))
+
+# `_logpdf` for arrays of univariate distributions
+# we have to fix a method ambiguity
+function _logpdf(d::ArrayOfUnivariateDistribution, x::AbstractArray{<:Real,N}) where {N}
+    return __logpdf(d, x)
+end
+_logpdf(d::MatrixOfUnivariateDistribution, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
+function __logpdf(d::ArrayOfUnivariateDistribution, x::AbstractArray{<:Real,N}) where {N}
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # without allocations to compute `sum(logpdf.(d.v, x))`
+    broadcasted = Broadcast.broadcasted(logpdf, d.v, x)
+    return sum(Broadcast.instantiate(broadcasted))
 end
 
-# possibly more efficient implementations for `Fill` arrays
+# more efficient implementation of `_rand!` for `Fill` array of univariate distributions
 function _rand!(
     rng::AbstractRNG,
-    d::ProductDistribution{N,S,T,<:Fill{T,N}},
+    d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport,T<:UnivariateDistribution{S}}
-    return rand!(rng, sampler(first(d.v)), x)
-end
-function _logpdf(
-    d::ProductDistribution{N,S,T,<:Fill{T,N}}, x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport,T<:UnivariateDistribution{S}}
-    return loglikelihood(first(d.v), x)
+) where {N}
+    return @inbounds rand!(rng, sampler(first(d.v)), x)
 end
 
-## Product distributions of multivariate distributions
+# more efficient implementation of `_logpdf` for `Fill` array of univariate distributions
+# we have to fix a method ambiguity
+function _logpdf(
+    d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
+) where {N}
+    return __logpdf(d, x)
+end
+_logpdf(d::FillArrayOfUnivariateDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
+function __logpdf(
+    d::FillArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}
+) where {N}
+    return @inbounds loglikelihood(first(d.v), x)
+end
+
+# `_rand! for arrays of distributions
 function _rand!(
     rng::AbstractRNG,
-    d::ProductDistribution{N,S,<:MultivariateDistribution{S}},
+    d::ProductDistribution{N,S,<:Distribution{ArrayLikeVariate{M},S}},
     A::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport}
-    B = view(A, size(A, 1), :)
-    @inbounds for (i, di) in zip(axes(B, 2), d.v)
-        rand!(rng, di, view(B, :, i))
+) where {N,M,S<:ValueSupport}
+    @inbounds for (di, Ai) in zip(d.v, eachvariate(A, ArrayLikeVariate{M}))
+        rand!(rng, di, Ai)
     end
     return A
 end
-function _logpdf(
-    d::ProductDistribution{N,S,<:MultivariateDistribution{S}},
+
+# `_logpdf` for arrays of distributions
+# we have to fix a method ambiguity
+_logpdf(d::ProductDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __logpdf(d, x)
+_logpdf(d::ProductDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
+function __logpdf(
+    d::ProductDistribution{N,S,<:Distribution{ArrayLikeVariate{M},S}},
     x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport}
-    y = view(x, size(x, 1), :)
-    return sum(logpdf(di, yi) for (di, yi) in zip(d.v, (view(y, :, i) for i in axes(y, 2))))
+) where {N,M,S<:ValueSupport}
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # to compute `sum(logpdf.(d.v, eachvariate))`
+    @inbounds broadcasted = Broadcast.broadcasted(
+        logpdf, d.v, eachvariate(x, ArrayLikeVariate{M}),
+    )
+    return sum(Broadcast.instantiate(broadcasted))
 end
 
-# possibly more efficient implementations for `Fill` arrays
+# more efficient implementation of `_rand!` for `Fill` arrays of distributions
 function _rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,S,T,<:Fill{T}},
     A::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport,T<:MultivariateDistribution{S}}
-    di = first(d.v)
-    rand!(rng, sampler(di), reshape(A, length(di), :))
+) where {N,M,S<:ValueSupport,T<:Distribution{ArrayLikeVariate{M},S}}
+    @inbounds rand!(rng, sampler(first(d.v)), A)
     return A
 end
+
+# more efficient implementation of `_logpdf` for `Fill` arrays of distributions
+# we have to fix a method ambiguity
 function _logpdf(
     d::ProductDistribution{N,S,T,<:Fill{T}},
     x::AbstractArray{<:Real,N},
-) where {N,S<:ValueSupport,T<:MultivariateDistribution{S}}
-    di = first(d.v)
-    loglikelihood(di, reshape(x, length(di), :))
+) where {N,S<:ValueSupport,T<:Distribution{<:ArrayLikeVariate,S}}
+    return __logpdf(d, x)
 end
-
-## For matrix distributions
-cov(d::ProductDistribution{2}, ::Val{false}) = reshape(cov(d), size(d)..., size(d)...)
-
-## Vector of univariate distributions
-length(d::VectorOfUnivariateDistribution) = length(d.v)
-
-
-entropy(d::VectorOfUnivariateDistribution) = sum(entropy, d.v)
-function insupport(d::VectorOfUnivariateDistribution, x::AbstractVector)
-    length(d) == length(x) && all(insupport(vi, xi) for (vi, xi) in zip(d.v, x))
+function _logpdf(
+    d::ProductDistribution{2,S,T,<:Fill{T}},
+    x::AbstractMatrix{<:Real},
+) where {S<:ValueSupport,T<:Distribution{<:ArrayLikeVariate,S}}
+    return __logpdf(d, x)
 end
-minimum(d::Product) = map(minimum, d.v)
-maximum(d::Product) = map(maximum, d.v)
+function __logpdf(
+    d::ProductDistribution{N,S,T,<:Fill{T}},
+    x::AbstractArray{<:Real,N},
+) where {N,M,S<:ValueSupport,T<:Distribution{ArrayLikeVariate{M},S}}
+    return @inbounds loglikelihood(first(d.v), x)
+end
 
 """
     product_distribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N})

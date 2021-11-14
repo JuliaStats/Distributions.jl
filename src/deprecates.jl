@@ -50,3 +50,8 @@ end
 # Deprecate 3 arguments expectation
 @deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(distr, g; epsilon=epsilon) false
 @deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(distr, g) false
+
+# `rand!` with `allocate`
+@deprecate rand!(rng::AbstractRNG, s::Sampleable, x::AbstractArray, allocate::Bool) rand!(
+    rng, s, x,
+)

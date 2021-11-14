@@ -1,3 +1,34 @@
+## AbstractArray wrapper for collection of variates
+## Similar to https://github.com/JuliaLang/julia/pull/32310 - replace with EachSlice?
+struct EachVariate{V,P,A,T,N} <: AbstractArray{T,N}
+    parent::P
+    axes::A
+end
+
+function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
+    ax = ntuple(i -> axes(x, i + V), Val(M - V))
+    T = typeof(view(x, ntuple(i -> i <= V ? Colon() : firstindex(x, i), Val(M))...))
+    return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
+end
+
+Base.IteratorSize(::Type{EachVariate{V,P,A,T,N}}) where {V,P,A,T,N} = Base.HasShape{N}()
+
+Base.axes(x::EachVariate) = x.axes
+
+Base.size(x::EachVariate) = map(length, x.axes)
+Base.size(x::EachVariate, d::Int) = 1 <= ndims(x) ? length(axes(x)[d]) : 1
+
+# We don't need `setindex!` (currently), therefore only `getindex` is implemented
+function Base.getindex(x::EachVariate{V,P,A,T,N}, I::Vararg{Int,N}) where {V,P,A,T,N}
+    return view(x.parent, ntuple(_ -> Colon(), Val(V))..., I...)
+end
+
+# optimization for univariate distributions
+eachvariate(x::AbstractArray{<:Real}, ::Type{Univariate}) = x
+function eachvariate(x::AbstractArray{<:Real}, ::Type{ArrayLikeVariate{N}}) where {N}
+    return EachVariate{N}(x)
+end
+
 ## macro for argument checking
 
 macro check_args(D, cond)
@@ -16,13 +47,6 @@ isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
 isprobvec(p::AbstractVector{<:Real}) =
     all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))
 
-pnormalize!(v::AbstractVector{<:Real}) = (v ./= sum(v); v)
-
-add!(x::AbstractArray, y::AbstractVector) = broadcast!(+, x, x, y)
-add!(x::AbstractArray, y::Zeros) = x
-
-multiply!(x::AbstractArray, c::Number) = (x .*= c; x)
-
 exp!(x::AbstractArray) = (x .= exp.(x); x)
 
 # get a type wide enough to represent all a distributions's parameters
@@ -30,18 +54,6 @@ exp!(x::AbstractArray) = (x .= exp.(x); x)
 # if the distribution is not parametric, we need this to be a float so that
 # inplace pdf calculations, etc. allocate storage correctly
 @inline partype(::Distribution) = Float64
-
-# for checking the input range of quantile functions
-# comparison with NaN is always false, so no explicit check is required
-macro checkquantile(p,ex)
-    p, ex = esc(p), esc(ex)
-    :(zero($p) <= $p <= one($p) ? $ex : NaN)
-end
-
-macro checkinvlogcdf(lp,ex)
-    lp, ex = esc(lp), esc(ex)
-    :($lp <= zero($lp) ? $ex : NaN)
-end
 
 # because X == X' keeps failing due to floating point nonsense
 function isApproxSymmmetric(a::AbstractMatrix{Float64})
@@ -52,17 +64,6 @@ function isApproxSymmmetric(a::AbstractMatrix{Float64})
         end
     end
     return tmp
-end
-
-# because isposdef keeps giving the wrong answer for samples
-# from Wishart and InverseWisharts
-hasCholesky(a::Matrix{Float64}) = isa(trycholesky(a), Cholesky)
-
-function trycholesky(a::Matrix{Float64})
-    try cholesky(a)
-    catch e
-        return e
-    end
 end
 
 """

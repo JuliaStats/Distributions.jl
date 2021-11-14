@@ -165,6 +165,229 @@ Return the minimum and maximum of the support of `d` as a 2-tuple.
 """
 Base.extrema(d::Distribution) = minimum(d), maximum(d)
 
+"""
+    pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+
+Evaluate the probability density function of `d` at `x`.
+
+This function checks if the size of `x` is compatible with distribution `d`. This check can
+be disabled by using `@inbounds`.
+
+# Implementation
+
+Instead of `pdf` one should implement `_pdf(d, x)` which does not have to check the size of
+`x`. However, due to the fallback `_pdf(d, x) = exp(_logpdf(d, x))` usually it is sufficient
+to implement `_logpdf`.
+
+See also: [`logpdf`](@ref).
+"""
+@inline function pdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}
+) where {N}
+    @boundscheck begin
+        size(x) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _pdf(d, x)
+end
+
+function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+    return exp(@inbounds logpdf(d, x))
+end
+
+"""
+    logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+
+Evaluate the probability density function of `d` at `x`.
+
+This function checks if the size of `x` is compatible with distribution `d`. This check can
+be disabled by using `@inbounds`.
+
+# Implementation
+
+Instead of `logpdf` one should implement `_logpdf(d, x)` which does not have to check the
+size of `x`.
+
+See also: [`pdf`](@ref).
+"""
+@inline function logpdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}
+) where {N}
+    @boundscheck begin
+        size(x) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _logpdf(d, x)
+end
+
+# `_logpdf` should be implemented and has no default definition
+# _logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+
+# TODO: deprecate?
+"""
+    pdf(
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real,N}}
+    ) where {N}
+
+Evaluate the probability density function of `d` at every element in a collection `x`.
+
+This function checks for every element of `x` if its size is compatible with distribution
+`d`. This check can be disabled by using `@inbounds`.
+"""
+Base.@propagate_inbounds function pdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    return map(Base.Fix1(pdf, d), x)
+end
+
+"""
+    logpdf(
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real,N}}
+    ) where {N}
+
+Evaluate the logarithm of the probability density function of `d` at every element in a
+collection `x`.
+
+This function checks for every element of `x` if its size is compatible with distribution
+`d`. This check can be disabled by using `@inbounds`.
+"""
+Base.@propagate_inbounds function logpdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    return map(Base.Fix1(logpdf, d), x)
+end
+
+"""
+    pdf!(
+        out::AbstractArray{<:Real},
+        d::Distribution{<:ArrayLikeVariate},
+        x,
+    )
+
+Compute the
+    x::AbstractArray{<:AbstractArray{<:Real,N}})
+"""
+Base.@propagate_inbounds function pdf!(
+    out::AbstractArray{<:Real,M},
+    d::Distribution{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N},M}
+) where {N,M}
+    return map!(Base.Fix1(pdf, d), out, x)
+end
+
+Base.@propagate_inbounds function logpdf!(
+    out::AbstractArray{<:Real,M},
+    d::Distribution{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N},M}
+) where {N,M}
+    return map!(Base.Fix1(logpdf, d), out, x)
+end
+
+@inline function pdf!(
+    out::AbstractArray{<:Real,M},
+    d::Distribution{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real},
+) where {N,M}
+    @boundscheck begin
+        ndims(x) == N + M || throw(
+            DimensionMismatch(
+                "number of dimensions of `x` ($(ndims(x))) must be equal to the sum of " *
+                "the dimensions of `d` ($N) and output `out` ($M)"
+            )
+        )
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+        ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _pdf!(out, d, X)
+end
+
+function _pdf!(
+    out::AbstractArray{<:Real},
+    d::Distribution{<:ArrayLikeVariate},
+    x::AbstractArray{<:Real},
+)
+    @inbounds logpdf!(out, d, x)
+    map!(exp, out, out)
+    return out
+end
+
+@inline function logpdf!(
+    out::AbstractArray{<:Real,M},
+    d::Distribution{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real},
+) where {N,M}
+    @boundscheck begin
+        ndims(x) == N + M || throw(
+            DimensionMismatch(
+                "number of dimensions of `x` ($(ndims(x))) must be equal to the sum of " *
+                "the dimensions of `d` ($N) and output `out` ($M)"
+            )
+        )
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+        ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _logpdf!(out, d, X)
+end
+
+# default definition
+function _logpdf!(
+    out::AbstractArray{<:Real},
+    d::Distribution{<:ArrayLikeVariate},
+    x::AbstractArray{<:Real},
+)
+    @inbounds map!(Base.Fix1(logpdf, d), out, eachvariate(x, variate_form(typeof(d))))
+    return out
+end
+
+"""
+    loglikelihood(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
+
+The log-likelihood of distribution `d` with respect to all variate(s) contained in `x`.
+
+Here, `x` can be any output of `rand(d, dims...)` and `rand!(d, x)`. For instance, `x` can
+be
+- an array of dimension `N` with `size(x) == size(d)`,
+- an array of dimension `N + 1` with `size(x)[1:N] == size(d)`, or
+- an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
+"""
+Base.@propagate_inbounds function loglikelihood(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N},
+) where {N}
+    return logpdf(d, x)
+end
+@inline function loglikelihood(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # to compute `sum(logpdf.((d,), eachvariate(x, V)))`
+    @inbounds broadcasted = Broadcast.broadcasted(
+        logpdf, (d,), eachvariate(x, ArrayLikeVariate{N}),
+    )
+    return sum(Broadcast.instantiate(broadcasted))
+end
+Base.@propagate_inbounds function loglikelihood(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
+    # to compute `sum(logpdf.((d,), x))`
+    broadcasted = Broadcast.broadcasted(logpdf, (d,), x)
+    return sum(Broadcast.instantiate(broadcasted))
+end
+
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
 abstract type IncompleteDistribution end

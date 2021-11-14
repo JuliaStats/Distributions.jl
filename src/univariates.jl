@@ -133,20 +133,14 @@ end
 
 ## sampling
 
-# multiple univariate, must allocate array
-rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
-    rand!(rng, s, Array{eltype(s)}(undef, dims))
-rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{float(eltype(s))}(undef, dims))
-
 # multiple univariate with pre-allocated array
 # we use a function barrier since for some distributions `sampler(s)` is not type-stable:
 # https://github.com/JuliaStats/Distributions.jl/pull/1281
-function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
-    return _rand_loops!(rng, sampler(s), A)
+function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray{<:Real})
+    return _rand!(rng, sampler(s), A)
 end
 
-function _rand_loops!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray)
+function _rand!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray{<:Real})
     for i in eachindex(A)
         @inbounds A[i] = rand(rng, sampler)
     end
@@ -305,6 +299,9 @@ See also: [`logpdf`](@ref).
 """
 pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
+# extract value from array of zero dimension
+_pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
+
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
@@ -313,6 +310,9 @@ Evaluate the logarithm of probability density (mass) at `x`.
 See also: [`pdf`](@ref).
 """
 logpdf(d::UnivariateDistribution, x::Real)
+
+# extract value from array of zero dimension
+_logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -466,17 +466,6 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 
     return r
 end
-
-## loglikelihood
-"""
-    loglikelihood(d::UnivariateDistribution, x::Union{Real,AbstractArray})
-
-The log-likelihood of distribution `d` with respect to all samples contained in `x`.
-
-Here `x` can be a single scalar sample or an array of samples.
-"""
-loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
-loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### special definitions for distributions with integer-valued support
 
