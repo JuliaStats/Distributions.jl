@@ -169,6 +169,55 @@ function quantile(d::GeneralizedPareto{T}, p::Real) where T<:Real
     return μ + σ * z
 end
 
+#### Fitting
+
+#
+# MLE
+#
+
+"""
+    GeneralizedParetoKnownMuTheta(μ, θ)
+
+Represents a [`GeneralizedPareto`](@ref) where ``\\mu`` and ``\\theta=\\frac{\\xi}{\\sigma}`` are known.
+"""
+struct GeneralizedParetoKnownMuTheta{T} <: IncompleteDistribution
+    μ::T
+    θ::T
+end
+GeneralizedParetoKnownMuTheta(μ, θ) = GeneralizedParetoKnownMuTheta(Base.promote(μ, θ)...)
+
+struct GeneralizedParetoKnownMuThetaStats{T} <: SufficientStats
+    μ::T  # known mean
+    θ::T  # known theta
+    ξ::T  # known shape
+end
+function GeneralizedParetoKnownMuThetaStats(μ, θ, ξ)
+    return GeneralizedParetoKnownMuThetaStats(Base.promote(μ, θ, ξ)...)
+end
+
+function suffstats(d::GeneralizedParetoKnownMuTheta, x::AbstractArray)
+    μ = d.μ
+    θ = d.θ
+    ξ = mean(xi -> log1p(θ * (xi - μ)), x) # mle estimate of ξ
+    return GeneralizedParetoKnownMuThetaStats(μ, θ, ξ)
+end
+
+"""
+    fit_mle(GeneralizedPareto, x; μ, θ)
+
+Compute the maximum likelihood estimate of the parameters of a [`GeneralizedPareto`](@ref)
+where ``\\mu`` and ``\\theta=\\frac{\\xi}{\\sigma}`` are known.
+"""
+function fit_mle(::Type{<:GeneralizedPareto}, x::AbstractArray; μ::Real, θ::Real)
+    g = GeneralizedParetoKnownMuTheta(μ, θ)
+    ss = suffstats(g, x)
+    return fit_mle(g, ss)
+end
+function fit_mle(d::GeneralizedParetoKnownMuTheta, ss::GeneralizedParetoKnownMuThetaStats)
+    ξ = ss.ξ
+    return GeneralizedPareto(d.μ, ξ / d.θ, ξ)
+end
+
 
 #### Sampling
 
