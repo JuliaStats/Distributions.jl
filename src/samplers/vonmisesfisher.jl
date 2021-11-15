@@ -1,6 +1,6 @@
 # Sampler for von Mises-Fisher
 
-struct VonMisesFisherSampler
+struct VonMisesFisherSampler <: Sampleable{Multivariate,Continuous}
     p::Int          # the dimension
     κ::Float64
     b::Float64
@@ -17,6 +17,8 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     v = _vmf_householder_vec(μ)
     VonMisesFisherSampler(p, κ, b, x0, c, v)
 end
+
+Base.length(s::VonMisesFisherSampler) = length(s.v)
 
 @inline function _vmf_rot!(v::AbstractVector, x::AbstractVector)
     # rotate
