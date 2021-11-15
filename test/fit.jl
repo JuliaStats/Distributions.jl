@@ -325,8 +325,8 @@ end
 end
 
 @testset "Testing fit_mle for GeneralizedPareto" begin
-    for func in funcs, dist in (GeneralizedPareto, GeneralizedPareto{Float64})
-        for (μ, σ, ξ) in ((-1.5, 0.5, 2.0), (-10.0, 1.0, -0.5))
+    for func in funcs, dist in (GeneralizedPareto,)
+        for (μ, σ, ξ) in ((-1.5, 0.5, 2), (-10, 1, -0.5))
             x = func[2](dist(μ, σ, ξ), N)
 
             ss = suffstats(Distributions.GeneralizedParetoKnownMuTheta(μ, ξ/σ), x)
@@ -345,14 +345,17 @@ end
 end
 
 @testset "Testing fit for GeneralizedPareto" begin
-    for func in funcs, dist in (GeneralizedPareto, GeneralizedPareto{Float64})
-        for (μ, σ, ξ) in ((-1.5, 0.5, 2.0), (-10.0, 1.0, -0.5)), improved in (true, false)
-            x = func[2](dist(μ, σ, ξ), N)
+    for func in funcs, dist in (GeneralizedPareto,), T in (Float64, Float32)
+        for (μ, σ, ξ) in ((-T(1.5), T(0.5), 2), (-10, 1, -T(0.5))), improved in (true, false)
+            x = T.(func[2](dist(μ, σ, ξ), N))
             d = @inferred fit(dist, x; μ=μ, improved=improved)
-            @test isa(d, dist)
+            @test isa(d, GeneralizedPareto{T})
             @test minimum(d) == μ
             @test isapprox(scale(d), σ, rtol=0.1)
             @test isapprox(shape(d), ξ, rtol=0.1)
+            if T <: Float32
+                @test isa(fit(dist, x[1:n0]; μ=Float64(μ), improved=improved), GeneralizedPareto{Float64})
+            end
 
             d2 = fit(dist, sort(x); μ=μ, improved=improved, sorted=true)
             @test d2 == d
