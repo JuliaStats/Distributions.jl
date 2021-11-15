@@ -304,7 +304,7 @@ function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
 end
 
 # Zhang & Stephens, 2009
-function _gpd_empirical_prior(μ, xsorted, n=length(x))
+function _gpd_empirical_prior(μ, xsorted, n=length(xsorted))
     xmax = xsorted[n]
     μ_star = -inv(xmax - μ)
     x_25 = xsorted[fld(n + 2, 4)]
@@ -314,7 +314,7 @@ function _gpd_empirical_prior(μ, xsorted, n=length(x))
 end
 
 # Zhang, 2010
-function _gpd_empirical_prior_improved(μ, xsorted, n=length(x))
+function _gpd_empirical_prior_improved(μ, xsorted, n=length(xsorted))
     xmax = xsorted[n]
     μ_star = (n - 1) / ((n + 1) *  (μ - xmax))
     p = (3//10, 2//5, 1//2, 3//5, 7//10, 4//5, 9//10)  # 0.3:0.1:0.9
