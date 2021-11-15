@@ -13,9 +13,11 @@ makedocs(
         "truncate.md",
         "multivariate.md",
         "matrix.md",
+        "cholesky.md",
         "mixture.md",
         "fit.md",
         "extends.md",
+        "density_interface.md",
     ]
 )
 

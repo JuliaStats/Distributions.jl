@@ -1,26 +1,23 @@
-function getEndpoints(distr::UnivariateDistribution, epsilon::Real)
-    (left,right) = map(x -> quantile(distr,x), (0,1))
-    leftEnd = left!=-Inf ? left : quantile(distr, epsilon)
-    rightEnd = right!=-Inf ? right : quantile(distr, 1-epsilon)
-    (leftEnd, rightEnd)
-end
-
-function expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    quadgk(x -> f(x)*g(x), leftEnd, rightEnd)[1]
+function expectation(g, distr::ContinuousUnivariateDistribution; kwargs...)
+    return first(quadgk(x -> pdf(distr, x) * g(x), extrema(distr)...; kwargs...))
 end
 
 ## Assuming that discrete distributions only take integer values.
-function expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real)
-    f = x->pdf(distr,x)
-    (leftEnd, rightEnd) = getEndpoints(distr, epsilon)
-    sum(x -> f(x)*g(x), leftEnd:rightEnd)
+function expectation(g, distr::DiscreteUnivariateDistribution; epsilon::Real=1e-10)
+    mindist, maxdist = extrema(distr)
+    # We want to avoid taking values up to infinity
+    minval = isfinite(mindist) ? mindist : quantile(distr, epsilon)
+    maxval = isfinite(maxdist) ? maxdist : quantile(distr, 1 - epsilon)
+    return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(distr::UnivariateDistribution, g::Function)
-    expectation(distr, g, 1e-10)
+function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
+    nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
+    # We use a function barrier to work around type instability of `sampler(dist)`
+    return mcexpectation(rng, g, sampler(distr), nsamples)
 end
+
+mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 
 ## Leave undefined until we've implemented a numerical integration procedure
 # function entropy(distr::UnivariateDistribution)
@@ -29,6 +26,9 @@ end
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function kldivergence(P::UnivariateDistribution, Q::UnivariateDistribution)
-    expectation(P, x -> let p = pdf(P,x); (p > 0)*log(p/pdf(Q,x)) end)
+function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
+    return expectation(P; kwargs...) do x
+        logp = logpdf(P, x)
+        return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
+    end
 end

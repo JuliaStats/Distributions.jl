@@ -17,6 +17,12 @@ const Multivariate  = ArrayLikeVariate{1}
 const Matrixvariate = ArrayLikeVariate{2}
 
 """
+`F <: CholeskyVariate` specifies that the variate or a sample is of type
+`LinearAlgebra.Cholesky`.
+"""
+abstract type CholeskyVariate <: VariateForm end
+
+"""
 `S <: ValueSupport` specifies the support of sample elements,
 either discrete or continuous.
 """

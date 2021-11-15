@@ -27,6 +27,8 @@ using SpecialFunctions
 
 import ChainRulesCore
 
+import DensityInterface
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -38,6 +40,7 @@ export
     Univariate,
     Multivariate,
     Matrixvariate,
+    CholeskyVariate,
     Discrete,
     Continuous,
     Sampleable,
@@ -111,9 +114,11 @@ export
     Laplace,
     Levy,
     LKJ,
+    LKJCholesky,
     LocationScale,
     Logistic,
     LogNormal,
+    LogUniform,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
@@ -202,6 +207,7 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
+    kldivergence,       # kl divergence between distributions
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
@@ -281,6 +287,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
@@ -294,6 +301,12 @@ include("pdfnorm.jl")
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
+
+# Implementation of DensityInterface API
+include("density_interface.jl")
+
+# Testing utilities for other packages which implement distributions.
+include("test_utils.jl")
 
 include("deprecates.jl")
 
@@ -325,7 +338,7 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
