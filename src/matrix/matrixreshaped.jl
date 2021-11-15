@@ -65,7 +65,7 @@ params(d::MatrixReshaped) = (d.d, d.num_rows, d.num_cols)
     d::MatrixReshaped{S,<:MultivariateDistribution{S}},
 ) where {S<:Real} = S
 
-_logpdf(d::MatrixReshaped, X::AbstractMatrix) = logpdf(d.d, vec(X))
+_logpdf(d::MatrixReshaped, X::AbstractMatrix{<:Real}) = logpdf(d.d, vec(X))
 
 function _rand!(rng::AbstractRNG, d::MatrixReshaped, Y::AbstractMatrix)
     rand!(rng, d.d, view(Y, :))
