@@ -225,10 +225,7 @@ end
 
 # TODO: deprecate?
 """
-    pdf(
-        d::Distribution{ArrayLikeVariate{N}},
-        x::AbstractArray{<:AbstractArray{<:Real,N}}
-    ) where {N}
+    pdf(d::Distribution{<:ArrayLikeVariate}, x)
 
 Evaluate the probability density function of `d` at every element in a collection `x`.
 
@@ -241,11 +238,22 @@ Base.@propagate_inbounds function pdf(
     return map(Base.Fix1(pdf, d), x)
 end
 
+@inline function pdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return @inbounds map(Base.Fix1(pdf, d), eachvariate(x, variate_form(typeof(d))))
+end
+
 """
-    logpdf(
-        d::Distribution{ArrayLikeVariate{N}},
-        x::AbstractArray{<:AbstractArray{<:Real,N}}
-    ) where {N}
+    logpdf(d::Distribution{<:ArrayLikeVariate}, x)
 
 Evaluate the logarithm of the probability density function of `d` at every element in a
 collection `x`.
@@ -257,6 +265,20 @@ Base.@propagate_inbounds function logpdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     return map(Base.Fix1(logpdf, d), x)
+end
+
+@inline function logpdf(
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return @inbounds map(Base.Fix1(logpdf, d), eachvariate(x, variate_form(typeof(d))))
 end
 
 """

@@ -39,7 +39,7 @@ function rand(
 )
     sz = size(s)
     ax = map(Base.OneTo, dims)
-    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax)]
+    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
     return @inbounds rand!(rng, sampler(s), out)
 end
 
@@ -56,7 +56,7 @@ function rand(
 )
     sz = size(s)
     ax = map(Base.OneTo, dims)
-    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax)]
+    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
     return @inbounds rand!(rng, sampler(s), out)
 end
 
