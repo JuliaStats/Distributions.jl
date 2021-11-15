@@ -309,8 +309,8 @@ function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
     # estimate mean θ over the quadrature points
     # with weights as the normalized profile likelihood 
     lθ = _gpd_profile_loglikelihood.(μ, θ, Ref(xsorted), n)
-    softmax!(lθ)
-    θ_hat = dot(lθ, θ)
+    weights = softmax!(lθ)
+    θ_hat = dot(weights, θ)
 
     return θ_hat
 end
