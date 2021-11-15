@@ -196,13 +196,14 @@ Compute the maximum likelihood estimate of the parameters of a [`GeneralizedPare
 where ``\\mu`` and ``\\theta=\\frac{\\xi}{\\sigma}`` are known.
 """
 function fit_mle(::Type{<:GeneralizedPareto}, x::AbstractArray{<:Real}; μ::Real, θ::Real)
-    g = GeneralizedParetoKnownMuTheta(μ, θ)
-    ss = suffstats(g, x)
-    return fit_mle(g, ss)
+    return fit_mle(GeneralizedParetoKnownMuTheta(μ, θ), x)
 end
-function fit_mle(d::GeneralizedParetoKnownMuTheta, ss::GeneralizedParetoKnownMuThetaStats)
+function fit_mle(g::GeneralizedParetoKnownMuTheta, x::AbstractArray{<:Real})
+    return fit_mle(g, suffstats(g, x))
+end
+function fit_mle(g::GeneralizedParetoKnownMuTheta, ss::GeneralizedParetoKnownMuThetaStats)
     ξ = ss.ξ
-    return GeneralizedPareto(d.μ, ξ / d.θ, ξ)
+    return GeneralizedPareto(g.μ, ξ / g.θ, ξ)
 end
 
 #
@@ -272,7 +273,7 @@ function fit_empiricalbayes(
     # estimate θ using empirical bayes
     θ_hat = _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
     # estimate remaining parameters using MLE
-    return fit_mle(GeneralizedPareto, xsorted; μ=μ, θ=θ_hat)
+    return fit_mle(GeneralizedParetoKnownMuTheta(μ, θ_hat), xsorted)
 end
 
 # estimate θ̂ = ∫θp(θ|x,μ)dθ, i.e. the posterior mean using quadrature over grid
@@ -338,7 +339,7 @@ end
 
 # compute log joint likelihood p(x|μ,θ), with ξ the MLE given θ and x
 function _gpd_profile_loglikelihood(μ, θ, x, n=length(x))
-    d = fit_mle(GeneralizedPareto, x; μ=μ, θ=θ)
+    d = fit_mle(GeneralizedParetoKnownMuTheta(μ, θ), x)
     return -n * (log(d.σ) + d.ξ + 1)
 end
 
