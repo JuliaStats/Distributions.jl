@@ -330,15 +330,16 @@ end
 function _gpd_empirical_prior_improved(μ, xsorted, n=length(x))
     xmax = xsorted[n]
     μ_star = (n - 1) / ((n + 1) *  (μ - xmax))
-    p = (3:9) ./ oftype(μ_star, 10)
-    q = [1 .- p; 1 .- p .^2]
-    xquantiles = if VERSION ≥ v"1.5.0"
-        quantile(xsorted, q; sorted=true, alpha=0, beta=1)
+    p = (3//10, 2//5, 1//2, 3//5, 7//10, 4//5, 9//10)  # 0.3:0.1:0.9
+    q1 = (7//10, 3//5, 1//2, 2//5, 3//10, 1//5, 1//10)  # 1 .- p
+    q2 = (91//100, 21//25, 3//4, 16//25, 51//100, 9//25, 19//100)  # 1 .- p .^ 2
+    @static if VERSION ≥ v"1.5.0"
+        x1mp = quantile(xsorted, q1; sorted=true, alpha=0, beta=1)
+        x1mp2 = quantile(xsorted, q2; sorted=true, alpha=0, beta=1)
     else
-        quantile(xsorted, q; sorted=true)
+        x1mp = quantile(xsorted, q1; sorted=true)
+        x1mp2 = quantile(xsorted, q2; sorted=true)
     end
-    x1mp = @views xquantiles[1:7]
-    x1mp2 = @views xquantiles[8:14]
     expkp = @. (x1mp2 - x1mp) / (x1mp - μ)
     σp = @. log(p, expkp) * (x1mp - μ) / (1 - expkp)
     σ_star = inv(2 * median(σp))
