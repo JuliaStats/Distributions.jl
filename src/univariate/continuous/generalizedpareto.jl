@@ -190,7 +190,7 @@ function suffstats(d::GeneralizedParetoKnownMuTheta, x::AbstractArray{<:Real})
 end
 
 """
-    fit_mle(GeneralizedPareto, x; μ, θ)
+    fit_mle(::Type{<:GeneralizedPareto}, x; μ, θ)
 
 Compute the maximum likelihood estimate of the parameters of a [`GeneralizedPareto`](@ref)
 where ``\\mu`` and ``\\theta=\\frac{\\xi}{\\sigma}`` are known.
@@ -220,7 +220,7 @@ struct GeneralizedParetoKnownMu{T} <: IncompleteDistribution
 end
 
 """
-    fit(GeneralizedPareto, x; μ, kwargs...)
+    fit(::Type{<:GeneralizedPareto}, x; μ, kwargs...)
 
 Fit a [`GeneralizedPareto`](@ref) with known location `μ` to the data `x`.
 
