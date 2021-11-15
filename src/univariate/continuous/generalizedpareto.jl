@@ -279,7 +279,8 @@ function fit_empiricalbayes(
         # support is nearly a point. solution is not unique; any solution satisfying the
         # constraints σ/ξ ≈ 0 and ξ < 0 is acceptable. we choose the ξ = -1 solution, i.e.
         # the uniform distribution
-        return GeneralizedPareto(μ, max(eps(zero(T)), xmax - μ), -one(μ))
+        σ = xmax - μ
+        return GeneralizedPareto(μ, max(eps(zero(σ)), σ), -1)
     end
     # estimate θ using empirical bayes
     θ_hat = _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
