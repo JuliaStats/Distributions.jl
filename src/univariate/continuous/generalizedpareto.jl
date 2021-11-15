@@ -151,22 +151,8 @@ logcdf(d::GeneralizedPareto, x::Real) = log1mexp(logccdf(d, x))
 
 function quantile(d::GeneralizedPareto{T}, p::Real) where T<:Real
     (μ, σ, ξ) = params(d)
-
-    if p == 0
-        z = zero(T)
-    elseif p == 1
-        z = ξ < 0 ? -1 / ξ : T(Inf)
-    elseif 0 < p < 1
-        if abs(ξ) < eps()
-            z = -log1p(-p)
-        else
-            z = expm1(-ξ * log1p(-p)) / ξ
-        end
-    else
-      z = T(NaN)
-    end
-
-    return μ + σ * z
+    nlog1pp = -log1p(-p * one(T))
+    z = abs(ξ) < eps() ? nlog1pp : expm1(ξ * nlog1pp) / ξ
 end
 
 #### Fitting
