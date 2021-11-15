@@ -140,7 +140,7 @@ sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(p
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
-function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
+function _logpdf!(r::AbstractArray{<:Real}, d::AbstractMvNormal, x::AbstractMatrix{<:Real})
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
@@ -149,7 +149,7 @@ function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     r
 end
 
-_pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
+_pdf!(r::AbstractArray{<:Real}, d::AbstractMvNormal, x::AbstractMatrix{<:Real}) = exp!(_logpdf!(r, d, x))
 
 ###########################################################
 #

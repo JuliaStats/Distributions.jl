@@ -326,7 +326,7 @@ end
         ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
-    return _pdf!(out, d, X)
+    return _pdf!(out, d, x)
 end
 
 function _pdf!(
@@ -356,7 +356,7 @@ end
         ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
-    return _logpdf!(out, d, X)
+    return _logpdf!(out, d, x)
 end
 
 # default definition

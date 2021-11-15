@@ -468,6 +468,8 @@ function MixtureSampler(d::MixtureModel{VF,VS}) where {VF,VS}
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
 end
 
+Base.length(s::MixtureSampler) = length(first(s.csamplers))
+
 rand(rng::AbstractRNG, s::MixtureSampler{Univariate}) =
     rand(rng, s.csamplers[rand(rng, s.psampler)])
 rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
@@ -476,7 +478,5 @@ rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
 # multivariate mixture sampler for a vector
 _rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector) =
     _rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
-_rand!(rng::AbstractRNG, s::MixtureModel{Multivariate}, x::AbstractVector) =
-    _rand!(rng, sampler(s), x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)
