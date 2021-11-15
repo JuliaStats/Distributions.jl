@@ -334,9 +334,11 @@ function _gpd_empirical_prior_improved(μ, xsorted, n=length(x))
     q1 = (7//10, 3//5, 1//2, 2//5, 3//10, 1//5, 1//10)  # 1 .- p
     q2 = (91//100, 21//25, 3//4, 16//25, 51//100, 9//25, 19//100)  # 1 .- p .^ 2
     @static if VERSION ≥ v"1.5.0"
+        # alpha=0, beta=1 corresponds to no interpolation between points
         x1mp = quantile(xsorted, q1; sorted=true, alpha=0, beta=1)
         x1mp2 = quantile(xsorted, q2; sorted=true, alpha=0, beta=1)
     else
+        # older versions of Julia do not have the alpha/beta keywords
         x1mp = quantile(xsorted, q1; sorted=true)
         x1mp2 = quantile(xsorted, q2; sorted=true)
     end
