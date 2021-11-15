@@ -24,29 +24,8 @@ a vector of length `dim(d)` or a matrix with `dim(d)` rows.
 """
 rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 
-# multiple multivariates with pre-allocated array of maybe pre-allocated vectors
-rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
-      X::AbstractArray{<:AbstractVector}) =
-          @inbounds rand!(rng, s, X,
-                          !all([isassigned(X,i) for i in eachindex(X)]) ||
-                          !all(length.(X) .== length(s)))
-
-function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
-               X::AbstractArray{V}, allocate::Bool) where V <: AbstractVector
-    smp = sampler(s)
-    if allocate
-        for i in eachindex(X)
-            X[i] = _rand!(rng, smp, V(undef, size(s)))
-        end
-    else
-        for x in X
-            rand!(rng, smp, x)
-        end
-    end
-    return X
-end
-
 # multiple multivariate, must allocate matrix
+# TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
     @inbounds rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
 rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =

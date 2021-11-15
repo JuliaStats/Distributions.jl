@@ -51,8 +51,3 @@ end
 @deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr; epsilon=epsilon) false
 @deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr) false
 @deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
-
-# `rand!` with `allocate`
-@deprecate rand!(rng::AbstractRNG, s::Sampleable, x::AbstractArray, allocate::Bool) rand!(
-    rng, s, x,
-)

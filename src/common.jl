@@ -45,6 +45,9 @@ Any `Sampleable` implements the `Base.rand` method.
 """
 abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
 
+variate_form(::Type{<:Sampleable{VF}}) where {VF} = VF
+value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS} = VS
+
 """
     length(s::Sampleable)
 
@@ -138,10 +141,6 @@ const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
 const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
 const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
 const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
-
-variate_form(::Type{<:Distribution{VF}}) where {VF} = VF
-
-value_support(::Type{<:Distribution{VF,VS}}) where {VF,VS} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?

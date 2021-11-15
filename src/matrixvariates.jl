@@ -91,31 +91,6 @@ Must be implemented by matrix-variate distributions.
 """
 _rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
 
-## sampling
-
-
-# multiple matrix-variates with pre-allocated array of maybe pre-allocated matrices
-rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-      X::AbstractArray{<:AbstractMatrix}) =
-          @inbounds rand!(rng, s, X,
-                          !all([isassigned(X,i) for i in eachindex(X)]) ||
-                          (sz = size(s); !all(size(x) == sz for x in X)))
-
-function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
-               X::AbstractArray{M}, allocate::Bool) where M <: AbstractMatrix
-    smp = sampler(s)
-    if allocate
-        for i in eachindex(X)
-            X[i] = _rand!(rng, smp, M(undef, size(s)))
-        end
-    else
-        for x in X
-            rand!(rng, smp, x)
-        end
-    end
-    return X
-end
-
 # pdf & logpdf
 
 _logpdf(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logkernel(d, X) + d.logc0

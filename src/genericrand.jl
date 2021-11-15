@@ -40,7 +40,7 @@ function rand(
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out)
+    return @inbounds rand!(rng, sampler(s), out, false)
 end
 
 # these are workarounds for sampleables that incorrectly base `eltype` on the parameters
@@ -57,7 +57,7 @@ function rand(
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out)
+    return @inbounds rand!(rng, sampler(s), out, false)
 end
 
 """
@@ -122,17 +122,49 @@ Base.@propagate_inbounds function rand!(
     s::Sampleable{ArrayLikeVariate{N}},
     x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
-    # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
+    sz = size(s)
+    allocate = !all(isassigned(x, i) && size(@inbounds x[i]) == sz for i in eachindex(x))
+    return rand!(rng, s, x, allocate)
 end
 
-Base.@propagate_inbounds function _rand!(
+Base.@propagate_inbounds function rand!(
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
+) where {N}
+    return rand!(GLOBAL_RNG, s, x, allocate)
+end
+@inline function rand!(
     rng::AbstractRNG,
     s::Sampleable{ArrayLikeVariate{N}},
     x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
 ) where {N}
-    for xi in x
-        rand!(rng, s, xi)
+    @boundscheck begin
+        if !allocate
+            sz = size(s)
+            all(size(xi) == sz for xi in x) ||
+                throw(DimensionMismatch("inconsistent array dimensions"))
+        end
+    end
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x, allocate)
+end
+
+function _rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
+) where {N}
+    if allocate
+        @inbounds for i in eachindex(x)
+            x[i] = rand(rng, s)
+        end
+    else
+        @inbounds for xi in x
+            rand!(rng, s, xi)
+        end
     end
     return x
 end
