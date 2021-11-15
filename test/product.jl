@@ -46,14 +46,17 @@ end
 
     ds1 = Uniform.(0.0, ubound)
     d_product1 = @inferred(product_distribution(ds1))
-    @test d_product1 isa Distributions.VectorOfUnivariateDistribution{Continuous,Uniform{Float64},<:Vector}
+    @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous,Float64}
 
-    ds2 = Fill(Uniform(0.0, first(ubound)), N)
-    d_product2 = @inferred(product_distribution(ds2))
-    @test d_product2 isa Distributions.VectorOfUnivariateDistribution{Continuous,Uniform{Float64},<:Fill}
+    d_product2 = @inferred(product_distribution(ds1...))
+    @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+
+    ds3 = Fill(Uniform(0.0, first(ubound)), N)
+    d_product3 = @inferred(product_distribution(ds3))
+    @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill,Continuous,Float64}
 
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
-    for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
+    for (ds, d_product) in ((ds1, d_product1), (ds1, d_product2), (ds3, d_product3))
         @test length(d_product) == length(ds)
         @test eltype(d_product) === eltype(ds[1])
         @test @inferred(mean(d_product)) == mean.(ds)
@@ -87,14 +90,17 @@ end
         # Construct independent distributions and `ProductDistribution` from these.
         ds1 = DiscreteNonParametric.(fill(a, N), Ref([0.5, 0.5]))
         d_product1 = @inferred(product_distribution(ds1))
-        @test d_product1 isa Distributions.VectorOfUnivariateDistribution{Discrete,<:DiscreteNonParametric,<:Vector}
+        @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector{<:DiscreteNonParametric},Discrete,eltype(a)}
 
-        ds2 = Fill(DiscreteNonParametric(a, [0.5, 0.5]), N)
-        d_product2 = @inferred(product_distribution(ds2))
-        @test d_product2 isa Distributions.VectorOfUnivariateDistribution{Discrete,<:DiscreteNonParametric,<:Fill}
+        d_product2 = @inferred(product_distribution(ds1...))
+        @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:NTuple{N,<:DiscreteNonParametric},Discrete,eltype(a)}
+
+        ds3 = Fill(DiscreteNonParametric(a, [0.5, 0.5]), N)
+        d_product3 = @inferred(product_distribution(ds3))
+        @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill{<:DiscreteNonParametric,1},Discrete,eltype(a)}
 
         # Check that methods for `VectorOfUnivariateDistribution` are consistent.
-        for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
+        for (ds, d_product) in ((ds1, d_product1), (ds1, d_product3), (ds3, d_product2))
             @test length(d_product) == length(ds)
             @test eltype(d_product) === eltype(ds[1])
             @test @inferred(mean(d_product)) == mean.(ds)
@@ -120,6 +126,38 @@ end
     end
 end
 
+@testset "Testing tuple of continuous and discrete distribution" begin
+    Random.seed!(123456)
+    N = 11
+
+    ds = (Bernoulli(0.3), Uniform(0.0, 0.7), Categorical([0.4, 0.2, 0.4]))
+    d_product = @inferred(product_distribution(ds...))
+    @test d_product isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+
+    ds_vec = vcat(ds...)
+
+    @test length(d_product) == 3
+    @test eltype(d_product) === Float64
+    @test @inferred(mean(d_product)) == mean.(ds_vec)
+    @test @inferred(var(d_product)) == var.(ds_vec)
+    @test @inferred(cov(d_product)) == Diagonal(var.(ds_vec))
+    @test @inferred(entropy(d_product)) == sum(entropy.(ds_vec))
+    @test insupport(d_product, [0, 0.2, 3])
+    @test !insupport(d_product, [-0.5, 0.2, 3])
+    @test !insupport(d_product, [0, -0.5, 3])
+    @test !insupport(d_product, [0, 0.2, -0.5])
+
+    @test @inferred(minimum(d_product)) == map(minimum, ds_vec)
+    @test @inferred(maximum(d_product)) == map(maximum, ds_vec)
+    @test @inferred(extrema(d_product)) == (map(minimum, ds_vec), map(maximum, ds_vec))
+
+    x = @inferred(rand(d_product))
+    @test x isa Vector{Float64}
+    @test length(x) == length(d_product)
+    @test insupport(d_product, x)
+    @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
+end
+
 @testset "Testing generic MatrixOfUnivariateDistribution" begin
     Random.seed!(123456)
     M, N = 11, 16
@@ -129,11 +167,11 @@ end
 
     ds1 = Uniform.(0.0, ubound)
     d_product1 = @inferred(product_distribution(ds1))
-    @test d_product1 isa Distributions.MatrixOfUnivariateDistribution{Continuous,Uniform{Float64},<:Matrix}
+    @test d_product1 isa Distributions.MatrixOfUnivariateDistribution{<:Matrix{<:Uniform},Continuous,Float64}
 
     ds2 = Fill(Uniform(0.0, first(ubound)), M, N)
     d_product2 = @inferred(product_distribution(ds2))
-    @test d_product2 isa Distributions.MatrixOfUnivariateDistribution{Continuous,Uniform{Float64},<:Fill{Uniform{Float64},2}}
+    @test d_product2 isa Distributions.MatrixOfUnivariateDistribution{<:Fill{<:Uniform,2},Continuous,Float64}
 
     # Check that methods for `MatrixOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
@@ -167,11 +205,11 @@ end
 
         ds1 = Dirichlet.(alphas)
         d_product1 = @inferred(product_distribution(ds1))
-        @test d_product1 isa Distributions.ProductDistribution{length(N) + 1,Continuous,<:Dirichlet{Float64},<:Array{<:Dirichlet{Float64},length(N)}}
+        @test d_product1 isa Distributions.ProductDistribution{length(N) + 1,1,<:Array{<:Dirichlet{Float64},length(N)},Continuous,Float64}
 
         ds2 = Fill(Dirichlet(first(alphas)), N...)
         d_product2 = @inferred(product_distribution(ds2))
-        @test d_product2 isa Distributions.ProductDistribution{length(N) + 1,Continuous,<:Dirichlet{Float64},<:Fill{<:Dirichlet{Float64},length(N)}}
+        @test d_product2 isa Distributions.ProductDistribution{length(N) + 1,1,<:Fill{<:Dirichlet{Float64},length(N)},Continuous,Float64}
 
         # Check that methods for `VectorOfMultivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))

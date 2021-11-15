@@ -30,6 +30,9 @@ abstract type ValueSupport end
 struct Discrete   <: ValueSupport end
 struct Continuous <: ValueSupport end
 
+# promotions: embed discrete set in continuous space
+Base.promote_rule(::Type{Continuous}, ::Type{Discrete}) = Continuous
+
 ## Sampleable
 
 """
