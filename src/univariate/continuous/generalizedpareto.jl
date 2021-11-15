@@ -292,7 +292,6 @@ end
 # of minimum length `min_points + floor(sqrt(length(x)))` uniformly sampled over an
 # empirical prior
 function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
-    T = Base.promote_eltype(xsorted, μ)
     n = length(xsorted)
 
     # empirical prior on y = r/(xmax-μ) + θ
@@ -304,7 +303,8 @@ function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
 
     # quadrature points uniformly spaced on the quantiles of the θ prior
     npoints = min_points + floor(Int, sqrt(n))
-    p = ((1:npoints) .- one(T)/2) ./ npoints
+    pmin = 1 // (2 * npoints)
+    p = pmin:(1//npoints):(1 - pmin)
     θ = quantile.(Ref(θ_prior), p)
 
     # estimate mean θ over the quadrature points
