@@ -153,6 +153,7 @@ function quantile(d::GeneralizedPareto{T}, p::Real) where T<:Real
     (μ, σ, ξ) = params(d)
     nlog1pp = -log1p(-p * one(T))
     z = abs(ξ) < eps() ? nlog1pp : expm1(ξ * nlog1pp) / ξ
+    return muladd(σ, z, μ)
 end
 
 #### Fitting
