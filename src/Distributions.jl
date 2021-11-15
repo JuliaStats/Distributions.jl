@@ -121,6 +121,7 @@ export
     MixtureModel,
     Multinomial,
     MultivariateNormal,
+    MvDiscreteNonParametric,
     MvLogNormal,
     MvNormal,
     MvNormalCanon,
