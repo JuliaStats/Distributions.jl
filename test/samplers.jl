@@ -108,7 +108,7 @@ import Distributions:
             Gamma(0.1, 1.0),
             Gamma(2.0, 1.0),
             MatrixNormal(3, 4),
-            MvNormal(3, 1.0),
+            MvNormal(zeros(3), I),
             Normal(1.5, 2.0),
             Poisson(0.5),
         )

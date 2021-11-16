@@ -60,21 +60,31 @@ kurtosis(::Exponential{T}) where {T} = T(6)
 
 entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
-#### Evaluation
-
-zval(d::Exponential, x::Real) = x / d.θ
-xval(d::Exponential, z::Real) = z * d.θ
-
-pdf(d::Exponential, x::Real) = (λ = rate(d); x < 0 ? zero(λ) : λ * exp(-λ * x))
-function logpdf(d::Exponential{T}, x::Real) where T<:Real
-    λ = rate(d)
-    x < 0 ? -T(Inf) : log(λ) - λ * x
+function kldivergence(p::Exponential, q::Exponential)
+    λq_over_λp = scale(q) / scale(p)
+    return -logmxp1(λq_over_λp)
 end
 
-cdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-zval(d, x)) : zero(T)
-ccdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? exp(-zval(d, x)) : zero(T)
-logcdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-zval(d, x)) : -T(Inf)
-logccdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -zval(d, x) : zero(T)
+#### Evaluation
+
+zval(d::Exponential, x::Real) = max(x / d.θ, 0)
+xval(d::Exponential, z::Real) = z * d.θ
+
+function pdf(d::Exponential, x::Real)
+    λ = rate(d)
+    z = λ * exp(-λ * max(x, 0))
+    return x < 0 ? zero(z) : z
+end
+function logpdf(d::Exponential, x::Real)
+    λ = rate(d)
+    z = log(λ) - λ * x
+    return x < 0 ? oftype(z, -Inf) : z
+end
+
+cdf(d::Exponential, x::Real) = -expm1(-zval(d, x))
+ccdf(d::Exponential, x::Real) = exp(-zval(d, x))
+logcdf(d::Exponential, x::Real) = log1mexp(-zval(d, x))
+logccdf(d::Exponential, x::Real) = -zval(d, x)
 
 quantile(d::Exponential, p::Real) = -xval(d, log1p(-p))
 cquantile(d::Exponential, p::Real) = -xval(d, log(p))

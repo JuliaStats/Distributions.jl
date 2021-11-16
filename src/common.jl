@@ -17,6 +17,12 @@ const Multivariate  = ArrayLikeVariate{1}
 const Matrixvariate = ArrayLikeVariate{2}
 
 """
+`F <: CholeskyVariate` specifies that the variate or a sample is of type
+`LinearAlgebra.Cholesky`.
+"""
+abstract type CholeskyVariate <: VariateForm end
+
+"""
 `S <: ValueSupport` specifies the support of sample elements,
 either discrete or continuous.
 """
@@ -138,6 +144,26 @@ value_support(::Type{<:Distribution{VF,VS}}) where {VF,VS} = VS
 # to be decided: how to handle multivariate/matrixvariate distributions?
 Broadcast.broadcastable(d::UnivariateDistribution) = Ref(d)
 
+"""
+    minimum(d::Distribution)
+
+Return the minimum of the support of `d`.
+"""
+minimum(d::Distribution)
+
+"""
+    maximum(d::Distribution)
+
+Return the maximum of the support of `d`.
+"""
+maximum(d::Distribution)
+
+"""
+    extrema(d::Distribution)
+
+Return the minimum and maximum of the support of `d` as a 2-tuple.
+"""
+Base.extrema(d::Distribution) = minimum(d), maximum(d)
 
 ## TODO: the following types need to be improved
 abstract type SufficientStats end

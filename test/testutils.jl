@@ -35,6 +35,7 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
     test_range_evaluation(distr)
+    test_nonfinite(distr)
 
     test_stats(distr, vs)
     test_samples(distr, n)
@@ -52,6 +53,7 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
 
     test_support(distr, vs)
     test_evaluation(distr, vs, testquan)
+    test_nonfinite(distr)
 
     if isa(distr, StudentizedRange)
         n = 2000 # must use fewer values due to performance
@@ -462,6 +464,27 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     @test logccdf.(Ref(d), vs) ≈ lcc
 end
 
+function test_nonfinite(distr::UnivariateDistribution)
+    # non-finite bounds
+    @test iszero(@inferred(cdf(distr, -Inf)))
+    @test isone(@inferred(cdf(distr, Inf)))
+    @test isone(@inferred(ccdf(distr, -Inf)))
+    @test iszero(@inferred(ccdf(distr, Inf)))
+    @test @inferred(logcdf(distr, -Inf)) == -Inf
+    @test iszero(@inferred(logcdf(distr, Inf)))
+    @test iszero(@inferred(logccdf(distr, -Inf)))
+    @test @inferred(logccdf(distr, Inf)) == -Inf
+
+    # NaN
+    for f in (cdf, ccdf, logcdf, logccdf)
+        if distr isa NoncentralT
+            # broken in StatsFuns/R
+            @test_broken isnan(f(distr, NaN))
+        else
+            @test isnan(f(distr, NaN))
+        end
+    end
+end
 
 #### Testing statistics methods
 
@@ -556,7 +579,7 @@ function test_params(d::Truncated)
     d_unt = d.untruncated
     D = typeof(d_unt)
     pars = params(d_unt)
-    d_new = Truncated(D(pars...), d.lower, d.upper)
+    d_new = truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
     @test d == deepcopy(d)
 end
@@ -566,4 +589,19 @@ function fdm(f, at)
     map(1:length(at)) do i
         FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
     end
+end
+
+# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
+# We implement it here to avoid a circular dependency on HypothesisTests
+# that causes test failures when preparing a breaking release of Distributions
+function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
+    # compute maximum absolute deviation from the empirical cdf
+    n = length(x)
+    cdfs = sort!(map(Base.Fix1(cdf, d), x))
+    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
+        return max(cdf - lower, upper - cdf)
+    end
+
+    # compute asymptotic p-value (see `KSDist`)
+    return ccdf(KSDist(n), dmax)
 end

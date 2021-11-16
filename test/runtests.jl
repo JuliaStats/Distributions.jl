@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "loguniform",
     "arcsine",
     "dirac",
     "truncate",
@@ -39,6 +40,7 @@ const tests = [
     "edgeworth",
     "matrixreshaped",
     "matrixvariates",
+    "lkjcholesky",
     "vonmisesfisher",
     "conversion",
     "convolution",
@@ -63,6 +65,9 @@ const tests = [
     "chi",
     "gumbel",
     "pdfnorm",
+    "rician",
+    "functionals",
+    "density_interface",
 ]
 
 printstyled("Running tests:\n", color=:blue)

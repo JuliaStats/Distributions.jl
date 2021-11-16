@@ -7,6 +7,7 @@ using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
 
+@testset "matrixvariates" begin
 #=
     1. baseline tests
     2. compare 1 x 1 matrix-variate with univariate
@@ -184,23 +185,8 @@ function test_against_univariate(D::MatrixDistribution, d::UnivariateDistributio
     nothing
 end
 
-# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
-# We implement it here to avoid a circular dependency on HypothesisTests
-# that causes test failures when preparing a breaking release of Distributions
-function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
-    # compute maximum absolute deviation from the empirical cdf
-    n = length(x)
-    cdfs = sort!(map(Base.Fix1(cdf, d), x))
-    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
-        return max(cdf - lower, upper - cdf)
-    end
-
-    # compute asymptotic p-value (see `KSDist`)
-    return ccdf(KSDist(n), dmax)
-end
-
 function test_draws_against_univariate_cdf(D::MatrixDistribution, d::UnivariateDistribution)
-    α = 0.05
+    α = 0.025
     M = 100000
     matvardraws = [rand(D)[1] for m in 1:M]
     @test pvalue_kolmogorovsmirnoff(matvardraws, d) >= α
@@ -341,6 +327,11 @@ function test_special(dist::Type{Wishart})
     ν, Σ = _rand_params(Wishart, Float64, n, n)
     d = Wishart(ν, Σ)
     H = rand(d, M)
+    @testset "deprecations" begin
+        for warn in (true, false)
+            @test @test_deprecated(Wishart(n - 1, Σ, warn)) == Wishart(n - 1, Σ)
+        end
+    end
     @testset "meanlogdet" begin
         @test isapprox(Distributions.meanlogdet(d), mean(logdet.(H)), atol = 0.1)
     end
@@ -364,15 +355,17 @@ function test_special(dist::Type{Wishart})
         end
     end
     @testset "Check Singular Branch" begin
-        X = H[1]
-        rank1 = Wishart(n - 2, Σ, false)
-        rank2 = Wishart(n - 1, Σ, false)
+        # Check that no warnings are shown: #1410
+        rank1 = @test_logs Wishart(n - 2, Σ)
+        rank2 = @test_logs Wishart(n - 1, Σ)
         test_draw(rank1)
         test_draw(rank2)
         test_draws(rank1, rand(rank1, 10^6))
         test_draws(rank2, rand(rank2, 10^6))
         test_cov(rank1)
         test_cov(rank2)
+
+        X = H[1]
         @test Distributions.singular_wishart_logkernel(d, X) ≈ Distributions.nonsingular_wishart_logkernel(d, X)
         @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈ Distributions.nonsingular_wishart_logc0(n, ν, d.S)
         @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
@@ -536,4 +529,5 @@ for distribution in matrixvariates
     @testset "$(dist)" begin
         test_matrixvariate(dist, n, p, M)
     end
+end
 end

@@ -166,3 +166,36 @@ for c in ["discrete",
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
 end
+
+# #1358
+@testset "Poisson quantile" begin
+    d = Poisson(1)
+    @test quantile(d, 0.2) isa Int
+    @test cquantile(d, 0.4) isa Int
+    @test invlogcdf(d, log(0.2)) isa Int
+    @test invlogccdf(d, log(0.6)) isa Int
+end
+
+@testset "Uniform type inference" begin
+    for T in (Int, Float32)
+        d = Uniform{T}(T(2), T(3))
+        FT = float(T)
+        XFT = promote_type(FT, Float64)
+
+        @test @inferred(pdf(d, 1.5)) === zero(FT)
+        @test @inferred(pdf(d, 2.5)) === one(FT)
+        @test @inferred(pdf(d, 3.5)) === zero(FT)
+
+        @test @inferred(logpdf(d, 1.5)) === FT(-Inf)
+        @test @inferred(logpdf(d, 2.5)) === -zero(FT) # negative zero
+        @test @inferred(logpdf(d, 3.5)) === FT(-Inf)
+
+        @test @inferred(cdf(d, 1.5)) === zero(XFT)
+        @test @inferred(cdf(d, 2.5)) === XFT(1//2)
+        @test @inferred(cdf(d, 3.5)) === one(XFT)
+
+        @test @inferred(ccdf(d, 1.5)) === one(XFT)
+        @test @inferred(ccdf(d, 2.5)) === XFT(1//2)
+        @test @inferred(ccdf(d, 3.5)) === zero(XFT)
+    end
+end

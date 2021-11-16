@@ -119,15 +119,18 @@ function logpdf(d::Frechet{T}, x::Real) where T<:Real
     end
 end
 
-cdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? exp(-((d.θ / x) ^ d.α)) : zero(T)
-ccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-((d.θ / x) ^ d.α)) : one(T)
-logcdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? -(d.θ / x) ^ d.α : -T(Inf)
-logccdf(d::Frechet{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-((d.θ / x) ^ d.α)) : zero(T)
+zval(d::Frechet, x::Real) = (d.θ / max(x, 0))^d.α
+xval(d::Frechet, z::Real) = d.θ * z^(- 1 / d.α)
 
-quantile(d::Frechet, p::Real) = d.θ * (-log(p)) ^ (-1 / d.α)
-cquantile(d::Frechet, p::Real) = d.θ * (-log1p(-p)) ^ (-1 / d.α)
-invlogcdf(d::Frechet, lp::Real) = d.θ * (-lp)^(-1 / d.α)
-invlogccdf(d::Frechet, lp::Real) = d.θ * (-log1mexp(lp))^(-1 / d.α)
+cdf(d::Frechet, x::Real) = exp(- zval(d, x))
+ccdf(d::Frechet, x::Real) = -expm1(- zval(d, x))
+logcdf(d::Frechet, x::Real) = - zval(d, x)
+logccdf(d::Frechet, x::Real) = log1mexp(- zval(d, x))
+
+quantile(d::Frechet, p::Real) = xval(d, -log(p))
+cquantile(d::Frechet, p::Real) = xval(d, -log1p(-p))
+invlogcdf(d::Frechet, lp::Real) = xval(d, -lp)
+invlogccdf(d::Frechet, lp::Real) = xval(d, -log1mexp(lp))
 
 function gradlogpdf(d::Frechet{T}, x::Real) where T<:Real
     (α, θ) = params(d)
