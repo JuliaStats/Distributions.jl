@@ -1,4 +1,4 @@
-@inline DensityInterface.hasdensity(::Distribution) = true
+@inline DensityInterface.DensityKind(::Distribution) = DensityInterface.HasDensity()
 
 for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
     @eval begin

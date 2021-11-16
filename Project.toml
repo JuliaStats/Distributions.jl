@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.25.29"
+version = "0.25.30"
 
 [deps]
 ArraysOfArrays = "65a8f2f4-9b39-5baf-92e2-a9cc46fdf018"
@@ -23,7 +23,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 ArraysOfArrays = "0.5"
 ChainRulesCore = "1"
-DensityInterface = "0.3.2"
+DensityInterface = "0.4"
 FillArrays = "0.9, 0.10, 0.11, 0.12"
 PDMats = "0.10, 0.11"
 QuadGK = "2"
