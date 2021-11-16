@@ -25,6 +25,8 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
+using ArraysOfArrays
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
