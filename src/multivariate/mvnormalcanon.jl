@@ -174,7 +174,12 @@ if isdefined(PDMats, :PDSparseMat)
     unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
 end
 
-function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVecOrMat)
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
+    unwhiten_winv!(d.J, randn!(rng, x))
+    x .+= d.μ
+    return x
+end
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
     unwhiten_winv!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
