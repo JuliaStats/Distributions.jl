@@ -317,19 +317,14 @@ end
 # Zhang, 2010
 function _gpd_empirical_prior_improved(μ, xsorted, n=length(xsorted))
     xmax = xsorted[n]
-    μ_star = (n - 1) / ((n + 1) *  (μ - xmax))
+    μ_star = (n - 1) / ((n + 1) * (μ - xmax))
     p = (3//10, 2//5, 1//2, 3//5, 7//10, 4//5, 9//10)  # 0.3:0.1:0.9
-    q1 = (7//10, 3//5, 1//2, 2//5, 3//10, 1//5, 1//10)  # 1 .- p
-    q2 = (91//100, 21//25, 3//4, 16//25, 51//100, 9//25, 19//100)  # 1 .- p .^ 2
-    @static if VERSION ≥ v"1.5.0"
-        # alpha=0, beta=1 corresponds to no interpolation between points
-        x1mp = quantile(xsorted, q1; sorted=true, alpha=0, beta=1)
-        x1mp2 = quantile(xsorted, q2; sorted=true, alpha=0, beta=1)
-    else
-        # older versions of Julia do not have the alpha/beta keywords
-        x1mp = quantile(xsorted, q1; sorted=true)
-        x1mp2 = quantile(xsorted, q2; sorted=true)
-    end
+    q1 = (7, 6, 5, 4, 3, 2, 1)  # 10 .* (1 .- p)
+    q2 = (91, 84, 75, 64, 51, 36, 19)  # 100 .* (1 .- p .^ 2)
+    # q1/10- and q2/100- quantiles of xsorted without interpolation,
+    # i.e. the α-quantile of x without interpolation is x[max(1, floor(Int, α * n + 1/2))]
+    x1mp = map(qi -> xsorted[max(1, div(qi * n, 10, RoundNearestTiesUp))], q1)
+    x1mp2 = map(qi -> xsorted[max(1, div(qi * n, 100, RoundNearestTiesUp))], q2)
     expkp = @. (x1mp2 - x1mp) / (x1mp - μ)
     σp = @. log(p, expkp) * (x1mp - μ) / (1 - expkp)
     σ_star = inv(2 * median(σp))
