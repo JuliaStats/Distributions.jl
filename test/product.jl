@@ -48,7 +48,7 @@ end
     d_product1 = @inferred(product_distribution(ds1))
     @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous,Float64}
 
-    d_product2 = @inferred(product_distribution(ds1...))
+    d_product2 = @inferred(product_distribution(ntuple(i -> Uniform(0.0, ubound[i]), 11)...))
     @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
 
     ds3 = Fill(Uniform(0.0, first(ubound)), N)
@@ -92,7 +92,7 @@ end
         d_product1 = @inferred(product_distribution(ds1))
         @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector{<:DiscreteNonParametric},Discrete,eltype(a)}
 
-        d_product2 = @inferred(product_distribution(ds1...))
+        d_product2 = @inferred(product_distribution(ntuple(_ -> DiscreteNonParametric(a, [0.5, 0.5]), 11)...))
         @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:NTuple{N,<:DiscreteNonParametric},Discrete,eltype(a)}
 
         ds3 = Fill(DiscreteNonParametric(a, [0.5, 0.5]), N)
