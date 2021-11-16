@@ -314,6 +314,9 @@ logpdf(d::UnivariateDistribution, x::Real)
 # extract value from array of zero dimension
 _logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
 
+# loglikelihood for `Real`
+Base.@propagate_inbounds loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
+
 """
     cdf(d::UnivariateDistribution, x::Real)
 
