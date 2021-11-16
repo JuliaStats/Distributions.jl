@@ -1,4 +1,4 @@
-struct MvDiscreteNonParametric{T <: Real,P <: Real,Ts <:  ArrayOfSimilarArrays{T},Ps <: AbstractVector{P}} <: DiscreteMultivariateDistribution
+const MvDiscreteNonParametric{T<:AbstractVector{<:Real},P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} = GeneralDiscreteNonParametric{Multivariate,T,P,Ts,Ps}
 
     support::Ts
     p::Ps
@@ -83,24 +83,8 @@ probs(d::MvDiscreteNonParametric) = d.p
 
 # It would be more intuitive if length was the
 # 
-"""
-    length(d::MvDiscreteNonParametric)
-Retunrs the dimension of the mass points (samples).
-It corresponds to `innersize(d.support)[1]`,
-where `innersize` is a function from from ArraysOfArrays.jl.
-"""
-Base.length(d::MvDiscreteNonParametric) = innersize(d.support)[1]
-
-"""
-    size(d::MvDiscreteNonParametric)
-Returns the size of the support as a tuple where
-the first value is the number of points (samples)
-and the second is the dimension of the samples (e.g ℝⁿ).
-It corresponds to `size(flatview(d.support)')`
-where `flatview` is a function from from ArraysOfArrays.jl
-that turns an Array of Arrays into a matrix.
-"""
-Base.size(d::MvDiscreteNonParametric) = size(flatview(d.support)')
+Base.length(d::MvDiscreteNonParametric) = length(first(d.support))
+Base.size(d::MvDiscreteNonParametric) = (length(d), length(d.support))
 
 function _rand!(rng::AbstractRNG, d::MvDiscreteNonParametric, x::AbstractVector{T}) where T <: Real
 
@@ -115,10 +99,9 @@ function _rand!(rng::AbstractRNG, d::MvDiscreteNonParametric, x::AbstractVector{
     while cp <= draw && i < n
         @inbounds cp += p[i += 1]
     end
-    for (j, v) in enumerate(s[i])
-        x[j] = v
-    end
+    copyto!(x, s[i])
     return x
+end
 end
 
 function _logpdf(d::MvDiscreteNonParametric, x::AbstractVector{T}) where T <: Real
@@ -150,4 +133,3 @@ function cov(d::MvDiscreteNonParametric)
 end
 
 entropy(d::MvDiscreteNonParametric) = entropy(probs(d))
-entropy(d::MvDiscreteNonParametric, b::Real) = entropy(probs(d), b)
