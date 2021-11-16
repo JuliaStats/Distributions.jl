@@ -24,6 +24,7 @@ for fname in ["aliastable.jl",
               "vonmises.jl",
               "vonmisesfisher.jl",
               "discretenonparametric.jl",
+              "mvdiscretenonparametric.jl",
               "categorical.jl"]
 
     include(joinpath("samplers", fname))
