@@ -155,14 +155,14 @@ function _rand!(rng::AbstractRNG,
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{<:Real}) where {T<:Real}
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 #######################################
@@ -231,7 +231,7 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     end
     α0 /= K
 
-    multiply!(μ, α0)
+    lmul!(α0, μ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})

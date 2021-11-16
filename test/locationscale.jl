@@ -167,7 +167,7 @@ end
     end
     test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
 
-    probs = Distributions.pnormalize!(rand(10))
+    probs = normalize!(rand(10), 1)
     for _rng in (missing, rng)
         test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
