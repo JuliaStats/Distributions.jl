@@ -125,7 +125,7 @@ function Base.reshape(
     _reshape_check_dims(dist, dims)
     return dist.dist
 end
-function Base.reshape(d::MatrixNormal, dims::Tuple{Int})
+function Base.reshape(dist::MatrixNormal, dims::Tuple{Int})
     _reshape_check_dims(dist, dims)
     return MvNormal(vec(dist.M), kron(dist.V, dist.U))
 end
