@@ -23,9 +23,10 @@ MvDiscreteNonParametricSampler(support::S, p::AbstractVector{<:Real}
 sampler(d::MvDiscreteNonParametric) =
     MvDiscreteNonParametricSampler(support(d), probs(d))
 
+_rand!(s::MvDiscreteNonParametricSampler, x::AbstractVector{T}) where T<:Real =
+    _rand!(GLOBAL_RNG, s, x)
 
 function _rand!(rng::AbstractRNG, d::MvDiscreteNonParametric, x::AbstractVector{T}) where T <: Real
-
     length(x) == length(d) || throw(DimensionMismatch("Invalid argument dimension."))
     s = d.support
     p = d.p
