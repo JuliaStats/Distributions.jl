@@ -161,6 +161,10 @@ end
 
 # Sampling
 
+# if only a single sample is requested, no alias table is created
+_rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{<:Real}) =
+    multinom_rand!(rng, ntrials(d), probs(d), x)
+
 sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
 
 

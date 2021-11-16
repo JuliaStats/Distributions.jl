@@ -26,7 +26,7 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
-    return @inbounds rand!(rng, sampler(s), Array{eltype(s)}(undef, size(s)))
+    return @inbounds rand!(rng, s, Array{eltype(s)}(undef, size(s)))
 end
 
 # multiple samples
@@ -86,8 +86,7 @@ rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
     @boundscheck begin
         size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
-    # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
+    return _rand!(rng, s, x)
 end
 
 @inline function rand!(
@@ -103,6 +102,7 @@ end
         ntuple(i -> size(x, i), Val(N)) == size(s) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
     return _rand!(rng, sampler(s), x)
 end
 
