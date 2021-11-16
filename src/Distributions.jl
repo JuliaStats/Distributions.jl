@@ -291,6 +291,7 @@ include("samplers.jl")
 
 # others
 include("product.jl")
+include("reshaped.jl")
 include("truncate.jl")
 include("conversion.jl")
 include("convolution.jl")

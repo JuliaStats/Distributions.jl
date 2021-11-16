@@ -70,7 +70,7 @@ d1s = [MatrixReshaped(d1, s...) for s in sizes]
     end
     @testset "MatrixReshaped params" begin
         for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
-            @test params(d) == (d1, s...)
+            @test params(d) == (d1, s)
         end
     end
     @testset "MatrixReshaped partype" begin
@@ -158,7 +158,7 @@ d1s = [MatrixReshaped(d1, s...) for s in sizes]
     end
     @testset "MatrixReshaped params" begin
         for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
-            @test params(d) == (d1, s...)
+            @test params(d) == (d1, s)
         end
     end
     @testset "MatrixReshaped partype" begin

@@ -25,14 +25,6 @@ The rank of each sample from the distribution `d`.
 LinearAlgebra.rank(d::MatrixDistribution)
 
 """
-    vec(d::MatrixDistribution)
-
-If known, returns a `MultivariateDistribution` instance representing the
-distribution of vec(X), where X is a random matrix with distribution `d`.
-"""
-Base.vec(d::MatrixDistribution)
-
-"""
     inv(d::MatrixDistribution)
 
 If known, returns a `MatrixDistribution` instance representing the
@@ -59,7 +51,7 @@ var(d::MatrixDistribution) = ((n, p) = size(d); [var(d, i, j) for i in 1:n, j in
 
 Compute the covariance matrix for `vec(X)`, where `X` is a random matrix with distribution `d`.
 """
-function cov(d::MatrixDistribution, ::Val{true}=Val(true))
+function cov(d::MatrixDistribution)
     M = length(d)
     V = zeros(partype(d), M, M)
     iter = CartesianIndices(size(d))
@@ -72,6 +64,7 @@ function cov(d::MatrixDistribution, ::Val{true}=Val(true))
     end
     return V + tril(V, -1)'
 end
+cov(d::MatrixDistribution, ::Val{true}) = cov(d)
 
 """
     cov(d::MatrixDistribution, flattened = Val(false))
@@ -102,7 +95,6 @@ check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentErro
 ##### Specific distributions #####
 
 for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
-              "matrixreshaped.jl", "matrixtdist.jl", "matrixbeta.jl",
-              "matrixfdist.jl", "lkj.jl"]
+              "matrixtdist.jl", "matrixbeta.jl", "matrixfdist.jl", "lkj.jl"]
     include(joinpath("matrix", fname))
 end
