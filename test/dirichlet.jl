@@ -21,8 +21,13 @@ rng = MersenneTwister(123)
         @test d.alpha0 == 6
 
         @test mean(d) ≈ fill(1/3, 3)
+        @test mode(d) ≈ fill(1/3, 3)
         @test cov(d)  ≈ [8 -4 -4; -4 8 -4; -4 -4 8] / (36 * 7)
         @test var(d)  ≈ diag(cov(d))
+
+        r = Vector{Float64}(undef, 3)
+        Distributions.dirichlet_mode!(r, d.alpha, d.alpha0)
+        @test r ≈ fill(1/3, 3)
 
         @test pdf(Dirichlet([1, 1]), [0, 1]) ≈ 1
         @test pdf(Dirichlet([1f0, 1f0]), [0f0, 1f0]) ≈ 1
