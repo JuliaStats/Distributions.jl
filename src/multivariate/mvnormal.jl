@@ -217,10 +217,10 @@ Construct a multivariate normal distribution with zero mean and covariance matri
 MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
 # deprecated constructors with standard deviations
-Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
-Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(Diagonal(map(abs2, σ)))
-Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(Fill(σ^2, d)))
+Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
