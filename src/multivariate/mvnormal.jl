@@ -220,7 +220,7 @@ MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), 
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
 Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(Diagonal(map(abs2, σ)))
-Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(Fill(σ^2, d)))
+Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(fill(σ^2, d)))
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
