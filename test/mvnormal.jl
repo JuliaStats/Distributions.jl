@@ -284,4 +284,9 @@ end
     @test rand(d) isa Vector{Float64}
     @test rand(d, 10) isa Matrix{Float64}
     @test rand(d, (3, 2)) isa Matrix{Vector{Float64}}
+
+    # evaluation of `logpdf`
+    # (bug fixed by https://github.com/JuliaStats/Distributions.jl/pull/1429)
+    x = rand(d)
+    @test logpdf(d, x) ≈ logpdf(Normal(), x[1]) + logpdf(Normal(), x[2])
 end
