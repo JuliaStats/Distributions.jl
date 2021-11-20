@@ -1,20 +1,9 @@
-struct GeneralDiscreteNonParametric{VF,T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: Distribution{VF,Discrete}
-    support::Ts
-    p::Ps
-
-    function GeneralDiscreteNonParametric{VF,T,P,Ts,Ps}(support::Ts,
-        p::Ps; check_args=true) where {VF,T,P<: Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
-        if check_args
-            length(support) == length(p) || error("length of `support` and `p` must be equal")
-            isprobvec(p) || error("`p` must be a probability vector")
-            allunique(support) || error("`support` must contain only unique values")
-        end
-        new{VF,T,P,Ts,Ps}(support, p)
-    end
-end
-
-const MvDiscreteNonParametric{T<:AbstractVector{<:Real},
-    P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} = GeneralDiscreteNonParametric{Multivariate,T,P,Ts,Ps}
+const MvDiscreteNonParametric{
+    T<:AbstractVector{<:Real},
+    P<:Real,
+    Ts<:AbstractVector{T},
+    Ps<:AbstractVector{P},
+} = GeneralDiscreteNonParametric{Multivariate,T,P,Ts,Ps}
 
 """
     MvDiscreteNonParametric(
@@ -39,12 +28,15 @@ y = collect(eachcol(rand(7,12)))
 """
 function MvDiscreteNonParametric(
     support::AbstractArray{<:AbstractVector{<:Real}},
-    p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)),
+    p::AbstractVector{<:Real} = fill(inv(length(support)), length(support)),
 )
-    return MvDiscreteNonParametric{eltype(support),eltype(p),typeof(support),typeof(p)}(support, p)
+    return MvDiscreteNonParametric{eltype(support),eltype(p),typeof(support),typeof(p)}(
+        support,
+        p,
+    )
 end
 
-Base.eltype(::Type{<:MvDiscreteNonParametric{T}}) where T = T
+Base.eltype(::Type{<:MvDiscreteNonParametric{T}}) where {T} = T
 
 """
     support(d::MvDiscreteNonParametric)
@@ -64,7 +56,11 @@ probs(d::MvDiscreteNonParametric) = d.p
 Base.length(d::MvDiscreteNonParametric) = length(first(d.support))
 Base.size(d::MvDiscreteNonParametric) = (length(d), length(d.support))
 
-function _rand!(rng::AbstractRNG, d::MvDiscreteNonParametric, x::AbstractVector{T}) where T <: Real
+function _rand!(
+    rng::AbstractRNG,
+    d::MvDiscreteNonParametric,
+    x::AbstractVector{T},
+) where {T<:Real}
 
     length(x) == length(d) || throw(DimensionMismatch("Invalid argument dimension."))
     s = d.support
@@ -75,16 +71,16 @@ function _rand!(rng::AbstractRNG, d::MvDiscreteNonParametric, x::AbstractVector{
     cp = p[1]
     i = 1
     while cp <= draw && i < n
-        @inbounds cp += p[i += 1]
+        @inbounds cp += p[i+=1]
     end
     copyto!(x, s[i])
     return x
 end
 
-function _logpdf(d::MvDiscreteNonParametric, x::AbstractVector{T}) where T <: Real
+function _logpdf(d::MvDiscreteNonParametric, x::AbstractVector{T}) where {T<:Real}
     s = support(d)
     p = probs(d)
-    for i in 1:length(p)
+    for i = 1:length(p)
         if s[i] == x
             return log(p[i])
         end
@@ -94,19 +90,17 @@ end
 
 
 function mean(d::MvDiscreteNonParametric)
-    return StatsBase.mean(d.support, weights(d.p))
+    return StatsBase.mean(hcat(d.support...), Weights(d.p, one(eltype(d.p))),dims=2)
 end
 
 function var(d::MvDiscreteNonParametric)
-    x = support(d)
+    x = hcat(support(d)...)
     p = probs(d)
-    return StatsBase.var(x, Weights(p, one(eltype(p))), corrected=false)
+    return StatsBase.var(x, Weights(p, one(eltype(p))), 2,corrected = false)
 end
 
 function cov(d::MvDiscreteNonParametric)
-    x = support(d)
+    x = hcat(support(d)...)
     p = probs(d)
-    return cov(x, Weights(p, one(eltype(p))), corrected=false)
+    return cov(x, Weights(p, one(eltype(p))), 2,corrected = false)
 end
-
-entropy(d::MvDiscreteNonParametric) = entropy(probs(d))
