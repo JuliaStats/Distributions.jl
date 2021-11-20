@@ -29,8 +29,8 @@ function _rand!(rng::AbstractRNG, s::Sampleable{Multivariate}, m::AbstractMatrix
     @boundscheck size(m, 1) == length(s) ||
         throw(DimensionMismatch("Output size inconsistent with sample length."))
     smp = sampler(s)
-    for i in Base.OneTo(size(m, 2))
-        _rand!(rng, smp, view(m, :, i))
+    for i in Base.OneTo(size(m,2))
+        _rand!(rng, smp, view(m,:,i))
     end
     return m
 end
@@ -47,7 +47,7 @@ end
 rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
       X::AbstractArray{<:AbstractVector}) =
           @inbounds rand!(rng, s, X,
-                          !all([isassigned(X, i) for i in eachindex(X)]) ||
+                          !all([isassigned(X,i) for i in eachindex(X)]) ||
                           !all(length.(X) .== length(s)))
 
 function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
@@ -90,11 +90,11 @@ rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}) =
 If ``x`` is a vector, it returns whether x is within the support of ``d``.
 If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``.
 """
-insupport{D <: MultivariateDistribution}(d::Union{D,Type{D}}, x::AbstractArray)
+insupport{D<:MultivariateDistribution}(d::Union{D, Type{D}}, x::AbstractArray)
 
-function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) where D <: MultivariateDistribution
+function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) where D<:MultivariateDistribution
     n = length(r)
-    size(X) == (length(d), n) ||
+    size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
     for i in 1:n
         @inbounds r[i] = insupport(d, view(X, :, i))
@@ -102,8 +102,8 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) wh
     return r
 end
 
-insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D <: MultivariateDistribution} =
-    insupport!(BitArray(undef, size(X, 2)), d, X)
+insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D<:MultivariateDistribution} =
+    insupport!(BitArray(undef, size(X,2)), d, X)
 
 ## statistics
 
@@ -154,11 +154,11 @@ function cor(d::MultivariateDistribution)
     R = Matrix{eltype(C)}(undef, n, n)
 
     for j = 1:n
-        for i = 1:j - 1
+        for i = 1:j-1
             @inbounds R[i, j] = R[j, i]
         end
         R[j, j] = 1.0
-        for i = j + 1:n
+        for i = j+1:n
             @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
@@ -208,15 +208,15 @@ function pdf(d::MultivariateDistribution, X::AbstractVector)
 end
 
 function _logpdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1:size(X, 2)
-        @inbounds r[i] = logpdf(d, view(X, :, i))
+    for i in 1 : size(X,2)
+        @inbounds r[i] = logpdf(d, view(X,:,i))
     end
     return r
 end
 
 function _pdf!(r::AbstractArray, d::MultivariateDistribution, X::AbstractMatrix)
-    for i in 1:size(X, 2)
-        @inbounds r[i] = pdf(d, view(X, :, i))
+    for i in 1 : size(X,2)
+        @inbounds r[i] = pdf(d, view(X,:,i))
     end
     return r
 end
@@ -275,6 +275,7 @@ end
 for fname in ["dirichlet.jl",
               "multinomial.jl",
               "dirichletmultinomial.jl",
+              "generaldiscretenonparametric.jl",
               "mvdiscretenonparametric.jl",
               "mvnormal.jl",
               "mvnormalcanon.jl",

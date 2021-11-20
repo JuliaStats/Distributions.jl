@@ -25,12 +25,9 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
-using ArraysOfArrays
-
 import ChainRulesCore
 
 import DensityInterface
-
 
 export
     # re-export Statistics
@@ -101,6 +98,7 @@ export
     FullNormalCanon,
     Gamma,
     DiscreteNonParametric,
+    GeneralDiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
     Geometric,
