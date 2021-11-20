@@ -323,8 +323,9 @@ function _gpd_empirical_prior_improved(μ, xsorted, n=length(xsorted))
     q2 = (91, 84, 75, 64, 51, 36, 19)  # 100 .* (1 .- p .^ 2)
     # q1/10- and q2/100- quantiles of xsorted without interpolation,
     # i.e. the α-quantile of x without interpolation is x[max(1, floor(Int, α * n + 1/2))]
-    x1mp = map(qi -> xsorted[max(1, div(qi * n, 10, RoundNearestTiesUp))], q1)
-    x1mp2 = map(qi -> xsorted[max(1, div(qi * n, 100, RoundNearestTiesUp))], q2)
+    twon = 2 * n
+    x1mp_2 = map(qi -> xsorted[max(1, fld(qi * twon + 1, 20))], q1)
+    x1mp2_2 = map(qi -> xsorted[max(1, fld(qi * twon + 1, 200))], q2)
     expkp = @. (x1mp2 - x1mp) / (x1mp - μ)
     σp = @. log(p, expkp) * (x1mp - μ) / (1 - expkp)
     σ_star = inv(2 * median(σp))
