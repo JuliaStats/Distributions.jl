@@ -1,111 +1,21 @@
-# struct MvDiscreteNonParametric{T <: Real,P <: Real,Ts <:  ArrayOfSimilarArrays{T},Ps <: AbstractVector{P}} <: DiscreteMultivariateDistribution
-#     support::Ts
-#     p::Ps
-#     function MvDiscreteNonParametric{T,P,Ts,Ps}(support::Ts,
-#         p::Ps) where {T <: Real,P <: Real,Ts <: AbstractVector{<:AbstractVector{T}},Ps <: AbstractVector{P}}
-#         length(support) == length(p) || error("length of `support` and `p` must be equal")
-#         isprobvec(p) || error("`p` must be a probability vector")
-#         allunique(support) || error("`support` must contain only unique value")
-#         new{T,P,Ts,Ps}(support, p)
-#     end
-# end
-# """
-#     MvDiscreteNonParametric(
-#         support::AbstractVector,
-#         p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)),
-#     )
-# Construct a multivariate discrete nonparametric probability distribution with `support` and corresponding
-# probabilities `p`. If the probability vector argument is not passed, then
-# equal probability is assigned to each entry in the support.
-# # Examples
-# ```julia
-# using ArraysOfArrays
-# # rows correspond to samples
-# μ = MvDiscreteNonParametric(nestedview(rand(7,3)'))
-# # columns correspond to samples
-# ν = MvDiscreteNonParametric(nestedview(rand(7,3)))
-# ```
-# """
-# function MvDiscreteNonParametric(
-#     support::AbstractVector{<:AbstractVector{<:Real}},
-#     p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)),
-# )
-#     return MvDiscreteNonParametric{eltype(eltype(support)),eltype(p),typeof(ArrayOfSimilarArrays(support)),typeof(p)}(
-#         ArrayOfSimilarArrays(support), p)
-# end
-# """
-#     MvDiscreteNonParametric(
-#         support::Matrix{<:Real},
-#         p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)
-#     )
-# Construct a multivariate discrete nonparametric probability distribution
-# from a matrix as `support` where each row is a sample, and corresponding
-# probabilities `p`. If the probability vector argument is not passed, then
-# equal probability is assigned to each entry in the support.
-# # Examples
-# ```julia
-# # the rows correspond to the samples
-# using LinearAlgebra
-# μ = MvDiscreteNonParametric(rand(10,3), normalize!(rand(10),1))
-# ```
-# """
-# function MvDiscreteNonParametric(
-#     support::Matrix{<:Real},
-#     p::AbstractVector{<:Real}=fill(inv(size(support)[1]), size(support)[1])
-# )
-#     return MvDiscreteNonParametric(nestedview(support'), p)
-# end
-# Base.eltype(::Type{<:MvDiscreteNonParametric{T}}) where T = T
-
-
-
-# struct GeneralDiscreteNonParametric{VF,T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: Distribution{VF,Discrete}
-
-#     support::Ts
-#     p::Ps
-
-#     function GeneralDiscreteNonParametric{VF,T,P,Ts,Ps}(support::Ts,
-#         p::Ps) where {T,P <: Real,Ts <: AbstractVector{<:AbstractVector{T}},Ps <: AbstractVector{P}}
-
-#         length(support) == length(p) || error("length of `support` and `p` must be equal")
-#         isprobvec(p) || error("`p` must be a probability vector")
-#         allunique(support) || error("`support` must contain only unique value")
-#         new{VF,T,P,Ts,Ps}(support, p)
-#     end
-# end
-
-# const MvDiscreteNonParametric{T<:AbstractVector{<:Real},
-#     P<:Real,Ts<:AbstractVector{T},
-#     Ps<:AbstractVector{P}} = GeneralDiscreteNonParametric{Multivariate,T,P,Ts,Ps}
-
-struct MvDiscreteNonParametric{T <: Real,P <: Real,
-    Ts <: AbstractVector{<: AbstractVector{T}},Ps <: AbstractVector{P}} <: DiscreteMultivariateDistribution
+struct GeneralDiscreteNonParametric{VF,T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: Distribution{VF,Discrete}
     support::Ts
     p::Ps
-    function MvDiscreteNonParametric{T,P,Ts,Ps}(support::Ts,
-        p::Ps) where {T <: Real,P <: Real,Ts <: AbstractVector{<:AbstractVector{T}},Ps <: AbstractVector{P}}
-        length(support) == length(p) || error("length of `support` and `p` must be equal")
-        isprobvec(p) || error("`p` must be a probability vector")
-        allunique(support) || error("`support` must contain only unique value")
-        new{T,P,Ts,Ps}(support, p)
+
+    function GeneralDiscreteNonParametric{VF,T,P,Ts,Ps}(support::Ts,
+        p::Ps; check_args=true) where {VF,T,P<: Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
+        if check_args
+            length(support) == length(p) || error("length of `support` and `p` must be equal")
+            isprobvec(p) || error("`p` must be a probability vector")
+            allunique(support) || error("`support` must contain only unique values")
+        end
+        new{VF,T,P,Ts,Ps}(support, p)
     end
 end
 
+const MvDiscreteNonParametric{T<:AbstractVector{<:Real},
+    P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} = GeneralDiscreteNonParametric{Multivariate,T,P,Ts,Ps}
 
-# struct MvDiscreteNonParametric{VF,T,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <: Distribution{VF,Discrete}
-
-#     support::Ts
-#     p::Ps
-
-#     function MvDiscreteNonParametric{T,P,Ts,Ps}(support::Ts,
-#         p::Ps) where {T <: Real,P <: Real,Ts <: AbstractVector{<:AbstractVector{T}},Ps <: AbstractVector{P}}
-
-#         length(support) == length(p) || error("length of `support` and `p` must be equal")
-#         isprobvec(p) || error("`p` must be a probability vector")
-#         allunique(support) || error("`support` must contain only unique value")
-#         new{T,P,Ts,Ps}(support, p)
-#     end
-# end
 """
     MvDiscreteNonParametric(
         support::AbstractVector,
@@ -118,44 +28,20 @@ equal probability is assigned to each entry in the support.
 
 # Examples
 ```julia
-using ArraysOfArrays
 # rows correspond to samples
-μ = MvDiscreteNonParametric(nestedview(rand(7,3)'))
+x = collect(eachrow(rand(10,2)))
+μ = MvDiscreteNonParametric(x)
 
 # columns correspond to samples
-ν = MvDiscreteNonParametric(nestedview(rand(7,3)))
+y = collect(eachcol(rand(7,12)))
+ν = MvDiscreteNonParametric(y)
 ```
 """
 function MvDiscreteNonParametric(
     support::AbstractArray{<:AbstractVector{<:Real}},
     p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)),
 )
-    return MvDiscreteNonParametric{eltype(eltype(support)),eltype(p),typeof(support),typeof(p)}(support, p)
-end
-
-"""
-    MvDiscreteNonParametric(
-        support::Matrix{<:Real},
-        p::AbstractVector{<:Real}=fill(inv(length(support)), length(support)
-    )
-
-Construct a multivariate discrete nonparametric probability distribution
-from a matrix as `support` where each row is a sample, and corresponding
-probabilities `p`. If the probability vector argument is not passed, then
-equal probability is assigned to each entry in the support.
-
-# Examples
-```julia
-# the rows correspond to the samples
-using LinearAlgebra
-μ = MvDiscreteNonParametric(rand(10,3), normalize!(rand(10),1))
-```
-"""
-function MvDiscreteNonParametric(
-    support::Matrix{<:Real},
-    p::AbstractVector{<:Real}=fill(inv(size(support)[1]), size(support)[1])
-)
-    return MvDiscreteNonParametric(nestedview(support'), p)
+    return MvDiscreteNonParametric{eltype(support),eltype(p),typeof(support),typeof(p)}(support, p)
 end
 
 Base.eltype(::Type{<:MvDiscreteNonParametric{T}}) where T = T
