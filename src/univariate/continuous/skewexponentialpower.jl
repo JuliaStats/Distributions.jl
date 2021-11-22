@@ -80,3 +80,19 @@ mode(d::SkewedExponentialPower) =  m_k(d, 1) + d.μ
 var(d::SkewedExponentialPower) = m_k(d, 2) - m_k(d, 1)^2
 skewness(d::SkewedExponentialPower) = m_k(d, 3)
 kurtosis(d::SkewedExponentialPower) = m_k(d, 4)
+
+function logpdf(d::SkewedExponentialPower, x::Real)
+    μ, σ, p, α = params(d)
+    -log(σ) - log(2*p^(1/p)*gamma(1+1/p)) - 1/p*(x < μ ? ((μ-x)/(2*σ*α))^p : ((x-μ)/(2*σ*(1-α)))^p)
+end
+
+pdf(d::SkewedExponentialPower, x::Real) = exp(logpdf(d, x))
+
+function rand(rng::AbstractRNG, d::SkewedExponentialPower)
+    μ, σ, p, α = params(d)
+    if rand(rng) < d.α
+        μ - σ * 2*p^(1/p) * α * rand(Gamma(1/p, 1))^(1/p)
+    else
+        μ + σ * 2*p^(1/p) * (1-α) * rand(Gamma(1/p, 1))^(1/p)
+    end
+end

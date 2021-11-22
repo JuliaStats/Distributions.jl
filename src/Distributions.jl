@@ -144,6 +144,7 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
+    SkewedExponentialPower,
     Product,
     Poisson,
     PoissonBinomial,
