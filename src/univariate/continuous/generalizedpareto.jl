@@ -270,8 +270,15 @@ function fit_empiricalbayes(
         σ = xmax - μ
         return GeneralizedPareto(μ, max(eps(zero(σ)), σ), -1)
     end
+    # empirical prior on θ
+    n = length(xsorted)
+    θ_prior = if improved
+        _gpd_empirical_prior_improved(μ, xsorted, n)
+    else
+        _gpd_empirical_prior(μ, xsorted, n)
+    end
     # estimate θ using empirical bayes
-    θ_hat = _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
+    θ_hat = _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, θ_prior)
     # estimate remaining parameters using MLE
     return fit_mle(GeneralizedParetoKnownMuTheta(μ, θ_hat), xsorted)
 end
@@ -279,15 +286,8 @@ end
 # estimate θ̂ = ∫θp(θ|x,μ)dθ, i.e. the posterior mean using quadrature over grid
 # of minimum length `min_points + floor(sqrt(length(x)))` uniformly sampled over an
 # empirical prior
-function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, improved)
+function _fit_gpd_θ_empirical_bayes(μ, xsorted, min_points, θ_prior)
     n = length(xsorted)
-
-    # empirical prior on y = r/(xmax-μ) + θ
-    θ_prior = if improved
-        _gpd_empirical_prior_improved(μ, xsorted, n)
-    else
-        _gpd_empirical_prior(μ, xsorted, n)
-    end
 
     # quadrature points uniformly spaced on the quantiles of the θ prior
     npoints = min_points + floor(Int, sqrt(n))
@@ -324,8 +324,8 @@ function _gpd_empirical_prior_improved(μ, xsorted, n=length(xsorted))
     # q1/10- and q2/100- quantiles of xsorted without interpolation,
     # i.e. the α-quantile of x without interpolation is x[max(1, floor(Int, α * n + 1/2))]
     twon = 2 * n
-    x1mp_2 = map(qi -> xsorted[max(1, fld(qi * twon + 1, 20))], q1)
-    x1mp2_2 = map(qi -> xsorted[max(1, fld(qi * twon + 1, 200))], q2)
+    x1mp = map(qi -> xsorted[max(1, fld(qi * twon + 1, 20))], q1)
+    x1mp2 = map(qi -> xsorted[max(1, fld(qi * twon + 1, 200))], q2)
     expkp = @. (x1mp2 - x1mp) / (x1mp - μ)
     σp = @. log(p, expkp) * (x1mp - μ) / (1 - expkp)
     σ_star = inv(2 * median(σp))
