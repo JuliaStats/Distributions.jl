@@ -63,7 +63,7 @@ end
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)
-Base.eltype(::Type{Truncated{D, S, T} } ) where {D, S, T} = T
+Base.eltype(::Type{<:Truncated{D}}) where {D} = eltype(D)
 
 ### range and support
 
@@ -137,17 +137,19 @@ end
 
 ## random number generation
 
-function _rand!(rng::AbstractRNG, d::Truncated)
+function rand(rng::AbstractRNG, ::Type{T}, d::Truncated) where {T}
     d0 = d.untruncated
     if d.tp > 0.25
         while true
-            r = _rand!(rng, d0)
+            r = rand(rng, T, d0)
             if d.lower <= r <= d.upper
                 return r
             end
         end
     else
-        return quantile(d0, d.lcdf + rand(rng) * d.tp)
+        lcdf = d.lcdf
+        tp = d.tp
+        return convert(T, quantile(d0, lcdf + rand(rng, typeof(lcdf)) * tp))
     end
 end
 

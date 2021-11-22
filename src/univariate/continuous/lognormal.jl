@@ -151,7 +151,9 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+function rand(rng::AbstractRNG, ::Type{T}, d::LogNormal) where {T}
+    return exp(randn(rng, T) * T(d.σ) + T(d.μ))
+end
 
 ## Fitting
 

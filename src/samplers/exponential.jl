@@ -2,10 +2,12 @@ struct ExponentialSampler <: Sampleable{Univariate,Continuous}
     scale::Float64
 end
 
-rand(rng::AbstractRNG, s::ExponentialSampler) = s.scale * randexp(rng)
+rand(rng::AbstractRNG, ::Type{T}, s::ExponentialSampler) where {T} = T(s.scale) * randexp(rng, T)
 
 struct ExponentialLogUSampler <: Sampleable{Univariate,Continuous}
     scale::Float64
 end
 
-rand(rng::AbstractRNG, s::ExponentialLogUSampler) = -s.scale * log(rand(rng))
+function rand(rng::AbstractRNG, ::Type{T}, s::ExponentialLogUSampler) where {T}
+    return -T(s.scale) * log(rand(rng, T))
+end

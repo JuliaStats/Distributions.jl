@@ -54,4 +54,11 @@ cf(d::Dirac, t) = cis(t * d.value)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Dirac) = d.value
+rand(::AbstractRNG, ::Type{T}, d::Dirac) where {T} = convert(T, d.value)
+function rand(::AbstractRNG, ::Type{T}, d::Dirac, dims::Dims) where {T}
+    return fill(convert(T, d.value), dims)
+end
+function rand!(::AbstractRNG, d::Dirac, x::AbstractArray)
+    fill!(x, d.value)
+    return x
+end

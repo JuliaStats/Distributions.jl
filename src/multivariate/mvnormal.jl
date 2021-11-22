@@ -80,8 +80,8 @@ abstract type AbstractMvNormal <: ContinuousMultivariateDistribution end
 insupport(d::AbstractMvNormal, x::AbstractVector) =
     length(d) == length(x) && all(isfinite, x)
 
-minimum(d::AbstractMvNormal) = fill(eltype(d)(-Inf), length(d))
-maximum(d::AbstractMvNormal) = fill(eltype(d)(Inf), length(d))
+minimum(d::AbstractMvNormal) = fill(-Inf, length(d))
+maximum(d::AbstractMvNormal) = fill(Inf, length(d))
 mode(d::AbstractMvNormal) = mean(d)
 modes(d::AbstractMvNormal) = [mean(d)]
 
@@ -221,8 +221,6 @@ Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real})
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
 Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
-
-Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real

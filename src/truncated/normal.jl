@@ -137,7 +137,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
+function rand(rng::AbstractRNG, ::Type{T}, d::Truncated{<:Normal}) where {T}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -145,9 +145,9 @@ function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: R
         a = (d.lower - μ) / σ
         b = (d.upper - μ) / σ
         z = randnt(rng, a, b, d.tp)
-        return μ + σ * z
+        return T(μ + σ * z)
     else
-        return clamp(μ, d.lower, d.upper)
+        return T(clamp(μ, d.lower, d.upper))
     end
 end
 
