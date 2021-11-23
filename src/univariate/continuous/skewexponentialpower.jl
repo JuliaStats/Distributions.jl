@@ -28,40 +28,40 @@ skewness(d)     # Get the skewness parameter, α
 location(d)     # Get the location parameter, μ
 ```
 """
-struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
+struct SkewExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     p::T
     α::T
-    SkewedExponentialPower{T}(μ::T, σ::T, p::T, α::T) where {T} = new{T}(μ, σ, p, α)
+    SkewExponentialPower{T}(μ::T, σ::T, p::T, α::T) where {T} = new{T}(μ, σ, p, α)
 end
 
-function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) where {T <: Real}
-    check_args && @check_args(SkewedExponentialPower, σ > zero(σ))
-    check_args && @check_args(SkewedExponentialPower, p > zero(p))
-    check_args && @check_args(SkewedExponentialPower, α > zero(α) && α < one(α))
-    return SkewedExponentialPower{T}(µ, σ, p, α)
+function SkewExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) where {T <: Real}
+    check_args && @check_args(SkewExponentialPower, σ > zero(σ))
+    check_args && @check_args(SkewExponentialPower, p > zero(p))
+    check_args && @check_args(SkewExponentialPower, α > zero(α) && α < one(α))
+    return SkewExponentialPower{T}(µ, σ, p, α)
 end
 
-SkewedExponentialPower(μ::Real, σ::Real, p::Real, α::Real) = SkewedExponentialPower(promote(μ, σ, p, α)...)
-SkewedExponentialPower(μ::Real, σ::Real, p::Real) = SkewedExponentialPower(promote(μ, σ, p, 0.5)...)
-SkewedExponentialPower(μ::Real, σ::Real) = SkewedExponentialPower(promote(μ, σ, 2., 0.5)...)
-SkewedExponentialPower(σ::Real) = SkewedExponentialPower(promote(0., σ, 2., 0.5)...)
+SkewExponentialPower(μ::Real, σ::Real, p::Real, α::Real) = SkewExponentialPower(promote(μ, σ, p, α)...)
+SkewExponentialPower(μ::Real, σ::Real, p::Real) = SkewExponentialPower(promote(μ, σ, p, 0.5)...)
+SkewExponentialPower(μ::Real, σ::Real) = SkewExponentialPower(promote(μ, σ, 2., 0.5)...)
+SkewExponentialPower(σ::Real) = SkewExponentialPower(promote(0., σ, 2., 0.5)...)
+SkewExponentialPower() = SkewExponentialPower(0., 1., 2., 0.5)
 
-@distr_support SkewedExponentialPower -Inf Inf
+@distr_support SkewExponentialPower -Inf Inf
 
 ### Conversions
-convert(::Type{SkewedExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewedExponentialPower(T(μ), T(σ), T(p), T(α))
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{S}) where {T <: Real, S <: Real} = SkewedExponentialPower((T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
+convert(::Type{SkewExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewExponentialPower(T(μ), T(σ), T(p), T(α))
+convert(::Type{SkewExponentialPower{T}}, d::SkewExponentialPower{S}) where {T <: Real, S <: Real} = SkewExponentialPower((T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
 
 ### Parameters
-@inline partype(d::SkewedExponentialPower{T}) where {T<:Real} = T
+@inline partype(d::SkewExponentialPower{T}) where {T<:Real} = T
 
-params(d::SkewedExponentialPower) = (d.μ, d.σ, d.p, d.α)
-location(d::SkewedExponentialPower) = d.μ
-shape(d::SkewedExponentialPower) = d.p
-scale(d::SkewedExponentialPower) = d.σ
-skew(d::SkewedExponentialPower) = d.α
+params(d::SkewExponentialPower) = (d.μ, d.σ, d.p, d.α)
+location(d::SkewExponentialPower) = d.μ
+shape(d::SkewExponentialPower) = d.p
+scale(d::SkewExponentialPower) = d.σ
 
 ### Statistics
 """
@@ -70,25 +70,45 @@ skew(d::SkewedExponentialPower) = d.α
 Calculates the kth central moment of the SEPD, see Equation 18 in [1].
 [1]
 """
-function m_k(d::SkewedExponentialPower, k::Integer)
-    (2*d.p^(1/d.p))^2*((-1)^k*d.α^(1+k) + (1-α)^(1+k)) *
-    σ * a * gamma((1+k)/d.p) / gamma(1/p)
+function m_k(d::SkewExponentialPower, k::Integer)
+    _, σ, p, α = params(d)
+    (2*p^(1/p))^k*((-1)^k*α^(1+k) + (1-α)^(1+k)) *
+        σ^k * gamma((1+k)/p) / gamma(1/p)
 end
-mean(d::SkewedExponentialPower) = m_k(d, 1) + d.μ
-median(d::SkewedExponentialPower) = d.μ
-mode(d::SkewedExponentialPower) =  m_k(d, 1) + d.μ
-var(d::SkewedExponentialPower) = m_k(d, 2) - m_k(d, 1)^2
-skewness(d::SkewedExponentialPower) = m_k(d, 3)
-kurtosis(d::SkewedExponentialPower) = m_k(d, 4)
 
-function logpdf(d::SkewedExponentialPower, x::Real)
+mean(d::SkewExponentialPower) = m_k(d, 1) + d.μ
+mode(d::SkewExponentialPower) =  m_k(d, 1) + d.μ
+var(d::SkewExponentialPower) = m_k(d, 2) - m_k(d, 1)^2
+std(d::SkewExponentialPower) = √var(d)
+skewness(d::SkewExponentialPower) = m_k(d, 3)/(std(d))^3
+kurtosis(d::SkewExponentialPower) = m_k(d, 4)/var(d)^2 - 3.
+
+function logpdf(d::SkewExponentialPower, x::Real)
     μ, σ, p, α = params(d)
     -log(σ) - log(2*p^(1/p)*gamma(1+1/p)) - 1/p*(x < μ ? ((μ-x)/(2*σ*α))^p : ((x-μ)/(2*σ*(1-α)))^p)
 end
 
-pdf(d::SkewedExponentialPower, x::Real) = exp(logpdf(d, x))
+pdf(d::SkewExponentialPower, x::Real) = exp(logpdf(d, x))
 
-function rand(rng::AbstractRNG, d::SkewedExponentialPower)
+function cdf(d::SkewExponentialPower, x::Real)
+    μ, σ, p, α = params(d)
+    if x <= μ
+        α * (1 - cdf(Gamma(1/p), 1/p * (abs((x-μ)/σ) / (2*α))^p))
+    else
+        α + (1-α) * cdf(Gamma(1/p), 1/p * (abs((x-μ)/σ) / (2*(1-α)))^p)
+    end
+end
+
+function quantile(d::SkewExponentialPower, p::Real)
+    μ, σ, p, α = params(d)
+    if q <= α
+        μ - 2*α*σ * (p * quantile(Gamma(1/p), 1-q/α))^(1/p)
+    else
+        μ + 2*(1-α)*σ * (p * quantile(Gamma(1/p), 1-(1-q)/(1-α)))^(1/p)
+    end
+end
+
+function rand(rng::AbstractRNG, d::SkewExponentialPower)
     μ, σ, p, α = params(d)
     if rand(rng) < d.α
         μ - σ * 2*p^(1/p) * α * rand(Gamma(1/p, 1))^(1/p)
