@@ -43,17 +43,17 @@ mean(d::SkewNormal) = d.ξ + d.ω * mean_z(d)
 var(d::SkewNormal) = abs2(d.ω) * (1 - mean_z(d)^2)
 std(d::SkewNormal) = √var(d)
 skewness(d::SkewNormal) = ((4 - π)/2) * (mean_z(d)^3/(1 - mean_z(d)^2)^(3/2))
-kurtosis(d::SkewNormal) = 2 * (π-3) * ((delta(d) * sqrt(2/π))^4/(1-2 * (delta(d)^2)/π)^2)
+kurtosis(d::SkewNormal) = 2 * (π-3) * ((delta(d) * sqrt(2/π))^4/(1-2 * (delta(d)^2)/π)^2) 
 
-# no analytic expression for max m_0(d) but accurate numerical approximation
+# no analytic expression for max m_0(d) but accurate numerical approximation 
 m_0(d::SkewNormal) = mean_z(d) - (skewness(d) * std_z(d))/2 - (sign(d.α)/2) * exp(-2π/abs(d.α))
-mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)
+mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)  
 
 #### Evalution
 pdf(d::SkewNormal, x::Real) = (2/d.ω) * normpdf((x-d.ξ)/d.ω) * normcdf(d.α * (x-d.ξ)/d.ω)
 logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω) + normlogcdf(d.α * (x-d.ξ) / d.ω)
 #cdf requires Owen's T function.
-#cdf/quantile etc
+#cdf/quantile etc 
 
 mgf(d::SkewNormal, t::Real) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2 ) * normcdf(d.ω * delta(d) * t)
 
@@ -69,3 +69,5 @@ function rand(rng::AbstractRNG, d::SkewNormal)
 end
 
 ## Fitting  # to be added see: https://github.com/STOR-i/SkewDist.jl/issues/3
+
+
