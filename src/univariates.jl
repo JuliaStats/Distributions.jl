@@ -712,7 +712,8 @@ const continuous_distributions = [
     "uniform",
     "loguniform", # depends on Uniform
     "vonmises",
-    "weibull"
+    "weibull",
+    "skewexponentialpower"
 ]
 
 include(joinpath("univariate", "locationscale.jl"))

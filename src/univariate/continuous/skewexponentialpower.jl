@@ -2,30 +2,31 @@
     SkewExponentialPower(μ, σ, p, α)
 
 The *Skewed exponential power distribution*, with location `μ`, scale `σ`, shape `p`, and skewness `α`
-has the probability density function
+has the probability density function [1]
 ```math
-f(x; \\mu, \\sigma, \\p, \\alpha) =
+f(x; \\mu, \\sigma, p, \\alpha) =
 \\begin{cases}
-\\frac{1}{\\sigma}K_{EP}(p_1) \\exp \\left\\{ - \\frac{1}{2p}\\Big| \\frac{x-\\mu}{\\alpha \\sigma} \\Big|^{p_1} \\right\\}, & \\text{if } x \\leq \\mu; \\\\
-\\frac{1}{\\sigma}K_{EP}(p_2) \\exp \\left\\{ - \\frac{1}{2p}\\Big| \\frac{x-\\mu}{(1-\\alpha) \\sigma} \\Big|^{p_2} \\right\\}, & \\text{if } x > \\mu,
-\\end{cases}
+\\frac{1}{\\sigma 2p^{1/p}\\Gamma(1+1/p)} \\exp \\left\\{ - \\frac{1}{2p}\\Big| \\frac{x-\\mu}{\\alpha \\sigma} \\Big|^p \\right\\}, & \\text{if } x \\leq \\mu \\\\
+\\frac{1}{\\sigma 2p^{1/p}\\Gamma(1+1/p)} \\exp \\left\\{ - \\frac{1}{2p}\\Big| \\frac{x-\\mu}{(1-\\alpha) \\sigma} \\Big|^p \\right\\}, & \\text{if } x > \\mu
+\\end{cases}.
 ```
-where ``K_{EP}(p) = 1/[2p^{1/p}\\Gamma(1+1/p)]``.
 The Skewed exponential power distribution (SEPD) incorporates the laplace (``p=1, \\alpha=0.5``),
 normal (``p=2, \\alpha=0.5``), uniform (``p\\rightarrow \\infty, \\alpha=0.5``), asymmetric laplace (``p=1``), skew normal (``p=2``),
 and exponential power distribution (``\\alpha = 0.5``) as special cases.
+
+[1] Zhy, D. and V. Zinde-Walsh (2009). Properties and estimation of asymmetric exponential power distribution. _Journal of econometrics_, 148(1):86-96, 2009.
 
 ```julia
 SkewExponentialPower()            # SEPD with shape 2, scale 1, location 0, and skewness 0.5 (the standard normal distribution)
 SkewExponentialPower(μ, σ, p, α)  # SEPD with location μ, scale σ, shape p, and skewness α
 SkewExponentialPower(μ, σ, p)     # SEPD with location μ, scale σ, shape p, and skewness 0.5 (the exponential power distribution)
 SkewExponentialPower(μ, σ)        # SEPD with location μ, scale σ, shape 2, and skewness 0.5 (the normal distribution)
-SkewExponentialPower(σ)           # SEPD with location 0, scale σ, shape 2, and skewness 0.5 (the normal distribution)
+SkewExponentialPower(μ)           # SEPD with location μ, scale 1, shape 2, and skewness 0.5 (the normal distribution)
 
 params(d)       # Get the parameters, i.e. (μ, σ, p, α)
-shape(d)        # Get the shape parameter, p
-skewness(d)     # Get the skewness parameter, α
-location(d)     # Get the location parameter, μ
+shape(d)        # Get the shape parameter, i.e. p
+location(d)     # Get the location parameter, i.e. μ
+scale(d)        # Get the scale parameter, i.e. σ
 ```
 """
 struct SkewExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
@@ -46,14 +47,14 @@ end
 SkewExponentialPower(μ::Real, σ::Real, p::Real, α::Real) = SkewExponentialPower(promote(μ, σ, p, α)...)
 SkewExponentialPower(μ::Real, σ::Real, p::Real) = SkewExponentialPower(promote(μ, σ, p, 0.5)...)
 SkewExponentialPower(μ::Real, σ::Real) = SkewExponentialPower(promote(μ, σ, 2., 0.5)...)
-SkewExponentialPower(σ::Real) = SkewExponentialPower(promote(0., σ, 2., 0.5)...)
+SkewExponentialPower(μ::Real) = SkewExponentialPower(promote(μ, 1., 2., 0.5)...)
 SkewExponentialPower() = SkewExponentialPower(0., 1., 2., 0.5)
 
 @distr_support SkewExponentialPower -Inf Inf
 
 ### Conversions
 convert(::Type{SkewExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewExponentialPower(T(μ), T(σ), T(p), T(α))
-convert(::Type{SkewExponentialPower{T}}, d::SkewExponentialPower{S}) where {T <: Real, S <: Real} = SkewExponentialPower((T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
+convert(::Type{SkewExponentialPower{T}}, d::SkewExponentialPower{S}) where {T <: Real, S <: Real} = SkewExponentialPower(T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
 
 ### Parameters
 @inline partype(d::SkewExponentialPower{T}) where {T<:Real} = T
@@ -64,12 +65,8 @@ shape(d::SkewExponentialPower) = d.p
 scale(d::SkewExponentialPower) = d.σ
 
 ### Statistics
-"""
-    m_k(d, k)
 
-Calculates the kth central moment of the SEPD, see Equation 18 in [1].
-[1]
-"""
+#Calculates the kth central moment of the SEPD, see Equation 18 in [1].
 function m_k(d::SkewExponentialPower, k::Integer)
     _, σ, p, α = params(d)
     (2*p^(1/p))^k*((-1)^k*α^(1+k) + (1-α)^(1+k)) *
