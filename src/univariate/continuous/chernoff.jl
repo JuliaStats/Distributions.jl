@@ -35,6 +35,7 @@ end
 
 module ChernoffComputations
     import QuadGK.quadgk
+    using Roots: newton
     # The following arrays of constants have been precomputed to speed up computation.
     # The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
     # The array airyai_roots contains roots of the airyai functions (atilde in the paper).
@@ -123,11 +124,11 @@ module ChernoffComputations
 
         (y > 0) || throw(DomainError(y, "argument must be positive"))
 
-        cnsty = y^(-1.5)
+        cnsty = inv(sqrt(y^3))
         if (y <= 1.0)
-            return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
+            return sum((b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k in 1:length(a)) - sqrthalfpi
         else
-            return sum([exp(cuberoottwo*a*y) for a in airyai_roots]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
+            return sum(exp(cuberoottwo*a*y) for a in airyai_roots) * 2 * sqrttwopi * exp(-y^3 / 6) - cnsty
         end
     end
 
@@ -136,11 +137,11 @@ module ChernoffComputations
             return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
         end
         function g_two(y::Real)
-            z = 2*x+y*y
-            return (z*y*y + 0.5 * z*z) * exp(-0.5*y*y*z*z)
+            z = 2*x+y^2
+            return (z*y^2 + 0.5 * z^2) * exp(-0.5*y^2*z^2)
         end
         if (x <= -1.0)
-            return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k=1:length(airyai_roots)])
+            return cuberoottwo^2 * exp(2*x^3/3) * sum(exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k in 1:length(airyai_roots))
         else
             return 2*x - (quadgk(g_one, 0.0, Inf)[1] - 4*quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
         end
