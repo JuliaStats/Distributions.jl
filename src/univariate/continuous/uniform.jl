@@ -114,7 +114,7 @@ end
 
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
-rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
+_rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
     A .= quantile.(d, rand!(rng, A))
 
 

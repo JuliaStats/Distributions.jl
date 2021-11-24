@@ -104,14 +104,14 @@ end
 
 function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
-    length(p) == length(q) || 
+    length(p) == length(q) ||
         throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
     # logdetcov is used separately from _cov for any potential optimization done there
     return (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p)) / 2
 end
 
 # This is a workaround to take advantage of the PDMats objects for MvNormal and avoid copies as Matrix
-# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object 
+# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object
 _cov(d::AbstractMvNormal) = cov(d)
 
 """
@@ -142,7 +142,7 @@ sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(p
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
-function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
+function _logpdf!(r::AbstractVector{<:Real}, d::AbstractMvNormal, x::AbstractMatrix{<:Real})
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
@@ -150,8 +150,6 @@ function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     end
     r
 end
-
-_pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
 ###########################################################
 #
