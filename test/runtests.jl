@@ -66,7 +66,7 @@ const tests = [
     "rician",
     "functionals",
     "density_interface",
-    "skewexponentialpower"
+    "skewedexponentialpower"
 ]
 
 printstyled("Running tests:\n", color=:blue)
