@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.package.repo }}
+    name: ${{ matrix.package.repo }}/${{ matrix.package.group }}
     runs-on: ubuntu-latest
     env:
       GROUP: ${{ matrix.package.group }}
