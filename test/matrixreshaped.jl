@@ -5,7 +5,8 @@ rng = MersenneTwister(123456)
 
 @testset "matrixreshaped.jl" begin
 
-function test_matrixreshaped(rng, d1, x1, sizes)
+function test_matrixreshaped(rng, d1, sizes)
+    x1 = rand(rng, d1)
     d1s = [@test_deprecated(MatrixReshaped(d1, s...)) for s in sizes]
 
 @testset "MatrixReshaped $(nameof(typeof(d1))) tests" begin
@@ -103,14 +104,12 @@ end
     σ = rand(rng, 16, 16)
     μ = rand(rng, 16)
     d1 = MvNormal(μ, σ * σ')
-    x1 = rand(rng, d1)
     sizes = [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4,)]
-    test_matrixreshaped(rng, d1, x1, sizes)
+    test_matrixreshaped(rng, d1, sizes)
 
     # Dirichlet
     α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
     d1 = Dirichlet(α)
-    x1 = rand(rng, d1)
     sizes = [(6, 6), (4, 9), (9, 4), (3, 12), (12, 3), (1, 36), (36, 1), (6,)]
-    test_matrixreshaped(rng, d1, x1, sizes)
+    test_matrixreshaped(rng, d1, sizes)
 end

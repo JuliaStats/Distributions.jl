@@ -5,7 +5,10 @@
 
     rng = MersenneTwister(1234)
 
-    function test_reshaped(rng, d1, x1, sizes)
+    function test_reshaped(rng, d1, sizes)
+        x1 = rand(rng, d1)
+        x3 = similar(x1, size(x1)..., 3)
+        rand!(rng, d1, x3)
         d1s = map(s -> reshape(d1, s...), sizes)
 
         # check types
@@ -81,6 +84,13 @@
         # logpdf
         for (d, s) in zip(d1s, sizes)
             @test logpdf(d, reshape(x1, s)) == logpdf(d1, x1)
+            @test logpdf(d, reshape(x3, s..., 3)) == logpdf(d1, x3)
+        end
+
+        # loglikelihood
+        for (d, s) in zip(d1s, sizes)
+            @test loglikelihood(d, reshape(x1, s)) == loglikelihood(d1, x1)
+            @test loglikelihood(d, reshape(x3, s..., 3)) == loglikelihood(d1, x3)
         end
 
         # rand
@@ -110,20 +120,18 @@
         σ = rand(rng, 16, 16)
         μ = rand(rng, 16)
         d1 = MvNormal(μ, σ * σ')
-        x1 = rand(rng, d1)
         sizes = [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4, 2, 2), (2, 4, 2), (2, 2, 2, 2)]
-        test_reshaped(rng, d1, x1, sizes)
+        test_reshaped(rng, d1, sizes)
     end
 
     @testset "reshape Dirichlet" begin
         α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
         d1 = Dirichlet(α)
-        x1 = rand(rng, d1)
         sizes = [
         (6, 6), (4, 9), (9, 4), (3, 12), (12, 3), (1, 36), (36, 1), (6, 3, 2),
         (3, 2, 6), (2, 3, 3, 2),
         ]
-        test_reshaped(rng, d1, x1, sizes)
+        test_reshaped(rng, d1, sizes)
     end
 
     @testset "special cases" begin
