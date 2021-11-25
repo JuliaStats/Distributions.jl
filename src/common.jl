@@ -316,7 +316,7 @@ back to `logpdf!` usually it is sufficient to implement `logpdf!`.
 See also: [`logpdf!`](@ref).
 """
 Base.@propagate_inbounds function pdf!(
-    out::AbstractArray{<:Real,M},
+    out::AbstractArray{<:Real},
     d::Distribution{ArrayLikeVariate{N}},
     x::AbstractArray{<:AbstractArray{<:Real,N},M}
 ) where {N,M}
@@ -324,7 +324,7 @@ Base.@propagate_inbounds function pdf!(
 end
 
 Base.@propagate_inbounds function logpdf!(
-    out::AbstractArray{<:Real,M},
+    out::AbstractArray{<:Real},
     d::Distribution{ArrayLikeVariate{N}},
     x::AbstractArray{<:AbstractArray{<:Real,N},M}
 ) where {N,M}
@@ -332,20 +332,18 @@ Base.@propagate_inbounds function logpdf!(
 end
 
 @inline function pdf!(
-    out::AbstractArray{<:Real,M},
+    out::AbstractArray{<:Real},
     d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real},
+    x::AbstractArray{<:Real,M},
 ) where {N,M}
     @boundscheck begin
-        ndims(x) == N + M || throw(
-            DimensionMismatch(
-                "number of dimensions of `x` ($(ndims(x))) must be equal to the sum of " *
-                "the dimensions of `d` ($N) and output `out` ($M)"
-            )
-        )
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
         ntuple(i -> size(x, i), Val(N)) == size(d) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
-        ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
+        length(out) == prod(i -> size(x, i), (N + 1):M) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     return _pdf!(out, d, x)
@@ -383,20 +381,18 @@ the size of `out` and `x`.
 See also: [`pdf!`](@ref).
 """
 @inline function logpdf!(
-    out::AbstractArray{<:Real,M},
+    out::AbstractArray{<:Real},
     d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real},
+    x::AbstractArray{<:Real,M},
 ) where {N,M}
     @boundscheck begin
-        ndims(x) == N + M || throw(
-            DimensionMismatch(
-                "number of dimensions of `x` ($(ndims(x))) must be equal to the sum of " *
-                "the dimensions of `d` ($N) and output `out` ($M)"
-            )
-        )
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
         ntuple(i -> size(x, i), Val(N)) == size(d) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
-        ntuple(i -> size(x, i + N), Val(M)) == size(out) ||
+        length(out) == prod(i -> size(x, i), (N + 1):M) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     return _logpdf!(out, d, x)
