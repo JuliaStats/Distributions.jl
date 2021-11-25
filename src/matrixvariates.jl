@@ -128,16 +128,14 @@ function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},
 end
 
 # multiple matrix-variates, must allocate array of arrays
-rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}, dims::Dims) =
-    rand!(rng, s, Array{Matrix{eltype(s)}}(undef, dims), true)
-rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{Matrix{float(eltype(s))}}(undef, dims), true)
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Matrixvariate}, dims::Dims) where {T}
+    return rand!(rng, s, Array{Matrix{T}}(undef, dims), true)
+end
 
 # single matrix-variate, must allocate one matrix
-rand(rng::AbstractRNG, s::Sampleable{Matrixvariate}) =
-    _rand!(rng, s, Matrix{eltype(s)}(undef, size(s)))
-rand(rng::AbstractRNG, s::Sampleable{Matrixvariate,Continuous}) =
-    _rand!(rng, s, Matrix{float(eltype(s))}(undef, size(s)))
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Matrixvariate}) where {T}
+    return _rand!(rng, s, Matrix{T}(undef, size(s)))
+end
 
 # single matrix-variate with pre-allocated matrix
 function rand!(rng::AbstractRNG, s::Sampleable{Matrixvariate},

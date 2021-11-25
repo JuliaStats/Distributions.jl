@@ -19,14 +19,14 @@ end
 
 PoissonCountSampler(d::Poisson) = PoissonCountSampler(rate(d))
 
-function rand(rng::AbstractRNG, s::PoissonCountSampler)
+function rand(rng::AbstractRNG, ::Type{T}, s::PoissonCountSampler) where {T}
     μ = s.μ
-    T = typeof(μ)
-    n = 0
-    c = randexp(rng, T)
+    n = zero(T)
+    C = typeof(float(μ))
+    c = randexp(rng, C)
     while c < μ
         n += 1
-        c += randexp(rng, T)
+        c += randexp(rng, C)
     end
     return n
 end
@@ -43,7 +43,7 @@ struct PoissonADSampler{T<:Real} <: Sampleable{Univariate,Discrete}
     μ::T
     s::T
     d::T
-    L::Int
+    L::T
 end
 
 PoissonADSampler(d::Poisson) = PoissonADSampler(rate(d))
@@ -51,23 +51,23 @@ PoissonADSampler(d::Poisson) = PoissonADSampler(rate(d))
 function PoissonADSampler(μ::Real)
     s = sqrt(μ)
     d = 6 * μ^2
-    L = floor(Int, μ - 1.1484)
+    L = floor(μ - 1.1484)
 
-    PoissonADSampler(promote(μ, s, d)..., L)
+    PoissonADSampler(promote(μ, s, d, L)...)
 end
 
-function rand(rng::AbstractRNG, sampler::PoissonADSampler)
+function rand(rng::AbstractRNG, ::Type{Ttype}, sampler::PoissonADSampler) where {Ttype}
     μ = sampler.μ
     s = sampler.s
     d = sampler.d
-    L = sampler.L
+    L = Ttype(sampler.L)
     μType = typeof(μ)
 
     # Step N
     G = μ + s * randn(rng, μType)
 
     if G >= zero(G)
-        K = floor(Int, G)
+        K = Ttype(floor(G))
         # Step I
         if K >= L
             return K
@@ -97,7 +97,7 @@ function rand(rng::AbstractRNG, sampler::PoissonADSampler)
             continue
         end
 
-        K = floor(Int, μ + s * T)
+        K = Ttype(floor(μ + s * T))
         px, py, fx, fy = procf(μ, K, s)
         c = 0.1069 / μ
 

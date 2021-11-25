@@ -69,7 +69,7 @@ Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
 
 # Sampling
 
-function rand(rng::AbstractRNG, d::DiscreteNonParametric)
+function rand(rng::AbstractRNG, ::Type{T}, d::DiscreteNonParametric) where {T}
     x = support(d)
     p = probs(d)
     n = length(p)
@@ -79,7 +79,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric)
     while cp <= draw && i < n
         @inbounds cp += p[i +=1]
     end
-    return x[i]
+    return convert(T, x[i])
 end
 
 sampler(d::DiscreteNonParametric) =

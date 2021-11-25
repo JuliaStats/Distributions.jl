@@ -60,8 +60,6 @@ params(d::Normal) = (d.μ, d.σ)
 location(d::Normal) = d.μ
 scale(d::Normal) = d.σ
 
-Base.eltype(::Type{Normal{T}}) where {T} = T
-
 #### Statistics
 
 mean(d::Normal) = d.μ
@@ -249,7 +247,9 @@ cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
+function rand(rng::AbstractRNG, ::Type{T}, d::Normal) where {T}
+    return T(d.μ) + T(d.σ) * randn(rng, T)
+end
 
 #### Fitting
 

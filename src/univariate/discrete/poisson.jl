@@ -143,4 +143,4 @@ function sampler(d::Poisson)
     end
 end
 
-rand(rng::AbstractRNG, d::Poisson) = rand(rng, sampler(d))
+rand(rng::AbstractRNG, ::Type{T}, d::Poisson) where {T} = rand(rng, T, sampler(d))

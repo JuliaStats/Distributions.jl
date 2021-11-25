@@ -44,23 +44,23 @@ function BinomialGeomSampler(n::Int, prob::Float64)
     BinomialGeomSampler(comp, n, scale)
 end
 
-function rand(rng::AbstractRNG, s::BinomialGeomSampler)
-    y = 0
-    x = 0
-    n = s.n
+function rand(rng::AbstractRNG, ::Type{T}, s::BinomialGeomSampler) where {T}
+    y = zero(T)
+    x = zero(T)
+    n = T(s.n)
     while true
         er = randexp(rng)
         v = er * s.scale
         if v > n  # in case when v is very large or infinity
             break
         end
-        y += ceil(Int,v)
+        y += T(ceil(v))
         if y > n
             break
         end
         x += 1
     end
-    (s.comp ? s.n - x : x)::Int
+    return s.comp ? n - x : x
 end
 
 
@@ -129,14 +129,14 @@ function BinomialTPESampler(n::Int, prob::Float64)
                        xM,xL,xR,c,λL,λR)
 end
 
-function rand(rng::AbstractRNG, s::BinomialTPESampler)
-    y = 0
+function rand(rng::AbstractRNG, ::Type{T}, s::BinomialTPESampler) where {T}
+    y = zero(T)
     while true
         # Step 1
         u = s.p4*rand(rng)
         v = rand(rng)
         if u <= s.p1
-            y = floor(Int,s.xM-s.p1*v+u)
+            y = T(floor(s.xM-s.p1*v+u))
             # Goto 6
             break
         elseif u <= s.p2 # Step 2
@@ -146,10 +146,10 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
                 # Goto 1
                 continue
             end
-            y = floor(Int,x)
+            y = T(floor(x))
             # Goto 5
         elseif u <= s.p3 # Step 3
-            y = floor(Int,s.xL + log(v)/s.λL)
+            y = T(floor(s.xL + log(v)/s.λL))
             if y < 0
                 # Goto 1
                 continue
@@ -157,7 +157,7 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             v *= (u-s.p2)*s.λL
             # Goto 5
         else # Step 4
-            y = floor(Int,s.xR-log(v)/s.λR)
+            y = T(floor(s.xR-log(v)/s.λR))
             if y > s.n
                 # Goto 1
                 continue
@@ -219,7 +219,7 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
         end
     end
     # 6
-    (s.comp ? s.n - y : y)::Int
+    return s.comp ? T(s.n) - y : y
 end
 
 
@@ -231,7 +231,7 @@ end
 
 BinomialAliasSampler(n::Int, p::Float64) = BinomialAliasSampler(AliasTable(binompvec(n, p)))
 
-rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
+rand(rng::AbstractRNG, ::Type{T}, s::BinomialAliasSampler) where {T} = rand(rng, T, s.table) - 1
 
 
 # Integrated Polyalgorithm sampler that automatically chooses the proper one
@@ -260,5 +260,6 @@ end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))
 
-rand(rng::AbstractRNG, s::BinomialPolySampler) =
-    s.use_btpe ? rand(rng, s.btpe_sampler) : rand(rng, s.geom_sampler)
+function rand(rng::AbstractRNG, ::Type{T}, s::BinomialPolySampler) where {T}
+    return rand(rng, T, s.use_btpe ? s.btpe_sampler : s.geom_sampler)
+end

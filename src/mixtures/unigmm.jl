@@ -25,10 +25,10 @@ probs(d::UnivariateGMM) = probs(d.prior)
 
 mean(d::UnivariateGMM) = dot(d.means, probs(d))
 
-rand(d::UnivariateGMM) = (k = rand(d.prior); d.means[k] + randn() * d.stds[k])
-
-rand(rng::AbstractRNG, d::UnivariateGMM) =
-    (k = rand(rng, d.prior); d.means[k] + randn(rng) * d.stds[k])
+function rand(rng::AbstractRNG, ::Type{T}, d::UnivariateGMM) where {T}
+    k = rand(rng, d.prior)
+    return T(d.means[k]) + randn(rng, T) * T(d.stds[k])
+end
 
 params(d::UnivariateGMM) = (d.means, d.stds, d.prior)
 
@@ -38,6 +38,9 @@ struct UnivariateGMMSampler{VT1<:AbstractVector{<:Real},VT2<:AbstractVector{<:Re
     psampler::AliasTable
 end
 
-rand(rng::AbstractRNG, s::UnivariateGMMSampler) =
-    (k = rand(rng, s.psampler); s.means[k] + randn(rng) * s.stds[k])
+function rand(rng::AbstractRNG, ::Type{T}, s::UnivariateGMMSampler) where {T}
+    k = rand(rng, s.psampler)
+    return T(s.means[k]) + randn(rng, T) * T(s.stds[k])
+end
+
 sampler(d::UnivariateGMM) = UnivariateGMMSampler(d.means, d.stds, sampler(d.prior))

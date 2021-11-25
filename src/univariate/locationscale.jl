@@ -44,10 +44,9 @@ struct LocationScale{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: 
 end
 
 function LocationScale(μ::T, σ::T, ρ::UnivariateDistribution; check_args=true) where {T<:Real}
-    _T = promote_type(eltype(ρ), T)
     D = typeof(ρ)
     S = value_support(D)
-    return LocationScale{_T,S,D}(_T(μ), _T(σ), ρ; check_args=check_args)
+    return LocationScale{T,S,D}(μ, σ, ρ; check_args=check_args)
 end
 
 LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution) = LocationScale(promote(μ, σ)..., ρ)
@@ -56,7 +55,18 @@ LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution) = LocationScale(pr
 const ContinuousLocationScale{T<:Real,D<:ContinuousUnivariateDistribution} = LocationScale{T,Continuous,D}
 const DiscreteLocationScale{T<:Real,D<:DiscreteUnivariateDistribution} = LocationScale{T,Discrete,D}
 
-Base.eltype(::Type{<:LocationScale{T}}) where T = T
+function Base.eltype(::Type{<:LocationScale{T,S,D}}) where {T,S,D<:ContinuousUnivariateDistribution}
+    return eltype(D)
+end
+function Base.eltype(::Type{<:LocationScale{T,S,D}}) where {T,S,D<:DiscreteUnivariateDistribution}
+    U = eltype(D)
+    return if float(U) === U
+        # no need to promote, already floating point number
+        U
+    else
+        promote(T, U)
+    end
+end
 
 minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
@@ -115,7 +125,7 @@ end
 
 quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 
-rand(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * rand(rng, d.ρ)
+rand(rng::AbstractRNG, ::Type{T}, d::LocationScale) where {T} = convert(T, d.μ + d.σ * rand(rng, T, d.ρ))
 cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 gradlogpdf(d::ContinuousLocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
 

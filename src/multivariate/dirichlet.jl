@@ -46,8 +46,6 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
-Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
-
 #### Conversions
 convert(::Type{Dirichlet{T}}, cf::DirichletCanon) where {T<:Real} =
     Dirichlet(convert(AbstractVector{T}, cf.alpha))

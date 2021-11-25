@@ -66,21 +66,17 @@ function rand!(rng::AbstractRNG, s::Sampleable{Multivariate},
 end
 
 # multiple multivariate, must allocate matrix or array of vectors
-rand(s::Sampleable{Multivariate}, n::Int) = rand(GLOBAL_RNG, s, n)
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
-    _rand!(rng, s, Matrix{eltype(s)}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
-    _rand!(rng, s, Matrix{float(eltype(s))}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}, dims::Dims) =
-    rand!(rng, s, Array{Vector{eltype(s)}}(undef, dims), true)
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{Vector{float(eltype(s))}}(undef, dims), true)
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Multivariate,Continuous}, n::Int) where {T}
+    return _rand!(rng, s, Matrix{T}(undef, length(s), n))
+end
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Multivariate}, dims::Dims) where {T}
+    return rand!(rng, s, Array{Vector{T}}(undef, dims), true)
+end
 
 # single multivariate, must allocate vector
-rand(rng::AbstractRNG, s::Sampleable{Multivariate}) =
-    _rand!(rng, s, Vector{eltype(s)}(undef, length(s)))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}) =
-    _rand!(rng, s, Vector{float(eltype(s))}(undef, length(s)))
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Multivariate}) where {T}
+    return _rand!(rng, s, Vector{T}(undef, length(s)))
+end
 
 ## domain
 

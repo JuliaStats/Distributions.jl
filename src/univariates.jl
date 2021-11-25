@@ -134,10 +134,9 @@ end
 ## sampling
 
 # multiple univariate, must allocate array
-rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
-    rand!(rng, s, Array{eltype(s)}(undef, dims))
-rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{float(eltype(s))}(undef, dims))
+function rand(rng::AbstractRNG, ::Type{T}, s::Sampleable{Univariate}, dims::Dims) where {T}
+    return rand!(rng, s, Array{T}(undef, dims))
+end
 
 # multiple univariate with pre-allocated array
 # we use a function barrier since for some distributions `sampler(s)` is not type-stable:
@@ -147,18 +146,23 @@ function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
 end
 
 function _rand_loops!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray)
+    T = eltype(A)
     for i in eachindex(A)
-        @inbounds A[i] = rand(rng, sampler)
+        @inbounds A[i] = rand(rng, T, sampler)
     end
     return A
 end
 
 """
-    rand(rng::AbstractRNG, d::UnivariateDistribution)
+    rand(rng::AbstractRNG=GLOBAL_RNG, ::Type{T}=eltype(d), d::UnivariateDistribution)
 
-Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
+Generate a scalar sample from `d` of element type `T`.
+
+The general fallback is `convert(T, quantile(d, rand(rng, float(T))))`.
 """
-rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
+function rand(rng::AbstractRNG, ::Type{T}, d::UnivariateDistribution) where {T}
+    return convert(T, quantile(d, rand(rng, float(T))))
+end
 
 """
     rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)

@@ -79,8 +79,6 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-Base.eltype(::Type{LKJCholesky{T}}) where {T} = T
-
 function Base.size(d::LKJCholesky)
     p = d.d
     return (p, p)
@@ -150,15 +148,14 @@ end
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function Base.rand(rng::AbstractRNG, d::LKJCholesky)
-    factors = Matrix{eltype(d)}(undef, size(d))
+function Base.rand(rng::AbstractRNG, ::Type{T}, d::LKJCholesky) where {T}
+    factors = Matrix{T}(undef, size(d))
     R = LinearAlgebra.Cholesky(factors, d.uplo, 0)
     return _lkj_cholesky_onion_sampler!(rng, d, R)
 end
-function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
+function Base.rand(rng::AbstractRNG, ::Type{T}, d::LKJCholesky, dims::Dims) where {T}
     p = d.d
     uplo = d.uplo
-    T = eltype(d)
     TM = Matrix{T}
     Rs = Array{LinearAlgebra.Cholesky{T,TM}}(undef, dims)
     for i in eachindex(Rs)
