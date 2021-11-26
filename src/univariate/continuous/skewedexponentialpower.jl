@@ -67,17 +67,21 @@ scale(d::SkewedExponentialPower) = d.σ
 
 ### Statistics
 
-#Calculates the kth central moment of the SEPD on the log-scale
+#Calculates the kth central moment of the SEPD
 function m_k(d::SkewedExponentialPower, k::Integer)
     _, σ, p, α = params(d)
-    return (k*log(2) + k*inv(p) * log(p) + k*log(σ) + loggamma((1+k)*inv(p)) -
-        loggamma(inv(p))) + log((-1)^k*α^(1+k) + (1-α)^(1+k))
+    inv_p = inv(p)
+    return  ((k*logtwo + k*inv(p) * log(p) + k*log(σ) + loggamma((1+k)*inv(p)) -
+        loggamma(inv(p))) + log(abs((-1)^k*α^(1+k) + (1-α)^(1+k))))
 end
 
-mean(d::SkewedExponentialPower) = d.α == 0.5 ? d.μ : exp(m_k(d, 1)) + d.μ
+# needed for odd moments on log-scale
+sgn(d::SkewedExponentialPower) = d.α > 1//2 ? -1 : 1
+
+mean(d::SkewedExponentialPower) = d.α == 1//2 ? float(d.μ) : sgn(d)*exp(m_k(d, 1)) + d.μ
 mode(d::SkewedExponentialPower) =  mean(d)
 var(d::SkewedExponentialPower) = exp(m_k(d, 2)) - exp(2*m_k(d, 1))
-skewness(d::SkewedExponentialPower) = d.α == 0.5 ? 0 : exp(m_k(d, 3)) / (√(v(d)))^3
+skewness(d::SkewedExponentialPower) = d.α == 1//2 ? float(zero(partype(d))) : sgn(d)*exp(m_k(d, 3)) / (std(d))^3
 kurtosis(d::SkewedExponentialPower) = exp(m_k(d, 4))/var(d)^2 - 3
 
 function logpdf(d::SkewedExponentialPower, x::Real)
@@ -91,7 +95,7 @@ function cdf(d::SkewedExponentialPower, x::Real)
     μ, σ, p, α = params(d)
     inv_p = inv(p)
     if x <= μ
-        α * (1 - cdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*α))^p))
+        α * ccdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*α))^p)
     else
         α + (1-α) * cdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*(1-α)))^p)
     end
