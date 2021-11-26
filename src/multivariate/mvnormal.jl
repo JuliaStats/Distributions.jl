@@ -94,11 +94,13 @@ rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
 
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
-    T = typeof(ldcd)
-    (length(d) * (T(log2π) + one(T)) + ldcd)/2
+    return (length(d) * (oftype(ldcd, log2π) + 1) + ldcd) / 2
 end
 
-mvnormal_c0(g::AbstractMvNormal) = -(length(g) * convert(eltype(g), log2π) + logdetcov(g))/2
+function mvnormal_c0(d::AbstractMvNormal)
+    ldcd = logdetcov(d)
+    return - (length(d) * oftype(ldcd, log2π) + ldcd) / 2
+end
 
 function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
@@ -221,10 +223,10 @@ Construct a multivariate normal distribution with zero mean and covariance matri
 MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
 # deprecated constructors with standard deviations
-Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
-Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(Diagonal(map(abs2, σ)))
-Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(Fill(σ^2, d)))
+Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 

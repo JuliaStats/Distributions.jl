@@ -111,6 +111,7 @@ function entropy(d::Dirichlet)
 end
 
 function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, α0::Real)
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     k = length(α)
     inv_s = inv(α0 - k)
     @. r = inv_s * (α - 1)
@@ -118,7 +119,7 @@ function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, 
 end
 
 function dirichlet_mode(α::AbstractVector{<:Real}, α0::Real)
-    all(αi < 1 for αi in α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     inv_s = inv(α0 - length(α))
     r = map(α) do αi
         inv_s * (αi - 1)
