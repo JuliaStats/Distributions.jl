@@ -30,6 +30,7 @@ rate(::UnivariateDistribution)
 ncategories(::UnivariateDistribution)
 ntrials(::UnivariateDistribution)
 dof(::UnivariateDistribution)
+isperiodic(::UnivariateDistribution)
 ```
 
 For distributions for which success and failure have a meaning,

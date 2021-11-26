@@ -38,6 +38,8 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 @distr_support VonMises d.μ - π d.μ + π
 
+isperiodic(d::VonMises) = true
+
 #### Conversions
 
 convert(::Type{VonMises{T}}, μ::Real, κ::Real) where {T<:Real} = VonMises(T(μ), T(κ))
@@ -65,10 +67,8 @@ cf(d::VonMises, t::Real) = (besselix(abs(t), d.κ) / d.I0κx) * cis(t * d.μ)
 #### Evaluations
 
 #pdf(d::VonMises, x::Real) = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
-pdf(d::VonMises{T}, x::Real) where T<:Real =
-    minimum(d) ≤ x ≤ maximum(d) ? exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx) : zero(T)
-logpdf(d::VonMises{T}, x::Real) where T<:Real =
-    minimum(d) ≤ x ≤ maximum(d) ? d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π : -T(Inf)
+pdf(d::VonMises{T}, x::Real) where T<:Real = exp(d.κ * (cos(x - d.μ) - 1)) / (twoπ * d.I0κx)
+logpdf(d::VonMises{T}, x::Real) where T<:Real = d.κ * (cos(x - d.μ) - 1) - log(d.I0κx) - log2π 
 
 function cdf(d::VonMises, x::Real)
     # handle `±Inf` for which `sin` can't be evaluated
