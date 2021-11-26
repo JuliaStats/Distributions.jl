@@ -71,8 +71,8 @@ scale(d::SkewedExponentialPower) = d.σ
 function m_k(d::SkewedExponentialPower, k::Integer)
     _, σ, p, α = params(d)
     inv_p = inv(p)
-    return  ((k*logtwo + k*inv(p) * log(p) + k*log(σ) + loggamma((1+k)*inv(p)) -
-        loggamma(inv(p))) + log(abs((-1)^k*α^(1+k) + (1-α)^(1+k))))
+    return  k * (logtwo + inv_p * log(p) + log(σ)) + loggamma((1 + k) * inv_p) -
+        loggamma(inv_p) + log(abs((-1)^k * α^(1 + k) + (1 - α)^(1 + k)))
 end
 
 # needed for odd moments on log-scale
