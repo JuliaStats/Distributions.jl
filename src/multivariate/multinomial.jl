@@ -51,9 +51,12 @@ params(d::Multinomial) = (d.n, d.p)
 
 ### Conversions
 convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))
+convert(::Type{Multinomial{T, TV}}, d::Multinomial{T, TV}) where {T<:Real, TV<:AbstractVector{T}} = d
 convert(::Type{Multinomial{T, TV}}, n, p::AbstractVector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
 convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, T.(d.p))
+convert(::Type{Multinomial{T}}, d::Multinomial{T}) where {T<:Real} = d
 convert(::Type{Multinomial{T}}, n, p::AbstractVector) where {T<:Real} = Multinomial(n, T.(p))
+
 # Statistics
 
 mean(d::Multinomial) = d.n .* d.p
@@ -161,9 +164,8 @@ end
 
 # Sampling
 
-_rand!(d::Multinomial, x::AbstractVector{T}) where T<:Real =
-    multinom_rand!(ntrials(d), probs(d), x)
-_rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{T}) where T<:Real =
+# if only a single sample is requested, no alias table is created
+_rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{<:Real}) =
     multinom_rand!(rng, ntrials(d), probs(d), x)
 
 sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))

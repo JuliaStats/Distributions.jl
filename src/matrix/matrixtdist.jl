@@ -111,7 +111,7 @@ end
 
 mode(d::MatrixTDist) = d.M
 
-cov(d::MatrixTDist, ::Val{true}=Val(true)) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : Matrix(kron(d.Ω, d.Σ)) ./ (d.ν - 2)
+cov(d::MatrixTDist) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : Matrix(kron(d.Ω, d.Σ)) ./ (d.ν - 2)
 
 cov(d::MatrixTDist, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
