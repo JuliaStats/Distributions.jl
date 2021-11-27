@@ -146,12 +146,6 @@ function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix)
     return r
 end
 
-function _pdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{<:Real})
-    _logpdf!(r, d, x)
-    map!(exp, r, r)
-    return r
-end
-
 function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
     z = x - d.μ
     prz = invscale(d)*z

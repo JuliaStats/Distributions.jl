@@ -66,6 +66,7 @@ const tests = [
     "rician",
     "functionals",
     "density_interface",
+    "reshaped",
 ]
 
 printstyled("Running tests:\n", color=:blue)
