@@ -67,6 +67,7 @@ const tests = [
     "functionals",
     "density_interface",
     "reshaped",
+    "skewedexponentialpower",
 ]
 
 printstyled("Running tests:\n", color=:blue)
