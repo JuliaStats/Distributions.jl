@@ -153,15 +153,15 @@ suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64
 # Model fitting
 
 function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
-    Categorical(pnormalize!(ss.h))
+    Categorical(normalize!(ss.h, 1))
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x)), check_args=false)
+    Categorical(normalize!(add_categorical_counts!(zeros(k), x), 1), check_args=false)
 end
 
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    Categorical(pnormalize!(add_categorical_counts!(zeros(k), x, w)), check_args=false)
+    Categorical(normalize!(add_categorical_counts!(zeros(k), x, w), 1), check_args=false)
 end
 
 fit_mle(::Type{<:Categorical}, data::CategoricalData) = fit_mle(Categorical, data...)

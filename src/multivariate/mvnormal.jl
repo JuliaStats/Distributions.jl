@@ -270,15 +270,20 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
-    add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+    unwhiten!(d.Σ, randn!(rng, x))
+    x .+= d.μ
+    return x
+end
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds x[i] = randn(rng, eltype(x))
     end
-    add!(unwhiten!(d.Σ, x), d.μ)
+    unwhiten!(d.Σ, x)
+    x .+= d.μ
+    return x
 end
 
 ### Affine transformations
@@ -342,7 +347,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
+    μ = lmul!(inv(size(x,2)), vec(sum(x,dims=2)))
     MvNormal(μ, g.Σ)
 end
 
@@ -448,7 +453,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
             @inbounds va[i] += abs2(x[i,j] - mu[i])
         end
     end
-    multiply!(va, inv(n))
+    lmul!(inv(n), va)
     MvNormal(mu, PDiagMat(va))
 end
 
@@ -467,7 +472,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
             @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
         end
     end
-    multiply!(va, inv_sw)
+    lmul!(inv_sw, va)
     MvNormal(mu, PDiagMat(va))
 end
 
