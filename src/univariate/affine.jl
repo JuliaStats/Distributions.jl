@@ -1,7 +1,8 @@
-@deprecate LocationScale(args...; kwargs...) affine(args...)
+@deprecate LocationScale(args...; kwargs...) Affine(args...)
+const LocationScale = Affine
 
 """
-    affine(shift, scale, base_dist)
+    Affine(shift, scale, base_dist)
 
 Return a shifted and scaled (affinely transformed) version of `base_dist`.
 
@@ -64,23 +65,6 @@ const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = Affine{T,Discr
 
 Base.eltype(::Type{<:Affine{T}}) where {T} = T
 
-# alias μ, σ, ρ for backwards compatibility with old LocationScale
-function Base.getproperty(x::Affine, name::Symbol)
-    try
-        getfield(x, name)
-    catch
-        if name == :μ
-            return x.shift
-        elseif name == :σ
-            return x.scale
-        elseif name == :ρ
-            return x.base_dist
-        else
-            error("type Affine has no field $name")
-        end
-    end
-end
-
 # Support
 function minimum(d::Affine)
     minim = d.scale > 0 ? minimum : maximum
@@ -101,8 +85,7 @@ function affine_support(shift::Real, scale::Real, support::RealInterval)
         lower = support.ub
         upper = support.lb
     end
-    _transform = x -> shift + scale * x
-    return RealInterval(_transform(lower), _transform(upper))
+    return RealInterval(shift + scale * lower, shift + scale * upper)
 end
 
 
