@@ -1,8 +1,8 @@
-@deprecate LocationScale(args...; kwargs...) Affine(args...)
-const LocationScale = Affine
+@deprecate LocationScale(args...; kwargs...) AffineDistribution(args...)
+const LocationScale = AffineDistribution
 
 """
-    Affine(shift, scale, base_dist)
+    affine(shift, scale, base_dist)
 
 Return a shifted and scaled (affinely transformed) version of `base_dist`.
 
@@ -25,7 +25,7 @@ f(x) = \\frac{1}{scale} base_dist \\! \\left( \\frac{x-shift}{scale} \\right).
 
 If `base_dist` falls under a location-scale family, `affine` will attempt to return a 
 transformed distribution of type `base_dist` if an `affine` method has been implemented. 
-Otherwise, it will fall back on the `Affine` wrapper type.
+Otherwise, it will fall back on the `AffineDistribution` wrapper type.
 
 ```julia
 affine(shift, scale, base_dist)  # location-scale transformed distribution
@@ -34,14 +34,14 @@ location(d)          # Get the location parameter
 scale(d)             # Get the scale parameter
 ```
 """
-struct Affine{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: UnivariateDistribution{S}
+struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: UnivariateDistribution{S}
     shift::T
     scale::T
     base_dist::D
-    function Affine{T,S,D}(shift::T, scale::T, base_dist::D; check_args=true) where {
+    function AffineDistribution{T,S,D}(shift::T, scale::T, base_dist::D; check_args=true) where {
         T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     }
-        !check_args || @check_args(Affine, !iszero(scale))
+        !check_args || @check_args(AffineDistribution, !iszero(scale))
         return new{T,S,D}(shift, scale, base_dist)
     end
 end
@@ -50,31 +50,31 @@ function affine(shift::Real, scale::Real, base_dist::UnivariateDistribution)
     T = promote_type(eltype(base_dist), typeof(shift), typeof(scale))
     D = typeof(base_dist)
     S = value_support(D)
-    return Affine{T,S,D}(T(shift), T(scale), base_dist)
+    return AffineDistribution{T,S,D}(T(shift), T(scale), base_dist)
 end
 
 # Composing affine transformations
-function affine(shift::Real, scale::Real, d::Affine)
+function affine(shift::Real, scale::Real, d::AffineDistribution)
     return affine(shift + scale * d.shift, scale * d.scale, d.base_dist)
 end
 
 
 # Aliases
-const ContinuousAffine{T<:Real,D<:ContinuousUnivariateDistribution} = Affine{T,Continuous,D}
-const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = Affine{T,Discrete,D}
+const ContinuousAffine{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
+const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 
-Base.eltype(::Type{<:Affine{T}}) where {T} = T
+Base.eltype(::Type{<:AffineDistribution{T}}) where {T} = T
 
 # Support
-function minimum(d::Affine)
+function minimum(d::AffineDistribution)
     minim = d.scale > 0 ? minimum : maximum
     return d.shift + d.scale * minim(d.base_dist)
 end
-function maximum(d::Affine)
+function maximum(d::AffineDistribution)
     maxim = d.scale > 0 ? maximum : minimum
     return d.shift + d.scale * maxim(d.base_dist)
 end
-support(d::Affine) = affine_support(d.shift, d.scale, support(d.base_dist))
+support(d::AffineDistribution) = affine_support(d.shift, d.scale, support(d.base_dist))
 
 affine_support(shift::Real, scale::Real, support) = shift .+ scale .* support
 function affine_support(shift::Real, scale::Real, support::RealInterval)
@@ -91,53 +91,53 @@ end
 
 #### Conversions
 
-function convert(::Type{Affine{T}}, shift::Real, scale::Real, base_dist::UnivariateDistribution) where T<:Real
-    return Affine(T(shift), T(scale), base_dist)
+function convert(::Type{AffineDistribution{T}}, shift::Real, scale::Real, base_dist::UnivariateDistribution) where T<:Real
+    return AffineDistribution(T(shift), T(scale), base_dist)
 end
-function convert(::Type{Affine{T}}, d::Affine{S}) where {T<:Real, S<:Real} 
+function convert(::Type{AffineDistribution{T}}, d::AffineDistribution{S}) where {T<:Real, S<:Real} 
     # Should we really leave the type of d.base_dist unchanged? (Old LocationScale behavior)
     return affine(T(d.shift), T(d.scale), d.base_dist)
 end
 
 #### Parameters
 
-function location(d::Affine)
+function location(d::AffineDistribution)
     if hasmethod(location, (typeof(d.base_dist),))
         return d.shift + location(d.base_dist)
     else
         return d.shift
     end
 end
-function scale(d::Affine)  # This might be ambiguous... do we want to return signed or unsigned scale?
+function scale(d::AffineDistribution)  # This might be ambiguous... do we want to return signed or unsigned scale?
     if hasmethod(scale, (typeof(d.base_dist),))
         return d.scale * scale(d.base_dist)
     else
         return d.scale
     end
 end
-params(d::Affine) = (d.shift, d.scale, d.base_dist)
-partype(::Affine{T}) where {T} = T
+params(d::AffineDistribution) = (d.shift, d.scale, d.base_dist)
+partype(::AffineDistribution{T}) where {T} = T
 
 #### Statistics
 
-mean(d::Affine) = d.shift + d.scale * mean(d.base_dist)
-median(d::Affine) = d.shift + d.scale * median(d.base_dist)
-mode(d::Affine) = d.shift + d.scale * mode(d.base_dist)
-modes(d::Affine) = d.shift .+ d.scale .* modes(d.base_dist)
+mean(d::AffineDistribution) = d.shift + d.scale * mean(d.base_dist)
+median(d::AffineDistribution) = d.shift + d.scale * median(d.base_dist)
+mode(d::AffineDistribution) = d.shift + d.scale * mode(d.base_dist)
+modes(d::AffineDistribution) = d.shift .+ d.scale .* modes(d.base_dist)
 
-var(d::Affine) = d.scale^2 * var(d.base_dist)
-std(d::Affine) = abs(d.scale) * std(d.base_dist)
-skewness(d::Affine) = skewness(d.base_dist)
-kurtosis(d::Affine) = kurtosis(d.base_dist)
+var(d::AffineDistribution) = d.scale^2 * var(d.base_dist)
+std(d::AffineDistribution) = abs(d.scale) * std(d.base_dist)
+skewness(d::AffineDistribution) = skewness(d.base_dist)
+kurtosis(d::AffineDistribution) = kurtosis(d.base_dist)
 
-isplatykurtic(d::Affine) = isplatykurtic(d.base_dist)
-isleptokurtic(d::Affine) = isleptokurtic(d.base_dist)
-ismesokurtic(d::Affine) = ismesokurtic(d.base_dist)
+isplatykurtic(d::AffineDistribution) = isplatykurtic(d.base_dist)
+isleptokurtic(d::AffineDistribution) = isleptokurtic(d.base_dist)
+ismesokurtic(d::AffineDistribution) = ismesokurtic(d.base_dist)
 
 entropy(d::ContinuousAffine) = entropy(d.base_dist) + log(abs(d.scale))
 entropy(d::DiscreteAffine) = entropy(d.base_dist)
 
-mgf(d::Affine, t::Real) = exp(d.shift * t) * mgf(d.base_dist, d.scale * t)
+mgf(d::AffineDistribution, t::Real) = exp(d.shift * t) * mgf(d.base_dist, d.scale * t)
 
 #### Evaluation & Sampling
 
@@ -149,23 +149,23 @@ function logpdf(d::ContinuousAffine, x::Real)
 end
 logpdf(d::DiscreteAffine, x::Real) = logpdf(d.base_dist, (x - d.shift) / d.scale)
 
-function cdf(d::Affine, x::Real)
+function cdf(d::AffineDistribution, x::Real)
     x = (x - d.shift) / d.scale
     return d.scale < 0 ? ccdf(d.base_dist, x) : cdf(d.base_dist, x)
 end
 
-function logcdf(d::Affine, x::Real)
+function logcdf(d::AffineDistribution, x::Real)
     x = (x - d.shift) / d.scale
     return d.scale < 0 ? logccdf(d.base_dist, x) : logcdf(d.base_dist, x)
 end
 
-function quantile(d::Affine, q::Real)
+function quantile(d::AffineDistribution, q::Real)
     q = d.scale < 0 ? (1 - q) : q
     return d.shift + d.scale * quantile(d.base_dist, q)
 end
 
-rand(rng::AbstractRNG, d::Affine) = d.shift + d.scale * rand(rng, d.base_dist)
-cf(d::Affine, t::Real) = cf(d.base_dist, t * d.scale) * exp(1im * t * d.shift)
+rand(rng::AbstractRNG, d::AffineDistribution) = d.shift + d.scale * rand(rng, d.base_dist)
+cf(d::AffineDistribution, t::Real) = cf(d.base_dist, t * d.scale) * exp(1im * t * d.shift)
 gradlogpdf(d::ContinuousAffine, x::Real) = gradlogpdf(d.base_dist, (x - d.shift) / d.scale) / d.scale
 
 #### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
