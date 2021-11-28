@@ -65,6 +65,7 @@ export
     MultivariateMixture,
 
     # distribution types
+    Affine,
     Arcsine,
     Bernoulli,
     Beta,
@@ -115,7 +116,6 @@ export
     Levy,
     LKJ,
     LKJCholesky,
-    LocationScale,
     Logistic,
     LogNormal,
     LogUniform,
@@ -178,6 +178,7 @@ export
     RealInterval,
 
     # methods
+    affine,             # apply an affine transformation to a distribution
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function

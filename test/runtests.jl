@@ -47,7 +47,7 @@ const tests = [
     "mixture",
     "gradlogpdf",
     "noncentralt",
-    "locationscale",
+    "affine",
     "quantile_newton",
     "semicircle",
     "qq",

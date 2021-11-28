@@ -159,7 +159,7 @@ function _marginal(lkj::LKJ)
     d = lkj.d
     η = lkj.η
     α = η + 0.5d - 1
-    LocationScale(-1, 2, Beta(α, α))
+    affine(-1, 2, Beta(α, α))
 end
 
 #  -----------------------------------------------------------------------------

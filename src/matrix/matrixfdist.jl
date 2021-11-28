@@ -157,7 +157,7 @@ function _univariate(d::MatrixFDist)
     n1, n2, B = params(d)
     μ = zero(partype(d))
     σ = (n1 / n2) * Matrix(B)[1]
-    return LocationScale(μ, σ, FDist(n1, n2))
+    return affine(μ, σ, FDist(n1, n2))
 end
 
 function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)

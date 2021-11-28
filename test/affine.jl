@@ -2,11 +2,11 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = LocationScale(μ,σ,ρ)
-    @test params(d) == (μ,σ,ρ)
+    d = affine(μ, σ, ρ)
+    @test params(d) == (μ, σ, ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the LocationScale object
+    # Different ways to construct the Affine object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
@@ -145,7 +145,7 @@ function test_location_scale_normal(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, μD::Real, σD::Real,
 )
     ρ = Normal(μD, σD)
-    dref = Normal(μ + σ * μD, σ * σD)
+    dref = Normal(μ + abs(σ) * μD, abs(σ) * σD)
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
@@ -157,20 +157,23 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "LocationScale" begin
+@testset "Affine" begin
     rng = MersenneTwister(123)
 
-    for _rng in (missing, rng)
-        test_location_scale_normal(_rng, 0.3, 0.2, 0.1, 0.2)
-        test_location_scale_normal(_rng, -0.3, 0.1, -0.1, 0.3)
-        test_location_scale_normal(_rng, 1.3, 0.4, -0.1, 0.5)
-    end
-    test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
+    for sgn in (1, -1)  # test with positive and negative scales
+        for _rng in (missing, rng)
+            test_location_scale_normal(_rng, 0.3, sgn * 0.2, 0.1, 0.2)
+            test_location_scale_normal(_rng, -0.3, sgn * 0.1, -0.1, 0.3)
+            test_location_scale_normal(_rng, 1.3, sgn * 0.4, -0.1, 0.5)
+        end
+        
+        test_location_scale_normal(rng, ForwardDiff.Dual(0.3), sgn * 0.2, 0.1, 0.2)
 
-    probs = Distributions.pnormalize!(rand(10))
-    for _rng in (missing, rng)
-        test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
-        test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
-        test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
+        probs = Distributions.pnormalize!(rand(10))
+        for _rng in (missing, rng)
+            test_location_scale_discretenonparametric(_rng, 1//3, sgn * 1//2, 1:10, probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sgn * 1//3, (-10):(-1), probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sgn * 3//2, 15:24, probs)
+        end
     end
 end
