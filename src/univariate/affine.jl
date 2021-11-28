@@ -32,9 +32,6 @@ params(d)            # Get the parameters, i.e. (shift, scale, base_dist)
 location(d)          # Get the location parameter
 scale(d)             # Get the scale parameter
 ```
-
-External links
-[Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
 struct Affine{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: UnivariateDistribution{S}
     shift::T
@@ -69,15 +66,19 @@ const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = Affine{T,Discr
 Base.eltype(::Type{<:Affine{T}}) where {T} = T
 
 # alias μ, σ, ρ for backwards compatibility with old LocationScale
-function getproperty(x::Affine, name::Symbol)  
-    if name == :μ
-        return x.shift
-    elseif name == :σ
-        return x.scale
-    elseif name == :ρ
-        return x.base_dist
-    else
-        return getfield(x, name)
+function Base.getproperty(x::Affine, name::Symbol)
+    try
+        getfield(x, name)
+    catch
+        if name == :μ
+            return x.shift
+        elseif name == :σ
+            return x.scale
+        elseif name == :ρ
+            return x.base_dist
+        else
+            error("type Affine has no field $name")
+        end
     end
 end
 
@@ -106,17 +107,17 @@ end
 #### Parameters
 
 function location(d::Affine)
-    if hasmethod(location, (typeof(d.base_dist)))
+    if hasmethod(location, (typeof(d.base_dist),))
         return d.shift + location(d.base_dist)
     else
         return d.shift
     end
 end
 function scale(d::Affine)  # This might be ambiguous... do we want to return signed or unsigned scale?
-    if hasmethod(scale, (typeof(d.base_dist)))
-        return abs(d.scale) * scale(d.base_dist)
+    if hasmethod(scale, (typeof(d.base_dist),))
+        return d.scale * scale(d.base_dist)
     else
-        return abs(d.scale)
+        return d.scale
     end
 end
 params(d::Affine) = (d.shift, d.scale, d.base_dist)
@@ -164,7 +165,7 @@ function logcdf(d::Affine, x::Real)
 end
 
 function quantile(d::Affine, q::Real)
-    q = reflected(d) ? q : 1 - q
+    q = reflected(d) ? (1 - q) : q
     return d.shift + d.scale * quantile(d.base_dist, q)
 end
 
