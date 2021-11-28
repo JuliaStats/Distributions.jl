@@ -50,6 +50,7 @@ end
 
 """
     affine(shift, scale, base_dist)
+    affine(base_dist, shift, scale)
 
 Return a shifted and scaled (affinely transformed) version of `base_dist`.
 
@@ -94,9 +95,11 @@ function affine(shift::Real, scale::Real, d::AffineDistribution)
 end
 
 
+affine(d::UnivariateDistribution, shift::Real, scale::Real) = affine(shift, scale, d)
+
 # Aliases
 @deprecate LocationScale(args...; kwargs...) AffineDistribution(args...)
-const LocationScale = AffineDistribution
+LocationScale = AffineDistribution
 const ContinuousAffine{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 
@@ -135,7 +138,7 @@ function convert(::Type{AffineDistribution{T}}, d::AffineDistribution{S}) where 
     return affine(T(d.shift), T(d.scale), d.base_dist)
 end
 
-Base.eltype(::Type{<:AffineDistribution{T, S, D}}) where {T} = promote(T, eltype(D))
+Base.eltype(::Type{<:AffineDistribution{T,S,D}}) where {T,S,D} = promote(T, eltype(D))
 
 
 #### Parameters
@@ -147,7 +150,7 @@ function location(d::AffineDistribution)
         return d.shift
     end
 end
-function scale(d::AffineDistribution)  # This might be ambiguous... do we want to return signed or unsigned scale?
+function scale(d::AffineDistribution)
     if hasmethod(scale, (typeof(d.base_dist),))
         return d.scale * scale(d.base_dist)
     else
