@@ -145,7 +145,7 @@ export
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
-    Product,
+    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,

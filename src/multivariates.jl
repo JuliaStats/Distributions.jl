@@ -116,6 +116,7 @@ for fname in ["dirichlet.jl",
               "mvnormalcanon.jl",
               "mvlognormal.jl",
               "mvtdist.jl",
+              "product.jl", # deprecated
               "vonmisesfisher.jl"]
     include(joinpath("multivariate", fname))
 end

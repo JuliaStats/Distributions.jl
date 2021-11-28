@@ -1,5 +1,3 @@
-import Statistics: mean, var, cov
-
 """
     ProductDistribution <: Distribution{<:ValueSupport,<:ArrayLikeVariate}
 
@@ -11,7 +9,7 @@ independent distributions instead of constructing a `ProductDistribution` direct
 """
 struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVariate{N},S}
     dists::D
-    size::NTuple{N,Int}
+    size::Dims{N}
 
     function ProductDistribution{N,M,D}(dists::D) where {N,M,D}
         isempty(dists) && error("product distribution must consist of at least one distribution")
@@ -50,12 +48,6 @@ const MatrixOfUnivariateDistribution{D,S<:ValueSupport,T} = ProductDistribution{
 const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
 
 const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
-
-## deprecations
-# type parameters can't be deprecated it seems: https://github.com/JuliaLang/julia/issues/9830
-# so we define an alias and deprecate the corresponding constructor
-const Product{S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}} = ProductDistribution{1,0,V,S,eltype(T)}
-Base.@deprecate Product(v::AbstractVector{<:UnivariateDistribution}) ProductDistribution(v)
 
 ## General definitions
 function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSupport,T}}) where {T}
