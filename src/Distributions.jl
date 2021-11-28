@@ -65,7 +65,6 @@ export
     MultivariateMixture,
 
     # distribution types
-    Affine,
     Arcsine,
     Bernoulli,
     Beta,
