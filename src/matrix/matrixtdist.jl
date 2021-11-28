@@ -178,7 +178,7 @@ function _univariate(d::MatrixTDist)
     ν, M, Σ, Ω = params(d)
     μ = M[1]
     σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
-    return affine(μ, σ, TDist(ν))
+    return μ + σ * TDist(ν)
 end
 
 _multivariate(d::MatrixTDist) = MvTDist(d)
