@@ -57,7 +57,6 @@ function affine(shift::Real, scale::Real, d::Affine)
     return affine(shift + scale * d.shift, scale * d.scale, d.base_dist)
 end
 
-reflected(d::Affine) = d.scale < 0
 
 # Aliases
 const ContinuousAffine{T<:Real,D<:ContinuousUnivariateDistribution} = Affine{T,Continuous,D}
@@ -83,14 +82,27 @@ function Base.getproperty(x::Affine, name::Symbol)
 end
 
 # Support
-minimum(d::Affine) = d.shift + d.scale * minimum(d.base_dist)
-maximum(d::Affine) = d.shift + d.scale * maximum(d.base_dist)
+function minimum(d::Affine)
+    minim = d.scale > 0 ? minimum : maximum
+    return d.shift + d.scale * minim(d.base_dist)
+end
+function maximum(d::Affine)
+    maxim = d.scale > 0 ? maximum : minimum
+    return d.shift + d.scale * maxim(d.base_dist)
+end
 support(d::Affine) = affine_support(d.shift, d.scale, support(d.base_dist))
 
 affine_support(shift::Real, scale::Real, support) = shift .+ scale .* support
 function affine_support(shift::Real, scale::Real, support::RealInterval)
+    if scale > 0
+        lower = support.lb
+        upper = support.ub
+    else
+        lower = support.ub
+        upper = support.lb
+    end
     _transform = x -> shift + scale * x
-    return RealInterval(_transform(support.lb), _transform(support.ub))
+    return RealInterval(_transform(lower), _transform(upper))
 end
 
 
@@ -156,16 +168,16 @@ logpdf(d::DiscreteAffine, x::Real) = logpdf(d.base_dist, (x - d.shift) / d.scale
 
 function cdf(d::Affine, x::Real)
     x = (x - d.shift) / d.scale
-    return reflected(d) ? ccdf(d.base_dist, x) : cdf(d.base_dist, x)
+    return d.scale < 0 ? ccdf(d.base_dist, x) : cdf(d.base_dist, x)
 end
 
 function logcdf(d::Affine, x::Real)
     x = (x - d.shift) / d.scale
-    return reflected(d) ? logccdf(d.base_dist, x) : logcdf(d.base_dist, x)
+    return d.scale < 0 ? logccdf(d.base_dist, x) : logcdf(d.base_dist, x)
 end
 
 function quantile(d::Affine, q::Real)
-    q = reflected(d) ? (1 - q) : q
+    q = d.scale < 0 ? (1 - q) : q
     return d.shift + d.scale * quantile(d.base_dist, q)
 end
 
