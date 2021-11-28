@@ -27,6 +27,8 @@ using SpecialFunctions
 
 import ChainRulesCore
 
+import DensityInterface
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -116,6 +118,7 @@ export
     LocationScale,
     Logistic,
     LogNormal,
+    LogUniform,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
@@ -141,6 +144,7 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
+    SkewedExponentialPower,
     Product,
     Poisson,
     PoissonBinomial,
@@ -204,6 +208,7 @@ export
     islowerbounded,
     isbounded,
     hasfinitesupport,
+    kldivergence,       # kl divergence between distributions
     kurtosis,           # kurtosis of the distribution
     logccdf,            # ccdf returning log-probability
     logcdf,             # cdf returning log-probability
@@ -270,6 +275,7 @@ include("common.jl")
 
 # implementation helpers
 include("utils.jl")
+include("eachvariate.jl")
 
 # generic functions
 include("show.jl")
@@ -287,6 +293,7 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("reshaped.jl")
 include("truncate.jl")
 include("conversion.jl")
 include("convolution.jl")
@@ -297,6 +304,12 @@ include("pdfnorm.jl")
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
+
+# Implementation of DensityInterface API
+include("density_interface.jl")
+
+# Testing utilities for other packages which implement distributions.
+include("test_utils.jl")
 
 include("deprecates.jl")
 
@@ -330,7 +343,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
-    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,

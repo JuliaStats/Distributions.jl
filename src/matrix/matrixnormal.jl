@@ -89,7 +89,7 @@ mean(d::MatrixNormal) = d.M
 
 mode(d::MatrixNormal) = d.M
 
-cov(d::MatrixNormal, ::Val{true}=Val(true)) = Matrix(kron(d.V, d.U))
+cov(d::MatrixNormal) = Matrix(kron(d.V, d.U))
 
 cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
@@ -127,12 +127,6 @@ function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
     B = cholesky(d.V).U
     Y .= d.M .+ A * X * B
 end
-
-#  -----------------------------------------------------------------------------
-#  Transformation
-#  -----------------------------------------------------------------------------
-
-vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))
 
 #  -----------------------------------------------------------------------------
 #  Test utils

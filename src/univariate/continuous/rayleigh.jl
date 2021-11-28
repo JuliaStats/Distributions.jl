@@ -79,7 +79,8 @@ end
 
 function logccdf(d::Rayleigh, x::Real)
     z = - x^2 / (2 * d.σ^2)
-    return x > 0 ? z : isnan(x) ? oftype(z, NaN) : zero(x)
+    # return negative zero so that cdf is +0, not -0
+    return x > 0 ? z : isnan(x) ? oftype(z, NaN) : -zero(z)
 end
 ccdf(d::Rayleigh, x::Real) = exp(logccdf(d, x))
 

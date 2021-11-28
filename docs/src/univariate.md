@@ -328,6 +328,13 @@ plotdensity((0, 5), LogNormal, (0, 1)) # hide
 ```
 
 ```@docs
+LogUniform
+```
+```@example plotdensity
+plotdensity((0, 11), LogUniform, (1, 10)) # hide
+```
+
+```@docs
 NoncentralBeta
 ```
 ```@example plotdensity
@@ -409,6 +416,13 @@ Semicircle
 ```
 ```@example plotdensity
 plotdensity((-1, 1), Semicircle, (1,)) # hide
+```
+
+```@docs
+SkewedExponentialPower
+```
+```@example plotdensity
+plotdensity((-8, 5), SkewedExponentialPower, (0, 1, 0.7, 0.7)) # hide
 ```
 
 ```@docs
