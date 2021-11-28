@@ -21,20 +21,38 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
 end
 
 function ProductDistribution(dists::AbstractArray{<:Distribution{ArrayLikeVariate{M}},N}) where {M,N}
-    return ProductDistribution{M + N, M, typeof(dists)}(dists)
+    return ProductDistribution{M + N,M,typeof(dists)}(dists)
 end
 
 function ProductDistribution(dists::Tuple{Vararg{<:Distribution{ArrayLikeVariate{M}},N}}) where {M,N}
-    return ProductDistribution{M + 1, M, typeof(dists)}(dists)
+    return ProductDistribution{M + 1,M,typeof(dists)}(dists)
 end
 
+# default definitions (type stable e.g. for arrays with concrete `eltype`)
 _product_valuesupport(dists) = mapreduce(value_support ∘ typeof, promote_type, dists)
 _product_eltype(dists) = mapreduce(eltype, promote_type, dists)
+
+# type-stable and faster implementations for tuples
+function _product_valuesupport(dists::Tuple{Vararg{<:Distribution}})
+    return __product_promote_type(value_support, typeof(dists))
+end
+function _product_eltype(dists::Tuple{Vararg{<:Distribution}})
+    return __product_promote_type(eltype, typeof(dists))
+end
+
+__product_promote_type(f::F, ::Type{Tuple{D}}) where {F,D<:Distribution} = f(D)
+function __product_promote_type(f::F, ::Type{T}) where {F,T}
+    return promote_type(
+        f(Base.tuple_type_head(T)),
+        __product_promote_type(f, Base.tuple_type_tail(T)),
+    )
+end
+
 function _product_size(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N}) where {M,N}
     size_d = size(first(dists))
     all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
     size_dists = size(dists)
-    return ntuple(i -> i <= M ? size_d[i] : size_dists[i - M], Val(M + N))
+    return ntuple(i -> i <= M ? size_d[i] : size_dists[i-M], Val(M + N))
 end
 function _product_size(dists::Tuple{Vararg{<:Distribution{<:ArrayLikeVariate{M}},N}}) where {M,N}
     size_d = size(first(dists))
@@ -62,18 +80,18 @@ cov(d::ProductDistribution) = Diagonal(vec(var(d)))
 
 ## For product distributions of univariate distributions
 mean(d::ArrayOfUnivariateDistribution) = map(mean, d.dists)
-mean(d::VectorOfUnivariateDistribution{<:Tuple}) = mapreduce(mean, vcat, d.dists)
+mean(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(mean, d.dists))
 var(d::ArrayOfUnivariateDistribution) = map(var, d.dists)
-var(d::VectorOfUnivariateDistribution{<:Tuple}) = mapreduce(var, vcat, d.dists)
+var(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(var, d.dists))
 
 function insupport(d::ArrayOfUnivariateDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
     size(d) == size(x) && all(insupport(vi, xi) for (vi, xi) in zip(d.dists, x))
 end
 
 minimum(d::ArrayOfUnivariateDistribution) = map(minimum, d.dists)
-minimum(d::VectorOfUnivariateDistribution{<:Tuple}) = mapreduce(minimum, vcat, d.dists)
+minimum(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(minimum, d.dists))
 maximum(d::ArrayOfUnivariateDistribution) = map(maximum, d.dists)
-maximum(d::VectorOfUnivariateDistribution{<:Tuple}) = mapreduce(maximum, vcat, d.dists)
+maximum(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(maximum, d.dists))
 
 function entropy(d::ArrayOfUnivariateDistribution)
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
