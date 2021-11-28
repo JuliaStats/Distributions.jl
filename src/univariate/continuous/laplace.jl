@@ -108,7 +108,6 @@ end
 #### Affine transformations
 
 Base.:+(d::Laplace, c::Real) = Laplace(d.μ + c, d.θ)
-Base.:+(c::Real, d::Laplace) = d + c
 Base.:*(c::Real, d::Laplace) = Laplace(c * d.μ, abs(c) * d.θ)
 
 #### Sampling

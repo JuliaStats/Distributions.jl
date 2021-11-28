@@ -112,7 +112,6 @@ end
 #### Affine transformations
 
 Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
-Base.:+(c::Real, d::Uniform) = d + c
 Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
