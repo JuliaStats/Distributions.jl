@@ -33,13 +33,13 @@ The `VariateForm` sub-types defined in `Distributions.jl` are:
 
 ### ValueSupport
 
-```@doc
+```@docs
 Distributions.ValueSupport
 ```
 
 The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
-```@doc
+```@docs
 Distributions.Discrete
 Distributions.Continuous
 ```
