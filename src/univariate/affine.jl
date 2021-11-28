@@ -99,7 +99,6 @@ affine(d::UnivariateDistribution, shift::Real, scale::Real) = affine(shift, scal
 
 # Aliases
 @deprecate LocationScale(args...; kwargs...) AffineDistribution(args...)
-LocationScale = AffineDistribution
 const ContinuousAffine{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffine{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 

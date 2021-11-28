@@ -178,6 +178,7 @@ export
     RealInterval,
 
     # methods
+    affine,
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
