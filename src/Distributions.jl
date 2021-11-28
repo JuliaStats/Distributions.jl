@@ -115,6 +115,7 @@ export
     Levy,
     LKJ,
     LKJCholesky,
+    LocationScale,    # for backwards compatibility
     Logistic,
     LogNormal,
     LogUniform,
