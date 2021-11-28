@@ -80,3 +80,11 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 #### Sampling
 
 rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)
+
+#### Affine transformations
+
+function Base.:+(d::NormalCanon, c::Real)
+    η, λ = params(d)
+    return NormalCanon(η + c * λ, λ)
+end
+Base.:*(c::Real, d::NormalCanon) = NormalCanon(d.η / c, d.λ / c^2)

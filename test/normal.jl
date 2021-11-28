@@ -184,3 +184,4 @@ end
 
 # affine transformations
 test_affine_transformations(Normal, randn(), randn()^2)
+test_affine_transformations(NormalCanon, randn()^2, randn()^2)

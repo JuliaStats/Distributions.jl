@@ -615,23 +615,23 @@ function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateD
         c = randn()
 
         # addition
-        d_c = @inferred(d + c)
-        c_d = @inferred(c + d)
-        @test d_c isa T
-        @test c_d isa T
-        @test location(d_c) == location(c_d) == location(d) + c
-        @test scale(c_d) == scale(d_c) == scale(d)
+        for shift_d in (@inferred(d + c), @inferred(c + d))
+            @test shift_d isa T
+            @test location(shift_d) ≈ location(d) + c
+            @test scale(shift_d) ≈ scale(d)
+        end
 
         # multiplication (negative and positive values)
         for s in (-abs(c), abs(c))
-            s_d = @inferred(s * d)
-            @test s_d isa T
-            if d isa Uniform
-                @test location(s_d) == (s > 0 ? s * minimum(d) : s * maximum(d))
-            else
-                @test location(s_d) == s * location(d)
+            for scale_d in (@inferred(s * d), @inferred(d * s), @inferred(d / inv(s)))
+                @test scale_d isa T
+                if d isa Uniform
+                    @test location(scale_d) ≈ (s > 0 ? s * minimum(d) : s * maximum(d))
+                else
+                    @test location(scale_d) ≈ s * location(d)
+                end
+                @test scale(scale_d) ≈ abs(s) * scale(d)
             end
-            @test scale(s_d) == abs(s) * scale(d)
         end
     end
 end
