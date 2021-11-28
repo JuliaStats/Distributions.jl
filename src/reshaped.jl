@@ -55,6 +55,35 @@ function __logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where 
     return @inbounds logpdf(dist, reshape(x, size(dist)))
 end
 
+# loglikelihood
+# useful if the original distribution defined more optimized methods
+@inline function loglikelihood(
+    d::ReshapedDistribution{N},
+    x::AbstractArray{<:Real,N},
+) where {N}
+    @boundscheck begin
+        size(x) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    dist = d.dist
+    return @inbounds loglikelihood(dist, reshape(x, size(dist)))
+end
+@inline function loglikelihood(
+    d::ReshapedDistribution{N},
+    x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(d) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    dist = d.dist
+    trailingsize = ntuple(i -> size(x, N + i), Val(M - N))
+    return @inbounds loglikelihood(dist, reshape(x, size(dist)..., trailingsize...))
+end
 
 # sampling
 function _rand!(
@@ -113,11 +142,7 @@ See also: [`reshape`](@ref)
 """
 Base.vec(dist::Distribution{<:ArrayLikeVariate}) = reshape(dist, length(dist))
 
-# shortcut for (reshaped) multivariate distributions
-function Base.reshape(dist::MultivariateDistribution, dims::Tuple{Int})
-    _reshape_check_dims(dist, dims)
-    return dist
-end
+# avoid unnecessary wrappers
 function Base.reshape(
     dist::ReshapedDistribution{<:Any,<:ValueSupport,<:MultivariateDistribution},
     dims::Tuple{Int},
@@ -125,6 +150,13 @@ function Base.reshape(
     _reshape_check_dims(dist, dims)
     return dist.dist
 end
+
+function Base.reshape(dist::MultivariateDistribution, dims::Tuple{Int})
+    _reshape_check_dims(dist, dims)
+    return dist
+end
+
+# specialization for flattened `MatrixNormal`
 function Base.reshape(dist::MatrixNormal, dims::Tuple{Int})
     _reshape_check_dims(dist, dims)
     return MvNormal(vec(dist.M), kron(dist.V, dist.U))

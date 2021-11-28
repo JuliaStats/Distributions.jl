@@ -76,16 +76,9 @@ function cov(d::MatrixDistribution, ::Val{false})
     [cov(d, i, j, k, l) for i in 1:n, j in 1:p, k in 1:n, l in 1:p]
 end
 
-"""
-    _rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
-
-Sample the matrix distribution and store the result in `A`.
-Must be implemented by matrix-variate distributions.
-"""
-_rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
-
 # pdf & logpdf
 
+# TODO: Remove or restrict - this causes many ambiguity errors...
 _logpdf(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logkernel(d, X) + d.logc0
 
 #  for testing

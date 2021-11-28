@@ -51,9 +51,12 @@ params(d::Multinomial) = (d.n, d.p)
 
 ### Conversions
 convert(::Type{Multinomial{T, TV}}, d::Multinomial) where {T<:Real, TV<:AbstractVector{T}} = Multinomial(d.n, TV(d.p))
+convert(::Type{Multinomial{T, TV}}, d::Multinomial{T, TV}) where {T<:Real, TV<:AbstractVector{T}} = d
 convert(::Type{Multinomial{T, TV}}, n, p::AbstractVector) where {T<:Real, TV<:AbstractVector} = Multinomial(n, TV(p))
 convert(::Type{Multinomial{T}}, d::Multinomial) where {T<:Real} = Multinomial(d.n, T.(d.p))
+convert(::Type{Multinomial{T}}, d::Multinomial{T}) where {T<:Real} = d
 convert(::Type{Multinomial{T}}, n, p::AbstractVector) where {T<:Real} = Multinomial(n, T.(p))
+
 # Statistics
 
 mean(d::Multinomial) = d.n .* d.p
@@ -229,12 +232,12 @@ end
 
 fit_mle(::Type{<:Multinomial}, ss::MultinomialStats) = Multinomial(ss.n, ss.scnts * inv(ss.tw * ss.n))
 
-function fit_mle(::Type{<:Multinomial}, x::Matrix{T}) where T<:Real
+function fit_mle(::Type{<:Multinomial}, x::Matrix{<:Real})
     ss = suffstats(Multinomial, x)
-    Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
+    Multinomial(ss.n, lmul!(inv(ss.tw * ss.n), ss.scnts))
 end
 
-function fit_mle(::Type{<:Multinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function fit_mle(::Type{<:Multinomial}, x::Matrix{<:Real}, w::Array{Float64})
     ss = suffstats(Multinomial, x, w)
-    Multinomial(ss.n, multiply!(ss.scnts, inv(ss.tw * ss.n)))
+    Multinomial(ss.n, lmul!(inv(ss.tw * ss.n), ss.scnts))
 end

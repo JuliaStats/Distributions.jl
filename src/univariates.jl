@@ -154,13 +154,6 @@ Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`
 """
 rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
 
-"""
-    rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
-
-Sample a univariate distribution and store the results in the provided array.
-"""
-rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
-
 ## statistics
 
 """
@@ -704,7 +697,8 @@ const continuous_distributions = [
     "uniform",
     "loguniform", # depends on Uniform
     "vonmises",
-    "weibull"
+    "weibull",
+    "skewedexponentialpower"
 ]
 
 include(joinpath("univariate", "locationscale.jl"))

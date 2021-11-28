@@ -1,5 +1,5 @@
 function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{Float64},
-                        x::AbstractVector{<:Real})
+                         x::AbstractVector{<:Real})
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
@@ -48,7 +48,8 @@ function MultinomialSampler(n::Int, prob::Vector{<:Real})
     return MultinomialSampler(n, prob, AliasTable(prob))
 end
 
-function _rand!(rng::AbstractRNG, s::MultinomialSampler, x::AbstractVector{<:Real})
+function _rand!(rng::AbstractRNG, s::MultinomialSampler,
+                x::AbstractVector{<:Real})
     n = s.n
     k = length(s)
     if n^2 > k

@@ -11,9 +11,6 @@
             x = rand(d)
             ref_logd_at_x = logpdf(d, x)
             DensityInterface.test_density_interface(d, x, ref_logd_at_x)
-
-            # Stricter than required by test_density_interface:
-            @test logfuncdensity(logdensityof(d)) === d
         end
 
         for di_func in (logdensityof, densityof)

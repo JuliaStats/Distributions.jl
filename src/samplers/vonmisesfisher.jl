@@ -1,5 +1,4 @@
 # Sampler for von Mises-Fisher
-
 struct VonMisesFisherSampler <: Sampleable{Multivariate,Continuous}
     p::Int          # the dimension
     κ::Float64

@@ -16,14 +16,6 @@ size(d::MultivariateDistribution)
 
 ## sampling
 
-"""
-    rand!([rng::AbstractRNG,] d::MultivariateDistribution, x::AbstractArray)
-
-Draw samples and output them to a pre-allocated array x. Here, x can be either
-a vector of length `dim(d)` or a matrix with `dim(d)` rows.
-"""
-rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
-
 # multiple multivariate, must allocate matrix
 # TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
@@ -114,33 +106,6 @@ function cor(d::MultivariateDistribution)
 
     return R
 end
-
-# pdf and logpdf
-
-"""
-    pdf(d::MultivariateDistribution, x::AbstractArray)
-
-Return the probability density of distribution `d` evaluated at `x`.
-
-- If `x` is a vector, it returns the result as a scalar.
-- If `x` is a matrix with n columns, it returns a vector `r` of length n, where `r[i]` corresponds
-to `x[:,i]` (i.e. treating each column as a sample).
-
-`pdf!(r, d, x)` will write the results to a pre-allocated array `r`.
-"""
-pdf(d::MultivariateDistribution, x::AbstractArray)
-
-"""
-    logpdf(d::MultivariateDistribution, x::AbstractArray)
-
-Return the logarithm of probability density evaluated at `x`.
-
-- If `x` is a vector, it returns the result as a scalar.
-- If `x` is a matrix with n columns, it returns a vector `r` of length n, where `r[i]` corresponds to `x[:,i]`.
-
-`logpdf!(r, d, x)` will write the results to a pre-allocated array `r`.
-"""
-logpdf(d::MultivariateDistribution, x::AbstractArray)
 
 ##### Specific distributions #####
 

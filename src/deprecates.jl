@@ -56,4 +56,4 @@ end
 const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
 @deprecate MatrixReshaped(
     d::MultivariateDistribution, n::Integer, p::Integer=n
-) ReshapedDistribution(d, (n, p))
+) reshape(d, (n, p))

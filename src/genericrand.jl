@@ -75,7 +75,9 @@ form as specified above. The rules are summarized as below:
 """
 function rand! end
 Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
-rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray)
+    return _rand!(rng, s, X)
+end
 
 # default definitions for arraylike variates
 @inline function rand!(
