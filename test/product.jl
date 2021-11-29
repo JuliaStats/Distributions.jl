@@ -37,7 +37,7 @@ end
     ubound = rand(N)
     ds = Uniform.(-ubound, ubound)
     x = rand.(ds)
-    d_product = @test_deprecated(Product(ds))
+    d_product = @test_deprecated(product_distribution(ds))
     @test d_product isa Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
@@ -68,7 +68,7 @@ end
         support = fill(a, N)
         ds = DiscreteNonParametric.(support, Ref([0.5, 0.5]))
         x = rand.(ds)
-        d_product = @test_deprecated(Product(ds))
+        d_product = @test_deprecated(product_distribution(ds))
         @test d_product isa Product
         # Check that methods for `Product` are consistent.
         @test length(d_product) == length(ds)
@@ -127,14 +127,20 @@ end
     ubound = rand(N)
 
     ds1 = Uniform.(0.0, ubound)
-    d_product1 = @inferred(product_distribution(ds1))
+    # Replace with
+    # d_product1 = @inferred(product_distribution(ds1))
+    # when `Product` is removed
+    d_product1 = @inferred(Distributions.ProductDistribution(ds1))
     @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous,Float64}
 
     d_product2 = @inferred(product_distribution(ntuple(i -> Uniform(0.0, ubound[i]), 11)...))
     @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
 
     ds3 = Fill(Uniform(0.0, first(ubound)), N)
-    d_product3 = @inferred(product_distribution(ds3))
+    # Replace with
+    # d_product3 = @inferred(product_distribution(ds3))
+    # when `Product` is removed
+    d_product3 = @inferred(Distributions.ProductDistribution(ds3))
     @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill,Continuous,Float64}
 
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
@@ -171,14 +177,20 @@ end
     for a in ([0, 1], [-0.5, 0.5])
         # Construct independent distributions and `ProductDistribution` from these.
         ds1 = DiscreteNonParametric.(fill(a, N), Ref([0.5, 0.5]))
-        d_product1 = @inferred(product_distribution(ds1))
+        # Replace with
+        # d_product1 = @inferred(product_distribution(ds1))
+        # when `Product` is removed
+        d_product1 = @inferred(Distributions.ProductDistribution(ds1))
         @test d_product1 isa Distributions.VectorOfUnivariateDistribution{<:Vector{<:DiscreteNonParametric},Discrete,eltype(a)}
 
         d_product2 = @inferred(product_distribution(ntuple(_ -> DiscreteNonParametric(a, [0.5, 0.5]), 11)...))
         @test d_product2 isa Distributions.VectorOfUnivariateDistribution{<:NTuple{N,<:DiscreteNonParametric},Discrete,eltype(a)}
 
         ds3 = Fill(DiscreteNonParametric(a, [0.5, 0.5]), N)
-        d_product3 = @inferred(product_distribution(ds3))
+        # Replace with
+        # d_product3 = @inferred(product_distribution(ds3))
+        # when `Product` is removed
+        d_product3 = @inferred(Distributions.ProductDistribution(ds3))
         @test d_product3 isa Distributions.VectorOfUnivariateDistribution{<:Fill{<:DiscreteNonParametric,1},Discrete,eltype(a)}
 
         # Check that methods for `VectorOfUnivariateDistribution` are consistent.
