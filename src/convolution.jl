@@ -1,25 +1,34 @@
 """
-    convolve(d1::T, d2::T) where T<:Distribution -> Distribution
+    convolve(d1::Distribution, d2::Distribution)
+    d1 ⊕ d2
 
-Convolve two distributions of the same type to yield the distribution corresponding to the
-sum of independent random variables drawn from the underlying distributions.
+Convolve two distributions and return the distribution corresponding to the sum of
+independent random variables drawn from the underlying distributions.
 
-The function is only defined in the cases where the convolution has a closed form as
-defined here https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions
+The Unicode operator `⊕` can be typed by `\\oplus<tab>`.
 
-* `Bernoulli`
-* `Binomial`
-* `NegativeBinomial`
-* `Geometric`
-* `Poisson`
-* `Normal`
-* `Cauchy`
-* `Chisq`
-* `Exponential`
-* `Gamma`
-* `MultivariateNormal`
+Currently, the function is only defined in cases where the convolution has a closed form.
+More precisely, the function is defined if the distributions of `d1` and `d2` are the same
+and one of
+* [`Bernoulli`](@ref)
+* [`Binomial`](@ref)
+* [`NegativeBinomial`](@ref)
+* [`Geometric`](@ref)
+* [`Poisson`](@ref)
+* [`Normal`](@ref)
+* [`Cauchy`](@ref)
+* [`Chisq`](@ref)
+* [`Exponential`](@ref)
+* [`Gamma`](@ref)
+* [`MvNormal`](@ref)
+
+External links: [List of convolutions of probability distributions on Wikipedia](https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions)
 """
-function convolve end
+convolve(::Distribution, ::Distribution)
+
+# define Unicode alias and add docstring
+⊕(d1::Distribution, d2::Distribution) = convolve(d1, d2)
+@doc (@doc convolve) :⊕
 
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
