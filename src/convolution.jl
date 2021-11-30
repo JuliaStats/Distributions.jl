@@ -61,27 +61,9 @@ function convolve(d1::Gamma, d2::Gamma)
 end
 
 # continuous multivariate
-# The first two methods exist for performance reasons to avoid unnecessarily converting
-# PDMats to a Matrix
-function convolve(
-    d1::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
-    d2::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
-    )
-    _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ + d2.Σ)
-end
-
-function convolve(
-    d1::Union{FullNormal, ZeroMeanFullNormal},
-    d2::Union{FullNormal, ZeroMeanFullNormal},
-    )
-    _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
-end
-
 function convolve(d1::MvNormal, d2::MvNormal)
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ))
+    return MvNormal(d1.μ + d2.μ, d1.Σ + d2.Σ)
 end
 
 
