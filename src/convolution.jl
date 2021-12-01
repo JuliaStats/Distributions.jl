@@ -26,9 +26,8 @@ External links: [List of convolutions of probability distributions on Wikipedia]
 """
 convolve(::Distribution, ::Distribution)
 
-# define Unicode alias and add docstring
-⊕(d1::Distribution, d2::Distribution) = convolve(d1, d2)
-@doc (@doc convolve) :⊕
+# define Unicode alias
+const ⊕ = convolve
 
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
