@@ -26,9 +26,6 @@ External links: [List of convolutions of probability distributions on Wikipedia]
 """
 convolve(::Distribution, ::Distribution)
 
-# define Unicode alias
-const ⊕ = convolve
-
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
     _check_convolution_args(d1.p, d2.p)
@@ -74,6 +71,8 @@ function convolve(d1::MvNormal, d2::MvNormal)
     return MvNormal(d1.μ + d2.μ, d1.Σ + d2.Σ)
 end
 
+# define Unicode alias
+const ⊕ = convolve
 
 function _check_convolution_args(p1, p2)
     p1 ≈ p2 || throw(ArgumentError(
