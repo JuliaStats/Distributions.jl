@@ -2,20 +2,20 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = σ * ρ + μ
-    @test params(d) == (μ, σ, ρ)
+    d = LocationScale(μ,σ,ρ)
+    @test params(d) == (μ,σ,ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the Affine object
+    # Different ways to construct the LocationScale object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
-        d_dict = Dict{String,Distribution}(
+        d_dict = Dict(
             "original" => d,
             "sugar" => σ * ρ + μ,
         )
     else
-        d_dict = Dict{String,Distribution}(
+        d_dict = Dict(
             "original" => d,
             "sugar" => σ * ρ + μ,
             "composed" =>  μ + ((2 * ρ) * σ - 2) / 2 + 1
@@ -32,10 +32,10 @@ function test_location_scale(
             @test maximum(d) == maximum(dref)
             @test extrema(d) == (minimum(d), maximum(d))
             @test extrema(support(d)) == extrema(d)
-            if support(d.base_dist) isa RealInterval
+            if support(d.ρ) isa RealInterval
                 @test support(d) isa RealInterval
-            elseif hasfinitesupport(d.base_dist)
-                @test support(d) == location(d) .+ scale(d) .* support(d.base_dist)
+            elseif hasfinitesupport(d.ρ)
+                @test support(d) == d.μ .+ d.σ .* support(d.ρ)
             end
         end
         @testset "$k" for (k,dtest) in d_dict
@@ -47,9 +47,9 @@ function test_location_scale(
 
     @testset "Promotions and conversions" begin
         function test_promotions_and_conversions(d, dref)
-            @test typeof(d.μ) === typeof(d.σ)
-            @test mean(d) ≈ μ + σ * mean(dref) atol=1e-15
-            @test std(d) ≈ σ * std(dref) atol=1e-15
+            @test typeof(d.µ) === typeof(d.σ)
+            @test location(d) ≈ μ atol=1e-15
+            @test    scale(d) ≈ σ atol=1e-15
         end
         @testset "$k" for (k,dtest) in d_dict
             test_promotions_and_conversions(dtest, dref)
@@ -144,8 +144,8 @@ end
 function test_location_scale_normal(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, μD::Real, σD::Real,
 )
-    ρ = Normal(μ, σD)
-    dref = Normal(μ + abs(σ) * μD, abs(σ) * σD)
+    ρ = Normal(μD, σD)
+    dref = Normal(μ + σ * μD, σ * σD)
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
@@ -157,23 +157,20 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "Affine" begin
+@testset "LocationScale" begin
     rng = MersenneTwister(123)
 
-    for sgn in (1,-1)  # test with positive and negative scales
-        for _rng in (missing, rng)
-            test_location_scale_normal(_rng, 0.3, sgn * 0.2, 0.1, 0.2)
-            test_location_scale_normal(_rng, -0.3, sgn * 0.1, -0.1, 0.3)
-            test_location_scale_normal(_rng, 1.3, sgn * 0.4, -0.1, 0.5)
-        end
-        
-        # test_location_scale_normal(rng, ForwardDiff.Dual(0.3), sgn * 0.2, 0.1, 0.2)
+    for _rng in (missing, rng)
+        test_location_scale_normal(_rng, 0.3, 0.2, 0.1, 0.2)
+        test_location_scale_normal(_rng, -0.3, 0.1, -0.1, 0.3)
+        test_location_scale_normal(_rng, 1.3, 0.4, -0.1, 0.5)
+    end
+    test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
 
-        probs = Distributions.pnormalize!(rand(10))
-        for _rng in (missing, rng)
-            test_location_scale_discretenonparametric(_rng, 1//3, sgn * 1//2, 1:10, probs)
-            test_location_scale_discretenonparametric(_rng, -1//4, sgn * 1//3, (-10):(-1), probs)
-            test_location_scale_discretenonparametric(_rng, 6//5, sgn * 3//2, 15:24, probs)
-        end
+    probs = normalize!(rand(10), 1)
+    for _rng in (missing, rng)
+        test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
+        test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
+        test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
     end
 end

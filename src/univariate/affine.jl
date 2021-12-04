@@ -1,41 +1,38 @@
-log_abs_det = first ∘ logabsdet
-mult_identity(x::Real) = one(x)
-mult_identity(x::AbstractVector) = Diagonal(Ones(x))
-add_identity(x::Real) = zero(x)
-add_identity(x::AbstractArray) = Zeros(x)
+log_abs_det(x::AbstractMatrix) = first(logabsdet(x))
+log_abs_det(x::Real) = log(abs(x))
 
 """
-    AffineDistribution(μ, σ, base_dist)
+    AffineDistribution(μ, σ, ρ)
 
-A shifted and scaled (affinely transformed) version of `base_dist`.
+A shifted and scaled (affinely transformed) version of `ρ`.
 
-If ``Z`` is a random variable with distribution `base_dist`, then `AffineDistribution` with
-parameters `μ`, `σ`, `base_dist` is the distribution of the random variable
+If ``Z`` is a random variable with distribution `ρ`, then `AffineDistribution` with
+parameters `μ`, `σ`, `ρ` is the distribution of the random variable
 ```math
 X = μ + σ * Z
 ```
 
-If `base_dist` is a discrete distribution, the probability mass function of the transformed 
+If `ρ` is a discrete distribution, the probability mass function of the transformed 
 distribution is given by
 ```math
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
 ```
 
-If `base_dist` is a continuous distribution, the probability density function of
+If `ρ` is a continuous distribution, the probability density function of
 the transformed distribution is given by
 ```math
-f(x) = \\frac{1}{σ} base_dist \\! \\left( \\frac{x-μ}{σ} \\right).
+f(x) = \\frac{1}{σ} ρ \\! \\left( \\frac{x-μ}{σ} \\right).
 ```
 
-If `base_dist` falls under a location-scale family, `affine` will attempt to return a 
-transformed distribution of type `base_dist` if an `affine` method has been implemented. 
+If `ρ` falls under a location-scale family, `affine` will attempt to return a 
+transformed distribution of type `ρ` if an `affine` method has been implemented. 
 Otherwise, it will fall back on the `AffineDistribution` wrapper type.
 
 ```julia
-d = σ * (base_dist + μ)     # Create location-scale transformed distribution
-params(d)                   # Get the parameters, i.e. (μ, scale, base_dist)
-location(d)                 # Get the location parameter
-scale(d)                    # Get the scale parameter
+d = σ * ρ + μ       # Create location-scale transformed distribution
+params(d)           # Get the parameters, i.e. (μ, scale, ρ)
+location(d)         # Get the location parameter
+scale(d)            # Get the scale parameter
 ```
 """
 struct AffineDistribution{
@@ -47,85 +44,159 @@ struct AffineDistribution{
     } <: Distribution{F,S}
     μ::Tμ
     σ::Tσ
-    base_dist::D
-
-    function AffineDistribution(
-        μ::Tμ, σ::Tσ, base_dist::D; 
-        check_args=true
-        ) where {
-            F<:VariateForm,
-            S<:ValueSupport,
-            D<:Distribution{F, S},
-            Tμ<:ArrayLike,
-            Tσ<:ArrayLike
-        }
-        !check_args || @check_args(AffineDistribution, !iszero(σ))
-        return new{F,S,Tμ,Tσ,D}(μ, σ, base_dist)
-    end
+    ρ::D
 end
 
 
-# Constructors
-
-"""
-    +(shift, base_dist)
-
-Return a version of `base_dist` that has been translated by `shift`, where `shift` can be a
-real number or (for a multivariate distribution) a vector.
-"""
-function Base.:+(μ::ArrayLike, base_dist::Distribution)
-    return AffineDistribution(μ, mult_identity(μ), base_dist)
-end
-
-"""
-    *(scale_factor, base_dist)
-
-Return a version of `base_dist` that has been scaled by `scale`, where `scale` can be a real
-number or (for a multivariate distribution) matrix.
-"""
-function Base.:*(σ::ArrayLike, base_dist::Distribution)
-    return AffineDistribution(add_identity(σ), σ, base_dist)
-end
-
-
-function Base.:+(μ::ArrayLike, aff_dist::AffineDistribution)
-    return AffineDistribution(μ + aff_dist.μ, aff_dist.σ, aff_dist.base_dist)
-end
-
-function Base.:*(σ::ArrayLike, aff_dist::AffineDistribution)
-    return AffineDistribution(σ * aff_dist.μ, σ * aff_dist.σ, aff_dist.base_dist)
-end
-
-
-Base.:+(d::Distribution, μ::ArrayLike) = μ + d
-Base.:-(d::UnivariateDistribution) = -1 * d
-Base.:-(d::Distribution, μ::ArrayLike) = d + -μ
-Base.:-(μ::ArrayLike, d::Distribution) = μ + -d
-Base.:*(d::Distribution, σ::ArrayLike) = σ * d
-Base.:/(d::Distribution, τ::ArrayLike) = inv(τ) * d
-
-
-# Aliases
+#### Aliases
 @deprecate LocationScale(args...; kwargs...) AffineDistribution(args...)
 const ContinuousAffine{F,Tμ,Tσ,D} = AffineDistribution{F,Continuous,Tμ,Tσ,D}
 const DiscreteAffine{F,Tμ,Tσ,D} = AffineDistribution{F,Discrete,Tμ,Tσ,D}
 
 const UnivariateAffine{S,Tμ,Tσ,D} = AffineDistribution{Univariate,S,Tμ,Tσ,D}
-const MultivariateAffine{F,S,Tμ,Tσ,D} = AffineDistribution{Multivariate,S,Tμ,Tσ,D}
+const MultivariateAffine{S,Tμ,Tσ,D} = AffineDistribution{Multivariate,S,Tμ,Tσ,D}
 
 
-# Support
-function minimum(d::AffineDistribution)
-    minim = d.σ > 0 ? minimum : maximum
-    return d.μ + d.σ * minim(d.base_dist)
+#### Constructors
+
+"""
+    +(μ, dist)
+
+Return a version of `dist` that has been translated by `μ`.
+"""
+function Base.:+(μ::Real, ρ::UnivariateDistribution)
+    return AffineDistribution(μ, one(μ), ρ)
 end
-function maximum(d::AffineDistribution)
-    maxim = d.σ > 0 ? maximum : minimum
-    return d.μ + d.σ * maxim(d.base_dist)
+
+function Base.:+(μ::AbstractArray{<:Real, N}, ρ::Distribution{ArrayLikeVariate{N}, S}) where {N, S}
+    if size(μ) ≠ size(dist) 
+        throw(DimensionMismatch("array and distribution have different sizes."))
+    end
+    return AffineDistribution(μ, Diagonal(Ones(μ)), ρ)
 end
 
 
-support(d::AffineDistribution) = affine_support(d.μ, d.σ, support(d.base_dist))
+"""
+    *(σ, dist)
+
+Return a version of `dist` that has been scaled by `σ`, where `σ` can be any real number or 
+matrix.
+"""
+function Base.:*(σ::Real, ρ::UnivariateDistribution)
+    if iszero(σ)
+        throw(ArgumentError("scale must be non-zero"))
+    end
+    return AffineDistribution(zero(σ), σ, ρ)
+end
+
+function Base.:*(σ::Real, ρ::Distribution)
+    if iszero(σ)
+        throw(ArgumentError("scale must be non-zero"))
+    end
+    return AffineDistribution(Zeros{eltype(ρ)}(size(ρ)), σ, ρ)
+end
+
+function Base.:*(σ::AbstractMatrix{<:Real}, ρ::MultivariateDistribution)
+    if iszero(σ)
+        throw(ArgumentError("scale must be non-zero"))
+    elseif size(σ)[end] ≠ size(ρ)[1]
+        throw(DimensionMismatch(
+            "scaling matrix and distribution have incompatible dimensions" *
+            "$(size(σ)) and $(size(ρ)))"
+        ))
+    end
+    return AffineDistribution(Zeros{eltype(ρ)}(σ), σ, ρ)
+end
+Base.:*(σ::AbstractVector{<:Real}, ρ::MultivariateDistribution) = Diagonal(σ) * ρ
+
+
+# Composing affine distributions
+
+function Base.:+(μ::Real, d::UnivariateAffine)
+    return AffineDistribution(μ + d.μ, d.σ, d.ρ)
+end
+function Base.:+(μ::AbstractArray, d::MultivariateAffine)
+    return AffineDistribution(μ + d.μ, d.σ, d.ρ)
+end
+
+
+function Base.:*(σ::Real, d::UnivariateAffine)
+    return AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
+end
+
+function Base.:*(σ::Real, d::MultivariateAffine)
+    return AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
+end
+
+function Base.:*(σ::AbstractMatrix, d::MultivariateAffine)
+    return AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
+end
+
+
+Base.:+(d::NonMatrixDistribution, μ::ArrayLike) = μ + d
+Base.:-(d::NonMatrixDistribution) = -1 * d
+Base.:-(d::NonMatrixDistribution, μ::ArrayLike) = -μ + d
+Base.:-(μ::ArrayLike, d::NonMatrixDistribution) = μ + -d
+
+Base.:*(d::NonMatrixDistribution, σ::Real) = σ * d
+Base.:/(d::NonMatrixDistribution, τ::Real) = inv(τ) * d
+Base.:\(τ::ArrayLike, d::NonMatrixDistribution) = inv(τ) * d
+
+
+#### Extremes
+
+## Univariate
+
+function maximum(d::UnivariateAffine)
+    maxim = d.σ > 0 ? maximum(d.ρ) : minimum(d.ρ)
+    return d.μ + d.σ * maxim
+end
+
+function minimum(d::UnivariateAffine)
+    minim = d.σ > 0 ? minimum(d.ρ) : maximum(d.ρ)
+    return d.μ + d.σ * minim
+end
+
+function extrema(d::UnivariateAffine)
+    extremes = extrema(d.ρ)
+    extremes = _flip(d.σ, extremes)
+    return @. d.μ + d.σ * extremes
+end
+
+
+## Multivariate
+# when finding the extrema, we need to flip the extremes if the scale is negative
+_flip(sign::Real, tuple::Tuple) = sign > 0 ? tuple : (last(tuple), first(tuple))
+
+function minimum(d::MultivariateAffine)
+    extremes = extrema(d.ρ) |> zip |> collect |> permutedims
+    # The minimum of d.ρ[i] will minimize d[j] if d.σ[i,j] is negative. 
+    # Otherwise the maximum will minimize d[j]
+    extreme_matrix = _flip.(d.σ, extremes)
+    argmins = first.(extreme_matrix)
+    mins = [σ ⋅ argmin for (σ, argmin) in zip(eachrow(d.σ), eachrow(argmins))]
+    return mins
+end
+
+function maximum(d::MultivariateAffine)
+    extremes = extrema(d.ρ) |> zip |> collect |> permutedims
+    extreme_matrix = _flip.(d.σ, extremes)
+    argmaxes = last.(extreme_matrix)
+    maxes = [σ ⋅ argmax for (σ, argmax) in zip(eachrow(d.σ), eachrow(argmaxes))]
+    return maxes
+end
+
+function extrema(d::MultivariateAffine)
+    extremes = extrema(d.ρ) |> zip |> collect |> permutedims
+    extreme_matrix = _flip.(d.σ, extremes)
+    argmins = first.(extreme_matrix)
+    mins = [σ ⋅ argmin for (σ, argmin) in zip(eachrow(d.σ), eachrow(argmins))]
+    argmaxes = last.(extreme_matrix)
+    maxes = [σ ⋅ argmax for (σ, argmax) in zip(eachrow(d.σ), eachrow(argmaxes))]
+    return (mins, maxes)
+end
+
+support(d::AffineDistribution) = affine_support(d.μ, d.σ, support(d.ρ))
 affine_support(μ::Real, σ::Real, support) = μ .+ σ .* support
 
 function affine_support(μ::Real, σ::Real, support::RealInterval) 
@@ -149,7 +220,7 @@ function convert(::Type{AffineDistribution{F,S,Tμ,Tσ,D}}, d::AffineDistributio
         Tμ<:ArrayLike,
         Tσ<:ArrayLike
     }
-    return AffineDistribution(Tμ(d.μ), Tσ(d.σ), convert(D, d))
+    return AffineDistribution(Tμ(d.μ), Tσ(d.σ), convert(D, d.ρ))
 end
 
 
@@ -168,74 +239,103 @@ end
 #### Parameters
 
 function location(d::AffineDistribution)
-    if hasmethod(location, (typeof(d.base_dist),))
-        return d.μ + location(d.base_dist)
+    if hasmethod(location, (typeof(d.ρ),))
+        return d.μ + d.σ * location(d.ρ)
     else
         return d.μ
     end
 end
 function scale(d::AffineDistribution)
-    if hasmethod(scale, (typeof(d.base_dist),))
-        return d.σ * scale(d.base_dist)
+    if hasmethod(scale, (typeof(d.ρ),))
+        return d.σ * scale(d.ρ)
     else
         return d.σ
     end
 end
-params(d::AffineDistribution) = (d.μ, d.σ, d.base_dist)
+shape(d::AffineDistribution) = shape(d.ρ)
+ncategories(d::AffineDistribution) = ncategories(d.ρ)
+params(d::AffineDistribution) = (d.μ, d.σ, d.ρ)
 partype(::AffineDistribution{F,S,Tμ,Tσ,D}) where {F,S,Tμ,Tσ,D} = (Tμ, Tσ)
+
+Base.sign(d::UnivariateAffine) = Base.sign(d.σ)
 
 
 #### Statistics
 
-mean(d::AffineDistribution) = d.μ + d.σ * mean(d.base_dist)
-median(d::AffineDistribution) = d.μ + d.σ * median(d.base_dist)
-mode(d::AffineDistribution) = d.μ + d.σ * mode(d.base_dist)
-modes(d::AffineDistribution) = d.μ .+ d.σ .* modes(d.base_dist)
+mean(d::AffineDistribution) = d.μ + d.σ * mean(d.ρ)
+median(d::AffineDistribution) = d.μ + d.σ * median(d.ρ)
+mode(d::AffineDistribution) = d.μ + d.σ * mode(d.ρ)
+modes(d::AffineDistribution) = d.μ .+ d.σ .* modes(d.ρ)
 
-var(d::UnivariateAffine) = d.σ^2 * var(d.base_dist)
-cov(d::AffineDistribution) = d.σ * cov(d.base_dist) * d.σ'
-std(d::UnivariateAffine) = abs(d.σ) * std(d.base_dist)
-skewness(d::AffineDistribution) = skewness(d.base_dist)
-kurtosis(d::AffineDistribution) = kurtosis(d.base_dist)
+var(d::UnivariateAffine) = d.σ^2 * var(d.ρ)
+std(d::UnivariateAffine) = abs(d.σ) * std(d.ρ)
+skewness(d::UnivariateAffine) = sign(d) * skewness(d.ρ)
+kurtosis(d::UnivariateAffine) = kurtosis(d.ρ)
 
-isplatykurtic(d::AffineDistribution) = isplatykurtic(d.base_dist)
-isleptokurtic(d::AffineDistribution) = isleptokurtic(d.base_dist)
-ismesokurtic(d::AffineDistribution) = ismesokurtic(d.base_dist)
+cov(d::AffineDistribution) = d.σ * cov(d.ρ) * d.σ'
 
-entropy(d::ContinuousAffine) = entropy(d.base_dist) + log_abs_det(d.σ)
-entropy(d::DiscreteAffine) = entropy(d.base_dist)
+isplatykurtic(d::AffineDistribution) = isplatykurtic(d.ρ)
+isleptokurtic(d::AffineDistribution) = isleptokurtic(d.ρ)
+ismesokurtic(d::AffineDistribution) = ismesokurtic(d.ρ)
 
-mgf(d::AffineDistribution, t::Real) = exp(d.μ * t) * mgf(d.base_dist, d.σ * t)
-cf(d::AffineDistribution, t::Real) = cf(d.base_dist, t * d.σ) * exp(1im * t * d.μ)
+entropy(d::ContinuousAffine) = entropy(d.ρ) + log_abs_det(d.σ)
+entropy(d::DiscreteAffine) = entropy(d.ρ)
+
+mgf(d::AffineDistribution, t::Real) = exp(d.μ * t) * mgf(d.ρ, d.σ * t)
+cf(d::AffineDistribution, t::Real) = cf(d.ρ, t * d.σ) * exp(1im * t * d.μ)
 
 
 #### Evaluation & Sampling
 
-pdf(d::ContinuousAffine, x::ArrayLike) = pdf(d.base_dist, (x - d.μ) / d.σ) / abs(det(d.σ))
-pdf(d::DiscreteAffine, x::ArrayLike) = pdf(d.base_dist, (x - d.μ) / d.σ)
-
-function logpdf(d::ContinuousAffine, x::Real) 
-    return logpdf(d.base_dist, d.σ \ (x - d.μ)) - log_abs_det(d.σ)
+# Continuous
+function pdf(d::ContinuousAffine{Univariate}, x::Real) 
+    return pdf(d.ρ, d.σ \ (x - d.μ)) / abs(det(d.σ))
 end
-logpdf(d::DiscreteAffine, x::Real) = logpdf(d.base_dist, (x - d.μ) / d.σ)
-
-function cdf(d::AffineDistribution, x::Real)
-    x = d.σ \ (x - d.μ)
-    return d.σ < 0 ? ccdf(d.base_dist, x) : cdf(d.base_dist, x)
+function pdf(d::ContinuousAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
+    return pdf(d.ρ, d.σ \ (x - d.μ)) / abs(det(d.σ))
 end
 
-function logcdf(d::AffineDistribution, x::Real)
+function logpdf(d::ContinuousAffine{Univariate}, x::Real) 
+    return logpdf(d.ρ, d.σ \ (x - d.μ)) - log(abs(d.σ))
+end
+function logpdf(d::ContinuousAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
+    return logpdf(d.ρ, d.σ \ (x - d.μ)) - log_abs_det(d.σ)
+end
+
+# Discrete
+
+function pdf(d::DiscreteAffine{Univariate}, x::Real)
+    return pdf(d.ρ, d.σ \ (x - d.μ))
+end
+function pdf(d::DiscreteAffine{Univariate}, x::Real)
+    return pdf(d.ρ, d.σ \ (x - d.μ))
+end
+function logpdf(d::DiscreteAffine{Univariate}, x::Real)
+    return logpdf(d.ρ, d.σ \ (x - d.μ))
+end
+function logpdf(d::DiscreteAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
+    return logpdf(d.ρ, d.σ \ (x - d.μ))
+end
+
+# CDF/quantile methods
+
+function cdf(d::UnivariateAffine, x::Real)
     x = d.σ \ (x - d.μ)
-    return d.σ < 0 ? logccdf(d.base_dist, x) : logcdf(d.base_dist, x)
+    return d.σ < 0 ? ccdf(d.ρ, x) : cdf(d.ρ, x)
+end
+
+function logcdf(d::UnivariateAffine, x::Real)
+    x = d.σ \ (x - d.μ)
+    return d.σ < 0 ? logccdf(d.ρ, x) : logcdf(d.ρ, x)
 end 
 
 function quantile(d::AffineDistribution, q::Real)
     q = d.σ < 0 ? (1 - q) : q
-    return d.μ + d.σ * quantile(d.base_dist, q)
+    return d.μ + d.σ * quantile(d.ρ, q)
 end
 
-rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.base_dist)
+rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.ρ)
 
 function gradlogpdf(d::ContinuousAffine, x::Real)
-    \(d.σ, gradlogpdf(d.base_dist, \(d.σ, x - d.μ)))
+    \(d.σ, gradlogpdf(d.ρ, \(d.σ, x - d.μ)))
 end
