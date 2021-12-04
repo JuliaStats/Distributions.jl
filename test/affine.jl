@@ -2,11 +2,10 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = LocationScale(μ,σ,ρ)
-    @test params(d) == (μ,σ,ρ)
+    d = Distributions.AffineDistribution(μ, σ, ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the LocationScale object
+    # Different ways to construct the AffineDistribution object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
@@ -47,9 +46,18 @@ function test_location_scale(
 
     @testset "Promotions and conversions" begin
         function test_promotions_and_conversions(d, dref)
-            @test typeof(d.µ) === typeof(d.σ)
-            @test location(d) ≈ μ atol=1e-15
-            @test    scale(d) ≈ σ atol=1e-15
+            if hasmethod(location, (typeof(dref),))
+                @test location(d) ≈ location(dref) atol=1e-15
+            else
+                @test location(d) ≈ d.μ atol = 1e-15
+            end
+
+            if hasmethod(scale, (typeof(dref),))
+                @test abs(scale(d)) ≈ abs(scale(dref)) atol=1e-15
+                @test sign(σ) == sign(scale(d))
+            else
+                @test location(d) ≈ d.μ atol = 1e-15
+            end
         end
         @testset "$k" for (k,dtest) in d_dict
             test_promotions_and_conversions(dtest, dref)
@@ -102,8 +110,8 @@ function test_location_scale(
 
             @test cdf(d, x) ≈ cdf(dref, x)
             @test logcdf(d, x) ≈ logcdf(dref, x)
-            @test ccdf(d, x) ≈ ccdf(dref, x) atol=1e-15
-            @test logccdf(d, x) ≈ logccdf(dref, x) atol=1e-15
+            @test ccdf(d, x) ≈ ccdf(dref, x) atol=1e-14
+            @test logccdf(d, x) ≈ logccdf(dref, x) atol=1e-14
 
             @test quantile(d,0.1) ≈ quantile(dref,0.1)
             @test quantile(d,0.5) ≈ quantile(dref,0.5)
@@ -145,7 +153,7 @@ function test_location_scale_normal(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, μD::Real, σD::Real,
 )
     ρ = Normal(μD, σD)
-    dref = Normal(μ + σ * μD, σ * σD)
+    dref = Normal(μ + σ * μD, abs(σ * σD))
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
@@ -157,20 +165,22 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "LocationScale" begin
+@testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
-    for _rng in (missing, rng)
-        test_location_scale_normal(_rng, 0.3, 0.2, 0.1, 0.2)
-        test_location_scale_normal(_rng, -0.3, 0.1, -0.1, 0.3)
-        test_location_scale_normal(_rng, 1.3, 0.4, -0.1, 0.5)
-    end
-    test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
+    for sign in (-1, 1)
+        for _rng in (missing, rng)
+            test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
+            test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
+            test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
+        end
+        #test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
 
-    probs = normalize!(rand(10), 1)
-    for _rng in (missing, rng)
-        test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
-        test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
-        test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
+        probs = normalize!(rand(10), 1)
+        for _rng in (missing, rng)
+            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+        end
     end
 end

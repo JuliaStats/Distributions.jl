@@ -317,15 +317,15 @@ function logpdf(d::DiscreteAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) whe
     return logpdf(d.ρ, d.σ \ (x - d.μ))
 end
 
-# CDF/quantile methods
+# CDF methods
 
 function cdf(d::UnivariateAffine, x::Real)
-    x = d.σ \ (x - d.μ)
+    x = (x - d.μ) / d.σ
     return d.σ < 0 ? ccdf(d.ρ, x) : cdf(d.ρ, x)
 end
 
 function logcdf(d::UnivariateAffine, x::Real)
-    x = d.σ \ (x - d.μ)
+    x = (x - d.μ) / d.σ
     return d.σ < 0 ? logccdf(d.ρ, x) : logcdf(d.ρ, x)
 end 
 
