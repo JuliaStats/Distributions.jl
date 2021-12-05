@@ -1,7 +1,5 @@
 log_abs_det(x::AbstractMatrix) = first(logabsdet(x))
 log_abs_det(x::Real) = log(abs(x))
-_eps(x) = zero(x)
-_eps(x::AbstractFloat) = eps(x)
 
 """
     AffineDistribution(μ, σ, ρ)
