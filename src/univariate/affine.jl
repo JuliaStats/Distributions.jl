@@ -60,9 +60,7 @@ const MultivariateAffine{S,Tμ,Tσ,D} = AffineDistribution{Multivariate,S,Tμ,T�
 
 Return a version of `dist` that has been translated by `μ`.
 """
-function Base.:+(μ::Real, ρ::UnivariateDistribution)
-    return AffineDistribution(μ, one(μ), ρ)
-end
+Base.:+(μ::Real, ρ::UnivariateDistribution) = AffineDistribution(μ, one(μ), ρ)
 
 function Base.:+(μ::AbstractArray{<:Real, N}, ρ::Distribution{ArrayLikeVariate{N}, S}) where {N, S}
     if size(μ) ≠ size(dist) 
