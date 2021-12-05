@@ -173,14 +173,15 @@ end
             test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
             test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
             test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
+            test_location_scale_normal(rng, ForwardDiff.Dual(0.3), sign * 0.2, 0.1, 0.2)
         end
-        #test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
-
-        probs = normalize!(rand(10), 1)
+        
+        probs = normalize!(rand(rng, 10), 1)
         for _rng in (missing, rng)
             test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
             test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
             test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+            test_location_scale_discretenonparametric(_rng, -9//5, sign, (10:(-1):1), probs)
         end
     end
 end

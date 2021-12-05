@@ -1,5 +1,7 @@
 log_abs_det(x::AbstractMatrix) = first(logabsdet(x))
 log_abs_det(x::Real) = log(abs(x))
+_eps(x) = zero(x)
+_eps(x::AbstractFloat) = eps(x)
 
 """
     AffineDistribution(μ, σ, ρ)
@@ -329,7 +331,7 @@ function logcdf(d::UnivariateAffine, x::Real)
     return d.σ < 0 ? logccdf(d.ρ, x) : logcdf(d.ρ, x)
 end 
 
-function quantile(d::AffineDistribution, q::Real)
+function quantile(d::UnivariateAffine, q::Real)
     q = d.σ < 0 ? (1 - q) : q
     return d.μ + d.σ * quantile(d.ρ, q)
 end
@@ -337,5 +339,5 @@ end
 rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.ρ)
 
 function gradlogpdf(d::ContinuousAffine, x::Real)
-    \(d.σ, gradlogpdf(d.ρ, \(d.σ, x - d.μ)))
+    return d.σ \ gradlogpdf(d.ρ, \(d.σ, x - d.μ))
 end
