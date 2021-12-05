@@ -12,10 +12,6 @@ multivariate (vector, `N == 1`) or matrix-variate (matrix, `N == 2`).
 """
 abstract type ArrayLikeVariate{N} <: VariateForm end
 
-const ArrayLike = Union{Number, AbstractArray{<:Number}}
-
-const Univariate = ArrayLikeVariate{0}
-const Multivariate = ArrayLikeVariate{1}
 const Matrixvariate = ArrayLikeVariate{2}
 
 """
