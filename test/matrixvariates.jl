@@ -52,13 +52,14 @@ test_draw(d::MatrixDistribution) = test_draw(d, rand(d))
 #  Check that sample quantities are close to population quantities
 #  --------------------------------------------------
 
-function test_draws(d::MatrixDistribution, draws::AbstractArray)
-    @test isapprox(mean(draws), mean(d), atol = 0.1)
-    @test isapprox(cov(hcat(vec.(draws)...)'), cov(d) , atol = 0.1)
+function test_draws(d::MatrixDistribution, draws::AbstractArray{<:AbstractMatrix})
+    @test mean(draws) ≈ mean(d) rtol = 0.01
+    draws_matrix = mapreduce(vec, hcat, draws)
+    @test cov(draws_matrix; dims=2) ≈ cov(d) rtol = 0.1
     nothing
 end
 
-function test_draws(d::LKJ, draws::AbstractArray)
+function test_draws(d::LKJ, draws::AbstractArray{<:AbstractMatrix})
     @test isapprox(mean(draws), mean(d), atol = 0.1)
     @test isapprox(var(draws), var(d) , atol = 0.1)
     nothing
