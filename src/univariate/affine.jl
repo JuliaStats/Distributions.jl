@@ -37,16 +37,10 @@ location(d)         # Get the location parameter
 scale(d)            # Get the scale parameter
 ```
 """
-struct AffineDistribution{
-        F<:VariateForm,
-        S<:ValueSupport,
-        Tμ<:ArrayLike,
-        Tσ<:ArrayLike,
-        D<:Distribution{F,S}
-    } <: Distribution{F,S}
+struct AffineDistribution{N,S<:ValueSupport,Tμ,Tσ,D<:Distribution{ArrayLikeVariate{N},S}} <: Distribution{ArrayLikeVariate{N},S}
     μ::Tμ
     σ::Tσ
-    ρ::D
+    dist::D
 end
 
 
