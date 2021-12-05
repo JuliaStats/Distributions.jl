@@ -9,7 +9,7 @@ distribution of the random variable
 X = μ + σ * Z
 ```
 
-If `ρ` is a discrete distribution, the probability mass function of the transformed 
+If `ρ` is a discrete univariate distribution, the probability mass function of the transformed 
 distribution is given by
 ```math
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
