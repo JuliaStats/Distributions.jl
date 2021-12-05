@@ -49,14 +49,14 @@ function test_location_scale(
             if hasmethod(location, (typeof(dref),))
                 @test location(d) ≈ location(dref) atol=1e-15
             else
-                @test location(d) ≈ d.μ atol = 1e-15
+                @test location(d) ≈ d.μ atol=1e-15
             end
 
             if hasmethod(scale, (typeof(dref),))
                 @test abs(scale(d)) ≈ abs(scale(dref)) atol=1e-15
                 @test sign(σ) == sign(scale(d))
             else
-                @test location(d) ≈ d.μ atol = 1e-15
+                @test location(d) ≈ d.μ atol=1e-15
             end
         end
         @testset "$k" for (k,dtest) in d_dict
@@ -129,6 +129,12 @@ function test_location_scale(
             @test invlogccdf(d,log(0.5)) ≈ invlogccdf(dref,log(0.5))
             @test invlogccdf(d,log(0.8)) ≈ invlogccdf(dref,log(0.8))
 
+            @test cf(d, -0.1) ≈ cf(dref, -0.1)
+
+            if dref isa ContinuousDistribution
+                @test gradlogpdf(d, 0.1) ≈ gradlogpdf(dref, 0.1)
+            end
+
             r = Array{float(eltype(d))}(undef, 100000)
             if ismissing(rng)
                 rand!(d,r)
@@ -136,12 +142,7 @@ function test_location_scale(
                 rand!(rng,d,r)
             end
             @test mean(r) ≈ mean(dref) atol=0.02
-            @test std(r) ≈ std(dref) atol=0.01
-            @test cf(d, -0.1) ≈ cf(dref,-0.1)
-
-            if dref isa ContinuousDistribution
-                @test gradlogpdf(d, 0.1) ≈ gradlogpdf(dref, 0.1)
-            end
+            @test std(r) ≈ std(dref) rtol=0.01
         end
         @testset "$k" for (k,dtest) in d_dict
             test_evaluation_and_sampling(rng, dtest, dref)
@@ -166,14 +167,14 @@ function test_location_scale_discretenonparametric(
 end
 
 @testset "AffineDistribution" begin
-    rng = MersenneTwister(123)
+    rng = MersenneTwister(1776)
 
     for sign in (-1, 1)
         for _rng in (missing, rng)
             test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
             test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
             test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
-            test_location_scale_normal(rng, ForwardDiff.Dual(0.3), sign * 0.2, 0.1, 0.2)
+            #test_location_scale_normal(_rng, ForwardDiff.Dual(0.3), sign * 0.2, 0.1, 0.2)
         end
         
         probs = normalize!(rand(rng, 10), 1)

@@ -309,7 +309,7 @@ end
 function pdf(d::DiscreteAffine{Univariate}, x::Real)
     return pdf(d.ρ, d.σ \ (x - d.μ))
 end
-function pdf(d::DiscreteAffine{Univariate}, x::Real)
+function pdf(d::DiscreteAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
     return pdf(d.ρ, d.σ \ (x - d.μ))
 end
 function logpdf(d::DiscreteAffine{Univariate}, x::Real)
