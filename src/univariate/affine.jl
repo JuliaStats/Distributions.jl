@@ -26,9 +26,10 @@ the transformed distribution is given by
 f(x) = \\frac{1}{σ} ρ \\! \\left( \\frac{x-μ}{σ} \\right).
 ```
 
-If `ρ` falls under a location-scale family, `affine` will attempt to return a 
-transformed distribution of type `ρ` if an `affine` method has been implemented. 
-Otherwise, it will fall back on the `AffineDistribution` wrapper type.
+Generally, it is recommended to not use the `AffineDistribution` constructor but
+`+`, `-`, `*`, and `/` to construct distributions of affine transformations. The latter fall back
+to constructing an `AffineDistribution` but can return more optimized distributions, e.g.,
+if `ρ` is from a location-scale family.
 
 ```julia
 d = σ * ρ + μ       # Create location-scale transformed distribution
