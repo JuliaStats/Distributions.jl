@@ -1,6 +1,3 @@
-log_abs_det(x::AbstractMatrix) = first(logabsdet(x))
-log_abs_det(x::Real) = log(abs(x))
-
 """
     AffineDistribution(μ, σ, ρ)
 
@@ -31,9 +28,7 @@ if `ρ` is from a location-scale family.
 
 ```julia
 d = σ * ρ + μ       # Create location-scale transformed distribution
-params(d)           # Get the parameters, i.e. (μ, scale, ρ)
-location(d)         # Get the location parameter
-scale(d)            # Get the scale parameter
+params(d)           # Get the parameters, i.e. (μ, σ, ρ)
 ```
 """
 struct AffineDistribution{N,S<:ValueSupport,Tμ,Tσ,D<:Distribution{ArrayLikeVariate{N},S}} <: Distribution{ArrayLikeVariate{N},S}
@@ -132,8 +127,8 @@ Base.:-(d::NonMatrixDistribution, μ::ArrayLike) = -μ + d
 Base.:-(μ::ArrayLike, d::NonMatrixDistribution) = μ + -d
 
 Base.:*(d::NonMatrixDistribution, σ::Real) = σ * d
-Base.:/(d::NonMatrixDistribution, τ::Real) = inv(τ) * d
-Base.:\(τ::ArrayLike, d::NonMatrixDistribution) = inv(τ) * d
+Base.:/(d::NonMatrixDistribution, τ::Real) = Base.inv(τ) * d
+Base.:\(τ::ArrayLike, d::NonMatrixDistribution) = Base.inv(τ) * d
 
 
 #### Extremes
@@ -159,7 +154,7 @@ end
 
 ## Multivariate
 # when finding the extrema, we need to flip the extremes if the scale is negative
-_flip(sign::Real, tuple::Tuple) = sign > 0 ? tuple : (last(tuple), first(tuple))
+_flip(signed::Real, tuple::Tuple) = signed > 0 ? tuple : (last(tuple), first(tuple))
 
 function minimum(d::MultivariateAffine)
     extremes = extrema(d.ρ) |> zip |> collect |> permutedims
@@ -262,7 +257,7 @@ modes(d::AffineDistribution) = d.μ .+ d.σ .* modes(d.ρ)
 
 var(d::UnivariateAffine) = d.σ^2 * var(d.ρ)
 std(d::UnivariateAffine) = abs(d.σ) * std(d.ρ)
-skewness(d::UnivariateAffine) = sign(d) * skewness(d.ρ)
+skewness(d::UnivariateAffine) = Base.sign(d) * skewness(d.ρ)
 kurtosis(d::UnivariateAffine) = kurtosis(d.ρ)
 
 cov(d::AffineDistribution) = d.σ * cov(d.ρ) * d.σ'
@@ -270,6 +265,9 @@ cov(d::AffineDistribution) = d.σ * cov(d.ρ) * d.σ'
 isplatykurtic(d::AffineDistribution) = isplatykurtic(d.ρ)
 isleptokurtic(d::AffineDistribution) = isleptokurtic(d.ρ)
 ismesokurtic(d::AffineDistribution) = ismesokurtic(d.ρ)
+
+log_abs_det(x::AbstractMatrix) = first(logabsdet(x))
+log_abs_det(x::Real) = log(abs(x))
 
 entropy(d::ContinuousAffine) = entropy(d.ρ) + log_abs_det(d.σ)
 entropy(d::DiscreteAffine) = entropy(d.ρ)
@@ -282,14 +280,14 @@ cf(d::AffineDistribution, t::Real) = cf(d.ρ, t * d.σ) * exp(1im * t * d.μ)
 
 # Continuous
 function pdf(d::ContinuousAffine{Univariate}, x::Real) 
-    return pdf(d.ρ, d.σ \ (x - d.μ)) / abs(det(d.σ))
+    return pdf(d.ρ, d.σ \ (x - d.μ)) / abs(d.σ)
 end
 function pdf(d::ContinuousAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
     return pdf(d.ρ, d.σ \ (x - d.μ)) / abs(det(d.σ))
 end
 
 function logpdf(d::ContinuousAffine{Univariate}, x::Real) 
-    return logpdf(d.ρ, d.σ \ (x - d.μ)) - log(abs(d.σ))
+    return logpdf(d.ρ, d.σ \ (x - d.μ)) - log_abs_det(d.σ)
 end
 function logpdf(d::ContinuousAffine{ArrayLikeVariate{N}}, x::AbstractArray{N}) where N
     return logpdf(d.ρ, d.σ \ (x - d.μ)) - log_abs_det(d.σ)
