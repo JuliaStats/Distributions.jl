@@ -188,14 +188,8 @@ support(d::AffineDistribution) = affine_support(d.μ, d.σ, support(d.ρ))
 affine_support(μ::Real, σ::Real, support) = μ .+ σ .* support
 
 function affine_support(μ::Real, σ::Real, support::RealInterval) 
-    if σ > 0
-        lower = support.lb
-        upper = support.ub
-    else
-        lower = support.ub
-        upper = support.lb
-    end
-    return RealInterval(μ + σ * lower, μ + σ * upper)
+    lower, upper = extrema(support)
+    return RealInterval(minmax(μ + σ * lower, μ + σ * upper)...)
 end
 
 
