@@ -124,9 +124,9 @@ Base.:-(μ::Union{Real, AbstractArray{<:Real}}, d::Distribution{ArrayLikeVariate
 
 Base.:*(d::Distribution{ArrayLikeVariate}, σ::Real) = σ * d
 Base.:/(d::Distribution{ArrayLikeVariate}, τ::Real) = inv(τ) * d
-function Base.:\(τ::Union{Real, AbstractArray{<:Real}}, d::Distribution{ArrayLikeVariate})
-    return inv(τ) * d
-end
+Base.:\(τ::Real, d::Distribution{ArrayLikeVariate}) = inv(τ) * d
+Base.:\(τ::AbstractMatrix, d::MultivariateDistribution) = inv(τ) * d
+
 
 
 #### Extremes
@@ -251,7 +251,7 @@ partype(::AffineDistribution{F,S,Tμ,Tσ,D}) where {F,S,Tμ,Tσ,D} = (Tμ, Tσ)
 mean(d::AffineDistribution) = d.μ + d.σ * mean(d.ρ)
 median(d::AffineDistribution) = d.μ + d.σ * median(d.ρ)
 mode(d::AffineDistribution) = d.μ + d.σ * mode(d.ρ)
-modes(d::AffineDistribution) = d.μ .+ d.σ .* modes(d.ρ)
+modes(d::AffineDistribution) = map(x -> d.μ + d.σ * x, modes(d.ρ))
 
 var(d::UnivariateAffine) = d.σ^2 * var(d.ρ)
 std(d::UnivariateAffine) = abs(d.σ) * std(d.ρ)
@@ -324,10 +324,11 @@ function quantile(d::UnivariateAffine, q::Real)
 end
 
 rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.ρ)
-function rand!(rng::AbstractRNG, d::MultivariateAffine)
-
+function rand!(rng::AbstractRNG, d::AffineDistribution, storage::AbstractArray)
+    rand!(rng, d.ρ, storage)
+    return @. storage = d.μ + d.σ * storage
 end
 
 function gradlogpdf(d::ContinuousAffine, x::Real)
-    return d.σ \ gradlogpdf(d.ρ, \(d.σ, x - d.μ))
+    return d.σ \ gradlogpdf(d.ρ, d.σ \ (x - d.μ))
 end
