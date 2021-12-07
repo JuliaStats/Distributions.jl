@@ -5,7 +5,7 @@ using StatsFuns: logtwo, invsqrt2, invsqrt2π
 
 import QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec
-import Base: sum, maximum, minimum, extrema, +, -, *, ==, inv, sign
+import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using FillArrays
