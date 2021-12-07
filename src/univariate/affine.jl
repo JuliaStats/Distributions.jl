@@ -31,7 +31,13 @@ d = σ * ρ + μ       # Create location-scale transformed distribution
 params(d)           # Get the parameters, i.e. (μ, σ, ρ)
 ```
 """
-struct AffineDistribution{N,S<:ValueSupport,Tμ,Tσ,D<:Distribution{ArrayLikeVariate{N},S}} <: Distribution{ArrayLikeVariate{N},S}
+struct AffineDistribution{
+    F<:ArrayLikeVariate,
+    S<:ValueSupport,
+    Tμ<:ArrayLike,
+    Tσ<:ArrayLike,
+    D<:Distribution{F,S}
+} <: Distribution{F,S} 
     μ::Tμ
     σ::Tσ
     ρ::D
@@ -41,7 +47,7 @@ function AffineDistribution(μ, σ, ρ; nonnegative=false)
     if nonnegative && σ ≤ 0
         throw(ArgumentError("scale cannot be negative"))
     end
-    return AffineDistribution(args...)
+    return AffineDistribution(μ, σ, ρ)
 end
 
 
@@ -65,7 +71,7 @@ Return a version of `ρ` that has been translated by `μ`.
 """
 Base.:+(μ::Real, ρ::UnivariateDistribution) = AffineDistribution(μ, one(μ), ρ)
 
-function Base.:+(μ::AbstractArray{<:Real, N}, ρ::Distribution{ArrayLikeVariate{N}, S}) where {N, S}
+function Base.:+(μ::AbstractArray{<:Real, N}, ρ::Distribution{ArrayLikeVariate{N}}) where N
     if size(μ) ≠ size(ρ) 
         throw(DimensionMismatch("array and distribution have different sizes."))
     end
@@ -112,7 +118,12 @@ end
 Base.:*(σ::Real, d::UnivariateAffine) = AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
 Base.:*(σ::Real, d::MultivariateAffine) = AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
 function Base.:*(σ::AbstractMatrix, d::MultivariateAffine)
-    σ
+    matrix_size = first(size(σ))
+    if any(x -> !isequal(x, matrix_size), size(σ)) || size(σ) ≠ first(size(d))
+        throw(DimensionMismatch(
+            "incompatible sizes: scale must be a square matrix of size $(first(size(d)))"
+        ))
+    end
     return AffineDistribution(σ * d.μ, σ * d.σ, d.ρ)
 end
 
@@ -258,7 +269,8 @@ std(d::UnivariateAffine) = abs(d.σ) * std(d.ρ)
 skewness(d::UnivariateAffine) = sign(d.σ) * skewness(d.ρ)
 kurtosis(d::UnivariateAffine) = kurtosis(d.ρ)
 
-cov(d::AffineDistribution) = d.σ * cov(d.ρ) * d.σ'
+cov(d::MultivariateAffine{F,Tμ,Tσ<:Diagonal}) = d.σ^2 * cov(d.ρ)
+cov(d::MultivariateAffine) = d.σ * cov(d.ρ) * d.σ'
 
 isplatykurtic(d::AffineDistribution) = isplatykurtic(d.ρ)
 isleptokurtic(d::AffineDistribution) = isleptokurtic(d.ρ)
