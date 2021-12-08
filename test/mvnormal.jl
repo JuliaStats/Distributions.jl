@@ -191,6 +191,26 @@ function _gauss_mle(x::AbstractMatrix{<:Real}, w::AbstractVector{<:Real})
     return mu, C
 end
 
+@testset "MvNormal suffstats" begin
+    x = randn(3, 200)
+    stat = suffstats(MvNormal, x)
+
+    @test isa(suffstats(MvNormal, x), Distributions.MvNormalStats)
+    @test suffstats(MvNormal{Float64}, x).s2 == stat.s2
+    @test suffstats(FullNormal, x).s2 == stat.s2
+    @test suffstats(DiagNormal, x).s2 == stat.s2
+    @test suffstats(IsoNormal, x).s2 == stat.s2
+
+    w = rand(200)
+    wstat = suffstats(MvNormal, x, w)
+
+    @test isa(wstat, Distributions.MvNormalStats)
+    @test suffstats(MvNormal{Float64}, x, w).s2 == wstat.s2
+    @test suffstats(FullNormal, x, w).s2 == wstat.s2
+    @test suffstats(DiagNormal, x, w).s2 == wstat.s2
+    @test suffstats(IsoNormal, x, w).s2 == wstat.s2
+end
+
 @testset "MvNormal MLE" begin
     x = randn(3, 200) .+ randn(3) * 2.
     w = rand(200)
