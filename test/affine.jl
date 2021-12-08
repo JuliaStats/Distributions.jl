@@ -31,11 +31,7 @@ function test_location_scale(
             @test maximum(d) == maximum(dref)
             @test extrema(d) == (minimum(d), maximum(d))
             @test extrema(support(d)) == extrema(d)
-            if support(d.ρ) isa RealInterval
-                @test support(d) isa RealInterval
-            elseif hasfinitesupport(d.ρ)
-                @test support(d) == d.μ .+ d.σ .* support(d.ρ)
-            end
+            @test support(d) == support(dref)
         end
         @testset "$k" for (k,dtest) in d_dict
             test_support(dtest, dref)
