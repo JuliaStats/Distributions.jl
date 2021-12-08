@@ -91,7 +91,7 @@ function test_location_scale(
 
             @test cdf(dtest, x) ≈ cdf(dref, x)
             @test logcdf(dtest, x) ≈ logcdf(dref, x)
-            @test ccdf(dtest, x) ≈ ccdf(dref, x) atol=1e-15
+            @test ccdf(dtest, x) ≈ ccdf(dref, x) atol=1e-14
             @test logccdf(dtest, x) ≈ logccdf(dref, x) atol=1e-14
 
             @test quantile(dtest, 0.1) ≈ quantile(dref, 0.1)

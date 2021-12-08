@@ -16,9 +16,9 @@ function test_matrixreshaped(rng, d1, sizes)
         end
     end
     @testset "MatrixReshaped constructor errors" begin
-        @test_throws ArgumentError MatrixReshaped(d1, length(d1), 2)
-        @test_throws ArgumentError MatrixReshaped(d1, length(d1))
-        @test_throws ArgumentError MatrixReshaped(d1, -length(d1), -1)
+        @test_deprecated(@test_throws ArgumentError MatrixReshaped(d1, length(d1), 2))
+        @test_deprecated(@test_throws ArgumentError MatrixReshaped(d1, length(d1)))
+        @test_deprecated(@test_throws ArgumentError MatrixReshaped(d1, -length(d1), -1))
     end
     @testset "MatrixReshaped size" begin
         for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
