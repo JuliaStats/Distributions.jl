@@ -101,7 +101,7 @@ function Base.:*(σ::Real, ρ::Distribution{<:ArrayLikeVariate})
     return AffineDistribution(Zeros{eltype(σ)}(size(ρ)), σ, ρ)
 end
 
-function Base.:*(σ::AbstractMatrix{<:Real}, ρ::MultivariateDistribution)
+function Base.:*(σ::AbstractMatrix, ρ::MultivariateDistribution)
     if iszero(σ)
         throw(ArgumentError("scale must be non-zero"))
     end
