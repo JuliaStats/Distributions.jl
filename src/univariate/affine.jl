@@ -3,14 +3,14 @@
 
 A shifted and scaled (affinely transformed) version of `ρ`.
 
-If ``Z`` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is the
-distribution of the random variable
+If `Z` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is
+the distribution of the random variable
 ```math
 X = μ + σ * Z
 ```
 
-If `ρ` is a discrete univariate distribution, the probability mass function of the transformed 
-distribution is given by
+If `ρ` is a discrete univariate distribution, the probability mass function of the 
+transformed distribution is given by
 ```math
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
 ```
@@ -21,10 +21,12 @@ the probability density function of the transformed distribution is given by
 f_X(x) = \\frac{1}{|σ|} f_Z\\left( \\frac{x-μ}{σ} \\right).
 ```
 
-Generally, it is recommended to not use the `AffineDistribution` constructor but
-`+`, `-`, `*`, and `/` to construct distributions of affine transformations. The latter fall back
-to constructing an `AffineDistribution` but can return more optimized distributions, e.g.,
-if `ρ` is from a location-scale family.
+We recommend against using the `AffineDistribution` constructor directly. Instead, use 
+`+`, `-`, `*`, and `/`. These are optimized for specific distributions and will automatically
+fall back on `AffineDistribution` if they need to.
+
+Affine transformations of discrete variables are easily affected by rounding errors. If you
+are getting incorrect results, try using exact `Rational` types instead of floats.
 
 ```julia
 d = σ * ρ + μ       # Create location-scale transformed distribution
