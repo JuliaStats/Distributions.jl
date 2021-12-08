@@ -30,6 +30,7 @@ function test_location_scale(
             @test minimum(d) == minimum(dref)
             @test maximum(d) == maximum(dref)
             @test extrema(d) == (minimum(d), maximum(d))
+            @test extrema(d) == extrema(dref)
             @test extrema(support(d)) == extrema(d)
             @test support(d) == support(dref)
         end
@@ -170,7 +171,7 @@ end
             test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
             test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
             test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
-            #test_location_scale_normal(_rng, ForwardDiff.Dual(0.3), sign * 0.2, 0.1, 0.2)
+            test_location_scale_normal(_rng, ForwardDiff.Dual(0.3), sign * 0.2, 0.1, 0.2)
         end
         
         probs = normalize!(rand(rng, 10), 1)
