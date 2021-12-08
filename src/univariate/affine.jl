@@ -132,9 +132,9 @@ Base.:-(d::Distribution{<:ArrayLikeVariate}, μ::Union{Real, AbstractArray{<:Rea
 Base.:-(μ::Union{Real, AbstractArray{<:Real}}, d::Distribution{<:ArrayLikeVariate}) = μ + -d
 
 Base.:*(d::Distribution{<:ArrayLikeVariate}, σ::Real) = σ * d
-Base.:/(d::Distribution{<:ArrayLikeVariate}, τ::Real) = Base.inv(τ) * d
-Base.:\(τ::Real, d::Distribution{<:ArrayLikeVariate}) = Base.inv(τ) * d
-Base.:\(τ::AbstractMatrix, d::MultivariateDistribution) = Base.inv(τ) * d
+Base.:/(d::Distribution{<:ArrayLikeVariate}, τ::Real) = inv(τ) * d
+Base.:\(τ::Real, d::Distribution{<:ArrayLikeVariate}) = inv(τ) * d
+Base.:\(τ::AbstractMatrix, d::MultivariateDistribution) = inv(τ) * d
 
 
 
