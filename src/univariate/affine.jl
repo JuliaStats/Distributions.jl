@@ -318,15 +318,30 @@ end
 
 # CDF methods
 
-function cdf(d::UnivariateAffine, x::Real)
+function cdf(d::ContinuousAffine, x::Real)
     x = (x - d.μ) / d.σ
     return d.σ < 0 ? ccdf(d.ρ, x) : cdf(d.ρ, x)
 end
 
-function logcdf(d::UnivariateAffine, x::Real)
+function logcdf(d::ContinuousAffine, x::Real)
     x = (x - d.μ) / d.σ
     return d.σ < 0 ? logccdf(d.ρ, x) : logcdf(d.ρ, x)
 end 
+
+function cdf(d::DiscreteAffine, x::Real)
+    x = (x - d.μ) / d.σ
+    if d.σ < 0
+        if x ∈ support(d.ρ)
+            return ccdf(d.ρ, x) + pdf(d.ρ, x)
+        else
+            return ccdf(d.ρ, x)
+        end
+    else
+        return cdf(d.ρ, x)
+    end
+end
+
+logcdf(d::DiscreteAffine, x::Real) = log(cdf(d, x))
 
 function quantile(d::UnivariateAffine, q::Real)
     q = d.σ < 0 ? (1 - q) : q

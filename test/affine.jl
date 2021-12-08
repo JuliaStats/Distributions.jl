@@ -159,7 +159,11 @@ function test_location_scale_discretenonparametric(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, support, probs,
 )
     ρ = DiscreteNonParametric(support, probs)
-    dref = DiscreteNonParametric(μ .+ σ .* support, probs)
+    if σ  > 0
+        dref = DiscreteNonParametric(μ .+ σ .* support, probs)
+    else
+        dref = DiscreteNonParametric(μ .+ σ .* support, probs)
+    end
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
@@ -176,10 +180,10 @@ end
         
         probs = normalize!(rand(rng, 10), 1)
         for _rng in (missing, rng)
-            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
-            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
-            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
-            test_location_scale_discretenonparametric(_rng, -9//5, sign, (10:(-1):1), probs)
+            test_location_scale_discretenonparametric(_rng, 1//3, sign*1//2, 1:10, probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sign*1//3, (-10):(-1), probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sign*3//2, 15:24, probs)
         end
     end
+    
 end
