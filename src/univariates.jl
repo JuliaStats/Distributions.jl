@@ -134,12 +134,6 @@ end
 ## sampling
 
 # multiple univariate with pre-allocated array
-# we use a function barrier since for some distributions `sampler(s)` is not type-stable:
-# https://github.com/JuliaStats/Distributions.jl/pull/1281
-function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray{<:Real})
-    return _rand!(rng, sampler(s), A)
-end
-
 function _rand!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray{<:Real})
     for i in eachindex(A)
         @inbounds A[i] = rand(rng, sampler)

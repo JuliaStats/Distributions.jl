@@ -170,12 +170,19 @@ Return the minimum and maximum of the support of `d` as a 2-tuple.
 Base.extrema(d::Distribution) = minimum(d), maximum(d)
 
 """
-    pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+    pdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
 
-Evaluate the probability density function of `d` at `x`.
+Evaluate the probability density function of distribution `d` at `x`.
 
 This function checks if the size of `x` is compatible with distribution `d`. This check can
 be disabled by using `@inbounds`.
+
+Here, `x` can be
+- a single variate of type `AbstractArray{<:Real,N}` with `size(x) = size(d)`,
+- a collection of variates of type `AbstractArray{<:Real,M}` with dimension `M > N` and
+  `size(x)[1:N] == size(d)`, or
+- a collection of variates of type `AbstractArray{<:AbstractArray{<:Real, N}}` with
+  `size(xi) == size(d)` for all variates `xi` in `x`.
 
 # Implementation
 
@@ -186,13 +193,28 @@ usually it is sufficient to implement `logpdf`.
 See also: [`logpdf`](@ref).
 """
 @inline function pdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}
-) where {N}
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
+) where {N,M}
+    # We handle both `M == N` (single sample) and `M > N` (multiple samples) here
+    # to make it less likely that user implementations cause method ambiguity errors
     @boundscheck begin
-        size(x) == size(d) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
+        if M == N
+            size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
+        elseif M > N ||
+            ntuple(i -> size(x, i), Val(N)) == size(d) ||
+                throw(DimensionMismatch("inconsistent array dimensions"))
+        else
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than or equal to " *
+                "number of dimensions of `d` ($N)"
+            ))
+        end
     end
-    return _pdf(d, x)
+    return if M == N
+        _pdf(d, x)
+    else
+        @inbounds map(Base.Fix1(pdf, d), eachvariate(x, ArrayLikeVariate{N}))
+    end
 end
 
 function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
@@ -200,12 +222,19 @@ function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) 
 end
 
 """
-    logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+    logpdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
 
-Evaluate the probability density function of `d` at `x`.
+Evaluate the probability density function of distribution `d` at `x`.
 
 This function checks if the size of `x` is compatible with distribution `d`. This check can
 be disabled by using `@inbounds`.
+
+Here, `x` can be
+- a single variate of type `AbstractArray{<:Real,N}` with `size(x) = size(d)`,
+- a collection of variates of type `AbstractArray{<:Real,M}` with dimension `M > N` and
+  `size(x)[1:N] == size(d)`, or
+- a collection of variates of type `AbstractArray{<:AbstractArray{<:Real, N}}` with
+  `size(xi) == size(d)` for all variates `xi` in `x`.
 
 # Implementation
 
@@ -215,82 +244,44 @@ size of `x`.
 See also: [`pdf`](@ref).
 """
 @inline function logpdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}
-) where {N}
+    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
+) where {N,M}
+    # We handle both `M == N` (single sample) and `M > N` (multiple samples) here
+    # to make it less likely that user implementations cause method ambiguity errors
     @boundscheck begin
-        size(x) == size(d) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
+        if M == N
+            size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
+        elseif M > N ||
+            ntuple(i -> size(x, i), Val(N)) == size(d) ||
+                throw(DimensionMismatch("inconsistent array dimensions"))
+        else
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than or equal to " *
+                "number of dimensions of `d` ($N)"
+            ))
+        end
     end
-    return _logpdf(d, x)
+    return if M == N
+        _logpdf(d, x)
+    else
+        @inbounds map(Base.Fix1(logpdf, d), eachvariate(x, ArrayLikeVariate{N}))
+    end
 end
 
 # `_logpdf` should be implemented and has no default definition
 # _logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
 # TODO: deprecate?
-"""
-    pdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
-
-Evaluate the probability density function of `d` at every element in a collection `x`.
-
-This function checks for every element of `x` if its size is compatible with distribution
-`d`. This check can be disabled by using `@inbounds`.
-
-Here, `x` can be
-- an array of dimension `> N` with `size(x)[1:N] == size(d)`, or
-- an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
-"""
 Base.@propagate_inbounds function pdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     return map(Base.Fix1(pdf, d), x)
 end
 
-@inline function pdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M},
-) where {N,M}
-    @boundscheck begin
-        M > N ||
-            throw(DimensionMismatch(
-                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
-            ))
-        ntuple(i -> size(x, i), Val(N)) == size(d) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
-    end
-    return @inbounds map(Base.Fix1(pdf, d), eachvariate(x, variate_form(typeof(d))))
-end
-
-"""
-    logpdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
-
-Evaluate the logarithm of the probability density function of `d` at every element in a
-collection `x`.
-
-This function checks for every element of `x` if its size is compatible with distribution
-`d`. This check can be disabled by using `@inbounds`.
-
-Here, `x` can be
-- an array of dimension `> N` with `size(x)[1:N] == size(d)`, or
-- an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
-"""
 Base.@propagate_inbounds function logpdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     return map(Base.Fix1(logpdf, d), x)
-end
-
-@inline function logpdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M},
-) where {N,M}
-    @boundscheck begin
-        M > N ||
-            throw(DimensionMismatch(
-                "number of dimensions of `x` ($M) must be greater than number of dimensions of `d` ($N)"
-            ))
-        ntuple(i -> size(x, i), Val(N)) == size(d) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
-    end
-    return @inbounds map(Base.Fix1(logpdf, d), eachvariate(x, variate_form(typeof(d))))
 end
 
 """
