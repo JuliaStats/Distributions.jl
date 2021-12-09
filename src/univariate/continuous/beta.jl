@@ -1,5 +1,5 @@
 """
-    Beta(α, β)
+    Beta <: ContinuousUnivariateDistribution
 
 The *Beta distribution* has probability density function
 
@@ -12,19 +12,13 @@ The Beta distribution is related to the [`Gamma`](@ref) distribution via the
 property that if ``X \\sim \\operatorname{Gamma}(\\alpha)`` and ``Y \\sim \\operatorname{Gamma}(\\beta)``
 independently, then ``X / (X + Y) \\sim \\operatorname{Beta}(\\alpha, \\beta)``.
 
-
 ```julia
-Beta()        # equivalent to Beta(1, 1)
-Beta(α)       # equivalent to Beta(α, α)
-Beta(α, β)    # Beta distribution with shape parameters α and β
-
 params(d)     # Get the parameters, i.e. (α, β)
 ```
 
 External links
 
 * [Beta distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_distribution)
-
 """
 struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     α::T
@@ -32,15 +26,32 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function Beta(α::T, β::T; check_args=true) where {T<:Real}
+# constructors with positional arguments
+function Beta(α::T, β::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(Beta, α > zero(α) && β > zero(β))
     return Beta{T}(α, β)
 end
+Beta(α::Real, β::Real=α; kwargs...) = Beta(promote(α, β)...; kwargs...)
+Beta(α::Integer, β::Integer; kwargs...) = Beta(float(α), float(β); kwargs...)
 
-Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
-Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1.0, 1.0, check_args=false)
+# constructor with keyword arguments and ASCII alternatives
+"""
+    Beta(; α::Real=1.0, β::Real=α, check_args::Bool=true)
+
+Construct a [`Beta`](@ref) distribution with parameters `α` and `β`.
+
+Use `check_args=false` to bypass the check if `α` and `β` are positive.
+
+# ASCII keyword arguments
+
+You can use `alpha` and `beta` instead of `α` and `β` to specify the parameters
+of the Beta distribution. The Unicode names have higher precedence, i.e., if
+both `α` and `alpha` or `β` and `beta` are given a Beta distribution with
+parameters `α` and `β` is constructed.
+"""
+function Beta(; alpha::Real=1.0, α::Real=alpha, beta::Real=α, β::Real=beta, kwargs...)
+    return Beta(α, β; kwargs...)
+end
 
 @distr_support Beta 0.0 1.0
 
