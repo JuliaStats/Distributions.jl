@@ -83,29 +83,31 @@ end
 @inline function rand!(
     rng::AbstractRNG,
     s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,N},
-) where {N}
-    @boundscheck begin
-        size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
-    end
-    return _rand!(rng, s, x)
-end
-
-@inline function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
     x::AbstractArray{<:Real,M},
 ) where {N,M}
+    # We handle both `M == N` (single sample) and `M > N` (multiple samples) here
+    # to make it less likely that user implementations cause method ambiguity errors
     @boundscheck begin
-        M > N ||
+        if M == N
+            size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
+        elseif M > N
+            ntuple(i -> size(x, i), Val(N)) == size(s) ||
+                throw(DimensionMismatch("inconsistent array dimensions"))
+        else
             throw(DimensionMismatch(
-                "number of dimensions of `x` ($M) must be greater than number of dimensions of `s` ($N)"
+                "number of dimensions of `x` ($M) must be greater than or equal to" *
+                "number of dimensions of `s` ($N)"
             ))
-        ntuple(i -> size(x, i), Val(N)) == size(s) ||
-            throw(DimensionMismatch("inconsistent array dimensions"))
+        end
     end
-    # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
+    return if M == N
+        # Use `s` directly since only a single sample is generated
+        _rand!(rng, s, x)
+    else
+        # Use `sampler(s)` which can be optimized for generating multiple samples
+        # The function barrier fixes performance issues if `sampler(s)` is type unstable
+        _rand!(rng, sampler(s), x)
+    end
 end
 
 function _rand!(
@@ -149,7 +151,7 @@ end
                 throw(DimensionMismatch("inconsistent array dimensions"))
         end
     end
-    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    # The function barrier fixes performance issues if `sampler(s)` is type unstable
     return _rand!(rng, sampler(s), x, allocate)
 end
 
