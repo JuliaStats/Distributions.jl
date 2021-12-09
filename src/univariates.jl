@@ -701,7 +701,7 @@ const continuous_distributions = [
     "skewedexponentialpower"
 ]
 
-include("affine.jl")
+include(joinpath("univariate", "locationscale.jl"))
 
 for dname in discrete_distributions
     include(joinpath("univariate", "discrete", "$(dname).jl"))
