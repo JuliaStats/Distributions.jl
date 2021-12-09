@@ -5,7 +5,6 @@ using LinearAlgebra
 using Test
 
 @testset "discrete univariate" begin
-
     @testset "Bernoulli" begin
         d1 = Bernoulli(0.1)
         for d2 in (@inferred(convolve(d1, d1)), @inferred(d1 ⊕ d1))
@@ -141,7 +140,6 @@ end
         d4 = Gamma(1.2, 0.4)
         @test_throws ArgumentError convolve(d1, d4)
     end
-
 end
 
 @testset "continuous multivariate" begin
