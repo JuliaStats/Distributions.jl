@@ -38,14 +38,14 @@ end
 
 LogLogistic(θ::Real, ϕ::Real) = LogLogistic(promote(θ,ϕ)...)
 LogLogistic(θ::Integer, ϕ::Integer) = LogLogistic(float(θ), float(ϕ))
-LogLogistic(θ::T) where {T<:Real} = LogLogistic(θ, π)
-LogLogistic() = LogLogistic(1.0, π, check_args=false) 
+LogLogistic(θ::T) where {T<:Real} = LogLogistic(θ, 2.0)
+LogLogistic() = LogLogistic(1.0, 2.0, check_args=false) 
 
 @distr_support LogLogistic 0.0 Inf
 
 #### Coversions
-covert(::Type{LogLogistic{T}}, θ::S, ϕ::S) where {T <: Real, S <: Real} = LogLogistic(T(θ), T(ϕ))
-covert(::Type{LogLogistic{T}}, d::LogLogistic{S}) where {T <: Real, S <: Real} = LogLogistic(T(d.θ), T(d.ϕ), check_args=false)
+convert(::Type{LogLogistic{T}}, θ::S, ϕ::S) where {T <: Real, S <: Real} = LogLogistic(T(θ), T(ϕ))
+convert(::Type{LogLogistic{T}}, d::LogLogistic{S}) where {T <: Real, S <: Real} = LogLogistic(T(d.θ), T(d.ϕ), check_args=false)
 
 #### Parameters 
 
