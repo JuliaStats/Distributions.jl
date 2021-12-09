@@ -2,11 +2,11 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = LocationScale(μ,σ,ρ)
+    d = AffineDistribution(μ,σ,ρ)
     @test params(d) == (μ,σ,ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the LocationScale object
+    # Different ways to construct the AffineDistribution object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
@@ -157,7 +157,7 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "LocationScale" begin
+@testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
     for _rng in (missing, rng)
