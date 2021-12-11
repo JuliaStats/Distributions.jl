@@ -62,7 +62,7 @@ Base.eltype(::Type{<:AffineDistribution{T}}) where T = T
 
 minimum(d::AffineDistribution) = d.μ + d.σ * minimum(d.ρ)
 maximum(d::AffineDistribution) = d.μ + d.σ * maximum(d.ρ)
-support(d::AffineDistribution) = AffineDistribution_support(d.μ, d.σ, support(d.ρ))
+support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
 function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
     return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
 end
