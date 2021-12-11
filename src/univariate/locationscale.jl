@@ -66,7 +66,7 @@ support(d::AffineDistribution) = AffineDistribution_support(d.μ, d.σ, support(
 function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
     return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
 end
-AffineDistribution_support(μ::Real, σ::Real, support) = μ .+ σ .* support
+affinedistribution_support(μ::Real, σ::Real, support) = μ .+ σ .* support
 
 AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + d.μ * σ, σ * d.σ, d.ρ)
 
