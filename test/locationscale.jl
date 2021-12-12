@@ -2,7 +2,7 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = μ + σ * ρ
+    d = Distributions.AffineDistribution(μ, σ, ρ)
     @test params(d) == (μ,σ,ρ)
     @test eltype(d) === eltype(dref)
 
