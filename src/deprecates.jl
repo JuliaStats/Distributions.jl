@@ -51,3 +51,9 @@ end
 @deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr; epsilon=epsilon) false
 @deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr) false
 @deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
+
+# Deprecate `MatrixReshaped`
+const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+@deprecate MatrixReshaped(
+    d::MultivariateDistribution, n::Integer, p::Integer=n
+) reshape(d, (n, p))

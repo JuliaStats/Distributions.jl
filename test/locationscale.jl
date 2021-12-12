@@ -102,8 +102,8 @@ function test_location_scale(
 
             @test cdf(d, x) ≈ cdf(dref, x)
             @test logcdf(d, x) ≈ logcdf(dref, x)
-            @test ccdf(d, x) ≈ ccdf(dref, x) atol=1e-15
-            @test logccdf(d, x) ≈ logccdf(dref, x) atol=1e-15
+            @test ccdf(d, x) ≈ ccdf(dref, x) atol=1e-14
+            @test logccdf(d, x) ≈ logccdf(dref, x) atol=1e-14
 
             @test quantile(d,0.1) ≈ quantile(dref,0.1)
             @test quantile(d,0.5) ≈ quantile(dref,0.5)
@@ -167,7 +167,7 @@ end
     end
     test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
 
-    probs = Distributions.pnormalize!(rand(10))
+    probs = normalize!(rand(10), 1)
     for _rng in (missing, rng)
         test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
