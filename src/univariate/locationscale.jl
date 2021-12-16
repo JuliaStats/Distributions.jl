@@ -43,14 +43,16 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     end
 end
 
-function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args=true) where {T<:Real}
+function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     _T = promote_type(eltype(ρ), T)
     D = typeof(ρ)
     S = value_support(D)
     return AffineDistribution{_T,S,D}(_T(μ), _T(σ), ρ; check_args=check_args)
 end
 
-AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution) = AffineDistribution(promote(μ, σ)..., ρ)
+function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
+    return AffineDistribution(promote(μ, σ)..., ρ; check_args=check_args)
+end
 
 # aliases
 const LocationScale{T,S,D} = AffineDistribution{T,S,D}
