@@ -9,7 +9,7 @@ the distribution of the random variable
 X = μ + σ * Z
 ```
 
-If `ρ` is a discrete univariate distribution, the probability mass function of the 
+If `ρ` is a discrete univariate distribution, the probability mass function of the
 transformed distribution is given by
 ```math
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
@@ -21,9 +21,9 @@ the probability density function of the transformed distribution is given by
 f_X(x) = \\frac{1}{|σ|} f_Z\\left( \\frac{x-μ}{σ} \\right).
 ```
 
-We recommend against using the `AffineDistribution` constructor directly. Instead, use 
-`+`, `-`, `*`, and `/`. These are optimized for specific distributions and will automatically
-fall back on `AffineDistribution` if they need to.
+We recommend against using the `AffineDistribution` constructor directly. Instead, use
+`+`, `-`, `*`, and `/`. These are optimized for specific distributions and will fall back
+on `AffineDistribution` only when they need to.
 
 Affine transformations of discrete variables are easily affected by rounding errors. If you
 are getting incorrect results, try using exact `Rational` types instead of floats.
@@ -53,7 +53,7 @@ end
 AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution) = AffineDistribution(promote(μ, σ)..., ρ)
 
 # aliases
-const LocationScale = AffineDistribution
+const LocationScale{T,S,D} = AffineDistribution{T,S,D}
 function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
     Base.depwarn("`LocationScale` is deprecated, use `AffineDistribution` instead", :LocationScale)
     if check_args && σ ≤ 0  # preparation for future PR where I remove σ > 0 check
