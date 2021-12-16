@@ -16,6 +16,7 @@ makedocs(
         "reshape.md",
         "cholesky.md",
         "mixture.md",
+        "convolution.md",
         "fit.md",
         "extends.md",
         "density_interface.md",
