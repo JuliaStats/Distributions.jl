@@ -59,7 +59,7 @@ partype(::Gumbel{T}) where {T} = T
 function Base.rand(rng::Random.AbstractRNG, d::Gumbel)
     return d.μ - d.θ * log(randexp(rng, float(eltype(d))))
 end
-function Random.rand!(rng::Random.AbstractRNG, d::Gumbel, x::AbstractArray)
+function _rand!(rng::Random.AbstractRNG, d::Gumbel, x::AbstractArray{<:Real})
     randexp!(rng, x)
     x .= d.μ .- d.θ .* log.(x)
     return x

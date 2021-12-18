@@ -94,22 +94,24 @@ rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
 
 function entropy(d::AbstractMvNormal)
     ldcd = logdetcov(d)
-    T = typeof(ldcd)
-    (length(d) * (T(log2π) + one(T)) + ldcd)/2
+    return (length(d) * (oftype(ldcd, log2π) + 1) + ldcd) / 2
 end
 
-mvnormal_c0(g::AbstractMvNormal) = -(length(g) * convert(eltype(g), log2π) + logdetcov(g))/2
+function mvnormal_c0(d::AbstractMvNormal)
+    ldcd = logdetcov(d)
+    return - (length(d) * oftype(ldcd, log2π) + ldcd) / 2
+end
 
 function kldivergence(p::AbstractMvNormal, q::AbstractMvNormal)
     # This is the generic implementation for AbstractMvNormal, you might need to specialize for your type
-    length(p) == length(q) || 
+    length(p) == length(q) ||
         throw(DimensionMismatch("Distributions p and q have different dimensions $(length(p)) and $(length(q))"))
     # logdetcov is used separately from _cov for any potential optimization done there
     return (tr(_cov(q) \ _cov(p)) + sqmahal(q, mean(p)) - length(p) + logdetcov(q) - logdetcov(p)) / 2
 end
 
 # This is a workaround to take advantage of the PDMats objects for MvNormal and avoid copies as Matrix
-# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object 
+# TODO: Remove this once `cov(::MvNormal)` returns the PDMats object
 _cov(d::AbstractMvNormal) = cov(d)
 
 """
@@ -140,7 +142,7 @@ sqmahal(d::AbstractMvNormal, x::AbstractMatrix) = sqmahal!(Vector{promote_type(p
 
 _logpdf(d::AbstractMvNormal, x::AbstractVector) = mvnormal_c0(d) - sqmahal(d, x)/2
 
-function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
+function _logpdf!(r::AbstractArray{<:Real}, d::AbstractMvNormal, x::AbstractMatrix{<:Real})
     sqmahal!(r, d, x)
     c0 = mvnormal_c0(d)
     for i = 1:size(x, 2)
@@ -148,8 +150,6 @@ function _logpdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix)
     end
     r
 end
-
-_pdf!(r::AbstractArray, d::AbstractMvNormal, x::AbstractMatrix) = exp!(_logpdf!(r, d, x))
 
 ###########################################################
 #
@@ -217,10 +217,10 @@ Construct a multivariate normal distribution with zero mean and covariance matri
 MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
 # deprecated constructors with standard deviations
-Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::AbstractVector{<:Real}) MvNormal(μ, LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2 * I)
-Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(Diagonal(map(abs2, σ)))
-Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(Diagonal(Fill(σ^2, d)))
+Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
+Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
 
 Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 
@@ -270,15 +270,20 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
-_rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat) =
-    add!(unwhiten!(d.Σ, randn!(rng, x)), d.μ)
+function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+    unwhiten!(d.Σ, randn!(rng, x))
+    x .+= d.μ
+    return x
+end
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds x[i] = randn(rng, eltype(x))
     end
-    add!(unwhiten!(d.Σ, x), d.μ)
+    unwhiten!(d.Σ, x)
+    x .+= d.μ
+    return x
 end
 
 ### Affine transformations
@@ -342,7 +347,7 @@ fit_mle(g::MvNormalKnownCov{C}, ss::MvNormalKnownCovStats{C}) where {C<:Abstract
 function fit_mle(g::MvNormalKnownCov, x::AbstractMatrix{Float64})
     d = length(g)
     size(x,1) == d || throw(DimensionMismatch("Invalid argument dimensions."))
-    μ = multiply!(vec(sum(x,dims=2)), inv(size(x,2)))
+    μ = lmul!(inv(size(x,2)), vec(sum(x,dims=2)))
     MvNormal(μ, g.Σ)
 end
 
@@ -448,7 +453,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
             @inbounds va[i] += abs2(x[i,j] - mu[i])
         end
     end
-    multiply!(va, inv(n))
+    lmul!(inv(n), va)
     MvNormal(mu, PDiagMat(va))
 end
 
@@ -467,7 +472,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVec
             @inbounds va[i] += abs2(x[i,j] - mu[i]) * wj
         end
     end
-    multiply!(va, inv_sw)
+    lmul!(inv_sw, va)
     MvNormal(mu, PDiagMat(va))
 end
 

@@ -146,6 +146,7 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
+    SkewedExponentialPower,
     Product,
     Poisson,
     PoissonBinomial,
@@ -276,6 +277,7 @@ include("common.jl")
 
 # implementation helpers
 include("utils.jl")
+include("eachvariate.jl")
 
 # generic functions
 include("show.jl")
@@ -293,6 +295,7 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("reshaped.jl")
 include("truncate.jl")
 include("conversion.jl")
 include("convolution.jl")
@@ -342,7 +345,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
-    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
