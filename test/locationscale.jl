@@ -173,4 +173,11 @@ end
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
         test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
     end
+
+    @test AffineDistribution(1.0, 1, Normal()) isa AffineDistribution{Float64, Continuous, Normal{Float64}}
+    @test_nowarn AffineDistribution(1.0, 1, Normal())
+
+    @test LocationScale(1.0, 1, Normal()) isa LocationScale{Float64, Continuous, Normal{Float64}}
+    @test LocationScale(1.0, 1, Normal()) isa AffineDistribution{Float64, Continuous, Normal{Float64}}
+    @test_warn "" LocationScale(1.0, 1, Normal())
 end
