@@ -177,7 +177,7 @@ end
     @test_nowarn ad_norm = AffineDistribution(1.0, 1, Normal())
     @test ad_norm isa AffineDistribution{Float64, Continuous, Normal{Float64}}
 
-    @test_warn ls_norm = LocationScale(1.0, 1, Normal())
+    @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
     @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
     @test ls_norm isa AffineDistribution{Float64, Continuous, Normal{Float64}}
     
