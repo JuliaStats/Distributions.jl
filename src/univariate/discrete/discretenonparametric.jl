@@ -69,19 +69,6 @@ Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
 
 # Sampling
 
-function rand(rng::AbstractRNG, d::DiscreteNonParametric)
-    x = support(d)
-    p = probs(d)
-    n = length(p)
-    draw = rand(rng, float(eltype(p)))
-    cp = p[1]
-    i = 1
-    while cp <= draw && i < n
-        @inbounds cp += p[i +=1]
-    end
-    return x[i]
-end
-
 sampler(d::DiscreteNonParametric) =
     DiscreteNonParametricSampler(support(d), probs(d))
 

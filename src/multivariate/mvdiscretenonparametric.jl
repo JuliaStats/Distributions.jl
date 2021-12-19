@@ -51,31 +51,29 @@ Get the vector of probabilities associated with the support of `d`.
 probs(d::MvDiscreteNonParametric) = d.p
 
 
-# It would be more intuitive if length was the
-#
 Base.length(d::MvDiscreteNonParametric) = length(first(d.support))
 Base.size(d::MvDiscreteNonParametric) = (length(d), length(d.support))
 
-function _rand!(
-    rng::AbstractRNG,
-    d::MvDiscreteNonParametric,
-    x::AbstractVector{T},
-) where {T<:Real}
+# function _rand!(
+#     rng::AbstractRNG,
+#     d::MvDiscreteNonParametric,
+#     x::AbstractVector{T},
+# ) where {T<:Real}
 
-    length(x) == length(d) || throw(DimensionMismatch("Invalid argument dimension."))
-    s = d.support
-    p = d.p
+#     length(x) == length(d) || throw(DimensionMismatch("Invalid argument dimension."))
+#     s = d.support
+#     p = d.p
 
-    n = length(p)
-    draw = Base.rand(rng, float(eltype(p)))
-    cp = p[1]
-    i = 1
-    while cp <= draw && i < n
-        @inbounds cp += p[i+=1]
-    end
-    copyto!(x, s[i])
-    return x
-end
+#     n = length(p)
+#     draw = Base.rand(rng, float(eltype(p)))
+#     cp = p[1]
+#     i = 1
+#     while cp <= draw && i < n
+#         @inbounds cp += p[i+=1]
+#     end
+#     copyto!(x, s[i])
+#     return x
+# end
 
 function _logpdf(d::MvDiscreteNonParametric, x::AbstractVector{T}) where {T<:Real}
     s = support(d)
