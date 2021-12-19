@@ -179,6 +179,4 @@ end
     @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
     @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
     @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
-    
-    @test ls_norm == ad_norm
 end
