@@ -174,8 +174,7 @@ end
         test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
     end
 
-    @test_nowarn ad_norm = AffineDistribution(1.0, 1, Normal())
-    @test ad_norm isa AffineDistribution{Float64, Continuous, Normal{Float64}}
+    @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
 
     @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
     @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
