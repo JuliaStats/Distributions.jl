@@ -15,7 +15,7 @@ transformed distribution is given by
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
 ```
 
-If `ρ` is a continuous univariate distribution with probability density function `f_Z`,
+If `ρ` is a continuous univariate distribution with probability density function ``f_Z``,
 the probability density function of the transformed distribution is given by
 ```math
 f_X(x) = \\frac{1}{|σ|} f_Z\\left( \\frac{x-μ}{σ} \\right).
