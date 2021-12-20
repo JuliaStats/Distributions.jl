@@ -29,7 +29,7 @@ Affine transformations of discrete variables are easily affected by rounding err
 are getting incorrect results, try using exact `Rational` types instead of floats.
 
 ```julia
-d = σ * ρ + μ       # Create location-scale transformed distribution
+d = μ + σ * ρ       # Create location-scale transformed distribution
 params(d)           # Get the parameters, i.e. (μ, σ, ρ)
 ```
 """
