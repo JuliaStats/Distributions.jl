@@ -6,7 +6,7 @@ A shifted and scaled (affinely transformed) version of `ρ`.
 If ``Z`` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is
 the distribution of the random variable
 ```math
-X = μ + σ * Z
+X = μ + σ Z
 ```
 
 If `ρ` is a discrete univariate distribution, the probability mass function of the
