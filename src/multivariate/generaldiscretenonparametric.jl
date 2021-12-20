@@ -29,3 +29,18 @@ function rand(rng::AbstractRNG, d::GeneralDiscreteNonParametric)
     end
     return x[i]
 end
+
+"""
+    support(d::MvDiscreteNonParametric)
+Get a sorted AbstractVector defining the support of `d`.
+"""
+support(d::GeneralDiscreteNonParametric) = d.support
+
+"""
+    probs(d::MvDiscreteNonParametric)
+Get the vector of probabilities associated with the support of `d`.
+"""
+probs(d::GeneralDiscreteNonParametric) = d.p
+
+
+Base.length(d::GeneralDiscreteNonParametric) = length(first(d.support))
