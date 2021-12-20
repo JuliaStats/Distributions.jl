@@ -3,7 +3,7 @@
 
 A shifted and scaled (affinely transformed) version of `ρ`.
 
-If `Z` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is
+If ``Z`` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is
 the distribution of the random variable
 ```math
 X = μ + σ * Z
