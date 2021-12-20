@@ -622,7 +622,7 @@ function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateD
         end
 
         # multiplication (negative and positive values)
-        for s in (-abs(c), abs(c))
+        for s in (-c, c)
             for scale_d in (@inferred(s * d), @inferred(d * s), @inferred(d / inv(s)))
                 @test scale_d isa T
                 if d isa Uniform
