@@ -109,6 +109,10 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Affine transformations
+
+Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
+Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
 
