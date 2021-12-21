@@ -31,7 +31,6 @@ StatsFuns = "0.8, 0.9"
 julia = "1"
 
 [extras]
-ArraysOfArrays = "65a8f2f4-9b39-5baf-92e2-a9cc46fdf018"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 ChainRulesTestUtils = "cdddcdb0-9152-4a09-a978-84456f9df70a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -43,4 +42,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ArraysOfArrays", "StableRNGs", "Calculus", "ChainRulesTestUtils", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test"]
+test = ["StableRNGs", "Calculus", "ChainRulesTestUtils", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test"]
