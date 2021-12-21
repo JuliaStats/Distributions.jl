@@ -2,11 +2,11 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = LocationScale(μ,σ,ρ)
+    d = Distributions.AffineDistribution(μ, σ, ρ)
     @test params(d) == (μ,σ,ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the LocationScale object
+    # Different ways to construct the AffineDistribution object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
@@ -144,7 +144,7 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "LocationScale" begin
+@testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
     for _rng in (missing, rng)
@@ -160,4 +160,10 @@ end
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
         test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
     end
+
+    @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
+
+    @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
+    @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
+    @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
 end
