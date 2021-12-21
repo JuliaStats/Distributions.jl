@@ -38,40 +38,6 @@ end
 
 Base.eltype(::Type{<:MvDiscreteNonParametric{T}}) where T = Base.eltype(T)
 
-
-function _rand!(
-    rng::AbstractRNG,
-    d::MvDiscreteNonParametric,
-    x::AbstractVector{T},
-) where {T<:Real}
-
-    length(x) == length(d) || throw(DimensionMismatch("Invalid argument dimension."))
-    s = d.support
-    p = d.p
-
-    n = length(p)
-    draw = Base.rand(rng, float(eltype(p)))
-    cp = p[1]
-    i = 1
-    while cp <= draw && i < n
-        @inbounds cp += p[i+=1]
-    end
-    copyto!(x, s[i])
-    return x
-end
-
-function _logpdf(d::MvDiscreteNonParametric, x::AbstractVector{T}) where {T<:Real}
-    s = support(d)
-    p = probs(d)
-    for i = 1:length(p)
-        if s[i] == x
-            return log(p[i])
-        end
-    end
-    return log(zero(eltype(p)))
-end
-
-
 function mean(d::MvDiscreteNonParametric)
     return StatsBase.mean(hcat(d.support...), Weights(d.p, one(eltype(d.p))),dims=2)
 end
