@@ -54,7 +54,7 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
-    "mvdiscretenonparametric",
+    "generaldiscretenonparametric",
     "functionals",
     "chernoff",
     "univariate_bounds",

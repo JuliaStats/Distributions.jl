@@ -5,7 +5,7 @@ using Random
 using Test
 
 
-@testset "MvDiscreteNonParametric" begin
+@testset "GeneralDiscreteNonParametric" begin
 
     @testset "Declaring MvDiscreteNonParametric" begin
 
