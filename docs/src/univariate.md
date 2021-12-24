@@ -132,6 +132,13 @@ end
 ```
 
 ```@docs
+Distributions.AffineDistribution
+```
+```@example plotdensity
+plotdensity((-4, 6), 1 + 2 * Normal(0, 1); title="Affinely Transformed Normal") # hide
+```
+
+```@docs
 Arcsine
 ```
 ```@example plotdensity
@@ -297,14 +304,6 @@ Levy
 plotdensity((0, 20), Levy, (0, 1)) # hide
 ```
 
-```@docs
-LocationScale
-```
-```@example plotdensity
-plotdensity(
-    (-2, 5), LocationScale(2, 1, Normal(0, 1)); title="LocationScale(2, 1, Normal(0, 1))",
-) # hide
-```
 
 ```@docs
 Logistic
