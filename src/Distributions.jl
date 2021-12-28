@@ -90,6 +90,7 @@ export
     EdgeworthZ,
     Erlang,
     Epanechnikov,
+    Exgaussian,
     Exponential,
     FDist,
     FisherNoncentralHypergeometric,
@@ -300,6 +301,7 @@ include("convolution.jl")
 include("qq.jl")
 include("estimators.jl")
 include("pdfnorm.jl")
+# include("univariate/continuous/exgaussian.jl")
 
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
