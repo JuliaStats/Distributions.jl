@@ -12,8 +12,11 @@ The *Exgaussian distribution* is the sum of a normal with mean `μ` and standard
 It has probability density function
 
 ```math
-f(x; \mu, \sigma, \tau) = NEWJEFF
+f(x; \mu, \sigma, \tau) = \frac{1}{\tau\sigma\sqrt{2\pi}
+   \exp\left( \mu/\tau + \sigma^2/(2\tau^2) \right)
+   \Phi\left( (x-\mu\\sigma^2/\tau)/\sigma\right)
 ```
+where $\Phi$ is the CDF of the unit Gaussian.
 
 Note that unlike normal.jl, we require σ > 0, in addition to τ > 0.
 
@@ -90,6 +93,10 @@ function cdf(d::Exgaussian, x::Real)
     t4 = rate*(μ-x) + t4a
     t2 = exp(t4)
     return t1 - t2.*t3
+end
+
+function mgf(d::Exgaussian, s::Real)
+    return exp(s*d.μ + ((s*d.σ)^2)/2) / (1 - s/d.rate)
 end
 
 #### Sampling
