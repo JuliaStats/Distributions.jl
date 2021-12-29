@@ -5,14 +5,14 @@
 ## No warranty is expressed or implied.
 ##
 
-"""
+@doc raw"""
     Exgaussian(μ,σ,τ)
 
 The *Exgaussian distribution* is the sum of a normal with mean `μ` and standard deviation `σ>0`, plus an independent exponential with mean `τ>0`. 
 It has probability density function
 
 ```math
-f(x; \\mu, \\sigma, \\tau) = NEWJEFF
+f(x; \mu, \sigma, \tau) = NEWJEFF
 ```
 
 Note that unlike normal.jl, we require σ > 0, in addition to τ > 0.
@@ -64,7 +64,6 @@ Base.eltype(::Type{Exgaussian{T}}) where {T} = T
 
 mean(d::Exgaussian) = d.μ+d.τ
 var(d::Exgaussian) = abs2(d.σ) + abs2(d.τ)
-std(d::Exgaussian) = sqrt( abs2(d.σ) + abs2(d.τ) )
 skewness(d::Exgaussian{T}) where {T<:Real} = 2/(d.σ*d.rate)^3 * (1 + 1/(d.rate*d.σ)^2)^(-1.5)
 kurtosis(d::Exgaussian{T}) where {T<:Real} = 3*(1+2/(d.σ*d.rate)^2 + 3/(d.σ*d.rate)^4) / (1 + 1/(d.σ*d.rate)^2)^2 - 3
 kurtosis(d::Exgaussian, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
@@ -84,13 +83,12 @@ end
 
 function cdf(d::Exgaussian, x::Real)
     μ, σ, rate = d.μ, d.σ, d.rate
-    t3a = μ / σ + σ*rate;  # NEWJEFF: compute t3a and t4a in constructor???
+    t3a = μ / σ + σ*rate;
     t4a = (σ*rate)^2 / 2;
     t1 = normcdf((x-μ)/σ)
     t3 = normcdf(x/σ-t3a)
     t4 = rate*(μ-x) + t4a
     t2 = exp(t4)
-    # t2(t3==0) = 0
     return t1 - t2.*t3
 end
 

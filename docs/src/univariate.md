@@ -209,6 +209,13 @@ plotdensity((0, 8), Erlang, (7, 0.5)) # hide
 ```
 
 ```@docs
+Exgaussian
+```
+```@example plotdensity
+plotdensity((100, 1500), Exgaussian, (400, 40, 200)) # hide
+```
+
+```@docs
 Exponential
 ```
 ```@example plotdensity
