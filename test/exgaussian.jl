@@ -20,5 +20,10 @@ using Test
     t = 500
     @test pdf(d,t) ≈ 0.0030607  atol = 1e-5
     @test cdf(d,t) ≈ 0.38164  atol = 1e-5
+
+    # Check mgf
+    del = 0.0000001
+    @test (mgf(d,del/2) - mgf(d,-del/2))/del  ≈ μ + τ  atol = 1e-5
+
 end
  

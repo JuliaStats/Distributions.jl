@@ -12,11 +12,11 @@ The *Exgaussian distribution* is the sum of a normal with mean `μ` and standard
 It has probability density function
 
 ```math
-f(x; \mu, \sigma, \tau) = \frac{1}{\tau\sigma\sqrt{2\pi}
+f(x; \mu, \sigma, \tau) = \frac{1}{\tau\sigma\sqrt{2\pi}}
    \exp\left( \mu/\tau + \sigma^2/(2\tau^2) \right)
-   \Phi\left( (x-\mu\\sigma^2/\tau)/\sigma\right)
+   \Phi\left( (x-\mu-\sigma^2/\tau)/\sigma \right)
 ```
-where $\Phi$ is the CDF of the unit Gaussian.
+where $\Phi$ is the CDF of the standard Normal(0,1).
 
 Note that unlike normal.jl, we require σ > 0, in addition to τ > 0.
 
