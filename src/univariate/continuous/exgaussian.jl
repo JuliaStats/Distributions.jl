@@ -50,7 +50,7 @@ end
 Exgaussian(μ::Real, σ::Real, τ::Real) = Exgaussian(promote(μ, σ, τ)...)
 Exgaussian(μ::Integer, σ::Integer, τ::Real) = Exgaussian(float(μ), float(σ), float(τ))
 
-# #### Conversions
+#### Conversions
 convert(::Type{Exgaussian{T}}, μ::S, σ::S, τ::S) where {T <: Real, S <: Real} = Exgaussian(T(μ), T(σ), T(τ))
 convert(::Type{Exgaussian{T}}, d::Exgaussian{S}) where {T <: Real, S <: Real} = Exgaussian(T(d.μ), T(d.σ), T(d.τ), check_args=false)
 
@@ -73,16 +73,12 @@ kurtosis(d::Exgaussian, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
 
 #### Evaluation
 
-# pdf
-
 function pdf(d::Exgaussian, x::Real)
     μ, σ, rate = d.μ, d.σ, d.rate
     t1 = -x*rate + μ*rate + 0.5*(σ*rate)^2
     t2 = (x - μ - σ^2*rate) / σ
     return rate*exp( t1 + _normlogcdf(t2) )
 end
-
-# cdf
 
 function cdf(d::Exgaussian, x::Real)
     μ, σ, rate = d.μ, d.σ, d.rate
@@ -95,9 +91,7 @@ function cdf(d::Exgaussian, x::Real)
     return t1 - t2.*t3
 end
 
-function mgf(d::Exgaussian, s::Real)
-    return exp(s*d.μ + ((s*d.σ)^2)/2) / (1 - s/d.rate)
-end
+mgf(d::Exgaussian, s::Real) = exp(s*d.μ + ((s*d.σ)^2)/2) / (1 - s/d.rate)
 
 #### Sampling
 
