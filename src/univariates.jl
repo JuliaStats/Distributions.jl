@@ -662,6 +662,7 @@ const continuous_distributions = [
     "cosine",
     "epanechnikov",
     "exponential",
+    "exgaussian",
     "fdist",
     "frechet",
     "gamma", "erlang",

@@ -90,6 +90,7 @@ export
     EdgeworthZ,
     Erlang,
     Epanechnikov,
+    Exgaussian,
     Exponential,
     FDist,
     FisherNoncentralHypergeometric,
