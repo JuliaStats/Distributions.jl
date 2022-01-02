@@ -49,8 +49,7 @@ function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
     GeneralizedPareto(float(μ), float(σ), float(ξ))
 end
 GeneralizedPareto(σ::Real, ξ::Real) = GeneralizedPareto(zero(σ), σ, ξ)
-GeneralizedPareto(ξ::Real) = GeneralizedPareto(zero(ξ), one(ξ), ξ; check_args=false)
-GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0; check_args=false) 
+GeneralizedPareto(ξ::Real=1.0) = GeneralizedPareto(zero(ξ), one(ξ), ξ; check_args=false)
 
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf
