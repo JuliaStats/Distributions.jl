@@ -154,7 +154,12 @@ function _normlogcdf(z::Real)
 end
 
 function logcdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
+    # The Inf cases are useful for ForwardDiff.Dual to avoid NaN derivatives
+    if x == Inf
+        return zero(promote_type(typeof(d.μ), typeof(d.σ), typeof(x)))
+    elseif x == -Inf
+        return convert(promote_type(typeof(d.μ), typeof(d.σ), typeof(x)), -Inf)
+    elseif iszero(d.σ) && x == d.μ
         z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
         z = zval(d, x)
