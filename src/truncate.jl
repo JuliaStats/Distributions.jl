@@ -34,8 +34,8 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
 
     # (log)ucdf = (log) P(X ≤ u) where X ~ d
     logucdf = logcdf(d, u)
-    if isfinite(logucdf) && l == Inf
-        loglcdf = zero(_T)
+    if isfinite(logucdf) && u == Inf
+        logucdf = zero(_T)
     end
     ucdf = exp(logucdf)
 
