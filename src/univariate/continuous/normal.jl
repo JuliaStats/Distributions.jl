@@ -154,16 +154,7 @@ function _normlogcdf(z::Real)
 end
 
 function logcdf(d::Normal, x::Real)
-    # The Inf cases are useful for ForwardDiff.Dual to avoid NaN derivatives
-    finited = isfinite(d.μ) && isfinite(d.σ)
-    if !isfinite(x) && !isnan(x) && finited
-        T = typeof(log(one(promote_type(typeof(d.μ), typeof(d.σ), typeof(x)))))
-        if x == Inf
-            return zero(T)
-        else
-            return convert(T, -Inf)
-        end
-    elseif iszero(d.σ) && x == d.μ
+    if iszero(d.σ) && x == d.μ
         z = zval(Normal(zero(d.μ), d.σ), one(x))
     else
         z = zval(d, x)
