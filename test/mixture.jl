@@ -69,8 +69,17 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test @inferred(componentwise_pdf(g, X)) ≈ P0
     @test @inferred(componentwise_logpdf(g, X)) ≈ LP0
 
+    # quantile
+    αs = float(partype(g))[0.0; 0.49; 0.5; 0.51; 1.0]
+    for α in αs
+        @test cdf(g, @inferred(quantile(g, α))) ≈ α
+    end
+    @test @inferred(median(g)) ≈ quantile(g, 1//2)
+
     # sampling
-    if (T <: AbstractFloat)
+    # sampling does not work with `Float32` since `AliasTable` does not support `Float32`
+    # Ref: https://github.com/JuliaStats/StatsBase.jl/issues/158
+    if T <: AbstractFloat && eltype(probs(g)) === Float64
         if ismissing(rng)
             Xs = rand(g, ns)
         else
@@ -172,6 +181,17 @@ end
          "rand(rng, ...)" => MersenneTwister(123))
 
     @testset "Testing UnivariateMixture" begin
+        g_u = MixtureModel([Normal(), Normal()])
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+        @test @inferred(median(g_u)) === 0.0
+        @test @inferred(quantile(g_u, 0.5f0)) === 0.0
+
         g_u = MixtureModel(Normal{Float64}, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
         @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
         @test ncomponents(g_u) == 3
@@ -180,6 +200,17 @@ end
         @test minimum(g_u) == -Inf
         @test maximum(g_u) == Inf
         @test extrema(g_u) == (-Inf, Inf)
+
+        g_u = MixtureModel(Normal{Float32}, [(0f0, 1f0), (0f0, 2f0)], [0.4f0, 0.6f0])
+        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test ncomponents(g_u) == 2
+        test_mixture(g_u, 1000, 10^6, rng)
+        test_params(g_u)
+        @test minimum(g_u) == -Inf
+        @test maximum(g_u) == Inf
+        @test extrema(g_u) == (-Inf, Inf)
+        @test @inferred(median(g_u)) === 0f0
+        @test @inferred(quantile(g_u, 0.5f0)) === 0f0
 
         g_u = MixtureModel([TriangularDist(-1,2,0),TriangularDist(-.5,3,1),TriangularDist(-2,0,-1)])
         @test minimum(g_u) ≈ -2.0
@@ -222,9 +253,9 @@ end
 
     @testset "Testing MultivariatevariateMixture" begin
         g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], 1.0),
-                       MvNormal([0.2, 1.0], 1.0),
-                       MvNormal([-0.5, -3.0], 1.6) ],
+            IsoNormal[ MvNormal([0.0, 0.0], I),
+                       MvNormal([0.2, 1.0], I),
+                       MvNormal([-0.5, -3.0], 1.6 * I) ],
             [0.2, 0.5, 0.3])
         @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
         @test length(components(g_m)) == 3

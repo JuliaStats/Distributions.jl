@@ -75,6 +75,15 @@ kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
+function kldivergence(p::Normal, q::Normal)
+    μp = mean(p)
+    σ²p = var(p)
+    μq = mean(q)
+    σ²q = var(q)
+    σ²p_over_σ²q = σ²p / σ²q
+    return (abs2(μp - μq) / σ²q - logmxp1(σ²p_over_σ²q)) / 2
+end
+
 #### Evaluation
 
 # Helpers
@@ -198,7 +207,7 @@ end
 # quantile
 function quantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, -erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
@@ -218,7 +227,7 @@ end
 # cquantile
 function cquantile(d::Normal, p::Real)
     # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
+    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
     q = xval(d, erfcinv(2*_p) * sqrt2)
     if isnan(_p)
         return oftype(q, _p)
@@ -237,6 +246,11 @@ end
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
+
+#### Affine transformations
+
+Base.:+(d::Normal, c::Real) = Normal(d.μ + c, d.σ)
+Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 
 #### Sampling
 

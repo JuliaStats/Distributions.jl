@@ -1,5 +1,5 @@
 """
-    BetaPrime(α,β)
+    BetaPrime(α, β)
 
 The *Beta prime distribution* has probability density function
 
@@ -15,10 +15,10 @@ relation ship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\
 
 ```julia
 BetaPrime()        # equivalent to BetaPrime(1, 1)
-BetaPrime(a)       # equivalent to BetaPrime(a, a)
-BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
+BetaPrime(α)       # equivalent to BetaPrime(α, α)
+BetaPrime(α, β)    # Beta prime distribution with shape parameters α and β
 
-params(d)          # Get the parameters, i.e. (a, b)
+params(d)          # Get the parameters, i.e. (α, β)
 ```
 
 External links

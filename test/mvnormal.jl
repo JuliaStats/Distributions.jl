@@ -10,88 +10,6 @@ using LinearAlgebra, Random, Test
 using SparseArrays
 using FillArrays
 
-import Distributions: distrname
-
-
-
-####### Core testing procedure
-
-function test_mvnormal(g::AbstractMvNormal, n_tsamples::Int=10^6,
-                       rng::Union{AbstractRNG, Missing} = missing)
-    d = length(g)
-    μ = mean(g)
-    Σ = cov(g)
-    @test length(μ) == d
-    @test size(Σ) == (d, d)
-    @test var(g)     ≈ diag(Σ)
-    @test entropy(g) ≈ 0.5 * logdet(2π * ℯ * Σ)
-    ldcov = logdetcov(g)
-    @test ldcov ≈ logdet(Σ)
-    vs = diag(Σ)
-    @test g == typeof(g)(params(g)...)
-    @test g == deepcopy(g)
-
-    # test sampling for AbstractMatrix (here, a SubArray):
-    if ismissing(rng)
-        subX = view(rand(d, 2d), :, 1:d)
-        @test isa(rand!(g, subX), SubArray)
-    else
-        subX = view(rand(rng, d, 2d), :, 1:d)
-        @test isa(rand!(rng, g, subX), SubArray)
-    end
-
-    # sampling
-    if ismissing(rng)
-        @test isa(rand(g), Vector{Float64})
-        X = rand(g, n_tsamples)
-    else
-        @test isa(rand(rng, g), Vector{Float64})
-        X = rand(rng, g, n_tsamples)
-    end
-    emp_mu = vec(mean(X, dims=2))
-    Z = X .- emp_mu
-    emp_cov = (Z * Z') * inv(n_tsamples)
-    for i = 1:d
-        @test isapprox(emp_mu[i], μ[i], atol=sqrt(vs[i] / n_tsamples) * 8.0)
-    end
-    for i = 1:d, j = 1:d
-        @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))
-    end
-
-    X = rand(MersenneTwister(14), g, n_tsamples)
-    Y = rand(MersenneTwister(14), g, n_tsamples)
-    @test X == Y
-    emp_mu = vec(mean(X, dims=2))
-    Z = X .- emp_mu
-    emp_cov = (Z * Z') * inv(n_tsamples)
-    for i = 1:d
-        @test isapprox(emp_mu[i]   , μ[i]  , atol=sqrt(vs[i] / n_tsamples) * 8.0)
-    end
-    for i = 1:d, j = 1:d
-        @test isapprox(emp_cov[i,j], Σ[i,j], atol=sqrt(vs[i] * vs[j]) * 10.0 / sqrt(n_tsamples))
-    end
-
-
-    # evaluation of sqmahal & logpdf
-    U = X .- μ
-    sqm = vec(sum(U .* (Σ \ U), dims=1))
-    for i = 1:min(100, n_tsamples)
-        @test sqmahal(g, X[:,i]) ≈ sqm[i]
-    end
-    @test sqmahal(g, X) ≈ sqm
-
-    lp = -0.5 .* sqm .- 0.5 * (d * log(2.0 * pi) + ldcov)
-    for i = 1:min(100, n_tsamples)
-        @test logpdf(g, X[:,i]) ≈ lp[i]
-    end
-    @test logpdf(g, X) ≈ lp
-
-    # log likelihood
-    @test loglikelihood(g, X) ≈ sum([Distributions._logpdf(g, X[:,i]) for i in 1:size(X, 2)])
-    @test loglikelihood(g, X[:, 1]) ≈ logpdf(g, X[:, 1])
-    @test loglikelihood(g, [X[:, i] for i in axes(X, 2)]) ≈ loglikelihood(g, X)
-end
-
 ###### General Testing
 
 @testset "MvNormal tests" begin
@@ -132,7 +50,7 @@ end
         @test mean(g)   ≈ μ
         @test cov(g)    ≈ Σ
         @test invcov(g) ≈ inv(Σ)
-        test_mvnormal(g, 10^4)
+        Distributions.TestUtils.test_mvnormal(g, 10^4)
 
         # conversion between mean form and canonical form
         if isa(g, MvNormal)
@@ -362,8 +280,13 @@ end
 end
 
 @testset "MvNormal: Sampling with integer-valued parameters (#1004)" begin
-    d = MvNormal([0, 0], [1, 1])
+    d = MvNormal([0, 0], Diagonal([1, 1]))
     @test rand(d) isa Vector{Float64}
     @test rand(d, 10) isa Matrix{Float64}
     @test rand(d, (3, 2)) isa Matrix{Vector{Float64}}
+
+    # evaluation of `logpdf`
+    # (bug fixed by https://github.com/JuliaStats/Distributions.jl/pull/1429)
+    x = rand(d)
+    @test logpdf(d, x) ≈ logpdf(Normal(), x[1]) + logpdf(Normal(), x[2])
 end

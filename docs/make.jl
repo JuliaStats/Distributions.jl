@@ -13,13 +13,18 @@ makedocs(
         "truncate.md",
         "multivariate.md",
         "matrix.md",
+        "reshape.md",
+        "cholesky.md",
         "mixture.md",
+        "convolution.md",
         "fit.md",
         "extends.md",
+        "density_interface.md",
     ]
 )
 
-deploydocs(
+deploydocs(;
     repo = "github.com/JuliaStats/Distributions.jl.git",
-    versions = ["stable" => "v^", "v#.#", "dev" => "master"]
+    versions = ["stable" => "v^", "v#.#", "dev" => "master"],
+    push_preview=true,
 )

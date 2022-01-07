@@ -84,6 +84,13 @@ function entropy(d::Poisson{T}) where T<:Real
     end
 end
 
+function kldivergence(p::Poisson, q::Poisson)
+    λp = rate(p)
+    λq = rate(q)
+    # `false` is a strong zero and ensures that `λp = 0` is handled correctly
+    # we don't use `xlogy` since it returns `NaN` for `λp = λq = 0`
+    return λq - λp + (λp > 0) * (λp * log(λp / λq))
+end
 
 ### Evaluation
 

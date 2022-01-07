@@ -4,7 +4,6 @@
 using Distributions
 using Test, Random, SpecialFunctions
 
-import SpecialFunctions: factorial
 Random.seed!(123)
 
 rng = MersenneTwister(123)
@@ -51,11 +50,10 @@ d = DirichletMultinomial(10, 5)
 @test !insupport(d, 3.0 * ones(5))
 
 for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
-    local x
     @test pdf(d, x) ≈
-        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α + x) ./ factorial.(x) ./ gamma.(d.α))
+        factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) * prod(gamma.(d.α .+ x) ./ (gamma.(x .+ 1) .* gamma.(d.α)))
     @test logpdf(d, x) ≈
-        log(factorial(d.n)) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(log.(factorial.(x)))
+        logfactorial(d.n) + loggamma(d.α0) - loggamma(d.n + d.α0) + sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(loggamma.(x .+ 1))
 end
 
 # test Sampling

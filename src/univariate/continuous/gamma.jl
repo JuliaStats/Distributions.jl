@@ -79,6 +79,14 @@ mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
 
 cf(d::Gamma, t::Real) = (1 - im * t * d.θ)^(-d.α)
 
+function kldivergence(p::Gamma, q::Gamma)
+    # We use the parametrization with the scale θ
+    αp, θp = params(p)
+    αq, θq = params(q)
+    θp_over_θq = θp / θq
+    return (αp - αq) * digamma(αp) - loggamma(αp) + loggamma(αq) -
+        αq * log(θp_over_θq) + αp * (θp_over_θq - 1)
+end
 
 #### Evaluation & Sampling
 

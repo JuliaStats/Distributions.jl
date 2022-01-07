@@ -20,6 +20,8 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
+Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
+
 """
     params(d::UnivariateDistribution)
 
@@ -78,27 +80,6 @@ Get the degrees of freedom.
 dof(d::UnivariateDistribution)
 
 """
-    minimum(d::UnivariateDistribution)
-
-Return the minimum of the support of `d`.
-"""
-minimum(d::UnivariateDistribution)
-
-"""
-    maximum(d::UnivariateDistribution)
-
-Return the maximum of the support of `d`.
-"""
-maximum(d::UnivariateDistribution)
-
-"""
-    extrema(d::UnivariateDistribution)
-
-Return the minimum and maximum of the support of `d` as a 2-tuple.
-"""
-extrema(d::UnivariateDistribution) = (minimum(d), maximum(d))
-
-"""
     insupport(d::UnivariateDistribution, x::Any)
 
 When `x` is a scalar, it returns whether x is within the support of `d`
@@ -154,20 +135,14 @@ end
 
 ## sampling
 
-# multiple univariate, must allocate array
-rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims) =
-    rand!(rng, s, Array{eltype(s)}(undef, dims))
-rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims) =
-    rand!(rng, s, Array{float(eltype(s))}(undef, dims))
-
 # multiple univariate with pre-allocated array
 # we use a function barrier since for some distributions `sampler(s)` is not type-stable:
 # https://github.com/JuliaStats/Distributions.jl/pull/1281
-function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray)
-    return _rand_loops!(rng, sampler(s), A)
+function rand!(rng::AbstractRNG, s::Sampleable{Univariate}, A::AbstractArray{<:Real})
+    return _rand!(rng, sampler(s), A)
 end
 
-function _rand_loops!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray)
+function _rand!(rng::AbstractRNG, sampler::Sampleable{Univariate}, A::AbstractArray{<:Real})
     for i in eachindex(A)
         @inbounds A[i] = rand(rng, sampler)
     end
@@ -180,13 +155,6 @@ end
 Generate a scalar sample from `d`. The general fallback is `quantile(d, rand())`.
 """
 rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
-
-"""
-    rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
-
-Sample a univariate distribution and store the results in the provided array.
-"""
-rand!(rng::AbstractRNG, ::UnivariateDistribution, ::AbstractArray)
 
 ## statistics
 
@@ -216,7 +184,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 
 Return the median value of distribution `d`.
 """
-median(d::UnivariateDistribution) = quantile(d, 0.5)
+median(d::UnivariateDistribution) = quantile(d, 1//2)
 
 """
     modes(d::UnivariateDistribution)
@@ -326,6 +294,9 @@ See also: [`logpdf`](@ref).
 """
 pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
+# extract value from array of zero dimension
+_pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
+
 """
     logpdf(d::UnivariateDistribution, x::Real)
 
@@ -334,6 +305,12 @@ Evaluate the logarithm of probability density (mass) at `x`.
 See also: [`pdf`](@ref).
 """
 logpdf(d::UnivariateDistribution, x::Real)
+
+# extract value from array of zero dimension
+_logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
+
+# loglikelihood for `Real`
+Base.@propagate_inbounds loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 """
     cdf(d::UnivariateDistribution, x::Real)
@@ -372,7 +349,7 @@ The natural logarithm of the difference between the cumulative density function 
 function logdiffcdf(d::UnivariateDistribution, x::Real, y::Real)
     # Promote to ensure that we don't compute logcdf in low precision and then promote
     _x, _y = promote(x, y)
-    _x <= _y && throw(ArgumentError("requires x > y."))
+    _x < _y && throw(ArgumentError("requires x >= y."))
     u = logcdf(d, _x)
     v = logcdf(d, _y)
     return u + log1mexp(v - u)
@@ -487,17 +464,6 @@ function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange
 
     return r
 end
-
-## loglikelihood
-"""
-    loglikelihood(d::UnivariateDistribution, x::Union{Real,AbstractArray})
-
-The log-likelihood of distribution `d` with respect to all samples contained in `x`.
-
-Here `x` can be a single scalar sample or an array of samples.
-"""
-loglikelihood(d::UnivariateDistribution, X::AbstractArray) = sum(x -> logpdf(d, x), X)
-loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
 
 ### special definitions for distributions with integer-valued support
 
@@ -722,6 +688,7 @@ const continuous_distributions = [
     "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
+    "rician",
     "semicircle",
     "skewnormal",
     "studentizedrange",
@@ -730,8 +697,10 @@ const continuous_distributions = [
     "triangular",
     "triweight",
     "uniform",
+    "loguniform", # depends on Uniform
     "vonmises",
-    "weibull"
+    "weibull",
+    "skewedexponentialpower"
 ]
 
 include(joinpath("univariate", "locationscale.jl"))

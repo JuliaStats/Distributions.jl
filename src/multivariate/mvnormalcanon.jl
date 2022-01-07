@@ -5,7 +5,7 @@
 """
     MvNormalCanon
 
-Multivariate normal distribution is an [exponential family distribution](http://en.wikipedia.org/wiki/Exponential_family),
+The multivariate normal distribution is an [exponential family distribution](http://en.wikipedia.org/wiki/Exponential_family),
 with two *canonical parameters*: the *potential vector* ``\\mathbf{h}`` and the *precision matrix* ``\\mathbf{J}``.
 The relation between these parameters and the conventional representation (*i.e.* the one using mean ``\\boldsymbol{\\mu}`` and
 covariance ``\\boldsymbol{\\Sigma}``) is:
@@ -19,7 +19,7 @@ which is also a subtype of `AbstractMvNormal` to represent a multivariate normal
 canonical parameters. Particularly, `MvNormalCanon` is defined as:
 
 ```julia
-struct MvNormalCanon{P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
+struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -29,13 +29,13 @@ end
 We also define aliases for common specializations of this parametric type:
 
 ```julia
-const FullNormalCanon = MvNormalCanon{PDMat,    Vector{Float64}}
-const DiagNormalCanon = MvNormalCanon{PDiagMat, Vector{Float64}}
-const IsoNormalCanon  = MvNormalCanon{ScalMat,  Vector{Float64}}
+const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},    Vector{Float64}}
+const DiagNormalCanon = MvNormalCanon{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
+const IsoNormalCanon  = MvNormalCanon{Float64, ScalMat{Float64},                  Vector{Float64}}
 
-const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{PDMat,    Zeros{Float64,1}}
-const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{PDiagMat, Zeros{Float64,1}}
-const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{ScalMat,  Zeros{Float64,1,Axes}}
+const ZeroMeanFullNormalCanon{Axes} = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},    Zeros{Float64,1,Axes}}
+const ZeroMeanDiagNormalCanon{Axes} = MvNormalCanon{Float64, PDiagMat{Float64,Vector{Float64}}, Zeros{Float64,1,Axes}}
+const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64, ScalMat{Float64},                  Zeros{Float64,1,Axes}}
 ```
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
@@ -46,7 +46,7 @@ struct MvNormalCanon{T<:Real,P<:AbstractPDMat,V<:AbstractVector} <: AbstractMvNo
     J::P    # precision matrix, i.e. inv(Σ)
 end
 
-const FullNormalCanon = MvNormalCanon{Float64, PDMat{Float64,Matrix{Float64}},Vector{Float64}}
+const FullNormalCanon = MvNormalCanon{Float64,PDMat{Float64,Matrix{Float64}},Vector{Float64}}
 const DiagNormalCanon = MvNormalCanon{Float64,PDiagMat{Float64,Vector{Float64}},Vector{Float64}}
 const IsoNormalCanon  = MvNormalCanon{Float64,ScalMat{Float64},Vector{Float64}}
 
@@ -110,10 +110,10 @@ precision matrix `J`.
 MvNormalCanon(J::AbstractMatrix{<:Real}) = MvNormalCanon(Zeros{eltype(J)}(size(J, 1)), J)
 
 # Deprecated constructors
-Base.@deprecate MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) MvNormalCanon(h, Diagonal(prec))
+Base.@deprecate MvNormalCanon(h::AbstractVector{<:Real}, prec::AbstractVector{<:Real}) MvNormalCanon(h, LinearAlgebra.Diagonal(prec))
 Base.@deprecate MvNormalCanon(h::AbstractVector{<:Real}, prec::Real) MvNormalCanon(h, prec * I)
-Base.@deprecate MvNormalCanon(prec::AbstractVector) MvNormalCanon(Diagonal(prec))
-Base.@deprecate MvNormalCanon(d::Int, prec::Real) MvNormalCanon(Diagonal(Fill(prec, d)))
+Base.@deprecate MvNormalCanon(prec::AbstractVector) MvNormalCanon(LinearAlgebra.Diagonal(prec))
+Base.@deprecate MvNormalCanon(d::Int, prec::Real) MvNormalCanon(LinearAlgebra.Diagonal(FillArrays.Fill(prec, d)))
 
 ### Show
 
@@ -174,7 +174,13 @@ if isdefined(PDMats, :PDSparseMat)
     unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
 end
 
-_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) =
-    add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
-_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix) =
-    add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
+    unwhiten_winv!(d.J, randn!(rng, x))
+    x .+= d.μ
+    return x
+end
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
+    unwhiten_winv!(d.J, randn!(rng, x))
+    x .+= d.μ
+    return x
+end

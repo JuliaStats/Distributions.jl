@@ -41,3 +41,19 @@ for fun in [:pdf, :logpdf,
 end
 
 @deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+
+# Wishart constructors
+@deprecate Wishart(df::Real, S::AbstractPDMat, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Matrix, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Cholesky, warn::Bool) Wishart(df, S)
+
+# Deprecate 3 arguments expectation and once with function in second place
+@deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr; epsilon=epsilon) false
+@deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr) false
+@deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
+
+# Deprecate `MatrixReshaped`
+const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+@deprecate MatrixReshaped(
+    d::MultivariateDistribution, n::Integer, p::Integer=n
+) reshape(d, (n, p))

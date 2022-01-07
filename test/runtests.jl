@@ -11,12 +11,16 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "loguniform",
     "arcsine",
     "dirac",
     "truncate",
     "truncnormal",
     "truncated_exponential",
     "normal",
+    "laplace",
+    "cauchy",
+    "uniform",
     "lognormal",
     "mvnormal",
     "mvlognormal",
@@ -39,6 +43,7 @@ const tests = [
     "edgeworth",
     "matrixreshaped",
     "matrixvariates",
+    "lkjcholesky",
     "vonmisesfisher",
     "conversion",
     "convolution",
@@ -52,7 +57,6 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
-    "functionals",
     "chernoff",
     "univariate_bounds",
     "negativebinomial",
@@ -62,6 +66,11 @@ const tests = [
     "chi",
     "gumbel",
     "pdfnorm",
+    "rician",
+    "functionals",
+    "density_interface",
+    "reshaped",
+    "skewedexponentialpower",
 ]
 
 printstyled("Running tests:\n", color=:blue)
@@ -73,7 +82,6 @@ include("testutils.jl")
 
 for t in tests
     @testset "Test $t" begin
-        Random.seed!(345679)
         include("$t.jl")
     end
 end

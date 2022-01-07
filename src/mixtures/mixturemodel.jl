@@ -441,6 +441,20 @@ componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_
 componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
 
 
+function quantile(d::UnivariateMixture{Continuous}, p::Real)
+    ps = probs(d)
+    min_q, max_q = extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
+    quantile_bisect(d, p, min_q, max_q)
+end
+
+# we also implement `median` since `median` is implemented more efficiently than
+# `quantile(d, 1//2)` for some distributions
+function median(d::UnivariateMixture{Continuous})
+    ps = probs(d)
+    min_q, max_q = extrema(median(component(d, i)) for (i, pi) in enumerate(ps) if pi > 0)
+    quantile_bisect(d, 1//2, min_q, max_q)
+end
+
 ## Sampling
 
 struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
@@ -454,15 +468,18 @@ function MixtureSampler(d::MixtureModel{VF,VS}) where {VF,VS}
     MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
 end
 
+Base.length(s::MixtureSampler) = length(first(s.csamplers))
+
 rand(rng::AbstractRNG, s::MixtureSampler{Univariate}) =
     rand(rng, s.csamplers[rand(rng, s.psampler)])
 rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
     rand(rng, component(d, rand(rng, d.prior)))
 
 # multivariate mixture sampler for a vector
-_rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector) =
-    _rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
-_rand!(rng::AbstractRNG, s::MixtureModel{Multivariate}, x::AbstractVector) =
-    _rand!(rng, sampler(s), x)
+_rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector{<:Real}) =
+    @inbounds rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
+# if only a single sample is requested, no alias table is created
+_rand!(rng::AbstractRNG, d::MixtureModel{Multivariate}, x::AbstractVector{<:Real}) =
+    @inbounds rand!(rng, component(d, rand(rng, d.prior)), x)
 
 sampler(d::MixtureModel) = MixtureSampler(d)

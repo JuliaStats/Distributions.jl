@@ -579,7 +579,7 @@ function test_params(d::Truncated)
     d_unt = d.untruncated
     D = typeof(d_unt)
     pars = params(d_unt)
-    d_new = Truncated(D(pars...), d.lower, d.upper)
+    d_new = truncated(D(pars...), d.lower, d.upper)
     @test d_new == d
     @test d == deepcopy(d)
 end
@@ -588,5 +588,50 @@ end
 function fdm(f, at)
     map(1:length(at)) do i
         FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+    end
+end
+
+# Equivalent to `ExactOneSampleKSTest` in HypothesisTests.jl
+# We implement it here to avoid a circular dependency on HypothesisTests
+# that causes test failures when preparing a breaking release of Distributions
+function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
+    # compute maximum absolute deviation from the empirical cdf
+    n = length(x)
+    cdfs = sort!(map(Base.Fix1(cdf, d), x))
+    dmax = maximum(zip(cdfs, (0:(n-1))/n, (1:n)/n)) do (cdf, lower, upper)
+        return max(cdf - lower, upper - cdf)
+    end
+
+    # compute asymptotic p-value (see `KSDist`)
+    return ccdf(KSDist(n), dmax)
+end
+
+function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateDistribution}
+    @testset "affine tranformations ($T)" begin
+        # distribution
+        d = T(params...)
+
+        # random shift and scale
+        c = randn()
+
+        # addition
+        for shift_d in (@inferred(d + c), @inferred(c + d))
+            @test shift_d isa T
+            @test location(shift_d) ≈ location(d) + c
+            @test scale(shift_d) ≈ scale(d)
+        end
+
+        # multiplication (negative and positive values)
+        for s in (-c, c)
+            for scale_d in (@inferred(s * d), @inferred(d * s), @inferred(d / inv(s)))
+                @test scale_d isa T
+                if d isa Uniform
+                    @test location(scale_d) ≈ (s > 0 ? s * minimum(d) : s * maximum(d))
+                else
+                    @test location(scale_d) ≈ s * location(d)
+                end
+                @test scale(scale_d) ≈ abs(s) * scale(d)
+            end
+        end
     end
 end

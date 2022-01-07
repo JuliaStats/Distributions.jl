@@ -1,54 +1,55 @@
 """
-    truncated(d, l, u):
+    truncated(d::UnivariateDistribution, l::Real, u::Real)
 
-Truncate a distribution between `l` and `u`.
-Builds the most appropriate distribution for the type of `d`,
-the fallback is constructing a `Truncated` wrapper.
+Truncate a univariate distribution `d` to the interval `[l, u]`.
 
-To implement a specialized truncated form for a distribution `D`,
-the method `truncate(d::D, l::T, u::T) where {T <: Real}`
-should be implemented.
+The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
+`Inf`. The function throws an error if `l > u`.
 
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
-Throws an error if `l >= u`.
+# Implementation
+
+To implement a specialized truncated form for distributions of type `D`, the method
+`truncate(d::D, l::T, u::T) where {T <: Real}` should be implemented.
 """
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
 
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    tp = ucdf - lcdf
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
+    l <= u || error("the lower bound must be less or equal than the upper bound")
+
+    # (log)lcdf = (log) P(X < l) where X ~ d
+    loglcdf = if value_support(typeof(d)) === Discrete
+        logsubexp(logcdf(d, l), logpdf(d, l))
+    else
+        logcdf(d, l)
+    end
+    lcdf = exp(loglcdf)
+
+    # (log)ucdf = (log) P(X ≤ u) where X ~ d
+    logucdf = logcdf(d, u)
+    ucdf = exp(logucdf)
+
+    # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
+    logtp = logsubexp(loglcdf, logucdf)
+    tp = exp(logtp)
+
+    Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
 end
 
-truncated(d::UnivariateDistribution, l::Integer, u::Integer) = truncated(d, float(l), float(u))
-
 """
-    Truncated(d, l, u):
+    Truncated
 
-Create a generic wrapper for a truncated distribution.
-Prefer calling the function `truncated(d, l, u)`, which can choose the appropriate
-representation of the truncated distribution.
-
-# Arguments
-- `d::UnivariateDistribution`: The original distribution.
-- `l::Real`: The lower bound of the truncation, which can be a finite value or `-Inf`.
-- `u::Real`: The upper bound of the truncation, which can be a finite value of `Inf`.
+Generic wrapper for a truncated distribution.
 """
 struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
     lower::T      # lower bound
     upper::T      # upper bound
-    lcdf::T       # cdf of lower bound
-    ucdf::T       # cdf of upper bound
+    lcdf::T       # cdf of lower bound (exclusive): P(X < lower)
+    ucdf::T       # cdf of upper bound (inclusive): P(X ≤ upper)
 
     tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
@@ -57,18 +58,7 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univa
     end
 end
 
-### Constructors
-function Truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l < u || error("lower bound should be less than upper bound.")
-    T2 = promote_type(T, eltype(d))
-    lcdf = isinf(l) ? zero(T2) : T2(cdf(d, l))
-    ucdf = isinf(u) ? one(T2) : T2(cdf(d, u))
-    tp = ucdf - lcdf
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, log(tp))...)
-end
-
-Truncated(d::UnivariateDistribution, l::Integer, u::Integer) = Truncated(d, float(l), float(u))
-
+### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
@@ -182,3 +172,4 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 include(joinpath("truncated", "normal.jl"))
 include(joinpath("truncated", "exponential.jl"))
 include(joinpath("truncated", "uniform.jl"))
+include(joinpath("truncated", "loguniform.jl"))
