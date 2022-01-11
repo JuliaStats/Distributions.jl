@@ -181,6 +181,7 @@ export
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
+    censored,           # censor a distribution with a lower and upper bound
     cf,                 # characteristic function
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     component,          # get the k-th component of a mixture model
@@ -292,6 +293,7 @@ include("samplers.jl")
 
 # others
 include("truncate.jl")
+include("censored.jl")
 include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
@@ -331,7 +333,7 @@ information.
 Supported distributions:
 
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
-    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Categorical, Cauchy, Censored, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
