@@ -17,7 +17,8 @@ const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
-    "truncated_discrete_uniform"
+    "truncated_uniform",
+    "truncated_discrete_uniform",
     "normal",
     "lognormal",
     "mvnormal",
