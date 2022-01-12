@@ -68,6 +68,80 @@ quantile(d::Censored, p::Real) = clamp(quantile(d.uncensored, p), d.lower, d.upp
 
 median(d::Censored) = clamp(median(d.uncensored), d.lower, d.upper)
 
+function mean(d::Censored)
+    d0 = d.uncensored
+    lower = d.lower
+    upper = d.upper
+    dtrunc = truncated(d.uncensored, lower, upper)
+    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+        cdf(d0, lower) - pdf(d0, lower)
+    else
+        cdf(d0, lower)
+    end
+    prob_upper = ccdf(d0, upper)
+    prob_interval = 1 - (prob_lower + prob_upper)
+
+    μ = prob_interval * mean(dtrunc)
+    if isfinite(lower)
+        μ += prob_lower * lower
+    end
+    if isfinite(upper)
+        μ += prob_upper * upper
+    end
+    return μ
+end
+
+function var(d::Censored)
+    d0 = d.uncensored
+    lower = d.lower
+    upper = d.upper
+    dtrunc = truncated(d.uncensored, lower, upper)
+    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+        cdf(d0, lower) - pdf(d0, lower)
+    else
+        cdf(d0, lower)
+    end
+    prob_upper = ccdf(d0, upper)
+    prob_interval = 1 - (prob_lower + prob_upper)
+    μinterval = mean(dtrunc)
+
+    μ = prob_interval * μinterval
+    if isfinite(lower)
+        μ += prob_lower * lower
+    end
+    if isfinite(upper)
+        μ += prob_upper * upper
+    end
+
+    v = prob_interval * (var(dtrunc) + abs2(μinterval - μ))
+    if isfinite(lower)
+        v += prob_lower * abs2(lower - μ)
+    end
+    if isfinite(upper)
+        v += prob_upper * abs2(upper - μ)
+    end
+    return v
+end
+
+function entropy(d::Censored)
+    d0 = d.uncensored
+    lower = d.lower
+    upper = d.upper
+    dtrunc = truncated(d.uncensored, lower, upper)
+    lcdf = cdf(d0, lower)
+    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+        lcdf - pdf(d0, lower)
+    else
+        lcdf
+    end
+    prob_upper = ccdf(d0, upper)
+    prob_interval = 1 - (prob_lower + prob_upper)
+    result = prob_interval * (entropy(dtrunc) - log(prob_interval)) -
+        prob_lower * log(lcdf) - xlogx(prob_upper)
+    return result
+end
+
+
 #### Evaluation
 
 function pdf(d::Censored, x::Real)
