@@ -40,7 +40,7 @@ params(d::Censored) = tuple(params(d.uncensored)..., d.lower, d.upper)
 partype(d::Censored) = partype(d.uncensored)
 Base.eltype(::Type{<:Censored{D} } ) where {D} = eltype(D)
 
-### range and support
+#### Range and Support
 
 islowerbounded(d::Censored) = islowerbounded(d.uncensored) || isfinite(d.lower)
 isupperbounded(d::Censored) = isupperbounded(d.uncensored) || isfinite(d.upper)
@@ -52,9 +52,28 @@ function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
     return d.lower <= x <= d.upper && insupport(d.uncensored, x)
 end
 
-### evaluation
+#### Show
+
+function show(io::IO, d::Censored)
+    print(io, "Censored(")
+    d0 = d.uncensored
+    uml, namevals = _use_multline_show(d0)
+    uml ? show_multline(io, d0, namevals) :
+          show_oneline(io, d0, namevals)
+    print(io, ", range=(", d.lower, ", ", d.upper, ")")
+    uml && println(io)
+end
+
+_use_multline_show(d::Censored) = _use_multline_show(d.uncensored)
+
+
+#### Statistics
 
 quantile(d::Censored, p::Real) = clamp(quantile(d.uncensored, p), d.lower, d.upper)
+
+median(d::Censored) = clamp(median(d.uncensored), d.lower, d.upper)
+
+#### Evaluation
 
 function pdf(d::Censored, x::Real)
     d0 = d.uncensored
@@ -139,30 +158,8 @@ function logccdf(d::Censored, x::Real)
 end
 
 
-## random number generation
+#### Sampling
 
 function rand(rng::AbstractRNG, d::Censored)
     return clamp(rand(rng, d.uncensored), d.lower, d.upper)
 end
-
-
-## show
-
-function show(io::IO, d::Censored)
-    print(io, "Censored(")
-    d0 = d.uncensored
-    uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals) :
-          show_oneline(io, d0, namevals)
-    print(io, ", range=(", d.lower, ", ", d.upper, ")")
-    uml && println(io)
-end
-
-_use_multline_show(d::Censored) = _use_multline_show(d.uncensored)
-
-
-#### statistics
-
-quantile(d::Censored, p::Real) = clamp(quantile(d.uncensored, p), d.lower, d.upper)
-
-median(d::Censored) = clamp(median(d.uncensored), d.lower, d.upper)
