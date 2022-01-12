@@ -18,6 +18,9 @@ structure, defined as follows:
 Censored
 ```
 
+In general, `censored` should be called instead of the constructor of
+`Censored`.
+
 Many functions, including those for the evaluation of pdf and sampling,
 are defined for all censored univariate distributions:
 

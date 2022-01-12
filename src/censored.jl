@@ -3,6 +3,20 @@
 
 Censor a univariate distribution `d` to the interval `[l, u]`.
 
+The density function (or mass function for discrete `d`) of the censored distribution is
+```math
+f(x; d, l, u) = \\begin{cases}
+    P_d(x \\le l), & x \\le l \\\\
+    P_d(x),         & l < x < u \\\\
+    P_d(x \\ge u), & x \\ge u \\\\
+  \\end{cases},
+```
+where ``P_d(x)`` is the density (or mass) function of `d`, and ``P_d(x \\le b)`` is the
+cumulative distribution function of ``d`` evaluated at ``x = b``.
+If ``x`` is a random variable from ``d``, then `clamp(x, l, u)` is a random variable from
+its censored version. Note that this implies that even if ``d`` is continuous, its censored
+form has discrete mixture components at the bounds.
+
 The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
 `Inf`. The function throws an error if `l > u`.
 
