@@ -16,11 +16,7 @@ To implement a specialized censored form for distributions of type `D`, the meth
 function censored(d::UnivariateDistribution, l::Real, u::Real)
     return censored(d, promote(l, u)...)
 end
-
-function censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-    l <= u || error("the lower bound must be less or equal than the upper bound")
-    Censored(d, l, u)
-end
+censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real} = Censored(d, l, u)
 
 """
     Censored
@@ -32,6 +28,7 @@ struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univar
     lower::T      # lower bound
     upper::T      # upper bound
     function Censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
+        l <= u || error("the lower bound must be less or equal than the upper bound")
         new{typeof(d), value_support(typeof(d)), T}(d, l, u)
     end
 end
