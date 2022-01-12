@@ -55,10 +55,8 @@ function show(io::IO, d::Censored)
     print(io, "Censored(")
     d0 = d.uncensored
     uml, namevals = _use_multline_show(d0)
-    uml ? show_multline(io, d0, namevals) :
-          show_oneline(io, d0, namevals)
-    print(io, ", range=(", d.lower, ", ", d.upper, ")")
-    uml && println(io)
+    uml ? show_multline(io, d0, namevals; newline=false) : show_oneline(io, d0, namevals)
+    print(io, ", range=(", d.lower, ", ", d.upper, "))")
 end
 
 _use_multline_show(d::Censored) = _use_multline_show(d.uncensored)
