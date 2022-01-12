@@ -143,7 +143,7 @@ function entropy(d::Censored)
     prob_interval = 1 - (prob_lower + prob_upper)
     result = prob_interval * (entropy(dtrunc) - log(prob_interval)) -
         prob_lower * log(lcdf) - xlogx(prob_upper)
-    return result
+    return d.lower == d.upper ? zero(result) : result
 end
 
 
@@ -154,7 +154,8 @@ function pdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     return if x == lower
-        cdf(d0, x)
+        result = cdf(d0, x)
+        x == upper ? one(result) : result
     elseif x == upper
         uccdf = ccdf(d0, x)
         if value_support(typeof(d)) === Discrete && isfinite(upper)
@@ -173,7 +174,8 @@ function logpdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     return if x == lower
-        logcdf(d0, x)
+        result = logcdf(d0, x)
+        x == upper ? zero(result) : result
     elseif x == upper
         ulogccdf = logccdf(d0, x)
         if value_support(typeof(d)) === Discrete && isfinite(upper)
@@ -215,6 +217,8 @@ function ccdf(d::Censored, x::Real)
         zero(result)
     elseif x > d.lower
         result
+    elseif d.lower == x == d.upper
+        zero(result)
     else
         one(result)
     end
@@ -226,6 +230,8 @@ function logccdf(d::Censored, x::Real)
         oftype(result, -Inf)
     elseif x > d.lower
         result
+    elseif d.lower == x == d.upper
+        oftype(result, -Inf)
     else
         zero(result)
     end
