@@ -28,14 +28,14 @@ struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univar
     lower::T      # lower bound
     upper::T      # upper bound
     function Censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-        l <= u || error("the lower bound must be less or equal than the upper bound")
+        l ≤ u || error("the lower bound must be less than or equal to the upper bound")
         new{typeof(d), value_support(typeof(d)), T}(d, l, u)
     end
 end
 
 params(d::Censored) = tuple(params(d.uncensored)..., d.lower, d.upper)
 partype(d::Censored) = partype(d.uncensored)
-Base.eltype(::Type{<:Censored{D} } ) where {D} = eltype(D)
+Base.eltype(::Type{<:Censored{D}}) where {D} = eltype(D)
 
 #### Range and Support
 
@@ -46,7 +46,7 @@ minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
-    return d.lower <= x <= d.upper && insupport(d.uncensored, x)
+    return d.lower ≤ x ≤ d.upper && insupport(d.uncensored, x)
 end
 
 #### Show
