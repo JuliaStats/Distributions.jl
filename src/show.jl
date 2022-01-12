@@ -67,7 +67,7 @@ function show_oneline(io::IO, d::Distribution, namevals)
     print(io, ')')
 end
 
-function show_multline(io::IO, d::Distribution, namevals)
+function show_multline(io::IO, d::Distribution, namevals; newline=true)
     print(io, distrname(d))
     println(io, "(")
     for (p, pv) in namevals
@@ -75,5 +75,5 @@ function show_multline(io::IO, d::Distribution, namevals)
         print(io, ": ")
         println(io, pv)
     end
-    println(io, ")")
+    newline ? println(io, ")") : print(io, ")")
 end
