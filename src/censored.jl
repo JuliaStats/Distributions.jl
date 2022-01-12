@@ -240,6 +240,4 @@ end
 
 #### Sampling
 
-function rand(rng::AbstractRNG, d::Censored)
-    return clamp(rand(rng, d.uncensored), d.lower, d.upper)
-end
+rand(rng::AbstractRNG, d::Censored) = clamp(rand(rng, d.uncensored), d.lower, d.upper)
