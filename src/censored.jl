@@ -78,7 +78,7 @@ function pdf(d::Censored, x::Real)
         cdf(d0, x)
     elseif x == upper
         uccdf = ccdf(d0, x)
-        if value_support(typeof(d)) === Discrete
+        if value_support(typeof(d)) === Discrete && isfinite(upper)
             uccdf - pdf(d0, x)
         else
             uccdf
@@ -97,7 +97,7 @@ function logpdf(d::Censored, x::Real)
         logcdf(d0, x)
     elseif x == upper
         ulogccdf = logccdf(d0, x)
-        if value_support(typeof(d)) === Discrete
+        if value_support(typeof(d)) === Discrete && isfinite(upper)
             logsubexp(ulogccdf, logpdf(d0, x))
         else
             ulogccdf
