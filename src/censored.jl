@@ -19,7 +19,7 @@ end
 
 function censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
-    Censored(d, promote(l, u)...)
+    Censored(d, l, u)
 end
 
 """
@@ -38,7 +38,7 @@ end
 
 params(d::Censored) = tuple(params(d.uncensored)..., d.lower, d.upper)
 partype(d::Censored) = partype(d.uncensored)
-Base.eltype(::Type{Censored{D, S, T} } ) where {D, S, T} = T
+Base.eltype(::Type{<:Censored{D} } ) where {D} = eltype(D)
 
 ### range and support
 
@@ -48,7 +48,7 @@ isupperbounded(d::Censored) = isupperbounded(d.uncensored) || isfinite(d.upper)
 minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
 
-function insupport(d::Censored{D,<:Union{Discrete,Continuous}}, x::Real) where {D<:UnivariateDistribution}
+function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
     return d.lower <= x <= d.upper && insupport(d.uncensored, x)
 end
 
@@ -64,14 +64,14 @@ function pdf(d::Censored, x::Real)
         cdf(d0, x)
     elseif x == upper
         uccdf = ccdf(d0, x)
-        if value_support(typeof(d)) == Discrete
+        if value_support(typeof(d)) === Discrete
             uccdf - pdf(d0, x)
         else
             uccdf
         end
     else
         result = pdf(d0, x)
-        ifelse(lower < x < upper, result, zero(result))
+        lower < x < upper ? result : zero(result)
     end
 end
 
@@ -83,14 +83,14 @@ function logpdf(d::Censored, x::Real)
         logcdf(d0, x)
     elseif x == upper
         ulogccdf = logccdf(d0, x)
-        if value_support(typeof(d)) == Discrete
+        if value_support(typeof(d)) === Discrete
             logsubexp(ulogccdf, logpdf(d0, x))
         else
             ulogccdf
         end
     else
         result = logpdf(d0, x)
-        ifelse(lower < x < upper, result, oftype(result, -Inf))
+        lower < x < upper ? result : oftype(result, -Inf)
     end
 end
 
@@ -141,8 +141,8 @@ end
 
 ## random number generation
 
-function _rand!(rng::AbstractRNG, d::Censored)
-    return clamp(_rand!(rng, d.uncensored), d.lower, d.upper)
+function rand(rng::AbstractRNG, d::Censored)
+    return clamp(rand(rng, d.uncensored), d.lower, d.upper)
 end
 
 
@@ -154,7 +154,7 @@ function show(io::IO, d::Censored)
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals) :
           show_oneline(io, d0, namevals)
-    print(io, ", range=($(d.lower), $(d.upper)))")
+    print(io, ", range=(", d.lower, ", ", d.upper, ")")
     uml && println(io)
 end
 
