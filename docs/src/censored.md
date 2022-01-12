@@ -35,9 +35,9 @@ are defined for all censored univariate distributions:
 - [`cquantile(::UnivariateDistribution, ::Real)`](@ref)
 - [`invlogcdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`invlogccdf(::UnivariateDistribution, ::Real)`](@ref)
+- [`median(::UnivariateDistribution)`](@ref)
 - [`rand(::UnivariateDistribution)`](@ref)
 - [`rand!(::UnivariateDistribution, ::AbstractArray)`](@ref)
-- [`median(::UnivariateDistribution)`](@ref)
 
 Some functions to compute statistics are available for the censored
 distribution if they are also available for its truncation:
@@ -46,10 +46,11 @@ distribution if they are also available for its truncation:
 - [`std(::UnivariateDistribution)`](@ref)
 - [`entropy(::UnivariateDistribution)`](@ref)
 
-For example, these functions work for:
-- `Censored{<:Normal}`
+For example, these functions are available for:
 - `Censored{<:Uniform}`
 - `Censored{<:DiscreteUniform}`
 - `Censored{<:LogUniform}`.
+- `Censored{<:Normal}`
+- `Censored{<:Exponential}`
 
 `mode` is not implemented for censored distributions.
