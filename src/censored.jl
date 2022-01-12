@@ -34,6 +34,10 @@ struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univar
 end
 Censored{D,S,T}(l::T, u::T, params...) where {D,S,T} = Censored(D(params...), l, u)
 
+function censored(d::Censored, l::T, u::T) where {T <: Real}
+    return Censored(d.uncensored, max(l, d.lower), min(u, d.upper))
+end
+
 params(d::Censored) = (d.lower, d.upper, params(d.uncensored)...)
 partype(d::Censored) = Base.promote_eltype(partype(d.uncensored), d.lower)
 Base.eltype(::Type{Censored{D,S,T}}) where {D,S,T} = Base.promote_eltype(eltype(D), T)
