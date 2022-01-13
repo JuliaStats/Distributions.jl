@@ -65,7 +65,9 @@ minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
-    return d.lower ≤ x ≤ d.upper && insupport(d.uncensored, x)
+    l = d.lower
+    u = d.upper
+    return x == l || x == u || (l < x < u && insupport(d.uncensored, x))
 end
 
 #### Show
