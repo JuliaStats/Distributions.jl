@@ -94,7 +94,7 @@ function mean(d::Censored)
     lower = d.lower
     upper = d.upper
     dtrunc = truncated(d.uncensored, lower, upper)
-    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+    prob_lower = if value_support(typeof(d)) === Discrete
         cdf(d0, lower) - pdf(d0, lower)
     else
         cdf(d0, lower)
@@ -103,10 +103,10 @@ function mean(d::Censored)
     prob_interval = 1 - (prob_lower + prob_upper)
 
     μ = prob_interval * mean(dtrunc)
-    if isfinite(lower)
+    if !iszero(prob_lower)
         μ += prob_lower * lower
     end
-    if isfinite(upper)
+    if !iszero(prob_upper)
         μ += prob_upper * upper
     end
     return μ
@@ -117,7 +117,7 @@ function var(d::Censored)
     lower = d.lower
     upper = d.upper
     dtrunc = truncated(d.uncensored, lower, upper)
-    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+    prob_lower = if value_support(typeof(d)) === Discrete
         cdf(d0, lower) - pdf(d0, lower)
     else
         cdf(d0, lower)
@@ -127,18 +127,18 @@ function var(d::Censored)
     μinterval = mean(dtrunc)
 
     μ = prob_interval * μinterval
-    if isfinite(lower)
+    if !iszero(prob_lower)
         μ += prob_lower * lower
     end
-    if isfinite(upper)
+    if !iszero(prob_upper)
         μ += prob_upper * upper
     end
 
     v = prob_interval * (var(dtrunc) + abs2(μinterval - μ))
-    if isfinite(lower)
+    if !iszero(prob_lower)
         v += prob_lower * abs2(lower - μ)
     end
-    if isfinite(upper)
+    if !iszero(prob_upper)
         v += prob_upper * abs2(upper - μ)
     end
     return v
@@ -150,7 +150,7 @@ function entropy(d::Censored)
     upper = d.upper
     dtrunc = truncated(d.uncensored, lower, upper)
     lcdf = cdf(d0, lower)
-    prob_lower = if value_support(typeof(d)) === Discrete && isfinite(lower)
+    prob_lower = if value_support(typeof(d)) === Discrete
         lcdf - pdf(d0, lower)
     else
         lcdf
@@ -174,7 +174,7 @@ function pdf(d::Censored, x::Real)
         x == upper ? one(result) : result
     elseif x == upper
         uccdf = ccdf(d0, x)
-        if value_support(typeof(d)) === Discrete && isfinite(upper)
+        if value_support(typeof(d)) === Discrete
             uccdf - pdf(d0, x)
         else
             uccdf
@@ -194,7 +194,7 @@ function logpdf(d::Censored, x::Real)
         x == upper ? zero(result) : result
     elseif x == upper
         ulogccdf = logccdf(d0, x)
-        if value_support(typeof(d)) === Discrete && isfinite(upper)
+        if value_support(typeof(d)) === Discrete
             logsubexp(ulogccdf, logpdf(d0, x))
         else
             ulogccdf
@@ -211,7 +211,7 @@ function loglikelihood(d::Censored, x::AbstractArray)
     upper = d.upper
     log_prob_lower = logcdf(d0, lower)
     ulogccdf = logccdf(d0, upper)
-    log_prob_upper = if value_support(typeof(d)) === Discrete && isfinite(upper)
+    log_prob_upper = if value_support(typeof(d)) === Discrete
         logsubexp(ulogccdf, logpdf(d0, upper))
     else
         ulogccdf
