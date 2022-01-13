@@ -26,7 +26,7 @@ struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     σ::T
 end
 
-function Levy(μ::T, σ::T; check_args::Bool=true) where {T}
+function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(Levy, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
