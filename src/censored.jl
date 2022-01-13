@@ -203,6 +203,25 @@ function logpdf(d::Censored, x::Real)
     end
 end
 
+function loglikelihood(d::Censored, x::AbstractArray)
+    d0 = d.uncensored
+    lower = d.lower
+    upper = d.upper
+    log_prob_lower = logcdf(d0, lower)
+    ulogccdf = logccdf(d0, upper)
+    log_prob_upper = if value_support(typeof(d)) === Discrete && isfinite(upper)
+        logsubexp(ulogccdf, logpdf(d0, upper))
+    else
+        ulogccdf
+    end
+    return sum(x) do xi
+        lower < xi < upper && return logpdf(d0, xi)
+        xi == lower && return log_prob_lower
+        xi == upper && return log_prob_upper
+        return oftype(log_prob_lower, -Inf)
+    end
+end
+
 function cdf(d::Censored, x::Real)
     result = cdf(d.uncensored, x)
     return if x < d.lower
