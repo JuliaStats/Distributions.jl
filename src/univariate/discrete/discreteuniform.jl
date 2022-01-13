@@ -110,7 +110,7 @@ rand(rng::AbstractRNG, d::DiscreteUniform) = rand(rng, d.a:d.b)
 
 function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{<:Real})
     if isempty(x)
-        throw(ArgumentError("x cannot be empty."))
+        throw(ArgumentError("data set must be non-empty."))
     end
     return DiscreteUniform(extrema(x)...)
 end
