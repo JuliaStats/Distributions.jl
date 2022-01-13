@@ -51,7 +51,7 @@ show(io::IO, d::DiscreteUniform) = show(io, d, (:a, :b))
 
 mean(d::DiscreteUniform) = middle(d.a, d.b)
 
-median(d::DiscreteUniform) = middle(d.a, d.b)
+median(d::DiscreteUniform) = fld(d.a + d.b, 2)
 
 var(d::DiscreteUniform) = (span(d)^2 - 1.0) / 12.0
 
@@ -85,18 +85,20 @@ function cdf(d::DiscreteUniform, x::Int)
     end
 end
 
-quantile(d::DiscreteUniform, p::Float64) = d.a + floor(Int,p * span(d))
+quantile(d::DiscreteUniform, p::Real) = iszero(p) ? d.a : d.a - 1 + ceil(Int, p * span(d))
 
-function mgf(d::DiscreteUniform, t::T) where {T <: Real}
+function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
     u = b - a + 1
-    t == 0 ? one(T) : (exp(t*a) * expm1(t*u)) / (u*expm1(t))
+    result = (exp(t*a) * expm1(t*u)) / (u*expm1(t))
+    return iszero(t) ? one(result) : result
 end
 
-function cf(d::DiscreteUniform, t::T) where {T <: Real}
+function cf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
     u = b - a + 1
-    t == 0 ? complex(one(T)) : (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
+    result = (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
+    return iszero(t) ? one(result) : result
 end
 
 
@@ -106,20 +108,9 @@ rand(rng::AbstractRNG, d::DiscreteUniform) = rand(rng, d.a:d.b)
 
 # Fit model
 
-function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{T}) where T <: Real
+function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{<:Real})
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
-
-    xmin = xmax = x[1]
-    for i = 2:length(x)
-        @inbounds xi = x[i]
-        if xi < xmin
-            xmin = xi
-        elseif xi > xmax
-            xmax = xi
-        end
-    end
-
-    return DiscreteUniform(xmin, xmax)
+    return DiscreteUniform(extrema(x)...)
 end
