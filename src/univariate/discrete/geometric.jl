@@ -29,12 +29,12 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function Geometric(p::T; check_args=true) where {T <: Real}
+function Geometric(p::Real; check_args::Bool=true)
     check_args && @check_args(Geometric, zero(p) < p < one(p))
-    return Geometric{T}(p)
+    return Geometric{typeof(p)}(p)
 end
 
-Geometric() = Geometric(0.5, check_args=false)
+Geometric() = Geometric{Float64}(0.5)
 
 @distr_support Geometric 0 Inf
 

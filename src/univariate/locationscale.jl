@@ -37,7 +37,7 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
-    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
         check_args && @check_args(AffineDistribution, σ > zero(σ))
         new{T, S, D}(μ, σ, ρ)
     end

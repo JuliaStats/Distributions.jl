@@ -37,7 +37,7 @@ struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
     SkewedExponentialPower{T}(μ::T, σ::T, p::T, α::T) where {T} = new{T}(μ, σ, p, α)
 end
 
-function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) where {T <: Real}
+function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args::Bool=true) where {T <: Real}
     if check_args
         @check_args(SkewedExponentialPower, σ > zero(σ))
         @check_args(SkewedExponentialPower, p > zero(p))
@@ -46,9 +46,10 @@ function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) wher
     return SkewedExponentialPower{T}(µ, σ, p, α)
 end
 
-function SkewedExponentialPower(μ::Real=0, σ::Real=1, p::Real=2, α::Real=1//2; kwargs...)
-    return SkewedExponentialPower(promote(μ, σ, p, α)...; kwargs...)
+function SkewedExponentialPower(μ::Real, σ::Real, p::Real=2, α::Real=1//2; check_args::Bool=true)
+    return SkewedExponentialPower(promote(μ, σ, p, α)...; check_args=check_args)
 end
+SkewedExponentialPower(μ::Real=0) = SkewedExponentialPower(μ, 1, 2, 1//2; check_args=false)
 
 @distr_support SkewedExponentialPower -Inf Inf
 

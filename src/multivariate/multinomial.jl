@@ -25,7 +25,7 @@ struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistri
     Multinomial{T, TV}(n::Int, p::TV) where {T <: Real, TV <: AbstractVector{T}} = new{T, TV}(n, p)
 end
 
-function Multinomial(n::Integer, p::TV; check_args=true) where {T <: Real, TV <: AbstractVector{T}}
+function Multinomial(n::Integer, p::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
     if check_args
         if n < 0
             throw(ArgumentError("n must be a nonnegative integer."))
@@ -34,10 +34,16 @@ function Multinomial(n::Integer, p::TV; check_args=true) where {T <: Real, TV <:
             throw(ArgumentError("p = $p is not a probability vector."))
         end
     end
-    return Multinomial{T, TV}(n, p)
+    return Multinomial{T,typeof(p)}(n, p)
 end
 
-Multinomial(n::Integer, k::Integer) = Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
+function Multinomial(n::Integer, k::Integer; check_args::Bool=true)
+    if check_args
+        @check_args(Multinomial, n >= 0)
+        @check_args(Multinomial, k >= 1)
+    end
+    return Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
+end
 
 # Parameters
 

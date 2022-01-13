@@ -40,7 +40,7 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
+function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args::Bool=true)
     if check_args
         d > 0 || throw(ArgumentError("matrix dimension must be positive"))
         η > 0 || throw(ArgumentError("shape parameter must be positive"))

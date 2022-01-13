@@ -31,15 +31,15 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
     Arcsine{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-function Arcsine(a::T, b::T; check_args=true) where {T <: Real}
+function Arcsine(a::T, b::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(Arcsine, a < b)
     return Arcsine{T}(a, b)
 end
 
-Arcsine(a::Real, b::Real) = Arcsine(promote(a, b)...)
-Arcsine(a::Integer, b::Integer) = Arcsine(float(a), float(b))
-Arcsine(b::T) where {T <: Real} = Arcsine(zero(T), b)
-Arcsine() = Arcsine(0.0, 1.0)
+Arcsine(a::Real, b::Real; check_args::Bool=true) = Arcsine(promote(a, b)...; check_args=check_args)
+Arcsine(a::Integer, b::Integer; check_args::Bool=true) = Arcsine(float(a), float(b); check_args=check_args)
+Arcsine(b::Real; check_args::Bool=true) = Arcsine(zero(b), b; check_args=check_args)
+Arcsine() = Arcsine{Float64}(0.0, 1.0)
 
 @distr_support Arcsine d.a d.b
 

@@ -199,3 +199,9 @@ end
         @test @inferred(ccdf(d, 3.5)) === zero(XFT)
     end
 end
+
+# #1471
+@testset "InverseGamma constructor (#1471)" begin
+    @test_throws ArgumentError InverseGamma(-1, 2)
+    InverseGamma(-1, 2; check_args=false) # no error
+end

@@ -23,15 +23,14 @@ struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     SymTriangularDist{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function SymTriangularDist(μ::T, σ::T; check_args=true) where {T <: Real}
+function SymTriangularDist(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(SymTriangularDist, σ > zero(σ))
     return SymTriangularDist{T}(μ, σ)
 end
 
-SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
-SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(float(μ), float(σ))
-SymTriangularDist(μ::T) where {T <: Real} = SymTriangularDist(μ, one(T))
-SymTriangularDist() = SymTriangularDist(0.0, 1.0, check_args=false)
+SymTriangularDist(μ::Real, σ::Real; check_args::Bool=true) = SymTriangularDist(promote(μ, σ)...; check_args=check_args)
+SymTriangularDist(μ::Integer, σ::Integer; check_args::Bool=true) = SymTriangularDist(float(μ), float(σ); check_args=check_args)
+SymTriangularDist(μ::Real=0.0) = SymTriangularDist(μ, one(μ); check_args=false)
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 

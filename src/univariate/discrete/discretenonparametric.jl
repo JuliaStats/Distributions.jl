@@ -21,7 +21,7 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     support::Ts
     p::Ps
 
-    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; check_args=true) where {
+    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; check_args::Bool=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         check_args || return new{T,P,Ts,Ps}(vs, ps)
         @check_args(DiscreteNonParametric, length(vs) == length(ps))
@@ -32,9 +32,9 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     end
 end
 
-DiscreteNonParametric(vs::Ts, ps::Ps; check_args=true) where {
-        T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} =
-    DiscreteNonParametric{T,P,Ts,Ps}(vs, ps, check_args=check_args)
+DiscreteNonParametric(vs::AbstractVector{T}, ps::AbstractVector{P}; check_args::Bool=true) where {
+        T<:Real,P<:Real} =
+    DiscreteNonParametric{T,P,typeof(vs),typeof(ps)}(vs, ps; check_args=check_args)
 
 Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
