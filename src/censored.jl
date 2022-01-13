@@ -58,8 +58,8 @@ Base.eltype(::Type{Censored{D,S,T}}) where {D,S,T} = Base.promote_eltype(eltype(
 
 #### Range and Support
 
-islowerbounded(d::Censored) = islowerbounded(d.uncensored) || isfinite(d.lower)
-isupperbounded(d::Censored) = isupperbounded(d.uncensored) || isfinite(d.upper)
+islowerbounded(d::Censored) = isfinite(d.lower) || islowerbounded(d.uncensored)
+isupperbounded(d::Censored) = isfinite(d.upper) || isupperbounded(d.uncensored)
 
 minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
