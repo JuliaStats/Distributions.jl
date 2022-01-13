@@ -71,6 +71,7 @@ const tests = [
     "density_interface",
     "reshaped",
     "skewedexponentialpower",
+    "discreteuniform",
 ]
 
 printstyled("Running tests:\n", color=:blue)
