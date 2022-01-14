@@ -3,19 +3,21 @@
 
 Censor a univariate distribution `d` to the interval `[l, u]`.
 
+When sampling from a censored distribution, values sampled from the distribution exceeding an upper limit `u` or falling below a lower limit `r` are replaced by the respective limit `u` or `l`.
+
 The density function (or mass function for discrete `d`) of the censored distribution is
 ```math
 f(x; d, l, u) = \\begin{cases}
-    P_d(x \\le l), & x \\le l \\\\
-    P_d(x),         & l < x < u \\\\
-    P_d(x \\ge u), & x \\ge u \\\\
+    P_d(x \\le l), & x = l \\\\
+    f_d(x),         & l < x < u \\\\
+    P_d(x \\ge u), & x = u \\\\
   \\end{cases},
 ```
-where ``P_d(x)`` is the density (or mass) function of `d`, and ``P_d(x \\le b)`` is the
+where ``f_d(x)`` is the density (or mass) function of `d`, and ``P_d(x \\le b)`` is the
 cumulative distribution function of ``d`` evaluated at ``x = b``.
-If ``x`` is a random variable from ``d``, then `clamp(x, l, u)` is a random variable from
+If ``X`` is a random variable from ``d``, then `clamp(X, l, u)` is a random variable from
 its censored version. Note that this implies that even if ``d`` is continuous, its censored
-form has discrete mixture components at the bounds.
+form assigns positive probability to the bounds ``l`` and `u``. Therefore a censored continuous distribution has atoms and is a mixture of a discrete and continuous components.
 
 The lower bound `l` can be finite or `missing` and the upper bound `u` can be finite or
 `missing`. The function throws an error if `l > u`.
