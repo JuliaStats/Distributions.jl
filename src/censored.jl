@@ -24,8 +24,11 @@ The function falls back to constructing a [`Censored`](@ref) wrapper.
 
 # Implementation
 
-To implement a specialized censored form for distributions of type `D`, the method
-`censored(d::D, l::T, u::T) where {T <: Real}`, `censored(d::D, ::Missing, u::Real)`, and `censored(d::D, l::Real, ::Missing)`, or a subset thereof, should be implemented.
+To implement a specialized censored form for distributions of type `D`, one or more of the
+following methods should be implemented:
+- `censored(d::D, l::T, u::T) where {T <: Real}`
+- `censored(d::D, ::Missing, u::Real)`
+- `censored(d::D, l::Real, ::Missing)`
 """
 function censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
     return Censored(d, l, u)
@@ -43,7 +46,7 @@ censored(d::UnivariateDistribution, ::Missing, ::Missing) = d
 """
     Censored
 
-Generic wrapper for a censored distribution.
+Generic wrapper for a [`censored`](@ref) distribution.
 """
 struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real, TL<:Union{T,Missing}, TU<:Union{T,Missing}} <: UnivariateDistribution{S}
     uncensored::D      # the original distribution (uncensored)
