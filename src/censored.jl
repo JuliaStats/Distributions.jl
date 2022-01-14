@@ -126,12 +126,13 @@ function maximum(d::Censored)
 end
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
+    d0 = d.uncensored
     lower = d.lower
     upper = d.upper
     return (
         _in_open_interval(x, lower, upper) ||
-        (_eqnotmissing(x, lower) && cdf(d, lower) > 0) ||
-        (_eqnotmissing(x, upper) && _ccdf_inc(d, upper) > 0)
+        (_eqnotmissing(x, lower) && cdf(d0, lower) > 0) ||
+        (_eqnotmissing(x, upper) && _ccdf_inc(d0, upper) > 0)
     )
 end
 
