@@ -48,7 +48,13 @@ censored(d::UnivariateDistribution, ::Missing, ::Missing) = d
 
 Generic wrapper for a [`censored`](@ref) distribution.
 """
-struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real, TL<:Union{T,Missing}, TU<:Union{T,Missing}} <: UnivariateDistribution{S}
+struct Censored{
+    D<:UnivariateDistribution,
+    S<:ValueSupport,
+    T <: Real,
+    TL<:Union{T,Missing},
+    TU<:Union{T,Missing}
+} <: UnivariateDistribution{S}
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
     upper::TU      # upper bound
