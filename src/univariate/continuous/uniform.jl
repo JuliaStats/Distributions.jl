@@ -109,12 +109,16 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Affine transformations
+
+Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
+Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
 
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
-rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
+_rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
     A .= quantile.(d, rand!(rng, A))
 
 

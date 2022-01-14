@@ -1,129 +1,140 @@
 """
-    LocationScale(μ,σ,ρ)
+    AffineDistribution(μ, σ, ρ)
 
-A location-scale transformed distribution with location parameter `μ`,
-scale parameter `σ`, and given univariate distribution `ρ`.
+A shifted and scaled (affinely transformed) version of `ρ`.
 
-If ``Z`` is a random variable with distribution `ρ`, then the distribution of the random
-variable
+If ``Z`` is a random variable with distribution `ρ`, then `AffineDistribution(μ, σ, ρ)` is
+the distribution of the random variable
 ```math
 X = μ + σ Z
 ```
-is the location-scale transformed distribution with location parameter `μ` and scale
-parameter `σ`.
 
-If `ρ` is a discrete distribution, the probability mass function of
-the transformed distribution is given by
+If `ρ` is a discrete univariate distribution, the probability mass function of the
+transformed distribution is given by
 ```math
 P(X = x) = P\\left(Z = \\frac{x-μ}{σ} \\right).
 ```
-If `ρ` is a continuous distribution, the probability density function of
-the transformed distribution is given by
+
+If `ρ` is a continuous univariate distribution with probability density function ``f_Z``,
+the probability density function of the transformed distribution is given by
 ```math
-f(x) = \\frac{1}{σ} ρ \\! \\left( \\frac{x-μ}{σ} \\right).
+f_X(x) = \\frac{1}{|σ|} f_Z\\left( \\frac{x-μ}{σ} \\right).
 ```
+
+We recommend against using the `AffineDistribution` constructor directly. Instead, use
+`+`, `-`, `*`, and `/`. These are optimized for specific distributions and will fall back
+on `AffineDistribution` only when they need to.
+
+Affine transformations of discrete variables are easily affected by rounding errors. If you
+are getting incorrect results, try using exact `Rational` types instead of floats.
 
 ```julia
-LocationScale(μ,σ,ρ) # location-scale transformed distribution
-params(d)            # Get the parameters, i.e. (μ, σ, and the base distribution ρ)
-location(d)          # Get the location parameter
-scale(d)             # Get the scale parameter
+d = μ + σ * ρ       # Create location-scale transformed distribution
+params(d)           # Get the parameters, i.e. (μ, σ, ρ)
 ```
-
-External links
-[Location-Scale family on Wikipedia](https://en.wikipedia.org/wiki/Location%E2%80%93scale_family)
 """
-struct LocationScale{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: UnivariateDistribution{S}
+struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}} <: UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
-    function LocationScale{T,S,D}(μ::T, σ::T, ρ::D; check_args=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
-        check_args && @check_args(LocationScale, σ > zero(σ))
+    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+        check_args && @check_args(AffineDistribution, σ > zero(σ))
         new{T, S, D}(μ, σ, ρ)
     end
 end
 
-function LocationScale(μ::T, σ::T, ρ::UnivariateDistribution; check_args=true) where {T<:Real}
+function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     _T = promote_type(eltype(ρ), T)
     D = typeof(ρ)
     S = value_support(D)
-    return LocationScale{_T,S,D}(_T(μ), _T(σ), ρ; check_args=check_args)
+    return AffineDistribution{_T,S,D}(_T(μ), _T(σ), ρ; check_args=check_args)
 end
 
-LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution) = LocationScale(promote(μ, σ)..., ρ)
+function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
+    return AffineDistribution(promote(μ, σ)..., ρ; check_args=check_args)
+end
 
 # aliases
-const ContinuousLocationScale{T<:Real,D<:ContinuousUnivariateDistribution} = LocationScale{T,Continuous,D}
-const DiscreteLocationScale{T<:Real,D<:DiscreteUnivariateDistribution} = LocationScale{T,Discrete,D}
+const LocationScale{T,S,D} = AffineDistribution{T,S,D}
+function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
+    Base.depwarn("`LocationScale` is deprecated, use `AffineDistribution` instead", :LocationScale)
+    if check_args && σ ≤ 0  # preparation for future PR where I remove σ > 0 check
+        throw(ArgumentError("σ must be strictly positive."))
+    end
+    return AffineDistribution(μ, σ, ρ; check_args=false)
+end
 
-Base.eltype(::Type{<:LocationScale{T}}) where T = T
+const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
+const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 
-minimum(d::LocationScale) = d.μ + d.σ * minimum(d.ρ)
-maximum(d::LocationScale) = d.μ + d.σ * maximum(d.ρ)
-support(d::LocationScale) = locationscale_support(d.μ, d.σ, support(d.ρ))
-function locationscale_support(μ::Real, σ::Real, support::RealInterval)
+Base.eltype(::Type{<:AffineDistribution{T}}) where T = T
+
+minimum(d::AffineDistribution) = d.μ + d.σ * minimum(d.ρ)
+maximum(d::AffineDistribution) = d.μ + d.σ * maximum(d.ρ)
+support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
+function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
     return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
 end
-locationscale_support(μ::Real, σ::Real, support) = μ .+ σ .* support
+affinedistribution_support(μ::Real, σ::Real, support) = μ .+ σ .* support
 
-LocationScale(μ::Real, σ::Real, d::LocationScale) = LocationScale(μ + d.μ * σ, σ * d.σ, d.ρ)
+AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + d.μ * σ, σ * d.σ, d.ρ)
 
 #### Conversions
 
-convert(::Type{LocationScale{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:UnivariateDistribution} = LocationScale(T(μ),T(σ),ρ)
-convert(::Type{LocationScale{T}}, d::LocationScale{S}) where {T<:Real, S<:Real} = LocationScale(T(d.μ),T(d.σ),d.ρ, check_args=false)
+convert(::Type{AffineDistribution{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:UnivariateDistribution} = AffineDistribution(T(μ),T(σ),ρ)
+convert(::Type{AffineDistribution{T}}, d::AffineDistribution{S}) where {T<:Real, S<:Real} = AffineDistribution(T(d.μ),T(d.σ),d.ρ, check_args=false)
 
 #### Parameters
 
-location(d::LocationScale) = d.μ
-scale(d::LocationScale) = d.σ
-params(d::LocationScale) = (d.μ,d.σ,d.ρ)
-partype(::LocationScale{T}) where {T} = T
+location(d::AffineDistribution) = d.μ
+scale(d::AffineDistribution) = d.σ
+params(d::AffineDistribution) = (d.μ,d.σ,d.ρ)
+partype(::AffineDistribution{T}) where {T} = T
 
 #### Statistics
 
-mean(d::LocationScale) = d.μ + d.σ * mean(d.ρ)
-median(d::LocationScale) = d.μ + d.σ * median(d.ρ)
-mode(d::LocationScale) = d.μ + d.σ * mode(d.ρ)
-modes(d::LocationScale) = d.μ .+ d.σ .* modes(d.ρ)
+mean(d::AffineDistribution) = d.μ + d.σ * mean(d.ρ)
+median(d::AffineDistribution) = d.μ + d.σ * median(d.ρ)
+mode(d::AffineDistribution) = d.μ + d.σ * mode(d.ρ)
+modes(d::AffineDistribution) = d.μ .+ d.σ .* modes(d.ρ)
 
-var(d::LocationScale) = d.σ^2 * var(d.ρ)
-std(d::LocationScale) = d.σ * std(d.ρ)
-skewness(d::LocationScale) = skewness(d.ρ)
-kurtosis(d::LocationScale) = kurtosis(d.ρ)
+var(d::AffineDistribution) = d.σ^2 * var(d.ρ)
+std(d::AffineDistribution) = d.σ * std(d.ρ)
+skewness(d::AffineDistribution) = skewness(d.ρ)
+kurtosis(d::AffineDistribution) = kurtosis(d.ρ)
 
-isplatykurtic(d::LocationScale) = isplatykurtic(d.ρ)
-isleptokurtic(d::LocationScale) = isleptokurtic(d.ρ)
-ismesokurtic(d::LocationScale) = ismesokurtic(d.ρ)
+isplatykurtic(d::AffineDistribution) = isplatykurtic(d.ρ)
+isleptokurtic(d::AffineDistribution) = isleptokurtic(d.ρ)
+ismesokurtic(d::AffineDistribution) = ismesokurtic(d.ρ)
 
-entropy(d::ContinuousLocationScale) = entropy(d.ρ) + log(d.σ)
-entropy(d::DiscreteLocationScale) = entropy(d.ρ)
+entropy(d::ContinuousAffineDistribution) = entropy(d.ρ) + log(d.σ)
+entropy(d::DiscreteAffineDistribution) = entropy(d.ρ)
 
-mgf(d::LocationScale,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
+mgf(d::AffineDistribution,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
 
 #### Evaluation & Sampling
 
-pdf(d::ContinuousLocationScale, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
-pdf(d::DiscreteLocationScale, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ)
+pdf(d::ContinuousAffineDistribution, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+pdf(d::DiscreteAffineDistribution, x::Real) = pdf(d.ρ,(x-d.μ)/d.σ)
 
-logpdf(d::ContinuousLocationScale,x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ) - log(d.σ)
-logpdf(d::DiscreteLocationScale, x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ)
+logpdf(d::ContinuousAffineDistribution,x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ) - log(d.σ)
+logpdf(d::DiscreteAffineDistribution, x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ)
 
 for f in (:cdf, :ccdf, :logcdf, :logccdf)
-    @eval $f(d::LocationScale, x::Real) = $f(d.ρ, (x - d.μ) / d.σ)
+    @eval $f(d::AffineDistribution, x::Real) = $f(d.ρ, (x - d.μ) / d.σ)
 end
 
-quantile(d::LocationScale,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
+quantile(d::AffineDistribution,q::Real) = d.μ + d.σ * quantile(d.ρ,q)
 
-rand(rng::AbstractRNG, d::LocationScale) = d.μ + d.σ * rand(rng, d.ρ)
-cf(d::LocationScale, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
-gradlogpdf(d::ContinuousLocationScale, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
+rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.ρ)
+cf(d::AffineDistribution, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
+gradlogpdf(d::ContinuousAffineDistribution, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
 
 #### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
 
-Base.:+(d::UnivariateDistribution, x::Real) = LocationScale(x, one(x), d)
+Base.:+(d::UnivariateDistribution, x::Real) = AffineDistribution(x, one(x), d)
 Base.:+(x::Real, d::UnivariateDistribution) = d + x
-Base.:*(x::Real, d::UnivariateDistribution) = LocationScale(zero(x), x, d)
+Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
 Base.:*(d::UnivariateDistribution, x::Real) = x * d
 Base.:-(d::UnivariateDistribution, x::Real) = d + -x
 Base.:/(d::UnivariateDistribution, x::Real) = inv(x) * d

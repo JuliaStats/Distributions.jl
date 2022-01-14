@@ -181,3 +181,7 @@ end
     @test mean(canonform(Normal(0.25, 0.7))) ≈ 0.25
     @test std(canonform(Normal(0.25, 0.7))) ≈ 0.7
 end
+
+# affine transformations
+test_affine_transformations(Normal, randn(), randn()^2)
+test_affine_transformations(NormalCanon, randn()^2, randn()^2)

@@ -105,6 +105,10 @@ function cf(d::Laplace, t::Real)
     cis(t * d.μ) / (1+st*st)
 end
 
+#### Affine transformations
+
+Base.:+(d::Laplace, c::Real) = Laplace(d.μ + c, d.θ)
+Base.:*(c::Real, d::Laplace) = Laplace(c * d.μ, abs(c) * d.θ)
 
 #### Sampling
 

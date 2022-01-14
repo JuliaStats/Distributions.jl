@@ -111,6 +111,7 @@ function entropy(d::Dirichlet)
 end
 
 function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, α0::Real)
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     k = length(α)
     inv_s = inv(α0 - k)
     @. r = inv_s * (α - 1)
@@ -118,7 +119,7 @@ function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, 
 end
 
 function dirichlet_mode(α::AbstractVector{<:Real}, α0::Real)
-    all(αi < 1 for αi in α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     inv_s = inv(α0 - length(α))
     r = map(α) do αi
         inv_s * (αi - 1)
@@ -155,14 +156,14 @@ function _rand!(rng::AbstractRNG,
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{<:Real}) where {T<:Real}
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 #######################################
@@ -231,7 +232,7 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     end
     α0 /= K
 
-    multiply!(μ, α0)
+    lmul!(α0, μ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})

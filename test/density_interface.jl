@@ -4,16 +4,13 @@
     d_uv_continous = Normal(-1.5, 2.3)
     d_uv_discrete = Poisson(4.7)
     d_mv = MvNormal([2.3 0.4; 0.4 1.2])
-    d_av = Distributions.MatrixReshaped(MvNormal(rand(10)), 2, 5)
+    d_av = reshape(MvNormal(Diagonal(rand(10))), 2, 5)
 
     @testset "Distribution" begin
         for d in (d_uv_continous, d_uv_discrete, d_mv, d_av)
             x = rand(d)
             ref_logd_at_x = logpdf(d, x)
             DensityInterface.test_density_interface(d, x, ref_logd_at_x)
-
-            # Stricter than required by test_density_interface:
-            @test logfuncdensity(logdensityof(d)) === d
         end
 
         for di_func in (logdensityof, densityof)
