@@ -19,6 +19,7 @@ const tests = [
     "truncated_exponential",
     "truncated_uniform",
     "truncated_discrete_uniform",
+    "censored",
     "normal",
     "laplace",
     "cauchy",
