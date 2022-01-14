@@ -5,6 +5,32 @@ module TestCensored
 using Distributions, Test
 using Distributions: Censored
 
+function _as_mixture(d::Censored{D,Discrete}) where {D}
+    d0 = d.uncensored
+    lower, upper = extrema(d)
+    dtrunc = if d0 isa DiscreteUniform
+        truncated(d0, floor(lower) + 1, ceil(upper) - 1)
+    else
+        error("truncation to open interval not implemented for $d0")
+    end
+    @assert minimum(dtrunc) > lower
+    @assert maximum(dtrunc) < upper
+    prob_lower = cdf(d0, lower)
+    prob_upper = ccdf(d0, upper) + pdf(d0, upper)
+    prob_interval = 1 - (prob_lower + prob_upper)
+    components = Distribution[dtrunc]
+    probs = [prob_interval]
+    if prob_lower > 0
+        push!(components, Dirac(lower))
+        push!(probs, prob_lower)
+    end
+    if prob_upper > 0
+        push!(components, Dirac(upper))
+        push!(probs, prob_upper)
+    end
+    return MixtureModel(map(identity, components), probs)
+end
+
 @testset "censored" begin
     d0 = Normal(0, 1)
     @test_throws ErrorException censored(d0, 1, -1)
@@ -97,6 +123,31 @@ end
         @test censored(Censored(Normal(), 1, missing), 2, missing) == Censored(Normal(), 2, missing)
         @test censored(Censored(Normal(), 1, missing), 1.5, missing) == Censored(Normal(), 1.5, missing)
         @test censored(Censored(Normal(), 1.5, missing), 1, missing) == Censored(Normal(), 1.5, missing)
+    end
+
+    @testset "DiscreteUniform" begin
+        d0 = DiscreteUniform(0, 10)
+        bounds = [(missing, 8), (2, missing), (2, 8), (3.5, missing)]
+        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+            d = censored(d0, lower, upper)
+            dmix = _as_mixture(d)
+            @test extrema(d) == extrema(dmix)
+            l, u = extrema(d)
+            @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
+                @test f(d, l) ≈ f(dmix, l)
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1)
+                @test f(d, u) ≈ f(dmix, u)
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1)
+                @test f(d, 5) ≈ f(dmix, 5)
+            end
+            @testset for f in [mean, var]
+                @test f(d) ≈ f(dmix)
+            end
+            @test median(d) ≈ clamp(median(d0), l, u)
+            @test quantile(d, 0:0.01:1) ≈ clamp.(quantile(d0, 0:0.01:1), l, u)
+            xs = rand(d, 100)
+            @test loglikelihood(d, xs) ≈ loglikelihood(dmix, xs)
+        end
     end
 end
 
