@@ -51,15 +51,16 @@ Generic wrapper for a [`censored`](@ref) distribution.
 struct Censored{
     D<:UnivariateDistribution,
     S<:ValueSupport,
-    T <: Real,
+    T<:Real,
     TL<:Union{T,Missing},
-    TU<:Union{T,Missing}
+    TU<:Union{T,Missing},
 } <: UnivariateDistribution{S}
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
     upper::TU      # upper bound
-    function Censored(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
-        _is_non_empty_interval(l, u) || error("the lower bound must be less than or equal to the upper bound")
+    function Censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
+        _is_non_empty_interval(l, u) ||
+            error("the lower bound must be less than or equal to the upper bound")
         new{typeof(d), value_support(typeof(d)), T, T, T}(d, l, u)
     end
     function Censored(d::UnivariateDistribution, l::Missing, u::T) where {T <: Real}
@@ -86,7 +87,7 @@ end
 
 function params(d::Censored)
     d0params = params(d.uncensored)
-    return if ismissing(d.lower) 
+    return if ismissing(d.lower)
         (d0params..., d.upper)
     elseif ismissing(d.upper)
         (d0params..., d.lower)
@@ -102,12 +103,16 @@ Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D)
 #### Range and Support
 
 function islowerbounded(d::Censored)
-    return (islowerbounded(d.uncensored) ||
-            (!ismissing(d.lower) && cdf(d.uncensored, d.lower) > 0))
+    return (
+        islowerbounded(d.uncensored) ||
+        (!ismissing(d.lower) && cdf(d.uncensored, d.lower) > 0)
+    )
 end
 function isupperbounded(d::Censored)
-    return (isupperbounded(d.uncensored) ||
-            (!ismissing(d.upper) && _ccdf_inc(d.uncensored, d.upper) > 0))
+    return (
+        isupperbounded(d.uncensored) ||
+        (!ismissing(d.upper) && _ccdf_inc(d.uncensored, d.upper) > 0)
+    )
 end
 
 function minimum(d::Censored)
@@ -124,7 +129,7 @@ function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
     lower = d.lower
     upper = d.upper
     return (
-        _in_open_interval(x, lower, upper) || 
+        _in_open_interval(x, lower, upper) ||
         (_eqnotmissing(x, lower) && cdf(d, lower) > 0) ||
         (_eqnotmissing(x, upper) && _ccdf_inc(d, upper) > 0)
     )
@@ -333,7 +338,7 @@ function _to_truncated(d::Censored)
     return truncated(
         d.uncensored,
         ismissing(d.lower) ? -Inf : d.lower,
-        ismissing(d.upper) ? Inf : d.upper
+        ismissing(d.upper) ? Inf : d.upper,
     )
 end
 
