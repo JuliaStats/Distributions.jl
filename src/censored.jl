@@ -122,7 +122,7 @@ end
 
 function maximum(d::Censored)
     d0max = maximum(d.uncensored)
-    return ismissing(d.upper) ? d0max : max(d0min, d.upper)
+    return ismissing(d.upper) ? d0max : min(d0max, d.upper)
 end
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
