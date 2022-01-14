@@ -30,6 +30,7 @@ following methods should be implemented:
 - `censored(d::D, ::Missing, u::Real)`
 - `censored(d::D, l::Real, ::Missing)`
 """
+censored
 function censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
     return Censored(d, l, u)
 end
@@ -39,7 +40,6 @@ end
 function censored(d::UnivariateDistribution, l::Real, ::Missing)
     return Censored(d, l, missing)
 end
-
 censored(d::UnivariateDistribution, l::Real, u::Real) = censored(d, promote(l, u)...)
 censored(d::UnivariateDistribution, ::Missing, ::Missing) = d
 
@@ -65,7 +65,11 @@ struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real, TL<:Union
 end
 
 function censored(d::Censored, l::T, u::T) where {T<:Real}
-    return censored(d.uncensored, d.lower === missing ? l : max(l, d.lower), d.upper === missing ? u : min(u, d.upper))
+    return censored(
+        d.uncensored,
+        d.lower === missing ? l : max(l, d.lower),
+        d.upper === missing ? u : min(u, d.upper),
+    )
 end
 function censored(d::Censored, ::Missing, u::Real)
     return censored(d.uncensored, d.lower, d.upper === missing ? u : min(u, d.upper))
