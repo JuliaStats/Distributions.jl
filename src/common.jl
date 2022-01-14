@@ -97,7 +97,7 @@ for func in (:(==), :isequal, :isapprox)
 
         for f in fields
             isdefined(s1, f) && isdefined(s2, f) || return false
-            $func(getfield(s1, f), getfield(s2, f); kwargs...) || return false
+            getfield(s1, f) === getfield(s2, f) || $func(getfield(s1, f), getfield(s2, f); kwargs...) || return false
         end
 
         return true
