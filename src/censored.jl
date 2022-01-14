@@ -1,5 +1,5 @@
 """
-    censored(d::UnivariateDistribution, l::Real, u::Real)
+    censored(d::UnivariateDistribution, l::Union{Real,Missing}, u::Union{Real,Missing})
 
 Censor a univariate distribution `d` to the interval `[l, u]`.
 
@@ -17,19 +17,28 @@ If ``x`` is a random variable from ``d``, then `clamp(x, l, u)` is a random vari
 its censored version. Note that this implies that even if ``d`` is continuous, its censored
 form has discrete mixture components at the bounds.
 
-The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
-`Inf`. The function throws an error if `l > u`.
+The lower bound `l` can be finite or `missing` and the upper bound `u` can be finite or
+`missing`. The function throws an error if `l > u`.
 
 The function falls back to constructing a [`Censored`](@ref) wrapper.
 
 # Implementation
 
 To implement a specialized censored form for distributions of type `D`, the method
-`censored(d::D, l::T, u::T) where {T <: Real}` should be implemented.
+`censored(d::D, l::T, u::T) where {T <: Real}`, `censored(d::D, ::Missing, u::Real)`, and `censored(d::D, l::Real, ::Missing)`, or a subset thereof, should be implemented.
 """
-function censored(d::UnivariateDistribution, l::Union{Missing,Real}, u::Union{Missing,Real})
+function censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
     return Censored(d, l, u)
 end
+function censored(d::UnivariateDistribution, ::Missing, u::Real)
+    return Censored(d, missing, u)
+end
+function censored(d::UnivariateDistribution, l::Real, ::Missing)
+    return Censored(d, l, missing)
+end
+
+censored(d::UnivariateDistribution, l::Real, u::Real) = censored(d, promote(l, u)...)
+censored(d::UnivariateDistribution, ::Missing, ::Missing) = d
 
 """
     Censored
@@ -51,20 +60,15 @@ struct Censored{D<:UnivariateDistribution, S<:ValueSupport, T <: Real, TL<:Union
         new{typeof(d), value_support(typeof(d)), T, T, Missing}(d, l, u)
     end
 end
-Censored(d::UnivariateDistribution, l::Real, u::Real) = Censored(d, Base.promote(l, u)...)
 
-function censored(d::Censored, l::Union{Missing,Real}, u::Union{Missing,Real})
-    lower = if l isa Missing
-        d.lower isa Missing ? missing : d.lower
-    else
-        d.lower isa Missing ? l : max(l, d.lower)
-    end
-    upper = if u isa Missing
-        d.upper isa Missing ? missing : d.upper
-    else
-        d.upper isa Missing ? u : min(u, d.upper)
-    end
-    return Censored(d.uncensored, lower, upper)
+function censored(d::Censored, l::T, u::T) where {T<:Real}
+    return censored(d.uncensored, d.lower === missing ? l : max(l, d.lower), d.upper === missing ? u : min(u, d.upper))
+end
+function censored(d::Censored, ::Missing, u::Real)
+    return censored(d.uncensored, d.lower, d.upper === missing ? u : min(u, d.upper))
+end
+function censored(d::Censored, l::Real, ::Missing)
+    return censored(d.uncensored, d.lower === missing ? l : max(l, d.lower), d.upper)
 end
 
 function params(d::Censored)
