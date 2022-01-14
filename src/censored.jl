@@ -260,7 +260,7 @@ function logpdf(d::Censored, x::Real)
 
 end
 
-function loglikelihood(d::Censored, x::AbstractArray)
+function loglikelihood(d::Censored, x::AbstractArray{<:Real, M}) where {M}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
