@@ -226,6 +226,30 @@ end
             # entropy
             @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
         end
+    end
+
+    @testset "Poisson" begin
+        d0 = Poisson(20)
+        bounds = [(missing, 12), (2, missing), (2, 12), (8, missing)]
+        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+            d = censored(d0, lower, upper)
+            dmix = _as_mixture(d)
+            @test extrema(d) == extrema(dmix)
+            l, u = extrema(d)
+            @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
+                @test f(d, l) ≈ f(dmix, l) atol=1e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol=1e-8
+                @test f(d, u) ≈ f(dmix, u) atol=1e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test f(d, 5) ≈ f(dmix, 5)
+            end
+            @test median(d) ≈ clamp(median(d0), l, u)
+            @test quantile(d, 0:0.01:0.99) ≈ clamp.(quantile(d0, 0:0.01:0.99), l, u)
+            x = rand(d, 100)
+            @test loglikelihood(d, x) ≈ loglikelihood(dmix, x)
+            # rand
+            x = rand(d, 10_000)
+            @test all(x -> insupport(d, x), x)
         end
     end
 end
