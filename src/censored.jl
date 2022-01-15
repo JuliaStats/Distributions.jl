@@ -76,22 +76,22 @@ end
 function censored(d::Censored, l::T, u::T) where {T<:Real}
     return censored(
         d.uncensored,
-        ismissing(d.lower) ? l : max(l, d.lower),
-        ismissing(d.upper) ? u : min(u, d.upper),
+        d.lower === missing ? l : max(l, d.lower),
+        d.upper === missing ? u : min(u, d.upper),
     )
 end
 function censored(d::Censored, ::Missing, u::Real)
-    return censored(d.uncensored, d.lower, ismissing(d.upper) ? u : min(u, d.upper))
+    return censored(d.uncensored, d.lower, d.upper === missing ? u : min(u, d.upper))
 end
 function censored(d::Censored, l::Real, ::Missing)
-    return censored(d.uncensored, ismissing(d.lower) ? l : max(l, d.lower), d.upper)
+    return censored(d.uncensored, d.lower === missing ? l : max(l, d.lower), d.upper)
 end
 
 function params(d::Censored)
     d0params = params(d.uncensored)
-    return if ismissing(d.lower)
+    return if d.lower === missing
         (d0params..., d.upper)
-    elseif ismissing(d.upper)
+    elseif d.upper === missing
         (d0params..., d.lower)
     else
         (d0params..., d.lower, d.upper)
@@ -107,24 +107,24 @@ Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D)
 function islowerbounded(d::Censored)
     return (
         islowerbounded(d.uncensored) ||
-        (!ismissing(d.lower) && cdf(d.uncensored, d.lower) > 0)
+        (d.lower !== missing && cdf(d.uncensored, d.lower) > 0)
     )
 end
 function isupperbounded(d::Censored)
     return (
         isupperbounded(d.uncensored) ||
-        (!ismissing(d.upper) && _ccdf_inc(d.uncensored, d.upper) > 0)
+        (d.upper !== missing && _ccdf_inc(d.uncensored, d.upper) > 0)
     )
 end
 
 function minimum(d::Censored)
     d0min = minimum(d.uncensored)
-    return ismissing(d.lower) ? d0min : max(d0min, d.lower)
+    return d.lower === missing ? d0min : max(d0min, d.lower)
 end
 
 function maximum(d::Censored)
     d0max = maximum(d.uncensored)
-    return ismissing(d.upper) ? d0max : min(d0max, d.upper)
+    return d.upper === missing ? d0max : min(d0max, d.upper)
 end
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
@@ -162,8 +162,8 @@ function mean(d::Censored)
     lower = d.lower
     upper = d.upper
     dtrunc = _to_truncated(d)
-    prob_lower = ismissing(lower) ? 0 : _cdf_noninc(d0, lower)
-    prob_upper = ismissing(upper) ? 0 : ccdf(d0, upper)
+    prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
+    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
 
     μ = prob_interval * mean(dtrunc)
@@ -181,8 +181,8 @@ function var(d::Censored)
     lower = d.lower
     upper = d.upper
     dtrunc = _to_truncated(d)
-    prob_lower = ismissing(lower) ? 0 : _cdf_noninc(d0, lower)
-    prob_upper = ismissing(upper) ? 0 : ccdf(d0, upper)
+    prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
+    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
     μinterval = mean(dtrunc)
 
@@ -211,15 +211,15 @@ function entropy(d::Censored)
     dtrunc = _to_truncated(d)
     entropy_dtrunc = entropy(dtrunc)
 
-    llogcdf = ismissing(lower) ? oftype(float(entropy_dtrunc), -Inf) : logcdf(d0, lower)
-    prob_lower = if ismissing(lower)
+    llogcdf = lower === missing ? oftype(float(entropy_dtrunc), -Inf) : logcdf(d0, lower)
+    prob_lower = if lower === missing
         0
     elseif value_support(typeof(d)) === Discrete
         logsubexp(llogcdf, logpdf(d0, lower))
     else
         llogcdf
     end
-    prob_upper = ismissing(upper) ? 0 : ccdf(d0, upper)
+    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
     result = prob_interval * (entropy(dtrunc) - log(prob_interval)) -
         prob_lower * llogcdf - xlogx(prob_upper)
@@ -233,7 +233,7 @@ function pdf(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    return if !ismissing(lower) && x == lower
+    return if lower !== missing && x == lower
         result = cdf(d0, x)
         _eqnotmissing(x, upper) ? one(result) : result
     elseif _eqnotmissing(x, upper)
@@ -248,7 +248,7 @@ function logpdf(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    return if !ismissing(lower) && x == lower
+    return if lower !== missing && x == lower
         result = logcdf(d0, x)
         _eqnotmissing(x, upper) ? zero(result) : result
     elseif _eqnotmissing(x, upper)
@@ -264,8 +264,8 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real, M}) where {M}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    log_prob_lower = ismissing(lower) ? 0 : logcdf(d0, lower)
-    log_prob_upper = ismissing(upper) ? 0 : _logccdf_inc(d0, upper)
+    log_prob_lower = lower === missing ? 0 : logcdf(d0, lower)
+    log_prob_upper = upper === missing ? 0 : _logccdf_inc(d0, upper)
 
     return sum(x) do xi
         _in_open_interval(xi, lower, upper) && return logpdf(d0, xi)
@@ -278,9 +278,9 @@ end
 
 function cdf(d::Censored, x::Real)
     result = cdf(d.uncensored, x)
-    return if !ismissing(d.lower) && x < d.lower
+    return if d.lower !== missing && x < d.lower
         zero(result)
-    elseif ismissing(d.upper) || x < d.upper
+    elseif d.upper === missing || x < d.upper
         result
     else
         one(result)
@@ -289,9 +289,9 @@ end
 
 function logcdf(d::Censored, x::Real)
     result = logcdf(d.uncensored, x)
-    return if !ismissing(d.lower) && x < d.lower
+    return if d.lower !== missing && x < d.lower
         oftype(result, -Inf)
-    elseif ismissing(d.upper) || x < d.upper
+    elseif d.upper === missing || x < d.upper
         result
     else
         zero(result)
@@ -300,9 +300,9 @@ end
 
 function ccdf(d::Censored, x::Real)
     result = ccdf(d.uncensored, x)
-    return if !ismissing(d.upper) && x ≥ d.upper
+    return if d.upper !== missing && x ≥ d.upper
         zero(result)
-    elseif ismissing(d.lower) || x > d.lower
+    elseif d.lower === missing || x > d.lower
         result
     else
         one(result)
@@ -311,9 +311,9 @@ end
 
 function logccdf(d::Censored, x::Real)
     result = logccdf(d.uncensored, x)
-    return if !ismissing(d.upper) && x ≥ d.upper
+    return if d.upper !== missing && x ≥ d.upper
         oftype(result, -Inf)
-    elseif ismissing(d.lower) || x > d.lower
+    elseif d.lower === missing || x > d.lower
         result
     else
         zero(result)
@@ -340,8 +340,8 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 function _to_truncated(d::Censored)
     return truncated(
         d.uncensored,
-        ismissing(d.lower) ? -Inf : d.lower,
-        ismissing(d.upper) ? Inf : d.upper,
+        d.lower === missing ? -Inf : d.lower,
+        d.upper === missing ? Inf : d.upper,
     )
 end
 
@@ -351,7 +351,7 @@ _clamp(x, l, ::Missing) = max(x, l)
 
 @inline function _eqnotmissing(x, y)
     result = x == y
-    return ismissing(result) ? false : result
+    return result === missing ? false : result
 end
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
