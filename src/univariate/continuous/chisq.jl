@@ -25,12 +25,12 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chisq(ν::T; check_args=true) where {T <: Real}
+function Chisq(ν::Real; check_args::Bool=true)
     check_args && @check_args(Chisq, ν > zero(ν))
-    return Chisq{T}(ν)
+    return Chisq{typeof(ν)}(ν)
 end
 
-Chisq(ν::Integer) = Chisq(float(ν))
+Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_args)
 
 @distr_support Chisq 0.0 Inf
 

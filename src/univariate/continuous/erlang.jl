@@ -20,23 +20,21 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Erlang(α::Real, θ::T; check_args=true) where {T <: Real}
+function Erlang(α::Real, θ::Real; check_args::Bool=true)
     check_args && @check_args(Erlang, isinteger(α) && α >= zero(α))
-    return Erlang{T}(α, θ)
+    return Erlang{typeof(θ)}(α, θ)
 end
 
-function Erlang(α::Integer, θ::T; check_args=true) where {T <: Real}
+function Erlang(α::Integer, θ::Real; check_args::Bool=true)
     check_args && @check_args(Erlang, α >= zero(α))
-    return Erlang{T}(α, θ)
+    return Erlang{typeof(θ)}(α, θ)
 end
 
-function Erlang(α::Integer, θ::Integer)
-    θf = float(θ)
-    return Erlang{typeof(θf)}(α, θf)
+function Erlang(α::Integer, θ::Integer; check_args::Bool=true)
+    return Erlang(α, float(θ); check_args=check_args)
 end
 
-Erlang(α::Integer) = Erlang(α, 1.0)
-Erlang() = Erlang(1, 1.0, check_args=false)
+Erlang(α::Integer=1) = Erlang(α, 1.0; check_args=false)
 
 @distr_support Erlang 0.0 Inf
 
@@ -63,9 +61,12 @@ var(d::Erlang) = d.α * d.θ^2
 skewness(d::Erlang) = 2 / sqrt(d.α)
 kurtosis(d::Erlang) = 6 / d.α
 
-function mode(d::Erlang)
-    (α, θ) = params(d)
-    α >= 1 ? θ * (α - 1) : error("Erlang has no mode when α < 1")
+function mode(d::Erlang; check_args::Bool=true)
+    α, θ = params(d)
+    if check_args
+        α >= 1 || error("Erlang has no mode when α < 1")
+    end
+    θ * (α - 1)
 end
 
 function entropy(d::Erlang)

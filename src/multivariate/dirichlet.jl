@@ -25,7 +25,7 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     alpha0::T
     lmnB::S
 
-    function Dirichlet{T}(alpha::AbstractVector{T}; check_args=true) where T
+    function Dirichlet{T}(alpha::AbstractVector{T}; check_args::Bool=true) where T
         if check_args && !all(x -> x > zero(x), alpha)
             throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
         end
@@ -35,10 +35,13 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     end
 end
 
-function Dirichlet(alpha::AbstractVector{<:Real}; check_args=true)
-    Dirichlet{eltype(alpha)}(alpha; check_args=check_args)
+function Dirichlet(alpha::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
+    Dirichlet{T}(alpha; check_args=check_args)
 end
-Dirichlet(d::Integer, alpha::Real; kwargs...) = Dirichlet(Fill(alpha, d); kwargs...)
+function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
+    check_args && @check_args(Dirichlet, d > zero(d) && alpha > zero(alpha))
+    return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
+end
 
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts

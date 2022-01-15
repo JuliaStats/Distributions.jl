@@ -33,16 +33,15 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
+function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(Normal, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
-Normal() = Normal(0.0, 1.0, check_args=false)
+Normal(μ::Real, σ::Real; check_args::Bool=true) = Normal(promote(μ, σ)...; check_args=check_args)
+Normal(μ::Integer, σ::Integer; check_args::Bool=true) = Normal(float(μ), float(σ); check_args=check_args)
+Normal(μ::Real=0.0) = Normal(μ, one(μ); check_args=false)
 
 const Gaussian = Normal
 
