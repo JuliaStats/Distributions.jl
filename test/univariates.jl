@@ -205,3 +205,9 @@ end
     @test_throws ArgumentError InverseGamma(-1, 2)
     InverseGamma(-1, 2; check_args=false) # no error
 end
+
+# #1479
+@testset "Inner and outer constructors" begin
+    @test_throws ArgumentError InverseGaussian(0.0, 0.0)
+    @test_throws ArgumentError Levy(0.0, 0.0)
+end

@@ -24,6 +24,7 @@ External links
 struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Levy{T}(μ::T, σ::T) where {T<:Real} = new{T}(μ, σ)
 end
 
 function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
