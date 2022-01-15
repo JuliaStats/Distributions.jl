@@ -5,28 +5,42 @@ module TestCensored
 using Distributions, Test
 using Distributions: Censored
 
-function _as_mixture(d::Censored{D,Discrete}) where {D}
+function _as_mixture(d::Censored)
     d0 = d.uncensored
-    dtrunc = if d0 isa DiscreteUniform
+    dtrunc = if d0 isa DiscreteUniform || d0 isa Poisson
         truncated(
             d0,
             d.lower === missing ? -Inf : floor(d.lower) + 1,
             d.upper === missing ? Inf : ceil(d.upper) - 1,
         )
+    elseif d0 isa ContinuousDistribution
+        truncated(
+            d0,
+            d.lower === missing ? -Inf : d.lower + eps(float(d.lower)),
+            d.upper === missing ? Inf : d.upper - eps(float(d.upper)),
+        )
     else
         error("truncation to open interval not implemented for $d0")
     end
     prob_lower = d.lower === missing ? 0 : cdf(d0, d.lower)
-    prob_upper = d.upper === missing ? 0 : ccdf(d0, d.upper) + pdf(d0, d.upper)
+    prob_upper = if d.upper === missing
+        0
+    elseif d0 isa ContinuousDistribution
+        ccdf(d0, d.upper)
+    else
+        ccdf(d0, d.upper) + pdf(d0, d.upper)
+    end
     prob_interval = 1 - (prob_lower + prob_upper)
     components = Distribution[dtrunc]
     probs = [prob_interval]
     if prob_lower > 0
-        push!(components, Dirac(d.lower))
+        # workaround for MixtureModel currently not supporting mixtures of discrete and
+        # continuous components
+        push!(components, d0 isa DiscreteDistribution ? Dirac(d.lower) : Normal(d.lower, 0))
         push!(probs, prob_lower)
     end
     if prob_upper > 0
-        push!(components, Dirac(d.upper))
+        push!(components, d0 isa DiscreteDistribution ? Dirac(d.upper) : Normal(d.upper, 0))
         push!(probs, prob_upper)
     end
     return MixtureModel(map(identity, components), probs)
