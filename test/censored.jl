@@ -7,25 +7,26 @@ using Distributions: Censored
 
 function _as_mixture(d::Censored{D,Discrete}) where {D}
     d0 = d.uncensored
-    lower, upper = extrema(d)
     dtrunc = if d0 isa DiscreteUniform
-        truncated(d0, floor(lower) + 1, ceil(upper) - 1)
+        truncated(
+            d0,
+            d.lower === missing ? -Inf : floor(d.lower) + 1,
+            d.upper === missing ? Inf : ceil(d.upper) - 1,
+        )
     else
         error("truncation to open interval not implemented for $d0")
     end
-    @assert minimum(dtrunc) > lower
-    @assert maximum(dtrunc) < upper
-    prob_lower = cdf(d0, lower)
-    prob_upper = ccdf(d0, upper) + pdf(d0, upper)
+    prob_lower = d.lower === missing ? 0 : cdf(d0, d.lower)
+    prob_upper = d.upper === missing ? 0 : ccdf(d0, d.upper) + pdf(d0, d.upper)
     prob_interval = 1 - (prob_lower + prob_upper)
     components = Distribution[dtrunc]
     probs = [prob_interval]
     if prob_lower > 0
-        push!(components, Dirac(lower))
+        push!(components, Dirac(d.lower))
         push!(probs, prob_lower)
     end
     if prob_upper > 0
-        push!(components, Dirac(upper))
+        push!(components, Dirac(d.upper))
         push!(probs, prob_upper)
     end
     return MixtureModel(map(identity, components), probs)
