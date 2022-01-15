@@ -26,6 +26,7 @@ External links
 struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
+    InverseGaussian{T}(μ::T, λ::T) where {T<:Real} = new{T}(μ, λ)
 end
 
 function InverseGaussian(μ::T, λ::T; check_args::Bool=true) where {T<:Real}
