@@ -300,23 +300,23 @@ end
 
 function ccdf(d::Censored, x::Real)
     result = ccdf(d.uncensored, x)
-    return if d.upper !== missing && x ≥ d.upper
-        zero(result)
-    elseif d.lower === missing || x > d.lower
+    return if d.lower !== missing && x < d.lower
+        one(result)
+    elseif d.upper === missing || x < d.upper
         result
     else
-        one(result)
+        zero(result)
     end
 end
 
 function logccdf(d::Censored, x::Real)
     result = logccdf(d.uncensored, x)
-    return if d.upper !== missing && x ≥ d.upper
-        oftype(result, -Inf)
-    elseif d.lower === missing || x > d.lower
+    return if d.lower !== missing && x < d.lower
+        zero(result)
+    elseif d.upper === missing || x < d.upper
         result
     else
-        zero(result)
+        oftype(result, -Inf)
     end
 end
 
