@@ -209,5 +209,10 @@ end
 # #1479
 @testset "Inner and outer constructors" begin
     @test_throws ArgumentError InverseGaussian(0.0, 0.0)
+    @test InverseGaussian(0.0, 0.0; check_args=false) isa InverseGaussian{Float64}
+    @test InverseGaussian{Float64}(0.0, 0.0) isa InverseGaussian{Float64}
+
     @test_throws ArgumentError Levy(0.0, 0.0)
+    @test Levy(0.0, 0.0; check_args=false) isa Levy{Float64}
+    @test Levy{Float64}(0.0, 0.0) isa Levy{Float64}
 end
