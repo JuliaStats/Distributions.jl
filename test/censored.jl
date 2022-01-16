@@ -268,10 +268,15 @@ end
             # loglikelihood
             @test @inferred(loglikelihood(d, x)) ≈ loglikelihood(dmix, x)
             # mean, std
-            @test @inferred(mean(x)) ≈ mean(d) atol = 1e-1
-            @test @inferred(std(x)) ≈ std(d) atol = 1e-1            
+            μ = @inferred mean(d)
+            xall = unique(x)
+            @test μ ≈ sum(x -> pdf(d, x) * x, xall)
+            @test mean(x) ≈ μ atol = 1e-1
+            v = @inferred var(d)
+            @test v ≈ sum(x -> pdf(d, x) * abs2(x - μ), xall)
+            @test std(x) ≈ sqrt(v) atol = 1e-1
             # entropy
-            @test @inferred(entropy(d)) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
+            @test @inferred(entropy(d)) ≈ sum(x -> pdf(d, x) * -logpdf(d, x), xall)
         end
     end
 
