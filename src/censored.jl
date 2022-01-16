@@ -119,12 +119,12 @@ end
 
 function minimum(d::Censored)
     d0min = minimum(d.uncensored)
-    return d.lower === missing ? d0min : max(d0min, d.lower)
+    return d.lower === missing ? min(d0min, d.upper) : max(d0min, d.lower)
 end
 
 function maximum(d::Censored)
     d0max = maximum(d.uncensored)
-    return d.upper === missing ? d0max : min(d0max, d.upper)
+    return d.upper === missing ? max(d0max, d.lower) : min(d0max, d.upper)
 end
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
@@ -161,11 +161,20 @@ function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    dtrunc = _to_truncated(d)
     prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
     prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
-
+    if iszero(prob_interval) # truncation contains no probability
+        if lower === missing
+            return one(prob_interval) * upper
+        elseif upper === missing
+            return one(prob_interval) * lower
+        else
+            return prob_lower * (iszero(prob_lower) ? one(lower) : lower) +
+                   prob_upper * (iszero(prob_upper) ? one(upper) : upper)
+        end
+    end
+    dtrunc = _to_truncated(d)
     μ = prob_interval * mean(dtrunc)
     if !iszero(prob_lower)
         μ += prob_lower * lower
@@ -180,12 +189,25 @@ function var(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    dtrunc = _to_truncated(d)
     prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
     prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
-    μinterval = mean(dtrunc)
+    if iszero(prob_interval) # truncation contains no probability
+        if lower === missing
+            return one(prob_interval) * abs2(zero(upper))
+        elseif upper === missing
+            return one(prob_interval) * abs2(zero(lower))
+        else
+            μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
+                prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
+            v = prob_lower * abs2(iszero(prob_lower) ? oneunit(lower) : lower - μ) +
+                prob_upper * abs2(iszero(prob_upper) ? oneunit(upper) : upper - μ)
+            return v
+        end
+    end
 
+    dtrunc = _to_truncated(d)
+    μinterval = mean(dtrunc)
     μ = prob_interval * μinterval
     if !iszero(prob_lower)
         μ += prob_lower * lower
@@ -208,34 +230,28 @@ function entropy(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    dtrunc = _to_truncated(d)
     if lower !== missing
         prob_lower_inc = cdf(d0, lower)
-        if value_support(typeof(d0)) === Discrete
-            pl = pdf(d0, lower)
-            prob_lower = prob_lower_inc - pl
-            entropy_lower = -xlogx(prob_lower_inc) + xlogx(pl)
-        else
-            prob_lower = prob_lower_inc
-            entropy_lower = -xlogx(prob_lower_inc)
-        end
+        pl = value_support(typeof(d0)) === Discrete ? pdf(d0, lower) : 0
+        prob_lower = prob_lower_inc - pl
+        entropy_lower = -xlogx(prob_lower_inc)
     else
-        prob_lower = entropy_lower = 0
+        pl = prob_lower = entropy_lower = 0
     end
     if upper !== missing
         prob_upper = ccdf(d0, upper)
-        if value_support(typeof(d0)) === Discrete
-            pu = pdf(d0, upper)
-            entropy_upper = -xlogx(prob_upper + pu) + xlogx(pu)
-        else
-            entropy_upper = -xlogx(prob_upper)
-        end
+        pu = value_support(typeof(d0)) === Discrete ? pdf(d0, upper) : 0
+        entropy_upper = -xlogx(prob_upper + pu)
     else
-        prob_upper = entropy_upper = 0
+        pu = prob_upper = entropy_upper = 0
     end
+    result = entropy_lower + entropy_upper
     prob_interval = 1 - (prob_lower + prob_upper)
-    entropy_interval = prob_interval * entropy(dtrunc) - xlogx(prob_interval)
-    result = entropy_lower + entropy_interval + entropy_upper
+    # truncation contains no probability
+    iszero(prob_interval) && return result
+
+    dtrunc = _to_truncated(d)
+    result += prob_interval * entropy(dtrunc) - xlogx(prob_interval) + xlogx(pl) + xlogx(pu)
     return result
 end
 
