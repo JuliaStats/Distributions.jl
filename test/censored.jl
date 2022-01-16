@@ -90,7 +90,7 @@ end
         d = Censored(Cauchy(0, 1), missing, 2)
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Cauchy(0, 1)), Int)
-        @test params(d) == (params(Cauchy(0, 1))..., 2)
+        @test params(d) === (params(Cauchy(0, 1))..., missing, 2)
         @test partype(d) === Float64
         @test extrema(d) == (-Inf, 2.0)
         @test @inferred !islowerbounded(d)
@@ -104,7 +104,7 @@ end
         d = Censored(Gamma(1, 2), 2, missing)
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Gamma(1, 2)), Int)
-        @test params(d) == (params(Gamma(1, 2))..., 2)
+        @test params(d) === (params(Gamma(1, 2))..., 2, missing)
         @test partype(d) === Float64
         @test extrema(d) == (2.0, Inf)
         @test @inferred islowerbounded(d)
