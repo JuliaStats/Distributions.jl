@@ -1,7 +1,7 @@
 # Censored Distributions
 
-In *censoring* of data, values exceeding an upper limit (right censoring) or falling below a lower limit (left censoring), or both (censoring) are replaced by the corresponding limit itself.
-The package provides the `censored` function which creates the most
+In *censoring* of data, values exceeding an upper limit (right censoring) or falling below a lower limit (left censoring), or both (interval censoring) are replaced by the corresponding limit itself.
+The package provides the `censored` function, which creates the most
 appropriate distribution to represent a censored version of a given
 distribution.
 
