@@ -377,9 +377,9 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 # utilities to handle intervals represented with possibly missing bounds
 
 
-@inline _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
-@inline _in_open_interval(x::Real, ::Missing, u::Real) = x < u
-@inline _in_open_interval(x::Real, l::Real, ::Missing) = x > l
+_in_open_interval(x::Real, l::Real, u::Real) = l < x < u
+_in_open_interval(x::Real, ::Missing, u::Real) = x < u
+_in_open_interval(x::Real, l::Real, ::Missing) = x > l
 
 function _to_truncated(d::Censored)
     return truncated(
@@ -393,8 +393,8 @@ _clamp(x, l, u) = clamp(x, l, u)
 _clamp(x, ::Missing, u) = min(x, u)
 _clamp(x, l, ::Missing) = max(x, l)
 
-@inline _eqnotmissing(x::Real, y::Real) = x == y
-@inline _eqnotmissing(::Real, ::Missing) = false
+_eqnotmissing(x::Real, y::Real) = x == y
+_eqnotmissing(::Real, ::Missing) = false
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 _cdf_noninclusive(d::UnivariateDistribution, x) = cdf(d, x)
