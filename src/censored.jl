@@ -11,9 +11,9 @@ f(x; d_0, l, u) = \\begin{cases}
     P_{Z \\sim d_0}(Z \\ge u), & x = u \\\\
   \\end{cases}, \\quad x \\in [l, u]
 ```
-where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
+where ``f_{d_0}`` is the probability density (mass) function of ``d_0``.
 
-If ``Z`` is a variate from ``d_0``, and `x = clamp(z, l, u)`, then ``X`` is a variate from
+If ``Z`` is a variate from ``d_0``, and `X = clamp(Z, l, u)`, then ``X`` is a variate from
 ``d``, the censored version of ``d_0``. Note that this implies that even if ``d`` is
 continuous, its censored form assigns positive probability to the bounds ``l`` and `u``.
 Therefore a censored continuous distribution has atoms and is a mixture of discrete and
@@ -92,16 +92,10 @@ end
 
 function params(d::Censored)
     d0params = params(d.uncensored)
-    return if d.lower === missing
-        (d0params..., d.upper)
-    elseif d.upper === missing
-        (d0params..., d.lower)
-    else
-        (d0params..., d.lower, d.upper)
-    end
+    return (d0params..., d.lower, d.upper)
 end
 
-partype(d::Censored) = partype(d.uncensored)
+partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T} = promote_type(partype(d.uncensored), T)
 
 Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D))
 
@@ -305,7 +299,7 @@ function logpdf(d::Censored, x::Real)
 
 end
 
-function loglikelihood(d::Censored, x::AbstractArray{<:Real, M}) where {M}
+function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
@@ -375,7 +369,6 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 
 # utilities to handle intervals represented with possibly missing bounds
 
-@inline _is_non_empty_interval(l::Real, u::Real) = l ≤ u
 
 @inline _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
 @inline _in_open_interval(x::Real, ::Missing, u::Real) = x < u
@@ -393,10 +386,8 @@ _clamp(x, l, u) = clamp(x, l, u)
 _clamp(x, ::Missing, u) = min(x, u)
 _clamp(x, l, ::Missing) = max(x, l)
 
-@inline function _eqnotmissing(x, y)
-    result = x == y
-    return result === missing ? false : result
-end
+@inline _eqnotmissing(x::Real, y::Real) = x == y
+@inline _eqnotmissing(::Real, ::Missing) = false
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 _cdf_noninc(d::UnivariateDistribution, x) = cdf(d, x)

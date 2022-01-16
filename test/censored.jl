@@ -16,8 +16,8 @@ function _as_mixture(d::Censored)
     elseif d0 isa ContinuousDistribution
         truncated(
             d0,
-            d.lower === missing ? -Inf : d.lower + eps(float(d.lower)),
-            d.upper === missing ? Inf : d.upper - eps(float(d.upper)),
+            d.lower === missing ? -Inf : nextfloat(float(d.lower)),
+            d.upper === missing ? Inf : prevfloat(float(d.upper)),
         )
     else
         error("truncation to open interval not implemented for $d0")
