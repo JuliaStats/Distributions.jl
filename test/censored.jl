@@ -71,6 +71,7 @@ end
 
 @testset "Censored" begin
     @testset "basic" begin
+        @test_throws ErrorException Censored(Normal(0, 1), 2, 1)
         d = Censored(Normal(0.0, 1.0), -1, 2)
         @test d isa Censored
         @test eltype(d) === Float64
