@@ -302,6 +302,62 @@ end
             @test std(x) ≈ std(x) atol = 1e-1            
         end
     end
+
+    @testset "interval containing no probability" begin
+        d0 = MixtureModel([Uniform(-1, 1), Uniform(10, 11)], [0.3, 0.7])
+        bounds = [(missing, -5), (12, missing), (3, 8)]
+        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+            d = censored(d0, lower, upper)
+            dmix = _as_mixture(d)
+            l, u = extrema(d)
+            if lower === missing
+                @test l == min(minimum(d0), u)
+            else
+                @test l == lower
+            end
+            if upper === missing
+                @test u == max(maximum(d0), l)
+            else
+                @test u == upper
+            end
+            @testset for f in [cdf, logcdf, ccdf, logccdf]
+                @test f(d, l) ≈ f(dmix, l) atol=1e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol=1e-8
+                @test f(d, u) ≈ f(dmix, u) atol=1e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol=1e-8
+                @test f(d, 5) ≈ f(dmix, 5)
+            end
+            @testset for f in [mean, var]
+                @test f(d) ≈ f(dmix)
+            end
+            @test median(d) ≈ clamp(median(d0), l, u)
+            @test quantile(d, 0:0.01:1) ≈ clamp.(quantile(d0, 0:0.01:1), l, u)
+            # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
+            # Normal(μ, 0), they are infinite
+            if lower === missing
+                @test pdf(d, l) ≈ 1
+                @test logpdf(d, l) ≈ 0
+            else
+                @test pdf(d, l) ≈ cdf(d0, l)
+                @test logpdf(d, l) ≈ logcdf(d0, l)
+            end
+            if upper === missing
+                @test pdf(d, u) ≈ 1
+                @test logpdf(d, u) ≈ 0
+            else
+                @test pdf(d, u) ≈ ccdf(d0, u)
+                @test logpdf(d, u) ≈ logccdf(d0, u)
+            end
+            # rand
+            x = rand(d, 10_000)
+            @test all(x -> insupport(d, x), x)
+            # loglikelihood
+            @test loglikelihood(d, x) ≈ sum(x -> logpdf(d, x), x)
+            # entropy
+            @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
+        end
+    end
+
 end
 
 end # module
