@@ -209,20 +209,33 @@ function entropy(d::Censored)
     lower = d.lower
     upper = d.upper
     dtrunc = _to_truncated(d)
-    entropy_dtrunc = entropy(dtrunc)
-
-    llogcdf = lower === missing ? oftype(float(entropy_dtrunc), -Inf) : logcdf(d0, lower)
-    prob_lower = if lower === missing
-        0
-    elseif value_support(typeof(d)) === Discrete
-        logsubexp(llogcdf, logpdf(d0, lower))
+    if lower !== missing
+        prob_lower_inc = cdf(d0, lower)
+        if value_support(typeof(d0)) === Discrete
+            pl = pdf(d0, lower)
+            prob_lower = prob_lower_inc - pl
+            entropy_lower = -xlogx(prob_lower_inc) + xlogx(pl)
+        else
+            prob_lower = prob_lower_inc
+            entropy_lower = -xlogx(prob_lower_inc)
+        end
     else
-        llogcdf
+        prob_lower = entropy_lower = 0
     end
-    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
+    if upper !== missing
+        prob_upper = ccdf(d0, upper)
+        if value_support(typeof(d0)) === Discrete
+            pu = pdf(d0, upper)
+            entropy_upper = -xlogx(prob_upper + pu) + xlogx(pu)
+        else
+            entropy_upper = -xlogx(prob_upper)
+        end
+    else
+        prob_upper = entropy_upper = 0
+    end
     prob_interval = 1 - (prob_lower + prob_upper)
-    result = prob_interval * (entropy(dtrunc) - log(prob_interval)) -
-        prob_lower * llogcdf - xlogx(prob_upper)
+    entropy_interval = prob_interval * entropy(dtrunc) - xlogx(prob_interval)
+    result = entropy_lower + entropy_interval + entropy_upper
     return result
 end
 
