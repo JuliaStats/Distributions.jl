@@ -136,7 +136,7 @@ end
 
 #### Show
 
-function show(io::IO, d::Censored)
+function show(io::IO, ::MIME"text/plain", d::Censored)
     print(io, "Censored(")
     d0 = d.uncensored
     uml, namevals = _use_multline_show(d0)
