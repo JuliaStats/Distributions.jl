@@ -191,6 +191,7 @@ end
             @test all(x -> insupport(d, x), x)
             # loglikelihood
             @test loglikelihood(d, x) ≈ sum(x -> logpdf(d, x), x)
+            @test loglikelihood(d, [x; -1]) == -Inf
             # entropy
             @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
         end
