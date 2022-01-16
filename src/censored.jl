@@ -302,15 +302,23 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    log_prob_lower = lower === missing ? 0 : logcdf(d0, lower)
-    log_prob_upper = upper === missing ? 0 : _logccdf_inc(d0, upper)
+    one_like_x = one(first(x))
+    if lower === missing
+        T = float(Base.promote_eltype(upper, one_like_x))
+    elseif upper === missing
+        T = float(Base.promote_eltype(lower, one_like_x))
+    else
+        T = float(Base.promote_eltype(lower, upper, one_like_x))
+    end
+    log_prob_lower = lower === missing ? 0 : logcdf(d0, T(lower))
+    log_prob_upper = upper === missing ? 0 : _logccdf_inc(d0, T(upper))
+    logzero = T(-Inf)
 
     return sum(x) do xi
         _in_open_interval(xi, lower, upper) && return logpdf(d0, xi)
         _eqnotmissing(xi, lower) && return log_prob_lower
         _eqnotmissing(xi, upper) && return log_prob_upper
-        T = float(Base.promote_eltype(log_prob_lower, log_prob_upper))
-        return T(-Inf)
+        return logzero
     end
 end
 

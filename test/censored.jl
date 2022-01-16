@@ -240,6 +240,9 @@ end
             # entropy
             @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
         end
+        d0 = Normal{Int}(0, 1)
+        d = censored(d0, 0.0f0, 0.2f0)
+        @inferred loglikelihood(d, [0.0, 1.0])
     end
 
     @testset "DiscreteUniform" begin
