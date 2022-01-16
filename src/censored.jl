@@ -157,6 +157,12 @@ quantile(d::Censored, p::Real) = _clamp(quantile(d.uncensored, p), d.lower, d.up
 
 median(d::Censored) = _clamp(median(d.uncensored), d.lower, d.upper)
 
+# the expectations use the following relation:
+# 𝔼_{x ~ d}[h(x)] = P_{x ~ d₀}(x < l) h(l) + P_{x ~ d₀}(x > u) h(u)
+#                 + P_{x ~ d₀}(l ≤ x ≤ u) 𝔼_{x ~ τ}[h(x)],
+# where d₀ is the uncensored distribution, d is d₀ censored to [l, u],
+# and τ is d₀ truncated to [l, u]
+
 function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
@@ -225,6 +231,13 @@ function var(d::Censored)
     end
     return v
 end
+
+# this expectation also uses the following relation:
+# 𝔼_{x ~ τ}[-log d(x)] = S[τ] - log P_{x ~ d₀}(l ≤ x ≤ u)
+#   + (P_{x ~ d₀}(x = l) (log P_{x ~ d₀}(x = l) - log P_{x ~ d₀}(x ≤ l)) + 
+#      P_{x ~ d₀}(x = u) (log P_{x ~ d₀}(x = u) - log P_{x ~ d₀}(x ≥ u))
+#   ) / P_{x ~ d₀}(l ≤ x ≤ u),
+# where S[τ] is the entropy of τ.
 
 function entropy(d::Censored)
     d0 = d.uncensored
