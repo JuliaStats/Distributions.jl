@@ -250,6 +250,9 @@ end
             # rand
             x = rand(d, 10_000)
             @test all(x -> insupport(d, x), x)
+            # mean, std
+            @test mean(x) ≈ mean(x) atol = 1e-1
+            @test std(x) ≈ std(x) atol = 1e-1            
         end
     end
 end
