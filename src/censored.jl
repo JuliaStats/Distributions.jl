@@ -344,7 +344,6 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 # utilities to handle intervals represented with possibly missing bounds
 
 @inline _is_non_empty_interval(l::Real, u::Real) = l ≤ u
-@inline _is_non_empty_interval(l, u) = true
 
 @inline _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
 @inline _in_open_interval(x::Real, ::Missing, u::Real) = x < u
@@ -370,9 +369,6 @@ end
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 _cdf_noninc(d::UnivariateDistribution, x) = cdf(d, x)
 _cdf_noninc(d::DiscreteUnivariateDistribution, x) = cdf(d, x) - pdf(d, x)
-
-_logcdf_noninc(d::UnivariateDistribution, x) = logcdf(d, x)
-_logcdf_noninc(d::DiscreteUnivariateDistribution, x) = logsubexp(logcdf(d, x), logpdf(d, x))
 
 _ccdf_inc(d::UnivariateDistribution, x) = ccdf(d, x)
 _ccdf_inc(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
