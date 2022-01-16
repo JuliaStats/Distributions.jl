@@ -1,26 +1,29 @@
 """
-    censored(d::UnivariateDistribution, l::Union{Real,Missing}, u::Union{Real,Missing})
+    censored(d0::UnivariateDistribution, l::Union{Real,Missing}, u::Union{Real,Missing})
 
-Censor a univariate distribution `d` to the interval `[l, u]`.
+A _censored distribution_ `d` of a distribution `d0` to the interval `[l, u]` has the
+probability density (mass) function:
 
-When sampling from a censored distribution, values sampled from the distribution exceeding an upper limit `u` or falling below a lower limit `r` are replaced by the respective limit `u` or `l`.
-
-The density function (or mass function for discrete `d`) of the censored distribution is
 ```math
-f(x; d, l, u) = \\begin{cases}
-    P_d(x \\le l), & x = l \\\\
-    f_d(x),         & l < x < u \\\\
-    P_d(x \\ge u), & x = u \\\\
-  \\end{cases},
+f(x; d_0, l, u) = \\begin{cases}
+    P_{Z \\sim d_0}(Z \\le l), & x = l \\\\
+    f_{d_0}(x),              & l < x < u \\\\
+    P_{Z \\sim d_0}(Z \\ge u), & x = u \\\\
+  \\end{cases}, \\quad x \\in [l, u]
 ```
-where ``f_d(x)`` is the density (or mass) function of `d`, and ``P_d(x \\le b)`` is the
-cumulative distribution function of ``d`` evaluated at ``x = b``.
-If ``X`` is a random variable from ``d``, then `clamp(X, l, u)` is a random variable from
-its censored version. Note that this implies that even if ``d`` is continuous, its censored
-form assigns positive probability to the bounds ``l`` and `u``. Therefore a censored continuous distribution has atoms and is a mixture of a discrete and continuous components.
+where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
-The lower bound `l` can be finite or `missing` and the upper bound `u` can be finite or
-`missing`. The function throws an error if `l > u`.
+If ``Z`` is a variate from ``d_0``, and `x = clamp(z, l, u)`, then ``X`` is a variate from
+``d``, the censored version of ``d_0``. Note that this implies that even if ``d`` is
+continuous, its censored form assigns positive probability to the bounds ``l`` and `u``.
+Therefore a censored continuous distribution has atoms and is a mixture of discrete and
+continuous components.
+
+```julia
+censored(d0, l, missing)   # d0 left-censored to the interval [l, Inf)
+censored(d0, missing, u)   # d0 right-censored to the interval (-Inf, u]
+censored(d0, l, u)         # d0 interval-censored to the interval [l, u]
+```
 
 The function falls back to constructing a [`Censored`](@ref) wrapper.
 
