@@ -64,8 +64,7 @@ struct Censored{
     lower::TL      # lower bound
     upper::TU      # upper bound
     function Censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
-        _is_non_empty_interval(l, u) ||
-            error("the lower bound must be less than or equal to the upper bound")
+        l ≤ u || error("the lower bound must be less than or equal to the upper bound")
         new{typeof(d), value_support(typeof(d)), T, T, T}(d, l, u)
     end
     function Censored(d::UnivariateDistribution, l::Missing, u::T) where {T <: Real}
