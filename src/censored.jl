@@ -109,7 +109,7 @@ end
 function isupperbounded(d::Censored)
     return (
         isupperbounded(d.uncensored) ||
-        (d.upper !== missing && _ccdf_inc(d.uncensored, d.upper) > 0)
+        (d.upper !== missing && _ccdf_inclusive(d.uncensored, d.upper) > 0)
     )
 end
 
@@ -130,7 +130,7 @@ function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
     return (
         _in_open_interval(x, lower, upper) ||
         (_eqnotmissing(x, lower) && cdf(d0, lower) > 0) ||
-        (_eqnotmissing(x, upper) && _ccdf_inc(d0, upper) > 0)
+        (_eqnotmissing(x, upper) && _ccdf_inclusive(d0, upper) > 0)
     )
 end
 
@@ -163,7 +163,7 @@ function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
+    prob_lower = lower === missing ? 0 : _cdf_noninclusive(d0, lower)
     prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
     if iszero(prob_interval) # truncation contains no probability
@@ -191,7 +191,7 @@ function var(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    prob_lower = lower === missing ? 0 : _cdf_noninc(d0, lower)
+    prob_lower = lower === missing ? 0 : _cdf_noninclusive(d0, lower)
     prob_upper = upper === missing ? 0 : ccdf(d0, upper)
     prob_interval = 1 - (prob_lower + prob_upper)
     if iszero(prob_interval) # truncation contains no probability
@@ -275,7 +275,7 @@ function pdf(d::Censored, x::Real)
         result = cdf(d0, x)
         _eqnotmissing(x, upper) ? one(result) : result
     elseif _eqnotmissing(x, upper)
-        _ccdf_inc(d0, x)
+        _ccdf_inclusive(d0, x)
     else
         result = pdf(d0, x)
         _in_open_interval(x, lower, upper) ? result : zero(result)
@@ -290,7 +290,7 @@ function logpdf(d::Censored, x::Real)
         result = logcdf(d0, x)
         _eqnotmissing(x, upper) ? zero(result) : result
     elseif _eqnotmissing(x, upper)
-        _logccdf_inc(d0, x)
+        _logccdf_inclusive(d0, x)
     else
         result = logpdf(d0, x)
         _in_open_interval(x, lower, upper) ? result : oftype(result, -Inf)
@@ -311,7 +311,7 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real})
         T = float(Base.promote_eltype(lower, upper, one_like_x))
     end
     log_prob_lower = lower === missing ? 0 : logcdf(d0, T(lower))
-    log_prob_upper = upper === missing ? 0 : _logccdf_inc(d0, T(upper))
+    log_prob_upper = upper === missing ? 0 : _logccdf_inclusive(d0, T(upper))
     logzero = T(-Inf)
 
     return sum(x) do xi
@@ -397,11 +397,11 @@ _clamp(x, l, ::Missing) = max(x, l)
 @inline _eqnotmissing(::Real, ::Missing) = false
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
-_cdf_noninc(d::UnivariateDistribution, x) = cdf(d, x)
-_cdf_noninc(d::DiscreteUnivariateDistribution, x) = cdf(d, x) - pdf(d, x)
+_cdf_noninclusive(d::UnivariateDistribution, x) = cdf(d, x)
+_cdf_noninclusive(d::DiscreteUnivariateDistribution, x) = cdf(d, x) - pdf(d, x)
 
-_ccdf_inc(d::UnivariateDistribution, x) = ccdf(d, x)
-_ccdf_inc(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
+_ccdf_inclusive(d::UnivariateDistribution, x) = ccdf(d, x)
+_ccdf_inclusive(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
 
-_logccdf_inc(d::UnivariateDistribution, x) = logccdf(d, x)
-_logccdf_inc(d::DiscreteUnivariateDistribution, x) = logaddexp(logccdf(d, x), logpdf(d, x))
+_logccdf_inclusive(d::UnivariateDistribution, x) = logccdf(d, x)
+_logccdf_inclusive(d::DiscreteUnivariateDistribution, x) = logaddexp(logccdf(d, x), logpdf(d, x))
