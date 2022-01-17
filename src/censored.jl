@@ -163,9 +163,21 @@ function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    prob_lower = lower === missing ? 0 : _cdf_noninclusive(d0, lower)
-    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
-    prob_interval = 1 - (prob_lower + prob_upper)
+    if lower === missing
+        log_prob_lower = -Inf
+        prob_lower = 0
+    else
+        log_prob_lower = _logcdf_noninclusive(d0, lower)
+        prob_lower = exp(log_prob_lower)
+    end
+    if upper === missing
+        log_prob_upper = -Inf
+        prob_upper = 0
+    else
+        log_prob_upper = logccdf(d0, upper)
+        prob_upper = exp(log_prob_upper)
+    end
+    prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
     if iszero(prob_interval) # truncation contains no probability
         if lower === missing
             return one(prob_interval) * upper
@@ -191,9 +203,21 @@ function var(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    prob_lower = lower === missing ? 0 : _cdf_noninclusive(d0, lower)
-    prob_upper = upper === missing ? 0 : ccdf(d0, upper)
-    prob_interval = 1 - (prob_lower + prob_upper)
+    if lower === missing
+        log_prob_lower = -Inf
+        prob_lower = 0
+    else
+        log_prob_lower = _logcdf_noninclusive(d0, lower)
+        prob_lower = exp(log_prob_lower)
+    end
+    if upper === missing
+        log_prob_upper = -Inf
+        prob_upper = 0
+    else
+        log_prob_upper = logccdf(d0, upper)
+        prob_upper = exp(log_prob_upper)
+    end
+    prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
     if iszero(prob_interval) # truncation contains no probability
         if lower === missing
             return one(prob_interval) * abs2(zero(upper))
@@ -239,29 +263,57 @@ function entropy(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    if lower !== missing
-        prob_lower_inc = cdf(d0, lower)
-        pl = value_support(typeof(d0)) === Discrete ? pdf(d0, lower) : 0
-        prob_lower = prob_lower_inc - pl
-        entropy_lower = -xlogx(prob_lower_inc)
+    if lower === missing
+        log_prob_upper = logccdf(d0, upper)
+        if value_support(typeof(d0)) === Discrete
+            logpu = logpdf(d0, upper)
+            log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
+            xlogx_pu = xexpx(logpu)
+        else
+            log_prob_upper_inc = log_prob_upper
+            xlogx_pu = 0
+        end
+        entropy_bound = -xexpx(log_prob_upper_inc)
+        log_prob_interval = log1mexp(log_prob_upper)    
+        xlogx_pl = 0
+    elseif upper === missing
+        log_prob_lower_inc = logcdf(d0, lower)
+        if value_support(typeof(d0)) === Discrete
+            logpl = logpdf(d0, lower)
+            log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
+            xlogx_pl = xexpx(logpl)
+        else
+            log_prob_lower = log_prob_lower_inc
+            xlogx_pl = 0
+        end
+        entropy_bound = -xexpx(log_prob_lower_inc)
+        log_prob_interval = log1mexp(log_prob_lower)    
+        xlogx_pu = 0
     else
-        pl = prob_lower = entropy_lower = 0
+        log_prob_lower_inc = logcdf(d0, lower)
+        log_prob_upper = logccdf(d0, upper)
+        if value_support(typeof(d0)) === Discrete
+            logpl = logpdf(d0, lower)
+            logpu = logpdf(d0, upper)
+            log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
+            log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
+            xlogx_pl = xexpx(logpl)
+            xlogx_pu = xexpx(logpu)
+        else
+            log_prob_lower = log_prob_lower_inc
+            log_prob_upper_inc = log_prob_upper
+            xlogx_pl = xlogx_pu = 0
+        end
+        entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
+        log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     end
-    if upper !== missing
-        prob_upper = ccdf(d0, upper)
-        pu = value_support(typeof(d0)) === Discrete ? pdf(d0, upper) : 0
-        entropy_upper = -xlogx(prob_upper + pu)
-    else
-        pu = prob_upper = entropy_upper = 0
-    end
-    result = entropy_lower + entropy_upper
-    prob_interval = 1 - (prob_lower + prob_upper)
     # truncation contains no probability
-    iszero(prob_interval) && return result
+    log_prob_interval == -Inf && return entropy_bound
 
     dtrunc = _to_truncated(d)
-    result += prob_interval * entropy(dtrunc) - xlogx(prob_interval) + xlogx(pl) + xlogx(pu)
-    return result
+    entropy_interval = 
+        exp(log_prob_interval) * entropy(dtrunc) - xexpx(log_prob_interval) + xlogx_pl + xlogx_pu
+    return entropy_bound + entropy_interval
 end
 
 
@@ -376,7 +428,6 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 
 # utilities to handle intervals represented with possibly missing bounds
 
-
 _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
 _in_open_interval(x::Real, ::Missing, u::Real) = x < u
 _in_open_interval(x::Real, l::Real, ::Missing) = x > l
@@ -397,8 +448,8 @@ _eqnotmissing(x::Real, y::Real) = x == y
 _eqnotmissing(::Real, ::Missing) = false
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
-_cdf_noninclusive(d::UnivariateDistribution, x) = cdf(d, x)
-_cdf_noninclusive(d::DiscreteUnivariateDistribution, x) = cdf(d, x) - pdf(d, x)
+_logcdf_noninclusive(d::UnivariateDistribution, x) = logcdf(d, x)
+_logcdf_noninclusive(d::DiscreteUnivariateDistribution, x) = logsubexp(logcdf(d, x), logpdf(d, x))
 
 _ccdf_inclusive(d::UnivariateDistribution, x) = ccdf(d, x)
 _ccdf_inclusive(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
