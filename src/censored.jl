@@ -405,3 +405,9 @@ _ccdf_inclusive(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
 
 _logccdf_inclusive(d::UnivariateDistribution, x) = logccdf(d, x)
 _logccdf_inclusive(d::DiscreteUnivariateDistribution, x) = logaddexp(logccdf(d, x), logpdf(d, x))
+
+# like xlogx but for input on log scale, safe when x == -Inf
+function xexpx(x::Real)
+    result = x * exp(x)
+    return x == -Inf ? zero(result) : result
+end
