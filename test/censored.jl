@@ -169,7 +169,8 @@ end
                 @test @inferred(f(d)) ≈ f(dmix)
             end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
-            @test @inferred(quantile.(d, 0:0.01:1)) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
+            @inferred quantile(d, 0.5)
+            @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
             if lower === missing
@@ -264,7 +265,8 @@ end
                 @test @inferred(f(d)) ≈ f(dmix)
             end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
-            @test @inferred(quantile.(d, 0:0.01:1)) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
+            @inferred quantile(d, 0.5)
+            @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # rand
             x = rand(d, 10_000)
             @test all(x -> insupport(d, x), x)
