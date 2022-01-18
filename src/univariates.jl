@@ -385,7 +385,7 @@ julia> second_quartile = quantile(d, 0.50)
 julia> third_quartile = quantile(d, 0.75)
 0.6744897501960818
 
-julia> confidence_interval_95_percent = quantile(d, 0.025), quantile(d, 0.975)
+julia> quantile(d, 0.025), quantile(d, 0.975) # 95%-probability interval 
 (-1.9599639845400592, 1.9599639845400576)
 ```
 """
