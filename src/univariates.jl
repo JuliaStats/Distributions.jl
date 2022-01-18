@@ -367,7 +367,7 @@ logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
     quantile(d::UnivariateDistribution, q::Real)
 
 Evaluate the inverse cumulative distribution function at `q`.
-Use `quantile` to calculate quartiles, medians and confidence intervals.
+Uses of `quantile` include calculation of quartiles and confidence intervals.
 
 See also: [`cquantile`](@ref), [`invlogcdf`](@ref), and [`invlogccdf`](@ref).
 
