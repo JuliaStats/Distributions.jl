@@ -63,11 +63,9 @@ struct Censored{
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
     upper::TU      # upper bound
-    function Censored(d::UnivariateDistribution, l::T, u::T; check_args::Bool=true) where {T<:Real}
-        if check_args
-            l ≤ u || error("the lower bound must be less than or equal to the upper bound")
-        end
-        new{typeof(d), value_support(typeof(d)), T, T, T}(d, l, u)
+    function Censored(d::UnivariateDistribution, lower::T, upper::T; check_args::Bool=true) where {T<:Real}
+        check_args && @check_args(Censored, lower ≤ upper) 
+        new{typeof(d), value_support(typeof(d)), T, T, T}(d, lower, upper)
     end
     function Censored(d::UnivariateDistribution, l::Missing, u::Real; check_args::Bool=true)
         new{typeof(d), value_support(typeof(d)), typeof(u), Missing, typeof(u)}(d, l, u)
