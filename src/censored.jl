@@ -179,19 +179,19 @@ function mean(d::Censored)
         log_prob_upper = logccdf(d0, upper)
         prob_upper = exp(log_prob_upper)
     end
-    prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if prob_interval < eps(one(prob_interval)) # truncation contains ~ no probability
+    prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
+    if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
         if lower === missing
-            return one(prob_interval) * upper
+            return one(prob_trunc) * upper
         elseif upper === missing
-            return one(prob_interval) * lower
+            return one(prob_trunc) * lower
         else
             return prob_lower * (iszero(prob_lower) ? one(lower) : lower) +
                    prob_upper * (iszero(prob_upper) ? one(upper) : upper)
         end
     end
     dtrunc = _to_truncated(d)
-    μ = prob_interval * mean(dtrunc)
+    μ = prob_trunc * mean(dtrunc)
     if !iszero(prob_lower)
         μ += prob_lower * lower
     end
@@ -219,12 +219,12 @@ function var(d::Censored)
         log_prob_upper = logccdf(d0, upper)
         prob_upper = exp(log_prob_upper)
     end
-    prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if prob_interval < eps(one(prob_interval)) # truncation contains ~ no probability
+    prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
+    if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
         if lower === missing
-            return one(prob_interval) * abs2(zero(upper))
+            return one(prob_trunc) * abs2(zero(upper))
         elseif upper === missing
-            return one(prob_interval) * abs2(zero(lower))
+            return one(prob_trunc) * abs2(zero(lower))
         else
             μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
                 prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
@@ -235,8 +235,8 @@ function var(d::Censored)
     end
 
     dtrunc = _to_truncated(d)
-    μinterval = mean(dtrunc)
-    μ = prob_interval * μinterval
+    μ_trunc = mean(dtrunc)
+    μ = prob_trunc * μ_trunc
     if !iszero(prob_lower)
         μ += prob_lower * lower
     end
@@ -244,7 +244,7 @@ function var(d::Censored)
         μ += prob_upper * upper
     end
 
-    v = prob_interval * (var(dtrunc) + abs2(μinterval - μ))
+    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
     if !iszero(prob_lower)
         v += prob_lower * abs2(lower - μ)
     end
@@ -276,7 +276,7 @@ function entropy(d::Censored)
             xlogx_pu = 0
         end
         entropy_bound = -xexpx(log_prob_upper_inc)
-        log_prob_interval = log1mexp(log_prob_upper)    
+        log_prob_trunc = log1mexp(log_prob_upper)    
         xlogx_pl = 0
     elseif upper === missing
         log_prob_lower_inc = logcdf(d0, lower)
@@ -289,7 +289,7 @@ function entropy(d::Censored)
             xlogx_pl = 0
         end
         entropy_bound = -xexpx(log_prob_lower_inc)
-        log_prob_interval = log1mexp(log_prob_lower)    
+        log_prob_trunc = log1mexp(log_prob_lower)    
         xlogx_pu = 0
     else
         log_prob_lower_inc = logcdf(d0, lower)
@@ -307,17 +307,17 @@ function entropy(d::Censored)
             xlogx_pl = xlogx_pu = 0
         end
         entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
-        log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
+        log_prob_trunc = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     end
     
     # truncation contains ~ no probability
-    if log_prob_interval < log(eps(one(log_prob_interval)))
+    if log_prob_trunc < log(eps(one(log_prob_trunc)))
         return entropy_bound
     end
 
     dtrunc = _to_truncated(d)
     entropy_interval = 
-        exp(log_prob_interval) * entropy(dtrunc) - xexpx(log_prob_interval) + xlogx_pl + xlogx_pu
+        exp(log_prob_trunc) * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
     return entropy_bound + entropy_interval
 end
 
