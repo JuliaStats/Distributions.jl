@@ -186,8 +186,8 @@ function mean(d::Censored)
         elseif upper === missing
             return one(prob_trunc) * lower
         else
-            return prob_lower * (iszero(prob_lower) ? one(lower) : lower) +
-                   prob_upper * (iszero(prob_upper) ? one(upper) : upper)
+            return prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
+                   prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
         end
     end
     dtrunc = _to_truncated(d)
