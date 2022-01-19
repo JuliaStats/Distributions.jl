@@ -71,7 +71,13 @@ end
 
 @testset "Censored" begin
     @testset "basic" begin
+        # check_args
         @test_throws ErrorException Censored(Normal(0, 1), 2, 1)
+        @test_throws ErrorException Censored(Normal(0, 1), 2, 1; check_args=true)
+        Censored(Normal(0, 1), 2, 1; check_args=false)
+        Censored(Normal(0, 1), missing, 1; check_args=true)
+        Censored(Normal(0, 1), 2, missing; check_args=true)
+
         d = Censored(Normal(0.0, 1.0), -1, 2)
         @test d isa Censored
         @test eltype(d) === Float64
