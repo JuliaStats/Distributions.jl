@@ -180,7 +180,7 @@ function mean(d::Censored)
         prob_upper = exp(log_prob_upper)
     end
     prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if iszero(prob_interval) # truncation contains no probability
+    if prob_interval < eps(one(prob_interval)) # truncation contains ~ no probability
         if lower === missing
             return one(prob_interval) * upper
         elseif upper === missing
@@ -220,7 +220,7 @@ function var(d::Censored)
         prob_upper = exp(log_prob_upper)
     end
     prob_interval = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if iszero(prob_interval) # truncation contains no probability
+    if prob_interval < eps(one(prob_interval)) # truncation contains ~ no probability
         if lower === missing
             return one(prob_interval) * abs2(zero(upper))
         elseif upper === missing
@@ -309,8 +309,11 @@ function entropy(d::Censored)
         entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
         log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     end
-    # truncation contains no probability
-    log_prob_interval == -Inf && return entropy_bound
+    
+    # truncation contains ~ no probability
+    if log_prob_interval < log(eps(one(log_prob_interval)))
+        return entropy_bound
+    end
 
     dtrunc = _to_truncated(d)
     entropy_interval = 
