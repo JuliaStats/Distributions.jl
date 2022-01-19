@@ -94,7 +94,9 @@ function params(d::Censored)
     return (d0params..., d.lower, d.upper)
 end
 
-partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T} = promote_type(partype(d.uncensored), T)
+function partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
+    return promote_type(partype(d.uncensored), T)
+end
 
 Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D))
 
@@ -449,13 +451,17 @@ _eqnotmissing(::Real, ::Missing) = false
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 _logcdf_noninclusive(d::UnivariateDistribution, x) = logcdf(d, x)
-_logcdf_noninclusive(d::DiscreteUnivariateDistribution, x) = logsubexp(logcdf(d, x), logpdf(d, x))
+function _logcdf_noninclusive(d::DiscreteUnivariateDistribution, x)
+    return logsubexp(logcdf(d, x), logpdf(d, x))
+end
 
 _ccdf_inclusive(d::UnivariateDistribution, x) = ccdf(d, x)
 _ccdf_inclusive(d::DiscreteUnivariateDistribution, x) = ccdf(d, x) + pdf(d, x)
 
 _logccdf_inclusive(d::UnivariateDistribution, x) = logccdf(d, x)
-_logccdf_inclusive(d::DiscreteUnivariateDistribution, x) = logaddexp(logccdf(d, x), logpdf(d, x))
+function _logccdf_inclusive(d::DiscreteUnivariateDistribution, x)
+    return logaddexp(logccdf(d, x), logpdf(d, x))
+end
 
 # like xlogx but for input on log scale, safe when x == -Inf
 function xexpx(x::Real)
