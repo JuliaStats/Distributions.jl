@@ -28,15 +28,14 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-function Cauchy(μ::T, σ::T; check_args=true) where {T<:Real}
+function Cauchy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(Cauchy, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end
 
-Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
-Cauchy(μ::T) where {T<:Real} = Cauchy(μ, one(T))
-Cauchy() = Cauchy(0.0, 1.0, check_args=false)
+Cauchy(μ::Real, σ::Real; check_args::Bool=true) = Cauchy(promote(μ, σ)...; check_args=check_args)
+Cauchy(μ::Integer, σ::Integer; check_args::Bool=true) = Cauchy(float(μ), float(σ); check_args=check_args)
+Cauchy(μ::Real=0.0) = Cauchy(μ, one(μ); check_args=false)
 
 @distr_support Cauchy -Inf Inf
 

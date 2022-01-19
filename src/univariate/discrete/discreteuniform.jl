@@ -26,11 +26,11 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
     b::Int
     pv::Float64 # individual probabilities
 
-    function DiscreteUniform(a::Real, b::Real)
-        @check_args(DiscreteUniform, a <= b)
-        new(a, b, 1.0 / (b - a + 1))
+    function DiscreteUniform(a::Real, b::Real; check_args::Bool=true)
+        check_args && @check_args(DiscreteUniform, a <= b)
+        new(a, b, 1 / (b - a + 1))
     end
-    DiscreteUniform(b::Real) = DiscreteUniform(0, b)
+    DiscreteUniform(b::Real; check_args::Bool=true) = DiscreteUniform(0, b; check_args=check_args)
     DiscreteUniform() = new(0, 1, 0.5)
 end
 

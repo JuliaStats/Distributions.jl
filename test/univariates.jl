@@ -199,3 +199,20 @@ end
         @test @inferred(ccdf(d, 3.5)) === zero(XFT)
     end
 end
+
+# #1471
+@testset "InverseGamma constructor (#1471)" begin
+    @test_throws ArgumentError InverseGamma(-1, 2)
+    InverseGamma(-1, 2; check_args=false) # no error
+end
+
+# #1479
+@testset "Inner and outer constructors" begin
+    @test_throws ArgumentError InverseGaussian(0.0, 0.0)
+    @test InverseGaussian(0.0, 0.0; check_args=false) isa InverseGaussian{Float64}
+    @test InverseGaussian{Float64}(0.0, 0.0) isa InverseGaussian{Float64}
+
+    @test_throws ArgumentError Levy(0.0, 0.0)
+    @test Levy(0.0, 0.0; check_args=false) isa Levy{Float64}
+    @test Levy{Float64}(0.0, 0.0) isa Levy{Float64}
+end

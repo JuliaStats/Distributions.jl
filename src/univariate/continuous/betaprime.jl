@@ -32,15 +32,18 @@ struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function BetaPrime(α::T, β::T; check_args=true) where {T<:Real}
+function BetaPrime(α::T, β::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(BetaPrime, α > zero(α) && β > zero(β))
     return BetaPrime{T}(α, β)
 end
 
-BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
-BetaPrime(α::Real) = BetaPrime(α, α)
-BetaPrime() = BetaPrime(1.0, 1.0, check_args=false)
+BetaPrime(α::Real, β::Real; check_args::Bool=true) = BetaPrime(promote(α, β)...; check_args=check_args)
+BetaPrime(α::Integer, β::Integer; check_args::Bool=true) = BetaPrime(float(α), float(β); check_args=check_args)
+function BetaPrime(α::Real; check_args::Bool=true)
+    check_args && @check_args(BetaPrime, α > zero(α))
+    BetaPrime(α, α; check_args=false)
+end
+BetaPrime() = BetaPrime{Float64}(1.0, 1.0)
 
 @distr_support BetaPrime 0.0 Inf
 

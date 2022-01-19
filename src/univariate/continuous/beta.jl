@@ -32,15 +32,18 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function Beta(α::T, β::T; check_args=true) where {T<:Real}
+function Beta(α::T, β::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(Beta, α > zero(α) && β > zero(β))
     return Beta{T}(α, β)
 end
 
-Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
-Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1.0, 1.0, check_args=false)
+Beta(α::Real, β::Real; check_args::Bool=true) = Beta(promote(α, β)...; check_args=check_args)
+Beta(α::Integer, β::Integer; check_args::Bool=true) = Beta(float(α), float(β); check_args=check_args)
+function Beta(α::Real; check_args::Bool=true)
+    check_args && @check_args(Beta, α > zero(α))
+    Beta(α, α; check_args=false)
+end
+Beta() = Beta{Float64}(1.0, 1.0)
 
 @distr_support Beta 0.0 1.0
 
@@ -62,7 +65,7 @@ params(d::Beta) = (d.α, d.β)
 
 mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
-function mode(d::Beta; check_args=true)
+function mode(d::Beta; check_args::Bool=true)
     (α, β) = params(d)
     if check_args
         (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")
