@@ -48,7 +48,7 @@ end
 
 @testset "censored" begin
     d0 = Normal(0, 1)
-    @test_throws ErrorException censored(d0, 1, -1)
+    @test_throws ArgumentError censored(d0, 1, -1)
 
     d = censored(d0, -1, 1.0)
     @test d isa Censored
@@ -72,8 +72,8 @@ end
 @testset "Censored" begin
     @testset "basic" begin
         # check_args
-        @test_throws ErrorException Censored(Normal(0, 1), 2, 1)
-        @test_throws ErrorException Censored(Normal(0, 1), 2, 1; check_args=true)
+        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1)
+        @test_throws ArgumentError Censored(Normal(0, 1), 2, 1; check_args=true)
         Censored(Normal(0, 1), 2, 1; check_args=false)
         Censored(Normal(0, 1), missing, 1; check_args=true)
         Censored(Normal(0, 1), 2, missing; check_args=true)
