@@ -369,7 +369,7 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     logzero = T(-Inf)
 
     return sum(x) do xi
-        _in_open_interval(xi, lower, upper) && return logpdf(d0, xi)
+        _in_open_interval(xi, lower, upper) && return logpdf(d0, T(xi))
         _eqnotmissing(xi, lower) && return log_prob_lower
         _eqnotmissing(xi, upper) && return log_prob_upper
         return logzero
