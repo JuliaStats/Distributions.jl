@@ -323,74 +323,75 @@ end
 
 #### Evaluation
 
-function pdf(d::Censored, x::Real)
+function pdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
+    S = Base.promote_eltype(T, x)
     return if lower !== missing && x == lower
-        result = cdf(d0, x)
+        result = cdf(d0, S(x))
         _eqnotmissing(x, upper) ? one(result) : result
     elseif _eqnotmissing(x, upper)
-        _ccdf_inclusive(d0, x)
+        _ccdf_inclusive(d0, S(x))
     else
-        result = pdf(d0, x)
+        result = pdf(d0, S(x))
         _in_open_interval(x, lower, upper) ? result : zero(result)
     end
 end
 
-function logpdf(d::Censored, x::Real)
+function logpdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
+    S = Base.promote_eltype(T, x)
     return if lower !== missing && x == lower
-        result = logcdf(d0, x)
+        result = logcdf(d0, S(x))
         _eqnotmissing(x, upper) ? zero(result) : result
     elseif _eqnotmissing(x, upper)
-        _logccdf_inclusive(d0, x)
+        _logccdf_inclusive(d0, S(x))
     else
-        result = logpdf(d0, x)
+        result = logpdf(d0, S(x))
         _in_open_interval(x, lower, upper) ? result : oftype(result, -Inf)
     end
-
 end
 
-function loglikelihood(d::Censored, x::AbstractArray{<:Real})
+function loglikelihood(d::Censored{<:Any,<:Any,T}, x::AbstractArray{<:Real}) where {T}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    one_like_x = one(first(x))
-    if lower === missing
-        T = float(Base.promote_eltype(upper, one_like_x))
-    elseif upper === missing
-        T = float(Base.promote_eltype(lower, one_like_x))
-    else
-        T = float(Base.promote_eltype(lower, upper, one_like_x))
-    end
-    log_prob_lower = lower === missing ? 0 : logcdf(d0, T(lower))
-    log_prob_upper = upper === missing ? 0 : _logccdf_inclusive(d0, T(upper))
-    logzero = T(-Inf)
+    S = float(Base.promote_eltype(T, first(x)))
+    log_prob_lower = lower === missing ? 0 : logcdf(d0, S(lower))
+    log_prob_upper = upper === missing ? 0 : _logccdf_inclusive(d0, S(upper))
+    logzero = S(-Inf)
 
     return sum(x) do xi
-        _in_open_interval(xi, lower, upper) && return logpdf(d0, T(xi))
+        R = float(Base.promote_eltype(T, xi))
+        _in_open_interval(xi, lower, upper) && return logpdf(d0, R(xi))
         _eqnotmissing(xi, lower) && return log_prob_lower
         _eqnotmissing(xi, upper) && return log_prob_upper
         return logzero
     end
 end
 
-function cdf(d::Censored, x::Real)
-    result = cdf(d.uncensored, x)
-    return if d.lower !== missing && x < d.lower
+function cdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+    lower = d.lower
+    upper = d.upper
+    S = Base.promote_eltype(T, x)
+    result = cdf(d.uncensored, S(x))
+    return if lower !== missing && x < lower
         zero(result)
-    elseif d.upper === missing || x < d.upper
+    elseif upper === missing || x < upper
         result
     else
         one(result)
     end
 end
 
-function logcdf(d::Censored, x::Real)
-    result = logcdf(d.uncensored, x)
+function logcdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+    lower = d.lower
+    upper = d.upper
+    S = float(Base.promote_eltype(T, x))
+    result = logcdf(d.uncensored, S(x))
     return if d.lower !== missing && x < d.lower
         oftype(result, -Inf)
     elseif d.upper === missing || x < d.upper
@@ -400,22 +401,28 @@ function logcdf(d::Censored, x::Real)
     end
 end
 
-function ccdf(d::Censored, x::Real)
-    result = ccdf(d.uncensored, x)
-    return if d.lower !== missing && x < d.lower
+function ccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+    lower = d.lower
+    upper = d.upper
+    S = Base.promote_eltype(T, x)
+    result = ccdf(d.uncensored, S(x))
+    return if lower !== missing && x < lower
         one(result)
-    elseif d.upper === missing || x < d.upper
+    elseif upper === missing || x < upper
         result
     else
         zero(result)
     end
 end
 
-function logccdf(d::Censored, x::Real)
-    result = logccdf(d.uncensored, x)
-    return if d.lower !== missing && x < d.lower
+function logccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+    lower = d.lower
+    upper = d.upper
+    S = float(Base.promote_eltype(T, x))
+    result = logccdf(d.uncensored, S(x))
+    return if lower !== missing && x < lower
         zero(result)
-    elseif d.upper === missing || x < d.upper
+    elseif upper === missing || x < upper
         result
     else
         oftype(result, -Inf)
