@@ -374,6 +374,29 @@ end
         end
     end
 
+    @testset "mixed types are still type-inferrible" begin
+        bounds = [(missing, 8), (2, missing), (2, 8)]
+        @testset "lower = $lower, upper = $upper, uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
+                T in (Int, Float32, Float64), T0 in (Int, Float32, Float64)
+            d0 = Uniform(T0(0), T0(10))
+            d = censored(d0, ismissing(lower) ? missing : T(lower), ismissing(upper) ? missing : T(upper))
+            l, u = extrema(d)
+            @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
+                @inferred f(d, 3)
+                @inferred f(d, 4f0)
+                @inferred f(d, 5.0)
+            end
+            @testset for f in [median, mean, var, entropy]
+                @inferred f(d)
+            end
+            @inferred quantile(d, 0.3f0)
+            @inferred quantile(d, 0.5)
+            x = randn(Float32, 100)
+            @inferred loglikelihood(d, x)
+            x = randn(100)
+            @inferred loglikelihood(d, x)
+        end
+    end
 end
 
 end # module
