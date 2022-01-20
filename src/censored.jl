@@ -312,54 +312,47 @@ function entropy(d::Censored)
     
     # truncation contains ~ no probability
     if log_prob_trunc < log(eps(one(log_prob_trunc)))
-        entropy_trunc = zero(entropy_bound)
-    else
-        entropy_trunc = oftype(entropy_bound, entropy(_to_truncated(d)))
+        return entropy_bound
     end
-    entropy_interval = exp(log_prob_trunc) * entropy_trunc - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
+
+    dtrunc = _to_truncated(d)
+    entropy_interval = 
+        exp(log_prob_trunc) * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
     return entropy_bound + entropy_interval
 end
 
 
 #### Evaluation
 
-function pdf(d::Censored{<:Any,<:Any,T}, x0::Real) where {T}
+function pdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x0)
-    x = S(x0)
-    px = float(pdf(d0, x))
+    S = Base.promote_eltype(T, x)
     return if lower !== missing && x == lower
-        _eqnotmissing(x, upper) ? one(px) : oftype(px, cdf(d0, x))
+        result = cdf(d0, S(x))
+        _eqnotmissing(x, upper) ? one(result) : result
     elseif _eqnotmissing(x, upper)
-        if value_support(typeof(d0)) === Discrete
-            oftype(px, ccdf(d0, x) + px)
-        else
-            oftype(px, ccdf(d0, x))
-        end
+        _ccdf_inclusive(d0, S(x))
     else
-        _in_open_interval(x, lower, upper) ? px : zero(px)
+        result = pdf(d0, S(x))
+        _in_open_interval(x, lower, upper) ? result : zero(result)
     end
 end
 
-function logpdf(d::Censored{<:Any,<:Any,T}, x0::Real) where {T}
+function logpdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x0)
-    x = S(x0)
-    logpx = float(logpdf(d0, x))
+    S = Base.promote_eltype(T, x)
     return if lower !== missing && x == lower
-        _eqnotmissing(x, upper) ? zero(logpx) : oftype(logpx, logcdf(d0, x))
+        result = logcdf(d0, S(x))
+        _eqnotmissing(x, upper) ? zero(result) : result
     elseif _eqnotmissing(x, upper)
-        if value_support(typeof(d0)) === Discrete
-            oftype(logpx, logaddexp(logccdf(d0, x), logpx))
-        else
-            oftype(logpx, logccdf(d0, x))
-        end
+        _logccdf_inclusive(d0, S(x))
     else
-        _in_open_interval(x, lower, upper) ? logpx : oftype(logpx, -Inf)
+        result = logpdf(d0, S(x))
+        _in_open_interval(x, lower, upper) ? result : oftype(result, -Inf)
     end
 end
 
@@ -367,14 +360,14 @@ function loglikelihood(d::Censored{<:Any,<:Any,T}, x::AbstractArray{<:Real}) whe
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x)
-    x1 = S(first(x))
-    logpx1 = float(logpdf(d0, x1))
-    log_prob_lower = lower === missing ? zero(logpx1) : oftype(logpx1, logcdf(d0, S(lower)))
-    log_prob_upper = upper === missing ? zero(logpx1) : oftype(logpx1, _logccdf_inclusive(d0, S(upper)))
-    logzero = oftype(logpx1, -Inf)
+    S = float(Base.promote_eltype(T, first(x)))
+    log_prob_lower = lower === missing ? 0 : logcdf(d0, S(lower))
+    log_prob_upper = upper === missing ? 0 : _logccdf_inclusive(d0, S(upper))
+    logzero = S(-Inf)
+
     return sum(x) do xi
-        _in_open_interval(xi, lower, upper) && return oftype(logpx1, logpdf(d0, oftype(x1, xi)))
+        R = float(Base.promote_eltype(T, xi))
+        _in_open_interval(xi, lower, upper) && return logpdf(d0, R(xi))
         _eqnotmissing(xi, lower) && return log_prob_lower
         _eqnotmissing(xi, upper) && return log_prob_upper
         return logzero
