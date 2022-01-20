@@ -10,7 +10,7 @@ x^{\\alpha - 1} (1 + x)^{- (\\alpha + \\beta)}, \\quad x > 0
 
 
 The Beta prime distribution is related to the [`Beta`](@ref) distribution via the
-relation ship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
+relationship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
 \\sim \\operatorname{BetaPrime}(\\alpha, \\beta)``
 
 ```julia
