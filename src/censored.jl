@@ -352,7 +352,9 @@ function pdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     px = float(pdf(d0, x))
-    return if lower !== missing && x == lower
+    return if _in_open_interval(x, lower, upper)
+        px
+    elseif _eqnotmissing(x, lower)
         _eqnotmissing(x, upper) ? one(px) : oftype(px, cdf(d0, x))
     elseif _eqnotmissing(x, upper)
         if value_support(typeof(d0)) === Discrete
@@ -360,8 +362,8 @@ function pdf(d::Censored, x::Real)
         else
             oftype(px, ccdf(d0, x))
         end
-    else
-        _in_open_interval(x, lower, upper) ? px : zero(px)
+    else  # not in support
+        zero(px)
     end
 end
 
@@ -370,7 +372,9 @@ function logpdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     logpx = float(logpdf(d0, x))
-    return if lower !== missing && x == lower
+    return if _in_open_interval(x, lower, upper)
+        logpx
+    elseif _eqnotmissing(x, lower)
         _eqnotmissing(x, upper) ? zero(logpx) : oftype(logpx, logcdf(d0, x))
     elseif _eqnotmissing(x, upper)
         if value_support(typeof(d0)) === Discrete
@@ -378,8 +382,8 @@ function logpdf(d::Censored, x::Real)
         else
             oftype(logpx, logccdf(d0, x))
         end
-    else
-        _in_open_interval(x, lower, upper) ? logpx : oftype(logpx, -Inf)
+    else  # not in support
+        oftype(logpx, -Inf)
     end
 end
 
