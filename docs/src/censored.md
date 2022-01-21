@@ -50,11 +50,11 @@ distribution if they are also available for its truncation:
 - [`std(::UnivariateDistribution)`](@ref)
 - [`entropy(::UnivariateDistribution)`](@ref)
 
-For example, these functions are available for:
-- `Censored{<:Uniform}`
-- `Censored{<:DiscreteUniform}`
-- `Censored{<:LogUniform}`.
-- `Censored{<:Normal}`
-- `Censored{<:Exponential}`
+For example, these functions are available if the uncensored distribution is a
+- `DiscreteUniform`
+- `Exponential`
+- `LogUniform`
+- `Normal`
+- `Uniform`
 
-`mode` is not implemented for censored distributions.
+[`mode`](@ref) is not implemented for censored distributions.
