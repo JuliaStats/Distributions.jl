@@ -117,12 +117,12 @@ minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 maximum(d::RightCensored) = max(maximum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
 
-function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
+function insupport(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
     return (
-        _in_open_interval(x, lower, upper) ||
+        (_in_open_interval(x, lower, upper) && insupport(d0, x)) ||
         (_eqnotmissing(x, lower) && cdf(d0, lower) > 0) ||
         (_eqnotmissing(x, upper) && _ccdf_inclusive(d0, upper) > 0)
     )
