@@ -1,8 +1,9 @@
 """
-    censored(d0::UnivariateDistribution, lower::Union{Real,Nothing}, upper::Union{Real,Nothing})
+    censored(d0::UnivariateDistribution; [lower::Real], [upper::Real])
+    censored(d0::UnivariateDistribution, lower::Real, upper::Real)
 
-A _censored distribution_ `d` of a distribution `d0` to the interval ``[l, u]=`` `[lower,upper]`
-has the probability density (mass) function:
+A _censored distribution_ `d` of a distribution `d0` to the interval
+``[l, u]=```[lower, upper]` has the probability density (mass) function:
 
 ```math
 f(x; d_0, l, u) = \\begin{cases}
@@ -20,17 +21,19 @@ Therefore a censored continuous distribution has atoms and is a mixture of discr
 continuous components.
 
 ```julia
-censored(d0, l, nothing)   # d0 left-censored to the interval [l, Inf)
-censored(d0, nothing, u)   # d0 right-censored to the interval (-Inf, u]
-censored(d0, l, u)         # d0 interval-censored to the interval [l, u]
+censored(d0; lower=l)           # d0 left-censored to the interval [l, Inf)
+censored(d0; upper=u)           # d0 right-censored to the interval (-Inf, u]
+censored(d0; lower=l, upper=u)  # d0 interval-censored to the interval [l, u]
+censored(d0, l, u)              # d0 interval-censored to the interval [l, u]
 ```
 
 The function falls back to constructing a [`Censored`](@ref) wrapper.
 
 # Implementation
 
-To implement a specialized censored form for distributions of type `D`, one or more of the
-following methods should be implemented:
+To implement a specialized censored form for distributions of type `D`, instead of
+overloading a method with one of the above signatures, one or more of the following methods
+should be implemented:
 - `censored(d0::D, l::T, u::T) where {T <: Real}`
 - `censored(d0::D, ::Nothing, u::Real)`
 - `censored(d0::D, l::Real, ::Nothing)`
