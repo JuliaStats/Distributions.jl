@@ -173,7 +173,7 @@ function mean(d::RightCensored)
     prob_trunc < eps(one(prob_trunc)) && return μ
     return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
 end
-function mean(d::IntervalCensored)
+function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
