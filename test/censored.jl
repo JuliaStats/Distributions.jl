@@ -58,12 +58,12 @@ end
 
     d = censored(d0, nothing, -1)
     @test d isa Censored
-    @test isnothing(d.lower)
+    @test d.lower === nothing
     @test d.upper == -1
 
     d = censored(d0, 1, nothing)
     @test d isa Censored
-    @test isnothing(d.upper)
+    @test d.upper === nothing
     @test d.lower == 1
 
     d = censored(d0, nothing, nothing)
@@ -77,12 +77,12 @@ end
 
     d = censored(d0; upper=true)
     @test d isa Censored
-    @test isnothing(d.lower)
+    @test d.lower === nothing
     @test d.upper === true
 
     d = censored(d0; lower=-3)
     @test d isa Censored
-    @test isnothing(d.upper)
+    @test d.upper === nothing
     @test d.lower === -3
 
     d = censored(d0)
@@ -396,7 +396,7 @@ end
         @testset "lower = $lower, upper = $upper, uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
                 T in (Int, Float32, Float64), T0 in (Int, Float32, Float64)
             d0 = Uniform(T0(0), T0(10))
-            d = censored(d0, isnothing(lower) ? nothing : T(lower), isnothing(upper) ? nothing : T(upper))
+            d = censored(d0, lower === nothing ? nothing : T(lower), upper === nothing ? nothing : T(upper))
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
                 @inferred f(d, 3)
