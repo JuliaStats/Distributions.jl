@@ -105,28 +105,17 @@ Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D)
 
 #### Range and Support
 
-function islowerbounded(d::Censored)
-    return (
-        islowerbounded(d.uncensored) ||
-        (d.lower !== missing && cdf(d.uncensored, d.lower) > 0)
-    )
-end
-function isupperbounded(d::Censored)
-    return (
-        isupperbounded(d.uncensored) ||
-        (d.upper !== missing && _ccdf_inclusive(d.uncensored, d.upper) > 0)
-    )
-end
+islowerbounded(d::LeftCensored) = islowerbounded(d.uncensored)
+islowerbounded(d::Censored) = islowerbounded(d.uncensored) || cdf(d.uncensored, d.lower) > 0
 
-function minimum(d::Censored)
-    d0min = minimum(d.uncensored)
-    return d.lower === missing ? min(d0min, d.upper) : max(d0min, d.lower)
-end
+isupperbounded(d::RightCensored) = isupperbounded(d.uncensored)
+isupperbounded(d::Censored) = isupperbounded(d.uncensored) || _ccdf_inclusive(d.uncensored, d.upper) > 0
 
-function maximum(d::Censored)
-    d0max = maximum(d.uncensored)
-    return d.upper === missing ? max(d0max, d.lower) : min(d0max, d.upper)
-end
+minimum(d::LeftCensored) = min(minimum(d.uncensored), d.upper)
+minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
+
+maximum(d::RightCensored) = max(maximum(d.uncensored), d.lower)
+maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
 
 function insupport(d::Censored{<:UnivariateDistribution}, x::Real)
     d0 = d.uncensored
