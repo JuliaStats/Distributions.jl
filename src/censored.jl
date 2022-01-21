@@ -145,7 +145,13 @@ function show(io::IO, ::MIME"text/plain", d::Censored)
     d0 = d.uncensored
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals; newline=false) : show_oneline(io, d0, namevals)
-    print(io, ", range=(", d.lower, ", ", d.upper, "))")
+    if d.lower === nothing
+        print(io, "; upper=$(d.upper))")
+    elseif d.upper === nothing
+        print(io, "; lower=$(d.lower))")
+    else
+        print(io, "; lower=$(d.lower), upper=$(d.upper))")
+    end
 end
 
 _use_multline_show(d::Censored) = _use_multline_show(d.uncensored)
