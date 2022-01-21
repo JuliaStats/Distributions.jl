@@ -316,35 +316,39 @@ end
 
 #### Evaluation
 
-function pdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function pdf(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x)
+    px = float(pdf(d0, x))
     return if lower !== missing && x == lower
-        result = cdf(d0, S(x))
-        _eqnotmissing(x, upper) ? one(result) : result
+        _eqnotmissing(x, upper) ? one(px) : oftype(px, cdf(d0, x))
     elseif _eqnotmissing(x, upper)
-        _ccdf_inclusive(d0, S(x))
+        if value_support(typeof(d0)) === Discrete
+            oftype(px, ccdf(d0, x) + px)
+        else
+            oftype(px, ccdf(d0, x))
+        end
     else
-        result = pdf(d0, S(x))
-        _in_open_interval(x, lower, upper) ? result : zero(result)
+        _in_open_interval(x, lower, upper) ? px : zero(px)
     end
 end
 
-function logpdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function logpdf(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x)
+    logpx = float(logpdf(d0, x))
     return if lower !== missing && x == lower
-        result = logcdf(d0, S(x))
-        _eqnotmissing(x, upper) ? zero(result) : result
+        _eqnotmissing(x, upper) ? zero(logpx) : oftype(logpx, logcdf(d0, x))
     elseif _eqnotmissing(x, upper)
-        _logccdf_inclusive(d0, S(x))
+        if value_support(typeof(d0)) === Discrete
+            oftype(logpx, logaddexp(logccdf(d0, x), logpx))
+        else
+            oftype(logpx, logccdf(d0, x))
+        end
     else
-        result = logpdf(d0, S(x))
-        _in_open_interval(x, lower, upper) ? result : oftype(result, -Inf)
+        _in_open_interval(x, lower, upper) ? logpx : oftype(logpx, -Inf)
     end
 end
 
