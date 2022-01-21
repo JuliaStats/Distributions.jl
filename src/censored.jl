@@ -387,18 +387,16 @@ function logpdf(d::Censored, x::Real)
     end
 end
 
-function loglikelihood(d::Censored{<:Any,<:Any,T}, x::AbstractArray{<:Real}) where {T}
+function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    S = float(Base.promote_eltype(T, first(x)))
-    log_prob_lower = lower === missing ? 0 : logcdf(d0, S(lower))
-    log_prob_upper = upper === missing ? 0 : _logccdf_inclusive(d0, S(upper))
-    logzero = S(-Inf)
-
+    logpx = float(logpdf(d0, first(x)))
+    log_prob_lower = lower === missing ? zero(logpx) : oftype(logpx, logcdf(d0, lower))
+    log_prob_upper = upper === missing ? zero(logpx) : oftype(logpx, _logccdf_inclusive(d0, upper))
+    logzero = oftype(logpx, -Inf)
     return sum(x) do xi
-        R = float(Base.promote_eltype(T, xi))
-        _in_open_interval(xi, lower, upper) && return logpdf(d0, R(xi))
+        _in_open_interval(xi, lower, upper) && return float(logpdf(d0, xi))
         _eqnotmissing(xi, lower) && return log_prob_lower
         _eqnotmissing(xi, upper) && return log_prob_upper
         return logzero
