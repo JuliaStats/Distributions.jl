@@ -12,13 +12,12 @@ f(x; d_0, l, u) = \\begin{cases}
     P_{Z \\sim d_0}(Z \\ge u), & x = u \\\\
   \\end{cases}, \\quad x \\in [l, u]
 ```
-where ``f_{d_0}`` is the probability density (mass) function of ``d_0``.
+where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
-If ``Z`` is a variate from ``d_0``, and `X = clamp(Z, l, u)`, then ``X`` is a variate from
-``d``, the censored version of ``d_0``. Note that this implies that even if ``d_0`` is
-continuous, its censored form assigns positive probability to the bounds ``l`` and `u``.
-Therefore a censored continuous distribution has atoms and is a mixture of discrete and
-continuous components.
+If ``Z \\sim d_0``, and `X = clamp(Z, l, u)`, then ``X \\sim d``. Note that this implies
+that even if ``d_0`` is continuous, its censored form assigns positive probability to the
+bounds ``l`` and `u``. Therefore a censored continuous distribution has atoms and is a
+mixture of discrete and continuous components.
 
 ```julia
 censored(d0; lower=l)           # d0 left-censored to the interval [l, Inf)
