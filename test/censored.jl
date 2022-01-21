@@ -10,20 +10,20 @@ function _as_mixture(d::Censored)
     dtrunc = if d0 isa DiscreteUniform || d0 isa Poisson
         truncated(
             d0,
-            d.lower === missing ? -Inf : floor(d.lower) + 1,
-            d.upper === missing ? Inf : ceil(d.upper) - 1,
+            d.lower === nothing ? -Inf : floor(d.lower) + 1,
+            d.upper === nothing ? Inf : ceil(d.upper) - 1,
         )
     elseif d0 isa ContinuousDistribution
         truncated(
             d0,
-            d.lower === missing ? -Inf : nextfloat(float(d.lower)),
-            d.upper === missing ? Inf : prevfloat(float(d.upper)),
+            d.lower === nothing ? -Inf : nextfloat(float(d.lower)),
+            d.upper === nothing ? Inf : prevfloat(float(d.upper)),
         )
     else
         error("truncation to open interval not implemented for $d0")
     end
-    prob_lower = d.lower === missing ? 0 : cdf(d0, d.lower)
-    prob_upper = if d.upper === missing
+    prob_lower = d.lower === nothing ? 0 : cdf(d0, d.lower)
+    prob_upper = if d.upper === nothing
         0
     elseif d0 isa ContinuousDistribution
         ccdf(d0, d.upper)
@@ -55,17 +55,17 @@ end
     @test d.lower === -1.0
     @test d.upper === 1.0
 
-    d = censored(d0, missing, -1)
+    d = censored(d0, nothing, -1)
     @test d isa Censored
-    @test ismissing(d.lower)
+    @test isnothing(d.lower)
     @test d.upper == -1
 
-    d = censored(d0, 1, missing)
+    d = censored(d0, 1, nothing)
     @test d isa Censored
-    @test ismissing(d.upper)
+    @test isnothing(d.upper)
     @test d.lower == 1
 
-    d = censored(d0, missing, missing)
+    d = censored(d0, nothing, nothing)
     @test d === d0
 end
 
@@ -75,8 +75,8 @@ end
         @test_throws ArgumentError Censored(Normal(0, 1), 2, 1)
         @test_throws ArgumentError Censored(Normal(0, 1), 2, 1; check_args=true)
         Censored(Normal(0, 1), 2, 1; check_args=false)
-        Censored(Normal(0, 1), missing, 1; check_args=true)
-        Censored(Normal(0, 1), 2, missing; check_args=true)
+        Censored(Normal(0, 1), nothing, 1; check_args=true)
+        Censored(Normal(0, 1), 2, nothing; check_args=true)
 
         d = Censored(Normal(0.0, 1.0), -1, 2)
         @test d isa Censored
@@ -93,10 +93,10 @@ end
         @test !insupport(d, 2.1)
         @test sprint(show, "text/plain", d) == "Censored($(Normal(0.0, 1.0)), range=(-1, 2))"
 
-        d = Censored(Cauchy(0, 1), missing, 2)
+        d = Censored(Cauchy(0, 1), nothing, 2)
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Cauchy(0, 1)), Int)
-        @test params(d) === (params(Cauchy(0, 1))..., missing, 2)
+        @test params(d) === (params(Cauchy(0, 1))..., nothing, 2)
         @test partype(d) === Float64
         @test extrema(d) == (-Inf, 2.0)
         @test @inferred !islowerbounded(d)
@@ -105,12 +105,12 @@ end
         @test insupport(d, -3)
         @test insupport(d, 2)
         @test !insupport(d, 2.1)
-        @test sprint(show, "text/plain", d) == "Censored($(Cauchy(0.0, 1.0)), range=(missing, 2))"
+        @test sprint(show, "text/plain", d) == "Censored($(Cauchy(0.0, 1.0)), range=(nothing, 2))"
 
-        d = Censored(Gamma(1, 2), 2, missing)
+        d = Censored(Gamma(1, 2), 2, nothing)
         @test d isa Censored
         @test eltype(d) === Base.promote_type(eltype(Gamma(1, 2)), Int)
-        @test params(d) === (params(Gamma(1, 2))..., 2, missing)
+        @test params(d) === (params(Gamma(1, 2))..., 2, nothing)
         @test partype(d) === Float64
         @test extrema(d) == (2.0, Inf)
         @test @inferred islowerbounded(d)
@@ -118,7 +118,7 @@ end
         @test @inferred insupport(d, 2.1)
         @test insupport(d, 2.0)
         @test !insupport(d, 1.9)
-        @test sprint(show, "text/plain", d) == "Censored($(Gamma(1, 2)), range=(2, missing))"
+        @test sprint(show, "text/plain", d) == "Censored($(Gamma(1, 2)), range=(2, nothing))"
 
         d = Censored(Binomial(10, 0.2), -1.5, 9.5)
         @test extrema(d) === (0.0, 9.5)
@@ -129,37 +129,37 @@ end
         @test insupport(d, 9.5)
         @test !insupport(d, 10)
 
-        @test censored(Censored(Normal(), 1, missing), missing, 2) == Censored(Normal(), 1, 2)
-        @test censored(Censored(Normal(), missing, 1), -1, missing) == Censored(Normal(), -1, 1)
+        @test censored(Censored(Normal(), 1, nothing), nothing, 2) == Censored(Normal(), 1, 2)
+        @test censored(Censored(Normal(), nothing, 1), -1, nothing) == Censored(Normal(), -1, 1)
         @test censored(Censored(Normal(), 1, 2), 1.5, 2.5) == Censored(Normal(), 1.5, 2.0)
         @test censored(Censored(Normal(), 1, 3), 1.5, 2.5) == Censored(Normal(), 1.5, 2.5)
         @test censored(Censored(Normal(), 1, 2), 0.5, 2.5) == Censored(Normal(), 1.0, 2.0)
         @test censored(Censored(Normal(), 1, 2), 0.5, 1.5) == Censored(Normal(), 1.0, 1.5)
 
-        @test censored(Censored(Normal(), missing, 1), missing, 1) == Censored(Normal(), missing, 1)
-        @test censored(Censored(Normal(), missing, 1), missing, 2) == Censored(Normal(), missing, 1)
-        @test censored(Censored(Normal(), missing, 1), missing, 1.5) == Censored(Normal(), missing, 1)
-        @test censored(Censored(Normal(), missing, 1.5), missing, 1) == Censored(Normal(), missing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 1) == Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 2) == Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1), nothing, 1.5) == Censored(Normal(), nothing, 1)
+        @test censored(Censored(Normal(), nothing, 1.5), nothing, 1) == Censored(Normal(), nothing, 1)
 
-        @test censored(Censored(Normal(), 1, missing), 1, missing) == Censored(Normal(), 1, missing)
-        @test censored(Censored(Normal(), 1, missing), 2, missing) == Censored(Normal(), 2, missing)
-        @test censored(Censored(Normal(), 1, missing), 1.5, missing) == Censored(Normal(), 1.5, missing)
-        @test censored(Censored(Normal(), 1.5, missing), 1, missing) == Censored(Normal(), 1.5, missing)
+        @test censored(Censored(Normal(), 1, nothing), 1, nothing) == Censored(Normal(), 1, nothing)
+        @test censored(Censored(Normal(), 1, nothing), 2, nothing) == Censored(Normal(), 2, nothing)
+        @test censored(Censored(Normal(), 1, nothing), 1.5, nothing) == Censored(Normal(), 1.5, nothing)
+        @test censored(Censored(Normal(), 1.5, nothing), 1, nothing) == Censored(Normal(), 1.5, nothing)
     end
 
     @testset "Uniform" begin
         d0 = Uniform(0, 10)
-        bounds = [(missing, 8), (2, missing), (2, 8), (3.5, missing)]
+        bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
         @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
-            if lower === missing
+            if lower === nothing
                 @test l == minimum(d0)
             else
                 @test l == lower
             end
-            if upper === missing
+            if upper === nothing
                 @test u == maximum(d0)
             else
                 @test u == upper
@@ -179,14 +179,14 @@ end
             @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
-            if lower === missing
+            if lower === nothing
                 @test @inferred(pdf(d, l)) ≈ pdf(d0, l)
                 @test @inferred(logpdf(d, l)) ≈ logpdf(d0, l)
             else
                 @test @inferred(pdf(d, l)) ≈ cdf(d0, l)
                 @test @inferred(logpdf(d, l)) ≈ logcdf(d0, l)
             end
-            if upper === missing
+            if upper === nothing
                 @test @inferred(pdf(d, u)) ≈ pdf(d0, u)
                 @test @inferred(logpdf(d, u)) ≈ logpdf(d0, u)
             else
@@ -206,7 +206,7 @@ end
 
     @testset "Normal" begin
         d0 = Normal()
-        bounds = [(missing, 0.2), (-0.1, missing), (-0.1, 0.2)]
+        bounds = [(nothing, 0.2), (-0.1, nothing), (-0.1, 0.2)]
         @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
@@ -225,14 +225,14 @@ end
             @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
-            if lower === missing
+            if lower === nothing
                 @test pdf(d, l) ≈ pdf(d0, l)
                 @test logpdf(d, l) ≈ logpdf(d0, l)
             else
                 @test pdf(d, l) ≈ cdf(d0, l)
                 @test logpdf(d, l) ≈ logcdf(d0, l)
             end
-            if upper === missing
+            if upper === nothing
                 @test pdf(d, u) ≈ pdf(d0, u)
                 @test logpdf(d, u) ≈ logpdf(d0, u)
             else
@@ -251,7 +251,7 @@ end
 
     @testset "DiscreteUniform" begin
         d0 = DiscreteUniform(0, 10)
-        bounds = [(missing, 8), (2, missing), (2, 8), (3.5, missing)]
+        bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
         @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
@@ -290,7 +290,7 @@ end
 
     @testset "Poisson" begin
         d0 = Poisson(20)
-        bounds = [(missing, 12), (2, missing), (2, 12), (8, missing)]
+        bounds = [(nothing, 12), (2, nothing), (2, 12), (8, nothing)]
         @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
@@ -318,17 +318,17 @@ end
 
     @testset "interval containing no probability" begin
         d0 = MixtureModel([Uniform(-1, 1), Uniform(10, 11)], [0.3, 0.7])
-        bounds = [(missing, -5), (12, missing), (3, 8)]
+        bounds = [(nothing, -5), (12, nothing), (3, 8)]
         @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
-            if lower === missing
+            if lower === nothing
                 @test l == min(minimum(d0), u)
             else
                 @test l == lower
             end
-            if upper === missing
+            if upper === nothing
                 @test u == max(maximum(d0), l)
             else
                 @test u == upper
@@ -347,14 +347,14 @@ end
             @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
-            if lower === missing
+            if lower === nothing
                 @test pdf(d, l) ≈ 1
                 @test logpdf(d, l) ≈ 0
             else
                 @test pdf(d, l) ≈ cdf(d0, l)
                 @test logpdf(d, l) ≈ logcdf(d0, l)
             end
-            if upper === missing
+            if upper === nothing
                 @test pdf(d, u) ≈ 1
                 @test logpdf(d, u) ≈ 0
             else
@@ -372,11 +372,11 @@ end
     end
 
     @testset "mixed types are still type-inferrible" begin
-        bounds = [(missing, 8), (2, missing), (2, 8)]
+        bounds = [(nothing, 8), (2, nothing), (2, 8)]
         @testset "lower = $lower, upper = $upper, uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
                 T in (Int, Float32, Float64), T0 in (Int, Float32, Float64)
             d0 = Uniform(T0(0), T0(10))
-            d = censored(d0, ismissing(lower) ? missing : T(lower), ismissing(upper) ? missing : T(upper))
+            d = censored(d0, isnothing(lower) ? nothing : T(lower), isnothing(upper) ? nothing : T(upper))
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
                 @inferred f(d, 3)

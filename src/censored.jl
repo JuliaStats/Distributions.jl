@@ -1,5 +1,5 @@
 """
-    censored(d0::UnivariateDistribution, lower::Union{Real,Missing}, upper::Union{Real,Missing})
+    censored(d0::UnivariateDistribution, lower::Union{Real,Nothing}, upper::Union{Real,Nothing})
 
 A _censored distribution_ `d` of a distribution `d0` to the interval ``[l, u]=`` `[lower,upper]`
 has the probability density (mass) function:
@@ -20,8 +20,8 @@ Therefore a censored continuous distribution has atoms and is a mixture of discr
 continuous components.
 
 ```julia
-censored(d0, l, missing)   # d0 left-censored to the interval [l, Inf)
-censored(d0, missing, u)   # d0 right-censored to the interval (-Inf, u]
+censored(d0, l, nothing)   # d0 left-censored to the interval [l, Inf)
+censored(d0, nothing, u)   # d0 right-censored to the interval (-Inf, u]
 censored(d0, l, u)         # d0 interval-censored to the interval [l, u]
 ```
 
@@ -32,21 +32,21 @@ The function falls back to constructing a [`Censored`](@ref) wrapper.
 To implement a specialized censored form for distributions of type `D`, one or more of the
 following methods should be implemented:
 - `censored(d0::D, l::T, u::T) where {T <: Real}`
-- `censored(d0::D, ::Missing, u::Real)`
-- `censored(d0::D, l::Real, ::Missing)`
+- `censored(d0::D, ::Nothing, u::Real)`
+- `censored(d0::D, l::Real, ::Nothing)`
 """
 censored
 function censored(d0::UnivariateDistribution, l::T, u::T) where {T<:Real}
     return Censored(d0, l, u)
 end
-function censored(d0::UnivariateDistribution, ::Missing, u::Real)
-    return Censored(d0, missing, u)
+function censored(d0::UnivariateDistribution, ::Nothing, u::Real)
+    return Censored(d0, nothing, u)
 end
-function censored(d0::UnivariateDistribution, l::Real, ::Missing)
-    return Censored(d0, l, missing)
+function censored(d0::UnivariateDistribution, l::Real, ::Nothing)
+    return Censored(d0, l, nothing)
 end
 censored(d0::UnivariateDistribution, l::Real, u::Real) = censored(d0, promote(l, u)...)
-censored(d0::UnivariateDistribution, ::Missing, ::Missing) = d0
+censored(d0::UnivariateDistribution, ::Nothing, ::Nothing) = d0
 
 """
     Censored
@@ -57,8 +57,8 @@ struct Censored{
     D<:UnivariateDistribution,
     S<:ValueSupport,
     T<:Real,
-    TL<:Union{T,Missing},
-    TU<:Union{T,Missing},
+    TL<:Union{T,Nothing},
+    TU<:Union{T,Nothing},
 } <: UnivariateDistribution{S}
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
@@ -67,29 +67,29 @@ struct Censored{
         check_args && @check_args(Censored, lower ≤ upper) 
         new{typeof(d0), value_support(typeof(d0)), T, T, T}(d0, lower, upper)
     end
-    function Censored(d0::UnivariateDistribution, l::Missing, u::Real; check_args::Bool=true)
-        new{typeof(d0), value_support(typeof(d0)), typeof(u), Missing, typeof(u)}(d0, l, u)
+    function Censored(d0::UnivariateDistribution, l::Nothing, u::Real; check_args::Bool=true)
+        new{typeof(d0), value_support(typeof(d0)), typeof(u), Nothing, typeof(u)}(d0, l, u)
     end
-    function Censored(d0::UnivariateDistribution, l::Real, u::Missing; check_args::Bool=true)
-        new{typeof(d0), value_support(typeof(d0)), typeof(l), typeof(l), Missing}(d0, l, u)
+    function Censored(d0::UnivariateDistribution, l::Real, u::Nothing; check_args::Bool=true)
+        new{typeof(d0), value_support(typeof(d0)), typeof(l), typeof(l), Nothing}(d0, l, u)
     end
 end
 
-const LeftCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,Missing,T}
-const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,T,Missing}
+const LeftCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,Nothing,T}
+const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,T,Nothing}
 
 function censored(d::Censored, l::T, u::T) where {T<:Real}
     return censored(
         d.uncensored,
-        d.lower === missing ? l : max(l, d.lower),
-        d.upper === missing ? u : min(u, d.upper),
+        d.lower === nothing ? l : max(l, d.lower),
+        d.upper === nothing ? u : min(u, d.upper),
     )
 end
-function censored(d::Censored, ::Missing, u::Real)
-    return censored(d.uncensored, d.lower, d.upper === missing ? u : min(u, d.upper))
+function censored(d::Censored, ::Nothing, u::Real)
+    return censored(d.uncensored, d.lower, d.upper === nothing ? u : min(u, d.upper))
 end
-function censored(d::Censored, l::Real, ::Missing)
-    return censored(d.uncensored, d.lower === missing ? l : max(l, d.lower), d.upper)
+function censored(d::Censored, l::Real, ::Nothing)
+    return censored(d.uncensored, d.lower === nothing ? l : max(l, d.lower), d.upper)
 end
 
 function params(d::Censored)
@@ -123,8 +123,8 @@ function insupport(d::Censored, x::Real)
     upper = d.upper
     return (
         (_in_open_interval(x, lower, upper) && insupport(d0, x)) ||
-        (_eqnotmissing(x, lower) && cdf(d0, lower) > 0) ||
-        (_eqnotmissing(x, upper) && _ccdf_inclusive(d0, upper) > 0)
+        (x == lower && cdf(d0, lower) > 0) ||
+        (x == upper && _ccdf_inclusive(d0, upper) > 0)
     )
 end
 
@@ -354,9 +354,9 @@ function pdf(d::Censored, x::Real)
     px = float(pdf(d0, x))
     return if _in_open_interval(x, lower, upper)
         px
-    elseif _eqnotmissing(x, lower)
-        _eqnotmissing(x, upper) ? one(px) : oftype(px, cdf(d0, x))
-    elseif _eqnotmissing(x, upper)
+    elseif x == lower
+        x == upper ? one(px) : oftype(px, cdf(d0, x))
+    elseif x == upper
         if value_support(typeof(d0)) === Discrete
             oftype(px, ccdf(d0, x) + px)
         else
@@ -374,9 +374,9 @@ function logpdf(d::Censored, x::Real)
     logpx = float(logpdf(d0, x))
     return if _in_open_interval(x, lower, upper)
         logpx
-    elseif _eqnotmissing(x, lower)
-        _eqnotmissing(x, upper) ? zero(logpx) : oftype(logpx, logcdf(d0, x))
-    elseif _eqnotmissing(x, upper)
+    elseif x == lower
+        x == upper ? zero(logpx) : oftype(logpx, logcdf(d0, x))
+    elseif x == upper
         if value_support(typeof(d0)) === Discrete
             oftype(logpx, logaddexp(logccdf(d0, x), logpx))
         else
@@ -392,13 +392,13 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     lower = d.lower
     upper = d.upper
     logpx = float(logpdf(d0, first(x)))
-    log_prob_lower = lower === missing ? zero(logpx) : oftype(logpx, logcdf(d0, lower))
-    log_prob_upper = upper === missing ? zero(logpx) : oftype(logpx, _logccdf_inclusive(d0, upper))
+    log_prob_lower = lower === nothing ? zero(logpx) : oftype(logpx, logcdf(d0, lower))
+    log_prob_upper = upper === nothing ? zero(logpx) : oftype(logpx, _logccdf_inclusive(d0, upper))
     logzero = oftype(logpx, -Inf)
     return sum(x) do xi
         _in_open_interval(xi, lower, upper) && return float(logpdf(d0, xi))
-        _eqnotmissing(xi, lower) && return log_prob_lower
-        _eqnotmissing(xi, upper) && return log_prob_upper
+        xi == lower && return log_prob_lower
+        xi == upper && return log_prob_upper
         return logzero
     end
 end
@@ -407,9 +407,9 @@ function cdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     result = cdf(d.uncensored, x)
-    return if lower !== missing && x < lower
+    return if lower !== nothing && x < lower
         zero(result)
-    elseif upper === missing || x < upper
+    elseif upper === nothing || x < upper
         result
     else
         one(result)
@@ -420,9 +420,9 @@ function logcdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     result = float(logcdf(d.uncensored, x))
-    return if d.lower !== missing && x < d.lower
+    return if d.lower !== nothing && x < d.lower
         oftype(result, -Inf)
-    elseif d.upper === missing || x < d.upper
+    elseif d.upper === nothing || x < d.upper
         result
     else
         zero(result)
@@ -433,9 +433,9 @@ function ccdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
     result = ccdf(d.uncensored, x)
-    return if lower !== missing && x < lower
+    return if lower !== nothing && x < lower
         one(result)
-    elseif upper === missing || x < upper
+    elseif upper === nothing || x < upper
         result
     else
         zero(result)
@@ -446,9 +446,9 @@ function logccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     lower = d.lower
     upper = d.upper
     result = float(logccdf(d.uncensored, x))
-    return if lower !== missing && x < lower
+    return if lower !== nothing && x < lower
         zero(result)
-    elseif upper === missing || x < upper
+    elseif upper === nothing || x < upper
         result
     else
         oftype(result, -Inf)
@@ -463,27 +463,24 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 
 #### Utilities
 
-# utilities to handle intervals represented with possibly missing bounds
+# utilities to handle intervals represented with possibly nothing bounds
 
 _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
-_in_open_interval(x::Real, ::Missing, u::Real) = x < u
-_in_open_interval(x::Real, l::Real, ::Missing) = x > l
+_in_open_interval(x::Real, ::Nothing, u::Real) = x < u
+_in_open_interval(x::Real, l::Real, ::Nothing) = x > l
 
 function _to_truncated(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
     FT = float(T)
     return truncated(
         d.uncensored,
-        d.lower === missing ? FT(-Inf) : d.lower,
-        d.upper === missing ? FT(Inf) : d.upper,
+        d.lower === nothing ? FT(-Inf) : d.lower,
+        d.upper === nothing ? FT(Inf) : d.upper,
     )
 end
 
 _clamp(x, l, u) = clamp(x, l, u)
-_clamp(x, ::Missing, u) = min(x, u)
-_clamp(x, l, ::Missing) = max(x, l)
-
-_eqnotmissing(x::Real, y::Real) = x == y
-_eqnotmissing(::Real, ::Missing) = false
+_clamp(x, ::Nothing, u) = min(x, u)
+_clamp(x, l, ::Nothing) = max(x, l)
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 _logcdf_noninclusive(d::UnivariateDistribution, x) = logcdf(d, x)
