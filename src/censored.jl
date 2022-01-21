@@ -36,17 +36,17 @@ following methods should be implemented:
 - `censored(d0::D, l::Real, ::Missing)`
 """
 censored
-function censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
-    return Censored(d, l, u)
+function censored(d0::UnivariateDistribution, l::T, u::T) where {T<:Real}
+    return Censored(d0, l, u)
 end
-function censored(d::UnivariateDistribution, ::Missing, u::Real)
-    return Censored(d, missing, u)
+function censored(d0::UnivariateDistribution, ::Missing, u::Real)
+    return Censored(d0, missing, u)
 end
-function censored(d::UnivariateDistribution, l::Real, ::Missing)
-    return Censored(d, l, missing)
+function censored(d0::UnivariateDistribution, l::Real, ::Missing)
+    return Censored(d0, l, missing)
 end
-censored(d::UnivariateDistribution, l::Real, u::Real) = censored(d, promote(l, u)...)
-censored(d::UnivariateDistribution, ::Missing, ::Missing) = d
+censored(d0::UnivariateDistribution, l::Real, u::Real) = censored(d0, promote(l, u)...)
+censored(d0::UnivariateDistribution, ::Missing, ::Missing) = d0
 
 """
     Censored
@@ -63,15 +63,15 @@ struct Censored{
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
     upper::TU      # upper bound
-    function Censored(d::UnivariateDistribution, lower::T, upper::T; check_args::Bool=true) where {T<:Real}
+    function Censored(d0::UnivariateDistribution, lower::T, upper::T; check_args::Bool=true) where {T<:Real}
         check_args && @check_args(Censored, lower ≤ upper) 
-        new{typeof(d), value_support(typeof(d)), T, T, T}(d, lower, upper)
+        new{typeof(d0), value_support(typeof(d0)), T, T, T}(d0, lower, upper)
     end
-    function Censored(d::UnivariateDistribution, l::Missing, u::Real; check_args::Bool=true)
-        new{typeof(d), value_support(typeof(d)), typeof(u), Missing, typeof(u)}(d, l, u)
+    function Censored(d0::UnivariateDistribution, l::Missing, u::Real; check_args::Bool=true)
+        new{typeof(d0), value_support(typeof(d0)), typeof(u), Missing, typeof(u)}(d0, l, u)
     end
-    function Censored(d::UnivariateDistribution, l::Real, u::Missing; check_args::Bool=true)
-        new{typeof(d), value_support(typeof(d)), typeof(l), typeof(l), Missing}(d, l, u)
+    function Censored(d0::UnivariateDistribution, l::Real, u::Missing; check_args::Bool=true)
+        new{typeof(d0), value_support(typeof(d0)), typeof(l), typeof(l), Missing}(d0, l, u)
     end
 end
 
