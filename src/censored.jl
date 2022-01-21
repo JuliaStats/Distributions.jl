@@ -75,6 +75,9 @@ struct Censored{
     end
 end
 
+const LeftCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,Missing,T}
+const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,T,Missing}
+
 function censored(d::Censored, l::T, u::T) where {T<:Real}
     return censored(
         d.uncensored,
