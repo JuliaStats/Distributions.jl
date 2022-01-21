@@ -9,13 +9,13 @@ A censored distribution can be constructed using the following signature:
 censored
 ```
 
-In the general case, this will create a `Censored{typeof(d)}` structure, defined as follows:
+In the general case, this will create a `Distributions.Censored{typeof(d)}` structure, defined as follows:
 
 ```@docs
 Distributions.Censored
 ```
 
-In general, `censored` should be called instead of the constructor of `Censored`.
+In general, `censored` should be called instead of the constructor of `Censored`, which is not exported.
 
 Many functions, including those for the evaluation of pdf and sampling, are defined for all censored univariate distributions:
 

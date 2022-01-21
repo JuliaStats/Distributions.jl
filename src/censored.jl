@@ -26,7 +26,7 @@ censored(d0; lower=l, upper=u)  # d0 interval-censored to the interval [l, u]
 censored(d0, l, u)              # d0 interval-censored to the interval [l, u]
 ```
 
-The function falls back to constructing a [`Censored`](@ref) wrapper.
+The function falls back to constructing a [`Distributions.Censored`](@ref) wrapper.
 
 # Implementation
 
