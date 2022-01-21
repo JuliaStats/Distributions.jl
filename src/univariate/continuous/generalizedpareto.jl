@@ -37,18 +37,22 @@ struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
     GeneralizedPareto{T}(μ::T, σ::T, ξ::T) where {T} = new{T}(μ, σ, ξ)
 end
 
-function GeneralizedPareto(μ::T, σ::T, ξ::T; check_args=true) where {T <: Real}
+function GeneralizedPareto(μ::T, σ::T, ξ::T; check_args::Bool=true) where {T <: Real}
     check_args && @check_args(GeneralizedPareto, σ > zero(σ))
     return GeneralizedPareto{T}(μ, σ, ξ)
 end
 
-GeneralizedPareto(μ::Real, σ::Real, ξ::Real) = GeneralizedPareto(promote(μ, σ, ξ)...)
-
-function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer)
-    GeneralizedPareto(float(μ), float(σ), float(ξ))
+function GeneralizedPareto(μ::Real, σ::Real, ξ::Real; check_args::Bool=true)
+    return GeneralizedPareto(promote(μ, σ, ξ)...; check_args=check_args)
 end
-GeneralizedPareto(σ::T, ξ::Real) where {T <: Real} = GeneralizedPareto(zero(T), σ, ξ)
-GeneralizedPareto() = GeneralizedPareto(0.0, 1.0, 1.0, check_args=false)
+
+function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer; check_args::Bool=true)
+    GeneralizedPareto(float(μ), float(σ), float(ξ); check_args=check_args)
+end
+function GeneralizedPareto(σ::Real, ξ::Real; check_args::Bool=true)
+    GeneralizedPareto(zero(σ), σ, ξ; check_args=check_args)
+end
+GeneralizedPareto() = GeneralizedPareto{Float64}(0.0, 1.0, 1.0)
 
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf

@@ -25,12 +25,12 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
     TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end
 
-function TDist(ν::T; check_args=true) where {T <: Real}
+function TDist(ν::Real; check_args::Bool=true)
     check_args && @check_args(TDist, ν > zero(ν))
-    return TDist{T}(ν)
+    return TDist{typeof(ν)}(ν)
 end
 
-TDist(ν::Integer) = TDist(float(ν))
+TDist(ν::Integer; check_args::Bool=true) = TDist(float(ν); check_args=check_args)
 
 @distr_support TDist -Inf Inf
 

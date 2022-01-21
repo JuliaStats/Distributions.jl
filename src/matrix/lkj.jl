@@ -32,7 +32,7 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJ(d::Integer, η::Real; check_args = true)
+function LKJ(d::Integer, η::Real; check_args::Bool=true)
     if check_args
         d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
         η > 0 || throw(ArgumentError("Shape parameter must be positive."))
@@ -74,7 +74,7 @@ insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(
 
 mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 
-function mode(d::LKJ; check_args = true)
+function mode(d::LKJ; check_args::Bool=true)
     p, η = params(d)
     if check_args
         η > 1 || throw(ArgumentError("mode is defined only when η > 1."))

@@ -33,14 +33,14 @@ struct Rician{T<:Real} <: ContinuousUnivariateDistribution
     Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
 end
 
-function Rician(ν::T, σ::T; check_args=true) where {T<:Real}
+function Rician(ν::T, σ::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(Rician, ν ≥ zero(ν) && σ ≥ zero(σ))
     return Rician{T}(ν, σ)
 end
 
-Rician() = Rician(0.0, 1.0)
-Rician(ν::Real, σ::Real) = Rician(promote(ν, σ)...)
-Rician(ν::Integer, σ::Integer) = Rician(float(ν), float(σ))
+Rician() = Rician{Float64}(0.0, 1.0)
+Rician(ν::Real, σ::Real; check_args::Bool=true) = Rician(promote(ν, σ)...; check_args=check_args)
+Rician(ν::Integer, σ::Integer; check_args::Bool=true) = Rician(float(ν), float(σ); check_args=check_args)
 
 @distr_support Rician 0.0 Inf
 
@@ -168,4 +168,3 @@ end
 #   entropy(d::Rician)
 #   mgf(d::Rician, t::Real)
 #   cf(d::Rician, t::Real)
-

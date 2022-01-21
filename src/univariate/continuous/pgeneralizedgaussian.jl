@@ -34,7 +34,7 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     PGeneralizedGaussian{T1,T2,T3}(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real} = new{T1,T2,T3}(µ, α, p)
 end
 
-function PGeneralizedGaussian(μ::T1,α::T2,p::T3; check_args=true) where {T1<:Real, T2<:Real, T3<:Real}
+function PGeneralizedGaussian(μ::T1,α::T2,p::T3; check_args::Bool=true) where {T1<:Real, T2<:Real, T3<:Real}
     check_args && @check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p))
     return PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
 end
@@ -44,7 +44,7 @@ end
 
 Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
-PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(zero(T), one(T), p)
+PGeneralizedGaussian(p::Real; check_args::Bool=true) = PGeneralizedGaussian(zero(p), one(p), p; check_args=check_args)
 
 """
     PGeneralizedGaussian()

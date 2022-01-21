@@ -26,17 +26,18 @@ External links
 struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
+    InverseGaussian{T}(μ::T, λ::T) where {T<:Real} = new{T}(μ, λ)
 end
 
-function InverseGaussian(μ::T, λ::T; check_args=true) where {T}
+function InverseGaussian(μ::T, λ::T; check_args::Bool=true) where {T<:Real}
     check_args && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
 
-InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
-InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
-InverseGaussian(μ::T) where {T <: Real} = InverseGaussian(μ, one(T))
-InverseGaussian() = InverseGaussian(1.0, 1.0, check_args=false)
+InverseGaussian(μ::Real, λ::Real; check_args::Bool=true) = InverseGaussian(promote(μ, λ)...; check_args=check_args)
+InverseGaussian(μ::Integer, λ::Integer; check_args::Bool=true) = InverseGaussian(float(μ), float(λ); check_args=check_args)
+InverseGaussian(μ::Real; check_args::Bool=true) = InverseGaussian(μ, one(μ); check_args=check_args)
+InverseGaussian() = InverseGaussian{Float64}(1.0, 1.0)
 
 @distr_support InverseGaussian 0.0 Inf
 

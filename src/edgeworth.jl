@@ -13,12 +13,14 @@ struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
 
-    function EdgeworthZ{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
-        @check_args(EdgeworthZ, n > zero(n))
+    function EdgeworthZ{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
+        check_args && @check_args(EdgeworthZ, n > zero(n))
         new{D}(d, n)
     end
 end
-EdgeworthZ(d::UnivariateDistribution,n::Real) = EdgeworthZ{typeof(d)}(d,n)
+function EdgeworthZ(d::UnivariateDistribution, n::Real; check_args::Bool=true)
+    return EdgeworthZ{typeof(d)}(d, n; check_args=check_args)
+end
 
 mean(d::EdgeworthZ) = 0.0
 var(d::EdgeworthZ) = 1.0
@@ -77,12 +79,14 @@ end
 struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function EdgeworthSum{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
-        @check_args(EdgeworthSum, n > zero(n))
+    function EdgeworthSum{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
+        check_args && @check_args(EdgeworthSum, n > zero(n))
         new{D}(d, n)
     end
 end
-EdgeworthSum(d::UnivariateDistribution, n::Real) = EdgeworthSum{typeof(d)}(d,n)
+function EdgeworthSum(d::UnivariateDistribution, n::Real; check_args::Bool=true)
+    return EdgeworthSum{typeof(d)}(d, n; check_args=check_args)
+end
 
 mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
