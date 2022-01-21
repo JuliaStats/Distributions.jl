@@ -170,7 +170,7 @@ end
     @testset "Uniform" begin
         d0 = Uniform(0, 10)
         bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
-        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -227,7 +227,7 @@ end
     @testset "Normal" begin
         d0 = Normal()
         bounds = [(nothing, 0.2), (-0.1, nothing), (-0.1, 0.2)]
-        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -272,7 +272,7 @@ end
     @testset "DiscreteUniform" begin
         d0 = DiscreteUniform(0, 10)
         bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
-        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
@@ -311,7 +311,7 @@ end
     @testset "Poisson" begin
         d0 = Poisson(20)
         bounds = [(nothing, 12), (2, nothing), (2, 12), (8, nothing)]
-        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
@@ -339,7 +339,7 @@ end
     @testset "interval containing no probability" begin
         d0 = MixtureModel([Uniform(-1, 1), Uniform(10, 11)], [0.3, 0.7])
         bounds = [(nothing, -5), (12, nothing), (3, 8)]
-        @testset "lower = $lower, upper = $upper" for (lower, upper) in bounds
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -393,7 +393,7 @@ end
 
     @testset "mixed types are still type-inferrible" begin
         bounds = [(nothing, 8), (2, nothing), (2, 8)]
-        @testset "lower = $lower, upper = $upper, uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
+        @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper), uncensored partype=$T0, partype=$T" for (lower, upper) in bounds,
                 T in (Int, Float32, Float64), T0 in (Int, Float32, Float64)
             d0 = Uniform(T0(0), T0(10))
             d = censored(d0, lower === nothing ? nothing : T(lower), upper === nothing ? nothing : T(upper))
