@@ -1,8 +1,8 @@
 """
-    censored(d0::UnivariateDistribution, l::Union{Real,Missing}, u::Union{Real,Missing})
+    censored(d0::UnivariateDistribution, lower::Union{Real,Missing}, upper::Union{Real,Missing})
 
-A _censored distribution_ `d` of a distribution `d0` to the interval `[l, u]` has the
-probability density (mass) function:
+A _censored distribution_ `d` of a distribution `d0` to the interval ``[l, u]=`` `[lower,upper]`
+has the probability density (mass) function:
 
 ```math
 f(x; d_0, l, u) = \\begin{cases}
@@ -14,7 +14,7 @@ f(x; d_0, l, u) = \\begin{cases}
 where ``f_{d_0}`` is the probability density (mass) function of ``d_0``.
 
 If ``Z`` is a variate from ``d_0``, and `X = clamp(Z, l, u)`, then ``X`` is a variate from
-``d``, the censored version of ``d_0``. Note that this implies that even if ``d`` is
+``d``, the censored version of ``d_0``. Note that this implies that even if ``d_0`` is
 continuous, its censored form assigns positive probability to the bounds ``l`` and `u``.
 Therefore a censored continuous distribution has atoms and is a mixture of discrete and
 continuous components.
@@ -31,9 +31,9 @@ The function falls back to constructing a [`Censored`](@ref) wrapper.
 
 To implement a specialized censored form for distributions of type `D`, one or more of the
 following methods should be implemented:
-- `censored(d::D, l::T, u::T) where {T <: Real}`
-- `censored(d::D, ::Missing, u::Real)`
-- `censored(d::D, l::Real, ::Missing)`
+- `censored(d0::D, l::T, u::T) where {T <: Real}`
+- `censored(d0::D, ::Missing, u::Real)`
+- `censored(d0::D, l::Real, ::Missing)`
 """
 censored
 function censored(d::UnivariateDistribution, l::T, u::T) where {T<:Real}
