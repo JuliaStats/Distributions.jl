@@ -12,7 +12,7 @@ censored
 In the general case, this will create a `Censored{typeof(d)}` structure, defined as follows:
 
 ```@docs
-Censored
+Distributions.Censored
 ```
 
 In general, `censored` should be called instead of the constructor of `Censored`.
