@@ -1,10 +1,7 @@
 # Censored Distributions
 
 In *censoring* of data, values exceeding an upper limit (right censoring) or falling below a lower limit (left censoring), or both (interval censoring) are replaced by the corresponding limit itself.
-The package provides the `censored` function, which creates the most
-appropriate distribution to represent a censored version of a given
-distribution.
-
+The package provides the `censored` function, which creates the most appropriate distribution to represent a censored version of a given distribution.
 
 A censored distribution can be constructed using the following signature:
 
@@ -12,18 +9,15 @@ A censored distribution can be constructed using the following signature:
 censored
 ```
 
-In the general case, this will create a `Censored{typeof(d)}`
-structure, defined as follows:
+In the general case, this will create a `Censored{typeof(d)}` structure, defined as follows:
 
 ```@docs
 Censored
 ```
 
-In general, `censored` should be called instead of the constructor of
-`Censored`.
+In general, `censored` should be called instead of the constructor of `Censored`.
 
-Many functions, including those for the evaluation of pdf and sampling,
-are defined for all censored univariate distributions:
+Many functions, including those for the evaluation of pdf and sampling, are defined for all censored univariate distributions:
 
 - [`maximum(::UnivariateDistribution)`](@ref)
 - [`minimum(::UnivariateDistribution)`](@ref)
@@ -43,14 +37,13 @@ are defined for all censored univariate distributions:
 - [`rand(::UnivariateDistribution)`](@ref)
 - [`rand!(::UnivariateDistribution, ::AbstractArray)`](@ref)
 
-Some functions to compute statistics are available for the censored
-distribution if they are also available for its truncation:
+Some functions to compute statistics are available for the censored distribution if they are also available for its truncation:
 - [`mean(::UnivariateDistribution)`](@ref)
 - [`var(::UnivariateDistribution)`](@ref)
 - [`std(::UnivariateDistribution)`](@ref)
 - [`entropy(::UnivariateDistribution)`](@ref)
 
-For example, these functions are available if the uncensored distribution is a
+For example, these functions are available for the following uncensored distributions:
 - `DiscreteUniform`
 - `Exponential`
 - `LogUniform`
