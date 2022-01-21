@@ -16,7 +16,7 @@ where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
 If ``Z \\sim d_0``, and `X = clamp(Z, l, u)`, then ``X \\sim d``. Note that this implies
 that even if ``d_0`` is continuous, its censored form assigns positive probability to the
-bounds ``l`` and ``u``. Therefore a censored continuous distribution has atoms and is a
+bounds ``l`` and ``u``. Therefore, a censored continuous distribution has atoms and is a
 mixture of discrete and continuous components.
 
 ```julia
