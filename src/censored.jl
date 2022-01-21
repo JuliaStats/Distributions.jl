@@ -366,11 +366,10 @@ function loglikelihood(d::Censored{<:Any,<:Any,T}, x::AbstractArray{<:Real}) whe
     end
 end
 
-function cdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function cdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x)
-    result = cdf(d.uncensored, S(x))
+    result = cdf(d.uncensored, x)
     return if lower !== missing && x < lower
         zero(result)
     elseif upper === missing || x < upper
@@ -380,11 +379,10 @@ function cdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     end
 end
 
-function logcdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function logcdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
-    S = float(Base.promote_eltype(T, x))
-    result = logcdf(d.uncensored, S(x))
+    result = float(logcdf(d.uncensored, x))
     return if d.lower !== missing && x < d.lower
         oftype(result, -Inf)
     elseif d.upper === missing || x < d.upper
@@ -394,11 +392,10 @@ function logcdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     end
 end
 
-function ccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function ccdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
-    S = Base.promote_eltype(T, x)
-    result = ccdf(d.uncensored, S(x))
+    result = ccdf(d.uncensored, x)
     return if lower !== missing && x < lower
         one(result)
     elseif upper === missing || x < upper
@@ -411,8 +408,7 @@ end
 function logccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     lower = d.lower
     upper = d.upper
-    S = float(Base.promote_eltype(T, x))
-    result = logccdf(d.uncensored, S(x))
+    result = float(logccdf(d.uncensored, x))
     return if lower !== missing && x < lower
         zero(result)
     elseif upper === missing || x < upper
@@ -436,11 +432,12 @@ _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
 _in_open_interval(x::Real, ::Missing, u::Real) = x < u
 _in_open_interval(x::Real, l::Real, ::Missing) = x > l
 
-function _to_truncated(d::Censored)
+function _to_truncated(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
+    FT = float(T)
     return truncated(
         d.uncensored,
-        d.lower === missing ? -Inf : d.lower,
-        d.upper === missing ? Inf : d.upper,
+        d.lower === missing ? FT(-Inf) : d.lower,
+        d.upper === missing ? FT(Inf) : d.upper,
     )
 end
 
