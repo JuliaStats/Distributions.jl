@@ -153,37 +153,40 @@ median(d::Censored) = _clamp(median(d.uncensored), d.lower, d.upper)
 # where d₀ is the uncensored distribution, d is d₀ censored to [l, u],
 # and τ is d₀ truncated to [l, u]
 
-function mean(d::Censored)
+function mean(d::LeftCensored)
+    upper = d.upper
+    log_prob_upper = logccdf(d.uncensored, upper)
+    prob_upper = exp(log_prob_upper)
+    μ = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
+    prob_trunc = exp(log1mexp(log_prob_upper))
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(prob_trunc)) && return μ
+    return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
+end
+function mean(d::RightCensored)
+    lower = d.lower
+    log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
+    prob_lower = exp(log_prob_lower)
+    μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
+    prob_trunc = exp(log1mexp(log_prob_lower))
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(prob_trunc)) && return μ
+    return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
+end
+function mean(d::IntervalCensored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    if lower === missing
-        log_prob_lower = -Inf
-        prob_lower = 0
-    else
-        log_prob_lower = _logcdf_noninclusive(d0, lower)
-        prob_lower = exp(log_prob_lower)
-    end
-    if upper === missing
-        log_prob_upper = -Inf
-        prob_upper = 0
-    else
-        log_prob_upper = logccdf(d0, upper)
-        prob_upper = exp(log_prob_upper)
-    end
+    log_prob_lower = _logcdf_noninclusive(d0, lower)
+    prob_lower = exp(log_prob_lower)
+    log_prob_upper = logccdf(d0, upper)
+    prob_upper = exp(log_prob_upper)
     prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
     if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
-        if lower === missing
-            return one(prob_trunc) * upper
-        elseif upper === missing
-            return one(prob_trunc) * lower
-        else
-            return prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
-                   prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-        end
+        return prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
+               prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
     end
-    dtrunc = _to_truncated(d)
-    μ = prob_trunc * mean(dtrunc)
+    μ = prob_trunc * mean(_to_truncated(d))
     if !iszero(prob_lower)
         μ += prob_lower * lower
     end
@@ -193,39 +196,58 @@ function mean(d::Censored)
     return μ
 end
 
+function var(d::LeftCensored)
+    upper = d.upper
+    log_prob_upper = logccdf(d.uncensored, upper)
+    prob_upper = exp(log_prob_upper)
+    μ_upper = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
+    prob_trunc = exp(log1mexp(log_prob_upper))
+    Tvar = typeof(one(prob_trunc) * abs2(zero(μ_upper)))
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(prob_trunc)) && return zero(Tvar)
+    dtrunc = _to_truncated(d)
+    μ_trunc = mean(dtrunc)
+    μ = prob_trunc * μ_trunc + μ_upper
+    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
+    if !iszero(prob_upper)
+        v += prob_upper * abs2(upper - μ)
+    end
+    return Tvar(v)
+end
+function var(d::RightCensored)
+    lower = d.lower
+    log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
+    prob_lower = exp(log_prob_lower)
+    μ_lower = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
+    prob_trunc = exp(log1mexp(log_prob_lower))
+    Tvar = typeof(one(prob_trunc) * abs2(zero(μ_lower)))
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(prob_trunc)) && return zero(Tvar)
+    dtrunc = _to_truncated(d)
+    μ_trunc = mean(dtrunc)
+    μ = prob_trunc * μ_trunc + μ_lower
+    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
+    if !iszero(prob_lower)
+        v += prob_lower * abs2(lower - μ)
+    end
+    return Tvar(v)
+end
 function var(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    if lower === missing
-        log_prob_lower = -Inf
-        prob_lower = 0
-    else
-        log_prob_lower = _logcdf_noninclusive(d0, lower)
-        prob_lower = exp(log_prob_lower)
-    end
-    if upper === missing
-        log_prob_upper = -Inf
-        prob_upper = 0
-    else
-        log_prob_upper = logccdf(d0, upper)
-        prob_upper = exp(log_prob_upper)
-    end
+    log_prob_lower = _logcdf_noninclusive(d0, lower)
+    log_prob_upper = logccdf(d0, upper)
+    prob_lower = exp(log_prob_lower)
+    prob_upper = exp(log_prob_upper)
     prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
     if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
-        if lower === missing
-            return one(prob_trunc) * abs2(zero(upper))
-        elseif upper === missing
-            return one(prob_trunc) * abs2(zero(lower))
-        else
-            μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
-                prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-            v = prob_lower * abs2(iszero(prob_lower) ? oneunit(lower) : lower - μ) +
-                prob_upper * abs2(iszero(prob_upper) ? oneunit(upper) : upper - μ)
-            return v
-        end
+        μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
+            prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
+        v = prob_lower * abs2(iszero(prob_lower) ? oneunit(lower) : lower - μ) +
+            prob_upper * abs2(iszero(prob_upper) ? oneunit(upper) : upper - μ)
+        return v
     end
-
     dtrunc = _to_truncated(d)
     μ_trunc = mean(dtrunc)
     μ = prob_trunc * μ_trunc
@@ -235,7 +257,6 @@ function var(d::Censored)
     if !iszero(prob_upper)
         μ += prob_upper * upper
     end
-
     v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
     if !iszero(prob_lower)
         v += prob_lower * abs2(lower - μ)
@@ -253,63 +274,73 @@ end
 #   ) / P_{x ~ d₀}(l ≤ x ≤ u),
 # where S[τ] is the entropy of τ.
 
+function entropy(d::LeftCensored)
+    d0 = d.uncensored
+    upper = d.upper
+    log_prob_upper = logccdf(d0, upper)
+    if value_support(typeof(d0)) === Discrete
+        logpu = logpdf(d0, upper)
+        log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
+        xlogx_pu = xexpx(logpu)
+    else
+        log_prob_upper_inc = log_prob_upper
+        xlogx_pu = 0
+    end
+    entropy_bound = -xexpx(log_prob_upper_inc)
+    log_prob_trunc = log1mexp(log_prob_upper)
+    prob_trunc = exp(log_prob_trunc)
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
+    dtrunc = _to_truncated(d)
+    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pu
+    return oftype(entropy_bound, entropy_bound + entropy_interval)
+end
+function entropy(d::RightCensored)
+    d0 = d.uncensored
+    lower = d.lower
+    log_prob_lower_inc = logcdf(d0, lower)
+    if value_support(typeof(d0)) === Discrete
+        logpl = logpdf(d0, lower)
+        log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
+        xlogx_pl = xexpx(logpl)
+    else
+        log_prob_lower = log_prob_lower_inc
+        xlogx_pl = 0
+    end
+    entropy_bound = -xexpx(log_prob_lower_inc)
+    log_prob_trunc = log1mexp(log_prob_lower)
+    prob_trunc = exp(log_prob_trunc)
+    # truncation contains ~ no probability
+    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
+    dtrunc = _to_truncated(d)
+    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl
+    return oftype(entropy_bound, entropy_bound + entropy_interval)
+end
 function entropy(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    if lower === missing
-        log_prob_upper = logccdf(d0, upper)
-        if value_support(typeof(d0)) === Discrete
-            logpu = logpdf(d0, upper)
-            log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
-            xlogx_pu = xexpx(logpu)
-        else
-            log_prob_upper_inc = log_prob_upper
-            xlogx_pu = 0
-        end
-        entropy_bound = -xexpx(log_prob_upper_inc)
-        log_prob_trunc = log1mexp(log_prob_upper)    
-        xlogx_pl = 0
-    elseif upper === missing
-        log_prob_lower_inc = logcdf(d0, lower)
-        if value_support(typeof(d0)) === Discrete
-            logpl = logpdf(d0, lower)
-            log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
-            xlogx_pl = xexpx(logpl)
-        else
-            log_prob_lower = log_prob_lower_inc
-            xlogx_pl = 0
-        end
-        entropy_bound = -xexpx(log_prob_lower_inc)
-        log_prob_trunc = log1mexp(log_prob_lower)    
-        xlogx_pu = 0
+    log_prob_lower_inc = logcdf(d0, lower)
+    log_prob_upper = logccdf(d0, upper)
+    if value_support(typeof(d0)) === Discrete
+        logpl = logpdf(d0, lower)
+        logpu = logpdf(d0, upper)
+        log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
+        log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
+        xlogx_pl = xexpx(logpl)
+        xlogx_pu = xexpx(logpu)
     else
-        log_prob_lower_inc = logcdf(d0, lower)
-        log_prob_upper = logccdf(d0, upper)
-        if value_support(typeof(d0)) === Discrete
-            logpl = logpdf(d0, lower)
-            logpu = logpdf(d0, upper)
-            log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
-            log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
-            xlogx_pl = xexpx(logpl)
-            xlogx_pu = xexpx(logpu)
-        else
-            log_prob_lower = log_prob_lower_inc
-            log_prob_upper_inc = log_prob_upper
-            xlogx_pl = xlogx_pu = 0
-        end
-        entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
-        log_prob_trunc = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
+        log_prob_lower = log_prob_lower_inc
+        log_prob_upper_inc = log_prob_upper
+        xlogx_pl = xlogx_pu = 0
     end
-    
+    entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
+    log_prob_trunc = log1mexp(logaddexp(log_prob_lower, log_prob_upper))    
+    prob_trunc = exp(log_prob_trunc)
     # truncation contains ~ no probability
-    if log_prob_trunc < log(eps(one(log_prob_trunc)))
-        return entropy_bound
-    end
-
+    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
     dtrunc = _to_truncated(d)
-    entropy_interval = 
-        exp(log_prob_trunc) * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
+    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
     return entropy_bound + entropy_interval
 end
 
