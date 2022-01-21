@@ -3,6 +3,7 @@
 module TestCensored
 
 using Distributions, Test
+using Distributions: Censored
 
 function _as_mixture(d::Censored)
     d0 = d.uncensored

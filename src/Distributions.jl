@@ -74,7 +74,6 @@ export
     Biweight,
     Categorical,
     Cauchy,
-    Censored,
     Chernoff,
     Chi,
     Chisq,
