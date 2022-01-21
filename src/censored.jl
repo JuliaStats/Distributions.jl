@@ -463,11 +463,15 @@ rand(rng::AbstractRNG, d::Censored) = _clamp(rand(rng, d.uncensored), d.lower, d
 
 #### Utilities
 
-# utilities to handle intervals represented with possibly nothing bounds
+# utilities to handle intervals represented with possibly `nothing` bounds
 
 _in_open_interval(x::Real, l::Real, u::Real) = l < x < u
 _in_open_interval(x::Real, ::Nothing, u::Real) = x < u
 _in_open_interval(x::Real, l::Real, ::Nothing) = x > l
+
+_clamp(x, l, u) = clamp(x, l, u)
+_clamp(x, ::Nothing, u) = min(x, u)
+_clamp(x, l, ::Nothing) = max(x, l)
 
 function _to_truncated(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
     FT = float(T)
@@ -478,11 +482,8 @@ function _to_truncated(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) w
     )
 end
 
-_clamp(x, l, u) = clamp(x, l, u)
-_clamp(x, ::Nothing, u) = min(x, u)
-_clamp(x, l, ::Nothing) = max(x, l)
-
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
+
 _logcdf_noninclusive(d::UnivariateDistribution, x) = logcdf(d, x)
 function _logcdf_noninclusive(d::DiscreteUnivariateDistribution, x)
     return logsubexp(logcdf(d, x), logpdf(d, x))
