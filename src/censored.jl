@@ -47,6 +47,13 @@ function censored(d0::UnivariateDistribution, l::Real, ::Nothing)
 end
 censored(d0::UnivariateDistribution, l::Real, u::Real) = censored(d0, promote(l, u)...)
 censored(d0::UnivariateDistribution, ::Nothing, ::Nothing) = d0
+function censored(
+    d0::UnivariateDistribution;
+    lower::Union{Real,Nothing} = nothing,
+    upper::Union{Real,Nothing} = nothing,
+)
+    return censored(d0, lower, upper)
+end
 
 """
     Censored

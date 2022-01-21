@@ -50,6 +50,7 @@ end
     d0 = Normal(0, 1)
     @test_throws ArgumentError censored(d0, 1, -1)
 
+    # bound argument constructors
     d = censored(d0, -1, 1.0)
     @test d isa Censored
     @test d.lower === -1.0
@@ -66,6 +67,25 @@ end
     @test d.lower == 1
 
     d = censored(d0, nothing, nothing)
+    @test d === d0
+
+    # bound keyword constructors
+    d = censored(d0; lower=-2, upper=1.5)
+    @test d isa Censored
+    @test d.lower === -2.0
+    @test d.upper === 1.5
+
+    d = censored(d0; upper=true)
+    @test d isa Censored
+    @test isnothing(d.lower)
+    @test d.upper === true
+
+    d = censored(d0; lower=-3)
+    @test d isa Censored
+    @test isnothing(d.upper)
+    @test d.lower === -3
+
+    d = censored(d0)
     @test d === d0
 end
 
