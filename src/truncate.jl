@@ -16,6 +16,13 @@ To implement a specialized truncated form for distributions of type `D`, the met
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
+function truncated(
+    d::UnivariateDistribution;
+    lower::Union{Real,Nothing}=nothing,
+    upper::Union{Real,Nothing}=nothing,
+)
+    return truncated(d, lower, upper)
+end
 
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
