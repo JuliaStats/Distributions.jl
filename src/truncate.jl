@@ -216,7 +216,17 @@ function show(io::IO, d::Truncated)
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals) :
           show_oneline(io, d0, namevals)
-    print(io, ", range=($(d.lower), $(d.upper)))")
+    if d.lower > -Inf
+        if d.upper < Inf
+            print(io, "; lower=$(d.lower), upper=$(d.upper))")
+        else
+            print(io, "; lower=$(d.lower))")
+        end
+    elseif d.upper < Inf
+        print(io, "; upper=$(d.upper))")
+    else
+        print(io, ")")
+    end
     uml && println(io)
 end
 
