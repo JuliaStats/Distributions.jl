@@ -64,15 +64,16 @@ end
 truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
+    force_kwarg = VERSION ≥ v"1.5.2" ? (force=true,) : ()
     l == -Inf && Base.depwarn(
         "`truncated(d, -Inf, u)` is deprecated. Please use `truncated(d; upper=u)` instead.",
         :truncated;
-        force=true,
+        force_kwarg...
     )
     u == Inf && Base.depwarn(
         "`truncated(d, l, Inf)` is deprecated. Please `truncated(d; lower=l)` instead.",
         :truncated;
-        force=true,
+        force_kwarg...
     )
 
     # (log)lcdf = (log) P(X < l) where X ~ d
