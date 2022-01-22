@@ -13,6 +13,7 @@ The function falls back to constructing a [`Truncated`](@ref) wrapper.
 To implement a specialized truncated form for distributions of type `D`, the method
 `truncated(d::D, l::T, u::T) where {T <: Real}` should be implemented.
 """
+truncated
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
