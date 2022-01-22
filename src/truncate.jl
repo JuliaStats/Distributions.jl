@@ -1,17 +1,32 @@
 """
-    truncated(d::UnivariateDistribution, l::Real, u::Real)
+    truncated(d0::UnivariateDistribution; [lower::Real], [upper::Real])
+    truncated(d0::UnivariateDistribution, lower::Real, upper::Real)
 
-Truncate a univariate distribution `d` to the interval `[l, u]`.
+A _truncated distribution_ `d` of a distribution `d0` to the interval
+``[l, u]=```[lower, upper]` has the probability density (mass) function:
 
-The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
-`Inf`. The function throws an error if `l > u`.
+```math
+f(x; d_0, l, u) = \\frac{f_{d_0}(x)}{P_{Z \\sim d_0}(l \\le Z \\le u)}, \\quad x \\in [l, u].
+```
+
+The function throws an error if ``l > u``.
+
+```julia
+truncated(d0; lower=l)           # d0 left-censored to the interval [l, Inf)
+truncated(d0; upper=u)           # d0 right-censored to the interval (-Inf, u]
+truncated(d0; lower=l, upper=u)  # d0 interval-censored to the interval [l, u]
+truncated(d0, l, u)              # d0 interval-censored to the interval [l, u]
+```
 
 The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
 # Implementation
 
-To implement a specialized truncated form for distributions of type `D`, the method
-`truncated(d::D, l::T, u::T) where {T <: Real}` should be implemented.
+To implement a specialized truncated form for distributions of type `D`, one of the
+following methods should be implemented:
+- `truncated(d0::D, l::T, u::T) where {T <: Real}`
+- `truncated(d0::D, ::Nothing, u::Real)`
+- `truncated(d0::D, ::Real, u::Nothing)`
 """
 truncated
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
