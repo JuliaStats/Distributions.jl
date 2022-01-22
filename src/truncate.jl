@@ -23,7 +23,29 @@ function truncated(
 )
     return truncated(d, lower, upper)
 end
+function truncated(d::UnivariateDistribution, ::Nothing, u::Real)
+    # (log)ucdf = (log)tp = (log) P(X ≤ u) where X ~ d
+    logucdf = logtp = logcdf(d, u)
+    ucdf = tp = exp(logucdf)
 
+    Truncated(d, promote(oftype(float(u), -Inf), u, zero(ucdf), ucdf, tp, logtp)...)
+end
+function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
+    # (log)lcdf = (log) P(X < l) where X ~ d
+    loglcdf = if value_support(typeof(d)) === Discrete
+        logsubexp(logcdf(d, l), logpdf(d, l))
+    else
+        logcdf(d, l)
+    end
+    lcdf = exp(loglcdf)
+
+    # (log)tp = (log) P(l ≤ X) where X ∼ d
+    logtp = log1mexp(loglcdf)
+    tp = exp(logtp)
+
+    Truncated(d, promote(l, oftype(float(l), Inf), lcdf, one(lcdf), tp, logtp)...)
+end
+truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
 
