@@ -123,6 +123,19 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 end
 
+# default methods
+for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
+    d = truncated(Normal(μ, 1), lower, upper)
+    @test d.untruncated === Normal(μ, 1)
+    @test d.lower == lower
+    @test d.upper == upper
+    @test truncated(Normal(μ, 1); lower=lower, upper=upper) === d
+end
+@test truncated(Normal(); lower=1) == Distributions.Truncated(Normal(), 1.0, Inf)
+@test truncated(Normal(); lower=-2) == Distributions.Truncated(Normal(), -2.0, Inf)
+@test truncated(Normal(); upper=1) == Distributions.Truncated(Normal(), -Inf, 1.0)
+@test truncated(Normal(); upper=2) == Distributions.Truncated(Normal(), -Inf, 2.0)
+@test truncated(Normal()) === Normal()
 
 ## main
 
