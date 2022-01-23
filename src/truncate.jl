@@ -6,8 +6,9 @@ A _truncated distribution_ `d` of a distribution `d0` to the interval
 ``[l, u]=```[lower, upper]` has the probability density (mass) function:
 
 ```math
-f(x; d_0, l, u) = \\frac{f_{d_0}(x)}{P_{Z \\sim d_0}(l \\le Z \\le u)}, \\quad x \\in [l, u].
+f(x; d_0, l, u) = \\frac{f_{d_0}(x)}{P_{Z \\sim d_0}(l \\le Z \\le u)}, \\quad x \\in [l, u],
 ```
+where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
 The function throws an error if ``l > u``.
 
@@ -24,9 +25,9 @@ The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
 To implement a specialized truncated form for distributions of type `D`, one of the
 following methods should be implemented:
-- `truncated(d0::D, l::T, u::T) where {T <: Real}`
-- `truncated(d0::D, ::Nothing, u::Real)`
-- `truncated(d0::D, ::Real, u::Nothing)`
+- `truncated(d0::D, l::T, u::T) where {T <: Real}`: interval-truncated
+- `truncated(d0::D, ::Nothing, u::Real)`: right-truncated
+- `truncated(d0::D, l::Real, u::Nothing)`: left-truncated
 """
 truncated
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
