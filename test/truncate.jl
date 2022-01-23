@@ -152,7 +152,7 @@ at = [0.0, 1.0, 0.0, 1.0]
     @testset "#1328" begin
         dist = Poisson(2.0)
         dist_zeroinflated = MixtureModel([Dirac(0.0), dist], [0.4, 0.6])
-        dist_zerotruncated = truncated(dist, 1, Inf)
+        dist_zerotruncated = truncated(dist; lower=1)
         dist_zeromodified = MixtureModel([Dirac(0.0), dist_zerotruncated], [0.4, 0.6])
 
         @test logsumexp(logpdf(dist, x) for x in 0:1000) ≈ 0 atol=1e-15
