@@ -25,7 +25,9 @@ struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function VonMises(μ::T, κ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(VonMises, κ > zero(κ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(VonMises, κ > zero(κ))
+    end
     return VonMises{T}(μ, κ, besselix(zero(T), κ))
 end
 

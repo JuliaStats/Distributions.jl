@@ -8,7 +8,9 @@ struct Biweight{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Biweight(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    check_args && @check_args(Biweight, σ > zero(σ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Biweight, σ > zero(σ))
+    end
     return Biweight{T}(μ, σ)
 end
 

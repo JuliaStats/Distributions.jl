@@ -21,12 +21,16 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Erlang(α::Real, θ::Real; check_args::Bool=true)
-    check_args && @check_args(Erlang, isinteger(α) && α >= zero(α))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Erlang, isinteger(α) && α >= zero(α))
+    end
     return Erlang{typeof(θ)}(α, θ)
 end
 
 function Erlang(α::Integer, θ::Real; check_args::Bool=true)
-    check_args && @check_args(Erlang, α >= zero(α))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Erlang, α >= zero(α))
+    end
     return Erlang{typeof(θ)}(α, θ)
 end
 
@@ -63,8 +67,10 @@ kurtosis(d::Erlang) = 6 / d.α
 
 function mode(d::Erlang; check_args::Bool=true)
     α, θ = params(d)
-    if check_args
-        α >= 1 || error("Erlang has no mode when α < 1")
+    ChainRulesCore.ignore_derivatives() do
+        if check_args
+            α >= 1 || error("Erlang has no mode when α < 1")
+        end
     end
     θ * (α - 1)
 end

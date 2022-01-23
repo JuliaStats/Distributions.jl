@@ -38,7 +38,9 @@ struct GeneralizedPareto{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function GeneralizedPareto(μ::T, σ::T, ξ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(GeneralizedPareto, σ > zero(σ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(GeneralizedPareto, σ > zero(σ))
+    end
     return GeneralizedPareto{T}(μ, σ, ξ)
 end
 

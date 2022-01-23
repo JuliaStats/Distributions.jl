@@ -29,7 +29,9 @@ struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Laplace(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Laplace, θ > zero(θ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Laplace, θ > zero(θ))
+    end
     return Laplace{T}(μ, θ)
 end
 

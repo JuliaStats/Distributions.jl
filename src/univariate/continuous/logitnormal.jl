@@ -59,7 +59,9 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(LogitNormal, σ > zero(σ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(LogitNormal, σ > zero(σ))
+    end
     return LogitNormal{T}(μ, σ)
 end
 

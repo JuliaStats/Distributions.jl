@@ -27,7 +27,9 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Chi(ν::Real; check_args::Bool=true)
-    check_args && @check_args(Chi, ν > zero(ν))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Chi, ν > zero(ν))
+    end
     return Chi{typeof(ν)}(ν)
 end
 
@@ -71,8 +73,10 @@ entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
 
 function mode(d::Chi; check_args::Bool=true)
     ν = d.ν
-    if check_args
-        ν >= 1 || error("Chi distribution has no mode when ν < 1")
+    ChainRulesCore.ignore_derivatives() do
+        if check_args
+            ν >= 1 || error("Chi distribution has no mode when ν < 1")
+        end
     end
     sqrt(ν - 1)
 end

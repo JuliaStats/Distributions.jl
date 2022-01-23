@@ -38,10 +38,12 @@ struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
 end
 
 function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args::Bool=true) where {T <: Real}
-    if check_args
-        @check_args(SkewedExponentialPower, σ > zero(σ))
-        @check_args(SkewedExponentialPower, p > zero(p))
-        @check_args(SkewedExponentialPower, zero(α) < α < one(α))
+    ChainRulesCore.ignore_derivatives() do
+        if check_args
+            @check_args(SkewedExponentialPower, σ > zero(σ))
+            @check_args(SkewedExponentialPower, p > zero(p))
+            @check_args(SkewedExponentialPower, zero(α) < α < one(α))
+        end
     end
     return SkewedExponentialPower{T}(µ, σ, p, α)
 end

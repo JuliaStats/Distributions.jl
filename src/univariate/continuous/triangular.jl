@@ -35,7 +35,9 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function TriangularDist(a::T, b::T, c::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(TriangularDist, a <= c <= b)
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(TriangularDist, a <= c <= b)
+    end
     return TriangularDist{T}(a, b, c)
 end
 

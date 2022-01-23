@@ -30,7 +30,9 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Geometric(p::Real; check_args::Bool=true)
-    check_args && @check_args(Geometric, zero(p) < p < one(p))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Geometric, zero(p) < p < one(p))
+    end
     return Geometric{typeof(p)}(p)
 end
 

@@ -26,8 +26,10 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     lmnB::S
 
     function Dirichlet{T}(alpha::AbstractVector{T}; check_args::Bool=true) where T
-        if check_args && !all(x -> x > zero(x), alpha)
-            throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
+        ChainRulesCore.ignore_derivatives() do
+            if check_args && !all(x -> x > zero(x), alpha)
+                throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
+            end
         end
         alpha0 = sum(alpha)
         lmnB = sum(loggamma, alpha) - loggamma(alpha0)
@@ -39,7 +41,9 @@ function Dirichlet(alpha::AbstractVector{T}; check_args::Bool=true) where {T<:Re
     Dirichlet{T}(alpha; check_args=check_args)
 end
 function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
-    check_args && @check_args(Dirichlet, d > zero(d) && alpha > zero(alpha))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Dirichlet, d > zero(d) && alpha > zero(alpha))
+    end
     return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
 end
 

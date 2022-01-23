@@ -27,7 +27,9 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Exponential(θ::Real; check_args::Bool=true)
-    check_args && @check_args(Exponential, θ > zero(θ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Exponential, θ > zero(θ))
+    end
     return Exponential{typeof(θ)}(θ)
 end
 

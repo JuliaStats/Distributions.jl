@@ -33,14 +33,18 @@ struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Skellam(μ1::T, μ2::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Skellam, μ1 > zero(μ1) && μ2 > zero(μ2))
+    end
     return Skellam{T}(μ1, μ2)
 end
 
 Skellam(μ1::Real, μ2::Real; check_args::Bool=true) = Skellam(promote(μ1, μ2)...; check_args=check_args)
 Skellam(μ1::Integer, μ2::Integer; check_args::Bool=true) = Skellam(float(μ1), float(μ2); check_args=check_args)
 function Skellam(μ::Real; check_args::Bool=true)
-    check_args && @check_args(Skellam, μ > zero(μ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Skellam, μ > zero(μ))
+    end
     Skellam(μ, μ; check_args=false)
 end
 Skellam() = Skellam{Float64}(1.0, 1.0)

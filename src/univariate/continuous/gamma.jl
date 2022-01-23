@@ -31,7 +31,9 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Gamma(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
+    end
     return Gamma{T}(α, θ)
 end
 

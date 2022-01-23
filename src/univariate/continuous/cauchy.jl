@@ -29,7 +29,9 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Cauchy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    check_args && @check_args(Cauchy, σ > zero(σ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Cauchy, σ > zero(σ))
+    end
     return Cauchy{T}(μ, σ)
 end
 

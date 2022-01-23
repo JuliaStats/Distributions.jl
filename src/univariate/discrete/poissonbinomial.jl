@@ -28,7 +28,9 @@ mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <: DiscreteUnivaria
     pmf::Union{Nothing,Vector{T}} # lazy computation of the probability mass function
 
     function PoissonBinomial{T}(p::AbstractVector{T}; check_args::Bool=true) where {T <: Real}
-        check_args && @check_args(PoissonBinomial, all(x -> zero(x) <= x <= one(x), p))
+        ChainRulesCore.ignore_derivatives() do
+            check_args && @check_args(PoissonBinomial, all(x -> zero(x) <= x <= one(x), p))
+        end
         return new{T,typeof(p)}(p, nothing)
     end
 end

@@ -29,7 +29,9 @@ struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Gumbel(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Gumbel, θ > zero(θ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Gumbel, θ > zero(θ))
+    end
     return Gumbel{T}(μ, θ)
 end
 

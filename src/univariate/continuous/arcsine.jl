@@ -32,7 +32,9 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Arcsine(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Arcsine, a < b)
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Arcsine, a < b)
+    end
     return Arcsine{T}(a, b)
 end
 

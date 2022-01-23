@@ -29,7 +29,9 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Rayleigh(σ::Real; check_args::Bool=true)
-    check_args && @check_args(Rayleigh, σ > zero(σ))
+    ChainRulesCore.ignore_derivatives() do
+        check_args && @check_args(Rayleigh, σ > zero(σ))
+    end
     return Rayleigh{typeof(σ)}(σ)
 end
 
