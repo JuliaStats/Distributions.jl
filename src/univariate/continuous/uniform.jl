@@ -109,6 +109,13 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Fast path for `loglikelihood`
+
+function loglikelihood(d::Uniform, x::AbstractArray{<:Real})
+    diff = d.b - d.a
+    return all(Base.Fix1(insupport, d), x) ? -length(x) * log(diff) : log(zero(diff))
+end
+
 #### Affine transformations
 
 Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
@@ -144,6 +151,7 @@ end
 
 # ChainRules definitions
 
+## logpdf
 function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real)
     # Compute log probability
     a, b = params(d)
@@ -157,7 +165,6 @@ function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real
 
     return Ω, ΔΩ
 end
-
 function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     # Compute log probability
     a, b = params(d)
@@ -168,7 +175,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     # Define pullback
     function logpdf_Uniform_pullback(Δ)
         Δa = Δ / diff
-        Δd = if insupport 
+        Δd = if insupport
             ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
         else
             ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
@@ -179,3 +186,39 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     return Ω, logpdf_Uniform_pullback
 end
 
+## loglikelihood
+function ChainRulesCore.frule((_, Δd, _), ::typeof(loglikelihood), d::Uniform, x::AbstractArray{<:Real})
+    # Compute log likelihood
+    a, b = params(d)
+    n = length(x)
+    all_insupport = all(Base.Fix1(insupport, d), x)
+    diff = b - a
+    Ω = all_insupport ? -n * log(diff) : log(zero(diff))
+
+    # Compute tangent
+    Δdiff = n * (Δd.a - Δd.b)
+    ΔΩ = (all_insupport ? Δdiff : zero(Δdiff)) / diff
+
+    return Ω, ΔΩ
+end
+function ChainRulesCore.rrule(::typeof(loglikelihood), d::Uniform, x::AbstractArray{<:Real})
+    # Compute log likelihood
+    a, b = params(d)
+    n = length(x)
+    all_insupport = all(Base.Fix1(insupport, d), x)
+    diff = b - a
+    Ω = all_insupport ? -n * log(diff) : log(zero(diff))
+
+    # Define pullback
+    function loglikelihood_Uniform_pullback(Δ)
+        Δa = n * Δ / diff
+        Δd = if all_insupport
+            ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
+        else
+            ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
+        end
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.ZeroTangent()
+    end
+
+    return Ω, loglikelihood_Uniform_pullback
+end
