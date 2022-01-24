@@ -78,7 +78,7 @@ mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 function mode(d::LKJ; check_args::Bool=true)
     @check_args(
         LKJ,
-        @setup(_, η = params(d)),
+        @setup((_, η) = params(d)),
         (η > 1, "mode is defined only when η > 1."),
     )
     return mean(d)
