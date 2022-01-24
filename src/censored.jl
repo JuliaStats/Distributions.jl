@@ -37,7 +37,7 @@ should be implemented:
 - `censored(d0::D, ::Nothing, u::Real)`
 - `censored(d0::D, l::Real, ::Nothing)`
 """
-censored
+function censored end
 function censored(d0::UnivariateDistribution, l::T, u::T) where {T<:Real}
     return Censored(d0, l, u)
 end
