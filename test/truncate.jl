@@ -136,10 +136,8 @@ end
 @test truncated(Normal(); upper=1) == Distributions.Truncated(Normal(), -Inf, 1.0)
 @test truncated(Normal(); upper=2) == Distributions.Truncated(Normal(), -Inf, 2.0)
 @test truncated(Normal()) === Normal()
-if VERSION ≥ v"1.5.2"
-    @test_warn "`truncated(d, -Inf, u)` is deprecated. Please use `truncated(d; upper=u)` instead." truncated(Normal(), -Inf, 2)
-    @test_warn "`truncated(d, l, Inf)` is deprecated. Please use `truncated(d; lower=l)` instead." truncated(Normal(), 2, Inf)
-end
+@test_deprecated truncated(Normal(), -Inf, 2)
+@test_deprecated truncated(Normal(), 2, Inf)
 
 ## main
 
