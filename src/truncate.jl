@@ -72,7 +72,7 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
         force_kwarg...
     )
     u == Inf && Base.depwarn(
-        "`truncated(d, l, Inf)` is deprecated. Please `truncated(d; lower=l)` instead.",
+        "`truncated(d, l, Inf)` is deprecated. Please use `truncated(d; lower=l)` instead.",
         :truncated;
         force_kwarg...
     )
