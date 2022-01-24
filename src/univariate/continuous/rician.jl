@@ -34,9 +34,7 @@ struct Rician{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Rician(ν::T, σ::T; check_args::Bool=true) where {T<:Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Rician, ν ≥ zero(ν) && σ ≥ zero(σ))
-    end
+    @check_args(Rician, ν ≥ zero(ν), σ ≥ zero(σ))
     return Rician{T}(ν, σ)
 end
 

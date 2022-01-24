@@ -14,9 +14,7 @@ struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     n::Float64
 
     function EdgeworthZ{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(EdgeworthZ, n > zero(n))
-        end
+        @check_args(EdgeworthZ, n > zero(n))
         new{D}(d, n)
     end
 end
@@ -82,9 +80,7 @@ struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
     function EdgeworthSum{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(EdgeworthSum, n > zero(n))
-        end
+        @check_args(EdgeworthSum, n > zero(n))
         new{D}(d, n)
     end
 end

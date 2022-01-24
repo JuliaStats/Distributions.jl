@@ -9,9 +9,7 @@ struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralBeta(α::T, β::T, λ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(NoncentralBeta, α > zero(α) && β > zero(β) && λ >= zero(λ))
-    end
+    @check_args(NoncentralBeta, α > zero(α), β > zero(β), λ >= zero(λ))
     return NoncentralBeta{T}(α, β, λ)
 end
 

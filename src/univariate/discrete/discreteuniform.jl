@@ -27,9 +27,7 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
     pv::Float64 # individual probabilities
 
     function DiscreteUniform(a::Real, b::Real; check_args::Bool=true)
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(DiscreteUniform, a <= b)
-        end
+        @check_args(DiscreteUniform, a <= b)
         new(a, b, 1 / (b - a + 1))
     end
     DiscreteUniform(b::Real; check_args::Bool=true) = DiscreteUniform(0, b; check_args=check_args)

@@ -1,10 +1,60 @@
 ## macro for argument checking
 
-macro check_args(D, cond)
+"""
+    @check_args(
+        D,
+        @setup(statements...),
+        (cond₁, message₁),
+        (cond₂, message₂),
+        ...,
+    )
+
+A convenience macro that generates AD-compatible checks of arguments for a distribution of
+type `D`.
+
+More concretely, it generates the following Julia code:
+```julia
+ChainRulesCore.ignore_derivatives() do
+    if check_args
+        \$(statements...)
+        cond₁ || throw(ArgumentError(\$(string(D, ": ", message₁))))
+        cond₂ || throw(ArgumentError(\$(string(D, ": ", message₂))))
+        ...
+    end
+end
+```
+
+The `@setup` argument can be elided if no setup code is needed. Moreover, error messages
+can be omitted. In this case the message `"the condition \$(cond) is not satisfied."` is
+used.
+"""
+macro check_args(D, setup_or_cond, conds...)
+    # Extract setup statements
+    if Meta.isexpr(setup_or_cond, :macrocall) && setup_or_cond.args[1] == Symbol("@setup")
+        setup_stmts = Any[esc(ex) for ex in setup_or_cond.args[3:end]]
+    else
+        setup_stmts = []
+        conds = (setup_or_cond, conds...)
+    end
+
+    # Generate expressions for each condition
+    conds_exprs = map(conds) do cond_maybe_message
+        if Meta.isexpr(cond_maybe_message, :tuple, 2)
+            cond = cond_maybe_message.args[1]
+            message = string(D, ": ", cond_maybe_message.args[2])
+        else
+            cond = cond_maybe_message
+            message = string(D, ": the condition ", cond, " is not satisfied.")
+        end
+        return :(($(esc(cond))) || throw(ArgumentError($message)))
+    end
+
     quote
-        if !($(esc(cond)))
-            throw(ArgumentError(string(
-                $(string(D)), ": the condition ", $(string(cond)), " is not satisfied.")))
+        ChainRulesCore.ignore_derivatives() do
+            if $(esc(:check_args))
+                $(setup_stmts...)
+                $(conds_exprs...)
+            end
         end
     end
 end

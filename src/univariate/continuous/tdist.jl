@@ -26,9 +26,7 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function TDist(ν::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(TDist, ν > zero(ν))
-    end
+    @check_args(TDist, ν > zero(ν))
     return TDist{typeof(ν)}(ν)
 end
 

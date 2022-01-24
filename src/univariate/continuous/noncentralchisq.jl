@@ -30,9 +30,7 @@ struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralChisq(ν::T, λ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(NoncentralChisq, ν > zero(ν) && λ >= zero(λ))
-    end
+    @check_args(NoncentralChisq, ν > zero(ν), λ >= zero(λ))
     return NoncentralChisq{T}(ν, λ)
 end
 

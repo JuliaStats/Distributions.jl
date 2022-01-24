@@ -31,9 +31,7 @@ end
 
 
 function Logistic(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Logistic, θ > zero(θ))
-    end
+    @check_args(Logistic, θ > zero(θ))
     return Logistic{T}(μ, θ)
 end
 

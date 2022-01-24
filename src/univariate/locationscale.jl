@@ -38,9 +38,7 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     σ::T
     ρ::D
     function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(AffineDistribution, σ > zero(σ))
-        end
+        @check_args(AffineDistribution, σ > zero(σ))
         new{T, S, D}(μ, σ, ρ)
     end
 end
@@ -60,10 +58,8 @@ end
 const LocationScale{T,S,D} = AffineDistribution{T,S,D}
 function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
     Base.depwarn("`LocationScale` is deprecated, use `AffineDistribution` instead", :LocationScale)
-    ChainRulesCore.ignore_derivatives() do
-        # preparation for future PR where I remove σ > 0 check
-        check_args && @check_args(LocationScale, σ > zero(σ))
-    end
+    # preparation for future PR where I remove σ > 0 check
+    @check_args(LocationScale, σ > zero(σ))
     return AffineDistribution(μ, σ, ρ; check_args=false)
 end
 

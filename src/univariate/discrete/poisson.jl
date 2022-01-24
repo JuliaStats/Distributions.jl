@@ -27,9 +27,7 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Poisson(λ::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Poisson, λ >= zero(λ))
-    end
+    @check_args(Poisson, λ >= zero(λ))
     return Poisson{typeof(λ)}(λ)
 end
 

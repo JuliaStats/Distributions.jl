@@ -33,18 +33,14 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Beta(α::T, β::T; check_args::Bool=true) where {T<:Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Beta, α > zero(α) && β > zero(β))
-    end
+    @check_args(Beta, α > zero(α), β > zero(β))
     return Beta{T}(α, β)
 end
 
 Beta(α::Real, β::Real; check_args::Bool=true) = Beta(promote(α, β)...; check_args=check_args)
 Beta(α::Integer, β::Integer; check_args::Bool=true) = Beta(float(α), float(β); check_args=check_args)
 function Beta(α::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Beta, α > zero(α))
-    end
+    @check_args(Beta, α > zero(α))
     Beta(α, α; check_args=false)
 end
 Beta() = Beta{Float64}(1.0, 1.0)
@@ -71,11 +67,10 @@ mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
 function mode(d::Beta; check_args::Bool=true)
     α, β = params(d)
-    ChainRulesCore.ignore_derivatives() do
-        if check_args
-            (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")
-        end
-    end
+    @check_args(
+        Beta,
+        (α > 1 && β > 1, "mode is defined only when α > 1 and β > 1."),
+    )
     return (α - 1) / (α + β - 2)
 end
 

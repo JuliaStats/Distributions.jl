@@ -17,9 +17,7 @@ struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogUniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(LogUniform, 0 < a < b)
-    end
+    @check_args(LogUniform, 0 < a < b)
     LogUniform{T}(a, b)
 end
 

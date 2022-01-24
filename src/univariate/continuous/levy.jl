@@ -28,9 +28,7 @@ struct Levy{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Levy, σ > zero(σ))
-    end
+    @check_args(Levy, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
 

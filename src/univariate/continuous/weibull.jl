@@ -33,9 +33,7 @@ struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Weibull(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Weibull, α > zero(α) && θ > zero(θ))
-    end
+    @check_args(Weibull, α > zero(α), θ > zero(θ))
     return Weibull{T}(α, θ)
 end
 

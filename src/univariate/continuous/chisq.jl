@@ -26,9 +26,7 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Chisq(ν::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Chisq, ν > zero(ν))
-    end
+    @check_args(Chisq, ν > zero(ν))
     return Chisq{typeof(ν)}(ν)
 end
 

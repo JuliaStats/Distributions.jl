@@ -34,9 +34,7 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Normal, σ >= zero(σ))
-    end
+    @check_args(Normal, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 

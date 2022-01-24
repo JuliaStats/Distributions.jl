@@ -27,9 +27,7 @@ struct FDist{T<:Real} <: ContinuousUnivariateDistribution
     ν2::T
 
     function FDist{T}(ν1::T, ν2::T; check_args::Bool=true) where T
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(FDist, ν1 > zero(ν1) && ν2 > zero(ν2))
-        end
+        @check_args(FDist, ν1 > zero(ν1), ν2 > zero(ν2))
         new{T}(ν1, ν2)
     end
 end

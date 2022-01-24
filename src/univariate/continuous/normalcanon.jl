@@ -12,9 +12,7 @@ struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     μ::T       # μ
 
     function NormalCanon{T}(η, λ; check_args::Bool=true) where T
-        ChainRulesCore.ignore_derivatives() do
-            check_args && @check_args(NormalCanon, λ > zero(λ))
-        end
+        @check_args(NormalCanon, λ > zero(λ))
         new{T}(η, λ, η / λ)
     end
 end

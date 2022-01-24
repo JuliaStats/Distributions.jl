@@ -30,9 +30,7 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Uniform, a < b)
-    end
+    @check_args(Uniform, a < b)
     return Uniform{T}(a, b)
 end
 

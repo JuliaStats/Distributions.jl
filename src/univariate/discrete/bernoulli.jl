@@ -31,9 +31,7 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Bernoulli(p::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Bernoulli, zero(p) <= p <= one(p))
-    end
+    @check_args(Bernoulli, zero(p) <= p <= one(p))
     return Bernoulli{typeof(p)}(p)
 end
 

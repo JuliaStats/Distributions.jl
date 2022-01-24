@@ -30,20 +30,13 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Binomial(n::Integer, p::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        if check_args
-            @check_args(Binomial, n >= zero(n))
-            @check_args(Binomial, zero(p) <= p <= one(p))
-        end
-    end
+    @check_args(Binomial, n >= zero(n), zero(p) <= p <= one(p))
     return Binomial{typeof(p)}(n, p)
 end
 
 Binomial(n::Integer, p::Integer; check_args::Bool=true) = Binomial(n, float(p); check_args=check_args)
 function Binomial(n::Integer; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Binomial, n >= zero(n))
-    end
+    @check_args(Binomial, n >= zero(n))
     Binomial{Float64}(n, 0.5)
 end
 Binomial() = Binomial{Float64}(1, 0.5)

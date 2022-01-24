@@ -15,9 +15,7 @@ struct SkewNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function SkewNormal(ξ::T, ω::T, α::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(SkewNormal, ω > zero(ω))
-    end
+    @check_args(SkewNormal, ω > zero(ω))
     return SkewNormal{T}(ξ, ω, α)
 end
 

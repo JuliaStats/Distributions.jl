@@ -33,9 +33,7 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(LogNormal, σ ≥ zero(σ))
-    end
+    @check_args(LogNormal, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 

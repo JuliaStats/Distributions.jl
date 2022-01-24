@@ -25,9 +25,7 @@ end
 
 
 function Semicircle(r::Real; check_args::Bool=true)
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Semicircle, r > zero(r))
-    end
+    @check_args(Semicircle, r > zero(r))
     return Semicircle{typeof(r)}(r)
 end
 

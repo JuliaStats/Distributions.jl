@@ -27,9 +27,7 @@ struct BetaBinomial{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function BetaBinomial(n::Integer, α::T, β::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(BetaBinomial, n >= zero(n) && α >= zero(α) && β >= zero(β))
-    end
+    @check_args(BetaBinomial, n >= zero(n), α >= zero(α), β >= zero(β))
     return BetaBinomial{T}(n, α, β)
 end
 

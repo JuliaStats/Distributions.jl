@@ -28,9 +28,7 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Pareto(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Pareto, α > zero(α) && θ > zero(θ))
-    end
+    @check_args(Pareto, α > zero(α), θ > zero(θ))
     return Pareto{T}(α, θ)
 end
 

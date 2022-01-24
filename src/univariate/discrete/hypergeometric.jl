@@ -25,12 +25,12 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     n::Int      # sample size
 
     function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool=true)
-        ChainRulesCore.ignore_derivatives() do
-            if check_args
-                @check_args(Hypergeometric, ns >= zero(ns) && nf >= zero(nf))
-                @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
-            end
-        end
+        @check_args(
+            Hypergeometric,
+            ns >= zero(ns),
+            nf >= zero(nf),
+            zero(n) <= n <= ns + nf,
+        )
         new(ns, nf, n)
     end
 end

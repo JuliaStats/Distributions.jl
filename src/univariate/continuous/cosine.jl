@@ -14,9 +14,7 @@ struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Cosine(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Cosine, σ > zero(σ))
-    end
+    @check_args(Cosine, σ > zero(σ))
     return Cosine{T}(μ, σ)
 end
 

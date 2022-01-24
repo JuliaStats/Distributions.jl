@@ -8,9 +8,7 @@ struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Triweight(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Triweight, σ > zero(σ))
-    end
+    @check_args(Triweight, σ > zero(σ))
     return Triweight{T}(μ, σ)
 end
 

@@ -30,9 +30,7 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Frechet(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(Frechet, α > zero(α) && θ > zero(θ))
-    end
+    @check_args(Frechet, α > zero(α), θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 

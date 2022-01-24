@@ -9,9 +9,7 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralF(ν1::T, ν2::T, λ::T; check_args::Bool=true) where {T <: Real}
-    ChainRulesCore.ignore_derivatives() do
-        check_args && @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T) && λ >= zero(T))
-    end
+    @check_args(NoncentralF, ν1 > zero(ν1), ν2 > zero(ν2), λ >= zero(λ))
     return NoncentralF{T}(ν1, ν2, λ)
 end
 

@@ -24,11 +24,12 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; check_args::Bool=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
         check_args || return new{T,P,Ts,Ps}(vs, ps)
-        ChainRulesCore.ignore_derivatives() do
-            @check_args(DiscreteNonParametric, length(vs) == length(ps))
-            @check_args(DiscreteNonParametric, isprobvec(ps))
-            @check_args(DiscreteNonParametric, allunique(vs))
-        end
+        @check_args(
+            DiscreteNonParametric,
+            length(vs) == length(ps),
+            isprobvec(ps),
+            allunique(vs),
+        )
         sort_order = sortperm(vs)
         new{T,P,Ts,Ps}(vs[sort_order], ps[sort_order])
     end
@@ -269,7 +270,7 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {
 end
 
 function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
-                   w::AbstractArray{W}) where {T<:Real,W<:Real}
+                   w::AbstractArray{W}; check_args::Bool=true) where {T<:Real,W<:Real}
 
     @check_args(DiscreteNonParametric, length(x) == length(w))
 
