@@ -33,7 +33,7 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    @check_args(LogNormal, σ ≥ zero(σ))
+    @check_args LogNormal (σ, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 

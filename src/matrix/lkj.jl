@@ -35,8 +35,8 @@ end
 function LKJ(d::Integer, η::Real; check_args::Bool=true)
     @check_args(
         LKJ,
-        (d > 0, "matrix dimension must be positive."),
-        (η > 0, "shape parameter must be positive."),
+        (d, d > 0, "matrix dimension must be positive."),
+        (η, η > 0, "shape parameter must be positive."),
     )
     logc0 = lkj_logc0(d, η)
     T = Base.promote_eltype(η, logc0)
@@ -79,7 +79,7 @@ function mode(d::LKJ; check_args::Bool=true)
     @check_args(
         LKJ,
         @setup((_, η) = params(d)),
-        (η > 1, "mode is defined only when η > 1."),
+        (η, η > 1, "mode is defined only when η > 1."),
     )
     return mean(d)
 end

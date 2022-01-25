@@ -27,7 +27,7 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Chi(ν::Real; check_args::Bool=true)
-    @check_args(Chi, ν > zero(ν))
+    @check_args Chi (ν, ν > zero(ν))
     return Chi{typeof(ν)}(ν)
 end
 
@@ -73,7 +73,7 @@ function mode(d::Chi; check_args::Bool=true)
     ν = d.ν
     @check_args(
         Chi,
-        (ν >= 1, "Chi distribution has no mode when ν < 1"),
+        (ν, ν >= 1, "Chi distribution has no mode when ν < 1"),
     )
     sqrt(ν - 1)
 end

@@ -38,7 +38,7 @@ struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
 end
 
 function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args::Bool=true) where {T <: Real}
-    @check_args(SkewedExponentialPower, σ > zero(σ), p > zero(p), zero(α) < α < one(α))
+    @check_args SkewedExponentialPower (σ, σ > zero(σ)) (p, p > zero(p)) (α, zero(α) < α < one(α))
     return SkewedExponentialPower{T}(µ, σ, p, α)
 end
 

@@ -31,6 +31,7 @@ mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <: DiscreteUnivaria
         @check_args(
             PoissonBinomial,
             (
+                p,
                 all(x -> zero(x) <= x <= one(x), p),
                 "p must be a vector of success probabilities",
             ),

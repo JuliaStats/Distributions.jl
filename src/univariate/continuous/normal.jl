@@ -34,7 +34,7 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    @check_args(Normal, σ >= zero(σ))
+    @check_args Normal (σ, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 

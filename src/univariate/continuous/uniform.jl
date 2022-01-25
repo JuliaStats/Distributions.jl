@@ -30,7 +30,7 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    @check_args(Uniform, a < b)
+    @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
 
@@ -168,7 +168,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     # Define pullback
     function logpdf_Uniform_pullback(Δ)
         Δa = Δ / diff
-        Δd = if insupport 
+        Δd = if insupport
             ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
         else
             ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
@@ -178,4 +178,3 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
 
     return Ω, logpdf_Uniform_pullback
 end
-

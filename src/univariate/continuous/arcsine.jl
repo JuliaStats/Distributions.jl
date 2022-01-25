@@ -32,7 +32,7 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Arcsine(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    @check_args(Arcsine, a < b)
+    @check_args Arcsine a < b
     return Arcsine{T}(a, b)
 end
 

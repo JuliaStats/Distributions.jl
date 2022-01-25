@@ -21,12 +21,12 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Erlang(α::Real, θ::Real; check_args::Bool=true)
-    @check_args(Erlang, isinteger(α), α >= zero(α))
+    @check_args Erlang (α, isinteger(α)) (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
 function Erlang(α::Integer, θ::Real; check_args::Bool=true)
-    @check_args(Erlang, α >= zero(α))
+    @check_args Erlang (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
@@ -65,7 +65,7 @@ function mode(d::Erlang; check_args::Bool=true)
     α, θ = params(d)
     @check_args(
         Erlang,
-        (α >= 1, "Erlang has no mode when α < 1"),
+        (α, α >= 1, "Erlang has no mode when α < 1"),
     )
     θ * (α - 1)
 end

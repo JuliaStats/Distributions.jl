@@ -42,10 +42,10 @@ struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     function FisherNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
         @check_args(
             FisherNoncentralHypergeometric,
-            ns >= zero(ns),
-            nf >= zero(nf),
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
             zero(n) < n < ns + nf,
-            ω > zero(ω),
+            (ω, ω > zero(ω)),
         )
         new{T}(ns, nf, n, ω)
     end
@@ -230,10 +230,10 @@ struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     function WalleniusNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
         @check_args(
             WalleniusNoncentralHypergeometric,
-            ns >= zero(ns),
-            nf >= zero(nf),
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
             zero(n) < n < ns + nf,
-            ω > zero(ω),
+            (ω, ω > zero(ω)),
         )
         new{T}(ns, nf, n, ω)
     end

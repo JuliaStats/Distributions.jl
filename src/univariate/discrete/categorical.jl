@@ -27,7 +27,7 @@ External links:
 const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
 function Categorical{P,Ps}(p::Ps; check_args::Bool=true) where {P<:Real, Ps<:AbstractVector{P}}
-    @check_args(Categorical, isprobvec(p))
+    @check_args Categorical (p, isprobvec(p), "vector p is not a probability vector")
     return Categorical{P,Ps}(Base.OneTo(length(p)), p; check_args=check_args)
 end
 
@@ -35,7 +35,7 @@ Categorical(p::AbstractVector{P}; check_args::Bool=true) where {P<:Real} =
     Categorical{P,typeof(p)}(p; check_args=check_args)
 
 function Categorical(k::Integer; check_args::Bool=true)
-    @check_args(Categorical, k >= 1)
+    @check_args Categorical (k, k >= 1, "at least one category is required")
     return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k); check_args=false)
 end
 

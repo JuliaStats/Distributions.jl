@@ -27,8 +27,8 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool=true)
         @check_args(
             Hypergeometric,
-            ns >= zero(ns),
-            nf >= zero(nf),
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
             zero(n) <= n <= ns + nf,
         )
         new(ns, nf, n)

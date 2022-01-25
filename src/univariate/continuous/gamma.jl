@@ -31,7 +31,7 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Gamma(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    @check_args(Gamma, α > zero(α), θ > zero(θ))
+    @check_args Gamma (α, α > zero(α)) (θ, θ > zero(θ))
     return Gamma{T}(α, θ)
 end
 

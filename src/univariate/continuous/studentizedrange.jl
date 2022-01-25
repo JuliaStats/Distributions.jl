@@ -34,7 +34,7 @@ struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function StudentizedRange(ν::T, k::T; check_args::Bool=true) where {T <: Real}
-    @check_args(StudentizedRange, ν > zero(ν), k > one(k))
+    @check_args StudentizedRange (ν, ν > zero(ν)) (k, k > one(k))
     return StudentizedRange{T}(ν, k)
 end
 

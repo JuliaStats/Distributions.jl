@@ -29,7 +29,7 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Cauchy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    @check_args(Cauchy, σ > zero(σ))
+    @check_args Cauchy (σ, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end
 

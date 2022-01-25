@@ -1,10 +1,14 @@
 ## macro for argument checking
 
+macro strip_linenos(expr)
+    return esc(Base.remove_linenums!(expr))
+end
+
 """
     @check_args(
         D,
         @setup(statements...),
-        (cond₁, message₁),
+        (arg₁, cond₁, message₁),
         (cond₂, message₂),
         ...,
     )
@@ -14,13 +18,11 @@ type `D`.
 
 More concretely, it generates the following Julia code:
 ```julia
-ChainRulesCore.ignore_derivatives() do
-    if check_args
-        \$(statements...)
-        cond₁ || throw(ArgumentError(\$(string(D, ": ", message₁))))
-        cond₂ || throw(ArgumentError(\$(string(D, ": ", message₂))))
-        ...
-    end
+Distributions.check_args(check_args) do
+    \$(statements...)
+    cond₁ || throw(DomainError(arg₁, \$(string(D, ": ", message₁))))
+    cond₂ || throw(ArgumentError(\$(string(D, ": ", message₂))))
+    ...
 end
 ```
 
@@ -28,36 +30,68 @@ The `@setup` argument can be elided if no setup code is needed. Moreover, error 
 can be omitted. In this case the message `"the condition \$(cond) is not satisfied."` is
 used.
 """
-macro check_args(D, setup_or_cond, conds...)
+macro check_args(D, setup_or_check, checks...)
     # Extract setup statements
-    if Meta.isexpr(setup_or_cond, :macrocall) && setup_or_cond.args[1] == Symbol("@setup")
-        setup_stmts = Any[esc(ex) for ex in setup_or_cond.args[3:end]]
+    if Meta.isexpr(setup_or_check, :macrocall) && setup_or_check.args[1] == Symbol("@setup")
+        setup_stmts = Any[esc(ex) for ex in setup_or_check.args[3:end]]
     else
         setup_stmts = []
-        conds = (setup_or_cond, conds...)
+        checks = (setup_or_check, checks...)
     end
 
     # Generate expressions for each condition
-    conds_exprs = map(conds) do cond_maybe_message
-        if Meta.isexpr(cond_maybe_message, :tuple, 2)
-            cond = cond_maybe_message.args[1]
-            message = string(D, ": ", cond_maybe_message.args[2])
+    conds_exprs = map(checks) do check
+        if Meta.isexpr(check, :tuple, 3)
+            # argument, condition, and message specified
+            arg = check.args[1]
+            cond = check.args[2]
+            message = string(D, ": ", check.args[3])
+            return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
+        elseif Meta.isexpr(check, :tuple, 2)
+            cond_or_message = check.args[2]
+            if cond_or_message isa String
+                # only condition and message specified
+                cond = check.args[1]
+                message = string(D, ": ", cond_or_message)
+                return :(($(esc(cond))) || throw(ArgumentError($message)))
+            else
+                # only argument and condition specified
+                arg = check.args[1]
+                cond = cond_or_message
+                message = string(D, ": the condition ", cond, " is not satisfied.")
+                return :(($(esc(cond))) || throw(DomainError($(esc(arg)), $message)))
+            end
         else
-            cond = cond_maybe_message
+            # only condition specified
+            cond = check
             message = string(D, ": the condition ", cond, " is not satisfied.")
+            return :(($(esc(cond))) || throw(ArgumentError($message)))
         end
-        return :(($(esc(cond))) || throw(ArgumentError($message)))
     end
 
-    quote
-        ChainRulesCore.ignore_derivatives() do
-            if $(esc(:check_args))
-                $(setup_stmts...)
-                $(conds_exprs...)
-            end
+    return @strip_linenos quote
+        Distributions.check_args($(esc(:check_args))) do
+            $(__source__)
+            $(setup_stmts...)
+            $(conds_exprs...)
         end
     end
 end
+
+"""
+    check_args(f, check::Bool)
+
+Perform check of arguments by calling a function `f`.
+
+If `check` is `false`, the checks are skipped.
+"""
+function check_args(f::F, check::Bool) where {F}
+    check && f()
+    nothing
+end
+
+ChainRulesCore.@non_differentiable check_args(::Any, ::Bool)
+
 
 ##### Utility functions
 

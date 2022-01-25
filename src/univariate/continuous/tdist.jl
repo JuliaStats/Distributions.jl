@@ -26,7 +26,7 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function TDist(ν::Real; check_args::Bool=true)
-    @check_args(TDist, ν > zero(ν))
+    @check_args TDist (ν, ν > zero(ν))
     return TDist{typeof(ν)}(ν)
 end
 
