@@ -171,66 +171,49 @@ median(d::Censored) = _clamp(median(d.uncensored), d.lower, d.upper)
 function mean(d::RightCensored)
     upper = d.upper
     log_prob_upper = logccdf(d.uncensored, upper)
-    prob_upper = exp(log_prob_upper)
-    μ = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-    prob_trunc = exp(log1mexp(log_prob_upper))
-    return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
+    log_prob_interval = log1mexp(log_prob_upper)
+    μ = xexpy(upper, log_prob_upper) + xexpy(mean(_to_truncated(d)), log_prob_interval)
+    return μ
 end
 function mean(d::LeftCensored)
     lower = d.lower
     log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
-    prob_lower = exp(log_prob_lower)
-    μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
-    prob_trunc = exp(log1mexp(log_prob_lower))
-    return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
+    log_prob_interval = log1mexp(log_prob_lower)
+    μ = xexpy(lower, log_prob_lower) + xexpy(mean(_to_truncated(d)), log_prob_interval)
+    return μ
 end
 function mean(d::Censored)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
     log_prob_lower = _logcdf_noninclusive(d0, lower)
-    prob_lower = exp(log_prob_lower)
     log_prob_upper = logccdf(d0, upper)
-    prob_upper = exp(log_prob_upper)
-    prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    μ = prob_trunc * mean(_to_truncated(d))
-    if !iszero(prob_lower)
-        μ += prob_lower * lower
-    end
-    if !iszero(prob_upper)
-        μ += prob_upper * upper
-    end
+    log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
+    μ = (xexpy(lower, log_prob_lower) + xexpy(upper, log_prob_upper) +
+         xexpy(mean(_to_truncated(d)), log_prob_interval))
     return μ
 end
 
 function var(d::RightCensored)
     upper = d.upper
     log_prob_upper = logccdf(d.uncensored, upper)
-    prob_upper = exp(log_prob_upper)
-    μ_upper = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-    prob_trunc = exp(log1mexp(log_prob_upper))
+    log_prob_interval = log1mexp(log_prob_upper)
     dtrunc = _to_truncated(d)
-    μ_trunc = mean(dtrunc)
-    μ = prob_trunc * μ_trunc + μ_upper
-    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
-    if !iszero(prob_upper)
-        v += prob_upper * abs2(upper - μ)
-    end
+    μ_interval = mean(dtrunc)
+    μ = xexpy(upper, log_prob_upper) + xexpy(μ_interval, log_prob_interval)
+    v_interval = var(dtrunc) + abs2(μ_interval - μ)
+    v = xexpy(abs2(upper - μ), log_prob_upper) + xexpy(v_interval, log_prob_interval)
     return v
 end
 function var(d::LeftCensored)
     lower = d.lower
     log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
-    prob_lower = exp(log_prob_lower)
-    μ_lower = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
-    prob_trunc = exp(log1mexp(log_prob_lower))
+    log_prob_interval = log1mexp(log_prob_lower)
     dtrunc = _to_truncated(d)
-    μ_trunc = mean(dtrunc)
-    μ = prob_trunc * μ_trunc + μ_lower
-    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
-    if !iszero(prob_lower)
-        v += prob_lower * abs2(lower - μ)
-    end
+    μ_interval = mean(dtrunc)
+    μ = xexpy(lower, log_prob_lower) + xexpy(μ_interval, log_prob_interval)
+    v_interval = var(dtrunc) + abs2(μ_interval - μ)
+    v = xexpy(abs2(lower - μ), log_prob_lower) + xexpy(v_interval, log_prob_interval)
     return v
 end
 function var(d::Censored)
@@ -239,25 +222,14 @@ function var(d::Censored)
     upper = d.upper
     log_prob_lower = _logcdf_noninclusive(d0, lower)
     log_prob_upper = logccdf(d0, upper)
-    prob_lower = exp(log_prob_lower)
-    prob_upper = exp(log_prob_upper)
-    prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
+    log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     dtrunc = _to_truncated(d)
-    μ_trunc = mean(dtrunc)
-    μ = prob_trunc * μ_trunc
-    if !iszero(prob_lower)
-        μ += prob_lower * lower
-    end
-    if !iszero(prob_upper)
-        μ += prob_upper * upper
-    end
-    v = prob_trunc * (var(dtrunc) + abs2(μ_trunc - μ))
-    if !iszero(prob_lower)
-        v += prob_lower * abs2(lower - μ)
-    end
-    if !iszero(prob_upper)
-        v += prob_upper * abs2(upper - μ)
-    end
+    μ_interval = mean(dtrunc)
+    μ = (xexpy(lower, log_prob_lower) + xexpy(upper, log_prob_upper) +
+         xexpy(μ_interval, log_prob_interval))
+    v_interval = var(dtrunc) + abs2(μ_interval - μ)
+    v = (xexpy(abs2(lower - μ), log_prob_lower) + xexpy(abs2(upper - μ), log_prob_upper) +
+         xexpy(v_interval, log_prob_interval))
     return v
 end
 
@@ -280,12 +252,11 @@ function entropy(d::RightCensored)
         log_prob_upper_inc = log_prob_upper
         xlogx_pu = 0
     end
+    log_prob_interval = log1mexp(log_prob_upper)
     entropy_bound = -xexpx(log_prob_upper_inc)
-    log_prob_trunc = log1mexp(log_prob_upper)
-    prob_trunc = exp(log_prob_trunc)
     dtrunc = _to_truncated(d)
-    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pu
-    return oftype(entropy_bound, entropy_bound + entropy_interval)
+    entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pu
+    return entropy_interval + entropy_bound
 end
 function entropy(d::LeftCensored)
     d0 = d.uncensored
@@ -299,12 +270,11 @@ function entropy(d::LeftCensored)
         log_prob_lower = log_prob_lower_inc
         xlogx_pl = 0
     end
+    log_prob_interval = log1mexp(log_prob_lower)
     entropy_bound = -xexpx(log_prob_lower_inc)
-    log_prob_trunc = log1mexp(log_prob_lower)
-    prob_trunc = exp(log_prob_trunc)
     dtrunc = _to_truncated(d)
-    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl
-    return oftype(entropy_bound, entropy_bound + entropy_interval)
+    entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pl
+    return entropy_interval + entropy_bound
 end
 function entropy(d::Censored)
     d0 = d.uncensored
@@ -324,12 +294,11 @@ function entropy(d::Censored)
         log_prob_upper_inc = log_prob_upper
         xlogx_pl = xlogx_pu = 0
     end
+    log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
-    log_prob_trunc = log1mexp(logaddexp(log_prob_lower, log_prob_upper))    
-    prob_trunc = exp(log_prob_trunc)
     dtrunc = _to_truncated(d)
-    entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
-    return entropy_bound + entropy_interval
+    entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pl + xlogx_pu
+    return entropy_interval + entropy_bound
 end
 
 
