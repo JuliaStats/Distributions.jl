@@ -265,7 +265,11 @@ end
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === Inf32
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(quantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
+    if VERSION >= v"1.3"
+        @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    end
 
     # cquantile
     @test @inferred(cquantile(LogNormal(1.0, 0.0), 0.0f0)) === Inf
@@ -276,7 +280,11 @@ end
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === 0.0f0
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(cquantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
+    if VERSION >= v"1.3"
+        @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    end
 
     # gradlogpdf
     @test @inferred(gradlogpdf(LogNormal(0.0, 1.0), 1.0)) === -1.0
