@@ -386,7 +386,7 @@ function logpdf(d::Censored, x::Real)
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    logpx = float(logpdf(d0, x))
+    logpx = logpdf(d0, x)
     return if _in_open_interval(x, lower, upper)
         logpx
     elseif x == lower
@@ -406,12 +406,12 @@ function loglikelihood(d::Censored, x::AbstractArray{<:Real})
     d0 = d.uncensored
     lower = d.lower
     upper = d.upper
-    logpx = float(logpdf(d0, first(x)))
+    logpx = logpdf(d0, first(x))
     log_prob_lower = lower === nothing ? zero(logpx) : oftype(logpx, logcdf(d0, lower))
     log_prob_upper = upper === nothing ? zero(logpx) : oftype(logpx, _logccdf_inclusive(d0, upper))
     logzero = oftype(logpx, -Inf)
     return sum(x) do xi
-        _in_open_interval(xi, lower, upper) && return float(logpdf(d0, xi))
+        _in_open_interval(xi, lower, upper) && return logpdf(d0, xi)
         xi == lower && return log_prob_lower
         xi == upper && return log_prob_upper
         return logzero
@@ -434,7 +434,7 @@ end
 function logcdf(d::Censored, x::Real)
     lower = d.lower
     upper = d.upper
-    result = float(logcdf(d.uncensored, x))
+    result = logcdf(d.uncensored, x)
     return if d.lower !== nothing && x < d.lower
         oftype(result, -Inf)
     elseif d.upper === nothing || x < d.upper
@@ -460,7 +460,7 @@ end
 function logccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
     lower = d.lower
     upper = d.upper
-    result = float(logccdf(d.uncensored, x))
+    result = logccdf(d.uncensored, x)
     return if lower !== nothing && x < lower
         zero(result)
     elseif upper === nothing || x < upper
