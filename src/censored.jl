@@ -174,8 +174,6 @@ function mean(d::RightCensored)
     prob_upper = exp(log_prob_upper)
     μ = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
     prob_trunc = exp(log1mexp(log_prob_upper))
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(prob_trunc)) && return μ
     return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
 end
 function mean(d::LeftCensored)
@@ -184,8 +182,6 @@ function mean(d::LeftCensored)
     prob_lower = exp(log_prob_lower)
     μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
     prob_trunc = exp(log1mexp(log_prob_lower))
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(prob_trunc)) && return μ
     return μ + oftype(μ, prob_trunc * mean(_to_truncated(d)))
 end
 function mean(d::Censored)
@@ -197,10 +193,6 @@ function mean(d::Censored)
     log_prob_upper = logccdf(d0, upper)
     prob_upper = exp(log_prob_upper)
     prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
-        return prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
-               prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-    end
     μ = prob_trunc * mean(_to_truncated(d))
     if !iszero(prob_lower)
         μ += prob_lower * lower
@@ -217,9 +209,6 @@ function var(d::RightCensored)
     prob_upper = exp(log_prob_upper)
     μ_upper = prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
     prob_trunc = exp(log1mexp(log_prob_upper))
-    Tvar = typeof(one(prob_trunc) * abs2(zero(μ_upper)))
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(prob_trunc)) && return zero(Tvar)
     dtrunc = _to_truncated(d)
     μ_trunc = mean(dtrunc)
     μ = prob_trunc * μ_trunc + μ_upper
@@ -227,7 +216,7 @@ function var(d::RightCensored)
     if !iszero(prob_upper)
         v += prob_upper * abs2(upper - μ)
     end
-    return Tvar(v)
+    return v
 end
 function var(d::LeftCensored)
     lower = d.lower
@@ -235,9 +224,6 @@ function var(d::LeftCensored)
     prob_lower = exp(log_prob_lower)
     μ_lower = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower)
     prob_trunc = exp(log1mexp(log_prob_lower))
-    Tvar = typeof(one(prob_trunc) * abs2(zero(μ_lower)))
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(prob_trunc)) && return zero(Tvar)
     dtrunc = _to_truncated(d)
     μ_trunc = mean(dtrunc)
     μ = prob_trunc * μ_trunc + μ_lower
@@ -245,7 +231,7 @@ function var(d::LeftCensored)
     if !iszero(prob_lower)
         v += prob_lower * abs2(lower - μ)
     end
-    return Tvar(v)
+    return v
 end
 function var(d::Censored)
     d0 = d.uncensored
@@ -256,13 +242,6 @@ function var(d::Censored)
     prob_lower = exp(log_prob_lower)
     prob_upper = exp(log_prob_upper)
     prob_trunc = exp(log1mexp(logaddexp(log_prob_lower, log_prob_upper)))
-    if prob_trunc < eps(one(prob_trunc)) # truncation contains ~ no probability
-        μ = prob_lower * (iszero(prob_lower) ? oneunit(lower) : lower) +
-            prob_upper * (iszero(prob_upper) ? oneunit(upper) : upper)
-        v = prob_lower * abs2(iszero(prob_lower) ? oneunit(lower) : lower - μ) +
-            prob_upper * abs2(iszero(prob_upper) ? oneunit(upper) : upper - μ)
-        return v
-    end
     dtrunc = _to_truncated(d)
     μ_trunc = mean(dtrunc)
     μ = prob_trunc * μ_trunc
@@ -304,8 +283,6 @@ function entropy(d::RightCensored)
     entropy_bound = -xexpx(log_prob_upper_inc)
     log_prob_trunc = log1mexp(log_prob_upper)
     prob_trunc = exp(log_prob_trunc)
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
     dtrunc = _to_truncated(d)
     entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pu
     return oftype(entropy_bound, entropy_bound + entropy_interval)
@@ -325,8 +302,6 @@ function entropy(d::LeftCensored)
     entropy_bound = -xexpx(log_prob_lower_inc)
     log_prob_trunc = log1mexp(log_prob_lower)
     prob_trunc = exp(log_prob_trunc)
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
     dtrunc = _to_truncated(d)
     entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl
     return oftype(entropy_bound, entropy_bound + entropy_interval)
@@ -352,8 +327,6 @@ function entropy(d::Censored)
     entropy_bound = -(xexpx(log_prob_lower_inc) + xexpx(log_prob_upper_inc))
     log_prob_trunc = log1mexp(logaddexp(log_prob_lower, log_prob_upper))    
     prob_trunc = exp(log_prob_trunc)
-    # truncation contains ~ no probability
-    prob_trunc < eps(one(log_prob_trunc)) && return entropy_bound
     dtrunc = _to_truncated(d)
     entropy_interval = prob_trunc * entropy(dtrunc) - xexpx(log_prob_trunc) + xlogx_pl + xlogx_pu
     return entropy_bound + entropy_interval
