@@ -490,3 +490,9 @@ function xexpx(x::Real)
     result = x * exp(x)
     return x == -Inf ? zero(result) : result
 end
+
+# x * exp(y) with correct limit for y == -Inf
+function xexpy(x::Real, y::Real)
+    result = x * exp(y)
+    return y == -Inf && !isnan(x) ? zero(result) : result
+end
