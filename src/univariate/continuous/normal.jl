@@ -88,7 +88,7 @@ end
 # Use Julia implementations in StatsFuns
 @_delegate_statsfuns Normal norm μ σ
 
-gradlogpdf(d::Normal, x::Real) = -(x - d.μ) / d.σ^2
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
