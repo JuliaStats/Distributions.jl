@@ -84,8 +84,8 @@ struct Censored{
     end
 end
 
-const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,Nothing,T}
 const LeftCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,T,Nothing}
+const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} = Censored{D,S,T,Nothing,T}
 
 function censored(d::Censored, l::T, u::T) where {T<:Real}
     return censored(
@@ -114,17 +114,17 @@ Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D)
 
 #### Range and Support
 
-islowerbounded(d::RightCensored) = islowerbounded(d.uncensored)
-islowerbounded(d::Censored) = islowerbounded(d.uncensored) || cdf(d.uncensored, d.lower) > 0
-
 isupperbounded(d::LeftCensored) = isupperbounded(d.uncensored)
 isupperbounded(d::Censored) = isupperbounded(d.uncensored) || _ccdf_inclusive(d.uncensored, d.upper) > 0
 
-minimum(d::RightCensored) = min(minimum(d.uncensored), d.upper)
-minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
+islowerbounded(d::RightCensored) = islowerbounded(d.uncensored)
+islowerbounded(d::Censored) = islowerbounded(d.uncensored) || cdf(d.uncensored, d.lower) > 0
 
 maximum(d::LeftCensored) = max(maximum(d.uncensored), d.lower)
 maximum(d::Censored) = min(maximum(d.uncensored), d.upper)
+
+minimum(d::RightCensored) = min(minimum(d.uncensored), d.upper)
+minimum(d::Censored) = max(minimum(d.uncensored), d.lower)
 
 function insupport(d::Censored, x::Real)
     d0 = d.uncensored
@@ -168,18 +168,18 @@ median(d::Censored) = _clamp(median(d.uncensored), d.lower, d.upper)
 # where d₀ is the uncensored distribution, d is d₀ censored to [l, u],
 # and τ is d₀ truncated to [l, u]
 
-function mean(d::RightCensored)
-    upper = d.upper
-    log_prob_upper = logccdf(d.uncensored, upper)
-    log_prob_interval = log1mexp(log_prob_upper)
-    μ = xexpy(upper, log_prob_upper) + xexpy(mean(_to_truncated(d)), log_prob_interval)
-    return μ
-end
 function mean(d::LeftCensored)
     lower = d.lower
     log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
     log_prob_interval = log1mexp(log_prob_lower)
     μ = xexpy(lower, log_prob_lower) + xexpy(mean(_to_truncated(d)), log_prob_interval)
+    return μ
+end
+function mean(d::RightCensored)
+    upper = d.upper
+    log_prob_upper = logccdf(d.uncensored, upper)
+    log_prob_interval = log1mexp(log_prob_upper)
+    μ = xexpy(upper, log_prob_upper) + xexpy(mean(_to_truncated(d)), log_prob_interval)
     return μ
 end
 function mean(d::Censored)
@@ -194,17 +194,6 @@ function mean(d::Censored)
     return μ
 end
 
-function var(d::RightCensored)
-    upper = d.upper
-    log_prob_upper = logccdf(d.uncensored, upper)
-    log_prob_interval = log1mexp(log_prob_upper)
-    dtrunc = _to_truncated(d)
-    μ_interval = mean(dtrunc)
-    μ = xexpy(upper, log_prob_upper) + xexpy(μ_interval, log_prob_interval)
-    v_interval = var(dtrunc) + abs2(μ_interval - μ)
-    v = xexpy(abs2(upper - μ), log_prob_upper) + xexpy(v_interval, log_prob_interval)
-    return v
-end
 function var(d::LeftCensored)
     lower = d.lower
     log_prob_lower = _logcdf_noninclusive(d.uncensored, lower)
@@ -214,6 +203,17 @@ function var(d::LeftCensored)
     μ = xexpy(lower, log_prob_lower) + xexpy(μ_interval, log_prob_interval)
     v_interval = var(dtrunc) + abs2(μ_interval - μ)
     v = xexpy(abs2(lower - μ), log_prob_lower) + xexpy(v_interval, log_prob_interval)
+    return v
+end
+function var(d::RightCensored)
+    upper = d.upper
+    log_prob_upper = logccdf(d.uncensored, upper)
+    log_prob_interval = log1mexp(log_prob_upper)
+    dtrunc = _to_truncated(d)
+    μ_interval = mean(dtrunc)
+    μ = xexpy(upper, log_prob_upper) + xexpy(μ_interval, log_prob_interval)
+    v_interval = var(dtrunc) + abs2(μ_interval - μ)
+    v = xexpy(abs2(upper - μ), log_prob_upper) + xexpy(v_interval, log_prob_interval)
     return v
 end
 function var(d::Censored)
@@ -240,24 +240,6 @@ end
 #   ) / P_{x ~ d₀}(l ≤ x ≤ u),
 # where S[τ] is the entropy of τ.
 
-function entropy(d::RightCensored)
-    d0 = d.uncensored
-    upper = d.upper
-    log_prob_upper = logccdf(d0, upper)
-    if value_support(typeof(d0)) === Discrete
-        logpu = logpdf(d0, upper)
-        log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
-        xlogx_pu = xexpx(logpu)
-    else
-        log_prob_upper_inc = log_prob_upper
-        xlogx_pu = 0
-    end
-    log_prob_interval = log1mexp(log_prob_upper)
-    entropy_bound = -xexpx(log_prob_upper_inc)
-    dtrunc = _to_truncated(d)
-    entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pu
-    return entropy_interval + entropy_bound
-end
 function entropy(d::LeftCensored)
     d0 = d.uncensored
     lower = d.lower
@@ -274,6 +256,24 @@ function entropy(d::LeftCensored)
     entropy_bound = -xexpx(log_prob_lower_inc)
     dtrunc = _to_truncated(d)
     entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pl
+    return entropy_interval + entropy_bound
+end
+function entropy(d::RightCensored)
+    d0 = d.uncensored
+    upper = d.upper
+    log_prob_upper = logccdf(d0, upper)
+    if value_support(typeof(d0)) === Discrete
+        logpu = logpdf(d0, upper)
+        log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
+        xlogx_pu = xexpx(logpu)
+    else
+        log_prob_upper_inc = log_prob_upper
+        xlogx_pu = 0
+    end
+    log_prob_interval = log1mexp(log_prob_upper)
+    entropy_bound = -xexpx(log_prob_upper_inc)
+    dtrunc = _to_truncated(d)
+    entropy_interval = xexpy(entropy(dtrunc), log_prob_interval) - xexpx(log_prob_interval) + xlogx_pu
     return entropy_interval + entropy_bound
 end
 function entropy(d::Censored)
