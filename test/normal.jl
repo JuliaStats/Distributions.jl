@@ -149,7 +149,11 @@ end
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 1.0f0)) ===  Inf32
     @test @inferred(quantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
     @test isnan_type(Float32, @inferred(quantile(Normal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(quantile(Normal(1//1, 0//1), 1//2))    ===  1.0
+    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
+    if VERSION >= v"1.3"
+        @test @inferred(quantile(Normal(1//1, 0//1), 1//2)) === 1.0
+    end
     @test @inferred(quantile(Normal(1f0, 0f0), 1//2))      ===  1f0
     @test @inferred(quantile(Normal(1f0, 0.0), 1//2))      ===  1.0
 
@@ -161,7 +165,11 @@ end
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 1.0f0)) === -Inf32
     @test @inferred(cquantile(Normal(1.0f0, 0.0f0), 0.5f0)) ===  1.0f0
     @test isnan_type(Float32, @inferred(cquantile(Normal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(cquantile(Normal(1//1, 0//1), 1//2))    ===  1.0
+    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
+    if VERSION >= v"1.3"
+        @test @inferred(cquantile(Normal(1//1, 0//1), 1//2)) === 1.0
+    end
     @test @inferred(cquantile(Normal(1f0, 0f0), 1//2))      ===  1f0
     @test @inferred(cquantile(Normal(1f0, 0.0), 1//2))      ===  1.0
 end
