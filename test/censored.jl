@@ -169,17 +169,28 @@ end
 
     @testset "Uniform" begin
         d0 = Uniform(0, 10)
-        bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
+        bounds = [
+            (nothing, 8),
+            (-Inf, 8),
+            (nothing, Inf),
+            (2, nothing),
+            (2, Inf),
+            (-Inf, nothing),
+            (2, 8),
+            (3.5, nothing),
+            (3.5, Inf),
+            (-Inf, Inf),
+        ]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
-            if lower === nothing
+            if lower === nothing || !isfinite(lower)
                 @test l == minimum(d0)
             else
                 @test l == lower
             end
-            if upper === nothing
+            if upper === nothing || !isfinite(upper)
                 @test u == maximum(d0)
             else
                 @test u == upper
@@ -199,14 +210,14 @@ end
             @test quantile.(d, 0:0.01:1) ≈ clamp.(quantile.(d0, 0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
-            if lower === nothing
+            if lower === nothing || !isfinite(lower)
                 @test @inferred(pdf(d, l)) ≈ pdf(d0, l)
                 @test @inferred(logpdf(d, l)) ≈ logpdf(d0, l)
             else
                 @test @inferred(pdf(d, l)) ≈ cdf(d0, l)
                 @test @inferred(logpdf(d, l)) ≈ logcdf(d0, l)
             end
-            if upper === nothing
+            if upper === nothing || !isfinite(upper)
                 @test @inferred(pdf(d, u)) ≈ pdf(d0, u)
                 @test @inferred(logpdf(d, u)) ≈ logpdf(d0, u)
             else
@@ -271,7 +282,18 @@ end
 
     @testset "DiscreteUniform" begin
         d0 = DiscreteUniform(0, 10)
-        bounds = [(nothing, 8), (2, nothing), (2, 8), (3.5, nothing)]
+        bounds = [
+            (nothing, 8),
+            (-Inf, 8),
+            (nothing, Inf),
+            (2, nothing),
+            (2, Inf),
+            (-Inf, nothing),
+            (2, 8),
+            (3.5, nothing),
+            (3.5, Inf),
+            (-Inf, Inf),
+        ]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (lower, upper) in bounds
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
