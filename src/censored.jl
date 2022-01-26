@@ -19,14 +19,16 @@ that even if ``d_0`` is continuous, its censored form assigns positive probabili
 bounds ``l`` and ``u``. Therefore, a censored continuous distribution has atoms and is a
 mixture of discrete and continuous components.
 
+The function falls back to constructing a [`Distributions.Censored`](@ref) wrapper.
+
+# Usage
+
 ```julia
 censored(d0; lower=l)           # d0 left-censored to the interval [l, Inf)
 censored(d0; upper=u)           # d0 right-censored to the interval (-Inf, u]
 censored(d0; lower=l, upper=u)  # d0 interval-censored to the interval [l, u]
 censored(d0, l, u)              # d0 interval-censored to the interval [l, u]
 ```
-
-The function falls back to constructing a [`Distributions.Censored`](@ref) wrapper.
 
 # Implementation
 
