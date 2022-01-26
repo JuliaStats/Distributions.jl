@@ -13,10 +13,10 @@ where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 The function throws an error if ``l > u``.
 
 ```julia
-truncated(d0; lower=l)           # d0 left-censored to the interval [l, Inf)
-truncated(d0; upper=u)           # d0 right-censored to the interval (-Inf, u]
-truncated(d0; lower=l, upper=u)  # d0 interval-censored to the interval [l, u]
-truncated(d0, l, u)              # d0 interval-censored to the interval [l, u]
+truncated(d0; lower=l)           # d0 left-truncated to the interval [l, Inf)
+truncated(d0; upper=u)           # d0 right-truncated to the interval (-Inf, u]
+truncated(d0; lower=l, upper=u)  # d0 truncated to the interval [l, u]
+truncated(d0, l, u)              # d0 truncated to the interval [l, u]
 ```
 
 The function falls back to constructing a [`Truncated`](@ref) wrapper.
