@@ -234,11 +234,11 @@ function var(d::Censored)
 end
 
 # this expectation also uses the following relation:
-# 𝔼_{x ~ τ}[-log d(x)] = S[τ] - log P_{x ~ d₀}(l ≤ x ≤ u)
+# 𝔼_{x ~ τ}[-log d(x)] = H[τ] - log P_{x ~ d₀}(l ≤ x ≤ u)
 #   + (P_{x ~ d₀}(x = l) (log P_{x ~ d₀}(x = l) - log P_{x ~ d₀}(x ≤ l)) + 
 #      P_{x ~ d₀}(x = u) (log P_{x ~ d₀}(x = u) - log P_{x ~ d₀}(x ≥ u))
 #   ) / P_{x ~ d₀}(l ≤ x ≤ u),
-# where S[τ] is the entropy of τ.
+# where H[τ] is the entropy of τ.
 
 function entropy(d::LeftCensored)
     d0 = d.uncensored
