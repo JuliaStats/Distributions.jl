@@ -9,7 +9,7 @@ A censored distribution can be constructed using the following signature:
 censored
 ```
 
-In the general case, this will create a `Distributions.Censored{typeof(d)}` structure, defined as follows:
+In the general case, this will create a `Distributions.Censored{typeof(d0)}` structure, defined as follows:
 
 ```@docs
 Distributions.Censored
