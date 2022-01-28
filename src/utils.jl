@@ -13,10 +13,10 @@ end
         ...,
     )
 
-A convenience macro that generates AD-compatible checks of arguments for a distribution of
-type `D`.
+A convenience macro that generates checks of arguments for a distribution of type `D`.
 
-More concretely, it generates the following Julia code:
+The macro expects that a boolean variable of name `check_args` is defined and generates
+the following Julia code:
 ```julia
 Distributions.check_args(check_args) do
     \$(statements...)
@@ -91,7 +91,6 @@ function check_args(f::F, check::Bool) where {F}
 end
 
 ChainRulesCore.@non_differentiable check_args(::Any, ::Bool)
-
 
 ##### Utility functions
 
