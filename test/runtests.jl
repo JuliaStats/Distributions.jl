@@ -17,6 +17,7 @@ const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "truncated_uniform",
     "normal",
     "laplace",
     "cauchy",
