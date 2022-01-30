@@ -80,9 +80,11 @@ end
 
 #### Evaluation
 
-logpdf(d::Chi, x::Real) = (ν = d.ν;
+function logpdf(d::Chi, x::Real)
+    x < 0 && return 0.0
+    ν = d.ν
     (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
-)
+end
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
