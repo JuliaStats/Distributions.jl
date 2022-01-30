@@ -131,13 +131,16 @@ for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
     @test d.upper == upper
     @test truncated(Normal(μ, 1); lower=lower, upper=upper) === d
 end
-@test truncated(Normal(); lower=1) == Distributions.Truncated(Normal(), 1.0, Inf)
-@test truncated(Normal(); lower=-2) == Distributions.Truncated(Normal(), -2.0, Inf)
-@test truncated(Normal(); upper=1) == Distributions.Truncated(Normal(), -Inf, 1.0)
-@test truncated(Normal(); upper=2) == Distributions.Truncated(Normal(), -Inf, 2.0)
+for bound in (-2, 1)
+    d = Distributions.Truncated(Normal(), Float64(bound), Inf)
+    @test truncated(Normal(); lower=bound) == d
+    @test truncated(Normal(); lower=bound, upper=Inf) == d
+
+    d = Distributions.Truncated(Normal(), -Inf, Float64(bound))
+    @test truncated(Normal(); upper=bound) == d
+    @test truncated(Normal(); lower=-Inf, upper=bound) == d
+end
 @test truncated(Normal()) === Normal()
-@test_deprecated truncated(Normal(), -Inf, 2)
-@test_deprecated truncated(Normal(), 2, Inf)
 
 ## main
 

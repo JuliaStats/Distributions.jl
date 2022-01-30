@@ -8,13 +8,19 @@ rng = MersenneTwister(123)
     @test mean(truncated(Normal(-2,3),50,70)) ≈ 50.171943499898757645751683644632860837133138152489
     @test mean(truncated(Normal(0,2),-100,0)) ≈ -1.59576912160573071175978423973752747390343452465973
     @test mean(truncated(Normal(0,1))) == 0
+    @test mean(truncated(Normal(0,1); lower=-Inf, upper=Inf)) == 0
     @test mean(truncated(Normal(0,1); lower=0)) ≈ +√(2/π)
+    @test mean(truncated(Normal(0,1); lower=0, upper=Inf)) ≈ +√(2/π)
     @test mean(truncated(Normal(0,1); upper=0)) ≈ -√(2/π)
+    @test mean(truncated(Normal(0,1); lower=-Inf, upper=0)) ≈ -√(2/π)
     @test var(truncated(Normal(0,1),50,70)) ≈ 0.00039904318680389954790992722653605933053648912703600
     @test var(truncated(Normal(-2,3); lower=50, upper=70)) ≈ 0.029373438107168350377591231295634273607812172191712
     @test var(truncated(Normal(0,1))) == 1
+    @test var(truncated(Normal(0,1); lower=-Inf, upper=Inf)) == 1
     @test var(truncated(Normal(0,1); lower=0)) ≈ 1 - 2/π
+    @test var(truncated(Normal(0,1); lower=0, upper=Inf)) ≈ 1 - 2/π
     @test var(truncated(Normal(0,1); upper=0)) ≈ 1 - 2/π
+    @test var(truncated(Normal(0,1); lower=-Inf, upper=0)) ≈ 1 - 2/π
     # https://github.com/JuliaStats/Distributions.jl/issues/827
     @test mean(truncated(Normal(1000000,1),0,1000)) ≈ 999.999998998998999001005011019018990904720462367106
     @test var(truncated(Normal(),999000,1e6)) ≥ 0
