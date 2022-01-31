@@ -432,14 +432,7 @@ _clamp(x, l, u) = clamp(x, l, u)
 _clamp(x, ::Nothing, u) = min(x, u)
 _clamp(x, l, ::Nothing) = max(x, l)
 
-function _to_truncated(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
-    FT = float(T)
-    return truncated(
-        d.uncensored,
-        d.lower === nothing ? FT(-Inf) : d.lower,
-        d.upper === nothing ? FT(Inf) : d.upper,
-    )
-end
+_to_truncated(d::Censored) = truncated(d.uncensored, d.lower, d.upper)
 
 # utilities for non-inclusive CDF p(x < u) and inclusive CCDF (p ≥ u)
 
