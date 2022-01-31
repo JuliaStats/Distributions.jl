@@ -17,8 +17,8 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test logdiffcdf(LogNormal(), Float64(exp(5)), Float64(exp(3))) ≈ -6.607938594596893 rtol=1e-12
     let d = LogNormal(Float64(0), Float64(1)), x = Float64(exp(-60)), y = Float64(exp(-60.001))
         float_res = logdiffcdf(d, x, y)
-        big_x = VERSION < v"1.1" ? BigFloat(x, 100) : BigFloat(x; precision=100)
-        big_y = VERSION < v"1.1" ? BigFloat(y, 100) : BigFloat(y; precision=100)
+        big_x = BigFloat(x; precision=100)
+        big_y = BigFloat(y; precision=100)
         big_float_res = log(cdf(d, big_x) - cdf(d, big_y))
         @test float_res ≈ big_float_res
     end
@@ -265,11 +265,7 @@ end
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === Inf32
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(quantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
-    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
-    if VERSION >= v"1.3"
-        @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
-    end
+    @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
 
     # cquantile
     @test @inferred(cquantile(LogNormal(1.0, 0.0), 0.0f0)) === Inf
@@ -280,11 +276,7 @@ end
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === 0.0f0
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(cquantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    # `erfcinv(::Rational)` is defined only in SpecialFunctions >= 1.2.0 which requires Julia >= 1.3
-    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1487#issuecomment-1020626771
-    if VERSION >= v"1.3"
-        @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
-    end
+    @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
 
     # gradlogpdf
     @test @inferred(gradlogpdf(LogNormal(0.0, 1.0), 1.0)) === -1.0
