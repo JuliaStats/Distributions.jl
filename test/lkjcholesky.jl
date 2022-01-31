@@ -83,9 +83,9 @@ using FiniteDifferences
             @test d.logc0 == LKJ(p, η).logc0
         end
 
-        @test_throws ArgumentError LKJCholesky(0, 2)
-        @test_throws ArgumentError LKJCholesky(4, 0.0)
-        @test_throws ArgumentError LKJCholesky(4, -1)
+        @test_throws DomainError LKJCholesky(0, 2)
+        @test_throws DomainError LKJCholesky(4, 0.0)
+        @test_throws DomainError LKJCholesky(4, -1)
 
         for uplo in (:U, 'U')
             d = LKJCholesky(4, 2, uplo)

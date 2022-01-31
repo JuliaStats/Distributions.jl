@@ -18,7 +18,7 @@ d = DiscreteNonParametric([40., 80., 120., -60.], [.4, .3, .1,  .2])
 @test d ≈ DiscreteNonParametric([-60., 40., 80, 120], [.2, .4, .3, .1], check_args=false)
 
 # Invalid probability
-@test_throws ArgumentError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
+@test_throws DomainError DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2])
 
 # Invalid probability, but no arg check
 DiscreteNonParametric([40., 80, 120, -60], [.5, .3, .1, .2], check_args=false)

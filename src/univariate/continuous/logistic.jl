@@ -31,7 +31,7 @@ end
 
 
 function Logistic(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Logistic, θ > zero(θ))
+    @check_args Logistic (θ, θ > zero(θ))
     return Logistic{T}(μ, θ)
 end
 
