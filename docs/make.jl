@@ -11,6 +11,7 @@ makedocs(
         "types.md",
         "univariate.md",
         "truncate.md",
+        "censored.md",
         "multivariate.md",
         "matrix.md",
         "reshape.md",
