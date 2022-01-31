@@ -75,7 +75,7 @@ struct Censored{
     lower::TL      # lower bound
     upper::TU      # upper bound
     function Censored(d0::UnivariateDistribution, lower::T, upper::T; check_args::Bool=true) where {T<:Real}
-        check_args && @check_args(Censored, lower ≤ upper) 
+        @check_args(Censored, lower ≤ upper) 
         new{typeof(d0), value_support(typeof(d0)), T, T, T}(d0, lower, upper)
     end
     function Censored(d0::UnivariateDistribution, l::Nothing, u::Real; check_args::Bool=true)
