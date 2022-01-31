@@ -81,9 +81,10 @@ end
 #### Evaluation
 
 function logpdf(d::Chi, x::Real)
-    x < 0 && return 0.0
-    ν = d.ν
-    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
+    ν, _x = promote(d.ν, x)
+    xsq = _x^2
+    val = (xlogy(ν - 1, xsq / 2) - xsq + logtwo) / 2 - loggamma(ν / 2)
+    return x < zero(x) ? oftype(val, -Inf) : val
 end
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
