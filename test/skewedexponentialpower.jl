@@ -3,7 +3,7 @@ using Distributions
 
 @testset "SkewedExponentialPower" begin
     @testset "α = 0.5" begin
-        @test_throws ArgumentError SkewedExponentialPower(0, 0, 0, 0)
+        @test_throws DomainError SkewedExponentialPower(0, 0, 0, 0)
         d1 = SkewedExponentialPower(0, 1, 1, 0.5f0)
         @test @inferred partype(d1) == Float32
         d2 = SkewedExponentialPower(0, 1, 1, 0.5)

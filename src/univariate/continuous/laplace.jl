@@ -29,7 +29,7 @@ struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Laplace(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Laplace, θ > zero(θ))
+    @check_args Laplace (θ, θ > zero(θ))
     return Laplace{T}(μ, θ)
 end
 

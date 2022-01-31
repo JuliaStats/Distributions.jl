@@ -205,6 +205,6 @@ d = Multinomial(nt, p)
 @test_nowarn rand!(d, m)
 
 p_v = [0.1, 0.4, 0.3, 0.8]
-@test_throws ArgumentError Multinomial(10, p_v)
-@test_throws ArgumentError Multinomial(10, p_v; check_args=true)
+@test_throws DomainError Multinomial(10, p_v)
+@test_throws DomainError Multinomial(10, p_v; check_args=true)
 Multinomial(10, p_v; check_args=false) # should not warn

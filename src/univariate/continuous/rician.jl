@@ -34,7 +34,7 @@ struct Rician{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Rician(ν::T, σ::T; check_args::Bool=true) where {T<:Real}
-    check_args && @check_args(Rician, ν ≥ zero(ν) && σ ≥ zero(σ))
+    @check_args Rician (ν, ν ≥ zero(ν)) (σ, σ ≥ zero(σ))
     return Rician{T}(ν, σ)
 end
 

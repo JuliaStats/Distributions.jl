@@ -26,22 +26,16 @@ struct Multinomial{T<:Real, TV<:AbstractVector{T}} <: DiscreteMultivariateDistri
 end
 
 function Multinomial(n::Integer, p::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
-    if check_args
-        if n < 0
-            throw(ArgumentError("n must be a nonnegative integer."))
-        end
-        if !isprobvec(p)
-            throw(ArgumentError("p = $p is not a probability vector."))
-        end
-    end
+    @check_args(
+        Multinomial,
+        (n, n >= 0),
+        (p, isprobvec(p), "p is not a probability vector."),
+    )
     return Multinomial{T,typeof(p)}(n, p)
 end
 
 function Multinomial(n::Integer, k::Integer; check_args::Bool=true)
-    if check_args
-        @check_args(Multinomial, n >= 0)
-        @check_args(Multinomial, k >= 1)
-    end
+    @check_args Multinomial (n, n >= 0) (k, k >= 1)
     return Multinomial{Float64, Vector{Float64}}(round(Int, n), fill(1.0 / k, k))
 end
 

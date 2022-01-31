@@ -25,7 +25,7 @@ struct VonMises{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function VonMises(μ::T, κ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(VonMises, κ > zero(κ))
+    @check_args VonMises (κ, κ > zero(κ))
     return VonMises{T}(μ, κ, besselix(zero(T), κ))
 end
 

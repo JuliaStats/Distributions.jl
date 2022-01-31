@@ -41,10 +41,11 @@ end
 #  -----------------------------------------------------------------------------
 
 function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args::Bool=true)
-    if check_args
-        d > 0 || throw(ArgumentError("matrix dimension must be positive"))
-        η > 0 || throw(ArgumentError("shape parameter must be positive"))
-    end
+    @check_args(
+        LKJCholesky,
+        (d, d > 0, "matrix dimension must be positive"),
+        (η, η > 0, "shape parameter must be positive"),
+    )
     logc0 = lkj_logc0(d, η)
     uplo = _char_uplo(_uplo)
     T = Base.promote_eltype(η, logc0)

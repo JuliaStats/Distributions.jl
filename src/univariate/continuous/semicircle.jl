@@ -25,7 +25,7 @@ end
 
 
 function Semicircle(r::Real; check_args::Bool=true)
-    check_args && @check_args(Semicircle, r > zero(r))
+    @check_args Semicircle (r, r > zero(r))
     return Semicircle{typeof(r)}(r)
 end
 
