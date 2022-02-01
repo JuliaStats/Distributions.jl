@@ -31,7 +31,7 @@ struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Bernoulli(p::Real; check_args::Bool=true)
-    check_args && @check_args(Bernoulli, zero(p) <= p <= one(p))
+    @check_args Bernoulli (p, zero(p) <= p <= one(p))
     return Bernoulli{typeof(p)}(p)
 end
 

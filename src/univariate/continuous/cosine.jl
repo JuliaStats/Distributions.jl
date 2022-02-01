@@ -14,7 +14,7 @@ struct Cosine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Cosine(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Cosine, σ > zero(σ))
+    @check_args Cosine (σ, σ > zero(σ))
     return Cosine{T}(μ, σ)
 end
 

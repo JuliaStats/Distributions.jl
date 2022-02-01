@@ -7,4 +7,4 @@ The [*Distributions*](https://github.com/JuliaStats/Distributions.jl) package pr
 * Probability density/mass functions (pdf) and their logarithm (logpdf)
 * Moment-generating functions and characteristic functions
 * Maximum likelihood estimation
-* Distribution composition (Cartesian product of distributions, truncated distributions)
+* Distribution composition and derived distributions (Cartesian product of distributions, truncated distributions, censored distributions)

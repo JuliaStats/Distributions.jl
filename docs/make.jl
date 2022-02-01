@@ -4,13 +4,14 @@ import Random: AbstractRNG, rand!
 makedocs(
     sitename = "Distributions.jl",
     modules  = [Distributions],
-    doctest  = false,
+    format   = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true"),
     pages    = [
         "index.md",
         "starting.md",
         "types.md",
         "univariate.md",
         "truncate.md",
+        "censored.md",
         "multivariate.md",
         "matrix.md",
         "reshape.md",

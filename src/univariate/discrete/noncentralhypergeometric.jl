@@ -40,11 +40,13 @@ struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ω::T # odds ratio
 
     function FisherNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
-        if check_args
-            @check_args(FisherNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
-            @check_args(FisherNoncentralHypergeometric, zero(n) < n < ns + nf)
-            @check_args(FisherNoncentralHypergeometric, ω > zero(ω))
-        end
+        @check_args(
+            FisherNoncentralHypergeometric,
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
+            zero(n) < n < ns + nf,
+            (ω, ω > zero(ω)),
+        )
         new{T}(ns, nf, n, ω)
     end
 end
@@ -226,11 +228,13 @@ struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     ω::T # odds ratio
 
     function WalleniusNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
-        if check_args
-            @check_args(WalleniusNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
-            @check_args(WalleniusNoncentralHypergeometric, zero(n) < n < ns + nf)
-            @check_args(WalleniusNoncentralHypergeometric, ω > zero(ω))
-        end
+        @check_args(
+            WalleniusNoncentralHypergeometric,
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
+            zero(n) < n < ns + nf,
+            (ω, ω > zero(ω)),
+        )
         new{T}(ns, nf, n, ω)
     end
 end

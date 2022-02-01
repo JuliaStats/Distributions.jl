@@ -33,6 +33,9 @@ import Random
     @test @inferred(maximum(d)) === 10
     @test partype(d) === Int
     @test truncated(d, 2, 14) === LogUniform(2,10)
+    @test truncated(d, 0, 8) === LogUniform(1, 8)
+    @test truncated(d; upper=8) === LogUniform(1, 8)
+    @test truncated(d; lower=3) === LogUniform(3, 10)
 
     # numbers obtained by calling scipy.stats.loguniform
     @test @inferred(std(d)        ) ≈ 2.49399867607628

@@ -27,7 +27,7 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Chi(ν::Real; check_args::Bool=true)
-    check_args && @check_args(Chi, ν > zero(ν))
+    @check_args Chi (ν, ν > zero(ν))
     return Chi{typeof(ν)}(ν)
 end
 
@@ -71,9 +71,10 @@ entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
 
 function mode(d::Chi; check_args::Bool=true)
     ν = d.ν
-    if check_args
-        ν >= 1 || error("Chi distribution has no mode when ν < 1")
-    end
+    @check_args(
+        Chi,
+        (ν, ν >= 1, "Chi distribution has no mode when ν < 1"),
+    )
     sqrt(ν - 1)
 end
 

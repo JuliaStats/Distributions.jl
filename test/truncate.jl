@@ -39,7 +39,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 
         println("    testing truncated($(ex),$lower,$upper)")
         d = truncated(eval(Meta.parse(ex)),lower,upper)
-        if dtype != Uniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
+        if dtype != Uniform && dtype != DiscreteUniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtypet)
             # verification and testing
@@ -123,6 +123,24 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 end
 
+# default methods
+for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
+    d = truncated(Normal(μ, 1), lower, upper)
+    @test d.untruncated === Normal(μ, 1)
+    @test d.lower == lower
+    @test d.upper == upper
+    @test truncated(Normal(μ, 1); lower=lower, upper=upper) === d
+end
+for bound in (-2, 1)
+    d = Distributions.Truncated(Normal(), Float64(bound), Inf)
+    @test truncated(Normal(); lower=bound) == d
+    @test truncated(Normal(); lower=bound, upper=Inf) == d
+
+    d = Distributions.Truncated(Normal(), -Inf, Float64(bound))
+    @test truncated(Normal(); upper=bound) == d
+    @test truncated(Normal(); lower=-Inf, upper=bound) == d
+end
+@test truncated(Normal()) === Normal()
 
 ## main
 
@@ -152,7 +170,7 @@ at = [0.0, 1.0, 0.0, 1.0]
     @testset "#1328" begin
         dist = Poisson(2.0)
         dist_zeroinflated = MixtureModel([Dirac(0.0), dist], [0.4, 0.6])
-        dist_zerotruncated = truncated(dist, 1, Inf)
+        dist_zerotruncated = truncated(dist; lower=1)
         dist_zeromodified = MixtureModel([Dirac(0.0), dist_zerotruncated], [0.4, 0.6])
 
         @test logsumexp(logpdf(dist, x) for x in 0:1000) ≈ 0 atol=1e-15
@@ -160,4 +178,10 @@ at = [0.0, 1.0, 0.0, 1.0]
         @test logsumexp(logpdf(dist_zerotruncated, x) for x in 0:1000) ≈ 0 atol=1e-15
         @test logsumexp(logpdf(dist_zeromodified, x) for x in 0:1000) ≈ 0 atol=1e-15
     end
+end
+
+@testset "show" begin
+    @test sprint(show, "text/plain", truncated(Normal(); lower=2.0)) == "Truncated($(Normal()); lower=2.0)"
+    @test sprint(show, "text/plain", truncated(Normal(); upper=3.0)) == "Truncated($(Normal()); upper=3.0)"
+    @test sprint(show, "text/plain", truncated(Normal(), 2.0, 3.0)) == "Truncated($(Normal()); lower=2.0, upper=3.0)"
 end
