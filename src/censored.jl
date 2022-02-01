@@ -2,22 +2,37 @@
     censored(d0::UnivariateDistribution; [lower::Real], [upper::Real])
     censored(d0::UnivariateDistribution, lower::Real, upper::Real)
 
-A _censored distribution_ `d` of a distribution `d0` to the interval
-``[l, u]=```[lower, upper]` has the probability density (mass) function:
+A _censored distribution_ `d` of a univariate distribution `d0`, censored
+to the interval ``[l, u]=```[lower, upper]` has the cumulative distribution 
+function (cdf)
+```math
+F(x) = \\begin{cases}
+0, & x < l\\\\
+F_0(x), & l \\le x < u\\\\
+1, & x \ge u,
+\end{cases}
+```
+where ``F_{0}`` is the cdf of `d0`. 
 
+If ``Z \\sim d_0``, and `X = clamp(Z, l, u)`, then ``X \\sim d``. Note that this implies
+that even if ``d_0`` is continuous, its censored form assigns positive probability to the
+bounds ``l`` and ``u``. Therefore, a censored continuous distribution has atoms and is a
+mixture of discrete and continuous components. 
+
+It has a probability density (mass) function 
 ```math
 f(x; d_0, l, u) = \\begin{cases}
     P_{Z \\sim d_0}(Z \\le l), & x = l \\\\
     f_{d_0}(x),              & l < x < u \\\\
     P_{Z \\sim d_0}(Z \\ge u), & x = u \\\\
-  \\end{cases}, \\quad x \\in [l, u]
+    0, & \\text{otherwise}
+\\end{cases},
 ```
 where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
-If ``Z \\sim d_0``, and `X = clamp(Z, l, u)`, then ``X \\sim d``. Note that this implies
-that even if ``d_0`` is continuous, its censored form assigns positive probability to the
-bounds ``l`` and ``u``. Therefore, a censored continuous distribution has atoms and is a
-mixture of discrete and continuous components.
+This is the density with respect to the mixture measure which assigns each interval 
+as measure the length of the interval increased by 0, 1, or 3 according to the number of 
+boundary points ``\\{l, u\\}`` contained in it.
 
 The function falls back to constructing a [`Distributions.Censored`](@ref) wrapper.
 
