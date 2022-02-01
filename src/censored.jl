@@ -6,13 +6,13 @@ A _censored distribution_ `d` of a univariate distribution `d0`, censored
 to the interval ``[l, u]=```[lower, upper]` has the cumulative distribution 
 function (cdf)
 ```math
-F(x) = \\begin{cases}
+F(x; d_0, l, u) = \\begin{cases}
 0, & x < l\\\\
-F_0(x), & l \\le x < u\\\\
+F_{d_0}(x), & l \\le x < u\\\\
 1, & x \\ge u,
 \end{cases}
 ```
-where ``F_{0}`` is the cdf of `d0`. 
+where ``F_{d_0}(x)`` is the cdf of ``d_0``. 
 
 If ``Z \\sim d_0``, and `X = clamp(Z, l, u)`, then ``X \\sim d``. Note that this implies
 that even if ``d_0`` is continuous, its censored form assigns positive probability to the
