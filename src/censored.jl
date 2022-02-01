@@ -4,7 +4,7 @@
 
 A _censored distribution_ `d` of a univariate distribution `d0`, censored
 to the interval ``[l, u]=```[lower, upper]` has the cumulative distribution 
-function (cdf)
+function ([`cdf`](@ref))
 ```math
 F(x; d_0, l, u) = \\begin{cases}
 0, & x < l\\\\
