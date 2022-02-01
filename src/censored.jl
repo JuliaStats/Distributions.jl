@@ -9,7 +9,7 @@ function (cdf)
 F(x) = \\begin{cases}
 0, & x < l\\\\
 F_0(x), & l \\le x < u\\\\
-1, & x \ge u,
+1, & x \\ge u,
 \end{cases}
 ```
 where ``F_{0}`` is the cdf of `d0`. 
@@ -31,7 +31,7 @@ f(x; d_0, l, u) = \\begin{cases}
 where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
 
 This is the density with respect to the mixture measure which assigns each interval 
-as measure the length of the interval increased by 0, 1, or 3 according to the number of 
+as measure the length of the interval increased by 0, 1, or 2 according to the number of 
 boundary points ``\\{l, u\\}`` contained in it.
 
 The function falls back to constructing a [`Distributions.Censored`](@ref) wrapper.
