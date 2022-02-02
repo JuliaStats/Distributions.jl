@@ -61,11 +61,11 @@ var(d::NoncentralChisq) = 2(d.ν + 2d.λ)
 skewness(d::NoncentralChisq) = 2sqrt2*(d.ν + 3d.λ)/sqrt(d.ν + 2d.λ)^3
 kurtosis(d::NoncentralChisq) = 12(d.ν + 4d.λ)/(d.ν + 2d.λ)^2
 
-function mgf(d::NoncentralChisq, t::Real)
+function mgf(d::NoncentralChisq, t::Number)
     exp(d.λ * t/(1 - 2t))*(1 - 2t)^(-d.ν/2)
 end
 
-function cf(d::NoncentralChisq, t::Real)
+function cf(d::NoncentralChisq, t::Number)
     cis(d.λ * t/(1 - 2im*t))*(1 - 2im*t)^(-d.ν/2)
 end
 

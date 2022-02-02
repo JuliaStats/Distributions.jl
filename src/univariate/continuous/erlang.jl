@@ -75,8 +75,8 @@ function entropy(d::Erlang)
     α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
-mgf(d::Erlang, t::Real) = (1 - t * d.θ)^(-d.α)
-cf(d::Erlang, t::Real)  = (1 - im * t * d.θ)^(-d.α)
+mgf(d::Erlang, t::Number) = (1 - t * d.θ)^(-d.α)
+cf(d::Erlang, t::Number)  = (1 - im * t * d.θ)^(-d.α)
 
 
 #### Evaluation & Sampling

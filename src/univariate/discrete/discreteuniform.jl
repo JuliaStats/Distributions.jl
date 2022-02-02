@@ -87,14 +87,14 @@ end
 
 quantile(d::DiscreteUniform, p::Real) = iszero(p) ? d.a : d.a - 1 + ceil(Int, p * span(d))
 
-function mgf(d::DiscreteUniform, t::Real)
+function mgf(d::DiscreteUniform, t::Number)
     a, b = d.a, d.b
     u = b - a + 1
     result = (exp(t*a) * expm1(t*u)) / (u*expm1(t))
     return iszero(t) ? one(result) : result
 end
 
-function cf(d::DiscreteUniform, t::Real)
+function cf(d::DiscreteUniform, t::Number)
     a, b = d.a, d.b
     u = b - a + 1
     result = (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))

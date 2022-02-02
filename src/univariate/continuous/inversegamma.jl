@@ -108,14 +108,14 @@ cquantile(d::InverseGamma, p::Real) = inv(quantile(d.invd, p))
 invlogcdf(d::InverseGamma, p::Real) = inv(invlogccdf(d.invd, p))
 invlogccdf(d::InverseGamma, p::Real) = inv(invlogcdf(d.invd, p))
 
-function mgf(d::InverseGamma{T}, t::Real) where T<:Real
+function mgf(d::InverseGamma{T}, t::Number) where T<:Real
     (a, b) = params(d)
-    t == zero(t) ? one(T) : 2(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*b*t))
+    iszero(t) ? one(T) : 2(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*b*t))
 end
 
-function cf(d::InverseGamma{T}, t::Real) where T<:Real
+function cf(d::InverseGamma{T}, t::Number) where T<:Real
     (a, b) = params(d)
-    t == zero(t) ? one(T)+zero(T)*im : 2(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*im*b*t))
+    iszero(t) ? complex(one(a)) : 2(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*im*b*t))
 end
 
 

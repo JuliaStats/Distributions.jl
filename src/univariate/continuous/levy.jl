@@ -90,9 +90,9 @@ ccdf(d::Levy{T}, x::Real) where {T<:Real} =  x <= d.μ ? one(T) : erf(sqrt(d.σ 
 quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
 cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
 
-mgf(d::Levy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
+mgf(d::Levy{T}, t::Number) where {T<:Real} = iszero(t) ? one(T) : T(NaN)
 
-function cf(d::Levy, t::Real)
+function cf(d::Levy, t::Number)
     μ, σ = params(d)
     exp(im * μ * t - sqrt(-2im * σ * t))
 end

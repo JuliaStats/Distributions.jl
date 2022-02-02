@@ -95,9 +95,9 @@ function gradlogpdf(d::Logistic, x::Real)
     ((2e) / (1 + e) - 1) / d.θ
 end
 
-mgf(d::Logistic, t::Real) = exp(t * d.μ) / sinc(d.θ * t)
+mgf(d::Logistic, t::Number) = exp(t * d.μ) / sinc(d.θ * t)
 
-function cf(d::Logistic, t::Real)
+function cf(d::Logistic{T}, t::Number) where {T<:Real}
     a = (π * t) * d.θ
-    a == zero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
+    iszero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
 end

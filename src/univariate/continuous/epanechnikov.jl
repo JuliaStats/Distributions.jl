@@ -65,14 +65,14 @@ end
 
 @quantile_newton Epanechnikov
 
-function mgf(d::Epanechnikov{T}, t::Real) where T<:Real
+function mgf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    a == 0 ? one(T) :
+    iszero(a) ? one(T) :
     3exp(d.μ * t) * (cosh(a) - sinh(a) / a) / a^2
 end
 
-function cf(d::Epanechnikov{T}, t::Real) where T<:Real
+function cf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    a == 0 ? one(T)+zero(T)*im :
+    iszero(a) ? complex(one(a)) :
     -3exp(im * d.μ * t) * (cos(a) - sin(a) / a) / a^2
 end

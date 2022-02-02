@@ -109,12 +109,12 @@ function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
     max(ceil(lp/log1p(-d.p)) - 1, zero(T))
 end
 
-function mgf(d::Geometric, t::Real)
+function mgf(d::Geometric, t::Number)
     p = succprob(d)
     p / (expm1(-t) + p)
 end
 
-function cf(d::Geometric, t::Real)
+function cf(d::Geometric, t::Number)
     p = succprob(d)
     # replace with expm1 when complex version available
     p / (exp(-t*im) - 1 + p)

@@ -125,12 +125,12 @@ function rand(rng::AbstractRNG, d::Binomial)
     p <= 0.5 ? y : n-y
 end
 
-function mgf(d::Binomial, t::Real)
+function mgf(d::Binomial, t::Number)
     n, p = params(d)
     (one(p) - p + p * exp(t)) ^ n
 end
 
-function cf(d::Binomial, t::Real)
+function cf(d::Binomial, t::Number)
     n, p = params(d)
     (one(p) - p + p * cis(t)) ^ n
 end

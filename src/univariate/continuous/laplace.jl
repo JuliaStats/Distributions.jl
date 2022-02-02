@@ -95,11 +95,11 @@ function gradlogpdf(d::Laplace, x::Real)
     x > μ ? -g : g
 end
 
-function mgf(d::Laplace, t::Real)
+function mgf(d::Laplace, t::Number)
     st = d.θ * t
     exp(t * d.μ) / ((1 - st) * (1 + st))
 end
-function cf(d::Laplace, t::Real)
+function cf(d::Laplace, t::Number)
     st = d.θ * t
     cis(t * d.μ) / (1+st*st)
 end

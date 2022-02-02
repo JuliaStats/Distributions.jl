@@ -80,12 +80,12 @@ function logpdf(d::Skellam, x::Real)
     end
 end
 
-function mgf(d::Skellam, t::Real)
+function mgf(d::Skellam, t::Number)
     μ1, μ2 = params(d)
     exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
 end
 
-function cf(d::Skellam, t::Real)
+function cf(d::Skellam, t::Number)
     μ1, μ2 = params(d)
     exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end

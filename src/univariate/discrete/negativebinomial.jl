@@ -109,12 +109,12 @@ invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d
 ## sampling
 rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
 
-function mgf(d::NegativeBinomial, t::Real)
+function mgf(d::NegativeBinomial, t::Number)
     r, p = params(d)
     return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
 end
 
-function cf(d::NegativeBinomial, t::Real)
+function cf(d::NegativeBinomial, t::LineNumberNode)
     r, p = params(d)
     return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
 end

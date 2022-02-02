@@ -93,8 +93,8 @@ invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 
 gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
 
-mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
-cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
+mgf(d::Exponential, t::Number) = 1/(1 - t * scale(d))
+cf(d::Exponential, t::Number) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling

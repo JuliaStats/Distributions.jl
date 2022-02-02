@@ -96,10 +96,10 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     @test isapprox(quantile(d, Float64(0.7)), quantile(d, Float32(0.7)))
 
     try
-        m = mgf(d,0.0)
-        @test m == 1.0
-        m = mgf(d,Dual(0.0))
-        @test m == 1.0
+        m = mgf(d, 0.0)
+        @test isone(m)
+        m = mgf(d, Dual(0.0))
+        @test isone(m)
     catch e
         isa(e, MethodError) || throw(e)
     end

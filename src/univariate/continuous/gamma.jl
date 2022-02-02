@@ -75,9 +75,9 @@ function entropy(d::Gamma)
     α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
-mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
+mgf(d::Gamma, t::Number) = (1 - t * d.θ)^(-d.α)
 
-cf(d::Gamma, t::Real) = (1 - im * t * d.θ)^(-d.α)
+cf(d::Gamma, t::Number) = (1 - im * t * d.θ)^(-d.α)
 
 function kldivergence(p::Gamma, q::Gamma)
     # We use the parametrization with the scale θ

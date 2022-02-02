@@ -102,8 +102,8 @@ function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
     0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 
-mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
-cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
+mgf(d::Bernoulli, t::Number) = failprob(d) + succprob(d) * exp(t)
+cf(d::Bernoulli, t::Number) = failprob(d) + succprob(d) * cis(t)
 
 
 #### Sampling

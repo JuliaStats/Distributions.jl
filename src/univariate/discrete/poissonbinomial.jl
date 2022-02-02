@@ -116,14 +116,14 @@ modes(d::PoissonBinomial) = modes(DiscreteNonParametric(support(d), d.pmf))
 
 quantile(d::PoissonBinomial, x::Float64) = quantile(Categorical(d.pmf), x) - 1
 
-function mgf(d::PoissonBinomial, t::Real)
+function mgf(d::PoissonBinomial, t::Number)
     expm1_t = expm1(t)
     mapreduce(*, succprob(d)) do p
         1 + p * expm1_t
     end
 end
 
-function cf(d::PoissonBinomial, t::Real)
+function cf(d::PoissonBinomial, t::Number)
     cis_t = cis(t)
     mapreduce(*, succprob(d)) do p
         1 - p + p * cis_t

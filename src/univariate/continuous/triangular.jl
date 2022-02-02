@@ -118,8 +118,8 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
-function mgf(d::TriangularDist{T}, t::Real) where T<:Real
-    if t == zero(t)
+function mgf(d::TriangularDist{T}, t::Number) where T<:Real
+    if iszero(t)
         return one(T)
     else
         (a, b, c) = params(d)
@@ -129,9 +129,9 @@ function mgf(d::TriangularDist{T}, t::Real) where T<:Real
     end
 end
 
-function cf(d::TriangularDist{T}, t::Real) where T<:Real
+function cf(d::TriangularDist{T}, t::Number) where T<:Real
     # Is this correct?
-    if t == zero(t)
+    if iszero(t)
         return one(Complex{T})
     else
         (a, b, c) = params(d)

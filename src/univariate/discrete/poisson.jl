@@ -96,12 +96,12 @@ end
 
 @_delegate_statsfuns Poisson pois λ
 
-function mgf(d::Poisson, t::Real)
+function mgf(d::Poisson, t::Number)
     λ = rate(d)
     return exp(λ * (exp(t) - 1))
 end
 
-function cf(d::Poisson, t::Real)
+function cf(d::Poisson, t::Number)
     λ = rate(d)
     return exp(λ * (cis(t) - 1))
 end

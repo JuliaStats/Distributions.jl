@@ -90,8 +90,8 @@ end
 
 gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
-mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
-cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
+mgf(d::Normal, t::Number) = exp(t * d.μ + d.σ^2 / 2 * t^2)
+cf(d::Normal, t::Number) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Affine transformations
 

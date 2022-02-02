@@ -49,8 +49,8 @@ logccdf(d::Dirac, x::Real) = x < d.value ? 0.0 : isnan(x) ? NaN : -Inf
 
 quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
 
-mgf(d::Dirac, t) = exp(t * d.value)
-cf(d::Dirac, t) = cis(t * d.value)
+mgf(d::Dirac, t::Number) = exp(t * d.value)
+cf(d::Dirac, t::Number) = cis(t * d.value)
 
 #### Sampling
 

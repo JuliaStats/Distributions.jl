@@ -93,20 +93,20 @@ quantile(d::Uniform, p::Real) = d.a + p * (d.b - d.a)
 cquantile(d::Uniform, p::Real) = d.b + p * (d.a - d.b)
 
 
-function mgf(d::Uniform, t::Real)
+function mgf(d::Uniform, t::Number)
     (a, b) = params(d)
     u = (b - a) * t / 2
-    u == zero(u) && return one(u)
+    iszero(u) && return one(u)
     v = (a + b) * t / 2
-    exp(v) * (sinh(u) / u)
+    return exp(v) * (sinh(u) / u)
 end
 
-function cf(d::Uniform, t::Real)
+function cf(d::Uniform, t::Number)
     (a, b) = params(d)
     u = (b - a) * t / 2
-    u == zero(u) && return complex(one(u))
+    iszero(u) && return complex(one(u))
     v = (a + b) * t / 2
-    cis(v) * (sin(u) / u)
+    return cis(v) * (sin(u) / u)
 end
 
 #### Affine transformations

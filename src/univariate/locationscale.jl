@@ -109,7 +109,7 @@ ismesokurtic(d::AffineDistribution) = ismesokurtic(d.ρ)
 entropy(d::ContinuousAffineDistribution) = entropy(d.ρ) + log(d.σ)
 entropy(d::DiscreteAffineDistribution) = entropy(d.ρ)
 
-mgf(d::AffineDistribution,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
+mgf(d::AffineDistribution, t::Number) = exp(d.μ * t) * mgf(d.ρ, d.σ * t)
 
 #### Evaluation & Sampling
 

@@ -213,18 +213,18 @@ function modes(d::DiscreteNonParametric)
     return modes(x, Weights(p, one(eltype(p))))
 end
 
-function mgf(d::DiscreteNonParametric, t::Real)
+function mgf(d::DiscreteNonParametric{T}, t::Number)
     x, p = params(d)
-    s = zero(Float64)
+    s = zero(t)
     for i in 1:length(x)
         s += p[i] * exp(t*x[i])
     end
     s
 end
 
-function cf(d::DiscreteNonParametric, t::Real)
+function cf(d::DiscreteNonParametric, t::Number)
     x, p = params(d)
-    s = zero(Complex{Float64})
+    s = complex(zero(t))
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])
     end
