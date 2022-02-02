@@ -96,6 +96,7 @@ function gradlogpdf(d::Laplace, x::Real)
 end
 
 function mgf(d::Laplace, t::Number)
+    abs(t) < 1 / d.θ || return Base.promote_typeof(t, d.θ, d.μ)(NaN)
     st = d.θ * t
     exp(t * d.μ) / ((1 - st) * (1 + st))
 end
