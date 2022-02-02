@@ -1,16 +1,26 @@
 # Various algorithms for computing quantile
 
-function quantile_bisect(
-    d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real,
+function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
+    rx < lx && throw(ArgumentError("[$lx, $rx] is not a valid bracketing interval"))
+
+    # In some special cases, e.g. #1501, rx == lx`
+    # If the distribution is degenerate the check below can fail, hence we skip it
+    if rx == lx
+        # Returns `lx` of the same type as `(lx + rx) / 2`
+        # For specific types such as `Float64` it is more performant than `oftype((lx + rx) / 2, lx)`
+        return middle(lx)
+    end
+
     # base tolerance on types to support e.g. `Float32` (avoids an infinite loop)
     # ≈ 3.7e-11 for Float64
     # ≈ 2.4e-5 for Float32
-    tol::Real=(eps(Base.promote_typeof(float(lx), float(rx))))^(2 / 3),
-)
+    tol = eps(float(T))^(2 / 3)
+    
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)
-    @assert cl <= p <= cr
+    cl <= p <= cr ||
+        throw(ArgumentError("[$lx, $rx] is not a valid bracketing interval for `quantile(d, $p)`"))
     while rx - lx > tol
         m = (lx + rx)/2
         c = cdf(d, m)
@@ -23,6 +33,10 @@ function quantile_bisect(
         end
     end
     return (lx + rx)/2
+end
+
+function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::Real, rx::Real)
+    return quantile_bisect(d, p, promote(lx, rx)...)
 end
 
 quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
