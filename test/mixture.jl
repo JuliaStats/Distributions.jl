@@ -280,7 +280,7 @@ end
     # issue #1501
     @testset "quantile of mixture with single component" begin
         for T in (Float32, Float64)
-            d = MixtureModel(Normal{T}(T(1), T(0)))
+            d = MixtureModel([Normal{T}(T(1), T(0))])
             for p in (0.2, 0.2f0, 1//3)
                 @test @inferred(quantile(d, p)) == 1
                 @test @inferred(median(d)) == 1
