@@ -14,8 +14,8 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test logdiffcdf(Normal(), Float64(5), Float64(3)) ≈ -6.607938594596893 rtol=1e-12
     let d = Normal(Float64(0), Float64(1)), x = Float64(-60), y = Float64(-60.001)
         float_res = logdiffcdf(d, x, y)
-        big_x = VERSION < v"1.1" ? BigFloat(x, 100) : BigFloat(x; precision=100)
-        big_y = VERSION < v"1.1" ? BigFloat(y, 100) : BigFloat(y; precision=100)
+        big_x = BigFloat(x; precision=100)
+        big_y = BigFloat(y; precision=100)
         big_float_res = log(cdf(d, big_x) - cdf(d, big_y))
         @test float_res ≈ big_float_res
     end
