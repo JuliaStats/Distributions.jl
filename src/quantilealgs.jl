@@ -15,7 +15,6 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
     # ≈ 3.7e-11 for Float64
     # ≈ 2.4e-5 for Float32
     tol = eps(float(T))^(2 / 3)
-    
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)
