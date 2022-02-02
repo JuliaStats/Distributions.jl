@@ -213,22 +213,20 @@ function modes(d::DiscreteNonParametric)
     return modes(x, Weights(p, one(eltype(p))))
 end
 
-function mgf(d::DiscreteNonParametric{T}, t::Number)
-    x, p = params(d)
-    s = zero(t)
-    for i in 1:length(x)
-        s += p[i] * exp(t*x[i])
-    end
-    s
+function mgf(d::DiscreteNonParametric, t::Number)
+    xs, ps = params(d)
+    s = sum(Broadcast.instantiate(Broadcast.broadcasted(ps, xs) do p, x
+        return p * exp(t * x)
+    end))
+    return s
 end
 
 function cf(d::DiscreteNonParametric, t::Number)
-    x, p = params(d)
-    s = complex(zero(t))
-    for i in 1:length(x)
-       s += p[i] * cis(t*x[i])
-    end
-    s
+    xs, ps = params(d)
+    s = sum(Broadcast.instantiate(Broadcast.broadcasted(ps, xs) do p, x
+        return p * cis(t * x)
+    end))
+    return s
 end
 
 # Sufficient statistics

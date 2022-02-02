@@ -119,22 +119,21 @@ function quantile(d::TriangularDist, p::Real)
 end
 
 function mgf(d::TriangularDist{T}, t::Number) where T<:Real
+    (a, b, c) = params(d)
     if iszero(t)
-        return one(T)
+        return one(Base.promote_typeof(a, b, c, t))
     else
-        (a, b, c) = params(d)
         u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
         v = (b - a) * (c - a) * (b - c) * t^2
         return 2u / v
     end
 end
 
-function cf(d::TriangularDist{T}, t::Number) where T<:Real
-    # Is this correct?
+function cf(d::TriangularDist, t::Number)
+    (a, b, c) = params(d)
     if iszero(t)
-        return one(Complex{T})
+        return complex(one(Base.promote_typeof(a, b, c, t)))
     else
-        (a, b, c) = params(d)
         u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
         v = (b - a) * (c - a) * (b - c) * t^2
         return -2u / v

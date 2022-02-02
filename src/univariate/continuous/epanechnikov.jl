@@ -67,12 +67,12 @@ end
 
 function mgf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    iszero(a) ? one(T) :
+    iszero(a) ? one(Base.promote_typeof(a, d.μ)) :
     3exp(d.μ * t) * (cosh(a) - sinh(a) / a) / a^2
 end
 
 function cf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    iszero(a) ? complex(one(a)) :
+    iszero(a) ? complex(one(promote_rule(typeof(a), typeof(d.μ)))) :
     -3exp(im * d.μ * t) * (cos(a) - sin(a) / a) / a^2
 end

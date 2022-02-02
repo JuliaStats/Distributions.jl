@@ -54,16 +54,16 @@ end
 
 @quantile_newton Biweight
 
-function mgf(d::Biweight{T}, t::Number) where T<:Real
+function mgf(d::Biweight, t::Number)
     a = d.σ * t
     a2 = a^2
-    iszero(a) ? one(a) :
+    iszero(a) ? one(Base.promote_typeof(a, d.μ)) :
     15exp(d.μ * t) * (-3cosh(a) + (a + 3/a) * sinh(a)) / (a2^2)
 end
 
 function cf(d::Biweight{T}, t::Number) where T<:Real
     a = d.σ * t
     a2 = a^2
-    iszero(a) ? complex(one(a)) :
+    iszero(a) ? complex(one(Base.promote_typeof(a, d.μ))) :
     -15cis(d.μ * t) * (3cos(a) + (a - 3/a) * sin(a)) / (a2^2)
 end

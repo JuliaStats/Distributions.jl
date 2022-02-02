@@ -56,7 +56,7 @@ logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω
 
 mgf(d::SkewNormal, t::Number) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2 ) * normcdf(d.ω * delta(d) * t)
 
-cf(d::SkewNormal, t::Number) = exp(im * t * d.ξ - (d.ω^2 * t^2)/2) * (1 + im * erfi((d.ω * delta(d) * t)/(sqrt(2))) )
+cf(d::SkewNormal, t::Number) = exp(im * t * d.ξ - (d.ω^2 * t^2)/2) * (1 + im * erfi((d.ω * delta(d) * t)/sqrttwo) )
 
 #### Sampling
 function rand(rng::AbstractRNG, d::SkewNormal)

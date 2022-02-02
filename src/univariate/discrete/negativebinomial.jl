@@ -114,7 +114,7 @@ function mgf(d::NegativeBinomial, t::Number)
     return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
 end
 
-function cf(d::NegativeBinomial, t::LineNumberNode)
+function cf(d::NegativeBinomial, t::Number)
     r, p = params(d)
     return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
 end

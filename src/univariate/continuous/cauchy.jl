@@ -97,7 +97,10 @@ function cquantile(d::Cauchy, p::Real)
     μ + σ * tan(π * (1//2 - p))
 end
 
-mgf(d::Cauchy{T}, t::Number) where {T<:Real} = iszero(t) ? one(T) : T(NaN)
+function mgf(d::Cauchy, t::Number)
+    T = float(partype(d))
+    return iszero(t) ? one(T) : T(NaN)
+end
 cf(d::Cauchy, t::Number) = exp(im * (t * d.μ) - d.σ * abs(t))
 
 #### Affine transformations

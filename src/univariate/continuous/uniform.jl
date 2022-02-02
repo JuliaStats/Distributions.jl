@@ -96,7 +96,7 @@ cquantile(d::Uniform, p::Real) = d.b + p * (d.a - d.b)
 function mgf(d::Uniform, t::Number)
     (a, b) = params(d)
     u = (b - a) * t / 2
-    iszero(u) && return one(u)
+    iszero(u) && return one(float(typeof(u)))
     v = (a + b) * t / 2
     return exp(v) * (sinh(u) / u)
 end
@@ -104,7 +104,7 @@ end
 function cf(d::Uniform, t::Number)
     (a, b) = params(d)
     u = (b - a) * t / 2
-    iszero(u) && return complex(one(u))
+    iszero(u) && return complex(one(float(typeof(u))))
     v = (a + b) * t / 2
     return cis(v) * (sin(u) / u)
 end

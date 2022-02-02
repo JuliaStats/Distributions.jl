@@ -59,14 +59,22 @@ end
 
 @quantile_newton Triweight
 
-function mgf(d::Triweight{T}, t::Number) where T<:Real
-    a = d.σ*t
-    a2 = a*a
-    iszero(t) ? one(T) : 105*exp(d.μ*t)*((15/a2+1)*cosh(a)-(15/a2-6)/a*sinh(a))/(a2*a2)
+function mgf(d::Triweight, t::Number)
+    a = d.σ * t
+    a2 = a * a
+    if iszero(t)
+        return one(Base.promote_typeof(a, d.μ))
+    else
+        return 105 * exp(d.μ * t) * ((15/a2 + 1) * cosh(a) - (15/a2 - 6) / a * sinh(a)) / (a2 * a2)
+    end
 end
 
-function cf(d::Triweight{T}, t::Number) where T<:Real
-    a = d.σ*t
-    a2 = a*a
-    iszero(t) ? complex(one(a)) : 105*cis(d.μ*t)*((1-15/a2)*cos(a)+(15/a2-6)/a*sin(a))/(a2*a2)
+function cf(d::Triweight, t::Number)
+    a = d.σ * t
+    a2 = a * a
+    if iszero(t)
+        return complex(one(Base.promote_typeof(a, d.μ)))
+    else
+        return 105 * cis(d.μ * t) * ((1 - 15/a2) * cos(a) + (15/a2 - 6) / a * sin(a)) / (a2 * a2)
+    end
 end

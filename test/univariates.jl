@@ -119,16 +119,22 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     end
 
     try
-        m = mgf(d, 0.0)
-        @test isone(m)
-        m = mgf(d, complex(0))
-        @test isone(m)
+        for T in (Float64, Float32, Rational, Int, Complex{Float64}, Complex{Float32})
+            m = mgf(d, zero(T))
+            @test isone(m)
+            @inferred mgf(d, zero(T))
+            @inferred mgf(d, one(T))
+        end
     catch e # only rethrow if it's not a MethodError i.e. it's defined
         isa(e, MethodError) || throw(e)
     end
     try
-        c = cf(d, 0.0)
-        @test isone(c)
+        for T in (Float64, Float32, Rational, Int, Complex{Float64}, Complex{Float32})
+            m = cf(d, zero(T))
+            @test isone(m)
+            @inferred cf(d, zero(T))
+            @inferred cf(d, one(T))
+        end
         # test some extra values: should all be well-defined
         for t in (0.1, -0.1, 1.0, -1.0)
             @test !isnan(cf(d, t))
