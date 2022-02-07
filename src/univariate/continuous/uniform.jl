@@ -97,6 +97,7 @@ function mgf(d::Uniform, t::Number)
     (a, b) = params(d)
     u = (b - a) * t / 2
     iszero(u) && return one(float(typeof(u)))
+    abs(real(u)) < 1 || throw(DomainError("|(b-a) real(t) / 2| should be smaller than 1"))
     v = (a + b) * t / 2
     return exp(v) * (sinh(u) / u)
 end

@@ -118,7 +118,7 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
-function mgf(d::TriangularDist{T}, t::Number) where T<:Real
+function mgf(d::TriangularDist, t::Number)
     (a, b, c) = params(d)
     if iszero(t)
         return one(Base.promote_typeof(a, b, c, t))

@@ -95,9 +95,12 @@ function gradlogpdf(d::Logistic, x::Real)
     ((2e) / (1 + e) - 1) / d.θ
 end
 
-mgf(d::Logistic, t::Number) = exp(t * d.μ) / sinc(d.θ * t)
+function mgf(d::Logistic, t::Number)
+    abs(real(t)) < inv(d.θ) || throw(DomainError("the absolute value of the real part of t should be smaller than θ⁻¹"))
+    return exp(t * d.μ) / sinc(d.θ * t)
+end
 
 function cf(d::Logistic, t::Number)
     a = (π * t) * d.θ
-    iszero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
+    return iszero(a) ? complex(one(a)) : cis(t * d.μ) * (a / sinh(a))
 end

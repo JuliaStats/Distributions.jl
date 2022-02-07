@@ -96,8 +96,8 @@ function gradlogpdf(d::Laplace, x::Real)
 end
 
 function mgf(d::Laplace, t::Number)
-    abs(t) < 1 / d.θ || return Base.promote_typeof(t, d.θ, d.μ)(NaN)
     st = d.θ * t
+    abs(real(t)) < 1 / d.θ || throw(DomainError("the absolute value of the real part of t should be smaller than θ"))
     exp(t * d.μ) / ((1 - st) * (1 + st))
 end
 function cf(d::Laplace, t::Number)

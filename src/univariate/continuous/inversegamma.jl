@@ -110,12 +110,13 @@ invlogccdf(d::InverseGamma, p::Real) = inv(invlogcdf(d.invd, p))
 
 function mgf(d::InverseGamma, t::Number)
     (a, b) = params(d)
+    # Where does this formula comes from?
+    # Wikipedia says (wrongly I think) that it is not defined
     iszero(t) ? one(Base.promote_typeof(a, b, t)) : 2(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*b*t))
 end
 
 function cf(d::InverseGamma, t::Number)
     (a, b) = params(d)
-    T = promote_rule(typeof(a), typeof(b))
     iszero(t) ? complex(one(Base.promote_typeof(a, b, t))) : 2(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*im*b*t))
 end
 
