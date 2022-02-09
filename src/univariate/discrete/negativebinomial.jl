@@ -117,6 +117,5 @@ end
 
 function cf(d::NegativeBinomial, t::Number)
     r, p = params(d)
-    real(t) < -log1p(-p) || return Base.promote_typeof(p, t)(NaN)
     return (p / (1 - (1 - p) * exp(t)))^r
 end
