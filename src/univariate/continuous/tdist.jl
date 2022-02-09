@@ -80,12 +80,12 @@ end
 
 rand(rng::AbstractRNG, d::TDist) = randn(rng) / ( isinf(d.ν) ? 1 : sqrt(rand(rng, Chisq(d.ν))/d.ν) )
 
-function cf(d::TDist{T}, t::Real) where T <: Real
+function cf(d::TDist{T}, t::Real) where {T<:Real}
     isinf(d.ν) && return cf(Normal(zero(T), one(T)), t)
-    t == 0 && return complex(1)
-    h = d.ν/2
-    q = d.ν/4
-    complex(2(q*t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
+    h = d.ν / 2 
+    q = d.ν / 4
+    c = complex(2(q * t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
+    iszero(t) ? one(c) : c
 end
 
 gradlogpdf(d::TDist{T}, x::Real) where {T<:Real} = isinf(d.ν) ? gradlogpdf(Normal(zero(T), one(T)), x) : -((d.ν + 1) * x) / (x^2 + d.ν)
