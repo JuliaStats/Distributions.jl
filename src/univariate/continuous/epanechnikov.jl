@@ -67,7 +67,7 @@ end
 
 function mgf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    abs(real(a)) < 1 || throw(DomainError("|σ real(t)| has to be smaller than 1"))
+    abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| has to be smaller than 1"))
     iszero(a) ? one(Base.promote_typeof(a, d.μ)) :
     3exp(d.μ * t) * (cosh(a) - sinh(a) / a) / a^2
 end

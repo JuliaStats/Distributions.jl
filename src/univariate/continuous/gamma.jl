@@ -76,7 +76,7 @@ function entropy(d::Gamma)
 end
 
 function mgf(d::Gamma, t::Number)
-    real(t) < inv(d.θ) || throw(DomainError("the real part of t should smaller than θ⁻¹"))
+    real(t) < rate(d) || throw(DomainError(t, "the real part of t should smaller than θ⁻¹"))
     return (1 - t * d.θ)^(-d.α)
 end
 

@@ -96,7 +96,7 @@ function gradlogpdf(d::Logistic, x::Real)
 end
 
 function mgf(d::Logistic, t::Number)
-    abs(real(t)) < inv(d.θ) || throw(DomainError("the absolute value of the real part of t should be smaller than θ⁻¹"))
+    abs(real(t)) < inv(d.θ) || throw(DomainError(t, "the absolute value of the real part of t should be smaller than θ⁻¹"))
     return exp(t * d.μ) / sinc(d.θ * t)
 end
 

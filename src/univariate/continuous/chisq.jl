@@ -76,7 +76,7 @@ end
 @_delegate_statsfuns Chisq chisq ν
 
 function mgf(d::Chisq, t::Number)
-    real(t) < 0.5 || throw(DomainError("the real part of t has to be smaller than 0.5"))
+    real(t) < 0.5 || throw(DomainError(t, "the real part of t has to be smaller than 0.5"))
     return (1 - 2 * t)^(-d.ν/2)
 end
 

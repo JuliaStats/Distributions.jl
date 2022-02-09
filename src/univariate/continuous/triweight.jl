@@ -65,7 +65,7 @@ function mgf(d::Triweight, t::Number)
     if iszero(t)
         return one(Base.promote_typeof(a, d.μ))
     else
-        abs(real(a)) < 1 || throw(DomainError("|σ real(t)| should be smaller than 1"))
+        abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| should be smaller than 1"))
         return 105 * exp(d.μ * t) * ((15/a2 + 1) * cosh(a) - (15/a2 - 6) / a * sinh(a)) / (a2 * a2)
     end
 end

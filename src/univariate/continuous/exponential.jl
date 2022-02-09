@@ -94,7 +94,7 @@ invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
 
 function mgf(d::Exponential, t::Number)
-    real(t) < rate(d) || throw(DomainError("the real part of t should be smaller than λ"))
+    real(t) < rate(d) || throw(DomainError(t, "the real part of t should be smaller than λ"))
     return 1/(1 - t * scale(d))
 end
 cf(d::Exponential, t::Number) = 1/(1 - t * im * scale(d))

@@ -76,7 +76,7 @@ function entropy(d::Erlang)
 end
 
 function mgf(d::Erlang, t::Number)
-    real(t) < inv(d.θ) || throw(DomainError("the real part of t should be smaller than θ⁻¹")) 
+    real(t) < inv(d.θ) || throw(DomainError(t, "the real part of t should be smaller than θ⁻¹")) 
     return (1 - t * d.θ)^(-d.α)
 end
 cf(d::Erlang, t::Number)  = (1 - im * t * d.θ)^(-d.α)

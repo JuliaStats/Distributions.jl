@@ -97,7 +97,7 @@ end
 
 function mgf(d::Laplace, t::Number)
     st = d.θ * t
-    abs(real(t)) < 1 / d.θ || throw(DomainError("the absolute value of the real part of t should be smaller than θ"))
+    abs(real(t)) < 1 / d.θ || throw(DomainError(t, "the absolute value of the real part of t should be smaller than θ⁻¹"))
     exp(t * d.μ) / ((1 - st) * (1 + st))
 end
 function cf(d::Laplace, t::Number)

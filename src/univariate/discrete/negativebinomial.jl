@@ -111,7 +111,7 @@ rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(
 
 function mgf(d::NegativeBinomial, t::Number)
     r, p = params(d)
-    real(t) < -log1p(-p) || throw(DomainError("the real part of t should be smaller than -log(1-p)"))
+    real(t) < -log1p(-p) || throw(DomainError(t, "the real part of t should be smaller than -log(1-p)"))
     return (p / (1 - (1 - p) * exp(t)))^r
 end
 
