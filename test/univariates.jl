@@ -126,7 +126,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
             @inferred mgf(d, one(T))
         end
     catch e # only rethrow if it's not a MethodError i.e. it's defined
-        isa(e, MethodError) || throw(e)
+        isa(e, Union{MethodError,DomainError}) || throw(e)
     end
     try
         for T in (Float64, Float32, Rational, Int, Complex{Float64}, Complex{Float32})
