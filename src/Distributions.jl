@@ -1,7 +1,7 @@
 module Distributions
 
 using StatsBase, PDMats, StatsFuns, Statistics
-using StatsFuns: logtwo, invsqrt2, invsqrt2π
+using StatsFuns: logtwo, invsqrt2, invsqrt2π, sqrt2
 
 import QuadGK: quadgk
 import Base: size, length, convert, show, getindex, rand, vec, inv

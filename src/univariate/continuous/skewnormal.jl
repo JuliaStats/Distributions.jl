@@ -54,9 +54,9 @@ logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω
 #cdf requires Owen's T function.
 #cdf/quantile etc 
 
-mgf(d::SkewNormal, t::Number) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2 ) * normcdf(d.ω * delta(d) * t)
+mgf(d::SkewNormal, t::Number) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2) * normcdf(d.ω * delta(d) * t)
 
-cf(d::SkewNormal, t::Number) = exp(im * t * d.ξ - (d.ω^2 * t^2)/2) * (1 + im * erfi((d.ω * delta(d) * t)/sqrttwo) )
+cf(d::SkewNormal, t::Number) = exp(im * t * d.ξ - (d.ω^2 * t^2)/2) * (1 + im * erfi((d.ω * delta(d) * t)/sqrt2))
 
 #### Sampling
 function rand(rng::AbstractRNG, d::SkewNormal)
