@@ -117,5 +117,5 @@ end
 
 function cf(d::NegativeBinomial, t::Number)
     r, p = params(d)
-    return (p / (1 - (1 - p) * exp(t)))^r
+    return complex(p / (1 - (1 - p) * exp(t)))^r
 end
