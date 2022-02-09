@@ -1,7 +1,7 @@
 # Various algorithms for computing quantile
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
-    rx < lx && throw(ArgumentError("[$lx, $rx] is not a valid bracketing interval"))
+    rx < lx && throw(ArgumentError("empty bracketing interval [$lx, $rx]"))
 
     # In some special cases, e.g. #1501, rx == lx`
     # If the distribution is degenerate the check below can fail, hence we skip it
@@ -14,7 +14,7 @@ function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx
     # base tolerance on types to support e.g. `Float32` (avoids an infinite loop)
     # ≈ 3.7e-11 for Float64
     # ≈ 2.4e-5 for Float32
-    tol = eps(float(T))^(2 / 3)
+    tol = cbrt(eps(float(T)))^2
     # find quantile using bisect algorithm
     cl = cdf(d, lx)
     cr = cdf(d, rx)
