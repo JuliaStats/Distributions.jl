@@ -85,7 +85,7 @@ function cf(d::TDist{T}, t::Real) where {T<:Real}
     h = d.ν / 2 
     q = d.ν / 4
     c = complex(2(q * t^2)^q * besselk(h, sqrt(d.ν) * abs(t)) / gamma(h))
-    iszero(t) ? one(c) : c
+    iszero(t) ? complex(one(c)) : c
 end
 
 gradlogpdf(d::TDist{T}, x::Real) where {T<:Real} = isinf(d.ν) ? gradlogpdf(Normal(zero(T), one(T)), x) : -((d.ν + 1) * x) / (x^2 + d.ν)

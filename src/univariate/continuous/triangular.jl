@@ -129,7 +129,7 @@ function cf(d::TriangularDist, t::Number)
     (a, b, c) = params(d)
     u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
     v = (b - a) * (c - a) * (b - c) * t^2
-    return iszero(t) ? one(u) : -2u / v
+    return iszero(t) ? complex(one(u)) : -2u / v
 end
 
 

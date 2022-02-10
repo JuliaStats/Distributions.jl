@@ -98,7 +98,7 @@ function cf(d::DiscreteUniform, t::Number)
     a, b = d.a, d.b
     u = b - a + 1
     result = (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
-    return iszero(t) ? one(result) : result
+    return iszero(t) ? complex(one(result)) : result
 end
 
 

@@ -71,5 +71,5 @@ function cf(d::Triweight, t::Number)
     a = d.σ * t
     a2 = a * a
     result = 105 * cis(d.μ * t) * ((1 - 15/a2) * cos(a) + (15/a2 - 6) / a * sin(a)) / (a2 * a2)
-    return iszero(t) ? one(result) : result
+    return iszero(t) ? complex(one(result)) : result
 end
