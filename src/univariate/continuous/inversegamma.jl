@@ -112,12 +112,14 @@ function mgf(d::InverseGamma, t::Number)
     (a, b) = params(d)
     # Where does this formula comes from?
     # Wikipedia says (wrongly I think) that it is not defined
-    iszero(t) ? one(Base.promote_typeof(a, b, t)) : 2(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*b*t))
+    result = 2(-b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*b*t))
+    return iszero(t) ? one(result) : result
 end
 
 function cf(d::InverseGamma, t::Number)
     (a, b) = params(d)
-    iszero(t) ? complex(one(Base.promote_typeof(a, b, t))) : 2(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*im*b*t))
+    result = 2(-im*b*t)^(0.5a) / gamma(a) * besselk(a, sqrt(-4*im*b*t))
+    iszero(t) ? complex(one(result)) : result
 end
 
 

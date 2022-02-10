@@ -58,13 +58,14 @@ function mgf(d::Biweight, t::Number)
     a = d.σ * t
     abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| has to be smaller than 1"))
     a2 = a^2
-    iszero(a) ? one(Base.promote_typeof(a, d.μ)) :
-    15exp(d.μ * t) * (-3cosh(a) + (a + 3/a) * sinh(a)) / (a2^2)
+    result = 15exp(d.μ * t) * (-3cosh(a) + (a + 3/a) * sinh(a)) / (a2^2)
+    return iszero(a) ? one(result) : result
+    
 end
 
 function cf(d::Biweight, t::Number)
     a = d.σ * t
     a2 = a^2
-    iszero(a) ? complex(one(Base.promote_typeof(a, d.μ))) :
-    -15cis(d.μ * t) * (3cos(a) + (a - 3/a) * sin(a)) / (a2^2)
+    result = -15cis(d.μ * t) * (3cos(a) + (a - 3/a) * sin(a)) / (a2^2)
+    return iszero(a) ? complex(one(result)) : result
 end

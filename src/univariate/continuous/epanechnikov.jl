@@ -68,12 +68,12 @@ end
 function mgf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
     abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| has to be smaller than 1"))
-    iszero(a) ? one(Base.promote_typeof(a, d.μ)) :
-    3exp(d.μ * t) * (cosh(a) - sinh(a) / a) / a^2
+    result = 3exp(d.μ * t) * (cosh(a) - sinh(a) / a) / a^2
+    return iszero(a) ? one(result) : result
 end
 
 function cf(d::Epanechnikov{T}, t::Number) where T<:Real
     a = d.σ * t
-    iszero(a) ? complex(one(Base.promote_typeof(a, d.μ))) :
-    -3exp(im * d.μ * t) * (cos(a) - sin(a) / a) / a^2
+    result = -3exp(im * d.μ * t) * (cos(a) - sin(a) / a) / a^2
+    return iszero(a) ? complex(one(result)) : result
 end

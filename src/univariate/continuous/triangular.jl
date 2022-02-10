@@ -120,24 +120,16 @@ end
 
 function mgf(d::TriangularDist, t::Number)
     (a, b, c) = params(d)
-    if iszero(t)
-        return one(Base.promote_typeof(a, b, c, t))
-    else
-        u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return 2u / v
-    end
+    u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
+    v = (b - a) * (c - a) * (b - c) * t^2
+    return iszero(t) ? one(u) : 2u / v
 end
 
 function cf(d::TriangularDist, t::Number)
     (a, b, c) = params(d)
-    if iszero(t)
-        return complex(one(Base.promote_typeof(a, b, c, t)))
-    else
-        u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return -2u / v
-    end
+    u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
+    v = (b - a) * (c - a) * (b - c) * t^2
+    return iszero(t) ? one(u) : -2u / v
 end
 
 

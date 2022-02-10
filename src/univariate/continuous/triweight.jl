@@ -62,20 +62,14 @@ end
 function mgf(d::Triweight, t::Number)
     a = d.σ * t
     a2 = a * a
-    if iszero(t)
-        return one(Base.promote_typeof(a, d.μ))
-    else
-        abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| should be smaller than 1"))
-        return 105 * exp(d.μ * t) * ((15/a2 + 1) * cosh(a) - (15/a2 - 6) / a * sinh(a)) / (a2 * a2)
-    end
+    abs(real(a)) < 1 || throw(DomainError(t, "|σ ⋅ real(t)| should be smaller than 1"))
+    result = 105 * exp(d.μ * t) * ((15/a2 + 1) * cosh(a) - (15/a2 - 6) / a * sinh(a)) / (a2 * a2)
+    return iszero(t) ? one(result) : result
 end
 
 function cf(d::Triweight, t::Number)
     a = d.σ * t
     a2 = a * a
-    if iszero(t)
-        return complex(one(Base.promote_typeof(a, d.μ)))
-    else
-        return 105 * cis(d.μ * t) * ((1 - 15/a2) * cos(a) + (15/a2 - 6) / a * sin(a)) / (a2 * a2)
-    end
+    result = 105 * cis(d.μ * t) * ((1 - 15/a2) * cos(a) + (15/a2 - 6) / a * sin(a)) / (a2 * a2)
+    return iszero(t) ? one(result) : result
 end
