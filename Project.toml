@@ -22,7 +22,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 ChainRulesCore = "1"
 DensityInterface = "0.4"
-FillArrays = "0.9, 0.10, 0.11, 0.12"
+FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13"
 PDMats = "0.10, 0.11"
 QuadGK = "2"
 SpecialFunctions = "1.2, 2"
