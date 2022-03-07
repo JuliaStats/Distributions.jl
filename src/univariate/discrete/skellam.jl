@@ -50,7 +50,8 @@ Skellam() = Skellam{Float64}(1.0, 1.0)
 #### Conversions
 
 convert(::Type{Skellam{T}}, μ1::S, μ2::S) where {T<:Real, S<:Real} = Skellam(T(μ1), T(μ2))
-convert(::Type{Skellam{T}}, d::Skellam{S}) where {T<:Real, S} =  Skellam(T(d.μ1), T(d.μ2), check_args=false)
+Base.convert(::Type{Skellam{T}}, d::Skellam) where {T<:Real} = Skellam{T}(T(d.μ1), T(d.μ2))
+Base.convert(::Type{Skellam{T}}, d::Skellam{T}) where {T<:Real} = d
 
 #### Parameters
 

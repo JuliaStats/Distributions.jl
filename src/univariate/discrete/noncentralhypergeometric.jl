@@ -59,7 +59,10 @@ FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer
 
 # Conversions
 convert(::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = FisherNoncentralHypergeometric(ns, nf, n, T(ω))
-convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{S}) where {T<:Real, S<:Real} = FisherNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω); check_args=false)
+function Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric) where {T<:Real}
+    FisherNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+end
+Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{T}) where {T<:Real} = d
 
 function _mode(d::FisherNoncentralHypergeometric)
     A = d.ω - 1
@@ -247,7 +250,10 @@ WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Inte
 
 # Conversions
 convert(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
-convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{S}) where {T<:Real, S<:Real} = WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω); check_args=false)
+function Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric) where {T<:Real}
+    WalleniusNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+end
+Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{T}) where {T<:Real} = d
 
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(Ref(d), support(d)))

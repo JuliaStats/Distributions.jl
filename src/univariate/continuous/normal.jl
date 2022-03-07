@@ -47,7 +47,8 @@ const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Normal{T}}, d::Normal) where {T<:Real} = Normal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Normal{T}}, d::Normal{T}) where {T<:Real} = d
 
 @distr_support Normal -Inf Inf
 

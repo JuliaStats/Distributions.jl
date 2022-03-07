@@ -72,6 +72,8 @@ Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
     return LKJCholesky{T}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
+Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where T <: Real = d
+
 function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
     return LKJCholesky{T}(Int(d), T(η), uplo, T(logc0))
 end

@@ -50,7 +50,8 @@ TriangularDist(a::Real, b::Real) = TriangularDist(a, b, middle(a, b); check_args
 
 #### Conversions
 convert(::Type{TriangularDist{T}}, a::Real, b::Real, c::Real) where {T<:Real} = TriangularDist(T(a), T(b), T(c))
-convert(::Type{TriangularDist{T}}, d::TriangularDist{S}) where {T<:Real, S<:Real} = TriangularDist(T(d.a), T(d.b), T(d.c), check_args=false)
+Base.convert(::Type{TriangularDist{T}}, d::TriangularDist) where {T<:Real} = TriangularDist{T}(T(d.a), T(d.b), T(d.c))
+Base.convert(::Type{TriangularDist{T}}, d::TriangularDist{T}) where {T<:Real} = d
 
 #### Parameters
 

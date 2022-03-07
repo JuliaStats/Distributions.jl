@@ -122,6 +122,9 @@ function test_convert(d::MatrixDistribution)
         @test del2 isa distname{elty}
         @test partype(del1) == elty
         @test partype(del2) == elty
+        if elty === partype(d)
+            @test del1 === d
+        end
     end
     nothing
 end

@@ -28,9 +28,10 @@ Cosine(μ::Real=0.0) = Cosine(μ, one(µ); check_args=false)
 function convert(::Type{Cosine{T}}, μ::Real, σ::Real) where T<:Real
     Cosine(T(μ), T(σ))
 end
-function convert(::Type{Cosine{T}}, d::Cosine{S}) where {T <: Real, S <: Real}
-    Cosine(T(d.μ), T(d.σ), check_args=false)
+function Base.convert(::Type{Cosine{T}}, d::Cosine) where {T<:Real}
+    Cosine{T}(T(d.μ), T(d.σ))
 end
+Base.convert(::Type{Cosine{T}}, d::Cosine{T}) where {T<:Real} = d
 
 #### Parameters
 

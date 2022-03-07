@@ -39,9 +39,10 @@ SymTriangularDist(μ::Real=0.0) = SymTriangularDist(μ, one(μ); check_args=fals
 function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where T<:Real
     SymTriangularDist(T(μ), T(σ))
 end
-function convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{S}) where {T <: Real, S <: Real}
-    SymTriangularDist(T(d.μ), T(d.σ), check_args=false)
+function Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist) where {T<:Real}
+    SymTriangularDist{T}(T(d.μ), T(d.σ))
 end
+Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{T}) where {T<:Real} = d
 
 #### Parameters
 

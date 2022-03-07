@@ -51,8 +51,10 @@ SkewedExponentialPower(μ::Real=0) = SkewedExponentialPower(μ, 1, 2, 1//2; chec
 
 ### Conversions
 convert(::Type{SkewedExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewedExponentialPower(T(μ), T(σ), T(p), T(α))
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{S}) where {T <: Real, S <: Real} = SkewedExponentialPower(T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
+function Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower) where {T<:Real}
+    SkewedExponentialPower{T}(T(d.μ), T(d.σ), T(d.p), T(d.α))
+end
+Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
 
 ### Parameters
 @inline partype(d::SkewedExponentialPower{T}) where {T<:Real} = T

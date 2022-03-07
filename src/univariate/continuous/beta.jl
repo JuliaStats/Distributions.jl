@@ -51,9 +51,8 @@ Beta() = Beta{Float64}(1.0, 1.0)
 function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
 end
-function convert(::Type{Beta{T}}, d::Beta{S}) where {T <: Real, S <: Real}
-    Beta(T(d.α), T(d.β), check_args=false)
-end
+Base.convert(::Type{Beta{T}}, d::Beta) where {T<:Real} = Beta{T}(T(d.α), T(d.β))
+Base.convert(::Type{Beta{T}}, d::Beta{T}) where {T<:Real} = d
 
 #### Parameters
 

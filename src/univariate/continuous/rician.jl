@@ -50,9 +50,8 @@ function convert(::Type{Rician{T}}, ν::Real, σ::Real) where T<:Real
     Rician(T(ν), T(σ))
 end
 
-function convert(::Type{Rician{T}}, d::Rician{S}) where {T <: Real, S <: Real}
-    Rician(T(d.ν), T(d.σ); check_args=false)
-end
+Base.convert(::Type{Rician{T}}, d::Rician) where {T<:Real} = Rician{T}(T(d.ν), T(d.σ))
+Base.convert(::Type{Rician{T}}, d::Rician{T}) where {T<:Real} = d
 
 #### Parameters
 

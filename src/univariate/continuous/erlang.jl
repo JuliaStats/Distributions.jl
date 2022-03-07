@@ -42,9 +42,10 @@ Erlang(α::Integer=1) = Erlang(α, 1.0; check_args=false)
 function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
     Erlang(α, T(θ), check_args=false)
 end
-function convert(::Type{Erlang{T}}, d::Erlang{S}) where {T <: Real, S <: Real}
-    Erlang(d.α, T(d.θ), check_args=false)
+function Base.convert(::Type{Erlang{T}}, d::Erlang) where {T<:Real}
+    Erlang{T}(d.α, T(d.θ))
 end
+Base.convert(::Type{Erlang{T}}, d::Erlang{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -54,9 +54,10 @@ NegativeBinomial() = NegativeBinomial{Float64}(1.0, 0.5)
 function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
     return NegativeBinomial(T(r), T(p))
 end
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{S}) where {T <: Real, S <: Real}
-    return NegativeBinomial(T(d.r), T(d.p), check_args=false)
+function Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial) where {T<:Real}
+    return NegativeBinomial{T}(T(d.r), T(d.p))
 end
+Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -43,9 +43,8 @@ Cauchy(μ::Real=0.0) = Cauchy(μ, one(μ); check_args=false)
 function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))
 end
-function convert(::Type{Cauchy{T}}, d::Cauchy{S}) where {T <: Real, S <: Real}
-    Cauchy(T(d.μ), T(d.σ), check_args=false)
-end
+Base.convert(::Type{Cauchy{T}}, d::Cauchy) where {T<:Real} = Cauchy{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Cauchy{T}}, d::Cauchy{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -42,9 +42,8 @@ FDist(ν1::Real, ν2::Real; check_args::Bool=true) = FDist(promote(ν1, ν2)...;
 function convert(::Type{FDist{T}}, ν1::S, ν2::S) where {T <: Real, S <: Real}
     FDist(T(ν1), T(ν2))
 end
-function convert(::Type{FDist{T}}, d::FDist{S}) where {T <: Real, S <: Real}
-    FDist(T(d.ν1), T(d.ν2))
-end
+Base.convert(::Type{FDist{T}}, d::FDist) where {T<:Real} = FDist{T}(T(d.ν1), T(d.ν2))
+Base.convert(::Type{FDist{T}}, d::FDist{T}) where {T<:Real} = d
 
 #### Parameters
 

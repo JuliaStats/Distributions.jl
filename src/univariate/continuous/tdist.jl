@@ -36,7 +36,8 @@ TDist(ν::Integer; check_args::Bool=true) = TDist(float(ν); check_args=check_ar
 
 #### Conversions
 convert(::Type{TDist{T}}, ν::Real) where {T<:Real} = TDist(T(ν))
-convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν), check_args=false)
+Base.convert(::Type{TDist{T}}, d::TDist) where {T<:Real} = TDist{T}(T(d.ν))
+Base.convert(::Type{TDist{T}}, d::TDist{T}) where {T<:Real} = d
 
 #### Parameters
 

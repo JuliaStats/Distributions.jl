@@ -42,7 +42,8 @@ Uniform() = Uniform{Float64}(0.0, 1.0)
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
+Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -44,9 +44,8 @@ Frechet(α::Real=1.0) = Frechet(α, one(α); check_args=false)
 function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
-function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ), check_args=false)
-end
+Base.convert(::Type{Frechet{T}}, d::Frechet) where {T<:Real} = Frechet{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Frechet{T}}, d::Frechet{T}) where {T<:Real} = d
 
 #### Parameters
 

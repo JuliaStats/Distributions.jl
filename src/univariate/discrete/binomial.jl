@@ -48,10 +48,10 @@ Binomial() = Binomial{Float64}(1, 0.5)
 function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     return Binomial(n, T(p))
 end
-function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
-    return Binomial(d.n, T(d.p), check_args=false)
+function Base.convert(::Type{Binomial{T}}, d::Binomial) where {T<:Real}
+    return Binomial{T}(d.n, T(d.p))
 end
-
+Base.convert(::Type{Binomial{T}}, d::Binomial{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -38,7 +38,8 @@ Poisson() = Poisson{Float64}(1.0)
 
 #### Conversions
 convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
-convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), check_args=false)
+Base.convert(::Type{Poisson{T}}, d::Poisson) where {T<:Real} = Poisson{T}(T(d.λ))
+Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
 
 ### Parameters
 

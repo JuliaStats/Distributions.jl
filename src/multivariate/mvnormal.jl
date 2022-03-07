@@ -228,6 +228,8 @@ Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
+Base.convert(::Type{MvNormal{T}}, d::MvNormal{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormal{T}}, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end

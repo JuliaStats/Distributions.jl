@@ -57,9 +57,10 @@ PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0, check_args=false) 
 #### Conversions
 
 convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, μ::S1, α::S2, p::S3) where {T1 <: Real, T2 <: Real, T3 <:Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(μ),T2(α),T3(p))
-function convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real}
-    return PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p), check_args=false)
+function Base.convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian) where {T1<:Real,T2<:Real,T3<:Real}
+    return PGeneralizedGaussian{T1,T2,T3}(T1(d.μ), T2(d.α), T3(d.p))
 end
+Base.convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{T1,T2,T3}) where {T1<:Real,T2<:Real,T3<:Real} = d
 
 @distr_support PGeneralizedGaussian -Inf Inf
 
