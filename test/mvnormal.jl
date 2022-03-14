@@ -21,7 +21,7 @@ using FillArrays
     h = [1., 2., 3.]
     dv = [1.2, 3.4, 2.6]
     J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
-
+    D = Diagonal(J);
     for (g, μ, Σ) in [
         (@test_deprecated(MvNormal(mu, sqrt(2.0))), mu, Matrix(2.0I, 3, 3)),
         (@test_deprecated(MvNormal(mu_r, sqrt(2.0))), mu_r, Matrix(2.0I, 3, 3)),
@@ -42,6 +42,10 @@ using FillArrays
         (@test_deprecated(MvNormalCanon(dv)), zeros(3), Matrix(Diagonal(inv.(dv)))),
         (MvNormalCanon(h, J), J \ h, inv(J)),
         (MvNormalCanon(J), zeros(3), inv(J)),
+        (MvNormalCanon(h, D), Diagonal(D) \ h, inv(D)),
+        (MvNormalCanon(D), zeros(3), inv(D)),
+        (MvNormalCanon(h, Symmetric(D)), D \ h, inv(D)),
+        (MvNormalCanon(Hermitian(D)), zeros(3), inv(D)),
         (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
         (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
         (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
