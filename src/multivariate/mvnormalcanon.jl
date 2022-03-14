@@ -91,6 +91,7 @@ Construct a multivariate normal distribution with potential vector `h` and preci
 """
 MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::AbstractVector{<:Real}, J::Diagonal{<:Real}) = MvNormalCanon(h, PDiagMat(J.diag))
+MvNormalCanon(μ::AbstractVector{<:Real}, J::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormalCanon(μ, PDiagMat(J.data.diag))
 function MvNormalCanon(h::AbstractVector{<:Real}, J::UniformScaling{<:Real})
     return MvNormalCanon(h, ScalMat(length(h), J.λ))
 end
