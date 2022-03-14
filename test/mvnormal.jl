@@ -45,6 +45,8 @@ using FillArrays
         (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
         (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
         (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
+        (MvNormal(mu, Symmetric(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
+        (MvNormal(mu, Hermitian(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
         (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))) ]
 
         @test mean(g)   ≈ μ

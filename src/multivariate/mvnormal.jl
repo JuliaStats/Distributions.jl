@@ -200,6 +200,7 @@ Construct a multivariate normal distribution with mean `μ` and covariance matri
 """
 MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormal(μ, PDiagMat(Σ.data.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
     MvNormal(μ, ScalMat(length(μ), Σ.λ))
 function MvNormal(
