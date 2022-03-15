@@ -37,7 +37,9 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
-    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+    # TODO: Remove? It is not used in Distributions anymore
+    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+        @check_args AffineDistribution (σ, σ > zero(σ))
         new{T, S, D}(μ, σ, ρ)
     end
     function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T<:Real}
