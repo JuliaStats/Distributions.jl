@@ -87,7 +87,7 @@ AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistributi
 
 convert(::Type{AffineDistribution{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:UnivariateDistribution} = AffineDistribution(T(μ),T(σ),ρ)
 function Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution) where {T<:Real}
-    AffineDistribution{T}(T(d.μ),T(d.σ),d.ρ)
+    AffineDistribution{T}(T(d.μ), T(d.σ), d.ρ)
 end
 Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:Real} = d
 
