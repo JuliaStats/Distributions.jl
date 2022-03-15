@@ -50,9 +50,10 @@ function convert(::Type{StudentizedRange{T}}, ν::S, k::S) where {T <: Real, S <
     StudentizedRange(T(ν), T(k))
 end
 
-function convert(::Type{StudentizedRange{T}}, d::StudentizedRange{S}) where {T <: Real, S <: Real}
-    StudentizedRange(T(d.ν), T(d.k), check_args=false)
+function Base.convert(::Type{StudentizedRange{T}}, d::StudentizedRange) where {T<:Real}
+    StudentizedRange{T}(T(d.ν), T(d.k))
 end
+Base.convert(::Type{StudentizedRange{T}}, d::StudentizedRange{T}) where {T<:Real} = d
 
 ### Parameters
 params(d::StudentizedRange) = (d.ν, d.k)

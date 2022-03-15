@@ -41,7 +41,8 @@ Pareto() = Pareto{Float64}(1.0, 1.0)
 
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Pareto{T}}, d::Pareto) where {T<:Real} = Pareto{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T<:Real} = d
 
 #### Parameters
 

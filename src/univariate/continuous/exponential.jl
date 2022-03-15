@@ -38,7 +38,10 @@ Exponential() = Exponential{Float64}(1.0)
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), check_args=false)
+function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
+    return Exponential(T(d.θ))
+end
+Base.convert(::Type{Exponential{T}}, d::Exponential{T}) where {T<:Real} = d
 
 #### Parameters
 

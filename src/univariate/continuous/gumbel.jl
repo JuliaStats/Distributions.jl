@@ -46,7 +46,8 @@ Base.eltype(::Type{Gumbel{T}}) where {T} = T
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
-convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ), check_args=false)
+Base.convert(::Type{Gumbel{T}}, d::Gumbel) where {T<:Real} = Gumbel{T}(T(d.μ), T(d.θ))
+Base.convert(::Type{Gumbel{T}}, d::Gumbel{T}) where {T<:Real} = d
 
 #### Parameters
 

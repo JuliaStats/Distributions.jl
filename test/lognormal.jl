@@ -7,6 +7,10 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 @testset "LogNormal" begin
     @test isa(convert(LogNormal{Float64}, Float16(0), Float16(1)),
               LogNormal{Float64})
+    d = LogNormal(0, 1)
+    @test convert(LogNormal{Float64}, d) === d
+    @test convert(LogNormal{Float32}, d) isa LogNormal{Float32}
+
     @test logpdf(LogNormal(0, 0), 1) === Inf
     @test logpdf(LogNormal(), Inf) === -Inf
     @test iszero(logcdf(LogNormal(0, 0), 1))

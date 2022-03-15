@@ -5,6 +5,12 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 @testset "Normal" begin
     @test isa(convert(Normal{Float64}, Float16(0), Float16(1)),
               Normal{Float64})
+    d = Normal(1.1, 2.3)
+    @test convert(Normal{Float64}, d) === d
+    d32 = convert(Normal{Float32}, d)
+    @test d32 isa Normal{Float32}
+    @test params(d32) == map(Float32, params(d))
+
     @test Inf === logpdf(Normal(0, 0), 0)
     @test -Inf === logpdf(Normal(), Inf)
     @test iszero(logcdf(Normal(0, 0), 0))

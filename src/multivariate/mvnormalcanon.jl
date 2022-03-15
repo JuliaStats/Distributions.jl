@@ -130,6 +130,8 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
+Base.convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormalCanon{T}}, μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractPDMat) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end

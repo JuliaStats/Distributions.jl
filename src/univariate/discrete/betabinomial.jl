@@ -40,9 +40,10 @@ BetaBinomial(n::Integer, α::Integer, β::Integer; check_args::Bool=true) = Beta
 function convert(::Type{BetaBinomial{T}}, n::Int, α::S, β::S) where {T <: Real, S <: Real}
     BetaBinomial(n, T(α), T(β))
 end
-function convert(::Type{BetaBinomial{T}}, d::BetaBinomial{S}) where {T <: Real, S <: Real}
-    BetaBinomial(d.n, T(d.α), T(d.β), check_args=false)
+function Base.convert(::Type{BetaBinomial{T}}, d::BetaBinomial) where {T<:Real}
+    BetaBinomial{T}(d.n, T(d.α), T(d.β))
 end
+Base.convert(::Type{BetaBinomial{T}}, d::BetaBinomial{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -106,6 +106,8 @@ using FiniteDifferences
 
     @testset "Conversion" begin
         d = LKJCholesky(5, 3.5)
+        @test convert(LKJCholesky{Float64}, d) === d
+
         df0_1 = convert(LKJCholesky{Float32}, d)
         @test df0_1 isa LKJCholesky{Float32}
         @test df0_1.d == d.d

@@ -41,7 +41,8 @@ Rayleigh() = Rayleigh{Float64}(1.0)
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), check_args=false)
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T<:Real} = Rayleigh{T}(T(d.σ))
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 
 #### Parameters
 

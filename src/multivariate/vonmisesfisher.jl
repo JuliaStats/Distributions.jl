@@ -42,7 +42,8 @@ end
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
 ### Conversions
-convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ))
+convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm=false)
+Base.convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher{T}) where {T<:Real} = d
 convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  VonMisesFisher{T}(convert(Vector{T}, μ), T(κ))
 
 

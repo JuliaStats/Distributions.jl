@@ -33,6 +33,8 @@ rng = MersenneTwister(123)
 @test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32, Vector{Float32}}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
+@test convert(Multinomial{Float64}, d) === d
+@test convert(Multinomial{Float64, Vector{Float64}}, d) === d
 
 # random sampling
 

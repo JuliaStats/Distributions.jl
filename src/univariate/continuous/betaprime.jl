@@ -51,9 +51,8 @@ BetaPrime() = BetaPrime{Float64}(1.0, 1.0)
 function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where T<:Real
     BetaPrime(T(α), T(β))
 end
-function convert(::Type{BetaPrime{T}}, d::BetaPrime{S}) where {T <: Real, S <: Real}
-    BetaPrime(T(d.α), T(d.β), check_args=false)
-end
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime) where {T<:Real} = BetaPrime{T}(T(d.α), T(d.β))
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime{T}) where {T<:Real} = d
 
 #### Parameters
 

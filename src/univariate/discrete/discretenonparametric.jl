@@ -44,6 +44,7 @@ Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
     DiscreteNonParametric{T,P,Ts,Ps}(convert(Ts, support(d)), convert(Ps, probs(d)), check_args=false)
+Base.convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric{T,P,Ts,Ps}) where {T,P,Ts,Ps} = d
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)

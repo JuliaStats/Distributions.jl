@@ -61,9 +61,10 @@ maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ
 function convert(::Type{GeneralizedPareto{T}}, μ::S, σ::S, ξ::S) where {T <: Real, S <: Real}
     GeneralizedPareto(T(μ), T(σ), T(ξ))
 end
-function convert(::Type{GeneralizedPareto{T}}, d::GeneralizedPareto{S}) where {T <: Real, S <: Real}
-    GeneralizedPareto(T(d.μ), T(d.σ), T(d.ξ), check_args=false)
+function Base.convert(::Type{GeneralizedPareto{T}}, d::GeneralizedPareto) where {T<:Real}
+    GeneralizedPareto{T}(T(d.μ), T(d.σ), T(d.ξ))
 end
+Base.convert(::Type{GeneralizedPareto{T}}, d::GeneralizedPareto{T}) where {T<:Real} = d
 
 #### Parameters
 

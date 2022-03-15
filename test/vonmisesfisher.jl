@@ -87,8 +87,11 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test partype(d) == Float64
 
     # conversions
-    @test typeof(convert(VonMisesFisher{Float32}, d)) == VonMisesFisher{Float32}
-    @test typeof(convert(VonMisesFisher{Float32}, d.μ, d.κ, d.logCκ)) == VonMisesFisher{Float32}
+    @test convert(VonMisesFisher{partype(d)}, d) === d
+    for d32 in (convert(VonMisesFisher{Float32}, d), convert(VonMisesFisher{Float32}, d.μ, d.κ, d.logCκ))
+        @test d32 isa VonMisesFisher{Float32}
+        @test params(d32) == (map(Float32, μ), Float32(κ))
+    end
 
     θ = κ * μ
     d2 = VonMisesFisher(θ)

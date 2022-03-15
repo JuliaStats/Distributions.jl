@@ -23,9 +23,10 @@ NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool=true) = No
 function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real, S <: Real}
     NoncentralF(T(ν1), T(ν2), T(λ))
 end
-function convert(::Type{NoncentralF{T}}, d::NoncentralF{S}) where {T <: Real, S <: Real}
-    NoncentralF(T(d.ν1), T(d.ν2), T(d.λ), check_args=false)
+function Base.convert(::Type{NoncentralF{T}}, d::NoncentralF) where {T<:Real}
+    NoncentralF{T}(T(d.ν1), T(d.ν2), T(d.λ))
 end
+Base.convert(::Type{NoncentralF{T}}, d::NoncentralF{T}) where {T<:Real} = d
 
 ### Parameters
 

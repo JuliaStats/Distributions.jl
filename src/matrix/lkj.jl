@@ -56,6 +56,7 @@ show(io::IO, d::LKJ) = show_multline(io, d, [(:d, d.d), (:η, d.η)])
 function convert(::Type{LKJ{T}}, d::LKJ) where T <: Real
     LKJ{T, typeof(d.d)}(d.d, T(d.η), T(d.logc0))
 end
+Base.convert(::Type{LKJ{T}}, d::LKJ{T}) where {T<:Real} = d
 
 function convert(::Type{LKJ{T}}, d::Integer, η, logc0) where T <: Real
     LKJ{T, typeof(d)}(d, T(η), T(logc0))

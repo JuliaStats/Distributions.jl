@@ -41,7 +41,8 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 #### Conversions
 
 convert(::Type{VonMises{T}}, μ::Real, κ::Real) where {T<:Real} = VonMises(T(μ), T(κ))
-convert(::Type{VonMises{T}}, d::VonMises{S}) where {T<:Real, S<:Real} = VonMises(T(d.μ), T(d.κ), check_args=false)
+Base.convert(::Type{VonMises{T}}, d::VonMises) where {T<:Real} = VonMises{T}(T(d.μ), T(d.κ), T(d.I0κx))
+Base.convert(::Type{VonMises{T}}, d::VonMises{T}) where {T<:Real} = d
 
 #### Parameters
 

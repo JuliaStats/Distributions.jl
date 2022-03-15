@@ -45,7 +45,10 @@ InverseGamma() = InverseGamma{Float64}(1.0, 1.0)
 
 #### Conversions
 convert(::Type{InverseGamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = InverseGamma(T(α), T(θ))
-convert(::Type{InverseGamma{T}}, d::InverseGamma{S}) where {T <: Real, S <: Real} = InverseGamma(T(shape(d.invd)), T(d.θ))
+function Base.convert(::Type{InverseGamma{T}}, d::InverseGamma) where {T<:Real}
+    return InverseGamma{T}(T(shape(d)), T(d.θ))
+end
+Base.convert(::Type{InverseGamma{T}}, d::InverseGamma{T}) where {T<:Real} = d
 
 #### Parameters
 

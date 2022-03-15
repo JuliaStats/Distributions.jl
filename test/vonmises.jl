@@ -15,7 +15,10 @@ function test_vonmises(μ::Float64, κ::Float64)
     # println(d)
 
     # conversions
-    @test typeof(convert(VonMises{Float32}, d)) == VonMises{Float32}
+    @test convert(VonMises{Float64}, d) === d
+    d32 = convert(VonMises{Float32}, d)
+    @test d32 isa VonMises{Float32}
+    @test params(d32) == map(Float32, params(d))
 
     # Support
     @test support(d) == RealInterval(d.μ-π,d.μ+π)

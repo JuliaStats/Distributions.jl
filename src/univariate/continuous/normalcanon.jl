@@ -26,7 +26,8 @@ NormalCanon() = NormalCanon{Float64}(0.0, 1.0; check_args=false)
 
 #### Type Conversions
 convert(::Type{NormalCanon{T}}, η::S, λ::S) where {T <: Real, S <: Real} = NormalCanon(T(η), T(λ))
-convert(::Type{NormalCanon{T}}, d::NormalCanon{S}) where {T <: Real, S <: Real} = NormalCanon(T(d.η), T(d.λ); check_args=false)
+Base.convert(::Type{NormalCanon{T}}, d::NormalCanon) where {T<:Real} = NormalCanon{T}(T(d.η), T(d.λ); check_args=false)
+Base.convert(::Type{NormalCanon{T}}, d::NormalCanon{T}) where {T<:Real} = d
 
 ## conversion between Normal and NormalCanon
 

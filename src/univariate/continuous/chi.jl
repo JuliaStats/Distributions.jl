@@ -37,7 +37,8 @@ Chi(ν::Integer; check_args::Bool=true) = Chi(float(ν); check_args=check_args)
 
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), check_args=false)
+Base.convert(::Type{Chi{T}}, d::Chi) where {T<:Real} = Chi{T}(T(d.ν))
+Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T<:Real} = d
 
 #### Parameters
 
