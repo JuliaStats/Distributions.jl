@@ -37,12 +37,10 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
-    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
-        @check_args AffineDistribution (σ, σ > zero(σ))
+    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
         new{T, S, D}(μ, σ, ρ)
     end
-    function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
-        @check_args AffineDistribution (σ, σ > zero(σ))
+    function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T<:Real}
         D = typeof(ρ)
         S = value_support(D)
         return new{T,S,D}(μ, σ, ρ)
@@ -50,6 +48,7 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
 end
 
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
+    @check_args AffineDistribution (σ, σ > zero(σ))
     _T = promote_type(eltype(ρ), T)
     return AffineDistribution{_T}(_T(μ), _T(σ), ρ; check_args=check_args)
 end
