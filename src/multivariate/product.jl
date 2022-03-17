@@ -31,7 +31,7 @@ function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
 end
 
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    broadcast!(dn->rand(rng, dn), x, d.v)
+    map!(Base.Fix1(rand, rng), x, d.v)
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
     sum(n->logpdf(d.v[n], x[n]), 1:length(d))
 
