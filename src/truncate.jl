@@ -1,22 +1,68 @@
 """
-    truncated(d::UnivariateDistribution, l::Real, u::Real)
+    truncated(d0::UnivariateDistribution; [lower::Real], [upper::Real])
+    truncated(d0::UnivariateDistribution, lower::Real, upper::Real)
 
-Truncate a univariate distribution `d` to the interval `[l, u]`.
+A _truncated distribution_ `d` of a distribution `d0` to the interval
+``[l, u]=```[lower, upper]` has the probability density (mass) function:
 
-The lower bound `l` can be finite or `-Inf` and the upper bound `u` can be finite or
-`Inf`. The function throws an error if `l > u`.
+```math
+f(x; d_0, l, u) = \\frac{f_{d_0}(x)}{P_{Z \\sim d_0}(l \\le Z \\le u)}, \\quad x \\in [l, u],
+```
+where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
+
+The function throws an error if ``l > u``.
+
+```julia
+truncated(d0; lower=l)           # d0 left-truncated to the interval [l, Inf)
+truncated(d0; upper=u)           # d0 right-truncated to the interval (-Inf, u]
+truncated(d0; lower=l, upper=u)  # d0 truncated to the interval [l, u]
+truncated(d0, l, u)              # d0 truncated to the interval [l, u]
+```
 
 The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
 # Implementation
 
-To implement a specialized truncated form for distributions of type `D`, the method
-`truncate(d::D, l::T, u::T) where {T <: Real}` should be implemented.
+To implement a specialized truncated form for distributions of type `D`, one or more of the
+following methods should be implemented:
+- `truncated(d0::D, l::T, u::T) where {T <: Real}`: interval-truncated
+- `truncated(d0::D, ::Nothing, u::Real)`: right-truncated
+- `truncated(d0::D, l::Real, u::Nothing)`: left-truncated
 """
+function truncated end
 function truncated(d::UnivariateDistribution, l::Real, u::Real)
     return truncated(d, promote(l, u)...)
 end
+function truncated(
+    d::UnivariateDistribution;
+    lower::Union{Real,Nothing}=nothing,
+    upper::Union{Real,Nothing}=nothing,
+)
+    return truncated(d, lower, upper)
+end
+function truncated(d::UnivariateDistribution, ::Nothing, u::Real)
+    # (log)ucdf = (log)tp = (log) P(X ≤ u) where X ~ d
+    logucdf = logtp = logcdf(d, u)
+    ucdf = tp = exp(logucdf)
 
+    Truncated(d, promote(oftype(float(u), -Inf), u, zero(ucdf), ucdf, tp, logtp)...)
+end
+function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
+    # (log)lcdf = (log) P(X < l) where X ~ d
+    loglcdf = if value_support(typeof(d)) === Discrete
+        logsubexp(logcdf(d, l), logpdf(d, l))
+    else
+        logcdf(d, l)
+    end
+    lcdf = exp(loglcdf)
+
+    # (log)tp = (log) P(l ≤ X) where X ∼ d
+    logtp = log1mexp(loglcdf)
+    tp = exp(logtp)
+
+    Truncated(d, promote(l, oftype(float(l), Inf), lcdf, one(lcdf), tp, logtp)...)
+end
+truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
 
@@ -160,7 +206,17 @@ function show(io::IO, d::Truncated)
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals) :
           show_oneline(io, d0, namevals)
-    print(io, ", range=($(d.lower), $(d.upper)))")
+    if d.lower > -Inf
+        if d.upper < Inf
+            print(io, "; lower=$(d.lower), upper=$(d.upper))")
+        else
+            print(io, "; lower=$(d.lower))")
+        end
+    elseif d.upper < Inf
+        print(io, "; upper=$(d.upper))")
+    else
+        print(io, ")")
+    end
     uml && println(io)
 end
 
@@ -173,3 +229,4 @@ include(joinpath("truncated", "normal.jl"))
 include(joinpath("truncated", "exponential.jl"))
 include(joinpath("truncated", "uniform.jl"))
 include(joinpath("truncated", "loguniform.jl"))
+include(joinpath("truncated", "discrete_uniform.jl"))

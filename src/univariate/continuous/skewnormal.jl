@@ -14,21 +14,21 @@ struct SkewNormal{T<:Real} <: ContinuousUnivariateDistribution
     SkewNormal{T}(ξ::T, ω::T, α::T) where {T} = new{T}(ξ, ω, α)
 end
 
-function SkewNormal(ξ::T, ω::T, α::T; check_args=true) where {T <: Real}
-    check_args && @check_args(SkewNormal, ω > zero(ω))
+function SkewNormal(ξ::T, ω::T, α::T; check_args::Bool=true) where {T <: Real}
+    @check_args SkewNormal (ω, ω > zero(ω))
     return SkewNormal{T}(ξ, ω, α)
 end
 
-SkewNormal(ξ::Real, ω::Real, α::Real) = SkewNormal(promote(ξ, ω, α)...)
-SkewNormal(ξ::Integer, ω::Integer, α::Integer) = SkewNormal(float(ξ), float(ω), float(α))
-SkewNormal(α::T) where {T <: Real} = SkewNormal(zero(α), one(α), α)
-SkewNormal() = SkewNormal(0.0, 1.0, 0.0)
+SkewNormal(ξ::Real, ω::Real, α::Real; check_args::Bool=true) = SkewNormal(promote(ξ, ω, α)...; check_args=check_args)
+SkewNormal(ξ::Integer, ω::Integer, α::Integer; check_args::Bool=true) = SkewNormal(float(ξ), float(ω), float(α); check_args=check_args)
+SkewNormal(α::Real=0.0) = SkewNormal(zero(α), one(α), α; check_args=false)
 
 @distr_support SkewNormal -Inf Inf
 
 #### Conversions
 convert(::Type{SkewNormal{T}}, ξ::S, ω::S, α::S) where {T <: Real, S <: Real} = SkewNormal(T(ξ), T(ω), T(α))
-convert(::Type{SkewNormal{T}}, d::SkewNormal{S}) where {T <: Real, S <: Real} = SkewNormal(T(d.ξ), T(d.ω), T(d.α), check_args=false)
+Base.convert(::Type{SkewNormal{T}}, d::SkewNormal) where {T<:Real} = SkewNormal{T}(T(d.ξ), T(d.ω), T(d.α))
+Base.convert(::Type{SkewNormal{T}}, d::SkewNormal{T}) where {T<:Real} = d
 
 #### Parameters
 params(d::SkewNormal) = (d.ξ, d.ω, d.α)

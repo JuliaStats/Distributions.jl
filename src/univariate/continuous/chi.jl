@@ -26,18 +26,19 @@ struct Chi{T<:Real} <: ContinuousUnivariateDistribution
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chi(ν::T; check_args=true) where {T<:Real}
-    check_args && @check_args(Chi, ν > zero(ν))
-    return Chi{T}(ν)
+function Chi(ν::Real; check_args::Bool=true)
+    @check_args Chi (ν, ν > zero(ν))
+    return Chi{typeof(ν)}(ν)
 end
 
-Chi(ν::Integer) = Chi(float(ν))
+Chi(ν::Integer; check_args::Bool=true) = Chi(float(ν); check_args=check_args)
 
 @distr_support Chi 0.0 Inf
 
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-convert(::Type{Chi{T}}, d::Chi{S}) where {T <: Real, S <: Real} = Chi(T(d.ν), check_args=false)
+Base.convert(::Type{Chi{T}}, d::Chi) where {T<:Real} = Chi{T}(T(d.ν))
+Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -69,17 +70,24 @@ end
 entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
     loggamma(ν/2) - T(logtwo)/2 - ((ν - 1)/2) * digamma(ν/2) + ν/2)
 
-function mode(d::Chi)
-    d.ν >= 1 || error("Chi distribution has no mode when ν < 1")
-    sqrt(d.ν - 1)
+function mode(d::Chi; check_args::Bool=true)
+    ν = d.ν
+    @check_args(
+        Chi,
+        (ν, ν >= 1, "Chi distribution has no mode when ν < 1"),
+    )
+    sqrt(ν - 1)
 end
 
 
 #### Evaluation
 
-logpdf(d::Chi, x::Real) = (ν = d.ν;
-    (1 - ν/2) * logtwo + (ν - 1) * log(x) - x^2/2 - loggamma(ν/2)
-)
+function logpdf(d::Chi, x::Real)
+    ν, _x = promote(d.ν, x)
+    xsq = _x^2
+    val = (xlogy(ν - 1, xsq / 2) - xsq + logtwo) / 2 - loggamma(ν / 2)
+    return x < zero(x) ? oftype(val, -Inf) : val
+end
 
 gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 

@@ -39,6 +39,8 @@ function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
     m = convert(AbstractArray{T}, d.μ)
     GenericMvTDist{T, typeof(S), typeof(m)}(T(d.df), d.dim, m, S)
 end
+Base.convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist{T}) where {T<:Real} = d
+
 function convert(::Type{GenericMvTDist{T}}, df, dim, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     S = convert(AbstractArray{T}, Σ)
     m = convert(AbstractArray{T}, μ)

@@ -29,13 +29,13 @@ struct NoncentralChisq{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralChisq{T}(ν::T, λ::T) where {T <: Real} = new{T}(ν, λ)
 end
 
-function NoncentralChisq(ν::T, λ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(NoncentralChisq, ν > zero(ν) && λ >= zero(λ))
+function NoncentralChisq(ν::T, λ::T; check_args::Bool=true) where {T <: Real}
+    @check_args NoncentralChisq (ν, ν > zero(ν)) (λ, λ >= zero(λ))
     return NoncentralChisq{T}(ν, λ)
 end
 
-NoncentralChisq(ν::Real, λ::Real) = NoncentralChisq(promote(ν, λ)...)
-NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(float(ν), float(λ))
+NoncentralChisq(ν::Real, λ::Real; check_args::Bool=true) = NoncentralChisq(promote(ν, λ)...; check_args=check_args)
+NoncentralChisq(ν::Integer, λ::Integer; check_args::Bool=true) = NoncentralChisq(float(ν), float(λ); check_args=check_args)
 
 @distr_support NoncentralChisq 0.0 Inf
 
@@ -44,9 +44,10 @@ NoncentralChisq(ν::Integer, λ::Integer) = NoncentralChisq(float(ν), float(λ)
 function convert(::Type{NoncentralChisq{T}}, ν::S, λ::S) where {T <: Real, S <: Real}
     NoncentralChisq(T(ν), T(λ))
 end
-function convert(::Type{NoncentralChisq{T}}, d::NoncentralChisq{S}) where {T <: Real, S <: Real}
-    NoncentralChisq(T(d.ν), T(d.λ), check_args=false)
+function Base.convert(::Type{NoncentralChisq{T}}, d::NoncentralChisq) where {T<:Real}
+    NoncentralChisq{T}(T(d.ν), T(d.λ))
 end
+Base.convert(::Type{NoncentralChisq{T}}, d::NoncentralChisq{T}) where {T<:Real} = d
 
 ### Parameters
 

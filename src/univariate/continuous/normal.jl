@@ -33,22 +33,22 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Normal, σ >= zero(σ))
+function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Normal (σ, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
-Normal() = Normal(0.0, 1.0, check_args=false)
+Normal(μ::Real, σ::Real; check_args::Bool=true) = Normal(promote(μ, σ)...; check_args=check_args)
+Normal(μ::Integer, σ::Integer; check_args::Bool=true) = Normal(float(μ), float(σ); check_args=check_args)
+Normal(μ::Real=0.0) = Normal(μ, one(μ); check_args=false)
 
 const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Normal{T}}, d::Normal) where {T<:Real} = Normal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Normal{T}}, d::Normal{T}) where {T<:Real} = d
 
 @distr_support Normal -Inf Inf
 
@@ -86,163 +86,10 @@ end
 
 #### Evaluation
 
-# Helpers
-"""
-    xval(d::Normal, z::Real)
+# Use Julia implementations in StatsFuns
+@_delegate_statsfuns Normal norm μ σ
 
-Computes the x-value based on a Normal distribution and a z-value.
-"""
-function xval(d::Normal, z::Real)
-    if isinf(z) && iszero(d.σ)
-        d.μ + one(d.σ) * z
-    else
-        d.μ + d.σ * z
-    end
-end
-"""
-    zval(d::Normal, x::Real)
-
-Computes the z-value based on a Normal distribution and a x-value.
-"""
-zval(d::Normal, x::Real) = (x - d.μ) / d.σ
-
-gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
-
-# logpdf
-_normlogpdf(z::Real) = -(abs2(z) + log2π)/2
-
-function logpdf(d::Normal, x::Real)
-    μ, σ = d.μ, d.σ
-    if iszero(d.σ)
-        if x == μ
-            z = zval(Normal(μ, one(σ)), x)
-        else
-            z = zval(d, x)
-            σ = one(σ)
-        end
-    else
-        z = zval(Normal(μ, σ), x)
-    end
-    return _normlogpdf(z) - log(σ)
-end
-
-# pdf
-_normpdf(z::Real) = exp(-abs2(z)/2) * invsqrt2π
-
-function pdf(d::Normal, x::Real)
-    μ, σ = d.μ, d.σ
-    if iszero(σ)
-        if x == μ
-            z = zval(Normal(μ, one(σ)), x)
-        else
-            z = zval(d, x)
-            σ = one(σ)
-        end
-    else
-        z = zval(Normal(μ, σ), x)
-    end
-    return _normpdf(z) / σ
-end
-
-# logcdf
-function _normlogcdf(z::Real)
-    if z < -one(z)
-        return log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
-    else
-        return log1p(-erfc(z * invsqrt2)/2)
-    end
-end
-
-function logcdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normlogcdf(z)
-end
-
-# logccdf
-function _normlogccdf(z::Real)
-    if z > one(z)
-        return log(erfcx(z * invsqrt2)/2) - abs2(z)/2
-    else
-        return log1p(-erfc(-z * invsqrt2)/2)
-    end
-end
-
-function logccdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normlogccdf(z)
-end
-
-# cdf
-_normcdf(z::Real) = erfc(-z * invsqrt2)/2
-
-function cdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normcdf(z)
-end
-
-# ccdf
-_normccdf(z::Real) = erfc(z * invsqrt2)/2
-
-function ccdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normccdf(z)
-end
-
-# quantile
-function quantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
-    q = xval(d, -erfcinv(2*_p) * sqrt2)
-    if isnan(_p)
-        return oftype(q, _p)
-    elseif iszero(_σ)
-        # Quantile not uniquely defined at p=0 and p=1 when σ=0
-        if iszero(_p)
-            return oftype(q, -Inf)
-        elseif isone(_p)
-            return oftype(q, Inf)
-        else
-            return oftype(q, _μ)
-        end
-    end
-    return q
-end
-
-# cquantile
-function cquantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = map(float, promote(p, d.μ, d.σ))
-    q = xval(d, erfcinv(2*_p) * sqrt2)
-    if isnan(_p)
-        return oftype(q, _p)
-    elseif iszero(_σ)
-        # Quantile not uniquely defined at p=0 and p=1 when σ=0
-        if iszero(_p)
-            return oftype(q, Inf)
-        elseif isone(_p)
-            return oftype(q, -Inf)
-        else
-            return oftype(q, _μ)
-        end
-    end
-    return q
-end
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)

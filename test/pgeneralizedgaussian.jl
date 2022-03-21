@@ -131,3 +131,8 @@ d = PGeneralizedGaussian(0.0, α, β)
 @test var(d) ≈ α^2 * (gamma(3.0 * inv(β)) / gamma(inv(β)))
 @test kurtosis(d) ≈ gamma(5.0 * inv(β)) * gamma(inv(β)) / (gamma(3.0 * inv(β))^2) - 3.0
 @test entropy(d) ≈ inv(β) - log( β / (2.0 * α * gamma(inv(β))))
+
+@test convert(PGeneralizedGaussian{Float64,Float64,Float64}, d) === d
+d32 = convert(PGeneralizedGaussian{Int,Float32,Float16}, d)
+@test d32 isa PGeneralizedGaussian{Int,Float32,Float16}
+@test params(d32) == (0, Float32(α), Float16(β))

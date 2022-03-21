@@ -73,8 +73,12 @@ println("    testing $d as Categorical")
 p = ones(10^6) * 1.0e-6
 @test Distributions.isprobvec(p)
 
-@test typeof(convert(Categorical{Float32,Vector{Float32}}, d)) == Categorical{Float32,Vector{Float32}}
-@test typeof(convert(Categorical{Float32,Vector{Float32}}, d.p)) == Categorical{Float32,Vector{Float32}}
+@test convert(Categorical{Float64,Vector{Float64}}, d) === d
+for x in (d, probs(d))
+    d32 = convert(Categorical{Float32,Vector{Float32}}, d)
+    @test d32 isa Categorical{Float32,Vector{Float32}}
+    @test probs(d32) == map(Float32, probs(d))
+end
 
 @testset "test args... constructor" begin
     @test Categorical(0.3, 0.7) == Categorical([0.3, 0.7])

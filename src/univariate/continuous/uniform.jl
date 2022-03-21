@@ -29,20 +29,21 @@ struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Uniform, a < b)
+function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
+    @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
 
-Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
-Uniform() = Uniform(0.0, 1.0, check_args=false)
+Uniform(a::Real, b::Real; check_args::Bool=true) = Uniform(promote(a, b)...; check_args=check_args)
+Uniform(a::Integer, b::Integer; check_args::Bool=true) = Uniform(float(a), float(b); check_args=check_args)
+Uniform() = Uniform{Float64}(0.0, 1.0)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
+Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -140,4 +141,41 @@ function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
     end
 
     Uniform(xmin, xmax)
+end
+
+# ChainRules definitions
+
+function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real)
+    # Compute log probability
+    a, b = params(d)
+    insupport = a <= x <= b
+    diff = b - a
+    Ω = insupport ? -log(diff) : log(zero(diff))
+
+    # Compute tangent
+    Δdiff = Δd.a - Δd.b
+    ΔΩ = (insupport ? Δdiff : zero(Δdiff)) / diff
+
+    return Ω, ΔΩ
+end
+
+function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
+    # Compute log probability
+    a, b = params(d)
+    insupport = a <= x <= b
+    diff = b - a
+    Ω = insupport ? -log(diff) : log(zero(diff))
+
+    # Define pullback
+    function logpdf_Uniform_pullback(Δ)
+        Δa = Δ / diff
+        Δd = if insupport
+            ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
+        else
+            ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
+        end
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.ZeroTangent()
+    end
+
+    return Ω, logpdf_Uniform_pullback
 end

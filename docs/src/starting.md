@@ -58,7 +58,7 @@ Each type splits further into `Discrete` and `Continuous`.
 For instance, you can define the following distributions (among many others):
 
 ```julia
-julia> Binomial(p) # Discrete univariate
+julia> Binomial(n, p) # Discrete univariate
 julia> Cauchy(u, b)  # Continuous univariate
 julia> Multinomial(n, p) # Discrete multivariate
 julia> Wishart(nu, S) # Continuous matrix-variate

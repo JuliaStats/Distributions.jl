@@ -182,6 +182,8 @@ Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real
     MvLogNormal(convert(MvNormal{T}, d.normal))
 end
+Base.convert(::Type{MvLogNormal{T}}, d::MvLogNormal{T}) where {T<:Real} = d
+
 function convert(::Type{MvLogNormal{T}}, pars...) where T<:Real
     MvLogNormal(convert(MvNormal{T}, MvNormal(pars...)))
 end

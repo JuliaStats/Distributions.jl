@@ -17,6 +17,9 @@ const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "truncated_uniform",
+    "truncated_discrete_uniform",
+    "censored",
     "normal",
     "laplace",
     "cauchy",
@@ -71,6 +74,7 @@ const tests = [
     "density_interface",
     "reshaped",
     "skewedexponentialpower",
+    "discreteuniform",
 ]
 
 printstyled("Running tests:\n", color=:blue)

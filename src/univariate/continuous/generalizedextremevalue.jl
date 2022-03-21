@@ -55,9 +55,10 @@ end
 function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real
     GeneralizedExtremeValue(T(μ), T(σ), T(ξ))
 end
-function convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{S}) where {T <: Real, S <: Real}
-    GeneralizedExtremeValue(T(d.μ), T(d.σ), T(d.ξ))
+function Base.convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue) where {T<:Real}
+    GeneralizedExtremeValue{T}(T(d.μ), T(d.σ), T(d.ξ))
 end
+Base.convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{T}) where {T<:Real} = d
 
 minimum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ > 0 ? d.μ - d.σ / d.ξ : -T(Inf)

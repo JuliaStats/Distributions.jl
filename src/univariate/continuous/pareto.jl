@@ -27,21 +27,22 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Pareto, α > zero(α) && θ > zero(θ))
+function Pareto(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Pareto (α, α > zero(α)) (θ, θ > zero(θ))
     return Pareto{T}(α, θ)
 end
 
-Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
-Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
-Pareto(α::T) where {T <: Real} = Pareto(α, one(T))
-Pareto() = Pareto(1.0, 1.0, check_args=false)
+Pareto(α::Real, θ::Real; check_args::Bool=true) = Pareto(promote(α, θ)...; check_args=check_args)
+Pareto(α::Integer, θ::Integer; check_args::Bool=true) = Pareto(float(α), float(θ); check_args=check_args)
+Pareto(α::Real; check_args::Bool=true) = Pareto(α, one(α); check_args=check_args)
+Pareto() = Pareto{Float64}(1.0, 1.0)
 
 @distr_support Pareto d.θ Inf
 
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Pareto{T}}, d::Pareto) where {T<:Real} = Pareto{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -61,5 +61,6 @@ end
     test_logitnormal( LogitNormal(2,0.5) )
     d = LogitNormal(Float32(2))
     typeof(rand(d, 5)) # still Float64
+    @test convert(LogitNormal{Float32}, d) === d
     @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
 end
