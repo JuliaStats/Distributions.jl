@@ -12,12 +12,15 @@ and one of
 * [`NegativeBinomial`](@ref)
 * [`Geometric`](@ref)
 * [`Poisson`](@ref)
+* [`DiscreteNonParametric`](@ref)
 * [`Normal`](@ref)
 * [`Cauchy`](@ref)
 * [`Chisq`](@ref)
 * [`Exponential`](@ref)
 * [`Gamma`](@ref)
 * [`MvNormal`](@ref)
+
+
 
 External links: [List of convolutions of probability distributions on Wikipedia](https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions)
 """
@@ -46,6 +49,20 @@ end
 
 convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
 
+
+
+function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
+    support_conv = vcat([d1.support .+ v for v in d2.support]...) |> unique 
+    sort!(support_conv) #for fast index finding below
+    p_conv = zeros(length(support_conv)) 
+    for (s1,p1) in zip(d1.support, d1.p)
+        for (s2,p2) in zip(d2.support, d2.p)
+            idx = searchsortedfirst(support_conv, s1+s2)
+            p_conv[idx] += p1*p2
+        end
+    end
+    DiscreteNonParametric(support_conv, p_conv)
+end
 
 # continuous univariate
 convolve(d1::Normal, d2::Normal) = Normal(d1.μ + d2.μ, hypot(d1.σ, d2.σ))
@@ -77,3 +94,6 @@ end
 function _check_convolution_shape(d1, d2)
     length(d1) == length(d2) || throw(ArgumentError("$d1 and $d2 are not the same size"))
 end
+
+    
+    
