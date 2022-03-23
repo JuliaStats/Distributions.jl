@@ -20,8 +20,6 @@ and one of
 * [`Gamma`](@ref)
 * [`MvNormal`](@ref)
 
-
-
 External links: [List of convolutions of probability distributions on Wikipedia](https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions)
 """
 convolve(::Distribution, ::Distribution)
