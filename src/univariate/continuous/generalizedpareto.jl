@@ -15,8 +15,8 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
 ```
 
 ```julia
-GeneralizedPareto()             # Standard exponential distribution (GPD with shape 0, location 0, scale 1)
-GeneralizedPareto(ξ)            # Generalized Pareto distribution with shape ξ, location 0, and scale 1
+GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
+GeneralizedPareto(ξ)            # Generalized Pareto distribution with shape ξ and unit scale, i.e. GeneralizedPareto(0, 1, ξ)
 GeneralizedPareto(σ, ξ)         # Generalized Pareto distribution with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
 GeneralizedPareto(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
 
@@ -53,7 +53,6 @@ end
 function GeneralizedPareto(σ::Real, ξ::Real; check_args::Bool=true)
     GeneralizedPareto(zero(σ), σ, ξ; check_args=check_args)
 end
-
 GeneralizedPareto() = GeneralizedPareto{Float64}(0.0, 1.0, 1.0)
 
 minimum(d::GeneralizedPareto) = d.μ
