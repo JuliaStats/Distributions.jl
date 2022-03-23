@@ -50,7 +50,7 @@ convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
 
 
 function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
-    support_conv = vcat([d1.support .+ v for v in d2.support]...) |> unique 
+    support_conv = collect(Set(v1 + v2 for v1 in support(d1), v2 in support(d2)))
     sort!(support_conv) #for fast index finding below
     p_conv = zeros(length(support_conv)) 
     for (s1,p1) in zip(d1.support, d1.p)
