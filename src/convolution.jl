@@ -55,8 +55,7 @@ function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
     probs1 = probs(d1)
     probs2 = probs(d2)
     p_conv = zeros(Base.promote_eltype(probs1, probs2), length(support_conv)) 
-    for (s1,p1) in zip(d1.support, d1.p)
-        for (s2,p2) in zip(d2.support, d2.p)
+    for (s1, p1) in zip(support(d1), probs(d1)), (s2, p2) in zip(support(d2), probs(d2))
             idx = searchsortedfirst(support_conv, s1+s2)
             p_conv[idx] += p1*p2
         end
@@ -94,6 +93,3 @@ end
 function _check_convolution_shape(d1, d2)
     length(d1) == length(d2) || throw(ArgumentError("$d1 and $d2 are not the same size"))
 end
-
-    
-    
