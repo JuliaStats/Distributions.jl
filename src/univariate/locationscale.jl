@@ -139,9 +139,30 @@ gradlogpdf(d::ContinuousAffineDistribution, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/
 
 #### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
 
+"""
+    +(d::Distribution, μ)
+
+Return a distribution that has been shifted by `μ`. If ``X ~ d``, this returns the distribution of ``μ + X``.
+"""
 Base.:+(d::UnivariateDistribution, x::Real) = AffineDistribution(x, one(x), d)
 Base.:+(x::Real, d::UnivariateDistribution) = d + x
+
+"""
+    *(d::Distribution, σ)
+
+Return a distribution that has been scaled by `σ`. If ``X ~ d``, this returns the distribution of ``σ X``.
+"""
 Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
-Base.:*(d::UnivariateDistribution, x::Real) = x * d
-Base.:-(d::UnivariateDistribution, x::Real) = d + -x
-Base.:/(d::UnivariateDistribution, x::Real) = inv(x) * d
+Base.:*(d::UnivariateDistribution, x) = x * d
+
+"""
+    -(d::Distribution, μ)
+
+Return a distribution that has been shifted by `-μ`.
+
+See also: [`+`](@ref)
+"""
+Base.:-(d::Distribution, x) = d + -x
+
+
+Base.:/(d::UnivariateDistribution, x) = inv(x) * d

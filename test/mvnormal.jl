@@ -273,6 +273,11 @@ end
                 @test b_d isa Normal && d_b isa Normal
                 @test mean(b_d) ≈ mean(d_b) ≈ dot(b, μ)
                 @test var(b_d) ≈ var(d_b) ≈ dot(b, Σ * b)
+
+                # make sure #1518 is fixed
+                @test mean(d_c - c) ≈ mean(d)
+                @test var(d_c - c) ≈ var(d)
+                @test d - c == d + (-c)
             end
         end
     end
