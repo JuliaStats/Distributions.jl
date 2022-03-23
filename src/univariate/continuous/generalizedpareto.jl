@@ -17,7 +17,7 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
 ```julia
 GeneralizedPareto()             # Standard exponential distribution (GPD with shape 0, location 0, scale 1)
 GeneralizedPareto(ξ)            # Generalized Pareto distribution with shape ξ, location 0, and scale 1
-GeneralizedPareto(σ, ξ)         # Generalized Pareto distribution with shape ξ and scale σ
+GeneralizedPareto(σ, ξ)         # Generalized Pareto distribution with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
 GeneralizedPareto(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
 
 params(d)       # Get the parameters, i.e. (μ, σ, ξ)
