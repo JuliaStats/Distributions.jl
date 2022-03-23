@@ -142,16 +142,4 @@ gradlogpdf(d::ContinuousAffineDistribution, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/
 Base.:+(d::UnivariateDistribution, x::Real) = AffineDistribution(x, one(x), d)
 Base.:+(x::Real, d::UnivariateDistribution) = d + x
 Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
-Base.:*(d::UnivariateDistribution, x) = x * d
-
-"""
-    -(d::Distribution, μ)
-
-Return a distribution that has been shifted by `-μ`.
-
-See also: [`+`](@ref)
-"""
-Base.:-(d::Distribution, x) = d + -x
-
-
-Base.:/(d::UnivariateDistribution, x) = inv(x) * d
+Base.:-(d::MultivariateDistribution, x::AbstractVector{<:Real}) = d + (-x)
