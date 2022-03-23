@@ -58,9 +58,8 @@ function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
     for (s1, p1) in zip(support(d1), probs(d1)), (s2, p2) in zip(support(d2), probs(d2))
             idx = searchsortedfirst(support_conv, s1+s2)
             p_conv[idx] += p1*p2
-        end
     end
-    DiscreteNonParametric(support_conv, p_conv)
+    DiscreteNonParametric(support_conv, p_conv,check_args=false) 
 end
 
 # continuous univariate
