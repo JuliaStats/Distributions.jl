@@ -1891,6 +1891,40 @@
   ]
 },
 {
+  "expr": "GeneralizedPareto(1.0)",
+  "dtype": "GeneralizedPareto",
+  "minimum": 0,
+  "maximum": "inf",
+  "properties": {
+    "location": 0,
+    "scale": 1,
+    "shape": 1,
+    "mean": "inf",
+    "median": 1,
+    "var": "inf",
+    "skewness": "inf",
+    "kurtosis": "inf"
+  },
+  "points": [
+    { "x": 0.111111111111111, "pdf": 0.81, "logpdf": -0.210721031315653, "cdf": 0.1 },
+    { "x": 0.25, "pdf": 0.64, "logpdf": -0.446287102628419, "cdf": 0.2 },
+    { "x": 0.428571428571429, "pdf": 0.49, "logpdf": -0.713349887877465, "cdf": 0.3 },
+    { "x": 0.666666666666667, "pdf": 0.36, "logpdf": -1.02165124753198, "cdf": 0.4 },
+    { "x": 1, "pdf": 0.25, "logpdf": -1.38629436111989, "cdf": 0.5 },
+    { "x": 1.5, "pdf": 0.16, "logpdf": -1.83258146374831, "cdf": 0.6 },
+    { "x": 2.33333333333333, "pdf": 0.09, "logpdf": -2.40794560865187, "cdf": 0.7 },
+    { "x": 4, "pdf": 0.04, "logpdf": -3.2188758248682, "cdf": 0.8 },
+    { "x": 9, "pdf": 0.01, "logpdf": -4.60517018598809, "cdf": 0.9 }
+  ],
+  "quans": [
+    { "q": 0.10, "x": 0.111111111111111 },
+    { "q": 0.25, "x": 0.333333333333333 },
+    { "q": 0.50, "x": 1 },
+    { "q": 0.75, "x": 3 },
+    { "q": 0.90, "x": 9 }
+  ]
+},
+{
   "expr": "GeneralizedPareto(0.1, 2.0)",
   "dtype": "GeneralizedPareto",
   "minimum": 0,

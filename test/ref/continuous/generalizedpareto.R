@@ -9,8 +9,9 @@ GeneralizedPareto <- R6Class("GeneralizedPareto",
         initialize = function(a1=NA, a2=NA, a3=NA) {
             if (is.na(a1)) {
                 u <- 0; s <- 1; k <- 1
+            } else if (is.na(a2)){
+                u <- 0; s <- 1; k <- a1
             } else if (is.na(a3)) {
-                stopifnot(!is.na(a2))
                 u <- 0; s <- a1; k <- a2
             } else {
                 u <- a1; s <- a2; k <- a3
