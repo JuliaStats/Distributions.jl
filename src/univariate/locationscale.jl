@@ -141,5 +141,25 @@ gradlogpdf(d::ContinuousAffineDistribution, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/
 
 Base.:+(d::UnivariateDistribution, x::Real) = AffineDistribution(x, one(x), d)
 Base.:+(x::Real, d::UnivariateDistribution) = d + x
+
 Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
-Base.:-(d::MultivariateDistribution, x::AbstractVector{<:Real}) = d + (-x)
+Base.:*(d::Distribution, x::Real) = x * d
+
+# Can be removed in future update if Julia issue #43903 is resolved
+Base.:-(d::UnivariateDistribution, x::Real) = d + (-x)
+function Base.:-(
+    d::Distribution{<:ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}
+) where N
+    return d + (-x)
+end
+
+Base.:-(x::Real, d::UnivariateDistribution) = -1 * d + x
+function Base.:-(
+    x::AbstractArray{<:Real,N}, d::Distribution{<:ArrayLikeVariate{N}}
+) where N
+    return -1 * d + x
+end
+
+
+Base.:/(d::Distribution, x::Real) = inv(x) * d
+Base.:\(x::Real, d::Distribution) = inv(x) * d
