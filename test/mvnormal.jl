@@ -259,8 +259,12 @@ end
 
                 d_c = d + c
                 c_d = c + d
-                @test mean(d_c) == mean(c_d) == μ .+ c
+                @test mean(d_c) == mean(c_d) == μ + c
                 @test cov(c_d) == cov(d_c) == cov(d)
+
+                d_c = d - c
+                @test mean(d_c) == μ - c
+                @test cov(d_c) == cov(d)
 
                 B_d = B * d
                 @test B_d isa MvNormal

@@ -291,11 +291,11 @@ end
 
 ### Affine transformations
 
-+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ .+ c, d.Σ)
+Base.:+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ + c, d.Σ)
+Base.:+(c::AbstractVector, d::MvNormal) = d + c
+Base.:-(d::MvNormal, c::AbstractVector) = MvNormal(d.μ - c, d.Σ)
 
-+(c::AbstractVector, d::MvNormal) = d + c
-
-*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
 
 dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
 
