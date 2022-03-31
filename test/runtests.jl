@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "fold",
     "loguniform",
     "arcsine",
     "dirac",

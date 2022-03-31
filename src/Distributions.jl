@@ -96,6 +96,7 @@ export
     Frechet,
     FullNormal,
     FullNormalCanon,
+    Folded,
     Gamma,
     DiscreteNonParametric,
     GeneralizedPareto,
@@ -197,6 +198,7 @@ export
     failprob,           # failing probability
     fit,                # fit a distribution to data (using default method)
     fit_mle,            # fit a distribution to data using MLE
+    folded,             # fold a 1D continuous distribution about a crease
     insupport,          # predicate, is x in the support of the distribution?
     invcov,             # get the inversed covariance
     invlogccdf,         # complementary quantile based on log probability
@@ -296,6 +298,7 @@ include("samplers.jl")
 # others
 include("reshaped.jl")
 include("truncate.jl")
+include("fold.jl")
 include("censored.jl")
 include("conversion.jl")
 include("convolution.jl")
