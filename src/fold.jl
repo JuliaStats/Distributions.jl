@@ -1,6 +1,6 @@
 """
-    folded(d::UnivariateDistribution, crease::Real)
-    folded(d::UnivariateDistribution, crease::Real, keep_right=false)
+    folded(d::ContinuousUnivariateDistribution, crease::Real)
+    folded(d::ContinuousUnivariateDistribution, crease::Real, keep_right=false)
 
 Creates a _folded distribution_ from the original distribution `d` about the value `crease`.
 This function defaults to folding the left side onto the right, but by using `keep_right=false` one can reflect the right side onto the left.
@@ -16,11 +16,11 @@ where ``x' = 2c - x``
 
 This can be implemented for any univariate continuous distribution by using the following method:
 
-    folded(d::UnivariateDistribution, crease::Real)
+    folded(d::ContinuousUnivariateDistribution, crease::Real)
 
 If one wants to reflect points _above_ the crease ``c`` onto points _below_ ``c`` (such that the resultant distribution lives on points below ``c``) one can do that using the `keep_right=false` tag:
 
-    folded(d::UnivariateDistribution, crease::Real, keep_right=false)
+    folded(d::ContinuousUnivariateDistribution, crease::Real, keep_right=false)
 
 A very useful and oft-occuring example of this is the action of the absolute value function (``|\\cdot|``) on random variables. 
 For example if we have a random variable obeying the normal distribution:
@@ -68,7 +68,7 @@ function folded end
 
 
 #the folded function with no arguments will just return the function itself
-folded(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
+folded(d::ContinuousUnivariateDistribution, ::Nothing, ::Nothing) = d
 
 
 ##### Defining the function and the initialization functions #####
@@ -77,7 +77,7 @@ Generic wrapper for the folded version of a distribution.
 Holds the original distribution, and two truncated copies of the 
 distribution: one above the crease and one below. 
 """
-struct Folded{D<:UnivariateDistribution, K<:Truncated, S<:ValueSupport, T <: Real} <: UnivariateDistribution{S}
+struct Folded{D<:ContinuousUnivariateDistribution, K<:Truncated, S<:Continuous, T <: Real} <: ContinuousUnivariateDistribution
     original::D      # the original distribution (unfolded)
     included::K     # The part of the old distribution left unchanged
     excluded::K     # The folded part that is now part of the new distribution
@@ -85,7 +85,7 @@ struct Folded{D<:UnivariateDistribution, K<:Truncated, S<:ValueSupport, T <: Rea
     keep_right::Bool # true if distribution folds the left distribution on to the right distribution, false if otherwise
 
     # Internal constructor
-    function Folded(unfolded::UnivariateDistribution, included::K, excluded::K,  crease::T, keep_right::Bool;  check_args=true) where {T <: Real, K <: Truncated}
+    function Folded(unfolded::ContinuousUnivariateDistribution, included::K, excluded::K,  crease::T, keep_right::Bool;  check_args=true) where {T <: Real, K <: Truncated}
         # Check if the crease is within the support of the original distiribution
         check_args && @check_args(Folded, insupport(unfolded, crease))
         new{typeof(unfolded), typeof(included), value_support(typeof(unfolded)), T}(unfolded, included, excluded, crease, keep_right)
@@ -94,13 +94,13 @@ end
 
 # This is the user facing initialization function that will be used in most cases
 """
-   folded(d::UnivariateDistribution, crease::T; keep_right=true) 
+   folded(d::ContinuousUnivariateDistribution, crease::T; keep_right=true) 
 
 Creates a folded distribution from the original distribution `d` by folding the distribution about the `crease`.
 This function defaults to folding the left side onto the right, but by using `keep_right=false` one can reflect the right side onto the left.
 
 """
-function folded(d::UnivariateDistribution, crease::T; keep_right=true) where {T <: Real}
+function folded(d::ContinuousUnivariateDistribution, crease::T; keep_right=true) where {T <: Real}
     lower = minimum(d); 
     upper = maximum(d);
     left_distribution = truncated(d, lower, crease);
@@ -124,7 +124,7 @@ params(d::Folded) = tuple(params(d.original)..., d.crease, d.keep_right)
 partype(d::Folded) = partype(d.original)
 
 # Use the type as the constructor and construct the original distribution to feed into the folded (lowercase) constructor.
-Folded{D,K,S,T}(p...) where {D<:UnivariateDistribution, K<:Truncated, S<:ValueSupport, T <: Real} = folded(D(p[1:(end-2)]...),p[end-1],keep_right=p[end])
+Folded{D,K,S,T}(p...) where {D<:ContinuousUnivariateDistribution, K<:Truncated, S<:Continuous, T <: Real} = folded(D(p[1:(end-2)]...),p[end-1],keep_right=p[end])
 
 
 ######################################################
