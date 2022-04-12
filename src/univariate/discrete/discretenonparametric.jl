@@ -312,3 +312,9 @@ end
 fit_mle(::Type{<:DiscreteNonParametric},
         ss::DiscreteNonParametricStats{T,W,Ts,Ws}) where {T,W,Ts,Ws} =
     DiscreteNonParametric{T,W,Ts,Ws}(ss.support, normalize!(copy(ss.freq), 1), check_args=false)
+
+# Collect a MixtureModel of DiscreteNonParametrics
+function Distributions.DiscreteNonParametric(mm::MixtureModel{<:VariateForm,Discrete,DiscreteNonParametric{T,P,Ts,Ps}}) where {T,P,Ts,Ps}
+	supp = unique(reduce(vcat, (support(m) for m in components(mm))))
+	DiscreteNonParametric(supp, pdf.(mm, supp))
+end
