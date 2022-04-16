@@ -395,9 +395,9 @@ end
 function ChainRulesCore.rrule(DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
     d = DT(alpha; check_args=check_args)
     function dirichlet_pullback(d_dir)
-        d_dir = ChainRulesCore.unthunk(alpha)
-        @info typeof(d_dir)
-        return (ChainRulesCore.NoTangent(), d_dir.alpha)
+        d_dir = ChainRulesCore.unthunk(d_dir)
+        ∂l = d_dir.lmnB * (SpecialFunctions.digamma.(alpha) .- SpecialFunctions.digamma.(d.alpha0))
+        return (ChainRulesCore.NoTangent(), d_dir.alpha .+ d_dir.alpha0 .+ ∂l)
     end
     return d, dirichlet_pullback
 end

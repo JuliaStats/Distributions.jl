@@ -134,9 +134,9 @@ end
         alpha = rand(n)
         Δalpha = randn(n)
         d2, ∂d = ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
-        ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha, check_inferred=false)
+        ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha, check_inferred=true)
 
-        _, dp = ChainRulesCore.rrule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha)
+        _, dp = ChainRulesCore.rrule(Dirichlet, alpha)
         ChainRulesTestUtils.test_rrule(Dirichlet{Float64} ⊢ ChainRulesCore.NoTangent(), alpha)
     end
 end
