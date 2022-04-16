@@ -2,7 +2,8 @@
 
 using  Distributions
 using Test, Random, LinearAlgebra
-
+using ChainRulesCore
+using ChainRulesTestUtils
 
 Random.seed!(34567)
 
@@ -126,4 +127,13 @@ end
     N = 10
     @test entropy(Dirichlet(N, 1)) ≈ -loggamma(N)
     @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
+end
+
+@testset "Dirichlet differentiation" begin
+    for n in (2, 10)
+        alpha = rand(n)
+        Δalpha = randn(n)
+        d2, ∂d = ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
+        ChainRulesTestUtils.test_frule(Dirichlet{Float64}, alpha ⊢ Δalpha)
+    end
 end

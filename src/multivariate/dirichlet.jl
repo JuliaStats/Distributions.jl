@@ -26,10 +26,12 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     lmnB::S
 
     function Dirichlet{T}(alpha::AbstractVector{T}; check_args::Bool=true) where T
-        @check_args(
-            Dirichlet,
-            (alpha, all(x -> x > zero(x), alpha), "alpha must be a positive vector."),
-        )
+        if check_args
+            @check_args(
+                Dirichlet,
+                (alpha, all(x -> x > zero(x), alpha), "alpha must be a positive vector."),
+            )
+        end
         alpha0 = sum(alpha)
         lmnB = sum(loggamma, alpha) - loggamma(alpha0)
         new{T,typeof(alpha),typeof(lmnB)}(alpha, alpha0, lmnB)
@@ -40,7 +42,9 @@ function Dirichlet(alpha::AbstractVector{T}; check_args::Bool=true) where {T<:Re
     Dirichlet{T}(alpha; check_args=check_args)
 end
 function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
-    @check_args Dirichlet (d, d > zero(d)) (alpha, alpha > zero(alpha))
+    if check_args
+        @check_args Dirichlet (d, d > zero(d)) (alpha, alpha > zero(alpha))
+    end
     return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
 end
 
@@ -72,7 +76,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 params(d::Dirichlet) = (d.alpha,)
-@inline partype(d::Dirichlet{T}) where {T<:Real} = T
+@inline partype(::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)
     α0 = d.alpha0
@@ -374,4 +378,13 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
+end
+
+## Differentiation
+function ChainRulesCore.frule((_, Δalpha), DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
+    d = DT(alpha; check_args=check_args)
+    Δalpha = ChainRulesCore.unthunk(Δalpha)
+    ∂alpha0 = sum(Δalpha)
+    ∂lmnB = (sum(SpecialFunctions.digamma(αi) for αi in alpha) - SpecialFunctions.digamma(d.alpha0)) * Δalpha
+    return d, ChainRulesCore.Tangent{typeof(d)}(; alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
 end
