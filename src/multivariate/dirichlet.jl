@@ -381,10 +381,23 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
+using Test
 function ChainRulesCore.frule((_, Δalpha), DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
     d = DT(alpha; check_args=check_args)
     Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
-    ∂lmnB = (sum(SpecialFunctions.digamma(αi) for αi in alpha) - SpecialFunctions.digamma(d.alpha0)) * Δalpha
-    return d, ChainRulesCore.Tangent{typeof(d)}(; alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
+    ∂lmnB::typeof(∂alpha0) = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - SpecialFunctions.digamma(d.alpha0)) for i in eachindex(alpha))
+    backing = (alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
+    t = ChainRulesCore.Tangent{typeof(d), NamedTuple{(:alpha, :alpha0, :lmnB), Tuple{typeof(alpha), typeof(d.alpha0), typeof(d.lmnB)}}}(backing)
+    return d, t
+end
+
+function ChainRulesCore.rrule(DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
+    d = DT(alpha; check_args=check_args)
+    function dirichlet_pullback(d_dir)
+        d_dir = ChainRulesCore.unthunk(alpha)
+        @info typeof(d_dir)
+        return (ChainRulesCore.NoTangent(), d_dir.alpha)
+    end
+    return d, dirichlet_pullback
 end
