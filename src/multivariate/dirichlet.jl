@@ -381,7 +381,7 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
-function ChainRulesCore.frule((_, Δalpha), DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
+function ChainRulesCore.frule((_, Δalpha)::Tuple{Any,Any}, DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
     d = DT(alpha; check_args=check_args)
     Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
