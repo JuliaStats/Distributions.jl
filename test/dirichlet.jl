@@ -129,14 +129,53 @@ end
     @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
 end
 
-@testset "Dirichlet differentiation" begin
-    for n in (2, 10)
-        alpha = rand(n)
-        Δalpha = randn(n)
-        d2, ∂d = ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
-        ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha, check_inferred=true)
-
-        _, dp = ChainRulesCore.rrule(Dirichlet, alpha)
-        ChainRulesTestUtils.test_rrule(Dirichlet{Float64} ⊢ ChainRulesCore.NoTangent(), alpha)
+@testset "Dirichlet differentiation $n" for n in (2, 10)
+    alpha = rand(n)
+    Δalpha = randn(n)
+    d, ∂d = ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
+    ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha)
+    _, dp = ChainRulesCore.rrule(Dirichlet, alpha)
+    ChainRulesTestUtils.test_rrule(Dirichlet{Float64} ⊢ ChainRulesCore.NoTangent(), alpha)
+    x = rand(n)
+    x ./= sum(x)
+    Δx = 0.05 * rand(n)
+    Δx .-= mean(Δx)
+    # such that x ∈ Δ, x + Δx ∈ Δ
+    ChainRulesTestUtils.test_frule(Distributions._logpdf ⊢ ChainRulesCore.NoTangent(), d, x ⊢ Δx)
+    @testset "finite diff f/r-rule logpdf" begin
+        for _ in 1:10
+            x = rand(n)
+            x ./= sum(x)
+            Δx = 0.005 * rand(n)
+            Δx .-= mean(Δx)
+            if insupport(d, x + Δx) && insupport(d, x - Δx)
+                y, pullback = ChainRulesCore.rrule(Distributions._logpdf, d, x)
+                yf, Δy = ChainRulesCore.frule(
+                    (
+                        ChainRulesCore.NoTangent(),
+                        map(zero, ChainRulesTestUtils.rand_tangent(d)),
+                        Δx,
+                    ),
+                    Distributions._logpdf,
+                    d, x,
+                )
+                y2 = Distributions._logpdf(d, x + Δx)
+                y1 = Distributions._logpdf(d, x - Δx)
+                @test isfinite(y)
+                @test y == yf
+                @test Δy ≈ y2 - y atol=5e-3
+                _, ∂d, ∂x = pullback(1.0)
+                @test y2 - y1 ≈ dot(2Δx, ∂x) atol=5e-3 rtol=1e-6
+                # mutating alpha only to compute a new y, changing only this term and not the others in Dirichlet
+                Δalpha = 0.03 * rand(n)
+                Δalpha .-= mean(Δalpha)
+                @assert all(>=(0), alpha + Δalpha)
+                d.alpha .+= Δalpha
+                ya = Distributions._logpdf(d, x)
+                # resetting alpha
+                d.alpha .-= Δalpha
+                @test ya - y ≈ dot(Δalpha, ∂d.alpha) atol=5e-5 rtol=1e-6
+            end
+        end
     end
 end

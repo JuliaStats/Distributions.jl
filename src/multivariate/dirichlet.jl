@@ -381,7 +381,6 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
-using Test
 function ChainRulesCore.frule((_, Δalpha), DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
     d = DT(alpha; check_args=check_args)
     Δalpha = ChainRulesCore.unthunk(Δalpha)
@@ -400,4 +399,43 @@ function ChainRulesCore.rrule(DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, al
         return (ChainRulesCore.NoTangent(), d_dir.alpha .+ d_dir.alpha0 .+ ∂l)
     end
     return d, dirichlet_pullback
+end
+
+function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T}
+    lp = _logpdf(d, x)
+    if !insupport(d, x)
+        return (lp, zero(lp))
+    end
+    ∂α = sum(Δd.alpha[i] * log(x[i]) for i in eachindex(x))
+    ∂l = - Δd.lmnB
+    ∂x = sum((d.alpha[i] - 1) * Δx[i] / x[i] for i in eachindex(x))
+    return (lp, ∂α + ∂l + ∂x)
+end
+
+function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T}
+    y = _logpdf(d, x)
+    function Dirichlet_logpdf_pullback(dy)
+        if !isfinite(y)
+            backing = (alpha = zero(d.alpha), alpha0 = ChainRulesCore.ZeroTangent(), lmnB=zero(d.lmnB))
+            ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
+            ∂x = zero(d.alpha + x)
+            return (ChainRulesCore.NoTangent(), ∂d, ∂x)
+        end
+        ∂alpha = dy * log.(x)
+        ∂l = -dy
+        ∂x = dy * (d.alpha .-1) ./ x
+        backing = (alpha = ∂alpha, alpha0 = ChainRulesCore.ZeroTangent(), lmnB=∂l)
+        ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
+        return (ChainRulesCore.NoTangent(), ∂d, ∂x)
+    end
+    return (y, Dirichlet_logpdf_pullback)
+end
+
+function _logpdf(d::Dirichlet, x::AbstractVector{<:Real})
+    if !insupport(d, x)
+        return xlogy(one(eltype(d.alpha)), zero(eltype(x))) - d.lmnB
+    end
+    a = d.alpha
+    s = sum(xlogy(αi - 1, xi) for (αi, xi) in zip(d.alpha, x))
+    return s - d.lmnB
 end
