@@ -59,7 +59,7 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(LogitNormal, σ > zero(σ))
+    @check_args LogitNormal (σ, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
@@ -76,8 +76,10 @@ LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
 #### Conversions
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
   {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
-convert(::Type{LogitNormal{T}}, d::LogitNormal{S}) where
-  {T <: Real, S <: Real} = LogitNormal(T(d.μ), T(d.σ), check_args=false)
+function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T<:Real}
+    LogitNormal{T}(T(d.μ), T(d.σ))
+end
+Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T<:Real} = d
 
 #### Parameters
 

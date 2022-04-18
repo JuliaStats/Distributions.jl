@@ -30,16 +30,13 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Binomial(n::Integer, p::Real; check_args::Bool=true)
-    if check_args
-        @check_args(Binomial, n >= zero(n))
-        @check_args(Binomial, zero(p) <= p <= one(p))
-    end
+    @check_args Binomial (n, n >= zero(n)) (p, zero(p) <= p <= one(p))
     return Binomial{typeof(p)}(n, p)
 end
 
 Binomial(n::Integer, p::Integer; check_args::Bool=true) = Binomial(n, float(p); check_args=check_args)
 function Binomial(n::Integer; check_args::Bool=true)
-    check_args && @check_args(Binomial, n >= zero(n))
+    @check_args Binomial (n, n >= zero(n))
     Binomial{Float64}(n, 0.5)
 end
 Binomial() = Binomial{Float64}(1, 0.5)
@@ -51,10 +48,10 @@ Binomial() = Binomial{Float64}(1, 0.5)
 function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     return Binomial(n, T(p))
 end
-function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
-    return Binomial(d.n, T(d.p), check_args=false)
+function Base.convert(::Type{Binomial{T}}, d::Binomial) where {T<:Real}
+    return Binomial{T}(d.n, T(d.p))
 end
-
+Base.convert(::Type{Binomial{T}}, d::Binomial{T}) where {T<:Real} = d
 
 #### Parameters
 

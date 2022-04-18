@@ -29,7 +29,7 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Rayleigh(σ::Real; check_args::Bool=true)
-    check_args && @check_args(Rayleigh, σ > zero(σ))
+    @check_args Rayleigh (σ, σ > zero(σ))
     return Rayleigh{typeof(σ)}(σ)
 end
 
@@ -41,7 +41,8 @@ Rayleigh() = Rayleigh{Float64}(1.0)
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), check_args=false)
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T<:Real} = Rayleigh{T}(T(d.σ))
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 
 #### Parameters
 

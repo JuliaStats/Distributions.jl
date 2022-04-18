@@ -32,7 +32,7 @@ struct Arcsine{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Arcsine(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Arcsine, a < b)
+    @check_args Arcsine a < b
     return Arcsine{T}(a, b)
 end
 
@@ -47,9 +47,8 @@ Arcsine() = Arcsine{Float64}(0.0, 1.0)
 function convert(::Type{Arcsine{T}}, a::Real, b::Real) where T<:Real
     Arcsine(T(a), T(b))
 end
-function convert(::Type{Arcsine{T}}, d::Arcsine{S}) where {T <: Real, S <: Real}
-    Arcsine(T(d.a), T(d.b))
-end
+Base.convert(::Type{Arcsine{T}}, d::Arcsine) where {T<:Real} = Arcsine{T}(T(d.a), T(d.b))
+Base.convert(::Type{Arcsine{T}}, d::Arcsine{T}) where {T<:Real} = d
 
 ### Parameters
 

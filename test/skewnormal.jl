@@ -3,7 +3,7 @@ using Distributions
 import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
 
 @testset "SkewNormal" begin
-    @test_throws ArgumentError SkewNormal(0.0, 0.0, 0.0)
+    @test_throws DomainError SkewNormal(0.0, 0.0, 0.0)
     d1 = SkewNormal(1, 2, 3)
     d2 = SkewNormal(1.0f0, 2, 3)
     @test partype(d1) == Float64

@@ -28,7 +28,7 @@ struct Levy{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    check_args && @check_args(Levy, σ > zero(σ))
+    @check_args Levy (σ, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
 
@@ -41,7 +41,8 @@ Levy(μ::Real=0.0) = Levy(μ, one(μ); check_args=false)
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
-convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Levy{T}}, d::Levy) where {T<:Real} = Levy{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
 
 #### Parameters
 

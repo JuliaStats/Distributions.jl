@@ -67,6 +67,7 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     VV = convert(AbstractArray{T}, d.V)
     MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(d.logc0))
 end
+Base.convert(::Type{MatrixNormal{T}}, d::MatrixNormal{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)

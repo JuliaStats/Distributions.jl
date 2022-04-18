@@ -21,12 +21,12 @@ struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Erlang(α::Real, θ::Real; check_args::Bool=true)
-    check_args && @check_args(Erlang, isinteger(α) && α >= zero(α))
+    @check_args Erlang (α, isinteger(α)) (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
 function Erlang(α::Integer, θ::Real; check_args::Bool=true)
-    check_args && @check_args(Erlang, α >= zero(α))
+    @check_args Erlang (α, α >= zero(α))
     return Erlang{typeof(θ)}(α, θ)
 end
 
@@ -42,9 +42,10 @@ Erlang(α::Integer=1) = Erlang(α, 1.0; check_args=false)
 function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
     Erlang(α, T(θ), check_args=false)
 end
-function convert(::Type{Erlang{T}}, d::Erlang{S}) where {T <: Real, S <: Real}
-    Erlang(d.α, T(d.θ), check_args=false)
+function Base.convert(::Type{Erlang{T}}, d::Erlang) where {T<:Real}
+    Erlang{T}(d.α, T(d.θ))
 end
+Base.convert(::Type{Erlang{T}}, d::Erlang{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -63,9 +64,10 @@ kurtosis(d::Erlang) = 6 / d.α
 
 function mode(d::Erlang; check_args::Bool=true)
     α, θ = params(d)
-    if check_args
-        α >= 1 || error("Erlang has no mode when α < 1")
-    end
+    @check_args(
+        Erlang,
+        (α, α >= 1, "Erlang has no mode when α < 1"),
+    )
     θ * (α - 1)
 end
 

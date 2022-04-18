@@ -8,7 +8,7 @@ struct Triweight{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Triweight(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Triweight, σ > zero(σ))
+    @check_args Triweight (σ, σ > zero(σ))
     return Triweight{T}(μ, σ)
 end
 
@@ -21,7 +21,8 @@ Triweight(μ::Real=0.0) = Triweight(μ, one(μ); check_args=false)
 ## Conversions
 
 convert(::Type{Triweight{T}}, μ::Real, σ::Real) where {T<:Real} = Triweight(T(μ), T(σ))
-convert(::Type{Triweight{T}}, d::Triweight{S}) where {T<:Real, S<:Real} = Triweight(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Triweight{T}}, d::Triweight) where {T<:Real} = Triweight{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Triweight{T}}, d::Triweight{T}) where {T<:Real} = d
 
 ## Parameters
 

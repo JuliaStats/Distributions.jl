@@ -27,7 +27,7 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Poisson(λ::Real; check_args::Bool=true)
-    check_args && @check_args(Poisson, λ >= zero(λ))
+    @check_args Poisson (λ, λ >= zero(λ))
     return Poisson{typeof(λ)}(λ)
 end
 
@@ -38,7 +38,8 @@ Poisson() = Poisson{Float64}(1.0)
 
 #### Conversions
 convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
-convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), check_args=false)
+Base.convert(::Type{Poisson{T}}, d::Poisson) where {T<:Real} = Poisson{T}(T(d.λ))
+Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
 
 ### Parameters
 

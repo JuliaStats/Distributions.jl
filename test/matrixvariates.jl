@@ -122,6 +122,9 @@ function test_convert(d::MatrixDistribution)
         @test del2 isa distname{elty}
         @test partype(del1) == elty
         @test partype(del2) == elty
+        if elty === partype(d)
+            @test del1 === d
+        end
     end
     nothing
 end
@@ -413,7 +416,7 @@ end
 function test_special(dist::Type{LKJ})
     @testset "LKJ mode" begin
         @test mode(LKJ(5, 1.5)) == mean(LKJ(5, 1.5))
-        @test_throws ArgumentError mode( LKJ(5, 0.5) )
+        @test_throws DomainError mode( LKJ(5, 0.5) )
     end
     @testset "LKJ marginals" begin
         d = 4

@@ -31,7 +31,7 @@ struct Gamma{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Gamma(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Gamma, α > zero(α) && θ > zero(θ))
+    @check_args Gamma (α, α > zero(α)) (θ, θ > zero(θ))
     return Gamma{T}(α, θ)
 end
 
@@ -44,7 +44,8 @@ Gamma() = Gamma{Float64}(1.0, 1.0)
 
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
-convert(::Type{Gamma{T}}, d::Gamma{S}) where {T <: Real, S <: Real} = Gamma(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Gamma{T}}, d::Gamma) where {T<:Real} = Gamma{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Gamma{T}}, d::Gamma{T}) where {T<:Real} = d
 
 #### Parameters
 

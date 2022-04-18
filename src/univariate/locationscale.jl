@@ -37,17 +37,22 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
+    # TODO: Remove? It is not used in Distributions anymore
     function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
-        check_args && @check_args(AffineDistribution, σ > zero(σ))
+        @check_args AffineDistribution (σ, σ > zero(σ))
         new{T, S, D}(μ, σ, ρ)
+    end
+    function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T<:Real}
+        D = typeof(ρ)
+        S = value_support(D)
+        return new{T,S,D}(μ, σ, ρ)
     end
 end
 
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
+    @check_args AffineDistribution (σ, σ > zero(σ))
     _T = promote_type(eltype(ρ), T)
-    D = typeof(ρ)
-    S = value_support(D)
-    return AffineDistribution{_T,S,D}(_T(μ), _T(σ), ρ; check_args=check_args)
+    return AffineDistribution{_T}(_T(μ), _T(σ), ρ)
 end
 
 function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
@@ -58,9 +63,8 @@ end
 const LocationScale{T,S,D} = AffineDistribution{T,S,D}
 function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
     Base.depwarn("`LocationScale` is deprecated, use `AffineDistribution` instead", :LocationScale)
-    if check_args && σ ≤ 0  # preparation for future PR where I remove σ > 0 check
-        throw(ArgumentError("σ must be strictly positive."))
-    end
+    # preparation for future PR where I remove σ > 0 check
+    @check_args LocationScale (σ, σ > zero(σ))
     return AffineDistribution(μ, σ, ρ; check_args=false)
 end
 
@@ -82,7 +86,10 @@ AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistributi
 #### Conversions
 
 convert(::Type{AffineDistribution{T}}, μ::Real, σ::Real, ρ::D) where {T<:Real, D<:UnivariateDistribution} = AffineDistribution(T(μ),T(σ),ρ)
-convert(::Type{AffineDistribution{T}}, d::AffineDistribution{S}) where {T<:Real, S<:Real} = AffineDistribution(T(d.μ),T(d.σ),d.ρ, check_args=false)
+function Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution) where {T<:Real}
+    AffineDistribution{T}(T(d.μ), T(d.σ), d.ρ)
+end
+Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:Real} = d
 
 #### Parameters
 

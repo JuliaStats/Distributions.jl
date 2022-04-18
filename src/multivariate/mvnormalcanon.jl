@@ -91,6 +91,7 @@ Construct a multivariate normal distribution with potential vector `h` and preci
 """
 MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::AbstractVector{<:Real}, J::Diagonal{<:Real}) = MvNormalCanon(h, PDiagMat(J.diag))
+MvNormalCanon(μ::AbstractVector{<:Real}, J::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormalCanon(μ, PDiagMat(J.data.diag))
 function MvNormalCanon(h::AbstractVector{<:Real}, J::UniformScaling{<:Real})
     return MvNormalCanon(h, ScalMat(length(h), J.λ))
 end
@@ -129,6 +130,8 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
+Base.convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormalCanon{T}}, μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractPDMat) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end

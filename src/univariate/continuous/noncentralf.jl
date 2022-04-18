@@ -9,7 +9,7 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function NoncentralF(ν1::T, ν2::T, λ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T) && λ >= zero(T))
+    @check_args NoncentralF (ν1, ν1 > zero(ν1)) (ν2, ν2 > zero(ν2)) (λ, λ >= zero(λ))
     return NoncentralF{T}(ν1, ν2, λ)
 end
 
@@ -23,9 +23,10 @@ NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool=true) = No
 function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real, S <: Real}
     NoncentralF(T(ν1), T(ν2), T(λ))
 end
-function convert(::Type{NoncentralF{T}}, d::NoncentralF{S}) where {T <: Real, S <: Real}
-    NoncentralF(T(d.ν1), T(d.ν2), T(d.λ), check_args=false)
+function Base.convert(::Type{NoncentralF{T}}, d::NoncentralF) where {T<:Real}
+    NoncentralF{T}(T(d.ν1), T(d.ν2), T(d.λ))
 end
+Base.convert(::Type{NoncentralF{T}}, d::NoncentralF{T}) where {T<:Real} = d
 
 ### Parameters
 

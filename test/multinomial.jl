@@ -33,6 +33,8 @@ rng = MersenneTwister(123)
 @test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
 @test typeof(convert(Multinomial{Float32, Vector{Float32}}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
+@test convert(Multinomial{Float64}, d) === d
+@test convert(Multinomial{Float64, Vector{Float64}}, d) === d
 
 # random sampling
 
@@ -205,6 +207,6 @@ d = Multinomial(nt, p)
 @test_nowarn rand!(d, m)
 
 p_v = [0.1, 0.4, 0.3, 0.8]
-@test_throws ArgumentError Multinomial(10, p_v)
-@test_throws ArgumentError Multinomial(10, p_v; check_args=true)
+@test_throws DomainError Multinomial(10, p_v)
+@test_throws DomainError Multinomial(10, p_v; check_args=true)
 Multinomial(10, p_v; check_args=false) # should not warn

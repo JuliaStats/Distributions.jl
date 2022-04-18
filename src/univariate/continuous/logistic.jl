@@ -31,7 +31,7 @@ end
 
 
 function Logistic(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Logistic, θ > zero(θ))
+    @check_args Logistic (θ, θ > zero(θ))
     return Logistic{T}(μ, θ)
 end
 
@@ -45,9 +45,10 @@ Logistic(μ::Real=0.0) = Logistic(μ, one(μ); check_args=false)
 function convert(::Type{Logistic{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Logistic(T(μ), T(θ))
 end
-function convert(::Type{Logistic{T}}, d::Logistic{S}) where {T <: Real, S <: Real}
-    Logistic(T(d.μ), T(d.θ), check_args=false)
+function Base.convert(::Type{Logistic{T}}, d::Logistic) where {T<:Real}
+    Logistic{T}(T(d.μ), T(d.θ))
 end
+Base.convert(::Type{Logistic{T}}, d::Logistic{T}) where {T<:Real} = d
 
 #### Parameters
 

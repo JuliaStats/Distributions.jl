@@ -26,7 +26,7 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Chisq(ν::Real; check_args::Bool=true)
-    check_args && @check_args(Chisq, ν > zero(ν))
+    @check_args Chisq (ν, ν > zero(ν))
     return Chisq{typeof(ν)}(ν)
 end
 
@@ -42,8 +42,8 @@ params(d::Chisq) = (d.ν,)
 
 ### Conversions
 convert(::Type{Chisq{T}}, ν::Real) where {T<:Real} = Chisq(T(ν))
-convert(::Type{Chisq{T}}, d::Chisq{S}) where {T <: Real, S <: Real} = Chisq(T(d.ν))
-
+Base.convert(::Type{Chisq{T}}, d::Chisq) where {T<:Real} = Chisq{T}(T(d.ν))
+Base.convert(::Type{Chisq{T}}, d::Chisq{T}) where {T<:Real} = d
 
 #### Statistics
 

@@ -85,6 +85,7 @@ function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     ΩΩ = convert(AbstractArray{T}, d.Ω)
     MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
+Base.convert(::Type{MatrixTDist{T}}, d::MatrixTDist{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)

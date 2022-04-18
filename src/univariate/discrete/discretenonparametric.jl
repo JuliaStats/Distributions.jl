@@ -21,14 +21,17 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
     support::Ts
     p::Ps
 
-    function DiscreteNonParametric{T,P,Ts,Ps}(vs::Ts, ps::Ps; check_args::Bool=true) where {
+    function DiscreteNonParametric{T,P,Ts,Ps}(xs::Ts, ps::Ps; check_args::Bool=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
-        check_args || return new{T,P,Ts,Ps}(vs, ps)
-        @check_args(DiscreteNonParametric, length(vs) == length(ps))
-        @check_args(DiscreteNonParametric, isprobvec(ps))
-        @check_args(DiscreteNonParametric, allunique(vs))
-        sort_order = sortperm(vs)
-        new{T,P,Ts,Ps}(vs[sort_order], ps[sort_order])
+        check_args || return new{T,P,Ts,Ps}(xs, ps)
+        @check_args(
+            DiscreteNonParametric,
+            (length(xs) == length(ps), "length of support and probability vector must be equal"),
+            (ps, isprobvec(ps), "vector is not a probability vector"),
+            (xs, allunique(xs), "support must contain only unique elements"),
+        )
+        sort_order = sortperm(xs)
+        new{T,P,Ts,Ps}(xs[sort_order], ps[sort_order])
     end
 end
 
@@ -41,6 +44,7 @@ Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 # Conversion
 convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric) where {T,P,Ts,Ps} =
     DiscreteNonParametric{T,P,Ts,Ps}(convert(Ts, support(d)), convert(Ps, probs(d)), check_args=false)
+Base.convert(::Type{DiscreteNonParametric{T,P,Ts,Ps}}, d::DiscreteNonParametric{T,P,Ts,Ps}) where {T,P,Ts,Ps} = d
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -267,9 +271,9 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {
 end
 
 function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T},
-                   w::AbstractArray{W}) where {T<:Real,W<:Real}
+                   w::AbstractArray{W}; check_args::Bool=true) where {T<:Real,W<:Real}
 
-    @check_args(DiscreteNonParametric, length(x) == length(w))
+    @check_args DiscreteNonParametric (length(x) == length(w))
 
     N = length(x)
     N == 0 && return DiscreteNonParametricStats(T[], W[])

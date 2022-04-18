@@ -8,7 +8,7 @@ struct Epanechnikov{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Epanechnikov(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
-    check_args && @check_args(Epanechnikov, σ > zero(σ))
+    @check_args Epanechnikov (σ, σ > zero(σ))
     return Epanechnikov{T}(μ, σ)
 end
 
@@ -22,9 +22,10 @@ Epanechnikov(μ::Real=0.0) = Epanechnikov(μ, one(μ); check_args=false)
 function convert(::Type{Epanechnikov{T}}, μ::Real, σ::Real) where T<:Real
     Epanechnikov(T(μ), T(σ), check_args=false)
 end
-function convert(::Type{Epanechnikov{T}}, d::Epanechnikov{S}) where {T <: Real, S <: Real}
-    Epanechnikov(T(d.μ), T(d.σ), check_args=false)
+function Base.convert(::Type{Epanechnikov{T}}, d::Epanechnikov) where {T<:Real}
+    Epanechnikov{T}(T(d.μ), T(d.σ))
 end
+Base.convert(::Type{Epanechnikov{T}}, d::Epanechnikov{T}) where {T<:Real} = d
 
 ## Parameters
 

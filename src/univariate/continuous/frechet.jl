@@ -30,7 +30,7 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function Frechet(α::T, θ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(Frechet, α > zero(α) && θ > zero(θ))
+    @check_args Frechet (α, α > zero(α)) (θ, θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 
@@ -44,9 +44,8 @@ Frechet(α::Real=1.0) = Frechet(α, one(α); check_args=false)
 function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
-function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ), check_args=false)
-end
+Base.convert(::Type{Frechet{T}}, d::Frechet) where {T<:Real} = Frechet{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Frechet{T}}, d::Frechet{T}) where {T<:Real} = d
 
 #### Parameters
 

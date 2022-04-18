@@ -33,10 +33,11 @@ end
 #  -----------------------------------------------------------------------------
 
 function LKJ(d::Integer, η::Real; check_args::Bool=true)
-    if check_args
-        d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
-        η > 0 || throw(ArgumentError("Shape parameter must be positive."))
-    end
+    @check_args(
+        LKJ,
+        (d, d > 0, "matrix dimension must be positive."),
+        (η, η > 0, "shape parameter must be positive."),
+    )
     logc0 = lkj_logc0(d, η)
     T = Base.promote_eltype(η, logc0)
     LKJ{T, typeof(d)}(d, T(η), T(logc0))
@@ -55,6 +56,7 @@ show(io::IO, d::LKJ) = show_multline(io, d, [(:d, d.d), (:η, d.η)])
 function convert(::Type{LKJ{T}}, d::LKJ) where T <: Real
     LKJ{T, typeof(d.d)}(d.d, T(d.η), T(d.logc0))
 end
+Base.convert(::Type{LKJ{T}}, d::LKJ{T}) where {T<:Real} = d
 
 function convert(::Type{LKJ{T}}, d::Integer, η, logc0) where T <: Real
     LKJ{T, typeof(d)}(d, T(η), T(logc0))
@@ -75,10 +77,11 @@ insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(
 mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
 
 function mode(d::LKJ; check_args::Bool=true)
-    p, η = params(d)
-    if check_args
-        η > 1 || throw(ArgumentError("mode is defined only when η > 1."))
-    end
+    @check_args(
+        LKJ,
+        @setup((_, η) = params(d)),
+        (η, η > 1, "mode is defined only when η > 1."),
+    )
     return mean(d)
 end
 

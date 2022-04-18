@@ -33,7 +33,7 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(LogNormal, σ ≥ zero(σ))
+    @check_args LogNormal (σ, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 
@@ -45,7 +45,8 @@ LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
 
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} = LogNormal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 
 #### Parameters
 

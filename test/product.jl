@@ -1,4 +1,4 @@
-using Distributions, Test, Random, LinearAlgebra
+using Distributions, Test, Random, LinearAlgebra, FillArrays
 using Distributions: Product
 
 @testset "Testing normal product distributions" begin
@@ -80,3 +80,13 @@ end
         @test length(y) == N
     end
 end
+
+@testset "Testing iid product distributions" begin
+    Random.seed!(123456)
+    N = 11
+    d = Product(Fill(Laplace(0.0, 2.3), N))
+    @test N == length(unique(rand(d)));
+    @test mean(d) === Fill(0.0, N)
+    @test cov(d) === Diagonal(Fill(var(Laplace(0.0, 2.3)), N))
+end
+

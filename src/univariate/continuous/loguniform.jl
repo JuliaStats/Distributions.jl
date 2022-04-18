@@ -17,13 +17,15 @@ struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function LogUniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
-    check_args && @check_args(LogUniform, 0 < a < b)
+    @check_args LogUniform (0 < a < b)
     LogUniform{T}(a, b)
 end
 
 LogUniform(a::Real, b::Real; check_args::Bool=true) = LogUniform(promote(a, b)...; check_args=check_args)
 
-convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} = LogUniform(T(d.a), T(d.b); check_args=false)
+Base.convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} = LogUniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{LogUniform{T}}, d::LogUniform{T}) where {T<:Real} = d
+
 Base.minimum(d::LogUniform) = d.a
 Base.maximum(d::LogUniform) = d.b
 
