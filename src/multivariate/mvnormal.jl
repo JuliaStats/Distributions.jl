@@ -253,7 +253,7 @@ Base.show(io::IO, d::MvNormal) =
 length(d::MvNormal) = length(d.μ)
 mean(d::MvNormal) = d.μ
 params(d::MvNormal) = (d.μ, d.Σ)
-@inline partype(d::MvNormal{T}) where {T<:Real} = T
+@inline partype(::MvNormal{T}) where {T<:Real} = T
 
 var(d::MvNormal) = diag(d.Σ)
 cov(d::MvNormal) = Matrix(d.Σ)
@@ -382,7 +382,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     MvNormalStats(s, m, s2, Float64(n))
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
+function suffstats(::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     d = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -410,11 +410,11 @@ end
 # each kind of covariance
 #
 
-fit_mle(D::Type{MvNormal}, ss::MvNormalStats) = fit_mle(FullNormal, ss)
-fit_mle(D::Type{MvNormal}, x::AbstractMatrix{Float64}) = fit_mle(FullNormal, x)
-fit_mle(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) = fit_mle(FullNormal, x, w)
+fit_mle(::Type{MvNormal}, ss::MvNormalStats) = fit_mle(FullNormal, ss)
+fit_mle(::Type{MvNormal}, x::AbstractMatrix{Float64}) = fit_mle(FullNormal, x)
+fit_mle(::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64}) = fit_mle(FullNormal, x, w)
 
-fit_mle(D::Type{FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
+fit_mle(::Type{<:FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
 function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
@@ -425,7 +425,7 @@ function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, PDMat(C))
 end
 
-function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
+function fit_mle(::Type{<:FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -460,7 +460,7 @@ function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
+function fit_mle(::Type{<:DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -495,7 +495,7 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
     MvNormal(mu, ScalMat(m, va / (m * n)))
 end
 
-function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
+function fit_mle(::Type{<:IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     m = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions"))
@@ -514,4 +514,41 @@ function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64}, w::AbstractVect
         va += va_j
     end
     MvNormal(mu, ScalMat(m, va / (m * sw)))
+end
+
+## Differentiation
+
+function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpdf), d::AbstractMvNormal, x::AbstractVector)
+    c0, Δc0 = ChainRulesCore.frule((ChainRulesCore.NoTangent(), Δd), mvnormal_c0, d)
+    sq, Δsq = ChainRulesCore.frule((ChainRulesCore.NoTangent(), Δd, Δx), sqmahal, d, x)
+    return c0 - sq/2, ChainRulesCore.@thunk(begin
+        Δc0 = ChainRulesCore.unthunk(Δc0)
+        Δsq = ChainRulesCore.unthunk(Δsq)
+        Δc0 - Δsq/2
+    end)
+end
+
+function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::AbstractMvNormal)
+    y = mvnormal_c0(d)
+    Δy = ChainRulesCore.@thunk(begin
+        Δd = ChainRulesCore.unthunk(Δd)
+        -dot(Δd.Σ, invcov(d)) / 2
+    end)
+    return y, Δy
+end
+
+function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::AbstractMvNormal, x::AbstractVector)
+    y = sqmahal(d, x)
+    Δy = ChainRulesCore.@thunk(begin
+        (_, Δd, Δx) = dargs
+        Δd = ChainRulesCore.unthunk(Δd)
+        Δx = ChainRulesCore.unthunk(Δx)
+        Σinv = inv(d.Σ)
+        # TODO optimize
+        dΣ = -dot(Σinv * Δd.Σ * Σinv, x * x' - d.μ * x' - x * d.μ' + d.μ * d.μ')
+        dx = 2 * dot(Σinv * (x - d.μ), Δx)
+        dμ = 2 * dot(Σinv * (d.μ - x), Δd.μ)
+        dΣ + dx + dμ
+    end)
+    return (y, Δy)
 end
