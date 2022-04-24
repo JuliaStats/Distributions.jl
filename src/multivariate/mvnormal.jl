@@ -528,6 +528,26 @@ function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpd
     end)
 end
 
+function ChainRulesCore.rrule(::typeof(_logpdf), d::AbstractMvNormal, x::AbstractVector)
+    c0, c0_pullback = ChainRulesCore.rrule(mvnormal_c0, d)
+    sq, sq_pullback = ChainRulesCore.rrule(sqmahal, d, x)
+    function logpdf_MvNormal_pullback(dy)
+        dy = ChainRulesCore.unthunk(dy)
+        (_, ∂d_c0) = c0_pullback(dy)
+        ∂d_c0 = ChainRulesCore.unthunk(∂d_c0)
+        (_, ∂d_sq, ∂x_sq) = sq_pullback(dy)
+        ∂d_sq = ChainRulesCore.unthunk(∂d_sq)
+        ∂x_sq = ChainRulesCore.unthunk(∂x_sq)
+        backing = NamedTuple{(:μ, :Σ), Tuple{typeof(∂d_sq.μ), typeof(∂d_sq.Σ)}}((
+            (∂d_c0.μ - 0.5 * ∂d_sq.μ),
+            (∂d_c0.Σ - 0.5 * ∂d_sq.Σ),
+        ))
+        ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
+        return ChainRulesCore.NoTangent(), ∂d, - 0.5 * ∂x_sq
+    end
+    return c0 - 0.5 * sq, logpdf_MvNormal_pullback
+end
+
 function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::AbstractMvNormal)
     y = mvnormal_c0(d)
     Δy = ChainRulesCore.@thunk(begin
@@ -537,13 +557,26 @@ function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d
     return y, Δy
 end
 
+function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::AbstractMvNormal)
+    y = mvnormal_c0(d)
+    function mvnormal_c0_pullback(dy)
+        ∂d = ChainRulesCore.@thunk(begin
+            dy = ChainRulesCore.unthunk(dy)
+            ∂Σ = -dy/2 * invcov(d)
+            ChainRulesCore.Tangent{typeof(d)}(μ = ChainRulesCore.ZeroTangent(), Σ = ∂Σ)
+        end)
+        return ChainRulesCore.NoTangent(), ∂d
+    end
+    return y, mvnormal_c0_pullback
+end
+
 function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::AbstractMvNormal, x::AbstractVector)
     y = sqmahal(d, x)
     Δy = ChainRulesCore.@thunk(begin
         (_, Δd, Δx) = dargs
         Δd = ChainRulesCore.unthunk(Δd)
         Δx = ChainRulesCore.unthunk(Δx)
-        Σinv = inv(d.Σ)
+        Σinv = invcov(d)
         # TODO optimize
         dΣ = -dot(Σinv * Δd.Σ * Σinv, x * x' - d.μ * x' - x * d.μ' + d.μ * d.μ')
         dx = 2 * dot(Σinv * (x - d.μ), Δx)
@@ -551,4 +584,26 @@ function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::A
         dΣ + dx + dμ
     end)
     return (y, Δy)
+end
+
+function ChainRulesCore.rrule(::typeof(sqmahal), d::AbstractMvNormal, x::AbstractVector)
+    y = sqmahal(d, x)
+    function sqmahal_pullback(dy)
+        ∂x = ChainRulesCore.@thunk(begin
+            dy = ChainRulesCore.unthunk(dy)
+            Σinv = invcov(d)
+            2dy * Σinv * (x - d.μ)
+        end)
+        ∂d = ChainRulesCore.@thunk(begin
+            dy = ChainRulesCore.unthunk(dy)
+            Σinv = invcov(d)
+            cx = x - d.μ
+            ∂μ = -2dy * Σinv * cx
+            ∂J = dy * cx * cx'
+            ∂Σ = - Σinv * ∂J * Σinv
+            ChainRulesCore.Tangent{typeof(d)}(μ = ∂μ, Σ = ∂Σ)
+        end)
+        return (ChainRulesCore.NoTangent(), ∂d, ∂x)
+    end
+    return y, sqmahal_pullback
 end

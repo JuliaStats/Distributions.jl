@@ -1,5 +1,6 @@
 # Tests on Multivariate Normal distributions
 
+import PDMats
 import PDMats: ScalMat, PDiagMat, PDMat
 if isdefined(PDMats, :PDSparseMat)
     import PDMats: PDSparseMat
@@ -326,24 +327,45 @@ end
             end
             # mvnormal_c0
             (y, Δy) = @inferred ChainRulesCore.frule((ChainRulesCore.NoTangent(), t), Distributions.mvnormal_c0, d)
+            y_r, c0_pullback = @inferred ChainRulesCore.rrule(Distributions.mvnormal_c0, d)
+            @test y_r ≈ y
             y2 = Distributions.mvnormal_c0(MvNormal(d.μ, d.Σ + t.Σ))
             @test unthunk(Δy) ≈ y2 - y atol= n * 1e-4
             y3 = Distributions.mvnormal_c0(MvNormal(d.μ, d.Σ - t.Σ))
             @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
+            (_, ∇c0) = c0_pullback(1.0)
+            ∇c0 = ChainRulesCore.unthunk(∇c0)
+            @test dot(∇c0.Σ, t.Σ) ≈ y2 - y atol = n * 1e-4
+            @test dot(∇c0.Σ, t.Σ) ≈ y - y3 atol = n * 1e-4
             # sqmahal
             x = randn(n)
-            Δx = 0.001 * randn(n)
+            Δx = 0.0001 * randn(n)
             (y, Δy) = @inferred ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, Δx), sqmahal, d, x)
+            (yr, sqmahal_pullback) = @inferred ChainRulesCore.rrule(sqmahal, d, x)
+            (_, ∇s_d, ∇s_x) = @inferred sqmahal_pullback(1.0)
+            ∇s_d = ChainRulesCore.unthunk(∇s_d)
+            ∇s_x = ChainRulesCore.unthunk(∇s_x)
+            @test yr ≈ y
             y2 = Distributions.sqmahal(MvNormal(d.μ + t.μ, d.Σ + t.Σ), x + Δx)
-            @test unthunk(Δy) ≈ y2 - y atol = n * 1e-4
             y3 = Distributions.sqmahal(MvNormal(d.μ - t.μ, d.Σ - t.Σ), x - Δx)
+            @test unthunk(Δy) ≈ y2 - y atol = n * 1e-4
             @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
+            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y2 - y atol = n * 1e-4
+            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y - y3 atol = n * 1e-4
             # _logpdf
             (y, Δy) = @inferred ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, Δx), Distributions._logpdf, d, x)
+            (yr, logpdf_MvNormal_pullback) = @inferred ChainRulesCore.rrule(Distributions._logpdf, d, x)
+            @test y ≈ yr
+            # inference broken
+            # (_, ∇s_d, ∇s_x) = @inferred logpdf_MvNormal_pullback(1.0)
+            (_, ∇s_d, ∇s_x) = logpdf_MvNormal_pullback(1.0)
+
             y2 = Distributions._logpdf(MvNormal(d.μ + t.μ, d.Σ + t.Σ), x + Δx)
             y3 = Distributions._logpdf(MvNormal(d.μ - t.μ, d.Σ - t.Σ), x - Δx)
             @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
             @test unthunk(Δy) ≈ y2 - y atol = n * 1e-4
+            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y2 - y atol = n * 1e-4
+            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y - y3 atol = n * 1e-4
         end
     end
 end
