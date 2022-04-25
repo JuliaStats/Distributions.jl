@@ -85,20 +85,20 @@ failprob(d::NegativeBinomial2{T}) where {T} = d.μ / (d.μ + d.ϕ)
 
 mean(d::NegativeBinomial2{T}) where {T} = d.μ
 
-var(d::NegativeBinomial2{T}) where {T} = ((; μ, ϕ) = d; μ * (one(T) + μ / ϕ))
+var(d::NegativeBinomial2{T}) where {T} = (μ, ϕ = params(d); μ * (one(T) + μ / ϕ))
 
-std(d::NegativeBinomial2{T}) where {T} = ((; μ, ϕ) = d; √(μ * (one(T) + μ / ϕ)))
+std(d::NegativeBinomial2{T}) where {T} = (μ, ϕ = params(d); √(μ * (one(T) + μ / ϕ)))
 
 skewness(d::NegativeBinomial2{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.ϕ))
 
 kurtosis(d::NegativeBinomial2{T}) where {T} = (p = succprob(d); T(6) / d.ϕ + (p * p) / ((one(T) - p) * d.ϕ))
 
-mode(d::NegativeBinomial2{T}) where {T} = ((; μ, ϕ) = d; ϕ > one(T) ? floor(Int, μ * (ϕ - one(T)) / ϕ) : 0)
+mode(d::NegativeBinomial2{T}) where {T} = (μ, ϕ = params(d); ϕ > one(T) ? floor(Int, μ * (ϕ - one(T)) / ϕ) : 0)
 
 #### Evaluation & Sampling
 
 function logpdf(d::NegativeBinomial2, n::Real)
-    (; μ, ϕ) = d
+    μ, ϕ = params(d)
     r = n * log(μ) + ϕ * log(ϕ) - (n + ϕ) * log(μ + ϕ)
     if isone(succprob(d)) && iszero(n)
         return zero(r)
@@ -123,14 +123,14 @@ invlogccdf(d::NegativeBinomial2{T}, lq::Real) where {T} = invlogccdf(convert(Neg
 
 
 function mgf(d::NegativeBinomial2, t::Real)
-    μ, ϕ = d
+    μ, ϕ = params(d)
     p = ϕ / (μ + ϕ)
     # ((1 - p) * exp(t))^ϕ / (1 - p * exp(t))^ϕ
     ((1 - p) / (inv(exp(t)) - p))^ϕ
 end
 
 function cf(d::NegativeBinomial2, t::Real)
-    μ, ϕ = d
+    μ, ϕ = params(d)
     p = ϕ / (μ + ϕ)
     # (((1 - p) * cis(t)) / (1 - p * cis(t)))^ϕ
     ((1 - p) / (inv(cis(t)) - p))^ϕ
