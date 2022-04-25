@@ -135,7 +135,7 @@ end
     Δalpha = randn(n)
     d, ∂d = @inferred ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
     ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha; fdm=FiniteDifferences.forward_fdm(5, 1))
-    ChainRulesTestUtils.test_rrule(Dirichlet{Float64}, alpha)
+    ChainRulesTestUtils.test_rrule(Dirichlet{Float64}, alpha; fdm=FiniteDifferences.forward_fdm(5, 1))
     x = rand(n)
     x ./= sum(x)
     Δx = 0.05 * rand(n)
