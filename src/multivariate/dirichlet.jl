@@ -397,7 +397,7 @@ function ChainRulesCore.rrule(DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, al
     return d, dirichlet_pullback
 end
 
-function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T}
+function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     lp = _logpdf(d, x)
     if !insupport(d, x)
         return (lp, zero(lp))
