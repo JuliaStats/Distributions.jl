@@ -372,7 +372,7 @@ struct MvNormalStats <: SufficientStats
     tw::Float64         # total sample weight
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
+function suffstats(::Type{MvNormal}, x::AbstractMatrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
     s = vec(sum(x, dims=2))
@@ -416,7 +416,7 @@ fit_mle(::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractArray{Float64})
 
 fit_mle(::Type{<:FullNormal}, ss::MvNormalStats) = MvNormal(ss.m, ss.s2 * inv(ss.tw))
 
-function fit_mle(D::Type{FullNormal}, x::AbstractMatrix{Float64})
+function fit_mle(::Type{FullNormal}, x::AbstractMatrix{Float64})
     n = size(x, 2)
     mu = vec(mean(x, dims=2))
     z = x .- mu
@@ -445,7 +445,7 @@ function fit_mle(::Type{<:FullNormal}, x::AbstractMatrix{Float64}, w::AbstractVe
     MvNormal(mu, PDMat(C))
 end
 
-function fit_mle(D::Type{DiagNormal}, x::AbstractMatrix{Float64})
+function fit_mle(::Type{DiagNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
@@ -479,7 +479,7 @@ function fit_mle(::Type{<:DiagNormal}, x::AbstractMatrix{Float64}, w::AbstractVe
     MvNormal(mu, PDiagMat(va))
 end
 
-function fit_mle(D::Type{IsoNormal}, x::AbstractMatrix{Float64})
+function fit_mle(::Type{IsoNormal}, x::AbstractMatrix{Float64})
     m = size(x, 1)
     n = size(x, 2)
 
@@ -528,7 +528,7 @@ function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpd
     end)
 end
 
-function ChainRulesCore.rrule(::typeof(_logpdf), d::AbstractMvNormal, x::AbstractVector)
+function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
     c0, c0_pullback = ChainRulesCore.rrule(mvnormal_c0, d)
     sq, sq_pullback = ChainRulesCore.rrule(sqmahal, d, x)
     function logpdf_MvNormal_pullback(dy)
@@ -548,7 +548,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::AbstractMvNormal, x::Abstrac
     return c0 - 0.5 * sq, logpdf_MvNormal_pullback
 end
 
-function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::AbstractMvNormal)
+function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::MvNormal)
     y = mvnormal_c0(d)
     Δy = ChainRulesCore.@thunk(begin
         Δd = ChainRulesCore.unthunk(Δd)
@@ -557,7 +557,7 @@ function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d
     return y, Δy
 end
 
-function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::AbstractMvNormal)
+function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::MvNormal)
     y = mvnormal_c0(d)
     function mvnormal_c0_pullback(dy)
         ∂d = ChainRulesCore.@thunk(begin
@@ -570,7 +570,7 @@ function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::AbstractMvNormal)
     return y, mvnormal_c0_pullback
 end
 
-function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::AbstractMvNormal, x::AbstractVector)
+function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::MvNormal, x::AbstractVector)
     y = sqmahal(d, x)
     Δy = ChainRulesCore.@thunk(begin
         (_, Δd, Δx) = dargs
@@ -586,7 +586,7 @@ function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::A
     return (y, Δy)
 end
 
-function ChainRulesCore.rrule(::typeof(sqmahal), d::AbstractMvNormal, x::AbstractVector)
+function ChainRulesCore.rrule(::typeof(sqmahal), d::MvNormal, x::AbstractVector)
     y = sqmahal(d, x)
     function sqmahal_pullback(dy)
         ∂x = ChainRulesCore.@thunk(begin
