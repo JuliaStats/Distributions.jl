@@ -382,7 +382,9 @@ function ChainRulesCore.frule((_, Δalpha), ::Type{DT}, alpha::AbstractVector{T}
     Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
     digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
-    ∂lmnB = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - digamma_alpha0) for i in eachindex(alpha))
+    ∂lmnB = sum(Broadcast.instantiate(Broadcast.broadcasted(Δalpha, alpha))) do Δalpha_i, alpha_i
+        Δalpha_i * (SpecialFunctions.digamma(alpha_i) - digamma_alpha0)
+    end
     backing = (alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
     t = ChainRulesCore.Tangent{typeof(d), NamedTuple{(:alpha, :alpha0, :lmnB), Tuple{typeof(alpha), typeof(d.alpha0), typeof(d.lmnB)}}}(backing)
     return d, t
@@ -392,7 +394,8 @@ function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::
     d = DT(alpha; check_args=check_args)
     function dirichlet_pullback(d_dir)
         d_dir = ChainRulesCore.unthunk(d_dir)
-        dalpha = d_dir.alpha .+ d_dir.alpha0 .+ d_dir.lmnB .* (SpecialFunctions.digamma.(alpha) .- SpecialFunctions.digamma.(d.alpha0))
+        digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
+        dalpha = d_dir.alpha .+ d_dir.alpha0 .+ d_dir.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
         return ChainRulesCore.NoTangent(), dalpha
     end
     return d, dirichlet_pullback
@@ -403,8 +406,8 @@ function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x:
     if !insupport(d, x)
         return (lp, zero(lp) + zero(eltype(Δx)) + zero(eltype(Δd.alpha)) + zero(eltype(Δd.lmnB)))
     end
-    ∂α_x = sum(eachindex(x)) do i
-        xlogy(Δd.alpha[i], x[i]) + (d.alpha[i] - 1) * Δx[i] / x[i]
+    ∂α_x = sum(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x)) do Δalpha_i, Δx_i, alpha_i, x_i
+        xlogy(Δalpha_i, x_i) + (alpha_i - 1) * Δx_i / x_i
     end
     ∂l = - Δd.lmnB
     return (lp, ∂α_x + ∂l)
