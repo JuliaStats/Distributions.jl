@@ -66,7 +66,7 @@ failprob(d::NegativeBinomial3{T}) where {T} = (β = d.β; β / (β + one(T)))
 
 #### Statistics
 
-mean(d::NegativeBinomial3{T}) where {T} = d.α * d.β
+mean(d::NegativeBinomial3) = d.α * d.β
 
 var(d::NegativeBinomial3{T}) where {T} = d.α * d.β * (one(T) + d.β)
 
