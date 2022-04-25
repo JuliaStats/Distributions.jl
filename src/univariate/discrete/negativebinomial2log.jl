@@ -94,7 +94,6 @@ mode(d::NegativeBinomial2Log{T}) where {T} = d.ϕ > one(T) ? floor(Int, exp(d.η
 
 #### Evaluation & Sampling
 @inline binomial_log(n, k) = loggamma(n + 1) - loggamma(k + 1) - loggamma(n - k + 1)
-# binomial_log2(n, k) = log(n) - log((n - k) * k) - logbeta(n - k, k)
 
 function logpdf(d::NegativeBinomial2Log, n::Real)
     η, ϕ = params(d)
