@@ -51,9 +51,6 @@ insupport(d::NegativeBinomial3, x::Real) = false
 insupport(d::NegativeBinomial3, x::T) where {T<:Integer} = x ≥ 0
 #### Conversions
 
-function convert(::Type{NegativeBinomial3{T}}, α::Real, β::Real) where {T<:Real}
-    NegativeBinomial3(T(α), T(β))
-end
 function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial3) where {T<:Real}
     NegativeBinomial3{T}(T(d.α), T(d.β))
 end
