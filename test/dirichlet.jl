@@ -135,7 +135,7 @@ end
     d, ∂d = ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
     ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha)
     _, dp = ChainRulesCore.rrule(Dirichlet, alpha)
-    ChainRulesTestUtils.test_rrule(Dirichlet{Float64} ⊢ ChainRulesCore.NoTangent(), alpha)
+    ChainRulesTestUtils.test_rrule(Dirichlet{Float64}, alpha)
     x = rand(n)
     x ./= sum(x)
     Δx = 0.05 * rand(n)
