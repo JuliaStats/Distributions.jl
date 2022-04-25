@@ -60,16 +60,16 @@ end
 Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{T}) where {T<:Real} = d
 
 
-# Interconversion
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2) where {T<:Real}
-    NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (d.μ + d.ϕ)))
-end
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2Log) where {T<:Real}
-    NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (exp(d.η) + d.ϕ)))
-end
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial3) where {T<:Real}
-    NegativeBinomial{T}(T(d.α), T(one(T) / (d.β + one(T))))
-end
+# # Interconversion
+# function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2) where {T<:Real}
+#     NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (d.μ + d.ϕ)))
+# end
+# function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2Log) where {T<:Real}
+#     NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (exp(d.η) + d.ϕ)))
+# end
+# function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial3) where {T<:Real}
+#     NegativeBinomial{T}(T(d.α), T(one(T) / (d.β + one(T))))
+# end
 
 
 #### Parameters

@@ -57,16 +57,16 @@ function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2Log) where
 end
 convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2Log{T}) where {T<:Real} = d
 
-# Interconversion
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.r) + log1p(-d.p) - log(d.p)), T(d.r))
-end
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.μ)), T(d.ϕ))
-end
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial3) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.α) + log(d.β)), T(d.α))
-end
+# # Interconversion
+# function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial) where {T<:Real}
+#     NegativeBinomial2Log{T}(T(log(d.r) + log1p(-d.p) - log(d.p)), T(d.r))
+# end
+# function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2) where {T<:Real}
+#     NegativeBinomial2Log{T}(T(log(d.μ)), T(d.ϕ))
+# end
+# function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial3) where {T<:Real}
+#     NegativeBinomial2Log{T}(T(log(d.α) + log(d.β)), T(d.α))
+# end
 
 #### Parameters
 
