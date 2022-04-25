@@ -44,7 +44,6 @@ function NegativeBinomial2(μ::T, ϕ::T; check_args::Bool=true) where {T<:Real}
 end
 
 NegativeBinomial2(μ::Real, ϕ::Real; check_args::Bool=true) = NegativeBinomial2(promote(μ, ϕ)...; check_args=check_args)
-NegativeBinomial2(μ::Integer, ϕ::Integer; check_args::Bool=true) = NegativeBinomial2(float(μ), float(ϕ); check_args=check_args)
 NegativeBinomial2(μ::Real; check_args::Bool=true) = NegativeBinomial2(μ, 1.0; check_args=check_args)
 NegativeBinomial2() = NegativeBinomial2{Float64}(1.0, 1.0)
 
