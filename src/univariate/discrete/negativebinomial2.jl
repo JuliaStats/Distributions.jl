@@ -62,7 +62,7 @@ convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2{T}) where {T<:Real} =
 params(d::NegativeBinomial2) = (d.μ, d.ϕ)
 partype(::NegativeBinomial2{T}) where {T} = T
 
-succprob(d::NegativeBinomial2{T}) where {T} = d.ϕ / (d.μ + d.ϕ)
+succprob(d::NegativeBinomial2) = d.ϕ / (d.μ + d.ϕ)
 failprob(d::NegativeBinomial2) = d.μ / (d.μ + d.ϕ)
 
 #### Statistics
