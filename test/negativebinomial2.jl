@@ -1,4 +1,4 @@
-using Distribution
+using Distributions
 using Test
 
 @testset "Check the corner case p==1" begin
