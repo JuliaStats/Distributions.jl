@@ -82,15 +82,15 @@ failprob(d::NegativeBinomial2Log{T}) where {T} = (μ = exp(d.η); μ / (μ + d.�
 
 mean(d::NegativeBinomial2Log{T}) where {T} = d.η
 
-var(d::NegativeBinomial2Log{T}) where {T} = ((η, ϕ = params(d)); exp(η) * (one(T) + exp(η) / ϕ))
+var(d::NegativeBinomial2Log{T}) where {T} = (μ = exp(d.η); μ * (one(T) + μ / d.ϕ))
 
-std(d::NegativeBinomial2Log{T}) where {T} = ((η, ϕ = params(d)); √(exp(η) * (one(T) + exp(η) / ϕ)))
+std(d::NegativeBinomial2Log{T}) where {T} = (μ = exp(d.η); √(μ * (one(T) + μ / d.ϕ)))
 
 skewness(d::NegativeBinomial2Log{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.ϕ))
 
 kurtosis(d::NegativeBinomial2Log{T}) where {T} = (p = succprob(d); T(6) / d.ϕ + (p * p) / ((one(T) - p) * d.ϕ))
 
-mode(d::NegativeBinomial2Log{T}) where {T} = ((η, ϕ = params(d)); ϕ > one(T) ? floor(Int, exp(η) * (ϕ - one(T)) / ϕ) : 0)
+mode(d::NegativeBinomial2Log{T}) where {T} = d.ϕ > one(T) ? floor(Int, exp(d.η) * (d.ϕ - one(T)) / d.ϕ) : 0
 
 #### Evaluation & Sampling
 @inline binomial_log(n, k) = loggamma(n + 1) - loggamma(k + 1) - loggamma(n - k + 1)
@@ -112,8 +112,7 @@ function logpdf(d::NegativeBinomial2Log, n::Real)
     end
 end
 
-
-rand(rng::AbstractRNG, d::NegativeBinomial2Log) = ((η, ϕ = params(d)); rand(rng, Poisson(rand(rng, Gamma(ϕ, exp(η) / ϕ)))))
+rand(rng::AbstractRNG, d::NegativeBinomial2Log) = rand(rng, Poisson(rand(rng, Gamma(d.ϕ, exp(d.η) / d.ϕ))))
 
 # cdf and quantile is roundabout, but this is the most reliable approach
 cdf(d::NegativeBinomial2Log{T}, x::Real) where {T} = cdf(convert(NegativeBinomial{T}, d), x)

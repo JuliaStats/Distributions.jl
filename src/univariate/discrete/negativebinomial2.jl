@@ -85,15 +85,15 @@ failprob(d::NegativeBinomial2{T}) where {T} = d.μ / (d.μ + d.ϕ)
 
 mean(d::NegativeBinomial2{T}) where {T} = d.μ
 
-var(d::NegativeBinomial2{T}) where {T} = ((μ, ϕ = params(d)); μ * (one(T) + μ / ϕ))
+var(d::NegativeBinomial2{T}) where {T} = d.μ * (one(T) + d.μ / d.ϕ)
 
-std(d::NegativeBinomial2{T}) where {T} = ((μ, ϕ = params(d)); √(μ * (one(T) + μ / ϕ)))
+std(d::NegativeBinomial2{T}) where {T} = √(d.μ * (one(T) + d.μ / d.ϕ))
 
 skewness(d::NegativeBinomial2{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.ϕ))
 
 kurtosis(d::NegativeBinomial2{T}) where {T} = (p = succprob(d); T(6) / d.ϕ + (p * p) / ((one(T) - p) * d.ϕ))
 
-mode(d::NegativeBinomial2{T}) where {T} = ((μ, ϕ = params(d)); ϕ > one(T) ? floor(Int, μ * (ϕ - one(T)) / ϕ) : 0)
+mode(d::NegativeBinomial2{T}) where {T} = d.ϕ > one(T) ? floor(Int, d.μ * (d.ϕ - one(T)) / d.ϕ) : 0
 
 #### Evaluation & Sampling
 
@@ -109,7 +109,7 @@ function logpdf(d::NegativeBinomial2, n::Real)
     end
 end
 
-rand(rng::AbstractRNG, d::NegativeBinomial2) = ((μ, ϕ = params(d)); rand(rng, Poisson(rand(rng, Gamma(ϕ, μ / ϕ)))))
+rand(rng::AbstractRNG, d::NegativeBinomial2) = rand(rng, Poisson(rand(rng, Gamma(d.ϕ, d.μ / d.ϕ))))
 
 # cdf and quantile is roundabout, but this is the most reliable approach
 cdf(d::NegativeBinomial2{T}, x::Real) where {T} = cdf(convert(NegativeBinomial{T}, d), x)

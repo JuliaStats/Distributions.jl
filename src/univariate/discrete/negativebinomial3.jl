@@ -57,6 +57,7 @@ end
 function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial3) where {T<:Real}
     NegativeBinomial3{T}(T(d.α), T(d.β))
 end
+convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial3{T}) where {T<:Real} = d
 
 # # Interconversion
 # function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial) where {T<:Real}
@@ -81,15 +82,15 @@ failprob(d::NegativeBinomial3{T}) where {T} = (β = d.β; β / (β + one(T)))
 
 mean(d::NegativeBinomial3{T}) where {T} = d.α * d.β
 
-var(d::NegativeBinomial3{T}) where {T} = ((α, β = params(d)); α * β * (one(T) + β))
+var(d::NegativeBinomial3{T}) where {T} = d.α * d.β * (one(T) + d.β)
 
-std(d::NegativeBinomial3{T}) where {T} = ((α, β = params(d)); √(α * β * (one(T) + β)))
+std(d::NegativeBinomial3{T}) where {T} = √(d.α * d.β * (one(T) + d.β))
 
 skewness(d::NegativeBinomial3{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.α))
 
 kurtosis(d::NegativeBinomial3{T}) where {T} = (p = succprob(d); T(6) / d.α + (p * p) / ((one(T) - p) * d.α))
 
-mode(d::NegativeBinomial3{T}) where {T} = ((α, β = params(d)); α > one(T) ? floor(Int, β * (α - one(T))) : 0)
+mode(d::NegativeBinomial3{T}) where {T} = d.α > one(T) ? floor(Int, d.β * (d.α - one(T))) : 0
 
 #### Evaluation & Sampling
 
