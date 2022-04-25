@@ -381,7 +381,8 @@ function ChainRulesCore.frule((_, Δalpha), ::Type{DT}, alpha::AbstractVector{T}
     d = DT(alpha; check_args=check_args)
     Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
-    ∂lmnB = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - SpecialFunctions.digamma(d.alpha0)) for i in eachindex(alpha))
+    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
+    ∂lmnB = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - digamma_alpha0) for i in eachindex(alpha))
     backing = (alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
     t = ChainRulesCore.Tangent{typeof(d), NamedTuple{(:alpha, :alpha0, :lmnB), Tuple{typeof(alpha), typeof(d.alpha0), typeof(d.lmnB)}}}(backing)
     return d, t
@@ -402,13 +403,14 @@ function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x:
     if !insupport(d, x)
         return (lp, zero(lp) + zero(eltype(Δx)) + zero(eltype(Δd.alpha)) + zero(eltype(Δd.lmnB)))
     end
-    ∂α = sum(Δd.alpha[i] * log(x[i]) for i in eachindex(x))
+    ∂α_x = sum(eachindex(x)) do i
+        xlogy(Δd.alpha[i], log(x[i])) + (d.alpha[i] - 1) * Δx[i] / x[i]
+    end
     ∂l = - Δd.lmnB
-    ∂x = sum((d.alpha[i] - 1) * Δx[i] / x[i] for i in eachindex(x))
-    return (lp, ∂α + ∂l + ∂x)
+    return (lp, ∂α_x + ∂l)
 end
 
-function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T <: Real}
+function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     y = _logpdf(d, x)
     function Dirichlet_logpdf_pullback(dy)
         if !isfinite(y)
@@ -417,7 +419,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
             ∂x = zero(d.alpha + x)
             return (ChainRulesCore.NoTangent(), ∂d, ∂x)
         end
-        ∂alpha = dy * log.(x)
+        ∂alpha = xlogxy.(dy, x)
         ∂l = -dy
         ∂x = dy * (d.alpha .-1) ./ x
         backing = (alpha = ∂alpha, alpha0 = ChainRulesCore.ZeroTangent(), lmnB=∂l)
