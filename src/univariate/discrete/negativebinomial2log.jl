@@ -46,8 +46,7 @@ NegativeBinomial2Log() = NegativeBinomial2Log{Float64}(0.0, 1.0)
 
 @distr_support NegativeBinomial2Log 0 Inf
 
-insupport(d::NegativeBinomial2Log, x::Real) = false
-insupport(d::NegativeBinomial2Log, x::T) where {T<:Integer} = x ≥ 0
+insupport(d::NegativeBinomial2Log, x::Real) = isinteger(x) && x ≥ 0
 #### Conversions
 
 function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2Log) where {T<:Real}
