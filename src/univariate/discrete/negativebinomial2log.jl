@@ -65,7 +65,7 @@ failprob(d::NegativeBinomial2Log) = (μ = exp(d.η); μ / (μ + d.ϕ))
 
 #### Statistics
 
-mean(d::NegativeBinomial2Log{T}) where {T} = d.η
+mean(d::NegativeBinomial2Log) = d.η
 
 var(d::NegativeBinomial2Log{T}) where {T} = (μ = exp(d.η); μ * (one(T) + μ / d.ϕ))
 
