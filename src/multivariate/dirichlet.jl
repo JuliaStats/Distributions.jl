@@ -403,29 +403,30 @@ end
 
 function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     lp = _logpdf(d, x)
-    if !insupport(d, x)
-        return (lp, zero(lp) + zero(eltype(Δx)) + zero(eltype(Δd.alpha)) + zero(eltype(Δd.lmnB)))
-    end
     ∂α_x = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalpha_i, Δx_i, alpha_i, x_i
         xlogy(Δalpha_i, x_i) + (alpha_i - 1) * Δx_i / x_i
     end))
-    ∂l = - Δd.lmnB
+    ∂l = -Δd.lmnB
+    if !insupport(d, x)
+        ∂α_x = oftype(∂α_x, NaN)
+    end
     return (lp, ∂α_x + ∂l)
 end
 
 function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     y = _logpdf(d, x)
     function Dirichlet_logpdf_pullback(dy)
-        if !isfinite(y)
-            backing = (alpha = zero(d.alpha), alpha0 = ChainRulesCore.ZeroTangent(), lmnB=zero(d.lmnB))
-            ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
-            ∂x = zero(d.alpha + x)
-            return (ChainRulesCore.NoTangent(), ∂d, ∂x)
-        end
         ∂alpha = xlogy.(dy, x)
         ∂l = -dy
         ∂x = dy * (d.alpha .-1) ./ x
-        backing = (alpha = ∂alpha, alpha0 = ChainRulesCore.ZeroTangent(), lmnB=∂l)
+        ∂alpha0 = 0.0
+        if !isfinite(y)
+            ∂alpha .= NaN
+            ∂l = oftype(∂l, NaN)
+            ∂x .= NaN
+            ∂alpha0 = NaN
+        end
+        backing = (alpha = ∂alpha, alpha0 = ∂alpha0, lmnB=∂l)
         ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
         return (ChainRulesCore.NoTangent(), ∂d, ∂x)
     end
