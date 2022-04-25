@@ -47,8 +47,7 @@ NegativeBinomial3() = NegativeBinomial3{Float64}(1.0, 1.0)
 
 @distr_support NegativeBinomial3 0 Inf
 
-insupport(d::NegativeBinomial3, x::Real) = false
-insupport(d::NegativeBinomial3, x::T) where {T<:Integer} = x ≥ 0
+insupport(d::NegativeBinomial3, x::Real) = isinteger(x) && x ≥ 0
 #### Conversions
 
 function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial3) where {T<:Real}
