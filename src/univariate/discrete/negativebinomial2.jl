@@ -49,8 +49,7 @@ NegativeBinomial2() = NegativeBinomial2{Float64}(1.0, 1.0)
 
 @distr_support NegativeBinomial2 0 Inf
 
-insupport(d::NegativeBinomial2, x::Real) = false
-insupport(d::NegativeBinomial2, x::T) where {T<:Integer} = x ≥ 0
+insupport(d::NegativeBinomial2, x::Real) = isinteger(x) && x ≥ 0
 #### Conversions
 
 function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2) where {T<:Real}
