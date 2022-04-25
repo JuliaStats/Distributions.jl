@@ -8,14 +8,16 @@ to the classic form of a Poisson GLM with offset (with logarithmic link),
 the rate parameter of which is expressed as λ = μT, with T an exposure and μ being events
 per unit exposure. Moreover, paramerization on the log scale enables evaluation of
 the `logpdf` as:
+
 `log(binomial(n + ϕ - 1, n)) + n * η - n * (log(exp(η) / ϕ + 1) + log(ϕ)) - ϕ * log(exp(η) / ϕ + 1)`
+
 (note: equation for clarity, not for implementation).
 This results in fewer special function calls for each `logpdf` evaluation compared
 to the NegativeBinomial(μ, ϕ).
 
 ```julia
 NegativeBinomial2Log()        # distribution with η = 0.0 and ϕ = 1.0
-NegativeBinomial2Log(η, ϕ)    # distribution with log-location η and overdispersion ϕ
+NegativeBinomial2Log(η, ϕ)    # distribution with log location η and overdispersion ϕ
 
 convert(NegativeBinomial{T}, d)      # Parametric conversion to NegativeBinomial
 convert(NegativeBinomial2{T}, d)     # Parametric conversion to NegativeBinomial2

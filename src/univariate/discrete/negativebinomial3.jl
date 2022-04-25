@@ -15,7 +15,7 @@ z \\sim \\text{Gamma}(\\alpha, \\beta)
 
 ```julia
 NegativeBinomial3()        # distribution with α = 1.0 and β = 1.0
-NegativeBinomial3(μ, ϕ)    # distribution with shape α and scale β
+NegativeBinomial3(α, β)    # distribution with shape α and scale β
 
 convert(NegativeBinomial{T}, d)         # Parametric conversion to NegativeBinomial
 convert(NegativeBinomial2Log{T}, d)     # Parametric conversion to NegativeBinomial2Log
