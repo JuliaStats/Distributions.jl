@@ -60,8 +60,8 @@ convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2Log{T}) where {T<:R
 params(d::NegativeBinomial2Log) = (d.η, d.ϕ)
 partype(::NegativeBinomial2Log{T}) where {T} = T
 
-succprob(d::NegativeBinomial2Log{T}) where {T} = d.ϕ / (exp(d.η) + d.ϕ)
-failprob(d::NegativeBinomial2Log{T}) where {T} = (μ = exp(d.η); μ / (μ + d.ϕ))
+succprob(d::NegativeBinomial2Log) = d.ϕ / (exp(d.η) + d.ϕ)
+failprob(d::NegativeBinomial2Log) = (μ = exp(d.η); μ / (μ + d.ϕ))
 
 #### Statistics
 
