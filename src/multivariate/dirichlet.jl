@@ -404,7 +404,7 @@ function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x:
         return (lp, zero(lp) + zero(eltype(Δx)) + zero(eltype(Δd.alpha)) + zero(eltype(Δd.lmnB)))
     end
     ∂α_x = sum(eachindex(x)) do i
-        xlogy(Δd.alpha[i], log(x[i])) + (d.alpha[i] - 1) * Δx[i] / x[i]
+        xlogy(Δd.alpha[i], x[i]) + (d.alpha[i] - 1) * Δx[i] / x[i]
     end
     ∂l = - Δd.lmnB
     return (lp, ∂α_x + ∂l)
@@ -419,7 +419,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
             ∂x = zero(d.alpha + x)
             return (ChainRulesCore.NoTangent(), ∂d, ∂x)
         end
-        ∂alpha = xlogxy.(dy, x)
+        ∂alpha = xlogy.(dy, x)
         ∂l = -dy
         ∂x = dy * (d.alpha .-1) ./ x
         backing = (alpha = ∂alpha, alpha0 = ChainRulesCore.ZeroTangent(), lmnB=∂l)
