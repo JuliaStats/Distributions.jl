@@ -377,17 +377,17 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
-function ChainRulesCore.frule((_, Δalpha)::Tuple{Any,Any}, DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
+function ChainRulesCore.frule((_, Δalpha), ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
     Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
-    ∂lmnB::typeof(∂alpha0) = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - SpecialFunctions.digamma(d.alpha0)) for i in eachindex(alpha))
+    ∂lmnB = sum(Δalpha[i] * (SpecialFunctions.digamma(alpha[i]) - SpecialFunctions.digamma(d.alpha0)) for i in eachindex(alpha))
     backing = (alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
     t = ChainRulesCore.Tangent{typeof(d), NamedTuple{(:alpha, :alpha0, :lmnB), Tuple{typeof(alpha), typeof(d.alpha0), typeof(d.lmnB)}}}(backing)
     return d, t
 end
 
-function ChainRulesCore.rrule(DT::Union{Type{Dirichlet{T}}, Type{Dirichlet}}, alpha::AbstractVector{T}; check_args = true) where {T}
+function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
     function dirichlet_pullback(d_dir)
         d_dir = ChainRulesCore.unthunk(d_dir)
@@ -425,13 +425,4 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
         return (ChainRulesCore.NoTangent(), ∂d, ∂x)
     end
     return (y, Dirichlet_logpdf_pullback)
-end
-
-function _logpdf(d::Dirichlet, x::AbstractVector{<:Real})
-    if !insupport(d, x)
-        return xlogy(one(eltype(d.alpha)), zero(eltype(x))) - d.lmnB
-    end
-    a = d.alpha
-    s = sum(xlogy(αi - 1, xi) for (αi, xi) in zip(d.alpha, x))
-    return s - d.lmnB
 end
