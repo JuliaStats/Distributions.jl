@@ -62,17 +62,6 @@ function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2) where {T<:R
 end
 convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2{T}) where {T<:Real} = d
 
-# # Interconversion
-# function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial) where {T<:Real}
-#     NegativeBinomial2{T}(T(d.r * (1 - d.p) / d.p), T(d.r))
-# end
-# function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2Log) where {T<:Real}
-#     NegativeBinomial2{T}(T(exp(d.η)), T(d.ϕ))
-# end
-# function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial3) where {T<:Real}
-#     NegativeBinomial2{T}(T(d.α * d.β), T(d.α))
-# end
-
 #### Parameters
 
 params(d::NegativeBinomial2) = (d.μ, d.ϕ)
