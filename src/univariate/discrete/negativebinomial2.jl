@@ -53,9 +53,6 @@ insupport(d::NegativeBinomial2, x::Real) = false
 insupport(d::NegativeBinomial2, x::T) where {T<:Integer} = x ≥ 0
 #### Conversions
 
-function convert(::Type{NegativeBinomial2{T}}, μ::Real, ϕ::Real) where {T<:Real}
-    NegativeBinomial2(T(μ), T(ϕ))
-end
 function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2) where {T<:Real}
     NegativeBinomial2{T}(T(d.μ), T(d.ϕ))
 end
