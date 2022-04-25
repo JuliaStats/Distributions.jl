@@ -41,7 +41,6 @@ function NegativeBinomial2Log(η::T, ϕ::T; check_args::Bool=true) where {T<:Rea
 end
 
 NegativeBinomial2Log(η::Real, ϕ::Real; check_args::Bool=true) = NegativeBinomial2Log(promote(η, ϕ)...; check_args=check_args)
-NegativeBinomial2Log(η::Integer, ϕ::Integer; check_args::Bool=true) = NegativeBinomial2Log(float(η), float(ϕ); check_args=check_args)
 NegativeBinomial2Log(η::Real; check_args::Bool=true) = NegativeBinomial2Log(η, 1.0; check_args=check_args)
 NegativeBinomial2Log() = NegativeBinomial2Log{Float64}(0.0, 1.0)
 
