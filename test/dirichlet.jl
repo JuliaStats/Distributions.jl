@@ -141,7 +141,7 @@ end
     Δx = 0.05 * rand(n)
     Δx .-= mean(Δx)
     # such that x ∈ Δ, x + Δx ∈ Δ
-    ChainRulesTestUtils.test_frule(Distributions._logpdf ⊢ ChainRulesCore.NoTangent(), d, x ⊢ Δx)
+    ChainRulesTestUtils.test_frule(Distributions._logpdf, d, x ⊢ Δx)
     @testset "finite diff f/r-rule logpdf" begin
         for _ in 1:10
             x = rand(n)
