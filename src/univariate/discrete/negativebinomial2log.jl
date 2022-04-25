@@ -78,13 +78,9 @@ kurtosis(d::NegativeBinomial2Log{T}) where {T} = (p = succprob(d); T(6) / d.ϕ +
 mode(d::NegativeBinomial2Log{T}) where {T} = d.ϕ > one(T) ? floor(Int, exp(d.η) * (d.ϕ - one(T)) / d.ϕ) : 0
 
 #### Evaluation & Sampling
-@inline binomial_log(n, k) = loggamma(n + 1) - loggamma(k + 1) - loggamma(n - k + 1)
 
 function logpdf(d::NegativeBinomial2Log, n::Real)
     η, ϕ = params(d)
-    # ϕₘ₁ = ϕ - 1
-    # c = log(n + ϕₘ₁) - log(n * ϕₘ₁) - logbeta(n, ϕₘ₁)
-    # c = binomial_log(n + ϕₘ₁, n) # safer; TO DO: to create branches to use logbeta
     r = log1p(exp(η) / ϕ)
     if isone(succprob(d)) && iszero(n)
         return zero(r)
