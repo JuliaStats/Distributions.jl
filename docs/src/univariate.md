@@ -481,6 +481,9 @@ DiscreteNonParametric
 Geometric
 Hypergeometric
 NegativeBinomial
+NegativeBinomial2
+NegativeBinomial2Log
+NegativeBinomial3
 Poisson
 PoissonBinomial
 Skellam
