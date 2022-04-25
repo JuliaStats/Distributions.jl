@@ -400,7 +400,7 @@ end
 function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     lp = _logpdf(d, x)
     if !insupport(d, x)
-        return (lp, zero(lp))
+        return (lp, zero(lp) + zero(eltype(Δx)) + zero(eltype(Δd.alpha)) + zero(eltype(Δd.lmnB)))
     end
     ∂α = sum(Δd.alpha[i] * log(x[i]) for i in eachindex(x))
     ∂l = - Δd.lmnB
@@ -408,7 +408,7 @@ function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x:
     return (lp, ∂α + ∂l + ∂x)
 end
 
-function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T}
+function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{T}) where {T <: Real}
     y = _logpdf(d, x)
     function Dirichlet_logpdf_pullback(dy)
         if !isfinite(y)
