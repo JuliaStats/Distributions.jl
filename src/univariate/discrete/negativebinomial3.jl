@@ -41,7 +41,6 @@ function NegativeBinomial3(α::T, β::T; check_args::Bool=true) where {T<:Real}
 end
 
 NegativeBinomial3(α::Real, β::Real; check_args::Bool=true) = NegativeBinomial3(promote(α, β)...; check_args=check_args)
-NegativeBinomial3(α::Integer, β::Integer; check_args::Bool=true) = NegativeBinomial3(float(α), float(β); check_args=check_args)
 NegativeBinomial3(α::Real; check_args::Bool=true) = NegativeBinomial3(α, one(α); check_args=check_args)
 NegativeBinomial3() = NegativeBinomial3{Float64}(1.0, 1.0)
 
