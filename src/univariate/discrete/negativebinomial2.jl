@@ -67,7 +67,7 @@ failprob(d::NegativeBinomial2) = d.μ / (d.μ + d.ϕ)
 
 #### Statistics
 
-mean(d::NegativeBinomial2{T}) where {T} = d.μ
+mean(d::NegativeBinomial2) = d.μ
 
 var(d::NegativeBinomial2{T}) where {T} = d.μ * (one(T) + d.μ / d.ϕ)
 
