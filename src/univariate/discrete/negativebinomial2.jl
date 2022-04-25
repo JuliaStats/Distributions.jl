@@ -64,7 +64,7 @@ params(d::NegativeBinomial2) = (d.μ, d.ϕ)
 partype(::NegativeBinomial2{T}) where {T} = T
 
 succprob(d::NegativeBinomial2{T}) where {T} = d.ϕ / (d.μ + d.ϕ)
-failprob(d::NegativeBinomial2{T}) where {T} = d.μ / (d.μ + d.ϕ)
+failprob(d::NegativeBinomial2) = d.μ / (d.μ + d.ϕ)
 
 #### Statistics
 
