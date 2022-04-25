@@ -50,9 +50,6 @@ insupport(d::NegativeBinomial2Log, x::Real) = false
 insupport(d::NegativeBinomial2Log, x::T) where {T<:Integer} = x ≥ 0
 #### Conversions
 
-function convert(::Type{NegativeBinomial2Log{T}}, η::Real, ϕ::Real) where {T<:Real}
-    NegativeBinomial2Log(T(η), T(ϕ))
-end
 function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2Log) where {T<:Real}
     NegativeBinomial2Log{T}(T(d.η), T(d.ϕ))
 end
