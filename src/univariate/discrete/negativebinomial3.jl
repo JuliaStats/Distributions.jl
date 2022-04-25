@@ -4,13 +4,13 @@ Shape-scale parameterization of the negative binomial distribution. For small va
 `r`, `p` found in `NegativeBinomial`.
 
 ```math
-P(X = n) = {n + \\alpha - 1 \\choose \\alpha - 1} (\\frac{1}{\\beta + 1})^\\alpha (\\frac{\\beta}{\\beta + 1})^n
+P(X = n) = {n + \\alpha - 1 \\choose \\alpha - 1} (\\frac{1}{\\beta + 1})^\\alpha (\\frac{\\beta}{\\beta + 1})^n, \\quad \\text{for } n = 0,1,2,\\ldots
 ```
 
 In terms of the mixture definition, this corresponds to:
 ```math
-n ~ Poisson(z)
-z ~ Gamma(\\alpha, \\beta)
+n \\sim \\text{Poisson}(z), \\quad
+z \\sim \\text{Gamma}(\\alpha, \\beta)
 ```
 
 ```julia
@@ -18,7 +18,7 @@ NegativeBinomial3()        # distribution with α = 1.0 and β = 1.0
 NegativeBinomial3(μ, ϕ)    # distribution with shape α and scale β
 
 convert(NegativeBinomial{T}, d)         # Parametric conversion to NegativeBinomial
-convert(NegativeBinomial2Log{T}, d)     # Parametric conversion to NegativeBinomial2
+convert(NegativeBinomial2Log{T}, d)     # Parametric conversion to NegativeBinomial2Log
 convert(NegativeBinomial3{T}, d)        # Parametric conversion to NegativeBinomial3
 ```
 

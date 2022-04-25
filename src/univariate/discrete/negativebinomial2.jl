@@ -3,13 +3,13 @@ Alternative location-scale parameterization of the negative binomial distributio
 in terms of location `μ` and overdispersion `ϕ`.
 
 ```math
-P(X = n) = {n + \\phi - 1 \\choose n} (\\frac{\\mu}{\\mu + \\phi})^n (\\frac{\\phi}{\\mu + \\phi})^\\phi
+P(X = n) = {n + \\phi - 1 \\choose n} (\\frac{\\mu}{\\mu + \\phi})^n (\\frac{\\phi}{\\mu + \\phi})^\\phi, \\quad \\text{for } n = 0,1,2,\\ldots
 ```
 
 In terms of the mixture definition, this corresponds to:
 ```math
-n ~ Poisson(z)
-z ~ Gamma(\\phi, \\frac{\\mu}{\\phi})
+n \\sim \\text{Poisson}(z), \\quad
+z \\sim \\text{Gamma}(\\phi, \\frac{\\mu}{\\phi})
 ```
 This provides a clear interpretation of the negative binomial as an overdispersed
 Poisson with expected location 𝔼[z] = μ and var[z] = μ + μ²/ϕ. It also has advantages in that
@@ -21,7 +21,7 @@ NegativeBinomial2()        # distribution with μ = 1.0 and ϕ = 1.0
 NegativeBinomial2(μ, ϕ)    # distribution with location μ and overdispersion ϕ
 
 convert(NegativeBinomial{T}, d)         # Parametric conversion to NegativeBinomial
-convert(NegativeBinomial2Log{T}, d)     # Parametric conversion to NegativeBinomial2
+convert(NegativeBinomial2Log{T}, d)     # Parametric conversion to NegativeBinomial2Log
 convert(NegativeBinomial3{T}, d)        # Parametric conversion to NegativeBinomial3
 ```
 
