@@ -90,6 +90,16 @@ end
             p0 = Poisson(0.0)
             test_kl(p0, p)
         end
+        @testset "Chi" begin
+            p = Chi(4.0)
+            q = Chi(3.0)
+            test_kl(p, q)
+        end
+        @testset "Chisq" begin
+            p = Chisq(4.0)
+            q = Chisq(3.0)
+            test_kl(p, q)
+        end
     end
 
     @testset "multivariate" begin
