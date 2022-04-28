@@ -61,6 +61,17 @@ end
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
                 kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
         end
+        @testset "Chi" begin
+            p = Chi(4.0)
+            q = Chi(3.0)
+            test_kl(p, q)
+        end
+        @testset "Chisq" begin
+            p = Chisq(4.0)
+            q = Chisq(3.0)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Chisq(4.0), Chisq(3.0))
+        end
         @testset "Exponential" begin
             p = Exponential(2.0)
             q = Exponential(3.0)
@@ -89,16 +100,6 @@ end
             # special case (test function also checks `kldivergence(p0, p0)`)
             p0 = Poisson(0.0)
             test_kl(p0, p)
-        end
-        @testset "Chi" begin
-            p = Chi(4.0)
-            q = Chi(3.0)
-            test_kl(p, q)
-        end
-        @testset "Chisq" begin
-            p = Chisq(4.0)
-            q = Chisq(3.0)
-            test_kl(p, q)
         end
     end
 
