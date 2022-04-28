@@ -73,7 +73,7 @@ end
 function kldivergence(p::Chisq, q::Chisq)
     pν = dof(p)
     qν = dof(q)
-    return kldivergence(Chi(pν), Chi(qν))
+    return kldivergence(Chi{typeof(pν)}(pν), Chi{typeof(qν)}(qν))
 end
 
 
