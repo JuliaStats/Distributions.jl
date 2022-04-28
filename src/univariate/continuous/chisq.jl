@@ -73,8 +73,7 @@ end
 function kldivergence(p::Chisq, q::Chisq)
     pν = dof(p)
     qν = dof(q)
-    pν2 = pν / 2
-    return loggamma(qν / 2) - loggamma(pν2) + (pν - qν) * digamma(pν2) / 2
+    return kldivergence(Chi(pν), Chi(qν))
 end
 
 
