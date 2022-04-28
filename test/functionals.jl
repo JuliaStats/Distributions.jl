@@ -76,6 +76,11 @@ end
             q = InverseGamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "Laplace" begin
+            p = Laplace(2.0)
+            q = Laplace(3.0)
+            test_kl(p, q)
+        end
         @testset "Normal" begin
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)
@@ -89,11 +94,6 @@ end
             # special case (test function also checks `kldivergence(p0, p0)`)
             p0 = Poisson(0.0)
             test_kl(p0, p)
-        end
-        @testset "Laplace" begin
-            p = Laplace(2.0)
-            q = Laplace(3.0)
-            test_kl(p, q)
         end
     end
 
