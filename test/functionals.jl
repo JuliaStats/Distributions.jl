@@ -76,6 +76,12 @@ end
             q = InverseGamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "LogNormal" begin
+            p = LogNormal(0, 1)
+            q = LogNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
         @testset "Normal" begin
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)
