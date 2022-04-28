@@ -79,11 +79,11 @@ function mode(d::Chi; check_args::Bool=true)
     sqrt(ν - 1)
 end
 
-function kldivergence(P::Chi, Q::Chi)
-    Pv = params(P)
-    Qv = params(Q)
-    Pv2 = Pv / 2
-    return loggamma(Qν / 2) - loggamma(Pν2) + (Pν - Qν) * digamma(Pν2) / 2
+function kldivergence(p::Chi, q::Chi)
+    pv = params(p)
+    qv = params(q)
+    pv2 = pv / 2
+    return loggamma(qν / 2) - loggamma(pν2) + (pν - qν) * digamma(pν2) / 2
 end
 
 
