@@ -70,6 +70,11 @@ skewness(d::Laplace{T}) where {T<:Real} = zero(T)
 kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
+        
+function kldivergence(P::Laplace, Q::Laplace)
+    r = abs(P.μ - Q.μ)
+    return (P.θ * exp(-r / P.θ) + r) / Q.θ + log(Q.θ / P.θ) - 1
+end
 
 #### Evaluations
 
