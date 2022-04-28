@@ -80,9 +80,9 @@ function mode(d::Chi; check_args::Bool=true)
 end
 
 function kldivergence(p::Chi, q::Chi)
-    pv = params(p)
-    qv = params(q)
-    pv2 = pv / 2
+    pν = params(p)
+    qν = params(q)
+    pν2 = pν / 2
     return loggamma(qν / 2) - loggamma(pν2) + (pν - qν) * digamma(pν2) / 2
 end
 
