@@ -71,7 +71,10 @@ function entropy(d::Chisq)
 end
 
 function kldivergence(P::Chisq, Q::Chisq)
-    return log(gamma(Q.ν/2) / gamma(P.ν/2)) + (P.ν - Q.ν) * digamma(P.ν/2) / 2
+    pv = params(p)
+    qv = params(q)
+    pv2 = pv / 2
+    return loggamma(qν / 2) - loggamma(pν2) + (pν - qν) * digamma(pν2) / 2
 end
 
 
