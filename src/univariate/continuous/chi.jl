@@ -79,6 +79,10 @@ function mode(d::Chi; check_args::Bool=true)
     sqrt(ν - 1)
 end
 
+function kldivergence(P::Chi, Q::Chi)
+    return log(gamma(Q.ν/2) / gamma(P.ν/2)) + (P.ν - Q.ν) * digamma(P.ν/2) / 2
+end
+
 
 #### Evaluation
 
