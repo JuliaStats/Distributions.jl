@@ -90,8 +90,8 @@ function entropy(d::LogNormal)
 end
 
 function Distributions.kldivergence(p::LogNormal, q::LogNormal)
-    pn = Normal(p.μ, p.σ)
-    qn = Normal(q.μ, q.σ)
+    pn = Normal{partype(p)}(p.μ, p.σ)
+    qn = Normal{partype(q)}(q.μ, q.σ)
     return kldivergence(pn, qn)
 end
 
