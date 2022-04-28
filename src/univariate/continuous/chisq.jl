@@ -70,6 +70,11 @@ function entropy(d::Chisq)
     hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
+function kldivergence(P::Chisq, Q::Chisq)
+    return log(gamma(Q.ν/2) / gamma(P.ν/2)) + (P.ν - Q.ν) * digamma(P.ν/2) / 2
+end
+
+
 
 #### Evaluation
 
