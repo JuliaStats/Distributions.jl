@@ -90,6 +90,11 @@ end
             p0 = Poisson(0.0)
             test_kl(p0, p)
         end
+        @testset "Laplace" begin
+            p = Laplace(2.0)
+            q = Laplace(3.0)
+            test_kl(p, q)
+        end
     end
 
     @testset "multivariate" begin
