@@ -70,7 +70,7 @@ end
             p = Chisq(4.0)
             q = Chisq(3.0)
             test_kl(p, q)
-            @test kldivergence(p, q) ≈ kldivergence(Chisq(4.0), Chisq(3.0))
+            @test kldivergence(p, q) ≈ kldivergence(Chi(4.0), Chi(3.0))
         end
         @testset "Exponential" begin
             p = Exponential(2.0)
