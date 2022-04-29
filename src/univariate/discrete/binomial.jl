@@ -116,7 +116,7 @@ function kldivergence(p::Binomial, q::Binomial; kwargs...)
     else
         # There does not appear to be an analytical formula for
         # this case. Hence we fall back to the numerical approximation.
-        return _kldivergence_fallback(p, q; kwargs...)
+        return invoke(kldivergence, Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}}, p, q; kwargs...)
     end
 end
 
