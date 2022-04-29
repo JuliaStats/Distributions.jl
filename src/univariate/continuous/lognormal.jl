@@ -89,7 +89,7 @@ function entropy(d::LogNormal)
     (1 + log(twoπ * σ^2))/2 + μ
 end
 
-function Distributions.kldivergence(p::LogNormal, q::LogNormal)
+function kldivergence(p::LogNormal, q::LogNormal)
     pn = Normal{partype(p)}(p.μ, p.σ)
     qn = Normal{partype(q)}(q.μ, q.σ)
     return kldivergence(pn, qn)
