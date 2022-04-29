@@ -70,6 +70,13 @@ function entropy(d::Chisq)
     hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
+function kldivergence(p::Chisq, q::Chisq)
+    pν = dof(p)
+    qν = dof(q)
+    return kldivergence(Chi{typeof(pν)}(pν), Chi{typeof(qν)}(qν))
+end
+
+
 
 #### Evaluation
 
