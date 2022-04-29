@@ -27,6 +27,10 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 # end
 
 function kldivergence(p::Distribution{V}, q::Distribution{V}; kwargs...) where {V<:VariateForm}
+    return _kldivergence_fallback(p, q; kwargs...)
+end
+
+function _kldivergence_fallback(p::Distribution, q::Distribution; kwargs...)
     return expectation(p; kwargs...) do x
         logp = logpdf(p, x)
         return (logp > oftype(logp, -Inf)) * (logp - logpdf(q, x))
