@@ -106,10 +106,13 @@ function entropy(d::Binomial; approx::Bool=false)
 end
 
 function kldivergence(p::Binomial, q::Binomial; kwargs...)
-    if ntrials(p) == ntrials(q)
-        return ntrials(p) * kldivergence(Bernoulli(succprob(p)), Bernoulli(succprob(q)))
-    elseif ntrials(p) > ntrials(q)
-        return Inf
+    np = ntrials(p)
+    nq = ntrials(q)
+    if np >= nq
+        succp = succprob(p)
+        succq = succprob(q)
+        res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
+        return np == nq ? res : oftype(res, Inf)
     else
         # There does not appear to be an analytical formula for
         # this case. Hence we fall back to the numerical approximation.
