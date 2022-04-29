@@ -83,7 +83,7 @@ kurtosis(d::NegativeBinomial{T}) where {T} = (p = succprob(d); T(6) / d.r + (p *
 mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p) * (d.r - one(T)) / p))
 
 function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
-    if p.r ≈ q.r
+    if p.r == q.r
         return p.r * kldivergence(Geometric(succprob(p)), Geometric(succprob(q)))
     else
         # There does not appear to be an analytical formula for
