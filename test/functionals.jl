@@ -87,6 +87,12 @@ end
             test_kl(p, q)
             @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
         end
+        @testset "LogitNormal" begin
+            p = LogitNormal(0, 1)
+            q = LogitNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
         @testset "Normal" begin
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)

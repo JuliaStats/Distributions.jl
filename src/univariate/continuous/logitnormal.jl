@@ -103,6 +103,12 @@ scale(d::LogitNormal) = d.σ
 
 median(d::LogitNormal) = logistic(d.μ)
 
+function kldivergence(p::LogitNormal, q::LogitNormal)
+    pn = Normal{partype(p)}(p.μ, p.σ)
+    qn = Normal{partype(q)}(q.μ, q.σ)
+    return kldivergence(pn, qn)
+end
+
 #### Evaluation
 
 #TODO check pd and logpdf
