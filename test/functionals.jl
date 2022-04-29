@@ -77,6 +77,11 @@ end
             q = Gamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "Geometric" begin
+            p = Geometric(0.3)
+            q = Geometric(0.4)
+            test_kl(p, q)
+        end
         @testset "InverseGamma" begin
             p = InverseGamma(2.0, 1.0)
             q = InverseGamma(3.0, 2.0)
