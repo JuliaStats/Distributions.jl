@@ -76,6 +76,11 @@ end
             q = InverseGamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "Laplace" begin
+            p = Laplace(2.0)
+            q = Laplace(3.0)
+            test_kl(p, q)
+        end
         @testset "LogNormal" begin
             p = LogNormal(0, 1)
             q = LogNormal(0.5, 0.5)
