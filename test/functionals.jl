@@ -65,12 +65,14 @@ end
             p = Chi(4.0)
             q = Chi(3.0)
             test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
         end
         @testset "Chisq" begin
             p = Chisq(4.0)
             q = Chisq(3.0)
             test_kl(p, q)
             @test kldivergence(p, q) ≈ kldivergence(Chi(4.0), Chi(3.0))
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
         end
         @testset "Exponential" begin
             p = Exponential(2.0)
