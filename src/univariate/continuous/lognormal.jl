@@ -95,7 +95,6 @@ function kldivergence(p::LogNormal, q::LogNormal)
     return kldivergence(pn, qn)
 end
 
-
 #### Evaluation
 
 function pdf(d::LogNormal, x::Real)
