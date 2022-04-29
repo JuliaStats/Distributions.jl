@@ -96,7 +96,7 @@ function kldivergence(p::LogNormal, q::LogNormal)
 end
 
 
-#### Evalution
+#### Evaluation
 
 function pdf(d::LogNormal, x::Real)
     if x ≤ zero(x)

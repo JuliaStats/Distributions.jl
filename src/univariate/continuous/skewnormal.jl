@@ -49,7 +49,7 @@ kurtosis(d::SkewNormal) = 2 * (π-3) * ((delta(d) * sqrt(2/π))^4/(1-2 * (delta(
 m_0(d::SkewNormal) = mean_z(d) - (skewness(d) * std_z(d))/2 - (sign(d.α)/2) * exp(-2π/abs(d.α))
 mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)  
 
-#### Evalution
+#### Evaluation
 pdf(d::SkewNormal, x::Real) = (2/d.ω) * normpdf((x-d.ξ)/d.ω) * normcdf(d.α * (x-d.ξ)/d.ω)
 logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω) + normlogcdf(d.α * (x-d.ξ) / d.ω)
 #cdf requires Owen's T function.

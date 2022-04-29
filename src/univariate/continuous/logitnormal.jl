@@ -103,7 +103,7 @@ scale(d::LogitNormal) = d.σ
 
 median(d::LogitNormal) = logistic(d.μ)
 
-#### Evalution
+#### Evaluation
 
 #TODO check pd and logpdf
 function pdf(d::LogitNormal{T}, x::Real) where T<:Real
