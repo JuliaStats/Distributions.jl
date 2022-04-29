@@ -424,7 +424,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
             ∂alpha .= NaN
             ∂l = oftype(∂l, NaN)
             ∂x .= NaN
-            ∂alpha0 = NaN
+            ∂alpha0 = oftype(∂alpha0, NaN)
         end
         backing = (alpha = ∂alpha, alpha0 = ∂alpha0, lmnB=∂l)
         ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
