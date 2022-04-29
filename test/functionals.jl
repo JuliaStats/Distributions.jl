@@ -98,6 +98,12 @@ end
             q = Normal(0.5, 0.5)
             test_kl(p, q)
         end
+        @testset "NormalCanon" begin
+            p = NormalCanon(1, 2)
+            q = NormalCanon(3, 4)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(1/2, 1/sqrt(2)), Normal(3/4, 1/2))
+        end
         @testset "Poisson" begin
             p = Poisson(4.0)
             q = Poisson(3.0)

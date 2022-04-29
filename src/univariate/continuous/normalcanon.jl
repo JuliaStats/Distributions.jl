@@ -59,6 +59,12 @@ entropy(d::NormalCanon) = (-log(d.λ) + log2π + 1) / 2
 location(d::NormalCanon) = mean(d)
 scale(d::NormalCanon) = std(d)
 
+function kldivergence(p::NormalCanon, q::NormalCanon)
+    pn = convert(Normal, p)
+    qn = convert(Normal, q)
+    return kldivergence(pn, qn)
+end
+
 #### Evaluation
 
 pdf(d::NormalCanon, x::Real) = (sqrt(d.λ) / sqrt2π) * exp(-d.λ * abs2(x - d.μ)/2)
