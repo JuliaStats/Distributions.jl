@@ -92,6 +92,11 @@ end
             q = Laplace(3.0)
             test_kl(p, q)
         end
+        @testset "NegativeBinomial" begin
+            p = NegativeBinomial(3, 0.3)
+            q = NegativeBinomial(3, 0.5)
+            test_kl(p, q)
+        end
         @testset "Normal" begin
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)
