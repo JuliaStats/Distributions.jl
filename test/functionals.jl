@@ -56,6 +56,12 @@ end
             q = Beta(3, 5)
             test_kl(p, q)
         end
+        @testset "Binomial" begin
+            p = Binomial(3, 0.3)
+            q = Binomial(3, 0.5)
+            test_kl(p, q)
+            @test isinf(kldivergence(Binomial(4, 0.3), Binomial(2, 0.3)))
+        end
         @testset "Categorical" begin
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈

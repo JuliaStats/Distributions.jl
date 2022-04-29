@@ -105,6 +105,17 @@ function entropy(d::Binomial; approx::Bool=false)
     end
 end
 
+function kldivergence(p::Binomial, q::Binomial; kwargs...)
+    if ntrials(p) == ntrials(q)
+        return ntrials(p) * kldivergence(Bernoulli(succprob(p)), Bernoulli(succprob(q)))
+    elseif ntrials(p) > ntrials(q)
+        return Inf
+    else
+        # There does not appear to be an analytical formula for
+        # this case. Hence we fall back to the numerical approximation.
+        return _kldivergence_fallback(p, q; kwargs...)
+    end
+end
 
 #### Evaluation & Sampling
 
