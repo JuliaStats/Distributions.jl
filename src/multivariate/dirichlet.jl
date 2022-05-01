@@ -419,12 +419,12 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
         ∂alpha = xlogy.(dy, x)
         ∂l = -dy
         ∂x = dy * (d.alpha .-1) ./ x
-        ∂alpha0 = 0.0
+        ∂alpha0 = sum(∂alpha)
         if !isfinite(y)
-            ∂alpha .= NaN
+            ∂alpha = oftype(eltype(∂alpha), NaN) * ∂alpha
             ∂l = oftype(∂l, NaN)
-            ∂x .= NaN
-            ∂alpha0 = NaN
+            ∂x = oftype(eltype(∂x), NaN) * ∂x
+            ∂alpha0 = oftype(eltype(∂alpha), NaN)
         end
         backing = (alpha = ∂alpha, alpha0 = ∂alpha0, lmnB=∂l)
         ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)

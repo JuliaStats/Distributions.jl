@@ -141,7 +141,7 @@ end
     Δx = 0.05 * rand(n)
     Δx .-= mean(Δx)
     # such that x ∈ Δ, x + Δx ∈ Δ
-    ChainRulesTestUtils.test_frule(Distributions._logpdf, d, x ⊢ Δx)
+    ChainRulesTestUtils.test_frule(Distributions._logpdf, d, x ⊢ Δx, fdm=FiniteDifferences.forward_fdm(5, 1))
     @testset "finite diff f/r-rule logpdf" begin
         for _ in 1:10
             x = rand(n)
@@ -174,7 +174,7 @@ end
                 ya = Distributions._logpdf(d, x)
                 # resetting alpha
                 d.alpha .-= Δalpha
-                @test ya - y ≈ dot(Δalpha, ∂d.alpha) atol=5e-5 rtol=1e-6
+                @test ya - y ≈ dot(Δalpha, ∂d.alpha) atol=1e-6 rtol=1e-6
             end
         end
     end
