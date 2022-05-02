@@ -67,6 +67,19 @@ end
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
                 kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
         end
+        @testset "Chi" begin
+            p = Chi(4.0)
+            q = Chi(3.0)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
+        end
+        @testset "Chisq" begin
+            p = Chisq(4.0)
+            q = Chisq(3.0)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Chi(4.0), Chi(3.0))
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
+        end
         @testset "Exponential" begin
             p = Exponential(2.0)
             q = Exponential(3.0)
@@ -92,6 +105,18 @@ end
             q = Laplace(3.0)
             test_kl(p, q)
         end
+        @testset "LogNormal" begin
+            p = LogNormal(0, 1)
+            q = LogNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
+        @testset "LogitNormal" begin
+            p = LogitNormal(0, 1)
+            q = LogitNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
         @testset "NegativeBinomial" begin
             p = NegativeBinomial(3, 0.3)
             q = NegativeBinomial(3, 0.5)
@@ -101,6 +126,12 @@ end
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)
             test_kl(p, q)
+        end
+        @testset "NormalCanon" begin
+            p = NormalCanon(1, 2)
+            q = NormalCanon(3, 4)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(1/2, 1/sqrt(2)), Normal(3/4, 1/2))
         end
         @testset "Poisson" begin
             p = Poisson(4.0)
