@@ -70,9 +70,8 @@ entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 function kldivergence(p::Geometric, q::Geometric)
     x = succprob(p)
     y = succprob(q)
-    z = failprob(p)
-    w = failprob(q)
-    return log(x / y) + z / x * log(z / w)
+    x == y && return zero(x)
+    return log(x) - log(y) + (inv(x) - one(x)) * (log1p(-x) - log1p(-y))
 end
 
 
