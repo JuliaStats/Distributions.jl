@@ -94,6 +94,19 @@ end
             p = Geometric(0.3)
             q = Geometric(0.4)
             test_kl(p, q)
+            
+            x1 = nextfloat(0.0)
+            x2 = prevfloat(1.0)
+            p1 = Geometric(x1)
+            p2 = Geometric(x2)
+            @test iszero(kldivergence(p2, p2))
+            @test iszero(kldivergence(p1, p1))
+            @test isinf(kldivergence(p1, p2))
+            @test kldivergence(p2, p1) ≈ -log(x1)
+            @test isinf(kldivergence(p1, Geometric(0.5)))
+            @test kldivergence(p2, Geometric(0.5)) ≈ -log(0.5)
+            @test kldivergence(Geometric(0.5), p2) ≈ 2*log(0.5) - log(1-x2)
+            @test kldivergence(Geometric(0.5), p1) ≈ 2*log(0.5) - log(x1)
         end
         @testset "InverseGamma" begin
             p = InverseGamma(2.0, 1.0)
