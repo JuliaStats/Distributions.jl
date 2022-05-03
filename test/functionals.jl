@@ -60,7 +60,12 @@ end
             p = Binomial(3, 0.3)
             q = Binomial(3, 0.5)
             test_kl(p, q)
+            @test iszero(kldivergence(Binomial(0, 0), Binomial(0, 1)))
+            @test iszero(kldivergence(Binomial(0, 0.5), Binomial(0, 0.3)))
             @test isinf(kldivergence(Binomial(4, 0.3), Binomial(2, 0.3)))
+            @test isinf(kldivergence(Binomial(3, 0), Binomial(3, 1)))
+            @test isinf(kldivergence(Binomial(3, 0), Binomial(5, 1)))
+            @test kldivergence(p, q) ≈ 3 * kldivergence(Bernoulli(0.3), Bernoulli(0.5))
         end
         @testset "Categorical" begin
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
@@ -134,6 +139,7 @@ end
             p = NegativeBinomial(3, 0.3)
             q = NegativeBinomial(3, 0.5)
             test_kl(p, q)
+            @test kldivergence(p, q) ≈ 3 * kldivergence(Geometric(0.3), Geometric(0.5))
         end
         @testset "Normal" begin
             p = Normal(0, 1)
