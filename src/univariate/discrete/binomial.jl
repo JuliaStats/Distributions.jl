@@ -108,15 +108,18 @@ end
 function kldivergence(p::Binomial, q::Binomial; kwargs...)
     np = ntrials(p)
     nq = ntrials(q)
-    if np >= nq
-        succp = succprob(p)
-        succq = succprob(q)
-        res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
-        return np == nq ? res : oftype(res, Inf)
+    succp = succprob(p)
+    succq = succprob(q)
+    res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
+    if np == nq
+        return res
+    elseif np > nq
+        return oftype(res, Inf)
     else
-        # There does not appear to be an analytical formula for
-        # this case. Hence we fall back to the numerical approximation.
-        return invoke(kldivergence, Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}}, p, q; kwargs...)
+        # pull some terms out of the expectation to make this more efficient:
+        res += logfactorial(np) - logfactorial(nq) - (nq - np) * log1p(-succq)
+        res += expectation(k -> logfactorial(nq - k) - logfactorial(np - k), p)
+        return res
     end
 end
 
