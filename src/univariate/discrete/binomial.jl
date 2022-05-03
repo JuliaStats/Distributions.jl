@@ -112,7 +112,7 @@ function kldivergence(p::Binomial, q::Binomial; kwargs...)
     succq = succprob(q)
     res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
     if np == nq
-        iszero(np) && return np
+        iszero(np) && return zero(res)
         return res
     elseif np > nq
         return oftype(res, Inf)
