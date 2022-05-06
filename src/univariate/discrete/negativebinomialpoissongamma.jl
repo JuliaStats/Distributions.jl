@@ -17,9 +17,9 @@ z \\sim \\text{Gamma}(\\alpha, \\beta)
 NegativeBinomialPoissonGamma()        # distribution with α = 1.0 and β = 1.0
 NegativeBinomialPoissonGamma(α, β)    # distribution with shape α and scale β
 
-convert(NegativeBinomial{T}, d)                # Parametric conversion to NegativeBinomial
-convert(NegativeBinomialLocation{T}, d)        # Parametric conversion to NegativeBinomialLocation
-convert(NegativeBinomialLogLocation{T}, d)     # Parametric conversion to NegativeBinomialLogLocation
+convert(NegativeBinomial{T}, d)                # (r, p) = (α, 1 / (β + 1))
+convert(NegativeBinomialLocation{T}, d)        # (μ, ϕ) = (α * β, 1 / α)
+convert(NegativeBinomialLogLocation{T}, d)     # (η, ϕ) = (log(α) + log(β), 1 / α)
 ```
 
 External links:

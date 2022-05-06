@@ -19,9 +19,9 @@ to the NegativeBinomialLocation(μ, ϕ).
 NegativeBinomialLogLocation()        # distribution with η = 0.0 and ϕ = 1.0
 NegativeBinomialLogLocation(η, ϕ)    # distribution with log location η and overdispersion ϕ
 
-convert(NegativeBinomial{T}, d)                 # Parametric conversion to NegativeBinomial
-convert(NegativeBinomialLocation{T}, d)         # Parametric conversion to NegativeBinomialLocation
-convert(NegativeBinomialPoissonGamma{T}, d)     # Parametric conversion to NegativeBinomialPoissonGamma
+convert(NegativeBinomial{T}, d)                 # (r, p) = (1 / ϕ, 1 / (ϕ * exp(η) + 1))
+convert(NegativeBinomialLocation{T}, d)         # (μ, ϕ) = (exp(η), ϕ)
+convert(NegativeBinomialPoissonGamma{T}, d)     # (α, β) = (1 / ϕ, ϕ * exp(η))
 ```
 
 External links:
