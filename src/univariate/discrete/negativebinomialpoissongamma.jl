@@ -4,7 +4,7 @@ Shape-scale parameterization of the negative binomial distribution. For small va
 `r`, `p` found in `NegativeBinomial`. An alias for this distribution is `PoissonGamma`.
 
 ```math
-P(X = n) = {n + \\alpha - 1 \\choose \\alpha - 1} (\\frac{1}{\\beta + 1})^\\alpha (\\frac{\\beta}{\\beta + 1})^n, \\quad \\text{for } n = 0,1,2,\\ldots
+P(X = n) = {n + \\alpha - 1 \\choose \\alpha - 1} \\left( \\frac{1}{\\beta + 1} \\right)^\\alpha \\left( \\frac{\\beta}{\\beta + 1} \\right)^n, \\quad \\text{for } n = 0,1,2,\\ldots
 ```
 
 In terms of the mixture definition, this corresponds to:

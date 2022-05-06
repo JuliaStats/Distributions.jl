@@ -3,13 +3,13 @@ Alternative parameterization of the negative binomial distribution in terms of
 location `μ` and overdispersion `ϕ`.
 
 ```math
-P(X = n) = {n + \\phi^-1 - 1 \\choose n} (\\frac{\\mu}{\\mu + \\phi^-1})^n (\\frac{\\phi^-1}{\\mu + \\phi^-1})^\\phi^-1, \\quad \\text{for } n = 0,1,2,\\ldots
+P(X = n) = {n + \\frac{1}{\\phi} - 1 \\choose n} \\left( \\frac{\\frac{1}{\\phi}}{\\mu + \\frac{1}{\\phi}} \\right)^\\frac{1}{\\phi} \\left( \\frac{\\mu}{\\mu + \\frac{1}{\\phi}} \\right)^n, \\quad \\text{for } n = 0,1,2,\\ldots
 ```
 
 In terms of the mixture definition, this corresponds to:
 ```math
 n \\sim \\text{Poisson}(zμ), \\quad
-z \\sim \\text{Gamma}(\\phi^-1, \\phi)
+z \\sim \\text{Gamma}(\\frac{1}{\\phi}, \\phi)
 ```
 This provides a clear interpretation of the negative binomial as an overdispersed
 Poisson with expected location 𝔼[z] = μ and var[z] = μ + μ²ϕ. It also has advantages in that

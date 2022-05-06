@@ -1,7 +1,10 @@
 """
 Alternative parameterization of the negative binomial distribution in terms of
-the log location parameter `η` and overdispersion `ϕ`,
-such that `NegativeBinomialLogLocation(η, ϕ)` = `NegativeBinomialLocation(exp(η), ϕ)`.
+the log location `η` and overdispersion `ϕ`, such that
+
+```math
+\\text{NegativeBinomialLogLocation}(n | \\eta, \\phi) = \\text{NegativeBinomialLocation}(n | \\exp(\\eta), \\phi)
+```
 
 This paramerization is important in that it connects the the negative binomial distribution
 to the classic form of a Poisson GLM with offset (with logarithmic link),
