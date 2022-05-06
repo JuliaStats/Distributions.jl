@@ -2,7 +2,7 @@ using Distributions
 using Test
 
 @testset "Check the corner case p==1" begin
-    d = convert(NegativeBinomial3{Float64}, NegativeBinomial(0.5, 1.0))
+    d = convert(NegativeBinomialPoissonGamma{Float64}, NegativeBinomial(0.5, 1.0))
     @test logpdf(d, 0) === 0.0
     @test logpdf(d, 1) === -Inf
 end
