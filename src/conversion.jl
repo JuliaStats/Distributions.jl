@@ -4,47 +4,47 @@
 convert(::Type{Binomial}, d::Bernoulli) = Binomial(1, d.p)
 
 # to NegativeBinomial
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2) where {T<:Real}
-    NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (d.μ + d.ϕ)))
+function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomialLocation) where {T<:Real}
+    NegativeBinomial{T}(T(inv(d.ϕ)), T(inv(d.μ * d.ϕ + 1)))
 end
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial2Log) where {T<:Real}
-    NegativeBinomial{T}(T(d.ϕ), T(d.ϕ / (exp(d.η) + d.ϕ)))
+function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomialLogLocation) where {T<:Real}
+    NegativeBinomial{T}(T(inv(d.ϕ)), T(inv(exp(d.η) * d.ϕ + 1)))
 end
-function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial3) where {T<:Real}
-    NegativeBinomial{T}(T(d.α), T(one(T) / (d.β + one(T))))
-end
-
-# to NegativeBinomial2
-function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomial2{T}(T(d.r * (1 - d.p) / d.p), T(d.r))
-end
-function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial2Log) where {T<:Real}
-    NegativeBinomial2{T}(T(exp(d.η)), T(d.ϕ))
-end
-function convert(::Type{NegativeBinomial2{T}}, d::NegativeBinomial3) where {T<:Real}
-    NegativeBinomial2{T}(T(d.α * d.β), T(d.α))
+function convert(::Type{NegativeBinomial{T}}, d::NegativeBinomialPoissonGamma) where {T<:Real}
+    NegativeBinomial{T}(T(d.α), T(inv(d.β + 1)))
 end
 
-# to NegativeBinomial2Log
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.r) + log1p(-d.p) - log(d.p)), T(d.r))
+# to NegativeBinomialLocation
+function convert(::Type{NegativeBinomialLocation{T}}, d::NegativeBinomial) where {T<:Real}
+    NegativeBinomialLocation{T}(T((1 - d.p) / (d.p * d.r)), T(inv(d.r)))
 end
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial2) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.μ)), T(d.ϕ))
+function convert(::Type{NegativeBinomialLocation{T}}, d::NegativeBinomialLogLocation) where {T<:Real}
+    NegativeBinomialLocation{T}(T(exp(d.η)), T(d.ϕ))
 end
-function convert(::Type{NegativeBinomial2Log{T}}, d::NegativeBinomial3) where {T<:Real}
-    NegativeBinomial2Log{T}(T(log(d.α) + log(d.β)), T(d.α))
+function convert(::Type{NegativeBinomialLocation{T}}, d::NegativeBinomialPoissonGamma) where {T<:Real}
+    NegativeBinomialLocation{T}(T(d.α * d.β), T(inv(d.α)))
 end
 
-# to NegativeBinomial3
-function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomial3{T}(T(d.r), T((1 - d.p) / d.p))
+# to NegativeBinomialLogLocation
+function convert(::Type{NegativeBinomialLogLocation{T}}, d::NegativeBinomial) where {T<:Real}
+    NegativeBinomialLogLocation{T}(T(log1p(-d.p) - log(d.p) - log(d.r)), T(inv(d.r)))
 end
-function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial2) where {T<:Real}
-    NegativeBinomial3{T}(T(d.ϕ), T(d.μ / d.ϕ))
+function convert(::Type{NegativeBinomialLogLocation{T}}, d::NegativeBinomialLocation) where {T<:Real}
+    NegativeBinomialLogLocation{T}(T(log(d.μ)), T(d.ϕ))
 end
-function convert(::Type{NegativeBinomial3{T}}, d::NegativeBinomial2Log) where {T<:Real}
-    NegativeBinomial3{T}(T(d.ϕ), T(exp(d.η) / d.ϕ))
+function convert(::Type{NegativeBinomialLogLocation{T}}, d::NegativeBinomialPoissonGamma) where {T<:Real}
+    NegativeBinomialLogLocation{T}(T(log(d.α) + log(d.β)), T(inv(d.α)))
+end
+
+# to NegativeBinomialPoissonGamma
+function convert(::Type{NegativeBinomialPoissonGamma{T}}, d::NegativeBinomial) where {T<:Real}
+    NegativeBinomialPoissonGamma{T}(T(d.r), T((1 - d.p) / d.p))
+end
+function convert(::Type{NegativeBinomialPoissonGamma{T}}, d::NegativeBinomialLocation) where {T<:Real}
+    NegativeBinomialPoissonGamma{T}(T(inv(d.ϕ)), T(d.μ * d.ϕ))
+end
+function convert(::Type{NegativeBinomialPoissonGamma{T}}, d::NegativeBinomialLogLocation) where {T<:Real}
+    NegativeBinomialPoissonGamma{T}(T(inv(d.ϕ)), T(exp(d.η) * d.ϕ))
 end
 
 # Continuous univariate
