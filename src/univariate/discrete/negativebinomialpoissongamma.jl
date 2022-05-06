@@ -1,7 +1,7 @@
 """
 Shape-scale parameterization of the negative binomial distribution. For small values of
 `β`, this confers superior numerical stability in comparison to the parameterization in terms
-`r`, `p` found in `NegativeBinomial`.
+`r`, `p` found in `NegativeBinomial`. An alias for this distribution is `PoissonGamma`.
 
 ```math
 P(X = n) = {n + \\alpha - 1 \\choose \\alpha - 1} (\\frac{1}{\\beta + 1})^\\alpha (\\frac{\\beta}{\\beta + 1})^n, \\quad \\text{for } n = 0,1,2,\\ldots
