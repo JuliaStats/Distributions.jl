@@ -103,7 +103,7 @@ ccdf(d::NegativeBinomialLocation{T}, x::Real) where {T} = ccdf(convert(NegativeB
 logcdf(d::NegativeBinomialLocation{T}, x::Real) where {T} = logcdf(convert(NegativeBinomial{T}, d), x)
 logccdf(d::NegativeBinomialLocation{T}, x::Real) where {T} = logccdf(convert(NegativeBinomial{T}, d), x)
 quantile(d::NegativeBinomialLocation{T}, q::Real) where {T} = quantile(convert(NegativeBinomial{T}, d), q)
-cquantile(d::NegativeBinomialLocation{T}, q::Real) where {T} = quantile(convert(NegativeBinomial{T}, d), q)
+cquantile(d::NegativeBinomialLocation{T}, q::Real) where {T} = cquantile(convert(NegativeBinomial{T}, d), q)
 invlogcdf(d::NegativeBinomialLocation{T}, lq::Real) where {T} = invlogcdf(convert(NegativeBinomial{T}, d), lq)
 invlogccdf(d::NegativeBinomialLocation{T}, lq::Real) where {T} = invlogccdf(convert(NegativeBinomial{T}, d), lq)
 

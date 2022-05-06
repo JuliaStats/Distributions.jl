@@ -105,7 +105,7 @@ ccdf(d::NegativeBinomialPoissonGamma{T}, x::Real) where {T} = ccdf(convert(Negat
 logcdf(d::NegativeBinomialPoissonGamma{T}, x::Real) where {T} = logcdf(convert(NegativeBinomial{T}, d), x)
 logccdf(d::NegativeBinomialPoissonGamma{T}, x::Real) where {T} = logccdf(convert(NegativeBinomial{T}, d), x)
 quantile(d::NegativeBinomialPoissonGamma{T}, q::Real) where {T} = quantile(convert(NegativeBinomial{T}, d), q)
-cquantile(d::NegativeBinomialPoissonGamma{T}, q::Real) where {T} = quantile(convert(NegativeBinomial{T}, d), q)
+cquantile(d::NegativeBinomialPoissonGamma{T}, q::Real) where {T} = cquantile(convert(NegativeBinomial{T}, d), q)
 invlogcdf(d::NegativeBinomialPoissonGamma{T}, lq::Real) where {T} = invlogcdf(convert(NegativeBinomial{T}, d), lq)
 invlogccdf(d::NegativeBinomialPoissonGamma{T}, lq::Real) where {T} = invlogccdf(convert(NegativeBinomial{T}, d), lq)
 
