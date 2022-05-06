@@ -43,7 +43,7 @@ end
 NegativeBinomialLogLocation(η::Real, ϕ::Real; check_args::Bool=true) = NegativeBinomialLogLocation(promote(η, ϕ)...; check_args=check_args)
 NegativeBinomialLogLocation(η::Integer, ϕ::Integer; check_args::Bool=true) = NegativeBinomialLogLocation(float(η), float(ϕ); check_args=check_args)
 NegativeBinomialLogLocation(η::Real; check_args::Bool=true) = NegativeBinomialLogLocation(η, one(η); check_args=check_args)
-NegativeBinomialLogLocation() = NegativeBinomialLogLocation{Float64}(1.0, 1.0)
+NegativeBinomialLogLocation() = NegativeBinomialLogLocation{Float64}(0.0, 1.0)
 
 @distr_support NegativeBinomialLogLocation 0 Inf
 
