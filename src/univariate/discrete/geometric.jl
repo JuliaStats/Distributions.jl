@@ -67,6 +67,18 @@ kurtosis(d::Geometric) = 6 + abs2(d.p) / (1 - d.p)
 
 entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
+function kldivergence(p::Geometric, q::Geometric)
+    x = succprob(p)
+    y = succprob(q)
+    if x == y
+        return zero(float(x / y))
+    elseif isone(x)
+        return -log(y / x)
+    else
+        return log(x) - log(y) + (inv(x) - one(x)) * (log1p(-x) - log1p(-y))
+    end
+end
+
 
 ### Evaluations
 

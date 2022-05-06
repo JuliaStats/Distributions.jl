@@ -105,6 +105,24 @@ function entropy(d::Binomial; approx::Bool=false)
     end
 end
 
+function kldivergence(p::Binomial, q::Binomial; kwargs...)
+    np = ntrials(p)
+    nq = ntrials(q)
+    succp = succprob(p)
+    succq = succprob(q)
+    res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
+    if np == nq
+        iszero(np) && return zero(res)
+        return res
+    elseif np > nq
+        return oftype(res, Inf)
+    else
+        # pull some terms out of the expectation to make this more efficient:
+        res += logfactorial(np) - logfactorial(nq) - (nq - np) * log1p(-succq)
+        res += expectation(k -> logfactorial(nq - k) - logfactorial(np - k), p)
+        return res
+    end
+end
 
 #### Evaluation & Sampling
 
