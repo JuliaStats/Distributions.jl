@@ -16,7 +16,7 @@ end
 
 # to NegativeBinomialLocation
 function convert(::Type{NegativeBinomialLocation{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomialLocation{T}(T((1 - d.p) / (d.p * d.r)), T(inv(d.r)))
+    NegativeBinomialLocation{T}(T(d.r * (1 - d.p) / d.p), T(inv(d.r)))
 end
 function convert(::Type{NegativeBinomialLocation{T}}, d::NegativeBinomialLogLocation) where {T<:Real}
     NegativeBinomialLocation{T}(T(exp(d.η)), T(d.ϕ))
@@ -27,7 +27,7 @@ end
 
 # to NegativeBinomialLogLocation
 function convert(::Type{NegativeBinomialLogLocation{T}}, d::NegativeBinomial) where {T<:Real}
-    NegativeBinomialLogLocation{T}(T(log1p(-d.p) - log(d.p) - log(d.r)), T(inv(d.r)))
+    NegativeBinomialLogLocation{T}(T(log(d.r) + log1p(-d.p) - log(d.p)), T(inv(d.r)))
 end
 function convert(::Type{NegativeBinomialLogLocation{T}}, d::NegativeBinomialLocation) where {T<:Real}
     NegativeBinomialLogLocation{T}(T(log(d.μ)), T(d.ϕ))
