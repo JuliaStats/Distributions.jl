@@ -37,7 +37,7 @@ function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractMatrix) wh
     n = length(r)
     size(X) == (length(d),n) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    for i in 1:n
+    for i in axes(r, 1)
         @inbounds r[i] = insupport(d, view(X, :, i))
     end
     return r
