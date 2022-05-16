@@ -377,8 +377,8 @@ _logpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogp
 function _cwise_pdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for i = 1:K
-        r[i] = pdf(component(d, i), x)
+    for (ri, i) in zip(axes(r,1), 1:K)
+        r[ri] = pdf(component(d, i), x)
     end
     r
 end
@@ -386,8 +386,8 @@ end
 function _cwise_logpdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for i = 1:K
-        r[i] = logpdf(component(d, i), x)
+    for (ri, i) in zip(axes(r,1), 1:K)
+        r[ri] = logpdf(component(d, i), x)
     end
     r
 end
@@ -396,11 +396,11 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for i = 1:K
+    for (ri, i) in zip(axes(r, 2), 1:K)
         if d isa UnivariateMixture
-            view(r,:,i) .= pdf.(Ref(component(d, i)), X)
+            view(r,:,ri) .= pdf.(Ref(component(d, i)), X)
         else
-            pdf!(view(r,:,i),component(d, i), X)
+            pdf!(view(r,:,ri),component(d, i), X)
         end
     end
     r
@@ -410,11 +410,11 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for i = 1:K
+    for (ri, i) in zip(axes(r, 2), 1:K)
         if d isa UnivariateMixture
-            view(r,:,i) .= logpdf.(Ref(component(d, i)), X)
+            view(r,:,ri) .= logpdf.(Ref(component(d, i)), X)
         else
-            logpdf!(view(r,:,i), component(d, i), X)
+            logpdf!(view(r,:,ri), component(d, i), X)
         end
     end
     r
