@@ -318,7 +318,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     p = probs(d)
     n = length(r)
     Lp = Matrix{eltype(p)}(undef, n, K)
-    m = fill(-Inf, n)
+    m = similar(r)
     @inbounds for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
@@ -334,7 +334,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 
             # in the mean time, add log(prior) to lp and
             # update the maximum for each sample
-            for j = 1:n
+            for j in axes(r, 1)
                 lp_i[j] += lpri
                 if lp_i[j] > m[j]
                     m[j] = lp_i[j]
@@ -347,13 +347,13 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     @inbounds for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
-            for j = 1:n
-                r[j] += exp(lp_i[j] - m[j])
+            for (j, lp_ij) in zip(axes(r, 1), lp_i)
+                r[j] += exp(lp_ij - m[j])
             end
         end
     end
 
-    @inbounds for j = 1:n
+    @inbounds for j in axes(r, 1)
         r[j] = log(r[j]) + m[j]
     end
     return r
