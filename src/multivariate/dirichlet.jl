@@ -191,30 +191,30 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
     K = size(P, 1)
     n = size(P, 2)
     slogp = zeros(K)
-    for i = 1:n
-        for k = 1:K
-            @inbounds slogp[k] += log(P[k,i])
+    for i in axes(P, 2)
+        for (k, kP) in zip(1:K, axes(P,1))
+            @inbounds slogp[k] += log(P[kP,i])
         end
     end
     DirichletStats(slogp, n)
 end
 
 function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                   w::AbstractArray{Float64})
+                   w::AbstractArray{Float64,1})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
-    tw = 0.
+    tw = zero(Float64)
     slogp = zeros(K)
 
-    for i = 1:n
+    for (i, iP) in zip(axes(w, 1), axes(P, 2))
         @inbounds wi = w[i]
         tw += wi
-        for k = 1:K
-            @inbounds slogp[k] += log(P[k,i]) * wi
+        for (k, kP) in zip(1:K, axes(P,1))
+            @inbounds slogp[k] += log(P[kP,iP]) * wi
         end
     end
     DirichletStats(slogp, tw)
@@ -226,6 +226,8 @@ end
 
 function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     K = length(μ)
+
+    K == length(γ) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     α0 = 0.
     for k = 1:K
@@ -253,19 +255,21 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     _dirichlet_mle_init2(μ, γ)
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractVector{Float64})
     K = size(P, 1)
     n = size(P, 2)
+
+    n == length(w) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     μ = zeros(K)  # E[p]
     γ = zeros(K)  # E[p^2]
     tw = 0.0
 
-    for i in 1:n
+    for (i, iP) in zip(axes(w, 1), axes(P, 2))
         @inbounds wi = w[i]
         tw += wi
-        for k in 1:K
-            pk = P[k, i]
+        for k in axes(P, 1)
+            pk = P[k, iP]
             @inbounds μ[k] += pk * wi
             @inbounds γ[k] += pk * pk * wi
         end
@@ -364,7 +368,7 @@ function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
 end
 
 function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                 w::AbstractArray{Float64};
+                 w::AbstractVector{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
     debug::Bool=false)
 
