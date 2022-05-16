@@ -89,7 +89,7 @@ function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}) where T<:Real
     end
     DirichletMultinomialStats(n, s, m)
 end
-function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Array{Float64}) where T<:Real
+function suffstats(::Type{<:DirichletMultinomial}, x::Matrix{T}, w::Vector{Float64}) where T<:Real
     length(w) == size(x, 2) || throw(DimensionMismatch("Inconsistent argument dimensions."))
     ns = sum(x, dims=1)
     n = ns[1]
