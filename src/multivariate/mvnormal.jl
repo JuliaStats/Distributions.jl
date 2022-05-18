@@ -48,11 +48,15 @@ struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNo
 end
 ```
 
-Here, the mean vector can be an instance of any `AbstractVector`. The covariance can be
-of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
-`PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
-in the form of ``\\sigma^2 \\mathbf{I}``. (See the Julia package
+Here, the mean vector can be an instance of any `AbstractVector`.
+
+Special handling is included if the covariance is a subtype of `AbstractPDMat`.
+Particularly, one can use `PDMat` for full covariance, `PDiagMat` for diagonal covariance,
+and `ScalMat` for the isotropic covariance 
+-- those in the form of ``\\sigma^2 \\mathbf{I}``. (See the Julia package
 [PDMats](https://github.com/JuliaStats/PDMats.jl/) for details).
+If you pass a dense `Matrix` for the covariance, it is automatically converted to a `PDMat`.
+For other matrix types, you have to convert them yourself.
 
 We also define a set of aliases for the types using different combinations of mean vectors and covariance:
 
@@ -166,9 +170,14 @@ Generally, users don't have to worry about these internal details.
 We provide a common constructor `MvNormal`, which will construct a distribution of
 appropriate type depending on the input arguments.
 """
-struct MvNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
+
+    function MvNormal{T, Cov, Mean}(μ::Mean, Σ::Cov) where {T, Mean, Cov}
+        size(Σ, 1) == size(Σ, 2) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
+        return new{T, Cov, Mean}(μ, Σ)
+    end
 end
 
 const MultivariateNormal = MvNormal  # for the purpose of backward compatibility
@@ -182,11 +191,10 @@ const ZeroMeanDiagNormal{Axes} = MvNormal{Float64,PDiagMat{Float64,Vector{Float6
 const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}},Zeros{Float64,1,Axes}}
 
 ### Construction
-function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
-    dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
-    MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
-end
 
+function MvNormal(μ::AbstractVector{T}, Σ) where T
+    MvNormal{T, typeof(μ), typeof(Σ)}(μ, Σ)
+end
 function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
     MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
@@ -198,7 +206,7 @@ end
 
 Construct a multivariate normal distribution with mean `μ` and covariance matrix `Σ`.
 """
-MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Matrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormal(μ, PDiagMat(Σ.data.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
@@ -213,7 +221,7 @@ end
 """
     MvNormal(Σ::AbstractMatrix{<:Real})
 
-Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
+    Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
 """
 MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
@@ -264,27 +272,40 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = _invquad(d.Σ, x .- d.μ)
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    invquad!(r, d.Σ, x .- d.μ)
+    _invquad!(r, d.Σ, x .- d.μ)
+
+_invquad(a::AbstractPDMat, x) = PDMats.invquad(a, x)
+_invquad(a, x) = x' / a * x
+
+_invquad!(a::AbstractPDMat, x) = PDMats.invquad!(r, a, x)
+_invquad!(r, a, x) = copyto!(r, _invquad(a, x))
+
 
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
 function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
-    unwhiten!(d.Σ, randn!(rng, x))
+    _unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ
     return x
 end
+
+# This mutates `x`, not `a`, but we are just matching what PDMats.jl dones
+_unwhiten!(a, x) = lmul!(PDMats.chol_lower(cholesky(a)), x)
+
+
+
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds x[i] = randn(rng, eltype(x))
     end
-    unwhiten!(d.Σ, x)
+    _unwhiten!(d.Σ, x)
     x .+= d.μ
     return x
 end

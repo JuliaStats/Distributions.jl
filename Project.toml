@@ -31,6 +31,7 @@ StatsFuns = "0.9.15, 1"
 julia = "1.3"
 
 [extras]
+BlockDiagonals = "0a1fb500-61f7-11e9-3c65-f5ef3456f9f0"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 ChainRulesTestUtils = "cdddcdb0-9152-4a09-a978-84456f9df70a"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -43,4 +44,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["StableRNGs", "Calculus", "ChainRulesTestUtils", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test", "OffsetArrays"]
+test = ["BlockDiagonals", "StableRNGs", "Calculus", "ChainRulesTestUtils", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test", "OffsetArrays"]
