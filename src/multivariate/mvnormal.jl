@@ -197,7 +197,9 @@ function MvNormal(μ::AbstractVector{T}, Σ) where T
 end
 function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
-    MvNormal(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, Σ))
+    μc = convert(AbstractArray{R}, μ)
+    Σc = convert(AbstractArray{R}, Σ)
+    MvNormal{R, typeof(Σc), typeof(μc)}(μc, Σc)
 end
 
 # constructor with general covariance matrix
