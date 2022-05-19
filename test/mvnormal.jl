@@ -54,9 +54,8 @@ using BlockDiagonals
         (MvNormal(mu, Hermitian(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
         (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))),
         (MvNormal([mu_r; mu_r], BlockDiagonal([C, C])), [mu_r; mu_r], Matrix(BlockDiagonal([C, C]))),
-        (MvNormal([mu_r; mu_r], BlockDiagonal([PDMat(C), PDMat(C)])), [mu_r; mu_r], Matric(BlockDiagonal([C, C]))),
-        (MvNormalCanon([mu_r; mu_r], BlockDiagonal([C, C])), [mu_r; mu_r], Matrix(BlockDiagonal([C, C]))),
-        (MvNormalCanon([mu_r; mu_r], BlockDiagonal([PDMat(C), PDMat(C)])), [mu_r; mu_r], Matric(BlockDiagonal([C, C]))),
+        (MvNormal([mu_r; mu_r], BlockDiagonal([PDMat(C), PDMat(C)])), [mu_r; mu_r], Matrix(BlockDiagonal([C, C]))),
+        (MvNormalCanon([mu_r; mu_r], BlockDiagonal([C, C])), BlockDiagonal([C, C]) \ [mu_r; mu_r], inv(BlockDiagonal([C, C]))),
         ]
 
         @test mean(g)   ≈ μ
