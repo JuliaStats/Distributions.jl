@@ -272,16 +272,11 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 ### Evaluation
 
-sqmahal(d::MvNormal, x::AbstractVector) = _invquad(d.Σ, x .- d.μ)
+sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
-    _invquad!(r, d.Σ, x .- d.μ)
+    invquad!(r, d.Σ, x .- d.μ)
 
-_invquad(a::AbstractPDMat, x) = PDMats.invquad(a, x)
-_invquad(a, x) = x' / a * x
-
-_invquad!(a::AbstractPDMat, x) = PDMats.invquad!(r, a, x)
-_invquad!(r, a, x) = copyto!(r, _invquad(a, x))
 
 
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
@@ -289,23 +284,17 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 # Sampling (for GenericMvNormal)
 
 function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
-    _unwhiten!(d.Σ, randn!(rng, x))
+    unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ
     return x
 end
-
-# This mutates `x`, not `a`, but we are just matching what PDMats.jl dones
-_unwhiten!(a, x) = lmul!(PDMats.chol_lower(cholesky(a)), x)
-
-
-
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
 function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds x[i] = randn(rng, eltype(x))
     end
-    _unwhiten!(d.Σ, x)
+    unwhiten!(d.Σ, x)
     x .+= d.μ
     return x
 end
