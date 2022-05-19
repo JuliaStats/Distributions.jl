@@ -193,7 +193,7 @@ const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}}
 ### Construction
 
 function MvNormal(μ::AbstractVector{T}, Σ) where T
-    MvNormal{T, typeof(μ), typeof(Σ)}(μ, Σ)
+    MvNormal{T, typeof(Σ), typeof(μ)}(μ, Σ)
 end
 function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
     R = Base.promote_eltype(μ, Σ)
