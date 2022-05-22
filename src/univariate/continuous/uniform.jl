@@ -125,22 +125,11 @@ _rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
 
 #### Fitting
 
-function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:Uniform}, x::AbstractArray{<:Real})
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
-
-    xmin = xmax = x[1]
-    for i = 2:length(x)
-        xi = x[i]
-        if xi < xmin
-            xmin = xi
-        elseif xi > xmax
-            xmax = xi
-        end
-    end
-
-    Uniform(xmin, xmax)
+    return Uniform(extrema(x)...)
 end
 
 # ChainRules definitions
