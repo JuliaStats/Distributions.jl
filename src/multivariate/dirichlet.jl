@@ -417,7 +417,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector
     y = _logpdf(d, x)
     function Dirichlet_logpdf_pullback(dy)
         ∂alpha = xlogy.(dy, x)
-        ∂l = -dy
+        ∂l = -dy # + (SpecialFunctions.digamma(alpha_i) - digamma_alpha0)
         ∂x = dy .* (d.alpha .-1) ./ x
         ∂alpha0 = sum(∂alpha)
         if !isfinite(y)
