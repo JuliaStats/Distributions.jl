@@ -390,14 +390,13 @@ end
 
 function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
-    alpha0 = d.alpha0
-    function dirichlet_pullback(_Δd)
+    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
+    function Dirichlet_pullback(_Δd)
         Δd = ChainRulesCore.unthunk(_Δd)
-        digamma_alpha0 = SpecialFunctions.digamma(alpha0)
         Δalpha = Δd.alpha .+ Δd.alpha0 .+ Δd.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
         return ChainRulesCore.NoTangent(), Δalpha
     end
-    return d, dirichlet_pullback
+    return d, Dirichlet_pullback
 end
 
 function ChainRulesCore.frule((_, Δd, Δx)::Tuple{ChainRulesCore.NoTangent,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
