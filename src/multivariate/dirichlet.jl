@@ -377,7 +377,7 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
-function ChainRulesCore.frule((_, Δalpha)::Tuple{ChainRulesCore.NoTangent,Any}, ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
+function ChainRulesCore.frule((_, Δalpha)::Tuple{Any,Any}, ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
     ∂alpha0 = sum(Δalpha)
     digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
@@ -399,7 +399,7 @@ function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::
     return d, Dirichlet_pullback
 end
 
-function ChainRulesCore.frule((_, Δd, Δx)::Tuple{ChainRulesCore.NoTangent,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
+function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
     Ω = _logpdf(d, x)
     ∂alpha = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalphai, Δxi, alphai, xi
         xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
