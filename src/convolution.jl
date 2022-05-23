@@ -1,8 +1,11 @@
 """
     convolve(d1::Distribution, d2::Distribution)
+    d1 ⊕ d2
 
 Convolve two distributions and return the distribution corresponding to the sum of
 independent random variables drawn from the underlying distributions.
+
+The Unicode operator `⊕` can be typed by `\\oplus<tab>`.
 
 Currently, the function is only defined in cases where the convolution has a closed form.
 More precisely, the function is defined if the distributions of `d1` and `d2` are the same
@@ -67,6 +70,9 @@ function convolve(d1::MvNormal, d2::MvNormal)
     _check_convolution_shape(d1, d2)
     return MvNormal(d1.μ + d2.μ, d1.Σ + d2.Σ)
 end
+
+# define Unicode alias
+const ⊕ = convolve
 
 function _check_convolution_args(p1, p2)
     p1 ≈ p2 || throw(ArgumentError(
