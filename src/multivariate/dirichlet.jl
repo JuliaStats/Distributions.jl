@@ -377,58 +377,61 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
 end
 
 ## Differentiation
-function ChainRulesCore.frule((_, Δalpha), ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
+function ChainRulesCore.frule((_, Δalpha)::Tuple{ChainRulesCore.NoTangent,Any}, ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
-    Δalpha = ChainRulesCore.unthunk(Δalpha)
     ∂alpha0 = sum(Δalpha)
     digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
-    ∂lmnB = sum(Broadcast.instantiate(Broadcast.broadcasted(Δalpha, alpha) do Δalpha_i, alpha_i
-        Δalpha_i * (SpecialFunctions.digamma(alpha_i) - digamma_alpha0)
+    ∂lmnB = sum(Broadcast.instantiate(Broadcast.broadcasted(Δalpha, alpha) do Δalphai, alphai
+        Δalphai * (SpecialFunctions.digamma(alphai) - digamma_alpha0)
     end))
-    backing = (alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
-    t = ChainRulesCore.Tangent{typeof(d), NamedTuple{(:alpha, :alpha0, :lmnB), Tuple{typeof(alpha), typeof(d.alpha0), typeof(d.lmnB)}}}(backing)
-    return d, t
+    Δd = ChainRulesCore.Tangent{typeof(d)}(; alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
+    return d, Δd
 end
 
 function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args=check_args)
-    function dirichlet_pullback(d_dir)
-        d_dir = ChainRulesCore.unthunk(d_dir)
-        digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
-        dalpha = d_dir.alpha .+ d_dir.alpha0 .+ d_dir.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
-        return ChainRulesCore.NoTangent(), dalpha
+    alpha0 = d.alpha0
+    function dirichlet_pullback(_Δd)
+        Δd = ChainRulesCore.unthunk(_Δd)
+        digamma_alpha0 = SpecialFunctions.digamma(alpha0)
+        Δalpha = Δd.alpha .+ Δd.alpha0 .+ Δd.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
+        return ChainRulesCore.NoTangent(), Δalpha
     end
     return d, dirichlet_pullback
 end
 
-function ChainRulesCore.frule((_, Δd, Δx), ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
-    lp = _logpdf(d, x)
-    ∂α_x = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalpha_i, Δx_i, alpha_i, x_i
-        xlogy(Δalpha_i, x_i) + (alpha_i - 1) * Δx_i / x_i
+function ChainRulesCore.frule((_, Δd, Δx)::Tuple{ChainRulesCore.NoTangent,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
+    Ω = _logpdf(d, x)
+    ∂alpha = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalphai, Δxi, alphai, xi
+        xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
     end))
-    ∂l = -Δd.lmnB
-    if !insupport(d, x)
-        ∂α_x = oftype(∂α_x, NaN)
+    ∂lmnB = -Δd.lmnB
+    ΔΩ = ∂alpha + ∂lmnB
+    if !isfinite(Ω)
+        ΔΩ = oftype(ΔΩ, NaN)
     end
-    return (lp, ∂α_x + ∂l)
+    return Ω, ΔΩ
 end
 
-function ChainRulesCore.rrule(::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
-    y = _logpdf(d, x)
-    function Dirichlet_logpdf_pullback(dy)
-        ∂alpha = xlogy.(dy, x)
-        ∂l = -dy
-        ∂x = dy .* (d.alpha .-1) ./ x
-        ∂alpha0 = sum(∂alpha)
-        if !isfinite(y)
-            ∂alpha = oftype(eltype(∂alpha), NaN) * ∂alpha
-            ∂l = oftype(∂l, NaN)
-            ∂x = oftype(eltype(∂x), NaN) * ∂x
-            ∂alpha0 = oftype(eltype(∂alpha), NaN)
-        end
-        backing = (alpha = ∂alpha, alpha0 = ∂alpha0, lmnB=∂l)
-        ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
-        return (ChainRulesCore.NoTangent(), ∂d, ∂x)
+function ChainRulesCore.rrule(::typeof(_logpdf), d::T, x::AbstractVector{<:Real}) where {T<:Dirichlet}
+    Ω = _logpdf(d, x)
+    isfinite_Ω = isfinite(Ω)
+    alpha = d.alpha
+    function _logpdf_Dirichlet_pullback(_ΔΩ)
+        ΔΩ = ChainRulesCore.unthunk(_ΔΩ)
+        ∂alpha = _logpdf_Dirichlet_∂alphai.(x, ΔΩ, isfinite_Ω)
+        ∂lmnB = isfinite_Ω ? -float(ΔΩ) : oftype(float(ΔΩ), NaN)
+        Δd = ChainRulesCore.Tangent{T}(; alpha=∂alpha, lmnB=∂lmnB)
+        Δx = _logpdf_Dirichlet_Δxi.(ΔΩ, alpha, x, isfinite_Ω)
+        return ChainRulesCore.NoTangent(), Δd, Δx
     end
-    return (y, Dirichlet_logpdf_pullback)
+    return Ω, _logpdf_Dirichlet_pullback
+end
+function _logpdf_Dirichlet_∂alphai(xi, ΔΩi, isfinite::Bool)
+    ∂alphai = xlogy.(ΔΩi, xi)
+    return isfinite ? ∂alphai : oftype(∂alphai, NaN)
+end
+function _logpdf_Dirichlet_Δxi(ΔΩi, alphai, xi, isfinite::Bool)
+    Δxi = ΔΩi * (alphai - 1) / xi
+    return isfinite ? Δxi : oftype(Δxi, NaN)
 end
