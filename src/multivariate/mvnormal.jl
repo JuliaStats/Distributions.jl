@@ -543,7 +543,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
         ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
         return ChainRulesCore.NoTangent(), ∂d, - 0.5 * ∂x_sq
     end
-    return c0 - 0.5 * sq, logpdf_MvNormal_pullback
+    return c0 - sq / 2, logpdf_MvNormal_pullback
 end
 
 function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::MvNormal)
