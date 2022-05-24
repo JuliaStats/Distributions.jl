@@ -356,9 +356,7 @@ end
             (y, Δy) = @inferred ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, Δx), Distributions._logpdf, d, x)
             (yr, logpdf_MvNormal_pullback) = @inferred ChainRulesCore.rrule(Distributions._logpdf, d, x)
             @test y ≈ yr
-            # inference broken
-            # (_, ∇s_d, ∇s_x) = @inferred logpdf_MvNormal_pullback(1.0)
-            (_, ∇s_d, ∇s_x) = logpdf_MvNormal_pullback(1.0)
+            (_, ∇s_d, ∇s_x) = @inferred logpdf_MvNormal_pullback(1.0)
 
             y2 = Distributions._logpdf(MvNormal(d.μ + t.μ, d.Σ + t.Σ), x + Δx)
             y3 = Distributions._logpdf(MvNormal(d.μ - t.μ, d.Σ - t.Σ), x - Δx)

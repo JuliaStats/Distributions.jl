@@ -534,13 +534,15 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
         (_, ∂d_c0) = c0_pullback(dy)
         ∂d_c0 = ChainRulesCore.unthunk(∂d_c0)
         (_, ∂d_sq, ∂x_sq) = sq_pullback(dy)
-        ∂d_sq = ChainRulesCore.unthunk(∂d_sq)
-        ∂x_sq = ChainRulesCore.unthunk(∂x_sq)
+        ∂d_sq_v = ChainRulesCore.unthunk(∂d_sq)
+        ∂x_sq_v::typeof(x) = ChainRulesCore.unthunk(∂x_sq)
+        μs::typeof(d.μ) = ∂d_sq_v.μ
+        Σs::Matrix{partype(d)} = ∂d_sq_v.Σ
         ∂d = ChainRulesCore.Tangent{typeof(d)}(;
-            μ = ∂d_c0.μ - 0.5 * ∂d_sq.μ,
-            Σ = ∂d_c0.Σ - 0.5 * ∂d_sq.Σ,
+            μ = ∂d_c0.μ - 0.5 * μs,
+            Σ = ∂d_c0.Σ - 0.5 * Σs,
         )
-        return ChainRulesCore.NoTangent(), ∂d, -∂x_sq / 2
+        return ChainRulesCore.NoTangent(), ∂d, -∂x_sq_v / 2
     end
     return c0 - sq / 2, logpdf_MvNormal_pullback
 end
