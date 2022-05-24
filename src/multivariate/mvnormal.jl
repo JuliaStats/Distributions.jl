@@ -536,11 +536,10 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
         (_, ∂d_sq, ∂x_sq) = sq_pullback(dy)
         ∂d_sq = ChainRulesCore.unthunk(∂d_sq)
         ∂x_sq = ChainRulesCore.unthunk(∂x_sq)
-        backing = NamedTuple{(:μ, :Σ), Tuple{typeof(∂d_sq.μ), typeof(∂d_sq.Σ)}}((
-            (∂d_c0.μ - 0.5 * ∂d_sq.μ),
-            (∂d_c0.Σ - 0.5 * ∂d_sq.Σ),
-        ))
-        ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
+        ∂d = ChainRulesCore.Tangent{typeof(d)}(;
+            μ = ∂d_c0.μ - 0.5 * ∂d_sq.μ,
+            Σ = ∂d_c0.Σ - 0.5 * ∂d_sq.Σ,
+        )
         return ChainRulesCore.NoTangent(), ∂d, - 0.5 * ∂x_sq
     end
     return c0 - 0.5 * sq, logpdf_MvNormal_pullback

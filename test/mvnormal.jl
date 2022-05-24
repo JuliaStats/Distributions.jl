@@ -333,7 +333,7 @@ end
             @test unthunk(Δy) ≈ y2 - y atol= n * 1e-4
             y3 = Distributions.mvnormal_c0(MvNormal(d.μ, d.Σ - t.Σ))
             @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
-            (_, ∇c0) = c0_pullback(1.0)
+            (_, ∇c0) = @inferred c0_pullback(1.0)
             ∇c0 = ChainRulesCore.unthunk(∇c0)
             @test dot(∇c0.Σ, t.Σ) ≈ y2 - y atol = n * 1e-4
             @test dot(∇c0.Σ, t.Σ) ≈ y - y3 atol = n * 1e-4
