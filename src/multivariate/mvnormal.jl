@@ -540,9 +540,9 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
             μ = ∂d_c0.μ - 0.5 * ∂d_sq.μ,
             Σ = ∂d_c0.Σ - 0.5 * ∂d_sq.Σ,
         )
-        return ChainRulesCore.NoTangent(), ∂d, - 0.5 * ∂x_sq
+        return ChainRulesCore.NoTangent(), ∂d, -∂x_sq / 2
     end
-    return c0 - 0.5 * sq, logpdf_MvNormal_pullback
+    return c0 - sq / 2, logpdf_MvNormal_pullback
 end
 
 function ChainRulesCore.frule((_, Δd)::Tuple{Any,Any}, ::typeof(mvnormal_c0), d::MvNormal)
