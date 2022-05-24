@@ -130,52 +130,31 @@ end
     @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
 end
 
-@testset "Dirichlet differentiation $n" for n in (2, 10)
+@testset "Dirichlet: ChainRules (length=$n)" for n in (2, 10)
     alpha = rand(n)
-    Δalpha = randn(n)
-    d, ∂d = @inferred ChainRulesCore.frule((nothing, Δalpha), Dirichlet, alpha)
-    ChainRulesTestUtils.test_frule(Dirichlet ⊢ ChainRulesCore.NoTangent(), alpha ⊢ Δalpha; fdm=FiniteDifferences.forward_fdm(5, 1))
-    ChainRulesTestUtils.test_rrule(Dirichlet{Float64}, alpha; fdm=FiniteDifferences.forward_fdm(5, 1))
-    x = rand(n)
-    x ./= sum(x)
-    Δx = 0.05 * rand(n)
-    Δx .-= mean(Δx)
-    # such that x ∈ Δ, x + Δx ∈ Δ
-    ChainRulesTestUtils.test_frule(Distributions._logpdf, d, x ⊢ Δx, fdm=FiniteDifferences.forward_fdm(5, 1))
-    @testset "finite diff f/r-rule logpdf" begin
-        for _ in 1:10
-            x = rand(n)
-            x ./= sum(x)
-            Δx = 0.005 * rand(n)
-            Δx .-= mean(Δx)
-            if insupport(d, x + Δx) && insupport(d, x - Δx)
-                y, pullback = ChainRulesCore.rrule(Distributions._logpdf, d, x)
-                yf, Δy = ChainRulesCore.frule(
-                    (
-                        ChainRulesCore.NoTangent(),
-                        map(zero, ChainRulesTestUtils.rand_tangent(d)),
-                        Δx,
-                    ),
-                    Distributions._logpdf,
-                    d, x,
-                )
-                y2 = Distributions._logpdf(d, x + Δx)
-                y1 = Distributions._logpdf(d, x - Δx)
-                @test isfinite(y)
-                @test y == yf
-                @test Δy ≈ y2 - y atol=5e-3
-                _, ∂d, ∂x = pullback(1.0)
-                @test y2 - y1 ≈ dot(2Δx, ∂x) atol=5e-3 rtol=1e-6
-                # mutating alpha only to compute a new y, changing only this term and not the others in Dirichlet
-                Δalpha = 0.03 * rand(n)
-                Δalpha .-= mean(Δalpha)
-                @assert all(>=(0), alpha + Δalpha)
-                d.alpha .+= Δalpha
-                ya = Distributions._logpdf(d, x)
-                # resetting alpha
-                d.alpha .-= Δalpha
-                @test ya - y ≈ dot(Δalpha, ∂d.alpha) atol=1e-6 rtol=1e-6
-            end
+    d = Dirichlet(alpha)
+
+    @testset "constructor $T" for T in (Dirichlet, Dirichlet{Float64})
+        # Avoid issues with finite differencing if values in `alpha` become negative or zero
+        # by using forward differencing
+        test_frule(T, alpha; fdm=forward_fdm(5, 1))
+        test_rrule(T, alpha; fdm=forward_fdm(5, 1))
+    end
+
+    @testset "_logpdf" begin
+        # `x1` is in the support, `x2` isn't
+        x1 = rand(n)
+        x1 ./= sum(x1)
+        x2 = x1 .+ 1
+
+        # Use special finite differencing method that tries to avoid moving outside of the
+        # support by limiting the range of the points around the input that are evaluated
+        fdm = central_fdm(5, 1; max_range=1e-9)
+
+        for x in (x1, x2)
+            # We have to adjust the tolerance since the finite differencing method is rough
+            test_frule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
+            test_rrule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
         end
     end
 end
