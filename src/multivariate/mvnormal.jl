@@ -541,7 +541,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::MvNormal, x::AbstractVector)
             (∂d_c0.Σ - 0.5 * ∂d_sq.Σ),
         ))
         ∂d = ChainRulesCore.Tangent{typeof(d), typeof(backing)}(backing)
-        return ChainRulesCore.NoTangent(), ∂d, - 0.5 * ∂x_sq
+        return ChainRulesCore.NoTangent(), ∂d, ∂x_sq / (-2)
     end
     return c0 - sq / 2, logpdf_MvNormal_pullback
 end
