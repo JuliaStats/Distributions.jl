@@ -113,44 +113,39 @@ rand(rng::AbstractRNG, d::Bernoulli) = rand(rng) <= succprob(d)
 
 #### MLE fitting
 
-struct BernoulliStats <: SufficientStats
-    cnt0::Float64
-    cnt1::Float64
-
-    BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
+struct BernoulliStats{C<:Real} <: SufficientStats
+    cnt0::C
+    cnt1::C
 end
+
+BernoulliStats(c0::Real, c1::Real) = BernoulliStats(promote(c0, c1)...)
 
 fit_mle(::Type{<:Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
 
 function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}) where T<:Integer
-    n = length(x)
     c0 = c1 = 0
-    for i = 1:n
-        @inbounds xi = x[i]
+    for xi in x
         if xi == 0
             c0 += 1
         elseif xi == 1
             c1 += 1
         else
-            throw(DomainError())
+            throw(DomainError(xi, "samples must be 0 or 1"))
         end
     end
     BernoulliStats(c0, c1)
 end
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    n = length(x)
-    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
-    c0 = c1 = 0
-    for i = 1:n
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray{<:Real}) where T<:Integer
+    length(x) == length(w) || throw(DimensionMismatch("inconsistent argument dimensions"))
+    c0 = c1 = zero(eltype(w))
+    for (xi, wi) in zip(x, w)
         if xi == 0
             c0 += wi
         elseif xi == 1
             c1 += wi
         else
-            throw(DomainError())
+            throw(DomainError(xi, "samples must be 0 or 1"))
         end
     end
     BernoulliStats(c0, c1)
