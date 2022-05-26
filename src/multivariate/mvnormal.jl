@@ -582,14 +582,13 @@ end
 function ChainRulesCore.rrule(::typeof(sqmahal), d::MvNormal, x::AbstractVector)
     y = sqmahal(d, x)
     function sqmahal_pullback(dy)
+        Σinv = invcov(d)
         ∂x = ChainRulesCore.@thunk(begin
             dy = ChainRulesCore.unthunk(dy)
-            Σinv = invcov(d)
             2dy * Σinv * (x - d.μ)
         end)
         ∂d = ChainRulesCore.@thunk(begin
             dy = ChainRulesCore.unthunk(dy)
-            Σinv = invcov(d)
             cx = x - d.μ
             ∂μ = -2dy * Σinv * cx
             ∂J = dy * cx * cx'
