@@ -132,11 +132,11 @@ for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
     @test truncated(Normal(μ, 1); lower=lower, upper=upper) === d
 end
 for bound in (-2, 1)
-    d = Distributions.Truncated(Normal(), Float64(bound), Inf)
+    d = @test_deprecated Distributions.Truncated(Normal(), Float64(bound), Inf)
     @test truncated(Normal(); lower=bound) == d
     @test truncated(Normal(); lower=bound, upper=Inf) == d
 
-    d = Distributions.Truncated(Normal(), -Inf, Float64(bound))
+    d = @test_deprecated Distributions.Truncated(Normal(), -Inf, Float64(bound))
     @test truncated(Normal(); upper=bound) == d
     @test truncated(Normal(); lower=-Inf, upper=bound) == d
 end
@@ -184,4 +184,10 @@ end
     @test sprint(show, "text/plain", truncated(Normal(); lower=2.0)) == "Truncated($(Normal()); lower=2.0)"
     @test sprint(show, "text/plain", truncated(Normal(); upper=3.0)) == "Truncated($(Normal()); upper=3.0)"
     @test sprint(show, "text/plain", truncated(Normal(), 2.0, 3.0)) == "Truncated($(Normal()); lower=2.0, upper=3.0)"
+end
+
+@testset "sampling with small mass (#1548)" begin
+    d = truncated(Beta(10, 100); lower=0.5)
+    x = rand(d, 10_000)
+    @test mean(x) ≈ 0.5 atol=0.05
 end
