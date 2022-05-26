@@ -162,10 +162,11 @@ struct BinomialStats{N<:Real} <: SufficientStats
     n::Int        # the number of trials in each experiment
 end
 
-BinomialStats(ns::Real, ne::Real, n::Integer) = BinomialStats(promote(ns, ne)..., n)
+BinomialStats(ns::Real, ne::Real, n::Integer) = BinomialStats(promote(ns, ne)..., Int(n))
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<:Integer
-    ns = zero(T)
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer})
+    z = zero(eltype(x))
+    ns = z + z # possibly widened and different from `z`, e.g., if `z = true`
     for xi in x
         0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi
@@ -173,9 +174,9 @@ function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{<:Real}) where T<:Integer
-    ns = zero(T) * zero(eltype(w))
-    ne = zero(eltype(w))
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
+    z = zero(eltype(x)) * zero(eltype(w))
+    ns = ne = z + z # possibly widened and different from `z`, e.g., if `z = true`
     for (xi, wi) in zip(x, w)
         0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi * wi
@@ -191,8 +192,8 @@ suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{<:Real}) = suffs
 
 fit_mle(::Type{<:Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{<:Real}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
+fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}) = fit_mle(Binomial, suffstats(Binomial, n, x))
+fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real}) = fit_mle(Binomial, suffstats(Binomial, n, x, w))
 fit_mle(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
 fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{<:Real}) = fit_mle(Binomial, suffstats(Binomial, data, w))
 

@@ -122,7 +122,7 @@ BernoulliStats(c0::Real, c1::Real) = BernoulliStats(promote(c0, c1)...)
 
 fit_mle(::Type{<:Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}) where T<:Integer
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{<:Integer})
     c0 = c1 = 0
     for xi in x
         if xi == 0
@@ -136,9 +136,10 @@ function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}) where T<:Integer
     BernoulliStats(c0, c1)
 end
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray{<:Real}) where T<:Integer
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
     length(x) == length(w) || throw(DimensionMismatch("inconsistent argument dimensions"))
-    c0 = c1 = zero(eltype(w))
+    z = zero(eltype(w))
+    c0 = c1 = z + z # possibly widened and different from `z`, e.g., if `z = true`
     for (xi, wi) in zip(x, w)
         if xi == 0
             c0 += wi
