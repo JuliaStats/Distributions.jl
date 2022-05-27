@@ -5,6 +5,7 @@
 #
 
 using Distributions
+using OffsetArrays
 using Test, Random, LinearAlgebra
 
 
@@ -33,33 +34,35 @@ end
 
 
 @testset "Testing fit for Bernoulli" begin
-    for func in funcs, dist in (Bernoulli, Bernoulli{Float64})
-        w = func[1](n0)
-        x = func[2](dist(0.7), n0)
+    for rng in ((), (rng,)), D in (Bernoulli, Bernoulli{Float64})
+        v = rand(rng..., n0)
+        z = rand(rng..., D(0.7), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
+            ss = @inferred suffstats(D, x)
+            @test ss isa Distributions.BernoulliStats
+            @test ss.cnt0 == n0 - count(t->t != 0, z)
+            @test ss.cnt1 == count(t->t != 0, z)
 
-        ss = suffstats(dist, x)
-        @test isa(ss, Distributions.BernoulliStats)
-        @test ss.cnt0 == n0 - count(t->t != 0, x)
-        @test ss.cnt1 == count(t->t != 0, x)
+            ss = @inferred suffstats(D, x, w)
+            @test ss isa Distributions.BernoulliStats
+            @test ss.cnt0 ≈ sum(v[z .== 0])
+            @test ss.cnt1 ≈ sum(v[z .== 1])
 
-        ss = suffstats(dist, x, w)
-        @test isa(ss, Distributions.BernoulliStats)
-        @test ss.cnt0 ≈ sum(w[x .== 0])
-        @test ss.cnt1 ≈ sum(w[x .== 1])
+            d = @inferred fit(D, x)
+            @test d isa D
+            @test mean(d) ≈ count(t->t != 0, z) / n0
 
-        d = fit(dist, x)
-        p = count(t->t != 0, x) / n0
-        @test isa(d, dist)
-        @test mean(d) ≈ p
+            d = @inferred fit(D, x, w)
+            @test d isa D
+            @test mean(d) ≈ sum(v[z .== 1]) / sum(v)
+        end
 
-        d = fit(dist, x, w)
-        p = sum(w[x .== 1]) / sum(w)
-        @test isa(d, dist)
-        @test mean(d) ≈ p
-
-        d = fit(dist, func[2](dist(0.7), N))
-        @test isa(d, dist)
-        @test isapprox(mean(d), 0.7, atol=0.01)
+        z = rand(rng..., D(0.7), N)
+        for x in (z, OffsetArray(z, -N ÷ 2))
+            d = @inferred fit(D, x)
+            @test d isa D
+            @test mean(d) ≈ 0.7 atol=0.01
+        end
     end
 end
 
@@ -79,37 +82,40 @@ end
 end
 
 @testset "Testing fit for Binomial" begin
-    for func in funcs, dist in (Binomial, Binomial{Float64})
-        w = func[1](n0)
+    for rng in ((), (rng,)), D in (Binomial, Binomial{Float64})
+        v = rand(rng..., n0)
+        z = rand(rng..., D(100, 0.3), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
+            ss = @inferred suffstats(D, (100, x))
+            @test ss isa Distributions.BinomialStats
+            @test ss.ns ≈ sum(z)
+            @test ss.ne == n0
+            @test ss.n == 100
 
-        x = func[2](dist(100, 0.3), n0)
+            ss = @inferred suffstats(D, (100, x), w)
+            @test ss isa Distributions.BinomialStats
+            @test ss.ns ≈ dot(z, v)
+            @test ss.ne ≈ sum(v)
+            @test ss.n == 100
 
-        ss = suffstats(dist, (100, x))
-        @test isa(ss, Distributions.BinomialStats)
-        @test ss.ns ≈ sum(x)
-        @test ss.ne == n0
-        @test ss.n == 100
+            d = @inferred fit(D, (100, x))
+            @test d isa D
+            @test ntrials(d) == 100
+            @test succprob(d) ≈ sum(z) / (n0 * 100)
 
-        ss = suffstats(dist, (100, x), w)
-        @test isa(ss, Distributions.BinomialStats)
-        @test ss.ns ≈ dot(Float64[xx for xx in x], w)
-        @test ss.ne ≈ sum(w)
-        @test ss.n == 100
+            d = @inferred fit(D, (100, x), w)
+            @test d isa D
+            @test ntrials(d) == 100
+            @test succprob(d) ≈ dot(z, v) / (sum(v) * 100)
+        end
 
-        d = fit(dist, (100, x))
-        @test isa(d, dist)
-        @test ntrials(d) == 100
-        @test succprob(d) ≈ sum(x) / (n0 * 100)
-
-        d = fit(dist, (100, x), w)
-        @test isa(d, dist)
-        @test ntrials(d) == 100
-        @test succprob(d) ≈ dot(x, w) / (sum(w) * 100)
-
-        d = fit(dist, 100, func[2](dist(100, 0.3), N))
-        @test isa(d, dist)
-        @test ntrials(d) == 100
-        @test isapprox(succprob(d), 0.3, atol=0.01)
+        z = rand(rng..., D(100, 0.3), N)
+        for x in (z, OffsetArray(z, -N ÷ 2))
+            d = @inferred fit(D, 100, x)
+            @test d isa D
+            @test ntrials(d) == 100
+            @test succprob(d) ≈ 0.3 atol=0.01
+        end
     end
 end
 
