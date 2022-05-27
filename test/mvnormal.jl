@@ -352,18 +352,6 @@ end
             @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
             @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y2 - y atol = n * 1e-4
             @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y - y3 atol = n * 1e-4
-            # _logpdf
-            (y, Δy) = @inferred ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, Δx), Distributions._logpdf, d, x)
-            (yr, logpdf_MvNormal_pullback) = @inferred ChainRulesCore.rrule(Distributions._logpdf, d, x)
-            @test y ≈ yr
-            (_, ∇s_d, ∇s_x) = @inferred logpdf_MvNormal_pullback(1.0)
-
-            y2 = Distributions._logpdf(MvNormal(d.μ + t.μ, d.Σ + t.Σ), x + Δx)
-            y3 = Distributions._logpdf(MvNormal(d.μ - t.μ, d.Σ - t.Σ), x - Δx)
-            @test unthunk(Δy) ≈ y - y3 atol = n * 1e-4
-            @test unthunk(Δy) ≈ y2 - y atol = n * 1e-4
-            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y2 - y atol = n * 1e-4
-            @test dot(∇s_d.Σ, t.Σ) + dot(∇s_d.μ, t.μ) + dot(∇s_x, Δx) ≈ y - y3 atol = n * 1e-4
         end
     end
 end
