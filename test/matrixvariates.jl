@@ -6,6 +6,7 @@ using Statistics
 using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
+using ChainRulesTestUtils
 
 @testset "matrixvariates" begin
 #=
@@ -534,4 +535,19 @@ for distribution in matrixvariates
         test_matrixvariate(dist, n, p, M)
     end
 end
+
+@testset "Differentiation Wishart (p=$p, n=$n)" for p in (2, 10), n in (p+1, p+3)
+    M = randn(p, p)
+    M += M'
+    while !isposdef(M)
+        M += I
+    end
+    S = PDMat(M)
+    d = Wishart(n, S)
+    for _ in 1:10
+        X = M + 10 * rand() * I
+        ChainRulesTestUtils.test_rrule(Distributions.nonsingular_wishart_logkernel, d, X)
+    end
+end
+
 end

@@ -111,7 +111,7 @@ mean(d::Wishart) = d.df * Matrix(d.S)
 function mode(d::Wishart)
     r = d.df - dim(d) - 1
     r > 0 || throw(ArgumentError("mode is only defined when df > p + 1"))
-    return Matrix(d.S) * r
+    return d.S.mat * r
 end
 
 function meanlogdet(d::Wishart)
@@ -248,4 +248,34 @@ function _rand_params(::Type{Wishart}, elty, n::Int, p::Int)
     X .= 2 .* X .- 1
     S = X * X'
     return ν, S
+end
+
+# Differentiation
+
+function ChainRulesCore.frule((_, Δd, ΔX)::Tuple{Any,Any,Any}, ::typeof(nonsingular_wishart_logkernel), d, X)
+    CX = cholesky(X)
+    SinvX = d.S \ X
+    k = (d.df - (dim(d) + 1))
+    y = (k * logdet(CX) - tr(SinvX)) / 2
+    Δy = (k * tr(X \ ΔX) - tr(d.S \ ΔX) + tr(d.S \ (Δd.S * SinvX))) / 2
+    return y, Δy
+end
+
+function ChainRulesCore.rrule(::typeof(nonsingular_wishart_logkernel), d::D, X) where {D}
+    y = nonsingular_wishart_logkernel(d, X)
+    CX = cholesky(X)
+    SinvX = d.S \ X
+    k = (d.df - (dim(d) + 1))
+    y = (k * logdet(CX) - tr(SinvX)) / 2
+    function pullback_nonsingular_wishart_logkernel(dy)
+        ∂d = ChainRulesCore.@thunk(begin
+            ∂S = dy/2 * d.S \ SinvX
+            ChainRulesCore.Tangent{D}(S = ∂S, df = ChainRulesCore.NoTangent(), rank = ChainRulesCore.NoTangent())
+        end)
+        ∂X = ChainRulesCore.@thunk(begin
+            dy/2 * (k * inv(CX) - SinvX)
+        end)
+        return ChainRulesCore.NoTangent(), ∂d, ∂X
+    end
+    return y, pullback_nonsingular_wishart_logkernel
 end
