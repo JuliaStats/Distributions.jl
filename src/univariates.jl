@@ -695,6 +695,7 @@ const continuous_distributions = [
     "studentizedrange",
     "symtriangular",
     "tdist",
+    "trapezoidal",
     "triangular",
     "triweight",
     "uniform",

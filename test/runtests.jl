@@ -64,6 +64,7 @@ const tests = [
     "univariate_bounds",
     "negativebinomial",
     "bernoulli",
+    "trapezoidal",
     "soliton",
     "skewnormal",
     "chi",

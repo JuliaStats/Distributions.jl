@@ -158,6 +158,7 @@ export
     StudentizedRange,
     SymTriangularDist,
     TDist,
+    TrapezoidalDist,
     TriangularDist,
     Triweight,
     Truncated,
