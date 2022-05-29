@@ -26,7 +26,7 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
+    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
 end
 
 function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
@@ -125,11 +125,11 @@ _rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
 
 #### Fitting
 
-function fit_mle(::Type{<:Uniform}, x::AbstractArray{<:Real})
+function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
-    return Uniform(extrema(x)...)
+    return T(extrema(x)...)
 end
 
 # ChainRules definitions

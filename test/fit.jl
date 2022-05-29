@@ -291,18 +291,24 @@ end
 end
 
 @testset "Testing fit for Uniform" begin
-    for func in funcs, dist in (Uniform, Uniform{Float64})
-        x = func[2](dist(1.2, 5.8), n0)
-        d = fit(dist, x)
-        @test isa(d, dist)
-        @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-        @test minimum(d) == minimum(x)
-        @test maximum(d) == maximum(x)
+    for rng in ((), (rng,)), D in (Uniform, Uniform{Float64}, Uniform{Float32})
+        z = rand(rng..., Uniform(1.2, 5.8), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2))
+            d = fit(D, x)
+            @test d isa D
+            @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+            @test minimum(d) == partype(d)(minimum(z))
+            @test maximum(d) == partype(d)(maximum(z))
+        end
 
-        d = fit(dist, func[2](dist(1.2, 5.8), N))
-        @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-        @test isapprox(minimum(d), 1.2, atol=0.02)
-        @test isapprox(maximum(d), 5.8, atol=0.02)
+        z = rand(rng..., Uniform(1.2, 5.8), N)
+        for x in (z, OffsetArray(z, -N ÷ 2))
+            d = fit(D, x)
+            @test d isa D
+            @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+            @test minimum(d) ≈ 1.2 atol=0.02
+            @test maximum(d) ≈ 5.8 atol=0.02
+        end
     end
 end
 
