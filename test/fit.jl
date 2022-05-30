@@ -34,9 +34,9 @@ end
 
 
 @testset "Testing fit for Bernoulli" begin
-    for rng in ((), (rng,)), D in (Bernoulli, Bernoulli{Float64})
+    for rng in ((), (rng,)), D in (Bernoulli, Bernoulli{Float64}, Bernoulli{Float32})
         v = rand(rng..., n0)
-        z = rand(rng..., D(0.7), n0)
+        z = rand(rng..., Bernoulli(0.7), n0)
         for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
             ss = @inferred suffstats(D, x)
             @test ss isa Distributions.BernoulliStats
@@ -57,7 +57,7 @@ end
             @test mean(d) ≈ sum(v[z .== 1]) / sum(v)
         end
 
-        z = rand(rng..., D(0.7), N)
+        z = rand(rng..., Bernoulli(0.7), N)
         for x in (z, OffsetArray(z, -N ÷ 2))
             d = @inferred fit(D, x)
             @test d isa D
@@ -82,9 +82,9 @@ end
 end
 
 @testset "Testing fit for Binomial" begin
-    for rng in ((), (rng,)), D in (Binomial, Binomial{Float64})
+    for rng in ((), (rng,)), D in (Binomial, Binomial{Float64}, Binomial{Float32})
         v = rand(rng..., n0)
-        z = rand(rng..., D(100, 0.3), n0)
+        z = rand(rng..., Binomial(100, 0.3), n0)
         for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
             ss = @inferred suffstats(D, (100, x))
             @test ss isa Distributions.BinomialStats
@@ -109,7 +109,7 @@ end
             @test succprob(d) ≈ dot(z, v) / (sum(v) * 100)
         end
 
-        z = rand(rng..., D(100, 0.3), N)
+        z = rand(rng..., Binomial(100, 0.3), N)
         for x in (z, OffsetArray(z, -N ÷ 2))
             d = @inferred fit(D, 100, x)
             @test d isa D
@@ -291,18 +291,24 @@ end
 end
 
 @testset "Testing fit for Uniform" begin
-    for func in funcs, dist in (Uniform, Uniform{Float64})
-        x = func[2](dist(1.2, 5.8), n0)
-        d = fit(dist, x)
-        @test isa(d, dist)
-        @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-        @test minimum(d) == minimum(x)
-        @test maximum(d) == maximum(x)
+    for rng in ((), (rng,)), D in (Uniform, Uniform{Float64}, Uniform{Float32})
+        z = rand(rng..., Uniform(1.2, 5.8), n0)
+        for x in (z, OffsetArray(z, -n0 ÷ 2))
+            d = fit(D, x)
+            @test d isa D
+            @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+            @test minimum(d) == partype(d)(minimum(z))
+            @test maximum(d) == partype(d)(maximum(z))
+        end
 
-        d = fit(dist, func[2](dist(1.2, 5.8), N))
-        @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-        @test isapprox(minimum(d), 1.2, atol=0.02)
-        @test isapprox(maximum(d), 5.8, atol=0.02)
+        z = rand(rng..., Uniform(1.2, 5.8), N)
+        for x in (z, OffsetArray(z, -N ÷ 2))
+            d = fit(D, x)
+            @test d isa D
+            @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
+            @test minimum(d) ≈ 1.2 atol=0.02
+            @test maximum(d) ≈ 5.8 atol=0.02
+        end
     end
 end
 

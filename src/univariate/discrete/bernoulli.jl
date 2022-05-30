@@ -27,7 +27,7 @@ External links:
 struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
+    Bernoulli{T}(p::Real) where {T <: Real} = new{T}(p)
 end
 
 function Bernoulli(p::Real; check_args::Bool=true)
@@ -120,7 +120,7 @@ end
 
 BernoulliStats(c0::Real, c1::Real) = BernoulliStats(promote(c0, c1)...)
 
-fit_mle(::Type{<:Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
+fit_mle(::Type{T}, ss::BernoulliStats) where {T<:Bernoulli} = T(ss.cnt1 / (ss.cnt0 + ss.cnt1))
 
 function suffstats(::Type{<:Bernoulli}, x::AbstractArray{<:Integer})
     c0 = c1 = 0
