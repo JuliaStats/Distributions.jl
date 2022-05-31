@@ -9,6 +9,7 @@ import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using FillArrays
+using SparseArrays: SparseMatrixCSC, sparse, spdiagm, blockdiag
 
 using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank

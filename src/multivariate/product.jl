@@ -12,36 +12,84 @@ Product(Uniform.(rand(10), 1)) # A 10-dimensional Product from 10 independent `U
 """
 struct Product{
     S<:ValueSupport,
-    T<:UnivariateDistribution{S},
+    T<:Distribution{<:VariateForm,S},
     V<:AbstractVector{T},
 } <: MultivariateDistribution{S}
     v::V
     function Product(v::V) where
         V<:AbstractVector{T} where
-        T<:UnivariateDistribution{S} where
+        T<:Distribution{<:VariateForm,S} where
         S<:ValueSupport
         return new{S, T, V}(v)
     end
 end
 
-length(d::Product) = length(d.v)
+length(d::Product) = sum(length.(d.v))
 function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
                                                     T<:UnivariateDistribution{S}}
     return eltype(T)
 end
 
-_rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    map!(Base.Fix1(rand, rng), x, d.v)
-_logpdf(d::Product, x::AbstractVector{<:Real}) =
-    sum(n->logpdf(d.v[n], x[n]), 1:length(d))
+function _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    if all(length.(d.v) .== 1)
+        map!(Base.Fix1(rand, rng), x, d.v)
+    else
+        dshape = length.(d.v)
+        start_idx = 1
+        for (i, n) in enumerate(dshape)
+            if n == 1
+                x[start_idx + i - 1] = rand(rng, d.v[i])
+            else
+                x[start_idx:(start_idx + n - 1)] = rand(rng, d.v[i])
+            end
+            start_idx += n
+        end
+        return x
+    end
+end
 
-mean(d::Product) = mean.(d.v)
-var(d::Product) = var.(d.v)
-cov(d::Product) = Diagonal(var(d))
+_logpdf(d::Product, x::AbstractVector{<:Real}) =
+    sum(n->logpdf(d.v[n], _partitionargs(d, x)[n]), 1:length(d.v))
+
+function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
+    dshape = length.(d.v)
+    args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
+
+    start_idx = 1
+    for (i, n) in enumerate(dshape)
+        if n == 1
+            args[i] = x[start_idx + i - 1]
+        else
+            args[i] = x[start_idx:(start_idx + n - 1)]
+        end
+        start_idx += n
+    end
+    return args
+end
+
+mean(d::Product) = collect(Iterators.flatten(mean.(d.v)))
+var(d::Product) = collect(Iterators.flatten(var.(d.v)))
+
+function cov(d::Product)
+    if all(length.(d.v) .== 1)
+        return Diagonal(var(d))
+    else        
+        sparse_covs = Vector{SparseMatrixCSC{Float64,Int64}}(undef, length(d.v))
+        for (i, u) in enumerate(d.v)
+            if typeof(u)<:UnivariateDistribution
+                sparse_covs[i] = spdiagm(0 => [var(u)])
+            elseif typeof(u)<:MultivariateDistribution
+                sparse_covs[i] = sparse(cov(u))
+            end
+        end
+        return blockdiag(sparse_covs...)
+    end
+end
+
 entropy(d::Product) = sum(entropy, d.v)
-insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
-minimum(d::Product) = map(minimum, d.v)
-maximum(d::Product) = map(maximum, d.v)
+insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, _partitionargs(d, x)))
+minimum(d::Product) = collect(Iterators.flatten(map(minimum, d.v)))
+maximum(d::Product) = collect(Iterators.flatten(map(maximum, d.v)))
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})
