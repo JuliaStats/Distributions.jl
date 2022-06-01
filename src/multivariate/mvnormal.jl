@@ -170,7 +170,7 @@ Generally, users don't have to worry about these internal details.
 We provide a common constructor `MvNormal`, which will construct a distribution of
 appropriate type depending on the input arguments.
 """
-struct MvNormal{T<:Real,Cov,Mean<:AbstractVector} <: AbstractMvNormal
+struct MvNormal{T<:Real,Cov<:AbstractMatrix,Mean<:AbstractVector} <: AbstractMvNormal
     μ::Mean
     Σ::Cov
 
@@ -192,7 +192,7 @@ const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}}
 
 ### Construction
 
-function MvNormal(μ::AbstractVector{T}, Σ) where T
+function MvNormal(μ::AbstractVector{T}, Σ::AbstractMatrix{T}) where {T<:Real}
     MvNormal{T, typeof(Σ), typeof(μ)}(μ, Σ)
 end
 function MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractPDMat{<:Real})
@@ -223,7 +223,7 @@ end
 """
     MvNormal(Σ::AbstractMatrix{<:Real})
 
-    Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
+Construct a multivariate normal distribution with zero mean and covariance matrix `Σ`.
 """
 MvNormal(Σ::AbstractMatrix{<:Real}) = MvNormal(Zeros{eltype(Σ)}(size(Σ, 1)), Σ)
 
@@ -278,8 +278,6 @@ sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, x .- d.μ)
-
-
 
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 

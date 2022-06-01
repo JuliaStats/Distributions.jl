@@ -19,7 +19,7 @@ which is also a subtype of `AbstractMvNormal` to represent a multivariate normal
 canonical parameters. Particularly, `MvNormalCanon` is defined as:
 
 ```julia
-struct MvNormalCanon{T<:Real,P,V<:AbstractVector} <: AbstractMvNormal
+struct MvNormalCanon{T<:Real,P<:AbstractMatrix,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -40,7 +40,7 @@ const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64, ScalMat{Float64},  
 
 **Note:** `MvNormalCanon` share the same set of methods as `MvNormal`.
 """
-struct MvNormalCanon{T<:Real,P,V<:AbstractVector} <: AbstractMvNormal
+struct MvNormalCanon{T<:Real,P<:AbstractMatrix,V<:AbstractVector} <: AbstractMvNormal
     μ::V    # the mean vector
     h::V    # potential vector, i.e. inv(Σ) * μ
     J::P    # precision matrix, i.e. inv(Σ)
@@ -70,12 +70,12 @@ function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::P) where 
     MvNormalCanon{T,P,typeof(μ)}(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-function MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J)
+function MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real})
     R = Base.promote_eltype(μ, h, J)
     MvNormalCanon(convert(AbstractArray{R}, μ), convert(AbstractArray{R}, h), convert(AbstractArray{R}, J))
 end
 
-function MvNormalCanon(h::AbstractVector{<:Real}, J)
+function MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real})
     length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     R = Base.promote_eltype(h, J)
     hh = convert(AbstractArray{R}, h)
