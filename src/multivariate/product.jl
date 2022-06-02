@@ -4,7 +4,7 @@ import Statistics: mean, var, cov
     Product <: MultivariateDistribution
 
 An N dimensional `MultivariateDistribution` constructed from a vector of N independent
-`UnivariateDistribution`s.
+`Distribution`s.
 
 ```julia
 Product(Uniform.(rand(10), 1)) # A 10-dimensional Product from 10 independent `Uniform` distributions.
@@ -67,13 +67,13 @@ minimum(d::Product) = _flatten(map(minimum, d.v))
 maximum(d::Product) = _flatten(map(maximum, d.v))
 
 """
-    product_distribution(dists::AbstractVector{<:UnivariateDistribution})
+    product_distribution(dists::AbstractVector{<:Distribution})
 
-Creates a multivariate product distribution `P` from a vector of univariate distributions.
+Creates a multivariate product distribution `P` from a vector of distributions.
 Fallback is the `Product constructor`, but specialized methods can be defined
 for distributions with a special multivariate product.
 """
-function product_distribution(dists::AbstractVector{<:UnivariateDistribution})
+function product_distribution(dists::AbstractVector{<:Distribution})
     return Product(dists)
 end
 

@@ -109,7 +109,7 @@ end
     b3 = randn(N3) .^ 2
     d3 = Laplace.(μ3, b3)
 
-    d_product = Product([d1; d2; d3])
+    d_product = product_distribution([d1; d2; d3])
 
     _diagv(A) = [A[i,i] for i in 1:size(A, 1)]
     
@@ -141,7 +141,7 @@ end
     d2 = Geometric(0.5)
     N = 4
 
-    d_product = Product([d1, d2])
+    d_product = product_distribution([d1, d2])
 
     @test !insupport(d_product, Fill(0.5, N))
     @test length(d_product) == N
