@@ -90,8 +90,10 @@ end
     @test cov(d) === Diagonal(Fill(var(Laplace(0.0, 2.3)), N))
 end
 
-@testset "Testing non-iid product distributions" begin
+@testset "Testing non-independent product distributions" begin
     Random.seed!(123456)
+
+    # Construct two non-isotropic Gaussians and some iid Laplaces
     N1, N2, N3 = 2, 3, 6
     N = N1 + N2 + N3
 
@@ -111,6 +113,7 @@ end
 
     _diagv(A) = [A[i,i] for i in 1:size(A, 1)]
     
+    # check summary statistics
     @test length(d_product) == N
     @test mean(d_product) ≈ [μ1; μ2; μ3]
     @test var(d_product) ≈ [_diagv(Σ1); _diagv(Σ2); var.(d3)]
@@ -129,5 +132,24 @@ end
     y = rand(d_product)
     @test y isa Vector{eltype(d_product)}
     @test length(y) == N
+end
+
+@testset "Testing independent discrete distributions" begin
+    Random.seed!(123456)
+
+    d1 = Multinomial(10, [0.25, 0.25, 0.5])
+    d2 = Geometric(0.5)
+    N = 4
+
+    d_product = Product([d1, d2])
+
+    @test !insupport(d_product, Fill(0.5, N))
+    @test length(d_product) == N
+    
+    # check sampling
+    y = rand(d_product)
+    @test y isa Vector{eltype(d_product)}
+    @test length(y) == N
+    
 end
 

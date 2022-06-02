@@ -26,24 +26,22 @@ end
 
 length(d::Product) = sum(length.(d.v))
 function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-                                                    T<:UnivariateDistribution{S}}
-    return eltype(T)
+                                                    T<:Distribution{<:VariateForm,S}}
+    # eltype(ContinuousDistribution) returns Any, necessitating this hack
+    if T == ContinuousDistribution
+        return Float64
+    elseif T == DiscreteDistribution
+        return Int
+    else
+        return eltype(T)
+    end
 end
 
 function _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
-    if all(length.(d.v) .== 1)
+    if _isindependent(d)
         map!(Base.Fix1(rand, rng), x, d.v)
     else
-        dshape = length.(d.v)
-        start_idx = 1
-        for (i, n) in enumerate(dshape)
-            if n == 1
-                x[start_idx - 1] = rand(rng, d.v[i])
-            else
-                x[start_idx:(start_idx + n - 1)] = rand(rng, d.v[i])
-            end
-            start_idx += n
-        end
+        x = vcat(map(Base.Fix1(rand, rng), d.v)...)
         return x
     end
 end
@@ -55,17 +53,10 @@ mean(d::Product) = _flatten(mean.(d.v))
 var(d::Product) = _flatten(var.(d.v))
 
 function cov(d::Product)
-    if all(length.(d.v) .== 1)
+    if _isindependent(d)
         return Diagonal(var(d))
-    else        
-        sparse_covs = Vector{SparseMatrixCSC{Float64,Int64}}(undef, length(d.v))
-        for (i, u) in enumerate(d.v)
-            if typeof(u)<:UnivariateDistribution
-                sparse_covs[i] = spdiagm(0 => [var(u)])
-            elseif typeof(u)<:MultivariateDistribution
-                sparse_covs[i] = sparse(cov(u))
-            end
-        end
+    else
+        sparse_covs = map(d -> d isa UnivariateDistribution ? spdiagm(0 => [var(d)]) : sparse(cov(d)), d.v)
         return blockdiag(sparse_covs...)
     end
 end
@@ -99,10 +90,14 @@ function product_distribution(dists::AbstractVector{<:Normal})
     return MvNormal(µ, Diagonal(σ2))
 end
 
-# Supplementary functions
+##### utility functions
+
+_isindependent(d::Product) = all(length.(d.v) .== 1)
 
 _flatten(v::AbstractVector) = all(length.(v) .== 1) ? v : vcat(v...)
 
+# Split the vector x so that each constituent distribution can be evaluated
+# correctly at the elements of the split vector
 function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
     dshape = length.(d.v)
     args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
@@ -112,7 +107,7 @@ function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
         if n == 1
             args[i] = x[start_idx]
         else
-            args[i] = x[start_idx:(start_idx + n - 1)]
+            args[i] = collect(x[start_idx:(start_idx + n - 1)])
         end
         start_idx += n
     end
