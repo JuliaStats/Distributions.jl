@@ -38,7 +38,7 @@ function _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
         start_idx = 1
         for (i, n) in enumerate(dshape)
             if n == 1
-                x[start_idx + i - 1] = rand(rng, d.v[i])
+                x[start_idx - 1] = rand(rng, d.v[i])
             else
                 x[start_idx:(start_idx + n - 1)] = rand(rng, d.v[i])
             end
@@ -50,30 +50,6 @@ end
 
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
     sum(n->logpdf(d.v[n], _partitionargs(d, x)[n]), 1:length(d.v))
-
-function _flatten(v::AbstractVector)
-    if all(length.(v) .== 1)
-        return v
-    else
-        return collect(Iterators.flatten(v))
-    end
-end    
-
-function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
-    dshape = length.(d.v)
-    args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
-
-    start_idx = 1
-    for (i, n) in enumerate(dshape)
-        if n == 1
-            args[i] = x[start_idx]
-        else
-            args[i] = x[start_idx:(start_idx + n - 1)]
-        end
-        start_idx += n
-    end
-    return args
-end
 
 mean(d::Product) = _flatten(mean.(d.v))
 var(d::Product) = _flatten(var.(d.v))
@@ -121,4 +97,24 @@ function product_distribution(dists::AbstractVector{<:Normal})
     µ = mean.(dists)
     σ2 = var.(dists)
     return MvNormal(µ, Diagonal(σ2))
+end
+
+# Supplementary functions
+
+_flatten(v::AbstractVector) = all(length.(v) .== 1) ? v : vcat(v...)
+
+function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
+    dshape = length.(d.v)
+    args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
+
+    start_idx = 1
+    for (i, n) in enumerate(dshape)
+        if n == 1
+            args[i] = x[start_idx]
+        else
+            args[i] = x[start_idx:(start_idx + n - 1)]
+        end
+        start_idx += n
+    end
+    return args
 end

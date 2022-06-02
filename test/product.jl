@@ -90,3 +90,44 @@ end
     @test cov(d) === Diagonal(Fill(var(Laplace(0.0, 2.3)), N))
 end
 
+@testset "Testing non-iid product distributions" begin
+    Random.seed!(123456)
+    N1, N2, N3 = 2, 3, 6
+    N = N1 + N2 + N3
+
+    μ1 = Fill(0, N1)
+    Σ1 = sum(v -> v*v', eachcol(randn(N1, N1)))
+    d1 = MvNormal(μ1, Σ1)
+    
+    μ2 = randn(N2)
+    Σ2 = sum(v -> v*v', eachcol(randn(N2, N2)))
+    d2 = MvNormal(μ2, Σ2)
+    
+    μ3 = randn(N3)
+    b3 = randn(N3) .^ 2
+    d3 = Laplace.(μ3, b3)
+
+    d_product = Product([d1; d2; d3])
+
+    _diagv(A) = [A[i,i] for i in 1:size(A, 1)]
+    
+    @test length(d_product) == N
+    @test mean(d_product) ≈ [μ1; μ2; μ3]
+    @test var(d_product) ≈ [_diagv(Σ1); _diagv(Σ2); var.(d3)]
+    @test var(d_product) ≈ _diagv(cov(d_product))
+
+    # check additive properties
+    x1, x2, x3 = randn(N1), randn(N2), randn(N3)
+    x = [x1; x2; x3]
+
+    @test insupport(d_product, x)
+    @test logpdf(d_product, x) ≈ sum(logpdf.([d1, d2], [x1, x2])) +
+        sum(logpdf.(d3, x3))
+    @test entropy(d_product) ≈ sum(entropy, [d1; d2; d3])
+
+    # check sampling
+    y = rand(d_product)
+    @test y isa Vector{eltype(d_product)}
+    @test length(y) == N
+end
+
