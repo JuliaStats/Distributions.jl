@@ -51,6 +51,14 @@ end
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
     sum(n->logpdf(d.v[n], _partitionargs(d, x)[n]), 1:length(d.v))
 
+function _flatten(v::AbstractVector)
+    if all(length.(v) .== 1)
+        return v
+    else
+        return collect(Iterators.flatten(v))
+    end
+end    
+
 function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
     dshape = length.(d.v)
     args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
@@ -58,7 +66,7 @@ function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
     start_idx = 1
     for (i, n) in enumerate(dshape)
         if n == 1
-            args[i] = x[start_idx + i - 1]
+            args[i] = x[start_idx]
         else
             args[i] = x[start_idx:(start_idx + n - 1)]
         end
@@ -67,8 +75,8 @@ function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
     return args
 end
 
-mean(d::Product) = collect(Iterators.flatten(mean.(d.v)))
-var(d::Product) = collect(Iterators.flatten(var.(d.v)))
+mean(d::Product) = _flatten(mean.(d.v))
+var(d::Product) = _flatten(var.(d.v))
 
 function cov(d::Product)
     if all(length.(d.v) .== 1)
@@ -88,8 +96,8 @@ end
 
 entropy(d::Product) = sum(entropy, d.v)
 insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, _partitionargs(d, x)))
-minimum(d::Product) = collect(Iterators.flatten(map(minimum, d.v)))
-maximum(d::Product) = collect(Iterators.flatten(map(maximum, d.v)))
+minimum(d::Product) = _flatten(map(minimum, d.v))
+maximum(d::Product) = _flatten(map(maximum, d.v))
 
 """
     product_distribution(dists::AbstractVector{<:UnivariateDistribution})
