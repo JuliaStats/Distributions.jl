@@ -12,7 +12,7 @@ n \\sim \\text{Poisson}(zμ), \\quad
 z \\sim \\text{Gamma}(\\frac{1}{\\phi}, \\phi)
 ```
 This provides a clear interpretation of the negative binomial as an overdispersed
-Poisson with expected location 𝔼[z] = μ and var[z] = μ + μ²ϕ. It also has advantages in that
+Poisson with expected location 𝔼[⋅] = μ and var[⋅] = μ + μ²ϕ. It also has advantages in that
 its pmf can be expressed in terms of μ = exp(η), such that it can natively be
 parameterized on the log scale.
 

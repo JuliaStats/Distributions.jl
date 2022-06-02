@@ -12,7 +12,7 @@ the rate parameter of which is expressed as λ = μT, with T an exposure and μ 
 per unit exposure. Moreover, paramerization on the log scale enables evaluation of
 the `logpdf` as:
 
-`log(binomial(n + ϕ⁻¹ - 1, n)) + n * η - n * log(exp(η) * ϕ + 1)  + n * log(ϕ) - log(exp(η) * ϕ + 1) / ϕ`
+`log(binomial(n + ϕ⁻¹ - 1, n)) + n * η - n * log(exp(η) * ϕ + 1) + n * log(ϕ) - log(exp(η) * ϕ + 1) / ϕ`
 
 (note: equation for clarity, not for implementation).
 This results in fewer special function calls for each `logpdf` evaluation compared
