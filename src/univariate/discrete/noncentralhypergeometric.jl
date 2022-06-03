@@ -39,21 +39,30 @@ struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     n::Int     # sample size
     ω::T # odds ratio
 
-    function FisherNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T) where T
-        @check_args(FisherNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
-        @check_args(FisherNoncentralHypergeometric, zero(n) < n < ns + nf)
-        @check_args(FisherNoncentralHypergeometric, ω > zero(ω))
+    function FisherNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
+        @check_args(
+            FisherNoncentralHypergeometric,
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
+            zero(n) < n < ns + nf,
+            (ω, ω > zero(ω)),
+        )
         new{T}(ns, nf, n, ω)
     end
 end
 
-FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::T) where {T<:Real} = FisherNoncentralHypergeometric{T}(ns, nf, n, ω)
+FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Real; check_args::Bool=true) =
+    FisherNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args=check_args)
 
-FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = FisherNoncentralHypergeometric(ns, nf, n, Float64(ω))
+FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer; check_args::Bool=true) =
+    FisherNoncentralHypergeometric(ns, nf, n, float(ω); check_args=check_args)
 
 # Conversions
 convert(::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = FisherNoncentralHypergeometric(ns, nf, n, T(ω))
-convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{S}) where {T<:Real, S<:Real} = FisherNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
+function Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric) where {T<:Real}
+    FisherNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+end
+Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{T}) where {T<:Real} = d
 
 function _mode(d::FisherNoncentralHypergeometric)
     A = d.ω - 1
@@ -221,21 +230,30 @@ struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
     n::Int     # sample size
     ω::T # odds ratio
 
-    function WalleniusNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T) where T
-        @check_args(WalleniusNoncentralHypergeometric, ns >= zero(ns) && nf >= zero(nf))
-        @check_args(WalleniusNoncentralHypergeometric, zero(n) < n < ns + nf)
-        @check_args(WalleniusNoncentralHypergeometric, ω > zero(ω))
+    function WalleniusNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
+        @check_args(
+            WalleniusNoncentralHypergeometric,
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
+            zero(n) < n < ns + nf,
+            (ω, ω > zero(ω)),
+        )
         new{T}(ns, nf, n, ω)
     end
 end
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::T) where {T<:Real} = WalleniusNoncentralHypergeometric{T}(ns, nf, n, ω)
+WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Real; check_args::Bool=true) =
+    WalleniusNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args=check_args)
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer) = WalleniusNoncentralHypergeometric(ns, nf, n, Float64(ω))
+WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer; check_args::Bool=true) =
+    WalleniusNoncentralHypergeometric(ns, nf, n, float(ω); check_args=check_args)
 
 # Conversions
 convert(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
-convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{S}) where {T<:Real, S<:Real} = WalleniusNoncentralHypergeometric(d.ns, d.nf, d.n, T(d.ω))
+function Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric) where {T<:Real}
+    WalleniusNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+end
+Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{T}) where {T<:Real} = d
 
 # Properties
 mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(Ref(d), support(d)))

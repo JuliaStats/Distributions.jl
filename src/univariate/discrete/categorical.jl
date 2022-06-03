@@ -26,20 +26,20 @@ External links:
 """
 const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-function Categorical{P,Ps}(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}}
-    check_args && @check_args(Categorical, isprobvec(p))
-    return Categorical{P,Ps}(Base.OneTo(length(p)), p, check_args=check_args)
+function Categorical{P,Ps}(p::Ps; check_args::Bool=true) where {P<:Real, Ps<:AbstractVector{P}}
+    @check_args Categorical (p, isprobvec(p), "vector p is not a probability vector")
+    return Categorical{P,Ps}(Base.OneTo(length(p)), p; check_args=check_args)
 end
 
-Categorical(p::Ps; check_args=true) where {P<:Real, Ps<:AbstractVector{P}} =
-    Categorical{P,Ps}(p, check_args=check_args)
+Categorical(p::AbstractVector{P}; check_args::Bool=true) where {P<:Real} =
+    Categorical{P,typeof(p)}(p; check_args=check_args)
 
-function Categorical(k::Integer; check_args=true)
-    check_args && @check_args(Categorical, k >= 1)
-    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k), check_args=check_args)
+function Categorical(k::Integer; check_args::Bool=true)
+    @check_args Categorical (k, k >= 1, "at least one category is required")
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k); check_args=false)
 end
 
-Categorical(probabilities::Real...; check_args=true) = Categorical([probabilities...]; check_args=check_args)
+Categorical(probabilities::Real...; check_args::Bool=true) = Categorical([probabilities...]; check_args=check_args)
 
 ### Conversions
 

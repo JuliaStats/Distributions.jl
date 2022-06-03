@@ -20,6 +20,8 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
 
+Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
+
 """
     params(d::UnivariateDistribution)
 
@@ -180,7 +182,8 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 """
     median(d::UnivariateDistribution)
 
-Return the median value of distribution `d`.
+Return the median value of distribution `d`. The median is the smallest `x` such that `cdf(d, x) ≥ 1/2`.
+Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
 median(d::UnivariateDistribution) = quantile(d, 1//2)
 

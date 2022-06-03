@@ -2,11 +2,11 @@ function test_location_scale(
     rng::Union{AbstractRNG, Missing},
     μ::Real, σ::Real, ρ::UnivariateDistribution, dref::UnivariateDistribution,
 )
-    d = LocationScale(μ,σ,ρ)
+    d = Distributions.AffineDistribution(μ, σ, ρ)
     @test params(d) == (μ,σ,ρ)
     @test eltype(d) === eltype(dref)
 
-    # Different ways to construct the LocationScale object
+    # Different ways to construct the AffineDistribution object
     if dref isa DiscreteDistribution
         # floating point division introduces numerical errors
         # Better: multiply with rational numbers
@@ -27,116 +27,102 @@ function test_location_scale(
     #### Support / Domain
 
     @testset "Support" begin
-        function test_support(d, dref)
-            @test minimum(d) == minimum(dref)
-            @test maximum(d) == maximum(dref)
-            @test extrema(d) == (minimum(d), maximum(d))
-            @test extrema(support(d)) == extrema(d)
-            if support(d.ρ) isa RealInterval
-                @test support(d) isa RealInterval
-            elseif hasfinitesupport(d.ρ)
-                @test support(d) == d.μ .+ d.σ .* support(d.ρ)
-            end
-        end
         @testset "$k" for (k,dtest) in d_dict
-            test_support(dtest, dref)
+            @test minimum(dtest) == minimum(dref)
+            @test maximum(dtest) == maximum(dref)
+            @test extrema(dtest) == (minimum(dref), maximum(dref))
+            @test extrema(support(dtest)) == extrema(dref)
+            @test support(dtest) == support(dref)
         end
     end
 
     #### Promotions and conversions
 
     @testset "Promotions and conversions" begin
-        function test_promotions_and_conversions(d, dref)
-            @test typeof(d.µ) === typeof(d.σ)
-            @test location(d) ≈ μ atol=1e-15
-            @test    scale(d) ≈ σ atol=1e-15
-        end
         @testset "$k" for (k,dtest) in d_dict
-            test_promotions_and_conversions(dtest, dref)
+            if dtest isa LocationScale
+                @test typeof(dtest.μ) === typeof(dtest.σ)
+                @test location(dtest) ≈ μ atol=1e-15
+                @test    scale(dtest) ≈ σ atol=1e-15
+            end
         end
     end
 
     #### Statistics
 
     @testset "Statistics" begin
-        function test_statistics(d, dref)
-            @test mean(d) ≈ mean(dref)
-            @test median(d) ≈ median(dref)
-            @test mode(d) ≈ mode(dref)
-            @test modes(d) ≈ modes(dref)
-
-            @test var(d) ≈ var(dref)
-            @test std(d) ≈ std(dref)
-
-            @test skewness(d) ≈ skewness(dref)
-            @test kurtosis(d) ≈ kurtosis(dref)
-
-            @test isplatykurtic(d) == isplatykurtic(dref)
-            @test isleptokurtic(d) == isleptokurtic(dref)
-            @test ismesokurtic(d) == ismesokurtic(dref)
-
-            @test entropy(d) ≈ entropy(dref)
-            @test mgf(d,-0.1) ≈ mgf(dref,-0.1)
-        end
         @testset "$k" for (k,dtest) in d_dict
-            test_statistics(dtest, dref)
+            @test mean(dtest) ≈ mean(dref)
+            @test median(dtest) ≈ median(dref)
+            @test mode(dtest) ≈ mode(dref)
+            @test modes(dtest) ≈ modes(dref)
+
+            @test var(dtest) ≈ var(dref)
+            @test std(dtest) ≈ std(dref)
+
+            @test skewness(dtest) ≈ skewness(dref)
+            @test kurtosis(dtest) ≈ kurtosis(dref)
+
+            @test isplatykurtic(dtest) == isplatykurtic(dref)
+            @test isleptokurtic(dtest) == isleptokurtic(dref)
+            @test ismesokurtic(dtest) == ismesokurtic(dref)
+
+            @test entropy(dtest) ≈ entropy(dref)
+            @test mgf(dtest,-0.1) ≈ mgf(dref,-0.1)
         end
     end
 
     #### Evaluation & Sampling
 
     @testset "Evaluation & Sampling" begin
-        function test_evaluation_and_sampling(rng, d, dref)
+        @testset "$k" for (k,dtest) in d_dict
             xs = rand(dref, 5)
             x = first(xs)
-            insupport(d, x) == insupport(dref, x)
+            insupport(dtest, x) == insupport(dref, x)
             # might return `false` for discrete distributions
-            insupport(d, -x) == insupport(dref, -x)
+            insupport(dtest, -x) == insupport(dref, -x)
 
-            @test pdf(d, x) ≈ pdf(dref, x)
-            @test pdf.(d, xs) ≈ pdf.(dref, xs)
-            @test logpdf(d, x) ≈ logpdf(dref, x)
-            @test logpdf.(d, xs) ≈ logpdf.(dref, xs)
-            @test loglikelihood(d, x) ≈ loglikelihood(dref, x)
-            @test loglikelihood(d, xs) ≈ loglikelihood(dref, xs)
+            @test pdf(dtest, x) ≈ pdf(dref, x)
+            @test pdf.(dtest, xs) ≈ pdf.(dref, xs)
+            @test logpdf(dtest, x) ≈ logpdf(dref, x)
+            @test logpdf.(dtest, xs) ≈ logpdf.(dref, xs)
+            @test loglikelihood(dtest, x) ≈ loglikelihood(dref, x)
+            @test loglikelihood(dtest, xs) ≈ loglikelihood(dref, xs)
 
-            @test cdf(d, x) ≈ cdf(dref, x)
-            @test logcdf(d, x) ≈ logcdf(dref, x)
-            @test ccdf(d, x) ≈ ccdf(dref, x) atol=1e-15
-            @test logccdf(d, x) ≈ logccdf(dref, x) atol=1e-15
+            @test cdf(dtest, x) ≈ cdf(dref, x)
+            @test logcdf(dtest, x) ≈ logcdf(dref, x)
+            @test ccdf(dtest, x) ≈ ccdf(dref, x) atol=1e-14
+            @test logccdf(dtest, x) ≈ logccdf(dref, x) atol=1e-14
 
-            @test quantile(d,0.1) ≈ quantile(dref,0.1)
-            @test quantile(d,0.5) ≈ quantile(dref,0.5)
-            @test quantile(d,0.9) ≈ quantile(dref,0.9)
+            @test quantile(dtest, 0.1) ≈ quantile(dref, 0.1)
+            @test quantile(dtest, 0.5) ≈ quantile(dref, 0.5)
+            @test quantile(dtest, 0.9) ≈ quantile(dref, 0.9)
 
-            @test cquantile(d,0.1) ≈ cquantile(dref,0.1)
-            @test cquantile(d,0.5) ≈ cquantile(dref,0.5)
-            @test cquantile(d,0.9) ≈ cquantile(dref,0.9)
+            @test cquantile(dtest, 0.1) ≈ cquantile(dref, 0.1)
+            @test cquantile(dtest, 0.5) ≈ cquantile(dref, 0.5)
+            @test cquantile(dtest, 0.9) ≈ cquantile(dref, 0.9)
 
-            @test invlogcdf(d,log(0.2)) ≈ invlogcdf(dref,log(0.2))
-            @test invlogcdf(d,log(0.5)) ≈ invlogcdf(dref,log(0.5))
-            @test invlogcdf(d,log(0.8)) ≈ invlogcdf(dref,log(0.8))
+            @test invlogcdf(dtest, log(0.2)) ≈ invlogcdf(dref, log(0.2))
+            @test invlogcdf(dtest, log(0.5)) ≈ invlogcdf(dref, log(0.5))
+            @test invlogcdf(dtest, log(0.8)) ≈ invlogcdf(dref, log(0.8))
 
-            @test invlogccdf(d,log(0.2)) ≈ invlogccdf(dref,log(0.2))
-            @test invlogccdf(d,log(0.5)) ≈ invlogccdf(dref,log(0.5))
-            @test invlogccdf(d,log(0.8)) ≈ invlogccdf(dref,log(0.8))
+            @test invlogccdf(dtest, log(0.2)) ≈ invlogccdf(dref, log(0.2))
+            @test invlogccdf(dtest, log(0.5)) ≈ invlogccdf(dref, log(0.5))
+            @test invlogccdf(dtest, log(0.8)) ≈ invlogccdf(dref, log(0.8))
 
-            r = Array{float(eltype(d))}(undef, 100000)
+            r = Array{float(eltype(dtest))}(undef, 100000)
             if ismissing(rng)
-                rand!(d,r)
+                rand!(dtest, r)
             else
-                rand!(rng,d,r)
+                rand!(rng, dtest, r)
             end
             @test mean(r) ≈ mean(dref) atol=0.02
             @test std(r) ≈ std(dref) atol=0.01
-            @test cf(d, -0.1) ≈ cf(dref,-0.1)
+            @test cf(dtest, -0.1) ≈ cf(dref,-0.1)
 
             if dref isa ContinuousDistribution
-                @test gradlogpdf(d, 0.1) ≈ gradlogpdf(dref, 0.1)
+                @test gradlogpdf(dtest, 0.1) ≈ gradlogpdf(dref, 0.1)
             end
-        end
-        @testset "$k" for (k,dtest) in d_dict
-            test_evaluation_and_sampling(rng, dtest, dref)
         end
     end
 end
@@ -146,6 +132,7 @@ function test_location_scale_normal(
 )
     ρ = Normal(μD, σD)
     dref = Normal(μ + σ * μD, σ * σD)
+    @test dref === μ + σ * ρ
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
@@ -157,7 +144,7 @@ function test_location_scale_discretenonparametric(
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
 
-@testset "LocationScale" begin
+@testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
     for _rng in (missing, rng)
@@ -173,4 +160,10 @@ end
         test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
         test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
     end
+
+    @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
+
+    @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
+    @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
+    @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
 end

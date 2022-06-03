@@ -200,6 +200,7 @@ Construct a multivariate normal distribution with mean `μ` and covariance matri
 """
 MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormal(μ, PDiagMat(Σ.data.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
     MvNormal(μ, ScalMat(length(μ), Σ.λ))
 function MvNormal(
@@ -228,6 +229,8 @@ Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
+Base.convert(::Type{MvNormal{T}}, d::MvNormal{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormal{T}}, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
@@ -288,11 +291,11 @@ end
 
 ### Affine transformations
 
-+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ .+ c, d.Σ)
+Base.:+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ + c, d.Σ)
+Base.:+(c::AbstractVector, d::MvNormal) = d + c
+Base.:-(d::MvNormal, c::AbstractVector) = MvNormal(d.μ - c, d.Σ)
 
-+(c::AbstractVector, d::MvNormal) = d + c
-
-*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
 
 dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
 

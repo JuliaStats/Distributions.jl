@@ -56,10 +56,34 @@ end
             q = Beta(3, 5)
             test_kl(p, q)
         end
+        @testset "Binomial" begin
+            p = Binomial(3, 0.3)
+            q = Binomial(3, 0.5)
+            test_kl(p, q)
+            @test iszero(kldivergence(Binomial(0, 0), Binomial(0, 1)))
+            @test iszero(kldivergence(Binomial(0, 0.5), Binomial(0, 0.3)))
+            @test isinf(kldivergence(Binomial(4, 0.3), Binomial(2, 0.3)))
+            @test isinf(kldivergence(Binomial(3, 0), Binomial(3, 1)))
+            @test isinf(kldivergence(Binomial(3, 0), Binomial(5, 1)))
+            @test kldivergence(p, q) ≈ 3 * kldivergence(Bernoulli(0.3), Bernoulli(0.5))
+        end
         @testset "Categorical" begin
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥ 0
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
                 kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
+        end
+        @testset "Chi" begin
+            p = Chi(4.0)
+            q = Chi(3.0)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
+        end
+        @testset "Chisq" begin
+            p = Chisq(4.0)
+            q = Chisq(3.0)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Chi(4.0), Chi(3.0))
+            @test kldivergence(p, q) ≈ kldivergence(Gamma(2., 0.5), Gamma(1.5, 0.5))
         end
         @testset "Exponential" begin
             p = Exponential(2.0)
@@ -71,15 +95,62 @@ end
             q = Gamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "Geometric" begin
+            p = Geometric(0.3)
+            q = Geometric(0.4)
+            test_kl(p, q)
+            
+            x1 = nextfloat(0.0)
+            x2 = prevfloat(1.0)
+            p1 = Geometric(x1)
+            p2 = Geometric(x2)
+            @test iszero(kldivergence(p2, p2))
+            @test iszero(kldivergence(p1, p1))
+            @test isinf(kldivergence(p1, p2))
+            @test kldivergence(p2, p1) ≈ -log(x1)
+            @test isinf(kldivergence(p1, Geometric(0.5)))
+            @test kldivergence(p2, Geometric(0.5)) ≈ -log(0.5)
+            @test kldivergence(Geometric(0.5), p2) ≈ 2*log(0.5) - log(1-x2)
+            @test kldivergence(Geometric(0.5), p1) ≈ 2*log(0.5) - log(x1)
+        end
         @testset "InverseGamma" begin
             p = InverseGamma(2.0, 1.0)
             q = InverseGamma(3.0, 2.0)
             test_kl(p, q)
         end
+        @testset "Laplace" begin
+            p = Laplace(2.0)
+            q = Laplace(3.0)
+            test_kl(p, q)
+        end
+        @testset "LogNormal" begin
+            p = LogNormal(0, 1)
+            q = LogNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
+        @testset "LogitNormal" begin
+            p = LogitNormal(0, 1)
+            q = LogitNormal(0.5, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(0, 1), Normal(0.5, 0.5))
+        end
+        @testset "NegativeBinomial" begin
+            p = NegativeBinomial(3, 0.3)
+            q = NegativeBinomial(3, 0.5)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ 3 * kldivergence(Geometric(0.3), Geometric(0.5))
+        end
         @testset "Normal" begin
             p = Normal(0, 1)
             q = Normal(0.5, 0.5)
             test_kl(p, q)
+        end
+        @testset "NormalCanon" begin
+            p = NormalCanon(1, 2)
+            q = NormalCanon(3, 4)
+            test_kl(p, q)
+            @test kldivergence(p, q) ≈ kldivergence(Normal(1/2, 1/sqrt(2)), Normal(3/4, 1/2))
         end
         @testset "Poisson" begin
             p = Poisson(4.0)

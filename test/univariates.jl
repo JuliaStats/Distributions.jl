@@ -78,6 +78,13 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @test typeof(D(int_pars...)) == typeof(d)
     end
 
+    # conversions
+    if D isa Type && !isconcretetype(D)
+        @test convert(D{partype(d)}, d) === d
+        d32 = convert(D{Float32}, d)
+        @test d32 isa D{Float32}
+    end
+
     # verify properties (params & stats)
     pdct = dct["properties"]
     for (fname, val) in pdct
@@ -198,4 +205,21 @@ end
         @test @inferred(ccdf(d, 2.5)) === XFT(1//2)
         @test @inferred(ccdf(d, 3.5)) === zero(XFT)
     end
+end
+
+# #1471
+@testset "InverseGamma constructor (#1471)" begin
+    @test_throws DomainError InverseGamma(-1, 2)
+    InverseGamma(-1, 2; check_args=false) # no error
+end
+
+# #1479
+@testset "Inner and outer constructors" begin
+    @test_throws DomainError InverseGaussian(0.0, 0.0)
+    @test InverseGaussian(0.0, 0.0; check_args=false) isa InverseGaussian{Float64}
+    @test InverseGaussian{Float64}(0.0, 0.0) isa InverseGaussian{Float64}
+
+    @test_throws DomainError Levy(0.0, 0.0)
+    @test Levy(0.0, 0.0; check_args=false) isa Levy{Float64}
+    @test Levy{Float64}(0.0, 0.0) isa Levy{Float64}
 end

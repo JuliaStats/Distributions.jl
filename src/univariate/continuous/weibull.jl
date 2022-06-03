@@ -32,22 +32,22 @@ struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     end
 end
 
-function Weibull(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Weibull, α > zero(α) && θ > zero(θ))
+function Weibull(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Weibull (α, α > zero(α)) (θ, θ > zero(θ))
     return Weibull{T}(α, θ)
 end
 
-Weibull(α::Real, θ::Real) = Weibull(promote(α, θ)...)
-Weibull(α::Integer, θ::Integer) = Weibull(float(α), float(θ))
-Weibull(α::T) where {T <: Real} = Weibull(α, one(T))
-Weibull() = Weibull(1.0, 1.0, check_args=false)
+Weibull(α::Real, θ::Real; check_args::Bool=true) = Weibull(promote(α, θ)...; check_args=check_args)
+Weibull(α::Integer, θ::Integer; check_args::Bool=true) = Weibull(float(α), float(θ); check_args=check_args)
+Weibull(α::Real=1.0) = Weibull(α, one(α); check_args=false)
 
 @distr_support Weibull 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T<:Real} = Weibull(T(α), T(θ))
-convert(::Type{Weibull{T}}, d::Weibull{S}) where {T <: Real, S <: Real} = Weibull(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Weibull{T}}, d::Weibull) where {T<:Real} = Weibull{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Weibull{T}}, d::Weibull{T}) where {T<:Real} = d
 
 #### Parameters
 

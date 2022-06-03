@@ -5,6 +5,8 @@ using Test
 using Random
 using LinearAlgebra
 
+using Distributions: Product
+
 # TODO: remove when `Product` is removed
 @testset "Deprecated `Product` distribution" begin
 @testset "Testing normal product distributions" begin
@@ -85,6 +87,15 @@ end
         @test y isa typeof(x)
         @test length(y) == N
     end
+end
+
+@testset "Testing iid product distributions" begin
+    Random.seed!(123456)
+    N = 11
+    d = Product(Fill(Laplace(0.0, 2.3), N))
+    @test N == length(unique(rand(d)));
+    @test mean(d) === Fill(0.0, N)
+    @test cov(d) === Diagonal(Fill(var(Laplace(0.0, 2.3)), N))
 end
 end
 

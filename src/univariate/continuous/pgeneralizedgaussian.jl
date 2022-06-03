@@ -34,8 +34,8 @@ struct PGeneralizedGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariat
     PGeneralizedGaussian{T1,T2,T3}(μ::T1,α::T2,p::T3) where {T1<:Real, T2<:Real, T3<:Real} = new{T1,T2,T3}(µ, α, p)
 end
 
-function PGeneralizedGaussian(μ::T1,α::T2,p::T3; check_args=true) where {T1<:Real, T2<:Real, T3<:Real}
-    check_args && @check_args(PGeneralizedGaussian, α > zero(α) && p > zero(p))
+function PGeneralizedGaussian(μ::T1,α::T2,p::T3; check_args::Bool=true) where {T1<:Real, T2<:Real, T3<:Real}
+    @check_args PGeneralizedGaussian (α, α > zero(α)) (p, p > zero(p))
     return PGeneralizedGaussian{T1,T2,T3}(μ,α,p)
 end
 
@@ -44,7 +44,7 @@ end
 
 Builds a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
-PGeneralizedGaussian(p::T) where {T<:Real} = PGeneralizedGaussian(zero(T), one(T), p)
+PGeneralizedGaussian(p::Real; check_args::Bool=true) = PGeneralizedGaussian(zero(p), one(p), p; check_args=check_args)
 
 """
     PGeneralizedGaussian()
@@ -57,9 +57,10 @@ PGeneralizedGaussian() = PGeneralizedGaussian(0.0, √2, 2.0, check_args=false) 
 #### Conversions
 
 convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, μ::S1, α::S2, p::S3) where {T1 <: Real, T2 <: Real, T3 <:Real, S1 <: Real, S2 <: Real, S3 <: Real} = PGeneralizedGaussian(T1(μ),T2(α),T3(p))
-function convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{S1,S2,S3}) where {T1 <: Real, T2 <: Real, T3 <: Real, S1 <: Real, S2 <: Real, S3 <: Real}
-    return PGeneralizedGaussian(T1(d.μ), T2(d.α), T3(d.p), check_args=false)
+function Base.convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian) where {T1<:Real,T2<:Real,T3<:Real}
+    return PGeneralizedGaussian{T1,T2,T3}(T1(d.μ), T2(d.α), T3(d.p))
 end
+Base.convert(::Type{PGeneralizedGaussian{T1,T2,T3}}, d::PGeneralizedGaussian{T1,T2,T3}) where {T1<:Real,T2<:Real,T3<:Real} = d
 
 @distr_support PGeneralizedGaussian -Inf Inf
 

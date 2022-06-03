@@ -32,21 +32,21 @@ struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogNormal(μ::T, σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(LogNormal, σ ≥ zero(σ))
+function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+    @check_args LogNormal (σ, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 
-LogNormal(μ::Real, σ::Real) = LogNormal(promote(μ, σ)...)
-LogNormal(μ::Integer, σ::Integer) = LogNormal(float(μ), float(σ))
-LogNormal(μ::T) where {T <: Real} = LogNormal(μ, one(T))
-LogNormal() = LogNormal(0.0, 1.0, check_args=false)
+LogNormal(μ::Real, σ::Real; check_args::Bool=true) = LogNormal(promote(μ, σ)...; check_args=check_args)
+LogNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogNormal(float(μ), float(σ); check_args=check_args)
+LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
 
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-convert(::Type{LogNormal{T}}, d::LogNormal{S}) where {T <: Real, S <: Real} = LogNormal(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} = LogNormal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -89,8 +89,13 @@ function entropy(d::LogNormal)
     (1 + log(twoπ * σ^2))/2 + μ
 end
 
+function kldivergence(p::LogNormal, q::LogNormal)
+    pn = Normal{partype(p)}(p.μ, p.σ)
+    qn = Normal{partype(q)}(q.μ, q.σ)
+    return kldivergence(pn, qn)
+end
 
-#### Evalution
+#### Evaluation
 
 function pdf(d::LogNormal, x::Real)
     if x ≤ zero(x)

@@ -85,6 +85,7 @@ function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     ΩΩ = convert(AbstractArray{T}, d.Ω)
     MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
+Base.convert(::Type{MatrixTDist{T}}, d::MatrixTDist{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
@@ -178,7 +179,7 @@ function _univariate(d::MatrixTDist)
     ν, M, Σ, Ω = params(d)
     μ = M[1]
     σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
-    return LocationScale(μ, σ, TDist(ν))
+    return AffineDistribution(μ, σ, TDist(ν))
 end
 
 _multivariate(d::MatrixTDist) = MvTDist(d)

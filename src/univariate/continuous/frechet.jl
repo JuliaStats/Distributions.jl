@@ -29,15 +29,14 @@ struct Frechet{T<:Real} <: ContinuousUnivariateDistribution
     Frechet{T}(α::T, θ::T) where {T<:Real} = new{T}(α, θ)
 end
 
-function Frechet(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Frechet, α > zero(α) && θ > zero(θ))
+function Frechet(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Frechet (α, α > zero(α)) (θ, θ > zero(θ))
     return Frechet{T}(α, θ)
 end
 
-Frechet(α::Real, θ::Real) = Frechet(promote(α, θ)...)
-Frechet(α::Integer, θ::Integer) = Frechet(float(α), float(θ))
-Frechet(α::T) where {T <: Real} = Frechet(α, one(T))
-Frechet() = Frechet(1.0, 1.0, check_args=false)
+Frechet(α::Real, θ::Real; check_args::Bool=true) = Frechet(promote(α, θ)...; check_args=check_args)
+Frechet(α::Integer, θ::Integer; check_args::Bool=true) = Frechet(float(α), float(θ); check_args=check_args)
+Frechet(α::Real=1.0) = Frechet(α, one(α); check_args=false)
 
 @distr_support Frechet 0.0 Inf
 
@@ -45,9 +44,8 @@ Frechet() = Frechet(1.0, 1.0, check_args=false)
 function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))
 end
-function convert(::Type{Frechet{T}}, d::Frechet{S}) where {T <: Real, S <: Real}
-    Frechet(T(d.α), T(d.θ), check_args=false)
-end
+Base.convert(::Type{Frechet{T}}, d::Frechet) where {T<:Real} = Frechet{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Frechet{T}}, d::Frechet{T}) where {T<:Real} = d
 
 #### Parameters
 

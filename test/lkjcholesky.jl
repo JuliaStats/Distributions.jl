@@ -83,9 +83,9 @@ using FiniteDifferences
             @test d.logc0 == LKJ(p, η).logc0
         end
 
-        @test_throws ArgumentError LKJCholesky(0, 2)
-        @test_throws ArgumentError LKJCholesky(4, 0.0)
-        @test_throws ArgumentError LKJCholesky(4, -1)
+        @test_throws DomainError LKJCholesky(0, 2)
+        @test_throws DomainError LKJCholesky(4, 0.0)
+        @test_throws DomainError LKJCholesky(4, -1)
 
         for uplo in (:U, 'U')
             d = LKJCholesky(4, 2, uplo)
@@ -106,6 +106,8 @@ using FiniteDifferences
 
     @testset "Conversion" begin
         d = LKJCholesky(5, 3.5)
+        @test convert(LKJCholesky{Float64}, d) === d
+
         df0_1 = convert(LKJCholesky{Float32}, d)
         @test df0_1 isa LKJCholesky{Float32}
         @test df0_1.d == d.d

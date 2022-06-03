@@ -11,22 +11,23 @@ struct NormalCanon{T<:Real} <: ContinuousUnivariateDistribution
     λ::T       # σ^(-2)
     μ::T       # μ
 
-    function NormalCanon{T}(η, λ) where T
-        @check_args(NormalCanon, λ > zero(λ))
+    function NormalCanon{T}(η, λ; check_args::Bool=true) where T
+        @check_args NormalCanon (λ, λ > zero(λ))
         new{T}(η, λ, η / λ)
     end
 end
 
-NormalCanon(η::T, λ::T) where {T<:Real} = NormalCanon{typeof(η/λ)}(η, λ)
-NormalCanon(η::Real, λ::Real) = NormalCanon(promote(η, λ)...)
-NormalCanon(η::Integer, λ::Integer) = NormalCanon(float(η), float(λ))
-NormalCanon() = NormalCanon(0., 1.)
+NormalCanon(η::T, λ::T; check_args::Bool=true) where {T<:Real} = NormalCanon{typeof(η/λ)}(η, λ; check_args=check_args)
+NormalCanon(η::Real, λ::Real; check_args::Bool=true) = NormalCanon(promote(η, λ)...; check_args=check_args)
+NormalCanon(η::Integer, λ::Integer; check_args::Bool=true) = NormalCanon(float(η), float(λ); check_args=check_args)
+NormalCanon() = NormalCanon{Float64}(0.0, 1.0; check_args=false)
 
 @distr_support NormalCanon -Inf Inf
 
 #### Type Conversions
 convert(::Type{NormalCanon{T}}, η::S, λ::S) where {T <: Real, S <: Real} = NormalCanon(T(η), T(λ))
-convert(::Type{NormalCanon{T}}, d::NormalCanon{S}) where {T <: Real, S <: Real} = NormalCanon(T(d.η), T(d.λ))
+Base.convert(::Type{NormalCanon{T}}, d::NormalCanon) where {T<:Real} = NormalCanon{T}(T(d.η), T(d.λ); check_args=false)
+Base.convert(::Type{NormalCanon{T}}, d::NormalCanon{T}) where {T<:Real} = d
 
 ## conversion between Normal and NormalCanon
 
@@ -58,6 +59,13 @@ entropy(d::NormalCanon) = (-log(d.λ) + log2π + 1) / 2
 location(d::NormalCanon) = mean(d)
 scale(d::NormalCanon) = std(d)
 
+function kldivergence(p::NormalCanon, q::NormalCanon)
+    μp = mean(p)
+    μq = mean(q)
+    σ²p_over_σ²q = q.λ / p.λ
+    return (abs2(μp - μq) * q.λ - logmxp1(σ²p_over_σ²q)) / 2
+end
+
 #### Evaluation
 
 pdf(d::NormalCanon, x::Real) = (sqrt(d.λ) / sqrt2π) * exp(-d.λ * abs2(x - d.μ)/2)
@@ -80,3 +88,11 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 #### Sampling
 
 rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)
+
+#### Affine transformations
+
+function Base.:+(d::NormalCanon, c::Real)
+    η, λ = params(d)
+    return NormalCanon(η + c * λ, λ)
+end
+Base.:*(c::Real, d::NormalCanon) = NormalCanon(d.η / c, d.λ / c^2)

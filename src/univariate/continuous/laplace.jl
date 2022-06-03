@@ -28,15 +28,14 @@ struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
     Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Laplace(μ::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Laplace, θ > zero(θ))
+function Laplace(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Laplace (θ, θ > zero(θ))
     return Laplace{T}(μ, θ)
 end
 
-Laplace(μ::Real, θ::Real) = Laplace(promote(μ, θ)...)
-Laplace(μ::Integer, θ::Integer) = Laplace(float(μ), float(θ))
-Laplace(μ::T) where {T <: Real} = Laplace(μ, one(T))
-Laplace() = Laplace(0.0, 1.0, check_args=false)
+Laplace(μ::Real, θ::Real; check_args::Bool=true) = Laplace(promote(μ, θ)...; check_args=check_args)
+Laplace(μ::Integer, θ::Integer; check_args::Bool=true) = Laplace(float(μ), float(θ); check_args=check_args)
+Laplace(μ::Real=0.0) = Laplace(μ, one(μ); check_args=false)
 
 const Biexponential = Laplace
 
@@ -46,9 +45,10 @@ const Biexponential = Laplace
 function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))
 end
-function convert(::Type{Laplace{T}}, d::Laplace{S}) where {T <: Real, S <: Real}
-    Laplace(T(d.μ), T(d.θ), check_args=false)
+function Base.convert(::Type{Laplace{T}}, d::Laplace) where {T<:Real}
+    Laplace{T}(T(d.μ), T(d.θ))
 end
+Base.convert(::Type{Laplace{T}}, d::Laplace{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -70,6 +70,13 @@ skewness(d::Laplace{T}) where {T<:Real} = zero(T)
 kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
+        
+function kldivergence(p::Laplace, q::Laplace)
+    pμ, pθ = params(p)
+    qμ, qθ = params(q)
+    r = abs(pμ - qμ)
+    return (pθ * exp(-r / pθ) + r) / qθ + log(qθ / pθ) - 1
+end
 
 #### Evaluations
 
@@ -105,6 +112,10 @@ function cf(d::Laplace, t::Real)
     cis(t * d.μ) / (1+st*st)
 end
 
+#### Affine transformations
+
+Base.:+(d::Laplace, c::Real) = Laplace(d.μ + c, d.θ)
+Base.:*(c::Real, d::Laplace) = Laplace(c * d.μ, abs(c) * d.θ)
 
 #### Sampling
 

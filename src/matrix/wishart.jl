@@ -79,6 +79,8 @@ function convert(::Type{Wishart{T}}, d::Wishart) where T<:Real
     P = convert(AbstractArray{T}, d.S)
     Wishart{T, typeof(P), typeof(d.rank)}(T(d.df), P, T(d.logc0), d.rank, d.singular)
 end
+Base.convert(::Type{Wishart{T}}, d::Wishart{T}) where {T<:Real} = d
+
 function convert(::Type{Wishart{T}}, df, S::AbstractPDMat, logc0, rnk, singular) where T<:Real
     P = convert(AbstractArray{T}, S)
     Wishart{T, typeof(P), typeof(rnk)}(T(df), P, T(logc0), rnk, singular)

@@ -67,6 +67,7 @@ function convert(::Type{MatrixFDist{T}}, d::MatrixFDist) where T <: Real
     W = convert(Wishart{T}, d.W)
     MatrixFDist{T, typeof(W)}(W, T(d.n2), T(d.logc0))
 end
+Base.convert(::Type{MatrixFDist{T}}, d::MatrixFDist{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixFDist{T}}, W::Wishart, n2, logc0) where T <: Real
     WW = convert(Wishart{T}, W)
@@ -157,7 +158,7 @@ function _univariate(d::MatrixFDist)
     n1, n2, B = params(d)
     μ = zero(partype(d))
     σ = (n1 / n2) * Matrix(B)[1]
-    return LocationScale(μ, σ, FDist(n1, n2))
+    return AffineDistribution(μ, σ, FDist(n1, n2))
 end
 
 function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)

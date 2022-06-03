@@ -17,7 +17,13 @@ const tests = [
     "truncate",
     "truncnormal",
     "truncated_exponential",
+    "truncated_uniform",
+    "truncated_discrete_uniform",
+    "censored",
     "normal",
+    "laplace",
+    "cauchy",
+    "uniform",
     "lognormal",
     "mvnormal",
     "mvlognormal",
@@ -68,6 +74,7 @@ const tests = [
     "density_interface",
     "reshaped",
     "skewedexponentialpower",
+    "discreteuniform",
 ]
 
 printstyled("Running tests:\n", color=:blue)
@@ -79,7 +86,6 @@ include("testutils.jl")
 
 for t in tests
     @testset "Test $t" begin
-        Random.seed!(345679)
         include("$t.jl")
     end
 end

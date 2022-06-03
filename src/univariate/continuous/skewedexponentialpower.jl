@@ -37,25 +37,24 @@ struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
     SkewedExponentialPower{T}(μ::T, σ::T, p::T, α::T) where {T} = new{T}(μ, σ, p, α)
 end
 
-function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) where {T <: Real}
-    if check_args
-        @check_args(SkewedExponentialPower, σ > zero(σ))
-        @check_args(SkewedExponentialPower, p > zero(p))
-        @check_args(SkewedExponentialPower, zero(α) < α < one(α))
-    end
+function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args::Bool=true) where {T <: Real}
+    @check_args SkewedExponentialPower (σ, σ > zero(σ)) (p, p > zero(p)) (α, zero(α) < α < one(α))
     return SkewedExponentialPower{T}(µ, σ, p, α)
 end
 
-function SkewedExponentialPower(μ::Real=0, σ::Real=1, p::Real=2, α::Real=1//2; kwargs...)
-    return SkewedExponentialPower(promote(μ, σ, p, α)...; kwargs...)
+function SkewedExponentialPower(μ::Real, σ::Real, p::Real=2, α::Real=1//2; check_args::Bool=true)
+    return SkewedExponentialPower(promote(μ, σ, p, α)...; check_args=check_args)
 end
+SkewedExponentialPower(μ::Real=0) = SkewedExponentialPower(μ, 1, 2, 1//2; check_args=false)
 
 @distr_support SkewedExponentialPower -Inf Inf
 
 ### Conversions
 convert(::Type{SkewedExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewedExponentialPower(T(μ), T(σ), T(p), T(α))
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{S}) where {T <: Real, S <: Real} = SkewedExponentialPower(T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
+function Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower) where {T<:Real}
+    SkewedExponentialPower{T}(T(d.μ), T(d.σ), T(d.p), T(d.α))
+end
+Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
 
 ### Parameters
 @inline partype(d::SkewedExponentialPower{T}) where {T<:Real} = T

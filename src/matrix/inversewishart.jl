@@ -60,6 +60,8 @@ function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
     P = convert(AbstractArray{T}, d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.logc0))
 end
+Base.convert(::Type{InverseWishart{T}}, d::InverseWishart{T}) where {T<:Real} = d
+
 function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, logc0) where T<:Real
     P = convert(AbstractArray{T}, Ψ)
     InverseWishart{T, typeof(P)}(T(df), P, T(logc0))
