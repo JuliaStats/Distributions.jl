@@ -47,7 +47,7 @@ function _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
 end
 
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
-    sum(n->logpdf(d.v[n], _partitionargs(d, x)[n]), 1:length(d.v))
+    sum(_mappartitioned(logpdf, d, x))
 
 mean(d::Product) = _flatten(mean.(d.v))
 var(d::Product) = _flatten(var.(d.v))
@@ -62,7 +62,7 @@ function cov(d::Product)
 end
 
 entropy(d::Product) = sum(entropy, d.v)
-insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, _partitionargs(d, x)))
+insupport(d::Product, x::AbstractVector) = all(_mappartitioned(insupport, d, x))
 minimum(d::Product) = _flatten(map(minimum, d.v))
 maximum(d::Product) = _flatten(map(maximum, d.v))
 
@@ -96,20 +96,19 @@ _isindependent(d::Product) = all(length.(d.v) .== 1)
 
 _flatten(v::AbstractVector) = all(length.(v) .== 1) ? v : vcat(v...)
 
-# Split the vector x so that each constituent distribution can be evaluated
-# correctly at the elements of the split vector
-function _partitionargs(d::Product, x::AbstractVector{T}) where T<:Real
+# Map the function f across f(d.v[i], x[i]) for x split to match the
+# number of arguments needed for each d.v
+function _mappartitioned(f, d::Product, x::AbstractVector{<:Real})
     dshape = length.(d.v)
-    args = Vector{Union{T,Vector{T}}}(undef, length(dshape))
+    x_part = Vector{typeof(x)}(undef, length(dshape))
 
     start_idx = 1
     for (i, n) in enumerate(dshape)
-        if n == 1
-            args[i] = x[start_idx]
-        else
-            args[i] = collect(x[start_idx:(start_idx + n - 1)])
-        end
+        x_part[i] = x[start_idx:(start_idx + n - 1)]
         start_idx += n
     end
-    return args
+
+    f_part(d, x) = (length(x) == 1) ? f(d, x[1]) : f(d, x)
+    return f_part.(d.v, x_part)
 end
+
