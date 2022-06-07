@@ -39,7 +39,7 @@ struct NegativeBinomialLocation{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function NegativeBinomialLocation(μ::T, ϕ::T; check_args::Bool=true) where {T<:Real}
-    @check_args NegativeBinomialLocation (μ, μ > zero(μ)) (ϕ, ϕ ≥ zero(ϕ))
+    @check_args NegativeBinomialLocation (μ, μ ≥ zero(μ)) (ϕ, ϕ ≥ zero(ϕ))
     return NegativeBinomialLocation{T}(μ, ϕ)
 end
 
