@@ -7,6 +7,8 @@ using Test
 import JSON
 import Distributions: _univariate, _multivariate, _rand_params
 using ChainRulesTestUtils
+using ChainRulesCore
+using FiniteDifferences
 
 @testset "matrixvariates" begin
 #=
@@ -536,7 +538,7 @@ for distribution in matrixvariates
     end
 end
 
-@testset "Differentiation Wishart (p=$p, n=$n)" for p in (2, 10), n in (p+1, p+3)
+@testset "Differentiation Wishart (p=$p, n=$n)" for p in (3, 10), n in (p, p+3)
     M = randn(p, p)
     M += M'
     while !isposdef(M)
@@ -546,7 +548,41 @@ end
     d = Wishart(n, S)
     for _ in 1:10
         X = M + 10 * rand() * I
-        ChainRulesTestUtils.test_rrule(Distributions.nonsingular_wishart_logkernel, d, X)
+        ΔX = 0.05 * randn(size(X))
+        ΔX += ΔX'
+        while !isposdef(X + ΔX) || !isposdef(X - ΔX)
+            ΔX *= 0.8
+        end
+        y = Distributions.nonsingular_wishart_logkernel(d, X)
+        t = ChainRulesTestUtils.rand_tangent(d)
+        t.S .= 0
+        y1 = Distributions.nonsingular_wishart_logkernel(d, X + ΔX)
+        y2 = Distributions.nonsingular_wishart_logkernel(d, X - ΔX)
+        @testset "frule" begin
+            yf, Δy = ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, ΔX), Distributions.nonsingular_wishart_logkernel, d, X)
+            @test yf ≈ y
+            @test y1 - y ≈ Δy atol=1e-3 * n rtol=1e-4
+            @test y2 - y ≈ -Δy atol=1e-3 * n rtol=1e-4
+            _, Δy2 = ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, -ΔX), Distributions.nonsingular_wishart_logkernel, d, X)
+            @test y2 - y ≈ Δy2 atol=1e-3 * n rtol=1e-4
+        end
+        @testset "rrule" begin
+            yf, pullback = ChainRulesCore.rrule(Distributions.nonsingular_wishart_logkernel, d, X)
+            @test yf ≈ y
+            for _ in 1:10
+                dy = 10 * randn()
+                _, ∂d, ∂x = pullback(dy)
+                ∂d = ChainRulesCore.unthunk(∂d)
+                ∂x = ChainRulesCore.unthunk(∂x)
+                
+            end
+        end 
+        # t.S .= Symmetric(0.1 * randn(p, p))
+        # while !isposdef(d.S + t.S) || !isposdef(d.S - t.S)
+        #     t.S .*= 0.8
+        # end
+        # _, Δy1 = ChainRulesCore.frule((ChainRulesCore.NoTangent(), t, ΔX), Distributions.nonsingular_wishart_logkernel, d, X)
+        # y1 = Distributions.nonsingular_wishart_logkernel(Wishart(n, d.S + t.S), X + ΔX)
     end
 end
 
