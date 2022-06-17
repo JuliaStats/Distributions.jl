@@ -24,8 +24,8 @@ julia> d = Normal()
 Normal(μ=0.0, σ=1.0)
 ```
 
-The object `d::Distribution` represents a probability distribution, in our
-case the standard-normal distribution. One can query its properties such as the mean:
+The object `d` represents a probability distribution, in our case the standard-normal distribution.
+One can query its properties such as the mean:
 
 ```julia
 julia> mean(d)
@@ -33,7 +33,7 @@ julia> mean(d)
 ```
 
 We can also draw samples from `d` with `rand`.
-```
+```julia
 julia> x = rand(d, 100)
 100-element Array{Float64,1}:
   0.376264
