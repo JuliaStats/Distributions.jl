@@ -151,7 +151,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
     # Define pullback
     function logpdf_NegativeBinomial_pullback(Δ)
         Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
-        Δp = Δ * (r / p - k * inv(1 - p))
+        Δp = Δ * (r / p - k / (1 - p))
         Δd = if edgecase
             ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=NaN)
         elseif !insupp
