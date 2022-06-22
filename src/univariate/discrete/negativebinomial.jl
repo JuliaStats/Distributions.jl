@@ -134,7 +134,7 @@ end
 
 function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
     # Compute log probability
-    r, p = Distributions.params(d)
+    r, p = params(d)
     edgecase = isone(p) && iszero(k)
     insupp = insupport(d, k)
     
