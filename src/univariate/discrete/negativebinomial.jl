@@ -152,13 +152,13 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
     function logpdf_NegativeBinomial_pullback(Δ)
         Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
         Δp = Δ * (r / p - k / (1 - p))
-        Δd = if edgecase
-            ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=NaN)
+        if edgecase
+            Δp = one(Δp)
         elseif !insupp
-            ChainRulesCore.Tangent{typeof(d)}(; r=zero(Δr), p=zero(Δp))
-        else
-            ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=Δp)
+            Δr = oftype(Δr, NaN)
+            Δp = oftype(Δp, NaN)
         end
+        Δd = ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=Δp)
         return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
     end
 
