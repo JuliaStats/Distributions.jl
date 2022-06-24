@@ -73,6 +73,7 @@ export
     Binomial,
     Biweight,
     Categorical,
+    DirichletCategorical,
     Cauchy,
     Chernoff,
     Chi,
