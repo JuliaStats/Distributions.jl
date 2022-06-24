@@ -1,7 +1,8 @@
 using Distributions
+using ChainRulesTestUtils
 using Test, ForwardDiff
 
-# Currently, most of the tests for NegativeBinomail are in the "ref" folder.
+# Currently, most of the tests for NegativeBinomial are in the "ref" folder.
 # Eventually, we might want to consolidate the tests here
 
 mydiffp(r, p, k) = r/p - k/(1 - p)
@@ -12,9 +13,14 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
             k in (0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
 
     @test ForwardDiff.derivative(_p -> logpdf(NegativeBinomial(r, _p), k), p) ≈ mydiffp(r, p, k) rtol=1e-12 atol=1e-12
+
+    dist = NegativeBinomial(r, p)
+    test_rrule(logpdf, dist, k)
 end
 
 @testset "Check the corner case p==1" begin
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
+
+    test_rrule(logpdf, NegativeBinomial(0.5, 1.0), 0)
 end
