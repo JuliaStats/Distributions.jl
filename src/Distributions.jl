@@ -21,7 +21,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
 
-import PDMats: dim, PDMat, invquad
+import PDMats: PDMat, invquad
 
 using SpecialFunctions
 
@@ -191,7 +191,6 @@ export
     componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
-    dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability

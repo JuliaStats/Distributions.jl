@@ -41,7 +41,7 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixFDist(n1::Real, n2::Real, B::AbstractPDMat)
-    p = dim(B)
+    p = size(B, 1)
     n1 > p - 1 || throw(ArgumentError("first degrees of freedom must be larger than $(p - 1)"))
     n2 > p - 1 || throw(ArgumentError("second degrees of freedom must be larger than $(p - 1)"))
     logc0 = matrixfdist_logc0(n1, n2, B)
@@ -78,18 +78,16 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::MatrixFDist) = dim(d.W)
-
 size(d::MatrixFDist) = size(d.W)
 
-rank(d::MatrixFDist) = dim(d)
+rank(d::MatrixFDist) = rank(d.W)
 
 insupport(d::MatrixFDist, Σ::AbstractMatrix) = isreal(Σ) && size(Σ) == size(d) && isposdef(Σ)
 
 params(d::MatrixFDist) = (d.W.df, d.n2, d.W.S)
 
 function mean(d::MatrixFDist)
-    p = dim(d)
+    p = size(d, 1)
     n1, n2, B = params(d)
     n2 > p + 1 || throw(ArgumentError("mean only defined for df2 > dim + 1"))
     return (n1 / (n2 - p - 1)) * Matrix(B)
@@ -99,7 +97,7 @@ end
 
 #  Konno (1988 JJSS) Corollary 2.4.i
 function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
-    p = dim(d)
+    p = size(d, 1)
     n1, n2, PDB = params(d)
     n2 > p + 3 || throw(ArgumentError("cov only defined for df2 > dim + 3"))
     n = n1 + n2
@@ -108,7 +106,7 @@ function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
 end
 
 function var(d::MatrixFDist, i::Integer, j::Integer)
-    p = dim(d)
+    p = size(d, 1)
     n1, n2, PDB = params(d)
     n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
     n = n1 + n2
@@ -122,14 +120,14 @@ end
 
 function matrixfdist_logc0(n1::Real, n2::Real, B::AbstractPDMat)
     #  returns the natural log of the normalizing constant for the pdf
-    p = dim(B)
+    p = size(B, 1)
     term1 = -logmvbeta(p, n1 / 2, n2 / 2)
     term2 = (n2 / 2) * logdet(B)
     return term1 + term2
 end
 
 function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
-    p = dim(d)
+    p = size(d, 1)
     n1, n2, B = params(d)
     ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
 end

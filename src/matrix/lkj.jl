@@ -66,15 +66,14 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::LKJ) = d.d
 
-size(d::LKJ) = (dim(d), dim(d))
+size(d::LKJ) = (d.d, d.d)
 
-rank(d::LKJ) = dim(d)
+rank(d::LKJ) = d.d
 
 insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(Diagonal(R)) && isposdef(R)
 
-mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
+mean(d::LKJ) = Matrix{partype(d)}(I, d.d, d.d)
 
 function mode(d::LKJ; check_args::Bool=true)
     @check_args(
@@ -86,7 +85,7 @@ function mode(d::LKJ; check_args::Bool=true)
 end
 
 function var(lkj::LKJ)
-    d = dim(lkj)
+    d = lkj.d
     d > 1 || return zeros(d, d)
     σ² = var(_marginal(lkj))
     σ² * (ones(partype(lkj), d, d) - I)
