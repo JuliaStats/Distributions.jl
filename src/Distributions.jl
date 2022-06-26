@@ -21,7 +21,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
 
-import PDMats: PDMat, invquad
+import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
