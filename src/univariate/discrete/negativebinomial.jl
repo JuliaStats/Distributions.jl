@@ -153,7 +153,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
         Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
         Δp = Δ * (r / p - k / (1 - p))
         if edgecase
-            Δp = one(Δp)
+            Δp = Δ * r
         elseif !insupp
             Δr = oftype(Δr, NaN)
             Δp = oftype(Δp, NaN)

@@ -1,5 +1,6 @@
 using Distributions
 using ChainRulesTestUtils
+using FiniteDifferences
 using Test, ForwardDiff
 
 # Currently, most of the tests for NegativeBinomial are in the "ref" folder.
@@ -15,12 +16,14 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
     @test ForwardDiff.derivative(_p -> logpdf(NegativeBinomial(r, _p), k), p) ≈ mydiffp(r, p, k) rtol=1e-12 atol=1e-12
 
     dist = NegativeBinomial(r, p)
-    test_rrule(logpdf, dist, k)
+    test_rrule(logpdf, dist, k; fdm = forward_fdm(5, 1))
 end
 
 @testset "Check the corner case p==1" begin
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
 
-    test_rrule(logpdf, NegativeBinomial(0.5, 1.0), 0; fdm = forward_fdm(5, 1))
+    @testset "r=$r" for r in exp10.(range(-2, stop=2, length=8))
+        test_rrule(logpdf, NegativeBinomial(r, 1.0), 0; fdm = backward_fdm(5, 1))
+    end
 end
