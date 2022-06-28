@@ -22,5 +22,5 @@ end
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
 
-    test_rrule(logpdf, NegativeBinomial(0.5, 1.0), 0)
+    test_rrule(logpdf, NegativeBinomial(0.5, 1.0), 0; fdm = forward_fdm(5, 1))
 end
