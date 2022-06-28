@@ -72,15 +72,13 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::MatrixBeta) = dim(d.W1)
-
 size(d::MatrixBeta) = size(d.W1)
 
-rank(d::MatrixBeta) = dim(d)
+rank(d::MatrixBeta) = size(d, 1)
 
 insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
 
-params(d::MatrixBeta) = (dim(d), d.W1.df, d.W2.df)
+params(d::MatrixBeta) = (size(d, 1), d.W1.df, d.W2.df)
 
 mean(d::MatrixBeta) = ((p, n1, n2) = params(d); Matrix((n1 / (n1 + n2)) * I, p, p))
 

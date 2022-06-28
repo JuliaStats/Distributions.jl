@@ -57,7 +57,7 @@ const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zer
 
 ### Constructors
 function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractPDMat{T}) where {T<:Real}
-    length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    length(μ) == length(h) == size(J, 1) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     if typeof(μ) === typeof(h)
         return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
     else
@@ -76,7 +76,7 @@ function MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J:
 end
 
 function MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractPDMat)
-    length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    length(h) == size(J, 1) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     R = Base.promote_eltype(h, J)
     hh = convert(AbstractArray{R}, h)
     JJ = convert(AbstractArray{R}, J)
