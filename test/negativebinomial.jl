@@ -23,7 +23,7 @@ end
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
 
-    @testset "r=$r" for r in exp10.(range(-2, stop=2, length=8))
+    @testset "r=$r" for r in exp10.(range(-10, stop=2, length=25))
         test_rrule(logpdf, NegativeBinomial(r, 1.0), 0; fdm = backward_fdm(5, 1))
     end
 end
