@@ -80,7 +80,7 @@ end
 
 size(d::MatrixFDist) = size(d.W)
 
-rank(d::MatrixFDist) = rank(d.W)
+rank(d::MatrixFDist) = size(d, 1)
 
 insupport(d::MatrixFDist, Σ::AbstractMatrix) = isreal(Σ) && size(Σ) == size(d) && isposdef(Σ)
 

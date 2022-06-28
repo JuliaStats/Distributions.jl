@@ -74,7 +74,7 @@ end
 
 size(d::MatrixBeta) = size(d.W1)
 
-rank(d::MatrixBeta) = rank(d.W1)
+rank(d::MatrixBeta) = size(d, 1)
 
 insupport(d::MatrixBeta, U::AbstractMatrix) = isreal(U) && size(U) == size(d) && isposdef(U) && isposdef(I - U)
 
