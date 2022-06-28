@@ -44,7 +44,7 @@ end
 
 function Wishart(df::T, S::AbstractPDMat{T}) where T<:Real
     df > 0 || throw(ArgumentError("df must be positive. got $(df)."))
-    p = dim(S)
+    p = size(S, 1)
     singular = df <= p - 1
     if singular
         isinteger(df) || throw(
@@ -100,8 +100,8 @@ function insupport(d::Wishart, X::AbstractMatrix)
     end
 end
 
-dim(d::Wishart) = dim(d.S)
-size(d::Wishart) = (p = dim(d); (p, p))
+size(d::Wishart) = size(d.S)
+
 rank(d::Wishart) = d.rank
 params(d::Wishart) = (d.df, d.S)
 @inline partype(d::Wishart{T}) where {T<:Real} = T
@@ -109,14 +109,14 @@ params(d::Wishart) = (d.df, d.S)
 mean(d::Wishart) = d.df * Matrix(d.S)
 
 function mode(d::Wishart)
-    r = d.df - dim(d) - 1
+    r = d.df - size(d, 1) - 1
     r > 0 || throw(ArgumentError("mode is only defined when df > p + 1"))
     return Matrix(d.S) * r
 end
 
 function meanlogdet(d::Wishart)
     logdet_S = logdet(d.S)
-    p = dim(d)
+    p = size(d, 1)
     v = logdet_S + p * oftype(logdet_S, logtwo)
     df = oftype(logdet_S, d.df)
     for i in 0:(p - 1)
@@ -127,7 +127,7 @@ end
 
 function entropy(d::Wishart)
     d.singular && throw(ArgumentError("entropy not defined for singular Wishart."))
-    p = dim(d)
+    p = size(d, 1)
     df = d.df
     return -d.logc0 - ((df - p - 1) * meanlogdet(d) - df * p) / 2
 end
@@ -148,7 +148,7 @@ end
 #  -----------------------------------------------------------------------------
 
 function wishart_logc0(df::T, S::AbstractPDMat{T}, rnk::Integer) where {T<:Real}
-    p = dim(S)
+    p = size(S, 1)
     if df <= p - 1
         return singular_wishart_logc0(p, df, S, rnk)
     else
@@ -172,7 +172,7 @@ function singular_wishart_logc0(p::Integer, df::T, S::AbstractPDMat{T}, rnk::Int
 end
 
 function singular_wishart_logkernel(d::Wishart, X::AbstractMatrix)
-    p = dim(d)
+    p = size(d, 1)
     r = rank(d)
     L = eigvals(Hermitian(X), (p - r + 1):p)
     return ((d.df - (p + 1)) * sum(log, L) - tr(d.S \ X)) / 2
@@ -186,7 +186,7 @@ function nonsingular_wishart_logc0(p::Integer, df::T, S::AbstractPDMat{T}) where
 end
 
 function nonsingular_wishart_logkernel(d::Wishart, X::AbstractMatrix)
-    return ((d.df - (dim(d) + 1)) * logdet(cholesky(X)) - tr(d.S \ X)) / 2
+    return ((d.df - (size(d, 1) + 1)) * logdet(cholesky(X)) - tr(d.S \ X)) / 2
 end
 
 #  -----------------------------------------------------------------------------
