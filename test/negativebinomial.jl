@@ -17,5 +17,5 @@ end
 @testset "Check the corner case p==1" begin
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
-    @test iszero(rand(NegativeBinomial(0.5, 1.0)))
+    @test all(iszero, rand(NegativeBinomial(rand(), 1.0), 10))
 end
