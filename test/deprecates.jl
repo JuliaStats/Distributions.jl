@@ -1,5 +1,7 @@
 using Distributions, Test, Random, LinearAlgebra
 
+rng = MersenneTwister(123456)
+
 @testset "Test deprecates" begin
     @testset "matrixreshaped.jl" begin
         # TODO: Remove when `MatrixReshaped` is removed
