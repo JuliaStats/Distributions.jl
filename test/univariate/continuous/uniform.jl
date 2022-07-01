@@ -47,4 +47,28 @@ using Test
             @test fit(Uniform, data) == Uniform(10, 20)
         end
     end
+
+    @testset "Type inference" begin
+        for T in (Int, Float32)
+            d = Uniform{T}(T(2), T(3))
+            FT = float(T)
+            XFT = promote_type(FT, Float64)
+
+            @test @inferred(pdf(d, 1.5)) === zero(FT)
+            @test @inferred(pdf(d, 2.5)) === one(FT)
+            @test @inferred(pdf(d, 3.5)) === zero(FT)
+
+            @test @inferred(logpdf(d, 1.5)) === FT(-Inf)
+            @test @inferred(logpdf(d, 2.5)) === -zero(FT) # negative zero
+            @test @inferred(logpdf(d, 3.5)) === FT(-Inf)
+
+            @test @inferred(cdf(d, 1.5)) === zero(XFT)
+            @test @inferred(cdf(d, 2.5)) === XFT(1//2)
+            @test @inferred(cdf(d, 3.5)) === one(XFT)
+
+            @test @inferred(ccdf(d, 1.5)) === one(XFT)
+            @test @inferred(ccdf(d, 2.5)) === XFT(1//2)
+            @test @inferred(ccdf(d, 3.5)) === zero(XFT)
+        end
+    end
 end

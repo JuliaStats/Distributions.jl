@@ -188,6 +188,48 @@ end
     @test std(canonform(Normal(0.25, 0.7))) ≈ 0.7
 end
 
+@testset "Normal with non-standard (ie not Float64) parameter types" begin
+    n32 = Normal(1f0, 0.1f0)
+    n64 = Normal(1., 0.1)
+    nbig = Normal(big(pi), big(ℯ))
+
+    @test eltype(typeof(n32)) === Float32
+    @test eltype(rand(n32)) === Float32
+    @test eltype(rand(n32, 4)) === Float32
+
+    @test eltype(typeof(n64)) === Float64
+    @test eltype(rand(n64)) === Float64
+    @test eltype(rand(n64, 4)) === Float64
+
+    @test string(logpdf(Normal(0,1),big(1))) == "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
+    @test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
+    @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
+end
+
+@testset "Normal with std=0" begin
+    d = Normal(0.5,0.0)
+    @test pdf(d, 0.49) == 0.0
+    @test pdf(d, 0.5) == Inf
+    @test pdf(d, 0.51) == 0.0
+
+    @test cdf(d, 0.49) == 0.0
+    @test cdf(d, 0.5) == 1.0
+    @test cdf(d, 0.51) == 1.0
+
+    @test ccdf(d, 0.49) == 1.0
+    @test ccdf(d, 0.5) == 0.0
+    @test ccdf(d, 0.51) == 0.0
+
+    @test quantile(d, 0.0) == -Inf
+    @test quantile(d, 0.49) == 0.5
+    @test quantile(d, 0.5) == 0.5
+    @test quantile(d, 0.51) == 0.5
+    @test quantile(d, 1.0) == +Inf
+
+    @test rand(d) == 0.5
+    @test rand(MersenneTwister(123), d) == 0.5
+end
+
 # affine transformations
 test_affine_transformations(Normal, randn(), randn()^2)
 test_affine_transformations(NormalCanon, randn()^2, randn()^2)
