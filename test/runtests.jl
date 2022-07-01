@@ -81,8 +81,7 @@ const generic_tests = [
     "gradlogpdf", # extra file where there is none in /src
     "pdfnorm",
     "qq",
-    # "quantilealgs", # missing file
-    "quantile_newton", # extra file where there is none in /src
+    "quantilealgs",
     "reshaped",
     "samplers",
     # "show", # missing file
