@@ -10,71 +10,87 @@ using LinearAlgebra
 import JSON
 import ForwardDiff
 
-const tests = [
-    "loguniform",
-    "arcsine",
-    "dirac",
-    "truncate",
-    "truncnormal",
-    "truncated_exponential",
-    "truncated_uniform",
-    "truncated_discrete_uniform",
+using Distributions: continuous_distributions,
+                     discrete_distributions,
+                     matrix_distributions,
+                     multivariate_distributions,
+                     truncated_distributions
+
+untested_distributions = [
+    "beta",
+    "betabinomial", # present but errors
+    "betaprime",
+    "biweight",
+    "chisq",
+    "cosine",
+    "epanechnikov",
+    "erlang",
+    "exponential",
+    "fdist",
+    "frechet",
+    "gamma",
+    "generalizedextremevalue",
+    "generalizedpareto",
+    "geometric",
+    "hypergeometric",
+    "inversegamma",
+    "inversegaussian",
+    "ksdist",
+    "ksonesided",
+    "levy",
+    "logistic",
+    "noncentralbeta",
+    "noncentralchisq",
+    "noncentralf",
+    "noncentralhypergeometric",
+    "normalcanon",
+    "normalinversegaussian",
+    "pareto",
+    "poisson",
+    "rayleigh",
+    "skellam",
+    "studentizedrange",
+    "symtriangular",
+    "tdist",
+    "triangular",
+    "triweight",
+    "weibull",
+
+    "inversewishart",
+    "lkj",
+    "matrixbeta",
+    "matrixfdist", 
+    "matrixnormal",
+    "matrixtdist",
+    "wishart",
+
+    "mvnormalcanon",
+]
+
+const generic_tests = [
     "censored",
-    "normal",
-    "laplace",
-    "cauchy",
-    "uniform",
-    "lognormal",
-    "mvnormal",
-    "mvlognormal",
-    "types",
-    "utils",
-    "samplers",
-    "categorical",
-    "univariates",
-    "continuous",
-    "edgecases",
-    "fit",
-    "multinomial",
-    "binomial",
-    "poissonbinomial",
-    "dirichlet",
-    "dirichletmultinomial",
-    "logitnormal",
-    "mvtdist",
-    "kolmogorov",
-    "edgeworth",
-    "matrixreshaped",
-    "matrixvariates",
-    "lkjcholesky",
-    "vonmisesfisher",
+    # "common", # missing file
     "conversion",
     "convolution",
-    "mixture",
-    "gradlogpdf",
-    "noncentralt",
-    "locationscale",
-    "quantile_newton",
-    "semicircle",
-    "qq",
-    "pgeneralizedgaussian",
-    "product",
-    "discretenonparametric",
-    "chernoff",
-    "univariate_bounds",
-    "negativebinomial",
-    "bernoulli",
-    "soliton",
-    "skewnormal",
-    "chi",
-    "gumbel",
-    "pdfnorm",
-    "rician",
-    "functionals",
     "density_interface",
+    # "eachvariate", # missing file
+    "edgecases", # extra file where there is none in /src
+    "edgeworth",
+    "fit", # extra file where there is none in /src
+    "functionals",
+    # "genericfit", # missing file
+    # "genericrand", # missing file
+    "gradlogpdf", # extra file where there is none in /src
+    "pdfnorm",
+    "qq",
+    # "quantilealgs", # missing file
+    "quantile_newton", # extra file where there is none in /src
     "reshaped",
-    "skewedexponentialpower",
-    "discreteuniform",
+    "samplers",
+    # "show", # missing file
+    "types", # extra file where there is none in /src
+    "univariate_bounds", # extra file where there is none in /src
+    "utils"
 ]
 
 printstyled("Running tests:\n", color=:blue)
@@ -84,9 +100,53 @@ Random.seed!(345679)
 # to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
 include("testutils.jl")
 
-for t in tests
-    @testset "Test $t" begin
-        include("$t.jl")
+@testset "Distributions" begin
+    for t in generic_tests
+        @testset "Test $t" begin
+            include("$t.jl")
+        end
+    end
+    @testset "Test univariates" begin
+        include("univariates.jl")
+        @testset "Test locationscale" begin
+            include(joinpath("univariate", "locationscale.jl"))
+        end
+        for dname in setdiff(discrete_distributions, untested_distributions)
+            @testset "Test $dname" begin
+                include(joinpath("univariate", "discrete", "$(dname).jl"))
+            end
+        end
+        include("continuous.jl") # extra file where there is none in /src
+        for dname in setdiff(continuous_distributions, untested_distributions)
+            @testset "Test $dname" begin
+                include(joinpath("univariate", "continuous", "$(dname).jl"))
+            end
+        end
+    end
+    @testset "Test multivariates" begin
+        # include("multivariates.jl") # file missing
+        for dname in setdiff(multivariate_distributions, untested_distributions)
+            @testset "Test $dname" begin
+                include(joinpath("multivariate", "$(dname).jl"))
+            end
+        end
+    end
+    @testset "Test matrixvariates" begin
+        include("matrixreshaped.jl") # extra file where there is none in /src
+        include("matrixvariates.jl")
+        for dname in setdiff(matrix_distributions, untested_distributions)
+            @testset "Test $dname" begin
+                include(joinpath("matrix", "$(dname).jl"))
+            end
+        end
+    end
+    @testset "Test truncated" begin
+        include("truncate.jl")
+        for dname in setdiff(truncated_distributions, ["normal", "loguniform"])
+            @testset "Test $dname" begin
+                include(joinpath("truncated", "$(dname).jl"))
+            end
+        end
     end
 end
 
