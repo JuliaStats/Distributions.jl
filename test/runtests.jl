@@ -74,7 +74,6 @@ const generic_tests = [
     "density_interface",
     "eachvariate",
     "edgeworth",
-    "fit", # extra file where there is none in /src
     "functionals",
     "genericfit",
     "genericrand",
@@ -87,6 +86,13 @@ const generic_tests = [
     "utils"
 ]
 
+const tests_by_method_or_trait = [
+    "fit",
+    "gradlogpdf",
+    "types",
+    "univariate_bounds",
+]
+
 printstyled("Running tests:\n", color=:blue)
 
 Random.seed!(345679)
@@ -96,6 +102,11 @@ include("testutils.jl")
 
 @testset "Distributions" begin
     for t in generic_tests
+        @testset "Test $t" begin
+            include("$t.jl")
+        end
+    end
+    for t in tests_by_method_or_trait
         @testset "Test $t" begin
             include("$t.jl")
         end
