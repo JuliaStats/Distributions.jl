@@ -1,55 +1,45 @@
 using Distributions
+using Test, ForwardDiff
 using ChainRulesTestUtils
 using FiniteDifferences
-using Test, ForwardDiff
 
 # Currently, most of the tests for NegativeBinomial are in the "ref" folder.
 # Eventually, we might want to consolidate the tests here
 
-mydiffp(r, p, k) = isone(p) ? r : r/p - k/(1 - p)
-mydiffr(r, p, k) = log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1)
+mydiffp(r, p, k) = r/p - k/(1 - p)
 
-@testset "NegativeBinomial" begin
-    ks = (0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
-    @testset "logpdf, rand, and ForwardDiff" begin
-        rs = exp10.(range(-10, stop=2, length=25))
-        ps = exp10.(-10:0) .- eps() # avoid p==1 since it's not differentiable
-        @testset "r=$r" for r in rs
-            @testset "p=1, k=0" begin
-                @test logpdf(NegativeBinomial(r, 1.0), 0) === 0.0
-                @test iszero(rand(NegativeBinomial(r, 1.0)))
-                fdm = backward_fdm(5, 1, max_range = r/10)
-                f1(_p) = logpdf(NegativeBinomial(r, _p), 0)
-                f2(_r) = logpdf(NegativeBinomial(_r, 1.0), 0)
-                @test_broken ForwardDiff.derivative(f1, 1.0) ≈ mydiffp(r, 1.0, 0)
-                @test_skip ForwardDiff.derivative(f2, r) ≈ mydiffr(r, 1.0, 0)
-            end
-            @testset "p=1, k=1" begin
-                @test logpdf(NegativeBinomial(r, 1.0), 1) === -Inf
-            end
-            @testset "p=$p, k=$k" for p in ps, k in ks
-                fdm = central_fdm(5, 1, max_range = min(r, p, 1-p)/2)
-                f1(_p) = logpdf(NegativeBinomial(r, _p), k)
-                f2(_r) = logpdf(NegativeBinomial(_r, p), k)
-                @test ForwardDiff.derivative(f1, p) ≈ mydiffp(r, p, k)
-                @test_skip ForwardDiff.derivative(f2, r) ≈ mydiffr(r, p, k)
-            end
-        end
+@testset "NegativeBinomial r=$r, p=$p, k=$k" for
+    p in exp10.(-10:0) .- eps(), # avoid p==1 since it's not differentiable
+        r in exp10.(range(-10, stop=2, length=25)),
+            k in (0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
+
+    @test ForwardDiff.derivative(_p -> logpdf(NegativeBinomial(r, _p), k), p) ≈ mydiffp(r, p, k) rtol=1e-12 atol=1e-12
+end
+
+@testset "Check the corner case p==1" begin
+    @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
+    @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
+    @test all(iszero, rand(NegativeBinomial(rand(), 1.0), 10))
+end
+
+@testset "rrule: logpdf of NegativeBinomial" begin
+    r = randexp()
+
+    # Test with values in and outside of support
+    p = rand()
+    dist = NegativeBinomial(r, p)
+    fdm = central_fdm(5, 1; max_range=min(r, p, 1-p)/2) # avoids numerical issues with finite differencing
+    for k in (0, 10, 42, -1, -5, -13)
+        # Test both integers and floating point numbers.
+        # For floating point numbers we have to tell FiniteDifferences explicitly that the
+        # argument is non-differentiable. Otherwise it will compute `NaN` as derivative.
+        test_rrule(logpdf, dist, k; fdm=fdm, nans=true)
+        test_rrule(logpdf, dist, float(k) ⊢ ChainRulesTestUtils.NoTangent(); fdm=fdm, nans=true)
     end
-    @testset "rrule" begin
-        rs = -log.(rand(25))
-        ps = rand(25)
-        @testset "r=$r" for r in rs
-            @testset "p=1, k=0" begin
-                dist = NegativeBinomial(r, 1.0)
-                fdm = backward_fdm(5, 1, max_range = r/10)
-                test_rrule(logpdf, dist, 0; fdm = fdm, check_inferred=true)
-            end
-            @testset "p=$p, k=$k" for p in ps, k in ks
-                dist = NegativeBinomial(r, p)
-                fdm = central_fdm(5, 1, max_range = min(r, p, 1-p)/2)
-                test_rrule(logpdf, dist, k; fdm = fdm, check_inferred=true)
-            end
-        end
-    end
+
+    # Test edge case `p = 1` and `k = 0`
+    dist = NegativeBinomial(r, 1)
+    fdm = backward_fdm(5, 1; max_range = r/10)
+    test_rrule(logpdf, dist, 0; fdm=fdm)
+    test_rrule(logpdf, dist, 0.0 ⊢ ChainRulesTestUtils.NoTangent(); fdm=fdm)
 end
