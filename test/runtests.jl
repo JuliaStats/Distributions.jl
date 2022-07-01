@@ -123,7 +123,6 @@ include("testutils.jl")
                 include(joinpath("univariate", "discrete", "$(dname).jl"))
             end
         end
-        include("continuous.jl") # extra file where there is none in /src
         for dname in setdiff(continuous_distributions, untested_distributions)
             @testset "Test $dname" begin
                 include(joinpath("univariate", "continuous", "$(dname).jl"))
