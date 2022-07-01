@@ -1,7 +1,7 @@
 using Distributions
 using Test, ForwardDiff
 
-# Currently, most of the tests for NegativeBinomail are in the "ref" folder.
+# Currently, most of the tests for NegativeBinomail are in the "_ref" folder.
 # Eventually, we might want to consolidate the tests here
 
 mydiffp(r, p, k) = r/p - k/(1 - p)

@@ -267,7 +267,7 @@ function unpack_matvar_json_dict(dist::Type{<:MatrixDistribution}, dict)
 end
 
 function test_against_stan(dist::Type{<:MatrixDistribution})
-    filename = joinpath(@__DIR__, "ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
+    filename = joinpath(@__DIR__, "_ref", "matrixvariates", "jsonfiles", "$(dist)_stan_output.json")
     stan_output = JSON.parsefile(filename)
     K = length(stan_output)
     for k in 1:K
