@@ -118,7 +118,13 @@ invlogcdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf(d.r, d.p
 invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
-rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
+function rand(rng::AbstractRNG, d::NegativeBinomial)
+    if isone(d.p)
+        return 0
+    else
+        return rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
+    end
+end
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)

@@ -11,12 +11,13 @@ mydiffr(r, p, k) = log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1)
 
 @testset "NegativeBinomial" begin
     ks = (0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
-    @testset "logpdf and ForwardDiff" begin
+    @testset "logpdf, rand, and ForwardDiff" begin
         rs = exp10.(range(-10, stop=2, length=25))
         ps = exp10.(-10:0) .- eps() # avoid p==1 since it's not differentiable
         @testset "r=$r" for r in rs
             @testset "p=1, k=0" begin
                 @test logpdf(NegativeBinomial(r, 1.0), 0) === 0.0
+                @test iszero(rand(NegativeBinomial(r, 1.0)))
                 fdm = backward_fdm(5, 1, max_range = r/10)
                 f1(_p) = logpdf(NegativeBinomial(r, _p), 0)
                 f2(_r) = logpdf(NegativeBinomial(_r, 1.0), 0)
@@ -51,4 +52,3 @@ mydiffr(r, p, k) = log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1)
             end
         end
     end
-end
