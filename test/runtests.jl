@@ -68,25 +68,22 @@ untested_distributions = [
 
 const generic_tests = [
     "censored",
-    # "common", # missing file
+    "common",
     "conversion",
     "convolution",
     "density_interface",
-    # "eachvariate", # missing file
+    "eachvariate",
     "edgeworth",
     "fit", # extra file where there is none in /src
     "functionals",
-    # "genericfit", # missing file
-    # "genericrand", # missing file
-    "gradlogpdf", # extra file where there is none in /src
+    "genericfit",
+    "genericrand",
     "pdfnorm",
     "qq",
     "quantilealgs",
     "reshaped",
     "samplers",
-    # "show", # missing file
-    "types", # extra file where there is none in /src
-    "univariate_bounds", # extra file where there is none in /src
+    "show",
     "utils"
 ]
 
