@@ -29,18 +29,3 @@ SpecialFunctions = "1.2, 2"
 StatsBase = "0.32, 0.33"
 StatsFuns = "0.9.15, 1"
 julia = "1.3"
-
-[extras]
-Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
-ChainRulesTestUtils = "cdddcdb0-9152-4a09-a978-84456f9df70a"
-Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["StableRNGs", "Calculus", "ChainRulesTestUtils", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test", "OffsetArrays"]
