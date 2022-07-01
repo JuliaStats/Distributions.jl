@@ -52,3 +52,4 @@ mydiffr(r, p, k) = log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1)
             end
         end
     end
+end
