@@ -16,7 +16,7 @@ using Distributions: continuous_distributions,
                      multivariate_distributions,
                      truncated_distributions
 
-untested_distributions = [
+distributions_without_separate_test_file = [
     "beta",
     "betabinomial", # present but errors
     "betaprime",
@@ -118,12 +118,12 @@ include("testutils.jl")
         @testset "Test locationscale" begin
             include(joinpath("univariate", "locationscale.jl"))
         end
-        for dname in setdiff(discrete_distributions, untested_distributions)
+        for dname in setdiff(discrete_distributions, distributions_without_separate_test_file)
             @testset "Test $dname" begin
                 include(joinpath("univariate", "discrete", "$(dname).jl"))
             end
         end
-        for dname in setdiff(continuous_distributions, untested_distributions)
+        for dname in setdiff(continuous_distributions, distributions_without_separate_test_file)
             @testset "Test $dname" begin
                 include(joinpath("univariate", "continuous", "$(dname).jl"))
             end
@@ -131,7 +131,7 @@ include("testutils.jl")
     end
     @testset "Test multivariates" begin
         include("multivariates.jl")
-        for dname in setdiff(multivariate_distributions, untested_distributions)
+        for dname in setdiff(multivariate_distributions, distributions_without_separate_test_file)
             @testset "Test $dname" begin
                 include(joinpath("multivariate", "$(dname).jl"))
             end
@@ -139,7 +139,7 @@ include("testutils.jl")
     end
     @testset "Test matrixvariates" begin
         include("matrixvariates.jl")
-        for dname in setdiff(matrix_distributions, untested_distributions)
+        for dname in setdiff(matrix_distributions, distributions_without_separate_test_file)
             @testset "Test $dname" begin
                 include(joinpath("matrix", "$(dname).jl"))
             end
