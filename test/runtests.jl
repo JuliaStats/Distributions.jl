@@ -72,8 +72,10 @@ const generic_tests = [
     "conversion",
     "convolution",
     "density_interface",
+    "deprecates",
     "eachvariate",
     "edgeworth",
+    "estimators",
     "functionals",
     "genericfit",
     "genericrand",
@@ -108,7 +110,7 @@ include("testutils.jl")
     end
     for t in tests_by_method_or_trait
         @testset "Test $t" begin
-            include("$t.jl")
+            include(joinpath("_methods", "$t.jl"))
         end
     end
     @testset "Test univariates" begin
@@ -129,7 +131,7 @@ include("testutils.jl")
         end
     end
     @testset "Test multivariates" begin
-        # include("multivariates.jl") # file missing
+        include("multivariates.jl")
         for dname in setdiff(multivariate_distributions, untested_distributions)
             @testset "Test $dname" begin
                 include(joinpath("multivariate", "$(dname).jl"))
