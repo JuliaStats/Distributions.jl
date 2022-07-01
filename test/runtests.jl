@@ -51,7 +51,6 @@ untested_distributions = [
     "skellam",
     "studentizedrange",
     "symtriangular",
-    "tdist",
     "triangular",
     "triweight",
     "weibull",
@@ -74,7 +73,6 @@ const generic_tests = [
     "convolution",
     "density_interface",
     # "eachvariate", # missing file
-    "edgecases", # extra file where there is none in /src
     "edgeworth",
     "fit", # extra file where there is none in /src
     "functionals",

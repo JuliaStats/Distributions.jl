@@ -1,5 +1,3 @@
-using Test, Distributions, StatsBase
-
 @testset "TDist(Inf) is Normal(0,1)" begin
     T = TDist(Inf)
     N = Normal(0, 1)
