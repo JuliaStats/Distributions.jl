@@ -139,7 +139,6 @@ include("testutils.jl")
         end
     end
     @testset "Test matrixvariates" begin
-        include("matrixreshaped.jl") # extra file where there is none in /src
         include("matrixvariates.jl")
         for dname in setdiff(matrix_distributions, untested_distributions)
             @testset "Test $dname" begin
