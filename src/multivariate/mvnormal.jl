@@ -372,7 +372,7 @@ struct MvNormalStats <: SufficientStats
     tw::Float64         # total sample weight
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
+function suffstats(::Type{<:MvNormal}, x::AbstractMatrix{Float64})
     d = size(x, 1)
     n = size(x, 2)
     s = vec(sum(x, dims=2))
@@ -382,7 +382,7 @@ function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64})
     MvNormalStats(s, m, s2, Float64(n))
 end
 
-function suffstats(D::Type{MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
+function suffstats(::Type{<:MvNormal}, x::AbstractMatrix{Float64}, w::AbstractVector)
     d = size(x, 1)
     n = size(x, 2)
     length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
