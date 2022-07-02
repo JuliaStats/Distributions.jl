@@ -52,7 +52,13 @@ mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)
 #### Evaluation
 pdf(d::SkewNormal, x::Real) = (2/d.ω) * normpdf((x-d.ξ)/d.ω) * normcdf(d.α * (x-d.ξ)/d.ω)
 logpdf(d::SkewNormal, x::Real) = log(2) - log(d.ω) + normlogpdf((x-d.ξ) / d.ω) + normlogcdf(d.α * (x-d.ξ) / d.ω)
-#cdf requires Owen's T function.
+
+#cdf closed form requires Owen's T function.
+function cdf(dist::SkewNormal, x::Real)
+    float_x = float(x)
+    return first(quadgk(Base.Fix1(pdf, dist), oftype(float_x, -Inf), float_x))
+end
+
 #cdf/quantile etc 
 
 mgf(d::SkewNormal, t::Real) = 2 * exp(d.ξ * t + (d.ω^2 * t^2)/2 ) * normcdf(d.ω * delta(d) * t)

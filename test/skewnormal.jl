@@ -1,6 +1,6 @@
 using Test
 using Distributions
-import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
+import Distributions: normpdf, normcdf, normlogpdf, normlogcdf, cdf
 
 @testset "SkewNormal" begin
     @test_throws DomainError SkewNormal(0.0, 0.0, 0.0)
@@ -33,6 +33,17 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
     @test kurtosis(d3) == Distributions.kurtosis(d4)
     @test mgf(d3, 2.25) == Distributions.mgf(d4, 2.25)
     @test cf(d3, 2.25) == Distributions.cf(d4, 2.25)
+    # reference values computed with Mathematica
+    gridx = [-0.15, 0.0, 0, 0.15] 
+    cdfx = [
+        0.003579417457235501,
+        0.006369452573950052,
+        0.006369452573950052,
+        0.0108418482378097
+    ]
+    for (x, y) in zip(gridx, cdfx)
+        @test cdf(d1, x) ≈ y
+    end
 end
 
 
