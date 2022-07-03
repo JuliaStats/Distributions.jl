@@ -77,7 +77,7 @@ function rand(rng::AbstractRNG, d::Semicircle)
     # sample polar coodinates r,θ 
     # of point uniformly distributed on radius d.r half disk
     # project onto x axis
-    θ = rand(rng)
+    θ = pi*rand(rng)
     r = d.r*sqrt(rand(rng))
     x = cos(θ) * r
     return x
