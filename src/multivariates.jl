@@ -109,18 +109,14 @@ end
 
 ##### Specific distributions #####
 
-const multivariate_distributions = [
-    "dirichlet",
-    "multinomial",
-    "dirichletmultinomial",
-    "mvnormal",
-    "mvnormalcanon",
-    "mvlognormal",
-    "mvtdist",
-    "product",
-    "vonmisesfisher"
-]
-
-for dname in multivariate_distributions
-    include(joinpath("multivariate", "$(dname).jl"))
+for fname in ["dirichlet.jl",
+              "multinomial.jl",
+              "dirichletmultinomial.jl",
+              "mvnormal.jl",
+              "mvnormalcanon.jl",
+              "mvlognormal.jl",
+              "mvtdist.jl",
+              "product.jl",
+              "vonmisesfisher.jl"]
+    include(joinpath("multivariate", fname))
 end

@@ -12,8 +12,6 @@ import ForwardDiff
 
 using Distributions: continuous_distributions,
                      discrete_distributions,
-                     matrix_distributions,
-                     multivariate_distributions,
                      truncated_distributions
 
 const matrix_distributions = [
@@ -24,6 +22,18 @@ const matrix_distributions = [
     "matrixbeta",
     "matrixfdist", 
     "lkj"
+]
+
+const multivariate_distributions = [
+    "dirichlet",
+    "multinomial",
+    "dirichletmultinomial",
+    "mvnormal",
+    "mvnormalcanon",
+    "mvlognormal",
+    "mvtdist",
+    "product",
+    "vonmisesfisher"
 ]
 
 const generic_tests = [
