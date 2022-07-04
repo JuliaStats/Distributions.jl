@@ -16,6 +16,16 @@ using Distributions: continuous_distributions,
                      multivariate_distributions,
                      truncated_distributions
 
+const matrix_distributions = [
+    "wishart",
+    "inversewishart",
+    "matrixnormal",
+    "matrixtdist",
+    "matrixbeta",
+    "matrixfdist", 
+    "lkj"
+]
+
 const generic_tests = [
     "censored",
     "common",
