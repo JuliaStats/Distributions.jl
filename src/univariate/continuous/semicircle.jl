@@ -72,4 +72,14 @@ function cdf(d::Semicircle, x::Real)
     end
 end
 
+function rand(rng::AbstractRNG, d::Semicircle)
+    # Idea:
+    # sample polar coodinates r,θ 
+    # of point uniformly distributed on radius d.r half disk
+    # project onto x axis
+    θ = rand(rng) # multiple of π
+    r = d.r * sqrt(rand(rng))
+    return cospi(θ) * r
+end
+
 @quantile_newton Semicircle
