@@ -97,13 +97,15 @@ end
 
 # Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
 function logpdf(d::NegativeBinomial, k::Real)
-    r = d.r * log(d.p) + k * log1p(-d.p)
-    if isone(d.p) && iszero(k)
-        return zero(r)
-    elseif !insupport(d, k)
-        return oftype(r, -Inf)
+    r, p = params(d)
+    z = xlogy(r, p) + xlog1py(k, -p)
+    if iszero(k)
+        # in this case `log(k + r) + logbeta(r, k + 1) == 0` analytically but unfortunately not numerically
+        return z
+    elseif insupport(d, k)
+        return z - log(k + r) - logbeta(r, k + 1)
     else
-        return r - log(k + d.r) - logbeta(d.r, k + 1)
+        return oftype(z, -Inf)
     end
 end
 

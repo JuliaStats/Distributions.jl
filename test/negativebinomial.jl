@@ -1,5 +1,6 @@
 using Distributions
 using Test, ForwardDiff
+using StatsFuns
 
 # Currently, most of the tests for NegativeBinomail are in the "ref" folder.
 # Eventually, we might want to consolidate the tests here
@@ -15,7 +16,17 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
 end
 
 @testset "Check the corner case p==1" begin
-    @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
-    @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf
-    @test all(iszero, rand(NegativeBinomial(rand(), 1.0), 10))
+    for r in randexp(10)
+        d = NegativeBinomial(r, 1.0)
+        @test @inferred(logpdf(d, 0)) === 0.0
+        @test @inferred(logpdf(d, -1)) === -Inf
+        @test @inferred(logpdf(d, 1)) === -Inf
+        @test all(iszero, rand(d, 10))
+    end
+end
+
+@testset "Check the corner case k==0" begin
+	for r in randexp(5), p in rand(5)
+        @test @inferred(logpdf(NegativeBinomial(r, p), 0)) === xlogy(r, p)
+    end
 end
