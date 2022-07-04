@@ -10,8 +10,7 @@ using LinearAlgebra
 import JSON
 import ForwardDiff
 
-using Distributions: continuous_distributions,
-                     discrete_distributions
+using Distributions: continuous_distributions, discrete_distributions
 
 const matrix_distributions = [
     "wishart",
