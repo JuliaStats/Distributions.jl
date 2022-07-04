@@ -11,8 +11,7 @@ import JSON
 import ForwardDiff
 
 using Distributions: continuous_distributions,
-                     discrete_distributions,
-                     truncated_distributions
+                     discrete_distributions
 
 const matrix_distributions = [
     "wishart",
@@ -34,6 +33,14 @@ const multivariate_distributions = [
     "mvtdist",
     "product",
     "vonmisesfisher"
+]
+
+const truncated_distributions = [
+    "normal",
+    "exponential",
+    "uniform",
+    "loguniform",
+    "discrete_uniform"
 ]
 
 const generic_tests = [

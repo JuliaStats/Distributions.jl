@@ -231,15 +231,8 @@ _use_multline_show(d::Truncated) = _use_multline_show(d.untruncated)
 
 ### specialized truncated distributions
 
-const truncated_distributions = [
-    "normal",
-    "exponential",
-    "uniform",
-    "loguniform",
-    "discrete_uniform"
-]
-
-for dname in truncated_distributions
-    include(joinpath("truncated", "$(dname).jl"))
-end
-
+include(joinpath("truncated", "normal.jl"))
+include(joinpath("truncated", "exponential.jl"))
+include(joinpath("truncated", "uniform.jl"))
+include(joinpath("truncated", "loguniform.jl"))
+include(joinpath("truncated", "discrete_uniform.jl"))
