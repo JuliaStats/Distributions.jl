@@ -85,9 +85,11 @@ Random.seed!(345679)
 # to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
 include("testutils.jl")
 
-for t in tests
-    @testset "Test $t" begin
-        include("$t.jl")
+@testset "Distributions" begin
+    for t in tests
+        @testset "Test $t" begin
+            include("$t.jl")
+        end
     end
 end
 
