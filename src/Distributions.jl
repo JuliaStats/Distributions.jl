@@ -145,7 +145,7 @@ export
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
-    Product,
+    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,
@@ -293,6 +293,7 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("product.jl")
 include("reshaped.jl")
 include("truncate.jl")
 include("censored.jl")
