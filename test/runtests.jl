@@ -159,10 +159,8 @@ Random.seed!(345679)
 include("testutils.jl")
 
 @testset "Distributions" begin
-    for t in tests
-        @testset "Test $t" begin
-            include("$t.jl")
-        end
+    @testset "Test $t" for t in tests
+        include("$t.jl")
     end
 end
 
