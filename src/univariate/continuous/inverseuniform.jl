@@ -18,7 +18,7 @@ function InverseUniform(binv::T, ainv::T; check_args::Bool=true) where {T}
     @check_args InverseUniform (0 < binv < ainv)
     InverseUniform{T}(binv, ainv)
 end
-InverseUniform(binv, ainv; check_args=true) = InverseUniform(promote(binv, ainv)...; check_args)
+InverseUniform(binv, ainv; check_args=true) = InverseUniform(promote(binv, ainv)...; check_args=check_args)
 
 Base.minimum(d::InverseUniform) = d.binv
 Base.maximum(d::InverseUniform) = d.ainv
