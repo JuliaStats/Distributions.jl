@@ -106,6 +106,7 @@ export
     InverseWishart,
     InverseGamma,
     InverseGaussian,
+    InverseUniform,
     IsoNormal,
     IsoNormalCanon,
     Kolmogorov,
