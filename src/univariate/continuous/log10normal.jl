@@ -60,12 +60,6 @@ function var(d::Log10Normal)
     μ = d.μ
     10^2μ * e * (e-1)
 end
-# function vartest(d::Log10Normal)
-#     quadgk(x-> (exp10(x)-mean(d))^2 * pdf(d,exp10(x)) * exp10(x) * log(10), min(1e-5,d.μ-5*d.σ),d.μ+5*d.σ)[1]
-# end
-# function meantest(d::Log10Normal)
-#     quadgk(x-> exp10(x) * pdf(d,exp10(x)) * exp10(x) * log(10), min(1e-5,d.μ-5*d.σ),d.μ+5*d.σ)[1]
-# end
 
 function skewness(d::Log10Normal)
     σ2 = d.σ^2
@@ -88,12 +82,8 @@ function entropy(d::Log10Normal)
     (μ, σ) = params(d)
     (1 + μ * log(100) + log(twoπ) + 2*log(σ*log(10)))/2
 end
-# function entropytest(d::Log10Normal)
-#     quadgk(x-> -logpdf(d,exp10(x)) * pdf(d,exp10(x)) * exp10(x) * log(10), min(1e-5,d.μ-5*d.σ),d.μ+5*d.σ)
-# end
 
-
-#### Evalution
+#### Evaluation
 
 function pdf(d::Log10Normal, x::Real)
     if x ≤ zero(x)
