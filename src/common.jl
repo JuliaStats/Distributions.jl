@@ -23,12 +23,41 @@ const Matrixvariate = ArrayLikeVariate{2}
 abstract type CholeskyVariate <: VariateForm end
 
 """
-`S <: ValueSupport` specifies the support of sample elements,
-either discrete or continuous.
+    ValueSupport
+
+Abstract type that specifies the support of elements of samples.
+
+It is either [`Discrete`](@ref) or [`Continuous`](@ref).
 """
 abstract type ValueSupport end
+
+"""
+    Discrete <: ValueSupport
+
+This type represents the support of a discrete random variable.
+
+It is countable. For instance, it can be a finite set or a countably infinite set such as
+the natural numbers.
+
+See also: [`Continuous`](@ref), [`ValueSupport`](@ref)
+"""
 struct Discrete   <: ValueSupport end
+
+"""
+    Continuous <: ValueSupport
+
+This types represents the support of a continuous random variable.
+
+It is uncountably infinite. For instance, it can be an interval on the real line.
+
+See also: [`Discrete`](@ref), [`ValueSupport`](@ref)
+"""
 struct Continuous <: ValueSupport end
+
+# promotions (e.g., in product distribution):
+# combination of discrete support (countable) and continuous support (uncountable) yields
+# continuous support (uncountable)
+Base.promote_rule(::Type{Continuous}, ::Type{Discrete}) = Continuous
 
 ## Sampleable
 
@@ -41,7 +70,6 @@ and a `ValueSupport` defining the domain of possibly sampled values.
 Any `Sampleable` implements the `Base.rand` method.
 """
 abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
-
 
 variate_form(::Type{<:Sampleable{VF}}) where {VF} = VF
 value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS} = VS
@@ -141,10 +169,6 @@ const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
 const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
 const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
 const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
-
-variate_form(::Type{<:Distribution{VF}}) where {VF} = VF
-
-value_support(::Type{<:Distribution{VF,VS}}) where {VF,VS} = VS
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?

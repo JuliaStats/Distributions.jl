@@ -33,16 +33,21 @@ The `VariateForm` sub-types defined in `Distributions.jl` are:
 
 ### ValueSupport
 
-```@doc
+```@docs
 Distributions.ValueSupport
 ```
 
 The `ValueSupport` sub-types defined in `Distributions.jl` are:
 
-**Type** | **Element type** | **Descriptions**
---- | --- | ---
-`Discrete` | `Int` | Samples take discrete values
-`Continuous` | `Float64` | Samples take continuous real values
+```@docs
+Distributions.Discrete
+Distributions.Continuous
+```
+
+**Type** | **Default element type** | **Description** | **Examples**
+--- | --- | --- | ---
+`Discrete` | `Int` | Samples take countably many values | $\{0,1,2,3\}$, $\mathbb{N}$
+`Continuous` | `Float64` | Samples take uncountably many values | $[0, 1]$, $\mathbb{R}$
 
 Multiple samples are often organized into an array, depending on the variate form.
 
