@@ -25,6 +25,7 @@ const tests = [
     "cauchy",
     "uniform",
     "lognormal",
+    "log10normal",
     "mvnormal",
     "mvlognormal",
     "types",

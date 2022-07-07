@@ -319,6 +319,13 @@ plotdensity((0, 5), LogNormal, (0, 1)) # hide
 ```
 
 ```@docs
+Log10Normal
+```
+```@example plotdensity
+plotdensity((0, 20), Log10Normal, (1, 0.2)) # hide
+```
+
+```@docs
 LogUniform
 ```
 ```@example plotdensity

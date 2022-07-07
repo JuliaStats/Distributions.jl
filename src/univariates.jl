@@ -686,6 +686,7 @@ const continuous_distributions = [
     "normalcanon",
     "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
+    "log10normal",  # Log10Normal depends on Normal
     "logitnormal",    # LogitNormal depends on Normal
     "pareto",
     "rayleigh",
