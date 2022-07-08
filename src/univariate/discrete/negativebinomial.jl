@@ -135,3 +135,38 @@ function cf(d::NegativeBinomial, t::Real)
     r, p = params(d)
     return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
 end
+
+# ChainRules definitions
+
+function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
+    # Compute log probability
+    r, p = params(d)
+    edgecase = isone(p) && iszero(k)
+    insupp = insupport(d, k)
+    
+    # Primal computation
+    Ω = r * log(p) + k * log1p(-p)
+    if edgecase
+        Ω = zero(Ω)
+    elseif !insupp
+        Ω = oftype(Ω, -Inf)
+    else
+        Ω = Ω - log(k + r) - logbeta(r, k + 1)
+    end
+
+    # Define pullback
+    function logpdf_NegativeBinomial_pullback(Δ)
+        Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
+        Δp = Δ * (r / p - k / (1 - p))
+        if edgecase
+            Δp = oftype(Δp, Δ * r)
+        elseif !insupp
+            Δr = oftype(Δr, NaN)
+            Δp = oftype(Δp, NaN)
+        end
+        Δd = ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=Δp)
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
+    end
+
+    return Ω, logpdf_NegativeBinomial_pullback
+end
