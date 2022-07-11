@@ -39,7 +39,7 @@ end
     ubound = rand(N)
     ds = Uniform.(-ubound, ubound)
     x = rand.(ds)
-    d_product = @test_deprecated(product_distribution(ds))
+    d_product = product_distribution(ds)
     @test d_product isa Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
@@ -70,7 +70,7 @@ end
         support = fill(a, N)
         ds = DiscreteNonParametric.(support, Ref([0.5, 0.5]))
         x = rand.(ds)
-        d_product = @test_deprecated(product_distribution(ds))
+        d_product = product_distribution(ds)
         @test d_product isa Product
         # Check that methods for `Product` are consistent.
         @test length(d_product) == length(ds)

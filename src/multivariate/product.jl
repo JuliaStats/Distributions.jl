@@ -48,9 +48,9 @@ insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
 minimum(d::Product) = map(minimum, d.v)
 maximum(d::Product) = map(maximum, d.v)
 
-# TODO: remove deprecation when `Product` is removed
+# will be removed when `Product` is removed
 # it will return a `ProductDistribution` then which is already the default for
 # higher-dimensional arrays and distributions
-Base.@deprecate product_distribution(
-    dists::AbstractVector{<:UnivariateDistribution}
-) Product(dists)
+function product_distribution(dists::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{S}}
+    return Product{S,T,V}(dists)
+end
