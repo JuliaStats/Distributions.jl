@@ -24,7 +24,7 @@ function ProductDistribution(dists::AbstractArray{<:Distribution{ArrayLikeVariat
     return ProductDistribution{M + N,M,typeof(dists)}(dists)
 end
 
-function ProductDistribution(dists::Tuple{Vararg{<:Distribution{ArrayLikeVariate{M}},N}}) where {M,N}
+function ProductDistribution(dists::NTuple{N,Distribution{ArrayLikeVariate{M}}}) where {M,N}
     return ProductDistribution{M + 1,M,typeof(dists)}(dists)
 end
 
@@ -33,10 +33,10 @@ _product_valuesupport(dists) = mapreduce(value_support ∘ typeof, promote_type,
 _product_eltype(dists) = mapreduce(eltype, promote_type, dists)
 
 # type-stable and faster implementations for tuples
-function _product_valuesupport(dists::Tuple{Vararg{<:Distribution}})
+function _product_valuesupport(dists::NTuple{<:Any,Distribution})
     return __product_promote_type(value_support, typeof(dists))
 end
-function _product_eltype(dists::Tuple{Vararg{<:Distribution}})
+function _product_eltype(dists::NTuple{<:Any,Distribution})
     return __product_promote_type(eltype, typeof(dists))
 end
 
@@ -54,7 +54,7 @@ function _product_size(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}
     size_dists = size(dists)
     return ntuple(i -> i <= M ? size_d[i] : size_dists[i-M], Val(M + N))
 end
-function _product_size(dists::Tuple{Vararg{<:Distribution{<:ArrayLikeVariate{M}},N}}) where {M,N}
+function _product_size(dists::NTuple{N,Distribution{<:ArrayLikeVariate{M}}}) where {M,N}
     size_d = size(first(dists))
     all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
     return ntuple(i -> i <= M ? size_d[i] : N, Val(M + 1))
