@@ -59,7 +59,7 @@ const tests = [
     "univariate/continuous/semicircle",
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
-    "multivariate/product",
+    "product",
     "univariate/discrete/discretenonparametric",
     "univariate/continuous/chernoff",
     "univariate_bounds", # extra file compared to /src
@@ -91,6 +91,7 @@ const tests = [
     # "mixtures/mixturemodel",
     # "mixtures/unigmm",
     # "multivariate/mvnormalcanon",
+    # "multivariate/product",
     # "quantilealgs",
     # "samplers/aliastable",
     # "samplers/binomial",
