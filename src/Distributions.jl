@@ -72,6 +72,7 @@ export
     BetaPrime,
     Binomial,
     Biweight,
+    Burr,
     Categorical,
     Cauchy,
     Chernoff,

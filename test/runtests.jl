@@ -67,6 +67,7 @@ const tests = [
     "bernoulli",
     "soliton",
     "skewnormal",
+    "burr",
     "chi",
     "gumbel",
     "pdfnorm",
