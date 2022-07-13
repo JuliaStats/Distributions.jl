@@ -10,6 +10,17 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     d = LogNormal(0, 1)
     @test convert(LogNormal{Float64}, d) === d
     @test convert(LogNormal{Float32}, d) isa LogNormal{Float32}
+    # test three-argument constructor
+    d = LogNormal(0, 1, 10)
+    @test convert(LogNormal{Float64}, d) === d
+    @test convert(LogNormal{Float32}, d) isa LogNormal{Float32}
+    @test LogNormal(0, 1, 10.0) isa LogNormal{Float64}
+    @test LogNormal(0, 1, 10.0f0) isa LogNormal{Float32}
+    @test LogNormal(0, Float16(1), 10.0f0) isa LogNormal{Float32}
+    @test pdf(d,1.0) == inv(log(10)*sqrt(2π))
+    d = LogNormal(2.0, 0.2, 10)
+    @test pdf(d,100.0) == inv(100.0*log(10)*sqrt(2π)*0.2)
+    @test pdf(d,150.0) ≈ inv(150.0*log(10)*sqrt(2π)*0.2) * exp( -0.5 * (log10(150.0) - 2.0)^2 / 0.2^2 )
 
     @test logpdf(LogNormal(0, 0), 1) === Inf
     @test logpdf(LogNormal(), Inf) === -Inf

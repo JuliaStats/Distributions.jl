@@ -10,10 +10,21 @@ f(x; \\mu, \\sigma) = \\frac{1}{x \\sqrt{2 \\pi \\sigma^2}}
 \\quad x > 0
 ```
 
+The log normal distribution is transformable between different log bases. For example, if ``X \\sim \\operatorname{Normal}(\\mu, \\sigma)``, then ``\\exp(X)`` is log-normally distributed, and more generally ``B^X`` is also log-normally distributed. In this more general case, the probability density function is
+
+```math
+f(x; \\mu, \\sigma, B) = \\frac{1}{x \\log(B) \\sqrt{2 \\pi \\sigma^2}}
+\\exp \\left( - \\frac{(\\log(B,x) - \\mu)^2}{2 \\sigma^2} \\right),
+\\quad x > 0, \\quad B > 0
+```
+
+where ``B`` is the base to which ``μ`` and ``σ`` are defined. A log normal distribution defined with a general base ``B``, denoted ``\\operatorname{LogNormal}(\\mu,\\sigma,B)``, is transformable to natural base ``e`` through the transformation ``Y \\sim \\operatorname{LogNormal}(\\mu,\\sigma,B) \\sim \\operatorname{LogNormal}(\\mu \\times \\log(B),\\sigma \\times \\log(B),e)``. If you provide a base to the constructor through the three-argument call ``\\operatorname{LogNormal}(\\mu,\\sigma,B)``, it will be transformed to natural base internally.
+
 ```julia
 LogNormal()          # Log-normal distribution with zero log-mean and unit scale
-LogNormal(μ)         # Log-normal distribution with log-mean mu and unit scale
-LogNormal(μ, σ)      # Log-normal distribution with log-mean mu and scale sig
+LogNormal(μ)         # Log-normal distribution with log-mean μ and unit scale
+LogNormal(μ, σ)      # Log-normal distribution with log-mean μ and scale σ
+LogNormal(μ, σ, B)   # Log-normal distribution with log-base-B-mean μ and scale σ
 
 params(d)            # Get the parameters, i.e. (μ, σ)
 meanlogx(d)          # Get the mean of log(X), i.e. μ
@@ -40,6 +51,13 @@ end
 LogNormal(μ::Real, σ::Real; check_args::Bool=true) = LogNormal(promote(μ, σ)...; check_args=check_args)
 LogNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogNormal(float(μ), float(σ); check_args=check_args)
 LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
+
+# for arbitrary base
+function LogNormal(μ::Real, σ::Real, B::Real; check_args::Bool=true)
+    @check_args LogNormal (B, B ≥ zero(B))
+    lb = log(B)
+    LogNormal(promote(μ * lb, σ * lb)...; check_args=check_args)
+end
 
 @distr_support LogNormal 0.0 Inf
 
