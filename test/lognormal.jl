@@ -17,6 +17,7 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test LogNormal(0, 1, 10.0) isa LogNormal{Float64}
     @test LogNormal(0, 1, 10.0f0) isa LogNormal{Float32}
     @test LogNormal(0, Float16(1), 10.0f0) isa LogNormal{Float32}
+    @test LogNormal(1.0f0,0.2f0,10) isa LogNormal{Float32}
     @test pdf(d,1.0) == inv(log(10)*sqrt(2π))
     d = LogNormal(2.0, 0.2, 10)
     @test pdf(d,100.0) == inv(100.0*log(10)*sqrt(2π)*0.2)

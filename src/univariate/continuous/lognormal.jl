@@ -53,11 +53,12 @@ LogNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogNormal(float(μ)
 LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
 
 # for arbitrary base
-function LogNormal(μ::Real, σ::Real, B::Real; check_args::Bool=true)
+function LogNormal(μ::T, σ::T, B::T; check_args::Bool=true) where {T <: Real}
     @check_args LogNormal (B, B ≥ zero(B))
     lb = log(B)
-    LogNormal(promote(μ * lb, σ * lb)...; check_args=check_args)
+    return LogNormal(μ * lb, σ * lb; check_args=check_args)
 end
+LogNormal(μ::Real, σ::Real, B::Real; check_args::Bool=true) = LogNormal(promote(μ, σ, B)...; check_args=check_args)
 
 @distr_support LogNormal 0.0 Inf
 
