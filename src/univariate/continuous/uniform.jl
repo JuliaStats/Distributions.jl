@@ -110,6 +110,14 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Fast path for `loglikelihood`
+
+function loglikelihood(d::Uniform, x::AbstractArray{<:Real})
+    a, b = params(d)
+    diff = b - a
+    return all(x -> a <= x <= b, x) ? -length(x) * log(diff) : log(zero(diff))
+end
+
 #### Affine transformations
 
 Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
@@ -133,32 +141,38 @@ function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
 end
 
 # ChainRules definitions
+# Added to ensure that derivatives for values at boundaries and not in support are zero
+# and to imporve performance
+# Ref: https://github.com/JuliaStats/Distributions.jl/pull/1459
 
+## logpdf
 function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real)
     # Compute log probability
     a, b = params(d)
-    insupport = a <= x <= b
     diff = b - a
-    Ω = insupport ? -log(diff) : log(zero(diff))
+    Ω = a <= x <= b ? -log(diff) : log(zero(diff))
 
     # Compute tangent
+    # Return zero for values at the boundary or not in the support
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1459
     Δdiff = Δd.a - Δd.b
-    ΔΩ = (insupport ? Δdiff : zero(Δdiff)) / diff
+    ΔΩ = (a < x < b ? Δdiff : zero(Δdiff)) / diff
 
     return Ω, ΔΩ
 end
-
 function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     # Compute log probability
     a, b = params(d)
-    insupport = a <= x <= b
     diff = b - a
-    Ω = insupport ? -log(diff) : log(zero(diff))
+    Ω = a <= x <= b ? -log(diff) : log(zero(diff))
 
     # Define pullback
+    # Return zero for values at the boundary or not in the support
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1459
+    insidesupport = a < x < b
     function logpdf_Uniform_pullback(Δ)
         Δa = Δ / diff
-        Δd = if insupport
+        Δd = if insidesupport
             ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
         else
             ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
@@ -167,4 +181,42 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
     end
 
     return Ω, logpdf_Uniform_pullback
+end
+
+## loglikelihood
+function ChainRulesCore.frule((_, Δd, _), ::typeof(loglikelihood), d::Uniform, x::AbstractArray{<:Real})
+    # Compute log likelihood
+    a, b = params(d)
+    n = length(x)
+    count_insidesupport = count(x -> a < x < b, x) # used below
+    all_insupport = count_insidesupport == n || all(x -> a <= x <= b, x)
+    diff = b - a
+    Ω = all_insupport ? -n * log(diff) : log(zero(diff))
+
+    # Compute tangent
+    # Return zero for values at the boundary or not in the support
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1459
+    ΔΩ = count_insidesupport * (Δd.a - Δd.b) / diff
+
+    return Ω, ΔΩ
+end
+function ChainRulesCore.rrule(::typeof(loglikelihood), d::Uniform, x::AbstractArray{<:Real})
+    # Compute log likelihood
+    a, b = params(d)
+    n = length(x)
+    count_insidesupport = count(x -> a < x < b, x) # used below
+    all_insupport = count_insidesupport == n || all(x -> a <= x <= b, x)
+    diff = b - a
+    Ω = all_insupport ? -n * log(diff) : log(zero(diff))
+
+    # Define pullback
+    # Return zero for values at the boundary or not in the support
+    # Ref: https://github.com/JuliaStats/Distributions.jl/pull/1459
+    function loglikelihood_Uniform_pullback(Δ)
+        Δa = count_insidesupport * Δ / diff
+        Δd = ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.ZeroTangent()
+    end
+
+    return Ω, loglikelihood_Uniform_pullback
 end
