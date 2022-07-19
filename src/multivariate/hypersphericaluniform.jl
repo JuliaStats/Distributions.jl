@@ -1,7 +1,5 @@
-# Uniform distribution on the hyperspherical unit ball Sᵈ⁻²
-
 """
-Uniform distribution on the hyperspherical unit ball U(Sᵈ⁻²)
+Uniform distribution on the hyperspherical unit ball in `d` dimensions.
 """
 struct HyperSphericalUniform <: ContinuousMultivariateDistribution
     d :: Int

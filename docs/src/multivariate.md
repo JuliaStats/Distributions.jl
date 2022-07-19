@@ -58,6 +58,8 @@ MvNormalCanon
 MvLogNormal
 Dirichlet
 Product
+PowerSpherical
+HypherSphericalUniform
 ```
 
 ## Addition Methods

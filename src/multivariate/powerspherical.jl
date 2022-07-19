@@ -1,9 +1,13 @@
-# Power Spherical distribution is useful as a replacement for the von Mises-Fisher distribution
-#
-# see https://arxiv.org/abs/2006.04437
-
 """
-A Power Spherical distribution parameterized by the mean direction μ and the concentration parameter κ.
+The Power Spherical distribution is useful as a replacement for the von Mises-Fisher distribution.
+
+The probability density function of the Power Spherical distribution parameterized by the mean direction μ and the concentration parameter κ is given by
+    
+```math
+\\left\\{2^{\\alpha+\\beta} \\pi^{\\beta} \\frac{\\Gamma(\\alpha)}{\\Gamma(\\alpha+\\beta)}\\right\\}^{-1}\\left(1+\\mu^{\\top} x\\right)^{\\kappa}
+```
+
+Reference: https://arxiv.org/abs/2006.04437.
 """
 struct PowerSpherical{T <: Real} <: ContinuousMultivariateDistribution
     μ::Vector{T}
