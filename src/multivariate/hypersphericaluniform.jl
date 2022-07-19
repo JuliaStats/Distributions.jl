@@ -1,5 +1,5 @@
 """
-Uniform distribution on the hyperspherical unit ball in `d` dimensions.
+Uniform distribution on the hyperspherical unit ball in ``d`` dimensions.
 """
 struct HyperSphericalUniform <: ContinuousMultivariateDistribution
     d :: Int

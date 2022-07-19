@@ -59,7 +59,7 @@ MvLogNormal
 Dirichlet
 Product
 PowerSpherical
-HypherSphericalUniform
+HyperSphericalUniform
 ```
 
 ## Addition Methods
