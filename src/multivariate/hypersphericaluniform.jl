@@ -9,8 +9,8 @@ end
 Base.length(s::HyperSphericalUniform) = s.d
 
 # sampling
-function _rand!(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{T}) where T<:Real
-    x .= randn(rng, T, length(x))
+function _rand!(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{<:Real})
+    randn!(rng, x)
     normalize!(x)
 end
 
