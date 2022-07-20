@@ -11,11 +11,18 @@ struct PowerSpherical{T <: Real} <: ContinuousMultivariateDistribution
     μ::Vector{T}
     κ::T
 
-    PowerSpherical(μ) =
-        new{eltype(μ)}(normalize(μ) : μ, norm(μ))
-
-    PowerSpherical(μ, κ; normalize_μ = true) =
+    function PowerSpherical(μ::Vector{T}, κ::T = one(T); checknorm = true, normalize_μ = true) where {T <: Real}
+        # check arguments
+        κ > 0 || error("κ must be positive.")
+        normalize_μ || !checknorm || isunitvec(μ) || error("μ must be a unit vector")
+             
         new{eltype(μ)}(normalize_μ ? normalize(μ) : μ, κ)
+    end
+end
+
+function PowerSpherical(μ::Vector{T}, κ::Real; kwargs...) where {T<:Real}
+    R = promote_type(T, eltype(κ))
+    return PowerSpherical(convert(AbstractArray{R}, μ), convert(R, κ), kwargs...)
 end
 
 ### Basic properties
