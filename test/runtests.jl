@@ -61,6 +61,8 @@ const tests = [
     "pgeneralizedgaussian",
     "product",
     "discretenonparametric",
+    "generaldiscretenonparametric",
+    "functionals",
     "chernoff",
     "univariate_bounds",
     "negativebinomial",
