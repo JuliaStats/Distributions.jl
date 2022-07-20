@@ -20,7 +20,8 @@ function _rand(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{T}) 
 end
 
 function StatsBase.entropy(s::HyperSphericalUniform)
-    return 1/2 * s.d * log(pi) - lgamma(s.d/2) + log(2)
+    halfd = s.d / 2
+    return halfd * logπ - loggamma(halfd) + logtwo
 end
 
 function _logpdf(s::HyperSphericalUniform, x)
