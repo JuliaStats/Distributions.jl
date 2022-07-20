@@ -63,7 +63,7 @@ end
 function StatsBase.entropy(d::PowerSpherical)
     b = (length(d) - 1) / 2
     a = b + d.κ
-    c = a + b
+    c = length(d) - 1 + d.κ
 
     logC = -(c * logtwo + loggamma(a) + b * logπ - loggamma(c))
     return -(logC + d.κ * ( logtwo + digamma(a) - digamma(c)))
