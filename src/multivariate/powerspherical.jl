@@ -32,6 +32,7 @@ insupport(d::PowerSpherical, x::AbstractVector{<:Real}) = length(x) == length(d)
 
 function sampler(d::PowerSpherical)
     dim = length(d)
+    beta = (dim - 1) / 2
     return PowerSphericalSampler(
         d.μ,
         d.κ,
