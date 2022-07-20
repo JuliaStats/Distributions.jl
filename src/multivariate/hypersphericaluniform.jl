@@ -14,10 +14,6 @@ function _rand!(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{<:R
     normalize!(x)
 end
 
-function _rand(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{T}) where T<:Real
-    normalize!(randn(rng, T, length(x)))
-end
-
 function StatsBase.entropy(s::HyperSphericalUniform)
     halfd = s.d / 2
     return halfd * logπ - loggamma(halfd) + logtwo
