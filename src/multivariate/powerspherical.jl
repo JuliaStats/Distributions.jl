@@ -22,7 +22,7 @@ end
 
 function PowerSpherical(μ::Vector{T}, κ::Real; kwargs...) where {T<:Real}
     R = promote_type(T, eltype(κ))
-    return PowerSpherical(convert(AbstractArray{R}, μ), convert(R, κ), kwargs...)
+    return PowerSpherical(convert(AbstractArray{R}, μ), convert(R, κ); kwargs...)
 end
 
 ### Basic properties
