@@ -44,9 +44,6 @@ end
 _rand!(rng::AbstractRNG, d::PowerSpherical, x::AbstractVector) =
     _rand!(rng, sampler(d), x)
 
-rand(rng::AbstractRNG, d::PowerSpherical) =
-    rand(rng, sampler(d))
-
 #_logpdf
 function _logpdf(d::PowerSpherical, x::AbstractArray)
     b = (length(d) - 1) // 2
