@@ -62,3 +62,9 @@ function StatsBase.entropy(d::PowerSpherical)
     return -(logC + d.κ * ( logtwo + digamma(a) - digamma(c)))
 end
 
+# analytical KL divergences
+function kldivergence(p::PowerSpherical, q::HyperSphericalUniform)
+    return -entropy(p) + entropy(q)
+end
+
+#TODO: add KL divergence for VonMissesFisher
