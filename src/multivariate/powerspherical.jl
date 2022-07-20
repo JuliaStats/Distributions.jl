@@ -39,18 +39,26 @@ end
 _rand!(rng::AbstractRNG, d::PowerSpherical, x::AbstractVector) =
     _rand!(rng, sampler(d), x)
 
-_rand(rng::AbstractRNG, d::PowerSpherical, x::AbstractVector) =
-    _rand(rng, sampler(d), x)
+rand(rng::AbstractRNG, d::PowerSpherical) =
+    rand(rng, sampler(d))
 
 #_logpdf
 function _logpdf(d::PowerSpherical, x::AbstractArray)
-    a, b = (length(d) - 1) / 2. + d.κ, (length(d) - 1) / 2.
-    return log(2) * (-a-b) + lgamma(a+b) - lgamma(a) + b * log(π) + d.κ .* log(d.μ' * x .+ 1)
+    b = (length(d) - 1) // 2
+    a = b + d.κ
+    c = a + b
+
+    return logtwo * (-a-b) + loggamma(c) - loggamma(a) + b * logπ + d.κ .* log1p(d.μ' * x)
 end
+
 
 # entropy
 function StatsBase.entropy(d::PowerSpherical)
-    a, b = (length(d) - 1) / 2. + d.κ, (length(d) - 1) / 2.
-    logC = -( (a+b) * log(2) + lgamma(a) + b * log(pi) - lgamma(a+b))
-    return -(logC + d.κ * ( log(2) + digamma(a) - digamma(a+b)))
+    b = (length(d) - 1) / 2
+    a = b + d.κ
+    c = a + b
+
+    logC = -(c * logtwo + loggamma(a) + b * logπ - loggamma(c))
+    return -(logC + d.κ * ( logtwo + digamma(a) - digamma(c)))
 end
+
