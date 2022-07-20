@@ -30,7 +30,7 @@ Base.length(d::PowerSpherical) = length(d.μ)
 Base.eltype(d::PowerSpherical) = eltype(d.μ)
 meandir(d::PowerSpherical) = d.μ
 concentration(d::PowerSpherical) = d.κ
-insupport(::PowerSpherical, x::AbstractVector{T}) where {T<:Real} = isunitvec(x)
+insupport(d::PowerSpherical, x::AbstractVector{<:Real}) = length(x) == length(d) && isunitvec(x)
 
 function sampler(d::PowerSpherical)
     dim = length(d)
