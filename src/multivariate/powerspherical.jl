@@ -36,7 +36,7 @@ function sampler(d::PowerSpherical)
         d.μ,
         d.κ,
         dim, 
-        Beta((dim - 1) / 2. + d.κ, (dim - 1) / 2.), 
+        Beta(beta + d.κ, beta; check_args=false), 
         HyperSphericalUniform(dim-1)
     )
 end
