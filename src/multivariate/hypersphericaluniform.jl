@@ -7,7 +7,6 @@ end
 
 # basic properties
 Base.length(s::HyperSphericalUniform) = s.d
-Base.eltype(::HyperSphericalUniform) = Float32
 
 # sampling
 function _rand!(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{T}) where T<:Real
