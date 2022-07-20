@@ -15,13 +15,14 @@ function _rand!(rng::AbstractRNG, spl::PowerSphericalSampler, x::AbstractVector)
     t = 2 * z - 1
     m = sqrt(1 - t ^ 2) * v'
     y = [t; m]
+
     x[1] = 1.
     x[2:end] .= 0.
     x .= x - spl.μ
 
     normalize!(x)
 
-    x .= (-1) * (I(2) .- 2*x*x') * y
+    x .= (-1) * (I(spl.d) .- 2*x*x') * y
 end
 
 function rand(rng::AbstractRNG, spl::PowerSphericalSampler)
@@ -37,7 +38,7 @@ function rand(rng::AbstractRNG, spl::PowerSphericalSampler)
     û = e_1 - spl.μ
     u = normalize(û)
 
-    return (-1) * (I(2) .- 2*u*u') * y
+    return (-1) * (I(spl.d) .- 2*u*u') * y
 end
 
 Base.length(s::PowerSphericalSampler) = length(s.μ)
