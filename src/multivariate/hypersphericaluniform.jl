@@ -19,6 +19,7 @@ function StatsBase.entropy(s::HyperSphericalUniform)
     return halfd * logπ - loggamma(halfd) + logtwo
 end
 
-function _logpdf(s::HyperSphericalUniform, x)
-    return -entropy(s)
+function _logpdf(s::HyperSphericalUniform, x::AbstractVector{<:Real})
+    y = entropy(s)
+    return insupport(s, x) ? -y : oftype(y, -Inf)
 end
