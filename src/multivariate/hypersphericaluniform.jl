@@ -7,6 +7,7 @@ end
 
 # basic properties
 Base.length(s::HyperSphericalUniform) = s.d
+insupport(s::HyperSphericalUniform, x::AbstractVector{<:Real}) = length(x) == length(s) && isunitvec(x)
 
 # sampling
 function _rand!(rng::AbstractRNG, ::HyperSphericalUniform, x::AbstractVector{<:Real})
