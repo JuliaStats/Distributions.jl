@@ -30,16 +30,8 @@ meandir(d::PowerSpherical) = d.μ
 concentration(d::PowerSpherical) = d.κ
 insupport(d::PowerSpherical, x::AbstractVector{<:Real}) = length(x) == length(d) && isunitvec(x)
 
-function sampler(d::PowerSpherical)
-    dim = length(d)
-    beta = (dim - 1) / 2
-    return PowerSphericalSampler(
-        d.μ,
-        d.κ,
-        Beta(beta + d.κ, beta; check_args=false), 
-        HyperSphericalUniform(dim-1)
-    )
-end
+# Sampler
+sampler(d::PowerSpherical) = PowerSphericalSampler(d.μ, d.κ)
 
 #_logpdf
 function _logpdf(d::PowerSpherical, x::AbstractArray)
