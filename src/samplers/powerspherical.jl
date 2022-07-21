@@ -8,20 +8,21 @@ struct PowerSphericalSampler{T <: Real} <: Sampleable{Multivariate,Continuous}
 end
 
 function _rand!(rng::AbstractRNG, spl::PowerSphericalSampler, x::AbstractVector)
+    v = @views x[begin+1:end]
+    uhat1 = 1 - spl.μ[begin]
+    μv = @views spl.μ[begin+1:end]
+
     z = rand(rng, spl.dist_b)
-    v = rand(rng, spl.dist_u)
+    rand!(rng, spl.dist_u, v)
 
     t = 2 * z - 1
-    m = sqrt(1 - t ^ 2) * v'
-    y = [t; m]
 
-    x[1] = 1.
-    x[2:end] .= 0.
-    x .= x - spl.μ
+    v .*= sqrt(1 - t ^ 2)
 
-    normalize!(x)
-
-    x .= (-1) * (I(length(spl)) .- 2*x*x') * y
+    twouuᵀy1 = t * uhat1 - dot(v, μv)
+    x[begin] = t - twouuᵀy1
+    v .+= μv .* (twouuᵀy1 / uhat1)
+    return x
 end
 
 Base.length(s::PowerSphericalSampler) = length(s.μ)
