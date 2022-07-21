@@ -33,4 +33,5 @@ function _rand!(rng::AbstractRNG, spl::PowerSphericalSampler, x::AbstractVector)
     return x
 end
 
+
 Base.length(s::PowerSphericalSampler) = length(s.μ)
