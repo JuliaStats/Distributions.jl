@@ -65,7 +65,7 @@ function _vmflck(p, κ)
     T = typeof(κ)
     hp = T(p/2)
     q = hp - 1
-    q * log(κ) - hp * log2π - log(besselix(q, κ) + κ)
+    q * log(κ) - hp * log2π - log(besselix(q, κ)) + κ
 end
 _vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))
