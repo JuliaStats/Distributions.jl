@@ -52,15 +52,17 @@ end
 
 # entropy
 function StatsBase.entropy(d::PowerSpherical)
-    b = (length(d) - 1) / convert(typeof(d.κ), 2)
-    a = b + d.κ
-    c = length(d) - 1 + d.κ
+    _b = (length(d) - 1) // 2
+    a = _b + d.κ
+    T = float(typeof(a))
+    b = T(_b)
+    c = T(length(d) - 1 + d.κ)
 
-    _logtwo = convert(typeof(d.κ), logtwo)
-    _logπ = convert(typeof(d.κ), logπ)
+    _logtwo = T(logtwo)
+    _logπ = T(logπ)
 
-    logC = -(c * _logtwo + loggamma(a) + b * _logπ - loggamma(c))
-    return -(logC + d.κ * ( _logtwo + digamma(a) - digamma(c)))
+    logC = c * _logtwo + loggamma(a) + b * _logπ - loggamma(c)
+    return logC - d.κ * ( _logtwo + digamma(a) - digamma(c))
 end
 
 # analytical KL divergences
