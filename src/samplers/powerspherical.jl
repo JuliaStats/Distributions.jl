@@ -3,7 +3,7 @@
 struct PowerSphericalSampler{T <: Real} <: Sampleable{Multivariate,Continuous}
     μ::Vector{T}
     κ::T
-    dist_b::Beta
+    dist_b::Beta{T}
     dist_u::HyperSphericalUniform
 end
 
