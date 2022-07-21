@@ -12,7 +12,7 @@ struct PowerSpherical{T <: Real} <: ContinuousMultivariateDistribution
     κ::T
 
     function PowerSpherical(μ::Vector{T}, κ::T = one(T); check_args::Bool=true, normalize_μ::Bool = false) where {T <: Real}
-        μ = normalize_μ ? normalize!(μ) : μ
+        μ = normalize_μ ? normalize(μ) : μ
         @check_args PowerSpherical (κ, κ > zero(κ)) (μ, isunitvec(μ))
         new{eltype(μ)}(μ, κ)
     end
@@ -50,15 +50,17 @@ function _logpdf(d::PowerSpherical, x::AbstractArray)
     return logtwo * (-a-b) + loggamma(c) - loggamma(a) + b * logπ + d.κ .* log1p(d.μ' * x)
 end
 
-
 # entropy
 function StatsBase.entropy(d::PowerSpherical)
-    b = (length(d) - 1) / 2
+    b = (length(d) - 1) / convert(typeof(d.κ), 2)
     a = b + d.κ
     c = length(d) - 1 + d.κ
 
-    logC = -(c * logtwo + loggamma(a) + b * logπ - loggamma(c))
-    return -(logC + d.κ * ( logtwo + digamma(a) - digamma(c)))
+    _logtwo = convert(typeof(d.κ), logtwo)
+    _logπ = convert(typeof(d.κ), logπ)
+
+    logC = -(c * _logtwo + loggamma(a) + b * _logπ - loggamma(c))
+    return -(logC + d.κ * ( _logtwo + digamma(a) - digamma(c)))
 end
 
 # analytical KL divergences
