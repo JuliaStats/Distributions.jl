@@ -7,6 +7,14 @@ struct PowerSphericalSampler{T <: Real} <: Sampleable{Multivariate,Continuous}
     dist_u::HyperSphericalUniform
 end
 
+function PowerSphericalSampler(μ, κ)
+    d = length(μ)
+    β = (d - 1) // 2
+    dist_b = Beta(β + κ, β)
+    dist_u = HyperSphericalUniform(d - 1)
+    return PowerSphericalSampler(μ, κ, dist_b, dist_u)
+end
+
 function _rand!(rng::AbstractRNG, spl::PowerSphericalSampler, x::AbstractVector)
     v = @views x[begin+1:end]
     uhat1 = 1 - spl.μ[begin]
