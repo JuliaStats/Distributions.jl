@@ -1,6 +1,6 @@
 # R References for Distributions.jl
 
-We relies on the distribution-related functions provided by
+We rely on the distribution-related functions provided by
 [R](https://www.r-project.org) and a number of packages in
 [CRAN](https://cran.r-project.org) to generate references
 for verifying the correctness of our implementations.

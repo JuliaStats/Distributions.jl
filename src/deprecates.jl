@@ -57,3 +57,7 @@ const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedD
 @deprecate MatrixReshaped(
     d::MultivariateDistribution, n::Integer, p::Integer=n
 ) reshape(d, (n, p))
+
+for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
+    @eval @deprecate dim(d::$D) size(d, 1)
+end

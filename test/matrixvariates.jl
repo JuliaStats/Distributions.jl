@@ -145,10 +145,11 @@ test_cov(d::LKJ) = nothing
 #  --------------------------------------------------
 
 function test_dim(d::MatrixDistribution)
-    @test dim(d) == size(d, 1)
-    @test dim(d) == size(d, 2)
-    @test dim(d) == size(mean(d), 1)
-    @test dim(d) == size(mean(d), 2)
+    n = @test_deprecated(dim(d))
+    @test n == size(d, 1)
+    @test n == size(d, 2)
+    @test n == size(mean(d), 1)
+    @test n == size(mean(d), 2)
 end
 
 test_dim(d::Union{MatrixNormal, MatrixTDist}) = nothing

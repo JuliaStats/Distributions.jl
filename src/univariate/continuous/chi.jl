@@ -79,6 +79,13 @@ function mode(d::Chi; check_args::Bool=true)
     sqrt(ν - 1)
 end
 
+function kldivergence(p::Chi, q::Chi)
+    pν = dof(p)
+    qν = dof(q)
+    pν2 = pν / 2
+    return loggamma(qν / 2) - loggamma(pν2) + (pν - qν) * digamma(pν2) / 2
+end
+
 
 #### Evaluation
 

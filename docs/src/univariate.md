@@ -298,15 +298,6 @@ plotdensity((0, 20), Levy, (0, 1)) # hide
 ```
 
 ```@docs
-LocationScale
-```
-```@example plotdensity
-plotdensity(
-    (-2, 5), LocationScale(2, 1, Normal(0, 1)); title="LocationScale(2, 1, Normal(0, 1))",
-) # hide
-```
-
-```@docs
 Logistic
 ```
 ```@example plotdensity

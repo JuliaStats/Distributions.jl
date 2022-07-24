@@ -1,7 +1,7 @@
 """
     Poisson(λ)
 
-A *Poisson distribution* descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
+A *Poisson distribution* describes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
 
 ```math
 P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
