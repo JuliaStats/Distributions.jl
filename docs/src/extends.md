@@ -15,7 +15,7 @@ Unlike full-fledged distributions, a sampler, in general, only provides limited 
 
 ### Univariate Sampler
 
-To implement a univariate sampler, one can define a sub-type (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
+To implement a univariate sampler, one can define a subtype (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
 
 ```julia
 function rand(rng::AbstractRNG, s::Spl)
@@ -27,7 +27,7 @@ The package already implements a vectorized version of `rand!` and `rand` that r
 
 ### Multivariate Sampler
 
-To implement a multivariate sampler, one can define a sub-type of `Sampleable{Multivariate,S}`, and provide both `length` and `_rand!` methods, as
+To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `length` and `_rand!` methods, as
 
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
@@ -80,7 +80,7 @@ Remember that each *column* of A is a sample.
 
 ### Matrix-variate Sampler
 
-To implement a multivariate sampler, one can define a sub-type of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` methods, as
+To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` methods, as
 
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
