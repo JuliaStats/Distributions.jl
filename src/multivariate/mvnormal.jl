@@ -552,17 +552,16 @@ end
 
 function ChainRulesCore.rrule(::typeof(sqmahal), d::MvNormal, x::AbstractVector)
     y = sqmahal(d, x)
-    function sqmahal_pullback(dy)
-        Σinv = invcov(d)
-        dy = ChainRulesCore.unthunk(dy)
-        ∂x = ChainRulesCore.@thunk(begin
-            2dy * Σinv * (x - d.μ)
-        end)
+    Σ = _cov(d)
+    cx = x - d.μ
+    z = Σ \ cx
+    function sqmahal_pullback(_dy)
+        dy = ChainRulesCore.unthunk(_dy)
+        ∂x = 2 * dy * z
         ∂d = ChainRulesCore.@thunk(begin
-            cx = x - d.μ
-            ∂μ = -2dy * Σinv * cx
+            ∂μ = -∂x
             ∂J = dy * cx * cx'
-            ∂Σ = - Σinv * ∂J * Σinv
+            ∂Σ = - (Σ \ ∂J) / Σ
             ChainRulesCore.Tangent{typeof(d)}(μ = ∂μ, Σ = ∂Σ)
         end)
         return (ChainRulesCore.NoTangent(), ∂d, ∂x)
