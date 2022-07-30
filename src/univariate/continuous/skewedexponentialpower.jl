@@ -74,7 +74,7 @@ function m_k(d::SkewedExponentialPower, k::Integer)
         loggamma(inv_p) + log(abs((-1)^k * α^(1 + k) + (1 - α)^(1 + k)))
 end
 
-# needed for odd moments on log-scale
+# needed for odd moments on a logscale
 sgn(d::SkewedExponentialPower) = d.α > 1//2 ? -1 : 1
 
 mean(d::SkewedExponentialPower) = d.α == 1//2 ? float(d.μ) : sgn(d)*exp(m_k(d, 1)) + d.μ
