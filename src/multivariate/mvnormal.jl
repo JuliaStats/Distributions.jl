@@ -530,7 +530,7 @@ function ChainRulesCore.rrule(::typeof(mvnormal_c0), d::MvNormal)
     function mvnormal_c0_pullback(dy)
         dy = ChainRulesCore.unthunk(dy)
         ∂Σ = -dy/2 * invcov(d)
-        ∂d = ChainRulesCore.Tangent{typeof(d)}(μ = ChainRulesCore.ZeroTangent(), Σ = ∂Σ)
+        ∂d = ChainRulesCore.Tangent{typeof(d)}(Σ = ∂Σ)
         return ChainRulesCore.NoTangent(), ∂d
     end
     return y, mvnormal_c0_pullback
