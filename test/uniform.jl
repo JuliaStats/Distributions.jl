@@ -1,5 +1,8 @@
 using Distributions
 using ChainRulesTestUtils
+using OffsetArrays
+
+using Random
 using Test
 
 @testset "uniform.jl" begin
@@ -35,6 +38,13 @@ using Test
                 ChainRulesTestUtils.Tangent{Uniform{Float64}}(; a=0.0, b=0.0),
                 ChainRulesTestUtils.ZeroTangent(),
             )
+        end
+    end
+
+    @testset "fit: array indexing (#1253)" begin
+        x = shuffle(10:20)
+        for data in (x, OffsetArray(x, -5:5))
+            @test fit(Uniform, data) == Uniform(10, 20)
         end
     end
 end
