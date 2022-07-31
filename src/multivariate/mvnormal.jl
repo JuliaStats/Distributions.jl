@@ -543,10 +543,10 @@ function ChainRulesCore.frule(dargs::Tuple{Any,Any,Any}, ::typeof(sqmahal), d::M
     Δx = ChainRulesCore.unthunk(Δx)
     Σinv = inv(_cov(d))
     # TODO optimize
-    z =  x - d.μ
-    dΣ = -dot(Xt_A_X(Σinv, Δd.Σ), z * z')
-    dx_dμ = 2 * dot(Σinv * z, Δx - Δd.μ)
-    Δy = dΣ + dx_dμ
+    dΣ = -dot(Σinv * Δd.Σ * Σinv, x * x' - d.μ * x' - x * d.μ' + d.μ * d.μ')
+    dx = 2 * dot(Σinv * (x - d.μ), Δx)
+    dμ = 2 * dot(Σinv * (d.μ - x), Δd.μ)
+    Δy = dΣ + dx + dμ
     return (y, Δy)
 end
 
