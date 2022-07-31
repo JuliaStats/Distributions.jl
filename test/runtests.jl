@@ -37,6 +37,7 @@ const tests = [
     "fit",
     "multinomial",
     "binomial",
+    "betabinomial",
     "poissonbinomial",
     "dirichlet",
     "dirichletmultinomial",

@@ -45,7 +45,7 @@ function truncated(d::UnivariateDistribution, ::Nothing, u::Real)
     logucdf = logtp = logcdf(d, u)
     ucdf = tp = exp(logucdf)
 
-    Truncated(d, promote(oftype(float(u), -Inf), u, zero(ucdf), ucdf, tp, logtp)...)
+    Truncated(d, promote(oftype(float(u), -Inf), u, oftype(ucdf, -Inf), zero(ucdf), ucdf, tp, logtp)...)
 end
 function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
     # (log)lcdf = (log) P(X < l) where X ~ d
@@ -60,7 +60,7 @@ function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
     logtp = log1mexp(loglcdf)
     tp = exp(logtp)
 
-    Truncated(d, promote(l, oftype(float(l), Inf), lcdf, one(lcdf), tp, logtp)...)
+    Truncated(d, promote(l, oftype(float(l), Inf), loglcdf, lcdf, one(lcdf), tp, logtp)...)
 end
 truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
@@ -82,7 +82,7 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     logtp = logsubexp(loglcdf, logucdf)
     tp = exp(logtp)
 
-    Truncated(d, promote(l, u, lcdf, ucdf, tp, logtp)...)
+    Truncated(d, promote(l, u, loglcdf, lcdf, ucdf, tp, logtp)...)
 end
 
 """
@@ -94,18 +94,21 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T <: Real} <: Univa
     untruncated::D      # the original distribution (untruncated)
     lower::T      # lower bound
     upper::T      # upper bound
+    loglcdf::T    # log-cdf of lower bound (exclusive): log P(X < lower)
     lcdf::T       # cdf of lower bound (exclusive): P(X < lower)
     ucdf::T       # cdf of upper bound (inclusive): P(X ≤ upper)
 
     tp::T         # the probability of the truncated part, i.e. ucdf - lcdf
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
-    function Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real}
-        new{typeof(d), value_support(typeof(d)), T}(d, l, u, lcdf, ucdf, tp, logtp)
+
+    function Truncated(d::UnivariateDistribution, l::T, u::T, loglcdf::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real}
+        new{typeof(d), value_support(typeof(d)), T}(d, l, u, loglcdf, lcdf, ucdf, tp, logtp)
     end
 end
 
 ### Constructors of `Truncated` are deprecated - users should call `truncated`
 @deprecate Truncated(d::UnivariateDistribution, l::Real, u::Real) truncated(d, l, u)
+@deprecate Truncated(d::UnivariateDistribution, l::T, u::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real} Truncated(d, l, u, log(lcdf), lcdf, ucdf, tp, logtp)
 
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated) = partype(d.untruncated)
@@ -149,7 +152,7 @@ function cdf(d::Truncated, x::Real)
 end
 
 function logcdf(d::Truncated, x::Real)
-    result = logsubexp(logcdf(d.untruncated, x), log(d.lcdf)) - d.logtp
+    result = logsubexp(logcdf(d.untruncated, x), d.loglcdf) - d.logtp
     return if x < d.lower
         oftype(result, -Inf)
     elseif x >= d.upper
@@ -183,20 +186,23 @@ end
 
 ## random number generation
 
-function _rand!(rng::AbstractRNG, d::Truncated)
+function rand(rng::AbstractRNG, d::Truncated)
     d0 = d.untruncated
-    if d.tp > 0.25
+    tp = d.tp
+    if tp > 0.25
         while true
-            r = _rand!(rng, d0)
+            r = rand(rng, d0)
             if d.lower <= r <= d.upper
                 return r
             end
         end
-    else
+    elseif tp > sqrt(eps(typeof(float(tp))))
         return quantile(d0, d.lcdf + rand(rng) * d.tp)
+    else
+        # computation in log-space fixes numerical issues if d.tp is small (#1548)
+        return invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng)))
     end
 end
-
 
 ## show
 
