@@ -2,7 +2,9 @@
 
 using  Distributions
 using Test, Random, LinearAlgebra
-
+using ChainRulesCore
+using ChainRulesTestUtils
+using FiniteDifferences
 
 Random.seed!(34567)
 
@@ -126,4 +128,33 @@ end
     N = 10
     @test entropy(Dirichlet(N, 1)) ≈ -loggamma(N)
     @test entropy(Dirichlet(ones(N))) ≈ -loggamma(N)
+end
+
+@testset "Dirichlet: ChainRules (length=$n)" for n in (2, 10)
+    alpha = rand(n)
+    d = Dirichlet(alpha)
+
+    @testset "constructor $T" for T in (Dirichlet, Dirichlet{Float64})
+        # Avoid issues with finite differencing if values in `alpha` become negative or zero
+        # by using forward differencing
+        test_frule(T, alpha; fdm=forward_fdm(5, 1))
+        test_rrule(T, alpha; fdm=forward_fdm(5, 1))
+    end
+
+    @testset "_logpdf" begin
+        # `x1` is in the support, `x2` isn't
+        x1 = rand(n)
+        x1 ./= sum(x1)
+        x2 = x1 .+ 1
+
+        # Use special finite differencing method that tries to avoid moving outside of the
+        # support by limiting the range of the points around the input that are evaluated
+        fdm = central_fdm(5, 1; max_range=1e-9)
+
+        for x in (x1, x2)
+            # We have to adjust the tolerance since the finite differencing method is rough
+            test_frule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
+            test_rrule(Distributions._logpdf, d, x; fdm=fdm, rtol=1e-5, nans=true)
+        end
+    end
 end
