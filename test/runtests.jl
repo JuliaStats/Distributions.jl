@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "inverseuniform",
     "loguniform",
     "arcsine",
     "dirac",
