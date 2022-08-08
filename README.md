@@ -13,7 +13,7 @@ A Julia package for probability distributions and associated functions. Particul
 * Moments (e.g mean, variance, skewness, and kurtosis), entropy, and other properties
 * Probability density/mass functions (pdf) and their logarithm (logpdf)
 * Moment generating functions and characteristic functions
-* Sampling a population or a distribution
+* Sampling from a population or from a distribution
 * Maximum likelihood estimation
 
 **Note:** The functionalities related to conjugate priors have been moved to the [ConjugatePriors package](https://github.com/JuliaStats/ConjugatePriors.jl).
