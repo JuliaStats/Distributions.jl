@@ -39,7 +39,7 @@ end
     ubound = rand(N)
     ds = Uniform.(-ubound, ubound)
     x = rand.(ds)
-    d_product = @test_deprecated(product_distribution(ds))
+    d_product = product_distribution(ds)
     @test d_product isa Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
@@ -70,7 +70,7 @@ end
         support = fill(a, N)
         ds = DiscreteNonParametric.(support, Ref([0.5, 0.5]))
         x = rand.(ds)
-        d_product = @test_deprecated(product_distribution(ds))
+        d_product = product_distribution(ds)
         @test d_product isa Product
         # Check that methods for `Product` are consistent.
         @test length(d_product) == length(ds)
@@ -92,7 +92,7 @@ end
 @testset "Testing iid product distributions" begin
     Random.seed!(123456)
     N = 11
-    d = Product(Fill(Laplace(0.0, 2.3), N))
+    d = @test_deprecated(Product(Fill(Laplace(0.0, 2.3), N)))
     @test N == length(unique(rand(d)));
     @test mean(d) === Fill(0.0, N)
     @test cov(d) === Diagonal(Fill(var(Laplace(0.0, 2.3)), N))
