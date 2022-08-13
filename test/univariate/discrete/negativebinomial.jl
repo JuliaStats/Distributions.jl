@@ -16,6 +16,11 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
     @test ForwardDiff.derivative(_p -> logpdf(NegativeBinomial(r, _p), k), p) ≈ mydiffp(r, p, k) rtol=1e-12 atol=1e-12
 end
 
+@testset "issue #1603" begin
+    d = NegativeBinomial(4, 0.2)
+    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
+end
+
 @testset "Check the corner case p==1" begin
     @test logpdf(NegativeBinomial(0.5, 1.0), 0) === 0.0
     @test logpdf(NegativeBinomial(0.5, 1.0), 1) === -Inf

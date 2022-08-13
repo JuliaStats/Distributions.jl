@@ -128,7 +128,7 @@ end
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)
-    return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
+    return mgf(Geometric(p), t)^r
 end
 
 function cf(d::NegativeBinomial, t::Real)
