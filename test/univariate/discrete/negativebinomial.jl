@@ -7,6 +7,16 @@ using FiniteDifferences
 # Eventually, we might want to consolidate the tests here
 
 mydiffp(r, p, k) = r/p - k/(1 - p)
+@testset "issue #1603" begin
+    d = NegativeBinomial(4, 0.2)
+    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    d = NegativeBinomial(1, 0.2)
+    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    d = Geometric(0.2)
+    @test mgf(d, 0) ≈ 1
+    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
+end
+
 
 @testset "NegativeBinomial r=$r, p=$p, k=$k" for
     p in exp10.(-10:0) .- eps(), # avoid p==1 since it's not differentiable
@@ -14,11 +24,6 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
             k in (0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024)
 
     @test ForwardDiff.derivative(_p -> logpdf(NegativeBinomial(r, _p), k), p) ≈ mydiffp(r, p, k) rtol=1e-12 atol=1e-12
-end
-
-@testset "issue #1603" begin
-    d = NegativeBinomial(4, 0.2)
-    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
 end
 
 @testset "Check the corner case p==1" begin
