@@ -64,6 +64,7 @@ const tests = [
     "univariate/continuous/chernoff",
     "univariate_bounds", # extra file compared to /src
     "univariate/discrete/negativebinomial",
+    "univariate/discrete/geometric",
     "univariate/discrete/bernoulli",
     "univariate/discrete/soliton",
     "univariate/continuous/skewnormal",

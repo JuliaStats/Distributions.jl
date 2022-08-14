@@ -12,9 +12,6 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
     @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
     d = NegativeBinomial(1, 0.2)
     @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
-    d = Geometric(0.2)
-    @test mgf(d, 0) ≈ 1
-    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
 end
 
 
