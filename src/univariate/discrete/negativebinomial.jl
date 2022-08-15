@@ -126,15 +126,17 @@ function rand(rng::AbstractRNG, d::NegativeBinomial)
     end
 end
 
-function mgf(d::NegativeBinomial, t::Real)
+function laplace_transform(d::NegativeBinomial, t)
     r, p = params(d)
-    return mgf(Geometric(p, check_args=false), t)^r
+    return laplace_transform(Geometric(p, check_args=false), t)^r
 end
 
 function cf(d::NegativeBinomial, t::Real)
     r, p = params(d)
     return cf(Geometric(p, check_args=false), t)^r
 end
+mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
+cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 # ChainRules definitions
 

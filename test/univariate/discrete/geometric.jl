@@ -7,7 +7,12 @@ using FiniteDifferences
     @test mgf(d, 0) == 1
     @test cf(d, 0) == 1
 
-    fdm = central_fdm(5, 1)
-    @test fdm(Base.Fix1(mgf, d), 0) ≈ mean(d)
-    @test fdm(Base.Fix1(cf, d), 0) ≈ mean(d) * im
+    fdm1 = central_fdm(5, 1)
+    @test fdm1(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    @test fdm1(Base.Fix1(cf, d), 0) ≈ mean(d) * im
+
+    fdm2 = central_fdm(5, 2)
+    m2 = var(d) + mean(d)^2
+    @test fdm2(Base.Fix1(mgf, d), 0) ≈ m2
+    @test fdm2(Base.Fix1(cf, d), 0) ≈ -m2
 end
