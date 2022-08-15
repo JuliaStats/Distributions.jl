@@ -127,7 +127,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     try
         m = mgf(d,0.0)
-        @test m ≈ 1.0 atol=10*eps(Float64) rtol=0
+        @test m == 1.0
     catch e
         isa(e, MethodError) || throw(e)
     end
