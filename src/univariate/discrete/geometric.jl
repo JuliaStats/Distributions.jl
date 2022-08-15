@@ -129,7 +129,7 @@ end
 
 function cf(d::Geometric, t::Real)
     p = succprob(d)
-    p / (1 - (1 - p) * cis(t))
+    p / (p - (1 - p) * expm1(t*im))
 end
 
 
