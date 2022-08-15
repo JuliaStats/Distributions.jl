@@ -9,13 +9,11 @@ using FiniteDifferences
 mydiffp(r, p, k) = r/p - k/(1 - p)
 @testset "issue #1603" begin
     d = NegativeBinomial(4, 0.2)
-    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    fdm = central_fdm(5, 1)
+    @test fdm(Base.Fix1(mgf, d), 0) ≈ mean(d)
     d = NegativeBinomial(1, 0.2)
-    @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
-    if VERSION >= v"1.6"
-        # ForwardDiff bug in old julia
-        @test ForwardDiff.derivative(Base.Fix1(cf, d), 0) ≈ mean(d) * im
-    end
+    @test fdm(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    @test fdm(Base.Fix1(cf, d), 0) ≈ mean(d) * im
 end
 
 
