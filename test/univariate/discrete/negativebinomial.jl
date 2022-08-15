@@ -12,7 +12,10 @@ mydiffp(r, p, k) = r/p - k/(1 - p)
     @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
     d = NegativeBinomial(1, 0.2)
     @test ForwardDiff.derivative(Base.Fix1(mgf, d), 0) ≈ mean(d)
-    @test ForwardDiff.derivative(Base.Fix1(cf, d), 0) ≈ mean(d) * im
+    if VERSION >= v"1.6"
+        # ForwardDiff bug in old julia
+        @test ForwardDiff.derivative(Base.Fix1(cf, d), 0) ≈ mean(d) * im
+    end
 end
 
 
