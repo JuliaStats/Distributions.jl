@@ -124,7 +124,7 @@ end
 
 function mgf(d::Geometric, t::Real)
     p = succprob(d)
-    p / (1 - (1 - p) * exp(t))
+    p / (p - (1 - p) * expm1(t))
 end
 
 function cf(d::Geometric, t::Real)
