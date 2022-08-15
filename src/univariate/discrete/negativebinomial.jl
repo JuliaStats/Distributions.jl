@@ -128,12 +128,12 @@ end
 
 function mgf(d::NegativeBinomial, t::Real)
     r, p = params(d)
-    return mgf(Geometric(p), t)^r
+    return mgf(Geometric(p, check_args=false), t)^r
 end
 
 function cf(d::NegativeBinomial, t::Real)
     r, p = params(d)
-    return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
+    return cf(Geometric(p, check_args=false), t)^r
 end
 
 # ChainRules definitions
