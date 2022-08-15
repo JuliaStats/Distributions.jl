@@ -133,7 +133,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     end
     try
         c = cf(d,0.0)
-        @test c ≈ 1.0 atol=10*eps(Float64) rtol=0
+        @test c == 1.0
         # test some extra values: should all be well-defined
         for t in (0.1,-0.1,1.0,-1.0)
             @test !isnan(cf(d,t))
