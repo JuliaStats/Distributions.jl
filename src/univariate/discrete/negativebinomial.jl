@@ -132,7 +132,7 @@ function laplace_transform(d::NegativeBinomial, t)
 end
 
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
-cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
+cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
 
 # ChainRules definitions
 
