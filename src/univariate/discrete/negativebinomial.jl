@@ -131,10 +131,6 @@ function laplace_transform(d::NegativeBinomial, t)
     return laplace_transform(Geometric(p, check_args=false), t)^r
 end
 
-function cf(d::NegativeBinomial, t::Real)
-    r, p = params(d)
-    return cf(Geometric(p, check_args=false), t)^r
-end
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
 cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
