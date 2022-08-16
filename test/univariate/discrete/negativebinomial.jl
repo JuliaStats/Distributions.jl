@@ -7,6 +7,20 @@ using FiniteDifferences
 # Eventually, we might want to consolidate the tests here
 
 mydiffp(r, p, k) = r/p - k/(1 - p)
+@testset "issue #1603" begin
+    d = NegativeBinomial(4, 0.2)
+    fdm = central_fdm(5, 1)
+    @test fdm(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    d = NegativeBinomial(1, 0.2)
+    @test fdm(Base.Fix1(mgf, d), 0) ≈ mean(d)
+    @test fdm(Base.Fix1(cf, d), 0) ≈ mean(d) * im
+
+    fdm2 = central_fdm(5, 2)
+    m2 = var(d) + mean(d)^2
+    @test fdm2(Base.Fix1(mgf, d), 0) ≈ m2
+    @test fdm2(Base.Fix1(cf, d), 0) ≈ -m2
+end
+
 
 @testset "NegativeBinomial r=$r, p=$p, k=$k" for
     p in exp10.(-10:0) .- eps(), # avoid p==1 since it's not differentiable
