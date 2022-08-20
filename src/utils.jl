@@ -102,7 +102,7 @@ isprobvec(p::AbstractVector{<:Real}) =
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
-# inplace pdf calculations, etc. allocate storage correctly
+# in-place pdf calculations, etc. allocate storage correctly
 @inline partype(::Distribution) = Float64
 
 # because X == X' keeps failing due to floating point nonsense

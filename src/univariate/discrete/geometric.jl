@@ -122,17 +122,12 @@ function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
     max(ceil(lp/log1p(-d.p)) - 1, zero(T))
 end
 
-function mgf(d::Geometric, t::Real)
+function laplace_transform(d::Geometric, t)
     p = succprob(d)
-    p / (expm1(-t) + p)
+    p / (p - (1 - p) * expm1(-t))
 end
-
-function cf(d::Geometric, t::Real)
-    p = succprob(d)
-    # replace with expm1 when complex version available
-    p / (exp(-t*im) - 1 + p)
-end
-
+mgf(d::Geometric, t::Real) = laplace_transform(d, -t)
+cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 ### Sampling
 
