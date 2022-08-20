@@ -111,7 +111,7 @@ mean(d::Wishart) = d.df * Matrix(d.S)
 function mode(d::Wishart)
     r = d.df - size(d, 1) - 1
     r > 0 || throw(ArgumentError("mode is only defined when df > p + 1"))
-    return d.S.mat * r
+    return Matrix(d.S) * r
 end
 
 function meanlogdet(d::Wishart)
