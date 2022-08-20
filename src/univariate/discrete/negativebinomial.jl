@@ -118,14 +118,53 @@ invlogcdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf(d.r, d.p
 invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
-rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
-
-function mgf(d::NegativeBinomial, t::Real)
-    r, p = params(d)
-    return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
+function rand(rng::AbstractRNG, d::NegativeBinomial)
+    if isone(d.p)
+        return 0
+    else
+        return rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
+    end
 end
 
-function cf(d::NegativeBinomial, t::Real)
+function laplace_transform(d::NegativeBinomial, t)
     r, p = params(d)
-    return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
+    return laplace_transform(Geometric(p, check_args=false), t)^r
+end
+
+mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
+cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
+
+# ChainRules definitions
+
+function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
+    # Compute log probability
+    r, p = params(d)
+    edgecase = isone(p) && iszero(k)
+    insupp = insupport(d, k)
+    
+    # Primal computation
+    Ω = r * log(p) + k * log1p(-p)
+    if edgecase
+        Ω = zero(Ω)
+    elseif !insupp
+        Ω = oftype(Ω, -Inf)
+    else
+        Ω = Ω - log(k + r) - logbeta(r, k + 1)
+    end
+
+    # Define pullback
+    function logpdf_NegativeBinomial_pullback(Δ)
+        Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
+        Δp = Δ * (r / p - k / (1 - p))
+        if edgecase
+            Δp = oftype(Δp, Δ * r)
+        elseif !insupp
+            Δr = oftype(Δr, NaN)
+            Δp = oftype(Δp, NaN)
+        end
+        Δd = ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=Δp)
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
+    end
+
+    return Ω, logpdf_NegativeBinomial_pullback
 end
