@@ -215,7 +215,8 @@ function modes(d::DiscreteNonParametric)
 end
 
 function mgf(d::DiscreteNonParametric, t::Real)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     s = zero(Float64)
     for i in 1:length(x)
         s += p[i] * exp(t*x[i])
@@ -224,7 +225,8 @@ function mgf(d::DiscreteNonParametric, t::Real)
 end
 
 function cf(d::DiscreteNonParametric, t::Real)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     s = zero(Complex{Float64})
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])
