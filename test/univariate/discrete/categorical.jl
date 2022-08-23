@@ -58,7 +58,7 @@ for p in Any[
     @test pdf.(d, 1:k) == p
 
     @test cf(d, 0) ≈ 1.0
-    @test cf(d, 1) ≈ p' * Distributions.cis.(1:length(p))
+    @test cf(d, 1) ≈ p' * cis.(1:length(p))
 
     @test mgf(d, 0) ≈ 1.0
     @test mgf(d, 1) ≈ p' * exp.(1:length(p))
