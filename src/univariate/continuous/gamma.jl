@@ -77,6 +77,10 @@ function entropy(d::Gamma)
 end
 
 mgf(d::Gamma, t::Real) = (1 - t * d.θ)^(-d.α)
+function cgf(d::Gamma, t)
+    α, θ = params(d)
+    return α * cgf(Exponential{typeof(θ)}(θ), t)
+end
 
 cf(d::Gamma, t::Real) = (1 - im * t * d.θ)^(-d.α)
 

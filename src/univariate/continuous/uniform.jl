@@ -101,6 +101,21 @@ function mgf(d::Uniform, t::Real)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
 end
+function expfd0_taylor(x)
+    # taylor series of (exp(x) - 1) / x
+    evalpoly(x, (1, 1/2, 1/6, 1/24, 1/120))
+end
+
+function cgf(d::Uniform, t)
+    a,b = params(d)
+    # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
+    x = t*(b-a)
+    if abs(x) < sqrt(eps(float(one(x))))
+        t*a + log(expfd0_taylor(x))
+    else
+        logsubexp(t*b, t*a) - log(abs(x))
+    end
+end
 
 function cf(d::Uniform, t::Real)
     (a, b) = params(d)

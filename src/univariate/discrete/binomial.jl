@@ -147,6 +147,10 @@ function mgf(d::Binomial, t::Real)
     n, p = params(d)
     (one(p) - p + p * exp(t)) ^ n
 end
+function cgf(d::Binomial, t)
+    n,p = params(d)
+    n*cgf(Bernoulli(p),t)
+end
 
 function cf(d::Binomial, t::Real)
     n, p = params(d)
