@@ -180,9 +180,9 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
 end
 
 ### Affine transformations
-# Base.:+(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ + c, d.Σ)
-# Base.:+(c::AbstractVector, d::GenericMvTDist) = d + c
-# Base.:-(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ - c, d.Σ)
+Base.:+(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ + c, d.Σ)
+Base.:+(c::AbstractVector, d::GenericMvTDist) = d + c
+Base.:-(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ - c, d.Σ)
 
-# Base.:*(B::AbstractMatrix, d::GenericMvTDist) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
-# Base.:*(B::GenericMvTDist, d::AbstractMatrix) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::AbstractMatrix, d::GenericMvTDist) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::GenericMvTDist, d::AbstractMatrix) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
