@@ -1,5 +1,5 @@
 """
-    cgf(distribution, t)
+    cgf(d::UnivariateDistribution, t)
 
 Evaluate the [cumulant-generating-function](https://en.wikipedia.org/wiki/Cumulant) of `distribution` at `t`.
 Mathematically the cumulant-generating-function is the logarithm of the [moment-generating-function](https://en.wikipedia.org/wiki/Moment-generating_function):
