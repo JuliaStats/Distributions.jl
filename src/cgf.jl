@@ -37,10 +37,7 @@ function cgf(d::NegativeBinomial, t)
     r,p = params(d)
     r*cgf_Geometric(p,t)
 end
-function cgf(d::Poisson, t)
-    λ = mean(d)
-    λ*(exp(t)-1)
-end
+cgf(d::Poisson, t) = mean(d) * expm1(t)
 
 function expfd0_taylor(x)
     # taylor series of (exp(x) - 1) / x
