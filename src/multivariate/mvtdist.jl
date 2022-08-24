@@ -1,7 +1,13 @@
 # Multivariate t-distribution
 
 ## Generic multivariate t-distribution class
-
+"""
+Multivariate Student-T distribution support affine transformations:
+```julia
+d = GenericMvTDist(ν, μ, Σ)
+c + B * d    # == GenericMvTDist(d.df, B * μ + c, B * Σ * B')
+```
+"""
 abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
 struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
@@ -172,3 +178,11 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
     x .= x ./ sqrt.(y ./ d.df) .+ d.μ
     x
 end
+
+### Affine transformations
+# Base.:+(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ + c, d.Σ)
+# Base.:+(c::AbstractVector, d::GenericMvTDist) = d + c
+# Base.:-(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ - c, d.Σ)
+
+# Base.:*(B::AbstractMatrix, d::GenericMvTDist) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
+# Base.:*(B::GenericMvTDist, d::AbstractMatrix) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
