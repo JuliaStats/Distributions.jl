@@ -3,7 +3,9 @@
 
 Evaluate the [cumulant-generating-function](https://en.wikipedia.org/wiki/Cumulant) of `distribution` at `t`.
 Mathematically the cumulant-generating-function is the logarithm of the [moment-generating-function](https://en.wikipedia.org/wiki/Moment-generating_function):
-`cgf = (log∘mgf)`. In practice the right hand side may have overflow issues however.
+`cgf = log ∘ mgf`. In practice, however, the right hand side may have overflow issues.
+
+See also [`mgf`](@ref)
 """
 function cgf end
 
