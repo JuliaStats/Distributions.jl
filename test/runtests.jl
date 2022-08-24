@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "cgf",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
