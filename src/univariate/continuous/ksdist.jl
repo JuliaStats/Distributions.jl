@@ -4,7 +4,7 @@
 Distribution of the (two-sided) Kolmogorov-Smirnoff statistic
 
 ```math
-D_n = \\sup_x | \\hat{F}_n(x) -F(x)| \\sqrt(n)
+D_n = \\sup_x | \\hat{F}_n(x) -F(x)|
 ```
 
 ``D_n`` converges a.s. to the Kolmogorov distribution.

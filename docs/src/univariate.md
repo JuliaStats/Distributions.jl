@@ -11,7 +11,7 @@ const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
 
 ## Common Interface
 
-A series of methods are implemented for each univariate distribution, which provide
+A series of methods is implemented for each univariate distribution, which provides
 useful functionalities such as moment computation, pdf evaluation, and sampling
 (*i.e.* random number generation).
 
@@ -488,7 +488,7 @@ Skellam
 
 ### Vectorized evaluation
 
-Vectorized computation and inplace vectorized computation have been deprecated.
+Vectorized computation and in-place vectorized computation have been deprecated.
 
 ## Index
 
