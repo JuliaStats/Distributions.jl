@@ -68,7 +68,7 @@ function cgf(d::Gamma, t)
     return α * cgf(Exponential{typeof(θ)}(θ), t)
 end
 function cgf(d::Laplace, t)
-    μ,θ = params(d)
+    μ, θ = params(d)
     t*μ - log1p(-(θ*t)^2)
 end
 function cgf(d::Chisq, t)
