@@ -60,14 +60,12 @@ function cgf(d::Normal, t)
 end
 function cgf(d::Exponential, t)
     μ = mean(d)
-    cgf_Exponential(μ,t)
+    return - log1p(- t * μ)
 end
-function cgf_Exponential(μ, t)
-    -log1p(-t*μ)
-end
+
 function cgf(d::Gamma, t)
-    α,θ = params(d)
-    α*cgf_Exponential(θ,t)
+    α, θ = params(d)
+    return α * cgf(Exponential{typeof(θ)}(θ), t)
 end
 function cgf(d::Laplace, t)
     μ,θ = params(d)
