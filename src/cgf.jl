@@ -71,14 +71,12 @@ function cgf(d::Laplace, t)
     μ,θ = params(d)
     t*μ - log1p(-(θ*t)^2)
 end
-function cgf_Chisq(ν,t)
-    -ν/2*log1p(-2*t)
-end
 function cgf(d::Chisq, t)
-    ν, = params(d)
-    cgf_Chisq(ν,t)
+    ν = dof(d)
+    return -ν/2 * log1p(-2*t)
 end
+
 function cgf(d::NoncentralChisq, t)
     ν, λ = params(d)
-    λ*t/(1-2t) + cgf_Chisq(ν,t)
+    return λ*t/(1 - 2*t) + cgf(Chisq{typeof(ν)}(ν), t)
 end
