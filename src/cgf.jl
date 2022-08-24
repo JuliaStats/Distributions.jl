@@ -1,6 +1,3 @@
-using Distributions
-using LogExpFunctions
-
 """
     cgf(distribution, t)
 
