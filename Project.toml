@@ -29,7 +29,6 @@ SpecialFunctions = "1.2, 2"
 StatsBase = "0.32, 0.33"
 StatsFuns = "0.9.15, 1"
 julia = "1.3"
-LogExpFunctions = "0.3.18"
 
 [extras]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
