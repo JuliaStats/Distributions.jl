@@ -87,7 +87,7 @@ end
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
 end
 
-@testset "MvNormal affine tranformations" begin
+@testset "GenericMvTDist affine tranformations" begin
     @testset "moment identities" begin
         for n in 1:5                       # dimension
             # distribution
