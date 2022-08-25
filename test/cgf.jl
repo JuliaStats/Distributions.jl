@@ -43,8 +43,10 @@ import ForwardDiff
         @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
         κ₁ = d(Base.Fix1(cgf, dist))(0)
         @test κ₁ ≈ mean(dist)
-        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
-        @test κ₂ ≈ var(dist)
+        if VERSION >= v"1.4"
+            κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+            @test κ₂ ≈ var(dist)
+        end
         
         for t in ts
             val = @inferred cgf(dist, t)
