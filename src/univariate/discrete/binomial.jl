@@ -149,7 +149,7 @@ function mgf(d::Binomial, t::Real)
 end
 function cgf(d::Binomial, t)
     n,p = params(d)
-    n*cgf(Bernoulli(p),t)
+    n * cgf(Bernoulli{typeof(p)}(p), t)
 end
 
 function cf(d::Binomial, t::Real)
