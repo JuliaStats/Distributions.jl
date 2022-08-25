@@ -53,7 +53,6 @@ mgf(d::Dirac, t) = exp(t * d.value)
 cgf(d::Dirac, t) = t*d.value
 cf(d::Dirac, t) = cis(t * d.value)
 
-
 #### Sampling
 
 rand(rng::AbstractRNG, d::Dirac) = d.value
