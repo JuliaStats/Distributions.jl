@@ -3,6 +3,33 @@ using Test
 using Distributions
 import ForwardDiff
 
+@testset "cgf uniform around 0" begin
+    for (lo, hi, t) in [
+        ((Float16(0), Float16(1), sqrt(eps(Float16)))),
+        ((Float16(0), Float16(1), Float16(0))),
+        ((Float16(0), Float16(1), -sqrt(eps(Float16)))),
+        (0f0, 1f0, sqrt(eps(Float32))),
+        (0f0, 1f0, 0f0),
+        (0f0, 1f0, -sqrt(eps(Float32))),
+        (-2f0, 1f0, 1f-30),
+        (-2f-4, -1f-4, -2f-40),
+        (0.0, 1.0, sqrt(eps(Float64))),
+        (0.0, 1.0, 0.0),
+        (0.0, 1.0, -sqrt(eps(Float64))),
+        (-2.0, 10.0, -1e-100),
+                       ]
+        T = typeof(lo)
+        @assert T == typeof(lo) == typeof(hi) == typeof(t)
+        @assert t <= sqrt(eps(T))
+        d = Uniform(lo, hi)
+        d_big = Uniform(BigFloat(lo), BigFloat(hi))
+        t_big = BigFloat(t)
+        @test cgf(d, t) isa T
+        @test Distributions.cgf_around_zero(d, t) ≈ cgf(d_big, t_big) atol=eps(t) rtol=0
+        @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
+    end
+end
+
 @testset "CumulantGeneratingFunctions.jl" begin
     d(f) = Base.Fix1(ForwardDiff.derivative, f)
     @testset "$(dist)" for (dist, ts) in [
@@ -47,7 +74,6 @@ import ForwardDiff
             κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
             @test κ₂ ≈ var(dist)
         end
-        
         for t in ts
             val = @inferred cgf(dist, t)
             @test isfinite(val)

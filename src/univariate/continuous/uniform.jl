@@ -101,26 +101,35 @@ function mgf(d::Uniform, t::Real)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
 end
-function expfd0_taylor(x)
-    # taylor series of (exp(x) - 1) / x
+function cgf_uniform_around_zero_kernel(x)
+    # taylor series of (exp(x) - x - 1) / x
     T = typeof(x)
-    a0 = inv(T(1))
-    a1 = inv(T(2))
-    a2 = inv(T(6))
-    a3 = inv(T(24))
-    a4 = inv(T(120))
-    @evalpoly(x, a0, a1, a2, a3, a4)
+    a0 = inv(T(2))
+    a1 = inv(T(6))
+    a2 = inv(T(24))
+    a3 = inv(T(120))
+    x*@evalpoly(x, a0, a1, a2, a3)
 end
 
 function cgf(d::Uniform, t)
-    a,b = params(d)
     # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
+    a,b = params(d)
     x = t*(b-a)
-    if abs(x) < sqrt(eps(float(one(x))))
-        t*a + log(expfd0_taylor(x))
+    if abs(x) <= sqrt(eps(float(one(x))))
+        cgf_around_zero(d, t)
     else
-        logsubexp(t*b, t*a) - log(abs(x))
+        cgf_away_from_zero(d, t)
     end
+end
+function cgf_around_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    t*a + log1p(cgf_uniform_around_zero_kernel(x))
+end
+function cgf_away_from_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    logsubexp(t*b, t*a) - log(abs(x))
 end
 
 function cf(d::Uniform, t::Real)
