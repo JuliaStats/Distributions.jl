@@ -128,7 +128,7 @@ function laplace_transform(d::Geometric, t)
 end
 mgf(d::Geometric, t::Real) = laplace_transform(d, -t)
 function cgf(d::Geometric, t)
-    p, = params(d)
+    p = succprob(d)
     # log(p / (1 - (1-p) * exp(t)))
     log(p) - logsubexp(0, t + log1p(-p))
 end
