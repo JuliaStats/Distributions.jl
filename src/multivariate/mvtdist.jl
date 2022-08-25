@@ -103,14 +103,11 @@ IsoTDist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(σ)))
 mvtdist(df::Real, μ::Vector, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
 mvtdist(df::Real, C::AbstractPDMat) = GenericMvTDist(df, C)
 
-mvtdist(df::Real, μ::AbstractVector, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
+mvtdist(df::Real, μ::Vector, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
 mvtdist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, μ, ScalMat(d, abs2(σ)))
-mvtdist(df::Real, μ::AbstractVector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
-mvtdist(df::Real, μ::AbstractVector, Σ::AbstractMatrix) = GenericMvTDist(df, μ, PDMat(Σ))
-mvtdist(df::Real, Σ::AbstractMatrix) = GenericMvTDist(df, PDMat(Σ))
-
-mvtdist(df::Real, μ::AbstractVector, Σ::UniformScaling{<:Real}) = GenericMvTDist(df, μ, ScalMat(length(μ), Σ.λ))
-
+mvtdist(df::Real, μ::Vector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
+mvtdist(df::Real, μ::Vector, Σ::Matrix) = GenericMvTDist(df, μ, PDMat(Σ))
+mvtdist(df::Real, Σ::Matrix) = GenericMvTDist(df, PDMat(Σ))
 
 # mvtdist(df::Real, μ::Vector{<:Real}, σ::Real) = IsoTDist(df, μ, σ)
 # mvtdist(df::Real, d::Int, σ::Real) = IsoTDist(d, σ)
