@@ -133,7 +133,7 @@ end
 
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
 function cgf(d::NegativeBinomial, t)
-    r,p = params(d)
+    r, p = params(d)
     r*cgf(Geometric(p),t)
 end
 cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
