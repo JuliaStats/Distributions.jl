@@ -35,6 +35,8 @@ import ForwardDiff
         (NoncentralChisq(3,2),     Any[0.49, -1, -100, -1f6]),
         (Logistic(0,1),            Any[-0.99,0.99, 1f-2, -1f-2]),
         (Logistic(100,10),         Any[-0.099,0.099, 1f-2, -1f-2]),
+        (Erlang(1,0.4),            Any[1, 1/0.400001, -1, -100f0, -1e6]),
+        (Erlang(10,0.01),            Any[1, 1/0.010001f0, -1, -100f0, -1e6]),
                    ]
         κ₀ = cgf(dist, 0)
         @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
