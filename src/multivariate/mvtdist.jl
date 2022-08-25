@@ -59,6 +59,8 @@ function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     GenericMvTDist(df, Zeros{R}(size(Σ, 1)), Σ)
 end
 
+GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractMatrix) = GenericMvTDist(df, μ, PDMat(Σ))
+
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
     GenericMvTDist(convert(T,df), convert(Mean, μ), convert(Cov, Σ))
 
@@ -206,8 +208,8 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
 end
 
 ### Affine transformations
-Base.:+(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ + c, d.Σ)
+Base.:+(d::GenericMvTDist, c::AbstractVector) = GenericMvTDist(d.df, d.μ + c, d.Σ)
 Base.:+(c::AbstractVector, d::GenericMvTDist) = d + c
-Base.:-(d::GenericMvTDist, c::AbstractVector) = mvtdist(d.df, d.μ - c, d.Σ)
+Base.:-(d::GenericMvTDist, c::AbstractVector) = GenericMvTDist(d.df, d.μ - c, d.Σ)
 
-Base.:*(B::AbstractMatrix, d::GenericMvTDist) = mvtdist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::AbstractMatrix, d::GenericMvTDist) = GenericMvTDist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
