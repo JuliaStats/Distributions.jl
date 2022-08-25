@@ -1,7 +1,7 @@
 using Distributions, Random, StaticArrays, LinearAlgebra
 using Test
 
-import Distributions: GenericMvTDist, mvtdist
+import Distributions: GenericMvTDist
 import PDMats: PDMat
 
 @testset "mvtdist" begin
@@ -87,6 +87,6 @@ end
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
 end
 
-test_affine(GenericMvTDist, (μ, Σ) -> mvtdist(4.5, μ, Σ))
+test_affine(GenericMvTDist, (μ, Σ) -> GenericMvTDist(4.5, μ, Σ))
 
 end

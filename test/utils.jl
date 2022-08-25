@@ -77,9 +77,8 @@ function test_affine(dist_type::Type{<:ContinuousMultivariateDistribution}, dist
             for n in 1:5                       # dimension
                 # distribution
                 μ = randn(n)
-                for Σ in (randn(n, n) |> A -> A*A',  # dense
-                        Diagonal(abs2.(randn(n))), # diagonal
-                        abs2(randn()) * I)         # scaled unit
+                for Σ in (randn(n, n) |> A -> PDMat(A*A'),  # dense
+                        PDiagMat(abs2.(randn(n)))) # diagonal
                     
                     d = dist_builder(μ, Σ)
                     
