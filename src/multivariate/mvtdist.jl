@@ -1,8 +1,8 @@
 # Multivariate t-distribution
 
 ## Generic multivariate t-distribution class
-abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
+abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
 """
 The [Multivariate Student-T distribution](https://en.wikipedia.org/wiki/Multivariate_t-distribution)
@@ -11,7 +11,7 @@ a d-dimensional multivariate T-distribution is an elliptical distribution with m
 scale matrix ``\\boldsymbol{\\Sigma}``, with ν degrees of freedom. It is typically represented as:
 
 ```math
-\\frac {\\Gamma \\left[(\\nu +p)/2\\right]}{\\Gamma (\\nu /2)\\nu ^{p/2} \\pi ^{p/2}\\left|{\\boldsymbol {\\Sigma }}\\right|^{1/2}}} \\\
+\\frac {\\Gamma \\left[(\\nu +p)/2\\right]}{\\Gamma (\\nu /2)\\nu ^{p/2} \\pi ^{p/2}\\left|{\\boldsymbol {\\Sigma }}\\right|^{1/2}}}
 \\left[1+{\\frac {1}{\\nu }}({\\mathbf {x} }{\\boldsymbol {\\mu }})^{\\rm {T}}{\\boldsymbol {\\Sigma }}^{-1}({\\mathbf {x} }-{\\boldsymbol {\\mu }})\\right]^{-(\\nu +p)/2}
 ```
 
