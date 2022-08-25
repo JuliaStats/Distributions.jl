@@ -21,6 +21,7 @@ import ForwardDiff
         (Poisson(10),              Any[1f0,2f0,10.0,50.0]),
         (Poisson(1e-3),            Any[1f0,2f0,10.0,50.0]),
         (Uniform(0,1),             Any[1, -1, 100f0, 1e6, -1e6]),
+        (Uniform(100f0,101f0),     Any[1, -1, 100f0, 1e6, -1e6]),
         (Normal(0,1),              Any[1, -1, 100f0, 1e6, -1e6]),
         (Normal(1,0.4),            Any[1, -1, 100f0, 1e6, -1e6]),
         (Exponential(1),           Any[0.9, -1, -100f0, -1e6]),

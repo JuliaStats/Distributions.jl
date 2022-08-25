@@ -103,7 +103,13 @@ function mgf(d::Uniform, t::Real)
 end
 function expfd0_taylor(x)
     # taylor series of (exp(x) - 1) / x
-    evalpoly(x, (1, 1/2, 1/6, 1/24, 1/120))
+    T = typeof(x)
+    a0 = inv(T(1))
+    a1 = inv(T(2))
+    a2 = inv(T(6))
+    a3 = inv(T(24))
+    a4 = inv(T(120))
+    @evalpoly(x, a0, a1, a2, a3, a4)
 end
 
 function cgf(d::Uniform, t)
