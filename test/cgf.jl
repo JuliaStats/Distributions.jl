@@ -16,17 +16,22 @@ import ForwardDiff
         (0.0, 1.0, sqrt(eps(Float64))),
         (0.0, 1.0, 0.0),
         (0.0, 1.0, -sqrt(eps(Float64))),
-        (-2.0, 10.0, -1e-100),
+        (-2.0, 5.0, -1e-35),
                        ]
         T = typeof(lo)
         @assert T == typeof(lo) == typeof(hi) == typeof(t)
         @assert t <= sqrt(eps(T))
         d = Uniform(lo, hi)
-        d_big = Uniform(BigFloat(lo), BigFloat(hi))
-        t_big = BigFloat(t)
+        precision = 512
+        d_big = Uniform(BigFloat(lo, precision=precision), BigFloat(hi; precision=precision))
+        t_big = BigFloat(t, precision=precision)
         @test cgf(d, t) isa T
-        @test Distributions.cgf_around_zero(d, t) ≈ cgf(d_big, t_big) atol=eps(t) rtol=0
-        @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
+        if iszero(t)
+            @test cgf(d,t) === zero(t)
+        else
+            @test Distributions.cgf_around_zero(d, t) ≈ Distributions.cgf_away_from_zero(d_big, t_big) atol=eps(t) rtol=0
+            @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
+        end
     end
 end
 
