@@ -3,6 +3,7 @@
 ## Generic multivariate t-distribution class
 abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
+
 """
 The [Multivariate Student-T distribution](https://en.wikipedia.org/wiki/Multivariate_t-distribution)
 is a multidimensional generalization of the *Student-T distribution*. The probability density function of
@@ -10,7 +11,8 @@ a d-dimensional multivariate T-distribution is an elliptical distribution with m
 scale matrix ``\\boldsymbol{\\Sigma}``, with ν degrees of freedom. It is typically represented as:
 
 ```math
-T_ν(μ, Σ)
+\\frac {\\Gamma \\left[(\\nu +p)/2\\right]}{\\Gamma (\\nu /2)\\nu ^{p/2} \\pi ^{p/2}\\left|{\\boldsymbol {\\Sigma }}\\right|^{1/2}}} \\\
+\\left[1+{\\frac {1}{\\nu }}({\\mathbf {x} }{\\boldsymbol {\\mu }})^{\\rm {T}}{\\boldsymbol {\\Sigma }}^{-1}({\\mathbf {x} }-{\\boldsymbol {\\mu }})\\right]^{-(\\nu +p)/2}
 ```
 
 Here, the mean vector can be an instance of any `AbstractVector`. The scale-matrix can be
@@ -99,11 +101,14 @@ IsoTDist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, ScalMat(d, abs2(σ)))
 mvtdist(df::Real, μ::Vector, C::AbstractPDMat) = GenericMvTDist(df, μ, C)
 mvtdist(df::Real, C::AbstractPDMat) = GenericMvTDist(df, C)
 
-mvtdist(df::Real, μ::Vector, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
+mvtdist(df::Real, μ::AbstractVector, σ::Real) = GenericMvTDist(df, μ, ScalMat(length(μ), abs2(σ)))
 mvtdist(df::Real, d::Int, σ::Real) = GenericMvTDist(df, μ, ScalMat(d, abs2(σ)))
-mvtdist(df::Real, μ::Vector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
-mvtdist(df::Real, μ::Vector, Σ::Matrix) = GenericMvTDist(df, μ, PDMat(Σ))
-mvtdist(df::Real, Σ::Matrix) = GenericMvTDist(df, PDMat(Σ))
+mvtdist(df::Real, μ::AbstractVector, σ::Vector) = GenericMvTDist(df, μ, PDiagMat(abs2.(σ)))
+mvtdist(df::Real, μ::AbstractVector, Σ::AbstractMatrix) = GenericMvTDist(df, μ, PDMat(Σ))
+mvtdist(df::Real, Σ::AbstractMatrix) = GenericMvTDist(df, PDMat(Σ))
+
+mvtdist(df::Real, μ::AbstractVector, Σ::UniformScaling{<:Real}) = GenericMvTDist(df, μ, ScalMat(length(μ), Σ.λ))
+
 
 # mvtdist(df::Real, μ::Vector{<:Real}, σ::Real) = IsoTDist(df, μ, σ)
 # mvtdist(df::Real, d::Int, σ::Real) = IsoTDist(d, σ)
