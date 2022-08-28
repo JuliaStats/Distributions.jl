@@ -188,10 +188,10 @@ end
 
 function lkj_onion_loginvconst(d::Integer, η::T) where {T <: Real}
     #  Equation (17) in LKJ (2009 JMA)
-    sumlogs = zero(η)
     h = convert(float(T), 0.5)
-    for k in 2:d - 1
-        sumlogs += h * k * logπ + loggamma(η + h * (d - 1 - k))
+    sumlogs = (h * 2) * logπ + loggamma(η + h * (d - 3))
+    for k in 3:d - 1
+        sumlogs += (h * k) * logπ + loggamma(η + h * (d - 1 - k))
     end
     α = η + h * d - 1
     loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + h * (d - 1))
