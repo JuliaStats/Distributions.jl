@@ -141,7 +141,6 @@ using FiniteDifferences
             @test insupport(LKJCholesky(40, 2, 'U'), cholesky(rand(LKJ(40, 2))))
             @test insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(40, 2))))
             @test !insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2))))
-            @test logpdf(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2)))) == -Inf
             @test @inferred(logpdf(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2))))) === -Inf
             @test @inferred(logpdf(LKJCholesky(40, 2f0), cholesky(Float32.(rand(LKJ(41, 2)))))) === convert(Float32, -Inf)
             z = rand(LKJ(40, 1))
