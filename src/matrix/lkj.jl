@@ -186,14 +186,15 @@ end
 #  for 1 / c₀, even if they say that it is not.
 #  -----------------------------------------------------------------------------
 
-function lkj_onion_loginvconst(d::Integer, η::Real)
+function lkj_onion_loginvconst(d::Integer, η::T) where {T <: Real}
     #  Equation (17) in LKJ (2009 JMA)
     sumlogs = zero(η)
+    h = convert(float(T), 0.5)
     for k in 2:d - 1
-        sumlogs += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k))
+        sumlogs += h * k * logπ + loggamma(η + h * (d - 1 - k))
     end
-    α = η + 0.5d - 1
-    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + 0.5(d - 1))
+    α = η + h * d - 1
+    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + h * (d - 1))
     return loginvconst
 end
 

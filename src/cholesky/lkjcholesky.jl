@@ -136,8 +136,8 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
 end
 
 function logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky)
-    insupport(d, R) || return oftype(_logpdf(d, LinearAlgebra.Cholesky(zeros(eltype(R.factors), d.d, d.d), R.uplo, R.info)), -Inf)
-    return _logpdf(d, R)
+    lp = _logpdf(d, R)
+    return insupport(d, R) ? lp : oftype(lp, -Inf)
 end
 
 _logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky) = logkernel(d, R) + d.logc0
