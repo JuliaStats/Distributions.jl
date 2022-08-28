@@ -142,7 +142,7 @@ using FiniteDifferences
             @test insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(40, 2))))
             @test !insupport(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2))))
             @test @inferred(logpdf(LKJCholesky(40, 2), cholesky(rand(LKJ(41, 2))))) === -Inf
-            @test @inferred(logpdf(LKJCholesky(40, 2f0), cholesky(Float32.(rand(LKJ(41, 2)))))) === convert(Float32, -Inf)
+            @test @inferred(logpdf(LKJCholesky(40, 2f0), cholesky(Float32.(rand(LKJ(41, 2)))))) === -Inf32
             z = rand(LKJ(40, 1))
             z .+= exp(Symmetric(randn(size(z)))) .* 1e-8
             x = cholesky(z)

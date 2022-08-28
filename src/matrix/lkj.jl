@@ -189,7 +189,8 @@ end
 function lkj_onion_loginvconst(d::Integer, η::T) where {T <: Real}
     #  Equation (17) in LKJ (2009 JMA)
     h = convert(float(T), 0.5)
-    sumlogs = (h * 2) * logπ + loggamma(η + h * (d - 3))
+    sumlogs = logπ + loggamma(η + h * (d - 3))
+    sumlogs = ifelse(2 <= d - 1, sumlogs, zero(sumlogs))
     for k in 3:d - 1
         sumlogs += (h * k) * logπ + loggamma(η + h * (d - 1 - k))
     end
