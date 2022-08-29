@@ -8,6 +8,8 @@ using Test
 @testset "uniform.jl" begin
     # affine transformations
     test_affine_transformations(Uniform, rand(), 4 + rand())
+    test_cgf(Uniform(0,1), Any[1, -1, 100f0, 1e6, -1e6])
+    test_cgf(Uniform(100f0,101f0), Any[1, -1, 100f0, 1e6, -1e6])
 
     @testset "ChainRules" begin
         # run test suite for values in the support
@@ -45,6 +47,37 @@ using Test
         x = shuffle(10:20)
         for data in (x, OffsetArray(x, -5:5))
             @test fit(Uniform, data) == Uniform(10, 20)
+        end
+    end
+    @testset "cgf uniform around 0" begin
+        for (lo, hi, t) in [
+            ((Float16(0), Float16(1), sqrt(eps(Float16)))),
+            ((Float16(0), Float16(1), Float16(0))),
+            ((Float16(0), Float16(1), -sqrt(eps(Float16)))),
+            (0f0, 1f0, sqrt(eps(Float32))),
+            (0f0, 1f0, 0f0),
+            (0f0, 1f0, -sqrt(eps(Float32))),
+            (-2f0, 1f0, 1f-30),
+            (-2f-4, -1f-4, -2f-40),
+            (0.0, 1.0, sqrt(eps(Float64))),
+            (0.0, 1.0, 0.0),
+            (0.0, 1.0, -sqrt(eps(Float64))),
+            (-2.0, 5.0, -1e-35),
+                           ]
+            T = typeof(lo)
+            @assert T == typeof(lo) == typeof(hi) == typeof(t)
+            @assert t <= sqrt(eps(T))
+            d = Uniform(lo, hi)
+            precision = 512
+            d_big = Uniform(BigFloat(lo, precision=precision), BigFloat(hi; precision=precision))
+            t_big = BigFloat(t, precision=precision)
+            @test cgf(d, t) isa T
+            if iszero(t)
+                @test cgf(d,t) === zero(t)
+            else
+                @test Distributions.cgf_around_zero(d, t) ≈ Distributions.cgf_away_from_zero(d_big, t_big) atol=eps(t) rtol=0
+                @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
+            end
         end
     end
 end

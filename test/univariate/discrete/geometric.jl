@@ -15,4 +15,6 @@ using FiniteDifferences
     m2 = var(d) + mean(d)^2
     @test fdm2(Base.Fix1(mgf, d), 0) ≈ m2
     @test fdm2(Base.Fix1(cf, d), 0) ≈ -m2
+    test_cgf(Geometric(0.1), Any[1f-1, -1e6])
+    test_cgf(Geometric(0.5), Any[1f-1, -1e6])
 end
