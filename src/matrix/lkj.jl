@@ -186,7 +186,7 @@ end
 #  for 1 / c₀, even if they say that it is not.
 #  -----------------------------------------------------------------------------
 
-function lkj_onion_loginvconst(d::Integer, η::T) where {T <: Real}
+function lkj_onion_loginvconst(d::Integer, η::Real)
     #  Equation (17) in LKJ (2009 JMA)
     T = float(Base.promote_typeof(d, η))
     h = T(1//2)
