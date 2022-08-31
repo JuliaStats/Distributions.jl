@@ -2,8 +2,8 @@ using Distributions
 using Test
 
 @testset "Dirac tests" begin
-    test_cgf(Dirac(13), Any[1, 1f-4, 1e10, 10, -4])
-    test_cgf(Dirac(-1f2), Any[1, 1f-4, 1e10, 10,-4])
+    test_cgf(Dirac(13)  , (1, 1f-4, 1e10, 10, -4))
+    test_cgf(Dirac(-1f2), (1, 1f-4, 1e10, 10,-4))
     for val in (3, 3.0, -3.5)
         d = Dirac(val)
 

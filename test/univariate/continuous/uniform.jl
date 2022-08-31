@@ -8,8 +8,8 @@ using Test
 @testset "uniform.jl" begin
     # affine transformations
     test_affine_transformations(Uniform, rand(), 4 + rand())
-    test_cgf(Uniform(0,1), Any[1, -1, 100f0, 1e6, -1e6])
-    test_cgf(Uniform(100f0,101f0), Any[1, -1, 100f0, 1e6, -1e6])
+    test_cgf(Uniform(0,1),         (1, -1, 100f0, 1e6, -1e6))
+    test_cgf(Uniform(100f0,101f0), (1, -1, 100f0, 1e6, -1e6))
 
     @testset "ChainRules" begin
         # run test suite for values in the support
