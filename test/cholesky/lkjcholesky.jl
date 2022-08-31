@@ -135,7 +135,7 @@ using FiniteDifferences
             @test m isa Cholesky{eltype(d)}
             @test Matrix(m) ≈ I
         end
-        @test_broken partype(LKJCholesky(2, 4f0)) <: Float32
+        @test partype(LKJCholesky(2, 4f0)) <: Float32
 
         @testset "insupport" begin
             @test insupport(LKJCholesky(40, 2, 'U'), cholesky(rand(LKJ(40, 2))))
