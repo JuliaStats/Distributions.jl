@@ -99,14 +99,14 @@ end
 function logpdf(d::NegativeBinomial, k::Real)
     r, p = params(d)
     z = xlogy(r, p) + xlog1py(k, -p)
+
     if iszero(k)
-        # in this case `log(k + r) + logbeta(r, k + 1) == 0` analytically but unfortunately not numerically
+        # in this case `logpdf(d, k) = z - log(k + r) - logbeta(r, k + 1) = z` analytically
+        # but unfortunately not numerically, so we handle this case separately to improve accuracy
         return z
-    elseif insupport(d, k)
-        return z - log(k + r) - logbeta(r, k + 1)
-    else
-        return oftype(z, -Inf)
     end
+    
+    return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
 end
 
 # cdf and quantile functions are more involved so we still rely on Rmath
@@ -152,7 +152,7 @@ function (f::LogPDFNegativeBinomialPullback{D})(Δ) where {D}
 end
 
 function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
-    # Compute log probability
+    # Compute log probability (as in the definition of `logpdf(d, k)` above)
     r, p = params(d)
     z = xlogy(r, p) + xlog1py(k, -p)
     if iszero(k)
