@@ -191,7 +191,7 @@ function lkj_onion_loginvconst(d::Integer, η::Real)
     T = float(Base.promote_typeof(d, η))
     h = T(1//2)
     α = η + h * d - 1
-    loginvconst = (2*η + d - 3)*oftype(T, logtwo) + (oftype(T, logπ) / 4) * (d * (d - 1) - 2) + logbeta(α, α) - (d - 2) * loggamma(η + h * (d - 1))
+    loginvconst = (2*η + d - 3)*T(logtwo) + (T(logπ) / 4) * (d * (d - 1) - 2) + logbeta(α, α) - (d - 2) * loggamma(η + h * (d - 1))
     for k in 2:(d - 1)
         loginvconst += loggamma(η + h * (d - 1 - k))
     end
