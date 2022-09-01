@@ -199,27 +199,24 @@ function lkj_onion_loginvconst(d::Integer, η::Real)
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T} = Float64) where {T}
+function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = zero(T)
-    for k in 1:div(d - 1, 2)
-        sumlogs += loggamma(T(2k))
-    end
     h = T(1//2)
-    q = T(1//4)
-    loginvconst = q*(d^2 - 1)*logπ + sumlogs - q*(d - 1)^2*logtwo - (d - 1)*loggamma(h*(d + 1))
+    loginvconst = (d - 1) * ((d + 1) * (T(logπ) / 4) - (d - 1) * (T(logtwo) / 4) - loggamma(h * (d + 1)))
+    for k in 2:2:(d - 1)
+        loginvconst += loggamma(T(k))
+    end
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T} = Float64) where {T}
+function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = zero(T)
-    for k in 1:div(d - 2, 2)
-        sumlogs += loggamma(T(2k))
-    end
     h = T(1//2)
-    q = T(1//4)
-    return q*d*(d - 2)*logπ + q*(3d^2 - 4d)*logtwo + d*loggamma(h*d) + sumlogs - (d - 1)*loggamma(T(d))
+    loginvconst = d * ((d - 2) * (T(logπ) / 4) + (3 * d - 4) * (T(logtwo) / 4) + loggamma(h * d)) - (d - 1) * loggamma(T(d))
+    for k in 2:2:(d - 2)
+        loginvconst += loggamma(k)
+    end
+    return loginvconst
 end
 
 function lkj_vine_loginvconst(d::Integer, η::Real)

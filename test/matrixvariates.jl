@@ -454,11 +454,11 @@ function test_special(dist::Type{LKJ})
         η = 1.0
         lkj = LKJ(d, η)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
-        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_odd(d)
+        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
-        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d)
+        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
         #  =============
         #  even non-uniform
         #  =============
@@ -475,11 +475,11 @@ function test_special(dist::Type{LKJ})
         η = 1.0
         lkj = LKJ(d, η)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
-        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_even(d)
+        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
-        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d)
+        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
     end
     @testset "check integrating constant as a volume" begin
         #  d = 2: Lebesgue measure of the set of correlation matrices is 2.
