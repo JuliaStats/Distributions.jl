@@ -100,12 +100,13 @@ params(d::LKJ) = (d.d, d.η)
 #  -----------------------------------------------------------------------------
 
 function lkj_logc0(d::Integer, η::Real)
+    T = float(Base.promote_typeof(d, η))
     d > 1 || return zero(η)
     if isone(η)
         if iseven(d)
-            logc0 = -lkj_onion_loginvconst_uniform_even(d)
+            logc0 = -lkj_onion_loginvconst_uniform_even(d, T)
         else
-            logc0 = -lkj_onion_loginvconst_uniform_odd(d)
+            logc0 = -lkj_onion_loginvconst_uniform_odd(d, T)
         end
     else
         logc0 = -lkj_onion_loginvconst(d, η)
@@ -198,23 +199,27 @@ function lkj_onion_loginvconst(d::Integer, η::Real)
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_odd(d::Integer)
+function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T} = Float64) where {T}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = 0.0
+    sumlogs = zero(T)
     for k in 1:div(d - 1, 2)
-        sumlogs += loggamma(2k)
+        sumlogs += loggamma(T(2k))
     end
-    loginvconst = 0.25(d^2 - 1)*logπ + sumlogs - 0.25(d - 1)^2*logtwo - (d - 1)*loggamma(0.5(d + 1))
+    h = T(1//2)
+    q = T(1//4)
+    loginvconst = q*(d^2 - 1)*logπ + sumlogs - q*(d - 1)^2*logtwo - (d - 1)*loggamma(h*(d + 1))
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_even(d::Integer)
+function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T} = Float64) where {T}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = 0.0
+    sumlogs = zero(T)
     for k in 1:div(d - 2, 2)
-        sumlogs += loggamma(2k)
+        sumlogs += loggamma(T(2k))
     end
-    loginvconst = 0.25d*(d - 2)*logπ + 0.25(3d^2 - 4d)*logtwo + d*loggamma(0.5d) + sumlogs - (d - 1)*loggamma(d)
+    h = T(1//2)
+    q = T(1//4)
+    return q*d*(d - 2)*logπ + q*(3d^2 - 4d)*logtwo + d*loggamma(h*d) + sumlogs - (d - 1)*loggamma(T(d))
 end
 
 function lkj_vine_loginvconst(d::Integer, η::Real)
