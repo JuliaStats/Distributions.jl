@@ -135,7 +135,9 @@ using FiniteDifferences
             @test m isa Cholesky{eltype(d)}
             @test Matrix(m) ≈ I
         end
-        @test partype(LKJCholesky(2, 4f0)) <: Float32
+        for (d, η) in ((2, 4), (2, 1), (3, 1)), T in (Float32, Float64)
+            @test @inferred(partype(LKJCholesky(d, T(η)))) === T
+        end
 
         @testset "insupport" begin
             @test insupport(LKJCholesky(40, 2, 'U'), cholesky(rand(LKJ(40, 2))))
