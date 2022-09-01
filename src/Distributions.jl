@@ -229,6 +229,7 @@ export
     meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
+    cgf,                # cumulant generating function
     mode,               # the mode of a unimodal distribution
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution

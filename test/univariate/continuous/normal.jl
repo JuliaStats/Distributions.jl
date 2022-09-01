@@ -3,6 +3,8 @@ using Test, Distributions, ForwardDiff
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
 @testset "Normal" begin
+    test_cgf(Normal(0,1  ), (1, -1, 100f0, 1e6, -1e6))
+    test_cgf(Normal(1,0.4), (1, -1, 100f0, 1e6, -1e6))
     @test isa(convert(Normal{Float64}, Float16(0), Float16(1)),
               Normal{Float64})
     d = Normal(1.1, 2.3)
