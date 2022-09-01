@@ -136,8 +136,8 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
 end
 
 function logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky)
-    insupport(d, R) || throw(ArgumentError("provided point is not in the support"))
-    return _logpdf(d, R)
+    lp = _logpdf(d, R)
+    return insupport(d, R) ? lp : oftype(lp, -Inf)
 end
 
 _logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky) = logkernel(d, R) + d.logc0
