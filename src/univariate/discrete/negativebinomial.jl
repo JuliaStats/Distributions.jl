@@ -134,6 +134,10 @@ function laplace_transform(d::NegativeBinomial, t)
 end
 
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
+function cgf(d::NegativeBinomial, t)
+    r, p = params(d)
+    r * cgf(Geometric{typeof(p)}(p), t)
+end
 cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
 
 # ChainRules definitions

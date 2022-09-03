@@ -62,6 +62,7 @@ entropy(::UnivariateDistribution)
 entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
+cgf(::UnivariateDistribution, ::Any)
 cf(::UnivariateDistribution, ::Any)
 pdfsquaredL2norm
 ```

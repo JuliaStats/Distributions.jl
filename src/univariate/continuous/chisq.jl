@@ -83,6 +83,11 @@ end
 @_delegate_statsfuns Chisq chisq ν
 
 mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
+function cgf(d::Chisq, t)
+    ν = dof(d)
+    return -ν/2 * log1p(-2*t)
+end
+
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
 

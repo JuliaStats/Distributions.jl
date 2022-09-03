@@ -7,6 +7,9 @@ using StatsFuns
 # Currently, most of the tests for NegativeBinomial are in the "ref" folder.
 # Eventually, we might want to consolidate the tests here
 
+test_cgf(NegativeBinomial(10,0.5), (-1f0, -200.0,-1e6))
+test_cgf(NegativeBinomial(3,0.1),  (-1f0, -200.0,-1e6))
+
 mydiffp(r, p, k) = iszero(k) ? r/p : r/p - k/(1 - p)
 mydiffr(r, p, k) = iszero(k) ? log(p) : log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1)
 
