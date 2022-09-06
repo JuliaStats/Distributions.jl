@@ -161,6 +161,6 @@ A matrix-variate distribution type should be defined as a subtype of `DiscreteMa
 The following methods need to be implemented for each matrix-variate distribution type:
 
 - [`size(d::MatrixDistribution)`](@ref)
-- [`rand(rng::AbstractRNG, d::MatrixDistribution)`](@ref)
+- [`Distributions._rand!(rng::AbstractRNG, d::MatrixDistribution, A::AbstractMatrix)`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
 - [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)
