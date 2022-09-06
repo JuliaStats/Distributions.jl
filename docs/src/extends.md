@@ -154,7 +154,7 @@ It is also recommended that one also implements the following statistics functio
 - [`entropy(d::MultivariateDistribution)`](@ref)
 - [`cov(d::MultivariateDistribution)`](@ref)
 
-## Create a matrix-variate Distribution
+## Create a Matrix-Variate Distribution
 
 A matrix-variate distribution type should be defined as a subtype of `DiscreteMatrixDistribution` or `ContinuousMatrixDistribution`.
 
