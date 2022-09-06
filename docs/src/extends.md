@@ -154,13 +154,13 @@ It is also recommended that one also implements the following statistics functio
 - [`entropy(d::MultivariateDistribution)`](@ref)
 - [`cov(d::MultivariateDistribution)`](@ref)
 
-## Create a Matrix-variate Distribution
+## Create a matrix-variate Distribution
 
-A multivariate distribution type should be defined as a subtype of `DiscreteMatrixDistribution` or `ContinuousMatrixDistribution`.
+A matrix-variate distribution type should be defined as a subtype of `DiscreteMatrixDistribution` or `ContinuousMatrixDistribution`.
 
 The following methods need to be implemented for each matrix-variate distribution type:
 
 - [`size(d::MatrixDistribution)`](@ref)
-- [`rand(d::MatrixDistribution)`](@ref)
+- [`rand(rng::AbstractRNG, d::MatrixDistribution)`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
 - [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)
