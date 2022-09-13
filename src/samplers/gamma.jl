@@ -199,24 +199,15 @@ struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleabl
     nia::T #-1/scale
 end
 
-function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
-    GammaIPSampler(Gamma(1.0 + shape(d), scale(d)), -1.0 / shape(d))
+GammaIPSampler(d::Gamma) = GammaIPSampler(d, GammaMTSampler)
+function GammaIPSampler(d::Gamma, ::Type{S}) where {S<:Sampleable}
+    shape_d = shape(d)
+    sampler = S(Gamma(1 + shape_d, scale(d)))
+    return GammaIPSampler(sampler, -inv(shape_d))
 end
-GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
 function rand(rng::AbstractRNG, s::GammaIPSampler)
     x = rand(rng, s.s)
     e = randexp(rng)
     x*exp(s.nia*e)
 end
-
-# function sampler(d::Gamma)
-#     if d.shape < 1.0
-#         # TODO: d.shape = 0.5 : use scaled chisq
-#         GammaIPSampler(d)
-#     elseif d.shape == 1.0
-#         Exponential(d.scale)
-#     else
-#         GammaGDSampler(d)
-#     end
-# end
