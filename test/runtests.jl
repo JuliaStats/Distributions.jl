@@ -84,6 +84,7 @@ const tests = [
     "reshaped",
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
+    "univariate/continuous/tdist",
 
     ### missing files compared to /src:
     # "common",
