@@ -219,7 +219,7 @@ end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d, GammaMTSampler)
 function GammaIPSampler(d::Gamma, ::Type{S}) where {S<:Sampleable}
     shape_d = shape(d)
-    sampler = S(Gamma(1 + shape_d, scale(d)))
+    sampler = S(Gamma{partype(d)}(1 + shape_d, scale(d)))
     return GammaIPSampler(sampler, -inv(shape_d))
 end
 
