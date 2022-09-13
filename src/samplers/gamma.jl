@@ -205,7 +205,7 @@ end
 GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
 function rand(rng::AbstractRNG, s::GammaIPSampler)
-    x = rand(rng, s.s)
+    x = rand(rng, GammaGDSampler(s.s))
     e = randexp(rng)
     x*exp(s.nia*e)
 end
