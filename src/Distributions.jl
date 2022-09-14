@@ -103,6 +103,7 @@ export
     Geometric,
     Gumbel,
     Hypergeometric,
+    HyperSphericalUniform,
     InverseWishart,
     InverseGamma,
     InverseGaussian,
@@ -143,6 +144,7 @@ export
     NormalCanon,
     NormalInverseGaussian,
     Pareto,
+    PowerSpherical,
     PGeneralizedGaussian,
     SkewedExponentialPower,
     Product, # deprecated
