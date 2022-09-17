@@ -5,10 +5,8 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
-logvmfCp(p::Int, κ::Real) = 1/2 * ((p - 2) * log(κ) - 2 * (log(besselix(p/2 - 1, κ)) +  κ) + p * (-log(2π)))
+logvmfCp(p::Int, κ::Real) = (p / 2 - 1) * log(κ) - log(besselix(p / 2 - 1, κ)) - κ - p / 2 * log(2π)
 
-safe_vmfpdf(μ::Vector, κ::Real, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
 safe_logvmfpdf(μ::Vector, κ::Real, x::Vector) = logvmfCp(length(μ), κ) + κ * dot(μ, x)
 
 function gen_vmf_tdata(n::Int, p::Int,
@@ -101,7 +99,7 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test meandir(d2) ≈ μ
     @test concentration(d2) ≈ κ
 
-    @test isapprox(d.logCκ, logvmfCp(p, κ), atol=1.0e-12)
+    @test d.logCκ ≈ logvmfCp(p, κ) atol=1.0e-12
 
     X = gen_vmf_tdata(n, p, rng)
     lp0 = zeros(n)
@@ -160,13 +158,6 @@ end
     d = VonMisesFisher(Float64[1, 0], Float32(5))
     @test d isa VonMisesFisher{Float64}
 end
-
-## Test log functions
-@testset "Testing logvmfCp and safe_logvmfpdf" begin
-    @test isapprox(log(vmfCp(5, 345.)), logvmfCp(5, 345.), atol=10e-10)
-    @test isapprox(log(safe_vmfpdf([1., 0], 500., [1., 7.])), safe_logvmfpdf([1., 0], 500., [1., 7.]), atol=10e-10)
-end
-
 
 n = 1000
 ns = 10^6
