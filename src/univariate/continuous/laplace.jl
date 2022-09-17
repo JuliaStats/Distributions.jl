@@ -107,6 +107,10 @@ function mgf(d::Laplace, t::Real)
     st = d.θ * t
     exp(t * d.μ) / ((1 - st) * (1 + st))
 end
+function cgf(d::Laplace, t)
+    μ, θ = params(d)
+    t*μ - log1p(-(θ*t)^2)
+end
 function cf(d::Laplace, t::Real)
     st = d.θ * t
     cis(t * d.μ) / (1+st*st)

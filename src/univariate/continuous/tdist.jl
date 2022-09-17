@@ -79,7 +79,11 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-rand(rng::AbstractRNG, d::TDist) = randn(rng) / ( isinf(d.ν) ? 1 : sqrt(rand(rng, Chisq(d.ν))/d.ν) )
+function rand(rng::AbstractRNG, d::TDist)
+    ν = d.ν
+    z = sqrt(rand(rng, Chisq{typeof(ν)}(ν)) / ν)
+    return randn(rng) / (isinf(ν) ? one(z) : z)
+end
 
 function cf(d::TDist{T}, t::Real) where T <: Real
     isinf(d.ν) && return cf(Normal(zero(T), one(T)), t)
