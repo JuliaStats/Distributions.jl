@@ -39,7 +39,7 @@ end
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
     map!(Base.Fix1(rand, rng), x, d.v)
 _logpdf(d::Product, x::AbstractVector{<:Real}) =
-    sum(n->logpdf(d.v[n], x[n]), 1:length(d))
+    sum(n->logpdf(d.v[n], x[n]), 1:length(d); init=0.0)
 
 mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)
