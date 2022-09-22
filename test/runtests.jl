@@ -85,6 +85,7 @@ const tests = [
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
+    "multivariate/product",
 
     ### missing files compared to /src:
     # "common",
@@ -100,7 +101,6 @@ const tests = [
     # "mixtures/mixturemodel",
     # "mixtures/unigmm",
     # "multivariate/mvnormalcanon",
-    # "multivariate/product",
     # "quantilealgs",
     # "samplers/aliastable",
     # "samplers/binomial",

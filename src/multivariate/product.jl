@@ -38,8 +38,13 @@ end
 
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
     map!(Base.Fix1(rand, rng), x, d.v)
-_logpdf(d::Product, x::AbstractVector{<:Real}) =
-    sum(n->logpdf(d.v[n], x[n]), 1:length(d))
+function _logpdf(d::Product, x::AbstractVector{<:Real})
+    dists = d.v
+    if isempty(dists)
+        return sum(map(logpdf, dists, x))
+    end
+    return sum(n -> logpdf(dists[n], x[n]), 1:length(d))
+end
 
 mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)
