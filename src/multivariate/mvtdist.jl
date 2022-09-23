@@ -60,6 +60,15 @@ function GenericMvTDist(df::Real, Σ::AbstractPDMat)
 end
 
 GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractMatrix) = GenericMvTDist(df, μ, PDMat(Σ))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = GenericMvTDist(df, μ, PDiagMat(Σ.diag))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = GenericMvTDist(df, μ, PDiagMat(Σ.data.diag))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
+    GenericMvTDist(df, μ, ScalMat(length(μ), Σ.λ))
+function GenericMvTDist(
+    μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real,<:FillArrays.AbstractFill{<:Real,1}}
+)
+    return GenericMvTDist(df, μ, ScalMat(size(Σ, 1), FillArrays.getindex_value(Σ.diag)))
+end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
     GenericMvTDist(convert(T,df), convert(Mean, μ), convert(Cov, Σ))
