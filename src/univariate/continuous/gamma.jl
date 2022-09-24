@@ -108,7 +108,7 @@ function rand(rng::AbstractRNG, d::Gamma)
         θ = 
         return rand(rng, Exponential{partype(d)}(scale(d)))
     else
-        return rand(rng, GammaGDSampler(d))
+        return rand(rng, GammaMTSampler(d))
     end
 end
 
