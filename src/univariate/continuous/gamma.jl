@@ -105,9 +105,10 @@ function rand(rng::AbstractRNG, d::Gamma)
         # TODO: shape(d) = 0.5 : use scaled chisq
         return rand(rng, GammaIPSampler(d))
     elseif shape(d) == 1.0
-        return rand(rng, Exponential(d.θ))
+        θ = 
+        return rand(rng, Exponential{partype(d)}(scale(d)))
     else
-        return rand(rng, GammaGDSampler(d))
+        return rand(rng, GammaMTSampler(d))
     end
 end
 
@@ -116,9 +117,9 @@ function sampler(d::Gamma)
         # TODO: shape(d) = 0.5 : use scaled chisq
         return GammaIPSampler(d)
     elseif shape(d) == 1.0
-        return sampler(Exponential(d.θ))
+        return sampler(Exponential{partype(d)}(scale(d)))
     else
-        return GammaGDSampler(d)
+        return GammaMTSampler(d)
     end
 end
 
