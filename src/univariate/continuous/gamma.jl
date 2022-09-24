@@ -119,7 +119,7 @@ function sampler(d::Gamma)
     elseif shape(d) == 1.0
         return sampler(Exponential{partype(d)}(scale(d)))
     else
-        return GammaGDSampler(d)
+        return GammaMTSampler(d)
     end
 end
 
