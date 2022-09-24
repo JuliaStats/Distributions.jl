@@ -97,14 +97,16 @@ end
 
 # Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
 function logpdf(d::NegativeBinomial, k::Real)
-    r = d.r * log(d.p) + k * log1p(-d.p)
-    if isone(d.p) && iszero(k)
-        return zero(r)
-    elseif !insupport(d, k)
-        return oftype(r, -Inf)
-    else
-        return r - log(k + d.r) - logbeta(d.r, k + 1)
+    r, p = params(d)
+    z = xlogy(r, p) + xlog1py(k, -p)
+
+    if iszero(k)
+        # in this case `logpdf(d, k) = z - log(k + r) - logbeta(r, k + 1) = z` analytically
+        # but unfortunately not numerically, so we handle this case separately to improve accuracy
+        return z
     end
+    
+    return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
 end
 
 # cdf and quantile functions are more involved so we still rely on Rmath
@@ -140,35 +142,39 @@ cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
 
 # ChainRules definitions
 
+## Callable struct to fix type inference issues caused by captured values
+struct LogPDFNegativeBinomialPullback{D,T<:Real}
+    ∂r::T
+    ∂p::T
+end
+
+function (f::LogPDFNegativeBinomialPullback{D})(Δ) where {D}
+    Δr = Δ * f.∂r
+    Δp = Δ * f.∂p
+    Δd = ChainRulesCore.Tangent{D}(; r=Δr, p=Δp)
+    return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
+end
+
 function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
-    # Compute log probability
+    # Compute log probability (as in the definition of `logpdf(d, k)` above)
     r, p = params(d)
-    edgecase = isone(p) && iszero(k)
-    insupp = insupport(d, k)
-    
-    # Primal computation
-    Ω = r * log(p) + k * log1p(-p)
-    if edgecase
-        Ω = zero(Ω)
-    elseif !insupp
-        Ω = oftype(Ω, -Inf)
+    z = xlogy(r, p) + xlog1py(k, -p)
+    if iszero(k)
+        Ω = z
+        ∂r = oftype(z, log(p))
+        ∂p = oftype(z, r/p)
+    elseif insupport(d, k)
+        Ω = z - log(k + r) - logbeta(r, k + 1)
+        ∂r = oftype(z, log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
+        ∂p = oftype(z, r/p - k / (1 - p))
     else
-        Ω = Ω - log(k + r) - logbeta(r, k + 1)
+        Ω = oftype(z, -Inf)
+        ∂r = oftype(z, NaN)
+        ∂p = oftype(z, NaN)
     end
 
     # Define pullback
-    function logpdf_NegativeBinomial_pullback(Δ)
-        Δr = Δ * (log(p) - inv(k + r) - digamma(r) + digamma(r + k + 1))
-        Δp = Δ * (r / p - k / (1 - p))
-        if edgecase
-            Δp = oftype(Δp, Δ * r)
-        elseif !insupp
-            Δr = oftype(Δr, NaN)
-            Δp = oftype(Δp, NaN)
-        end
-        Δd = ChainRulesCore.Tangent{typeof(d)}(; r=Δr, p=Δp)
-        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.NoTangent()
-    end
+    logpdf_NegativeBinomial_pullback = LogPDFNegativeBinomialPullback{typeof(d),typeof(z)}(∂r, ∂p)
 
     return Ω, logpdf_NegativeBinomial_pullback
 end
