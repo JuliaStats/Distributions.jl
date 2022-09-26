@@ -66,3 +66,54 @@ aimg  = randn(n,n)/2
         end
     end
 end
+
+# test_affine
+## dist_type := e.g. GenericMvTDist # Type of distribtion
+## dist_builder := (μ, Σ) -> mvtdist(ν, μ, Σ) # Funciton that takes in mean and _scale_ matrix
+function test_affine(dist_type::Type{<:ContinuousMultivariateDistribution}, dist_builder)
+    @testset "$(dist_type) affine tranformations" begin
+
+        @testset "moment identities" begin
+            for n in 1:5                       # dimension
+                # distribution
+                μ = randn(n)
+                for Σ in (randn(n, n) |> A -> PDMat(A*A'),  # dense
+                        PDiagMat(abs2.(randn(n)))) # diagonal
+                    
+                    d = dist_builder(μ, Σ)
+                    
+                    # random arrays for transformations
+                    c = randn(n)
+                    m = rand(1:n)
+                    B = randn(m, n)
+                    b = randn(n)
+
+                    d_c = d + c
+                    c_d = c + d
+                    @test mean(d_c) == mean(c_d) == μ + c
+                    @test cov(c_d) == cov(d_c) == cov(d)
+
+                    d_c = d - c
+                    @test mean(d_c) == μ - c
+                    @test scale(d_c) == scale(d)
+
+                    B_d = B * d
+                    @test B_d isa dist_type
+                    @test length(B_d) == m
+                    @test mean(B_d) == B * μ
+                    @test scale(B_d) ≈ B * Σ * B'
+                    d_trans = B * (d + c)
+                    d_trans == dist_builder(B * (μ + c), X_A_Xt(d.Σ, B))
+                end
+            end
+        end
+
+        @testset "dimension mismatch errors" begin
+            d4 = dist_builder(zeros(4), PDMat(Diagonal(ones(4))))
+            o3 = ones(3)
+            @test_throws DimensionMismatch d4 + o3
+            @test_throws DimensionMismatch o3 + d4
+            @test_throws DimensionMismatch ones(3, 3) * d4
+        end
+    end
+end
