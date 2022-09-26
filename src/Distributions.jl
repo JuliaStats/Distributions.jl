@@ -23,7 +23,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 
 import PDMats: dim, PDMat, invquad
 
-using SpecialFunctions
+using SpecialFunctions, LambertW
 
 import ChainRulesCore
 
@@ -168,6 +168,7 @@ export
     WalleniusNoncentralHypergeometric,
     Weibull,
     Wishart,
+    ZeroInflatedPoisson,
     ZeroMeanIsoNormal,
     ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal,
@@ -248,6 +249,7 @@ export
     quantile,           # inverse of cdf (defined for p in (0,1))
     qqbuild,            # build a paired quantiles data structure for qqplots
     rate,               # get the rate parameter
+    excessprob,         # get the exess probability of zeros parameter (ZeroInflatedPoison)
     sampler,            # create a Sampler object for efficient samples
     scale,              # get the scale parameter
     scale!,             # provide storage for the scale parameter (used in multivariate distribution mvlognormal)
@@ -354,7 +356,7 @@ Supported distributions:
     QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
     Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
-    Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
+    Wishart, ZeroInflatedPoisson, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,
     ZeroMeanFullNormalCanon
 
