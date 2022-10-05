@@ -650,6 +650,7 @@ end
 
 const discrete_distributions = [
     "bernoulli",
+    "bernoullilogit",
     "betabinomial",
     "binomial",
     "dirac",

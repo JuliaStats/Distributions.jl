@@ -67,6 +67,7 @@ export
     # distribution types
     Arcsine,
     Bernoulli,
+    BernoulliLogit,
     Beta,
     BetaBinomial,
     BetaPrime,
