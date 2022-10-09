@@ -34,8 +34,8 @@ Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T<:Real} = 
 
 succprob(d::BernoulliLogit) = logistic(d.logitp)
 failprob(d::BernoulliLogit) = logistic(-d.logitp)
-logsuccprob(d::BernoulliLogit) = -log1pexp(d.logitp)
-logfailprob(d::BernoulliLogit) = -log1pexp(-d.logitp)
+logsuccprob(d::BernoulliLogit) = -log1pexp(-d.logitp)
+logfailprob(d::BernoulliLogit) = -log1pexp(d.logitp)
 
 params(d::BernoulliLogit) = (d.logitp,)
 partype(::BernoulliLogit{T}) where {T} = T
@@ -72,7 +72,7 @@ pdf(d::BernoulliLogit, x::Bool) = x ? succprob(d) : failprob(d)
 pdf(d::BernoulliLogit, x::Real) = x == 0 ? failprob(d) : (x == 1 ? succprob(d) : zero(float(d.logitp)))
 
 logpdf(d::BernoulliLogit, x::Bool) = x ? logsuccprob(d) : logfailprob(d)
-logpdf(d::BernoulliLogit, x::Real) = x == 0 ? logfailprob(d) : (x == 1 ? logsuccprob(d) : zero(float(d.logitp)))
+logpdf(d::BernoulliLogit, x::Real) = x == 0 ? logfailprob(d) : (x == 1 ? logsuccprob(d) : oftype(float(d.logitp), -Inf))
 
 cdf(d::BernoulliLogit, x::Bool) = x ? one(float(d.logitp)) : failprob(d)
 cdf(d::BernoulliLogit, x::Int) = x < 0 ? zero(float(d.logitp)) : (x < 1 ? failprob(d) : one(float(d.logitp)))
