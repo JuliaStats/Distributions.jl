@@ -1,6 +1,7 @@
 using ChainRulesTestUtils
 using ChainRulesTestUtils: FiniteDifferences
 
+# Without this, `to_vec` will also include the `axes` field of `EachVariate`.
 function FiniteDifferences.to_vec(xs::Distributions.EachVariate{V}) where {V}
     vals, vals_from_vec = FiniteDifferences.to_vec(xs.parent)
     return vals, x -> Distributions.EachVariate{V}(vals_from_vec(x))
