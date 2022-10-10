@@ -418,6 +418,13 @@ plotdensity((-8, 5), SkewedExponentialPower, (0, 1, 0.7, 0.7)) # hide
 ```
 
 ```@docs
+SkewNormal
+```
+```@example plotdensity
+plotdensity((-4, 4), SkewNormal, (0, 1, -1)) # hide
+```
+
+```@docs
 StudentizedRange
 SymTriangularDist
 ```
