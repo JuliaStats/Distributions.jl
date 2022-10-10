@@ -7,9 +7,9 @@ location `ξ`, scale `ω`, and shape `α`, it has the probability density functi
 
 ```math
 f(x; \\xi, \\omega, \\alpha) =
-\\frac{2}{\\omega \\sqrt{2 \\pi}} e^{-\\frac{(x-\\xi)^2}{2\\omega^2}}
+\\frac{2}{\\omega \\sqrt{2 \\pi}} \\exp{\\bigg(-\\frac{(x-\\xi)^2}{2\\omega^2}\\bigg)}
 \\int_{-\\infty}^{\\alpha\\left(\\frac{x-\\xi}{\\omega}\\right)}
-\\frac{1}{\\sqrt{2 \\pi}}  e^{-\\frac{t^2}{2}}\\ dt
+\\frac{1}{\\sqrt{2 \\pi}}  \\exp{\\bigg(-\\frac{t^2}{2}\\bigg)} \\, \\mathrm{d}t
 ```
 
 External links
