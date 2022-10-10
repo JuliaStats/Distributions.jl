@@ -492,6 +492,7 @@ NegativeBinomial
 Poisson
 PoissonBinomial
 Skellam
+Soliton
 ```
 
 ### Vectorized evaluation
