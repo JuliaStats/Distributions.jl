@@ -11,6 +11,23 @@ function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
     return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
 end
 
+function ChainRulesCore.rrule(::Type{EachVariate{V}}, x::AbstractArray{<:Real,M}) where {V,M}
+    y = EachVariate{V}(x)
+    function EachVariate_pullback(Δ)
+        # Currently assuming `Δ` is `AbstratArray{<:AbstractArray}`.
+        # TODO: Should we also handle `Tangent{<:EachVariate}`?
+        Δ_unthunked = ChainRulesCore.unthunk(Δ)
+        Δ_out = zero(x)
+        # TODO: Surely exist more efficient way to do this?
+        base_ind = ntuple(i -> Colon(), Val(V))
+        for i in CartesianIndices(Δ_unthunked)
+            Δ_out[base_ind..., Tuple(i)...] .= Δ_unthunked[i]
+        end
+        return (ChainRulesCore.NoTangent(), Δ_out)
+    end
+    return y, EachVariate_pullback
+end
+
 Base.IteratorSize(::Type{EachVariate{V,P,A,T,N}}) where {V,P,A,T,N} = Base.HasShape{N}()
 
 Base.axes(x::EachVariate) = x.axes
