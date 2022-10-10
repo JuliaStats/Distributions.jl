@@ -1,11 +1,23 @@
 """
-SkewNormal(ξ, ω, α)
-    The *skew normal distribution* is a continuous probability distribution
-    that generalises the normal distribution to allow for non-zero skewness.
+    SkewNormal(ξ, ω, α)
+
+The *skew normal distribution* is a continuous probability distribution that
+generalises the normal distribution to allow for non-zero skewness. Given a
+location `ξ`, scale `ω`, and shape `α`, it has the probability density function
+
+```math
+f(x; \\xi, \\omega, \\alpha) =
+\\frac{2}{\\omega \\sqrt{2 \\pi}} e^{-\\frac{(x-\\xi)^2}{2\\omega^2}}
+\\int_{-\\infty}^{\\alpha\\left(\\frac{x-\\xi}{\\omega}\\right)}
+\\frac{1}{\\sqrt{2 \\pi}}  e^{-\\frac{t^2}{2}}\\ dt
+```
+
 External links
+
 * [Skew normal distribution on Wikipedia](https://en.wikipedia.org/wiki/Skew_normal_distribution)
 * [Discourse](https://discourse.julialang.org/t/skew-normal-distribution/21549/7)
 * [SkewDist.jl](https://github.com/STOR-i/SkewDist.jl)
+
 """
 struct SkewNormal{T<:Real} <: ContinuousUnivariateDistribution
     ξ::T
