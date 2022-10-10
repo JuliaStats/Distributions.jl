@@ -11,7 +11,7 @@ function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
     return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
 end
 
-function ChainRulesCore.rrule(::Type{EachVariate{V}}, x::AbstractArray{<:Real,M}) where {V,M}
+function ChainRulesCore.rrule(::Type{EachVariate{V}}, x::AbstractArray{<:Real}) where {V}
     y = EachVariate{V}(x)
     size_x = size(x)
     function EachVariate_pullback(Δ)
