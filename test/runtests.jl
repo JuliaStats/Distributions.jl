@@ -86,6 +86,7 @@ const tests = [
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
     "multivariate/product",
+    "eachvariate",
 
     ### missing files compared to /src:
     # "common",
