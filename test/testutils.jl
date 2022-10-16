@@ -5,6 +5,7 @@ using Random
 using Printf: @printf
 using Test: @test
 import FiniteDifferences
+import ForwardDiff
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -43,6 +44,25 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_params(distr)
 end
 
+function test_cgf(dist, ts)
+    κ₀ = cgf(dist, 0)
+    @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
+    d(f) = Base.Fix1(ForwardDiff.derivative, f)
+    κ₁ = d(Base.Fix1(cgf, dist))(0)
+    @test κ₁ ≈ mean(dist)
+    if VERSION >= v"1.4"
+        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+        @test κ₂ ≈ var(dist)
+    end
+    for t in ts
+        val = @inferred cgf(dist, t)
+        @test isfinite(val)
+        if isfinite(mgf(dist, t))
+            rtol = eps(float(one(t)))^(1/2)
+            @test (exp∘cgf)(dist, t) ≈ mgf(dist, t) rtol=rtol
+        end
+    end
+end
 
 # testing the implementation of a continuous univariate distribution
 #

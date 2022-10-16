@@ -101,6 +101,28 @@ import Distributions:
         end
     end
 
+    @testset "GammaIPSampler" begin
+        @testset "d=$d" for d in [Gamma(0.1, 1.0), Gamma(0.9, 1.0)]
+            s = sampler(d)
+            @test s isa GammaIPSampler{<:GammaMTSampler}
+            @test s.s isa GammaMTSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+
+            s = @inferred(GammaIPSampler(d, GammaMTSampler))
+            @test s isa GammaIPSampler{<:GammaMTSampler}
+            @test s.s isa GammaMTSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+
+            s = @inferred(GammaIPSampler(d, GammaGDSampler))
+            @test s isa GammaIPSampler{<:GammaGDSampler}
+            @test s.s isa GammaGDSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+        end
+    end
+
     @testset "Random.Sampler" begin
         for dist in (
             Binomial(5, 0.3),

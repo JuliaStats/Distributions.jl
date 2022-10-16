@@ -162,32 +162,49 @@ end
 # doi:10.1145/358407.358414
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
-struct GammaMTSampler <: Sampleable{Univariate,Continuous}
-    d::Float64
-    c::Float64
-    κ::Float64
+# valid for shape >= 1
+struct GammaMTSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+    d::T
+    c::T
+    κ::T
+    r::T
 end
 
 function GammaMTSampler(g::Gamma)
-    d = shape(g) - 1/3
-    c = 1.0 / sqrt(9.0 * d)
+    # Setup (Step 1)
+    d = shape(g) - 1//3
+    c = inv(3 * sqrt(d))
+
+    # Pre-compute scaling factor
     κ = d * scale(g)
-    GammaMTSampler(d, c, κ)
+
+    # We also pre-compute the factor in the squeeze function
+    return GammaMTSampler(promote(d, c, κ, 331//10_000)...)
 end
 
-function rand(rng::AbstractRNG, s::GammaMTSampler)
+function rand(rng::AbstractRNG, s::GammaMTSampler{T}) where {T<:Real}
+    d = s.d
+    c = s.c
+    κ = s.κ
+    r = s.r
+    z = zero(T)
     while true
-        x = randn(rng)
-        v = 1.0 + s.c * x
-        while v <= 0.0
-            x = randn(rng)
-            v = 1.0 + s.c * x
+        # Generate v (Step 2)
+        x = randn(rng, T)
+        cbrt_v = 1 + c * x
+        while cbrt_v <= z # requires x <= -sqrt(9 * shape - 3)
+            x = randn(rng, T)
+            cbrt_v = 1 + c * x
         end
-        v *= (v * v)
-        u = rand(rng)
-        x2 = x * x
-        if u < 1.0 - 0.331 * abs2(x2) || log(u) < 0.5 * x2 + s.d * (1.0 - v + log(v))
-            return v*s.κ
+        v = cbrt_v^3
+
+        # Generate uniform u (Step 3)
+        u = rand(rng, T)
+
+        # Check acceptance (Step 4 and 5)
+        xsq = x^2
+        if u < 1 - r * xsq^2 || log(u) < xsq / 2 + d * logmxp1(v)
+            return v * κ
         end
     end
 end
@@ -199,24 +216,15 @@ struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <: Sampleabl
     nia::T #-1/scale
 end
 
-function GammaIPSampler(d::Gamma,::Type{S}) where S<:Sampleable
-    GammaIPSampler(Gamma(1.0 + shape(d), scale(d)), -1.0 / shape(d))
+GammaIPSampler(d::Gamma) = GammaIPSampler(d, GammaMTSampler)
+function GammaIPSampler(d::Gamma, ::Type{S}) where {S<:Sampleable}
+    shape_d = shape(d)
+    sampler = S(Gamma{partype(d)}(1 + shape_d, scale(d)))
+    return GammaIPSampler(sampler, -inv(shape_d))
 end
-GammaIPSampler(d::Gamma) = GammaIPSampler(d,GammaMTSampler)
 
 function rand(rng::AbstractRNG, s::GammaIPSampler)
     x = rand(rng, s.s)
     e = randexp(rng)
     x*exp(s.nia*e)
 end
-
-# function sampler(d::Gamma)
-#     if d.shape < 1.0
-#         # TODO: d.shape = 0.5 : use scaled chisq
-#         GammaIPSampler(d)
-#     elseif d.shape == 1.0
-#         Exponential(d.scale)
-#     else
-#         GammaGDSampler(d)
-#     end
-# end
