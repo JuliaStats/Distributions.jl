@@ -269,7 +269,7 @@ function ChainRulesCore.rrule(::typeof(nonsingular_wishart_logkernel), d::D, X) 
     y = (k * logdet(CX) - tr(SinvX)) / 2
     function pullback_nonsingular_wishart_logkernel(dy)
         ∂d = ChainRulesCore.@thunk(begin
-            ∂S = dy/2 * d.S \ SinvX
+            ∂S = dy/2 * (d.S \ SinvX)
             ChainRulesCore.Tangent{D}(S = ∂S, df = ChainRulesCore.NoTangent(), rank = ChainRulesCore.NoTangent())
         end)
         ∂X = ChainRulesCore.@thunk(begin

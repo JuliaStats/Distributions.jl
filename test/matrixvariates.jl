@@ -548,7 +548,7 @@ end
     S = PDMat(M)
     d = Wishart(n, S)
     for _ in 1:10
-        X = M + 10 * rand() * I
+        X = M + 50 * rand() * I
         ΔX = 0.05 * randn(size(X))
         ΔX += ΔX'
         while !isposdef(X + ΔX) || !isposdef(X - ΔX)
@@ -571,11 +571,10 @@ end
             yf, pullback = ChainRulesCore.rrule(Distributions.nonsingular_wishart_logkernel, d, X)
             @test yf ≈ y
             for _ in 1:10
-                dy = 10 * randn()
+                dy = 1.5 * randn()
                 _, ∂d, ∂x = pullback(dy)
                 ∂d = ChainRulesCore.unthunk(∂d)
                 ∂x = ChainRulesCore.unthunk(∂x)
-                
             end
         end 
         # t.S .= Symmetric(0.1 * randn(p, p))
