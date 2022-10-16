@@ -1,7 +1,7 @@
 """
     BernoulliLogit(logitp=0.0)
 
-A *Bernoulli distribution* that is parameterized by the logit `logitp` of its success rate.
+A *Bernoulli distribution* that is parameterized by the logit `logitp = logit(p) = log(p/(1-p))` of its success rate `p`.
 
 ```math
 P(X = k) = \\begin{cases}
