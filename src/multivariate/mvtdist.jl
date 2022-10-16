@@ -156,7 +156,7 @@ end
 
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
     x .= x ./ y .+ d.μ
@@ -165,7 +165,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
