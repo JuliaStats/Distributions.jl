@@ -77,7 +77,45 @@ end
 
 #### Evaluation & Sampling
 
-@_delegate_statsfuns TDist tdist ν
+pdf(d::TDist, x::Real) = exp(logpdf(d, x))
+function logpdf(d::TDist, x::Real)
+    ν = d.ν
+    isinf(ν) && return logpdf(Normal(), x)
+    νp12 = (ν + 1) / 2
+    return νp12 * log1p(x^2/ν) - logbeta(ν/2, T(.5)) - log(ν) / 2
+end
+function cdf(d::TDist, x::Real)
+    ν = d.ν
+    if x < 0 && r < (0x1p-26 * x)^2
+       return -log(abs(x))*r + log(r)*muladd(r, .5, -1.) - logbeta(r/2, 1/2)
+    end
+    q = 0.5*beta_inc(r/2, 1/2, r/muladd(x, x, r))[1]
+    return ifelse(q > 0, 1 - q, q)
+end
+function logcdf(d::TDist, x::Real)
+    ν = d.ν
+    if x < 0 && r < (0x1p-26 * x)^2
+       return -log(abs(x))*r + log(r)*muladd(r, .5, -1.) - logbeta(r/2, 1/2)
+    end
+    q = 0.5*beta_inc(r/2, 1/2, r/muladd(x, x, r))[1]
+    return q > 0 ? log1p(-q) : log(q)
+end
+ccdf(d::TDist, x::Real) = cdf(d, -x)
+logccdf(d::TDist, x::Real) = logcdf(d, -x)
+
+function quantile(d::TDist, x::Real)
+    ν = d.ν
+    if x > .5
+        return -quantile(d, 1-x)
+    end
+    return -sqrt(ν * (inv(beta_inc_inv(ν/2, 1/2, 2*x)[1]) - 1))
+end
+function cquantile(d::TDist, q::Real)
+end
+function invlogcdf(d::TDist, l1::Real)
+    return quantile(d, exp(lq)) #TODO: do this better.
+end
+invlogccdf(d::TDist, lq::Real) = -invlogcdf(d, lq)
 
 function rand(rng::AbstractRNG, d::TDist)
     ν = d.ν
