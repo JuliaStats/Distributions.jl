@@ -23,7 +23,7 @@ Base.rand(::Distributions.Sampleable)
 Distributions.VariateForm
 ```
 
-The `VariateForm` sub-types defined in `Distributions.jl` are:
+The `VariateForm` subtypes defined in `Distributions.jl` are:
 
 **Type** | **A single sample** | **Multiple samples**
 --- | --- |---
@@ -51,7 +51,7 @@ Distributions.Continuous
 
 Multiple samples are often organized into an array, depending on the variate form.
 
-The basic functionalities that a sampleable object provides is to *retrieve information about the samples it generates* and to *draw samples*. Particularly, the following functions are provided for sampleable objects:
+The basic functionalities that a sampleable object provides are to *retrieve information about the samples it generates* and to *draw samples*. Particularly, the following functions are provided for sampleable objects:
 
 ```@docs
 length(::Sampleable)
@@ -64,7 +64,7 @@ rand!(::AbstractRNG, ::Sampleable, ::AbstractArray)
 
 ## Distributions
 
-We use `Distribution`, a subtype of `Sampleable` as defined below, to capture probabilistic distributions. In addition to being sampleable, a *distribution* typically comes with an explicit way to combine its domain, probability density functions, among many other quantities.
+We use `Distribution`, a subtype of `Sampleable` as defined below, to capture probabilistic distributions. In addition to being sampleable, a *distribution* typically comes with an explicit way to combine its domain, probability density function, and many other quantities.
 
 ```julia
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end

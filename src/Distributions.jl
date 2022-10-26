@@ -222,7 +222,7 @@ export
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
-    sqmahal!,           # inplace evaluation of sqmahal
+    sqmahal!,           # in-place evaluation of sqmahal
     location,           # get the location parameter
     location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
@@ -231,6 +231,7 @@ export
     meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
+    cgf,                # cumulant generating function
     mode,               # the mode of a unimodal distribution
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution

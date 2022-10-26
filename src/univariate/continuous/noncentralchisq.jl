@@ -65,6 +65,10 @@ kurtosis(d::NoncentralChisq) = 12(d.ν + 4d.λ)/(d.ν + 2d.λ)^2
 function mgf(d::NoncentralChisq, t::Real)
     exp(d.λ * t/(1 - 2t))*(1 - 2t)^(-d.ν/2)
 end
+function cgf(d::NoncentralChisq, t)
+    ν, λ = params(d)
+    return λ*t/(1 - 2*t) + cgf(Chisq{typeof(ν)}(ν), t)
+end
 
 function cf(d::NoncentralChisq, t::Real)
     cis(d.λ * t/(1 - 2im*t))*(1 - 2im*t)^(-d.ν/2)

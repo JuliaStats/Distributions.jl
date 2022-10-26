@@ -5,9 +5,9 @@ using LinearAlgebra, Test
 
 using SpecialFunctions
 
-vmfCp(p::Int, κ::Real) = (κ ^ (p/2 - 1)) / ((2π)^(p/2) * besseli(p/2-1, κ))
+logvmfCp(p::Int, κ::Real) = (p / 2 - 1) * log(κ) - log(besselix(p / 2 - 1, κ)) - κ - p / 2 * log(2π)
 
-safe_vmfpdf(μ::Vector, κ::Real, x::Vector) = vmfCp(length(μ), κ) * exp(κ * dot(μ, x))
+safe_logvmfpdf(μ::Vector, κ::Real, x::Vector) = logvmfCp(length(μ), κ) + κ * dot(μ, x)
 
 function gen_vmf_tdata(n::Int, p::Int,
                        rng::Union{AbstractRNG, Missing} = missing)
@@ -99,13 +99,13 @@ function test_vonmisesfisher(p::Int, κ::Real, n::Int, ns::Int,
     @test meandir(d2) ≈ μ
     @test concentration(d2) ≈ κ
 
-    @test isapprox(d.logCκ, log(vmfCp(p, κ)), atol=1.0e-12)
+    @test d.logCκ ≈ logvmfCp(p, κ) atol=1.0e-12
 
     X = gen_vmf_tdata(n, p, rng)
     lp0 = zeros(n)
     for i = 1:n
         xi = X[:,i]
-        lp0[i] = log(safe_vmfpdf(μ, κ, xi))
+        lp0[i] = safe_logvmfpdf(μ, κ, xi)
         @test logpdf(d, xi) ≈ lp0[i]
     end
     @test logpdf(d, X) ≈ lp0
@@ -170,7 +170,8 @@ ns = 10^6
                                                                            (3, 1.0),
                                                                            (3, 5.0),
                                                                            (5, 2.0),
-                                                                           (2, 2)]
+                                                                           (2, 2),
+                                                                           (2, 1000)] # test with large κ
         test_vonmisesfisher(p, κ, n, ns, rng)
         test_vmf_rot(p, rng)
     end
