@@ -1,5 +1,7 @@
 """
     NoncentralBeta(α, β, λ)
+
+*Noncentral Beta distribution* with shape parameters `α` and `β` and noncentrality parameter `λ`.
 """
 struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
     α::T

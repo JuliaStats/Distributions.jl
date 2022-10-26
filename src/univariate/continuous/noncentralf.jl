@@ -1,5 +1,7 @@
 """
     NoncentralF(ν1, ν2, λ)
+
+*Noncentral F-distribution* with `ν1` and `ν2` degrees of freedom and noncentrality parameter `λ`.
 """
 struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
