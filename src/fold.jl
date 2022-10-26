@@ -204,7 +204,7 @@ maximum(d::Folded) = maximum(d.included)
 
 Returns samples from the folded distribution
 """
-rand(::AbstractRNG, d::Folded) = fold_value(rand(d.original), d)
+rand(rng::AbstractRNG, d::Folded) = fold_value(rand(rng,d.original), d)
 
 """
    logpdf(d::Folded, x::Real)
