@@ -5,15 +5,6 @@
 Creates a _folded distribution_ from the original distribution `d` about the value `crease`.
 This function defaults to folding the left side onto the right, but by using `keep_right=false` one can reflect the right side onto the left.
 
-##### Folded Distributions
-
-A folded distribution ``F_{c}(D)`` of a distribution ``D`` at crease ``c \\in \\mathbb{R}`` is the reflection of the distribution below ``c`` onto the the distribution above ``c``. 
-The pdf of such a distribution is given by:
-```math
-p(x | F_{c}(D)) = p(x | D) + p(x' | D)
-```
-where ``x' = 2c - x``
-
 This can be implemented for any univariate continuous distribution by using the following method:
 
     folded(d::ContinuousUnivariateDistribution, crease::Real)
