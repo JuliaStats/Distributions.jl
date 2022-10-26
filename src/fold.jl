@@ -249,7 +249,8 @@ pdf(folded(Normal(3,4),0.0),0.1) ≈ pdf(Normal(3,4),-0.1) + pdf(Normal(3,4),0.1
 """
 function pdf(d::Folded, x::Real)
     !insupport(d,x) && return zero(x)
-    return pdf(d.original,x) + pdf(d.original,unfold_value(x,d))
+    #return pdf(d.original,x) + pdf(d.original,unfold_value(x,d)) -- removed for numerical stability
+    return exp(logpdf(d,x))
 end
 
 """
