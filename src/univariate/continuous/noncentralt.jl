@@ -1,7 +1,7 @@
 """
     NoncentralT(ν, λ)
 
-*Noncentral Student's t-distribution* with `0 < v` degrees of freedom and noncentrality parameter `λ`.
+*Noncentral Student's t-distribution* with `v > 0` degrees of freedom and noncentrality parameter `λ`.
 """
 struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
