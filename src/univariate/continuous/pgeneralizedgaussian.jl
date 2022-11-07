@@ -1,5 +1,5 @@
 """
-    PGeneralizedGaussian(α, μ, p)
+    PGeneralizedGaussian(μ, α, p)
 
 The *p-Generalized Gaussian distribution*, more commonly known as the exponential
 power or the generalized normal distribution, with scale `α`, location `μ`, and
@@ -15,9 +15,9 @@ the distribution approaches the Uniform distribution on `[μ-α, μ+α]`.
 
 ```julia
 PGeneralizedGaussian()           # GGD with shape 2, scale 1, location 0, (the Normal distribution)
-PGeneralizedGaussian(α, μ, p)    # GGD with location α, scale μ, and shape p
+PGeneralizedGaussian(μ, α, p)    # GGD with location μ, scale α, and shape p
 
-params(d)                       # Get the parameters, i.e. (α, μ, p)
+params(d)                       # Get the parameters, i.e. (μ, α, p)
 shape(d)                        # Get the shape parameter, p
 scale(d)                        # Get the scale parameter, α
 location(d)                     # Get the location parameter, μ
