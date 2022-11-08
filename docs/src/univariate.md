@@ -480,6 +480,7 @@ plotdensity((0.001, 3), Weibull, (0.5, 1)) # hide
 
 ```@docs
 Bernoulli
+BernoulliLogit
 BetaBinomial
 Binomial
 Categorical
