@@ -97,7 +97,7 @@ function pdf(d::Weibull, x::Real)
     α, θ = params(d)
     z = abs(x) / θ
     res = (α / θ) * z^(α - 1) * exp(-z^α)
-    x < 0 ? zero(res) : res
+    x < 0 || isinf(x) ? zero(res) : res
 end
 
 function logpdf(d::Weibull, x::Real)
