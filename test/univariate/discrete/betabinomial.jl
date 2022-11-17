@@ -29,8 +29,8 @@ using Test
                     @test @inferred(BetaBinomial(n, α, β)) isa BetaBinomial{ST}
                     @test @inferred(BetaBinomial(n, α, β; check_args=true)) isa BetaBinomial{ST}
                 else
-                    @test_throws ArgumentError BetaBinomial(n, α, β)
-                    @test_throws ArgumentError BetaBinomial(n, α, β; check_args=true)
+                    @test_throws DomainError BetaBinomial(n, α, β)
+                    @test_throws DomainError BetaBinomial(n, α, β; check_args=true)
                 end
 
                 @test @inferred(BetaBinomial(n, α, β; check_args=false)) isa BetaBinomial{ST}
