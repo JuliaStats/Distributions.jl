@@ -1,0 +1,7 @@
+name = "DistributionsCore"
+uuid = "6d16faba-1546-4ea5-8fd0-4205cbc68023"
+authors = ["JuliaStats"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
