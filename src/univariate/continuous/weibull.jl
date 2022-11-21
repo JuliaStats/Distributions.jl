@@ -93,24 +93,18 @@ end
 
 #### Evaluation
 
-function pdf(d::Weibull{T}, x::Real) where T<:Real
-    if x >= 0
-        α, θ = params(d)
-        z = x / θ
-        (α / θ) * z^(α - 1) * exp(-z^α)
-    else
-        zero(T)
-    end
+function pdf(d::Weibull, x::Real)
+    α, θ = params(d)
+    z = abs(x) / θ
+    res = (α / θ) * z^(α - 1) * exp(-z^α)
+    x < 0 || isinf(x) ? zero(res) : res
 end
 
-function logpdf(d::Weibull{T}, x::Real) where T<:Real
-    if x >= 0
-        α, θ = params(d)
-        z = x / θ
-        log(α / θ) + (α - 1) * log(z) - z^α
-    else
-        -T(Inf)
-    end
+function logpdf(d::Weibull, x::Real)
+    α, θ = params(d)
+    z = abs(x) / θ
+    res = log(α / θ) + xlogy(α - 1, z) - z^α
+    x < 0 || isinf(x) ? oftype(res, -Inf) : res
 end
 
 zval(d::Weibull, x::Real) = (max(x, 0) / d.θ) ^ d.α
