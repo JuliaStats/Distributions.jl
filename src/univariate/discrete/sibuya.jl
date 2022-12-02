@@ -1,11 +1,11 @@
 # See https://rdrr.io/rforge/copula/man/Sibuya.html
-struct Sibuya{T<:Real} <: Distributions.DiscreteUnivariateDistribution
+struct Sibuya{T<:Real} <: DiscreteUnivariateDistribution
     p::T
     function Sibuya(p::T) where {T <: Real}
         new{T}(p)
     end
 end
-function Distributions.rand(rng::Distributions.AbstractRNG, d::Sibuya{T}) where {T <: Real}
+function rand(rng::AbstractRNG, d::Sibuya{T}) where {T <: Real}
     u = rand(rng, T)
     if u <= d.p
         return T(1)

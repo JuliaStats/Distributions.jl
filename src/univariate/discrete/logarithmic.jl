@@ -1,14 +1,14 @@
 # Corresponds to https://en.wikipedia.org/wiki/Logarithmic_distribution
-struct Logarithmic{T<:Real} <: Distributions.DiscreteUnivariateDistribution
+struct Logarithmic{T<:Real} <: DiscreteUnivariateDistribution
     p::T
     function Logarithmic(p::T) where {T <: Real}
         new{T}(p)
     end
 end
-function Distributions.logpdf(d::Logarithmic, x::Real)
+function logpdf(d::Logarithmic, x::Real)
     insupport(d, x) ? x*log(d.p) - log(x) - log(-log(1-d.p)) : log(zero(d.p))
 end
-function Distributions.rand(rng::Distributions.AbstractRNG, d::Logarithmic)
+function rand(rng::AbstractRNG, d::Logarithmic)
     # Sample a Log(p) distribution with the algorithm "LK" of Kemp (1981).
     u = rand(rng)
     if u > d.p 
