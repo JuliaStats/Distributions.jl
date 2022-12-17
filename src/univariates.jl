@@ -311,7 +311,7 @@ See also: [`logpdf`](@ref).
 pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 # extract value from array of zero dimension
-_pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
+pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -323,7 +323,7 @@ See also: [`pdf`](@ref).
 logpdf(d::UnivariateDistribution, x::Real)
 
 # extract value from array of zero dimension
-_logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
+logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
 
 # loglikelihood for `Real`
 Base.@propagate_inbounds loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
