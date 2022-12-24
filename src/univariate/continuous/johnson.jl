@@ -16,7 +16,7 @@ X = \\lambda\\sinh\\Bigg( \\frac{Z - \\gamma}{\\delta} \\Bigg) + \\xi,
 where ``Z \\sim \\mathcal{N}(0,1)``,  then ``X \\sim {\\rm Johnson}(\\xi, \\lambda, \\gamma, \\delta)``.
 
 ```julia
-Johnson()           # Equivalent to Johnson(0.0, 1.0, 0.0, 1.0)
+Johnson()           # Equivalent to Johnson(0, 1, 0, 1)
 Johnson(ξ, λ, γ, δ) # Johnson's S_U-distrubtion with shape parameters ξ, λ, γ and δ
 
 params(d)           # Get the parameters, i.e. (ξ, λ, γ, δ)
