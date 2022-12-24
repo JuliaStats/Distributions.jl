@@ -23,8 +23,8 @@
     @test rand(d1) isa Float64
 
     d1 = Johnson()
-    @test d1 isa Johnson{Float64}
-    @test params(d1) == (0.0, 1.0, 0.0, 1.0)
+    @test d1 isa Johnson{Int}
+    @test params(d1) == (0, 1, 0, 1)
 
     @test pdf(d1, -Inf) == 0.0
     @test pdf(d1, Inf) == 0.0

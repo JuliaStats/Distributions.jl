@@ -35,15 +35,13 @@ function Johnson(ξ::T, λ::T, γ::T, δ::T; check_args::Bool=true) where {T<:Re
     return Johnson{T}(ξ, λ, γ, δ)
 end
 
-Johnson() = Johnson{Float64}(0.0, 1.0, 0.0, 1.0)
+Johnson() = Johnson{Int}(0, 1, 0, 1)
 Johnson(ξ::Real, λ::Real, γ::Real, δ::Real; check_args::Bool=true) = Johnson(promote(ξ, λ, γ, δ)...; check_args=check_args)
-Johnson(ξ::Integer, λ::Integer, γ::Integer, δ::Integer; check_args::Bool=true) = Johnson(float(ξ), float(λ), float(γ), float(δ); check_args=check_args)
 
 @distr_support Johnson -Inf Inf
 
 #### Conversions
 
-convert(::Type{Johnson{T}}, ξ::S, λ::S, γ::S, δ::S) where {T<:Real, S<:Real} = Johnson(T(ξ), T(λ), T(γ), T(δ))
 Base.convert(::Type{Johnson{T}}, d::Johnson) where {T<:Real} = Johnson{T}(T(d.ξ), T(d.λ), T(d.γ), T(d.δ))
 Base.convert(::Type{Johnson{T}}, d::Johnson{T}) where {T<:Real} = d
 
