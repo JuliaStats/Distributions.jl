@@ -87,46 +87,21 @@ end
 
 #### Evaluation
 
-function pdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    d.δ / d.λ / sqrt(2π * (1.0 + y^2)) * exp(-0.5 * z ^ 2)
-end
+yval(d::Johnson, x::Real) = (x - d.ξ) / d.λ
+zval(d::Johnson, x::Real) = d.γ + d.δ * asinh(yval(d, x))
+xval(d::Johnson, x::Real) = d.λ * sinh((x - d.γ) / d.δ) + d.ξ
 
-function logpdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    -0.5 * (z^2 + log2π + log(1.0 + y^2)) + log(d.δ) - log(d.λ)
-end
+pdf(d::Johnson, x::Real) = d.δ / d.λ / sqrt(1 + yval(d, x)^2) * normpdf(zval(d, x))
+logpdf(d::Johnson, x::Real) = log(d.δ) - log(d.λ) - 1/2log(1 + yval(d, x)^2) + normlogpdf(zval(d, x))
+cdf(d::Johnson, x::Real) = normcdf(zval(d, x))
+logcdf(d::Johnson, x::Real) = normlogcdf(zval(d, x))
+ccdf(d::Johnson, x::Real) = normccdf(zval(d, x))
+logccdf(d::Johnson, x::Real) = normlogccdf(zval(d, x))
 
-function cdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    cdf(Normal(), z)
-end
-
-function ccdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    ccdf(Normal(), z)
-end
-
-function logcdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    logcdf(Normal(), z)
-end
-
-function logccdf(d::Johnson, x::Real)
-    y = (x - d.ξ) / d.λ
-    z = d.γ + d.δ * asinh(y)
-    logccdf(Normal(), z)
-end
-
-quantile(d::Johnson, q::Real) = d.λ * sinh((quantile(Normal(), q) - d.γ) / d.δ) + d.ξ
-cquantile(d::Johnson, q::Real) = d.λ * sinh((cquantile(Normal(), q) - d.γ) / d.δ) + d.ξ
-invlogcdf(d::Johnson, lq::Real) = d.λ * sinh((invlogcdf(Normal(), lq) - d.γ) / d.δ) + d.ξ
-invlogccdf(d::Johnson, lq::Real) = d.λ * sinh((invlogccdf(Normal(), lq) - d.γ) / d.δ) + d.ξ
+quantile(d::Johnson, q::Real) = xval(d, norminvcdf(q))
+cquantile(d::Johnson, p::Real) = xval(d, norminvccdf(p))
+invlogcdf(d::Johnson, lp::Real) = xval(d, norminvlogcdf(lp))
+invlogccdf(d::Johnson, lq::Real) = xval(d, norminvlogccdf(lq))
 
 # entropy(d::Johnson)
 # mgf(d::Johnson)
@@ -134,7 +109,7 @@ invlogccdf(d::Johnson, lq::Real) = d.λ * sinh((invlogccdf(Normal(), lq) - d.γ)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Johnson) = d.λ * sinh((rand(rng) - d.γ) / d.δ) + d.ξ
+rand(rng::AbstractRNG, d::Johnson) = xval(d, randn(rng))
 
 ## Fitting
 
