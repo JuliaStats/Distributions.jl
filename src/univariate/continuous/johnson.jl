@@ -23,16 +23,16 @@ External links
 * [Johnson's ``S_U``-distribution on Wikipedia](http://en.wikipedia.org/wiki/Johnson%27s_SU-distribution)
 """
 struct Johnson{T<:Real} <: ContinuousUnivariateDistribution
-	ξ::T
-	λ::T
-	γ::T
-	δ::T
-	Johnson{T}(ξ, λ, γ, δ) where {T} = new{T}(ξ, λ, γ, δ)
+    ξ::T
+    λ::T
+    γ::T
+    δ::T
+    Johnson{T}(ξ, λ, γ, δ) where {T} = new{T}(ξ, λ, γ, δ)
 end
 
 function Johnson(ξ::T, λ::T, γ::T, δ::T; check_args::Bool=true) where {T<:Real}
     @check_args Johnson (λ, λ ≥ zero(λ)) (δ, δ ≥ zero(δ))
-	return Johnson{T}(ξ, λ, γ, δ)
+    return Johnson{T}(ξ, λ, γ, δ)
 end
 
 Johnson() = Johnson{Float64}(0.0, 1.0, 0.0, 1.0)
@@ -88,9 +88,9 @@ end
 #### Evaluation
 
 function pdf(d::Johnson, x::Real)
-	y = (x - d.ξ) / d.λ
-	z = d.γ + d.δ * asinh(y)
-	d.δ / d.λ / sqrt(2π * (1.0 + y^2)) * exp(-0.5 * z ^ 2)
+    y = (x - d.ξ) / d.λ
+    z = d.γ + d.δ * asinh(y)
+    d.δ / d.λ / sqrt(2π * (1.0 + y^2)) * exp(-0.5 * z ^ 2)
 end
 
 function logpdf(d::Johnson, x::Real)
@@ -100,27 +100,27 @@ function logpdf(d::Johnson, x::Real)
 end
 
 function cdf(d::Johnson, x::Real)
-	y = (x - d.ξ) / d.λ
-	z = d.γ + d.δ * asinh(y)
-	cdf(Normal(), z)
+    y = (x - d.ξ) / d.λ
+    z = d.γ + d.δ * asinh(y)
+    cdf(Normal(), z)
 end
 
 function ccdf(d::Johnson, x::Real)
-	y = (x - d.ξ) / d.λ
-	z = d.γ + d.δ * asinh(y)
-	ccdf(Normal(), z)
+    y = (x - d.ξ) / d.λ
+    z = d.γ + d.δ * asinh(y)
+    ccdf(Normal(), z)
 end
 
 function logcdf(d::Johnson, x::Real)
-	y = (x - d.ξ) / d.λ
-	z = d.γ + d.δ * asinh(y)
-	logcdf(Normal(), z)
+    y = (x - d.ξ) / d.λ
+    z = d.γ + d.δ * asinh(y)
+    logcdf(Normal(), z)
 end
 
 function logccdf(d::Johnson, x::Real)
-	y = (x - d.ξ) / d.λ
-	z = d.γ + d.δ * asinh(y)
-	logccdf(Normal(), z)
+    y = (x - d.ξ) / d.λ
+    z = d.γ + d.δ * asinh(y)
+    logccdf(Normal(), z)
 end
 
 quantile(d::Johnson, q::Real) = d.λ * sinh((quantile(Normal(), q) - d.γ) / d.δ) + d.ξ
