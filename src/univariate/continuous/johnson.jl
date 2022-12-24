@@ -4,7 +4,7 @@
 The Johnson's ``S_U``-distribution with parameters ξ, λ, γ and δ is a transformation of the normal distribution:
 
 ```math
-z \\sim \\gamma + \\delta \\sinh^{-1}\\Big(\\frac{x-\\xi}{\\lambda}\\Big),
+z = \\gamma + \\delta \\sinh^{-1}\\Big(\\frac{x-\\xi}{\\lambda}\\Big),
 ```
 
 where ``z \\sim \\mathcal{N}(0,1)``.
