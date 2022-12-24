@@ -7,7 +7,13 @@ The Johnson's ``S_U``-distribution with parameters ξ, λ, γ and δ is a transf
 z = \\gamma + \\delta \\sinh^{-1}\\Big(\\frac{x-\\xi}{\\lambda}\\Big),
 ```
 
-where ``z \\sim \\mathcal{N}(0,1)``.
+where ``z \\sim \\mathcal{N}(0,1)`` i.e. if a random variable ``X`` is defined to be
+
+```math
+X = \\lambda\\sinh\\Bigg( \\frac{Z - \\gamma}{\\delta} \\Bigg) + \\xi,
+```
+
+where ``Z \\sim \\mathcal{N}(0,1)``,  then ``X \\sim {\\rm Johnson}(\\xi, \\lambda, \\gamma, \\delta)``.
 
 ```julia
 Johnson()           # Equivalent to Johnson(0.0, 1.0, 0.0, 1.0)
