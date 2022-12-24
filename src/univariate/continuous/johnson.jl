@@ -27,7 +27,7 @@ struct Johnson{T<:Real} <: ContinuousUnivariateDistribution
     λ::T
     γ::T
     δ::T
-    Johnson{T}(ξ, λ, γ, δ) where {T} = new{T}(ξ, λ, γ, δ)
+    Johnson{T}(ξ::T, λ::T, γ::T, δ::T) where {T<:Real} = new{T}(ξ, λ, γ, δ)
 end
 
 function Johnson(ξ::T, λ::T, γ::T, δ::T; check_args::Bool=true) where {T<:Real}
