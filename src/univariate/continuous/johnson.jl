@@ -56,9 +56,9 @@ partype(d::Johnson{T}) where {T<:Real} = T
 #### Statistics
 
 function mean(d::Johnson)
-    a = exp(d.δ^-2)
+    a = exp(1/(2*d.δ^2))
     r = d.γ/d.δ
-    d.ξ - d.λ * sqrt(a) * sinh(r)
+    d.ξ - d.λ * a * sinh(r)
 end
 function median(d::Johnson)
     r = d.γ/d.δ
@@ -72,7 +72,7 @@ end
 function skewness(d::Johnson)
     a = exp(d.δ^-2)
     r = d.γ/d.δ
-    - (d.λ^3 * sqrt(a) * (a-1)^2 * (a*(a+2)*sinh(3r)+3sinh(2r))) / 4var(d)^1.5
+    - (d.λ^3 * sqrt(a) * (a-1)^2 * (a*(a+2)*sinh(3r)+3sinh(2r))) / 4sqrt(var(d)^3)
 end
 function kurtosis(d::Johnson)
     a = exp(d.δ^-2)
