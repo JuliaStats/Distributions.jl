@@ -27,16 +27,16 @@ External links:
 struct Bernoulli{T<:Real} <: DiscreteUnivariateDistribution
     p::T
 
-    Bernoulli{T}(p::T) where {T <: Real} = new{T}(p)
+    Bernoulli{T}(p::Real) where {T <: Real} = new{T}(p)
 end
 
-function Bernoulli(p::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Bernoulli, zero(p) <= p <= one(p))
-    return Bernoulli{T}(p)
+function Bernoulli(p::Real; check_args::Bool=true)
+    @check_args Bernoulli (p, zero(p) <= p <= one(p))
+    return Bernoulli{typeof(p)}(p)
 end
 
-Bernoulli(p::Integer) = Bernoulli(float(p))
-Bernoulli() = Bernoulli(0.5, check_args=false)
+Bernoulli(p::Integer; check_args::Bool=true) = Bernoulli(float(p); check_args=check_args)
+Bernoulli() = Bernoulli{Float64}(0.5)
 
 @distr_support Bernoulli false true
 
@@ -44,7 +44,8 @@ Base.eltype(::Type{<:Bernoulli}) = Bool
 
 #### Conversions
 convert(::Type{Bernoulli{T}}, p::Real) where {T<:Real} = Bernoulli(T(p))
-convert(::Type{Bernoulli{T}}, d::Bernoulli{S}) where {T <: Real, S <: Real} = Bernoulli(T(d.p), check_args=false)
+Base.convert(::Type{Bernoulli{T}}, d::Bernoulli) where {T<:Real} = Bernoulli{T}(T(d.p))
+Base.convert(::Type{Bernoulli{T}}, d::Bernoulli{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -103,6 +104,11 @@ function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
 end
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
+function cgf(d::Bernoulli, t)
+    p, = params(d)
+    # log(1-p+p*exp(t))
+    logaddexp(log1p(-p), t+log(p))
+end
 cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 
@@ -112,44 +118,40 @@ rand(rng::AbstractRNG, d::Bernoulli) = rand(rng) <= succprob(d)
 
 #### MLE fitting
 
-struct BernoulliStats <: SufficientStats
-    cnt0::Float64
-    cnt1::Float64
-
-    BernoulliStats(c0::Real, c1::Real) = new(Float64(c0), Float64(c1))
+struct BernoulliStats{C<:Real} <: SufficientStats
+    cnt0::C
+    cnt1::C
 end
 
-fit_mle(::Type{<:Bernoulli}, ss::BernoulliStats) = Bernoulli(ss.cnt1 / (ss.cnt0 + ss.cnt1))
+BernoulliStats(c0::Real, c1::Real) = BernoulliStats(promote(c0, c1)...)
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}) where T<:Integer
-    n = length(x)
+fit_mle(::Type{T}, ss::BernoulliStats) where {T<:Bernoulli} = T(ss.cnt1 / (ss.cnt0 + ss.cnt1))
+
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{<:Integer})
     c0 = c1 = 0
-    for i = 1:n
-        @inbounds xi = x[i]
+    for xi in x
         if xi == 0
             c0 += 1
         elseif xi == 1
             c1 += 1
         else
-            throw(DomainError())
+            throw(DomainError(xi, "samples must be 0 or 1"))
         end
     end
     BernoulliStats(c0, c1)
 end
 
-function suffstats(::Type{<:Bernoulli}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    n = length(x)
-    length(w) == n || throw(DimensionMismatch("Inconsistent argument dimensions."))
-    c0 = c1 = 0
-    for i = 1:n
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
+function suffstats(::Type{<:Bernoulli}, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
+    length(x) == length(w) || throw(DimensionMismatch("inconsistent argument dimensions"))
+    z = zero(eltype(w))
+    c0 = c1 = z + z # possibly widened and different from `z`, e.g., if `z = true`
+    for (xi, wi) in zip(x, w)
         if xi == 0
             c0 += wi
         elseif xi == 1
             c1 += wi
         else
-            throw(DomainError())
+            throw(DomainError(xi, "samples must be 0 or 1"))
         end
     end
     BernoulliStats(c0, c1)

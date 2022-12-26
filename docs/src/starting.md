@@ -22,7 +22,18 @@ Then, we create a standard-normal distribution `d` and obtain samples using `ran
 ```julia
 julia> d = Normal()
 Normal(μ=0.0, σ=1.0)
+```
 
+The object `d` represents a probability distribution, in our case the standard-normal distribution.
+One can query its properties such as the mean:
+
+```julia
+julia> mean(d)
+0.0
+```
+
+We can also draw samples from `d` with `rand`.
+```julia
 julia> x = rand(d, 100)
 100-element Array{Float64,1}:
   0.376264
@@ -58,7 +69,7 @@ Each type splits further into `Discrete` and `Continuous`.
 For instance, you can define the following distributions (among many others):
 
 ```julia
-julia> Binomial(p) # Discrete univariate
+julia> Binomial(n, p) # Discrete univariate
 julia> Cauchy(u, b)  # Continuous univariate
 julia> Multinomial(n, p) # Discrete multivariate
 julia> Wishart(nu, S) # Continuous matrix-variate

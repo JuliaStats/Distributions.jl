@@ -1,4 +1,5 @@
-import Statistics: mean, var, cov
+# Deprecated product distribution
+# TODO: Remove in next breaking release
 
 """
     Product <: MultivariateDistribution
@@ -16,12 +17,17 @@ struct Product{
     V<:AbstractVector{T},
 } <: MultivariateDistribution{S}
     v::V
-    function Product(v::V) where
-        V<:AbstractVector{T} where
-        T<:UnivariateDistribution{S} where
-        S<:ValueSupport
-        return new{S, T, V}(v)
+    function Product{S,T,V}(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
+        return new{S,T,V}(v)
     end
+end
+
+function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
+    Base.depwarn(
+        "`Product(v)` is deprecated, please use `product_distribution(v)`",
+        :Product,
+    )
+    return Product{S, T, V}(v)
 end
 
 length(d::Product) = length(d.v)
@@ -31,9 +37,14 @@ function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
 end
 
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    broadcast!(dn->rand(rng, dn), x, d.v)
-_logpdf(d::Product, x::AbstractVector{<:Real}) =
-    sum(n->logpdf(d.v[n], x[n]), 1:length(d))
+    map!(Base.Fix1(rand, rng), x, d.v)
+function _logpdf(d::Product, x::AbstractVector{<:Real})
+    dists = d.v
+    if isempty(dists)
+        return sum(map(logpdf, dists, x))
+    end
+    return sum(n -> logpdf(dists[n], x[n]), 1:length(d))
+end
 
 mean(d::Product) = mean.(d.v)
 var(d::Product) = var.(d.v)
@@ -43,26 +54,9 @@ insupport(d::Product, x::AbstractVector) = all(insupport.(d.v, x))
 minimum(d::Product) = map(minimum, d.v)
 maximum(d::Product) = map(maximum, d.v)
 
-"""
-    product_distribution(dists::AbstractVector{<:UnivariateDistribution})
-
-Creates a multivariate product distribution `P` from a vector of univariate distributions.
-Fallback is the `Product constructor`, but specialized methods can be defined
-for distributions with a special multivariate product.
-"""
-function product_distribution(dists::AbstractVector{<:UnivariateDistribution})
-    return Product(dists)
-end
-
-"""
-    product_distribution(dists::AbstractVector{<:Normal})
-
-Computes the multivariate Normal distribution obtained by stacking the univariate
-normal distributions. The result is a multivariate Gaussian with a diagonal
-covariance matrix.
-"""
-function product_distribution(dists::AbstractVector{<:Normal})
-    µ = mean.(dists)
-    σ2 = var.(dists)
-    return MvNormal(µ, Diagonal(σ2))
+# will be removed when `Product` is removed
+# it will return a `ProductDistribution` then which is already the default for
+# higher-dimensional arrays and distributions
+function product_distribution(dists::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:AbstractVector{T}}
+    return Product{S,T,V}(dists)
 end

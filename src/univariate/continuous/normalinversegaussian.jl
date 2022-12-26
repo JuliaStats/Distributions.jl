@@ -39,9 +39,10 @@ end
 function convert(::Type{NormalInverseGaussian{T}}, μ::Real, α::Real, β::Real, δ::Real) where T<:Real
     NormalInverseGaussian(T(μ), T(α), T(β), T(δ))
 end
-function convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian{S}) where {T <: Real, S <: Real}
-    NormalInverseGaussian(T(d.μ), T(d.α), T(d.β), T(d.δ))
+function Base.convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian) where {T<:Real}
+    NormalInverseGaussian{T}(T(d.μ), T(d.α), T(d.β), T(d.δ))
 end
+Base.convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian{T}) where {T<:Real} = d
 
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 @inline partype(d::NormalInverseGaussian{T}) where {T<:Real} = T

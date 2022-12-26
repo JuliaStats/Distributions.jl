@@ -182,6 +182,8 @@ Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
 function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where T<:Real
     MvLogNormal(convert(MvNormal{T}, d.normal))
 end
+Base.convert(::Type{MvLogNormal{T}}, d::MvLogNormal{T}) where {T<:Real} = d
+
 function convert(::Type{MvLogNormal{T}}, pars...) where T<:Real
     MvLogNormal(convert(MvNormal{T}, MvNormal(pars...)))
 end
@@ -230,8 +232,11 @@ var(d::MvLogNormal) = diag(cov(d))
 entropy(d::MvLogNormal) = length(d)*(1+log2π)/2 + logdetcov(d.normal)/2 + sum(mean(d.normal))
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
-_rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real}) =
-    exp!(_rand!(rng, d.normal, x))
+function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
+    _rand!(rng, d.normal, x)
+    map!(exp, x, x)
+    return x
+end
 
 _logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
 _pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d,x) ? _pdf(d.normal, log.(x))/prod(x) : 0.0

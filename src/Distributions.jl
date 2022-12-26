@@ -67,6 +67,7 @@ export
     # distribution types
     Arcsine,
     Bernoulli,
+    BernoulliLogit,
     Beta,
     BetaBinomial,
     BetaPrime,
@@ -143,7 +144,8 @@ export
     NormalInverseGaussian,
     Pareto,
     PGeneralizedGaussian,
-    Product,
+    SkewedExponentialPower,
+    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,
@@ -180,6 +182,7 @@ export
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
+    censored,           # censor a distribution with a lower and upper bound
     cf,                 # characteristic function
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     component,          # get the k-th component of a mixture model
@@ -188,7 +191,6 @@ export
     componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
-    dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability
@@ -218,7 +220,7 @@ export
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
-    sqmahal!,           # inplace evaluation of sqmahal
+    sqmahal!,           # in-place evaluation of sqmahal
     location,           # get the location parameter
     location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
@@ -227,6 +229,7 @@ export
     meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
+    cgf,                # cumulant generating function
     mode,               # the mode of a unimodal distribution
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution
@@ -273,6 +276,7 @@ include("common.jl")
 
 # implementation helpers
 include("utils.jl")
+include("eachvariate.jl")
 
 # generic functions
 include("show.jl")
@@ -290,7 +294,10 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("product.jl")
+include("reshaped.jl")
 include("truncate.jl")
+include("censored.jl")
 include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
@@ -330,7 +337,7 @@ information.
 Supported distributions:
 
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
-    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Categorical, Cauchy, Censored, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
@@ -339,7 +346,7 @@ Supported distributions:
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
     IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
-    MatrixReshaped, MatrixTDist, MixtureModel, Multinomial,
+    MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,
     MvNormalKnownCov, MvTDist, NegativeBinomial, NoncentralBeta, NoncentralChisq,
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,

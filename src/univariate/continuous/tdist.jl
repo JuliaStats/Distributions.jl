@@ -25,18 +25,19 @@ struct TDist{T<:Real} <: ContinuousUnivariateDistribution
     TDist{T}(ν::T) where {T <: Real} = new{T}(ν)
 end
 
-function TDist(ν::T; check_args=true) where {T <: Real}
-    check_args && @check_args(TDist, ν > zero(ν))
-    return TDist{T}(ν)
+function TDist(ν::Real; check_args::Bool=true)
+    @check_args TDist (ν, ν > zero(ν))
+    return TDist{typeof(ν)}(ν)
 end
 
-TDist(ν::Integer) = TDist(float(ν))
+TDist(ν::Integer; check_args::Bool=true) = TDist(float(ν); check_args=check_args)
 
 @distr_support TDist -Inf Inf
 
 #### Conversions
 convert(::Type{TDist{T}}, ν::Real) where {T<:Real} = TDist(T(ν))
-convert(::Type{TDist{T}}, d::TDist{S}) where {T<:Real, S<:Real} = TDist(T(d.ν), check_args=false)
+Base.convert(::Type{TDist{T}}, d::TDist) where {T<:Real} = TDist{T}(T(d.ν))
+Base.convert(::Type{TDist{T}}, d::TDist{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -78,7 +79,11 @@ end
 
 @_delegate_statsfuns TDist tdist ν
 
-rand(rng::AbstractRNG, d::TDist) = randn(rng) / ( isinf(d.ν) ? 1 : sqrt(rand(rng, Chisq(d.ν))/d.ν) )
+function rand(rng::AbstractRNG, d::TDist)
+    ν = d.ν
+    z = sqrt(rand(rng, Chisq{typeof(ν)}(ν)) / ν)
+    return randn(rng) / (isinf(ν) ? one(z) : z)
+end
 
 function cf(d::TDist{T}, t::Real) where T <: Real
     isinf(d.ν) && return cf(Normal(zero(T), one(T)), t)

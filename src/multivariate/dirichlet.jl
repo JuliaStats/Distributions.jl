@@ -25,20 +25,24 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     alpha0::T
     lmnB::S
 
-    function Dirichlet{T}(alpha::AbstractVector{T}; check_args=true) where T
-        if check_args && !all(x -> x > zero(x), alpha)
-            throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
-        end
+    function Dirichlet{T}(alpha::AbstractVector{T}; check_args::Bool=true) where T
+        @check_args(
+            Dirichlet,
+            (alpha, all(x -> x > zero(x), alpha), "alpha must be a positive vector."),
+        )
         alpha0 = sum(alpha)
         lmnB = sum(loggamma, alpha) - loggamma(alpha0)
         new{T,typeof(alpha),typeof(lmnB)}(alpha, alpha0, lmnB)
     end
 end
 
-function Dirichlet(alpha::AbstractVector{<:Real}; check_args=true)
-    Dirichlet{eltype(alpha)}(alpha; check_args=check_args)
+function Dirichlet(alpha::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
+    Dirichlet{T}(alpha; check_args=check_args)
 end
-Dirichlet(d::Integer, alpha::Real; kwargs...) = Dirichlet(Fill(alpha, d); kwargs...)
+function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
+    @check_args Dirichlet (d, d > zero(d)) (alpha, alpha > zero(alpha))
+    return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
+end
 
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts
@@ -68,7 +72,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 params(d::Dirichlet) = (d.alpha,)
-@inline partype(d::Dirichlet{T}) where {T<:Real} = T
+@inline partype(::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)
     α0 = d.alpha0
@@ -156,14 +160,14 @@ function _rand!(rng::AbstractRNG,
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{<:Real}) where {T<:Real}
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 #######################################
@@ -232,7 +236,7 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     end
     α0 /= K
 
-    multiply!(μ, α0)
+    lmul!(α0, μ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})
@@ -370,4 +374,63 @@ function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     α = isempty(init) ? dirichlet_mle_init(P, w) : init
     elogp = mean_logp(suffstats(Dirichlet, P, w))
     fit_dirichlet!(elogp, α; maxiter=maxiter, tol=tol, debug=debug)
+end
+
+## Differentiation
+function ChainRulesCore.frule((_, Δalpha)::Tuple{Any,Any}, ::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
+    d = DT(alpha; check_args=check_args)
+    ∂alpha0 = sum(Δalpha)
+    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
+    ∂lmnB = sum(Broadcast.instantiate(Broadcast.broadcasted(Δalpha, alpha) do Δalphai, alphai
+        Δalphai * (SpecialFunctions.digamma(alphai) - digamma_alpha0)
+    end))
+    Δd = ChainRulesCore.Tangent{typeof(d)}(; alpha=Δalpha, alpha0=∂alpha0, lmnB=∂lmnB)
+    return d, Δd
+end
+
+function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::Bool = true) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
+    d = DT(alpha; check_args=check_args)
+    digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
+    function Dirichlet_pullback(_Δd)
+        Δd = ChainRulesCore.unthunk(_Δd)
+        Δalpha = Δd.alpha .+ Δd.alpha0 .+ Δd.lmnB .* (SpecialFunctions.digamma.(alpha) .- digamma_alpha0)
+        return ChainRulesCore.NoTangent(), Δalpha
+    end
+    return d, Dirichlet_pullback
+end
+
+function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
+    Ω = _logpdf(d, x)
+    ∂alpha = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalphai, Δxi, alphai, xi
+        xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
+    end))
+    ∂lmnB = -Δd.lmnB
+    ΔΩ = ∂alpha + ∂lmnB
+    if !isfinite(Ω)
+        ΔΩ = oftype(ΔΩ, NaN)
+    end
+    return Ω, ΔΩ
+end
+
+function ChainRulesCore.rrule(::typeof(_logpdf), d::T, x::AbstractVector{<:Real}) where {T<:Dirichlet}
+    Ω = _logpdf(d, x)
+    isfinite_Ω = isfinite(Ω)
+    alpha = d.alpha
+    function _logpdf_Dirichlet_pullback(_ΔΩ)
+        ΔΩ = ChainRulesCore.unthunk(_ΔΩ)
+        ∂alpha = _logpdf_Dirichlet_∂alphai.(x, ΔΩ, isfinite_Ω)
+        ∂lmnB = isfinite_Ω ? -float(ΔΩ) : oftype(float(ΔΩ), NaN)
+        Δd = ChainRulesCore.Tangent{T}(; alpha=∂alpha, lmnB=∂lmnB)
+        Δx = _logpdf_Dirichlet_Δxi.(ΔΩ, alpha, x, isfinite_Ω)
+        return ChainRulesCore.NoTangent(), Δd, Δx
+    end
+    return Ω, _logpdf_Dirichlet_pullback
+end
+function _logpdf_Dirichlet_∂alphai(xi, ΔΩi, isfinite::Bool)
+    ∂alphai = xlogy.(ΔΩi, xi)
+    return isfinite ? ∂alphai : oftype(∂alphai, NaN)
+end
+function _logpdf_Dirichlet_Δxi(ΔΩi, alphai, xi, isfinite::Bool)
+    Δxi = ΔΩi * (alphai - 1) / xi
+    return isfinite ? Δxi : oftype(Δxi, NaN)
 end

@@ -24,12 +24,12 @@ struct Semicircle{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 
-function Semicircle(r::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Semicircle, r > 0)
-    return Semicircle{T}(r)
+function Semicircle(r::Real; check_args::Bool=true)
+    @check_args Semicircle (r, r > zero(r))
+    return Semicircle{typeof(r)}(r)
 end
 
-Semicircle(r::Integer) = Semicircle(float(r))
+Semicircle(r::Integer; check_args::Bool=true) = Semicircle(float(r); check_args=check_args)
 
 @distr_support Semicircle -d.r +d.r
 
@@ -70,6 +70,16 @@ function cdf(d::Semicircle, x::Real)
     else
         return one(r)
     end
+end
+
+function rand(rng::AbstractRNG, d::Semicircle)
+    # Idea:
+    # sample polar coodinates r,θ 
+    # of point uniformly distributed on radius d.r half disk
+    # project onto x axis
+    θ = rand(rng) # multiple of π
+    r = d.r * sqrt(rand(rng))
+    return cospi(θ) * r
 end
 
 @quantile_newton Semicircle

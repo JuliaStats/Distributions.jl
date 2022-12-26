@@ -11,7 +11,7 @@ const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
 
 ## Common Interface
 
-A series of methods are implemented for each univariate distribution, which provide
+A series of methods is implemented for each univariate distribution, which provides
 useful functionalities such as moment computation, pdf evaluation, and sampling
 (*i.e.* random number generation).
 
@@ -62,6 +62,7 @@ entropy(::UnivariateDistribution)
 entropy(::UnivariateDistribution, ::Bool)
 entropy(::UnivariateDistribution, ::Real)
 mgf(::UnivariateDistribution, ::Any)
+cgf(::UnivariateDistribution, ::Any)
 cf(::UnivariateDistribution, ::Any)
 pdfsquaredL2norm
 ```
@@ -298,15 +299,6 @@ plotdensity((0, 20), Levy, (0, 1)) # hide
 ```
 
 ```@docs
-LocationScale
-```
-```@example plotdensity
-plotdensity(
-    (-2, 5), LocationScale(2, 1, Normal(0, 1)); title="LocationScale(2, 1, Normal(0, 1))",
-) # hide
-```
-
-```@docs
 Logistic
 ```
 ```@example plotdensity
@@ -419,6 +411,20 @@ plotdensity((-1, 1), Semicircle, (1,)) # hide
 ```
 
 ```@docs
+SkewedExponentialPower
+```
+```@example plotdensity
+plotdensity((-8, 5), SkewedExponentialPower, (0, 1, 0.7, 0.7)) # hide
+```
+
+```@docs
+SkewNormal
+```
+```@example plotdensity
+plotdensity((-4, 4), SkewNormal, (0, 1, -1)) # hide
+```
+
+```@docs
 StudentizedRange
 SymTriangularDist
 ```
@@ -474,6 +480,7 @@ plotdensity((0.001, 3), Weibull, (0.5, 1)) # hide
 
 ```@docs
 Bernoulli
+BernoulliLogit
 BetaBinomial
 Binomial
 Categorical
@@ -486,11 +493,12 @@ NegativeBinomial
 Poisson
 PoissonBinomial
 Skellam
+Soliton
 ```
 
 ### Vectorized evaluation
 
-Vectorized computation and inplace vectorized computation have been deprecated.
+Vectorized computation and in-place vectorized computation have been deprecated.
 
 ## Index
 

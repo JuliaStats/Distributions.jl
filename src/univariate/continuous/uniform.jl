@@ -26,23 +26,24 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
+    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Uniform, a < b)
+function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
+    @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
 
-Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
-Uniform() = Uniform(0.0, 1.0, check_args=false)
+Uniform(a::Real, b::Real; check_args::Bool=true) = Uniform(promote(a, b)...; check_args=check_args)
+Uniform(a::Integer, b::Integer; check_args::Bool=true) = Uniform(float(a), float(b); check_args=check_args)
+Uniform() = Uniform{Float64}(0.0, 1.0)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
+Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -100,6 +101,36 @@ function mgf(d::Uniform, t::Real)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
 end
+function cgf_uniform_around_zero_kernel(x)
+    # taylor series of (exp(x) - x - 1) / x
+    T = typeof(x)
+    a0 = inv(T(2))
+    a1 = inv(T(6))
+    a2 = inv(T(24))
+    a3 = inv(T(120))
+    x*@evalpoly(x, a0, a1, a2, a3)
+end
+
+function cgf(d::Uniform, t)
+    # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
+    a,b = params(d)
+    x = t*(b-a)
+    if abs(x) <= sqrt(eps(float(one(x))))
+        cgf_around_zero(d, t)
+    else
+        cgf_away_from_zero(d, t)
+    end
+end
+function cgf_around_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    t*a + log1p(cgf_uniform_around_zero_kernel(x))
+end
+function cgf_away_from_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    logsubexp(t*b, t*a) - log(abs(x))
+end
 
 function cf(d::Uniform, t::Real)
     (a, b) = params(d)
@@ -109,31 +140,61 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Affine transformations
+
+Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
+Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
 
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
-rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
+_rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
     A .= quantile.(d, rand!(rng, A))
 
 
 #### Fitting
 
-function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
+    return T(extrema(x)...)
+end
 
-    xmin = xmax = x[1]
-    for i = 2:length(x)
-        xi = x[i]
-        if xi < xmin
-            xmin = xi
-        elseif xi > xmax
-            xmax = xi
+# ChainRules definitions
+
+function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real)
+    # Compute log probability
+    a, b = params(d)
+    insupport = a <= x <= b
+    diff = b - a
+    Ω = insupport ? -log(diff) : log(zero(diff))
+
+    # Compute tangent
+    Δdiff = Δd.a - Δd.b
+    ΔΩ = (insupport ? Δdiff : zero(Δdiff)) / diff
+
+    return Ω, ΔΩ
+end
+
+function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
+    # Compute log probability
+    a, b = params(d)
+    insupport = a <= x <= b
+    diff = b - a
+    Ω = insupport ? -log(diff) : log(zero(diff))
+
+    # Define pullback
+    function logpdf_Uniform_pullback(Δ)
+        Δa = Δ / diff
+        Δd = if insupport
+            ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
+        else
+            ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
         end
+        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.ZeroTangent()
     end
 
-    Uniform(xmin, xmax)
+    return Ω, logpdf_Uniform_pullback
 end

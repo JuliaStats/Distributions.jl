@@ -40,11 +40,12 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args = true)
-    if check_args
-        d > 0 || throw(ArgumentError("matrix dimension must be positive"))
-        η > 0 || throw(ArgumentError("shape parameter must be positive"))
-    end
+function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_args::Bool=true)
+    @check_args(
+        LKJCholesky,
+        (d, d > 0, "matrix dimension must be positive"),
+        (η, η > 0, "shape parameter must be positive"),
+    )
     logc0 = lkj_logc0(d, η)
     uplo = _char_uplo(_uplo)
     T = Base.promote_eltype(η, logc0)
@@ -71,6 +72,8 @@ Base.show(io::IO, d::LKJCholesky) = show(io, d, (:d, :η, :uplo))
 function Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky) where T <: Real
     return LKJCholesky{T}(d.d, T(d.η), d.uplo, T(d.logc0))
 end
+Base.convert(::Type{LKJCholesky{T}}, d::LKJCholesky{T}) where T <: Real = d
+
 function convert(::Type{LKJCholesky{T}}, d::Integer, η::Real, uplo::Char, logc0::Real) where T <: Real
     return LKJCholesky{T}(Int(d), T(η), uplo, T(logc0))
 end
@@ -133,8 +136,8 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
 end
 
 function logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky)
-    insupport(d, R) || throw(ArgumentError("provided point is not in the support"))
-    return _logpdf(d, R)
+    lp = _logpdf(d, R)
+    return insupport(d, R) ? lp : oftype(lp, -Inf)
 end
 
 _logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky) = logkernel(d, R) + d.logc0

@@ -1,21 +1,21 @@
 # Create New Samplers and Distributions
 
-Whereas this package already provides a large collection of common distributions out of box, there are still occasions where you want to create new distributions (*e.g* your application requires a special kind of distributions, or you want to contribute to this package).
+Whereas this package already provides a large collection of common distributions out of the box, there are still occasions where you want to create new distributions (*e.g.* your application requires a special kind of distribution, or you want to contribute to this package).
 
 Generally, you don't have to implement every API method listed in the documentation. This package provides a series of generic functions that turn a small number of internal methods into user-end API methods. What you need to do is to implement this small set of internal methods for your distributions.
 
-By default, `Discrete` sampleables have support of type `Int` while `Continuous` sampleables have support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
+By default, `Discrete` sampleables have the support of type `Int` while `Continuous` sampleables have the support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
 
-**Note:** the methods need to be implemented are different for distributions of different variate forms.
+**Note:** The methods that need to be implemented are different for distributions of different variate forms.
 
 
 ## Create a Sampler
 
-Unlike a full fledged distributions, a sampler, in general, only provides limited functionalities, mainly to support sampling.
+Unlike full-fledged distributions, a sampler, in general, only provides limited functionalities, mainly to support sampling.
 
 ### Univariate Sampler
 
-To implement a univariate sampler, one can define a sub type (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
+To implement a univariate sampler, one can define a subtype (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
 
 ```julia
 function rand(rng::AbstractRNG, s::Spl)
@@ -27,7 +27,7 @@ The package already implements a vectorized version of `rand!` and `rand` that r
 
 ### Multivariate Sampler
 
-To implement a multivariate sampler, one can define a sub type of `Sampleable{Multivariate,S}`, and provide both `length` and `_rand!` methods, as
+To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `length` and `_rand!` methods, as
 
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
@@ -68,7 +68,7 @@ rand(rng::AbstractRNG, s::Sampleable{Multivariate,S}, n::Int) where {S<:ValueSup
     _rand!(rng, s, Matrix{eltype(S)}(length(s), n))
 ```
 
-If there is a more efficient method to generate multiple vector samples in batch, one should provide the following method
+If there is a more efficient method to generate multiple vector samples in a batch, one should provide the following method
 
 ```julia
 function _rand!(rng::AbstractRNG, s::Spl, A::DenseMatrix{T}) where T<:Real
@@ -80,7 +80,7 @@ Remember that each *column* of A is a sample.
 
 ### Matrix-variate Sampler
 
-To implement a multivariate sampler, one can define a sub type of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` method, as
+To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` methods, as
 
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
@@ -104,7 +104,7 @@ sampler(d::Distribution)
 
 A univariate distribution type should be defined as a subtype of `DiscreteUnivarateDistribution` or `ContinuousUnivariateDistribution`.
 
-Following methods need to be implemented for each univariate distribution type:
+The following methods need to be implemented for each univariate distribution type:
 
 - [`rand(::AbstractRNG, d::UnivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
@@ -134,7 +134,7 @@ You may refer to the source file `src/univariates.jl` to see details about how g
 
 A multivariate distribution type should be defined as a subtype of `DiscreteMultivarateDistribution` or `ContinuousMultivariateDistribution`.
 
-Following methods need to be implemented for each multivariate distribution type:
+The following methods need to be implemented for each multivariate distribution type:
 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
@@ -142,7 +142,7 @@ Following methods need to be implemented for each multivariate distribution type
 - [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)`](@ref)
 - [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
 
-Note that if there exists faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
+Note that if there exist faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
 
 Furthermore, the generic `loglikelihood` function repeatedly calls `_logpdf`. If there is
 a better way to compute the log-likelihood, one should override `loglikelihood`.
@@ -154,13 +154,13 @@ It is also recommended that one also implements the following statistics functio
 - [`entropy(d::MultivariateDistribution)`](@ref)
 - [`cov(d::MultivariateDistribution)`](@ref)
 
-## Create a Matrix-variate Distribution
+## Create a Matrix-Variate Distribution
 
-A multivariate distribution type should be defined as a subtype of `DiscreteMatrixDistribution` or `ContinuousMatrixDistribution`.
+A matrix-variate distribution type should be defined as a subtype of `DiscreteMatrixDistribution` or `ContinuousMatrixDistribution`.
 
-Following methods need to be implemented for each matrix-variate distribution type:
+The following methods need to be implemented for each matrix-variate distribution type:
 
 - [`size(d::MatrixDistribution)`](@ref)
-- [`rand(d::MatrixDistribution)`](@ref)
+- [`Distributions._rand!(rng::AbstractRNG, d::MatrixDistribution, A::AbstractMatrix)`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
 - [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)

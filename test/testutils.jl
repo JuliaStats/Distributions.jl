@@ -5,6 +5,7 @@ using Random
 using Printf: @printf
 using Test: @test
 import FiniteDifferences
+import ForwardDiff
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -43,6 +44,25 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_params(distr)
 end
 
+function test_cgf(dist, ts)
+    κ₀ = cgf(dist, 0)
+    @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
+    d(f) = Base.Fix1(ForwardDiff.derivative, f)
+    κ₁ = d(Base.Fix1(cgf, dist))(0)
+    @test κ₁ ≈ mean(dist)
+    if VERSION >= v"1.4"
+        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+        @test κ₂ ≈ var(dist)
+    end
+    for t in ts
+        val = @inferred cgf(dist, t)
+        @test isfinite(val)
+        if isfinite(mgf(dist, t))
+            rtol = eps(float(one(t)))^(1/2)
+            @test (exp∘cgf)(dist, t) ≈ mgf(dist, t) rtol=rtol
+        end
+    end
+end
 
 # testing the implementation of a continuous univariate distribution
 #
@@ -604,4 +624,34 @@ function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
 
     # compute asymptotic p-value (see `KSDist`)
     return ccdf(KSDist(n), dmax)
+end
+
+function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateDistribution}
+    @testset "affine tranformations ($T)" begin
+        # distribution
+        d = T(params...)
+
+        # random shift and scale
+        c = randn()
+
+        # addition
+        for shift_d in (@inferred(d + c), @inferred(c + d))
+            @test shift_d isa T
+            @test location(shift_d) ≈ location(d) + c
+            @test scale(shift_d) ≈ scale(d)
+        end
+
+        # multiplication (negative and positive values)
+        for s in (-c, c)
+            for scale_d in (@inferred(s * d), @inferred(d * s), @inferred(d / inv(s)))
+                @test scale_d isa T
+                if d isa Uniform
+                    @test location(scale_d) ≈ (s > 0 ? s * minimum(d) : s * maximum(d))
+                else
+                    @test location(scale_d) ≈ s * location(d)
+                end
+                @test scale(scale_d) ≈ abs(s) * scale(d)
+            end
+        end
+    end
 end

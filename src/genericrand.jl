@@ -19,12 +19,46 @@ Generate `n` samples from `s`. The form of the returned object depends on the va
 Generate an array of samples from `s` whose shape is determined by the given
 dimensions.
 """
-rand(s::Sampleable) = rand(GLOBAL_RNG, s)
+rand(s::Sampleable, dims::Int...) = rand(GLOBAL_RNG, s, dims...)
 rand(s::Sampleable, dims::Dims) = rand(GLOBAL_RNG, s, dims)
-rand(s::Sampleable, dim1::Int, moredims::Int...) =
-    rand(GLOBAL_RNG, s, (dim1, moredims...))
 rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
     rand(rng, s, (dim1, moredims...))
+
+# default fallback (redefined for univariate distributions)
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
+    return @inbounds rand!(rng, s, Array{eltype(s)}(undef, size(s)))
+end
+
+# multiple samples
+function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
+    out = Array{eltype(s)}(undef, dims)
+    return @inbounds rand!(rng, sampler(s), out)
+end
+function rand(
+    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
+)
+    sz = size(s)
+    ax = map(Base.OneTo, dims)
+    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
+    return @inbounds rand!(rng, sampler(s), out, false)
+end
+
+# these are workarounds for sampleables that incorrectly base `eltype` on the parameters
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
+    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+end
+function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
+    out = Array{float(eltype(s))}(undef, dims)
+    return @inbounds rand!(rng, sampler(s), out)
+end
+function rand(
+    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
+)
+    sz = size(s)
+    ax = map(Base.OneTo, dims)
+    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
+    return @inbounds rand!(rng, sampler(s), out, false)
+end
 
 """
     rand!([rng::AbstractRNG,] s::Sampleable, A::AbstractArray)
@@ -40,10 +74,102 @@ form as specified above. The rules are summarized as below:
   matrices with each element for a sample matrix.
 """
 function rand! end
-rand!(s::Sampleable, X::AbstractArray{<:AbstractArray}, allocate::Bool) =
-    rand!(GLOBAL_RNG, s, X, allocate)
-rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
-rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray) = _rand!(rng, s, X)
+Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray)
+    return _rand!(rng, s, X)
+end
+
+# default definitions for arraylike variates
+@inline function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real,N},
+) where {N}
+    @boundscheck begin
+        size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    return _rand!(rng, s, x)
+end
+
+@inline function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:Real,M},
+) where {N,M}
+    @boundscheck begin
+        M > N ||
+            throw(DimensionMismatch(
+                "number of dimensions of `x` ($M) must be greater than number of dimensions of `s` ($N)"
+            ))
+        ntuple(i -> size(x, i), Val(N)) == size(s) ||
+            throw(DimensionMismatch("inconsistent array dimensions"))
+    end
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x)
+end
+
+function _rand!(
+    rng::AbstractRNG,
+    s::Sampleable{<:ArrayLikeVariate},
+    x::AbstractArray{<:Real},
+)
+    @inbounds for xi in eachvariate(x, variate_form(typeof(s)))
+        rand!(rng, s, xi)
+    end
+    return x
+end
+
+Base.@propagate_inbounds function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+) where {N}
+    sz = size(s)
+    allocate = !all(isassigned(x, i) && size(@inbounds x[i]) == sz for i in eachindex(x))
+    return rand!(rng, s, x, allocate)
+end
+
+Base.@propagate_inbounds function rand!(
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
+) where {N}
+    return rand!(GLOBAL_RNG, s, x, allocate)
+end
+@inline function rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
+) where {N}
+    @boundscheck begin
+        if !allocate
+            sz = size(s)
+            all(size(xi) == sz for xi in x) ||
+                throw(DimensionMismatch("inconsistent array dimensions"))
+        end
+    end
+    # the function barrier fixes performance issues if `sampler(s)` is type unstable
+    return _rand!(rng, sampler(s), x, allocate)
+end
+
+function _rand!(
+    rng::AbstractRNG,
+    s::Sampleable{ArrayLikeVariate{N}},
+    x::AbstractArray{<:AbstractArray{<:Real,N}},
+    allocate::Bool,
+) where {N}
+    if allocate
+        @inbounds for i in eachindex(x)
+            x[i] = rand(rng, s)
+        end
+    else
+        @inbounds for xi in x
+            rand!(rng, s, xi)
+        end
+    end
+    return x
+end
 
 """
     sampler(d::Distribution) -> Sampleable

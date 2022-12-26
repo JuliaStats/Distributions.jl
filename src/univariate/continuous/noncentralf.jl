@@ -1,5 +1,7 @@
 """
     NoncentralF(ν1, ν2, λ)
+
+*Noncentral F-distribution* with `ν1 > 0` and `ν2 > 0` degrees of freedom and noncentrality parameter `λ >= 0`.
 """
 struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
@@ -8,13 +10,13 @@ struct NoncentralF{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralF{T}(ν1::T, ν2::T, λ::T) where {T} = new{T}(ν1, ν2, λ)
 end
 
-function NoncentralF(ν1::T, ν2::T, λ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(NoncentralF, ν1 > zero(T) && ν2 > zero(T) && λ >= zero(T))
+function NoncentralF(ν1::T, ν2::T, λ::T; check_args::Bool=true) where {T <: Real}
+    @check_args NoncentralF (ν1, ν1 > zero(ν1)) (ν2, ν2 > zero(ν2)) (λ, λ >= zero(λ))
     return NoncentralF{T}(ν1, ν2, λ)
 end
 
-NoncentralF(ν1::Real, ν2::Real, λ::Real) = NoncentralF(promote(ν1, ν2, λ)...)
-NoncentralF(ν1::Integer, ν2::Integer, λ::Integer) = NoncentralF(float(ν1), float(ν2), float(λ))
+NoncentralF(ν1::Real, ν2::Real, λ::Real; check_args::Bool=true) = NoncentralF(promote(ν1, ν2, λ)...; check_args=check_args)
+NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool=true) = NoncentralF(float(ν1), float(ν2), float(λ); check_args=check_args)
 
 @distr_support NoncentralF 0.0 Inf
 
@@ -23,9 +25,10 @@ NoncentralF(ν1::Integer, ν2::Integer, λ::Integer) = NoncentralF(float(ν1), f
 function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real, S <: Real}
     NoncentralF(T(ν1), T(ν2), T(λ))
 end
-function convert(::Type{NoncentralF{T}}, d::NoncentralF{S}) where {T <: Real, S <: Real}
-    NoncentralF(T(d.ν1), T(d.ν2), T(d.λ), check_args=false)
+function Base.convert(::Type{NoncentralF{T}}, d::NoncentralF) where {T<:Real}
+    NoncentralF{T}(T(d.ν1), T(d.ν2), T(d.λ))
 end
+Base.convert(::Type{NoncentralF{T}}, d::NoncentralF{T}) where {T<:Real} = d
 
 ### Parameters
 

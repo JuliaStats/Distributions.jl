@@ -23,10 +23,9 @@ Distributions.rank(::MatrixDistribution)
 mean(::MatrixDistribution)
 var(::MatrixDistribution)
 cov(::MatrixDistribution)
-pdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
-logpdf{T<:Real}(d::MatrixDistribution, x::AbstractMatrix{T})
+pdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
+logpdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
 Distributions._rand!(::AbstractRNG, ::MatrixDistribution, A::AbstractMatrix)
-vec(d::MatrixDistribution)
 ```
 
 ## Distributions
@@ -35,7 +34,6 @@ vec(d::MatrixDistribution)
 MatrixNormal
 Wishart
 InverseWishart
-MatrixReshaped
 MatrixTDist
 MatrixBeta
 MatrixFDist
@@ -45,7 +43,7 @@ LKJ
 ## Internal Methods (for creating your own matrix-variate distributions)
 
 ```@docs
-Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)
+Distributions._logpdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})
 ```
 
 ## Index

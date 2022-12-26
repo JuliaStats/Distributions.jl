@@ -34,12 +34,12 @@ function var(d::DirichletMultinomial{T}) where T <: Real
     end
     v
 end
-function cov(d::DirichletMultinomial{T}) where T <: Real
+function cov(d::DirichletMultinomial{<:Real})
     v = var(d)
     c = d.α * d.α'
-    multiply!(c, -d.n * (d.n + d.α0) / (d.α0^2 * (1 + d.α0)))
-    for i in 1:length(d)
-        @inbounds c[i, i] = v[i]
+    lmul!(-d.n * (d.n + d.α0) / (d.α0^2 * (1 + d.α0)), c)
+    for (i, vi) in zip(diagind(c), v)
+        @inbounds c[i] = vi
     end
     c
 end

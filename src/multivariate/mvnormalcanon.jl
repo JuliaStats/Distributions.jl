@@ -57,7 +57,7 @@ const ZeroMeanIsoNormalCanon{Axes}  = MvNormalCanon{Float64,ScalMat{Float64},Zer
 
 ### Constructors
 function MvNormalCanon(μ::AbstractVector{T}, h::AbstractVector{T}, J::AbstractPDMat{T}) where {T<:Real}
-    length(μ) == length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    length(μ) == length(h) == size(J, 1) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     if typeof(μ) === typeof(h)
         return MvNormalCanon{T,typeof(J),typeof(μ)}(μ, h, J)
     else
@@ -76,7 +76,7 @@ function MvNormalCanon(μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J:
 end
 
 function MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractPDMat)
-    length(h) == dim(J) || throw(DimensionMismatch("Inconsistent argument dimensions"))
+    length(h) == size(J, 1) || throw(DimensionMismatch("Inconsistent argument dimensions"))
     R = Base.promote_eltype(h, J)
     hh = convert(AbstractArray{R}, h)
     JJ = convert(AbstractArray{R}, J)
@@ -91,6 +91,7 @@ Construct a multivariate normal distribution with potential vector `h` and preci
 """
 MvNormalCanon(h::AbstractVector{<:Real}, J::AbstractMatrix{<:Real}) = MvNormalCanon(h, PDMat(J))
 MvNormalCanon(h::AbstractVector{<:Real}, J::Diagonal{<:Real}) = MvNormalCanon(h, PDiagMat(J.diag))
+MvNormalCanon(μ::AbstractVector{<:Real}, J::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormalCanon(μ, PDiagMat(J.data.diag))
 function MvNormalCanon(h::AbstractVector{<:Real}, J::UniformScaling{<:Real})
     return MvNormalCanon(h, ScalMat(length(h), J.λ))
 end
@@ -129,6 +130,8 @@ distrname(d::ZeroMeanFullNormalCanon) = "ZeroMeanFullNormalCanon"
 function convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.h), convert(AbstractArray{T}, d.J))
 end
+Base.convert(::Type{MvNormalCanon{T}}, d::MvNormalCanon{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormalCanon{T}}, μ::AbstractVector{<:Real}, h::AbstractVector{<:Real}, J::AbstractPDMat) where {T<:Real}
     MvNormalCanon(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, h), convert(AbstractArray{T}, J))
 end
@@ -174,7 +177,13 @@ if isdefined(PDMats, :PDSparseMat)
     unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
 end
 
-_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector) =
-    add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
-_rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix) =
-    add!(unwhiten_winv!(d.J, randn!(rng,x)), d.μ)
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
+    unwhiten_winv!(d.J, randn!(rng, x))
+    x .+= d.μ
+    return x
+end
+function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
+    unwhiten_winv!(d.J, randn!(rng, x))
+    x .+= d.μ
+    return x
+end

@@ -18,7 +18,7 @@ end
 
 function GenericMvTDist(df::T, μ::Mean, Σ::Cov) where {Cov<:AbstractPDMat, Mean<:AbstractVector, T<:Real}
     d = length(μ)
-    dim(Σ) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
+    size(Σ, 1) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
     R = Base.promote_eltype(T, μ, Σ)
     S = convert(AbstractArray{R}, Σ)
     m = convert(AbstractArray{R}, μ)
@@ -27,7 +27,7 @@ end
 
 function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     R = Base.promote_eltype(df, Σ)
-    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ)
+    GenericMvTDist(df, Zeros{R}(size(Σ, 1)), Σ)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -39,6 +39,8 @@ function convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist) where T<:Real
     m = convert(AbstractArray{T}, d.μ)
     GenericMvTDist{T, typeof(S), typeof(m)}(T(d.df), d.dim, m, S)
 end
+Base.convert(::Type{GenericMvTDist{T}}, d::GenericMvTDist{T}) where {T<:Real} = d
+
 function convert(::Type{GenericMvTDist{T}}, df, dim, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     S = convert(AbstractArray{T}, Σ)
     m = convert(AbstractArray{T}, μ)
@@ -146,8 +148,6 @@ function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix)
     return r
 end
 
-_pdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = exp!(_logpdf!(r, d, x))
-
 function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
     z = x - d.μ
     prz = invscale(d)*z
@@ -156,7 +156,7 @@ end
 
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
     x .= x ./ y .+ d.μ
@@ -165,7 +165,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)

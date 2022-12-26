@@ -32,11 +32,12 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function LKJ(d::Integer, η::Real; check_args = true)
-    if check_args
-        d > 0 || throw(ArgumentError("Matrix dimension must be positive."))
-        η > 0 || throw(ArgumentError("Shape parameter must be positive."))
-    end
+function LKJ(d::Integer, η::Real; check_args::Bool=true)
+    @check_args(
+        LKJ,
+        (d, d > 0, "matrix dimension must be positive."),
+        (η, η > 0, "shape parameter must be positive."),
+    )
     logc0 = lkj_logc0(d, η)
     T = Base.promote_eltype(η, logc0)
     LKJ{T, typeof(d)}(d, T(η), T(logc0))
@@ -55,6 +56,7 @@ show(io::IO, d::LKJ) = show_multline(io, d, [(:d, d.d), (:η, d.η)])
 function convert(::Type{LKJ{T}}, d::LKJ) where T <: Real
     LKJ{T, typeof(d.d)}(d.d, T(d.η), T(d.logc0))
 end
+Base.convert(::Type{LKJ{T}}, d::LKJ{T}) where {T<:Real} = d
 
 function convert(::Type{LKJ{T}}, d::Integer, η, logc0) where T <: Real
     LKJ{T, typeof(d)}(d, T(η), T(logc0))
@@ -64,26 +66,26 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-dim(d::LKJ) = d.d
 
-size(d::LKJ) = (dim(d), dim(d))
+size(d::LKJ) = (d.d, d.d)
 
-rank(d::LKJ) = dim(d)
+rank(d::LKJ) = d.d
 
 insupport(d::LKJ, R::AbstractMatrix) = isreal(R) && size(R) == size(d) && isone(Diagonal(R)) && isposdef(R)
 
-mean(d::LKJ) = Matrix{partype(d)}(I, dim(d), dim(d))
+mean(d::LKJ) = Matrix{partype(d)}(I, d.d, d.d)
 
-function mode(d::LKJ; check_args = true)
-    p, η = params(d)
-    if check_args
-        η > 1 || throw(ArgumentError("mode is defined only when η > 1."))
-    end
+function mode(d::LKJ; check_args::Bool=true)
+    @check_args(
+        LKJ,
+        @setup((_, η) = params(d)),
+        (η, η > 1, "mode is defined only when η > 1."),
+    )
     return mean(d)
 end
 
 function var(lkj::LKJ)
-    d = dim(lkj)
+    d = lkj.d
     d > 1 || return zeros(d, d)
     σ² = var(_marginal(lkj))
     σ² * (ones(partype(lkj), d, d) - I)
@@ -98,12 +100,13 @@ params(d::LKJ) = (d.d, d.η)
 #  -----------------------------------------------------------------------------
 
 function lkj_logc0(d::Integer, η::Real)
+    T = float(Base.promote_typeof(d, η))
     d > 1 || return zero(η)
     if isone(η)
         if iseven(d)
-            logc0 = -lkj_onion_loginvconst_uniform_even(d)
+            logc0 = -lkj_onion_loginvconst_uniform_even(d, T)
         else
-            logc0 = -lkj_onion_loginvconst_uniform_odd(d)
+            logc0 = -lkj_onion_loginvconst_uniform_odd(d, T)
         end
     else
         logc0 = -lkj_onion_loginvconst(d, η)
@@ -159,7 +162,7 @@ function _marginal(lkj::LKJ)
     d = lkj.d
     η = lkj.η
     α = η + 0.5d - 1
-    return 2*Beta(α, α) - 1
+    AffineDistribution(-1, 2, Beta(α, α))
 end
 
 #  -----------------------------------------------------------------------------
@@ -186,32 +189,34 @@ end
 
 function lkj_onion_loginvconst(d::Integer, η::Real)
     #  Equation (17) in LKJ (2009 JMA)
-    sumlogs = zero(η)
-    for k in 2:d - 1
-        sumlogs += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k))
+    T = float(Base.promote_typeof(d, η))
+    h = T(1//2)
+    α = η + h * d - 1
+    loginvconst = (2*η + d - 3)*T(logtwo) + (T(logπ) / 4) * (d * (d - 1) - 2) + logbeta(α, α) - (d - 2) * loggamma(η + h * (d - 1))
+    for k in 2:(d - 1)
+        loginvconst += loggamma(η + h * (d - 1 - k))
     end
-    α = η + 0.5d - 1
-    loginvconst = (2η + d - 3)*logtwo + logbeta(α, α) + sumlogs - (d - 2) * loggamma(η + 0.5(d - 1))
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_odd(d::Integer)
+function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = 0.0
-    for k in 1:div(d - 1, 2)
-        sumlogs += loggamma(2k)
+    h = T(1//2)
+    loginvconst = (d - 1) * ((d + 1) * (T(logπ) / 4) - (d - 1) * (T(logtwo) / 4) - loggamma(h * (d + 1)))
+    for k in 2:2:(d - 1)
+        loginvconst += loggamma(T(k))
     end
-    loginvconst = 0.25(d^2 - 1)*logπ + sumlogs - 0.25(d - 1)^2*logtwo - (d - 1)*loggamma(0.5(d + 1))
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_even(d::Integer)
+function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
-    sumlogs = 0.0
-    for k in 1:div(d - 2, 2)
-        sumlogs += loggamma(2k)
+    h = T(1//2)
+    loginvconst = d * ((d - 2) * (T(logπ) / 4) + (3 * d - 4) * (T(logtwo) / 4) + loggamma(h * d)) - (d - 1) * loggamma(T(d))
+    for k in 2:2:(d - 2)
+        loginvconst += loggamma(k)
     end
-    loginvconst = 0.25d*(d - 2)*logπ + 0.25(3d^2 - 4d)*logtwo + d*loggamma(0.5d) + sumlogs - (d - 1)*loggamma(d)
+    return loginvconst
 end
 
 function lkj_vine_loginvconst(d::Integer, η::Real)
