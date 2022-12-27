@@ -668,6 +668,7 @@ const discrete_distributions = [
 ]
 
 const continuous_distributions = [
+    "alpha",
     "arcsine",
     "beta",
     "betaprime",
