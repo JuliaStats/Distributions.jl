@@ -4,7 +4,7 @@
 The *Alpha distribution* with shape parameter `α` and scale parameter `β` has probability density function
 
 ```math
-f(x, \\alpha) = \\frac{\\beta}{x^2 \\Phi(\\alpha) \\sqrt{2\\pi}} *
+f(x, \\alpha, \\beta) = \\frac{\\beta}{x^2 \\Phi(\\alpha) \\sqrt{2\\pi}} *
 \\exp(-\\frac{1}{2} (\\alpha-\\beta/x)^2)
 ```
 where :math:`\\Phi` is the normal CDF.
