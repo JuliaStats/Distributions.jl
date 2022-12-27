@@ -703,6 +703,7 @@ const continuous_distributions = [
     "normalinversegaussian",
     "lognormal",    # LogNormal depends on Normal
     "logitnormal",    # LogitNormal depends on Normal
+    "maximum",
     "pareto",
     "rayleigh",
     "rician",
