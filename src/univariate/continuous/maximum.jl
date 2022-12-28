@@ -16,10 +16,10 @@ rand(rng::AbstractRNG, d::Maximum{D}) where {D} = maximum([rand(rng, d.dist) for
 
 #### Evaluation
 
-cdf(d::Maximum{D}, x::Real) where {D} = cdf(d.dist, x)^n
-pdf(d::Maximum{D}, x::Real) where {D} = n*pdf(d.dist, x)*cdf(d.dist, x)^(n-1)
-logpdf(d::Maximum{D}, x::Real) where {D} = log(n)+logpdf(d.dist, x)+(n-1)*logcdf(d.dist, x)
-quantile(d::Maximum{D}, q::Real) where {D} = quantile(d.dist, q^(1/n))
+cdf(d::Maximum{D}, x::Real) where {D} = cdf(d.dist, x)^d.n
+pdf(d::Maximum{D}, x::Real) where {D} = d.n*pdf(d.dist, x)*cdf(d.dist, x)^(d.n-1)
+logpdf(d::Maximum{D}, x::Real) where {D} = log(d.n)+logpdf(d.dist, x)+(d.n-1)*logcdf(d.dist, x)
+quantile(d::Maximum{D}, q::Real) where {D} = quantile(d.dist, q^(1/d.n))
 minimum(d::Maximum{D}) where {D} = minimum(d.dist)
 maximum(d::Maximum{D}) where {D} = maximum(d.dist)
 insupport(d::Maximum{D}, x::Real) where {D} = insupport(d.dist, x)
