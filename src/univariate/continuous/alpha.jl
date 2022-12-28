@@ -4,10 +4,10 @@
 The *Alpha distribution* with shape parameter `α` and scale parameter `β` has probability density function
 
 ```math
-f(x, \\alpha, \\beta) = \\frac{\\beta}{x^2 \\Phi(\\alpha) \\sqrt{2\\pi}} *
-\\exp(-\\frac{1}{2} (\\alpha-\\beta/x)^2)
+f(x; \\alpha, \\beta) = \\frac{\\beta}{\\sqrt{2\\pi} x^2 \\Phi(\\alpha)}
+\\exp{\\bigg(-\\frac{(\\alpha-\\beta/x)^2}{2}\\bigg)}
 ```
-where :math:`\\Phi` is the normal CDF.
+where ``\\Phi`` is the normal CDF.
 
 
 ```julia
@@ -24,28 +24,27 @@ External links
 
 * [Continuous Univariate Distributions, Volumes I and II](https://www.wiley.com/en-us/Continuous+Univariate+Distributions%2C+Volume+1%2C+2nd+Edition-p-9780471584957)
 * [scipy.stats.alpha](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.alpha.html)
+* [Reliability Application of the Alpha Distribution](https://ieeexplore.ieee.org/abstract/document/5222136)
 
 """
 struct Alpha{T<:Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
-    Alpha{T}(α, β) where {T} = new{T}(α, β)
+    Alpha{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
 # as per NIST. ALPPDF. Online: https://www.itl.nist.gov/div898/software/dataplot/refman2/auxillar/alppdf.htm
-function Alpha(α::T; check_args::Bool=true) where {T <: Real}
+function Alpha(α::Real; check_args::Bool=true)
     @check_args Alpha (α, α > zero(α))
-    return Alpha{T}(α, 1)
+    return Alpha{typeof(α)}(α, oneunit(α))
 end
 
-function Alpha(α::T, β::T; check_args::Bool=true) where {T <: Real}
+function Alpha(α::Real, β::Real; check_args::Bool=true)
     @check_args Alpha (α, α > zero(α)) (β, β > zero(β))
-    return Alpha{T}(α, β)
+    a, b = promote(α, β)
+    return Alpha{typeof(a)}(a, b)
 end
 
-Alpha(α::Real, β::Real; check_args::Bool=true) = Alpha(promote(α, β)...; check_args=check_args)
-Alpha(α::Integer, β::Integer; check_args::Bool=true) = Alpha(float(α), float(β); check_args=check_args)
-Alpha(α::Real; check_args::Bool=true) = Alpha(α, one(α); check_args=check_args)
 Alpha() = Alpha{Float64}(1.0, 1.0)
 
 @distr_support Alpha 0.0 Inf
@@ -67,12 +66,21 @@ partype(::Alpha{T}) where {T} = T
 
 mode(d::Alpha) = ((sqrt(d.α^2 + 8) - d.α) * d.β) / 4
 
-function pdf(d::Alpha{T}, x::Real) where T<:Real
-    nd = Normal()
-    return pdf(nd, d.α-d.β/x) / ((x^2) * cdf(nd, d.α))
+function pdf(d::Alpha, x::Real)
+    return d.β * normpdf(d.α - d.β/x) / (x^2 * normcdf(d.α))
 end
 
-function cdf(d::Alpha{T}, x::Real) where T<:Real
-    nd = Normal()
-    return cdf(nd, d.α-d.β/x) / cdf(nd, d.α)
+function cdf(d::Alpha, x::Real)
+    return normcdf(d.α - d.β/x) / normcdf(d.α)
+end
+
+logpdf(d::Alpha, x::Real) = d.β - (2 * log(x)) + normlogpdf(d.α - d.β/x) - normlogcdf(d.α)
+logcdf(d::Alpha, x::Real) = log(cdf(d, x))
+
+function quantile(d::Alpha, p::Real)
+    return d.β / (d.α - norminvcdf(p * normcdf(d.α)))
+end
+
+function survivor_function(d::Alpha, x::Real)
+    return (normcdf(d.α) - normcdf(d.α - d.β/x)) / normcdf(d.α)
 end
