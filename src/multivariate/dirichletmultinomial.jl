@@ -1,3 +1,24 @@
+"""
+The [Dirichlet-Multinomial distribution](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
+can be understood as draws from a Multinomial distribution where each sample has a slightly different probability vector, which is itself drawn from a common Dirichlet distribution. This contrasts with the Multinomial distribution, which assumes that all observations arise from a single fixed probability vector. This enables the Dirichlet-multinomial to accommodate more variable (a.k.a, over-dispersed) count data than the Multinomial.
+
+The probability mass function is given by
+
+```math
+f(x; \\alpha) = \\frac{\\left(n!\\right)\\Gamma\\left(\\alpha_0\\right)} {\\Gamma\\left(n+\\alpha_0\\right)}\\prod_{k=1}^K\\frac{\\Gamma(x_{k}+\\alpha_{k})}{\\left(x_{k}!\\right)\\Gamma(\\alpha_{k})}
+```
+where
+- ``x_k`` is the k-th count
+- ``n = \\sum_k x_k``
+- ``\\alpha_k`` is a prior belief about the k-th count
+- ``\\alpha_0 = \\sum_k \\alpha_k``
+- ``\\Gamma`` is the gamma function, defined as ``\\Gamma(x) = (x -1)!``
+
+```julia
+DirichletMultinomial(n, α)   # Dirichlet-Multinomial distribution for n trials with parameter vector α.
+DirichletMultinomial(n, k)   # Dirichlet-Multinomial distribution with n trials and paramemeter vector of length k of ones.
+```
+"""
 struct DirichletMultinomial{T <: Real} <: DiscreteMultivariateDistribution
     n::Int
     α::Vector{T}
