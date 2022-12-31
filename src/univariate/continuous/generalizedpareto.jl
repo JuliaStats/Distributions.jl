@@ -54,7 +54,6 @@ end
 function GeneralizedPareto(σ::Real, ξ::Real; check_args::Bool=true)
     GeneralizedPareto(zero(σ), σ, ξ; check_args=check_args)
 end
-
 function GeneralizedPareto(ξ::Real; check_args::Bool=true)
     GeneralizedPareto(zero(ξ), one(ξ), ξ; check_args=check_args)
 end
