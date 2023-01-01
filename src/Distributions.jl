@@ -261,7 +261,6 @@ export
     suffstats,          # compute sufficient statistics
     succprob,           # the success probability
     support,            # the support of a distribution (or a distribution type)
-    survivor_function,  # complementary cumulative distribution function 
     truncated,          # truncate a distribution with a lower and upper bound
     var,                # variance of distribution
     varlogx,            # variance of log(x)

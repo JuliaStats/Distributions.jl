@@ -50,7 +50,6 @@ Alpha() = Alpha{Float64}(1.0, 1.0)
 @distr_support Alpha 0.0 Inf
 
 #### Conversions
-convert(::Type{Alpha{T}}, α::S, β::S) where {T <: Real, S <: Real} = Alpha(T(α), T(β))
 Base.convert(::Type{Alpha{T}}, d::Alpha) where {T<:Real} = Alpha{T}(T(d.α), T(d.β))
 Base.convert(::Type{Alpha{T}}, d::Alpha{T}) where {T<:Real} = d
 
@@ -67,20 +66,29 @@ partype(::Alpha{T}) where {T} = T
 mode(d::Alpha) = ((sqrt(d.α^2 + 8) - d.α) * d.β) / 4
 
 function pdf(d::Alpha, x::Real)
-    return d.β * normpdf(d.α - d.β/x) / (x^2 * normcdf(d.α))
+    res = d.β * normpdf(d.α - d.β/x) / (x^2 * normcdf(d.α))
+    return x < 0 ? zero(res) : res
 end
 
 function cdf(d::Alpha, x::Real)
     return normcdf(d.α - d.β/x) / normcdf(d.α)
 end
 
-logpdf(d::Alpha, x::Real) = d.β - (2 * log(x)) + normlogpdf(d.α - d.β/x) - normlogcdf(d.α)
-logcdf(d::Alpha, x::Real) = log(cdf(d, x))
+function logpdf(d::Alpha, x::Real)
+    res = log(d.β / x^2) + normlogpdf(d.α - d.β/x) - normlogcdf(d.α)
+    return x < 0 ? oftype(res, -Inf) : res
+end
+
+function logcdf(d::Alpha, x::Real)
+    u = normlogcdf(d, d.α)
+    v = normlogcdf(d, max(d.α - d.β/x, d.α))
+    return u + log1mexp(v - u)
+end
 
 function quantile(d::Alpha, p::Real)
     return d.β / (d.α - norminvcdf(p * normcdf(d.α)))
 end
 
-function survivor_function(d::Alpha, x::Real)
+function ccdf(d::Alpha, x::Real)
     return (normcdf(d.α) - normcdf(d.α - d.β/x)) / normcdf(d.α)
 end
