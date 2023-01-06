@@ -3,7 +3,7 @@
 
 The [Dirichlet-multinomial distribution](https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution)
 is the distribution of a draw from a multinomial distribution where each sample has a 
-slightly different probability vector, dr awn from a common Dirichlet distribution.
+slightly different probability vector, drawn from a common Dirichlet distribution.
 
 This contrasts with the multinomial distribution, which assumes that all observations arise
 from a single fixed probability vector. This enables the Dirichlet-multinomial to
