@@ -40,7 +40,7 @@ function test_location_scale(
 
     @testset "Promotions and conversions" begin
         @testset "$k" for (k,dtest) in d_dict
-            if dtest isa LocationScale
+            if dtest isa AffineDistribution
                 @test typeof(dtest.μ) === typeof(dtest.σ)
                 @test location(dtest) ≈ μ atol=1e-15
                 @test    scale(dtest) ≈ σ atol=1e-15
@@ -131,7 +131,7 @@ function test_location_scale_normal(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, μD::Real, σD::Real,
 )
     ρ = Normal(μD, σD)
-    dref = Normal(μ + σ * μD, σ * σD)
+    dref = Normal(μ + σ * μD,  abs(σ) * σD)
     @test dref === μ + σ * ρ
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
@@ -147,23 +147,23 @@ end
 @testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
-    for _rng in (missing, rng)
-        test_location_scale_normal(_rng, 0.3, 0.2, 0.1, 0.2)
-        test_location_scale_normal(_rng, -0.3, 0.1, -0.1, 0.3)
-        test_location_scale_normal(_rng, 1.3, 0.4, -0.1, 0.5)
+    for (_rng, sign) in Iterators.product((missing, rng), (1, -1))
+        test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
+        test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
+        test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
     end
     test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
 
     probs = normalize!(rand(10), 1)
-    for _rng in (missing, rng)
-        test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
-        test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
-        test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
+    for (_rng, sign) in Iterators.product((missing, rng), (1, -1))
+        test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
+        test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
+        test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
     end
 
-    @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
+    @test_logs AffineDistribution(1.0, 1, Normal())
 
-    @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
-    @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
+    ls_norm = AffineDistribution(1.0, 1, Normal())
+    @test ls_norm isa AffineDistribution{Float64, Continuous, Normal{Float64}}
     @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
 end
