@@ -38,23 +38,24 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     σ::T
     ρ::D
     # TODO: Remove? It is not used in Distributions anymore
-    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+    function AffineDistribution{T,S,D}(μ::T, σ::T, ρ::D; check_args::Bool=true) where {T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}}
+        @check_args AffineDistribution (σ, !iszero(σ))
         new{T, S, D}(μ, σ, ρ)
     end
     function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T<:Real}
-        @assert σ ≉ 0 "Scale parameter σ cannot be zero."
         D = typeof(ρ)
         S = value_support(D)
         return new{T,S,D}(μ, σ, ρ)
     end
 end
 
-function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=false) where {T<:Real}
+function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
+    @check_args AffineDistribution (σ, !iszero(σ))
     _T = promote_type(eltype(ρ), T)
     return AffineDistribution{_T}(_T(μ), _T(σ), ρ)
 end
 
-function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=false)
+function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
     return AffineDistribution(promote(μ, σ)..., ρ; check_args=check_args)
 end
 
@@ -64,7 +65,7 @@ function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_arg
     Base.depwarn("`LocationScale` is deprecated. Use `+` and `*` instead", :LocationScale)
     # preparation for future PR where I remove σ > 0 check
     @check_args LocationScale (σ, σ > zero(σ))
-    return AffineDistribution(μ, σ, ρ)
+    return AffineDistribution(μ, σ, ρ; check_args=false)
 end
 
 const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
@@ -76,7 +77,7 @@ minimum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * minimum(d.ρ) : d.μ + d.σ * maximum(d.ρ)
 maximum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * maximum(d.ρ) : d.μ + d.σ * minimum(d.ρ)
-support(d::AffineDistribution) = _support(d.μ, d.σ, support(d.ρ))
+support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
 _support(μ::Real, σ::Real, support) =
     σ > 0 ? μ .+ σ .* support : μ .+ σ .* reverse(support)
 _support(μ::Real, σ::Real, support::RealInterval) =
@@ -119,7 +120,6 @@ entropy(d::ContinuousAffineDistribution) = entropy(d.ρ) + log(abs(d.σ))
 entropy(d::DiscreteAffineDistribution) = entropy(d.ρ)
 
 mgf(d::AffineDistribution,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
-cf(d::AffineDistribution, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 
 #### Evaluation & Sampling
 
@@ -163,5 +163,5 @@ Base.:+(x::Real, d::UnivariateDistribution) = d + x
 Base.:*(x::Real, d::UnivariateDistribution) = AffineDistribution(zero(x), x, d)
 Base.:*(d::UnivariateDistribution, x::Real) = x * d
 Base.:-(d::UnivariateDistribution, x::Real) = d + -x
-Base.:-(d::UnivariateDistribution) = -one(eltype(d)) * d
+Base.:-(d::UnivariateDistribution) = -one(partype(d)) * d
 Base.:/(d::UnivariateDistribution, x::Real) = inv(x) * d
