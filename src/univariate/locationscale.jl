@@ -87,7 +87,7 @@ function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
 end
 affinedistribution_support(μ::Real, σ::Real, support) = σ > 0 ? μ .+ σ .* support : μ .+ σ .* reverse(support)
 
-AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + σ * d.μ, σ * d.σ, d.ρ)
+AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + d.μ * σ, σ * d.σ, d.ρ)
 
 #### Conversions
 
