@@ -78,8 +78,6 @@ minimum(d::AffineDistribution) =
 maximum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * maximum(d.ρ) : d.μ + d.σ * minimum(d.ρ)
 support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
-affinedistribution_support(μ::Real, σ::Real, support) =
-    σ > 0 ? μ .+ σ .* support : μ .+ σ .* reverse(support)
 function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
     if σ > 0
         return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
@@ -88,8 +86,7 @@ function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
     end
 end
 
-AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) =
-    AffineDistribution(μ + σ * d.μ, σ * d.σ, d.ρ)
+AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + σ * d.μ, σ * d.σ, d.ρ)
 
 #### Conversions
 
@@ -126,7 +123,6 @@ entropy(d::ContinuousAffineDistribution) = entropy(d.ρ) + log(abs(d.σ))
 entropy(d::DiscreteAffineDistribution) = entropy(d.ρ)
 
 mgf(d::AffineDistribution,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
-cf(d::AffineDistribution, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 
 #### Evaluation & Sampling
 
@@ -138,28 +134,37 @@ logpdf(d::DiscreteAffineDistribution, x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ)
 
 # CDF methods
 
-const CDF_FNS = (:cdf, :logcdf, :logccdf, :ccdf)
-for (f, fc) in zip(CDF_FNS, reverse(CDF_FNS))
+for (f, fc) in ((:cdf, :ccdf), (:ccdf, :cdf), (:logcdf, :logccdf), (:logccdf, :logcdf))
     @eval function $f(d::ContinuousAffineDistribution, x::Real)
-        x = (x - d.μ) / d.σ
-        return d.σ > 0 ? $f(d.ρ, x) : $fc(d.ρ, x)
+        z = (x - d.μ) / d.σ
+        return d.σ > 0 ? $f(d.ρ, z) : $fc(d.ρ, z)
     end
 end
 
 function cdf(d::DiscreteAffineDistribution, x::Real)
-    x = (x - d.μ) / d.σ
+    z = (x - d.μ) / d.σ
     # Have to include probability mass at endpoints
-    return d.σ > 0 ? cdf(d.ρ, x) : (ccdf(d.ρ, x) + pdf(d.ρ, x))
+    return d.σ > 0 ? cdf(d.ρ, z) : (ccdf(d.ρ, z) + pdf(d.ρ, z))
 end
-ccdf(d::DiscreteAffineDistribution, x::Real) = 1 - cdf(d, x)
-logcdf(d::DiscreteAffineDistribution, x::Real) = log(cdf(d, x))
-logccdf(d::DiscreteAffineDistribution, x::Real) = log(ccdf(d, x))
+function ccdf(d::DiscreteAffineDistribution, x::Real)
+    z = (x - d.μ) / d.σ
+    # Have to exlude probability mass at endpoints
+    return d.σ > 0 ? ccdf(d.ρ, z) : (cdf(d.ρ, z) - pdf(d.ρ, z))
+end
+function logcdf(d::DiscreteAffineDistribution, x::Real)
+    z = (x - d.μ) / d.σ
+    return d.σ > 0 ? logcdf(d.ρ, z) : logaddexp(logccdf(d.ρ, z), logpdf(d.ρ, z))
+end
+function logccdf(d::DiscreteAffineDistribution, x::Real)
+    z = (x - d.μ) / d.σ
+    return d.σ > 0 ? logccdf(d.ρ, z) : logsubexp(logcdf(d.ρ, z), logpdf(d.ρ, z))
+end
 
 quantile(d::AffineDistribution, q::Real) = d.μ + d.σ * quantile(d.ρ, d.σ > 0 ? q : 1 - q)
 
 rand(rng::AbstractRNG, d::AffineDistribution) = d.μ + d.σ * rand(rng, d.ρ)
-gradlogpdf(d::ContinuousAffineDistribution, x::Real) =
-    gradlogpdf(d.ρ, (x-d.μ)/d.σ) / d.σ
+cf(d::AffineDistribution, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
+gradlogpdf(d::ContinuousAffineDistribution, x::Real) = gradlogpdf(d.ρ,(x-d.μ)/d.σ) / d.σ
 
 #### Syntactic sugar for simple transforms of distributions, e.g., d + x, d - x, and so on
 

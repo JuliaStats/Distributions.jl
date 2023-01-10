@@ -20,7 +20,6 @@ import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
-import LogExpFunctions: logaddexp
 
 import PDMats: dim, PDMat, invquad
 
