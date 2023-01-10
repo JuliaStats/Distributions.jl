@@ -78,12 +78,18 @@ minimum(d::AffineDistribution) =
 maximum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * maximum(d.ρ) : d.μ + d.σ * minimum(d.ρ)
 support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
-_support(μ::Real, σ::Real, support) =
+affinedistribution_support(μ::Real, σ::Real, support) =
     σ > 0 ? μ .+ σ .* support : μ .+ σ .* reverse(support)
-_support(μ::Real, σ::Real, support::RealInterval) =
-    σ > 0 ? μ + σ * support : μ + σ * support
+function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
+    if σ > 0
+        return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
+    else
+        return RealInterval(μ + σ * support.ub, μ + σ * support.lb)
+    end
+end
 
-AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) = AffineDistribution(μ + d.μ * σ, σ * d.σ, d.ρ)
+AffineDistribution(μ::Real, σ::Real, d::AffineDistribution) =
+    AffineDistribution(μ + σ * d.μ, σ * d.σ, d.ρ)
 
 #### Conversions
 
@@ -120,6 +126,7 @@ entropy(d::ContinuousAffineDistribution) = entropy(d.ρ) + log(abs(d.σ))
 entropy(d::DiscreteAffineDistribution) = entropy(d.ρ)
 
 mgf(d::AffineDistribution,t::Real) = exp(d.μ*t) * mgf(d.ρ,d.σ*t)
+cf(d::AffineDistribution, t::Real) = cf(d.ρ,t*d.σ) * exp(1im*t*d.μ)
 
 #### Evaluation & Sampling
 
@@ -130,25 +137,23 @@ logpdf(d::ContinuousAffineDistribution,x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ) - l
 logpdf(d::DiscreteAffineDistribution, x::Real) = logpdf(d.ρ,(x-d.μ)/d.σ)
 
 # CDF methods
-function cdf(d::ContinuousAffineDistribution, x::Real)
-    x = (x - d.μ) / d.σ
-    return d.σ < 0 ? ccdf(d.ρ, x) : cdf(d.ρ, x)
-end
 
-function logcdf(d::ContinuousAffineDistribution, x::Real)
-    x = (x - d.μ) / d.σ
-    return d.σ < 0 ? logccdf(d.ρ, x) : logcdf(d.ρ, x)
+const CDF_FNS = (:cdf, :logcdf, :logccdf, :ccdf)
+for (f, fc) in zip(CDF_FNS, reverse(CDF_FNS))
+    @eval function $f(d::ContinuousAffineDistribution, x::Real)
+        x = (x - d.μ) / d.σ
+        return d.σ > 0 ? $f(d.ρ, x) : $fc(d.ρ, x)
+    end
 end
 
 function cdf(d::DiscreteAffineDistribution, x::Real)
     x = (x - d.μ) / d.σ
-    if d.σ < 0
-        # We have to include the probability mass at the end point
-        return ccdf(d.ρ, x) + pdf(d.ρ, x)
-    else
-        return cdf(d.ρ, x)
-    end
+    # Have to include probability mass at endpoints
+    return d.σ > 0 ? cdf(d.ρ, x) : (ccdf(d.ρ, x) + pdf(d.ρ, x))
 end
+ccdf(d::DiscreteAffineDistribution, x::Real) = 1 - cdf(d, x)
+logcdf(d::DiscreteAffineDistribution, x::Real) = log(cdf(d, x))
+logccdf(d::DiscreteAffineDistribution, x::Real) = log(ccdf(d, x))
 
 quantile(d::AffineDistribution, q::Real) = d.μ + d.σ * quantile(d.ρ, d.σ > 0 ? q : 1 - q)
 

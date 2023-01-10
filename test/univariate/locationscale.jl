@@ -147,18 +147,21 @@ end
 @testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
-    for _rng in (missing, rng), sign in (1, -1)
-        test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
-        test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
-        test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
+    @testset "Normal" begin
+        for _rng in (missing, rng), sign in (1, -1)
+            test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
+            test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
+            test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
+        end
+        test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
     end
-    test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
-
-    probs = normalize!(rand(10), 1)
-    for _rng in (missing, rng), sign in (1, -1)
-        test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
-        test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
-        test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+    @testset "DiscreteNonParametric" begin
+        probs = normalize!(rand(10), 1)
+        for _rng in (missing, rng), sign in (1, -1)
+            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+        end
     end
 
     @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
