@@ -149,7 +149,7 @@ function cdf(d::DiscreteAffineDistribution, x::Real)
 end
 function ccdf(d::DiscreteAffineDistribution, x::Real)
     z = (x - d.μ) / d.σ
-    # Have to exlude probability mass at endpoints
+    # Have to exclude probability mass at endpoints
     return d.σ > 0 ? ccdf(d.ρ, z) : (cdf(d.ρ, z) - pdf(d.ρ, z))
 end
 function logcdf(d::DiscreteAffineDistribution, x::Real)

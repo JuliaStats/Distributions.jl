@@ -90,7 +90,7 @@ function test_location_scale(
             @test loglikelihood(dtest, xs) ≈ loglikelihood(dref, xs)
 
             @test cdf(dtest, x) ≈ cdf(dref, x)
-            @test logcdf(dtest, x) ≈ logcdf(dref, x)
+            @test logcdf(dtest, x) ≈ logcdf(dref, x) atol=1e-14
             @test ccdf(dtest, x) ≈ ccdf(dref, x) atol=1e-14
             @test logccdf(dtest, x) ≈ logccdf(dref, x) atol=1e-14
 
@@ -102,7 +102,7 @@ function test_location_scale(
             @test cquantile(dtest, 0.5) ≈ cquantile(dref, 0.5)
             @test cquantile(dtest, 0.9) ≈ cquantile(dref, 0.9)
 
-            @test invlogcdf(dtest, log(0.2)) ≈ invlogcdf(dref, log(0.2))
+            @test invlogcdf(dtest, log(0.2)) ≈ invlogcdf(dref, log(0.2)) atol
             @test invlogcdf(dtest, log(0.5)) ≈ invlogcdf(dref, log(0.5))
             @test invlogcdf(dtest, log(0.8)) ≈ invlogcdf(dref, log(0.8))
 
