@@ -102,7 +102,7 @@ function test_location_scale(
             @test cquantile(dtest, 0.5) ≈ cquantile(dref, 0.5)
             @test cquantile(dtest, 0.9) ≈ cquantile(dref, 0.9)
 
-            @test invlogcdf(dtest, log(0.2)) ≈ invlogcdf(dref, log(0.2)) atol
+            @test invlogcdf(dtest, log(0.2)) ≈ invlogcdf(dref, log(0.2))
             @test invlogcdf(dtest, log(0.5)) ≈ invlogcdf(dref, log(0.5))
             @test invlogcdf(dtest, log(0.8)) ≈ invlogcdf(dref, log(0.8))
 
