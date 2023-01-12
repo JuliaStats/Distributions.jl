@@ -6,7 +6,6 @@ struct RealInterval{T<:Real}
 end
 
 RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
-
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)

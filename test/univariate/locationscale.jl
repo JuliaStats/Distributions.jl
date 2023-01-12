@@ -40,7 +40,7 @@ function test_location_scale(
 
     @testset "Promotions and conversions" begin
         @testset "$k" for (k,dtest) in d_dict
-            if dtest isa LocationScale
+            if dtest isa Distributions.AffineDistribution
                 @test typeof(dtest.μ) === typeof(dtest.σ)
                 @test location(dtest) ≈ μ atol=1e-15
                 @test    scale(dtest) ≈ σ atol=1e-15
@@ -90,7 +90,7 @@ function test_location_scale(
             @test loglikelihood(dtest, xs) ≈ loglikelihood(dref, xs)
 
             @test cdf(dtest, x) ≈ cdf(dref, x)
-            @test logcdf(dtest, x) ≈ logcdf(dref, x)
+            @test logcdf(dtest, x) ≈ logcdf(dref, x) atol=1e-14
             @test ccdf(dtest, x) ≈ ccdf(dref, x) atol=1e-14
             @test logccdf(dtest, x) ≈ logccdf(dref, x) atol=1e-14
 
@@ -131,7 +131,7 @@ function test_location_scale_normal(
     rng::Union{AbstractRNG, Missing}, μ::Real, σ::Real, μD::Real, σD::Real,
 )
     ρ = Normal(μD, σD)
-    dref = Normal(μ + σ * μD, σ * σD)
+    dref = Normal(μ + σ * μD,  abs(σ) * σD)
     @test dref === μ + σ * ρ
     return test_location_scale(rng, μ, σ, ρ, dref)
 end
@@ -147,18 +147,21 @@ end
 @testset "AffineDistribution" begin
     rng = MersenneTwister(123)
 
-    for _rng in (missing, rng)
-        test_location_scale_normal(_rng, 0.3, 0.2, 0.1, 0.2)
-        test_location_scale_normal(_rng, -0.3, 0.1, -0.1, 0.3)
-        test_location_scale_normal(_rng, 1.3, 0.4, -0.1, 0.5)
+    @testset "Normal" begin
+        for _rng in (missing, rng), sign in (1, -1)
+            test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
+            test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
+            test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
+        end
+        test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
     end
-    test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
-
-    probs = normalize!(rand(10), 1)
-    for _rng in (missing, rng)
-        test_location_scale_discretenonparametric(_rng, 1//3, 1//2, 1:10, probs)
-        test_location_scale_discretenonparametric(_rng, -1//4, 1//3, (-10):(-1), probs)
-        test_location_scale_discretenonparametric(_rng, 6//5, 3//2, 15:24, probs)
+    @testset "DiscreteNonParametric" begin
+        probs = normalize!(rand(10), 1)
+        for _rng in (missing, rng), sign in (1, -1)
+            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+        end
     end
 
     @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
