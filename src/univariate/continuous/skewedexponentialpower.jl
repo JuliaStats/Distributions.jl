@@ -114,8 +114,8 @@ function rand(rng::AbstractRNG, d::SkewedExponentialPower)
     μ, σ, p, α = params(d)
     inv_p = inv(d.p)
     if rand(rng) < d.α
-        μ - σ * 2*p^(inv_p) * α * rand(Gamma(inv_p, 1))^(inv_p)
+        μ - σ * 2*p^(inv_p) * α * rand(rng, Gamma(inv_p, 1))^(inv_p)
     else
-        μ + σ * 2*p^(inv_p) * (1-α) * rand(Gamma(inv_p, 1))^(inv_p)
+        μ + σ * 2*p^(inv_p) * (1-α) * rand(rng, Gamma(inv_p, 1))^(inv_p)
     end
 end
