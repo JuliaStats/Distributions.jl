@@ -50,9 +50,21 @@ logccdf(d::Dirac, x::Real) = x < d.value ? 0.0 : isnan(x) ? NaN : -Inf
 quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
 
 mgf(d::Dirac, t) = exp(t * d.value)
-cgf(d::Dirac, t) = t*d.value
+cgf(d::Dirac, t) = t * d.value
 cf(d::Dirac, t) = cis(t * d.value)
 
 #### Sampling
 
 rand(rng::AbstractRNG, d::Dirac) = d.value
+
+#### Fitting
+
+fit_mle(::Type{<:Dirac}, x::AbstractArray{T}) where {T<:Real} = length(unique(x)) == 1 ? Dirac(first(x)) : Dirac(NaN)
+
+function fit_mle(::Type{<:Dirac}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Real}
+    n = length(x)
+    if n != length(w)
+        throw(DimensionMismatch("Inconsistent array lengths."))
+    end
+    return length(unique(x[findall(!iszero, w)])) == 1 ? Dirac(first(x)) : Dirac(NaN)
+end
