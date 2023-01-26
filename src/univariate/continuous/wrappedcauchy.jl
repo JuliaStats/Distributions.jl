@@ -87,6 +87,8 @@ function cdf(d::WrappedCauchy, x::Real)
         end
     elseif x < minimum(d)
         return zero(r)
+    elseif isnan(x)
+        return NaN
     else
         return one(r)
     end
