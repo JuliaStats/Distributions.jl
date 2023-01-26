@@ -476,6 +476,13 @@ Weibull
 plotdensity((0.001, 3), Weibull, (0.5, 1)) # hide
 ```
 
+```@docs
+WrappedCauchy
+```
+```@example plotdensity
+plotdensity((-π, π), WrappedCauchy, (0, 0.5); xlim=(-π, π)) # hide
+```
+
 ## Discrete Distributions
 
 ```@docs
