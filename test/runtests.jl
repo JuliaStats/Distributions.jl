@@ -59,7 +59,7 @@ const tests = [
     "univariate/continuous/semicircle",
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
-    "univariate/continuous/wrappedcauchy.jl",
+    "univariate/continuous/wrappedcauchy",
     "product",
     "univariate/discrete/discretenonparametric",
     "univariate/continuous/chernoff",
