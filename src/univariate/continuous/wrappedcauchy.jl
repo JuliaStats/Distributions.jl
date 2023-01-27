@@ -31,8 +31,10 @@ function WrappedCauchy(μ::T, r::T; check_args::Bool=true) where {T <: Real}
 end
 
 WrappedCauchy(μ::Real, r::Real; check_args::Bool=true) = WrappedCauchy(promote(μ, r)...; check_args=check_args)
-WrappedCauchy(μ::Integer, r::Integer; check_args::Bool=true) = WrappedCauchy(float(μ), float(r); check_args=check_args)
-WrappedCauchy(r::Real=0.0) = WrappedCauchy(zero(r), r; check_args=false)
+function WrappedCauchy(r::Real; check_args::Bool=true)
+    @check_args WrappedCauchy (r, zero(r) < r < one(r))
+    return WrappedCauchy(zero(r), r; check_args=false)
+end
 
 @distr_support WrappedCauchy -oftype(d.r, π) oftype(d.r, π)
 
