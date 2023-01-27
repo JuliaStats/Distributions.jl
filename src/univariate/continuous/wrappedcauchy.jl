@@ -25,7 +25,8 @@ end
 
 
 function WrappedCauchy(μ::T, r::T; check_args::Bool=true) where {T <: Real}
-    @check_args WrappedCauchy (μ, μ > oftype(μ,-π), μ < oftype(μ, π)) (r, r > zero(r), r < one(r))
+    @check_args WrappedCauchy (μ, -π < μ < π) (r, zero(r) < r < one(r))
+
     return WrappedCauchy{T}(μ, r)
 end
 
@@ -33,7 +34,8 @@ WrappedCauchy(μ::Real, r::Real; check_args::Bool=true) = WrappedCauchy(promote(
 WrappedCauchy(μ::Integer, r::Integer; check_args::Bool=true) = WrappedCauchy(float(μ), float(r); check_args=check_args)
 WrappedCauchy(r::Real=0.0) = WrappedCauchy(zero(r), r; check_args=false)
 
-@distr_support WrappedCauchy oftype(d.r,-π) oftype(d.r,+π)
+@distr_support WrappedCauchy -oftype(d.r, π) oftype(d.r, π)
+
 
 params(d::WrappedCauchy) = (d.μ, d.r)
 partype(::WrappedCauchy{T}) where {T} = T
@@ -53,48 +55,42 @@ median(d::WrappedCauchy) = zero(d.r)
 
 mode(d::WrappedCauchy) = zero(d.r)
 
-entropy(d::WrappedCauchy) = log(2π * (one(d.r) - d.r^2))
+entropy(d::WrappedCauchy) = log2π + log1p(-d.r^2)
 
-cf(d::WrappedCauchy, t::Real) = exp(im * t * d.μ) * d.r ^ abs(t)
+
+cf(d::WrappedCauchy, t::Real) = cis(t * d.μ - abs(t) * log(d.r) * im)
+
 
 
 function pdf(d::WrappedCauchy, x::Real)
     μ, r = params(d)
-    if insupport(d, x)
-        return (1-r^2) / (1 + r^2 - 2 * r * cos(x-μ)) / 2π
-    else
-        return zero(x)
-    end
+    res = inv2π * ((1 - r^2) / (1 + r^2 - 2 * r * cos(x - μ)))
+    return insupport(d, x) ? res : zero(res)
 end
 
 function logpdf(d::WrappedCauchy, x::Real)
     μ, r = params(d)
-    if insupport(d, x)
-        return log(1 - r^2) - log(1 + r^2 - 2 * r * cos(x-μ)) - log(2π)
-    else
-        return oftype(r, -Inf)
-    end
+    res = - log1p(2 * r * (r - cos(x-μ)) / (1 - r^2)) - log2π
+    return insupport(d, x) ? res : oftype(res, -Inf)
 end
 
 function cdf(d::WrappedCauchy, x::Real)
     μ, r = params(d)
-    if insupport(d, x)
-        c = (one(r) + r) / (one(r) - r)
-        res = (atan(c * tan((x - μ) / 2)) - atan(c * tan(-(μ + π) / 2))) / π
-        if μ == zero(μ) || x < mod(μ, 2π) - π
-            return res
-        else
-            return 1 + res
-        end
-    elseif x < minimum(d)
-        return zero(r)
-    elseif isnan(x)
-        return NaN
+    min_d, max_d = extrema(d)
+    c = (one(r) + r) / (one(r) - r)
+    res = (atan(c * tan(mod2pi(x - μ) / 2)) / π
+    return if x < min_d
+        zero(res)
+    elseif x > max_d
+        one(res)
+    elseif res < 0 # if mod2pi(x - μ) > π
+        1 + res
     else
-        return one(r)
+        res
     end
 end
 
 function rand(rng::AbstractRNG, d::WrappedCauchy)
-    return mod(π - log(d.r) * tan(π * (rand(rng) - oftype(r, 0.5))) + d.μ - π, 2π) - π
+    return mod2pi(d.μ + log(d.r) * tan(π * (rand(rng) - 0.5))) - π
+
 end
