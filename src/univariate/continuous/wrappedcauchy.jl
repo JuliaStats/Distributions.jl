@@ -1,14 +1,20 @@
 """
     WrappedCauchy(r)
+
 The Wrapped Cauchy distribution with scale factor `r` has probability density function
+
 ```math
 f(x; r) = \\frac{1-r^2}{2\\pi(1+r^2-2r\\cos(x-\\mu))}, \\quad x \\in [-\\pi, \\pi].
 ```
+
 ```julia
 WrappedCauchy(μ,r)   # Wrapped Cauchy distribution centered on μ with scale factor r
+
 params(d)       # Get the location and scale parameters, i.e. (μ, r)
 ```
+
 External links
+
 * [Wrapped Cauchy distribution on Wikipedia](https://en.wikipedia.org/wiki/Wrapped_Cauchy_distribution)
 """
 struct WrappedCauchy{T<:Real} <: ContinuousUnivariateDistribution
@@ -27,8 +33,6 @@ WrappedCauchy(μ::Real, r::Real; check_args::Bool=true) = WrappedCauchy(promote(
 WrappedCauchy(μ::Integer, r::Integer; check_args::Bool=true) = WrappedCauchy(float(μ), float(r); check_args=check_args)
 WrappedCauchy(r::Real=0.0) = WrappedCauchy(zero(r), r; check_args=false)
 
-const WrappedLorentz = WrappedCauchy
-
 @distr_support WrappedCauchy oftype(d.r,-π) oftype(d.r,+π)
 
 params(d::WrappedCauchy) = (d.μ, d.r)
@@ -42,9 +46,6 @@ scale(d::WrappedCauchy) = d.r
 mean(d::WrappedCauchy) = d.μ
 
 var(d::WrappedCauchy) = one(d.r) - d.r
-
-# deprecated 12 September 2016
-@deprecate circvar(d) var(d)
 
 skewness(d::WrappedCauchy) = zero(d.r)
 

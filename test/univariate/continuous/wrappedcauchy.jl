@@ -1,5 +1,4 @@
 using Distributions
-using Random: MersenneTwister
 using Test
 
 d = WrappedCauchy(0.6)
