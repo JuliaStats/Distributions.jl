@@ -8,6 +8,7 @@ d = WrappedCauchy(0.6)
 @test skewness(d) ==  .0
 @test median(d)   ==  .0
 @test mode(d)     ==  .0
+# values found using mathematica evaluation
 @test entropy(d)  == 1.391589963780926
 
 @test pdf(d, -5) == .0

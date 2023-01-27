@@ -10,6 +10,8 @@ f(x; r) = \\frac{1-r^2}{2\\pi(1+r^2-2r\\cos(x-\\mu))}, \\quad x \\in [-\\pi, \\p
 ```julia
 WrappedCauchy(μ,r)   # Wrapped Cauchy distribution centered on μ with scale factor r
 
+WrappedCauchy(r)   # Wrapped Cauchy distribution centered on 0 with scale factor r
+
 params(d)       # Get the location and scale parameters, i.e. (μ, r)
 ```
 
@@ -53,9 +55,9 @@ var(d::WrappedCauchy) = one(d.r) - d.r
 
 skewness(d::WrappedCauchy) = zero(d.r)
 
-median(d::WrappedCauchy) = zero(d.r)
+median(d::WrappedCauchy) = d.μ
 
-mode(d::WrappedCauchy) = zero(d.r)
+mode(d::WrappedCauchy) = d.μ
 
 entropy(d::WrappedCauchy) = log2π + log1p(-d.r^2)
 
@@ -80,7 +82,7 @@ function cdf(d::WrappedCauchy, x::Real)
     μ, r = params(d)
     min_d, max_d = extrema(d)
     c = (one(r) + r) / (one(r) - r)
-    res = (atan(c * tan(mod2pi(x - μ) / 2)) / π
+    res = atan(c * tan(mod2pi(x - μ) / 2)) / π
     return if x < min_d
         zero(res)
     elseif x > max_d
