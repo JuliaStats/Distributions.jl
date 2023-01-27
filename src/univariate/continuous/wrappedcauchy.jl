@@ -82,10 +82,10 @@ function cdf(d::WrappedCauchy, x::Real)
     μ, r = params(d)
     min_d, max_d = extrema(d)
     c = (one(r) + r) / (one(r) - r)
-    res = atan(c * tan(mod2pi(x - μ) / 2)) / π
-    return if x < min_d
+    res = (atan(c*tan((x-μ)/2)) - atan(c*cot(μ/2))) / π
+    return if x ≤ min_d
         zero(res)
-    elseif x > max_d
+    elseif x ≥ max_d
         one(res)
     elseif res < 0 # if mod2pi(x - μ) > π
         1 + res
