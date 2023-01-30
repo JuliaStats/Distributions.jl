@@ -1,0 +1,94 @@
+# Implementation based on chapters 2-4 of
+# Arnold, Barry C., Narayanaswamy Balakrishnan, and Haikady Navada Nagaraja.
+# A first course in order statistics. Society for Industrial and Applied Mathematics, 2008.
+
+"""
+    OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <: UnivariateDistribution{S}
+
+The distribution of an order statistic from IID samples from a univariate distribution
+
+    OrderStatistic(dist::UnivariateDistribution, n::Int, i::Int; check_args::Bool=true)
+
+Construct the distribution of the `i`th order statistic from `n` independent samples from `dist`.
+
+The ``i``th order statistic of a sample is the ``i``th element of the sorted sample.
+For example, the 1st order statistic is the sample minimum, while the ``n``th order
+statistic is the sample maximum.
+
+If ``f`` is probability density (mass) function of `dist` with distribution function ``F``,
+then the probability density function ``g`` of the order statistic for continuous
+`dist` is
+```math
+g(x; n, i) = {n \\choose i} [F(x)]^{i-1} [1 - F(x)]^{n-i} f(x),
+```
+and the probability mass function ``g`` of the order statistic for discrete `dist` is
+```math
+g(x; n, i) = \\sum_{k=i}^n {n \\choose k} \\left( [F(x)]^k [1 - F(x)]^{n-k} - [F(x_-)]^k [1 - F(x_-)]^{n-k} \\right),
+```
+where ``x_-`` is the largest element in the support of `dist` less than ``x``.
+
+## Examples
+
+```julia
+OrderStatistic(Cauchy(), 10, 1)              # distribution of the sample minimum
+OrderStatistic(DiscreteUniform(10), 10, 10)  # distribution of the sample maximum
+OrderStatistic(Gamma(1, 1), 11, 5)           # distribution of the sample median
+```
+"""
+struct OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <:
+       UnivariateDistribution{S}
+    dist::D
+    n::Int
+    i::Int
+    function OrderStatistic(
+        dist::UnivariateDistribution, n::Int, i::Int; check_args::Bool=true
+    )
+        @check_args(OrderStatistic, 1 ≤ i ≤ n)
+        return new{typeof(dist),value_support(typeof(dist))}(dist, n, i)
+    end
+end
+
+minimum(d::OrderStatistic) = minimum(d.dist)
+maximum(d::OrderStatistic) = maximum(d.dist)
+insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
+
+params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.i)
+partype(d::OrderStatistic) = partype(d.dist)
+Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
+
+# distribution of the ith order statistic from an IID uniform distribution
+function _uniform_orderstatistic(d::OrderStatistic)
+    n = d.n
+    i = d.i
+    return Beta{Int}(i, n - i + 1)
+end
+
+function logcdf(d::OrderStatistic, x::Real)
+    b = _uniform_orderstatistic(d)
+    return logcdf(b, cdf(d.dist, x))
+end
+
+function cdf(d::OrderStatistic, x::Real)
+    b = _uniform_orderstatistic(d)
+    return cdf(b, cdf(d.dist, x))
+end
+
+function logpdf(d::OrderStatistic, x::Real)
+    b = _uniform_orderstatistic(d)
+    p = cdf(d.dist, x)
+    if value_support(typeof(d)) === Continuous
+        return logpdf(b, p) + logpdf(d.dist, x)
+    else
+        return logdiffcdf(b, p, p - pdf(d.dist, x))
+    end
+end
+
+function quantile(d::OrderStatistic, p::Real)
+    b = _uniform_orderstatistic(d)
+    return quantile(d.dist, quantile(b, p))
+end
+
+function rand(rng::AbstractRNG, d::OrderStatistic)
+    b = _uniform_orderstatistic(d)
+    return quantile(d.dist, rand(rng, b))
+end

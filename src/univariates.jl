@@ -728,3 +728,5 @@ end
 for dname in continuous_distributions
     include(joinpath("univariate", "continuous", "$(dname).jl"))
 end
+
+include(joinpath("univariate", "orderstatistic.jl"))

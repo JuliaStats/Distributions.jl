@@ -143,6 +143,7 @@ export
     Normal,
     NormalCanon,
     NormalInverseGaussian,
+    OrderStatistic,
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
