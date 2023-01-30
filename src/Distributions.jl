@@ -109,6 +109,7 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
+    JointOrderStatistics,
     Kolmogorov,
     KSDist,
     KSOneSided,
