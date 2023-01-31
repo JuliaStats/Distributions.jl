@@ -14,7 +14,7 @@ N = 10^5
 
 rng = MersenneTwister(123)
 
-const funcs = ([rand,rand], [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
+const funcs = ([rand, rand], [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)])
 
 @testset "Testing fit for DiscreteUniform" begin
     for func in funcs
@@ -40,28 +40,28 @@ end
         for x in (z, OffsetArray(z, -n0 ÷ 2)), w in (v, OffsetArray(v, -n0 ÷ 2))
             ss = @inferred suffstats(D, x)
             @test ss isa Distributions.BernoulliStats
-            @test ss.cnt0 == n0 - count(t->t != 0, z)
-            @test ss.cnt1 == count(t->t != 0, z)
+            @test ss.cnt0 == n0 - count(t -> t != 0, z)
+            @test ss.cnt1 == count(t -> t != 0, z)
 
             ss = @inferred suffstats(D, x, w)
             @test ss isa Distributions.BernoulliStats
-            @test ss.cnt0 ≈ sum(v[z .== 0])
-            @test ss.cnt1 ≈ sum(v[z .== 1])
+            @test ss.cnt0 ≈ sum(v[z.==0])
+            @test ss.cnt1 ≈ sum(v[z.==1])
 
             d = @inferred fit(D, x)
             @test d isa D
-            @test mean(d) ≈ count(t->t != 0, z) / n0
+            @test mean(d) ≈ count(t -> t != 0, z) / n0
 
             d = @inferred fit(D, x, w)
             @test d isa D
-            @test mean(d) ≈ sum(v[z .== 1]) / sum(v)
+            @test mean(d) ≈ sum(v[z.==1]) / sum(v)
         end
 
         z = rand(rng..., Bernoulli(0.7), N)
         for x in (z, OffsetArray(z, -N ÷ 2))
             d = @inferred fit(D, x)
             @test d isa D
-            @test mean(d) ≈ 0.7 atol=0.01
+            @test mean(d) ≈ 0.7 atol = 0.01
         end
     end
 end
@@ -114,7 +114,11 @@ end
             d = @inferred fit(D, 100, x)
             @test d isa D
             @test ntrials(d) == 100
-            @test succprob(d) ≈ 0.3 atol=0.01
+            @test succprob(d) ≈ 0.3 atol = 0.01
+            d2 = @inferred fit_mle(D(100, 0.5), x)
+            @test d2 isa D
+            @test ntrials(d2) == 100
+            @test succprob(d2) ≈ 0.3 atol = 0.01
         end
     end
 end
@@ -128,7 +132,7 @@ end
         w = func[1](n0)
 
         ss = suffstats(Categorical, (3, x))
-        h = Float64[count(v->v == i, x) for i = 1 : 3]
+        h = Float64[count(v -> v == i, x) for i = 1:3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 
@@ -141,8 +145,12 @@ end
         @test isa(d2, Categorical)
         @test probs(d2) == probs(d)
 
+        d3 = fit_mle(Categorical(p), x)
+        @test isa(d3, Categorical)
+        @test probs(d3) == probs(d)
+
         ss = suffstats(Categorical, (3, x), w)
-        h = Float64[sum(w[x .== i]) for i = 1 : 3]
+        h = Float64[sum(w[x.==i]) for i = 1:3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 
@@ -163,6 +171,20 @@ end
 @testset "Testing fit for Cauchy" begin
     @test fit(Cauchy, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
     @test fit(Cauchy{Float64}, collect(-4.0:4.0)) === Cauchy(0.0, 2.0)
+end
+
+@testset "Testing fit for Delta" begin
+    for func in funcs, dist in (Dirac, Dirac{Float64})
+        x = func[2](dist(1.3), n0)
+        w = func[1](n0)
+        d = fit(dist, x)
+        @test isa(d, dist)
+        @test isapprox(d.value, 1.3)
+
+        d = fit(dist, x, w)
+        @test isa(d, dist)
+        @test isapprox(d.value, 1.3)
+    end
 end
 
 @testset "Testing fit for Exponential" begin
@@ -204,27 +226,27 @@ end
 
         ss = suffstats(dist, x)
         @test isa(ss, Distributions.NormalStats)
-        @test ss.s  ≈ sum(x)
-        @test ss.m  ≈ mean(x)
-        @test ss.s2 ≈ sum((x .- ss.m).^2)
+        @test ss.s ≈ sum(x)
+        @test ss.m ≈ mean(x)
+        @test ss.s2 ≈ sum((x .- ss.m) .^ 2)
         @test ss.tw ≈ n0
 
         ss = suffstats(dist, x, w)
         @test isa(ss, Distributions.NormalStats)
-        @test ss.s  ≈ dot(x, w)
-        @test ss.m  ≈ dot(x, w) / sum(w)
-        @test ss.s2 ≈ dot((x .- ss.m).^2, w)
+        @test ss.s ≈ dot(x, w)
+        @test ss.m ≈ dot(x, w) / sum(w)
+        @test ss.s2 ≈ dot((x .- ss.m) .^ 2, w)
         @test ss.tw ≈ sum(w)
 
         d = fit(dist, x)
         @test isa(d, dist)
         @test d.μ ≈ mean(x)
-        @test d.σ ≈ sqrt(mean((x .- d.μ).^2))
+        @test d.σ ≈ sqrt(mean((x .- d.μ) .^ 2))
 
         d = fit(dist, x, w)
         @test isa(d, dist)
         @test d.μ ≈ dot(x, w) / sum(w)
-        @test d.σ ≈ sqrt(dot((x .- d.μ).^2, w) / sum(w))
+        @test d.σ ≈ sqrt(dot((x .- d.μ) .^ 2, w) / sum(w))
 
         d = fit(dist, func[2](dist(μ, σ), N))
         @test isa(d, dist)
@@ -252,18 +274,18 @@ end
         ss = suffstats(NormalKnownMu(μ), x, w)
         @test isa(ss, Distributions.NormalKnownMuStats)
         @test ss.μ == μ
-        @test ss.s2 ≈ dot((x .- μ).^2, w)
+        @test ss.s2 ≈ dot((x .- μ) .^ 2, w)
         @test ss.tw ≈ sum(w)
 
         d = fit_mle(Normal, x; mu=μ)
         @test isa(d, Normal)
         @test d.μ == μ
-        @test d.σ ≈ sqrt(mean((x .- d.μ).^2))
+        @test d.σ ≈ sqrt(mean((x .- d.μ) .^ 2))
 
         d = fit_mle(Normal, x, w; mu=μ)
         @test isa(d, Normal)
         @test d.μ == μ
-        @test d.σ ≈ sqrt(dot((x .- d.μ).^2, w) / sum(w))
+        @test d.σ ≈ sqrt(dot((x .- d.μ) .^ 2, w) / sum(w))
 
 
         ss = suffstats(NormalKnownSigma(σ), x)
@@ -306,8 +328,8 @@ end
             d = fit(D, x)
             @test d isa D
             @test 1.2 <= minimum(d) <= maximum(d) <= 5.8
-            @test minimum(d) ≈ 1.2 atol=0.02
-            @test maximum(d) ≈ 5.8 atol=0.02
+            @test minimum(d) ≈ 1.2 atol = 0.02
+            @test maximum(d) ≈ 5.8 atol = 0.02
         end
     end
 end
@@ -319,15 +341,15 @@ end
 
         ss = suffstats(dist, x)
         @test isa(ss, Distributions.GammaStats)
-        @test ss.sx    ≈ sum(x)
+        @test ss.sx ≈ sum(x)
         @test ss.slogx ≈ sum(log.(x))
-        @test ss.tw    ≈ n0
+        @test ss.tw ≈ n0
 
         ss = suffstats(dist, x, w)
         @test isa(ss, Distributions.GammaStats)
-        @test ss.sx    ≈ dot(x, w)
+        @test ss.sx ≈ dot(x, w)
         @test ss.slogx ≈ dot(log.(x), w)
-        @test ss.tw    ≈ sum(w)
+        @test ss.tw ≈ sum(w)
 
         d = fit(dist, func[2](dist(3.9, 2.1), N))
         @test isa(d, dist)
@@ -353,11 +375,11 @@ end
 
         d = fit(dist, x)
         @test isa(d, dist)
-        @test succprob(d) ≈ inv(1. + mean(x))
+        @test succprob(d) ≈ inv(1.0 + mean(x))
 
         d = fit(dist, x, w)
         @test isa(d, dist)
-        @test succprob(d) ≈ inv(1. + dot(x, w) / sum(w))
+        @test succprob(d) ≈ inv(1.0 + dot(x, w) / sum(w))
 
         d = fit(dist, func[2](dist(0.3), N))
         @test isa(d, dist)
@@ -367,21 +389,29 @@ end
 
 @testset "Testing fit for Laplace" begin
     for func in funcs, dist in (Laplace, Laplace{Float64})
-        d = fit(dist, func[2](dist(5.0, 3.0), N + 1))
+        x = func[2](dist(5.0, 3.0), N)
+        w = func[1](N)
+
+        d = fit(dist, x)
         @test isa(d, dist)
         @test isapprox(location(d), 5.0, atol=0.02)
-        @test isapprox(scale(d)   , 3.0, atol=0.03)
+        @test isapprox(scale(d), 3.0, atol=0.03)
+
+        d = fit(dist, x, w)
+        @test isa(d, dist)
+        @test isapprox(location(d), 5.0, atol=0.02)
+        @test isapprox(scale(d), 3.0, atol=0.03)
     end
 end
 
 @testset "Testing fit for Pareto" begin
     for func in funcs, dist in (Pareto, Pareto{Float64})
-        x = func[2](dist(3., 7.), N)
+        x = func[2](dist(3.0, 7.0), N)
         d = fit(dist, x)
 
         @test isa(d, dist)
-        @test isapprox(shape(d), 3., atol=0.1)
-        @test isapprox(scale(d), 7., atol=0.1)
+        @test isapprox(shape(d), 3.0, atol=0.1)
+        @test isapprox(scale(d), 7.0, atol=0.1)
     end
 end
 
@@ -414,6 +444,22 @@ end
     end
 end
 
+@testset "Testing fit_mle for Product" begin
+    for func in funcs
+        dist = product_distribution([Exponential(0.5), Normal(11.3, 3.2)])
+        x = rand(dist, N)
+        w = func[1](N)
+
+        d = fit_mle(dist, x)
+        @test isa(d, typeof(dist))
+        @test isapprox(collect.(params(d)), collect.(params(dist)), atol=0.1)
+
+        d = fit_mle(dist, x, w)
+        @test isa(d, typeof(dist))
+        @test isapprox(collect.(params(d)), collect.(params(dist)), atol=0.1)
+    end
+end
+
 @testset "Testing fit for InverseGaussian" begin
     for func in funcs, dist in (InverseGaussian, InverseGaussian{Float64})
         x = rand(dist(3.9, 2.1), n0)
@@ -421,15 +467,15 @@ end
 
         ss = suffstats(dist, x)
         @test isa(ss, Distributions.InverseGaussianStats)
-        @test ss.sx    ≈ sum(x)
+        @test ss.sx ≈ sum(x)
         @test ss.sinvx ≈ sum(1 ./ x)
-        @test ss.sw    ≈ n0
+        @test ss.sw ≈ n0
 
         ss = suffstats(dist, x, w)
         @test isa(ss, Distributions.InverseGaussianStats)
-        @test ss.sx    ≈ dot(x, w)
+        @test ss.sx ≈ dot(x, w)
         @test ss.sinvx ≈ dot(1 ./ x, w)
-        @test ss.sw    ≈ sum(w)
+        @test ss.sw ≈ sum(w)
 
         d = fit(dist, rand(dist(3.9, 2.1), N))
         @test isa(d, dist)
@@ -460,8 +506,8 @@ end
     for func in funcs, dist in (Weibull, Weibull{Float64})
         d = fit(dist, func[2](dist(8.1, 4.3), N))
         @test isa(d, dist)
-        @test isapprox(d.α, 8.1, atol = 0.1)
-        @test isapprox(d.θ, 4.3, atol = 0.1)
+        @test isapprox(d.α, 8.1, atol=0.1)
+        @test isapprox(d.θ, 4.3, atol=0.1)
 
     end
 end
