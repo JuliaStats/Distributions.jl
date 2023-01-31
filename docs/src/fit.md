@@ -42,6 +42,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Binomial`](@ref)
 - [`Categorical`](@ref)
 - [`DiscreteUniform`](@ref)
+- [`Dirac`](@ref)
 - [`Exponential`](@ref)
 - [`LogNormal`](@ref)
 - [`Normal`](@ref)
@@ -60,6 +61,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Multinomial`](@ref)
 - [`MvNormal`](@ref)
 - [`Dirichlet`](@ref)
+- [`Product`](@ref)
 
 For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use a modified interface:
 
@@ -73,6 +75,15 @@ fit_mle(Categorical, k, x, w)
 fit_mle(Categorical, x)        # equivalent to fit_mle(Categorical, max(x), x)
 fit_mle(Categorical, x, w)
 ```
+
+It is also possible to directly input a distribution `fit_mle(D::Distribution, x[, w])`. This form avoids the extra arguments:
+```julia
+fit_mle(Binomial(n, 0.1), x) # equivalent to fit_mle(Binomial, ntrials(Binomial(n, 0.1)), x), here the parameter 0.1 is not used
+fit_mle(Categorical(p), x) # equivalent to fit_mle(Categorical, ncategories(Categorical(p)), x), here the only the length of p is used not its values
+fit_mle(product_distribution([Exponential(0.5), Normal(11.3, 3.2)]), x) # equivalent to product_distribution([fit_mle(Exponential, x[1,:]), fit_mle(Normal, x[2, :])]). Again values are not used.
+```
+Note that for standard distributions, the values of the distribution parameters `D` are not used in `fit_mle` only the “structure” of `D` is passed into `fit_mle`.
+However, for complex Maximum Likelihood estimation, one can imagine using `D` as an initial guess.
 
 ## Sufficient Statistics
 
