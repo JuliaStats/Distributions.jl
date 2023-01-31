@@ -71,26 +71,24 @@ function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     T = eltype(lp)
     lp += loggamma(T(n + 1))
     length(r) == n && return lp
-    T = eltype(lp)
-    i = first(r)
-    xᵢ = first(x)
-    k = i - 1
-    if k != 0
-        lp += k * logcdf(d.dist, xᵢ) - loggamma(T(k + 1))
-    end
-    for (j, xⱼ) in Iterators.drop(zip(r, x), 1)
-        k = j - i - 1
-        if k != 0
-            lp += k * logsubexp(logcdf(d.dist, xⱼ), logcdf(d.dist, xᵢ)) - loggamma(T(k + 1))
-        end
+    i = 0
+    xᵢ = oftype(float(first(x)), -Inf)
+    for (j, xⱼ) in zip(r, x)
+        lp += _marginalize_range(d.dist, n, i, j, xᵢ, xⱼ, T)
         i = j
         xᵢ = xⱼ
     end
-    k = n - i
-    if k != 0
-        lp += k * logccdf(d.dist, xold) - loggamma(T(k + 1))
-    end
+    lp += _marginalize_range(d.dist, n, i, n + 1, xᵢ, oftype(xᵢ, Inf), T)
     return lp
+end
+
+# given ∏ₖf(xₖ), marginalize all xₖ for i < k < j
+function _marginalize_range(dist, n, i, j, xᵢ, xⱼ, T)
+    k = j - i - 1
+    k == 0 && return zero(T)
+    i == 0 && return k * logcdf(dist, xᵢ) - loggamma(T(k + 1))
+    j == n + 1 && return k * logccdf(dist, xᵢ) - loggamma(T(k + 1))
+    return k * logsubexp(logcdf(dist, xⱼ), logcdf(dist, xᵢ)) - loggamma(T(k + 1))
 end
 
 function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
