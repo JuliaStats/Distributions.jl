@@ -61,7 +61,6 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`Multinomial`](@ref)
 - [`MvNormal`](@ref)
 - [`Dirichlet`](@ref)
-- [`Product`](@ref)
 
 For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use a modified interface:
 
