@@ -78,7 +78,9 @@ function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
         i = j
         xᵢ = xⱼ
     end
-    lp += _marginalize_range(d.dist, n, i, n + 1, xᵢ, oftype(xᵢ, Inf), T)
+    j = n + 1
+    xⱼ = oftype(xᵢ, Inf)
+    lp += _marginalize_range(d.dist, n, i, j, xᵢ, xⱼ, T)
     return lp
 end
 
@@ -86,7 +88,7 @@ end
 function _marginalize_range(dist, n, i, j, xᵢ, xⱼ, T)
     k = j - i - 1
     k == 0 && return zero(T)
-    i == 0 && return k * logcdf(dist, xᵢ) - loggamma(T(k + 1))
+    i == 0 && return k * logcdf(dist, xⱼ) - loggamma(T(k + 1))
     j == n + 1 && return k * logccdf(dist, xᵢ) - loggamma(T(k + 1))
     return k * logsubexp(logcdf(dist, xⱼ), logcdf(dist, xᵢ)) - loggamma(T(k + 1))
 end
