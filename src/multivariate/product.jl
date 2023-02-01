@@ -27,12 +27,12 @@ function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:Ab
         "`Product(v)` is deprecated, please use `product_distribution(v)`",
         :Product,
     )
-    return Product{S,T,V}(v)
+    return Product{S, T ,V}(v)
 end
 
 length(d::Product) = length(d.v)
 function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-    T<:UnivariateDistribution{S}}
+                                                    T<:UnivariateDistribution{S}}
     return eltype(T)
 end
 

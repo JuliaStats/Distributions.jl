@@ -1,6 +1,6 @@
 # generic functions for distribution fitting
 
-function suffstats(dt::Type{D}, xs...) where {D<:Distribution}
+function suffstats(dt::Type{D}, xs...) where D<:Distribution
     argtypes = tuple(D, map(typeof, xs)...)
     error("suffstats is not implemented for $argtypes.")
 end
