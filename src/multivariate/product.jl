@@ -63,16 +63,3 @@ function product_distribution(dists::V) where {S<:ValueSupport,T<:UnivariateDist
     return Product{S,T,V}(dists)
 end
 
-#### Fitting
-
-"""
-    fit_mle(g::Product, x::AbstractMatrix)
-    fit_mle(g::Product, x::AbstractMatrix, γ::AbstractVector)
-
-The `fit_mle` for a multivariate Product distributions `g` is the `product_distribution` of `fit_mle` of each components of `g`.
-"""
-function fit_mle(g::Product, x::AbstractMatrix, args...)
-    d = size(x, 1)
-    length(g) == d || throw(DimensionMismatch("The dimensions of g and x are inconsistent."))
-    return product_distribution([fit_mle(g.v[s], y, args...) for (s, y) in enumerate(eachrow(x))])
-end

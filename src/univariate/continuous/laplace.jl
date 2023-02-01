@@ -136,15 +136,3 @@ function fit_mle(::Type{<:Laplace}, x::AbstractArray{<:Real})
     xc .= abs.(x .- m)
     return Laplace(m, mean(xc))
 end
-
-function fit_mle(::Type{<:Laplace}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
-    n = length(x)
-    if n != length(w)
-        throw(DimensionMismatch("Inconsistent array lengths."))
-    end
-    xc = similar(x)
-    copyto!(xc, x)
-    m = median(xc, weights(w)) # https://github.com/JuliaStats/StatsBase.jl/blob/0b64a9c8a16355da16469d0fe5016e0fdf099af5/src/weights.jl#L788
-    xc .= abs.(x .- m)
-    return Laplace(m, mean(xc, weights(w)))
-end

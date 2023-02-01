@@ -244,3 +244,22 @@ function product_distribution(dists::AbstractVector{<:Normal})
     σ2 = map(var, dists)
     return MvNormal(µ, Diagonal(σ2))
 end
+
+#### Fitting
+promote_sample(::Type{dT}, x::AbstractArray{T}) where {T<:Real, dT<:Real} = T <: dT ? x : convert.(dT, x)
+
+"""
+    fit_mle(dists::ArrayOfUnivariateDistribution, x::AbstractArray)
+    fit_mle(dists::ArrayOfUnivariateDistribution, x::AbstractArray, γ::AbstractVector)
+
+The `fit_mle` for a `ArrayOfUnivariateDistribution` distributions `dists` is the `product_distribution` of `fit_mle` of each components of `dists`.
+"""
+function fit_mle(dists::VectorOfUnivariateDistribution, x::AbstractMatrix{<:Real}, args...)
+    length(dists) == size(x, 1) || throw(DimensionMismatch("The dimensions of dists and x are inconsistent."))
+    return product_distribution([fit_mle(d, promote_sample(eltype(d), x[s, :]), args...) for (s, d) in enumerate(dists.dists)])
+end
+
+function fit_mle(dists::ArrayOfUnivariateDistribution, x::AbstractArray, args...)
+    size(dists) == size(first(x)) || throw(DimensionMismatch("The dimensions of dists and x are inconsistent."))
+    return product_distribution([fit_mle(d, promote_sample(eltype(d), [x[i][s] for i in eachindex(x)]), args...) for (s, d) in enumerate(dists.dists)])
+end
