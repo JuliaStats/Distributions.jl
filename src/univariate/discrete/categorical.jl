@@ -26,7 +26,7 @@ External links:
 """
 const Categorical{P<:Real,Ps<:AbstractVector{P}} = DiscreteNonParametric{Int,P,Base.OneTo{Int},Ps}
 
-function Categorical{P,Ps}(p::Ps; check_args::Bool=true) where {P<:Real,Ps<:AbstractVector{P}}
+function Categorical{P,Ps}(p::Ps; check_args::Bool=true) where {P<:Real, Ps<:AbstractVector{P}}
     @check_args Categorical (p, isprobvec(p), "vector p is not a probability vector")
     return Categorical{P,Ps}(Base.OneTo(length(p)), p; check_args=check_args)
 end
@@ -36,7 +36,7 @@ Categorical(p::AbstractVector{P}; check_args::Bool=true) where {P<:Real} =
 
 function Categorical(k::Integer; check_args::Bool=true)
     @check_args Categorical (k, k >= 1, "at least one category is required")
-    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1 / k, k); check_args=false)
+    return Categorical{Float64,Vector{Float64}}(Base.OneTo(k), fill(1/k, k); check_args=false)
 end
 
 Categorical(probabilities::Real...; check_args::Bool=true) = Categorical([probabilities...]; check_args=check_args)
@@ -49,7 +49,7 @@ convert(::Type{Categorical{P,Ps}}, x::AbstractVector{<:Real}) where {
 ### Parameters
 
 ncategories(d::Categorical) = support(d).stop
-params(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} = (probs(d),)
+params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
 partype(::Categorical{T}) where {T<:Real} = T
 
 ### Statistics
@@ -59,7 +59,7 @@ function median(d::Categorical{T}) where {T<:Real}
     p = probs(d)
     cp = zero(T)
     i = 0
-    while cp < 1 / 2 && i <= k
+    while cp < 1/2 && i <= k
         i += 1
         @inbounds cp += p[i]
     end
@@ -87,16 +87,16 @@ function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Re
     vr = min(vlast, ncategories(d))
     p = probs(d)
     if vl > vfirst
-        for i = 1:(vl-vfirst)
+        for i = 1:(vl - vfirst)
             r[i] = zero(T)
         end
     end
     fm1 = vfirst - 1
     for v = vl:vr
-        r[v-fm1] = p[v]
+        r[v - fm1] = p[v]
     end
     if vr < vlast
-        for i = (vr-vfirst+2):length(rgn)
+        for i = (vr - vfirst + 2):length(rgn)
             r[i] = zero(T)
         end
     end
@@ -107,7 +107,7 @@ end
 # sampling
 
 sampler(d::Categorical{P,Ps}) where {P<:Real,Ps<:AbstractVector{P}} =
-    AliasTable(probs(d))
+   AliasTable(probs(d))
 
 
 ### sufficient statistics
@@ -116,20 +116,20 @@ struct CategoricalStats <: SufficientStats
     h::Vector{Float64}
 end
 
-function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where {T<:Integer}
-    for i = 1:length(x)
+function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}) where T<:Integer
+    for i = 1 : length(x)
         @inbounds xi = x[i]
-        h[xi] += 1.0   # cannot use @inbounds, as no guarantee that x[i] is in bound
+        h[xi] += 1.   # cannot use @inbounds, as no guarantee that x[i] is in bound
     end
     h
 end
 
-function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer}
+function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     n = length(x)
     if n != length(w)
         throw(DimensionMismatch("Inconsistent array lengths."))
     end
-    for i = 1:n
+    for i = 1 : n
         @inbounds xi = x[i]
         @inbounds wi = w[i]
         h[xi] += wi   # cannot use @inbounds, as no guarantee that x[i] is in bound
@@ -137,15 +137,15 @@ function add_categorical_counts!(h::Vector{Float64}, x::AbstractArray{T}, w::Abs
     h
 end
 
-function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}) where {T<:Integer}
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x))
 end
 
-function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer}
+function suffstats(::Type{<:Categorical}, k::Int, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     CategoricalStats(add_categorical_counts!(zeros(k), x, w))
 end
 
-const CategoricalData = Tuple{Int,AbstractArray}
+const CategoricalData = Tuple{Int, AbstractArray}
 
 suffstats(::Type{<:Categorical}, data::CategoricalData) = suffstats(Categorical, data...)
 suffstats(::Type{<:Categorical}, data::CategoricalData, w::AbstractArray{Float64}) = suffstats(Categorical, data..., w)
@@ -157,11 +157,11 @@ function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
 end
 
 fit_mle(d::T, x::AbstractArray{<:Integer}) where {T<:Categorical} = fit_mle(T, ncategories(d), x)
-function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where {T<:Integer}
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
     Categorical(normalize!(add_categorical_counts!(zeros(k), x), 1), check_args=false)
 end
 
-function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer}
+function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
     Categorical(normalize!(add_categorical_counts!(zeros(k), x, w), 1), check_args=false)
 end
 
