@@ -74,6 +74,8 @@ end
 
 size(d::ProductDistribution) = d.size
 
+params(d::ArrayOfUnivariateDistribution) = params.(d.dists)
+
 mean(d::ProductDistribution) = reshape(mapreduce(vec ∘ mean, vcat, d.dists), size(d))
 var(d::ProductDistribution) = reshape(mapreduce(vec ∘ var, vcat, d.dists), size(d))
 cov(d::ProductDistribution) = Diagonal(vec(var(d)))
