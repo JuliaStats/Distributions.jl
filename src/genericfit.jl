@@ -30,7 +30,7 @@ fit_mle(dt::Type{D}, x::AbstractArray, w::AbstractArray) where {D<:UnivariateDis
 fit_mle(dt::Type{D}, x::AbstractMatrix) where {D<:MultivariateDistribution} = fit_mle(D, suffstats(D, x))
 fit_mle(dt::Type{D}, x::AbstractMatrix, w::AbstractArray) where {D<:MultivariateDistribution} = fit_mle(D, suffstats(D, x, w))
 
-fit_mle(dt::D, args...) where {D<:Distribution} = fit_mle(typeof(dt), args...)
+fit_mle(dist::Distribution, args...) = fit_mle(typeof(dist), args...)
 
 fit(dt::Type{D}, x) where {D<:Distribution} = fit_mle(D, x)
 fit(dt::Type{D}, args...) where {D<:Distribution} = fit_mle(D, args...)
