@@ -93,20 +93,28 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 function pdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    return if x < c
-        2 * max(x - a, 0) / ((b - a) * (c - a))
-    else
-        2 * max(b - x, 0) / ((b - a) * (b - c))
+    if x < a || b < x
+        return 0
+    elseif a <= x < c
+        return 2 * (x - a) / ((b - a) * (c - a))
+    elseif x == c
+        return 2 / (b - a)
+    elseif c < x <= b
+        return 2 * (b - x) / ((b - a) * (b - c))
     end
 end
 logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    return if x < c
-        max(x - a, 0)^2 / ((b - a) * (c - a))
-    else
-        1 - max(b - x, 0)^2 / ((b - a) * (b - c))
+    if x <= a
+        return 0
+    elseif a < x <= c
+        return (x - a) ^ 2 / ((b - a) * (c - a))
+    elseif c < x < b
+        return 1 - (b - x) ^ 2 / ((b - a) * (b - c))
+    elseif b <= x
+        return 1
     end
 end
 
