@@ -86,7 +86,7 @@ for f in [:quantile, :cquantile]
     @eval begin
         function $f(d::OrderStatistic, p::Real)
             b = _uniform_orderstatistic(d)
-            return $f(d.dist, quantile(b, p))
+            return quantile(d.dist, $f(b, p))
         end
     end
 end
