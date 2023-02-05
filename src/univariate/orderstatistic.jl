@@ -68,9 +68,19 @@ function logcdf(d::OrderStatistic, x::Real)
     return logcdf(b, cdf(d.dist, x))
 end
 
+function logccdf(d::OrderStatistic, x::Real)
+    b = _uniform_orderstatistic(d)
+    return logccdf(b, cdf(d.dist, x))
+end
+
 function cdf(d::OrderStatistic, x::Real)
     b = _uniform_orderstatistic(d)
     return cdf(b, cdf(d.dist, x))
+end
+
+function ccdf(d::OrderStatistic, x::Real)
+    b = _uniform_orderstatistic(d)
+    return ccdf(b, cdf(d.dist, x))
 end
 
 function logpdf(d::OrderStatistic, x::Real)
@@ -86,6 +96,11 @@ end
 function quantile(d::OrderStatistic, p::Real)
     b = _uniform_orderstatistic(d)
     return quantile(d.dist, quantile(b, p))
+end
+
+function cquantile(d::OrderStatistic, p::Real)
+    b = _uniform_orderstatistic(d)
+    return cquantile(d.dist, quantile(b, p))
 end
 
 function rand(rng::AbstractRNG, d::OrderStatistic)
