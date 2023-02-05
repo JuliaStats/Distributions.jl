@@ -63,26 +63,6 @@ function _uniform_orderstatistic(d::OrderStatistic)
     return Beta{Int}(i, n - i + 1)
 end
 
-function logcdf(d::OrderStatistic, x::Real)
-    b = _uniform_orderstatistic(d)
-    return logcdf(b, cdf(d.dist, x))
-end
-
-function logccdf(d::OrderStatistic, x::Real)
-    b = _uniform_orderstatistic(d)
-    return logccdf(b, cdf(d.dist, x))
-end
-
-function cdf(d::OrderStatistic, x::Real)
-    b = _uniform_orderstatistic(d)
-    return cdf(b, cdf(d.dist, x))
-end
-
-function ccdf(d::OrderStatistic, x::Real)
-    b = _uniform_orderstatistic(d)
-    return ccdf(b, cdf(d.dist, x))
-end
-
 function logpdf(d::OrderStatistic, x::Real)
     b = _uniform_orderstatistic(d)
     p = cdf(d.dist, x)
@@ -93,14 +73,22 @@ function logpdf(d::OrderStatistic, x::Real)
     end
 end
 
-function quantile(d::OrderStatistic, p::Real)
-    b = _uniform_orderstatistic(d)
-    return quantile(d.dist, quantile(b, p))
+for f in [:logcdf, :logccdf, :cdf, :ccdf]
+    @eval begin
+        function $f(d::OrderStatistic, x::Real)
+            b = _uniform_orderstatistic(d)
+            return $f(b, cdf(d.dist, x))
+        end
+    end
 end
 
-function cquantile(d::OrderStatistic, p::Real)
-    b = _uniform_orderstatistic(d)
-    return cquantile(d.dist, quantile(b, p))
+for f in [:quantile, :cquantile]
+    @eval begin
+        function $f(d::OrderStatistic, p::Real)
+            b = _uniform_orderstatistic(d)
+            return $f(d.dist, quantile(b, p))
+        end
+    end
 end
 
 function rand(rng::AbstractRNG, d::OrderStatistic)
