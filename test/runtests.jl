@@ -86,6 +86,7 @@ const tests = [
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
+    "univariate/orderstatistic.jl",
     "multivariate/product",
     "eachvariate",
 
