@@ -41,7 +41,7 @@ struct JointOrderStatistics{D<:ContinuousUnivariateDistribution,R<:AbstractVecto
         check_args::Bool=true,
     )
         @check_args(
-            OrderStatistic,
+            JointOrderStatistics,
             (n, n ≥ 1, "`n` must be a positive integer."),
             (
                 r,
