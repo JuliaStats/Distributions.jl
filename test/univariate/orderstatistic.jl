@@ -184,7 +184,7 @@ using StatsBase
             @inferred Vector{T} rand(rng, d, 10)
         end
 
-        ndraws = 10_000
+        ndraws = 100_000
         nchecks = 4 * 2 * 111  # NOTE: update if the below number of tests changes
         α = (0.01 / nchecks) / 2  # multiple correction
         tol = quantile(Normal(), 1 - α)
