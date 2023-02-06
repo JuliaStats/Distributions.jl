@@ -88,9 +88,14 @@ end
 function _marginalize_range(dist, n, i, j, xᵢ, xⱼ, T)
     k = j - i - 1
     k == 0 && return zero(T)
-    i == 0 && return k * logcdf(dist, xⱼ) - loggamma(T(k + 1))
-    j == n + 1 && return k * logccdf(dist, xᵢ) - loggamma(T(k + 1))
-    return k * logsubexp(logcdf(dist, xⱼ), logcdf(dist, xᵢ)) - loggamma(T(k + 1))
+    lpdiff = if i == 0
+        logcdf(dist, xⱼ)
+    elseif j == n + 1
+        logccdf(dist, xᵢ)
+    else
+        logdiffcdf(dist, xⱼ, xᵢ)
+    end
+    return k * lpdiff - loggamma(T(k + 1))
 end
 
 function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
