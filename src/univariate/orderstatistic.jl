@@ -56,7 +56,7 @@ params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.i)
 partype(d::OrderStatistic) = partype(d.dist)
 Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
 
-# distribution of the ith order statistic from an IID uniform distribution, with CDF 𝒰ᵢₙ
+# distribution of the ith order statistic from an IID uniform distribution, with CDF Uᵢₙ(x)
 function _uniform_orderstatistic(d::OrderStatistic)
     n = d.n
     i = d.i
@@ -85,9 +85,9 @@ end
 for f in [:quantile, :cquantile]
     @eval begin
         function $f(d::OrderStatistic, p::Real)
-            # since cdf is Fᵢₙ(x) = 𝒰ᵢₙ(Fₓ(x)), and 𝒰ᵢₙ is invertible and increasing, we
-            # have Fₓ(x) = 𝒰ᵢₙ⁻¹(Fᵢₙ(x)). then quantile function is
-            # Qᵢₙ(p) = inf{x: p ≤ Fᵢₙ(x)} = inf{x: 𝒰ᵢₙ⁻¹(p) ≤ Fₓ(x)} = Qₓ(𝒰ᵢₙ⁻¹(p))
+            # since cdf is Fᵢₙ(x) = Uᵢₙ(Fₓ(x)), and Uᵢₙ is invertible and increasing, we
+            # have Fₓ(x) = Uᵢₙ⁻¹(Fᵢₙ(x)). then quantile function is
+            # Qᵢₙ(p) = inf{x: p ≤ Fᵢₙ(x)} = inf{x: Uᵢₙ⁻¹(p) ≤ Fₓ(x)} = Qₓ(Uᵢₙ⁻¹(p))
             b = _uniform_orderstatistic(d)
             return quantile(d.dist, $f(b, p))
         end
@@ -95,8 +95,8 @@ for f in [:quantile, :cquantile]
 end
 
 function rand(rng::AbstractRNG, d::OrderStatistic)
-    # inverse transform sampling. Since quantile function is Qₓ(𝒰ᵢₙ⁻¹(p)), we draw a random
-    # variable from 𝒰ᵢₙ and pass it through the quantile function of `d.dist`
+    # inverse transform sampling. Since quantile function is Qₓ(Uᵢₙ⁻¹(p)), we draw a random
+    # variable from Uᵢₙ and pass it through the quantile function of `d.dist`
     b = _uniform_orderstatistic(d)
     return quantile(d.dist, rand(rng, b))
 end
