@@ -185,6 +185,10 @@ using StatsBase
         end
 
         ndraws = 10_000
+        nchecks = 4 * 2 * 111  # NOTE: update if the below number of tests changes
+        α = (0.01 / nchecks) / 2  # multiple correction
+        tol = quantile(Normal(), 1 - α)
+
         @testset "Uniform()" begin
             # test against known mean and variance of order statistics
             @testset for n in [1, 10, 100], i in 1:n
@@ -196,8 +200,8 @@ using StatsBase
                 # compute asymptotic sample standard deviation
                 mean_std = sqrt(v_exact / ndraws)
                 var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
-                @test m ≈ m_exact atol = (3 * mean_std)
-                @test v ≈ v_exact atol = (4 * var_std)
+                @test m ≈ m_exact atol = (tol * mean_std)
+                @test v ≈ v_exact atol = (tol * var_std)
             end
         end
 
@@ -212,8 +216,8 @@ using StatsBase
                 # compute asymptotic sample standard deviation
                 mean_std = sqrt(v_exact / ndraws)
                 var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
-                @test m ≈ m_exact atol = (3 * mean_std)
-                @test v ≈ v_exact atol = (4 * var_std)
+                @test m ≈ m_exact atol = (tol * mean_std)
+                @test v ≈ v_exact atol = (tol * var_std)
             end
         end
 
@@ -231,8 +235,8 @@ using StatsBase
                 # compute asymptotic sample standard deviation
                 mean_std = sqrt(v_exact / ndraws)
                 var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
-                @test m ≈ m_exact atol = (3 * mean_std)
-                @test v ≈ v_exact atol = (4 * var_std)
+                @test m ≈ m_exact atol = (tol * mean_std)
+                @test v ≈ v_exact atol = (tol * var_std)
             end
         end
     end
