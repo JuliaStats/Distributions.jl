@@ -89,7 +89,7 @@ for f in [:quantile, :cquantile]
             # have Fₓ(x) = 𝒰ᵢₙ⁻¹(Fᵢₙ(x)). then quantile function is
             # Qᵢₙ(p) = inf{x: p ≤ Fᵢₙ(x)} = inf{x: 𝒰ᵢₙ⁻¹(p) ≤ Fₓ(x)} = Qₓ(𝒰ᵢₙ⁻¹(p))
             b = _uniform_orderstatistic(d)
-            return $f(d.dist, quantile(b, p))
+            return quantile(d.dist, $f(b, p))
         end
     end
 end
