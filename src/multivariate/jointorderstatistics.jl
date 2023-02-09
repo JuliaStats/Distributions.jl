@@ -112,14 +112,15 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         # but this branch is probably taken when length(d.r) is small or much smaller than n.
         T = typeof(one(eltype(x)))
         s = zero(one(T))
-        j = 0
-        for (m, i) in zip(eachindex(x), d.r)
+        i = 0
+        for (m, j) in zip(eachindex(x), d.r)
             k = j - i
             s += k > 1 ? rand(rng, Gamma(k, one(T); check_args=false)) : randexp(rng, T)
-            j = i
+            i = j
             x[m] = s
         end
-        k = n + 1 - j
+        j = n + 1
+        k = j - i
         s += k > 1 ? rand(rng, Gamma(k, one(T); check_args=false)) : randexp(rng, T)
         x .= quantile.(d.dist, x ./ s)
     end
