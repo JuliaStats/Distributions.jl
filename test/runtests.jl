@@ -87,6 +87,7 @@ const tests = [
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
     "univariate/orderstatistic",
+    "multivariate/jointorderstatistics",
     "multivariate/product",
     "eachvariate",
 
