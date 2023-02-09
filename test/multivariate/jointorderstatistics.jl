@@ -148,7 +148,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             end
         end
 
-        @testset "pairwise correlations of Uniform" begin
+        @testset "pairwise correlations" begin
             n = 100
             rs = [    # good mixture of r values with gaps and no gaps
                 1:n,
