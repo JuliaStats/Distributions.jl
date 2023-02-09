@@ -176,12 +176,24 @@ using StatsBase
     end
 
     @testset "rand" begin
-        @testset for T in [Float32, Float64]
-            dist = Uniform(T(-2), T(1))
+        @testset for T in [Float32, Float64],
+            dist in [Uniform(T(-2), T(1)), Normal(T(1), T(2))]
+
             d = OrderStatistic(dist, 10, 5)
             rng = Random.default_rng()
-            @inferred T rand(rng, d)
-            @inferred Vector{T} rand(rng, d, 10)
+            Random.seed!(rng, 42)
+            x = @inferred(rand(rng, d))
+            xs = @inferred(rand(rng, d, 10))
+            S = eltype(rand(dist))
+            @test typeof(x) === S
+            @test eltype(xs) === S
+            @test length(xs) == 10
+
+            Random.seed!(rng, 42)
+            x2 = rand(rng, d)
+            xs2 = rand(rng, d, 10)
+            @test x2 == x
+            @test xs2 == xs
         end
 
         ndraws = 100_000
@@ -189,49 +201,26 @@ using StatsBase
         α = (0.01 / nchecks) / 2  # multiple correction
         tol = quantile(Normal(), 1 - α)
 
-        @testset "Uniform()" begin
-            # test against known mean and variance of order statistics
-            @testset for n in [1, 10, 100], i in 1:n
-                d = OrderStatistic(Uniform(), n, i)
-                x = rand(d, ndraws)
-                m, v = mean_and_var(x)
-                m_exact = i//(n + 1)
-                v_exact = (m * (1 - m) / (n + 2))
-                # compute asymptotic sample standard deviation
-                mean_std = sqrt(v_exact / ndraws)
-                var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
-                @test m ≈ m_exact atol = (tol * mean_std)
-                @test v ≈ v_exact atol = (tol * var_std)
-            end
-        end
-
-        @testset "Exponential()" begin
-            # test against known mean and variance of order statistics
-            @testset for n in [1, 10, 100], i in 1:n
-                d = OrderStatistic(Exponential(), n, i)
-                x = rand(d, ndraws)
-                m, v = mean_and_var(x)
-                m_exact = sum(r -> inv(n - r + 1), 1:i)
-                v_exact = sum(r -> inv((n - r + 1)^2), 1:i)
-                # compute asymptotic sample standard deviation
-                mean_std = sqrt(v_exact / ndraws)
-                var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
-                @test m ≈ m_exact atol = (tol * mean_std)
-                @test v ≈ v_exact atol = (tol * var_std)
-            end
-        end
-
-        @testset for dist in [Poisson(20), Binomial(20, 0.3)]
-            # test against known mean and variance of order statistics
+        @testset for dist in [Uniform(), Exponential(), Poisson(20), Binomial(20, 0.3)]
             @testset for n in [1, 10, 100], i in 1:n
                 d = OrderStatistic(dist, n, i)
                 x = rand(d, ndraws)
                 m, v = mean_and_var(x)
-                # estimate mean and variance with explicit sum, Eqs 3.2.6-7 from
-                # Arnold (2008). A first course in order statistics.
-                xs = 0:quantile(dist, 0.9999)
-                m_exact = sum(x -> ccdf(d, x), xs)
-                v_exact = 2 * sum(x -> x * ccdf(d, x), xs) + m_exact - m_exact^2
+                if dist isa Uniform
+                    # Arnold (2008). A first course in order statistics. Eqs 2.2.20-21
+                    m_exact = i / (n + 1)
+                    v_exact = m_exact * (1 - m_exact) / (n + 2)
+                elseif dist isa Exponential
+                    # Arnold (2008). A first course in order statistics. Eqs 4.6.6-7
+                    m_exact = sum(k -> inv(n - k + 1), 1:i)
+                    v_exact = sum(k -> inv((n - k + 1)^2), 1:i)
+                elseif dist isa DiscreteUnivariateDistribution
+                    # estimate mean and variance with explicit sum, Eqs 3.2.6-7 from
+                    # Arnold (2008). A first course in order statistics.
+                    xs = 0:quantile(dist, 0.9999)
+                    m_exact = sum(x -> ccdf(d, x), xs)
+                    v_exact = 2 * sum(x -> x * ccdf(d, x), xs) + m_exact - m_exact^2
+                end
                 # compute asymptotic sample standard deviation
                 mean_std = sqrt(v_exact / ndraws)
                 var_std = sqrt((moment(x, 4) - v_exact^2) / ndraws)
