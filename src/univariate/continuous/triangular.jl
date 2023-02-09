@@ -93,10 +93,17 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 function pdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    return if x <= c
-        2 * max(x - a, 0) / ((b - a) * (c - a))
+    T = typeof(x / a)
+    if x < a || b < x
+        return T(0)
+    elseif a <= x < c
+        return 2 * (x - a) / ((b - a) * (c - a))
+    elseif x == c
+        return T(2) / (b - a)
+    elseif c < x <= b
+        return 2 * (b - x) / ((b - a) * (b - c))
     else
-        2 * max(b - x, 0) / ((b - a) * (b - c))
+        return T(NaN)
     end
 end
 logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
@@ -104,12 +111,16 @@ logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 function cdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
     T = typeof(x / a)
-    return if x <= c
-        max(x - a, 0)^2 / ((b - a) * (c - a))
-    elseif x < b
-        1 - max(b - x, 0)^2 / ((b - a) * (b - c))
+    if x <= a
+        return T(0)
+    elseif a < x <= c
+        return (x - a) ^ 2 / ((b - a) * (c - a))
+    elseif c < x < b
+        return 1 - (b - x) ^ 2 / ((b - a) * (b - c))
+    elseif b <= x
+        return T(1)
     else
-        isnan(x) ? T(NaN) : T(1)
+        return T(NaN)
     end
 end
 
@@ -126,18 +137,18 @@ function mgf(d::TriangularDist, t::Real)
     a, b, c = params(d)
     T = typeof(t / a)
     t == zero(T) && return one(T)
-        u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return 2u / v
+    u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
+    v = (b - a) * (c - a) * (b - c) * t^2
+    return 2u / v
 end
 
 function cf(d::TriangularDist, t::Real)
     a, b, c = params(d)
     T = typeof(t / a)
     t == zero(T) && return complex(one(T))
-        u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return -2u / v
+    u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
+    v = (b - a) * (c - a) * (b - c) * t^2
+    return -2u / v
 end
 
 
