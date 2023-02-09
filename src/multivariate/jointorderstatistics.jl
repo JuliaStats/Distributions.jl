@@ -106,8 +106,10 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         rand!(rng, d.dist, x)
         sort!(x)
     else
-        # use exponential spacing method with inversion, where for gaps in the ranks, we
+        # use exponential generation method with inversion, where for gaps in the ranks, we
         # use the fact that the sum Y of k IID variables xₘ ~ Exp(1) is Y ~ Gamma(k, 1).
+        # Lurie, D., and H. O. Hartley. "Machine-generation of order statistics for Monte
+        # Carlo computations." The American Statistician 26.1 (1972): 26-27.
         # this is slow if length(d.r) is close to n and quantile for d.dist is expensive,
         # but this branch is probably taken when length(d.r) is small or much smaller than n.
         T = typeof(one(eltype(x)))
