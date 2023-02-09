@@ -122,27 +122,22 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
-function mgf(d::TriangularDist{T}, t::Real) where T<:Real
-    if t == zero(t)
-        return one(T)
-    else
-        (a, b, c) = params(d)
+function mgf(d::TriangularDist, t::Real)
+    a, b, c = params(d)
+    T = typeof(t / a)
+    t == zero(T) && return one(T)
         u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
         v = (b - a) * (c - a) * (b - c) * t^2
         return 2u / v
-    end
 end
 
-function cf(d::TriangularDist{T}, t::Real) where T<:Real
-    # Is this correct?
-    if t == zero(t)
-        return one(Complex{T})
-    else
-        (a, b, c) = params(d)
+function cf(d::TriangularDist, t::Real)
+    a, b, c = params(d)
+    T = typeof(t / a)
+    t == zero(T) && return complex(one(T))
         u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
         v = (b - a) * (c - a) * (b - c) * t^2
         return -2u / v
-    end
 end
 
 
