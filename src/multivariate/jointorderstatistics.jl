@@ -22,6 +22,8 @@ statistic is the sample maximum.
 
 `r` must be a sorted vector of unique integers between 1 and `n`.
 
+For a single order statistic, use [`OrderStatistic`](@ref) instead.
+
 ## Examples
 
 ```julia

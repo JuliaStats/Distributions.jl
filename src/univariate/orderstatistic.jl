@@ -27,6 +27,9 @@ g(x; n, i) = \\sum_{k=i}^n {n \\choose k} \\left( [F(x)]^k [1 - F(x)]^{n-k} - [F
 ```
 where ``x_-`` is the largest element in the support of `dist` less than ``x``.
 
+For the joint distribution of a subset of order statistics, use
+[`JointOrderStatistics`](@ref) instead.
+
 ## Examples
 
 ```julia
