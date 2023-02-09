@@ -111,7 +111,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test x2 == x
         end
 
-        ndraws = 100_000
+        ndraws = 300_000
         dists = [Uniform(), Exponential()]
 
         @testset "marginal mean and standard deviation" begin
