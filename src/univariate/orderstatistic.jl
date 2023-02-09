@@ -97,6 +97,7 @@ end
 function rand(rng::AbstractRNG, d::OrderStatistic)
     # inverse transform sampling. Since quantile function is Qₓ(Uᵢₙ⁻¹(p)), we draw a random
     # variable from Uᵢₙ and pass it through the quantile function of `d.dist`
+    T = eltype(d.dist)
     b = _uniform_orderstatistic(d)
-    return quantile(d.dist, rand(rng, b))
+    return T(quantile(d.dist, rand(rng, b)))
 end
