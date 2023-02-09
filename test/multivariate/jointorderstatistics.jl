@@ -156,14 +156,19 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 vcat(10:20, (n - 19):(n - 10)),
             ]
 
+            nchecks = length(dists) * sum(rs) do r
+                m = length(r)
+                return div(m * (m - 1), 2)
+            end
+            α = (0.01 / nchecks) / 2  # multiple correction
+            tol = quantile(Normal(), 1 - α) / sqrt(ndraws)
+
             @testset for dist in dists, r in rs
                 d = JointOrderStatistics(dist, n, r)
                 x = rand(d, ndraws)
                 @test all(xi -> insupport(d, xi), eachcol(x))
 
                 m = length(r)
-                nchecks = div(m * (m - 1), 2)
-                α = (0.01 / nchecks) / 2  # multiple correction
 
                 xcor = cor(x; dims=2)
                 if dist isa Uniform
@@ -182,7 +187,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     ρ_exact = xcor_exact[ii, ji]
                     # use variance-stabilizing transformation, recommended in §3.6 of
                     # Van der Vaart, A. W. (2000). Asymptotic statistics (Vol. 3).
-                    @test atanh(ρ) ≈ atanh(ρ_exact) atol = (tol / sqrt(ndraws))
+                    @test atanh(ρ) ≈ atanh(ρ_exact) atol = tol
                 end
             end
         end
