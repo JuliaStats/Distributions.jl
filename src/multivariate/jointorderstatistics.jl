@@ -89,11 +89,11 @@ function _marginalize_range(dist, n, i, j, xᵢ, xⱼ, T)
     k = j - i - 1
     k == 0 && return zero(T)
     lpdiff = if i == 0
-        logcdf(dist, xⱼ)
+        T(logcdf(dist, xⱼ))
     elseif j == n + 1
-        logccdf(dist, xᵢ)
+        T(logccdf(dist, xᵢ))
     else
-        logdiffcdf(dist, xⱼ, xᵢ)
+        T(logdiffcdf(dist, xⱼ, xᵢ))
     end
     return k * lpdiff - loggamma(T(k + 1))
 end
