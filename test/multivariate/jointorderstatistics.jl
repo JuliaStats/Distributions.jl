@@ -1,6 +1,8 @@
 using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
 
 @testset "JointOrderStatistics" begin
+    Random.seed!(123)
+
     @testset "check_args" begin
         dist = Normal()
         JointOrderStatistics(dist, 2, 1:2)
