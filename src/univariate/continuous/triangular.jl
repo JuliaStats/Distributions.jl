@@ -35,7 +35,7 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function TriangularDist(a::T, b::T, c::T; check_args::Bool=true) where {T <: Real}
-    @check_args(TriangularDist, (a <= c <= b, "must have a <= c <= b"), (a < b, "must have a < b"))
+    @check_args TriangularDist (a <= c <= b) (a < b)
     return TriangularDist{T}(a, b, c)
 end
 
@@ -93,7 +93,7 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 function pdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    T = typeof(x / a)
+    T = typeof(one(x) / one(a))
     if x < a || b < x
         return T(0)
     elseif a <= x < c
@@ -110,7 +110,7 @@ logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    T = typeof(x / a)
+    T = typeof(one(x) / one(a))
     if x <= a
         return T(0)
     elseif a < x <= c
@@ -135,18 +135,16 @@ end
 
 function mgf(d::TriangularDist, t::Real)
     a, b, c = params(d)
-    T = typeof(t / a)
-    t == zero(T) && return one(T)
     u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
+    iszero(t) && return one(u)
     v = (b - a) * (c - a) * (b - c) * t^2
     return 2u / v
 end
 
 function cf(d::TriangularDist, t::Real)
     a, b, c = params(d)
-    T = typeof(t / a)
-    t == zero(T) && return complex(one(T))
     u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
+    iszero(t) && return complex(one(u))
     v = (b - a) * (c - a) * (b - c) * t^2
     return -2u / v
 end
