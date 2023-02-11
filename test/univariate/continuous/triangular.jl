@@ -3,6 +3,41 @@ using Statistics
 using Test
 
 ϵ = .01
+ψ = 1
+
+function convertstr(t::String, x::T) where T<:Real
+    t == "Float16" && return convert(Float16, x)
+    t == "Float32" && return convert(Float32, x)
+    t == "Float64" && return convert(Float64, x)
+    t == "BigFloat" && return convert(BigFloat, x)
+    t == "Rational" && return convert(Rational, x)
+    t == "Int8" && return convert(Int8, x)
+    t == "Int16" && return convert(Int16, x)
+    t == "Int32" && return convert(Int32, x)
+    t == "Int64" && return convert(Int64, x)
+    t == "Int128" && return convert(Int128, x)
+    t == "BigInt" && return convert(BigInt, x)
+    t == "UInt8" && return convert(UInt8, x)
+    t == "UInt16" && return convert(UInt16, x)
+    t == "UInt32" && return convert(UInt32, x)
+    t == "UInt64" && return convert(UInt64, x)
+    t == "UInt128" && return convert(UInt128, x)
+    # t == "Bool" && return convert(Bool, x)
+end
+
+types = ["Float16", "Float32", "Float64", "BigFloat", "Rational"
+        , "Int8", "Int16", "Int32", "Int64", "Int128", "BigInt"
+        , "UInt8", "UInt16", "UInt32", "UInt64", "UInt128"] #Bool
+n = length(types)^2
+typeslist = Array{String}(undef, n, 2)
+j = 1
+for t in eachindex(types)
+    for u in eachindex(types)
+        typeslist[j, 1] = types[t]
+        typeslist[j, 2] = types[u]
+        global j += 1
+    end
+end
 
 @testset "triangular" begin
     
@@ -247,4 +282,192 @@ using Test
             (c - a) * cis(b * t2)) / ((b - a) * (c - a) * (b - c) * t2^2))
     end
 
+    @testset "type_stable_regular_triangle" begin
+        a = 2
+        b = 10
+        c = 8
+        xa = a
+        xb = b
+        xlow = a - ψ
+        xhigh = b + ψ
+        xac = middle(a, c)
+        xbc = middle(b, c)
+        t1 = 1
+        t2 = 2
+
+        for j = 1:n
+            typep = typeslist[j, 1]
+            typex = typeslist[j, 2]
+            za = convertstr(typep, a)
+            zb = convertstr(typep, b)
+            zc = convertstr(typep, c)
+            zxa = convertstr(typex, xa)
+            zxb = convertstr(typex, xb)
+            zxlow = convertstr(typex, xlow)
+            zxhigh = convertstr(typex, xhigh)
+            zxac = convertstr(typex, xac)
+            zxbc = convertstr(typex, xbc)
+            zt1 = convertstr(typex, t1)
+            zt2 = convertstr(typex, t2)
+
+            @inferred pdf(TriangularDist(za, zb, zc), zxa)
+            @inferred pdf(TriangularDist(za, zb, zc), zxb)
+            @inferred pdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred pdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred pdf(TriangularDist(za, zb, zc), zxac)
+            @inferred pdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred cdf(TriangularDist(za, zb, zc), zxa)
+            @inferred cdf(TriangularDist(za, zb, zc), zxb)
+            @inferred cdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred cdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred cdf(TriangularDist(za, zb, zc), zxac)
+            @inferred cdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred mgf(TriangularDist(za, zb, zc), zt1)
+            @inferred mgf(TriangularDist(za, zb, zc), zt2)
+            @inferred cf(TriangularDist(za, zb, zc), zt1)
+            @inferred cf(TriangularDist(za, zb, zc), zt2)
+        end
+    end
+    
+    @testset "type_stable_symmetric_triangle" begin
+        a = 2
+        b = 6
+        c = 4
+        xa = a
+        xb = b
+        xlow = a - ψ
+        xhigh = b + ψ
+        xac = middle(a, c)
+        xbc = middle(b, c)
+        t1 = 1
+        t2 = 2
+
+        for j = 1:n
+            typep = typeslist[j, 1]
+            typex = typeslist[j, 2]
+            za = convertstr(typep, a)
+            zb = convertstr(typep, b)
+            zc = convertstr(typep, c)
+            zxa = convertstr(typex, xa)
+            zxb = convertstr(typex, xb)
+            zxlow = convertstr(typex, xlow)
+            zxhigh = convertstr(typex, xhigh)
+            zxac = convertstr(typex, xac)
+            zxbc = convertstr(typex, xbc)
+            zt1 = convertstr(typex, t1)
+            zt2 = convertstr(typex, t2)
+
+            @inferred pdf(TriangularDist(za, zb, zc), zxa)
+            @inferred pdf(TriangularDist(za, zb, zc), zxb)
+            @inferred pdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred pdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred pdf(TriangularDist(za, zb, zc), zxac)
+            @inferred pdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred cdf(TriangularDist(za, zb, zc), zxa)
+            @inferred cdf(TriangularDist(za, zb, zc), zxb)
+            @inferred cdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred cdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred cdf(TriangularDist(za, zb, zc), zxac)
+            @inferred cdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred mgf(TriangularDist(za, zb, zc), zt1)
+            @inferred mgf(TriangularDist(za, zb, zc), zt2)
+            @inferred cf(TriangularDist(za, zb, zc), zt1)
+            @inferred cf(TriangularDist(za, zb, zc), zt2)
+        end
+    end
+    
+    @testset "type_stable_right_triangle" begin
+        a = 2
+        b = 4
+        c = 4
+        xa = a
+        xb = b
+        xlow = a - ψ
+        xhigh = b + ψ
+        xac = middle(a, c)
+        xbc = middle(b, c)
+        t1 = 1
+        t2 = 2
+
+        for j = 1:n
+            typep = typeslist[j, 1]
+            typex = typeslist[j, 2]
+            za = convertstr(typep, a)
+            zb = convertstr(typep, b)
+            zc = convertstr(typep, c)
+            zxa = convertstr(typex, xa)
+            zxb = convertstr(typex, xb)
+            zxlow = convertstr(typex, xlow)
+            zxhigh = convertstr(typex, xhigh)
+            zxac = convertstr(typex, xac)
+            zxbc = convertstr(typex, xbc)
+            zt1 = convertstr(typex, t1)
+            zt2 = convertstr(typex, t2)
+
+            @inferred pdf(TriangularDist(za, zb, zc), zxa)
+            @inferred pdf(TriangularDist(za, zb, zc), zxb)
+            @inferred pdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred pdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred pdf(TriangularDist(za, zb, zc), zxac)
+            @inferred pdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred cdf(TriangularDist(za, zb, zc), zxa)
+            @inferred cdf(TriangularDist(za, zb, zc), zxb)
+            @inferred cdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred cdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred cdf(TriangularDist(za, zb, zc), zxac)
+            @inferred cdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred mgf(TriangularDist(za, zb, zc), zt1)
+            @inferred mgf(TriangularDist(za, zb, zc), zt2)
+            @inferred cf(TriangularDist(za, zb, zc), zt1)
+            @inferred cf(TriangularDist(za, zb, zc), zt2)
+        end
+    end
+    
+    @testset "type_stable_left_triangle" begin
+        a = 2
+        b = 4
+        c = 2
+        xa = a
+        xb = b
+        xlow = a - ψ
+        xhigh = b + ψ
+        xac = middle(a, c)
+        xbc = middle(b, c)
+        t1 = 1
+        t2 = 2
+
+        for j = 1:n
+            typep = typeslist[j, 1]
+            typex = typeslist[j, 2]
+            za = convertstr(typep, a)
+            zb = convertstr(typep, b)
+            zc = convertstr(typep, c)
+            zxa = convertstr(typex, xa)
+            zxb = convertstr(typex, xb)
+            zxlow = convertstr(typex, xlow)
+            zxhigh = convertstr(typex, xhigh)
+            zxac = convertstr(typex, xac)
+            zxbc = convertstr(typex, xbc)
+            zt1 = convertstr(typex, t1)
+            zt2 = convertstr(typex, t2)
+
+            @inferred pdf(TriangularDist(za, zb, zc), zxa)
+            @inferred pdf(TriangularDist(za, zb, zc), zxb)
+            @inferred pdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred pdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred pdf(TriangularDist(za, zb, zc), zxac)
+            @inferred pdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred cdf(TriangularDist(za, zb, zc), zxa)
+            @inferred cdf(TriangularDist(za, zb, zc), zxb)
+            @inferred cdf(TriangularDist(za, zb, zc), zxlow)
+            @inferred cdf(TriangularDist(za, zb, zc), zxhigh)
+            @inferred cdf(TriangularDist(za, zb, zc), zxac)
+            @inferred cdf(TriangularDist(za, zb, zc), zxbc)
+            @inferred mgf(TriangularDist(za, zb, zc), zt1)
+            @inferred mgf(TriangularDist(za, zb, zc), zt2)
+            @inferred cf(TriangularDist(za, zb, zc), zt1)
+            @inferred cf(TriangularDist(za, zb, zc), zt2)
+        end
+    end
+    
 end
