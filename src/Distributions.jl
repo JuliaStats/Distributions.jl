@@ -23,7 +23,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 
 import PDMats: dim, PDMat, invquad
 
-using SpecialFunctions
+using SpecialFunctions, LambertW
 
 import ChainRulesCore
 
@@ -114,6 +114,7 @@ export
     KSOneSided,
     Laplace,
     Levy,
+    Lindley,
     LKJ,
     LKJCholesky,
     LocationScale,
@@ -345,7 +346,7 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
+    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, Lindley, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,

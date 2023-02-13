@@ -692,6 +692,7 @@ const continuous_distributions = [
     "ksonesided",
     "laplace",
     "levy",
+    "lindley",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
