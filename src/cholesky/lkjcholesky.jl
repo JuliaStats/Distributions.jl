@@ -172,7 +172,7 @@ function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     return Rs
 end
 
-Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky) = Random.rand!(GLOBAL_RNG, d, R)
+Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky) = Random.rand!(default_rng(), d, R)
 function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky)
     return _lkj_cholesky_onion_sampler!(rng, d, R)
 end
