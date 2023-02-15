@@ -107,8 +107,7 @@ Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 
 rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
 
-rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real}) = 
-    A .= randn!(rng, A) .* d.σ .+ d.μ
+rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real}) = A .= muladd.(d.σ, randn!(rng, A), d.μ)
 
 #### Fitting
 
