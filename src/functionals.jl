@@ -11,7 +11,7 @@ function expectation(g, distr::DiscreteUnivariateDistribution; epsilon::Real=1e-
     return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
+function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=default_rng())
     nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
     # We use a function barrier to work around type instability of `sampler(dist)`
     return mcexpectation(rng, g, sampler(distr), nsamples)

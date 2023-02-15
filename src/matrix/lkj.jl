@@ -124,7 +124,7 @@ function _rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix)
     R .= _lkj_onion_sampler(d.d, d.η, rng)
 end
 
-function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.GLOBAL_RNG)
+function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.default_rng())
     #  Section 3.2 in LKJ (2009 JMA)
     #  1. Initialization
     R = ones(typeof(η), d, d)
