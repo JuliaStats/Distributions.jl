@@ -143,7 +143,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples using RNG passed or global RNG
+    # generate samples using RNG passed or default RNG
     samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
     @assert length(samples) == n
 
