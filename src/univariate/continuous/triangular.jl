@@ -100,10 +100,8 @@ function pdf(d::TriangularDist, x::Real)
         return 2 * (x - a) / ((b - a) * (c - a))
     elseif x == c
         return T(2) / (b - a)
-    elseif c < x <= b
-        return 2 * (b - x) / ((b - a) * (b - c))
     else
-        return T(NaN)
+        return 2 * (b - x) / ((b - a) * (b - c))
     end
 end
 logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
@@ -117,10 +115,8 @@ function cdf(d::TriangularDist, x::Real)
         return (x - a) ^ 2 / ((b - a) * (c - a))
     elseif c < x < b
         return 1 - (b - x) ^ 2 / ((b - a) * (b - c))
-    elseif b <= x
-        return T(1)
     else
-        return T(NaN)
+        return T(1)
     end
 end
 
@@ -144,7 +140,7 @@ end
 function cf(d::TriangularDist, t::Real)
     a, b, c = params(d)
     u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
-    iszero(t) && return complex(one(u))
+    iszero(t) && return one(u)
     v = (b - a) * (c - a) * (b - c) * t^2
     return -2u / v
 end
