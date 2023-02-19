@@ -35,7 +35,7 @@ struct TriangularDist{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function TriangularDist(a::T, b::T, c::T; check_args::Bool=true) where {T <: Real}
-    @check_args TriangularDist (a <= c <= b) (a < b)
+    @check_args TriangularDist (a <= c <= b)
     return TriangularDist{T}(a, b, c)
 end
 
@@ -93,30 +93,26 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 function pdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    T = typeof(one(x) / one(a))
-    if x < a || b < x
-        return T(0)
-    elseif a <= x < c
-        return 2 * (x - a) / ((b - a) * (c - a))
-    elseif x == c
-        return T(2) / (b - a)
+    res = if x < c
+        2 * (x - a) / ((b - a) * (c - a))
+    elseif x > c
+        2 * (b - x) / ((b - a) * (b - c))
     else
-        return 2 * (b - x) / ((b - a) * (b - c))
+        # Handle x == c separately to avoid `NaN` if `c == a` or `c == b`
+        oftype(x - a, 2) / (b - a)
     end
+    return insupport(d, x) ? res : zero(res)
 end
 logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    T = typeof(one(x) / one(a))
-    if x <= a
-        return T(0)
-    elseif x >= b
-        return T(1)
-    elseif a < x <= c
-        return (x - a) ^ 2 / ((b - a) * (c - a))
-    else c < x < b
-        return 1 - (b - x) ^ 2 / ((b - a) * (b - c))
+    if x < c
+        res = (x - a)^2 / ((b - a) * (c - a))
+        return x < a ? zero(res) : res
+    else
+        res = 1 - (b - x)^2 / ((b - a) * (b - c))
+        return x ≥ b ? one(res) : res
     end
 end
 
@@ -129,20 +125,73 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
+"""
+    _phi2(x::Real)
+
+Compute
+```math
+2 (exp(x) - 1 - x) / x^2
+```
+with the correct limit at ``x = 0``.
+"""
+function _phi2(x::Real)
+    res = 2 * (expm1(x) - x) / x^2
+    return iszero(x) ? one(res) : res
+end
 function mgf(d::TriangularDist, t::Real)
     a, b, c = params(d)
-    u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
-    iszero(t) && return one(u)
-    v = (b - a) * (c - a) * (b - c) * t^2
-    return 2u / v
+    # In principle, only two branches (degenerate + non-degenerate case) are needed
+    # But writing out all four cases will avoid unnecessary computations
+    if a < c
+        if c < b
+            # Case: a < c < b
+            return exp(c * t) * ((c - a) * _phi2((a - c) * t) + (b - c) * _phi2((b - c) * t)) / (b - a)
+        else
+            # Case: a < c = b
+            return exp(c * t) * _phi2((a - c) * t)
+        end
+    elseif c < b
+        # Case: a = c < b
+        return exp(c * t) * _phi2((b - c) * t)
+    else
+        # Case: a = c = b
+        return exp(c * t)
+    end
 end
 
+"""
+    _cisphi2(x::Real)
+
+Compute
+```math
+- 2 (exp(x im) - 1 - x im) / x^2
+```
+with the correct limit at ``x = 0``.
+"""
+function _cisphi2(x::Real)
+    z = x * im
+    res = -2 * (expm1(z) - z) / x^2
+    return iszero(x) ? one(res) : res
+end
 function cf(d::TriangularDist, t::Real)
     a, b, c = params(d)
-    u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
-    iszero(t) && return one(u)
-    v = (b - a) * (c - a) * (b - c) * t^2
-    return -2u / v
+    # In principle, only two branches (degenerate + non-degenerate case) are needed
+    # But writing out all four cases will avoid unnecessary computations
+    if a < c
+        if c < b
+            # Case: a < c < b
+            return cis(c * t) * ((c - a) * _cisphi2((a - c) * t) + (b - c) * _cisphi2((b - c) * t)) / (b - a)
+        else
+            # Case: a < c = b
+            return cis(c * t) * _cisphi2((a - c) * t)
+        end
+    elseif c < b
+        # Case: a = c < b
+        return cis(c * t) * _cisphi2((b - c) * t)
+    else
+        # Case: a = c = b
+        return cis(c * t)
+    end
 end
 
 
