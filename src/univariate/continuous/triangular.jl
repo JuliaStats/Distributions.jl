@@ -111,12 +111,12 @@ function cdf(d::TriangularDist, x::Real)
     T = typeof(one(x) / one(a))
     if x <= a
         return T(0)
+    elseif x >= b
+        return T(1)
     elseif a < x <= c
         return (x - a) ^ 2 / ((b - a) * (c - a))
-    elseif c < x < b
+    else c < x < b
         return 1 - (b - x) ^ 2 / ((b - a) * (b - c))
-    else
-        return T(1)
     end
 end
 
