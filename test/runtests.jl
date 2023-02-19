@@ -160,7 +160,7 @@ printstyled("Running tests:\n", color=:blue)
 
 Random.seed!(345679)
 
-# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+# to reduce redundancy, we might break this file down into separate `$t * "_utils.jl"` files
 include("testutils.jl")
 
 @testset "Distributions" begin
