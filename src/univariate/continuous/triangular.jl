@@ -125,6 +125,12 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
+_expm1(x::Number) = expm1(x)
+if VERSION < v"1.7.0-DEV.1172"
+    # expm1(::Float16) is not defined in older Julia versions
+    _expm1(x::Float16) = Float16(expm1(Float32(x)))
+end
+
 """
     _phi2(x::Real)
 
@@ -135,7 +141,7 @@ Compute
 with the correct limit at ``x = 0``.
 """
 function _phi2(x::Real)
-    res = 2 * (expm1(x) - x) / x^2
+    res = 2 * (_expm1(x) - x) / x^2
     return iszero(x) ? one(res) : res
 end
 function mgf(d::TriangularDist, t::Real)
@@ -170,7 +176,7 @@ with the correct limit at ``x = 0``.
 """
 function _cisphi2(x::Real)
     z = x * im
-    res = -2 * (expm1(z) - z) / x^2
+    res = -2 * (_expm1(z) - z) / x^2
     return iszero(x) ? one(res) : res
 end
 function cf(d::TriangularDist, t::Real)
