@@ -74,7 +74,7 @@ end
 
 function rand(rng::AbstractRNG, d::Semicircle)
     # Idea:
-    # sample polar coodinates r,θ 
+    # sample polar coordinates r,θ
     # of point uniformly distributed on radius d.r half disk
     # project onto x axis
     θ = rand(rng) # multiple of π
