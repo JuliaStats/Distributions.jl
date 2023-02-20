@@ -99,7 +99,7 @@ rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))
 #### Fitting
 
 function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T<:Real}
-    # Compute MLE (and unbiasd estimator) of σ^2
+    # Compute MLE (and unbiased estimator) of σ^2
     s2 = zero(T)
     for xi in x
         s2 += xi^2

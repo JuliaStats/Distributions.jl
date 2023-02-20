@@ -213,7 +213,7 @@ kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
-rand(d::Chernoff) = rand(GLOBAL_RNG, d)
+rand(d::Chernoff) = rand(default_rng(), d)
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
     A = 0.03248227216266608

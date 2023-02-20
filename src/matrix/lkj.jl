@@ -124,7 +124,7 @@ function _rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix)
     R .= _lkj_onion_sampler(d.d, d.η, rng)
 end
 
-function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.GLOBAL_RNG)
+function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.default_rng())
     #  Section 3.2 in LKJ (2009 JMA)
     #  1. Initialization
     R = ones(typeof(η), d, d)
@@ -181,7 +181,7 @@ function _rand_params(::Type{LKJ}, elty, n::Int, p::Int)
 end
 
 #  -----------------------------------------------------------------------------
-#  Several redundant implementations of the recipricol integrating constant.
+#  Several redundant implementations of the reciprocal integrating constant.
 #  If f(R; n) = c₀ |R|ⁿ⁻¹, these give log(1 / c₀).
 #  Every integrating constant formula given in LKJ (2009 JMA) is an expression
 #  for 1 / c₀, even if they say that it is not.

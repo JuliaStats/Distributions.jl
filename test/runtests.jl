@@ -88,6 +88,7 @@ const tests = [
     "univariate/continuous/tdist",
     "multivariate/product",
     "eachvariate",
+    "univariate/continuous/triangular",
 
     ### missing files compared to /src:
     # "common",
@@ -142,7 +143,6 @@ const tests = [
     # "univariate/continuous/studentizedrange",
     # "univariate/continuous/symtriangular",
     # "univariate/continuous/tdist",
-    # "univariate/continuous/triangular",
     # "univariate/continuous/triweight",
     # "univariate/continuous/noncentralf",
     # "univariate/discrete/geometric",
@@ -160,7 +160,7 @@ printstyled("Running tests:\n", color=:blue)
 
 Random.seed!(345679)
 
-# to reduce redundancy, we might break this file down into seperate `$t * "_utils.jl"` files
+# to reduce redundancy, we might break this file down into separate `$t * "_utils.jl"` files
 include("testutils.jl")
 
 @testset "Distributions" begin
