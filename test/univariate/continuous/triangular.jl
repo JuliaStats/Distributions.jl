@@ -18,6 +18,7 @@ using Test
             b = T1(7)
             c = T1(5)
             dist = TriangularDist(a, b, c)
+            distf64 = TriangularDist(Float64(a), Float64(b), Float64(c))
 
             for T2 in Ts
                 xa = T2(1)
@@ -30,17 +31,17 @@ using Test
                 t2 = T2(5)
 
                 for f in (pdf, cdf)
-                    @inferred f(dist, xa)
-                    @inferred f(dist, xb)
-                    @inferred f(dist, xsmall)
-                    @inferred f(dist, xlarge)
-                    @inferred f(dist, x_middle_a_c)
-                    @inferred f(dist, x_middle_b_c)
+                    @inferred f(dist, xa) ≈ f(distf64, Float64(xa))
+                    @inferred f(dist, xb) ≈ f(distf64, Float64(xb))
+                    @inferred f(dist, xsmall) ≈ f(distf64, Float64(xsmall))
+                    @inferred f(dist, xlarge) ≈ f(distf64, Float64(xlarge))
+                    @inferred f(dist, x_middle_a_c) ≈ f(distf64, Float64(x_middle_a_c))
+                    @inferred f(dist, x_middle_b_c) ≈ f(distf64, Float64(x_middle_b_c))
                 end
 
                 for f in (mgf, cf)
-                    @inferred f(dist, t1)
-                    @inferred f(dist, t2)
+                    @inferred f(dist, t1) ≈ f(distf64, Float64(t1))
+                    @inferred f(dist, t2) ≈ f(distf64, Float64(t2))
                 end
             end
         end
