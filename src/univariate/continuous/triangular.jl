@@ -129,6 +129,11 @@ _expm1(x::Number) = expm1(x)
 if VERSION < v"1.7.0-DEV.1172"
     # expm1(::Float16) is not defined in older Julia versions
     _expm1(x::Float16) = Float16(expm1(Float32(x)))
+    function _expm1(x::Complex{Float16})
+        xr, xi = reim(x)
+        yr, yi = reim(expm1(complex(Float32(xr), Float32(xi))))
+        return complex(Float16(yr), Float16(yi))
+    end
 end
 
 """
