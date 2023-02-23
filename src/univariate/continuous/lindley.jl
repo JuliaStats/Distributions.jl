@@ -34,6 +34,7 @@ Lindley(θ::Integer; check_args::Bool=true) = Lindley(float(θ); check_args=chec
 Lindley() = Lindley{Float64}(1.0)
 
 Base.convert(::Type{Lindley{T}}, d::Lindley) where {T} = Lindley{T}(T(shape(d)))
+Base.convert(::Type{Lindley{T}}, d::Lindley{T}) where {T} = d
 
 @distr_support Lindley 0.0 Inf
 
@@ -49,9 +50,9 @@ mean(d::Lindley) = (2 + d.θ) / d.θ / (1 + d.θ)
 
 var(d::Lindley) = 2 / d.θ^2 - 1 / (1 + d.θ)^2
 
-skewness(d::Lindley) = 2 * evalpoly(d.θ, (2, 6, 6, 1)) / evalpoly(d.θ, (2, 4, 1))^(3//2)
+skewness(d::Lindley) = 2 * @evalpoly(d.θ, 2, 6, 6, 1) / @evalpoly(d.θ, 2, 4, 1)^(3//2)
 
-kurtosis(d::Lindley) = 3 * evalpoly(d.θ, (8, 32, 44, 24, 3)) / evalpoly(d.θ, (2, 4, 1))^2 - 3
+kurtosis(d::Lindley) = 3 * @evalpoly(d.θ, 8, 32, 44, 24, 3) / @evalpoly(d.θ, 2, 4, 1)^2 - 3
 
 mode(d::Lindley) = d.θ < 1 ? (1 - d.θ) / d.θ : zero(d.θ)
 
@@ -90,77 +91,46 @@ _oftype(d::Lindley, y::Real, x) = oftype(_zero(d, y), x)
 
 function pdf(d::Lindley, y::Real)
     θ = shape(d)
-    if isnan(y)
-        return _oftype(d, y, NaN)
-    elseif isfinite(y) && y > 0
-        return θ^2 / (1 + θ) * (1 + y) * exp(-θ * y)
-    else
-        return _zero(d, y)
-    end
+    res = θ^2 / (1 + θ) * (1 + y) * exp(-θ * y)
+    return y < 0 ? zero(res) : res
 end
 
 function logpdf(d::Lindley, y::Real)
     θ = shape(d)
-    if isnan(y)
-        return _oftype(d, y, NaN)
-    elseif isfinite(y) && y > 0
-        return 2 * log(θ) - log1p(θ) + log1p(y) - θ * y
-    else
-        return _oftype(d, y, -Inf)
-    end
+    _y = y < 0 ? zero(y) : y
+    res = 2 * log(θ) - log1p(θ) + log1p(_y) - θ * _y
+    return y < 0 ? oftype(res, -Inf) : res
 end
 
 function gradlogpdf(d::Lindley, y::Real)
-    if isnan(y)
-        return _oftype(d, y, NaN)
-    elseif isfinite(y) && y > 0
-        return inv(1 + y) - shape(d)
-    else
-        return _zero(d, y)
-    end
+    res = inv(1 + y) - shape(d)
+    return y < 0 ? zero(res) : res
 end
 
 function ccdf(d::Lindley, y::Real)
     θ = shape(d)
     θy = θ * y
-    if isnan(y)
-        return _oftype(d, y, NaN)
-    elseif y > 0
-        if isfinite(y)
-            return (1 + θy / (1 + θ)) * exp(-θy)
-        else
-            return _zero(d, y)
-        end
-    else
-        return _oftype(d, y, 1)
-    end
+    res = xexpy(1 + θy / (1 + θ), -θy)
+    return y < 0 ? oftype(res, 1) : res
 end
 
 function logccdf(d::Lindley, y::Real)
     θ = shape(d)
-    if isnan(y)
-        return _oftype(d, y, NaN)
-    elseif y > 0
-        if isfinite(y)
-            return log1p(θ * (1 + y)) - log1p(θ) - θ * y
-        else
-            return _oftype(d, y, -Inf)
-        end
-    else
-        return _zero(d, y)
-    end
+    θy = θ * y
+    res = log1p(θy / (1 + θ)) - θy
+    return y < 0 ? zero(res) : (y == Inf ? oftype(res, -Inf) : res)
 end
 
 cdf(d::Lindley, y::Real) = 1 - ccdf(d, y)
 
-logcdf(d::Lindley, y::Real) = log1p(-ccdf(d, y))
+logcdf(d::Lindley, y::Real) = log1mexp(logccdf(d, y))
 
 # Jodrá, P. (2010). Computer generation of random variables with Lindley or
 # Poisson–Lindley distribution via the Lambert W function. Mathematics and Computers
 # in Simulation, 81(4), 851–859.
 function quantile(d::Lindley, q::Real)
     θ = shape(d)
-    return -1 - inv(θ) - lambertw((1 + θ) * (q - 1) / exp(1 + θ), -1) / θ
+    return -(1 + (1 + lambertw((1 + θ) * (q - 1) / exp(1 + θ), -1)) / θ)
 end
 
 ### Sampling
