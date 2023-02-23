@@ -104,7 +104,7 @@ function logcdf(d::SkewedExponentialPower, x::Real)
     if x <= μ
         log(α) + logccdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*α))^p)
     else
-        log(α) + log1pexp(logcdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*(1-α)))^p) - logit(α))
+        log1pexp(log1p(-α) + logccdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*(1-α)))^p))
     end
 end
 
