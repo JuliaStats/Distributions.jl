@@ -1,6 +1,7 @@
 using Distributions
 using ChainRulesTestUtils
 using OffsetArrays
+using StatsFuns
 
 using Random
 using Test
@@ -82,34 +83,34 @@ using Test
     end
     # issue #1677
     @testset "consistency of pdf and cdf" begin
-        for T in (Int, Float32)
-            d = Uniform{T}(T(2), T(3))
-            for S in (Float32, Float64)
-                TS = promote_type(T, S)
-    
-                @test @inferred(pdf(d, S(1.5))) === TS(0)
-                @test @inferred(pdf(d, S(2.5))) === TS(1)
-                @test @inferred(pdf(d, S(3.5))) === TS(0)
-    
-                @test @inferred(logpdf(d, S(1.5))) === TS(-Inf)
-                @test @inferred(logpdf(d, S(2.5))) === TS(0)
-                @test @inferred(logpdf(d, S(3.5))) === TS(-Inf)
-    
-                @test @inferred(cdf(d, S(1.5))) === TS(0)
-                @test @inferred(cdf(d, S(2.5))) === TS(1//2)
-                @test @inferred(cdf(d, S(3.5))) === TS(1)
+        for T in (Int, Float32, Float64)
+            d = Uniform{T}(T(2), T(4))
+            for S in (Int, Float32, Float64)
+                TS = float(promote_type(T, S))
 
-                @test @inferred(logcdf(d, S(1.5))) === TS(-Inf)
-                @test @inferred(logcdf(d, S(2.5))) === -log(TS(2))
-                @test @inferred(logcdf(d, S(3.5))) === TS(0)
+                @test @inferred(pdf(d, S(1))) === TS(0)
+                @test @inferred(pdf(d, S(3))) === TS(1//2)
+                @test @inferred(pdf(d, S(5))) === TS(0)
 
-                @test @inferred(ccdf(d, S(1.5))) === TS(1)
-                @test @inferred(ccdf(d, S(2.5))) === TS(1//2)
-                @test @inferred(ccdf(d, S(3.5))) === TS(0)
+                @test @inferred(logpdf(d, S(1))) === TS(-Inf)
+                @test @inferred(logpdf(d, S(3))) === -TS(logtwo)
+                @test @inferred(logpdf(d, S(5))) === TS(-Inf)
 
-                @test @inferred(logccdf(d, S(1.5))) === TS(0)
-                @test @inferred(logccdf(d, S(2.5))) === -log(TS(2))
-                @test @inferred(logccdf(d, S(3.5))) === TS(-Inf)
+                @test @inferred(cdf(d, S(1))) === TS(0)
+                @test @inferred(cdf(d, S(3))) === TS(1//2)
+                @test @inferred(cdf(d, S(5))) === TS(1)
+
+                @test @inferred(logcdf(d, S(1))) === TS(-Inf)
+                @test @inferred(logcdf(d, S(3))) === -TS(logtwo)
+                @test @inferred(logcdf(d, S(5))) === TS(0)
+
+                @test @inferred(ccdf(d, S(1))) === TS(1)
+                @test @inferred(ccdf(d, S(3))) === TS(1//2)
+                @test @inferred(ccdf(d, S(5))) === TS(0)
+
+                @test @inferred(logccdf(d, S(1))) === TS(0)
+                @test @inferred(logccdf(d, S(3))) === -log(logtwo)
+                @test @inferred(logccdf(d, S(5))) === TS(-Inf)
             end
         end
     end
