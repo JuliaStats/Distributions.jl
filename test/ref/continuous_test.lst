@@ -150,6 +150,10 @@ Pareto(2.0)
 Pareto(2.0, 1.5)
 Pareto(3.0, 2.0)
 
+PGeneralizedGaussian()
+PGeneralizedGaussian(0.0, 1.5, 2.0)
+PGeneralizedGaussian(3.0, 2.0, 1.5)
+
 Rayleigh()
 Rayleigh(3.0)
 Rayleigh(8.0)

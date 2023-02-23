@@ -23,6 +23,7 @@ in addition to the R language itself:
 | skellam     | For ``Skellam`` |
 | BiasedUrn   | For ``NoncentralHypergeometric`` |
 | fBasics     | For ``NormalInverseGaussian`` |
+| gnorm       | For ``PGeneralizedGaussian`` |
 | LindleyR    | For ``Lindley`` |
 
 ## Usage
