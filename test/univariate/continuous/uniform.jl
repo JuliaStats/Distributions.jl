@@ -109,7 +109,7 @@ using Test
                 @test @inferred(ccdf(d, S(5))) === TS(0)
 
                 @test @inferred(logccdf(d, S(1))) === TS(0)
-                @test @inferred(logccdf(d, S(3))) === -log(logtwo)
+                @test @inferred(logccdf(d, S(3))) === -TS(logtwo)
                 @test @inferred(logccdf(d, S(5))) === TS(-Inf)
             end
         end
