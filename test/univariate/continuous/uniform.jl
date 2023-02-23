@@ -80,4 +80,14 @@ using Test
             end
         end
     end
+    # issue #1677
+    @testset "consistency of pdf and cdf" begin
+        d = Uniform(0f0, 1f0)
+        for x in (1f0, 1.0)
+            @test @inferred(pdf(d, x)) === x
+            @test @inferred(logpdf(d, x)) === zero(x)
+            @test @inferred(cdf(d, x)) === x
+            @test @inferred(logcdf(d, x)) === zero(x)
+        end
+    end
 end

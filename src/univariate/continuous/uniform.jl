@@ -72,12 +72,14 @@ entropy(d::Uniform) = log(d.b - d.a)
 #### Evaluation
 
 function pdf(d::Uniform, x::Real)
-    val = inv(d.b - d.a)
+    # include dependency on `x` for return type to be consistent with `cdf`
+    val = one(x) / (d.b - d.a)
     return insupport(d, x) ? val : zero(val)
 end
 function logpdf(d::Uniform, x::Real)
-    diff = d.b - d.a
-    return insupport(d, x) ? -log(diff) : log(zero(diff))
+    # include dependency on `x` for return type to be consistent with `logcdf`
+    val = zero(x) - log(d.b - d.a)
+    return insupport(d, x) ? val : oftype(val, -Inf)
 end
 gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
