@@ -1,5 +1,7 @@
-using Test
 using Distributions
+using SpecialFunctions
+
+using Test
 
 @testset "SkewedExponentialPower" begin
     @testset "α = 0.5" begin
@@ -13,6 +15,7 @@ using Distributions
         @test @inferred cdf(d2, -Inf) == 0
         @test @inferred quantile(d2, 1) == Inf
         @test @inferred quantile(d2, 0) == -Inf
+        test_distr(d2, 10^6)
 
         # Comparison to laplace
         d = SkewedExponentialPower(0, 1, 1, 0.5)
@@ -36,10 +39,12 @@ using Distributions
         @test @inferred kurtosis(d) ≈ kurtosis(de)
         @test @inferred pdf(d, 0.5) ≈ pdf(de, 0.5)
         @test @inferred cdf(d, 0.5) ≈ cdf(de, 0.5)
+        test_distr(d, 10^6)
 
         # This is infinite for the PGeneralizedGaussian implementation
         d = SkewedExponentialPower(0, 1, 0.01, 0.5)
         @test @inferred isfinite(var(d))
+        test_distr(d, 10^6)
 
         # Comparison to normal
         d = SkewedExponentialPower(0, 1, 2, 0.5)
@@ -51,6 +56,7 @@ using Distributions
         @test @inferred pdf(d, 0.5) ≈ pdf(dn, 0.5)
         @test @inferred cdf(d, 0.5) ≈ cdf(dn, 0.5)
         @test @inferred quantile(d, 0.5) ≈ quantile(dn, 0.5)
+        test_distr(d, 10^6)
     end
     @testset "α != 0.5" begin
         # Format is [x, pdf, cdf] from the asymmetric
@@ -80,10 +86,13 @@ using Distributions
         ]
 
         d = SkewedExponentialPower(0, 1, 0.5, 0.7)
-        for i ∈ 1:size(test, 1)
-            @test @inferred isapprox(pdf(d, test[i, 1]), test[i, 2], rtol=1e-3)
-            @test @inferred isapprox(cdf(d, test[i, 1]), test[i, 3], rtol=1e-3)
+        for t in eachrow(test)
+            @test @inferred(pdf(d, t[1])) ≈ t[2] rtol=1e-5
+            @test @inferred(logpdf(d, t[1])) ≈ log(t[2]) rtol=1e-5
+            @test @inferred(cdf(d, t[1])) ≈ t[3] rtol=1e-3
+            @test @inferred(logcdf(d, t[1])) ≈ log(t[3]) rtol=1e-3
         end
+        test_distr(d, 10^6)
 
         # relationship between sepd(μ, σ, p, α) and
         # sepd(μ, σ, p, 1-α)
@@ -102,5 +111,6 @@ using Distributions
         @inferred var(d) ≈ moments[2] - moments[1]^2
         @inferred skewness(d) ≈ moments[3] / (√(moments[2] - moments[1]^2))^3
         @inferred kurtosis(d) ≈ (moments[4] / ((moments[2] - moments[1]^2))^2 - 3)
+        test_distr(d, 10^6)
     end
 end

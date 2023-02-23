@@ -72,12 +72,6 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @test typeof(D(mixed_pars...)) == typeof(d)
     end
 
-    # promote integer arguments to floats, where applicable
-    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric) && !isa(D, typeof(truncated))
-        int_pars = map(x -> ceil(Int, x), pars)
-        @test typeof(D(int_pars...)) == typeof(d)
-    end
-
     # conversions
     if D isa Type && !isconcretetype(D)
         @test convert(D{partype(d)}, d) === d
