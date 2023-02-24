@@ -6,7 +6,6 @@ using Test
 
 using Base: Fix1
 using Distributions: expectation
-using ForwardDiff: derivative
 
 @testset "Lindley" begin
     @testset "NaNs" begin
@@ -30,7 +29,7 @@ using ForwardDiff: derivative
         tol = sqrt(eps(float(T)))
         @testset "Gradient of log PDF" begin
             for x in T(0):T(0.5):T(20)
-                fd = derivative(Fix1(logpdf, D), x)
+                fd = ForwardDiff.derivative(Fix1(logpdf, D), x)
                 gl = @inferred gradlogpdf(D, x)
                 @test gl isa T
                 @test fd ≈ gl atol=tol
@@ -74,7 +73,7 @@ using ForwardDiff: derivative
         @testset "MGF, CGF, CF" begin
             @test @inferred(mgf(D, 0)) === one(T)
             @test iszero(mgf(D, shape(D) + 1))
-            @test derivative(Fix1(mgf, D), 0) ≈ mean(D)
+            @test ForwardDiff.derivative(Fix1(mgf, D), 0) ≈ mean(D)
             @test central_fdm(5, 1)(Fix1(cf, D), 0) ≈ mean(D) * im
             test_cgf(D, (-1e6, -100f0, Float16(-1), 1//10, 0.9))
         end
