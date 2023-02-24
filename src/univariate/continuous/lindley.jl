@@ -54,7 +54,7 @@ skewness(d::Lindley) = 2 * @evalpoly(d.θ, 2, 6, 6, 1) / @evalpoly(d.θ, 2, 4, 1
 
 kurtosis(d::Lindley) = 3 * @evalpoly(d.θ, 8, 32, 44, 24, 3) / @evalpoly(d.θ, 2, 4, 1)^2 - 3
 
-mode(d::Lindley) = d.θ < 1 ? (1 - d.θ) / d.θ : zero(d.θ)
+mode(d::Lindley) = max(0, (1 - d.θ) / d.θ)
 
 # Derived with Mathematica:
 #     KLDivergence := ResourceFunction["KullbackLeiblerDivergence"]
@@ -85,9 +85,6 @@ mgf(d::Lindley, t::Real) = _lindley_mgf(shape(d), t)
 cf(d::Lindley, t::Real) = _lindley_mgf(shape(d), t * im)
 
 cgf(d::Lindley, t::Real) = log1p(-t / (1 + d.θ)) - 2 * log1p(-t / d.θ)
-
-_zero(d::Lindley, y::Real) = zero(shape(d)) * zero(y)
-_oftype(d::Lindley, y::Real, x) = oftype(_zero(d, y), x)
 
 function pdf(d::Lindley, y::Real)
     θ = shape(d)
