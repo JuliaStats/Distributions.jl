@@ -116,7 +116,8 @@ end
 
 function logccdf(d::Lindley, y::Real)
     θ = shape(d)
-    θy = θ * y
+    _y = y < 0 ? zero(y) : y
+    θy = θ * _y
     res = log1p(θy / (1 + θ)) - θy
     return y < 0 ? zero(res) : (y == Inf ? oftype(res, -Inf) : res)
 end
@@ -128,21 +129,46 @@ logcdf(d::Lindley, y::Real) = log1mexp(logccdf(d, y))
 # Jodrá, P. (2010). Computer generation of random variables with Lindley or
 # Poisson–Lindley distribution via the Lambert W function. Mathematics and Computers
 # in Simulation, 81(4), 851–859.
+#
+# Only the -1 branch of the Lambert W functions is required since the argument is
+# in (-1/e, 0) for all θ > 0 and 0 < q < 1.
 function quantile(d::Lindley, q::Real)
     θ = shape(d)
-    return -(1 + (1 + lambertw((1 + θ) * (q - 1) / exp(1 + θ), -1)) / θ)
+    return -(1 + (1 + _lambertwm1((1 + θ) * (q - 1) / exp(1 + θ))) / θ)
+end
+
+# Lóczi, L. (2022). Guaranteed- and high-precision evaluation of the Lambert W function.
+# Applied Mathematics and Computation, 433, 127406.
+#
+# Compute W₋₁(x) for x ∈ (-1/e, 0) using formula (27) in Lóczi. By Theorem 2.23, the
+# upper bound on the error for this algorithm is (1/2)^(2^n), where n is the number of
+# recursion steps. The default here is set such that this error is less than `eps()`.
+function _lambertwm1(x, n=6)
+    if -exp(-one(x)) < x <= -1//4
+        β = -1 - sqrt2 * sqrt(1 + ℯ * x)
+    elseif x < 0
+        lnmx = log(-x)
+        β = lnmx - log(-lnmx)
+    else
+        throw(DomainError(x))
+    end
+    for i in 1:n
+        β = β / (1 + β) * (1 + log(x / β))
+    end
+    return β
 end
 
 ### Sampling
 
 # Ghitany, M. E., Atieh, B., & Nadarajah, S. (2008). Lindley distribution and its
 # application. Mathematics and Computers in Simulation, 78(4), 493–506.
-function rand(rng::AbstractRNG, d::Lindley{T}) where {T}
+function rand(rng::AbstractRNG, d::Lindley)
     θ = shape(d)
     λ = inv(θ)
-    u = rand(rng, T)
+    T = typeof(λ)
+    u = rand(rng)
     p = θ / (1 + θ)
-    return T(rand(rng, u <= p ? Exponential{T}(λ) : Gamma{T}(2, λ)))
+    return oftype(u, rand(rng, u <= p ? Exponential{T}(λ) : Gamma{T}(2, λ)))
 end
 
 ### Fitting

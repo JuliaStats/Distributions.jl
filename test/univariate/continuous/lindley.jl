@@ -25,10 +25,7 @@ using ForwardDiff: derivative
     @testset "$T" for T in (Float16, Float32, Float64, Rational{Int})
         D = Lindley(one(T))
         @test partype(D) === T
-        # Random can't handle rationals
-        if T <: AbstractFloat
-            @test typeof(@inferred rand(D)) === T
-        end
+        @test typeof(@inferred rand(D)) === typeof(rand())
         @test @inferred(mean(D)) == T(3/2)
         tol = sqrt(eps(float(T)))
         @testset "Gradient of log PDF" begin
