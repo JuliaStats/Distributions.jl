@@ -299,6 +299,13 @@ plotdensity((0, 20), Levy, (0, 1)) # hide
 ```
 
 ```@docs
+Lindley
+```
+```@example plotdensity
+plotdensity((0, 20), Lindley, (1.5,)) # hide
+```
+
+```@docs
 Logistic
 ```
 ```@example plotdensity
