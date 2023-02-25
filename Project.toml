@@ -7,7 +7,6 @@ version = "0.25.87"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
-InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -23,10 +22,12 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [weakdeps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
 
 [extensions]
 DistributionsChainRulesCoreExt = "ChainRulesCore"
 DistributionsDensityInterfaceExt = "DensityInterface"
+InverseFunctionsDistributionsExt = "InverseFunctions"
 
 [compat]
 ChainRulesCore = "1"
@@ -48,6 +49,7 @@ DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
@@ -55,4 +57,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "StaticArrays", "Test", "OffsetArrays"]
+test = ["StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "InverseFunctions", "JSON", "StaticArrays", "Test", "OffsetArrays"]

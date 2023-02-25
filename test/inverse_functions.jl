@@ -1,4 +1,4 @@
-@testset "InverseFunctions" begin
+VERSION >= v"1.9-" && @testset "InverseFunctions" begin
     using InverseFunctions
 
     @testset for d in (Normal(1.5, 2.3), Uniform(1, 2), truncated(Normal(1.5, 2.3), 1, 2))
