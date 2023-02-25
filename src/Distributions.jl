@@ -25,10 +25,6 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
-import ChainRulesCore
-
-import DensityInterface
-
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -310,8 +306,11 @@ include("pdfnorm.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
-# Implementation of DensityInterface API
-include("density_interface.jl")
+# Extensions: Implementation of DensityInterface and ChainRulesCore API
+if !isdefined(Base, :get_extension)
+    include("../ext/DistributionsChainRulesCoreExt.jl")
+    include("../ext/DistributionsDensityInterfaceExt.jl")
+end
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")

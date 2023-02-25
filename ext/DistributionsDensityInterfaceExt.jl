@@ -1,3 +1,8 @@
+module DistributionsDensityInterfaceExt
+
+using Distributions
+import DensityInterface
+
 @inline DensityInterface.DensityKind(::Distribution) = DensityInterface.HasDensity()
 
 for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
@@ -17,3 +22,5 @@ for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
         end
     end
 end
+
+end # module
