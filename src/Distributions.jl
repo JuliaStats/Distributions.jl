@@ -308,7 +308,7 @@ include("mixtures/unigmm.jl")
 
 # Extensions: Implementation of DensityInterface and ChainRulesCore API
 if !isdefined(Base, :get_extension)
-    include("../ext/DistributionsChainRulesCoreExt.jl")
+    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
     include("../ext/DistributionsDensityInterfaceExt.jl")
 end
 

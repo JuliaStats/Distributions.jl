@@ -20,10 +20,10 @@ function ChainRulesCore.rrule(::Type{DT}, alpha::AbstractVector{T}; check_args::
     return d, Dirichlet_pullback
 end
 
-function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpdf), d::Dirichlet, x::AbstractVector{<:Real})
-    Ω = _logpdf(d, x)
+function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(Distributions._logpdf), d::Dirichlet, x::AbstractVector{<:Real})
+    Ω = Distributions._logpdf(d, x)
     ∂alpha = sum(Broadcast.instantiate(Broadcast.broadcasted(Δd.alpha, Δx, d.alpha, x) do Δalphai, Δxi, alphai, xi
-        xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
+        StatsFuns.xlogy(Δalphai, xi) + (alphai - 1) * Δxi / xi
     end))
     ∂lmnB = -Δd.lmnB
     ΔΩ = ∂alpha + ∂lmnB
@@ -33,8 +33,8 @@ function ChainRulesCore.frule((_, Δd, Δx)::Tuple{Any,Any,Any}, ::typeof(_logpd
     return Ω, ΔΩ
 end
 
-function ChainRulesCore.rrule(::typeof(_logpdf), d::T, x::AbstractVector{<:Real}) where {T<:Dirichlet}
-    Ω = _logpdf(d, x)
+function ChainRulesCore.rrule(::typeof(Distributions._logpdf), d::T, x::AbstractVector{<:Real}) where {T<:Dirichlet}
+    Ω = Distributions._logpdf(d, x)
     isfinite_Ω = isfinite(Ω)
     alpha = d.alpha
     function _logpdf_Dirichlet_pullback(_ΔΩ)
@@ -48,7 +48,7 @@ function ChainRulesCore.rrule(::typeof(_logpdf), d::T, x::AbstractVector{<:Real}
     return Ω, _logpdf_Dirichlet_pullback
 end
 function _logpdf_Dirichlet_∂alphai(xi, ΔΩi, isfinite::Bool)
-    ∂alphai = xlogy.(ΔΩi, xi)
+    ∂alphai = StatsFuns.xlogy.(ΔΩi, xi)
     return isfinite ? ∂alphai : oftype(∂alphai, NaN)
 end
 function _logpdf_Dirichlet_Δxi(ΔΩi, alphai, xi, isfinite::Bool)
