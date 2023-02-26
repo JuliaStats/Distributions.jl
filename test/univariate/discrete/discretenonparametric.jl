@@ -208,5 +208,9 @@ end
     @test !isapprox(d5, d1)
 
     # issue #1140
-    @test DiscreteNonParametric(1:2, [0.5, 0.5]) != DiscreteNonParametric(1:3, [0.2, 0.4, 0.4])   
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) != DiscreteNonParametric(1:3, [0.2, 0.4, 0.4])
+
+    # Different types
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) == DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈ DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
 end

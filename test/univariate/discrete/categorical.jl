@@ -120,6 +120,8 @@ end
 
     # issue #1675
     @test Categorical([0.5, 0.5]) ≈ Categorical([0.5, 0.5])
+    @test Categorical([0.5, 0.5]) == Categorical([0.5f0, 0.5f0])
+    @test Categorical([0.5, 0.5]) ≈ Categorical([0.5f0, 0.5f0])
 end
 
 end

@@ -52,7 +52,7 @@ ncategories(d::Categorical) = support(d).stop
 params(d::Categorical{P,Ps}) where {P<:Real, Ps<:AbstractVector{P}} = (probs(d),)
 partype(::Categorical{T}) where {T<:Real} = T
 
-function Base.isapprox(c1::C, c2::C; kwargs...) where {C<:Categorical}
+function Base.isapprox(c1::Categorical, c2::Categorical; kwargs...)
     # support are of type Base.OneTo, so comparing the cardinality of the support
     # is sufficient
     # we explicitly redefine the method for `DiscreteNonParametric` which also compares

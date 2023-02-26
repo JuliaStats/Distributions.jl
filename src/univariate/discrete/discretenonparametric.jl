@@ -63,7 +63,7 @@ Get the vector of probabilities associated with the support of `d`.
 """
 probs(d::DiscreteNonParametric)  = d.p
 
-function Base.isapprox(c1::D, c2::D; kwargs...) where D<:DiscreteNonParametric
+function Base.isapprox(c1::DiscreteNonParametric, c2::DiscreteNonParametric; kwargs...)
     support_c1 = support(c1)
     support_c2 = support(c2)
     return length(support_c1) == length(support_c2) &&
