@@ -1,7 +1,7 @@
 module DistributionsChainRulesCoreExt
 
 using Distributions
-using Distributions: SpecialFunctions, StatsFuns
+using Distributions: LinearAlgebra, SpecialFunctions, StatsFuns
 import ChainRulesCore
 
 include("eachvariate.jl")

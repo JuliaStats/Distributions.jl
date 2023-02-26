@@ -44,12 +44,12 @@ for f in (:poissonbinomial_pdf, :poissonbinomial_pdf_fft)
         function ChainRulesCore.frule(
             (_, Δp)::Tuple{<:Any,<:AbstractVector{<:Real}}, ::typeof(Distributions.$f), p::AbstractVector{<:Real}
         )
-            y = $f(p)
+            y = Distributions.$f(p)
             A = poissonbinomial_pdf_partialderivatives(p)
             return y, A' * Δp
         end
         function ChainRulesCore.rrule(::typeof(Distributions.$f), p::AbstractVector{<:Real})
-            y = $f(p)
+            y = Distributions.$f(p)
             A = poissonbinomial_pdf_partialderivatives(p)
             function $pullback(Δy)
                 p̄ = ChainRulesCore.InplaceableThunk(
