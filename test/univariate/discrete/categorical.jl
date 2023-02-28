@@ -21,6 +21,8 @@ for p in Any[
     @test maximum(d) == k
     @test extrema(d) == (1, k)
     @test ncategories(d) == k
+    @test d == d
+    @test d ≈ d
 
     c = 0.0
     for i = 1:k
@@ -94,6 +96,32 @@ end
     d= Categorical([0.1, 0.2, 0.7])
     rng = StableRNGs.StableRNG(600)
     @test rand(rng, d, 10) == [2, 1, 3, 3, 2, 3, 3, 3, 3, 3]
+end
+
+@testset "comparisons" begin
+    d1 = Categorical([0.4, 0.6])
+    d2 = Categorical([0.6, 0.4])
+    d3 = Categorical([0.2, 0.7, 0.1])
+
+    # Same distribution
+    for d in (d1, d2, d3)
+        @test d == d
+        @test d ≈ d
+    end
+
+    # Same support, different probabilities
+    @test d2 != d1
+    @test !isapprox(d2, d1)
+    @test d2 ≈ d1 atol=0.4
+
+    # Different support
+    @test d3 != d1
+    @test !isapprox(d3, d1)
+
+    # issue #1675
+    @test Categorical([0.5, 0.5]) ≈ Categorical([0.5, 0.5])
+    @test Categorical([0.5, 0.5]) == Categorical([0.5f0, 0.5f0])
+    @test Categorical([0.5, 0.5]) ≈ Categorical([0.5f0, 0.5f0])
 end
 
 end
