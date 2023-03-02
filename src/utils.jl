@@ -90,8 +90,6 @@ function check_args(f::F, check::Bool) where {F}
     nothing
 end
 
-ChainRulesCore.@non_differentiable check_args(::Any, ::Bool)
-
 ##### Utility functions
 
 isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12

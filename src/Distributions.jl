@@ -25,8 +25,6 @@ import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
 
-import ChainRulesCore
-
 import DensityInterface
 
 export
@@ -317,6 +315,10 @@ include("density_interface.jl")
 include("test_utils.jl")
 
 include("deprecates.jl")
+
+if !isdefined(Base, :get_extension)
+    include("../ext/DistributionsChainRulesCoreExt.jl")
+end
 
 """
 A Julia package for probability distributions and associated functions.

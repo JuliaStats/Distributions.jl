@@ -11,17 +11,6 @@ function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
     return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
 end
 
-function ChainRulesCore.rrule(::Type{EachVariate{V}}, x::AbstractArray{<:Real}) where {V}
-    y = EachVariate{V}(x)
-    size_x = size(x)
-    function EachVariate_pullback(Δ)
-        # TODO: Should we also handle `Tangent{<:EachVariate}`?
-        Δ_out = reshape(mapreduce(vec, vcat, ChainRulesCore.unthunk(Δ)), size_x)
-        return (ChainRulesCore.NoTangent(), Δ_out)
-    end
-    return y, EachVariate_pullback
-end
-
 Base.IteratorSize(::Type{EachVariate{V,P,A,T,N}}) where {V,P,A,T,N} = Base.HasShape{N}()
 
 Base.axes(x::EachVariate) = x.axes
