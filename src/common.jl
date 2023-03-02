@@ -225,13 +225,8 @@ function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) 
     return exp(@inbounds logpdf(d, x))
 end
 
-function pdf(
-    d::Union{Distribution{ArrayLikeVariate{N}},Missing}, x::Any
-) where N
-    if ismissing(d) || ismissing(x)
-        return missing
-    end
-    return pdf(d, x)
+function pdf(d::Distribution{ArrayLikeVariate{N}}, x::Missing) where N
+    return missing
 end
 
 """

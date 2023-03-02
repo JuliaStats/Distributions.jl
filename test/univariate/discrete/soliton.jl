@@ -5,6 +5,7 @@ using Distributions
     Ω = Soliton(K, M, δ, atol)
     @test pdf(Ω, M) > pdf(Ω, M-1)
     @test pdf(Ω, M) > pdf(Ω, M+1)
+    @test typeof(pdf(Ω, missing)) == Missing
     @test cumsum(pdf.(Ω, 1:K)) ≈ cdf.(Ω, 1:K)
     @test cdf(Ω, 0) ≈ 0
     @test cdf(Ω, K) ≈ 1
