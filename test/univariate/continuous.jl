@@ -49,7 +49,6 @@ end
     @test pdf(d, 0.49) == 0.0
     @test pdf(d, 0.5) == Inf
     @test pdf(d, 0.51) == 0.0
-    @test typeof(pdf(d, missing)) == Missing
 
     @test cdf(d, 0.49) == 0.0
     @test cdf(d, 0.5) == 1.0

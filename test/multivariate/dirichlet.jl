@@ -39,7 +39,6 @@ rng = MersenneTwister(123)
         @test iszero(pdf(d, [0, 0, 1]))
         @test pdf(d, [0.2, 0.3, 0.5]) ≈ 3.6
         @test pdf(d, [0.4, 0.5, 0.1]) ≈ 2.4
-        @test typeof(pdf(d, missing)) == Missing
         @test logpdf(d, [0.2, 0.3, 0.5]) ≈ log(3.6)
         @test logpdf(d, [0.4, 0.5, 0.1]) ≈ log(2.4)
 

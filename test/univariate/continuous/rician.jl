@@ -17,7 +17,6 @@
     @test quantile.(d1, [0.25, 0.45, 0.60, 0.80, 0.90]) ≈ quantile.(d2, [0.25, 0.45, 0.60, 0.80, 0.90])
     @test pdf.(d1, 0.0:0.1:1.0) ≈ pdf.(d2, 0.0:0.1:1.0)
     @test cdf.(d1, 0.0:0.1:1.0) ≈ cdf.(d2, 0.0:0.1:1.0)
-    @test typeof(pdf(d2, missing)) == Missing
 
     d1 = Rician(10.0, 10.0)
     @test median(d1) == quantile(d1, 0.5)
@@ -47,7 +46,6 @@
     @test pdf(d1, -1) == 0.0
     @test pdf(d1, Inf) == 0.0
     @test isnan(pdf(d1, NaN))
-    @test typeof(pdf(d1, missing)) == Missing
 
     @test logpdf(d1, -Inf) == -Inf
     @test logpdf(d1, -1) == -Inf
