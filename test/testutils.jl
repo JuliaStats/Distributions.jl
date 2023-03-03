@@ -435,6 +435,10 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     @test logpdf.(Ref(d), vs)  ≈ lp
     @test logcdf.(Ref(d), vs)  ≈ lc
     @test logccdf.(Ref(d), vs) ≈ lcc
+
+    # missing values
+    @test pdf(d, missing) === missing
+    @test logpdf(d, missing) === missing
 end
 
 
@@ -504,6 +508,10 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
     @test logcdf.(Ref(d), vs)  ≈ lc
     @test logccdf.(Ref(d), vs) ≈ lcc
+
+    # missing values
+    @test pdf(d, missing) === missing
+    @test logpdf(d, missing) === missing
 end
 
 function test_nonfinite(distr::UnivariateDistribution)
@@ -677,17 +685,3 @@ function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateD
         end
     end
 end
-
-#Testing for pdf(d, missing) and logpdf(d, missing)
-using Distributions
-using Test
-a = Dirichlet(ones(3))
-b = Normal(0, 1)
-c = Soliton(100, 60, 0.2, 0)
-
-@test pdf(a, missing) === missing
-@test pdf(b, missing) === missing
-@test pdf(c, missing) === missing
-@test logpdf(a, missing) === missing
-@test logpdf(b, missing) === missing
-@test logpdf(c, missing) === missing
