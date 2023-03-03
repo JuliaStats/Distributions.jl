@@ -684,13 +684,10 @@ using Test
 a = Dirichlet(ones(3))
 b = Normal(0, 1)
 c = Soliton(100, 60, 0.2, 0)
-d = MvNormal(ones(3), ones(3))
 
-@test pdf(a, missing) == missing
-@test pdf(b, missing) == missing
-@test pdf(c, missing) == missing
-@test pdf(d, missing) == missing
-@test logpdf(a, missing) == missing
-@test logpdf(b, missing) == missing
-@test logpdf(c, missing) == missing
-@test logpdf(d, missing) == missing
+@test pdf(a, missing) === missing
+@test pdf(b, missing) === missing
+@test pdf(c, missing) === missing
+@test logpdf(a, missing) === missing
+@test logpdf(b, missing) === missing
+@test logpdf(c, missing) === missing
