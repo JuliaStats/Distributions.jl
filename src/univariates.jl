@@ -377,6 +377,11 @@ The logarithm of the complementary cumulative function values evaluated at x, i.
 """
 logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 
+# missing values
+for f in (:cdf, :logcdf, :ccdf, :logccdf)
+    @eval $f(d::UnivariateDistribution, ::Missing) = missing
+end
+
 """
     quantile(d::UnivariateDistribution, q::Real)
 

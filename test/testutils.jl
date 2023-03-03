@@ -437,8 +437,9 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     @test logccdf.(Ref(d), vs) ≈ lcc
 
     # missing values
-    @test pdf(d, missing) === missing
-    @test logpdf(d, missing) === missing
+    for f in (pdf, logpdf, cdf, logcdf, ccdf, logccdf)
+        @test f(d, missing) === missing
+    end
 end
 
 
@@ -510,8 +511,9 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
     @test logccdf.(Ref(d), vs) ≈ lcc
 
     # missing values
-    @test pdf(d, missing) === missing
-    @test logpdf(d, missing) === missing
+    for f in (pdf, logpdf, cdf, logcdf, ccdf, logccdf)
+        @test f(d, missing) === missing
+    end
 end
 
 function test_nonfinite(distr::UnivariateDistribution)
