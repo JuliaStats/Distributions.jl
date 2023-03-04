@@ -25,6 +25,7 @@ in addition to the R language itself:
 | fBasics     | For ``NormalInverseGaussian`` |
 | gnorm       | For ``PGeneralizedGaussian`` |
 | LindleyR    | For ``Lindley`` |
+| ExtDist     | For ``Johnson`` |
 
 ## Usage
 

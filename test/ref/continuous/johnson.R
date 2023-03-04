@@ -1,0 +1,28 @@
+library("ExtDist")
+
+Johnson <- R6Class("Johnson",
+	inherit = ContinuousDistribution,
+	public = list(names = c("xi", "lambda", "gamma", "delta"),
+		xi = NA,
+		lambda = NA,
+		gamma = NA,
+		delta = NA,
+		initialize = function(xi = 0, lambda = 1, gamma = 0, delta = 1) {
+			self$xi <- xi
+			self$lambda <- lambda
+			self$gamma <- gamma
+			self$delta <- delta
+		},
+		supp = function() { c(-Inf, Inf) },
+		properties = function() { list() },
+		pdf = function(x, log = FALSE) {
+			dJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta, log = log)
+		},
+		cdf = function(x) {
+			pJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta)
+		},
+		quan = function(x) {
+			qJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta)
+		}
+	)
+)
