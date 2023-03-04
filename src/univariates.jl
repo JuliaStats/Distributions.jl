@@ -687,6 +687,7 @@ const continuous_distributions = [
     "gumbel",
     "inversegamma",
     "inversegaussian",
+    "johnson",
     "kolmogorov",
     "ksdist",
     "ksonesided",

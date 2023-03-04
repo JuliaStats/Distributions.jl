@@ -77,6 +77,7 @@ const tests = [
     "univariate/continuous/gumbel",
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
+    "univariate/continuous/johnson",
     "univariate/continuous/noncentralchisq",
     "univariate/continuous/weibull",
     "pdfnorm",

@@ -273,6 +273,13 @@ plotdensity((0, 5), InverseGaussian, (1, 1)) # hide
 ```
 
 ```@docs
+Johnson
+```
+```@example plotdensity
+plotdensity((-20, 20), Johnson, (0.0, 1.0, 0.0, 1.0)) # hide
+```
+
+```@docs
 Kolmogorov
 ```
 ```@example plotdensity
