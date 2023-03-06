@@ -17,7 +17,7 @@ where ``Z \\sim \\mathcal{N}(0,1)``,  then ``X \\sim {\\rm Johnson}(\\xi, \\lamb
 
 ```julia
 JohnsonSU()           # Equivalent to JohnsonSU(0, 1, 0, 1)
-JohnsonSU(ξ, λ, γ, δ) # JohnsonSU's S_U-distrubtion with shape parameters ξ, λ, γ and δ
+JohnsonSU(ξ, λ, γ, δ) # JohnsonSU's S_U-distribution with parameters ξ, λ, γ and δ
 
 params(d)           # Get the parameters, i.e. (ξ, λ, γ, δ)
 shape(d)            # Get the shape parameter, i.e. ξ
