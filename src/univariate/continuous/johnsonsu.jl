@@ -73,7 +73,7 @@ function skewness(d::JohnsonSU)
     a = exp(d.δ^-2)
     r = d.γ/d.δ
     var_d = var(d)
-    - (d.λ^3 * sqrt(a) * (a-1)^2 * (a*(a+2)*sinh(3r)+3sinh(2r))) / (4 * var_d * sqrt(var_d)))
+    - (d.λ^3 * sqrt(a) * (a-1)^2 * (a*(a+2)*sinh(3r)+3sinh(2r))) / (4 * var_d * sqrt(var_d))
 end
 function kurtosis(d::JohnsonSU)
     a = exp(d.δ^-2)
