@@ -1,7 +1,7 @@
-@testset "Johnson" begin
+@testset "JohnsonSU" begin
 
-    d1 = Johnson(0.0, 10.0, -2.0, 3.0)
-    @test d1 isa Johnson{Float64}
+    d1 = JohnsonSU(0.0, 10.0, -2.0, 3.0)
+    @test d1 isa JohnsonSU{Float64}
     @test params(d1) == (0.0, 10.0, -2.0, 3.0)
     @test shape(d1) == 0.0
     @test scale(d1) == 10.0
@@ -13,8 +13,8 @@
     x = quantile.(d1, [0.25, 0.45, 0.60, 0.80, 0.90])
     @test all(cdf.(d1, x) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
 
-    d1 = Johnson(10.0f0, 10.0f0, 1.0f0, 3.0f0)
-    @test d1 isa Johnson{Float32}
+    d1 = JohnsonSU(10.0f0, 10.0f0, 1.0f0, 3.0f0)
+    @test d1 isa JohnsonSU{Float32}
     @test params(d1) == (10.0f0, 10.0f0, 1.0f0, 3.0f0)
     @test shape(d1) == 10.0f0
     @test scale(d1) == 10.0f0
@@ -22,8 +22,8 @@
     @test eltype(d1) === Float64
     @test rand(d1) isa Float64
 
-    d1 = Johnson()
-    @test d1 isa Johnson{Int}
+    d1 = JohnsonSU()
+    @test d1 isa JohnsonSU{Int}
     @test params(d1) == (0, 1, 0, 1)
 
     @test pdf(d1, -Inf) == 0.0

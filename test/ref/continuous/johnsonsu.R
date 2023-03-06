@@ -1,6 +1,6 @@
 library("ExtDist")
 
-Johnson <- R6Class("Johnson",
+JohnsonSU <- R6Class("JohnsonSU",
 	inherit = ContinuousDistribution,
 	public = list(names = c("xi", "lambda", "gamma", "delta"),
 		xi = NA,

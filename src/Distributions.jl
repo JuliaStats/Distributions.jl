@@ -105,7 +105,7 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
-    Johnson,
+    JohnsonSU,
     Kolmogorov,
     KSDist,
     KSOneSided,

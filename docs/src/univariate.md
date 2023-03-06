@@ -273,10 +273,10 @@ plotdensity((0, 5), InverseGaussian, (1, 1)) # hide
 ```
 
 ```@docs
-Johnson
+JohnsonSU
 ```
 ```@example plotdensity
-plotdensity((-20, 20), Johnson, (0.0, 1.0, 0.0, 1.0)) # hide
+plotdensity((-20, 20), JohnsonSU, (0.0, 1.0, 0.0, 1.0)) # hide
 ```
 
 ```@docs
