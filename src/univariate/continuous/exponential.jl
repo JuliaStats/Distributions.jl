@@ -21,13 +21,18 @@ External links
 * [Exponential distribution on Wikipedia](http://en.wikipedia.org/wiki/Exponential_distribution)
 
 """
-struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
+struct Exponential{T<:Number} <: ContinuousUnivariateDistribution
     θ::T        # note: scale not rate
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::Real; check_args::Bool=true)
-    @check_args Exponential (θ, θ > zero(θ))
+function Exponential(θ::Number; check_args::Bool=true)
+    @check_args(
+        Exponential, 
+        (!(θ isa Complex), "Complex not allowed for θ"),
+        (isreal(θ), "θ must be a real number"),
+        (θ, θ > zero(θ)),
+    )
     return Exponential{typeof(θ)}(θ)
 end
 
@@ -37,7 +42,7 @@ Exponential() = Exponential{Float64}(1.0)
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
-convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
+convert(::Type{Exponential{T}}, θ::S) where {T <: Number, S <: Number} = Exponential(T(θ))
 function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
     return Exponential(T(d.θ))
 end
