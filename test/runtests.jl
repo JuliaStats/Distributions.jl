@@ -83,6 +83,7 @@ const tests = [
     "univariate/continuous/rician",
     "functionals",
     "density_interface",
+    "inverse_functions",
     "reshaped",
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
