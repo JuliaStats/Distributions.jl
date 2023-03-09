@@ -12,6 +12,13 @@
     @test median(d1) == quantile(d1, 0.5)
     x = quantile.(d1, [0.25, 0.45, 0.60, 0.80, 0.90])
     @test all(cdf.(d1, x) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
+    y = cquantile.(d1, [0.25, 0.45, 0.60, 0.80, 0.90])
+    @test all(ccdf.(d1, y) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
+
+    @test mean(d1) ≈ 7.581281
+    @test var(d1) ≈ 19.1969485
+    @test skewness(d1) ≈ 0.7780949
+    @test kurtosis(d1) ≈ 0.447512937
 
     d1 = JohnsonSU(10.0f0, 10.0f0, 1.0f0, 3.0f0)
     @test d1 isa JohnsonSU{Float32}
@@ -42,6 +49,22 @@
     @test logcdf(d1, Inf) == 0.0
     @test isnan(logcdf(d1, NaN))
 
+    @test ccdf(d1, -Inf) == 1.0
+    @test ccdf(d1, Inf) == 0.0
+    @test isnan(ccdf(d1, NaN))
+
+    @test logccdf(d1, -Inf) == 0.0
+    @test logccdf(d1, Inf) == -Inf
+    @test isnan(logccdf(d1, NaN))
+
+    @test invlogcdf(d1, -Inf) == -Inf
+    @test isnan(invlogcdf(d1, Inf))
+    @test isnan(invlogcdf(d1, NaN))
+
+    @test invlogccdf(d1, -Inf) == Inf
+    @test isnan(invlogccdf(d1, Inf))
+    @test isnan(invlogccdf(d1, NaN))
+
     @inferred pdf(d1, -Inf32)
     @inferred pdf(d1, 1.0)
     @inferred pdf(d1, 1.0f0)
@@ -69,5 +92,33 @@
     @inferred logcdf(d1, 1)
     @inferred logcdf(d1, 1//2)
     @inferred logcdf(d1, Inf)
+
+    @inferred ccdf(d1, -Inf32)
+    @inferred ccdf(d1, 1.0)
+    @inferred ccdf(d1, 1.0f0)
+    @inferred ccdf(d1, 1)
+    @inferred ccdf(d1, 1//2)
+    @inferred ccdf(d1, Inf)
+
+    @inferred logccdf(d1, -Inf32)
+    @inferred logccdf(d1, 1.0)
+    @inferred logccdf(d1, 1.0f0)
+    @inferred logccdf(d1, 1)
+    @inferred logccdf(d1, 1//2)
+    @inferred logccdf(d1, Inf)
+
+    @inferred invlogcdf(d1, -Inf32)
+    @inferred invlogcdf(d1, 1.0)
+    @inferred invlogcdf(d1, 1.0f0)
+    @inferred invlogcdf(d1, 1)
+    @inferred invlogcdf(d1, 1//2)
+    @inferred invlogcdf(d1, Inf)
+
+    @inferred invlogccdf(d1, -Inf32)
+    @inferred invlogccdf(d1, 1.0)
+    @inferred invlogccdf(d1, 1.0f0)
+    @inferred invlogccdf(d1, 1)
+    @inferred invlogccdf(d1, 1//2)
+    @inferred invlogccdf(d1, Inf)
 
 end
