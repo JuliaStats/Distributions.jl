@@ -708,6 +708,7 @@ const continuous_distributions = [
     "rician",
     "semicircle",
     "skewnormal",
+    "stable",
     "studentizedrange",
     "symtriangular",
     "tdist",

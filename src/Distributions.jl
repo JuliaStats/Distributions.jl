@@ -153,6 +153,7 @@ export
     Skellam,
     SkewNormal,
     Soliton,
+    Stable,
     StudentizedRange,
     SymTriangularDist,
     TDist,
