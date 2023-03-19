@@ -79,9 +79,9 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
-function rand(d::NoncentralChisq, rng::AbstractRNG=Random.GLOBAL_RNG)
+function rand(rng::AbstractRNG, d::NoncentralChisq)
     χ² = Chisq(d.ν)
     poi = Poisson(d.λ / 2)
     x = rand(rng, χ²) + 2 * rand(rng, poi)
-    return x
+    return eltype(d)(x)
 end
