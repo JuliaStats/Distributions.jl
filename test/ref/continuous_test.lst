@@ -94,6 +94,13 @@ JohnsonSU()
 JohnsonSU(2.0, 5.0, 5.0, 5.0)
 JohnsonSU(0.0, 2.0, -1.0, 3.0)
 
+Kumaraswamy()
+Kumaraswamy(0.5, 0.5)
+Kumaraswamy(5, 1.0)
+Kumaraswamy(1.0, 3)
+Kumaraswamy(2, 2)
+Kumaraswamy(2, 5)
+
 Laplace()
 Laplace(2.0)
 Laplace(0.0, 1.0)
