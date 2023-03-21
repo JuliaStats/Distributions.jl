@@ -8,6 +8,9 @@ import Base: size, length, convert, show, getindex, rand, vec, inv
 import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
+using HypergeometricFunctions
+import HypergeometricFunctions: pFq
+
 using FillArrays
 
 using LinearAlgebra, Printf

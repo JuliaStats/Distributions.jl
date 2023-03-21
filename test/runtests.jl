@@ -6,6 +6,7 @@ using Random
 using SpecialFunctions
 using StatsBase
 using LinearAlgebra
+using HypergeometricFunctions
 
 import JSON
 import ForwardDiff
@@ -78,6 +79,7 @@ const tests = [
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
     "univariate/continuous/noncentralchisq",
+    "univariate/continuous/noncentralbeta",
     "univariate/continuous/weibull",
     "pdfnorm",
     "univariate/continuous/rician",
@@ -135,7 +137,6 @@ const tests = [
     # "univariate/continuous/ksdist",
     # "univariate/continuous/ksonesided",
     # "univariate/continuous/levy",
-    # "univariate/continuous/noncentralbeta",
     # "univariate/continuous/noncentralf",
     # "univariate/continuous/normalcanon",
     # "univariate/continuous/normalinversegaussian",
