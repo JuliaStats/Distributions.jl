@@ -1,6 +1,5 @@
 using Distributions
 using Test
-using HypergeometricFunctions
 
 @testset "NoncentralBeta" begin
     α = 2.0; β = 3.0; λ = 1.0
