@@ -41,8 +41,11 @@ function mean(d::NoncentralBeta)
 end
 
 function var(d::NoncentralBeta)
-    term_1 = -(((d.α / (d.α + d.β))^2) * exp(-d.λ) * HypergeometricFunctions.pFq([1 + d.α, d.α + d.β],[d.α, d.α + d.β + 1], d.λ / 2)^2)
-    term_2 = (((d.α*(1+d.α)) / ((d.α + d.β)*(d.α + d.β + 1))) * exp(-d.λ / 2) * HypergeometricFunctions.pFq([2 + d.α, d.α + d.β],[d.α, d.α + d.β + 2], d.λ / 2))
+    α, β, λ = params(d)
+    expλ = exp(-λ)
+    x = α / (α + β)
+    term_1 = -x^2 * expλ * pFq([1 + α, α + β], [α, α + β + 1], λ / 2)^2
+    term_2 = x * (1 + α) / (α + β + 1) * sqrt(expλ) * pFq([2 + α, α + β], [α, α + β + 2], λ / 2)
     return term_1 + term_2
 end
 
