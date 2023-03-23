@@ -36,7 +36,12 @@ partype(::NoncentralBeta{T}) where {T} = T
 ### Evaluation & Sampling
 
 mean(d::NoncentralBeta) = (d.α / (d.α + d.β)) * exp(-d.λ / 2) * HypergeometricFunctions.pFq([1 + d.α, d.α + d.β],[d.α, d.α + d.β + 1], d.λ / 2)
-var(d::NoncentralBeta) = -(((d.α / (d.α + d.β))^2) * exp(-d.λ) * HypergeometricFunctions.pFq([1 + d.α, d.α + d.β],[d.α, d.α + d.β + 1], d.λ / 2)^2) + (((d.α*(1+d.α)) / ((d.α + d.β)*(d.α + d.β + 1))) * exp(-d.λ / 2) * HypergeometricFunctions.pFq([2 + d.α, d.α + d.β],[d.α, d.α + d.β + 2], d.λ / 2))
+
+function var(d::NoncentralBeta)
+    term_1 = -(((d.α / (d.α + d.β))^2) * exp(-d.λ) * HypergeometricFunctions.pFq([1 + d.α, d.α + d.β],[d.α, d.α + d.β + 1], d.λ / 2)^2)
+    term_2 = (((d.α*(1+d.α)) / ((d.α + d.β)*(d.α + d.β + 1))) * exp(-d.λ / 2) * HypergeometricFunctions.pFq([2 + d.α, d.α + d.β],[d.α, d.α + d.β + 2], d.λ / 2))
+    return term_1 + term_2
+end
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
