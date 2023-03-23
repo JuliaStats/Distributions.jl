@@ -9,7 +9,6 @@ import Base: sum, maximum, minimum, extrema, +, -, *, ==
 import Base.Math: @horner
 
 using HypergeometricFunctions
-import HypergeometricFunctions: pFq
 
 using FillArrays
 
