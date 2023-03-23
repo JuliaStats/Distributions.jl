@@ -2,8 +2,7 @@ using Distributions
 using Test
 using HypergeometricFunctions
 
-
-let 
+@testset "NoncentralBeta" begin
     α = 2.0; β = 3.0; λ = 1.0
     d = NoncentralBeta(α, β, λ)
     @test isapprox(mean(d), 0.4466, atol=1e-4)
