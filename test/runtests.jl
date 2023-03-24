@@ -54,6 +54,7 @@ const tests = [
     "mixture", # extra file compared to /src
     "gradlogpdf", # extra file compared to /src
     "univariate/continuous/noncentralt",
+    "univariate/continuous/noncentralf",
     "univariate/locationscale",
     "quantile_newton", # extra file compared to /src
     "univariate/continuous/semicircle",
@@ -145,7 +146,6 @@ const tests = [
     # "univariate/continuous/symtriangular",
     # "univariate/continuous/tdist",
     # "univariate/continuous/triweight",
-    # "univariate/continuous/noncentralf",
     # "univariate/discrete/geometric",
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
