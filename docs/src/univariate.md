@@ -432,6 +432,13 @@ plotdensity((-4, 4), SkewNormal, (0, 1, -1)) # hide
 ```
 
 ```@docs
+Stable
+```
+```@example plotdensity
+plotdensity((-4, 5), Stable, (1.5, 1, 1,0)) # hide
+```
+
+```@docs
 StudentizedRange
 SymTriangularDist
 ```
