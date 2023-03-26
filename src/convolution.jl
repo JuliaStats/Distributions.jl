@@ -4,9 +4,7 @@
 Convolve two distributions and return the distribution corresponding to the sum of
 independent random variables drawn from the underlying distributions.
 
-Currently, the function is only defined in cases where the convolution has a closed form.
-More precisely, the function is defined if the distributions of `d1` and `d2` are the same
-and one of
+Currently, the function is only defined in cases where the convolution has a closed form and is one of
 * [`Bernoulli`](@ref)
 * [`Binomial`](@ref)
 * [`NegativeBinomial`](@ref)
@@ -18,6 +16,7 @@ and one of
 * [`Exponential`](@ref)
 * [`Gamma`](@ref)
 * [`MvNormal`](@ref)
+* [`Stable`](@ref)
 
 External links: [List of convolutions of probability distributions on Wikipedia](https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions)
 """
@@ -60,6 +59,19 @@ end
 function convolve(d1::Gamma, d2::Gamma)
     _check_convolution_args(d1.θ, d2.θ)
     return Gamma(d1.α + d2.α, d1.θ)
+end
+
+function convolve(d1::Stable, d2::Stable)
+    d1.α ≈ d2.α || throw(ArgumentError("$(d1.α) !≈ $(d2.α): α parameters must be approximately equal"))
+    α, β₁, σ₁, μ₁ = params(d1)
+    _, β₂, σ₂, μ₂ = params(d2)
+
+    return Stable(
+        α,                                   # α
+        (β₁*σ₁^α + β₂*σ₂^α) / (σ₁^α + σ₂^α), # β
+        (σ₁^α + σ₂^α)^(1/α),                 # σ
+        μ₁ + μ₂                              # μ
+    )
 end
 
 # continuous multivariate
