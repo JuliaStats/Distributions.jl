@@ -55,6 +55,7 @@ const tests = [
     "gradlogpdf", # extra file compared to /src
     "univariate/continuous/noncentralt",
     "univariate/continuous/noncentralf",
+    "univariate/continuous/noncentralbeta",
     "univariate/locationscale",
     "quantile_newton", # extra file compared to /src
     "univariate/continuous/semicircle",
@@ -136,8 +137,6 @@ const tests = [
     # "univariate/continuous/ksdist",
     # "univariate/continuous/ksonesided",
     # "univariate/continuous/levy",
-    # "univariate/continuous/noncentralbeta",
-    # "univariate/continuous/noncentralf",
     # "univariate/continuous/normalcanon",
     # "univariate/continuous/normalinversegaussian",
     # "univariate/continuous/pareto",

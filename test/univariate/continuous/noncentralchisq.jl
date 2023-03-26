@@ -2,6 +2,9 @@ using Distributions
 using Random
 using Test
 
+test_cgf(NoncentralChisq(3,2), (0.49, -1, -100, -1f6))
+test_samples(NoncentralF(5, 10,5), 5000; rng=MersenneTwister(1234), nbins=50)
+
 @testset "Native RNG" begin
     rng = MersenneTwister(1234)
     n = 5000
