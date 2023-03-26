@@ -341,7 +341,7 @@ function fit(::Type{<:Stable}, x::AbstractArray{<:Real})
     αₑₛₜ = _crop(αₑₛₜ, 0., 2.)
     σ₁ = exp(b/αₑₛₜ)
 
-    η(u) = - tan(αₑₛₜ*π/2)*sign(u)*abs(σ₁*u)^αₑₛₜ
+    η(u) = - tan(αₑₛₜ*π/2)*(σ₁*u)^αₑₛₜ # u > 0
     mΘ = [η.(u) u]
     c, μ₁ =  (mΘ'*mΘ)\(mΘ'*θ) # ols regression
 
