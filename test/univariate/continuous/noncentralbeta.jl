@@ -3,10 +3,10 @@ using Test
 
 
 @testset "NoncentralBeta" begin 
-    α = 11.54 ; β = 8.89; λ = 5.0
+    α = 11.54 ; β = 8.89; λ = 5/4
     d = NoncentralBeta(α, β, λ)
-    @test isapprox(mean(d), 0.6105, atol=1e-4)
-    @test isapprox(var(d), 0.0106, atol=1e-4)
+    @test isapprox(mean(d), 0.5772, atol=1e-4)
+    @test isapprox(var(d), 0.0113, atol=1e-4)
     λ = 0.0
     d = NoncentralBeta(α, β, λ)
     d1 = Beta(α, β)
