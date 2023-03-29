@@ -35,11 +35,22 @@ partype(::NoncentralBeta{T}) where {T} = T
 
 ### Evaluation & Sampling
 
-# TODO: add mean and var
+function mean(d::NoncentralBeta)
+    α, β, λ = params(d)
+    return α / (α + β) * exp(-λ / 2) * pFq([1 + α, α + β], [α, α + β + 1], λ / 2)
+end
+
+function var(d::NoncentralBeta)
+    α, β, λ = params(d)
+    expλ = exp(-λ)
+    x = α / (α + β)
+    term_1 = -x^2 * expλ * pFq([1 + α, α + β], [α, α + β + 1], λ / 2)^2
+    term_2 = x * (1 + α) / (α + β + 1) * sqrt(expλ) * pFq([2 + α, α + β], [α, α + β + 2], λ / 2)
+    return term_1 + term_2
+end
 
 @_delegate_statsfuns NoncentralBeta nbeta α β λ
 
-# TODO: remove RFunctions dependency once NoncentralChisq has its removed
 @rand_rdist(NoncentralBeta)
 
 function rand(d::NoncentralBeta)
