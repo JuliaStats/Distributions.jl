@@ -67,7 +67,7 @@ partype(::Stable{T}) where {T} = T
 mean(d::Stable{T}) where T = d.α > one(T) ? d.μ : T(NaN)
 var(d::Stable{T}) where T = d.α == 2one(T) ? 2d.σ^2 : T(Inf)
 skewness(d::Stable{T}) where T = d.α == 2one(T) ? T(0.0) : T(NaN)
-kurtosis(d::Stable{T}) where T = d.α == 2one(T) ? T(3.0) : T(NaN)
+kurtosis(d::Stable{T}) where T = d.α == 2one(T) ? T(0.0) : T(NaN)
 
 #### Evaluation
 
