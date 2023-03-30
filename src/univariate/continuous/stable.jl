@@ -15,12 +15,12 @@ Stable(α)             # standard symmetric α-Stable distribution equivalent to
 Stable(α, β)          # standard α-Stable distribution with skewness parameter β equivalent to S(α, β, 1, 0)
 Stable(α, β, σ, μ)    # α-Stable distribution with skewness parameter β, scale σ and location μ
 
-params(d, [type=:type1])      # Get the parameters, i.e. (α, β, σ, μ) in a chosen parametrization
-shape(d)                      # Get the shape, i.e. (α, β)
-location(d)                   # Get the location, i.e. μ
-scale(d)                      # Get the scale, i.e. σ
-minimum(d)                    # Get the lower bound
-maximum(d)                    # Get the upper bound
+params(d)             # Get the parameters, i.e. (α, β, σ, μ)
+shape(d)              # Get the shape, i.e. (α, β)
+location(d)           # Get the location, i.e. μ
+scale(d)              # Get the scale, i.e. σ
+minimum(d)            # Get the lower bound
+maximum(d)            # Get the upper bound
 ```
 
 External links
@@ -59,21 +59,7 @@ Base.convert(::Type{Stable{T}}, d::Stable{T}) where {T<:Real} = d
 shape(d::Stable) = (d.α, d.β)
 location(d::Stable) = d.μ
 scale(d::Stable) = d.σ
-
-"""
-    params(d::Stable, [type::Symbol=:type1])
-
-Return a tuple of parameters in a chosen parametrization. Type-0 and type-1 (default) are implemented.
-
-"""
-params(d::Stable{T}, type::Symbol = :type1) where T = 
-    if type ∈ (:type1, :t1, :one)
-        return (d.α, d.β, d.σ, d.μ)
-    elseif type ∈ (:type0, :t0, :zero)
-        return (d.α, d.β, d.σ, d.μ + d.β*d.σ*(d.α == one(T) ? 2/π*log(d.σ) : tan(d.α*π/2)))
-    else # type-2 may be added, see "Univariate Stable Distributions" J.P. Nolan
-        throw(ArgumentError("Unrecognized parametrization type. Choose between :type0, :t0, :zero or  :type1, :t1, :one."))
-    end
+params(d::Stable) = (d.α, d.β, d.σ, d.μ)
 partype(::Stable{T}) where {T} = T
 
 #### Statistics
@@ -90,7 +76,7 @@ function pdf(d::Stable{T}, x::Real) where T
     α, β, σ, μ =  params(d)
 
     α == 2one(T) && return pdf(Normal(μ, √2σ),x)
-    β == zero(T) && return pdf(Cauchy(μ,σ),x)
+    α == one(T) && β == zero(T) && return pdf(Cauchy(μ,σ),x)
     α == one(T)/2 && β == one(T) && return pdf(Levy(μ, σ), x)
     α == one(T)/2 && β == -one(T) && return pdf(Levy(-μ, σ), -x)
 
@@ -203,17 +189,17 @@ end
 
 #### Fit model
 
-function _crop(x::Real,a::Real,b::Real)
-    x = max(x, a)
-    x = min(x, b)
-end 
 
-# McCulloch's quantile method
+"""
+    fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
+
+Compute the estimate of the [`Stable`](@ref) distribution with McCulloch's quantile method. The result is tuple with distribution's type-0 parameters.
+"""
 function fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
     function ψ₁(x::Real,y::Real)
         i = [2.439, 2.5, 2.6, 2.7, 2.8, 3.0, 3.2, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0, 15.0, 25.0]
         j = [0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0] 
-        x = _crop(x, i[1], i[end])
+        x = clamp(x, i[1], i[end])
 
         Ψ₁=[2.000 2.000 2.000 2.000 2.000 2.000 2.000;
             1.916 1.924 1.924 1.924 1.924 1.924 1.924;
@@ -237,7 +223,7 @@ function fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
     function ψ₂(x::Real,y::Real)
         i = [2.439, 2.5, 2.6, 2.7, 2.8, 3.0, 3.2, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0, 15.0, 25.0]
         j = [0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0] 
-        x = _crop(x, i[1], i[end])
+        x = clamp(x, i[1], i[end])
         
         Ψ₂=[0.000 2.160 1.000 1.000 1.000 1.000 1.000;
             0.000 1.592 3.390 1.000 1.000 1.000 1.000;
@@ -261,7 +247,7 @@ function fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
     function ψ₃(x::Real,y::Real)
         i = 0.5:0.1:2.0 
         j = 0.0:0.25:1.0
-        x = _crop(x, i[1], i[end])
+        x = clamp(x, i[1], i[end])
 
         Ψ₃=[2.588 3.073 4.534 6.636 9.144;
             2.337 2.635 3.542 4.808 6.247;
@@ -286,7 +272,7 @@ function fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
     function ψ₄(x::Real,y::Real) # this is ψ₅ in original McCuloch paper
         i = 0.5:0.1:2.0 
         j = 0.0:0.25:1.0 
-        x = _crop(x, i[1], i[end])
+        x = clamp(x, i[1], i[end])
 
         Ψ₄=[0.0 -0.061 -0.279 -0.659 -1.198;
             0.0 -0.078 -0.272 -0.581 -0.997;
@@ -314,41 +300,39 @@ function fit_quantile(::Type{<:Stable}, x::AbstractArray{<:Real})
     v₂ = (q₉₅ + q₀₅ - 2q₅₀) / (q₉₅ - q₀₅)
 
     αₑₛₜ = ψ₁(v₁, v₂)
+    αₑₛₜ >= 2. && return params(convert(Stable, fit(Normal,x)))
+    
     βₑₛₜ = ψ₂(v₁, v₂)
-    βₑₛₜ = _crop(βₑₛₜ, -1., 1.)
+    βₑₛₜ = clamp(βₑₛₜ , -1, 1)
     σₑₛₜ = (q₇₅ - q₂₅) / ψ₃(αₑₛₜ, βₑₛₜ)
-    μₑₛₜ =
-        if 0.9 < αₑₛₜ < 1.1 
-            q₅₀ + σₑₛₜ * ψ₄(αₑₛₜ, βₑₛₜ)
-        else
-            q₅₀ + σₑₛₜ * (ψ₄(αₑₛₜ, βₑₛₜ) - βₑₛₜ*tan(αₑₛₜ*π/2))
-        end
+    δₑₛₜ = q₅₀ + σₑₛₜ * ψ₄(αₑₛₜ, βₑₛₜ)
 
-    return Stable(αₑₛₜ, βₑₛₜ, σₑₛₜ, μₑₛₜ)
+    return αₑₛₜ, βₑₛₜ, σₑₛₜ, δₑₛₜ # type-0
 end
 
 # ECF method, see Nolan ch. 4.
 # quantie_fit is used for a robust initial estimate
+
 function fit(::Type{<:Stable}, x::AbstractArray{<:Real}) 
-    α₀, _β₀, σ₀, μ₀ = params(fit_quantile(Stable, x))
-    u = exp.(LinRange(α₀ > 1 ? -2.0 : 10α₀-12, 0, 10))
-    ecf = [mean(cis(t * (val-μ₀)/σ₀) for val in x) for t in u]
+    α₀, _β₀, σ₀, δ₀ = fit_quantile(Stable, x)
+    u = exp.(LinRange(α₀ > 1 ? -2 : 10α₀-12, 0, 10))
+    ecf = [mean(cis(t * (val-δ₀)/σ₀) for val in x) for t in u] # ecf of normalized data
     r, θ = abs.(ecf), angle.(ecf)
 
     mU, mR = [ones(10) -log.(u)], -log.(-log.(r))
     b, αₑₛₜ = (mU'*mU)\(mU'*mR) # ols regression
 
-    αₑₛₜ = _crop(αₑₛₜ, 0., 2.)
+    αₑₛₜ >= 2 && return convert(Stable, fit(Normal,x))
+
     σ₁ = exp(b/αₑₛₜ)
-
-    η(u) = - tan(αₑₛₜ*π/2)*(σ₁*u)^αₑₛₜ # u > 0
+    η(u) = tan(αₑₛₜ*π/2)*(u-u^αₑₛₜ) # u > 0
     mΘ = [η.(u) u]
-    c, μ₁ =  (mΘ'*mΘ)\(mΘ'*θ) # ols regression
-
+    c, δ₁ =  (mΘ'*mΘ)\(mΘ'*θ) # ols regression
     βₑₛₜ = -c/exp(b)
-    βₑₛₜ = _crop(βₑₛₜ , -1., 1.)
-    σₑₛₜ = σ₀ * σ₁
-    μₑₛₜ = σ₀*μ₁ + μ₀
+    βₑₛₜ = clamp(βₑₛₜ , -1, 1)
+    μ₁ = δ₁ - βₑₛₜ*σ₁*tan(αₑₛₜ*π/2) # back to type-1 parametrization
+    σₑₛₜ = σ₀ * σ₁ # unnormalize
+    μₑₛₜ = σ₀*μ₁ + δ₀ # unnormalize
 
     return Stable(αₑₛₜ, βₑₛₜ, σₑₛₜ, μₑₛₜ)
 end
