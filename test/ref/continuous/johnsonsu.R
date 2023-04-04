@@ -16,13 +16,19 @@ JohnsonSU <- R6Class("JohnsonSU",
 		supp = function() { c(-Inf, Inf) },
 		properties = function() { list() },
 		pdf = function(x, log = FALSE) {
-			dJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta, log = log)
+			p <- dJohnsonSU(x, xi = self$xi, lambda = self$lambda, gamma = self$gamma, delta = self$delta)
+            if (log) {
+                result <- log(p)
+            } else {
+                result <- p
+            }
+            return(result)
 		},
 		cdf = function(x) {
-			pJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta)
+			pJohnsonSU(x, xi = self$xi, lambda = self$lambda, gamma = self$gamma, delta = self$delta)
 		},
 		quan = function(x) {
-			qJohnsonSU(x, self$xi, self$lambda, self$gamma, self$delta)
+			qJohnsonSU(x, xi = self$xi, lambda = self$lambda, gamma = self$gamma, delta = self$delta)
 		}
 	)
 )
