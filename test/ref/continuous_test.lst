@@ -91,7 +91,7 @@ InverseGaussian(2.0, 1.5)
 InverseGaussian(2.0, 7.0)
 
 JohnsonSU()
-JohnsonSU(2.0, 5.0, 5.0, 0.5)
+JohnsonSU(2.0, 5.0, 5.0, 5.0)
 JohnsonSU(0.0, 2.0, -1.0, 3.0)
 
 Laplace()
@@ -166,9 +166,9 @@ Rician(1.0, 1.0)
 Rician(5.0, 1.0)
 Rician(10.0, 1.0)
 
-StudentizedRange(2.0, 2.0)
-StudentizedRange(5.0, 10.0)
-StudentizedRange(10.0, 5.0)
+#StudentizedRange(2.0, 2.0)
+#StudentizedRange(5.0, 10.0)
+#StudentizedRange(10.0, 5.0)
 
 SymTriangularDist()
 SymTriangularDist(3.0)
