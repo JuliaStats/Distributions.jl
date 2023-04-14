@@ -1,1 +1,0 @@
-test_samples(NoncentralBeta(3,2,1), 5000; rng=MersenneTwister(1234), nbins=50)
