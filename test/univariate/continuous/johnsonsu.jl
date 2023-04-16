@@ -30,7 +30,8 @@
     @test rand(d1) isa Float64
 
     d1 = JohnsonSU(1.0, 1, 0, 1)
-    d1 = Base.convert(JohnsonSU{Float64}, JohnsonSU())
+    @test Base.convert(JohnsonSU{Float64}, d1) === d1
+    @test Base.convert(JohnsonSU{Int}, d1) isa JohnsonSU{Int}
 
     d1 = JohnsonSU()
     @test d1 isa JohnsonSU{Int}
