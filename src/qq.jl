@@ -38,7 +38,7 @@ end
 
 function qqbuild(d::UnivariateDistribution, x::AbstractVector)
     n = length(x)
-    grid = ppoints(x)
+    grid = ppoints(n)
     qd = quantile.(Ref(d), grid)
     qx = quantile(x, grid)
     return QQPair(qd, qx)
