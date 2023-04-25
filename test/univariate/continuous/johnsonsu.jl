@@ -17,8 +17,6 @@
 
     @test mean(d1) ≈ 7.581281
     @test var(d1) ≈ 19.1969485
-    @test skewness(d1) ≈ 0.7780949
-    @test kurtosis(d1) ≈ 0.447512937
 
     d1 = JohnsonSU(10.0f0, 10.0f0, 1.0f0, 3.0f0)
     @test d1 isa JohnsonSU{Float32}

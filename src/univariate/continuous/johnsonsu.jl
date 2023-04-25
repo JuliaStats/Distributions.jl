@@ -69,20 +69,6 @@ function var(d::JohnsonSU)
     r = d.γ/d.δ
     d.λ^2/2 * (a-1) * (a*cosh(2r)+1)
 end
-function skewness(d::JohnsonSU)
-    a = exp(d.δ^-2)
-    r = d.γ/d.δ
-    var_d = var(d)
-    - (d.λ^3 * sqrt(a) * (a-1)^2 * (a*(a+2)*sinh(3r)+3sinh(2r))) / (4 * var_d * sqrt(var_d))
-end
-function kurtosis(d::JohnsonSU)
-    a = exp(d.δ^-2)
-    r = d.γ/d.δ
-    K1 = a^2 * (a^4+2a^3+3a^2-3) * cosh(4r)
-    K2 = 4a^2 * (a+1) * cosh(3r)
-    K3 = 3(2a+1)
-    d.λ^3 * (a-1)^2 * (K1+K2+K3) / 8var(d)^2
-end
 
 #### Evaluation
 
