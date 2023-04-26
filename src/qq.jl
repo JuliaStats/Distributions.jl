@@ -13,13 +13,18 @@ end
 
 
 """
-Generates a sequence of probability points of length `n`:
+    ppoints(n::Int, a::Real=0.5)
 
-``
+Generate a sequence of probability points of length `n`:
+
+```math
 (k − a)/(n + 1 − 2a), k ∈ 1, ..., n
-``
+```
 
-`a` should be ∈ [0,1]. See the references listed here:
+`a` should be a number in ``[0, 1]``.
+
+## References
+
 https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
 """
 function ppoints(n, a=0.5)
