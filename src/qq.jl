@@ -27,11 +27,7 @@ Generate a sequence of probability points of length `n`:
 
 https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
 """
-function ppoints(n, a=0.5)
-    start = (1-a)/(n + 1 - 2*a)
-    stop = (n-a)/(n + 1 - 2*a)
-    range(start, stop, length=n)
-end
+ppoints(n::Int, a::Real=0.5) = ((1:n) .- a) ./ (n + 1 - 2*a)
 
 function qqbuild(x::AbstractVector, d::UnivariateDistribution)
     n = length(x)
