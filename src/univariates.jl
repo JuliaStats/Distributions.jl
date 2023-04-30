@@ -89,12 +89,12 @@ Generic fallback methods are provided, but it is often the case that `insupport`
 done more efficiently, and a specialized `insupport` is thus desirable.
 You should also override this function if the support is composed of multiple disjoint intervals.
 """
-insupport{D<:UnivariateDistribution}(d::Union{D, Type{D}}, x::Any)
+insupport{D<:UnivariateDistribution}(d::Union{D,Type{D}}, x::Any)
 
-function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) where D<:UnivariateDistribution
+function insupport!(r::AbstractArray, d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution}
     length(r) == length(X) ||
         throw(DimensionMismatch("Inconsistent array dimensions."))
-    for i in 1 : length(X)
+    for i in 1:length(X)
         @inbounds r[i] = insupport(d, X[i])
     end
     return r
@@ -102,10 +102,10 @@ end
 
 
 insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistribution} =
-     insupport!(BitArray(undef, size(X)), d, X)
+    insupport!(BitArray(undef, size(X)), d, X)
 
-insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
-insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}}, x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
+insupport(d::Union{D,Type{D}}, x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
 support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
 support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
@@ -120,7 +120,7 @@ macro distr_support(D, lb, ub)
     D_has_constantbounds = (isa(ub, Number) || ub == :Inf) &&
                            (isa(lb, Number) || lb == :(-Inf))
 
-    paramdecl = D_has_constantbounds ? :(d::Union{$D, Type{<:$D}}) : :(d::$D)
+    paramdecl = D_has_constantbounds ? :(d::Union{$D,Type{<:$D}}) : :(d::$D)
 
     # overall
     esc(quote
@@ -184,7 +184,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 Return the median value of distribution `d`. The median is the smallest `x` such that `cdf(d, x) ≥ 1/2`.
 Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
-median(d::UnivariateDistribution) = quantile(d, 1//2)
+median(d::UnivariateDistribution) = quantile(d, 1 // 2)
 
 """
     modes(d::UnivariateDistribution)
@@ -431,7 +431,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
 
     # fill left part
     if vl > vfirst
-        for i = 1:(vl - vfirst)
+        for i = 1:(vl-vfirst)
             r[i] = 0.0
         end
     end
@@ -439,7 +439,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
     # fill central part: with non-zero pdf
     fm1 = vfirst - 1
     for v = vl:vr
-        r[v - fm1] = pdf(d, v)
+        r[v-fm1] = pdf(d, v)
     end
 
     # fill right part
@@ -452,12 +452,12 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
 end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+    vl, vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
     fm1 = vfirst - 1
     for v = vl:vr
-        r[v - fm1] = pdf(d, v)
+        r[v-fm1] = pdf(d, v)
     end
     return r
 end
@@ -466,14 +466,14 @@ end
 abstract type RecursiveProbabilityEvaluator end
 
 function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange, rpe::RecursiveProbabilityEvaluator)
-    vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
+    vl, vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf
     if vl <= vr
         fm1 = vfirst - 1
-        r[vl - fm1] = pv = pdf(d, vl)
+        r[vl-fm1] = pv = pdf(d, vl)
         for v = (vl+1):vr
-            r[v - fm1] = pv = nextpdf(rpe, pv, v)
+            r[v-fm1] = pv = nextpdf(rpe, pv, v)
         end
     end
 
@@ -687,6 +687,7 @@ const continuous_distributions = [
     "gumbel",
     "inversegamma",
     "inversegaussian",
+    "generalizedinversegaussian",
     "kolmogorov",
     "ksdist",
     "ksonesided",
