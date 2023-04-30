@@ -209,8 +209,6 @@ end
 
 sampler(d::PoissonBinomial) = PoissBinAliasSampler(d)
 
-## ChainRules definitions
-
 # Compute matrix of partial derivatives [∂P(X=j-1)/∂pᵢ]_{i=1,…,n; j=1,…,n+1}
 #
 # This implementation uses the same dynamic programming "trick" as for the computation of
@@ -249,29 +247,4 @@ function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
         A[i, j] -= A[i, j+1]
     end
     return A
-end
-
-for f in (:poissonbinomial_pdf, :poissonbinomial_pdf_fft)
-    pullback = Symbol(f, :_pullback)
-    @eval begin
-        function ChainRulesCore.frule(
-            (_, Δp)::Tuple{<:Any,<:AbstractVector{<:Real}}, ::typeof($f), p::AbstractVector{<:Real}
-        )
-            y = $f(p)
-            A = poissonbinomial_pdf_partialderivatives(p)
-            return y, A' * Δp
-        end
-        function ChainRulesCore.rrule(::typeof($f), p::AbstractVector{<:Real})
-            y = $f(p)
-            A = poissonbinomial_pdf_partialderivatives(p)
-            function $pullback(Δy)
-                p̄ = ChainRulesCore.InplaceableThunk(
-                    Δ -> LinearAlgebra.mul!(Δ, A, Δy, true, true),
-                    ChainRulesCore.@thunk(A * Δy),
-                )
-                return ChainRulesCore.NoTangent(), p̄
-            end
-            return y, $pullback
-        end
-    end
 end
