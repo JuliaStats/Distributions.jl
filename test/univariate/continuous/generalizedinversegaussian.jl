@@ -18,13 +18,13 @@ using Test
     @testset "Special cases" begin
         a = Random.randexp()
         b = Random.randexp()
-        p = Random.randexp()
+        # NOTE: p > 1 for Gamma to have a mode
+        p_plus = Random.randexp() + 1
+        p_minus = -Random.randexp()
         for (d, dref) in (
             (GeneralizedInverseGaussian(a, b, -1 // 2), InverseGaussian(sqrt(b / a), b)), # p = -1 // 2 (inverse gaussian)
-        # NOTE: p + 1 for Gamma to have a mode <30-04-23> 
-        # TODO: Uncomment when special case of a == 0 or b == 0 is managed <30-04-23> 
-        # (GeneralizedInverseGaussian(a, 0.0, p + 1), Gamma(p + 1, 2 / a)), # b = 0 (gamma)
-        # TODO: Add InverseGamma special case <30-04-23> 
+            (GeneralizedInverseGaussian(a, 0.0, p_plus), Gamma(p_plus, 2 / a)), # b = 0 (gamma)
+            (GeneralizedInverseGaussian(0.0, b, p_minus), InverseGamma(-p_minus, b / 2)) # a = 0 (inverse gamma)
         )
             @test minimum(d) == 0.0
             @test maximum(d) == Inf
@@ -43,8 +43,12 @@ using Test
             # @test entropy(d) ≈ entropy(dref)
 
             # PDF + CDF tests.
-            for x in (0.0, 1.0, 2.0, 3.0, 4.0f0)
+            for x in map((0.0, 1.0, 2.0, 3.0, 4.0f0)) do x
+                # NOTE: InverseGamma is only defined for values greater than 0
+                d isa InverseGamma ? (x == 0.0 ? x + eps() : x) : x
+            end
                 @test @inferred(pdf(d, x)) ≈ pdf(dref, x)
+
                 # TODO: Uncomment after implemented <30-04-23> 
                 # @test @inferred(logpdf(d, x)) ≈ logpdf(dref, x)
                 # @test @inferred(cdf(d, x)) ≈ cdf(dref, x) atol = 1e-12

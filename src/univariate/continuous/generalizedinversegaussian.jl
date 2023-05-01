@@ -1,4 +1,3 @@
-# TODO: Manage the special case where a == 0 or b == 0. Since besselk(0) == Inf <30-04-23> 
 """
     GeneralizedInverseGaussian(a, b, p)
 
@@ -23,6 +22,11 @@ end
 
 function GeneralizedInverseGaussian(a::T, b::T, p::T; check_args::Bool=true) where {T<:Real}
     @check_args GeneralizedInverseGaussian (a, a >= zero(a)) (b, b >= zero(b))
+    if b == zero(b)
+        return Gamma(p, 2 / a)
+    elseif a == zero(a)
+        return InverseGamma(-p, b / 2)
+    end
     return GeneralizedInverseGaussian{T}(a, b, p)
 end
 
