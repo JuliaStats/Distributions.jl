@@ -1,7 +1,7 @@
 name = "Distributions"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
 authors = ["JuliaStats"]
-version = "0.25.87"
+version = "0.25.88"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
@@ -26,7 +26,7 @@ FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
 PDMats = "0.10, 0.11"
 QuadGK = "2"
 SpecialFunctions = "1.2, 2"
-StatsBase = "0.32, 0.33"
+StatsBase = "0.32, 0.33, 0.34"
 StatsFuns = "0.9.15, 1"
 julia = "1.3"
 
