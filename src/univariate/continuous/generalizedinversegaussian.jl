@@ -88,7 +88,26 @@ function pdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real}
     end
 end
 
-# TODO: logpdf, cdf, ccdf, logcdf, logccdf <29-04-23> 
+# TODO: cdf <29-04-23> 
+
+function logpdf(d::GeneralizedInverseGaussian{T}, x::Real) where {T<:Real}
+    if x > 0
+        a, b, p = params(d)
+        return (p / 2) * (log(a) - log(b)) - logtwo - log(besselk(p, sqrt(a * b))) + (p - 1) * log(x) - a * x / 2 - b / (2 * x)
+    else
+        return -Inf
+    end
+end
+
+function mgf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
+    a, b, p = params(d)
+    return (a / a - 2t)^(p / 2) * besselk(p, sqrt(b * (a - 2t))) / besselk(p, sqrt(a * b))
+end
+
+function cf(d::GeneralizedInverseGaussian{T}, t::Real) where {T<:Real}
+    a, b, p = params(d)
+    return (a / a - 2(im * t))^(p / 2) * besselk(p, sqrt(b * (a - 2(im * t)))) / besselk(p, sqrt(a * b))
+end
 
 @quantile_newton GeneralizedInverseGaussian
 

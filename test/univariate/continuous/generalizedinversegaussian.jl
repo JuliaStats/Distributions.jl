@@ -50,7 +50,7 @@ using Test
                 @test @inferred(pdf(d, x)) ≈ pdf(dref, x)
 
                 # TODO: Uncomment after implemented <30-04-23> 
-                # @test @inferred(logpdf(d, x)) ≈ logpdf(dref, x)
+                @test @inferred(logpdf(d, x)) ≈ logpdf(dref, x) atol = 1e-6
                 # @test @inferred(cdf(d, x)) ≈ cdf(dref, x) atol = 1e-12
                 # @test @inferred(logcdf(d, x)) ≈ logcdf(dref, x) atol = 1e-12
             end
