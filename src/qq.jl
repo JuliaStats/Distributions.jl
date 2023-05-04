@@ -12,34 +12,18 @@ function qqbuild(x::AbstractVector, y::AbstractVector)
 end
 
 
-"""
-    ppoints(n::Int, a::Real=0.5)
-
-Generate a sequence of probability points of length `n`:
-
-```math
-(k − a)/(n + 1 − 2a), k ∈ 1, ..., n
-```
-
-`a` should be a number in ``[0, 1]``.
-
-## References
-
-https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot#Heuristics
-"""
-ppoints(n::Int, a::Real=0.5) = ((1:n) .- a) ./ (n + 1 - 2*a)
-
 function qqbuild(x::AbstractVector, d::UnivariateDistribution)
+    ## Follows Matlab's convention (https://ch.mathworks.com/help/stats/qqplot.html)
     n = length(x)
-    grid = ppoints(n)
-    qx = quantile(x, grid)
+    grid = ((1:n) .- 0.5) ./ n
     qd = quantile.(Ref(d), grid)
     return QQPair(qx, qd)
 end
 
 function qqbuild(d::UnivariateDistribution, x::AbstractVector)
+    ## Follows Matlab's convention (https://ch.mathworks.com/help/stats/qqplot.html)
     n = length(x)
-    grid = ppoints(n)
+    grid = ((1:n) .- 0.5) ./ n
     qd = quantile.(Ref(d), grid)
     qx = quantile(x, grid)
     return QQPair(qd, qx)
