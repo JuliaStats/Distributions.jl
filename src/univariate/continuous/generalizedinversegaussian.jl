@@ -73,6 +73,8 @@ function mode(d::GeneralizedInverseGaussian)
     ((p - 1) + sqrt((p - 1)^2 + a * b)) / a
 end
 
+# NOTE: Entropy could be implemented for integer and half integer values of `p` using tabulated values of the derivative
+# at  https://dlmf.nist.gov/10.38#E7 <04-05-23> 
 
 #### Evaluation
 
