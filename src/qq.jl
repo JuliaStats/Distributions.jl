@@ -13,7 +13,7 @@ end
 
 
 """
-    ppoints(n::Int, a::Real=0.5)
+    ppoints(n::Int)
 
 Generate a sequence of probability points of length `n`:
 
