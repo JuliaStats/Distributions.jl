@@ -8,6 +8,11 @@ c = qqbuild(view(collect(1:20), 1:10), view(collect(1:20), 1:10))
 @test a.qy ≈ b.qy ≈ c.qy ≈ collect(1.0:10)
 
 
+pp = Distributions.ppoints(10)
+@test length(pp) == 10
+@test minimum(pp) >= 0
+@test maximum(pp) <= 1
+
 a = qqbuild(collect(1:10), Uniform(1,10))
 b = qqbuild(1:10, Uniform(1,10))
 c = qqbuild(view(collect(1:20), 1:10), Uniform(1,10))
