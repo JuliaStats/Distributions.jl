@@ -18,7 +18,7 @@ end
 Generate a sequence of probability points of length `n`:
 
 ```math
-(k − 0.5)/n, \\; k ∈ 1, ..., n
+(k − 0.5)/n, \\qquad k \\in \\{1, \\ldots, n\\}
 ```
 
 ## References
