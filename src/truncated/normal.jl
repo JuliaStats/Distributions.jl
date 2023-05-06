@@ -27,56 +27,59 @@ modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
 function _tnmom1(a, b)
+    mid = middle(a, b)
     if !(a ≤ b)
-        return oftype(middle(a, b), NaN)
+        return oftype(mid, NaN)
     elseif a == b
-        return middle(a, b)
+        return mid
     elseif abs(a) > abs(b)
         return -_tnmom1(-b, -a)
     elseif isinf(a) && isinf(b)
-        return zero(middle(a, b))
+        return zero(mid)
     end
-    Δ = (b - a) * middle(a, b)
+    Δ = (b - a) * mid
+    a′ = a * invsqrt2
+    b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        m = √(2/π) * expm1(-Δ) * exp(-a^2 / 2) / (erf(a/√2) - erf(b/√2))
+        m = expm1(-Δ) * exp(-a^2 / 2) / (erf(a′) - erf(b′))
     elseif 0 < a < b
-        z = exp(-Δ) * erfcx(b/√2) - erfcx(a/√2)
-        iszero(z) && return middle(a, b)
-        m = √(2/π) * expm1(-Δ) / z
+        z = exp(-Δ) * erfcx(b′) - erfcx(a′)
+        iszero(z) && return mid
+        m = expm1(-Δ) / z
     end
-    return clamp(m, a, b)
+    return clamp(m / sqrthalfπ, a, b)
 end
 
 # do not export. Used in var
 # computes 2nd moment of standard normal distribution truncated to [a, b]
 function _tnmom2(a::Real, b::Real)
+    mid = middle(a, b)
     if !(a ≤ b)
-        return oftype(middle(a, b), NaN)
+        return oftype(mid, NaN)
     elseif a == b
-        return middle(a, b)^2
+        return mid^2
     elseif abs(a) > abs(b)
         return _tnmom2(-b, -a)
     elseif isinf(a) && isinf(b)
-        return one(middle(a, b))
+        return one(mid)
     elseif isinf(b)
-        return 1 + √(2 / π) * a / erfcx(a / √2)
+        return 1 + a / erfcx(a * invsqrt2) / sqrthalfπ
     end
-
+    a′ = a * invsqrt2
+    b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        ea = √(π/2) * erf(a / √2)
-        eb = √(π/2) * erf(b / √2)
+        ea = sqrthalfπ * erf(a′)
+        eb = sqrthalfπ * erf(b′)
         fa = ea - a * exp(-a^2 / 2)
         fb = eb - b * exp(-b^2 / 2)
-        m2 = (fb - fa) / (eb - ea)
-        return m2
+        return (fb - fa) / (eb - ea)
     else # 0 ≤ a ≤ b
-        exΔ = exp((a - b)middle(a, b))
-        ea = √(π/2) * erfcx(a / √2)
-        eb = √(π/2) * erfcx(b / √2)
+        exΔ = exp((a - b) * mid)
+        ea = sqrthalfπ * erfcx(a′)
+        eb = sqrthalfπ * erfcx(b′)
         fa = ea + a
         fb = eb + b
-        m2 = (fa - fb * exΔ) / (ea - eb * exΔ)
-        return m2
+        return (fa - fb * exΔ) / (ea - eb * exΔ)
     end
 end
 
