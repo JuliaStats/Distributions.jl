@@ -27,7 +27,7 @@ modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
 function _tnmom1(a, b)
-    mid = middle(a, b)
+    mid = float(middle(a, b))
     if !(a ≤ b)
         return oftype(mid, NaN)
     elseif a == b
@@ -41,7 +41,7 @@ function _tnmom1(a, b)
     a′ = a * invsqrt2
     b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        m = expm1(-Δ) * exp(-a^2 / 2) / (erf(a′) - erf(b′))
+        m = expm1(-Δ) * exp(-a^2 / 2) / erf(b′, a′)
     elseif 0 < a < b
         z = exp(-Δ) * erfcx(b′) - erfcx(a′)
         iszero(z) && return mid
@@ -53,7 +53,7 @@ end
 # do not export. Used in var
 # computes 2nd moment of standard normal distribution truncated to [a, b]
 function _tnmom2(a::Real, b::Real)
-    mid = middle(a, b)
+    mid = float(middle(a, b))
     if !(a ≤ b)
         return oftype(mid, NaN)
     elseif a == b
@@ -68,11 +68,9 @@ function _tnmom2(a::Real, b::Real)
     a′ = a * invsqrt2
     b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        ea = sqrthalfπ * erf(a′)
-        eb = sqrthalfπ * erf(b′)
-        fa = ea - a * exp(-a^2 / 2)
-        fb = eb - b * exp(-b^2 / 2)
-        return (fb - fa) / (eb - ea)
+        eb_ea = sqrthalfπ * erf(a′, b′)
+        fb_fa = eb_ea + a * exp(-a^2 / 2) - b * exp(-b^2 / 2)
+        return fb_fa / eb_ea
     else # 0 ≤ a ≤ b
         exΔ = exp((a - b) * mid)
         ea = sqrthalfπ * erfcx(a′)
