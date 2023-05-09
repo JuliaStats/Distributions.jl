@@ -270,7 +270,7 @@ function pdf_wrapped_cf(d::Wrapped, x::Real; tol=sqrt(eps(float(typeof(x)))), ma
     for i in 1:maxiter
         z *= z₀
         iscale += scale
-        Δp = real(cf(d_unwrapped, -iscale) * conj(z)) + real(cf(d_unwrapped, iscale) * z)
+        Δp = 2 * real(cf(d_unwrapped, iscale) * z)
         p += Δp
         i > k && abs(Δp) ≤ tol && p > 0 && break
     end
@@ -292,8 +292,7 @@ function cdf_wrapped_cf(d::Wrapped, x::Real; tol=sqrt(eps(float(typeof(x)))), ma
         z *= z₀
         zₗ *= z₀ₗ
         iscale += scale
-        y = im * (z - zₗ) / iscale
-        Δp = real(cf(d_unwrapped, -iscale) * conj(y)) + real(cf(d_unwrapped, iscale) * y)
+        Δp = 2 * imag(cf(d_unwrapped, iscale) * (zₗ - z)) / iscale
         p += Δp
         i > k && abs(Δp) ≤ tol && p > 0 && break
     end
