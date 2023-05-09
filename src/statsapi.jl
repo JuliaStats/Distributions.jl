@@ -1,6 +1,6 @@
 function _check_tail(tail::Symbol)
     if tail !== :both && tail !== :left && tail !== :right
-        throw(ArgumentError("tail=$(tail) is invalid"))
+        throw(ArgumentError("`tail=$(repr(tail))` is invalid"))
     end
 end
 
