@@ -221,6 +221,7 @@ function logcdf_wrapped_logcdf(
     l = d.lower
     period = d.upper - l
     k = d.k
+    x < l && return oftype(logcdf(d_unwrapped, l), -Inf)
     logp = logdiffcdf(d_unwrapped, x, l)
     x < l && return oftype(logp, -Inf)
     Δx = period / k
@@ -253,7 +254,7 @@ function logcdf_wrapped_logcdf(
         logp = logaddexp(logp, Δlogp)
         i > k && abs(Δlogp) ≤ tol && isfinite(logp) && break
     end
-    return logp - log(oftype(logp, k))
+    return min(logp - log(oftype(logp, k)), 0)
 end
 
 function pdf_wrapped_cf(d::Wrapped, x::Real; tol=sqrt(eps(float(typeof(x)))), maxiter=1_000)
@@ -297,7 +298,7 @@ function cdf_wrapped_cf(d::Wrapped, x::Real; tol=sqrt(eps(float(typeof(x)))), ma
         i > k && abs(Δp) ≤ tol && p > 0 && break
     end
     # ensure probability is never negative
-    return max(0, p) / period
+    return clamp(p / period, 0, 1)
 end
 
 function rand(rng::AbstractRNG, d::Wrapped)
