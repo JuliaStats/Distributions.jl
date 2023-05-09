@@ -90,7 +90,7 @@ const tests = [
     "multivariate/product",
     "eachvariate",
     "univariate/continuous/triangular",
-    "statsapi.jl",
+    "statsapi",
 
     ### missing files compared to /src:
     # "common",
