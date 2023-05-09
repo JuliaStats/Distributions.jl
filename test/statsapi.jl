@@ -13,8 +13,8 @@ using Test
         ys = rand(dist, 1_000_000)
 
         # Check that empirical frequencies match pvalues of left/right tail approximately
-        @test pvalue(dist, x; tail=:left) ≈ count(y -> y ≤ x, ys) / length(ys) rtol=5e-3
-        @test pvalue(dist, x; tail=:right) ≈ count(y -> y ≥ x, ys) / length(ys) rtol=5e-3
+        @test pvalue(dist, x; tail=:left) ≈ mean(≤(x), ys) rtol=5e-3
+        @test pvalue(dist, x; tail=:right) ≈ mean(≥(x), ys) rtol=5e-3
 
         # Check consistency of pvalues of both tails
         @test pvalue(dist, x; tail=:both) ==
