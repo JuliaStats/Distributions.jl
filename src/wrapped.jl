@@ -310,6 +310,8 @@ function rand(rng::AbstractRNG, d::Wrapped)
     return mod(z - l + ((k - i)//k) * period, period) + l
 end
 
-### specialized truncated distributions
+### specialized wrapped distributions
 
 include(joinpath("wrapped", "normal.jl"))
+include(joinpath("wrapped", "cauchy.jl"))
+include(joinpath("wrapped", "exponential.jl"))
