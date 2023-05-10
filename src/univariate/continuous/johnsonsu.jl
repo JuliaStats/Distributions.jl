@@ -65,9 +65,9 @@ function median(d::JohnsonSU)
     d.ξ + d.λ * sinh(-r)
 end
 function var(d::JohnsonSU)
-    a = exp(d.δ^-2)
+    a = d.δ^-2
     r = d.γ/d.δ
-    d.λ^2/2 * (a-1) * (a*cosh(2r)+1)
+    d.λ^2/2 * expm1(a) * (exp(a)*cosh(2r)+1)
 end
 
 #### Evaluation
