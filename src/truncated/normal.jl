@@ -128,14 +128,22 @@ function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
+    a, b = extrema(d)
     if isfinite(μ)
-        lower, upper = extrema(d)
-        a = (lower - μ) / σ
-        b = (upper - μ) / σ
-        z = randnt(rng, a, b, d.tp)
+        if iszero(σ)
+            if a <= μ <= b
+                z = 0.0
+            else
+                throw(ArgumentError("cannot sample from distribution with 0 mass"))
+            end
+        else
+            a′ = (a - μ) / σ
+            b′ = (b - μ) / σ
+            z = randnt(rng, a′, b′, d.tp)
+        end
         return μ + σ * z
     else
-        return clamp(μ, extrema(d)...)
+        return clamp(μ, a, b)
     end
 end
 

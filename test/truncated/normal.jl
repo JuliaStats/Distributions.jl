@@ -47,7 +47,7 @@ end
         [(r = rand, r! = rand!),
          (r = ((d, n) -> rand(rng, d, n)), r! = ((d, X) -> rand!(rng, d, X)))]
         repeats = 1000000
-        
+
         @test abs(mean(func.r(trunc, repeats))) < 0.01
         @test abs(median(func.r(trunc, repeats))) < 0.01
         @test abs(var(func.r(trunc, repeats)) - var(trunc)) < 0.01
@@ -68,4 +68,16 @@ end
         @test isfinite(logpdf(trunc, x))
         @test isfinite(pdf(trunc, x))
     end
+end
+
+@testset "Degenerate truncated normal" begin
+    # https://github.com/JuliaStats/Distributions.jl/issues/1712
+    d = Normal(2, 0)
+    @test rand(truncated(d, 2, 2)) == 2    # a == μ == b
+    @test rand(truncated(d, 1, 3)) == 2    # a <= μ <= b
+    @test_throws ArgumentError rand(truncated(d, 6, 9))  # μ ∉ [a, b]
+    # https://github.com/JuliaStats/Distributions.jl/issues/1867
+    d = Normal(1, 0)
+    @test rand(truncated(Normal(1, 0), 0, 1)) == 1
+    @test rand(truncated(Normal(0, 0), 0, 1)) == 0
 end
