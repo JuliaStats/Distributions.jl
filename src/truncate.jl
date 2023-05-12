@@ -95,6 +95,9 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
 
     function Truncated(d::UnivariateDistribution, l::TL, u::TU, loglcdf::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real, TL <: Union{T,Nothing}, TU <: Union{T,Nothing}}
+        if iszero(tp) && !(l == u && insupport(d, l))
+            throw(ArgumentError("cannot truncate distribution; `$d` has 0 probability in the interval `[$l, $u]`"))
+        end
         new{typeof(d), value_support(typeof(d)), T, TL, TU}(d, l, u, loglcdf, lcdf, ucdf, tp, logtp)
     end
 end
