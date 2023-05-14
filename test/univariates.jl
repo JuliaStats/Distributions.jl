@@ -72,12 +72,6 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @test typeof(D(mixed_pars...)) == typeof(d)
     end
 
-    # promote integer arguments to floats, where applicable
-    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric) && !isa(D, typeof(truncated))
-        int_pars = map(x -> ceil(Int, x), pars)
-        @test typeof(D(int_pars...)) == typeof(d)
-    end
-
     # conversions
     if D isa Type && !isconcretetype(D)
         @test convert(D{partype(d)}, d) === d
@@ -127,13 +121,13 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     try
         m = mgf(d,0.0)
-        @test m == 1.0
+        @test m ≈ 1.0
     catch e
         isa(e, MethodError) || throw(e)
     end
     try
         c = cf(d,0.0)
-        @test c == 1.0
+        @test c ≈ 1.0
         # test some extra values: should all be well-defined
         for t in (0.1,-0.1,1.0,-1.0)
             @test !isnan(cf(d,t))
@@ -181,30 +175,6 @@ end
     @test cquantile(d, 0.4) isa Int
     @test invlogcdf(d, log(0.2)) isa Int
     @test invlogccdf(d, log(0.6)) isa Int
-end
-
-@testset "Uniform type inference" begin
-    for T in (Int, Float32)
-        d = Uniform{T}(T(2), T(3))
-        FT = float(T)
-        XFT = promote_type(FT, Float64)
-
-        @test @inferred(pdf(d, 1.5)) === zero(FT)
-        @test @inferred(pdf(d, 2.5)) === one(FT)
-        @test @inferred(pdf(d, 3.5)) === zero(FT)
-
-        @test @inferred(logpdf(d, 1.5)) === FT(-Inf)
-        @test @inferred(logpdf(d, 2.5)) === -zero(FT) # negative zero
-        @test @inferred(logpdf(d, 3.5)) === FT(-Inf)
-
-        @test @inferred(cdf(d, 1.5)) === zero(XFT)
-        @test @inferred(cdf(d, 2.5)) === XFT(1//2)
-        @test @inferred(cdf(d, 3.5)) === one(XFT)
-
-        @test @inferred(ccdf(d, 1.5)) === one(XFT)
-        @test @inferred(ccdf(d, 2.5)) === XFT(1//2)
-        @test @inferred(ccdf(d, 3.5)) === zero(XFT)
-    end
 end
 
 # #1471

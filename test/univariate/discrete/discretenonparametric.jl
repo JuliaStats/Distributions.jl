@@ -171,3 +171,46 @@ d = DiscreteNonParametric([2, 1], [1, 0])
         @inferred(skewness(d))
     end
 end
+
+@testset "comparisons" begin
+    d1 = DiscreteNonParametric([1, 2], [0.4, 0.6])
+    d2 = DiscreteNonParametric([1, 2], [0.6, 0.4])
+    d3 = DiscreteNonParametric([1 + 1e-9, 2], [0.4, 0.6])
+    d4 = DiscreteNonParametric([1 + 1e-9, 2], [0.6, 0.4])
+    d5 = DiscreteNonParametric([9, 2, 4], [0.2, 0.7, 0.1])
+
+    # Same distribution
+    for d in (d1, d2, d3, d4, d5)
+        @test d == d
+        @test d ≈ d
+    end
+
+    # Comparison with categorical distribution
+    @test Categorical([0.4, 0.6]) == d1
+    @test Categorical([0.4, 0.6]) ≈ d1
+
+    # Same support, different probabilities
+    @test d2 != d1
+    @test !isapprox(d2, d1)
+    @test d2 ≈ d1 atol=0.4
+
+    # Different support, same probabilities
+    @test d3 != d1
+    @test d3 ≈ d1
+
+    # Different support, different probabilities, same dimension
+    @test d4 != d1
+    @test !isapprox(d4, d1)
+    @test d4 ≈ d1 atol=0.4
+
+    # Different cardinality of the support
+    @test d5 != d1
+    @test !isapprox(d5, d1)
+
+    # issue #1140
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) != DiscreteNonParametric(1:3, [0.2, 0.4, 0.4])
+
+    # Different types
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) == DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+    @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈ DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+end

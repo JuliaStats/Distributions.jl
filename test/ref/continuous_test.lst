@@ -101,6 +101,11 @@ Levy(2)
 Levy(2, 8)
 Levy(3.0, 3)
 
+Lindley()
+Lindley(0.5)
+Lindley(1.5)
+Lindley(3.0)
+
 Logistic()
 Logistic(2.0)
 Logistic(0.0, 1.0)
@@ -144,6 +149,10 @@ Pareto()
 Pareto(2.0)
 Pareto(2.0, 1.5)
 Pareto(3.0, 2.0)
+
+PGeneralizedGaussian()
+PGeneralizedGaussian(0.0, 1.5, 2.0)
+PGeneralizedGaussian(3.0, 2.0, 1.5)
 
 Rayleigh()
 Rayleigh(3.0)

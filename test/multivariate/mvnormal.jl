@@ -241,7 +241,7 @@ end
     @test g.Σ.diag ≈ diag(Cw)
 end
 
-@testset "MvNormal affine tranformations" begin
+@testset "MvNormal affine transformations" begin
     @testset "moment identities" begin
         for n in 1:5                       # dimension
             # distribution
