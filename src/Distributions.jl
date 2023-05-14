@@ -17,6 +17,7 @@ using Random
 import Random: default_rng, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
@@ -308,6 +309,9 @@ include("pdfnorm.jl")
 # mixture distributions (TODO: moveout)
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
+
+# Interface for StatsAPI
+include("statsapi.jl")
 
 # Extensions: Implementation of DensityInterface and ChainRulesCore API
 if !isdefined(Base, :get_extension)
