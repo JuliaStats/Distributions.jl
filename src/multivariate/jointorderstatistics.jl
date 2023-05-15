@@ -5,12 +5,13 @@
 """
     JointOrderStatistics <: ContinuousMultivariateDistribution
 
-The joint distribution of a subset of order statistics from a sample from a continuous univariate distribution.
+The joint distribution of a subset of order statistics from a sample from a continuous
+univariate distribution.
 
     JointOrderStatistics(
         dist::ContinuousUnivariateDistribution,
         n::Int,
-        ranks::AbstractVector{Int}=1:n;
+        ranks=Base.OneTo(n);
         check_args::Bool=true,
     )
 
@@ -21,7 +22,7 @@ The ``i``th order statistic of a sample is the ``i``th element of the sorted sam
 For example, the 1st order statistic is the sample minimum, while the ``n``th order
 statistic is the sample maximum.
 
-`ranks` must be a sorted vector of unique integers between 1 and `n`.
+`ranks` must be a sorted vector or tuple of unique `Int`s between 1 and `n`.
 
 For a single order statistic, use [`OrderStatistic`](@ref) instead.
 
@@ -32,15 +33,16 @@ JointOrderStatistics(Normal(), 10)           # Product(fill(Normal(), 10)) restr
 JointOrderStatistics(Cauchy(), 10, [1, 10])  # joint distribution of the extrema
 ```
 """
-struct JointOrderStatistics{D<:ContinuousUnivariateDistribution,R<:AbstractVector{Int}} <:
-       ContinuousMultivariateDistribution
+struct JointOrderStatistics{
+    D<:ContinuousUnivariateDistribution,R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}
+} <: ContinuousMultivariateDistribution
     dist::D
     n::Int
     ranks::R
     function JointOrderStatistics(
         dist::ContinuousUnivariateDistribution,
         n::Int,
-        ranks::AbstractVector{Int}=1:n;
+        ranks::Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}=Base.OneTo(n);
         check_args::Bool=true,
     )
         @check_args(
@@ -49,7 +51,7 @@ struct JointOrderStatistics{D<:ContinuousUnivariateDistribution,R<:AbstractVecto
             (
                 ranks,
                 _are_ranks_valid(ranks, n),
-                "`ranks` must be a sorted vector of unique integers between 1 and `n`.",
+                "`ranks` must be a sorted vector or tuple of unique integers between 1 and `n`.",
             ),
         )
         return new{typeof(dist),typeof(ranks)}(dist, n, ranks)

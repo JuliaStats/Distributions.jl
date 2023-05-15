@@ -15,8 +15,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         @test_throws DomainError JointOrderStatistics(dist, 0, [1, 2])
         @test_throws DomainError JointOrderStatistics(dist, 2, [2, 3])
         @test_throws DomainError JointOrderStatistics(dist, 3, [0, 1, 2, 3])
-        @test_throws DomainError JointOrderStatistics(dist, 5, [3, 2])
-        @test_throws DomainError JointOrderStatistics(dist, 5, [3, 3])
+        @test_throws DomainError JointOrderStatistics(dist, 5, (3, 2))
+        @test_throws DomainError JointOrderStatistics(dist, 5, (3, 3))
         JointOrderStatistics(dist, 0, 1:2; check_args=false)
         JointOrderStatistics(dist, 2, 2:3; check_args=false)
         JointOrderStatistics(dist, 3, 0:3; check_args=false)
@@ -24,8 +24,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         JointOrderStatistics(dist, 0, [1, 2]; check_args=false)
         JointOrderStatistics(dist, 2, [2, 3]; check_args=false)
         JointOrderStatistics(dist, 3, [0, 1, 2, 3]; check_args=false)
-        JointOrderStatistics(dist, 5, [3, 2]; check_args=false)
-        JointOrderStatistics(dist, 5, [3, 3]; check_args=false)
+        JointOrderStatistics(dist, 5, (3, 2); check_args=false)
+        JointOrderStatistics(dist, 5, (3, 3); check_args=false)
     end
 
     @testset for T in [Float32, Float64],
@@ -35,6 +35,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             1:n,
             ([i, j] for j in 2:n for i in 1:min(10, j - 1))...,
             vcat(2:4, (n - 10):(n - 5)),
+            (2, n ÷ 2, n - 5),
         ]
 
         d = JointOrderStatistics(dist, n, r)
@@ -91,7 +92,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 )
                 @test logpdf(d, x) ≈ lp
                 @test pdf(d, x) ≈ exp(lp)
-            elseif r == 1:n
+            elseif collect(r) == 1:n
                 @test logpdf(d, x) ≈ sum(Base.Fix1(logpdf, d.dist), x) + loggamma(T(n + 1))
                 @test pdf(d, x) ≈ exp(logpdf(d, x))
             end
@@ -164,6 +165,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 1:n,
                 vcat(1:10, (div(n, 2) - 5):(div(n, 2) + 5), (n - 9):n),
                 vcat(10:20, (n - 19):(n - 10)),
+                (1, n),
             ]
 
             nchecks = length(dists) * sum(rs) do r
@@ -184,7 +186,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 if dist isa Uniform
                     # Arnold (2008). A first course in order statistics. Eq 2.3.16
                     s = @. n - r + 1
-                    xcor_exact = Symmetric(sqrt.((r .* s') ./ (r' .* s)))
+                    xcor_exact = Symmetric(sqrt.((r .* collect(s)') ./ (collect(r)' .* s)))
                 elseif dist isa Exponential
                     # Arnold (2008).  A first course in order statistics. Eq 4.6.8
                     v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
