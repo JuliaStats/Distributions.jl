@@ -78,7 +78,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         end
         @test cdf(d, x) ≈ cf atol=sqrt(eps())
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
+        if !any(T -> d isa T, [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64},
@@ -133,12 +133,18 @@ for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
 end
 for bound in (-2, 1)
     d = @test_deprecated Distributions.Truncated(Normal(), Float64(bound), Inf)
-    @test truncated(Normal(); lower=bound) == d
     @test truncated(Normal(); lower=bound, upper=Inf) == d
 
+    d_nothing = truncated(Normal(); lower=bound)
+    @test truncated(Normal(); lower=bound, upper=nothing) == d_nothing
+    @test extrema(d_nothing) == promote(bound, Inf)
+
     d = @test_deprecated Distributions.Truncated(Normal(), -Inf, Float64(bound))
-    @test truncated(Normal(); upper=bound) == d
     @test truncated(Normal(); lower=-Inf, upper=bound) == d
+
+    d_nothing = truncated(Normal(); upper=bound)
+    @test truncated(Normal(); lower=nothing, upper=bound) == d_nothing
+    @test extrema(d_nothing) == promote(-Inf, bound)
 end
 @test truncated(Normal()) === Normal()
 
