@@ -48,12 +48,27 @@ struct JointOrderStatistics{D<:ContinuousUnivariateDistribution,R<:AbstractVecto
             (n, n ≥ 1, "`n` must be a positive integer."),
             (
                 ranks,
-                1 ≤ first(ranks) && last(ranks) ≤ n && issorted(ranks) && allunique(ranks),
+                _are_ranks_valid(ranks, n),
                 "`ranks` must be a sorted vector of unique integers between 1 and `n`.",
             ),
         )
         return new{typeof(dist),typeof(ranks)}(dist, n, ranks)
     end
+end
+
+_islesseq(x, y) = isless(x, y) || isequal(x, y)
+
+function _are_ranks_valid(ranks, n)
+    first(ranks) ≥ 1 || return false
+    last(ranks) ≤ n || return false
+    # combined with the above checks, this is equivalent to but faster than
+    # issorted(ranks) && allunique(ranks)
+    return issorted(ranks; lt=_islesseq)
+end
+function _are_ranks_valid(ranks::AbstractRange, n)
+    first(ranks) ≥ 1 || return false
+    last(ranks) ≤ n || return false
+    return issorted(ranks) && allunique(ranks)
 end
 
 length(d::JointOrderStatistics) = length(d.ranks)
