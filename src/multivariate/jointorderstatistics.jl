@@ -134,13 +134,21 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         i = 0
         for (m, j) in zip(eachindex(x), d.ranks)
             k = j - i
-            s += k > 1 ? rand(rng, Gamma(k, one(T); check_args=false)) : randexp(rng, T)
+            if k > 1
+                s += T(rand(rng, GammaMTSampler(Gamma{T}(T(k), T(1)))))
+            else
+                s += randexp(rng, T)
+            end
             i = j
             x[m] = s
         end
         j = n + 1
         k = j - i
-        s += k > 1 ? rand(rng, Gamma(k, one(T); check_args=false)) : randexp(rng, T)
+        if k > 1
+            s += T(rand(rng, GammaMTSampler(Gamma{T}(T(k), T(1)))))
+        else
+            s += randexp(rng, T)
+        end
         x .= quantile.(d.dist, x ./ s)
     end
     return x
