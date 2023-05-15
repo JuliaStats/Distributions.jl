@@ -77,18 +77,19 @@ length(d::JointOrderStatistics) = length(d.ranks)
 function insupport(d::JointOrderStatistics, x::AbstractVector)
     return length(d) == length(x) && issorted(x) && all(Base.Fix1(insupport, d.dist), x)
 end
-minimum(d::JointOrderStatistics) = fill(minimum(d.dist), length(d))
+minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = fill(maximum(d.dist), length(d))
 
 params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.ranks)
 partype(d::JointOrderStatistics) = partype(d.dist)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
+Base.eltype(d::JointOrderStatistics) = eltype(d.dist)
 
 function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     n = d.n
     ranks = d.ranks
-    lp = sum(Base.Fix1(logpdf, d.dist), x)
-    T = eltype(lp)
+    lp = loglikelihood(d.dist, x)
+    T = typeof(lp)
     lp += loggamma(T(n + 1))
     length(ranks) == n && return lp
     i = 0
@@ -133,7 +134,7 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         # this is slow if length(d.ranks) is close to n and quantile for d.dist is expensive,
         # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
         T = typeof(one(eltype(x)))
-        s = zero(one(T))
+        s = zero(eltype(x))
         i = 0
         for (m, j) in zip(eachindex(x), d.ranks)
             k = j - i
