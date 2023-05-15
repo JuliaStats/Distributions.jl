@@ -35,9 +35,9 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test d isa JointOrderStatistics
             @test d.dist === dist
             @test d.n === n
-            @test d.r === r
+            @test d.ranks === r
             @test length(d) == length(r)
-            @test params(d) == (params(dist)..., d.n, d.r)
+            @test params(d) == (params(dist)..., d.n, d.ranks)
             @test partype(d) === partype(dist)
             @test eltype(d) === eltype(dist)
 

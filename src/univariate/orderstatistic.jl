@@ -7,9 +7,10 @@
 
 The distribution of an order statistic from IID samples from a univariate distribution
 
-    OrderStatistic(dist::UnivariateDistribution, n::Int, i::Int; check_args::Bool=true)
+    OrderStatistic(dist::UnivariateDistribution, n::Int, rank::Int; check_args::Bool=true)
 
-Construct the distribution of the `i`th order statistic from `n` independent samples from `dist`.
+Construct the distribution of the `rank` ``=i``th order statistic from `n` independent
+samples from `dist`.
 
 The ``i``th order statistic of a sample is the ``i``th element of the sorted sample.
 For example, the 1st order statistic is the sample minimum, while the ``n``th order
@@ -42,12 +43,12 @@ struct OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <:
        UnivariateDistribution{S}
     dist::D
     n::Int
-    i::Int
+    rank::Int
     function OrderStatistic(
-        dist::UnivariateDistribution, n::Int, i::Int; check_args::Bool=true
+        dist::UnivariateDistribution, n::Int, rank::Int; check_args::Bool=true
     )
-        @check_args(OrderStatistic, 1 ≤ i ≤ n)
-        return new{typeof(dist),value_support(typeof(dist))}(dist, n, i)
+        @check_args(OrderStatistic, 1 ≤ rank ≤ n)
+        return new{typeof(dist),value_support(typeof(dist))}(dist, n, rank)
     end
 end
 
@@ -55,15 +56,15 @@ minimum(d::OrderStatistic) = minimum(d.dist)
 maximum(d::OrderStatistic) = maximum(d.dist)
 insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
 
-params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.i)
+params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.rank)
 partype(d::OrderStatistic) = partype(d.dist)
 Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
 
 # distribution of the ith order statistic from an IID uniform distribution, with CDF Uᵢₙ(x)
 function _uniform_orderstatistic(d::OrderStatistic)
     n = d.n
-    i = d.i
-    return Beta{Int}(i, n - i + 1)
+    rank = d.rank
+    return Beta{Int}(rank, n - rank + 1)
 end
 
 function logpdf(d::OrderStatistic, x::Real)

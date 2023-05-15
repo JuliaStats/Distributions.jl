@@ -10,17 +10,18 @@ The joint distribution of a subset of order statistics from a sample from a cont
     JointOrderStatistics(
         dist::ContinuousUnivariateDistribution,
         n::Int,
-        r::AbstractVector{Int}=1:n;
+        ranks::AbstractVector{Int}=1:n;
         check_args::Bool=true,
     )
 
-Construct the joint distribution of order statistics `r` from an IID sample of size `n` from `dist`.
+Construct the joint distribution of order statistics for the specified `ranks` from an IID
+sample of size `n` from `dist`.
 
 The ``i``th order statistic of a sample is the ``i``th element of the sorted sample.
 For example, the 1st order statistic is the sample minimum, while the ``n``th order
 statistic is the sample maximum.
 
-`r` must be a sorted vector of unique integers between 1 and `n`.
+`ranks` must be a sorted vector of unique integers between 1 and `n`.
 
 For a single order statistic, use [`OrderStatistic`](@ref) instead.
 
@@ -35,47 +36,47 @@ struct JointOrderStatistics{D<:ContinuousUnivariateDistribution,R<:AbstractVecto
        ContinuousMultivariateDistribution
     dist::D
     n::Int
-    r::R
+    ranks::R
     function JointOrderStatistics(
         dist::ContinuousUnivariateDistribution,
         n::Int,
-        r::AbstractVector{Int}=1:n;
+        ranks::AbstractVector{Int}=1:n;
         check_args::Bool=true,
     )
         @check_args(
             JointOrderStatistics,
             (n, n ≥ 1, "`n` must be a positive integer."),
             (
-                r,
-                1 ≤ first(r) && last(r) ≤ n && issorted(r) && allunique(r),
-                "`r` must be a sorted vector of unique integers between 1 and `n`.",
+                ranks,
+                1 ≤ first(ranks) && last(ranks) ≤ n && issorted(ranks) && allunique(ranks),
+                "`ranks` must be a sorted vector of unique integers between 1 and `n`.",
             ),
         )
-        return new{typeof(dist),typeof(r)}(dist, n, r)
+        return new{typeof(dist),typeof(ranks)}(dist, n, ranks)
     end
 end
 
-length(d::JointOrderStatistics) = length(d.r)
+length(d::JointOrderStatistics) = length(d.ranks)
 function insupport(d::JointOrderStatistics, x::AbstractVector)
     return length(d) == length(x) && issorted(x) && all(Base.Fix1(insupport, d.dist), x)
 end
 minimum(d::JointOrderStatistics) = fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = fill(maximum(d.dist), length(d))
 
-params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.r)
+params(d::JointOrderStatistics) = tuple(params(d.dist)..., d.n, d.ranks)
 partype(d::JointOrderStatistics) = partype(d.dist)
 Base.eltype(::Type{<:JointOrderStatistics{D}}) where {D} = Base.eltype(D)
 
 function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     n = d.n
-    r = d.r
+    ranks = d.ranks
     lp = sum(Base.Fix1(logpdf, d.dist), x)
     T = eltype(lp)
     lp += loggamma(T(n + 1))
-    length(r) == n && return lp
+    length(ranks) == n && return lp
     i = 0
     xᵢ = oftype(float(first(x)), -Inf)
-    for (j, xⱼ) in zip(r, x)
+    for (j, xⱼ) in zip(ranks, x)
         lp += _marginalize_range(d.dist, n, i, j, xᵢ, xⱼ, T)
         i = j
         xᵢ = xⱼ
@@ -102,7 +103,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
     n = d.n
-    if n == length(d.r)  # r == 1:n
+    if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with
         # fast quantile function or that use inversion sampling
         rand!(rng, d.dist, x)
@@ -112,12 +113,12 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         # use the fact that the sum Y of k IID variables xₘ ~ Exp(1) is Y ~ Gamma(k, 1).
         # Lurie, D., and H. O. Hartley. "Machine-generation of order statistics for Monte
         # Carlo computations." The American Statistician 26.1 (1972): 26-27.
-        # this is slow if length(d.r) is close to n and quantile for d.dist is expensive,
-        # but this branch is probably taken when length(d.r) is small or much smaller than n.
+        # this is slow if length(d.ranks) is close to n and quantile for d.dist is expensive,
+        # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
         T = typeof(one(eltype(x)))
         s = zero(one(T))
         i = 0
-        for (m, j) in zip(eachindex(x), d.r)
+        for (m, j) in zip(eachindex(x), d.ranks)
             k = j - i
             s += k > 1 ? rand(rng, Gamma(k, one(T); check_args=false)) : randexp(rng, T)
             i = j

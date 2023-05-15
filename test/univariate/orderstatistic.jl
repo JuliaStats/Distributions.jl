@@ -14,7 +14,7 @@ using StatsBase
             end
             @test d.dist === dist
             @test d.n == n
-            @test d.i == i
+            @test d.rank == i
         end
         @test_throws ArgumentError OrderStatistic(Normal(), 0, 1)
         OrderStatistic(Normal(), 0, 1; check_args=false)
