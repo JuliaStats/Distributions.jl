@@ -5,7 +5,7 @@
 """
     OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <: UnivariateDistribution{S}
 
-The distribution of an order statistic from IID samples from a univariate distribution
+The distribution of an order statistic from IID samples from a univariate distribution.
 
     OrderStatistic(dist::UnivariateDistribution, n::Int, i::Int; check_args::Bool=true)
 
@@ -58,6 +58,7 @@ insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
 params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.i)
 partype(d::OrderStatistic) = partype(d.dist)
 Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
+Base.eltype(d::OrderStatistic) = eltype(d.dist)
 
 # distribution of the ith order statistic from an IID uniform distribution, with CDF Uᵢₙ(x)
 function _uniform_orderstatistic(d::OrderStatistic)
