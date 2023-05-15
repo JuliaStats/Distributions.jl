@@ -16,8 +16,8 @@ The ``i``th order statistic of a sample is the ``i``th element of the sorted sam
 For example, the 1st order statistic is the sample minimum, while the ``n``th order
 statistic is the sample maximum.
 
-If ``f`` is probability density (mass) function of `dist` with distribution function ``F``,
-then the probability density function ``g`` of the order statistic for continuous
+If ``f`` is the probability density (mass) function of `dist` with distribution function
+``F``, then the probability density function ``g`` of the order statistic for continuous
 `dist` is
 ```math
 g(x; n, i) = {n \\choose i} [F(x)]^{i-1} [1 - F(x)]^{n-i} f(x),

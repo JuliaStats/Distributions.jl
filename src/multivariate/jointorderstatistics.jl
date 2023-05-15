@@ -30,7 +30,8 @@ For a single order statistic, use [`OrderStatistic`](@ref) instead.
 
 ```julia
 JointOrderStatistics(Normal(), 10)           # Product(fill(Normal(), 10)) restricted to ordered vectors
-JointOrderStatistics(Cauchy(), 10, [1, 10])  # joint distribution of the extrema
+JointOrderStatistics(Cauchy(), 10, 2:9)      # joint distribution of all but the extrema
+JointOrderStatistics(Cauchy(), 10, (1, 10))  # joint distribution of only the extrema
 ```
 """
 struct JointOrderStatistics{
