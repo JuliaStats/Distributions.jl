@@ -92,31 +92,27 @@ function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     T = typeof(lp)
     lp += loggamma(T(n + 1))
     length(ranks) == n && return lp
-    i = 0
-    xᵢ = oftype(float(first(x)), -Inf)
-    for (j, xⱼ) in zip(ranks, x)
-        lp += _marginalize_range(d.dist, n, i, j, xᵢ, xⱼ, T)
+    i = first(ranks)
+    xᵢ = first(x)
+    if i > 1  # _marginalize_range(d.dist, 0, i, -Inf, xᵢ, T)
+        lp += (i - 1) * logcdf(d.dist, xᵢ) - loggamma(T(i))
+    end
+    for (j, xⱼ) in Iterators.drop(zip(ranks, x), 1)
+        lp += _marginalize_range(d.dist, i, j, xᵢ, xⱼ, T)
         i = j
         xᵢ = xⱼ
     end
-    j = n + 1
-    xⱼ = oftype(xᵢ, Inf)
-    lp += _marginalize_range(d.dist, n, i, j, xᵢ, xⱼ, T)
+    if i < n  # _marginalize_range(d.dist, i, n + 1, xᵢ, Inf, T)
+        lp += (n - i) * logccdf(d.dist, xᵢ) - loggamma(T(n - i + 1))
+    end
     return lp
 end
 
 # given ∏ₖf(xₖ), marginalize all xₖ for i < k < j
-function _marginalize_range(dist, n, i, j, xᵢ, xⱼ, T)
+function _marginalize_range(dist, i, j, xᵢ, xⱼ, T)
     k = j - i - 1
     k == 0 && return zero(T)
-    lpdiff = if i == 0
-        T(logcdf(dist, xⱼ))
-    elseif j == n + 1
-        T(logccdf(dist, xᵢ))
-    else
-        T(logdiffcdf(dist, xⱼ, xᵢ))
-    end
-    return k * lpdiff - loggamma(T(k + 1))
+    return k * T(logdiffcdf(dist, xⱼ, xᵢ)) - loggamma(T(k + 1))
 end
 
 function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
