@@ -26,6 +26,13 @@ using Distributions: expectation
                 end
             end
         end
+        @testset "median" begin
+            m = @inferred median(D)
+            @test m ≈ sqrt(1 - T(2)^(-1//3)) atol=tol
+            if T <: AbstractFloat
+                @test m isa T
+            end
+        end
         @testset "entropy" begin
             shannon = @inferred entropy(D)
             @test shannon ≈ (19//12 - log(T(6))) atol=tol

@@ -126,7 +126,10 @@ function kurtosis(d::Kumaraswamy)
     return (m₄ + μ * (-4m₃ + μ * (6m₂ - 3μ^2))) / var(d)^2 - 3
 end
 
-median(d::Kumaraswamy) = (1 - 2^-inv(b))^inv(a)
+function median(d::Kumaraswamy)
+    a, b = params(d)
+    return (1 - 2^-inv(b))^inv(a)
+end
 
 function mode(d::Kumaraswamy)
     a, b = params(d)
