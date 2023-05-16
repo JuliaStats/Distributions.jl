@@ -25,7 +25,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
-using Base.MathConstants
+using Base.MathConstants: eulergamma
 
 export
     # re-export Statistics

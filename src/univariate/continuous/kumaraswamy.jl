@@ -10,7 +10,7 @@ f(x; a, b) = a b x^{a - 1} (1 - x^a)^{b - 1}, \\quad 0 < x < 1
 
 It is related to the [Beta distribution](@ref Beta) by the following identity:
 if ``X \\sim \\operatorname{Kumaraswamy}(a, b)`` then ``X^a \\sim \\operatorname{Beta}(1, b)``.
-Additionally, if ``X \\sim \\operatorname{Kumaraswamy}(1, 1)`` then
+In particular, if ``X \\sim \\operatorname{Kumaraswamy}(1, 1)`` then
 ``X \\sim \\operatorname{Uniform}(0, 1)``.
 
 External links
@@ -47,17 +47,13 @@ partype(::Kumaraswamy{T}) where {T} = T
 
 ### Evaluation
 
-function pdf(d::Kumaraswamy, x::Real)
-    a, b = params(d)
-    y = a * b * x^(a - 1) * (1 - x^a)^(b - 1)
-    return 0 < x < 1 ? y : (isnan(x) ? oftype(y, NaN) : zero(y))
-end
+# `pdf`: Uses fallback `exp(logpdf(_))` method
 
 function logpdf(d::Kumaraswamy, x::Real)
     a, b = params(d)
     _x = clamp(x, 0, 1)  # Ensures we can still get a value when outside the support
-    y = log(a) + log(b) + (a - 1) * log(_x) + (b - 1) * log1p(-_x^a)
-    return 0 < x < 1 ? y : (isnan(x) ? oftype(y, NaN) : oftype(y, -Inf))
+    y = log(a) + log(b) + xlogy(a - 1, _x) + xlog1py(b - 1, -_x^a)
+    return insupport(d, x) ? y : (isnan(x) ? oftype(y, NaN) : oftype(y, -Inf))
 end
 
 function ccdf(d::Kumaraswamy, x::Real)
@@ -92,12 +88,12 @@ function gradlogpdf(d::Kumaraswamy, x::Real)
     _x = clamp(x, 0, 1)
     _xᵃ = _x^a
     y = (a * (b * _xᵃ - 1) + (1 - _xᵃ)) / (_x * (_xᵃ - 1))
-    return 0 < x < 1 ? y : (isnan(x) ? oftype(y, NaN) : zero(y))
+    return insupport(d, x) ? y : (isnan(x) ? oftype(y, NaN) : zero(y))
 end
 
 ### Sampling
 
-rand(rng::AbstractRNG, d::Kumaraswamy) = quantile(d, rand(rng))
+# `rand`: Uses fallback inversion sampling method
 
 ### Statistics
 

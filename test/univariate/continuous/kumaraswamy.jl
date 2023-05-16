@@ -52,4 +52,11 @@ using Distributions: expectation
             @test y₁ ≈ y₂ atol=sqrt(tol)
         end
     end
+    @testset "limits" begin
+        bathtub = Kumaraswamy(0.5, 0.5)
+        @test logpdf(bathtub, 0) == logpdf(bathtub, 1) == Inf
+        explike = Kumaraswamy(5, 1)
+        @test logpdf(explike, 0) == -Inf
+        @test logpdf(explike, 1) ≈ log(5)
+    end
 end
