@@ -81,7 +81,7 @@ function insupport(d::JointOrderStatistics, x::AbstractVector)
         xj ≥ xi && insupport(dist, xj) || return false
         xi = xj
     end
-    return true       
+    return true
 end
 minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
@@ -141,6 +141,9 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         for (m, j) in zip(eachindex(x), d.ranks)
             k = j - i
             if k > 1
+                # specify GammaMTSampler directly to avoid unnecessarily checking the shape
+                # parameter again and because it has been benchmarked to be the fastest for
+                # shape k ≥ 1 and scale 1
                 s += T(rand(rng, GammaMTSampler(Gamma{T}(T(k), T(1)))))
             else
                 s += randexp(rng, T)
