@@ -62,21 +62,26 @@ end
 _islesseq(x, y) = isless(x, y) || isequal(x, y)
 
 function _are_ranks_valid(ranks, n)
-    first(ranks) ≥ 1 || return false
-    last(ranks) ≤ n || return false
-    # combined with the above checks, this is equivalent to but faster than
+    # this is equivalent to but faster than
     # issorted(ranks) && allunique(ranks)
-    return issorted(ranks; lt=_islesseq)
+    !isempty(ranks) && first(ranks) ≥ 1 && last(ranks) ≤ n && issorted(ranks; lt=_islesseq)
 end
 function _are_ranks_valid(ranks::AbstractRange, n)
-    first(ranks) ≥ 1 || return false
-    last(ranks) ≤ n || return false
-    return issorted(ranks) && allunique(ranks)
+    !isempty(ranks) && first(ranks) ≥ 1 && last(ranks) ≤ n && step(ranks) > 0
 end
 
 length(d::JointOrderStatistics) = length(d.ranks)
 function insupport(d::JointOrderStatistics, x::AbstractVector)
-    return length(d) == length(x) && issorted(x) && all(Base.Fix1(insupport, d.dist), x)
+    length(d) == length(x) || return false
+    xi, state = iterate(x) # at least one element!
+    dist = d.dist
+    insupport(dist, xi) || return false
+    while (xj_state = iterate(x, state)) !== nothing
+        xj, state = xj_state
+        xj ≥ xi && insupport(dist, xj) || return false
+        xi = xj
+    end
+    return true       
 end
 minimum(d::JointOrderStatistics) = Fill(minimum(d.dist), length(d))
 maximum(d::JointOrderStatistics) = Fill(maximum(d.dist), length(d))
