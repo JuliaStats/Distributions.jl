@@ -12,9 +12,9 @@ TruncatedNormal
 
 ### statistics
 
-function mode(d::Truncated{<:Normal{<:Real},Continuous})
+function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     μ = mean(d.untruncated)
-    return clamp(μ, extrema(d)...)
+    return T(clamp(μ, extrema(d)...))
 end
 
 modes(d::Truncated{<:Normal{<:Real},Continuous}) = [mode(d)]
@@ -89,7 +89,7 @@ function _tnvar(a::Real, b::Real)
     end
 end
 
-function mean(d::Truncated{<:Normal{<:Real},Continuous})
+function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -99,21 +99,21 @@ function mean(d::Truncated{<:Normal{<:Real},Continuous})
         lower, upper = extrema(d)
         a = (lower - μ) / σ
         b = (upper - μ) / σ
-        return μ + _tnmom1(a, b) * σ
+        return T(μ + _tnmom1(a, b) * σ)
     end
 end
 
-function var(d::Truncated{<:Normal{<:Real},Continuous})
+function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if iszero(σ)
-        return σ
+        return T(σ)
     else
         lower, upper = extrema(d)
         a = (lower - μ) / σ
         b = (upper - μ) / σ
-        return _tnvar(a, b) * σ^2
+        return T(_tnvar(a, b) * σ^2)
     end
 end
 
