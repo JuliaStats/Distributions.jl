@@ -53,7 +53,7 @@ function logpdf(d::Kumaraswamy, x::Real)
     a, b = params(d)
     _x = clamp(x, 0, 1)  # Ensures we can still get a value when outside the support
     y = log(a) + log(b) + xlogy(a - 1, _x) + xlog1py(b - 1, -_x^a)
-    return insupport(d, x) ? y : (isnan(x) ? oftype(y, NaN) : oftype(y, -Inf))
+    return x < 0 || x > 1 ? oftype(y, -Inf) : y
 end
 
 function ccdf(d::Kumaraswamy, x::Real)
@@ -88,7 +88,7 @@ function gradlogpdf(d::Kumaraswamy, x::Real)
     _x = clamp(x, 0, 1)
     _xᵃ = _x^a
     y = (a * (b * _xᵃ - 1) + (1 - _xᵃ)) / (_x * (_xᵃ - 1))
-    return insupport(d, x) ? y : (isnan(x) ? oftype(y, NaN) : zero(y))
+    return x < 0 || x > 1 ? oftype(y, -Inf) : y
 end
 
 ### Sampling
