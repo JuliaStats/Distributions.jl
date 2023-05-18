@@ -12,17 +12,12 @@ TruncatedNormal
 
 ### statistics
 
-minimum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.lower
-maximum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.upper
-
-
-function mode(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     μ = mean(d.untruncated)
-    d.upper < μ ? d.upper :
-    d.lower > μ ? d.lower : μ
+    return T(clamp(μ, extrema(d)...))
 end
 
-modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
+modes(d::Truncated{<:Normal{<:Real},Continuous}) = [mode(d)]
 
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
@@ -94,39 +89,42 @@ function _tnvar(a::Real, b::Real)
     end
 end
 
-function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if iszero(σ)
         return mode(d)
     else
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
-        return μ + _tnmom1(a, b) * σ
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
+        return T(μ + _tnmom1(a, b) * σ)
     end
 end
 
-function var(d::Truncated{Normal{T},Continuous}) where T <: Real
+function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if iszero(σ)
-        return σ
+        return T(σ)
     else
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
-        return _tnvar(a, b) * σ^2
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
+        return T(_tnvar(a, b) * σ^2)
     end
 end
 
-function entropy(d::Truncated{Normal{T},Continuous}) where T <: Real
+function entropy(d::Truncated{<:Normal{<:Real},Continuous})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
+    lower, upper = extrema(d)
+    a = (lower - μ) / σ
+    b = (upper - μ) / σ
     aφa = isinf(a) ? 0.0 : a * normpdf(a)
     bφb = isinf(b) ? 0.0 : b * normpdf(b)
     0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
@@ -138,17 +136,18 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
+function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if isfinite(μ)
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
         z = randnt(rng, a, b, d.tp)
         return μ + σ * z
     else
-        return clamp(μ, d.lower, d.upper)
+        return clamp(μ, extrema(d)...)
     end
 end
 
