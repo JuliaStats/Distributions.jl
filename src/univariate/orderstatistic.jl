@@ -78,7 +78,7 @@ function logpdf(d::OrderStatistic, x::Real)
     end
 end
 
-for f in [:logcdf, :logccdf, :cdf, :ccdf]
+for f in (:logcdf, :logccdf, :cdf, :ccdf)
     @eval begin
         function $f(d::OrderStatistic, x::Real)
             b = _uniform_orderstatistic(d)
@@ -87,7 +87,7 @@ for f in [:logcdf, :logccdf, :cdf, :ccdf]
     end
 end
 
-for f in [:quantile, :cquantile]
+for f in (:quantile, :cquantile)
     @eval begin
         function $f(d::OrderStatistic, p::Real)
             # since cdf is Fᵢₙ(x) = Uᵢₙ(Fₓ(x)), and Uᵢₙ is invertible and increasing, we
