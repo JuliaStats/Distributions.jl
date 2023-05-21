@@ -100,6 +100,27 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 @test logpdf(d, x) ≈ sum(Base.Fix1(logpdf, d.dist), x) + loggamma(T(n + 1))
                 @test pdf(d, x) ≈ exp(logpdf(d, x))
             end
+
+            @testset "no density for vectors out of support" begin
+                # check unsorted vectors have 0 density
+                x2 = copy(x)
+                x2[1], x2[2] = x2[2], x2[1]
+                @test logpdf(d, x2) == T(-Inf)
+                @test pdf(d, x2) == zero(T)
+
+                x3 = copy(x)
+                x3[end-1], x3[end] = x3[end], x3[end-1]
+                @test logpdf(d, x3) == T(-Inf)
+                @test pdf(d, x3) == zero(T)
+
+                # check out of support of original distribution
+                if islowerbounded(dist)
+                    x4 = copy(x)
+                    x4[1] = minimum(dist) - 1
+                    @test logpdf(d, x4) == T(-Inf)
+                    @test pdf(d, x4) == zero(T)
+                end
+            end
         end
     end
 
