@@ -97,13 +97,17 @@ function logpdf(d::JointOrderStatistics, x::AbstractVector{<:Real})
     lp = loglikelihood(d.dist, x)
     T = typeof(lp)
     lp += loggamma(T(n + 1))
-    length(ranks) == n && return lp
+    if length(ranks) == n
+        issorted(x) && return lp
+        return oftype(lp, -Inf)
+    end
     i = first(ranks)
     xᵢ = first(x)
     if i > 1  # _marginalize_range(d.dist, 0, i, -Inf, xᵢ, T)
         lp += (i - 1) * logcdf(d.dist, xᵢ) - loggamma(T(i))
     end
     for (j, xⱼ) in Iterators.drop(zip(ranks, x), 1)
+        xⱼ < xᵢ && return oftype(lp, -Inf)
         lp += _marginalize_range(d.dist, i, j, xᵢ, xⱼ, T)
         i = j
         xᵢ = xⱼ
