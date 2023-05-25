@@ -89,6 +89,15 @@ end
 # Use Julia implementations in StatsFuns
 @_delegate_statsfuns Normal norm μ σ
 
+# `logerf(...)` is more accurate for arguments in the tails than `logsubexp(logcdf(...), logcdf(...))`
+function logdiffcdf(d::Normal, x::Real, y::Real)
+    x < y && throw(ArgumentError("requires x >= y."))
+    μ, σ = params(d)
+    _x, _y, _μ, _σ = promote(x, y, μ, σ)
+    s = sqrt2 * _σ
+    return logerf((_y - _μ) / s, (_x - _μ) / s) - logtwo
+end
+
 gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
