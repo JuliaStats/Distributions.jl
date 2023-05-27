@@ -72,7 +72,11 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     ucdf = exp(logucdf)
 
     # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
-    logtp = logdiffcdf(d, u, l)
+    logtp = if d isa DiscreteUnivariateDistribution
+        logaddexp(logdiffcdf(d, u, l), logpdf(d, l))
+    else
+        logdiffcdf(d, u, l)
+    end    
     tp = exp(logtp)
 
     Truncated(d, promote(l, u, loglcdf, lcdf, ucdf, tp, logtp)...)
