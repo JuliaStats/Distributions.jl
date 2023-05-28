@@ -72,7 +72,11 @@ function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     ucdf = exp(logucdf)
 
     # (log)tp = (log) P(l ≤ X ≤ u) where X ∼ d
-    logtp = logsubexp(loglcdf, logucdf)
+    logtp = if d isa DiscreteUnivariateDistribution
+        logaddexp(logdiffcdf(d, u, l), logpdf(d, l))
+    else
+        logdiffcdf(d, u, l)
+    end    
     tp = exp(logtp)
 
     Truncated(d, promote(l, u, loglcdf, lcdf, ucdf, tp, logtp)...)
@@ -95,6 +99,9 @@ struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union
     logtp::T      # log(tp), i.e. log(ucdf - lcdf)
 
     function Truncated(d::UnivariateDistribution, l::TL, u::TU, loglcdf::T, lcdf::T, ucdf::T, tp::T, logtp::T) where {T <: Real, TL <: Union{T,Nothing}, TU <: Union{T,Nothing}}
+        if logtp == -Inf
+            throw(ArgumentError("cannot truncate distribution; `$d` has 0 probability in the interval `[$l, $u]`"))
+        end
         new{typeof(d), value_support(typeof(d)), T, TL, TU}(d, l, u, loglcdf, lcdf, ucdf, tp, logtp)
     end
 end

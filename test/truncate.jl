@@ -197,3 +197,8 @@ end
     x = rand(d, 10_000)
     @test mean(x) ≈ 0.5 atol=0.05
 end
+
+@testset "truncation outside support (#843)" begin
+    @test_throws ArgumentError truncated(Exponential(), -3, -1)  # truncated region outside support
+    @test_throws ArgumentError truncated(Normal(2, 0), 0, 1)  # point mass outside truncated region
+end
