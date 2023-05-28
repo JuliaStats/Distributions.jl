@@ -2,13 +2,19 @@
     truncated(d0::UnivariateDistribution; [lower::Real], [upper::Real])
     truncated(d0::UnivariateDistribution, lower::Real, upper::Real)
 
-A _truncated distribution_ `d` of a distribution `d0` to the interval
+A _truncated distribution_ `d` of a distribution `d0` to the closed interval
 ``[l, u]=```[lower, upper]` has the probability density (mass) function:
 
 ```math
 f(x; d_0, l, u) = \\frac{f_{d_0}(x)}{P_{Z \\sim d_0}(l \\le Z \\le u)}, \\quad x \\in [l, u],
 ```
 where ``f_{d_0}(x)`` is the probability density (mass) function of ``d_0``.
+
+If both `lower` and `upper` are `nothing` or are equal to the endpoints of the support
+of `d0`, the distribution is not truncated and `d0` is returned as-is.
+The function falls back to constructing a [`Truncated`](@ref) wrapper around `d0`,
+internally replacing any specified bounds equal to or beyond the endpoints of the support
+with `nothing`.
 
 The function throws an error if ``l > u``.
 
@@ -18,8 +24,6 @@ truncated(d0; upper=u)           # d0 right-truncated to the interval (-Inf, u]
 truncated(d0; lower=l, upper=u)  # d0 truncated to the interval [l, u]
 truncated(d0, l, u)              # d0 truncated to the interval [l, u]
 ```
-
-The function falls back to constructing a [`Truncated`](@ref) wrapper.
 
 # Implementation
 
@@ -41,6 +45,7 @@ function truncated(
     return truncated(d, lower, upper)
 end
 function truncated(d::UnivariateDistribution, ::Nothing, u::Real)
+    u < maximum(d) || return d
     # (log)ucdf = (log)tp = (log) P(X ≤ u) where X ~ d
     logucdf = logtp = logcdf(d, u)
     ucdf = tp = exp(logucdf)
@@ -48,6 +53,7 @@ function truncated(d::UnivariateDistribution, ::Nothing, u::Real)
     Truncated(d, nothing, promote(u, oftype(ucdf, -Inf), zero(ucdf), ucdf, tp, logtp)...)
 end
 function truncated(d::UnivariateDistribution, l::Real, ::Nothing)
+    l > minimum(d) || return d
     # (log)lcdf = (log) P(X < l) where X ~ d
     loglcdf = _logcdf_noninclusive(d, l)
     lcdf = exp(loglcdf)
@@ -62,6 +68,14 @@ end
 truncated(d::UnivariateDistribution, ::Nothing, ::Nothing) = d
 function truncated(d::UnivariateDistribution, l::T, u::T) where {T <: Real}
     l <= u || error("the lower bound must be less or equal than the upper bound")
+    dmin, dmax = extrema(d)
+    if l <= dmin && u >= dmax
+        return d
+    elseif l <= dmin
+        return truncated(d, nothing, u)
+    elseif u >= dmax
+        return truncated(d, l, nothing)
+    end
 
     # (log)lcdf = (log) P(X < l) where X ~ d
     loglcdf = _logcdf_noninclusive(d, l)

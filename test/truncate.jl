@@ -146,7 +146,16 @@ for bound in (-2, 1)
     @test truncated(Normal(); lower=nothing, upper=bound) == d_nothing
     @test extrema(d_nothing) == promote(-Inf, bound)
 end
-@test truncated(Normal()) === Normal()
+@testset "no-op truncation" begin
+    @test truncated(Normal()) === Normal()
+    @test truncated(Normal(), -Inf, Inf) === Normal()
+    @test truncated(Poisson(), 0, Inf) === Poisson()
+    @test truncated(Kumaraswamy(), -1, 2) === Kumaraswamy()
+end
+@testset "equivalent truncations" begin
+    @test truncated(Beta(), -1, 0.5) === truncated(Beta(), 0, 0.5) === truncated(Beta(), nothing, 0.5)
+    @test truncated(Beta(), 0.5, 2) === truncated(Beta(), 0.5, 1) === truncated(Beta(), 0.5, nothing)
+end
 
 ## main
 
