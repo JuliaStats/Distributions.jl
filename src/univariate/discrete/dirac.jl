@@ -18,7 +18,7 @@ External links:
 
 * [Dirac measure on Wikipedia](http://en.wikipedia.org/wiki/Dirac_measure)
 """
-struct Dirac{T} <: DiscreteUnivariateDistribution
+struct Dirac{T<:Real} <: DiscreteUnivariateDistribution
     value::T
 end
 
@@ -28,6 +28,9 @@ insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value
 support(d::Dirac) = (d.value,)
+
+location(d::Dirac) = d.value
+scale(d::Dirac{T}) where {T} = one(T)
 
 #### Properties
 mean(d::Dirac) = d.value
@@ -52,6 +55,11 @@ quantile(d::Dirac{T}, p::Real) where {T} = 0 <= p <= 1 ? d.value : T(NaN)
 mgf(d::Dirac, t) = exp(t * d.value)
 cgf(d::Dirac, t) = t*d.value
 cf(d::Dirac, t) = cis(t * d.value)
+
+#### Affine transformation
+Base.:+(d::Dirac, c::Real) = Dirac(d.value + c)
+Base.:+(a::Dirac, b::Dirac) = Dirac(a.value + b.value)
+Base.:*(c::Real, d::Dirac) = error("Rescaling of Dirac is prohibited.")
 
 #### Sampling
 
