@@ -125,9 +125,13 @@ struct NormalStats{T} <: SufficientStats
     m::T    # (weighted) mean of x
     s2::T   # (weighted) sum of (x - μ)^2
     tw::T    # total sample weight
+    function NormalStats(s::T1, m::T2, s2::T3, tw::T4) where {T1,T2,T3,T4}
+        T = promote_type(T1, T2, T3, T4)
+        return new{T}(T(s), T(m), T(s2), T(tw))
+    end
 end
 
-function suffstats(::Type{Normal{T}}, x::AbstractArray{<:Real}) where {T<:Real}
+function suffstats(::Type{<:Normal}, x::AbstractArray{<:Real})
     n = length(x)
 
     # compute s
@@ -143,10 +147,10 @@ function suffstats(::Type{Normal{T}}, x::AbstractArray{<:Real}) where {T<:Real}
         @inbounds s2 += abs2(x[i] - m)
     end
 
-    NormalStats{T}(s, m, s2, n)
+    NormalStats(s, m, s2, n)
 end
 
-function suffstats(::Type{Normal{T}}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real}) where {T<:Real}
+function suffstats(::Type{<:Normal}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
     n = length(x)
 
     # compute s
@@ -165,22 +169,26 @@ function suffstats(::Type{Normal{T}}, x::AbstractArray{<:Real}, w::AbstractArray
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
 
-    NormalStats{T}(s, m, s2, tw)
+    NormalStats(s, m, s2, tw)
 end
 
 # Cases where μ or σ is known
 
-struct NormalKnownMu <: IncompleteDistribution
-    μ::Float64
+struct NormalKnownMu{T} <: IncompleteDistribution
+    μ::T
 end
 
-struct NormalKnownMuStats <: SufficientStats
-    μ::Float64      # known mean
-    s2::Float64     # (weighted) sum of (x - μ)^2
-    tw::Float64     # total sample weight
+struct NormalKnownMuStats{T} <: SufficientStats
+    μ::T      # known mean
+    s2::T     # (weighted) sum of (x - μ)^2
+    tw::T     # total sample weight
+    function NormalKnownMuStats(μ::T1, s2::T2, tw::T3) where {T1,T2,T3}
+        T = promote_type(T1, T2, T3)
+        return new{T}(μ, s2, tw)
+    end
 end
 
-function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
+function suffstats(g::NormalKnownMu, x::AbstractArray{<:Real})
     μ = g.μ
     s2 = abs2(x[1] - μ)
     for i = 2:length(x)
@@ -189,7 +197,7 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     NormalKnownMuStats(g.μ, s2, length(x))
 end
 
-function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
+function suffstats(g::NormalKnownMu, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
     μ = g.μ
     s2 = abs2(x[1] - μ) * w[1]
     tw = w[1]
@@ -201,26 +209,29 @@ function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float
     NormalKnownMuStats(g.μ, s2, tw)
 end
 
-struct NormalKnownSigma <: IncompleteDistribution
-    σ::Float64
-
-    function NormalKnownSigma(σ::Float64)
+struct NormalKnownSigma{T} <: IncompleteDistribution
+    σ::T
+    function NormalKnownSigma(σ::T) where {T}
         σ > 0 || throw(ArgumentError("σ must be a positive value."))
-        new(σ)
+        return new{T}(σ)
     end
 end
 
-struct NormalKnownSigmaStats <: SufficientStats
-    σ::Float64      # known std.dev
-    sx::Float64      # (weighted) sum of x
-    tw::Float64     # total sample weight
+struct NormalKnownSigmaStats{T} <: SufficientStats
+    σ::T      # known std.dev
+    sx::T      # (weighted) sum of x
+    tw::T     # total sample weight
+    function NormalKnownSigmaStats(σ::T1, sx::T2, tw::T3) where {T1,T2,T3}
+        T = promote_type(T1, T2, T3)
+        return new{T}(σ, sx, tw)
+    end
 end
 
-function suffstats(g::NormalKnownSigma, x::AbstractArray{T}) where T<:Real
+function suffstats(g::NormalKnownSigma, x::AbstractArray{<:Real})
     NormalKnownSigmaStats(g.σ, sum(x), Float64(length(x)))
 end
 
-function suffstats(g::NormalKnownSigma, x::AbstractArray{T}, w::AbstractArray{T}) where T<:Real
+function suffstats(g::NormalKnownSigma, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
     NormalKnownSigmaStats(g.σ, dot(x, w), sum(w))
 end
 
@@ -232,16 +243,19 @@ fit_mle(g::NormalKnownSigma, ss::NormalKnownSigmaStats) = Normal(ss.sx / ss.tw, 
 
 # generic fit_mle methods
 
-function fit_mle(::Type{D}, x::AbstractArray{<:Real}; mu::Float64=NaN, sigma::Float64=NaN) where {D<:Normal}
-    if isnan(mu)
-        if isnan(sigma)
+function fit_mle(
+    ::Type{D}, x::AbstractArray{<:Real};
+    mu::Union{Nothing,<:Real}=nothing, sigma::Union{Nothing,<:Real}=nothing
+) where {D<:Normal}
+    if isnothing(mu)
+        if isnothing(sigma)
             fit_mle(D, suffstats(Normal, x))
         else
             g = NormalKnownSigma(sigma)
             fit_mle(g, suffstats(g, x))
         end
     else
-        if isnan(sigma)
+        if isnothing(sigma)
             g = NormalKnownMu(mu)
             fit_mle(g, suffstats(g, x))
         else
@@ -250,16 +264,19 @@ function fit_mle(::Type{D}, x::AbstractArray{<:Real}; mu::Float64=NaN, sigma::Fl
     end
 end
 
-function fit_mle(::Type{D}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real}; mu::Float64=NaN, sigma::Float64=NaN) where {D<:Normal}
-    if isnan(mu)
-        if isnan(sigma)
+function fit_mle(
+    ::Type{D}, x::AbstractArray{<:Real}, w::AbstractArray{<:Real};
+    mu::Union{Nothing,<:Real}=nothing, sigma::Union{Nothing,<:Real}=nothing
+) where {D<:Normal}
+    if isnothing(mu)
+        if isnothing(sigma)
             fit_mle(D, suffstats(Normal, x, w))
         else
             g = NormalKnownSigma(sigma)
             fit_mle(g, suffstats(g, x, w))
         end
     else
-        if isnan(sigma)
+        if isnothing(sigma)
             g = NormalKnownMu(mu)
             fit_mle(g, suffstats(g, x, w))
         else
