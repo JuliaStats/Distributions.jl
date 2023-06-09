@@ -63,13 +63,13 @@ Get the vector of probabilities associated with the support of `d`.
 """
 probs(d::DiscreteNonParametric)  = d.p
 
-==(c1::D, c2::D) where D<:DiscreteNonParametric =
-    (support(c1) == support(c2) || all(support(c1) .== support(c2))) &&
-    (probs(c1) == probs(c2) || all(probs(c1) .== probs(c2)))
-
-Base.isapprox(c1::D, c2::D) where D<:DiscreteNonParametric =
-    (support(c1) ≈ support(c2) || all(support(c1) .≈ support(c2))) &&
-    (probs(c1) ≈ probs(c2) || all(probs(c1) .≈ probs(c2)))
+function Base.isapprox(c1::DiscreteNonParametric, c2::DiscreteNonParametric; kwargs...)
+    support_c1 = support(c1)
+    support_c2 = support(c2)
+    return length(support_c1) == length(support_c2) &&
+        isapprox(support_c1, support_c2; kwargs...) &&
+        isapprox(probs(c1), probs(c2); kwargs...)
+end
 
 # Sampling
 
@@ -215,7 +215,8 @@ function modes(d::DiscreteNonParametric)
 end
 
 function mgf(d::DiscreteNonParametric, t::Real)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     s = zero(Float64)
     for i in 1:length(x)
         s += p[i] * exp(t*x[i])
@@ -224,7 +225,8 @@ function mgf(d::DiscreteNonParametric, t::Real)
 end
 
 function cf(d::DiscreteNonParametric, t::Real)
-    x, p = params(d)
+    x = support(d)
+    p = probs(d)
     s = zero(Complex{Float64})
     for i in 1:length(x)
        s += p[i] * cis(t*x[i])

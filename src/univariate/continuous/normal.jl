@@ -89,9 +89,22 @@ end
 # Use Julia implementations in StatsFuns
 @_delegate_statsfuns Normal norm μ σ
 
+# `logerf(...)` is more accurate for arguments in the tails than `logsubexp(logcdf(...), logcdf(...))`
+function logdiffcdf(d::Normal, x::Real, y::Real)
+    x < y && throw(ArgumentError("requires x >= y."))
+    μ, σ = params(d)
+    _x, _y, _μ, _σ = promote(x, y, μ, σ)
+    s = sqrt2 * _σ
+    return logerf((_y - _μ) / s, (_x - _μ) / s) - logtwo
+end
+
 gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
+function cgf(d::Normal, t)
+    μ,σ = params(d)
+    t*μ + (σ*t)^2/2
+end
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Affine transformations
@@ -102,6 +115,8 @@ Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 #### Sampling
 
 rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
+
+rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real}) = A .= muladd.(d.σ, randn!(rng, A), d.μ)
 
 #### Fitting
 

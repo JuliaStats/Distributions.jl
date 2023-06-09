@@ -72,12 +72,16 @@ entropy(d::Uniform) = log(d.b - d.a)
 #### Evaluation
 
 function pdf(d::Uniform, x::Real)
-    val = inv(d.b - d.a)
+    # include dependency on `x` for return type to be consistent with `cdf`
+    a, b, _ = promote(d.a, d.b, x)
+    val = inv(b - a)
     return insupport(d, x) ? val : zero(val)
 end
 function logpdf(d::Uniform, x::Real)
-    diff = d.b - d.a
-    return insupport(d, x) ? -log(diff) : log(zero(diff))
+    # include dependency on `x` for return type to be consistent with `logcdf`
+    a, b, _ = promote(d.a, d.b, x)
+    val = - log(b - a)
+    return insupport(d, x) ? val : oftype(val, -Inf)
 end
 gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
@@ -100,6 +104,36 @@ function mgf(d::Uniform, t::Real)
     u == zero(u) && return one(u)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
+end
+function cgf_uniform_around_zero_kernel(x)
+    # taylor series of (exp(x) - x - 1) / x
+    T = typeof(x)
+    a0 = inv(T(2))
+    a1 = inv(T(6))
+    a2 = inv(T(24))
+    a3 = inv(T(120))
+    x*@evalpoly(x, a0, a1, a2, a3)
+end
+
+function cgf(d::Uniform, t)
+    # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
+    a,b = params(d)
+    x = t*(b-a)
+    if abs(x) <= sqrt(eps(float(one(x))))
+        cgf_around_zero(d, t)
+    else
+        cgf_away_from_zero(d, t)
+    end
+end
+function cgf_around_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    t*a + log1p(cgf_uniform_around_zero_kernel(x))
+end
+function cgf_away_from_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    logsubexp(t*b, t*a) - log(abs(x))
 end
 
 function cf(d::Uniform, t::Real)
@@ -130,41 +164,4 @@ function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
         throw(ArgumentError("x cannot be empty."))
     end
     return T(extrema(x)...)
-end
-
-# ChainRules definitions
-
-function ChainRulesCore.frule((_, Δd, _), ::typeof(logpdf), d::Uniform, x::Real)
-    # Compute log probability
-    a, b = params(d)
-    insupport = a <= x <= b
-    diff = b - a
-    Ω = insupport ? -log(diff) : log(zero(diff))
-
-    # Compute tangent
-    Δdiff = Δd.a - Δd.b
-    ΔΩ = (insupport ? Δdiff : zero(Δdiff)) / diff
-
-    return Ω, ΔΩ
-end
-
-function ChainRulesCore.rrule(::typeof(logpdf), d::Uniform, x::Real)
-    # Compute log probability
-    a, b = params(d)
-    insupport = a <= x <= b
-    diff = b - a
-    Ω = insupport ? -log(diff) : log(zero(diff))
-
-    # Define pullback
-    function logpdf_Uniform_pullback(Δ)
-        Δa = Δ / diff
-        Δd = if insupport
-            ChainRulesCore.Tangent{typeof(d)}(; a=Δa, b=-Δa)
-        else
-            ChainRulesCore.Tangent{typeof(d)}(; a=zero(Δa), b=zero(Δa))
-        end
-        return ChainRulesCore.NoTangent(), Δd, ChainRulesCore.ZeroTangent()
-    end
-
-    return Ω, logpdf_Uniform_pullback
 end

@@ -5,6 +5,7 @@ using Random
 using Printf: @printf
 using Test: @test
 import FiniteDifferences
+import ForwardDiff
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -43,6 +44,25 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_params(distr)
 end
 
+function test_cgf(dist, ts)
+    κ₀ = cgf(dist, 0)
+    @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
+    d(f) = Base.Fix1(ForwardDiff.derivative, f)
+    κ₁ = d(Base.Fix1(cgf, dist))(0)
+    @test κ₁ ≈ mean(dist)
+    if VERSION >= v"1.4"
+        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+        @test κ₂ ≈ var(dist)
+    end
+    for t in ts
+        val = @inferred cgf(dist, t)
+        @test isfinite(val)
+        if isfinite(mgf(dist, t))
+            rtol = eps(float(one(t)))^(1/2)
+            @test (exp∘cgf)(dist, t) ≈ mgf(dist, t) rtol=rtol
+        end
+    end
+end
 
 # testing the implementation of a continuous univariate distribution
 #
@@ -85,7 +105,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
 
     # The basic idea
     # ------------------
-    #   Generate n samples, and count the occurences of each value within a reasonable range.
+    #   Generate n samples, and count the occurrences of each value within a reasonable range.
     #   For each distinct value, it computes an confidence interval of the counts
     #   and checks whether the count is within this interval.
     #
@@ -123,9 +143,20 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples using RNG passed or global RNG
-    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
-    @assert length(samples) == n
+    # generate samples using RNG passed or default RNG
+    # we also check reproducibility
+    if rng === missing
+        Random.seed!(1234)
+        samples = rand(s, n)
+        Random.seed!(1234)
+        samples2 = rand(s, n)
+    else
+        rng2 = deepcopy(rng)
+        samples = rand(rng, s, n)
+        samples2 = rand(rng2, s, n)
+    end
+    @test length(samples) == n
+    @test samples2 == samples
 
     # scan samples and get counts
     cnts = zeros(Int, m)
@@ -212,9 +243,20 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples
-    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
-    @assert length(samples) == n
+    # generate samples using RNG passed or default RNG
+    # we also check reproducibility
+    if rng === missing
+        Random.seed!(1234)
+        samples = rand(s, n)
+        Random.seed!(1234)
+        samples2 = rand(s, n)
+    else
+        rng2 = deepcopy(rng)
+        samples = rand(rng, s, n)
+        samples2 = rand(rng2, s, n)
+    end
+    @test length(samples) == n
+    @test samples2 == samples
 
     if isa(distr, StudentizedRange)
         samples[isnan.(samples)] .= 0.0 # Underlying implementation in Rmath can't handle very low values.
@@ -607,7 +649,7 @@ function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
 end
 
 function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateDistribution}
-    @testset "affine tranformations ($T)" begin
+    @testset "affine transformations ($T)" begin
         # distribution
         d = T(params...)
 

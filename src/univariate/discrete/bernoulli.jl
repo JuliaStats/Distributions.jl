@@ -104,6 +104,11 @@ function cquantile(d::Bernoulli{T}, p::Real) where T<:Real
 end
 
 mgf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * exp(t)
+function cgf(d::Bernoulli, t)
+    p, = params(d)
+    # log(1-p+p*exp(t))
+    logaddexp(log1p(-p), t+log(p))
+end
 cf(d::Bernoulli, t::Real) = failprob(d) + succprob(d) * cis(t)
 
 

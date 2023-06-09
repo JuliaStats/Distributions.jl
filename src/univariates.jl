@@ -6,7 +6,6 @@ struct RealInterval{T<:Real}
 end
 
 RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
-
 minimum(r::RealInterval) = r.lb
 maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)
@@ -270,9 +269,24 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 """
     mgf(d::UnivariateDistribution, t)
 
-Evaluate the moment generating function of distribution `d`.
+Evaluate the [moment-generating function](https://en.wikipedia.org/wiki/Moment-generating_function) of distribution `d` at `t`.
+
+See also [`cgf`](@ref)
 """
 mgf(d::UnivariateDistribution, t)
+
+"""
+    cgf(d::UnivariateDistribution, t)
+
+Evaluate the [cumulant-generating function](https://en.wikipedia.org/wiki/Cumulant) of distribution `d` at `t`.
+
+The cumulant-generating-function is the logarithm of the [moment-generating function](https://en.wikipedia.org/wiki/Moment-generating_function):
+`cgf = log ∘ mgf`.
+In practice, however, the right hand side may have overflow issues.
+
+See also [`mgf`](@ref)
+"""
+cgf(d::UnivariateDistribution, t)
 
 """
     cf(d::UnivariateDistribution, t)
@@ -635,6 +649,7 @@ end
 
 const discrete_distributions = [
     "bernoulli",
+    "bernoullilogit",
     "betabinomial",
     "binomial",
     "dirac",
@@ -672,11 +687,14 @@ const continuous_distributions = [
     "gumbel",
     "inversegamma",
     "inversegaussian",
+    "johnsonsu",
     "kolmogorov",
     "ksdist",
     "ksonesided",
+    "kumaraswamy",
     "laplace",
     "levy",
+    "lindley",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
@@ -713,3 +731,5 @@ end
 for dname in continuous_distributions
     include(joinpath("univariate", "continuous", "$(dname).jl"))
 end
+
+include(joinpath("univariate", "orderstatistic.jl"))

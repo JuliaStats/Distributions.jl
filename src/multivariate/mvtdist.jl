@@ -18,7 +18,7 @@ end
 
 function GenericMvTDist(df::T, μ::Mean, Σ::Cov) where {Cov<:AbstractPDMat, Mean<:AbstractVector, T<:Real}
     d = length(μ)
-    dim(Σ) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
+    size(Σ, 1) == d || throw(DimensionMismatch("The dimensions of μ and Σ are inconsistent."))
     R = Base.promote_eltype(T, μ, Σ)
     S = convert(AbstractArray{R}, Σ)
     m = convert(AbstractArray{R}, μ)
@@ -27,7 +27,7 @@ end
 
 function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     R = Base.promote_eltype(df, Σ)
-    GenericMvTDist(df, Zeros{R}(dim(Σ)), Σ)
+    GenericMvTDist(df, Zeros{R}(size(Σ, 1)), Σ)
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -156,7 +156,7 @@ end
 
 # Sampling (for GenericMvTDist)
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
     x .= x ./ y .+ d.μ
@@ -165,7 +165,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
     cols = size(x,2)
-    chisqd = Chisq(d.df)
+    chisqd = Chisq{partype(d)}(d.df)
     y = Matrix{T}(undef, 1, cols)
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
