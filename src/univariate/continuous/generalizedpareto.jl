@@ -1,7 +1,7 @@
 """
     GeneralizedPareto(μ, σ, ξ)
 
-The *Generalized Pareto distribution* with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
+The *Generalized Pareto distribution* (GPD) with shape parameter `ξ`, scale `σ` and location `μ` has probability density function
 
 ```math
 f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
@@ -15,9 +15,10 @@ f(x; \\mu, \\sigma, \\xi) = \\begin{cases}
 ```
 
 ```julia
-GeneralizedPareto()             # Generalized Pareto distribution with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
-GeneralizedPareto(μ, σ)         # Generalized Pareto distribution with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
-GeneralizedPareto(μ, σ, ξ)      # Generalized Pareto distribution with shape ξ, scale σ and location μ.
+GeneralizedPareto()             # GPD with unit shape and unit scale, i.e. GeneralizedPareto(0, 1, 1)
+GeneralizedPareto(ξ)            # GPD with shape ξ and unit scale, i.e. GeneralizedPareto(0, 1, ξ)
+GeneralizedPareto(σ, ξ)         # GPD with shape ξ and scale σ, i.e. GeneralizedPareto(0, σ, ξ)
+GeneralizedPareto(μ, σ, ξ)      # GPD with shape ξ, scale σ and location μ.
 
 params(d)       # Get the parameters, i.e. (μ, σ, ξ)
 location(d)     # Get the location parameter, i.e. μ
@@ -49,9 +50,14 @@ end
 function GeneralizedPareto(μ::Integer, σ::Integer, ξ::Integer; check_args::Bool=true)
     GeneralizedPareto(float(μ), float(σ), float(ξ); check_args=check_args)
 end
+
 function GeneralizedPareto(σ::Real, ξ::Real; check_args::Bool=true)
     GeneralizedPareto(zero(σ), σ, ξ; check_args=check_args)
 end
+function GeneralizedPareto(ξ::Real; check_args::Bool=true)
+    GeneralizedPareto(zero(ξ), one(ξ), ξ; check_args=check_args)
+end
+
 GeneralizedPareto() = GeneralizedPareto{Float64}(0.0, 1.0, 1.0)
 
 minimum(d::GeneralizedPareto) = d.μ
