@@ -2,7 +2,6 @@
 
 using Distributions, Random, StaticArrays
 using Test
-import Distributions: multinom_rand!
 
 
 p = [0.2, 0.5, 0.3]
@@ -223,6 +222,6 @@ p = [0.2, 0.4, 0.3, 0.1]
 @inferred rand(Multinomial(10, convert.(Float16, p)))
 
 x = zeros(Float64, size(p)...)
-@inferred multinom_rand!(rng, 10, convert.(Float32, p), convert.(Float32, x))
-@inferred multinom_rand!(rng, 10, convert.(Float64, p), convert.(Float64, x))
-@inferred multinom_rand!(rng, 10, convert.(Float16, p), convert.(Float16, x))
+@inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float32, x))
+@inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float64, x))
+@inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float16, x))
