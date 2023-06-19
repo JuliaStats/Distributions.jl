@@ -197,3 +197,20 @@ end
     x = rand(d, 10_000)
     @test mean(x) ≈ 0.5 atol=0.05
 end
+
+@testset "quantile examples (#1726)" begin
+  d_narrow = truncated(Normal(0, 0.01), -1, 1.2)
+
+  # prior to patch #1727 this was offering either ±Inf
+  @test quantile(d_narrow, 1) ≤ d_narrow.upper && quantile(d_narrow, 1) ≈ d_narrow.upper
+  @test quantile(d_narrow, 0) ≥ d_narrow.lower && quantile(d_narrow, 0) ≈ d_narrow.lower
+
+  @test isa(quantile(d_narrow, ForwardDiff.Dual(0., 0.)), ForwardDiff.Dual)
+
+  d = truncated(Normal(0, 2), 0, 1)
+
+  # prior to patch #1727 this was offering 1.0000000000000002 > 1.
+  @test quantile(d, 1) ≤ d.upper && quantile(d, 1) ≈ d.upper
+
+  @test isa(quantile(d, ForwardDiff.Dual(1.,0.)), ForwardDiff.Dual)
+end
