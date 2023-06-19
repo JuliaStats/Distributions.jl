@@ -1,7 +1,8 @@
 # Tests for Multinomial
 
-using Distributions, Random, StaticArrays, ForwardDiff
+using Distributions, Random, StaticArrays
 using Test
+import Distributions: multinom_rand!
 
 
 p = [0.2, 0.5, 0.3]
@@ -215,3 +216,13 @@ Multinomial(10, p_v; check_args=false) # should not warn
 p = [0.2, 0.4, 0.3, 0.1]
 @test (rand(Multinomial(10, p)); true)
 @test (rand(Multinomial(10, convert.(Float32, p))); true)
+
+# check type stability
+@inferred rand(Multinomial(10, convert.(Float32, p)))
+@inferred rand(Multinomial(10, convert.(Float64, p)))
+@inferred rand(Multinomial(10, convert.(Float16, p)))
+
+x = zeros(Float64, size(p)...)
+@inferred multinom_rand!(rng, 10, convert.(Float32, p), convert.(Float32, x))
+@inferred multinom_rand!(rng, 10, convert.(Float64, p), convert.(Float64, x))
+@inferred multinom_rand!(rng, 10, convert.(Float16, p), convert.(Float16, x))
