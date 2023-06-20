@@ -1,9 +1,9 @@
-function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
-                         x::AbstractVector{<:Real})
+function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{Tp},
+                         x::AbstractVector{Tx}) where {Tx <: Real, Tp <: Real}
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
-    rp = 1.0  # remaining total probability
+    rp = Tp(1.0)  # remaining total probability
     i = 0
     km1 = k - 1
 
@@ -11,23 +11,23 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
         i += 1
         @inbounds pi = p[i]
         if pi < rp
-            xi = rand(rng, Binomial(n, pi / rp))
+            xi = Tx(rand(rng, Binomial(n, Float64(pi / rp))))
             @inbounds x[i] = xi
-            n -= xi
+            n -= Int64(xi)
             rp -= pi
         else
             # In this case, we don't even have to sample
             # from Binomial. Just assign remaining counts
             # to xi.
 
-            @inbounds x[i] = n
+            @inbounds x[i] = Tx(n)
             n = 0
             # rp = 0.0 (no need for this, as rp is no longer needed)
         end
     end
 
     if i == km1
-        @inbounds x[k] = n
+        @inbounds x[k] = Tx(n)
     else  # n must have been zero
         z = zero(eltype(x))
         for j = i+1 : k
