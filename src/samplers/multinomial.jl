@@ -12,7 +12,7 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
         i += 1
         @inbounds pi = p[i]
         if pi < rp
-            xi = Tx(rand(rng, Binomial(n, Float64(pi / rp))))
+            xi = rand(rng, Binomial(n, Float64(pi / rp)))
             @inbounds x[i] = xi
             n -= xi
             rp -= pi
