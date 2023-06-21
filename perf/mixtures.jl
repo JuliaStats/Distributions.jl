@@ -137,7 +137,7 @@ large_probs .= large_probs ./ sum(large_probs)
 
 gmm_large = MixtureModel(large_normals, large_probs)
 
-@info "Large Gausian mixture"
+@info "Large Gaussian mixture"
 
 Random.seed!(42)
 for x in rand(5)
