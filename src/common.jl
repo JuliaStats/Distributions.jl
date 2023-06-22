@@ -228,7 +228,7 @@ end
 """
     logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
-Evaluate the probability density function of `d` at `x`.
+Evaluate the logarithm of the probability density function of `d` at `x`.
 
 This function checks if the size of `x` is compatible with distribution `d`. This check can
 be disabled by using `@inbounds`.
