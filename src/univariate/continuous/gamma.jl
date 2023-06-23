@@ -152,7 +152,7 @@ function suffstats(::Type{<:Gamma}, x::AbstractArray{T}, w::AbstractArray{Float6
     sx = zero(T)
     slogx = zero(T)
     tw = zero(T)
-    for i = 1:n
+    for i in eachindex(x, w)
         @inbounds xi = x[i]
         @inbounds wi = w[i]
         sx += wi * xi
