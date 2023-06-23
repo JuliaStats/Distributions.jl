@@ -160,7 +160,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     m = s / tw
 
     # compute s2
-    s2 = zero(T)
+    s2 = zero(m)
     for i in eachindex(x, w)
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
