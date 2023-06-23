@@ -131,7 +131,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
-    s = zero(T)
+    s = zero(T) + zero(T)
     for i in eachindex(x)
         @inbounds s += x[i]
     end
