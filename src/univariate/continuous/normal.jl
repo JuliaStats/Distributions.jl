@@ -131,14 +131,14 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
-    s = 0
+    s = zero(T)
     for i in eachindex(x)
         @inbounds s += x[i]
     end
     m = s / n
 
     # compute s2
-    s2 = 0
+    s2 = zero(T)
     for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - m)
     end
@@ -150,8 +150,8 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     n = length(x)
 
     # compute s
-    tw = 0
-    s = 0
+    tw = zero(T)
+    s = zero(T)
     for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s += wi * x[i]
@@ -160,7 +160,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     m = s / tw
 
     # compute s2
-    s2 = 0
+    s2 = zero(T)
     for i in eachindex(x, w)
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
