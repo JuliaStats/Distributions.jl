@@ -138,7 +138,7 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     m = s / n
 
     # compute s2
-    s2 = zero(T)
+    s2 = zero(m)
     for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - m)
     end
