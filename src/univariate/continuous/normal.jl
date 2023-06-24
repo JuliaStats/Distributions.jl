@@ -182,7 +182,7 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     μ = g.μ
-    s2 = 0
+    s2 = zero(T) + zero(μ)
     for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
@@ -191,8 +191,8 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     μ = g.μ
-    s2 = 0
-    tw = 0
+    s2 = 0.0 * abs2(zero(T) - zero(μ))
+    tw = 0.0
     for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s2 += abs2(x[i] - μ) * wi

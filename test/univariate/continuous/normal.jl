@@ -1,4 +1,4 @@
-using Test, Distributions, StatsFuns, ForwardDiff
+using Test, Distributions, StatsFuns, ForwardDiff, OffsetArrays
 
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
@@ -203,3 +203,29 @@ end
 # affine transformations
 test_affine_transformations(Normal, randn(), randn()^2)
 test_affine_transformations(NormalCanon, randn()^2, randn()^2)
+
+@testset "Normal suffstats and OffsetArrays" begin
+    a = collect(-5:5)
+    wa = collect(1.0:11.0)
+
+    resulta = suffstats(Normal, a)
+    @test resulta.s ≈ 0.0
+    @test resulta.m ≈ 0.0
+    @test resulta.s2 ≈ 110.0
+    @test resulta.tw ≈ 11.0
+
+    resultwa = suffstats(Normal, a, wa)
+    @test resultwa.s ≈ 110.0
+    @test resultwa.m ≈ 1.6666666666666667
+    @test resultwa.s2 ≈ 476.66666666666663
+    @test resultwa.tw ≈ 66.0
+
+    b = OffsetArray(a, -5:5)
+    wb = OffsetArray(wa, -5:5)
+
+    resultb = suffstats(Normal, b)
+    @test resulta == resultb
+
+    resultwb = suffstats(Normal, b, wb)
+    @test resultwa == resultwb
+end
