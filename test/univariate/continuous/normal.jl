@@ -205,7 +205,7 @@ test_affine_transformations(Normal, randn(), randn()^2)
 test_affine_transformations(NormalCanon, randn()^2, randn()^2)
 
 @testset "Normal suffstats and OffsetArrays" begin
-    a = -5:5
+    a = rand(Normal(), 11)
     wa = 1.0:11.0
 
     resulta = @inferred(suffstats(Normal, a))
@@ -215,10 +215,10 @@ test_affine_transformations(NormalCanon, randn()^2, randn()^2)
     b = OffsetArray(a, -5:5)
     wb = OffsetArray(wa, -5:5)
 
-    resultb = suffstats(Normal, b)
+    resultb = @inferred(suffstats(Normal, b))
     @test resulta == resultb
 
-    resultwb = suffstats(Normal, b, wb)
+    resultwb = @inferred(suffstats(Normal, b, wb))
     @test resultwa == resultwb
 
     @test_throws DimensionMismatch suffstats(Normal, b, wa)
