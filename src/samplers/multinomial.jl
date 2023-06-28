@@ -1,4 +1,4 @@
-function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{Float64},
+function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:AbstractFloat},
                          x::AbstractVector{<:Real})
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
