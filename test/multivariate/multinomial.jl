@@ -4,11 +4,11 @@ using Distributions, Random, StaticArrays
 using Test
 
 
-@testset "testing Multinomial with type $type" for (type, tol) in zip((Float16, Float32, Float64), (1e-3, 1e-6, 1e-8))
-    p = [0.2, 0.5, 0.3]
+@testset "testing Multinomial with type $T" for T in (Float16, Float32, Float64)
+    p = T[0.2, 0.5, 0.3]
     nt = 10
     rng = MersenneTwister(123)
-    d = Multinomial(nt, convert.(type, p))
+    d = Multinomial(nt, p)
 
     @testset "Testing Multinomial with $key" for (key, func) in
         Dict("rand(...)" => [rand, rand],
@@ -18,28 +18,29 @@ using Test
     
     @test length(d) == 3
     @test d.n == nt
-    @test mean(d) ≈ [2., 5., 3.]
-    @test var(d)  ≈ [1.6, 2.5, 2.1]
-    @test cov(d)  ≈ [1.6 -1.0 -0.6; -1.0 2.5 -1.5; -0.6 -1.5 2.1]
+    @test mean(d) ≈ T[2., 5., 3.]
+    @test var(d)  ≈ T[1.6, 2.5, 2.1]
+    @test cov(d)  ≈ T[1.6 -1.0 -0.6; -1.0 2.5 -1.5; -0.6 -1.5 2.1]
     
     @test insupport(d, [1, 6, 3])
     @test !insupport(d, [2, 6, 3])
-    @test partype(d) == type #Float64
-    @test partype(Multinomial(nt, Vector{Float32}(p))) == Float32
+    @test partype(d) === T
     
     # Conversion
-    @test typeof(d) == Multinomial{type, Vector{type}}
-    @test typeof(Multinomial(nt, Vector{Float32}(p))) == Multinomial{Float32, Vector{Float32}}
-    @test typeof(convert(Multinomial{Float32}, d)) == Multinomial{Float32, Vector{Float32}}
-    @test typeof(convert(Multinomial{Float32, Vector{Float32}}, d)) == Multinomial{Float32, Vector{Float32}}
-    @test typeof(convert(Multinomial{Float32}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
-    @test typeof(convert(Multinomial{Float32, Vector{Float32}}, params(d)...)) == Multinomial{Float32, Vector{Float32}}
-    @test convert(Multinomial{type}, d) === d
-    @test convert(Multinomial{type, Vector{type}}, d) === d
+    @test typeof(d) === Multinomial{T, Vector{T}}
+    for S in (Float16, Float32, Float64)
+        S === T && continue
+        @test typeof(convert(Multinomial{S}, d)) === Multinomial{S, Vector{S}}
+        @test typeof(convert(Multinomial{S, Vector{S}}, d)) === Multinomial{S, Vector{S}}
+        @test typeof(convert(Multinomial{S}, params(d)...)) === Multinomial{S, Vector{S}}
+        @test typeof(convert(Multinomial{S, Vector{S}}, params(d)...)) == Multinomial{S, Vector{S}}
+    end
+    @test convert(Multinomial{T}, d) === d
+    @test convert(Multinomial{T, Vector{T}}, d) === d
     
     # random sampling
     
-    x = func[1](d)
+    x = @inferred(func[1](d))
     @test isa(x, Vector{Int})
     @test sum(x) == nt
     @test insupport(d, x)
@@ -48,12 +49,12 @@ using Test
     @test d == typeof(d)(params(d)...)
     @test d == deepcopy(d)
     
-    x = func[2](d, 100)
+    x = @inferred(func[2](d, 100))
     @test isa(x, Matrix{Int})
     @test all(sum(x, dims=1) .== nt)
     @test all(insupport(d, x))
     
-    x = func[1](sampler(d))
+    x = @inferred(func[1](sampler(d)))
     @test isa(x, Vector{Int})
     @test sum(x) == nt
     @test insupport(d, x)
@@ -62,8 +63,8 @@ using Test
     
     x1 = [1, 6, 3]
     
-    @test isapprox(pdf(d, x1), 0.070875, atol=tol)
-    @test logpdf(d, x1) ≈ log(pdf(d, x1))
+    @test @inferred(pdf(d, x1)) ≈ T(0.070875)
+    @test @inferred(logpdf(d, x1)) ≈ log(pdf(d, x1))
     
     x = func[2](d, 100)
     pv = pdf(d, x)
@@ -73,17 +74,17 @@ using Test
         @test lp[i] ≈ logpdf(d, x[:,i])
     end
     
-    # test type stability of logpdf
-    @test typeof(logpdf(convert(Multinomial{Float32}, d), x1)) == Float32
+    # test result type of logpdf
+    @test typeof(logpdf(d, x1)) === T
     
     # test degenerate cases of logpdf
-    d1 = Multinomial(1, [0.5, 0.5, 0.0])
-    d2 = Multinomial(0, [0.5, 0.5, 0.0])
+    d1 = Multinomial(1, T[0.5, 0.5, 0.0])
+    d2 = Multinomial(0, T[0.5, 0.5, 0.0])
     x2 = [1, 0, 0]
     x3 = [0, 0, 1]
     x4 = [1, 0, 1]
     
-    @test logpdf(d1, x2) ≈ log(0.5)
+    @test logpdf(d1, x2) ≈ T(log(0.5))
     @test logpdf(d2, x2) == -Inf
     @test logpdf(d1, x3) == -Inf
     @test logpdf(d2, x3) == -Inf
@@ -98,13 +99,13 @@ using Test
     ss = suffstats(Multinomial, x)
     @test isa(ss, Distributions.MultinomialStats)
     @test ss.n == nt
-    @test ss.scnts == vec(sum(Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], dims=2))
+    @test ss.scnts == vec(sum(T[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)], dims=2))
     @test ss.tw == n0
     
     ss = suffstats(Multinomial, x, w)
     @test isa(ss, Distributions.MultinomialStats)
     @test ss.n == nt
-    @test ss.scnts ≈ Float64[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)] * w
+    @test ss.scnts ≈ T[x[i,j] for i = 1:size(x,1), j = 1:size(x,2)] * w
     @test ss.tw    ≈ sum(w)
     
     # fit
@@ -116,16 +117,16 @@ using Test
     r = fit(Multinomial, x)
     @test r.n == nt
     @test length(r) == length(p)
-    @test isapprox(probs(r), p, atol=0.02)
+    @test probs(r) ≈ p atol=0.02
     r = fit(Multinomial{Float64}, x)
     @test r.n == nt
     @test length(r) == length(p)
-    @test isapprox(probs(r), p, atol=0.02)
+    @test probs(r) ≈ p atol=0.02
     
     r = fit_mle(Multinomial, x, fill(2.0, size(x,2)))
     @test r.n == nt
     @test length(r) == length(p)
-    @test isapprox(probs(r), p, atol=0.02)
+    @test probs(r) ≈ p atol=0.02
     
     # behavior for n = 0
     d0 = Multinomial(0, p)
@@ -143,7 +144,7 @@ using Test
     
     # Abstract vector p
     
-    @test typeof(Multinomial(nt, SVector{length(p), Float64}(p))) == Multinomial{Float64, SVector{3, Float64}}
+    @test typeof(Multinomial(nt, SVector{length(p), T}(p))) == Multinomial{T, SVector{3, T}}
     
     end
     
@@ -152,7 +153,7 @@ using Test
              "rand!(rng, ...)" => (dist, X) -> rand!(rng, dist, X))
         # random sampling
         X = Matrix{Int}(undef, length(p), 100)
-        x = func(d, X)
+        x = @inferred(func(d, X))
         @test x ≡ X
         @test isa(x, Matrix{Int})
         @test all(sum(x, dims=1) .== nt)
@@ -170,7 +171,7 @@ using Test
              "rand!(rng, ..., true)" => (dist, X) -> rand!(rng, dist, X, true))
         # random sampling
         X = Vector{Vector{Int}}(undef, 100)
-        x = func(d, X)
+        x = @inferred(func(d, X))
         @test x ≡ X
         @test all(sum.(x) .== nt)
         @test all(insupport(d, a) for a in x)
@@ -182,49 +183,33 @@ using Test
         # random sampling
         X = [Vector{Int}(undef, length(p)) for _ in Base.OneTo(100)]
         x1 = X[1]
-        x = func(d, X)
+        x = @inferred(func(d, X))
         @test x1 ≡ X[1]
         @test all(sum.(x) .== nt)
         @test all(insupport(d, a) for a in x)
     end
     
     repeats = 10
-    m = Vector{Vector{partype(d)}}(undef, repeats)
-    rand!(d, m)
+    m = Vector{Vector{T}}(undef, repeats)
+    @inferred(rand!(d, m))
     @test isassigned(m, 1)
     m1=m[1]
-    rand!(d, m)
+    @inferred(rand!(d, m))
     @test m1 ≡ m[1]
-    rand!(d, m, true)
+    @inferred(rand!(d, m, true))
     @test m1 ≢ m[1]
     m1 = m[1]
-    rand!(d, m, false)
+    @inferred(rand!(d, m, false))
     @test m1 ≡ m[1]
     
-    p = [0.2, 0.4, 0.3, 0.1]
+    p = T[0.2, 0.4, 0.3, 0.1]
     nt = 10
     d = Multinomial(nt, p)
     @test_throws DimensionMismatch rand!(d, m, false)
     @test_nowarn rand!(d, m)
     
-    p_v = [0.1, 0.4, 0.3, 0.8]
+    p_v = T[0.1, 0.4, 0.3, 0.8]
     @test_throws DomainError Multinomial(10, p_v)
     @test_throws DomainError Multinomial(10, p_v; check_args=true)
     Multinomial(10, p_v; check_args=false) # should not warn
 end
-    
-@testset "Type stability" begin
-
-    p = [0.2, 0.5, 0.3]
-
-    @inferred rand(Multinomial(10, convert.(Float32, p)))
-    @inferred rand(Multinomial(10, convert.(Float64, p)))
-    @inferred rand(Multinomial(10, convert.(Float16, p)))
-
-    x = zeros(Float64, size(p)...)
-    @inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float32, x))
-    @inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float64, x))
-    @inferred rand!(Multinomial(10, convert.(Float32, p)), convert.(Float16, x))
-end
-
-    
