@@ -26,6 +26,6 @@ c = qqbuild(Uniform(1,10), view(collect(1:20), 1:10))
 @test a.qx ≈ b.qx ≈ c.qx ≈ a.qy ≈ b.qy ≈ c.qy
 
 for n in 0:3
-    a = qqbuild(rand(n), Uniform(0,1))
+    local a = qqbuild(rand(n), Uniform(0,1))
     @test length(a.qy) == length(a.qx) == n
 end
