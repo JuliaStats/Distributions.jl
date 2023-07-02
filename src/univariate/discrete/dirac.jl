@@ -59,7 +59,7 @@ cf(d::Dirac, t) = cis(t * d.value)
 #### Affine transformation
 Base.:+(d::Dirac, c::Real) = Dirac(d.value + c)
 Base.:+(a::Dirac, b::Dirac) = Dirac(a.value + b.value)
-Base.:*(c::Real, d::Dirac) = error("Rescaling of Dirac is prohibited.")
+Base.:*(c::Real, d::Dirac) = Dirac(c * d.value)
 
 #### Sampling
 
