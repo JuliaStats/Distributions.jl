@@ -40,4 +40,5 @@ in most cases, is maximum likelihood estimation. Note that this algorithm may
 change; for a function that will behave consistently across versions, see 
 `fit_mle`.
 """
+fit(dt::Type{D}, x) where {D<:Distribution} = fit_mle(D, x)
 fit(dt::Type{D}, args...) where {D<:Distribution} = fit_mle(D, args...)
