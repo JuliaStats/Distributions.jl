@@ -31,7 +31,7 @@ fit_mle(dt::Type{D}, x::AbstractMatrix) where {D<:MultivariateDistribution} = fi
 fit_mle(dt::Type{D}, x::AbstractMatrix, w::AbstractArray) where {D<:MultivariateDistribution} = fit_mle(D, suffstats(D, x, w))
 
 """
-    fit(D, x)
+    fit(D, args...)
 
 Fit a distribution of type `D` to a dataset `x`.
 
@@ -39,6 +39,9 @@ The fit function will choose a reasonable way to fit the distribution, which,
 in most cases, is maximum likelihood estimation. Note that this algorithm may
 change; for a function that will behave consistently across versions, see 
 `fit_mle`.
+
+By default, the fallback is `fit_mle(D, x)`; developers can change this default
+for a distribution by defining a specific `fit(::Type{<:Distribution})` method.
 """
 fit(dt::Type{D}, x) where {D<:Distribution} = fit_mle(D, x)
 fit(dt::Type{D}, args...) where {D<:Distribution} = fit_mle(D, args...)
