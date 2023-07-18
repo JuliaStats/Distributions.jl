@@ -40,7 +40,7 @@ in most cases, is maximum likelihood estimation. Note that this algorithm may
 change; for a function that will behave consistently across versions, see 
 `fit_mle`.
 
-By default, the fallback is `fit_mle(D, x)`; developers can change this default
+By default, the fallback is [`fit_mle(D, args...)`](@ref); developers can change this default
 for a distribution by defining a specific `fit(::Type{<:Distribution})` method.
 """
 fit(dt::Type{D}, x) where {D<:Distribution} = fit_mle(D, x)
