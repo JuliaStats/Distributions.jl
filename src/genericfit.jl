@@ -41,7 +41,7 @@ change; for a function that will behave consistently across versions, see
 `fit_mle`.
 
 By default, the fallback is [`fit_mle(D, args...)`](@ref); developers can change this default
-for a distribution by defining a specific `fit(::Type{<:Distribution})` method.
+for a specific distribution type `D <: Distribution` by defining a `fit(::Type{D}, args...)` method.
 """
 fit(dt::Type{D}, x) where {D<:Distribution} = fit_mle(D, x)
 fit(dt::Type{D}, args...) where {D<:Distribution} = fit_mle(D, args...)
