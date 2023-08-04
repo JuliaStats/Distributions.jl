@@ -325,6 +325,7 @@ end
 function test_support(d::UnivariateDistribution, vs::AbstractVector)
     for v in vs
         @test insupport(d, v)
+        @test v ∈ support(d)
     end
     @test all(insupport(d, vs))
 
@@ -332,11 +333,15 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
         @test isfinite(minimum(d))
         @test insupport(d, minimum(d))
         @test !insupport(d, minimum(d)-1)
+        @test minimum(d) ∈ support(d)
+        @test (minimum(d) - 1) ∉ support(d)
     end
     if isupperbounded(d)
         @test isfinite(maximum(d))
         @test insupport(d, maximum(d))
         @test !insupport(d, maximum(d)+1)
+        @test maximum(d) ∈ support(d)
+        @test (maximum(d) + 1) ∉ support(d)
     end
 
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
@@ -344,7 +349,7 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
     if isbounded(d)
         if isa(d, DiscreteUnivariateDistribution)
             s = support(d)
-            @test isa(s, AbstractUnitRange)
+            @test length(s) == length(minimum(d):maximum(d))
             @test first(s) == minimum(d)
             @test last(s) == maximum(d)
         end
