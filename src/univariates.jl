@@ -11,33 +11,6 @@ maximum(r::RealInterval) = r.ub
 extrema(r::RealInterval) = (r.lb, r.ub)
 in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
 
-Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
-
-# `L` can be an integer and `R` can be an `Inf`, which is `Float64`
-struct DiscreteInterval{L<:Real, R<:Real}
-    lb::L
-    ub::R
-end
-
-minimum(r::DiscreteInterval) = r.lb
-maximuk(r::DiscreteInterval) = r.ub
-extrema(r::DiscreteInterval) = (r.lb, r.ub)
-in(x::Real, r::DiscreteInterval) = isinteger(x) && (r.lb <= x <= r.ub)
-
-# will fail if `ub` is an Inf
-_as_discrete_range(r::DiscreteInterval) = round(Int, r.lb):round(Int, r.ub)
-
-Base.reverse(r::DiscreteInterval) = reverse(_as_discrete_range(r)) 
-Base.getindex(r::DiscreteInterval, index...) = getindex(_as_discrete_range(r), index...) 
-Base.firstindex(r::DiscreteInterval) = firstindex(_as_discrete_range(r))
-Base.lastindex(r::DiscreteInterval) = lastindex(_as_discrete_range(r))
-Base.eltype(r::DiscreteInterval) = eltype(_as_discrete_range(r))
-Base.length(r::DiscreteInterval) = length(_as_discrete_range(r))
-Base.iterate(r::DiscreteInterval) = iterate(_as_discrete_range(r)) 
-Base.iterate(r::DiscreteInterval, state) = iterate(_as_discrete_range(r), state) 
-
-Base.:(==)(r1::DiscreteInterval, r2::DiscreteInterval) = r1.lb == r2.lb && r1.ub == r2.ub
-
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
@@ -45,6 +18,8 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
+
+Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
 
 """
     params(d::UnivariateDistribution)
@@ -133,7 +108,7 @@ insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistributio
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
 support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
-support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = DiscreteInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support
 # T = true or false
