@@ -6,10 +6,11 @@ struct RealInterval{T<:Real}
 end
 
 RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
-minimum(r::RealInterval) = r.lb
-maximum(r::RealInterval) = r.ub
-extrema(r::RealInterval) = (r.lb, r.ub)
-in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
+
+Base.minimum(r::RealInterval) = r.lb
+Base.maximum(r::RealInterval) = r.ub
+Base.extrema(r::RealInterval) = (r.lb, r.ub)
+Base.in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
@@ -124,8 +125,8 @@ macro distr_support(D, lb, ub)
 
     # overall
     esc(quote
-        minimum($(paramdecl)) = $lb
-        maximum($(paramdecl)) = $ub
+        Base.minimum($(paramdecl)) = $lb
+        Base.maximum($(paramdecl)) = $ub
     end)
 end
 

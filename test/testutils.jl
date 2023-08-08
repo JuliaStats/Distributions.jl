@@ -341,13 +341,29 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
 
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 
-    if isbounded(d)
-        if isa(d, DiscreteUnivariateDistribution)
-            s = support(d)
-            @test isa(s, AbstractUnitRange)
-            @test first(s) == minimum(d)
-            @test last(s) == maximum(d)
+    # Test the `Base.in` or `∈` operator
+    # The `support` function is buggy for unbounded `DiscreteUnivariateDistribution`s
+    if isbounded(d) || isa(d, ContinuousUnivariateDistribution)
+        s = support(d)
+        for v in vs
+            @test v ∈ s
         end
+
+        if islowerbounded(d)
+            @test minimum(d) ∈ s
+            @test (minimum(d) - 1) ∉ s
+        end
+        if isupperbounded(d)
+            @test maximum(d) ∈ s
+            @test (maximum(d) + 1) ∉ s
+        end
+    end
+
+    if isbounded(d) && isa(d, DiscreteUnivariateDistribution)
+        s = support(d)
+        @test isa(s, AbstractUnitRange)
+        @test first(s) == minimum(d)
+        @test last(s) == maximum(d)
     end
 end
 
