@@ -319,6 +319,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     n = length(r)
     Lp = Matrix{eltype(p)}(undef, n, K)
     m = similar(r)
+    fill!(m, -Inf)
     @inbounds for i in eachindex(p)
         pi = p[i]
         if pi > 0.0
@@ -334,7 +335,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 
             # in the mean time, add log(prior) to lp and
             # update the maximum for each sample
-            for j in axes(r, 1)
+            for j in eachindex(r)
                 lp_i[j] += lpri
                 if lp_i[j] > m[j]
                     m[j] = lp_i[j]
@@ -347,13 +348,13 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     @inbounds for i = 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
-            for (j, lp_ij) in zip(axes(r, 1), lp_i)
+            for (j, lp_ij) in zip(eachindex(r), lp_i)
                 r[j] += exp(lp_ij - m[j])
             end
         end
     end
 
-    @inbounds for j in axes(r, 1)
+    @inbounds for j in eachindex(r)
         r[j] = log(r[j]) + m[j]
     end
     return r
@@ -377,7 +378,7 @@ _logpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogp
 function _cwise_pdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for (ri, i) in zip(axes(r,1), 1:K)
+    for (i, ri) in enumerate(eachindex(r))
         r[ri] = pdf(component(d, i), x)
     end
     r
@@ -386,7 +387,7 @@ end
 function _cwise_logpdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for (ri, i) in zip(axes(r,1), 1:K)
+    for (i, ri) in enumerate(eachindex(r))
         r[ri] = logpdf(component(d, i), x)
     end
     r
@@ -396,7 +397,7 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for (ri, i) in zip(axes(r, 2), 1:K)
+    for (i, ri) in enumerate(axes(r, 2))
         if d isa UnivariateMixture
             view(r,:,ri) .= pdf.(Ref(component(d, i)), X)
         else
@@ -410,7 +411,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for (ri, i) in zip(axes(r, 2), 1:K)
+    for (i, ri) in enumerate(axes(r, 2))
         if d isa UnivariateMixture
             view(r,:,ri) .= logpdf.(Ref(component(d, i)), X)
         else

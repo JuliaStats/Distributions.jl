@@ -200,7 +200,7 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
 end
 
 function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                   w::AbstractArray{Float64,1})
+                   w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
     if length(w) != n
@@ -210,10 +210,9 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
     tw = zero(Float64)
     slogp = zeros(K)
 
-    for (i, iP) in zip(axes(w, 1), axes(P, 2))
-        @inbounds wi = w[i]
+    for (iP, wi) in zip(axes(P, 2), w)
         tw += wi
-        for (k, kP) in zip(1:K, axes(P,1))
+        for (k, kP) in enumerate(axes(P, 1))
             @inbounds slogp[k] += log(P[kP,iP]) * wi
         end
     end
@@ -255,7 +254,7 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64})
     _dirichlet_mle_init2(μ, γ)
 end
 
-function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractVector{Float64})
+function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64})
     K = size(P, 1)
     n = size(P, 2)
 
@@ -265,8 +264,7 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractVector{Float6
     γ = zeros(K)  # E[p^2]
     tw = 0.0
 
-    for (i, iP) in zip(axes(w, 1), axes(P, 2))
-        @inbounds wi = w[i]
+    for (iP, wi) in zip(axes(P, 2), w)
         tw += wi
         for k in axes(P, 1)
             pk = P[k, iP]
@@ -368,7 +366,7 @@ function fit_mle(::Type{T}, P::AbstractMatrix{Float64};
 end
 
 function fit_mle(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
-                 w::AbstractVector{Float64};
+                 w::AbstractArray{Float64};
     init::Vector{Float64}=Float64[], maxiter::Int=25, tol::Float64=1.0e-12,
     debug::Bool=false)
 
