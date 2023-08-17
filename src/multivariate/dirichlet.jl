@@ -72,7 +72,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 params(d::Dirichlet) = (d.alpha,)
-@inline partype(d::Dirichlet{T}) where {T<:Real} = T
+@inline partype(::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)
     α0 = d.alpha0

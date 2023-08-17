@@ -147,6 +147,10 @@ function mgf(d::Binomial, t::Real)
     n, p = params(d)
     (one(p) - p + p * exp(t)) ^ n
 end
+function cgf(d::Binomial, t)
+    n, p = params(d)
+    n * cgf(Bernoulli{typeof(p)}(p), t)
+end
 
 function cf(d::Binomial, t::Real)
     n, p = params(d)
@@ -156,31 +160,29 @@ end
 
 #### Fit model
 
-struct BinomialStats <: SufficientStats
-    ns::Float64   # the total number of successes
-    ne::Float64   # the number of experiments
+struct BinomialStats{N<:Real} <: SufficientStats
+    ns::N         # the total number of successes
+    ne::N         # the number of experiments
     n::Int        # the number of trials in each experiment
-
-    BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<:Integer
-    ns = zero(T)
-    for i = 1:length(x)
-        @inbounds xi = x[i]
-        0 <= xi <= n || throw(DomainError())
+BinomialStats(ns::Real, ne::Real, n::Integer) = BinomialStats(promote(ns, ne)..., Int(n))
+
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer})
+    z = zero(eltype(x))
+    ns = z + z # possibly widened and different from `z`, e.g., if `z = true`
+    for xi in x
+        0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi
     end
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    ns = 0.
-    ne = 0.
-    for i = 1:length(x)
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
-        0 <= xi <= n || throw(DomainError())
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
+    z = zero(eltype(x)) * zero(eltype(w))
+    ns = ne = z + z # possibly widened and different from `z`, e.g., if `z = true`
+    for (xi, wi) in zip(x, w)
+        0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi * wi
         ne += wi
     end
@@ -189,15 +191,15 @@ end
 
 const BinomData = Tuple{Int, AbstractArray}
 
-suffstats(::Type{<:Binomial}, data::BinomData) = suffstats(Binomial, data...)
-suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)
+suffstats(::Type{T}, data::BinomData) where {T<:Binomial} = suffstats(T, data...)
+suffstats(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = suffstats(T, data..., w)
 
-fit_mle(::Type{<:Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
+fit_mle(::Type{T}, ss::BinomialStats) where {T<:Binomial} = T(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
-fit_mle(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}) where {T<:Binomial}= fit_mle(T, suffstats(T, n, x))
+fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, n, x, w))
+fit_mle(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, suffstats(T, data))
+fit_mle(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, data, w))
 
-fit(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, data)
-fit(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, data, w)
+fit(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, data)
+fit(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, data, w)

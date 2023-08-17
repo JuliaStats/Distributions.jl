@@ -93,20 +93,26 @@ entropy(d::TriangularDist{T}) where {T<:Real} = one(T)/2 + log((d.b - d.a) / 2)
 
 function pdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    return if x < c
-        2 * max(x - a, 0) / ((b - a) * (c - a))
+    res = if x < c
+        2 * (x - a) / ((b - a) * (c - a))
+    elseif x > c
+        2 * (b - x) / ((b - a) * (b - c))
     else
-        2 * max(b - x, 0) / ((b - a) * (b - c))
+        # Handle x == c separately to avoid `NaN` if `c == a` or `c == b`
+        oftype(x - a, 2) / (b - a)
     end
+    return insupport(d, x) ? res : zero(res)
 end
 logpdf(d::TriangularDist, x::Real) = log(pdf(d, x))
 
 function cdf(d::TriangularDist, x::Real)
     a, b, c = params(d)
-    return if x < c
-        max(x - a, 0)^2 / ((b - a) * (c - a))
+    if x < c
+        res = (x - a)^2 / ((b - a) * (c - a))
+        return x < a ? zero(res) : res
     else
-        1 - max(b - x, 0)^2 / ((b - a) * (b - c))
+        res = 1 - (b - x)^2 / ((b - a) * (b - c))
+        return x ≥ b ? one(res) : res
     end
 end
 
@@ -119,26 +125,83 @@ function quantile(d::TriangularDist, p::Real)
               b - sqrt(b_m_a * (b - c) * (1 - p))
 end
 
-function mgf(d::TriangularDist{T}, t::Real) where T<:Real
-    if t == zero(t)
-        return one(T)
-    else
-        (a, b, c) = params(d)
-        u = (b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return 2u / v
+_expm1(x::Number) = expm1(x)
+if VERSION < v"1.7.0-DEV.1172"
+    # expm1(::Float16) is not defined in older Julia versions
+    _expm1(x::Float16) = Float16(expm1(Float32(x)))
+    function _expm1(x::Complex{Float16})
+        xr, xi = reim(x)
+        yr, yi = reim(expm1(complex(Float32(xr), Float32(xi))))
+        return complex(Float16(yr), Float16(yi))
     end
 end
 
-function cf(d::TriangularDist{T}, t::Real) where T<:Real
-    # Is this correct?
-    if t == zero(t)
-        return one(Complex{T})
+"""
+    _phi2(x::Real)
+
+Compute
+```math
+2 (exp(x) - 1 - x) / x^2
+```
+with the correct limit at ``x = 0``.
+"""
+function _phi2(x::Real)
+    res = 2 * (_expm1(x) - x) / x^2
+    return iszero(x) ? one(res) : res
+end
+function mgf(d::TriangularDist, t::Real)
+    a, b, c = params(d)
+    # In principle, only two branches (degenerate + non-degenerate case) are needed
+    # But writing out all four cases will avoid unnecessary computations
+    if a < c
+        if c < b
+            # Case: a < c < b
+            return exp(c * t) * ((c - a) * _phi2((a - c) * t) + (b - c) * _phi2((b - c) * t)) / (b - a)
+        else
+            # Case: a < c = b
+            return exp(c * t) * _phi2((a - c) * t)
+        end
+    elseif c < b
+        # Case: a = c < b
+        return exp(c * t) * _phi2((b - c) * t)
     else
-        (a, b, c) = params(d)
-        u = (b - c) * cis(a * t) - (b - a) * cis(c * t) + (c - a) * cis(b * t)
-        v = (b - a) * (c - a) * (b - c) * t^2
-        return -2u / v
+        # Case: a = c = b
+        return exp(c * t)
+    end
+end
+
+"""
+    _cisphi2(x::Real)
+
+Compute
+```math
+- 2 (exp(x im) - 1 - x im) / x^2
+```
+with the correct limit at ``x = 0``.
+"""
+function _cisphi2(x::Real)
+    z = x * im
+    res = -2 * (_expm1(z) - z) / x^2
+    return iszero(x) ? one(res) : res
+end
+function cf(d::TriangularDist, t::Real)
+    a, b, c = params(d)
+    # In principle, only two branches (degenerate + non-degenerate case) are needed
+    # But writing out all four cases will avoid unnecessary computations
+    if a < c
+        if c < b
+            # Case: a < c < b
+            return cis(c * t) * ((c - a) * _cisphi2((a - c) * t) + (b - c) * _cisphi2((b - c) * t)) / (b - a)
+        else
+            # Case: a < c = b
+            return cis(c * t) * _cisphi2((a - c) * t)
+        end
+    elseif c < b
+        # Case: a = c < b
+        return cis(c * t) * _cisphi2((b - c) * t)
+    else
+        # Case: a = c = b
+        return cis(c * t)
     end
 end
 

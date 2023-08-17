@@ -14,9 +14,10 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, rand!, SamplerRangeInt
+import Random: default_rng, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
@@ -24,10 +25,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
-
-import ChainRulesCore
-
-import DensityInterface
+using Base.MathConstants: eulergamma
 
 export
     # re-export Statistics
@@ -67,6 +65,7 @@ export
     # distribution types
     Arcsine,
     Bernoulli,
+    BernoulliLogit,
     Beta,
     BetaBinomial,
     BetaPrime,
@@ -108,11 +107,15 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
+    JohnsonSU,
+    JointOrderStatistics,
     Kolmogorov,
     KSDist,
     KSOneSided,
+    Kumaraswamy,
     Laplace,
     Levy,
+    Lindley,
     LKJ,
     LKJCholesky,
     LocationScale,
@@ -142,10 +145,11 @@ export
     Normal,
     NormalCanon,
     NormalInverseGaussian,
+    OrderStatistic,
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
-    Product,
+    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,
@@ -191,7 +195,6 @@ export
     componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
-    dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability
@@ -221,7 +224,7 @@ export
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
-    sqmahal!,           # inplace evaluation of sqmahal
+    sqmahal!,           # in-place evaluation of sqmahal
     location,           # get the location parameter
     location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
@@ -230,6 +233,7 @@ export
     meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
+    cgf,                # cumulant generating function
     mode,               # the mode of a unimodal distribution
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution
@@ -294,6 +298,7 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("product.jl")
 include("reshaped.jl")
 include("truncate.jl")
 include("censored.jl")
@@ -307,8 +312,14 @@ include("pdfnorm.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
-# Implementation of DensityInterface API
-include("density_interface.jl")
+# Interface for StatsAPI
+include("statsapi.jl")
+
+# Extensions: Implementation of DensityInterface and ChainRulesCore API
+if !isdefined(Base, :get_extension)
+    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
+    include("../ext/DistributionsDensityInterfaceExt.jl")
+end
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
@@ -343,7 +354,8 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
+    IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
+    Laplace, Levy, Lindley, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,

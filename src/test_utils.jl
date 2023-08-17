@@ -14,7 +14,7 @@ __rand!(rng::AbstractRNG, args...) = rand!(rng, args...)
 
 """
     test_mvnormal(
-        g::AbstractMvNormal, n_tsamples::Int=10^6, rng::AbstractRNG=Random.GLOBAL_RNG
+        g::AbstractMvNormal, n_tsamples::Int=10^6, rng::AbstractRNG=Random.default_rng()
     )
 
 Test that `AbstractMvNormal` implements the expected API.

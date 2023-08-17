@@ -2,7 +2,7 @@
     ReshapedDistribution(d::Distribution{<:ArrayLikeVariate}, dims::Dims{N})
 
 Distribution of the `N`-dimensional random variable `reshape(X, dims)` where `X` is a random
-variable wth distribution `d`.
+variable with distribution `d`.
 
 It is recommended to not use `reshape` instead of the constructor of `ReshapedDistribution`
 directly since `reshape` can return more optimized distributions for specific types of `d`

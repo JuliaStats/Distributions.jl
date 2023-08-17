@@ -77,6 +77,10 @@ function entropy(d::Erlang)
 end
 
 mgf(d::Erlang, t::Real) = (1 - t * d.θ)^(-d.α)
+function cgf(d::Erlang, t)
+    α, θ = params(d)
+    -α * log1p(-t*θ)
+end
 cf(d::Erlang, t::Real)  = (1 - im * t * d.θ)^(-d.α)
 
 
