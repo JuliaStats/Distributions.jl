@@ -188,14 +188,8 @@ length(ss::DirichletStats) = length(s.slogp)
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
 function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
-    K = size(P, 1)
     n = size(P, 2)
-    slogp = zeros(K)
-    for i in axes(P, 2)
-        for (k, kP) in zip(1:K, axes(P,1))
-            @inbounds slogp[k] += log(P[kP,i])
-        end
-    end
+    slogp = vec(sum(log, P; dims=2))
     DirichletStats(slogp, n)
 end
 
