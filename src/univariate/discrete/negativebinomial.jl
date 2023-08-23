@@ -14,18 +14,33 @@ P(X = k) = \\frac{\\Gamma(k+r)}{k! \\Gamma(r)} p^r (1 - p)^k, \\quad \\text{for 
 ```
 
 ```julia
-NegativeBinomial()        # Negative binomial distribution with r = 1 and p = 0.5
+NegativeBinomial()        # Negative binomial stribution with r = 1 and p = 0.5
 NegativeBinomial(r, p)    # Negative binomial distribution with r successes and success rate p
 
 params(d)       # Get the parameters, i.e. (r, p)
 succprob(d)     # Get the success rate, i.e. p
 failprob(d)     # Get the failure rate, i.e. 1 - p
+
+#statistics 
+mean()
+var()
+std()
+skewness() 
+kurtosis()
+mode()
+kldivergence() # Kullback-Leibler Divergence
 ```
 
 External links:
 
-* [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
-Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
+* [Negative binomial distribution on Wolfram]
+  (https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
+
+
+Note: The definition from wolfram is different from wikipedia where r is the number of failures and k is number of successes.
+
+* [Negative binomial distribution on Wikipedia]
+  (https://en.wikipedia.org/wiki/Negative_binomial_distribution)
 
 """
 struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
