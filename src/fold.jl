@@ -1,5 +1,4 @@
 """
-    folded(d::ContinuousUnivariateDistribution, crease::Real)
     folded(d::ContinuousUnivariateDistribution, crease::Real, keep_right=false)
 
 Creates a _folded distribution_ from the original distribution `d` about the value `crease`.
