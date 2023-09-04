@@ -96,7 +96,6 @@ export
     Frechet,
     FullNormal,
     FullNormalCanon,
-    Folded,
     Gamma,
     DiscreteNonParametric,
     GeneralizedPareto,
