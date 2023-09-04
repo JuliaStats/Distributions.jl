@@ -4,13 +4,6 @@
 Creates a _folded distribution_ from the original distribution `d` about the value `crease`.
 This function defaults to folding the left side onto the right, but by using `keep_right=false` you can reflect the right side onto the left.
 
-This can be implemented for any univariate continuous distribution by using the following method:
-
-    folded(d::ContinuousUnivariateDistribution, crease::Real)
-
-If one wants to reflect points _above_ the crease ``c`` onto points _below_ ``c`` (such that the resultant distribution lives on points below ``c``) one can do that using the `keep_right=false` tag:
-
-    folded(d::ContinuousUnivariateDistribution, crease::Real, keep_right=false)
 
 A very useful and oft-occuring example of this is the action of the absolute value function (``|\\cdot|``) on random variables. 
 For example if we have a random variable obeying the normal distribution:
