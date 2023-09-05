@@ -18,6 +18,9 @@ Triweight(μ::Real=0.0) = Triweight(μ, one(μ); check_args=false)
 
 @distr_support Triweight d.μ - d.σ d.μ + d.σ
 
+Base.eltype(::Type{<:Triweight{T}}) where {T} = T
+
+
 ## Conversions
 
 convert(::Type{Triweight{T}}, μ::Real, σ::Real) where {T<:Real} = Triweight(T(μ), T(σ))

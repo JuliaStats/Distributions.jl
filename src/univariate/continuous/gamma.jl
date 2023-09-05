@@ -42,6 +42,8 @@ Gamma() = Gamma{Float64}(1.0, 1.0)
 
 @distr_support Gamma 0.0 Inf
 
+Base.eltype(::Type{<:Gamma{T}}) where {T} = T
+
 #### Conversions
 convert(::Type{Gamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = Gamma(T(α), T(θ))
 Base.convert(::Type{Gamma{T}}, d::Gamma) where {T<:Real} = Gamma{T}(T(d.α), T(d.θ))

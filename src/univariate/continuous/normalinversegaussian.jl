@@ -35,6 +35,9 @@ end
 
 @distr_support NormalInverseGaussian -Inf Inf
 
+Base.eltype(::Type{<:NormalInverseGaussian{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{NormalInverseGaussian{T}}, μ::Real, α::Real, β::Real, δ::Real) where T<:Real
     NormalInverseGaussian(T(μ), T(α), T(β), T(δ))

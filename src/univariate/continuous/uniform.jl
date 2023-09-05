@@ -40,6 +40,8 @@ Uniform() = Uniform{Float64}(0.0, 1.0)
 
 @distr_support Uniform d.a d.b
 
+Base.eltype(::Type{<:Uniform{T}}) where {T} = T
+
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
 Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))

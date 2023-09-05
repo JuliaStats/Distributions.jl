@@ -43,6 +43,9 @@ Arcsine() = Arcsine{Float64}(0.0, 1.0)
 
 @distr_support Arcsine d.a d.b
 
+Base.eltype(::Type{<:Arcsine{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Arcsine{T}}, a::Real, b::Real) where T<:Real
     Arcsine(T(a), T(b))

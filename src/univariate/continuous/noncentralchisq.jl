@@ -39,6 +39,9 @@ NoncentralChisq(ν::Integer, λ::Integer; check_args::Bool=true) = NoncentralChi
 
 @distr_support NoncentralChisq 0.0 Inf
 
+Base.eltype(::Type{<:NoncentralChisq{T}}) where {T} = T
+
+
 #### Conversions
 
 function convert(::Type{NoncentralChisq{T}}, ν::S, λ::S) where {T <: Real, S <: Real}

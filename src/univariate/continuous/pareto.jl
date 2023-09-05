@@ -39,6 +39,8 @@ Pareto() = Pareto{Float64}(1.0, 1.0)
 
 @distr_support Pareto d.θ Inf
 
+Base.eltype(::Type{<:Pareto{T}}) where {T} = T
+
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
 Base.convert(::Type{Pareto{T}}, d::Pareto) where {T<:Real} = Pareto{T}(T(d.α), T(d.θ))

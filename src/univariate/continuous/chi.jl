@@ -35,6 +35,8 @@ Chi(ν::Integer; check_args::Bool=true) = Chi(float(ν); check_args=check_args)
 
 @distr_support Chi 0.0 Inf
 
+Base.eltype(::Type{<:Chi{T}}) where {T} = T
+
 ### Conversions
 convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
 Base.convert(::Type{Chi{T}}, d::Chi) where {T<:Real} = Chi{T}(T(d.ν))

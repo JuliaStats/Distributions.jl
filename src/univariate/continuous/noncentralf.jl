@@ -20,6 +20,9 @@ NoncentralF(ν1::Integer, ν2::Integer, λ::Integer; check_args::Bool=true) = No
 
 @distr_support NoncentralF 0.0 Inf
 
+Base.eltype(::Type{<:NoncentralF{T}}) where {T} = T
+
+
 #### Conversions
 
 function convert(::Type{NoncentralF{T}}, ν1::S, ν2::S, λ::S) where {T <: Real, S <: Real}

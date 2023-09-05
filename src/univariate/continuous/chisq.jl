@@ -34,6 +34,8 @@ Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_ar
 
 @distr_support Chisq 0.0 Inf
 
+Base.eltype(::Type{<:Chisq{T}}) where {T} = T
+
 #### Parameters
 
 dof(d::Chisq) = d.ν

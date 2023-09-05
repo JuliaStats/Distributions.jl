@@ -51,6 +51,9 @@ function GeneralizedExtremeValue(μ::Integer, σ::Integer, ξ::Integer)
     return GeneralizedExtremeValue(float(μ), float(σ), float(ξ))
 end
 
+Base.eltype(::Type{<:GeneralizedExtremeValue{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real
     GeneralizedExtremeValue(T(μ), T(σ), T(ξ))

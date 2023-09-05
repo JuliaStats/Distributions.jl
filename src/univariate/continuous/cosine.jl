@@ -24,6 +24,9 @@ Cosine(μ::Real=0.0) = Cosine(μ, one(µ); check_args=false)
 
 @distr_support Cosine d.μ - d.σ d.μ + d.σ
 
+Base.eltype(::Type{<:Cosine{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Cosine{T}}, μ::Real, σ::Real) where T<:Real
     Cosine(T(μ), T(σ))

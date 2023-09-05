@@ -47,6 +47,9 @@ BetaPrime() = BetaPrime{Float64}(1.0, 1.0)
 
 @distr_support BetaPrime 0.0 Inf
 
+Base.eltype(::Type{<:BetaPrime{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where T<:Real
     BetaPrime(T(α), T(β))

@@ -47,6 +47,8 @@ Beta() = Beta{Float64}(1.0, 1.0)
 
 @distr_support Beta 0.0 1.0
 
+Base.eltype(::Type{<:Beta{T}}) where {T} = T
+
 #### Conversions
 function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))

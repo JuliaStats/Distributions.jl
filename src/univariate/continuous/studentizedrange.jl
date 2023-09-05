@@ -43,6 +43,9 @@ StudentizedRange(ν::Real, k::Real; check_args::Bool=true) = StudentizedRange(pr
 
 @distr_support StudentizedRange 0.0 Inf
 
+Base.eltype(::Type{<:StudentizedRange{T}}) where {T} = T
+
+
 
 ###  Conversions
 

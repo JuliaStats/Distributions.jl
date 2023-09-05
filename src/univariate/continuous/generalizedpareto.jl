@@ -63,6 +63,9 @@ GeneralizedPareto() = GeneralizedPareto{Float64}(0.0, 1.0, 1.0)
 minimum(d::GeneralizedPareto) = d.μ
 maximum(d::GeneralizedPareto{T}) where {T<:Real} = d.ξ < 0 ? d.μ - d.σ / d.ξ : Inf
 
+Base.eltype(::Type{<:GeneralizedPareto{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{GeneralizedPareto{T}}, μ::S, σ::S, ξ::S) where {T <: Real, S <: Real}
     GeneralizedPareto(T(μ), T(σ), T(ξ))

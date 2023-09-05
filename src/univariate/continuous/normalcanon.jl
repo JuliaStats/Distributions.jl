@@ -24,6 +24,9 @@ NormalCanon() = NormalCanon{Float64}(0.0, 1.0; check_args=false)
 
 @distr_support NormalCanon -Inf Inf
 
+Base.eltype(::Type{<:NormalCanon{T}}) where {T} = T
+
+
 #### Type Conversions
 convert(::Type{NormalCanon{T}}, η::S, λ::S) where {T <: Real, S <: Real} = NormalCanon(T(η), T(λ))
 Base.convert(::Type{NormalCanon{T}}, d::NormalCanon) where {T<:Real} = NormalCanon{T}(T(d.η), T(d.λ); check_args=false)

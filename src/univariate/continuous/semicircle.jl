@@ -33,6 +33,9 @@ Semicircle(r::Integer; check_args::Bool=true) = Semicircle(float(r); check_args=
 
 @distr_support Semicircle -d.r +d.r
 
+Base.eltype(::Type{<:Semicircle{T}}) where {T} = T
+
+
 params(d::Semicircle) = (d.r,)
 
 mean(d::Semicircle) = zero(d.r)

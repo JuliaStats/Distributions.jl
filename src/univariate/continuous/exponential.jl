@@ -36,6 +36,9 @@ Exponential() = Exponential{Float64}(1.0)
 
 @distr_support Exponential 0.0 Inf
 
+Base.eltype(::Type{<:Exponential{T}}) where {T} = T
+
+
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
 function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}

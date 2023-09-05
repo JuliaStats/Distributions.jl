@@ -49,6 +49,9 @@ SkewedExponentialPower(μ::Real=0) = SkewedExponentialPower(μ, 1, 2, 1//2; chec
 
 @distr_support SkewedExponentialPower -Inf Inf
 
+Base.eltype(::Type{<:SkewedExponentialPower{T}}) where {T} = T
+
+
 ### Conversions
 function Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower) where {T<:Real}
     SkewedExponentialPower{T}(T(d.μ), T(d.σ), T(d.p), T(d.α))

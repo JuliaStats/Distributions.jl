@@ -38,6 +38,9 @@ Rayleigh() = Rayleigh{Float64}(1.0)
 
 @distr_support Rayleigh 0.0 Inf
 
+Base.eltype(::Type{<:Rayleigh{T}}) where {T} = T
+
+
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))

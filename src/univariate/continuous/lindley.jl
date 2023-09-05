@@ -38,6 +38,9 @@ Base.convert(::Type{Lindley{T}}, d::Lindley{T}) where {T} = d
 
 @distr_support Lindley 0.0 Inf
 
+Base.eltype(::Type{<:Lindley{T}}) where {T} = T
+
+
 ### Parameters
 
 shape(d::Lindley) = d.θ

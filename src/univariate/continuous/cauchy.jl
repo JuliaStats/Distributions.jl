@@ -39,6 +39,8 @@ Cauchy(μ::Real=0.0) = Cauchy(μ, one(μ); check_args=false)
 
 @distr_support Cauchy -Inf Inf
 
+Base.eltype(::Type{<:Cauchy{T}}) where {T} = T
+
 #### Conversions
 function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))

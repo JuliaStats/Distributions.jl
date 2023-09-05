@@ -43,6 +43,9 @@ LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
 
 @distr_support LogNormal 0.0 Inf
 
+Base.eltype(::Type{<:LogNormal{T}}) where {T} = T
+
+
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
 Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} = LogNormal{T}(T(d.μ), T(d.σ))

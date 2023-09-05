@@ -18,6 +18,9 @@ Epanechnikov(μ::Real=0.0) = Epanechnikov(μ, one(μ); check_args=false)
 
 @distr_support Epanechnikov d.μ - d.σ d.μ + d.σ
 
+Base.eltype(::Type{<:Epanechnikov{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Epanechnikov{T}}, μ::Real, σ::Real) where T<:Real
     Epanechnikov(T(μ), T(σ), check_args=false)

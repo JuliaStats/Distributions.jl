@@ -34,6 +34,9 @@ SymTriangularDist(μ::Real=0.0) = SymTriangularDist(μ, one(μ); check_args=fals
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 
+Base.eltype(::Type{<:SymTriangularDist{T}}) where {T} = T
+
+
 #### Conversions
 
 function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where T<:Real

@@ -38,6 +38,9 @@ show(io::IO, d::VonMises) = show(io, d, (:μ, :κ))
 
 @distr_support VonMises d.μ - π d.μ + π
 
+Base.eltype(::Type{<:VonMises{T}}) where {T} = T
+
+
 #### Conversions
 
 convert(::Type{VonMises{T}}, μ::Real, κ::Real) where {T<:Real} = VonMises(T(μ), T(κ))

@@ -18,6 +18,9 @@ Biweight(μ::Real=0.0) = Biweight(μ, one(μ); check_args=false)
 
 @distr_support Biweight d.μ - d.σ d.μ + d.σ
 
+Base.eltype(::Type{<:Biweight{T}}) where {T} = T
+
+
 ## Parameters
 params(d::Biweight) = (d.μ, d.σ)
 @inline partype(d::Biweight{T}) where {T<:Real} = T

@@ -40,6 +40,9 @@ JohnsonSU(ξ::Real, λ::Real, γ::Real, δ::Real; check_args::Bool=true) = Johns
 
 @distr_support JohnsonSU -Inf Inf
 
+Base.eltype(::Type{<:JohnsonSU{T}}) where {T} = T
+
+
 #### Conversions
 
 Base.convert(::Type{JohnsonSU{T}}, d::JohnsonSU) where {T<:Real} = JohnsonSU{T}(T(d.ξ), T(d.λ), T(d.γ), T(d.δ))

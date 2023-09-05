@@ -38,6 +38,9 @@ Levy(μ::Real=0.0) = Levy(μ, one(μ); check_args=false)
 
 @distr_support Levy d.μ Inf
 
+Base.eltype(::Type{<:Levy{T}}) where {T} = T
+
+
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))

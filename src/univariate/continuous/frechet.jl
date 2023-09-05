@@ -40,6 +40,8 @@ Frechet(α::Real=1.0) = Frechet(α, one(α); check_args=false)
 
 @distr_support Frechet 0.0 Inf
 
+Base.eltype(::Type{<:Frechet{T}}) where {T} = T
+
 #### Conversions
 function convert(::Type{Frechet{T}}, α::S, θ::S) where {T <: Real, S <: Real}
     Frechet(T(α), T(θ))

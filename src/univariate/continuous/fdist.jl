@@ -38,6 +38,8 @@ FDist(ν1::Real, ν2::Real; check_args::Bool=true) = FDist(promote(ν1, ν2)...;
 
 @distr_support FDist 0.0 Inf
 
+Base.eltype(::Type{<:FDist{T}}) where {T} = T
+
 #### Conversions
 function convert(::Type{FDist{T}}, ν1::S, ν2::S) where {T <: Real, S <: Real}
     FDist(T(ν1), T(ν2))

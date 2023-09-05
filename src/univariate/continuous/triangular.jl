@@ -48,6 +48,9 @@ TriangularDist(a::Real, b::Real) = TriangularDist(a, b, middle(a, b); check_args
 
 @distr_support TriangularDist d.a d.b
 
+Base.eltype(::Type{<:TriangularDist{T}}) where {T} = T
+
+
 #### Conversions
 convert(::Type{TriangularDist{T}}, a::Real, b::Real, c::Real) where {T<:Real} = TriangularDist(T(a), T(b), T(c))
 Base.convert(::Type{TriangularDist{T}}, d::TriangularDist) where {T<:Real} = TriangularDist{T}(T(d.a), T(d.b), T(d.c))

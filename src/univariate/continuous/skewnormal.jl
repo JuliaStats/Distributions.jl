@@ -37,6 +37,9 @@ SkewNormal(α::Real=0.0) = SkewNormal(zero(α), one(α), α; check_args=false)
 
 @distr_support SkewNormal -Inf Inf
 
+Base.eltype(::Type{<:SkewNormal{T}}) where {T} = T
+
+
 #### Conversions
 convert(::Type{SkewNormal{T}}, ξ::S, ω::S, α::S) where {T <: Real, S <: Real} = SkewNormal(T(ξ), T(ω), T(α))
 Base.convert(::Type{SkewNormal{T}}, d::SkewNormal) where {T<:Real} = SkewNormal{T}(T(d.ξ), T(d.ω), T(d.α))

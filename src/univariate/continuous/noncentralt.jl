@@ -19,6 +19,9 @@ NoncentralT(ν::Integer, λ::Integer; check_args::Bool=true) = NoncentralT(float
 
 @distr_support NoncentralT -Inf Inf
 
+Base.eltype(::Type{<:NoncentralT{T}}) where {T} = T
+
+
 ### Conversions
 convert(::Type{NoncentralT{T}}, ν::S, λ::S) where {T <: Real, S <: Real} = NoncentralT(T(ν), T(λ))
 Base.convert(::Type{NoncentralT{T}}, d::NoncentralT) where {T<:Real} = NoncentralT(T(d.ν), T(d.λ))

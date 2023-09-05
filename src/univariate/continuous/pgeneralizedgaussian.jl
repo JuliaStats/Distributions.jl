@@ -61,14 +61,17 @@ to the normal distribution with `μ=0.0, σ=1.0`.
 """
 PGeneralizedGaussian() = PGeneralizedGaussian{Float64}(0.0, √2, 2.0) # approximate scale with unity std deviation and shape 2
 
+@distr_support PGeneralizedGaussian -Inf Inf
+
+Base.eltype(::Type{<:PGeneralizedGaussian{T}}) where {T} = T
+
+
 #### Conversions
 
 function Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian) where {T<:Real}
     return PGeneralizedGaussian{T}(T(d.μ), T(d.α), T(d.p))
 end
 Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where {T<:Real} = d
-
-@distr_support PGeneralizedGaussian -Inf Inf
 
 
 #### Parameters

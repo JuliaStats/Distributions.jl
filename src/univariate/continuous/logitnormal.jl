@@ -72,6 +72,7 @@ LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
 @distr_support LogitNormal 0.0 1.0
 #insupport(d::Union{D,Type{D}},x::Real) where {D<:LogitNormal} = 0.0 < x < 1.0
 
+Base.eltype(::Type{<:LogitNormal{T}}) where {T} = T
 
 #### Conversions
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
@@ -80,6 +81,7 @@ function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T<:Real}
     LogitNormal{T}(T(d.μ), T(d.σ))
 end
 Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T<:Real} = d
+
 
 #### Parameters
 

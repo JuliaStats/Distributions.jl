@@ -41,6 +41,9 @@ Logistic(μ::Real=0.0) = Logistic(μ, one(μ); check_args=false)
 
 @distr_support Logistic -Inf Inf
 
+Base.eltype(::Type{<:Logistic{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Logistic{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Logistic(T(μ), T(θ))

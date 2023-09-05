@@ -41,6 +41,9 @@ InverseGaussian() = InverseGaussian{Float64}(1.0, 1.0)
 
 @distr_support InverseGaussian 0.0 Inf
 
+Base.eltype(::Type{<:InverseGaussian{T}}) where {T} = T
+
+
 #### Conversions
 
 function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <: Real}

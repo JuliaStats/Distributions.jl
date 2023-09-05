@@ -43,6 +43,9 @@ Weibull(α::Real=1.0) = Weibull(α, one(α); check_args=false)
 
 @distr_support Weibull 0.0 Inf
 
+Base.eltype(::Type{<:Weibull{T}}) where {T} = T
+
+
 #### Conversions
 
 convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T<:Real} = Weibull(T(α), T(θ))

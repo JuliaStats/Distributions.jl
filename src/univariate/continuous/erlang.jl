@@ -38,6 +38,9 @@ Erlang(α::Integer=1) = Erlang(α, 1.0; check_args=false)
 
 @distr_support Erlang 0.0 Inf
 
+Base.eltype(::Type{<:Erlang{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
     Erlang(α, T(θ), check_args=false)

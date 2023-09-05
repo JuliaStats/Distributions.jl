@@ -41,6 +41,9 @@ const Biexponential = Laplace
 
 @distr_support Laplace -Inf Inf
 
+Base.eltype(::Type{<:Laplace{T}}) where {T} = T
+
+
 #### Conversions
 function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
     Laplace(T(μ), T(θ))

@@ -40,6 +40,8 @@ Base.convert(::Type{Kumaraswamy{T}}, d::Kumaraswamy{T}) where {T} = d
 
 @distr_support Kumaraswamy 0 1
 
+Base.eltype(::Type{<:Kumaraswamy{T}}) where {T} = T
+
 ### Parameters
 
 params(d::Kumaraswamy) = (d.a, d.b)

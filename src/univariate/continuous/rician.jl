@@ -44,6 +44,9 @@ Rician(ν::Integer, σ::Integer; check_args::Bool=true) = Rician(float(ν), floa
 
 @distr_support Rician 0.0 Inf
 
+Base.eltype(::Type{<:Rician{T}}) where {T} = T
+
+
 #### Conversions
 
 function convert(::Type{Rician{T}}, ν::Real, σ::Real) where T<:Real

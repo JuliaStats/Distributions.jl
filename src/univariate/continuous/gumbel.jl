@@ -39,6 +39,9 @@ Gumbel(μ::Real=0.0) = Gumbel(μ, one(μ); check_args=false)
 
 @distr_support Gumbel -Inf Inf
 
+Base.eltype(::Type{<:Gumbel{T}}) where {T} = T
+
+
 const DoubleExponential = Gumbel
 
 Base.eltype(::Type{Gumbel{T}}) where {T} = T

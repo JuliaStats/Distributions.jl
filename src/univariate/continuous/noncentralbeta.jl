@@ -20,6 +20,9 @@ NoncentralBeta(α::Integer, β::Integer, λ::Integer; check_args::Bool=true) = N
 
 @distr_support NoncentralBeta 0.0 1.0
 
+Base.eltype(::Type{<:NoncentralBeta{T}}) where {T} = T
+
+
 #### Conversions
 
 function Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta) where {T<:Real}
