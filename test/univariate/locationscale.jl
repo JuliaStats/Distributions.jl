@@ -170,3 +170,13 @@ end
     @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
     @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
 end
+
+
+@testset "user specified type Float32" begin
+    dln = LogitNormal(0f0, sqrt(2f0))
+    lower, upper = 1f0, 3f0
+    d = Distributions.AffineDistribution(lower, (upper -lower), dln, partype(dln))
+    @test scale(d) isa Float32
+    @test minimum(d) isa Float32 
+    #plot(d)
+end;
