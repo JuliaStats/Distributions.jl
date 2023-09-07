@@ -72,6 +72,9 @@ LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
 @distr_support LogitNormal 0.0 1.0
 #insupport(d::Union{D,Type{D}},x::Real) where {D<:LogitNormal} = 0.0 < x < 1.0
 
+# TODO change @distr_support to generate functions that respect the type parameter
+minimum(::LogitNormal{T}) where T = T(0)
+maximum(::LogitNormal{T}) where T = T(1)
 
 #### Conversions
 convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
