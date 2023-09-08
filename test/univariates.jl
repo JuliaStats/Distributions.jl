@@ -62,6 +62,9 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # test various constructors for promotion, all-Integer args, etc.
     pars = params(d)
 
+    # verify parameter type
+    @test partype(d) === promote_type(typeof.(pars)...)
+
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
     if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
@@ -75,9 +78,17 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # conversions
     if D isa Type && !isconcretetype(D)
         @test convert(D{partype(d)}, d) === d
-        d32 = convert(D{Float32}, d)
-        @test d32 isa D{Float32}
+        if D <: DiscreteUniform #|| D  <: Hypergeometric
+            d32 = convert(D{Int32}, d)
+            @test d32 isa D{Int32}
+            @test partype(d32) == Int32
+        else
+            d32 = convert(D{Float32}, d)
+            @test d32 isa D{Float32}
+            @test partype(d32) == Float32
+        end
     end
+
 
     # verify properties (params & stats)
     pdct = dct["properties"]

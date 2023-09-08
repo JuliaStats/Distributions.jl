@@ -38,6 +38,7 @@ end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
+partype(::Hypergeometric) = Int
 
 ### Parameters
 
