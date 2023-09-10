@@ -32,11 +32,11 @@ end
 # Conversions
 
 function convert(::Type{MvLogitNormal{D}}, d::MvLogitNormal) where {D}
-    return MvLogNormal(convert(D, d.normal))
+    return MvLogitNormal(convert(D, d.normal))
 end
 Base.convert(::Type{MvLogitNormal{D}}, d::MvLogitNormal{D}) where {D} = d
 function convert(::Type{MvLogitNormal{D}}, pars...) where {D}
-    return MvLogNormal(convert(D, MvNormal(pars...)))
+    return MvLogitNormal(convert(D, pars...))
 end
 
 function Base.show(io::IO, d::MvLogitNormal)
