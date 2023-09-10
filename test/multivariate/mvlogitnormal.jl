@@ -143,4 +143,15 @@ end
             test_mvlogitnormal(d; nsamples=10^4)
         end
     end
+
+    @testset "show" begin
+        d = MvLogitNormal([1.0, 2.0, 3.0], Diagonal([4.0, 5.0, 6.0]))
+        @test sprint(show, d) === """
+        MvLogitNormal{DiagNormal}(
+        dim: 3
+        μ: [1.0, 2.0, 3.0]
+        Σ: [4.0 0.0 0.0; 0.0 5.0 0.0; 0.0 0.0 6.0]
+        )
+        """
+    end
 end

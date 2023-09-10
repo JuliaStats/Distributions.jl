@@ -33,8 +33,14 @@ MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
 function Base.show(io::IO, d::MvLogitNormal)
-    show_multline(io, d, [(:dim, length(d)), (:μ, mean(d.normal)), (:Σ, cov(d.normal))])
-    return nothing
+    # extract params lines from multiline show of d.normal
+    norm_str = sprint(show, d.normal; context=IOContext(io))
+    params_str = strip(replace(norm_str, r"^.*?\(" => "", r"\).*?$" => ""))
+    # show with this distribution name
+    print(io, distrname(d))
+    println(io, "(")
+    println(io, params_str)
+    println(io, ")")
 end
 
 # Conversions
