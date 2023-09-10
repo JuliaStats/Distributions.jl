@@ -144,6 +144,12 @@ end
         end
     end
 
+    @testset "kldivergence" begin
+        d1 = MvLogitNormal(randn(5), exp(Symmetric(randn(5, 5))))
+        d2 = MvLogitNormal(randn(5), exp(Symmetric(randn(5, 5))))
+        @test kldivergence(d1, d2) ≈ kldivergence(d1.normal, d2.normal)
+    end
+
     VERSION ≥ v"1.8" && @testset "show" begin
         d = MvLogitNormal([1.0, 2.0, 3.0], Diagonal([4.0, 5.0, 6.0]))
         @test sprint(show, d) === """
