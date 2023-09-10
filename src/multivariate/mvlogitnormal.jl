@@ -39,24 +39,21 @@ function convert(::Type{MvLogitNormal{D}}, pars...) where {D}
     return MvLogitNormal(convert(D, pars...))
 end
 
-function Base.show(io::IO, d::MvLogitNormal)
-    show_multline(io, d, [(:dim, length(d)), (:μ, mean(d.normal)), (:Σ, cov(d.normal))])
-    return nothing
-end
 
 # Properties
 
-Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
 length(d::MvLogitNormal) = length(d.normal) + 1
+Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
 params(d::MvLogitNormal) = params(d.normal)
-location(d::MvLogitNormal) = mean(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
-function insupport(d::MvLogitNormal, x::AbstractVector{<:Real})
-    return length(d) == length(x) && !any(x -> x < zero(x), x) && sum(x) ≈ 1
-end
+location(d::MvLogitNormal) = mean(d.normal)
 minimum(d::MvLogitNormal) = fill(zero(eltype(d)), length(d))
 maximum(d::MvLogitNormal) = fill(oneunit(eltype(d)), length(d))
+
+function insupport(d::MvLogitNormal, x::AbstractVector{<:Real})
+    return length(d) == length(x) && all(≥(0), x) && sum(x) ≈ 1
+end
 
 # Evaluation
 
