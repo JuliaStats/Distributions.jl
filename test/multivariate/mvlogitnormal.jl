@@ -120,7 +120,7 @@ end
 
 ###### General Testing
 
-@testset "Lognormal tests" begin
+@testset "MvLogitNormal tests" begin
     mvnorm_params = [
         (randn(5), I * rand()),
         (randn(4), Diagonal(rand(4))),
