@@ -39,6 +39,8 @@ function convert(::Type{MvLogitNormal{D}}, pars...) where {D}
     return MvLogitNormal(convert(D, pars...))
 end
 
+meanform(d::MvLogitNormal{<:MvNormalCanon}) = MvLogitNormal(meanform(d.normal))
+canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 
 # Properties
 
