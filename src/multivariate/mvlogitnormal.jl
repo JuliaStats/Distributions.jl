@@ -59,7 +59,7 @@ end
 
 function _logpdf(d::MvLogitNormal, x::AbstractVector{<:Real})
     if !insupport(d, x)
-        return oftype(logpdf(d.normal, _inv_softmax1(log.(abs.(x)))), -Inf)
+        return oftype(logpdf(d.normal, _inv_softmax1(abs.(x))), -Inf)
     else
         return logpdf(d.normal, _inv_softmax1(x)) - sum(log, x)
     end
