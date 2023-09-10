@@ -16,12 +16,20 @@ is a length ``d`` probability vector.
 ```julia
 MvLogitNormal(μ, Σ)                 # MvLogitNormal with y ~ MvNormal(μ, Σ)
 MvLogitNormal(MvNormal(μ, Σ))       # same as above
+MvLogitNormal{MvNormal}(μ, Σ)       # same as above
 MvLogitNormal(MvNormalCanon(μ, J))  # MvLogitNormal with y ~ MvNormalCanon(μ, J)
+MvLogitNormal{MvNormalCanon}(μ, J)  # same as above
 ```
 """
 struct MvLogitNormal{D<:AbstractMvNormal} <: ContinuousMultivariateDistribution
     normal::D
+    MvLogitNormal{D}(normal::D) where {D<:AbstractMvNormal} = new{D}(normal)
 end
+function MvLogitNormal{D}(args...) where {D<:AbstractMvNormal}
+    normal = D(args...)
+    return MvLogitNormal{typeof(normal)}(normal)
+end
+MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
 function Base.show(io::IO, d::MvLogitNormal)
