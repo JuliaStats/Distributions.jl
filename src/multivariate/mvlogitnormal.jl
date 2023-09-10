@@ -35,7 +35,7 @@ MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 function Base.show(io::IO, d::MvLogitNormal)
     # extract params lines from multiline show of d.normal
     norm_str = sprint(show, d.normal; context=IOContext(io))
-    params_str = strip(replace(norm_str, r"^.*?\(" => "", r"\).*?$" => ""))
+    params_str = strip(replace(replace(norm_str, r"^.*?\(" => ""), r"\).*?$" => ""))
     # show with this distribution name
     print(io, distrname(d))
     println(io, "(")
