@@ -42,7 +42,7 @@ Exponential() = Exponential{Float64}(1.0)
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
-convert(::Type{Exponential{T}}, θ::S) where {T <: Number, S <: Number} = Exponential(T(θ))
+convert(::Type{Exponential{T}}, θ::S) where {T <: Number, S <: Number} = Exponential(convert(T, θ))
 function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
     return Exponential(T(d.θ))
 end
