@@ -1,5 +1,5 @@
 """
-    MvLogitNormal
+    MvLogitNormal{<:AbstractMvNormal}
 
 The [multivariate logit-normal distribution](https://en.wikipedia.org/wiki/Logit-normal_distribution#Multivariate_generalization)
 is the multivariate generalization of [`LogitNormal`](@ref).
@@ -20,6 +20,10 @@ MvLogitNormal{MvNormal}(μ, Σ)       # same as above
 MvLogitNormal(MvNormalCanon(μ, J))  # MvLogitNormal with y ~ MvNormalCanon(μ, J)
 MvLogitNormal{MvNormalCanon}(μ, J)  # same as above
 ```
+
+# Fields
+
+- `normal::AbstractMvNormal`: contains the ``d-1``-dimensional distribution of ``y``
 """
 struct MvLogitNormal{D<:AbstractMvNormal} <: ContinuousMultivariateDistribution
     normal::D
