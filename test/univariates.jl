@@ -63,7 +63,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     pars = params(d)
 
     # verify parameter type
-    @test partype(d) === promote_type(typeof.(pars)...)
+    # truncated parameters may be nothing: Union{Nothing, promote_type()}
+    # but partype should still be type of the non-nothing ones
+    #@test partype(d) === promote_type(typeof.(pars)...)
+    @test partype(d) === promote_type(typeof.(pars)...) || 
+      Union{Nothing,partype(d)} ===  promote_type(typeof.(pars)...)
 
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
