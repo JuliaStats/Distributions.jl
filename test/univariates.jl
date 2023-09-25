@@ -82,17 +82,9 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # conversions
     if D isa Type && !isconcretetype(D)
         @test convert(D{partype(d)}, d) === d
-        if D <: DiscreteUniform #|| D  <: Hypergeometric
-            d32 = convert(D{Int32}, d)
-            @test d32 isa D{Int32}
-            @test partype(d32) == Int32
-        else
-            d32 = convert(D{Float32}, d)
-            @test d32 isa D{Float32}
-            @test partype(d32) == Float32
-        end
+        d32 = convert(D{Float32}, d)
+        @test d32 isa D{Float32}
     end
-
 
     # verify properties (params & stats)
     pdct = dct["properties"]

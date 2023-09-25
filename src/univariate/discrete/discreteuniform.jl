@@ -21,40 +21,29 @@ External links
 
 * [Discrete uniform distribution on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(discrete))
 """
-struct DiscreteUniform{I} <: DiscreteUnivariateDistribution where I
-    a::I
-    b::I
+struct DiscreteUniform <: DiscreteUnivariateDistribution
+    a::Int
+    b::Int
     pv::Float64 # individual probabilities
 
-    function DiscreteUniform{I}(a::I, b::I; check_args::Bool=true) where I <: Integer
+    function DiscreteUniform(a::Real, b::Real; check_args::Bool=true)
         @check_args DiscreteUniform (a <= b)
-        new{I}(a, b, one(I) / (b - a + one(I)))
-    end
-    function DiscreteUniform(a::Real, b::Real; kwargs...)
-        a_int = a isa Integer ? a : ceil(Int,a)
-        b_int = b isa Integer ? b : floor(Int, b)
-        aI, bI = promote(a_int,b_int)
-        I = typeof(aI)
-        DiscreteUniform{I}(aI,bI; kwargs...)
+        new(a, b, 1 / (b - a + 1))
     end
     DiscreteUniform(b::Real; check_args::Bool=true) = DiscreteUniform(0, b; check_args=check_args)
-    DiscreteUniform() = new{Int}(0, 1, 0.5)
+    DiscreteUniform() = new(0, 1, 0.5)
 end
 
 @distr_support DiscreteUniform d.a d.b
-
-partype(::DiscreteUniform{T}) where {T<:Integer} = T
-
-#### Conversions
-convert(::Type{DiscreteUniform{T}}, a::S, b::S) where {T <: Integer, S <: Real} = DiscreteUniform(T(a), T(b))
-Base.convert(::Type{DiscreteUniform{T}}, d::DiscreteUniform) where {T<:Integer} = DiscreteUniform{T}(T(d.a), T(d.b))
-Base.convert(::Type{DiscreteUniform{T}}, d::DiscreteUniform{T}) where {T<:Integer} = d
 
 ### Parameters
 
 span(d::DiscreteUniform) = d.b - d.a + 1
 probval(d::DiscreteUniform) = d.pv
 params(d::DiscreteUniform) = (d.a, d.b)
+
+partype(::DiscreteUniform) = Int
+
 
 ### Show
 
@@ -87,7 +76,7 @@ modes(d::DiscreteUniform) = [d.a:d.b]
 pdf(d::DiscreteUniform, x::Real) = insupport(d, x) ? d.pv : zero(d.pv)
 logpdf(d::DiscreteUniform, x::Real) = log(pdf(d, x))
 
-function cdf(d::DiscreteUniform, x::Integer)
+function cdf(d::DiscreteUniform, x::Int)
     a = d.a
     result = (x - a + 1) * d.pv
     return if x < a
@@ -99,10 +88,7 @@ function cdf(d::DiscreteUniform, x::Integer)
     end
 end
 
-function quantile(d::DiscreteUniform, p::Real) 
-    T = partype(d)
-    iszero(p) ? d.a : d.a - one(T) + ceil(T, p * span(d))
-end
+quantile(d::DiscreteUniform, p::Real) = iszero(p) ? d.a : d.a - 1 + ceil(Int, p * span(d))
 
 function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
@@ -131,3 +117,7 @@ function fit_mle(::Type{DiscreteUniform}, x::AbstractArray{<:Real})
     end
     return DiscreteUniform(extrema(x)...)
 end
+
+
+
+
