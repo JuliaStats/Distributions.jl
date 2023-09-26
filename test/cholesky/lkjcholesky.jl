@@ -181,6 +181,7 @@ using FiniteDifferences
         nkstests = 4 # use for appropriate Bonferroni correction for KS test
 
         @testset "rand" begin
+            @test only(rand(LKJCholesky(1, 0.5)).L) == 1.0
             @testset for p in (2, 4, 10), η in (0.5, 1, 3), uplo in ('L', 'U')
                 d = LKJCholesky(p, η, uplo)
                 test_draw(d, rand(rng, d))
