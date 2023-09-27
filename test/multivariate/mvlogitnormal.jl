@@ -132,14 +132,12 @@ end
         @testset "$(typeof(prms))" for prms in mvnorm_params
             d = MvLogitNormal(prms...)
             @test d == MvLogitNormal(MvNormal(prms...))
-            @test d == MvLogitNormal{MvNormal}(prms...)
             test_mvlogitnormal(d; nsamples=10^4)
         end
     end
     @testset "wraps MvNormalCanon" begin
         @testset "$(typeof(prms))" for prms in mvnorm_params
-            d = MvLogitNormal{MvNormalCanon}(prms...)
-            @test d == MvLogitNormal(MvNormalCanon(prms...))
+            d = MvLogitNormal(MvNormalCanon(prms...))
             test_mvlogitnormal(d; nsamples=10^4)
         end
     end

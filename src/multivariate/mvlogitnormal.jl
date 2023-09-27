@@ -29,10 +29,6 @@ struct MvLogitNormal{D<:AbstractMvNormal} <: ContinuousMultivariateDistribution
     normal::D
     MvLogitNormal{D}(normal::D) where {D<:AbstractMvNormal} = new{D}(normal)
 end
-function MvLogitNormal{D}(args...) where {D<:AbstractMvNormal}
-    normal = D(args...)
-    return MvLogitNormal{typeof(normal)}(normal)
-end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
