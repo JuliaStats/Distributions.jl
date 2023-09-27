@@ -32,14 +32,13 @@ end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
-function Base.show(io::IO, d::MvLogitNormal)
-    # extract params lines from multiline show of d.normal
-    norm_str = sprint(show, d.normal; context=IOContext(io))
-    params_str = strip(replace(replace(norm_str, r"^.*?\(" => ""), r"\).*?$" => ""))
-    # show with this distribution name
+function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
     print(io, distrname(d))
     println(io, "(")
-    println(io, params_str)
+    normstr = strip(sprint(show, d.normal; context=IOContext(io)))
+    normstr = replace(normstr, "\n" => "\n$indent")
+    print(io, indent)
+    println(io, normstr)
     println(io, ")")
 end
 
