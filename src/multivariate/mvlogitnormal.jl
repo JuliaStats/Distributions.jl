@@ -16,9 +16,7 @@ is a length ``d`` probability vector.
 ```julia
 MvLogitNormal(μ, Σ)                 # MvLogitNormal with y ~ MvNormal(μ, Σ)
 MvLogitNormal(MvNormal(μ, Σ))       # same as above
-MvLogitNormal{MvNormal}(μ, Σ)       # same as above
 MvLogitNormal(MvNormalCanon(μ, J))  # MvLogitNormal with y ~ MvNormalCanon(μ, J)
-MvLogitNormal{MvNormalCanon}(μ, J)  # same as above
 ```
 
 # Fields
