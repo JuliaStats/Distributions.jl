@@ -2,9 +2,8 @@
     MvLogitNormal{<:AbstractMvNormal}
 
 The [multivariate logit-normal distribution](https://en.wikipedia.org/wiki/Logit-normal_distribution#Multivariate_generalization)
-is the multivariate generalization of [`LogitNormal`](@ref).
-
-It is a more general alternative to [`Dirichlet`](@ref) for probability vectors.
+is a multivariate generalization of [`LogitNormal`](@ref) capable of handling correlations
+between variables.
 
 If ``\\mathbf{y} \\sim \\mathrm{MvNormal}(\\boldsymbol{\\mu}, \\boldsymbol{\\Sigma})`` is a
 length ``d-1`` vector, then
