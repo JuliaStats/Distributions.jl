@@ -122,6 +122,7 @@ export
     Logistic,
     LogNormal,
     LogUniform,
+    MvLogitNormal,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
