@@ -16,6 +16,7 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
         @test params(d) == params(dnorm)
         @test partype(d) == partype(dnorm)
         @test eltype(d) == eltype(dnorm)
+        @test eltype(typeof(d)) == eltype(typeof(dnorm))
         @test location(d) == mean(dnorm)
         @test minimum(d) == fill(0, length(d))
         @test maximum(d) == fill(1, length(d))
@@ -34,18 +35,12 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
             @test convert(MvLogitNormal{MvNormal{T}}, d).normal ==
                 convert(MvNormal{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormal{T}}, d)) <: T
-            @test convert(MvLogitNormal{MvNormal{T}}, params(d)...).normal ==
-                convert(MvNormal{T}, dnorm)
-            @test partype(convert(MvLogitNormal{MvNormal{T}}, params(d)...)) <: T
             @test canonform(d) isa MvLogitNormal{<:MvNormalCanon}
             @test canonform(d).normal == canonform(dnorm)
         elseif dnorm isa MvNormalCanon
             @test convert(MvLogitNormal{MvNormalCanon{T}}, d).normal ==
                 convert(MvNormalCanon{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormalCanon{T}}, d)) <: T
-            @test convert(MvLogitNormal{MvNormalCanon{T}}, params(d)...).normal ==
-                convert(MvNormalCanon{T}, dnorm)
-            @test partype(convert(MvLogitNormal{MvNormalCanon{T}}, params(d)...)) <: T
             @test meanform(d) isa MvLogitNormal{<:MvNormal}
             @test meanform(d).normal == meanform(dnorm)
         end

@@ -45,9 +45,6 @@ function convert(::Type{MvLogitNormal{D}}, d::MvLogitNormal) where {D}
     return MvLogitNormal(convert(D, d.normal))
 end
 Base.convert(::Type{MvLogitNormal{D}}, d::MvLogitNormal{D}) where {D} = d
-function convert(::Type{MvLogitNormal{D}}, pars...) where {D}
-    return MvLogitNormal(convert(D, pars...))
-end
 
 meanform(d::MvLogitNormal{<:MvNormalCanon}) = MvLogitNormal(meanform(d.normal))
 canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
@@ -56,6 +53,7 @@ canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 
 length(d::MvLogitNormal) = length(d.normal) + 1
 Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
+Base.eltype(d::MvLogitNormal) = eltype(d.normal)
 params(d::MvLogitNormal) = params(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
