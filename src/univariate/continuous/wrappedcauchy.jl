@@ -118,18 +118,29 @@ function _WC_mle_update(x::AbstractArray{T}, μ1, μ2) where {T <: Real}
     return sc / sw, ss / sw
 end
 
+function fit(::Type{<:WrappedCauchy}, x::AbstractArray{T}) where {T <: Real}
+    n = length(x)
+    s = mean(sin.(x))
+    c = mean(cos.(x))
+    μ = atan(s, c)
+    r2_bar = s^2 + c^2
+    r = sqrt(n / (n - one(T)) * (r2_bar - one(T) / n))
+    return WrappedCauchy{T}(μ, r)
+end
+
 
 function fit_mle(::Type{<:WrappedCauchy},
     x::AbstractArray{T};
     mu0::Float64=NaN, r0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16
 ) where {T <: Real}
-
-    μ::Float64 = isnan(mu0) ? angle(mean(exp.(im*x))) : mu0
-    r::Float64 = isnan(mu0) ? 0.5 : r0
+    est0 = fit(WrappedCauchy, x)
+    μ::Float64 = isnan(mu0) ? est0.μ : mu0
+    r::Float64 = isnan(r0) ? est0.r : r0
     converged = false
 
-    μ1 = 2*r*cos(μ)/(1+r^2)
-    μ2 = 2*r*sin(μ)/(1+r^2)
+    # reparameterize
+    μ1 = 2 * r * cos(μ) / (one(T) + r^2)
+    μ2 = 2 * r * sin(μ) / (one(T) + r^2)
 
     t = 0
     while !converged && t < maxiter
@@ -138,8 +149,8 @@ function fit_mle(::Type{<:WrappedCauchy},
         μ1, μ2 = _WC_mle_update(x, μ1, μ2)
         converged = (abs(μ1 - μ1_old) <= tol && abs(μ2 - μ2_old) <= tol)
     end
-    μ = mod2pi(atan(μ2,μ1)) - π
-    r = (1 - sqrt(1-μ1^2-μ2^2))/sqrt(μ1^2+μ2^2)
+    μ = mod2pi(atan(μ2, μ1)) - π
+    r = (one(T) - sqrt(one(T) - μ1^2 - μ2^2)) / sqrt(μ1^2 + μ2^2)
 
     WrappedCauchy{T}(μ, r)
 end
