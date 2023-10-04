@@ -38,7 +38,7 @@ function WrappedCauchy(r::Real; check_args::Bool=true)
     return WrappedCauchy(zero(r), r; check_args=false)
 end
 
-@distr_support WrappedCauchy -oftype(d.r, π) oftype(d.r, π)
+@distr_support WrappedCauchy -oftype(d.μ, π) oftype(d.μ, π)
 
 
 params(d::WrappedCauchy) = (d.μ, d.r)
@@ -97,8 +97,7 @@ end
 #### Sampling
 
 function rand(rng::AbstractRNG, d::WrappedCauchy)
-    return mod2pi(d.μ + log(d.r) * tan(π * (rand(rng) - 0.5))) - π
-
+    return mod2pi(d.μ + π + log(d.r) * tan(π * (rand(rng) - 0.5))) - π
 end
 
 #### Fitting
