@@ -472,6 +472,6 @@ end
         d = fit(dist, x)
         @test isa(d, dist)
         @test isapprox(d.μ, 1.0, atol=0.05)
-        @test isapprox(d.r, 0.5, rtol=0.05)
+        @test isapprox(d.c, 0.5, rtol=0.05)
     end
 end

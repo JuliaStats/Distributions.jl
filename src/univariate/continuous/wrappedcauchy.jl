@@ -1,16 +1,16 @@
 """
-    WrappedCauchy(r)
+    WrappedCauchy(c)
 
-The Wrapped Cauchy distribution with scale factor `r` has probability density function
+The Wrapped Cauchy distribution with concentration parameter `c` has probability density function
 
 ```math
-f(x; r) = \\frac{1-r^2}{2\\pi(1+r^2-2r\\cos(x-\\mu))}, \\quad x \\in [-\\pi, \\pi].
+f(x; c, \\mu) = \\frac{1-c^2}{2\\pi(1+c^2-2c\\cos(x-\\mu))}, \\quad x \\in [0, 2\\pi].
 ```
 
 ```julia
-WrappedCauchy(μ,r)   # Wrapped Cauchy distribution centered on μ with scale factor r
+WrappedCauchy(μ,c)   # Wrapped Cauchy distribution centered on μ with concentration parameter c
 
-WrappedCauchy(r)   # Wrapped Cauchy distribution centered on 0 with scale factor r
+WrappedCauchy(c)   # Wrapped Cauchy distribution centered on 0 with concentration parameter c
 
 params(d)       # Get the location and scale parameters, i.e. (μ, r)
 ```
@@ -21,68 +21,68 @@ External links
 """
 struct WrappedCauchy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
-    r::T
-    WrappedCauchy{T}(μ::T, r::T) where {T <: Real} = new{T}(μ, r)
+    c::T
+    WrappedCauchy{T}(μ::T, c::T) where {T <: Real} = new{T}(μ, c)
 end
 
 
-function WrappedCauchy(μ::T, r::T; check_args::Bool=true) where {T <: Real}
-    @check_args WrappedCauchy (μ, -π < μ < π) (r, zero(r) < r < one(r))
-
-    return WrappedCauchy{T}(μ, r)
+function WrappedCauchy(μ::T, c::T; check_args::Bool=true) where {T <: Real}
+    @check_args WrappedCauchy (μ, 0 ≤ μ ≤ 2π) (c, zero(c) < c < one(c))
+    return WrappedCauchy{T}(μ, c)
 end
 
-WrappedCauchy(μ::Real, r::Real; check_args::Bool=true) = WrappedCauchy(promote(μ, r)...; check_args=check_args)
-function WrappedCauchy(r::Real; check_args::Bool=true)
-    @check_args WrappedCauchy (r, zero(r) < r < one(r))
-    return WrappedCauchy(zero(r), r; check_args=false)
+WrappedCauchy(μ::Real, c::Real; check_args::Bool=true) = WrappedCauchy(promote(μ, c)...; check_args=check_args)
+
+function WrappedCauchy(c::Real; check_args::Bool=true)
+    @check_args WrappedCauchy (c, zero(c) < c < one(c))
+    return WrappedCauchy(zero(c), c; check_args=false)
 end
 
-@distr_support WrappedCauchy -oftype(d.μ, π) oftype(d.μ, π)
+@distr_support WrappedCauchy 0 oftype(d.μ, 2π)
 
 
-params(d::WrappedCauchy) = (d.μ, d.r)
+params(d::WrappedCauchy) = (d.μ, d.c)
 partype(::WrappedCauchy{T}) where {T} = T
 
 location(d::WrappedCauchy) = d.μ
-scale(d::WrappedCauchy) = d.r
+scale(d::WrappedCauchy) = d.c
 
 #### Statistics
 
 mean(d::WrappedCauchy) = d.μ
 
-var(d::WrappedCauchy) = one(d.r) - d.r
+var(d::WrappedCauchy) = one(d.c) - d.c
 
-skewness(d::WrappedCauchy) = zero(d.r)
+skewness(d::WrappedCauchy) = zero(d.c)
 
 median(d::WrappedCauchy) = d.μ
 
 mode(d::WrappedCauchy) = d.μ
 
-entropy(d::WrappedCauchy) = log2π + log1p(-d.r^2)
+entropy(d::WrappedCauchy) = log2π + log1p(-d.c^2)
 
 
-cf(d::WrappedCauchy, t::Real) = cis(t * d.μ - abs(t) * log(d.r) * im)
+cf(d::WrappedCauchy, t::Real) = cis(t * d.μ - abs(t) * log(d.c) * im)
 
 #### Evaluation
 
 function pdf(d::WrappedCauchy, x::Real)
-    μ, r = params(d)
-    res = inv2π * ((1 - r^2) / (1 + r^2 - 2 * r * cos(x - μ)))
+    μ, c = params(d)
+    res = inv2π * ((1 - c^2) / (1 + c^2 - 2 * c * cos(x - μ)))
     return insupport(d, x) ? res : zero(res)
 end
 
 function logpdf(d::WrappedCauchy, x::Real)
-    μ, r = params(d)
-    res = - log1p(2 * r * (r - cos(x-μ)) / (1 - r^2)) - log2π
+    μ, c = params(d)
+    res = - log1p(2 * c * (c - cos(x-μ)) / (1 - c^2)) - log2π
     return insupport(d, x) ? res : oftype(res, -Inf)
 end
 
 function cdf(d::WrappedCauchy, x::Real)
-    μ, r = params(d)
+    μ, c = params(d)
     min_d, max_d = extrema(d)
-    c = (one(r) + r) / (one(r) - r)
-    res = (atan(c * tan((x - μ) / 2)) - atan(c * cot(μ / 2))) / π
+    a = (one(c) + c) / (one(c) - c)
+    res = (atan(a * tan((x - μ) / 2)) - atan(a * cot((μ+π) / 2))) / π
     return if x ≤ min_d
         zero(res)
     elseif x ≥ max_d
@@ -97,7 +97,7 @@ end
 #### Sampling
 
 function rand(rng::AbstractRNG, d::WrappedCauchy)
-    return mod2pi(d.μ + π + log(d.r) * tan(π * (rand(rng) - 0.5))) - π
+    return mod2pi(d.μ + log(d.c) * tan(π * (rand(rng) - 0.5)))
 end
 
 #### Fitting
@@ -119,27 +119,27 @@ end
 
 function fit(::Type{<:WrappedCauchy}, x::AbstractArray{T}) where {T <: Real}
     n = length(x)
-    s = mean(sin.(x))
-    c = mean(cos.(x))
-    μ = atan(s, c)
-    r2_bar = s^2 + c^2
-    r = sqrt(n / (n - one(T)) * (r2_bar - one(T) / n))
-    return WrappedCauchy{T}(μ, r)
+    sn = mean(sin.(x))
+    cs = mean(cos.(x))
+    μ = mod2pi(atan(sn, cs))
+    c2_bar = sn^2 + cs^2
+    c = sqrt(n / (n - one(T)) * (c2_bar - one(T) / n))
+    return WrappedCauchy{T}(μ, c)
 end
 
 
 function fit_mle(::Type{<:WrappedCauchy},
     x::AbstractArray{T};
-    mu0::Float64=NaN, r0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16
+    mu0::Float64=NaN, c0::Float64=NaN, maxiter::Int=1000, tol::Float64=1e-16
 ) where {T <: Real}
     est0 = fit(WrappedCauchy, x)
     μ::Float64 = isnan(mu0) ? est0.μ : mu0
-    r::Float64 = isnan(r0) ? est0.r : r0
+    c::Float64 = isnan(c0) ? est0.c : r0
     converged = false
 
     # reparameterize
-    μ1 = 2 * r * cos(μ) / (one(T) + r^2)
-    μ2 = 2 * r * sin(μ) / (one(T) + r^2)
+    μ1 = 2 * c * cos(μ) / (one(T) + c^2)
+    μ2 = 2 * c * sin(μ) / (one(T) + c^2)
 
     t = 0
     while !converged && t < maxiter
@@ -148,8 +148,8 @@ function fit_mle(::Type{<:WrappedCauchy},
         μ1, μ2 = _WC_mle_update(x, μ1, μ2)
         converged = (abs(μ1 - μ1_old) <= tol && abs(μ2 - μ2_old) <= tol)
     end
-    μ = mod2pi(atan(μ2, μ1)) - π
-    r = (one(T) - sqrt(one(T) - μ1^2 - μ2^2)) / sqrt(μ1^2 + μ2^2)
+    μ = mod2pi(atan(μ2, μ1))
+    c = (one(T) - sqrt(one(T) - μ1^2 - μ2^2)) / sqrt(μ1^2 + μ2^2)
 
-    WrappedCauchy{T}(μ, r)
+    WrappedCauchy{T}(μ, c)
 end
