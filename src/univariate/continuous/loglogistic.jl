@@ -1,136 +1,105 @@
 """
-    LogLogistic(θ, ϕ)
+    LogLogistic(α, β)
 
-The *log logistic distribution* with scale `θ` and shape `ϕ` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
-If ``X \\sim \\operatorname{Logistic}(\\theta, \\phi)`` then ``exp(X) \\sim \\operatorname{LogLogistic}(\\theta, \\phi)``. The probability density function is 
+The *log logistic distribution* with scale `α` and shape `β` is the distribution of a random variable whose logarithm has a [`Logistic`](@ref) distribution. 
+If ``X \\sim \\operatorname{LogLogistic}(\\alpha, \\beta)`` then ``log(X) \\sim \\operatorname{Logistic}(log(\\alpha), 1/\\beta)``. The probability density function is 
 
 ```math
-f(x; \\theta, \\phi) = \\frac{(\\phi / \\theta)x/\\theta()^(\\phi - 1)}{(1 + (x/\\theta)^\\phi)^2}, \\theta > 0, \\phi > 0
+f(x; \\alpha, \\beta) = \\frac{(\\alpha / \\beta)x/\\beta()^(\\alpha - 1)}{(1 + (x/\\beta)^\\alpha)^2}, \\beta > 0, \\alpha > 0
 ```
 
 ```julia
 LogLogistic()            # Log-logistic distribution with unit scale and unit shape
-LogLogistic(θ)           # Log-logistic distribution with scale θ and unit shape
-LogLogistic(θ,ϕ)         # Log-logistic distribution with scale θ and shape ϕ
+LogLogistic(α,β)         # Log-logistic distribution with scale α and shape β
 
-params(d)                # Get the parameters, i.e. (θ, ϕ)
-scale(d)                 # Get the scale parameter, i.e. θ
-shape(d)                 # Get the shape parameter, i.e. ϕ
+params(d)                # Get the parameters, i.e. (α, β)
+scale(d)                 # Get the scale parameter, i.e. α
+shape(d)                 # Get the shape parameter, i.e. β
 ```
 
 External links
 
 * [Log logistic distribution on Wikipedia](https://en.wikipedia.org/wiki/Log-logistic_distribution)
-
 """
 
-
 struct LogLogistic{T<:Real} <: ContinuousUnivariateDistribution
-    θ::T
-    ϕ::T
-    LogLogistic{T}(θ::T,ϕ::T) where {T} = new{T}(θ,ϕ)
+    α::T
+    β::T
+    LogLogistic{T}(α::T,β::T) where {T} = new{T}(α,β)
 end
 
-function LogLogistic(θ::T, ϕ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(LogLogistic, θ > zero(θ) && ϕ > zero(ϕ))
-    return LogLogistic{T}(θ, ϕ)
+function LogLogistic(α::T, β::T; check_args=true) where {T <: Real}
+    check_args && @check_args(LogLogistic, α > zero(α) && β > zero(β))
+    return LogLogistic{T}(α, β)
 end
 
-LogLogistic(θ::Real, ϕ::Real) = LogLogistic(promote(θ,ϕ)...)
-LogLogistic(θ::Integer, ϕ::Integer) = LogLogistic(float(θ), float(ϕ))
-LogLogistic(θ::T) where {T<:Real} = LogLogistic(θ, 1.0)
+LogLogistic(α::Real, β::Real) = LogLogistic(promote(α,β)...)
+LogLogistic(α::Integer, β::Integer) = LogLogistic(float(α), float(β))
 LogLogistic() = LogLogistic(1.0, 1.0, check_args=false) 
 
 @distr_support LogLogistic 0.0 Inf
 
 #### Coversions
-convert(::Type{LogLogistic{T}}, θ::S, ϕ::S) where {T <: Real, S <: Real} = LogLogistic(T(θ), T(ϕ))
-convert(::Type{LogLogistic{T}}, d::LogLogistic{S}) where {T <: Real, S <: Real} = LogLogistic(T(d.θ), T(d.ϕ), check_args=false)
-
+convert(::Type{LogLogistic{T}}, d::LogLogistic{T}) where {T<:Real} = d
+convert(::Type{LogLogistic{T}}, d::LogLogistic) where {T<:Real} = LogLogistic{T}(T(d.α), T(d.β))
 #### Parameters 
 
-params(d::LogLogistic) = (d.θ, d.ϕ)
+params(d::LogLogistic) = (d.α, d.β)
 partype(::LogLogistic{T}) where {T} = T
 
 #### Statistics 
 
-median(d::LogLogistic) = d.θ
-function mean(d::LogLogistic)
-	if d.ϕ ≤ 1
-        error("mean is defined only when ϕ > 1") 	
+median(d::LogLogistic) = d.α
+function mean(d::LogLogistic{T}) where T<:Real
+	if d.β ≤ 1
+        ArgumentError("mean is defined only when β > 1") 	
 	end
-	return d.θ*π/d.ϕ/sin(π/d.ϕ)
+	return d.α*π/d.β/sin(π/d.β)
 end
 
-function mode(d::LogLogistic)
-	if d.ϕ ≤ 1
-		error("mode is defined only when ϕ > 1")
+function mode(d::LogLogistic{T}) where T<:Real
+	if d.β ≤ 1
+		ArgumentError("mode is defined only when β > 1")
 	end 
-	return d.θ*((d.ϕ-1)/(d.ϕ+1))^(1/d.ϕ)
+	return d.α*((d.β-1)/(d.β+1))^(1/d.β)
 end
 
-function var(d::LogLogistic)
-	if d.ϕ ≤ 2
-		erros("var is defined only when ϕ > 2") 
+function var(d::LogLogistic{T}) where T<:Real
+	if d.β ≤ 2
+		ArgumentError("var is defined only when β > 2") 
 	end
-    b = π/d.ϕ
-	return d.θ^2 * (2*b/sin(2*b)-b^2/(sin(b))^2)
+    b = π/d.β
+	return d.α^2 * (2*b/sin(2*b)-b^2/(sin(b))^2)
 end
 
 
 #### Evaluation
-function pdf(d::LogLogistic, x::Real)
-    if x ≤ zero(0)
-        z = zero(x)
-    else
-        # use built-in impletation to evaluate the density 
-        # of loglogistic at x 
-        # Y = log(X)
-        # Y ~ logistic(log(θ), 1/ϕ)
-        z = pdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) / x
-    end    
-    return z
+function pdf(d::LogLogistic{T}, x::Real) where T<:Real
+    # use built-in impletation to evaluate the density 
+    # of loglogistic at x 
+    # Y = log(X)
+    # Y ~ logistic(log(θ), 1/ϕ)
+    x >= 0 ? pdf(Logistic(log(d.α), 1/d.β), log(x)) / x : zero(T)
 end
 
-function logpdf(d::LogLogistic, x::Real)
-    if x ≤ zero(0)
-        z = log(zero(x))
-    else
-        z = logpdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) + log(x)
-    end
-    return z 
+function logpdf(d::LogLogistic{T}, x::Real) where T<:Real
+    x >= 0 ? logpdf(Logistic(log(d.α), 1/d.β), log(x)) + log(x) : -T(Inf)
 end
 
-function cdf(d::LogLogistic, x::Real)
-    if x <= 0
-        return 0.0
-    end 
-    z = cdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) 
-    return z
+function cdf(d::LogLogistic{T}, x::Real) where T<:Real
+    x >= 0 ? cdf(Logistic(log(d.α), 1/d.β), log(x)) : zero(T)
 end
 
-function logcdf(d::LogLogistic, x::Real)
-    if x <= 0
-        -Inf
-    end
-    z = logcdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) 
-	return z
+function logcdf(d::LogLogistic{T}, x::Real) where T<:Real
+    x >= 0 ? logcdf(Logistic(log(d.α), 1/d.β), log(x)) : -T(Inf)
 end
 
-function ccdf(d::LogLogistic, x::Real)
-    if x <= 0
-        return 1
-    end 
-    z = ccdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) 
-	return z 
+function ccdf(d::LogLogistic{T}, x::Real) where T<:Real
+    x >= 0 ? ccdf(Logistic(log(d.α), 1/d.β), log(x)) : one(T)
 end
 
-function logccdf(d::LogLogistic, x::Real)
-    if x <= 0
-        return 0.0
-    end
-    z = logccdf(Logistic(log(d.θ), 1/d.ϕ), log(x)) 
-	return z 
+function logccdf(d::LogLogistic{T}, x::Real) where T<:Real
+    x >= 0 ? logccdf(Logistic(log(d.α), 1/d.β), log(x)) : zero(T)
 end
 
 
@@ -138,5 +107,5 @@ end
 function rand(rng::AbstractRNG, d::LogLogistic)
     u = rand(rng)
     r = u / (1 - u)
-    return r^(1/d.ϕ)*d.θ
+    return r^(1/d.β)*d.α
 end
