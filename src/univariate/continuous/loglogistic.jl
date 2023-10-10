@@ -54,7 +54,7 @@ function mean(d::LogLogistic{T}) where T<:Real
 	if d.β ≤ 1
         ArgumentError("mean is defined only when β > 1") 	
 	end
-	return d.α*π/d.β/sin(π/d.β)
+    return d.α/sinc(1/d.β)
 end
 
 function mode(d::LogLogistic{T}) where T<:Real
