@@ -4,7 +4,9 @@ import ..Distributions
 
 """
     test_mvnormal(
-        g::AbstractMvNormal, n_tsamples::Int=10^6, rng::AbstractRNG=Random.default_rng()
+        g::AbstractMvNormal,
+        n_tsamples::Int=10^6,
+        rng::Union{Random.AbstractRNG, Nothing}=nothing,
     )
 
 Test that `AbstractMvNormal` implements the expected API.
@@ -14,7 +16,9 @@ Test that `AbstractMvNormal` implements the expected API.
     this function.
 """
 test_mvnormal(
-    g::AbstractMvNormal, n_tsamples::Int=10^6, rng::Union{AbstractRNG, Nothing}=nothing
+    g::Distributions.AbstractMvNormal,
+    n_tsamples::Int=10^6,
+    rng::Union{AbstractRNG, Nothing}=nothing
 )
 
 if isdefined(Base, :get_extension) && isdefined(Base.Experimental, :register_error_hint)
