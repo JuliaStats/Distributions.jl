@@ -3,6 +3,8 @@ module TestUtils
 import ..Distributions
 import ..Distributions.Random
 
+function test_mvnormal end
+
 """
     test_mvnormal(
         g::AbstractMvNormal,

@@ -3,7 +3,6 @@ module DistributionsTestExt
 using Distributions
 using Distributions.LinearAlgebra
 using Distributions.Random
-using Distributions.TestUtils
 using Test
 
 __rand(::Nothing, args...) = rand(args...)
@@ -12,7 +11,7 @@ __rand(rng::AbstractRNG, args...) = rand(rng, args...)
 __rand!(::Nothing, args...) = rand!(args...)
 __rand!(rng::AbstractRNG, args...) = rand!(rng, args...)
 
-function TestUtils.test_mvnormal(
+function Distributions.TestUtils.test_mvnormal(
     g::AbstractMvNormal, n_tsamples::Int=10^6, rng::Union{AbstractRNG, Nothing}=nothing
 )
     d = length(g)
