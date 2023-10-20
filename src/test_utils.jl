@@ -1,6 +1,7 @@
 module TestUtils
 
 import ..Distributions
+import ..Distributions.Random
 
 """
     test_mvnormal(
@@ -18,7 +19,7 @@ Test that `AbstractMvNormal` implements the expected API.
 test_mvnormal(
     g::Distributions.AbstractMvNormal,
     n_tsamples::Int=10^6,
-    rng::Union{AbstractRNG, Nothing}=nothing
+    rng::Union{Random.AbstractRNG, Nothing}=nothing
 )
 
 if isdefined(Base, :get_extension) && isdefined(Base.Experimental, :register_error_hint)
