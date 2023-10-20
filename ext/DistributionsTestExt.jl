@@ -11,6 +11,19 @@ __rand(rng::AbstractRNG, args...) = rand(rng, args...)
 __rand!(::Nothing, args...) = rand!(args...)
 __rand!(rng::AbstractRNG, args...) = rand!(rng, args...)
 
+"""
+    test_mvnormal(
+        g::AbstractMvNormal,
+        n_tsamples::Int=10^6,
+        rng::Union{Random.AbstractRNG, Nothing}=nothing,
+    )
+
+Test that `AbstractMvNormal` implements the expected API.
+
+!!! Note
+    On Julia >= 1.9, you have to load the `Test` standard library to be able to use
+    this function.
+"""
 function Distributions.TestUtils.test_mvnormal(
     g::AbstractMvNormal, n_tsamples::Int=10^6, rng::Union{AbstractRNG, Nothing}=nothing
 )
