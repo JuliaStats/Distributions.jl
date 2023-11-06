@@ -26,7 +26,8 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
+    len::T
+    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b, b-a)
 end
 
 function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
@@ -47,11 +48,11 @@ Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 
 #### Parameters
 
-params(d::Uniform) = (d.a, d.b)
+params(d::Uniform) = (d.a, d.b, d.len)
 partype(::Uniform{T}) where {T<:Real} = T
 
 location(d::Uniform) = d.a
-scale(d::Uniform) = d.b - d.a
+scale(d::Uniform) = d.len
 
 
 #### Statistics
@@ -61,12 +62,12 @@ median(d::Uniform) = mean(d)
 mode(d::Uniform) = mean(d)
 modes(d::Uniform) = Float64[]
 
-var(d::Uniform) = (w = d.b - d.a; w^2 / 12)
+var(d::Uniform) = (w = d.len; w^2 / 12)
 
 skewness(d::Uniform{T}) where {T<:Real} = zero(T)
 kurtosis(d::Uniform{T}) where {T<:Real} = -6/5*one(T)
 
-entropy(d::Uniform) = log(d.b - d.a)
+entropy(d::Uniform) = log(d.len)
 
 
 #### Evaluation
@@ -86,21 +87,21 @@ end
 gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
 function cdf(d::Uniform, x::Real)
-    a, b = params(d)
-    return clamp((x - a) / (b - a), 0, 1)
+    a, _, len = params(d)
+    return clamp((x - a) / len, 0, 1)
 end
 function ccdf(d::Uniform, x::Real)
-    a, b = params(d)
-    return clamp((b - x) / (b - a), 0, 1)
+    _, b = params(d)
+    return clamp((b - x) / len, 0, 1)
 end
 
-quantile(d::Uniform, p::Real) = d.a + p * (d.b - d.a)
-cquantile(d::Uniform, p::Real) = d.b + p * (d.a - d.b)
+quantile(d::Uniform, p::Real) = d.a + p * d.len
+cquantile(d::Uniform, p::Real) = d.b + p * -d.len
 
 
 function mgf(d::Uniform, t::Real)
-    (a, b) = params(d)
-    u = (b - a) * t / 2
+    (a, b, len) = params(d)
+    u = len * t / 2
     u == zero(u) && return one(u)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
@@ -117,8 +118,8 @@ end
 
 function cgf(d::Uniform, t)
     # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
-    a,b = params(d)
-    x = t*(b-a)
+    _,_,len = params(d)
+    x = t*len
     if abs(x) <= sqrt(eps(float(one(x))))
         cgf_around_zero(d, t)
     else
@@ -126,19 +127,19 @@ function cgf(d::Uniform, t)
     end
 end
 function cgf_around_zero(d::Uniform, t)
-    a,b = params(d)
-    x = t*(b-a)
+    a,_,len = params(d)
+    x = t*len
     t*a + log1p(cgf_uniform_around_zero_kernel(x))
 end
 function cgf_away_from_zero(d::Uniform, t)
-    a,b = params(d)
-    x = t*(b-a)
+    a,b,len = params(d)
+    x = t*len
     logsubexp(t*b, t*a) - log(abs(x))
 end
 
 function cf(d::Uniform, t::Real)
-    (a, b) = params(d)
-    u = (b - a) * t / 2
+    (a, b, len) = params(d)
+    u = len * t / 2
     u == zero(u) && return complex(one(u))
     v = (a + b) * t / 2
     cis(v) * (sin(u) / u)
@@ -151,7 +152,7 @@ Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
+rand(rng::AbstractRNG, d::Uniform{T}) where T = d.a + d.len * rand(T, rng)
 
 _rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
     A .= quantile.(d, rand!(rng, A))
