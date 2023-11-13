@@ -146,7 +146,11 @@ end
 
 ### evaluation
 
-quantile(d::Truncated, p::Real) = quantile(d.untruncated, d.lcdf + p * d.tp)
+function quantile(d::Truncated, p::Real)
+    x = quantile(d.untruncated, d.lcdf + p * d.tp)
+    min_x, max_x = extrema(d)
+    return clamp(x, oftype(x, min_x), oftype(x, max_x))
+end
 
 function pdf(d::Truncated, x::Real)
     result = pdf(d.untruncated, x) / d.tp

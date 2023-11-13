@@ -151,7 +151,7 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
     lnxsq = lnx.^2
     mean_lnx = mean(lnx)
 
-    # first iteration outside loop, prevents type instabililty in α, ϵ
+    # first iteration outside loop, prevents type instability in α, ϵ
 
     xpow0 = x.^alpha0
     sum_xpow0 = sum(xpow0)

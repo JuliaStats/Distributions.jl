@@ -26,6 +26,7 @@ const tests = [
     "univariate/continuous/uniform",
     "univariate/continuous/lognormal",
     "multivariate/mvnormal",
+    "multivariate/mvlogitnormal",
     "multivariate/mvlognormal",
     "types", # extra file compared to /src
     "utils",

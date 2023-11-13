@@ -55,6 +55,7 @@ Multinomial
 Distributions.AbstractMvNormal
 MvNormal
 MvNormalCanon
+MvLogitNormal
 MvLogNormal
 Dirichlet
 Product

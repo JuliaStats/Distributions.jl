@@ -1,4 +1,4 @@
-using Test, Distributions, StatsFuns, ForwardDiff
+using Test, Distributions, StatsFuns, ForwardDiff, OffsetArrays
 
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
@@ -203,3 +203,23 @@ end
 # affine transformations
 test_affine_transformations(Normal, randn(), randn()^2)
 test_affine_transformations(NormalCanon, randn()^2, randn()^2)
+
+@testset "Normal suffstats and OffsetArrays" begin
+    a = rand(Normal(), 11)
+    wa = 1.0:11.0
+
+    resulta = @inferred(suffstats(Normal, a))
+
+    resultwa = @inferred(suffstats(Normal, a, wa))
+
+    b = OffsetArray(a, -5:5)
+    wb = OffsetArray(wa, -5:5)
+
+    resultb = @inferred(suffstats(Normal, b))
+    @test resulta == resultb
+
+    resultwb = @inferred(suffstats(Normal, b, wb))
+    @test resultwa == resultwb
+
+    @test_throws DimensionMismatch suffstats(Normal, b, wa)
+end

@@ -150,7 +150,7 @@ end
 
 `Distribution` is a `Sampleable` generating random values from a probability
 distribution. Distributions define a Probability Distribution Function (PDF)
-to implement with `pdf` and a Cumulated Distribution Function (CDF) to implement
+to implement with `pdf` and a Cumulative Distribution Function (CDF) to implement
 with `cdf`.
 """
 abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
@@ -228,7 +228,7 @@ end
 """
     logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
-Evaluate the probability density function of `d` at `x`.
+Evaluate the logarithm of the probability density function of `d` at `x`.
 
 This function checks if the size of `x` is compatible with distribution `d`. This check can
 be disabled by using `@inbounds`.
