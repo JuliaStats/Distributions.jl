@@ -296,6 +296,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("namedtuple/productnamedtuple.jl")
 include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
