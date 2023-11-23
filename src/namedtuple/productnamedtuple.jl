@@ -88,6 +88,16 @@ function logpdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where 
     return sum(map(logpdf, dist.dists, x))
 end
 
+function loglikelihood(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
+    return logpdf(dist, x)
+end
+
+function loglikelihood(
+    dist::ProductNamedTupleDistribution{K}, xs::AbstractArray{<:NamedTuple{K}}
+) where {K}
+    return sum(Base.Fix1(loglikelihood, dist), xs)
+end
+
 # Statistics
 
 mode(d::ProductNamedTupleDistribution) = map(mode, d.dists)
