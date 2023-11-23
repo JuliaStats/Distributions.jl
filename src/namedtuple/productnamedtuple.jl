@@ -77,6 +77,8 @@ mean(d::ProductNamedTupleDistribution) = map(mean, d.dists)
 
 var(d::ProductNamedTupleDistribution) = map(var, d.dists)
 
+std(d::ProductNamedTupleDistribution) = map(std, d.dists)
+
 entropy(d::ProductNamedTupleDistribution) = sum(entropy, d.dists)
 
 function kldivergence(
