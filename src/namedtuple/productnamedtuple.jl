@@ -99,11 +99,7 @@ function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution, dims::Dim
     return xs
 end
 
-function _rand!(
-    rng::AbstractRNG,
-    d::ProductNamedTupleDistribution,
-    xs::AbstractArray,
-)
+function _rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
     for i in eachindex(xs)
         xs[i] = Random.rand(rng, d)
     end
