@@ -16,8 +16,8 @@ end
 function ProductNamedTupleDistribution(
     dists::NamedTuple{K,V}
 ) where {K,V<:Tuple{Vararg{Distribution}}}
-    vs = _product_valuesupport(dists)
-    eltypes = _product_namedtuple_eltype(dists)
+    vs = _product_valuesupport(values(dists))
+    eltypes = _product_namedtuple_eltype(values(dists))
     return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
 end
 
@@ -48,7 +48,9 @@ distributions.
 The function falls back to constructing a [`ProductNamedTupleDistribution`](@ref)
 distribution but specialized methods can be defined.
 """
-function product_distribution(dists::NamedTuple{<:Any,<:Tuple{Vararg{Distribution}}})
+function product_distribution(
+    dists::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}}
+)
     return ProductNamedTupleDistribution(dists)
 end
 
@@ -101,7 +103,7 @@ var(d::ProductNamedTupleDistribution) = map(var, d.dists)
 
 std(d::ProductNamedTupleDistribution) = map(std, d.dists)
 
-entropy(d::ProductNamedTupleDistribution) = sum(entropy, d.dists)
+entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 
 function kldivergence(
     d1::ProductNamedTupleDistribution{K}, d2::ProductNamedTupleDistribution{K}
