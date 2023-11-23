@@ -1,18 +1,27 @@
-struct ProductNamedTupleDistribution{Tnames,Tdists,eltypes,S<:ValueSupport} <:
+struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
        Distribution{NamedTupleVariate{Tnames},S}
     dists::NamedTuple{Tnames,Tdists}
 end
 function ProductNamedTupleDistribution(
     dists::NamedTuple{K,V}
 ) where {K,V<:Tuple{Vararg{Distribution}}}
-    eltypes = Tuple{map(eltype, values(dists))...}
-    # TODO: allow mixed ValueSupports here
     vs = _product_valuesupport(dists)
-    return ProductNamedTupleDistribution{K,V,eltypes,vs}(dists)
+    eltypes = _product_namedtuple_eltype(dists)
+    return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
 end
 
+_gentype(d::UnivariateDistribution) = eltype(d)
+_gentype(d::Distribution{<:ArrayLikeVariate{S}}) where {S} = Array{eltype(d),S}
+function _gentype(d::Distribution{CholeskyVariate})
+    T = eltype(d)
+    return LinearAlgebra.Cholesky{T,Matrix{T}}
+end
+_gentype(::Distribution) = Any
+
+_product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
+
 function Base.show(io::IO, d::ProductNamedTupleDistribution)
-    show_multline(io, d, collect(pairs(d.dists)))
+    return show_multline(io, d, collect(pairs(d.dists)))
 end
 
 function distrname(::ProductNamedTupleDistribution{K}) where {K}
@@ -34,9 +43,7 @@ end
 
 # Properties
 
-function Base.eltype(::Type{<:ProductNamedTupleDistribution{K,<:Any,V}}) where {K,V}
-    return NamedTuple{K,V}
-end
+Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any,<:Any,<:Any,T}}) where {T} = T
 
 function minimum(
     d::ProductNamedTupleDistribution{<:Any,<:Tuple{Vararg{UnivariateDistribution}}}
