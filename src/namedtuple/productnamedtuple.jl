@@ -56,16 +56,9 @@ end
 
 Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any,<:Any,<:Any,T}}) where {T} = T
 
-function minimum(
-    d::ProductNamedTupleDistribution{<:Any,<:Tuple{Vararg{UnivariateDistribution}}}
-)
-    return map(minimum, d.dists)
-end
-function maximum(
-    d::ProductNamedTupleDistribution{<:Any,<:Tuple{Vararg{UnivariateDistribution}}}
-)
-    return map(maximum, d.dists)
-end
+Base.minimum(d::ProductNamedTupleDistribution) = map(minimum, d.dists)
+
+Base.maximum(d::ProductNamedTupleDistribution) = map(maximum, d.dists)
 
 marginal(d::ProductNamedTupleDistribution, k::Union{Int,Symbol}) = d.dists[k]
 if VERSION ≥ v"1.7.0-DEV.294"
