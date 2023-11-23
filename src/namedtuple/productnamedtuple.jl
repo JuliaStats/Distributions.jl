@@ -68,6 +68,11 @@ function maximum(
 end
 
 marginal(d::ProductNamedTupleDistribution, k::Union{Int,Symbol}) = d.dists[k]
+if VERSION ≥ v"1.7.0-DEV.294"
+    function marginal(d::ProductNamedTupleDistribution, ks::Tuple{Symbol,Vararg{Symbol}})
+        return ProductNamedTupleDistribution(d.dists[ks])
+    end
+end
 
 function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
     return all(map(insupport, dist.dists, x))
