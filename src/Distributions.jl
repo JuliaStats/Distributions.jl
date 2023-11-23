@@ -39,6 +39,7 @@ export
     Multivariate,
     Matrixvariate,
     CholeskyVariate,
+    NamedTupleVariate,
     Discrete,
     Continuous,
     Sampleable,
