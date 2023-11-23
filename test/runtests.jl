@@ -61,7 +61,7 @@ const tests = [
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
     "product",
-    "namedtuple/productnamedtuple.jl",
+    "namedtuple/productnamedtuple",
     "univariate/discrete/discretenonparametric",
     "univariate/continuous/chernoff",
     "univariate_bounds", # extra file compared to /src
