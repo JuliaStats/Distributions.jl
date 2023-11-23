@@ -1,7 +1,7 @@
 """
     Poisson(λ)
 
-A *Poisson distribution* descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
+A *Poisson distribution* describes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
 
 ```math
 P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
@@ -26,19 +26,20 @@ struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
     Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
 end
 
-function Poisson(λ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Poisson, λ >= zero(λ))
-    return Poisson{T}(λ)
+function Poisson(λ::Real; check_args::Bool=true)
+    @check_args Poisson (λ, λ >= zero(λ))
+    return Poisson{typeof(λ)}(λ)
 end
 
-Poisson(λ::Integer) = Poisson(float(λ))
-Poisson() = Poisson(1.0, check_args=false)
+Poisson(λ::Integer; check_args::Bool=true) = Poisson(float(λ); check_args=check_args)
+Poisson() = Poisson{Float64}(1.0)
 
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 #### Conversions
 convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
-convert(::Type{Poisson{T}}, d::Poisson{S}) where {T <: Real, S <: Real} = Poisson(T(d.λ), check_args=false)
+Base.convert(::Type{Poisson{T}}, d::Poisson) where {T<:Real} = Poisson{T}(T(d.λ))
+Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
 
 ### Parameters
 
@@ -100,6 +101,7 @@ function mgf(d::Poisson, t::Real)
     λ = rate(d)
     return exp(λ * (exp(t) - 1))
 end
+cgf(d::Poisson, t) = mean(d) * expm1(t)
 
 function cf(d::Poisson, t::Real)
     λ = rate(d)
@@ -121,7 +123,7 @@ function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{Floa
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.
     tw = 0.
-    for i = 1 : n
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds sx += x[i] * wi
         tw += wi

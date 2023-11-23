@@ -12,71 +12,67 @@ TruncatedNormal
 
 ### statistics
 
-minimum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.lower
-maximum(d::Truncated{Normal{T},Continuous}) where {T <: Real} = d.upper
-
-
-function mode(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     μ = mean(d.untruncated)
-    d.upper < μ ? d.upper :
-    d.lower > μ ? d.lower : μ
+    return T(clamp(μ, extrema(d)...))
 end
 
-modes(d::Truncated{Normal{T},Continuous}) where {T <: Real} = [mode(d)]
+modes(d::Truncated{<:Normal{<:Real},Continuous}) = [mode(d)]
 
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
 function _tnmom1(a, b)
+    mid = float(middle(a, b))
     if !(a ≤ b)
-        return oftype(middle(a, b), NaN)
+        return oftype(mid, NaN)
     elseif a == b
-        return middle(a, b)
+        return mid
     elseif abs(a) > abs(b)
         return -_tnmom1(-b, -a)
     elseif isinf(a) && isinf(b)
-        return zero(middle(a, b))
+        return zero(mid)
     end
-    Δ = (b - a) * middle(a, b)
+    Δ = (b - a) * mid
+    a′ = a * invsqrt2
+    b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        m = √(2/π) * expm1(-Δ) * exp(-a^2 / 2) / (erf(a/√2) - erf(b/√2))
+        m = expm1(-Δ) * exp(-a^2 / 2) / erf(b′, a′)
     elseif 0 < a < b
-        z = exp(-Δ) * erfcx(b/√2) - erfcx(a/√2)
-        iszero(z) && return middle(a, b)
-        m = √(2/π) * expm1(-Δ) / z
+        z = exp(-Δ) * erfcx(b′) - erfcx(a′)
+        iszero(z) && return mid
+        m = expm1(-Δ) / z
     end
-    return clamp(m, a, b)
+    return clamp(m / sqrthalfπ, a, b)
 end
 
 # do not export. Used in var
 # computes 2nd moment of standard normal distribution truncated to [a, b]
 function _tnmom2(a::Real, b::Real)
+    mid = float(middle(a, b))
     if !(a ≤ b)
-        return oftype(middle(a, b), NaN)
+        return oftype(mid, NaN)
     elseif a == b
-        return middle(a, b)^2
+        return mid^2
     elseif abs(a) > abs(b)
         return _tnmom2(-b, -a)
     elseif isinf(a) && isinf(b)
-        return one(middle(a, b))
+        return one(mid)
     elseif isinf(b)
-        return 1 + √(2 / π) * a / erfcx(a / √2)
+        return 1 + a / erfcx(a * invsqrt2) / sqrthalfπ
     end
-
+    a′ = a * invsqrt2
+    b′ = b * invsqrt2
     if a ≤ 0 ≤ b
-        ea = √(π/2) * erf(a / √2)
-        eb = √(π/2) * erf(b / √2)
-        fa = ea - a * exp(-a^2 / 2)
-        fb = eb - b * exp(-b^2 / 2)
-        m2 = (fb - fa) / (eb - ea)
-        return m2
+        eb_ea = sqrthalfπ * erf(a′, b′)
+        fb_fa = eb_ea + a * exp(-a^2 / 2) - b * exp(-b^2 / 2)
+        return fb_fa / eb_ea
     else # 0 ≤ a ≤ b
-        exΔ = exp((a - b)middle(a, b))
-        ea = √(π/2) * erfcx(a / √2)
-        eb = √(π/2) * erfcx(b / √2)
+        exΔ = exp((a - b) * mid)
+        ea = sqrthalfπ * erfcx(a′)
+        eb = sqrthalfπ * erfcx(b′)
         fa = ea + a
         fb = eb + b
-        m2 = (fa - fb * exΔ) / (ea - eb * exΔ)
-        return m2
+        return (fa - fb * exΔ) / (ea - eb * exΔ)
     end
 end
 
@@ -93,39 +89,42 @@ function _tnvar(a::Real, b::Real)
     end
 end
 
-function mean(d::Truncated{Normal{T},Continuous}) where T <: Real
+function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if iszero(σ)
         return mode(d)
     else
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
-        return μ + _tnmom1(a, b) * σ
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
+        return T(μ + _tnmom1(a, b) * σ)
     end
 end
 
-function var(d::Truncated{Normal{T},Continuous}) where T <: Real
+function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if iszero(σ)
-        return σ
+        return T(σ)
     else
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
-        return _tnvar(a, b) * σ^2
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
+        return T(_tnvar(a, b) * σ^2)
     end
 end
 
-function entropy(d::Truncated{Normal{T},Continuous}) where T <: Real
+function entropy(d::Truncated{<:Normal{<:Real},Continuous})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
     σ = std(d0)
-    a = (d.lower - μ) / σ
-    b = (d.upper - μ) / σ
+    lower, upper = extrema(d)
+    a = (lower - μ) / σ
+    b = (upper - μ) / σ
     aφa = isinf(a) ? 0.0 : a * normpdf(a)
     bφb = isinf(b) ? 0.0 : b * normpdf(b)
     0.5 * (log2π + 1.) + log(σ * z) + (aφa - bφb) / (2.0 * z)
@@ -137,17 +136,18 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{Normal{T},Continuous}) where T <: Real
+function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
     if isfinite(μ)
-        a = (d.lower - μ) / σ
-        b = (d.upper - μ) / σ
+        lower, upper = extrema(d)
+        a = (lower - μ) / σ
+        b = (upper - μ) / σ
         z = randnt(rng, a, b, d.tp)
         return μ + σ * z
     else
-        return clamp(μ, d.lower, d.upper)
+        return clamp(μ, extrema(d)...)
     end
 end
 

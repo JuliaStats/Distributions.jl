@@ -1,5 +1,7 @@
 """
     NoncentralT(ν, λ)
+
+*Noncentral Student's t-distribution* with `v > 0` degrees of freedom and noncentrality parameter `λ`.
 """
 struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
@@ -7,19 +9,20 @@ struct NoncentralT{T<:Real} <: ContinuousUnivariateDistribution
     NoncentralT{T}(ν::T, λ::T) where {T} = new{T}(ν, λ)
 end
 
-function NoncentralT(ν::T, λ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(NoncentralT, ν > zero(ν))
+function NoncentralT(ν::T, λ::T; check_args::Bool=true) where {T <: Real}
+    @check_args NoncentralT (ν, ν > zero(ν))
     return NoncentralT{T}(ν, λ)
 end
 
-NoncentralT(ν::Real, λ::Real) = NoncentralT(promote(ν, λ)...)
-NoncentralT(ν::Integer, λ::Integer) = NoncentralT(float(ν), float(λ))
+NoncentralT(ν::Real, λ::Real; check_args::Bool=true) = NoncentralT(promote(ν, λ)...; check_args=check_args)
+NoncentralT(ν::Integer, λ::Integer; check_args::Bool=true) = NoncentralT(float(ν), float(λ); check_args=check_args)
 
 @distr_support NoncentralT -Inf Inf
 
 ### Conversions
 convert(::Type{NoncentralT{T}}, ν::S, λ::S) where {T <: Real, S <: Real} = NoncentralT(T(ν), T(λ))
-convert(::Type{NoncentralT{T}}, d::NoncentralT{S}) where {T <: Real, S <: Real} = NoncentralT(T(d.ν), T(d.λ), check_args=false)
+Base.convert(::Type{NoncentralT{T}}, d::NoncentralT) where {T<:Real} = NoncentralT(T(d.ν), T(d.λ))
+Base.convert(::Type{NoncentralT{T}}, d::NoncentralT{T}) where {T<:Real} = d
 
 ### Parameters
 

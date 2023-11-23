@@ -13,12 +13,14 @@ struct EdgeworthZ{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
 
-    function EdgeworthZ{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
-        @check_args(EdgeworthZ, n > zero(n))
+    function EdgeworthZ{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
+        @check_args EdgeworthZ (n, n > zero(n))
         new{D}(d, n)
     end
 end
-EdgeworthZ(d::UnivariateDistribution,n::Real) = EdgeworthZ{typeof(d)}(d,n)
+function EdgeworthZ(d::UnivariateDistribution, n::Real; check_args::Bool=true)
+    return EdgeworthZ{typeof(d)}(d, n; check_args=check_args)
+end
 
 mean(d::EdgeworthZ) = 0.0
 var(d::EdgeworthZ) = 1.0
@@ -77,12 +79,14 @@ end
 struct EdgeworthSum{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function EdgeworthSum{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
-        @check_args(EdgeworthSum, n > zero(n))
+    function EdgeworthSum{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
+        @check_args EdgeworthSum (n, n > zero(n))
         new{D}(d, n)
     end
 end
-EdgeworthSum(d::UnivariateDistribution, n::Real) = EdgeworthSum{typeof(d)}(d,n)
+function EdgeworthSum(d::UnivariateDistribution, n::Real; check_args::Bool=true)
+    return EdgeworthSum{typeof(d)}(d, n; check_args=check_args)
+end
 
 mean(d::EdgeworthSum) = d.n*mean(d.dist)
 var(d::EdgeworthSum) = d.n*var(d.dist)
@@ -91,14 +95,15 @@ var(d::EdgeworthSum) = d.n*var(d.dist)
 struct EdgeworthMean{D<:UnivariateDistribution} <: EdgeworthAbstract
     dist::D
     n::Float64
-    function EdgeworthMean{D}(d::T, n::Real) where {D<:UnivariateDistribution,T<:UnivariateDistribution}
+    function EdgeworthMean{D}(d::UnivariateDistribution, n::Real; check_args::Bool=true) where {D<:UnivariateDistribution}
         # although n would usually be an integer, no methods are require this
-        n > zero(n) ||
-            error("n must be positive")
+        @check_args EdgeworthMean (n, n > zero(n), "n must be positive")
         new{D}(d, Float64(n))
     end
 end
-EdgeworthMean(d::UnivariateDistribution,n::Real) = EdgeworthMean{typeof(d)}(d,n)
+function EdgeworthMean(d::UnivariateDistribution, n::Real; check_args::Bool=true)
+    return EdgeworthMean{typeof(d)}(d, n; check_args=check_args)
+end
 
 mean(d::EdgeworthMean) = mean(d.dist)
 var(d::EdgeworthMean) = var(d.dist) / d.n

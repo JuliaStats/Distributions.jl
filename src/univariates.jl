@@ -7,10 +7,10 @@ end
 
 RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
 
-minimum(r::RealInterval) = r.lb
-maximum(r::RealInterval) = r.ub
-extrema(r::RealInterval) = (r.lb, r.ub)
-in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
+Base.minimum(r::RealInterval) = r.lb
+Base.maximum(r::RealInterval) = r.ub
+Base.extrema(r::RealInterval) = (r.lb, r.ub)
+Base.in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
 
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
@@ -125,8 +125,8 @@ macro distr_support(D, lb, ub)
 
     # overall
     esc(quote
-        minimum($(paramdecl)) = $lb
-        maximum($(paramdecl)) = $ub
+        Base.minimum($(paramdecl)) = $lb
+        Base.maximum($(paramdecl)) = $ub
     end)
 end
 
@@ -182,7 +182,8 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 """
     median(d::UnivariateDistribution)
 
-Return the median value of distribution `d`.
+Return the median value of distribution `d`. The median is the smallest `x` such that `cdf(d, x) ≥ 1/2`.
+Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
 median(d::UnivariateDistribution) = quantile(d, 1//2)
 
@@ -269,9 +270,24 @@ proper_kurtosis(d::Distribution) = kurtosis(d, false)
 """
     mgf(d::UnivariateDistribution, t)
 
-Evaluate the moment generating function of distribution `d`.
+Evaluate the [moment-generating function](https://en.wikipedia.org/wiki/Moment-generating_function) of distribution `d` at `t`.
+
+See also [`cgf`](@ref)
 """
 mgf(d::UnivariateDistribution, t)
+
+"""
+    cgf(d::UnivariateDistribution, t)
+
+Evaluate the [cumulant-generating function](https://en.wikipedia.org/wiki/Cumulant) of distribution `d` at `t`.
+
+The cumulant-generating-function is the logarithm of the [moment-generating function](https://en.wikipedia.org/wiki/Moment-generating_function):
+`cgf = log ∘ mgf`.
+In practice, however, the right hand side may have overflow issues.
+
+See also [`mgf`](@ref)
+"""
+cgf(d::UnivariateDistribution, t)
 
 """
     cf(d::UnivariateDistribution, t)
@@ -634,6 +650,7 @@ end
 
 const discrete_distributions = [
     "bernoulli",
+    "bernoullilogit",
     "betabinomial",
     "binomial",
     "dirac",
@@ -671,11 +688,14 @@ const continuous_distributions = [
     "gumbel",
     "inversegamma",
     "inversegaussian",
+    "johnsonsu",
     "kolmogorov",
     "ksdist",
     "ksonesided",
+    "kumaraswamy",
     "laplace",
     "levy",
+    "lindley",
     "logistic",
     "noncentralbeta",
     "noncentralchisq",
@@ -712,3 +732,5 @@ end
 for dname in continuous_distributions
     include(joinpath("univariate", "continuous", "$(dname).jl"))
 end
+
+include(joinpath("univariate", "orderstatistic.jl"))

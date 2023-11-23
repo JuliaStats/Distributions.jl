@@ -28,15 +28,14 @@ struct Gumbel{T<:Real} <: ContinuousUnivariateDistribution
     Gumbel{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Gumbel(μ::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Gumbel, θ > zero(θ))
+function Gumbel(μ::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Gumbel (θ, θ > zero(θ))
     return Gumbel{T}(μ, θ)
 end
 
-Gumbel(μ::Real, θ::Real) = Gumbel(promote(μ, θ)...)
-Gumbel(μ::Integer, θ::Integer) = Gumbel(float(μ), float(θ))
-Gumbel(μ::T) where {T <: Real} = Gumbel(μ, one(T))
-Gumbel() = Gumbel(0.0, 1.0, check_args=false)
+Gumbel(μ::Real, θ::Real; check_args::Bool=true) = Gumbel(promote(μ, θ)...; check_args=check_args)
+Gumbel(μ::Integer, θ::Integer; check_args::Bool=true) = Gumbel(float(μ), float(θ); check_args=check_args)
+Gumbel(μ::Real=0.0) = Gumbel(μ, one(μ); check_args=false)
 
 @distr_support Gumbel -Inf Inf
 
@@ -47,7 +46,8 @@ Base.eltype(::Type{Gumbel{T}}) where {T} = T
 #### Conversions
 
 convert(::Type{Gumbel{T}}, μ::S, θ::S) where {T <: Real, S <: Real} = Gumbel(T(μ), T(θ))
-convert(::Type{Gumbel{T}}, d::Gumbel{S}) where {T <: Real, S <: Real} = Gumbel(T(d.μ), T(d.θ), check_args=false)
+Base.convert(::Type{Gumbel{T}}, d::Gumbel) where {T<:Real} = Gumbel{T}(T(d.μ), T(d.θ))
+Base.convert(::Type{Gumbel{T}}, d::Gumbel{T}) where {T<:Real} = d
 
 #### Parameters
 

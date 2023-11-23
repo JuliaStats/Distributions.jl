@@ -179,7 +179,7 @@ const ZeroMeanFullNormal{Axes} = MvNormal{Float64,PDMat{Float64,Matrix{Float64}}
 
 ### Construction
 function MvNormal(μ::AbstractVector{T}, Σ::AbstractPDMat{T}) where {T<:Real}
-    dim(Σ) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
+    size(Σ, 1) == length(μ) || throw(DimensionMismatch("The dimensions of mu and Sigma are inconsistent."))
     MvNormal{T,typeof(Σ), typeof(μ)}(μ, Σ)
 end
 
@@ -196,6 +196,7 @@ Construct a multivariate normal distribution with mean `μ` and covariance matri
 """
 MvNormal(μ::AbstractVector{<:Real}, Σ::AbstractMatrix{<:Real}) = MvNormal(μ, PDMat(Σ))
 MvNormal(μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = MvNormal(μ, PDiagMat(Σ.diag))
+MvNormal(μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = MvNormal(μ, PDiagMat(Σ.data.diag))
 MvNormal(μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
     MvNormal(μ, ScalMat(length(μ), Σ.λ))
 function MvNormal(
@@ -224,6 +225,8 @@ Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
 end
+Base.convert(::Type{MvNormal{T}}, d::MvNormal{T}) where {T<:Real} = d
+
 function convert(::Type{MvNormal{T}}, μ::AbstractVector, Σ::AbstractPDMat) where T<:Real
     MvNormal(convert(AbstractArray{T}, μ), convert(AbstractArray{T}, Σ))
 end
@@ -283,11 +286,11 @@ end
 
 ### Affine transformations
 
-+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ .+ c, d.Σ)
+Base.:+(d::MvNormal, c::AbstractVector) = MvNormal(d.μ + c, d.Σ)
+Base.:+(c::AbstractVector, d::MvNormal) = d + c
+Base.:-(d::MvNormal, c::AbstractVector) = MvNormal(d.μ - c, d.Σ)
 
-+(c::AbstractVector, d::MvNormal) = d + c
-
-*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
+Base.:*(B::AbstractMatrix, d::MvNormal) = MvNormal(B * d.μ, X_A_Xt(d.Σ, B))
 
 dot(b::AbstractVector, d::MvNormal) = Normal(dot(d.μ, b), √quad(d.Σ, b))
 
@@ -309,7 +312,7 @@ MvNormalKnownCov(d::Int, σ::Real) = MvNormalKnownCov(ScalMat(d, abs2(Float64(σ
 MvNormalKnownCov(σ::Vector{Float64}) = MvNormalKnownCov(PDiagMat(abs2.(σ)))
 MvNormalKnownCov(Σ::Matrix{Float64}) = MvNormalKnownCov(PDMat(Σ))
 
-length(g::MvNormalKnownCov) = dim(g.Σ)
+length(g::MvNormalKnownCov) = size(g.Σ, 1)
 
 struct MvNormalKnownCovStats{Cov<:AbstractPDMat}
     invΣ::Cov              # inverse covariance

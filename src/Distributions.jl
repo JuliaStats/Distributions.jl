@@ -14,9 +14,10 @@ using LinearAlgebra, Printf
 import LinearAlgebra: dot, rank
 
 using Random
-import Random: GLOBAL_RNG, rand!, SamplerRangeInt
+import Random: default_rng, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
                   fit, kldivergence, loglikelihood, dof, span,
                   params, params!
@@ -24,10 +25,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
-
-import ChainRulesCore
-
-import DensityInterface
+using Base.MathConstants: eulergamma
 
 export
     # re-export Statistics
@@ -67,6 +65,7 @@ export
     # distribution types
     Arcsine,
     Bernoulli,
+    BernoulliLogit,
     Beta,
     BetaBinomial,
     BetaPrime,
@@ -108,17 +107,22 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
+    JohnsonSU,
+    JointOrderStatistics,
     Kolmogorov,
     KSDist,
     KSOneSided,
+    Kumaraswamy,
     Laplace,
     Levy,
+    Lindley,
     LKJ,
     LKJCholesky,
     LocationScale,
     Logistic,
     LogNormal,
     LogUniform,
+    MvLogitNormal,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
@@ -142,10 +146,11 @@ export
     Normal,
     NormalCanon,
     NormalInverseGaussian,
+    OrderStatistic,
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
-    Product,
+    Product, # deprecated
     Poisson,
     PoissonBinomial,
     QQPair,
@@ -182,6 +187,7 @@ export
     canonform,          # get canonical form of a distribution
     ccdf,               # complementary cdf, i.e. 1 - cdf
     cdf,                # cumulative distribution function
+    censored,           # censor a distribution with a lower and upper bound
     cf,                 # characteristic function
     cquantile,          # complementary quantile (i.e. using prob in right hand tail)
     component,          # get the k-th component of a mixture model
@@ -190,7 +196,6 @@ export
     componentwise_logpdf,   # component-wise logpdf for mixture models
     concentration,      # the concentration parameter
     convolve,           # convolve distributions of the same type
-    dim,                # sample dimension of multivariate distribution
     dof,                # get the degree of freedom
     entropy,            # entropy of distribution in nats
     failprob,           # failing probability
@@ -220,7 +225,7 @@ export
 
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
-    sqmahal!,           # inplace evaluation of sqmahal
+    sqmahal!,           # in-place evaluation of sqmahal
     location,           # get the location parameter
     location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
     mean,               # mean of distribution
@@ -229,6 +234,7 @@ export
     meanlogx,           # the mean of log(x)
     median,             # median of distribution
     mgf,                # moment generating function
+    cgf,                # cumulant generating function
     mode,               # the mode of a unimodal distribution
     modes,              # mode(s) of distribution as vector
     moment,             # moments of distribution
@@ -293,8 +299,10 @@ include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
 # others
+include("product.jl")
 include("reshaped.jl")
 include("truncate.jl")
+include("censored.jl")
 include("conversion.jl")
 include("convolution.jl")
 include("qq.jl")
@@ -305,11 +313,18 @@ include("pdfnorm.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
-# Implementation of DensityInterface API
-include("density_interface.jl")
+# Interface for StatsAPI
+include("statsapi.jl")
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
+
+# Extensions: Implementation of DensityInterface and ChainRulesCore API
+if !isdefined(Base, :get_extension)
+    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
+    include("../ext/DistributionsDensityInterfaceExt.jl")
+    include("../ext/DistributionsTestExt.jl")
+end
 
 include("deprecates.jl")
 
@@ -334,14 +349,15 @@ information.
 Supported distributions:
 
     Arcsine, Bernoulli, Beta, BetaBinomial, BetaPrime, Binomial, Biweight,
-    Categorical, Cauchy, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
+    Categorical, Cauchy, Censored, Chi, Chisq, Cosine, DiagNormal, DiagNormalCanon,
     Dirichlet, DiscreteUniform, DoubleExponential, EdgeworthMean,
     EdgeworthSum, EdgeworthZ, Erlang,
     Epanechnikov, Exponential, FDist, FisherNoncentralHypergeometric,
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, LKJ, LKJCholesky,
+    IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
+    Laplace, Levy, Lindley, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,

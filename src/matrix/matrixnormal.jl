@@ -30,8 +30,8 @@ end
 
 function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
     n, p = size(M)
-    n == dim(U) || throw(ArgumentError("Number of rows of M must equal dim of U."))
-    p == dim(V) || throw(ArgumentError("Number of columns of M must equal dim of V."))
+    n == size(U, 1) || throw(ArgumentError("Number of rows of M must equal dim of U."))
+    p == size(V, 1) || throw(ArgumentError("Number of columns of M must equal dim of V."))
     logc0 = matrixnormal_logc0(U, V)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
@@ -67,6 +67,7 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     VV = convert(AbstractArray{T}, d.V)
     MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(d.logc0))
 end
+Base.convert(::Type{MatrixNormal{T}}, d::MatrixNormal{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
@@ -104,8 +105,8 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 #  -----------------------------------------------------------------------------
 
 function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
-    n = dim(U)
-    p = dim(V)
+    n = size(U, 1)
+    p = size(V, 1)
     -(n * p / 2) * (logtwo + logπ) - (n / 2) * logdet(V) - (p / 2) * logdet(U)
 end
 

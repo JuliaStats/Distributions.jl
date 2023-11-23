@@ -11,9 +11,29 @@ function qqbuild(x::AbstractVector, y::AbstractVector)
     return QQPair(qx, qy)
 end
 
+
+"""
+    ppoints(n::Int)
+
+Generate a sequence of probability points of length `n`:
+
+```math
+(k − 0.5)/n, \\qquad k \\in \\{1, \\ldots, n\\}
+```
+
+## References
+
+https://ch.mathworks.com/help/stats/probplot.html
+"""
+function ppoints(n::Int)
+    m = 2 * n
+    return (1:2:(m - 1)) ./ m
+end
+
+
 function qqbuild(x::AbstractVector, d::UnivariateDistribution)
     n = length(x)
-    grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
+    grid = ppoints(n)
     qx = quantile(x, grid)
     qd = quantile.(Ref(d), grid)
     return QQPair(qx, qd)
@@ -21,7 +41,7 @@ end
 
 function qqbuild(d::UnivariateDistribution, x::AbstractVector)
     n = length(x)
-    grid = [(1 / (n - 1)):(1 / (n - 1)):(1.0 - (1 / (n - 1)));]
+    grid = ppoints(n)
     qd = quantile.(Ref(d), grid)
     qx = quantile(x, grid)
     return QQPair(qd, qx)

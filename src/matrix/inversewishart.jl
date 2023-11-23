@@ -29,7 +29,7 @@ end
 #  -----------------------------------------------------------------------------
 
 function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
-    p = dim(Ψ)
+    p = size(Ψ, 1)
     df > p - 1 || throw(ArgumentError("df should be greater than dim - 1."))
     logc0 = invwishart_logc0(df, Ψ)
     R = Base.promote_eltype(T, logc0)
@@ -60,6 +60,8 @@ function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
     P = convert(AbstractArray{T}, d.Ψ)
     InverseWishart{T, typeof(P)}(T(d.df), P, T(d.logc0))
 end
+Base.convert(::Type{InverseWishart{T}}, d::InverseWishart{T}) where {T<:Real} = d
+
 function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, logc0) where T<:Real
     P = convert(AbstractArray{T}, Ψ)
     InverseWishart{T, typeof(P)}(T(df), P, T(logc0))
@@ -72,31 +74,31 @@ end
 insupport(::Type{InverseWishart}, X::Matrix) = isposdef(X)
 insupport(d::InverseWishart, X::Matrix) = size(X) == size(d) && isposdef(X)
 
-dim(d::InverseWishart) = dim(d.Ψ)
-size(d::InverseWishart) = (p = dim(d); (p, p))
-rank(d::InverseWishart) = dim(d)
+size(d::InverseWishart) = size(d.Ψ)
+rank(d::InverseWishart) = rank(d.Ψ)
+
 params(d::InverseWishart) = (d.df, d.Ψ)
 @inline partype(d::InverseWishart{T}) where {T<:Real} = T
 
 function mean(d::InverseWishart)
     df = d.df
-    p = dim(d)
+    p = size(d, 1)
     r = df - (p + 1)
     r > 0.0 || throw(ArgumentError("mean only defined for df > p + 1"))
     return Matrix(d.Ψ) * (1.0 / r)
 end
 
-mode(d::InverseWishart) = d.Ψ * inv(d.df + dim(d) + 1.0)
+mode(d::InverseWishart) = d.Ψ * inv(d.df + size(d, 1) + 1.0)
 
 #  https://en.wikipedia.org/wiki/Inverse-Wishart_distribution#Moments
 function cov(d::InverseWishart, i::Integer, j::Integer, k::Integer, l::Integer)
-    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
+    p, ν, Ψ = (size(d, 1), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("cov only defined for df > dim + 3"))
     inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*(2Ψ[i,j]*Ψ[k,l] + (ν-p-1)*(Ψ[i,k]*Ψ[j,l] + Ψ[i,l]*Ψ[k,j]))
 end
 
 function var(d::InverseWishart, i::Integer, j::Integer)
-    p, ν, Ψ = (dim(d), d.df, Matrix(d.Ψ))
+    p, ν, Ψ = (size(d, 1), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("var only defined for df > dim + 3"))
     inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*((ν - p + 1)*Ψ[i,j]^2 + (ν - p - 1)*Ψ[i,i]*Ψ[j,j])
 end
@@ -107,12 +109,12 @@ end
 
 function invwishart_logc0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
-    p = dim(Ψ)
+    p = size(Ψ, 1)
     -h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) - logmvgamma(p, h_df)
 end
 
 function logkernel(d::InverseWishart, X::AbstractMatrix)
-    p = dim(d)
+    p = size(d, 1)
     df = d.df
     Xcf = cholesky(X)
     # we use the fact: tr(Ψ * inv(X)) = tr(inv(X) * Ψ) = tr(X \ Ψ)

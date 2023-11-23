@@ -1,7 +1,7 @@
 """
     SkewedExponentialPower(μ, σ, p, α)
 
-The *Skewed exponential power distribution*, with location `μ`, scale `σ`, shape `p`, and skewness `α`
+The *Skewed exponential power distribution*, with location `μ`, scale `σ`, shape `p`, and skewness `α`,
 has the probability density function [1]
 ```math
 f(x; \\mu, \\sigma, p, \\alpha) =
@@ -37,28 +37,26 @@ struct SkewedExponentialPower{T <: Real} <: ContinuousUnivariateDistribution
     SkewedExponentialPower{T}(μ::T, σ::T, p::T, α::T) where {T} = new{T}(μ, σ, p, α)
 end
 
-function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args=true) where {T <: Real}
-    if check_args
-        @check_args(SkewedExponentialPower, σ > zero(σ))
-        @check_args(SkewedExponentialPower, p > zero(p))
-        @check_args(SkewedExponentialPower, zero(α) < α < one(α))
-    end
+function SkewedExponentialPower(µ::T, σ::T, p::T, α::T; check_args::Bool=true) where {T <: Real}
+    @check_args SkewedExponentialPower (σ, σ > zero(σ)) (p, p > zero(p)) (α, zero(α) < α < one(α))
     return SkewedExponentialPower{T}(µ, σ, p, α)
 end
 
-function SkewedExponentialPower(μ::Real=0, σ::Real=1, p::Real=2, α::Real=1//2; kwargs...)
-    return SkewedExponentialPower(promote(μ, σ, p, α)...; kwargs...)
+function SkewedExponentialPower(μ::Real, σ::Real, p::Real=2, α::Real=1//2; check_args::Bool=true)
+    return SkewedExponentialPower(promote(μ, σ, p, α)...; check_args=check_args)
 end
+SkewedExponentialPower(μ::Real=0) = SkewedExponentialPower(μ, 1, 2, 1//2; check_args=false)
 
 @distr_support SkewedExponentialPower -Inf Inf
 
 ### Conversions
-convert(::Type{SkewedExponentialPower{T}}, μ::S, σ::S, p::S, α::S) where {T <: Real, S <: Real} = SkewedExponentialPower(T(μ), T(σ), T(p), T(α))
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{S}) where {T <: Real, S <: Real} = SkewedExponentialPower(T(d.μ), T(d.σ), T(d.p), T(d.α), check_args=false)
-convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
+function Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower) where {T<:Real}
+    SkewedExponentialPower{T}(T(d.μ), T(d.σ), T(d.p), T(d.α))
+end
+Base.convert(::Type{SkewedExponentialPower{T}}, d::SkewedExponentialPower{T}) where {T<:Real} = d
 
 ### Parameters
-@inline partype(d::SkewedExponentialPower{T}) where {T<:Real} = T
+@inline partype(::SkewedExponentialPower{T}) where {T<:Real} = T
 
 params(d::SkewedExponentialPower) = (d.μ, d.σ, d.p, d.α)
 location(d::SkewedExponentialPower) = d.μ
@@ -75,7 +73,7 @@ function m_k(d::SkewedExponentialPower, k::Integer)
         loggamma(inv_p) + log(abs((-1)^k * α^(1 + k) + (1 - α)^(1 + k)))
 end
 
-# needed for odd moments on log-scale
+# needed for odd moments in log scale
 sgn(d::SkewedExponentialPower) = d.α > 1//2 ? -1 : 1
 
 mean(d::SkewedExponentialPower) = d.α == 1//2 ? float(d.μ) : sgn(d)*exp(m_k(d, 1)) + d.μ
@@ -88,7 +86,7 @@ function logpdf(d::SkewedExponentialPower, x::Real)
     μ, σ, p, α = params(d)
     a = x < μ ? α : 1 - α
     inv_p = inv(p)
-    return -(logtwo + log(σ) + inv_p * log(p) + loggamma(1 + inv_p) + inv_p * (abs(μ - x) / (2 * σ * a))^p)
+    return -(logtwo + log(σ) + loggamma(inv_p) + ((1 - p) * log(p) + (abs(μ - x) / (2 * σ * a))^p) / p)
 end
 
 function cdf(d::SkewedExponentialPower, x::Real)
@@ -100,23 +98,33 @@ function cdf(d::SkewedExponentialPower, x::Real)
         α + (1-α) * cdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*(1-α)))^p)
     end
 end
+function logcdf(d::SkewedExponentialPower, x::Real)
+    μ, σ, p, α = params(d)
+    inv_p = inv(p)
+    if x <= μ
+        log(α) + logccdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*α))^p)
+    else
+        log1mexp(log1p(-α) + logccdf(Gamma(inv_p), inv_p * (abs((x-μ)/σ) / (2*(1-α)))^p))
+    end
+end
 
 function quantile(d::SkewedExponentialPower, p::Real)
     μ, σ, _, α = params(d)
     inv_p = inv(d.p)
     if p <= α
-        μ - 2*α*σ * (d.p * quantile(Gamma(inv_p), 1-p/α))^(inv_p)
+        μ - 2*α*σ * (d.p * quantile(Gamma(inv_p), (α-p)/α))^inv_p
     else
-        μ + 2*(1-α)*σ * (d.p * quantile(Gamma(inv_p), 1-(1-p)/(1-α)))^(inv_p)
+        μ + 2*(1-α)*σ * (d.p * quantile(Gamma(inv_p), (p-α)/(1-α)))^inv_p
     end
 end
 
 function rand(rng::AbstractRNG, d::SkewedExponentialPower)
     μ, σ, p, α = params(d)
     inv_p = inv(d.p)
+    z = 2*σ * (p * rand(rng, Gamma(inv_p, 1)))^inv_p
     if rand(rng) < d.α
-        μ - σ * 2*p^(inv_p) * α * rand(Gamma(inv_p, 1))^(inv_p)
+        return μ - α * z
     else
-        μ + σ * 2*p^(inv_p) * (1-α) * rand(Gamma(inv_p, 1))^(inv_p)
+        return μ + (1-α) * z
     end
 end

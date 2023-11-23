@@ -193,7 +193,7 @@ end
 """
     var(d::UnivariateMixture)
 
-Compute the overall variance (only for ``UnivariateMixture``).
+Compute the overall variance (only for `UnivariateMixture`).
 """
 function var(d::UnivariateMixture)
     K = ncomponents(d)

@@ -10,7 +10,7 @@ This statement fits a distribution of type `D` to a given dataset `x`, where `x`
 
 !!! note
 
-    One can use as first argument simply the distribution name, like `Binomial`,
+    One can use as the first argument simply the distribution name, like `Binomial`,
     or a concrete distribution with a type parameter, like `Normal{Float64}` or
     `Exponential{Float32}`.  However, in the latter case the type parameter of
     the distribution will be ignored:
@@ -61,7 +61,7 @@ The `fit_mle` method has been implemented for the following distributions:
 - [`MvNormal`](@ref)
 - [`Dirichlet`](@ref)
 
-For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use modified interface:
+For most of these distributions, the usage is as described above. For a few special distributions that require additional information for estimation, we have to use a modified interface:
 
 ```julia
 fit_mle(Binomial, n, x)        # n is the number of trials in each experiment
@@ -76,7 +76,7 @@ fit_mle(Categorical, x, w)
 
 ## Sufficient Statistics
 
-For many distributions, estimation can be based on (sum of) sufficient statistics computed from a dataset. To simplify implementation, for such distributions, we implement `suffstats` method instead of `fit_mle` directly:
+For many distributions, the estimation can be based on (sum of) sufficient statistics computed from a dataset. To simplify implementation, for such distributions, we implement `suffstats` method instead of `fit_mle` directly:
 
 ```julia
 ss = suffstats(D, x)        # ss captures the sufficient statistics of x

@@ -122,6 +122,9 @@ function test_convert(d::MatrixDistribution)
         @test del2 isa distname{elty}
         @test partype(del1) == elty
         @test partype(del2) == elty
+        if elty === partype(d)
+            @test del1 === d
+        end
     end
     nothing
 end
@@ -142,10 +145,11 @@ test_cov(d::LKJ) = nothing
 #  --------------------------------------------------
 
 function test_dim(d::MatrixDistribution)
-    @test dim(d) == size(d, 1)
-    @test dim(d) == size(d, 2)
-    @test dim(d) == size(mean(d), 1)
-    @test dim(d) == size(mean(d), 2)
+    n = @test_deprecated(dim(d))
+    @test n == size(d, 1)
+    @test n == size(d, 2)
+    @test n == size(mean(d), 1)
+    @test n == size(mean(d), 2)
 end
 
 test_dim(d::Union{MatrixNormal, MatrixTDist}) = nothing
@@ -413,7 +417,7 @@ end
 function test_special(dist::Type{LKJ})
     @testset "LKJ mode" begin
         @test mode(LKJ(5, 1.5)) == mean(LKJ(5, 1.5))
-        @test_throws ArgumentError mode( LKJ(5, 0.5) )
+        @test_throws DomainError mode( LKJ(5, 0.5) )
     end
     @testset "LKJ marginals" begin
         d = 4
@@ -450,11 +454,11 @@ function test_special(dist::Type{LKJ})
         η = 1.0
         lkj = LKJ(d, η)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
-        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_odd(d)
+        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
-        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d)
+        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
         #  =============
         #  even non-uniform
         #  =============
@@ -471,11 +475,11 @@ function test_special(dist::Type{LKJ})
         η = 1.0
         lkj = LKJ(d, η)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst(d, η)
-        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_even(d)
+        @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
         @test Distributions.lkj_vine_loginvconst(d, η) ≈ Distributions.lkj_vine_loginvconst_uniform(d)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.lkj_loginvconst_alt(d, η)
         @test Distributions.lkj_onion_loginvconst(d, η) ≈ Distributions.corr_logvolume(d)
-        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d)
+        @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
     end
     @testset "check integrating constant as a volume" begin
         #  d = 2: Lebesgue measure of the set of correlation matrices is 2.

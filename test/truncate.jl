@@ -39,7 +39,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 
         println("    testing truncated($(ex),$lower,$upper)")
         d = truncated(eval(Meta.parse(ex)),lower,upper)
-        if dtype != Uniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
+        if dtype != Uniform && dtype != DiscreteUniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtypet)
             # verification and testing
@@ -78,7 +78,7 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         end
         @test cdf(d, x) ≈ cf atol=sqrt(eps())
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !(typeof(d) in [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
+        if !any(T -> d isa T, [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
                            Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64},
@@ -123,6 +123,30 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
     end
 end
 
+# default methods
+for (μ, lower, upper) in [(0, -1, 1), (1, 2, 4)]
+    d = truncated(Normal(μ, 1), lower, upper)
+    @test d.untruncated === Normal(μ, 1)
+    @test d.lower == lower
+    @test d.upper == upper
+    @test truncated(Normal(μ, 1); lower=lower, upper=upper) === d
+end
+for bound in (-2, 1)
+    d = @test_deprecated Distributions.Truncated(Normal(), Float64(bound), Inf)
+    @test truncated(Normal(); lower=bound, upper=Inf) == d
+
+    d_nothing = truncated(Normal(); lower=bound)
+    @test truncated(Normal(); lower=bound, upper=nothing) == d_nothing
+    @test extrema(d_nothing) == promote(bound, Inf)
+
+    d = @test_deprecated Distributions.Truncated(Normal(), -Inf, Float64(bound))
+    @test truncated(Normal(); lower=-Inf, upper=bound) == d
+
+    d_nothing = truncated(Normal(); upper=bound)
+    @test truncated(Normal(); lower=nothing, upper=bound) == d_nothing
+    @test extrema(d_nothing) == promote(-Inf, bound)
+end
+@test truncated(Normal()) === Normal()
 
 ## main
 
@@ -152,7 +176,7 @@ at = [0.0, 1.0, 0.0, 1.0]
     @testset "#1328" begin
         dist = Poisson(2.0)
         dist_zeroinflated = MixtureModel([Dirac(0.0), dist], [0.4, 0.6])
-        dist_zerotruncated = truncated(dist, 1, Inf)
+        dist_zerotruncated = truncated(dist; lower=1)
         dist_zeromodified = MixtureModel([Dirac(0.0), dist_zerotruncated], [0.4, 0.6])
 
         @test logsumexp(logpdf(dist, x) for x in 0:1000) ≈ 0 atol=1e-15
@@ -160,4 +184,33 @@ at = [0.0, 1.0, 0.0, 1.0]
         @test logsumexp(logpdf(dist_zerotruncated, x) for x in 0:1000) ≈ 0 atol=1e-15
         @test logsumexp(logpdf(dist_zeromodified, x) for x in 0:1000) ≈ 0 atol=1e-15
     end
+end
+
+@testset "show" begin
+    @test sprint(show, "text/plain", truncated(Normal(); lower=2.0)) == "Truncated($(Normal()); lower=2.0)"
+    @test sprint(show, "text/plain", truncated(Normal(); upper=3.0)) == "Truncated($(Normal()); upper=3.0)"
+    @test sprint(show, "text/plain", truncated(Normal(), 2.0, 3.0)) == "Truncated($(Normal()); lower=2.0, upper=3.0)"
+end
+
+@testset "sampling with small mass (#1548)" begin
+    d = truncated(Beta(10, 100); lower=0.5)
+    x = rand(d, 10_000)
+    @test mean(x) ≈ 0.5 atol=0.05
+end
+
+@testset "quantile examples (#1726)" begin
+  d_narrow = truncated(Normal(0, 0.01), -1, 1.2)
+
+  # prior to patch #1727 this was offering either ±Inf
+  @test quantile(d_narrow, 1) ≤ d_narrow.upper && quantile(d_narrow, 1) ≈ d_narrow.upper
+  @test quantile(d_narrow, 0) ≥ d_narrow.lower && quantile(d_narrow, 0) ≈ d_narrow.lower
+
+  @test isa(quantile(d_narrow, ForwardDiff.Dual(0., 0.)), ForwardDiff.Dual)
+
+  d = truncated(Normal(0, 2), 0, 1)
+
+  # prior to patch #1727 this was offering 1.0000000000000002 > 1.
+  @test quantile(d, 1) ≤ d.upper && quantile(d, 1) ≈ d.upper
+
+  @test isa(quantile(d, ForwardDiff.Dual(1.,0.)), ForwardDiff.Dual)
 end
