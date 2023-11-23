@@ -93,11 +93,8 @@ function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where 
     return NamedTuple{K}(map(Base.Fix1(rand, rng), d.dists))
 end
 function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution, dims::Dims)
-    x = rand(rng, d)
-    xs = Array{typeof(x)}(undef, dims)
-    xs[1] = x
-    for i in Iterators.drop(eachindex(xs), 1)
-        xs[i] = rand(rng, d)
+    xs = return map(CartesianIndices(dims)) do _
+        return rand(rng, d)
     end
     return xs
 end
