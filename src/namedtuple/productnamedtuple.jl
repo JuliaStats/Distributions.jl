@@ -57,7 +57,7 @@ function maximum(
 end
 
 function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
-    return all(Base.splat(insupport), zip(dist.dists, x))
+    return all(map(insupport, dist.dists, x))
 end
 
 # Evaluation
