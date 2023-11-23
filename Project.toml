@@ -30,15 +30,26 @@ DistributionsDensityInterfaceExt = "DensityInterface"
 DistributionsTestExt = "Test"
 
 [compat]
+Aqua = "0.8"
+Calculus = "0.5"
 ChainRulesCore = "1"
+ChainRulesTestUtils = "1"
 DensityInterface = "0.4"
+Distributed = "1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
+FiniteDifferences = "0.12"
+ForwardDiff = "0.10"
+JSON = "0.21"
 LinearAlgebra = "<0.0.1, 1"
+OffsetArrays = "1"
 PDMats = "0.10, 0.11"
 Printf = "<0.0.1, 1"
 QuadGK = "2"
 Random = "<0.0.1, 1"
+SparseArrays = "1"
 SpecialFunctions = "1.2, 2"
+StableRNGs = "1"
+StaticArrays = "1"
 Statistics = "1"
 StatsAPI = "1.6"
 StatsBase = "0.32, 0.33, 0.34"
@@ -47,6 +58,7 @@ Test = "<0.0.1, 1"
 julia = "1.3"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 ChainRulesTestUtils = "cdddcdb0-9152-4a09-a978-84456f9df70a"
@@ -62,4 +74,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "SparseArrays", "StaticArrays", "Test", "OffsetArrays"]
+test = ["Aqua", "StableRNGs", "Calculus", "ChainRulesCore", "ChainRulesTestUtils", "DensityInterface", "Distributed", "FiniteDifferences", "ForwardDiff", "JSON", "SparseArrays", "StaticArrays", "Test", "OffsetArrays"]

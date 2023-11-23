@@ -89,7 +89,7 @@ function pdf(d::Categorical, x::Real)
     return insupport(d, x) ? ps[round(Int, x)] : zero(eltype(ps))
 end
 
-function _pdf!(r::AbstractArray, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
+function _pdf!(r::AbstractArray{<:Real}, d::Categorical{T}, rgn::UnitRange) where {T<:Real}
     vfirst = round(Int, first(rgn))
     vlast = round(Int, last(rgn))
     vl = max(vfirst, 1)

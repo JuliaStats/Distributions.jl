@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "aqua",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -174,8 +175,3 @@ include("testutils.jl")
         include("$t.jl")
     end
 end
-
-# print method ambiguities
-println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
-println()
