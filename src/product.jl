@@ -67,6 +67,8 @@ const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport,T} = ProductDistribution
 
 const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
 
+marginal(d::ProductDistribution, i...) = d.dists[i...]
+
 ## General definitions
 function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSupport,T}}) where {T}
     return T
