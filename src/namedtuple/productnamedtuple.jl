@@ -83,8 +83,9 @@ end
 function pdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
     return exp(logpdf(dist, x))
 end
+
 function logpdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
-    return mapreduce(logpdf, +, dist.dists, x)
+    return sum(map(logpdf, dist.dists, x))
 end
 
 # Statistics
