@@ -392,21 +392,30 @@ quantile(d::UnivariateDistribution, p::Real)
 
 The complementary quantile value, i.e. `quantile(d, 1-q)`.
 """
-cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
+function cquantile(d::UnivariateDistribution, p::Real)
+    _check_cquantile_arg(p)
+    quantile(d, 1 - p)
+end
 
 """
     invlogcdf(d::UnivariateDistribution, lp::Real)
 
 The inverse function of logcdf.
 """
-invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
+function invlogcdf(d::UnivariateDistribution, lp::Real)
+    _check_invlogcdf_arg(lp)
+    quantile(d, exp(lp))
+end
 
 """
     invlogccdf(d::UnivariateDistribution, lp::Real)
 
 The inverse function of logccdf.
 """
-invlogccdf(d::UnivariateDistribution, lp::Real) = quantile(d, -expm1(lp))
+function invlogccdf(d::UnivariateDistribution, lp::Real)
+    _check_invlogccdf_arg(lp)
+    quantile(d, -expm1(lp))
+end
 
 # gradlogpdf
 
@@ -609,6 +618,38 @@ function integerunitrange_logccdf(d::DiscreteUnivariateDistribution, x::Integer)
     return result
 end
 
+### Error messages
+
+const QUANTILE_ARG_ERROR = "`Distributions.quantile(d, p)` only accepts arguments `p` in `[0, 1]`." 
+const CQUANTILE_ARG_ERROR = "`Distributions.cquantile(d, p)` only accepts arguments `p` in `[0, 1]`." 
+const INVLOGCDF_ARG_ERROR = "`Distributions.invlogcdf(d, lp)` only accepts non-negative arguments `lp`." 
+const INVLOGCCDF_ARG_ERROR = "`Distributions.invlogccdf(d, lp)` only accepts non-negative arguments `lp`." 
+
+function _check_quantile_arg(p::Real)
+    if !(zero(p) <= p <= oneunit(p))
+        throw(DomainError(p, QUANTILE_ARG_ERROR))
+    end
+    nothing
+end
+function _check_cquantile_arg(p::Real)
+    if !(zero(p) <= p <= oneunit(p))
+        throw(DomainError(p, CQUANTILE_ARG_ERROR))
+    end
+    nothing
+end
+function _check_invlogcdf_arg(lp::Real)
+    if !(lp <= zero(lp))
+        throw(DomainError(lp, INVLOGCDF_ARG_ERROR))
+    end
+    nothing
+end
+function _check_invlogccdf_arg(lp::Real)
+    if !(lp <= zero(lp))
+        throw(DomainError(lp, INVLOGCDF_ARG_ERROR))
+    end
+    nothing
+end
+
 ### macros to use StatsFuns for method implementation
 
 macro _delegate_statsfuns(D, fpre, psyms...)
@@ -639,10 +680,34 @@ macro _delegate_statsfuns(D, fpre, psyms...)
         $Distributions.ccdf(d::$D, x::Real) = $(fccdf)($(pargs...), x)
         $Distributions.logccdf(d::$D, x::Real) = $(flogccdf)($(pargs...), x)
 
-        $Distributions.quantile(d::$D, q::Real) = convert($T, $(finvcdf)($(pargs...), q))
-        $Distributions.cquantile(d::$D, q::Real) = convert($T, $(finvccdf)($(pargs...), q))
-        $Distributions.invlogcdf(d::$D, lq::Real) = convert($T, $(finvlogcdf)($(pargs...), lq))
-        $Distributions.invlogccdf(d::$D, lq::Real) = convert($T, $(finvlogccdf)($(pargs...), lq))
+        function $Distributions.quantile(d::$D, q::Real)::$T
+            _check_quantile_arg(q)
+            return $(finvcdf)($(pargs...), q)
+        end
+        function $Distributions.cquantile(d::$D, q::Real)::$T
+            _check_cquantile_arg(q)
+            return $(finvccdf)($(pargs...), q)
+        end
+
+        # There is a bug in some functions in StatsFuns.RFunctions/Rmath:
+        # For `lq = -Inf` they return `NaN`
+        # We work around this issue by falling back to quantile/cquantile
+        function $Distributions.invlogcdf(d::$D, lq::Real)::$T
+            _check_invlogcdf_arg(lq)
+            if isinf(lq)
+                return $(finvcdf)($(pargs...), zero(lq))
+            else
+                return $(finvlogcdf)($(pargs...), lq)
+            end
+        end
+        function $Distributions.invlogccdf(d::$D, lq::Real)::$T
+            _check_invlogccdf_arg(lq)
+            if isinf(lq)
+                return $(finvccdf)($(pargs...), zero(lq))
+            else
+                return $(finvlogccdf)($(pargs...), lq)
+            end
+        end
     end
 end
 
