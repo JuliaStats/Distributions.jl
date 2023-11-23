@@ -475,6 +475,16 @@ Base.@propagate_inbounds function loglikelihood(
     return sum(Base.Fix1(logpdf, d), x)
 end
 
+"""
+    marginal(d::Distribution, k...) -> Distribution
+
+Return the marginal distribution of `d` at the indices `k...`.
+
+The result is the distribution of the variate `rand(d)[k...]` that one would obtain by
+integrating over all other indices.
+"""
+marginal(d::Distribution, k...)
+
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
 abstract type IncompleteDistribution end

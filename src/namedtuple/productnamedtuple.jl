@@ -39,6 +39,8 @@ function distrname(::ProductNamedTupleDistribution{K}) where {K}
     return "ProductNamedTupleDistribution{$K}"
 end
 
+marginal(d::ProductNamedTupleDistribution, k::Union{Int,Symbol}) = d.dists[k]
+
 """
     product_distribution(dists::Namedtuple{K,Tuple{Vararg{Distribution}}}) where {K}
 
