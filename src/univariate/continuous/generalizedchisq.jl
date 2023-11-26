@@ -115,15 +115,23 @@ end
 
 logpdf(d::GeneralizedChisq, x::Real) = log(pdf(d, x))
 
-function quantile(d::GeneralizedChisq, p::Real)
-    # search starting point meeting convergence criterion
-    x0 = mean(d)
-    error0, curv0, converges = GChisqComputations.newtonconvergence(d, p, x0)
-    if !converges
-        bracket = GChisqComputations.definebracket(d, p, x0, error0, curv0, sqrt(var(d)))
-        x0 = GChisqComputations.searchnewtonconvergence(d, p, bracket...)
+function quantile(d::GeneralizedChisq{T}, p::Real) where T
+    if 0 < p < 1
+        # search starting point meeting convergence criterion
+        x0 = mean(d)
+        error0, curv0, converges = GChisqComputations.newtonconvergence(d, p, x0)
+        if !converges
+            bracket = GChisqComputations.definebracket(d, p, x0, error0, curv0, sqrt(var(d)))
+            x0 = GChisqComputations.searchnewtonconvergence(d, p, bracket...)
+        end
+        return quantile_newton(d, p, x0)
+    elseif p == 0
+        return minimum(d)
+    elseif p == 1
+        return maximum(d)
+    else
+        return T(NaN)
     end
-    quantile_newton(d, p, x0)
 end
 
 function minimum(d::GeneralizedChisq{T}) where T
@@ -207,7 +215,8 @@ module GChisqComputations
 	end
 
     function daviescdf(d, x)
-        integral, _ = quadgk(0, Inf) do u
+        atol = eps(eltype(d)) # uniform tolerance to avoid issues at cdf ≈ 0.5 (integral ≈ 0)
+        integral, _ = quadgk(0, Inf; atol=atol) do u
             θ, ρ = daviesterms(d, u, x)
             return sin(θ)/(u*ρ)
         end
