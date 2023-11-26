@@ -126,20 +126,6 @@ function quantile(d::GeneralizedChisq, p::Real)
     quantile_newton(d, p, x0)
 end
 
-function quantile_b(d::GeneralizedChisq, p::Real)
-    # search starting point meeting convergence criterion
-    x0 = mean(d)
-    error0, curv0, converges = GChisqComputations.newtonconvergence(d, p, x0)
-    if converges
-        return quantile_newton(d, p, x0)
-    else
-        (x1, x2), _, _ = GChisqComputations.definebracket(d, p, x0, error0, curv0, sqrt(var(d)))
-        xl, xr = (x1 < x2) ? (x1, x2) : (x2, x1)
-        return quantile_bisect(d, p, xl, xr)
-    end
-end
-
-
 function minimum(d::GeneralizedChisq{T}) where T
     d.σ > zero(T) || any(<(zero(T)), d.w) ? typemin(T) : d.μ
 end
@@ -200,7 +186,7 @@ module GChisqComputations
     where `θ` and `ρ` are the outputs of this function.
 
     Those terms are related to the characteristic function of the distribution as:
-        exp(θ*im)/ρ = exp(-ux*im)*cf(u) 
+        exp(θ*im)/ρ = exp(-u*x*im)*cf(u) 
 
     They can be also used to calculate the pdf as:
         f(x) = 1/π *∫cos(θ)/ρ du
@@ -244,13 +230,6 @@ module GChisqComputations
         end
         return integral/π
     end
-
-    # function dpdf(d::GeneralizedChisq{T}, x::Real) where T
-    #     # special case
-    #     iszero(d.σ) && !insupport(d, x) && return zero(T)
-    #     # general case
-    #     GChisqComputations.daviesdpdf(x, d.w, d.ν, d.λ, d.μ, d.σ)
-    # end
 
     # functions to look for starting point where
     # the Newton method for quantiles converges:
