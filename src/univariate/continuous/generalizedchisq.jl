@@ -4,7 +4,7 @@
 The *Generalized chi-squared distribution* is the distribution of a sum of independent noncentral chi-squared variables and a normal variable:
 
 ```math
-\\xi =\\sum_{i}w_{i}y_{i}+x,\\quad y_{i}\\sim \\chi '^{2}(\\nu_{i},\\lambda _{i}),\\quad x\\sim N(\\mu,\\sigma^{2}).
+\\xi =\\sum_{i}w_{i}y_{i}+x,\\quad y_{i}\\sim \\chi^{2}(\\nu_{i},\\lambda _{i}),\\quad x\\sim N(\\mu,\\sigma^{2}).
 ```
 
 ```julia
@@ -41,6 +41,8 @@ end
 GeneralizedChisq(w, ν, λ, μ::Integer, σ::Integer; check_args...) = GeneralizedChisq(w, ν, λ, float(μ), float(σ); check_args...)
 
 Base.eltype(::GeneralizedChisq{T,V}) where {T,V} = T
+
+params(d::GeneralizedChisq) = (d.w, d.ν, d.λ, d.μ, d.σ)
 
 """
     GeneralizedChisqSampler
@@ -293,15 +295,12 @@ module GChisqComputations
         xbis = x + span
         errorxbis, curvxbis, _ = newtonconvergence(d, p, xbis)
         # greedier search if the bracket does not contain the solution
-        iterations = 0
         while sign(errorxbis) == sign(errorx)
-            iterations += 1
             span *= 2*errorxbis / (errorx - errorxbis)
             x, errorx, curvx = xbis, errorxbis, curvxbis
             xbis = x + span
             errorxbis, curvxbis, _ = newtonconvergence(d, p, xbis)
         end
-        @debug "Iterations to define bracket" iterations
         # bracket end out of bounds
         if !insupport(d, xbis)
             xbis = d.μ
@@ -311,12 +310,9 @@ module GChisqComputations
 
     # Bisect bracket until convergence point is reached
     function searchnewtonconvergence(d, p, (x,xbis), (errorx, errorxbis), (curvx, curvxbis))
-        iterations = 0
         while true
-            iterations += 1
             # Assumes that the first point is *outside* the region of convergence
             if sign(errorxbis) == sign(curvxbis)
-                @debug "Iterations to find convergence point" iterations
                 return xbis
             end
             xmid = (x + xbis) / 2
