@@ -1,6 +1,3 @@
-using Distributions, Random # remove
-import Distributions: sampler, cf, cdf, pdf, quadgk, quantile_newton, quantile_bisect # remove
-
 """
     GeneralizedChisq(w, ν, λ, μ, σ)
 
@@ -63,7 +60,7 @@ end
 # sampler that predefines the distributions for batch sampling
 function sampler(d::GeneralizedChisq{T}) where T
     μ = d.μ
-    nchisqsamplers = [(d.w[i], sampler(NoncentralChisq(d.ν[i], d.λ[i]))) for i in eachindex(d.w)]
+    nchisqsamplers = [(T(d.w[i]), sampler(NoncentralChisq(d.ν[i], d.λ[i]))) for i in eachindex(d.w)]
     normalsampler = sampler(Normal(zero(T), d.σ)) # zero-mean
     skipnormal = iszero(d.σ)
     GeneralizedChisqSampler(μ, nchisqsamplers, normalsampler, skipnormal)
@@ -85,31 +82,41 @@ rand(rng::AbstractRNG, d::GeneralizedChisq) = rand(rng, sampler(d))
 # cdf algorithm derived from https://github.com/abhranildas/gx2, by Abhranil Das.
 function cdf(d::GeneralizedChisq{T}, x::Real) where T
     # special cases
-    if iszero(d.σ)
+    if isempty(d.w)
+        return cdf(Normal(d.μ, d.σ), x)
+    elseif iszero(d.σ)
+        # out of support (or all weights equal to zero)
         (x < minimum(d)) && return zero(T)
-        (x > maximum(d)) && return one(T)
+        (x ≥ maximum(d)) && return one(T)
+        # inside support
         if all(==(first(d.w)), d.w)
-            iszero(first(d.w)) && return cdf(Normal(d.μ, d.σ), x)
-            nchisq = NoncentralChisq{T}(sum(d.ν), sum(d.λ))
+            nchisq = NoncentralChisq(sum(T, d.ν), sum(T, d.λ))
             (first(d.w) > zero(T)) && return cdf(nchisq, (x - d.μ)/first(d.w))
             (first(d.w) < zero(T)) && return ccdf(nchisq, (x - d.μ)/first(d.w))
         end
     end
     # general case
+    (x == -Inf) && return zero(T)
+    (x == Inf) && return one(T)
     GChisqComputations.daviescdf(d, x)
 end
 
 function pdf(d::GeneralizedChisq{T}, x::Real) where T
     # special cases
-    if iszero(d.σ)
+    if isempty(d.w)
+        return pdf(Normal(d.μ, d.σ), x)
+    elseif iszero(d.σ)
+        # out of support
         !insupport(d, x) && return zero(T)
+        # inside support
         if all(==(first(d.w)), d.w)
-            iszero(first(d.w)) && return pdf(Normal(d.μ, d.σ), x)
-            nchisq = NoncentralChisq{T}(sum(d.ν), sum(d.λ))
+            iszero(first(d.w)) && return typemax(T) # zero weights (delta at d.μ)
+            nchisq = NoncentralChisq(sum(T, d.ν), sum(T, d.λ))
             return pdf(nchisq, (x - d.μ)/first(d.w)) / abs(first(d.w))
         end
     end
     # general case
+    !isfinite(x) && return zero(T)
     GChisqComputations.daviespdf(d, x)
 end
 
@@ -117,14 +124,17 @@ logpdf(d::GeneralizedChisq, x::Real) = log(pdf(d, x))
 
 function quantile(d::GeneralizedChisq{T}, p::Real) where T
     if 0 < p < 1
-        # search starting point meeting convergence criterion
-        x0 = mean(d)
-        error0, curv0, converges = GChisqComputations.newtonconvergence(d, p, x0)
-        if !converges
-            bracket = GChisqComputations.definebracket(d, p, x0, error0, curv0, sqrt(var(d)))
-            x0 = GChisqComputations.searchnewtonconvergence(d, p, bracket...)
+        # special cases
+        if isempty(d.w)
+            return quantile(Normal(d.μ, d.σ), x)
+        elseif iszero(d.σ) && all(==(first(d.w)), d.w)
+            iszero(first(d.w)) && return d.μ # zero weights (delta at d.μ)
+            nchisq = NoncentralChisq(sum(T, d.ν), sum(T, d.λ))
+            (first(d.w) > zero(T)) && return quantile(nchisq, p)*first(d.w) + d.μ
+            (first(d.w) < zero(T)) && return cquantile(nchisq, p)*first(d.w) + d.μ
         end
-        return quantile_newton(d, p, x0)
+        # general cases
+        return GChisqComputations.quantile(d, p)
     elseif p == 0
         return minimum(d)
     elseif p == 1
@@ -148,19 +158,27 @@ insupport(d::GeneralizedChisq, x::Real) = minimum(d) ≤ x ≤ maximum(d)
 
 mean(d::GeneralizedChisq) = d.μ + sum(d.w[i] * (d.ν[i] + d.λ[i]) for i in eachindex(d.w))
 var(d::GeneralizedChisq) = d.σ^2 + 2 * sum(d.w[i]^2 * (d.ν[i] + 2*d.λ[i]) for i in eachindex(d.w))
+cf(d::GeneralizedChisq, t) = GChisqComputations.cf_explicit(d, t)
 
+# # [Missing]
 # modes(d::GeneralizedChisq)
 # mode(d::GeneralizedChisq)
 # skewness(d::GeneralizedChisq)
 # kurtosis(d::GeneralizedChisq, ::Bool)
 # entropy(d::GeneralizedChisq, ::Real)
 # mgf(d::GeneralizedChisq, ::Any)
-cf(d::GeneralizedChisq, t) = GChisqComputations.cf_explicit(d, t)
 
+"""
+    GChisqComputations
+
+Computations for the Generalized Chi-squared distribution.
+This module is meant to be private, not part of the API.
+"""
 module GChisqComputations
-    import ..Normal, ..NoncentralChisq, ..GeneralizedChisq
-    import ..cf, ..cdf, ..insupport
-    import ..quadgk
+    import ..Distributions # to use `Normal` and `NoncentralChisq` (which cannot be imported)
+    import ..GeneralizedChisq
+    import ..cf, ..cdf, ..insupport, ..quantile_newton
+    import ..quadgk, ..mean, ..var
 
     # Characteristic function - explicit formula
     function cf_explicit(d, t)
@@ -175,33 +193,46 @@ module GChisqComputations
     end
 
     # Characteristic function - by inheritance
-    function cf_inherit(d::GeneralizedChisq{T}, t) where T
+    function cf_inherit(d::GeneralizedChisq, t)
         result = exp(im * d.μ * t)
         for i in eachindex(d.w)
-            result *= cf(NoncentralChisq{T}(d.ν[i], d.λ[i]), d.w[i] * t)
+            result *= cf(Distributions.NoncentralChisq(d.ν[i], d.λ[i]), d.w[i] * t)
         end
         if !iszero(d.σ)
-            result *= cf(Normal(zero(d.μ), d.σ), t)
+            result *= cf(Distributions.Normal(zero(d.μ), d.σ), t)
         end
         return result
     end
 
-    #=
+    """
+        daviesterms(d::GeneralizedChisq, u, x)
+
     Terms of the formula (13) in Davies (1980) to calculate
     the cdf of a generalized chi-squared distribution, as: 
+        
         F(x) = 1/2 - 1/π *∫sin(θ)/(u*ρ)du
 
     where `θ` and `ρ` are the outputs of this function.
 
     Those terms are related to the characteristic function of the distribution as:
+        
         exp(θ*im)/ρ = exp(-u*x*im)*cf(u) 
 
     They can be also used to calculate the pdf as:
+        
         f(x) = 1/π *∫cos(θ)/ρ du
 
     And its derivative as:
+        
         f'(x) = 1/π *∫u*sin(θ)/ρ du
-    =#
+    
+    Reference:
+
+    Robert B. Davies (1980).
+    Algorithm AS 155: The Distribution of a Linear Combination of χ2Random Variables.
+    *Journal of the Royal Statistical Society. Series C (Applied Statistics)*, 29(3), 323–333
+    DOI:10.2307/2346911  
+    """
     function daviesterms(d::GeneralizedChisq{T}, u, x) where {T<:Real}
         θ = -T(u*(x - d.μ))
         ρ = exp(T(u*d.σ)^2 / 2)
@@ -240,7 +271,7 @@ module GChisqComputations
         return integral/π
     end
 
-    # functions to look for starting point where
+    # functions to look for the starting point where
     # the Newton method for quantiles converges:
     # sign(F(x) - q) == sign(f'(x))
 
@@ -256,7 +287,7 @@ module GChisqComputations
     end
 
     # Bracket containing solution for q, with x as one of the ends
-    function definebracket(d::GeneralizedChisq{T}, p, x, errorx, curvx, initialwidth) where T
+    function definebracket(d::GeneralizedChisq, p, x, errorx, curvx, initialwidth)
         # set direction of span and initialize bracket
         span = (errorx < 0) ? abs(initialwidth) : -abs(initialwidth)
         xbis = x + span
@@ -298,4 +329,14 @@ module GChisqComputations
         end
     end
 
+    function quantile(d, p)
+        # search starting point meeting convergence criterion
+        x0 = mean(d)
+        error0, curv0, converges = GChisqComputations.newtonconvergence(d, p, x0)
+        if !converges
+            bracket = GChisqComputations.definebracket(d, p, x0, error0, curv0, sqrt(var(d)))
+            x0 = GChisqComputations.searchnewtonconvergence(d, p, bracket...)
+        end
+        return quantile_newton(d, p, x0)
+    end
 end

@@ -682,6 +682,7 @@ const continuous_distributions = [
     "fdist",
     "frechet",
     "gamma", "erlang",
+    "generalizedchisq",
     "pgeneralizedgaussian", # GeneralizedGaussian depends on Gamma
     "generalizedpareto",
     "generalizedextremevalue",
