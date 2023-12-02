@@ -1,4 +1,5 @@
 # methods mainly from John P. Nolan, "Univariate Stable Distributions", Springer 2020
+
 """
     Stable(α, β, σ, μ)
 
@@ -33,18 +34,18 @@ struct Stable{T<:Real} <: ContinuousUnivariateDistribution
     β::T
     σ::T
     μ::T
-    Stable{T}(α, β, σ, μ) where {T} = new{T}(α, β, σ, μ)
+    function Stable{T}(α, β, σ, μ; check_args::Bool=true) where {T}
+        @check_args Stable (α, zero(T) < α <= 2one(T)) (β, -one(T) <= β <= one(T)) (σ, zero(T) < σ) ((α, β), α != 2 || β == 0 )
+        new{T}(α, β, σ, μ)
+    end
 end
 
-function Stable(α::T, β::T, σ::T, μ::T; check_args::Bool=true) where {T <: Real}
-    @check_args Stable (α, zero(T) < α <= 2one(T)) (β, -one(T) <= β <= one(T)) (σ, zero(T) < σ) ((α, β), α != 2 || β == 0 )
-    return Stable{T}(α, β, σ, μ)
-end
+Stable(α::T, β::T, σ::T, μ::T; check_args::Bool=true) where {T <: Real} = Stable{T}(α, β, σ, μ; check_args=check_args)
 
 Stable(α::Real, β::Real, σ::Real, μ::Real; check_args::Bool=true) = Stable(promote(α, β, σ, μ)...; check_args=check_args)
 Stable(α::Integer, β::Integer, σ::Integer, μ::Integer; check_args::Bool=true) = Stable(float(α), float(β), float(σ), float(μ); check_args=check_args)
 Stable(α::Real, β::Real; check_args::Bool=true) = Stable(α, β, one(α), zero(α); check_args=check_args)
-Stable(α::Real; check_args::Bool=true) = Stable(α,zero(α); check_args=check_args)
+Stable(α::Real; check_args::Bool=true) = Stable(α, zero(α); check_args=check_args)
 
 @distr_support Stable (d.α < 1 && d.β == 1 ? d.μ : -Inf) (d.α < 1 && d.β == -1 ? d.μ : Inf)
 
@@ -70,6 +71,23 @@ skewness(d::Stable{T}) where T = d.α == 2one(T) ? T(0.0) : T(NaN)
 kurtosis(d::Stable{T}) where T = d.α == 2one(T) ? T(0.0) : T(NaN)
 
 #### Evaluation
+
+function cf(d::Stable{T}, t::Real) where T
+    α, β, σ, μ =  params(d)
+    if α == one(T)
+        exp(im*t*μ - abs(σ*t) * (1 + im*β*2/π*sign(t)*log(abs(t))))
+    else
+        exp(im*t*μ - abs(σ*t)^α * (1 - im*β*sign(t)*tan(α*π/2)))
+    end
+end
+
+function mgf(d::Stable{T}, t::Real) where T
+    if d.α == 2one(T)
+        mgf(Normal(d.μ, √2d.σ), t)
+    else
+        T(Inf)
+    end
+end
 
 # integral representation from Nolan ch. 3
 function pdf(d::Stable{T}, x::Real) where T
@@ -126,7 +144,7 @@ function cdf(d::Stable{T}, x::Real) where T
 
     z(v,c) = v*c > 36. ? 0.0 : exp(-c*v) # numerical truncation
 
-    function F(α,β,x) # works for x > 0
+    function F(α, β, x) # works for x > 0
         V(θ) =(cos(α*θ₀))^(1/(α-1)) * (cos(θ)/sin(α*(θ₀+θ)))^(α/(α-1)) * cos(α*θ₀ + (α-1)*θ)/cos(θ)
         θ₀=  atan(β*tan(α*π/2))/α
         x ≈ 0. && return (π/2 - θ₀)/π
@@ -136,20 +154,20 @@ function cdf(d::Stable{T}, x::Real) where T
         return c + sign(1-α)/π * I
     end
 
-    function F₁(β,x) # works for β > 0
+    function F₁(β, x) # works for β > 0
         V₁(θ) = 2/π*(π/2+β*θ)/cos(θ) * exp((π/2+β*θ)*tan(θ)/β)
         I, _err = quadgk(θ -> z(V₁(θ),exp(-π*x/2β)), -π/2, π/2 ) 
-        return 1/π* I
+        return 1/π * I
     end
 
     if α == one(T) 
         x = (x-μ)/σ - 2/π*β*log(σ) # normalize to S(1,β,1,0)
-        β < 0 && return F₁(-β,x)
-        return F₁(β,x)
+        β < 0 && return 1 - F₁(-β, -x)
+        return F₁(β, x)
     else
         x = (x-μ)/σ # normalize to S(α,β,1,0)
-        x < 0 && return 1 - F(α,-β,-x)
-        return F(α,β,x)
+        x < 0 && return 1 - F(α, -β, -x)
+        return F(α, β, x)
         
     end
 end
