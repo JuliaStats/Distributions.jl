@@ -78,6 +78,7 @@ const tests = [
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
     "univariate/continuous/noncentralchisq",
+    "univariate/continuous/stable",
     "univariate/continuous/weibull",
     "pdfnorm",
     "univariate/continuous/rician",
