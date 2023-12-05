@@ -10,7 +10,9 @@ using LinearAlgebra
 import JSON
 import ForwardDiff
 
-const tests = [
+
+
+const temp = [
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -87,6 +89,7 @@ const tests = [
     "density_interface",
     "reshaped",
     "univariate/continuous/skewedexponentialpower",
+    "univariate/continuous/asymmetricexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
     "univariate/orderstatistic",
@@ -154,13 +157,15 @@ const tests = [
     # "univariate/discrete/geometric",
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
-    # "univariate/discrete/poisson",
+    # "univariate/discrete/poisson",a
     # "univariate/discrete/skellam",
 
     ### file is present but was not included in list
     # "multivariate_stats", # extra file compared to /src
     # "univariate/continuous/vonmises",
 ]
+
+const tests = ["univariate/continuous/asymmetricexponentialpower",]
 
 printstyled("Running tests:\n", color=:blue)
 
@@ -176,6 +181,6 @@ include("testutils.jl")
 end
 
 # print method ambiguities
-println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
+#println("Potentially stale exports: ")
+#display(Test.detect_ambiguities(Distributions))
 println()
