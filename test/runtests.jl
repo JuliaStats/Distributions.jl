@@ -12,7 +12,7 @@ import ForwardDiff
 
 
 
-const temp = [
+const tests = [
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -165,8 +165,6 @@ const temp = [
     # "univariate/continuous/vonmises",
 ]
 
-const tests = ["univariate/continuous/asymmetricexponentialpower",]
-
 printstyled("Running tests:\n", color=:blue)
 
 Random.seed!(345679)
@@ -181,6 +179,6 @@ include("testutils.jl")
 end
 
 # print method ambiguities
-#println("Potentially stale exports: ")
-#display(Test.detect_ambiguities(Distributions))
+println("Potentially stale exports: ")
+display(Test.detect_ambiguities(Distributions))
 println()
