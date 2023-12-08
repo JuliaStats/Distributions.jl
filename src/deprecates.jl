@@ -34,9 +34,9 @@ for fun in [:pdf, :logpdf,
     fun! = Symbol(fun, '!')
 
     @eval begin
-        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+        @deprecate ($_fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= ($fun).(d, X) false
+        @deprecate ($fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= ($fun).(d, X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray{<:Real}) ($fun).(d, X)
     end
 end
 
