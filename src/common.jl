@@ -237,6 +237,9 @@ function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) 
     return exp(@inbounds logpdf(d, x))
 end
 
+pdf(::Distribution{<:ArrayLikeVariate}, ::Missing) = missing
+logpdf(::Distribution{<:ArrayLikeVariate}, ::Missing) = missing
+
 """
     logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
