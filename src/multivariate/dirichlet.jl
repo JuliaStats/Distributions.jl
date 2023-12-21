@@ -188,14 +188,8 @@ length(ss::DirichletStats) = length(s.slogp)
 mean_logp(ss::DirichletStats) = ss.slogp * inv(ss.tw)
 
 function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64})
-    K = size(P, 1)
     n = size(P, 2)
-    slogp = zeros(K)
-    for i = 1:n
-        for k = 1:K
-            @inbounds slogp[k] += log(P[k,i])
-        end
-    end
+    slogp = vec(sum(log, P; dims=2))
     DirichletStats(slogp, n)
 end
 
@@ -207,14 +201,13 @@ function suffstats(::Type{<:Dirichlet}, P::AbstractMatrix{Float64},
         throw(DimensionMismatch("Inconsistent argument dimensions."))
     end
 
-    tw = 0.
+    tw = zero(Float64)
     slogp = zeros(K)
 
-    for i = 1:n
-        @inbounds wi = w[i]
+    for (iP, wi) in zip(axes(P, 2), w)
         tw += wi
-        for k = 1:K
-            @inbounds slogp[k] += log(P[k,i]) * wi
+        for (k, kP) in enumerate(axes(P, 1))
+            @inbounds slogp[k] += log(P[kP,iP]) * wi
         end
     end
     DirichletStats(slogp, tw)
@@ -226,6 +219,8 @@ end
 
 function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     K = length(μ)
+
+    K == length(γ) || throw(DimensionMismatch("Inconsistent argument dimensions."))
 
     α0 = 0.
     for k = 1:K
@@ -257,15 +252,16 @@ function dirichlet_mle_init(P::AbstractMatrix{Float64}, w::AbstractArray{Float64
     K = size(P, 1)
     n = size(P, 2)
 
+    n == length(w) || throw(DimensionMismatch("Inconsistent argument dimensions."))
+
     μ = zeros(K)  # E[p]
     γ = zeros(K)  # E[p^2]
     tw = 0.0
 
-    for i in 1:n
-        @inbounds wi = w[i]
+    for (iP, wi) in zip(axes(P, 2), w)
         tw += wi
-        for k in 1:K
-            pk = P[k, i]
+        for k in axes(P, 1)
+            pk = P[k, iP]
             @inbounds μ[k] += pk * wi
             @inbounds γ[k] += pk * pk * wi
         end
