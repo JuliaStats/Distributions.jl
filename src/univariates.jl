@@ -382,7 +382,7 @@ logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 """
     quantile(d::UnivariateDistribution, q::Real)
 
-Evaluate the generalized inverse cumulative distribution function at `q`.
+Evaluate the (generalized) inverse cumulative distribution function at `q`.
 
 For a given `0 ≤ q ≤ 1`, `quantile(d, q)` is the smallest value `x` in the support of `d`
 for which `cdf(d, x) ≥ q`.
@@ -401,7 +401,7 @@ cquantile(d::UnivariateDistribution, p::Real) = quantile(d, 1.0 - p)
 """
     invlogcdf(d::UnivariateDistribution, lp::Real)
 
-The generalized inverse function of [`logcdf`](@ref).
+The (generalized) inverse function of [`logcdf`](@ref).
 
 For a given `lp ≤ 0`, `invlogcdf(d, lp)` is the smallest value `x` in the support of `d` for
 which `logcdf(d, x) ≥ lp`.
@@ -411,7 +411,7 @@ invlogcdf(d::UnivariateDistribution, lp::Real) = quantile(d, exp(lp))
 """
     invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The generalized inverse function of [`logccdf`](@ref).
+The (generalized) inverse function of [`logccdf`](@ref).
 
 For a given `lp ≤ 0`, `invlogccdf(d, lp)` is the smallest value `x` in the support of `d`
 for which `logccdf(d, x) ≤ lp`.
