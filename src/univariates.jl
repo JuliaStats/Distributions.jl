@@ -183,7 +183,7 @@ std(d::UnivariateDistribution) = sqrt(var(d))
     median(d::UnivariateDistribution)
 
 Return the median value of distribution `d`. The median is the smallest `x` in the support
-of `d` such that `cdf(d, x) ≥ 1/2`.
+of `d` for which `cdf(d, x) ≥ 1/2`.
 Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
 median(d::UnivariateDistribution) = quantile(d, 1//2)
