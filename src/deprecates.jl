@@ -34,13 +34,13 @@ for fun in [:pdf, :logpdf,
     fun! = Symbol(fun, '!')
 
     @eval begin
-        @deprecate ($_fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= ($fun).(d, X) false
-        @deprecate ($fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= ($fun).(d, X) false
-        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray{<:Real}) ($fun).(d, X)
+        @deprecate ($_fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray{<:Real}) map(Base.Fix1($fun, d), X)
     end
 end
 
-@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::DiscreteUnivariateDistribution) map(Base.Fix1(pdf, d), support(d))
 
 # Wishart constructors
 @deprecate Wishart(df::Real, S::AbstractPDMat, warn::Bool) Wishart(df, S)

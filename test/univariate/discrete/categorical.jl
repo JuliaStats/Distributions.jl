@@ -56,8 +56,8 @@ for p in Any[
     @test iszero(ccdf(d, Inf))
     @test isnan(ccdf(d, NaN))
 
-    @test pdf.(d, support(d)) == p
-    @test pdf.(d, 1:k) == p
+    @test Base.Fix1(pdf, d).(support(d)) == p
+    @test Base.Fix1(pdf, d).(1:k) == p
 
     @test cf(d, 0) ≈ 1.0
     @test cf(d, 1) ≈ p' * cis.(1:length(p))
