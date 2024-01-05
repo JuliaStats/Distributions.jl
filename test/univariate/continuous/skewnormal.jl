@@ -25,7 +25,7 @@ import Distributions: normpdf, normcdf, normlogpdf, normlogcdf
     d4 = Normal(0.5, 2.2)
     #
     @test pdf(d3, 3.3) == Distributions.pdf(d4, 3.3)
-    @test pdf.(d3, 1:3) == Distributions.pdf.(d4, 1:3)
+    @test Base.Fix1(pdf, d3).(1:3) == Base.Fix1(pdf, d4).(1:3)
     a = mean(d3), var(d3), std(d3)
     b = Distributions.mean(d4), Distributions.var(d4), Distributions.std(d4)
     @test a == b
