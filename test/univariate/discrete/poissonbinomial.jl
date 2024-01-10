@@ -41,7 +41,7 @@ naive_sol = naive_pb(p)
 for (p, n) in [(0.8, 6), (0.5, 10), (0.04, 20)]
     d = PoissonBinomial(fill(p, n))
     dref = Binomial(n, p)
-    println("   testing PoissonBinomial p=$p, n=$n")
+    println("    testing PoissonBinomial p=$p, n=$n")
 
     @test isa(d, PoissonBinomial)
     @test minimum(d) == 0
@@ -99,7 +99,7 @@ for (n₁, n₂, n₃, p₁, p₂, p₃) in [(10, 10, 10, 0.1, 0.5, 0.9),
     p[n₁+1: n₁ + n₂] .= p₂
     p[n₁ + n₂ + 1:end] .= p₃
     d = PoissonBinomial(p)
-    println("   testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
+    println("    testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
     b1 = Binomial(n₁, p₁)
     b2 = Binomial(n₂, p₂)
     b3 = Binomial(n₃, p₃)
