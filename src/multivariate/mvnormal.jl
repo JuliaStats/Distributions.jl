@@ -213,7 +213,7 @@ end
 MvNormal{T,Cov}(μ, Σ::AbstractMatrix) where {T<:Real,Cov<:AbstractPDMat{T}} =
     MvNormal{T,Cov}(μ, Cov(Σ))
 MvNormal{T,Cov}(μ, Σ::UniformScaling) where {T<:Real,Cov<:AbstractPDMat{T}} =
-    MvNormal{T,Cov}(μ, pdmat(length(μ), Σ))
+    MvNormal{T,Cov}(μ, pdmat(T, length(μ), Σ))
 MvNormal{T}(μ, Σ::AbstractMatrix) where {T<:Real} = MvNormal{T}(μ, pdmat(T, Σ))
 MvNormal{T}(μ, Σ::UniformScaling) where {T<:Real} = MvNormal{T}(μ, pdmat(T, length(μ), Σ))
 
