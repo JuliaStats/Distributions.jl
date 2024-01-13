@@ -43,7 +43,7 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     for i = 1:min(100, n_tsamples)
         @test logpdf(g, X[i]) ≈ log(pdf(g, X[i]))
     end
-    @test logpdf.(g, X) ≈ log.(pdf.(g, X))
+    @test Base.Fix1(logpdf, g).(X) ≈ log.(Base.Fix1(pdf, g).(X))
     @test isequal(logpdf(g, 0),-Inf)
     @test isequal(logpdf(g, 1),-Inf)
     @test isequal(logpdf(g, -eps()),-Inf)

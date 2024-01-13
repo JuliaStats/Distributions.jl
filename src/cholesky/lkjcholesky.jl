@@ -238,7 +238,7 @@ function _lkj_cholesky_onion_tri!(
     # equivalent steps in algorithm in reference are marked.
     @assert size(A) == (d, d)
     A[1, 1] = 1
-    d > 1 || return R
+    d > 1 || return A
     β = η + (d - 2)//2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1

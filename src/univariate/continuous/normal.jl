@@ -135,15 +135,15 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{<:Real})
     n = length(x)
 
     # compute s
-    s = x[1]
-    for i = 2:n
+    s = zero(T) + zero(T)
+    for i in eachindex(x)
         @inbounds s += x[i]
     end
     m = s / n
 
     # compute s2
-    s2 = abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - m)
     end
 
@@ -154,9 +154,9 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{<:Real}, w::AbstractArray{
     n = length(x)
 
     # compute s
-    tw = w[1]
-    s = w[1] * x[1]
-    for i = 2:n
+    tw = 0.0
+    s = 0.0 * zero(T)
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s += wi * x[i]
         tw += wi
@@ -164,8 +164,8 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{<:Real}, w::AbstractArray{
     m = s / tw
 
     # compute s2
-    s2 = w[1] * abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x, w)
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
 
@@ -190,8 +190,8 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{<:Real})
     μ = g.μ
-    s2 = abs2(x[1] - μ)
-    for i = 2:length(x)
+    s2 = zero(T) + zero(μ)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
     NormalKnownMuStats(g.μ, s2, length(x))
@@ -199,9 +199,9 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{<:Real}, w::AbstractArray{<:Real})
     μ = g.μ
-    s2 = abs2(x[1] - μ) * w[1]
-    tw = w[1]
-    for i = 2:length(x)
+    s2 = 0.0 * abs2(zero(T) - zero(μ))
+    tw = 0.0
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi

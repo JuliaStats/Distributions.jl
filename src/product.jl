@@ -12,7 +12,9 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
     size::Dims{N}
 
     function ProductDistribution{N,M,D}(dists::D) where {N,M,D}
-        isempty(dists) && error("product distribution must consist of at least one distribution")
+        if isempty(dists)
+            throw(ArgumentError("a product distribution must consist of at least one distribution"))
+        end
         return new{N,M,D,_product_valuesupport(dists),_product_eltype(dists)}(
             dists,
             _product_size(dists),
@@ -20,11 +22,11 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
     end
 end
 
-function ProductDistribution(dists::AbstractArray{<:Distribution{ArrayLikeVariate{M}},N}) where {M,N}
+function ProductDistribution(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}},N}) where {M,N}
     return ProductDistribution{M + N,M,typeof(dists)}(dists)
 end
 
-function ProductDistribution(dists::NTuple{N,Distribution{ArrayLikeVariate{M}}}) where {M,N}
+function ProductDistribution(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}}}) where {M}
     return ProductDistribution{M + 1,M,typeof(dists)}(dists)
 end
 
@@ -54,10 +56,10 @@ function _product_size(dists::AbstractArray{<:Distribution{<:ArrayLikeVariate{M}
     size_dists = size(dists)
     return ntuple(i -> i <= M ? size_d[i] : size_dists[i-M], Val(M + N))
 end
-function _product_size(dists::NTuple{N,Distribution{<:ArrayLikeVariate{M}}}) where {M,N}
+function _product_size(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{Distribution{<:ArrayLikeVariate{M}}, N}}) where {M,N}
     size_d = size(first(dists))
     all(size(d) == size_d for d in dists) || error("all distributions must be of the same size")
-    return ntuple(i -> i <= M ? size_d[i] : N, Val(M + 1))
+    return ntuple(i -> i <= M ? size_d[i] : N + 1, Val(M + 1))
 end
 
 ## aliases
@@ -167,7 +169,7 @@ function _rand!(
 end
 
 # `_logpdf` for arrays of distributions
-# we have to fix a method ambiguity
+# we have to fix some method ambiguities
 _logpdf(d::ProductDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __logpdf(d, x)
 _logpdf(d::ProductDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
 function __logpdf(

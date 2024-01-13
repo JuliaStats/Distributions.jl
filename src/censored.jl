@@ -431,6 +431,7 @@ _in_open_interval(x::Real, l::Real, ::Nothing) = x > l
 _clamp(x, l, u) = clamp(x, l, u)
 _clamp(x, ::Nothing, u) = min(x, u)
 _clamp(x, l, ::Nothing) = max(x, l)
+_clamp(x, ::Nothing, u::Nothing) = x
 
 _to_truncated(d::Censored) = truncated(d.uncensored, d.lower, d.upper)
 

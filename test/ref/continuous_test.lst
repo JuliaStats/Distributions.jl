@@ -66,6 +66,8 @@ GeneralizedExtremeValue(1.0, 1.0, -1.0)
 GeneralizedExtremeValue(-1.0, 0.5, 0.6)
 
 GeneralizedPareto()
+GeneralizedPareto(1.0)
+GeneralizedPareto(2.0)
 GeneralizedPareto(1.0, 1.0)
 GeneralizedPareto(0.1, 2.0)
 GeneralizedPareto(1.0, 1.0, 1.0)

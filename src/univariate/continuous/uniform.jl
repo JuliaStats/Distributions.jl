@@ -154,7 +154,7 @@ Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
 _rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
-    A .= quantile.(d, rand!(rng, A))
+    A .= Base.Fix1(quantile, d).(rand!(rng, A))
 
 
 #### Fitting

@@ -162,7 +162,7 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
         else
             s += randexp(rng, T)
         end
-        x .= quantile.(d.dist, x ./ s)
+        x .= Base.Fix1(quantile, d.dist).(x ./ s)
     end
     return x
 end
