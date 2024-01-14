@@ -96,6 +96,7 @@ const tests = [
     "eachvariate",
     "univariate/continuous/triangular",
     "statsapi",
+    "extensions",
 
     ### missing files compared to /src:
     # "common",
