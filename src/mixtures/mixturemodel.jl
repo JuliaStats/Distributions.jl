@@ -88,6 +88,14 @@ Here, `x` can be a single sample or an array of multiple samples.
 logpdf(d::AbstractMixtureModel, x::Any)
 
 """
+    gradlogpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
+
+Evaluate the gradient of the logarithm of the (mixed) probability density function over `x`.
+Here, `x` is expected to be a single sample.
+"""
+gradlogpdf(d::AbstractMixtureModel, x::Any)
+
+"""
     rand(d::Union{UnivariateMixture, MultivariateMixture})
 
 Draw a sample from the mixture model `d`.
@@ -359,8 +367,14 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
+function _mixgradlogpdf1(d::AbstractMixtureModel, x)
+    glp = insupport(d, x) ? sum(pbi * pdf(d.components[i], x) .* gradlogpdf(d.components[i], x) for (i, pbi) in enumerate(probs(d)) if pdf(d.components[i], x) > 0) / pdf(d, x) : zero(x)
+    return glp
+end
+
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
+gradlogpdf(d::UnivariateMixture, x::Real) = _mixgradlogpdf1(d, x)
 
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
@@ -368,6 +382,7 @@ _logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real
 
 _pdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixpdf1(d, x)
 _logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
+gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixgradlogpdf1(d, x)
 _pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
