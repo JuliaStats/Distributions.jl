@@ -26,7 +26,7 @@ using Test
 @test isapprox(gradlogpdf(MvTDist(5., [1., 2.], [1. 0.1; 0.1 1.]), [0.7, 0.9]),
     [0.2150711513583442, 1.2111901681759383] ,atol=1.0e-8)
 
-# Test for gradlogpdf on univariate mixture distributions
+# Test for gradlogpdf on univariate mixture distributions against centered finite-difference on logpdf
 
 x = [-0.2, 0.3, 0.8, 1.3, 10.5]
 delta = 0.001
@@ -40,12 +40,12 @@ for d in (
     MixtureModel([Logistic(-6.0), LogNormal(5.5), TDist(8.0), Weibull(2.0)], [0.3, 0.2, 0.4, 0.1])
 )
     xs = filter(s -> insupport(d, s), x)
-    glp1 = gradlogpdf.(d, xs)
+    glp1 = gradlogpdf(d, xs)
     glp2 = ( logpdf.(d, xs .+ delta) - logpdf.(d, xs .- delta) ) ./ 2delta
     @test isapprox(glp1, glp2, atol = delta)
 end
 
-# Test for gradlogpdf on multivariate mixture distributions
+# Test for gradlogpdf on multivariate mixture distributions against centered finite-difference on logpdf
 
 x = [[0.2, 0.3], [0.8, 1.3], [-1.0, 10.5]]
 delta = 0.001
@@ -57,15 +57,9 @@ for d in (
     MixtureModel([MvNormal([1.0, 2.0], [0.4 0.2; 0.2 0.5]), MvTDist(5., [1., 2.], [1. 0.1; 0.1 1.])], [0.4, 0.6])
 )
     xs = filter(s -> insupport(d, s), x)
-    for xi in xs
-        glp = gradlogpdf(d, xi)
-        glpx = ( logpdf(d, xi .+ [delta, 0]) - logpdf(d, xi .- [delta, 0]) ) ./ 2delta
-        glpy = ( logpdf(d, xi .+ [0, delta]) - logpdf(d, xi .- [0, delta]) ) ./ 2delta
-        @test isapprox(glp, [glpx, glpy], atol = delta)
-    end
+    glp = gradlogpdf(d, xs)
+    glpx = ( logpdf(d, xs .+ [[delta, 0]]) - logpdf(d, xs .- [[delta, 0]]) ) ./ 2delta
+    glpy = ( logpdf(d, xs .+ [[0, delta]]) - logpdf(d, xs .- [[0, delta]]) ) ./ 2delta
+    @test isapprox(getindex.(glp, 1), glpx, atol=delta)
+    @test isapprox(getindex.(glp, 2), glpy, atol=delta)
 end
-
-#@test isapprox(gradlogpdf(MixtureModel([MvNormal([1., 2.], [1. 0.1; 0.1 1.])], [1.0]), [0.7, 0.9])   , 
-#[-0.4375, 2.375]   ,atol=1.0e-8)
-#@test isapprox(gradlogpdf(MixtureModel([MvNormal([1.0, 2.0], [0.4 0.2; 0.2 0.5]), MvNormal([2.0, 1.0], [0.3 0.1; 0.1 0.4])], [0.4, 0.6]), [0.7, 0.9])   ,
-#[-0.4375, 2.375]   ,atol=1.0e-8)
