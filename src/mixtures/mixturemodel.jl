@@ -368,7 +368,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 end
 
 function _mixgradlogpdf1(d::AbstractMixtureModel, x)
-    glp = insupport(d, x) ? sum(pbi * pdf(d.components[i], x) .* gradlogpdf(d.components[i], x) for (i, pbi) in enumerate(probs(d)) if pdf(d.components[i], x) > 0) / pdf(d, x) : zero(x)
+    glp = insupport(d, x) ? sum(pi * pdf(d.components[i], x) .* gradlogpdf(d.components[i], x) for (i, pi) in enumerate(probs(d)) if (!iszero(pi) && !iszero(pdf(d.components[i], x)))) / pdf(d, x) : zero(x)
     return glp
 end
 
