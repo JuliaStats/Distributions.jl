@@ -24,6 +24,7 @@ Many functions, including those for the evaluation of pdf and sampling, are defi
 - [`insupport(::UnivariateDistribution, x::Any)`](@ref)
 - [`pdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`logpdf(::UnivariateDistribution, ::Real)`](@ref)
+- [`gradlogpdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`cdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`logcdf(::UnivariateDistribution, ::Real)`](@ref)
 - [`logdiffcdf(::UnivariateDistribution, ::T, ::T) where {T <: Real}`](@ref)
