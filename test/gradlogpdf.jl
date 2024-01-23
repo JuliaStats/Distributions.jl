@@ -41,7 +41,7 @@ for d in (
     MixtureModel([Logistic(-6.0), LogNormal(5.5), TDist(8.0), Weibull(2.0)], [0.3, 0.2, 0.4, 0.1])
 )
     xs = filter(s -> insupport(d, s), x)
-    glp1 = gradlogpdf(d, xs)
+    glp1 = gradlogpdf.(d, xs)
     glp2 = ( logpdf.(d, xs .+ delta) - logpdf.(d, xs .- delta) ) ./ 2delta
     @test isapprox(glp1, glp2, atol = delta)
 end
@@ -59,9 +59,11 @@ for d in (
     MixtureModel([MvNormal([1.0, 2.0], [0.4 0.2; 0.2 0.5]), MvTDist(5., [1., 2.], [1. 0.1; 0.1 1.])], [0.4, 0.6])
 )
     xs = filter(s -> insupport(d, s), x)
-    glp = gradlogpdf(d, xs)
-    glpx = ( logpdf(d, xs .+ [[delta, 0]]) - logpdf(d, xs .- [[delta, 0]]) ) ./ 2delta
-    glpy = ( logpdf(d, xs .+ [[0, delta]]) - logpdf(d, xs .- [[0, delta]]) ) ./ 2delta
-    @test isapprox(getindex.(glp, 1), glpx, atol=delta)
-    @test isapprox(getindex.(glp, 2), glpy, atol=delta)
+    for xi in xs
+        glp = gradlogpdf(d, xi)
+        glpx = ( logpdf(d, xi .+ [delta, 0]) - logpdf(d, xi .- [delta, 0]) ) ./ 2delta
+        glpy = ( logpdf(d, xi .+ [0, delta]) - logpdf(d, xi .- [0, delta]) ) ./ 2delta
+        @test isapprox(glp[1], glpx, atol=delta)
+        @test isapprox(glp[2], glpy, atol=delta)
+    end
 end

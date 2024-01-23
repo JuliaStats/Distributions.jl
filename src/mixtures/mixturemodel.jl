@@ -382,10 +382,10 @@ _logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real
 
 _pdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixpdf1(d, x)
 _logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
-_gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixgradlogpdf1(d, x)
 _pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
+gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixgradlogpdf1(d, x)
 
 ## component-wise pdf and logpdf
 

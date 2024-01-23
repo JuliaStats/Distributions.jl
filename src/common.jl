@@ -277,46 +277,6 @@ end
 # `_logpdf` should be implemented and has no default definition
 # _logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
 
-"""
-    gradlogpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
-
-Evaluate the gradient of the logarithm of the probability density function of `d` at `x`.
-
-This function checks if the size of `x` is compatible with distribution `d`. This check can
-be disabled by using `@inbounds`.
-
-# Implementation
-
-Instead of `gradlogpdf` one should implement `_gradlogpdf(d, x)` which does not have to check the
-size of `x`.
-
-See also: [`pdf`](@ref).
-"""
-@inline function gradlogpdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
-) where {N,M}
-    if M == N
-        @boundscheck begin
-            size(x) == size(d) ||
-                throw(DimensionMismatch("inconsistent array dimensions"))
-        end
-        return _gradlogpdf(d, x)
-    else
-        @boundscheck begin
-            M > N ||
-                throw(DimensionMismatch(
-                    "number of dimensions of the variates ($M) must be greater than or equal to the dimension of the distribution ($N)"
-                ))
-            ntuple(i -> size(x, i), Val(N)) == size(d) ||
-                throw(DimensionMismatch("inconsistent array dimensions"))
-        end
-        return @inbounds map(Base.Fix1(gradlogpdf, d), eachvariate(x, variate_form(typeof(d))))
-    end
-end
-
-# `_gradlogpdf` should be implemented and has no default definition
-# _gradlogpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
-
 # TODO: deprecate?
 """
     pdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
@@ -353,25 +313,6 @@ Base.@propagate_inbounds function logpdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
 ) where {N}
     return map(Base.Fix1(logpdf, d), x)
-end
-
-"""
-    gradlogpdf(d::Distribution{ArrayLikeVariate{N}}, x) where {N}
-
-Evaluate the gradient of the logarithm of the probability density function of `d` at every 
-element in a collection `x`.
-
-This function checks for every element of `x` if its size is compatible with distribution
-`d`. This check can be disabled by using `@inbounds`.
-
-Here, `x` can be
-- an array of dimension `> N` with `size(x)[1:N] == size(d)`, or
-- an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
-"""
-Base.@propagate_inbounds function gradlogpdf(
-    d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
-    return map(Base.Fix1(gradlogpdf, d), x)
 end
 
 """
