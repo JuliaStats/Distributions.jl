@@ -367,15 +367,31 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     return r
 end
 
-function _mixgradlogpdf1(d::AbstractMixtureModel, x)
-    pdfdx = pdf(d, x) 
-    glp = !iszero(pdfdx) ? sum(pi * pdf(d.components[i], x) .* gradlogpdf(d.components[i], x) for (i, pi) in enumerate(probs(d)) if (!iszero(pi) && !iszero(pdf(d.components[i], x)))) / pdfdx : pdfdx
-    return glp
-end
-
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
-gradlogpdf(d::UnivariateMixture, x::Real) = _mixgradlogpdf1(d, x)
+
+function gradlogpdf(d::UnivariateMixture, x::Real)
+    cp = components(d)
+    pr = probs(d)
+    pdfx1 = pdf(cp[1], x)
+    pdfx = pr[1] * pdfx1
+    _glp = pdfx * gradlogpdf(cp[1], x)
+    glp = (!iszero(pr[1])) && (!iszero(pdfx)) ? _glp : zero(_glp)
+    @inbounds for i in Iterators.drop(eachindex(pr, cp), 1)
+        if !iszero(pr[i])
+            pdfxi = pdf(cp[i], x)
+            if !iszero(pdfxi)
+                pipdfxi = pr[i] * pdfxi
+                pdfx += pipdfxi
+                glp += pipdfxi * gradlogpdf(cp[i], x)
+            end
+        end
+    end
+    if !iszero(pdfx) # else glp is already zero
+        glp /= pdfx
+    end 
+    return glp
+end
 
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
@@ -386,7 +402,30 @@ _logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
 _pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
-gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixgradlogpdf1(d, x)
+function gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real})
+    cp = components(d)
+    pr = probs(d)
+    pdfx1 = pdf(cp[1], x)
+    pdfx = pr[1] * pdfx1
+    glp = pdfx * gradlogpdf(cp[1], x)
+    if ( iszero(pr[1]) || iszero(pdfx) )
+        glp .= zero(eltype(glp))
+    end
+    @inbounds for i in Iterators.drop(eachindex(pr, cp), 1)
+        if !iszero(pr[i])
+            pdfxi = pdf(cp[i], x)
+            if !iszero(pdfxi)
+                pipdfxi = pr[i] * pdfxi
+                pdfx += pipdfxi
+                glp .+= pipdfxi * gradlogpdf(cp[i], x)
+            end
+        end
+    end
+    if !iszero(pdfx) # else glp is already zero
+        glp ./= pdfx
+    end
+    return glp
+end
 
 ## component-wise pdf and logpdf
 

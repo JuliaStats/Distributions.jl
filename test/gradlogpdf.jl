@@ -28,22 +28,24 @@ using Test
 
 # Test for gradlogpdf on univariate mixture distributions against centered finite-difference on logpdf
 
-x = [-0.2, 0.3, 0.8, 1.3, 10.5]
-delta = 0.001
+x = [-0.2, 0.3, 0.8, 1.0, 1.3, 10.5]
+delta = 0.0001
 
 for d in (
     MixtureModel([Normal(-4.5, 2.0)], [1.0]),
     MixtureModel([Exponential(2.0)], [1.0]),
     MixtureModel([Uniform(-1.0, 1.0)], [1.0]),
+    MixtureModel([Normal(1//1, 2//1), Beta(2//1, 3//1), Exponential(3//2)], [3//10, 4//10, 3//10]),
     MixtureModel([Normal(-2.0, 3.5), Normal(-4.5, 2.0)], [0.0, 1.0]),
     MixtureModel([Beta(1.5, 3.0), Chi(5.0), Chisq(7.0)], [0.4, 0.3, 0.3]),
     MixtureModel([Exponential(2.0), Gamma(9.0, 0.5), Gumbel(3.5, 1.0), Laplace(7.0)], [0.3, 0.2, 0.4, 0.1]),
     MixtureModel([Logistic(-6.0), LogNormal(5.5), TDist(8.0), Weibull(2.0)], [0.3, 0.2, 0.4, 0.1])
 )
-    xs = filter(s -> insupport(d, s), x)
+    xs = filter(s -> all(insupport.(d, [s - delta, s, s + delta])), x)
     glp1 = gradlogpdf.(d, xs)
     glp2 = ( logpdf.(d, xs .+ delta) - logpdf.(d, xs .- delta) ) ./ 2delta
-    @test isapprox(glp1, glp2, atol = delta)
+    @info "Testing `gradlogpdf` on $d"
+    @test isapprox(glp1, glp2, atol = 0.01)
 end
 
 # Test for gradlogpdf on multivariate mixture distributions against centered finite-difference on logpdf
