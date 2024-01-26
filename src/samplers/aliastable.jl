@@ -15,9 +15,7 @@ end
 
 function rand(rng::AbstractRNG, s::AliasTable)
     i = rand(rng, 1:length(s.alias)) % Int
-    u = rand(rng)
-    @inbounds r = u < s.accept[i] ? i : s.alias[i]
-    r
+    ifelse(rand(rng) < s.accept[i],  i, s.alias[i])
 end
 
 show(io::IO, s::AliasTable) = @printf(io, "AliasTable with %d entries", ncategories(s))
