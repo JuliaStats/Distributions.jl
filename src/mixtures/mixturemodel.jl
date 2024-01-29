@@ -383,10 +383,7 @@ function gradlogpdf(d::UnivariateMixture, x::Real)
         glp = zero(glp)
     end
     
-    while true
-        iterps = iterate(ps, idxps)
-        itercs = iterate(cs, idxcs)
-        ( (iterps !== nothing) && (itercs !== nothing) ) || break
+    while (iterps = iterate(ps, idxps)) !== nothing && (itercs = iterate(cs, idxcs)) !== nothing
         psi, idxps = iterps
         csi, idxcs = itercs
         if !iszero(psi)
@@ -424,13 +421,10 @@ function gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real})
     pdfx = psi * pdfx1
     glp = pdfx * gradlogpdf(csi, x)
     if iszero(psi) || iszero(pdfx)
-        glp .= zero(eltype(glp))
+        fill!(glp, zero(eltype(glp)))
     end
     
-    while true
-        iterps = iterate(ps, idxps)
-        itercs = iterate(cs, idxcs)
-        ( (iterps !== nothing) && (itercs !== nothing) ) || break
+    while (iterps = iterate(ps, idxps)) !== nothing && (itercs = iterate(cs, idxcs)) !== nothing
         psi, idxps = iterps
         csi, idxcs = itercs
         if !iszero(psi)
@@ -438,7 +432,7 @@ function gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real})
             if !iszero(pdfxi)
                 pipdfxi = psi * pdfxi
                 pdfx += pipdfxi
-                glp .+= pipdfxi * gradlogpdf(csi, x)
+                glp .+= pipdfxi .* gradlogpdf(csi, x)
             end
         end
     end
