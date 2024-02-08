@@ -58,7 +58,7 @@ function mean(d::GeneralizedInverseGaussian)
     λ, ψ, χ = params(d)
     ω = sqrt(ψ * χ)
     η = sqrt(χ / ψ)
-    return η * besselk(χ + 1, ω) / besselk(χ, ω)
+    return η * besselk(λ + 1, ω) / besselk(λ, ω)
 end
 
 function var(d::GeneralizedInverseGaussian)
