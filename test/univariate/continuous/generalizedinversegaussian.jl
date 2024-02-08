@@ -6,25 +6,25 @@ using Test
 @testset "GeneralizedInverseGaussian" begin
     @testset "Constructors" begin
         # Argument checks
-        p = randn()
-        ab = -0.2
-        @test_throws DomainError GeneralizedInverseGaussian(ab, 1.0, p)
-        GeneralizedInverseGaussian(ab, 1.0, p; check_args=false)
+        λ = randn()
+        ψχ = -0.2
+        @test_throws DomainError GeneralizedInverseGaussian(λ, ψχ, 1.0)
+        GeneralizedInverseGaussian(λ, ψχ, 1.0; check_args=false) # passes
 
-        @test_throws DomainError GeneralizedInverseGaussian(1.0, ab, p)
-        GeneralizedInverseGaussian(1.0, ab, p; check_args=false)
+        @test_throws DomainError GeneralizedInverseGaussian(λ, 1.0, ψχ)
+        GeneralizedInverseGaussian(λ, 1.0, ψχ; check_args=false) # passes
     end
 
     @testset "Special cases" begin
-        a = Random.randexp()
-        b = Random.randexp()
-        # NOTE: p > 1 for Gamma to have a mode
-        p_plus = Random.randexp() + 1
-        p_minus = -Random.randexp()
+        ψ = Random.randexp()
+        χ = Random.randexp()
+        # NOTE: λ > 1 for Gamma to have a mode
+        λ_plus = Random.randexp() + 1
+        λ_minus = -Random.randexp()
         for (d, dref) in (
-            (GeneralizedInverseGaussian(a, b, -1 // 2), InverseGaussian(sqrt(b / a), b)), # p = -1 // 2 (inverse gaussian)
-            (GeneralizedInverseGaussian(a, 0.0, p_plus), Gamma(p_plus, 2 / a)), # b = 0 (gamma)
-            (GeneralizedInverseGaussian(0.0, b, p_minus), InverseGamma(-p_minus, b / 2)) # a = 0 (inverse gamma)
+            (GeneralizedInverseGaussian(-1 // 2, ψ, χ), InverseGaussian(sqrt(χ / ψ), χ)), # λ = -1 // 2 => inverse gaussian)
+            (GeneralizedInverseGaussian(λ_plus, ψ, 0.0), Gamma(λ_plus, 2 / ψ)),           # χ = 0 => gamma
+            (GeneralizedInverseGaussian(λ_minus, 0.0, χ), InverseGamma(-λ_minus, χ / 2))  # ψ = 0 => inverse gamma
         )
             @test minimum(d) == 0.0
             @test maximum(d) == Inf
@@ -63,10 +63,10 @@ using Test
     end
 
     @testset "Non-special case" begin
-        p = randn()
-        a = Random.randexp()
-        b = Random.randexp()
-        d = GeneralizedInverseGaussian(a, b, p)
+        λ = randn()
+        ψ = Random.randexp()
+        χ = Random.randexp()
+        d = GeneralizedInverseGaussian(λ, ψ, χ)
 
         @test minimum(d) == 0.0
         @test maximum(d) == Inf
