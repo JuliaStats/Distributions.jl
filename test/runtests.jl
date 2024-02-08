@@ -11,6 +11,7 @@ import JSON
 import ForwardDiff
 
 const tests = [
+    "aqua",
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
@@ -26,6 +27,7 @@ const tests = [
     "univariate/continuous/uniform",
     "univariate/continuous/lognormal",
     "multivariate/mvnormal",
+    "multivariate/mvlogitnormal",
     "multivariate/mvlognormal",
     "types", # extra file compared to /src
     "utils",
@@ -78,6 +80,7 @@ const tests = [
     "univariate/continuous/gumbel",
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
+    "univariate/continuous/johnsonsu",
     "univariate/continuous/noncentralchisq",
     "univariate/continuous/weibull",
     "pdfnorm",
@@ -88,9 +91,12 @@ const tests = [
     "univariate/continuous/skewedexponentialpower",
     "univariate/discrete/discreteuniform",
     "univariate/continuous/tdist",
+    "univariate/orderstatistic",
+    "multivariate/jointorderstatistics",
     "multivariate/product",
     "eachvariate",
     "univariate/continuous/triangular",
+    "statsapi",
 
     ### missing files compared to /src:
     # "common",
@@ -170,8 +176,3 @@ include("testutils.jl")
         include("$t.jl")
     end
 end
-
-# print method ambiguities
-println("Potentially stale exports: ")
-display(Test.detect_ambiguities(Distributions))
-println()

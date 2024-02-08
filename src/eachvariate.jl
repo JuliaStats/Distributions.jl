@@ -7,7 +7,7 @@ end
 
 function EachVariate{V}(x::AbstractArray{<:Real,M}) where {V,M}
     ax = ntuple(i -> axes(x, i + V), Val(M - V))
-    T = typeof(view(x, ntuple(i -> i <= V ? Colon() : firstindex(x, i), Val(M))...))
+    T = Base.promote_op(view, typeof(x), ntuple(i -> i <= V ? Colon : eltype(axes(x, i)), Val(M))...)
     return EachVariate{V,typeof(x),typeof(ax),T,M-V}(x, ax)
 end
 

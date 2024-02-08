@@ -17,6 +17,7 @@ using Random
 import Random: default_rng, rand!, SamplerRangeInt
 
 import Statistics: mean, median, quantile, std, var, cov, cor
+import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
     fit, kldivergence, loglikelihood, dof, span,
     params, params!
@@ -24,6 +25,7 @@ import StatsBase: kurtosis, skewness, entropy, mode, modes,
 import PDMats: dim, PDMat, invquad
 
 using SpecialFunctions
+using Base.MathConstants: eulergamma
 
 export
     # re-export Statistics
@@ -106,9 +108,12 @@ export
     InverseGaussian,
     IsoNormal,
     IsoNormalCanon,
+    JohnsonSU,
+    JointOrderStatistics,
     Kolmogorov,
     KSDist,
     KSOneSided,
+    Kumaraswamy,
     Laplace,
     Levy,
     Lindley,
@@ -118,6 +123,7 @@ export
     Logistic,
     LogNormal,
     LogUniform,
+    MvLogitNormal,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
@@ -141,6 +147,7 @@ export
     Normal,
     NormalCanon,
     NormalInverseGaussian,
+    OrderStatistic,
     Pareto,
     PGeneralizedGaussian,
     SkewedExponentialPower,
@@ -306,14 +313,18 @@ include("pdfnorm.jl")
 include("mixtures/mixturemodel.jl")
 include("mixtures/unigmm.jl")
 
+# Interface for StatsAPI
+include("statsapi.jl")
+
+# Testing utilities for other packages which implement distributions.
+include("test_utils.jl")
+
 # Extensions: Implementation of DensityInterface and ChainRulesCore API
 if !isdefined(Base, :get_extension)
     include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
     include("../ext/DistributionsDensityInterfaceExt.jl")
+    include("../ext/DistributionsTestExt.jl")
 end
-
-# Testing utilities for other packages which implement distributions.
-include("test_utils.jl")
 
 include("deprecates.jl")
 
@@ -345,7 +356,8 @@ Supported distributions:
     Frechet, FullNormal, FullNormalCanon, Gamma, GeneralizedPareto,
     GeneralizedExtremeValue, Geometric, Gumbel, Hypergeometric,
     InverseWishart, InverseGamma, InverseGaussian, IsoNormal,
-    IsoNormalCanon, Kolmogorov, KSDist, KSOneSided, Laplace, Levy, Lindley, LKJ, LKJCholesky,
+    IsoNormalCanon, JohnsonSU, Kolmogorov, KSDist, KSOneSided, Kumaraswamy,
+    Laplace, Levy, Lindley, LKJ, LKJCholesky,
     Logistic, LogNormal, MatrixBeta, MatrixFDist, MatrixNormal,
     MatrixTDist, MixtureModel, Multinomial,
     MultivariateNormal, MvLogNormal, MvNormal, MvNormalCanon,

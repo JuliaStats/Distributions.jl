@@ -139,7 +139,7 @@ function _logpdf(d::AbstractMvTDist, x::AbstractVector{T}) where T<:Real
     v - shdfhdim * log1p(sqmahal(d, x) / d.df)
 end
 
-function _logpdf!(r::AbstractArray, d::AbstractMvTDist, x::AbstractMatrix)
+function _logpdf!(r::AbstractArray{<:Real}, d::AbstractMvTDist, x::AbstractMatrix{<:Real})
     sqmahal!(r, d, x)
     shdfhdim, v = mvtdist_consts(d)
     for i = 1:size(x, 2)
