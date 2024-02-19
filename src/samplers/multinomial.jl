@@ -69,7 +69,7 @@ function MultinomialSampler(n::Int, prob::Vector{<:Real})
             k,
             AliasTable(prob),
             Vector{Int}(undef, n),
-            Vector{Float64}(undef, n)
+            similar(prob, n)
         )
     end
 end
