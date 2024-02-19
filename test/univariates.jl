@@ -54,7 +54,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # Note: properties include all applicable params and stats
     #
 
-    # D can be a function, e.g. TruncatedNormal
+    # D can be a function
     if isa(D, Type)
         @assert isa(d, D)
     end

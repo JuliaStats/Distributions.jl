@@ -5157,7 +5157,7 @@
 },
 {
   "expr": "truncated(Normal(0, 1), -2, 2)",
-  "dtype": "TruncatedNormal",
+  "dtype": "Truncated",
   "minimum": -2,
   "maximum": 2,
   "properties": {
@@ -5187,7 +5187,7 @@
 },
 {
   "expr": "truncated(Normal(3, 10), 7, 8)",
-  "dtype": "TruncatedNormal",
+  "dtype": "Truncated",
   "minimum": 7,
   "maximum": 8,
   "properties": {
@@ -5217,7 +5217,7 @@
 },
 {
   "expr": "truncated(Normal(27, 3); lower=0)",
-  "dtype": "TruncatedNormal",
+  "dtype": "Truncated",
   "minimum": 0,
   "maximum": "inf",
   "properties": {
@@ -5247,7 +5247,7 @@
 },
 {
   "expr": "truncated(Normal(-5, 1); upper=-10)",
-  "dtype": "TruncatedNormal",
+  "dtype": "Truncated",
   "minimum": "-inf",
   "maximum": -10,
   "properties": {
@@ -5277,7 +5277,7 @@
 },
 {
   "expr": "truncated(Normal(1.8, 1.2); upper=0)",
-  "dtype": "TruncatedNormal",
+  "dtype": "Truncated",
   "minimum": "-inf",
   "maximum": 0,
   "properties": {
