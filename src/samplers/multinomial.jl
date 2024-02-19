@@ -39,20 +39,20 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
     return x
 end
 
-abstract type AbstractMultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete} end
+abstract type MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete} end
 
-struct MultinomialSamplerBinomial{T<:Real} <: AbstractMultinomialSampler{T}
+struct MultinomialSamplerBinomial{T<:Real} <: MultinomialSampler{T}
     n::Int
     k::Int
     prob::Vector{T}
 end
 
-struct MultinomialSamplerSequential
+struct MultinomialSamplerSequential{T<:Real} <: MultinomialSampler{T}
     n::Int
     k::Int
     alias::AliasTable
     scratch_idx::Vector{Int}
-    scratch_acc::Vector{Float64}
+    scratch_acc::Vector{T}
 end
 
 function MultinomialSampler(n::Int, prob::Vector{<:Real})
@@ -88,6 +88,7 @@ function _rand!(rng::AbstractRNG, s::MultinomialSamplerSequential, x::AbstractVe
         i2 = s.scratch_idx[i] % Int
         x[ifelse(s.scratch_acc[i] < at.accept[i2], i2, at.alias[i2])] += 1
     end
+    return x
 end
 
-length(s::AbstractMultinomialSampler) = s.k
+length(s::MultinomialSampler) = s.k
