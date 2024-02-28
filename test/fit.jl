@@ -465,3 +465,13 @@ end
 
     end
 end
+
+@testset "Testing fit for WrappedCauchy" begin
+    for func in funcs, dist in (WrappedCauchy, WrappedCauchy{Float64})
+        x = func[2](dist(1.0,0.5), N)
+        d = fit(dist, x)
+        @test isa(d, dist)
+        @test isapprox(d.μ, 1.0, atol=0.05)
+        @test isapprox(d.c, 0.5, rtol=0.05)
+    end
+end
