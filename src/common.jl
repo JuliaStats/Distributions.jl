@@ -17,6 +17,12 @@ const Multivariate  = ArrayLikeVariate{1}
 const Matrixvariate = ArrayLikeVariate{2}
 
 """
+`F <: NamedTupleVariate{K}` specifies that the variate or a sample is of type
+`NamedTuple{K}`.
+"""
+abstract type NamedTupleVariate{K} <: VariateForm end
+
+"""
 `F <: CholeskyVariate` specifies that the variate or a sample is of type
 `LinearAlgebra.Cholesky`.
 """
@@ -463,6 +469,16 @@ Base.@propagate_inbounds function loglikelihood(
 ) where {N}
     return sum(Base.Fix1(logpdf, d), x)
 end
+
+"""
+    marginal(d::Distribution, k...) -> Distribution
+
+Return the marginal distribution of `d` at the indices `k...`.
+
+The result is the distribution of the variate `rand(d)[k...]` that one would obtain by
+integrating over all other indices.
+"""
+marginal(d::Distribution, k...)
 
 ## TODO: the following types need to be improved
 abstract type SufficientStats end
