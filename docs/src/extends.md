@@ -18,7 +18,7 @@ Unlike full-fledged distributions, a sampler, in general, only provides limited 
 To implement a univariate sampler, one can define a subtype (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
 
 ```julia
-function rand(rng::AbstractRNG, s::Spl)
+function Distributions.rand(rng::AbstractRNG, s::Spl)
     # ... generate a single sample from s
 end
 ```
@@ -32,7 +32,7 @@ To implement a multivariate sampler, one can define a subtype of `Sampleable{Mul
 ```julia
 Base.length(s::Spl) = ... # return the length of each sample
 
-function _rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{T}) where T<:Real
+function Distributions._rand!(rng::AbstractRNG, s::Spl, x::AbstractVector{T}) where T<:Real
     # ... generate a single vector sample to x
 end
 ```
@@ -80,7 +80,7 @@ Remember that each *column* of A is a sample.
 
 ### Matrix-variate Sampler
 
-To implement a multivariate sampler, one can define a subtype of `Sampleable{Multivariate,S}`, and provide both `size` and `_rand!` methods, as
+To implement a matrix-variate sampler, one can define a subtype of `Sampleable{Matrixvariate,S}`, and provide both `size` and `_rand!` methods, as
 
 ```julia
 Base.size(s::Spl) = ... # the size of each matrix sample
@@ -104,7 +104,7 @@ sampler(d::Distribution)
 
 A univariate distribution type should be defined as a subtype of `DiscreteUnivarateDistribution` or `ContinuousUnivariateDistribution`.
 
-The following methods need to be implemented for each univariate distribution type:
+The following methods need to be implemented for each univariate distribution type (qualify each with `Distributions.`):
 
 - [`rand(::AbstractRNG, d::UnivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
@@ -115,7 +115,7 @@ The following methods need to be implemented for each univariate distribution ty
 - [`maximum(d::UnivariateDistribution)`](@ref)
 - [`insupport(d::UnivariateDistribution, x::Real)`](@ref)
 
-It is also recommended that one also implements the following statistics functions:
+It is also recommended that one also implements the following statistics functions (qualify each with `Distributions.`):
 
 - [`mean(d::UnivariateDistribution)`](@ref)
 - [`var(d::UnivariateDistribution)`](@ref)
@@ -139,10 +139,10 @@ The following methods need to be implemented for each multivariate distribution 
 - [`length(d::MultivariateDistribution)`](@ref)
 - [`sampler(d::Distribution)`](@ref)
 - [`eltype(d::Distribution)`](@ref)
-- [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)`](@ref)
-- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)`](@ref)
+- [`Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractVector{<:Real})`](@ref)
+- [`Distributions._logpdf(d::MultivariateDistribution, x::AbstractVector{<:Real})`](@ref)
 
-Note that if there exist faster methods for batch evaluation, one should override `_logpdf!` and `_pdf!`.
+Note that if there exist faster methods for batch evaluation, one may also override `Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractMatrix{<:Real})` and [`Distributions._logpdf!`](@ref).
 
 Furthermore, the generic `loglikelihood` function repeatedly calls `_logpdf`. If there is
 a better way to compute the log-likelihood, one should override `loglikelihood`.
@@ -161,6 +161,6 @@ A matrix-variate distribution type should be defined as a subtype of `DiscreteMa
 The following methods need to be implemented for each matrix-variate distribution type:
 
 - [`size(d::MatrixDistribution)`](@ref)
-- [`Distributions._rand!(rng::AbstractRNG, d::MatrixDistribution, A::AbstractMatrix)`](@ref)
+- [`Distributions._rand!(rng::AbstractRNG, d::MatrixDistribution, A::AbstractMatrix{<:Real})`](@ref)
 - [`sampler(d::MatrixDistribution)`](@ref)
-- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractArray)`](@ref)
+- [`Distributions._logpdf(d::MatrixDistribution, x::AbstractMatrix{<:Real})`](@ref)
