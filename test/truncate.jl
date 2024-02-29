@@ -214,3 +214,8 @@ end
 
   @test isa(quantile(d, ForwardDiff.Dual(1.,0.)), ForwardDiff.Dual)
 end
+
+@testset "inconsistent types of samples (#1798)" begin
+    @test @inferred(rand(truncated(Geometric(0.6); lower = 2))) isa Int
+    @test @inferred(rand(truncated(Geometric(0.6); upper = 4))) isa Int
+end
