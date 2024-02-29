@@ -238,6 +238,13 @@ plotdensity((0, 18), Gamma, (7.5, 1)) # hide
 ```
 
 ```@docs
+GeneralizedChisq
+```
+```@example plotdensity
+plotdensity((-20, 20), GeneralizedChisq, ([1,-2], [1,2], [0,2], 10, 1)) # hide
+```
+
+```@docs
 GeneralizedExtremeValue
 ```
 ```@example plotdensity
