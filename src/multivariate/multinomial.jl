@@ -168,7 +168,26 @@ end
 _rand!(rng::AbstractRNG, d::Multinomial, x::AbstractVector{<:Real}) =
     multinom_rand!(rng, ntrials(d), probs(d), x)
 
-sampler(d::Multinomial) = MultinomialSampler(ntrials(d), probs(d))
+function sampler(d::Multinomial)
+    n = ntrials(d)
+    p = probs(d)
+    k = length(p)
+
+    # the constant λ term should be proportional to the perfomance ratio of
+    # constructing and sampling from a Binomial vs sampling from an AliasTable
+    λ = 10
+    return if n > λ * k
+        MultinomialSamplerBinomial(n, k, p)
+    else
+        MultinomialSamplerSequential(
+            n,
+            k,
+            AliasTable(p),
+            Vector{Int}(undef, n),
+            similar(p, n)
+        )
+    end
+end
 
 
 ## Fit model
