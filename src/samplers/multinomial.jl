@@ -39,15 +39,13 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
     return x
 end
 
-abstract type MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete} end
-
-struct MultinomialSamplerBinomial{T<:Real} <: MultinomialSampler{T}
+struct MultinomialSamplerBinomial{T<:Real} <: Sampleable{Multivariate,Discrete}
     n::Int
     k::Int
     prob::Vector{T}
 end
 
-struct MultinomialSamplerSequential{T<:Real} <: MultinomialSampler{T}
+struct MultinomialSamplerSequential{T<:Real} <: Sampleable{Multivariate,Discrete}
     n::Int
     k::Int
     alias::AliasTable
@@ -55,24 +53,7 @@ struct MultinomialSamplerSequential{T<:Real} <: MultinomialSampler{T}
     scratch_acc::Vector{T}
 end
 
-function MultinomialSampler(n::Int, prob::Vector{<:Real})
-    k = length(prob)
-
-    # the constant λ term should be proportional to the perfomance ratio of
-    # constructing and sampling from a Binomial vs sampling from an AliasTable
-    λ = 10
-    if n > λ * k
-        MultinomialSamplerBinomial(n, k, prob)
-    else
-        MultinomialSamplerSequential(
-            n,
-            k,
-            AliasTable(prob),
-            Vector{Int}(undef, n),
-            similar(prob, n)
-        )
-    end
-end
+Base.@deprecate MultinomialSampler(n::Int, prob::Vector{<:Real}) MultinomialSamplerBinomial(n, length(prob), prob) false
 
 function _rand!(rng::AbstractRNG, s::MultinomialSamplerBinomial, x::AbstractVector{<:Real})
     multinom_rand!(rng, s.n, s.prob, x)
@@ -91,4 +72,5 @@ function _rand!(rng::AbstractRNG, s::MultinomialSamplerSequential, x::AbstractVe
     return x
 end
 
-length(s::MultinomialSampler) = s.k
+length(s::MultinomialSamplerBinomial) = s.k
+length(s::MultinomialSamplerSequential) = s.k
