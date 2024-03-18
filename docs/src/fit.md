@@ -74,6 +74,23 @@ fit_mle(Categorical, x)        # equivalent to fit_mle(Categorical, max(x), x)
 fit_mle(Categorical, x, w)
 ```
 
+It is also possible to directly input a distribution `fit_mle(d::Distribution, x[, w])`. This form avoids the extra arguments:
+
+```julia
+fit_mle(Binomial(n, 0.1), x) 
+# equivalent to fit_mle(Binomial, ntrials(Binomial(n, 0.1)), x), here the parameter 0.1 is not used
+
+fit_mle(Categorical(p), x) 
+# equivalent to fit_mle(Categorical, ncategories(Categorical(p)), x), here the only the length of p is used not its values
+
+d = product_distribution([Exponential(0.5), Normal(11.3, 3.2)])
+fit_mle(d, x) 
+# equivalent to product_distribution([fit_mle(Exponential, x[1,:]), fit_mle(Normal, x[2, :])]). Again parameters of d are not used.
+```
+
+Note that for standard distributions, the values of the distribution parameters `d` are not used in `fit_mle` only the “structure” of `d` is passed into `fit_mle`.
+However, for complex Maximum Likelihood estimation requiring optimization, e.g., EM algorithm, one could use `D` as an initial guess.
+
 ## Sufficient Statistics
 
 For many distributions, the estimation can be based on (sum of) sufficient statistics computed from a dataset. To simplify implementation, for such distributions, we implement `suffstats` method instead of `fit_mle` directly:
