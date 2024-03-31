@@ -62,8 +62,8 @@ end
 function _rand!(rng::AbstractRNG, s::MultinomialSamplerSequential, x::AbstractVector{<:Real})
     fill!(x, zero(eltype(x)))
     at = s.alias
-    rand!(rng, s.scratch_idx, eachindex(at.alias, at.accept))
-    rand!(rng, s.scratch_acc)
+    rand!(rng, s.scratch_index_rng, eachindex(at.alias, at.accept))
+    rand!(rng, s.scratch_accept_rng)
 
     @inbounds for (i, acc) in zip(s.scratch_index_rng, s.scratch_accept_rng)
         x[ifelse(acc < at.accept[i], i, at.alias[i])] += 1
