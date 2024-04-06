@@ -124,4 +124,17 @@ end
     @test Categorical([0.5, 0.5]) ≈ Categorical([0.5f0, 0.5f0])
 end
 
+@testset "issue #832" begin
+    priorities = collect(1:1000) .* 1.
+    priorities[1:50] .= 1e8
+
+    at = Distributions.AliasTable(priorities)
+    iat = rand(at, 16)
+
+    # failure rate of a single sample is sum(51:1000)/50e8 = 9.9845e-5
+    # failure rate of 4 out of 16 samples is 1-cdf(Binomial(16, 9.9845e-5), 3) = 1.8074430840897548e-13
+    # this test should randomly fail with a probability of 1.8074430840897548e-13
+    @test count(==(1e8), priorities[iat]) >= 13
+end
+
 end
