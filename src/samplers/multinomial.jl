@@ -53,7 +53,7 @@ function _rand!(rng::AbstractRNG, s::MultinomialSampler,
                 x::AbstractVector{<:Real})
     n = s.n
     k = length(s)
-    if k < n/50+2
+    if n^2 > k
         multinom_rand!(rng, n, s.prob, x)
     else
         # Use an alias table
