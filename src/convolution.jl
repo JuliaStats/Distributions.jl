@@ -48,7 +48,6 @@ end
 convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
 
 
-
 function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
     support_conv = collect(Set(s1 + s2 for s1 in support(d1), s2 in support(d2)))
     sort!(support_conv) #for fast index finding below
