@@ -25,8 +25,6 @@ failprob(d)     # Get the failure rate, i.e. 1 - p
 External links:
 
 * [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
-Note: The definition of the negative binomial distribution in Wolfram is different from the [Wikipedia definition](http://en.wikipedia.org/wiki/Negative_binomial_distribution). In Wikipedia, `r` is the number of failures and `k` is the number of successes.
-
 """
 struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
@@ -82,19 +80,31 @@ kurtosis(d::NegativeBinomial{T}) where {T} = (p = succprob(d); T(6) / d.r + (p *
 
 mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p) * (d.r - one(T)) / p))
 
+function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
+    if p.r == q.r
+        return p.r * kldivergence(Geometric(succprob(p)), Geometric(succprob(q)))
+    else
+        # There does not appear to be an analytical formula for
+        # this case. Hence we fall back to the numerical approximation.
+        return invoke(kldivergence, Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}}, p, q; kwargs...)
+    end
+end
+
 
 #### Evaluation & Sampling
 
 # Implement native pdf and logpdf since it's relatively straight forward and allows for ForwardDiff
 function logpdf(d::NegativeBinomial, k::Real)
-    r = d.r * log(d.p) + k * log1p(-d.p)
-    if isone(d.p) && iszero(k)
-        return zero(r)
-    elseif !insupport(d, k)
-        return oftype(r, -Inf)
-    else
-        return r - log(k + d.r) - logbeta(d.r, k + 1)
+    r, p = params(d)
+    z = xlogy(r, p) + xlog1py(k, -p)
+
+    if iszero(k)
+        # in this case `logpdf(d, k) = z - log(k + r) - logbeta(r, k + 1) = z` analytically
+        # but unfortunately not numerically, so we handle this case separately to improve accuracy
+        return z
     end
+    
+    return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
 end
 
 # cdf and quantile functions are more involved so we still rely on Rmath
@@ -108,14 +118,22 @@ invlogcdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogcdf(d.r, d.p
 invlogccdf(d::NegativeBinomial, lq::Real) = convert(Int, nbinominvlogccdf(d.r, d.p, lq))
 
 ## sampling
-rand(rng::AbstractRNG, d::NegativeBinomial) = rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
-
-function mgf(d::NegativeBinomial, t::Real)
-    r, p = params(d)
-    return ((1 - p) * exp(t))^r / (1 - p * exp(t))^r
+function rand(rng::AbstractRNG, d::NegativeBinomial)
+    if isone(d.p)
+        return 0
+    else
+        return rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
+    end
 end
 
-function cf(d::NegativeBinomial, t::Real)
+function laplace_transform(d::NegativeBinomial, t)
     r, p = params(d)
-    return (((1 - p) * cis(t)) / (1 - p * cis(t)))^r
+    return laplace_transform(Geometric(p, check_args=false), t)^r
 end
+
+mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
+function cgf(d::NegativeBinomial, t)
+    r, p = params(d)
+    r * cgf(Geometric{typeof(p)}(p), t)
+end
+cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)

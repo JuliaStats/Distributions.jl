@@ -89,9 +89,22 @@ end
 # Use Julia implementations in StatsFuns
 @_delegate_statsfuns Normal norm μ σ
 
+# `logerf(...)` is more accurate for arguments in the tails than `logsubexp(logcdf(...), logcdf(...))`
+function logdiffcdf(d::Normal, x::Real, y::Real)
+    x < y && throw(ArgumentError("requires x >= y."))
+    μ, σ = params(d)
+    _x, _y, _μ, _σ = promote(x, y, μ, σ)
+    s = sqrt2 * _σ
+    return logerf((_y - _μ) / s, (_x - _μ) / s) - logtwo
+end
+
 gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
+function cgf(d::Normal, t)
+    μ,σ = params(d)
+    t*μ + (σ*t)^2/2
+end
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
 
 #### Affine transformations
@@ -102,6 +115,8 @@ Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 #### Sampling
 
 rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
+
+rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real}) = A .= muladd.(d.σ, randn!(rng, A), d.μ)
 
 #### Fitting
 
@@ -116,15 +131,15 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
-    s = x[1]
-    for i = 2:n
+    s = zero(T) + zero(T)
+    for i in eachindex(x)
         @inbounds s += x[i]
     end
     m = s / n
 
     # compute s2
-    s2 = abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - m)
     end
 
@@ -135,9 +150,9 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     n = length(x)
 
     # compute s
-    tw = w[1]
-    s = w[1] * x[1]
-    for i = 2:n
+    tw = 0.0
+    s = 0.0 * zero(T)
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s += wi * x[i]
         tw += wi
@@ -145,8 +160,8 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     m = s / tw
 
     # compute s2
-    s2 = w[1] * abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x, w)
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
 
@@ -167,8 +182,8 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     μ = g.μ
-    s2 = abs2(x[1] - μ)
-    for i = 2:length(x)
+    s2 = zero(T) + zero(μ)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
     NormalKnownMuStats(g.μ, s2, length(x))
@@ -176,9 +191,9 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     μ = g.μ
-    s2 = abs2(x[1] - μ) * w[1]
-    tw = w[1]
-    for i = 2:length(x)
+    s2 = 0.0 * abs2(zero(T) - zero(μ))
+    tw = 0.0
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi

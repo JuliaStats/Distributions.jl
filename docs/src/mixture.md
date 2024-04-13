@@ -1,6 +1,6 @@
 # Mixture Models
 
-A [mixture model](http://en.wikipedia.org/wiki/Mixture_model) is a probabilistic distribution that combines a set of *component* to represent the overall distribution. Generally, the probability density/mass function is given by a convex combination of the pdf/pmf of individual components, as
+A [mixture model](http://en.wikipedia.org/wiki/Mixture_model) is a probabilistic distribution that combines a set of *components* to represent the overall distribution. Generally, the probability density/mass function is given by a convex combination of the pdf/pmf of individual components, as
 
 ```math
 f_{mix}(x; \Theta, \pi) = \sum_{k=1}^K \pi_k f(x; \theta_k)
@@ -27,7 +27,7 @@ const MultivariateMixture  = AbstractMixtureModel{Multivariate}
 
 **Remarks:**
 
-- We introduce `AbstractMixtureModel` as a base type, which allows one to define a mixture model with different internal implementation, while still being able to leverage the common methods defined for `AbstractMixtureModel`.
+- We introduce `AbstractMixtureModel` as a base type, which allows one to define a mixture model with different internal implementations, while still being able to leverage the common methods defined for `AbstractMixtureModel`.
 
 ```@docs
 AbstractMixtureModel
@@ -105,5 +105,5 @@ rand!(::AbstractMixtureModel, ::AbstractArray)
 
 ## Estimation
 
-There are a number of methods for estimating of mixture models from data, and this problem remains an open research topic.
+There are several methods for the estimation of mixture models from data, and this problem remains an open research topic.
 This package does not provide facilities for estimating mixture models. One can resort to other packages, *e.g.* [*GaussianMixtures.jl*](https://github.com/davidavdav/GaussianMixtures.jl), for this purpose.

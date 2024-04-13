@@ -17,6 +17,7 @@ makedocs(
         "reshape.md",
         "cholesky.md",
         "mixture.md",
+        "order_statistics.md",
         "convolution.md",
         "fit.md",
         "extends.md",

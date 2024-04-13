@@ -90,8 +90,6 @@ function check_args(f::F, check::Bool) where {F}
     nothing
 end
 
-ChainRulesCore.@non_differentiable check_args(::Any, ::Bool)
-
 ##### Utility functions
 
 isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
@@ -102,7 +100,7 @@ isprobvec(p::AbstractVector{<:Real}) =
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
-# inplace pdf calculations, etc. allocate storage correctly
+# in-place pdf calculations, etc. allocate storage correctly
 @inline partype(::Distribution) = Float64
 
 # because X == X' keeps failing due to floating point nonsense

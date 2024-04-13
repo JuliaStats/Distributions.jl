@@ -19,8 +19,8 @@ Generate `n` samples from `s`. The form of the returned object depends on the va
 Generate an array of samples from `s` whose shape is determined by the given
 dimensions.
 """
-rand(s::Sampleable, dims::Int...) = rand(GLOBAL_RNG, s, dims...)
-rand(s::Sampleable, dims::Dims) = rand(GLOBAL_RNG, s, dims)
+rand(s::Sampleable, dims::Int...) = rand(default_rng(), s, dims...)
+rand(s::Sampleable, dims::Dims) = rand(default_rng(), s, dims)
 rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
     rand(rng, s, (dim1, moredims...))
 
@@ -67,14 +67,14 @@ Generate one or multiple samples from `s` to a pre-allocated array `A`. `A` shou
 form as specified above. The rules are summarized as below:
 
 - When `s` is univariate, `A` can be an array of arbitrary shape. Each element of `A` will
-  be overriden by one sample.
+  be overridden by one sample.
 - When `s` is multivariate, `A` can be a vector to store one sample, or a matrix with each
   column for a sample.
 - When `s` is matrix-variate, `A` can be a matrix to store one sample, or an array of
   matrices with each element for a sample matrix.
 """
 function rand! end
-Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(GLOBAL_RNG, s, X)
+Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(default_rng(), s, X)
 Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray)
     return _rand!(rng, s, X)
 end
@@ -134,7 +134,7 @@ Base.@propagate_inbounds function rand!(
     x::AbstractArray{<:AbstractArray{<:Real,N}},
     allocate::Bool,
 ) where {N}
-    return rand!(GLOBAL_RNG, s, x, allocate)
+    return rand!(default_rng(), s, x, allocate)
 end
 @inline function rand!(
     rng::AbstractRNG,

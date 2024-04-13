@@ -11,7 +11,7 @@ function expectation(g, distr::DiscreteUnivariateDistribution; epsilon::Real=1e-
     return sum(x -> pdf(distr, x) * g(x), minval:maxval)
 end
 
-function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=GLOBAL_RNG)
+function expectation(g, distr::MultivariateDistribution; nsamples::Int=100, rng::AbstractRNG=default_rng())
     nsamples > 0 || throw(ArgumentError("number of samples should be > 0"))
     # We use a function barrier to work around type instability of `sampler(dist)`
     return mcexpectation(rng, g, sampler(distr), nsamples)
@@ -26,9 +26,9 @@ mcexpectation(rng, f, sampler, n) = sum(f, rand(rng, sampler) for _ in 1:n) / n
 #     expectation(distr, x -> -log(f(x)))
 # end
 
-function kldivergence(P::Distribution{V}, Q::Distribution{V}; kwargs...) where {V<:VariateForm}
-    return expectation(P; kwargs...) do x
-        logp = logpdf(P, x)
-        return (logp > oftype(logp, -Inf)) * (logp - logpdf(Q, x))
+function kldivergence(p::Distribution{V}, q::Distribution{V}; kwargs...) where {V<:VariateForm}
+    return expectation(p; kwargs...) do x
+        logp = logpdf(p, x)
+        return (logp > oftype(logp, -Inf)) * (logp - logpdf(q, x))
     end
 end

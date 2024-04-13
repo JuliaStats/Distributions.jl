@@ -70,6 +70,13 @@ skewness(d::Laplace{T}) where {T<:Real} = zero(T)
 kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
+        
+function kldivergence(p::Laplace, q::Laplace)
+    pμ, pθ = params(p)
+    qμ, qθ = params(q)
+    r = abs(pμ - qμ)
+    return (pθ * exp(-r / pθ) + r) / qθ + log(qθ / pθ) - 1
+end
 
 #### Evaluations
 
@@ -99,6 +106,10 @@ end
 function mgf(d::Laplace, t::Real)
     st = d.θ * t
     exp(t * d.μ) / ((1 - st) * (1 + st))
+end
+function cgf(d::Laplace, t)
+    μ, θ = params(d)
+    t*μ - log1p(-(θ*t)^2)
 end
 function cf(d::Laplace, t::Real)
     st = d.θ * t

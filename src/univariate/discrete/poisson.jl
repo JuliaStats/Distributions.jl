@@ -1,7 +1,7 @@
 """
     Poisson(λ)
 
-A *Poisson distribution* descibes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
+A *Poisson distribution* describes the number of independent events occurring within a unit time interval, given the average rate of occurrence `λ`.
 
 ```math
 P(X = k) = \\frac{\\lambda^k}{k!} e^{-\\lambda}, \\quad \\text{ for } k = 0,1,2,\\ldots.
@@ -101,6 +101,7 @@ function mgf(d::Poisson, t::Real)
     λ = rate(d)
     return exp(λ * (exp(t) - 1))
 end
+cgf(d::Poisson, t) = mean(d) * expm1(t)
 
 function cf(d::Poisson, t::Real)
     λ = rate(d)
@@ -122,7 +123,7 @@ function suffstats(::Type{<:Poisson}, x::AbstractArray{T}, w::AbstractArray{Floa
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.
     tw = 0.
-    for i = 1 : n
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds sx += x[i] * wi
         tw += wi

@@ -34,13 +34,13 @@ for fun in [:pdf, :logpdf,
     fun! = Symbol(fun, '!')
 
     @eval begin
-        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+        @deprecate ($_fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray{<:Real}) map(Base.Fix1($fun, d), X)
     end
 end
 
-@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::DiscreteUnivariateDistribution) map(Base.Fix1(pdf, d), support(d))
 
 # Wishart constructors
 @deprecate Wishart(df::Real, S::AbstractPDMat, warn::Bool) Wishart(df, S)
@@ -57,3 +57,7 @@ const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedD
 @deprecate MatrixReshaped(
     d::MultivariateDistribution, n::Integer, p::Integer=n
 ) reshape(d, (n, p))
+
+for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
+    @eval @deprecate dim(d::$D) size(d, 1)
+end

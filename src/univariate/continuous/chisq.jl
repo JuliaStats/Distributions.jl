@@ -4,7 +4,7 @@ The *Chi squared distribution* (typically written χ²) with `ν` degrees of fre
 probability density function
 
 ```math
-f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(k/2)}, \\quad x > 0.
+f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(\\nu/2)}, \\quad x > 0.
 ```
 
 If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
@@ -70,12 +70,24 @@ function entropy(d::Chisq)
     hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
+function kldivergence(p::Chisq, q::Chisq)
+    pν = dof(p)
+    qν = dof(q)
+    return kldivergence(Chi{typeof(pν)}(pν), Chi{typeof(qν)}(qν))
+end
+
+
 
 #### Evaluation
 
 @_delegate_statsfuns Chisq chisq ν
 
 mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
+function cgf(d::Chisq, t)
+    ν = dof(d)
+    return -ν/2 * log1p(-2*t)
+end
+
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
 
@@ -84,7 +96,14 @@ gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Chisq) =
-    (ν = d.ν; rand(rng, Gamma(ν / 2.0, 2.0one(ν))))
+function rand(rng::AbstractRNG, d::Chisq)
+    α = dof(d) / 2
+    θ = oftype(α, 2)
+    return rand(rng, Gamma{typeof(α)}(α, θ))
+end
 
-sampler(d::Chisq) = (ν = d.ν; sampler(Gamma(ν / 2.0, 2.0one(ν))))
+function sampler(d::Chisq)
+    α = dof(d) / 2
+    θ = oftype(α, 2)
+    return sampler(Gamma{typeof(α)}(α, θ))
+end

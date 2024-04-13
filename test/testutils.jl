@@ -5,6 +5,7 @@ using Random
 using Printf: @printf
 using Test: @test
 import FiniteDifferences
+import ForwardDiff
 
 # to workaround issues of Base.linspace
 function _linspace(a::Float64, b::Float64, n::Int)
@@ -43,6 +44,25 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
     test_params(distr)
 end
 
+function test_cgf(dist, ts)
+    κ₀ = cgf(dist, 0)
+    @test κ₀ ≈ 0 atol=2*eps(one(float(κ₀)))
+    d(f) = Base.Fix1(ForwardDiff.derivative, f)
+    κ₁ = d(Base.Fix1(cgf, dist))(0)
+    @test κ₁ ≈ mean(dist)
+    if VERSION >= v"1.4"
+        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+        @test κ₂ ≈ var(dist)
+    end
+    for t in ts
+        val = @inferred cgf(dist, t)
+        @test isfinite(val)
+        if isfinite(mgf(dist, t))
+            rtol = eps(float(one(t)))^(1/2)
+            @test (exp∘cgf)(dist, t) ≈ mgf(dist, t) rtol=rtol
+        end
+    end
+end
 
 # testing the implementation of a continuous univariate distribution
 #
@@ -85,7 +105,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
 
     # The basic idea
     # ------------------
-    #   Generate n samples, and count the occurences of each value within a reasonable range.
+    #   Generate n samples, and count the occurrences of each value within a reasonable range.
     #   For each distinct value, it computes an confidence interval of the counts
     #   and checks whether the count is within this interval.
     #
@@ -108,7 +128,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     rmin = floor(Int,quantile(distr, 0.00001))::Int
     rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
-    p0 = pdf.(Ref(distr), rmin:rmax)  # reference probability masses
+    p0 = map(Base.Fix1(pdf, distr), rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
     # determine confidence intervals for counts:
@@ -123,9 +143,20 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples using RNG passed or global RNG
-    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
-    @assert length(samples) == n
+    # generate samples using RNG passed or default RNG
+    # we also check reproducibility
+    if rng === missing
+        Random.seed!(1234)
+        samples = rand(s, n)
+        Random.seed!(1234)
+        samples2 = rand(s, n)
+    else
+        rng2 = deepcopy(rng)
+        samples = rand(rng, s, n)
+        samples2 = rand(rng2, s, n)
+    end
+    @test length(samples) == n
+    @test samples2 == samples
 
     # scan samples and get counts
     cnts = zeros(Int, m)
@@ -202,7 +233,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     #
     clb = Vector{Int}(undef, nbins)
     cub = Vector{Int}(undef, nbins)
-    cdfs = cdf.(Ref(distr), edges)
+    cdfs = map(Base.Fix1(cdf, distr), edges)
 
     for i = 1:nbins
         pi = cdfs[i+1] - cdfs[i]
@@ -212,9 +243,20 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         @assert cub[i] >= clb[i]
     end
 
-    # generate samples
-    samples = ismissing(rng) ? rand(s, n) : rand(rng, s, n)
-    @assert length(samples) == n
+    # generate samples using RNG passed or default RNG
+    # we also check reproducibility
+    if rng === missing
+        Random.seed!(1234)
+        samples = rand(s, n)
+        Random.seed!(1234)
+        samples2 = rand(s, n)
+    else
+        rng2 = deepcopy(rng)
+        samples = rand(rng, s, n)
+        samples2 = rand(rng2, s, n)
+    end
+    @test length(samples) == n
+    @test samples2 == samples
 
     if isa(distr, StudentizedRange)
         samples[isnan.(samples)] .= 0.0 # Underlying implementation in Rmath can't handle very low values.
@@ -299,13 +341,29 @@ function test_support(d::UnivariateDistribution, vs::AbstractVector)
 
     @test isbounded(d) == (isupperbounded(d) && islowerbounded(d))
 
-    if isbounded(d)
-        if isa(d, DiscreteUnivariateDistribution)
-            s = support(d)
-            @test isa(s, AbstractUnitRange)
-            @test first(s) == minimum(d)
-            @test last(s) == maximum(d)
+    # Test the `Base.in` or `∈` operator
+    # The `support` function is buggy for unbounded `DiscreteUnivariateDistribution`s
+    if isbounded(d) || isa(d, ContinuousUnivariateDistribution)
+        s = support(d)
+        for v in vs
+            @test v ∈ s
         end
+
+        if islowerbounded(d)
+            @test minimum(d) ∈ s
+            @test (minimum(d) - 1) ∉ s
+        end
+        if isupperbounded(d)
+            @test maximum(d) ∈ s
+            @test (maximum(d) + 1) ∉ s
+        end
+    end
+
+    if isbounded(d) && isa(d, DiscreteUnivariateDistribution)
+        s = support(d)
+        @test isa(s, AbstractUnitRange)
+        @test first(s) == minimum(d)
+        @test last(s) == maximum(d)
     end
 end
 
@@ -327,19 +385,19 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf.(Ref(d), collect(rmin:rmax))
-    @test pdf.(Ref(d), rmin:rmax) ≈ p0
+    p0 = map(Base.Fix1(pdf, d), collect(rmin:rmax))
+    @test map(Base.Fix1(pdf, d), rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test pdf.(Ref(d), rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test map(Base.Fix1(pdf, d), rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test pdf.(Ref(d), support(d)) ≈ p0
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test pdf.(Ref(d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test pdf.(Ref(d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), support(d)) ≈ p0
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
@@ -386,13 +444,13 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
-    @test cdf.(Ref(d), vs)  ≈ c
-    @test ccdf.(Ref(d), vs) ≈ cc
+    @test Base.Fix1(pdf, d).(vs)  ≈ p
+    @test Base.Fix1(cdf, d).(vs)  ≈ c
+    @test Base.Fix1(ccdf, d).(vs) ≈ cc
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
-    @test logcdf.(Ref(d), vs)  ≈ lc
-    @test logccdf.(Ref(d), vs) ≈ lcc
+    @test Base.Fix1(logpdf, d).(vs)  ≈ lp
+    @test Base.Fix1(logcdf, d).(vs)  ≈ lc
+    @test Base.Fix1(logccdf, d).(vs) ≈ lcc
 end
 
 
@@ -453,15 +511,15 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
     # consistency of scalar-based and vectorized evaluation
     if !isa(d, StudentizedRange)
-        @test pdf.(Ref(d), vs)  ≈ p
-        @test logpdf.(Ref(d), vs)  ≈ lp
+        @test Base.Fix1(pdf, d).(vs) ≈ p
+        @test Base.Fix1(logpdf, d).(vs) ≈ lp
     end
 
-    @test cdf.(Ref(d), vs)  ≈ c
-    @test ccdf.(Ref(d), vs) ≈ cc
+    @test Base.Fix1(cdf, d).(vs)  ≈ c
+    @test Base.Fix1(ccdf, d).(vs) ≈ cc
 
-    @test logcdf.(Ref(d), vs)  ≈ lc
-    @test logccdf.(Ref(d), vs) ≈ lcc
+    @test Base.Fix1(logcdf, d).(vs)  ≈ lc
+    @test Base.Fix1(logccdf, d).(vs) ≈ lcc
 end
 
 function test_nonfinite(distr::UnivariateDistribution)
@@ -492,7 +550,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]
-    p = pdf.(Ref(d), vf)
+    p = Base.Fix1(pdf, d).(vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
     xstd = sqrt(xvar)
@@ -607,7 +665,7 @@ function pvalue_kolmogorovsmirnoff(x::AbstractVector, d::UnivariateDistribution)
 end
 
 function test_affine_transformations(::Type{T}, params...) where {T<:UnivariateDistribution}
-    @testset "affine tranformations ($T)" begin
+    @testset "affine transformations ($T)" begin
         # distribution
         d = T(params...)
 

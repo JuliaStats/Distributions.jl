@@ -136,8 +136,8 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
 end
 
 function logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky)
-    insupport(d, R) || throw(ArgumentError("provided point is not in the support"))
-    return _logpdf(d, R)
+    lp = _logpdf(d, R)
+    return insupport(d, R) ? lp : oftype(lp, -Inf)
 end
 
 _logpdf(d::LKJCholesky, R::LinearAlgebra.Cholesky) = logkernel(d, R) + d.logc0
@@ -172,7 +172,7 @@ function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     return Rs
 end
 
-Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky) = Random.rand!(GLOBAL_RNG, d, R)
+Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky) = Random.rand!(default_rng(), d, R)
 function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky)
     return _lkj_cholesky_onion_sampler!(rng, d, R)
 end
@@ -238,7 +238,7 @@ function _lkj_cholesky_onion_tri!(
     # equivalent steps in algorithm in reference are marked.
     @assert size(A) == (d, d)
     A[1, 1] = 1
-    d > 1 || return R
+    d > 1 || return A
     β = η + (d - 2)//2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1
