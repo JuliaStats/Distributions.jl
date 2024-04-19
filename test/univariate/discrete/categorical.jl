@@ -125,7 +125,7 @@ end
 end
 
 @testset "issue #832" begin
-    priorities = collect(1:1000) .* 1.
+    priorities = collect(Float64, 1:1000)
     priorities[1:50] .= 1e8
 
     at = Distributions.AliasTable(priorities)
