@@ -27,6 +27,8 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 using Base.MathConstants: eulergamma
 
+import AliasTables
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
