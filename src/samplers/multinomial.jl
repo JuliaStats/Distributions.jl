@@ -39,31 +39,34 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
     return x
 end
 
-struct MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete}
+struct MultinomialSamplerBinomial{T<:Real} <: Sampleable{Multivariate,Discrete}
     n::Int
+    k::Int
     prob::Vector{T}
+end
+
+struct MultinomialSamplerSequential{S} <: Sampleable{Multivariate,Discrete}
+    n::Int
+    k::Int
     alias::AliasTable
+    scratch_alias_rng::Vector{S}
 end
 
-function MultinomialSampler(n::Int, prob::Vector{<:Real})
-    return MultinomialSampler(n, prob, AliasTable(prob))
+Base.@deprecate MultinomialSampler(n::Int, prob::Vector{<:Real}) MultinomialSamplerBinomial(n, length(prob), prob) false
+
+function _rand!(rng::AbstractRNG, s::MultinomialSamplerBinomial, x::AbstractVector{<:Real})
+    multinom_rand!(rng, s.n, s.prob, x)
 end
 
-function _rand!(rng::AbstractRNG, s::MultinomialSampler,
-                x::AbstractVector{<:Real})
-    n = s.n
-    k = length(s)
-    if n^2 > k
-        multinom_rand!(rng, n, s.prob, x)
-    else
-        # Use an alias table
-        fill!(x, zero(eltype(x)))
-        a = s.alias
-        for i = 1:n
-            x[rand(rng, a)] += 1
-        end
+function _rand!(rng::AbstractRNG, s::MultinomialSamplerSequential, x::AbstractVector{<:Real})
+    fill!(x, zero(eltype(x)))
+    rand!(rng, s.scratch_alias_rng)
+
+    for r in s.scratch_alias_rng
+        x[AliasTables.sample(r, s.alias.at)] += 1
     end
     return x
 end
 
-length(s::MultinomialSampler) = length(s.prob)
+length(s::MultinomialSamplerBinomial) = s.k
+length(s::MultinomialSamplerSequential) = s.k
