@@ -27,6 +27,8 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 using Base.MathConstants: eulergamma
 
+import AliasTables
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -365,7 +367,7 @@ Supported distributions:
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
     QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
-    Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
+    Triweight, Truncated, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,

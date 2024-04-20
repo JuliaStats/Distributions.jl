@@ -45,12 +45,11 @@ struct MultinomialSamplerBinomial{T<:Real} <: Sampleable{Multivariate,Discrete}
     prob::Vector{T}
 end
 
-struct MultinomialSamplerSequential{T<:Real} <: Sampleable{Multivariate,Discrete}
+struct MultinomialSamplerSequential{S} <: Sampleable{Multivariate,Discrete}
     n::Int
     k::Int
     alias::AliasTable
-    scratch_index_rng::Vector{Int}
-    scratch_accept_rng::Vector{T}
+    scratch_alias_rng::Vector{S}
 end
 
 Base.@deprecate MultinomialSampler(n::Int, prob::Vector{<:Real}) MultinomialSamplerBinomial(n, length(prob), prob) false
@@ -61,12 +60,10 @@ end
 
 function _rand!(rng::AbstractRNG, s::MultinomialSamplerSequential, x::AbstractVector{<:Real})
     fill!(x, zero(eltype(x)))
-    at = s.alias
-    rand!(rng, s.scratch_index_rng, eachindex(at.alias, at.accept))
-    rand!(rng, s.scratch_accept_rng)
+    rand!(rng, s.scratch_alias_rng)
 
-    @inbounds for (i, acc) in zip(s.scratch_index_rng, s.scratch_accept_rng)
-        x[ifelse(acc < at.accept[i], i, at.alias[i])] += 1
+    for r in s.scratch_alias_rng
+        x[AliasTables.sample(r, s.alias.at)] += 1
     end
     return x
 end

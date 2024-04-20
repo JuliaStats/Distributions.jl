@@ -31,9 +31,11 @@ import Distributions:
         @testset "p=$p" for p in Any[[1.0], [0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
             test_samples(S(p), Categorical(p), n_tsamples)
             test_samples(S(p), Categorical(p), n_tsamples, rng=rng)
+            @test ncategories(S(p)) == length(p)
         end
     end
 
+    @test string(AliasTable(Float16[1,2,3])) == "AliasTable with 3 entries"
 
     ## Binomial samplers
 

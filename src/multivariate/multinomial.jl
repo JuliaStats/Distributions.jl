@@ -179,12 +179,12 @@ function sampler(d::Multinomial)
     return if n > λ * k
         MultinomialSamplerBinomial(n, k, p)
     else
+        alias = AliasTable(p)
         MultinomialSamplerSequential(
             n,
             k,
-            AliasTable(p),
-            Vector{Int}(undef, n),
-            similar(p, n)
+            alias,
+            Vector{typeof(alias.at.mask)}(undef, n),
         )
     end
 end
