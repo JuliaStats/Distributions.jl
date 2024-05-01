@@ -165,6 +165,7 @@ function fit_mle(::Type{<:Categorical}, ss::CategoricalStats)
     Categorical(normalize!(ss.h, 1))
 end
 
+fit_mle(d::T, x::AbstractArray{<:Integer}) where {T<:Categorical} = fit_mle(T, ncategories(d), x)
 function fit_mle(::Type{<:Categorical}, k::Integer, x::AbstractArray{T}) where T<:Integer
     Categorical(normalize!(add_categorical_counts!(zeros(k), x), 1), check_args=false)
 end

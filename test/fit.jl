@@ -115,6 +115,11 @@ end
             @test d isa D
             @test ntrials(d) == 100
             @test succprob(d) ≈ 0.3 atol=0.01
+
+            d2 = @inferred fit_mle(D(100, 0.5), x)
+            @test d2 isa D
+            @test ntrials(d2) == 100
+            @test succprob(d2) ≈ 0.3 atol = 0.01
         end
     end
 end
@@ -140,6 +145,10 @@ end
         d2 = fit(Categorical, x)
         @test isa(d2, Categorical)
         @test probs(d2) == probs(d)
+
+        d3 = fit_mle(Categorical(p), x)
+        @test isa(d3, Categorical)
+        @test probs(d3) == probs(d)
 
         ss = suffstats(Categorical, (3, x), w)
         h = Float64[sum(w[x .== i]) for i = 1 : 3]
@@ -411,6 +420,23 @@ end
         d = fit(dist, func[2](dist(8.2), N))
         @test isa(d, dist)
         @test isapprox(mean(d), 8.2, atol=0.2)
+    end
+end
+
+@testset "Testing fit_mle for ProductDistribution" begin
+    dists = [product_distribution([Exponential(0.5), Normal(11.3, 3.2)]), product_distribution([Exponential(0.5) Normal(11.3, 3.2)
+                                                                                                Bernoulli(0.2)  Normal{Float32}(0f0,0f0)])]
+    for func in funcs, dist in dists 
+        x = rand(dist, N)
+        w = func[1](N)
+
+        d = fit_mle(dist, x)
+        @test isa(d, typeof(dist))
+        @test isapprox(collect.(params(d)), collect.(params(dist)), atol=0.1)
+
+        d = fit_mle(dist, x, w)
+        @test isa(d, typeof(dist))
+        @test isapprox(collect.(params(d)), collect.(params(dist)), atol=0.1)
     end
 end
 

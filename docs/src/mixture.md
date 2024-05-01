@@ -106,4 +106,4 @@ rand!(::AbstractMixtureModel, ::AbstractArray)
 ## Estimation
 
 There are several methods for the estimation of mixture models from data, and this problem remains an open research topic.
-This package does not provide facilities for estimating mixture models. One can resort to other packages, *e.g.* [*GaussianMixtures.jl*](https://github.com/davidavdav/GaussianMixtures.jl), for this purpose.
+This package does not provide facilities for estimating mixture models. One can resort to other packages, *e.g.* [*GaussianMixtures.jl*](https://github.com/davidavdav/GaussianMixtures.jl) or [*ExpectationMaximization.jl*](https://github.com/dmetivie/ExpectationMaximization.jl), for this purpose.
