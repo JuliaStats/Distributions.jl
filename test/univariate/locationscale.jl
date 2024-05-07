@@ -83,9 +83,9 @@ function test_location_scale(
             insupport(dtest, -x) == insupport(dref, -x)
 
             @test pdf(dtest, x) ≈ pdf(dref, x)
-            @test pdf.(dtest, xs) ≈ pdf.(dref, xs)
+            @test Base.Fix1(pdf, dtest).(xs) ≈ Base.Fix1(pdf, dref).(xs)
             @test logpdf(dtest, x) ≈ logpdf(dref, x)
-            @test logpdf.(dtest, xs) ≈ logpdf.(dref, xs)
+            @test Base.Fix1(logpdf, dtest).(xs) ≈ Base.Fix1(logpdf, dref).(xs)
             @test loglikelihood(dtest, x) ≈ loglikelihood(dref, x)
             @test loglikelihood(dtest, xs) ≈ loglikelihood(dref, xs)
 

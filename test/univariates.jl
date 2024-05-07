@@ -54,7 +54,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # Note: properties include all applicable params and stats
     #
 
-    # D can be a function, e.g. TruncatedNormal
+    # D can be a function
     if isa(D, Type)
         @assert isa(d, D)
     end
@@ -99,8 +99,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
         # pdf method is not implemented for StudentizedRange
         if !isa(d, StudentizedRange)
-            @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
-            @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+            @test Base.Fix1(pdf, d).(x) ≈ p atol=1e-16 rtol=1e-8
+            @test Base.Fix1(logpdf, d).(x) ≈ lp atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12
         end
 
         # cdf method is not implemented for NormalInverseGaussian
