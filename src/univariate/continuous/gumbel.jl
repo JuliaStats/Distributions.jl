@@ -85,7 +85,7 @@ entropy(d::Gumbel) = log(d.θ) + 1 + MathConstants.γ
 #### Evaluation
 
 zval(d::Gumbel, x::Real) = (x - d.μ) / d.θ
-xval(d::Gumbel, z::Real) = x * d.θ + d.μ
+xval(d::Gumbel, z::Real) = z * d.θ + d.μ
 
 function pdf(d::Gumbel, x::Real)
     z = zval(d, x)
