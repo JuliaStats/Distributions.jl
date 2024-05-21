@@ -98,8 +98,17 @@ function logpdf(d::Gumbel, x::Real)
 end
 
 cdf(d::Gumbel, x::Real) = exp(-exp(-zval(d, x)))
+ccdf(d::Gumbel, x::Real) = -expm1(-exp(-zval(d, x)))
 logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
+logccdf(d::Gumbel, x::Real) = log1mexp(-exp(-zval(d, x)))
 
 quantile(d::Gumbel, p::Real) = xval(d, -log(-log(p)))
+cquantile(d::Gumbel, p::Real) = xval(d, -log(-log1p(-p)))
+invlogcdf(d::Gumbel, lp::Real) = xval(d, -log(-lp))
+invlogccdf(d::Gumbel, lp::Real) = xval(d, -log(-log1mexp(lp)))
 
 gradlogpdf(d::Gumbel, x::Real) = expm1(-zval(d, x)) / d.θ
+
+mgf(d::Gumbel, t::Real) = gamma(1.0 - d.θ * t) * exp(d.μ * t)
+cgf(d::Gumbel, t::Real) = loggamma(1.0 - d.θ * t) + d.μ * t
+cf(d::Gumbel, t::Real) = gamma(1.0 - im * d.θ * t) * exp(im * d.μ * t)
