@@ -100,6 +100,6 @@ end
 cdf(d::Gumbel, x::Real) = exp(-exp(-zval(d, x)))
 logcdf(d::Gumbel, x::Real) = -exp(-zval(d, x))
 
-quantile(d::Gumbel, p::Real) = d.μ - d.θ * log(-log(p))
+quantile(d::Gumbel, p::Real) = xval(d, -log(-log(p)))
 
 gradlogpdf(d::Gumbel, x::Real) = expm1(-zval(d, x)) / d.θ
