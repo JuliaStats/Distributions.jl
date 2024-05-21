@@ -111,4 +111,4 @@ gradlogpdf(d::Gumbel, x::Real) = expm1(-zval(d, x)) / d.θ
 
 mgf(d::Gumbel, t::Real) = gamma(1 - d.θ * t) * exp(d.μ * t)
 cgf(d::Gumbel, t::Real) = loggamma(1 - d.θ * t) + d.μ * t
-cf(d::Gumbel, t::Real) = gamma(1.0 - im * d.θ * t) * exp(im * d.μ * t)
+cf(d::Gumbel, t::Real) = gamma(1 - im * d.θ * t) * cis(d.μ * t)
