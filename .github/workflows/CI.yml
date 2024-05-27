@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   test:
-    name: Julia ${{ matrix.version }}${{ matrix.prerelease && ' (prerelease)' || '' }} - ${{ matrix.os }} - ${{ github.event_name }}
+    name: "Julia ${{ matrix.version }}${{ matrix.prerelease && ' (prerelease)' || '' }} - ${{ matrix.os }} - ${{ github.event_name }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
