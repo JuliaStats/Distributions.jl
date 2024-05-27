@@ -46,7 +46,7 @@ jobs:
         id: setup-julia
         with:
           version: ${{ matrix.version }}
-          arch: ${{ runner.arch == "ARM64" && 'aarch64' || runner.arch }}
+          arch: ${{ runner.arch == 'ARM64' && 'aarch64' || runner.arch }}
           include-all-prereleases: ${{ matrix.prerelease }}
           show-versioninfo: true
       - name: Check if prerelease version is available
