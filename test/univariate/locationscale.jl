@@ -157,7 +157,7 @@ end
     end
     @testset "DiscreteNonParametric" begin
         _probs = normalize!(rand(10), 1)
-        @testset "_rng=$_rng, sign=$sign" for _rng in (missing, rng), sign in (1, -1)
+        @testset for _rng in (missing, rng), sign in (1, -1)
             test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, _probs)
             test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), _probs)
             test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, _probs)
