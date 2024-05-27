@@ -46,7 +46,7 @@ jobs:
         id: setup-julia
         with:
           version: ${{ matrix.version }}
-          arch: ${{ runner.arch == 'ARM64' && 'aarch64' || runner.arch }}
+          arch: 'x64' # ARM64 on macos-latest is neither supported by older Julia versions nor setup-julia
           include-all-prereleases: ${{ matrix.prerelease }}
           show-versioninfo: true
       - name: Check if prerelease version is available
@@ -54,6 +54,7 @@ jobs:
         if: ${{ matrix.prerelease }}
         run: |
           if [[ "$VERSION" =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]
+          then
             echo "no prerelease"
             exit 1
           else
