@@ -67,8 +67,7 @@ end
 
     for a in ([0, 1], [-0.5, 0.5])
         # Construct independent distributions and `Product` distribution from these.
-        support = fill(a, N)
-        ds = DiscreteNonParametric.(support, Ref([0.5, 0.5]))
+        ds = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ in 1:N]
         x = rand.(ds)
         d_product = product_distribution(ds)
         @test d_product isa Product

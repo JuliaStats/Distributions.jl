@@ -128,7 +128,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     rmin = floor(Int,quantile(distr, 0.00001))::Int
     rmax = floor(Int,quantile(distr, 0.99999))::Int
     m = rmax - rmin + 1  # length of the range
-    p0 = pdf.(Ref(distr), rmin:rmax)  # reference probability masses
+    p0 = map(Base.Fix1(pdf, distr), rmin:rmax)  # reference probability masses
     @assert length(p0) == m
 
     # determine confidence intervals for counts:
@@ -233,7 +233,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     #
     clb = Vector{Int}(undef, nbins)
     cub = Vector{Int}(undef, nbins)
-    cdfs = cdf.(Ref(distr), edges)
+    cdfs = map(Base.Fix1(cdf, distr), edges)
 
     for i = 1:nbins
         pi = cdfs[i+1] - cdfs[i]
@@ -385,19 +385,19 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     rmin = round(Int, islowerbounded(d) ? vmin : quantile(d, 0.001))::Int
     rmax = round(Int, isupperbounded(d) ? vmax : quantile(d, 0.999))::Int
 
-    p0 = pdf.(Ref(d), collect(rmin:rmax))
-    @test pdf.(Ref(d), rmin:rmax) ≈ p0
+    p0 = map(Base.Fix1(pdf, d), collect(rmin:rmax))
+    @test map(Base.Fix1(pdf, d), rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test pdf.(Ref(d), rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test map(Base.Fix1(pdf, d), rmin+1:rmax-1) ≈ p0[2:end-1]
     end
 
     if isbounded(d)
-        @test pdf.(Ref(d), support(d)) ≈ p0
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test pdf.(Ref(d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test pdf.(Ref(d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), support(d)) ≈ p0
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test pdf.(Ref(d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
@@ -444,13 +444,13 @@ function test_evaluation(d::DiscreteUnivariateDistribution, vs::AbstractVector, 
     end
 
     # consistency of scalar-based and vectorized evaluation
-    @test pdf.(Ref(d), vs)  ≈ p
-    @test cdf.(Ref(d), vs)  ≈ c
-    @test ccdf.(Ref(d), vs) ≈ cc
+    @test Base.Fix1(pdf, d).(vs)  ≈ p
+    @test Base.Fix1(cdf, d).(vs)  ≈ c
+    @test Base.Fix1(ccdf, d).(vs) ≈ cc
 
-    @test logpdf.(Ref(d), vs)  ≈ lp
-    @test logcdf.(Ref(d), vs)  ≈ lc
-    @test logccdf.(Ref(d), vs) ≈ lcc
+    @test Base.Fix1(logpdf, d).(vs)  ≈ lp
+    @test Base.Fix1(logcdf, d).(vs)  ≈ lc
+    @test Base.Fix1(logccdf, d).(vs) ≈ lcc
 end
 
 
@@ -511,15 +511,15 @@ function test_evaluation(d::ContinuousUnivariateDistribution, vs::AbstractVector
 
     # consistency of scalar-based and vectorized evaluation
     if !isa(d, StudentizedRange)
-        @test pdf.(Ref(d), vs)  ≈ p
-        @test logpdf.(Ref(d), vs)  ≈ lp
+        @test Base.Fix1(pdf, d).(vs) ≈ p
+        @test Base.Fix1(logpdf, d).(vs) ≈ lp
     end
 
-    @test cdf.(Ref(d), vs)  ≈ c
-    @test ccdf.(Ref(d), vs) ≈ cc
+    @test Base.Fix1(cdf, d).(vs)  ≈ c
+    @test Base.Fix1(ccdf, d).(vs) ≈ cc
 
-    @test logcdf.(Ref(d), vs)  ≈ lc
-    @test logccdf.(Ref(d), vs) ≈ lcc
+    @test Base.Fix1(logcdf, d).(vs)  ≈ lc
+    @test Base.Fix1(logccdf, d).(vs) ≈ lcc
 end
 
 function test_nonfinite(distr::UnivariateDistribution)
@@ -550,7 +550,7 @@ function test_stats(d::DiscreteUnivariateDistribution, vs::AbstractVector)
     # using definition (or an approximation)
 
     vf = Float64[v for v in vs]
-    p = pdf.(Ref(d), vf)
+    p = Base.Fix1(pdf, d).(vf)
     xmean = dot(p, vf)
     xvar = dot(p, abs2.(vf .- xmean))
     xstd = sqrt(xvar)
