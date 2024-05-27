@@ -148,7 +148,7 @@ end
     rng = MersenneTwister(123)
 
     @testset "Normal" begin
-        @testset "_rng=$_rng, sign=$sign" for _rng in (missing, rng), sign in (1, -1)
+        @testset for _rng in (missing, rng), sign in (1, -1)
             test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
             test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
             test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
