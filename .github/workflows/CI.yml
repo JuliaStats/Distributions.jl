@@ -46,13 +46,19 @@ jobs:
         id: setup-julia
         with:
           version: ${{ matrix.version }}
+          arch: ${{ runner.arch == "ARM64" && 'aarch64' || runner.arch }}
           include-all-prereleases: ${{ matrix.prerelease }}
           show-versioninfo: true
       - name: Check if prerelease version is available
         continue-on-error: true
         if: ${{ matrix.prerelease }}
         run: |
-          [[ "$VERSION" =~ ^\d+\.\d+\.\d+$ ]] && exit 1
+          if [[ "$VERSION" =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]
+            echo "no prerelease"
+            exit 1
+          else
+            exit 0
+          fi
         shell: bash
         env:
           VERSION: ${{ steps.setup-julia.outputs.julia-version }}
