@@ -79,6 +79,10 @@ end
 
 @_delegate_statsfuns NoncentralChisq nchisq ν λ
 
-# TODO: remove RFunctions dependency
-@rand_rdist(NoncentralChisq)
-rand(d::NoncentralChisq) = StatsFuns.RFunctions.nchisqrand(d.ν, d.λ)
+function rand(rng::AbstractRNG, d::NoncentralChisq)
+    poisson_dist = Poisson(d.λ / 2)
+    poisson_sample = rand(rng, poisson_dist)
+    chi_dist = Chisq(d.ν + 2 * poisson_sample)
+    x = rand(rng, chi_dist)
+    return eltype(d)(x)
+end
