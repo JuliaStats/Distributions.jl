@@ -61,3 +61,7 @@ const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedD
 for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
     @eval @deprecate dim(d::$D) size(d, 1)
 end
+
+# ValueSupport types
+@deprecate Discrete DiscreteSupport
+@deprecate Continuous ContinuousSupport
