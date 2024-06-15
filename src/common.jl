@@ -27,37 +27,37 @@ abstract type CholeskyVariate <: VariateForm end
 
 Abstract type that specifies the support of elements of samples.
 
-It is either [`Discrete`](@ref) or [`Continuous`](@ref).
+It is either [`DiscreteSupport`](@ref) or [`ContinuousSupport`](@ref).
 """
 abstract type ValueSupport end
 
 """
-    Discrete <: ValueSupport
+    DiscreteSupport <: ValueSupport
 
 This type represents the support of a discrete random variable.
 
 It is countable. For instance, it can be a finite set or a countably infinite set such as
 the natural numbers.
 
-See also: [`Continuous`](@ref), [`ValueSupport`](@ref)
+See also: [`ContinuousSupport`](@ref), [`ValueSupport`](@ref)
 """
-struct Discrete   <: ValueSupport end
+struct DiscreteSupport   <: ValueSupport end
 
 """
-    Continuous <: ValueSupport
+    ContinuousSupport <: ValueSupport
 
 This types represents the support of a continuous random variable.
 
 It is uncountably infinite. For instance, it can be an interval on the real line.
 
-See also: [`Discrete`](@ref), [`ValueSupport`](@ref)
+See also: [`DiscreteSupport`](@ref), [`ValueSupport`](@ref)
 """
-struct Continuous <: ValueSupport end
+struct ContinuousSupport <: ValueSupport end
 
 # promotions (e.g., in product distribution):
 # combination of discrete support (countable) and continuous support (uncountable) yields
 # continuous support (uncountable)
-Base.promote_rule(::Type{Continuous}, ::Type{Discrete}) = Continuous
+Base.promote_rule(::Type{ContinuousSupport}, ::Type{DiscreteSupport}) = ContinuousSupport
 
 ## Sampleable
 
@@ -100,8 +100,8 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(::Type{<:Sampleable{F,Discrete}}) where {F} = Int
-Base.eltype(::Type{<:Sampleable{F,Continuous}}) where {F} = Float64
+Base.eltype(::Type{<:Sampleable{F,DiscreteSupport}}) where {F} = Int
+Base.eltype(::Type{<:Sampleable{F,ContinuousSupport}}) where {F} = Float64
 
 """
     nsamples(s::Sampleable)
@@ -160,15 +160,15 @@ const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
 const MatrixDistribution{S<:ValueSupport}       = Distribution{Matrixvariate,S}
 const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-const DiscreteDistribution{F<:VariateForm}   = Distribution{F,Discrete}
-const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+const DiscreteDistribution{F<:VariateForm}   = Distribution{F,DiscreteSupport}
+const ContinuousDistribution{F<:VariateForm} = Distribution{F,ContinuousSupport}
 
-const DiscreteUnivariateDistribution     = Distribution{Univariate,    Discrete}
-const ContinuousUnivariateDistribution   = Distribution{Univariate,    Continuous}
-const DiscreteMultivariateDistribution   = Distribution{Multivariate,  Discrete}
-const ContinuousMultivariateDistribution = Distribution{Multivariate,  Continuous}
-const DiscreteMatrixDistribution         = Distribution{Matrixvariate, Discrete}
-const ContinuousMatrixDistribution       = Distribution{Matrixvariate, Continuous}
+const DiscreteUnivariateDistribution     = Distribution{Univariate,    DiscreteSupport}
+const ContinuousUnivariateDistribution   = Distribution{Univariate,    ContinuousSupport}
+const DiscreteMultivariateDistribution   = Distribution{Multivariate,  DiscreteSupport}
+const ContinuousMultivariateDistribution = Distribution{Multivariate,  ContinuousSupport}
+const DiscreteMatrixDistribution         = Distribution{Matrixvariate, DiscreteSupport}
+const ContinuousMatrixDistribution       = Distribution{Matrixvariate, ContinuousSupport}
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?

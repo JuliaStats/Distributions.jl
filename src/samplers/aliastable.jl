@@ -1,4 +1,4 @@
-struct AliasTable <: Sampleable{Univariate,Discrete}
+struct AliasTable <: Sampleable{Univariate,DiscreteSupport}
     at::AliasTables.AliasTable{UInt64, Int}
     AliasTable(probs::AbstractVector{<:Real}) = new(AliasTables.AliasTable(probs))
 end

@@ -167,6 +167,6 @@ end
     @test_logs Distributions.AffineDistribution(1.0, 1, Normal())
 
     @test_deprecated ls_norm = LocationScale(1.0, 1, Normal())
-    @test ls_norm isa LocationScale{Float64, Continuous, Normal{Float64}}
-    @test ls_norm isa Distributions.AffineDistribution{Float64, Continuous, Normal{Float64}}
+    @test ls_norm isa LocationScale{Float64, ContinuousSupport, Normal{Float64}}
+    @test ls_norm isa Distributions.AffineDistribution{Float64, ContinuousSupport, Normal{Float64}}
 end

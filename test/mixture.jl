@@ -182,7 +182,7 @@ end
 
     @testset "Testing UnivariateMixture" begin
         g_u = MixtureModel([Normal(), Normal()])
-        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
+        @test isa(g_u, MixtureModel{Univariate, ContinuousSupport, <:Normal})
         @test ncomponents(g_u) == 2
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -193,7 +193,7 @@ end
         @test @inferred(quantile(g_u, 0.5f0)) === 0.0
 
         g_u = MixtureModel(Normal{Float64}, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
-        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test isa(g_u, MixtureModel{Univariate,ContinuousSupport,<:Normal})
         @test ncomponents(g_u) == 3
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -202,7 +202,7 @@ end
         @test extrema(g_u) == (-Inf, Inf)
 
         g_u = MixtureModel(Normal{Float32}, [(0f0, 1f0), (0f0, 2f0)], [0.4f0, 0.6f0])
-        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test isa(g_u, MixtureModel{Univariate,ContinuousSupport,<:Normal})
         @test ncomponents(g_u) == 2
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -257,7 +257,7 @@ end
                        MvNormal([0.2, 1.0], I),
                        MvNormal([-0.5, -3.0], 1.6 * I) ],
             [0.2, 0.5, 0.3])
-        @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
+        @test isa(g_m, MixtureModel{Multivariate, ContinuousSupport, IsoNormal})
         @test length(components(g_m)) == 3
         @test length(g_m) == 2
         @test insupport(g_m, [0.0, 0.0]) == true

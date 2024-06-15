@@ -1,11 +1,11 @@
 ### statistics
 
-function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function mode(d::Truncated{<:Normal{<:Real},ContinuousSupport,T}) where {T<:Real}
     μ = mean(d.untruncated)
     return T(clamp(μ, extrema(d)...))
 end
 
-modes(d::Truncated{<:Normal{<:Real},Continuous}) = [mode(d)]
+modes(d::Truncated{<:Normal{<:Real},ContinuousSupport}) = [mode(d)]
 
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
@@ -77,7 +77,7 @@ function _tnvar(a::Real, b::Real)
     end
 end
 
-function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function mean(d::Truncated{<:Normal{<:Real},ContinuousSupport,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -91,7 +91,7 @@ function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     end
 end
 
-function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function var(d::Truncated{<:Normal{<:Real},ContinuousSupport,T}) where {T<:Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -105,7 +105,7 @@ function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     end
 end
 
-function entropy(d::Truncated{<:Normal{<:Real},Continuous})
+function entropy(d::Truncated{<:Normal{<:Real},ContinuousSupport})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
@@ -124,7 +124,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},Continuous})
+function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},ContinuousSupport})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)

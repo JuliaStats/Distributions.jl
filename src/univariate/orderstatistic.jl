@@ -71,7 +71,7 @@ end
 function logpdf(d::OrderStatistic, x::Real)
     b = _uniform_orderstatistic(d)
     p = cdf(d.dist, x)
-    if value_support(typeof(d)) === Continuous
+    if value_support(typeof(d)) === ContinuousSupport
         return logpdf(b, p) + logpdf(d.dist, x)
     else
         return logdiffcdf(b, p, p - pdf(d.dist, x))

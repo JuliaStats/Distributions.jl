@@ -64,7 +64,7 @@ The package contains a large number of additional distributions of three main ty
 * `Multivariate == ArrayLikeVariate{1}`
 * `Matrixvariate == ArrayLikeVariate{2}`
 
-Each type splits further into `Discrete` and `Continuous`.
+Each type splits further into `DiscreteSupport` and `ContinuousSupport`.
 
 For instance, you can define the following distributions (among many others):
 

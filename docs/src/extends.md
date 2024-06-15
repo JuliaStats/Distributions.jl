@@ -4,7 +4,7 @@ Whereas this package already provides a large collection of common distributions
 
 Generally, you don't have to implement every API method listed in the documentation. This package provides a series of generic functions that turn a small number of internal methods into user-end API methods. What you need to do is to implement this small set of internal methods for your distributions.
 
-By default, `Discrete` sampleables have the support of type `Int` while `Continuous` sampleables have the support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `Discrete` nor `Continuous`, you should implement the `eltype` method in addition to the other methods listed below.
+By default, `DiscreteSupport` sampleables have the support of type `Int` while `ContinuousSupport` sampleables have the support of type `Float64`. If this assumption does not hold for your new distribution or sampler, or its `ValueSupport` is neither `DiscreteSupport` nor `ContinuousSupport`, you should implement the `eltype` method in addition to the other methods listed below.
 
 **Note:** The methods that need to be implemented are different for distributions of different variate forms.
 
@@ -15,7 +15,7 @@ Unlike full-fledged distributions, a sampler, in general, only provides limited 
 
 ### Univariate Sampler
 
-To implement a univariate sampler, one can define a subtype (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `Discrete` or `Continuous`), and provide a `rand` method, as
+To implement a univariate sampler, one can define a subtype (say `Spl`) of `Sampleable{Univariate,S}` (where `S` can be `DiscreteSupport` or `ContinuousSupport`), and provide a `rand` method, as
 
 ```julia
 function rand(rng::AbstractRNG, s::Spl)

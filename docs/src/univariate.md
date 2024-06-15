@@ -5,8 +5,8 @@
 ```julia
 const UnivariateDistribution{S<:ValueSupport} = Distribution{Univariate,S}
 
-const DiscreteUnivariateDistribution   = Distribution{Univariate, Discrete}
-const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
+const DiscreteUnivariateDistribution   = Distribution{Univariate, DiscreteSupport}
+const ContinuousUnivariateDistribution = Distribution{Univariate, ContinuousSupport}
 ```
 
 ## Common Interface

@@ -68,8 +68,8 @@ function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_arg
     return AffineDistribution(μ, σ, ρ; check_args=false)
 end
 
-const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
-const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
+const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,ContinuousSupport,D}
+const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,DiscreteSupport,D}
 
 Base.eltype(::Type{<:AffineDistribution{T}}) where T = T
 

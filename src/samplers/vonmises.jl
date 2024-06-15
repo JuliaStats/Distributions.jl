@@ -1,5 +1,5 @@
 
-struct VonMisesSampler <: Sampleable{Univariate,Continuous}
+struct VonMisesSampler <: Sampleable{Univariate,ContinuousSupport}
     μ::Float64
     κ::Float64
     r::Float64

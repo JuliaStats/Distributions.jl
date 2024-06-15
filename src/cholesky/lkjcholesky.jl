@@ -29,7 +29,7 @@ External links
   Journal of Multivariate Analysis (2009), 100(9): 1989-2001
   doi: [10.1016/j.jmva.2009.04.008](https://doi.org/10.1016/j.jmva.2009.04.008)
 """
-struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate,Continuous}
+struct LKJCholesky{T <: Real} <: Distribution{CholeskyVariate,ContinuousSupport}
     d::Int
     η::T
     uplo::Char

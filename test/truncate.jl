@@ -73,16 +73,16 @@ function verify_and_test(d::UnivariateDistribution, dct::Dict, n_tsamples::Int)
         x = _parse_x(d, pt["x"])
         lp = d.lower <= x <= d.upper ? Float64(pt["logpdf"]) - d.logtp : -Inf
         cf = x < d.lower ? 0.0 : x >= d.upper ? 1.0 : (Float64(pt["cdf"]) - d.lcdf)/d.tp
-        if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous})
+        if !isa(d, Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.ContinuousSupport})
             @test logpdf(d, x) ≈ lp atol=sqrt(eps())
         end
         @test cdf(d, x) ≈ cf atol=sqrt(eps())
         # NOTE: some distributions use pdf() in StatsFuns.jl which have no generic support yet
-        if !any(T -> d isa T, [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.Continuous, Float64},
-                           Distributions.Truncated{Distributions.Rician{Float64},Distributions.Continuous, Float64}])
+        if !any(T -> d isa T, [Distributions.Truncated{Distributions.NoncentralChisq{Float64},Distributions.ContinuousSupport, Float64},
+                           Distributions.Truncated{Distributions.NoncentralF{Float64},Distributions.ContinuousSupport, Float64},
+                           Distributions.Truncated{Distributions.NoncentralT{Float64},Distributions.ContinuousSupport, Float64},
+                           Distributions.Truncated{Distributions.StudentizedRange{Float64},Distributions.ContinuousSupport, Float64},
+                           Distributions.Truncated{Distributions.Rician{Float64},Distributions.ContinuousSupport, Float64}])
             @test isapprox(logpdf(d, Dual(float(x))), lp, atol=sqrt(eps()))
         end
         # NOTE: this test is disabled as StatsFuns.jl doesn't have generic support for cdf()

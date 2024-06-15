@@ -7,7 +7,7 @@
 ##### Draw Table #####
 
 # Store an alias table
-struct DiscreteDistributionTable <: Sampler{Univariate,Discrete}
+struct DiscreteDistributionTable <: Sampler{Univariate,DiscreteSupport}
     table::Vector{Vector{Int64}}
     bounds::Vector{Int64}
 end
@@ -91,7 +91,7 @@ Base.show(io::IO, table::DiscreteDistributionTable) = @printf io "DiscreteDistri
 
 ##### Huffman Table ######
 
-abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
+abstract type HuffmanNode{T} <: Sampler{Univariate,DiscreteSupport} end
 
 struct HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
