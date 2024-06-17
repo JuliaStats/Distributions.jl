@@ -41,7 +41,7 @@ d = Semicircle(2.0)
 
 rng = MersenneTwister(0)
 for r in rand(rng, Uniform(0,10), 5)
-    N = 10^4
+    local N = 10^4
     semi = Semicircle(r)
     sample = rand(rng, semi, N)
     mi, ma = extrema(sample)
