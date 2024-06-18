@@ -86,4 +86,20 @@ end
     x = rand(X_implicit)
     @test logpdf(X_implicit, x) ≈ logpdf(X_expicit, x)
 end
+
+@testset "MvTDist: Specialised PDMat constructors" begin
+    Σ = [4. 2; 2 3]
+    μ = [1.; 2]
+    df = 4.5
+
+    # These test each of the specialised PDMat Constructors
+    _Σ = Σ; @test GenericMvTDist(df, μ, PDMat(Σ)) isa GenericMvTDist
+    _Σ = Diagonal(Σ); @test GenericMvTDist(df, μ, _Σ) == GenericMvTDist(df, μ, PDiagMat(_Σ.diag))
+    _Σ = Symmetric(Diagonal(Σ)); @test GenericMvTDist(df, μ, _Σ) == GenericMvTDist(df, μ, PDiagMat(_Σ.data.diag))
+    _Σ = Hermitian(Diagonal(Σ)); @test GenericMvTDist(df, μ, _Σ) == GenericMvTDist(df, μ, PDiagMat(_Σ.data.diag))
+    _Σ = 5 * I; @test GenericMvTDist(df, μ, _Σ) == GenericMvTDist(df, μ, ScalMat(length(μ), _Σ.λ))
+end
+
+test_affine(GenericMvTDist, (μ, Σ) -> GenericMvTDist(4.5, μ, Σ))
+
 end

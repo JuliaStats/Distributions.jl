@@ -4,6 +4,35 @@
 
 abstract type AbstractMvTDist <: ContinuousMultivariateDistribution end
 
+"""
+The [Multivariate Student-T distribution](https://en.wikipedia.org/wiki/Multivariate_t-distribution)
+is a multidimensional generalization of the *Student-T distribution*. The probability density function of
+a d-dimensional multivariate T-distribution is an elliptical distribution with mean vector ``\\boldsymbol{\\mu}`` and
+scale matrix ``\\boldsymbol{\\Sigma}``, with ν degrees of freedom. It is typically represented as:
+
+```math
+\\frac {\\Gamma \\left[(\\nu +p)/2\\right]}{\\Gamma (\\nu /2)\\nu ^{p/2} \\pi ^{p/2}\\left|{\\boldsymbol {\\Sigma }}\\right|^{1/2}}}
+\\left[1+{\\frac {1}{\\nu }}({\\mathbf {x} }{\\boldsymbol {\\mu }})^{\\rm {T}}{\\boldsymbol {\\Sigma }}^{-1}({\\mathbf {x} }-{\\boldsymbol {\\mu }})\\right]^{-(\\nu +p)/2}
+```
+
+Here, the mean vector can be an instance of any `AbstractVector`. The scale-matrix can be
+of any subtype of `AbstractPDMat`. Particularly, one can use `PDMat` for full covariance,
+`PDiagMat` for diagonal covariance, and `ScalMat` for the isotropic covariance -- those
+in the form of ``\\sigma^2 \\mathbf{I}``. (See the Julia package
+[PDMats](https://github.com/JuliaStats/PDMats.jl/) for details).
+
+We also define a set of aliases for the types using different combinations of mean vectors and scale-matrix:
+
+    const IsoTDist  = GenericMvTDist{Float64, ScalMat{Float64}, Vector{Float64}}
+    const DiagTDist = GenericMvTDist{Float64, PDiagMat{Float64,Vector{Float64}}, Vector{Float64}}
+    const MvTDist = GenericMvTDist{Float64, PDMat{Float64,Matrix{Float64}}, Vector{Float64}}
+
+Multivariate Student-T distribution support affine transformations:
+```julia
+d = GenericMvTDist(ν, μ, Σ)
+c + B * d    # == GenericMvTDist(d.df, B * μ + c, B * Σ * B')
+```
+"""
 struct GenericMvTDist{T<:Real, Cov<:AbstractPDMat, Mean<:AbstractVector} <: AbstractMvTDist
     df::T # non-integer degrees of freedom allowed
     dim::Int
@@ -28,6 +57,17 @@ end
 function GenericMvTDist(df::Real, Σ::AbstractPDMat)
     R = Base.promote_eltype(df, Σ)
     GenericMvTDist(df, Zeros{R}(size(Σ, 1)), Σ)
+end
+
+GenericMvTDist(df::Real, μ::AbstractVector, Σ::AbstractMatrix) = GenericMvTDist(df, μ, PDMat(Σ))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real}) = GenericMvTDist(df, μ, PDiagMat(Σ.diag))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::Union{Symmetric{<:Real,<:Diagonal{<:Real}},Hermitian{<:Real,<:Diagonal{<:Real}}}) = GenericMvTDist(df, μ, PDiagMat(Σ.data.diag))
+GenericMvTDist(df::Real, μ::AbstractVector{<:Real}, Σ::UniformScaling{<:Real}) =
+    GenericMvTDist(df, μ, ScalMat(length(μ), Σ.λ))
+function GenericMvTDist(
+    μ::AbstractVector{<:Real}, Σ::Diagonal{<:Real,<:FillArrays.AbstractFill{<:Real,1}}
+)
+    return GenericMvTDist(df, μ, ScalMat(size(Σ, 1), FillArrays.getindex_value(Σ.diag)))
 end
 
 GenericMvTDist{T,Cov,Mean}(df, μ, Σ) where {T,Cov,Mean} =
@@ -172,3 +212,10 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where
     x .= x ./ sqrt.(y ./ d.df) .+ d.μ
     x
 end
+
+### Affine transformations
+Base.:+(d::GenericMvTDist, c::AbstractVector) = GenericMvTDist(d.df, d.μ + c, d.Σ)
+Base.:+(c::AbstractVector, d::GenericMvTDist) = d + c
+Base.:-(d::GenericMvTDist, c::AbstractVector) = GenericMvTDist(d.df, d.μ - c, d.Σ)
+
+Base.:*(B::AbstractMatrix, d::GenericMvTDist) = GenericMvTDist(d.df, B * d.μ, X_A_Xt(d.Σ, B))
