@@ -191,6 +191,7 @@ end
         @test extrema(g_u) == (-Inf, Inf)
         @test @inferred(median(g_u)) === 0.0
         @test @inferred(quantile(g_u, 0.5f0)) === 0.0
+        show(IOBuffer(), "text/plain", g_u)
 
         g_u = MixtureModel(Normal{Float64}, [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)], [0.2, 0.5, 0.3])
         @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
@@ -263,6 +264,7 @@ end
         @test insupport(g_m, [0.0, 0.0]) == true
         test_mixture(g_m, 1000, 10^6, rng)
         test_params(g_m)
+        show(IOBuffer(), "text/plain", g_m)
 
         u1 =  Uniform()
         u2 =  Uniform(1.0, 2.0)
