@@ -163,14 +163,14 @@ rand(rng::AbstractRNG, d::UnivariateDistribution) = quantile(d, rand(rng))
 
 Compute the expectation.
 """
-mean(d::UnivariateDistribution)
+mean(d::UnivariateDistribution) = expectation(identity, d)
 
 """
     var(d::UnivariateDistribution)
 
 Compute the variance. (A generic std is provided as `std(d) = sqrt(var(d))`)
 """
-var(d::UnivariateDistribution)
+var(d::UnivariateDistribution) = (μ = mean(d); expectation(x -> (x - μ)^2, d))
 
 """
     std(d::UnivariateDistribution)
@@ -214,7 +214,7 @@ skewness(d::UnivariateDistribution)
 
 Compute the entropy value of distribution `d`.
 """
-entropy(d::UnivariateDistribution)
+entropy(d::UnivariateDistribution) = expectation(x -> -log(pdf(d, x)), d)
 
 """
     entropy(d::UnivariateDistribution, b::Real)
