@@ -7,8 +7,8 @@
 function _truncnorm(d::Truncated{<:LogNormal})
     μ, σ = params(d.untruncated)
     T = partype(d)
-    a = d.lower === nothing ? nothing : log(T(d.lower))
-    b = d.upper === nothing ? nothing : log(T(d.upper))
+    a = d.lower === nothing || d.lower <= 0 ? nothing : log(T(d.lower))
+    b = d.upper === nothing || isinf(d.upper) ? nothing : log(T(d.upper))
     return truncated(Normal(μ, σ), a, b)
 end
 
