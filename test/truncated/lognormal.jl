@@ -32,5 +32,9 @@ naive_moment(d, n, μ, σ²) = (σ = sqrt(σ²); expectation(x -> ((x - μ) / σ
         d2 = truncated(LogNormal(1, 5); upper=1e5)
         @test mean(d1) == mean(d2)
         @test var(d1) == var(d2)
+
+        # Truncated outside of support where taking a log would error
+        d3 = truncated(LogNormal(); lower=-1)
+        @test mean(d3) == mean(d3.untruncated)
     end
 end
