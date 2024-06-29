@@ -6,10 +6,10 @@
 # Given `truncate(LogNormal(μ, σ), a, b)`, return `truncate(Normal(μ, σ), log(a), log(b))`
 function _truncnorm(d::Truncated{<:LogNormal})
     μ, σ = params(d.untruncated)
-    T = partype(d)
+    T = float(partype(d))
     a = d.lower === nothing || d.lower <= 0 ? nothing : log(T(d.lower))
     b = d.upper === nothing || isinf(d.upper) ? nothing : log(T(d.upper))
-    return truncated(Normal(μ, σ), a, b)
+    return truncated(Normal{T}(T(μ), T(σ)), a, b)
 end
 
 mean(d::Truncated{<:LogNormal}) = mgf(_truncnorm(d), 1)
