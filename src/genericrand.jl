@@ -44,15 +44,15 @@ function rand(
 end
 
 # these are workarounds for sampleables that incorrectly base `eltype` on the parameters
-function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,ContinuousSupport})
     return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
 end
-function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
+function rand(rng::AbstractRNG, s::Sampleable{Univariate,ContinuousSupport}, dims::Dims)
     out = Array{float(eltype(s))}(undef, dims)
     return @inbounds rand!(rng, sampler(s), out)
 end
 function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
+    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,ContinuousSupport}, dims::Dims,
 )
     sz = size(s)
     ax = map(Base.OneTo, dims)

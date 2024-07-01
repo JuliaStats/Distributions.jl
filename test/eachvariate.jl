@@ -12,7 +12,7 @@ function FiniteDifferences.to_vec(xs::Distributions.EachVariate{V}) where {V}
 end
 
 # MWE in #1817
-struct FooEachvariate <: Sampleable{Multivariate, Continuous} end
+struct FooEachvariate <: Sampleable{Multivariate, ContinuousSupport} end
 Base.length(::FooEachvariate) = 3
 Base.eltype(::FooEachvariate) = Float64
 function Distributions._rand!(rng::AbstractRNG, ::FooEachvariate, x::AbstractVector{<:Real})

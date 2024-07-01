@@ -96,7 +96,7 @@ end
 
 # for discrete samplers
 #
-function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable instance
+function test_samples(s::Sampleable{Univariate, DiscreteSupport},      # the sampleable instance
                       distr::DiscreteUnivariateDistribution,    # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
@@ -185,7 +185,7 @@ test_samples(distr::DiscreteUnivariateDistribution, n::Int;
 
 # for continuous samplers
 #
-function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable instance
+function test_samples(s::Sampleable{Univariate, ContinuousSupport},    # the sampleable instance
                       distr::ContinuousUnivariateDistribution,  # corresponding distribution
                       n::Int;                                   # number of samples to generate
                       nbins::Int=50,                            # divide the main interval into nbins

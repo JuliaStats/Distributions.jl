@@ -143,7 +143,7 @@ minimum(d::Truncated) = max(minimum(d.untruncated), d.lower)
 maximum(d::LeftTruncated) = maximum(d.untruncated)
 maximum(d::Truncated) = min(maximum(d.untruncated), d.upper)
 
-function insupport(d::Truncated{<:UnivariateDistribution,<:Union{Discrete,Continuous}}, x::Real)
+function insupport(d::Truncated{<:UnivariateDistribution,<:Union{DiscreteSupport,ContinuousSupport}}, x::Real)
     return _in_closed_interval(x, d.lower, d.upper) && insupport(d.untruncated, x)
 end
 

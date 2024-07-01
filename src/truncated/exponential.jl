@@ -2,7 +2,7 @@
 ##### Truncated exponential distribution
 #####
 
-function mean(d::Truncated{<:Exponential,Continuous})
+function mean(d::Truncated{<:Exponential,ContinuousSupport})
     θ = d.untruncated.θ
     l, r = extrema(d)           # l is always finite
     if isfinite(r)

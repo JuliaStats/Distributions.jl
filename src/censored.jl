@@ -246,7 +246,7 @@ function entropy(d::LeftCensored)
     d0 = d.uncensored
     lower = d.lower
     log_prob_lower_inc = logcdf(d0, lower)
-    if value_support(typeof(d0)) === Discrete
+    if value_support(typeof(d0)) === DiscreteSupport
         logpl = logpdf(d0, lower)
         log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
         xlogx_pl = xexpx(logpl)
@@ -264,7 +264,7 @@ function entropy(d::RightCensored)
     d0 = d.uncensored
     upper = d.upper
     log_prob_upper = logccdf(d0, upper)
-    if value_support(typeof(d0)) === Discrete
+    if value_support(typeof(d0)) === DiscreteSupport
         logpu = logpdf(d0, upper)
         log_prob_upper_inc = logaddexp(log_prob_upper, logpu)
         xlogx_pu = xexpx(logpu)
@@ -284,7 +284,7 @@ function entropy(d::Censored)
     upper = d.upper
     log_prob_lower_inc = logcdf(d0, lower)
     log_prob_upper = logccdf(d0, upper)
-    if value_support(typeof(d0)) === Discrete
+    if value_support(typeof(d0)) === DiscreteSupport
         logpl = logpdf(d0, lower)
         logpu = logpdf(d0, upper)
         log_prob_lower = logsubexp(log_prob_lower_inc, logpl)
@@ -316,7 +316,7 @@ function pdf(d::Censored, x::Real)
     elseif x == lower
         x == upper ? one(px) : oftype(px, cdf(d0, x))
     elseif x == upper
-        if value_support(typeof(d0)) === Discrete
+        if value_support(typeof(d0)) === DiscreteSupport
             oftype(px, ccdf(d0, x) + px)
         else
             oftype(px, ccdf(d0, x))
@@ -336,7 +336,7 @@ function logpdf(d::Censored, x::Real)
     elseif x == lower
         x == upper ? zero(logpx) : oftype(logpx, logcdf(d0, x))
     elseif x == upper
-        if value_support(typeof(d0)) === Discrete
+        if value_support(typeof(d0)) === DiscreteSupport
             oftype(logpx, logaddexp(logccdf(d0, x), logpx))
         else
             oftype(logpx, logccdf(d0, x))

@@ -39,7 +39,7 @@ function multinom_rand!(rng::AbstractRNG, n::Int, p::AbstractVector{<:Real},
     return x
 end
 
-struct MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete}
+struct MultinomialSampler{T<:Real} <: Sampleable{Multivariate,DiscreteSupport}
     n::Int
     prob::Vector{T}
     alias::AliasTable

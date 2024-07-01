@@ -86,7 +86,7 @@ function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
     else
         # There does not appear to be an analytical formula for
         # this case. Hence we fall back to the numerical approximation.
-        return invoke(kldivergence, Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}}, p, q; kwargs...)
+        return invoke(kldivergence, Tuple{UnivariateDistribution{DiscreteSupport},UnivariateDistribution{DiscreteSupport}}, p, q; kwargs...)
     end
 end
 

@@ -128,9 +128,9 @@ gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
 
 #### Sampling
 
-struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,Continuous},
-                   S2 <: Sampleable{Univariate,Continuous}} <:
-    Sampleable{Univariate,Continuous}
+struct BetaSampler{T<:Real, S1 <: Sampleable{Univariate,ContinuousSupport},
+                   S2 <: Sampleable{Univariate,ContinuousSupport}} <:
+    Sampleable{Univariate,ContinuousSupport}
     γ::Bool
     iα::T
     iβ::T

@@ -25,7 +25,7 @@ end
 #   "Generating the maximum of independent identically  distributed random variables"
 #   Computers & Mathematics with Applications, Volume 6, Issue 3, 1980, Pages 305-315.
 #
-struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
+struct BinomialGeomSampler <: Sampleable{Univariate,DiscreteSupport}
     comp::Bool
     n::Int
     scale::Float64
@@ -73,7 +73,7 @@ end
 # Note: only use this sampler when n * min(p, 1-p) is large enough
 #       e.g., it is greater than 20.
 #
-struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
+struct BinomialTPESampler <: Sampleable{Univariate,DiscreteSupport}
     comp::Bool
     n::Int
     r::Float64
@@ -225,7 +225,7 @@ end
 
 # Constructing an alias table by directly computing the probability vector
 #
-struct BinomialAliasSampler <: Sampleable{Univariate,Discrete}
+struct BinomialAliasSampler <: Sampleable{Univariate,DiscreteSupport}
     table::AliasTable
 end
 
@@ -238,7 +238,7 @@ rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 #
 # It is important for type-stability
 #
-mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
+mutable struct BinomialPolySampler <: Sampleable{Univariate,DiscreteSupport}
     use_btpe::Bool
     geom_sampler::BinomialGeomSampler
     btpe_sampler::BinomialTPESampler

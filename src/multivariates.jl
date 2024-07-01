@@ -20,7 +20,7 @@ size(d::MultivariateDistribution)
 # TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
     @inbounds rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
+rand(rng::AbstractRNG, s::Sampleable{Multivariate,ContinuousSupport}, n::Int) =
     @inbounds rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
 
 ## domain

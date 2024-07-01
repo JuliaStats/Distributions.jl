@@ -36,7 +36,7 @@ AbstractMixtureModel
 - The `MixtureModel` is a parametric type, with three type parameters:
 
     - `VF`: the variate form, which can be `Univariate`, `Multivariate`, or `Matrixvariate`.
-    - `VS`: the value support, which can be `Continuous` or `Discrete`.
+    - `VS`: the value support, which can be `ContinuousSupport` or `DiscreteSupport`.
     - `Component`: the type of component distributions, *e.g.* `Normal`.
 
 - We define two aliases: `UnivariateMixture` and `MultivariateMixture`.
@@ -44,7 +44,7 @@ AbstractMixtureModel
 With such a type system, the type for a mixture of univariate normal distributions can be written as
 
 ```julia
-MixtureModel{Univariate,Continuous,Normal}
+MixtureModel{Univariate,ContinuousSupport,Normal}
 ```
 
 ## Constructors

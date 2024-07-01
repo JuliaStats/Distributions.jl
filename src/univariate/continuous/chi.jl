@@ -111,8 +111,8 @@ end
 rand(rng::AbstractRNG, d::Chi) =
     (ν = d.ν; sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
 
-struct ChiSampler{S <: Sampleable{Univariate,Continuous}} <:
-    Sampleable{Univariate,Continuous}
+struct ChiSampler{S <: Sampleable{Univariate,ContinuousSupport}} <:
+    Sampleable{Univariate,ContinuousSupport}
     s::S
 end
 

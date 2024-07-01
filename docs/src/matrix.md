@@ -5,8 +5,8 @@
 ```julia
 const MatrixDistribution{S<:ValueSupport} = Distribution{Matrixvariate,S}
 
-const DiscreteMatrixDistribution   = Distribution{Matrixvariate, Discrete}
-const ContinuousMatrixDistribution = Distribution{Matrixvariate, Continuous}
+const DiscreteMatrixDistribution   = Distribution{Matrixvariate, DiscreteSupport}
+const ContinuousMatrixDistribution = Distribution{Matrixvariate, ContinuousSupport}
 ```
 
 More advanced functionalities related to random matrices can be found in the
