@@ -367,10 +367,18 @@ end
 
 @testset "Testing fit for Laplace" begin
     for func in funcs, dist in (Laplace, Laplace{Float64})
-        d = fit(dist, func[2](dist(5.0, 3.0), N + 1))
+        x = func[2](dist(5.0, 3.0), N + 1)
+        w = func[1](N + 1)
+
+        d = fit(dist, x)
         @test isa(d, dist)
         @test isapprox(location(d), 5.0, atol=0.02)
         @test isapprox(scale(d)   , 3.0, atol=0.03)
+
+        dw = fit(dist, x, w)
+        @test isa(dw, dist)
+        @test isapprox(location(dw), 5.0, atol=0.02)
+        @test isapprox(scale(dw), 3.0, atol=0.03)
     end
 end
 
