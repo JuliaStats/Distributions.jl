@@ -41,6 +41,7 @@ export
     Multivariate,
     Matrixvariate,
     CholeskyVariate,
+    NamedTupleVariate,
     Discrete,
     Continuous,
     Sampleable,
@@ -230,6 +231,7 @@ export
     sqmahal!,           # in-place evaluation of sqmahal
     location,           # get the location parameter
     location!,          # provide storage for the location parameter (used in multivariate distribution mvlognormal)
+    marginal,           # marginal distributions
     mean,               # mean of distribution
     meandir,            # mean direction (of a spherical distribution)
     meanform,           # convert a normal distribution from canonical form to mean form
@@ -297,6 +299,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("namedtuple/productnamedtuple.jl")
 include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
