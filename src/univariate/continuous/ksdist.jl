@@ -28,7 +28,7 @@ function cdf(d::KSDist,x::Float64)
         return 0.0
     elseif b <= 1
         # accuracy could be improved
-        return exp(lfact(n)+n*(log(2*b-1)-log(n)))
+        return exp(logfactorial(n)+n*(log(2*b-1)-log(n)))
     elseif x >= 1
         return 1.0
     elseif b >= n-1
@@ -56,7 +56,7 @@ function ccdf(d::KSDist,x::Float64)
     if b <= 0.5
         return 1.0
     elseif b <= 1
-        return 1-exp(lfact(n)+n*(log(2*b-1)-log(n)))
+        return 1-exp(logfactorial(n)+n*(log(2*b-1)-log(n)))
     elseif x >= 1
         return 0.0
     elseif b >= n-1
