@@ -177,13 +177,20 @@ using Test
             x3 = rand(rng, d)
             @test x3 != x1
 
-            xs1 = @inferred rand(rng, d, 10)
+            # not completely type-inferrable due to sampler(::Gamma) being type-unstable
+            xs1 = @inferred Vector{<:NamedTuple{(:x, :y, :z, :w)}} rand(rng, d, 10)
             @test length(xs1) == 10
             @test all(insupport.(Ref(d), xs1))
 
-            xs2 = @inferred rand(rng, d, (2, 3, 4))
+            xs2 = @inferred Array{<:NamedTuple{(:x, :y, :z, :w)},3} rand(rng, d, (2, 3, 4))
             @test size(xs2) == (2, 3, 4)
             @test all(insupport.(Ref(d), xs2))
+
+            nt2 = (x=Normal(1.0, 2.0), z=Dirichlet(5, 1.0), w=Bernoulli())
+            d2 = ProductNamedTupleDistribution(nt2)
+            # now type-inferrable
+            @inferred rand(rng, d2, 10)
+            @inferred rand(rng, d2, 2, 3, 4)
         end
 
         @testset "rand!" begin
