@@ -15,7 +15,7 @@ struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
 end
 function ProductNamedTupleDistribution(
     dists::NamedTuple{K,V}
-) where {K,V<:Tuple{Vararg{Distribution}}}
+) where {K,V<:Tuple{Distribution,Vararg{Distribution}}}
     vs = _product_valuesupport(values(dists))
     eltypes = _product_namedtuple_eltype(values(dists))
     return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
@@ -125,7 +125,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
     for i in eachindex(xs)
-        xs[i] = Random.rand(rng, d)
+        xs[i] = rand(rng, d)
     end
     return xs
 end
