@@ -95,8 +95,6 @@ minimum(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(minimum, d.dis
 maximum(d::ArrayOfUnivariateDistribution) = map(maximum, d.dists)
 maximum(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(maximum, d.dists))
 
-marginal(d::ProductDistribution, i...) = d.dists[i...]
-
 function entropy(d::ArrayOfUnivariateDistribution)
     # we use pairwise summation (https://github.com/JuliaLang/julia/pull/31020)
     return sum(Broadcast.instantiate(Broadcast.broadcasted(entropy, d.dists)))

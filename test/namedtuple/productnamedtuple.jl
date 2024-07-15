@@ -97,25 +97,6 @@ using Test
                 (x=maximum(nt.x), y=maximum(nt.y), z=maximum(nt.z))
         end
 
-        @testset "marginal" begin
-            nt = (x=Normal(1.0, 2.0), y=Gamma(), z=Dirichlet(5, 1.0))
-            d = ProductNamedTupleDistribution(nt)
-            @test marginal(d, :x) === nt[:x]
-            @test marginal(d, :y) === nt[:y]
-            @test marginal(d, :z) === nt[:z]
-            @test marginal(d, 1) === nt[1]
-            @test marginal(d, 2) === nt[2]
-            @test marginal(d, 3) === nt[3]
-            if VERSION ≥ v"1.7.0-DEV.294"
-                @test marginal(d, (:x, :y)) ===
-                    ProductNamedTupleDistribution((x=nt[:x], y=nt[:y]))
-                @test marginal(d, (:z, :x)) ===
-                    ProductNamedTupleDistribution((z=nt[:z], x=nt[:x]))
-                @test_throws ErrorException marginal(d, (:x, :w))
-            end
-            @test_throws MethodError marginal(d, ())
-        end
-
         @testset "insupport" begin
             nt = (x=Normal(1.0, 2.0), y=Gamma(), z=Dirichlet(5, 1.0))
             d = ProductNamedTupleDistribution(nt)
