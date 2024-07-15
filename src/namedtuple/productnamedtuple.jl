@@ -106,6 +106,12 @@ end
 
 # Sampling
 
+function sampler(d::ProductNamedTupleDistribution{K,<:Any,S}) where {K,S}
+    samplers = map(sampler, d.dists)
+    Tsamplers = typeof(values(samplers))
+    return ProductNamedTupleSampler{K,Tsamplers,S}(samplers)
+end
+
 function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where {K}
     return NamedTuple{K}(map(Base.Fix1(rand, rng), d.dists))
 end

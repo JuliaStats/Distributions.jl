@@ -1,5 +1,5 @@
 using Distributions
-using Distributions: ProductNamedTupleDistribution
+using Distributions: ProductNamedTupleDistribution, ProductNamedTupleSampler
 using LinearAlgebra
 using Random
 using Test
@@ -140,9 +140,29 @@ using Test
         @test std(d3) == (x=std(d3.dists.x), y=std(d3.dists.y))
     end
 
-    @testset "Sampling" begin
+    @testset "Sampler" begin
+        nt1 = (x=Normal(1.0, 2.0), y=Gamma(), z=Dirichlet(5, 1.0), w=Bernoulli())
+        d1 = ProductNamedTupleDistribution(nt1)
+        # sampler(::Gamma) is type-unstable
+        spl = @inferred ProductNamedTupleSampler{(:x, :y, :z, :w)} sampler(d1)
+        @test spl.samplers == (; (k => sampler(v) for (k, v) in pairs(nt1))...)
         rng = MersenneTwister(973)
+        x1 = @inferred rand(rng, d1)
+        rng = MersenneTwister(973)
+        x2 = (
+            x=rand(rng, nt1.x), y=rand(rng, nt1.y), z=rand(rng, nt1.z), w=rand(rng, nt1.w)
+        )
+        @test x1 == x2
+        x3 = rand(rng, d1)
+        @test x3 != x1
 
+        # sampler should now be type-stable
+        nt2 = (x=Normal(1.0, 2.0), z=Dirichlet(5, 1.0), w=Bernoulli())
+        d2 = ProductNamedTupleDistribution(nt2)
+        @inferred sampler(d2)
+    end
+
+    @testset "Sampling" begin
         @testset "rand" begin
             nt = (x=Normal(1.0, 2.0), y=Gamma(), z=Dirichlet(5, 1.0), w=Bernoulli())
             d = ProductNamedTupleDistribution(nt)
