@@ -76,6 +76,7 @@ const tests = [
     "univariate/continuous/erlang",
     "univariate/continuous/exponential",
     "univariate/continuous/gamma",
+    "univariate/continuous/generalizedchisq",
     "univariate/continuous/gumbel",
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
