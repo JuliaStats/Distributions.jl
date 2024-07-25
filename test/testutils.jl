@@ -28,8 +28,9 @@ end
 # testing the implementation of a discrete univariate distribution
 #
 function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
-                    testquan::Bool=true)
-
+                    testquan::Bool=true, rng::AbstractRNG=MersenneTwister(),
+                    test_scalar_rand::Bool=false)
+    println("    testing $(distr)")
     test_range(distr)
     vs = get_evalsamples(distr, 0.00001)
 
@@ -40,7 +41,12 @@ function test_distr(distr::DiscreteUnivariateDistribution, n::Int;
 
     test_stats(distr, vs)
     test_samples(distr, n)
-    test_samples(distr, n, rng=MersenneTwister())
+    test_samples(distr, n, rng=rng)
+    if test_scalar_rand
+        xs = test_samples(distr, n; call_scalar = true)
+        xs = test_samples(distr, n, rng=rng, call_scalar = true)
+    end
+
     test_params(distr)
 end
 
@@ -67,7 +73,9 @@ end
 # testing the implementation of a continuous univariate distribution
 #
 function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
-                    testquan::Bool=true, rng::AbstractRNG=MersenneTwister(123))
+                    testquan::Bool=true, rng::AbstractRNG=MersenneTwister(123),
+                    test_scalar_rand::Bool=false)
+    println("    testing $(distr)")
     test_range(distr)
     vs = get_evalsamples(distr, 0.01, 2000)
 
@@ -82,6 +90,13 @@ function test_distr(distr::ContinuousUnivariateDistribution, n::Int;
     allow_test_stats(distr) && test_stats(distr, xs)
     xs = test_samples(distr, n, rng=rng)
     allow_test_stats(distr) && test_stats(distr, xs)
+    if test_scalar_rand
+        xs = test_samples(distr, n; call_scalar = true)
+        allow_test_stats(distr) && test_stats(distr, xs)
+        xs = test_samples(distr, n, rng=rng, call_scalar = true)
+        allow_test_stats(distr) && test_stats(distr, xs)
+    end
+
     test_params(distr)
 end
 
@@ -101,8 +116,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
                       n::Int;                                   # number of samples to generate
                       q::Float64=1.0e-7,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false,                      # show intermediate info (for debugging)
-                      rng::Union{AbstractRNG, Missing}=missing) # add an rng?
-
+                      rng::Union{AbstractRNG, Missing}=missing,  # add an rng?
+                      call_scalar::Bool=false)                  # directly scall the scalar rand(d) instead
     # The basic idea
     # ------------------
     #   Generate n samples, and count the occurrences of each value within a reasonable range.
@@ -146,14 +161,30 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
     # generate samples using RNG passed or default RNG
     # we also check reproducibility
     if rng === missing
+        Random.seed!(1234)    
+        samples = if !call_scalar
+            rand(s, n)
+        else
+            map((_) -> rand(s), 1:n)
+        end
         Random.seed!(1234)
-        samples = rand(s, n)
-        Random.seed!(1234)
-        samples2 = rand(s, n)
+        samples2 = if !call_scalar
+            rand(s, n)
+        else
+            map((_) -> rand(s), 1:n)
+        end
     else
         rng2 = deepcopy(rng)
-        samples = rand(rng, s, n)
-        samples2 = rand(rng2, s, n)
+        samples = if !call_scalar
+            rand(rng, s, n)
+        else
+            map((_) -> rand(rng, s), 1:n)
+        end
+        samples2 = if !call_scalar
+            rand(rng2, s, n)
+        else
+            map((_) -> rand(rng2, s), 1:n)
+        end
     end
     @test length(samples) == n
     @test samples2 == samples
@@ -180,8 +211,8 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
 end
 
 test_samples(distr::DiscreteUnivariateDistribution, n::Int;
-             q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
-    test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng)
+             q::Float64=1.0e-6, verbose::Bool=false, rng=missing, kwargs...) =
+    test_samples(distr, distr, n; q=q, verbose=verbose, rng=rng, kwargs...)
 
 # for continuous samplers
 #
@@ -191,7 +222,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
                       nbins::Int=50,                            # divide the main interval into nbins
                       q::Float64=1.0e-6,                        # confidence interval, 1 - q as confidence
                       verbose::Bool=false,                      # show intermediate info (for debugging)
-                      rng::Union{AbstractRNG, Missing}=missing) # add an rng?
+                      rng::Union{AbstractRNG, Missing}=missing, # add an rng?
+                      call_scalar::Bool=false)                  # directly scall the scalar rand(d) instead
 
     # The basic idea
     # ------------------
@@ -246,14 +278,30 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     # generate samples using RNG passed or default RNG
     # we also check reproducibility
     if rng === missing
+        Random.seed!(1234)    
+        samples = if !call_scalar
+            rand(s, n)
+        else
+            map((_) -> rand(s), 1:n)
+        end
         Random.seed!(1234)
-        samples = rand(s, n)
-        Random.seed!(1234)
-        samples2 = rand(s, n)
+        samples2 = if !call_scalar
+            rand(s, n)
+        else
+            map((_) -> rand(s), 1:n)
+        end
     else
         rng2 = deepcopy(rng)
-        samples = rand(rng, s, n)
-        samples2 = rand(rng2, s, n)
+        samples = if !call_scalar
+            rand(rng, s, n)
+        else
+            map((_) -> rand(rng, s), 1:n)
+        end
+        samples2 = if !call_scalar
+            rand(rng2, s, n)
+        else
+            map((_) -> rand(rng2, s), 1:n)
+        end
     end
     @test length(samples) == n
     @test samples2 == samples
@@ -284,8 +332,8 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
     return samples
 end
 
-test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false, rng=missing) =
-    test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose, rng=rng)
+test_samples(distr::ContinuousUnivariateDistribution, n::Int; nbins::Int=50, q::Float64=1.0e-6, verbose::Bool=false, rng=missing, kwargs...) =
+    test_samples(distr, distr, n; nbins=nbins, q=q, verbose=verbose, rng=rng, kwargs...)
 
 
 #### Testing range & support methods
@@ -583,6 +631,7 @@ end
 allow_test_stats(d::UnivariateDistribution) = true
 allow_test_stats(d::NoncentralBeta) = false
 allow_test_stats(::StudentizedRange) = false
+allow_test_stats(::LogitNormal) = false
 
 function test_stats(d::ContinuousUnivariateDistribution, xs::AbstractVector{Float64})
     # using Monte Carlo methods
