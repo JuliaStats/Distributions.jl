@@ -156,7 +156,10 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+rand(rng::AbstractRNG, d::LogNormal) = exp(muladd(d.σ, randn(rng), d.μ))
+
+rand!(rng::AbstractRNG, d::LogNormal, A::AbstractArray{<:Real}) =
+    A .= exp.(muladd.(d.σ, randn!(rng, A), d.μ))
 
 ## Fitting
 

@@ -141,9 +141,20 @@ function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
     inv_p = inv(d.p)
     g = Gamma(inv_p, 1)
     z = d.α * rand(rng, g)^inv_p
-    if rand(rng) < 0.5
+    if rand(rng, Bool)
         return d.μ - z
     else
         return d.μ + z
     end
+end
+
+function rand!(rng::AbstractRNG, d::PGeneralizedGaussian, A::AbstractArray{<:Real})
+    inv_p = inv(d.p)
+    g = Gamma(inv_p, 1)
+    A .= rand!(rng, g, A).^inv_p
+    A .= muladd.(
+        A,
+        ifelse.(rand(rng, Bool, size(A)), d.α, -d.α),
+        d.μ
+    )
 end

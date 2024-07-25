@@ -126,6 +126,14 @@ Base.:*(c::Real, d::Laplace) = Laplace(c * d.μ, abs(c) * d.θ)
 rand(rng::AbstractRNG, d::Laplace) =
     d.μ + d.θ*randexp(rng)*ifelse(rand(rng, Bool), 1, -1)
 
+function rand!(rng::AbstractRNG, d::Laplace, A::AbstractArray{<:Real})
+    randexp!(rng, A)
+    A .= muladd.(
+        A,
+        ifelse.(rand(rng, Bool, size(A)), d.θ, -d.θ),
+        d.μ
+    )
+end
 
 #### Fitting
 

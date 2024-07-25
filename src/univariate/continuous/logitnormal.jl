@@ -157,7 +157,11 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogitNormal) = logistic(randn(rng) * d.σ + d.μ)
+rand(rng::AbstractRNG, d::LogitNormal) = logistic(muladd(d.σ, randn(rng), d.μ))
+
+rand!(rng::AbstractRNG, d::LogitNormal, A::AbstractArray{<:Real}) =
+    A .= logistic.(muladd.(d.σ, randn!(rng, A), d.μ))
+
 
 ## Fitting
 
