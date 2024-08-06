@@ -107,6 +107,33 @@ function cor(d::MultivariateDistribution)
     return R
 end
 
+"""
+    Distributions._rand!(::AbstractRNG, d::MultivariateDistribution, x::AbstractVector)
+
+Internal function for generating samples from `d` into `x`. When creating new multivariate distributions,
+one should implement this method at least for `x::AbstractVector`. If there are faster
+methods for creating samples in a batch, then consider implementing it also for `x::AbstractMatrix`
+where each sample is one column of `x`.
+"""
+function _rand! end
+
+"""
+    Distributions._logpdf(d::MultivariateDistribution, x::AbstractVector{<:Real})
+
+Internal function for computing the log-density of `d` at `x`. When creating new multivariate
+distributions, one should implement this method at least for `x::AbstractVector{<:Real}`. If there are
+faster methods for computing the log-density in a batch, then consider implementing
+[`Distributions._logpdf!`](@ref).
+"""
+function _logpdf end
+
+"""
+    Distributions._logpdf!(r::AbstractArray{<:Real}, d::MultivariateDistribution, x::AbstractMatrix{<:Real})
+
+An optional method to implement for multivariate distributions, computing `logpdf` for each column in `x`.
+"""
+function _logpdf! end
+
 ##### Specific distributions #####
 
 for fname in ["dirichlet.jl",
