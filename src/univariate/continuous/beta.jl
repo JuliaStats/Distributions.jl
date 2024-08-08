@@ -47,6 +47,8 @@ Beta() = Beta{Float64}(1.0, 1.0)
 
 @distr_support Beta 0.0 1.0
 
+
+
 #### Conversions
 function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
@@ -59,39 +61,120 @@ Base.convert(::Type{Beta{T}}, d::Beta{T}) where {T<:Real} = d
 params(d::Beta) = (d.α, d.β)
 @inline partype(d::Beta{T}) where {T<:Real} = T
 
+#### Support 
+
+function minimum(d::Beta)
+    (α, β) = params(d)
+
+    if isinf(α)
+        return isinf(β) ? 0.5 : 1.0
+    end
+
+    return 0.0
+end
+
+function maximum(d::Beta)
+    (α, β) = params(d)
+
+    if isinf(β)
+        return isinf(α) ? 0.5 : 0.0
+    end
+
+    return 1.0
+end
+
+minimum(d::Type{Beta}) = 0.0
+maximum(d::Type{Beta}) = 1.0
 
 #### Statistics
 
-mean(d::Beta) = ((α, β) = params(d); α / (α + β))
+function mean(d::Beta{T})::float(T) where T
+    (α, β) = params(d)
 
-function mode(d::Beta; check_args::Bool=true)
+    if !isinf(α)
+        return α / (α + β)
+    else # α is infinite
+        return isinf(β) ? 0.5 : 1.0
+    end
+end
+
+function mode(d::Beta{T}; check_args::Bool=true)::float(T) where T
     α, β = params(d)
-    @check_args(
-        Beta,
-        (α, α > 1, "mode is defined only when α > 1."),
-        (β, β > 1, "mode is defined only when β > 1."),
-    )
-    return (α - 1) / (α + β - 2)
+
+    if !isinf(α)
+        if !isinf(β)
+            # non-degenerate case
+            @check_args(
+                Beta,
+                (α, α > 1, "mode is defined only when α > 1 for non-degenerate cases."),
+                (β, β > 1, "mode is defined only when β > 1 for non-degenerate cases."),
+            )
+            return (α - 1) / (α + β - 2)
+        else # β is infinite
+            return 0.0
+        end
+    else # α is infinite
+        return isinf(β) ? 0.5 : 1.0
+    end
 end
 
 modes(d::Beta) = [mode(d)]
 
 function var(d::Beta)
     (α, β) = params(d)
+
+    if isinf(α) || isinf(β)
+        # degenerate cases
+        return zero(α)
+    end
+
     s = α + β
     return (α * β) / (abs2(s) * (s + 1))
 end
 
-meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
+function meanlogx(d::Beta{T})::float(T) where T
+    (α, β) = params(d)
 
-varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
+    if !isinf(α)
+        if !isinf(β)
+            # non-degenerate case
+            return digamma(α) - digamma(α + β)
+        else # β is infinite
+            return log(0.0) # this is -Inf in Julia
+        end
+    else # α is infinite
+        if isinf(β)
+            return log(0.5)
+        else
+            return 0 # log(1)
+        end
+    end
+end
+
+function varlogx(d::Beta)
+    (α, β) = params(d)
+
+    if isinf(α) || isinf(β)
+        # degenerate cases
+        return zero(α)
+    end
+
+    trigamma(α) - trigamma(α + β)
+end
+
 stdlogx(d::Beta) = sqrt(varlogx(d))
 
-function skewness(d::Beta)
+function skewness(d::Beta{T})::float(T) where T
     (α, β) = params(d)
-    if α == β
+
+    if isinf(α) || isinf(β)
+        # degenerate cases
+        return NaN
+    elseif α == β
+        # symmetric non-degenerate
         return zero(α)
     else
+        # asymmetric non-degenerate
         s = α + β
         (2(β - α) * sqrt(s + 1)) / ((s + 2) * sqrt(α * β))
     end
@@ -106,6 +189,9 @@ end
 
 function entropy(d::Beta)
     α, β = params(d)
+    if isinf(α) || isinf(β)
+        return zero(α)
+    end
     s = α + β
     logbeta(α, β) - (α - 1) * digamma(α) - (β - 1) * digamma(β) +
         (s - 2) * digamma(s)
@@ -151,7 +237,7 @@ function sampler(d::Beta{T}) where T
 end
 
 # From Knuth
-function rand(rng::AbstractRNG, s::BetaSampler)
+function rand(rng::AbstractRNG, s::BetaSampler{T, S1, S2})::float(T) where {T, S1, S2}
     if s.γ
         g1 = rand(rng, s.s1)
         g2 = rand(rng, s.s2)
@@ -159,6 +245,13 @@ function rand(rng::AbstractRNG, s::BetaSampler)
     else
         iα = s.iα
         iβ = s.iβ
+        
+        if iszero(iα)
+            return iszero(iβ) ? 0.5 : 1.0
+        elseif iszero(iβ)
+            return 0
+        end
+
         while true
             u = rand(rng) # the Uniform sampler just calls rand()
             v = rand(rng)
@@ -180,7 +273,7 @@ function rand(rng::AbstractRNG, s::BetaSampler)
     end
 end
 
-function rand(rng::AbstractRNG, d::Beta{T}) where T
+function rand(rng::AbstractRNG, d::Beta{T})::float(T) where T
     (α, β) = params(d)
     if (α ≤ 1.0) && (β ≤ 1.0)
         while true
@@ -201,6 +294,10 @@ function rand(rng::AbstractRNG, d::Beta{T}) where T
                 end
             end
         end
+    elseif isinf(α)
+        return isinf(β) ? 0.5 : 1.0
+    elseif isinf(β)
+        return 0
     else
         g1 = rand(rng, Gamma(α, one(T)))
         g2 = rand(rng, Gamma(β, one(T)))
