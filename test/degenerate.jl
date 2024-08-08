@@ -1,9 +1,9 @@
 using Test, Distributions, StatsBase
 
 @testset "Degenerate Beta" begin
-    d1 = Beta(.5, Inf)
+    d1 = Beta(Inf, .5)
     d2 = Beta(Inf, Inf)
-    d3 = Beta(Inf, 14)
+    d3 = Beta(14, Inf)
 
     @test minimum(d1) == 1
     @test minimum(d2) == .5
@@ -14,7 +14,7 @@ using Test, Distributions, StatsBase
     @test maximum(d3) == 0
 
     @test mean(d1) == 1
-    @test mean(d2) == 5
+    @test mean(d2) == .5
     @test mean(d3) == 0
 
     # Currently hangs due to StatsFuns

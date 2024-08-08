@@ -238,20 +238,18 @@ end
 
 # From Knuth
 function rand(rng::AbstractRNG, s::BetaSampler{T, S1, S2})::float(T) where {T, S1, S2}
+    iα = s.iα
+    iβ = s.iβ
     if s.γ
-        g1 = rand(rng, s.s1)
-        g2 = rand(rng, s.s2)
-        return g1 / (g1 + g2)
-    else
-        iα = s.iα
-        iβ = s.iβ
-        
         if iszero(iα)
             return iszero(iβ) ? 0.5 : 1.0
         elseif iszero(iβ)
             return 0
         end
-
+        g1 = rand(rng, s.s1)
+        g2 = rand(rng, s.s2)
+        return g1 / (g1 + g2)
+    else
         while true
             u = rand(rng) # the Uniform sampler just calls rand()
             v = rand(rng)
