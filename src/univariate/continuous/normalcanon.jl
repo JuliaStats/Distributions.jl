@@ -89,6 +89,12 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 
 rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)
 
+rand!(rng::AbstractRNG, cf::NormalCanon, A::AbstractArray{<:Real}) =
+    # A .* inv(sqrt(cf.λ)) is faster but less accurate than A ./ sqrt(cf.λ)
+    # in floating point. This is a fast-math style optimization.
+    # It shouldn't be a problem for PRNG.
+    A .= muladd.(randn!(rng, A), inv(sqrt(cf.λ)), cf.μ)
+
 #### Affine transformations
 
 function Base.:+(d::NormalCanon, c::Real)

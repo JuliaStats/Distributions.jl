@@ -2,3 +2,14 @@
 test_cgf(Exponential(1), (0.9, -1, -100f0, -1e6))
 test_cgf(Exponential(0.91), (0.9, -1, -100f0, -1e6))
 test_cgf(Exponential(10  ), (0.08, -1, -100f0, -1e6))
+
+# Sampling Tests
+@testset "Exponential sampling tests" begin
+    for d in [
+        Exponential(1),
+        Exponential(0.91),
+        Exponential(10)
+    ]
+        test_distr(d, 10^6, test_scalar_rand = true)
+    end
+end

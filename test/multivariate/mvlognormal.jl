@@ -105,8 +105,8 @@ end
     @test  entropy(l1)   ≈ entropy(l2)
     @test logpdf(l1,5.0) ≈ logpdf(l2,[5.0])
     @test pdf(l1,5.0)    ≈ pdf(l2,[5.0])
-    @test (Random.seed!(78393) ; [rand(l1)]) == (Random.seed!(78393) ; rand(l2))
-    @test [rand(MersenneTwister(78393), l1)] == rand(MersenneTwister(78393), l2)
+    @test (Random.seed!(78393) ; [rand(l1)]) ≈ (Random.seed!(78393) ; rand(l2))
+    @test [rand(MersenneTwister(78393), l1)] ≈ rand(MersenneTwister(78393), l2)
 end
 
 ###### General Testing

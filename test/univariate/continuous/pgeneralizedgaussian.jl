@@ -74,7 +74,7 @@ using Test
             end
 
             # Additional tests, including sampling
-            test_distr(d, 10^6)
+            test_distr(d, 10^6, test_scalar_rand = true)
         end
     end
 
@@ -104,6 +104,6 @@ using Test
         @test quantile(d, 1 // 2) ≈ μ
 
         # Additional tests, including sampling
-        test_distr(d, 10^6)
+        test_distr(d, 10^6, test_scalar_rand = true)
     end
 end

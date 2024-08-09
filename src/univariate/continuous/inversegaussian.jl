@@ -163,8 +163,23 @@ function rand(rng::AbstractRNG, d::InverseGaussian)
     u >= p1 ? μ^2 / x1 : x1
 end
 
-#### Fit model
+function rand!(rng::AbstractRNG, d::InverseGaussian, A::AbstractArray{<:Real})
+    # Based off of the non-vectorized code
+    μ, λ = params(d)
+    Z = V = W = X1 = A # prevents extra heap allocs
+    randn!(rng, A)
+    V .*= Z
+    W .*= μ
+    X1 .= μ .+ μ / (2λ) .* (W .- sqrt.(W .* (4λ .+ W)))
+    A .= ifelse.( # TODO Can we avoid heap-allocing a whole float vec?
+        rand(rng, size(A)...) .>= μ ./ (μ .+ X1),
+        (μ * μ) ./ X1,
+        X1
+    )
+end
 
+
+#### Fit model
 """
 Sufficient statistics for `InverseGaussian`, containing the weighted
 sum of observations, the weighted sum of inverse points and sum of weights.
