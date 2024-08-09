@@ -99,6 +99,7 @@ const tests = [
     "eachvariate",
     "univariate/continuous/triangular",
     "statsapi",
+    "univariate/continuous/inversegaussian",
 
     ### missing files compared to /src:
     # "common",
