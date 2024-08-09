@@ -7,6 +7,12 @@
             p = cdf(d, x)
             @test 0.0 <= p <= 1.0
             @test p ≈ exp(logcdf(d, x))
+
+            q = ccdf(d, x)
+            @test 0.0 <= q <= 1.0
+            @test q ≈ exp(logccdf(d, x))
+
+            @test (p + q) ≈ 1
         end
     end
 end
