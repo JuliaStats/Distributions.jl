@@ -151,7 +151,6 @@ const tests = [
     # "univariate/continuous/symtriangular",
     # "univariate/continuous/tdist",
     # "univariate/continuous/triweight",
-    # "univariate/continuous/noncentralf",
     # "univariate/discrete/geometric",
     # "univariate/discrete/hypergeometric",
     # "univariate/discrete/noncentralhypergeometric",
