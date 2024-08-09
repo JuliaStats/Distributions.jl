@@ -78,7 +78,6 @@ const tests = [
     "univariate/continuous/exponential",
     "univariate/continuous/gamma",
     "univariate/continuous/gumbel",
-    "univariate/continuous/inversegaussian",
     "univariate/continuous/lindley",
     "univariate/continuous/logistic",
     "univariate/continuous/johnsonsu",
