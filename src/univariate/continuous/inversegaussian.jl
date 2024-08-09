@@ -100,8 +100,9 @@ function cdf(d::InverseGaussian, x::Real)
     u = sqrt(λ / y)
     v = y / μ
     # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
-    z = normcdf(u * (v - 1)) + exp(2λ / μ + normlogcdf(-u * (v + 1)))
-    z = clamp(z, 0, 1) # extra safety precaution
+    # truncating to [0, 1] as an additional precaution
+    # Ref https://github.com/JuliaStats/Distributions.jl/issues/1873
+    z = clamp(normcdf(u * (v - 1)) + exp(2λ / μ + normlogcdf(-u * (v + 1)), 0, 1)
 
     # otherwise `NaN` is returned for `+Inf`
     return isinf(x) && x > 0 ? one(z) : z
