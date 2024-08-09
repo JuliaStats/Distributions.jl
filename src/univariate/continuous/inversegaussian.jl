@@ -99,7 +99,9 @@ function cdf(d::InverseGaussian, x::Real)
     y = max(x, 0)
     u = sqrt(λ / y)
     v = y / μ
-    z = normcdf(u * (v - 1)) + exp(2λ / μ) * normcdf(-u * (v + 1))
+    # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
+    z = normcdf(u * (v - 1)) + exp(2λ / μ + normlogcdf(-u * (v + 1)))
+    z = clamp(z, 0, 1) # extra safety precaution
 
     # otherwise `NaN` is returned for `+Inf`
     return isinf(x) && x > 0 ? one(z) : z
@@ -110,7 +112,8 @@ function ccdf(d::InverseGaussian, x::Real)
     y = max(x, 0)
     u = sqrt(λ / y)
     v = y / μ
-    z = normccdf(u * (v - 1)) - exp(2λ / μ) * normcdf(-u * (v + 1))
+    z = normccdf(u * (v - 1)) - exp(2λ / μ + normlogcdf(-u * (v + 1)))
+    z = clamp(z, 0, 1)
 
     # otherwise `NaN` is returned for `+Inf`
     return isinf(x) && x > 0 ? zero(z) : z

@@ -99,6 +99,19 @@ end
     @test skewness(d) ≈ 3β/(α*sqrt(δ*g))
 end
 
+@testset "InverseGaussian cdf outside of [0, 1] (#1873)" begin
+    for d in [
+        InverseGaussian(1.65, 590),
+        InverseGaussian(0.5, 1000)
+    ]
+        for x in [0.02, 1.0, 20.0, 300.0]
+            p = cdf(d, x)
+            @test 0.0 <= p <= 1.0
+            @test p ≈ exp(logcdf(d, x))
+        end
+    end
+end
+
 @testset "edge cases" begin
     # issue #1371: cdf should not return -0.0
     @test cdf(Rayleigh(1), 0) === 0.0
