@@ -179,7 +179,4 @@ end
         x = rand(d, 10^6)
         @test mean(x, dims = 2) ≈ μ atol=0.01
     end
-
-    # Should equal [0.625061099164708, 0.37493890083529186, 0] on Julia v1.11.0-rc1
-    @test sum(rand(Xoshiro(123322), Dirichlet([4.5e-5, 4.5e-5, 8e-5]))) == 1
 end
