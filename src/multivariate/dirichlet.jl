@@ -160,14 +160,56 @@ function _rand!(rng::AbstractRNG,
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
-    lmul!(inv(sum(x)), x) # this returns x
+    Σ = sum(x)
+    if Σ == 0.0
+        # Distribution behavior approaches categorical as Σα -> 0
+        α = d.alpha
+        iΣα = inv(d.alpha0)
+        if isinf(iΣα)
+            # Dirichlet with ALL deeply subnormal parameters
+            α .*= floatmax(eltype(α))
+            iΣα = inv(sum(α))
+        end
+        x[rand(rng, Categorical(iΣα .* α))] = 1
+        return x
+    end
+    
+    iΣ = inv(Σ)
+    if isinf(iΣ)
+        # Σ is deep subnormal
+        x .*= floatmax(eltype(x))
+        iΣ = inv(sum(x))
+    end
+
+    lmul!(iΣ, x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{<:Real}) where {T<:Real}
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    lmul!(inv(sum(x)), x) # this returns x
+    Σ = sum(x)
+    if Σ == 0.0
+        # Distribution behavior approaches categorical as Σα -> 0
+        α = d.alpha
+        iΣα = inv(alpha0)
+        if isinf(iΣα)
+            # Dirichlet with ALL deeply subnormal parameters
+            α .*= floatmax(eltype(α))
+            iΣα = inv(sum(α))
+        end
+        x[rand(rng, Categorical(iΣα .* α))] = 1
+        return x
+    end
+
+    iΣ = inv(Σ)
+    if isinf(iΣ)
+        # Σ is deep subnormal
+        x .*= floatmax(eltype(x))
+        iΣ = inv(sum(x))
+    end
+
+    lmul!(iΣ, x) # this returns x
 end
 
 #######################################

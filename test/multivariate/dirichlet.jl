@@ -158,3 +158,28 @@ end
         end
     end
 end
+
+@testset "Dirichlet rand Inf and NaN (#1702)" begin
+    for d in [
+        Dirichlet([8e-5, 1e-5, 2e-5]),
+        Dirichlet([8e-4, 1e-4, 2e-4]),
+        Dirichlet([4.5e-5, 8e-5]),
+        Dirichlet([6e-5, 2e-5, 3e-5, 4e-5, 5e-5]),
+        Dirichlet(FillArrays.Fill(1e-5, 5))
+    ]
+        x = rand(d, 10^6)
+        @test mean(x, dims = 2) ≈ mean(d) atol=0.01
+        @test var(x, dims = 2) ≈ var(d) atol=0.01
+    end
+
+    for (d, μ) in [ # Subnormal params cause mean(d) to error
+        (Dirichlet([5e-321, 1e-321, 4e-321]), [.5, .1, .4]),
+        (Dirichlet([1e-321, 2e-321, 3e-321, 4e-321]), [.1, .2, .3, .4])
+    ]
+        x = rand(d, 10^6)
+        @test mean(x, dims = 2) ≈ μ atol=0.01
+    end
+
+    # Should equal [0.625061099164708, 0.37493890083529186, 0] on Julia v1.11.0-rc1
+    @test sum(rand(Xoshiro(123322), Dirichlet([4.5e-5, 4.5e-5, 8e-5]))) == 1
+end
