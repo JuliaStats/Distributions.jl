@@ -156,7 +156,7 @@ end
 
 #### Sampling
 
-xval(d::LogNormal, z::Real) = exp(muladd(d.σ, z, d.μ)  
+xval(d::LogNormal, z::Real) = exp(muladd(d.σ, z, d.μ))
 
 rand(rng::AbstractRNG, d::LogNormal) = xval(d,  randn(rng))
 function rand!(rng::AbstractRNG, d::LogNormal, A::AbstractArray{<:Real})

@@ -147,14 +147,3 @@ function rand(rng::AbstractRNG, d::PGeneralizedGaussian)
         return d.μ + z
     end
 end
-
-function rand!(rng::AbstractRNG, d::PGeneralizedGaussian, A::AbstractArray{<:Real})
-    inv_p = inv(d.p)
-    g = Gamma(inv_p, 1)
-    A .= rand!(rng, g, A).^inv_p
-    A .= muladd.(
-        A,
-        ifelse.(rand(rng, Bool, size(A)), d.α, -d.α),
-        d.μ
-    )
-end
