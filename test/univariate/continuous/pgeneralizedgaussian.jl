@@ -74,7 +74,7 @@ using Test
             end
 
             # Additional tests, including sampling
-            test_distr(d, 10^6, test_scalar_rand = true)
+            test_distr(d, 10^6)
         end
     end
 

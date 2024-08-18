@@ -170,6 +170,7 @@ function rand(rng::AbstractRNG, d::InverseGaussian)
 end
 
 #### Fit model
+
 """
 Sufficient statistics for `InverseGaussian`, containing the weighted
 sum of observations, the weighted sum of inverse points and sum of weights.
