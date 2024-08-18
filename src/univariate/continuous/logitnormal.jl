@@ -157,11 +157,14 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogitNormal) = logistic(muladd(d.σ, randn(rng), d.μ))
+xval(d::LogitNormal, z::Real) = logistic(muladd(d.σ, z, d.μ))
 
-rand!(rng::AbstractRNG, d::LogitNormal, A::AbstractArray{<:Real}) =
-    A .= logistic.(muladd.(d.σ, randn!(rng, A), d.μ))
-
+rand(rng::AbstractRNG, d::LogitNormal) = xval(d, randn(rng))
+function rand!(rng::AbstractRNG, d::LogitNormal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 
