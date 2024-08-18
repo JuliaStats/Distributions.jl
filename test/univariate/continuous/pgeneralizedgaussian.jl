@@ -102,5 +102,8 @@ using Test
         @test cdf(d, Inf) == 1
         @test logcdf(d, Inf) == 0
         @test quantile(d, 1 // 2) ≈ μ
+
+        # Additional tests, including sampling
+        test_distr(d, 10^6)
     end
 end
