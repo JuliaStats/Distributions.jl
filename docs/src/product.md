@@ -19,3 +19,9 @@ Distributions.Product
 Distributions.product_distribution(::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}})
 Distributions.ProductNamedTupleDistribution
 ```
+
+## Index
+
+```@index
+Pages = ["product.md"]
+```
