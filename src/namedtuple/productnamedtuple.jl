@@ -11,7 +11,7 @@ directly.
 
 # Examples
 
-```jldoctest ProductNamedTuple; setup = :(using Random; Random.seed!(832))
+```jldoctest ProductNamedTuple; setup = :(using Distributions, Random; Random.seed!(832))
 julia> d = product_distribution((x=Normal(), y=Dirichlet([2, 4])))
 ProductNamedTupleDistribution{(:x, :y)}(
 x: Normal{Float64}(μ=0.0, σ=1.0)
