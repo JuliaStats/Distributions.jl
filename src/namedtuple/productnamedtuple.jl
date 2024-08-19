@@ -2,12 +2,12 @@
     ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
         Distribution{NamedTupleVariate{Tnames},S}
 
-    A distribution of `NamedTuple`s, constructed from a `NamedTuple` of independent named
-    distributions.
+A distribution of `NamedTuple`s, constructed from a `NamedTuple` of independent named
+distributions.
 
-    Users should use [`product_distribution`](@ref) to construct a product distribution of
-    independent distributions instead of constructing a `ProductNamedTupleDistribution`
-    directly.
+Users should use [`product_distribution`](@ref) to construct a product distribution of
+independent distributions instead of constructing a `ProductNamedTupleDistribution`
+directly.
 """
 struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
        Distribution{NamedTupleVariate{Tnames},S}
