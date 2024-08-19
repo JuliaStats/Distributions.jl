@@ -12,3 +12,10 @@ Distributions.product_distribution(::AbstractVector{<:Normal})
 Distributions.ProductDistribution
 Distributions.Product
 ```
+
+## NamedTuple-variate products
+
+```@docs
+Distributions.product_distribution(::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}})
+Distributions.ProductNamedTupleDistribution
+```
