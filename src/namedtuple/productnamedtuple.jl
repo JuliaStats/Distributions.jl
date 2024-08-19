@@ -8,6 +8,32 @@ distributions.
 Users should use [`product_distribution`](@ref) to construct a product distribution of
 independent distributions instead of constructing a `ProductNamedTupleDistribution`
 directly.
+
+# Examples
+
+```jldoctest ProductNamedTuple; setup = :(using Random; Random.seed!(832))
+julia> d = product_distribution((x=Normal(), y=Dirichlet([2, 4])))
+ProductNamedTupleDistribution{(:x, :y)}(
+x: Normal{Float64}(μ=0.0, σ=1.0)
+y: Dirichlet{Int64, Vector{Int64}, Float64}(alpha=[2, 4])
+)
+
+
+julia> nt = rand(d)
+(x = 1.5155385995160346, y = [0.533531876438439, 0.466468123561561])
+
+julia> pdf(d, nt)
+0.13702825691074877
+
+julia> mode(d)  # mode of marginals
+(x = 0.0, y = [0.25, 0.75])
+
+julia> mean(d)  # mean of marginals
+(x = 0.0, y = [0.3333333333333333, 0.6666666666666666])
+
+julia> var(d)  # var of marginals
+(x = 1.0, y = [0.031746031746031744, 0.031746031746031744])
+```
 """
 struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
        Distribution{NamedTupleVariate{Tnames},S}
