@@ -13,9 +13,8 @@ using Test
 
     end
 
-    @test rand(TDist(1.0)) isa Float64
-    @test rand(TDist(1.0f0)) isa Float32
-
-    @test entropy(TDist(1.0)) isa Float64
-    @test entropy(TDist(1.0f0)) isa Float32
+    for T in (Float32, Float64)
+        @test @inferred(rand(TDist(T(1)))) isa T
+        @test @inferred(entropy(TDist(T(1)))) isa T
+    end
 end
