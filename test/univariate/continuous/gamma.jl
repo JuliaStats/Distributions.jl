@@ -25,11 +25,9 @@ using Test, Distributions, OffsetArrays
         @test_throws DimensionMismatch suffstats(Gamma, a, wb)
     end
 
-    @test rand(Gamma(1.0, 1.0)) isa Float64
-    @test rand(Gamma(0.5, 1.0)) isa Float64
-    @test rand(Gamma(2.0, 1.0)) isa Float64
-
-    @test rand(Gamma(1.0f0, 1.0f0)) isa Float32
-    @test rand(Gamma(0.5f0, 1.0f0)) isa Float32
-    @test rand(Gamma(2.0f0, 1.0f0)) isa Float32
+    for T in (Float32, Float64)
+        @test @inferred(rand(Gamma(T(1), T(1)))) isa T
+        @test @inferred(rand(Gamma(1/T(2), T(1)))) isa T
+        @test @inferred(rand(Gamma(T(2), T(1)))) isa T
+    end
 end
