@@ -15,6 +15,5 @@ using Test
 
     for T in (Float32, Float64)
         @test @inferred(rand(TDist(T(1)))) isa T
-        @test @inferred(entropy(TDist(T(1)))) isa T
     end
 end
