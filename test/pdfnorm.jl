@@ -5,7 +5,7 @@ using QuadGK
 # norms of the distributions.  These methods aren't very robust because can't
 # deal with divergent norms, or discrete distributions with infinite support.
 numeric_norm(d::ContinuousUnivariateDistribution) =
-    quadgk(x -> pdf(d, x) ^ 2, support(d).lb, support(d).ub)[1]
+    quadgk(x -> pdf(d, x) ^ 2, extrema(support(d))...)[1]
 
 function numeric_norm(d::DiscreteUnivariateDistribution)
     # When the distribution has infinite support, sum up to an arbitrary large

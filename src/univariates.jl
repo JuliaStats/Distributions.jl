@@ -1,17 +1,5 @@
 #### Domain && Support
 
-struct RealInterval{T<:Real}
-    lb::T
-    ub::T
-end
-
-RealInterval(lb::Real, ub::Real) = RealInterval(promote(lb, ub)...)
-
-Base.minimum(r::RealInterval) = r.lb
-Base.maximum(r::RealInterval) = r.ub
-Base.extrema(r::RealInterval) = (r.lb, r.ub)
-Base.in(x::Real, r::RealInterval) = r.lb <= x <= r.ub
-
 isbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = isupperbounded(d) && islowerbounded(d)
 
 islowerbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = minimum(d) > -Inf
@@ -19,8 +7,6 @@ isupperbounded(d::Union{D,Type{D}}) where {D<:UnivariateDistribution} = maximum(
 
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = isbounded(d)
 hasfinitesupport(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = false
-
-Base.:(==)(r1::RealInterval, r2::RealInterval) = r1.lb == r2.lb && r1.ub == r2.ub
 
 """
     params(d::UnivariateDistribution)
@@ -108,7 +94,7 @@ insupport(d::Union{D,Type{D}}, X::AbstractArray) where {D<:UnivariateDistributio
 insupport(d::Union{D,Type{D}},x::Real) where {D<:ContinuousUnivariateDistribution} = minimum(d) <= x <= maximum(d)
 insupport(d::Union{D,Type{D}},x::Real) where {D<:DiscreteUnivariateDistribution} = isinteger(x) && minimum(d) <= x <= maximum(d)
 
-support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = RealInterval(minimum(d), maximum(d))
+support(d::Union{D,Type{D}}) where {D<:ContinuousUnivariateDistribution} = Interval(minimum(d), maximum(d))
 support(d::Union{D,Type{D}}) where {D<:DiscreteUnivariateDistribution} = round(Int, minimum(d)):round(Int, maximum(d))
 
 # Type used for dispatch on finite support

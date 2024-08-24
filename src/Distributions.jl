@@ -27,6 +27,10 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 using Base.MathConstants: eulergamma
 
+using IntervalSets
+
+const RealInterval = Interval
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -327,6 +331,12 @@ if !isdefined(Base, :get_extension)
 end
 
 include("deprecates.jl")
+
+
+Uniform(i::Interval) = Uniform(leftendpoint(i), rightendpoint(i))
+LogUniform(i::Interval) = LogUniform(leftendpoint(i), rightendpoint(i))
+truncated(d0, i::Interval) = truncated(d, leftendpoint(i), rightendpoint(i))
+censored(d0, i::Interval) = censored(d, leftendpoint(i), rightendpoint(i))
 
 """
 A Julia package for probability distributions and associated functions.

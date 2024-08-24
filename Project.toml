@@ -7,6 +7,7 @@ version = "0.25.104"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -22,13 +23,11 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [weakdeps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
-IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
 DistributionsChainRulesCoreExt = "ChainRulesCore"
 DistributionsDensityInterfaceExt = "DensityInterface"
-DistributionIntervalSetsExt = "IntervalSets"
 DistributionsTestExt = "Test"
 
 [compat]

@@ -78,11 +78,11 @@ minimum(d::AffineDistribution) =
 maximum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * maximum(d.ρ) : d.μ + d.σ * minimum(d.ρ)
 support(d::AffineDistribution) = affinedistribution_support(d.μ, d.σ, support(d.ρ))
-function affinedistribution_support(μ::Real, σ::Real, support::RealInterval)
+function affinedistribution_support(μ::Real, σ::Real, support::Interval)
     if σ > 0
-        return RealInterval(μ + σ * support.lb, μ + σ * support.ub)
+        return Interval(μ + σ * minimum(support), μ + σ * maximum(support))
     else
-        return RealInterval(μ + σ * support.ub, μ + σ * support.lb)
+        return Interval(μ + σ * maximum(support), μ + σ * minimum(support))
     end
 end
 affinedistribution_support(μ::Real, σ::Real, support) = σ > 0 ? μ .+ σ .* support : μ .+ σ .* reverse(support)
