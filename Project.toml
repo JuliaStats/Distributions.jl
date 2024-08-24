@@ -23,11 +23,13 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [weakdeps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
 DistributionsChainRulesCoreExt = "ChainRulesCore"
 DistributionsDensityInterfaceExt = "DensityInterface"
+DistributionIntervalSetsExt = "IntervalSets"
 DistributionsTestExt = "Test"
 
 [compat]
@@ -41,6 +43,7 @@ Distributed = "<0.0.1, 1"
 FillArrays = "0.9, 0.10, 0.11, 0.12, 0.13, 1"
 FiniteDifferences = "0.12"
 ForwardDiff = "0.10"
+IntervalSets = "0.7"
 JSON = "0.21"
 LinearAlgebra = "<0.0.1, 1"
 OffsetArrays = "1"
