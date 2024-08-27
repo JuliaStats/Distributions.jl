@@ -87,11 +87,11 @@ invlogccdf(d::NormalCanon, lp::Real) = xval(d, norminvlogccdf(lp))
 
 #### Sampling
 
-rand(rng::AbstractRNG, cf::NormalCanon) = cf.μ + randn(rng) / sqrt(cf.λ)
+rand(rng::AbstractRNG, cf::NormalCanon) = xval(cf, randn(rng))
 
 function rand!(rng::AbstractRNG, cf::NormalCanon, A::AbstractArray{<:Real})
     randn!(rng, A)
-    A .= cf.μ .+ A ./ sqrt(cf.λ)
+    map!(Base.Fix1(xval, cf), A, A)
     return A
 end
 
