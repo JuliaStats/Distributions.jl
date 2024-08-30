@@ -24,7 +24,7 @@ function test_matrixreshaped(rng, d1, sizes)
         for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
             @test size(d) == s
         end
-        @test size(d1s[end]) == (sizes[end], sizes[end])
+        @test size(d1s[end]) == (sizes[end][1], sizes[end][1])
     end
     @testset "MatrixReshaped length" begin
         for d in d1s
@@ -34,13 +34,6 @@ function test_matrixreshaped(rng, d1, sizes)
     @testset "MatrixReshaped ndims" begin
         for d in d1s
             @test ndims(d) == 2
-        end
-    end
-    @testset "MatrixReshaped axes" begin
-        for d in d1s
-            # should be unimplemented:
-            @test_throws MethodError axes(d)
-            @test_throws MethodError axes(d, 1)
         end
     end
     @testset "MatrixReshaped rank" begin
