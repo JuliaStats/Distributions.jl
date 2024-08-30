@@ -24,6 +24,7 @@ function test_matrixreshaped(rng, d1, sizes)
         for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
             @test size(d) == s
         end
+        @test size(d1s[end]) == (sizes[end], sizes[end])
     end
     @testset "MatrixReshaped length" begin
         for d in d1s
