@@ -32,7 +32,7 @@ function test_matrixreshaped(rng, d1, sizes)
     end
     @testset "MatrixReshaped axes" begin
         for (d,s) in zip(d1s,sizes), k in 1:ndims(d)
-            @test axes(d)[k] == axes(d,k) == 1:s[k]
+            @test axes(d)[k] == axes(d,k) == 1:s[min(k, length(s))]
         end
     end
     @testset "MatrixReshaped rank" begin
