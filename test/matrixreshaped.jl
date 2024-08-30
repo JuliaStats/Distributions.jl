@@ -30,6 +30,11 @@ function test_matrixreshaped(rng, d1, sizes)
             @test length(d) == length(d1)
         end
     end
+    @testset "MatrixReshaped axes" begin
+        for (d,s) in zip(d1s,sizes), k in 1:ndims(d)
+            @test axes(d)[k] == axes(d,k) == Base.oneto(s[k])
+        end
+    end
     @testset "MatrixReshaped rank" begin
         for (d, s) in zip(d1s, sizes)
             @test rank(d) == minimum(s)
