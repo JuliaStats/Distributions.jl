@@ -25,7 +25,7 @@ end
 
 Base.size(d::ReshapedDistribution) = d.dims
 Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
-Base.axes(d::ReshapedDistribution, k::Integer) = Base.oneto(d.dims[k])
+Base.axes(d::ReshapedDistribution, k::Integer) = Base.OneTo(d.dims[k])
 Base.ndims(d::ReshapedDistribution{N}) where {N} = N
 
 partype(d::ReshapedDistribution) = partype(d.dist)
