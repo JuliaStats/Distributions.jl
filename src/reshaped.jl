@@ -25,7 +25,6 @@ end
 
 Base.size(d::ReshapedDistribution) = d.dims
 Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
-Base.axes(d::ReshapedDistribution) = throw(MethodError(axes, (d,))) # avoid generic fallback: not indexable
 Base.ndims(d::ReshapedDistribution{N}) where {N} = N
 
 partype(d::ReshapedDistribution) = partype(d.dist)
