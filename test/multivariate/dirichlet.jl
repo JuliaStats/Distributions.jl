@@ -173,8 +173,12 @@ end
     end
 
     for (d, μ) in [ # Subnormal params cause mean(d) to error
+        
+        (Dirichlet([5e-310, 5e-310, 5e-310]), [1/3, 1/3, 1/3]),
+        (Dirichlet(FillArrays.Fill(5e-310, 3)), [1/3, 1/3, 1/3]),
         (Dirichlet([5e-321, 1e-321, 4e-321]), [.5, .1, .4]),
-        (Dirichlet([1e-321, 2e-321, 3e-321, 4e-321]), [.1, .2, .3, .4])
+        (Dirichlet([1e-321, 2e-321, 3e-321, 4e-321]), [.1, .2, .3, .4]),
+        (Dirichlet(FillArrays.Fill(1e-321, 4)), [.25, .25, .25, .25])
     ]
         x = rand(d, 10^6)
         @test mean(x, dims = 2) ≈ μ atol=0.01

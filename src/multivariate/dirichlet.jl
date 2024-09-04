@@ -154,49 +154,59 @@ end
 
 # sampling
 
-function _rand_handle_overflow!(
-    rng::AbstractRNG,
-    d::Union{Dirichlet,DirichletCanon},
-    x::AbstractVector{<:Real}
-    )
-    Σ = sum(x)
-    if Σ == 0.0
-        # Distribution behavior approaches categorical as Σα -> 0
-        α = d.alpha
-        iΣα = inv(d.alpha0)
-        if isinf(iΣα)
-            # Dirichlet with ALL deeply subnormal parameters
-            α .*= floatmax(eltype(α))
-            iΣα = inv(sum(α))
-        end
-        x[rand(rng, Categorical(iΣα .* α))] = 1
-        return x
-    end
-    
-    iΣ = inv(Σ)
-    if isinf(iΣ)
-        # Σ is deep subnormal
-        x .*= floatmax(eltype(x))
-        iΣ = inv(sum(x))
-    end
-
-    lmul!(iΣ, x) # this returns x
-end
-
 function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{<:Real})
-    for (i, αi) in zip(eachindex(x), d.alpha)
-        @inbounds x[i] = rand(rng, Gamma(αi))
+                x::AbstractVector{E}) where {E<:Real}
+    
+    if any(a -> a > one(partype(d)), d.alpha)
+        for (i, αi) in zip(eachindex(x), d.alpha)
+            @inbounds x[i] = rand(rng, Gamma(αi))
+        end
+
+        return lmul!(inv(sum(x)), x)
+    else
+        # Sample in log-space to lower underflow risk
+        for (i, αi) in zip(eachindex(x), d.alpha)
+            @inbounds x[i] = _logrand(rng, Gamma(αi))
+        end
+
+        if all(isinf, x)
+            # Final fallback, parameters likely deeply subnormal
+            # Distribution behavior approaches categorical as Σα -> 0
+            p = copy(d.alpha)
+            p .*= floatmax(eltype(p)) # rescale to non-subnormal
+            x .= zero(E)
+            x[rand(rng, Categorical(inv(sum(p)) .* p))] = one(E)
+            return x
+        end
+
+        return softmax!(x)
     end
-    _rand_handle_overflow!(rng, d, x)
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
-                x::AbstractVector{<:Real}) where {T<:Real}
-    rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    _rand_handle_overflow!(rng, d, x)
+                x::AbstractVector{E}) where {T<:Real, E<:Real}
+    
+    if FillArrays.getindex_value(d.alpha) > one(T)
+        rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
+        return lmul!(inv(sum(x)), x)
+    else
+        # Sample in log-space to lower underflow risk
+        _logrand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
+        
+        if all(isinf, x)
+            # Final fallback, parameters likely deeply subnormal
+            # Distribution behavior approaches categorical as Σα -> 0
+            n = length(d.alpha)
+            p = Fill(inv(n), n)
+            x .= zero(E)
+            x[rand(rng, Categorical(p))] = one(E)
+            return x
+        end
+
+        return softmax!(x)
+    end
 end
 
 #######################################

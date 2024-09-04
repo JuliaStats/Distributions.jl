@@ -29,7 +29,6 @@ struct ExpGammaSSSampler{T<:Real} <: Sampleable{Univariate,Continuous}
     λ::T
     ω::T
     ωω::T
-    η::T
 end
 
 function ExpGammaSSSampler(d::Gamma)
@@ -41,18 +40,47 @@ function ExpGammaSSSampler(d::Gamma)
         inv(α) - 1,
         ω,
         inv(ω + 1)
-    ))
+    )...)
 end
 
-function rand(rng::AbstractRNG, s::ExpGammaSSSampler)
+function rand(rng::AbstractRNG, s::ExpGammaSSSampler{T})::Float64 where T
+    flT = float(T)
     while true
-        U = rand(rng)
-        z = (U <= s.ωω) ? -log(U / s.ωω) : log(rand(rng)) / s.λ
-        h = exp(-z - exp(-z / α))
-        η = z >= 0 ? exp(-z) : s.ω * s.λ * exp(s.λ * z)
-        if h / η > rand(rng)
-            return z / α
+        U = rand(rng, flT)
+        z = (U <= s.ωω) ? -log(U / s.ωω) : log(rand(rng, flT)) / s.λ
+        h = exp(-z - exp(-z / s.α))
+        η = z >= zero(T) ? exp(-z) : s.ω * s.λ * exp(s.λ * z)
+        if h / η > rand(rng, flT)
+            return s.θ - z / s.α
         end
     end
 end
 
+
+function _logsampler(d::Gamma)
+    if shape(d) < 0.3
+        return ExpGammaSSSampler(d)
+    else
+        return ExpGammaIPSampler(d)
+    end
+end
+
+function _logrand(rng::AbstractRNG, d::Gamma)
+    if shape(d) < 0.3
+        return rand(rng, ExpGammaSSSampler(d))
+    else
+        return rand(rng, ExpGammaIPSampler(d))
+    end
+end
+
+function _logrand!(rng::AbstractRNG, d::Gamma, A::AbstractArray{<:Real})
+    if shape(d) < 0.3
+        @inbounds for i in eachindex(A)
+            A[i] = rand(rng, ExpGammaSSSampler(d))
+        end
+    else
+        @inbounds for i in eachindex(A)
+            A[i] = rand(rng, ExpGammaIPSampler(d))
+        end
+    end
+end
