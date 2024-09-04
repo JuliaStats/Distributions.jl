@@ -43,7 +43,7 @@ function ProductNamedTupleDistribution(
     dists::NamedTuple{K,V}
 ) where {K,V<:Tuple{Distribution,Vararg{Distribution}}}
     vs = _product_valuesupport(values(dists))
-    eltypes = _product_namedtuple_eltype(values(dists))
+    eltypes = _product_namedtuple_eltype(dists)
     return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
 end
 
