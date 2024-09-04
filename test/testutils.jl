@@ -151,7 +151,7 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         Random.seed!(1234)
         samples2 = rand(s, n)
         Random.seed!(1234)
-        samples3 = map!((_) -> rand(s), 1:n)
+        samples3 = map((_) -> rand(s), 1:n)
         Random.seed!(1234)
         samples4 = map((_) -> rand(s), 1:n)
     else
@@ -273,7 +273,7 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         Random.seed!(1234)
         samples2 = rand(s, n)
         Random.seed!(1234)
-        samples3 = map!((_) -> rand(s), 1:n)
+        samples3 = map((_) -> rand(s), 1:n)
         Random.seed!(1234)
         samples4 = map((_) -> rand(s), 1:n)
     else
