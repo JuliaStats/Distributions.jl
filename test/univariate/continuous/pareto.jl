@@ -5,6 +5,6 @@
             Pareto(2.0, 1.5)
             Pareto(3.0, 2.0)
         ]
-        test_distr(d, 10^6, test_scalar_rand = true)
+        test_distr(d, 10^6)
     end
 end

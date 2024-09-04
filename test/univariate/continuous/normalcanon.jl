@@ -5,6 +5,6 @@
         NormalCanon(-1.0, 2.5)
         NormalCanon(2.0, 0.8)
     ]
-        test_distr(d, 10^6, test_scalar_rand = true)
+        test_distr(d, 10^6)
     end
 end

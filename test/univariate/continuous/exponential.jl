@@ -19,6 +19,6 @@ test_cgf(Exponential(10  ), (0.08, -1, -100f0, -1e6))
         Exponential(0.91),
         Exponential(10)
     ]
-        test_distr(d, 10^6, test_scalar_rand = true)
+        test_distr(d, 10^6)
     end
 end

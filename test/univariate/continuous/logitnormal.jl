@@ -70,6 +70,6 @@ end
         LogitNormal(-2, 3),
         LogitNormal(0, 0.2)
     ]
-        test_distr(d, 10^6, test_scalar_rand = true)
+        test_distr(d, 10^6)
     end
 end
