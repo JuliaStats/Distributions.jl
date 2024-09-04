@@ -55,7 +55,7 @@ function _gentype(d::Distribution{CholeskyVariate})
 end
 _gentype(::Distribution) = Any
 
-_product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
+_product_namedtuple_eltype(dists::NamedTuple{K,V}) where {K,V} = __product_promote_type(eltype, V)
 
 function Base.show(io::IO, d::ProductNamedTupleDistribution)
     return show_multline(io, d, collect(pairs(d.dists)))
@@ -127,7 +127,7 @@ entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 function kldivergence(
     d1::ProductNamedTupleDistribution{K}, d2::ProductNamedTupleDistribution{K}
 ) where {K}
-    return mapreduce(kldivergence, +, d1.dists, d2.dists)
+    return sum(map(kldivergence, d1.dists, d2.dists))
 end
 
 # Sampling

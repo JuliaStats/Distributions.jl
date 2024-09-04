@@ -20,7 +20,7 @@ const Matrixvariate = ArrayLikeVariate{2}
 `F <: NamedTupleVariate{K}` specifies that the variate or a sample is of type
 `NamedTuple{K}`.
 """
-abstract type NamedTupleVariate{K} <: VariateForm end
+struct NamedTupleVariate{K} <: VariateForm end
 
 """
 `F <: CholeskyVariate` specifies that the variate or a sample is of type
