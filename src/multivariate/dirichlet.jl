@@ -158,7 +158,7 @@ function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},
                 x::AbstractVector{E}) where {E<:Real}
     
-    if any(a -> a > one(partype(d)), d.alpha)
+    if any(a -> a >= .5, d.alpha)
         for (i, αi) in zip(eachindex(x), d.alpha)
             @inbounds x[i] = rand(rng, Gamma(αi))
         end
@@ -188,7 +188,7 @@ function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{E}) where {T<:Real, E<:Real}
     
-    if FillArrays.getindex_value(d.alpha) > one(T)
+    if FillArrays.getindex_value(d.alpha) >= 0.5
         rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
         return lmul!(inv(sum(x)), x)
     else
