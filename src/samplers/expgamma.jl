@@ -16,7 +16,7 @@ end
 
 function rand(rng::AbstractRNG, s::ExpGammaIPSampler)
     x = log(rand(rng, s.s))
-    e = randexp(rng)
+    e = randexp(rng, typeof(x))
     return muladd(s.nia, e, x)
 end
 
