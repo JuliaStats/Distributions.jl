@@ -54,10 +54,10 @@ end
 
 # Deprecate `MatrixReshaped`
 const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
-Base.deprecate(@__MODULE__, :MatrixReshaped)
 @deprecate MatrixReshaped(
     d::MultivariateDistribution, n::Integer, p::Integer=n
 ) reshape(d, (n, p))
+Base.deprecate(@__MODULE__, :MatrixReshaped)
 
 for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
     @eval @deprecate dim(d::$D) size(d, 1)

@@ -12,7 +12,7 @@ function test_matrixreshaped(rng, d1, sizes)
 @testset "MatrixReshaped $(nameof(typeof(d1))) tests" begin
     @testset "MatrixReshaped constructor" begin
         for d in d1s
-            @test d isa MatrixReshaped
+            @test_deprecated(@test d isa MatrixReshaped)
         end
     end
     @testset "MatrixReshaped constructor errors" begin
