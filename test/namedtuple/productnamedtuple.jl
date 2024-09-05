@@ -43,7 +43,7 @@ using Test
 
     @testset "show" begin
         d = ProductNamedTupleDistribution((x=Gamma(1.0, 2.0), y=Normal()))
-        @test sprint(show, d) == """
+        @test repr(d) == """
         ProductNamedTupleDistribution{(:x, :y)}(
         x: Gamma{Float64}(α=1.0, θ=2.0)
         y: Normal{Float64}(μ=0.0, σ=1.0)
