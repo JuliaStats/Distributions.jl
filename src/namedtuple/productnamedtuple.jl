@@ -53,6 +53,9 @@ function _gentype(d::Distribution{CholeskyVariate})
     T = eltype(d)
     return LinearAlgebra.Cholesky{T,Matrix{T}}
 end
+function _gentype(d::ProductNamedTupleDistribution{K}) where {K}
+    return NamedTuple{K,Tuple{map(_gentype, values(d.dists))...}}
+end
 _gentype(::Distribution) = Any
 
 _product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
