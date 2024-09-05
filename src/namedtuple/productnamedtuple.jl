@@ -55,7 +55,7 @@ function _gentype(d::Distribution{CholeskyVariate})
 end
 _gentype(::Distribution) = Any
 
-_product_namedtuple_eltype(dists::NamedTuple{K,V}) where {K,V} = __product_promote_type(eltype, V)
+_product_namedtuple_eltype(dists) = typejoin(map(_gentype, dists)...)
 
 function Base.show(io::IO, d::ProductNamedTupleDistribution)
     return show_multline(io, d, collect(pairs(d.dists)))
