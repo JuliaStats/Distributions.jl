@@ -53,34 +53,22 @@ using Test
 
     @testset "Properties" begin
         @testset "eltype" begin
-            nt = (x=Normal(1.0, 2.0), y=Normal(3.0, 4.0))
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === Float64
-
-            nt = (x=Normal(), y=Gamma())
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === Float64
-
-            nt = (x=Bernoulli(),)
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === Bool
-
-            nt = (x=Normal(), y=Bernoulli())
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === Real
-
-            nt = (w=LKJCholesky(3, 2.0),)
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === LinearAlgebra.Cholesky{Float64,Array{Float64,2}}
-
-            nt = (
-                x=Normal(),
-                y=Dirichlet(10, 1.0),
-                z=DiscreteUniform(1, 10),
-                w=LKJCholesky(3, 2.0),
-            )
-            d = ProductNamedTupleDistribution(nt)
-            @test eltype(d) === Any
+            @testset for nt in [
+                (x=Normal(1.0, 2.0), y=Normal(3.0, 4.0)),
+                (x=Normal(), y=Gamma()),
+                (x=Bernoulli(),),
+                (x=Normal(), y=Bernoulli()),
+                (w=LKJCholesky(3, 2.0),),
+                (
+                    x=Normal(),
+                    y=Dirichlet(10, 1.0),
+                    z=DiscreteUniform(1, 10),
+                    w=LKJCholesky(3, 2.0),
+                ),
+            ]
+                d = ProductNamedTupleDistribution(nt)
+                @test eltype(d) === eltype(rand(d))
+            end
         end
 
         @testset "minimum" begin
