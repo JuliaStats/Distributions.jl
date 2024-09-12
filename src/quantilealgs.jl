@@ -1,3 +1,5 @@
+using Roots
+
 # Various algorithms for computing quantile
 
 function quantile_bisect(d::ContinuousUnivariateDistribution, p::Real, lx::T, rx::T) where {T<:Real}
@@ -47,20 +49,8 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function newton_impl(Δ, xs::T=mode(d), xrtol::Real=1e-12) where {T}
-    x = xs - Δ(xs)
-    @assert typeof(x) === T
-    x0 = T(xs)
-    while !isapprox(x, x0, atol=0, rtol=xrtol)
-        x0 = x
-        x = x0 - Δ(x0)
-    end
-    return x
-end
-
 function newton((f,df), xs::T=mode(d), xrtol::Real=1e-12) where {T}
-    Δ(x) = f(x)/df(x)
-    return newton_impl(Δ, xs, xrtol)
+    return find_zero((f,df), xs, Roots.Newton(), xatol=0, xrtol=xrtol, atol=0, rtol=eps(float(T)), maxiters=typemax(Int))
 end
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), xrtol::Real=1e-12)
