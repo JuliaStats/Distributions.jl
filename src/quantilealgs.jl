@@ -48,10 +48,11 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
 function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
+    converged(a,b) = abs(a-b) <= max(abs(a),abs(b)) * tol
     x = xs + f(xs)
     @assert typeof(x) === T
     x0 = T(xs)
-    while abs(x-x0) > max(abs(x),abs(x0)) * tol
+    while !converged(x, x0)
         x0 = x
         x = x0 + f(x0)
     end
