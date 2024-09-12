@@ -97,17 +97,9 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            x = x0 + f_a(x0)
-            while abs(x-x0) > max(abs(x),abs(x0)) * tol
-                x0 = x
-                x = x0 + f_a(x0)
-            end
+            return newton(f_a, T(xs), tol)
         else
-            x = x0 + f_b(x0)
-            while abs(x-x0) > max(abs(x),abs(x0))*tol
-                x0 = x
-                x = x0 + f_b(x0)
-            end
+            return newton(f_b, T(xs), tol)
         end
         return x
     elseif lp == -Inf
