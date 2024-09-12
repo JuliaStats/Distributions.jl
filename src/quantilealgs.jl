@@ -41,6 +41,27 @@ end
 quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
     quantile_bisect(d, p, minimum(d), maximum(d))
 
+mutable struct ValueAndPredecessor{T}
+    storage::Tuple{T,T}
+
+    function ValueAndPredecessor{T}(storage::Tuple{T,T}) where {T}
+        return new(storage)
+    end
+
+    function ValueAndPredecessor{T}() where {T}
+        storage = Tuple{T,T}((T(NaN),T(NaN)))
+        return new(storage)
+    end
+
+    function Base.push!(huh::ValueAndPredecessor{T}, e::T) where {T}
+        huh.storage = Tuple{T,T}((huh.storage[2], e))
+    end
+
+    function Base.getindex(ValueAndPredecessor::ValueAndPredecessor{T}, delay::Int)::T where {T}
+        return ValueAndPredecessor.storage[length(ValueAndPredecessor.storage) + delay]
+    end
+end
+
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
 #   Göknur Giner, Gordon K. Smyth (2014)
 #   A Monotonically Convergent Newton Iteration for the Quantiles of any Unimodal
@@ -49,14 +70,15 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 
 function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
     converged(a,b) = abs(a-b) <= max(abs(a),abs(b)) * tol
-    x = xs + f(xs)
-    @assert typeof(x) === T
-    x0 = T(xs)
-    while !converged(x, x0)
-        x0 = x
-        x = x0 + f(x0)
+    x = ValueAndPredecessor{T}()
+    push!(x, xs)
+    push!(x, x[0] + f(x[0]))
+    while !converged(x[0], x[-1])
+        df = f(x[0])
+        r = x[0] + df
+        push!(x, r)
     end
-    return x
+    return x[0]
 end
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
