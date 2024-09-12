@@ -47,24 +47,24 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
-    x = xs - f(xs)
+function newton(Δ, xs::T=mode(d), tol::Real=1e-12) where {T}
+    x = xs - Δ(xs)
     @assert typeof(x) === T
     x0 = T(xs)
     while abs(x-x0) > max(abs(x),abs(x0)) * tol
         x0 = x
-        x = x0 - f(x0)
+        x = x0 - Δ(x0)
     end
     return x
 end
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    f(x) = -((p - cdf(d, x)) / pdf(d, x))
+    Δ(x) = -((p - cdf(d, x)) / pdf(d, x))
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
-    x = xs - f(xs)
+    x = xs - Δ(xs)
     T = typeof(x)
     if 0 < p < 1
-        return newton(f, T(xs), tol)
+        return newton(Δ, T(xs), tol)
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
@@ -75,12 +75,12 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
 end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    f(x) = -((ccdf(d, x)-p) / pdf(d, x))
+    Δ(x) = -((ccdf(d, x)-p) / pdf(d, x))
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
-    x = xs - f(xs)
+    x = xs - Δ(xs)
     T = typeof(x)
     if 0 < p < 1
-        return newton(f, T(xs), tol)
+        return newton(Δ, T(xs), tol)
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
@@ -92,14 +92,14 @@ end
 
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
-    f_a(x) = exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
-    f_b(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
+    Δ_ver0(x) = exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
+    Δ_ver1(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            return newton(f_a, T(xs), tol)
+            return newton(Δ_ver0, T(xs), tol)
         else
-            return newton(f_b, T(xs), tol)
+            return newton(Δ_ver1, T(xs), tol)
         end
         return x
     elseif lp == -Inf
@@ -113,14 +113,14 @@ end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
-    f_a(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
-    f_b(x) = exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
+    Δ_ver0(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
+    Δ_ver1(x) = exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            return newton(f_a, T(xs), tol)
+            return newton(Δ_ver0, T(xs), tol)
         else
-            return newton(f_b, T(xs), tol)
+            return newton(Δ_ver1, T(xs), tol)
         end
         return x
     elseif lp == -Inf
