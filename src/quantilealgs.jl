@@ -64,7 +64,7 @@ function newton((f,df), xs::T=mode(d), tol::Real=1e-12) where {T}
 end
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    f(x) = -(p - cdf(d, x))
+    f(x) = cdf(d, x) - p
     df(x) = pdf(d, x)
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
     Δ(x) = f(x)/df(x)
@@ -82,7 +82,7 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
 end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    f(x) = -(ccdf(d, x)-p)
+    f(x) = p - ccdf(d, x)
     df(x) = pdf(d, x)
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
     Δ(x) = f(x)/df(x)
