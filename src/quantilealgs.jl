@@ -76,15 +76,11 @@ end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
     f(x) = (ccdf(d, x)-p) / pdf(d, x)
+    # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
     x = xs + f(xs)
     T = typeof(x)
     if 0 < p < 1
-        x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
-            x0 = x
-            x = x0 + f(x0)
-        end
-        return x
+        return newton(f, T(xs), tol)
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
