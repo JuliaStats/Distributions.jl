@@ -121,19 +121,21 @@ end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
+    f_a(x) = exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
+    f_b(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
+            x = x0 + f_a(x0)
             while abs(x-x0) > max(abs(x),abs(x0)) * tol
                 x0 = x
-                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
+                x = x0 + f_a(x0)
             end
         else
-            x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
+            x = x0 + f_b(x0)
             while abs(x-x0) > max(abs(x),abs(x0)) * tol
                 x0 = x
-                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
+                x = x0 + f_b(x0)
             end
         end
         return x
