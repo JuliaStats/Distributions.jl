@@ -47,17 +47,24 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
+function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
+    x = xs + f(xs)
+    @assert typeof(x) === T
+    x0 = T(xs)
+    while abs(x-x0) > max(abs(x),abs(x0)) * tol
+        x0 = x
+        x = x0 + f(x0)
+    end
+    return x
+end
+
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
     f(x) = (p - cdf(d, x)) / pdf(d, x)
+    # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
     x = xs + f(xs)
     T = typeof(x)
     if 0 < p < 1
-        x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
-            x0 = x
-            x = x0 + f(x0)
-        end
-        return x
+        return newton(f, T(xs), tol)
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
