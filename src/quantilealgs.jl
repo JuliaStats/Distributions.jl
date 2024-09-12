@@ -76,6 +76,14 @@ function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
     while !converged(x[0], x[-1])
         df = f(x[0])
         r = x[0] + df
+        # Vanilla Newton algorithm is known to be prone to oscillation,
+        # where we, e.g., go from 24.0 to 42.0, back to 24.0 and so forth.
+        # We can detect this situation by checking for convergence between
+        # the newly-computed "root" and the "root" we had two steps before.
+        if converged(r, x[-1])
+            # To recover from oscillation, let's use just half of the delta.
+            r = r - (df / 2)
+        end
         push!(x, r)
     end
     return x[0]
