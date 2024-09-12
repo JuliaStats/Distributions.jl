@@ -96,13 +96,13 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
         x0 = T(xs)
         if lp < logcdf(d,x0)
             x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            while abs(x-x0) > max(abs(x),abs(x0)) * tol
                 x0 = x
                 x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
             end
         else
             x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0))*tol
+            while abs(x-x0) > max(abs(x),abs(x0))*tol
                 x0 = x
                 x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
             end
@@ -123,13 +123,13 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Re
         x0 = T(xs)
         if lp < logccdf(d,x0)
             x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            while abs(x-x0) > max(abs(x),abs(x0)) * tol
                 x0 = x
                 x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
             end
         else
             x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
+            while abs(x-x0) > max(abs(x),abs(x0)) * tol
                 x0 = x
                 x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
             end
