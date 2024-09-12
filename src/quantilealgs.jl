@@ -48,13 +48,14 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    x = xs + (p - cdf(d, xs)) / pdf(d, xs)
+    f(x) = (p - cdf(d, x)) / pdf(d, x)
+    x = xs + f(xs)
     T = typeof(x)
     if 0 < p < 1
         x0 = T(xs)
         while abs(x-x0) > max(abs(x),abs(x0)) * tol
             x0 = x
-            x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
+            x = x0 + f(x0)
         end
         return x
     elseif p == 0
