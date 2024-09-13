@@ -15,7 +15,7 @@ import Aqua
     )
     # Tests are not reliable on older Julia versions and
     # show ambiguities in loaded packages
-    if VERSION >= v"1.6"
+    if VERSION >= v"1.7"
         Aqua.test_ambiguities(Distributions)
     end
 end
