@@ -47,23 +47,23 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
-function newton_impl(Δ, xs::T=mode(d), tol::Real=1e-12) where {T}
+function newton_impl(Δ, xs::T=mode(d), xrtol::Real=1e-12) where {T}
     x = xs - Δ(xs)
     @assert typeof(x) === T
     x0 = T(xs)
-    while !isapprox(x, x0, atol=0, rtol=tol)
+    while !isapprox(x, x0, atol=0, rtol=xrtol)
         x0 = x
         x = x0 - Δ(x0)
     end
     return x
 end
 
-function newton((f,df), xs::T=mode(d), tol::Real=1e-12) where {T}
+function newton((f,df), xs::T=mode(d), xrtol::Real=1e-12) where {T}
     Δ(x) = f(x)/df(x)
-    return newton_impl(Δ, xs, tol)
+    return newton_impl(Δ, xs, xrtol)
 end
 
-function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), xrtol::Real=1e-12)
     f(x) = cdf(d, x) - p
     df(x) = pdf(d, x)
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
@@ -71,7 +71,7 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     x = xs - Δ(xs)
     T = typeof(x)
     if 0 < p < 1
-        return newton((f, df), T(xs), tol)
+        return newton((f, df), T(xs), xrtol)
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
@@ -81,7 +81,7 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
     end
 end
 
-function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
+function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), xrtol::Real=1e-12)
     f(x) = p - ccdf(d, x)
     df(x) = pdf(d, x)
     # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
@@ -89,7 +89,7 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     x = xs - Δ(xs)
     T = typeof(x)
     if 0 < p < 1
-        return newton((f, df), T(xs), tol)
+        return newton((f, df), T(xs), xrtol)
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
@@ -99,7 +99,7 @@ function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real
     end
 end
 
-function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), xrtol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
     f_ver0(x) = exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
     f_ver1(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
@@ -107,9 +107,9 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            return newton((f_ver0,df), T(xs), tol)
+            return newton((f_ver0,df), T(xs), xrtol)
         else
-            return newton((f_ver1,df), T(xs), tol)
+            return newton((f_ver1,df), T(xs), xrtol)
         end
         return x
     elseif lp == -Inf
@@ -121,7 +121,7 @@ function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Rea
     end
 end
 
-function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
+function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), xrtol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
     f_ver0(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
     f_ver1(x) = exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
@@ -129,9 +129,9 @@ function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Re
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            return newton((f_ver0,df), T(xs), tol)
+            return newton((f_ver0,df), T(xs), xrtol)
         else
-            return newton((f_ver1,df), T(xs), tol)
+            return newton((f_ver1,df), T(xs), xrtol)
         end
         return x
     elseif lp == -Inf
