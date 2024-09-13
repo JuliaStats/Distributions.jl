@@ -101,14 +101,15 @@ end
 
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
-    Δ_ver0(x) = exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
-    Δ_ver1(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
+    f_ver0(x) = exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
+    f_ver1(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
+    df(x::T) where {T} = T(1)
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            return newton_impl(Δ_ver0, T(xs), tol)
+            return newton((f_ver0,df), T(xs), tol)
         else
-            return newton_impl(Δ_ver1, T(xs), tol)
+            return newton((f_ver1,df), T(xs), tol)
         end
         return x
     elseif lp == -Inf
@@ -122,14 +123,15 @@ end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
-    Δ_ver0(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
-    Δ_ver1(x) = exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
+    f_ver0(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
+    f_ver1(x) = exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
+    df(x::T) where {T} = T(1)
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            return newton_impl(Δ_ver0, T(xs), tol)
+            return newton((f_ver0,df), T(xs), tol)
         else
-            return newton_impl(Δ_ver1, T(xs), tol)
+            return newton((f_ver1,df), T(xs), tol)
         end
         return x
     elseif lp == -Inf
