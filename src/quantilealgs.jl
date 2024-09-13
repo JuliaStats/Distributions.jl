@@ -51,7 +51,7 @@ function newton_impl(Δ, xs::T=mode(d), tol::Real=1e-12) where {T}
     x = xs - Δ(xs)
     @assert typeof(x) === T
     x0 = T(xs)
-    while abs(x-x0) > max(abs(x),abs(x0)) * tol
+    while !isapprox(x, x0, atol=0, rtol=tol)
         x0 = x
         x = x0 - Δ(x0)
     end
