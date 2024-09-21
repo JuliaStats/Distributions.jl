@@ -53,11 +53,13 @@ end
 @deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
 
 # Deprecate `MatrixReshaped`
-const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
-@deprecate MatrixReshaped(
+Base.@deprecate_binding MatrixReshaped ReshapedDistribution{2}
+# We use the alias `ReshapedDistribution{2}` here to not throw a deprecation warning/error
+# We do not export the function since MatrixReshaped (two lines above) is already exported
+# and `ReshapedDistribution` is kept internal
+Base.@deprecate ReshapedDistribution{2}( 
     d::MultivariateDistribution, n::Integer, p::Integer=n
-) reshape(d, (n, p))
-Base.deprecate(@__MODULE__, :MatrixReshaped)
+) reshape(d, (n, p)) false
 
 for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
     @eval @deprecate dim(d::$D) size(d, 1)
