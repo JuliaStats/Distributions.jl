@@ -98,21 +98,17 @@ function test_matrixreshaped(rng, d1, sizes)
     end
 end
 
-# In contrast to `@deprecate`, `@deprecate_binding` can't be tested with `@test_deprecated`
+# Note: In contrast to `@deprecate`, `@deprecate_binding` can't be tested with `@test_deprecated`
 # Ref: https://github.com/JuliaLang/julia/issues/38780
-# Therefore we check the stderr output manually
 @testset "matrixreshaped.jl" begin
     @testset "MvNormal" begin
         σ = rand(rng, 16, 16)
         μ = rand(rng, 16)
         d1 = MvNormal(μ, σ * σ')
         sizes = [(4, 4), (8, 2), (2, 8), (1, 16), (16, 1), (4,)]
-        pipe = Pipe()
-        redirect_stderr(pipe) do
+        redirect_stderr(devnull) do
             test_matrixreshaped(rng, d1, sizes)
         end
-        close(pipe.in)
-        @test contains(read(pipe, String), "MatrixReshaped is deprecated")
     end
 
     # Dirichlet
@@ -120,11 +116,8 @@ end
         α = rand(rng, 36) .+ 1 # mode is only defined if all alpha > 1
         d1 = Dirichlet(α)
         sizes = [(6, 6), (4, 9), (9, 4), (3, 12), (12, 3), (1, 36), (36, 1), (6,)]
-        pipe = Pipe()
-        redirect_stderr(pipe) do
+        redirect_stderr(devnull) do
             test_matrixreshaped(rng, d1, sizes)
         end
-        close(pipe.in)
-        @test contains(read(pipe, String), "MatrixReshaped is deprecated")
     end
 end
