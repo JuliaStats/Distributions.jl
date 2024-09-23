@@ -58,14 +58,12 @@ end
 export MatrixReshaped
 const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
 Base.deprecate(@__MODULE__, :MatrixReshaped)
-# We use the alias `ReshapedDistribution{2}` here to not throw a deprecation warning/error
-# We do not export the function since MatrixReshaped (a few lines above) is already exported
-# and `ReshapedDistribution` is kept internal
-# This is very similar to `Base.@deprecate (ReshapedDistribution{...} where {...})(...) reshape(...)`
-# However, `@deprecate` in Julia 1.3 does not support functions with where-clauses
-function (ReshapedDistribution{2,S,D} where {S<:ValueSupport,D<:MultivariateDistribution{S}})( 
-    d::MultivariateDistribution, n::Integer, p::Integer=n
-)
+# This is very similar to `Base.@deprecate MatrixReshaped(...) reshape(...)`
+# We use another (unexported!) alias here to not throw a deprecation warning/error
+# Unexported aliases do not affect the type printing
+# In Julia >= 1.6, instead of a new alias we could have defined a method for (ReshapedDistribution{2,S,D} where {S<:ValueSupport,D<:MultivariateDistribution{S}})
+const _MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+function _MatrixReshaped(d::MultivariateDistribution, n::Integer, p::Integer=n)
     Base.depwarn("`MatrixReshaped(d, n, p)` is deprecated, use `reshape(d, (n, p))` instead.", :MatrixReshaped)
     return reshape(d, (n, p))
 end
