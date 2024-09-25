@@ -155,9 +155,11 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         Random.seed!(1234)
         samples4 = [rand(s) for _ in 1:n]
     else
-        rng2 = deepcopy(rng)
-        rng3 = deepcopy(rng)
-        rng4 = deepcopy(rng)
+        # RNGs have to be copied with `copy`, not `deepcopy`
+        # Ref https://github.com/JuliaLang/julia/issues/42899
+        rng2 = copy(rng)
+        rng3 = copy(rng)
+        rng4 = copy(rng)
         samples = rand(rng, s, n)
         samples2 = rand(rng2, s, n)
         samples3 = [rand(rng3, s) for _ in 1:n]
@@ -277,9 +279,11 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         Random.seed!(1234)
         samples4 = [rand(s) for _ in 1:n]
     else
-        rng2 = deepcopy(rng)
-        rng3 = deepcopy(rng)
-        rng4 = deepcopy(rng)
+        # RNGs have to be copied with `copy`, not `deepcopy`
+        # Ref https://github.com/JuliaLang/julia/issues/42899
+        rng2 = copy(rng)
+        rng3 = copy(rng)
+        rng4 = copy(rng)
         samples = rand(rng, s, n)
         samples2 = rand(rng2, s, n)
         samples3 = [rand(rng3, s) for _ in 1:n]
