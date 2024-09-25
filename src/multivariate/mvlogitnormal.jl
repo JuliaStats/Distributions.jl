@@ -88,6 +88,19 @@ kldivergence(p::MvLogitNormal, q::MvLogitNormal) = kldivergence(p.normal, q.norm
 
 # Sampling
 
+function rand(rng::AbstractRNG, d::MvLogitNormal)
+    x = rand(rng, d.normal)
+    push!(x, zero(eltype(x)))
+    StatsFuns.softmax!(x)
+    return x
+end
+function rand(rng::AbstractRNG, d::MvLogitNormal, n::Int)
+    r = rand(rng, d.normal, n)
+    x = vcat(r, zeros(eltype(r), 1, n))
+    StatsFuns.softmax!(x; dims=1)
+    return x
+end
+
 function _rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractVecOrMat{<:Real})
     y = @views _drop1(x)
     rand!(rng, d.normal, y)

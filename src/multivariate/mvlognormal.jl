@@ -232,6 +232,17 @@ var(d::MvLogNormal) = diag(cov(d))
 entropy(d::MvLogNormal) = length(d)*(1+log2π)/2 + logdetcov(d.normal)/2 + sum(mean(d.normal))
 
 #See https://en.wikipedia.org/wiki/Log-normal_distribution
+function rand(rng::AbstractRNG, d::MvLogNormal)
+    x = rand(rng, d.normal)
+    map!(exp, x, x)
+    return x
+end
+function rand(rng::AbstractRNG, d::MvLogNormal, n::Int)
+    xs = rand(rng, d.normal, n)
+    map!(exp, xs, xs)
+    return xs
+end
+
 function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
     _rand!(rng, d.normal, x)
     map!(exp, x, x)

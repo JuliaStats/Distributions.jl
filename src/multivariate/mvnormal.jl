@@ -273,6 +273,17 @@ gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
 
+function rand(rng::AbstractRNG, d::MvNormal)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d)))
+    x .+= d.μ
+    return x
+end
+function rand(rng::AbstractRNG, d::MvNormal, n::Int)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d), n))
+    x .+= d.μ
+    return x
+end
+
 function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
     unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ

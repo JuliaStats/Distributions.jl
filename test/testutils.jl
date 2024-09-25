@@ -165,7 +165,12 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         samples3 = [rand(rng3, s) for _ in 1:n]
         samples4 = [rand(rng4, s) for _ in 1:n]
     end
-    @test length(samples) == n
+    T = typeof(rand(s))
+    @test samples isa Vector{T}
+    @test samples2 isa Vector{T}
+    @test samples3 isa Vector{T}
+    @test samples4 isa Vector{T}
+    @test length(samples) == length(samples2) == length(samples3) == length(samples4) == n
     @test samples2 == samples
     @test samples3 == samples4
 
@@ -289,7 +294,12 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         samples3 = [rand(rng3, s) for _ in 1:n]
         samples4 = [rand(rng4, s) for _ in 1:n]
     end
-    @test length(samples) == n
+    T = typeof(rand(s))
+    @test samples isa Vector{T}
+    @test samples2 isa Vector{T}
+    @test samples3 isa Vector{T}
+    @test samples4 isa Vector{T}
+    @test length(samples) == length(samples2) == length(samples3) == length(samples4) == n
     @test samples2 == samples
     @test samples3 == samples4
 

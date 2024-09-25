@@ -30,34 +30,22 @@ function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
 end
 
 # multiple samples
-function rand(rng::AbstractRNG, s::Sampleable{Univariate}, dims::Dims)
-    out = Array{eltype(s)}(undef, dims)
-    return @inbounds rand!(rng, sampler(s), out)
+# we use function barriers since for some distributions `sampler(s)` is not type-stable:
+# https://github.com/JuliaStats/Distributions.jl/pull/1281
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
+    return _rand(rng, sampler(s), dims)
 end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims,
-)
-    sz = size(s)
-    ax = map(Base.OneTo, dims)
-    out = [Array{eltype(s)}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out, false)
+function _rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
+    r = rand(rng, s)
+    out = Array{typeof(r)}(undef, dims)
+    out[1] = r
+    rand!(rng, s, @view(out[2:end]))
+    return out
 end
 
-# these are workarounds for sampleables that incorrectly base `eltype` on the parameters
+# this is a workaround for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
     return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
-end
-function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
-    out = Array{float(eltype(s))}(undef, dims)
-    return @inbounds rand!(rng, sampler(s), out)
-end
-function rand(
-    rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims,
-)
-    sz = size(s)
-    ax = map(Base.OneTo, dims)
-    out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
-    return @inbounds rand!(rng, sampler(s), out, false)
 end
 
 """

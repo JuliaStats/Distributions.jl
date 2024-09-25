@@ -154,6 +154,15 @@ end
 
 # sampling
 
+function rand(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon})
+    x = map(αi -> rand(rng, Gamma(αi)), d.alpha)
+    return lmul!(inv(sum(x)), x)
+end
+function rand(rng::AbstractRNG, d::Dirichlet{<:Real,<:FillArrays.AbstractFill{<:Real}})
+    x = rand(rng, Gamma(FillArrays.getindex_value(d.alpha)), length(d))
+    return lmul!(inv(sum(x)), x)
+end
+
 function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},
                 x::AbstractVector{<:Real})

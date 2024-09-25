@@ -97,6 +97,8 @@ end
 
 
 # Sampling
+rand(rng::AbstractRNG, d::DirichletMultinomial) =
+    multinom_rand(rng, ntrials(d), rand(rng, Dirichlet(d.α)))
 _rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
     multinom_rand!(rng, ntrials(d), rand(rng, Dirichlet(d.α)), x)
 

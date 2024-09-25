@@ -10,10 +10,10 @@ using Test
             @inferred(rand(TDist(big"1.0")))
         end
         @inferred(rand(TDist(ForwardDiff.Dual(1.0))))
-
     end
 
     for T in (Float32, Float64)
         @test @inferred(rand(TDist(T(1)))) isa T
+        @test @inferred(rand(TDist(T(1)), 5)) isa Vector{T}
     end
 end

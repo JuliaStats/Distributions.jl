@@ -155,6 +155,21 @@ function gradlogpdf(d::GenericMvTDist, x::AbstractVector{<:Real})
 end
 
 # Sampling (for GenericMvTDist)
+function rand(rng::AbstractRNG, d::GenericMvTDist)
+    chisqd = Chisq{partype(d)}(d.df)
+    y = sqrt(rand(rng, chisqd) / d.df)
+    x = unwhiten!(d.Σ, randn(rng, typeof(y), length(d)))
+    x .= x ./ y .+ d.μ
+    x
+end
+function rand(rng::AbstractRNG, d::GenericMvTDist, n::Int)
+    chisqd = Chisq{partype(d)}(d.df)
+    y = rand(rng, chisqd, n)
+    x = unwhiten!(d.Σ, randn(rng, eltype(y), length(d), n))
+    x .= x ./ sqrt.(y' ./ d.df) .+ d.μ
+    x
+end
+
 function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
