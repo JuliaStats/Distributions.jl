@@ -40,7 +40,7 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     for i = 1:n
         @test @inferred(cdf(g, X[i])) ≈ cf[i]
     end
-    @test cdf.(g, X) ≈ cf
+    @test Base.Fix1(cdf, g).(X) ≈ cf
 
     # evaluation
     P0 = zeros(T, n, K)

@@ -93,7 +93,7 @@ end
 
     for a in ([0, 1], [-0.5, 0.5])
         # Construct independent distributions and `ProductDistribution` from these.
-        ds1 = DiscreteNonParametric.(fill(a, N), Ref([0.5, 0.5]))
+        ds1 = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ in 1:N]
         # Replace with
         # d_product1 = @inferred(product_distribution(ds1))
         # when `Product` is removed

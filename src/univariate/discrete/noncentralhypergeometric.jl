@@ -256,9 +256,12 @@ end
 Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{T}) where {T<:Real} = d
 
 # Properties
-mean(d::WalleniusNoncentralHypergeometric) = sum(support(d) .* pdf.(Ref(d), support(d)))
-var(d::WalleniusNoncentralHypergeometric)  = sum((support(d) .- mean(d)).^2 .* pdf.(Ref(d), support(d)))
-mode(d::WalleniusNoncentralHypergeometric) = support(d)[argmax(pdf.(Ref(d), support(d)))]
+function _discretenonparametric(d::WalleniusNoncentralHypergeometric)
+    return DiscreteNonParametric(support(d), map(Base.Fix1(pdf, d), support(d)))
+end
+mean(d::WalleniusNoncentralHypergeometric) = mean(_discretenonparametric(d))
+var(d::WalleniusNoncentralHypergeometric)  = var(_discretenonparametric(d))
+mode(d::WalleniusNoncentralHypergeometric) = mode(_discretenonparametric(d))
 
 entropy(d::WalleniusNoncentralHypergeometric) = 1
 

@@ -314,3 +314,17 @@ end
     @test @inferred(gradlogpdf(LogNormal(0.0, 1.0), BigFloat(-1))) == big(0.0)
     @test isnan_type(BigFloat, @inferred(gradlogpdf(LogNormal(0.0, 1.0), BigFloat(NaN))))
 end
+
+@testset "LogNormal Sampling Tests" begin
+    for d in [
+            LogNormal()
+            LogNormal(1.0)
+            LogNormal(0.0, 2.0)
+            LogNormal(1.0, 2.0)
+            LogNormal(3.0, 0.5)
+            LogNormal(3.0, 1.0)
+            LogNormal(3.0, 2.0)
+        ]
+        test_distr(d, 10^6)
+    end
+end

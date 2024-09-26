@@ -182,7 +182,8 @@ std(d::UnivariateDistribution) = sqrt(var(d))
 """
     median(d::UnivariateDistribution)
 
-Return the median value of distribution `d`. The median is the smallest `x` such that `cdf(d, x) ≥ 1/2`.
+Return the median value of distribution `d`. The median is the smallest `x` in the support
+of `d` for which `cdf(d, x) ≥ 1/2`.
 Corresponding to this definition as 1/2-quantile, a fallback is provided calling the `quantile` function.
 """
 median(d::UnivariateDistribution) = quantile(d, 1//2)
@@ -311,7 +312,7 @@ See also: [`logpdf`](@ref).
 pdf(d::UnivariateDistribution, x::Real) = exp(logpdf(d, x))
 
 # extract value from array of zero dimension
-_pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
+pdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = pdf(d, first(x))
 
 """
     logpdf(d::UnivariateDistribution, x::Real)
@@ -323,7 +324,7 @@ See also: [`pdf`](@ref).
 logpdf(d::UnivariateDistribution, x::Real)
 
 # extract value from array of zero dimension
-_logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
+logpdf(d::UnivariateDistribution, x::AbstractArray{<:Real,0}) = logpdf(d, first(x))
 
 # loglikelihood for `Real`
 Base.@propagate_inbounds loglikelihood(d::UnivariateDistribution, x::Real) = logpdf(d, x)
@@ -381,7 +382,10 @@ logccdf(d::UnivariateDistribution, x::Real) = log(ccdf(d, x))
 """
     quantile(d::UnivariateDistribution, q::Real)
 
-Evaluate the inverse cumulative distribution function at `q`.
+Evaluate the (generalized) inverse cumulative distribution function at `q`.
+
+For a given `0 ≤ q ≤ 1`, `quantile(d, q)` is the smallest value `x` in the support of `d`
+for which `cdf(d, x) ≥ q`.
 
 See also: [`cquantile`](@ref), [`invlogcdf`](@ref), and [`invlogccdf`](@ref).
 """
@@ -400,7 +404,10 @@ end
 """
     invlogcdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logcdf.
+The (generalized) inverse function of [`logcdf`](@ref).
+
+For a given `lp ≤ 0`, `invlogcdf(d, lp)` is the smallest value `x` in the support of `d` for
+which `logcdf(d, x) ≥ lp`.
 """
 function invlogcdf(d::UnivariateDistribution, lp::Real)
     _check_invlogcdf_arg(lp)
@@ -410,7 +417,10 @@ end
 """
     invlogccdf(d::UnivariateDistribution, lp::Real)
 
-The inverse function of logccdf.
+The (generalized) inverse function of [`logccdf`](@ref).
+
+For a given `lp ≤ 0`, `invlogccdf(d, lp)` is the smallest value `x` in the support of `d`
+for which `logccdf(d, x) ≤ lp`.
 """
 function invlogccdf(d::UnivariateDistribution, lp::Real)
     _check_invlogccdf_arg(lp)
@@ -461,7 +471,7 @@ function _pdf_fill_outside!(r::AbstractArray, d::DiscreteUnivariateDistribution,
     return vl, vr, vfirst, vlast
 end
 
-function _pdf!(r::AbstractArray, d::DiscreteUnivariateDistribution, X::UnitRange)
+function _pdf!(r::AbstractArray{<:Real}, d::DiscreteUnivariateDistribution, X::UnitRange)
     vl,vr, vfirst, vlast = _pdf_fill_outside!(r, d, X)
 
     # fill central part: with non-zero pdf

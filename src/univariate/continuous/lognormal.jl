@@ -156,7 +156,14 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::LogNormal) = exp(randn(rng) * d.σ + d.μ)
+xval(d::LogNormal, z::Real) = exp(muladd(d.σ, z, d.μ))
+
+rand(rng::AbstractRNG, d::LogNormal) = xval(d, randn(rng))
+function rand!(rng::AbstractRNG, d::LogNormal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 
