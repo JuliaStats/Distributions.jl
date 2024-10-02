@@ -58,8 +58,6 @@ insupport(d::OrderStatistic, x::Real) = insupport(d.dist, x)
 
 params(d::OrderStatistic) = tuple(params(d.dist)..., d.n, d.rank)
 partype(d::OrderStatistic) = partype(d.dist)
-Base.eltype(::Type{<:OrderStatistic{D}}) where {D} = Base.eltype(D)
-Base.eltype(d::OrderStatistic) = eltype(d.dist)
 
 # distribution of the ith order statistic from an IID uniform distribution, with CDF Uᵢₙ(x)
 function _uniform_orderstatistic(d::OrderStatistic)

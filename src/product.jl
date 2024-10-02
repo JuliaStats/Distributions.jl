@@ -70,10 +70,6 @@ const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport,T} = ProductDistribution
 const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
 
 ## General definitions
-function Base.eltype(::Type{<:ProductDistribution{<:Any,<:Any,<:Any,<:ValueSupport,T}}) where {T}
-    return T
-end
-
 size(d::ProductDistribution) = d.size
 
 mean(d::ProductDistribution) = reshape(mapreduce(vec ∘ mean, vcat, d.dists), size(d))

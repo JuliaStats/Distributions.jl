@@ -52,8 +52,6 @@ canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 # Properties
 
 length(d::MvLogitNormal) = length(d.normal) + 1
-Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
-Base.eltype(d::MvLogitNormal) = eltype(d.normal)
 params(d::MvLogitNormal) = params(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
