@@ -54,8 +54,8 @@ scale(d::Gumbel) = d.θ
 params(d::Gumbel) = (d.μ, d.θ)
 partype(::Gumbel{T}) where {T} = T
 
-function Base.rand(rng::Random.AbstractRNG, d::Gumbel)
-    return d.μ - d.θ * log(randexp(rng, float(eltype(d))))
+function Base.rand(rng::Random.AbstractRNG, d::Gumbel{T}) where {T}
+    return d.μ - d.θ * log(randexp(rng, float(T)))
 end
 function _rand!(rng::Random.AbstractRNG, d::Gumbel, x::AbstractArray{<:Real})
     randexp!(rng, x)
