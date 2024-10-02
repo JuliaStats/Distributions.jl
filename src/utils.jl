@@ -97,6 +97,23 @@ isunitvec(v::AbstractVector) = (norm(v) - 1.0) < 1.0e-12
 isprobvec(p::AbstractVector{<:Real}) =
     all(x -> x ≥ zero(x), p) && isapprox(sum(p), one(eltype(p)))
 
+issorted_allunique(xs::AbstractUnitRange{<:Real}) = true
+function issorted_allunique(xs::AbstractVector{<:Real})
+    xi_state = iterate(xs)
+    if xi_state === nothing
+        return true
+    end
+    xi, state = xi_state
+    while (xj_state = iterate(xs, state)) !== nothing
+        xj, state = xj_state
+        if xj <= xi
+            return false
+        end
+        xi = xj
+    end
+    return true
+end
+
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
