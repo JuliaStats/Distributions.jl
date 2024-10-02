@@ -105,9 +105,23 @@ However, one can provide an array of different element types to store the sample
     This method is deprecated and will be removed in an upcoming breaking release.
 
 """
-function Base.eltype(::Type{S}) where {S<:Sampleable}
+function Base.eltype(::Type{S}) where {VF<:VariateForm,VS<:Union{Discrete,Continuous},S<:Sampleable{VF,VS}}
     Base.depwarn("`eltype(::Type{<:Distributions.Sampleable})` is deprecated and will be removed", :eltype)
-    return eltype(Base.promote_op(rand, S))
+    T = Base.promote_op(rand, S)
+    if T === Union{}
+        # `T` can be `Union{}` if
+        # - `rand(::S)` is not defined and/or
+        # - `rand(::S)` calls `eltype(::S)` or `eltype(::Type{S})` but they are not specialized and fall back to the generic definition here
+        # (the latter case happens e.g. for non-univariate samplers that only implement `_rand!` and rely on the generic fallback for `rand`)
+        # In all these cases we return 1) `Int` for `Discrete` samplers and 2) `Float64` for `Continuous` samplers
+        if VS === Discrete
+            return Int
+        elseif VS === Continuous
+            return Float64
+        end
+    else
+        return eltype(T)
+    end
 end
 
 """
