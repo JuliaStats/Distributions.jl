@@ -214,3 +214,24 @@ end
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) == DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈ DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
 end
+
+@testset "AbstractVector (issue #1084)" begin
+    P = abs.(randn(5,4,2))
+    p = view(P,:,1,1)
+    p ./= sum(p)
+    
+    d = @inferred(DiscreteNonParametric(Base.OneTo(5), p))
+    @test d isa DiscreteNonParametric
+    @test d.p === p
+    d = @inferred(DiscreteNonParametric(1:5, p))
+    @test d isa DiscreteNonParametric
+    @test d.p === p
+    d = @inferred(DiscreteNonParametric(1:1:5, p))
+    @test d isa DiscreteNonParametric
+    @test d.p !== p
+    @test d.p == p
+    d = @inferred(DiscreteNonParametric([1, 2, 3, 4, 5], p))
+    @test d isa DiscreteNonParametric
+    @test d.p !== p
+    @test d.p == p
+end
