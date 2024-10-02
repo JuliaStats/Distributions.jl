@@ -24,7 +24,6 @@ function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
 end
 
 Base.size(d::ReshapedDistribution) = d.dims
-Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
 
 partype(d::ReshapedDistribution) = partype(d.dist)
 params(d::ReshapedDistribution) = (d.dist, d.dims)

@@ -126,9 +126,6 @@ end
 params(d::Truncated) = tuple(params(d.untruncated)..., d.lower, d.upper)
 partype(d::Truncated{<:UnivariateDistribution,<:ValueSupport,T}) where {T<:Real} = promote_type(partype(d.untruncated), T)
 
-Base.eltype(::Type{<:Truncated{D}}) where {D<:UnivariateDistribution} = eltype(D)
-Base.eltype(d::Truncated) = eltype(d.untruncated)
-
 ### range and support
 
 islowerbounded(d::RightTruncated) = islowerbounded(d.untruncated)

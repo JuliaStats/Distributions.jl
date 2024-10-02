@@ -223,8 +223,6 @@ Base.@deprecate MvNormal(μ::AbstractVector{<:Real}, σ::Real) MvNormal(μ, σ^2
 Base.@deprecate MvNormal(σ::AbstractVector{<:Real}) MvNormal(LinearAlgebra.Diagonal(map(abs2, σ)))
 Base.@deprecate MvNormal(d::Int, σ::Real) MvNormal(LinearAlgebra.Diagonal(FillArrays.Fill(σ^2, d)))
 
-Base.eltype(::Type{<:MvNormal{T}}) where {T} = T
-
 ### Conversion
 function convert(::Type{MvNormal{T}}, d::MvNormal) where T<:Real
     MvNormal(convert(AbstractArray{T}, d.μ), convert(AbstractArray{T}, d.Σ))
@@ -272,6 +270,17 @@ sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
 gradlogpdf(d::MvNormal, x::AbstractVector{<:Real}) = -(d.Σ \ (x .- d.μ))
 
 # Sampling (for GenericMvNormal)
+
+function rand(rng::AbstractRNG, d::MvNormal)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d)))
+    x .+= d.μ
+    return x
+end
+function rand(rng::AbstractRNG, d::MvNormal, n::Int)
+    x = unwhiten!(d.Σ, randn(rng, float(partype(d)), length(d), n))
+    x .+= d.μ
+    return x
+end
 
 function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
     unwhiten!(d.Σ, randn!(rng, x))

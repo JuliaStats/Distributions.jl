@@ -71,8 +71,6 @@ end
 const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
 
-Base.eltype(::Type{<:AffineDistribution{T}}) where T = T
-
 minimum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * minimum(d.ρ) : d.μ + d.σ * maximum(d.ρ)
 maximum(d::AffineDistribution) =

@@ -31,10 +31,6 @@ function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:Ab
 end
 
 length(d::Product) = length(d.v)
-function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-                                                    T<:UnivariateDistribution{S}}
-    return eltype(T)
-end
 
 _rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
     map!(Base.Fix1(rand, rng), x, d.v)

@@ -50,8 +50,6 @@ end
 
 length(d::DirichletCanon) = length(d.alpha)
 
-Base.eltype(::Type{<:Dirichlet{T}}) where {T} = T
-
 #### Conversions
 convert(::Type{Dirichlet{T}}, cf::DirichletCanon) where {T<:Real} =
     Dirichlet(convert(AbstractVector{T}, cf.alpha))
@@ -153,6 +151,15 @@ function _logpdf(d::Dirichlet, x::AbstractVector{<:Real})
 end
 
 # sampling
+
+function rand(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon})
+    x = map(αi -> rand(rng, Gamma(αi)), d.alpha)
+    return lmul!(inv(sum(x)), x)
+end
+function rand(rng::AbstractRNG, d::Dirichlet{<:Real,<:FillArrays.AbstractFill{<:Real}})
+    x = rand(rng, Gamma(FillArrays.getindex_value(d.alpha)), length(d))
+    return lmul!(inv(sum(x)), x)
+end
 
 function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},

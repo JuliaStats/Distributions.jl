@@ -52,8 +52,6 @@ canonform(d::MvLogitNormal{<:MvNormal}) = MvLogitNormal(canonform(d.normal))
 # Properties
 
 length(d::MvLogitNormal) = length(d.normal) + 1
-Base.eltype(::Type{<:MvLogitNormal{D}}) where {D} = eltype(D)
-Base.eltype(d::MvLogitNormal) = eltype(d.normal)
 params(d::MvLogitNormal) = params(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
@@ -87,6 +85,19 @@ end
 kldivergence(p::MvLogitNormal, q::MvLogitNormal) = kldivergence(p.normal, q.normal)
 
 # Sampling
+
+function rand(rng::AbstractRNG, d::MvLogitNormal)
+    x = rand(rng, d.normal)
+    push!(x, zero(eltype(x)))
+    StatsFuns.softmax!(x)
+    return x
+end
+function rand(rng::AbstractRNG, d::MvLogitNormal, n::Int)
+    r = rand(rng, d.normal, n)
+    x = vcat(r, zeros(eltype(r), 1, n))
+    StatsFuns.softmax!(x; dims=1)
+    return x
+end
 
 function _rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractVecOrMat{<:Real})
     y = @views _drop1(x)
