@@ -114,9 +114,14 @@ Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
+xval(d::Normal, z::Real) = muladd(d.σ, z, d.μ)
 
-rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real}) = A .= muladd.(d.σ, randn!(rng, A), d.μ)
+rand(rng::AbstractRNG, d::Normal{T}) where {T} = xval(d, randn(rng, float(T)))
+function rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 #### Fitting
 

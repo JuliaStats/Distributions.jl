@@ -110,7 +110,14 @@ quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
+xval(d::Pareto, z::Real) = d.θ * exp(z / d.α)
+
+rand(rng::AbstractRNG, d::Pareto) = xval(d, randexp(rng))
+function rand!(rng::AbstractRNG, d::Pareto, A::AbstractArray{<:Real})
+    randexp!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 

@@ -53,10 +53,20 @@ end
 @deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
 
 # Deprecate `MatrixReshaped`
+# This is very similar to `Base.@deprecate_binding MatrixReshaped{...} ReshapedDistribution{...}`
+# However, `Base.@deprecate_binding` does not support type parameters
+export MatrixReshaped
 const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
-@deprecate MatrixReshaped(
-    d::MultivariateDistribution, n::Integer, p::Integer=n
-) reshape(d, (n, p))
+Base.deprecate(@__MODULE__, :MatrixReshaped)
+# This is very similar to `Base.@deprecate MatrixReshaped(...) reshape(...)`
+# We use another (unexported!) alias here to not throw a deprecation warning/error
+# Unexported aliases do not affect the type printing
+# In Julia >= 1.6, instead of a new alias we could have defined a method for (ReshapedDistribution{2,S,D} where {S<:ValueSupport,D<:MultivariateDistribution{S}})
+const _MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+function _MatrixReshaped(d::MultivariateDistribution, n::Integer, p::Integer=n)
+    Base.depwarn("`MatrixReshaped(d, n, p)` is deprecated, use `reshape(d, (n, p))` instead.", :MatrixReshaped)
+    return reshape(d, (n, p))
+end
 
 for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
     @eval @deprecate dim(d::$D) size(d, 1)

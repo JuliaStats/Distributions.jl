@@ -64,3 +64,12 @@ end
     @test convert(LogitNormal{Float32}, d) === d
     @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
 end
+
+@testset "Logitnormal Sampling Tests" begin
+    for d in [
+        LogitNormal(-2, 3),
+        LogitNormal(0, 0.2)
+    ]
+        test_distr(d, 10^6)
+    end
+end

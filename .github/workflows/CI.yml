@@ -2,12 +2,12 @@ name: CI
 
 on:
   pull_request:
-    branches:
-      - master
   push:
     branches:
       - master
     tags: '*'
+  workflow_dispatch:
+  merge_group:
 
 concurrency:
   # Skip intermediate builds: always.
@@ -17,38 +17,28 @@ concurrency:
 
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.version == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
         version:
           - '1.3'
           - '1'
-          - 'nightly'
+          - pre
         os:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        arch:
-          - x64
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          # ARM64 on macos-latest is neither supported by older Julia versions nor setup-julia
+          arch: ${{ matrix.os == 'macos-latest' && matrix.version != '1.3' && 'aarch64' || 'x64' }}
+          show-versioninfo: true
+      - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - run: |
@@ -70,6 +60,7 @@ jobs:
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
+          show-versioninfo: true
       - run: |
           julia --project=docs -e '
             using Pkg
