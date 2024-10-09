@@ -41,22 +41,61 @@ end
 quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
     quantile_bisect(d, p, minimum(d), maximum(d))
 
+mutable struct ValueAndPredecessor{T}
+    storage::Tuple{T,T}
+
+    function ValueAndPredecessor{T}(storage::Tuple{T,T}) where {T}
+        return new(storage)
+    end
+
+    function ValueAndPredecessor{T}() where {T}
+        storage = Tuple{T,T}((T(NaN),T(NaN)))
+        return new(storage)
+    end
+
+    function Base.push!(huh::ValueAndPredecessor{T}, e::T) where {T}
+        huh.storage = Tuple{T,T}((huh.storage[2], e))
+    end
+
+    function Base.getindex(ValueAndPredecessor::ValueAndPredecessor{T}, delay::Int)::T where {T}
+        return ValueAndPredecessor.storage[length(ValueAndPredecessor.storage) + delay]
+    end
+end
+
 # if starting at mode, Newton is convergent for any unimodal continuous distribution, see:
 #   Göknur Giner, Gordon K. Smyth (2014)
 #   A Monotonically Convergent Newton Iteration for the Quantiles of any Unimodal
 #   Distribution, with Application to the Inverse Gaussian Distribution
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
+function newton(f, xs::T=mode(d), tol::Real=1e-12) where {T}
+    converged(a,b) = abs(a-b) <= max(abs(a),abs(b)) * tol
+    x = ValueAndPredecessor{T}()
+    push!(x, xs)
+    push!(x, x[0] + f(x[0]))
+    while !converged(x[0], x[-1])
+        df = f(x[0])
+        r = x[0] + df
+        # Vanilla Newton algorithm is known to be prone to oscillation,
+        # where we, e.g., go from 24.0 to 42.0, back to 24.0 and so forth.
+        # We can detect this situation by checking for convergence between
+        # the newly-computed "root" and the "root" we had two steps before.
+        if converged(r, x[-1])
+            # To recover from oscillation, let's use just half of the delta.
+            r = r - (df / 2)
+        end
+        push!(x, r)
+    end
+    return x[0]
+end
+
 function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    x = xs + (p - cdf(d, xs)) / pdf(d, xs)
+    f(x) = (p - cdf(d, x)) / pdf(d, x)
+    # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
+    x = xs + f(xs)
     T = typeof(x)
     if 0 < p < 1
-        x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
-            x0 = x
-            x = x0 + (p - cdf(d, x0)) / pdf(d, x0)
-        end
-        return x
+        return newton(f, T(xs), tol)
     elseif p == 0
         return T(minimum(d))
     elseif p == 1
@@ -67,15 +106,12 @@ function quantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=
 end
 
 function cquantile_newton(d::ContinuousUnivariateDistribution, p::Real, xs::Real=mode(d), tol::Real=1e-12)
-    x = xs + (ccdf(d, xs)-p) / pdf(d, xs)
+    f(x) = (ccdf(d, x)-p) / pdf(d, x)
+    # FIXME: can this be expressed via `promote_type()`? Test coverage missing.
+    x = xs + f(xs)
     T = typeof(x)
     if 0 < p < 1
-        x0 = T(xs)
-        while abs(x-x0) > max(abs(x),abs(x0)) * tol
-            x0 = x
-            x = x0 + (ccdf(d, x0)-p) / pdf(d, x0)
-        end
-        return x
+        return newton(f, T(xs), tol)
     elseif p == 1
         return T(minimum(d))
     elseif p == 0
@@ -87,20 +123,14 @@ end
 
 function invlogcdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
+    f_a(x) = -exp(lp - logpdf(d,x) + logexpm1(max(logcdf(d,x)-lp,0)))
+    f_b(x) = exp(lp - logpdf(d,x) + log1mexp(min(logcdf(d,x)-lp,0)))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logcdf(d,x0)
-            x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
-                x0 = x
-                x = x0 - exp(lp - logpdf(d,x0) + logexpm1(max(logcdf(d,x0)-lp,0)))
-            end
+            return newton(f_a, T(xs), tol)
         else
-            x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0))*tol
-                x0 = x
-                x = x0 + exp(lp - logpdf(d,x0) + log1mexp(min(logcdf(d,x0)-lp,0)))
-            end
+            return newton(f_b, T(xs), tol)
         end
         return x
     elseif lp == -Inf
@@ -114,20 +144,14 @@ end
 
 function invlogccdf_newton(d::ContinuousUnivariateDistribution, lp::Real, xs::Real=mode(d), tol::Real=1e-12)
     T = typeof(lp - logpdf(d,xs))
+    f_a(x) = exp(lp - logpdf(d,x) + logexpm1(max(logccdf(d,x)-lp,0)))
+    f_b(x) = -exp(lp - logpdf(d,x) + log1mexp(min(logccdf(d,x)-lp,0)))
     if -Inf < lp < 0
         x0 = T(xs)
         if lp < logccdf(d,x0)
-            x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
-                x0 = x
-                x = x0 + exp(lp - logpdf(d,x0) + logexpm1(max(logccdf(d,x0)-lp,0)))
-            end
+            return newton(f_a, T(xs), tol)
         else
-            x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            while abs(x-x0) >= max(abs(x),abs(x0)) * tol
-                x0 = x
-                x = x0 - exp(lp - logpdf(d,x0) + log1mexp(min(logccdf(d,x0)-lp,0)))
-            end
+            return newton(f_b, T(xs), tol)
         end
         return x
     elseif lp == -Inf
