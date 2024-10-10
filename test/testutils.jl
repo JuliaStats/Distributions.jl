@@ -360,9 +360,8 @@ end
 function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     # samples for testing evaluation functions (even spacing)
 
-    T = eltype(typeof(d))
-    lv = (islowerbounded(d) ? minimum(d) : floor(T,quantile(d, q/2)))::T
-    hv = (isupperbounded(d) ? maximum(d) : ceil(T,cquantile(d, q/2)))::T
+    lv = islowerbounded(d) ? minimum(d) : quantile(d, q/2)
+    hv = isupperbounded(d) ? maximum(d) : cquantile(d, q/2)
     @assert lv <= hv
     return lv:hv
 end

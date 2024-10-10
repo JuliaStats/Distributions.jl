@@ -7,7 +7,7 @@ independent `M`-dimensional distributions by stacking them.
 Users should use [`product_distribution`](@ref) to construct a product distribution of
 independent distributions instead of constructing a `ProductDistribution` directly.
 """
-struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVariate{N},S}
+struct ProductDistribution{N,M,D,S<:ValueSupport} <: Distribution{ArrayLikeVariate{N},S}
     dists::D
     size::Dims{N}
 
@@ -15,7 +15,7 @@ struct ProductDistribution{N,M,D,S<:ValueSupport,T} <: Distribution{ArrayLikeVar
         if isempty(dists)
             throw(ArgumentError("a product distribution must consist of at least one distribution"))
         end
-        return new{N,M,D,_product_valuesupport(dists),_product_eltype(dists)}(
+        return new{N,M,D,_product_valuesupport(dists)}(
             dists,
             _product_size(dists),
         )
@@ -32,14 +32,10 @@ end
 
 # default definitions (type stable e.g. for arrays with concrete `eltype`)
 _product_valuesupport(dists) = mapreduce(value_support ∘ typeof, promote_type, dists)
-_product_eltype(dists) = mapreduce(eltype, promote_type, dists)
 
 # type-stable and faster implementations for tuples
 function _product_valuesupport(dists::NTuple{<:Any,Distribution})
     return __product_promote_type(value_support, typeof(dists))
-end
-function _product_eltype(dists::NTuple{<:Any,Distribution})
-    return __product_promote_type(eltype, typeof(dists))
 end
 
 __product_promote_type(f::F, ::Type{Tuple{D}}) where {F,D<:Distribution} = f(D)
@@ -63,11 +59,11 @@ function _product_size(dists::Tuple{Distribution{<:ArrayLikeVariate{M}},Vararg{D
 end
 
 ## aliases
-const VectorOfUnivariateDistribution{D,S<:ValueSupport,T} = ProductDistribution{1,0,D,S,T}
-const MatrixOfUnivariateDistribution{D,S<:ValueSupport,T} = ProductDistribution{2,0,D,S,T}
-const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
+const VectorOfUnivariateDistribution{D,S<:ValueSupport} = ProductDistribution{1,0,D,S}
+const MatrixOfUnivariateDistribution{D,S<:ValueSupport} = ProductDistribution{2,0,D,S}
+const ArrayOfUnivariateDistribution{N,D,S<:ValueSupport} = ProductDistribution{N,0,D,S}
 
-const FillArrayOfUnivariateDistribution{N,D<:Fill{<:Any,N},S<:ValueSupport,T} = ProductDistribution{N,0,D,S,T}
+const FillArrayOfUnivariateDistribution{N,D<:FillArrays.AbstractFill{<:Any,N},S<:ValueSupport} = ProductDistribution{N,0,D,S}
 
 ## General definitions
 size(d::ProductDistribution) = d.size
@@ -104,8 +100,11 @@ length(d::VectorOfUnivariateDistribution) = length(d.dists)
 ## For matrix distributions
 cov(d::ProductDistribution{2}, ::Val{false}) = reshape(cov(d), size(d)..., size(d)...)
 
-# `_rand!` for arrays of univariate distributions
-function _rand!(
+# Arrays of univariate distributions
+function rand(rng::AbstractRNG, d::ArrayOfUnivariateDistribution)
+    return map(Base.Fix1(rand, rng), d.dists)
+end
+function rand!(
     rng::AbstractRNG,
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
@@ -129,8 +128,14 @@ function __logpdf(d::ArrayOfUnivariateDistribution, x::AbstractArray{<:Real,N}) 
     return sum(Broadcast.instantiate(broadcasted))
 end
 
-# more efficient implementation of `_rand!` for `Fill` array of univariate distributions
-function _rand!(
+# more efficient sampling for `Fill` array of univariate distributions
+function rand(
+    rng::AbstractRNG,
+    d::FillArrayOfUnivariateDistribution,
+)
+    return @inbounds rand(rng, sampler(first(d.dists)), size(d))
+end
+function rand!(
     rng::AbstractRNG,
     d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
@@ -152,13 +157,19 @@ function __logpdf(
     return @inbounds loglikelihood(first(d.dists), x)
 end
 
-# `_rand! for arrays of distributions
-function _rand!(
+# sampling for arrays of distributions
+function rand(rng::AbstractRNG, d::ProductDistribution)
+    x = let rng = rng, d = d
+        mapreduce(di -> vec(rand(rng, di)), hcat, vec(d.dists))
+    end
+    return reshape(x, size(d))
+end
+Base.@propagate_inbounds function rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,M},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    @inbounds for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
+    for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
     return A
@@ -180,32 +191,48 @@ function __logpdf(
     return sum(Broadcast.instantiate(broadcasted))
 end
 
-# more efficient implementation of `_rand!` for `Fill` arrays of distributions
+# more efficient sampling for `Fill` arrays of distributions
+function rand(rng::AbstractRNG, d::ProductDistribution{<:Any,<:Any,<:FillArrays.AbstractFill})
+    rand(rng, sampler(first(d.dists)), A)
+    x = let rng = rng, d = d
+        mapreduce(di -> vec(rand(rng, di)), hcat, vec(d.dists))
+    end
+    return reshape(x, size(d))
+end
+function _product_rand(rng::AbstractRNG, spl::Sampleable{ArrayLikeVariate{N}}, dims::Dims) where N
+    xi = rand(rng, spl)
+    x = Array{eltype(xi)}(undef, dims)
+    copyto!(x, xi)
+    vx = reshape(x, ntuple(i -> i <= N ? size(xi, i) : Colon(), N + 1))
+    @inbounds rand!(rng, spl, @view(vx[ntuple(i -> i <= N ? Colon() : 2:lastindex(vx, N + 1), N + 1)...]))
+    return x
+end
+
 function _rand!(
     rng::AbstractRNG,
-    d::ProductDistribution{N,M,<:Fill},
+    d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
     @inbounds rand!(rng, sampler(first(d.dists)), A)
     return A
 end
 
-# more efficient implementation of `_logpdf` for `Fill` arrays of distributions
+# more efficient implementation of `_logpdf` for `AbstractFill` arrays of distributions
 # we have to fix a method ambiguity
 function _logpdf(
-    d::ProductDistribution{N,M,<:Fill},
+    d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     x::AbstractArray{<:Real,N},
 ) where {N,M}
     return __logpdf(d, x)
 end
 function _logpdf(
-    d::ProductDistribution{2,M,<:Fill},
+    d::ProductDistribution{2,M,<:FillArrays.AbstractFill},
     x::AbstractMatrix{<:Real},
 ) where {M}
     return __logpdf(d, x)
 end
 function __logpdf(
-    d::ProductDistribution{N,M,<:Fill},
+    d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     x::AbstractArray{<:Real,N},
 ) where {N,M}
     return @inbounds loglikelihood(first(d.dists), x)

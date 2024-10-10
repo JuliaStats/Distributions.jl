@@ -6,7 +6,7 @@
     @test shape(d1) == 0.0
     @test scale(d1) == 10.0
     @test partype(d1) === Float64
-    @test eltype(d1) === Float64
+    @test @test_deprecated(eltype(d1)) === Float64
     @test rand(d1) isa Float64
 
     @test median(d1) == quantile(d1, 0.5)
@@ -24,7 +24,7 @@
     @test shape(d1) == 10.0f0
     @test scale(d1) == 10.0f0
     @test partype(d1) === Float32
-    @test eltype(d1) === Float64
+    @test @test_deprecated(eltype(d1)) === Float64
     @test rand(d1) isa Float64
 
     d1 = JohnsonSU(1.0, 1, 0, 1)

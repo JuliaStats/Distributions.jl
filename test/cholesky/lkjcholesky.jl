@@ -17,9 +17,10 @@ using FiniteDifferences
         dmat = LKJ(p, d.η)
         marginal = Distributions._marginal(dmat)    
         ndraws = length(xs)
-        zs = Array{eltype(d)}(undef, p, p, ndraws)
-        for k in 1:ndraws
-            zs[:, :, k] = Matrix(xs[k])
+        zs = if VERSION >= v"1.9"
+            stack(xs)
+        else
+            reduce((x , y) -> cat(x, y; dims=3), xs)
         end
 
         @testset "LKJCholesky marginal moments" begin
@@ -132,7 +133,7 @@ using FiniteDifferences
             @test partype(d) <: Float64
 
             m = mode(d)
-            @test m isa Cholesky{eltype(d)}
+            @test m isa Cholesky{Float64}
             @test Matrix(m) ≈ I
         end
         for (d, η) in ((2, 4), (2, 1), (3, 1)), T in (Float32, Float64)

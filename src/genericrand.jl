@@ -26,6 +26,7 @@ rand(rng::AbstractRNG, s::Sampleable, dim1::Int, moredims::Int...) =
 
 # default fallback (redefined for univariate distributions)
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate})
+    Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s)))`. The default fallback will be removed", :rand)
     return @inbounds rand!(rng, s, Array{eltype(s)}(undef, size(s)))
 end
 
@@ -45,7 +46,8 @@ end
 
 # this is a workaround for sampleables that incorrectly base `eltype` on the parameters
 function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
-    return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
+    Base.depwarn("Please implement `rand(rng::AbstractRNG, s::$(typeof(s))`. The default fallback will be removed", :rand)
+    return @inbounds rand!(rng, s, Array{float(eltype(s))}(undef, size(s)))
 end
 
 """
@@ -63,9 +65,6 @@ form as specified above. The rules are summarized as below:
 """
 function rand! end
 Base.@propagate_inbounds rand!(s::Sampleable, X::AbstractArray) = rand!(default_rng(), s, X)
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, s::Sampleable, X::AbstractArray)
-    return _rand!(rng, s, X)
-end
 
 # default definitions for arraylike variates
 @inline function rand!(
@@ -73,6 +72,7 @@ end
     s::Sampleable{ArrayLikeVariate{N}},
     x::AbstractArray{<:Real,N},
 ) where {N}
+    Base.depwarn("Please implement `Random.rand!(rng::Random.AbstractRNG, s::$(typeof(s)), x::AbstractArray{<:Real,$N})`, the default fallback will be removed.", :rand!)
     @boundscheck begin
         size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
@@ -93,7 +93,8 @@ end
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     # the function barrier fixes performance issues if `sampler(s)` is type unstable
-    return _rand!(rng, sampler(s), x)
+    _rand!(rng, sampler(s), x)
+    return x
 end
 
 function _rand!(

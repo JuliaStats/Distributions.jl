@@ -99,8 +99,10 @@ end
 # Sampling
 rand(rng::AbstractRNG, d::DirichletMultinomial) =
     multinom_rand(rng, ntrials(d), rand(rng, Dirichlet(d.α)))
-_rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real}) =
+@inline function rand!(rng::AbstractRNG, d::DirichletMultinomial, x::AbstractVector{<:Real})
+    @boundscheck length(d) == length(x)
     multinom_rand!(rng, ntrials(d), rand(rng, Dirichlet(d.α)), x)
+end
 
 # Fit Model
 # Using https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945396/pdf/nihms205488.pdf

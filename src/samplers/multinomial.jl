@@ -53,10 +53,12 @@ function MultinomialSampler(n::Int, prob::Vector{<:Real})
 end
 
 function rand(rng::AbstractRNG, s::MultinomialSampler)
-    return _rand!(rng, s, Vector{Int}(undef, length(s.prob)))
+    x = Vector{Int}(undef, length(s.prob))
+    return rand!(rng, s, x)
 end
-function _rand!(rng::AbstractRNG, s::MultinomialSampler,
+@inline function rand!(rng::AbstractRNG, s::MultinomialSampler,
                 x::AbstractVector{<:Real})
+    @boundscheck length(s) == length(x)
     n = s.n
     k = length(s)
     if n^2 > k

@@ -77,11 +77,10 @@ _logpdf(d::VonMisesFisher, x::AbstractVector{T}) where {T<:Real} = d.logCκ + d.
 
 sampler(d::VonMisesFisher) = VonMisesFisherSampler(d.μ, d.κ)
 
-_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector) =
-    _rand!(rng, sampler(d), x)
-_rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractMatrix) =
-    _rand!(rng, sampler(d), x)
-
+rand(rng::AbstractRNG, d::VonMisesFisher) = rand(rng, sampler(d))
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::VonMisesFisher, x::AbstractVector)
+    return rand!(rng, sampler(d), x)
+end
 
 ### Estimation
 

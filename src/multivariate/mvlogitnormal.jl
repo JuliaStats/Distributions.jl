@@ -99,11 +99,15 @@ function rand(rng::AbstractRNG, d::MvLogitNormal, n::Int)
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractVecOrMat{<:Real})
-    y = @views _drop1(x)
-    rand!(rng, d.normal, y)
-    _softmax1!(x, y)
-    return x
+for N in (1, 2)
+    @eval begin
+        Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvLogitNormal, x::AbstractArray{<:Real, $N})
+            y = @views _drop1(x)
+            rand!(rng, d.normal, y)
+            _softmax1!(x, y)
+            return x
+        end
+    end
 end
 
 # Fitting

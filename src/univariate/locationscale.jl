@@ -51,8 +51,7 @@ end
 
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     @check_args AffineDistribution (σ, !iszero(σ))
-    _T = promote_type(eltype(ρ), T)
-    return AffineDistribution{_T}(_T(μ), _T(σ), ρ)
+    return AffineDistribution{T}(μ, σ, ρ)
 end
 
 function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)

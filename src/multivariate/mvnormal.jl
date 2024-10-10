@@ -282,16 +282,16 @@ function rand(rng::AbstractRNG, d::MvNormal, n::Int)
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::VecOrMat{<:Real})
     unwhiten!(d.Σ, randn!(rng, x))
     x .+= d.μ
     return x
 end
 
 # Workaround: randn! only works for Array, but not generally for AbstractArray
-function _rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvNormal, x::AbstractVector{<:Real})
     for i in eachindex(x)
-        @inbounds x[i] = randn(rng, eltype(x))
+        x[i] = randn(rng, eltype(x))
     end
     unwhiten!(d.Σ, x)
     x .+= d.μ

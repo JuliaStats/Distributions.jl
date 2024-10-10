@@ -241,10 +241,14 @@ function rand(rng::AbstractRNG, d::MvLogNormal, n::Int)
     return xs
 end
 
-function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
-    _rand!(rng, d.normal, x)
-    map!(exp, x, x)
-    return x
+for N in (1, 2)
+    @eval begin
+        Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractArray{<:Real,$N})
+            rand!(rng, d.normal, x)
+            map!(exp, x, x)
+            return x
+        end
+    end
 end
 
 _logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} = insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf

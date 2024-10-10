@@ -23,7 +23,7 @@ using LinearAlgebra
     # Check that methods for `ProductDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
         @test length(d_product) == length(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test mean(d_product) == mean.(ds)
         @test var(d_product) == var.(ds)
         @test cov(d_product) == Diagonal(var.(ds))
@@ -63,7 +63,7 @@ end
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds1, d_product2), (ds3, d_product3))
         @test length(d_product) == length(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test @inferred(mean(d_product)) == mean.(ds)
         @test @inferred(var(d_product)) == var.(ds)
         @test @inferred(cov(d_product)) == Diagonal(var.(ds))
@@ -113,7 +113,7 @@ end
         # Check that methods for `VectorOfUnivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds1, d_product3), (ds3, d_product2))
             @test length(d_product) == length(ds)
-            @test eltype(d_product) === eltype(ds[1])
+            @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
             @test @inferred(mean(d_product)) == mean.(ds)
             @test @inferred(var(d_product)) == var.(ds)
             @test @inferred(cov(d_product)) == Diagonal(var.(ds))
@@ -148,7 +148,7 @@ end
     ds_vec = vcat(ds...)
 
     @test length(d_product) == 3
-    @test eltype(d_product) === Float64
+    @test @test_deprecated(eltype(d_product)) === Float64
     @test @inferred(mean(d_product)) == mean.(ds_vec)
     @test @inferred(var(d_product)) == var.(ds_vec)
     @test @inferred(cov(d_product)) == Diagonal(var.(ds_vec))
@@ -187,7 +187,7 @@ end
     # Check that methods for `MatrixOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
         @test size(d_product) == size(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test @inferred(mean(d_product)) == mean.(ds)
         @test @inferred(var(d_product)) == var.(ds)
         @test @inferred(cov(d_product)) == Diagonal(vec(var.(ds)))
@@ -225,7 +225,7 @@ end
         # Check that methods for `VectorOfMultivariateDistribution` are consistent.
         for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
             @test size(d_product) == (length(ds[1]), size(ds)...)
-            @test eltype(d_product) === eltype(ds[1])
+            @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
             @test @inferred(mean(d_product)) == reshape(mapreduce(mean, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
             @test @inferred(var(d_product)) == reshape(mapreduce(var, (x, y) -> cat(x, y; dims=ndims(ds) + 1), ds), size(d_product))
             @test @inferred(cov(d_product)) == Diagonal(mapreduce(var, vcat, ds))
