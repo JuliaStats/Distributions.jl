@@ -82,8 +82,6 @@ end
 #  Properties
 #  -----------------------------------------------------------------------------
 
-Base.eltype(::Type{LKJCholesky{T}}) where {T} = T
-
 function Base.size(d::LKJCholesky)
     p = d.d
     return (p, p)

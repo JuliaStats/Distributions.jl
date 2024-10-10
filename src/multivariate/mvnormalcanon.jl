@@ -154,7 +154,6 @@ length(d::MvNormalCanon) = length(d.μ)
 mean(d::MvNormalCanon) = convert(Vector{eltype(d.μ)}, d.μ)
 params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
-Base.eltype(::Type{<:MvNormalCanon{T}}) where {T} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
 cov(d::MvNormalCanon) = Matrix(inv(d.J))
@@ -175,6 +174,17 @@ unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
 unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
 if isdefined(PDMats, :PDSparseMat)
     unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
+end
+
+function rand(rng::AbstractRNG, d::MvNormalCanon)
+    x = unwhiten_winv!(d.J, randn(rng, float(partype(d)), length(d)))
+    x .+= d.μ
+    return x
+end
+function rand(rng::AbstractRNG, d::MvNormalCanon, n::Int)
+    x = unwhiten_winv!(d.J, randn(rng, float(partype(d)), length(d), n))
+    x .+= d.μ
+    return x
 end
 
 function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)

@@ -31,13 +31,12 @@ function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:Ab
 end
 
 length(d::Product) = length(d.v)
-function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-                                                    T<:UnivariateDistribution{S}}
-    return eltype(T)
+
+rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    return map!(Base.Fix1(rand, rng), x, d.v)
 end
 
-_rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    map!(Base.Fix1(rand, rng), x, d.v)
 function _logpdf(d::Product, x::AbstractVector{<:Real})
     dists = d.v
     if isempty(dists)

@@ -52,7 +52,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test length(d) == length(r)
             @test params(d) == (params(dist)..., d.n, d.ranks)
             @test partype(d) === partype(dist)
-            @test eltype(d) === eltype(dist)
+            @test @test_deprecated(eltype(d)) === @test_deprecated(eltype(dist))
 
             length(r) == n && @test JointOrderStatistics(dist, n) == d
         end

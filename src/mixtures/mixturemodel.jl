@@ -470,16 +470,14 @@ end
 
 Base.length(s::MixtureSampler) = length(first(s.csamplers))
 
-rand(rng::AbstractRNG, s::MixtureSampler{Univariate}) =
+# mixture sampler
+rand(rng::AbstractRNG, s::MixtureSampler) =
     rand(rng, s.csamplers[rand(rng, s.psampler)])
-rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
-    rand(rng, component(d, rand(rng, d.prior)))
 
-# multivariate mixture sampler for a vector
-_rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector{<:Real}) =
-    @inbounds rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
 # if only a single sample is requested, no alias table is created
-_rand!(rng::AbstractRNG, d::MixtureModel{Multivariate}, x::AbstractVector{<:Real}) =
-    @inbounds rand!(rng, component(d, rand(rng, d.prior)), x)
+rand(rng::AbstractRNG, s::MixtureModel) = rand(rng, s.csamplers[rand(rng, s.psampler)])
+Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::MixtureModel{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+    return rand!(rng, component(d, rand(rng, d.prior)), x)
+end
 
 sampler(d::MixtureModel) = MixtureSampler(d)

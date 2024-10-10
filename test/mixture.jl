@@ -7,15 +7,8 @@ using ForwardDiff: Dual
 
 function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
                       rng::Union{AbstractRNG, Missing} = missing)
-    if g isa UnivariateGMM
-        T = eltype(g.means)
-    else
-        T = eltype(typeof(g))
-    end
-    X = zeros(T, n)
-    for i = 1:n
-        X[i] = rand(g)
-    end
+    X = rand(g, n)
+    @test eltype(X) isa @test_deprecated(eltype(g)) 
 
     K = ncomponents(g)
     pr = @inferred(probs(g))
