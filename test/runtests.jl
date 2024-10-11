@@ -54,12 +54,7 @@ const tests = [
     "multivariate/vonmisesfisher",
     "conversion",
     "convolution",
-    "mixture", # extra file compared to /src
-    "gradlogpdf", # extra file compared to /src
-    "univariate/continuous/noncentralt",
     "univariate/locationscale",
-    "quantile_newton", # extra file compared to /src
-    "univariate/continuous/semicircle",
     "qq",
     "univariate/continuous/pgeneralizedgaussian",
     "product",
