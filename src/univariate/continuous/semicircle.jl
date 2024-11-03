@@ -78,8 +78,8 @@ function rand(rng::AbstractRNG, d::Semicircle)
     # of point uniformly distributed on radius d.r half disk
     # project onto x axis
     rmax = float(d.r)
-    θ = rand(rng, eltype(rmax)) # multiple of π
-    r = rmax * sqrt(rand(rng, eltype(rmax)))
+    θ = rand(rng, typeof(rmax)) # multiple of π
+    r = rmax * sqrt(rand(rng, typeof(rmax)))
     return cospi(θ) * r
 end
 
