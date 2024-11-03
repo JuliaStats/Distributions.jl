@@ -7,7 +7,8 @@
     @test scale(d1) == 10.0
     @test partype(d1) === Float64
     @test @test_deprecated(eltype(d1)) === Float64
-    @test rand(d1) isa Float64
+    @test @inferred(rand(d1)) isa Float64
+    @test @inferred(eltype(rand(d1, 2))) === Float64
 
     @test median(d1) == quantile(d1, 0.5)
     x = Base.Fix1(quantile, d1).([0.25, 0.45, 0.60, 0.80, 0.90])
@@ -24,8 +25,9 @@
     @test shape(d1) == 10.0f0
     @test scale(d1) == 10.0f0
     @test partype(d1) === Float32
-    @test @test_deprecated(eltype(d1)) === Float64
-    @test rand(d1) isa Float64
+    @test @test_deprecated(eltype(d1)) === Float32
+    @test @inferred(rand(d1)) isa Float32
+    @test @inferred(eltype(rand(d1, 2))) === Float32
 
     d1 = JohnsonSU(1.0, 1, 0, 1)
     @test Base.convert(JohnsonSU{Float64}, d1) === d1
