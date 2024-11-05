@@ -126,7 +126,60 @@ end
 
 #### Evaluation & Sampling
 
-@_delegate_statsfuns Binomial binom n p
+# We rely on Rmath for (log)pdf, (log)cdf, and quantile functions
+# We do not use the `@_delegate_statsfuns` macro to work around some issues in the 
+# quantile functions such as `StatsFuns.binominvcdf(10, 0.0, 1.0) = 10`.
+pdf(d::Binomial, x::Real) = binompdf(d.n, d.p, x)
+logpdf(d::Binomial, x::Real) = binomlogpdf(d.n, d.p, x)
+cdf(d::Binomial, x::Real) = binomcdf(d.n, d.p, x)
+ccdf(d::Binomial, x::Real) = binomccdf(d.n, d.p, x)
+logcdf(d::Binomial, x::Real) = binomlogcdf(d.n, d.p, x)
+logccdf(d::Binomial, x::Real) = binomlogccdf(d.n, d.p, x)
+
+function quantile(d::Binomial, q::Real)::Int
+    _check_quantile_arg(q)
+    if iszero(d.p)
+        return 0
+    elseif isone(d.p)
+        return d.n
+    else
+        return binominvcdf(d.n, d.p, q)
+    end
+end
+function cquantile(d::Binomial, q::Real)::Int
+    _check_cquantile_arg(q)
+    if iszero(d.p)
+        return 0
+    elseif isone(d.p)
+        return d.n
+    else
+        return binominvccdf(d.n, d.p, q)
+    end
+end
+function invlogcdf(d::Binomial, lq::Real)::Int
+    _check_invlogcdf_arg(lq)
+    if iszero(d.p)
+        return 0
+    elseif isone(d.p)
+        return d.n
+    elseif isinf(lq)
+        return 0
+    else
+        return binominvlogcdf(d.n, d.p, lq)
+    end
+end
+function invlogccdf(d::Binomial, lq::Real)::Int
+    _check_invlogccdf_arg(lq)
+    if iszero(d.p)
+        return 0
+    elseif isone(d.p)
+        return d.n
+    elseif isinf(lq)
+        return d.n
+    else
+        return binominvlogccdf(d.n, d.p, lq)
+    end
+end
 
 function rand(rng::AbstractRNG, d::Binomial)
     p, n = d.p, d.n
