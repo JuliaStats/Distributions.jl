@@ -136,9 +136,18 @@ end
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function _rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix)
-    Ψ = rand(rng, d.W)
-    A .= rand(rng, InverseWishart(d.n2, Ψ) )
+function rand(rng::AbstractRNG, d::MatrixFDist)
+    A = Matrix{float(partype(d))}(undef, size(d))
+    @inbounds rand!(rng, d, A)
+    return A
+end
+
+@inline function rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix{<:Real})
+    @boundscheck size(A) == size(d)
+    X = rand(rng, d.W)
+    Ψ = PDMat(Symmetric(X))
+    @inbounds rand!(rng, InverseWishart(d.n2, Ψ), A)
+    return A
 end
 
 #  -----------------------------------------------------------------------------
@@ -146,23 +155,3 @@ end
 #  -----------------------------------------------------------------------------
 
 inv(d::MatrixFDist) = ( (n1, n2, B) = params(d); MatrixFDist(n2, n1, inv(B)) )
-
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::MatrixFDist)
-    check_univariate(d)
-    n1, n2, B = params(d)
-    μ = zero(partype(d))
-    σ = (n1 / n2) * Matrix(B)[1]
-    return AffineDistribution(μ, σ, FDist(n1, n2))
-end
-
-function _rand_params(::Type{MatrixFDist}, elty, n::Int, p::Int)
-    n == p || throw(ArgumentError("dims must be equal for MatrixFDist"))
-    n1 = elty( n + 1 + abs(10randn()) )
-    n2 = elty( n + 3 + abs(10randn()) )
-    B = (X = 2rand(elty, n, n) .- 1; X * X')
-    return n1, n2, B
-end

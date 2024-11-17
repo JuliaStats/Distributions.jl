@@ -104,10 +104,12 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
+function matrixnormal_logc0(U::AbstractPDMat{T}, V::AbstractPDMat{T}) where {T<:Real}
     n = size(U, 1)
     p = size(V, 1)
-    -(n * p / 2) * (logtwo + logπ) - (n / 2) * logdet(V) - (p / 2) * logdet(U)
+    term1 = n * logdet(V) + p * logdet(U)
+    term2 = n * p * (oftype(term1, logtwo) + oftype(term1, logπ))
+    return - (term1 + term2) / 2
 end
 
 function logkernel(d::MatrixNormal, X::AbstractMatrix)
@@ -121,35 +123,17 @@ end
 
 #  https://en.wikipedia.org/wiki/Matrix_normal_distribution#Drawing_values_from_the_distribution
 
-function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
+function rand(rng::AbstractRNG, d::MatrixNormal)
+    Y = Matrix{float(partype(d))}(undef, size(d))
+    @inbounds rand!(rng, d, Y)
+    return Y
+end
+
+@inline function rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix{<:Real})
+    @boundscheck size(Y) == size(d)
     n, p = size(d)
     X = randn(rng, n, p)
     A = cholesky(d.U).L
     B = cholesky(d.V).U
     Y .= d.M .+ A * X * B
-end
-
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::MatrixNormal)
-    check_univariate(d)
-    M, U, V = params(d)
-    μ = M[1]
-    σ = sqrt( Matrix(U)[1] * Matrix(V)[1] )
-    return Normal(μ, σ)
-end
-
-function _multivariate(d::MatrixNormal)
-    n, p = size(d)
-    all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixNormal` must be 1 to coerce to `MvNormal`"))
-    return vec(d)
-end
-
-function _rand_params(::Type{MatrixNormal}, elty, n::Int, p::Int)
-    M = randn(elty, n, p)
-    U = (X = 2 .* rand(elty, n, n) .- 1; X * X')
-    V = (Y = 2 .* rand(elty, p, p) .- 1; Y * Y')
-    return M, U, V
 end

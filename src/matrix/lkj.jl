@@ -39,8 +39,8 @@ function LKJ(d::Integer, η::Real; check_args::Bool=true)
         (η, η > 0, "shape parameter must be positive."),
     )
     logc0 = lkj_logc0(d, η)
-    T = Base.promote_eltype(η, logc0)
-    LKJ{T, typeof(d)}(d, T(η), T(logc0))
+    _η, _logc0 = promote(η, logc0)
+    return LKJ(d, _η, _logc0)
 end
 
 #  -----------------------------------------------------------------------------
@@ -100,13 +100,13 @@ params(d::LKJ) = (d.d, d.η)
 #  -----------------------------------------------------------------------------
 
 function lkj_logc0(d::Integer, η::Real)
-    T = float(Base.promote_typeof(d, η))
+    η = float(first(promote(η, d)))
     d > 1 || return zero(η)
     if isone(η)
         if iseven(d)
-            logc0 = -lkj_onion_loginvconst_uniform_even(d, T)
+            logc0 = -lkj_onion_loginvconst_uniform_even(d, η)
         else
-            logc0 = -lkj_onion_loginvconst_uniform_odd(d, T)
+            logc0 = -lkj_onion_loginvconst_uniform_odd(d, η)
         end
     else
         logc0 = -lkj_onion_loginvconst(d, η)
@@ -120,14 +120,39 @@ logkernel(d::LKJ, R::AbstractMatrix) = (d.η - 1) * logdet(R)
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function _rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix)
-    R .= _lkj_onion_sampler(d.d, d.η, rng)
+function rand(rng::AbstractRNG, d::LKJ)
+    R = Matrix{float(partype(d))}(undef, size(d))
+    @inbounds rand!(rng, d, R)
+    return R
 end
 
-function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.default_rng())
+@inbounds function rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix{<:Real})
+    @boundscheck size(R) == size(d)
+
+    # Currently requires one-based indexing
+    # TODO: Generalize to more general indices
+    Base.require_one_based_indexing(R)
+
+    # Special case: Distribution collapses to a Dirac distribution at the identity matrix
+    # We handle this separately, to increase performance and since `rand(Beta(Inf, Inf))` is not well defined.
+    η = d.η
+    d = d.d
+    if η == Inf
+        for j in 1:d
+            for i in 1:(j - 1)
+                R[i, j] = 0
+            end
+            R[j, j] = 1
+            for i in (j + 1):d
+                R[i, j] = 0
+            end
+        end
+        return R
+    end
+
     #  Section 3.2 in LKJ (2009 JMA)
     #  1. Initialization
-    R = ones(typeof(η), d, d)
+    fill!(R, oneunit(float(η)))
     d > 1 || return R
     β = η + 0.5d - 1
     u = rand(rng, Beta(β, β))
@@ -159,25 +184,9 @@ end
 #  -----------------------------------------------------------------------------
 
 function _marginal(lkj::LKJ)
-    d = lkj.d
-    η = lkj.η
-    α = η + 0.5d - 1
-    AffineDistribution(-1, 2, Beta(α, α))
-end
-
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::LKJ)
-    check_univariate(d)
-    return DiscreteNonParametric([one(d.η)], [one(d.η)])
-end
-
-function _rand_params(::Type{LKJ}, elty, n::Int, p::Int)
-    n == p || throw(ArgumentError("dims must be equal for LKJ"))
-    η = abs(3randn(elty))
-    return n, η
+    η, d = promote(lkj.η, lkj.d)
+    α = η + d/2 - 1
+    return 2 * Beta(α, α) - 1
 end
 
 #  -----------------------------------------------------------------------------
@@ -187,78 +196,49 @@ end
 #  for 1 / c₀, even if they say that it is not.
 #  -----------------------------------------------------------------------------
 
+#  Equation (17) in LKJ (2009 JMA)
 function lkj_onion_loginvconst(d::Integer, η::Real)
-    #  Equation (17) in LKJ (2009 JMA)
-    T = float(Base.promote_typeof(d, η))
-    h = T(1//2)
-    α = η + h * d - 1
-    loginvconst = (2*η + d - 3)*T(logtwo) + (T(logπ) / 4) * (d * (d - 1) - 2) + logbeta(α, α) - (d - 2) * loggamma(η + h * (d - 1))
+    η = float(first(promote(η, d)))
+    α = η + oftype(η, d) / 2 - 1
+    loginvconst = (2 * η + d - 3) * oftype(η, logtwo) + (d * (d - 1) - 2) * (oftype(η, logπ) / 4) + logbeta(α, α)
+    z = loggamma(η + oftype(η, d - 1) / 2)
     for k in 2:(d - 1)
-        loginvconst += loggamma(η + h * (d - 1 - k))
+        loginvconst += loggamma(η + oftype(η, d - 1 - k) / 2) - z
     end
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T}) where {T <: Real}
-    #  Theorem 5 in LKJ (2009 JMA)
-    h = T(1//2)
-    loginvconst = (d - 1) * ((d + 1) * (T(logπ) / 4) - (d - 1) * (T(logtwo) / 4) - loggamma(h * (d + 1)))
+#  Theorem 5 in LKJ (2009 JMA)
+function lkj_onion_loginvconst_uniform_odd(d::Integer, η::Real)
+    @assert isodd(d) && isone(η)
+    η = float(first(promote(η, d)))
+    loginvconst = (d - 1) * ((d + 1) * (oftype(η, logπ) / 4) - (d - 1) * (oftype(η, logtwo) / 4) - loggamma(oftype(η, (d + 1) ÷ 2)))
     for k in 2:2:(d - 1)
-        loginvconst += loggamma(T(k))
+        loginvconst += loggamma(oftype(η, k))
     end
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T}) where {T <: Real}
-    #  Theorem 5 in LKJ (2009 JMA)
-    h = T(1//2)
-    loginvconst = d * ((d - 2) * (T(logπ) / 4) + (3 * d - 4) * (T(logtwo) / 4) + loggamma(h * d)) - (d - 1) * loggamma(T(d))
+#  Theorem 5 in LKJ (2009 JMA)
+function lkj_onion_loginvconst_uniform_even(d::Integer, η::Real)
+    @assert iseven(d) && isone(η)
+    η = float(first(promote(η, d)))
+    loginvconst = d * ((d - 2) * (oftype(η, logπ) / 4) + (3 * d - 4) * (oftype(η, logtwo) / 4) + loggamma(oftype(η, d ÷ 2))) - (d - 1) * loggamma(oftype(η, d))
     for k in 2:2:(d - 2)
-        loginvconst += loggamma(k)
+        loginvconst += loggamma(oftype(η, k))
     end
     return loginvconst
 end
 
 function lkj_vine_loginvconst(d::Integer, η::Real)
     #  Equation (16) in LKJ (2009 JMA)
-    expsum = zero(η)
-    betasum = zero(η)
-    for k in 1:d - 1
-        α = η + 0.5(d - k - 1)
-        expsum += (2η - 2 + d - k) * (d - k)
+    η = float(first(promote(η, d)))
+    expsum = betasum = zero(η)
+    for k in 1:(d - 1)
+        α = η + oftype(η, d - k - 1) / 2
+        expsum += (2 * η - 2 + d - k) * (d - k)
         betasum += (d - k) * logbeta(α, α)
     end
     loginvconst = expsum * logtwo + betasum
     return loginvconst
-end
-
-function lkj_vine_loginvconst_uniform(d::Integer)
-    #  Equation after (16) in LKJ (2009 JMA)
-    expsum = 0.0
-    betasum = 0.0
-    for k in 1:d - 1
-        α = (k + 1) / 2
-        expsum += k ^ 2
-        betasum += k * logbeta(α, α)
-    end
-    loginvconst = expsum * logtwo + betasum
-    return loginvconst
-end
-
-function lkj_loginvconst_alt(d::Integer, η::Real)
-    #  Third line in first proof of Section 3.3 in LKJ (2009 JMA)
-    loginvconst = zero(η)
-    for k in 1:d - 1
-        loginvconst += 0.5k*logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
-    end
-    return loginvconst
-end
-
-function corr_logvolume(n::Integer)
-    #  https://doi.org/10.4169/amer.math.monthly.123.9.909
-    logvol = 0.0
-    for k in 1:n - 1
-        logvol += 0.5k*logπ + k*loggamma((k+1)/2) - k*loggamma((k+2)/2)
-    end
-    return logvol
 end

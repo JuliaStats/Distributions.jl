@@ -1,6 +1,7 @@
 # Tests for Dirichlet distribution
 
-using  Distributions
+using Distributions
+using SpecialFunctions
 using Test, Random, LinearAlgebra
 using ChainRulesCore
 using ChainRulesTestUtils

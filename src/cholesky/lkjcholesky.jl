@@ -48,8 +48,8 @@ function LKJCholesky(d::Int, η::Real, _uplo::Union{Char,Symbol} = 'L'; check_ar
     )
     logc0 = lkj_logc0(d, η)
     uplo = _char_uplo(_uplo)
-    T = Base.promote_eltype(η, logc0)
-    return LKJCholesky(d, T(η), uplo, T(logc0))
+    _η, _logc0 = promote(η, logc0)
+    return LKJCholesky(d, _η, uplo, _logc0)
 end
 
 # adapted from LinearAlgebra.char_uplo
@@ -108,7 +108,7 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
 end
 
 function StatsBase.mode(d::LKJCholesky)
-    factors = Matrix{eltype(d)}(LinearAlgebra.I, size(d))
+    factors = Matrix{float(partype(d))}(LinearAlgebra.I, size(d))
     return LinearAlgebra.Cholesky(factors, d.uplo, 0)
 end
 
@@ -152,27 +152,26 @@ end
 #  -----------------------------------------------------------------------------
 
 function Base.rand(rng::AbstractRNG, d::LKJCholesky)
-    factors = Matrix{eltype(d)}(undef, size(d))
-    R = LinearAlgebra.Cholesky(factors, d.uplo, 0)
-    return _lkj_cholesky_onion_sampler!(rng, d, R)
-end
-function Base.rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     p = d.d
+    η = d.η
     uplo = d.uplo
-    T = eltype(d)
-    TM = Matrix{T}
-    Rs = Array{LinearAlgebra.Cholesky{T,TM}}(undef, dims)
-    for i in eachindex(Rs)
-        factors = TM(undef, p, p)
-        Rs[i] = R = LinearAlgebra.Cholesky(factors, uplo, 0)
-        _lkj_cholesky_onion_sampler!(rng, d, R)
+    factors = Matrix{float(partype(d))}(undef, p, p)
+    _lkj_cholesky_onion_tri!(rng, factors, p, η, uplo)
+    return LinearAlgebra.Cholesky(factors, uplo, 0)
+end
+function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
+    let rng=rng, d=d
+        map(_ -> rand(rng, d), CartesianIndices(dims))
     end
-    return Rs
 end
 
-Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky) = Random.rand!(default_rng(), d, R)
-function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky)
-    return _lkj_cholesky_onion_sampler!(rng, d, R)
+Base.@propagate_inbounds function Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
+    return Random.rand!(default_rng(), d, R)
+end
+@inline function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
+    @boundscheck size(R.factors) == size(d)
+    _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, R.uplo)
+    return R
 end
 
 function Random.rand!(
@@ -180,20 +179,27 @@ function Random.rand!(
     d::LKJCholesky,
     Rs::AbstractArray{<:LinearAlgebra.Cholesky{T,TM}},
     allocate::Bool,
-) where {T,TM}
+) where {T<:Real,TM}
     p = d.d
-    uplo = d.uplo
+    η = d.η
     if allocate
+        uplo = d.uplo
         for i in eachindex(Rs)
-            Rs[i] = _lkj_cholesky_onion_sampler!(
-                rng,
-                d,
-                LinearAlgebra.Cholesky(TM(undef, p, p), uplo, 0),
+            Rs[i] = LinearAlgebra.Cholesky(
+                _lkj_cholesky_onion_tri!(
+                    rng,
+                    TM(undef, p, p),
+                    p,
+                    η,
+                    uplo,
+                ),
+                uplo,
+                0,
             )
         end
     else
-        for i in eachindex(Rs)
-            _lkj_cholesky_onion_sampler!(rng, d, Rs[i])
+        for R in Rs
+            _lkj_cholesky_onion_tri!(rng, R.factors, p, η, R.uplo)
         end
     end
     return Rs
@@ -211,36 +217,49 @@ end
 # onion method
 #
 
-function _lkj_cholesky_onion_sampler!(
-    rng::AbstractRNG,
-    d::LKJCholesky,
-    R::LinearAlgebra.Cholesky,
-)
-    if R.uplo === 'U'
-        _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, Val(:U))
-    else
-        _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, Val(:L))
-    end
-    return R
-end
-
 function _lkj_cholesky_onion_tri!(
     rng::AbstractRNG,
-    A::AbstractMatrix,
+    A::AbstractMatrix{<:Real},
     d::Int,
     η::Real,
-    ::Val{uplo},
-) where {uplo}
+    uplo::Char,
+)
+    # Currently requires one-based indexing
+    # TODO: Generalize to more general indices
+    Base.require_one_based_indexing(A)
+    @assert size(A) == (d, d)
+
+    # Special case: Distribution collapses to a Dirac distribution at the identity matrix
+    # We handle this separately, to increase performance and since `rand(Beta(Inf, Inf))` is not well defined.
+    if η == Inf
+        if uplo === 'L'
+            for j in 1:d
+                A[j, j] = 1
+                for i in (j+1):d
+                    A[i, j] = 0
+                end
+            end 
+        else
+            for j in 1:d
+                for i in 1:(j - 1)
+                    A[i, j] = 0
+                end
+                A[j, j] = 1
+            end
+        end
+        return A
+    end
+
     # Section 3.2 in LKJ (2009 JMA)
     # reformulated to incrementally construct Cholesky factor as mentioned in Section 5
     # equivalent steps in algorithm in reference are marked.
-    @assert size(A) == (d, d)
+
     A[1, 1] = 1
     d > 1 || return A
     β = η + (d - 2)//2
     #  1. Initialization
     w0 = 2 * rand(rng, Beta(β, β)) - 1
-    @inbounds if uplo === :L
+    @inbounds if uplo === 'L'
         A[2, 1] = w0
     else
         A[1, 2] = w0
@@ -254,7 +273,7 @@ function _lkj_cholesky_onion_tri!(
         y = rand(rng, Beta(k//2, β))
         #  (c)-(e)
         # w is directionally uniform vector of length √y
-        @inbounds w = @views uplo === :L ? A[k + 1, 1:k] : A[1:k, k + 1]
+        @inbounds w = @views uplo === 'L' ? A[k + 1, 1:k] : A[1:k, k + 1]
         Random.randn!(rng, w)
         rmul!(w, sqrt(y) / norm(w))
         # normalize so new row/column has unit norm

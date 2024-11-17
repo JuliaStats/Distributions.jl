@@ -161,18 +161,16 @@ function rand(rng::AbstractRNG, d::Dirichlet{<:Real,<:FillArrays.AbstractFill{<:
     return lmul!(inv(sum(x)), x)
 end
 
-function _rand!(rng::AbstractRNG,
-                d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{<:Real})
+@inline function rand!(rng::AbstractRNG, d::Union{Dirichlet,DirichletCanon}, x::AbstractVector{<:Real})
+    @boundscheck length(d) == length(x)
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
     lmul!(inv(sum(x)), x) # this returns x
 end
 
-function _rand!(rng::AbstractRNG,
-                d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
-                x::AbstractVector{<:Real}) where {T<:Real}
+@inline function rand!(rng::AbstractRNG, d::Dirichlet{T,<:FillArrays.AbstractFill{T}}, x::AbstractVector{<:Real}) where {T<:Real}
+    @boundscheck length(d) == length(x)
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
     lmul!(inv(sum(x)), x) # this returns x
 end
