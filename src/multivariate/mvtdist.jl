@@ -124,12 +124,14 @@ sqmahal(d::AbstractMvTDist, x::AbstractMatrix{T}) where {T<:Real} = sqmahal!(Vec
 
 
 function mvtdist_consts(d::AbstractMvTDist)
-    H = convert(eltype(d), 0.5)
-    logpi = convert(eltype(d), log(pi))
-    hdf = H * d.df
-    hdim = H * d.dim
+    logdet_Σ = logdet(d.Σ)
+    onehalf = oftype(logdet_Σ, 1//2)
+    logpi = oftype(logdet_Σ, logπ)
+    df = oftype(logdet_Σ, d.df)
+    hdf = onehalf * df
+    hdim = onehalf * d.dim
     shdfhdim = hdf + hdim
-    v = loggamma(shdfhdim) - loggamma(hdf) - hdim*log(d.df) - hdim*logpi - H*logdet(d.Σ)
+    v = loggamma(shdfhdim) - loggamma(hdf) - hdim * (log(df) + logpi) - onehalf * logdet_Σ
     return (shdfhdim, v)
 end
 
@@ -169,7 +171,8 @@ function rand(rng::AbstractRNG, d::GenericMvTDist, n::Int)
     x
 end
 
-function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
+@inline function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
     chisqd = Chisq{partype(d)}(d.df)
     y = sqrt(rand(rng, chisqd) / d.df)
     unwhiten!(d.Σ, randn!(rng, x))
@@ -177,10 +180,11 @@ function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractVector{<:Real})
     x
 end
 
-function _rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{T}) where T<:Real
+@inline function rand!(rng::AbstractRNG, d::GenericMvTDist, x::AbstractMatrix{<:Real})
+    @boundscheck size(x, 1) == length(d)
     cols = size(x,2)
     chisqd = Chisq{partype(d)}(d.df)
-    y = Matrix{T}(undef, 1, cols)
+    y = similar(x, (1, cols))
     unwhiten!(d.Σ, randn!(rng, x))
     rand!(rng, chisqd, y)
     x .= x ./ sqrt.(y ./ d.df) .+ d.μ

@@ -35,14 +35,16 @@ _product_valuesupport(dists) = mapreduce(value_support ∘ typeof, promote_type,
 
 # type-stable and faster implementations for tuples
 function _product_valuesupport(dists::NTuple{<:Any,Distribution})
-    return __product_promote_type(value_support, typeof(dists))
+    return __promote_type(value_support, typeof(dists))
 end
 
-__product_promote_type(f::F, ::Type{Tuple{D}}) where {F,D<:Distribution} = f(D)
-function __product_promote_type(f::F, ::Type{T}) where {F,T}
+_common_eltype(xs) = mapreduce(eltype, promote_type, xs)
+_common_eltype(xs::NTuple{N,<:Real}) where {N} = __promote_type(eltype, typeof(xs))
+__promote_type(f::F, ::Type{Tuple{D}}) where {F,D} = f(D)
+function __promote_type(f::F, ::Type{T}) where {F,T<:Tuple}
     return promote_type(
         f(Base.tuple_type_head(T)),
-        __product_promote_type(f, Base.tuple_type_tail(T)),
+        __promote_type(f, Base.tuple_type_tail(T)),
     )
 end
 
@@ -102,16 +104,21 @@ cov(d::ProductDistribution{2}, ::Val{false}) = reshape(cov(d), size(d)..., size(
 
 # Arrays of univariate distributions
 function rand(rng::AbstractRNG, d::ArrayOfUnivariateDistribution)
-    return map(Base.Fix1(rand, rng), d.dists)
+    x = map(Base.Fix1(rand, rng), d.dists)
+    if x isa AbstractArray{<:Real}
+        return x
+    else
+        # For instance, if x is a tuple
+        return collect(_common_eltype(x), x)
+    end
 end
-function rand!(
+@inline function rand!(
     rng::AbstractRNG,
     d::ArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    @inbounds for (i, di) in zip(eachindex(x), d.dists)
-        x[i] = rand(rng, di)
-    end
+    @boundscheck size(x) == size(d)
+    map!(Base.Fix1(rand, rng), x, d.dists)
     return x
 end
 
@@ -133,14 +140,16 @@ function rand(
     rng::AbstractRNG,
     d::FillArrayOfUnivariateDistribution,
 )
-    return @inbounds rand(rng, sampler(first(d.dists)), size(d))
+    return rand(rng, first(d.dists), size(d))
 end
-function rand!(
+@inline function rand!(
     rng::AbstractRNG,
     d::FillArrayOfUnivariateDistribution{N},
     x::AbstractArray{<:Real,N},
 ) where {N}
-    return @inbounds rand!(rng, sampler(first(d.dists)), x)
+    @boundscheck size(x) == size(d)
+    rand!(rng, first(d.dists), x)
+    return x
 end
 
 # more efficient implementation of `_logpdf` for `Fill` array of univariate distributions
@@ -159,17 +168,16 @@ end
 
 # sampling for arrays of distributions
 function rand(rng::AbstractRNG, d::ProductDistribution)
-    x = let rng = rng, d = d
-        mapreduce(di -> vec(rand(rng, di)), hcat, vec(d.dists))
-    end
+    x = mapreduce(vec ∘ Base.Fix1(rand, rng), hcat, d.dists)
     return reshape(x, size(d))
 end
-Base.@propagate_inbounds function rand!(
+@inline function rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,M},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
-    for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
+    @boundscheck size(A) == size(d)
+    @inbounds for (di, Ai) in zip(d.dists, eachvariate(A, ArrayLikeVariate{M}))
         rand!(rng, di, Ai)
     end
     return A
@@ -193,11 +201,7 @@ end
 
 # more efficient sampling for `Fill` arrays of distributions
 function rand(rng::AbstractRNG, d::ProductDistribution{<:Any,<:Any,<:FillArrays.AbstractFill})
-    rand(rng, sampler(first(d.dists)), A)
-    x = let rng = rng, d = d
-        mapreduce(di -> vec(rand(rng, di)), hcat, vec(d.dists))
-    end
-    return reshape(x, size(d))
+    return _product_rand(rng, sampler(first(d.dists)), size(d))
 end
 function _product_rand(rng::AbstractRNG, spl::Sampleable{ArrayLikeVariate{N}}, dims::Dims) where N
     xi = rand(rng, spl)
@@ -208,11 +212,12 @@ function _product_rand(rng::AbstractRNG, spl::Sampleable{ArrayLikeVariate{N}}, d
     return x
 end
 
-function _rand!(
+@inline function rand!(
     rng::AbstractRNG,
     d::ProductDistribution{N,M,<:FillArrays.AbstractFill},
     A::AbstractArray{<:Real,N},
 ) where {N,M}
+    @boundscheck size(A) == size(d)
     @inbounds rand!(rng, sampler(first(d.dists)), A)
     return A
 end

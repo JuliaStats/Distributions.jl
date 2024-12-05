@@ -111,7 +111,7 @@ function test_location_scale(
             @test invlogccdf(dtest, log(0.8)) ≈ invlogccdf(dref, log(0.8))
 
             r = if ismissing(rng)
-                rand(dtest, r, 200_000)
+                rand(dtest, 200_000)
             else
                 rand(rng, dtest, 200_000)
             end

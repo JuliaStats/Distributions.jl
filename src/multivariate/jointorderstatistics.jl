@@ -139,12 +139,13 @@ function rand(rng::AbstractRNG, d::JointOrderStatistics)
         # but this branch is probably taken when length(d.ranks) is small or much smaller than n.
         xi = rand(rng, d.dist) # this is only used to obtain the type of samples from `d.dist`
         x = Vector{typeof(xi)}(undef, length(d.ranks))
-        _rand!(rng, d, x)
+        rand!(rng, d, x)
     end
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+@inline function rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
     n = d.n
     if n == length(d.ranks)  # ranks == 1:n
         # direct method, slower than inversion method for large `n` and distributions with

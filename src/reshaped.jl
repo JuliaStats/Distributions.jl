@@ -85,11 +85,15 @@ end
 end
 
 # sampling
-function _rand!(
+function rand(rng::AbstractRNG, d::ReshapedDistribution)
+    return reshape(rand(rng, d.dist), size(d))
+end
+@inline function rand!(
     rng::AbstractRNG,
     d::ReshapedDistribution{N},
     x::AbstractArray{<:Real,N}
 ) where {N}
+    @boundscheck size(x) == size(d.dist)
     dist = d.dist
     @inbounds rand!(rng, dist, reshape(x, size(dist)))
     return x

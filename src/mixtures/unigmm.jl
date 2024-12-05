@@ -28,7 +28,7 @@ mean(d::UnivariateGMM) = dot(d.means, probs(d))
 function rand(rng::AbstractRNG, d::UnivariateGMM)
     k = rand(rng, d.prior)
     μ = d.means[k]
-    σ = d.std[k]
+    σ = d.stds[k]
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
 
@@ -46,7 +46,7 @@ function rand(rng::AbstractRNG, s::UnivariateGMMSampler)
     σ = d.stds[k]
     return muladd(randn(rng, float(Base.promote_typeof(μ, σ))), σ, μ)
 end
-function rand(rng::AbstractRNG, s::UnivariateGMMSampler, x::AbstractArray{<:Real})
+function rand!(rng::AbstractRNG, s::UnivariateGMMSampler, x::AbstractArray{<:Real})
     psampler = s.psampler
     means = s.means
     stds = s.stds

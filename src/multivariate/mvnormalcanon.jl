@@ -187,12 +187,14 @@ function rand(rng::AbstractRNG, d::MvNormalCanon, n::Int)
     return x
 end
 
-function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector)
+@inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
     unwhiten_winv!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end
-function _rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix)
+@inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix{<:Real})
+    @boundscheck size(x, 1) == length(d)
     unwhiten_winv!(d.J, randn!(rng, x))
     x .+= d.μ
     return x

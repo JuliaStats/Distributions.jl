@@ -56,8 +56,8 @@ params(d::MvLogitNormal) = params(d.normal)
 @inline partype(d::MvLogitNormal) = partype(d.normal)
 
 location(d::MvLogitNormal) = mean(d.normal)
-minimum(d::MvLogitNormal) = fill(zero(eltype(d)), length(d))
-maximum(d::MvLogitNormal) = fill(oneunit(eltype(d)), length(d))
+minimum(d::MvLogitNormal) = Fill(zero(float(partype(d))), length(d))
+maximum(d::MvLogitNormal) = Fill(oneunit(float(partype(d))), length(d))
 
 function insupport(d::MvLogitNormal, x::AbstractVector{<:Real})
     return length(d) == length(x) && all(≥(0), x) && sum(x) ≈ 1

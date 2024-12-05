@@ -7,7 +7,7 @@ matrices (positive-definite matrices with ones on the diagonal).
 
 Variates or samples of the distribution are `LinearAlgebra.Cholesky` objects, as might
 be returned by `F = LinearAlgebra.cholesky(R)`, so that `Matrix(F) ≈ R` is a variate or
-sample of [`LKJ`](@ref). 
+sample of [`LKJ`](@ref).
 
 Sampling `LKJCholesky` is faster than sampling `LKJ`, and often having the correlation
 matrix in factorized form makes subsequent computations cheaper as well.
@@ -127,7 +127,7 @@ function logkernel(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     p == 1 && return c * log(first(factors))
     # assuming D = diag(factors) with length(D) = p,
     # logp = sum(i -> (c - i) * log(D[i]), 2:p)
-    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di) 
+    logp = sum(Iterators.drop(enumerate(diagind(factors)), 1)) do (i, di)
         return (c - i) * log(factors[di])
     end
     return logp
@@ -165,16 +165,16 @@ function rand(rng::AbstractRNG, d::LKJCholesky, dims::Dims)
     end
 end
 
-Base.@propagate_inbounds function Random.rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
-    return Random.rand!(default_rng(), d, R)
+Base.@propagate_inbounds function rand!(d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
+    return rand!(default_rng(), d, R)
 end
-@inline function Random.rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
+@inline function rand!(rng::AbstractRNG, d::LKJCholesky, R::LinearAlgebra.Cholesky{<:Real})
     @boundscheck size(R.factors) == size(d)
     _lkj_cholesky_onion_tri!(rng, R.factors, d.d, d.η, R.uplo)
     return R
 end
 
-function Random.rand!(
+function rand!(
     rng::AbstractRNG,
     d::LKJCholesky,
     Rs::AbstractArray{<:LinearAlgebra.Cholesky{T,TM}},
@@ -204,13 +204,13 @@ function Random.rand!(
     end
     return Rs
 end
-function Random.rand!(
+function rand!(
     rng::AbstractRNG,
     d::LKJCholesky,
     Rs::AbstractArray{<:LinearAlgebra.Cholesky{<:Real}},
 )
     allocate = any(!isassigned(Rs, i) for i in eachindex(Rs)) || any(R -> size(R, 1) != d.d, Rs)
-    return Random.rand!(rng, d, Rs, allocate)
+    return rand!(rng, d, Rs, allocate)
 end
 
 #
@@ -238,7 +238,7 @@ function _lkj_cholesky_onion_tri!(
                 for i in (j+1):d
                     A[i, j] = 0
                 end
-            end 
+            end
         else
             for j in 1:d
                 for i in 1:(j - 1)

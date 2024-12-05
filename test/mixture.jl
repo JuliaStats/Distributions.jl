@@ -1,4 +1,4 @@
-using Distributions, Random
+using Distributions, LinearAlgebra, Random
 using Test
 using ForwardDiff: Dual
 
@@ -7,22 +7,22 @@ using ForwardDiff: Dual
 
 function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
                       rng::Union{AbstractRNG, Missing} = missing)
-    X = rand(g, n)
-    @test eltype(X) isa @test_deprecated(eltype(g)) 
+    X = rng === missing ? [rand(g) for _ in 1:n] : [rand(rng, g) for _ in 1:n]
+    @test eltype(X) === @test_deprecated(eltype(g))
 
     K = ncomponents(g)
     pr = @inferred(probs(g))
     @assert length(pr) == K
 
     # mean
-    mu = 0.0
+    mu = zero(float(partype(g)))
     for k = 1:K
         mu += pr[k] * mean(component(g, k))
     end
     @test @inferred(mean(g)) ≈ mu
 
-    # evaluation of cdf
-    cf = zeros(T, n)
+    # evaluation of cdfc
+    cf = zeros(eltype(X), n)
     for k = 1:K
         c_k = component(g, k)
         for i = 1:n
@@ -36,8 +36,8 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test Base.Fix1(cdf, g).(X) ≈ cf
 
     # evaluation
-    P0 = zeros(T, n, K)
-    LP0 = zeros(T, n, K)
+    P0 = zeros(eltype(X), n, K)
+    LP0 = zeros(eltype(X), n, K)
     for k = 1:K
         c_k = component(g, k)
         for i = 1:n
@@ -70,15 +70,14 @@ function test_mixture(g::UnivariateMixture, n::Int, ns::Int,
     @test @inferred(median(g)) ≈ quantile(g, 1//2)
 
     # sampling
-    # sampling does not work with `Float32` since `AliasTable` does not support `Float32`
-    # Ref: https://github.com/JuliaStats/StatsBase.jl/issues/158
-    if T <: AbstractFloat && eltype(probs(g)) === Float64
+    # sampling does not work with `Dual`s since `AliasTable` does not support them
+    if eltype(X) <: AbstractFloat
         if ismissing(rng)
             Xs = rand(g, ns)
         else
             Xs = rand(rng, g, ns)
         end
-        @test isa(Xs, Vector{T})
+        @test Xs isa Vector{float(partype(g))}
         @test length(Xs) == ns
         @test isapprox(mean(Xs), mean(g), atol=0.01)
     end

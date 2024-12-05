@@ -30,7 +30,7 @@ end
 
 VonMisesFisher(μ::Vector{T}, κ::T) where {T<:Real} = VonMisesFisher{T}(μ, κ)
 function VonMisesFisher(μ::Vector{T}, κ::Real) where {T<:Real}
-    R = promote_type(T, eltype(κ))
+    R = promote_type(T, typeof(κ))
     return VonMisesFisher(convert(AbstractArray{R}, μ), convert(R, κ))
 end
 

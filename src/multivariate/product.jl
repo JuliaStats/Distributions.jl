@@ -33,8 +33,20 @@ end
 length(d::Product) = length(d.v)
 
 rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
-Base.@propagate_inbounds function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
-    return map!(Base.Fix1(rand, rng), x, d.v)
+@inline function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
+    map!(Base.Fix1(rand, rng), x, d.v)
+    return x
+end
+
+# Specializations for FillArrays (for which `map(Base.Fix1(rand, rng), d.v)` is incorrect)
+function rand(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    return rand(rng, first(d.v), size(d))
+end
+@inline function rand!(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}, x::AbstractVector{<:Real}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    @boundscheck length(x) == length(d)
+    rand!(rng, first(d.v), x)
+    return x
 end
 
 function _logpdf(d::Product, x::AbstractVector{<:Real})

@@ -94,7 +94,7 @@ Base.size(s::Sampleable{Univariate}) = ()
 Base.size(s::Sampleable{Multivariate}) = (length(s),)
 
 """
-    eltype(::Type{S}) where {S<:Distributions.Sampleable}
+    Base.eltype(::Type{S}) where {S<:Distributions.Sampleable}
 
 The default element type of a sample from a sampler of type `S`.
 
@@ -103,7 +103,6 @@ However, one can provide an array of different element types to store the sample
 
 !!! warn
     This method is deprecated and will be removed in an upcoming breaking release.
-
 """
 function Base.eltype(::Type{S}) where {VF<:VariateForm,VS<:Union{Discrete,Continuous},S<:Sampleable{VF,VS}}
     Base.depwarn("`eltype(::Type{<:Distributions.Sampleable})` is deprecated and will be removed", :eltype)

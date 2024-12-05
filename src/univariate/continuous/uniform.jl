@@ -153,7 +153,7 @@ Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 rand(rng::AbstractRNG, d::Uniform{T}) where {T} = d.a + (d.b - d.a) * rand(rng, float(T))
 
-_rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
+rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
     A .= Base.Fix1(quantile, d).(rand!(rng, A))
 
 
