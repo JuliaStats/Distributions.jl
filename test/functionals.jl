@@ -29,7 +29,13 @@ end
 @inline function Random.rand!(rng::AbstractRNG, p::CholeskyMvNormal, x::AbstractVector{<:Real})
     @boundscheck length(x) == length(p)
     randn!(rng, x)
-    lmul!(p.L, x)
+    # Older Julia versions that do not support `lmul!(::Diagonal, ::AbstractVector)`
+    # Ref https://github.com/JuliaLang/julia/pull/36012
+    if p.L isa Diagonal && VERSION < v"1.6.0-DEV.88"
+        x .*= p.L.diag
+    else
+        lmul!(p.L, x)
+    end
     x .+= p.m
     return x
 end

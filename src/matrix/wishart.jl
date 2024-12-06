@@ -211,6 +211,7 @@ end
     end
     unwhiten!(d.S, A)
     A .= A * A'
+    return A
 end
 
 function _wishart_genA!(rng::AbstractRNG, A::AbstractMatrix, df::Real)
