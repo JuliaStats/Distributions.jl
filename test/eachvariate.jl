@@ -14,8 +14,9 @@ end
 # MWE in #1817
 struct FooEachvariate <: Sampleable{Multivariate, Continuous} end
 Base.length(::FooEachvariate) = 3
-Base.eltype(::FooEachvariate) = Float64
-function Distributions._rand!(rng::AbstractRNG, ::FooEachvariate, x::AbstractVector{<:Real})
+Base.rand(rng::AbstractRNG, d::FooEachvariate) = rand(rng, length(d))
+@inline function Random.rand!(rng::AbstractRNG, d::FooEachvariate, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
     return rand!(rng, x)
 end
 
