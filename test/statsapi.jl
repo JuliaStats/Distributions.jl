@@ -1,7 +1,10 @@
 using Distributions
 using StatsAPI: pvalue
 
+using Random
 using Test
+
+Random.seed!(7362)
 
 @testset "pvalue" begin
     # For two discrete and two continuous distribution
