@@ -73,15 +73,8 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
-function median(d::Binomial)
-    round_down_mean = floor(Int,mean(d))
-    if cdf(d,round_down) < 0.5
-        round_down_mean+1
-    else
-        round_down_mean
-    end
-end
-            
+# `median` falls back to quantile-based definition
+
 function skewness(d::Binomial)
     n, p1 = params(d)
     p0 = 1 - p1
