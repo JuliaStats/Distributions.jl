@@ -73,8 +73,6 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
-median(d::Binomial) = round(Int,mean(d))
-
 function skewness(d::Binomial)
     n, p1 = params(d)
     p0 = 1 - p1
