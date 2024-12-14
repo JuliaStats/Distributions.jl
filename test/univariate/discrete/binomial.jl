@@ -26,6 +26,13 @@ end
 @test Distributions.expectation(identity, Binomial(6)) ≈ 3.0
 @test Distributions.expectation(x -> -x, Binomial(10, 0.2)) ≈ -2.0
 
+# Test median
+@test Distributions.median(Binomial(5,3//10)) == 1
+@test Distributions.median(Binomial(25,3//10)) == 7
+@test Distributions.median(Binomial(45,3//10)) == 13
+@test Distributions.median(Binomial(65,3//10)) == 19
+@test Distributions.median(Binomial(85,3//10)) == 25
+    
 # Test mode
 @test Distributions.mode(Binomial(100, 0.4)) == 40
 @test Distributions.mode(Binomial(1, 0.51)) == 1
