@@ -99,6 +99,7 @@ var(::UnivariateMixture)
 length(::MultivariateMixture)
 pdf(::AbstractMixtureModel, ::Any)
 logpdf(::AbstractMixtureModel, ::Any)
+gradlogpdf(::AbstractMixtureModel, ::Any)
 rand(::AbstractMixtureModel)
 rand!(::AbstractMixtureModel, ::AbstractArray)
 ```
