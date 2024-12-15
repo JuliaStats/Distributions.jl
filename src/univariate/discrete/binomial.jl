@@ -80,7 +80,7 @@ function median(dist::Binomial)
     ceil_mean = ceil(Int, rv_mean)
     if rv_mean - floor_mean <= bound
         floor_mean
-    elseif abs(ceil_mean - rv_mean) <= bound
+    elseif ceil_mean - rv_mean <= bound
         ceil_mean
     elseif cdf(rv, floor_mean) > 0.5
         floor_mean
