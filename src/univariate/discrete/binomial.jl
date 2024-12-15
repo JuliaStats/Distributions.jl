@@ -78,7 +78,7 @@ function median(rv::Binomial)
     rv_mean = mean(rv)
     floor_mean = floor(Int, rv_mean)
     ceil_mean = ceil(Int, rv_mean)
-    if abs(floor_mean - rv_mean) <= bound
+    if rv_mean - floor_mean <= bound
         floor_mean
     elseif abs(ceil_mean - rv_mean) <= bound
         ceil_mean
