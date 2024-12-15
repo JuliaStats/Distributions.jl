@@ -82,7 +82,7 @@ function median(dist::Binomial)
         floor_mean
     elseif ceil_mean - rv_mean <= bound
         ceil_mean
-    elseif cdf(rv, floor_mean) > 0.5
+    elseif cdf(rv, floor_mean) >= 0.5
         floor_mean
     else
         ceil_mean
