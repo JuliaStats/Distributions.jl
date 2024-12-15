@@ -73,7 +73,7 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
-function median(rv::Binomial)
+function median(dist::Binomial)
     bound = min(rv.p, 1-rv.p)
     rv_mean = mean(rv)
     floor_mean = floor(Int, rv_mean)
