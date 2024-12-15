@@ -74,18 +74,19 @@ end
 modes(d::Binomial) = Int[mode(d)]
 
 function median(dist::Binomial)
-    bound = min(rv.p, 1-rv.p)
-    rv_mean = mean(rv)
-    floor_mean = floor(Int, rv_mean)
-    ceil_mean = ceil(Int, rv_mean)
-    if rv_mean - floor_mean <= bound
+    bound = min(dist.p, 1-dist.p) # from http://dx.doi.org/10.1111/j.1467-9574.1980.tb00681.x
+    dist_mean = mean(dist)
+    
+    floor_mean = floor(Int, dist_mean)
+
+    if dist_mean - floor_mean < bound
         floor_mean
-    elseif ceil_mean - rv_mean <= bound
-        ceil_mean
-    elseif cdf(rv, floor_mean) >= 0.5
+    elseif floor_mean + 1 - dist_mean < bound
+        floor_mean + 1
+    elseif cdf(dist, floor_mean) >= 0.5
         floor_mean
     else
-        ceil_mean
+        floor_mean + 1
     end
 end
 
