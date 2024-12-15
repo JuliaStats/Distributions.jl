@@ -73,6 +73,22 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
+function median(rv::Binomial)
+    bound = min(rv.p, 1-rv.p)
+    rv_mean = mean(rv)
+    floor_mean = floor(Int, rv_mean)
+    ceil_mean = ceil(Int, rv_mean)
+    if abs(floor_mean - rv_mean) <= bound
+        floor_mean
+    elseif abs(ceil_mean - rv_mean) <= bound
+        ceil_mean
+    elseif cdf(rv, floor_mean) > 0.5
+        floor_mean
+    else
+        ceil_mean
+    end
+end
+
 function skewness(d::Binomial)
     n, p1 = params(d)
     p0 = 1 - p1
