@@ -27,16 +27,13 @@ end
 @test Distributions.expectation(x -> -x, Binomial(10, 0.2)) ≈ -2.0
 
 # Test median
-@test median(Binomial(5,3//10)) == 1
 @test median(Binomial(25,3//10)) == 7
 @test median(Binomial(45,3//10)) == 13
 @test median(Binomial(65,3//10)) == 19
 @test median(Binomial(85,3//10)) == 25
 
-@test median(Binomial(25,0.756)) == 19
-@test median(Binomial(25,1//2)) == 12
-@test median(Binomial(25,3//5)) == 15
-
+@test all([median(Binomial(7,p))==quantile(Binomial(7,p),1//2) for p in range(0,1,length=11)])
+    
 # Test mode
 @test Distributions.mode(Binomial(100, 0.4)) == 40
 @test Distributions.mode(Binomial(1, 0.51)) == 1
