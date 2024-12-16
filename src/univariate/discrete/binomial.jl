@@ -74,7 +74,14 @@ end
 modes(d::Binomial) = Int[mode(d)]
 
 function median(dist::Binomial)
-    bound = min(dist.p, 1-dist.p) # from http://dx.doi.org/10.1111/j.1467-9574.1980.tb00681.x
+    # The median is floor(Int, mean) or ceil(Int, mean)
+    # As shown in https://doi.org/10.1016/0167-7152(94)00090-U,
+    # |median - mean| <= 1 - bound
+    # where the equality is strict except for the case p = 1/2 and n odd.
+    # Thus if |k - mean| < bound for one of the two candidates if p = 1/2 and n odd
+    # or |k - mean| <= bound for one of the two candidates otherwise,
+    # the other candidate can't satisfy the condition and hence k must be the median
+    bound = max(min(dist.p, 1-dist.p), loghalf)
     dist_mean = mean(dist)
     
     floor_mean = floor(Int, dist_mean)
