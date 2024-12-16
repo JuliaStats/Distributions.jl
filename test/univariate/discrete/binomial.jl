@@ -32,7 +32,11 @@ end
 @test median(Binomial(45,3//10)) == 13
 @test median(Binomial(65,3//10)) == 19
 @test median(Binomial(85,3//10)) == 25
-    
+
+@test median(Binomial(25,0.756)) == 19
+@test median(Binomial(25,1//2)) == 12
+@test median(Binomial(25,3//5)) == 15
+
 # Test mode
 @test Distributions.mode(Binomial(100, 0.4)) == 40
 @test Distributions.mode(Binomial(1, 0.51)) == 1
