@@ -82,7 +82,10 @@ function median(dist::Binomial)
     
     if difference <= bound
         floor_mean
-    elseif  difference >= 1 - bound
+    elseif difference >= 1 - bound
+        # The case p = 1/2 and n odd was already covered above,
+        # thus only cases with |median - mean| < 1 - bound are left here
+        # Therefore difference >= 1 - bound implies that floor(mean) cannot be the median
         floor_mean + 1
     elseif cdf(dist, floor_mean) >= 0.5
         floor_mean
