@@ -78,10 +78,11 @@ function median(dist::Binomial)
     dist_mean = mean(dist)
     
     floor_mean = floor(Int, dist_mean)
-
-    if dist_mean - floor_mean < bound
+    difference = dist_mean - floor_mean
+    
+    if difference < bound
         floor_mean
-    elseif floor_mean + 1 - dist_mean < bound
+    elseif  difference > 1 - bound
         floor_mean + 1
     elseif cdf(dist, floor_mean) >= 0.5
         floor_mean
