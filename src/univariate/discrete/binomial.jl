@@ -81,6 +81,9 @@ function median(dist::Binomial)
     difference = dist_mean - floor_mean
     
     if difference <= bound
+        # The only case where the median satisfies |median - mean| <= 1 - bound with equality
+        # is p = 1/2 and n odd
+        # However, in that case we also want to return floor(mean)
         floor_mean
     elseif difference >= 1 - bound
         # The case p = 1/2 and n odd was already covered above,
