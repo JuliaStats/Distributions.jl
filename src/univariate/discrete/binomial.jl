@@ -67,11 +67,36 @@ params(d::Binomial) = (d.n, d.p)
 
 mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
-function mode(d::Binomial{T}) where T<:Real
+
+function mode(d::Binomial)
     (n, p) = params(d)
-    n > 0 ? floor(Int, (n + 1) * d.p) : zero(T)
+    v = (n + 1) * p
+    quasi_mode = floor(Int, v)
+    if quasi_mode == v
+        if p == 1
+            n
+        else
+            quasi_mode-1
+        end
+    else
+        quasi_mode
+    end
 end
-modes(d::Binomial) = Int[mode(d)]
+
+function modes(d::Binomial)
+    (n, p) = params(d)
+    v = (n + 1) * p
+    quasi_mode = floor(Int, v)
+    if quasi_mode == v
+        if p == 1
+            Int[n]
+        else
+            Int[quasi_mode-1, quasi_mode]
+        end
+    else
+        Int[quasi_mode]
+    end
+end
 
 function skewness(d::Binomial)
     n, p1 = params(d)
