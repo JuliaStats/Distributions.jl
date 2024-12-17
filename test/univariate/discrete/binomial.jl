@@ -32,11 +32,18 @@ end
 @test median(Binomial(45,3//10)) == 13
 @test median(Binomial(65,3//10)) == 19
 @test median(Binomial(85,3//10)) == 25
-    
+
 # Test mode
-@test Distributions.mode(Binomial(100, 0.4)) == 40
-@test Distributions.mode(Binomial(1, 0.51)) == 1
-@test Distributions.mode(Binomial(1, 0.49)) == 0
+@test mode(Binomial(100, 0.4)) == 40
+@test mode(Binomial(1, 0.51)) == 1
+@test mode(Binomial(1, 0.49)) == 0
+@test mode(Binomial(4, 2//3)) == 3
+@test mode(Binomial(6, 2//7)) == 1
+@test mode(Binomial(7, 1//8)) == 0
+
+@test modes(Binomial(4, 2//3)) == [3, 4]
+@test modes(Binomial(6, 2//7)) == [1, 2]
+@test modes(Binomial(7, 1//8)) == [0, 1]
 
 @test isplatykurtic(Bernoulli(0.5))
 @test ismesokurtic(Normal(0.0, 1.0))
