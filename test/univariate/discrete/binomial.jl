@@ -32,7 +32,7 @@ end
 @test median(Binomial(65,3//10)) == 19
 @test median(Binomial(85,3//10)) == 25
 
-@test all([median(Binomial(7,p))==quantile(Binomial(7,p),1//2) for p in range(0,1,length=11)])
+@test all(median(Binomial(7, p)) == quantile(Binomial(7, p), 1//2) for p in 0:0.1:1)
     
 # Test mode
 @test Distributions.mode(Binomial(100, 0.4)) == 40
