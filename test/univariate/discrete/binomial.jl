@@ -42,7 +42,11 @@ end
 @test mode(Binomial(7, 1//8)) == 0
 
 @test modes(Binomial(4, 2//3)) == [3]
+@test modes(Binomial(5, 3//4)) == [4]
+@test modes(Binomial(3, 2//4)) == [1, 2]
+@test modes(Binomial(4, 2//5)) == [1, 2]
 @test modes(Binomial(6, 2//7)) == [1, 2]
+@test modes(Binomial(6, 3//7)) == [2, 3]
 @test modes(Binomial(7, 1//8)) == [0, 1]
 
 @test isplatykurtic(Bernoulli(0.5))
