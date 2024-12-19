@@ -72,7 +72,7 @@ function mode(d::Binomial)
     (n, p) = params(d)
     v = (n + 1) * p
     quasi_mode = floor(Int, v)
-    if quasi_mode == v
+    if quasi_mode == v && p > 0
         if p == 1
             n
         else
