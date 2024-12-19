@@ -41,7 +41,7 @@ end
 @test mode(Binomial(6, 2//7)) == 1
 @test mode(Binomial(7, 1//8)) == 0
 
-@test modes(Binomial(4, 2//3)) == [3, 4]
+@test modes(Binomial(4, 2//3)) == [3]
 @test modes(Binomial(6, 2//7)) == [1, 2]
 @test modes(Binomial(7, 1//8)) == [0, 1]
 
