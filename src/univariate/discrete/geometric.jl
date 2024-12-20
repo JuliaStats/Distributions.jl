@@ -34,9 +34,7 @@ function Geometric(p::Real; check_args::Bool=true)
     return Geometric{typeof(p)}(p)
 end
 
-struct OneHalf <: Real end
-Geometric() = Geometric{OneHalf}(OneHalf())
-Base.getproperty(d::Geometric{OneHalf}, s::Symbol) = s == :p ? 0.5 : getfield(d, s)
+Geometric() = Geometric{Float64}(0.5)
 
 @distr_support Geometric 0 Inf
 
@@ -138,8 +136,14 @@ cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 ### Sampling
 
-rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
-rand(rng::AbstractRNG, ::Geometric{OneHalf}) = leading_zeros(rand(rng, UInt))
+# Inlining is required to hoist the d.p == 0.5 check when generating in bulk
+@inline function rand(rng::AbstractRNG, d::Geometric)
+    if d.p == 0.5
+        leading_zeros(rand(rng, UInt)) # This branch is a performance optimization
+    else
+        floor(Int,-randexp(rng) / log1p(-d.p))
+    end
+end
 
 ### Model Fitting
 
