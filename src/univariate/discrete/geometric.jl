@@ -136,9 +136,9 @@ cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 ### Sampling
 
-# Inlining is required to hoist the d.p == 0.5 check when generating in bulk
+# Inlining is required to hoist the d.p == 1//2 check when generating in bulk
 @inline function rand(rng::AbstractRNG, d::Geometric)
-    if d.p == 0.5
+    if d.p == 1//2
         leading_zeros(rand(rng, UInt)) # This branch is a performance optimization
     else
         floor(Int,-randexp(rng) / log1p(-d.p))
