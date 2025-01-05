@@ -130,7 +130,6 @@ export
     MatrixBeta,
     MatrixFDist,
     MatrixNormal,
-    MatrixReshaped,
     MatrixTDist,
     MixtureModel,
     Multinomial,
