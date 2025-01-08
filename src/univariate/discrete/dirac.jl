@@ -22,8 +22,6 @@ struct Dirac{T} <: DiscreteUnivariateDistribution
     value::T
 end
 
-Base.eltype(::Type{Dirac{T}}) where {T} = T
-
 insupport(d::Dirac, x::Real) = x == d.value
 minimum(d::Dirac) = d.value
 maximum(d::Dirac) = d.value

@@ -1,8 +1,8 @@
 @testset "Gumbel" begin
     @testset "eltype" begin
-        @test eltype(Gumbel()) === Float64
-        @test eltype(Gumbel(1f0)) === Float32
-        @test eltype(Gumbel{Int}(0, 1)) === Int
+        @test @test_deprecated(eltype(Gumbel())) === Float64
+        @test @test_deprecated(eltype(Gumbel(1f0))) === Float32
+        @test @test_deprecated(eltype(Gumbel{Int}(0, 1))) === Float64
     end
 
     @testset "rand" begin

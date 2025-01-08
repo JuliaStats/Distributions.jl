@@ -18,7 +18,6 @@ The methods listed below are implemented for each multivariate distribution, whi
 ```@docs
 length(::MultivariateDistribution)
 size(::MultivariateDistribution)
-eltype(::Type{MultivariateDistribution})
 mean(::MultivariateDistribution)
 var(::MultivariateDistribution)
 cov(::MultivariateDistribution)
@@ -41,8 +40,8 @@ loglikelihood(::MultivariateDistribution, ::AbstractVector{<:Real})
 ### Sampling
 
 ```@docs
-rand(rng::AbstractRNG, ::MultivariateDistribution)
-rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
+Base.rand(rng::AbstractRNG, ::MultivariateDistribution)
+Random.rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractVector{<:Real})
 ```
 
 **Note:** In addition to these common methods, each multivariate distribution has its special methods, as introduced below.
@@ -111,7 +110,7 @@ Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 Distributions.product_distribution
 ```
 
-Using `product_distribution` is advised to construct product distributions. 
+Using `product_distribution` is advised to construct product distributions.
 For some distributions, it constructs a special multivariate type.
 
 ## Index
