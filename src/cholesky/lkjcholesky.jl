@@ -109,9 +109,18 @@ function insupport(d::LKJCholesky, R::LinearAlgebra.Cholesky)
     return true
 end
 
-function StatsBase.mode(d::LKJCholesky)
+function StatsBase.mean(d::LKJCholesky)
     factors = Matrix{eltype(d)}(LinearAlgebra.I, size(d))
     return LinearAlgebra.Cholesky(factors, d.uplo, 0)
+end
+
+function mode(d::LKJCholesky; check_args::Bool=true)
+    @check_args(
+        LKJCholesky,
+        @setup(η = d.η),
+        (η, η > 1, "mode is defined only when η > 1."),
+    )
+    return mean(d)
 end
 
 StatsBase.params(d::LKJCholesky) = (d.d, d.η, d.uplo)
