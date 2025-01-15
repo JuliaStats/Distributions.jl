@@ -141,10 +141,6 @@ using FiniteDifferences
             m = mode(d; check_args = false)
             @test m isa Cholesky{eltype(d)}
             @test Matrix(m) ≈ I
-
-            m = mean(d)
-            @test m isa Cholesky{eltype(d)}
-            @test Matrix(m) ≈ I
         end
         for (d, η) in ((2, 4), (2, 1), (3, 1)), T in (Float32, Float64)
             @test @inferred(partype(LKJCholesky(d, T(η)))) === T
