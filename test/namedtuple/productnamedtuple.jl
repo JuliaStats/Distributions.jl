@@ -128,8 +128,13 @@ using Test
 
         d1 = ProductNamedTupleDistribution((x=Normal(1.0, 2.0), y=Gamma()))
         d2 = ProductNamedTupleDistribution((x=Normal(), y=Gamma(2.0, 3.0)))
+        d2_perm = ProductNamedTupleDistribution((y=Gamma(2.0, 3.0), x=Normal()))
+        d2_sub = ProductNamedTupleDistribution((x=Normal(1.0, 2.0),))
         @test kldivergence(d1, d2) ==
             kldivergence(d1.dists.x, d2.dists.x) + kldivergence(d1.dists.y, d2.dists.y)
+        @test kldivergence(d1, d2_perm) == kldivergence(d1, d2)
+        @test_throws ArgumentError kldivergence(d1, d2_sub)
+        @test_throws ArgumentError kldivergence(d2_sub, d1)
 
         d3 = ProductNamedTupleDistribution((x=Normal(1.0, 2.0), y=Gamma(6.0, 7.0)))
         @test std(d3) == (x=std(d3.dists.x), y=std(d3.dists.y))
