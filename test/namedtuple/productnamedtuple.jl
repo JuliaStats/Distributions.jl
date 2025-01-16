@@ -65,7 +65,7 @@ using Test
                     z=DiscreteUniform(1, 10),
                     w=LKJCholesky(3, 2.0),
                 ),
-                (x = product_distribution((x=Normal(), y=Gamma())),),
+                (x=product_distribution((x=Normal(), y=Gamma())),),
             ]
                 d = ProductNamedTupleDistribution(nt)
                 @test eltype(d) === eltype(rand(d))

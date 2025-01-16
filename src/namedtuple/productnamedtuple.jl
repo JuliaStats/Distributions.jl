@@ -105,8 +105,10 @@ function _named_fields_match(x::NamedTuple{K}, y::NamedTuple) where {K}
 end
 
 function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple) where {K}
-    return (_named_fields_match(dist.dists, x) &&
-            all(map(insupport, dist.dists, NamedTuple{K}(x))))
+    return (
+        _named_fields_match(dist.dists, x) &&
+        all(map(insupport, dist.dists, NamedTuple{K}(x)))
+    )
 end
 
 # Evaluation
@@ -142,8 +144,11 @@ entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 function kldivergence(
     d1::ProductNamedTupleDistribution{K}, d2::ProductNamedTupleDistribution{K}
 ) where {K}
-    _named_fields_match(d1.dists, d2.dists) ||
-        throw(ArgumentError("Sets of named tuple fields are not the same: !issetequal($(fieldnames(d1)), $(fieldnames(d2)))"))
+    _named_fields_match(d1.dists, d2.dists) || throw(
+        ArgumentError(
+            "Sets of named tuple fields are not the same: !issetequal($(fieldnames(d1)), $(fieldnames(d2)))",
+        ),
+    )
     return sum(map(kldivergence, d1.dists, NamedTuple{K}(d2.dists)))
 end
 
