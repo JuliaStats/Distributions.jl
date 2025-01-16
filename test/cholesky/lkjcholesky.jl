@@ -124,7 +124,7 @@ using FiniteDifferences
     end
 
     @testset "properties" begin
-        @testset for p in (4, 5), η in (0.5, 2, 3.5), uplo in ('L', 'U')
+        @testset for p in (4, 5), η in (0.5, 1, 2, 3.5), uplo in ('L', 'U')
             d = LKJCholesky(p, η, uplo)
             @test d.d == p
             @test size(d) == (p, p)
