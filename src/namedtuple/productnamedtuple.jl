@@ -25,6 +25,9 @@ julia> nt = rand(d)
 julia> pdf(d, nt)
 0.13702825691074877
 
+julia> pdf(d, reverse(nt))  # order of fields does not matter
+0.13702825691074877
+
 julia> mode(d)  # mode of marginals
 (x = 0.0, y = [0.25, 0.75])
 
@@ -91,27 +94,36 @@ Base.minimum(d::ProductNamedTupleDistribution) = map(minimum, d.dists)
 
 Base.maximum(d::ProductNamedTupleDistribution) = map(maximum, d.dists)
 
-function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
-    return all(map(insupport, dist.dists, x))
+function _named_fields_match(x::NamedTuple{K}, y::NamedTuple) where {K}
+    length(x) == length(y) || return false
+    try
+        NamedTuple{K}(y)
+        return true
+    catch
+        return false
+    end
+end
+
+function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple) where {K}
+    return (_named_fields_match(dist.dists, x) &&
+            all(map(insupport, dist.dists, NamedTuple{K}(x))))
 end
 
 # Evaluation
 
-function pdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
+function pdf(dist::ProductNamedTupleDistribution, x::NamedTuple)
     return exp(logpdf(dist, x))
 end
 
-function logpdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
-    return sum(map(logpdf, dist.dists, x))
+function logpdf(dist::ProductNamedTupleDistribution{K}, x::NamedTuple) where {K}
+    return sum(map(logpdf, dist.dists, NamedTuple{K}(x)))
 end
 
-function loglikelihood(dist::ProductNamedTupleDistribution{K}, x::NamedTuple{K}) where {K}
+function loglikelihood(dist::ProductNamedTupleDistribution, x::NamedTuple)
     return logpdf(dist, x)
 end
 
-function loglikelihood(
-    dist::ProductNamedTupleDistribution{K}, xs::AbstractArray{<:NamedTuple{K}}
-) where {K}
+function loglikelihood(dist::ProductNamedTupleDistribution, xs::AbstractArray{<:NamedTuple})
     return sum(Base.Fix1(loglikelihood, dist), xs)
 end
 
@@ -130,7 +142,9 @@ entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 function kldivergence(
     d1::ProductNamedTupleDistribution{K}, d2::ProductNamedTupleDistribution{K}
 ) where {K}
-    return sum(map(kldivergence, d1.dists, d2.dists))
+    _named_fields_match(d1.dists, d2.dists) ||
+        throw(ArgumentError("Sets of named tuple fields are not the same: !issetequal($(fieldnames(d1)), $(fieldnames(d2)))"))
+    return sum(map(kldivergence, d1.dists, NamedTuple{K}(d2.dists)))
 end
 
 # Sampling

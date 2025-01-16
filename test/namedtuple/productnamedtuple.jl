@@ -91,8 +91,8 @@ using Test
             d = ProductNamedTupleDistribution(nt)
             x = (x=rand(nt.x), y=rand(nt.y), z=rand(nt.z))
             @test @inferred(insupport(d, x))
-            @test_throws MethodError insupport(d, NamedTuple{(:y, :z, :x)}(x))
-            @test_throws MethodError insupport(d, NamedTuple{(:x, :y)}(x))
+            @test insupport(d, NamedTuple{(:z, :y, :x)}(x))
+            @test !insupport(d, NamedTuple{(:x, :y)}(x))
             @test !insupport(d, merge(x, (x=NaN,)))
             @test !insupport(d, merge(x, (y=-1,)))
             @test !insupport(d, merge(x, (z=fill(0.25, 4),)))
@@ -103,12 +103,18 @@ using Test
         nt = (x=Normal(1.0, 2.0), y=Gamma(), z=Dirichlet(5, 1.0), w=Bernoulli())
         d = ProductNamedTupleDistribution(nt)
         x = (x=rand(nt.x), y=rand(nt.y), z=rand(nt.z), w=rand(nt.w))
+        xrev = NamedTuple{(:z, :y, :x, :w)}(x)
         @test @inferred(logpdf(d, x)) ==
             logpdf(nt.x, x.x) + logpdf(nt.y, x.y) + logpdf(nt.z, x.z) + logpdf(nt.w, x.w)
+        @test @inferred(logpdf(d, xrev)) == logpdf(d, x)
         @test @inferred(pdf(d, x)) == exp(logpdf(d, x))
+        @test @inferred(pdf(d, xrev)) == pdf(d, x)
         @test @inferred(loglikelihood(d, x)) == logpdf(d, x)
+        @test @inferred(loglikelihood(d, xrev)) == loglikelihood(d, x)
         xs = [(x=rand(nt.x), y=rand(nt.y), z=rand(nt.z), w=rand(nt.w)) for _ in 1:10]
+        xs_perm = [NamedTuple{(:z, :y, :x, :w)}(x) for x in xs]
         @test @inferred(loglikelihood(d, xs)) == sum(logpdf.(Ref(d), xs))
+        @test @inferred(loglikelihood(d, xs_perm)) == loglikelihood(d, xs)
     end
 
     @testset "Statistics" begin
@@ -190,6 +196,9 @@ using Test
             xs = Array{typeof(x)}(undef, (2, 3, 4))
             rand!(d, xs)
             @test all(insupport.(Ref(d), xs))
+            xs_perm = Array{typeof(NamedTuple{(:z, :y, :x, :w)}(x))}(undef, (2, 3, 4))
+            rand!(d, xs_perm)
+            @test all(insupport.(Ref(d), xs_perm))
         end
     end
 end
