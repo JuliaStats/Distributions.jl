@@ -117,7 +117,7 @@ function test_convert(d::MatrixDistribution)
     @test d == deepcopy(d)
     for elty in (Float32, Float64, BigFloat)
         del1 = convert(distname{elty}, d)
-        del2 = convert(distname{elty}, getfield.(Ref(d), fieldnames(typeof(d)))...)
+        del2 = convert(distname{elty}, (Base.Fix1(getfield, d)).(fieldnames(typeof(d)))...)
         @test del1 isa distname{elty}
         @test del2 isa distname{elty}
         @test partype(del1) == elty

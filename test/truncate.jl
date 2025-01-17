@@ -39,7 +39,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int,lower::Int,up
 
         println("    testing truncated($(ex),$lower,$upper)")
         d = truncated(eval(Meta.parse(ex)),lower,upper)
-        if dtype != Uniform && dtype != DiscreteUniform && dtype != TruncatedNormal # Uniform is truncated to Uniform
+        if dtype != Uniform && dtype != DiscreteUniform # Uniform is truncated to Uniform
             @assert isa(dtype, Type) && dtype <: UnivariateDistribution
             @test isa(d, dtypet)
             # verification and testing
@@ -213,4 +213,22 @@ end
   @test quantile(d, 1) ≤ d.upper && quantile(d, 1) ≈ d.upper
 
   @test isa(quantile(d, ForwardDiff.Dual(1.,0.)), ForwardDiff.Dual)
+end
+
+@testset "cdf outside of [0, 1] (#1854)" begin
+    dist = truncated(Normal(2.5, 0.2); lower=0.0)
+    @test @inferred(cdf(dist, 3.741058503233821e-17)) === 0.0
+    @test @inferred(ccdf(dist, 3.741058503233821e-17)) === 1.0
+    @test @inferred(cdf(dist, 1.4354474178676617e-18)) === 0.0
+    @test @inferred(ccdf(dist, 1.4354474178676617e-18)) === 1.0
+    @test @inferred(cdf(dist, 8.834854780587132e-18)) === 0.0
+    @test @inferred(ccdf(dist, 8.834854780587132e-18)) === 1.0
+
+    dist = truncated(
+        Normal(2.122039143928797, 0.07327367710864985);
+        lower = 1.9521656132878236,
+        upper = 2.8274429454898398,
+    )
+    @test @inferred(cdf(dist, 2.82)) === 1.0
+    @test @inferred(ccdf(dist, 2.82)) === 0.0
 end

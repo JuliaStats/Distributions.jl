@@ -225,6 +225,6 @@ end
 
 function rand(rng::AbstractRNG, s::GammaIPSampler)
     x = rand(rng, s.s)
-    e = randexp(rng)
+    e = randexp(rng, typeof(x))
     x*exp(s.nia*e)
 end

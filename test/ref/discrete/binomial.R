@@ -18,7 +18,7 @@ Binomial <- R6Class("Binomial",
                  failprob=q,
                  ntrials=n,
                  mean=n * p,
-                 median=round(n * p),
+                 median=qbinom(0.5, self$n, self$p),
                  var=n * p * q,
                  skewness=(q - p) / sqrt(n*p*q),
                  kurtosis=(1 - 6*p*q) / (n*p*q))

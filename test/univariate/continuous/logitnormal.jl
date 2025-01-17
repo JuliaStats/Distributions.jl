@@ -43,7 +43,7 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     for i = 1:min(100, n_tsamples)
         @test logpdf(g, X[i]) ≈ log(pdf(g, X[i]))
     end
-    @test logpdf.(g, X) ≈ log.(pdf.(g, X))
+    @test Base.Fix1(logpdf, g).(X) ≈ log.(Base.Fix1(pdf, g).(X))
     @test isequal(logpdf(g, 0),-Inf)
     @test isequal(logpdf(g, 1),-Inf)
     @test isequal(logpdf(g, -eps()),-Inf)
@@ -63,4 +63,13 @@ end
     typeof(rand(d, 5)) # still Float64
     @test convert(LogitNormal{Float32}, d) === d
     @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
+end
+
+@testset "Logitnormal Sampling Tests" begin
+    for d in [
+        LogitNormal(-2, 3),
+        LogitNormal(0, 0.2)
+    ]
+        test_distr(d, 10^6)
+    end
 end
