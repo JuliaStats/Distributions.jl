@@ -84,18 +84,20 @@ end
 _vmf_genw(rng::AbstractRNG, s::VonMisesFisherSampler) =
     _vmf_genw(rng, s.p, s.b, s.x0, s.c, s.κ)
 
-function _vmf_householder_vec(μ::Vector{Float64})
+function _vmf_householder_vec(μ::Vector{Float64}, ε::Float64=1e-8)
     # assuming μ is a unit-vector (which it should be)
     #  can compute v in a single pass over μ
+    # Add small value, ε, to denominator to avoid dividing by zero
 
     p = length(μ)
     v = similar(μ)
     v[1] = μ[1] - 1.0
     s = sqrt(-2*v[1])
-    v[1] /= s
+    v[1] /= (s + ε)
 
     @inbounds for i in 2:p
-        v[i] = μ[i] / s
+        
+        v[i] = μ[i] / (s + ε)
     end
 
     return v
