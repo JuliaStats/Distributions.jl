@@ -73,7 +73,36 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
-median(d::Binomial) = round(Int,mean(d))
+function median(dist::Binomial)
+    # The median is floor(Int, mean) or ceil(Int, mean)
+    # As shown in https://doi.org/10.1016/0167-7152(94)00090-U,
+    # |median - mean| <= 1 - bound
+    # where the equality is strict except for the case p = 1/2 and n odd.
+    # Thus if |k - mean| < bound for one of the two candidates if p = 1/2 and n odd
+    # or |k - mean| <= bound for one of the two candidates otherwise,
+    # the other candidate can't satisfy the condition and hence k must be the median
+    bound = max(min(dist.p, 1-dist.p), loghalf)
+    dist_mean = mean(dist)
+    
+    floor_mean = floor(Int, dist_mean)
+    difference = dist_mean - floor_mean
+    
+    if difference <= bound
+        # The only case where the median satisfies |median - mean| <= 1 - bound with equality
+        # is p = 1/2 and n odd
+        # However, in that case we also want to return floor(mean)
+        floor_mean
+    elseif difference >= 1 - bound
+        # The case p = 1/2 and n odd was already covered above,
+        # thus only cases with |median - mean| < 1 - bound are left here
+        # Therefore difference >= 1 - bound implies that floor(mean) cannot be the median
+        floor_mean + 1
+    elseif cdf(dist, floor_mean) >= 0.5
+        floor_mean
+    else
+        floor_mean + 1
+    end
+end
 
 function skewness(d::Binomial)
     n, p1 = params(d)

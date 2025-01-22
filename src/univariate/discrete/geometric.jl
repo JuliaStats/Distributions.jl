@@ -30,7 +30,7 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
 end
 
 function Geometric(p::Real; check_args::Bool=true)
-    @check_args Geometric (p, zero(p) < p < one(p))
+    @check_args Geometric (p, zero(p) < p <= one(p))
     return Geometric{typeof(p)}(p)
 end
 
@@ -136,7 +136,14 @@ cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 ### Sampling
 
-rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
+# Inlining is required to hoist the d.p == 1//2 check when generating in bulk
+@inline function rand(rng::AbstractRNG, d::Geometric)
+    if d.p == 1//2
+        leading_zeros(rand(rng, UInt)) # This branch is a performance optimization
+    else
+        floor(Int,-randexp(rng) / log1p(-d.p))
+    end
+end
 
 ### Model Fitting
 

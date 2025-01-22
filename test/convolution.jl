@@ -66,6 +66,28 @@ using Test
         @test d3 isa Poisson
         @test d3.λ == 0.5
     end
+
+    @testset "DiscreteNonParametric" begin
+        d1 = DiscreteNonParametric([0, 1], [0.5, 0.5])
+        d2 = DiscreteNonParametric([1, 2], [0.5, 0.5])
+        d_eps = DiscreteNonParametric([prevfloat(0.0), 0.0, nextfloat(0.0), 1.0], fill(1//4, 4))
+        d10 = DiscreteNonParametric((1//10):(1//10):1, fill(1//10, 10))
+        
+        d_int_simple = @inferred(convolve(d1, d2))
+        @test d_int_simple isa DiscreteNonParametric
+        @test support(d_int_simple) == [1, 2, 3]
+        @test probs(d_int_simple) == [0.25, 0.5, 0.25]
+               
+        d_rat = convolve(d10, d10)
+        @test support(d_rat) == (1//5):(1//10):2
+        @test probs(d_rat) == [1//100, 1//50, 3//100, 1//25, 1//20, 3//50, 7//100, 2//25, 9//100, 1//10, 
+                               9//100, 2//25, 7//100, 3//50, 1//20, 1//25, 3//100, 1//50, 1//100]
+
+        d_float_supp = convolve(d_eps, d_eps)
+        @test support(d_float_supp) == [2 * prevfloat(0.0), prevfloat(0.0), 0.0, nextfloat(0.0), 2 * nextfloat(0.0), 1.0, 2.0]
+        @test probs(d_float_supp) == [1//16, 1//8, 3//16, 1//8, 1//16, 3//8, 1//16]
+    end
+    
 end
 
 @testset "continuous univariate" begin
