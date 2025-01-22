@@ -82,7 +82,7 @@ end
 function rand(rng::AbstractRNG, d::TDist)
     ν = d.ν
     z = sqrt(rand(rng, Chisq{typeof(ν)}(ν)) / ν)
-    return randn(rng) / (isinf(ν) ? one(z) : z)
+    return randn(rng, typeof(z)) / (isinf(ν) ? one(z) : z)
 end
 
 function cf(d::TDist{T}, t::Real) where T <: Real

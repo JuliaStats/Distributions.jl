@@ -105,8 +105,13 @@ cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling
-rand(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
+rand(rng::AbstractRNG, d::Exponential{T}) where {T} = xval(d, randexp(rng, float(T)))
 
+function rand!(rng::AbstractRNG, d::Exponential, A::AbstractArray{<:Real})
+    randexp!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 #### Fit model
 
