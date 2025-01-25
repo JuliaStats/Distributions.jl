@@ -14,7 +14,8 @@ All subtypes of `AbstractMixtureModel` should implement the following methods:
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+    MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
