@@ -90,6 +90,13 @@ Here, `x` can be a single sample or an array of multiple samples.
 logpdf(d::AbstractMixtureModel, x::Any)
 
 """
+    gradlogpdf(d::Union{UnivariateMixture, MultivariateMixture}, x)
+
+Evaluate the gradient of the logarithm of the (mixed) probability density function over a single sample `x`.
+"""
+gradlogpdf(d::AbstractMixtureModel, x::Any)
+
+"""
     rand(d::Union{UnivariateMixture, MultivariateMixture})
 
 Draw a sample from the mixture model `d`.
@@ -364,6 +371,38 @@ end
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
 
+function gradlogpdf(d::UnivariateMixture, x::Real)
+    ps = probs(d)
+    cs = components(d)
+
+    # `d` is expected to have at least one distribution, otherwise this will just error
+    psi, idxps = iterate(ps)
+    csi, idxcs = iterate(cs)
+    pdfx1 = pdf(csi, x)
+    pdfx = psi * pdfx1
+    glp = pdfx * gradlogpdf(csi, x)
+    if iszero(psi) || iszero(pdfx)
+        glp = zero(glp)
+    end
+    
+    while (iterps = iterate(ps, idxps)) !== nothing && (itercs = iterate(cs, idxcs)) !== nothing
+        psi, idxps = iterps
+        csi, idxcs = itercs
+        if !iszero(psi)
+            pdfxi = pdf(csi, x)
+            if !iszero(pdfxi)
+                pipdfxi = psi * pdfxi
+                pdfx += pipdfxi
+                glp += pipdfxi * gradlogpdf(csi, x)
+            end
+        end
+    end
+    if !iszero(pdfx) # else glp is already zero
+        glp /= pdfx
+    end 
+    return glp
+end
+
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
 _pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixlogpdf!(r, d, x)
@@ -373,6 +412,37 @@ _logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
 _pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
 _logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
+function gradlogpdf(d::MultivariateMixture, x::AbstractVector{<:Real})
+    ps = probs(d)
+    cs = components(d)
+
+    # `d` is expected to have at least one distribution, otherwise this will just error
+    psi, idxps = iterate(ps)
+    csi, idxcs = iterate(cs)
+    pdfx1 = pdf(csi, x)
+    pdfx = psi * pdfx1
+    glp = pdfx * gradlogpdf(csi, x)
+    if iszero(psi) || iszero(pdfx)
+        fill!(glp, zero(eltype(glp)))
+    end
+    
+    while (iterps = iterate(ps, idxps)) !== nothing && (itercs = iterate(cs, idxcs)) !== nothing
+        psi, idxps = iterps
+        csi, idxcs = itercs
+        if !iszero(psi)
+            pdfxi = pdf(csi, x)
+            if !iszero(pdfxi)
+                pipdfxi = psi * pdfxi
+                pdfx += pipdfxi
+                glp .+= pipdfxi .* gradlogpdf(csi, x)
+            end
+        end
+    end
+    if !iszero(pdfx) # else glp is already zero
+        glp ./= pdfx
+    end 
+    return glp
+end
 
 ## component-wise pdf and logpdf
 
