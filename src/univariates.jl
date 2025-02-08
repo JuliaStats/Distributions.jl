@@ -707,6 +707,7 @@ const continuous_distributions = [
     "levy",
     "lindley",
     "logistic",
+    "marchenkopastur",
     "noncentralbeta",
     "noncentralchisq",
     "noncentralf",
