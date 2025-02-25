@@ -169,6 +169,30 @@ function kurtosis(d::OrderStatistic{<:Logistic})
     return _polygamma_sum(T, 3, d.rank, d.n + 1 - d.rank) /
            _polygamma_sum(T, 1, d.rank, d.n + 1 - d.rank)^2
 end
+## AffineDistribution
+
+function mean(d::OrderStatistic{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.rank : d.n - d.rank + 1
+    dρ = OrderStatistic(d.dist.ρ, d.n, r; check_args=false)
+    return mean(dρ) * σ + d.dist.μ
+end
+function var(d::OrderStatistic{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.rank : d.n - d.rank + 1
+    dρ = OrderStatistic(d.dist.ρ, d.n, r; check_args=false)
+    return var(dρ) * σ^2
+end
+function skewness(d::OrderStatistic{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.rank : d.n - d.rank + 1
+    return sign(σ) * skewness(OrderStatistic(d.dist.ρ, d.n, r; check_args=false))
+end
+function kurtosis(d::OrderStatistic{<:AffineDistribution})
+    r = scale(d.dist) ≥ 0 ? d.rank : d.n - d.rank + 1
+    return kurtosis(OrderStatistic(d.dist.ρ, d.n, r; check_args=false))
+end
+
 # Common utilities
 
 _harmonicnum(T::Type{<:Real}, n::Int) = _harmonicnum_from(zero(T), 0, n)

@@ -252,6 +252,28 @@ function var(d::JointOrderStatistics{<:Logistic})
     v .= scale(d.dist)^2 .* (ϕ1 .+ ϕ2)
     return v
 end
+
+## AffineDistribution
+
+function mean(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return mean(dρ) .* σ .+ d.dist.μ
+end
+function var(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return var(dρ) * σ^2
+end
+function cov(d::JointOrderStatistics{<:AffineDistribution})
+    σ = scale(d.dist)
+    r = σ ≥ 0 ? d.ranks : d.n + 1 .- d.ranks
+    dρ = JointOrderStatistics(d.dist.ρ, d.n, r; check_args=false)
+    return cov(dρ) * σ^2
+end
+
 ## Common utilities
 
 # assume ns are sorted in increasing or decreasing order
