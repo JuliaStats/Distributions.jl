@@ -106,3 +106,13 @@ function rand(rng::AbstractRNG, d::OrderStatistic)
     b = _uniform_orderstatistic(d)
     return T(quantile(d.dist, rand(rng, b)))
 end
+
+# Moments
+
+## Uniform
+
+mean(d::OrderStatistic{<:Uniform}) = d.rank * scale(d.dist) / (d.n + 1) + minimum(d)
+std(d::OrderStatistic{<:Uniform}) = std(_uniform_orderstatistic(d)) * scale(d.dist)
+var(d::OrderStatistic{<:Uniform}) = var(_uniform_orderstatistic(d)) * scale(d.dist)^2
+skewness(d::OrderStatistic{<:Uniform}) = skewness(_uniform_orderstatistic(d))
+kurtosis(d::OrderStatistic{<:Uniform}) = kurtosis(_uniform_orderstatistic(d))

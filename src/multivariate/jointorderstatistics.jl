@@ -166,3 +166,25 @@ function _rand!(rng::AbstractRNG, d::JointOrderStatistics, x::AbstractVector{<:R
     end
     return x
 end
+
+# Moments
+
+## Uniform
+
+function mean(d::JointOrderStatistics{<:Uniform})
+    return d.ranks .* scale(d.dist) ./ (d.n + 1) .+ minimum(d.dist)
+end
+function var(d::JointOrderStatistics{<:Uniform})
+    n = d.n
+    ranks = d.ranks
+    return @. (scale(d.dist)^2 * ranks * (n + 1 - ranks)) / (n + 1)^2 / (n + 2)
+end
+function cov(d::JointOrderStatistics{<:Uniform})
+    n = d.n
+    ranks = d.ranks
+    c = (scale(d.dist) / (n + 1))^2 / (n + 2)
+    return broadcast(ranks, ranks') do rᵢ, rⱼ
+        rmin, rmax = minmax(rᵢ, rⱼ)
+        return rmin * (n + 1 - rmax) * c
+    end
+end
