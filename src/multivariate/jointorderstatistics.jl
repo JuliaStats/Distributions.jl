@@ -169,6 +169,47 @@ end
 
 # Moments
 
+## Fallbacks
+
+mean(d::JointOrderStatistics{<:ContinuousUnivariateDistribution}) = _moment(d, 1)
+function var(d::JointOrderStatistics{<:ContinuousUnivariateDistribution})
+    return _moment(d, 2, mean(d))
+end
+
+function _moment(
+    d::JointOrderStatistics{<:ContinuousUnivariateDistribution},
+    p::Int,
+    μ::Union{Real,AbstractVector{<:Real}}=0;
+    rtol=sqrt(eps(promote_type(partype(d), eltype(μ)))),
+)
+    # assumes if p == 1, then μ=0 and if p>1, then μ==mean(d)
+    T = float(typeof(one(Base.promote_type(partype(d), eltype(μ)))))
+    n = d.n
+    ranks = d.ranks
+
+    μdist = mean(d.dist)
+    mp = similar(d.ranks, T)
+    logC = @. -logbeta(ranks, T(n - ranks + 1))
+    function integrand!(y, x)
+        if x < μdist
+            # for some distributions (e.g. Normal) this improves numerical stability
+            logF = logcdf(d.dist, x)
+            log1mF = log1mexp(logF)
+        else
+            log1mF = logccdf(d.dist, x)
+            logF = log1mexp(log1mF)
+        end
+        logf = logpdf(d.dist, x)
+        @. y = (x - μ)^p * exp(logC + logf + (ranks - 1) * logF + (n - ranks) * log1mF)
+        return y
+    end
+    α = eps(T) / 2
+    lower = quantile(OrderStatistic(d.dist, n, first(ranks)), α)
+    upper = quantile(OrderStatistic(d.dist, n, last(ranks)), 1 - α)
+    quadgk!(integrand!, mp, lower, upper; rtol=rtol)
+    return mp
+end
+
 ## Uniform
 
 function mean(d::JointOrderStatistics{<:Uniform})

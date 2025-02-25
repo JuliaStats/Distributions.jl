@@ -109,6 +109,103 @@ end
 
 # Moments
 
+## Fallbacks
+
+mean(d::OrderStatistic) = _moment(d, 1)
+var(d::OrderStatistic) = _moment(d, 2, _moment(d, 1))
+function skewness(d::OrderStatistic)
+    m = mean(d)
+    return _moment(d, 3, m) / _moment(d, 2, m)^(3//2)
+end
+function kurtosis(d::OrderStatistic)
+    m = mean(d)
+    return _moment(d, 4, m) / _moment(d, 2, m)^2 - 3
+end
+
+function _moment(
+    d::OrderStatistic{<:ContinuousUnivariateDistribution},
+    p::Int,
+    μ::Real=0;
+    rtol=sqrt(eps(promote_type(partype(d), typeof(μ)))),
+)
+    # assumes if p == 1, then μ=0 and if p>1, then μ==mean(d)
+    T = float(typeof(one(Base.promote_type(partype(d), typeof(μ)))))
+    n = d.n
+    rank = d.rank
+
+    μdist = mean(d.dist)
+    isfinite(μ) && isfinite(μdist) || return T(NaN)
+    if isodd(p) && isodd(n) && rank == (n + 1) ÷ 2 && _issymmetric(d.dist)
+        # for symmetric distributions, distribution of median is also symmetric, so all of
+        # its odd central moments are 0.
+        return p == 1 ? μdist : zero(T)
+    end
+
+    logC = -logbeta(rank, T(n - rank + 1))
+    function integrand(x)
+        if x < μ
+            # for some distributions (e.g. Normal) this improves numerical stability
+            logF = logcdf(d.dist, x)
+            log1mF = log1mexp(logF)
+        else
+            log1mF = logccdf(d.dist, x)
+            logF = log1mexp(log1mF)
+        end
+        return (x - μ)^p *
+               exp(logC + logpdf(d.dist, x) + (rank - 1) * logF + (n - rank) * log1mF)
+    end
+    α = eps(T) / 2
+    lower = quantile(d, α)
+    upper = quantile(d, 1 - α)
+    return first(quadgk(integrand, lower, upper; rtol=rtol))
+end
+
+function _moment(d::OrderStatistic{<:DiscreteUnivariateDistribution}, p::Int, μ::Real=0)
+    T = float(typeof(one(Base.promote_type(partype(d), typeof(μ)))))
+
+    if isbounded(d.dist)
+        xs = support(d.dist)
+    elseif eltype(d.dist) <: Integer
+        # Note: this approximation can fail in the unlikely case of an atom with huge
+        # magnitude just outside of the bulk.
+        α = eps(T) / 2
+        xmin = quantile(d, α)
+        xmax = quantile(d, 1 - α)
+        xs = xmin:xmax
+    else
+        throw(
+            ArgumentError(
+                "Moments can only be computed for bounded distributions or those with integer support.",
+            ),
+        )
+    end
+    length(xs) == 1 && p == 1 && return first(xs) - μ
+
+    b = _uniform_orderstatistic(d)
+    cx = cdf(d.dist, first(xs) - 1)
+    c = cdf(b, cx)
+    mp = zero(first(xs)) * c
+    for x in xs
+        cx += pdf(d.dist, x)
+        c_new = cdf(b, cx)
+        mp += (x - μ)^p * (c_new - c)
+        c = c_new
+    end
+
+    return mp
+end
+
+_issymmetric(d) = false
+_issymmetric(::Normal) = true
+_issymmetric(::NormalCanon) = true
+_issymmetric(::Laplace) = true
+_issymmetric(::Arcsine) = true
+_issymmetric(::TDist) = true
+_issymmetric(d::Beta) = d.α == d.β
+_issymmetric(::Biweight) = true
+_issymmetric(::Triweight) = true
+_issymmetric(::SymTriangularDist) = true
+
 ## Uniform
 
 mean(d::OrderStatistic{<:Uniform}) = d.rank * scale(d.dist) / (d.n + 1) + minimum(d)
