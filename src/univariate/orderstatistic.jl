@@ -266,6 +266,36 @@ function kurtosis(d::OrderStatistic{<:Logistic})
     return _polygamma_sum(T, 3, d.rank, d.n + 1 - d.rank) /
            _polygamma_sum(T, 1, d.rank, d.n + 1 - d.rank)^2
 end
+
+## Normal
+
+function mean(d::OrderStatistic{<:Normal})
+    n = d.n
+    n > 5 && return _moment(d, 1)
+    rank = d.rank
+    μ = mean(d.dist)
+    σ = scale(d.dist)
+    T = float(typeof(one(σ)))
+    # Arnold §4.9
+    isodd(n) && rank == (n + 1) ÷ 2 && return μ
+    n == 2 && return (2 * rank - 3) * σ / sqrtπ + μ
+    n == 3 && return (rank - 2) * 3σ / 2 / sqrtπ + μ
+    I2 = atan(T(sqrt2)) / π
+    I3 = (6I2 - 1) / 4
+    r = max(rank, n - rank + 1)
+    s = (-1)^(d.rank != r)
+    if n == 4
+        c = 6s * σ / sqrtπ
+        r == 4 && return c * I2 + μ
+        r == 5 && return c * (1 - 3I2) + μ
+    end
+    if n == 5
+        c = 10s * σ / sqrtπ
+        r == 5 && return c * I3 + μ
+        r == 4 && return c * (3I2 - 4I3) + μ
+    end
+end
+
 ## AffineDistribution
 
 function mean(d::OrderStatistic{<:AffineDistribution})

@@ -294,6 +294,14 @@ function var(d::JointOrderStatistics{<:Logistic})
     return v
 end
 
+## Normal
+
+function mean(d::JointOrderStatistics{<:Normal})
+    n = d.n
+    n > 5 && return _moment(d, 1)
+    return mean.(OrderStatistic.(d, d.n, d.ranks; check_args=false))
+end
+
 ## AffineDistribution
 
 function mean(d::JointOrderStatistics{<:AffineDistribution})
