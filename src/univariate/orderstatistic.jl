@@ -116,3 +116,79 @@ std(d::OrderStatistic{<:Uniform}) = std(_uniform_orderstatistic(d)) * scale(d.di
 var(d::OrderStatistic{<:Uniform}) = var(_uniform_orderstatistic(d)) * scale(d.dist)^2
 skewness(d::OrderStatistic{<:Uniform}) = skewness(_uniform_orderstatistic(d))
 kurtosis(d::OrderStatistic{<:Uniform}) = kurtosis(_uniform_orderstatistic(d))
+
+## Exponential
+
+function mean(d::OrderStatistic{<:Exponential})
+    # Arnold, eq 4.6.6
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    return θ * _harmonicdiff(T, d.n - d.rank, d.n)
+end
+function var(d::OrderStatistic{<:Exponential})
+    # Arnold, eq 4.6.7
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    return θ^2 * _polygamma_diff(T, 1, d.n + 1 - d.rank, d.n + 1)
+end
+function skewness(d::OrderStatistic{<:Exponential})
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    return -_polygamma_diff(T, 2, d.n + 1 - d.rank, d.n + 1) /
+           _polygamma_diff(T, 1, d.n + 1 - d.rank, d.n + 1)^(3//2)
+end
+function kurtosis(d::OrderStatistic{<:Exponential})
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    return _polygamma_diff(T, 3, d.n + 1 - d.rank, d.n + 1) /
+           _polygamma_diff(T, 1, d.n + 1 - d.rank, d.n + 1)^2
+end
+# Common utilities
+
+_harmonicnum(T::Type{<:Real}, n::Int) = _harmonicnum_from(zero(T), 0, n)
+
+function _harmonicnum_from(Hm::Real, m::Int, n::Int)
+    # m ≤ n
+    (n - m) < 25 && return sum(Base.Fix1(/, one(Hm)), (m + 1):n; init=Hm)
+    return digamma(oftype(Hm, n + 1)) + Base.MathConstants.eulergamma
+end
+
+function _harmonicdiff(T::Type{<:Real}, m::Int, n::Int)
+    # TODO: improve heuristic
+    d = n - m
+    m, n = minmax(m, n)
+    abs(d) < 50 && return sign(d) * sum(Base.Fix1(/, one(T)), (m + 1):n; init=zero(T))
+    Hm = _harmonicnum(T, m)
+    Hn = _harmonicnum_from(Hm, m, n)
+    return sign(d) * (Hn - Hm)
+end
+
+function _polygamma_from(m, ϕk::Real, k::Int, n::Int)
+    # backwards recurrence is more stable than forwards
+    gap = k - n
+    gap > 10 || gap < 0 && return polygamma(m, oftype(ϕk, n))
+    num = (-1)^(m + 1) * oftype(ϕk, factorial(m))
+    f = Base.Fix1(/, num) ∘ Base.Fix2(^, m + 1)
+    return sum(f, (k - 1):-1:n; init=ϕk)
+end
+
+function _polygamma_diff(T::Type{<:Real}, m::Int, k::Int, n::Int)
+    d = n - k
+    k, n = minmax(k, n)
+    s = -sign(d)
+    if abs(d) ≤ 10
+        num = (-1)^m * s * T(factorial(m))
+        f = Base.Fix1(/, num) ∘ Base.Fix2(^, m + 1)
+        return sum(f, k:(n - 1); init=zero(T))
+    end
+    ϕn = polygamma(m, T(n))
+    ϕk = _polygamma_from(m, ϕn, n, k)
+    return s * (ϕn - ϕk)
+end
+
+function _polygamma_sum(T::Type{<:Real}, m::Int, k::Int, n::Int)
+    k, n = minmax(k, n)
+    ϕn = polygamma(m, T(n))
+    ϕk = _polygamma_from(m, ϕn, n, k)
+    return ϕn + ϕk
+end

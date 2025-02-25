@@ -188,3 +188,73 @@ function cov(d::JointOrderStatistics{<:Uniform})
         return rmin * (n + 1 - rmax) * c
     end
 end
+
+## Exponential
+
+function mean(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.6
+    θ = scale(d.dist)
+    T = float(typeof(one(θ)))
+    m = similar(d.ranks, T)
+    ks = d.n .- d.ranks
+    _harmonicnum!(m, ks)
+    Hn = _harmonicnum_from(first(m), first(ks), d.n)
+    @. m = θ * (Hn - m)
+    return m
+end
+function var(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.7
+    θ = scale(d.dist)
+    T = float(typeof(oneunit(θ)^2))
+    v = similar(d.ranks, T)
+    ks = (d.n + 1) .- d.ranks
+    _polygamma!(v, 1, ks)
+    ϕn = _polygamma_from(1, first(v), first(ks), d.n + 1)
+    @. v = θ^2 * (v - ϕn)
+    return v
+end
+function cov(d::JointOrderStatistics{<:Exponential})
+    # Arnold, eq 4.6.8
+    v = var(d)
+    S = broadcast(d.ranks, d.ranks', v, v') do rᵢ, rⱼ, vᵢ, vⱼ
+        rᵢ < rⱼ ? vᵢ : vⱼ
+    end
+    return S
+end
+
+## Common utilities
+
+# assume ns are sorted in increasing or decreasing order
+function _harmonicnum!(Hns, ns::AbstractVector{<:Int})
+    Hk = zero(eltype(Hns))
+    k = 0
+    iter = if last(ns) ≥ first(ns)
+        zip(eachindex(Hns), ns)
+    else
+        Iterators.reverse(zip(eachindex(Hns), ns))
+    end
+    for (i, n) in iter
+        Hns[i] = Hk = _harmonicnum_from(Hk, k, n)
+        k = n
+    end
+    return Hns
+end
+
+# assume ns are sorted in increasing or decreasing order
+function _polygamma!(ϕns, m::Int, ns::AbstractVector{<:Int})
+    if last(ns) ≥ first(ns)
+        i = lastindex(ϕns)
+        k = last(ns)
+        iter = Iterators.reverse(zip(eachindex(ϕns), ns))
+    else
+        i = firstindex(ϕns)
+        k = first(ns)
+        iter = zip(eachindex(ϕns), ns)
+    end
+    ϕns[i] = ϕk = polygamma(m, k)
+    for (i, n) in Iterators.drop(iter, 1)
+        ϕns[i] = ϕk = _polygamma_from(m, ϕk, k, n)
+        k = n
+    end
+    return ϕns
+end
