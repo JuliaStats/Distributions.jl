@@ -143,6 +143,32 @@ function kurtosis(d::OrderStatistic{<:Exponential})
     return _polygamma_diff(T, 3, d.n + 1 - d.rank, d.n + 1) /
            _polygamma_diff(T, 1, d.n + 1 - d.rank, d.n + 1)^2
 end
+
+## Logistic
+
+function mean(d::OrderStatistic{<:Logistic})
+    # Arnold, eq 4.8.6
+    T = typeof(oneunit(partype(d.dist)))
+    return scale(d.dist) * _harmonicdiff(T, d.n - d.rank, d.rank - 1) + mean(d.dist)
+end
+function var(d::OrderStatistic{<:Logistic})
+    # Arnold, eq 4.8.7
+    σ = scale(d.dist)
+    T = float(typeof(one(σ)))
+    return σ^2 * _polygamma_sum(T, 1, d.n + 1 - d.rank, d.rank)
+end
+function skewness(d::OrderStatistic{<:Logistic})
+    σ = scale(d.dist)
+    T = float(typeof(one(σ)))
+    return _polygamma_diff(T, 2, d.rank, d.n + 1 - d.rank) /
+           _polygamma_sum(T, 1, d.rank, d.n + 1 - d.rank)^(3//2)
+end
+function kurtosis(d::OrderStatistic{<:Logistic})
+    σ = scale(d.dist)
+    T = float(typeof(one(σ)))
+    return _polygamma_sum(T, 3, d.rank, d.n + 1 - d.rank) /
+           _polygamma_sum(T, 1, d.rank, d.n + 1 - d.rank)^2
+end
 # Common utilities
 
 _harmonicnum(T::Type{<:Real}, n::Int) = _harmonicnum_from(zero(T), 0, n)

@@ -222,6 +222,36 @@ function cov(d::JointOrderStatistics{<:Exponential})
     return S
 end
 
+## Logistic
+
+function mean(d::JointOrderStatistics{<:Logistic})
+    # Arnold, eq 4.8.6
+    T = typeof(oneunit(partype(d.dist)))
+    m = H1 = similar(d.ranks, T)
+    _harmonicnum!(H1, d.n .- d.ranks)
+    if d.ranks == 1:(d.n)
+        H2 = view(H1, reverse(eachindex(H1)))
+    else
+        H2 = similar(H1)
+        _harmonicnum!(H2, d.ranks .- 1)
+    end
+    m .= scale(d.dist) .* (H2 .- H1) .+ mean(d.dist)
+    return m
+end
+function var(d::JointOrderStatistics{<:Logistic})
+    # Arnold, eq 4.8.7
+    T = typeof(oneunit(partype(d.dist))^2)
+    v = ϕ1 = similar(d.ranks, T)
+    _polygamma!(ϕ1, 1, d.ranks)
+    if d.ranks == 1:(d.n)
+        ϕ2 = view(ϕ1, reverse(eachindex(ϕ1)))
+    else
+        ϕ2 = similar(ϕ1)
+        _polygamma!(H2, 1, d.n + 1 - d.ranks)
+    end
+    v .= scale(d.dist)^2 .* (ϕ1 .+ ϕ2)
+    return v
+end
 ## Common utilities
 
 # assume ns are sorted in increasing or decreasing order
