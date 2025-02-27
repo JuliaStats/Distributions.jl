@@ -1,6 +1,3 @@
-module EKDistribution
-
-export EKDist
 """
     kumaraswamy(α,β,γ,l,u)
 The exponentiated (scaled) kumaraswamy (EK) distribution is 5 paramter two of which are normalizing constants (l,u) to a range.
@@ -225,6 +222,3 @@ end
 
 #= function entropy(d::EKDist) μ # In paper but not sure if is the expected form of entropy for package.
 end =#
-
-#end modeule EKDist
-end
