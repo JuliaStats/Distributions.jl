@@ -1,3 +1,6 @@
+module EKDistribution
+
+export EKDist
 """
     kumaraswamy(α,β,γ,l,u)
 The exponentiated (scaled) kumaraswamy (EK) distribution is 5 paramter two of which are normalizing constants (l,u) to a range.
@@ -11,6 +14,14 @@ External links
 * The exponentiated Kumaraswamy Distribution and its log-transform: Lemonte et al https://www.jstor.org/stable/43601233
 
 """
+## NEED TO ACCOMONDATE LOG(1 -1) when x hits the upper bound of support
+## I get errors in trying to extend Distiributions functions in the script because I don't understand modules lol
+using Distributions
+import Distributions: @check_args, @distr_support, params, convert, partype, beta, gamma
+import Distributions: AbstractRNG,  maximum, minimum, convert
+import Distributions:   pdf, logpdf, gradlogpdf, cdf, ccdf, logcdf, logccdf, quantile, cquantile, median, mean, var, skewness, kurtosis, mode
+import Distributions: fit_mle
+
 
 struct EKDist{T<:Real} <: ContinuousUnivariateDistribution
     α::T
@@ -185,14 +196,22 @@ var(d::EKDist) = (ekdmoment(d, 2) - ekdmoment(d, 1)^2) * (d.u - d.l)^2 # no clue
 std(d::EKDist) = var(d::EKDist) ^.5
 
 # These aren't scaled for sure.
-skewness(d::EKDist) = if d.l == 0 & d.u == 1 
+skewness(d::EKDist) = if (d.l == 0) & (d.u == 1 )
                         (ekdmoment(d, 3) - 3 * mean(d) * var(d) - mean(d)^3) / var(d)^(3/2) 
                       else error("I didn't scale these yet, so it's not remotely right")
                       end
-kurtosis(d::EKDist) = if d.l == 0 & d.u == 1 
-                        ( ekdmoment(d, 4) - 4 * ekdmoment(d, 3) * mean(d) + 6 * ekdmoment(d, 2) * mean(d)^2 - 4 * mean(d)^4  + mean(d)^4) / var(d)^2
-                    else error("I didn't scale these yet, so it's not remotely right")
+
+kurtosis(d::EKDist) = if (d.l == 0) & (d.u == 1 )
+                        a1 = ekdmoment(d, 1)
+                        a2 = ekdmoment(d, 2)
+                        a3 = ekdmoment(d, 3)
+                        a4 = ekdmoment(d, 4)
+                        
+                        return (a4 + a1 * (-4a3 + a1 * (6a2 - 3a1^2))) / (a2-a1^2)^2 - 3
+
+                    else return error("I didn't scale these yet, so it's not remotely right")
                     end
+                    
 function mode(d::EKDist)
     if (d.γ == 1) & (d.α >= 1) & (d.β >= 1) & !(d.α == d.β == 1)
         return ( (d.α -1) / (d.α * d.β - 1) ) ^ (1 / d.α)
@@ -206,3 +225,6 @@ end
 
 #= function entropy(d::EKDist) μ # In paper but not sure if is the expected form of entropy for package.
 end =#
+
+#end modeule EKDist
+end
