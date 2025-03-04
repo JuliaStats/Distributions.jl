@@ -108,9 +108,9 @@ end
 #  -----------------------------------------------------------------------------
 
 function invwishart_logc0(df::Real, Ψ::AbstractPDMat)
-    h_df = df / 2
     p = size(Ψ, 1)
-    logdet_Ψ = logdet(Ψ)
+    logdet_Ψ, _df = promote(logdet(Ψ), df)
+    h_df = _df / 2
     -h_df * (p * oftype(logdet_Ψ, logtwo) - logdet_Ψ) - logmvgamma(p, h_df)
 end
 
