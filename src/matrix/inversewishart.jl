@@ -110,7 +110,8 @@ end
 function invwishart_logc0(df::Real, Ψ::AbstractPDMat)
     h_df = df / 2
     p = size(Ψ, 1)
-    -h_df * (p * typeof(df)(logtwo) - logdet(Ψ)) - logmvgamma(p, h_df)
+    logdet_Ψ = logdet(Ψ)
+    -h_df * (p * oftype(logdet_Ψ, logtwo) - logdet_Ψ) - logmvgamma(p, h_df)
 end
 
 function logkernel(d::InverseWishart, X::AbstractMatrix)
