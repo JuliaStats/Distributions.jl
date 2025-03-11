@@ -1,19 +1,21 @@
 # finite mixture models
 
 """
+    AbstractMixtureModel <: Distribution
 
-  All subtypes of `AbstractMixtureModel` should implement the following methods:
+All subtypes of `AbstractMixtureModel` should implement the following methods:
 
-  - ncomponents(d): the number of components
+  - `ncomponents(d)`: the number of components
 
-  - component(d, k):  return the k-th component
+  - `component(d, k)`:  return the k-th component
 
-  - probs(d):       return a vector of prior probabilities over components.
+  - `probs(d)`:       return a vector of prior probabilities over components.
 """
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+    MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
