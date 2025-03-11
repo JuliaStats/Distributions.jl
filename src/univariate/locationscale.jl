@@ -51,8 +51,7 @@ end
 
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     @check_args AffineDistribution (σ, !iszero(σ))
-    _T = promote_type(eltype(ρ), T)
-    return AffineDistribution{_T}(_T(μ), _T(σ), ρ)
+    return AffineDistribution{T}(μ, σ, ρ)
 end
 
 function AffineDistribution(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool=true)
@@ -70,8 +69,6 @@ end
 
 const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} = AffineDistribution{T,Continuous,D}
 const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} = AffineDistribution{T,Discrete,D}
-
-Base.eltype(::Type{<:AffineDistribution{T}}) where T = T
 
 minimum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * minimum(d.ρ) : d.μ + d.σ * maximum(d.ρ)

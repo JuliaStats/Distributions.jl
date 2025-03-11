@@ -193,7 +193,14 @@ end
 #  Sampling
 #  -----------------------------------------------------------------------------
 
-function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
+function rand(rng::AbstractRNG, d::Wishart)
+    A = Matrix{float(partype(d))}(undef, size(d))
+    @inbounds rand!(rng, d, A)
+    return A
+end
+
+@inline function rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix{<:Real})
+    @boundscheck size(d) == size(A)
     if d.singular
         axes2 = axes(A, 2)
         r = rank(d)
@@ -204,6 +211,7 @@ function _rand!(rng::AbstractRNG, d::Wishart, A::AbstractMatrix)
     end
     unwhiten!(d.S, A)
     A .= A * A'
+    return A
 end
 
 function _wishart_genA!(rng::AbstractRNG, A::AbstractMatrix, df::Real)
@@ -223,29 +231,8 @@ function _wishart_genA!(rng::AbstractRNG, A::AbstractMatrix, df::Real)
         elseif i > j
             randn(rng, T)
         else
-            rand(rng, Chi(df - i + 1))
+            rand(rng, Chi{T}(T(df - i + 1)))
         end
     end
     return A
-end
-
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::Wishart)
-    check_univariate(d)
-    df, S = params(d)
-    α = df / 2
-    β = 2 * first(S)
-    return Gamma(α, β)
-end
-
-function _rand_params(::Type{Wishart}, elty, n::Int, p::Int)
-    n == p || throw(ArgumentError("dims must be equal for Wishart"))
-    ν = elty(n - 1 + abs(10 * randn()))
-    X = rand(elty, n, n)
-    X .= 2 .* X .- 1
-    S = X * X'
-    return ν, S
 end
