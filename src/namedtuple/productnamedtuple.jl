@@ -153,6 +153,6 @@ function Base.rand(
     return rand(rng, sampler(d), dims)
 end
 
-Base.@propagate_inbounds function Base.rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
+Base.@propagate_inbounds function Random.rand!(rng::AbstractRNG, d::ProductNamedTupleDistribution, xs::AbstractArray)
     return rand!(rng, sampler(d), xs)
 end

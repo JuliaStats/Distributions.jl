@@ -15,7 +15,7 @@ function Base.rand(rng::AbstractRNG, s::ProductNamedTupleSampler, dims::Dims)
     return out
 end
 
-function Base.rand!(
+function Random.rand!(
     rng::AbstractRNG, spl::ProductNamedTupleSampler, xs::AbstractArray{<:NamedTuple{K}}
 ) where {K}
     for i in eachindex(xs)
