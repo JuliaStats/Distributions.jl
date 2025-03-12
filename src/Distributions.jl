@@ -67,6 +67,7 @@ export
 
     # distribution types
     Arcsine,
+    AsymmetricExponentialPower,
     Bernoulli,
     BernoulliLogit,
     Beta,
