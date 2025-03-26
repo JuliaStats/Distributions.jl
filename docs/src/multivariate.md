@@ -58,7 +58,6 @@ MvNormalCanon
 MvLogitNormal
 MvLogNormal
 Dirichlet
-Product
 ```
 
 ## Addition Methods
@@ -104,15 +103,6 @@ params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::Abst
 ```@docs
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```
-
-## Product distributions
-
-```@docs
-Distributions.product_distribution
-```
-
-Using `product_distribution` is advised to construct product distributions. 
-For some distributions, it constructs a special multivariate type.
 
 ## Index
 
