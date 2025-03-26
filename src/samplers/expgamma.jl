@@ -59,8 +59,11 @@ end
 
 function _logsampler(d::Gamma)
     if shape(d) < 0.3
+        # Liu, Martin, and Syring recommend 0.3 as a cutoff to switch
+        # to Kundu-Gupta, but we have not implemented Kundu-Gupta yet.
         return ExpGammaSSSampler(d)
     else
+        # TODO: Kundu-Gupta algo. #3 for performance reasons?
         return ExpGammaIPSampler(d)
     end
 end
