@@ -50,10 +50,8 @@ function test_cgf(dist, ts)
     d(f) = Base.Fix1(ForwardDiff.derivative, f)
     κ₁ = d(Base.Fix1(cgf, dist))(0)
     @test κ₁ ≈ mean(dist)
-    if VERSION >= v"1.4"
-        κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
-        @test κ₂ ≈ var(dist)
-    end
+    κ₂ = d(d(Base.Fix1(cgf, dist)))(0)
+    @test κ₂ ≈ var(dist)
     for t in ts
         val = @inferred cgf(dist, t)
         @test isfinite(val)
