@@ -23,6 +23,7 @@ function gen_vmf_tdata(n::Int, p::Int,
 end
 
 function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
+    # Random μ
     if ismissing(rng)
         μ = randn(p)
         x = randn(p)
@@ -34,16 +35,24 @@ function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
     μ = μ ./ κ
 
     s = Distributions.VonMisesFisherSampler(μ, κ)
+    @test s.rotate
     v = μ - vcat(1, zeros(p-1))
     H = I - 2*v*v'/(v'*v)
 
-    @test Distributions._vmf_rot!(s.v, copy(x)) ≈ (H*x)
+    @test Distributions._vmf_rotate!(copy(x), s) ≈ (H*x)
 
+    # Special case: μ = (1, 0, ..., 0)
+    # In this case no rotation is performed
+    μ = zeros(p)
+    μ[1] = 1
+    s = Distributions.VonMisesFisherSampler(μ, κ)
+    @test !s.rotate
+    @test Distributions._vmf_rotate!(copy(x), s) == x
+
+    return nothing
 end
 
-
-
-function test_genw3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missing)
+function test_angle3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missing)
     p = 3
 
     if ismissing(rng)
@@ -53,21 +62,20 @@ function test_genw3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missin
     end
     μ = μ ./ norm(μ)
 
-    s = Distributions.VonMisesFisherSampler(μ, float(κ))
+    spl = Distributions.VonMisesFisherSampler(μ, float(κ))
+    angle3_res = [Distributions._vmf_angle3(rng, spl.κ) for _ in 1:ns]
+    angle_res = [Distributions._vmf_angle(rng, spl) for _ in 1:ns]
 
-    genw3_res = [Distributions._vmf_genw3(rng, s.p, s.b, s.x0, s.c, s.κ) for _ in 1:ns]
-    genwp_res = [Distributions._vmf_genwp(rng, s.p, s.b, s.x0, s.c, s.κ) for _ in 1:ns]
-
-    @test isapprox(mean(genw3_res), mean(genwp_res), atol=0.01)
-    @test isapprox(std(genw3_res), std(genwp_res), atol=0.01/κ)
+    @test mean(angle3_res) ≈ mean(angle_res) rtol=5e-2
+    @test std(angle3_res) ≈ std(angle_res) rtol=1e-2
 
     # test mean and stdev against analytical formulas
     coth_κ = coth(κ)
     mean_w = coth_κ - 1/κ
     var_w = 1 - coth_κ^2 + 1/κ^2
 
-    @test isapprox(mean(genw3_res), mean_w, atol=0.01)
-    @test isapprox(std(genw3_res), sqrt(var_w), atol=0.01/κ)
+    @test mean(angle3_res) ≈ mean_w rtol=5e-2
+    @test std(angle3_res) ≈ sqrt(var_w) rtol=1e-2
 end
 
 
@@ -178,7 +186,15 @@ ns = 10^6
 
     if !ismissing(rng)
         @testset "Testing genw with $key at (3, $κ)" for κ in [0.1, 0.5, 1.0, 2.0, 5.0]
-            test_genw3(κ, ns, rng)
+            test_angle3(κ, ns, rng)
         end
+    end
+end
+
+# issue #1423
+@testset "Special case: No rotation" begin
+    for n in 2:10
+        d = VonMisesFisher(vcat(1, zeros(n - 1)), 1.0)
+        @test sum(abs2, rand(d)) ≈ 1
     end
 end
