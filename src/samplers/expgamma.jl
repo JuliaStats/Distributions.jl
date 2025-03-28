@@ -55,32 +55,3 @@ function rand(rng::AbstractRNG, s::ExpGammaSSSampler{T})::Float64 where T
         end
     end
 end
-
-
-function _logsampler(d::Gamma)
-    if shape(d) < 0.3
-        return ExpGammaSSSampler(d)
-    else
-        return ExpGammaIPSampler(d)
-    end
-end
-
-function _logrand(rng::AbstractRNG, d::Gamma)
-    if shape(d) < 0.3
-        return rand(rng, ExpGammaSSSampler(d))
-    else
-        return rand(rng, ExpGammaIPSampler(d))
-    end
-end
-
-function _logrand!(rng::AbstractRNG, d::Gamma, A::AbstractArray{<:Real})
-    if shape(d) < 0.3
-        @inbounds for i in eachindex(A)
-            A[i] = rand(rng, ExpGammaSSSampler(d))
-        end
-    else
-        @inbounds for i in eachindex(A)
-            A[i] = rand(rng, ExpGammaIPSampler(d))
-        end
-    end
-end
