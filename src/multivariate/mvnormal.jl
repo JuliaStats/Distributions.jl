@@ -245,8 +245,10 @@ distrname(d::ZeroMeanIsoNormal) = "ZeroMeanIsoNormal"
 distrname(d::ZeroMeanDiagNormal) = "ZeroMeanDiagNormal"
 distrname(d::ZeroMeanFullNormal) = "ZeroMeanFullNormal"
 
-Base.show(io::IO, d::MvNormal) =
+Base.show(io::IO, ::MIME"text/plain", d::MvNormal) =
     show_multline(io, d, [(:dim, length(d)), (:μ, mean(d)), (:Σ, cov(d))])
+Base.show(io::IO, d::MvNormal) =
+    print(io, "MvNormal($(d.μ), $(d.Σ))")
 
 ### Basic statistics
 
