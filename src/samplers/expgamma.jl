@@ -11,7 +11,7 @@ ExpGammaIPSampler(d::Gamma) = ExpGammaIPSampler(d, GammaMTSampler)
 function ExpGammaIPSampler(d::Gamma, ::Type{S}) where {S<:Sampleable}
     shape_d = shape(d)
     sampler = S(Gamma{partype(d)}(1 + shape_d, scale(d)))
-    return GammaIPSampler(sampler, -inv(shape_d))
+    return ExpGammaIPSampler(sampler, -inv(shape_d))
 end
 
 function rand(rng::AbstractRNG, s::ExpGammaIPSampler)
