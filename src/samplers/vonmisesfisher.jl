@@ -7,8 +7,8 @@ struct VonMisesFisherSampler <: Sampleable{Multivariate,Continuous}
     b::Float64
     x0::Float64
     c::Float64
+    τ::Float64
     v::Vector{Float64}
-    rotate::Bool    # whether to rotate the samples
 end
 
 function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
@@ -18,10 +18,17 @@ function VonMisesFisherSampler(μ::Vector{Float64}, κ::Float64)
     x0 = (1.0 - b) / (1.0 + b)
     c = κ * x0 + (p - 1) * log1p(-abs2(x0))
 
-    # Compute Householder transformation, and whether it has to be applied
-    v, rotate = _vmf_householder_vec(μ)
+    # Compute Householder transformation:
+    # `LinearAlgebra.reflector!` computes a Householder transformation H such that
+    # H μ = -copysign(|μ|₂, μ[1]) e₁
+    # μ is a unit vector, and hence this implies that
+    # H e₁ = μ if μ[1] < 0 and H (-e₁) = μ otherwise
+    # Since `v[1] = flipsign(1, μ[1])`, the sign of `μ[1]` can be extracted from `v[1]` during sampling
+    v = similar(μ)
+    copyto!(v, μ)
+    τ = LinearAlgebra.reflector!(v)
     
-    return VonMisesFisherSampler(p, κ, b, x0, c, v, rotate)
+    return VonMisesFisherSampler(p, κ, b, x0, c, τ, v)
 end
 
 Base.length(s::VonMisesFisherSampler) = length(s.v)
@@ -30,10 +37,14 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{
     # TODO: Generalize to more general indices
     Base.require_one_based_indexing(x)
 
-    # Sample angle `w`
+    # Sample angle `w` assuming mean direction `(1, 0, ..., 0)`
     w = _vmf_angle(rng, spl)
+    
+    # Transform to sample for mean direction `(flipsign(1.0, μ[1]), 0, ..., 0)`
+    v = spl.v
+    w = flipsign(w, v[1])
 
-    # Generate sample assuming `μ = (1, 0, 0, ..., 0)`
+    # Generate sample assuming mean direction `(flipsign(1.0, μ[1]), 0, ..., 0)`
     p = spl.p
     x[1] = w
     s = 0.0
@@ -48,8 +59,8 @@ function _rand!(rng::AbstractRNG, spl::VonMisesFisherSampler, x::AbstractVector{
         x[i] *= r
     end
 
-    # Rotate for general `μ` (if necessary)
-    return _vmf_rotate!(x, spl)
+    # Apply Householder transformation to mean direction `μ`
+    return LinearAlgebra.reflectorApply!(v, spl.τ, x)
 end
 
 ### Core computation
@@ -119,39 +130,4 @@ end
     ξ = rand(rng)
     w = 1.0 + (log(ξ + (1.0 - ξ)*exp(-2κ))/κ)
     return w::Float64
-end
-
-# Create Householder transformation to rotate samples for `μ = (1, 0, ..., 0)`
-# to samples for general `μ`
-function _vmf_householder_vec(μ::Vector{Float64})
-    # assuming μ is a unit-vector (which it should be)
-    #  can compute v in a single pass over μ
-
-    p = length(μ)
-    v = similar(μ)
-    v[1] = μ[1] - 1.0
-    s = sqrt(-2*v[1])
-    if iszero(s)
-        # In this case, μ is (approx.) (1, 0, ..., 0)
-        # Hence no rotation has to be performed and `v` is not used
-        return v, false
-    end
-
-    v[1] /= s
-
-    @inbounds for i in 2:p
-        v[i] = μ[i] / s
-    end
-
-    return v, true
-end
-
-# Rotate samples for general `μ` (if needed)
-@inline function _vmf_rotate!(x::AbstractVector{<:Real}, spl::VonMisesFisherSampler)
-    if spl.rotate
-        v = spl.v
-        scale = 2.0 * (v' * x)
-        @. x -= (scale * v)
-    end
-    return x
 end

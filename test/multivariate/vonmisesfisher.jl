@@ -22,36 +22,6 @@ function gen_vmf_tdata(n::Int, p::Int,
     return X
 end
 
-function test_vmf_rot(p::Int, rng::Union{AbstractRNG, Missing} = missing)
-    # Random μ
-    if ismissing(rng)
-        μ = randn(p)
-        x = randn(p)
-    else
-        μ = randn(rng, p)
-        x = randn(rng, p)
-    end
-    κ = norm(μ)
-    μ = μ ./ κ
-
-    s = Distributions.VonMisesFisherSampler(μ, κ)
-    @test s.rotate
-    v = μ - vcat(1, zeros(p-1))
-    H = I - 2*v*v'/(v'*v)
-
-    @test Distributions._vmf_rotate!(copy(x), s) ≈ (H*x)
-
-    # Special case: μ = (1, 0, ..., 0)
-    # In this case no rotation is performed
-    μ = zeros(p)
-    μ[1] = 1
-    s = Distributions.VonMisesFisherSampler(μ, κ)
-    @test !s.rotate
-    @test Distributions._vmf_rotate!(copy(x), s) == x
-
-    return nothing
-end
-
 function test_angle3(κ::Real, ns::Int, rng::Union{AbstractRNG, Missing} = missing)
     p = 3
 
@@ -181,7 +151,6 @@ ns = 10^6
                                                                            (2, 2),
                                                                            (2, 1000)] # test with large κ
         test_vonmisesfisher(p, κ, n, ns, rng)
-        test_vmf_rot(p, rng)
     end
 
     if !ismissing(rng)
@@ -196,5 +165,6 @@ end
     for n in 2:10
         d = VonMisesFisher(vcat(1, zeros(n - 1)), 1.0)
         @test sum(abs2, rand(d)) ≈ 1
+        @test normalize!(mean(rand(d) for _ in 1:1_000_000)) ≈ vcat(1, zeros(n - 1)) rtol = 1e-2
     end
 end
