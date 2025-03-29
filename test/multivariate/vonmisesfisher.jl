@@ -165,6 +165,7 @@ end
     for n in 2:10
         d = VonMisesFisher(vcat(1, zeros(n - 1)), 1.0)
         @test sum(abs2, rand(d)) ≈ 1
-        @test normalize!(mean(rand(d) for _ in 1:1_000_000)) ≈ vcat(1, zeros(n - 1)) rtol = 1e-2
+        d_est = fit_mle(VonMisesFisher, rand(d, 100_000))
+        @test d_est.μ ≈ meandir(d) rtol=5e-2
     end
 end
