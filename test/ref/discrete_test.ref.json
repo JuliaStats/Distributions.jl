@@ -285,7 +285,7 @@
     "failprob": 0.5,
     "ntrials": 3,
     "mean": 1.5,
-    "median": 2,
+    "median": 1,
     "var": 0.75,
     "skewness": 0,
     "kurtosis": -0.666666666666667

@@ -378,6 +378,14 @@ function test_special(dist::Type{Wishart})
     nothing
 end
 
+function test_special(dist::Type{InverseWishart})
+    @testset "InverseWishart constructor" begin
+        # Tests https://github.com/JuliaStats/Distributions.jl/issues/1948
+        @test typeof(InverseWishart(5, ScalMat(5, 1))) == InverseWishart{Float64, ScalMat{Float64}}
+        @test typeof(InverseWishart(5, PDiagMat(ones(Int, 5)))) == InverseWishart{Float64, PDiagMat{Float64, Vector{Float64}}}
+    end
+end
+
 function test_special(dist::Type{MatrixTDist})
     @testset "MT(v, M, vΣ, Ω) → MN(M, Σ, Ω) as v → ∞" begin
         n, p = (6, 3)
