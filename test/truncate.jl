@@ -232,3 +232,9 @@ end
     @test @inferred(cdf(dist, 2.82)) === 1.0
     @test @inferred(ccdf(dist, 2.82)) === 0.0
 end
+
+@testset "inconsistent types of samples (#1798)" begin
+    @test @inferred(rand(truncated(Geometric(0.6); lower = 2))) isa Int
+    @test @inferred(rand(truncated(Geometric(0.6); upper = 4))) isa Int
+end
+
