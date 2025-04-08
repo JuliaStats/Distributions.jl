@@ -125,6 +125,7 @@ export
     Logistic,
     LogNormal,
     LogUniform,
+    MvHypergeometric,
     MvLogitNormal,
     LogitNormal,
     MatrixBeta,

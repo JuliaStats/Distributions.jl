@@ -117,12 +117,12 @@ function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     return s
 end
 
-# Sampling
+# Testing it out
+n = 5
+m = [5, 3, 2]
 
-# if only a single sample is requested, no alias table is created
-_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{<:Real}) =
-    multinom_rand!(rng, ntrials(d), probs(d), x)
+d = MvHypergeometric(m, n)
+x = [2, 2, 1]
 
-sampler(d::MvHypergeometric) = MvHypergeometricSampler(ntrials(d), probs(d))
-
+println("Probability of $x: ", exp(_logpdf(d, x)))
 
