@@ -4,10 +4,16 @@ using Distributions, Random
 using Test
 
 @testset "Multivariate Hypergeometric" begin 
+
+
+
+    
+    @test_throws DomainError MvHypergeometric([5, 3, -2], 4)
+    @test_throws ArgumentError MvHypergeometric([5, 3], 10)
+    
     m = [5, 3, 2]
     n = 4
     d = MvHypergeometric(m, n)
-    
     @test length(d) == 3
     @test d.n == n
     @test nelements(d) == m
@@ -60,6 +66,11 @@ using Test
     @test logpdf(d2, [1, 0]) ≈ 0
     @test logpdf(d2, [0, 1]) == -Inf
 
+    d3 = MvHypergeometric([5, 0, 0, 0], 3)
+    @test logpdf(d3, [3, 0, 0, 0]) ≈ 0
+    @test logpdf(d3, [2, 1, 0, 0]) == -Inf
+    @test logpdf(d3, [2, 0, 0, 0]) == -Inf
+
     # behavior with n = 0
     d0 = MvHypergeometric([5, 3, 2], 0)
     @test logpdf(d0, [0, 0, 0]) ≈ 0
@@ -73,6 +84,30 @@ using Test
     @test length(d0) == 3
 
     # compare with hypergeometric
-    dh1 = MvHypergeometric([5, 5], 4)
-    dh2
+    ns = 3
+    nf = 5
+    n  = 4
+    dh1 = MvHypergeometric([ns, nf], n)
+    dh2 = Hypergeometric(ns, nf, n)
+    
+    x = 2 
+    @test pdf(dh1, [x, n-x]) ≈ pdf(dh2, x)
+    x = 3
+    @test pdf(dh1, [x, n-x]) ≈ pdf(dh2, x)
+
+    # comparing marginals to hypergeometric
+    m = [5, 3, 2]
+    n = 4
+    d = MvHypergeometric(m, n)
+    dh = Hypergeometric(m[1], sum(m[2:end]), n)
+    x1 = 2
+    @test pdf(dh, x1) ≈ sum([pdf(d, [x1, x2, n-x1-x2]) for x2 in 0:m[2]]) 
+
+    # comparing conditionals to hypergeometric
+    x1 = 2
+    dh = Hypergeometric(m[2], m[3], n-x1)
+    q = sum([pdf(d, [x1, x2, n-x1-x2]) for x2 in 0:m[2]])
+    for x2 = 0:m[2]
+        @test pdf(dh, x2) ≈ pdf(d, [x1, x2, n-x1-x2])/q
+    end
 end
