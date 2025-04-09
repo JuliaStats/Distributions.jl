@@ -1,6 +1,6 @@
 # Tests for Multivariate Hypergeometric
 
-using Distributions, Random
+using Distributions
 using Test
 
 @testset "Multivariate Hypergeometric" begin 
@@ -14,9 +14,9 @@ using Test
     @test d.n == n
     @test nelements(d) == m
     @test ncategories(d) == length(m)
+    @test params(d) == (m, n)
     
     @test mean(d) ≈ [2.0, 1.2, 0.8]
-    
     @test var(d) ≈ [2/3, 56/100, 32/75]
     
     covmat = cov(d)
@@ -25,20 +25,33 @@ using Test
     @test insupport(d, [2, 1, 1])
     @test !insupport(d, [3, 2, 1])
     @test !insupport(d, [0, 0, 4])
+
     
     # random sampling
-    rng = MersenneTwister(123)
-    x = rand(rng, d)
+    x = rand(d)
     @test isa(x, Vector{Int})
     @test sum(x) == n
+    @test all(x .>= 0)
+    @test all(x .<= m)
     @test insupport(d, x)
     
-    x = rand(rng, d, 100)
+    x = rand(d, 100)
     @test isa(x, Matrix{Int})
     @test all(sum(x, dims=1) .== n)
     @test all(x .>= 0)
     @test all(x .<= m)
     @test all(insupport(d, x))
+
+    # random sampling with many catergories
+    m = [20, 2, 2, 2, 1, 1, 1]
+    n = 5
+    d2 = MvHypergeometric(m, n)
+    x = rand(d2)
+    @test isa(x, Vector{Int})
+    @test sum(x) == n
+    @test all(x .>= 0)
+    @test all(x .<= m)
+    @test insupport(d2, x)
 
     # log pdf
     x = [2, 1, 1]
@@ -46,7 +59,7 @@ using Test
     @test logpdf(d, x) ≈ log(2/7)
     @test logpdf(d, x) ≈ log(pdf(d, x))
 
-    x = rand(rng, d, 100)
+    x = rand(d, 100)
     pv = pdf(d, x)
     lp = logpdf(d, x)
     for i in 1 : size(x, 2)
@@ -72,7 +85,7 @@ using Test
     @test logpdf(d0, [0, 0, 0]) ≈ 0
     @test logpdf(d0, [1, 0, 0]) == -Inf
  
-    @test rand(rng, d0) == [0, 0, 0]
+    @test rand(d0) == [0, 0, 0]
     @test mean(d0) == [0.0, 0.0, 0.0]
     @test var(d0) == [0.0, 0.0, 0.0]
     @test insupport(d0, [0, 0, 0])
