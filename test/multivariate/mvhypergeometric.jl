@@ -4,10 +4,6 @@ using Distributions, Random
 using Test
 
 @testset "Multivariate Hypergeometric" begin 
-
-
-
-    
     @test_throws DomainError MvHypergeometric([5, 3, -2], 4)
     @test_throws ArgumentError MvHypergeometric([5, 3], 10)
     
