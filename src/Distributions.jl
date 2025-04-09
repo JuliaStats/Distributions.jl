@@ -245,6 +245,7 @@ export
     ncategories,        # the number of categories in a Categorical distribution
     ncomponents,        # the number of components in a mixture model
     ntrials,            # the number of trials being performed in the experiment
+    nelements,          # the number of elements of each type in a finite population
     params,             # get the tuple of parameters
     params!,            # provide storage space to calculate the tuple of parameters for a multivariate distribution like mvlognormal
     partype,            # returns a type large enough to hold all of a distribution's parameters' element types
