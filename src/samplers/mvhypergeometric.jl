@@ -4,7 +4,7 @@ function mvhypergeom_rand!(rng::AbstractRNG, m::AbstractVector{Int}, n::Int,
         length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
         z = zero(eltype(m))
-        M = sum(m) # remaining total probability (widens type if needed)
+        M = sum(m) # remaining population
         i = 0
         km1 = k - 1
 
@@ -12,16 +12,19 @@ function mvhypergeom_rand!(rng::AbstractRNG, m::AbstractVector{Int}, n::Int,
             i += 1
             @inbounds mi = m[i]
             if mi < M
-                xi = rand(rng, Hypergeometric(mi, M-mi, n))
+                # Sample from hypergeometric distribution 
+                # element of type i are considered successes
+                # all other elements are considered failures
+                xi = rand(rng, Hypergeometric(mi, M-mi, n)) 
                 @inbounds x[i] = xi
-            n -= xi
-            M -= mi
+                # Remove elements of type i from population
+                n -= xi
+                M -= mi
             else
-            # In this case, we don't even have to sample
-            # from Hypergeometric. Just assign remaining counts
-
-            @inbounds x[i] = n
-            n = 0
+                # In this case, we don't even have to sample
+                # from Hypergeometric. Just assign remaining counts
+                @inbounds x[i] = n
+                n = 0
             end
         end
 

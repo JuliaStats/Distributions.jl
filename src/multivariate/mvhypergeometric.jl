@@ -1,6 +1,6 @@
 """
 The [Multivariate hypergeometric distribution](https://en.wikipedia.org/wiki/Hypergeometric_distribution#Multivariate_hypergeometric_distribution)
-generalizes the *hypergeometric distribution*. Consider ``n`` draws from a finite population containing `k` types of elements. Suppose that the population has size `M` and there are ``m_i`` elements of type ``i`` for ``i = 1, .., k`` with ``m_1+...m_k = M``. Let ``X = (X_1, ..., X_k)`` where ``X_i`` represents the number of elements of type ``i`` drawn, then the distribution of ``X`` is a multivariate hypergeometric distribution. Each sample of a multivariate hypergeometric distribution is a ``k``-dimensional integer vector that sums to ``n``. 
+generalizes the *hypergeometric distribution*. Consider ``n`` draws from a finite population containing ``k`` types of elements. Suppose that the population has size `M` and there are ``m_i`` elements of type ``i`` for ``i = 1, .., k`` with ``m_1+...m_k = M``. Let ``X = (X_1, ..., X_k)`` where ``X_i`` represents the number of elements of type ``i`` drawn, then the distribution of ``X`` is a multivariate hypergeometric distribution. Each sample of a multivariate hypergeometric distribution is a ``k``-dimensional integer vector that sums to ``n`` and satisfies ``0 \\le X_i \\le m_i``. 
 
 
 The probability mass function is given by
@@ -117,6 +117,8 @@ function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     return s
 end
 
+# Sampling is performed by sequentially sampling each entry from the
+# hypergeometric distribution
 _rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) = 
     mvhypergeom_rand!(rng, nelements(d), ntrials(d), x)
 
