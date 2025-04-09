@@ -52,7 +52,7 @@ using Test
         @test lp[i] ≈ logpdf(d, x[:,i])
     end
 
-    # test degenerate cases of logpdf
+    # test degenerate cases
     d1 = MvHypergeometric([1], 1)
     @test logpdf(d1, [1]) ≈ 0
     @test logpdf(d1, [0]) == -Inf
@@ -71,4 +71,8 @@ using Test
     @test insupport(d0, [0, 0, 0])
     @test !insupport(d0, [1, 0, 0])
     @test length(d0) == 3
+
+    # compare with hypergeometric
+    dh1 = MvHypergeometric([5, 5], 4)
+    dh2
 end
