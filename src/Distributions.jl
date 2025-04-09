@@ -125,7 +125,6 @@ export
     Logistic,
     LogNormal,
     LogUniform,
-    MvHypergeometric,
     MvLogitNormal,
     LogitNormal,
     MatrixBeta,
@@ -134,6 +133,7 @@ export
     MatrixTDist,
     MixtureModel,
     Multinomial,
+    MvHypergeometric,
     MultivariateNormal,
     MvLogNormal,
     MvNormal,
@@ -281,6 +281,8 @@ export
 
 # type system
 include("common.jl")
+
+
 
 # implementation helpers
 include("utils.jl")

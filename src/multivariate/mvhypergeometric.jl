@@ -20,10 +20,10 @@ params(d)       # Get the parameters, i.e. (m, n)
 struct MvHypergeometric <: DiscreteMultivariateDistribution
     m::AbstractVector{Int}  # number of elements of each type
     n::Int                  # number of draws
-    function MvHypergeometric(m::Real, n::Real; check_args::Bool=true)
+    function MvHypergeometric(m::AbstractVector{Int}, n::Int; check_args::Bool=true)
         @check_args(
             MvHypergeometric,
-            (m, m >= zero.(n)),
+            (m, all(m .>= zero.(n))),
             zero(n) <= n <= sum(m),
         )
         new(m, n)
@@ -44,7 +44,7 @@ params(d::MvHypergeometric) = (d.m, d.n)
 
 mean(d::MvHypergeometric) = d.n .* d.m ./ sum(d.m)
 
-function var(d::MvHypergeometric{T}) where T<:Real
+function var(d::MvHypergeometric) 
     m = nelements(d)
     k = length(m)
     n = ntrials(d)
@@ -52,7 +52,7 @@ function var(d::MvHypergeometric{T}) where T<:Real
     p = m / M
     f = n * (M - n) / (M-1)
 
-    v = Vector{T}(undef, k)
+    v = Vector{Real}(undef, k)
     for i = 1:k
         @inbounds p_i = p[i]
         v[i] = f * p_i * (1 - p_i)
@@ -60,7 +60,7 @@ function var(d::MvHypergeometric{T}) where T<:Real
     v
 end
 
-function cov(d::MvHypergeometric{T}) where T<:Real
+function cov(d::MvHypergeometric) 
     m = nelements(d)
     k = length(m)
     n = ntrials(d)
@@ -68,7 +68,7 @@ function cov(d::MvHypergeometric{T}) where T<:Real
     p = m / M
     f = n * (M - n) / (M-1)
 
-    C = Matrix{T}(undef, k, k)
+    C = Matrix{Real}(undef, k, k)
     for j = 1:k
         pj = p[j]
         for i = 1:j-1
@@ -95,7 +95,7 @@ function insupport(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     s = 0.0
     for i = 1:k
         @inbounds xi = x[i]
-        if !(isinteger(xi) && xi >= 0 && x <= m[i])
+        if !(isinteger(xi) && xi >= 0 && xi <= m[i])
             return false
         end
         s += xi
@@ -117,12 +117,9 @@ function _logpdf(d::MvHypergeometric, x::AbstractVector{T}) where T<:Real
     return s
 end
 
-# Testing it out
-n = 5
-m = [5, 3, 2]
+_rand!(rng::AbstractRNG, d::MvHypergeometric, x::AbstractVector{Int}) = 
+    mvhypergeom_rand!(rng, nelements(d), ntrials(d), x)
 
-d = MvHypergeometric(m, n)
-x = [2, 2, 1]
 
-println("Probability of $x: ", exp(_logpdf(d, x)))
+
 
