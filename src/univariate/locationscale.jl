@@ -49,14 +49,10 @@ struct AffineDistribution{T<:Real, S<:ValueSupport, D<:UnivariateDistribution{S}
     end
 end
 
-
 function AffineDistribution(μ::T, σ::T, ρ::UnivariateDistribution; check_args::Bool=true) where {T<:Real}
     @check_args AffineDistribution (σ, !iszero(σ))
     # μ and σ act on both random numbers and parameter-like quantities like mean
     # hence do not promote: but take care in eltype and partype
-    #_T = promote_type(eltype(ρ), T)
-    # _T = typeof(one(eltype(D))*one(T) + one(T))    
-    # return AffineDistribution{_T}(_T(μ), _T(σ), ρ)
     return AffineDistribution{T}(μ, σ, ρ)
 end
 
