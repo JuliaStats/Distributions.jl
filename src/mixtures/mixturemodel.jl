@@ -186,7 +186,7 @@ function mean(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
+            m .= muladd.(pi, mean(c), m)
         end
     end
     return m
@@ -236,17 +236,21 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            BLAS.axpy!(pi, mean(c), m)
-            BLAS.axpy!(pi, cov(c), V)
+            m .= muladd.(pi, mean(c), m)
+            V .= muladd.(pi, cov(c), V)
         end
     end
     for i = 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            # todo: use more in-place operations
-            md = mean(c) - m
-            BLAS.axpy!(pi, md*md', V)
+            md .= mean(c) .- m
+            BLAS.syr!('U', pi, md, V)
+        end
+    end
+    for j in 1:length(d)
+        for i in (j+1):length(d)
+            V[i, j] = V[j, i]
         end
     end
     return V
@@ -303,7 +307,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             else
                 pdf!(t, component(d, i), x)
             end
-            BLAS.axpy!(pi, t, r)
+            r .= muladd.(pi, t, r)
         end
     end
     return r
