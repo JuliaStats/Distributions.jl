@@ -82,6 +82,9 @@ end
     Truncated
 
 Generic wrapper for a truncated distribution.
+
+The *truncated normal distribution* is a particularly important one in the family of truncated distributions.
+Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
 """
 struct Truncated{D<:UnivariateDistribution, S<:ValueSupport, T<: Real, TL<:Union{T,Nothing}, TU<:Union{T,Nothing}} <: UnivariateDistribution{S}
     untruncated::D      # the original distribution (untruncated)
@@ -163,7 +166,8 @@ function logpdf(d::Truncated, x::Real)
 end
 
 function cdf(d::Truncated, x::Real)
-    result = (cdf(d.untruncated, x) - d.lcdf) / d.tp
+    result = clamp((cdf(d.untruncated, x) - d.lcdf) / d.tp, 0, 1)
+    # Special cases for values outside of the support to avoid e.g. NaN issues with `Binomial`
     return if d.lower !== nothing && x < d.lower
         zero(result)
     elseif d.upper !== nothing && x >= d.upper
@@ -185,7 +189,8 @@ function logcdf(d::Truncated, x::Real)
 end
 
 function ccdf(d::Truncated, x::Real)
-    result = (d.ucdf - cdf(d.untruncated, x)) / d.tp
+    result = clamp((d.ucdf - cdf(d.untruncated, x)) / d.tp, 0, 1)
+    # Special cases for values outside of the support to avoid e.g. NaN issues with `Binomial`
     return if d.lower !== nothing && x <= d.lower
         one(result)
     elseif d.upper !== nothing && x > d.upper

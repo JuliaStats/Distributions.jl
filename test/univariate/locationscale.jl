@@ -83,9 +83,9 @@ function test_location_scale(
             insupport(dtest, -x) == insupport(dref, -x)
 
             @test pdf(dtest, x) ≈ pdf(dref, x)
-            @test pdf.(dtest, xs) ≈ pdf.(dref, xs)
+            @test Base.Fix1(pdf, dtest).(xs) ≈ Base.Fix1(pdf, dref).(xs)
             @test logpdf(dtest, x) ≈ logpdf(dref, x)
-            @test logpdf.(dtest, xs) ≈ logpdf.(dref, xs)
+            @test Base.Fix1(logpdf, dtest).(xs) ≈ Base.Fix1(logpdf, dref).(xs)
             @test loglikelihood(dtest, x) ≈ loglikelihood(dref, x)
             @test loglikelihood(dtest, xs) ≈ loglikelihood(dref, xs)
 
@@ -110,7 +110,7 @@ function test_location_scale(
             @test invlogccdf(dtest, log(0.5)) ≈ invlogccdf(dref, log(0.5))
             @test invlogccdf(dtest, log(0.8)) ≈ invlogccdf(dref, log(0.8))
 
-            r = Array{float(eltype(dtest))}(undef, 100000)
+            r = Array{float(eltype(dtest))}(undef, 200000)
             if ismissing(rng)
                 rand!(dtest, r)
             else
@@ -148,7 +148,7 @@ end
     rng = MersenneTwister(123)
 
     @testset "Normal" begin
-        for _rng in (missing, rng), sign in (1, -1)
+        @testset for _rng in (missing, rng), sign in (1, -1)
             test_location_scale_normal(_rng, 0.3, sign * 0.2, 0.1, 0.2)
             test_location_scale_normal(_rng, -0.3, sign * 0.1, -0.1, 0.3)
             test_location_scale_normal(_rng, 1.3, sign * 0.4, -0.1, 0.5)
@@ -156,11 +156,11 @@ end
         test_location_scale_normal(rng, ForwardDiff.Dual(0.3), 0.2, 0.1, 0.2)
     end
     @testset "DiscreteNonParametric" begin
-        probs = normalize!(rand(10), 1)
-        for _rng in (missing, rng), sign in (1, -1)
-            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, probs)
-            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), probs)
-            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, probs)
+        _probs = normalize!(rand(10), 1)
+        @testset for _rng in (missing, rng), sign in (1, -1)
+            test_location_scale_discretenonparametric(_rng, 1//3, sign * 1//2, 1:10, _probs)
+            test_location_scale_discretenonparametric(_rng, -1//4, sign * 1//3, (-10):(-1), _probs)
+            test_location_scale_discretenonparametric(_rng, 6//5, sign * 3//2, 15:24, _probs)
         end
     end
 

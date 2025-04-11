@@ -1,15 +1,3 @@
-# Truncated normal distribution
-"""
-    TruncatedNormal(mu, sigma, l, u)
-
-The *truncated normal distribution* is a particularly important one in the family of truncated distributions.
-We provide additional support for this type with `TruncatedNormal` which calls `Truncated(Normal(mu, sigma), l, u)`.
-Unlike the general case, truncated normal distributions support `mean`, `mode`, `modes`, `var`, `std`, and `entropy`.
-"""
-TruncatedNormal
-
-@deprecate TruncatedNormal(mu::Real, sigma::Real, a::Real, b::Real) truncated(Normal(mu, sigma), a, b)
-
 ### statistics
 
 function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}

@@ -115,6 +115,7 @@ for fname in ["dirichlet.jl",
               "jointorderstatistics.jl",
               "mvnormal.jl",
               "mvnormalcanon.jl",
+              "mvlogitnormal.jl",
               "mvlognormal.jl",
               "mvtdist.jl",
               "product.jl", # deprecated

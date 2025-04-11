@@ -19,7 +19,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     @test partype(g) == Float64
     @test isa(mn, Vector{Float64})
     if g.normal.μ isa Zeros{Float64,1}
-        @test md isa Fill{Float64,1}
+        @test md isa FillArrays.AbstractFill{Float64,1}
     else
         @test md isa Vector{Float64}
     end
@@ -105,8 +105,8 @@ end
     @test  entropy(l1)   ≈ entropy(l2)
     @test logpdf(l1,5.0) ≈ logpdf(l2,[5.0])
     @test pdf(l1,5.0)    ≈ pdf(l2,[5.0])
-    @test (Random.seed!(78393) ; [rand(l1)]) == (Random.seed!(78393) ; rand(l2))
-    @test [rand(MersenneTwister(78393), l1)] == rand(MersenneTwister(78393), l2)
+    @test (Random.seed!(78393) ; [rand(l1)]) ≈ (Random.seed!(78393) ; rand(l2))
+    @test [rand(MersenneTwister(78393), l1)] ≈ rand(MersenneTwister(78393), l2)
 end
 
 ###### General Testing

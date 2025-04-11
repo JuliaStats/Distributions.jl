@@ -18,3 +18,8 @@ using FiniteDifferences
     test_cgf(Geometric(0.1), (1f-1, -1e6))
     test_cgf(Geometric(0.5), (1f-1, -1e6))
 end
+
+@testset "Support" begin
+    @test rand(Geometric(1)) == 0
+    @test_throws DomainError Geometric(0)
+end

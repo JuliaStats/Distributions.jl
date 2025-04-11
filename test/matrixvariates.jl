@@ -117,7 +117,7 @@ function test_convert(d::MatrixDistribution)
     @test d == deepcopy(d)
     for elty in (Float32, Float64, BigFloat)
         del1 = convert(distname{elty}, d)
-        del2 = convert(distname{elty}, getfield.(Ref(d), fieldnames(typeof(d)))...)
+        del2 = convert(distname{elty}, (Base.Fix1(getfield, d)).(fieldnames(typeof(d)))...)
         @test del1 isa distname{elty}
         @test del2 isa distname{elty}
         @test partype(del1) == elty
@@ -376,6 +376,14 @@ function test_special(dist::Type{Wishart})
         @test logpdf(d, X) ≈ Distributions.singular_wishart_logkernel(d, X) + Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
     end
     nothing
+end
+
+function test_special(dist::Type{InverseWishart})
+    @testset "InverseWishart constructor" begin
+        # Tests https://github.com/JuliaStats/Distributions.jl/issues/1948
+        @test typeof(InverseWishart(5, ScalMat(5, 1))) == InverseWishart{Float64, ScalMat{Float64}}
+        @test typeof(InverseWishart(5, PDiagMat(ones(Int, 5)))) == InverseWishart{Float64, PDiagMat{Float64, Vector{Float64}}}
+    end
 end
 
 function test_special(dist::Type{MatrixTDist})

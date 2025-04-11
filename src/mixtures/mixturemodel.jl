@@ -1,19 +1,21 @@
 # finite mixture models
 
 """
+    AbstractMixtureModel <: Distribution
 
-  All subtypes of `AbstractMixtureModel` should implement the following methods:
+All subtypes of `AbstractMixtureModel` should implement the following methods:
 
-  - ncomponents(d): the number of components
+  - `ncomponents(d)`: the number of components
 
-  - component(d, k):  return the k-th component
+  - `component(d, k)`:  return the k-th component
 
-  - probs(d):       return a vector of prior probabilities over components.
+  - `probs(d)`:       return a vector of prior probabilities over components.
 """
 abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
 
 """
-MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+    MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
+
 A mixture of distributions, parametrized on:
 * `VF,VS` variate and support
 * `C` distribution family of the mixture
@@ -297,7 +299,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
         pi = p[i]
         if pi > 0.0
             if d isa UnivariateMixture
-                t .= pdf.(component(d, i), x)
+                t .= Base.Fix1(pdf, component(d, i)).(x)
             else
                 pdf!(t, component(d, i), x)
             end
@@ -326,7 +328,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             lp_i = view(Lp, :, i)
             # compute logpdf in batch and store
             if d isa UnivariateMixture
-                lp_i .= logpdf.(component(d, i), x)
+                lp_i .= Base.Fix1(logpdf, component(d, i)).(x)
             else
                 logpdf!(lp_i, component(d, i), x)
             end
@@ -362,14 +364,14 @@ end
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
 
-_pdf!(r::AbstractArray, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
-_pdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray, d::UnivariateMixture, x::AbstractArray) = _mixlogpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixlogpdf!(r, d, x)
 
-_pdf(d::MultivariateMixture, x::AbstractVector) = _mixpdf1(d, x)
-_logpdf(d::MultivariateMixture, x::AbstractVector) = _mixlogpdf1(d, x)
-_pdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray, d::MultivariateMixture, x::AbstractMatrix) = _mixlogpdf!(r, d, x)
+_pdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixpdf1(d, x)
+_logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
+_pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
 
 
 ## component-wise pdf and logpdf
@@ -398,7 +400,7 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= pdf.(Ref(component(d, i)), X)
+            view(r,:,i) .= Base.Fix1(pdf, component(d, i)).(X)
         else
             pdf!(view(r,:,i),component(d, i), X)
         end
@@ -412,7 +414,7 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= logpdf.(Ref(component(d, i)), X)
+            view(r,:,i) .= Base.Fix1(logpdf, component(d, i)).(X)
         else
             logpdf!(view(r,:,i), component(d, i), X)
         end

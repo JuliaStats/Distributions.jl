@@ -27,6 +27,8 @@ import PDMats: dim, PDMat, invquad
 using SpecialFunctions
 using Base.MathConstants: eulergamma
 
+import AliasTables
+
 export
     # re-export Statistics
     mean, median, quantile, std, var, cov, cor,
@@ -39,6 +41,7 @@ export
     Multivariate,
     Matrixvariate,
     CholeskyVariate,
+    NamedTupleVariate,
     Discrete,
     Continuous,
     Sampleable,
@@ -122,11 +125,11 @@ export
     Logistic,
     LogNormal,
     LogUniform,
+    MvLogitNormal,
     LogitNormal,
     MatrixBeta,
     MatrixFDist,
     MatrixNormal,
-    MatrixReshaped,
     MatrixTDist,
     MixtureModel,
     Multinomial,
@@ -294,6 +297,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("namedtuple/productnamedtuple.jl")
 include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
@@ -314,12 +318,6 @@ include("mixtures/unigmm.jl")
 
 # Interface for StatsAPI
 include("statsapi.jl")
-
-# Extensions: Implementation of DensityInterface and ChainRulesCore API
-if !isdefined(Base, :get_extension)
-    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
-    include("../ext/DistributionsDensityInterfaceExt.jl")
-end
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
@@ -363,7 +361,7 @@ Supported distributions:
     NoncentralF, NoncentralHypergeometric, NoncentralT, Normal, NormalCanon,
     NormalInverseGaussian, Pareto, PGeneralizedGaussian, Poisson, PoissonBinomial,
     QQPair, Rayleigh, Rician, Skellam, Soliton, StudentizedRange, SymTriangularDist, TDist, TriangularDist,
-    Triweight, Truncated, TruncatedNormal, Uniform, UnivariateGMM,
+    Triweight, Truncated, Uniform, UnivariateGMM,
     VonMises, VonMisesFisher, WalleniusNoncentralHypergeometric, Weibull,
     Wishart, ZeroMeanIsoNormal, ZeroMeanIsoNormalCanon,
     ZeroMeanDiagNormal, ZeroMeanDiagNormalCanon, ZeroMeanFullNormal,

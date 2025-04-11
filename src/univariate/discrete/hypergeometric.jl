@@ -76,7 +76,7 @@ function kurtosis(d::Hypergeometric)
     a/b
 end
 
-entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
+entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ### Evaluation & Sampling
 

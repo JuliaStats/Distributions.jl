@@ -208,12 +208,8 @@ function rand(rng::AbstractRNG, d::Beta{T}) where T
     end
 end
 
-#### Fit model
-"""
-    fit_mle(::Type{<:Beta}, x::AbstractArray{T})
 
-Maximum Likelihood Estimate of `Beta` Distribution via Newton's Method
-"""
+
 function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
     maxiter::Int=1000, tol::Float64=1e-14) where T<:Real
 
@@ -240,11 +236,8 @@ function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
     return Beta(θ[1], θ[2])
 end
 
-"""
-    fit(::Type{<:Beta}, x::AbstractArray{T})
 
-fit a `Beta` distribution
-"""
+
 function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)
