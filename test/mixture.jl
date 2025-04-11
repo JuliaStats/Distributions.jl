@@ -1,5 +1,6 @@
 using Distributions, Random
 using Test
+using FillArrays
 using ForwardDiff: Dual
 
 
@@ -253,9 +254,9 @@ end
 
     @testset "Testing MultivariatevariateMixture" begin
         g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], I),
-                       MvNormal([0.2, 1.0], I),
-                       MvNormal([-0.5, -3.0], 1.6 * I) ],
+            IsoNormal[ MvNormal([0.0, 0.0], Eye(2)),
+                       MvNormal([0.2, 1.0], Eye(2)),
+                       MvNormal([-0.5, -3.0], 1.6 * Eye(2)) ],
             [0.2, 0.5, 0.3])
         @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
         @test length(components(g_m)) == 3
