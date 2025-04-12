@@ -186,7 +186,7 @@ function mean(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            m .= muladd.(pi, mean(c), m)
+            mul!(m, pi, mean(c), true, true)
         end
     end
     return m
@@ -236,8 +236,8 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            m .= muladd.(pi, mean(c), m)
-            V .= muladd.(pi, cov(c), V)
+            mul!(m, pi, mean(c), true, true)
+            mul!(V, pi, cov(c), true, true)
         end
     end
     for i = 1:K
@@ -307,7 +307,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             else
                 pdf!(t, component(d, i), x)
             end
-            r .= muladd.(pi, t, r)
+            mul!(r, pi, t, true, true)
         end
     end
     return r
