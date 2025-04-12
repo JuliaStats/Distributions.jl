@@ -248,11 +248,7 @@ function cov(d::MultivariateMixture)
             BLAS.syr!('U', pi, md, V)
         end
     end
-    for j in 1:length(d)
-        for i in (j+1):length(d)
-            V[i, j] = V[j, i]
-        end
-    end
+    LinearAlgebra.copytri!(V, 'U')
     return V
 end
 
