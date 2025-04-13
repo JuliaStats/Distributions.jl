@@ -186,7 +186,7 @@ function mean(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            mul!(m, pi, mean(c), true, true)
+            axpy!(pi, mean(c), m)
         end
     end
     return m
@@ -236,8 +236,8 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            mul!(m, pi, mean(c), true, true)
-            mul!(V, pi, cov(c), true, true)
+            axpy!(pi, mean(c), m)
+            axpy!(pi, cov(c), V)
         end
     end
     for i = 1:K
@@ -303,7 +303,7 @@ function _mixpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
             else
                 pdf!(t, component(d, i), x)
             end
-            mul!(r, pi, t, true, true)
+            axpy!(pi, t, r)
         end
     end
     return r
