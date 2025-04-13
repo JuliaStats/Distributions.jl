@@ -27,21 +27,22 @@ struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Pareto, α > zero(α) && θ > zero(θ))
+function Pareto(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Pareto (α, α > zero(α)) (θ, θ > zero(θ))
     return Pareto{T}(α, θ)
 end
 
-Pareto(α::Real, θ::Real) = Pareto(promote(α, θ)...)
-Pareto(α::Integer, θ::Integer) = Pareto(float(α), float(θ))
-Pareto(α::T) where {T <: Real} = Pareto(α, one(T))
-Pareto() = Pareto(1.0, 1.0, check_args=false)
+Pareto(α::Real, θ::Real; check_args::Bool=true) = Pareto(promote(α, θ)...; check_args=check_args)
+Pareto(α::Integer, θ::Integer; check_args::Bool=true) = Pareto(float(α), float(θ); check_args=check_args)
+Pareto(α::Real; check_args::Bool=true) = Pareto(α, one(α); check_args=check_args)
+Pareto() = Pareto{Float64}(1.0, 1.0)
 
 @distr_support Pareto d.θ Inf
 
 #### Conversions
 convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-convert(::Type{Pareto{T}}, d::Pareto{S}) where {T <: Real, S <: Real} = Pareto(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Pareto{T}}, d::Pareto) where {T<:Real} = Pareto{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -91,19 +92,17 @@ function logpdf(d::Pareto{T}, x::Real) where T<:Real
     x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
 end
 
-function ccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? (θ / x)^α : one(T)
+function ccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return (θ / max(x, θ))^α
 end
-
 cdf(d::Pareto, x::Real) = 1 - ccdf(d, x)
 
-function logccdf(d::Pareto{T}, x::Real) where T<:Real
-    (α, θ) = params(d)
-    x >= θ ? α * log(θ / x) : zero(T)
+function logccdf(d::Pareto, x::Real)
+    α, θ = params(d)
+    return xlogy(α, θ / max(x, θ))
 end
-
-logcdf(d::Pareto, x::Real) = log1p(-ccdf(d, x))
+logcdf(d::Pareto, x::Real) = log1mexp(logccdf(d, x))
 
 cquantile(d::Pareto, p::Real) = d.θ / p^(1 / d.α)
 quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)
@@ -111,7 +110,14 @@ quantile(d::Pareto, p::Real) = cquantile(d, 1 - p)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Pareto) = d.θ * exp(randexp(rng) / d.α)
+xval(d::Pareto, z::Real) = d.θ * exp(z / d.α)
+
+rand(rng::AbstractRNG, d::Pareto) = xval(d, randexp(rng))
+function rand!(rng::AbstractRNG, d::Pareto, A::AbstractArray{<:Real})
+    randexp!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 ## Fitting
 

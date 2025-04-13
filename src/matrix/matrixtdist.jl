@@ -50,8 +50,8 @@ end
 function MatrixTDist(ν::T, M::AbstractMatrix{T}, Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}) where T <: Real
     n, p = size(M)
     0 < ν < Inf || throw(ArgumentError("degrees of freedom must be positive and finite."))
-    n == dim(Σ) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
-    p == dim(Ω) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
+    n == size(Σ, 1) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
+    p == size(Ω, 1) || throw(ArgumentError("Number of columns of M must equal dim of Ω."))
     logc0 = matrixtdist_logc0(Σ, Ω, ν)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
@@ -85,6 +85,7 @@ function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where T <: Real
     ΩΩ = convert(AbstractArray{T}, d.Ω)
     MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
+Base.convert(::Type{MatrixTDist{T}}, d::MatrixTDist{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixTDist{T}}, ν, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
@@ -111,7 +112,7 @@ end
 
 mode(d::MatrixTDist) = d.M
 
-cov(d::MatrixTDist, ::Val{true}=Val(true)) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : Matrix(kron(d.Ω, d.Σ)) ./ (d.ν - 2)
+cov(d::MatrixTDist) = d.ν <= 2 ? throw(ArgumentError("cov only defined for df > 2")) : Matrix(kron(d.Ω, d.Σ)) ./ (d.ν - 2)
 
 cov(d::MatrixTDist, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
@@ -127,8 +128,8 @@ params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
 function matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     #  returns the natural log of the normalizing constant for the pdf
-    n = dim(Σ)
-    p = dim(Ω)
+    n = size(Σ, 1)
+    p = size(Ω, 1)
     term1 = logmvgamma(p, (ν + n + p - 1) / 2)
     term2 = - (n * p / 2) * logπ
     term3 = - logmvgamma(p, (ν + p - 1) / 2)
@@ -178,7 +179,7 @@ function _univariate(d::MatrixTDist)
     ν, M, Σ, Ω = params(d)
     μ = M[1]
     σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
-    return LocationScale(μ, σ, TDist(ν))
+    return AffineDistribution(μ, σ, TDist(ν))
 end
 
 _multivariate(d::MatrixTDist) = MvTDist(d)

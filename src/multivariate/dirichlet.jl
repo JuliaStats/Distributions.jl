@@ -25,20 +25,24 @@ struct Dirichlet{T<:Real,Ts<:AbstractVector{T},S<:Real} <: ContinuousMultivariat
     alpha0::T
     lmnB::S
 
-    function Dirichlet{T}(alpha::AbstractVector{T}; check_args=true) where T
-        if check_args && !all(x -> x > zero(x), alpha)
-            throw(ArgumentError("Dirichlet: alpha must be a positive vector."))
-        end
+    function Dirichlet{T}(alpha::AbstractVector{T}; check_args::Bool=true) where T
+        @check_args(
+            Dirichlet,
+            (alpha, all(x -> x > zero(x), alpha), "alpha must be a positive vector."),
+        )
         alpha0 = sum(alpha)
         lmnB = sum(loggamma, alpha) - loggamma(alpha0)
         new{T,typeof(alpha),typeof(lmnB)}(alpha, alpha0, lmnB)
     end
 end
 
-function Dirichlet(alpha::AbstractVector{<:Real}; check_args=true)
-    Dirichlet{eltype(alpha)}(alpha; check_args=check_args)
+function Dirichlet(alpha::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
+    Dirichlet{T}(alpha; check_args=check_args)
 end
-Dirichlet(d::Integer, alpha::Real; kwargs...) = Dirichlet(Fill(alpha, d); kwargs...)
+function Dirichlet(d::Integer, alpha::Real; check_args::Bool=true)
+    @check_args Dirichlet (d, d > zero(d)) (alpha, alpha > zero(alpha))
+    return Dirichlet{typeof(alpha)}(Fill(alpha, d); check_args=false)
+end
 
 struct DirichletCanon{T<:Real,Ts<:AbstractVector{T}}
     alpha::Ts
@@ -68,7 +72,7 @@ Base.show(io::IO, d::Dirichlet) = show(io, d, (:alpha,))
 length(d::Dirichlet) = length(d.alpha)
 mean(d::Dirichlet) = d.alpha .* inv(d.alpha0)
 params(d::Dirichlet) = (d.alpha,)
-@inline partype(d::Dirichlet{T}) where {T<:Real} = T
+@inline partype(::Dirichlet{T}) where {T<:Real} = T
 
 function var(d::Dirichlet)
     α0 = d.alpha0
@@ -111,6 +115,7 @@ function entropy(d::Dirichlet)
 end
 
 function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, α0::Real)
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     k = length(α)
     inv_s = inv(α0 - k)
     @. r = inv_s * (α - 1)
@@ -118,7 +123,7 @@ function dirichlet_mode!(r::AbstractVector{<:Real}, α::AbstractVector{<:Real}, 
 end
 
 function dirichlet_mode(α::AbstractVector{<:Real}, α0::Real)
-    all(αi < 1 for αi in α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
+    all(x -> x > 1, α) || error("Dirichlet has a mode only when alpha[i] > 1 for all i")
     inv_s = inv(α0 - length(α))
     r = map(α) do αi
         inv_s * (αi - 1)
@@ -155,14 +160,14 @@ function _rand!(rng::AbstractRNG,
     for (i, αi) in zip(eachindex(x), d.alpha)
         @inbounds x[i] = rand(rng, Gamma(αi))
     end
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
                 x::AbstractVector{<:Real}) where {T<:Real}
     rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    multiply!(x, inv(sum(x))) # this returns x
+    lmul!(inv(sum(x)), x) # this returns x
 end
 
 #######################################
@@ -231,7 +236,7 @@ function _dirichlet_mle_init2(μ::Vector{Float64}, γ::Vector{Float64})
     end
     α0 /= K
 
-    multiply!(μ, α0)
+    lmul!(α0, μ)
 end
 
 function dirichlet_mle_init(P::AbstractMatrix{Float64})

@@ -4,7 +4,7 @@ The *Chi squared distribution* (typically written χ²) with `ν` degrees of fre
 probability density function
 
 ```math
-f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(k/2)}, \\quad x > 0.
+f(x; \\nu) = \\frac{x^{\\nu/2 - 1} e^{-x/2}}{2^{\\nu/2} \\Gamma(\\nu/2)}, \\quad x > 0.
 ```
 
 If `ν` is an integer, then it is the distribution of the sum of squares of `ν` independent standard [`Normal`](@ref) variates.
@@ -25,12 +25,12 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chisq(ν::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Chisq, ν > zero(ν))
-    return Chisq{T}(ν)
+function Chisq(ν::Real; check_args::Bool=true)
+    @check_args Chisq (ν, ν > zero(ν))
+    return Chisq{typeof(ν)}(ν)
 end
 
-Chisq(ν::Integer) = Chisq(float(ν))
+Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_args)
 
 @distr_support Chisq 0.0 Inf
 
@@ -42,8 +42,8 @@ params(d::Chisq) = (d.ν,)
 
 ### Conversions
 convert(::Type{Chisq{T}}, ν::Real) where {T<:Real} = Chisq(T(ν))
-convert(::Type{Chisq{T}}, d::Chisq{S}) where {T <: Real, S <: Real} = Chisq(T(d.ν))
-
+Base.convert(::Type{Chisq{T}}, d::Chisq) where {T<:Real} = Chisq{T}(T(d.ν))
+Base.convert(::Type{Chisq{T}}, d::Chisq{T}) where {T<:Real} = d
 
 #### Statistics
 
@@ -70,12 +70,24 @@ function entropy(d::Chisq)
     hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
+function kldivergence(p::Chisq, q::Chisq)
+    pν = dof(p)
+    qν = dof(q)
+    return kldivergence(Chi{typeof(pν)}(pν), Chi{typeof(qν)}(qν))
+end
+
+
 
 #### Evaluation
 
 @_delegate_statsfuns Chisq chisq ν
 
 mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
+function cgf(d::Chisq, t)
+    ν = dof(d)
+    return -ν/2 * log1p(-2*t)
+end
+
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
 
@@ -84,7 +96,14 @@ gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Chisq) =
-    (ν = d.ν; rand(rng, Gamma(ν / 2.0, 2.0one(ν))))
+function rand(rng::AbstractRNG, d::Chisq)
+    α = dof(d) / 2
+    θ = oftype(α, 2)
+    return rand(rng, Gamma{typeof(α)}(α, θ))
+end
 
-sampler(d::Chisq) = (ν = d.ν; sampler(Gamma(ν / 2.0, 2.0one(ν))))
+function sampler(d::Chisq)
+    α = dof(d) / 2
+    θ = oftype(α, 2)
+    return sampler(Gamma{typeof(α)}(α, θ))
+end

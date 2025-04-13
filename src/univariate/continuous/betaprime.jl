@@ -1,5 +1,5 @@
 """
-    BetaPrime(α,β)
+    BetaPrime(α, β)
 
 The *Beta prime distribution* has probability density function
 
@@ -10,15 +10,15 @@ x^{\\alpha - 1} (1 + x)^{- (\\alpha + \\beta)}, \\quad x > 0
 
 
 The Beta prime distribution is related to the [`Beta`](@ref) distribution via the
-relation ship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
+relationship that if ``X \\sim \\operatorname{Beta}(\\alpha, \\beta)`` then ``\\frac{X}{1 - X}
 \\sim \\operatorname{BetaPrime}(\\alpha, \\beta)``
 
 ```julia
 BetaPrime()        # equivalent to BetaPrime(1, 1)
-BetaPrime(a)       # equivalent to BetaPrime(a, a)
-BetaPrime(a, b)    # Beta prime distribution with shape parameters a and b
+BetaPrime(α)       # equivalent to BetaPrime(α, α)
+BetaPrime(α, β)    # Beta prime distribution with shape parameters α and β
 
-params(d)          # Get the parameters, i.e. (a, b)
+params(d)          # Get the parameters, i.e. (α, β)
 ```
 
 External links
@@ -32,15 +32,18 @@ struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function BetaPrime(α::T, β::T; check_args=true) where {T<:Real}
-    check_args && @check_args(BetaPrime, α > zero(α) && β > zero(β))
+function BetaPrime(α::T, β::T; check_args::Bool=true) where {T<:Real}
+    @check_args BetaPrime (α, α > zero(α)) (β, β > zero(β))
     return BetaPrime{T}(α, β)
 end
 
-BetaPrime(α::Real, β::Real) = BetaPrime(promote(α, β)...)
-BetaPrime(α::Integer, β::Integer) = BetaPrime(float(α), float(β))
-BetaPrime(α::Real) = BetaPrime(α, α)
-BetaPrime() = BetaPrime(1.0, 1.0, check_args=false)
+BetaPrime(α::Real, β::Real; check_args::Bool=true) = BetaPrime(promote(α, β)...; check_args=check_args)
+BetaPrime(α::Integer, β::Integer; check_args::Bool=true) = BetaPrime(float(α), float(β); check_args=check_args)
+function BetaPrime(α::Real; check_args::Bool=true)
+    @check_args BetaPrime (α, α > zero(α))
+    BetaPrime(α, α; check_args=false)
+end
+BetaPrime() = BetaPrime{Float64}(1.0, 1.0)
 
 @distr_support BetaPrime 0.0 Inf
 
@@ -48,9 +51,8 @@ BetaPrime() = BetaPrime(1.0, 1.0, check_args=false)
 function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where T<:Real
     BetaPrime(T(α), T(β))
 end
-function convert(::Type{BetaPrime{T}}, d::BetaPrime{S}) where {T <: Real, S <: Real}
-    BetaPrime(T(d.α), T(d.β), check_args=false)
-end
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime) where {T<:Real} = BetaPrime{T}(T(d.α), T(d.β))
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -85,25 +87,28 @@ end
 
 #### Evaluation
 
-function logpdf(d::BetaPrime{T}, x::Real) where T<:Real
-    (α, β) = params(d)
-    if x < 0
-        T(-Inf)
-    else
-        (α - 1) * log(x) - (α + β) * log1p(x) - logbeta(α, β)
-    end
+function logpdf(d::BetaPrime, x::Real)
+    α, β = params(d)
+    _x = max(0, x)
+    z = xlogy(α - 1, _x) - (α + β) * log1p(_x) - logbeta(α, β)
+    return x < 0 ? oftype(z, -Inf) : z
 end
 
-cdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? zero(T) : betacdf(d.α, d.β, x / (1 + x))
-ccdf(d::BetaPrime{T}, x::Real) where {T<:Real} = x <= 0 ? one(T) : betaccdf(d.α, d.β, x / (1 + x))
-logcdf(d::BetaPrime{T}, x::Real) where {T<:Real} =  x <= 0 ? T(-Inf) : betalogcdf(d.α, d.β, x / (1 + x))
-logccdf(d::BetaPrime{T}, x::Real) where {T<:Real} =  x <= 0 ? zero(T) : betalogccdf(d.α, d.β, x / (1 + x))
+function zval(::BetaPrime, x::Real)
+    y = max(x, 0)
+    z = y / (1 + y)
+    # map `Inf` to `Inf` (otherwise it returns `NaN`)
+    return isinf(x) && x > 0 ? oftype(z, Inf) : z
+end
+xval(::BetaPrime, z::Real) = z / (1 - z)
 
-quantile(d::BetaPrime, p::Real) = (x = betainvcdf(d.α, d.β, p); x / (1 - x))
-cquantile(d::BetaPrime, p::Real) = (x = betainvccdf(d.α, d.β, p); x / (1 - x))
-invlogcdf(d::BetaPrime, p::Real) = (x = betainvlogcdf(d.α, d.β, p); x / (1 - x))
-invlogccdf(d::BetaPrime, p::Real) = (x = betainvlogccdf(d.α, d.β, p); x / (1 - x))
+for f in (:cdf, :ccdf, :logcdf, :logccdf)
+    @eval $f(d::BetaPrime, x::Real) = $f(Beta(d.α, d.β; check_args=false), zval(d, x))
+end
 
+for f in (:quantile, :cquantile, :invlogcdf, :invlogccdf)
+    @eval $f(d::BetaPrime, p::Real) = xval(d, $f(Beta(d.α, d.β; check_args=false), p))
+end
 
 #### Sampling
 

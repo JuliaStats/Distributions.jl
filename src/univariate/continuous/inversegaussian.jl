@@ -26,17 +26,18 @@ External links
 struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
+    InverseGaussian{T}(μ::T, λ::T) where {T<:Real} = new{T}(μ, λ)
 end
 
-function InverseGaussian(μ::T, λ::T; check_args=true) where {T}
-    check_args && @check_args(InverseGaussian, μ > zero(μ) && λ > zero(λ))
+function InverseGaussian(μ::T, λ::T; check_args::Bool=true) where {T<:Real}
+    @check_args InverseGaussian (μ, μ > zero(μ)) (λ, λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
 
-InverseGaussian(μ::Real, λ::Real) = InverseGaussian(promote(μ, λ)...)
-InverseGaussian(μ::Integer, λ::Integer) = InverseGaussian(float(μ), float(λ))
-InverseGaussian(μ::T) where {T <: Real} = InverseGaussian(μ, one(T))
-InverseGaussian() = InverseGaussian(1.0, 1.0, check_args=false)
+InverseGaussian(μ::Real, λ::Real; check_args::Bool=true) = InverseGaussian(promote(μ, λ)...; check_args=check_args)
+InverseGaussian(μ::Integer, λ::Integer; check_args::Bool=true) = InverseGaussian(float(μ), float(λ); check_args=check_args)
+InverseGaussian(μ::Real; check_args::Bool=true) = InverseGaussian(μ, one(μ); check_args=check_args)
+InverseGaussian() = InverseGaussian{Float64}(1.0, 1.0)
 
 @distr_support InverseGaussian 0.0 Inf
 
@@ -45,9 +46,10 @@ InverseGaussian() = InverseGaussian(1.0, 1.0, check_args=false)
 function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <: Real}
     InverseGaussian(T(μ), T(λ))
 end
-function convert(::Type{InverseGaussian{T}}, d::InverseGaussian{S}) where {T <: Real, S <: Real}
-    InverseGaussian(T(d.μ), T(d.λ), check_args=false)
+function Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian) where {T<:Real}
+    InverseGaussian{T}(T(d.μ), T(d.λ))
 end
+Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -92,52 +94,60 @@ function logpdf(d::InverseGaussian{T}, x::Real) where T<:Real
     end
 end
 
-function cdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        return normcdf(u * (v - 1)) + exp(2λ / μ) * normcdf(-u * (v + 1))
-    else
-        return zero(T)
-    end
+function cdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+    # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
+    # truncating to [0, 1] as an additional precaution
+    # Ref https://github.com/JuliaStats/Distributions.jl/issues/1873
+    z = clamp(normcdf(u * (v - 1)) + exp(2λ / μ + normlogcdf(-u * (v + 1))), 0, 1)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? one(z) : z
 end
 
-function ccdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        normccdf(u * (v - 1)) - exp(2λ / μ) * normcdf(-u * (v + 1))
-    else
-        return one(T)
-    end
+function ccdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+    # 2λ/μ and normlogcdf(-u*(v+1)) are similar magnitude, opp. sign
+    # truncating to [0, 1] as an additional precaution
+    # Ref https://github.com/JuliaStats/Distributions.jl/issues/1873
+    z = clamp(normccdf(u * (v - 1)) - exp(2λ / μ + normlogcdf(-u * (v + 1))), 0, 1)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? zero(z) : z
 end
 
-function logcdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        a = normlogcdf(u * (v -1))
-        b = 2λ / μ + normlogcdf(-u * (v + 1))
-        a + log1pexp(b - a)
-    else
-        return -T(Inf)
-    end
+function logcdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+
+    a = normlogcdf(u * (v - 1))
+    b = 2λ / μ + normlogcdf(-u * (v + 1))
+    z = logaddexp(a, b)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? zero(z) : z
 end
 
-function logccdf(d::InverseGaussian{T}, x::Real) where T<:Real
-    if x > 0
-        μ, λ = params(d)
-        u = sqrt(λ / x)
-        v = x / μ
-        a = normlogccdf(u * (v - 1))
-        b = 2λ / μ + normlogcdf(-u * (v + 1))
-        a + log1mexp(b - a)
-    else
-        return zero(T)
-    end
+function logccdf(d::InverseGaussian, x::Real)
+    μ, λ = params(d)
+    y = max(x, 0)
+    u = sqrt(λ / y)
+    v = y / μ
+
+    a = normlogccdf(u * (v - 1))
+    b = 2λ / μ + normlogcdf(-u * (v + 1))
+    z = logsubexp(a, b)
+
+    # otherwise `NaN` is returned for `+Inf`
+    return isinf(x) && x > 0 ? oftype(z, -Inf) : z
 end
 
 @quantile_newton InverseGaussian

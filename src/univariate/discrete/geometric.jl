@@ -29,18 +29,19 @@ struct Geometric{T<:Real} <: DiscreteUnivariateDistribution
     end
 end
 
-function Geometric(p::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Geometric, zero(p) < p < one(p))
-    return Geometric{T}(p)
+function Geometric(p::Real; check_args::Bool=true)
+    @check_args Geometric (p, zero(p) < p <= one(p))
+    return Geometric{typeof(p)}(p)
 end
 
-Geometric() = Geometric(0.5, check_args=false)
+Geometric() = Geometric{Float64}(0.5)
 
 @distr_support Geometric 0 Inf
 
 ### Conversions
 convert(::Type{Geometric{T}}, p::Real) where {T<:Real} = Geometric(T(p))
-convert(::Type{Geometric{T}}, d::Geometric{S}) where {T <: Real, S <: Real} = Geometric(T(d.p), check_args=false)
+Base.convert(::Type{Geometric{T}}, d::Geometric) where {T<:Real} = Geometric{T}(T(d.p))
+Base.convert(::Type{Geometric{T}}, d::Geometric{T}) where {T<:Real} = d
 
 ### Parameters
 
@@ -66,6 +67,18 @@ kurtosis(d::Geometric) = 6 + abs2(d.p) / (1 - d.p)
 
 entropy(d::Geometric) = (-xlogx(succprob(d)) - xlogx(failprob(d))) / d.p
 
+function kldivergence(p::Geometric, q::Geometric)
+    x = succprob(p)
+    y = succprob(q)
+    if x == y
+        return zero(float(x / y))
+    elseif isone(x)
+        return -log(y / x)
+    else
+        return log(x) - log(y) + (inv(x) - one(x)) * (log1p(-x) - log1p(-y))
+    end
+end
+
 
 ### Evaluations
 
@@ -73,25 +86,24 @@ function logpdf(d::Geometric, x::Real)
     insupport(d, x) ? log(d.p) + log1p(-d.p) * x : log(zero(d.p))
 end
 
-function cdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 && return zero(T)
+function cdf(d::Geometric, x::Int)
     p = succprob(d)
-    n = x + 1
+    n = max(x + 1, 0)
     p < 1/2 ? -expm1(log1p(-p)*n) : 1 - (1 - p)^n
 end
 
-function ccdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 && return one(T)
+ccdf(d::Geometric, x::Real) = ccdf_int(d, x)
+function ccdf(d::Geometric, x::Int)
     p = succprob(d)
-    n = x + 1
+    n = max(x + 1, 0)
     p < 1/2 ? exp(log1p(-p)*n) : (1 - p)^n
 end
 
-function logcdf(d::Geometric{T}, x::Int) where T<:Real
-    x < 0 ? -T(Inf) : log1mexp(log1p(-d.p) * (x + 1))
-end
+logcdf(d::Geometric, x::Real) = logcdf_int(d, x)
+logcdf(d::Geometric, x::Int) = log1mexp(log1p(-d.p) * max(x + 1, 0))
 
-logccdf(d::Geometric, x::Int) =  x < 0 ? zero(d.p) : log1p(-d.p) * (x + 1)
+logccdf(d::Geometric, x::Real) = logccdf_int(d, x)
+logccdf(d::Geometric, x::Int) =  log1p(-d.p) * max(x + 1, 0)
 
 quantile(d::Geometric, p::Real) = invlogccdf(d, log1p(-p))
 
@@ -110,21 +122,28 @@ function invlogccdf(d::Geometric{T}, lp::Real) where T<:Real
     max(ceil(lp/log1p(-d.p)) - 1, zero(T))
 end
 
-function mgf(d::Geometric, t::Real)
+function laplace_transform(d::Geometric, t)
     p = succprob(d)
-    p / (expm1(-t) + p)
+    p / (p - (1 - p) * expm1(-t))
 end
-
-function cf(d::Geometric, t::Real)
+mgf(d::Geometric, t::Real) = laplace_transform(d, -t)
+function cgf(d::Geometric, t)
     p = succprob(d)
-    # replace with expm1 when complex version available
-    p / (exp(-t*im) - 1 + p)
+    # log(p / (1 - (1-p) * exp(t)))
+    log(p) - log1mexp(t + log1p(-p))
 end
-
+cf(d::Geometric, t::Real) = laplace_transform(d, -t*im)
 
 ### Sampling
 
-rand(rng::AbstractRNG, d::Geometric) = floor(Int,-randexp(rng) / log1p(-d.p))
+# Inlining is required to hoist the d.p == 1//2 check when generating in bulk
+@inline function rand(rng::AbstractRNG, d::Geometric)
+    if d.p == 1//2
+        leading_zeros(rand(rng, UInt)) # This branch is a performance optimization
+    else
+        floor(Int,-randexp(rng) / log1p(-d.p))
+    end
+end
 
 ### Model Fitting
 

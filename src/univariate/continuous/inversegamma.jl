@@ -31,21 +31,24 @@ struct InverseGamma{T<:Real} <: ContinuousUnivariateDistribution
     InverseGamma{T}(α::T, θ::T) where {T<:Real} = new{T}(Gamma(α, inv(θ), check_args=false), θ)
 end
 
-function InverseGamma(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(InverseGamma, α > zero(α) && θ > zero(θ))
+function InverseGamma(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args InverseGamma (α, α > zero(α)) (θ, θ > zero(θ))
     return InverseGamma{T}(α, θ)
 end
 
-InverseGamma(α::Real, θ::Real) = InverseGamma(promote(α, θ)...)
-InverseGamma(α::Integer, θ::Integer) = InverseGamma(float(α), float(θ))
-InverseGamma(α::T) where {T <: Real} = InverseGamma(α, one(T))
-InverseGamma() = InverseGamma(1.0, 1.0, check_args=false)
+InverseGamma(α::Real, θ::Real; check_args::Bool=true) = InverseGamma(promote(α, θ)...; check_args=check_args)
+InverseGamma(α::Integer, θ::Integer; check_args::Bool=true) = InverseGamma(float(α), float(θ); check_args=check_args)
+InverseGamma(α::Real; check_args::Bool=true) = InverseGamma(α, one(α); check_args=check_args)
+InverseGamma() = InverseGamma{Float64}(1.0, 1.0)
 
 @distr_support InverseGamma 0.0 Inf
 
 #### Conversions
 convert(::Type{InverseGamma{T}}, α::S, θ::S) where {T <: Real, S <: Real} = InverseGamma(T(α), T(θ))
-convert(::Type{InverseGamma{T}}, d::InverseGamma{S}) where {T <: Real, S <: Real} = InverseGamma(T(shape(d.invd)), T(d.θ))
+function Base.convert(::Type{InverseGamma{T}}, d::InverseGamma) where {T<:Real}
+    return InverseGamma{T}(T(shape(d)), T(d.θ))
+end
+Base.convert(::Type{InverseGamma{T}}, d::InverseGamma{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -83,6 +86,11 @@ function entropy(d::InverseGamma)
     α + loggamma(α) - (1 + α) * digamma(α) + log(θ)
 end
 
+function kldivergence(p::InverseGamma, q::InverseGamma)
+    # We can reuse the implementation of Gamma
+    return kldivergence(p.invd, q.invd)
+end
+
 
 #### Evaluation
 
@@ -91,15 +99,17 @@ function logpdf(d::InverseGamma, x::Real)
     α * log(θ) - loggamma(α) - (α + 1) * log(x) - θ / x
 end
 
-cdf(d::InverseGamma, x::Real) = ccdf(d.invd, 1 / x)
-ccdf(d::InverseGamma, x::Real) = cdf(d.invd, 1 / x)
-logcdf(d::InverseGamma, x::Real) = logccdf(d.invd, 1 / x)
-logccdf(d::InverseGamma, x::Real) = logcdf(d.invd, 1 / x)
+zval(::InverseGamma, x::Real) = inv(max(x, 0))
 
-quantile(d::InverseGamma, p::Real) = 1 / cquantile(d.invd, p)
-cquantile(d::InverseGamma, p::Real) = 1 / quantile(d.invd, p)
-invlogcdf(d::InverseGamma, p::Real) = 1 / invlogccdf(d.invd, p)
-invlogccdf(d::InverseGamma, p::Real) = 1 / invlogcdf(d.invd, p)
+cdf(d::InverseGamma, x::Real) = ccdf(d.invd, zval(d, x))
+ccdf(d::InverseGamma, x::Real) = cdf(d.invd, zval(d, x))
+logcdf(d::InverseGamma, x::Real) = logccdf(d.invd, zval(d, x))
+logccdf(d::InverseGamma, x::Real) = logcdf(d.invd, zval(d, x))
+
+quantile(d::InverseGamma, p::Real) = inv(cquantile(d.invd, p))
+cquantile(d::InverseGamma, p::Real) = inv(quantile(d.invd, p))
+invlogcdf(d::InverseGamma, p::Real) = inv(invlogccdf(d.invd, p))
+invlogccdf(d::InverseGamma, p::Real) = inv(invlogcdf(d.invd, p))
 
 function mgf(d::InverseGamma{T}, t::Real) where T<:Real
     (a, b) = params(d)

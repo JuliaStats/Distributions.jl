@@ -42,7 +42,8 @@ end
 show(io::IO, d::VonMisesFisher) = show(io, d, (:μ, :κ))
 
 ### Conversions
-convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ))
+convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher) where {T<:Real} = VonMisesFisher{T}(convert(Vector{T}, d.μ), T(d.κ); checknorm=false)
+Base.convert(::Type{VonMisesFisher{T}}, d::VonMisesFisher{T}) where {T<:Real} = d
 convert(::Type{VonMisesFisher{T}}, μ::Vector, κ, logCκ) where {T<:Real} =  VonMisesFisher{T}(convert(Vector{T}, μ), T(κ))
 
 
@@ -64,7 +65,7 @@ function _vmflck(p, κ)
     T = typeof(κ)
     hp = T(p/2)
     q = hp - 1
-    q * log(κ) - hp * log2π - log(besseli(q, κ))
+    q * log(κ) - hp * log2π - log(besselix(q, κ)) - κ
 end
 _vmflck3(κ) = log(κ) - log2π - κ - log1mexp(-2κ)
 vmflck(p, κ) = (p == 3 ? _vmflck3(κ) : _vmflck(p, κ))
@@ -123,4 +124,4 @@ function _vmf_estkappa(p::Int, ρ::Float64)
     return κ
 end
 
-_vmfA(half_p::Float64, κ::Float64) = besseli(half_p, κ) / besseli(half_p - 1.0, κ)
+_vmfA(half_p::Float64, κ::Float64) = besselix(half_p, κ) / besselix(half_p - 1.0, κ)

@@ -27,13 +27,20 @@ mutable struct PoissonBinomial{T<:Real,P<:AbstractVector{T}} <: DiscreteUnivaria
     p::P
     pmf::Union{Nothing,Vector{T}} # lazy computation of the probability mass function
 
-    function PoissonBinomial{T}(p::AbstractVector{T}; check_args=true) where {T <: Real}
-        check_args && @check_args(PoissonBinomial, all(x -> zero(x) <= x <= one(x), p))
+    function PoissonBinomial{T}(p::AbstractVector{T}; check_args::Bool=true) where {T <: Real}
+        @check_args(
+            PoissonBinomial,
+            (
+                p,
+                all(x -> zero(x) <= x <= one(x), p),
+                "p must be a vector of success probabilities",
+            ),
+        )
         return new{T,typeof(p)}(p, nothing)
     end
 end
 
-function PoissonBinomial(p::AbstractVector{T}; check_args=true) where {T<:Real}
+function PoissonBinomial(p::AbstractVector{T}; check_args::Bool=true) where {T<:Real}
     return PoissonBinomial{T}(p; check_args=check_args)
 end
 
@@ -126,6 +133,16 @@ end
 pdf(d::PoissonBinomial, k::Real) = insupport(d, k) ? d.pmf[Int(k+1)] : zero(eltype(d.pmf))
 logpdf(d::PoissonBinomial, k::Real) = log(pdf(d, k))
 
+cdf(d::PoissonBinomial, k::Int) = integerunitrange_cdf(d, k)
+
+# leads to numerically more accurate results
+for f in (:ccdf, :logcdf, :logccdf)
+    @eval begin
+        $f(d::PoissonBinomial, k::Real) = $(Symbol(f, :_int))(d, k)
+        $f(d::PoissonBinomial, k::Int) = $(Symbol(:integerunitrange_, f))(d, k)
+    end
+end
+
 # Computes the pdf of a poisson-binomial random variable using
 # simple, fast recursive formula
 #
@@ -191,3 +208,43 @@ end
 #### Sampling
 
 sampler(d::PoissonBinomial) = PoissBinAliasSampler(d)
+
+# Compute matrix of partial derivatives [∂P(X=j-1)/∂pᵢ]_{i=1,…,n; j=1,…,n+1}
+#
+# This implementation uses the same dynamic programming "trick" as for the computation of
+# the primals.
+#
+# Reference (for the primal):
+#
+#      Marlin A. Thomas & Audrey E. Taub (1982)
+#      Calculating binomial probabilities when the trial probabilities are unequal,
+#      Journal of Statistical Computation and Simulation, 14:2, 125-131, DOI: 10.1080/00949658208810534
+function poissonbinomial_pdf_partialderivatives(p::AbstractVector{<:Real})
+    n = length(p)
+    A = zeros(eltype(p), n, n + 1)
+    @inbounds for j in 1:n
+        A[j, end] = 1
+    end
+    @inbounds for (i, pi) in enumerate(p)
+        qi = 1 - pi
+        for k in (n - i + 1):n
+            kp1 = k + 1
+            for j in 1:(i - 1)
+                A[j, k] = pi * A[j, k] + qi * A[j, kp1]
+            end
+            for j in (i+1):n
+                A[j, k] = pi * A[j, k] + qi * A[j, kp1]
+            end
+        end
+        for j in 1:(i-1)
+            A[j, end] *= pi
+        end
+        for j in (i+1):n
+            A[j, end] *= pi
+        end
+    end
+    @inbounds for j in 1:n, i in 1:n
+        A[i, j] -= A[i, j+1]
+    end
+    return A
+end

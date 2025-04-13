@@ -24,11 +24,13 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
     nf::Int     # number of failures in population
     n::Int      # sample size
 
-    function Hypergeometric(ns::Real, nf::Real, n::Real; check_args=true)
-        if check_args
-            @check_args(Hypergeometric, ns >= zero(ns) && nf >= zero(nf))
-            @check_args(Hypergeometric, zero(n) <= n <= ns + nf)
-        end
+    function Hypergeometric(ns::Real, nf::Real, n::Real; check_args::Bool=true)
+        @check_args(
+            Hypergeometric,
+            (ns, ns >= zero(ns)),
+            (nf, nf >= zero(nf)),
+            zero(n) <= n <= ns + nf,
+        )
         new(ns, nf, n)
     end
 end
@@ -36,6 +38,7 @@ end
 
 @distr_support Hypergeometric max(d.n - d.nf, 0) min(d.ns, d.n)
 
+partype(::Hypergeometric) = Int
 
 ### Parameters
 
@@ -73,23 +76,11 @@ function kurtosis(d::Hypergeometric)
     a/b
 end
 
-entropy(d::Hypergeometric) = entropy(pdf.(Ref(d), support(d)))
+entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))
 
 ### Evaluation & Sampling
 
 @_delegate_statsfuns Hypergeometric hyper ns nf n
-
-function pdf(d::Hypergeometric, x::Real)
-    _insupport = insupport(d, x)
-    s = pdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : zero(s)
-end
-
-function logpdf(d::Hypergeometric, x::Real)
-    _insupport = insupport(d, x)
-    s = logpdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : oftype(s, -Inf)
-end
 
 ## sampling
 

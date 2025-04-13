@@ -1,5 +1,5 @@
 #####
-##### Truncated exponential distribition
+##### Truncated exponential distribution
 #####
 
 function mean(d::Truncated{<:Exponential,Continuous})

@@ -28,20 +28,21 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end
 
-function Rayleigh(σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Rayleigh, σ > zero(σ))
-    return Rayleigh{T}(σ)
+function Rayleigh(σ::Real; check_args::Bool=true)
+    @check_args Rayleigh (σ, σ > zero(σ))
+    return Rayleigh{typeof(σ)}(σ)
 end
 
-Rayleigh(σ::Integer) = Rayleigh(float(σ))
-Rayleigh() = Rayleigh(1.0, check_args=false)
+Rayleigh(σ::Integer; check_args::Bool=true) = Rayleigh(float(σ); check_args=check_args)
+Rayleigh() = Rayleigh{Float64}(1.0)
 
 @distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
-convert(::Type{Rayleigh{T}}, d::Rayleigh{S}) where {T <: Real, S <: Real} = Rayleigh(T(d.σ), check_args=false)
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T<:Real} = Rayleigh{T}(T(d.σ))
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -77,10 +78,14 @@ function logpdf(d::Rayleigh{T}, x::Real) where T<:Real
     x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
-logccdf(d::Rayleigh{T}, x::Real) where {T<:Real} = x > 0 ? - (x^2) / (2d.σ^2) : zero(T)
+function logccdf(d::Rayleigh, x::Real)
+    z = - x^2 / (2 * d.σ^2)
+    # return negative zero so that cdf is +0, not -0
+    return x > 0 ? z : isnan(x) ? oftype(z, NaN) : -zero(z)
+end
 ccdf(d::Rayleigh, x::Real) = exp(logccdf(d, x))
 
-cdf(d::Rayleigh, x::Real) = 1 - ccdf(d, x)
+cdf(d::Rayleigh, x::Real) = -expm1(logccdf(d, x))
 logcdf(d::Rayleigh, x::Real) = log1mexp(logccdf(d, x))
 
 quantile(d::Rayleigh, p::Real) = sqrt(-2d.σ^2 * log1p(-p))
@@ -94,7 +99,7 @@ rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))
 #### Fitting
 
 function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T<:Real}
-    # Compute MLE (and unbiasd estimator) of σ^2
+    # Compute MLE (and unbiased estimator) of σ^2
     s2 = zero(T)
     for xi in x
         s2 += xi^2

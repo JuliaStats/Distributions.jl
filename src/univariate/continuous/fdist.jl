@@ -26,15 +26,15 @@ struct FDist{T<:Real} <: ContinuousUnivariateDistribution
     ν1::T
     ν2::T
 
-    function FDist{T}(ν1::T, ν2::T) where T
-        @check_args(FDist, ν1 > zero(ν1) && ν2 > zero(ν2))
+    function FDist{T}(ν1::T, ν2::T; check_args::Bool=true) where T
+        @check_args FDist (ν1, ν1 > zero(ν1)) (ν2, ν2 > zero(ν2))
         new{T}(ν1, ν2)
     end
 end
 
-FDist(ν1::T, ν2::T) where {T<:Real} = FDist{T}(ν1, ν2)
-FDist(ν1::Integer, ν2::Integer) = FDist(float(ν1), float(ν2))
-FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
+FDist(ν1::T, ν2::T; check_args::Bool=true) where {T<:Real} = FDist{T}(ν1, ν2; check_args=check_args)
+FDist(ν1::Integer, ν2::Integer; check_args::Bool=true) = FDist(float(ν1), float(ν2); check_args=check_args)
+FDist(ν1::Real, ν2::Real; check_args::Bool=true) = FDist(promote(ν1, ν2)...; check_args=check_args)
 
 @distr_support FDist 0.0 Inf
 
@@ -42,9 +42,8 @@ FDist(ν1::Real, ν2::Real) = FDist(promote(ν1, ν2)...)
 function convert(::Type{FDist{T}}, ν1::S, ν2::S) where {T <: Real, S <: Real}
     FDist(T(ν1), T(ν2))
 end
-function convert(::Type{FDist{T}}, d::FDist{S}) where {T <: Real, S <: Real}
-    FDist(T(d.ν1), T(d.ν2))
-end
+Base.convert(::Type{FDist{T}}, d::FDist) where {T<:Real} = FDist{T}(T(d.ν1), T(d.ν2))
+Base.convert(::Type{FDist{T}}, d::FDist{T}) where {T<:Real} = d
 
 #### Parameters
 

@@ -1,25 +1,28 @@
 """
-    convolve(d1::T, d2::T) where T<:Distribution -> Distribution
+    convolve(d1::Distribution, d2::Distribution)
 
-Convolve two distributions of the same type to yield the distribution corresponding to the
-sum of independent random variables drawn from the underlying distributions.
+Convolve two distributions and return the distribution corresponding to the sum of
+independent random variables drawn from the underlying distributions.
 
-The function is only defined in the cases where the convolution has a closed form as
-defined here https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions
+Currently, the function is only defined in cases where the convolution has a closed form.
+More precisely, the function is defined if the distributions of `d1` and `d2` are the same
+and one of
+* [`Bernoulli`](@ref)
+* [`Binomial`](@ref)
+* [`NegativeBinomial`](@ref)
+* [`Geometric`](@ref)
+* [`Poisson`](@ref)
+* [`DiscreteNonParametric`](@ref)
+* [`Normal`](@ref)
+* [`Cauchy`](@ref)
+* [`Chisq`](@ref)
+* [`Exponential`](@ref)
+* [`Gamma`](@ref)
+* [`MvNormal`](@ref)
 
-* `Bernoulli`
-* `Binomial`
-* `NegativeBinomial`
-* `Geometric`
-* `Poisson`
-* `Normal`
-* `Cauchy`
-* `Chisq`
-* `Exponential`
-* `Gamma`
-* `MultivariateNormal`
+External links: [List of convolutions of probability distributions on Wikipedia](https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions)
 """
-function convolve end
+convolve(::Distribution, ::Distribution)
 
 # discrete univariate
 function convolve(d1::Bernoulli, d2::Bernoulli)
@@ -45,6 +48,19 @@ end
 convolve(d1::Poisson, d2::Poisson) =  Poisson(d1.λ + d2.λ)
 
 
+function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
+    support_conv = collect(Set(s1 + s2 for s1 in support(d1), s2 in support(d2)))
+    sort!(support_conv) #for fast index finding below
+    probs1 = probs(d1)
+    probs2 = probs(d2)
+    p_conv = zeros(Base.promote_eltype(probs1, probs2), length(support_conv)) 
+    for (s1, p1) in zip(support(d1), probs(d1)), (s2, p2) in zip(support(d2), probs(d2))
+            idx = searchsortedfirst(support_conv, s1+s2)
+            p_conv[idx] += p1*p2
+    end
+    DiscreteNonParametric(support_conv, p_conv,check_args=false) 
+end
+
 # continuous univariate
 convolve(d1::Normal, d2::Normal) = Normal(d1.μ + d2.μ, hypot(d1.σ, d2.σ))
 convolve(d1::Cauchy, d2::Cauchy) = Cauchy(d1.μ + d2.μ, d1.σ + d2.σ)
@@ -61,29 +77,10 @@ function convolve(d1::Gamma, d2::Gamma)
 end
 
 # continuous multivariate
-# The first two methods exist for performance reasons to avoid unnecessarily converting
-# PDMats to a Matrix
-function convolve(
-    d1::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
-    d2::Union{IsoNormal, ZeroMeanIsoNormal, DiagNormal, ZeroMeanDiagNormal},
-    )
-    _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ + d2.Σ)
-end
-
-function convolve(
-    d1::Union{FullNormal, ZeroMeanFullNormal},
-    d2::Union{FullNormal, ZeroMeanFullNormal},
-    )
-    _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, d1.Σ.mat + d2.Σ.mat)
-end
-
 function convolve(d1::MvNormal, d2::MvNormal)
     _check_convolution_shape(d1, d2)
-    return MvNormal(d1.μ .+ d2.μ, Matrix(d1.Σ) + Matrix(d2.Σ))
+    return MvNormal(d1.μ + d2.μ, d1.Σ + d2.Σ)
 end
-
 
 function _check_convolution_args(p1, p2)
     p1 ≈ p2 || throw(ArgumentError(

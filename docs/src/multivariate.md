@@ -11,7 +11,7 @@ const ContinuousMultivariateDistribution = Distribution{Multivariate, Continuous
 
 ## Common Interface
 
-The methods listed as below are implemented for each multivariate distribution, which provides a consistent interface to work with multivariate distributions.
+The methods listed below are implemented for each multivariate distribution, which provides a consistent interface to work with multivariate distributions.
 
 ### Computation of statistics
 
@@ -36,7 +36,7 @@ pdf(::MultivariateDistribution, ::AbstractArray)
 logpdf(::MultivariateDistribution, ::AbstractArray)
 loglikelihood(::MultivariateDistribution, ::AbstractVector{<:Real})
 ```
-**Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluating the pdf may cause numerical problems. It is generally advisable to perform probability computation in log-scale.
+**Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluation of the pdf may cause numerical problems. It is generally advisable to perform probability computation in log scale.
 
 
 ### Sampling
@@ -46,7 +46,7 @@ rand(rng::AbstractRNG, ::MultivariateDistribution)
 rand!(rng::AbstractRNG, d::MultivariateDistribution, x::AbstractArray)
 ```
 
-**Note:** In addition to these common methods, each multivariate distribution has its own special methods, as introduced below.
+**Note:** In addition to these common methods, each multivariate distribution has its special methods, as introduced below.
 
 
 ## Distributions
@@ -56,9 +56,9 @@ Multinomial
 Distributions.AbstractMvNormal
 MvNormal
 MvNormalCanon
+MvLogitNormal
 MvLogNormal
 Dirichlet
-Product
 ```
 
 ## Addition Methods
@@ -72,7 +72,11 @@ invcov(::Distributions.AbstractMvNormal)
 logdetcov(::Distributions.AbstractMvNormal)
 sqmahal(::Distributions.AbstractMvNormal, ::AbstractArray)
 rand(::AbstractRNG, ::Distributions.AbstractMvNormal)
+minimum(::Distributions.AbstractMvNormal)
+maximum(::Distributions.AbstractMvNormal)
+extrema(::Distributions.AbstractMvNormal)
 ```
+
 
 ### MvLogNormal
 
@@ -95,20 +99,11 @@ scale!{D<:Distributions.AbstractMvLogNormal}(::Type{D},s::Symbol,m::AbstractVect
 params{D<:Distributions.AbstractMvLogNormal}(::Type{D},m::AbstractVector,S::AbstractMatrix)
 ```
 
-## Internal Methods (for creating you own multivariate distribution)
+## Internal Methods (for creating your own multivariate distribution)
 
 ```@docs
 Distributions._logpdf(d::MultivariateDistribution, x::AbstractArray)
 ```
-
-## Product distributions
-
-```@docs
-Distributions.product_distribution
-```
-
-Using `product_distribution` is advised to construct product distributions. 
-For some distributions, it constructs a special multivariate type.
 
 ## Index
 

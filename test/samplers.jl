@@ -31,9 +31,11 @@ import Distributions:
         @testset "p=$p" for p in Any[[1.0], [0.3, 0.7], [0.2, 0.3, 0.4, 0.1]]
             test_samples(S(p), Categorical(p), n_tsamples)
             test_samples(S(p), Categorical(p), n_tsamples, rng=rng)
+            @test ncategories(S(p)) == length(p)
         end
     end
 
+    @test string(AliasTable(Float16[1,2,3])) == "AliasTable with 3 entries"
 
     ## Binomial samplers
 
@@ -101,6 +103,28 @@ import Distributions:
         end
     end
 
+    @testset "GammaIPSampler" begin
+        @testset "d=$d" for d in [Gamma(0.1, 1.0), Gamma(0.9, 1.0)]
+            s = sampler(d)
+            @test s isa GammaIPSampler{<:GammaMTSampler}
+            @test s.s isa GammaMTSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+
+            s = @inferred(GammaIPSampler(d, GammaMTSampler))
+            @test s isa GammaIPSampler{<:GammaMTSampler}
+            @test s.s isa GammaMTSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+
+            s = @inferred(GammaIPSampler(d, GammaGDSampler))
+            @test s isa GammaIPSampler{<:GammaGDSampler}
+            @test s.s isa GammaGDSampler
+            test_samples(s, d, n_tsamples)
+            test_samples(s, d, n_tsamples, rng=rng)
+        end
+    end
+
     @testset "Random.Sampler" begin
         for dist in (
             Binomial(5, 0.3),
@@ -108,7 +132,7 @@ import Distributions:
             Gamma(0.1, 1.0),
             Gamma(2.0, 1.0),
             MatrixNormal(3, 4),
-            MvNormal(3, 1.0),
+            MvNormal(zeros(3), I),
             Normal(1.5, 2.0),
             Poisson(0.5),
         )

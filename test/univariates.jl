@@ -54,7 +54,7 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # Note: properties include all applicable params and stats
     #
 
-    # D can be a function, e.g. TruncatedNormal
+    # D can be a function
     if isa(D, Type)
         @assert isa(d, D)
     end
@@ -62,6 +62,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # test various constructors for promotion, all-Integer args, etc.
     pars = params(d)
 
+    # verify parameter type
+    # truncated parameters may be nothing
+    @test partype(d) === mapfoldl(
+        typeof, (S, T) -> T <: Distribution ? promote_type(S, partype(T)) : (T <: Nothing ? S : promote_type(S, eltype(T))), pars; init = Union{})
+    
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
     if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
@@ -72,10 +77,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
         @test typeof(D(mixed_pars...)) == typeof(d)
     end
 
-    # promote integer arguments to floats, where applicable
-    if sum(float_pars) >= 1 && !any(map(isinf, pars)) && !isa(d, Geometric) && !isa(D, typeof(truncated))
-        int_pars = map(x -> ceil(Int, x), pars)
-        @test typeof(D(int_pars...)) == typeof(d)
+    # conversions
+    if D isa Type && !isconcretetype(D)
+        @test convert(D{partype(d)}, d) === d
+        d32 = convert(D{Float32}, d)
+        @test d32 isa D{Float32}
     end
 
     # verify properties (params & stats)
@@ -98,8 +104,8 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
         # pdf method is not implemented for StudentizedRange
         if !isa(d, StudentizedRange)
-            @test isapprox(pdf.(d, x),     p; atol=1e-16, rtol=1e-8)
-            @test isapprox(logpdf.(d, x), lp; atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12)
+            @test Base.Fix1(pdf, d).(x) ≈ p atol=1e-16 rtol=1e-8
+            @test Base.Fix1(logpdf, d).(x) ≈ lp atol=isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12
         end
 
         # cdf method is not implemented for NormalInverseGaussian
@@ -120,13 +126,13 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
 
     try
         m = mgf(d,0.0)
-        @test m == 1.0
+        @test m ≈ 1.0
     catch e
         isa(e, MethodError) || throw(e)
     end
     try
         c = cf(d,0.0)
-        @test c == 1.0
+        @test c ≈ 1.0
         # test some extra values: should all be well-defined
         for t in (0.1,-0.1,1.0,-1.0)
             @test !isnan(cf(d,t))
@@ -165,4 +171,30 @@ for c in ["discrete",
     jsonfile = joinpath(@__DIR__, "ref", "$(c)_test.ref.json")
     verify_and_test_drive(jsonfile, ARGS, 10^6)
     println()
+end
+
+# #1358
+@testset "Poisson quantile" begin
+    d = Poisson(1)
+    @test quantile(d, 0.2) isa Int
+    @test cquantile(d, 0.4) isa Int
+    @test invlogcdf(d, log(0.2)) isa Int
+    @test invlogccdf(d, log(0.6)) isa Int
+end
+
+# #1471
+@testset "InverseGamma constructor (#1471)" begin
+    @test_throws DomainError InverseGamma(-1, 2)
+    InverseGamma(-1, 2; check_args=false) # no error
+end
+
+# #1479
+@testset "Inner and outer constructors" begin
+    @test_throws DomainError InverseGaussian(0.0, 0.0)
+    @test InverseGaussian(0.0, 0.0; check_args=false) isa InverseGaussian{Float64}
+    @test InverseGaussian{Float64}(0.0, 0.0) isa InverseGaussian{Float64}
+
+    @test_throws DomainError Levy(0.0, 0.0)
+    @test Levy(0.0, 0.0; check_args=false) isa Levy{Float64}
+    @test Levy{Float64}(0.0, 0.0) isa Levy{Float64}
 end

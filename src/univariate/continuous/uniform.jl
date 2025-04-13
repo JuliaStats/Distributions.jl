@@ -26,23 +26,24 @@ External links
 struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
+    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Uniform, a < b)
+function Uniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
+    @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
 
-Uniform(a::Real, b::Real) = Uniform(promote(a, b)...)
-Uniform(a::Integer, b::Integer) = Uniform(float(a), float(b))
-Uniform() = Uniform(0.0, 1.0, check_args=false)
+Uniform(a::Real, b::Real; check_args::Bool=true) = Uniform(promote(a, b)...; check_args=check_args)
+Uniform(a::Integer, b::Integer; check_args::Bool=true) = Uniform(float(a), float(b); check_args=check_args)
+Uniform() = Uniform{Float64}(0.0, 1.0)
 
 @distr_support Uniform d.a d.b
 
 #### Conversions
 convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-convert(::Type{Uniform{T}}, d::Uniform{S}) where {T<:Real, S<:Real} = Uniform(T(d.a), T(d.b), check_args=false)
+Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -70,20 +71,27 @@ entropy(d::Uniform) = log(d.b - d.a)
 
 #### Evaluation
 
-pdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? 1 / (d.b - d.a) : zero(T)
-logpdf(d::Uniform{T}, x::Real) where {T<:Real} = insupport(d, x) ? -log(d.b - d.a) : -T(Inf)
-gradlogpdf(d::Uniform{T}, x::Real) where {T<:Real} = zero(T)
-
-function cdf(d::Uniform{T}, x::Real) where T<:Real
-    (a, b) = params(d)
-    x <= a ? zero(T) :
-    x >= d.b ? one(T) : (x - a) / (b - a)
+function pdf(d::Uniform, x::Real)
+    # include dependency on `x` for return type to be consistent with `cdf`
+    a, b, _ = promote(d.a, d.b, x)
+    val = inv(b - a)
+    return insupport(d, x) ? val : zero(val)
 end
+function logpdf(d::Uniform, x::Real)
+    # include dependency on `x` for return type to be consistent with `logcdf`
+    a, b, _ = promote(d.a, d.b, x)
+    val = - log(b - a)
+    return insupport(d, x) ? val : oftype(val, -Inf)
+end
+gradlogpdf(d::Uniform, x::Real) = zero(partype(d)) / oneunit(x)
 
-function ccdf(d::Uniform{T}, x::Real) where T<:Real
-    (a, b) = params(d)
-    x <= a ? one(T) :
-    x >= d.b ? zero(T) : (b - x) / (b - a)
+function cdf(d::Uniform, x::Real)
+    a, b = params(d)
+    return clamp((x - a) / (b - a), 0, 1)
+end
+function ccdf(d::Uniform, x::Real)
+    a, b = params(d)
+    return clamp((b - x) / (b - a), 0, 1)
 end
 
 quantile(d::Uniform, p::Real) = d.a + p * (d.b - d.a)
@@ -97,6 +105,36 @@ function mgf(d::Uniform, t::Real)
     v = (a + b) * t / 2
     exp(v) * (sinh(u) / u)
 end
+function cgf_uniform_around_zero_kernel(x)
+    # taylor series of (exp(x) - x - 1) / x
+    T = typeof(x)
+    a0 = inv(T(2))
+    a1 = inv(T(6))
+    a2 = inv(T(24))
+    a3 = inv(T(120))
+    x*@evalpoly(x, a0, a1, a2, a3)
+end
+
+function cgf(d::Uniform, t)
+    # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
+    a,b = params(d)
+    x = t*(b-a)
+    if abs(x) <= sqrt(eps(float(one(x))))
+        cgf_around_zero(d, t)
+    else
+        cgf_away_from_zero(d, t)
+    end
+end
+function cgf_around_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    t*a + log1p(cgf_uniform_around_zero_kernel(x))
+end
+function cgf_away_from_zero(d::Uniform, t)
+    a,b = params(d)
+    x = t*(b-a)
+    logsubexp(t*b, t*a) - log(abs(x))
+end
 
 function cf(d::Uniform, t::Real)
     (a, b) = params(d)
@@ -106,31 +144,24 @@ function cf(d::Uniform, t::Real)
     cis(v) * (sin(u) / u)
 end
 
+#### Affine transformations
+
+Base.:+(d::Uniform, c::Real) = Uniform(d.a + c, d.b + c)
+Base.:*(c::Real, d::Uniform) = Uniform(minmax(c * d.a, c * d.b)...)
 
 #### Sampling
 
 rand(rng::AbstractRNG, d::Uniform) = d.a + (d.b - d.a) * rand(rng)
 
-rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray) =
-    A .= quantile.(d, rand!(rng, A))
+_rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
+    A .= Base.Fix1(quantile, d).(rand!(rng, A))
 
 
 #### Fitting
 
-function fit_mle(::Type{<:Uniform}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end
-
-    xmin = xmax = x[1]
-    for i = 2:length(x)
-        xi = x[i]
-        if xi < xmin
-            xmin = xi
-        elseif xi > xmax
-            xmax = xi
-        end
-    end
-
-    Uniform(xmin, xmax)
+    return T(extrema(x)...)
 end

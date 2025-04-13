@@ -1,5 +1,5 @@
 """
-    SymTriangularDist(μ,σ)
+    SymTriangularDist(μ, σ)
 
 The *Symmetric triangular distribution* with location `μ` and scale `σ` has probability density function
 
@@ -9,8 +9,8 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\sigma} \\left( 1 - \\left| \\frac{x - \\mu}{\\
 
 ```julia
 SymTriangularDist()         # Symmetric triangular distribution with zero location and unit scale
-SymTriangularDist(u)        # Symmetric triangular distribution with location μ and unit scale
-SymTriangularDist(u, s)     # Symmetric triangular distribution with location μ and scale σ
+SymTriangularDist(μ)        # Symmetric triangular distribution with location μ and unit scale
+SymTriangularDist(μ, s)     # Symmetric triangular distribution with location μ and scale σ
 
 params(d)       # Get the parameters, i.e. (μ, σ)
 location(d)     # Get the location parameter, i.e. μ
@@ -23,15 +23,14 @@ struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
     SymTriangularDist{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function SymTriangularDist(μ::T, σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(SymTriangularDist, σ > zero(σ))
+function SymTriangularDist(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+    @check_args SymTriangularDist (σ, σ > zero(σ))
     return SymTriangularDist{T}(μ, σ)
 end
 
-SymTriangularDist(μ::Real, σ::Real) = SymTriangularDist(promote(μ, σ)...)
-SymTriangularDist(μ::Integer, σ::Integer) = SymTriangularDist(float(μ), float(σ))
-SymTriangularDist(μ::T) where {T <: Real} = SymTriangularDist(μ, one(T))
-SymTriangularDist() = SymTriangularDist(0.0, 1.0, check_args=false)
+SymTriangularDist(μ::Real, σ::Real; check_args::Bool=true) = SymTriangularDist(promote(μ, σ)...; check_args=check_args)
+SymTriangularDist(μ::Integer, σ::Integer; check_args::Bool=true) = SymTriangularDist(float(μ), float(σ); check_args=check_args)
+SymTriangularDist(μ::Real=0.0) = SymTriangularDist(μ, one(μ); check_args=false)
 
 @distr_support SymTriangularDist d.μ - d.σ d.μ + d.σ
 
@@ -40,9 +39,10 @@ SymTriangularDist() = SymTriangularDist(0.0, 1.0, check_args=false)
 function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where T<:Real
     SymTriangularDist(T(μ), T(σ))
 end
-function convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{S}) where {T <: Real, S <: Real}
-    SymTriangularDist(T(d.μ), T(d.σ), check_args=false)
+function Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist) where {T<:Real}
+    SymTriangularDist{T}(T(d.μ), T(d.σ))
 end
+Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -68,42 +68,30 @@ entropy(d::SymTriangularDist) = 1//2 + log(d.σ)
 
 #### Evaluation
 
-zval(d::SymTriangularDist, x::Real) = (x - d.μ) / d.σ
+zval(d::SymTriangularDist, x::Real) = min(abs(x - d.μ) / d.σ, 1)
 xval(d::SymTriangularDist, z::Real) = d.μ + z * d.σ
 
+pdf(d::SymTriangularDist, x::Real) = (1 - zval(d, x)) / scale(d)
+logpdf(d::SymTriangularDist, x::Real) = log(pdf(d, x))
 
-pdf(d::SymTriangularDist{T}, x::Real) where {T<:Real} = insupport(d, x) ? (1 - abs(zval(d, x))) / scale(d) : zero(T)
-
-function logpdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    insupport(d, x) ? log((1 - abs(zval(d, x))) / scale(d)) : -convert(T, T(Inf))
+function cdf(d::SymTriangularDist, x::Real)
+    r = (1 - zval(d, x))^2/2
+    return x < d.μ ? r : 1 - r
 end
 
-function cdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? zero(T) :
-    x <= μ ? (1 + zval(d, x))^2/2 :
-    x < μ + σ ? 1 - (1 - zval(d, x))^2/2 : one(T)
+function ccdf(d::SymTriangularDist, x::Real)
+    r = (1 - zval(d, x))^2/2
+    return x < d.μ ? 1 - r : r
 end
 
-function ccdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? one(T) :
-    x <= μ ? 1 - (1 + zval(d, x))^2/2 :
-    x < μ + σ ? (1 - zval(d, x))^2/2 : zero(T)
+function logcdf(d::SymTriangularDist, x::Real)
+    log_r = 2 * log1p(- zval(d, x)) + loghalf
+    return x < d.μ ? log_r : log1mexp(log_r)
 end
 
-function logcdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? -T(Inf) :
-    x <= μ ? loghalf + 2*log1p(zval(d, x)) :
-    x < μ + σ ? log1p(-1/2 * (1 - zval(d, x))^2) : zero(T)
-end
-
-function logccdf(d::SymTriangularDist{T}, x::Real) where T<:Real
-    (μ, σ) = params(d)
-    x <= μ - σ ? zero(T) :
-    x <= μ ? log1p(-1/2 * (1 + zval(d, x))^2) :
-    x < μ + σ ? loghalf + 2*log1p(-zval(d, x)) : -T(Inf)
+function logccdf(d::SymTriangularDist, x::Real)
+    log_r = 2 * log1p(- zval(d, x)) + loghalf
+    return x < d.μ ? log1mexp(log_r) : log_r
 end
 
 quantile(d::SymTriangularDist, p::Real) = p < 1/2 ? xval(d, sqrt(2p) - 1) :

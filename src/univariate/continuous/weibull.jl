@@ -32,22 +32,22 @@ struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
     end
 end
 
-function Weibull(α::T, θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Weibull, α > zero(α) && θ > zero(θ))
+function Weibull(α::T, θ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Weibull (α, α > zero(α)) (θ, θ > zero(θ))
     return Weibull{T}(α, θ)
 end
 
-Weibull(α::Real, θ::Real) = Weibull(promote(α, θ)...)
-Weibull(α::Integer, θ::Integer) = Weibull(float(α), float(θ))
-Weibull(α::T) where {T <: Real} = Weibull(α, one(T))
-Weibull() = Weibull(1.0, 1.0, check_args=false)
+Weibull(α::Real, θ::Real; check_args::Bool=true) = Weibull(promote(α, θ)...; check_args=check_args)
+Weibull(α::Integer, θ::Integer; check_args::Bool=true) = Weibull(float(α), float(θ); check_args=check_args)
+Weibull(α::Real=1.0) = Weibull(α, one(α); check_args=false)
 
 @distr_support Weibull 0.0 Inf
 
 #### Conversions
 
 convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T<:Real} = Weibull(T(α), T(θ))
-convert(::Type{Weibull{T}}, d::Weibull{S}) where {T <: Real, S <: Real} = Weibull(T(d.α), T(d.θ), check_args=false)
+Base.convert(::Type{Weibull{T}}, d::Weibull) where {T<:Real} = Weibull{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Weibull{T}}, d::Weibull{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -93,38 +93,32 @@ end
 
 #### Evaluation
 
-function pdf(d::Weibull{T}, x::Real) where T<:Real
-    if x >= 0
-        α, θ = params(d)
-        z = x / θ
-        (α / θ) * z^(α - 1) * exp(-z^α)
-    else
-        zero(T)
-    end
+function pdf(d::Weibull, x::Real)
+    α, θ = params(d)
+    z = abs(x) / θ
+    res = (α / θ) * z^(α - 1) * exp(-z^α)
+    x < 0 || isinf(x) ? zero(res) : res
 end
 
-function logpdf(d::Weibull{T}, x::Real) where T<:Real
-    if x >= 0
-        α, θ = params(d)
-        z = x / θ
-        log(α / θ) + (α - 1) * log(z) - z^α
-    else
-        -T(Inf)
-    end
+function logpdf(d::Weibull, x::Real)
+    α, θ = params(d)
+    z = abs(x) / θ
+    res = log(α / θ) + xlogy(α - 1, z) - z^α
+    x < 0 || isinf(x) ? oftype(res, -Inf) : res
 end
 
-zv(d::Weibull, x::Real) = (x / d.θ) ^ d.α
-xv(d::Weibull, z::Real) = d.θ * z ^ (1 / d.α)
+zval(d::Weibull, x::Real) = (max(x, 0) / d.θ) ^ d.α
+xval(d::Weibull, z::Real) = d.θ * z ^ (1 / d.α)
 
-cdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-zv(d, x)) : zero(T)
-ccdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? exp(-zv(d, x)) : one(T)
-logcdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-zv(d, x)) : -T(Inf)
-logccdf(d::Weibull{T}, x::Real) where {T<:Real} = x > 0 ? -zv(d, x) : zero(T)
+cdf(d::Weibull, x::Real) = -expm1(- zval(d, x))
+ccdf(d::Weibull, x::Real) = exp(- zval(d, x))
+logcdf(d::Weibull, x::Real) = log1mexp(- zval(d, x))
+logccdf(d::Weibull, x::Real) = - zval(d, x)
 
-quantile(d::Weibull, p::Real) = xv(d, -log1p(-p))
-cquantile(d::Weibull, p::Real) = xv(d, -log(p))
-invlogcdf(d::Weibull, lp::Real) = xv(d, -log1mexp(lp))
-invlogccdf(d::Weibull, lp::Real) = xv(d, -lp)
+quantile(d::Weibull, p::Real) = xval(d, -log1p(-p))
+cquantile(d::Weibull, p::Real) = xval(d, -log(p))
+invlogcdf(d::Weibull, lp::Real) = xval(d, -log1mexp(lp))
+invlogccdf(d::Weibull, lp::Real) = xval(d, -lp)
 
 function gradlogpdf(d::Weibull{T}, x::Real) where T<:Real
     if insupport(Weibull, x)
@@ -138,7 +132,7 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Weibull) = xv(d, randexp(rng))
+rand(rng::AbstractRNG, d::Weibull) = xval(d, randexp(rng))
 
 #### Fit model
 
@@ -157,7 +151,7 @@ function fit_mle(::Type{<:Weibull}, x::AbstractArray{<:Real};
     lnxsq = lnx.^2
     mean_lnx = mean(lnx)
 
-    # first iteration outside loop, prevents type instabililty in α, ϵ
+    # first iteration outside loop, prevents type instability in α, ϵ
 
     xpow0 = x.^alpha0
     sum_xpow0 = sum(xpow0)

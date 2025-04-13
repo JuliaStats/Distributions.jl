@@ -30,8 +30,8 @@ end
 
 function MatrixNormal(M::AbstractMatrix{T}, U::AbstractPDMat{T}, V::AbstractPDMat{T}) where T <: Real
     n, p = size(M)
-    n == dim(U) || throw(ArgumentError("Number of rows of M must equal dim of U."))
-    p == dim(V) || throw(ArgumentError("Number of columns of M must equal dim of V."))
+    n == size(U, 1) || throw(ArgumentError("Number of rows of M must equal dim of U."))
+    p == size(V, 1) || throw(ArgumentError("Number of columns of M must equal dim of V."))
     logc0 = matrixnormal_logc0(U, V)
     R = Base.promote_eltype(T, logc0)
     prom_M = convert(AbstractArray{R}, M)
@@ -67,6 +67,7 @@ function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where T <: Real
     VV = convert(AbstractArray{T}, d.V)
     MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(d.logc0))
 end
+Base.convert(::Type{MatrixNormal{T}}, d::MatrixNormal{T}) where {T<:Real} = d
 
 function convert(::Type{MatrixNormal{T}}, M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat, logc0) where T <: Real
     MM = convert(AbstractArray{T}, M)
@@ -89,7 +90,7 @@ mean(d::MatrixNormal) = d.M
 
 mode(d::MatrixNormal) = d.M
 
-cov(d::MatrixNormal, ::Val{true}=Val(true)) = Matrix(kron(d.V, d.U))
+cov(d::MatrixNormal) = Matrix(kron(d.V, d.U))
 
 cov(d::MatrixNormal, ::Val{false}) = ((n, p) = size(d); reshape(cov(d), n, p, n, p))
 
@@ -104,8 +105,8 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 #  -----------------------------------------------------------------------------
 
 function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
-    n = dim(U)
-    p = dim(V)
+    n = size(U, 1)
+    p = size(V, 1)
     -(n * p / 2) * (logtwo + logπ) - (n / 2) * logdet(V) - (p / 2) * logdet(U)
 end
 
@@ -127,12 +128,6 @@ function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
     B = cholesky(d.V).U
     Y .= d.M .+ A * X * B
 end
-
-#  -----------------------------------------------------------------------------
-#  Transformation
-#  -----------------------------------------------------------------------------
-
-vec(d::MatrixNormal) = MvNormal(vec(d.M), kron(d.V, d.U))
 
 #  -----------------------------------------------------------------------------
 #  Test utils

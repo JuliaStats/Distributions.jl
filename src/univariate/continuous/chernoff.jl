@@ -16,7 +16,7 @@ The *Chernoff distribution* is the distribution of the random variable
 ```math
 \\underset{t \\in (-\\infty,\\infty)}{\\arg\\max} ( G(t) - t^2 ),
 ```
-where ``G`` is standard two--sided Brownian motion.
+where ``G`` is standard two-sided Brownian motion.
 
 The distribution arises as the limit distribution of various cube-root-n consistent estimators,
 including the isotonic regression estimator of Brunk, the isotonic density estimator of Grenander,
@@ -27,21 +27,7 @@ computation of pdf and cdf is based on the algorithm described in Groeneboom and
 Journal of Computational and Graphical Statistics, 2001.
 
 ```julia
-Chernoff()
-pdf(Chernoff(),x::Real)
-cdf(Chernoff(),x::Real)
-logpdf(Chernoff(),x::Real)
-survivor(Chernoff(),x::Real)
-mean(Chernoff())
-var(Chernoff())
-skewness(Chernoff())
-kurtosis(Chernoff())
-kurtosis(Chernoff(), excess::Bool)
-mode(Chernoff())
-entropy(Chernoff())
-rand(Chernoff())
-rand(rng, Chernoff()
-cdf(Chernoff(),-x)              #For tail probabilities, use this instead of 1-cdf(Chernoff(),x)
+cdf(Chernoff(),-x)              # For tail probabilities, use this instead of 1-cdf(Chernoff(),x)
 ```
 """
 struct Chernoff <: ContinuousUnivariateDistribution
@@ -227,7 +213,7 @@ kurtosis(d::Chernoff, excess::Bool) = kurtosis(d) + (excess ? 0.0 : 3.0)
 entropy(d::Chernoff) = -0.7515605300273104
 
 ### Random number generation
-rand(d::Chernoff) = rand(GLOBAL_RNG, d)
+rand(d::Chernoff) = rand(default_rng(), d)
 function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random number generator --- slow in the tails
     # constants needed for the Ziggurat algorithm
     A = 0.03248227216266608

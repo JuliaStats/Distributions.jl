@@ -1,5 +1,5 @@
 """
-    Beta(α,β)
+    Beta(α, β)
 
 The *Beta distribution* has probability density function
 
@@ -15,10 +15,10 @@ independently, then ``X / (X + Y) \\sim \\operatorname{Beta}(\\alpha, \\beta)``.
 
 ```julia
 Beta()        # equivalent to Beta(1, 1)
-Beta(a)       # equivalent to Beta(a, a)
-Beta(a, b)    # Beta distribution with shape parameters a and b
+Beta(α)       # equivalent to Beta(α, α)
+Beta(α, β)    # Beta distribution with shape parameters α and β
 
-params(d)     # Get the parameters, i.e. (a, b)
+params(d)     # Get the parameters, i.e. (α, β)
 ```
 
 External links
@@ -32,15 +32,18 @@ struct Beta{T<:Real} <: ContinuousUnivariateDistribution
     Beta{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function Beta(α::T, β::T; check_args=true) where {T<:Real}
-    check_args && @check_args(Beta, α > zero(α) && β > zero(β))
+function Beta(α::T, β::T; check_args::Bool=true) where {T<:Real}
+    @check_args Beta (α, α > zero(α)) (β, β > zero(β))
     return Beta{T}(α, β)
 end
 
-Beta(α::Real, β::Real) = Beta(promote(α, β)...)
-Beta(α::Integer, β::Integer) = Beta(float(α), float(β))
-Beta(α::Real) = Beta(α, α)
-Beta() = Beta(1.0, 1.0, check_args=false)
+Beta(α::Real, β::Real; check_args::Bool=true) = Beta(promote(α, β)...; check_args=check_args)
+Beta(α::Integer, β::Integer; check_args::Bool=true) = Beta(float(α), float(β); check_args=check_args)
+function Beta(α::Real; check_args::Bool=true)
+    @check_args Beta (α, α > zero(α))
+    Beta(α, α; check_args=false)
+end
+Beta() = Beta{Float64}(1.0, 1.0)
 
 @distr_support Beta 0.0 1.0
 
@@ -48,9 +51,8 @@ Beta() = Beta(1.0, 1.0, check_args=false)
 function convert(::Type{Beta{T}}, α::Real, β::Real) where T<:Real
     Beta(T(α), T(β))
 end
-function convert(::Type{Beta{T}}, d::Beta{S}) where {T <: Real, S <: Real}
-    Beta(T(d.α), T(d.β), check_args=false)
-end
+Base.convert(::Type{Beta{T}}, d::Beta) where {T<:Real} = Beta{T}(T(d.α), T(d.β))
+Base.convert(::Type{Beta{T}}, d::Beta{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -62,11 +64,13 @@ params(d::Beta) = (d.α, d.β)
 
 mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
-function mode(d::Beta; check_args=true)
-    (α, β) = params(d)
-    if check_args
-        (α > 1 && β > 1) || error("mode is defined only when α > 1 and β > 1.")
-    end
+function mode(d::Beta; check_args::Bool=true)
+    α, β = params(d)
+    @check_args(
+        Beta,
+        (α, α > 1, "mode is defined only when α > 1."),
+        (β, β > 1, "mode is defined only when β > 1."),
+    )
     return (α - 1) / (α + β - 2)
 end
 
@@ -107,6 +111,12 @@ function entropy(d::Beta)
         (s - 2) * digamma(s)
 end
 
+function kldivergence(p::Beta, q::Beta)
+    αp, βp = params(p)
+    αq, βq = params(q)
+    return logbeta(αq, βq) - logbeta(αp, βp) + (αp - αq) * digamma(αp) +
+        (βp - βq) * digamma(βp) + (αq - αp + βq - βp) * digamma(αp + βp)
+end
 
 #### Evaluation
 
@@ -198,12 +208,8 @@ function rand(rng::AbstractRNG, d::Beta{T}) where T
     end
 end
 
-#### Fit model
-"""
-    fit_mle(::Type{<:Beta}, x::AbstractArray{T})
 
-Maximum Likelihood Estimate of `Beta` Distribution via Newton's Method
-"""
+
 function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
     maxiter::Int=1000, tol::Float64=1e-14) where T<:Real
 
@@ -230,11 +236,8 @@ function fit_mle(::Type{<:Beta}, x::AbstractArray{T};
     return Beta(θ[1], θ[2])
 end
 
-"""
-    fit(::Type{<:Beta}, x::AbstractArray{T})
 
-fit a `Beta` distribution
-"""
+
 function fit(::Type{<:Beta}, x::AbstractArray{T}) where T<:Real
     x_bar = mean(x)
     v_bar = varm(x, x_bar)

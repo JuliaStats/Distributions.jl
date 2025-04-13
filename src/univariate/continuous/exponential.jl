@@ -26,19 +26,22 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Exponential, θ > zero(θ))
-    return Exponential{T}(θ)
+function Exponential(θ::Real; check_args::Bool=true)
+    @check_args Exponential (θ, θ > zero(θ))
+    return Exponential{typeof(θ)}(θ)
 end
 
-Exponential(θ::Integer) = Exponential(float(θ))
-Exponential() = Exponential(1.0, check_args=false)
+Exponential(θ::Integer; check_args::Bool=true) = Exponential(float(θ); check_args=check_args)
+Exponential() = Exponential{Float64}(1.0)
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
 convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
-convert(::Type{Exponential{T}}, d::Exponential{S}) where {T <: Real, S <: Real} = Exponential(T(d.θ), check_args=false)
+function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
+    return Exponential(T(d.θ))
+end
+Base.convert(::Type{Exponential{T}}, d::Exponential{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -60,21 +63,31 @@ kurtosis(::Exponential{T}) where {T} = T(6)
 
 entropy(d::Exponential{T}) where {T} = one(T) + log(d.θ)
 
-#### Evaluation
-
-zval(d::Exponential, x::Real) = x / d.θ
-xval(d::Exponential, z::Real) = z * d.θ
-
-pdf(d::Exponential, x::Real) = (λ = rate(d); x < 0 ? zero(λ) : λ * exp(-λ * x))
-function logpdf(d::Exponential{T}, x::Real) where T<:Real
-    λ = rate(d)
-    x < 0 ? -T(Inf) : log(λ) - λ * x
+function kldivergence(p::Exponential, q::Exponential)
+    λq_over_λp = scale(q) / scale(p)
+    return -logmxp1(λq_over_λp)
 end
 
-cdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -expm1(-zval(d, x)) : zero(T)
-ccdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? exp(-zval(d, x)) : zero(T)
-logcdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? log1mexp(-zval(d, x)) : -T(Inf)
-logccdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -zval(d, x) : zero(T)
+#### Evaluation
+
+zval(d::Exponential, x::Real) = max(x / d.θ, 0)
+xval(d::Exponential, z::Real) = z * d.θ
+
+function pdf(d::Exponential, x::Real)
+    λ = rate(d)
+    z = λ * exp(-λ * max(x, 0))
+    return x < 0 ? zero(z) : z
+end
+function logpdf(d::Exponential, x::Real)
+    λ = rate(d)
+    z = log(λ) - λ * x
+    return x < 0 ? oftype(z, -Inf) : z
+end
+
+cdf(d::Exponential, x::Real) = -expm1(-zval(d, x))
+ccdf(d::Exponential, x::Real) = exp(-zval(d, x))
+logcdf(d::Exponential, x::Real) = log1mexp(-zval(d, x))
+logccdf(d::Exponential, x::Real) = -zval(d, x)
 
 quantile(d::Exponential, p::Real) = -xval(d, log1p(-p))
 cquantile(d::Exponential, p::Real) = -xval(d, log(p))
@@ -84,12 +97,21 @@ invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
 
 mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
+function cgf(d::Exponential, t)
+    μ = mean(d)
+    return - log1p(- t * μ)
+end
 cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
 
 
 #### Sampling
-rand(rng::AbstractRNG, d::Exponential) = xval(d, randexp(rng))
+rand(rng::AbstractRNG, d::Exponential{T}) where {T} = xval(d, randexp(rng, float(T)))
 
+function rand!(rng::AbstractRNG, d::Exponential, A::AbstractArray{<:Real})
+    randexp!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 #### Fit model
 

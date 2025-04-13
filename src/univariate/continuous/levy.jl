@@ -24,24 +24,25 @@ External links
 struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
+    Levy{T}(μ::T, σ::T) where {T<:Real} = new{T}(μ, σ)
 end
 
-function Levy(μ::T, σ::T; check_args=true) where {T}
-    check_args && @check_args(Levy, σ > zero(σ))
+function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
+    @check_args Levy (σ, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
 
-Levy(μ::Real, σ::Real) = Levy(promote(μ, σ)...)
-Levy(μ::Integer, σ::Integer) = Levy(float(μ), float(σ))
-Levy(μ::T) where {T <: Real} = Levy(μ, one(T))
-Levy() = Levy(0.0, 1.0, check_args=false)
+Levy(μ::Real, σ::Real; check_args::Bool=true) = Levy(promote(μ, σ)...; check_args=check_args)
+Levy(μ::Integer, σ::Integer; check_args::Bool=true) = Levy(float(μ), float(σ); check_args=check_args)
+Levy(μ::Real=0.0) = Levy(μ, one(μ); check_args=false)
 
 @distr_support Levy d.μ Inf
 
 #### Conversions
 
 convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
-convert(::Type{Levy{T}}, d::Levy{S}) where {T <: Real, S <: Real} = Levy(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Levy{T}}, d::Levy) where {T<:Real} = Levy{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
 
 #### Parameters
 

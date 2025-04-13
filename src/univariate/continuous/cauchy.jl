@@ -9,12 +9,12 @@ f(x; \\mu, \\sigma) = \\frac{1}{\\pi \\sigma \\left(1 + \\left(\\frac{x - \\mu}{
 
 ```julia
 Cauchy()         # Standard Cauchy distribution, i.e. Cauchy(0, 1)
-Cauchy(u)        # Cauchy distribution with location u and unit scale, i.e. Cauchy(u, 1)
-Cauchy(u, b)     # Cauchy distribution with location u and scale b
+Cauchy(μ)        # Cauchy distribution with location μ and unit scale, i.e. Cauchy(μ, 1)
+Cauchy(μ, σ)     # Cauchy distribution with location μ and scale σ
 
-params(d)        # Get the parameters, i.e. (u, b)
-location(d)      # Get the location parameter, i.e. u
-scale(d)         # Get the scale parameter, i.e. b
+params(d)        # Get the parameters, i.e. (μ, σ)
+location(d)      # Get the location parameter, i.e. μ
+scale(d)         # Get the scale parameter, i.e. σ
 ```
 
 External links
@@ -28,15 +28,14 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-function Cauchy(μ::T, σ::T; check_args=true) where {T<:Real}
-    check_args && @check_args(Cauchy, σ > zero(σ))
+function Cauchy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
+    @check_args Cauchy (σ, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end
 
-Cauchy(μ::Real, σ::Real) = Cauchy(promote(μ, σ)...)
-Cauchy(μ::Integer, σ::Integer) = Cauchy(float(μ), float(σ))
-Cauchy(μ::T) where {T<:Real} = Cauchy(μ, one(T))
-Cauchy() = Cauchy(0.0, 1.0, check_args=false)
+Cauchy(μ::Real, σ::Real; check_args::Bool=true) = Cauchy(promote(μ, σ)...; check_args=check_args)
+Cauchy(μ::Integer, σ::Integer; check_args::Bool=true) = Cauchy(float(μ), float(σ); check_args=check_args)
+Cauchy(μ::Real=0.0) = Cauchy(μ, one(μ); check_args=false)
 
 @distr_support Cauchy -Inf Inf
 
@@ -44,9 +43,8 @@ Cauchy() = Cauchy(0.0, 1.0, check_args=false)
 function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
     Cauchy(T(μ), T(σ))
 end
-function convert(::Type{Cauchy{T}}, d::Cauchy{S}) where {T <: Real, S <: Real}
-    Cauchy(T(d.μ), T(d.σ), check_args=false)
-end
+Base.convert(::Type{Cauchy{T}}, d::Cauchy) where {T<:Real} = Cauchy{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Cauchy{T}}, d::Cauchy{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -101,6 +99,10 @@ end
 mgf(d::Cauchy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 cf(d::Cauchy, t::Real) = exp(im * (t * d.μ) - d.σ * abs(t))
 
+#### Affine transformations
+
+Base.:+(d::Cauchy, c::Real) = Cauchy(d.μ + c, d.σ)
+Base.:*(c::Real, d::Cauchy) = Cauchy(c * d.μ, abs(c) * d.σ)
 
 #### Fitting
 

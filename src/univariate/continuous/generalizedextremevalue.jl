@@ -55,9 +55,10 @@ end
 function convert(::Type{GeneralizedExtremeValue{T}}, μ::Real, σ::Real, ξ::Real) where T<:Real
     GeneralizedExtremeValue(T(μ), T(σ), T(ξ))
 end
-function convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{S}) where {T <: Real, S <: Real}
-    GeneralizedExtremeValue(T(d.μ), T(d.σ), T(d.ξ))
+function Base.convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue) where {T<:Real}
+    GeneralizedExtremeValue{T}(T(d.μ), T(d.σ), T(d.ξ))
 end
+Base.convert(::Type{GeneralizedExtremeValue{T}}, d::GeneralizedExtremeValue{T}) where {T<:Real} = d
 
 minimum(d::GeneralizedExtremeValue{T}) where {T<:Real} =
         d.ξ > 0 ? d.μ - d.σ / d.ξ : -T(Inf)
@@ -219,43 +220,21 @@ function pdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
     end
 end
 
-function logcdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
-    if insupport(d, x)
-        (μ, σ, ξ) = params(d)
-
-        z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps(one(ξ)) # ξ == 0
-            return -exp(- z)
-        else
-            return - (1 + z * ξ) ^ ( -1/ξ)
-        end
-    elseif x <= minimum(d)
-        return -T(Inf)
+function logcdf(d::GeneralizedExtremeValue, x::Real)
+    μ, σ, ξ = params(d)
+    z = (x - μ) / σ
+    return if abs(ξ) < eps(one(ξ)) # ξ == 0
+        -exp(- z)
     else
-        return zero(T)
+        # y(x) = y(bound) = 0 if x is not in the support with lower/upper bound
+        y = max(1 + z * ξ, 0)
+        - y^(-1/ξ)
     end
 end
+cdf(d::GeneralizedExtremeValue, x::Real) = exp(logcdf(d, x))
 
-function cdf(d::GeneralizedExtremeValue{T}, x::Real) where T<:Real
-    if insupport(d, x)
-        (μ, σ, ξ) = params(d)
-
-        z = (x - μ) / σ # Normalise x.
-        if abs(ξ) < eps(one(ξ)) # ξ == 0
-            t = exp(-z)
-        else
-            t = (1 + z * ξ) ^ (-1/ξ)
-        end
-        return exp(- t)
-    elseif x <= minimum(d)
-        return zero(T)
-    else
-        return one(T)
-    end
-end
-
-logccdf(d::GeneralizedExtremeValue, x::Real) = log1p(- cdf(d, x))
 ccdf(d::GeneralizedExtremeValue, x::Real) = - expm1(logcdf(d, x))
+logccdf(d::GeneralizedExtremeValue, x::Real) = log1mexp(logcdf(d, x))
 
 
 #### Sampling

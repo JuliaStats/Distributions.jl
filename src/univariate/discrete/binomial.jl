@@ -29,17 +29,17 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     Binomial{T}(n, p) where {T <: Real} = new{T}(n, p)
 end
 
-function Binomial(n::Integer, p::T; check_args=true) where {T <: Real}
-    if check_args
-        @check_args(Binomial, n >= zero(n))
-        @check_args(Binomial, zero(p) <= p <= one(p))
-    end
-    return Binomial{T}(n, p)
+function Binomial(n::Integer, p::Real; check_args::Bool=true)
+    @check_args Binomial (n, n >= zero(n)) (p, zero(p) <= p <= one(p))
+    return Binomial{typeof(p)}(n, p)
 end
 
-Binomial(n::Integer, p::Integer) = Binomial(n, float(p))
-Binomial(n::Integer) = Binomial(n, 0.5)
-Binomial() = Binomial(1, 0.5, check_args=false)
+Binomial(n::Integer, p::Integer; check_args::Bool=true) = Binomial(n, float(p); check_args=check_args)
+function Binomial(n::Integer; check_args::Bool=true)
+    @check_args Binomial (n, n >= zero(n))
+    Binomial{Float64}(n, 0.5)
+end
+Binomial() = Binomial{Float64}(1, 0.5)
 
 @distr_support Binomial 0 d.n
 
@@ -48,10 +48,10 @@ Binomial() = Binomial(1, 0.5, check_args=false)
 function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
     return Binomial(n, T(p))
 end
-function convert(::Type{Binomial{T}}, d::Binomial{S}) where {T <: Real, S <: Real}
-    return Binomial(d.n, T(d.p), check_args=false)
+function Base.convert(::Type{Binomial{T}}, d::Binomial) where {T<:Real}
+    return Binomial{T}(d.n, T(d.p))
 end
-
+Base.convert(::Type{Binomial{T}}, d::Binomial{T}) where {T<:Real} = d
 
 #### Parameters
 
@@ -73,7 +73,36 @@ function mode(d::Binomial{T}) where T<:Real
 end
 modes(d::Binomial) = Int[mode(d)]
 
-median(d::Binomial) = round(Int,mean(d))
+function median(dist::Binomial)
+    # The median is floor(Int, mean) or ceil(Int, mean)
+    # As shown in https://doi.org/10.1016/0167-7152(94)00090-U,
+    # |median - mean| <= 1 - bound
+    # where the equality is strict except for the case p = 1/2 and n odd.
+    # Thus if |k - mean| < bound for one of the two candidates if p = 1/2 and n odd
+    # or |k - mean| <= bound for one of the two candidates otherwise,
+    # the other candidate can't satisfy the condition and hence k must be the median
+    bound = max(min(dist.p, 1-dist.p), loghalf)
+    dist_mean = mean(dist)
+    
+    floor_mean = floor(Int, dist_mean)
+    difference = dist_mean - floor_mean
+    
+    if difference <= bound
+        # The only case where the median satisfies |median - mean| <= 1 - bound with equality
+        # is p = 1/2 and n odd
+        # However, in that case we also want to return floor(mean)
+        floor_mean
+    elseif difference >= 1 - bound
+        # The case p = 1/2 and n odd was already covered above,
+        # thus only cases with |median - mean| < 1 - bound are left here
+        # Therefore difference >= 1 - bound implies that floor(mean) cannot be the median
+        floor_mean + 1
+    elseif cdf(dist, floor_mean) >= 0.5
+        floor_mean
+    else
+        floor_mean + 1
+    end
+end
 
 function skewness(d::Binomial)
     n, p1 = params(d)
@@ -105,22 +134,28 @@ function entropy(d::Binomial; approx::Bool=false)
     end
 end
 
+function kldivergence(p::Binomial, q::Binomial; kwargs...)
+    np = ntrials(p)
+    nq = ntrials(q)
+    succp = succprob(p)
+    succq = succprob(q)
+    res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
+    if np == nq
+        iszero(np) && return zero(res)
+        return res
+    elseif np > nq
+        return oftype(res, Inf)
+    else
+        # pull some terms out of the expectation to make this more efficient:
+        res += logfactorial(np) - logfactorial(nq) - (nq - np) * log1p(-succq)
+        res += expectation(k -> logfactorial(nq - k) - logfactorial(np - k), p)
+        return res
+    end
+end
 
 #### Evaluation & Sampling
 
 @_delegate_statsfuns Binomial binom n p
-
-function pdf(d::Binomial, x::Real)
-    _insupport = insupport(d, x)
-    s = pdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : zero(s)
-end
-
-function logpdf(d::Binomial, x::Real)
-    _insupport = insupport(d, x)
-    s = logpdf(d, _insupport ? round(Int, x) : 0)
-    return _insupport ? s : oftype(s, -Inf)
-end
 
 function rand(rng::AbstractRNG, d::Binomial)
     p, n = d.p, d.n
@@ -141,6 +176,10 @@ function mgf(d::Binomial, t::Real)
     n, p = params(d)
     (one(p) - p + p * exp(t)) ^ n
 end
+function cgf(d::Binomial, t)
+    n, p = params(d)
+    n * cgf(Bernoulli{typeof(p)}(p), t)
+end
 
 function cf(d::Binomial, t::Real)
     n, p = params(d)
@@ -150,31 +189,29 @@ end
 
 #### Fit model
 
-struct BinomialStats <: SufficientStats
-    ns::Float64   # the total number of successes
-    ne::Float64   # the number of experiments
+struct BinomialStats{N<:Real} <: SufficientStats
+    ns::N         # the total number of successes
+    ne::N         # the number of experiments
     n::Int        # the number of trials in each experiment
-
-    BinomialStats(ns::Real, ne::Real, n::Integer) = new(ns, ne, n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where T<:Integer
-    ns = zero(T)
-    for i = 1:length(x)
-        @inbounds xi = x[i]
-        0 <= xi <= n || throw(DomainError())
+BinomialStats(ns::Real, ne::Real, n::Integer) = BinomialStats(promote(ns, ne)..., Int(n))
+
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer})
+    z = zero(eltype(x))
+    ns = z + z # possibly widened and different from `z`, e.g., if `z = true`
+    for xi in x
+        0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi
     end
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Integer
-    ns = 0.
-    ne = 0.
-    for i = 1:length(x)
-        @inbounds xi = x[i]
-        @inbounds wi = w[i]
-        0 <= xi <= n || throw(DomainError())
+function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
+    z = zero(eltype(x)) * zero(eltype(w))
+    ns = ne = z + z # possibly widened and different from `z`, e.g., if `z = true`
+    for (xi, wi) in zip(x, w)
+        0 <= xi <= n || throw(DomainError(xi, "samples must be between 0 and $n"))
         ns += xi * wi
         ne += wi
     end
@@ -183,15 +220,15 @@ end
 
 const BinomData = Tuple{Int, AbstractArray}
 
-suffstats(::Type{<:Binomial}, data::BinomData) = suffstats(Binomial, data...)
-suffstats(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = suffstats(Binomial, data..., w)
+suffstats(::Type{T}, data::BinomData) where {T<:Binomial} = suffstats(T, data...)
+suffstats(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = suffstats(T, data..., w)
 
-fit_mle(::Type{<:Binomial}, ss::BinomialStats) = Binomial(ss.n, ss.ns / (ss.ne * ss.n))
+fit_mle(::Type{T}, ss::BinomialStats) where {T<:Binomial} = T(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x))
-fit_mle(::Type{<:Binomial}, n::Integer, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Integer} = fit_mle(Binomial, suffstats(Binomial, n, x, w))
-fit_mle(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, suffstats(Binomial, data))
-fit_mle(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, suffstats(Binomial, data, w))
+fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}) where {T<:Binomial}= fit_mle(T, suffstats(T, n, x))
+fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, n, x, w))
+fit_mle(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, suffstats(T, data))
+fit_mle(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, data, w))
 
-fit(::Type{<:Binomial}, data::BinomData) = fit_mle(Binomial, data)
-fit(::Type{<:Binomial}, data::BinomData, w::AbstractArray{Float64}) = fit_mle(Binomial, data, w)
+fit(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, data)
+fit(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, data, w)

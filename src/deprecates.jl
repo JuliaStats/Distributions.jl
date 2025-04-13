@@ -34,10 +34,40 @@ for fun in [:pdf, :logpdf,
     fun! = Symbol(fun, '!')
 
     @eval begin
-        @deprecate ($_fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun!)(r::AbstractArray, d::UnivariateDistribution, X::AbstractArray) r .= ($fun).(d, X) false
-        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray) ($fun).(d, X)
+        @deprecate ($_fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun!)(r::AbstractArray{<:Real}, d::UnivariateDistribution, X::AbstractArray{<:Real}) r .= Base.Fix1($fun, d).(X) false
+        @deprecate ($fun)(d::UnivariateDistribution, X::AbstractArray{<:Real}) map(Base.Fix1($fun, d), X)
     end
 end
 
-@deprecate pdf(d::DiscreteUnivariateDistribution) pdf.(Ref(d), support(d))
+@deprecate pdf(d::DiscreteUnivariateDistribution) map(Base.Fix1(pdf, d), support(d))
+
+# Wishart constructors
+@deprecate Wishart(df::Real, S::AbstractPDMat, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Matrix, warn::Bool) Wishart(df, S)
+@deprecate Wishart(df::Real, S::Cholesky, warn::Bool) Wishart(df, S)
+
+# Deprecate 3 arguments expectation and once with function in second place
+@deprecate expectation(distr::DiscreteUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr; epsilon=epsilon) false
+@deprecate expectation(distr::ContinuousUnivariateDistribution, g::Function, epsilon::Real) expectation(g, distr) false
+@deprecate expectation(distr::Union{UnivariateDistribution,MultivariateDistribution}, g::Function; kwargs...) expectation(g, distr; kwargs...) false
+
+# Deprecate `MatrixReshaped`
+# This is very similar to `Base.@deprecate_binding MatrixReshaped{...} ReshapedDistribution{...}`
+# However, `Base.@deprecate_binding` does not support type parameters
+export MatrixReshaped
+const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+Base.deprecate(@__MODULE__, :MatrixReshaped)
+# This is very similar to `Base.@deprecate MatrixReshaped(...) reshape(...)`
+# We use another (unexported!) alias here to not throw a deprecation warning/error
+# Unexported aliases do not affect the type printing
+# In Julia >= 1.6, instead of a new alias we could have defined a method for (ReshapedDistribution{2,S,D} where {S<:ValueSupport,D<:MultivariateDistribution{S}})
+const _MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} = ReshapedDistribution{2,S,D}
+function _MatrixReshaped(d::MultivariateDistribution, n::Integer, p::Integer=n)
+    Base.depwarn("`MatrixReshaped(d, n, p)` is deprecated, use `reshape(d, (n, p))` instead.", :MatrixReshaped)
+    return reshape(d, (n, p))
+end
+
+for D in (:InverseWishart, :LKJ, :MatrixBeta, :MatrixFDist, :Wishart)
+    @eval @deprecate dim(d::$D) size(d, 1)
+end

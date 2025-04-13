@@ -33,22 +33,22 @@ struct Normal{T<:Real} <: ContinuousUnivariateDistribution
     Normal{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
 end
 
-function Normal(μ::T, σ::T; check_args=true) where {T <: Real}
-    check_args && @check_args(Normal, σ >= zero(σ))
+function Normal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+    @check_args Normal (σ, σ >= zero(σ))
     return Normal{T}(μ, σ)
 end
 
 #### Outer constructors
-Normal(μ::Real, σ::Real) = Normal(promote(μ, σ)...)
-Normal(μ::Integer, σ::Integer) = Normal(float(μ), float(σ))
-Normal(μ::T) where {T <: Real} = Normal(μ, one(T))
-Normal() = Normal(0.0, 1.0, check_args=false)
+Normal(μ::Real, σ::Real; check_args::Bool=true) = Normal(promote(μ, σ)...; check_args=check_args)
+Normal(μ::Integer, σ::Integer; check_args::Bool=true) = Normal(float(μ), float(σ); check_args=check_args)
+Normal(μ::Real=0.0) = Normal(μ, one(μ); check_args=false)
 
 const Gaussian = Normal
 
 # #### Conversions
 convert(::Type{Normal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Normal(T(μ), T(σ))
-convert(::Type{Normal{T}}, d::Normal{S}) where {T <: Real, S <: Real} = Normal(T(d.μ), T(d.σ), check_args=false)
+Base.convert(::Type{Normal{T}}, d::Normal) where {T<:Real} = Normal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Normal{T}}, d::Normal{T}) where {T<:Real} = d
 
 @distr_support Normal -Inf Inf
 
@@ -75,172 +75,53 @@ kurtosis(d::Normal{T}) where {T<:Real} = zero(T)
 
 entropy(d::Normal) = (log2π + 1)/2 + log(d.σ)
 
+function kldivergence(p::Normal, q::Normal)
+    μp = mean(p)
+    σ²p = var(p)
+    μq = mean(q)
+    σ²q = var(q)
+    σ²p_over_σ²q = σ²p / σ²q
+    return (abs2(μp - μq) / σ²q - logmxp1(σ²p_over_σ²q)) / 2
+end
+
 #### Evaluation
 
-# Helpers
-"""
-    xval(d::Normal, z::Real)
+# Use Julia implementations in StatsFuns
+@_delegate_statsfuns Normal norm μ σ
 
-Computes the x-value based on a Normal distribution and a z-value.
-"""
-function xval(d::Normal, z::Real)
-    if isinf(z) && iszero(d.σ)
-        d.μ + one(d.σ) * z
-    else
-        d.μ + d.σ * z
-    end
-end
-"""
-    zval(d::Normal, x::Real)
-
-Computes the z-value based on a Normal distribution and a x-value.
-"""
-zval(d::Normal, x::Real) = (x - d.μ) / d.σ
-
-gradlogpdf(d::Normal, x::Real) = -zval(d, x) / d.σ
-
-# logpdf
-_normlogpdf(z::Real) = -(abs2(z) + log2π)/2
-
-function logpdf(d::Normal, x::Real)
-    μ, σ = d.μ, d.σ
-    if iszero(d.σ)
-        if x == μ
-            z = zval(Normal(μ, one(σ)), x)
-        else
-            z = zval(d, x)
-            σ = one(σ)
-        end
-    else
-        z = zval(Normal(μ, σ), x)
-    end
-    return _normlogpdf(z) - log(σ)
+# `logerf(...)` is more accurate for arguments in the tails than `logsubexp(logcdf(...), logcdf(...))`
+function logdiffcdf(d::Normal, x::Real, y::Real)
+    x < y && throw(ArgumentError("requires x >= y."))
+    μ, σ = params(d)
+    _x, _y, _μ, _σ = promote(x, y, μ, σ)
+    s = sqrt2 * _σ
+    return logerf((_y - _μ) / s, (_x - _μ) / s) - logtwo
 end
 
-# pdf
-_normpdf(z::Real) = exp(-abs2(z)/2) * invsqrt2π
-
-function pdf(d::Normal, x::Real)
-    μ, σ = d.μ, d.σ
-    if iszero(σ)
-        if x == μ
-            z = zval(Normal(μ, one(σ)), x)
-        else
-            z = zval(d, x)
-            σ = one(σ)
-        end
-    else
-        z = zval(Normal(μ, σ), x)
-    end
-    return _normpdf(z) / σ
-end
-
-# logcdf
-function _normlogcdf(z::Real)
-    if z < -one(z)
-        return log(erfcx(-z * invsqrt2)/2) - abs2(z)/2
-    else
-        return log1p(-erfc(z * invsqrt2)/2)
-    end
-end
-
-function logcdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normlogcdf(z)
-end
-
-# logccdf
-function _normlogccdf(z::Real)
-    if z > one(z)
-        return log(erfcx(z * invsqrt2)/2) - abs2(z)/2
-    else
-        return log1p(-erfc(-z * invsqrt2)/2)
-    end
-end
-
-function logccdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normlogccdf(z)
-end
-
-# cdf
-_normcdf(z::Real) = erfc(-z * invsqrt2)/2
-
-function cdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normcdf(z)
-end
-
-# ccdf
-_normccdf(z::Real) = erfc(z * invsqrt2)/2
-
-function ccdf(d::Normal, x::Real)
-    if iszero(d.σ) && x == d.μ
-        z = zval(Normal(zero(d.μ), d.σ), one(x))
-    else
-        z = zval(d, x)
-    end
-    return _normccdf(z)
-end
-
-# quantile
-function quantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
-    q = xval(d, -erfcinv(2*_p) * sqrt2)
-    if isnan(_p)
-        return oftype(q, _p)
-    elseif iszero(_σ)
-        # Quantile not uniquely defined at p=0 and p=1 when σ=0
-        if iszero(_p)
-            return oftype(q, -Inf)
-        elseif isone(_p)
-            return oftype(q, Inf)
-        else
-            return oftype(q, _μ)
-        end
-    end
-    return q
-end
-
-# cquantile
-function cquantile(d::Normal, p::Real)
-    # Promote to ensure that we don't compute erfcinv in low precision and then promote
-    _p, _μ, _σ = promote(float(p), d.μ, d.σ)
-    q = xval(d, erfcinv(2*_p) * sqrt2)
-    if isnan(_p)
-        return oftype(q, _p)
-    elseif iszero(_σ)
-        # Quantile not uniquely defined at p=0 and p=1 when σ=0
-        if iszero(_p)
-            return oftype(q, Inf)
-        elseif isone(_p)
-            return oftype(q, -Inf)
-        else
-            return oftype(q, _μ)
-        end
-    end
-    return q
-end
+gradlogpdf(d::Normal, x::Real) = (d.μ - x) / d.σ^2
 
 mgf(d::Normal, t::Real) = exp(t * d.μ + d.σ^2 / 2 * t^2)
+function cgf(d::Normal, t)
+    μ,σ = params(d)
+    t*μ + (σ*t)^2/2
+end
 cf(d::Normal, t::Real) = exp(im * t * d.μ - d.σ^2 / 2 * t^2)
+
+#### Affine transformations
+
+Base.:+(d::Normal, c::Real) = Normal(d.μ + c, d.σ)
+Base.:*(c::Real, d::Normal) = Normal(c * d.μ, abs(c) * d.σ)
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Normal{T}) where {T} = d.μ + d.σ * randn(rng, float(T))
+xval(d::Normal, z::Real) = muladd(d.σ, z, d.μ)
+
+rand(rng::AbstractRNG, d::Normal{T}) where {T} = xval(d, randn(rng, float(T)))
+function rand!(rng::AbstractRNG, d::Normal, A::AbstractArray{<:Real})
+    randn!(rng, A)
+    map!(Base.Fix1(xval, d), A, A)
+    return A
+end
 
 #### Fitting
 
@@ -255,15 +136,15 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}) where T<:Real
     n = length(x)
 
     # compute s
-    s = x[1]
-    for i = 2:n
+    s = zero(T) + zero(T)
+    for i in eachindex(x)
         @inbounds s += x[i]
     end
     m = s / n
 
     # compute s2
-    s2 = abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - m)
     end
 
@@ -274,9 +155,9 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     n = length(x)
 
     # compute s
-    tw = w[1]
-    s = w[1] * x[1]
-    for i = 2:n
+    tw = 0.0
+    s = 0.0 * zero(T)
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s += wi * x[i]
         tw += wi
@@ -284,8 +165,8 @@ function suffstats(::Type{<:Normal}, x::AbstractArray{T}, w::AbstractArray{Float
     m = s / tw
 
     # compute s2
-    s2 = w[1] * abs2(x[1] - m)
-    for i = 2:n
+    s2 = zero(m)
+    for i in eachindex(x, w)
         @inbounds s2 += w[i] * abs2(x[i] - m)
     end
 
@@ -306,8 +187,8 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}) where T<:Real
     μ = g.μ
-    s2 = abs2(x[1] - μ)
-    for i = 2:length(x)
+    s2 = zero(T) + zero(μ)
+    for i in eachindex(x)
         @inbounds s2 += abs2(x[i] - μ)
     end
     NormalKnownMuStats(g.μ, s2, length(x))
@@ -315,9 +196,9 @@ end
 
 function suffstats(g::NormalKnownMu, x::AbstractArray{T}, w::AbstractArray{Float64}) where T<:Real
     μ = g.μ
-    s2 = abs2(x[1] - μ) * w[1]
-    tw = w[1]
-    for i = 2:length(x)
+    s2 = 0.0 * abs2(zero(T) - zero(μ))
+    tw = 0.0
+    for i in eachindex(x, w)
         @inbounds wi = w[i]
         @inbounds s2 += abs2(x[i] - μ) * wi
         tw += wi

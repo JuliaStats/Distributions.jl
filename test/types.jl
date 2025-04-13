@@ -26,14 +26,17 @@ using ForwardDiff: Dual
 @testset "Test Sample Type" begin
     for T in (Float64,Float32,Dual{Nothing,Float64,0})
         @testset "Type $T" begin
-            for d in (MvNormal,MvLogNormal,MvNormalCanon,Dirichlet)
-                dist = d(map(T,ones(2)))
-                @test eltype(typeof(dist)) == T
-                @test eltype(rand(dist)) == eltype(dist)
+            dists = (
+                MvNormal(Diagonal(ones(T, 2))),
+                MvLogNormal(Diagonal(ones(T, 2))),
+                MvNormalCanon(Diagonal(ones(T, 2))),
+                Dirichlet(ones(T, 2)),
+                Distributions.mvtdist(one(T), Matrix{T}(I, 2, 2)),
+            )
+            for dist in dists
+                @test eltype(typeof(dist)) === T
+                @test eltype(rand(dist)) === eltype(dist)
             end
-            dist = Distributions.mvtdist(map(T,1.0),map(T,[1.0 0.0; 0.0 1.0]))
-            @test eltype(typeof(dist)) == T
-            @test eltype(rand(dist)) == eltype(dist)
         end
     end
 end

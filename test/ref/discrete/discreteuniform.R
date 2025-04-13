@@ -26,7 +26,7 @@ DiscreteUniform <- R6Class("DiscreteUniform",
             list(span=s,
                  probval=1/s,
                  mean=(a + b)/2,
-                 median=(a + b)/2,
+                 median=floor((a + b)/2),
                  var=(s^2 - 1)/12,
                  skewness=0,
                  kurtosis=-(6 * (s^2 + 1))/(5 * (s^2 - 1)),
@@ -53,7 +53,7 @@ DiscreteUniform <- R6Class("DiscreteUniform",
             a <- self$a
             b <- self$b
             cv <- pmin(pmax(v, 0), 1)
-            floor(a + (b - a + 1) * cv)
+            ifelse(cv == 0, a, a - 1 + ceiling((b - a + 1) * cv))
         }
     )
 )
