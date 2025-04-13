@@ -15,12 +15,8 @@ r = RealInterval(1.5, 4.0)
 
 # special cases
 @test partype(Kolmogorov()) == Float64
-# twutz: Hypergeometric needs integer parameters
-#@test partype(Hypergeometric(2, 2, 2)) == Float64
 @test partype(Hypergeometric(2, 2, 2)) == Int
 @test partype(Hypergeometric(2.0, 2, 2)) == Int
-# twutz: should DiscreteUniform needs a partype of Int
-#@test partype(DiscreteUniform(0, 4)) == Float64
 @test partype(DiscreteUniform(0, 4)) == Int
 @test partype(DiscreteUniform(0.0, 4)) == Int
 

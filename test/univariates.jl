@@ -63,10 +63,9 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     pars = params(d)
 
     # verify parameter type
-    # truncated parameters may be nothing: Union{Nothing, promote_type()}
-    # in the following exclude all non-Real from creating the promoted type
+    # truncated parameters may be nothing
     @test partype(d) === mapfoldl(
-        typeof, (S, T) -> T <: Real ? promote_type(S, T) : S, pars; init = Bool)
+        typeof, (S, T) -> T <: Distribution ? promote_type(S, partype(T)) : (T <: Nothing ? S : promote_type(S, eltype(T))), pars; init = Union{})
     
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
