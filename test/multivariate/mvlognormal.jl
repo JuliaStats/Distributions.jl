@@ -32,6 +32,7 @@ function test_mvlognormal(g::MvLogNormal, n_tsamples::Int=10^6,
     @test length(s) == d
     @test size(S) == (d, d)
     @test s          ≈ diag(S)
+    @test std(g)     ≈ sqrt.(diag(S)) 
     @test md         ≈ exp.(mean(g.normal))
     @test mn         ≈ exp.(mean(g.normal) .+ var(g.normal)/2)
     @test mo         ≈ exp.(mean(g.normal) .- var(g.normal))
