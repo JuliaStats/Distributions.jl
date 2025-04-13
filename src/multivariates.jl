@@ -126,11 +126,7 @@ var(d::MultivariateDistribution)
 
 Compute the vector of element-wise standard deviations for distribution `d`.
 """
-function std(d::MultivariateDistribution)
-    v = var(d)
-    map!(sqrt, v, v)
-    return v
-end
+std(d::MultivariateDistribution) = sqrt!!(var(d))
 
 """
     entropy(d::MultivariateDistribution)
