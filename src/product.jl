@@ -83,6 +83,8 @@ cov(d::ProductDistribution) = Diagonal(vec(var(d)))
 ## For product distributions of univariate distributions
 mean(d::ArrayOfUnivariateDistribution) = map(mean, d.dists)
 mean(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(mean, d.dists))
+std(d::ArrayOfUnivariateDistribution) = map(std, d.dists)
+std(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(std, d.dists))
 var(d::ArrayOfUnivariateDistribution) = map(var, d.dists)
 var(d::VectorOfUnivariateDistribution{<:Tuple}) = collect(map(var, d.dists))
 
