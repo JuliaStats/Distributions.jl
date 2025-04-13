@@ -62,6 +62,11 @@ function verify_and_test(D::Union{Type,Function}, d::UnivariateDistribution, dct
     # test various constructors for promotion, all-Integer args, etc.
     pars = params(d)
 
+    # verify parameter type
+    # truncated parameters may be nothing
+    @test partype(d) === mapfoldl(
+        typeof, (S, T) -> T <: Distribution ? promote_type(S, partype(T)) : (T <: Nothing ? S : promote_type(S, eltype(T))), pars; init = Union{})
+    
     # promotion constructor:
     float_pars = map(x -> isa(x, AbstractFloat), pars)
     if length(pars) > 1 && sum(float_pars) > 1 && !isa(D, typeof(truncated))
