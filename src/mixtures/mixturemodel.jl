@@ -256,11 +256,11 @@ end
 
 #### show
 
-function show(io::IO, d::MixtureModel)
+function show(io::IO, ::MIME"text/plain", d::AbstractMixtureModel)
     K = ncomponents(d)
     pr = probs(d)
-    println(io, "MixtureModel{$(component_type(d))}(K = $K)")
-    Ks = min(K, 8)
+    println(io, "Mixture Model{$(component_type(d))}(K = $K)")
+    Ks = get(io, :limit, true) ? min(K, 8) : K
     for i = 1:Ks
         @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
         println(io, component(d, i))
