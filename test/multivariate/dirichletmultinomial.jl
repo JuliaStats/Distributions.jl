@@ -33,11 +33,13 @@ d = DirichletMultinomial(10, α)
 @test mean(d) ≈ α * (d.n / d.α0)
 p = d.α / d.α0
 @test var(d)  ≈ d.n * (d.n + d.α0) / (1 + d.α0) .* p .* (1.0 .- p)
+@test std(d) ≈ sqrt.(var(d))
 x = func[2](d, 10_000)
 
 # test statistics with mle fit
 d = fit(DirichletMultinomial, x)
 @test isapprox(mean(d), vec(mean(x, dims=2)), atol=.5)
+@test isapprox(std(d) , vec(std(x, dims=2)) , atol=.5)
 @test isapprox(var(d) , vec(var(x, dims=2)) , atol=.5)
 @test isapprox(cov(d) , cov(x, dims=2)      , atol=.5)
 
