@@ -156,18 +156,61 @@ end
 
 function _rand!(rng::AbstractRNG,
                 d::Union{Dirichlet,DirichletCanon},
-                x::AbstractVector{<:Real})
-    for (i, αi) in zip(eachindex(x), d.alpha)
-        @inbounds x[i] = rand(rng, Gamma(αi))
+                x::AbstractVector{E}) where {E<:Real}
+    
+    if any(a -> a >= .5, d.alpha)
+        # 0.5 is a placeholder; optimal value unknown
+        # 1 is known to be too high.
+        for (i, αi) in zip(eachindex(x), d.alpha)
+            @inbounds x[i] = rand(rng, Gamma(αi))
+        end
+
+        return lmul!(inv(sum(x)), x)
+    else
+        # Sample in log-space to lower underflow risk
+        for (i, αi) in zip(eachindex(x), d.alpha)
+            @inbounds x[i] = _logrand(rng, Gamma(αi))
+        end
+
+        if all(isinf, x)
+            # Final fallback, parameters likely deeply subnormal
+            # Distribution behavior approaches categorical as Σα -> 0
+            p = copy(d.alpha)
+            p .*= floatmax(eltype(p)) # rescale to non-subnormal
+            x .= zero(E)
+            x[rand(rng, Categorical(inv(sum(p)) .* p))] = one(E)
+            return x
+        end
+
+        return softmax!(x)
     end
-    lmul!(inv(sum(x)), x) # this returns x
 end
 
 function _rand!(rng::AbstractRNG,
                 d::Dirichlet{T,<:FillArrays.AbstractFill{T}},
-                x::AbstractVector{<:Real}) where {T<:Real}
-    rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
-    lmul!(inv(sum(x)), x) # this returns x
+                x::AbstractVector{E}) where {T<:Real, E<:Real}
+    
+    if FillArrays.getindex_value(d.alpha) >= 0.5
+        # 0.5 is a placeholder; optimal value unknown
+        # 1 is known to be too high.
+        rand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
+        return lmul!(inv(sum(x)), x)
+    else
+        # Sample in log-space to lower underflow risk
+        _logrand!(rng, Gamma(FillArrays.getindex_value(d.alpha)), x)
+        
+        if all(isinf, x)
+            # Final fallback, parameters likely deeply subnormal
+            # Distribution behavior approaches categorical as Σα -> 0
+            n = length(d.alpha)
+            p = Fill(inv(n), n)
+            x .= zero(E)
+            x[rand(rng, Categorical(p))] = one(E)
+            return x
+        end
+
+        return softmax!(x)
+    end
 end
 
 #######################################
