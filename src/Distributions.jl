@@ -41,6 +41,7 @@ export
     Multivariate,
     Matrixvariate,
     CholeskyVariate,
+    NamedTupleVariate,
     Discrete,
     Continuous,
     Sampleable,
@@ -296,6 +297,7 @@ include("univariates.jl")
 include("edgeworth.jl")
 include("multivariates.jl")
 include("matrixvariates.jl")
+include("namedtuple/productnamedtuple.jl")
 include("cholesky/lkjcholesky.jl")
 include("samplers.jl")
 
@@ -319,13 +321,6 @@ include("statsapi.jl")
 
 # Testing utilities for other packages which implement distributions.
 include("test_utils.jl")
-
-# Extensions: Implementation of DensityInterface and ChainRulesCore API
-if !isdefined(Base, :get_extension)
-    include("../ext/DistributionsChainRulesCoreExt/DistributionsChainRulesCoreExt.jl")
-    include("../ext/DistributionsDensityInterfaceExt.jl")
-    include("../ext/DistributionsTestExt.jl")
-end
 
 include("deprecates.jl")
 

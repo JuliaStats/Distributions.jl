@@ -114,6 +114,14 @@ function issorted_allunique(xs::AbstractVector{<:Real})
     return true
 end
 
+sqrt!!(x::AbstractVector{<:Real}) = map(sqrt, x)
+function sqrt!!(x::Vector{<:Real})
+    for i in eachindex(x)
+        x[i] = sqrt(x[i])
+    end
+    return x
+end
+
 # get a type wide enough to represent all a distributions's parameters
 # (if the distribution is parametric)
 # if the distribution is not parametric, we need this to be a float so that
