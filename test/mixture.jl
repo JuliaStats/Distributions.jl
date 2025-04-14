@@ -1,5 +1,6 @@
 using Distributions, Random
 using Test
+using LinearAlgebra
 using ForwardDiff: Dual
 
 
@@ -252,17 +253,19 @@ end
     end
 
     @testset "Testing MultivariatevariateMixture" begin
-        g_m = MixtureModel(
-            IsoNormal[ MvNormal([0.0, 0.0], I),
-                       MvNormal([0.2, 1.0], I),
-                       MvNormal([-0.5, -3.0], 1.6 * I) ],
-            [0.2, 0.5, 0.3])
-        @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
-        @test length(components(g_m)) == 3
-        @test length(g_m) == 2
-        @test insupport(g_m, [0.0, 0.0]) == true
-        test_mixture(g_m, 1000, 10^6, rng)
-        test_params(g_m)
+        for T in (Float32, Float64)
+            g_m = MixtureModel(
+                IsoNormal[ MvNormal([0.0, 0.0], I),
+                           MvNormal([0.2, 1.0], I),
+                           MvNormal([-0.5, -3.0], 1.6 * I) ],
+                T[0.2, 0.5, 0.3])
+            @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
+            @test length(components(g_m)) == 3
+            @test length(g_m) == 2
+            @test insupport(g_m, [0.0, 0.0])
+            test_mixture(g_m, 1000, 10^6, rng)
+            test_params(g_m)
+        end
 
         u1 =  Uniform()
         u2 =  Uniform(1.0, 2.0)
