@@ -245,7 +245,7 @@ function cov(d::MultivariateMixture)
         if pi > 0.0
             c = component(d, i)
             md .= mean(c) .- m
-            BLAS.syr!('U', pi, md, V)
+            BLAS.syr!('U', Float64(pi), md, V)
         end
     end
     LinearAlgebra.copytri!(V, 'U')
