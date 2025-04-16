@@ -94,7 +94,7 @@ invlogccdf(d::JohnsonSU, lq::Real) = xval(d, norminvlogccdf(lq))
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::JohnsonSU) = xval(d, randn(rng))
+rand(rng::AbstractRNG, d::JohnsonSU) = xval(d, randn(rng, float(partype(d))))
 
 ## Fitting
 
