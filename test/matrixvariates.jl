@@ -489,6 +489,14 @@ function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) wher
     nothing
 end
 
+function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) where {T<:Real,D<:InverseWishart{T}}
+    @testset "InverseWishart constructor" begin
+        # Tests https://github.com/JuliaStats/Distributions.jl/issues/1948
+        @test InverseWishart(5, ScalMat(5, T(1))) isa InverseWishart{T, ScalMat{T}}
+        @test InverseWishart(5, PDiagMat(ones(T, 5))) isa InverseWishart{T, PDiagMat{T, Vector{T}}}
+    end
+end
+                                                                                                            
 function test_special(::Type{D}; rng::Union{AbstractRNG,Nothing} = nothing) where {T<:Real,D<:MatrixTDist{T}}
     @testset "MT(v, M, vΣ, Ω) → MN(M, Σ, Ω) as v → ∞" begin
         n, p = (6, 3)

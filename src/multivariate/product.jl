@@ -62,6 +62,7 @@ function _logpdf(d::Product, x::AbstractVector{<:Real})
 end
 
 mean(d::Product) = mean.(d.v)
+std(d::Product) = std.(d.v)
 var(d::Product) = var.(d.v)
 cov(d::Product) = Diagonal(var(d))
 entropy(d::Product) = sum(entropy, d.v)

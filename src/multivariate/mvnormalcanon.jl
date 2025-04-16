@@ -156,8 +156,8 @@ params(d::MvNormalCanon) = (d.μ, d.h, d.J)
 @inline partype(d::MvNormalCanon{T}) where {T<:Real} = T
 
 var(d::MvNormalCanon) = diag(inv(d.J))
-cov(d::MvNormalCanon) = Matrix(inv(d.J))
-invcov(d::MvNormalCanon) = Matrix(d.J)
+cov(d::MvNormalCanon) = inv(d.J)
+invcov(d::MvNormalCanon) = d.J
 logdetcov(d::MvNormalCanon) = -logdet(d.J)
 
 

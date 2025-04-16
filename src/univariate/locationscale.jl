@@ -99,7 +99,7 @@ Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:
 location(d::AffineDistribution) = d.μ
 scale(d::AffineDistribution) = d.σ
 params(d::AffineDistribution) = (d.μ,d.σ,d.ρ)
-partype(::AffineDistribution{T}) where {T} = T
+partype(d::AffineDistribution{T}) where {T} = promote_type(partype(d.ρ), T)
 
 #### Statistics
 

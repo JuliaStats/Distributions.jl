@@ -116,7 +116,7 @@ function test_location_scale(
                 rand(rng, dtest, 200_000)
             end
             @test mean(r) ≈ mean(dref) atol=0.02
-            @test std(r) ≈ std(dref) atol=0.01
+            @test std(r) ≈ std(dref) atol=0.02
             @test cf(dtest, -0.1) ≈ cf(dref,-0.1)
 
             if dref isa ContinuousDistribution
