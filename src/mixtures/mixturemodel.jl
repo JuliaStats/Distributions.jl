@@ -244,11 +244,11 @@ function cov(d::MultivariateMixture)
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
-            # todo: use more in-place operations
-            md = mean(c) - m
-            axpy!(pi, md*md', V)
+            md .= mean(c) .- m
+            BLAS.syr!('U', Float64(pi), md, V)
         end
     end
+    LinearAlgebra.copytri!(V, 'U')
     return V
 end
 
