@@ -32,8 +32,8 @@ entropy(::MultivariateDistribution, ::Real)
 
 ```@docs
 insupport(::MultivariateDistribution, ::AbstractArray)
-pdf(::MultivariateDistribution, ::AbstractArray)
-logpdf(::MultivariateDistribution, ::AbstractArray)
+pdf(::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}) where {N,M}
+logpdf(::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}) where {N,M}
 loglikelihood(::MultivariateDistribution, ::AbstractVector{<:Real})
 ```
 **Note:** For multivariate distributions, the pdf value is usually very small or large, and therefore direct evaluation of the pdf may cause numerical problems. It is generally advisable to perform probability computation in log scale.
