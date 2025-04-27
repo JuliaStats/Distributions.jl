@@ -87,7 +87,10 @@ function cdf(d::DiscreteUniform, x::Int)
     end
 end
 
-quantile(d::DiscreteUniform, p::Real) = iszero(p) ? d.a : d.a - 1 + ceil(Int, p * span(d))
+function quantile(d::DiscreteUniform, p::Real)
+    _check_quantile_arg(p)
+    iszero(p) ? d.a : d.a - 1 + ceil(Int, p * span(d))
+end
 
 function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
