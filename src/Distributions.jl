@@ -19,8 +19,8 @@ import Random: default_rng, rand!, SamplerRangeInt
 import Statistics: mean, median, quantile, std, var, cov, cor
 import StatsAPI
 import StatsBase: kurtosis, skewness, entropy, mode, modes,
-                  fit, kldivergence, loglikelihood, dof, span,
-                  params, params!
+    fit, kldivergence, loglikelihood, dof, span,
+    params, params!
 
 import PDMats: dim, PDMat, invquad
 
@@ -102,6 +102,7 @@ export
     DiscreteNonParametric,
     GeneralizedPareto,
     GeneralizedExtremeValue,
+    GeneralizedInverseGaussian,
     Geometric,
     Gumbel,
     Hypergeometric,
@@ -224,7 +225,6 @@ export
     loglikelihood,      # log probability of array of IID draws
     logpdf,             # log probability density
     logpdf!,            # evaluate log pdf to provided storage
-
     invscale,           # Inverse scale parameter
     sqmahal,            # squared Mahalanobis distance to Gaussian center
     sqmahal!,           # in-place evaluation of sqmahal
