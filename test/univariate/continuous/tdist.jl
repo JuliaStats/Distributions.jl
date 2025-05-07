@@ -11,5 +11,6 @@ using Test
 
     for T in (Float32, Float64)
         @test @inferred(rand(TDist(T(1)))) isa T
+        @test @inferred(rand(TDist(T(1)), 5)) isa Vector{T}
     end
 end

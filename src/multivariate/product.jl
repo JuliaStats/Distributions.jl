@@ -35,13 +35,24 @@ function Product(v::V) where {S<:ValueSupport,T<:UnivariateDistribution{S},V<:Ab
 end
 
 length(d::Product) = length(d.v)
-function Base.eltype(::Type{<:Product{S,T}}) where {S<:ValueSupport,
-                                                    T<:UnivariateDistribution{S}}
-    return eltype(T)
+
+rand(rng::AbstractRNG, d::Product) = map(Base.Fix1(rand, rng), d.v)
+@inline function rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real})
+    @boundscheck length(x) == length(d)
+    map!(Base.Fix1(rand, rng), x, d.v)
+    return x
 end
 
-_rand!(rng::AbstractRNG, d::Product, x::AbstractVector{<:Real}) =
-    map!(Base.Fix1(rand, rng), x, d.v)
+# Specializations for FillArrays (for which `map(Base.Fix1(rand, rng), d.v)` is incorrect)
+function rand(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    return rand(rng, first(d.v), size(d))
+end
+@inline function rand!(rng::AbstractRNG, d::Product{S,T,<:FillArrays.AbstractFill{T,1}}, x::AbstractVector{<:Real}) where {S<:ValueSupport,T<:UnivariateDistribution{S}}
+    @boundscheck length(x) == length(d)
+    rand!(rng, first(d.v), x)
+    return x
+end
+
 function _logpdf(d::Product, x::AbstractVector{<:Real})
     dists = d.v
     if isempty(dists)
