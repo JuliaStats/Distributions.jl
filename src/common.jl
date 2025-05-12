@@ -256,7 +256,7 @@ be disabled by using `@inbounds`.
 Instead of `logpdf` one should implement `_logpdf(d, x)` which does not have to check the
 size of `x`.
 
-See also: [`pdf`](@ref).
+See also: [`pdf`](@ref), [`gradlogpdf`](@ref).
 """
 @inline function logpdf(
     d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,M}
@@ -279,6 +279,17 @@ See also: [`pdf`](@ref).
         return @inbounds map(Base.Fix1(logpdf, d), eachvariate(x, variate_form(typeof(d))))
     end
 end
+
+"""
+    gradlogpdf(d::Distribution, x)
+
+Evaluate the gradient of the logarithm of the probability density function of `d` at `x`.
+
+For univariate distributions, return the derivative.
+
+See also: [`logpdf`](@ref).
+"""
+function gradlogpdf end
 
 # `_logpdf` should be implemented and has no default definition
 # _logpdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
