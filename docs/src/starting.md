@@ -33,7 +33,7 @@ julia> mean(d)
 ```
 
 We can also draw samples from `d` with `rand`.
-```jldoctest getting-started
+```julia-repl
 julia> x = rand(d, 100)
 100-element Vector{Float64}:
   0.8082879284649668
@@ -43,15 +43,9 @@ julia> x = rand(d, 100)
   0.28758798062385577
   0.2298186980518676
  -0.4217686643996927
- -1.355590621101197
-  0.0694591410918936
- -0.11732280453081337
   ⋮
   0.4350014776438522
   0.8402951127287839
-  0.37905112039392486
- -0.10862495404911267
- -0.6787747615011163
  -1.088218513936287
   0.7037583257923017
   0.14332589323751366
@@ -111,7 +105,7 @@ This tells you that a Cauchy distribution is initialized with location `μ` and 
 
 It is often useful to approximate an empirical distribution with a theoretical distribution. As an example, we can use the array `x` we created above and ask which normal distribution best describes it:
 
-```jldoctest getting-started
+```julia-repl
 julia> fit(Normal, x)
 Normal{Float64}(μ=-0.04827714875398303, σ=0.9256810813636542)
 ```
