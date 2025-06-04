@@ -100,6 +100,7 @@ const tests = [
     "univariate/continuous/triangular",
     "statsapi",
     "univariate/continuous/inversegaussian",
+    "univariate/continuous/generalizedinversegaussian",
 
     ### missing files compared to /src:
     # "common",

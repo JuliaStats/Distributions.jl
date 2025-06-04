@@ -15,16 +15,22 @@ External links:
 
 * [Generalized Inverse Gaussian distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_inverse_Gaussian_distribution).
 """
-struct GeneralizedInverseGaussian{T1<:Real, T2<:Real, T3<:Real} <: ContinuousUnivariateDistribution
-	a::T1
-	b::T2
-	p::T3
-	function GeneralizedInverseGaussian(a::T1, b::T2, p::T3) where {T1<:Real, T2<:Real, T3<:Real}
-		@assert a >= 0
-		@assert b >= 0
-		new{T1, T2, T3}(a, b, p)
+struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+	a::T
+	b::T
+	p::T
+	function GeneralizedInverseGaussian{T}(a::T, b::T, p::T) where T<:Real
+		new{T}(a, b, p)
 	end
 end
+
+function GeneralizedInverseGaussian(a::T, b::T, p::T; check_args::Bool=true) where T<:Real
+	@check_args GeneralizedInverseGaussian (a, a > zero(a)) (b, b > zero(b))
+	GeneralizedInverseGaussian{T}(a, b, p)
+end
+
+GeneralizedInverseGaussian(a::Real, b::Real, p::Real; check_args::Bool=true) =
+	GeneralizedInverseGaussian(promote(a, b, p)...; check_args)
 
 """
     GeneralizedInverseGaussian(; μ::Real, λ::Real, θ::Real=-1/2)
@@ -35,6 +41,8 @@ GeneralizedInverseGaussian(; μ::Real, λ::Real, θ::Real=-1/2) =
 	GeneralizedInverseGaussian(λ / μ^2, λ, θ)
 
 params(d::GeneralizedInverseGaussian) = (d.a, d.b, d.p)
+partype(::GeneralizedInverseGaussian{T}) where T = T
+
 minimum(d::GeneralizedInverseGaussian) = 0.0
 miximum(d::GeneralizedInverseGaussian) = Inf
 insupport(d::GeneralizedInverseGaussian, x::Real) = x >= 0
