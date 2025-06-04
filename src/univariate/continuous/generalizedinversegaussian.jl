@@ -67,9 +67,16 @@ logpdf(d::GeneralizedInverseGaussian, x::Real) = (
 	+ (d.p - 1) * log(x) - (d.a * x + d.b / x) / 2
 )
 
-cdf(d::GeneralizedInverseGaussian, x::Real) = quadgk(
-	z -> pdf(d, z), 0, x, maxevals=1000
-)[1]
+cdf(d::GeneralizedInverseGaussian, x::Real) =
+	if isinf(x)
+		(x < 0) ? zero(x) : one(x)
+	elseif isnan(x)
+		typeof(x)(NaN)
+	else
+		quadgk(z -> pdf(d, z), 0, x, maxevals=1000)[1]
+	end
+
+@quantile_newton GeneralizedInverseGaussian
 
 mgf(d::GeneralizedInverseGaussian, t::Real) =
 	(d.a / (d.a - 2t))^(d.p/2) * (
@@ -115,18 +122,6 @@ logpdf(d::_GIG, x::Real) =
 	else
 		-Inf
 	end
-
-cdf(d::_GIG, x::Real) = quadgk(
-	z -> pdf(d, z), 0, x, maxevals=1000
-)[1]
-
-mean(d::_GIG) = besselk(1 + d.λ, d.ω) / besselk(d.λ, d.ω)
-var(d::_GIG) = begin
-	tmp = besselk(d.λ, d.ω)
-	(
-		tmp * besselk(2 + d.λ, d.ω) - besselk(1 + d.λ, d.ω)^2
-	) / tmp^2
-end
 
 """
     rand(rng::Random.AbstractRNG, d::_GIG)
@@ -179,7 +174,7 @@ function rand(rng::AbstractRNG, d::_GIG)
 	end
 
 	# Generation
-	UVW = rand(rng, 3) # allocates 3 x Float64
+	UVW = rand(rng, 3) # FIXME: allocates 3 x Float64 per sample
 	U, V, W = UVW
 	X = if U < q / (p + q + r)
 		-s_ + q * V
