@@ -44,7 +44,7 @@ params(d::GeneralizedInverseGaussian) = (d.a, d.b, d.p)
 partype(::GeneralizedInverseGaussian{T}) where T = T
 
 minimum(d::GeneralizedInverseGaussian) = 0.0
-miximum(d::GeneralizedInverseGaussian) = Inf
+maximum(d::GeneralizedInverseGaussian) = Inf
 insupport(d::GeneralizedInverseGaussian, x::Real) = x >= 0
 
 mode(d::GeneralizedInverseGaussian) = (
