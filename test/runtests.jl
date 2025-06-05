@@ -15,6 +15,7 @@ const tests = [
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
+    "univariate/continuous/generalizedhyperbolic",
     "truncate",
     "truncated/normal",
     "truncated/exponential",
