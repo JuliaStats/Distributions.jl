@@ -85,6 +85,64 @@ minimum(::GeneralizedHyperbolic) = -Inf
 maximum(::GeneralizedHyperbolic) = Inf
 insupport(::GeneralizedHyperbolic, x::Real) = true
 
+"Fit quadratic `y = ax^2 + bx + c` through 3 points (x, y), return coefficients `(a, b)`."
+function _fit_quadratic(x1, y1, x2, y2, x3, y3)
+    @assert x1 <= x2 <= x3
+    denom = (x1-x2) * (x1-x3) * (x2-x3) # < 0
+    a = (
+        x3 * (y2-y1) + x2 * (y1-y3) + x1 * (y3-y2)
+    ) / denom
+    b = (
+        x3^2 * (y1-y2) + x1^2 * (y2-y3) + x2^2 * (y3-y1)
+    ) / denom
+    (a, b)
+end
+mode(d::GeneralizedHyperbolic) = begin
+    α, β, δ, μ, λ = params(d)
+    γ = sqrt(α^2 - β^2)
+
+    if λ ≈ 1
+        μ + β * δ / γ # Wolfram
+    elseif λ ≈ 2
+        μ + β / α / γ^2 * (α + sqrt(β^2 + (α * δ * γ)^2)) # Wolfram
+    else
+        # Maximize log-PDF
+        x1, x2, x3 = μ - 2std(d), μ, μ + 2std(d) # invariant: x1 < x2 < x3
+        xopt = x2
+        y1, y2, y3 = logpdf(d, x1), logpdf(d, x2), logpdf(d, x3)
+        a, b = _fit_quadratic(x1, y1, x2, y2, x3, y3)
+        (a > 0) && return xopt # quadratic points down instead of up
+        (!isfinite(a) || !isfinite(b)) && return xopt
+        niter = 0
+        while (abs(a) > 1e-6) && (a < 0) # if a is small, the quadratic is flat
+            niter += 1
+            xopt = -b / (2a)
+            yopt = logpdf(d, xopt)
+            
+            if xopt < x1
+                x1, x2, x3 = xopt, x1, x2 # move left
+                y1, y2, y3 = yopt, y1, y2
+            elseif xopt < x2
+                x1, x2, x3 = x1, xopt, x2
+                y1, y2, y3 = y1, yopt, y2
+            elseif xopt < x3
+                x1, x2, x3 = x2, xopt, x3
+                y1, y2, y3 = y2, yopt, y3
+            else # xopt > x3
+                x1, x2, x3 = x2, x3, xopt # move right
+                y1, y2, y3 = y2, y3, yopt
+            end
+
+            a, b = _fit_quadratic(x1, y1, x2, y2, x3, y3)
+            if !isfinite(a) || !isfinite(b)
+                @warn "Failed to build quadratic" (; niter, x1, y1, x2, y2, x3, y3)
+                break
+            end
+        end
+        xopt
+    end
+end
+
 mean(d::GeneralizedHyperbolic) = begin
     α, β, δ, μ, λ = params(d)
     γ = sqrt(α^2 - β^2)
