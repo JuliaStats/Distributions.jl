@@ -25,7 +25,7 @@ struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
 end
 
 function GeneralizedInverseGaussian(a::T, b::T, p::T; check_args::Bool=true) where T<:Real
-	@check_args GeneralizedInverseGaussian (a, a > zero(a)) (b, b > zero(b))
+	check_args && @check_args GeneralizedInverseGaussian (a, a > zero(a)) (b, b > zero(b))
 	GeneralizedInverseGaussian{T}(a, b, p)
 end
 
@@ -33,19 +33,22 @@ GeneralizedInverseGaussian(a::Real, b::Real, p::Real; check_args::Bool=true) =
 	GeneralizedInverseGaussian(promote(a, b, p)...; check_args)
 
 """
-    GeneralizedInverseGaussian(; μ::Real, λ::Real, θ::Real=-1/2)
+    GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2)
 
-Wolfram Language parameterization, equivalent to `InverseGamma(μ, λ)`
+Wolfram Language parameterization, equivalent to `InverseGamma(μ, λ)`.
 """
-GeneralizedInverseGaussian(; μ::Real, λ::Real, θ::Real=-1/2) =
-	GeneralizedInverseGaussian(λ / μ^2, λ, θ)
+GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2; check_args::Bool=true) =
+	GeneralizedInverseGaussian(λ / μ^2, λ, θ; check_args)
 
 params(d::GeneralizedInverseGaussian) = (d.a, d.b, d.p)
+params(d::GeneralizedInverseGaussian, ::Val{:Wolfram}) = (
+	μ=sqrt(d.b/d.a), λ=d.b, θ=d.p
+)
 partype(::GeneralizedInverseGaussian{T}) where T = T
 
-minimum(d::GeneralizedInverseGaussian) = 0.0
-maximum(d::GeneralizedInverseGaussian) = Inf
-insupport(d::GeneralizedInverseGaussian, x::Real) = x >= 0
+minimum(::GeneralizedInverseGaussian) = 0.0
+maximum(::GeneralizedInverseGaussian) = Inf
+insupport(::GeneralizedInverseGaussian, x::Real) = x >= 0
 
 mode(d::GeneralizedInverseGaussian) = (
 	(d.p - 1) + sqrt((d.p - 1)^2 + d.a * d.b)
@@ -62,10 +65,44 @@ var(d::GeneralizedInverseGaussian) = begin
 	)
 end
 
-logpdf(d::GeneralizedInverseGaussian, x::Real) = (
-	d.p / 2 * log(d.a / d.b) - log(2 * besselk(d.p, sqrt(d.a * d.b)))
-	+ (d.p - 1) * log(x) - (d.a * x + d.b / x) / 2
-)
+# Source: Wolfram
+skewness(d::GeneralizedInverseGaussian) = begin
+	μ, λ, θ = params(d, Val(:Wolfram))
+	t0 = besselk(0 + θ, λ/μ)
+	t1 = besselk(1 + θ, λ/μ)
+	t2 = besselk(2 + θ, λ/μ)
+	t3 = besselk(3 + θ, λ/μ)
+	(
+		2 * t1^3 - 3t0 * t1 * t2 + t0^2 * t3
+	) / sqrt(
+		-t1^2 + t0 * t2
+	)^3
+end
+
+# Source: Wolfram
+kurtosis(d::GeneralizedInverseGaussian) = begin
+	μ, λ, θ = params(d, Val(:Wolfram))
+	t0 = besselk(0 + θ, λ/μ)
+	t1 = besselk(1 + θ, λ/μ)
+	t2 = besselk(2 + θ, λ/μ)
+	t3 = besselk(3 + θ, λ/μ)
+	t4 = besselk(4 + θ, λ/μ)
+	(
+		-3 * t1^4 + 6t0 * t1^2 * t2 - 4 * t0^2 * t1 * t3 + t0^3 * t4
+	) / (
+		t1^2 - t0 * t2
+	)^2 - 3 # EXCESS kurtosis!
+end
+
+logpdf(d::GeneralizedInverseGaussian, x::Real) =
+	if x >= 0
+		(
+			d.p / 2 * log(d.a / d.b) - log(2 * besselk(d.p, sqrt(d.a * d.b)))
+			+ (d.p - 1) * log(x) - (d.a * x + d.b / x) / 2
+		)
+	else
+		-Inf
+	end
 
 cdf(d::GeneralizedInverseGaussian, x::Real) =
 	if isinf(x)
@@ -88,7 +125,16 @@ cf(d::GeneralizedInverseGaussian, t::Number) =
 		besselk(d.p, sqrt(d.b * (d.a - 2t))) / besselk(d.p, sqrt(d.a * d.b))
 	)
 
-rand(rng::Random.AbstractRNG, d::GeneralizedInverseGaussian) = begin
+"""
+    rand(rng::AbstractRNG, d::GeneralizedInverseGaussian)
+
+Sample from the generalized inverse Gaussian distribution based on [1], end of Section 6.
+
+### References
+
+1. Devroye, Luc. 2014. “Random Variate Generation for the Generalized Inverse Gaussian Distribution.” Statistics and Computing 24 (2): 239–46. https://doi.org/10.1007/s11222-012-9367-z.
+"""
+rand(rng::AbstractRNG, d::GeneralizedInverseGaussian) = begin
 	# Paper says ω = sqrt(b/a), but Wolfram disagrees
 	ω = sqrt(d.a * d.b)
 	sqrt(d.b / d.a) * rand(rng, _GIG(d.p, ω))
@@ -117,14 +163,14 @@ struct _GIG{T1<:Real, T2<:Real} <: ContinuousUnivariateDistribution
 end
 
 logpdf(d::_GIG, x::Real) =
-	if x > 0
+	if x >= 0
 		-log(2 * besselk(-d.λ, d.ω)) + (d.λ - 1) * log(x) - d.ω/2 * (x + 1/x)
 	else
 		-Inf
 	end
 
 """
-    rand(rng::Random.AbstractRNG, d::_GIG)
+    rand(rng::AbstractRNG, d::_GIG)
 
 Sampling from the _2-parameter_ generalized inverse Gaussian distribution based on [1], end of Section 6.
 
@@ -174,8 +220,7 @@ function rand(rng::AbstractRNG, d::_GIG)
 	end
 
 	# Generation
-	UVW = rand(rng, 3) # FIXME: allocates 3 x Float64 per sample
-	U, V, W = UVW
+	U, V, W = rand(rng), rand(rng), rand(rng)
 	X = if U < q / (p + q + r)
 		-s_ + q * V
 	elseif U < (q + r) / (p + q + r)
@@ -184,8 +229,7 @@ function rand(rng::AbstractRNG, d::_GIG)
 		-s_ + p * log(V)
 	end
 	while W * chi(X) > exp(ψ(X))
-		Random.rand!(UVW)
-		U, V, W = UVW
+		U, V, W = rand(rng), rand(rng), rand(rng)
 		X = if U < q / (p + q + r)
 			-s_ + q * V
 		elseif U < (q + r) / (p + q + r)
