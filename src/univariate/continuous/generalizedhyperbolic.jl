@@ -135,6 +135,7 @@ mode(d::GeneralizedHyperbolic) = begin
 
             a, b = _fit_quadratic(x1, y1, x2, y2, x3, y3)
             if !isfinite(a) || !isfinite(b)
+                (abs(x2 - x1) < 1e-6 || abs(x3 - x2) < 1e-6) && break
                 @warn "Failed to build quadratic" (; niter, x1, y1, x2, y2, x3, y3)
                 break
             end
