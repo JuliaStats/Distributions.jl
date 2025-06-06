@@ -1,8 +1,5 @@
-export GeneralizedHyperbolic
-
-raw"""
-    GeneralizedHyperbolic(α, β, δ, μ=0, λ=1) # traditional
-    GeneralizedHyperbolic(Val(:locscale), z, p=0, μ=0, σ=1, λ=1) # location-scale
+@doc raw"""
+    GeneralizedHyperbolic(α, β, δ, μ=0, λ=1)
 
 The *generalized hyperbolic (GH) distribution* with traditional parameters:
 
@@ -10,7 +7,7 @@ The *generalized hyperbolic (GH) distribution* with traditional parameters:
 - $-\alpha<\beta<\alpha$ (skewness);
 - $\delta>0$ ("scale", but not really, because it appears as an argument to the modified Bessel function of the 2nd kind in the normalizing constant);
 - $\mu\in\mathbb R$ (location);
-- $\lambda\in\mathbb R$ (shape, $\lambda\neq 1$ makes the distribution "generalized");
+- $\lambda\in\mathbb R$ is a shape parameter, where $\lambda\neq 1$ makes the distribution "generalized"
 
 has probability density function:
 
@@ -30,25 +27,9 @@ e^{\beta (x-\mu)}
 
 These paameters are actually stored in `struct GeneralizedHyperbolic{T<:Real}`.
 
-The alternative location-scale parameterization is used in [2]. There, parameters have the following meaning:
-
-- $z>0$ measures heavy-tailedness;
-- $p\in\mathbb R$ measures skewness ($p=0$ results in a symmetric distribution);
-- $\mu\in\mathbb R$ and $\sigma>0$ are location and scale;
-- $\lambda\in\mathbb R$ is a shape parameter.
-
-These parameters are _not_ stored in the struct. Use `params(d, Val(:locscale))`,
-where `d` is an instance of `GeneralizedHyperbolic`, to retrieve them.
-
-Advantages of this parameterization are:
-
-- It's location-scale, whereas $\delta$ in the traditional parameterization isn't a true scale parameter.
-- All parameters are either positive or unconstrained. The traditional parameterization has the complicated linear constraint $-\alpha<\beta<\alpha$.
-
 External links:
 
-1. [Generalized hyperbolic distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution).
-2. Puig, Pedro, and Michael A. Stephens. “Goodness-of-Fit Tests for the Hyperbolic Distribution.” The Canadian Journal of Statistics / La Revue Canadienne de Statistique 29, no. 2 (2001): 309–20. https://doi.org/10.2307/3316079.
+* [Generalized hyperbolic distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalised_hyperbolic_distribution).
 """
 struct GeneralizedHyperbolic{T<:Real} <: ContinuousUnivariateDistribution
     α::T
@@ -69,6 +50,43 @@ end
 GeneralizedHyperbolic(α::Real, β::Real, δ::Real, μ::Real=0, λ::Real=1; check_args::Bool=true) =
     GeneralizedHyperbolic(promote(α, β, δ, μ, λ)...; check_args)
 
+@doc raw"""
+    GeneralizedHyperbolic(Val(:locscale), z, p=0, μ=0, σ=1, λ=1)
+
+Location-scale parameterization [1] of the generalized hyperbolic distribution with parameters
+
+- $z>0$ (shape);
+- $p\in\mathbb R$ measures skewness ($p=0$ results in a symmetric distribution);
+- $\mu\in\mathbb R$ and $\sigma>0$ are location and scale;
+- $\lambda\in\mathbb R$ is a shape parameter, where $\lambda\neq 1$ makes the distribution "generalized"
+
+has probability density function:
+
+```math
+\frac{\sqrt z}{
+ \sqrt{2\pi} K_{\lambda}(z)
+}
+e^{p z \cdot\varepsilon}
+\sqrt{
+ \left(\frac{1+\varepsilon^2}{1+p^2}\right)^{\lambda - 1/2}
+}
+K_{\lambda-1/2}\left[
+ z \sqrt{(1+p^2)(1+\varepsilon^2)}
+\right]
+```
+
+These parameters are _not_ stored in `struct GeneralizedHyperbolic`.
+Use `params(d, Val(:locscale))`, where `d` is an instance of `GeneralizedHyperbolic`, to retrieve them.
+
+Advantages of this parameterization:
+
+- It's truly location-scale, whereas $\delta$ in the traditional parameterization isn't a true scale parameter.
+- All parameters are either positive or unconstrained. The traditional parameterization has the complicated linear constraint $-\alpha<\beta<\alpha$.
+
+References:
+
+1. Puig, Pedro, and Michael A. Stephens. “Goodness-of-Fit Tests for the Hyperbolic Distribution.” The Canadian Journal of Statistics / La Revue Canadienne de Statistique 29, no. 2 (2001): 309–20. https://doi.org/10.2307/3316079.
+"""
 GeneralizedHyperbolic(::Val{:locscale}, z::Real, p::Real=0, μ::Real=0, σ::Real=1, λ::Real=1; check_args::Bool=true) =
 	GeneralizedHyperbolic(z * sqrt(1 + p^2)/σ, z * p / σ, σ, μ, λ; check_args)
 
@@ -243,6 +261,35 @@ end
 
 cf(d::GeneralizedHyperbolic, t::Number) = mgf(d, 1im * t)
 
+@doc raw"""
+    rand(::AbstractRNG, ::GeneralizedHyperbolic)
+
+Sample from `GeneralizedHyperbolic(α, β, δ, μ, λ)` using its mixture representation:
+
+```math
+\begin{aligned}
+\gamma &= \sqrt{\alpha^2 - \beta^2}\\
+V &\sim \mathrm{GeneralizedInverseGaussian}\left(\frac{\delta}{\gamma}, \delta^2, \lambda\right)\\
+\xi &= \mu + \beta V + \sqrt{V} \varepsilon, \quad\varepsilon \sim \mathcal N(0,1)
+\end{aligned}
+```
+
+Then ξ is distributed as `GeneralizedHyperbolic(α, β, δ, μ, λ)`.
+
+Verified in Wolfram Mathematica:
+
+```
+In:= TransformedDistribution[\[Mu] + \[Beta]*V + 
+  Sqrt[V] \[Epsilon], {\[Epsilon] \[Distributed] NormalDistribution[],
+   V \[Distributed] 
+   InverseGaussianDistribution[\[Delta]/
+     Sqrt[\[Alpha]^2 - \[Beta]^2], \[Delta]^2, \[Lambda]]}]
+
+Out= HyperbolicDistribution[\[Lambda], \[Alpha], \[Beta], \[Delta], \[Mu]]
+```
+
+Note that here λ is the first parameter, while in this implementation it's the _last_ one.
+"""
 rand(rng::AbstractRNG, d::GeneralizedHyperbolic) = begin
 	α, β, δ, μ, λ = params(d)
     γ = sqrt(α^2 - β^2)

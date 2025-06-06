@@ -1,6 +1,6 @@
 import SpecialFunctions: besselk
 
-raw"""
+@doc raw"""
     GeneralizedInverseGaussian(a, b, p)
 
 The *generalized inverse Gaussian distribution* with parameters `a>0`, `b>0` and real `p` has probability density function:
@@ -35,7 +35,8 @@ GeneralizedInverseGaussian(a::Real, b::Real, p::Real; check_args::Bool=true) =
 """
     GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2)
 
-Wolfram Language parameterization, equivalent to `InverseGamma(μ, λ)`.
+Wolfram Language parameterization, equivalent to `InverseGamma(μ, λ)`. `μ, λ` must be positive.
+Obtain parameters in Wolfram parameterization like `params(the_GIG, Val(:Wolfram))`
 """
 GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2; check_args::Bool=true) =
 	GeneralizedInverseGaussian(λ / μ^2, λ, θ; check_args)
