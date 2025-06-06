@@ -269,7 +269,7 @@ Sample from `GeneralizedHyperbolic(α, β, δ, μ, λ)` using its mixture repres
 ```math
 \begin{aligned}
 \gamma &= \sqrt{\alpha^2 - \beta^2}\\
-V &\sim \mathrm{GeneralizedInverseGaussian}\left(\frac{\delta}{\gamma}, \delta^2, \lambda\right)\\
+V &\sim \mathrm{GeneralizedInverseGaussian}(\delta / \gamma, \delta^2, \lambda)\\
 \xi &= \mu + \beta V + \sqrt{V} \varepsilon, \quad\varepsilon \sim \mathcal N(0,1)
 \end{aligned}
 ```

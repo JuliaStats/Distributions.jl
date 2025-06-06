@@ -7,7 +7,7 @@
     #
     # Hyp[z_, p_ : 0, m_ : 0, s_ : 1, \[Lambda]_ : 1] :=
     #  HyperbolicDistribution[\[Lambda], z*Sqrt[1 + p^2]/s, z*p/s, s, m]
-    # props[d_] := N[{Mean@d, Variance@d, Skewness@d, Kurtosis[d]-Kurtosis[NormalDistribution]}, 30]
+    # props[d_] := N[{Mean@d, Variance@d, Skewness@d, Kurtosis[d]-Kurtosis[NormalDistribution[]]}, 30]
     #
     # In[]:= props@Hyp[6, 1, -5, 2, 8]
 
