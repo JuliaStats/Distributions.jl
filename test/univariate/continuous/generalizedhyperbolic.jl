@@ -8,7 +8,7 @@
         # No skewness, location, scale
         Hyp(3/10), Hyp(3), Hyp(10),
         # Add skewness
-        Hyp(1/10, -5), Hyp(3, -1), Hyp(8, 1), Hyp(20, 5), # last one breaks `test_samples`
+        Hyp(1/10, -5), Hyp(3, -1), Hyp(8, 1), Hyp(20, 5),
         # Add location & scale
         Hyp(1, -2, -1, 5), Hyp(1, -2, 1, 5), Hyp(6, 1, -5, 2),
         # Different λ
@@ -36,6 +36,6 @@
         # Empirical CF should be close to theoretical CF
         @test maximum(t->abs(cf(d, t) - cf_empirical(samples, t)), range(-100, 100, 100)) < 0.005
 
-        @test length(test_samples(d, N)) > 0 broken=(i == 7)
+        test_samples(d, N)
     end
 end

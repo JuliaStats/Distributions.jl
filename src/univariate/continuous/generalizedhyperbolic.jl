@@ -197,11 +197,28 @@ logpdf(d::GeneralizedHyperbolic, x::Real) = begin
     α, β, δ, μ, λ = params(d)
     γ = sqrt(α^2 - β^2)
 
+    function logbesselk(v::Real, x::Real, K::Integer=5)
+        if x > 600
+            # Asymptotic expansion, works for massive values of `x` on the order of 10^3, 10^4 and higher.
+            # Important, because otherwise PDF becomes exactly zero `exp(-Inf)==0` way too early.
+            μ = 4v^2
+            term = one(x)
+            s = one(x)
+            for k in 1:K
+                term *= (μ - (2k-1)^2) / (k * 8x)
+                s += term
+            end
+            (log(π) - log(2x))/2 - x + log(abs(s))
+        else
+            log(besselk(v, x)) # Returns `-Inf` for x>600
+        end
+    end
+
     (
-        -0.5log(2π) - log(besselk(λ, γ * δ)) + λ * (log(γ) - log(δ))
+        -0.5log(2π) - logbesselk(λ, γ * δ) + λ * (log(γ) - log(δ))
         + β * (x - μ)
         + (λ - 1/2) * (0.5log(δ^2 + (x - μ)^2) - log(α))
-        + log(besselk(λ - 1/2, α * sqrt(δ^2 + (x - μ)^2)))
+        + logbesselk(λ - 1/2, α * sqrt(δ^2 + (x - μ)^2))
     )
 end
 
@@ -211,7 +228,7 @@ cdf(d::GeneralizedHyperbolic, x::Real) =
 	elseif isnan(x)
 		typeof(x)(NaN)
 	else
-		quadgk(z -> pdf(d, z), -Inf, x, maxevals=10^4)[1]
+        quadgk(z -> pdf(d, z), -Inf, x, maxevals=10^4)[1]
 	end
 
 @quantile_newton GeneralizedHyperbolic
