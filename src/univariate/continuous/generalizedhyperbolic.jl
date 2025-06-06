@@ -25,7 +25,7 @@ e^{\beta (x-\mu)}
 }, \quad\gamma=\sqrt{\alpha^2 - \beta^2}
 ```
 
-These paameters are actually stored in `struct GeneralizedHyperbolic{T<:Real}`.
+These parameters are actually stored in `struct GeneralizedHyperbolic{T<:Real}`.
 
 External links:
 
