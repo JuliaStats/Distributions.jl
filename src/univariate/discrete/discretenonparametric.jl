@@ -23,21 +23,46 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
 
     function DiscreteNonParametric{T,P,Ts,Ps}(xs::Ts, ps::Ps; check_args::Bool=true) where {
             T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
-        check_args || return new{T,P,Ts,Ps}(xs, ps)
+        let xs = xs, ps = ps
+            @check_args(
+                DiscreteNonParametric,
+                (length(xs) == length(ps), "length of support and probability vector must be equal"),
+                (ps, isprobvec(ps), "vector is not a probability vector"),
+                (xs, issorted_allunique(xs), "support must be sorted and contain only unique elements"),
+            )
+        end
+        new{T,P,Ts,Ps}(xs, ps)
+    end
+end
+
+function DiscreteNonParametric(xs::AbstractVector{T}, ps::AbstractVector{P}; check_args::Bool=true) where {T<:Real,P<:Real}
+    # These checks are performed before sorting the support since we do not want to throw a `BoundsError` when the lengths do not match
+    let xs = xs, ps = ps
         @check_args(
             DiscreteNonParametric,
             (length(xs) == length(ps), "length of support and probability vector must be equal"),
             (ps, isprobvec(ps), "vector is not a probability vector"),
-            (xs, allunique(xs), "support must contain only unique elements"),
         )
-        sort_order = sortperm(xs)
-        new{T,P,Ts,Ps}(xs[sort_order], ps[sort_order])
     end
+    # We always sort the support unless it can be deduced from the type of the support that it is sorted.
+    # Sorting can be skipped for all inputs by using the inner constructor.
+    if xs isa AbstractUnitRange
+        sortedxs = xs
+        sortedps = ps
+    else
+        sort_order = sortperm(xs)
+        sortedxs = xs[sort_order]
+        sortedps = ps[sort_order]
+        # It is more efficient to perform this check once the array is sorted
+        let sortedxs = sortedxs
+            @check_args(
+                DiscreteNonParametric,
+                (sortedxs, issorted_allunique(sortedxs), "support must contain only unique elements"),
+            )
+        end
+    end
+    return DiscreteNonParametric{T,P,typeof(sortedxs),typeof(sortedps)}(sortedxs, sortedps; check_args=false)
 end
-
-DiscreteNonParametric(vs::AbstractVector{T}, ps::AbstractVector{P}; check_args::Bool=true) where {
-        T<:Real,P<:Real} =
-    DiscreteNonParametric{T,P,typeof(vs),typeof(ps)}(vs, ps; check_args=check_args)
 
 Base.eltype(::Type{<:DiscreteNonParametric{T}}) where T = T
 
