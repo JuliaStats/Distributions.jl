@@ -15,6 +15,7 @@ const tests = [
     "univariate/continuous/loguniform",
     "univariate/continuous/arcsine",
     "univariate/discrete/dirac",
+    "univariate/continuous/generalizedhyperbolic",
     "truncate",
     "truncated/normal",
     "truncated/exponential",
@@ -100,6 +101,7 @@ const tests = [
     "univariate/continuous/triangular",
     "statsapi",
     "univariate/continuous/inversegaussian",
+    "univariate/continuous/generalizedinversegaussian",
 
     ### missing files compared to /src:
     # "common",
