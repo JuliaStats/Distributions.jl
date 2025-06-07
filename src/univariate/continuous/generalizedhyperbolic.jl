@@ -115,7 +115,19 @@ function _fit_quadratic(x1, y1, x2, y2, x3, y3)
     ) / denom
     (a, b)
 end
-mode(d::GeneralizedHyperbolic) = begin
+
+"""
+    mode(::GeneralizedHyperbolic)
+
+- Exact formulae are used for λ=1 and λ=2.
+- For other values of λ quadratic fit search is used. The initial bracket `lo < mode < hi` is computed based on
+inequalities from [1, eq. 2.27].
+
+## References
+
+1. Robert E. Gaunt, Milan Merkle, "On bounds for the mode and median of the generalized hyperbolic and related distributions", Journal of Mathematical Analysis and Applications, Volume 493, Issue 1, 2021, 124508, ISSN 0022-247X, https://doi.org/10.1016/j.jmaa.2020.124508.
+"""
+function mode(d::GeneralizedHyperbolic)
     α, β, δ, μ, λ = params(d)
     γ = sqrt(α^2 - β^2)
 
@@ -124,31 +136,52 @@ mode(d::GeneralizedHyperbolic) = begin
     elseif λ ≈ 2
         μ + β / α / γ^2 * (α + sqrt(β^2 + (α * δ * γ)^2)) # Wolfram
     else
-        # Maximize log-PDF
-        x1, x2, x3 = μ - 2std(d), μ, μ + 2std(d) # invariant: x1 < x2 < x3
+        lo, hi = let # Bounds for the bracketing interval
+            EX = mean(d)
+            # eq. 2.27 from the paper: EX - upper < mode < EX - lower for β>0.
+            # When β<0, the inequality is reversed.
+            lower = β/γ^2 * (
+                1/2 + sqrt(λ^2 + δ^2 * γ^2) - sqrt((λ - 1/2)^2 + δ^2 * γ^2)
+            )
+            upper = β/γ^2 * (
+                5/2 + sqrt((λ + 1)^2 + δ^2 * γ^2) - sqrt((λ - 3/2)^2 + δ^2 * γ^2)
+            )
+            if β < 0
+                upper, lower = lower, upper
+            end
+            EX - upper, EX - lower
+        end
+
+        # Minimize negative log-PDF using quadratic fit search
+        x1, x2, x3 = lo, (lo + hi)/2, hi # invariant: x1 < x2 < x3
         xopt = x2
-        y1, y2, y3 = logpdf(d, x1), logpdf(d, x2), logpdf(d, x3)
+        y1, y2, y3 = -logpdf(d, x1), -logpdf(d, x2), -logpdf(d, x3)
         a, b = _fit_quadratic(x1, y1, x2, y2, x3, y3)
-        (a > 0) && return xopt # quadratic points down instead of up
+        if a < 0
+            @warn "Quadratic points up instead of down: a=$a."
+            return xopt
+        end
         (!isfinite(a) || !isfinite(b)) && return xopt
         niter = 0
-        while (abs(a) > 1e-6) && (a < 0) # if a is small, the quadratic is flat
+        while x3 - x1 > 1e-6
             niter += 1
             xopt = -b / (2a)
-            yopt = logpdf(d, xopt)
-            
-            if xopt < x1
-                x1, x2, x3 = xopt, x1, x2 # move left
-                y1, y2, y3 = yopt, y1, y2
-            elseif xopt < x2
-                x1, x2, x3 = x1, xopt, x2
-                y1, y2, y3 = y1, yopt, y2
-            elseif xopt < x3
-                x1, x2, x3 = x2, xopt, x3
-                y1, y2, y3 = y2, yopt, y3
-            else # xopt > x3
-                x1, x2, x3 = x2, x3, xopt # move right
-                y1, y2, y3 = y2, y3, yopt
+            yopt = -logpdf(d, xopt)
+
+            if xopt < x2
+                if yopt > y2
+                    x1, y1 = xopt, yopt
+                else
+                    x2, x3 = xopt, x2
+                    y2, y3 = yopt, y2
+                end
+            else # xopt > x2
+                if yopt > y2
+                    x3, y3 = xopt, yopt
+                else
+                    x1, x2 = x2, xopt
+                    y1, y2 = y2, yopt
+                end
             end
 
             a, b = _fit_quadratic(x1, y1, x2, y2, x3, y3)

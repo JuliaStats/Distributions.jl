@@ -154,6 +154,8 @@
     for (d, mean_true, var_true, skew_true, kurt_true, mode_true) in distributions
         println("\ttesting $d")
 
+        @test collect(params(d)) ≈ [d.α, d.β, d.δ, d.μ, d.λ]
+
         # Specified `atol` because sometimes ground truth is zero, but we may get some floating-point inaccuracy
         @test mean(d)     ≈ mean_true atol=1e-6
         @test var(d)      ≈ var_true  atol=1e-6
