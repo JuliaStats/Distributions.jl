@@ -37,6 +37,8 @@ import SpecialFunctions: besselk
 	for (d, mean_true, var_true, skew_true, kurt_true) in distributions
 		println("\ttesting $d")
 
+		@test collect(params(d)) ≈ [d.a, d.b, d.p]
+
 		@test mean(d)     ≈ mean_true
 		@test var(d)      ≈ var_true
 		@test skewness(d) ≈ skew_true
