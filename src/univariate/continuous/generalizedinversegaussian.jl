@@ -116,15 +116,12 @@ cdf(d::GeneralizedInverseGaussian, x::Real) =
 
 @quantile_newton GeneralizedInverseGaussian
 
-mgf(d::GeneralizedInverseGaussian, t::Real) =
-	(d.a / (d.a - 2t))^(d.p/2) * (
-		besselk(d.p+1, sqrt(d.a * d.b)) / besselk(d.p, sqrt(d.a * d.b))
-	)
+mgf(d::GeneralizedInverseGaussian, t::Number) = begin
+	a, b, p = params(d)
+	sqrt(a / (a - 2t))^p * besselk(p, sqrt(b * (a - 2t))) / besselk(p, sqrt(a * b))
+end
 
-cf(d::GeneralizedInverseGaussian, t::Number) =
-	(d.a / (d.a - 2im * t))^(d.p/2) * (
-		besselk(d.p, sqrt(d.b * (d.a - 2t))) / besselk(d.p, sqrt(d.a * d.b))
-	)
+cf(d::GeneralizedInverseGaussian, t::Number) = mgf(d, 1im * t)
 
 """
     rand(rng::AbstractRNG, d::GeneralizedInverseGaussian)

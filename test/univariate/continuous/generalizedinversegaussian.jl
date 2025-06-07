@@ -2,6 +2,8 @@ import SpecialFunctions: besselk
 
 @testset "Generalized inverse Gaussian" begin
 	GIG(μ, λ, θ) = GeneralizedInverseGaussian(Val(:Wolfram), μ, λ, θ)
+	# Empirical characteristic function
+    cf_empirical(samples::AbstractVector{<:Real}, t::Real) = mean(x->exp(1im * t * x), samples)
 	# Derivative d/dp log(besselk(p, x))
 	dlog_besselk_dp(p::Real, x::Real, h::Real=1e-5) = (log(besselk(p + h, x)) - log(besselk(p - h, x))) / (2h)
 
@@ -48,6 +50,8 @@ import SpecialFunctions: besselk
 
 		@test abs(mean(d) - mean(samples)) < 0.01
 		@test abs(std(d) - std(samples)) < 0.01
+
+		@test maximum(t->abs(cf(d, t) - cf_empirical(samples, t)), range(-50, 50, 100)) < 0.005
 
 		a, b, p = params(d)
 		t = sqrt(a * b)
