@@ -53,7 +53,7 @@ partype(::Geometric{T}) where {T<:Real} = T
 
 ### Statistics
 
-mean(d::Geometric) = failprob(d) / succprob(d)
+mean(d::Geometric) = 1 / succprob(d)
 
 median(d::Geometric) = -fld(logtwo, log1p(-d.p)) - 1
 
