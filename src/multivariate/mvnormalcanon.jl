@@ -169,33 +169,26 @@ sqmahal!(r::AbstractVector, d::MvNormalCanon, x::AbstractMatrix) = quad!(r, d.J,
 
 # Sampling (for GenericMvNormal)
 
-unwhiten_winv!(J::AbstractPDMat, x::AbstractVecOrMat) = unwhiten!(inv(J), x)
-unwhiten_winv!(J::PDiagMat, x::AbstractVecOrMat) = whiten!(J, x)
-unwhiten_winv!(J::ScalMat, x::AbstractVecOrMat) = whiten!(J, x)
-if isdefined(PDMats, :PDSparseMat)
-    unwhiten_winv!(J::PDSparseMat, x::AbstractVecOrMat) = x[:] = J.chol.PtL' \ x
-end
-
 function rand(rng::AbstractRNG, d::MvNormalCanon)
-    x = unwhiten_winv!(d.J, randn(rng, float(partype(d)), length(d)))
+    x = invunwhiten!(d.J, randn(rng, float(partype(d)), length(d)))
     x .+= d.μ
     return x
 end
 function rand(rng::AbstractRNG, d::MvNormalCanon, n::Int)
-    x = unwhiten_winv!(d.J, randn(rng, float(partype(d)), length(d), n))
+    x = invunwhiten!(d.J, randn(rng, float(partype(d)), length(d), n))
     x .+= d.μ
     return x
 end
 
 @inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractVector{<:Real})
     @boundscheck length(x) == length(d)
-    unwhiten_winv!(d.J, randn!(rng, x))
+    invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end
 @inline function rand!(rng::AbstractRNG, d::MvNormalCanon, x::AbstractMatrix{<:Real})
     @boundscheck size(x, 1) == length(d)
-    unwhiten_winv!(d.J, randn!(rng, x))
+    invunwhiten!(d.J, randn!(rng, x))
     x .+= d.μ
     return x
 end
