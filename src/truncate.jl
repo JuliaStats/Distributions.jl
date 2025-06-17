@@ -233,6 +233,25 @@ function rand(rng::AbstractRNG, d::Truncated)
     end
 end
 
+
+function rand(rng::AbstractRNG, d::Truncated, n::Int)
+    d0 = d.untruncated
+    tp = d.tp
+    lower = d.lower
+    upper = d.upper
+    # Correct for rejected samples
+    n_corrected = round(Int, n / tp)
+    n_gen = n_corrected + 3 * round(Int, sqrt(n_corrected))
+    # 
+    sample = rand(rng, d0, n_gen)
+    filter!(sample) do r
+        _in_closed_interval(r, lower, upper)
+    end
+    length(sample) > n_corrected && return sample[1:n_corrected]
+    # If we didn't get enough samples, generate more
+    return rand(rng, d, n) # try again
+end
+
 ## show
 
 function show(io::IO, d::Truncated)
