@@ -234,22 +234,44 @@ function rand(rng::AbstractRNG, d::Truncated)
 end
 
 
+"""
+    rand(rng::AbstractRNG, d::Truncated, n::Int)
+
+Generate `n` random samples from a truncated distribution.
+
+The implementation uses rejection sampling. It draws samples from the untruncated distribution in batches and only keeps the samples that fall within the truncated range.
+The size of the batches is adaptively estimated to reduce the number of iterations.
+
+!!! warning
+    This method can be inefficient if the probability mass of the truncated region is very small.
+"""
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
+    n == 0 && return eltype(d)[]
+    # 
     d0 = d.untruncated
     tp = d.tp
     lower = d.lower
     upper = d.upper
-    # Correct for rejected samples
-    n_corrected = round(Int, n / tp)
-    n_gen = n_corrected + 3 * round(Int, sqrt(n_corrected))
-    # 
-    sample = rand(rng, d0, n_gen)
-    filter!(sample) do r
-        _in_closed_interval(r, lower, upper)
+    # Preallocate samples array
+    samples = Vector{eltype(d)}(undef, n)
+    n_collected = 0
+    while n_collected < n
+        n_remaining = n - n_collected
+        # Estimate number of samples to draw from the untruncated distribution.
+        # We draw more to reduce the chance of needing more rounds.
+        n_expected = n_remaining / tp
+        δn_expected = sqrt(n_remaining * tp * (1 - tp))  # standard deviation of the expected number
+        n_batch = ceil(Int, n_expected + 3δn_expected)
+        samples_d0 = rand(rng, d0, n_batch)
+        for s in samples_d0
+            if _in_closed_interval(s, lower, upper)
+                n_collected += 1
+                samples[n_collected] = s
+                n_collected == n && break
+            end
+        end
     end
-    length(sample) > n_corrected && return sample[1:n_corrected]
-    # If we didn't get enough samples, generate more
-    return rand(rng, d, n) # try again
+    return samples
 end
 
 ## show
