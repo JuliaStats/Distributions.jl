@@ -477,6 +477,22 @@ rand(rng::AbstractRNG, s::MixtureSampler{Univariate}) =
 rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
     rand(rng, component(d, rand(rng, d.prior)))
 
+function rand(rng::AbstractRNG, d::MixtureModel{Univariate}, n::Int)
+    counts = rand(rng, Multinomial(n, probs(d.prior)))
+    x = Vector{eltype(d)}(undef, n)
+    offset = 0
+    for i in eachindex(counts)
+        ni = counts[i]
+        if ni > 0
+            c = component(d, i)
+            v = view(x, (offset+1):(offset+ni))
+            v .= rand(rng, c, ni)
+            offset += ni
+        end
+    end
+    return shuffle!(rng, x)
+end
+
 # multivariate mixture sampler for a vector
 _rand!(rng::AbstractRNG, s::MixtureSampler{Multivariate}, x::AbstractVector{<:Real}) =
     @inbounds rand!(rng, s.csamplers[rand(rng, s.psampler)], x)
