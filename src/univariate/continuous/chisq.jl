@@ -97,13 +97,16 @@ gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1
 #### Sampling
 
 function rand(rng::AbstractRNG, d::Chisq)
-    α = dof(d) / 2
-    θ = oftype(α, 2)
+    α, θ = promote(dof(d) / 2, 2)
     return rand(rng, Gamma{typeof(α)}(α, θ))
 end
 
+function rand!(rng::AbstractRNG, d::Chisq, A::AbstractArray{<:Real})
+    α, θ = promote(dof(d) / 2, 2)
+    rand!(rng, Gamma{typeof(α)}(α, θ), A)
+end
+
 function sampler(d::Chisq)
-    α = dof(d) / 2
-    θ = oftype(α, 2)
+    α, θ = promote(dof(d) / 2, 2)
     return sampler(Gamma{typeof(α)}(α, θ))
 end

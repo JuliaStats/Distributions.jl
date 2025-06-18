@@ -120,22 +120,19 @@ var(d::MatrixTDist) = d.ν <= 2 ? throw(ArgumentError("var only defined for df >
 
 params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
-@inline partype(d::MatrixTDist{T}) where {T <: Real} = T
+partype(::MatrixTDist{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
 #  -----------------------------------------------------------------------------
 
-function matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
+function matrixtdist_logc0(Σ::AbstractPDMat{T}, Ω::AbstractPDMat{T}, ν::T) where {T<:Real}
     #  returns the natural log of the normalizing constant for the pdf
     n = size(Σ, 1)
     p = size(Ω, 1)
-    term1 = logmvgamma(p, (ν + n + p - 1) / 2)
-    term2 = - (n * p / 2) * logπ
-    term3 = - logmvgamma(p, (ν + p - 1) / 2)
-    term4 = (-n / 2) * logdet(Ω)
-    term5 = (-p / 2) * logdet(Σ)
-    term1 + term2 + term3 + term4 + term5
+    term1 = logmvgamma(p, (ν + n + p - 1) / 2) - logmvgamma(p, (ν + p - 1) / 2)
+    term2 = (n * p * oftype(term1, logπ) + n * logdet(Ω) + p * logdet(Σ)) / 2
+    return term1 - term2
 end
 
 function logkernel(d::MatrixTDist, X::AbstractMatrix)
@@ -150,10 +147,19 @@ end
 
 #  Theorem 4.2.1 in Gupta and Nagar (1999)
 
-function _rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix)
+function rand(rng::AbstractRNG, d::MatrixTDist)
+    n, _ = size(d)
+    S = Symmetric(rand(rng, InverseWishart(d.ν + n - 1, d.Σ)), :L)
+    A = rand(rng, MatrixNormal(d.M, S, d.Ω))
+    return A
+end
+
+@inline function rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix{<:Real})
     n, p = size(d)
-    S = rand(rng, InverseWishart(d.ν + n - 1, d.Σ) )
-    A .= rand(rng, MatrixNormal(d.M, S, d.Ω) )
+    @boundscheck size(A) == (n, p)
+    S = Symmetric(rand(rng, InverseWishart(d.ν + n - 1, d.Σ)), :L)
+    @inbounds rand!(rng, MatrixNormal(d.M, S, d.Ω), A)
+    return A
 end
 
 #  -----------------------------------------------------------------------------
@@ -168,26 +174,4 @@ function MvTDist(MT::MatrixTDist)
     all([n, p] .> 1) && throw(ArgumentError("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`"))
     ν, M, Σ, Ω = params(MT)
     MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
-end
-
-#  -----------------------------------------------------------------------------
-#  Test utils
-#  -----------------------------------------------------------------------------
-
-function _univariate(d::MatrixTDist)
-    check_univariate(d)
-    ν, M, Σ, Ω = params(d)
-    μ = M[1]
-    σ = sqrt( Matrix(Σ)[1] * Matrix(Ω)[1] / ν )
-    return AffineDistribution(μ, σ, TDist(ν))
-end
-
-_multivariate(d::MatrixTDist) = MvTDist(d)
-
-function _rand_params(::Type{MatrixTDist}, elty, n::Int, p::Int)
-    ν = elty( n + p + 1 + abs(10randn()) )
-    M = randn(elty, n, p)
-    Σ = (X = 2rand(elty, n, n) .- 1; X * X')
-    Ω = (Y = 2rand(elty, p, p) .- 1; Y * Y')
-    return ν, M, Σ, Ω
 end

@@ -20,7 +20,7 @@ using Distributions: Product
     @test d_product isa Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
-    @test eltype(d_product) === eltype(ds[1])
+    @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)
     @test std(d_product) == std.(ds)
@@ -44,7 +44,7 @@ end
     @test d_product isa Product
     # Check that methods for `Product` are consistent.
     @test length(d_product) == length(ds)
-    @test eltype(d_product) === eltype(ds[1])
+    @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
     @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
     @test mean(d_product) == mean.(ds)
     @test std(d_product) == std.(ds)
@@ -75,7 +75,7 @@ end
         @test d_product isa Product
         # Check that methods for `Product` are consistent.
         @test length(d_product) == length(ds)
-        @test eltype(d_product) === eltype(ds[1])
+        @test @test_deprecated(eltype(d_product)) === @test_deprecated(eltype(ds[1]))
         @test @inferred(logpdf(d_product, x)) ≈ sum(logpdf.(ds, x))
         @test mean(d_product) == mean.(ds)
         @test std(d_product) == std.(ds)
