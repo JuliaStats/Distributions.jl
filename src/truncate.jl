@@ -233,19 +233,6 @@ function rand(rng::AbstractRNG, d::Truncated)
     end
 end
 
-
-"""
-    rand(rng::AbstractRNG, d::Truncated, n::Int)
-
-Generate `n` random samples from a truncated distribution.
-
-The implementation samples the untruncated distribution, `d0` with `rand(rng, d0, n)` in batches and only keeps the samples that fall within the truncated range. The size of the batches is adaptively estimated to reduce the number of iterations.
-
-See [rand(rng::AbstractRNG, d::Truncated)](@ref) that handles the case of small mass of the truncated region.
-
-!!! warning
-    This method can be inefficient if the probability mass of the truncated region is very small. 
-"""
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
     n == 0 && return partype(d)[]
     # 
