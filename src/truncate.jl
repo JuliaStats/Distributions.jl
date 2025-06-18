@@ -258,14 +258,14 @@ See [rand(rng::AbstractRNG, d::Truncated)](@ref) that handles the case of small 
     This method can be inefficient if the probability mass of the truncated region is very small. 
 """
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
-    n == 0 && return eltype(d)[]
+    n == 0 && return partype(d)[]
     # 
     d0 = d.untruncated
     tp = d.tp
     lower = d.lower
     upper = d.upper
     # Preallocate samples array
-    samples = Vector{eltype(d)}(undef, n)
+    samples = Vector{partype(d)}(undef, n)
     n_collected = 0
     while n_collected < n
         n_remaining = n - n_collected

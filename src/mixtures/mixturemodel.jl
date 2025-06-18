@@ -479,14 +479,14 @@ rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
 
 function rand(rng::AbstractRNG, d::MixtureModel{Univariate}, n::Int)
     counts = rand(rng, Multinomial(n, probs(d.prior)))
-    x = Vector{eltype(d)}(undef, n)
+    x = Vector{partype(d)}(undef, n)
     offset = 0
     for i in eachindex(counts)
         ni = counts[i]
         if ni > 0
             c = component(d, i)
-            last_offset = offset + ni - 1 
-            rand!(rng, c, @view(x[(begin + offset):(begin + last_offset)]))
+            last_offset = offset + ni - 1
+            rand!(rng, c, @view(x[(begin+offset):(begin+last_offset)]))
             offset = last_offset + 1
         end
     end
