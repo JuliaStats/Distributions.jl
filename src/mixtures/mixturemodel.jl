@@ -485,9 +485,9 @@ function rand(rng::AbstractRNG, d::MixtureModel{Univariate}, n::Int)
         ni = counts[i]
         if ni > 0
             c = component(d, i)
-            v = view(x, (offset+1):(offset+ni))
-            v .= rand(rng, c, ni)
-            offset += ni
+            last_offset = offset + ni - 1 
+            rand!(rng, c, @view(x[(begin + offset):(begin + last_offset)]))
+            offset = last_offset + 1
         end
     end
     return shuffle!(rng, x)
