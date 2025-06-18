@@ -240,17 +240,25 @@ function rand(rng::AbstractRNG, d::Truncated, n::Int)
     tp = d.tp
     lower = d.lower
     upper = d.upper
-    # Preallocate samples array
     samples = Vector{partype(d)}(undef, n)
     n_collected = 0
-    # Preallocate a buffer for batch sampling (size will be adjusted as needed)
     max_batch = 0
     batch_buffer = Vector{partype(d)}()
+    # If tp is extremely small, fall back to scalar sampling
+    threshold = 1e7  # maximum batch size allowed
     while n_collected < n
         n_remaining = n - n_collected
         n_expected = n_remaining / tp
         δn_expected = sqrt(n_remaining * tp * (1 - tp))
-        n_batch = ceil(Int, n_expected + 3δn_expected)
+        n_batch_f = n_expected + 3δn_expected
+        if !isfinite(n_batch_f) || n_batch_f > threshold
+            # Fallback: use scalar method for remaining samples
+            for i in 1:n_remaining
+                samples[n_collected+i] = rand(rng, d)
+            end
+            break
+        end
+        n_batch = ceil(Int, n_batch_f)
         if n_batch > max_batch
             resize!(batch_buffer, n_batch)
             max_batch = n_batch
