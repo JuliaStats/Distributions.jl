@@ -213,17 +213,6 @@ end
 
 ## random number generation
 
-
-"""
-    rand(rng::AbstractRNG, d::Truncated)
-
-Generate a single random sample from a truncated distribution.
-
-The sampling strategy depends on the probability mass of the truncated region (`tp`):
-- If `tp > 0.25`, rejection sampling is used. This is efficient when the truncated region covers a large portion of the original distribution.
-- If `sqrt(eps) < tp <= 0.25`, inverse transform sampling is used. This is more efficient for smaller truncated regions.
-- If `tp` is very small (`<= sqrt(eps)`), a numerically stable version of inverse transform sampling is used which performs calculations in log-space to maintain precision.
-"""
 function rand(rng::AbstractRNG, d::Truncated)
     d0 = d.untruncated
     tp = d.tp
