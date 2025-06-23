@@ -27,7 +27,7 @@ struct Kumaraswamy{T<:Real} <: ContinuousUnivariateDistribution
     b::T
 end
 
-function Kumaraswamy(a::Real, b::Real; check_args::Bool=true)
+function Kumaraswamy(a::Real, b::Real; check_args::Bool = true)
     @check_args Kumaraswamy (a, a > zero(a)) (b, b > zero(b))
     a′, b′ = promote(a, b)
     return Kumaraswamy{typeof(a′)}(a′, b′)
@@ -35,7 +35,8 @@ end
 
 Kumaraswamy() = Kumaraswamy{Float64}(1.0, 1.0)
 
-Base.convert(::Type{Kumaraswamy{T}}, d::Kumaraswamy) where {T} = Kumaraswamy{T}(T(d.a), T(d.b))
+Base.convert(::Type{Kumaraswamy{T}}, d::Kumaraswamy) where {T} =
+    Kumaraswamy{T}(T(d.a), T(d.b))
 Base.convert(::Type{Kumaraswamy{T}}, d::Kumaraswamy{T}) where {T} = d
 
 @distr_support Kumaraswamy 0 1

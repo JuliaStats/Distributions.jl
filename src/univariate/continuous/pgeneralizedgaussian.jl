@@ -35,12 +35,12 @@ struct PGeneralizedGaussian{T<:Real} <: ContinuousUnivariateDistribution
     PGeneralizedGaussian{T}(μ::T, α::T, p::T) where {T<:Real} = new{T}(µ, α, p)
 end
 
-function PGeneralizedGaussian(μ::T, α::T, p::T; check_args::Bool=true) where {T<:Real}
+function PGeneralizedGaussian(μ::T, α::T, p::T; check_args::Bool = true) where {T<:Real}
     @check_args PGeneralizedGaussian (α, α > zero(α)) (p, p > zero(p))
     return PGeneralizedGaussian{T}(μ, α, p)
 end
-function PGeneralizedGaussian(μ::Real, α::Real, p::Real; check_args::Bool=true)
-    return PGeneralizedGaussian(promote(μ, α, p)...; check_args=check_args)
+function PGeneralizedGaussian(μ::Real, α::Real, p::Real; check_args::Bool = true)
+    return PGeneralizedGaussian(promote(μ, α, p)...; check_args = check_args)
 end
 
 """
@@ -48,7 +48,7 @@ end
 
 Build a p-generalized Gaussian with `μ=0.0, α=1.0`
 """
-function PGeneralizedGaussian(p::Real; check_args::Bool=true)
+function PGeneralizedGaussian(p::Real; check_args::Bool = true)
     @check_args PGeneralizedGaussian (p, p > zero(p))
     return PGeneralizedGaussian{typeof(p)}(zero(p), oftype(p, 1), p)
 end
@@ -63,10 +63,14 @@ PGeneralizedGaussian() = PGeneralizedGaussian{Float64}(0.0, √2, 2.0) # approxi
 
 #### Conversions
 
-function Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian) where {T<:Real}
+function Base.convert(
+    ::Type{PGeneralizedGaussian{T}},
+    d::PGeneralizedGaussian,
+) where {T<:Real}
     return PGeneralizedGaussian{T}(T(d.μ), T(d.α), T(d.p))
 end
-Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where {T<:Real} = d
+Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where {T<:Real} =
+    d
 
 @distr_support PGeneralizedGaussian -Inf Inf
 
@@ -97,7 +101,7 @@ entropy(d::PGeneralizedGaussian) = 1 / d.p - log(d.p / (2 * d.α * gamma(1 / d.p
 
 function pdf(d::PGeneralizedGaussian, x::Real)
     μ, α, p = params(d)
-    return (p / (2 * α * gamma(1 / p))) * exp(- (abs(x - μ) / α)^p)
+    return (p / (2 * α * gamma(1 / p))) * exp(-(abs(x - μ) / α)^p)
 end
 function logpdf(d::PGeneralizedGaussian, x::Real)
     μ, α, p = params(d)

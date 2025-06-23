@@ -35,13 +35,13 @@ end
         d = BernoulliLogit(logit(p))
         @test @inferred(rand(d)) isa Bool
         @test @inferred(rand(d, 10)) isa Vector{Bool}
-        @test mean(rand(d, N)) ≈ p atol=0.01
+        @test mean(rand(d, N)) ≈ p atol = 0.01
     end
 end
 
 @testset "cgf" begin
-    test_cgf(BernoulliLogit(), (1f0, -1f0, 1e6, -1e6))
-    test_cgf(BernoulliLogit(0.1), (1f0, -1f0, 1e6, -1e6))
+    test_cgf(BernoulliLogit(), (1.0f0, -1.0f0, 1e6, -1e6))
+    test_cgf(BernoulliLogit(0.1), (1.0f0, -1.0f0, 1e6, -1e6))
 end
 
 @testset "comparison with `Bernoulli`" begin
@@ -68,14 +68,14 @@ end
         end
 
         for q in (-0.2f0, 0.25, 0.6f0, 1.5)
-            @test @inferred(quantile(d, q)) ≈ quantile(d0, q) nans=true
-            @test @inferred(cquantile(d, q)) ≈ cquantile(d0, q) nans=true
+            @test @inferred(quantile(d, q)) ≈ quantile(d0, q) nans = true
+            @test @inferred(cquantile(d, q)) ≈ cquantile(d0, q) nans = true
         end
 
         for t in (-5.2, 1.2f0)
-            @test @inferred(mgf(d, t)) ≈ mgf(d0, t) rtol=1e-6
-            @test @inferred(cgf(d, t)) ≈ cgf(d0, t) rtol=1e-6
-            @test @inferred(cf(d, t)) ≈ cf(d0, t) rtol=1e-6
+            @test @inferred(mgf(d, t)) ≈ mgf(d0, t) rtol = 1e-6
+            @test @inferred(cgf(d, t)) ≈ cgf(d0, t) rtol = 1e-6
+            @test @inferred(cf(d, t)) ≈ cf(d0, t) rtol = 1e-6
         end
     end
 end

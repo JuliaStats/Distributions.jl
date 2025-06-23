@@ -1,10 +1,10 @@
 #### naive sampling
 
-struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <: Sampleable{Univariate,Discrete}
+struct CategoricalDirectSampler{T<:Real,Ts<:AbstractVector{T}} <:
+       Sampleable{Univariate,Discrete}
     prob::Ts
 
-    function CategoricalDirectSampler{T,Ts}(p::Ts) where {
-        T<:Real,Ts<:AbstractVector{T}}
+    function CategoricalDirectSampler{T,Ts}(p::Ts) where {T<:Real,Ts<:AbstractVector{T}}
         isempty(p) && throw(ArgumentError("p is empty."))
         new{T,Ts}(p)
     end
@@ -22,7 +22,7 @@ function rand(rng::AbstractRNG, s::CategoricalDirectSampler)
     c = p[1]
     u = rand(rng)
     while c < u && i < n
-        c += p[i += 1]
+        c += p[i+=1]
     end
     return i
 end

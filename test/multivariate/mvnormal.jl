@@ -13,15 +13,15 @@ using FillArrays
 ###### General Testing
 
 @testset "MvNormal tests" begin
-    mu = [1., 2., 3.]
-    mu_r = 1.:3.
+    mu = [1.0, 2.0, 3.0]
+    mu_r = 1.0:3.0
     va = [1.2, 3.4, 2.6]
-    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    C = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
 
-    h = [1., 2., 3.]
+    h = [1.0, 2.0, 3.0]
     dv = [1.2, 3.4, 2.6]
-    J = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
-    D = Diagonal(J);
+    J = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
+    D = Diagonal(J)
     for (g, μ, Σ) in [
         (@test_deprecated(MvNormal(mu, sqrt(2.0))), mu, Matrix(2.0I, 3, 3)),
         (@test_deprecated(MvNormal(mu_r, sqrt(2.0))), mu_r, Matrix(2.0I, 3, 3)),
@@ -51,10 +51,11 @@ using FillArrays
         (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
         (MvNormal(mu, Symmetric(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
         (MvNormal(mu, Hermitian(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
-        (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))) ]
+        (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))),
+    ]
 
-        @test mean(g)   ≈ μ
-        @test cov(g)    ≈ Σ
+        @test mean(g) ≈ μ
+        @test cov(g) ≈ Σ
         @test invcov(g) ≈ inv(Σ)
         Distributions.TestUtils.test_mvnormal(g, 10^4)
 
@@ -64,33 +65,37 @@ using FillArrays
             @test isa(gc, MvNormalCanon)
             @test length(gc) == length(g)
             @test mean(gc) ≈ mean(g)
-            @test cov(gc)  ≈ cov(g)
+            @test cov(gc) ≈ cov(g)
         else
             @assert isa(g, MvNormalCanon)
             gc = meanform(g)
             @test isa(gc, MvNormal)
             @test length(gc) == length(g)
             @test mean(gc) ≈ mean(g)
-            @test cov(gc)  ≈ cov(g)
+            @test cov(gc) ≈ cov(g)
         end
     end
 end
 
 
 @testset "MvNormal constructor" begin
-    mu = [1., 2., 3.]
-    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    mu = [1.0, 2.0, 3.0]
+    C = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
     J = inv(C)
     h = J \ mu
     @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
     @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
-    @test typeof(@test_deprecated(MvNormal(mu, 2.0f0))) == typeof(@test_deprecated(MvNormal(mu, 2.0)))
+    @test typeof(@test_deprecated(MvNormal(mu, 2.0f0))) ==
+          typeof(@test_deprecated(MvNormal(mu, 2.0)))
 
-    @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(h, PDMat(J)))
+    @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) ==
+          typeof(MvNormalCanon(h, PDMat(J)))
     @test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
-    @test typeof(@test_deprecated(MvNormalCanon(h, 2.0f0))) == typeof(@test_deprecated(MvNormalCanon(h, 2.0)))
+    @test typeof(@test_deprecated(MvNormalCanon(h, 2.0f0))) ==
+          typeof(@test_deprecated(MvNormalCanon(h, 2.0)))
 
-    @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) ==
+          typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
     @test convert(MvNormal{Float32}, d) === d
@@ -99,8 +104,10 @@ end
 
     d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
     @test convert(MvNormalCanon{Float32}, d) === d
-    @test typeof(convert(MvNormalCanon{Float64}, d)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
-    @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) == typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(convert(MvNormalCanon{Float64}, d)) ==
+          typeof(MvNormalCanon(mu, h, PDMat(J)))
+    @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) ==
+          typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     @test MvNormal(mu, I) === @test_deprecated(MvNormal(mu, 1))
     @test MvNormal(mu, 9 * I) === @test_deprecated(MvNormal(mu, 3))
@@ -112,19 +119,23 @@ end
 
     @test MvNormalCanon(h, I) == MvNormalCanon(h, Diagonal(Ones(length(h))))
     @test MvNormalCanon(h, 9 * I) == MvNormalCanon(h, Diagonal(Fill(9, length(h))))
-    @test MvNormalCanon(h, 0.25f0 * I) == MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h))))
+    @test MvNormalCanon(h, 0.25f0 * I) ==
+          MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h))))
 
-    @test typeof(MvNormalCanon(h, I)) === typeof(MvNormalCanon(h, Diagonal(Ones(length(h)))))
-    @test typeof(MvNormalCanon(h, 9 * I)) === typeof(MvNormalCanon(h, Diagonal(Fill(9, length(h)))))
-    @test typeof(MvNormalCanon(h, 0.25f0 * I)) === typeof(MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h)))))
+    @test typeof(MvNormalCanon(h, I)) ===
+          typeof(MvNormalCanon(h, Diagonal(Ones(length(h)))))
+    @test typeof(MvNormalCanon(h, 9 * I)) ===
+          typeof(MvNormalCanon(h, Diagonal(Fill(9, length(h)))))
+    @test typeof(MvNormalCanon(h, 0.25f0 * I)) ===
+          typeof(MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h)))))
 end
 
 @testset "MvNormal 32-bit logpdf" begin
     # Test 32-bit logpdf
-    mu = [1., 2., 3.]
-    C = [4. -2. -1.; -2. 5. -1.; -1. -1. 6.]
+    mu = [1.0, 2.0, 3.0]
+    C = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
     d = MvNormal(mu, PDMat(C))
-    X = [1., 2., 3.]
+    X = [1.0, 2.0, 3.0]
 
     d32 = convert(MvNormal{Float32}, d)
     X32 = convert(AbstractArray{Float32}, X)
@@ -146,8 +157,8 @@ if isdefined(PDMats, :PDSparseMat)
         J = PDSparseMat(J)
         μ = zeros(n)
 
-        d_prec_sparse = MvNormalCanon(μ, J*μ, J)
-        d_prec_dense = MvNormalCanon(μ, J*μ, PDMat(Matrix(J)))
+        d_prec_sparse = MvNormalCanon(μ, J * μ, J)
+        d_prec_dense = MvNormalCanon(μ, J * μ, PDMat(Matrix(J)))
         d_cov_dense = MvNormal(μ, PDMat(Symmetric(Σ)))
 
         x_prec_sparse = rand(d_prec_sparse, nsamp)
@@ -168,12 +179,12 @@ if isdefined(PDMats, :PDSparseMat)
         identical.  As a result, these tests only check for approximate statistical equality,
         rather than strict numerical equality of the samples.
         =#
-        for i in 1:3, j in 1:3
+        for i = 1:3, j = 1:3
             @test all(abs.(mean(samples[i]) .- μ) .< 2se)
-            loglik_ii = [logpdf(dists[i], samples[i][:, k]) for k in 1:100_000]
-            loglik_ji = [logpdf(dists[j], samples[i][:, k]) for k in 1:100_000]
+            loglik_ii = [logpdf(dists[i], samples[i][:, k]) for k = 1:100_000]
+            loglik_ji = [logpdf(dists[j], samples[i][:, k]) for k = 1:100_000]
             # test average likelihood ratio between distribution i and sample j are small
-            @test mean((loglik_ii .- loglik_ji).^2) < tol
+            @test mean((loglik_ii .- loglik_ji) .^ 2) < tol
         end
     end
 end
@@ -184,23 +195,23 @@ end
 # a slow but safe way to implement MLE for verification
 
 function _gauss_mle(x::AbstractMatrix{<:Real})
-    mu = vec(mean(x, dims=2))
+    mu = vec(mean(x, dims = 2))
     z = x .- mu
-    C = (z * z') * (1/size(x,2))
+    C = (z * z') * (1 / size(x, 2))
     return mu, C
 end
 
 function _gauss_mle(x::AbstractMatrix{<:Real}, w::AbstractVector{<:Real})
     sw = sum(w)
-    mu = (x * w) * (1/sw)
+    mu = (x * w) * (1 / sw)
     z = x .- mu
-    C = (z * (Diagonal(w) * z')) * (1/sw)
+    C = (z * (Diagonal(w) * z')) * (1 / sw)
     LinearAlgebra.copytri!(C, 'U')
     return mu, C
 end
 
 @testset "MvNormal MLE" begin
-    x = randn(3, 200) .+ randn(3) * 2.
+    x = randn(3, 200) .+ randn(3) * 2.0
     w = rand(200)
     u, C = _gauss_mle(x)
     uw, Cw = _gauss_mle(x, w)
@@ -208,47 +219,49 @@ end
     g = fit_mle(MvNormal, suffstats(MvNormal, x))
     @test isa(g, FullNormal)
     @test mean(g) ≈ u
-    @test cov(g)  ≈ C
+    @test cov(g) ≈ C
 
     g = fit_mle(MvNormal, x)
     @test isa(g, FullNormal)
     @test mean(g) ≈ u
-    @test cov(g)  ≈ C
+    @test cov(g) ≈ C
 
     g = fit_mle(MvNormal, x, w)
     @test isa(g, FullNormal)
     @test mean(g) ≈ uw
-    @test cov(g)  ≈ Cw
+    @test cov(g) ≈ Cw
 
     g = fit_mle(IsoNormal, x)
     @test isa(g, IsoNormal)
-    @test g.μ       ≈ u
+    @test g.μ ≈ u
     @test g.Σ.value ≈ mean(diag(C))
 
     g = fit_mle(IsoNormal, x, w)
     @test isa(g, IsoNormal)
-    @test g.μ       ≈ uw
+    @test g.μ ≈ uw
     @test g.Σ.value ≈ mean(diag(Cw))
 
     g = fit_mle(DiagNormal, x)
     @test isa(g, DiagNormal)
-    @test g.μ      ≈ u
+    @test g.μ ≈ u
     @test g.Σ.diag ≈ diag(C)
 
     g = fit_mle(DiagNormal, x, w)
     @test isa(g, DiagNormal)
-    @test g.μ      ≈ uw
+    @test g.μ ≈ uw
     @test g.Σ.diag ≈ diag(Cw)
 end
 
 @testset "MvNormal affine transformations" begin
     @testset "moment identities" begin
-        for n in 1:5                       # dimension
+        for n = 1:5                       # dimension
             # distribution
             μ = randn(n)
-            for Σ in (randn(n, n) |> A -> A*A',  # dense
-                      Diagonal(abs2.(randn(n))), # diagonal
-                      abs2(randn()) * I)         # scaled unit
+            for Σ in (
+                randn(n, n) |> A -> A * A',  # dense
+                Diagonal(abs2.(randn(n))), # diagonal
+                abs2(randn()) * I,
+            )         # scaled unit
                 d = MvNormal(μ, Σ)
 
                 # random arrays for transformations

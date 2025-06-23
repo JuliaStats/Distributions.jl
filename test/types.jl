@@ -24,7 +24,7 @@ using ForwardDiff: Dual
 @assert ContinuousMatrixDistribution <: MatrixDistribution
 
 @testset "Test Sample Type" begin
-    for T in (Float64,Float32,Dual{Nothing,Float64,0})
+    for T in (Float64, Float32, Dual{Nothing,Float64,0})
         @testset "Type $T" begin
             dists = (
                 MvNormal(Diagonal(ones(T, 2))),
@@ -60,7 +60,7 @@ end
     @test !isequal(dist1, dist3)
     @test !isapprox(dist1, dist3)
     @test hash(dist1) != hash(dist3)
-    @test isapprox(dist1, dist3, atol=0.3)
+    @test isapprox(dist1, dist3, atol = 0.3)
 
     dist4 = LogNormal(1, 1)
     @test dist1 != dist4

@@ -30,154 +30,164 @@ Journal of Computational and Graphical Statistics, 2001.
 cdf(Chernoff(),-x)              # For tail probabilities, use this instead of 1-cdf(Chernoff(),x)
 ```
 """
-struct Chernoff <: ContinuousUnivariateDistribution
-end
+struct Chernoff <: ContinuousUnivariateDistribution end
 
 module ChernoffComputations
-    import QuadGK.quadgk
-    # The following arrays of constants have been precomputed to speed up computation.
-    # The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
-    # The array airyai_roots contains roots of the airyai functions (atilde in the paper).
-    # Finally airyai_prime contains contains airyaiprime evaluated at the corresponding atildes
-    const a=[
-         0.14583333333333334
-        -0.0014105902777777765
-        -2.045269786155239e-5
-         1.7621771897199738e-6
-        -5.7227597511834636e-8
-         1.2738111577329235e-9
-        -2.1640824986157608e-11
-         2.87925759635786e-13
-        -2.904496582565578e-15
-         1.8213982724416428e-17
-         4.318809086319947e-20
-        -3.459634830348895e-21
-         6.541295360751684e-23
-        -8.92275524974091e-25
-         1.0102911018761945e-26
-        -9.976759882474874e-29
-        ]
-    const b=[
-         0.6666666666666666
-         0.021164021164021163
-        -0.0007893341226674574
-         1.9520978781876193e-5
-        -3.184888134149933e-7
-         2.4964953625552273e-9
-         3.6216439304006735e-11
-        -1.874438299727797e-12
-         4.393984966701305e-14
-        -7.57237085924526e-16
-         1.063018673013022e-17
-        -1.26451831871265e-19
-         1.2954000902764143e-21
-        -1.1437790369170514e-23
-         8.543413293195206e-26
-        -5.05879944592705e-28
-        ]
-    const airyai_roots=[
-        -2.338107410459767
-        -4.08794944413097
-        -5.520559828095551
-        -6.786708090071759
-        -7.944133587120853
-        -9.02265085334098
-        -10.040174341558085
-        -11.008524303733262
-        -11.936015563236262
-        -12.828776752865757
-        -13.691489035210719
-        -14.527829951775335
-        -15.340755135977997
-        -16.132685156945772
-        -16.90563399742994
-        -17.66130010569706
-        ]
-    const airyai_prime=[
-         0.7012108227206906
-        -0.8031113696548534
-         0.865204025894141
-        -0.9108507370495821
-         0.9473357094415571
-        -0.9779228085695176
-         1.0043701226603126
-        -1.0277386888207862
-         1.0487206485881893
-        -1.0677938591574279
-         1.0853028313507
-        -1.1015045702774968
-         1.1165961779326556
-        -1.1307323104931881
-         1.1440366732735523
-        -1.156609849116565
-        ]
+import QuadGK.quadgk
+# The following arrays of constants have been precomputed to speed up computation.
+# The first two correspond to the arrays a and b in the Groeneboom and Wellner article.
+# The array airyai_roots contains roots of the airyai functions (atilde in the paper).
+# Finally airyai_prime contains contains airyaiprime evaluated at the corresponding atildes
+const a = [
+    0.14583333333333334
+    -0.0014105902777777765
+    -2.045269786155239e-5
+    1.7621771897199738e-6
+    -5.7227597511834636e-8
+    1.2738111577329235e-9
+    -2.1640824986157608e-11
+    2.87925759635786e-13
+    -2.904496582565578e-15
+    1.8213982724416428e-17
+    4.318809086319947e-20
+    -3.459634830348895e-21
+    6.541295360751684e-23
+    -8.92275524974091e-25
+    1.0102911018761945e-26
+    -9.976759882474874e-29
+]
+const b = [
+    0.6666666666666666
+    0.021164021164021163
+    -0.0007893341226674574
+    1.9520978781876193e-5
+    -3.184888134149933e-7
+    2.4964953625552273e-9
+    3.6216439304006735e-11
+    -1.874438299727797e-12
+    4.393984966701305e-14
+    -7.57237085924526e-16
+    1.063018673013022e-17
+    -1.26451831871265e-19
+    1.2954000902764143e-21
+    -1.1437790369170514e-23
+    8.543413293195206e-26
+    -5.05879944592705e-28
+]
+const airyai_roots = [
+    -2.338107410459767
+    -4.08794944413097
+    -5.520559828095551
+    -6.786708090071759
+    -7.944133587120853
+    -9.02265085334098
+    -10.040174341558085
+    -11.008524303733262
+    -11.936015563236262
+    -12.828776752865757
+    -13.691489035210719
+    -14.527829951775335
+    -15.340755135977997
+    -16.132685156945772
+    -16.90563399742994
+    -17.66130010569706
+]
+const airyai_prime = [
+    0.7012108227206906
+    -0.8031113696548534
+    0.865204025894141
+    -0.9108507370495821
+    0.9473357094415571
+    -0.9779228085695176
+    1.0043701226603126
+    -1.0277386888207862
+    1.0487206485881893
+    -1.0677938591574279
+    1.0853028313507
+    -1.1015045702774968
+    1.1165961779326556
+    -1.1307323104931881
+    1.1440366732735523
+    -1.156609849116565
+]
 
-    const cuberoottwo = cbrt(2.0)
-    const sqrthalfpi = sqrt(0.5*pi)
-    const sqrttwopi = sqrt(2.0*pi)
+const cuberoottwo = cbrt(2.0)
+const sqrthalfpi = sqrt(0.5 * pi)
+const sqrttwopi = sqrt(2.0 * pi)
 
-    function p(y::Real)
-        if iszero(y)
-            return -sqrt(0.5*pi)
-        end
-
-        (y > 0) || throw(DomainError(y, "argument must be positive"))
-
-        cnsty = y^(-1.5)
-        if (y <= 1.0)
-            return sum([(b[k]*cnsty - a[k]*sqrthalfpi)*y^(3*k) for k=1:length(a)])-sqrthalfpi
-        else
-            return sum([exp(cuberoottwo*a*y) for a in airyai_roots]) * 2 * sqrttwopi * exp(-y*y*y/6) - cnsty
-        end
+function p(y::Real)
+    if iszero(y)
+        return -sqrt(0.5 * pi)
     end
 
-    function g(x::Real)
-        function g_one(y::Real)
-            return p(y) * exp(-0.5*y*(2*x+y)*(2*x+y))
-        end
-        function g_two(y::Real)
-            z = 2*x+y*y
-            return (z*y*y + 0.5 * z*z) * exp(-0.5*y*y*z*z)
-        end
-        if (x <= -1.0)
-            return cuberoottwo*cuberoottwo * exp(2*x*x*x/3.0) * sum([exp(-cuberoottwo*airyai_roots[k]*x) / airyai_prime[k] for k=1:length(airyai_roots)])
-        else
-            return 2*x - (quadgk(g_one, 0.0, Inf)[1] - 4*quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
-        end
-    end
+    (y > 0) || throw(DomainError(y, "argument must be positive"))
 
-    _pdf(x::Real) = g(x)*g(-x)*0.5
-    _cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf,0.0,x)[1]
-    _cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
+    cnsty = y^(-1.5)
+    if (y <= 1.0)
+        return sum([(b[k] * cnsty - a[k] * sqrthalfpi) * y^(3 * k) for k = 1:length(a)]) - sqrthalfpi
+    else
+        return sum([exp(cuberoottwo * a * y) for a in airyai_roots]) *
+               2 *
+               sqrttwopi *
+               exp(-y * y * y / 6) - cnsty
+    end
+end
+
+function g(x::Real)
+    function g_one(y::Real)
+        return p(y) * exp(-0.5 * y * (2 * x + y) * (2 * x + y))
+    end
+    function g_two(y::Real)
+        z = 2 * x + y * y
+        return (z * y * y + 0.5 * z * z) * exp(-0.5 * y * y * z * z)
+    end
+    if (x <= -1.0)
+        return cuberoottwo *
+               cuberoottwo *
+               exp(2 * x * x * x / 3.0) *
+               sum([
+                   exp(-cuberoottwo * airyai_roots[k] * x) / airyai_prime[k] for
+                   k = 1:length(airyai_roots)
+               ])
+    else
+        return 2 * x -
+               (quadgk(g_one, 0.0, Inf)[1] - 4 * quadgk(g_two, 0.0, Inf)[1]) / sqrttwopi   # should perhaps combine integrals
+    end
+end
+
+_pdf(x::Real) = g(x) * g(-x) * 0.5
+_cdf(x::Real) = (x < 0.0) ? _cdfbar(-x) : 0.5 + quadgk(_pdf, 0.0, x)[1]
+_cdfbar(x::Real) = (x < 0.0) ? _cdf(x) : quadgk(_pdf, x, Inf)[1]
 end
 
 pdf(d::Chernoff, x::Real) = ChernoffComputations._pdf(x)
-logpdf(d::Chernoff, x::Real) = log(ChernoffComputations.g(x))+log(ChernoffComputations.g(-x))+log(0.5)
+logpdf(d::Chernoff, x::Real) =
+    log(ChernoffComputations.g(x)) + log(ChernoffComputations.g(-x)) + log(0.5)
 cdf(d::Chernoff, x::Real) = ChernoffComputations._cdf(x)
 
 function quantile(d::Chernoff, tau::Real)
     # some commonly used quantiles were precomputed
-    precomputedquants=[
-        0.0 -Inf;
-        0.01 -1.171534341573129;
-        0.025 -0.9981810946684274;
-        0.05 -0.8450811886357725;
-        0.1 -0.6642351964332931;
-        0.2 -0.43982766604886553;
-        0.25 -0.353308035220429;
-        0.3 -0.2751512847290148;
-        0.4 -0.13319637678583637;
-        0.5 0.0;
-        0.6 0.13319637678583637;
-        0.7 0.2751512847290147;
-        0.75 0.353308035220429;
-        0.8 0.4398276660488655;
-        0.9 0.6642351964332931;
-        0.95 0.8450811886357724;
-        0.975 0.9981810946684272;
-        0.99 1.17153434157313;
+    precomputedquants = [
+        0.0 -Inf
+        0.01 -1.171534341573129
+        0.025 -0.9981810946684274
+        0.05 -0.8450811886357725
+        0.1 -0.6642351964332931
+        0.2 -0.43982766604886553
+        0.25 -0.353308035220429
+        0.3 -0.2751512847290148
+        0.4 -0.13319637678583637
+        0.5 0.0
+        0.6 0.13319637678583637
+        0.7 0.2751512847290147
+        0.75 0.353308035220429
+        0.8 0.4398276660488655
+        0.9 0.6642351964332931
+        0.95 0.8450811886357724
+        0.975 0.9981810946684272
+        0.99 1.17153434157313
         1.0 Inf
-        ]
+    ]
     (0.0 <= tau && tau <= 1.0) || throw(DomainError(tau, "illegal value of tau"))
     present = searchsortedfirst(precomputedquants[:, 1], tau)
     if present <= size(precomputedquants, 1)
@@ -190,13 +200,25 @@ function quantile(d::Chernoff, tau::Real)
     stdapprox = 0.52
     dnorm = Normal(0.0, 1.0)
     if tau < 0.001
-        return -newton(x -> tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, 1.0 - tau)*stdapprox)
+        return -newton(
+            x -> tau - ChernoffComputations._cdfbar(x),
+            ChernoffComputations._pdf,
+            quantile(dnorm, 1.0 - tau) * stdapprox,
+        )
 
     end
     if tau > 0.999
-        return newton(x -> 1.0 - tau - ChernoffComputations._cdfbar(x), ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)
+        return newton(
+            x -> 1.0 - tau - ChernoffComputations._cdfbar(x),
+            ChernoffComputations._pdf,
+            quantile(dnorm, tau) * stdapprox,
+        )
     end
-    return newton(x -> ChernoffComputations._cdf(x) - tau, ChernoffComputations._pdf, quantile(dnorm, tau)*stdapprox)   # should consider replacing x-> construct for speed
+    return newton(
+        x -> ChernoffComputations._cdf(x) - tau,
+        ChernoffComputations._pdf,
+        quantile(dnorm, tau) * stdapprox,
+    )   # should consider replacing x-> construct for speed
 end
 
 minimum(d::Chernoff) = -Inf
@@ -250,8 +272,8 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         0.31692143952775814
         0.2358977457249061
         1.0218214689661219e-7
-       ]
-    y=[
+    ]
+    y = [
         0.02016386420423385
         0.042162593823411566
         0.06607475557706186
@@ -284,23 +306,23 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         1.2764995726449935
         1.3789927085182485
         1.516689116183566
-        ]
+    ]
     n = length(x)
     i = rand(rng, 0:n-1)
-    r = (2.0*rand(rng)-1) * ((i>0) ? x[i] : A/y[1])
+    r = (2.0 * rand(rng) - 1) * ((i > 0) ? x[i] : A / y[1])
     rabs = abs(r)
     if rabs < x[i+1]
         return r
     end
-    s = (i>0) ? (y[i]+rand(rng)*(y[i+1]-y[i])) : rand(rng)*y[1]
-    if s < 2.0*ChernoffComputations._pdf(rabs)
+    s = (i > 0) ? (y[i] + rand(rng) * (y[i+1] - y[i])) : rand(rng) * y[1]
+    if s < 2.0 * ChernoffComputations._pdf(rabs)
         return r
     end
     if i > 0
         return rand(rng, d)
     end
-    F0 = ChernoffComputations._cdf(A/y[1])
-    tau = 2.0*rand(rng)-1 # ~ U(-1,1)
+    F0 = ChernoffComputations._cdf(A / y[1])
+    tau = 2.0 * rand(rng) - 1 # ~ U(-1,1)
     tauabs = abs(tau)
-    return quantile(d, tauabs + (1-tauabs)*F0) * sign(tau)
+    return quantile(d, tauabs + (1 - tauabs) * F0) * sign(tau)
 end

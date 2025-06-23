@@ -30,23 +30,25 @@ External links
 struct StudentizedRange{T<:Real} <: ContinuousUnivariateDistribution
     ν::T
     k::T
-    StudentizedRange{T}(ν::T, k::T) where {T <: Real} = new{T}(ν, k)
+    StudentizedRange{T}(ν::T, k::T) where {T<:Real} = new{T}(ν, k)
 end
 
-function StudentizedRange(ν::T, k::T; check_args::Bool=true) where {T <: Real}
+function StudentizedRange(ν::T, k::T; check_args::Bool = true) where {T<:Real}
     @check_args StudentizedRange (ν, ν > zero(ν)) (k, k > one(k))
     return StudentizedRange{T}(ν, k)
 end
 
-StudentizedRange(ν::Integer, k::Integer; check_args::Bool=true) = StudentizedRange(float(ν), float(k); check_args=check_args)
-StudentizedRange(ν::Real, k::Real; check_args::Bool=true) = StudentizedRange(promote(ν, k)...; check_args=check_args)
+StudentizedRange(ν::Integer, k::Integer; check_args::Bool = true) =
+    StudentizedRange(float(ν), float(k); check_args = check_args)
+StudentizedRange(ν::Real, k::Real; check_args::Bool = true) =
+    StudentizedRange(promote(ν, k)...; check_args = check_args)
 
 @distr_support StudentizedRange 0.0 Inf
 
 
 ###  Conversions
 
-function convert(::Type{StudentizedRange{T}}, ν::S, k::S) where {T <: Real, S <: Real}
+function convert(::Type{StudentizedRange{T}}, ν::S, k::S) where {T<:Real,S<:Real}
     StudentizedRange(T(ν), T(k))
 end
 
@@ -57,7 +59,7 @@ Base.convert(::Type{StudentizedRange{T}}, d::StudentizedRange{T}) where {T<:Real
 
 ### Parameters
 params(d::StudentizedRange) = (d.ν, d.k)
-@inline partype(d::StudentizedRange{T}) where {T <: Real} = T
+@inline partype(d::StudentizedRange{T}) where {T<:Real} = T
 
 
 ### Evaluation & Sampling

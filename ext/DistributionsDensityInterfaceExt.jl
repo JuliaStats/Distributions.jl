@@ -10,15 +10,30 @@ for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
         DensityInterface.$di_func(d::Distribution, x) = $d_func(d, x)
 
         function DensityInterface.$di_func(d::UnivariateDistribution, x::AbstractArray)
-            throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
+            throw(
+                ArgumentError(
+                    "$(DensityInterface.$di_func) doesn't support multiple samples as an argument",
+                ),
+            )
         end
 
         function DensityInterface.$di_func(d::MultivariateDistribution, x::AbstractMatrix)
-            throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
+            throw(
+                ArgumentError(
+                    "$(DensityInterface.$di_func) doesn't support multiple samples as an argument",
+                ),
+            )
         end
 
-        function DensityInterface.$di_func(d::MatrixDistribution, x::AbstractArray{<:AbstractMatrix{<:Real}})
-            throw(ArgumentError("$(DensityInterface.$di_func) doesn't support multiple samples as an argument"))
+        function DensityInterface.$di_func(
+            d::MatrixDistribution,
+            x::AbstractArray{<:AbstractMatrix{<:Real}},
+        )
+            throw(
+                ArgumentError(
+                    "$(DensityInterface.$di_func) doesn't support multiple samples as an argument",
+                ),
+            )
         end
     end
 end

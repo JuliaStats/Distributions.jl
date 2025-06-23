@@ -30,19 +30,22 @@ struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function NegativeBinomial{T}(r::T, p::T) where {T <: Real}
+    function NegativeBinomial{T}(r::T, p::T) where {T<:Real}
         return new{T}(r, p)
     end
 end
 
-function NegativeBinomial(r::T, p::T; check_args::Bool=true) where {T <: Real}
+function NegativeBinomial(r::T, p::T; check_args::Bool = true) where {T<:Real}
     @check_args NegativeBinomial (r, r > zero(r)) (p, zero(p) < p <= one(p))
     return NegativeBinomial{T}(r, p)
 end
 
-NegativeBinomial(r::Real, p::Real; check_args::Bool=true) = NegativeBinomial(promote(r, p)...; check_args=check_args)
-NegativeBinomial(r::Integer, p::Integer; check_args::Bool=true) = NegativeBinomial(float(r), float(p); check_args=check_args)
-NegativeBinomial(r::Real; check_args::Bool=true) = NegativeBinomial(r, 0.5; check_args=check_args)
+NegativeBinomial(r::Real, p::Real; check_args::Bool = true) =
+    NegativeBinomial(promote(r, p)...; check_args = check_args)
+NegativeBinomial(r::Integer, p::Integer; check_args::Bool = true) =
+    NegativeBinomial(float(r), float(p); check_args = check_args)
+NegativeBinomial(r::Real; check_args::Bool = true) =
+    NegativeBinomial(r, 0.5; check_args = check_args)
 NegativeBinomial() = NegativeBinomial{Float64}(1.0, 0.5)
 
 @distr_support NegativeBinomial 0 Inf
@@ -70,15 +73,18 @@ failprob(d::NegativeBinomial{T}) where {T} = one(T) - d.p
 
 mean(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (one(T) - p) * d.r / p)
 
-var(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); (one(T) - p) * d.r / (p * p))
+var(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (one(T) - p) * d.r / (p * p))
 
-std(d::NegativeBinomial{T}) where {T}  = (p = succprob(d); sqrt((one(T) - p) * d.r) / p)
+std(d::NegativeBinomial{T}) where {T} = (p = succprob(d); sqrt((one(T) - p) * d.r) / p)
 
-skewness(d::NegativeBinomial{T}) where {T} = (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.r))
+skewness(d::NegativeBinomial{T}) where {T} =
+    (p = succprob(d); (T(2) - p) / sqrt((one(T) - p) * d.r))
 
-kurtosis(d::NegativeBinomial{T}) where {T} = (p = succprob(d); T(6) / d.r + (p * p) / ((one(T) - p) * d.r))
+kurtosis(d::NegativeBinomial{T}) where {T} =
+    (p = succprob(d); T(6) / d.r + (p * p) / ((one(T) - p) * d.r))
 
-mode(d::NegativeBinomial{T}) where {T} = (p = succprob(d); floor(Int,(one(T) - p) * (d.r - one(T)) / p))
+mode(d::NegativeBinomial{T}) where {T} =
+    (p = succprob(d); floor(Int, (one(T) - p) * (d.r - one(T)) / p))
 
 function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
     if p.r == q.r
@@ -86,7 +92,13 @@ function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
     else
         # There does not appear to be an analytical formula for
         # this case. Hence we fall back to the numerical approximation.
-        return invoke(kldivergence, Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}}, p, q; kwargs...)
+        return invoke(
+            kldivergence,
+            Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}},
+            p,
+            q;
+            kwargs...,
+        )
     end
 end
 
@@ -103,7 +115,7 @@ function logpdf(d::NegativeBinomial, k::Real)
         # but unfortunately not numerically, so we handle this case separately to improve accuracy
         return z
     end
-    
+
     return insupport(d, k) ? z - log(k + r) - logbeta(r, k + 1) : oftype(z, -Inf)
 end
 
@@ -122,13 +134,13 @@ function rand(rng::AbstractRNG, d::NegativeBinomial)
     if isone(d.p)
         return 0
     else
-        return rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p)/d.p))))
+        return rand(rng, Poisson(rand(rng, Gamma(d.r, (1 - d.p) / d.p))))
     end
 end
 
 function laplace_transform(d::NegativeBinomial, t)
     r, p = params(d)
-    return laplace_transform(Geometric(p, check_args=false), t)^r
+    return laplace_transform(Geometric(p, check_args = false), t)^r
 end
 
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
@@ -136,4 +148,4 @@ function cgf(d::NegativeBinomial, t)
     r, p = params(d)
     r * cgf(Geometric{typeof(p)}(p), t)
 end
-cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t*im)
+cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t * im)

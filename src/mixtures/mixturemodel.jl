@@ -11,7 +11,8 @@ All subtypes of `AbstractMixtureModel` should implement the following methods:
 
   - `probs(d)`:       return a vector of prior probabilities over components.
 """
-abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <: Distribution{VF, VS} end
+abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <:
+              Distribution{VF,VS} end
 
 """
     MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
@@ -21,7 +22,8 @@ A mixture of distributions, parametrized on:
 * `C` distribution family of the mixture
 * `CT` the type for probabilities of the prior
 """
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Categorical} <: AbstractMixtureModel{VF,VS,C}
+struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Categorical} <:
+       AbstractMixtureModel{VF,VS,C}
     components::Vector{C}
     prior::CT
 
@@ -32,9 +34,12 @@ struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Categor
     end
 end
 
-const UnivariateMixture{S<:ValueSupport,   C<:Distribution} = AbstractMixtureModel{Univariate,S,C}
-const MultivariateMixture{S<:ValueSupport, C<:Distribution} = AbstractMixtureModel{Multivariate,S,C}
-const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} = AbstractMixtureModel{Matrixvariate,S,C}
+const UnivariateMixture{S<:ValueSupport,C<:Distribution} =
+    AbstractMixtureModel{Univariate,S,C}
+const MultivariateMixture{S<:ValueSupport,C<:Distribution} =
+    AbstractMixtureModel{Multivariate,S,C}
+const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} =
+    AbstractMixtureModel{Matrixvariate,S,C}
 
 # Interface
 
@@ -50,7 +55,7 @@ component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel) = [component(d, k) for k in 1:ncomponents(d)]
+components(d::AbstractMixtureModel) = [component(d, k) for k = 1:ncomponents(d)]
 
 """
     probs(d::AbstractMixtureModel)
@@ -126,24 +131,31 @@ Construct a mixture model with component type ``C``, a vector of parameters for 
 the components given by ``params``, and a prior probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
-function MixtureModel(::Type{C}, params::AbstractArray) where C<:Distribution
+function MixtureModel(::Type{C}, params::AbstractArray) where {C<:Distribution}
     components = C[_construct_component(C, a) for a in params]
     MixtureModel(components)
 end
 
-function MixtureModel(components::Vector{C}, prior::Categorical) where C<:Distribution
+function MixtureModel(components::Vector{C}, prior::Categorical) where {C<:Distribution}
     VF = variate_form(C)
     VS = value_support(C)
     MixtureModel{VF,VS,C}(components, prior)
 end
 
-MixtureModel(components::Vector{C}, p::VT) where {C<:Distribution,VT<:AbstractVector{<:Real}} =
+MixtureModel(
+    components::Vector{C},
+    p::VT,
+) where {C<:Distribution,VT<:AbstractVector{<:Real}} =
     MixtureModel(components, Categorical(p))
 
 _construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
 _construct_component(::Type{C}, args::Tuple) where {C<:Distribution} = C(args...)
 
-function MixtureModel(::Type{C}, params::AbstractArray, p::Vector{T}) where {C<:Distribution,T<:Real}
+function MixtureModel(
+    ::Type{C},
+    params::AbstractArray,
+    p::Vector{T},
+) where {C<:Distribution,T<:Real}
     components = C[_construct_component(C, a) for a in params]
     MixtureModel(components, p)
 end
@@ -230,7 +242,7 @@ function cov(d::MultivariateMixture)
     p = probs(d)
     m = zeros(length(d))
     md = zeros(length(d))
-    V = zeros(length(d),length(d))
+    V = zeros(length(d), length(d))
 
     for i = 1:K
         pi = p[i]
@@ -311,7 +323,9 @@ end
 
 function _mixlogpdf1(d::AbstractMixtureModel, x)
     p = probs(d)
-    lp = logsumexp(log(pi) + logpdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi))
+    lp = logsumexp(
+        log(pi) + logpdf(component(d, i), x) for (i, pi) in enumerate(p) if !iszero(pi)
+    )
     return lp
 end
 
@@ -364,14 +378,19 @@ end
 pdf(d::UnivariateMixture, x::Real) = _mixpdf1(d, x)
 logpdf(d::UnivariateMixture, x::Real) = _mixlogpdf1(d, x)
 
-_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) = _mixpdf!(r, d, x)
-_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) = _mixlogpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture{Discrete}, x::UnitRange) =
+    _mixpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) =
+    _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::UnivariateMixture, x::AbstractArray{<:Real}) =
+    _mixlogpdf!(r, d, x)
 
 _pdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixpdf1(d, x)
 _logpdf(d::MultivariateMixture, x::AbstractVector{<:Real}) = _mixlogpdf1(d, x)
-_pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixpdf!(r, d, x)
-_logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) = _mixlogpdf!(r, d, x)
+_pdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) =
+    _mixpdf!(r, d, x)
+_logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:Real}) =
+    _mixlogpdf!(r, d, x)
 
 
 ## component-wise pdf and logpdf
@@ -400,9 +419,9 @@ function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= Base.Fix1(pdf, component(d, i)).(X)
+            view(r, :, i) .= Base.Fix1(pdf, component(d, i)).(X)
         else
-            pdf!(view(r,:,i),component(d, i), X)
+            pdf!(view(r, :, i), component(d, i), X)
         end
     end
     r
@@ -414,38 +433,54 @@ function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     size(r) == (n, K) || error("The size of r is incorrect.")
     for i = 1:K
         if d isa UnivariateMixture
-            view(r,:,i) .= Base.Fix1(logpdf, component(d, i)).(X)
+            view(r, :, i) .= Base.Fix1(logpdf, component(d, i)).(X)
         else
-            logpdf!(view(r,:,i), component(d, i), X)
+            logpdf!(view(r, :, i), component(d, i), X)
         end
     end
     r
 end
 
 componentwise_pdf!(r::AbstractVector, d::UnivariateMixture, x::Real) = _cwise_pdf1!(r, d, x)
-componentwise_pdf!(r::AbstractVector, d::MultivariateMixture, x::AbstractVector) = _cwise_pdf1!(r, d, x)
-componentwise_pdf!(r::AbstractMatrix, d::UnivariateMixture, x::AbstractVector) = _cwise_pdf!(r, d, x)
-componentwise_pdf!(r::AbstractMatrix, d::MultivariateMixture, x::AbstractMatrix) = _cwise_pdf!(r, d, x)
+componentwise_pdf!(r::AbstractVector, d::MultivariateMixture, x::AbstractVector) =
+    _cwise_pdf1!(r, d, x)
+componentwise_pdf!(r::AbstractMatrix, d::UnivariateMixture, x::AbstractVector) =
+    _cwise_pdf!(r, d, x)
+componentwise_pdf!(r::AbstractMatrix, d::MultivariateMixture, x::AbstractMatrix) =
+    _cwise_pdf!(r, d, x)
 
-componentwise_logpdf!(r::AbstractVector, d::UnivariateMixture, x::Real) = _cwise_logpdf1!(r, d, x)
-componentwise_logpdf!(r::AbstractVector, d::MultivariateMixture, x::AbstractVector) = _cwise_logpdf1!(r, d, x)
-componentwise_logpdf!(r::AbstractMatrix, d::UnivariateMixture, x::AbstractVector) = _cwise_logpdf!(r, d, x)
-componentwise_logpdf!(r::AbstractMatrix, d::MultivariateMixture, x::AbstractMatrix) = _cwise_logpdf!(r, d, x)
+componentwise_logpdf!(r::AbstractVector, d::UnivariateMixture, x::Real) =
+    _cwise_logpdf1!(r, d, x)
+componentwise_logpdf!(r::AbstractVector, d::MultivariateMixture, x::AbstractVector) =
+    _cwise_logpdf1!(r, d, x)
+componentwise_logpdf!(r::AbstractMatrix, d::UnivariateMixture, x::AbstractVector) =
+    _cwise_logpdf!(r, d, x)
+componentwise_logpdf!(r::AbstractMatrix, d::MultivariateMixture, x::AbstractMatrix) =
+    _cwise_logpdf!(r, d, x)
 
-componentwise_pdf(d::UnivariateMixture, x::Real) = componentwise_pdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
-componentwise_pdf(d::UnivariateMixture, x::AbstractVector) = componentwise_pdf!(Matrix{eltype(x)}(undef, length(x), ncomponents(d)), d, x)
-componentwise_pdf(d::MultivariateMixture, x::AbstractVector) = componentwise_pdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
-componentwise_pdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_pdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
+componentwise_pdf(d::UnivariateMixture, x::Real) =
+    componentwise_pdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
+componentwise_pdf(d::UnivariateMixture, x::AbstractVector) =
+    componentwise_pdf!(Matrix{eltype(x)}(undef, length(x), ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractVector) =
+    componentwise_pdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
+componentwise_pdf(d::MultivariateMixture, x::AbstractMatrix) =
+    componentwise_pdf!(Matrix{eltype(x)}(undef, size(x, 2), ncomponents(d)), d, x)
 
-componentwise_logpdf(d::UnivariateMixture, x::Real) = componentwise_logpdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
-componentwise_logpdf(d::UnivariateMixture, x::AbstractVector) = componentwise_logpdf!(Matrix{eltype(x)}(undef, length(x), ncomponents(d)), d, x)
-componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) = componentwise_logpdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
-componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) = componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x,2), ncomponents(d)), d, x)
+componentwise_logpdf(d::UnivariateMixture, x::Real) =
+    componentwise_logpdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
+componentwise_logpdf(d::UnivariateMixture, x::AbstractVector) =
+    componentwise_logpdf!(Matrix{eltype(x)}(undef, length(x), ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractVector) =
+    componentwise_logpdf!(Vector{eltype(x)}(undef, ncomponents(d)), d, x)
+componentwise_logpdf(d::MultivariateMixture, x::AbstractMatrix) =
+    componentwise_logpdf!(Matrix{eltype(x)}(undef, size(x, 2), ncomponents(d)), d, x)
 
 
 function quantile(d::UnivariateMixture{Continuous}, p::Real)
     ps = probs(d)
-    min_q, max_q = extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
+    min_q, max_q =
+        extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
     quantile_bisect(d, p, min_q, max_q)
 end
 
@@ -454,7 +489,7 @@ end
 function median(d::UnivariateMixture{Continuous})
     ps = probs(d)
     min_q, max_q = extrema(median(component(d, i)) for (i, pi) in enumerate(ps) if pi > 0)
-    quantile_bisect(d, 1//2, min_q, max_q)
+    quantile_bisect(d, 1 // 2, min_q, max_q)
 end
 
 ## Sampling

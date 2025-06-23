@@ -25,12 +25,12 @@ struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
 
-function Chisq(ν::Real; check_args::Bool=true)
+function Chisq(ν::Real; check_args::Bool = true)
     @check_args Chisq (ν, ν > zero(ν))
     return Chisq{typeof(ν)}(ν)
 end
 
-Chisq(ν::Integer; check_args::Bool=true) = Chisq(float(ν); check_args=check_args)
+Chisq(ν::Integer; check_args::Bool = true) = Chisq(float(ν); check_args = check_args)
 
 @distr_support Chisq 0.0 Inf
 
@@ -57,16 +57,16 @@ kurtosis(d::Chisq) = 12 / d.ν
 
 mode(d::Chisq{T}) where {T<:Real} = d.ν > 2 ? d.ν - 2 : zero(T)
 
-function median(d::Chisq; approx::Bool=false)
+function median(d::Chisq; approx::Bool = false)
     if approx
         return d.ν * (1 - 2 / (9 * d.ν))^3
     else
-        return quantile(d, 1//2)
+        return quantile(d, 1 // 2)
     end
 end
 
 function entropy(d::Chisq)
-    hν = d.ν/2
+    hν = d.ν / 2
     hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
@@ -82,16 +82,17 @@ end
 
 @_delegate_statsfuns Chisq chisq ν
 
-mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν/2)
+mgf(d::Chisq, t::Real) = (1 - 2 * t)^(-d.ν / 2)
 function cgf(d::Chisq, t)
     ν = dof(d)
-    return -ν/2 * log1p(-2*t)
+    return -ν / 2 * log1p(-2 * t)
 end
 
 
-cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν/2)
+cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν / 2)
 
-gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =  x > 0 ? (d.ν/2 - 1) / x - 1//2 : zero(T)
+gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =
+    x > 0 ? (d.ν / 2 - 1) / x - 1 // 2 : zero(T)
 
 
 #### Sampling

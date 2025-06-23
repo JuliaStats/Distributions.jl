@@ -27,20 +27,22 @@ struct Levy{T<:Real} <: ContinuousUnivariateDistribution
     Levy{T}(μ::T, σ::T) where {T<:Real} = new{T}(μ, σ)
 end
 
-function Levy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
+function Levy(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
     @check_args Levy (σ, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
 
-Levy(μ::Real, σ::Real; check_args::Bool=true) = Levy(promote(μ, σ)...; check_args=check_args)
-Levy(μ::Integer, σ::Integer; check_args::Bool=true) = Levy(float(μ), float(σ); check_args=check_args)
-Levy(μ::Real=0.0) = Levy(μ, one(μ); check_args=false)
+Levy(μ::Real, σ::Real; check_args::Bool = true) =
+    Levy(promote(μ, σ)...; check_args = check_args)
+Levy(μ::Integer, σ::Integer; check_args::Bool = true) =
+    Levy(float(μ), float(σ); check_args = check_args)
+Levy(μ::Real = 0.0) = Levy(μ, one(μ); check_args = false)
 
 @distr_support Levy d.μ Inf
 
 #### Conversions
 
-convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
+convert(::Type{Levy{T}}, μ::S, σ::S) where {T<:Real,S<:Real} = Levy(T(μ), T(σ))
 Base.convert(::Type{Levy{T}}, d::Levy) where {T<:Real} = Levy{T}(T(d.μ), T(d.σ))
 Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
 
@@ -67,29 +69,31 @@ median(d::Levy{T}) where {T<:Real} = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 #### Evaluation
 
-function pdf(d::Levy{T}, x::Real) where T<:Real
+function pdf(d::Levy{T}, x::Real) where {T<:Real}
     μ, σ = params(d)
     if x <= μ
         return zero(T)
     end
     z = x - μ
-    (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3//2)
+    (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3 // 2)
 end
 
-function logpdf(d::Levy{T}, x::Real) where T<:Real
+function logpdf(d::Levy{T}, x::Real) where {T<:Real}
     μ, σ = params(d)
     if x <= μ
         return T(-Inf)
     end
     z = x - μ
-    (log(σ) - log2π - σ / z - 3log(z))/2
+    (log(σ) - log2π - σ / z - 3log(z)) / 2
 end
 
-cdf(d::Levy{T}, x::Real) where {T<:Real} = x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf(d::Levy{T}, x::Real) where {T<:Real} =  x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
+cdf(d::Levy{T}, x::Real) where {T<:Real} =
+    x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
+ccdf(d::Levy{T}, x::Real) where {T<:Real} =
+    x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
-quantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfcinv(p)^2)
-cquantile(d::Levy, p::Real) = d.μ + d.σ / (2*erfinv(p)^2)
+quantile(d::Levy, p::Real) = d.μ + d.σ / (2 * erfcinv(p)^2)
+cquantile(d::Levy, p::Real) = d.μ + d.σ / (2 * erfinv(p)^2)
 
 mgf(d::Levy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
 

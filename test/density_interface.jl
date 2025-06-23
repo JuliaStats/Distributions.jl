@@ -14,9 +14,12 @@
         end
 
         for di_func in (logdensityof, densityof)
-            @test_throws ArgumentError di_func(d_uv_continuous, [rand(d_uv_continuous) for i in 1:3])
-            @test_throws ArgumentError di_func(d_mv, hcat([rand(d_mv) for i in 1:3]...))
-            @test_throws ArgumentError di_func(d_av, [rand(d_av) for i in 1:3])
+            @test_throws ArgumentError di_func(
+                d_uv_continuous,
+                [rand(d_uv_continuous) for i = 1:3],
+            )
+            @test_throws ArgumentError di_func(d_mv, hcat([rand(d_mv) for i = 1:3]...))
+            @test_throws ArgumentError di_func(d_av, [rand(d_av) for i = 1:3])
         end
     end
 end

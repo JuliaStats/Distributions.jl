@@ -5,8 +5,7 @@ using Test
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
 @testset "LogNormal" begin
-    @test isa(convert(LogNormal{Float64}, Float16(0), Float16(1)),
-              LogNormal{Float64})
+    @test isa(convert(LogNormal{Float64}, Float16(0), Float16(1)), LogNormal{Float64})
     d = LogNormal(0, 1)
     @test convert(LogNormal{Float64}, d) === d
     @test convert(LogNormal{Float32}, d) isa LogNormal{Float32}
@@ -16,13 +15,19 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test iszero(logcdf(LogNormal(0, 0), 1))
     @test iszero(logcdf(LogNormal(), Inf))
     @test logdiffcdf(LogNormal(), Float32(exp(3)), Float32(exp(3))) === -Inf
-    @test logdiffcdf(LogNormal(), Float32(exp(5)), Float32(exp(3))) ≈ -6.607938594596893 rtol=1e-12
-    @test logdiffcdf(LogNormal(), Float32(exp(5)), Float64(exp(3))) ≈ -6.60793859457367 rtol=1e-12
-    @test logdiffcdf(LogNormal(), Float64(exp(5)), Float64(exp(3))) ≈ -6.607938594596893 rtol=1e-12
-    let d = LogNormal(Float64(0), Float64(1)), x = Float64(exp(-60)), y = Float64(exp(-60.001))
+    @test logdiffcdf(LogNormal(), Float32(exp(5)), Float32(exp(3))) ≈ -6.607938594596893 rtol =
+        1e-12
+    @test logdiffcdf(LogNormal(), Float32(exp(5)), Float64(exp(3))) ≈ -6.60793859457367 rtol =
+        1e-12
+    @test logdiffcdf(LogNormal(), Float64(exp(5)), Float64(exp(3))) ≈ -6.607938594596893 rtol =
+        1e-12
+    let d = LogNormal(Float64(0), Float64(1)),
+        x = Float64(exp(-60)),
+        y = Float64(exp(-60.001))
+
         float_res = logdiffcdf(d, x, y)
-        big_x = BigFloat(x; precision=100)
-        big_y = BigFloat(y; precision=100)
+        big_x = BigFloat(x; precision = 100)
+        big_y = BigFloat(y; precision = 100)
         big_float_res = log(cdf(d, big_x) - cdf(d, big_y))
         @test float_res ≈ big_float_res
     end
@@ -62,7 +67,8 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
     # test for #996 being fixed
     let d = LogNormal(0, 1), x = exp(1), ∂x = exp(2)
-        @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈ ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
+        @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈
+                  ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
     end
 end
 
@@ -263,13 +269,13 @@ end
     # quantile
     @test @inferred(quantile(LogNormal(1.0, 0.0), 0.0f0)) === 0.0
     @test @inferred(quantile(LogNormal(1.0, 0.0f0), 1.0)) === Inf
-    @test @inferred(quantile(LogNormal(1.0f0, 0.0), 0.5)) ===  exp(1)
+    @test @inferred(quantile(LogNormal(1.0f0, 0.0), 0.5)) === exp(1)
     @test isnan_type(Float64, @inferred(quantile(LogNormal(1.0f0, 0.0), NaN)))
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.0f0)) === 0.0f0
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === Inf32
     @test @inferred(quantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(quantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(quantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    @test @inferred(quantile(LogNormal(1 // 1, 0 // 1), 1 // 2)) === exp(1)
 
     # cquantile
     @test @inferred(cquantile(LogNormal(1.0, 0.0), 0.0f0)) === Inf
@@ -280,7 +286,7 @@ end
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 1.0f0)) === 0.0f0
     @test @inferred(cquantile(LogNormal(1.0f0, 0.0f0), 0.5f0)) === exp(1.0f0)
     @test isnan_type(Float32, @inferred(cquantile(LogNormal(1.0f0, 0.0f0), NaN32)))
-    @test @inferred(cquantile(LogNormal(1//1, 0//1), 1//2)) === exp(1)
+    @test @inferred(cquantile(LogNormal(1 // 1, 0 // 1), 1 // 2)) === exp(1)
 
     # gradlogpdf
     @test @inferred(gradlogpdf(LogNormal(0.0, 1.0), 1.0)) === -1.0
@@ -317,14 +323,14 @@ end
 
 @testset "LogNormal Sampling Tests" begin
     for d in [
-            LogNormal()
-            LogNormal(1.0)
-            LogNormal(0.0, 2.0)
-            LogNormal(1.0, 2.0)
-            LogNormal(3.0, 0.5)
-            LogNormal(3.0, 1.0)
-            LogNormal(3.0, 2.0)
-        ]
+        LogNormal()
+        LogNormal(1.0)
+        LogNormal(0.0, 2.0)
+        LogNormal(1.0, 2.0)
+        LogNormal(3.0, 0.5)
+        LogNormal(3.0, 1.0)
+        LogNormal(3.0, 2.0)
+    ]
         test_distr(d, 10^6)
     end
 end

@@ -70,24 +70,55 @@ using Test
     @testset "DiscreteNonParametric" begin
         d1 = DiscreteNonParametric([0, 1], [0.5, 0.5])
         d2 = DiscreteNonParametric([1, 2], [0.5, 0.5])
-        d_eps = DiscreteNonParametric([prevfloat(0.0), 0.0, nextfloat(0.0), 1.0], fill(1//4, 4))
-        d10 = DiscreteNonParametric((1//10):(1//10):1, fill(1//10, 10))
-        
+        d_eps = DiscreteNonParametric(
+            [prevfloat(0.0), 0.0, nextfloat(0.0), 1.0],
+            fill(1 // 4, 4),
+        )
+        d10 = DiscreteNonParametric((1//10):(1//10):1, fill(1 // 10, 10))
+
         d_int_simple = @inferred(convolve(d1, d2))
         @test d_int_simple isa DiscreteNonParametric
         @test support(d_int_simple) == [1, 2, 3]
         @test probs(d_int_simple) == [0.25, 0.5, 0.25]
-               
+
         d_rat = convolve(d10, d10)
         @test support(d_rat) == (1//5):(1//10):2
-        @test probs(d_rat) == [1//100, 1//50, 3//100, 1//25, 1//20, 3//50, 7//100, 2//25, 9//100, 1//10, 
-                               9//100, 2//25, 7//100, 3//50, 1//20, 1//25, 3//100, 1//50, 1//100]
+        @test probs(d_rat) == [
+            1 // 100,
+            1 // 50,
+            3 // 100,
+            1 // 25,
+            1 // 20,
+            3 // 50,
+            7 // 100,
+            2 // 25,
+            9 // 100,
+            1 // 10,
+            9 // 100,
+            2 // 25,
+            7 // 100,
+            3 // 50,
+            1 // 20,
+            1 // 25,
+            3 // 100,
+            1 // 50,
+            1 // 100,
+        ]
 
         d_float_supp = convolve(d_eps, d_eps)
-        @test support(d_float_supp) == [2 * prevfloat(0.0), prevfloat(0.0), 0.0, nextfloat(0.0), 2 * nextfloat(0.0), 1.0, 2.0]
-        @test probs(d_float_supp) == [1//16, 1//8, 3//16, 1//8, 1//16, 3//8, 1//16]
+        @test support(d_float_supp) == [
+            2 * prevfloat(0.0),
+            prevfloat(0.0),
+            0.0,
+            nextfloat(0.0),
+            2 * nextfloat(0.0),
+            1.0,
+            2.0,
+        ]
+        @test probs(d_float_supp) ==
+              [1 // 16, 1 // 8, 3 // 16, 1 // 8, 1 // 16, 3 // 8, 1 // 16]
     end
-    
+
 end
 
 @testset "continuous univariate" begin
@@ -160,22 +191,22 @@ end
         zmdn1 = MvNormal(Diagonal([1.2, 0.3]))
         zmdn2 = MvNormal(Diagonal([0.8, 1.0]))
 
-        m1 = Symmetric(rand(2,2))
+        m1 = Symmetric(rand(2, 2))
         fn1 = MvNormal(ones(2), m1^2)
 
-        m2 = Symmetric(rand(2,2))
+        m2 = Symmetric(rand(2, 2))
         fn2 = MvNormal([2.1, 0.4], m2^2)
 
-        m3 = Symmetric(rand(2,2))
+        m3 = Symmetric(rand(2, 2))
         zm1 = MvNormal(m3^2)
 
-        m4 = Symmetric(rand(2,2))
+        m4 = Symmetric(rand(2, 2))
         zm2 = MvNormal(m4^2)
 
         dist_list = (in1, in2, zmin1, zmin2, dn1, dn2, zmdn1, zmdn2, fn1, fn2, zm1, zm2)
 
         for (d1, d2) in Iterators.product(dist_list, dist_list)
-            d3  = @inferred(convolve(d1, d2))
+            d3 = @inferred(convolve(d1, d2))
             @test d3 isa MvNormal
             @test d3.μ == d1.μ .+ d2.μ
             @test Matrix(d3.Σ) == Matrix(d1.Σ + d2.Σ)  # isequal not defined for PDMats

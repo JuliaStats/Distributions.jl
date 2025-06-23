@@ -58,14 +58,16 @@ struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+function LogitNormal(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
     @check_args LogitNormal (σ, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end
 
-LogitNormal(μ::Real, σ::Real; check_args::Bool=true) = LogitNormal(promote(μ, σ)...; check_args=check_args)
-LogitNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogitNormal(float(μ), float(σ); check_args=check_args)
-LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
+LogitNormal(μ::Real, σ::Real; check_args::Bool = true) =
+    LogitNormal(promote(μ, σ)...; check_args = check_args)
+LogitNormal(μ::Integer, σ::Integer; check_args::Bool = true) =
+    LogitNormal(float(μ), float(σ); check_args = check_args)
+LogitNormal(μ::Real = 0.0) = LogitNormal(μ, one(μ); check_args = false)
 
 # minimum and maximum not defined for logitnormal
 # but see https://github.com/JuliaStats/Distributions.jl/pull/457
@@ -74,8 +76,8 @@ LogitNormal(μ::Real=0.0) = LogitNormal(μ, one(μ); check_args=false)
 
 
 #### Conversions
-convert(::Type{LogitNormal{T}}, μ::S, σ::S) where
-  {T <: Real, S <: Real} = LogitNormal(T(μ), T(σ))
+convert(::Type{LogitNormal{T}}, μ::S, σ::S) where {T<:Real,S<:Real} =
+    LogitNormal(T(μ), T(σ))
 function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T<:Real}
     LogitNormal{T}(T(d.μ), T(d.σ))
 end
@@ -112,15 +114,15 @@ end
 #### Evaluation
 
 #TODO check pd and logpdf
-function pdf(d::LogitNormal{T}, x::Real) where T<:Real
+function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
     if zero(x) < x < one(x)
-        return normpdf(d.μ, d.σ, logit(x)) / (x * (1-x))
+        return normpdf(d.μ, d.σ, logit(x)) / (x * (1 - x))
     else
         return T(0)
     end
 end
 
-function logpdf(d::LogitNormal{T}, x::Real) where T<:Real
+function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
     if zero(x) < x < one(x)
         lx = logit(x)
         return normlogpdf(d.μ, d.σ, lx) - log(x) - log1p(-x)
@@ -168,7 +170,7 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where {T<:Real}
     lx = logit.(x)
     μ, σ = mean_and_std(lx)
     LogitNormal(μ, σ)

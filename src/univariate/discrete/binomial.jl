@@ -26,16 +26,17 @@ struct Binomial{T<:Real} <: DiscreteUnivariateDistribution
     n::Int
     p::T
 
-    Binomial{T}(n, p) where {T <: Real} = new{T}(n, p)
+    Binomial{T}(n, p) where {T<:Real} = new{T}(n, p)
 end
 
-function Binomial(n::Integer, p::Real; check_args::Bool=true)
+function Binomial(n::Integer, p::Real; check_args::Bool = true)
     @check_args Binomial (n, n >= zero(n)) (p, zero(p) <= p <= one(p))
     return Binomial{typeof(p)}(n, p)
 end
 
-Binomial(n::Integer, p::Integer; check_args::Bool=true) = Binomial(n, float(p); check_args=check_args)
-function Binomial(n::Integer; check_args::Bool=true)
+Binomial(n::Integer, p::Integer; check_args::Bool = true) =
+    Binomial(n, float(p); check_args = check_args)
+function Binomial(n::Integer; check_args::Bool = true)
     @check_args Binomial (n, n >= zero(n))
     Binomial{Float64}(n, 0.5)
 end
@@ -45,7 +46,7 @@ Binomial() = Binomial{Float64}(1, 0.5)
 
 #### Conversions
 
-function convert(::Type{Binomial{T}}, n::Int, p::Real) where T<:Real
+function convert(::Type{Binomial{T}}, n::Int, p::Real) where {T<:Real}
     return Binomial(n, T(p))
 end
 function Base.convert(::Type{Binomial{T}}, d::Binomial) where {T<:Real}
@@ -67,7 +68,7 @@ params(d::Binomial) = (d.n, d.p)
 
 mean(d::Binomial) = ntrials(d) * succprob(d)
 var(d::Binomial) = ntrials(d) * succprob(d) * failprob(d)
-function mode(d::Binomial{T}) where T<:Real
+function mode(d::Binomial{T}) where {T<:Real}
     (n, p) = params(d)
     n > 0 ? floor(Int, (n + 1) * d.p) : zero(T)
 end
@@ -81,12 +82,12 @@ function median(dist::Binomial)
     # Thus if |k - mean| < bound for one of the two candidates if p = 1/2 and n odd
     # or |k - mean| <= bound for one of the two candidates otherwise,
     # the other candidate can't satisfy the condition and hence k must be the median
-    bound = max(min(dist.p, 1-dist.p), loghalf)
+    bound = max(min(dist.p, 1 - dist.p), loghalf)
     dist_mean = mean(dist)
-    
+
     floor_mean = floor(Int, dist_mean)
     difference = dist_mean - floor_mean
-    
+
     if difference <= bound
         # The only case where the median satisfies |median - mean| <= 1 - bound with equality
         # is p = 1/2 and n odd
@@ -116,7 +117,7 @@ function kurtosis(d::Binomial)
     (1 - 6u) / (n * u)
 end
 
-function entropy(d::Binomial; approx::Bool=false)
+function entropy(d::Binomial; approx::Bool = false)
     n, p1 = params(d)
     (p1 == 0 || p1 == 1 || n == 0) && return zero(p1)
     p0 = 1 - p1
@@ -127,8 +128,8 @@ function entropy(d::Binomial; approx::Bool=false)
         lp = n * log(p0)
         s = exp(lp) * lp
         for k = 1:n
-           lp += log((n - k + 1) / k) + lg
-           s += exp(lp) * lp
+            lp += log((n - k + 1) / k) + lg
+            s += exp(lp) * lp
         end
         return -s
     end
@@ -139,7 +140,8 @@ function kldivergence(p::Binomial, q::Binomial; kwargs...)
     nq = ntrials(q)
     succp = succprob(p)
     succq = succprob(q)
-    res = np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
+    res =
+        np * kldivergence(Bernoulli{typeof(succp)}(succp), Bernoulli{typeof(succq)}(succq))
     if np == nq
         iszero(np) && return zero(res)
         return res
@@ -162,19 +164,19 @@ function rand(rng::AbstractRNG, d::Binomial)
     if p <= 0.5
         r = p
     else
-        r = 1.0-p
+        r = 1.0 - p
     end
-    if r*n <= 10.0
-        y = rand(rng, BinomialGeomSampler(n,r))
+    if r * n <= 10.0
+        y = rand(rng, BinomialGeomSampler(n, r))
     else
-        y = rand(rng, BinomialTPESampler(n,r))
+        y = rand(rng, BinomialTPESampler(n, r))
     end
-    p <= 0.5 ? y : n-y
+    p <= 0.5 ? y : n - y
 end
 
 function mgf(d::Binomial, t::Real)
     n, p = params(d)
-    (one(p) - p + p * exp(t)) ^ n
+    (one(p) - p + p * exp(t))^n
 end
 function cgf(d::Binomial, t)
     n, p = params(d)
@@ -183,7 +185,7 @@ end
 
 function cf(d::Binomial, t::Real)
     n, p = params(d)
-    (one(p) - p + p * cis(t)) ^ n
+    (one(p) - p + p * cis(t))^n
 end
 
 
@@ -207,7 +209,12 @@ function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer})
     BinomialStats(ns, length(x), n)
 end
 
-function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real})
+function suffstats(
+    ::Type{<:Binomial},
+    n::Integer,
+    x::AbstractArray{<:Integer},
+    w::AbstractArray{<:Real},
+)
     z = zero(eltype(x)) * zero(eltype(w))
     ns = ne = z + z # possibly widened and different from `z`, e.g., if `z = true`
     for (xi, wi) in zip(x, w)
@@ -218,17 +225,26 @@ function suffstats(::Type{<:Binomial}, n::Integer, x::AbstractArray{<:Integer}, 
     BinomialStats(ns, ne, n)
 end
 
-const BinomData = Tuple{Int, AbstractArray}
+const BinomData = Tuple{Int,AbstractArray}
 
 suffstats(::Type{T}, data::BinomData) where {T<:Binomial} = suffstats(T, data...)
-suffstats(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = suffstats(T, data..., w)
+suffstats(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} =
+    suffstats(T, data..., w)
 
 fit_mle(::Type{T}, ss::BinomialStats) where {T<:Binomial} = T(ss.n, ss.ns / (ss.ne * ss.n))
 
-fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}) where {T<:Binomial}= fit_mle(T, suffstats(T, n, x))
-fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, n, x, w))
+fit_mle(::Type{T}, n::Integer, x::AbstractArray{<:Integer}) where {T<:Binomial} =
+    fit_mle(T, suffstats(T, n, x))
+fit_mle(
+    ::Type{T},
+    n::Integer,
+    x::AbstractArray{<:Integer},
+    w::AbstractArray{<:Real},
+) where {T<:Binomial} = fit_mle(T, suffstats(T, n, x, w))
 fit_mle(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, suffstats(T, data))
-fit_mle(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, suffstats(T, data, w))
+fit_mle(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} =
+    fit_mle(T, suffstats(T, data, w))
 
 fit(::Type{T}, data::BinomData) where {T<:Binomial} = fit_mle(T, data)
-fit(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} = fit_mle(T, data, w)
+fit(::Type{T}, data::BinomData, w::AbstractArray{<:Real}) where {T<:Binomial} =
+    fit_mle(T, data, w)

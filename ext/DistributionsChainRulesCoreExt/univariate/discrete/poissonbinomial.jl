@@ -2,7 +2,9 @@ for f in (:poissonbinomial_pdf, :poissonbinomial_pdf_fft)
     pullback = Symbol(f, :_pullback)
     @eval begin
         function ChainRulesCore.frule(
-            (_, Δp)::Tuple{<:Any,<:AbstractVector{<:Real}}, ::typeof(Distributions.$f), p::AbstractVector{<:Real}
+            (_, Δp)::Tuple{<:Any,<:AbstractVector{<:Real}},
+            ::typeof(Distributions.$f),
+            p::AbstractVector{<:Real},
         )
             y = Distributions.$f(p)
             A = Distributions.poissonbinomial_pdf_partialderivatives(p)

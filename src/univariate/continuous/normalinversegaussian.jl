@@ -20,15 +20,17 @@ struct NormalInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
     β::T
     δ::T
     γ::T
-    function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where T
+    function NormalInverseGaussian{T}(μ::T, α::T, β::T, δ::T) where {T}
         γ = sqrt(α^2 - β^2)
 
         new{T}(μ, α, β, δ, γ)
     end
 end
 
-NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} = NormalInverseGaussian{T}(μ, α, β, δ)
-NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) = NormalInverseGaussian(promote(μ, α, β, δ)...)
+NormalInverseGaussian(μ::T, α::T, β::T, δ::T) where {T<:Real} =
+    NormalInverseGaussian{T}(μ, α, β, δ)
+NormalInverseGaussian(μ::Real, α::Real, β::Real, δ::Real) =
+    NormalInverseGaussian(promote(μ, α, β, δ)...)
 function NormalInverseGaussian(μ::Integer, α::Integer, β::Integer, δ::Integer)
     return NormalInverseGaussian(float(μ), float(α), float(β), float(δ))
 end
@@ -36,13 +38,25 @@ end
 @distr_support NormalInverseGaussian -Inf Inf
 
 #### Conversions
-function convert(::Type{NormalInverseGaussian{T}}, μ::Real, α::Real, β::Real, δ::Real) where T<:Real
+function convert(
+    ::Type{NormalInverseGaussian{T}},
+    μ::Real,
+    α::Real,
+    β::Real,
+    δ::Real,
+) where {T<:Real}
     NormalInverseGaussian(T(μ), T(α), T(β), T(δ))
 end
-function Base.convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian) where {T<:Real}
+function Base.convert(
+    ::Type{NormalInverseGaussian{T}},
+    d::NormalInverseGaussian,
+) where {T<:Real}
     NormalInverseGaussian{T}(T(d.μ), T(d.α), T(d.β), T(d.δ))
 end
-Base.convert(::Type{NormalInverseGaussian{T}}, d::NormalInverseGaussian{T}) where {T<:Real} = d
+Base.convert(
+    ::Type{NormalInverseGaussian{T}},
+    d::NormalInverseGaussian{T},
+) where {T<:Real} = d
 
 params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 @inline partype(d::NormalInverseGaussian{T}) where {T<:Real} = T
@@ -50,16 +64,20 @@ params(d::NormalInverseGaussian) = (d.μ, d.α, d.β, d.δ)
 mean(d::NormalInverseGaussian) = d.μ + d.δ * d.β / d.γ
 var(d::NormalInverseGaussian) = d.δ * d.α^2 / d.γ^3
 skewness(d::NormalInverseGaussian) = 3d.β / (d.α * sqrt(d.δ * d.γ))
-kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4*d.β^2/d.α^2) / (d.δ * d.γ)
+kurtosis(d::NormalInverseGaussian) = 3 * (1 + 4 * d.β^2 / d.α^2) / (d.δ * d.γ)
 
 function pdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    α * δ * besselk(1, α*sqrt(δ^2+(x - μ)^2)) / (π*sqrt(δ^2 + (x - μ)^2)) * exp(δ * d.γ + β*(x - μ))
+    α * δ * besselk(1, α * sqrt(δ^2 + (x - μ)^2)) / (π * sqrt(δ^2 + (x - μ)^2)) *
+    exp(δ * d.γ + β * (x - μ))
 end
 
 function logpdf(d::NormalInverseGaussian, x::Real)
     μ, α, β, δ = params(d)
-    log(α*δ) + log(besselk(1, α*sqrt(δ^2+(x-μ)^2))) - log(π*sqrt(δ^2+(x-μ)^2)) + δ*d.γ + β*(x-μ)
+    log(α * δ) + log(besselk(1, α * sqrt(δ^2 + (x - μ)^2))) -
+    log(π * sqrt(δ^2 + (x - μ)^2)) +
+    δ * d.γ +
+    β * (x - μ)
 end
 
 
@@ -76,8 +94,8 @@ end
 function rand(rng::Random.AbstractRNG, d::NormalInverseGaussian)
     μ, α, β, δ = params(d)
 
-    Z = InverseGaussian(δ/d.γ, δ^2)
+    Z = InverseGaussian(δ / d.γ, δ^2)
     z = rand(rng, Z)
-    X = Normal(μ + β*z, sqrt(z))
+    X = Normal(μ + β * z, sqrt(z))
     return rand(rng, X)
 end

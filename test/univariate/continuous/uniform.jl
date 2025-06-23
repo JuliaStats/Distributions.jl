@@ -9,13 +9,13 @@ using Test
 @testset "uniform.jl" begin
     # affine transformations
     test_affine_transformations(Uniform, rand(), 4 + rand())
-    test_cgf(Uniform(0,1),         (1, -1, 100f0, 1e6, -1e6))
-    test_cgf(Uniform(100f0,101f0), (1, -1, 100f0, 1e6, -1e6))
+    test_cgf(Uniform(0, 1), (1, -1, 100.0f0, 1e6, -1e6))
+    test_cgf(Uniform(100.0f0, 101.0f0), (1, -1, 100.0f0, 1e6, -1e6))
 
     @testset "ChainRules" begin
         # run test suite for values in the support
-        dist = Uniform(- 1 - rand(), 1 + rand())
-        tangent = ChainRulesTestUtils.Tangent{Uniform{Float64}}(; a=randn(), b=randn())
+        dist = Uniform(-1 - rand(), 1 + rand())
+        tangent = ChainRulesTestUtils.Tangent{Uniform{Float64}}(; a = randn(), b = randn())
         for x in (rand(), -rand())
             test_frule(logpdf, dist ⊢ tangent, x)
             test_rrule(logpdf, dist ⊢ tangent, x)
@@ -38,7 +38,7 @@ using Test
             @test Ω == -Inf
             @test @inferred(pullback(randn())) == (
                 ChainRulesTestUtils.NoTangent(),
-                ChainRulesTestUtils.Tangent{Uniform{Float64}}(; a=0.0, b=0.0),
+                ChainRulesTestUtils.Tangent{Uniform{Float64}}(; a = 0.0, b = 0.0),
                 ChainRulesTestUtils.ZeroTangent(),
             )
         end
@@ -55,28 +55,32 @@ using Test
             ((Float16(0), Float16(1), sqrt(eps(Float16)))),
             ((Float16(0), Float16(1), Float16(0))),
             ((Float16(0), Float16(1), -sqrt(eps(Float16)))),
-            (0f0, 1f0, sqrt(eps(Float32))),
-            (0f0, 1f0, 0f0),
-            (0f0, 1f0, -sqrt(eps(Float32))),
-            (-2f0, 1f0, 1f-30),
-            (-2f-4, -1f-4, -2f-40),
+            (0.0f0, 1.0f0, sqrt(eps(Float32))),
+            (0.0f0, 1.0f0, 0.0f0),
+            (0.0f0, 1.0f0, -sqrt(eps(Float32))),
+            (-2.0f0, 1.0f0, 1.0f-30),
+            (-2.0f-4, -1.0f-4, -2.0f-40),
             (0.0, 1.0, sqrt(eps(Float64))),
             (0.0, 1.0, 0.0),
             (0.0, 1.0, -sqrt(eps(Float64))),
             (-2.0, 5.0, -1e-35),
-                           ]
+        ]
             T = typeof(lo)
             @assert T == typeof(lo) == typeof(hi) == typeof(t)
             @assert t <= sqrt(eps(T))
             d = Uniform(lo, hi)
             precision = 512
-            d_big = Uniform(BigFloat(lo, precision=precision), BigFloat(hi; precision=precision))
-            t_big = BigFloat(t, precision=precision)
+            d_big = Uniform(
+                BigFloat(lo, precision = precision),
+                BigFloat(hi; precision = precision),
+            )
+            t_big = BigFloat(t, precision = precision)
             @test cgf(d, t) isa T
             if iszero(t)
-                @test cgf(d,t) === zero(t)
+                @test cgf(d, t) === zero(t)
             else
-                @test Distributions.cgf_around_zero(d, t) ≈ Distributions.cgf_away_from_zero(d_big, t_big) atol=eps(t) rtol=0
+                @test Distributions.cgf_around_zero(d, t) ≈
+                      Distributions.cgf_away_from_zero(d_big, t_big) atol = eps(t) rtol = 0
                 @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
             end
         end
@@ -89,7 +93,7 @@ using Test
                 TS = float(promote_type(T, S))
 
                 @test @inferred(pdf(d, S(1))) === TS(0)
-                @test @inferred(pdf(d, S(3))) === TS(1//2)
+                @test @inferred(pdf(d, S(3))) === TS(1 // 2)
                 @test @inferred(pdf(d, S(5))) === TS(0)
 
                 @test @inferred(logpdf(d, S(1))) === TS(-Inf)
@@ -97,7 +101,7 @@ using Test
                 @test @inferred(logpdf(d, S(5))) === TS(-Inf)
 
                 @test @inferred(cdf(d, S(1))) === TS(0)
-                @test @inferred(cdf(d, S(3))) === TS(1//2)
+                @test @inferred(cdf(d, S(3))) === TS(1 // 2)
                 @test @inferred(cdf(d, S(5))) === TS(1)
 
                 @test @inferred(logcdf(d, S(1))) === TS(-Inf)
@@ -105,7 +109,7 @@ using Test
                 @test @inferred(logcdf(d, S(5))) === TS(0)
 
                 @test @inferred(ccdf(d, S(1))) === TS(1)
-                @test @inferred(ccdf(d, S(3))) === TS(1//2)
+                @test @inferred(ccdf(d, S(3))) === TS(1 // 2)
                 @test @inferred(ccdf(d, S(5))) === TS(0)
 
                 @test @inferred(logccdf(d, S(1))) === TS(0)

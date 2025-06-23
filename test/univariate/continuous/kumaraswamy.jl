@@ -17,10 +17,10 @@ using Distributions: expectation
         @test typeof(@inferred rand(D)) === typeof(rand())
         tol = sqrt(eps(float(T)))
         @testset "gradlogpdf" begin
-            for x in T(0):(T <: Integer ? one(T) : T(0.5)):T(20)
+            for x = T(0):(T <: Integer ? one(T) : T(0.5)):T(20)
                 fd = ForwardDiff.derivative(Base.Fix1(logpdf, D), x)
                 gl = @inferred gradlogpdf(D, x)
-                @test fd ≈ gl atol=tol
+                @test fd ≈ gl atol = tol
                 if T <: AbstractFloat
                     @test gl isa T
                 end
@@ -28,21 +28,21 @@ using Distributions: expectation
         end
         @testset "median" begin
             m = @inferred median(D)
-            @test m ≈ sqrt(1 - T(2)^(-1//3)) atol=tol
+            @test m ≈ sqrt(1 - T(2)^(-1 // 3)) atol = tol
             if T <: AbstractFloat
                 @test m isa T
             end
         end
         @testset "entropy" begin
             shannon = @inferred entropy(D)
-            @test shannon ≈ (19//12 - log(T(6))) atol=tol
+            @test shannon ≈ (19 // 12 - log(T(6))) atol = tol
             if T <: AbstractFloat
                 @test shannon isa T
             end
         end
         @testset "mode" begin
             m = @inferred mode(D)
-            @test m ≈ inv(sqrt(T(5))) atol=tol
+            @test m ≈ inv(sqrt(T(5))) atol = tol
             if T <: AbstractFloat
                 @test m isa T
             end
@@ -56,7 +56,7 @@ using Distributions: expectation
             if T <: AbstractFloat
                 @test y₁ isa T
             end
-            @test y₁ ≈ y₂ atol=sqrt(tol)
+            @test y₁ ≈ y₂ atol = sqrt(tol)
         end
     end
     @testset "limits" begin

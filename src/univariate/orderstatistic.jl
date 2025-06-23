@@ -45,7 +45,10 @@ struct OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <:
     n::Int
     rank::Int
     function OrderStatistic(
-        dist::UnivariateDistribution, n::Int, rank::Int; check_args::Bool=true
+        dist::UnivariateDistribution,
+        n::Int,
+        rank::Int;
+        check_args::Bool = true,
     )
         @check_args(OrderStatistic, 1 ≤ rank ≤ n)
         return new{typeof(dist),value_support(typeof(dist))}(dist, n, rank)

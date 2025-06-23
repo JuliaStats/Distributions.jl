@@ -28,19 +28,21 @@ struct Cauchy{T<:Real} <: ContinuousUnivariateDistribution
     Cauchy{T}(µ, σ) where {T} = new{T}(µ, σ)
 end
 
-function Cauchy(μ::T, σ::T; check_args::Bool=true) where {T<:Real}
+function Cauchy(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
     @check_args Cauchy (σ, σ > zero(σ))
     return Cauchy{T}(μ, σ)
 end
 
-Cauchy(μ::Real, σ::Real; check_args::Bool=true) = Cauchy(promote(μ, σ)...; check_args=check_args)
-Cauchy(μ::Integer, σ::Integer; check_args::Bool=true) = Cauchy(float(μ), float(σ); check_args=check_args)
-Cauchy(μ::Real=0.0) = Cauchy(μ, one(μ); check_args=false)
+Cauchy(μ::Real, σ::Real; check_args::Bool = true) =
+    Cauchy(promote(μ, σ)...; check_args = check_args)
+Cauchy(μ::Integer, σ::Integer; check_args::Bool = true) =
+    Cauchy(float(μ), float(σ); check_args = check_args)
+Cauchy(μ::Real = 0.0) = Cauchy(μ, one(μ); check_args = false)
 
 @distr_support Cauchy -Inf Inf
 
 #### Conversions
-function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where T<:Real
+function convert(::Type{Cauchy{T}}, μ::Real, σ::Real) where {T<:Real}
     Cauchy(T(μ), T(σ))
 end
 Base.convert(::Type{Cauchy{T}}, d::Cauchy) where {T<:Real} = Cauchy{T}(T(d.μ), T(d.σ))
@@ -74,26 +76,26 @@ zval(d::Cauchy, x::Real) = (x - d.μ) / d.σ
 xval(d::Cauchy, z::Real) = d.μ + z * d.σ
 
 pdf(d::Cauchy, x::Real) = 1 / (π * scale(d) * (1 + zval(d, x)^2))
-logpdf(d::Cauchy, x::Real) = - (log1psq(zval(d, x)) + logπ + log(d.σ))
+logpdf(d::Cauchy, x::Real) = -(log1psq(zval(d, x)) + logπ + log(d.σ))
 
 function cdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan(x - μ, σ) + 1//2
+    invπ * atan(x - μ, σ) + 1 // 2
 end
 
 function ccdf(d::Cauchy, x::Real)
     μ, σ = params(d)
-    invπ * atan(μ - x, σ) + 1//2
+    invπ * atan(μ - x, σ) + 1 // 2
 end
 
 function quantile(d::Cauchy, p::Real)
     μ, σ = params(d)
-    μ + σ * tan(π * (p - 1//2))
+    μ + σ * tan(π * (p - 1 // 2))
 end
 
 function cquantile(d::Cauchy, p::Real)
     μ, σ = params(d)
-    μ + σ * tan(π * (1//2 - p))
+    μ + σ * tan(π * (1 // 2 - p))
 end
 
 mgf(d::Cauchy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
@@ -107,7 +109,7 @@ Base.:*(c::Real, d::Cauchy) = Cauchy(c * d.μ, abs(c) * d.σ)
 #### Fitting
 
 # Note: this is not a Maximum Likelihood estimator
-function fit(::Type{<:Cauchy}, x::AbstractArray{T}) where T<:Real
+function fit(::Type{<:Cauchy}, x::AbstractArray{T}) where {T<:Real}
     l, m, u = quantile(x, [0.25, 0.5, 0.75])
     Cauchy(m, (u - l) / 2)
 end

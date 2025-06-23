@@ -7,7 +7,7 @@ using Test
 
 ####### Core testing procedure
 
-function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
+function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int = 10^6)
     @test d.normal isa AbstractMvNormal
     dnorm = d.normal
 
@@ -33,13 +33,13 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
         T = partype(d) <: Float64 ? Float32 : Float64
         if dnorm isa MvNormal
             @test convert(MvLogitNormal{MvNormal{T}}, d).normal ==
-                convert(MvNormal{T}, dnorm)
+                  convert(MvNormal{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormal{T}}, d)) <: T
             @test canonform(d) isa MvLogitNormal{<:MvNormalCanon}
             @test canonform(d).normal == canonform(dnorm)
         elseif dnorm isa MvNormalCanon
             @test convert(MvLogitNormal{MvNormalCanon{T}}, d).normal ==
-                convert(MvNormalCanon{T}, dnorm)
+                  convert(MvNormalCanon{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormalCanon{T}}, d)) <: T
             @test meanform(d) isa MvLogitNormal{<:MvNormal}
             @test meanform(d).normal == meanform(dnorm)
@@ -48,19 +48,21 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
 
     @testset "sampling" begin
         X = rand(d, nsamples)
-        Y = @views log.(X[1:(end - 1), :]) .- log.(X[end, :]')
-        Ymean = vec(mean(Y; dims=2))
-        Ycov = cov(Y; dims=2)
-        for i in 1:(length(d) - 1)
+        Y = @views log.(X[1:(end-1), :]) .- log.(X[end, :]')
+        Ymean = vec(mean(Y; dims = 2))
+        Ycov = cov(Y; dims = 2)
+        for i = 1:(length(d)-1)
             @test isapprox(
-                Ymean[i], mean(dnorm)[i], atol=sqrt(var(dnorm)[i] / nsamples) * 8
+                Ymean[i],
+                mean(dnorm)[i],
+                atol = sqrt(var(dnorm)[i] / nsamples) * 8,
             )
         end
-        for i in 1:(length(d) - 1), j in 1:(length(d) - 1)
+        for i = 1:(length(d)-1), j = 1:(length(d)-1)
             @test isapprox(
                 Ycov[i, j],
                 cov(dnorm)[i, j],
-                atol=sqrt(prod(var(dnorm)[[i, j]]) / nsamples) * 20,
+                atol = sqrt(prod(var(dnorm)[[i, j]]) / nsamples) * 20,
             )
         end
     end
@@ -69,16 +71,18 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
         X = rand(d, nsamples)
         dfit = fit_mle(MvLogitNormal, X)
         dfit_norm = dfit.normal
-        for i in 1:(length(d) - 1)
+        for i = 1:(length(d)-1)
             @test isapprox(
-                mean(dfit_norm)[i], mean(dnorm)[i], atol=sqrt(var(dnorm)[i] / nsamples) * 8
+                mean(dfit_norm)[i],
+                mean(dnorm)[i],
+                atol = sqrt(var(dnorm)[i] / nsamples) * 8,
             )
         end
-        for i in 1:(length(d) - 1), j in 1:(length(d) - 1)
+        for i = 1:(length(d)-1), j = 1:(length(d)-1)
             @test isapprox(
                 cov(dfit_norm)[i, j],
                 cov(dnorm)[i, j],
-                atol=sqrt(prod(var(dnorm)[[i, j]]) / nsamples) * 20,
+                atol = sqrt(prod(var(dnorm)[[i, j]]) / nsamples) * 20,
             )
         end
         @test fit_mle(MvLogitNormal{IsoNormal}, X) isa MvLogitNormal{<:IsoNormal}
@@ -86,11 +90,11 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int=10^6)
 
     @testset "evaluation" begin
         X = rand(d, nsamples)
-        for i in 1:min(100, nsamples)
+        for i = 1:min(100, nsamples)
             @test @inferred(logpdf(d, X[:, i])) ≈ log(pdf(d, X[:, i]))
             if dnorm isa MvNormal
                 @test @inferred(gradlogpdf(d, X[:, i])) ≈
-                    ForwardDiff.gradient(x -> logpdf(d, x), X[:, i])
+                      ForwardDiff.gradient(x -> logpdf(d, x), X[:, i])
             end
         end
         @test logpdf(d, X) ≈ log.(pdf(d, X))
@@ -127,13 +131,13 @@ end
         @testset "$(typeof(prms))" for prms in mvnorm_params
             d = MvLogitNormal(prms...)
             @test d == MvLogitNormal(MvNormal(prms...))
-            test_mvlogitnormal(d; nsamples=10^4)
+            test_mvlogitnormal(d; nsamples = 10^4)
         end
     end
     @testset "wraps MvNormalCanon" begin
         @testset "$(typeof(prms))" for prms in mvnorm_params
             d = MvLogitNormal(MvNormalCanon(prms...))
-            test_mvlogitnormal(d; nsamples=10^4)
+            test_mvlogitnormal(d; nsamples = 10^4)
         end
     end
 

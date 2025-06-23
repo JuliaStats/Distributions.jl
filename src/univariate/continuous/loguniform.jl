@@ -13,17 +13,19 @@ External links
 struct LogUniform{T<:Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    LogUniform{T}(a::T, b::T) where {T <: Real} = new{T}(a, b)
+    LogUniform{T}(a::T, b::T) where {T<:Real} = new{T}(a, b)
 end
 
-function LogUniform(a::T, b::T; check_args::Bool=true) where {T <: Real}
+function LogUniform(a::T, b::T; check_args::Bool = true) where {T<:Real}
     @check_args LogUniform (0 < a < b)
     LogUniform{T}(a, b)
 end
 
-LogUniform(a::Real, b::Real; check_args::Bool=true) = LogUniform(promote(a, b)...; check_args=check_args)
+LogUniform(a::Real, b::Real; check_args::Bool = true) =
+    LogUniform(promote(a, b)...; check_args = check_args)
 
-Base.convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} = LogUniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{LogUniform{T}}, d::LogUniform) where {T<:Real} =
+    LogUniform{T}(T(d.a), T(d.b))
 Base.convert(::Type{LogUniform{T}}, d::LogUniform{T}) where {T<:Real} = d
 
 Base.minimum(d::LogUniform) = d.a
@@ -37,18 +39,18 @@ partype(::LogUniform{T}) where {T<:Real} = T
 
 function mean(d::LogUniform)
     a, b = params(d)
-    (b - a) / log(b/a)
+    (b - a) / log(b / a)
 end
 function var(d::LogUniform)
     a, b = params(d)
-    log_ba = log(b/a)
-    (b^2 - a^2) / (2*log_ba) - ((b-a)/ log_ba)^2
+    log_ba = log(b / a)
+    (b^2 - a^2) / (2 * log_ba) - ((b - a) / log_ba)^2
 end
-mode(d::LogUniform)   = d.a
-modes(d::LogUniform)  = partype(d)[]
+mode(d::LogUniform) = d.a
+modes(d::LogUniform) = partype(d)[]
 
 function entropy(d::LogUniform)
-    a,b = params(d)
+    a, b = params(d)
     log(a * b) / 2 + log(log(b / a))
 end
 #### Evaluation
@@ -62,11 +64,11 @@ function cdf(d::LogUniform, x::Real)
     x1 = clamp(x1, a, b)
     return log(x1 / a) / log(b / a)
 end
-logpdf(d::LogUniform, x::Real) = log(pdf(d,x))
+logpdf(d::LogUniform, x::Real) = log(pdf(d, x))
 
 function quantile(d::LogUniform, p::Real)
-    p1,a,b = promote(p, params(d)...) # ensure e.g. quantile(LogUniform(1,2), 1f0)::Float32
-    exp(p1 * log(b/a)) * a
+    p1, a, b = promote(p, params(d)...) # ensure e.g. quantile(LogUniform(1,2), 1f0)::Float32
+    exp(p1 * log(b / a)) * a
 end
 
 function kldivergence(p::LogUniform, q::LogUniform)

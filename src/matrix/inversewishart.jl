@@ -18,7 +18,7 @@ f(\\boldsymbol{\\Sigma}; \\nu,\\boldsymbol{\\Psi}) =
 ``\\mathbf{H}\\sim \\textrm{W}_p(\\nu, \\mathbf{S})`` if and only if
 ``\\mathbf{H}^{-1}\\sim \\textrm{IW}_p(\\nu, \\mathbf{S}^{-1})``.
 """
-struct InverseWishart{T<:Real, ST<:AbstractPDMat} <: ContinuousMatrixDistribution
+struct InverseWishart{T<:Real,ST<:AbstractPDMat} <: ContinuousMatrixDistribution
     df::T     # degree of freedom
     Ψ::ST     # scale matrix
     logc0::T  # log of normalizing constant
@@ -28,13 +28,13 @@ end
 #  Constructors
 #  -----------------------------------------------------------------------------
 
-function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where T<:Real
+function InverseWishart(df::T, Ψ::AbstractPDMat{T}) where {T<:Real}
     p = size(Ψ, 1)
     df > p - 1 || throw(ArgumentError("df should be greater than dim - 1."))
     logc0 = invwishart_logc0(df, Ψ)
     R = Base.promote_eltype(T, logc0)
     prom_Ψ = convert(AbstractArray{R}, Ψ)
-    InverseWishart{R, typeof(prom_Ψ)}(R(df), prom_Ψ, R(logc0))
+    InverseWishart{R,typeof(prom_Ψ)}(R(df), prom_Ψ, R(logc0))
 end
 
 function InverseWishart(df::Real, Ψ::AbstractPDMat)
@@ -56,15 +56,15 @@ show(io::IO, d::InverseWishart) = show_multline(io, d, [(:df, d.df), (:Ψ, Matri
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{InverseWishart{T}}, d::InverseWishart) where T<:Real
+function convert(::Type{InverseWishart{T}}, d::InverseWishart) where {T<:Real}
     P = convert(AbstractArray{T}, d.Ψ)
-    InverseWishart{T, typeof(P)}(T(d.df), P, T(d.logc0))
+    InverseWishart{T,typeof(P)}(T(d.df), P, T(d.logc0))
 end
 Base.convert(::Type{InverseWishart{T}}, d::InverseWishart{T}) where {T<:Real} = d
 
-function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, logc0) where T<:Real
+function convert(::Type{InverseWishart{T}}, df, Ψ::AbstractPDMat, logc0) where {T<:Real}
     P = convert(AbstractArray{T}, Ψ)
-    InverseWishart{T, typeof(P)}(T(df), P, T(logc0))
+    InverseWishart{T,typeof(P)}(T(df), P, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -94,13 +94,15 @@ mode(d::InverseWishart) = d.Ψ * inv(d.df + size(d, 1) + 1.0)
 function cov(d::InverseWishart, i::Integer, j::Integer, k::Integer, l::Integer)
     p, ν, Ψ = (size(d, 1), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("cov only defined for df > dim + 3"))
-    inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*(2Ψ[i,j]*Ψ[k,l] + (ν-p-1)*(Ψ[i,k]*Ψ[j,l] + Ψ[i,l]*Ψ[k,j]))
+    inv((ν - p) * (ν - p - 3) * (ν - p - 1)^2) *
+    (2Ψ[i, j] * Ψ[k, l] + (ν - p - 1) * (Ψ[i, k] * Ψ[j, l] + Ψ[i, l] * Ψ[k, j]))
 end
 
 function var(d::InverseWishart, i::Integer, j::Integer)
     p, ν, Ψ = (size(d, 1), d.df, Matrix(d.Ψ))
     ν > p + 3 || throw(ArgumentError("var only defined for df > dim + 3"))
-    inv((ν - p)*(ν - p - 3)*(ν - p - 1)^2)*((ν - p + 1)*Ψ[i,j]^2 + (ν - p - 1)*Ψ[i,i]*Ψ[j,j])
+    inv((ν - p) * (ν - p - 3) * (ν - p - 1)^2) *
+    ((ν - p + 1) * Ψ[i, j]^2 + (ν - p - 1) * Ψ[i, i] * Ψ[j, j])
 end
 
 #  -----------------------------------------------------------------------------
@@ -144,7 +146,7 @@ end
 
 function _rand_params(::Type{InverseWishart}, elty, n::Int, p::Int)
     n == p || throw(ArgumentError("dims must be equal for InverseWishart"))
-    ν = elty( n + 3 + abs(10randn()) )
-    Ψ = (X = 2rand(elty, n, n) .- 1 ; X * X')
+    ν = elty(n + 3 + abs(10randn()))
+    Ψ = (X = 2rand(elty, n, n) .- 1; X * X')
     return ν, Ψ
 end

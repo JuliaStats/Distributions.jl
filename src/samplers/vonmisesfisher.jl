@@ -52,7 +52,7 @@ _vmf_bval(p::Int, κ::Real) = (p - 1) / (2.0κ + sqrt(4 * abs2(κ) + abs2(p - 1)
 
 function _vmf_genw3(rng::AbstractRNG, p, b, x0, c, κ)
     ξ = rand(rng)
-    w = 1.0 + (log(ξ + (1.0 - ξ)*exp(-2κ))/κ)
+    w = 1.0 + (log(ξ + (1.0 - ξ) * exp(-2κ)) / κ)
     return w::Float64
 end
 
@@ -91,10 +91,10 @@ function _vmf_householder_vec(μ::Vector{Float64})
     p = length(μ)
     v = similar(μ)
     v[1] = μ[1] - 1.0
-    s = sqrt(-2*v[1])
+    s = sqrt(-2 * v[1])
     v[1] /= s
 
-    @inbounds for i in 2:p
+    @inbounds for i = 2:p
         v[i] = μ[i] / s
     end
 

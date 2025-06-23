@@ -28,19 +28,19 @@ struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
     Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
 end
 
-function Rayleigh(σ::Real; check_args::Bool=true)
+function Rayleigh(σ::Real; check_args::Bool = true)
     @check_args Rayleigh (σ, σ > zero(σ))
     return Rayleigh{typeof(σ)}(σ)
 end
 
-Rayleigh(σ::Integer; check_args::Bool=true) = Rayleigh(float(σ); check_args=check_args)
+Rayleigh(σ::Integer; check_args::Bool = true) = Rayleigh(float(σ); check_args = check_args)
 Rayleigh() = Rayleigh{Float64}(1.0)
 
 @distr_support Rayleigh 0.0 Inf
 
 #### Conversions
 
-convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
+convert(::Type{Rayleigh{T}}, σ::S) where {T<:Real,S<:Real} = Rayleigh(T(σ))
 Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T<:Real} = Rayleigh{T}(T(d.σ))
 Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
 
@@ -57,29 +57,30 @@ mean(d::Rayleigh) = sqrthalfπ * d.σ
 median(d::Rayleigh{T}) where {T<:Real} = sqrt2 * sqrt(T(logtwo)) * d.σ # sqrt(log(4))
 mode(d::Rayleigh) = d.σ
 
-var(d::Rayleigh{T}) where {T<:Real} = (2 - T(π)/2) * d.σ^2
-std(d::Rayleigh{T}) where {T<:Real} = sqrt(2 - T(π)/2) * d.σ
+var(d::Rayleigh{T}) where {T<:Real} = (2 - T(π) / 2) * d.σ^2
+std(d::Rayleigh{T}) where {T<:Real} = sqrt(2 - T(π) / 2) * d.σ
 
-skewness(d::Rayleigh{T}) where {T<:Real} = 2 * sqrtπ * (T(π) - 3)/(4 - T(π))^(3/2)
-kurtosis(d::Rayleigh{T}) where {T<:Real} = -(6*T(π)^2 - 24*T(π) +16)/(4 - T(π))^2
+skewness(d::Rayleigh{T}) where {T<:Real} = 2 * sqrtπ * (T(π) - 3) / (4 - T(π))^(3 / 2)
+kurtosis(d::Rayleigh{T}) where {T<:Real} = -(6 * T(π)^2 - 24 * T(π) + 16) / (4 - T(π))^2
 
-entropy(d::Rayleigh{T}) where {T<:Real} = 1 - T(logtwo)/2 + T(MathConstants.γ)/2 + log(d.σ)
+entropy(d::Rayleigh{T}) where {T<:Real} =
+    1 - T(logtwo) / 2 + T(MathConstants.γ) / 2 + log(d.σ)
 
 
 #### Evaluation
 
-function pdf(d::Rayleigh{T}, x::Real) where T<:Real
+function pdf(d::Rayleigh{T}, x::Real) where {T<:Real}
     σ2 = d.σ^2
-    x > 0 ? (x / σ2) * exp(- (x^2) / (2σ2)) : zero(T)
+    x > 0 ? (x / σ2) * exp(-(x^2) / (2σ2)) : zero(T)
 end
 
-function logpdf(d::Rayleigh{T}, x::Real) where T<:Real
+function logpdf(d::Rayleigh{T}, x::Real) where {T<:Real}
     σ2 = d.σ^2
     x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
 function logccdf(d::Rayleigh, x::Real)
-    z = - x^2 / (2 * d.σ^2)
+    z = -x^2 / (2 * d.σ^2)
     # return negative zero so that cdf is +0, not -0
     return x > 0 ? z : isnan(x) ? oftype(z, NaN) : -zero(z)
 end
@@ -105,6 +106,6 @@ function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T<:Real}
         s2 += xi^2
     end
 
-    s2 /= (2*length(x))
+    s2 /= (2 * length(x))
     return Rayleigh(sqrt(s2))
 end

@@ -19,17 +19,17 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         @test_throws DomainError JointOrderStatistics(dist, 5, Int[])
         @test_throws DomainError JointOrderStatistics(dist, 5, (3, 2))
         @test_throws DomainError JointOrderStatistics(dist, 5, (3, 3))
-        JointOrderStatistics(dist, 0, 1:2; check_args=false)
-        JointOrderStatistics(dist, 2, 2:3; check_args=false)
-        JointOrderStatistics(dist, 3, 0:3; check_args=false)
-        JointOrderStatistics(dist, 5, 3:-1:2; check_args=false)
-        JointOrderStatistics(dist, 5, 2:1:1; check_args=false)
-        JointOrderStatistics(dist, 0, [1, 2]; check_args=false)
-        JointOrderStatistics(dist, 2, [2, 3]; check_args=false)
-        JointOrderStatistics(dist, 3, [0, 1, 2, 3]; check_args=false)
-        JointOrderStatistics(dist, 5, Int[]; check_args=false)
-        JointOrderStatistics(dist, 5, (3, 2); check_args=false)
-        JointOrderStatistics(dist, 5, (3, 3); check_args=false)
+        JointOrderStatistics(dist, 0, 1:2; check_args = false)
+        JointOrderStatistics(dist, 2, 2:3; check_args = false)
+        JointOrderStatistics(dist, 3, 0:3; check_args = false)
+        JointOrderStatistics(dist, 5, 3:-1:2; check_args = false)
+        JointOrderStatistics(dist, 5, 2:1:1; check_args = false)
+        JointOrderStatistics(dist, 0, [1, 2]; check_args = false)
+        JointOrderStatistics(dist, 2, [2, 3]; check_args = false)
+        JointOrderStatistics(dist, 3, [0, 1, 2, 3]; check_args = false)
+        JointOrderStatistics(dist, 5, Int[]; check_args = false)
+        JointOrderStatistics(dist, 5, (3, 2); check_args = false)
+        JointOrderStatistics(dist, 5, (3, 3); check_args = false)
     end
 
     @testset for T in [Float32, Float64],
@@ -37,8 +37,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         n in [16, 40],
         r in [
             1:n,
-            ([i, j] for j in 2:n for i in 1:min(10, j - 1))...,
-            vcat(2:4, (n - 10):(n - 5)),
+            ([i, j] for j = 2:n for i = 1:min(10, j - 1))...,
+            vcat(2:4, (n-10):(n-5)),
             (2, n ÷ 2, n - 5),
         ]
 
@@ -65,7 +65,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             @test insupport(d, x)
             if length(x) > 1
                 @test !insupport(d, reverse(x))
-                @test !insupport(d, x[1:(end - 1)])
+                @test !insupport(d, x[1:(end-1)])
             end
             @test !insupport(d, x2)
             @test !insupport(d, fill(NaN, length(x)))
@@ -158,8 +158,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 x = rand(d, ndraws)
                 @test all(xi -> insupport(d, xi), eachcol(x))
 
-                m = mean(x; dims=2)
-                v = var(x; mean=m, dims=2)
+                m = mean(x; dims = 2)
+                v = var(x; mean = m, dims = 2)
                 if dist isa Uniform
                     # Arnold (2008). A first course in order statistics. eq 2.2.20-21
                     m_exact = r ./ (n + 1)
@@ -171,7 +171,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 end
                 # compute asymptotic sample standard deviation
                 mean_std = @. sqrt(v_exact / ndraws)
-                m4 = dropdims(mapslices(xi -> moment(xi, 4), x; dims=2); dims=2)
+                m4 = dropdims(mapslices(xi -> moment(xi, 4), x; dims = 2); dims = 2)
                 var_std = @. sqrt((m4 - v_exact^2) / ndraws)
 
                 nchecks = length(r)
@@ -188,8 +188,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
             n = 100
             rs = [    # good mixture of r values with gaps and no gaps
                 1:n,
-                vcat(1:10, (div(n, 2) - 5):(div(n, 2) + 5), (n - 9):n),
-                vcat(10:20, (n - 19):(n - 10)),
+                vcat(1:10, (div(n, 2)-5):(div(n, 2)+5), (n-9):n),
+                vcat(10:20, (n-19):(n-10)),
                 (1, n),
             ]
 
@@ -207,7 +207,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
 
                 m = length(r)
 
-                xcor = cor(x; dims=2)
+                xcor = cor(x; dims = 2)
                 if dist isa Uniform
                     # Arnold (2008). A first course in order statistics. Eq 2.3.16
                     s = @. n - r + 1
@@ -217,7 +217,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                     v = [sum(k -> inv((n - k + 1)^2), 1:i) for i in r]
                     xcor_exact = Symmetric(sqrt.(v ./ v'))
                 end
-                for ii in 1:m, ji in (ii + 1):m
+                for ii = 1:m, ji = (ii+1):m
                     i = r[ii]
                     j = r[ji]
                     ρ = xcor[ii, ji]

@@ -5,8 +5,11 @@ using Random, Test
 using StatsFuns
 
 ####### Core testing procedure
-function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
-                          rng::Union{AbstractRNG, Missing} = missing)
+function test_logitnormal(
+    g::LogitNormal,
+    n_tsamples::Int = 10^6,
+    rng::Union{AbstractRNG,Missing} = missing,
+)
     d = length(g)
     #mn = mean(g)
     md = median(g)
@@ -20,16 +23,16 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
     #@test isa(s, Float64)
     @test md ≈ logistic(g.μ)
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
-     @test insupport(g,1e-8)
-     # corner cases of 0 and 1 handled as in support
-     @test insupport(g,1.0)
-     @test pdf(g,0.0) == 0.0
-     @test insupport(g,0.0)
-     @test pdf(g,1.0) == 0.0
-     @test !insupport(g,-1e-8)
-     @test pdf(g,-1e-8) == 0.0
-     @test !insupport(g,1+1e-8)
-     @test pdf(g,1+1e-8) == 0.0
+    @test insupport(g, 1e-8)
+    # corner cases of 0 and 1 handled as in support
+    @test insupport(g, 1.0)
+    @test pdf(g, 0.0) == 0.0
+    @test insupport(g, 0.0)
+    @test pdf(g, 1.0) == 0.0
+    @test !insupport(g, -1e-8)
+    @test pdf(g, -1e-8) == 0.0
+    @test !insupport(g, 1 + 1e-8)
+    @test pdf(g, 1 + 1e-8) == 0.0
 
     # sampling
     if ismissing(rng)
@@ -44,9 +47,9 @@ function test_logitnormal(g::LogitNormal, n_tsamples::Int=10^6,
         @test logpdf(g, X[i]) ≈ log(pdf(g, X[i]))
     end
     @test Base.Fix1(logpdf, g).(X) ≈ log.(Base.Fix1(pdf, g).(X))
-    @test isequal(logpdf(g, 0),-Inf)
-    @test isequal(logpdf(g, 1),-Inf)
-    @test isequal(logpdf(g, -eps()),-Inf)
+    @test isequal(logpdf(g, 0), -Inf)
+    @test isequal(logpdf(g, 1), -Inf)
+    @test isequal(logpdf(g, -eps()), -Inf)
 
     # test the location and scale functions
     @test location(g) == g.μ
@@ -57,19 +60,16 @@ end
 
 ###### General Testing
 @testset "Logitnormal tests" begin
-    test_logitnormal( LogitNormal() )
-    test_logitnormal( LogitNormal(2,0.5) )
+    test_logitnormal(LogitNormal())
+    test_logitnormal(LogitNormal(2, 0.5))
     d = LogitNormal(Float32(2))
     typeof(rand(d, 5)) # still Float64
     @test convert(LogitNormal{Float32}, d) === d
-    @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2,1))
+    @test typeof(convert(LogitNormal{Float64}, d)) == typeof(LogitNormal(2, 1))
 end
 
 @testset "Logitnormal Sampling Tests" begin
-    for d in [
-        LogitNormal(-2, 3),
-        LogitNormal(0, 0.2)
-    ]
+    for d in [LogitNormal(-2, 3), LogitNormal(0, 0.2)]
         test_distr(d, 10^6)
     end
 end

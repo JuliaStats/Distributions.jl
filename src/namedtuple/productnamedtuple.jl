@@ -43,7 +43,7 @@ struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
     dists::NamedTuple{Tnames,Tdists}
 end
 function ProductNamedTupleDistribution(
-    dists::NamedTuple{K,V}
+    dists::NamedTuple{K,V},
 ) where {K,V<:Tuple{Distribution,Vararg{Distribution}}}
     vs = _product_valuesupport(values(dists))
     eltypes = _product_namedtuple_eltype(values(dists))
@@ -81,7 +81,7 @@ The function falls back to constructing a [`ProductNamedTupleDistribution`](@ref
 distribution but specialized methods can be defined.
 """
 function product_distribution(
-    dists::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}}
+    dists::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}},
 )
     return ProductNamedTupleDistribution(dists)
 end
@@ -142,7 +142,8 @@ std(d::ProductNamedTupleDistribution) = map(std, d.dists)
 entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 
 function kldivergence(
-    d1::ProductNamedTupleDistribution{K}, d2::ProductNamedTupleDistribution
+    d1::ProductNamedTupleDistribution{K},
+    d2::ProductNamedTupleDistribution,
 ) where {K}
     _named_fields_match(d1.dists, d2.dists) || throw(
         ArgumentError(
@@ -164,7 +165,9 @@ function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where 
     return NamedTuple{K}(map(Base.Fix1(rand, rng), d.dists))
 end
 function Base.rand(
-    rng::AbstractRNG, d::ProductNamedTupleDistribution{K}, dims::Dims
+    rng::AbstractRNG,
+    d::ProductNamedTupleDistribution{K},
+    dims::Dims,
 ) where {K}
     return convert(AbstractArray{<:NamedTuple{K}}, _rand(rng, sampler(d), dims))
 end

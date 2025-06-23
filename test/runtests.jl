@@ -164,7 +164,7 @@ const tests = [
     # "univariate/continuous/vonmises",
 ]
 
-printstyled("Running tests:\n", color=:blue)
+printstyled("Running tests:\n", color = :blue)
 
 Random.seed!(345679)
 

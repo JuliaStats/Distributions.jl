@@ -26,18 +26,19 @@ struct Exponential{T<:Real} <: ContinuousUnivariateDistribution
     Exponential{T}(θ::T) where {T} = new{T}(θ)
 end
 
-function Exponential(θ::Real; check_args::Bool=true)
+function Exponential(θ::Real; check_args::Bool = true)
     @check_args Exponential (θ, θ > zero(θ))
     return Exponential{typeof(θ)}(θ)
 end
 
-Exponential(θ::Integer; check_args::Bool=true) = Exponential(float(θ); check_args=check_args)
+Exponential(θ::Integer; check_args::Bool = true) =
+    Exponential(float(θ); check_args = check_args)
 Exponential() = Exponential{Float64}(1.0)
 
 @distr_support Exponential 0.0 Inf
 
 ### Conversions
-convert(::Type{Exponential{T}}, θ::S) where {T <: Real, S <: Real} = Exponential(T(θ))
+convert(::Type{Exponential{T}}, θ::S) where {T<:Real,S<:Real} = Exponential(T(θ))
 function Base.convert(::Type{Exponential{T}}, d::Exponential) where {T<:Real}
     return Exponential(T(d.θ))
 end
@@ -96,12 +97,12 @@ invlogccdf(d::Exponential, lp::Real) = -xval(d, lp)
 
 gradlogpdf(d::Exponential{T}, x::Real) where {T<:Real} = x > 0 ? -rate(d) : zero(T)
 
-mgf(d::Exponential, t::Real) = 1/(1 - t * scale(d))
+mgf(d::Exponential, t::Real) = 1 / (1 - t * scale(d))
 function cgf(d::Exponential, t)
     μ = mean(d)
-    return - log1p(- t * μ)
+    return -log1p(-t * μ)
 end
-cf(d::Exponential, t::Real) = 1/(1 - t * im * scale(d))
+cf(d::Exponential, t::Real) = 1 / (1 - t * im * scale(d))
 
 
 #### Sampling
@@ -122,7 +123,12 @@ struct ExponentialStats <: SufficientStats
     ExponentialStats(sx::Real, sw::Real) = new(sx, sw)
 end
 
-suffstats(::Type{<:Exponential}, x::AbstractArray{T}) where {T<:Real} = ExponentialStats(sum(x), length(x))
-suffstats(::Type{<:Exponential}, x::AbstractArray{T}, w::AbstractArray{Float64}) where {T<:Real} = ExponentialStats(dot(x, w), sum(w))
+suffstats(::Type{<:Exponential}, x::AbstractArray{T}) where {T<:Real} =
+    ExponentialStats(sum(x), length(x))
+suffstats(
+    ::Type{<:Exponential},
+    x::AbstractArray{T},
+    w::AbstractArray{Float64},
+) where {T<:Real} = ExponentialStats(dot(x, w), sum(w))
 
 fit_mle(::Type{<:Exponential}, ss::ExponentialStats) = Exponential(ss.sx / ss.sw)
