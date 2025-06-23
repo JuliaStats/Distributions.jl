@@ -1,11 +1,14 @@
-using JuliaFormatter
+using Runic
 
 project_path = Base.Filesystem.joinpath(Base.Filesystem.dirname(Base.source_path()), "..")
 
-not_formatted = format(project_path; verbose = true)
-if not_formatted
-    @info "Formatting verified."
+println("Formatting code with Runic...")
+
+# Format all files in the project
+not_formatted = Runic.main(["--inplace", project_path])
+if not_formatted == 0
+    @info "Formatting completed successfully."
 else
-    @warn "Formatting verification failed: Some files are not properly formatted!"
+    @warn "Formatting failed!"
 end
-exit(not_formatted ? 0 : 1)
+exit(not_formatted)

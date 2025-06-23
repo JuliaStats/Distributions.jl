@@ -5,6 +5,7 @@ Distributions.jl
 [![](https://zenodo.org/badge/DOI/10.5281/zenodo.2647458.svg)](https://zenodo.org/record/2647458)
 [![Coverage Status](https://coveralls.io/repos/JuliaStats/Distributions.jl/badge.svg?branch=master)](https://coveralls.io/r/JuliaStats/Distributions.jl?branch=master)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+[![code style: runic](https://img.shields.io/badge/code_style-%E1%9A%B1%E1%9A%A2%E1%9A%BE%E1%9B%81%E1%9A%B2-black)](https://github.com/fredrikekre/Runic.jl)
 
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaStats.github.io/Distributions.jl/latest/)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaStats.github.io/Distributions.jl/stable/)
@@ -60,7 +61,7 @@ To format the code, run the following command:
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
 ```
 
-**Note:** Code formatting is automatically checked in CI.
+**Note:** Code formatting is automatically checked in CI using Runic.
 The formatting command can be run locally with 
 ```julia
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
