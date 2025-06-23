@@ -235,45 +235,55 @@ end
 
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
     n == 0 && return partype(d)[]
-    # 
+
     d0 = d.untruncated
     tp = d.tp
     lower = d.lower
     upper = d.upper
-    samples = Vector{partype(d)}(undef, n)
-    n_collected = 0
-    max_batch = 0
-    batch_buffer = Vector{partype(d)}()
-    # If tp is extremely small, fall back to scalar sampling
-    threshold = 1e7  # maximum batch size allowed
-    while n_collected < n
-        n_remaining = n - n_collected
-        n_expected = n_remaining / tp
-        δn_expected = sqrt(n_remaining * tp * (1 - tp))
-        n_batch_f = n_expected + 3δn_expected
-        if !isfinite(n_batch_f) || n_batch_f > threshold
-            # Fallback: use scalar method for remaining samples
-            for i in 1:n_remaining
-                samples[n_collected+i] = rand(rng, d)
+
+    # Use the same three regimes as the scalar version
+    if tp > 0.25
+        # Regime 1: Rejection sampling with batch optimization
+        samples = Vector{partype(d)}(undef, n)
+        n_collected = 0
+        max_batch = 0
+        batch_buffer = Vector{partype(d)}()
+        while n_collected < n
+            n_remaining = n - n_collected
+            n_expected = n_remaining / tp
+            δn_expected = sqrt(n_remaining * tp * (1 - tp))
+            n_batch_f = n_expected + 3δn_expected
+            n_batch = ceil(Int, n_batch_f)
+            if n_batch > max_batch
+                resize!(batch_buffer, n_batch)
+                max_batch = n_batch
             end
-            break
-        end
-        n_batch = ceil(Int, n_batch_f)
-        if n_batch > max_batch
-            resize!(batch_buffer, n_batch)
-            max_batch = n_batch
-        end
-        rand!(rng, d0, batch_buffer)
-        for i in 1:n_batch
-            s = batch_buffer[i]
-            if _in_closed_interval(s, lower, upper)
-                n_collected += 1
-                samples[n_collected] = s
-                n_collected == n && break
+            rand!(rng, d0, batch_buffer)
+            for i in 1:n_batch
+                s = batch_buffer[i]
+                if _in_closed_interval(s, lower, upper)
+                    n_collected += 1
+                    samples[n_collected] = s
+                    n_collected == n && break
+                end
             end
         end
+        return samples
+    elseif tp > sqrt(eps(typeof(float(tp))))
+        # Regime 2: Quantile-based sampling
+        samples = Vector{partype(d)}(undef, n)
+        for i in 1:n
+            samples[i] = quantile(d0, d.lcdf + rand(rng) * d.tp)
+        end
+        return samples
+    else
+        # Regime 3: Log-space computation
+        samples = Vector{partype(d)}(undef, n)
+        for i in 1:n
+            samples[i] = invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng)))
+        end
+        return samples
     end
-    return samples
 end
 
 ## show
