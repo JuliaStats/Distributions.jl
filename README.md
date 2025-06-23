@@ -66,6 +66,9 @@ The formatting command can be run locally with
 ```julia
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
 ```
+The `.git-blame-ignore-revs` file contains commit hashes for mass formatting changes.
+This allows `git blame` to show the actual authors of code changes rather than the formatting commit.
+When viewing blame information, use `git blame --ignore-revs-file .git-blame-ignore-revs <filename>`.
 
 ### Requirements
 
