@@ -479,15 +479,27 @@ rand(rng::AbstractRNG, d::MixtureModel{Univariate}) =
 
 function rand(rng::AbstractRNG, d::MixtureModel{Univariate}, n::Int)
     counts = rand(rng, Multinomial(n, probs(d.prior)))
-    x = Vector{partype(d)}(undef, n)
-    offset = 0
+
+    # Find the component with the maximum count to minimize resizing
+    max_count_idx = argmax(counts)
+    max_count = counts[max_count_idx]
+
+    # Sample from the component with maximum count first and use it directly
+    x = rand(rng, component(d, max_count_idx), max_count)
+
+    # Resize to the full size and continue with other components
+    resize!(x, n)
+    offset = max_count
+
     for i in eachindex(counts)
-        ni = counts[i]
-        if ni > 0
-            c = component(d, i)
-            last_offset = offset + ni - 1
-            rand!(rng, c, @view(x[(begin+offset):(begin+last_offset)]))
-            offset = last_offset + 1
+        if i != max_count_idx
+            ni = counts[i]
+            if ni > 0
+                c = component(d, i)
+                last_offset = offset + ni - 1
+                rand!(rng, c, @view(x[(begin+offset):(begin+last_offset)]))
+                offset = last_offset + 1
+            end
         end
     end
     return shuffle!(rng, x)

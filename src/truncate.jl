@@ -234,7 +234,7 @@ function rand(rng::AbstractRNG, d::Truncated)
 end
 
 function rand(rng::AbstractRNG, d::Truncated, n::Int)
-    n == 0 && return partype(d)[]
+    n == 0 && return rand(d.untruncated, 0)
 
     d0 = d.untruncated
     tp = d.tp
@@ -244,10 +244,11 @@ function rand(rng::AbstractRNG, d::Truncated, n::Int)
     # Use the same three regimes as the scalar version
     if tp > 0.25
         # Regime 1: Rejection sampling with batch optimization
-        samples = Vector{partype(d)}(undef, n)
+        # Get the correct type and memory by sampling from the untruncated distribution
+        samples = rand(rng, d0, n)
         n_collected = 0
         max_batch = 0
-        batch_buffer = Vector{partype(d)}()
+        batch_buffer = Vector{eltype(samples)}()
         while n_collected < n
             n_remaining = n - n_collected
             n_expected = n_remaining / tp
@@ -271,14 +272,18 @@ function rand(rng::AbstractRNG, d::Truncated, n::Int)
         return samples
     elseif tp > sqrt(eps(typeof(float(tp))))
         # Regime 2: Quantile-based sampling
-        samples = Vector{partype(d)}(undef, n)
+        # Sample one value first to determine the correct type
+        sample_type = typeof(quantile(d0, d.lcdf + rand(rng) * d.tp))
+        samples = Vector{sample_type}(undef, n)
         for i in 1:n
             samples[i] = quantile(d0, d.lcdf + rand(rng) * d.tp)
         end
         return samples
     else
         # Regime 3: Log-space computation
-        samples = Vector{partype(d)}(undef, n)
+        # Sample one value first to determine the correct type
+        sample_type = typeof(invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng))))
+        samples = Vector{sample_type}(undef, n)
         for i in 1:n
             samples[i] = invlogcdf(d0, logaddexp(d.loglcdf, d.logtp - randexp(rng)))
         end
