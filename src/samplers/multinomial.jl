@@ -35,7 +35,7 @@ function multinom_rand!(
         @inbounds x[k] = n
     else  # n must have been zero
         z = zero(eltype(x))
-        for j = i+1:k
+        for j = (i+1):k
             @inbounds x[j] = z
         end
     end

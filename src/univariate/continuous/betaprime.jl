@@ -65,13 +65,11 @@ params(d::BetaPrime) = (d.α, d.β)
 #### Statistics
 
 function mean(d::BetaPrime{T}) where {T<:Real}
-    ((α, β) = params(d);
-    β > 1 ? α / (β - 1) : T(NaN))
+    ((α, β) = params(d); β > 1 ? α / (β - 1) : T(NaN))
 end
 
 function mode(d::BetaPrime{T}) where {T<:Real}
-    ((α, β) = params(d);
-    α > 1 ? (α - 1) / (β + 1) : zero(T))
+    ((α, β) = params(d); α > 1 ? (α - 1) / (β + 1) : zero(T))
 end
 
 function var(d::BetaPrime{T}) where {T<:Real}

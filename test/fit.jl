@@ -45,8 +45,8 @@ end
 
             ss = @inferred suffstats(D, x, w)
             @test ss isa Distributions.BernoulliStats
-            @test ss.cnt0 ≈ sum(v[z.==0])
-            @test ss.cnt1 ≈ sum(v[z.==1])
+            @test ss.cnt0 ≈ sum(v[z .== 0])
+            @test ss.cnt1 ≈ sum(v[z .== 1])
 
             d = @inferred fit(D, x)
             @test d isa D
@@ -54,7 +54,7 @@ end
 
             d = @inferred fit(D, x, w)
             @test d isa D
-            @test mean(d) ≈ sum(v[z.==1]) / sum(v)
+            @test mean(d) ≈ sum(v[z .== 1]) / sum(v)
         end
 
         z = rand(rng..., Bernoulli(0.7), N)
@@ -142,7 +142,7 @@ end
         @test probs(d2) == probs(d)
 
         ss = suffstats(Categorical, (3, x), w)
-        h = Float64[sum(w[x.==i]) for i = 1:3]
+        h = Float64[sum(w[x .== i]) for i = 1:3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 

@@ -486,16 +486,16 @@ function test_range_evaluation(d::DiscreteUnivariateDistribution)
     p0 = map(Base.Fix1(pdf, d), collect(rmin:rmax))
     @test map(Base.Fix1(pdf, d), rmin:rmax) ≈ p0
     if rmin + 2 <= rmax
-        @test map(Base.Fix1(pdf, d), rmin+1:rmax-1) ≈ p0[2:end-1]
+        @test map(Base.Fix1(pdf, d), (rmin+1):(rmax-1)) ≈ p0[2:(end-1)]
     end
 
     if isbounded(d)
         @test map(Base.Fix1(pdf, d), support(d)) ≈ p0
-        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
-        @test map(Base.Fix1(pdf, d), rmin:rmax+3) ≈ vcat(p0, 0.0, 0.0, 0.0)
-        @test map(Base.Fix1(pdf, d), rmin-2:rmax+3) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), (rmin-2):rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), rmin:(rmax+3)) ≈ vcat(p0, 0.0, 0.0, 0.0)
+        @test map(Base.Fix1(pdf, d), (rmin-2):(rmax+3)) ≈ vcat(0.0, 0.0, p0, 0.0, 0.0, 0.0)
     elseif islowerbounded(d)
-        @test map(Base.Fix1(pdf, d), rmin-2:rmax) ≈ vcat(0.0, 0.0, p0)
+        @test map(Base.Fix1(pdf, d), (rmin-2):rmax) ≈ vcat(0.0, 0.0, p0)
     end
 end
 
@@ -752,7 +752,7 @@ end
 # Finite difference differentiation
 function fdm(f, at)
     map(1:length(at)) do i
-        FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:i-1]; x; at[i+1:end]]), at[i])
+        FiniteDifferences.central_fdm(5, 1)(x -> f([at[1:(i-1)]; x; at[(i+1):end]]), at[i])
     end
 end
 

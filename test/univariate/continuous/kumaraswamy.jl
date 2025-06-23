@@ -17,7 +17,7 @@ using Distributions: expectation
         @test typeof(@inferred rand(D)) === typeof(rand())
         tol = sqrt(eps(float(T)))
         @testset "gradlogpdf" begin
-            for x = T(0):(T <: Integer ? one(T) : T(0.5)):T(20)
+            for x = T(0):(T<:Integer ? one(T) : T(0.5)):T(20)
                 fd = ForwardDiff.derivative(Base.Fix1(logpdf, D), x)
                 gl = @inferred gradlogpdf(D, x)
                 @test fd ≈ gl atol = tol

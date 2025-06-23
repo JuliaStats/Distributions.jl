@@ -66,8 +66,7 @@ end
 
 median(d::Frechet) = d.θ * logtwo^(-1 / d.α)
 
-mode(d::Frechet) = (iα = -1 / d.α;
-d.θ * (1 - iα)^iα)
+mode(d::Frechet) = (iα = -1 / d.α; d.θ * (1 - iα)^iα)
 
 function var(d::Frechet{T}) where {T<:Real}
     if d.α > 2

@@ -37,7 +37,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         n in [16, 40],
         r in [
             1:n,
-            ([i, j] for j = 2:n for i = 1:min(10, j - 1))...,
+            ([i, j] for j = 2:n for i = 1:min(10, j-1))...,
             vcat(2:4, (n-10):(n-5)),
             (2, n ÷ 2, n - 5),
         ]

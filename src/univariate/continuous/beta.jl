@@ -64,8 +64,7 @@ params(d::Beta) = (d.α, d.β)
 
 #### Statistics
 
-mean(d::Beta) = ((α, β) = params(d);
-α / (α + β))
+mean(d::Beta) = ((α, β) = params(d); α / (α + β))
 
 function mode(d::Beta; check_args::Bool = true)
     α, β = params(d)
@@ -85,11 +84,9 @@ function var(d::Beta)
     return (α * β) / (abs2(s) * (s + 1))
 end
 
-meanlogx(d::Beta) = ((α, β) = params(d);
-digamma(α) - digamma(α + β))
+meanlogx(d::Beta) = ((α, β) = params(d); digamma(α) - digamma(α + β))
 
-varlogx(d::Beta) = ((α, β) = params(d);
-trigamma(α) - trigamma(α + β))
+varlogx(d::Beta) = ((α, β) = params(d); trigamma(α) - trigamma(α + β))
 stdlogx(d::Beta) = sqrt(varlogx(d))
 
 function skewness(d::Beta)
@@ -128,8 +125,8 @@ end
 
 @_delegate_statsfuns Beta beta α β
 
-gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} = ((α, β) = params(d);
-0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
+gradlogpdf(d::Beta{T}, x::Real) where {T<:Real} =
+    ((α, β) = params(d); 0 <= x <= 1 ? (α - 1) / x - (β - 1) / (1 - x) : zero(T))
 
 
 #### Sampling

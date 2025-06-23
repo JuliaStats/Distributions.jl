@@ -62,11 +62,9 @@ meanlogx(d::LogNormal) = d.μ
 varlogx(d::LogNormal) = abs2(d.σ)
 stdlogx(d::LogNormal) = d.σ
 
-mean(d::LogNormal) = ((μ, σ) = params(d);
-exp(μ + σ^2 / 2))
+mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2 / 2))
 median(d::LogNormal) = exp(d.μ)
-mode(d::LogNormal) = ((μ, σ) = params(d);
-exp(μ - σ^2))
+mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
 partype(::LogNormal{T}) where {T<:Real} = T
 
 function var(d::LogNormal)

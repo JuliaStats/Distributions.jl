@@ -135,7 +135,7 @@ function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.defa
     R[1, 2] = 2u - 1
     R[2, 1] = R[1, 2]
     #  2.
-    for k = 2:d-1
+    for k = 2:(d-1)
         #  (a)
         β -= 0.5
         #  (b)
@@ -230,7 +230,7 @@ function lkj_vine_loginvconst(d::Integer, η::Real)
     #  Equation (16) in LKJ (2009 JMA)
     expsum = zero(η)
     betasum = zero(η)
-    for k = 1:d-1
+    for k = 1:(d-1)
         α = η + 0.5(d - k - 1)
         expsum += (2η - 2 + d - k) * (d - k)
         betasum += (d - k) * logbeta(α, α)
@@ -243,7 +243,7 @@ function lkj_vine_loginvconst_uniform(d::Integer)
     #  Equation after (16) in LKJ (2009 JMA)
     expsum = 0.0
     betasum = 0.0
-    for k = 1:d-1
+    for k = 1:(d-1)
         α = (k + 1) / 2
         expsum += k^2
         betasum += k * logbeta(α, α)
@@ -255,7 +255,7 @@ end
 function lkj_loginvconst_alt(d::Integer, η::Real)
     #  Third line in first proof of Section 3.3 in LKJ (2009 JMA)
     loginvconst = zero(η)
-    for k = 1:d-1
+    for k = 1:(d-1)
         loginvconst += 0.5k * logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
     end
     return loginvconst
@@ -264,7 +264,7 @@ end
 function corr_logvolume(n::Integer)
     #  https://doi.org/10.4169/amer.math.monthly.123.9.909
     logvol = 0.0
-    for k = 1:n-1
+    for k = 1:(n-1)
         logvol += 0.5k * logπ + k * loggamma((k + 1) / 2) - k * loggamma((k + 2) / 2)
     end
     return logvol

@@ -105,11 +105,11 @@ function cor(d::MultivariateDistribution)
     R = Matrix{eltype(C)}(undef, n, n)
 
     for j = 1:n
-        for i = 1:j-1
+        for i = 1:(j-1)
             @inbounds R[i, j] = R[j, i]
         end
         R[j, j] = 1.0
-        for i = j+1:n
+        for i = (j+1):n
             @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end

@@ -308,7 +308,7 @@ function rand(rng::AbstractRNG, d::Chernoff)                 # Ziggurat random n
         1.516689116183566
     ]
     n = length(x)
-    i = rand(rng, 0:n-1)
+    i = rand(rng, 0:(n-1))
     r = (2.0 * rand(rng) - 1) * ((i > 0) ? x[i] : A / y[1])
     rabs = abs(r)
     if rabs < x[i+1]

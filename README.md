@@ -40,7 +40,7 @@ not been reported yet on the issues of the repository.
 If not, you can file a new issue, add your version of the package
 which you can get with this command in the Julia REPL:
 ```julia
-julia> ]status Distributions
+julia> ] status Distributions
 ```
 
 Be exhaustive in your report, summarize the bug, and provide:
@@ -54,6 +54,11 @@ clone it and make modifications on a new branch,
 **do not commit modifications on master**.
 Once your changes are made, push them on your fork and create the
 Pull Request on the main repository.
+
+To format the code, run the following command:
+```bash
+julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
+```
 
 ### Requirements
 

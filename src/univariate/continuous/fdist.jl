@@ -56,8 +56,7 @@ params(d::FDist) = (d.ν1, d.ν2)
 
 #### Statistics
 
-mean(d::FDist{T}) where {T<:Real} = (ν2 = d.ν2;
-ν2 > 2 ? ν2 / (ν2 - 2) : T(NaN))
+mean(d::FDist{T}) where {T<:Real} = (ν2 = d.ν2; ν2 > 2 ? ν2 / (ν2 - 2) : T(NaN))
 
 function mode(d::FDist{T}) where {T<:Real}
     (ν1, ν2) = params(d)
@@ -104,5 +103,5 @@ end
 
 @_delegate_statsfuns FDist fdist ν1 ν2
 
-rand(rng::AbstractRNG, d::FDist) = ((ν1, ν2) = params(d);
-(ν2 * rand(rng, Chisq(ν1))) / (ν1 * rand(rng, Chisq(ν2))))
+rand(rng::AbstractRNG, d::FDist) =
+    ((ν1, ν2) = params(d); (ν2 * rand(rng, Chisq(ν1))) / (ν1 * rand(rng, Chisq(ν2))))

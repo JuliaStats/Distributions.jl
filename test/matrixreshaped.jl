@@ -19,7 +19,7 @@ function test_matrixreshaped(rng, d1, sizes)
             @test_deprecated(@test_throws ArgumentError MatrixReshaped(d1, -length(d1), -1))
         end
         @testset "MatrixReshaped size" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test size(d) == s
             end
         end
@@ -34,35 +34,35 @@ function test_matrixreshaped(rng, d1, sizes)
             end
         end
         @testset "MatrixReshaped insupport" begin
-            for (i, d) in enumerate(d1s[1:end-1])
-                for (j, s) in enumerate(sizes[1:end-1])
+            for (i, d) in enumerate(d1s[1:(end-1)])
+                for (j, s) in enumerate(sizes[1:(end-1)])
                     @test (i == j) ⊻ !insupport(d, reshape(x1, s))
                 end
             end
         end
         @testset "MatrixReshaped mean" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test mean(d) == reshape(mean(d1), s)
             end
         end
         @testset "MatrixReshaped mode" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test mode(d) == reshape(mode(d1), s)
             end
         end
         @testset "MatrixReshaped covariance" begin
-            for (d, (n, p)) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, (n, p)) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test cov(d) == cov(d1)
                 @test cov(d, Val(false)) == reshape(cov(d1), n, p, n, p)
             end
         end
         @testset "MatrixReshaped variance" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test var(d) == reshape(var(d1), s)
             end
         end
         @testset "MatrixReshaped params" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 @test params(d) == (d1, s)
             end
         end
@@ -77,7 +77,7 @@ function test_matrixreshaped(rng, d1, sizes)
             end
         end
         @testset "MatrixReshaped logpdf" begin
-            for (d, s) in zip(d1s[1:end-1], sizes[1:end-1])
+            for (d, s) in zip(d1s[1:(end-1)], sizes[1:(end-1)])
                 x = reshape(x1, s)
                 @test logpdf(d, x) == logpdf(d1, x1)
             end

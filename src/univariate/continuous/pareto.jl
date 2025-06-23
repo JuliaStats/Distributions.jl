@@ -61,8 +61,7 @@ function mean(d::Pareto{T}) where {T<:Real}
     (α, θ) = params(d)
     α > 1 ? α * θ / (α - 1) : T(Inf)
 end
-median(d::Pareto) = ((α, θ) = params(d);
-θ * 2^(1 / α))
+median(d::Pareto) = ((α, θ) = params(d); θ * 2^(1 / α))
 mode(d::Pareto) = d.θ
 
 function var(d::Pareto{T}) where {T<:Real}
@@ -80,8 +79,7 @@ function kurtosis(d::Pareto{T}) where {T<:Real}
     α > 4 ? (6(α^3 + α^2 - 6α - 2)) / (α * (α - 3) * (α - 4)) : T(NaN)
 end
 
-entropy(d::Pareto) = ((α, θ) = params(d);
-log(θ / α) + 1 / α + 1)
+entropy(d::Pareto) = ((α, θ) = params(d); log(θ / α) + 1 / α + 1)
 
 
 #### Evaluation

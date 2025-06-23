@@ -474,7 +474,7 @@ import Distributions: _univariate, _multivariate, _rand_params
                 mymats[:, :, m] = rand(G)
             end
             for i = 1:d
-                for j = 1:i-1
+                for j = 1:(i-1)
                     @test pvalue_kolmogorovsmirnoff(mymats[i, j, :], ρ) >= α / L
                 end
             end

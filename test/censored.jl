@@ -196,6 +196,7 @@ end
             lower,
             upper,
         ) in bounds
+
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -257,6 +258,7 @@ end
             lower,
             upper,
         ) in bounds
+
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
@@ -317,6 +319,7 @@ end
             lower,
             upper,
         ) in bounds
+
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
@@ -360,6 +363,7 @@ end
             lower,
             upper,
         ) in bounds
+
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)

@@ -95,15 +95,15 @@ function cov(d::Multinomial{T}) where {T<:Real}
     C = Matrix{T}(undef, k, k)
     for j = 1:k
         pj = p[j]
-        for i = 1:j-1
+        for i = 1:(j-1)
             @inbounds C[i, j] = -n * p[i] * pj
         end
 
         @inbounds C[j, j] = n * pj * (1 - pj)
     end
 
-    for j = 1:k-1
-        for i = j+1:k
+    for j = 1:(k-1)
+        for i = (j+1):k
             @inbounds C[i, j] = C[j, i]
         end
     end

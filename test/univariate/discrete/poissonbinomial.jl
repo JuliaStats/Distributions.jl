@@ -7,13 +7,13 @@ using Test
     function naive_esf(x::AbstractVector{T}) where {T<:Real}
         n = length(x)
         S = zeros(T, n + 1)
-        states = hcat(reverse.(digits.(0:2^n-1, base = 2, pad = n))...)'
+        states = hcat(reverse.(digits.(0:(2^n-1), base = 2, pad = n))...)'
 
         r_states = vec(mapslices(sum, states, dims = 2))
 
         for r = 0:n
             idx = findall(r_states .== r)
-            S[r+1] = sum(mapslices(x -> prod(x[x.!=0]), states[idx, :] .* x', dims = 2))
+            S[r+1] = sum(mapslices(x -> prod(x[x .!= 0]), states[idx, :] .* x', dims = 2))
         end
         return S
     end
@@ -98,8 +98,8 @@ using Test
         n = n₁ + n₂ + n₃
         p = zeros(n)
         p[1:n₁] .= p₁
-        p[n₁+1:n₁+n₂] .= p₂
-        p[n₁+n₂+1:end] .= p₃
+        p[(n₁+1):(n₁+n₂)] .= p₂
+        p[(n₁+n₂+1):end] .= p₃
         d = PoissonBinomial(p)
         println("   testing PoissonBinomial [$(n₁) × $(p₁), $(n₂) × $(p₂), $(n₃) × $(p₃)]")
         b1 = Binomial(n₁, p₁)
@@ -121,7 +121,7 @@ using Test
             m = 0.0
             for i = 0:min(n₁, k)
                 mc = 0.0
-                for j = i:min(i + n₂, k)
+                for j = i:min(i+n₂, k)
                     mc += (k - j <= n₃) && pmf2[j-i+1] * pmf3[k-j+1]
                 end
                 m += pmf1[i+1] * mc

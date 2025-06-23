@@ -223,14 +223,14 @@ using FiniteDifferences
                 test_draws(d, xs; nkstests = nkstests)
 
                 F2 = cholesky(exp(Symmetric(randn(rng, p, p))))
-                xs2 = [deepcopy(F2) for _ = 1:10^4]
+                xs2 = [deepcopy(F2) for _ = 1:(10^4)]
                 xs2[1] = cholesky(exp(Symmetric(randn(rng, p + 1, p + 1))))
                 rand!(rng, d, xs2)
                 test_draws(d, xs2; nkstests = nkstests)
 
                 # non-allocating
                 F3 = cholesky(exp(Symmetric(randn(rng, p, p))))
-                xs3 = [deepcopy(F3) for _ = 1:10^4]
+                xs3 = [deepcopy(F3) for _ = 1:(10^4)]
                 rand!(rng, d, xs3)
                 test_draws(d, xs3; check_uplo = uplo == 'U', nkstests = nkstests)
             end

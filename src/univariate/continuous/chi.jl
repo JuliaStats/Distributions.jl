@@ -52,9 +52,7 @@ params(d::Chi) = (d.ν,)
 mean(d::Chi) = (h = d.ν / 2; sqrt2 * exp(loggamma(h + 1 // 2) - loggamma(h)))
 
 var(d::Chi) = d.ν - mean(d)^2
-_chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2;
-σ3 = σ2 * σ;
-(μ / σ3) * (1 - 2σ2))
+_chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1 - 2σ2))
 
 function skewness(d::Chi)
     μ = mean(d)
@@ -69,8 +67,8 @@ function kurtosis(d::Chi)
     (2 / σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-entropy(d::Chi{T}) where {T<:Real} = (ν = d.ν;
-loggamma(ν / 2) - T(logtwo) / 2 - ((ν - 1) / 2) * digamma(ν / 2) + ν / 2)
+entropy(d::Chi{T}) where {T<:Real} =
+    (ν = d.ν; loggamma(ν / 2) - T(logtwo) / 2 - ((ν - 1) / 2) * digamma(ν / 2) + ν / 2)
 
 function mode(d::Chi; check_args::Bool = true)
     ν = d.ν
@@ -107,8 +105,7 @@ end
 
 #### Sampling
 
-rand(rng::AbstractRNG, d::Chi) = (ν = d.ν;
-sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
+rand(rng::AbstractRNG, d::Chi) = (ν = d.ν; sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
 
 struct ChiSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Univariate,Continuous}
     s::S

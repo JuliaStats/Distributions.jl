@@ -588,7 +588,7 @@ function integerunitrange_cdf(d::DiscreteUnivariateDistribution, x::Integer)
             c = sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
             x < minimum_d ? zero(c) : c
         else
-            c = 1 - sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+            c = 1 - sum(Base.Fix1(pdf, d), (min(x+1, maximum_d)):maximum_d)
             x >= maximum_d ? one(c) : c
         end
 
@@ -605,7 +605,7 @@ function integerunitrange_ccdf(d::DiscreteUnivariateDistribution, x::Integer)
             c = 1 - sum(Base.Fix1(pdf, d), minimum_d:(max(x, minimum_d)))
             x < minimum_d ? one(c) : c
         else
-            c = sum(Base.Fix1(pdf, d), (min(x + 1, maximum_d)):maximum_d)
+            c = sum(Base.Fix1(pdf, d), (min(x+1, maximum_d)):maximum_d)
             x >= maximum_d ? zero(c) : c
         end
 
@@ -622,7 +622,7 @@ function integerunitrange_logcdf(d::DiscreteUnivariateDistribution, x::Integer)
             c = logsumexp(logpdf(d, y) for y = minimum_d:(max(x, minimum_d)))
             x < minimum_d ? oftype(c, -Inf) : c
         else
-            c = log1mexp(logsumexp(logpdf(d, y) for y = (min(x + 1, maximum_d)):maximum_d))
+            c = log1mexp(logsumexp(logpdf(d, y) for y = (min(x+1, maximum_d)):maximum_d))
             x >= maximum_d ? zero(c) : c
         end
 
@@ -639,7 +639,7 @@ function integerunitrange_logccdf(d::DiscreteUnivariateDistribution, x::Integer)
             c = log1mexp(logsumexp(logpdf(d, y) for y = minimum_d:(max(x, minimum_d))))
             x < minimum_d ? zero(c) : c
         else
-            c = logsumexp(logpdf(d, y) for y = (min(x + 1, maximum_d)):maximum_d)
+            c = logsumexp(logpdf(d, y) for y = (min(x+1, maximum_d)):maximum_d)
             x >= maximum_d ? oftype(c, -Inf) : c
         end
 

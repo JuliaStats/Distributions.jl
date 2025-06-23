@@ -203,7 +203,7 @@ end
 function _dft(x::Vector{T}) where {T}
     n = length(x)
     y = zeros(complex(float(T)), n)
-    @inbounds for j = 0:n-1, k = 0:n-1
+    @inbounds for j = 0:(n-1), k = 0:(n-1)
         y[k+1] += x[j+1] * cis(-π * float(T)(2 * mod(j * k, n)) / n)
     end
     return y

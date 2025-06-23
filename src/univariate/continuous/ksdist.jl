@@ -93,7 +93,7 @@ function cdf_durbin(d::KSDist, x::Float64)
     end
     H[m, 1] += h <= 0.5 ? -h^m : -h^m + (h - ch)
     for i = 1:m, j = 1:m
-        for g = 1:max(i - j + 1, 0)
+        for g = 1:max(i-j+1, 0)
             H[i, j] /= g
         end
         # we can avoid keeping track of the exponent by dividing by e
