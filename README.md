@@ -60,6 +60,12 @@ To format the code, run the following command:
 julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_all.jl")'
 ```
 
+**Note:** Code formatting is automatically checked in CI.
+The formatting command can be run locally with 
+```julia
+julia --project=.formatting -e 'using Pkg; Pkg.instantiate(); include(".formatting/format_check.jl")'
+```
+
 ### Requirements
 
 Distributions is a central package which many rely on,
