@@ -80,13 +80,13 @@ end
 function indexed_sum_comp(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    return @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
 function indexed_boolprod(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
+    return @inbounds sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function indexed_boolprod_noinbound(d, x)
@@ -99,7 +99,7 @@ function sumcomp_cond(d, x)
     ps = probs(d)
     cs = components(d)
     s = zero(eltype(ps))
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    return @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
 distributions = [Normal(-1.0, 0.3), Normal(0.0, 0.5), Normal(3.0, 1.0)]
@@ -137,8 +137,8 @@ for x in rand(5)
     @info "==================="
 end
 
-large_normals = [Normal(rand(), rand()) for _ = 1:1000]
-large_probs = [rand() for _ = 1:1000]
+large_normals = [Normal(rand(), rand()) for _ in 1:1000]
+large_probs = [rand() for _ in 1:1000]
 large_probs .= large_probs ./ sum(large_probs)
 
 gmm_large = MixtureModel(large_normals, large_probs)
@@ -173,11 +173,11 @@ for x in rand(5)
 end
 
 large_het = append!(
-    ContinuousUnivariateDistribution[Normal(rand(), rand()) for _ = 1:1000],
-    ContinuousUnivariateDistribution[LogNormal(rand(), rand()) for _ = 1:1000],
+    ContinuousUnivariateDistribution[Normal(rand(), rand()) for _ in 1:1000],
+    ContinuousUnivariateDistribution[LogNormal(rand(), rand()) for _ in 1:1000],
 )
 
-large_het_probs = [rand() for _ = 1:2000]
+large_het_probs = [rand() for _ in 1:2000]
 large_het_probs .= large_het_probs ./ sum(large_het_probs)
 
 gmm_het = MixtureModel(large_het, large_het_probs)

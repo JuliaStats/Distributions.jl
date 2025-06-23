@@ -43,13 +43,13 @@ import Random
     @test @inferred(pdf(d, 1.0001)) ≈ 0.43425105679757203
     @test @inferred(pdf(d, 5)) ≈ 0.08685889638065035
     @test @inferred(pdf(d, 9.9999)) ≈ 0.04342988248915007
-    @test @inferred(cdf(d, 1.0001)) ≈ 4.342727686266485e-05
+    @test @inferred(cdf(d, 1.0001)) ≈ 4.342727686266485e-5
     @test @inferred(cdf(d, 5)) ≈ 0.6989700043360187
     @test @inferred(cdf(d, 9.9999)) ≈ 0.999995657033466
     @test @inferred(median(d)) ≈ 3.1622776601683795
     @test @inferred(logpdf(d, 5)) ≈ -2.443470357682056
 
-    for _ = 1:10
+    for _ in 1:10
         lo = rand(rng)
         hi = lo + 10 * rand(rng)
         dist = LogUniform(lo, hi)
@@ -63,7 +63,7 @@ import Random
         @test cdf(u, log(x)) ≈ cdf(dist, x)
 
         @test @inferred(entropy(dist)) ≈
-              Distributions.expectation(x -> -logpdf(dist, x), dist)
+            Distributions.expectation(x -> -logpdf(dist, x), dist)
     end
 
     @test kldivergence(LogUniform(1, 2), LogUniform(1, 2)) ≈ 0 atol = 100eps(Float64)
@@ -73,7 +73,7 @@ import Random
     @test kldivergence(LogUniform(0.1, 1), LogUniform(1, 2)) === Inf
     @test @inferred(kldivergence(LogUniform(0.1f0, 1), LogUniform(1, 2))) === Inf32
 
-    for _ = 1:10
+    for _ in 1:10
         aq = 10 * rand(rng)
         ap = aq + 10 * rand(rng)
         bp = ap + 10 * rand(rng)
@@ -81,9 +81,9 @@ import Random
         p = LogUniform(ap, bp)
         q = LogUniform(aq, bq)
         @test @inferred(kldivergence(p, q)) ≈
-              kldivergence(Uniform(log(ap), log(bp)), Uniform(log(aq), log(bq)))
+            kldivergence(Uniform(log(ap), log(bp)), Uniform(log(aq), log(bq)))
     end
 end
 
 
-end#module
+end #module

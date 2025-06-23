@@ -9,9 +9,9 @@ Random.seed!(123)
 rng = MersenneTwister(123)
 
 @testset "Testing DirichletMultinomial with $key" for (key, func) in Dict(
-    "rand(...)" => [rand, rand],
-    "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
-)
+        "rand(...)" => [rand, rand],
+        "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+    )
 
     # Test Constructors
     d = DirichletMultinomial(10, ones(5))
@@ -54,11 +54,11 @@ rng = MersenneTwister(123)
 
     for x in (2 * ones(5), [1, 2, 3, 4, 0], [3.0, 0.0, 3.0, 0.0, 4.0], [0, 0, 0, 0, 10])
         @test pdf(d, x) ≈
-              factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) *
-              prod(gamma.(d.α .+ x) ./ (gamma.(x .+ 1) .* gamma.(d.α)))
+            factorial(d.n) * gamma(d.α0) / gamma(d.n + d.α0) *
+            prod(gamma.(d.α .+ x) ./ (gamma.(x .+ 1) .* gamma.(d.α)))
         @test logpdf(d, x) ≈
-              logfactorial(d.n) + loggamma(d.α0) - loggamma(d.n + d.α0) +
-              sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(loggamma.(x .+ 1))
+            logfactorial(d.n) + loggamma(d.α0) - loggamma(d.n + d.α0) +
+            sum(loggamma, d.α + x) - sum(loggamma, d.α) - sum(loggamma.(x .+ 1))
     end
 
     # test Sampling

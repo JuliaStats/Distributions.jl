@@ -75,10 +75,10 @@ Parametrized by a `VariateForm` defining the dimension of samples
 and a `ValueSupport` defining the domain of possibly sampled values.
 Any `Sampleable` implements the `Base.rand` method.
 """
-abstract type Sampleable{F<:VariateForm,S<:ValueSupport} end
+abstract type Sampleable{F <: VariateForm, S <: ValueSupport} end
 
 variate_form(::Type{<:Sampleable{VF}}) where {VF} = VF
-value_support(::Type{<:Sampleable{<:VariateForm,VS}}) where {VS} = VS
+value_support(::Type{<:Sampleable{<:VariateForm, VS}}) where {VS} = VS
 
 """
     length(s::Sampleable)
@@ -106,8 +106,8 @@ The default element type of a sample. This is the type of elements of the sample
 by the `rand` method. However, one can provide an array of different element types to
 store the samples using `rand!`.
 """
-Base.eltype(::Type{<:Sampleable{F,Discrete}}) where {F} = Int
-Base.eltype(::Type{<:Sampleable{F,Continuous}}) where {F} = Float64
+Base.eltype(::Type{<:Sampleable{F, Discrete}}) where {F} = Int
+Base.eltype(::Type{<:Sampleable{F, Continuous}}) where {F} = Float64
 
 """
     nsamples(s::Sampleable)
@@ -116,16 +116,16 @@ The number of values contained in one sample of `s`. Multiple samples are often 
 into an array, depending on the variate form.
 """
 nsamples(t::Type{Sampleable}, x::Any)
-nsamples(::Type{D}, x::Number) where {D<:Sampleable{Univariate}} = 1
-nsamples(::Type{D}, x::AbstractArray) where {D<:Sampleable{Univariate}} = length(x)
-nsamples(::Type{D}, x::AbstractVector) where {D<:Sampleable{Multivariate}} = 1
-nsamples(::Type{D}, x::AbstractMatrix) where {D<:Sampleable{Multivariate}} = size(x, 2)
-nsamples(::Type{D}, x::Number) where {D<:Sampleable{Matrixvariate}} = 1
-nsamples(::Type{D}, x::Array{Matrix{T}}) where {D<:Sampleable{Matrixvariate},T<:Number} =
+nsamples(::Type{D}, x::Number) where {D <: Sampleable{Univariate}} = 1
+nsamples(::Type{D}, x::AbstractArray) where {D <: Sampleable{Univariate}} = length(x)
+nsamples(::Type{D}, x::AbstractVector) where {D <: Sampleable{Multivariate}} = 1
+nsamples(::Type{D}, x::AbstractMatrix) where {D <: Sampleable{Multivariate}} = size(x, 2)
+nsamples(::Type{D}, x::Number) where {D <: Sampleable{Matrixvariate}} = 1
+nsamples(::Type{D}, x::Array{Matrix{T}}) where {D <: Sampleable{Matrixvariate}, T <: Number} =
     length(x)
 
 for func in (:(==), :isequal, :isapprox)
-    @eval function Base.$func(s1::A, s2::B; kwargs...) where {A<:Sampleable,B<:Sampleable}
+    @eval function Base.$func(s1::A, s2::B; kwargs...) where {A <: Sampleable, B <: Sampleable}
         nameof(A) === nameof(B) || return false
         fields = fieldnames(A)
         fields === fieldnames(B) || return false
@@ -143,7 +143,7 @@ for func in (:(==), :isequal, :isapprox)
     end
 end
 
-function Base.hash(s::S, h::UInt) where {S<:Sampleable}
+function Base.hash(s::S, h::UInt) where {S <: Sampleable}
     hashed = hash(Sampleable, h)
     hashed = hash(nameof(S), hashed)
 
@@ -162,22 +162,22 @@ distribution. Distributions define a Probability Distribution Function (PDF)
 to implement with `pdf` and a Cumulative Distribution Function (CDF) to implement
 with `cdf`.
 """
-abstract type Distribution{F<:VariateForm,S<:ValueSupport} <: Sampleable{F,S} end
+abstract type Distribution{F <: VariateForm, S <: ValueSupport} <: Sampleable{F, S} end
 
-const UnivariateDistribution{S<:ValueSupport} = Distribution{Univariate,S}
-const MultivariateDistribution{S<:ValueSupport} = Distribution{Multivariate,S}
-const MatrixDistribution{S<:ValueSupport} = Distribution{Matrixvariate,S}
-const NonMatrixDistribution = Union{UnivariateDistribution,MultivariateDistribution}
+const UnivariateDistribution{S <: ValueSupport} = Distribution{Univariate, S}
+const MultivariateDistribution{S <: ValueSupport} = Distribution{Multivariate, S}
+const MatrixDistribution{S <: ValueSupport} = Distribution{Matrixvariate, S}
+const NonMatrixDistribution = Union{UnivariateDistribution, MultivariateDistribution}
 
-const DiscreteDistribution{F<:VariateForm} = Distribution{F,Discrete}
-const ContinuousDistribution{F<:VariateForm} = Distribution{F,Continuous}
+const DiscreteDistribution{F <: VariateForm} = Distribution{F, Discrete}
+const ContinuousDistribution{F <: VariateForm} = Distribution{F, Continuous}
 
-const DiscreteUnivariateDistribution = Distribution{Univariate,Discrete}
-const ContinuousUnivariateDistribution = Distribution{Univariate,Continuous}
-const DiscreteMultivariateDistribution = Distribution{Multivariate,Discrete}
-const ContinuousMultivariateDistribution = Distribution{Multivariate,Continuous}
-const DiscreteMatrixDistribution = Distribution{Matrixvariate,Discrete}
-const ContinuousMatrixDistribution = Distribution{Matrixvariate,Continuous}
+const DiscreteUnivariateDistribution = Distribution{Univariate, Discrete}
+const ContinuousUnivariateDistribution = Distribution{Univariate, Continuous}
+const DiscreteMultivariateDistribution = Distribution{Multivariate, Discrete}
+const ContinuousMultivariateDistribution = Distribution{Multivariate, Continuous}
+const DiscreteMatrixDistribution = Distribution{Matrixvariate, Discrete}
+const ContinuousMatrixDistribution = Distribution{Matrixvariate, Continuous}
 
 # allow broadcasting over distribution objects
 # to be decided: how to handle multivariate/matrixvariate distributions?
@@ -221,9 +221,9 @@ usually it is sufficient to implement `logpdf`.
 See also: [`logpdf`](@ref).
 """
 @inline function pdf(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     if M == N
         @boundscheck begin
             size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
@@ -243,7 +243,7 @@ See also: [`logpdf`](@ref).
     end
 end
 
-function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real,N}) where {N}
+function _pdf(d::Distribution{ArrayLikeVariate{N}}, x::AbstractArray{<:Real, N}) where {N}
     return exp(@inbounds logpdf(d, x))
 end
 
@@ -263,9 +263,9 @@ size of `x`.
 See also: [`pdf`](@ref), [`gradlogpdf`](@ref).
 """
 @inline function logpdf(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     if M == N
         @boundscheck begin
             size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
@@ -313,9 +313,9 @@ Here, `x` can be
 - an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
 """
 Base.@propagate_inbounds function pdf(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+    ) where {N}
     return map(Base.Fix1(pdf, d), x)
 end
 
@@ -333,9 +333,9 @@ Here, `x` can be
 - an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
 """
 Base.@propagate_inbounds function logpdf(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+    ) where {N}
     return map(Base.Fix1(logpdf, d), x)
 end
 
@@ -362,26 +362,26 @@ back to `logpdf!` usually it is sufficient to implement `logpdf!`.
 See also: [`logpdf!`](@ref).
 """
 Base.@propagate_inbounds function pdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N},M},
-) where {N,M}
+        out::AbstractArray{<:Real},
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}, M},
+    ) where {N, M}
     return map!(Base.Fix1(pdf, d), out, x)
 end
 
 Base.@propagate_inbounds function logpdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N},M},
-) where {N,M}
+        out::AbstractArray{<:Real},
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}, M},
+    ) where {N, M}
     return map!(Base.Fix1(logpdf, d), out, x)
 end
 
 @inline function pdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        out::AbstractArray{<:Real},
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     @boundscheck begin
         M > N || throw(
             DimensionMismatch(
@@ -390,17 +390,17 @@ end
         )
         ntuple(i -> size(x, i), Val(N)) == size(d) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
-        length(out) == prod(i -> size(x, i), (N+1):M) ||
+        length(out) == prod(i -> size(x, i), (N + 1):M) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     return _pdf!(out, d, x)
 end
 
 function _pdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{<:ArrayLikeVariate},
-    x::AbstractArray{<:Real},
-)
+        out::AbstractArray{<:Real},
+        d::Distribution{<:ArrayLikeVariate},
+        x::AbstractArray{<:Real},
+    )
     @inbounds logpdf!(out, d, x)
     map!(exp, out, out)
     return out
@@ -428,10 +428,10 @@ the size of `out` and `x`.
 See also: [`pdf!`](@ref).
 """
 @inline function logpdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        out::AbstractArray{<:Real},
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     @boundscheck begin
         M > N || throw(
             DimensionMismatch(
@@ -440,7 +440,7 @@ See also: [`pdf!`](@ref).
         )
         ntuple(i -> size(x, i), Val(N)) == size(d) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
-        length(out) == prod(i -> size(x, i), (N+1):M) ||
+        length(out) == prod(i -> size(x, i), (N + 1):M) ||
             throw(DimensionMismatch("inconsistent array dimensions"))
     end
     return _logpdf!(out, d, x)
@@ -448,10 +448,10 @@ end
 
 # default definition
 function _logpdf!(
-    out::AbstractArray{<:Real},
-    d::Distribution{<:ArrayLikeVariate},
-    x::AbstractArray{<:Real},
-)
+        out::AbstractArray{<:Real},
+        d::Distribution{<:ArrayLikeVariate},
+        x::AbstractArray{<:Real},
+    )
     @inbounds map!(Base.Fix1(logpdf, d), out, eachvariate(x, variate_form(typeof(d))))
     return out
 end
@@ -468,9 +468,9 @@ be
 - an array of arrays `xi` of dimension `N` with `size(xi) == size(d)`.
 """
 Base.@propagate_inbounds @inline function loglikelihood(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     if M == N
         return logpdf(d, x)
     else
@@ -487,9 +487,9 @@ Base.@propagate_inbounds @inline function loglikelihood(
     end
 end
 Base.@propagate_inbounds function loglikelihood(
-    d::Distribution{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
+        d::Distribution{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+    ) where {N}
     return sum(Base.Fix1(logpdf, d), x)
 end
 
@@ -497,8 +497,8 @@ end
 abstract type SufficientStats end
 abstract type IncompleteDistribution end
 
-const DistributionType{D<:Distribution} = Type{D}
-const IncompleteFormulation = Union{DistributionType,IncompleteDistribution}
+const DistributionType{D <: Distribution} = Type{D}
+const IncompleteFormulation = Union{DistributionType, IncompleteDistribution}
 
 """
     succprob(d::DiscreteUnivariateDistribution)
@@ -526,15 +526,17 @@ RFunction. Calls using another random number generator still work, but rely on
 a quantile function to operate.
 """
 macro rand_rdist(D)
-    esc(quote
-        function rand(d::$D, n::Int)
-            [rand(d) for i in Base.OneTo(n)]
-        end
-        function rand!(d::$D, X::AbstractArray)
-            for i in eachindex(X)
-                X[i] = rand(d)
+    return esc(
+        quote
+            function rand(d::$D, n::Int)
+                return [rand(d) for i in Base.OneTo(n)]
             end
-            return X
+            function rand!(d::$D, X::AbstractArray)
+                for i in eachindex(X)
+                    X[i] = rand(d)
+                end
+                return X
+            end
         end
-    end)
+    )
 end

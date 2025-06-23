@@ -28,7 +28,7 @@ using Distributions: expectation
         @test @inferred(mean(D)) == T(3 / 2)
         tol = sqrt(eps(float(T)))
         @testset "Gradient of log PDF" begin
-            for x = T(0):T(0.5):T(20)
+            for x in T(0):T(0.5):T(20)
                 fd = ForwardDiff.derivative(Fix1(logpdf, D), x)
                 gl = @inferred gradlogpdf(D, x)
                 @test gl isa T
@@ -47,7 +47,7 @@ using Distributions: expectation
             S = supertype(typeof(D))
             D₂ = Lindley(T(2))
             d₁ = kldivergence(D, D₂)
-            d₂ = invoke(kldivergence, Tuple{S,S}, D, D₂)
+            d₂ = invoke(kldivergence, Tuple{S, S}, D, D₂)
             if T <: AbstractFloat
                 @test d₁ isa T
             end
@@ -75,7 +75,7 @@ using Distributions: expectation
             @test iszero(mgf(D, shape(D) + 1))
             @test ForwardDiff.derivative(Fix1(mgf, D), 0) ≈ mean(D)
             @test central_fdm(5, 1)(Fix1(cf, D), 0) ≈ mean(D) * im
-            test_cgf(D, (-1e6, -100.0f0, Float16(-1), 1 // 10, 0.9))
+            test_cgf(D, (-1.0e6, -100.0f0, Float16(-1), 1 // 10, 0.9))
         end
     end
 end

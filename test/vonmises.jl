@@ -23,7 +23,7 @@ function test_vonmises(μ::Float64, κ::Float64)
     # Support
     @test support(d) == RealInterval(d.μ - π, d.μ + π)
     @test pdf(d, d.μ - 2π) == 0.0
-    @test pdf(d, d.μ + 2π) == 0.0
+    return @test pdf(d, d.μ + 2π) == 0.0
 
 end
 

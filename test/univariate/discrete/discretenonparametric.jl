@@ -4,14 +4,14 @@ using Test
 
 # A dummy RNG that always outputs 1
 struct AllOneRNG <: AbstractRNG end
-Base.rand(::AllOneRNG, ::Type{T}) where {T<:Number} = one(T)
+Base.rand(::AllOneRNG, ::Type{T}) where {T <: Number} = one(T)
 
 rng = MersenneTwister(123)
 
 @testset "Testing matrix-variates with $key" for (key, func) in Dict(
-    "rand(...)" => [rand, rand],
-    "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
-)
+        "rand(...)" => [rand, rand],
+        "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+    )
 
     d = DiscreteNonParametric([40.0, 80.0, 120.0, -60.0], [0.4, 0.3, 0.1, 0.2])
 
@@ -127,17 +127,17 @@ rng = MersenneTwister(123)
     ws = [1.0, 2, 1, 0, 1, 1, 2, 3, 2, 6, 1]
 
     ss = suffstats(DiscreteNonParametric, xs)
-    @test ss isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
+    @test ss isa Distributions.DiscreteNonParametricStats{Int, Float64, Vector{Int}}
     @test ss.support == [1, 2, 3, 4, 5]
     @test ss.freq == [2.0, 3.0, 3.0, 2.0, 1.0]
 
     ss2 = suffstats(DiscreteNonParametric, xs, ws)
-    @test ss2 isa Distributions.DiscreteNonParametricStats{Int,Float64,Vector{Int}}
+    @test ss2 isa Distributions.DiscreteNonParametricStats{Int, Float64, Vector{Int}}
     @test ss2.support == [1, 2, 3, 4, 5]
     @test ss2.freq == [2.0, 11.0, 5.0, 1.0, 1.0]
 
     d1 = fit_mle(DiscreteNonParametric, ss)
-    @test d1 isa DiscreteNonParametric{Int,Float64,Vector{Int}}
+    @test d1 isa DiscreteNonParametric{Int, Float64, Vector{Int}}
     @test support(d1) == ss.support
     @test probs(d1) ≈ ss.freq ./ 11
 
@@ -154,29 +154,29 @@ rng = MersenneTwister(123)
     # Numerical stability; see issue #872 and PR #926
     p = [1 - eps(Float32), eps(Float32)]
     d = Categorical(p)
-    @test ([rand(d) for _ = 1:100_000]; true)
+    @test ([rand(d) for _ in 1:100_000]; true)
 
     # Numerical stability w/ large prob vectors;
     # see issue #1017
     n = 20000 # large vector length
-    p = Float32[0.5; fill(0.5 / (n ÷ 2) - 3e-8, n ÷ 2); fill(eps(Float64), n ÷ 2)]
+    p = Float32[0.5; fill(0.5 / (n ÷ 2) - 3.0e-8, n ÷ 2); fill(eps(Float64), n ÷ 2)]
     d = Categorical(p)
     rng = AllOneRNG()
     @test (rand(rng, d); true)
 
     # Sampling with values of zero probability; see issue #1105
     d = DiscreteNonParametric([0, 1, 2, 3, 4], [0.0f0, 0.1f0, 0.2f0, 0.3f0, 0.4f0])
-    @test iszero(count(iszero(rand(d)) for _ = 1:100_000_000))
+    @test iszero(count(iszero(rand(d)) for _ in 1:100_000_000))
 
     d = DiscreteNonParametric([4, 3, 2, 1, 0], [0.4f0, 0.3f0, 0.2f0, 0.1f0, 0.0f0])
-    @test iszero(count(iszero(rand(d)) for _ = 1:100_000_000))
+    @test iszero(count(iszero(rand(d)) for _ in 1:100_000_000))
 
     # Sampling with integer-valued probabilities; see issue #1111
     d = DiscreteNonParametric([1, 2], [0, 1])
-    @test iszero(count(isone(rand(d)) for _ = 1:100))
+    @test iszero(count(isone(rand(d)) for _ in 1:100))
 
     d = DiscreteNonParametric([2, 1], [1, 0])
-    @test iszero(count(isone(rand(d)) for _ = 1:100))
+    @test iszero(count(isone(rand(d)) for _ in 1:100))
 
     @testset "type stability" begin
         d = DiscreteNonParametric([0, 1], [0.5, 0.5])
@@ -189,8 +189,8 @@ end
 @testset "comparisons" begin
     d1 = DiscreteNonParametric([1, 2], [0.4, 0.6])
     d2 = DiscreteNonParametric([1, 2], [0.6, 0.4])
-    d3 = DiscreteNonParametric([1 + 1e-9, 2], [0.4, 0.6])
-    d4 = DiscreteNonParametric([1 + 1e-9, 2], [0.6, 0.4])
+    d3 = DiscreteNonParametric([1 + 1.0e-9, 2], [0.4, 0.6])
+    d4 = DiscreteNonParametric([1 + 1.0e-9, 2], [0.6, 0.4])
     d5 = DiscreteNonParametric([9, 2, 4], [0.2, 0.7, 0.1])
 
     # Same distribution
@@ -223,11 +223,11 @@ end
 
     # issue #1140
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) !=
-          DiscreteNonParametric(1:3, [0.2, 0.4, 0.4])
+        DiscreteNonParametric(1:3, [0.2, 0.4, 0.4])
 
     # Different types
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) ==
-          DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+        DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
     @test DiscreteNonParametric(1:2, [0.5, 0.5]) ≈
-          DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
+        DiscreteNonParametric([1, 2], [0.5f0, 0.5f0])
 end

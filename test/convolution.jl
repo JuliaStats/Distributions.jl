@@ -74,7 +74,7 @@ using Test
             [prevfloat(0.0), 0.0, nextfloat(0.0), 1.0],
             fill(1 // 4, 4),
         )
-        d10 = DiscreteNonParametric((1//10):(1//10):1, fill(1 // 10, 10))
+        d10 = DiscreteNonParametric((1 // 10):(1 // 10):1, fill(1 // 10, 10))
 
         d_int_simple = @inferred(convolve(d1, d2))
         @test d_int_simple isa DiscreteNonParametric
@@ -82,7 +82,7 @@ using Test
         @test probs(d_int_simple) == [0.25, 0.5, 0.25]
 
         d_rat = convolve(d10, d10)
-        @test support(d_rat) == (1//5):(1//10):2
+        @test support(d_rat) == (1 // 5):(1 // 10):2
         @test probs(d_rat) == [
             1 // 100,
             1 // 50,
@@ -116,7 +116,7 @@ using Test
             2.0,
         ]
         @test probs(d_float_supp) ==
-              [1 // 16, 1 // 8, 3 // 16, 1 // 8, 1 // 16, 3 // 8, 1 // 16]
+            [1 // 16, 1 // 8, 3 // 16, 1 // 8, 1 // 16, 3 // 8, 1 // 16]
     end
 
 end

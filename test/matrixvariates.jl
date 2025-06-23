@@ -68,29 +68,29 @@ import Distributions: _univariate, _multivariate, _rand_params
     function test_draws(d::MatrixDistribution, M::Integer)
         rng = MersenneTwister(123)
         @testset "Testing matrix-variates with $key" for (key, func) in Dict(
-            "rand(...)" => [rand, rand],
-            "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
-        )
+                "rand(...)" => [rand, rand],
+                "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+            )
             test_draws(d, func[2](d, M))
         end
         @testset "Testing matrix-variates with $key" for (key, func) in Dict(
-            "rand!(..., false)" => [(dist, X) -> rand!(dist, X, false), rand!],
-            "rand!(rng, ..., false)" =>
-                [(dist, X) -> rand!(rng, dist, X, false), (dist, X) -> rand!(rng, dist, X)],
-        )
+                "rand!(..., false)" => [(dist, X) -> rand!(dist, X, false), rand!],
+                "rand!(rng, ..., false)" =>
+                    [(dist, X) -> rand!(rng, dist, X, false), (dist, X) -> rand!(rng, dist, X)],
+            )
             m = [Matrix{partype(d)}(undef, size(d)) for _ in Base.OneTo(M)]
             x = func[1](d, m)
             @test x ≡ m
             @test isapprox(mean(x), mean(d), atol = 0.1)
-            m3 = Array{partype(d),3}(undef, size(d)..., M)
+            m3 = Array{partype(d), 3}(undef, size(d)..., M)
             x = func[2](d, m3)
             @test x ≡ m3
             @test isapprox(mean(x), mean(mean(d)), atol = 0.1)
         end
         @testset "Testing matrix-variates with $key" for (key, func) in Dict(
-            "rand!(..., true)" => (dist, X) -> rand!(dist, X, true),
-            "rand!(rng, true)" => (dist, X) -> rand!(rng, dist, X, true),
-        )
+                "rand!(..., true)" => (dist, X) -> rand!(dist, X, true),
+                "rand!(rng, true)" => (dist, X) -> rand!(rng, dist, X, true),
+            )
             m = Vector{Matrix{partype(d)}}(undef, M)
             x = func(d, m)
             @test x ≡ m
@@ -157,7 +157,7 @@ import Distributions: _univariate, _multivariate, _rand_params
         @test n == size(mean(d), 2)
     end
 
-    test_dim(d::Union{MatrixNormal,MatrixTDist}) = nothing
+    test_dim(d::Union{MatrixNormal, MatrixTDist}) = nothing
 
     #  --------------------------------------------------
     #  RUN EVERYTHING
@@ -173,11 +173,11 @@ import Distributions: _univariate, _multivariate, _rand_params
     end
 
     function test_distr(
-        dist::Type{<:MatrixDistribution},
-        n::Integer,
-        p::Integer,
-        M::Integer,
-    )
+            dist::Type{<:MatrixDistribution},
+            n::Integer,
+            p::Integer,
+            M::Integer,
+        )
         d = dist(_rand_params(dist, Float64, n, p)...)
         test_distr(d, M)
         nothing
@@ -198,12 +198,12 @@ import Distributions: _univariate, _multivariate, _rand_params
     end
 
     function test_draws_against_univariate_cdf(
-        D::MatrixDistribution,
-        d::UnivariateDistribution,
-    )
+            D::MatrixDistribution,
+            d::UnivariateDistribution,
+        )
         α = 0.025
         M = 100000
-        matvardraws = [rand(D)[1] for m = 1:M]
+        matvardraws = [rand(D)[1] for m in 1:M]
         @test pvalue_kolmogorovsmirnoff(matvardraws, d) >= α
         nothing
     end
@@ -233,10 +233,10 @@ import Distributions: _univariate, _multivariate, _rand_params
     end
 
     function test_against_multivariate(
-        dist::Union{Type{MatrixNormal},Type{MatrixTDist}},
-        n::Integer,
-        p::Integer,
-    )
+            dist::Union{Type{MatrixNormal}, Type{MatrixTDist}},
+            n::Integer,
+            p::Integer,
+        )
         D = dist(_rand_params(dist, Float64, n, 1)...)
         d = _multivariate(D)
         test_against_multivariate(D, d)
@@ -291,24 +291,24 @@ import Distributions: _univariate, _multivariate, _rand_params
         )
         stan_output = JSON.parsefile(filename)
         K = length(stan_output)
-        for k = 1:K
+        for k in 1:K
             d, X, lpdf = unpack_matvar_json_dict(dist, stan_output[k])
-            @test isapprox(logpdf(d, X), lpdf, atol = 1e-10)
-            @test isapprox(logpdf(d, [X, X]), [lpdf, lpdf], atol = 1e-8)
-            @test isapprox(pdf(d, X), exp(lpdf), atol = 1e-6)
-            @test isapprox(pdf(d, [X, X]), exp.([lpdf, lpdf]), atol = 1e-6)
+            @test isapprox(logpdf(d, X), lpdf, atol = 1.0e-10)
+            @test isapprox(logpdf(d, [X, X]), [lpdf, lpdf], atol = 1.0e-8)
+            @test isapprox(pdf(d, X), exp(lpdf), atol = 1.0e-6)
+            @test isapprox(pdf(d, [X, X]), exp.([lpdf, lpdf]), atol = 1.0e-6)
         end
         nothing
     end
 
     function test_against_stan(
-        dist::Union{
-            Type{MatrixNormal},
-            Type{MatrixTDist},
-            Type{MatrixBeta},
-            Type{MatrixFDist},
-        },
-    )
+            dist::Union{
+                Type{MatrixNormal},
+                Type{MatrixTDist},
+                Type{MatrixBeta},
+                Type{MatrixFDist},
+            },
+        )
         nothing
     end
 
@@ -372,7 +372,7 @@ import Distributions: _univariate, _multivariate, _rand_params
             q = MvTDist(10, randn(n), rand(d))
             ρ = Chisq(ν)
             A = rand(q, M)
-            z = [A[:, m]' * H[m] * A[:, m] / (A[:, m]' * Σ * A[:, m]) for m = 1:M]
+            z = [A[:, m]' * H[m] * A[:, m] / (A[:, m]' * Σ * A[:, m]) for m in 1:M]
             @test pvalue_kolmogorovsmirnoff(z, ρ) >= α
         end
         @testset "H ~ W(ν, I) ⟹ H[i, i] ~ χ²(ν)" begin
@@ -380,10 +380,10 @@ import Distributions: _univariate, _multivariate, _rand_params
             ρ = Chisq(κ)
             g = Wishart(κ, ScalMat(n, 1))
             mymats = zeros(n, n, M)
-            for m = 1:M
+            for m in 1:M
                 mymats[:, :, m] = rand(g)
             end
-            for i = 1:n
+            for i in 1:n
                 @test pvalue_kolmogorovsmirnoff(mymats[i, i, :], ρ) >= α / n
             end
         end
@@ -400,12 +400,12 @@ import Distributions: _univariate, _multivariate, _rand_params
 
             X = H[1]
             @test Distributions.singular_wishart_logkernel(d, X) ≈
-                  Distributions.nonsingular_wishart_logkernel(d, X)
+                Distributions.nonsingular_wishart_logkernel(d, X)
             @test Distributions.singular_wishart_logc0(n, ν, d.S, rank(d)) ≈
-                  Distributions.nonsingular_wishart_logc0(n, ν, d.S)
+                Distributions.nonsingular_wishart_logc0(n, ν, d.S)
             @test logpdf(d, X) ≈
-                  Distributions.singular_wishart_logkernel(d, X) +
-                  Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
+                Distributions.singular_wishart_logkernel(d, X) +
+                Distributions.singular_wishart_logc0(n, ν, d.S, rank(d))
         end
         nothing
     end
@@ -414,9 +414,9 @@ import Distributions: _univariate, _multivariate, _rand_params
         @testset "InverseWishart constructor" begin
             # Tests https://github.com/JuliaStats/Distributions.jl/issues/1948
             @test typeof(InverseWishart(5, ScalMat(5, 1))) ==
-                  InverseWishart{Float64,ScalMat{Float64}}
+                InverseWishart{Float64, ScalMat{Float64}}
             @test typeof(InverseWishart(5, PDiagMat(ones(Int, 5)))) ==
-                  InverseWishart{Float64,PDiagMat{Float64,Vector{Float64}}}
+                InverseWishart{Float64, PDiagMat{Float64, Vector{Float64}}}
         end
     end
 
@@ -467,14 +467,14 @@ import Distributions: _univariate, _multivariate, _rand_params
             G = LKJ(d, η)
             M = 10000
             α = 0.05
-            L = sum(1:(d-1))
+            L = sum(1:(d - 1))
             ρ = Distributions._marginal(G)
             mymats = zeros(d, d, M)
-            for m = 1:M
+            for m in 1:M
                 mymats[:, :, m] = rand(G)
             end
-            for i = 1:d
-                for j = 1:(i-1)
+            for i in 1:d
+                for j in 1:(i - 1)
                     @test pvalue_kolmogorovsmirnoff(mymats[i, j, :], ρ) >= α / L
                 end
             end
@@ -487,9 +487,9 @@ import Distributions: _univariate, _multivariate, _rand_params
             η = 2.3
             lkj = LKJ(d, η)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst(d, η)
+                Distributions.lkj_onion_loginvconst(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_loginvconst_alt(d, η)
+                Distributions.lkj_loginvconst_alt(d, η)
             @test lkj.logc0 == -Distributions.lkj_onion_loginvconst(d, η)
             #  =============
             #  odd uniform
@@ -498,15 +498,15 @@ import Distributions: _univariate, _multivariate, _rand_params
             η = 1.0
             lkj = LKJ(d, η)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst(d, η)
+                Distributions.lkj_onion_loginvconst(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
+                Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_vine_loginvconst_uniform(d)
+                Distributions.lkj_vine_loginvconst_uniform(d)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_loginvconst_alt(d, η)
+                Distributions.lkj_loginvconst_alt(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.corr_logvolume(d)
+                Distributions.corr_logvolume(d)
             @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_odd(d, Float64)
             #  =============
             #  even non-uniform
@@ -515,9 +515,9 @@ import Distributions: _univariate, _multivariate, _rand_params
             η = 2.3
             lkj = LKJ(d, η)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst(d, η)
+                Distributions.lkj_onion_loginvconst(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_loginvconst_alt(d, η)
+                Distributions.lkj_loginvconst_alt(d, η)
             @test lkj.logc0 == -Distributions.lkj_onion_loginvconst(d, η)
             #  =============
             #  even uniform
@@ -526,15 +526,15 @@ import Distributions: _univariate, _multivariate, _rand_params
             η = 1.0
             lkj = LKJ(d, η)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst(d, η)
+                Distributions.lkj_onion_loginvconst(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
+                Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
             @test Distributions.lkj_vine_loginvconst(d, η) ≈
-                  Distributions.lkj_vine_loginvconst_uniform(d)
+                Distributions.lkj_vine_loginvconst_uniform(d)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.lkj_loginvconst_alt(d, η)
+                Distributions.lkj_loginvconst_alt(d, η)
             @test Distributions.lkj_onion_loginvconst(d, η) ≈
-                  Distributions.corr_logvolume(d)
+                Distributions.corr_logvolume(d)
             @test lkj.logc0 == -Distributions.lkj_onion_loginvconst_uniform_even(d, Float64)
         end
         @testset "check integrating constant as a volume" begin
@@ -561,11 +561,11 @@ import Distributions: _univariate, _multivariate, _rand_params
     #  =============================================================================
 
     function test_matrixvariate(
-        dist::Type{<:MatrixDistribution},
-        n::Integer,
-        p::Integer,
-        M::Integer,
-    )
+            dist::Type{<:MatrixDistribution},
+            n::Integer,
+            p::Integer,
+            M::Integer,
+        )
         test_distr(dist, n, p, M)
         test_against_univariate(dist)
         test_against_multivariate(dist, n, p)

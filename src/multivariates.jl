@@ -20,7 +20,7 @@ size(d::MultivariateDistribution)
 # TODO: inconsistency with other `ArrayLikeVariate`s and `rand(s, (n,))` - maybe remove?
 rand(rng::AbstractRNG, s::Sampleable{Multivariate}, n::Int) =
     @inbounds rand!(rng, sampler(s), Matrix{eltype(s)}(undef, length(s), n))
-rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
+rand(rng::AbstractRNG, s::Sampleable{Multivariate, Continuous}, n::Int) =
     @inbounds rand!(rng, sampler(s), Matrix{float(eltype(s))}(undef, length(s), n))
 
 ## domain
@@ -31,22 +31,22 @@ rand(rng::AbstractRNG, s::Sampleable{Multivariate,Continuous}, n::Int) =
 If ``x`` is a vector, it returns whether x is within the support of ``d``.
 If ``x`` is a matrix, it returns whether every column in ``x`` is within the support of ``d``.
 """
-insupport{D<:MultivariateDistribution}(d::Union{D,Type{D}}, x::AbstractArray)
+insupport{D <: MultivariateDistribution}(d::Union{D, Type{D}}, x::AbstractArray)
 
 function insupport!(
-    r::AbstractArray,
-    d::Union{D,Type{D}},
-    X::AbstractMatrix,
-) where {D<:MultivariateDistribution}
+        r::AbstractArray,
+        d::Union{D, Type{D}},
+        X::AbstractMatrix,
+    ) where {D <: MultivariateDistribution}
     n = length(r)
     size(X) == (length(d), n) || throw(DimensionMismatch("Inconsistent array dimensions."))
-    for i = 1:n
+    for i in 1:n
         @inbounds r[i] = insupport(d, view(X, :, i))
     end
     return r
 end
 
-insupport(d::Union{D,Type{D}}, X::AbstractMatrix) where {D<:MultivariateDistribution} =
+insupport(d::Union{D, Type{D}}, X::AbstractMatrix) where {D <: MultivariateDistribution} =
     insupport!(BitArray(undef, size(X, 2)), d, X)
 
 ## statistics
@@ -104,12 +104,12 @@ function cor(d::MultivariateDistribution)
     @assert size(C, 2) == n
     R = Matrix{eltype(C)}(undef, n, n)
 
-    for j = 1:n
-        for i = 1:(j-1)
+    for j in 1:n
+        for i in 1:(j - 1)
             @inbounds R[i, j] = R[j, i]
         end
         R[j, j] = 1.0
-        for i = (j+1):n
+        for i in (j + 1):n
             @inbounds R[i, j] = C[i, j] / sqrt(C[i, i] * C[j, j])
         end
     end
@@ -120,17 +120,17 @@ end
 ##### Specific distributions #####
 
 for fname in [
-    "dirichlet.jl",
-    "multinomial.jl",
-    "dirichletmultinomial.jl",
-    "jointorderstatistics.jl",
-    "mvnormal.jl",
-    "mvnormalcanon.jl",
-    "mvlogitnormal.jl",
-    "mvlognormal.jl",
-    "mvtdist.jl",
-    "product.jl", # deprecated
-    "vonmisesfisher.jl",
-]
+        "dirichlet.jl",
+        "multinomial.jl",
+        "dirichletmultinomial.jl",
+        "jointorderstatistics.jl",
+        "mvnormal.jl",
+        "mvnormalcanon.jl",
+        "mvlogitnormal.jl",
+        "mvlognormal.jl",
+        "mvtdist.jl",
+        "product.jl", # deprecated
+        "vonmisesfisher.jl",
+    ]
     include(joinpath("multivariate", fname))
 end

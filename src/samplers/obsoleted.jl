@@ -7,19 +7,19 @@
 ##### Draw Table #####
 
 # Store an alias table
-struct DiscreteDistributionTable <: Sampler{Univariate,Discrete}
+struct DiscreteDistributionTable <: Sampler{Univariate, Discrete}
     table::Vector{Vector{Int64}}
     bounds::Vector{Int64}
 end
 
 # TODO: Test if bit operations can speed up Base64 mod's and fld's
-function DiscreteDistributionTable(probs::Vector{T}) where {T<:Real}
+function DiscreteDistributionTable(probs::Vector{T}) where {T <: Real}
     # Cache the cardinality of the outcome set
     n = length(probs)
 
     # Convert all Float64's into integers
     vals = Vector{Int64}(undef, n)
-    for i = 1:n
+    for i in 1:n
         vals[i] = round(Int, probs[i] * 64^9)
     end
 
@@ -28,14 +28,14 @@ function DiscreteDistributionTable(probs::Vector{T}) where {T<:Real}
     bounds = zeros(Int64, 9)
 
     # Special case for deterministic distributions
-    for i = 1:n
+    for i in 1:n
         if vals[i] == 64^9
             table[1] = Vector{Int64}(undef, 64)
-            for j = 1:64
+            for j in 1:64
                 table[1][j] = i
             end
             bounds[1] = 64^9
-            for j = 2:9
+            for j in 2:9
                 table[j] = Vector{Int64}()
                 bounds[j] = 64^9
             end
@@ -45,14 +45,14 @@ function DiscreteDistributionTable(probs::Vector{T}) where {T<:Real}
 
     # Fill tables
     multiplier = 1
-    for index = 9:-1:1
+    for index in 9:-1:1
         counts = Vector{Int64}()
-        for i = 1:n
+        for i in 1:n
             digit = mod(vals[i], 64)
             # vals[i] = fld(vals[i], 64)
             vals[i] >>= 6
             bounds[index] += digit
-            for itr = 1:digit
+            for itr in 1:digit
                 push!(counts, i)
             end
         end
@@ -70,7 +70,7 @@ end
 
 function rand(table::DiscreteDistributionTable)
     # 64^9 - 1 == 0x003fffffffffffff
-    i = rand(1:(64^9-1))
+    i = rand(1:(64^9 - 1))
     # if i == 64^9
     #   return table.table[9][rand(1:length(table.table[9]))]
     # end
@@ -79,7 +79,7 @@ function rand(table::DiscreteDistributionTable)
         bound += 1
     end
     if bound > 1
-        index = fld(i - table.bounds[bound-1] - 1, 64^(9 - bound)) + 1
+        index = fld(i - table.bounds[bound - 1] - 1, 64^(9 - bound)) + 1
     else
         index = fld(i - 1, 64^(9 - bound)) + 1
     end
@@ -91,7 +91,7 @@ Base.show(io::IO, table::DiscreteDistributionTable) = @printf io "DiscreteDistri
 
 ##### Huffman Table ######
 
-abstract type HuffmanNode{T} <: Sampler{Univariate,Discrete} end
+abstract type HuffmanNode{T} <: Sampler{Univariate, Discrete} end
 
 struct HuffmanLeaf{T} <: HuffmanNode{T}
     value::T
@@ -118,13 +118,13 @@ function Base.getindex(h::HuffmanBranch{T}, u::UInt64) where {T}
             h = h.right
         end
     end
-    h.value
+    return h.value
 end
 
 # build the huffman tree
 # could be slightly more efficient using a Deque.
 function huffman(values::AbstractVector{T}, weights::AbstractVector{UInt64}) where {T}
-    leafs = [HuffmanLeaf{T}(values[i], weights[i]) for i = 1:length(weights)]
+    leafs = [HuffmanLeaf{T}(values[i], weights[i]) for i in 1:length(weights)]
     sort!(leafs; rev = true)
 
     branches = Vector{HuffmanBranch{T}}()
@@ -139,7 +139,7 @@ function huffman(values::AbstractVector{T}, weights::AbstractVector{UInt64}) whe
         pushfirst!(branches, HuffmanBranch(left, right))
     end
 
-    pop!(branches)
+    return pop!(branches)
 end
 
 function rand(h::HuffmanNode{T}) where {T}
@@ -158,5 +158,5 @@ function rand(h::HuffmanNode{T}) where {T}
         end
         u = rem(u, w)
     end
-    h[u]
+    return h[u]
 end

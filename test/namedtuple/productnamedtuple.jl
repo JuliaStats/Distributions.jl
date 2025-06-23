@@ -44,29 +44,29 @@ using Test
     @testset "show" begin
         d = ProductNamedTupleDistribution((x = Gamma(1.0, 2.0), y = Normal()))
         @test repr(d) == """
-        ProductNamedTupleDistribution{(:x, :y)}(
-        x: Gamma{Float64}(α=1.0, θ=2.0)
-        y: Normal{Float64}(μ=0.0, σ=1.0)
-        )
-        """
+            ProductNamedTupleDistribution{(:x, :y)}(
+            x: Gamma{Float64}(α=1.0, θ=2.0)
+            y: Normal{Float64}(μ=0.0, σ=1.0)
+            )
+            """
     end
 
     @testset "Properties" begin
         @testset "eltype" begin
             @testset for nt in [
-                (x = Normal(1.0, 2.0), y = Normal(3.0, 4.0)),
-                (x = Normal(), y = Gamma()),
-                (x = Bernoulli(),),
-                (x = Normal(), y = Bernoulli()),
-                (w = LKJCholesky(3, 2.0),),
-                (
-                    x = Normal(),
-                    y = Dirichlet(10, 1.0),
-                    z = DiscreteUniform(1, 10),
-                    w = LKJCholesky(3, 2.0),
-                ),
-                (x = product_distribution((x = Normal(), y = Gamma())),),
-            ]
+                    (x = Normal(1.0, 2.0), y = Normal(3.0, 4.0)),
+                    (x = Normal(), y = Gamma()),
+                    (x = Bernoulli(),),
+                    (x = Normal(), y = Bernoulli()),
+                    (w = LKJCholesky(3, 2.0),),
+                    (
+                        x = Normal(),
+                        y = Dirichlet(10, 1.0),
+                        z = DiscreteUniform(1, 10),
+                        w = LKJCholesky(3, 2.0),
+                    ),
+                    (x = product_distribution((x = Normal(), y = Gamma())),),
+                ]
                 d = ProductNamedTupleDistribution(nt)
                 @test eltype(d) === eltype(rand(d))
             end
@@ -76,14 +76,14 @@ using Test
             nt = (x = Normal(1.0, 2.0), y = Gamma(), z = MvNormal(Diagonal(ones(5))))
             d = ProductNamedTupleDistribution(nt)
             @test @inferred(minimum(d)) ==
-                  (x = minimum(nt.x), y = minimum(nt.y), z = minimum(nt.z))
+                (x = minimum(nt.x), y = minimum(nt.y), z = minimum(nt.z))
         end
 
         @testset "maximum" begin
             nt = (x = Normal(1.0, 2.0), y = Gamma(), z = MvNormal(Diagonal(ones(5))))
             d = ProductNamedTupleDistribution(nt)
             @test @inferred(maximum(d)) ==
-                  (x = maximum(nt.x), y = maximum(nt.y), z = maximum(nt.z))
+                (x = maximum(nt.x), y = maximum(nt.y), z = maximum(nt.z))
         end
 
         @testset "insupport" begin
@@ -105,13 +105,13 @@ using Test
         x = (x = rand(nt.x), y = rand(nt.y), z = rand(nt.z), w = rand(nt.w))
         xrev = NamedTuple{(:z, :y, :x, :w)}(x)
         @test @inferred(logpdf(d, x)) ==
-              logpdf(nt.x, x.x) + logpdf(nt.y, x.y) + logpdf(nt.z, x.z) + logpdf(nt.w, x.w)
+            logpdf(nt.x, x.x) + logpdf(nt.y, x.y) + logpdf(nt.z, x.z) + logpdf(nt.w, x.w)
         @test @inferred(logpdf(d, xrev)) == logpdf(d, x)
         @test @inferred(pdf(d, x)) == exp(logpdf(d, x))
         @test @inferred(pdf(d, xrev)) == pdf(d, x)
         @test @inferred(loglikelihood(d, x)) == logpdf(d, x)
         @test @inferred(loglikelihood(d, xrev)) == loglikelihood(d, x)
-        xs = [(x = rand(nt.x), y = rand(nt.y), z = rand(nt.z), w = rand(nt.w)) for _ = 1:10]
+        xs = [(x = rand(nt.x), y = rand(nt.y), z = rand(nt.z), w = rand(nt.w)) for _ in 1:10]
         xs_perm = [NamedTuple{(:z, :y, :x, :w)}(x) for x in xs]
         @test @inferred(loglikelihood(d, xs)) == sum(logpdf.(Ref(d), xs))
         @test @inferred(loglikelihood(d, xs_perm)) == loglikelihood(d, xs)
@@ -126,20 +126,20 @@ using Test
         )
         d = ProductNamedTupleDistribution(nt)
         @test @inferred(mode(d)) ==
-              (x = mode(nt.x), y = mode(nt.y), z = mode(nt.z), w = mode(nt.w))
+            (x = mode(nt.x), y = mode(nt.y), z = mode(nt.z), w = mode(nt.w))
         @test @inferred(mean(d)) ==
-              (x = mean(nt.x), y = mean(nt.y), z = mean(nt.z), w = mean(nt.w))
+            (x = mean(nt.x), y = mean(nt.y), z = mean(nt.z), w = mean(nt.w))
         @test @inferred(var(d)) ==
-              (x = var(nt.x), y = var(nt.y), z = var(nt.z), w = var(nt.w))
+            (x = var(nt.x), y = var(nt.y), z = var(nt.z), w = var(nt.w))
         @test @inferred(entropy(d)) ==
-              entropy(nt.x) + entropy(nt.y) + entropy(nt.z) + entropy(nt.w)
+            entropy(nt.x) + entropy(nt.y) + entropy(nt.z) + entropy(nt.w)
 
         d1 = ProductNamedTupleDistribution((x = Normal(1.0, 2.0), y = Gamma()))
         d2 = ProductNamedTupleDistribution((x = Normal(), y = Gamma(2.0, 3.0)))
         d2_perm = ProductNamedTupleDistribution((y = Gamma(2.0, 3.0), x = Normal()))
         d2_sub = ProductNamedTupleDistribution((x = Normal(1.0, 2.0),))
         @test kldivergence(d1, d2) ==
-              kldivergence(d1.dists.x, d2.dists.x) + kldivergence(d1.dists.y, d2.dists.y)
+            kldivergence(d1.dists.x, d2.dists.x) + kldivergence(d1.dists.y, d2.dists.y)
         @test kldivergence(d1, d2_perm) == kldivergence(d1, d2)
         @test_throws ArgumentError kldivergence(d1, d2_sub)
         @test_throws ArgumentError kldivergence(d2_sub, d1)
@@ -196,7 +196,7 @@ using Test
             @test length(xs1) == 10
             @test all(insupport.(Ref(d), xs1))
 
-            xs2 = @inferred Array{<:NamedTuple{(:x, :y, :z, :w)},3} rand(rng, d, (2, 3, 4))
+            xs2 = @inferred Array{<:NamedTuple{(:x, :y, :z, :w)}, 3} rand(rng, d, (2, 3, 4))
             @test size(xs2) == (2, 3, 4)
             @test all(insupport.(Ref(d), xs2))
 
@@ -208,12 +208,14 @@ using Test
         end
 
         @testset "rand!" begin
-            d = ProductNamedTupleDistribution((
-                x = Normal(1.0, 2.0),
-                y = Gamma(),
-                z = Dirichlet(5, 1.0),
-                w = Bernoulli(),
-            ))
+            d = ProductNamedTupleDistribution(
+                (
+                    x = Normal(1.0, 2.0),
+                    y = Gamma(),
+                    z = Dirichlet(5, 1.0),
+                    w = Bernoulli(),
+                )
+            )
             x = rand(d)
             xs = Array{typeof(x)}(undef, (2, 3, 4))
             rand!(d, xs)

@@ -25,7 +25,7 @@ using Test
     @test length(a.qy) == length(a.qx) == 10
     @test a.qx ≈ b.qx ≈ c.qx ≈ a.qy ≈ b.qy ≈ c.qy
 
-    for n = 0:3
+    for n in 0:3
         a = qqbuild(rand(n), Uniform(0, 1))
         @test length(a.qy) == length(a.qx) == n
     end

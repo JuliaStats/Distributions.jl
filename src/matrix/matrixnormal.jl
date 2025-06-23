@@ -17,8 +17,8 @@ f(\\mathbf{X};\\mathbf{M}, \\mathbf{U}, \\mathbf{V}) = \\frac{\\exp\\left( -\\fr
 ``\\mathbf{X}\\sim \\textrm{MN}_{n,p}(\\mathbf{M},\\mathbf{U},\\mathbf{V})``
 if and only if ``\\text{vec}(\\mathbf{X})\\sim \\textrm{N}(\\text{vec}(\\mathbf{M}),\\mathbf{V}\\otimes\\mathbf{U})``.
 """
-struct MatrixNormal{T<:Real,TM<:AbstractMatrix,TU<:AbstractPDMat,TV<:AbstractPDMat} <:
-       ContinuousMatrixDistribution
+struct MatrixNormal{T <: Real, TM <: AbstractMatrix, TU <: AbstractPDMat, TV <: AbstractPDMat} <:
+    ContinuousMatrixDistribution
     M::TM
     U::TU
     V::TV
@@ -30,10 +30,10 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixNormal(
-    M::AbstractMatrix{T},
-    U::AbstractPDMat{T},
-    V::AbstractPDMat{T},
-) where {T<:Real}
+        M::AbstractMatrix{T},
+        U::AbstractPDMat{T},
+        V::AbstractPDMat{T},
+    ) where {T <: Real}
     n, p = size(M)
     n == size(U, 1) || throw(ArgumentError("Number of rows of M must equal dim of U."))
     p == size(V, 1) || throw(ArgumentError("Number of columns of M must equal dim of V."))
@@ -42,7 +42,7 @@ function MatrixNormal(
     prom_M = convert(AbstractArray{R}, M)
     prom_U = convert(AbstractArray{R}, U)
     prom_V = convert(AbstractArray{R}, V)
-    MatrixNormal{R,typeof(prom_M),typeof(prom_U),typeof(prom_V)}(
+    return MatrixNormal{R, typeof(prom_M), typeof(prom_U), typeof(prom_V)}(
         prom_M,
         prom_U,
         prom_V,
@@ -52,7 +52,7 @@ end
 
 function MatrixNormal(M::AbstractMatrix, U::AbstractPDMat, V::AbstractPDMat)
     T = Base.promote_eltype(M, U, V)
-    MatrixNormal(
+    return MatrixNormal(
         convert(AbstractArray{T}, M),
         convert(AbstractArray{T}, U),
         convert(AbstractArray{T}, V),
@@ -61,18 +61,18 @@ end
 
 MatrixNormal(
     M::AbstractMatrix,
-    U::Union{AbstractMatrix,LinearAlgebra.Cholesky},
-    V::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    U::Union{AbstractMatrix, LinearAlgebra.Cholesky},
+    V::Union{AbstractMatrix, LinearAlgebra.Cholesky},
 ) = MatrixNormal(M, PDMat(U), PDMat(V))
 MatrixNormal(
     M::AbstractMatrix,
-    U::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    U::Union{AbstractMatrix, LinearAlgebra.Cholesky},
     V::AbstractPDMat,
 ) = MatrixNormal(M, PDMat(U), V)
 MatrixNormal(
     M::AbstractMatrix,
     U::AbstractPDMat,
-    V::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    V::Union{AbstractMatrix, LinearAlgebra.Cholesky},
 ) = MatrixNormal(M, U, PDMat(V))
 
 MatrixNormal(m::Int, n::Int) =
@@ -89,25 +89,25 @@ show(io::IO, d::MatrixNormal) =
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where {T<:Real}
+function convert(::Type{MatrixNormal{T}}, d::MatrixNormal) where {T <: Real}
     MM = convert(AbstractArray{T}, d.M)
     UU = convert(AbstractArray{T}, d.U)
     VV = convert(AbstractArray{T}, d.V)
-    MatrixNormal{T,typeof(MM),typeof(UU),typeof(VV)}(MM, UU, VV, T(d.logc0))
+    return MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(d.logc0))
 end
-Base.convert(::Type{MatrixNormal{T}}, d::MatrixNormal{T}) where {T<:Real} = d
+Base.convert(::Type{MatrixNormal{T}}, d::MatrixNormal{T}) where {T <: Real} = d
 
 function convert(
-    ::Type{MatrixNormal{T}},
-    M::AbstractMatrix,
-    U::AbstractPDMat,
-    V::AbstractPDMat,
-    logc0,
-) where {T<:Real}
+        ::Type{MatrixNormal{T}},
+        M::AbstractMatrix,
+        U::AbstractPDMat,
+        V::AbstractPDMat,
+        logc0,
+    ) where {T <: Real}
     MM = convert(AbstractArray{T}, M)
     UU = convert(AbstractArray{T}, U)
     VV = convert(AbstractArray{T}, V)
-    MatrixNormal{T,typeof(MM),typeof(UU),typeof(VV)}(MM, UU, VV, T(logc0))
+    return MatrixNormal{T, typeof(MM), typeof(UU), typeof(VV)}(MM, UU, VV, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ var(d::MatrixNormal) = reshape(diag(cov(d)), size(d))
 
 params(d::MatrixNormal) = (d.M, d.U, d.V)
 
-@inline partype(d::MatrixNormal{T}) where {T<:Real} = T
+@inline partype(d::MatrixNormal{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
@@ -141,12 +141,12 @@ params(d::MatrixNormal) = (d.M, d.U, d.V)
 function matrixnormal_logc0(U::AbstractPDMat, V::AbstractPDMat)
     n = size(U, 1)
     p = size(V, 1)
-    -(n * p / 2) * (logtwo + logπ) - (n / 2) * logdet(V) - (p / 2) * logdet(U)
+    return -(n * p / 2) * (logtwo + logπ) - (n / 2) * logdet(V) - (p / 2) * logdet(U)
 end
 
 function logkernel(d::MatrixNormal, X::AbstractMatrix)
     A = X - d.M
-    -0.5 * tr((d.V \ A') * (d.U \ A))
+    return -0.5 * tr((d.V \ A') * (d.U \ A))
 end
 
 #  -----------------------------------------------------------------------------
@@ -160,7 +160,7 @@ function _rand!(rng::AbstractRNG, d::MatrixNormal, Y::AbstractMatrix)
     X = randn(rng, n, p)
     A = cholesky(d.U).L
     B = cholesky(d.V).U
-    Y .= d.M .+ A * X * B
+    return Y .= d.M .+ A * X * B
 end
 
 #  -----------------------------------------------------------------------------

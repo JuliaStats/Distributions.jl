@@ -19,5 +19,5 @@ using Distributions, Random, Test
     @test mean(truncated(Exponential(1.0); lower = -Inf, upper = 0 + eps())) ≈ 0 atol =
         eps()
     @test mean(truncated(Exponential(1.0), 1.0, 1.0 + eps())) ≈ 1.0 # near-degenerate
-    @test mean(truncated(Exponential(1e308), 1.0, 1.0 + eps())) ≈ 1.0 # near-degenerate
+    @test mean(truncated(Exponential(1.0e308), 1.0, 1.0 + eps())) ≈ 1.0 # near-degenerate
 end

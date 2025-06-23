@@ -33,6 +33,7 @@ function verify_and_test_drive(jsonfile, selected, n_tsamples::Int)
         # verification and testing
         verify_and_test(dtype, d, dct, n_tsamples)
     end
+    return
 end
 
 
@@ -47,11 +48,11 @@ _json_value(x::AbstractString) =
 
 
 function verify_and_test(
-    D::Union{Type,Function},
-    d::UnivariateDistribution,
-    dct::Dict,
-    n_tsamples::Int,
-)
+        D::Union{Type, Function},
+        d::UnivariateDistribution,
+        dct::Dict,
+        n_tsamples::Int,
+    )
     # verify properties
     #
     # Note: properties include all applicable params and stats
@@ -70,7 +71,7 @@ function verify_and_test(
     @test partype(d) === mapfoldl(
         typeof,
         (S, T) ->
-            T <: Distribution ? promote_type(S, partype(T)) :
+        T <: Distribution ? promote_type(S, partype(T)) :
             (T <: Nothing ? S : promote_type(S, eltype(T))),
         pars;
         init = Union{},
@@ -99,7 +100,7 @@ function verify_and_test(
         expect_v = _json_value(val)
         f = eval(Symbol(fname))
         @assert isa(f, Function)
-        @test isapprox(f(d), expect_v; atol = 1e-12, rtol = 1e-8, nans = true)
+        @test isapprox(f(d), expect_v; atol = 1.0e-12, rtol = 1.0e-8, nans = true)
     end
     @test extrema(d) == (minimum(d), maximum(d))
 
@@ -113,9 +114,9 @@ function verify_and_test(
 
         # pdf method is not implemented for StudentizedRange
         if !isa(d, StudentizedRange)
-            @test Base.Fix1(pdf, d).(x) ≈ p atol = 1e-16 rtol = 1e-8
+            @test Base.Fix1(pdf, d).(x) ≈ p atol = 1.0e-16 rtol = 1.0e-8
             @test Base.Fix1(logpdf, d).(x) ≈ lp atol =
-                isa(d, NoncentralHypergeometric) ? 1e-4 : 1e-12
+                isa(d, NoncentralHypergeometric) ? 1.0e-4 : 1.0e-12
         end
 
         # cdf method is not implemented for NormalInverseGaussian
@@ -123,13 +124,13 @@ function verify_and_test(
             @test isapprox(
                 cdf(d, x),
                 cf;
-                atol = isa(d, NoncentralHypergeometric) ? 1e-8 : 1e-12,
+                atol = isa(d, NoncentralHypergeometric) ? 1.0e-8 : 1.0e-12,
             )
         end
     end
 
     # verify quantiles
-    if !isa(d, Union{Skellam,VonMises,NormalInverseGaussian})
+    if !isa(d, Union{Skellam, VonMises, NormalInverseGaussian})
         qts = dct["quans"]
         for qt in qts
             q = Float64(qt["q"])
@@ -159,13 +160,13 @@ function verify_and_test(
     if isa(d, Cosine)
         n_tsamples = floor(Int, n_tsamples / 10)
     elseif isa(d, NoncentralBeta) ||
-           isa(d, NoncentralChisq) ||
-           isa(d, NoncentralF) ||
-           isa(d, NoncentralT)
+            isa(d, NoncentralChisq) ||
+            isa(d, NoncentralF) ||
+            isa(d, NoncentralT)
         n_tsamples = min(n_tsamples, 100)
     end
 
-    if !isa(d, Union{Skellam,VonMises,NoncentralHypergeometric,NormalInverseGaussian})
+    return if !isa(d, Union{Skellam, VonMises, NoncentralHypergeometric, NormalInverseGaussian})
         test_distr(d, n_tsamples)
     end
 end

@@ -21,7 +21,7 @@ External links
 * [Chi distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi_distribution)
 
 """
-struct Chi{T<:Real} <: ContinuousUnivariateDistribution
+struct Chi{T <: Real} <: ContinuousUnivariateDistribution
     ν::T
     Chi{T}(ν::T) where {T} = new{T}(ν)
 end
@@ -36,15 +36,15 @@ Chi(ν::Integer; check_args::Bool = true) = Chi(float(ν); check_args = check_ar
 @distr_support Chi 0.0 Inf
 
 ### Conversions
-convert(::Type{Chi{T}}, ν::Real) where {T<:Real} = Chi(T(ν))
-Base.convert(::Type{Chi{T}}, d::Chi) where {T<:Real} = Chi{T}(T(d.ν))
-Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T<:Real} = d
+convert(::Type{Chi{T}}, ν::Real) where {T <: Real} = Chi(T(ν))
+Base.convert(::Type{Chi{T}}, d::Chi) where {T <: Real} = Chi{T}(T(d.ν))
+Base.convert(::Type{Chi{T}}, d::Chi{T}) where {T <: Real} = d
 
 #### Parameters
 
 dof(d::Chi) = d.ν
 params(d::Chi) = (d.ν,)
-@inline partype(d::Chi{T}) where {T<:Real} = T
+@inline partype(d::Chi{T}) where {T <: Real} = T
 
 
 #### Statistics
@@ -57,23 +57,23 @@ _chi_skewness(μ::Real, σ::Real) = (σ2 = σ^2; σ3 = σ2 * σ; (μ / σ3) * (1
 function skewness(d::Chi)
     μ = mean(d)
     σ = sqrt(d.ν - μ^2)
-    _chi_skewness(μ, σ)
+    return _chi_skewness(μ, σ)
 end
 
 function kurtosis(d::Chi)
     μ = mean(d)
     σ = sqrt(d.ν - μ^2)
     γ = _chi_skewness(μ, σ)
-    (2 / σ^2) * (1 - μ * σ * γ - σ^2)
+    return (2 / σ^2) * (1 - μ * σ * γ - σ^2)
 end
 
-entropy(d::Chi{T}) where {T<:Real} =
+entropy(d::Chi{T}) where {T <: Real} =
     (ν = d.ν; loggamma(ν / 2) - T(logtwo) / 2 - ((ν - 1) / 2) * digamma(ν / 2) + ν / 2)
 
 function mode(d::Chi; check_args::Bool = true)
     ν = d.ν
-    @check_args(Chi, (ν, ν >= 1, "Chi distribution has no mode when ν < 1"),)
-    sqrt(ν - 1)
+    @check_args(Chi, (ν, ν >= 1, "Chi distribution has no mode when ν < 1"))
+    return sqrt(ν - 1)
 end
 
 function kldivergence(p::Chi, q::Chi)
@@ -93,7 +93,7 @@ function logpdf(d::Chi, x::Real)
     return x < zero(x) ? oftype(val, -Inf) : val
 end
 
-gradlogpdf(d::Chi{T}, x::Real) where {T<:Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
+gradlogpdf(d::Chi{T}, x::Real) where {T <: Real} = x >= 0 ? (d.ν - 1) / x - x : zero(T)
 
 for f in (:cdf, :ccdf, :logcdf, :logccdf)
     @eval $f(d::Chi, x::Real) = $f(Chisq(d.ν; check_args = false), max(x, 0)^2)
@@ -107,7 +107,7 @@ end
 
 rand(rng::AbstractRNG, d::Chi) = (ν = d.ν; sqrt(rand(rng, Gamma(ν / 2.0, 2.0one(ν)))))
 
-struct ChiSampler{S<:Sampleable{Univariate,Continuous}} <: Sampleable{Univariate,Continuous}
+struct ChiSampler{S <: Sampleable{Univariate, Continuous}} <: Sampleable{Univariate, Continuous}
     s::S
 end
 

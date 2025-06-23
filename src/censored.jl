@@ -40,7 +40,7 @@ should be implemented:
 - `censored(d0::D, l::Real, ::Nothing)`
 """
 function censored end
-function censored(d0::UnivariateDistribution, l::T, u::T) where {T<:Real}
+function censored(d0::UnivariateDistribution, l::T, u::T) where {T <: Real}
     return Censored(d0, l, u)
 end
 function censored(d0::UnivariateDistribution, ::Nothing, u::Real)
@@ -52,10 +52,10 @@ end
 censored(d0::UnivariateDistribution, l::Real, u::Real) = censored(d0, promote(l, u)...)
 censored(d0::UnivariateDistribution, ::Nothing, ::Nothing) = d0
 function censored(
-    d0::UnivariateDistribution;
-    lower::Union{Real,Nothing} = nothing,
-    upper::Union{Real,Nothing} = nothing,
-)
+        d0::UnivariateDistribution;
+        lower::Union{Real, Nothing} = nothing,
+        upper::Union{Real, Nothing} = nothing,
+    )
     return censored(d0, lower, upper)
 end
 
@@ -65,48 +65,48 @@ end
 Generic wrapper for a [`censored`](@ref) distribution.
 """
 struct Censored{
-    D<:UnivariateDistribution,
-    S<:ValueSupport,
-    T<:Real,
-    TL<:Union{T,Nothing},
-    TU<:Union{T,Nothing},
-} <: UnivariateDistribution{S}
+        D <: UnivariateDistribution,
+        S <: ValueSupport,
+        T <: Real,
+        TL <: Union{T, Nothing},
+        TU <: Union{T, Nothing},
+    } <: UnivariateDistribution{S}
     uncensored::D      # the original distribution (uncensored)
     lower::TL      # lower bound
     upper::TU      # upper bound
     function Censored(
-        d0::UnivariateDistribution,
-        lower::T,
-        upper::T;
-        check_args::Bool = true,
-    ) where {T<:Real}
+            d0::UnivariateDistribution,
+            lower::T,
+            upper::T;
+            check_args::Bool = true,
+        ) where {T <: Real}
         @check_args(Censored, lower ≤ upper)
-        new{typeof(d0),value_support(typeof(d0)),T,T,T}(d0, lower, upper)
+        return new{typeof(d0), value_support(typeof(d0)), T, T, T}(d0, lower, upper)
     end
     function Censored(
-        d0::UnivariateDistribution,
-        l::Nothing,
-        u::Real;
-        check_args::Bool = true,
-    )
-        new{typeof(d0),value_support(typeof(d0)),typeof(u),Nothing,typeof(u)}(d0, l, u)
+            d0::UnivariateDistribution,
+            l::Nothing,
+            u::Real;
+            check_args::Bool = true,
+        )
+        return new{typeof(d0), value_support(typeof(d0)), typeof(u), Nothing, typeof(u)}(d0, l, u)
     end
     function Censored(
-        d0::UnivariateDistribution,
-        l::Real,
-        u::Nothing;
-        check_args::Bool = true,
-    )
-        new{typeof(d0),value_support(typeof(d0)),typeof(l),typeof(l),Nothing}(d0, l, u)
+            d0::UnivariateDistribution,
+            l::Real,
+            u::Nothing;
+            check_args::Bool = true,
+        )
+        return new{typeof(d0), value_support(typeof(d0)), typeof(l), typeof(l), Nothing}(d0, l, u)
     end
 end
 
-const LeftCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} =
-    Censored{D,S,T,T,Nothing}
-const RightCensored{D<:UnivariateDistribution,S<:ValueSupport,T<:Real} =
-    Censored{D,S,T,Nothing,T}
+const LeftCensored{D <: UnivariateDistribution, S <: ValueSupport, T <: Real} =
+    Censored{D, S, T, T, Nothing}
+const RightCensored{D <: UnivariateDistribution, S <: ValueSupport, T <: Real} =
+    Censored{D, S, T, Nothing, T}
 
-function censored(d::Censored, l::T, u::T) where {T<:Real}
+function censored(d::Censored, l::T, u::T) where {T <: Real}
     return censored(
         d.uncensored,
         d.lower === nothing ? l : max(l, d.lower),
@@ -125,11 +125,11 @@ function params(d::Censored)
     return (d0params..., d.lower, d.upper)
 end
 
-function partype(d::Censored{<:UnivariateDistribution,<:ValueSupport,T}) where {T}
+function partype(d::Censored{<:UnivariateDistribution, <:ValueSupport, T}) where {T}
     return promote_type(partype(d.uncensored), T)
 end
 
-Base.eltype(::Type{<:Censored{D,S,T}}) where {D,S,T} = promote_type(T, eltype(D))
+Base.eltype(::Type{<:Censored{D, S, T}}) where {D, S, T} = promote_type(T, eltype(D))
 
 #### Range and Support
 
@@ -152,8 +152,8 @@ function insupport(d::Censored, x::Real)
     upper = d.upper
     return (
         (_in_open_interval(x, lower, upper) && insupport(d0, x)) ||
-        (x == lower && cdf(d0, lower) > 0) ||
-        (x == upper && _ccdf_inclusive(d0, upper) > 0)
+            (x == lower && cdf(d0, lower) > 0) ||
+            (x == upper && _ccdf_inclusive(d0, upper) > 0)
     )
 end
 
@@ -164,7 +164,7 @@ function show(io::IO, ::MIME"text/plain", d::Censored)
     d0 = d.uncensored
     uml, namevals = _use_multline_show(d0)
     uml ? show_multline(io, d0, namevals; newline = false) : show_oneline(io, d0, namevals)
-    if d.lower === nothing
+    return if d.lower === nothing
         print(io, "; upper=$(d.upper))")
     elseif d.upper === nothing
         print(io, "; lower=$(d.lower))")
@@ -211,8 +211,8 @@ function mean(d::Censored)
     log_prob_interval = log1mexp(logaddexp(log_prob_lower, log_prob_upper))
     μ = (
         xexpy(lower, log_prob_lower) +
-        xexpy(upper, log_prob_upper) +
-        xexpy(mean(_to_truncated(d)), log_prob_interval)
+            xexpy(upper, log_prob_upper) +
+            xexpy(mean(_to_truncated(d)), log_prob_interval)
     )
     return μ
 end
@@ -250,21 +250,21 @@ function var(d::Censored)
     μ_interval = mean(dtrunc)
     μ = (
         xexpy(lower, log_prob_lower) +
-        xexpy(upper, log_prob_upper) +
-        xexpy(μ_interval, log_prob_interval)
+            xexpy(upper, log_prob_upper) +
+            xexpy(μ_interval, log_prob_interval)
     )
     v_interval = var(dtrunc) + abs2(μ_interval - μ)
     v = (
         xexpy(abs2(lower - μ), log_prob_lower) +
-        xexpy(abs2(upper - μ), log_prob_upper) +
-        xexpy(v_interval, log_prob_interval)
+            xexpy(abs2(upper - μ), log_prob_upper) +
+            xexpy(v_interval, log_prob_interval)
     )
     return v
 end
 
 # this expectation also uses the following relation:
 # 𝔼_{x ~ τ}[-log d(x)] = H[τ] - log P_{x ~ d₀}(l ≤ x ≤ u)
-#   + (P_{x ~ d₀}(x = l) (log P_{x ~ d₀}(x = l) - log P_{x ~ d₀}(x ≤ l)) + 
+#   + (P_{x ~ d₀}(x = l) (log P_{x ~ d₀}(x = l) - log P_{x ~ d₀}(x ≤ l)) +
 #      P_{x ~ d₀}(x = u) (log P_{x ~ d₀}(x = u) - log P_{x ~ d₀}(x ≥ u))
 #   ) / P_{x ~ d₀}(l ≤ x ≤ u),
 # where H[τ] is the entropy of τ.
@@ -434,7 +434,7 @@ function ccdf(d::Censored, x::Real)
     end
 end
 
-function logccdf(d::Censored{<:Any,<:Any,T}, x::Real) where {T}
+function logccdf(d::Censored{<:Any, <:Any, T}, x::Real) where {T}
     lower = d.lower
     upper = d.upper
     result = logccdf(d.uncensored, x)

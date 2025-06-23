@@ -7,18 +7,18 @@ using ForwardDiff: Dual
 # Core testing procedure
 
 function test_mixture(
-    g::UnivariateMixture,
-    n::Int,
-    ns::Int,
-    rng::Union{AbstractRNG,Missing} = missing,
-)
+        g::UnivariateMixture,
+        n::Int,
+        ns::Int,
+        rng::Union{AbstractRNG, Missing} = missing,
+    )
     if g isa UnivariateGMM
         T = eltype(g.means)
     else
         T = eltype(typeof(g))
     end
     X = zeros(T, n)
-    for i = 1:n
+    for i in 1:n
         X[i] = rand(g)
     end
 
@@ -28,21 +28,21 @@ function test_mixture(
 
     # mean
     mu = 0.0
-    for k = 1:K
+    for k in 1:K
         mu += pr[k] * mean(component(g, k))
     end
     @test @inferred(mean(g)) ≈ mu
 
     # evaluation of cdf
     cf = zeros(T, n)
-    for k = 1:K
+    for k in 1:K
         c_k = component(g, k)
-        for i = 1:n
+        for i in 1:n
             cf[i] += pr[k] * cdf(c_k, X[i])
         end
     end
 
-    for i = 1:n
+    for i in 1:n
         @test @inferred(cdf(g, X[i])) ≈ cf[i]
     end
     @test Base.Fix1(cdf, g).(X) ≈ cf
@@ -50,9 +50,9 @@ function test_mixture(
     # evaluation
     P0 = zeros(T, n, K)
     LP0 = zeros(T, n, K)
-    for k = 1:K
+    for k in 1:K
         c_k = component(g, k)
-        for i = 1:n
+        for i in 1:n
             x_i = X[i]
             P0[i, k] = pdf(c_k, x_i)
             LP0[i, k] = logpdf(c_k, x_i)
@@ -62,7 +62,7 @@ function test_mixture(
     mix_p0 = P0 * pr
     mix_lp0 = log.(mix_p0)
 
-    for i = 1:n
+    for i in 1:n
         @test @inferred(pdf(g, X[i])) ≈ mix_p0[i]
         @test @inferred(logpdf(g, X[i])) ≈ mix_lp0[i]
         @test @inferred(componentwise_pdf(g, X[i])) ≈ vec(P0[i, :])
@@ -84,7 +84,7 @@ function test_mixture(
     # sampling
     # sampling does not work with `Float32` since `AliasTable` does not support `Float32`
     # Ref: https://github.com/JuliaStats/StatsBase.jl/issues/158
-    if T <: AbstractFloat && eltype(probs(g)) === Float64
+    return if T <: AbstractFloat && eltype(probs(g)) === Float64
         if ismissing(rng)
             Xs = rand(g, ns)
         else
@@ -97,13 +97,13 @@ function test_mixture(
 end
 
 function test_mixture(
-    g::MultivariateMixture,
-    n::Int,
-    ns::Int,
-    rng::Union{AbstractRNG,Missing} = missing,
-)
+        g::MultivariateMixture,
+        n::Int,
+        ns::Int,
+        rng::Union{AbstractRNG, Missing} = missing,
+    )
     X = zeros(length(g), n)
-    for i = 1:n
+    for i in 1:n
         if ismissing(rng)
             X[:, i] = rand(g)
         else
@@ -117,7 +117,7 @@ function test_mixture(
 
     # mean
     mu = zeros(length(g))
-    for k = 1:K
+    for k in 1:K
         mu .+= pr[k] .* mean(component(g, k))
     end
     @test @inferred(mean(g)) ≈ mu
@@ -125,9 +125,9 @@ function test_mixture(
     # evaluation
     P0 = zeros(n, K)
     LP0 = zeros(n, K)
-    for k = 1:K
+    for k in 1:K
         c_k = component(g, k)
-        for i = 1:n
+        for i in 1:n
             x_i = X[:, i]
             P0[i, k] = pdf(c_k, x_i)
             LP0[i, k] = logpdf(c_k, x_i)
@@ -137,7 +137,7 @@ function test_mixture(
     mix_p0 = P0 * pr
     mix_lp0 = log.(mix_p0)
 
-    for i = 1:n
+    for i in 1:n
         x_i = X[:, i]
         @test @inferred(pdf(g, x_i)) ≈ mix_p0[i]
         @test @inferred(logpdf(g, x_i)) ≈ mix_lp0[i]
@@ -164,7 +164,7 @@ function test_mixture(
     @test size(Xs) == (length(g), ns)
     @test isapprox(vec(mean(Xs, dims = 2)), mean(g), atol = 0.1)
     @test isapprox(cov(Xs, dims = 2), cov(g), atol = 0.1)
-    @test isapprox(var(Xs, dims = 2), var(g), atol = 0.1)
+    return @test isapprox(var(Xs, dims = 2), var(g), atol = 0.1)
 end
 
 function test_params(g::AbstractMixtureModel)
@@ -173,26 +173,26 @@ function test_params(g::AbstractMixtureModel)
     mm = MixtureModel(C, pars...)
     @test g.prior == mm.prior
     @test g.components == mm.components
-    @test g == deepcopy(g)
+    return @test g == deepcopy(g)
 end
 
 function test_params(g::UnivariateGMM)
     pars = params(g)
     mm = UnivariateGMM(pars...)
     @test g == mm
-    @test g == deepcopy(g)
+    return @test g == deepcopy(g)
 end
 
 # Tests
 
 @testset "Testing Mixtures with $key" for (key, rng) in Dict(
-    "rand(...)" => missing,
-    "rand(rng, ...)" => MersenneTwister(123),
-)
+        "rand(...)" => missing,
+        "rand(rng, ...)" => MersenneTwister(123),
+    )
 
     @testset "Testing UnivariateMixture" begin
         g_u = MixtureModel([Normal(), Normal()])
-        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
         @test ncomponents(g_u) == 2
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -207,7 +207,7 @@ end
             [(0.0, 1.0), (2.0, 1.0), (-4.0, 1.5)],
             [0.2, 0.5, 0.3],
         )
-        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
         @test ncomponents(g_u) == 3
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -217,7 +217,7 @@ end
 
         g_u =
             MixtureModel(Normal{Float32}, [(0.0f0, 1.0f0), (0.0f0, 2.0f0)], [0.4f0, 0.6f0])
-        @test isa(g_u, MixtureModel{Univariate,Continuous,<:Normal})
+        @test isa(g_u, MixtureModel{Univariate, Continuous, <:Normal})
         @test ncomponents(g_u) == 2
         test_mixture(g_u, 1000, 10^6, rng)
         test_params(g_u)
@@ -227,11 +227,13 @@ end
         @test @inferred(median(g_u)) === 0.0f0
         @test @inferred(quantile(g_u, 0.5f0)) === 0.0f0
 
-        g_u = MixtureModel([
-            TriangularDist(-1, 2, 0),
-            TriangularDist(-0.5, 3, 1),
-            TriangularDist(-2, 0, -1),
-        ])
+        g_u = MixtureModel(
+            [
+                TriangularDist(-1, 2, 0),
+                TriangularDist(-0.5, 3, 1),
+                TriangularDist(-2, 0, -1),
+            ]
+        )
         @test minimum(g_u) ≈ -2.0
         @test maximum(g_u) ≈ 3.0
         @test extrema(g_u) == (minimum(g_u), maximum(g_u))
@@ -281,7 +283,7 @@ end
                 ],
                 T[0.2, 0.5, 0.3],
             )
-            @test isa(g_m, MixtureModel{Multivariate,Continuous,IsoNormal})
+            @test isa(g_m, MixtureModel{Multivariate, Continuous, IsoNormal})
             @test length(components(g_m)) == 3
             @test length(g_m) == 2
             @test insupport(g_m, [0.0, 0.0])
@@ -297,7 +299,7 @@ end
         unif_mixt = MixtureModel([u1, u2])
         @test var(utot) ≈ var(unif_mixt)
         @test mean(utot) ≈ mean(unif_mixt)
-        for x = -1.0:0.5:2.5
+        for x in -1.0:0.5:2.5
             @test cdf(utot, x) ≈ cdf(utot, x)
         end
     end

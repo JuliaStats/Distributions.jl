@@ -4,7 +4,7 @@ using StatsBase
 
 @testset "OrderStatistic" begin
     @testset "basic" begin
-        for dist in [Uniform(), Normal(), DiscreteUniform(10)], n in [1, 2, 10], i = 1:n
+        for dist in [Uniform(), Normal(), DiscreteUniform(10)], n in [1, 2, 10], i in 1:n
             d = OrderStatistic(dist, n, i)
             @test d isa OrderStatistic
             if dist isa DiscreteUnivariateDistribution
@@ -25,7 +25,7 @@ using StatsBase
     end
 
     @testset "params" begin
-        for dist in [Uniform(), Normal(), DiscreteUniform(10)], n in [1, 2, 10], i = 1:n
+        for dist in [Uniform(), Normal(), DiscreteUniform(10)], n in [1, 2, 10], i in 1:n
             d = OrderStatistic(dist, n, i)
             @test params(d) == (params(dist)..., n, i)
             @test partype(d) === partype(dist)
@@ -34,7 +34,7 @@ using StatsBase
 
     @testset "support" begin
         n = 10
-        for i = 1:10
+        for i in 1:10
             d1 = OrderStatistic(Uniform(), n, i)
             @test minimum(d1) == 0
             @test maximum(d1) == 1
@@ -76,9 +76,9 @@ using StatsBase
             # test against the exact formula computed using BigFloats
             @testset for T in (Float32, Float64)
                 @testset for dist in
-                             [Uniform(T(-2), T(1)), Normal(T(3), T(2)), Exponential(T(10))],
-                    n in [1, 10, 100],
-                    i = 1:n
+                        [Uniform(T(-2), T(1)), Normal(T(3), T(2)), Exponential(T(10))],
+                        n in [1, 10, 100],
+                        i in 1:n
 
                     d = OrderStatistic(dist, n, i)
                     c = factorial(big(n)) / factorial(big(i - 1)) / factorial(big(n - i))
@@ -95,9 +95,9 @@ using StatsBase
         @testset "discrete" begin
             # test check that the pdf is the difference of the CDF at adjacent points
             @testset for dist in
-                         [DiscreteUniform(10, 30), Poisson(100.0), Binomial(20, 0.3)],
-                n in [1, 10, 100],
-                i = 1:n
+                    [DiscreteUniform(10, 30), Poisson(100.0), Binomial(20, 0.3)],
+                    n in [1, 10, 100],
+                    i in 1:n
 
                 d = OrderStatistic(dist, n, i)
                 xs = quantile(dist, 0.01):quantile(dist, 0.99)
@@ -113,14 +113,14 @@ using StatsBase
 
     @testset "distribution normalizes to 1" begin
         @testset for dist in [
-                Uniform(-2, 1),
-                Normal(2, 3),
-                Exponential(5),
-                DiscreteUniform(10, 40),
-                Poisson(100),
-            ],
-            n in [1, 10, 20],
-            i = 1:n
+                    Uniform(-2, 1),
+                    Normal(2, 3),
+                    Exponential(5),
+                    DiscreteUniform(10, 40),
+                    Poisson(100),
+                ],
+                n in [1, 10, 20],
+                i in 1:n
 
             d = OrderStatistic(dist, n, i)
             Distributions.expectation(one, d) ≈ 1
@@ -137,12 +137,12 @@ using StatsBase
                 (DiscreteUniform(1, 10), DiscreteUniform(1, 10)),
                 (Poisson(T(20)), Poisson(big(20))),
             ]
-            @testset for (dist, bigdist) in dists, n in [10, 100], i = 1:n
+            @testset for (dist, bigdist) in dists, n in [10, 100], i in 1:n
                 dist isa DiscreteDistribution && T !== Float64 && continue
                 d = OrderStatistic(dist, n, i)
                 # since density is concentrated around the i/n quantile, sample a point
                 # nearby it
-                x = quantile(dist, clamp(i / n + (rand() - 1 // 2) / 10, 1e-4, 1 - 1e-4))
+                x = quantile(dist, clamp(i / n + (rand() - 1 // 2) / 10, 1.0e-4, 1 - 1.0e-4))
                 p = cdf(bigdist, big(x))
                 cdf_exp = sum(i:n) do j
                     c = binomial(big(n), big(j))
@@ -169,15 +169,15 @@ using StatsBase
                 xq = @inferred(T, quantile(d, q))
                 xqc = @inferred(T, cquantile(d, 1 - q))
                 @test xq ≈ xqc
-                @test isapprox(xq, T(x); atol = 1e-4) ||
-                      (dist isa DiscreteDistribution && xq < x)
+                @test isapprox(xq, T(x); atol = 1.0e-4) ||
+                    (dist isa DiscreteDistribution && xq < x)
             end
         end
     end
 
     @testset "rand" begin
         @testset for T in [Float32, Float64],
-            dist in [Uniform(T(-2), T(1)), Normal(T(1), T(2))]
+                dist in [Uniform(T(-2), T(1)), Normal(T(1), T(2))]
 
             d = OrderStatistic(dist, 10, 5)
             rng = Random.default_rng()
@@ -202,7 +202,7 @@ using StatsBase
         tol = quantile(Normal(), 1 - α)
 
         @testset for dist in [Uniform(), Exponential(), Poisson(20), Binomial(20, 0.3)]
-            @testset for n in [1, 10, 100], i = 1:n
+            @testset for n in [1, 10, 100], i in 1:n
                 d = OrderStatistic(dist, n, i)
                 x = rand(d, ndraws)
                 m, v = mean_and_var(x)

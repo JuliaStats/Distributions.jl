@@ -20,10 +20,10 @@ External links:
 * [Poisson distribution on Wikipedia](http://en.wikipedia.org/wiki/Poisson_distribution)
 
 """
-struct Poisson{T<:Real} <: DiscreteUnivariateDistribution
+struct Poisson{T <: Real} <: DiscreteUnivariateDistribution
     λ::T
 
-    Poisson{T}(λ::Real) where {T<:Real} = new{T}(λ)
+    Poisson{T}(λ::Real) where {T <: Real} = new{T}(λ)
 end
 
 function Poisson(λ::Real; check_args::Bool = true)
@@ -37,9 +37,9 @@ Poisson() = Poisson{Float64}(1.0)
 @distr_support Poisson 0 (d.λ == zero(typeof(d.λ)) ? 0 : Inf)
 
 #### Conversions
-convert(::Type{Poisson{T}}, λ::S) where {T<:Real,S<:Real} = Poisson(T(λ))
-Base.convert(::Type{Poisson{T}}, d::Poisson) where {T<:Real} = Poisson{T}(T(d.λ))
-Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T<:Real} = d
+convert(::Type{Poisson{T}}, λ::S) where {T <: Real, S <: Real} = Poisson(T(λ))
+Base.convert(::Type{Poisson{T}}, d::Poisson) where {T <: Real} = Poisson{T}(T(d.λ))
+Base.convert(::Type{Poisson{T}}, d::Poisson{T}) where {T <: Real} = d
 
 ### Parameters
 
@@ -56,7 +56,7 @@ mode(d::Poisson) = floor(Int, d.λ)
 
 function modes(d::Poisson)
     λ = d.λ
-    isinteger(λ) ? [round(Int, λ) - 1, round(Int, λ)] : [floor(Int, λ)]
+    return isinteger(λ) ? [round(Int, λ) - 1, round(Int, λ)] : [floor(Int, λ)]
 end
 
 var(d::Poisson) = d.λ
@@ -65,21 +65,21 @@ skewness(d::Poisson) = one(typeof(d.λ)) / sqrt(d.λ)
 
 kurtosis(d::Poisson) = one(typeof(d.λ)) / d.λ
 
-function entropy(d::Poisson{T}) where {T<:Real}
+function entropy(d::Poisson{T}) where {T <: Real}
     λ = rate(d)
     if λ == zero(T)
         return zero(T)
     elseif λ < 50
         s = zero(T)
         λk = one(T)
-        for k = 1:100
+        for k in 1:100
             λk *= λ
             s += λk * loggamma(k + 1) / gamma(k + 1)
         end
         return λ * (1 - log(λ)) + exp(-λ) * s
     else
         return log(2 * pi * ℯ * λ) / 2 - (1 / (12 * λ)) - (1 / (24 * λ * λ)) -
-               (19 / (360 * λ * λ * λ))
+            (19 / (360 * λ * λ * λ))
     end
 end
 
@@ -114,14 +114,14 @@ struct PoissonStats <: SufficientStats
     tw::Float64   # total sample weight
 end
 
-suffstats(::Type{<:Poisson}, x::AbstractArray{T}) where {T<:Integer} =
+suffstats(::Type{<:Poisson}, x::AbstractArray{T}) where {T <: Integer} =
     PoissonStats(sum(x), length(x))
 
 function suffstats(
-    ::Type{<:Poisson},
-    x::AbstractArray{T},
-    w::AbstractArray{Float64},
-) where {T<:Integer}
+        ::Type{<:Poisson},
+        x::AbstractArray{T},
+        w::AbstractArray{Float64},
+    ) where {T <: Integer}
     n = length(x)
     n == length(w) || throw(DimensionMismatch("Inconsistent array lengths."))
     sx = 0.0
@@ -131,7 +131,7 @@ function suffstats(
         @inbounds sx += x[i] * wi
         tw += wi
     end
-    PoissonStats(sx, tw)
+    return PoissonStats(sx, tw)
 end
 
 fit_mle(::Type{<:Poisson}, ss::PoissonStats) = Poisson(ss.sx / ss.tw)

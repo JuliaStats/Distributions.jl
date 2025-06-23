@@ -8,22 +8,22 @@ It is recommended to not use `reshape` instead of the constructor of `ReshapedDi
 directly since `reshape` can return more optimized distributions for specific types of `d`
 and number of dimensions `N`.
 """
-struct ReshapedDistribution{N,S<:ValueSupport,D<:Distribution{<:ArrayLikeVariate,S}} <:
-       Distribution{ArrayLikeVariate{N},S}
+struct ReshapedDistribution{N, S <: ValueSupport, D <: Distribution{<:ArrayLikeVariate, S}} <:
+    Distribution{ArrayLikeVariate{N}, S}
     dist::D
     dims::Dims{N}
 
     function ReshapedDistribution(
-        dist::Distribution{<:ArrayLikeVariate,S},
-        dims::Dims{N},
-    ) where {N,S<:ValueSupport}
+            dist::Distribution{<:ArrayLikeVariate, S},
+            dims::Dims{N},
+        ) where {N, S <: ValueSupport}
         _reshape_check_dims(dist, dims)
-        return new{N,S,typeof(dist)}(dist, dims)
+        return new{N, S, typeof(dist)}(dist, dims)
     end
 end
 
 function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
-    (all(d > 0 for d in dims) && length(dist) == prod(dims)) || throw(
+    return (all(d > 0 for d in dims) && length(dist) == prod(dims)) || throw(
         ArgumentError(
             "dimensions $(dims) do not match size of source distribution $(size(dist))",
         ),
@@ -31,12 +31,12 @@ function _reshape_check_dims(dist::Distribution{<:ArrayLikeVariate}, dims::Dims)
 end
 
 Base.size(d::ReshapedDistribution) = d.dims
-Base.eltype(::Type{ReshapedDistribution{<:Any,<:ValueSupport,D}}) where {D} = eltype(D)
+Base.eltype(::Type{ReshapedDistribution{<:Any, <:ValueSupport, D}}) where {D} = eltype(D)
 
 partype(d::ReshapedDistribution) = partype(d.dist)
 params(d::ReshapedDistribution) = (d.dist, d.dims)
 
-function insupport(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
+function insupport(d::ReshapedDistribution{N}, x::AbstractArray{<:Real, N}) where {N}
     return size(d) == size(x) && insupport(d.dist, reshape(x, size(d.dist)))
 end
 
@@ -55,9 +55,9 @@ rank(d::ReshapedDistribution{2}) = minimum(size(d))
 
 # logpdf evaluation
 # have to fix method ambiguity due to default fallback for `MatrixDistribution`...
-_logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N} = __logpdf(d, x)
+_logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real, N}) where {N} = __logpdf(d, x)
 _logpdf(d::ReshapedDistribution{2}, x::AbstractMatrix{<:Real}) = __logpdf(d, x)
-function __logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real,N}) where {N}
+function __logpdf(d::ReshapedDistribution{N}, x::AbstractArray{<:Real, N}) where {N}
     dist = d.dist
     return @inbounds logpdf(dist, reshape(x, size(dist)))
 end
@@ -65,9 +65,9 @@ end
 # loglikelihood
 # useful if the original distribution defined more optimized methods
 @inline function loglikelihood(
-    d::ReshapedDistribution{N},
-    x::AbstractArray{<:Real,N},
-) where {N}
+        d::ReshapedDistribution{N},
+        x::AbstractArray{<:Real, N},
+    ) where {N}
     @boundscheck begin
         size(x) == size(d) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
@@ -75,9 +75,9 @@ end
     return @inbounds loglikelihood(dist, reshape(x, size(dist)))
 end
 @inline function loglikelihood(
-    d::ReshapedDistribution{N},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        d::ReshapedDistribution{N},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     @boundscheck begin
         M > N || throw(
             DimensionMismatch(
@@ -94,10 +94,10 @@ end
 
 # sampling
 function _rand!(
-    rng::AbstractRNG,
-    d::ReshapedDistribution{N},
-    x::AbstractArray{<:Real,N},
-) where {N}
+        rng::AbstractRNG,
+        d::ReshapedDistribution{N},
+        x::AbstractArray{<:Real, N},
+    ) where {N}
     dist = d.dist
     @inbounds rand!(rng, dist, reshape(x, size(dist)))
     return x
@@ -151,9 +151,9 @@ Base.vec(dist::Distribution{<:ArrayLikeVariate}) = reshape(dist, length(dist))
 
 # avoid unnecessary wrappers
 function Base.reshape(
-    dist::ReshapedDistribution{<:Any,<:ValueSupport,<:MultivariateDistribution},
-    dims::Tuple{Int},
-)
+        dist::ReshapedDistribution{<:Any, <:ValueSupport, <:MultivariateDistribution},
+        dims::Tuple{Int},
+    )
     _reshape_check_dims(dist, dims)
     return dist.dist
 end

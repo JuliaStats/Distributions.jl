@@ -5,12 +5,12 @@ using StableRNGs
 @testset "Categorical" begin
 
     for p in Any[
-        [0.5, 0.5],
-        [0.5f0, 0.5f0],
-        [1 // 2, 1 // 2],
-        [0.1, 0.3, 0.2, 0.4],
-        [0.15, 0.25, 0.6],
-    ]
+            [0.5, 0.5],
+            [0.5f0, 0.5f0],
+            [1 // 2, 1 // 2],
+            [0.1, 0.3, 0.2, 0.4],
+            [0.15, 0.25, 0.6],
+        ]
 
         d = Categorical(p)
         k = length(p)
@@ -26,7 +26,7 @@ using StableRNGs
         @test d ≈ d
 
         c = 0.0
-        for i = 1:k
+        for i in 1:k
             c += p[i]
             @test @inferred(pdf(d, i)) == p[i]
             @test @inferred(pdf(d, float(i))) == p[i]
@@ -82,10 +82,10 @@ using StableRNGs
     p = ones(10^6) * 1.0e-6
     @test Distributions.isprobvec(p)
 
-    @test convert(Categorical{Float64,Vector{Float64}}, d) === d
+    @test convert(Categorical{Float64, Vector{Float64}}, d) === d
     for x in (d, probs(d))
-        d32 = convert(Categorical{Float32,Vector{Float32}}, d)
-        @test d32 isa Categorical{Float32,Vector{Float32}}
+        d32 = convert(Categorical{Float32, Vector{Float32}}, d)
+        @test d32 isa Categorical{Float32, Vector{Float32}}
         @test probs(d32) == map(Float32, probs(d))
     end
 
@@ -127,7 +127,7 @@ using StableRNGs
 
     @testset "issue #832" begin
         priorities = collect(Float64, 1:1000)
-        priorities[1:50] .= 1e8
+        priorities[1:50] .= 1.0e8
 
         at = Distributions.AliasTable(priorities)
         iat = rand(at, 16)
@@ -135,7 +135,7 @@ using StableRNGs
         # failure rate of a single sample is sum(51:1000)/50e8 = 9.9845e-5
         # failure rate of 4 out of 16 samples is 1-cdf(Binomial(16, 9.9845e-5), 3) = 1.8074430840897548e-13
         # this test should randomly fail with a probability of 1.8074430840897548e-13
-        @test count(==(1e8), priorities[iat]) >= 13
+        @test count(==(1.0e8), priorities[iat]) >= 13
     end
 
 end

@@ -7,27 +7,27 @@ Random.seed!(1234)
     # Test the consistency between the recursive and nonrecursive computation of the pdf
     # of the Binomial distribution
     for (p, n) in [
-        (0.6, 10),
-        (0.8, 6),
-        (0.5, 40),
-        (0.04, 20),
-        (1.0, 100),
-        (0.0, 10),
-        (0.999999, 1000),
-        (1e-7, 1000),
-    ]
+            (0.6, 10),
+            (0.8, 6),
+            (0.5, 40),
+            (0.04, 20),
+            (1.0, 100),
+            (0.0, 10),
+            (0.999999, 1000),
+            (1.0e-7, 1000),
+        ]
         d = Binomial(n, p)
 
         a = Base.Fix1(pdf, d).(0:n)
-        for t = 0:n
-            @test pdf(d, t) ≈ a[1+t]
+        for t in 0:n
+            @test pdf(d, t) ≈ a[1 + t]
         end
 
         li = rand(0:n, 2)
         rng = minimum(li):maximum(li)
         b = Base.Fix1(pdf, d).(rng)
         for t in rng
-            @test pdf(d, t) ≈ b[t-first(rng)+1]
+            @test pdf(d, t) ≈ b[t - first(rng) + 1]
         end
     end
 
@@ -41,7 +41,7 @@ Random.seed!(1234)
     @test median(Binomial(65, 3 // 10)) == 19
     @test median(Binomial(85, 3 // 10)) == 25
 
-    @test all(median(Binomial(7, p)) == quantile(Binomial(7, p), 1 // 2) for p = 0:0.1:1)
+    @test all(median(Binomial(7, p)) == quantile(Binomial(7, p), 1 // 2) for p in 0:0.1:1)
 
     # Test mode
     @test Distributions.mode(Binomial(100, 0.4)) == 40

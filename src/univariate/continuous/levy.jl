@@ -21,13 +21,13 @@ External links
 
 * [Lévy distribution on Wikipedia](http://en.wikipedia.org/wiki/Lévy_distribution)
 """
-struct Levy{T<:Real} <: ContinuousUnivariateDistribution
+struct Levy{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-    Levy{T}(μ::T, σ::T) where {T<:Real} = new{T}(μ, σ)
+    Levy{T}(μ::T, σ::T) where {T <: Real} = new{T}(μ, σ)
 end
 
-function Levy(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
+function Levy(μ::T, σ::T; check_args::Bool = true) where {T <: Real}
     @check_args Levy (σ, σ > zero(σ))
     return Levy{T}(μ, σ)
 end
@@ -42,9 +42,9 @@ Levy(μ::Real = 0.0) = Levy(μ, one(μ); check_args = false)
 
 #### Conversions
 
-convert(::Type{Levy{T}}, μ::S, σ::S) where {T<:Real,S<:Real} = Levy(T(μ), T(σ))
-Base.convert(::Type{Levy{T}}, d::Levy) where {T<:Real} = Levy{T}(T(d.μ), T(d.σ))
-Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T<:Real} = d
+convert(::Type{Levy{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = Levy(T(μ), T(σ))
+Base.convert(::Type{Levy{T}}, d::Levy) where {T <: Real} = Levy{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{Levy{T}}, d::Levy{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -55,51 +55,51 @@ partype(::Levy{T}) where {T} = T
 
 #### Statistics
 
-mean(d::Levy{T}) where {T<:Real} = T(Inf)
-var(d::Levy{T}) where {T<:Real} = T(Inf)
-skewness(d::Levy{T}) where {T<:Real} = T(NaN)
-kurtosis(d::Levy{T}) where {T<:Real} = T(NaN)
+mean(d::Levy{T}) where {T <: Real} = T(Inf)
+var(d::Levy{T}) where {T <: Real} = T(Inf)
+skewness(d::Levy{T}) where {T <: Real} = T(NaN)
+kurtosis(d::Levy{T}) where {T <: Real} = T(NaN)
 
 mode(d::Levy) = d.σ / 3 + d.μ
 
 entropy(d::Levy) = (1 - 3digamma(1) + log(16 * d.σ^2 * π)) / 2
 
-median(d::Levy{T}) where {T<:Real} = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
+median(d::Levy{T}) where {T <: Real} = d.μ + d.σ / (2 * T(erfcinv(0.5))^2)
 
 
 #### Evaluation
 
-function pdf(d::Levy{T}, x::Real) where {T<:Real}
+function pdf(d::Levy{T}, x::Real) where {T <: Real}
     μ, σ = params(d)
     if x <= μ
         return zero(T)
     end
     z = x - μ
-    (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3 // 2)
+    return (sqrt(σ) / sqrt2π) * exp((-σ) / (2z)) / z^(3 // 2)
 end
 
-function logpdf(d::Levy{T}, x::Real) where {T<:Real}
+function logpdf(d::Levy{T}, x::Real) where {T <: Real}
     μ, σ = params(d)
     if x <= μ
         return T(-Inf)
     end
     z = x - μ
-    (log(σ) - log2π - σ / z - 3log(z)) / 2
+    return (log(σ) - log2π - σ / z - 3log(z)) / 2
 end
 
-cdf(d::Levy{T}, x::Real) where {T<:Real} =
+cdf(d::Levy{T}, x::Real) where {T <: Real} =
     x <= d.μ ? zero(T) : erfc(sqrt(d.σ / (2(x - d.μ))))
-ccdf(d::Levy{T}, x::Real) where {T<:Real} =
+ccdf(d::Levy{T}, x::Real) where {T <: Real} =
     x <= d.μ ? one(T) : erf(sqrt(d.σ / (2(x - d.μ))))
 
 quantile(d::Levy, p::Real) = d.μ + d.σ / (2 * erfcinv(p)^2)
 cquantile(d::Levy, p::Real) = d.μ + d.σ / (2 * erfinv(p)^2)
 
-mgf(d::Levy{T}, t::Real) where {T<:Real} = t == zero(t) ? one(T) : T(NaN)
+mgf(d::Levy{T}, t::Real) where {T <: Real} = t == zero(t) ? one(T) : T(NaN)
 
 function cf(d::Levy, t::Real)
     μ, σ = params(d)
-    exp(im * μ * t - sqrt(-2im * σ * t))
+    return exp(im * μ * t - sqrt(-2im * σ * t))
 end
 
 

@@ -17,9 +17,9 @@ using Distributions
     @test insupport(Ω, 1) && insupport(Ω, 2) && insupport(Ω, K)
     @test !insupport(Ω, 0) && !insupport(Ω, 2.1) && !insupport(Ω, K + 1)
 
-    K, M, δ, atol = 100, 60, 0.2, 1e-3
+    K, M, δ, atol = 100, 60, 0.2, 1.0e-3
     Ω = Soliton(K, M, δ, atol)
-    ds = [d for d = 1:K if pdf(Ω, d) > 0]
+    ds = [d for d in 1:K if pdf(Ω, d) > 0]
     @test all(Base.Fix1(pdf, Ω).(ds) .> atol)
     @test cdf(Ω, 0) ≈ 0
     @test cdf(Ω, K) ≈ 1

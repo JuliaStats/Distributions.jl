@@ -23,13 +23,13 @@ External links
 * [Inverse Gaussian distribution on Wikipedia](http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution)
 
 """
-struct InverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
+struct InverseGaussian{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     λ::T
-    InverseGaussian{T}(μ::T, λ::T) where {T<:Real} = new{T}(μ, λ)
+    InverseGaussian{T}(μ::T, λ::T) where {T <: Real} = new{T}(μ, λ)
 end
 
-function InverseGaussian(μ::T, λ::T; check_args::Bool = true) where {T<:Real}
+function InverseGaussian(μ::T, λ::T; check_args::Bool = true) where {T <: Real}
     @check_args InverseGaussian (μ, μ > zero(μ)) (λ, λ > zero(λ))
     return InverseGaussian{T}(μ, λ)
 end
@@ -46,13 +46,13 @@ InverseGaussian() = InverseGaussian{Float64}(1.0, 1.0)
 
 #### Conversions
 
-function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T<:Real,S<:Real}
-    InverseGaussian(T(μ), T(λ))
+function convert(::Type{InverseGaussian{T}}, μ::S, λ::S) where {T <: Real, S <: Real}
+    return InverseGaussian(T(μ), T(λ))
 end
-function Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian) where {T<:Real}
-    InverseGaussian{T}(T(d.μ), T(d.λ))
+function Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian) where {T <: Real}
+    return InverseGaussian{T}(T(d.μ), T(d.λ))
 end
-Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian{T}) where {T<:Real} = d
+Base.convert(::Type{InverseGaussian{T}}, d::InverseGaussian{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -73,13 +73,13 @@ kurtosis(d::InverseGaussian) = 15d.μ / d.λ
 function mode(d::InverseGaussian)
     μ, λ = params(d)
     r = μ / λ
-    μ * (sqrt(1 + (3r / 2)^2) - (3r / 2))
+    return μ * (sqrt(1 + (3r / 2)^2) - (3r / 2))
 end
 
 
 #### Evaluation
 
-function pdf(d::InverseGaussian{T}, x::Real) where {T<:Real}
+function pdf(d::InverseGaussian{T}, x::Real) where {T <: Real}
     if x > 0
         μ, λ = params(d)
         return sqrt(λ / (twoπ * x^3)) * exp(-λ * (x - μ)^2 / (2μ^2 * x))
@@ -88,7 +88,7 @@ function pdf(d::InverseGaussian{T}, x::Real) where {T<:Real}
     end
 end
 
-function logpdf(d::InverseGaussian{T}, x::Real) where {T<:Real}
+function logpdf(d::InverseGaussian{T}, x::Real) where {T <: Real}
     if x > 0
         μ, λ = params(d)
         return (log(λ) - (log2π + 3log(x)) - λ * (x - μ)^2 / (μ^2 * x)) / 2
@@ -169,7 +169,7 @@ function rand(rng::AbstractRNG, d::InverseGaussian)
     x1 = μ + μ / (2λ) * (w - sqrt(w * (4λ + w)))
     p1 = μ / (μ + x1)
     u = rand(rng)
-    u >= p1 ? μ^2 / x1 : x1
+    return u >= p1 ? μ^2 / x1 : x1
 end
 
 #### Fit model
@@ -187,14 +187,14 @@ end
 function suffstats(::Type{<:InverseGaussian}, x::AbstractVector{<:Real})
     sx = sum(x)
     sinvx = sum(inv, x)
-    InverseGaussianStats(sx, sinvx, length(x))
+    return InverseGaussianStats(sx, sinvx, length(x))
 end
 
 function suffstats(
-    ::Type{<:InverseGaussian},
-    x::AbstractVector{<:Real},
-    w::AbstractVector{<:Real},
-)
+        ::Type{<:InverseGaussian},
+        x::AbstractVector{<:Real},
+        w::AbstractVector{<:Real},
+    )
     n = length(x)
     if length(w) != n
         throw(DimensionMismatch("Inconsistent argument dimensions."))
@@ -208,11 +208,11 @@ function suffstats(
         sinvx += w[i] / x[i]
         sw += w[i]
     end
-    InverseGaussianStats(sx, sinvx, sw)
+    return InverseGaussianStats(sx, sinvx, sw)
 end
 
 function fit_mle(::Type{<:InverseGaussian}, ss::InverseGaussianStats)
     mu = ss.sx / ss.sw
     invlambda = ss.sinvx / ss.sw - inv(mu)
-    InverseGaussian(mu, inv(invlambda))
+    return InverseGaussian(mu, inv(invlambda))
 end

@@ -1,11 +1,11 @@
 ### statistics
 
-function mode(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function mode(d::Truncated{<:Normal{<:Real}, Continuous, T}) where {T <: Real}
     μ = mean(d.untruncated)
     return T(clamp(μ, extrema(d)...))
 end
 
-modes(d::Truncated{<:Normal{<:Real},Continuous}) = [mode(d)]
+modes(d::Truncated{<:Normal{<:Real}, Continuous}) = [mode(d)]
 
 # do not export. Used in mean
 # computes mean of standard normal distribution truncated to [a, b]
@@ -77,7 +77,7 @@ function _tnvar(a::Real, b::Real)
     end
 end
 
-function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function mean(d::Truncated{<:Normal{<:Real}, Continuous, T}) where {T <: Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -91,7 +91,7 @@ function mean(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     end
 end
 
-function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
+function var(d::Truncated{<:Normal{<:Real}, Continuous, T}) where {T <: Real}
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -105,7 +105,7 @@ function var(d::Truncated{<:Normal{<:Real},Continuous,T}) where {T<:Real}
     end
 end
 
-function entropy(d::Truncated{<:Normal{<:Real},Continuous})
+function entropy(d::Truncated{<:Normal{<:Real}, Continuous})
     d0 = d.untruncated
     z = d.tp
     μ = mean(d0)
@@ -115,7 +115,7 @@ function entropy(d::Truncated{<:Normal{<:Real},Continuous})
     b = (upper - μ) / σ
     aφa = isinf(a) ? 0.0 : a * normpdf(a)
     bφb = isinf(b) ? 0.0 : b * normpdf(b)
-    0.5 * (log2π + 1.0) + log(σ * z) + (aφa - bφb) / (2.0 * z)
+    return 0.5 * (log2π + 1.0) + log(σ * z) + (aφa - bφb) / (2.0 * z)
 end
 
 
@@ -124,7 +124,7 @@ end
 ## Use specialized sampler, as quantile-based method is inaccurate in
 ## tail regions of the Normal, issue #343
 
-function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real},Continuous})
+function rand(rng::AbstractRNG, d::Truncated{<:Normal{<:Real}, Continuous})
     d0 = d.untruncated
     μ = mean(d0)
     σ = std(d0)
@@ -155,7 +155,7 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
     else
         span = ub - lb
         if lb > 0 &&
-           span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
+                span > 2.0 / (lb + sqrt(lb^2 + 4.0)) * exp((lb^2 - lb * sqrt(lb^2 + 4.0)) / 4.0)
             a = (lb + sqrt(lb^2 + 4.0)) / 2.0
             while true
                 r = rand(rng, Exponential(1.0 / a)) + lb
@@ -165,8 +165,8 @@ function randnt(rng::AbstractRNG, lb::Float64, ub::Float64, tp::Float64)
                 end
             end
         elseif ub < 0 &&
-               ub - lb >
-               2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
+                ub - lb >
+                2.0 / (-ub + sqrt(ub^2 + 4.0)) * exp((ub^2 + ub * sqrt(ub^2 + 4.0)) / 4.0)
             a = (-ub + sqrt(ub^2 + 4.0)) / 2.0
             while true
                 r = rand(rng, Exponential(1.0 / a)) - ub

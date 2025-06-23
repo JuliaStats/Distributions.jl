@@ -14,7 +14,7 @@ External links
 * [Erlang distribution on Wikipedia](http://en.wikipedia.org/wiki/Erlang_distribution)
 
 """
-struct Erlang{T<:Real} <: ContinuousUnivariateDistribution
+struct Erlang{T <: Real} <: ContinuousUnivariateDistribution
     α::Int
     θ::T
     Erlang{T}(α::Int, θ::T) where {T} = new{T}(α, θ)
@@ -39,13 +39,13 @@ Erlang(α::Integer = 1) = Erlang(α, 1.0; check_args = false)
 @distr_support Erlang 0.0 Inf
 
 #### Conversions
-function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T<:Real,S<:Real}
-    Erlang(α, T(θ), check_args = false)
+function convert(::Type{Erlang{T}}, α::Integer, θ::S) where {T <: Real, S <: Real}
+    return Erlang(α, T(θ), check_args = false)
 end
-function Base.convert(::Type{Erlang{T}}, d::Erlang) where {T<:Real}
-    Erlang{T}(d.α, T(d.θ))
+function Base.convert(::Type{Erlang{T}}, d::Erlang) where {T <: Real}
+    return Erlang{T}(d.α, T(d.θ))
 end
-Base.convert(::Type{Erlang{T}}, d::Erlang{T}) where {T<:Real} = d
+Base.convert(::Type{Erlang{T}}, d::Erlang{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -53,7 +53,7 @@ shape(d::Erlang) = d.α
 scale(d::Erlang) = d.θ
 rate(d::Erlang) = inv(d.θ)
 params(d::Erlang) = (d.α, d.θ)
-@inline partype(d::Erlang{T}) where {T<:Real} = T
+@inline partype(d::Erlang{T}) where {T <: Real} = T
 
 #### Statistics
 
@@ -64,19 +64,19 @@ kurtosis(d::Erlang) = 6 / d.α
 
 function mode(d::Erlang; check_args::Bool = true)
     α, θ = params(d)
-    @check_args(Erlang, (α, α >= 1, "Erlang has no mode when α < 1"),)
-    θ * (α - 1)
+    @check_args(Erlang, (α, α >= 1, "Erlang has no mode when α < 1"))
+    return θ * (α - 1)
 end
 
 function entropy(d::Erlang)
     (α, θ) = params(d)
-    α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
+    return α + loggamma(α) + (1 - α) * digamma(α) + log(θ)
 end
 
 mgf(d::Erlang, t::Real) = (1 - t * d.θ)^(-d.α)
 function cgf(d::Erlang, t)
     α, θ = params(d)
-    -α * log1p(-t * θ)
+    return -α * log1p(-t * θ)
 end
 cf(d::Erlang, t::Real) = (1 - im * t * d.θ)^(-d.α)
 

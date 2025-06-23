@@ -22,17 +22,17 @@ External links:
 
 * [Skellam distribution on Wikipedia](http://en.wikipedia.org/wiki/Skellam_distribution)
 """
-struct Skellam{T<:Real} <: DiscreteUnivariateDistribution
+struct Skellam{T <: Real} <: DiscreteUnivariateDistribution
     μ1::T
     μ2::T
 
-    function Skellam{T}(μ1::T, μ2::T) where {T<:Real}
+    function Skellam{T}(μ1::T, μ2::T) where {T <: Real}
         return new{T}(μ1, μ2)
     end
 
 end
 
-function Skellam(μ1::T, μ2::T; check_args::Bool = true) where {T<:Real}
+function Skellam(μ1::T, μ2::T; check_args::Bool = true) where {T <: Real}
     @check_args Skellam (μ1, μ1 > zero(μ1)) (μ2, μ2 > zero(μ2))
     return Skellam{T}(μ1, μ2)
 end
@@ -43,7 +43,7 @@ Skellam(μ1::Integer, μ2::Integer; check_args::Bool = true) =
     Skellam(float(μ1), float(μ2); check_args = check_args)
 function Skellam(μ::Real; check_args::Bool = true)
     @check_args Skellam (μ, μ > zero(μ))
-    Skellam(μ, μ; check_args = false)
+    return Skellam(μ, μ; check_args = false)
 end
 Skellam() = Skellam{Float64}(1.0, 1.0)
 
@@ -51,9 +51,9 @@ Skellam() = Skellam{Float64}(1.0, 1.0)
 
 #### Conversions
 
-convert(::Type{Skellam{T}}, μ1::S, μ2::S) where {T<:Real,S<:Real} = Skellam(T(μ1), T(μ2))
-Base.convert(::Type{Skellam{T}}, d::Skellam) where {T<:Real} = Skellam{T}(T(d.μ1), T(d.μ2))
-Base.convert(::Type{Skellam{T}}, d::Skellam{T}) where {T<:Real} = d
+convert(::Type{Skellam{T}}, μ1::S, μ2::S) where {T <: Real, S <: Real} = Skellam(T(μ1), T(μ2))
+Base.convert(::Type{Skellam{T}}, d::Skellam) where {T <: Real} = Skellam{T}(T(d.μ1), T(d.μ2))
+Base.convert(::Type{Skellam{T}}, d::Skellam{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -78,8 +78,8 @@ function logpdf(d::Skellam, x::Real)
     μ1, μ2 = params(d)
     if insupport(d, x)
         return -(μ1 + μ2) +
-               (x / 2) * log(μ1 / μ2) +
-               log(besseli(x, 2 * sqrt(μ1) * sqrt(μ2)))
+            (x / 2) * log(μ1 / μ2) +
+            log(besseli(x, 2 * sqrt(μ1) * sqrt(μ2)))
     else
         return one(x) / 2 * log(zero(μ1 / μ2))
     end
@@ -87,12 +87,12 @@ end
 
 function mgf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
+    return exp(μ1 * (exp(t) - 1) + μ2 * (exp(-t) - 1))
 end
 
 function cf(d::Skellam, t::Real)
     μ1, μ2 = params(d)
-    exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
+    return exp(μ1 * (cis(t) - 1) + μ2 * (cis(-t) - 1))
 end
 
 """

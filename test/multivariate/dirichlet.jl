@@ -11,9 +11,9 @@ Random.seed!(34567)
 rng = MersenneTwister(123)
 
 @testset "Testing Dirichlet with $key" for (key, func) in Dict(
-    "rand(...)" => [rand, rand],
-    "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
-)
+        "rand(...)" => [rand, rand],
+        "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+    )
 
     for T in (Int, Float64)
         d = Dirichlet(3, T(2))
@@ -47,7 +47,7 @@ rng = MersenneTwister(123)
         x = func[2](d, 100)
         p = pdf(d, x)
         lp = logpdf(d, x)
-        for i = 1:size(x, 2)
+        for i in 1:size(x, 2)
             @test lp[i] ≈ logpdf(d, x[:, i])
             @test p[i] ≈ pdf(d, x[:, i])
         end
@@ -77,7 +77,7 @@ rng = MersenneTwister(123)
         x = func[2](d, 100)
         p = pdf(d, x)
         lp = logpdf(d, x)
-        for i = 1:size(x, 2)
+        for i in 1:size(x, 2)
             @test p[i] ≈ pdf(d, x[:, i])
             @test lp[i] ≈ logpdf(d, x[:, i])
         end
@@ -152,12 +152,12 @@ end
 
         # Use special finite differencing method that tries to avoid moving outside of the
         # support by limiting the range of the points around the input that are evaluated
-        fdm = central_fdm(5, 1; max_range = 1e-9)
+        fdm = central_fdm(5, 1; max_range = 1.0e-9)
 
         for x in (x1, x2)
             # We have to adjust the tolerance since the finite differencing method is rough
-            test_frule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1e-5, nans = true)
-            test_rrule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1e-5, nans = true)
+            test_frule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1.0e-5, nans = true)
+            test_rrule(Distributions._logpdf, d, x; fdm = fdm, rtol = 1.0e-5, nans = true)
         end
     end
 end

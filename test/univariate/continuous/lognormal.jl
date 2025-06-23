@@ -16,14 +16,14 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test iszero(logcdf(LogNormal(), Inf))
     @test logdiffcdf(LogNormal(), Float32(exp(3)), Float32(exp(3))) === -Inf
     @test logdiffcdf(LogNormal(), Float32(exp(5)), Float32(exp(3))) ≈ -6.607938594596893 rtol =
-        1e-12
+        1.0e-12
     @test logdiffcdf(LogNormal(), Float32(exp(5)), Float64(exp(3))) ≈ -6.60793859457367 rtol =
-        1e-12
+        1.0e-12
     @test logdiffcdf(LogNormal(), Float64(exp(5)), Float64(exp(3))) ≈ -6.607938594596893 rtol =
-        1e-12
+        1.0e-12
     let d = LogNormal(Float64(0), Float64(1)),
-        x = Float64(exp(-60)),
-        y = Float64(exp(-60.001))
+            x = Float64(exp(-60)),
+            y = Float64(exp(-60.001))
 
         float_res = logdiffcdf(d, x, y)
         big_x = BigFloat(x; precision = 100)
@@ -68,7 +68,7 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     # test for #996 being fixed
     let d = LogNormal(0, 1), x = exp(1), ∂x = exp(2)
         @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈
-                  ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
+            ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
     end
 end
 
@@ -323,14 +323,14 @@ end
 
 @testset "LogNormal Sampling Tests" begin
     for d in [
-        LogNormal()
-        LogNormal(1.0)
-        LogNormal(0.0, 2.0)
-        LogNormal(1.0, 2.0)
-        LogNormal(3.0, 0.5)
-        LogNormal(3.0, 1.0)
-        LogNormal(3.0, 2.0)
-    ]
+            LogNormal()
+            LogNormal(1.0)
+            LogNormal(0.0, 2.0)
+            LogNormal(1.0, 2.0)
+            LogNormal(3.0, 0.5)
+            LogNormal(3.0, 1.0)
+            LogNormal(3.0, 2.0)
+        ]
         test_distr(d, 10^6)
     end
 end

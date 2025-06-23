@@ -33,13 +33,13 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int = 10^6)
         T = partype(d) <: Float64 ? Float32 : Float64
         if dnorm isa MvNormal
             @test convert(MvLogitNormal{MvNormal{T}}, d).normal ==
-                  convert(MvNormal{T}, dnorm)
+                convert(MvNormal{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormal{T}}, d)) <: T
             @test canonform(d) isa MvLogitNormal{<:MvNormalCanon}
             @test canonform(d).normal == canonform(dnorm)
         elseif dnorm isa MvNormalCanon
             @test convert(MvLogitNormal{MvNormalCanon{T}}, d).normal ==
-                  convert(MvNormalCanon{T}, dnorm)
+                convert(MvNormalCanon{T}, dnorm)
             @test partype(convert(MvLogitNormal{MvNormalCanon{T}}, d)) <: T
             @test meanform(d) isa MvLogitNormal{<:MvNormal}
             @test meanform(d).normal == meanform(dnorm)
@@ -48,17 +48,17 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int = 10^6)
 
     @testset "sampling" begin
         X = rand(d, nsamples)
-        Y = @views log.(X[1:(end-1), :]) .- log.(X[end, :]')
+        Y = @views log.(X[1:(end - 1), :]) .- log.(X[end, :]')
         Ymean = vec(mean(Y; dims = 2))
         Ycov = cov(Y; dims = 2)
-        for i = 1:(length(d)-1)
+        for i in 1:(length(d) - 1)
             @test isapprox(
                 Ymean[i],
                 mean(dnorm)[i],
                 atol = sqrt(var(dnorm)[i] / nsamples) * 8,
             )
         end
-        for i = 1:(length(d)-1), j = 1:(length(d)-1)
+        for i in 1:(length(d) - 1), j in 1:(length(d) - 1)
             @test isapprox(
                 Ycov[i, j],
                 cov(dnorm)[i, j],
@@ -71,14 +71,14 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int = 10^6)
         X = rand(d, nsamples)
         dfit = fit_mle(MvLogitNormal, X)
         dfit_norm = dfit.normal
-        for i = 1:(length(d)-1)
+        for i in 1:(length(d) - 1)
             @test isapprox(
                 mean(dfit_norm)[i],
                 mean(dnorm)[i],
                 atol = sqrt(var(dnorm)[i] / nsamples) * 8,
             )
         end
-        for i = 1:(length(d)-1), j = 1:(length(d)-1)
+        for i in 1:(length(d) - 1), j in 1:(length(d) - 1)
             @test isapprox(
                 cov(dfit_norm)[i, j],
                 cov(dnorm)[i, j],
@@ -88,13 +88,13 @@ function test_mvlogitnormal(d::MvLogitNormal; nsamples::Int = 10^6)
         @test fit_mle(MvLogitNormal{IsoNormal}, X) isa MvLogitNormal{<:IsoNormal}
     end
 
-    @testset "evaluation" begin
+    return @testset "evaluation" begin
         X = rand(d, nsamples)
-        for i = 1:min(100, nsamples)
+        for i in 1:min(100, nsamples)
             @test @inferred(logpdf(d, X[:, i])) ≈ log(pdf(d, X[:, i]))
             if dnorm isa MvNormal
                 @test @inferred(gradlogpdf(d, X[:, i])) ≈
-                      ForwardDiff.gradient(x -> logpdf(d, x), X[:, i])
+                    ForwardDiff.gradient(x -> logpdf(d, x), X[:, i])
             end
         end
         @test logpdf(d, X) ≈ log.(pdf(d, X))
@@ -150,13 +150,13 @@ end
     @testset "show" begin
         d = MvLogitNormal([1.0, 2.0, 3.0], Diagonal([4.0, 5.0, 6.0]))
         @test sprint(show, d) === """
-        MvLogitNormal{DiagNormal}(
-          DiagNormal(
-          dim: 3
-          μ: [1.0, 2.0, 3.0]
-          Σ: [4.0 0.0 0.0; 0.0 5.0 0.0; 0.0 0.0 6.0]
-          )
-        )
-        """
+            MvLogitNormal{DiagNormal}(
+              DiagNormal(
+              dim: 3
+              μ: [1.0, 2.0, 3.0]
+              Σ: [4.0 0.0 0.0; 0.0 5.0 0.0; 0.0 0.0 6.0]
+              )
+            )
+            """
     end
 end

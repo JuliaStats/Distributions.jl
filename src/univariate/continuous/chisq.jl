@@ -20,7 +20,7 @@ External links
 
 * [Chi-squared distribution on Wikipedia](http://en.wikipedia.org/wiki/Chi-squared_distribution)
 """
-struct Chisq{T<:Real} <: ContinuousUnivariateDistribution
+struct Chisq{T <: Real} <: ContinuousUnivariateDistribution
     ν::T
     Chisq{T}(ν::T) where {T} = new{T}(ν)
 end
@@ -38,12 +38,12 @@ Chisq(ν::Integer; check_args::Bool = true) = Chisq(float(ν); check_args = chec
 
 dof(d::Chisq) = d.ν
 params(d::Chisq) = (d.ν,)
-@inline partype(d::Chisq{T}) where {T<:Real} = T
+@inline partype(d::Chisq{T}) where {T <: Real} = T
 
 ### Conversions
-convert(::Type{Chisq{T}}, ν::Real) where {T<:Real} = Chisq(T(ν))
-Base.convert(::Type{Chisq{T}}, d::Chisq) where {T<:Real} = Chisq{T}(T(d.ν))
-Base.convert(::Type{Chisq{T}}, d::Chisq{T}) where {T<:Real} = d
+convert(::Type{Chisq{T}}, ν::Real) where {T <: Real} = Chisq(T(ν))
+Base.convert(::Type{Chisq{T}}, d::Chisq) where {T <: Real} = Chisq{T}(T(d.ν))
+Base.convert(::Type{Chisq{T}}, d::Chisq{T}) where {T <: Real} = d
 
 #### Statistics
 
@@ -55,7 +55,7 @@ skewness(d::Chisq) = sqrt(8 / d.ν)
 
 kurtosis(d::Chisq) = 12 / d.ν
 
-mode(d::Chisq{T}) where {T<:Real} = d.ν > 2 ? d.ν - 2 : zero(T)
+mode(d::Chisq{T}) where {T <: Real} = d.ν > 2 ? d.ν - 2 : zero(T)
 
 function median(d::Chisq; approx::Bool = false)
     if approx
@@ -67,7 +67,7 @@ end
 
 function entropy(d::Chisq)
     hν = d.ν / 2
-    hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
+    return hν + logtwo + loggamma(hν) + (1 - hν) * digamma(hν)
 end
 
 function kldivergence(p::Chisq, q::Chisq)
@@ -75,7 +75,6 @@ function kldivergence(p::Chisq, q::Chisq)
     qν = dof(q)
     return kldivergence(Chi{typeof(pν)}(pν), Chi{typeof(qν)}(qν))
 end
-
 
 
 #### Evaluation
@@ -91,7 +90,7 @@ end
 
 cf(d::Chisq, t::Real) = (1 - 2 * im * t)^(-d.ν / 2)
 
-gradlogpdf(d::Chisq{T}, x::Real) where {T<:Real} =
+gradlogpdf(d::Chisq{T}, x::Real) where {T <: Real} =
     x > 0 ? (d.ν / 2 - 1) / x - 1 // 2 : zero(T)
 
 

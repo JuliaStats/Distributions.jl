@@ -9,8 +9,8 @@ using Test
 @testset "uniform.jl" begin
     # affine transformations
     test_affine_transformations(Uniform, rand(), 4 + rand())
-    test_cgf(Uniform(0, 1), (1, -1, 100.0f0, 1e6, -1e6))
-    test_cgf(Uniform(100.0f0, 101.0f0), (1, -1, 100.0f0, 1e6, -1e6))
+    test_cgf(Uniform(0, 1), (1, -1, 100.0f0, 1.0e6, -1.0e6))
+    test_cgf(Uniform(100.0f0, 101.0f0), (1, -1, 100.0f0, 1.0e6, -1.0e6))
 
     @testset "ChainRules" begin
         # run test suite for values in the support
@@ -52,19 +52,19 @@ using Test
     end
     @testset "cgf uniform around 0" begin
         for (lo, hi, t) in [
-            ((Float16(0), Float16(1), sqrt(eps(Float16)))),
-            ((Float16(0), Float16(1), Float16(0))),
-            ((Float16(0), Float16(1), -sqrt(eps(Float16)))),
-            (0.0f0, 1.0f0, sqrt(eps(Float32))),
-            (0.0f0, 1.0f0, 0.0f0),
-            (0.0f0, 1.0f0, -sqrt(eps(Float32))),
-            (-2.0f0, 1.0f0, 1.0f-30),
-            (-2.0f-4, -1.0f-4, -2.0f-40),
-            (0.0, 1.0, sqrt(eps(Float64))),
-            (0.0, 1.0, 0.0),
-            (0.0, 1.0, -sqrt(eps(Float64))),
-            (-2.0, 5.0, -1e-35),
-        ]
+                ((Float16(0), Float16(1), sqrt(eps(Float16)))),
+                ((Float16(0), Float16(1), Float16(0))),
+                ((Float16(0), Float16(1), -sqrt(eps(Float16)))),
+                (0.0f0, 1.0f0, sqrt(eps(Float32))),
+                (0.0f0, 1.0f0, 0.0f0),
+                (0.0f0, 1.0f0, -sqrt(eps(Float32))),
+                (-2.0f0, 1.0f0, 1.0f-30),
+                (-2.0f-4, -1.0f-4, -2.0f-40),
+                (0.0, 1.0, sqrt(eps(Float64))),
+                (0.0, 1.0, 0.0),
+                (0.0, 1.0, -sqrt(eps(Float64))),
+                (-2.0, 5.0, -1.0e-35),
+            ]
             T = typeof(lo)
             @assert T == typeof(lo) == typeof(hi) == typeof(t)
             @assert t <= sqrt(eps(T))
@@ -80,7 +80,7 @@ using Test
                 @test cgf(d, t) === zero(t)
             else
                 @test Distributions.cgf_around_zero(d, t) ≈
-                      Distributions.cgf_away_from_zero(d_big, t_big) atol = eps(t) rtol = 0
+                    Distributions.cgf_away_from_zero(d_big, t_big) atol = eps(t) rtol = 0
                 @test Distributions.cgf_around_zero(d, t) === cgf(d, t)
             end
         end

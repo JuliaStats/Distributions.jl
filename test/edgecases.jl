@@ -24,6 +24,6 @@ using Test, Distributions, StatsBase
     @test isapprox(
         fnecdf(y),
         [0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975],
-        atol = 1e-3,
+        atol = 1.0e-3,
     )
 end

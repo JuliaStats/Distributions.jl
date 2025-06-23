@@ -44,7 +44,7 @@ n = 10
 areal = randn(n, n) / 2
 aimg = randn(n, n) / 2
 @testset "For A containing $eltya" for eltya in
-                                       (Float32, Float64, ComplexF32, ComplexF64, Int)
+    (Float32, Float64, ComplexF32, ComplexF64, Int)
     ainit =
         eltya == Int ? rand(1:7, n, n) :
         convert(Matrix{eltya}, eltya <: Complex ? complex.(areal, aimg) : areal)
@@ -53,11 +53,11 @@ aimg = randn(n, n) / 2
         notsquare = [ainit ainit]
         @test !ispossemdef(notsymmetric)
         @test !ispossemdef(notsquare)
-        for truerank = 0:n
+        for truerank in 0:n
             X = ainit[:, 1:truerank]
             A = truerank == 0 ? zeros(eltya, n, n) : X * X'
             @test ispossemdef(A)
-            for testrank = 0:n
+            for testrank in 0:n
                 if testrank == truerank
                     @test ispossemdef(A, testrank)
                 else

@@ -128,7 +128,7 @@ end
         w = func[1](n0)
 
         ss = suffstats(Categorical, (3, x))
-        h = Float64[count(v -> v == i, x) for i = 1:3]
+        h = Float64[count(v -> v == i, x) for i in 1:3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 
@@ -142,7 +142,7 @@ end
         @test probs(d2) == probs(d)
 
         ss = suffstats(Categorical, (3, x), w)
-        h = Float64[sum(w[x .== i]) for i = 1:3]
+        h = Float64[sum(w[x .== i]) for i in 1:3]
         @test isa(ss, Distributions.CategoricalStats)
         @test ss.h ≈ h
 

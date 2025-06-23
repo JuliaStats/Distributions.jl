@@ -3,14 +3,14 @@
 
 *Noncentral Beta distribution* with shape parameters `α > 0` and `β > 0` and noncentrality parameter `λ >= 0`.
 """
-struct NoncentralBeta{T<:Real} <: ContinuousUnivariateDistribution
+struct NoncentralBeta{T <: Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     λ::T
     NoncentralBeta{T}(α::T, β::T, λ::T) where {T} = new{T}(α, β, λ)
 end
 
-function NoncentralBeta(α::T, β::T, λ::T; check_args::Bool = true) where {T<:Real}
+function NoncentralBeta(α::T, β::T, λ::T; check_args::Bool = true) where {T <: Real}
     @check_args NoncentralBeta (α, α > zero(α)) (β, β > zero(β)) (λ, λ >= zero(λ))
     return NoncentralBeta{T}(α, β, λ)
 end
@@ -24,10 +24,10 @@ NoncentralBeta(α::Integer, β::Integer, λ::Integer; check_args::Bool = true) =
 
 #### Conversions
 
-function Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta) where {T<:Real}
-    NoncentralBeta{T}(T(d.α), T(d.β), T(d.λ))
+function Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta) where {T <: Real}
+    return NoncentralBeta{T}(T(d.α), T(d.β), T(d.λ))
 end
-Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta{T}) where {T<:Real} = d
+Base.convert(::Type{NoncentralBeta{T}}, d::NoncentralBeta{T}) where {T <: Real} = d
 
 ### Parameters
 
@@ -48,12 +48,12 @@ function rand(d::NoncentralBeta)
     β = d.β
     a = rand(NoncentralChisq(2d.α, β))
     b = rand(Chisq(2β))
-    a / (a + b)
+    return a / (a + b)
 end
 
 function rand(rng::AbstractRNG, d::NoncentralBeta)
     β = d.β
     a = rand(rng, NoncentralChisq(2d.α, β))
     b = rand(rng, Chisq(2β))
-    a / (a + b)
+    return a / (a + b)
 end

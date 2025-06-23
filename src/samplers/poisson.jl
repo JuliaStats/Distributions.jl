@@ -1,10 +1,9 @@
-
 function poissonpvec(μ::Float64, n::Int)
     # Poisson probabilities, from 0 to n
     pv = Vector{Float64}(undef, n + 1)
     @inbounds pv[1] = p = exp(-μ)
-    for i = 1:n
-        @inbounds pv[i+1] = (p *= (μ / i))
+    for i in 1:n
+        @inbounds pv[i + 1] = (p *= (μ / i))
     end
     return pv
 end
@@ -13,7 +12,7 @@ end
 #
 # Suitable for small μ
 #
-struct PoissonCountSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+struct PoissonCountSampler{T <: Real} <: Sampleable{Univariate, Discrete}
     μ::T
 end
 
@@ -39,7 +38,7 @@ end
 #
 #   For μ sufficiently large, (i.e. >= 10.0)
 #
-struct PoissonADSampler{T<:Real} <: Sampleable{Univariate,Discrete}
+struct PoissonADSampler{T <: Real} <: Sampleable{Univariate, Discrete}
     μ::T
     s::T
     d::T
@@ -53,7 +52,7 @@ function PoissonADSampler(μ::Real)
     d = 6 * μ^2
     L = floor(Int, μ - 1.1484)
 
-    PoissonADSampler(promote(μ, s, d)..., L)
+    return PoissonADSampler(promote(μ, s, d)..., L)
 end
 
 function rand(rng::AbstractRNG, sampler::PoissonADSampler)
@@ -106,6 +105,7 @@ function rand(rng::AbstractRNG, sampler::PoissonADSampler)
             return K
         end
     end
+    return
 end
 
 # Procedure F

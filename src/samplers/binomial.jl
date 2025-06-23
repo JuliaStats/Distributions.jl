@@ -1,4 +1,3 @@
-
 # compute probability vector of a Binomial distribution
 function binompvec(n::Int, p::Float64)
     pv = Vector{Float64}(undef, n + 1)
@@ -7,13 +6,13 @@ function binompvec(n::Int, p::Float64)
         pv[1] = 1.0
     elseif p == 1.0
         fill!(pv, 0.0)
-        pv[n+1] = 1.0
+        pv[n + 1] = 1.0
     else
         q = 1.0 - p
         a = p / q
         @inbounds pv[1] = pk = q^n
-        for k = 1:n
-            @inbounds pv[k+1] = (pk *= ((n - k + 1) / k) * a)
+        for k in 1:n
+            @inbounds pv[k + 1] = (pk *= ((n - k + 1) / k) * a)
         end
     end
     return pv
@@ -25,7 +24,7 @@ end
 #   "Generating the maximum of independent identically  distributed random variables"
 #   Computers & Mathematics with Applications, Volume 6, Issue 3, 1980, Pages 305-315.
 #
-struct BinomialGeomSampler <: Sampleable{Univariate,Discrete}
+struct BinomialGeomSampler <: Sampleable{Univariate, Discrete}
     comp::Bool
     n::Int
     scale::Float64
@@ -41,7 +40,7 @@ function BinomialGeomSampler(n::Int, prob::Float64)
         comp = true
         scale = prob < 1.0 ? -1.0 / log(prob) : Inf
     end
-    BinomialGeomSampler(comp, n, scale)
+    return BinomialGeomSampler(comp, n, scale)
 end
 
 function rand(rng::AbstractRNG, s::BinomialGeomSampler)
@@ -60,7 +59,7 @@ function rand(rng::AbstractRNG, s::BinomialGeomSampler)
         end
         x += 1
     end
-    (s.comp ? s.n - x : x)::Int
+    return (s.comp ? s.n - x : x)::Int
 end
 
 
@@ -73,7 +72,7 @@ end
 # Note: only use this sampler when n * min(p, 1-p) is large enough
 #       e.g., it is greater than 20.
 #
-struct BinomialTPESampler <: Sampleable{Univariate,Discrete}
+struct BinomialTPESampler <: Sampleable{Univariate, Discrete}
     comp::Bool
     n::Int
     r::Float64
@@ -141,7 +140,7 @@ function BinomialTPESampler(n::Int, prob::Float64)
     p3 = p2 + c / λL
     p4 = p3 + c / λR
 
-    BinomialTPESampler(comp, n, r, q, nrq, M, Mi, p1, p2, p3, p4, xM, xL, xR, c, λL, λR)
+    return BinomialTPESampler(comp, n, r, q, nrq, M, Mi, p1, p2, p3, p4, xM, xL, xR, c, λL, λR)
 end
 
 function rand(rng::AbstractRNG, s::BinomialTPESampler)
@@ -190,11 +189,11 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             a = S * (s.n + 1)
             F = 1.0
             if s.Mi < y
-                for i = (s.Mi+1):y
+                for i in (s.Mi + 1):y
                     F *= a / i - S
                 end
             elseif s.Mi > y
-                for i = (y+1):s.Mi
+                for i in (y + 1):s.Mi
                     F /= a / i - S
                 end
             end
@@ -224,14 +223,14 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
             w = Float64(s.n - y + 1)
 
             if A > (
-                s.xM * log(f1 / x1) +
-                ((s.n - s.Mi) + 0.5) * log(z / w) +
-                (y - s.Mi) * log(w * s.r / (x1 * s.q)) +
-                lstirling_asym(f1) +
-                lstirling_asym(z) +
-                lstirling_asym(x1) +
-                lstirling_asym(w)
-            )
+                    s.xM * log(f1 / x1) +
+                        ((s.n - s.Mi) + 0.5) * log(z / w) +
+                        (y - s.Mi) * log(w * s.r / (x1 * s.q)) +
+                        lstirling_asym(f1) +
+                        lstirling_asym(z) +
+                        lstirling_asym(x1) +
+                        lstirling_asym(w)
+                )
                 # Goto 1
                 continue
             end
@@ -241,13 +240,13 @@ function rand(rng::AbstractRNG, s::BinomialTPESampler)
         end
     end
     # 6
-    (s.comp ? s.n - y : y)::Int
+    return (s.comp ? s.n - y : y)::Int
 end
 
 
 # Constructing an alias table by directly computing the probability vector
 #
-struct BinomialAliasSampler <: Sampleable{Univariate,Discrete}
+struct BinomialAliasSampler <: Sampleable{Univariate, Discrete}
     table::AliasTable
 end
 
@@ -260,7 +259,7 @@ rand(rng::AbstractRNG, s::BinomialAliasSampler) = rand(rng, s.table) - 1
 #
 # It is important for type-stability
 #
-mutable struct BinomialPolySampler <: Sampleable{Univariate,Discrete}
+mutable struct BinomialPolySampler <: Sampleable{Univariate, Discrete}
     use_btpe::Bool
     geom_sampler::BinomialGeomSampler
     btpe_sampler::BinomialTPESampler
@@ -277,7 +276,7 @@ function BinomialPolySampler(n::Int, p::Float64)
         geom_sampler = BinomialGeomSampler(n, p)
         btpe_sampler = BinomialTPESampler()
     end
-    BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
+    return BinomialPolySampler(use_btpe, geom_sampler, btpe_sampler)
 end
 
 BinomialPolySampler(n::Real, p::Real) = BinomialPolySampler(round(Int, n), Float64(p))

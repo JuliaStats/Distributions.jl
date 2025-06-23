@@ -5,7 +5,7 @@ using Test
     @testset "logpdf" begin
         d = BetaBinomial(50, 0.2, 0.6)
 
-        for k = 1:50
+        for k in 1:50
             p = @inferred(pdf(d, k))
             lp = @inferred(logpdf(d, k))
             @test lp ≈ log(p)
@@ -15,7 +15,7 @@ using Test
     @testset "support" begin
         d = BetaBinomial(50, 0.2, 0.6)
 
-        for k = 1:50
+        for k in 1:50
             @test insupport(d, k)
         end
         @test !insupport(d, 51)
@@ -28,14 +28,14 @@ using Test
                 if n >= 0 && α > 0 && β > 0
                     @test @inferred(BetaBinomial(n, α, β)) isa BetaBinomial{ST}
                     @test @inferred(BetaBinomial(n, α, β; check_args = true)) isa
-                          BetaBinomial{ST}
+                        BetaBinomial{ST}
                 else
                     @test_throws DomainError BetaBinomial(n, α, β)
                     @test_throws DomainError BetaBinomial(n, α, β; check_args = true)
                 end
 
                 @test @inferred(BetaBinomial(n, α, β; check_args = false)) isa
-                      BetaBinomial{ST}
+                    BetaBinomial{ST}
             end
         end
     end

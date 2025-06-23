@@ -28,7 +28,7 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
 
     function DiscreteUniform(a::Real, b::Real; check_args::Bool = true)
         @check_args DiscreteUniform (a <= b)
-        new(a, b, 1 / (b - a + 1))
+        return new(a, b, 1 / (b - a + 1))
     end
     DiscreteUniform(b::Real; check_args::Bool = true) =
         DiscreteUniform(0, b; check_args = check_args)
@@ -62,7 +62,7 @@ skewness(d::DiscreteUniform) = 0.0
 
 function kurtosis(d::DiscreteUniform)
     n2 = span(d)^2
-    -1.2 * (n2 + 1.0) / (n2 - 1.0)
+    return -1.2 * (n2 + 1.0) / (n2 - 1.0)
 end
 
 entropy(d::DiscreteUniform) = log(span(d))

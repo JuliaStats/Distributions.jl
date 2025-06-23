@@ -6,10 +6,10 @@ using StatsFuns
 
 ####### Core testing procedure
 function test_logitnormal(
-    g::LogitNormal,
-    n_tsamples::Int = 10^6,
-    rng::Union{AbstractRNG,Missing} = missing,
-)
+        g::LogitNormal,
+        n_tsamples::Int = 10^6,
+        rng::Union{AbstractRNG, Missing} = missing,
+    )
     d = length(g)
     #mn = mean(g)
     md = median(g)
@@ -23,16 +23,16 @@ function test_logitnormal(
     #@test isa(s, Float64)
     @test md ≈ logistic(g.μ)
     #@test entropy(g) ≈ d*(1 + Distributions.log2π)/2 + logdetcov(g.normal)/2 + sum(mean(g.normal))
-    @test insupport(g, 1e-8)
+    @test insupport(g, 1.0e-8)
     # corner cases of 0 and 1 handled as in support
     @test insupport(g, 1.0)
     @test pdf(g, 0.0) == 0.0
     @test insupport(g, 0.0)
     @test pdf(g, 1.0) == 0.0
-    @test !insupport(g, -1e-8)
-    @test pdf(g, -1e-8) == 0.0
-    @test !insupport(g, 1 + 1e-8)
-    @test pdf(g, 1 + 1e-8) == 0.0
+    @test !insupport(g, -1.0e-8)
+    @test pdf(g, -1.0e-8) == 0.0
+    @test !insupport(g, 1 + 1.0e-8)
+    @test pdf(g, 1 + 1.0e-8) == 0.0
 
     # sampling
     if ismissing(rng)
@@ -40,10 +40,10 @@ function test_logitnormal(
     else
         X = rand(rng, g, n_tsamples)
     end
-    @test isa(X, Array{Float64,1})
+    @test isa(X, Array{Float64, 1})
 
     # evaluation of logpdf and pdf
-    for i = 1:min(100, n_tsamples)
+    for i in 1:min(100, n_tsamples)
         @test logpdf(g, X[i]) ≈ log(pdf(g, X[i]))
     end
     @test Base.Fix1(logpdf, g).(X) ≈ log.(Base.Fix1(pdf, g).(X))
@@ -55,7 +55,7 @@ function test_logitnormal(
     @test location(g) == g.μ
     @test scale(g) == g.σ
     @test params(g) == (g.μ, g.σ)
-    @test g == deepcopy(g)
+    return @test g == deepcopy(g)
 end
 
 ###### General Testing

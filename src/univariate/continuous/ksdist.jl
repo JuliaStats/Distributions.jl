@@ -82,18 +82,18 @@ function cdf_durbin(d::KSDist, x::Float64)
 
     m = 2 * k - 1
     H = Matrix{Float64}(undef, m, m)
-    for i = 1:m, j = 1:m
+    for i in 1:m, j in 1:m
         H[i, j] = i - j + 1 >= 0 ? 1 : 0
     end
     r = 1.0
-    for i = 1:m
+    for i in 1:m
         # (1-h^i) = (1-h)(1+h+...+h^(i-1))
-        H[i, 1] = H[m, m-i+1] = ch * r
+        H[i, 1] = H[m, m - i + 1] = ch * r
         r += h^i
     end
     H[m, 1] += h <= 0.5 ? -h^m : -h^m + (h - ch)
-    for i = 1:m, j = 1:m
-        for g = 1:max(i-j+1, 0)
+    for i in 1:m, j in 1:m
+        for g in 1:max(i - j + 1, 0)
             H[i, j] /= g
         end
         # we can avoid keeping track of the exponent by dividing by e
@@ -102,12 +102,12 @@ function cdf_durbin(d::KSDist, x::Float64)
     end
     Q = H^n
     s = Q[k, k]
-    s * stirling(n)
+    return s * stirling(n)
 end
 
 # Miller (1956) approximation
 function ccdf_miller(d::KSDist, x::Real)
-    2 * ccdf(KSOneSided(d.n), x)
+    return 2 * ccdf(KSOneSided(d.n), x)
 end
 
 ## these functions are used in durbin and pomeranz algorithms
@@ -131,7 +131,7 @@ end
 function stirling(n)
     if n < 500
         s = 1.0
-        for i = 1:n
+        for i in 1:n
             s *= i / n * ℯ
         end
         return s

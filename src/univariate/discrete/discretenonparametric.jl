@@ -17,17 +17,17 @@ External links
 
 * [Probability mass function on Wikipedia](http://en.wikipedia.org/wiki/Probability_mass_function)
 """
-struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}} <:
-       DiscreteUnivariateDistribution
+struct DiscreteNonParametric{T <: Real, P <: Real, Ts <: AbstractVector{T}, Ps <: AbstractVector{P}} <:
+    DiscreteUnivariateDistribution
     support::Ts
     p::Ps
 
-    function DiscreteNonParametric{T,P,Ts,Ps}(
-        xs::Ts,
-        ps::Ps;
-        check_args::Bool = true,
-    ) where {T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractVector{P}}
-        check_args || return new{T,P,Ts,Ps}(xs, ps)
+    function DiscreteNonParametric{T, P, Ts, Ps}(
+            xs::Ts,
+            ps::Ps;
+            check_args::Bool = true,
+        ) where {T <: Real, P <: Real, Ts <: AbstractVector{T}, Ps <: AbstractVector{P}}
+        check_args || return new{T, P, Ts, Ps}(xs, ps)
         @check_args(
             DiscreteNonParametric,
             (
@@ -38,7 +38,7 @@ struct DiscreteNonParametric{T<:Real,P<:Real,Ts<:AbstractVector{T},Ps<:AbstractV
             (xs, allunique(xs), "support must contain only unique elements"),
         )
         sort_order = sortperm(xs)
-        new{T,P,Ts,Ps}(xs[sort_order], ps[sort_order])
+        return new{T, P, Ts, Ps}(xs[sort_order], ps[sort_order])
     end
 end
 
@@ -46,24 +46,24 @@ DiscreteNonParametric(
     vs::AbstractVector{T},
     ps::AbstractVector{P};
     check_args::Bool = true,
-) where {T<:Real,P<:Real} =
-    DiscreteNonParametric{T,P,typeof(vs),typeof(ps)}(vs, ps; check_args = check_args)
+) where {T <: Real, P <: Real} =
+    DiscreteNonParametric{T, P, typeof(vs), typeof(ps)}(vs, ps; check_args = check_args)
 
 Base.eltype(::Type{<:DiscreteNonParametric{T}}) where {T} = T
 
 # Conversion
 convert(
-    ::Type{DiscreteNonParametric{T,P,Ts,Ps}},
+    ::Type{DiscreteNonParametric{T, P, Ts, Ps}},
     d::DiscreteNonParametric,
-) where {T,P,Ts,Ps} = DiscreteNonParametric{T,P,Ts,Ps}(
+) where {T, P, Ts, Ps} = DiscreteNonParametric{T, P, Ts, Ps}(
     convert(Ts, support(d)),
     convert(Ps, probs(d)),
     check_args = false,
 )
 Base.convert(
-    ::Type{DiscreteNonParametric{T,P,Ts,Ps}},
-    d::DiscreteNonParametric{T,P,Ts,Ps},
-) where {T,P,Ts,Ps} = d
+    ::Type{DiscreteNonParametric{T, P, Ts, Ps}},
+    d::DiscreteNonParametric{T, P, Ts, Ps},
+) where {T, P, Ts, Ps} = d
 
 # Accessors
 params(d::DiscreteNonParametric) = (d.support, d.p)
@@ -86,8 +86,8 @@ function Base.isapprox(c1::DiscreteNonParametric, c2::DiscreteNonParametric; kwa
     support_c1 = support(c1)
     support_c2 = support(c2)
     return length(support_c1) == length(support_c2) &&
-           isapprox(support_c1, support_c2; kwargs...) &&
-           isapprox(probs(c1), probs(c2); kwargs...)
+        isapprox(support_c1, support_c2; kwargs...) &&
+        isapprox(probs(c1), probs(c2); kwargs...)
 end
 
 # Sampling
@@ -100,7 +100,7 @@ function rand(rng::AbstractRNG, d::DiscreteNonParametric)
     cp = p[1]
     i = 1
     while cp <= draw && i < n
-        @inbounds cp += p[i+=1]
+        @inbounds cp += p[i += 1]
     end
     return x[i]
 end
@@ -140,11 +140,11 @@ function cdf(d::DiscreteNonParametric, x::Real)
     stop_idx = searchsortedlast(support(d), x)
     s = zero(P)
     if stop_idx < div(n, 2)
-        @inbounds for i = 1:stop_idx
+        @inbounds for i in 1:stop_idx
             s += ps[i]
         end
     else
-        @inbounds for i = (stop_idx+1):n
+        @inbounds for i in (stop_idx + 1):n
             s += ps[i]
         end
         s = 1 - s
@@ -166,12 +166,12 @@ function ccdf(d::DiscreteNonParametric, x::Real)
     stop_idx = searchsortedlast(support(d), x)
     s = zero(P)
     if stop_idx < div(n, 2)
-        @inbounds for i = 1:stop_idx
+        @inbounds for i in 1:stop_idx
             s += ps[i]
         end
         s = 1 - s
     else
-        @inbounds for i = (stop_idx+1):n
+        @inbounds for i in (stop_idx + 1):n
             s += ps[i]
         end
     end
@@ -190,7 +190,7 @@ function quantile(d::DiscreteNonParametric, q::Real)
         i += 1
         @inbounds cp += p[i]
     end
-    x[i]
+    return x[i]
 end
 
 minimum(d::DiscreteNonParametric) = first(support(d))
@@ -235,35 +235,35 @@ function mgf(d::DiscreteNonParametric, t::Real)
     x = support(d)
     p = probs(d)
     s = zero(Float64)
-    for i = 1:length(x)
+    for i in 1:length(x)
         s += p[i] * exp(t * x[i])
     end
-    s
+    return s
 end
 
 function cf(d::DiscreteNonParametric, t::Real)
     x = support(d)
     p = probs(d)
     s = zero(Complex{Float64})
-    for i = 1:length(x)
+    for i in 1:length(x)
         s += p[i] * cis(t * x[i])
     end
-    s
+    return s
 end
 
 # Sufficient statistics
 
 struct DiscreteNonParametricStats{
-    T<:Real,
-    W<:Real,
-    Ts<:AbstractVector{T},
-    Ws<:AbstractVector{W},
-} <: SufficientStats
+        T <: Real,
+        W <: Real,
+        Ts <: AbstractVector{T},
+        Ws <: AbstractVector{W},
+    } <: SufficientStats
     support::Ts
     freq::Ws
 end
 
-function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T<:Real}
+function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {T <: Real}
 
     N = length(x)
     N == 0 && return DiscreteNonParametricStats(T[], Float64[])
@@ -277,7 +277,7 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {
     ps[1] += 1.0
 
     xprev = x[1]
-    @inbounds for i = 2:N
+    @inbounds for i in 2:N
         xi = x[i]
         if xi != xprev
             n += 1
@@ -289,16 +289,16 @@ function suffstats(::Type{<:DiscreteNonParametric}, x::AbstractArray{T}) where {
 
     resize!(vs, n)
     resize!(ps, n)
-    DiscreteNonParametricStats(vs, ps)
+    return DiscreteNonParametricStats(vs, ps)
 
 end
 
 function suffstats(
-    ::Type{<:DiscreteNonParametric},
-    x::AbstractArray{T},
-    w::AbstractArray{W};
-    check_args::Bool = true,
-) where {T<:Real,W<:Real}
+        ::Type{<:DiscreteNonParametric},
+        x::AbstractArray{T},
+        w::AbstractArray{W};
+        check_args::Bool = true,
+    ) where {T <: Real, W <: Real}
 
     @check_args DiscreteNonParametric (length(x) == length(w))
 
@@ -317,7 +317,7 @@ function suffstats(
     ps[1] += w[1]
 
     xprev = x[1]
-    @inbounds for i = 2:N
+    @inbounds for i in 2:N
         xi = x[i]
         wi = w[i]
         if xi != xprev
@@ -330,7 +330,7 @@ function suffstats(
 
     resize!(vs, n)
     resize!(ps, n)
-    DiscreteNonParametricStats(vs, ps)
+    return DiscreteNonParametricStats(vs, ps)
 
 end
 
@@ -338,8 +338,8 @@ end
 
 fit_mle(
     ::Type{<:DiscreteNonParametric},
-    ss::DiscreteNonParametricStats{T,W,Ts,Ws},
-) where {T,W,Ts,Ws} = DiscreteNonParametric{T,W,Ts,Ws}(
+    ss::DiscreteNonParametricStats{T, W, Ts, Ws},
+) where {T, W, Ts, Ws} = DiscreteNonParametric{T, W, Ts, Ws}(
     ss.support,
     normalize!(copy(ss.freq), 1),
     check_args = false,

@@ -26,7 +26,7 @@ import PDMats: PDMat
         -5.4585441614404803801,
     ]
     df = [1.0, 2, 3, 5, 10]
-    for i = 1:length(df)
+    for i in 1:length(df)
         d = MvTDist(df[i], mu, Sigma)
         @test isapprox(logpdf(d, [-2.0, 3]), rvalues[i], atol = 1.0e-8)
         dd = typeof(d)(params(d)...)
@@ -37,17 +37,17 @@ import PDMats: PDMat
 
     # test constructors for mixed inputs:
     @test typeof(GenericMvTDist(1, Vector{Float32}(mu), PDMat(Sigma))) ==
-          typeof(GenericMvTDist(1.0, mu, PDMat(Sigma)))
+        typeof(GenericMvTDist(1.0, mu, PDMat(Sigma)))
 
     @test typeof(GenericMvTDist(1, mu, PDMat(Array{Float32}(Sigma)))) ==
-          typeof(GenericMvTDist(1.0, mu, PDMat(Sigma)))
+        typeof(GenericMvTDist(1.0, mu, PDMat(Sigma)))
 
     d = GenericMvTDist(1, Array{Float32}(mu), PDMat(Array{Float32}(Sigma)))
     @test convert(GenericMvTDist{Float32}, d) === d
     @test typeof(convert(GenericMvTDist{Float64}, d)) ==
-          typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+        typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
     @test typeof(convert(GenericMvTDist{Float64}, d.df, d.dim, d.μ, d.Σ)) ==
-          typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
+        typeof(GenericMvTDist(1, mu, PDMat(Sigma)))
     @test partype(d) == Float32
     @test d == deepcopy(d)
 
@@ -61,7 +61,7 @@ import PDMats: PDMat
     # depends on PDMats#101 (merged but not released)
     # Sigma_static = @SMatrix [4. 2; 2 3]
 
-    for i = 1:length(df)
+    for i in 1:length(df)
         d = GenericMvTDist(df[i], mu_static, PDMat(Sigma))
         d32 = convert(GenericMvTDist{Float32}, d)
         @test d.μ isa SVector

@@ -4,11 +4,11 @@ using Test
 # to make sure that subtypes provides the required behavior without having to add
 # a dependency to InteractiveUtils
 function _subtypes(
-    m::Module,
-    x::Type,
-    sts = Base.IdSet{Any}(),
-    visited = Base.IdSet{Module}(),
-)
+        m::Module,
+        x::Type,
+        sts = Base.IdSet{Any}(),
+        visited = Base.IdSet{Module}(),
+    )
     push!(visited, m)
     xt = Base.unwrap_unionall(x)
     if !isa(xt, DataType)

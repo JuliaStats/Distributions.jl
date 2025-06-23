@@ -23,36 +23,36 @@ using FillArrays
     J = [4.0 -2.0 -1.0; -2.0 5.0 -1.0; -1.0 -1.0 6.0]
     D = Diagonal(J)
     for (g, μ, Σ) in [
-        (@test_deprecated(MvNormal(mu, sqrt(2.0))), mu, Matrix(2.0I, 3, 3)),
-        (@test_deprecated(MvNormal(mu_r, sqrt(2.0))), mu_r, Matrix(2.0I, 3, 3)),
-        (@test_deprecated(MvNormal(3, sqrt(2.0))), zeros(3), Matrix(2.0I, 3, 3)),
-        (@test_deprecated(MvNormal(mu, sqrt.(va))), mu, Matrix(Diagonal(va))),
-        (@test_deprecated(MvNormal(mu_r, sqrt.(va))), mu_r, Matrix(Diagonal(va))),
-        (@test_deprecated(MvNormal(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
-        (MvNormal(mu, C), mu, C),
-        (MvNormal(mu_r, C), mu_r, C),
-        (MvNormal(C), zeros(3), C),
-        (MvNormal(Symmetric(C)), zeros(3), Matrix(Symmetric(C))),
-        (MvNormal(Diagonal(dv)), zeros(3), Matrix(Diagonal(dv))),
-        (@test_deprecated(MvNormalCanon(h, 2.0)), h ./ 2.0, Matrix(0.5I, 3, 3)),
-        (@test_deprecated(MvNormalCanon(mu_r, 2.0)), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
-        (@test_deprecated(MvNormalCanon(3, 2.0)), zeros(3), Matrix(0.5I, 3, 3)),
-        (@test_deprecated(MvNormalCanon(h, dv)), h ./ dv, Matrix(Diagonal(inv.(dv)))),
-        (@test_deprecated(MvNormalCanon(mu_r, dv)), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
-        (@test_deprecated(MvNormalCanon(dv)), zeros(3), Matrix(Diagonal(inv.(dv)))),
-        (MvNormalCanon(h, J), J \ h, inv(J)),
-        (MvNormalCanon(J), zeros(3), inv(J)),
-        (MvNormalCanon(h, D), Diagonal(D) \ h, inv(D)),
-        (MvNormalCanon(D), zeros(3), inv(D)),
-        (MvNormalCanon(h, Symmetric(D)), D \ h, inv(D)),
-        (MvNormalCanon(Hermitian(D)), zeros(3), inv(D)),
-        (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
-        (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
-        (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
-        (MvNormal(mu, Symmetric(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
-        (MvNormal(mu, Hermitian(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
-        (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))),
-    ]
+            (@test_deprecated(MvNormal(mu, sqrt(2.0))), mu, Matrix(2.0I, 3, 3)),
+            (@test_deprecated(MvNormal(mu_r, sqrt(2.0))), mu_r, Matrix(2.0I, 3, 3)),
+            (@test_deprecated(MvNormal(3, sqrt(2.0))), zeros(3), Matrix(2.0I, 3, 3)),
+            (@test_deprecated(MvNormal(mu, sqrt.(va))), mu, Matrix(Diagonal(va))),
+            (@test_deprecated(MvNormal(mu_r, sqrt.(va))), mu_r, Matrix(Diagonal(va))),
+            (@test_deprecated(MvNormal(sqrt.(va))), zeros(3), Matrix(Diagonal(va))),
+            (MvNormal(mu, C), mu, C),
+            (MvNormal(mu_r, C), mu_r, C),
+            (MvNormal(C), zeros(3), C),
+            (MvNormal(Symmetric(C)), zeros(3), Matrix(Symmetric(C))),
+            (MvNormal(Diagonal(dv)), zeros(3), Matrix(Diagonal(dv))),
+            (@test_deprecated(MvNormalCanon(h, 2.0)), h ./ 2.0, Matrix(0.5I, 3, 3)),
+            (@test_deprecated(MvNormalCanon(mu_r, 2.0)), mu_r ./ 2.0, Matrix(0.5I, 3, 3)),
+            (@test_deprecated(MvNormalCanon(3, 2.0)), zeros(3), Matrix(0.5I, 3, 3)),
+            (@test_deprecated(MvNormalCanon(h, dv)), h ./ dv, Matrix(Diagonal(inv.(dv)))),
+            (@test_deprecated(MvNormalCanon(mu_r, dv)), mu_r ./ dv, Matrix(Diagonal(inv.(dv)))),
+            (@test_deprecated(MvNormalCanon(dv)), zeros(3), Matrix(Diagonal(inv.(dv)))),
+            (MvNormalCanon(h, J), J \ h, inv(J)),
+            (MvNormalCanon(J), zeros(3), inv(J)),
+            (MvNormalCanon(h, D), Diagonal(D) \ h, inv(D)),
+            (MvNormalCanon(D), zeros(3), inv(D)),
+            (MvNormalCanon(h, Symmetric(D)), D \ h, inv(D)),
+            (MvNormalCanon(Hermitian(D)), zeros(3), inv(D)),
+            (MvNormal(mu, Symmetric(C)), mu, Matrix(Symmetric(C))),
+            (MvNormal(mu_r, Symmetric(C)), mu_r, Matrix(Symmetric(C))),
+            (MvNormal(mu, Diagonal(dv)), mu, Matrix(Diagonal(dv))),
+            (MvNormal(mu, Symmetric(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
+            (MvNormal(mu, Hermitian(Diagonal(dv))), mu, Matrix(Diagonal(dv))),
+            (MvNormal(mu_r, Diagonal(dv)), mu_r, Matrix(Diagonal(dv))),
+        ]
 
         @test mean(g) ≈ μ
         @test cov(g) ≈ Σ
@@ -86,16 +86,16 @@ end
     @test typeof(MvNormal(mu, PDMat(Array{Float32}(C)))) == typeof(MvNormal(mu, PDMat(C)))
     @test typeof(MvNormal(mu, Array{Float32}(C))) == typeof(MvNormal(mu, PDMat(C)))
     @test typeof(@test_deprecated(MvNormal(mu, 2.0f0))) ==
-          typeof(@test_deprecated(MvNormal(mu, 2.0)))
+        typeof(@test_deprecated(MvNormal(mu, 2.0)))
 
     @test typeof(MvNormalCanon(h, PDMat(Array{Float32}(J)))) ==
-          typeof(MvNormalCanon(h, PDMat(J)))
+        typeof(MvNormalCanon(h, PDMat(J)))
     @test typeof(MvNormalCanon(h, Array{Float32}(J))) == typeof(MvNormalCanon(h, PDMat(J)))
     @test typeof(@test_deprecated(MvNormalCanon(h, 2.0f0))) ==
-          typeof(@test_deprecated(MvNormalCanon(h, 2.0)))
+        typeof(@test_deprecated(MvNormalCanon(h, 2.0)))
 
     @test typeof(MvNormalCanon(mu, Array{Float16}(h), PDMat(Array{Float32}(J)))) ==
-          typeof(MvNormalCanon(mu, h, PDMat(J)))
+        typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     d = MvNormal(Array{Float32}(mu), PDMat(Array{Float32}(C)))
     @test convert(MvNormal{Float32}, d) === d
@@ -105,9 +105,9 @@ end
     d = MvNormalCanon(Array{Float32}(mu), Array{Float32}(h), PDMat(Array{Float32}(J)))
     @test convert(MvNormalCanon{Float32}, d) === d
     @test typeof(convert(MvNormalCanon{Float64}, d)) ==
-          typeof(MvNormalCanon(mu, h, PDMat(J)))
+        typeof(MvNormalCanon(mu, h, PDMat(J)))
     @test typeof(convert(MvNormalCanon{Float64}, d.μ, d.h, d.J)) ==
-          typeof(MvNormalCanon(mu, h, PDMat(J)))
+        typeof(MvNormalCanon(mu, h, PDMat(J)))
 
     @test MvNormal(mu, I) === @test_deprecated(MvNormal(mu, 1))
     @test MvNormal(mu, 9 * I) === @test_deprecated(MvNormal(mu, 3))
@@ -120,14 +120,14 @@ end
     @test MvNormalCanon(h, I) == MvNormalCanon(h, Diagonal(Ones(length(h))))
     @test MvNormalCanon(h, 9 * I) == MvNormalCanon(h, Diagonal(Fill(9, length(h))))
     @test MvNormalCanon(h, 0.25f0 * I) ==
-          MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h))))
+        MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h))))
 
     @test typeof(MvNormalCanon(h, I)) ===
-          typeof(MvNormalCanon(h, Diagonal(Ones(length(h)))))
+        typeof(MvNormalCanon(h, Diagonal(Ones(length(h)))))
     @test typeof(MvNormalCanon(h, 9 * I)) ===
-          typeof(MvNormalCanon(h, Diagonal(Fill(9, length(h)))))
+        typeof(MvNormalCanon(h, Diagonal(Fill(9, length(h)))))
     @test typeof(MvNormalCanon(h, 0.25f0 * I)) ===
-          typeof(MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h)))))
+        typeof(MvNormalCanon(h, Diagonal(Fill(0.25f0, length(h)))))
 end
 
 @testset "MvNormal 32-bit logpdf" begin
@@ -167,7 +167,7 @@ if isdefined(PDMats, :PDSparseMat)
 
         dists = [d_prec_sparse, d_prec_dense, d_cov_dense]
         samples = [x_prec_sparse, x_prec_dense, x_cov_dense]
-        tol = 1e-16
+        tol = 1.0e-16
         se = sqrt.(diag(Σ) ./ nsamp)
         #=
         The cholesky decomposition of sparse matrices is performed by `SuiteSparse.CHOLMOD`,
@@ -179,10 +179,10 @@ if isdefined(PDMats, :PDSparseMat)
         identical.  As a result, these tests only check for approximate statistical equality,
         rather than strict numerical equality of the samples.
         =#
-        for i = 1:3, j = 1:3
+        for i in 1:3, j in 1:3
             @test all(abs.(mean(samples[i]) .- μ) .< 2se)
-            loglik_ii = [logpdf(dists[i], samples[i][:, k]) for k = 1:100_000]
-            loglik_ji = [logpdf(dists[j], samples[i][:, k]) for k = 1:100_000]
+            loglik_ii = [logpdf(dists[i], samples[i][:, k]) for k in 1:100_000]
+            loglik_ji = [logpdf(dists[j], samples[i][:, k]) for k in 1:100_000]
             # test average likelihood ratio between distribution i and sample j are small
             @test mean((loglik_ii .- loglik_ji) .^ 2) < tol
         end
@@ -254,14 +254,14 @@ end
 
 @testset "MvNormal affine transformations" begin
     @testset "moment identities" begin
-        for n = 1:5                       # dimension
+        for n in 1:5                       # dimension
             # distribution
             μ = randn(n)
             for Σ in (
-                randn(n, n) |> A -> A * A',  # dense
-                Diagonal(abs2.(randn(n))), # diagonal
-                abs2(randn()) * I,
-            )         # scaled unit
+                    randn(n, n) |> A -> A * A',  # dense
+                    Diagonal(abs2.(randn(n))), # diagonal
+                    abs2(randn()) * I,
+                )         # scaled unit
                 d = MvNormal(μ, Σ)
 
                 # random arrays for transformations

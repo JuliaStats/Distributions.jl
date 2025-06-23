@@ -12,7 +12,7 @@ function Binomial(n::Real, p::Real)
         "Binomial(n::Real, p) is deprecated. Please use Binomial(n::Integer, p) instead.",
         :Binomial,
     )
-    Binomial(Int(n), p)
+    return Binomial(Int(n), p)
 end
 
 function Binomial(n::Real)
@@ -20,7 +20,7 @@ function Binomial(n::Real)
         "Binomial(n::Real) is deprecated. Please use Binomial(n::Integer) instead.",
         :Binomial,
     )
-    Binomial(Int(n))
+    return Binomial(Int(n))
 end
 
 function BetaBinomial(n::Real, α::Real, β::Real)
@@ -28,23 +28,23 @@ function BetaBinomial(n::Real, α::Real, β::Real)
         "BetaBinomial(n::Real, α, β) is deprecated. Please use BetaBinomial(n::Integer, α, β) instead.",
         :BetaBinomial,
     )
-    BetaBinomial(Int(n), α, β)
+    return BetaBinomial(Int(n), α, β)
 end
 
 
 # vectorized versions
 for fun in [
-    :pdf,
-    :logpdf,
-    :cdf,
-    :logcdf,
-    :ccdf,
-    :logccdf,
-    :invlogcdf,
-    :invlogccdf,
-    :quantile,
-    :cquantile,
-]
+        :pdf,
+        :logpdf,
+        :cdf,
+        :logcdf,
+        :ccdf,
+        :logccdf,
+        :invlogcdf,
+        :invlogccdf,
+        :quantile,
+        :cquantile,
+    ]
 
     _fun! = Symbol('_', fun, '!')
     fun! = Symbol(fun, '!')
@@ -85,7 +85,7 @@ end
     distr,
 ) false
 @deprecate expectation(
-    distr::Union{UnivariateDistribution,MultivariateDistribution},
+    distr::Union{UnivariateDistribution, MultivariateDistribution},
     g::Function;
     kwargs...,
 ) expectation(g, distr; kwargs...) false
@@ -94,15 +94,15 @@ end
 # This is very similar to `Base.@deprecate_binding MatrixReshaped{...} ReshapedDistribution{...}`
 # However, `Base.@deprecate_binding` does not support type parameters
 export MatrixReshaped
-const MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} =
-    ReshapedDistribution{2,S,D}
+const MatrixReshaped{S <: ValueSupport, D <: MultivariateDistribution{S}} =
+    ReshapedDistribution{2, S, D}
 Base.deprecate(@__MODULE__, :MatrixReshaped)
 # This is very similar to `Base.@deprecate MatrixReshaped(...) reshape(...)`
 # We use another (unexported!) alias here to not throw a deprecation warning/error
 # Unexported aliases do not affect the type printing
 # In Julia >= 1.6, instead of a new alias we could have defined a method for (ReshapedDistribution{2,S,D} where {S<:ValueSupport,D<:MultivariateDistribution{S}})
-const _MatrixReshaped{S<:ValueSupport,D<:MultivariateDistribution{S}} =
-    ReshapedDistribution{2,S,D}
+const _MatrixReshaped{S <: ValueSupport, D <: MultivariateDistribution{S}} =
+    ReshapedDistribution{2, S, D}
 function _MatrixReshaped(d::MultivariateDistribution, n::Integer, p::Integer = n)
     Base.depwarn(
         "`MatrixReshaped(d, n, p)` is deprecated, use `reshape(d, (n, p))` instead.",

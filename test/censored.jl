@@ -112,7 +112,7 @@ end
         @test !insupport(d, -1.1)
         @test !insupport(d, 2.1)
         @test sprint(show, "text/plain", d) ==
-              "Censored($(Normal(0.0, 1.0)); lower=-1, upper=2)"
+            "Censored($(Normal(0.0, 1.0)); lower=-1, upper=2)"
 
         d = Censored(Cauchy(0, 1), nothing, 2)
         @test d isa Censored
@@ -151,31 +151,31 @@ end
         @test !insupport(d, 10)
 
         @test censored(Censored(Normal(), 1, nothing), nothing, 2) ==
-              Censored(Normal(), 1, 2)
+            Censored(Normal(), 1, 2)
         @test censored(Censored(Normal(), nothing, 1), -1, nothing) ==
-              Censored(Normal(), -1, 1)
+            Censored(Normal(), -1, 1)
         @test censored(Censored(Normal(), 1, 2), 1.5, 2.5) == Censored(Normal(), 1.5, 2.0)
         @test censored(Censored(Normal(), 1, 3), 1.5, 2.5) == Censored(Normal(), 1.5, 2.5)
         @test censored(Censored(Normal(), 1, 2), 0.5, 2.5) == Censored(Normal(), 1.0, 2.0)
         @test censored(Censored(Normal(), 1, 2), 0.5, 1.5) == Censored(Normal(), 1.0, 1.5)
 
         @test censored(Censored(Normal(), nothing, 1), nothing, 1) ==
-              Censored(Normal(), nothing, 1)
+            Censored(Normal(), nothing, 1)
         @test censored(Censored(Normal(), nothing, 1), nothing, 2) ==
-              Censored(Normal(), nothing, 1)
+            Censored(Normal(), nothing, 1)
         @test censored(Censored(Normal(), nothing, 1), nothing, 1.5) ==
-              Censored(Normal(), nothing, 1)
+            Censored(Normal(), nothing, 1)
         @test censored(Censored(Normal(), nothing, 1.5), nothing, 1) ==
-              Censored(Normal(), nothing, 1)
+            Censored(Normal(), nothing, 1)
 
         @test censored(Censored(Normal(), 1, nothing), 1, nothing) ==
-              Censored(Normal(), 1, nothing)
+            Censored(Normal(), 1, nothing)
         @test censored(Censored(Normal(), 1, nothing), 2, nothing) ==
-              Censored(Normal(), 2, nothing)
+            Censored(Normal(), 2, nothing)
         @test censored(Censored(Normal(), 1, nothing), 1.5, nothing) ==
-              Censored(Normal(), 1.5, nothing)
+            Censored(Normal(), 1.5, nothing)
         @test censored(Censored(Normal(), 1.5, nothing), 1, nothing) ==
-              Censored(Normal(), 1.5, nothing)
+            Censored(Normal(), 1.5, nothing)
     end
 
     @testset "Uniform" begin
@@ -193,9 +193,9 @@ end
             (-Inf, Inf),
         ]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
-            lower,
-            upper,
-        ) in bounds
+                lower,
+                upper,
+            ) in bounds
 
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
@@ -211,10 +211,10 @@ end
                 @test u == upper
             end
             @testset for f in [cdf, logcdf, ccdf, logccdf]
-                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1e-8
-                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1e-8
-                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1e-8
-                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1e-8
+                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1.0e-8
+                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1.0e-8
+                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1.0e-8
+                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1.0e-8
                 @test @inferred(f(d, 5)) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
@@ -223,7 +223,7 @@ end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
             @inferred quantile(d, 0.5)
             @test Base.Fix1(quantile, d).(0:0.01:1) ≈
-                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+                clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
             if lower === nothing || !isfinite(lower)
@@ -247,7 +247,7 @@ end
             @test @inferred(loglikelihood(d, x)) ≈ sum(x -> logpdf(d, x), x)
             @test loglikelihood(d, [x; -1]) == -Inf
             # entropy
-            @test @inferred(entropy(d)) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
+            @test @inferred(entropy(d)) ≈ mean(x -> -logpdf(d, x), x) atol = 1.0e-1
         end
     end
 
@@ -255,18 +255,18 @@ end
         d0 = Normal()
         bounds = [(nothing, 0.2), (-0.1, nothing), (-0.1, 0.2)]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
-            lower,
-            upper,
-        ) in bounds
+                lower,
+                upper,
+            ) in bounds
 
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             l, u = extrema(d)
             @testset for f in [cdf, logcdf, ccdf, logccdf]
-                @test f(d, l) ≈ f(dmix, l) atol = 1e-8
-                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1e-8
-                @test f(d, u) ≈ f(dmix, u) atol = 1e-8
-                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1e-8
+                @test f(d, l) ≈ f(dmix, l) atol = 1.0e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1.0e-8
+                @test f(d, u) ≈ f(dmix, u) atol = 1.0e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1.0e-8
                 @test f(d, 5) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
@@ -274,7 +274,7 @@ end
             end
             @test median(d) ≈ clamp(median(d0), l, u)
             @test Base.Fix1(quantile, d).(0:0.01:1) ≈
-                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+                clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # special-case pdf/logpdf/loglikelihood since when replacing Dirac(μ) with
             # Normal(μ, 0), they are infinite
             if lower === nothing
@@ -297,7 +297,7 @@ end
             # loglikelihood
             @test loglikelihood(d, x) ≈ sum(x -> logpdf(d, x), x)
             # entropy
-            @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1e-1
+            @test entropy(d) ≈ mean(x -> -logpdf(d, x), x) atol = 1.0e-1
         end
     end
 
@@ -316,19 +316,19 @@ end
             (-Inf, Inf),
         ]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
-            lower,
-            upper,
-        ) in bounds
+                lower,
+                upper,
+            ) in bounds
 
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
-                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1e-8
-                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1e-8
-                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1e-8
-                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1e-8
+                @test @inferred(f(d, l)) ≈ f(dmix, l) atol = 1.0e-8
+                @test @inferred(f(d, l - 0.1)) ≈ f(dmix, l - 0.1) atol = 1.0e-8
+                @test @inferred(f(d, u)) ≈ f(dmix, u) atol = 1.0e-8
+                @test @inferred(f(d, u + 0.1)) ≈ f(dmix, u + 0.1) atol = 1.0e-8
                 @test @inferred(f(d, 5)) ≈ f(dmix, 5)
             end
             @testset for f in [mean, var]
@@ -337,7 +337,7 @@ end
             @test @inferred(median(d)) ≈ clamp(median(d0), l, u)
             @inferred quantile(d, 0.5)
             @test Base.Fix1(quantile, d).(0:0.01:1) ≈
-                  clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
+                clamp.(Base.Fix1(quantile, d0).(0:0.01:1), l, u)
             # rand
             x = rand(d, 10_000)
             @test all(x -> insupport(d, x), x)
@@ -347,10 +347,10 @@ end
             μ = @inferred mean(d)
             xall = unique(x)
             @test μ ≈ sum(x -> pdf(d, x) * x, xall)
-            @test mean(x) ≈ μ atol = 1e-1
+            @test mean(x) ≈ μ atol = 1.0e-1
             v = @inferred var(d)
             @test v ≈ sum(x -> pdf(d, x) * abs2(x - μ), xall)
-            @test std(x) ≈ sqrt(v) atol = 1e-1
+            @test std(x) ≈ sqrt(v) atol = 1.0e-1
             # entropy
             @test @inferred(entropy(d)) ≈ sum(x -> pdf(d, x) * -logpdf(d, x), xall)
         end
@@ -360,43 +360,43 @@ end
         d0 = Poisson(20)
         bounds = [(nothing, 12), (2, nothing), (2, 12), (8, nothing)]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper)" for (
-            lower,
-            upper,
-        ) in bounds
+                lower,
+                upper,
+            ) in bounds
 
             d = censored(d0, lower, upper)
             dmix = _as_mixture(d)
             @test extrema(d) == extrema(dmix)
             l, u = extrema(d)
             @testset for f in [pdf, logpdf, cdf, logcdf, ccdf, logccdf]
-                @test f(d, l) ≈ f(dmix, l) atol = 1e-8
-                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1e-8
-                @test f(d, u) ≈ f(dmix, u) atol = 1e-8
-                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1e-8
+                @test f(d, l) ≈ f(dmix, l) atol = 1.0e-8
+                @test f(d, l - 0.1) ≈ f(dmix, l - 0.1) atol = 1.0e-8
+                @test f(d, u) ≈ f(dmix, u) atol = 1.0e-8
+                @test f(d, u + 0.1) ≈ f(dmix, u + 0.1) atol = 1.0e-8
                 @test f(d, 5) ≈ f(dmix, 5)
             end
             @test median(d) ≈ clamp(median(d0), l, u)
             @test Base.Fix1(quantile, d).(0:0.01:0.99) ≈
-                  clamp.(Base.Fix1(quantile, d0).(0:0.01:0.99), l, u)
+                clamp.(Base.Fix1(quantile, d0).(0:0.01:0.99), l, u)
             x = rand(d, 100)
             @test loglikelihood(d, x) ≈ loglikelihood(dmix, x)
             # rand
             x = rand(d, 10_000)
             @test all(x -> insupport(d, x), x)
             # mean, std
-            @test mean(x) ≈ mean(x) atol = 1e-1
-            @test std(x) ≈ std(x) atol = 1e-1
+            @test mean(x) ≈ mean(x) atol = 1.0e-1
+            @test std(x) ≈ std(x) atol = 1.0e-1
         end
     end
 
     @testset "mixed types are still type-inferrible" begin
         bounds = [(nothing, 8), (2, nothing), (2, 8)]
         @testset "lower = $(lower === nothing ? "nothing" : lower), upper = $(upper === nothing ? "nothing" : upper), uncensored partype=$T0, partype=$T" for (
-                lower,
-                upper,
-            ) in bounds,
-            T in (Int, Float32, Float64),
-            T0 in (Int, Float32, Float64)
+                    lower,
+                    upper,
+                ) in bounds,
+                T in (Int, Float32, Float64),
+                T0 in (Int, Float32, Float64)
 
             d0 = Uniform(T0(0), T0(10))
             d = censored(

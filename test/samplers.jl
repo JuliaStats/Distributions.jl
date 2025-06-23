@@ -54,23 +54,23 @@ import Distributions:
     ]
 
     @testset "Binomial: $S" for (S, paramlst) in [
-        (
-            BinomialGeomSampler,
-            [
-                (0, 0.4),
-                (0, 0.6),
-                (5, 0.0),
-                (5, 1.0),
-                (1, 0.2),
-                (1, 0.8),
-                (3, 0.4),
-                (4, 0.6),
-            ],
-        ),
-        (BinomialTPESampler, [(40, 0.5), (100, 0.4), (300, 0.6)]),
-        (BinomialPolySampler, binomparams),
-        (BinomialAliasSampler, binomparams),
-    ]
+            (
+                BinomialGeomSampler,
+                [
+                    (0, 0.4),
+                    (0, 0.6),
+                    (5, 0.0),
+                    (5, 1.0),
+                    (1, 0.2),
+                    (1, 0.8),
+                    (3, 0.4),
+                    (4, 0.6),
+                ],
+            ),
+            (BinomialTPESampler, [(40, 0.5), (100, 0.4), (300, 0.6)]),
+            (BinomialPolySampler, binomparams),
+            (BinomialAliasSampler, binomparams),
+        ]
         @testset "pa=$pa" for pa in paramlst
             n, p = pa
             test_samples(S(n, p), Binomial(n, p), n_tsamples)
@@ -81,9 +81,9 @@ import Distributions:
     ## Poisson samplers
 
     @testset "Poisson: $S" for (S, paramlst) in [
-        (PoissonCountSampler, [0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0]),
-        (PoissonADSampler, [10.0, 15.0, 20.0, 30.0]),
-    ]
+            (PoissonCountSampler, [0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 30.0]),
+            (PoissonADSampler, [10.0, 15.0, 20.0, 30.0]),
+        ]
         @testset "μ=$μ" for μ in paramlst
             test_samples(S(μ), Poisson(μ), n_tsamples)
             test_samples(S(μ), Poisson(μ), n_tsamples, rng = rng)
@@ -93,10 +93,10 @@ import Distributions:
     ## Poisson Binomial sampler
     @testset "Poisson-Binomial: $S" for S in (PoissBinAliasSampler,)
         @testset "p=$p" for p in (
-            fill(0.2, 30),
-            range(0.1, stop = 0.99, length = 30),
-            [fill(0.1, 10); fill(0.9, 10)],
-        )
+                fill(0.2, 30),
+                range(0.1, stop = 0.99, length = 30),
+                [fill(0.1, 10); fill(0.9, 10)],
+            )
             d = PoissonBinomial(p)
             test_samples(S(d), d, n_tsamples)
             test_samples(S(d), d, n_tsamples, rng = rng)
@@ -117,13 +117,13 @@ import Distributions:
     ## Gamma samplers
     @testset "Gamma (shape >= 1): $S" for S in [GammaGDSampler, GammaMTSampler]
         @testset "d=$d" for d in [
-            Gamma(1.0, 1.0),
-            Gamma(2.0, 1.0),
-            Gamma(3.0, 1.0),
-            Gamma(1.0, 2.0),
-            Gamma(3.0, 2.0),
-            Gamma(100.0, 2.0),
-        ]
+                Gamma(1.0, 1.0),
+                Gamma(2.0, 1.0),
+                Gamma(3.0, 1.0),
+                Gamma(1.0, 2.0),
+                Gamma(3.0, 2.0),
+                Gamma(100.0, 2.0),
+            ]
             test_samples(S(d), d, n_tsamples)
             test_samples(S(d), d, n_tsamples, rng = rng)
         end
@@ -160,15 +160,15 @@ import Distributions:
 
     @testset "Random.Sampler" begin
         for dist in (
-            Binomial(5, 0.3),
-            Exponential(2.0),
-            Gamma(0.1, 1.0),
-            Gamma(2.0, 1.0),
-            MatrixNormal(3, 4),
-            MvNormal(zeros(3), I),
-            Normal(1.5, 2.0),
-            Poisson(0.5),
-        )
+                Binomial(5, 0.3),
+                Exponential(2.0),
+                Gamma(0.1, 1.0),
+                Gamma(2.0, 1.0),
+                MatrixNormal(3, 4),
+                MvNormal(zeros(3), I),
+                Normal(1.5, 2.0),
+                Poisson(0.5),
+            )
             @test Random.Sampler(rng, dist, Val(1)) == dist
             @test Random.Sampler(rng, dist) == sampler(dist)
         end

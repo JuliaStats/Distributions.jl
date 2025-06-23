@@ -26,13 +26,13 @@ External links
 * [Beta prime distribution on Wikipedia](http://en.wikipedia.org/wiki/Beta_prime_distribution)
 
 """
-struct BetaPrime{T<:Real} <: ContinuousUnivariateDistribution
+struct BetaPrime{T <: Real} <: ContinuousUnivariateDistribution
     α::T
     β::T
     BetaPrime{T}(α::T, β::T) where {T} = new{T}(α, β)
 end
 
-function BetaPrime(α::T, β::T; check_args::Bool = true) where {T<:Real}
+function BetaPrime(α::T, β::T; check_args::Bool = true) where {T <: Real}
     @check_args BetaPrime (α, α > zero(α)) (β, β > zero(β))
     return BetaPrime{T}(α, β)
 end
@@ -43,41 +43,41 @@ BetaPrime(α::Integer, β::Integer; check_args::Bool = true) =
     BetaPrime(float(α), float(β); check_args = check_args)
 function BetaPrime(α::Real; check_args::Bool = true)
     @check_args BetaPrime (α, α > zero(α))
-    BetaPrime(α, α; check_args = false)
+    return BetaPrime(α, α; check_args = false)
 end
 BetaPrime() = BetaPrime{Float64}(1.0, 1.0)
 
 @distr_support BetaPrime 0.0 Inf
 
 #### Conversions
-function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where {T<:Real}
-    BetaPrime(T(α), T(β))
+function convert(::Type{BetaPrime{T}}, α::Real, β::Real) where {T <: Real}
+    return BetaPrime(T(α), T(β))
 end
-Base.convert(::Type{BetaPrime{T}}, d::BetaPrime) where {T<:Real} =
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime) where {T <: Real} =
     BetaPrime{T}(T(d.α), T(d.β))
-Base.convert(::Type{BetaPrime{T}}, d::BetaPrime{T}) where {T<:Real} = d
+Base.convert(::Type{BetaPrime{T}}, d::BetaPrime{T}) where {T <: Real} = d
 
 #### Parameters
 
 params(d::BetaPrime) = (d.α, d.β)
-@inline partype(d::BetaPrime{T}) where {T<:Real} = T
+@inline partype(d::BetaPrime{T}) where {T <: Real} = T
 
 #### Statistics
 
-function mean(d::BetaPrime{T}) where {T<:Real}
+function mean(d::BetaPrime{T}) where {T <: Real}
     ((α, β) = params(d); β > 1 ? α / (β - 1) : T(NaN))
 end
 
-function mode(d::BetaPrime{T}) where {T<:Real}
+function mode(d::BetaPrime{T}) where {T <: Real}
     ((α, β) = params(d); α > 1 ? (α - 1) / (β + 1) : zero(T))
 end
 
-function var(d::BetaPrime{T}) where {T<:Real}
+function var(d::BetaPrime{T}) where {T <: Real}
     (α, β) = params(d)
-    β > 2 ? α * (α + β - 1) / ((β - 2) * (β - 1)^2) : T(NaN)
+    return β > 2 ? α * (α + β - 1) / ((β - 2) * (β - 1)^2) : T(NaN)
 end
 
-function skewness(d::BetaPrime{T}) where {T<:Real}
+function skewness(d::BetaPrime{T}) where {T <: Real}
     (α, β) = params(d)
     if β > 3
         s = α + β - 1
@@ -117,5 +117,5 @@ end
 
 function rand(rng::AbstractRNG, d::BetaPrime)
     (α, β) = params(d)
-    rand(rng, Gamma(α)) / rand(rng, Gamma(β))
+    return rand(rng, Gamma(α)) / rand(rng, Gamma(β))
 end

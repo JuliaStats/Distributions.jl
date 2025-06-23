@@ -1,5 +1,3 @@
-
-
 # the name of a distribution
 #
 #   Generally, this should be just the type name, e.g. Normal.
@@ -17,10 +15,10 @@ show(io::IO, d::Distribution) = show(io, d, fieldnames(typeof(d)))
 #
 function show(io::IO, d::Distribution, pnames)
     uml, namevals = _use_multline_show(d, pnames)
-    uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
+    return uml ? show_multline(io, d, namevals) : show_oneline(io, d, namevals)
 end
 
-const _NameVal = Tuple{Symbol,Any}
+const _NameVal = Tuple{Symbol, Any}
 
 function _use_multline_show(d::Distribution, pnames)
     # decide whether to use one-line or multi-line format
@@ -48,7 +46,7 @@ function _use_multline_show(d::Distribution, pnames)
 end
 
 function _use_multline_show(d::Distribution)
-    _use_multline_show(d, fieldnames(typeof(d)))
+    return _use_multline_show(d, fieldnames(typeof(d)))
 end
 
 function show_oneline(io::IO, d::Distribution, namevals)
@@ -64,7 +62,7 @@ function show_oneline(io::IO, d::Distribution, namevals)
             print(io, ", ")
         end
     end
-    print(io, ')')
+    return print(io, ')')
 end
 
 function show_multline(io::IO, d::Distribution, namevals; newline = true)
@@ -75,5 +73,5 @@ function show_multline(io::IO, d::Distribution, namevals; newline = true)
         print(io, ": ")
         println(io, pv)
     end
-    newline ? println(io, ")") : print(io, ")")
+    return newline ? println(io, ")") : print(io, ")")
 end

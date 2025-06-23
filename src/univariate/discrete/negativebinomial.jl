@@ -26,16 +26,16 @@ External links:
 
 * [Negative binomial distribution on Wolfram](https://reference.wolfram.com/language/ref/NegativeBinomialDistribution.html)
 """
-struct NegativeBinomial{T<:Real} <: DiscreteUnivariateDistribution
+struct NegativeBinomial{T <: Real} <: DiscreteUnivariateDistribution
     r::T
     p::T
 
-    function NegativeBinomial{T}(r::T, p::T) where {T<:Real}
+    function NegativeBinomial{T}(r::T, p::T) where {T <: Real}
         return new{T}(r, p)
     end
 end
 
-function NegativeBinomial(r::T, p::T; check_args::Bool = true) where {T<:Real}
+function NegativeBinomial(r::T, p::T; check_args::Bool = true) where {T <: Real}
     @check_args NegativeBinomial (r, r > zero(r)) (p, zero(p) < p <= one(p))
     return NegativeBinomial{T}(r, p)
 end
@@ -52,13 +52,13 @@ NegativeBinomial() = NegativeBinomial{Float64}(1.0, 0.5)
 
 #### Conversions
 
-function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T<:Real}
+function convert(::Type{NegativeBinomial{T}}, r::Real, p::Real) where {T <: Real}
     return NegativeBinomial(T(r), T(p))
 end
-function Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial) where {T<:Real}
+function Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial) where {T <: Real}
     return NegativeBinomial{T}(T(d.r), T(d.p))
 end
-Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{T}) where {T<:Real} = d
+Base.convert(::Type{NegativeBinomial{T}}, d::NegativeBinomial{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -94,7 +94,7 @@ function kldivergence(p::NegativeBinomial, q::NegativeBinomial; kwargs...)
         # this case. Hence we fall back to the numerical approximation.
         return invoke(
             kldivergence,
-            Tuple{UnivariateDistribution{Discrete},UnivariateDistribution{Discrete}},
+            Tuple{UnivariateDistribution{Discrete}, UnivariateDistribution{Discrete}},
             p,
             q;
             kwargs...,
@@ -146,6 +146,6 @@ end
 mgf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t)
 function cgf(d::NegativeBinomial, t)
     r, p = params(d)
-    r * cgf(Geometric{typeof(p)}(p), t)
+    return r * cgf(Geometric{typeof(p)}(p), t)
 end
 cf(d::NegativeBinomial, t::Real) = laplace_transform(d, -t * im)

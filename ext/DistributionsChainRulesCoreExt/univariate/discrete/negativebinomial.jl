@@ -1,5 +1,5 @@
 ## Callable struct to fix type inference issues caused by captured values
-struct LogPDFNegativeBinomialPullback{D,T<:Real}
+struct LogPDFNegativeBinomialPullback{D, T <: Real}
     ∂r::T
     ∂p::T
 end
@@ -24,7 +24,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
         ∂r = oftype(
             z,
             log(p) - inv(k + r) - SpecialFunctions.digamma(r) +
-            SpecialFunctions.digamma(r + k + 1),
+                SpecialFunctions.digamma(r + k + 1),
         )
         ∂p = oftype(z, r / p - k / (1 - p))
     else
@@ -35,7 +35,7 @@ function ChainRulesCore.rrule(::typeof(logpdf), d::NegativeBinomial, k::Real)
 
     # Define pullback
     logpdf_NegativeBinomial_pullback =
-        LogPDFNegativeBinomialPullback{typeof(d),typeof(z)}(∂r, ∂p)
+        LogPDFNegativeBinomialPullback{typeof(d), typeof(z)}(∂r, ∂p)
 
     return Ω, logpdf_NegativeBinomial_pullback
 end

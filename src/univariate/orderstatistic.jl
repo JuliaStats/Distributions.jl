@@ -39,19 +39,19 @@ OrderStatistic(DiscreteUniform(10), 10, 10)  # distribution of the sample maximu
 OrderStatistic(Gamma(1, 1), 11, 5)           # distribution of the sample median
 ```
 """
-struct OrderStatistic{D<:UnivariateDistribution,S<:ValueSupport} <:
-       UnivariateDistribution{S}
+struct OrderStatistic{D <: UnivariateDistribution, S <: ValueSupport} <:
+    UnivariateDistribution{S}
     dist::D
     n::Int
     rank::Int
     function OrderStatistic(
-        dist::UnivariateDistribution,
-        n::Int,
-        rank::Int;
-        check_args::Bool = true,
-    )
+            dist::UnivariateDistribution,
+            n::Int,
+            rank::Int;
+            check_args::Bool = true,
+        )
         @check_args(OrderStatistic, 1 ≤ rank ≤ n)
-        return new{typeof(dist),value_support(typeof(dist))}(dist, n, rank)
+        return new{typeof(dist), value_support(typeof(dist))}(dist, n, rank)
     end
 end
 

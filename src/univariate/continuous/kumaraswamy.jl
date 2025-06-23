@@ -22,7 +22,7 @@ References
 - Kumaraswamy, P. (1980). A generalized probability density function for double-bounded
   random processes. Journal of Hydrology. 46(1-2), 79-88.
 """
-struct Kumaraswamy{T<:Real} <: ContinuousUnivariateDistribution
+struct Kumaraswamy{T <: Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
 end

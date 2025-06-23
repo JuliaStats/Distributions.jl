@@ -14,7 +14,7 @@ using Test
                 @test @inferred(logpdf(d, T(-3))) === ST(-Inf)
                 @test @inferred(pdf(d, T(0))) === (α == 1 ? ST(S(α) / S(θ)) : ST(0))
                 @test @inferred(logpdf(d, T(0))) ===
-                      (α == 1 ? ST(log(S(α) / S(θ))) : ST(-Inf))
+                    (α == 1 ? ST(log(S(α) / S(θ))) : ST(-Inf))
 
                 if T <: AbstractFloat
                     @test @inferred(pdf(d, T(-Inf))) === ST(0)

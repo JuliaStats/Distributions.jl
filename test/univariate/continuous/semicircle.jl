@@ -64,5 +64,5 @@ rng = StableRNG(123)
     @test quantile(dmean, 0.01) < mean(sample) < quantile(dmean, 0.99)
 
     pvalue = pvalue_kolmogorovsmirnoff(sample, semi)
-    @test pvalue > 1e-2
+    @test pvalue > 1.0e-2
 end

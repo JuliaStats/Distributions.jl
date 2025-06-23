@@ -1,4 +1,3 @@
-
 # Discrete univariate
 
 convert(::Type{Binomial}, d::Bernoulli) = Binomial(1, d.p)

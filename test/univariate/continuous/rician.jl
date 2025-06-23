@@ -14,15 +14,15 @@
     @test var(d1) ≈ var(d2)
     @test mode(d1) ≈ mode(d2)
     @test median(d1) ≈ median(d2)
-    @test Base.Fix1(quantile, d1).([0.25, 0.45, 0.60, 0.80, 0.90]) ≈
-          Base.Fix1(quantile, d2).([0.25, 0.45, 0.60, 0.80, 0.90])
+    @test Base.Fix1(quantile, d1).([0.25, 0.45, 0.6, 0.8, 0.9]) ≈
+        Base.Fix1(quantile, d2).([0.25, 0.45, 0.6, 0.8, 0.9])
     @test Base.Fix1(pdf, d1).(0.0:0.1:1.0) ≈ Base.Fix1(pdf, d2).(0.0:0.1:1.0)
     @test Base.Fix1(cdf, d1).(0.0:0.1:1.0) ≈ Base.Fix1(cdf, d2).(0.0:0.1:1.0)
 
     d1 = Rician(10.0, 10.0)
     @test median(d1) == quantile(d1, 0.5)
-    x = Base.Fix1(quantile, d1).([0.25, 0.45, 0.60, 0.80, 0.90])
-    @test all(Base.Fix1(cdf, d1).(x) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
+    x = Base.Fix1(quantile, d1).([0.25, 0.45, 0.6, 0.8, 0.9])
+    @test all(Base.Fix1(cdf, d1).(x) .≈ [0.25, 0.45, 0.6, 0.8, 0.9])
 
     x = rand(Rician(5.0, 5.0), 100000)
     d1 = fit(Rician, x)

@@ -18,7 +18,7 @@ using LinearAlgebra
 
     ds2 = Fill(Normal(first(μ), 1.0), N)
     d_product2 = @inferred(product_distribution(ds2))
-    @test d_product2 isa MvNormal{Float64,Distributions.ScalMat{Float64},<:Fill{Float64,1}}
+    @test d_product2 isa MvNormal{Float64, Distributions.ScalMat{Float64}, <:Fill{Float64, 1}}
 
     # Check that methods for `ProductDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds2, d_product2))
@@ -50,12 +50,12 @@ end
     # when `Product` is removed
     d_product1 = @inferred(Distributions.ProductDistribution(ds1))
     @test d_product1 isa
-          Distributions.VectorOfUnivariateDistribution{<:Vector,Continuous,Float64}
+        Distributions.VectorOfUnivariateDistribution{<:Vector, Continuous, Float64}
 
     d_product2 =
         @inferred(product_distribution(ntuple(i -> Uniform(0.0, ubound[i]), 11)...))
     @test d_product2 isa
-          Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+        Distributions.VectorOfUnivariateDistribution{<:Tuple, Continuous, Float64}
 
     ds3 = Fill(Uniform(0.0, first(ubound)), N)
     # Replace with
@@ -63,7 +63,7 @@ end
     # when `Product` is removed
     d_product3 = @inferred(Distributions.ProductDistribution(ds3))
     @test d_product3 isa
-          Distributions.VectorOfUnivariateDistribution{<:Fill,Continuous,Float64}
+        Distributions.VectorOfUnivariateDistribution{<:Fill, Continuous, Float64}
 
     # Check that methods for `VectorOfUnivariateDistribution` are consistent.
     for (ds, d_product) in ((ds1, d_product1), (ds1, d_product2), (ds3, d_product3))
@@ -99,7 +99,7 @@ end
 
     for a in ([0, 1], [-0.5, 0.5])
         # Construct independent distributions and `ProductDistribution` from these.
-        ds1 = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ = 1:N]
+        ds1 = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ in 1:N]
         # Replace with
         # d_product1 = @inferred(product_distribution(ds1))
         # when `Product` is removed
@@ -114,7 +114,7 @@ end
             product_distribution(ntuple(_ -> DiscreteNonParametric(a, [0.5, 0.5]), 11)...)
         )
         @test d_product2 isa Distributions.VectorOfUnivariateDistribution{
-            <:NTuple{N,<:DiscreteNonParametric},
+            <:NTuple{N, <:DiscreteNonParametric},
             Discrete,
             eltype(a),
         }
@@ -125,7 +125,7 @@ end
         # when `Product` is removed
         d_product3 = @inferred(Distributions.ProductDistribution(ds3))
         @test d_product3 isa Distributions.VectorOfUnivariateDistribution{
-            <:Fill{<:DiscreteNonParametric,1},
+            <:Fill{<:DiscreteNonParametric, 1},
             Discrete,
             eltype(a),
         }
@@ -165,7 +165,7 @@ end
     ds = (Bernoulli(0.3), Uniform(0.0, 0.7), Categorical([0.4, 0.2, 0.4]))
     d_product = @inferred(product_distribution(ds...))
     @test d_product isa
-          Distributions.VectorOfUnivariateDistribution{<:Tuple,Continuous,Float64}
+        Distributions.VectorOfUnivariateDistribution{<:Tuple, Continuous, Float64}
 
     ds_vec = vcat(ds...)
 
@@ -210,7 +210,7 @@ end
     ds2 = Fill(Uniform(0.0, first(ubound)), M, N)
     d_product2 = @inferred(product_distribution(ds2))
     @test d_product2 isa Distributions.MatrixOfUnivariateDistribution{
-        <:Fill{<:Uniform,2},
+        <:Fill{<:Uniform, 2},
         Continuous,
         Float64,
     }
@@ -223,7 +223,7 @@ end
         @test @inferred(var(d_product)) == var.(ds)
         @test @inferred(cov(d_product)) == Diagonal(vec(var.(ds)))
         @test @inferred(cov(d_product, Val(false))) ==
-              reshape(Diagonal(vec(var.(ds))), M, N, M, N)
+            reshape(Diagonal(vec(var.(ds))), M, N, M, N)
 
         @test minimum(d_product) == map(minimum, ds)
         @test maximum(d_product) == map(maximum, ds)
@@ -251,7 +251,7 @@ end
         @test d_product1 isa Distributions.ProductDistribution{
             length(N) + 1,
             1,
-            <:Array{<:Dirichlet{Float64},length(N)},
+            <:Array{<:Dirichlet{Float64}, length(N)},
             Continuous,
             Float64,
         }
@@ -261,7 +261,7 @@ end
         @test d_product2 isa Distributions.ProductDistribution{
             length(N) + 1,
             1,
-            <:Fill{<:Dirichlet{Float64},length(N)},
+            <:Fill{<:Dirichlet{Float64}, length(N)},
             Continuous,
             Float64,
         }
@@ -293,16 +293,16 @@ end
             x = @inferred(rand(d_product))
             @test size(x) == size(d_product)
             @test x isa
-                  typeof(mapreduce(rand, (x, y) -> cat(x, y; dims = ndims(ds) + 1), ds))
+                typeof(mapreduce(rand, (x, y) -> cat(x, y; dims = ndims(ds) + 1), ds))
 
             # inference broken for non-Fill arrays
             y = reshape(x, Val(2))
             if ds isa Fill
                 @test @inferred(logpdf(d_product, x)) ≈
-                      sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
+                    sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
             else
                 @test logpdf(d_product, x) ≈
-                      sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
+                    sum(logpdf(d, y[:, i]) for (i, d) in enumerate(ds))
             end
             # ensure that samples are different, in particular if `Fill` is used
             @test length(unique(x)) == length(d_product)

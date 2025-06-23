@@ -27,15 +27,15 @@ External Links
  * [Generalized Gaussian on Wikipedia](http://en.wikipedia.org/wiki/Generalized_normal_distribution)
  * [Reference implementation](https://www.researchgate.net/publication/254282790_Simulation_of_the_p-generalized_Gaussian_distribution)
  """
-struct PGeneralizedGaussian{T<:Real} <: ContinuousUnivariateDistribution
+struct PGeneralizedGaussian{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     α::T
     p::T
 
-    PGeneralizedGaussian{T}(μ::T, α::T, p::T) where {T<:Real} = new{T}(µ, α, p)
+    PGeneralizedGaussian{T}(μ::T, α::T, p::T) where {T <: Real} = new{T}(µ, α, p)
 end
 
-function PGeneralizedGaussian(μ::T, α::T, p::T; check_args::Bool = true) where {T<:Real}
+function PGeneralizedGaussian(μ::T, α::T, p::T; check_args::Bool = true) where {T <: Real}
     @check_args PGeneralizedGaussian (α, α > zero(α)) (p, p > zero(p))
     return PGeneralizedGaussian{T}(μ, α, p)
 end
@@ -64,19 +64,19 @@ PGeneralizedGaussian() = PGeneralizedGaussian{Float64}(0.0, √2, 2.0) # approxi
 #### Conversions
 
 function Base.convert(
-    ::Type{PGeneralizedGaussian{T}},
-    d::PGeneralizedGaussian,
-) where {T<:Real}
+        ::Type{PGeneralizedGaussian{T}},
+        d::PGeneralizedGaussian,
+    ) where {T <: Real}
     return PGeneralizedGaussian{T}(T(d.μ), T(d.α), T(d.p))
 end
-Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where {T<:Real} =
+Base.convert(::Type{PGeneralizedGaussian{T}}, d::PGeneralizedGaussian{T}) where {T <: Real} =
     d
 
 @distr_support PGeneralizedGaussian -Inf Inf
 
 
 #### Parameters
-partype(::PGeneralizedGaussian{T}) where {T<:Real} = T
+partype(::PGeneralizedGaussian{T}) where {T <: Real} = T
 
 params(d::PGeneralizedGaussian) = (d.μ, d.α, d.p)
 location(d::PGeneralizedGaussian) = d.μ

@@ -48,7 +48,7 @@ if haskey(ENV, "binomial") && ENV["binomial"] != "skip"
         for n in nvals, p in pvals
             s = ST(n, p)
             b = @benchmark rand($mt, $s)
-            @info "(n,p): $((n,p)), result: $b"
+            @info "(n,p): $((n, p)), result: $b"
         end
     end
 end

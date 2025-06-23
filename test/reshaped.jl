@@ -41,7 +41,7 @@
         # support
         for d in d1s, s in sizes
             @test (size(d) == s) ⊻
-                  (length(s) != length(size(d)) || !insupport(d, reshape(x1, s)))
+                (length(s) != length(size(d)) || !insupport(d, reshape(x1, s)))
         end
 
         # mean

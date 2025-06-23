@@ -1,9 +1,9 @@
 function ChainRulesCore.frule(
-    (_, Δalpha)::Tuple{Any,Any},
-    ::Type{DT},
-    alpha::AbstractVector{T};
-    check_args::Bool = true,
-) where {T<:Real,DT<:Union{Dirichlet{T},Dirichlet}}
+        (_, Δalpha)::Tuple{Any, Any},
+        ::Type{DT},
+        alpha::AbstractVector{T};
+        check_args::Bool = true,
+    ) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args = check_args)
     ∂alpha0 = sum(Δalpha)
     digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
@@ -19,10 +19,10 @@ function ChainRulesCore.frule(
 end
 
 function ChainRulesCore.rrule(
-    ::Type{DT},
-    alpha::AbstractVector{T};
-    check_args::Bool = true,
-) where {T<:Real,DT<:Union{Dirichlet{T},Dirichlet}}
+        ::Type{DT},
+        alpha::AbstractVector{T};
+        check_args::Bool = true,
+    ) where {T <: Real, DT <: Union{Dirichlet{T}, Dirichlet}}
     d = DT(alpha; check_args = check_args)
     digamma_alpha0 = SpecialFunctions.digamma(d.alpha0)
     function Dirichlet_pullback(_Δd)
@@ -36,11 +36,11 @@ function ChainRulesCore.rrule(
 end
 
 function ChainRulesCore.frule(
-    (_, Δd, Δx)::Tuple{Any,Any,Any},
-    ::typeof(Distributions._logpdf),
-    d::Dirichlet,
-    x::AbstractVector{<:Real},
-)
+        (_, Δd, Δx)::Tuple{Any, Any, Any},
+        ::typeof(Distributions._logpdf),
+        d::Dirichlet,
+        x::AbstractVector{<:Real},
+    )
     Ω = Distributions._logpdf(d, x)
     ∂alpha = sum(
         Broadcast.instantiate(
@@ -58,10 +58,10 @@ function ChainRulesCore.frule(
 end
 
 function ChainRulesCore.rrule(
-    ::typeof(Distributions._logpdf),
-    d::T,
-    x::AbstractVector{<:Real},
-) where {T<:Dirichlet}
+        ::typeof(Distributions._logpdf),
+        d::T,
+        x::AbstractVector{<:Real},
+    ) where {T <: Dirichlet}
     Ω = Distributions._logpdf(d, x)
     isfinite_Ω = isfinite(Ω)
     alpha = d.alpha

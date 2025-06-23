@@ -17,13 +17,13 @@ location(d)     # Get the location parameter, i.e. μ
 scale(d)        # Get the scale parameter, i.e. σ
 ```
 """
-struct SymTriangularDist{T<:Real} <: ContinuousUnivariateDistribution
+struct SymTriangularDist{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
-    SymTriangularDist{T}(µ::T, σ::T) where {T<:Real} = new{T}(µ, σ)
+    SymTriangularDist{T}(µ::T, σ::T) where {T <: Real} = new{T}(µ, σ)
 end
 
-function SymTriangularDist(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
+function SymTriangularDist(μ::T, σ::T; check_args::Bool = true) where {T <: Real}
     @check_args SymTriangularDist (σ, σ > zero(σ))
     return SymTriangularDist{T}(μ, σ)
 end
@@ -38,13 +38,13 @@ SymTriangularDist(μ::Real = 0.0) = SymTriangularDist(μ, one(μ); check_args = 
 
 #### Conversions
 
-function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where {T<:Real}
-    SymTriangularDist(T(μ), T(σ))
+function convert(::Type{SymTriangularDist{T}}, μ::Real, σ::Real) where {T <: Real}
+    return SymTriangularDist(T(μ), T(σ))
 end
-function Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist) where {T<:Real}
-    SymTriangularDist{T}(T(d.μ), T(d.σ))
+function Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist) where {T <: Real}
+    return SymTriangularDist{T}(T(d.μ), T(d.σ))
 end
-Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{T}) where {T<:Real} = d
+Base.convert(::Type{SymTriangularDist{T}}, d::SymTriangularDist{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -52,7 +52,7 @@ location(d::SymTriangularDist) = d.μ
 scale(d::SymTriangularDist) = d.σ
 
 params(d::SymTriangularDist) = (d.μ, d.σ)
-@inline partype(d::SymTriangularDist{T}) where {T<:Real} = T
+@inline partype(d::SymTriangularDist{T}) where {T <: Real} = T
 
 
 #### Statistics
@@ -62,8 +62,8 @@ median(d::SymTriangularDist) = d.μ
 mode(d::SymTriangularDist) = d.μ
 
 var(d::SymTriangularDist) = d.σ^2 / 6
-skewness(d::SymTriangularDist{T}) where {T<:Real} = zero(T)
-kurtosis(d::SymTriangularDist{T}) where {T<:Real} = T(-3) / 5
+skewness(d::SymTriangularDist{T}) where {T <: Real} = zero(T)
+kurtosis(d::SymTriangularDist{T}) where {T <: Real} = T(-3) / 5
 
 entropy(d::SymTriangularDist) = 1 // 2 + log(d.σ)
 
@@ -106,7 +106,7 @@ invlogcdf(d::SymTriangularDist, lp::Real) =
     lp < loghalf ? xval(d, expm1(1 / 2 * (lp - loghalf))) : xval(d, 1 - sqrt(-2expm1(lp)))
 
 function invlogccdf(d::SymTriangularDist, lp::Real)
-    lp > loghalf ? xval(d, sqrt(-2 * expm1(lp)) - 1) : xval(d, -(expm1((lp - loghalf) / 2)))
+    return lp > loghalf ? xval(d, sqrt(-2 * expm1(lp)) - 1) : xval(d, -(expm1((lp - loghalf) / 2)))
 end
 
 
@@ -114,14 +114,14 @@ function mgf(d::SymTriangularDist, t::Real)
     (μ, σ) = params(d)
     a = σ * t
     a == zero(a) && return one(a)
-    4 * exp(μ * t) * (sinh(a / 2) / a)^2
+    return 4 * exp(μ * t) * (sinh(a / 2) / a)^2
 end
 
 function cf(d::SymTriangularDist, t::Real)
     (μ, σ) = params(d)
     a = σ * t
     a == zero(a) && return complex(one(a))
-    4 * cis(μ * t) * (sin(a / 2) / a)^2
+    return 4 * cis(μ * t) * (sin(a / 2) / a)^2
 end
 
 

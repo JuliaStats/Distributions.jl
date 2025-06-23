@@ -33,34 +33,34 @@ d = μ + σ * ρ       # Create location-scale transformed distribution
 params(d)           # Get the parameters, i.e. (μ, σ, ρ)
 ```
 """
-struct AffineDistribution{T<:Real,S<:ValueSupport,D<:UnivariateDistribution{S}} <:
-       UnivariateDistribution{S}
+struct AffineDistribution{T <: Real, S <: ValueSupport, D <: UnivariateDistribution{S}} <:
+    UnivariateDistribution{S}
     μ::T
     σ::T
     ρ::D
     # TODO: Remove? It is not used in Distributions anymore
-    function AffineDistribution{T,S,D}(
-        μ::T,
-        σ::T,
-        ρ::D;
-        check_args::Bool = true,
-    ) where {T<:Real,S<:ValueSupport,D<:UnivariateDistribution{S}}
+    function AffineDistribution{T, S, D}(
+            μ::T,
+            σ::T,
+            ρ::D;
+            check_args::Bool = true,
+        ) where {T <: Real, S <: ValueSupport, D <: UnivariateDistribution{S}}
         @check_args AffineDistribution (σ, !iszero(σ))
-        new{T,S,D}(μ, σ, ρ)
+        return new{T, S, D}(μ, σ, ρ)
     end
-    function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T<:Real}
+    function AffineDistribution{T}(μ::T, σ::T, ρ::UnivariateDistribution) where {T <: Real}
         D = typeof(ρ)
         S = value_support(D)
-        return new{T,S,D}(μ, σ, ρ)
+        return new{T, S, D}(μ, σ, ρ)
     end
 end
 
 function AffineDistribution(
-    μ::T,
-    σ::T,
-    ρ::UnivariateDistribution;
-    check_args::Bool = true,
-) where {T<:Real}
+        μ::T,
+        σ::T,
+        ρ::UnivariateDistribution;
+        check_args::Bool = true,
+    ) where {T <: Real}
     @check_args AffineDistribution (σ, !iszero(σ))
     # μ and σ act on both random numbers and parameter-like quantities like mean
     # hence do not promote: but take care in eltype and partype
@@ -68,16 +68,16 @@ function AffineDistribution(
 end
 
 function AffineDistribution(
-    μ::Real,
-    σ::Real,
-    ρ::UnivariateDistribution;
-    check_args::Bool = true,
-)
+        μ::Real,
+        σ::Real,
+        ρ::UnivariateDistribution;
+        check_args::Bool = true,
+    )
     return AffineDistribution(promote(μ, σ)..., ρ; check_args = check_args)
 end
 
 # aliases
-const LocationScale{T,S,D} = AffineDistribution{T,S,D}
+const LocationScale{T, S, D} = AffineDistribution{T, S, D}
 function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_args::Bool = true)
     Base.depwarn("`LocationScale` is deprecated. Use `+` and `*` instead", :LocationScale)
     # preparation for future PR where I remove σ > 0 check
@@ -85,12 +85,12 @@ function LocationScale(μ::Real, σ::Real, ρ::UnivariateDistribution; check_arg
     return AffineDistribution(μ, σ, ρ; check_args = false)
 end
 
-const ContinuousAffineDistribution{T<:Real,D<:ContinuousUnivariateDistribution} =
-    AffineDistribution{T,Continuous,D}
-const DiscreteAffineDistribution{T<:Real,D<:DiscreteUnivariateDistribution} =
-    AffineDistribution{T,Discrete,D}
+const ContinuousAffineDistribution{T <: Real, D <: ContinuousUnivariateDistribution} =
+    AffineDistribution{T, Continuous, D}
+const DiscreteAffineDistribution{T <: Real, D <: DiscreteUnivariateDistribution} =
+    AffineDistribution{T, Discrete, D}
 
-Base.eltype(::Type{<:AffineDistribution{T,S,D}}) where {T,S,D} = promote_type(eltype(D), T)
+Base.eltype(::Type{<:AffineDistribution{T, S, D}}) where {T, S, D} = promote_type(eltype(D), T)
 
 minimum(d::AffineDistribution) =
     d.σ > 0 ? d.μ + d.σ * minimum(d.ρ) : d.μ + d.σ * maximum(d.ρ)
@@ -117,11 +117,11 @@ convert(
     μ::Real,
     σ::Real,
     ρ::D,
-) where {T<:Real,D<:UnivariateDistribution} = AffineDistribution(T(μ), T(σ), ρ)
-function Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution) where {T<:Real}
-    AffineDistribution{T}(T(d.μ), T(d.σ), d.ρ)
+) where {T <: Real, D <: UnivariateDistribution} = AffineDistribution(T(μ), T(σ), ρ)
+function Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution) where {T <: Real}
+    return AffineDistribution{T}(T(d.μ), T(d.σ), d.ρ)
 end
-Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T<:Real} = d
+Base.convert(::Type{AffineDistribution{T}}, d::AffineDistribution{T}) where {T <: Real} = d
 
 #### Parameters
 

@@ -31,7 +31,7 @@ struct Hypergeometric <: DiscreteUnivariateDistribution
             (nf, nf >= zero(nf)),
             zero(n) <= n <= ns + nf,
         )
-        new(ns, nf, n)
+        return new(ns, nf, n)
     end
 end
 
@@ -52,12 +52,12 @@ mean(d::Hypergeometric) = d.n * d.ns / (d.ns + d.nf)
 function var(d::Hypergeometric)
     N = d.ns + d.nf
     p = d.ns / N
-    d.n * p * (1.0 - p) * (N - d.n) / (N - 1.0)
+    return d.n * p * (1.0 - p) * (N - d.n) / (N - 1.0)
 end
 mode(d::Hypergeometric) = floor(Int, (d.n + 1) * (d.ns + 1) / (d.ns + d.nf + 2))
 
 function modes(d::Hypergeometric)
-    if (d.ns == d.nf) && mod(d.n, 2) == 1
+    return if (d.ns == d.nf) && mod(d.n, 2) == 1
         [(d.n - 1) / 2, (d.n + 1) / 2]
     else
         [mode(d)]
@@ -77,7 +77,7 @@ function kurtosis(d::Hypergeometric)
         (N - 1) * N^2 * (N * (N + 1) - 6 * ns * (N - ns) - 6 * n * (N - n)) +
         6 * n * ns * (nf) * (N - n) * (5 * N - 6)
     b = (n * ns * (N - ns) * (N - n) * (N - 2) * (N - 3))
-    a / b
+    return a / b
 end
 
 entropy(d::Hypergeometric) = entropy(map(Base.Fix1(pdf, d), support(d)))

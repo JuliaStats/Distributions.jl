@@ -18,7 +18,7 @@ respective mixing weights `p = θ/(1 + θ)` and `1 - p`.
 [^2]: Ghitany, M. E., Atieh, B., & Nadarajah, S. (2008). Lindley distribution and its
       application. Mathematics and Computers in Simulation, 78(4), 493–506.
 """
-struct Lindley{T<:Real} <: ContinuousUnivariateDistribution
+struct Lindley{T <: Real} <: ContinuousUnivariateDistribution
     θ::T
 
     Lindley{T}(θ::T) where {T} = new{T}(θ)
@@ -149,7 +149,7 @@ function _lambertwm1(x, n = 6)
     else
         throw(DomainError(x))
     end
-    for i = 1:n
+    for i in 1:n
         β = β / (1 + β) * (1 + log(x / β))
     end
     return β

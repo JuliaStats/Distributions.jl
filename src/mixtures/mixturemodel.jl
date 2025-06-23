@@ -11,8 +11,8 @@ All subtypes of `AbstractMixtureModel` should implement the following methods:
 
   - `probs(d)`:       return a vector of prior probabilities over components.
 """
-abstract type AbstractMixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution} <:
-              Distribution{VF,VS} end
+abstract type AbstractMixtureModel{VF <: VariateForm, VS <: ValueSupport, C <: Distribution} <:
+Distribution{VF, VS} end
 
 """
     MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Real}
@@ -22,24 +22,24 @@ A mixture of distributions, parametrized on:
 * `C` distribution family of the mixture
 * `CT` the type for probabilities of the prior
 """
-struct MixtureModel{VF<:VariateForm,VS<:ValueSupport,C<:Distribution,CT<:Categorical} <:
-       AbstractMixtureModel{VF,VS,C}
+struct MixtureModel{VF <: VariateForm, VS <: ValueSupport, C <: Distribution, CT <: Categorical} <:
+    AbstractMixtureModel{VF, VS, C}
     components::Vector{C}
     prior::CT
 
-    function MixtureModel{VF,VS,C}(cs::Vector{C}, pri::CT) where {VF,VS,C,CT}
+    function MixtureModel{VF, VS, C}(cs::Vector{C}, pri::CT) where {VF, VS, C, CT}
         length(cs) == ncategories(pri) ||
             error("The number of components does not match the length of prior.")
-        new{VF,VS,C,CT}(cs, pri)
+        return new{VF, VS, C, CT}(cs, pri)
     end
 end
 
-const UnivariateMixture{S<:ValueSupport,C<:Distribution} =
-    AbstractMixtureModel{Univariate,S,C}
-const MultivariateMixture{S<:ValueSupport,C<:Distribution} =
-    AbstractMixtureModel{Multivariate,S,C}
-const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} =
-    AbstractMixtureModel{Matrixvariate,S,C}
+const UnivariateMixture{S <: ValueSupport, C <: Distribution} =
+    AbstractMixtureModel{Univariate, S, C}
+const MultivariateMixture{S <: ValueSupport, C <: Distribution} =
+    AbstractMixtureModel{Multivariate, S, C}
+const MatrixvariateMixture{S <: ValueSupport, C <: Distribution} =
+    AbstractMixtureModel{Matrixvariate, S, C}
 
 # Interface
 
@@ -48,14 +48,14 @@ const MatrixvariateMixture{S<:ValueSupport,C<:Distribution} =
 
 The type of the components of `d`.
 """
-component_type(d::AbstractMixtureModel{VF,VS,C}) where {VF,VS,C} = C
+component_type(d::AbstractMixtureModel{VF, VS, C}) where {VF, VS, C} = C
 
 """
     components(d::AbstractMixtureModel)
 
 Get a list of components of the mixture model `d`.
 """
-components(d::AbstractMixtureModel) = [component(d, k) for k = 1:ncomponents(d)]
+components(d::AbstractMixtureModel) = [component(d, k) for k in 1:ncomponents(d)]
 
 """
     probs(d::AbstractMixtureModel)
@@ -121,7 +121,7 @@ rand!(d::AbstractMixtureModel, r::AbstractArray)
 Construct a mixture model with a vector of `components` and a `prior` probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
-MixtureModel(components::Vector{C}) where {C<:Distribution} =
+MixtureModel(components::Vector{C}) where {C <: Distribution} =
     MixtureModel(components, Categorical(length(components)))
 
 """
@@ -131,36 +131,34 @@ Construct a mixture model with component type ``C``, a vector of parameters for 
 the components given by ``params``, and a prior probability vector.
 If no `prior` is provided then all components will have the same prior probabilities.
 """
-function MixtureModel(::Type{C}, params::AbstractArray) where {C<:Distribution}
+function MixtureModel(::Type{C}, params::AbstractArray) where {C <: Distribution}
     components = C[_construct_component(C, a) for a in params]
-    MixtureModel(components)
+    return MixtureModel(components)
 end
 
-function MixtureModel(components::Vector{C}, prior::Categorical) where {C<:Distribution}
+function MixtureModel(components::Vector{C}, prior::Categorical) where {C <: Distribution}
     VF = variate_form(C)
     VS = value_support(C)
-    MixtureModel{VF,VS,C}(components, prior)
+    return MixtureModel{VF, VS, C}(components, prior)
 end
 
 MixtureModel(
     components::Vector{C},
     p::VT,
-) where {C<:Distribution,VT<:AbstractVector{<:Real}} =
+) where {C <: Distribution, VT <: AbstractVector{<:Real}} =
     MixtureModel(components, Categorical(p))
 
-_construct_component(::Type{C}, arg) where {C<:Distribution} = C(arg)
-_construct_component(::Type{C}, args::Tuple) where {C<:Distribution} = C(args...)
+_construct_component(::Type{C}, arg) where {C <: Distribution} = C(arg)
+_construct_component(::Type{C}, args::Tuple) where {C <: Distribution} = C(args...)
 
 function MixtureModel(
-    ::Type{C},
-    params::AbstractArray,
-    p::Vector{T},
-) where {C<:Distribution,T<:Real}
+        ::Type{C},
+        params::AbstractArray,
+        p::Vector{T},
+    ) where {C <: Distribution, T <: Real}
     components = C[_construct_component(C, a) for a in params]
-    MixtureModel(components, p)
+    return MixtureModel(components, p)
 end
-
-
 
 
 #### Basic properties
@@ -194,7 +192,7 @@ function mean(d::MultivariateMixture)
     K = ncomponents(d)
     p = probs(d)
     m = zeros(length(d))
-    for i = 1:K
+    for i in 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
@@ -215,7 +213,7 @@ function var(d::UnivariateMixture)
     means = Vector{Float64}(undef, K)
     m = 0.0
     v = 0.0
-    for i = 1:K
+    for i in 1:K
         pi = p[i]
         if pi > 0.0
             ci = component(d, i)
@@ -224,7 +222,7 @@ function var(d::UnivariateMixture)
             v += pi * var(ci)
         end
     end
-    for i = 1:K
+    for i in 1:K
         pi = p[i]
         if pi > 0.0
             v += pi * abs2(means[i] - m)
@@ -244,7 +242,7 @@ function cov(d::MultivariateMixture)
     md = zeros(length(d))
     V = zeros(length(d), length(d))
 
-    for i = 1:K
+    for i in 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
@@ -252,7 +250,7 @@ function cov(d::MultivariateMixture)
             axpy!(pi, cov(c), V)
         end
     end
-    for i = 1:K
+    for i in 1:K
         pi = p[i]
         if pi > 0.0
             c = component(d, i)
@@ -265,7 +263,6 @@ function cov(d::MultivariateMixture)
 end
 
 
-
 #### show
 
 function show(io::IO, d::MixtureModel)
@@ -273,15 +270,14 @@ function show(io::IO, d::MixtureModel)
     pr = probs(d)
     println(io, "MixtureModel{$(component_type(d))}(K = $K)")
     Ks = min(K, 8)
-    for i = 1:Ks
+    for i in 1:Ks
         @printf(io, "components[%d] (prior = %.4f): ", i, pr[i])
         println(io, component(d, i))
     end
-    if Ks < K
+    return if Ks < K
         println(io, "The rest are omitted ...")
     end
 end
-
 
 
 #### Evaluation
@@ -350,7 +346,7 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
 
             # in the mean time, add log(prior) to lp and
             # update the maximum for each sample
-            for j = 1:n
+            for j in 1:n
                 lp_i[j] += lpri
                 if lp_i[j] > m[j]
                     m[j] = lp_i[j]
@@ -360,16 +356,16 @@ function _mixlogpdf!(r::AbstractArray, d::AbstractMixtureModel, x)
     end
 
     fill!(r, 0.0)
-    @inbounds for i = 1:K
+    @inbounds for i in 1:K
         if p[i] > 0.0
             lp_i = view(Lp, :, i)
-            for j = 1:n
+            for j in 1:n
                 r[j] += exp(lp_i[j] - m[j])
             end
         end
     end
 
-    @inbounds for j = 1:n
+    @inbounds for j in 1:n
         r[j] = log(r[j]) + m[j]
     end
     return r
@@ -398,47 +394,47 @@ _logpdf!(r::AbstractArray{<:Real}, d::MultivariateMixture, x::AbstractMatrix{<:R
 function _cwise_pdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for i = 1:K
+    for i in 1:K
         r[i] = pdf(component(d, i), x)
     end
-    r
+    return r
 end
 
 function _cwise_logpdf1!(r::AbstractVector, d::AbstractMixtureModel, x)
     K = ncomponents(d)
     length(r) == K || error("The length of r should match the number of components.")
-    for i = 1:K
+    for i in 1:K
         r[i] = logpdf(component(d, i), x)
     end
-    r
+    return r
 end
 
 function _cwise_pdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for i = 1:K
+    for i in 1:K
         if d isa UnivariateMixture
             view(r, :, i) .= Base.Fix1(pdf, component(d, i)).(X)
         else
             pdf!(view(r, :, i), component(d, i), X)
         end
     end
-    r
+    return r
 end
 
 function _cwise_logpdf!(r::AbstractMatrix, d::AbstractMixtureModel, X)
     K = ncomponents(d)
     n = size(X, ndims(X))
     size(r) == (n, K) || error("The size of r is incorrect.")
-    for i = 1:K
+    for i in 1:K
         if d isa UnivariateMixture
             view(r, :, i) .= Base.Fix1(logpdf, component(d, i)).(X)
         else
             logpdf!(view(r, :, i), component(d, i), X)
         end
     end
-    r
+    return r
 end
 
 componentwise_pdf!(r::AbstractVector, d::UnivariateMixture, x::Real) = _cwise_pdf1!(r, d, x)
@@ -481,7 +477,7 @@ function quantile(d::UnivariateMixture{Continuous}, p::Real)
     ps = probs(d)
     min_q, max_q =
         extrema(quantile(component(d, i), p) for (i, pi) in enumerate(ps) if pi > 0)
-    quantile_bisect(d, p, min_q, max_q)
+    return quantile_bisect(d, p, min_q, max_q)
 end
 
 # we also implement `median` since `median` is implemented more efficiently than
@@ -489,20 +485,20 @@ end
 function median(d::UnivariateMixture{Continuous})
     ps = probs(d)
     min_q, max_q = extrema(median(component(d, i)) for (i, pi) in enumerate(ps) if pi > 0)
-    quantile_bisect(d, 1 // 2, min_q, max_q)
+    return quantile_bisect(d, 1 // 2, min_q, max_q)
 end
 
 ## Sampling
 
-struct MixtureSampler{VF,VS,Sampler} <: Sampleable{VF,VS}
+struct MixtureSampler{VF, VS, Sampler} <: Sampleable{VF, VS}
     csamplers::Vector{Sampler}
     psampler::AliasTable
 end
 
-function MixtureSampler(d::MixtureModel{VF,VS}) where {VF,VS}
+function MixtureSampler(d::MixtureModel{VF, VS}) where {VF, VS}
     csamplers = map(sampler, d.components)
     psampler = sampler(d.prior)
-    MixtureSampler{VF,VS,eltype(csamplers)}(csamplers, psampler)
+    return MixtureSampler{VF, VS, eltype(csamplers)}(csamplers, psampler)
 end
 
 Base.length(s::MixtureSampler) = length(first(s.csamplers))

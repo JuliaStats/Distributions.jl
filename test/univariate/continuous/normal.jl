@@ -3,8 +3,8 @@ using Test, Distributions, StatsFuns, ForwardDiff, OffsetArrays
 isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
 
 @testset "Normal" begin
-    test_cgf(Normal(0, 1), (1, -1, 100.0f0, 1e6, -1e6))
-    test_cgf(Normal(1, 0.4), (1, -1, 100.0f0, 1e6, -1e6))
+    test_cgf(Normal(0, 1), (1, -1, 100.0f0, 1.0e6, -1.0e6))
+    test_cgf(Normal(1, 0.4), (1, -1, 100.0f0, 1.0e6, -1.0e6))
     @test isa(convert(Normal{Float64}, Float16(0), Float16(1)), Normal{Float64})
     d = Normal(1.1, 2.3)
     @test convert(Normal{Float64}, d) === d
@@ -16,9 +16,9 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     @test -Inf === logpdf(Normal(), Inf)
     @test iszero(logcdf(Normal(0, 0), 0))
     @test iszero(logcdf(Normal(), Inf))
-    @test @inferred(logdiffcdf(Normal(), 5.0f0, 3.0f0)) ≈ -6.607938594596893 rtol = 1e-12
-    @test @inferred(logdiffcdf(Normal(), 5.0f0, 3.0)) ≈ -6.607938594596893 rtol = 1e-12
-    @test @inferred(logdiffcdf(Normal(), 5.0, 3.0)) ≈ -6.607938594596893 rtol = 1e-12
+    @test @inferred(logdiffcdf(Normal(), 5.0f0, 3.0f0)) ≈ -6.607938594596893 rtol = 1.0e-12
+    @test @inferred(logdiffcdf(Normal(), 5.0f0, 3.0)) ≈ -6.607938594596893 rtol = 1.0e-12
+    @test @inferred(logdiffcdf(Normal(), 5.0, 3.0)) ≈ -6.607938594596893 rtol = 1.0e-12
     @test_throws ArgumentError logdiffcdf(Normal(), 3, 5)
 
     # Arguments in the tails
@@ -65,7 +65,7 @@ isnan_type(::Type{T}, v) where {T} = isnan(v) && v isa T
     # test for #996 being fixed
     let d = Normal(0, 1), x = 1.0, ∂x = 2.0
         @inferred cdf(d, ForwardDiff.Dual(x, ∂x)) ≈
-                  ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
+            ForwardDiff.Dual(cdf(d, x), ∂x * pdf(d, x))
     end
 end
 
@@ -197,7 +197,7 @@ end
     @test meanform(NormalCanon()) == Normal()
     @test meanform(canonform(Normal(0.25, 0.7))) ≈ Normal(0.25, 0.7)
     @test convert(NormalCanon, convert(Normal, NormalCanon(0.3, 0.8))) ≈
-          NormalCanon(0.3, 0.8)
+        NormalCanon(0.3, 0.8)
     @test mean(canonform(Normal(0.25, 0.7))) ≈ 0.25
     @test std(canonform(Normal(0.25, 0.7))) ≈ 0.7
 end

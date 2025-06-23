@@ -42,14 +42,14 @@ function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate}, dims::Dims)
 end
 
 # these are workarounds for sampleables that incorrectly base `eltype` on the parameters
-function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous})
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate, Continuous})
     return @inbounds rand!(rng, sampler(s), Array{float(eltype(s))}(undef, size(s)))
 end
-function rand(rng::AbstractRNG, s::Sampleable{Univariate,Continuous}, dims::Dims)
+function rand(rng::AbstractRNG, s::Sampleable{Univariate, Continuous}, dims::Dims)
     out = Array{float(eltype(s))}(undef, dims)
     return @inbounds rand!(rng, sampler(s), out)
 end
-function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate,Continuous}, dims::Dims)
+function rand(rng::AbstractRNG, s::Sampleable{<:ArrayLikeVariate, Continuous}, dims::Dims)
     sz = size(s)
     ax = map(Base.OneTo, dims)
     out = [Array{float(eltype(s))}(undef, sz) for _ in Iterators.product(ax...)]
@@ -77,10 +77,10 @@ end
 
 # default definitions for arraylike variates
 @inline function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,N},
-) where {N}
+        rng::AbstractRNG,
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, N},
+    ) where {N}
     @boundscheck begin
         size(x) == size(s) || throw(DimensionMismatch("inconsistent array dimensions"))
     end
@@ -88,10 +88,10 @@ end
 end
 
 @inline function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:Real,M},
-) where {N,M}
+        rng::AbstractRNG,
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:Real, M},
+    ) where {N, M}
     @boundscheck begin
         M > N || throw(
             DimensionMismatch(
@@ -106,10 +106,10 @@ end
 end
 
 function _rand!(
-    rng::AbstractRNG,
-    s::Sampleable{<:ArrayLikeVariate},
-    x::AbstractArray{<:Real},
-)
+        rng::AbstractRNG,
+        s::Sampleable{<:ArrayLikeVariate},
+        x::AbstractArray{<:Real},
+    )
     @inbounds for xi in eachvariate(x, variate_form(typeof(s)))
         rand!(rng, s, xi)
     end
@@ -117,28 +117,28 @@ function _rand!(
 end
 
 Base.@propagate_inbounds function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-) where {N}
+        rng::AbstractRNG,
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+    ) where {N}
     sz = size(s)
     allocate = !all(isassigned(x, i) && size(@inbounds x[i]) == sz for i in eachindex(x))
     return rand!(rng, s, x, allocate)
 end
 
 Base.@propagate_inbounds function rand!(
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-    allocate::Bool,
-) where {N}
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+        allocate::Bool,
+    ) where {N}
     return rand!(default_rng(), s, x, allocate)
 end
 @inline function rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-    allocate::Bool,
-) where {N}
+        rng::AbstractRNG,
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+        allocate::Bool,
+    ) where {N}
     @boundscheck begin
         if !allocate
             sz = size(s)
@@ -151,11 +151,11 @@ end
 end
 
 function _rand!(
-    rng::AbstractRNG,
-    s::Sampleable{ArrayLikeVariate{N}},
-    x::AbstractArray{<:AbstractArray{<:Real,N}},
-    allocate::Bool,
-) where {N}
+        rng::AbstractRNG,
+        s::Sampleable{ArrayLikeVariate{N}},
+        x::AbstractArray{<:AbstractArray{<:Real, N}},
+        allocate::Bool,
+    ) where {N}
     if allocate
         @inbounds for i in eachindex(x)
             x[i] = rand(rng, s)

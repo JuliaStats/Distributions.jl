@@ -22,7 +22,7 @@ If ``\\eta = 1``, then the LKJ distribution is uniform over
     if a Cholesky factor of the correlation matrix is desired, it is more efficient to
     use [`LKJCholesky`](@ref), which avoids factorizing the matrix.
 """
-struct LKJ{T<:Real,D<:Integer} <: ContinuousMatrixDistribution
+struct LKJ{T <: Real, D <: Integer} <: ContinuousMatrixDistribution
     d::D
     η::T
     logc0::T
@@ -40,7 +40,7 @@ function LKJ(d::Integer, η::Real; check_args::Bool = true)
     )
     logc0 = lkj_logc0(d, η)
     T = Base.promote_eltype(η, logc0)
-    LKJ{T,typeof(d)}(d, T(η), T(logc0))
+    return LKJ{T, typeof(d)}(d, T(η), T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -53,13 +53,13 @@ show(io::IO, d::LKJ) = show_multline(io, d, [(:d, d.d), (:η, d.η)])
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{LKJ{T}}, d::LKJ) where {T<:Real}
-    LKJ{T,typeof(d.d)}(d.d, T(d.η), T(d.logc0))
+function convert(::Type{LKJ{T}}, d::LKJ) where {T <: Real}
+    return LKJ{T, typeof(d.d)}(d.d, T(d.η), T(d.logc0))
 end
-Base.convert(::Type{LKJ{T}}, d::LKJ{T}) where {T<:Real} = d
+Base.convert(::Type{LKJ{T}}, d::LKJ{T}) where {T <: Real} = d
 
-function convert(::Type{LKJ{T}}, d::Integer, η, logc0) where {T<:Real}
-    LKJ{T,typeof(d)}(d, T(η), T(logc0))
+function convert(::Type{LKJ{T}}, d::Integer, η, logc0) where {T <: Real}
+    return LKJ{T, typeof(d)}(d, T(η), T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -89,12 +89,12 @@ function var(lkj::LKJ)
     d = lkj.d
     d > 1 || return zeros(d, d)
     σ² = var(_marginal(lkj))
-    σ² * (ones(partype(lkj), d, d) - I)
+    return σ² * (ones(partype(lkj), d, d) - I)
 end
 
 params(d::LKJ) = (d.d, d.η)
 
-@inline partype(d::LKJ{T}) where {T<:Real} = T
+@inline partype(d::LKJ{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
@@ -122,7 +122,7 @@ logkernel(d::LKJ, R::AbstractMatrix) = (d.η - 1) * logdet(R)
 #  -----------------------------------------------------------------------------
 
 function _rand!(rng::AbstractRNG, d::LKJ, R::AbstractMatrix)
-    R .= _lkj_onion_sampler(d.d, d.η, rng)
+    return R .= _lkj_onion_sampler(d.d, d.η, rng)
 end
 
 function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.default_rng())
@@ -135,7 +135,7 @@ function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.defa
     R[1, 2] = 2u - 1
     R[2, 1] = R[1, 2]
     #  2.
-    for k = 2:(d-1)
+    for k in 2:(d - 1)
         #  (a)
         β -= 0.5
         #  (b)
@@ -148,8 +148,8 @@ function _lkj_onion_sampler(d::Integer, η::Real, rng::AbstractRNG = Random.defa
         A = cholesky(R[1:k, 1:k]).L
         z = A * w
         #  (e)
-        R[1:k, k+1] = z
-        R[k+1, 1:k] = z'
+        R[1:k, k + 1] = z
+        R[k + 1, 1:k] = z'
     end
     #  3.
     return R
@@ -163,7 +163,7 @@ function _marginal(lkj::LKJ)
     d = lkj.d
     η = lkj.η
     α = η + 0.5d - 1
-    AffineDistribution(-1, 2, Beta(α, α))
+    return AffineDistribution(-1, 2, Beta(α, α))
 end
 
 #  -----------------------------------------------------------------------------
@@ -196,31 +196,31 @@ function lkj_onion_loginvconst(d::Integer, η::Real)
     loginvconst =
         (2 * η + d - 3) * T(logtwo) + (T(logπ) / 4) * (d * (d - 1) - 2) + logbeta(α, α) -
         (d - 2) * loggamma(η + h * (d - 1))
-    for k = 2:(d-1)
+    for k in 2:(d - 1)
         loginvconst += loggamma(η + h * (d - 1 - k))
     end
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T}) where {T<:Real}
+function lkj_onion_loginvconst_uniform_odd(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
     h = T(1 // 2)
     loginvconst =
         (d - 1) *
         ((d + 1) * (T(logπ) / 4) - (d - 1) * (T(logtwo) / 4) - loggamma(h * (d + 1)))
-    for k = 2:2:(d-1)
+    for k in 2:2:(d - 1)
         loginvconst += loggamma(T(k))
     end
     return loginvconst
 end
 
-function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T}) where {T<:Real}
+function lkj_onion_loginvconst_uniform_even(d::Integer, ::Type{T}) where {T <: Real}
     #  Theorem 5 in LKJ (2009 JMA)
     h = T(1 // 2)
     loginvconst =
         d * ((d - 2) * (T(logπ) / 4) + (3 * d - 4) * (T(logtwo) / 4) + loggamma(h * d)) -
         (d - 1) * loggamma(T(d))
-    for k = 2:2:(d-2)
+    for k in 2:2:(d - 2)
         loginvconst += loggamma(k)
     end
     return loginvconst
@@ -230,7 +230,7 @@ function lkj_vine_loginvconst(d::Integer, η::Real)
     #  Equation (16) in LKJ (2009 JMA)
     expsum = zero(η)
     betasum = zero(η)
-    for k = 1:(d-1)
+    for k in 1:(d - 1)
         α = η + 0.5(d - k - 1)
         expsum += (2η - 2 + d - k) * (d - k)
         betasum += (d - k) * logbeta(α, α)
@@ -243,7 +243,7 @@ function lkj_vine_loginvconst_uniform(d::Integer)
     #  Equation after (16) in LKJ (2009 JMA)
     expsum = 0.0
     betasum = 0.0
-    for k = 1:(d-1)
+    for k in 1:(d - 1)
         α = (k + 1) / 2
         expsum += k^2
         betasum += k * logbeta(α, α)
@@ -255,7 +255,7 @@ end
 function lkj_loginvconst_alt(d::Integer, η::Real)
     #  Third line in first proof of Section 3.3 in LKJ (2009 JMA)
     loginvconst = zero(η)
-    for k = 1:(d-1)
+    for k in 1:(d - 1)
         loginvconst += 0.5k * logπ + loggamma(η + 0.5(d - 1 - k)) - loggamma(η + 0.5(d - 1))
     end
     return loginvconst
@@ -264,7 +264,7 @@ end
 function corr_logvolume(n::Integer)
     #  https://doi.org/10.4169/amer.math.monthly.123.9.909
     logvol = 0.0
-    for k = 1:(n-1)
+    for k in 1:(n - 1)
         logvol += 0.5k * logπ + k * loggamma((k + 1) / 2) - k * loggamma((k + 2) / 2)
     end
     return logvol

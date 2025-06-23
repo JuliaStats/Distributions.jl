@@ -1,9 +1,9 @@
 function multinom_rand!(
-    rng::AbstractRNG,
-    n::Int,
-    p::AbstractVector{<:Real},
-    x::AbstractVector{<:Real},
-)
+        rng::AbstractRNG,
+        n::Int,
+        p::AbstractVector{<:Real},
+        x::AbstractVector{<:Real},
+    )
     k = length(p)
     length(x) == k || throw(DimensionMismatch("Invalid argument dimension."))
 
@@ -35,7 +35,7 @@ function multinom_rand!(
         @inbounds x[k] = n
     else  # n must have been zero
         z = zero(eltype(x))
-        for j = (i+1):k
+        for j in (i + 1):k
             @inbounds x[j] = z
         end
     end
@@ -43,7 +43,7 @@ function multinom_rand!(
     return x
 end
 
-struct MultinomialSampler{T<:Real} <: Sampleable{Multivariate,Discrete}
+struct MultinomialSampler{T <: Real} <: Sampleable{Multivariate, Discrete}
     n::Int
     prob::Vector{T}
     alias::AliasTable
@@ -62,7 +62,7 @@ function _rand!(rng::AbstractRNG, s::MultinomialSampler, x::AbstractVector{<:Rea
         # Use an alias table
         fill!(x, zero(eltype(x)))
         a = s.alias
-        for i = 1:n
+        for i in 1:n
             x[rand(rng, a)] += 1
         end
     end

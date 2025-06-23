@@ -10,10 +10,10 @@
     @test rand(d1) isa Float64
 
     @test median(d1) == quantile(d1, 0.5)
-    x = Base.Fix1(quantile, d1).([0.25, 0.45, 0.60, 0.80, 0.90])
-    @test all(Base.Fix1(cdf, d1).(x) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
-    y = Base.Fix1(cquantile, d1).([0.25, 0.45, 0.60, 0.80, 0.90])
-    @test all(Base.Fix1(ccdf, d1).(y) .≈ [0.25, 0.45, 0.60, 0.80, 0.90])
+    x = Base.Fix1(quantile, d1).([0.25, 0.45, 0.6, 0.8, 0.9])
+    @test all(Base.Fix1(cdf, d1).(x) .≈ [0.25, 0.45, 0.6, 0.8, 0.9])
+    y = Base.Fix1(cquantile, d1).([0.25, 0.45, 0.6, 0.8, 0.9])
+    @test all(Base.Fix1(ccdf, d1).(y) .≈ [0.25, 0.45, 0.6, 0.8, 0.9])
 
     @test mean(d1) ≈ 7.581281
     @test var(d1) ≈ 19.1969485

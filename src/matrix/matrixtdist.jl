@@ -35,8 +35,8 @@ is given by
 then the marginal distribution of ``\\mathbf{X}`` is
 ``\\textrm{MT}_{n,p}(\\nu,\\mathbf{M},\\boldsymbol{\\Sigma},\\boldsymbol{\\Omega})``.
 """
-struct MatrixTDist{T<:Real,TM<:AbstractMatrix,TΣ<:AbstractPDMat,TΩ<:AbstractPDMat} <:
-       ContinuousMatrixDistribution
+struct MatrixTDist{T <: Real, TM <: AbstractMatrix, TΣ <: AbstractPDMat, TΩ <: AbstractPDMat} <:
+    ContinuousMatrixDistribution
     ν::T
     M::TM
     Σ::TΣ
@@ -49,11 +49,11 @@ end
 #  -----------------------------------------------------------------------------
 
 function MatrixTDist(
-    ν::T,
-    M::AbstractMatrix{T},
-    Σ::AbstractPDMat{T},
-    Ω::AbstractPDMat{T},
-) where {T<:Real}
+        ν::T,
+        M::AbstractMatrix{T},
+        Σ::AbstractPDMat{T},
+        Ω::AbstractPDMat{T},
+    ) where {T <: Real}
     n, p = size(M)
     0 < ν < Inf || throw(ArgumentError("degrees of freedom must be positive and finite."))
     n == size(Σ, 1) || throw(ArgumentError("Number of rows of M must equal dim of Σ."))
@@ -63,7 +63,7 @@ function MatrixTDist(
     prom_M = convert(AbstractArray{R}, M)
     prom_Σ = convert(AbstractArray{R}, Σ)
     prom_Ω = convert(AbstractArray{R}, Ω)
-    MatrixTDist{R,typeof(prom_M),typeof(prom_Σ),typeof(prom_Ω)}(
+    return MatrixTDist{R, typeof(prom_M), typeof(prom_Σ), typeof(prom_Ω)}(
         R(ν),
         prom_M,
         prom_Σ,
@@ -74,7 +74,7 @@ end
 
 function MatrixTDist(ν::Real, M::AbstractMatrix, Σ::AbstractPDMat, Ω::AbstractPDMat)
     T = Base.promote_eltype(ν, M, Σ, Ω)
-    MatrixTDist(
+    return MatrixTDist(
         convert(T, ν),
         convert(AbstractArray{T}, M),
         convert(AbstractArray{T}, Σ),
@@ -85,19 +85,19 @@ end
 MatrixTDist(
     ν::Real,
     M::AbstractMatrix,
-    Σ::Union{AbstractMatrix,LinearAlgebra.Cholesky},
-    Ω::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky},
+    Ω::Union{AbstractMatrix, LinearAlgebra.Cholesky},
 ) = MatrixTDist(ν, M, PDMat(Σ), PDMat(Ω))
 MatrixTDist(
     ν::Real,
     M::AbstractMatrix,
     Σ::AbstractPDMat,
-    Ω::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    Ω::Union{AbstractMatrix, LinearAlgebra.Cholesky},
 ) = MatrixTDist(ν, M, Σ, PDMat(Ω))
 MatrixTDist(
     ν::Real,
     M::AbstractMatrix,
-    Σ::Union{AbstractMatrix,LinearAlgebra.Cholesky},
+    Σ::Union{AbstractMatrix, LinearAlgebra.Cholesky},
     Ω::AbstractPDMat,
 ) = MatrixTDist(ν, M, PDMat(Σ), Ω)
 
@@ -112,26 +112,26 @@ show(io::IO, d::MatrixTDist) =
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where {T<:Real}
+function convert(::Type{MatrixTDist{T}}, d::MatrixTDist) where {T <: Real}
     MM = convert(AbstractArray{T}, d.M)
     ΣΣ = convert(AbstractArray{T}, d.Σ)
     ΩΩ = convert(AbstractArray{T}, d.Ω)
-    MatrixTDist{T,typeof(MM),typeof(ΣΣ),typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
+    return MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(d.ν), MM, ΣΣ, ΩΩ, T(d.logc0))
 end
-Base.convert(::Type{MatrixTDist{T}}, d::MatrixTDist{T}) where {T<:Real} = d
+Base.convert(::Type{MatrixTDist{T}}, d::MatrixTDist{T}) where {T <: Real} = d
 
 function convert(
-    ::Type{MatrixTDist{T}},
-    ν,
-    M::AbstractMatrix,
-    Σ::AbstractPDMat,
-    Ω::AbstractPDMat,
-    logc0,
-) where {T<:Real}
+        ::Type{MatrixTDist{T}},
+        ν,
+        M::AbstractMatrix,
+        Σ::AbstractPDMat,
+        Ω::AbstractPDMat,
+        logc0,
+    ) where {T <: Real}
     MM = convert(AbstractArray{T}, M)
     ΣΣ = convert(AbstractArray{T}, Σ)
     ΩΩ = convert(AbstractArray{T}, Ω)
-    MatrixTDist{T,typeof(MM),typeof(ΣΣ),typeof(ΩΩ)}(T(ν), MM, ΣΣ, ΩΩ, T(logc0))
+    return MatrixTDist{T, typeof(MM), typeof(ΣΣ), typeof(ΩΩ)}(T(ν), MM, ΣΣ, ΩΩ, T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -164,7 +164,7 @@ var(d::MatrixTDist) =
 
 params(d::MatrixTDist) = (d.ν, d.M, d.Σ, d.Ω)
 
-@inline partype(d::MatrixTDist{T}) where {T<:Real} = T
+@inline partype(d::MatrixTDist{T}) where {T <: Real} = T
 
 #  -----------------------------------------------------------------------------
 #  Evaluation
@@ -179,13 +179,13 @@ function matrixtdist_logc0(Σ::AbstractPDMat, Ω::AbstractPDMat, ν::Real)
     term3 = -logmvgamma(p, (ν + p - 1) / 2)
     term4 = (-n / 2) * logdet(Ω)
     term5 = (-p / 2) * logdet(Σ)
-    term1 + term2 + term3 + term4 + term5
+    return term1 + term2 + term3 + term4 + term5
 end
 
 function logkernel(d::MatrixTDist, X::AbstractMatrix)
     n, p = size(d)
     A = X - d.M
-    (-(d.ν + n + p - 1) / 2) * logdet(I + (d.Σ \ A) * (d.Ω \ A'))
+    return (-(d.ν + n + p - 1) / 2) * logdet(I + (d.Σ \ A) * (d.Ω \ A'))
 end
 
 #  -----------------------------------------------------------------------------
@@ -197,7 +197,7 @@ end
 function _rand!(rng::AbstractRNG, d::MatrixTDist, A::AbstractMatrix)
     n, p = size(d)
     S = rand(rng, InverseWishart(d.ν + n - 1, d.Σ))
-    A .= rand(rng, MatrixNormal(d.M, S, d.Ω))
+    return A .= rand(rng, MatrixNormal(d.M, S, d.Ω))
 end
 
 #  -----------------------------------------------------------------------------
@@ -213,7 +213,7 @@ function MvTDist(MT::MatrixTDist)
         ArgumentError("Row or col dim of `MatrixTDist` must be 1 to coerce to `MvTDist`"),
     )
     ν, M, Σ, Ω = params(MT)
-    MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
+    return MvTDist(ν, vec(M), (1 / ν) * kron(Σ, Ω))
 end
 
 #  -----------------------------------------------------------------------------

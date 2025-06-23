@@ -11,9 +11,9 @@ using Test
     d = Multinomial(nt, p)
 
     @testset "Testing Multinomial with $key" for (key, func) in Dict(
-        "rand(...)" => [rand, rand],
-        "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
-    )
+            "rand(...)" => [rand, rand],
+            "rand(rng, ...)" => [dist -> rand(rng, dist), (dist, n) -> rand(rng, dist, n)],
+        )
 
         # Basics
 
@@ -29,17 +29,17 @@ using Test
         @test partype(d) === T
 
         # Conversion
-        @test typeof(d) === Multinomial{T,Vector{T}}
+        @test typeof(d) === Multinomial{T, Vector{T}}
         for S in (Float16, Float32, Float64)
             S === T && continue
-            @test typeof(convert(Multinomial{S}, d)) === Multinomial{S,Vector{S}}
-            @test typeof(convert(Multinomial{S,Vector{S}}, d)) === Multinomial{S,Vector{S}}
-            @test typeof(convert(Multinomial{S}, params(d)...)) === Multinomial{S,Vector{S}}
-            @test typeof(convert(Multinomial{S,Vector{S}}, params(d)...)) ==
-                  Multinomial{S,Vector{S}}
+            @test typeof(convert(Multinomial{S}, d)) === Multinomial{S, Vector{S}}
+            @test typeof(convert(Multinomial{S, Vector{S}}, d)) === Multinomial{S, Vector{S}}
+            @test typeof(convert(Multinomial{S}, params(d)...)) === Multinomial{S, Vector{S}}
+            @test typeof(convert(Multinomial{S, Vector{S}}, params(d)...)) ==
+                Multinomial{S, Vector{S}}
         end
         @test convert(Multinomial{T}, d) === d
-        @test convert(Multinomial{T,Vector{T}}, d) === d
+        @test convert(Multinomial{T, Vector{T}}, d) === d
 
         # random sampling
 
@@ -72,7 +72,7 @@ using Test
         x = func[2](d, 100)
         pv = pdf(d, x)
         lp = logpdf(d, x)
-        for i = 1:size(x, 2)
+        for i in 1:size(x, 2)
             @test pv[i] ≈ pdf(d, x[:, i])
             @test lp[i] ≈ logpdf(d, x[:, i])
         end
@@ -103,13 +103,13 @@ using Test
         @test isa(ss, Distributions.MultinomialStats)
         @test ss.n == nt
         @test ss.scnts ==
-              vec(sum(T[x[i, j] for i = 1:size(x, 1), j = 1:size(x, 2)], dims = 2))
+            vec(sum(T[x[i, j] for i in 1:size(x, 1), j in 1:size(x, 2)], dims = 2))
         @test ss.tw == n0
 
         ss = suffstats(Multinomial, x, w)
         @test isa(ss, Distributions.MultinomialStats)
         @test ss.n == nt
-        @test ss.scnts ≈ T[x[i, j] for i = 1:size(x, 1), j = 1:size(x, 2)] * w
+        @test ss.scnts ≈ T[x[i, j] for i in 1:size(x, 1), j in 1:size(x, 2)] * w
         @test ss.tw ≈ sum(w)
 
         # fit
@@ -148,15 +148,15 @@ using Test
 
         # Abstract vector p
 
-        @test typeof(Multinomial(nt, SVector{length(p),T}(p))) ==
-              Multinomial{T,SVector{3,T}}
+        @test typeof(Multinomial(nt, SVector{length(p), T}(p))) ==
+            Multinomial{T, SVector{3, T}}
 
     end
 
     @testset "Testing Multinomial with $key" for (key, func) in Dict(
-        "rand!(...)" => (dist, X) -> rand!(dist, X),
-        "rand!(rng, ...)" => (dist, X) -> rand!(rng, dist, X),
-    )
+            "rand!(...)" => (dist, X) -> rand!(dist, X),
+            "rand!(rng, ...)" => (dist, X) -> rand!(rng, dist, X),
+        )
         # random sampling
         X = Matrix{Int}(undef, length(p), 100)
         x = @inferred(func(d, X))
@@ -166,16 +166,16 @@ using Test
         @test all(insupport(d, x))
         pv = pdf(d, x)
         lp = logpdf(d, x)
-        for i = 1:size(x, 2)
+        for i in 1:size(x, 2)
             @test pv[i] ≈ pdf(d, x[:, i])
             @test lp[i] ≈ logpdf(d, x[:, i])
         end
     end
 
     @testset "Testing Multinomial with $key" for (key, func) in Dict(
-        "rand!(..., true)" => (dist, X) -> rand!(dist, X, true),
-        "rand!(rng, ..., true)" => (dist, X) -> rand!(rng, dist, X, true),
-    )
+            "rand!(..., true)" => (dist, X) -> rand!(dist, X, true),
+            "rand!(rng, ..., true)" => (dist, X) -> rand!(rng, dist, X, true),
+        )
         # random sampling
         X = Vector{Vector{Int}}(undef, 100)
         x = @inferred(func(d, X))
@@ -185,9 +185,9 @@ using Test
     end
 
     @testset "Testing Multinomial with $key" for (key, func) in Dict(
-        "rand!(..., false)" => (dist, X) -> rand!(dist, X, false),
-        "rand!(rng, ..., false)" => (dist, X) -> rand!(rng, dist, X, false),
-    )
+            "rand!(..., false)" => (dist, X) -> rand!(dist, X, false),
+            "rand!(rng, ..., false)" => (dist, X) -> rand!(rng, dist, X, false),
+        )
         # random sampling
         X = [Vector{Int}(undef, length(p)) for _ in Base.OneTo(100)]
         x1 = X[1]

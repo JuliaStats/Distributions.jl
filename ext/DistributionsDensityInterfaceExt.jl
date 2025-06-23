@@ -26,9 +26,9 @@ for (di_func, d_func) in ((:logdensityof, :logpdf), (:densityof, :pdf))
         end
 
         function DensityInterface.$di_func(
-            d::MatrixDistribution,
-            x::AbstractArray{<:AbstractMatrix{<:Real}},
-        )
+                d::MatrixDistribution,
+                x::AbstractArray{<:AbstractMatrix{<:Real}},
+            )
             throw(
                 ArgumentError(
                     "$(DensityInterface.$di_func) doesn't support multiple samples as an argument",

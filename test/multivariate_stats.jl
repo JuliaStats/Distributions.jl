@@ -11,15 +11,15 @@ J = C
 
 
 for d in [
-    Dirichlet(3, 2.0),
-    Dirichlet([2.0, 1.0, 3.0]),
-    IsoNormal(mu, 2.0),
-    DiagNormal(mu, [1.5, 2.0, 2.5]),
-    MvNormal(mu, C),
-    IsoNormalCanon(h, 2.0),
-    DiagNormalCanon(h, [1.5, 2.0, 1.2]),
-    MvNormalCanon(h, J),
-]
+        Dirichlet(3, 2.0),
+        Dirichlet([2.0, 1.0, 3.0]),
+        IsoNormal(mu, 2.0),
+        DiagNormal(mu, [1.5, 2.0, 2.5]),
+        MvNormal(mu, C),
+        IsoNormalCanon(h, 2.0),
+        DiagNormalCanon(h, [1.5, 2.0, 1.2]),
+        MvNormalCanon(h, J),
+    ]
 
     println(d)
     dmean = mean(d)

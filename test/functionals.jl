@@ -1,5 +1,5 @@
 # Struct to test AbstractMvNormal methods
-struct CholeskyMvNormal{M,T} <: Distributions.AbstractMvNormal
+struct CholeskyMvNormal{M, T} <: Distributions.AbstractMvNormal
     m::M
     L::T
 end
@@ -7,7 +7,7 @@ end
 # Constructor for diagonal covariance matrices used in the tests below
 function CholeskyMvNormal(m::Vector, Σ::Diagonal)
     L = Diagonal(map(sqrt, Σ.diag))
-    return CholeskyMvNormal{typeof(m),typeof(L)}(m, L)
+    return CholeskyMvNormal{typeof(m), typeof(L)}(m, L)
 end
 
 Distributions.length(p::CholeskyMvNormal) = length(p.m)
@@ -25,40 +25,40 @@ end
     # univariate distributions
     for d in (Normal(), Poisson(2.0), Binomial(10, 0.4))
         m = Distributions.expectation(identity, d)
-        @test m ≈ mean(d) atol = 1e-3
-        @test Distributions.expectation(x -> (x - mean(d))^2, d) ≈ var(d) atol = 1e-3
+        @test m ≈ mean(d) atol = 1.0e-3
+        @test Distributions.expectation(x -> (x - mean(d))^2, d) ≈ var(d) atol = 1.0e-3
 
-        @test @test_deprecated(Distributions.expectation(d, identity, 1e-10)) == m
+        @test @test_deprecated(Distributions.expectation(d, identity, 1.0e-10)) == m
         @test @test_deprecated(Distributions.expectation(d, identity)) == m
     end
 
     # multivariate distribution
     d = MvNormal([1.5, -0.5], I)
-    @test Distributions.expectation(identity, d; nsamples = 10_000) ≈ mean(d) atol = 5e-2
+    @test Distributions.expectation(identity, d; nsamples = 10_000) ≈ mean(d) atol = 5.0e-2
     @test @test_deprecated(Distributions.expectation(d, identity; nsamples = 10_000)) ≈
-          mean(d) atol = 5e-2
+        mean(d) atol = 5.0e-2
 end
 
 @testset "KL divergences" begin
     function test_kl(p, q)
         @test kldivergence(p, q) >= 0
-        @test kldivergence(p, p) ≈ 0 atol = 1e-1
-        @test kldivergence(q, q) ≈ 0 atol = 1e-1
+        @test kldivergence(p, p) ≈ 0 atol = 1.0e-1
+        @test kldivergence(q, q) ≈ 0 atol = 1.0e-1
         if p isa UnivariateDistribution
             @test kldivergence(p, q) ≈ invoke(
                 kldivergence,
-                Tuple{UnivariateDistribution,UnivariateDistribution},
+                Tuple{UnivariateDistribution, UnivariateDistribution},
                 p,
                 q,
-            ) atol = 1e-1
+            ) atol = 1.0e-1
         elseif p isa MultivariateDistribution
             @test kldivergence(p, q) ≈ invoke(
                 kldivergence,
-                Tuple{MultivariateDistribution,MultivariateDistribution},
+                Tuple{MultivariateDistribution, MultivariateDistribution},
                 p,
                 q;
                 nsamples = 10000,
-            ) atol = 1e-1
+            ) atol = 1.0e-1
         end
     end
 
@@ -81,9 +81,9 @@ end
         end
         @testset "Categorical" begin
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≥
-                  0
+                0
             @test kldivergence(Categorical([0.0, 0.1, 0.9]), Categorical([0.1, 0.1, 0.8])) ≈
-                  kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
+                kldivergence([0.0, 0.1, 0.9], [0.1, 0.1, 0.8])
         end
         @testset "Chi" begin
             p = Chi(4.0)
@@ -164,7 +164,7 @@ end
             q = NormalCanon(3, 4)
             test_kl(p, q)
             @test kldivergence(p, q) ≈
-                  kldivergence(Normal(1 / 2, 1 / sqrt(2)), Normal(3 / 4, 1 / 2))
+                kldivergence(Normal(1 / 2, 1 / sqrt(2)), Normal(3 / 4, 1 / 2))
         end
         @testset "Poisson" begin
             p = Poisson(4.0)

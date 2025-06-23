@@ -1,4 +1,3 @@
-
 # "Generating gamma variates by a modified rejection technique"
 # J.H. Ahrens, U. Dieter
 # Communications of the ACM, Vol 25(1), 1982, pp 47-54
@@ -6,7 +5,7 @@
 
 # suitable for shape >= 1.0
 
-struct GammaGDSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+struct GammaGDSampler{T <: Real} <: Sampleable{Univariate, Continuous}
     a::T
     s2::T
     s::T
@@ -31,17 +30,17 @@ function GammaGDSampler(g::Gamma{T}) where {T}
     ia = 1.0 / a
     q0 =
         ia * @horner(
-            ia,
-            0.0416666664,
-            0.0208333723,
-            0.0079849875,
-            0.0015746717,
-            -0.0003349403,
-            0.0003340332,
-            0.0006053049,
-            -0.0004701849,
-            0.0001710320
-        )
+        ia,
+        0.0416666664,
+        0.0208333723,
+        0.0079849875,
+        0.0015746717,
+        -0.0003349403,
+        0.0003340332,
+        0.0006053049,
+        -0.0004701849,
+        0.000171032
+    )
 
     if a <= 3.686
         b = 0.463 + s + 0.178s2
@@ -57,7 +56,7 @@ function GammaGDSampler(g::Gamma{T}) where {T}
         c = 0.1515 / s
     end
 
-    GammaGDSampler(T(a), T(s2), T(s), T(i2s), T(d), T(q0), T(b), T(σ), T(c), scale(g))
+    return GammaGDSampler(T(a), T(s2), T(s), T(i2s), T(d), T(q0), T(b), T(σ), T(c), scale(g))
 end
 
 function calc_q(s::GammaGDSampler, t)
@@ -66,23 +65,23 @@ function calc_q(s::GammaGDSampler, t)
         return s.q0 - s.s * t + 0.25 * t * t + 2.0 * s.s2 * log1p(v)
     else
         return s.q0 +
-               0.5 *
-               t *
-               t *
-               (
-                   v * @horner(
-                       v,
-                       0.333333333,
-                       -0.249999949,
-                       0.199999867,
-                       -0.1666774828,
-                       0.142873973,
-                       -0.124385581,
-                       0.110368310,
-                       -0.112750886,
-                       0.10408986
-                   )
-               )
+            0.5 *
+            t *
+            t *
+            (
+            v * @horner(
+                v,
+                0.333333333,
+                -0.249999949,
+                0.199999867,
+                -0.1666774828,
+                0.142873973,
+                -0.124385581,
+                0.11036831,
+                -0.112750886,
+                0.10408986
+            )
+        )
     end
 end
 
@@ -135,7 +134,7 @@ end
 # doi:10.1007/BF02293108
 
 # valid for 0 < shape <= 1
-struct GammaGSSampler <: Sampleable{Univariate,Continuous}
+struct GammaGSSampler <: Sampleable{Univariate, Continuous}
     a::Float64
     ia::Float64
     b::Float64
@@ -146,7 +145,7 @@ function GammaGSSampler(d::Gamma)
     a = shape(d)
     ia = 1.0 / a
     b = 1.0 + 0.36787944117144233 * a
-    GammaGSSampler(a, ia, b, scale(d))
+    return GammaGSSampler(a, ia, b, scale(d))
 end
 
 function rand(rng::AbstractRNG, s::GammaGSSampler)
@@ -164,6 +163,7 @@ function rand(rng::AbstractRNG, s::GammaGSSampler)
             e < log(x) * (1.0 - s.a) || return s.scale * x
         end
     end
+    return
 end
 
 
@@ -174,7 +174,7 @@ end
 # http://www.cparity.com/projects/AcmClassification/samples/358414.pdf
 
 # valid for shape >= 1
-struct GammaMTSampler{T<:Real} <: Sampleable{Univariate,Continuous}
+struct GammaMTSampler{T <: Real} <: Sampleable{Univariate, Continuous}
     d::T
     c::T
     κ::T
@@ -193,7 +193,7 @@ function GammaMTSampler(g::Gamma)
     return GammaMTSampler(promote(d, c, κ, 331 // 10_000)...)
 end
 
-function rand(rng::AbstractRNG, s::GammaMTSampler{T}) where {T<:Real}
+function rand(rng::AbstractRNG, s::GammaMTSampler{T}) where {T <: Real}
     d = s.d
     c = s.c
     κ = s.κ
@@ -218,18 +218,19 @@ function rand(rng::AbstractRNG, s::GammaMTSampler{T}) where {T<:Real}
             return v * κ
         end
     end
+    return
 end
 
 # Inverse Power sampler
 # uses the x*u^(1/a) trick from Marsaglia and Tsang (2000) for when shape < 1
-struct GammaIPSampler{S<:Sampleable{Univariate,Continuous},T<:Real} <:
-       Sampleable{Univariate,Continuous}
+struct GammaIPSampler{S <: Sampleable{Univariate, Continuous}, T <: Real} <:
+    Sampleable{Univariate, Continuous}
     s::S #sampler for Gamma(1+shape,scale)
     nia::T #-1/scale
 end
 
 GammaIPSampler(d::Gamma) = GammaIPSampler(d, GammaMTSampler)
-function GammaIPSampler(d::Gamma, ::Type{S}) where {S<:Sampleable}
+function GammaIPSampler(d::Gamma, ::Type{S}) where {S <: Sampleable}
     shape_d = shape(d)
     sampler = S(Gamma{partype(d)}(1 + shape_d, scale(d)))
     return GammaIPSampler(sampler, -inv(shape_d))
@@ -238,5 +239,5 @@ end
 function rand(rng::AbstractRNG, s::GammaIPSampler)
     x = rand(rng, s.s)
     e = randexp(rng, typeof(x))
-    x * exp(s.nia * e)
+    return x * exp(s.nia * e)
 end

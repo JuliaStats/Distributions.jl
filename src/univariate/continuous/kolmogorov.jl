@@ -42,7 +42,7 @@ function cdf_raw(d::Kolmogorov, x::Real)
     f = exp(a)
     f2 = f * f
     u = (1 + f * (1 + f2))
-    sqrt2π * exp(a / 8) * u / x
+    return sqrt2π * exp(a / 8) * u / x
 end
 
 function ccdf_raw(d::Kolmogorov, x::Real)
@@ -52,11 +52,11 @@ function ccdf_raw(d::Kolmogorov, x::Real)
     f5 = f2 * f3
     f7 = f2 * f5
     u = (1 - f3 * (1 - f5 * (1 - f7)))
-    2f * u
+    return 2f * u
 end
 
 function cdf(d::Kolmogorov, x::Real)
-    if x <= 0
+    return if x <= 0
         0
     elseif x <= 1
         cdf_raw(d, x)
@@ -65,7 +65,7 @@ function cdf(d::Kolmogorov, x::Real)
     end
 end
 function ccdf(d::Kolmogorov, x::Real)
-    if x <= 0
+    return if x <= 0
         1
     elseif x <= 1
         1 - cdf_raw(d, x)
@@ -82,14 +82,14 @@ function pdf(d::Kolmogorov, x::Real)
     elseif x <= 1
         c = π / (2 * x)
         s = 0.0
-        for i = 1:20
+        for i in 1:20
             k = ((2i - 1) * c)^2
             s += (k - 1) * exp(-k / 2)
         end
         return sqrt2π * s / x^2
     else
         s = 0.0
-        for i = 1:20
+        for i in 1:20
             s += (iseven(i) ? -1 : 1) * i^2 * exp(-2(i * x)^2)
         end
         return 8 * x * s
@@ -107,7 +107,7 @@ logpdf(d::Kolmogorov, x::Real) = log(pdf(d, x))
 #   Chapter IV.5, pp. 163-165.
 function rand(rng::AbstractRNG, d::Kolmogorov)
     t = 0.75
-    if rand(rng) < 0.3728329582237386 # cdf(d,t)
+    return if rand(rng) < 0.3728329582237386 # cdf(d,t)
         # left interval
         while true
             g = rand_trunc_gamma(rng)
@@ -163,4 +163,5 @@ function rand_trunc_gamma(rng::AbstractRNG)
             return g
         end
     end
+    return
 end

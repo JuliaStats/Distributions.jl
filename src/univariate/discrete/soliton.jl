@@ -38,12 +38,12 @@ struct Soliton <: DiscreteUnivariateDistribution
         0 < δ < 1 || throw(DomainError(δ, "Expected 0 < δ < 1."))
         0 < M <= K || throw(DomainError(M, "Expected 0 < M <= K."))
         0 <= atol < 1 || throw(DomainError(atol, "Expected 0 <= atol < 1."))
-        PDF = [soliton_τ(K, M, δ, i) + soliton_ρ(K, i) for i = 1:K]
+        PDF = [soliton_τ(K, M, δ, i) + soliton_ρ(K, i) for i in 1:K]
         PDF ./= sum(PDF)
-        degrees = [i for i = 1:K if PDF[i] > atol]
+        degrees = [i for i in 1:K if PDF[i] > atol]
         CDF = cumsum([PDF[i] for i in degrees])
         CDF ./= CDF[end]
-        new(K, M, δ, atol, degrees, CDF)
+        return new(K, M, δ, atol, degrees, CDF)
     end
 end
 
@@ -92,7 +92,7 @@ function pdf(Ω::Soliton, i::Real)
     (j > length(Ω.degrees) || Ω.degrees[j] != i) && return zero(eltype(Ω.CDF))
     rv = Ω.CDF[j]
     if j > 1
-        rv -= Ω.CDF[j-1]
+        rv -= Ω.CDF[j - 1]
     end
     return rv
 end
@@ -103,7 +103,7 @@ function cdf(Ω::Soliton, i::Integer)
     i > Ω.degrees[end] && return 1.0
     j = searchsortedfirst(Ω.degrees, i)
     Ω.degrees[j] == i && return Ω.CDF[j]
-    return Ω.CDF[j-1]
+    return Ω.CDF[j - 1]
 end
 
 Statistics.mean(Ω::Soliton) = sum(i -> i * pdf(Ω, i), Ω.degrees)

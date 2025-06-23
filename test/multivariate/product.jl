@@ -69,7 +69,7 @@ using Distributions: Product
 
         for a in ([0, 1], [-0.5, 0.5])
             # Construct independent distributions and `Product` distribution from these.
-            ds = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ = 1:N]
+            ds = [DiscreteNonParametric(copy(a), [0.5, 0.5]) for _ in 1:N]
             x = rand.(ds)
             d_product = product_distribution(ds)
             @test d_product isa Product

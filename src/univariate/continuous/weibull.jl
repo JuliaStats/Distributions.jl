@@ -23,16 +23,16 @@ External links
 * [Weibull distribution on Wikipedia](http://en.wikipedia.org/wiki/Weibull_distribution)
 
 """
-struct Weibull{T<:Real} <: ContinuousUnivariateDistribution
+struct Weibull{T <: Real} <: ContinuousUnivariateDistribution
     α::T   # shape
     θ::T   # scale
 
-    function Weibull{T}(α::T, θ::T) where {T<:Real}
-        new{T}(α, θ)
+    function Weibull{T}(α::T, θ::T) where {T <: Real}
+        return new{T}(α, θ)
     end
 end
 
-function Weibull(α::T, θ::T; check_args::Bool = true) where {T<:Real}
+function Weibull(α::T, θ::T; check_args::Bool = true) where {T <: Real}
     @check_args Weibull (α, α > zero(α)) (θ, θ > zero(θ))
     return Weibull{T}(α, θ)
 end
@@ -47,9 +47,9 @@ Weibull(α::Real = 1.0) = Weibull(α, one(α); check_args = false)
 
 #### Conversions
 
-convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T<:Real} = Weibull(T(α), T(θ))
-Base.convert(::Type{Weibull{T}}, d::Weibull) where {T<:Real} = Weibull{T}(T(d.α), T(d.θ))
-Base.convert(::Type{Weibull{T}}, d::Weibull{T}) where {T<:Real} = d
+convert(::Type{Weibull{T}}, α::Real, θ::Real) where {T <: Real} = Weibull(T(α), T(θ))
+Base.convert(::Type{Weibull{T}}, d::Weibull) where {T <: Real} = Weibull{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Weibull{T}}, d::Weibull{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -57,14 +57,14 @@ shape(d::Weibull) = d.α
 scale(d::Weibull) = d.θ
 
 params(d::Weibull) = (d.α, d.θ)
-partype(::Weibull{T}) where {T<:Real} = T
+partype(::Weibull{T}) where {T <: Real} = T
 
 
 #### Statistics
 
 mean(d::Weibull) = d.θ * gamma(1 + 1 / d.α)
 median(d::Weibull) = d.θ * logtwo^(1 / d.α)
-mode(d::Weibull{T}) where {T<:Real} = d.α > 1 ? (iα = 1 / d.α; d.θ * (1 - iα)^iα) : zero(T)
+mode(d::Weibull{T}) where {T <: Real} = d.α > 1 ? (iα = 1 / d.α; d.θ * (1 - iα)^iα) : zero(T)
 
 var(d::Weibull) = d.θ^2 * gamma(1 + 2 / d.α) - mean(d)^2
 
@@ -73,7 +73,7 @@ function skewness(d::Weibull)
     σ2 = var(d)
     σ = sqrt(σ2)
     r = μ / σ
-    gamma(1 + 3 / d.α) * (d.θ / σ)^3 - 3r - r^3
+    return gamma(1 + 3 / d.α) * (d.θ / σ)^3 - 3r - r^3
 end
 
 function kurtosis(d::Weibull)
@@ -84,12 +84,12 @@ function kurtosis(d::Weibull)
     r = μ / σ
     r2 = r^2
     r4 = r2^2
-    (θ / σ)^4 * gamma(1 + 4 / α) - 4γ * r - 6r2 - r4 - 3
+    return (θ / σ)^4 * gamma(1 + 4 / α) - 4γ * r - 6r2 - r4 - 3
 end
 
 function entropy(d::Weibull)
     α, θ = params(d)
-    0.5772156649015328606 * (1 - 1 / α) + log(θ / α) + 1
+    return 0.5772156649015328606 * (1 - 1 / α) + log(θ / α) + 1
 end
 
 
@@ -99,14 +99,14 @@ function pdf(d::Weibull, x::Real)
     α, θ = params(d)
     z = abs(x) / θ
     res = (α / θ) * z^(α - 1) * exp(-z^α)
-    x < 0 || isinf(x) ? zero(res) : res
+    return x < 0 || isinf(x) ? zero(res) : res
 end
 
 function logpdf(d::Weibull, x::Real)
     α, θ = params(d)
     z = abs(x) / θ
     res = log(α / θ) + xlogy(α - 1, z) - z^α
-    x < 0 || isinf(x) ? oftype(res, -Inf) : res
+    return x < 0 || isinf(x) ? oftype(res, -Inf) : res
 end
 
 zval(d::Weibull, x::Real) = (max(x, 0) / d.θ)^d.α
@@ -122,8 +122,8 @@ cquantile(d::Weibull, p::Real) = xval(d, -log(p))
 invlogcdf(d::Weibull, lp::Real) = xval(d, -log1mexp(lp))
 invlogccdf(d::Weibull, lp::Real) = xval(d, -lp)
 
-function gradlogpdf(d::Weibull{T}, x::Real) where {T<:Real}
-    if insupport(Weibull, x)
+function gradlogpdf(d::Weibull{T}, x::Real) where {T <: Real}
+    return if insupport(Weibull, x)
         α, θ = params(d)
         (α - 1) / x - α * x^(α - 1) / (θ^α)
     else
@@ -145,12 +145,12 @@ rand(rng::AbstractRNG, d::Weibull) = xval(d, randexp(rng))
 Compute the maximum likelihood estimate of the [`Weibull`](@ref) distribution with Newton's method.
 """
 function fit_mle(
-    ::Type{<:Weibull},
-    x::AbstractArray{<:Real};
-    alpha0::Real = 1,
-    maxiter::Int = 1000,
-    tol::Real = 1e-16,
-)
+        ::Type{<:Weibull},
+        x::AbstractArray{<:Real};
+        alpha0::Real = 1,
+        maxiter::Int = 1000,
+        tol::Real = 1.0e-16,
+    )
 
     N = 0
 

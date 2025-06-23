@@ -22,13 +22,13 @@ External links
 * [Laplace distribution on Wikipedia](http://en.wikipedia.org/wiki/Laplace_distribution)
 
 """
-struct Laplace{T<:Real} <: ContinuousUnivariateDistribution
+struct Laplace{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     θ::T
     Laplace{T}(µ::T, θ::T) where {T} = new{T}(µ, θ)
 end
 
-function Laplace(μ::T, θ::T; check_args::Bool = true) where {T<:Real}
+function Laplace(μ::T, θ::T; check_args::Bool = true) where {T <: Real}
     @check_args Laplace (θ, θ > zero(θ))
     return Laplace{T}(μ, θ)
 end
@@ -44,20 +44,20 @@ const Biexponential = Laplace
 @distr_support Laplace -Inf Inf
 
 #### Conversions
-function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T<:Real,S<:Real}
-    Laplace(T(μ), T(θ))
+function convert(::Type{Laplace{T}}, μ::S, θ::S) where {T <: Real, S <: Real}
+    return Laplace(T(μ), T(θ))
 end
-function Base.convert(::Type{Laplace{T}}, d::Laplace) where {T<:Real}
-    Laplace{T}(T(d.μ), T(d.θ))
+function Base.convert(::Type{Laplace{T}}, d::Laplace) where {T <: Real}
+    return Laplace{T}(T(d.μ), T(d.θ))
 end
-Base.convert(::Type{Laplace{T}}, d::Laplace{T}) where {T<:Real} = d
+Base.convert(::Type{Laplace{T}}, d::Laplace{T}) where {T <: Real} = d
 
 #### Parameters
 
 location(d::Laplace) = d.μ
 scale(d::Laplace) = d.θ
 params(d::Laplace) = (d.μ, d.θ)
-@inline partype(d::Laplace{T}) where {T<:Real} = T
+@inline partype(d::Laplace{T}) where {T <: Real} = T
 
 
 #### Statistics
@@ -68,8 +68,8 @@ mode(d::Laplace) = d.μ
 
 var(d::Laplace) = 2d.θ^2
 std(d::Laplace) = sqrt2 * d.θ
-skewness(d::Laplace{T}) where {T<:Real} = zero(T)
-kurtosis(d::Laplace{T}) where {T<:Real} = 3one(T)
+skewness(d::Laplace{T}) where {T <: Real} = zero(T)
+kurtosis(d::Laplace{T}) where {T <: Real} = 3one(T)
 
 entropy(d::Laplace) = log(2d.θ) + 1
 
@@ -104,20 +104,20 @@ function gradlogpdf(d::Laplace, x::Real)
     μ, θ = params(d)
     x == μ && error("Gradient is undefined at the location point")
     g = 1 / θ
-    x > μ ? -g : g
+    return x > μ ? -g : g
 end
 
 function mgf(d::Laplace, t::Real)
     st = d.θ * t
-    exp(t * d.μ) / ((1 - st) * (1 + st))
+    return exp(t * d.μ) / ((1 - st) * (1 + st))
 end
 function cgf(d::Laplace, t)
     μ, θ = params(d)
-    t * μ - log1p(-(θ * t)^2)
+    return t * μ - log1p(-(θ * t)^2)
 end
 function cf(d::Laplace, t::Real)
     st = d.θ * t
-    cis(t * d.μ) / (1 + st * st)
+    return cis(t * d.μ) / (1 + st * st)
 end
 
 #### Affine transformations

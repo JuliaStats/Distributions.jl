@@ -38,26 +38,26 @@ julia> var(d)  # var of marginals
 (x = 1.0, y = [0.031746031746031744, 0.031746031746031744])
 ```
 """
-struct ProductNamedTupleDistribution{Tnames,Tdists,S<:ValueSupport,eltypes} <:
-       Distribution{NamedTupleVariate{Tnames},S}
-    dists::NamedTuple{Tnames,Tdists}
+struct ProductNamedTupleDistribution{Tnames, Tdists, S <: ValueSupport, eltypes} <:
+    Distribution{NamedTupleVariate{Tnames}, S}
+    dists::NamedTuple{Tnames, Tdists}
 end
 function ProductNamedTupleDistribution(
-    dists::NamedTuple{K,V},
-) where {K,V<:Tuple{Distribution,Vararg{Distribution}}}
+        dists::NamedTuple{K, V},
+    ) where {K, V <: Tuple{Distribution, Vararg{Distribution}}}
     vs = _product_valuesupport(values(dists))
     eltypes = _product_namedtuple_eltype(values(dists))
-    return ProductNamedTupleDistribution{K,V,vs,eltypes}(dists)
+    return ProductNamedTupleDistribution{K, V, vs, eltypes}(dists)
 end
 
 _gentype(d::UnivariateDistribution) = eltype(d)
-_gentype(d::Distribution{<:ArrayLikeVariate{S}}) where {S} = Array{eltype(d),S}
+_gentype(d::Distribution{<:ArrayLikeVariate{S}}) where {S} = Array{eltype(d), S}
 function _gentype(d::Distribution{CholeskyVariate})
     T = eltype(d)
-    return LinearAlgebra.Cholesky{T,Matrix{T}}
+    return LinearAlgebra.Cholesky{T, Matrix{T}}
 end
 function _gentype(d::ProductNamedTupleDistribution{K}) where {K}
-    return NamedTuple{K,Tuple{map(_gentype, values(d.dists))...}}
+    return NamedTuple{K, Tuple{map(_gentype, values(d.dists))...}}
 end
 _gentype(::Distribution) = Any
 
@@ -81,14 +81,14 @@ The function falls back to constructing a [`ProductNamedTupleDistribution`](@ref
 distribution but specialized methods can be defined.
 """
 function product_distribution(
-    dists::NamedTuple{<:Any,<:Tuple{Distribution,Vararg{Distribution}}},
-)
+        dists::NamedTuple{<:Any, <:Tuple{Distribution, Vararg{Distribution}}},
+    )
     return ProductNamedTupleDistribution(dists)
 end
 
 # Properties
 
-Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any,<:Any,<:Any,T}}) where {T} = T
+Base.eltype(::Type{<:ProductNamedTupleDistribution{<:Any, <:Any, <:Any, T}}) where {T} = T
 
 Base.minimum(d::ProductNamedTupleDistribution) = map(minimum, d.dists)
 
@@ -107,7 +107,7 @@ end
 function insupport(dist::ProductNamedTupleDistribution{K}, x::NamedTuple) where {K}
     return (
         _named_fields_match(dist.dists, x) &&
-        all(map(insupport, dist.dists, NamedTuple{K}(x)))
+            all(map(insupport, dist.dists, NamedTuple{K}(x)))
     )
 end
 
@@ -142,9 +142,9 @@ std(d::ProductNamedTupleDistribution) = map(std, d.dists)
 entropy(d::ProductNamedTupleDistribution) = sum(entropy, values(d.dists))
 
 function kldivergence(
-    d1::ProductNamedTupleDistribution{K},
-    d2::ProductNamedTupleDistribution,
-) where {K}
+        d1::ProductNamedTupleDistribution{K},
+        d2::ProductNamedTupleDistribution,
+    ) where {K}
     _named_fields_match(d1.dists, d2.dists) || throw(
         ArgumentError(
             "Sets of named tuple fields are not the same: !issetequal($(keys(d1.dists)), $(keys(d2.dists)))",
@@ -155,20 +155,20 @@ end
 
 # Sampling
 
-function sampler(d::ProductNamedTupleDistribution{K,<:Any,S}) where {K,S}
+function sampler(d::ProductNamedTupleDistribution{K, <:Any, S}) where {K, S}
     samplers = map(sampler, d.dists)
     Tsamplers = typeof(values(samplers))
-    return ProductNamedTupleSampler{K,Tsamplers,S}(samplers)
+    return ProductNamedTupleSampler{K, Tsamplers, S}(samplers)
 end
 
 function Base.rand(rng::AbstractRNG, d::ProductNamedTupleDistribution{K}) where {K}
     return NamedTuple{K}(map(Base.Fix1(rand, rng), d.dists))
 end
 function Base.rand(
-    rng::AbstractRNG,
-    d::ProductNamedTupleDistribution{K},
-    dims::Dims,
-) where {K}
+        rng::AbstractRNG,
+        d::ProductNamedTupleDistribution{K},
+        dims::Dims,
+    ) where {K}
     return convert(AbstractArray{<:NamedTuple{K}}, _rand(rng, sampler(d), dims))
 end
 

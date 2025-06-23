@@ -1,6 +1,6 @@
-struct ProductNamedTupleSampler{Tnames,Tsamplers,S<:ValueSupport} <:
-       Sampleable{NamedTupleVariate{Tnames},S}
-    samplers::NamedTuple{Tnames,Tsamplers}
+struct ProductNamedTupleSampler{Tnames, Tsamplers, S <: ValueSupport} <:
+    Sampleable{NamedTupleVariate{Tnames}, S}
+    samplers::NamedTuple{Tnames, Tsamplers}
 end
 
 function Base.rand(rng::AbstractRNG, spl::ProductNamedTupleSampler{K}) where {K}
@@ -14,10 +14,10 @@ function _rand(rng::AbstractRNG, spl::ProductNamedTupleSampler, dims::Dims)
 end
 
 function _rand!(
-    rng::AbstractRNG,
-    spl::ProductNamedTupleSampler,
-    xs::AbstractArray{<:NamedTuple{K}},
-) where {K}
+        rng::AbstractRNG,
+        spl::ProductNamedTupleSampler,
+        xs::AbstractArray{<:NamedTuple{K}},
+    ) where {K}
     for i in eachindex(xs)
         xs[i] = NamedTuple{K}(rand(rng, spl))
     end

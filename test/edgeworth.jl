@@ -14,7 +14,7 @@ dg_s = Gamma(10, 1)
 dg_m = Gamma(10, 0.1)
 dg_za = Gamma(10, 1 / std(dg_s))
 
-for i = 0.01:0.01:0.99
+for i in 0.01:0.01:0.99
 
     q = quantile(dg_s, i)
     @test isapprox(quantile(d_s, i), q, atol = 0.02)

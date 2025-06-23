@@ -16,7 +16,7 @@ External links:
 
 See also [`Bernoulli`](@ref)
 """
-struct BernoulliLogit{T<:Real} <: DiscreteUnivariateDistribution
+struct BernoulliLogit{T <: Real} <: DiscreteUnivariateDistribution
     logitp::T
 end
 
@@ -27,9 +27,9 @@ BernoulliLogit() = BernoulliLogit(0.0)
 Base.eltype(::Type{<:BernoulliLogit}) = Bool
 
 #### Conversions
-Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit) where {T<:Real} =
+Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit) where {T <: Real} =
     BernoulliLogit{T}(T(d.logitp))
-Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T<:Real} = d
+Base.convert(::Type{BernoulliLogit{T}}, d::BernoulliLogit{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -57,18 +57,18 @@ mode(d::BernoulliLogit) = d.logitp > 0 ? 1 : 0
 function modes(d::BernoulliLogit)
     logitp = d.logitp
     z = zero(logitp)
-    logitp < z ? [false] : (logitp > z ? [true] : [false, true])
+    return logitp < z ? [false] : (logitp > z ? [true] : [false, true])
 end
 
 median(d::BernoulliLogit) = d.logitp > 0
 
 function entropy(d::BernoulliLogit)
     logitp = d.logitp
-    (logitp == -Inf || logitp == Inf) ? float(zero(logitp)) :
-    (
-        logitp > 0 ? -(succprob(d) * logitp + logfailprob(d)) :
-        -(logsuccprob(d) - failprob(d) * logitp)
-    )
+    return (logitp == -Inf || logitp == Inf) ? float(zero(logitp)) :
+        (
+            logitp > 0 ? -(succprob(d) * logitp + logfailprob(d)) :
+            -(logsuccprob(d) - failprob(d) * logitp)
+        )
 end
 
 #### Evaluation
@@ -99,17 +99,17 @@ logccdf(d::BernoulliLogit, x::Int) =
 
 function quantile(d::BernoulliLogit, p::Real)
     T = float(partype(d))
-    0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
+    return 0 <= p <= 1 ? (p <= failprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 function cquantile(d::BernoulliLogit, p::Real)
     T = float(partype(d))
-    0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
+    return 0 <= p <= 1 ? (p >= succprob(d) ? zero(T) : one(T)) : T(NaN)
 end
 
 mgf(d::BernoulliLogit, t::Real) = failprob(d) + exp(t + logsuccprob(d))
 function cgf(d::BernoulliLogit, t)
     # log(1-p+p*exp(t)) = logaddexp(log(1-p), t + log(p))
-    logaddexp(logfailprob(d), t + logsuccprob(d))
+    return logaddexp(logfailprob(d), t + logsuccprob(d))
 end
 cf(d::BernoulliLogit, t::Real) = failprob(d) + succprob(d) * cis(t)
 

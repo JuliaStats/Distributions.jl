@@ -1,11 +1,11 @@
 # Various algorithms for computing quantile
 
 function quantile_bisect(
-    d::ContinuousUnivariateDistribution,
-    p::Real,
-    lx::T,
-    rx::T,
-) where {T<:Real}
+        d::ContinuousUnivariateDistribution,
+        p::Real,
+        lx::T,
+        rx::T,
+    ) where {T <: Real}
     rx < lx && throw(ArgumentError("empty bracketing interval [$lx, $rx]"))
 
     # In some special cases, e.g. #1501, rx == lx`
@@ -56,11 +56,11 @@ quantile_bisect(d::ContinuousUnivariateDistribution, p::Real) =
 #   http://www.statsci.org/smyth/pubs/qinvgaussPreprint.pdf
 
 function quantile_newton(
-    d::ContinuousUnivariateDistribution,
-    p::Real,
-    xs::Real = mode(d),
-    tol::Real = 1e-12,
-)
+        d::ContinuousUnivariateDistribution,
+        p::Real,
+        xs::Real = mode(d),
+        tol::Real = 1.0e-12,
+    )
     x = xs + (p - cdf(d, xs)) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
@@ -80,11 +80,11 @@ function quantile_newton(
 end
 
 function cquantile_newton(
-    d::ContinuousUnivariateDistribution,
-    p::Real,
-    xs::Real = mode(d),
-    tol::Real = 1e-12,
-)
+        d::ContinuousUnivariateDistribution,
+        p::Real,
+        xs::Real = mode(d),
+        tol::Real = 1.0e-12,
+    )
     x = xs + (ccdf(d, xs) - p) / pdf(d, xs)
     T = typeof(x)
     if 0 < p < 1
@@ -104,11 +104,11 @@ function cquantile_newton(
 end
 
 function invlogcdf_newton(
-    d::ContinuousUnivariateDistribution,
-    lp::Real,
-    xs::Real = mode(d),
-    tol::Real = 1e-12,
-)
+        d::ContinuousUnivariateDistribution,
+        lp::Real,
+        xs::Real = mode(d),
+        tol::Real = 1.0e-12,
+    )
     T = typeof(lp - logpdf(d, xs))
     if -Inf < lp < 0
         x0 = T(xs)
@@ -136,11 +136,11 @@ function invlogcdf_newton(
 end
 
 function invlogccdf_newton(
-    d::ContinuousUnivariateDistribution,
-    lp::Real,
-    xs::Real = mode(d),
-    tol::Real = 1e-12,
-)
+        d::ContinuousUnivariateDistribution,
+        lp::Real,
+        xs::Real = mode(d),
+        tol::Real = 1.0e-12,
+    )
     T = typeof(lp - logpdf(d, xs))
     if -Inf < lp < 0
         x0 = T(xs)
@@ -170,10 +170,12 @@ end
 # A macro: specify that the quantile (and friends) of distribution D
 # is computed using the newton method
 macro quantile_newton(D)
-    esc(quote
-        quantile(d::$D, p::Real) = quantile_newton(d, p)
-        cquantile(d::$D, p::Real) = cquantile_newton(d, p)
-        invlogcdf(d::$D, lp::Real) = invlogcdf_newton(d, lp)
-        invlogccdf(d::$D, lp::Real) = invlogccdf_newton(d, lp)
-    end)
+    return esc(
+        quote
+            quantile(d::$D, p::Real) = quantile_newton(d, p)
+            cquantile(d::$D, p::Real) = cquantile_newton(d, p)
+            invlogcdf(d::$D, lp::Real) = invlogcdf_newton(d, lp)
+            invlogccdf(d::$D, lp::Real) = invlogccdf_newton(d, lp)
+        end
+    )
 end

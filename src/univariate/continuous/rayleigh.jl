@@ -23,9 +23,9 @@ External links
 * [Rayleigh distribution on Wikipedia](http://en.wikipedia.org/wiki/Rayleigh_distribution)
 
 """
-struct Rayleigh{T<:Real} <: ContinuousUnivariateDistribution
+struct Rayleigh{T <: Real} <: ContinuousUnivariateDistribution
     σ::T
-    Rayleigh{T}(σ::T) where {T<:Real} = new{T}(σ)
+    Rayleigh{T}(σ::T) where {T <: Real} = new{T}(σ)
 end
 
 function Rayleigh(σ::Real; check_args::Bool = true)
@@ -40,43 +40,43 @@ Rayleigh() = Rayleigh{Float64}(1.0)
 
 #### Conversions
 
-convert(::Type{Rayleigh{T}}, σ::S) where {T<:Real,S<:Real} = Rayleigh(T(σ))
-Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T<:Real} = Rayleigh{T}(T(d.σ))
-Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T<:Real} = d
+convert(::Type{Rayleigh{T}}, σ::S) where {T <: Real, S <: Real} = Rayleigh(T(σ))
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh) where {T <: Real} = Rayleigh{T}(T(d.σ))
+Base.convert(::Type{Rayleigh{T}}, d::Rayleigh{T}) where {T <: Real} = d
 
 #### Parameters
 
 scale(d::Rayleigh) = d.σ
 params(d::Rayleigh) = (d.σ,)
-partype(::Rayleigh{T}) where {T<:Real} = T
+partype(::Rayleigh{T}) where {T <: Real} = T
 
 
 #### Statistics
 
 mean(d::Rayleigh) = sqrthalfπ * d.σ
-median(d::Rayleigh{T}) where {T<:Real} = sqrt2 * sqrt(T(logtwo)) * d.σ # sqrt(log(4))
+median(d::Rayleigh{T}) where {T <: Real} = sqrt2 * sqrt(T(logtwo)) * d.σ # sqrt(log(4))
 mode(d::Rayleigh) = d.σ
 
-var(d::Rayleigh{T}) where {T<:Real} = (2 - T(π) / 2) * d.σ^2
-std(d::Rayleigh{T}) where {T<:Real} = sqrt(2 - T(π) / 2) * d.σ
+var(d::Rayleigh{T}) where {T <: Real} = (2 - T(π) / 2) * d.σ^2
+std(d::Rayleigh{T}) where {T <: Real} = sqrt(2 - T(π) / 2) * d.σ
 
-skewness(d::Rayleigh{T}) where {T<:Real} = 2 * sqrtπ * (T(π) - 3) / (4 - T(π))^(3 / 2)
-kurtosis(d::Rayleigh{T}) where {T<:Real} = -(6 * T(π)^2 - 24 * T(π) + 16) / (4 - T(π))^2
+skewness(d::Rayleigh{T}) where {T <: Real} = 2 * sqrtπ * (T(π) - 3) / (4 - T(π))^(3 / 2)
+kurtosis(d::Rayleigh{T}) where {T <: Real} = -(6 * T(π)^2 - 24 * T(π) + 16) / (4 - T(π))^2
 
-entropy(d::Rayleigh{T}) where {T<:Real} =
+entropy(d::Rayleigh{T}) where {T <: Real} =
     1 - T(logtwo) / 2 + T(MathConstants.γ) / 2 + log(d.σ)
 
 
 #### Evaluation
 
-function pdf(d::Rayleigh{T}, x::Real) where {T<:Real}
+function pdf(d::Rayleigh{T}, x::Real) where {T <: Real}
     σ2 = d.σ^2
-    x > 0 ? (x / σ2) * exp(-(x^2) / (2σ2)) : zero(T)
+    return x > 0 ? (x / σ2) * exp(-(x^2) / (2σ2)) : zero(T)
 end
 
-function logpdf(d::Rayleigh{T}, x::Real) where {T<:Real}
+function logpdf(d::Rayleigh{T}, x::Real) where {T <: Real}
     σ2 = d.σ^2
-    x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
+    return x > 0 ? log(x / σ2) - (x^2) / (2σ2) : -T(Inf)
 end
 
 function logccdf(d::Rayleigh, x::Real)
@@ -99,7 +99,7 @@ rand(rng::AbstractRNG, d::Rayleigh) = d.σ * sqrt(2 * randexp(rng))
 
 #### Fitting
 
-function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T<:Real}
+function fit_mle(::Type{<:Rayleigh}, x::AbstractArray{T}) where {T <: Real}
     # Compute MLE (and unbiased estimator) of σ^2
     s2 = zero(T)
     for xi in x

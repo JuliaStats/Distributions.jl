@@ -19,14 +19,14 @@ External links
 * [SkewDist.jl](https://github.com/STOR-i/SkewDist.jl)
 
 """
-struct SkewNormal{T<:Real} <: ContinuousUnivariateDistribution
+struct SkewNormal{T <: Real} <: ContinuousUnivariateDistribution
     ξ::T
     ω::T
     α::T
     SkewNormal{T}(ξ::T, ω::T, α::T) where {T} = new{T}(ξ, ω, α)
 end
 
-function SkewNormal(ξ::T, ω::T, α::T; check_args::Bool = true) where {T<:Real}
+function SkewNormal(ξ::T, ω::T, α::T; check_args::Bool = true) where {T <: Real}
     @check_args SkewNormal (ω, ω > zero(ω))
     return SkewNormal{T}(ξ, ω, α)
 end
@@ -40,15 +40,15 @@ SkewNormal(α::Real = 0.0) = SkewNormal(zero(α), one(α), α; check_args = fals
 @distr_support SkewNormal -Inf Inf
 
 #### Conversions
-convert(::Type{SkewNormal{T}}, ξ::S, ω::S, α::S) where {T<:Real,S<:Real} =
+convert(::Type{SkewNormal{T}}, ξ::S, ω::S, α::S) where {T <: Real, S <: Real} =
     SkewNormal(T(ξ), T(ω), T(α))
-Base.convert(::Type{SkewNormal{T}}, d::SkewNormal) where {T<:Real} =
+Base.convert(::Type{SkewNormal{T}}, d::SkewNormal) where {T <: Real} =
     SkewNormal{T}(T(d.ξ), T(d.ω), T(d.α))
-Base.convert(::Type{SkewNormal{T}}, d::SkewNormal{T}) where {T<:Real} = d
+Base.convert(::Type{SkewNormal{T}}, d::SkewNormal{T}) where {T <: Real} = d
 
 #### Parameters
 params(d::SkewNormal) = (d.ξ, d.ω, d.α)
-@inline partype(d::SkewNormal{T}) where {T<:Real} = T
+@inline partype(d::SkewNormal{T}) where {T <: Real} = T
 
 #### Statistics
 delta(d::SkewNormal) = d.α / √(1 + d.α^2)
@@ -62,7 +62,7 @@ skewness(d::SkewNormal) = ((4 - π) / 2) * (mean_z(d)^3 / (1 - mean_z(d)^2)^(3 /
 kurtosis(d::SkewNormal) =
     2 * (π - 3) * ((delta(d) * sqrt(2 / π))^4 / (1 - 2 * (delta(d)^2) / π)^2)
 
-# no analytic expression for max m_0(d) but accurate numerical approximation 
+# no analytic expression for max m_0(d) but accurate numerical approximation
 m_0(d::SkewNormal) =
     mean_z(d) - (skewness(d) * std_z(d)) / 2 - (sign(d.α) / 2) * exp(-2π / abs(d.α))
 mode(d::SkewNormal) = d.ξ + d.ω * m_0(d)
@@ -73,7 +73,7 @@ pdf(d::SkewNormal, x::Real) =
 logpdf(d::SkewNormal, x::Real) =
     log(2) - log(d.ω) + normlogpdf((x - d.ξ) / d.ω) + normlogcdf(d.α * (x - d.ξ) / d.ω)
 #cdf requires Owen's T function.
-#cdf/quantile etc 
+#cdf/quantile etc
 
 mgf(d::SkewNormal, t::Real) =
     2 * exp(d.ξ * t + (d.ω^2 * t^2) / 2) * normcdf(d.ω * delta(d) * t)
@@ -92,5 +92,3 @@ function rand(rng::AbstractRNG, d::SkewNormal)
 end
 
 ## Fitting  # to be added see: https://github.com/STOR-i/SkewDist.jl/issues/3
-
-

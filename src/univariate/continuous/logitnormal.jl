@@ -52,13 +52,13 @@ External links
 * [Logit normal distribution on Wikipedia](https://en.wikipedia.org/wiki/Logit-normal_distribution)
 
 """
-struct LogitNormal{T<:Real} <: ContinuousUnivariateDistribution
+struct LogitNormal{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     LogitNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogitNormal(μ::T, σ::T; check_args::Bool = true) where {T<:Real}
+function LogitNormal(μ::T, σ::T; check_args::Bool = true) where {T <: Real}
     @check_args LogitNormal (σ, σ > zero(σ))
     return LogitNormal{T}(μ, σ)
 end
@@ -76,19 +76,19 @@ LogitNormal(μ::Real = 0.0) = LogitNormal(μ, one(μ); check_args = false)
 
 
 #### Conversions
-convert(::Type{LogitNormal{T}}, μ::S, σ::S) where {T<:Real,S<:Real} =
+convert(::Type{LogitNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} =
     LogitNormal(T(μ), T(σ))
-function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T<:Real}
-    LogitNormal{T}(T(d.μ), T(d.σ))
+function Base.convert(::Type{LogitNormal{T}}, d::LogitNormal) where {T <: Real}
+    return LogitNormal{T}(T(d.μ), T(d.σ))
 end
-Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T<:Real} = d
+Base.convert(::Type{LogitNormal{T}}, d::LogitNormal{T}) where {T <: Real} = d
 
 #### Parameters
 
 params(d::LogitNormal) = (d.μ, d.σ)
 location(d::LogitNormal) = d.μ
 scale(d::LogitNormal) = d.σ
-@inline partype(d::LogitNormal{T}) where {T<:Real} = T
+@inline partype(d::LogitNormal{T}) where {T <: Real} = T
 
 #### Statistics
 
@@ -114,7 +114,7 @@ end
 #### Evaluation
 
 #TODO check pd and logpdf
-function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+function pdf(d::LogitNormal{T}, x::Real) where {T <: Real}
     if zero(x) < x < one(x)
         return normpdf(d.μ, d.σ, logit(x)) / (x * (1 - x))
     else
@@ -122,7 +122,7 @@ function pdf(d::LogitNormal{T}, x::Real) where {T<:Real}
     end
 end
 
-function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
+function logpdf(d::LogitNormal{T}, x::Real) where {T <: Real}
     if zero(x) < x < one(x)
         lx = logit(x)
         return normlogpdf(d.μ, d.σ, lx) - log(x) - log1p(-x)
@@ -131,13 +131,13 @@ function logpdf(d::LogitNormal{T}, x::Real) where {T<:Real}
     end
 end
 
-cdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
+cdf(d::LogitNormal{T}, x::Real) where {T <: Real} =
     x ≤ 0 ? zero(T) : x ≥ 1 ? one(T) : normcdf(d.μ, d.σ, logit(x))
-ccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
+ccdf(d::LogitNormal{T}, x::Real) where {T <: Real} =
     x ≤ 0 ? one(T) : x ≥ 1 ? zero(T) : normccdf(d.μ, d.σ, logit(x))
-logcdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
+logcdf(d::LogitNormal{T}, x::Real) where {T <: Real} =
     x ≤ 0 ? -T(Inf) : x ≥ 1 ? zero(T) : normlogcdf(d.μ, d.σ, logit(x))
-logccdf(d::LogitNormal{T}, x::Real) where {T<:Real} =
+logccdf(d::LogitNormal{T}, x::Real) where {T <: Real} =
     x ≤ 0 ? zero(T) : x ≥ 1 ? -T(Inf) : normlogccdf(d.μ, d.σ, logit(x))
 
 quantile(d::LogitNormal, q::Real) = logistic(norminvcdf(d.μ, d.σ, q))
@@ -170,8 +170,8 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where {T<:Real}
+function fit_mle(::Type{<:LogitNormal}, x::AbstractArray{T}) where {T <: Real}
     lx = logit.(x)
     μ, σ = mean_and_std(lx)
-    LogitNormal(μ, σ)
+    return LogitNormal(μ, σ)
 end

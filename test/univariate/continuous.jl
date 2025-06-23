@@ -9,15 +9,15 @@ n_tsamples = 100
 
 # additional distributions that have no direct counterparts in R references
 @testset "Testing $(distr)" for distr in [
-    Biweight(),
-    Biweight(1, 3),
-    Epanechnikov(),
-    Epanechnikov(1, 3),
-    Triweight(),
-    Triweight(2),
-    Triweight(1, 3),
-    Triweight(1),
-]
+        Biweight(),
+        Biweight(1, 3),
+        Epanechnikov(),
+        Epanechnikov(1, 3),
+        Triweight(),
+        Triweight(2),
+        Triweight(1, 3),
+        Triweight(1),
+    ]
 
     test_distr(distr, n_tsamples; testquan = false)
 end
@@ -25,7 +25,7 @@ end
 # Test for non-Float64 input
 using ForwardDiff
 @test string(logpdf(Normal(0, 1), big(1))) ==
-      "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
+    "-1.418938533204672741780329736405617639861397473637783412817151540482765695927251"
 @test derivative(t -> logpdf(Normal(1.0, 0.15), t), 2.5) ≈ -66.66666666666667
 @test derivative(t -> pdf(Normal(t, 1.0), 0.0), 0.0) == 0.0
 
@@ -75,11 +75,11 @@ end
 @testset "VonMises with large kappa" begin
     d = VonMises(1.1, 1000)
     @test var(d) ≈ 0.0005001251251957198
-    @test entropy(d) ≈ -2.034688918525470
-    @test cf(d, 2.5) ≈ -0.921417 + 0.38047im atol = 1e-6
+    @test entropy(d) ≈ -2.03468891852547
+    @test cf(d, 2.5) ≈ -0.921417 + 0.38047im atol = 1.0e-6
     @test pdf(d, 0.5) ≈ 1.758235814051e-75
     @test logpdf(d, 0.5) ≈ -172.1295710466005
-    @test cdf(d, 1.0) ≈ 0.000787319 atol = 1e-9
+    @test cdf(d, 1.0) ≈ 0.000787319 atol = 1.0e-9
 end
 
 @testset "NormalInverseGaussian random repeatable and basic metrics" begin

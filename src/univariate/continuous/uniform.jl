@@ -23,13 +23,13 @@ External links
 * [Uniform distribution (continuous) on Wikipedia](http://en.wikipedia.org/wiki/Uniform_distribution_(continuous))
 
 """
-struct Uniform{T<:Real} <: ContinuousUnivariateDistribution
+struct Uniform{T <: Real} <: ContinuousUnivariateDistribution
     a::T
     b::T
-    Uniform{T}(a::Real, b::Real) where {T<:Real} = new{T}(a, b)
+    Uniform{T}(a::Real, b::Real) where {T <: Real} = new{T}(a, b)
 end
 
-function Uniform(a::T, b::T; check_args::Bool = true) where {T<:Real}
+function Uniform(a::T, b::T; check_args::Bool = true) where {T <: Real}
     @check_args Uniform (a < b)
     return Uniform{T}(a, b)
 end
@@ -43,14 +43,14 @@ Uniform() = Uniform{Float64}(0.0, 1.0)
 @distr_support Uniform d.a d.b
 
 #### Conversions
-convert(::Type{Uniform{T}}, a::Real, b::Real) where {T<:Real} = Uniform(T(a), T(b))
-Base.convert(::Type{Uniform{T}}, d::Uniform) where {T<:Real} = Uniform{T}(T(d.a), T(d.b))
-Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T<:Real} = d
+convert(::Type{Uniform{T}}, a::Real, b::Real) where {T <: Real} = Uniform(T(a), T(b))
+Base.convert(::Type{Uniform{T}}, d::Uniform) where {T <: Real} = Uniform{T}(T(d.a), T(d.b))
+Base.convert(::Type{Uniform{T}}, d::Uniform{T}) where {T <: Real} = d
 
 #### Parameters
 
 params(d::Uniform) = (d.a, d.b)
-partype(::Uniform{T}) where {T<:Real} = T
+partype(::Uniform{T}) where {T <: Real} = T
 
 location(d::Uniform) = d.a
 scale(d::Uniform) = d.b - d.a
@@ -65,8 +65,8 @@ modes(d::Uniform) = Float64[]
 
 var(d::Uniform) = (w = d.b - d.a; w^2 / 12)
 
-skewness(d::Uniform{T}) where {T<:Real} = zero(T)
-kurtosis(d::Uniform{T}) where {T<:Real} = -6 / 5 * one(T)
+skewness(d::Uniform{T}) where {T <: Real} = zero(T)
+kurtosis(d::Uniform{T}) where {T <: Real} = -6 / 5 * one(T)
 
 entropy(d::Uniform) = log(d.b - d.a)
 
@@ -105,7 +105,7 @@ function mgf(d::Uniform, t::Real)
     u = (b - a) * t / 2
     u == zero(u) && return one(u)
     v = (a + b) * t / 2
-    exp(v) * (sinh(u) / u)
+    return exp(v) * (sinh(u) / u)
 end
 function cgf_uniform_around_zero_kernel(x)
     # taylor series of (exp(x) - x - 1) / x
@@ -114,14 +114,14 @@ function cgf_uniform_around_zero_kernel(x)
     a1 = inv(T(6))
     a2 = inv(T(24))
     a3 = inv(T(120))
-    x * @evalpoly(x, a0, a1, a2, a3)
+    return x * @evalpoly(x, a0, a1, a2, a3)
 end
 
 function cgf(d::Uniform, t)
     # log((exp(t*b) - exp(t*a))/ (t*(b-a)))
     a, b = params(d)
     x = t * (b - a)
-    if abs(x) <= sqrt(eps(float(one(x))))
+    return if abs(x) <= sqrt(eps(float(one(x))))
         cgf_around_zero(d, t)
     else
         cgf_away_from_zero(d, t)
@@ -130,12 +130,12 @@ end
 function cgf_around_zero(d::Uniform, t)
     a, b = params(d)
     x = t * (b - a)
-    t * a + log1p(cgf_uniform_around_zero_kernel(x))
+    return t * a + log1p(cgf_uniform_around_zero_kernel(x))
 end
 function cgf_away_from_zero(d::Uniform, t)
     a, b = params(d)
     x = t * (b - a)
-    logsubexp(t * b, t * a) - log(abs(x))
+    return logsubexp(t * b, t * a) - log(abs(x))
 end
 
 function cf(d::Uniform, t::Real)
@@ -143,7 +143,7 @@ function cf(d::Uniform, t::Real)
     u = (b - a) * t / 2
     u == zero(u) && return complex(one(u))
     v = (a + b) * t / 2
-    cis(v) * (sin(u) / u)
+    return cis(v) * (sin(u) / u)
 end
 
 #### Affine transformations
@@ -161,7 +161,7 @@ _rand!(rng::AbstractRNG, d::Uniform, A::AbstractArray{<:Real}) =
 
 #### Fitting
 
-function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T<:Uniform}
+function fit_mle(::Type{T}, x::AbstractArray{<:Real}) where {T <: Uniform}
     if isempty(x)
         throw(ArgumentError("x cannot be empty."))
     end

@@ -58,7 +58,7 @@ function convolve(d1::DiscreteNonParametric, d2::DiscreteNonParametric)
         idx = searchsortedfirst(support_conv, s1 + s2)
         p_conv[idx] += p1 * p2
     end
-    DiscreteNonParametric(support_conv, p_conv, check_args = false)
+    return DiscreteNonParametric(support_conv, p_conv, check_args = false)
 end
 
 # continuous univariate
@@ -83,7 +83,7 @@ function convolve(d1::MvNormal, d2::MvNormal)
 end
 
 function _check_convolution_args(p1, p2)
-    p1 ≈ p2 || throw(
+    return p1 ≈ p2 || throw(
         ArgumentError(
             "$(p1) !≈ $(p2): distribution parameters must be approximately equal",
         ),
@@ -91,5 +91,5 @@ function _check_convolution_args(p1, p2)
 end
 
 function _check_convolution_shape(d1, d2)
-    length(d1) == length(d2) || throw(ArgumentError("$d1 and $d2 are not the same size"))
+    return length(d1) == length(d2) || throw(ArgumentError("$d1 and $d2 are not the same size"))
 end

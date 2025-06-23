@@ -25,83 +25,83 @@
 
 abstract type AbstractMvLogNormal <: ContinuousMultivariateDistribution end
 
-function insupport(::Type{D}, x::AbstractVector{T}) where {T<:Real,D<:AbstractMvLogNormal}
-    for i = 1:length(x)
+function insupport(::Type{D}, x::AbstractVector{T}) where {T <: Real, D <: AbstractMvLogNormal}
+    for i in 1:length(x)
         @inbounds 0.0 < x[i] < Inf ? continue : (return false)
     end
-    true
+    return true
 end
-insupport(l::AbstractMvLogNormal, x::AbstractVector{T}) where {T<:Real} =
+insupport(l::AbstractMvLogNormal, x::AbstractVector{T}) where {T <: Real} =
     insupport(typeof(l), x)
-assertinsupport(::Type{D}, m::AbstractVector) where {D<:AbstractMvLogNormal} =
+assertinsupport(::Type{D}, m::AbstractVector) where {D <: AbstractMvLogNormal} =
     @assert insupport(D, m) "Mean of LogNormal distribution should be strictly positive"
 
 ###Internal functions to calculate scale and location for a desired average and covariance
 function _location!(
-    ::Type{D},
-    ::Type{Val{:meancov}},
-    mn::AbstractVector,
-    S::AbstractMatrix,
-    μ::AbstractVector,
-) where {D<:AbstractMvLogNormal}
-    @simd for i = 1:length(mn)
+        ::Type{D},
+        ::Type{Val{:meancov}},
+        mn::AbstractVector,
+        S::AbstractMatrix,
+        μ::AbstractVector,
+    ) where {D <: AbstractMvLogNormal}
+    @simd for i in 1:length(mn)
         @inbounds μ[i] = log(mn[i] / sqrt(1 + S[i, i] / mn[i] / mn[i]))
     end
-    μ
+    return μ
 end
 
 function _scale!(
-    ::Type{D},
-    ::Type{Val{:meancov}},
-    mn::AbstractVector,
-    S::AbstractMatrix,
-    Σ::AbstractMatrix,
-) where {D<:AbstractMvLogNormal}
-    for j = 1:length(mn)
-        @simd for i = j:length(mn)
+        ::Type{D},
+        ::Type{Val{:meancov}},
+        mn::AbstractVector,
+        S::AbstractMatrix,
+        Σ::AbstractMatrix,
+    ) where {D <: AbstractMvLogNormal}
+    for j in 1:length(mn)
+        @simd for i in j:length(mn)
             @inbounds Σ[i, j] = Σ[j, i] = log(1 + S[j, i] / mn[i] / mn[j])
         end
     end
-    Σ
+    return Σ
 end
 
 function _location!(
-    ::Type{D},
-    ::Type{Val{:mean}},
-    mn::AbstractVector,
-    S::AbstractMatrix,
-    μ::AbstractVector,
-) where {D<:AbstractMvLogNormal}
-    @simd for i = 1:length(mn)
+        ::Type{D},
+        ::Type{Val{:mean}},
+        mn::AbstractVector,
+        S::AbstractMatrix,
+        μ::AbstractVector,
+    ) where {D <: AbstractMvLogNormal}
+    @simd for i in 1:length(mn)
         @inbounds μ[i] = log(mn[i]) - S[i, i] / 2
     end
-    μ
+    return μ
 end
 
 function _location!(
-    ::Type{D},
-    ::Type{Val{:median}},
-    md::AbstractVector,
-    S::AbstractMatrix,
-    μ::AbstractVector,
-) where {D<:AbstractMvLogNormal}
-    @simd for i = 1:length(md)
+        ::Type{D},
+        ::Type{Val{:median}},
+        md::AbstractVector,
+        S::AbstractMatrix,
+        μ::AbstractVector,
+    ) where {D <: AbstractMvLogNormal}
+    @simd for i in 1:length(md)
         @inbounds μ[i] = log(md[i])
     end
-    μ
+    return μ
 end
 
 function _location!(
-    ::Type{D},
-    ::Type{Val{:mode}},
-    mo::AbstractVector,
-    S::AbstractMatrix,
-    μ::AbstractVector,
-) where {D<:AbstractMvLogNormal}
-    @simd for i = 1:length(mo)
+        ::Type{D},
+        ::Type{Val{:mode}},
+        mo::AbstractVector,
+        S::AbstractMatrix,
+        μ::AbstractVector,
+    ) where {D <: AbstractMvLogNormal}
+    @simd for i in 1:length(mo)
         @inbounds μ[i] = log(mo[i]) + S[i, i]
     end
-    μ
+    return μ
 end
 
 ###Functions to calculate location and scale for a distribution with desired :mean, :median or :mode and covariance
@@ -111,15 +111,15 @@ end
 Calculate the location vector (as above) and store the result in ``μ``
 """
 function location!(
-    ::Type{D},
-    s::Symbol,
-    m::AbstractVector,
-    S::AbstractMatrix,
-    μ::AbstractVector,
-) where {D<:AbstractMvLogNormal}
+        ::Type{D},
+        s::Symbol,
+        m::AbstractVector,
+        S::AbstractMatrix,
+        μ::AbstractVector,
+    ) where {D <: AbstractMvLogNormal}
     @assert size(S) == (length(m), length(m)) && length(m) == length(μ)
     assertinsupport(D, m)
-    _location!(D, Val{s}, m, S, μ)
+    return _location!(D, Val{s}, m, S, μ)
 end
 
 """
@@ -137,14 +137,14 @@ It is not possible to analytically calculate the location vector from e.g., medi
 or from mode + covariance.
 """
 function location(
-    ::Type{D},
-    s::Symbol,
-    m::AbstractVector,
-    S::AbstractMatrix,
-) where {D<:AbstractMvLogNormal}
+        ::Type{D},
+        s::Symbol,
+        m::AbstractVector,
+        S::AbstractMatrix,
+    ) where {D <: AbstractMvLogNormal}
     @assert size(S) == (length(m), length(m))
     assertinsupport(D, m)
-    _location!(D, Val{s}, m, S, similar(m))
+    return _location!(D, Val{s}, m, S, similar(m))
 end
 
 """
@@ -153,15 +153,15 @@ end
 Calculate the scale parameter, as defined for the location parameter above and store the result in `Σ`.
 """
 function scale!(
-    ::Type{D},
-    s::Symbol,
-    m::AbstractVector,
-    S::AbstractMatrix,
-    Σ::AbstractMatrix,
-) where {D<:AbstractMvLogNormal}
+        ::Type{D},
+        s::Symbol,
+        m::AbstractVector,
+        S::AbstractMatrix,
+        Σ::AbstractMatrix,
+    ) where {D <: AbstractMvLogNormal}
     @assert size(S) == size(Σ) == (length(m), length(m))
     assertinsupport(D, m)
-    _scale!(D, Val{s}, m, S, Σ)
+    return _scale!(D, Val{s}, m, S, Σ)
 end
 
 """
@@ -170,14 +170,14 @@ end
 Calculate the scale parameter, as defined for the location parameter above.
 """
 function scale(
-    ::Type{D},
-    s::Symbol,
-    m::AbstractVector,
-    S::AbstractMatrix,
-) where {D<:AbstractMvLogNormal}
+        ::Type{D},
+        s::Symbol,
+        m::AbstractVector,
+        S::AbstractMatrix,
+    ) where {D <: AbstractMvLogNormal}
     @assert size(S) == (length(m), length(m))
     assertinsupport(D, m)
-    _scale!(D, Val{s}, m, S, similar(S))
+    return _scale!(D, Val{s}, m, S, similar(S))
 end
 
 """
@@ -191,7 +191,7 @@ params!(
     S::AbstractMatrix,
     μ::AbstractVector,
     Σ::AbstractMatrix,
-) where {D<:AbstractMvLogNormal} =
+) where {D <: AbstractMvLogNormal} =
     location!(D, :meancov, m, S, μ), scale!(D, :meancov, m, S, Σ)
 
 """
@@ -199,7 +199,7 @@ params!(
 
 Return (scale,location) for a given mean and covariance
 """
-params(::Type{D}, m::AbstractVector, S::AbstractMatrix) where {D<:AbstractMvLogNormal} =
+params(::Type{D}, m::AbstractVector, S::AbstractMatrix) where {D <: AbstractMvLogNormal} =
     params!(D, m, S, similar(m), similar(S))
 
 #########################################################
@@ -223,8 +223,8 @@ Mean vector ``\\boldsymbol{\\mu}`` and covariance matrix ``\\boldsymbol{\\Sigma}
 underlying normal distribution are known as the *location* and *scale*
 parameters of the corresponding lognormal distribution.
 """
-struct MvLogNormal{T<:Real,Cov<:AbstractPDMat,Mean<:AbstractVector} <: AbstractMvLogNormal
-    normal::MvNormal{T,Cov,Mean}
+struct MvLogNormal{T <: Real, Cov <: AbstractPDMat, Mean <: AbstractVector} <: AbstractMvLogNormal
+    normal::MvNormal{T, Cov, Mean}
 end
 
 # Constructors mirror the ones for MvNormmal
@@ -243,18 +243,18 @@ MvLogNormal(d::Int, s::Real) = MvLogNormal(MvNormal(d, s))
 Base.eltype(::Type{<:MvLogNormal{T}}) where {T} = T
 
 ### Conversion
-function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where {T<:Real}
-    MvLogNormal(convert(MvNormal{T}, d.normal))
+function convert(::Type{MvLogNormal{T}}, d::MvLogNormal) where {T <: Real}
+    return MvLogNormal(convert(MvNormal{T}, d.normal))
 end
-Base.convert(::Type{MvLogNormal{T}}, d::MvLogNormal{T}) where {T<:Real} = d
+Base.convert(::Type{MvLogNormal{T}}, d::MvLogNormal{T}) where {T <: Real} = d
 
-function convert(::Type{MvLogNormal{T}}, pars...) where {T<:Real}
-    MvLogNormal(convert(MvNormal{T}, MvNormal(pars...)))
+function convert(::Type{MvLogNormal{T}}, pars...) where {T <: Real}
+    return MvLogNormal(convert(MvNormal{T}, MvNormal(pars...)))
 end
 
 length(d::MvLogNormal) = length(d.normal)
 params(d::MvLogNormal) = params(d.normal)
-@inline partype(d::MvLogNormal{T}) where {T<:Real} = T
+@inline partype(d::MvLogNormal{T}) where {T <: Real} = T
 
 """
     location(d::MvLogNormal)
@@ -303,9 +303,9 @@ function _rand!(rng::AbstractRNG, d::MvLogNormal, x::AbstractVecOrMat{<:Real})
     return x
 end
 
-_logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} =
+_logpdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T <: Real} =
     insupport(d, x) ? (_logpdf(d.normal, log.(x)) - sum(log.(x))) : -Inf
-_pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T<:Real} =
+_pdf(d::MvLogNormal, x::AbstractVecOrMat{T}) where {T <: Real} =
     insupport(d, x) ? _pdf(d.normal, log.(x)) / prod(x) : 0.0
 
 Base.show(io::IO, d::MvLogNormal) =

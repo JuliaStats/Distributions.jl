@@ -21,13 +21,13 @@ External links
  * [Pareto distribution on Wikipedia](http://en.wikipedia.org/wiki/Pareto_distribution)
 
 """
-struct Pareto{T<:Real} <: ContinuousUnivariateDistribution
+struct Pareto{T <: Real} <: ContinuousUnivariateDistribution
     α::T
     θ::T
     Pareto{T}(α::T, θ::T) where {T} = new{T}(α, θ)
 end
 
-function Pareto(α::T, θ::T; check_args::Bool = true) where {T<:Real}
+function Pareto(α::T, θ::T; check_args::Bool = true) where {T <: Real}
     @check_args Pareto (α, α > zero(α)) (θ, θ > zero(θ))
     return Pareto{T}(α, θ)
 end
@@ -42,9 +42,9 @@ Pareto() = Pareto{Float64}(1.0, 1.0)
 @distr_support Pareto d.θ Inf
 
 #### Conversions
-convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T<:Real} = Pareto(T(α), T(θ))
-Base.convert(::Type{Pareto{T}}, d::Pareto) where {T<:Real} = Pareto{T}(T(d.α), T(d.θ))
-Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T<:Real} = d
+convert(::Type{Pareto{T}}, α::Real, θ::Real) where {T <: Real} = Pareto(T(α), T(θ))
+Base.convert(::Type{Pareto{T}}, d::Pareto) where {T <: Real} = Pareto{T}(T(d.α), T(d.θ))
+Base.convert(::Type{Pareto{T}}, d::Pareto{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -52,31 +52,31 @@ shape(d::Pareto) = d.α
 scale(d::Pareto) = d.θ
 
 params(d::Pareto) = (d.α, d.θ)
-@inline partype(d::Pareto{T}) where {T<:Real} = T
+@inline partype(d::Pareto{T}) where {T <: Real} = T
 
 
 #### Statistics
 
-function mean(d::Pareto{T}) where {T<:Real}
+function mean(d::Pareto{T}) where {T <: Real}
     (α, θ) = params(d)
-    α > 1 ? α * θ / (α - 1) : T(Inf)
+    return α > 1 ? α * θ / (α - 1) : T(Inf)
 end
 median(d::Pareto) = ((α, θ) = params(d); θ * 2^(1 / α))
 mode(d::Pareto) = d.θ
 
-function var(d::Pareto{T}) where {T<:Real}
+function var(d::Pareto{T}) where {T <: Real}
     (α, θ) = params(d)
-    α > 2 ? (θ^2 * α) / ((α - 1)^2 * (α - 2)) : T(Inf)
+    return α > 2 ? (θ^2 * α) / ((α - 1)^2 * (α - 2)) : T(Inf)
 end
 
-function skewness(d::Pareto{T}) where {T<:Real}
+function skewness(d::Pareto{T}) where {T <: Real}
     α = shape(d)
-    α > 3 ? ((2(1 + α)) / (α - 3)) * sqrt((α - 2) / α) : T(NaN)
+    return α > 3 ? ((2(1 + α)) / (α - 3)) * sqrt((α - 2) / α) : T(NaN)
 end
 
-function kurtosis(d::Pareto{T}) where {T<:Real}
+function kurtosis(d::Pareto{T}) where {T <: Real}
     α = shape(d)
-    α > 4 ? (6(α^3 + α^2 - 6α - 2)) / (α * (α - 3) * (α - 4)) : T(NaN)
+    return α > 4 ? (6(α^3 + α^2 - 6α - 2)) / (α * (α - 3) * (α - 4)) : T(NaN)
 end
 
 entropy(d::Pareto) = ((α, θ) = params(d); log(θ / α) + 1 / α + 1)
@@ -84,14 +84,14 @@ entropy(d::Pareto) = ((α, θ) = params(d); log(θ / α) + 1 / α + 1)
 
 #### Evaluation
 
-function pdf(d::Pareto{T}, x::Real) where {T<:Real}
+function pdf(d::Pareto{T}, x::Real) where {T <: Real}
     (α, θ) = params(d)
-    x >= θ ? α * (θ / x)^α * (1 / x) : zero(T)
+    return x >= θ ? α * (θ / x)^α * (1 / x) : zero(T)
 end
 
-function logpdf(d::Pareto{T}, x::Real) where {T<:Real}
+function logpdf(d::Pareto{T}, x::Real) where {T <: Real}
     (α, θ) = params(d)
-    x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
+    return x >= θ ? log(α) + α * log(θ) - (α + 1) * log(x) : -T(Inf)
 end
 
 function ccdf(d::Pareto, x::Real)
@@ -123,7 +123,7 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where {T<:Real}
+function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where {T <: Real}
     # Based on
     # https://en.wikipedia.org/wiki/Pareto_distribution#Parameter_estimation
 
@@ -132,7 +132,7 @@ function fit_mle(::Type{<:Pareto}, x::AbstractArray{T}) where {T<:Real}
     n = length(x)
     lθ = log(θ)
     temp1 = zero(T)
-    for i = 1:n
+    for i in 1:n
         temp1 += log(x[i]) - lθ
     end
     α = n / temp1

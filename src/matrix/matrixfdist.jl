@@ -30,7 +30,7 @@ is given by
 then the marginal distribution of ``\\boldsymbol{\\Sigma}`` is
 ``\\textrm{MF}_{p}(n_1/2,n_2/2,\\mathbf{B})``.
 """
-struct MatrixFDist{T<:Real,TW<:Wishart} <: ContinuousMatrixDistribution
+struct MatrixFDist{T <: Real, TW <: Wishart} <: ContinuousMatrixDistribution
     W::TW
     n2::T
     logc0::T
@@ -50,10 +50,10 @@ function MatrixFDist(n1::Real, n2::Real, B::AbstractPDMat)
     T = Base.promote_eltype(n1, n2, logc0, B)
     prom_B = convert(AbstractArray{T}, B)
     W = Wishart(T(n1), prom_B)
-    MatrixFDist{T,typeof(W)}(W, T(n2), T(logc0))
+    return MatrixFDist{T, typeof(W)}(W, T(n2), T(logc0))
 end
 
-MatrixFDist(n1::Real, n2::Real, B::Union{AbstractMatrix,LinearAlgebra.Cholesky}) =
+MatrixFDist(n1::Real, n2::Real, B::Union{AbstractMatrix, LinearAlgebra.Cholesky}) =
     MatrixFDist(n1, n2, PDMat(B))
 
 #  -----------------------------------------------------------------------------
@@ -67,15 +67,15 @@ show(io::IO, d::MatrixFDist) =
 #  Conversion
 #  -----------------------------------------------------------------------------
 
-function convert(::Type{MatrixFDist{T}}, d::MatrixFDist) where {T<:Real}
+function convert(::Type{MatrixFDist{T}}, d::MatrixFDist) where {T <: Real}
     W = convert(Wishart{T}, d.W)
-    MatrixFDist{T,typeof(W)}(W, T(d.n2), T(d.logc0))
+    return MatrixFDist{T, typeof(W)}(W, T(d.n2), T(d.logc0))
 end
-Base.convert(::Type{MatrixFDist{T}}, d::MatrixFDist{T}) where {T<:Real} = d
+Base.convert(::Type{MatrixFDist{T}}, d::MatrixFDist{T}) where {T <: Real} = d
 
-function convert(::Type{MatrixFDist{T}}, W::Wishart, n2, logc0) where {T<:Real}
+function convert(::Type{MatrixFDist{T}}, W::Wishart, n2, logc0) where {T <: Real}
     WW = convert(Wishart{T}, W)
-    MatrixFDist{T,typeof(WW)}(WW, T(n2), T(logc0))
+    return MatrixFDist{T, typeof(WW)}(WW, T(n2), T(logc0))
 end
 
 #  -----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ function mean(d::MatrixFDist)
     return (n1 / (n2 - p - 1)) * Matrix(B)
 end
 
-@inline partype(d::MatrixFDist{T}) where {T<:Real} = T
+@inline partype(d::MatrixFDist{T}) where {T <: Real} = T
 
 #  Konno (1988 JJSS) Corollary 2.4.i
 function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
@@ -107,10 +107,10 @@ function cov(d::MatrixFDist, i::Integer, j::Integer, k::Integer, l::Integer)
     n2 > p + 3 || throw(ArgumentError("cov only defined for df2 > dim + 3"))
     n = n1 + n2
     B = Matrix(PDB)
-    n1 *
-    (n - p - 1) *
-    inv((n2 - p) * (n2 - p - 1) * (n2 - p - 3)) *
-    (2inv(n2 - p - 1) * B[i, j] * B[k, l] + B[j, l] * B[i, k] + B[i, l] * B[k, j])
+    return n1 *
+        (n - p - 1) *
+        inv((n2 - p) * (n2 - p - 1) * (n2 - p - 3)) *
+        (2inv(n2 - p - 1) * B[i, j] * B[k, l] + B[j, l] * B[i, k] + B[i, l] * B[k, j])
 end
 
 function var(d::MatrixFDist, i::Integer, j::Integer)
@@ -119,10 +119,10 @@ function var(d::MatrixFDist, i::Integer, j::Integer)
     n2 > p + 3 || throw(ArgumentError("var only defined for df2 > dim + 3"))
     n = n1 + n2
     B = Matrix(PDB)
-    n1 *
-    (n - p - 1) *
-    inv((n2 - p) * (n2 - p - 1) * (n2 - p - 3)) *
-    ((2inv(n2 - p - 1) + 1) * B[i, j]^2 + B[j, j] * B[i, i])
+    return n1 *
+        (n - p - 1) *
+        inv((n2 - p) * (n2 - p - 1) * (n2 - p - 3)) *
+        ((2inv(n2 - p - 1) + 1) * B[i, j]^2 + B[j, j] * B[i, i])
 end
 
 #  -----------------------------------------------------------------------------
@@ -140,7 +140,7 @@ end
 function logkernel(d::MatrixFDist, Σ::AbstractMatrix)
     p = size(d, 1)
     n1, n2, B = params(d)
-    ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
+    return ((n1 - p - 1) / 2) * logdet(Σ) - ((n1 + n2) / 2) * logdet(pdadd(Σ, B))
 end
 
 #  -----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ end
 
 function _rand!(rng::AbstractRNG, d::MatrixFDist, A::AbstractMatrix)
     Ψ = rand(rng, d.W)
-    A .= rand(rng, InverseWishart(d.n2, Ψ))
+    return A .= rand(rng, InverseWishart(d.n2, Ψ))
 end
 
 #  -----------------------------------------------------------------------------

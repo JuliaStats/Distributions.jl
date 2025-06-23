@@ -2,10 +2,10 @@
 ##### Truncated exponential distribution
 #####
 
-function mean(d::Truncated{<:Exponential,Continuous})
+function mean(d::Truncated{<:Exponential, Continuous})
     θ = d.untruncated.θ
     l, r = extrema(d)           # l is always finite
-    if isfinite(r)
+    return if isfinite(r)
         if abs(l - r) ≤ √eps() * θ
             # linear is a good approximation, just take the midpoint
             middle(l, r)
