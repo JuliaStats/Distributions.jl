@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - master
-    tags: '*'
+    tags: "*"
   workflow_dispatch:
   merge_group:
 
@@ -16,6 +16,21 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs:
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+          show-versioninfo: true
+      - uses: julia-actions/cache@v2
+      - run: |
+          julia --project=.formatting -e '
+            using Pkg
+            Pkg.instantiate()
+            include(".formatting/format_check.jl")'
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
@@ -23,8 +38,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 'min'
-          - '1'
+          - "min"
+          - "1"
           - pre
         os:
           - ubuntu-latest
@@ -57,7 +72,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
-          version: '1'
+          version: "1"
           show-versioninfo: true
       - run: |
           julia --project=docs -e '

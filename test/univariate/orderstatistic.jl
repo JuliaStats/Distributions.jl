@@ -17,11 +17,11 @@ using StatsBase
             @test d.rank == i
         end
         @test_throws ArgumentError OrderStatistic(Normal(), 0, 1)
-        OrderStatistic(Normal(), 0, 1; check_args=false)
+        OrderStatistic(Normal(), 0, 1; check_args = false)
         @test_throws ArgumentError OrderStatistic(Normal(), 10, 11)
-        OrderStatistic(Normal(), 10, 11; check_args=false)
+        OrderStatistic(Normal(), 10, 11; check_args = false)
         @test_throws ArgumentError OrderStatistic(Normal(), 10, 0)
-        OrderStatistic(Normal(), 10, 0; check_args=false)
+        OrderStatistic(Normal(), 10, 0; check_args = false)
     end
 
     @testset "params" begin
@@ -76,15 +76,15 @@ using StatsBase
             # test against the exact formula computed using BigFloats
             @testset for T in (Float32, Float64)
                 @testset for dist in
-                             [Uniform(T(-2), T(1)), Normal(T(3), T(2)), Exponential(T(10))],
-                    n in [1, 10, 100],
-                    i in 1:n
+                        [Uniform(T(-2), T(1)), Normal(T(3), T(2)), Exponential(T(10))],
+                        n in [1, 10, 100],
+                        i in 1:n
 
                     d = OrderStatistic(dist, n, i)
                     c = factorial(big(n)) / factorial(big(i - 1)) / factorial(big(n - i))
                     # since density is concentrated around the i/n quantile, sample a point
                     # nearby it
-                    x = quantile(dist, clamp(i / n + (rand() - 1//2) / 10, 0, 1))
+                    x = quantile(dist, clamp(i / n + (rand() - 1 // 2) / 10, 0, 1))
                     p = cdf(dist, big(x))
                     pdf_exp = c * p^(i - 1) * (1 - p)^(n - i) * pdf(dist, big(x))
                     @test @inferred(T, pdf(d, x)) ≈ T(pdf_exp)
@@ -95,9 +95,9 @@ using StatsBase
         @testset "discrete" begin
             # test check that the pdf is the difference of the CDF at adjacent points
             @testset for dist in
-                         [DiscreteUniform(10, 30), Poisson(100.0), Binomial(20, 0.3)],
-                n in [1, 10, 100],
-                i in 1:n
+                    [DiscreteUniform(10, 30), Poisson(100.0), Binomial(20, 0.3)],
+                    n in [1, 10, 100],
+                    i in 1:n
 
                 d = OrderStatistic(dist, n, i)
                 xs = quantile(dist, 0.01):quantile(dist, 0.99)
@@ -113,14 +113,14 @@ using StatsBase
 
     @testset "distribution normalizes to 1" begin
         @testset for dist in [
-                Uniform(-2, 1),
-                Normal(2, 3),
-                Exponential(5),
-                DiscreteUniform(10, 40),
-                Poisson(100),
-            ],
-            n in [1, 10, 20],
-            i in 1:n
+                    Uniform(-2, 1),
+                    Normal(2, 3),
+                    Exponential(5),
+                    DiscreteUniform(10, 40),
+                    Poisson(100),
+                ],
+                n in [1, 10, 20],
+                i in 1:n
 
             d = OrderStatistic(dist, n, i)
             Distributions.expectation(one, d) ≈ 1
@@ -142,7 +142,7 @@ using StatsBase
                 d = OrderStatistic(dist, n, i)
                 # since density is concentrated around the i/n quantile, sample a point
                 # nearby it
-                x = quantile(dist, clamp(i / n + (rand() - 1//2) / 10, 1e-4, 1 - 1e-4))
+                x = quantile(dist, clamp(i / n + (rand() - 1 // 2) / 10, 1.0e-4, 1 - 1.0e-4))
                 p = cdf(bigdist, big(x))
                 cdf_exp = sum(i:n) do j
                     c = binomial(big(n), big(j))
@@ -169,7 +169,7 @@ using StatsBase
                 xq = @inferred(T, quantile(d, q))
                 xqc = @inferred(T, cquantile(d, 1 - q))
                 @test xq ≈ xqc
-                @test isapprox(xq, T(x); atol=1e-4) ||
+                @test isapprox(xq, T(x); atol = 1.0e-4) ||
                     (dist isa DiscreteDistribution && xq < x)
             end
         end
@@ -177,7 +177,7 @@ using StatsBase
 
     @testset "rand" begin
         @testset for T in [Float32, Float64],
-            dist in [Uniform(T(-2), T(1)), Normal(T(1), T(2))]
+                dist in [Uniform(T(-2), T(1)), Normal(T(1), T(2))]
 
             d = OrderStatistic(dist, 10, 5)
             rng = Random.default_rng()

@@ -1,7 +1,7 @@
 # Noncentral hypergeometric distribution
 # TODO: this distribution needs clean-up and testing
 
-abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistribution end
+abstract type NoncentralHypergeometric{T <: Real} <: DiscreteUnivariateDistribution end
 
 ### handling support
 
@@ -9,12 +9,12 @@ abstract type NoncentralHypergeometric{T<:Real} <: DiscreteUnivariateDistributio
 
 # Functions
 
-function quantile(d::NoncentralHypergeometric{T}, q::Real) where T<:Real
-    if !(zero(q) <= q <= one(q))
+function quantile(d::NoncentralHypergeometric{T}, q::Real) where {T <: Real}
+    return if !(zero(q) <= q <= one(q))
         T(NaN)
     else
         range = support(d)
-        if q > 1/2
+        if q > 1 / 2
             q = 1 - q
             range = reverse(range)
         end
@@ -29,17 +29,23 @@ function quantile(d::NoncentralHypergeometric{T}, q::Real) where T<:Real
 end
 
 params(d::NoncentralHypergeometric) = (d.ns, d.nf, d.n, d.ω)
-@inline partype(d::NoncentralHypergeometric{T}) where {T<:Real} = T
+@inline partype(d::NoncentralHypergeometric{T}) where {T <: Real} = T
 
 ## Fisher's noncentral hypergeometric distribution
 
-struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
+struct FisherNoncentralHypergeometric{T <: Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size
     ω::T # odds ratio
 
-    function FisherNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
+    function FisherNoncentralHypergeometric{T}(
+            ns::Real,
+            nf::Real,
+            n::Real,
+            ω::T;
+            check_args::Bool = true,
+        ) where {T}
         @check_args(
             FisherNoncentralHypergeometric,
             (ns, ns >= zero(ns)),
@@ -47,28 +53,50 @@ struct FisherNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
             zero(n) < n < ns + nf,
             (ω, ω > zero(ω)),
         )
-        new{T}(ns, nf, n, ω)
+        return new{T}(ns, nf, n, ω)
     end
 end
 
-FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Real; check_args::Bool=true) =
-    FisherNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args=check_args)
+FisherNoncentralHypergeometric(
+    ns::Integer,
+    nf::Integer,
+    n::Integer,
+    ω::Real;
+    check_args::Bool = true,
+) = FisherNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args = check_args)
 
-FisherNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer; check_args::Bool=true) =
-    FisherNoncentralHypergeometric(ns, nf, n, float(ω); check_args=check_args)
+FisherNoncentralHypergeometric(
+    ns::Integer,
+    nf::Integer,
+    n::Integer,
+    ω::Integer;
+    check_args::Bool = true,
+) = FisherNoncentralHypergeometric(ns, nf, n, float(ω); check_args = check_args)
 
 # Conversions
-convert(::Type{FisherNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = FisherNoncentralHypergeometric(ns, nf, n, T(ω))
-function Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric) where {T<:Real}
-    FisherNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+convert(
+    ::Type{FisherNoncentralHypergeometric{T}},
+    ns::Real,
+    nf::Real,
+    n::Real,
+    ω::Real,
+) where {T <: Real} = FisherNoncentralHypergeometric(ns, nf, n, T(ω))
+function Base.convert(
+        ::Type{FisherNoncentralHypergeometric{T}},
+        d::FisherNoncentralHypergeometric,
+    ) where {T <: Real}
+    return FisherNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
 end
-Base.convert(::Type{FisherNoncentralHypergeometric{T}}, d::FisherNoncentralHypergeometric{T}) where {T<:Real} = d
+Base.convert(
+    ::Type{FisherNoncentralHypergeometric{T}},
+    d::FisherNoncentralHypergeometric{T},
+) where {T <: Real} = d
 
 function _mode(d::FisherNoncentralHypergeometric)
     A = d.ω - 1
-    B = d.n - d.nf - (d.ns + d.n + 2)*d.ω
-    C = (d.ns + 1)*(d.n + 1)*d.ω
-    return -2C / (B - sqrt(B^2 - 4A*C))
+    B = d.n - d.nf - (d.ns + d.n + 2) * d.ω
+    C = (d.ns + 1) * (d.n + 1) * d.ω
+    return -2C / (B - sqrt(B^2 - 4A * C))
 end
 
 mode(d::FisherNoncentralHypergeometric) = floor(Int, _mode(d))
@@ -94,7 +122,7 @@ function pdf(d::FisherNoncentralHypergeometric, k::Integer)
     fᵢ = one(ω)
     fₖ = one(ω)
     for i in (η + 1):u
-        rᵢ = (d.ns - i + 1)*ω/(i*(d.nf - d.n  + i))*(d.n - i + 1)
+        rᵢ = (d.ns - i + 1) * ω / (i * (d.nf - d.n + i)) * (d.n - i + 1)
         fᵢ *= rᵢ
 
         # break if terms no longer contribute to s
@@ -110,7 +138,7 @@ function pdf(d::FisherNoncentralHypergeometric, k::Integer)
     end
     fᵢ = one(ω)
     for i in (η - 1):-1:l
-        rᵢ₊ = (d.ns - i)*ω/((i + 1)*(d.nf - d.n  + i + 1))*(d.n - i)
+        rᵢ₊ = (d.ns - i) * ω / ((i + 1) * (d.nf - d.n + i + 1)) * (d.n - i)
         fᵢ /= rᵢ₊
 
         # break if terms no longer contribute to s
@@ -125,7 +153,7 @@ function pdf(d::FisherNoncentralHypergeometric, k::Integer)
         end
     end
 
-    return fₖ/s
+    return fₖ / s
 end
 
 logpdf(d::FisherNoncentralHypergeometric, k::Real) = log(pdf(d, k))
@@ -144,7 +172,7 @@ function cdf(d::FisherNoncentralHypergeometric, k::Integer)
     fᵢ = one(ω)
     Fₖ = k >= η ? one(ω) : zero(ω)
     for i in (η + 1):u
-        rᵢ = (d.ns - i + 1)*ω/(i*(d.nf - d.n  + i))*(d.n - i + 1)
+        rᵢ = (d.ns - i + 1) * ω / (i * (d.nf - d.n + i)) * (d.n - i + 1)
         fᵢ *= rᵢ
 
         # break if terms no longer contribute to s
@@ -159,7 +187,7 @@ function cdf(d::FisherNoncentralHypergeometric, k::Integer)
     end
     fᵢ = one(ω)
     for i in (η - 1):-1:l
-        rᵢ₊ = (d.ns - i)*ω/((i + 1)*(d.nf - d.n + i + 1))*(d.n - i)
+        rᵢ₊ = (d.ns - i) * ω / ((i + 1) * (d.nf - d.n + i + 1)) * (d.n - i)
         fᵢ /= rᵢ₊
 
         # break if terms no longer contribute to s
@@ -173,7 +201,7 @@ function cdf(d::FisherNoncentralHypergeometric, k::Integer)
         end
     end
 
-    return Fₖ/s
+    return Fₖ / s
 end
 
 function _expectation(f, d::FisherNoncentralHypergeometric)
@@ -182,10 +210,10 @@ function _expectation(f, d::FisherNoncentralHypergeometric)
     u = min(d.ns, d.n)
     η = mode(d)
     s = one(ω)
-    m = f(η)*s
+    m = f(η) * s
     fᵢ = one(ω)
     for i in (η + 1):u
-        rᵢ = (d.ns - i + 1)*ω/(i*(d.nf - d.n  + i))*(d.n - i + 1)
+        rᵢ = (d.ns - i + 1) * ω / (i * (d.nf - d.n + i)) * (d.n - i + 1)
         fᵢ *= rᵢ
 
         # break if terms no longer contribute to s
@@ -195,11 +223,11 @@ function _expectation(f, d::FisherNoncentralHypergeometric)
         end
         s = sfᵢ
 
-        m += f(i)*fᵢ
+        m += f(i) * fᵢ
     end
     fᵢ = one(ω)
     for i in (η - 1):-1:l
-        rᵢ₊ = (d.ns - i)*ω/((i + 1)*(d.nf - d.n  + i + 1))*(d.n - i)
+        rᵢ₊ = (d.ns - i) * ω / ((i + 1) * (d.nf - d.n + i + 1)) * (d.n - i)
         fᵢ /= rᵢ₊
 
         # break if terms no longer contribute to s
@@ -209,10 +237,10 @@ function _expectation(f, d::FisherNoncentralHypergeometric)
         end
         s = sfᵢ
 
-        m += f(i)*fᵢ
+        m += f(i) * fᵢ
     end
 
-    return m/s
+    return m / s
 end
 
 mean(d::FisherNoncentralHypergeometric) = _expectation(identity, d)
@@ -224,13 +252,19 @@ end
 
 ## Wallenius' noncentral hypergeometric distribution
 
-struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
+struct WalleniusNoncentralHypergeometric{T <: Real} <: NoncentralHypergeometric{T}
     ns::Int    # number of successes in population
     nf::Int    # number of failures in population
     n::Int     # sample size
     ω::T # odds ratio
 
-    function WalleniusNoncentralHypergeometric{T}(ns::Real, nf::Real, n::Real, ω::T; check_args::Bool=true) where T
+    function WalleniusNoncentralHypergeometric{T}(
+            ns::Real,
+            nf::Real,
+            n::Real,
+            ω::T;
+            check_args::Bool = true,
+        ) where {T}
         @check_args(
             WalleniusNoncentralHypergeometric,
             (ns, ns >= zero(ns)),
@@ -238,29 +272,51 @@ struct WalleniusNoncentralHypergeometric{T<:Real} <: NoncentralHypergeometric{T}
             zero(n) < n < ns + nf,
             (ω, ω > zero(ω)),
         )
-        new{T}(ns, nf, n, ω)
+        return new{T}(ns, nf, n, ω)
     end
 end
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Real; check_args::Bool=true) =
-    WalleniusNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args=check_args)
+WalleniusNoncentralHypergeometric(
+    ns::Integer,
+    nf::Integer,
+    n::Integer,
+    ω::Real;
+    check_args::Bool = true,
+) = WalleniusNoncentralHypergeometric{typeof(ω)}(ns, nf, n, ω; check_args = check_args)
 
-WalleniusNoncentralHypergeometric(ns::Integer, nf::Integer, n::Integer, ω::Integer; check_args::Bool=true) =
-    WalleniusNoncentralHypergeometric(ns, nf, n, float(ω); check_args=check_args)
+WalleniusNoncentralHypergeometric(
+    ns::Integer,
+    nf::Integer,
+    n::Integer,
+    ω::Integer;
+    check_args::Bool = true,
+) = WalleniusNoncentralHypergeometric(ns, nf, n, float(ω); check_args = check_args)
 
 # Conversions
-convert(::Type{WalleniusNoncentralHypergeometric{T}}, ns::Real, nf::Real, n::Real, ω::Real) where {T<:Real} = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
-function Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric) where {T<:Real}
-    WalleniusNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
+convert(
+    ::Type{WalleniusNoncentralHypergeometric{T}},
+    ns::Real,
+    nf::Real,
+    n::Real,
+    ω::Real,
+) where {T <: Real} = WalleniusNoncentralHypergeometric(ns, nf, n, T(ω))
+function Base.convert(
+        ::Type{WalleniusNoncentralHypergeometric{T}},
+        d::WalleniusNoncentralHypergeometric,
+    ) where {T <: Real}
+    return WalleniusNoncentralHypergeometric{T}(d.ns, d.nf, d.n, T(d.ω))
 end
-Base.convert(::Type{WalleniusNoncentralHypergeometric{T}}, d::WalleniusNoncentralHypergeometric{T}) where {T<:Real} = d
+Base.convert(
+    ::Type{WalleniusNoncentralHypergeometric{T}},
+    d::WalleniusNoncentralHypergeometric{T},
+) where {T <: Real} = d
 
 # Properties
 function _discretenonparametric(d::WalleniusNoncentralHypergeometric)
     return DiscreteNonParametric(support(d), map(Base.Fix1(pdf, d), support(d)))
 end
 mean(d::WalleniusNoncentralHypergeometric) = mean(_discretenonparametric(d))
-var(d::WalleniusNoncentralHypergeometric)  = var(_discretenonparametric(d))
+var(d::WalleniusNoncentralHypergeometric) = var(_discretenonparametric(d))
 mode(d::WalleniusNoncentralHypergeometric) = mode(_discretenonparametric(d))
 
 entropy(d::WalleniusNoncentralHypergeometric) = 1
@@ -272,8 +328,8 @@ function logpdf(d::WalleniusNoncentralHypergeometric, k::Real)
         D = d.ω * (d.ns - k) + (d.nf - d.n + k)
         f(t) = (1 - t^(d.ω / D))^k * (1 - t^(1 / D))^(d.n - k)
         I, _ = quadgk(f, 0, 1)
-        return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) -
-            log(d.nf + 1) - logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
+        return -log(d.ns + 1) - logbeta(d.ns - k + 1, k + 1) - log(d.nf + 1) -
+            logbeta(d.nf - d.n + k + 1, d.n - k + 1) + log(I)
     else
         return log(zero(k))
     end

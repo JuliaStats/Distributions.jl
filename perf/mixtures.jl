@@ -1,6 +1,16 @@
 using BenchmarkTools: @btime
 import Random
-using Distributions: AbstractMixtureModel, MixtureModel, LogNormal, Normal, pdf, ncomponents, probs, component, components, ContinuousUnivariateDistribution
+using Distributions:
+    AbstractMixtureModel,
+    MixtureModel,
+    LogNormal,
+    Normal,
+    pdf,
+    ncomponents,
+    probs,
+    component,
+    components,
+    ContinuousUnivariateDistribution
 using Test
 
 # v0.22.1
@@ -40,8 +50,8 @@ function improved_no_inbound(d, x)
     p = probs(d)
     return sum(enumerate(p)) do (i, pi)
         if pi > 0
-           c = component(d, i)
-           pdf(c, x) * pi
+            c = component(d, i)
+            pdf(c, x) * pi
         else
             zero(eltype(p))
         end
@@ -70,13 +80,13 @@ end
 function indexed_sum_comp(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    return @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
 function indexed_boolprod(d, x)
     ps = probs(d)
     cs = components(d)
-    @inbounds sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
+    return @inbounds sum((ps[i] > 0) * (ps[i] * pdf(cs[i], x)) for i in eachindex(ps))
 end
 
 function indexed_boolprod_noinbound(d, x)
@@ -89,14 +99,10 @@ function sumcomp_cond(d, x)
     ps = probs(d)
     cs = components(d)
     s = zero(eltype(ps))
-    @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
+    return @inbounds sum(ps[i] * pdf(cs[i], x) for i in eachindex(ps) if ps[i] > 0)
 end
 
-distributions = [
-    Normal(-1.0, 0.3),
-    Normal(0.0, 0.5),
-    Normal(3.0, 1.0),
-]
+distributions = [Normal(-1.0, 0.3), Normal(0.0, 0.5), Normal(3.0, 1.0)]
 
 priors = [0.25, 0.25, 0.5]
 
@@ -110,7 +116,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($distributions, $priors, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_normal, $x)
+    vmaster = @btime current_master($gmm_normal, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_normal, $x)
     @info "improved_no_inbound"
@@ -145,7 +151,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($large_normals, $large_probs, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_large, $x)
+    vmaster = @btime current_master($gmm_large, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_large, $x)
     @info "improved_no_inbound"
@@ -184,7 +190,7 @@ for x in rand(5)
     @info "evaluate_manual_pdf"
     vman = @btime evaluate_manual_pdf($large_het, $large_het_probs, $x)
     @info "current_master"
-    vmaster =  @btime current_master($gmm_het, $x)
+    vmaster = @btime current_master($gmm_het, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_het, $x)
     @info "improved_no_inbound"
@@ -208,12 +214,7 @@ end
 
 @info "Test with one NaN"
 
-distributions = [
-    Normal(-1.0, 0.3),
-    Normal(0.0, 0.5),
-    Normal(3.0, 1.0),
-    Normal(NaN, 1.0),
-]
+distributions = [Normal(-1.0, 0.3), Normal(0.0, 0.5), Normal(3.0, 1.0), Normal(NaN, 1.0)]
 
 priors = [0.25, 0.25, 0.5, 0.0]
 
@@ -223,7 +224,7 @@ Random.seed!(42)
 for x in rand(1)
     @info "sampling $x"
     @info "current_master"
-    vmaster =  @btime current_master($gmm_normal, $x)
+    vmaster = @btime current_master($gmm_normal, $x)
     @info "improved_version"
     v1 = @btime improved_version($gmm_normal, $x)
     @info "improved_no_inbound"

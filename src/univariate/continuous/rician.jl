@@ -27,31 +27,33 @@ External links:
 * [Rician distribution on Wikipedia](https://en.wikipedia.org/wiki/Rice_distribution)
 
 """
-struct Rician{T<:Real} <: ContinuousUnivariateDistribution
+struct Rician{T <: Real} <: ContinuousUnivariateDistribution
     ν::T
     σ::T
     Rician{T}(ν, σ) where {T} = new{T}(ν, σ)
 end
 
-function Rician(ν::T, σ::T; check_args::Bool=true) where {T<:Real}
+function Rician(ν::T, σ::T; check_args::Bool = true) where {T <: Real}
     @check_args Rician (ν, ν ≥ zero(ν)) (σ, σ ≥ zero(σ))
     return Rician{T}(ν, σ)
 end
 
 Rician() = Rician{Float64}(0.0, 1.0)
-Rician(ν::Real, σ::Real; check_args::Bool=true) = Rician(promote(ν, σ)...; check_args=check_args)
-Rician(ν::Integer, σ::Integer; check_args::Bool=true) = Rician(float(ν), float(σ); check_args=check_args)
+Rician(ν::Real, σ::Real; check_args::Bool = true) =
+    Rician(promote(ν, σ)...; check_args = check_args)
+Rician(ν::Integer, σ::Integer; check_args::Bool = true) =
+    Rician(float(ν), float(σ); check_args = check_args)
 
 @distr_support Rician 0.0 Inf
 
 #### Conversions
 
-function convert(::Type{Rician{T}}, ν::Real, σ::Real) where T<:Real
-    Rician(T(ν), T(σ))
+function convert(::Type{Rician{T}}, ν::Real, σ::Real) where {T <: Real}
+    return Rician(T(ν), T(σ))
 end
 
-Base.convert(::Type{Rician{T}}, d::Rician) where {T<:Real} = Rician{T}(T(d.ν), T(d.σ))
-Base.convert(::Type{Rician{T}}, d::Rician{T}) where {T<:Real} = d
+Base.convert(::Type{Rician{T}}, d::Rician) where {T <: Real} = Rician{T}(T(d.ν), T(d.σ))
+Base.convert(::Type{Rician{T}}, d::Rician{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -59,23 +61,24 @@ shape(d::Rician) = d.ν^2 / (2 * d.σ^2)
 scale(d::Rician) = d.ν^2 + 2 * d.σ^2
 
 params(d::Rician) = (d.ν, d.σ)
-partype(d::Rician{T}) where {T<:Real} = T
+partype(d::Rician{T}) where {T <: Real} = T
 
 #### Statistics
 
 # helper
-_Lhalf(x) = exp(x/2) * ((1-x) * besseli(zero(x), -x/2) - x * besseli(oneunit(x), -x/2))
+_Lhalf(x) =
+    exp(x / 2) * ((1 - x) * besseli(zero(x), -x / 2) - x * besseli(oneunit(x), -x / 2))
 
-mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2/(2 * d.σ^2))
-var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-d.ν^2/(2 * d.σ^2))^2
+mean(d::Rician) = d.σ * sqrthalfπ * _Lhalf(-d.ν^2 / (2 * d.σ^2))
+var(d::Rician) = 2 * d.σ^2 + d.ν^2 - halfπ * d.σ^2 * _Lhalf(-d.ν^2 / (2 * d.σ^2))^2
 
 function mode(d::Rician)
     m = mean(d)
-    _minimize_gss(x -> -pdf(d, x), zero(m), m)
+    return _minimize_gss(x -> -pdf(d, x), zero(m), m)
 end
 
 # helper: 1D minimization using Golden-section search
-function _minimize_gss(f, a, b; tol=1e-12)
+function _minimize_gss(f, a, b; tol = 1.0e-12)
     ϕ = (√5 + 1) / 2
     c = b - (b - a) / ϕ
     d = a + (b - a) / ϕ
@@ -88,7 +91,7 @@ function _minimize_gss(f, a, b; tol=1e-12)
         c = b - (b - a) / ϕ
         d = a + (b - a) / ϕ
     end
-    (b + a) / 2
+    return (b + a) / 2
 end
 
 #### PDF/CDF/quantile delegated to NoncentralChisq
@@ -132,22 +135,26 @@ end
 function rand(rng::AbstractRNG, d::Rician)
     x = randn(rng) * d.σ + d.ν
     y = randn(rng) * d.σ
-    hypot(x, y)
+    return hypot(x, y)
 end
 
 #### Fitting
 
 # implementation based on the Koay inversion technique
-function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) where T
+function fit(::Type{<:Rician}, x::AbstractArray{T}; tol = 1.0e-12, maxiters = 500) where {T}
     μ₁ = mean(x)
     μ₂ = var(x)
     r = μ₁ / √μ₂
-    if r < sqrt(π/(4-π))
+    if r < sqrt(π / (4 - π))
         ν = zero(float(T))
         σ = scale(fit(Rayleigh, x))
     else
-        ξ(θ) = 2 + θ^2 - π/8 * exp(-θ^2 / 2) * ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
-        g(θ) = sqrt(ξ(θ) * (1+r^2) - 2)
+        ξ(θ) =
+            2 + θ^2 -
+            π / 8 *
+            exp(-θ^2 / 2) *
+            ((2 + θ^2) * besseli(0, θ^2 / 4) + θ^2 * besseli(1, θ^2 / 4))^2
+        g(θ) = sqrt(ξ(θ) * (1 + r^2) - 2)
         θ = g(1)
         for j in 1:maxiters
             θ⁻ = θ
@@ -158,7 +165,7 @@ function fit(::Type{<:Rician}, x::AbstractArray{T}; tol=1e-12, maxiters=500) whe
         σ = convert(float(T), sqrt(μ₂ / ξθ))
         ν = convert(float(T), sqrt(μ₁^2 + (ξθ - 2) * σ^2))
     end
-    Rician(ν, σ)
+    return Rician(ν, σ)
 end
 
 # Not implemented:

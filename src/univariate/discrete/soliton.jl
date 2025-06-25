@@ -33,21 +33,22 @@ struct Soliton <: DiscreteUnivariateDistribution
     degrees::Vector{Int} # Degrees with non-zero probability
     CDF::Vector{Float64} # CDF evaluated at each element in degrees
 
-    function Soliton(K::Integer, M::Integer, δ::Real, atol::Real=0)
+    function Soliton(K::Integer, M::Integer, δ::Real, atol::Real = 0)
         0 < K || throw(DomainError(K, "Expected 0 < K."))
         0 < δ < 1 || throw(DomainError(δ, "Expected 0 < δ < 1."))
         0 < M <= K || throw(DomainError(M, "Expected 0 < M <= K."))
         0 <= atol < 1 || throw(DomainError(atol, "Expected 0 <= atol < 1."))
-        PDF = [soliton_τ(K, M, δ, i)+soliton_ρ(K, i) for i in 1:K]
+        PDF = [soliton_τ(K, M, δ, i) + soliton_ρ(K, i) for i in 1:K]
         PDF ./= sum(PDF)
         degrees = [i for i in 1:K if PDF[i] > atol]
         CDF = cumsum([PDF[i] for i in degrees])
         CDF ./= CDF[end]
-        new(K, M, δ, atol, degrees, CDF)
+        return new(K, M, δ, atol, degrees, CDF)
     end
 end
 
-Base.show(io::IO, Ω::Soliton) = print(io, "Soliton(K=$(Ω.K), M=$(Ω.M), δ=$(Ω.δ), atol=$(Ω.atol))")
+Base.show(io::IO, Ω::Soliton) =
+    print(io, "Soliton(K=$(Ω.K), M=$(Ω.M), δ=$(Ω.δ), atol=$(Ω.atol))")
 
 """
     degrees(Ω)
@@ -91,7 +92,7 @@ function pdf(Ω::Soliton, i::Real)
     (j > length(Ω.degrees) || Ω.degrees[j] != i) && return zero(eltype(Ω.CDF))
     rv = Ω.CDF[j]
     if j > 1
-        rv -= Ω.CDF[j-1]
+        rv -= Ω.CDF[j - 1]
     end
     return rv
 end
@@ -102,16 +103,16 @@ function cdf(Ω::Soliton, i::Integer)
     i > Ω.degrees[end] && return 1.0
     j = searchsortedfirst(Ω.degrees, i)
     Ω.degrees[j] == i && return Ω.CDF[j]
-    return Ω.CDF[j-1]
+    return Ω.CDF[j - 1]
 end
 
-Statistics.mean(Ω::Soliton) = sum(i -> i*pdf(Ω, i), Ω.degrees)
+Statistics.mean(Ω::Soliton) = sum(i -> i * pdf(Ω, i), Ω.degrees)
 
 function Statistics.var(Ω::Soliton)
     μ = mean(Ω)
     rv = 0.0
     for d in Ω.degrees
-        rv += pdf(Ω, d)*(d-μ)^2
+        rv += pdf(Ω, d) * (d - μ)^2
     end
     return rv
 end

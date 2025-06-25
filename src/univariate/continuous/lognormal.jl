@@ -26,27 +26,30 @@ External links
 * [Log normal distribution on Wikipedia](http://en.wikipedia.org/wiki/Log-normal_distribution)
 
 """
-struct LogNormal{T<:Real} <: ContinuousUnivariateDistribution
+struct LogNormal{T <: Real} <: ContinuousUnivariateDistribution
     μ::T
     σ::T
     LogNormal{T}(μ::T, σ::T) where {T} = new{T}(μ, σ)
 end
 
-function LogNormal(μ::T, σ::T; check_args::Bool=true) where {T <: Real}
+function LogNormal(μ::T, σ::T; check_args::Bool = true) where {T <: Real}
     @check_args LogNormal (σ, σ ≥ zero(σ))
     return LogNormal{T}(μ, σ)
 end
 
-LogNormal(μ::Real, σ::Real; check_args::Bool=true) = LogNormal(promote(μ, σ)...; check_args=check_args)
-LogNormal(μ::Integer, σ::Integer; check_args::Bool=true) = LogNormal(float(μ), float(σ); check_args=check_args)
-LogNormal(μ::Real=0.0) = LogNormal(μ, one(μ); check_args=false)
+LogNormal(μ::Real, σ::Real; check_args::Bool = true) =
+    LogNormal(promote(μ, σ)...; check_args = check_args)
+LogNormal(μ::Integer, σ::Integer; check_args::Bool = true) =
+    LogNormal(float(μ), float(σ); check_args = check_args)
+LogNormal(μ::Real = 0.0) = LogNormal(μ, one(μ); check_args = false)
 
 @distr_support LogNormal 0.0 Inf
 
 #### Conversions
 convert(::Type{LogNormal{T}}, μ::S, σ::S) where {T <: Real, S <: Real} = LogNormal(T(μ), T(σ))
-Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T<:Real} = LogNormal{T}(T(d.μ), T(d.σ))
-Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T<:Real} = d
+Base.convert(::Type{LogNormal{T}}, d::LogNormal) where {T <: Real} =
+    LogNormal{T}(T(d.μ), T(d.σ))
+Base.convert(::Type{LogNormal{T}}, d::LogNormal{T}) where {T <: Real} = d
 
 #### Parameters
 
@@ -59,21 +62,21 @@ meanlogx(d::LogNormal) = d.μ
 varlogx(d::LogNormal) = abs2(d.σ)
 stdlogx(d::LogNormal) = d.σ
 
-mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2/2))
+mean(d::LogNormal) = ((μ, σ) = params(d); exp(μ + σ^2 / 2))
 median(d::LogNormal) = exp(d.μ)
 mode(d::LogNormal) = ((μ, σ) = params(d); exp(μ - σ^2))
-partype(::LogNormal{T}) where {T<:Real} = T
+partype(::LogNormal{T}) where {T <: Real} = T
 
 function var(d::LogNormal)
     (μ, σ) = params(d)
     σ2 = σ^2
-    (exp(σ2) - 1) * exp(2μ + σ2)
+    return (exp(σ2) - 1) * exp(2μ + σ2)
 end
 
 function skewness(d::LogNormal)
     σ2 = varlogx(d)
     e = exp(σ2)
-    (e + 2) * sqrt(e - 1)
+    return (e + 2) * sqrt(e - 1)
 end
 
 function kurtosis(d::LogNormal)
@@ -82,12 +85,12 @@ function kurtosis(d::LogNormal)
     e2 = e * e
     e3 = e2 * e
     e4 = e3 * e
-    e4 + 2*e3 + 3*e2 - 6
+    return e4 + 2 * e3 + 3 * e2 - 6
 end
 
 function entropy(d::LogNormal)
     (μ, σ) = params(d)
-    (1 + log(twoπ * σ^2))/2 + μ
+    return (1 + log(twoπ * σ^2)) / 2 + μ
 end
 
 function kldivergence(p::LogNormal, q::LogNormal)
@@ -127,7 +130,7 @@ end
 function ccdf(d::LogNormal, x::Real)
     logx = x ≤ zero(x) ? log(zero(x)) : log(x)
     return ccdf(Normal(d.μ, d.σ), logx)
-    end
+end
 
 function logcdf(d::LogNormal, x::Real)
     logx = x ≤ zero(x) ? log(zero(x)) : log(x)
@@ -168,8 +171,8 @@ end
 
 ## Fitting
 
-function fit_mle(::Type{<:LogNormal}, x::AbstractArray{T}) where T<:Real
+function fit_mle(::Type{<:LogNormal}, x::AbstractArray{T}) where {T <: Real}
     lx = log.(x)
     μ, σ = mean_and_std(lx)
-    LogNormal(μ, σ)
+    return LogNormal(μ, σ)
 end

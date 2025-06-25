@@ -35,17 +35,18 @@ JointOrderStatistics(Cauchy(), 10, (1, 10))  # joint distribution of only the ex
 ```
 """
 struct JointOrderStatistics{
-    D<:ContinuousUnivariateDistribution,R<:Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}
-} <: ContinuousMultivariateDistribution
+        D <: ContinuousUnivariateDistribution,
+        R <: Union{AbstractVector{Int}, Tuple{Int, Vararg{Int}}},
+    } <: ContinuousMultivariateDistribution
     dist::D
     n::Int
     ranks::R
     function JointOrderStatistics(
-        dist::ContinuousUnivariateDistribution,
-        n::Int,
-        ranks::Union{AbstractVector{Int},Tuple{Int,Vararg{Int}}}=Base.OneTo(n);
-        check_args::Bool=true,
-    )
+            dist::ContinuousUnivariateDistribution,
+            n::Int,
+            ranks::Union{AbstractVector{Int}, Tuple{Int, Vararg{Int}}} = Base.OneTo(n);
+            check_args::Bool = true,
+        )
         @check_args(
             JointOrderStatistics,
             (n, n ≥ 1, "`n` must be a positive integer."),
@@ -55,7 +56,7 @@ struct JointOrderStatistics{
                 "`ranks` must be a sorted vector or tuple of unique integers between 1 and `n`.",
             ),
         )
-        return new{typeof(dist),typeof(ranks)}(dist, n, ranks)
+        return new{typeof(dist), typeof(ranks)}(dist, n, ranks)
     end
 end
 
@@ -64,10 +65,13 @@ _islesseq(x, y) = isless(x, y) || isequal(x, y)
 function _are_ranks_valid(ranks, n)
     # this is equivalent to but faster than
     # issorted(ranks) && allunique(ranks)
-    !isempty(ranks) && first(ranks) ≥ 1 && last(ranks) ≤ n && issorted(ranks; lt=_islesseq)
+    return !isempty(ranks) &&
+        first(ranks) ≥ 1 &&
+        last(ranks) ≤ n &&
+        issorted(ranks; lt = _islesseq)
 end
 function _are_ranks_valid(ranks::AbstractRange, n)
-    !isempty(ranks) && first(ranks) ≥ 1 && last(ranks) ≤ n && step(ranks) > 0
+    return !isempty(ranks) && first(ranks) ≥ 1 && last(ranks) ≤ n && step(ranks) > 0
 end
 
 length(d::JointOrderStatistics) = length(d.ranks)

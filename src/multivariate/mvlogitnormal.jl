@@ -22,21 +22,21 @@ MvLogitNormal(MvNormalCanon(μ, J))  # MvLogitNormal with y ~ MvNormalCanon(μ, 
 
 - `normal::AbstractMvNormal`: contains the ``d-1``-dimensional distribution of ``y``
 """
-struct MvLogitNormal{D<:AbstractMvNormal} <: ContinuousMultivariateDistribution
+struct MvLogitNormal{D <: AbstractMvNormal} <: ContinuousMultivariateDistribution
     normal::D
-    MvLogitNormal{D}(normal::D) where {D<:AbstractMvNormal} = new{D}(normal)
+    MvLogitNormal{D}(normal::D) where {D <: AbstractMvNormal} = new{D}(normal)
 end
 MvLogitNormal(d::AbstractMvNormal) = MvLogitNormal{typeof(d)}(d)
 MvLogitNormal(args...) = MvLogitNormal(MvNormal(args...))
 
-function Base.show(io::IO, d::MvLogitNormal; indent::String="  ")
+function Base.show(io::IO, d::MvLogitNormal; indent::String = "  ")
     print(io, distrname(d))
     println(io, "(")
-    normstr = strip(sprint(show, d.normal; context=IOContext(io)))
+    normstr = strip(sprint(show, d.normal; context = IOContext(io)))
     normstr = replace(normstr, "\n" => "\n$indent")
     print(io, indent)
     println(io, normstr)
-    println(io, ")")
+    return println(io, ")")
 end
 
 # Conversions

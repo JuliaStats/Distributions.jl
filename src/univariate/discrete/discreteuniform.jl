@@ -26,11 +26,12 @@ struct DiscreteUniform <: DiscreteUnivariateDistribution
     b::Int
     pv::Float64 # individual probabilities
 
-    function DiscreteUniform(a::Real, b::Real; check_args::Bool=true)
+    function DiscreteUniform(a::Real, b::Real; check_args::Bool = true)
         @check_args DiscreteUniform (a <= b)
-        new(a, b, 1 / (b - a + 1))
+        return new(a, b, 1 / (b - a + 1))
     end
-    DiscreteUniform(b::Real; check_args::Bool=true) = DiscreteUniform(0, b; check_args=check_args)
+    DiscreteUniform(b::Real; check_args::Bool = true) =
+        DiscreteUniform(0, b; check_args = check_args)
     DiscreteUniform() = new(0, 1, 0.5)
 end
 
@@ -61,7 +62,7 @@ skewness(d::DiscreteUniform) = 0.0
 
 function kurtosis(d::DiscreteUniform)
     n2 = span(d)^2
-    -1.2 * (n2 + 1.0) / (n2 - 1.0)
+    return -1.2 * (n2 + 1.0) / (n2 - 1.0)
 end
 
 entropy(d::DiscreteUniform) = log(span(d))
@@ -92,14 +93,14 @@ quantile(d::DiscreteUniform, p::Real) = iszero(p) ? d.a : d.a - 1 + ceil(Int, p 
 function mgf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
     u = b - a + 1
-    result = (exp(t*a) * expm1(t*u)) / (u*expm1(t))
+    result = (exp(t * a) * expm1(t * u)) / (u * expm1(t))
     return iszero(t) ? one(result) : result
 end
 
 function cf(d::DiscreteUniform, t::Real)
     a, b = d.a, d.b
     u = b - a + 1
-    result = (im*cos(t*(a+b)/2) + sin(t*(a-b-1)/2)) / (u*sin(t/2))
+    result = (im * cos(t * (a + b) / 2) + sin(t * (a - b - 1) / 2)) / (u * sin(t / 2))
     return iszero(t) ? one(result) : result
 end
 

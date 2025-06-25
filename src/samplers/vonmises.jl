@@ -1,5 +1,4 @@
-
-struct VonMisesSampler <: Sampleable{Univariate,Continuous}
+struct VonMisesSampler <: Sampleable{Univariate, Continuous}
     μ::Float64
     κ::Float64
     r::Float64
@@ -7,7 +6,7 @@ struct VonMisesSampler <: Sampleable{Univariate,Continuous}
     function VonMisesSampler(μ::Float64, κ::Float64)
         τ = 1.0 + sqrt(1.0 + 4 * abs2(κ))
         ρ = (τ - sqrt(2.0 * τ)) / (2.0 * κ)
-        new(μ, κ, (1.0 + abs2(ρ)) / (2.0 * ρ))
+        return new(μ, κ, (1.0 + abs2(ρ)) / (2.0 * ρ))
     end
 end
 

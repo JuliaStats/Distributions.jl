@@ -19,28 +19,28 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
         @test_throws DomainError JointOrderStatistics(dist, 5, Int[])
         @test_throws DomainError JointOrderStatistics(dist, 5, (3, 2))
         @test_throws DomainError JointOrderStatistics(dist, 5, (3, 3))
-        JointOrderStatistics(dist, 0, 1:2; check_args=false)
-        JointOrderStatistics(dist, 2, 2:3; check_args=false)
-        JointOrderStatistics(dist, 3, 0:3; check_args=false)
-        JointOrderStatistics(dist, 5, 3:-1:2; check_args=false)
-        JointOrderStatistics(dist, 5, 2:1:1; check_args=false)
-        JointOrderStatistics(dist, 0, [1, 2]; check_args=false)
-        JointOrderStatistics(dist, 2, [2, 3]; check_args=false)
-        JointOrderStatistics(dist, 3, [0, 1, 2, 3]; check_args=false)
-        JointOrderStatistics(dist, 5, Int[]; check_args=false)
-        JointOrderStatistics(dist, 5, (3, 2); check_args=false)
-        JointOrderStatistics(dist, 5, (3, 3); check_args=false)
+        JointOrderStatistics(dist, 0, 1:2; check_args = false)
+        JointOrderStatistics(dist, 2, 2:3; check_args = false)
+        JointOrderStatistics(dist, 3, 0:3; check_args = false)
+        JointOrderStatistics(dist, 5, 3:-1:2; check_args = false)
+        JointOrderStatistics(dist, 5, 2:1:1; check_args = false)
+        JointOrderStatistics(dist, 0, [1, 2]; check_args = false)
+        JointOrderStatistics(dist, 2, [2, 3]; check_args = false)
+        JointOrderStatistics(dist, 3, [0, 1, 2, 3]; check_args = false)
+        JointOrderStatistics(dist, 5, Int[]; check_args = false)
+        JointOrderStatistics(dist, 5, (3, 2); check_args = false)
+        JointOrderStatistics(dist, 5, (3, 3); check_args = false)
     end
 
     @testset for T in [Float32, Float64],
-        dist in [Uniform(T(2), T(10)), Exponential(T(10)), Normal(T(100), T(10))],
-        n in [16, 40],
-        r in [
-            1:n,
-            ([i, j] for j in 2:n for i in 1:min(10, j - 1))...,
-            vcat(2:4, (n - 10):(n - 5)),
-            (2, n ÷ 2, n - 5),
-        ]
+            dist in [Uniform(T(2), T(10)), Exponential(T(10)), Normal(T(100), T(10))],
+            n in [16, 40],
+            r in [
+                1:n,
+                ([i, j] for j in 2:n for i in 1:min(10, j - 1))...,
+                vcat(2:4, (n - 10):(n - 5)),
+                (2, n ÷ 2, n - 5),
+            ]
 
         d = JointOrderStatistics(dist, n, r)
 
@@ -84,15 +84,15 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 xi, xj = x
                 lc = T(
                     logfactorial(n) - logfactorial(i - 1) - logfactorial(n - j) -
-                    logfactorial(j - i - 1),
+                        logfactorial(j - i - 1),
                 )
                 lp = (
                     lc +
-                    (i - 1) * logcdf(dist, xi) +
-                    (n - j) * logccdf(dist, xj) +
-                    (j - i - 1) * logdiffcdf(dist, xj, xi) +
-                    logpdf(dist, xi) +
-                    logpdf(dist, xj)
+                        (i - 1) * logcdf(dist, xi) +
+                        (n - j) * logccdf(dist, xj) +
+                        (j - i - 1) * logdiffcdf(dist, xj, xi) +
+                        logpdf(dist, xi) +
+                        logpdf(dist, xj)
                 )
                 @test logpdf(d, x) ≈ lp
                 @test pdf(d, x) ≈ exp(lp)
@@ -109,7 +109,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 @test pdf(d, x2) == zero(T)
 
                 x3 = copy(x)
-                x3[end-1], x3[end] = x3[end], x3[end-1]
+                x3[end - 1], x3[end] = x3[end], x3[end - 1]
                 @test logpdf(d, x3) == T(-Inf)
                 @test pdf(d, x3) == zero(T)
 
@@ -158,8 +158,8 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 x = rand(d, ndraws)
                 @test all(xi -> insupport(d, xi), eachcol(x))
 
-                m = mean(x; dims=2)
-                v = var(x; mean=m, dims=2)
+                m = mean(x; dims = 2)
+                v = var(x; mean = m, dims = 2)
                 if dist isa Uniform
                     # Arnold (2008). A first course in order statistics. eq 2.2.20-21
                     m_exact = r ./ (n + 1)
@@ -171,7 +171,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
                 end
                 # compute asymptotic sample standard deviation
                 mean_std = @. sqrt(v_exact / ndraws)
-                m4 = dropdims(mapslices(xi -> moment(xi, 4), x; dims=2); dims=2)
+                m4 = dropdims(mapslices(xi -> moment(xi, 4), x; dims = 2); dims = 2)
                 var_std = @. sqrt((m4 - v_exact^2) / ndraws)
 
                 nchecks = length(r)
@@ -207,7 +207,7 @@ using Distributions, LinearAlgebra, Random, SpecialFunctions, Statistics, Test
 
                 m = length(r)
 
-                xcor = cor(x; dims=2)
+                xcor = cor(x; dims = 2)
                 if dist isa Uniform
                     # Arnold (2008). A first course in order statistics. Eq 2.3.16
                     s = @. n - r + 1

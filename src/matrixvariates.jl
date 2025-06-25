@@ -1,4 +1,3 @@
-
 ##### Generic methods #####
 
 """
@@ -55,8 +54,8 @@ function cov(d::MatrixDistribution)
     M = length(d)
     V = zeros(partype(d), M, M)
     iter = CartesianIndices(size(d))
-    for el1 = 1:M
-        for el2 = 1:el1
+    for el1 in 1:M
+        for el2 in 1:el1
             i, j = Tuple(iter[el1])
             k, l = Tuple(iter[el2])
             V[el1, el2] = cov(d, i, j, k, l)
@@ -73,7 +72,7 @@ Compute the 4-dimensional array whose `(i, j, k, l)` element is `cov(X[i,j], X[k
 """
 function cov(d::MatrixDistribution, ::Val{false})
     n, p = size(d)
-    [cov(d, i, j, k, l) for i in 1:n, j in 1:p, k in 1:n, l in 1:p]
+    return [cov(d, i, j, k, l) for i in 1:n, j in 1:p, k in 1:n, l in 1:p]
 end
 
 # pdf & logpdf
@@ -83,11 +82,19 @@ _logpdf(d::MatrixDistribution, X::AbstractMatrix{<:Real}) = logkernel(d, X) + d.
 
 #  for testing
 is_univariate(d::MatrixDistribution) = size(d) == (1, 1)
-check_univariate(d::MatrixDistribution) = is_univariate(d) || throw(ArgumentError("not 1 x 1"))
+check_univariate(d::MatrixDistribution) =
+    is_univariate(d) || throw(ArgumentError("not 1 x 1"))
 
 ##### Specific distributions #####
 
-for fname in ["wishart.jl", "inversewishart.jl", "matrixnormal.jl",
-              "matrixtdist.jl", "matrixbeta.jl", "matrixfdist.jl", "lkj.jl"]
+for fname in [
+        "wishart.jl",
+        "inversewishart.jl",
+        "matrixnormal.jl",
+        "matrixtdist.jl",
+        "matrixbeta.jl",
+        "matrixfdist.jl",
+        "lkj.jl",
+    ]
     include(joinpath("matrix", fname))
 end
