@@ -37,14 +37,10 @@ struct GeneralizedHyperbolic{T<:Real} <: ContinuousUnivariateDistribution
     δ::T
     μ::T
     λ::T
-    function GeneralizedHyperbolic{T}(α::T, β::T, δ::T, μ::T=zero(T), λ::T=one(T)) where T<:Real
+    function GeneralizedHyperbolic(α::T, β::T, δ::T, μ::T=zero(T), λ::T=one(T); check_args::Bool=true) where T<:Real
+        check_args && @check_args GeneralizedHyperbolic (α, α > zero(α)) (δ, δ > zero(δ)) (β, -α < β < α)
         new{T}(α, β, δ, μ, λ)
     end
-end
-
-function GeneralizedHyperbolic(α::T, β::T, δ::T, μ::T=zero(T), λ::T=one(T); check_args::Bool=true) where T<:Real
-	check_args && @check_args GeneralizedHyperbolic (α, α > zero(α)) (δ, δ > zero(δ)) (β, -α < β < α)
-	GeneralizedHyperbolic{T}(α, β, δ, μ, λ)
 end
 
 GeneralizedHyperbolic(α::Real, β::Real, δ::Real, μ::Real=0, λ::Real=1; check_args::Bool=true) =
@@ -327,6 +323,6 @@ rand(rng::AbstractRNG, d::GeneralizedHyperbolic) = begin
 	α, β, δ, μ, λ = params(d)
     γ = sqrt(α^2 - β^2)
 
-    V = rand(rng, GeneralizedInverseGaussian(Val(:Wolfram), δ/γ, δ^2, λ))
+    V = rand(rng, GeneralizedInverseGaussian(δ/γ, δ^2, λ))
     μ + β * V + sqrt(V) * randn(rng)
 end

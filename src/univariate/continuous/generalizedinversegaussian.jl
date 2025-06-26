@@ -1,14 +1,18 @@
 import SpecialFunctions: besselk
 
 @doc raw"""
-    GeneralizedInverseGaussian(a, b, p)
+    GeneralizedInverseGaussian(μ, λ, θ)
 
-The *generalized inverse Gaussian distribution* with parameters `a>0`, `b>0` and real `p` has probability density function:
+The *generalized inverse Gaussian distribution* with parameters `\mu>0`, `\lambda>0` and real `\theta` has probability density function:
 
 ```math
-f(x; a, b, p) =
-\frac{(a/b)^(p/2)}{2 K_p(\sqrt{ab})}
-x^{p-1} e^{-(ax + b/x)/2}, \quad x > 0
+f(x; \mu, \lambda, \theta) =
+\frac{1}{
+    2\mu^{\theta} K_{\theta}(\lambda/\mu)
+} x^{\theta-1} \exp\left(
+    -\frac{\lambda}{2} \left(\frac{1}{x} + \frac{x}{\mu^2}\right)
+\right)
+, \quad x > 0
 ```
 
 External links:
@@ -16,73 +20,66 @@ External links:
 * [Generalized Inverse Gaussian distribution on Wikipedia](https://en.wikipedia.org/wiki/Generalized_inverse_Gaussian_distribution).
 """
 struct GeneralizedInverseGaussian{T<:Real} <: ContinuousUnivariateDistribution
-    a::T
-    b::T
-    p::T
-    function GeneralizedInverseGaussian{T}(a::T, b::T, p::T) where T<:Real
-        new{T}(a, b, p)
+    μ::T
+    λ::T
+    θ::T
+    function GeneralizedInverseGaussian(μ::T, λ::T, θ::T; check_args::Bool=true) where T<:Real
+        check_args && @check_args GeneralizedInverseGaussian (μ, μ > zero(μ)) (λ, λ > zero(λ))
+        new{T}(μ, λ, θ)
     end
 end
 
-function GeneralizedInverseGaussian(a::T, b::T, p::T; check_args::Bool=true) where T<:Real
-    check_args && @check_args GeneralizedInverseGaussian (a, a > zero(a)) (b, b > zero(b))
-    GeneralizedInverseGaussian{T}(a, b, p)
-end
+GeneralizedInverseGaussian(μ::Real, λ::Real, θ::Real=-1/2; check_args::Bool=true) =
+    GeneralizedInverseGaussian(promote(μ, λ, θ)...; check_args)
 
-GeneralizedInverseGaussian(a::Real, b::Real, p::Real; check_args::Bool=true) =
-    GeneralizedInverseGaussian(promote(a, b, p)...; check_args)
-
-"""
-    GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2)
-
-Wolfram Language parameterization, equivalent to `InverseGamma(μ, λ)`. `μ, λ` must be positive.
-Obtain parameters in Wolfram parameterization like `params(the_GIG, Val(:Wolfram))`
-"""
-GeneralizedInverseGaussian(::Val{:Wolfram}, μ::Real, λ::Real, θ::Real=-1/2; check_args::Bool=true) =
-    GeneralizedInverseGaussian(λ / μ^2, λ, θ; check_args)
-
-params(d::GeneralizedInverseGaussian) = (d.a, d.b, d.p)
-params(d::GeneralizedInverseGaussian, ::Val{:Wolfram}) = (
-    μ=sqrt(d.b/d.a), λ=d.b, θ=d.p
-)
+params(d::GeneralizedInverseGaussian) = (d.μ, d.λ, d.θ)
 partype(::GeneralizedInverseGaussian{T}) where T = T
 
 minimum(::GeneralizedInverseGaussian) = 0.0
 maximum(::GeneralizedInverseGaussian) = Inf
 insupport(::GeneralizedInverseGaussian, x::Real) = x >= 0
 
-mode(d::GeneralizedInverseGaussian) = (
-    (d.p - 1) + sqrt((d.p - 1)^2 + d.a * d.b)
-) / d.a
+mode(d::GeneralizedInverseGaussian) = begin
+    μ, λ, θ = params(d)
+    tmp = μ * (θ - 1)
+    μ / λ * (
+        tmp + sqrt(λ^2 + tmp^2)
+    )
+end
 
-mean(d::GeneralizedInverseGaussian) =
-    sqrt(d.b/d.a) * besselk(d.p+1, sqrt(d.a*d.b)) / besselk(d.p, sqrt(d.a*d.b))
+mean(d::GeneralizedInverseGaussian) = begin
+    μ, λ, θ = params(d)
+    b0 = besselk(0 + θ, λ / μ)
+    b1 = besselk(1 + θ, λ / μ)
+    μ * b1 / b0
+end
 
 var(d::GeneralizedInverseGaussian) = begin
-    tmp1 = sqrt(d.a * d.b)
-    tmp2 = besselk(d.p, tmp1)
-    d.b/d.a * (
-        besselk(d.p+2, tmp1) / tmp2 - (besselk(d.p+1, tmp1) / tmp2)^2
-    )
+    μ, λ, θ = params(d)
+    b0 = besselk(0 + θ, λ / μ)
+    b1 = besselk(1 + θ, λ / μ)
+    b2 = besselk(2 + θ, λ / μ)
+
+    μ^2 * (b0 * b2 - b1^2) / b0^2
 end
 
 # Source: Wolfram
 skewness(d::GeneralizedInverseGaussian) = begin
-    μ, λ, θ = params(d, Val(:Wolfram))
-    t0 = besselk(0 + θ, λ/μ)
-    t1 = besselk(1 + θ, λ/μ)
-    t2 = besselk(2 + θ, λ/μ)
-    t3 = besselk(3 + θ, λ/μ)
+    μ, λ, θ = params(d)
+    b0 = besselk(0 + θ, λ / μ)
+    b1 = besselk(1 + θ, λ / μ)
+    b2 = besselk(2 + θ, λ / μ)
+    b3 = besselk(3 + θ, λ / μ)
     (
-        2 * t1^3 - 3t0 * t1 * t2 + t0^2 * t3
+        2 * b1^3 - 3b0 * b1 * b2 + b0^2 * b3
     ) / sqrt(
-        -t1^2 + t0 * t2
+        b0 * b2 - b1^2
     )^3
 end
 
 # Source: Wolfram
 kurtosis(d::GeneralizedInverseGaussian) = begin
-    μ, λ, θ = params(d, Val(:Wolfram))
+    μ, λ, θ = params(d)
     t0 = besselk(0 + θ, λ/μ)
     t1 = besselk(1 + θ, λ/μ)
     t2 = besselk(2 + θ, λ/μ)
@@ -95,15 +92,14 @@ kurtosis(d::GeneralizedInverseGaussian) = begin
     )^2 - 3 # EXCESS kurtosis!
 end
 
-logpdf(d::GeneralizedInverseGaussian, x::Real) =
+logpdf(d::GeneralizedInverseGaussian, x::Real) = begin
+    μ, λ, θ = params(d)
     if x >= 0
-        (
-            d.p / 2 * log(d.a / d.b) - log(2 * besselk(d.p, sqrt(d.a * d.b)))
-            + (d.p - 1) * log(x) - (d.a * x + d.b / x) / 2
-        )
+        -log(2) - θ * log(μ) - log(besselk(θ, λ / μ)) - λ/2 * (1/x + x/μ^2) + (θ - 1) * log(x)
     else
         -Inf
     end
+end
 
 cdf(d::GeneralizedInverseGaussian, x::Real) =
     if isinf(x)
@@ -117,8 +113,9 @@ cdf(d::GeneralizedInverseGaussian, x::Real) =
 @quantile_newton GeneralizedInverseGaussian
 
 mgf(d::GeneralizedInverseGaussian, t::Number) = begin
-    a, b, p = params(d)
-    sqrt(a / (a - 2t))^p * besselk(p, sqrt(b * (a - 2t))) / besselk(p, sqrt(a * b))
+    μ, λ, θ = params(d)
+    tmp = 1 - 2t * μ^2 / λ
+    tmp^(-θ/2) * besselk(θ, λ/μ * sqrt(tmp)) / besselk(θ, λ/μ)
 end
 
 cf(d::GeneralizedInverseGaussian, t::Number) = mgf(d, 1im * t)
@@ -133,9 +130,10 @@ Sample from the generalized inverse Gaussian distribution based on [1], end of S
 1. Devroye, Luc. 2014. “Random Variate Generation for the Generalized Inverse Gaussian Distribution.” Statistics and Computing 24 (2): 239–46. https://doi.org/10.1007/s11222-012-9367-z.
 """
 rand(rng::AbstractRNG, d::GeneralizedInverseGaussian) = begin
-    # Paper says ω = sqrt(b/a), but Wolfram disagrees
-    ω = sqrt(d.a * d.b)
-    sqrt(d.b / d.a) * rand(rng, _GIG(d.p, ω))
+    # If X ~ GIG(μ, λ, θ), then X/μ ~ _GIG(λ/μ, θ),
+    # so mu * _GIG(λ/μ, θ) == GIG(μ, λ, θ)
+    μ, λ, θ = params(d)
+    μ * rand(rng, _GIG(λ/μ, θ))
 end
 
 # ===== Private two-parameter version =====
@@ -144,7 +142,7 @@ end
 
 Two-parameter generalized inverse Gaussian distribution, only used for sampling.
 
-If `X ~ GeneralizedInverseGaussian(a, b, p)`, then `Y = sqrt(a/b) * X` follows `_GIG(p, 2sqrt(b * a))`.
+If `X ~ GeneralizedInverseGaussian(μ, λ, θ)`, then `Y = X / μ` follows `_GIG(λ/μ, θ)`.
 NOTE: the paper says (Section 1) that the second parameter of `_GIG` should be `ω = 2sqrt(b/a)`, but computations in Wolfram Mathematica show otherwise.
 
 ### References
@@ -152,17 +150,17 @@ NOTE: the paper says (Section 1) that the second parameter of `_GIG` should be `
 1. Devroye, Luc. 2014. “Random Variate Generation for the Generalized Inverse Gaussian Distribution.” Statistics and Computing 24 (2): 239–46. https://doi.org/10.1007/s11222-012-9367-z.
 """
 struct _GIG{T1<:Real, T2<:Real} <: ContinuousUnivariateDistribution
-    λ::T1
-    ω::T2
-    function _GIG(λ::T1, ω::T2) where {T1<:Real, T2<:Real}
+    ω::T1
+    λ::T2
+    function _GIG(ω::T1, λ::T2) where {T1<:Real, T2<:Real}
         @assert ω >= 0
-        new{T1, T2}(λ, ω)
+        new{T1, T2}(ω, λ)
     end
 end
 
 logpdf(d::_GIG, x::Real) =
     if x >= 0
-        -log(2 * besselk(-d.λ, d.ω)) + (d.λ - 1) * log(x) - d.ω/2 * (x + 1/x)
+        -log(2 * besselk(d.λ, d.ω)) + (d.λ - 1) * log(x) - d.ω/2 * (x + 1/x)
     else
         -Inf
     end
@@ -178,7 +176,8 @@ Sampling from the _2-parameter_ generalized inverse Gaussian distribution based 
 """
 function rand(rng::AbstractRNG, d::_GIG)
     λ, ω = d.λ, d.ω
-    (λ < 0) && return 1 / rand(rng, _GIG(-λ, ω))
+    negative_lmb = λ < 0
+    λ = abs(λ)
 
     α = sqrt(ω^2 + λ^2) - λ
     ψ(x) = -α * (cosh(x) - 1) - λ * (exp(x) - x - 1)
@@ -238,5 +237,6 @@ function rand(rng::AbstractRNG, d::_GIG)
     end
 
     tmp = λ/ω
-    (tmp + sqrt(1 + tmp^2)) * exp(X)
+    logGIG = log(tmp + sqrt(1 + tmp^2)) + X
+    exp(negative_lmb ? -logGIG : logGIG)
 end
