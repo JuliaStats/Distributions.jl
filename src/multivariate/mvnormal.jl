@@ -261,6 +261,16 @@ logdetcov(d::MvNormal) = logdet(d.Σ)
 
 sqmahal(d::MvNormal, x::AbstractVector) = invquad(d.Σ, x .- d.μ)
 
+function sqmahal(d::DiagNormal, x::AbstractVector)
+    # Faster than above as this avoids calculating (x .- d.µ)
+    T = promote_type(partype(d), eltype(x))
+    sum = zero(T)
+    for i in eachindex(x)
+        @inbounds sum += abs2(x[i] - d.μ[i]) / d.Σ[i, i]
+    end
+    return sum
+end
+
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, x .- d.μ)
 
