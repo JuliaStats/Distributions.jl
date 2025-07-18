@@ -277,7 +277,7 @@ function sqmahal(d::IsoNormal, x::AbstractVector)
     for i in eachindex(x)
         @inbounds sum += abs2(x[i] - d.μ[i])
     end
-    return sum
+    return sum / d.Σ[1, 1]
 end
 
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
