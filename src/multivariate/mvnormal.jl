@@ -271,6 +271,15 @@ function sqmahal(d::DiagNormal, x::AbstractVector)
     return sum
 end
 
+function sqmahal(d::IsoNormal, x::AbstractVector)
+    T = promote_type(partype(d), eltype(x))
+    sum = zero(T)
+    for i in eachindex(x)
+        @inbounds sum += abs2(x[i] - d.μ[i])
+    end
+    return sum
+end
+
 sqmahal!(r::AbstractVector, d::MvNormal, x::AbstractMatrix) =
     invquad!(r, d.Σ, x .- d.μ)
 
