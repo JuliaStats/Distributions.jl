@@ -163,7 +163,12 @@ function test_samples(s::Sampleable{Univariate, Discrete},      # the sampleable
         samples3 = [rand(rng3, s) for _ in 1:n]
         samples4 = [rand(rng4, s) for _ in 1:n]
     end
-    @test length(samples) == n
+    T = typeof(rand(s))
+    @test samples isa Vector{T}
+    @test samples2 isa Vector{T}
+    @test samples3 isa Vector{T}
+    @test samples4 isa Vector{T}
+    @test length(samples) == length(samples2) == length(samples3) == length(samples4) == n
     @test samples2 == samples
     @test samples3 == samples4
 
@@ -287,7 +292,12 @@ function test_samples(s::Sampleable{Univariate, Continuous},    # the sampleable
         samples3 = [rand(rng3, s) for _ in 1:n]
         samples4 = [rand(rng4, s) for _ in 1:n]
     end
-    @test length(samples) == n
+    T = typeof(rand(s))
+    @test samples isa Vector{T}
+    @test samples2 isa Vector{T}
+    @test samples3 isa Vector{T}
+    @test samples4 isa Vector{T}
+    @test length(samples) == length(samples2) == length(samples3) == length(samples4) == n
     @test samples2 == samples
     @test samples3 == samples4
 
@@ -348,9 +358,8 @@ end
 function get_evalsamples(d::DiscreteUnivariateDistribution, q::Float64)
     # samples for testing evaluation functions (even spacing)
 
-    T = eltype(typeof(d))
-    lv = (islowerbounded(d) ? minimum(d) : floor(T,quantile(d, q/2)))::T
-    hv = (isupperbounded(d) ? maximum(d) : ceil(T,cquantile(d, q/2)))::T
+    lv = islowerbounded(d) ? minimum(d) : quantile(d, q/2)
+    hv = isupperbounded(d) ? maximum(d) : cquantile(d, q/2)
     @assert lv <= hv
     return lv:hv
 end
